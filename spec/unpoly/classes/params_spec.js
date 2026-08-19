@@ -852,6 +852,23 @@ describe('up.Params', function() {
         ])
       })
 
+      it('serializes a form-associated custom element that has no { name } property', function() {
+        // The browser reads the [name] attribute, so a custom element has no reason to expose
+        // a property for it. Unpoly's own field walking must fall back to the attribute.
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-attribute-named-field name="email" value="foo@example.com"></test-attribute-named-field>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
       it('serializes a custom element that is configured in up.form.config.fieldSelectors', function() {
         up.form.config.fieldSelectors.push('test-form-field')
 
@@ -1055,6 +1072,23 @@ describe('up.Params', function() {
         expect(up.Params.fromContainer(form, { includeDisabled: true }).toArray()).toEqual([
           { name: 'email', value: 'foo@example.com' },
         ])
+      })
+
+      it('includes a field inside a <fieldset disabled>, unlike a submission', function() {
+        // up.Params.fromForm() honors the browser's algorithm, which omits such a field. The
+        // watch path reads the { disabled } property, which an ancestor fieldset does not set.
+        const [form] = htmlFixtureList(`
+          <form>
+            <fieldset disabled>
+              <input name="email" value="foo@example.com">
+            </fieldset>
+          </form>
+        `)
+
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+        expect(up.Params.fromForm(form).toArray()).toEqual([])
       })
 
       it('does not run formdata listeners, which only affect submissions', function() {

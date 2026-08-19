@@ -831,11 +831,11 @@ describe('up.form', function() {
               </form>
             `)
 
-            let options = up.form.submitOptions(form, { submitButton: submitButton1 })
+            let options = up.form.submitOptions(form, { submitButton: submitButton2 })
 
             expect(options.params).toEqual(new up.Params([
               { name: 'field-name', value: 'field-value' },
-              { name: 'button-name', value: 'button-value-1' },
+              { name: 'button-name', value: 'button-value-2' },
               { name: 'form-name', value: 'form-value' },
             ]))
           })

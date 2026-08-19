@@ -120,6 +120,31 @@ extendDescribe('up.form', function() {
         })
       })
 
+      describe('cross-layer [form] associations', function() {
+
+        it('aborts the submission when a field from another layer is associated with the form', async function() {
+          const html = `
+            <div id="container">
+              <form id="my-form" action="/action" method="post">
+                <input name="own-field" value="own-value">
+              </form>
+              <input name="external-field" value="external-value" form="my-form">
+            </div>
+          `
+          makeLayers([{ fragment: html }, { fragment: html }])
+          await wait()
+
+          const rootForm = up.fragment.get('#my-form', { layer: 'root' })
+
+          // up.form.submitOptions() builds the params before up.render() is called, so the
+          // error escapes synchronously instead of rejecting a promise.
+          const submit = () => up.submit(rootForm)
+
+          expect(submit).toThrowError(/associated with a form in another layer/i)
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+        })
+      })
+
       describe('custom form fields', function() {
 
         it('submits a form-associated custom element without configuration', async function() {

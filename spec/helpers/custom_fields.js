@@ -106,6 +106,34 @@ class TestValuelessField extends HTMLElement {
 
 }
 
+// A form-associated custom element as the platform documents it: it reports its value to the
+// browser and exposes { value }, but no { name } property — the browser reads the attribute,
+// so an author has no reason to add one.
+class TestAttributeNamedField extends HTMLElement {
+
+  static formAssociated = true
+
+  constructor() {
+    super()
+    this._internals = this.attachInternals()
+  }
+
+  connectedCallback() {
+    this._internals.setFormValue(this.value)
+  }
+
+  get value() {
+    return this.getAttribute('value') ?? ''
+  }
+
+  set value(newValue) {
+    this.setAttribute('value', newValue)
+    this._internals.setFormValue(newValue)
+  }
+
+}
+
+customElements.define('test-attribute-named-field', TestAttributeNamedField)
 customElements.define('test-form-associated-element', TestFormAssociatedElement)
 customElements.define('test-form-field', TestFormField)
 customElements.define('test-valueless-field', TestValuelessField)

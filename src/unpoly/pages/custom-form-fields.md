@@ -70,7 +70,12 @@ class DatePicker extends HTMLElement {
     this.internals = this.attachInternals()
   }
 
+  get value() {
+    return this.getAttribute('value')
+  }
+
   set value(newValue) {
+    this.setAttribute('value', newValue)
     this.internals.setFormValue(newValue) // mark: setFormValue
     this.dispatchEvent(new Event('change', { bubbles: true }))
   }
@@ -92,13 +97,18 @@ for free.
 > A form-associated element is only submitted if it calls `setFormValue()`. Declaring
 > `formAssociated` alone makes the browser aware of your element, but with no value to send.
 
-To also be watched, validated, switched or disabled, expose the properties Unpoly reads:
+Submission is all the browser can do for you. To also be watched, validated, switched or
+disabled, your element needs to be readable from a script:
 
-| Property | Read by |
+| What Unpoly reads | Needed for |
 |---|---|
-| `name` | every feature that identifies a field |
-| `value` | [watching](/up.watch), [validating](/validation), [switching](/switching-form-state) |
-| `disabled` | [disabling](/disabling-forms) |
+| the `[name]` attribute | every feature that identifies a field — no property required |
+| a `value` property | [watching](/up.watch), [validating](/validation), [switching](/switching-form-state) |
+| a `disabled` property | [disabling](/disabling-forms) |
+
+A `value` getter is the one to remember: the browser reads your value through
+`setFormValue()`, which a script cannot read back, so without a getter your element is
+submitted but never watched.
 
 For `disabled`, report the state the browser computed, so an ancestor `<fieldset disabled>`
 is covered too:

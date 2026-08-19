@@ -1335,6 +1335,29 @@ describe('up.layer', function() {
           expect(acceptListener).not.toHaveBeenCalled()
         })
 
+        it('includes the pressed submit button in the acceptance value', function() {
+          const acceptListener = jasmine.createSpy('accept listener')
+          up.on('up:layer:accept', acceptListener)
+
+          makeLayers(2)
+          const [form] = htmlFixtureList(`
+            <form up-accept>
+              <input name="foo" value="foo-value">
+              <button type="submit" name="commit" value="save">Save</button>
+              <button type="submit" name="commit" value="publish">Publish</button>
+            </form>
+          `)
+          up.layer.current.element.append(form)
+
+          Trigger.clickSequence(form.querySelectorAll('button')[1])
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener.calls.mostRecent().args[0].value).toEqual(new up.Params([
+            { name: 'foo', value: 'foo-value' },
+            { name: 'commit', value: 'publish' },
+          ]))
+        })
+
         it('uses the form params as the acceptance value', function() {
           const acceptListener = jasmine.createSpy('accept listener')
           up.on('up:layer:accept', acceptListener)

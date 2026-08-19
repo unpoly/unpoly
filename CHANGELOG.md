@@ -25,11 +25,14 @@ Unpoly now builds a form's request params with the browser's own [form-data algo
 - ⚠️ A form containing an `<input type="file">` is now submitted as `multipart/form-data` even when no file is selected, because the browser's form-data algorithm produces an entry for every file input.
 - ⚠️ An `<input type="image">` used as the submit button now contributes its `name.x` and `name.y` coordinates rather than its `[value]`, matching a native form submission.
 - ⚠️ A `<button type="reset">` with a `[name]` no longer contributes a param, matching a native form submission.
+- When an overlay is closed by submitting a form with `[up-accept]` or `[up-dismiss]`, the [result value](/closing-overlays#result-values) now also contains the `[name]` and `[value]` of the submit button the user pressed. Formerly it contained only the form's fields.
 - ⚠️ `up.Params.fromForm()` now requires a `<form>` element. It used to accept any container, which `up.Params.fromContainer()` does.
 - ⚠️ Params now arrive in the order the browser produces them: the form's own fields in tree order, then values appended by a `formdata` listener, then controls that only Unpoly knows about (custom elements listed in `up.form.config.fieldSelectors`). In particular a submit button's `[name]` and `[value]` now appear at the button's position in the form, rather than after the form's `[up-params]`.
 - `up.Params.fromForm()` now takes a `{ submitButton }` option, and assumes the form's first submit button when it is omitted. Pass `false` to submit no button at all. A button that the browser associates with a different form is ignored rather than crashing.
 - `up.Params.fromForm()` ignores an `{ includeDisabled }` option. The browser's algorithm never includes a disabled control. The option still works with `up.Params.fromContainer()`, which is what form watching uses.
-- Unpoly now throws an error when a field uses a `[form]` attribute to associate with a form in another [layer](/up.layer). The browser resolves such an attribute by document order and ignores layers, which would submit one layer's field with another layer's form.
+- ⚠️ Unpoly now throws an error when a field uses a `[form]` attribute to associate with a form in another [layer](/up.layer). The browser resolves such an attribute by document order and ignores layers, so it would submit one layer's field with another layer's form. If you render the same page into an overlay and it uses `[form]`, either give the form a unique `[id]` per layer, or move the field inside the form. Two forms sharing an `[id]` within a single layer are unaffected.
+- ⚠️ A field inside a `<fieldset disabled>` is no longer submitted or validated, but is still reported by [watchers](/up.watch) and [`[up-switch]`](/switching-form-state). Submission follows the browser, which omits it; watching reads the field's `{ disabled }` property, which an ancestor `<fieldset>` does not set.
+- A custom control that exposes a `{ name }` but no readable `{ value }` no longer contributes an `undefined` param when watched.
 
 
 3.14.3

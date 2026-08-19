@@ -526,9 +526,11 @@ up.Params = class Params {
     // apply here. Drop it, rather than have it half-apply to the configured controls below.
     options = u.omit(options, ['includeDisabled'])
 
-    // A browser only includes the button that submitted the form. Without an explicit option we
-    // assume the first one, as a browser does when the user submits a field with Enter.
-    let submitButton = options.submitButton ?? up.form.submitButtons(form)[0]
+    up.form.assertFieldsInSameLayer(form)
+
+    // Without an explicit option we assume the form's first submit button, as a browser does
+    // when the user submits from a field.
+    let submitButton = e.get(options.submitButton ?? up.form.defaultSubmitButton(form))
 
     // The FormData constructor throws unless the submitter is owned by this form, and
     // up.form.submitButtons() can return a button that carries [form] for another form.
@@ -536,23 +538,16 @@ up.Params = class Params {
 
     let params = new this(new FormData(form, submitButton), options)
 
-    // The algorithm above covers everything in form.elements.
-    let formLayer = up.layer.get(form)
-    let nativeFields = new Set()
-    for (let field of form.elements) {
-      // The browser resolves a [form] attribute by document order across the entire page,
-      // while Unpoly resolves it within the element's own layer. When the two disagree we
-      // would submit a field from another layer, which the user believes to be isolated.
-      if (field.hasAttribute('form') && up.layer.get(field) !== formLayer) {
-        up.fail('Cannot serialize %o: %o is associated with a form in another layer', form, field)
-      }
-      nativeFields.add(field)
-    }
-
-    // Add the controls that algorithm cannot know about, like custom elements from
+    // The browser's algorithm covered every control it knows about, i.e. everything in
+    // form.elements. Add the controls it cannot know about, like custom elements from
     // up.form.config.fieldSelectors.
+    //
+    // A control that *is* in form.elements but that the browser refuses to serialize (a reset
+    // button, an <output>) is not re-added: entries cannot be mapped back to elements, so
+    // "the browser knows it" is the closest test we have for "the browser handled it".
+    let browserControls = new Set(form.elements)
     for (let field of up.form.fields(form)) {
-      if (!nativeFields.has(field)) params.addField(field)
+      if (!browserControls.has(field)) params.addField(field)
     }
 
     return params
@@ -603,7 +598,8 @@ up.Params = class Params {
 
     // Input fields are excluded from form submissions if they have no [name]
     // or when they are [disabled].
-    let { name, tagName, type } = field
+    let name = up.form.fieldName(field)
+    let { tagName, type } = field
     if (name && this._considerFieldEnabled(field)) {
       let values = []
 

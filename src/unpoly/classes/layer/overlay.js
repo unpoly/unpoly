@@ -327,13 +327,19 @@ up.Layer.Overlay = class Overlay extends up.Layer {
 
   _registerSubmitCloser(attribute, closeFn) {
     // Allow the fallbacks to be both vanilla forms and Unpoly [up-submit] forms
-    this.on('submit', `[${attribute}]`, (event, form) => {
+    this.on('submit', `[${attribute}]`, (event, element) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
       // a form from being submitted on the root layer.
       up.event.halt(event, { log: true })
 
-      const value = up.Params.fromForm(form)
-      this._onAttrCloserActivated(form, value, closeFn)
+      // (1) `element` is whichever element carries the attribute, which for the documented
+      //     markup is the form itself. Read the form from the event instead, so we cannot
+      //     hand a non-form to up.Params.fromForm().
+      // (2) The opener is interested in the form's full params, including the button the user
+      //     pressed. When nothing submitted the form (a script dispatched the event) there is
+      //     no button to attribute, and we must not guess the form's first one.
+      const value = up.Params.fromForm(event.target, { submitButton: event.submitter ?? false })
+      this._onAttrCloserActivated(element, value, closeFn)
     })
   }
 

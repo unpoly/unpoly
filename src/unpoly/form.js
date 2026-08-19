@@ -160,6 +160,10 @@ up.form = (function() {
       // the only elements outside this list that the :enabled / :disabled pseudo-classes
       // match. Matching both states matters: an element must not stop being a field when
       // it is disabled.
+      //
+      // Chrome and Firefox match neither links nor <object> here, so the last three
+      // exclusions are defensive: CSS Selectors 4 defines :enabled more broadly than HTML
+      // does, and Safari is only ever checked by hand.
       ':is(:enabled, :disabled):not(input, select, textarea, button, fieldset, optgroup, option, a, area, object)',
     ],
     submitSelectors: ['form:is([up-submit], [up-target], [up-layer], [up-transition])'],
@@ -227,6 +231,36 @@ up.form = (function() {
   */
   function findFields(root) {
     return findFormElements(root, fieldSelector)
+  }
+
+  // A form-associated custom element takes its name from the [name] attribute, which is all the
+  // browser needs — so it often exposes no { name } property. A native control always reflects
+  // the attribute into the property, so reading the attribute changes nothing for them.
+  function fieldName(field) {
+    return field.name ?? field.getAttribute('name')
+  }
+
+  // A browser only submits the button that was pressed. When there is no submitter we assume
+  // the first submit button, which is what a browser does for an implicit submission from a
+  // field. Both up.form.destinationOptions() and up.Params.fromForm() need this rule.
+  function defaultSubmitButton(form) {
+    return findSubmitButtons(form)[0]
+  }
+
+  // The browser resolves a field's [form] attribute by document order across the whole page,
+  // while Unpoly resolves it within the field's own layer (see getAssociatedForm()). When the
+  // two disagree, serializing the form would send a field from a layer that the user believes
+  // to be isolated.
+  function assertFieldsInSameLayer(form) {
+    let formLayer = up.layer.get(form)
+
+    for (let field of form.elements) {
+      // Only a [form] attribute can pull in a field from another layer. Anything else in
+      // form.elements is a descendant of the form, and so in the form's own layer.
+      if (field.hasAttribute('form') && up.layer.get(field) !== formLayer) {
+        up.fail('Cannot serialize %o: %o is associated with a form in another layer', form, field)
+      }
+    }
   }
 
   function findFieldsAndButtons(container) {
@@ -609,7 +643,7 @@ up.form = (function() {
     //
     // We resolve this before parsing params, because the button's [name] and [value] are
     // contributed by the browser's form-data algorithm in up.Params.fromForm().
-    const submitButton = (options.submitButton ??= findSubmitButtons(form)[0])
+    const submitButton = (options.submitButton ??= defaultSubmitButton(form))
 
     // Parse params from form fields.
     const paramParts = [
@@ -2336,6 +2370,9 @@ up.form = (function() {
     trackFields,
     isField,
     submitButtons: findSubmitButtons,
+    defaultSubmitButton,
+    assertFieldsInSameLayer,
+    fieldName,
     focusedField,
     // disableWhile,
     disableTemp: disableContainerTemp,
