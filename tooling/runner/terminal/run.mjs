@@ -71,26 +71,23 @@ function resolveFileOption(config) {
   return Config.fromObject({ ...config, spec, file: [] })
 }
 
-// Which of the bundles this config asks the page to load are absent. Only meaningful for
-// variants the dev watcher does not build (currently --minify).
-function missingDistFiles(config) {
-  let dist = path.join(PROJECT_ROOT, 'dist')
-  return Object.values(config.distFilenames())
-    .filter((name) => !existsSync(path.join(dist, name)))
+const isMinified = (name) => name.includes('.min.')
+
+// Which of the bundles this config asks the page to load are absent from `dist`.
+//
+// Two things it deliberately does not report. Files the page will not request: runner.ejs
+// loads unpoly-migrate.js only when `migrate` is set, so a --minify run without --migrate
+// must not demand unpoly-migrate.min.js. And nothing at all before the watcher has built,
+// which is why the caller only asks once a build is green — see runDev().
+export function missingDistFiles(config, dist = path.join(PROJECT_ROOT, 'dist')) {
+  let { unpoly, specs, jasmine, migrate } = config.distFilenames()
+  let loaded = [unpoly, specs, jasmine, ...(config.migrate ? [migrate] : [])]
+  return loaded.filter((name) => !existsSync(path.join(dist, name)))
 }
 
 export async function runDev(argv, env) {
   const config = parseConfig(argv, env)
   if (!config) return CONFIG_ERROR
-
-  // The dev watcher never builds the minified bundles, so --minify loads files only
-  // `bin/build --config=ci` produces. Missing, they merely 404 and the specs run against
-  // no Unpoly at all — so check before spending ten minutes finding that out.
-  let missing = missingDistFiles(config)
-  if (missing.length) {
-    console.error(pc.red(`Missing from dist/: ${missing.join(', ')}. Build them with \`bin/build --config=ci\`.`))
-    return CONFIG_ERROR
-  }
 
   // Start one in the background if none is up, so `bin/test` needs no manual setup.
   if (!(await isDevEnvRunning())) {
@@ -117,6 +114,22 @@ export async function runDev(argv, env) {
       return 4
     }
     throw error
+  }
+
+  // Only now, with a green build behind us, does an absent bundle mean anything: `dist` is
+  // gitignored, so before the watcher's first build *everything* is missing. Asking up
+  // front turned every fresh clone's first `bin/test` into a hard error naming files the
+  // watcher was about to produce — and it sent you to the CI build, which also produces
+  // the minified ones, so it never recurred for anyone who hit it once.
+  //
+  // Missing bundles merely 404, leaving the specs to run against no Unpoly at all, so we
+  // still check before spending ten minutes finding that out.
+  let missing = missingDistFiles(config)
+  if (missing.length) {
+    console.error(pc.red(missing.every(isMinified)
+      ? `Missing from dist/: ${missing.join(', ')}. The dev watcher never builds the minified bundles — run \`bin/build --config=ci\` once.`
+      : `Missing from dist/: ${missing.join(', ')}, although the build reported success. Check tooling/build/webpack/development.js.`))
+    return 4
   }
 
   return await drive(config)

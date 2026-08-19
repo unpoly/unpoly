@@ -152,13 +152,17 @@ the browser log plus the HTML state as a CSS-selector outline (`#id.class[attr="
 ## Lifecycle
 
 - `bin/test` → `runDev(argv, env)`: ensure a dev environment (start it if needed, else
-  exit `3`) → `waitForFreshBuild` (else exit `4`) → puppeteer → receiver → exit 0/1.
-  The runner never builds; dev relies on the watcher.
+  exit `3`) → `waitForFreshBuild` (else exit `4`) → confirm the bundles the page loads are
+  in `dist` (else exit `4`) → puppeteer → receiver → exit 0/1.
+  The runner never builds; dev relies on the watcher. The `dist` check comes *after* the
+  build wait, because `dist` is gitignored: before the watcher's first build everything is
+  missing, and asking up front failed every fresh clone's first run.
 - `bin/ci` → `runCI(argv, env)`: boots its own server, skips the build wait, runs
   against `bin/build --config=ci` artifacts. CI workflow: `npm ci` (install) → `bin/build --config=ci` → `bin/ci`.
 - Exit codes: `0` pass · `1` failures · `2` runner timeout (the watchdog fires when the
-  receiver sees no event for 30s) · `3` no dev environment · `4` build stale ·
-  `5` bad config/flags · `6` build failed (compile/lint errors).
+  receiver sees no event for 30s) · `3` no dev environment · `4` build stale, or a bundle
+  the page loads is absent from `dist` · `5` bad config/flags · `6` build failed
+  (compile/lint errors).
 
 `up.log.config.format` deliberately stays at its default (`true`): some specs assert on
 the exact `%c`-styled arguments Unpoly passes to `console.warn`/`debug`. The console
@@ -235,5 +239,7 @@ suite. What's covered today:
 - `config`: `fromArgv`/`fromProcessEnv` precedence, unknown-flag error, CSP header,
   dist filenames. Plus a `server` integration test (start Express, fetch `/specs` with
   csp/es6/min/migrate, assert headers + script tags).
+- `run`: `missingDistFiles()` — which bundles a config actually loads (migrate only with
+  `--migrate`), and that a watcher-built `dist` leaves nothing to report.
 - `build_sync`: dead pid / missing file / stale / fresh / timeout, with an injected clock.
 - `receiver`: canned event arrays → captured output + exit code.
