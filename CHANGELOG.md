@@ -8,6 +8,30 @@ If you're upgrading from an older Unpoly version, you should load [`unpoly-migra
 You may browse a formatted and hyperlinked version of this file at <https://unpoly.com/changes>.
 
 
+Unreleased
+----------
+
+### Custom form fields
+
+Unpoly now builds a form's request params with the browser's own [form-data algorithm](https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData), instead of walking the form's fields itself.
+
+- [Form-associated custom elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements#form-associated_custom_elements) are now submitted, without any configuration. (by @kmmbvnr)
+- Values appended by a [`formdata`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/formdata_event) event listener are now submitted. (by @kmmbvnr)
+- A form-associated custom element is now also [watched](/up.watch), [validated](/validation), [switched](/switching-form-state) and [disabled](/disabling-forms), if it exposes `{ name, value, disabled }` properties.
+- A new guide explains the [patterns for building a custom form field](/custom-form-fields).
+- A `formdata` listener affects what Unpoly *sends*, not what it *watches*. Values it appends belong to the whole form, so they cannot be attributed to the form group a watcher or validation is looking at.
+- A form-associated custom element that never calls `setFormValue()` submits no value, even when it is listed in `up.form.config.fieldSelectors`. Serialization of such an element is the browser's job.
+- ⚠️ Fields inside a `<fieldset disabled>` are no longer submitted, matching a native form submission.
+- ⚠️ A form containing an `<input type="file">` is now submitted as `multipart/form-data` even when no file is selected, because the browser's form-data algorithm produces an entry for every file input.
+- ⚠️ An `<input type="image">` used as the submit button now contributes its `name.x` and `name.y` coordinates rather than its `[value]`, matching a native form submission.
+- ⚠️ A `<button type="reset">` with a `[name]` no longer contributes a param, matching a native form submission.
+- ⚠️ `up.Params.fromForm()` now requires a `<form>` element. It used to accept any container, which `up.Params.fromContainer()` does.
+- ⚠️ Params now arrive in the order the browser produces them: the form's own fields in tree order, then values appended by a `formdata` listener, then controls that only Unpoly knows about (custom elements listed in `up.form.config.fieldSelectors`). In particular a submit button's `[name]` and `[value]` now appear at the button's position in the form, rather than after the form's `[up-params]`.
+- `up.Params.fromForm()` now takes a `{ submitButton }` option, and assumes the form's first submit button when it is omitted. Pass `false` to submit no button at all. A button that the browser associates with a different form is ignored rather than crashing.
+- `up.Params.fromForm()` ignores an `{ includeDisabled }` option. The browser's algorithm never includes a disabled control. The option still works with `up.Params.fromContainer()`, which is what form watching uses.
+- Unpoly now throws an error when a field uses a `[form]` attribute to associate with a form in another [layer](/up.layer). The browser resolves such an attribute by document order and ignores layers, which would submit one layer's field with another layer's form.
+
+
 3.14.3
 ------
 
