@@ -128,9 +128,27 @@ rebuilds finished (no partial-read race) — and `errors` is deduplicated, becau
 source is built by several sub-compilers and would otherwise report each failure once per
 variant. `waitForFreshBuild` errors if the file is missing or the pid is dead, else waits
 until `idle && startedAt >= newestSourceMtime`, then throws if `ok` is false;
-`bin/dev status` reads the same two fields through `lastBuildErrors()`. Reader and writer
-both anchor the path to the repo root, and the write is a rename — so a `bin/test` run from
-a subdirectory works, and a poll landing mid-write cannot read a half-written file.
+`bin/dev status` reads the same two fields through `lastBuildErrors()`.
+
+`newestSourceMtime` walks `src`, `spec` and `tooling/runner/browser`, counting only the
+extensions webpack has a loader for (`WATCHABLE_SUFFIXES`). That last directory is in because
+`spec/helpers/terminal_reporter.js` imports `poster.js` from it, which pulls two more modules into
+`dist/specs.js`; the rest of `tooling` runs in Node and can never be bundled. One self-test derives
+the bundled set from the imports and fails if any of it moves outside a scanned directory; another
+fails if a webpack loader gains an extension that isn't listed — the drift that would otherwise stop
+those edits counting and run the suite against a stale bundle in silence.
+
+An allowlist rather than a skip list, because a skip list only skips what someone remembered to
+name: `src` alone holds 117 guide pages, an images tree of diagrams and recordings, and an
+`.htaccess`, and any of them being the newest file used to make the predicate unsatisfiable, so
+`bin/test` waited 30s and refused to run. Known gap: `runner/browser/log_value.mjs` is bundled but
+`.mjs` is not listed, since it means Node-only everywhere else under `tooling`.
+
+What no extension list can catch is a file with a watchable extension that webpack does not import.
+That is what the 3s grace is for: if the watcher is still `idle` with an unchanged `startedAt`,
+nothing needed building, so the run proceeds and reports `unbuiltEdit` so `bin/test` can name the
+file. Under-scanning is the failure that matters, and over-scanning cannot cause it. The 30s timeout
+now means only that a build started and never finished.
 
 **Only a watching compiler writes it**, which is what keeps it single-writer. The
 plugin arms itself on `watchRun` (watch-only) and ignores `done` until then, because

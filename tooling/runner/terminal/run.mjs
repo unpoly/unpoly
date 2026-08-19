@@ -103,7 +103,13 @@ export async function runDev(argv, env) {
   }
 
   try {
-    await waitForFreshBuild()
+    const build = await waitForFreshBuild()
+    // The watcher never reacted, so nothing needed building. Say which file that was: reading
+    // the name is what tells you whether to shrug (a guide page) or look closer (a source file
+    // the watcher should have picked up).
+    if (build.unbuiltEdit) {
+      console.error(pc.blue(`No rebuild for ${build.unbuiltEdit} — running against the current build.`))
+    }
   } catch (error) {
     if (error instanceof BuildFailedError) {
       process.stdout.write(buildFailure(error.errors))
