@@ -101,13 +101,23 @@ where the default shows only the topmost frame in a spec file and in `src/`.
 
 | Option | Effect |
 |--------|--------|
-| `--spec="…"` | Only run specs whose full name contains this string |
+| `--spec="…"` | Only run specs whose full name contains this string. Matched verbatim, never as a pattern |
 | `--file=path[:line]` | Run what a file declares — or, with `:line`, just the group or spec declared on that line |
 | `--verbose` | Add the browser log + HTML state (fixtures, overlays) to each failure |
 | `--browser=firefox` | Run in Firefox instead of Chrome |
 | `--headless=false` | Show the browser window while running |
 | `--stop-on-failure=false` | Keep running a spec after its first failed expectation (default: stop) |
 | `--csp=none\|nonce-only\|strict-dynamic` · `--es6` · `--migrate` | Serve the specs under a CSP / ES6 / unpoly-migrate variant |
+
+`--spec` and `--file` are **repeatable**, and a run is the union of everything they select:
+
+```
+bin/test --spec="up.form" --spec="up.radio"
+bin/test --file=spec/unpoly/form_switch_spec.js --file=spec/unpoly/radio_spec.js:88
+```
+
+Filters may overlap freely — naming a group and one of its specs is not a contradiction,
+and nothing can run twice.
 
 `--minify` runs the specs against the bundle we actually ship. That matters because the
 minifier renames every `_`-prefixed member, so a spec that reaches one by name passes
@@ -252,8 +262,19 @@ bin/test --file=spec/unpoly/classes/params_spec.js        # what that file decla
 bin/test --file=spec/unpoly/classes/params_spec.js:29     # just the group on line 29
 ```
 
-Naming a file runs its outermost group, which is its module — so pointing at an extracted
-file runs the module's specs, the same as pointing at the module's own file. Pointing at a
+What a file "declares" depends on which kind it is, and the difference is worth knowing
+because it is the difference between 13 seconds and three minutes:
+
+- An **extracted file** starts with `extendDescribe()`, which names a group that other
+  files contribute to as well. Its own name would run the whole module, so `--file` runs
+  the blocks *this* file declares instead.
+- A **module's own spec file** starts with a real `describe()`, and naming it runs that
+  module — extracted files included. That is deliberate: after changing
+  `src/unpoly/form.js` you want all of `up.form`, and skipping the extracted specs would
+  report a green run over a fraction of the coverage.
+
+So `--file` on a part means "this chunk", and on a module's file means "this module". The
+runner echoes the filters it derived, so you can always see which you got. Pointing at a
 line that declares nothing is an error rather than a silent wider run.
 
 

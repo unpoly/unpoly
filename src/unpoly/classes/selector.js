@@ -55,19 +55,28 @@ up.Selector = class Selector {
   }
 
   firstDescendant(root) {
-    // We make multiple queries here:
+    // Note that we query per expanded selector, not once for their union: when
+    // `up.fragment.config.mainTargets` matches both .container and body, up.fragment.get(':main')
+    // must prefer .container even though body comes first in the document.
     //
-    // (1) When we expand a selector into multiple native selectors, earlier selectors should match first.
-    //    E.g. `up.fragment.config.mainTargets` may match multiple elements in a layer
-    //    (like .container and body), but up.fragment.get(':main') should prefer to match .container.
+    // An *element* root is searched directly. The layer filter in this._filters is what
+    // keeps matches inside the requested layers, and it must: a root like <body> contains
+    // other layers' elements, since an overlay is appended to <body>.
     //
-    // (2) When we match within multiple layers, earlier layers should match first.
-    //     E.g. `up.fragment.get('main', { layer: 'current root' }` may match a main element in both
-    //    layers, but we should return the match in `'current'`.
-    if (this._ignoreLayers) {
-      root ||= document
+    // A Document root narrows nothing, so it is not a root for our purposes. Treating it
+    // as one would search the whole document and let the layer filter (which accepts a
+    // match in *any* requested layer) pick, losing the layer preference below.
+    if (u.isElement(root)) {
       return this._firstSelectorMatch((selector) => root.querySelectorAll(selector))
+    } else if (this._ignoreLayers) {
+      // With layers out of the picture the container is a whole document: the one we were
+      // given (up.ResponseDoc passes its own), or ours.
+      return this._firstSelectorMatch((selector) => (root || document).querySelectorAll(selector))
     } else {
+      // Earlier layers win, so u.findResult() tries one layer at a time. E.g.
+      // up.fragment.get('main', { layer: 'current root' }) may match in both layers, but
+      // must return the match in 'current'. A layer element may itself be the match, as in
+      // up.fragment.get('body'), hence e.subtree().
       return u.findResult(this._layers, (layer) => {
         return this._firstSelectorMatch((selector) => e.subtree(layer.element, selector))
       })

@@ -8,8 +8,11 @@ function parseBoolean(str, defaultValue = undefined) {
   }
 }
 
-function parseString(str, defaultValue = undefined) {
-  return str ?? defaultValue
+// Repeatable settings. A single value, a list, or nothing all normalize to an array, so
+// callers never branch on arity. Express parses a repeated ?spec= into an array for us.
+function parseList(value) {
+  if (value === undefined || value === null || value === '') return []
+  return (Array.isArray(value) ? value : [value]).filter((entry) => entry !== '')
 }
 
 function parseEnumString(str, knownValues, defaultValue = undefined) {
@@ -20,12 +23,24 @@ function parseEnumString(str, knownValues, defaultValue = undefined) {
   }
 }
 
+// Two setting values are the same setting if they are equal — element-wise for the
+// repeatable ones, where `[] !== []` would otherwise report every default as changed.
+function sameSetting(a, b) {
+  if (Array.isArray(a) || Array.isArray(b)) {
+    let listA = parseList(a), listB = parseList(b)
+    return listA.length === listB.length && listA.every((entry, i) => entry === listB[i])
+  }
+  return a === b
+}
+
 const PARSERS = {
-  // The title of an example or example group to focus on
-  'spec': (value) => parseString(value, ''),
-  // (terminal only) A spec file, optionally `:line`, whose group is turned into a `spec`
-  // filter — so you can run what you are looking at without retyping its title.
-  'file': (value) => parseString(value, ''),
+  // Full names (or any substring of one) of the examples to run. Repeatable: pass
+  // --spec more than once and the run is the union of all of them. Matched verbatim,
+  // never as a regular expression — see spec/helpers/spec_filter.js.
+  'spec': (value) => parseList(value),
+  // (terminal only) Spec files, each optionally `:line`, turned into `spec` filters — so
+  // you can run what you are looking at without retyping its title. Repeatable too.
+  'file': (value) => parseList(value),
   // Whether to deliver the test runner with a strict script-src CSP.
   'csp': (value) => parseEnumString(value, ['none', 'nonce-only', 'strict-dynamic'], 'none'),
   // Whether we use minified sources.
@@ -48,6 +63,8 @@ const PARSERS = {
   // helper applies it to Jasmine, so it affects the browser runner too.
   'stopOnFailure': (value) => parseBoolean(value, true),
 }
+
+const LIST_KEYS = ['spec', 'file']
 
 // Collects the raw (unparsed) string values for known settings from an env-like
 // object, reading each as its UPPERCASE name. Used by fromArgv, so CLI beats env.
@@ -91,7 +108,7 @@ export class Config {
   toParams() {
     let defaults = this.constructor.fromObject({})
     return Object.fromEntries(
-      Object.entries(this._object).filter(([key, val]) => val !== defaults[key])
+      Object.entries(this._object).filter(([key, val]) => !sameSetting(val, defaults[key]))
     )
   }
 
@@ -162,7 +179,14 @@ export class Config {
       if (!(key in PARSERS)) {
         throw new Error(`Unknown option: --${match[1]}`)
       }
-      raw[key] = match[2] ?? 'true'
+      let value = match[2] ?? 'true'
+      if (LIST_KEYS.includes(key)) {
+        // Repeating a flag adds to it. Anything from the environment is the starting
+        // point, so `SPEC=foo bin/test --spec=bar` runs both.
+        raw[key] = [...parseList(raw[key]), value]
+      } else {
+        raw[key] = value
+      }
     }
     return this.fromObject(raw)
   }

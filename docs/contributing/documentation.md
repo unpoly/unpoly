@@ -454,6 +454,21 @@ rewording:
 ## Callback arguments {#callback-arguments}
 ```
 
+### Line breaks
+
+The renderer keeps single newlines as line breaks, so how you wrap a paragraph in the
+source is how it reads on the site. There is no line-length convention to maintain and
+no reason to rewrap a paragraph you edited.
+
+A trailing backslash forces a break where the source has none:
+
+```markdown
+Unpoly introduces new HTML attributes that can execute JavaScript code.\
+This is a security risk if an attacker can inject HTML.
+```
+
+Those backslashes are deliberate. Leave them where they are.
+
 ### Admonitions
 
 Blockquotes opening with a bracketed type render as callout boxes:

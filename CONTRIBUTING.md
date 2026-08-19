@@ -99,7 +99,17 @@ commit.
 > Control flow moves through numerous functions and objects.
 
 [Read the rendering deep-dive](docs/contributing/rendering.md) before touching
-`up.fragment` or files in `src/unpoly/classes/change/`.
+`up.render()` or files in `src/unpoly/classes/change/`.
+
+
+### [🔍 Selector lookup deep-dive](docs/contributing/selector-lookup.md)
+
+> Unpoly has its own selector engine. Lookups are scoped to a single layer, skip
+> elements that are being destroyed, understand custom selectors like `:main` and
+> `:origin`, and prefer matches near the element the user interacted with.
+
+[Read the selector lookup deep-dive](docs/contributing/selector-lookup.md) before writing
+code that looks up elements, or when a lookup returns something you did not expect.
 
 
 ### [🔌 Compatibility](docs/contributing/compatibility.md)

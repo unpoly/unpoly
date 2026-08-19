@@ -19,7 +19,7 @@ import { createRemapper } from './source_map.mjs'
 import { createReceiver } from './receiver.mjs'
 import { buildFailure } from './formatter.mjs'
 import { specsURL } from './urls.mjs'
-import { specFilterFor } from '../../find_spec.mjs'
+import { specFiltersFor } from '../../find_spec.mjs'
 import { isDevEnvRunning, startDevEnv } from '../../dev_env.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -38,34 +38,37 @@ function parseConfig(argv, env) {
   }
 }
 
-// Turns `--file=path[:line]` into an ordinary `spec` filter, so the rest of the runner
-// (and the page URL) only ever deals with full names. Reuses the parser behind
+// Turns every `--file=path[:line]` into ordinary `spec` filters, so the rest of the
+// runner (and the page URL) only ever deals with full names. Reuses the parser behind
 // bin/find-spec rather than growing a second way to read a spec file.
 //
-// Without a line it takes the file's first group, which is its outermost describe — so it
-// runs that module, including any specs extracted into sibling files. With a line it takes
-// the block declared there, and refuses if there is none.
+// --file and --spec are both repeatable and simply union, so they compose: the run is
+// every spec matched by any of them.
 function resolveFileOption(config) {
-  if (!config.file) return config
-  // Both would mean two filters where Jasmine takes one. Refusing beats silently
-  // honouring whichever we happen to apply last.
-  if (config.spec) throw new Error('Pass either --file or --spec, not both.')
+  if (!config.file.length) return config
 
-  const [, name, lineText] = /^(.*?)(?::(\d+))?$/.exec(config.file)
-  const line = lineText ? Number(lineText) : null
-  const absolute = path.isAbsolute(name) ? name : path.join(projectRoot, name)
+  const filters = []
+  for (let location of config.file) {
+    const [, name, lineText] = /^(.*?)(?::(\d+))?$/.exec(location)
+    const line = lineText ? Number(lineText) : null
+    const absolute = path.isAbsolute(name) ? name : path.join(projectRoot, name)
 
-  if (!existsSync(absolute)) throw new Error(`No such file: ${name}`)
+    if (!existsSync(absolute)) throw new Error(`No such file: ${name}`)
 
-  const filter = specFilterFor(readFileSync(absolute, 'utf8'), line)
-  if (!filter) {
-    throw new Error(line
-      ? `Nothing is declared at ${name}:${line} — point at a describe() or it() line.`
-      : `${name} declares no specs.`)
+    const resolved = specFiltersFor(readFileSync(absolute, 'utf8'), line)
+    if (!resolved) {
+      throw new Error(line
+        ? `Nothing is declared at ${name}:${line} — point at a describe() or it() line.`
+        : `${name} declares no specs.`)
+    }
+
+    console.error(pc.blue(`--file=${location} →`))
+    for (let filter of resolved) console.error(pc.blue(`  --spec="${filter}"`))
+    filters.push(...resolved)
   }
 
-  console.error(pc.blue(`--file=${config.file} → --spec="${filter}"`))
-  return Config.fromObject({ ...config, spec: filter, file: '' })
+  const spec = [...new Set([...config.spec, ...filters])]
+  return Config.fromObject({ ...config, spec, file: [] })
 }
 
 // Which of the bundles this config asks the page to load are absent. Only meaningful for

@@ -55,19 +55,46 @@ export function findSpecs(sources, phrase) {
   return matches
 }
 
-// The --spec filter that runs a file, or just the block declared at `line`. Returns null
-// when the file declares nothing, or when no block starts at that line — the caller has
-// the path and can say so usefully.
+// The --spec filters that run a file, or just the block declared at `line`. Returns a list
+// of full names, or null when the file declares nothing / no block starts at that line —
+// the caller has the path and can say so usefully.
 //
-// Note that the filter is a *full name*, so running a whole file runs whatever else shares
-// its outermost group: naming an extracted file runs its module, the same as naming the
-// module's own spec file. That is the intent — both mean "this module's specs".
-export function specFilterFor(text, line = null) {
+// A plain describe() yields its own full name, which is that file's own scope. An
+// extendDescribe() is different: it names a group that *other* files also contribute to,
+// so its own name would run the whole module. We return the names of the real blocks
+// underneath it instead — the part this file actually declares. Their full names are
+// unique to the file, since two files cannot declare the same path.
+export function specFiltersFor(text, line = null) {
   const entries = parseTitles(text)
   if (!entries.length) return null
 
-  const entry = line === null ? entries[0] : entries.find((e) => e.line === line)
-  return entry ? entry.titles.join(' ') : null
+  const index = line === null ? 0 : entries.findIndex((e) => e.line === line)
+  if (index < 0) return null
+
+  const entry = entries[index]
+  if (entry.kind !== 'extendDescribe') return [entry.titles.join(' ')]
+
+  return ownBlocksBelow(entries, index)
+}
+
+// The shallowest blocks below entries[index] that are not themselves extendDescribe(),
+// as full names. Descends through nested extendDescribe() calls, and stops descending
+// once a block is collected — its children are already covered by its name.
+function ownBlocksBelow(entries, index) {
+  const parent = entries[index].titles
+  const isBelow = (titles) => titles.length > parent.length &&
+    parent.every((title, depth) => titles[depth] === title)
+
+  const names = []
+  for (let entry of entries.slice(index + 1)) {
+    if (!isBelow(entry.titles)) break
+    if (entry.kind === 'extendDescribe') continue
+    const name = entry.titles.join(' ')
+    if (!names.some((collected) => name.startsWith(collected + ' ') || name === collected)) {
+      names.push(name)
+    }
+  }
+  return names.length ? names : null
 }
 
 // One line per match: `file:line "full describe path"`. The path is space-joined, which
