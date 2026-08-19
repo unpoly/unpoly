@@ -688,6 +688,66 @@ describe('up.Params', function() {
       ])
     })
 
+    describe('cross-layer [form] associations', function() {
+
+      // A page rendered into an overlay usually repeats the ids of the page below it. The
+      // browser resolves a [form] attribute by document order and ignores layers, so it can
+      // hand one layer's field to another layer's form.
+      const html = `
+        <div id="container">
+          <form id="my-form">
+            <input name="own-field" value="own-value">
+          </form>
+          <input name="external-field" value="external-value" form="my-form">
+        </div>
+      `
+
+      it('fails when a field from another layer is associated with the given form', async function() {
+        makeLayers([{ fragment: html }, { fragment: html }])
+        await wait()
+
+        const rootForm = up.fragment.get('#my-form', { layer: 'root' })
+        const serialize = () => up.Params.fromForm(rootForm)
+
+        expect(serialize).toThrowError(/associated with a form in another layer/i)
+      })
+
+      it('does not fail when both layers repeat the id but no field uses a [form] attribute', async function() {
+        const withoutExternalField = `
+          <div id="container">
+            <form id="my-form">
+              <input name="own-field" value="own-value">
+            </form>
+          </div>
+        `
+        makeLayers([{ fragment: withoutExternalField }, { fragment: withoutExternalField }])
+        await wait()
+
+        const rootForm = up.fragment.get('#my-form', { layer: 'root' })
+
+        expect(up.Params.fromForm(rootForm).toArray()).toEqual([
+          { name: 'own-field', value: 'own-value' },
+        ])
+      })
+
+      it('does not fail when a duplicate form id and its [form] reference are in the same layer', function() {
+        // Two forms sharing an id is invalid HTML, but the browser and Unpoly resolve it the
+        // same way within one layer, so there is nothing to protect against.
+        const [form] = htmlFixtureList(`
+          <form id="my-form">
+            <input name="own-field" value="own-value">
+          </form>
+        `)
+        htmlFixtureList('<form id="my-form"></form>')
+        htmlFixtureList('<input name="external-field" value="external-value" form="my-form">')
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'own-field', value: 'own-value' },
+          { name: 'external-field', value: 'external-value' },
+        ])
+      })
+    })
+
     describe('submit buttons', function() {
 
       it('includes the [name] and [value] of the first submit button', function() {

@@ -536,9 +536,21 @@ up.Params = class Params {
 
     let params = new this(new FormData(form, submitButton), options)
 
-    // The algorithm above covers everything in form.elements. Add the controls it cannot know
-    // about, like custom elements from up.form.config.fieldSelectors.
-    let nativeFields = new Set(form.elements)
+    // The algorithm above covers everything in form.elements.
+    let formLayer = up.layer.get(form)
+    let nativeFields = new Set()
+    for (let field of form.elements) {
+      // The browser resolves a [form] attribute by document order across the entire page,
+      // while Unpoly resolves it within the element's own layer. When the two disagree we
+      // would submit a field from another layer, which the user believes to be isolated.
+      if (field.hasAttribute('form') && up.layer.get(field) !== formLayer) {
+        up.fail('Cannot serialize %o: %o is associated with a form in another layer', form, field)
+      }
+      nativeFields.add(field)
+    }
+
+    // Add the controls that algorithm cannot know about, like custom elements from
+    // up.form.config.fieldSelectors.
     for (let field of up.form.fields(form)) {
       if (!nativeFields.has(field)) params.addField(field)
     }
