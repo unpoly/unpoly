@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+// Regenerates the table of contents in every contributing guide that carries the
+// <!-- toc --> markers.
+//   bin/update-contributing-tocs            rewrite the TOCs
+//   bin/update-contributing-tocs --check    report stale TOCs, change nothing, exit non-zero
+import path from 'node:path'
+import { updateGuides, guidesMissingToc, GUIDE_DIR } from '../tooling/toc.mjs'
+
+const check = process.argv.includes('--check')
+const relative = (file) => path.relative(process.cwd(), file)
+
+const stale = updateGuides(undefined, { write: !check })
+const missing = guidesMissingToc()
+
+for (const file of stale) console.log(`${check ? 'stale' : 'updated'}: ${relative(file)}`)
+for (const file of missing) console.log(`no TOC, but long enough to want one: ${relative(file)}`)
+
+if (!stale.length && !missing.length) console.log(`All TOCs in ${relative(GUIDE_DIR)} are current.`)
+if (check && (stale.length || missing.length)) {
+  console.error('Run `bin/update-contributing-tocs` to regenerate.')
+  process.exit(1)
+}
