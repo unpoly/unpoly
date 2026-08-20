@@ -9,6 +9,21 @@ Almost every Unpoly feature ends up calling `up.render()`. Following a link, sub
 form, polling, preloading, opening an overlay: all of it funnels through here. That makes
 this the subsystem where a small change has the widest blast radius.
 
+<!-- toc -->
+- [Why it is intricate](#why-it-is-intricate)
+- [Start from the outside](#start-from-the-outside)
+- [The path through the code](#the-path-through-the-code)
+- [Plans, and why a pass can change its mind](#plans-and-why-a-pass-can-change-its-mind)
+- [Steps, and matching twice](#steps-and-matching-twice)
+- [One options object, refined in stages](#one-options-object-refined-in-stages)
+- [Hungry elements join late, and may live on another layer](#hungry-elements-join-late-and-may-live-on-another-layer)
+- [Rendering can open and close layers](#rendering-can-open-and-close-layers)
+- [Revalidation, or the second render pass](#revalidation-or-the-second-render-pass)
+- [Aborting](#aborting)
+- [Errors and results](#errors-and-results)
+- [Working here](#working-here)
+<!-- /toc -->
+
 
 ## Why it is intricate
 

@@ -3,6 +3,16 @@
 This guide walks through one complete change, from a fresh checkout to a pull request.
 
 Code blocks below are diffs, where `...` marks code left out.
+<!-- toc -->
+- [Our example feature](#our-example-feature)
+- [Before you start](#before-you-start)
+- [Where the code goes](#where-the-code-goes)
+- [1. The JavaScript function](#1-the-javascript-function)
+- [2. The HTML attribute](#2-the-html-attribute)
+- [3. Documentation](#3-documentation)
+- [Opening a pull request](#opening-a-pull-request)
+<!-- /toc -->
+
 
 ## Our example feature
 
@@ -48,7 +58,7 @@ Forms are the topic of `up.form`, so we work in two files:
 Every module `foo.js` has a spec `foo_spec.js`, and a feature with a lot of specs may have
 one of its own. `bin/find-spec "[up-submit]"` tells you which file to open; see
 [testing](testing.md#finding-the-spec-for-a-feature) and
-[code organization](code-organization.md#directory-structure--where-to-find-files).
+[code organization](code-organization.md#directory-structure).
 
 
 ## 1. The JavaScript function

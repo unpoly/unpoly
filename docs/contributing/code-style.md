@@ -1,6 +1,7 @@
 # Code style
 
-Some of these rules are enforced by ESLint, most are not.
+How Unpoly's own source is written: no types, no dependencies, no jQuery, and a real concern
+for byte count. Some of these rules are enforced by ESLint (`bin/lint`), most are not.
 
 
 ## No types

@@ -1,20 +1,42 @@
 # Testing
 
-Unpoly is almost all API surface. Every module publishes HTML attributes, JavaScript
-functions, events and configuration, and each of those has to keep behaving across
-browsers, CSP modes, slow networks and impatient users. Nobody holds all of that in their
-head — not the maintainers, and not an agent reading one file.
+**Any change needs a spec.** Unpoly is almost all API surface, and the ~4,000 specs that run in a real browser on
+every change are what let you alter code you don't fully understand and find out immediately whether you broke it.
+Treat a green suite as permission to be bold, and a red one as the cheapest possible bug report.
 
-That is what the suite is for. Around 4,000 specs run in a real browser on every change, so
-you can alter code you do not fully understand and find out immediately whether you broke
-something. Treat a green suite as permission to be bold, and a red one as the cheapest
-possible bug report.
+"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each module `foo.js` has a
+spec `spec/unpoly/foo_spec.js`.
 
-The corollary: **any change needs a spec.** A behaviour with no spec is a behaviour the next
-person will break without noticing.
-
-"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`;
-each module `foo.js` has a spec `spec/unpoly/foo_spec.js`.
+<!-- toc -->
+- [Running tests](#running-tests)
+  - [Reading a failure](#reading-a-failure)
+  - [Debugging a failure](#debugging-a-failure)
+  - [Options and filters](#options-and-filters)
+- [The full test suite is slow](#the-full-test-suite-is-slow)
+- [If you are an agent](#if-you-are-an-agent)
+- [Why a real browser](#why-a-real-browser)
+- [How specs are organized](#how-specs-are-organized)
+  - [Finding the spec for a feature](#finding-the-spec-for-a-feature)
+  - [Where a new spec goes](#where-a-new-spec-goes)
+  - [Extracted spec files](#extracted-spec-files)
+- [Anatomy of a spec](#anatomy-of-a-spec)
+- [Building test HTML](#building-test-html)
+  - [The parameterized HTML function](#the-parameterized-html-function)
+  - [Fixtures are not compiled](#fixtures-are-not-compiled)
+  - [State resets between specs](#state-resets-between-specs)
+  - [Overlays and styles](#overlays-and-styles)
+  - [Older fixture patterns](#older-fixture-patterns)
+- [Simulating user interaction](#simulating-user-interaction)
+- [The network is always mocked](#the-network-is-always-mocked)
+- [Waiting for async code](#waiting-for-async-code)
+  - [How to wait](#how-to-wait)
+  - [Real time and clocks](#real-time-and-clocks)
+  - [Asserting on promises](#asserting-on-promises)
+  - [When async/await isn't enough](#when-asyncawait-isnt-enough)
+- [Matchers](#matchers)
+- [Specs with special conditions](#specs-with-special-conditions)
+- [Trying something by hand](#trying-something-by-hand)
+<!-- /toc -->
 
 
 ## Running tests
@@ -28,6 +50,8 @@ bin/test --all                       # the whole suite (~9 minutes)
 
 `bin/test` needs a running [dev environment](dev-environment.md) and starts one in
 the background if none is running.
+
+### Reading a failure
 
 A run with one failing spec looks like this:
 
@@ -53,6 +77,8 @@ Re-run with --verbose for browser logs and HTML state.
 
 Stack traces are mapped back to the original source, so the frames point at
 `src/unpoly/…` and `spec/unpoly/…` rather than at the bundle.
+
+### Debugging a failure
 
 **How to debug depends on where you are running.** In the terminal runner there is
 nothing to attach a debugger to, so inspecting state means logging it: anything you
@@ -89,7 +115,7 @@ It is rooted at `body`, so it includes elements attached outside `#fixtures`, an
 large tree is clipped with a line saying so. `--verbose` also keeps every stack frame,
 where the default shows only the topmost frame in a spec file and in `src/`.
 
-**Options:**
+### Options and filters
 
 | Option | Effect |
 |--------|--------|

@@ -1,5 +1,8 @@
 # Compatibility
 
+Which browsers and language features Unpoly can rely on, and what we do instead of breaking a
+public API: a polyfill in `unpoly-migrate.js` rather than a major version bump.
+
 ## Browser support
 
 We support browser versions from the last two years, in Chrome, Firefox and Safari.

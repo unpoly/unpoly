@@ -1,6 +1,21 @@
 # Code organization
 
-## Directory structure / Where to find files
+Where code lives in this repository and why: the directory layout, the `window.up` global,
+which module owns which topic, how a module is structured internally, and where to find the
+specs for a given file.
+<!-- toc -->
+- [Directory structure](#directory-structure)
+  - [Where to find a module's specs](#where-to-find-a-modules-specs)
+  - [Implementation plans](#implementation-plans)
+- [Architecture](#architecture)
+  - [Not an ESM module](#not-an-esm-module)
+  - [Responsibilities](#responsibilities)
+  - [Main module pattern](#main-module-pattern)
+- [Entry points and optional bundles](#entry-points-and-optional-bundles)
+<!-- /toc -->
+
+
+## Directory structure
 
 You will mostly make changes in `src/unpoly` and test them in `spec/unpoly`. How the specs
 themselves are structured is covered in [Testing](testing.md#how-specs-are-organized).
@@ -71,6 +86,8 @@ dist/                     # Output directory for the Webpack bundler (gitignored
   unpoly.min.css          # ... Minified Unpoly bundle (CSS)
   ...
 ```
+
+### Where to find a module's specs
 
 A module's specs are not always in a single file: a group that grew too large lives in a
 sibling file sharing the module's prefix, like `form_switch_spec.js` above. See
