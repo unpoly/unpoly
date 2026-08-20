@@ -113,6 +113,22 @@ export async function runDev(argv, env) {
   const config = parseConfig(argv, env)
   if (!config) return CONFIG_ERROR
 
+  // The whole suite costs about nine minutes, and running it after every edit is the slowest
+  // habit available in this repository. Make it something you ask for. `--file` has already
+  // become `spec` filters by now, so one check covers both ways of narrowing a run.
+  if (!config.spec.length) {
+    if (!config.all) {
+      console.error(pc.red('Running every spec takes ~9 minutes. Narrow the run, or ask for all of it:'))
+      console.error('')
+      console.error(`  ${pc.bold('bin/find-spec "phrase"')}        find the groups that cover your change`)
+      console.error(`  ${pc.bold('bin/test --spec="up.form"')}     run those groups`)
+      console.error(`  ${pc.bold('bin/test --file=path[:line]')}   run what a file, or one line, declares`)
+      console.error(`  ${pc.bold('bin/test --all')}                run everything anyway`)
+      return CONFIG_ERROR
+    }
+    console.error(pc.blue('Running every spec — expect ~9 minutes.'))
+  }
+
   // Start one in the background if none is up, so `bin/test` needs no manual setup.
   if (!(await isDevEnvRunning())) {
     try {

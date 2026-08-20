@@ -55,6 +55,9 @@ const PARSERS = {
   'browser' : (value) => parseEnumString(value, ['chrome', 'firefox'], 'chrome'),
   // (terminal only) Whether the remote-controlled browser is hidden (true) or visible (false)
   'headless': (value) => parseBoolean(value, true),
+  // (terminal only) Whether to run every spec. Required for an unfiltered run, so that nine
+  // minutes is always something you asked for rather than the default — see runDev().
+  'all': (value) => parseBoolean(value, false),
   // (terminal only) Whether to print the detailed failure report (browser log +
   // HTML state). Read by the runner only; the browser ignores it.
   'verbose': (value) => parseBoolean(value, false),

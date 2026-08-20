@@ -13,7 +13,7 @@
     "unpoly*.map"
   ],
   "scripts": {
-    "test": "node bin/test",
+    "test": "node bin/test --all",
     "build": "node bin/build"
   },
   "repository": {
