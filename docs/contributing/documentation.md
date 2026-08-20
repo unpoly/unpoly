@@ -1,13 +1,43 @@
 # Documentation
 
-Unpoly has a large API surface, and developers meet most of it through the
-documentation rather than the source. All public API must be documented thoroughly.
+Unpoly has a large API surface, and developers meet most of it through the documentation
+rather than the source. All public API must be documented thoroughly.
 
-Documentation is written in this repository, next to the code it describes. A sister
-project ([`unpoly-site`](https://github.com/unpoly/unpoly-site), Ruby-based) parses
-`src/` and generates the static site at [unpoly.com](https://unpoly.com), which is
-republished with every release. You can [preview it locally](#previewing-your-changes),
-but you don't have to.
+Documentation lives in this repository, beside the code it describes. A sister project
+([`unpoly-site`](https://github.com/unpoly/unpoly-site)) parses `src/` and generates
+[unpoly.com](https://unpoly.com) with every release; previewing it locally is optional.
+
+<!-- toc -->
+- [Where documentation lives](#where-documentation-lives)
+- [Anatomy of a doc comment](#anatomy-of-a-doc-comment)
+  - [Where to put the comment](#where-to-put-the-comment)
+  - [Every symbol gets its own URL](#every-symbol-gets-its-own-url)
+- [The feature types](#the-feature-types)
+  - [How large a doc comment gets](#how-large-a-doc-comment-gets)
+- [Documenting parameters](#documenting-parameters)
+  - [Names, optionality and defaults](#names-optionality-and-defaults)
+  - [Structured objects](#structured-objects)
+  - [Modifying attributes](#modifying-attributes)
+  - [Types](#types)
+  - [Grouping params into sections](#grouping-params-into-sections)
+  - [A note above the params](#a-note-above-the-params)
+  - [Return values](#return-values)
+- [Visibility](#visibility)
+- [Writing prose](#writing-prose)
+  - [Referring to features](#referring-to-features)
+  - [Rely on autolinking](#rely-on-autolinking)
+  - [Line breaks](#line-breaks)
+  - [Admonitions](#admonitions)
+  - [Marking up code blocks](#marking-up-code-blocks)
+- [Reusing text](#reusing-text)
+  - [Markdown partials](#markdown-partials)
+  - [Param partials](#param-partials)
+  - [Inheriting a single param](#inheriting-a-single-param)
+- [Guide pages](#guide-pages)
+- [The contributing guides](#the-contributing-guides)
+- [Modules and classes](#modules-and-classes)
+- [Previewing your changes](#previewing-your-changes)
+<!-- /toc -->
 
 
 ## Where documentation lives
@@ -451,7 +481,7 @@ Give a heading a stable anchor when you intend to link to it, so the URL survive
 rewording:
 
 ```markdown
-## Callback arguments {#callback-arguments}
+## Callback arguments
 ```
 
 ### Line breaks
@@ -613,7 +643,7 @@ Submitting forms in-place
 
 You can enhance any form to update the existing page, without making a full page load.
 
-## Forms that update fragments {#submit}
+## Forms that update fragments
 
 ...
 
@@ -636,6 +666,32 @@ will link to it.
 > ```apache
 > RedirectPermanent /old-page-name /new-page-name
 > ```
+
+
+## The contributing guides
+
+Everything above describes the documentation Unpoly *publishes*: doc comments and guide pages
+under `src/`, parsed by `unpoly-site` and served from unpoly.com. The guides you are reading now
+are a separate set with separate rules. They live in `docs/contributing/`, they are written for
+people and agents working *on* Unpoly rather than with it, and they are never published.
+
+They are rendered by **GitHub**, not by our own parser, so none of the conventions above apply:
+no `@` directives, no autolinking of `up.*` symbols, no partials, and no custom `{#anchor}` on a
+heading — GitHub generates its own slug and prints the braces verbatim. Link to a section with
+that generated slug (`testing.md#how-specs-are-organized`), and to code with an ordinary relative
+path.
+
+Long guides carry a table of contents below their intro, between `<!-- toc -->` markers. It is
+generated: run `bin/update-contributing-tocs` after adding, renaming or reordering a heading.
+`bin/self-test` fails if a TOC is stale, if a guide long enough to need one lacks it, or if a
+link between these files points at a heading that no longer exists — and names the command.
+
+> [important]
+> These guides describe the tooling and the layout of this repository, so they go stale in a way
+> published documentation cannot. Renaming a `bin/` script, moving a directory, changing what a
+> command prints or adding a spec convention all mean editing a guide in the same commit. The
+> [overview in `CONTRIBUTING.md`](../../CONTRIBUTING.md) summarizes each guide, so a summary may
+> need the same edit.
 
 
 ## Modules and classes
