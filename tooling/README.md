@@ -173,18 +173,22 @@ the browser log plus the HTML state as a CSS-selector outline (`#id.class[attr="
 
 ## Lifecycle
 
-- `bin/test` → `runDev(argv, env)`: ensure a dev environment (start it if needed, else
-  exit `3`) → `waitForFreshBuild` (else exit `4`) → confirm the bundles the page loads are
-  in `dist` (else exit `4`) → puppeteer → receiver → exit 0/1.
-  The runner never builds; dev relies on the watcher. The `dist` check comes *after* the
-  build wait, because `dist` is gitignored: before the watcher's first build everything is
-  missing, and asking up front failed every fresh clone's first run.
+- `bin/test` → `runDev(argv, env)`: require a filter or `--all` (else exit `5`) → ensure a
+  dev environment (start it if needed, else exit `3`) → `waitForFreshBuild` (else exit `4`) →
+  build the minified bundles if this run loads stale ones → confirm the bundles the page loads
+  are in `dist` (else exit `4`) → puppeteer → receiver → exit 0/1.
+  The watcher builds everything except the minified bundles, which is why that one build lives
+  here. The `dist` check comes *after* the build wait, because `dist` is gitignored: before the
+  watcher's first build everything is missing, and asking up front failed every fresh clone's
+  first run.
+  `bin/test` also mirrors everything it prints into `tmp/test.log` (colours stripped), so a
+  truncated terminal never costs a run.
 - `bin/ci` → `runCI(argv, env)`: boots its own server, skips the build wait, runs
   against `bin/build --config=ci` artifacts. CI workflow: `npm ci` (install) → `bin/build --config=ci` → `bin/ci`.
 - Exit codes: `0` pass · `1` failures · `2` runner timeout (the watchdog fires when the
   receiver sees no event for 30s) · `3` no dev environment · `4` build stale, or a bundle
-  the page loads is absent from `dist` · `5` bad config/flags · `6` build failed
-  (compile/lint errors).
+  the page loads is absent from `dist` · `5` bad config/flags, or an unfiltered run
+  without `--all` · `6` build failed (compile/lint errors).
 
 `up.log.config.format` deliberately stays at its default (`true`): some specs assert on
 the exact `%c`-styled arguments Unpoly passes to `console.warn`/`debug`. The console

@@ -66,8 +66,6 @@ adding or moving code.
 > using `bin/test`. The network is always mocked. We have patterns to wait for
 > async code. The full suite takes ~9 minutes, so find the relevant groups with `bin/find-spec`,
 > run only those, and leave the minified, ES6, CSP and migrate variants to CI.
-> Never pipe a run through `tail` or `head`: truncating a red run's output means running the
-> suite again to see what broke.
 
 [Read the full testing guide](docs/contributing/testing.md) before writing or changing a spec.
 Many old specs use deprecated patterns, so don't copy a neighbour.

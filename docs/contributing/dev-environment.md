@@ -42,7 +42,10 @@ Everything the dev environment prints goes to **`tmp/dev.log`**, whether you sta
 how it was started, so you can read it without knowing who started what. Your terminal gets
 the same lines in colour; the file is plain text.
 
-Each line is `HH:MM:SS.mmm service | output`:
+A spec run is logged separately: `bin/test` mirrors its own output into **`tmp/test.log`**,
+so a red run can be re-read instead of re-run.
+
+Each line of the dev log is `HH:MM:SS.mmm service | output`:
 
 ```
 09:48:38.636 server      | Unpoly specs serving on http://localhost:4000. Press CTRL+C to quit.

@@ -22,8 +22,8 @@ each module `foo.js` has a spec `spec/unpoly/foo_spec.js`.
 Unpoly's specs run in a real browser, driven from your terminal:
 
 ```
-bin/test                             # the whole suite (~9 minutes)
 bin/test --spec="up.form"            # only specs whose full name contains this
+bin/test --all                       # the whole suite (~9 minutes)
 ```
 
 `bin/test` needs a running [dev environment](dev-environment.md) and starts one in
@@ -95,6 +95,7 @@ where the default shows only the topmost frame in a spec file and in `src/`.
 |--------|--------|
 | `--spec="…"` | Only run specs whose full name contains this string. Matched verbatim, never as a pattern |
 | `--file=path[:line]` | Run what a file declares — or, with `:line`, just the group or spec declared on that line |
+| `--all` | Run every spec. Required for an unfiltered run, so the nine minutes are deliberate |
 | `--verbose` | Add the browser log + HTML state (fixtures, overlays) to each failure |
 | `--browser=firefox` | Run in Firefox instead of Chrome |
 | `--headless=false` | Show the browser window while running |
@@ -125,8 +126,9 @@ documented in [`tooling/README.md`](../../tooling/README.md).
 
 ## The full test suite is slow
 
-An unfiltered `bin/test` takes about **nine minutes**. Treat that as a cost to avoid, not a
-routine step after every edit.
+`bin/test --all` takes about **nine minutes**. That is why it needs the flag: an unfiltered
+run without one is refused, with a reminder of how to narrow it. Treat the whole suite as a
+cost to avoid, not a routine step after every edit.
 
 **Find the specs that cover your change and run only those.** `bin/find-spec` searches
 `describe()` and `it()` titles and prints the full group path of every match:
@@ -188,15 +190,9 @@ nothing about your change.
 You don't need to guard against a hang yourself: a run that stops making progress detects
 itself and exits non-zero. Set your timeout from how long the suite actually takes.
 
-**Don't pipe the output through `tail` or `head`.** The part you need from a red run is
-the failure block, and truncating it means running the whole suite again to see what
-broke. If the output is too long to read directly, keep all of it and read the end:
-
-```
-bin/test 2>&1 | tee tmp/test.log
-```
-
-`tmp/` is gitignored, so a log left there is harmless.
+**The full output is always in `tmp/test.log`.** Every run writes it, with the colours
+stripped, so truncating what you see in the terminal costs you nothing — read the log
+instead of running the suite again. A red run prints the path to remind you.
 
 
 ## Why a real browser
