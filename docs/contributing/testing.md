@@ -22,20 +22,12 @@ each module `foo.js` has a spec `spec/unpoly/foo_spec.js`.
 Unpoly's specs run in a real browser, driven from your terminal:
 
 ```
-bin/test                             # the whole suite (a few minutes)
+bin/test                             # the whole suite (~9 minutes)
 bin/test --spec="up.form"            # only specs whose full name contains this
 ```
 
 `bin/test` needs a running [dev environment](dev-environment.md) and starts one in
 the background if none is running.
-
-**Filter while you work.** After editing `src/unpoly/form.js` (or its spec), run
-`bin/test --spec="up.form"`. The full suite runs in a real browser and takes
-several minutes, so run it unfiltered only as a final gate — and note that
-[CI](commit-conventions.md#continuous-integration) runs the full matrix once you open
-a pull request. Some modules are used by most others, so a change to `up.fragment`,
-`up.network`, `up.script`, `up.layer`, `up.util` or `up.element` can break specs anywhere
-and deserves the full suite.
 
 A run with one failing spec looks like this:
 
@@ -122,15 +114,72 @@ and nothing can run twice.
 `--minify` runs the specs against the bundle we actually ship. That matters because the
 minifier renames every `_`-prefixed member, so a spec that reaches one by name passes
 unminified and fails in production — see
-[private members](code-style.md#private-members-and-the-minified-build). It needs a
-minified build first (`bin/build --config=ci`), and says so if one is missing. CI runs this
-variant on every pull request.
+[private members](code-style.md#private-members-and-the-minified-build). The dev watcher
+does not build the minified bundles, so `bin/test` builds them itself when they are missing
+or older than your sources. CI runs this variant on every pull request.
 
 A failed spec exits with a non-zero exit code, so `bin/test` composes with other
 tooling. The spec runner itself — its exit codes, architecture and self-tests — is
 documented in [`tooling/README.md`](../../tooling/README.md).
 
+
+## The full test suite is slow
+
+An unfiltered `bin/test` takes about **nine minutes**. Treat that as a cost to avoid, not a
+routine step after every edit.
+
+**Find the specs that cover your change and run only those.** `bin/find-spec` searches
+`describe()` and `it()` titles and prints the full group path of every match:
+
+```
+bin/find-spec "up-disable"
+bin/find-spec "reset button"
+```
+
+Search more than once. A feature is known by several names, and the one in a spec title is
+rarely the one you were editing — so try the attribute, the function, the option, and the
+plain-English term somebody might have written:
+
+```
+bin/find-spec "fieldSelectors"
+bin/find-spec "custom form field"
+bin/find-spec "disabled"
+```
+
+Then run the groups you found. `--spec` and `--file` are repeatable and union, so several
+filters make a single run:
+
+```
+bin/test --spec="up.form" --spec="up.Params"
+```
+
+**Run the full suite only when the blast radius is genuinely wide:** a change to logic that
+most of the framework re-uses (`up.fragment`, `up.network`, `up.script`, `up.layer`,
+`up.util`, `up.element`), a change that touches many modules at once, or a refactoring whose
+reach you cannot enumerate. For an ordinary feature or fix inside one module, the filtered run
+*is* the verification.
+
+**Leave the build variants to CI.** The suite also runs minified, as an ES6 build, under two
+CSP modes, and with `unpoly-migrate.js` loaded — and each of those is another full suite.
+Open a pull request, let [CI](commit-conventions.md#continuous-integration) run the matrix in
+parallel, and read the result.
+
+Do not run variants locally "just to be sure": it multiplies the runtime of an already slow
+suite to look for a failure you have no reason to expect. Run one locally when
+
+- CI reported a failure in that variant, or
+- your change is specifically about what that variant exercises — CSP work earns
+  `--csp=nonce-only` and `--csp=strict-dynamic`, a new `unpoly-migrate.js` polyfill earns
+  `--migrate`.
+
+Even then, filter. `bin/test --migrate --spec="up.form"` answers the question in seconds.
+
+
 ## If you are an agent
+
+**Filter before you run.** [The full suite is slow](#the-full-test-suite-is-slow): find the groups that cover your
+change with `bin/find-spec` and run only those. Save the unfiltered run for a wide blast
+radius, and leave the build variants to CI.
 
 **Give the command a generous timeout.** The full suite takes minutes, and nothing caps
 its total runtime. A tool timeout shorter than that kills the run part-way and tells you
