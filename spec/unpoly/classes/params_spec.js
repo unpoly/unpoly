@@ -808,6 +808,19 @@ describe('up.Params', function() {
         ])
       })
 
+      it('ignores a <button type="reset"> with a [name]', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <button type="reset" name="action" value="clear">Clear</button>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
       it('ignores a submit button that the browser associates with another form', function() {
         // up.form.submitButtons() finds this button by subtree, but its [form] attribute makes
         // the browser own it elsewhere. Passing it as a submitter would throw a NotFoundError.
@@ -1012,6 +1025,20 @@ describe('up.Params', function() {
       expect(up.Params.fromContainer(container).toArray()).toEqual([
         { name: 'email', value: 'foo@example.com' },
         { name: 'city', value: 'Berlin' },
+      ])
+    })
+
+    it('ignores reset buttons, which a submission would not send either', function() {
+      const [form] = htmlFixtureList(`
+        <form>
+          <input name="email" value="foo@example.com">
+          <button type="reset" name="reset-button" value="clear">Clear</button>
+          <input type="reset" name="reset-input" value="clear">
+        </form>
+      `)
+
+      expect(up.Params.fromContainer(form).toArray()).toEqual([
+        { name: 'email', value: 'foo@example.com' },
       ])
     })
 

@@ -311,6 +311,9 @@ extendDescribe('up.form', function() {
             const input = e.affix(form, 'input[name=email]')
             const submitButton = e.affix(form, 'input[type=submit]')
             const genericButton = e.affix(form, 'button[type=button]')
+            // A reset button is not a field, but it must not stay clickable either.
+            const resetButton = e.affix(form, 'button[type=reset]')
+            const resetInput = e.affix(form, 'input[type=reset]')
 
             up.submit(form, { disable: true })
             await wait()
@@ -318,6 +321,8 @@ extendDescribe('up.form', function() {
             expect(input).toBeDisabled()
             expect(submitButton).toBeDisabled()
             expect(genericButton).toBeDisabled()
+            expect(resetButton).toBeDisabled()
+            expect(resetInput).toBeDisabled()
           })
 
           it('does not disable fields in another form', async function() {

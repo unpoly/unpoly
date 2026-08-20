@@ -7,6 +7,7 @@ up.form.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'submitButtons', 'submitButtonSelectors')
   up.migrate.renamedProperty(config, 'validateTargets', 'groupSelectors')
   up.migrate.renamedProperty(config, 'observeDelay', 'watchInputDelay')
+  up.migrate.renamedProperty(config, 'genericButtonSelectors', 'anyButtonSelectors')
 })
 
 up.migrate.migratedFormGroupSelectors = function() {

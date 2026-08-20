@@ -111,10 +111,14 @@ describe('up.form', function() {
               <input type="submit">
               <input type="image" name="image">
               <input type="button">
+              <input type="reset" name="reset-input">
               <button type="submit">Submit</button>
               <button type="button">Push</button>
+              <button type="reset" name="reset-button">Reset</button>
+              <button type="">Invalid type, submits natively</button>
               <fieldset></fieldset>
               <output name="output"></output>
+              <object name="object"></object>
             </form>
           `)
 

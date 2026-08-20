@@ -93,8 +93,11 @@ up.form = (function() {
     @param {string} [config.submitButtonSelectors]
       An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.
 
-    @param {string} [config.genericButtonSelectors]
-      An array of CSS selectors that represent push buttons with no default behavior, such as `input[type=button]` or `button[type=button]`.
+    @param {string} [config.anyButtonSelectors]
+      An array of CSS selectors that represent buttons of any kind, such as `button` or `input[type=button]`.
+
+      Unpoly uses this to disable a form's buttons while the form is submitting.
+      To find the button that *submits* a form, see `config.submitButtonSelectors`.
 
       @experimental
 
@@ -154,23 +157,19 @@ up.form = (function() {
     groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
     fieldSelectors: [
       'select',
-      'input:not([type=submit], [type=image], [type=button])',
-      'button[type]:not([type=submit], [type=button])',
+      'input:not([type=submit], [type=image], [type=button], [type=reset])',
       'textarea',
-      // Form-associated custom elements. No selector can name them directly, but they are
-      // the only elements outside this list that the :enabled / :disabled pseudo-classes
-      // match. Matching both states matters: an element must not stop being a field when
-      // it is disabled.
-      //
-      // Chrome and Firefox match neither links nor <object> here, so the last three
-      // exclusions are defensive: CSS Selectors 4 defines :enabled more broadly than HTML
-      // does, and Safari is only ever checked by hand.
-      ':is(:enabled, :disabled):not(input, select, textarea, button, fieldset, optgroup, option, a, area, object)',
+      // Form-associated custom elements. No selector can name them directly, but they are the only
+      // elements outside this list that :enabled and :disabled match — both states, so that an
+      // element does not stop being a field while it is disabled. CSS defines :enabled by
+      // capability ("can be activated or accept focus"), so `a, area` are excluded in case an
+      // engine reads it that way. Chrome, Firefox and Safari do not.
+      ':is(:enabled, :disabled):not(input, select, textarea, button, fieldset, optgroup, option, a, area)',
     ],
     submitSelectors: ['form:is([up-submit], [up-target], [up-layer], [up-transition])'],
     noSubmitSelectors: ['[up-submit=false]', '[target]', e.crossOriginSelector('action')],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
-    genericButtonSelectors: ['input[type=button]', 'button[type=button]'],
+    anyButtonSelectors: ['button', 'input:is([type=submit], [type=image], [type=button], [type=reset])'],
     // Although we only need to bind to `input`, we always also bind to `change`
     // in case another script manually triggers it.
     validateBatch: true,
@@ -311,8 +310,7 @@ up.form = (function() {
   function findFieldsAndButtons(container) {
     return [
       ...findFields(container),
-      ...findSubmitButtons(container),
-      ...findGenericButtons(container),
+      ...findAnyButtons(container),
     ]
   }
 
@@ -335,10 +333,10 @@ up.form = (function() {
     return findFormElements(root, submitButtonSelector)
   }
 
-  const genericButtonSelector = config.selectorFn('genericButtonSelectors')
+  const anyButtonSelector = config.selectorFn('anyButtonSelectors')
 
-  function findGenericButtons(root) {
-    return findFormElements(root, genericButtonSelector)
+  function findAnyButtons(root) {
+    return findFormElements(root, anyButtonSelector)
   }
 
   /*-
