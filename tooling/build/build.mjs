@@ -14,6 +14,7 @@ const CONFIGS = {
   development: 'tooling/build/webpack/development.js',
   production: 'tooling/build/webpack/production.js',
   ci: 'tooling/build/webpack/ci.js',
+  minified: 'tooling/build/webpack/minified.js',
 }
 
 // The minified bundles `npm run build` used to gzip.
@@ -40,7 +41,7 @@ export function parseBuildArgs(argv) {
   }
 
   if (!CONFIGS[config]) {
-    throw new Error(`Unknown --config=${config} (expected development, production or ci)`)
+    throw new Error(`Unknown --config=${config} (expected ${Object.keys(CONFIGS).join(', ')})`)
   }
   // Gzip is only meaningful for the production bundle, so that's its default.
   if (gzip === null) gzip = config === 'production'

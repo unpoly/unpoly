@@ -1,10 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, utimesSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { Config } from '../../../runner/config.mjs'
-import { missingDistFiles } from '../../../runner/terminal/run.mjs'
+import { missingDistFiles, outdatedMinifiedFiles } from '../../../runner/terminal/run.mjs'
 
 // A throwaway dist/ holding exactly `names`.
 function dist(names = []) {
@@ -34,4 +34,48 @@ test('nothing is missing once the watcher has built', () => {
   let built = dist(['unpoly.js', 'unpoly.es6.js', 'unpoly-migrate.js', 'specs.js', 'specs.es6.js', 'jasmine.js'])
   assert.deepEqual(missingDistFiles(Config.fromArgv([]), built), [])
   assert.deepEqual(missingDistFiles(Config.fromArgv(['--migrate']), built), [])
+})
+
+
+// A throwaway dist/ whose files are `ageMs` older than `now`, so a test can put a bundle
+// on either side of the newest source without touching the real tree.
+const NOW = 1_700_000_000_000
+function agedDist(names, ageMs) {
+  let dir = dist(names)
+  let when = new Date(NOW - ageMs)
+  for (let name of names) utimesSync(path.join(dir, name), when, when)
+  return dir
+}
+
+test('a run without --minify asks for no minified bundle', () => {
+  // Also means no source walk: the third argument stays unused because we return early.
+  assert.deepEqual(outdatedMinifiedFiles(Config.fromArgv([]), dist()), [])
+  assert.deepEqual(outdatedMinifiedFiles(Config.fromArgv(['--migrate']), dist()), [])
+})
+
+test('--minify reports a minified bundle that is not there', () => {
+  assert.deepEqual(outdatedMinifiedFiles(Config.fromArgv(['--minify']), dist(), NOW), ['unpoly.min.js'])
+})
+
+test('--minify reports a minified bundle older than the newest source', () => {
+  let built = agedDist(['unpoly.min.js'], 60_000)
+  assert.deepEqual(outdatedMinifiedFiles(Config.fromArgv(['--minify']), built, NOW), ['unpoly.min.js'])
+})
+
+test('--minify accepts a minified bundle newer than the newest source', () => {
+  let built = agedDist(['unpoly.min.js'], 0)
+  assert.deepEqual(outdatedMinifiedFiles(Config.fromArgv(['--minify']), built, NOW - 60_000), [])
+})
+
+test('--minify --migrate also judges the migrate bundle', () => {
+  let built = agedDist(['unpoly.min.js'], 0)
+  assert.deepEqual(
+    outdatedMinifiedFiles(Config.fromArgv(['--minify', '--migrate']), built, NOW - 60_000),
+    ['unpoly-migrate.min.js'])
+})
+
+test('--es6 --minify asks for the es6 bundle, which only --config=minified builds', () => {
+  assert.deepEqual(
+    outdatedMinifiedFiles(Config.fromArgv(['--es6', '--minify']), dist(), NOW),
+    ['unpoly.es6.min.js'])
 })
