@@ -59,6 +59,126 @@ extendDescribe('up.form', function() {
           expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com', csrf: 'token' })
         })
 
+        it('does not emit a formdata event while collecting changes', async function() {
+          const [form, , field] = htmlFixtureList(`
+            <form action="/form" method="post">
+              <div up-form-group>
+                <input name="email" value="foo@example.com">
+              </div>
+            </form>
+          `)
+          const listener = jasmine.createSpy('formdata listener')
+          form.addEventListener('formdata', listener)
+
+          up.validate(field, { delay: 130 })
+          await wait()
+
+          // The debounce is still running, so nothing has serialized the form yet.
+          expect(listener).not.toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          await wait(200)
+
+          expect(listener.calls.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+        })
+
+        it('emits one formdata event per validation request, not per change', async function() {
+          const [form, , emailField, , passwordField] = htmlFixtureList(`
+            <form action="/form" method="post">
+              <div up-form-group>
+                <input name="email" value="foo@example.com">
+              </div>
+              <div up-form-group>
+                <input name="password" value="secret">
+              </div>
+            </form>
+          `)
+          const listener = jasmine.createSpy('formdata listener')
+          form.addEventListener('formdata', listener)
+
+          up.validate(emailField, { delay: 130 })
+          up.validate(passwordField, { delay: 130 })
+          await wait()
+
+          expect(listener).not.toHaveBeenCalled()
+
+          await wait(200)
+
+          // Both changes were batched into a single request, so the form was serialized once.
+          expect(listener.calls.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+        })
+
+        it('names a field by its [name] attribute in the X-Up-Validate header', async function() {
+          // A form-associated custom element has no { name } property, since the browser reads
+          // the attribute itself.
+          const [, , field] = htmlFixtureList(`
+            <form action="/form" method="post">
+              <div up-form-group>
+                <test-attribute-named-field name="email" value="foo@example.com"></test-attribute-named-field>
+              </div>
+            </form>
+          `)
+
+          up.validate(field)
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+        })
+
+        it('sends an unknown X-Up-Validate header when a validated field has no name', async function() {
+          const [, , field] = htmlFixtureList(`
+            <form action="/form" method="post">
+              <div up-form-group>
+                <test-attribute-named-field id="picker" value="foo@example.com"></test-attribute-named-field>
+              </div>
+            </form>
+          `)
+
+          up.validate(field)
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
+        })
+
+      })
+
+
+      describe('submit buttons', function() {
+
+        it('does not send the params of a submit button, since no button was pressed', async function() {
+          const [, , field] = htmlFixtureList(`
+            <form action="/form" method="post">
+              <div up-form-group>
+                <input name="email" value="foo@example.com">
+              </div>
+              <button type="submit" name="commit" value="save">Save</button>
+            </form>
+          `)
+
+          up.validate(field)
+          await wait()
+
+          expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com' })
+        })
+
+        it("does not honor a submit button's [formaction]", async function() {
+          const [, , field] = htmlFixtureList(`
+            <form action="/form" method="post">
+              <div up-form-group>
+                <input name="email" value="foo@example.com">
+              </div>
+              <button type="submit" formaction="/other">Save</button>
+            </form>
+          `)
+
+          up.validate(field)
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/form')
+        })
+
       })
 
 

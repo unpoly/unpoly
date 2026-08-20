@@ -218,14 +218,17 @@ up.FormValidator = class FormValidator {
     // Remove duplicate names as a radio button group has multiple inputs with the same name.
     let dirtyOrigins = u.map(dirtySolutions, 'origin')
     let dirtyFields = u.flatMap(dirtyOrigins, up.form.fields)
-    let dirtyNames = u.uniq(u.map(dirtyFields, 'name'))
+    // Fields without a name drop out, so that _addValidateHeader() can fall back to ':unknown'.
+    let dirtyNames = u.uniq(u.filter(u.map(dirtyFields, up.form.readFieldName), u.isPresent))
     let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
-    let formDestinationOptions = up.form.destinationOptions(this._form)
+    // A validation is not a real submission: no button was pressed, so only the <form> element
+    // decides where the request goes and what it sends.
+    let formDestinationOptions = up.form.destinationOptions(this._form, { submitButton: false })
 
     // (1) Merge together all render options for all origins.
     // (2) Adopt some formDestinationOptions that cannot be overridden by solutions,
-    //     like { contentType } or { submitButton }.
+    //     like { contentType }.
     // (3) u.mergeDefined() does not skip undefined objects, it skips entries in objects
     //     that have an undefined value.
     let options = u.mergeDefined(formDestinationOptions, ...dirtyRenderOptionsList)
