@@ -658,7 +658,7 @@ Reference pages point at their main article with an `{:.article-ref}` link, and 
 list their articles with `@see`. Add a new page to its module's `@see` list, or nothing
 will link to it.
 
-> [important]
+> [!IMPORTANT]
 > Renaming a page changes its URL, and unlike a renamed API, we don't keep the old page
 > around as deprecated. Add a redirect to `src/unpoly-migrate/.htaccess`, which
 > unpoly.com includes:
@@ -679,14 +679,15 @@ They are rendered by **GitHub**, not by our own parser, so none of the conventio
 no `@` directives, no autolinking of `up.*` symbols, no partials, and no custom `{#anchor}` on a
 heading — GitHub generates its own slug and prints the braces verbatim. Link to a section with
 that generated slug (`testing.md#how-specs-are-organized`), and to code with an ordinary relative
-path.
+path. Admonitions use GitHub's spelling — `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`,
+`> [!WARNING]`, `> [!CAUTION]` — rather than the `> [important]` form used above.
 
 Long guides carry a table of contents below their intro, between `<!-- toc -->` markers. It is
 generated: run `bin/update-contributing-tocs` after adding, renaming or reordering a heading.
 `bin/self-test` fails if a TOC is stale, if a guide long enough to need one lacks it, or if a
 link between these files points at a heading that no longer exists — and names the command.
 
-> [important]
+> [!IMPORTANT]
 > These guides describe the tooling and the layout of this repository, so they go stale in a way
 > published documentation cannot. Renaming a `bin/` script, moving a directory, changing what a
 > command prints or adding a spec convention all mean editing a guide in the same commit. The
