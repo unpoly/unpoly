@@ -617,15 +617,12 @@ up.form = (function() {
     // This way we don't accidentally re-enable a control that we didn't change.
     if (readFieldDisabled(control)) return
 
-    let undoDisable
+    // Look the fallback up before disabling, while the control is still focusable.
     let focusFallback
-    if (document.activeElement === control) {
-      focusFallback = findGroup(control)
-      undoDisable = writeFieldDisabled(control, true)
-      up.focus(focusFallback, { force: true, preventScroll: true })
-    } else {
-      undoDisable = writeFieldDisabled(control, true)
-    }
+    if (document.activeElement === control) focusFallback = findGroup(control)
+
+    let undoDisable = writeFieldDisabled(control, true)
+    if (focusFallback) up.focus(focusFallback, { force: true, preventScroll: true })
 
     // (1) This function is only returned if we didn't early-return above
     //     for a control that is already disabled.
