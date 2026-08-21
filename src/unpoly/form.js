@@ -233,47 +233,35 @@ up.form = (function() {
     return findFormElements(root, fieldSelector)
   }
 
-  // ALWAYS access a field's { name } and { disabled } state through the three functions below.
-  // Reading or writing the property or the attribute directly is wrong for at least one kind of
-  // field, and which one is wrong depends on the field — see /custom-form-fields#contract.
-  //
-  // Component authors declare properties that are fed from attributes and rarely reflected back
-  // (Lit advises reflecting "sparingly"), while a hand-rolled form-associated element declares
-  // nothing at all, because the browser reads its attributes itself. So the property holds the
-  // live value wherever one exists, and the attribute is where the platform guarantees one.
-  //
-  // readFieldName() falls back on *absence*, not falseness: a native reports name === '', which
-  // is an answer rather than a gap.
-  //
-  // A field's { value } needs no accessor: the property is the only source there is, and
-  // up.Params#addField() is the only place that reads it.
+  // ALWAYS read and write a field's state through the accessors below. Direct property or
+  // attribute access is wrong for at least one kind of field — see /custom-form-fields#contract.
 
+  // Falls back on absence, not falseness: a native field reports '' and means it.
   function readFieldName(field) {
     return field.name ?? field.getAttribute('name')
   }
 
-  // A field's own disabled state. An ancestor <fieldset disabled> also disables a field for the
-  // browser, but Unpoly deliberately does not track that.
-  // This asks the same question as writeFieldDisabled() below — does the field implement a
-  // property at all — so that the two can never disagree about which spelling is authoritative.
+  // The property is the only source. A form-associated element reports its value to the browser
+  // through setFormValue(), which a script cannot read back.
+  function readFieldValue(field) {
+    return field.value
+  }
+
+  // The field's own state only: an ancestor <fieldset disabled> also disables it for the browser,
+  // which we deliberately don't track. Asks the same question as writeFieldDisabled(), so the two
+  // cannot disagree about which spelling is authoritative.
   function readFieldDisabled(field) {
     return 'disabled' in field ? field.disabled : field.hasAttribute('disabled')
   }
 
-  // Write whichever spelling the control implements. We never issue both writes, although the
-  // platform may reflect one into the other for a native control.
+  // Write only the spelling the control implements. Assigning a { disabled } property that a
+  // form-associated element never declared would *create* it, shadowing the attribute in
+  // readFieldDisabled() from then on.
   //
-  // (1) A control that declares a { disabled } property is written through it.
-  // (2) A form-associated custom element gets no property from the platform, and assigning one
-  //     would *create* it — shadowing the attribute in readFieldDisabled() from then on. Its
-  //     attribute is the only thing that disables it anyway.
-  //
-  // Writing both would also let us remove an attribute we never set, for a control whose
-  // unreflected property disagrees with its markup.
-  // Returns a function that undoes this write with the same spelling. Deciding again at undo
-  // time could straddle a custom element upgrade: we would disable a not-yet-defined element
-  // through its attribute, and re-enable it through a property that only just appeared,
-  // leaving our attribute behind for good.
+  // The undo closure reuses this spelling on purpose, so do not simplify it to
+  // `() => writeFieldDisabled(field, false)`: a custom element that upgrades in between would be
+  // disabled through its attribute and re-enabled through a property that only just appeared,
+  // leaving our attribute on the element for good.
   function writeFieldDisabled(field, disabled) {
     if ('disabled' in field) {
       field.disabled = disabled
@@ -2414,6 +2402,7 @@ up.form = (function() {
     defaultSubmitButton,
     assertFieldsInSameLayer,
     readFieldName,
+    readFieldValue,
     readFieldDisabled,
     writeFieldDisabled,
     focusedField,

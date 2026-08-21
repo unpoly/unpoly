@@ -607,15 +607,16 @@ up.Params = class Params {
       // A <select> can have multiple selected options.
       values = u.map(field.selectedOptions, 'value')
     } else if ((type === 'checkbox') || (type === 'radio')) {
-      if (field.checked) values = [field.value]
+      if (field.checked) values = [up.form.readFieldValue(field)]
     } else if (type === 'file') {
       // The value of an input[type=file] is the local path displayed in the form.
       // The actual File objects are in the #files property.
       values = field.files
-    } else if (u.isDefined(field.value)) {
+    } else {
       // A custom control may expose a { name } without a readable { value },
       // in which case it has nothing to contribute.
-      values = [field.value]
+      let value = up.form.readFieldValue(field)
+      if (u.isDefined(value)) values = [value]
     }
 
     for (let value of values) {
