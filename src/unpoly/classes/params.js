@@ -34,8 +34,7 @@ up.Params = class Params {
   @return {up.Params}
   @stable
   */
-  constructor(raw, options = {}) {
-    this._options = options
+  constructor(raw) {
     this.clear()
     this.addAll(raw)
   }
@@ -51,7 +50,7 @@ up.Params = class Params {
   }
 
   [u.copy.key]() {
-    return new up.Params(this, this._options)
+    return new up.Params(this)
   }
 
   /*-
@@ -211,7 +210,7 @@ up.Params = class Params {
 
   withoutBinaryEntries() {
     let simpleEntries = u.reject(this.entries, this._isBinaryEntry)
-    return new this.constructor(simpleEntries, this._options)
+    return new this.constructor(simpleEntries)
   }
 
   /*-
@@ -522,10 +521,6 @@ up.Params = class Params {
   static fromForm(form, options = {}) {
     form = e.get(form)
 
-    // The browser's algorithm never includes a disabled control, so { includeDisabled } cannot
-    // apply here. Drop it, rather than have it half-apply to the configured controls below.
-    options = u.omit(options, ['includeDisabled'])
-
     up.form.assertFieldsInSameLayer(form)
 
     let submitButton = e.get(options.submitButton ?? up.form.defaultSubmitButton(form))
@@ -534,7 +529,7 @@ up.Params = class Params {
     // up.form.submitButtons() can return a button that carries [form] for another form.
     if (submitButton?.form !== form) submitButton = undefined
 
-    let params = new this(new FormData(form, submitButton), options)
+    let params = new this(new FormData(form, submitButton))
 
     // The browser's algorithm covered every control it knows about, i.e. everything in
     // form.elements. Add the controls it cannot know about, like custom elements from
@@ -570,10 +565,10 @@ up.Params = class Params {
   @return {up.Params}
   @experimental
   */
-  static fromFields(fields, options) {
-    const params = new this(null, options)
+  static fromFields(fields, { includeDisabled } = {}) {
+    const params = new this()
     for (let field of u.wrapList(fields)) {
-      params.addField(field)
+      params.addField(field, { includeDisabled })
     }
     return params
   }
@@ -589,14 +584,16 @@ up.Params = class Params {
 
   @function up.Params#addField
   @param {Element|jQuery} field
+  @param {boolean} [options.includeDisabled=false]
+    Whether to add a field that is disabled.
   @experimental
   */
-  addField(field) {
+  addField(field, { includeDisabled } = {}) {
     field = e.get(field) // unwrap jQuery
 
     // A field is excluded from a form submission if it has no name, or if it is disabled.
     let name = up.form.readFieldName(field)
-    if (!name || !this._considerFieldEnabled(field)) return
+    if (!name || (up.form.readFieldDisabled(field) && !includeDisabled)) return
 
     let { tagName, type } = field
     let values = []
@@ -620,10 +617,6 @@ up.Params = class Params {
     for (let value of values) {
       this.add(name, value)
     }
-  }
-
-  _considerFieldEnabled(field) {
-    return !up.form.readFieldDisabled(field) || this._options.includeDisabled
   }
 
   [u.isEqual.key](other) {
