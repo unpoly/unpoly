@@ -127,18 +127,38 @@ extendDescribe('up.form', function() {
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
         })
 
-        it('sends an unknown X-Up-Validate header when a validated field has no name', async function() {
-          const [, , field] = htmlFixtureList(`
+        it('omits an unnamed field from the X-Up-Validate header', async function() {
+          htmlFixtureList(`
             <form action="/form" method="post">
-              <div up-form-group>
-                <test-attribute-named-field id="picker" value="foo@example.com"></test-attribute-named-field>
+              <div class="credentials">
+                <input name="email" value="foo@example.com">
+                <test-attribute-named-field value="2026-08-21"></test-attribute-named-field>
               </div>
             </form>
           `)
 
-          up.validate(field)
+          up.validate('.credentials')
           await wait()
 
+          // Unfiltered this header would be "email ", with an empty token for the unnamed field.
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+        })
+
+        it('sends an unknown X-Up-Validate header when no dirty field has a name', async function() {
+          htmlFixtureList(`
+            <form action="/form" method="post">
+              <div class="credentials">
+                <input value="foo@example.com">
+                <test-attribute-named-field value="2026-08-21"></test-attribute-named-field>
+              </div>
+            </form>
+          `)
+
+          up.validate('.credentials')
+          await wait()
+
+          // The native field reports a name of '' and the custom one null, so u.uniq() keeps
+          // both and unfiltered they join into a truthy " " that skips the fallback.
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual(':unknown')
         })
 

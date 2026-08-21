@@ -218,7 +218,9 @@ up.FormValidator = class FormValidator {
     // Remove duplicate names as a radio button group has multiple inputs with the same name.
     let dirtyOrigins = u.map(dirtySolutions, 'origin')
     let dirtyFields = u.flatMap(dirtyOrigins, up.form.fields)
-    // Fields without a name drop out, so that _addValidateHeader() can fall back to ':unknown'.
+    // Without this filter an unnamed field pads the header with an empty token ("email "). Two of
+    // them can even join into a truthy " " — u.uniq() keeps both when one reports '' and the other
+    // null — which would skip the ':unknown' fallback in _addValidateHeader() below.
     let dirtyNames = u.uniq(u.filter(u.map(dirtyFields, up.form.readFieldName), u.isPresent))
     let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
