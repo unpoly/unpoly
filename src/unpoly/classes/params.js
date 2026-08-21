@@ -596,31 +596,30 @@ up.Params = class Params {
   addField(field) {
     field = e.get(field) // unwrap jQuery
 
-    // Input fields are excluded from form submissions if they have no [name]
-    // or when they are [disabled].
+    // A field is excluded from a form submission if it has no name, or if it is disabled.
     let name = up.form.readFieldName(field)
+    if (!name || !this._considerFieldEnabled(field)) return
+
     let { tagName, type } = field
-    if (name && this._considerFieldEnabled(field)) {
-      let values = []
+    let values = []
 
-      if (tagName === 'SELECT') {
-        // A <select> can have multiple selected options.
-        values = u.map(field.selectedOptions, 'value')
-      } else if ((type === 'checkbox') || (type === 'radio')) {
-        if (field.checked) values = [field.value]
-      } else if (type === 'file') {
-        // The value of an input[type=file] is the local path displayed in the form.
-        // The actual File objects are in the #files property.
-        values = field.files
-      } else if (u.isDefined(field.value)) {
-        // A custom control may expose a { name } without a readable { value },
-        // in which case it has nothing to contribute.
-        values = [field.value]
-      }
+    if (tagName === 'SELECT') {
+      // A <select> can have multiple selected options.
+      values = u.map(field.selectedOptions, 'value')
+    } else if ((type === 'checkbox') || (type === 'radio')) {
+      if (field.checked) values = [field.value]
+    } else if (type === 'file') {
+      // The value of an input[type=file] is the local path displayed in the form.
+      // The actual File objects are in the #files property.
+      values = field.files
+    } else if (u.isDefined(field.value)) {
+      // A custom control may expose a { name } without a readable { value },
+      // in which case it has nothing to contribute.
+      values = [field.value]
+    }
 
-      for (let value of values) {
-        this.add(name, value)
-      }
+    for (let value of values) {
+      this.add(name, value)
     }
   }
 
