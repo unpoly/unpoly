@@ -272,9 +272,9 @@ up.form = (function() {
     }
   }
 
-  // A browser only submits the button that was pressed. When there is no submitter we assume
-  // the first submit button, which is what a browser does for an implicit submission from a
-  // field. Both up.form.destinationOptions() and up.Params.fromForm() need this rule.
+  // A browser only submits the button that was pressed. With no submitter we assume the form's
+  // first submit button, which is what the browser itself does for an implicit submission — press
+  // Enter in a text field and event.submitter *is* the first submit button.
   function defaultSubmitButton(form) {
     return findSubmitButtons(form)[0]
   }
@@ -665,13 +665,9 @@ up.form = (function() {
     parser.string('contentType', { attr: 'enctype' })
     parser.json('headers')
 
-    // (1) When processing a `submit` event, we may have received a { submitButton: event.submitter } option.
-    // (2) When the user submits the form from a focused input via Enter, the browser will also submit
-    //     with the first submit button set as submitter.
-    // (3) For pragmatic calls of up.submit(), we assume the first submit button.
-    //
-    // We resolve this before parsing params, because the button's [name] and [value] are
-    // contributed by the browser's form-data algorithm in up.Params.fromForm().
+    // A `submit` event may already have handed us { submitButton: event.submitter }. Resolve this
+    // before parsing params, because the button's [name] and [value] are contributed by the
+    // browser's form-data algorithm inside up.Params.fromForm().
     const submitButton = (options.submitButton ??= defaultSubmitButton(form))
 
     // Parse params from form fields.

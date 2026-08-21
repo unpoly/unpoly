@@ -528,8 +528,6 @@ up.Params = class Params {
 
     up.form.assertFieldsInSameLayer(form)
 
-    // Without an explicit option we assume the form's first submit button, as a browser does
-    // when the user submits from a field.
     let submitButton = e.get(options.submitButton ?? up.form.defaultSubmitButton(form))
 
     // The FormData constructor throws unless the submitter is owned by this form, and
