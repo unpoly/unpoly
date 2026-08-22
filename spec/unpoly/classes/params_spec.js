@@ -429,6 +429,57 @@ describe('up.Params', function() {
       ])
     })
 
+    it('includes values added by a [formdata] event listener', function() {
+      const $form = $fixture('form')
+      $form[0].addEventListener('formdata', function(event) {
+        event.formData.append('key', 'value')
+      })
+
+      const params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual([
+        { name: 'key', value: 'value' },
+      ])
+    })
+
+    it('includes a non-native field configured with up.form.config.fieldSelectors', function() {
+      up.form.config.fieldSelectors.push('test-form-field')
+      const $form = $fixture('form')
+      const $field = $('<test-form-field></test-form-field>').appendTo($form)
+      $field[0].name = 'key'
+      $field[0].value = 'value'
+
+      const params = up.Params.fromForm($form)
+      expect(params.toArray()).toEqual([
+        { name: 'key', value: 'value' },
+      ])
+    })
+
+    if (window.customElements && HTMLElement.prototype.attachInternals) {
+      class TestFormAssociatedElement extends HTMLElement {
+        constructor() {
+          super()
+          this.internals = this.attachInternals()
+        }
+
+        connectedCallback() {
+          this.internals.setFormValue(this.getAttribute('value'))
+        }
+      }
+
+      TestFormAssociatedElement.formAssociated = true
+      window.customElements.define('test-form-associated-element', TestFormAssociatedElement)
+
+      it('serializes a form-associated custom element', function() {
+        const $form = $fixture('form')
+        $form.append('<test-form-associated-element name="key" value="value"></test-form-associated-element>')
+
+        const params = up.Params.fromForm($form)
+        expect(params.toArray()).toEqual([
+          { name: 'key', value: 'value' },
+        ])
+      })
+    }
+
     it('serializes an <input type="text"> with its default [value]', function() {
       const $form = $fixture('form')
       $form.append('<input type="text" name="key" value="value-from-attribute">')
@@ -618,4 +669,3 @@ describe('up.Params', function() {
     })
   })
 })
-
