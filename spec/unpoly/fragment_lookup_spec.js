@@ -63,6 +63,24 @@ extendDescribe('up.fragment', function() {
           expect(result).toEqual(element)
         })
 
+        it('does not match the root element itself', function() {
+          const parent = fixture('.element')
+          const child = e.affix(parent, '.element')
+
+          expect(up.fragment.get(parent, '.element')).toBe(child)
+        })
+
+        it('does not match the root element itself while an overlay is open', function() {
+          // The layer-aware lookup used to search the layer's subtree, which includes the
+          // root — so whether a root matched itself depended on whether an overlay was
+          // open. Note makeLayers() creates its own .element fixture, hence .needle.
+          makeLayers(2)
+          const parent = fixture('.needle')
+          const child = e.affix(parent, '.needle')
+
+          expect(up.fragment.get(parent, '.needle')).toBe(child)
+        })
+
         it('only matches descendants of the given root element while an overlay is open', function() {
           // Note that makeLayers() creates its own .element fixture, so this spec
           // uses .needle to keep the two candidates unambiguous.
