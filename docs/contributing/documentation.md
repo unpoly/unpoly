@@ -3,11 +3,10 @@
 Unpoly has a large API surface, and developers meet most of it through the
 documentation rather than the source. All public API must be documented thoroughly.
 
-Documentation is written in this repository, next to the code it describes. A sister
-project ([`unpoly-site`](https://github.com/unpoly/unpoly-site), Ruby-based) parses
-`src/` and generates the static site at [unpoly.com](https://unpoly.com), which is
-republished with every release. You can [preview it locally](#previewing-your-changes),
-but you don't have to.
+Documentation is written in this repository, next to the code it describes, so that a
+feature and its documentation change in the same commit. It is published at
+[unpoly.com](https://unpoly.com), which is rebuilt from these sources with every release.
+You can [preview it locally](#previewing-your-changes), but you don't have to.
 
 
 ## Where documentation lives
@@ -681,11 +680,17 @@ Previewing is **optional**. Documentation has no automated tests, and a wrong di
 is a code-review fix rather than a blocker — so don't stall on it. Write the prose, make
 your best attempt at the syntax, and flag anything you're unsure of in the pull request.
 
-If you do want to see the output, check out
-[`unpoly-site`](https://github.com/unpoly/unpoly-site) next to this repository.
+If you do want to see the output, check out `unpoly-site` next to this repository — it
+needs Ruby, and its README has the setup steps.
 [`bin/dev`](dev-environment.md#running-the-dev-environment) then boots it alongside the
-build watcher and serves it at <http://localhost:4567>. It needs Ruby; see that
-repository's README for setup.
+build watcher and serves it at <http://localhost:4567>.
 
 Edits to existing pages appear on reload. A *new* page — a new API symbol or a new
 guide page — only appears after restarting the dev environment.
+
+
+## Changing the visual presentation on unpoly.com
+
+The sister repository [`unpoly-site`](https://github.com/unpoly/unpoly-site) has
+the HTML templates, CSS and JavaScripts for [unpoly.com](https://unpoly.com).
+It also contains a parser that reads the API documentation content from the `unpoly/unpoly` sources.
