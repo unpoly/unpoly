@@ -20,6 +20,26 @@ Unpoly has two kinds of documentation, and they do different jobs:
 | Reader intent | *"What arguments are accepted?"* | *"How do I implement this requirement?"* |
 | Example | [`/up.submit`](https://unpoly.com/up.submit) | [`/submitting-forms`](https://unpoly.com/submitting-forms) |
 
+Both kinds deliberately overlap, but they are written for different readers:
+
+- A **guide** shows a common use case end to end: how many features work together,
+  with lots of prose and examples, assuming little prior knowledge. It does *not*
+  explain every option or every edge case.
+- A **reference** explains every option, gives a basic example, and dives deep into
+  behavior and edge cases. It assumes prior knowledge: the reader already knows they
+  want this feature, but now they need the details.
+
+When unsure where content belongs, ask **who it serves**:
+
+- Text for a reader who *doesn't yet know this feature is the answer* — a use case,
+  a motivation, several features working together — belongs in a guide.
+- Text for a reader who *has already chosen the feature* — options, precise behavior,
+  edge cases — belongs in the reference.
+
+The same topic often needs both, written once for each audience. Some duplication
+is inevitable and intended; see [Reusing text](#reusing-text) for keeping repeated
+sentences consistent.
+
 Both are parsed from files in this repository. The difference is the container:
 
 - In a `.js` file, each `/*- … */` comment is one documentation block. A file can hold
