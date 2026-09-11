@@ -16,9 +16,9 @@ The controlling form field gets an `[up-switch]` attribute with a selector for t
 
 ```html
 <select name="level" up-switch=".level-dependent">
-  <option value="beginner">beginner</option>
-  <option value="intermediate">intermediate</option>
-  <option value="expert">expert</option>
+  <option value="beginner">Beginner</option>
+  <option value="intermediate">Intermediate</option>
+  <option value="expert">Expert</option>
 </select>
 ```
 
