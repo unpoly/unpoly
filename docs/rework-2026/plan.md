@@ -163,6 +163,41 @@ exemplar). Talk also = draft of "How Unpoly works" (transcribe, don't invent).
 - Length budgets from comparable existing pages. Outline with facts per section before prose.
 - Separate writer and critic agents. Approved pages join the exemplar set.
 - The guide-vs-reference placement contract is in docs/contributing/documentation.md.
+- **Deslop pass**: whenever a generated page is otherwise done, make a dedicated pass to
+  remove "AI slop" tropes from wording and sentence structure ("not X, it's Y",
+  em-dash chains, three-fragment runs, punchline endings, filler adjectives, etc.).
+  The `/deslop` skill can drive this pass. This is a per-page completion step,
+  in addition to the writer/critic split and any lint. Where deslop rules conflict
+  with the house voice of the exemplar guides (e.g. conventional passives like
+  "when no mode is given", or "See X for details and examples" pointers), house voice wins.
+
+## Overview page spec (settled 2026-09-12)
+
+Every chapter opens with an overview page. Jobs, in order:
+
+0. **Scope & value** in a standalone first paragraph: what Unpoly offers for this topic,
+   answering "do I want to read this?". Doubles as the chapter's blurb on the /learn hub.
+1. **Mental model**: the terms and the one idea every detail page in the chapter assumes.
+2. **Minimal working example** of the chapter's most common case. A reader who reads only
+   the overview can already do the basic thing.
+3. **Map of the 2-4 most common needs**, each a situation sentence with a taste of code,
+   ordered by escalation, linking its detail page. Never lists all pages: the sidebar and
+   next-page path own completeness. Include a rung only if a reader would plausibly arrive
+   at the chapter *because* of that need.
+4. **Boundaries** only where a likely wrong turn exists (e.g. infinite scrolling is not
+   under Scrolling). Omit the section otherwise.
+
+Jobs 0-2 are unconditional; 3 is capped; 4 is conditional. Budget: 400-800 words.
+Jobs are content requirements, not a section order: default to example before model,
+unless the example cannot be understood without the model. Headline features of the
+topic (e.g. layer isolation) get their own section; never bury them inside the
+model/terminology block (pilot review finding, 2026-09-12).
+Review contract: Henning reviews every overview page like any other mostly-new content.
+Chapters weight jobs differently: use-case chapters lean on the map (exemplar:
+loading-state.md), concept chapters lean on the model (exemplar: the Overlays pilot).
+
+Pilot: docs/rework-2026/pilots/overlays.md - pending Henning's review. Once approved,
+both exemplars + this spec are the contract for the other ~10 overviews.
 
 ## Evidence gathered (for context, verified 2026-09-02)
 
