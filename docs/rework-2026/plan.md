@@ -4,6 +4,9 @@ Status file for the unpoly.com documentation restructuring ("Rework docs entirel
 Written 2026-09-02 after the first alignment session. This is the source of truth for
 decisions made so far; the structure below supersedes any earlier sketches.
 
+Progress map (visual view of this file, update at end of each session):
+https://claude.ai/code/artifact/733a0aa5-3bdc-4f53-840a-f1ac8254146c
+
 Per Henning's rule: don't trust this file blindly — nothing here is implemented yet,
 so verify claims about the *current* repo state against the repo.
 
@@ -15,6 +18,8 @@ so verify claims about the *current* repo state against the repo.
 - URLs stay at root (`/up-follow`, `/enhancing-elements`); add `/learn` and `/api` hub pages
   (the current `/api` page shows guide links and must be rebuilt as a real reference hub).
   Old guide URLs get redirects in `src/unpoly-migrate/.htaccess`.
+  DEFERRED LONG-TERM (see Deferred section): eventually move symbols under `/api/...`
+  and guides under `/learn/...`.
 - Chapter order defined in a single TOC manifest file in this repo (replaces
   `PROMOTED_INTERFACE_NAMES` in unpoly-site's `repository.rb`). Build fails on orphan pages.
 - New directive `@guide-ref` for the reference→guide header slot (repeatable, resolves
@@ -67,7 +72,7 @@ GETTING STARTED
   Open overlays ✎
   Enhance elements ✎
   The shape of the API ↩ (attributes-and-options + layered-API idea from philosophy docs;
-    title open: "The shape of the API" / "Understanding the API")
+    title settled 2026-09-12)
   Where to go from here ✎ (adoption path: one screen at a time → going all-in)
 
 LINKS — Overview ✎ · Following links ✎ · Handling all links ✂ · Preloading links ·
@@ -84,8 +89,9 @@ OVERLAYS — Overview ✎ (⇒ layer-terminology) · Opening overlays ·
 LOADING STATE — Overview (exists; add perceived-responsiveness framing) · Feedback classes ·
   Placeholders · Previews · Optimistic rendering · Progress bar
 
-SELF-LOADING FRAGMENTS (title provisional, see open items) — Overview ✎ (incl. up.reload
-  baseline) · Lazy loading content · Infinite scrolling · Polling · Hungry elements ✎
+LIVE FRAGMENTS (settled 2026-09-12; overview's first line must defuse any realtime/
+  websocket connotation: no persistent connection, just HTTP) — Overview ✎ (incl.
+  up.reload baseline) · Lazy loading content · Infinite scrolling · Polling · Hungry elements ✎
 
 HISTORY — Overview ✎ · Updating history · Restoring history · Tracking page views ↩
   (analytics, reframed around location-change events)
@@ -97,7 +103,7 @@ NETWORK & CACHING — Overview ✎ (intro up.request briefly) · Caching (Vary t
 
 ANIMATION — one page (⇒ predefined-animations, predefined-transitions, motion-tuning)
 
-SCRIPTING (title open) — Overview ✎ · Enhancing elements with JavaScript ·
+SCRIPTING (title settled 2026-09-12) — Overview ✎ · Enhancing elements with JavaScript ·
   Attaching data to elements · Templates · Framework islands ✎ (React/Vue in compilers;
   from talk) · Migrating legacy JavaScripts ↩ · Script security ↩ §
 
@@ -123,15 +129,24 @@ Following links, Handling all links/forms, Framework islands, Hungry elements, S
 
 ## Open items
 
-- Title: SELF-LOADING FRAGMENTS (candidates: Live fragments, Active fragments,
-  Automatic loading; "self-loading" accepted as working title only).
-- Title: SCRIPTING (candidates: Scripting, Client-side logic, Enhancing with JavaScript).
-- Title: "The shape of the API" GS page.
-- Confirm "Learn" as the section name (used throughout this file).
 - Page order within chapters (decide at writing time).
+- (Settled 2026-09-12: chapter titles "Live fragments" and "Scripting", GS page
+  "The shape of the API", section name "Learn" confirmed.)
 - Signature decisions 2–8 from the session agenda were argued in discovery but NOT
   formally settled: TOC manifest format, @guide-ref syntax, review contract,
   shipping/two-repo coordination, landing-page skeleton. Next alignment session.
+
+## Deferred (only after content changes and the new landing page have shipped)
+
+- **URL prefixes** (added 2026-09-12): move API symbols under `/api` (e.g. `/api/up.render`)
+  and guide pages under `/learn` (e.g. `/learn/subinteractions`). Old root URLs keep
+  working via `.htaccess` redirects (e.g. `/up-submit` -> `/api/up-submit`), but our own
+  docs must link with the prefixes. Deferred because it causes heavy churn in the Unpoly
+  sources (thousands of links); until then, hubs live at `/learn` and `/api` while pages
+  stay at root.
+- Step 2 per-page rewrites of kept pages.
+- Backend language switcher for protocol-chapter code samples.
+- Goal-based index pages ("fast", "resilient") above the chapters.
 
 ## Landing page (separate track, discovery only — nothing settled)
 
