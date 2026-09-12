@@ -20,8 +20,14 @@ so verify claims about the *current* repo state against the repo.
   Old guide URLs get redirects in `src/unpoly-migrate/.htaccess`.
   DEFERRED LONG-TERM (see Deferred section): eventually move symbols under `/api/...`
   and guides under `/learn/...`.
-- Chapter order defined in a single TOC manifest file in this repo (replaces
-  `PROMOTED_INTERFACE_NAMES` in unpoly-site's `repository.rb`). Build fails on orphan pages.
+- SETTLED 2026-09-13 — Site structure manifest: one YAML file `src/unpoly/pages/learn.yml`
+  with two sections. `learn:` = chapters as `title` + ordered `pages` (slugs); no special
+  treatment for overviews or Getting started; a chapter's first page's first paragraph is
+  its blurb on the /learn hub. `api:` = ordered entries that are either `module: up.foo`
+  (children derived from source; replaces PROMOTED_INTERFACE_NAMES) or ordinary
+  `title` + `pages` groups (e.g. "Formats": url-patterns, relaxed-json). Section membership
+  decides nav tree and prev/next (learn only). Build checks: every @page listed exactly
+  once somewhere; every @module exactly once in api; listed slugs must exist.
 - New directive `@guide-ref` for the reference→guide header slot (repeatable, resolves
   labels from target page titles/anchors; build-checkable). In-body refs keep `{:.article-ref}`.
 - Tutorial dies; redirect to Getting started. `/install` content moves into this repo.
@@ -132,9 +138,10 @@ Following links, Handling all links/forms, Framework islands, Hungry elements, S
 - Page order within chapters (decide at writing time).
 - (Settled 2026-09-12: chapter titles "Live fragments" and "Scripting", GS page
   "The shape of the API", section name "Learn" confirmed.)
-- Signature decisions 2–8 from the session agenda were argued in discovery but NOT
-  formally settled: TOC manifest format, @guide-ref syntax, review contract,
-  shipping/two-repo coordination, landing-page skeleton. Next alignment session.
+- Remaining mechanisms (next up): @guide-ref syntax, redirect strategy for
+  renamed/dissolved pages, mechanics of moving /install into this repo.
+- Then: process & shipping (writing skill + prose lint, two-repo shipping),
+  landing-page skeleton. (TOC manifest settled 2026-09-13, see big picture.)
 
 ## Deferred (only after content changes and the new landing page have shipped)
 
