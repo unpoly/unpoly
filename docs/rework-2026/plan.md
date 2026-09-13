@@ -241,9 +241,17 @@ Following links, Handling all links/forms, Framework islands, Hungry elements, S
 - Page order within chapters (decide at writing time).
 - (Settled 2026-09-12: chapter titles "Live fragments" and "Scripting", GS page
   "The shape of the API", section name "Learn" confirmed.)
-- Next up: process & shipping (writing skill + prose lint, review contract details,
-  two-repo shipping), then landing-page skeleton. (All mechanisms settled 2026-09-13:
-  manifest, @learn-ref, wikilinks, redirects, /install move — see big picture.)
+- Next up (open alignment stops): landing-page skeleton, and SEARCH (added 2026-09-13):
+  - Single search across both areas, or one search per area (learn vs. API)?
+  - If single: where does the box live in the split layout?
+  - If single: how do results convey their type (learn page vs. API feature)?
+    May need extra attributes pushed to Algolia.
+  - Keep the two-stage search (instant word-match autocomplete first, then Algolia
+    full-text)? The first stage doubles as fast autocomplete for users who know their
+    target, and Algolia costs per request.
+  - Separate Algolia index? Currently one index per major version (v2, v3) plus one
+    for development (effectively v3 only).
+  (Process & shipping settled 2026-09-13; all mechanisms settled — see big picture.)
 
 ## Deferred (only after content changes and the new landing page have shipped)
 
