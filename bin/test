@@ -1,4 +1,14 @@
 #!/usr/bin/env node
 // Dev spec runner. Starts the dev environment in the background if none is running.
+// Everything it prints is also written to tmp/test.log, so a truncated terminal never
+// costs you the failure block.
 import { runDev } from '../tooling/runner/terminal/run.mjs'
-process.exit(await runDev(process.argv.slice(2), process.env))
+import { teeToLogFile, LOG_FILE } from '../tooling/runner/terminal/tee.mjs'
+
+const log = teeToLogFile()
+const code = await runDev(process.argv.slice(2), process.env)
+// Point at the log only when specs actually ran and something failed (1 = failures,
+// 2 = the watchdog). A preflight refusal has already printed its whole message.
+if (code === 1 || code === 2) console.error(`Full output: ${LOG_FILE}`)
+await log.close()
+process.exit(code)

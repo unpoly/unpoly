@@ -13,6 +13,106 @@ extendDescribe('up.form', function() {
       // if another script manually triggers `change` on the element.
       const defaultInputEvents = ['input', 'change']
 
+      describe('custom form fields', function() {
+
+        it('watches a form-associated custom element that has no { name } property', async function() {
+          const [, field] = htmlFixtureList(`
+            <form>
+              <test-attribute-named-field name="email" value="old@example.com"></test-attribute-named-field>
+            </form>
+          `)
+          const callback = jasmine.createSpy('watch callback')
+
+          up.watch(field, callback)
+
+          field.value = 'new@example.com'
+          Trigger.change(field)
+          await wait()
+
+          expect(callback.calls.count()).toBe(1)
+          expect(callback.calls.argsFor(0)[0]).toBe('new@example.com')
+          expect(callback.calls.argsFor(0)[1]).toBe('email')
+        })
+
+        it('watches a form-associated custom element without configuration', async function() {
+          const [, field] = htmlFixtureList(`
+            <form>
+              <test-form-associated-element name="email" value="old@example.com"></test-form-associated-element>
+            </form>
+          `)
+          const callback = jasmine.createSpy('watch callback')
+
+          up.watch(field, callback)
+
+          field.value = 'new@example.com'
+          Trigger.change(field)
+          await wait()
+
+          expect(callback.calls.count()).toBe(1)
+          expect(callback.calls.argsFor(0)[0]).toBe('new@example.com')
+          expect(callback.calls.argsFor(0)[1]).toBe('email')
+        })
+
+        it('watches a custom element that is configured in up.form.config.fieldSelectors', async function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [, field] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="old@example.com"></test-form-field>
+            </form>
+          `)
+          const callback = jasmine.createSpy('watch callback')
+
+          up.watch(field, callback)
+
+          field.value = 'new@example.com'
+          Trigger.change(field)
+          await wait()
+
+          expect(callback.calls.count()).toBe(1)
+          expect(callback.calls.argsFor(0)[0]).toBe('new@example.com')
+          expect(callback.calls.argsFor(0)[1]).toBe('email')
+        })
+
+        it('watches the native field that a custom control keeps hidden and synced', async function() {
+          const [, select] = htmlFixtureList(`
+            <form>
+              <select name="size" hidden>
+                <option value="S" selected>S</option>
+                <option value="M">M</option>
+              </select>
+            </form>
+          `)
+          const callback = jasmine.createSpy('watch callback')
+
+          up.watch(select, callback)
+
+          select.value = 'M'
+          Trigger.change(select)
+          await wait()
+
+          expect(callback.calls.count()).toBe(1)
+          expect(callback.calls.argsFor(0)[0]).toBe('M')
+        })
+
+        it('does not run formdata listeners, which only affect submissions', async function() {
+          const [form, field] = htmlFixtureList('<form><input name="email" value="old@example.com"></form>')
+          const listener = jasmine.createSpy('formdata listener')
+          form.addEventListener('formdata', listener)
+          const callback = jasmine.createSpy('watch callback')
+
+          up.watch(field, callback)
+
+          field.value = 'new@example.com'
+          Trigger.change(field)
+          await wait()
+
+          expect(callback.calls.count()).toBe(1)
+          expect(listener).not.toHaveBeenCalled()
+        })
+
+      })
+
       describe('with a field element', function() {
 
         describe('when the form is reset', function() {

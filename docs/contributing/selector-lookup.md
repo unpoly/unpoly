@@ -18,6 +18,21 @@ inside an element you already hold. There is even a deliberate cross-layer looku
 is intended — a popup has no viewport of its own. The rule of thumb: if the answer should
 depend on layers, liveness or Unpoly's custom selectors, go through `up.fragment`.
 
+<!-- toc -->
+- [Why we have our own lookup engine](#why-we-have-our-own-lookup-engine)
+- [Which entry point does what](#which-entry-point-does-what)
+- [What `up.Selector` does when you construct it](#what-upselector-does-when-you-construct-it)
+  - [Failing to resolve a layer: two different errors](#failing-to-resolve-a-layer-two-different-errors)
+  - [Order is a guarantee, not an accident](#order-is-a-guarantee-not-an-accident)
+  - [Root handling is inconsistent — know it before you trust it](#root-handling-is-inconsistent--know-it-before-you-trust-it)
+- [Layer scoping defaults to one layer](#layer-scoping-defaults-to-one-layer)
+- [The custom selectors, and where each is resolved](#the-custom-selectors-and-where-each-is-resolved)
+  - [Not every pseudo is a matcher](#not-every-pseudo-is-a-matcher)
+- [Origin and region awareness](#origin-and-region-awareness)
+- [Expansion during rendering](#expansion-during-rendering)
+- [Working here](#working-here)
+<!-- /toc -->
+
 
 ## Why we have our own lookup engine
 

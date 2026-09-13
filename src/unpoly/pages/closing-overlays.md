@@ -339,6 +339,17 @@ For example, this form has two fields named `foo` and `bar`:
 </form>
 ```
 
+The params are exactly those a [regular submission](/up.Params.fromForm) would send, so a
+[submit button](/up.Params.fromForm#submit-button) with a `[name]` also contributes its value.
+This lets the opener see *which* button was pressed:
+
+```html
+<form up-accept>
+  <button type="submit" name="commit" value="save">Save</button> <!-- mark: commit -->
+  <button type="submit" name="commit" value="publish">Publish</button>
+</form>
+```
+
 The values are provided as an `up.Params` object that can be accessed from an `{ onAccepted }` or `{ onDismissed }` handler:
 
 ```js

@@ -8,12 +8,13 @@
 
 import puppeteer from 'puppeteer'
 import path from 'node:path'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import pc from 'picocolors'
 import { Config } from '../config.mjs'
 import { serverURL, isServerRunning, startServer } from '../server/server.mjs'
-import { waitForFreshBuild, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
+import { waitForFreshBuild, newestSourceMtime, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
+import { runBuild } from '../../build/build.mjs'
 import { PROJECT_ROOT } from '../../build/build_status.mjs'
 import { createRemapper } from './source_map.mjs'
 import { createReceiver } from './receiver.mjs'
@@ -79,6 +80,29 @@ const isMinified = (name) => name.includes('.min.')
 // loads unpoly-migrate.js only when `migrate` is set, so a --minify run without --migrate
 // must not demand unpoly-migrate.min.js. And nothing at all before the watcher has built,
 // which is why the caller only asks once a build is green — see runDev().
+// The minified bundles this config asks for that dist/ cannot serve: absent, or older than the
+// newest source. They are the only artifacts that can be *silently* stale — the dev watcher
+// never builds them (see tooling/build/webpack/development.js), while waitForFreshBuild() has
+// already established that everything it does build is current. Testing a stale one fails
+// whichever specs cover the newest work, which reads exactly like a regression in that work.
+//
+// Only the mtime is compared, not the watcher's status: a docs-only edit legitimately leaves
+// every bundle older than the newest source, and for the minified ones that is still a reason
+// to rebuild — they may be older than the last *code* edit too, and we cannot tell from here.
+export function outdatedMinifiedFiles(config, dist = path.join(PROJECT_ROOT, 'dist'), sourceMtime = null) {
+  let { unpoly, migrate } = config.distFilenames()
+  let loaded = [unpoly, ...(config.migrate ? [migrate] : [])].filter(isMinified)
+  if (!loaded.length) return []
+
+  sourceMtime ??= newestSourceMtime()
+  return loaded.filter((name) => mtimeMs(path.join(dist, name)) < sourceMtime)
+}
+
+// 0 for a file that isn't there, so a missing bundle counts as outdated.
+function mtimeMs(file) {
+  try { return statSync(file).mtimeMs } catch { return 0 }
+}
+
 export function missingDistFiles(config, dist = path.join(PROJECT_ROOT, 'dist')) {
   let { unpoly, specs, jasmine, migrate } = config.distFilenames()
   let loaded = [unpoly, specs, jasmine, ...(config.migrate ? [migrate] : [])]
@@ -88,6 +112,22 @@ export function missingDistFiles(config, dist = path.join(PROJECT_ROOT, 'dist'))
 export async function runDev(argv, env) {
   const config = parseConfig(argv, env)
   if (!config) return CONFIG_ERROR
+
+  // The whole suite costs about nine minutes, and running it after every edit is the slowest
+  // habit available in this repository. Make it something you ask for. `--file` has already
+  // become `spec` filters by now, so one check covers both ways of narrowing a run.
+  if (!config.spec.length) {
+    if (!config.all) {
+      console.error(pc.red('Running every spec takes ~9 minutes. Narrow the run, or ask for all of it:'))
+      console.error('')
+      console.error(`  ${pc.bold('bin/find-spec "phrase"')}        find the groups that cover your change`)
+      console.error(`  ${pc.bold('bin/test --spec="up.form"')}     run those groups`)
+      console.error(`  ${pc.bold('bin/test --file=path[:line]')}   run what a file, or one line, declares`)
+      console.error(`  ${pc.bold('bin/test --all')}                run everything anyway`)
+      return CONFIG_ERROR
+    }
+    console.error(pc.blue('Running every spec — expect ~9 minutes.'))
+  }
 
   // Start one in the background if none is up, so `bin/test` needs no manual setup.
   if (!(await isDevEnvRunning())) {
@@ -120,6 +160,18 @@ export async function runDev(argv, env) {
       return 4
     }
     throw error
+  }
+
+  // The watcher leaves the minified bundles alone, so build them here rather than run against
+  // whatever `dist` happens to hold. `bin/test` already starts a dev environment when none is
+  // running; this is the same courtesy for the one artifact that environment does not produce.
+  let outdated = outdatedMinifiedFiles(config)
+  if (outdated.length) {
+    console.error(pc.blue(`The dev watcher does not build ${outdated.join(', ')} — building it once…`))
+    let code = await runBuild(['--config=minified'])
+    // webpack has printed its own errors; 6 is this runner's "the build is not usable" code.
+    if (code !== 0) return 6
+    console.error('')
   }
 
   // Only now, with a green build behind us, does an absent bundle mean anything: `dist` is

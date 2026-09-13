@@ -18,4 +18,7 @@ Afterwards it prints the manual follow-ups it cannot do for you: a matching
 [`unpoly-site`](https://github.com/unpoly/unpoly-site) so unpoly.com serves the new
 CHANGELOG and CDN links, and announcing the release.
 
-Agents should never make a release.
+
+## If you are an agent
+
+Never make a release.

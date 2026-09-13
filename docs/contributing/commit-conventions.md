@@ -1,5 +1,8 @@
 # Commit conventions
 
+How we write commits and what happens to them: the module prefix every subject carries, what
+CI runs when you open a pull request, and what an agent must ask before committing.
+
 ## Message prefix
 
 Every commit subject begins with the [main module](code-organization.md#responsibilities)

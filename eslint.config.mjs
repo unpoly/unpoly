@@ -72,6 +72,7 @@ export default tseslint.config(
         $fixture: 'readonly',
         wait: 'readonly',
         registerFixture: 'readonly',
+        fileList: 'readonly',
         makeLayers: 'readonly',
         Trigger: 'readonly',
         promiseState: 'readonly',

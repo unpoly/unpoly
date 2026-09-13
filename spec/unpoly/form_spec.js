@@ -102,6 +102,83 @@ describe('up.form', function() {
 
     describe('up.form.fields()', function() {
 
+      describe('custom form fields', function() {
+
+        it('does not include buttons, fieldsets or outputs, which the :enabled selector also matches', function() {
+          const [form, textField] = htmlFixtureList(`
+            <form>
+              <input name="email" type="text">
+              <input type="submit">
+              <input type="image" name="image">
+              <input type="button">
+              <input type="reset" name="reset-input">
+              <button type="submit">Submit</button>
+              <button type="button">Push</button>
+              <button type="reset" name="reset-button">Reset</button>
+              <button type="">Invalid type, submits natively</button>
+              <fieldset></fieldset>
+              <output name="output"></output>
+              <object name="object"></object>
+            </form>
+          `)
+
+          expect(up.form.fields(form)).toMatchList([textField])
+        })
+
+        it('includes a form-associated custom element without configuration', function() {
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-associated-element name="email" value="foo@example.com"></test-form-associated-element>
+            </form>
+          `)
+
+          expect(up.form.fields(form)).toMatchList([field])
+        })
+
+        it('includes a form-associated custom element that is [disabled]', function() {
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-associated-element name="email" value="foo@example.com" disabled></test-form-associated-element>
+            </form>
+          `)
+
+          expect(up.form.fields(form)).toMatchList([field])
+        })
+
+        it('includes a custom element that is configured in up.form.config.fieldSelectors', function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          expect(up.form.fields(form)).toMatchList([field])
+        })
+
+        it('does not include a custom element that is not configured', function() {
+          const [form] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          expect(up.form.fields(form)).toMatchList([])
+        })
+
+        it("includes a configured custom element outside the form with a [form] attribute matching the form's ID", function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form] = htmlFixtureList('<form id="form-id"></form>')
+          const [outside] = htmlFixtureList('<test-form-field name="email" value="foo@example.com" form="form-id"></test-form-field>')
+
+          expect(up.form.fields(form)).toMatchList([outside])
+        })
+
+      })
+
+
       it('returns a list of form fields within the given element', function() {
         const form = fixture('form')
         const textField = e.affix(form, 'input[name=email][type=text]')
@@ -726,8 +803,8 @@ describe('up.form', function() {
 
             expect(options.params).toEqual(new up.Params([
               { name: 'field-name', value: 'field-value' },
-              { name: 'form-name', value: 'form-value' },
               { name: 'button-name', value: 'button-value-1' },
+              { name: 'form-name', value: 'form-value' },
             ]))
           })
 
@@ -744,13 +821,13 @@ describe('up.form', function() {
 
             expect(options.params).toEqual(new up.Params([
               { name: 'field-name', value: 'field-value' },
-              { name: 'form-name', value: 'form-value' },
               { name: 'button-name', value: 'button-value-1' },
+              { name: 'form-name', value: 'form-value' },
             ]))
           })
 
           it('includes the [name] and [value] of the given submit button', function() {
-            let [form, submitButton1, submitButton2] = htmlFixtureList(`
+            let [form, , submitButton1, submitButton2] = htmlFixtureList(`
               <form action="/action" up-params="{ 'form-name': 'form-value' }">
                 <input type="text" name="field-name" value="field-value">
                 <button type="submit" name="button-name" value="button-value-1"></button>
@@ -762,8 +839,8 @@ describe('up.form', function() {
 
             expect(options.params).toEqual(new up.Params([
               { name: 'field-name', value: 'field-value' },
+              { name: 'button-name', value: 'button-value-2' },
               { name: 'form-name', value: 'form-value' },
-              { name: 'button-name', value: 'button-value-1' },
             ]))
           })
 
@@ -1098,6 +1175,165 @@ describe('up.form', function() {
     require('./form_validate_fn_spec')
 
     describe('up.form.disableTemp()', function() {
+
+      describe('custom form fields', function() {
+
+        it('does not also set the [disabled] attribute on a control that has a property', function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          up.form.disableTemp(form)
+
+          // The element's own property is unreflected, so an attribute here could only have
+          // come from us — and writing both spellings is what we must not do.
+          expect(field.disabled).toBe(true)
+          expect(field.hasAttribute('disabled')).toBe(false)
+        })
+
+        it('undoes a disable with the spelling it used, even if the field gains a property meanwhile', function() {
+          // A custom element whose definition arrives late starts out with no { disabled }
+          // property, so it is disabled through its attribute. If it is upgraded before the
+          // preview ends, deciding the spelling again would re-enable it through the property
+          // and leave our attribute behind for good.
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-attribute-named-field name="email" value="foo@example.com"></test-attribute-named-field>
+            </form>
+          `)
+
+          const reenable = up.form.disableTemp(form)
+          expect(field.hasAttribute('disabled')).toBe(true)
+
+          // The definition arrives and the element gains the property it never had. Its own
+          // state is whatever the component decided, which is not ours to change.
+          let disabled = false
+          Object.defineProperty(field, 'disabled', {
+            configurable: true,
+            get() { return disabled },
+            set(newDisabled) { disabled = newDisabled },
+          })
+
+          reenable()
+
+          // We must remove the attribute we set, rather than write the property that appeared.
+          expect(field.hasAttribute('disabled')).toBe(false)
+          expect(up.form.readFieldDisabled(field)).toBe(false)
+        })
+
+        it('does not create a { disabled } property on an element that has none', function() {
+          // Assigning the property would create it, and it would shadow the attribute in
+          // every later read — so a field the author disables afterwards would look enabled.
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-attribute-named-field name="email" value="foo@example.com"></test-attribute-named-field>
+            </form>
+          `)
+
+          up.form.disableTemp(form)()
+
+          expect('disabled' in field).toBe(false)
+
+          // The author disables it later. Unpoly must still see that.
+          field.setAttribute('disabled', '')
+          expect(up.Params.fromContainer(form).toArray()).toEqual([])
+        })
+
+        it('disables a form-associated custom element that has no { disabled } property', function() {
+          // The platform gives such an element no property, so only the attribute disables it.
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-attribute-named-field name="email" value="foo@example.com"></test-attribute-named-field>
+            </form>
+          `)
+          expect(field.matches('[disabled]')).toBe(false)
+
+          const reenable = up.form.disableTemp(form)
+          expect(field.matches('[disabled]')).toBe(true)
+
+          reenable()
+          expect(field.matches('[disabled]')).toBe(false)
+        })
+
+        it('leaves a form-associated custom element that was already [disabled]', function() {
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-attribute-named-field name="email" value="foo@example.com" disabled></test-attribute-named-field>
+            </form>
+          `)
+
+          const reenable = up.form.disableTemp(form)
+          reenable()
+
+          // We never enable a control that we did not disable.
+          expect(field.matches('[disabled]')).toBe(true)
+        })
+
+        it('disables a form-associated custom element without configuration', function() {
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-associated-element name="email" value="foo@example.com"></test-form-associated-element>
+            </form>
+          `)
+          expect(field).not.toBeDisabled()
+
+          const reenable = up.form.disableTemp(form)
+          expect(field).toBeDisabled()
+
+          reenable()
+          expect(field).not.toBeDisabled()
+        })
+
+        it('disables a configured custom element through its { disabled } property', function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+          expect(field).not.toBeDisabled()
+
+          up.form.disableTemp(form)
+
+          expect(field).toBeDisabled()
+        })
+
+        it('re-enables a configured custom element when the returned function is called', function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          const reenable = up.form.disableTemp(form)
+          expect(field).toBeDisabled()
+
+          reenable()
+
+          expect(field).not.toBeDisabled()
+        })
+
+        it('does not disable a custom element that is not configured', function() {
+          const [form, field] = htmlFixtureList(`
+            <form>
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          up.form.disableTemp(form)
+
+          expect(field).not.toBeDisabled()
+        })
+
+      })
+
 
       it("disables the form's fields", function() {
         const form = fixture('form')

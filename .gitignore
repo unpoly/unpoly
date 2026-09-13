@@ -17,3 +17,7 @@ npm-debug.log
 /tmp
 /node_modules
 .$*.xml.*
+
+# Implementation plans are local working notes (see docs/contributing/code-organization.md)
+/docs/plans/*
+!/docs/plans/.gitkeep

@@ -53,6 +53,7 @@ feature, or before reviewing someone else's.
 
 > Where files live, why Unpoly is a `window.up` global, which module owns which topic,
 > how we structure modules internally, and how to find tests for a given file.
+> Implementation plans for larger changes go in `docs/plans/`, named after their subject.
 
 [Read the code organization guide](docs/contributing/code-organization.md) before
 adding or moving code.
@@ -63,7 +64,8 @@ adding or moving code.
 > Any change must be tested. Tests ("specs") are written in Jasmine.
 > They always run in a real browser, but can be driven from the terminal
 > using `bin/test`. The network is always mocked. We have patterns to wait for
-> async code. Filtering to the module you're editing turns a multi-minute suite into a few seconds.
+> async code. The full suite takes ~9 minutes, so find the relevant groups with `bin/find-spec`,
+> run only those, and leave the minified, ES6, CSP and migrate variants to CI.
 
 [Read the full testing guide](docs/contributing/testing.md) before writing or changing a spec.
 Many old specs use deprecated patterns, so don't copy a neighbour.

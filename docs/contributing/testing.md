@@ -1,20 +1,42 @@
 # Testing
 
-Unpoly is almost all API surface. Every module publishes HTML attributes, JavaScript
-functions, events and configuration, and each of those has to keep behaving across
-browsers, CSP modes, slow networks and impatient users. Nobody holds all of that in their
-head — not the maintainers, and not an agent reading one file.
+**Any change needs a spec.** Unpoly is almost all API surface, and the ~4,000 specs that run in a real browser on
+every change are what let you alter code you don't fully understand and find out immediately whether you broke it.
+Treat a green suite as permission to be bold, and a red one as the cheapest possible bug report.
 
-That is what the suite is for. Around 4,000 specs run in a real browser on every change, so
-you can alter code you do not fully understand and find out immediately whether you broke
-something. Treat a green suite as permission to be bold, and a red one as the cheapest
-possible bug report.
+"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each module `foo.js` has a
+spec `spec/unpoly/foo_spec.js`.
 
-The corollary: **any change needs a spec.** A behaviour with no spec is a behaviour the next
-person will break without noticing.
-
-"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`;
-each module `foo.js` has a spec `spec/unpoly/foo_spec.js`.
+<!-- toc -->
+- [Running tests](#running-tests)
+  - [Reading a failure](#reading-a-failure)
+  - [Debugging a failure](#debugging-a-failure)
+  - [Options and filters](#options-and-filters)
+- [The full test suite is slow](#the-full-test-suite-is-slow)
+- [If you are an agent](#if-you-are-an-agent)
+- [Why a real browser](#why-a-real-browser)
+- [How specs are organized](#how-specs-are-organized)
+  - [Finding the spec for a feature](#finding-the-spec-for-a-feature)
+  - [Where a new spec goes](#where-a-new-spec-goes)
+  - [Extracted spec files](#extracted-spec-files)
+- [Anatomy of a spec](#anatomy-of-a-spec)
+- [Building test HTML](#building-test-html)
+  - [The parameterized HTML function](#the-parameterized-html-function)
+  - [Fixtures are not compiled](#fixtures-are-not-compiled)
+  - [State resets between specs](#state-resets-between-specs)
+  - [Overlays and styles](#overlays-and-styles)
+  - [Older fixture patterns](#older-fixture-patterns)
+- [Simulating user interaction](#simulating-user-interaction)
+- [The network is always mocked](#the-network-is-always-mocked)
+- [Waiting for async code](#waiting-for-async-code)
+  - [How to wait](#how-to-wait)
+  - [Real time and clocks](#real-time-and-clocks)
+  - [Asserting on promises](#asserting-on-promises)
+  - [When async/await isn't enough](#when-asyncawait-isnt-enough)
+- [Matchers](#matchers)
+- [Specs with special conditions](#specs-with-special-conditions)
+- [Trying something by hand](#trying-something-by-hand)
+<!-- /toc -->
 
 
 ## Running tests
@@ -22,20 +44,14 @@ each module `foo.js` has a spec `spec/unpoly/foo_spec.js`.
 Unpoly's specs run in a real browser, driven from your terminal:
 
 ```
-bin/test                             # the whole suite (a few minutes)
 bin/test --spec="up.form"            # only specs whose full name contains this
+bin/test --all                       # the whole suite (~9 minutes)
 ```
 
 `bin/test` needs a running [dev environment](dev-environment.md) and starts one in
 the background if none is running.
 
-**Filter while you work.** After editing `src/unpoly/form.js` (or its spec), run
-`bin/test --spec="up.form"`. The full suite runs in a real browser and takes
-several minutes, so run it unfiltered only as a final gate — and note that
-[CI](commit-conventions.md#continuous-integration) runs the full matrix once you open
-a pull request. Some modules are used by most others, so a change to `up.fragment`,
-`up.network`, `up.script`, `up.layer`, `up.util` or `up.element` can break specs anywhere
-and deserves the full suite.
+### Reading a failure
 
 A run with one failing spec looks like this:
 
@@ -61,6 +77,8 @@ Re-run with --verbose for browser logs and HTML state.
 
 Stack traces are mapped back to the original source, so the frames point at
 `src/unpoly/…` and `spec/unpoly/…` rather than at the bundle.
+
+### Debugging a failure
 
 **How to debug depends on where you are running.** In the terminal runner there is
 nothing to attach a debugger to, so inspecting state means logging it: anything you
@@ -97,12 +115,13 @@ It is rooted at `body`, so it includes elements attached outside `#fixtures`, an
 large tree is clipped with a line saying so. `--verbose` also keeps every stack frame,
 where the default shows only the topmost frame in a spec file and in `src/`.
 
-**Options:**
+### Options and filters
 
 | Option | Effect |
 |--------|--------|
 | `--spec="…"` | Only run specs whose full name contains this string. Matched verbatim, never as a pattern |
 | `--file=path[:line]` | Run what a file declares — or, with `:line`, just the group or spec declared on that line |
+| `--all` | Run every spec. Required for an unfiltered run, so the nine minutes are deliberate |
 | `--verbose` | Add the browser log + HTML state (fixtures, overlays) to each failure |
 | `--browser=firefox` | Run in Firefox instead of Chrome |
 | `--headless=false` | Show the browser window while running |
@@ -122,15 +141,73 @@ and nothing can run twice.
 `--minify` runs the specs against the bundle we actually ship. That matters because the
 minifier renames every `_`-prefixed member, so a spec that reaches one by name passes
 unminified and fails in production — see
-[private members](code-style.md#private-members-and-the-minified-build). It needs a
-minified build first (`bin/build --config=ci`), and says so if one is missing. CI runs this
-variant on every pull request.
+[private members](code-style.md#private-members-and-the-minified-build). The dev watcher
+does not build the minified bundles, so `bin/test` builds them itself when they are missing
+or older than your sources. CI runs this variant on every pull request.
 
 A failed spec exits with a non-zero exit code, so `bin/test` composes with other
 tooling. The spec runner itself — its exit codes, architecture and self-tests — is
 documented in [`tooling/README.md`](../../tooling/README.md).
 
-### If you are an agent
+
+## The full test suite is slow
+
+`bin/test --all` takes about **nine minutes**. That is why it needs the flag: an unfiltered
+run without one is refused, with a reminder of how to narrow it. Treat the whole suite as a
+cost to avoid, not a routine step after every edit.
+
+**Find the specs that cover your change and run only those.** `bin/find-spec` searches
+`describe()` and `it()` titles and prints the full group path of every match:
+
+```
+bin/find-spec "up-disable"
+bin/find-spec "reset button"
+```
+
+Search more than once. A feature is known by several names, and the one in a spec title is
+rarely the one you were editing — so try the attribute, the function, the option, and the
+plain-English term somebody might have written:
+
+```
+bin/find-spec "fieldSelectors"
+bin/find-spec "custom form field"
+bin/find-spec "disabled"
+```
+
+Then run the groups you found. `--spec` and `--file` are repeatable and union, so several
+filters make a single run:
+
+```
+bin/test --spec="up.form" --spec="up.Params"
+```
+
+**Run the full suite only when the blast radius is genuinely wide:** a change to logic that
+most of the framework re-uses (`up.fragment`, `up.network`, `up.script`, `up.layer`,
+`up.util`, `up.element`), a change that touches many modules at once, or a refactoring whose
+reach you cannot enumerate. For an ordinary feature or fix inside one module, the filtered run
+*is* the verification.
+
+**Leave the build variants to CI.** The suite also runs minified, as an ES6 build, under two
+CSP modes, and with `unpoly-migrate.js` loaded — and each of those is another full suite.
+Open a pull request, let [CI](commit-conventions.md#continuous-integration) run the matrix in
+parallel, and read the result.
+
+Do not run variants locally "just to be sure": it multiplies the runtime of an already slow
+suite to look for a failure you have no reason to expect. Run one locally when
+
+- CI reported a failure in that variant, or
+- your change is specifically about what that variant exercises — CSP work earns
+  `--csp=nonce-only` and `--csp=strict-dynamic`, a new `unpoly-migrate.js` polyfill earns
+  `--migrate`.
+
+Even then, filter. `bin/test --migrate --spec="up.form"` answers the question in seconds.
+
+
+## If you are an agent
+
+**Filter before you run.** [The full suite is slow](#the-full-test-suite-is-slow): find the groups that cover your
+change with `bin/find-spec` and run only those. Save the unfiltered run for a wide blast
+radius, and leave the build variants to CI.
 
 **Give the command a generous timeout.** The full suite takes minutes, and nothing caps
 its total runtime. A tool timeout shorter than that kills the run part-way and tells you
@@ -139,15 +216,9 @@ nothing about your change.
 You don't need to guard against a hang yourself: a run that stops making progress detects
 itself and exits non-zero. Set your timeout from how long the suite actually takes.
 
-**Don't pipe the output through `tail` or `head`.** The part you need from a red run is
-the failure block, and truncating it means running the whole suite again to see what
-broke. If the output is too long to read directly, keep all of it and read the end:
-
-```
-bin/test 2>&1 | tee tmp/test.log
-```
-
-`tmp/` is gitignored, so a log left there is harmless.
+**The full output is always in `tmp/test.log`.** Every run writes it, with the colours
+stripped, so truncating what you see in the terminal costs you nothing — read the log
+instead of running the suite again. A red run prints the path to remind you.
 
 
 ## Why a real browser

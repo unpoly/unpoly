@@ -514,9 +514,39 @@ describe('up.Params', function() {
       ])
     })
 
-    it('serializes an <input type="file">')
+    it('serializes an <input type="file">', function() {
+      const [form, input] = htmlFixtureList('<form><input type="file" name="key"></form>')
+      input.files = fileList(new File(['content'], 'file.txt', { type: 'text/plain' }))
 
-    it('serializes an <input type="file" multiple> into multiple params')
+      const entries = up.Params.fromForm(form).toArray()
+      expect(entries).toEqual([{ name: 'key', value: jasmine.any(File) }])
+      expect(entries[0].value.name).toBe('file.txt')
+    })
+
+    it('serializes an <input type="file" multiple> into multiple params', function() {
+      const [form, input] = htmlFixtureList('<form><input type="file" name="key" multiple></form>')
+      input.files = fileList(
+        new File(['one'], 'one.txt', { type: 'text/plain' }),
+        new File(['two'], 'two.txt', { type: 'text/plain' }),
+      )
+
+      const entries = up.Params.fromForm(form).toArray()
+      expect(entries.map((entry) => entry.name)).toEqual(['key', 'key'])
+      expect(entries.map((entry) => entry.value.name)).toEqual(['one.txt', 'two.txt'])
+    })
+
+    it('serializes an <input type="file"> with no selected file as an empty File', function() {
+      // The browser's form-data algorithm always produces an entry for a file input.
+      // Because that entry is binary, such a form is sent as multipart/form-data.
+      const [form] = htmlFixtureList('<form><input type="file" name="key"></form>')
+
+      const params = up.Params.fromForm(form)
+      const entries = params.toArray()
+      expect(entries.length).toBe(1)
+      expect(entries[0].value).toEqual(jasmine.any(File))
+      expect(entries[0].value.size).toBe(0)
+      expect(params.hasBinaryEntries()).toBe(true)
+    })
 
     it('includes an <input type="checkbox"> that was [checked] by default', function() {
       const $form = $fixture('form')
@@ -607,6 +637,47 @@ describe('up.Params', function() {
       expect(params.toArray()).toEqual([])
     })
 
+    it('serializes a <textarea>', function() {
+      const [form, textArea] = htmlFixtureList('<form><textarea name="key">value</textarea></form>')
+
+      expect(up.Params.fromForm(form).toArray()).toEqual([
+        { name: 'key', value: 'value' },
+      ])
+    })
+
+    it('serializes a <textarea> that had its value changed by a script', function() {
+      const [form, textArea] = htmlFixtureList('<form><textarea name="key">value-from-markup</textarea></form>')
+      textArea.value = 'value-from-script'
+
+      expect(up.Params.fromForm(form).toArray()).toEqual([
+        { name: 'key', value: 'value-from-script' },
+      ])
+    })
+
+    it("serializes a field outside the form with a [form] attribute matching the form's ID", function() {
+      const [form] = htmlFixtureList('<form id="form-id"><input name="inside" value="inside-value"></form>')
+      htmlFixtureList('<input name="outside" value="outside-value" form="form-id">')
+
+      expect(up.Params.fromForm(form).toArray()).toEqual([
+        { name: 'inside', value: 'inside-value' },
+        { name: 'outside', value: 'outside-value' },
+      ])
+    })
+
+    it("serializes a configured custom element outside the form with a [form] attribute", function() {
+      // The browser ignores [form] on an element that is not form-associated, so only
+      // Unpoly's own field lookup finds this control.
+      up.form.config.fieldSelectors.push('test-form-field')
+
+      const [form] = htmlFixtureList('<form id="form-id"><input name="inside" value="inside-value"></form>')
+      htmlFixtureList('<test-form-field name="outside" value="outside-value" form="form-id"></test-form-field>')
+
+      expect(up.Params.fromForm(form).toArray()).toEqual([
+        { name: 'inside', value: 'inside-value' },
+        { name: 'outside', value: 'outside-value' },
+      ])
+    })
+
     it('includes an <input readonly>', function() {
       const $form = $fixture('form')
       const $input = $('<input type="text" name="key" value="value" readonly>').appendTo($form)
@@ -616,6 +687,552 @@ describe('up.Params', function() {
         { name: 'key', value: 'value' }
       ])
     })
-  })
-})
 
+    describe('cross-layer [form] associations', function() {
+
+      // A page rendered into an overlay usually repeats the ids of the page below it. The
+      // browser resolves a [form] attribute by document order and ignores layers, so it can
+      // hand one layer's field to another layer's form.
+      const html = `
+        <div id="container">
+          <form id="my-form">
+            <input name="own-field" value="own-value">
+          </form>
+          <input name="external-field" value="external-value" form="my-form">
+        </div>
+      `
+
+      it('fails when a field from another layer is associated with the given form', async function() {
+        makeLayers([{ fragment: html }, { fragment: html }])
+        await wait()
+
+        const rootForm = up.fragment.get('#my-form', { layer: 'root' })
+        const serialize = () => up.Params.fromForm(rootForm)
+
+        expect(serialize).toThrowError(/associated with a form in another layer/i)
+      })
+
+      it('does not fail when both layers repeat the id but no field uses a [form] attribute', async function() {
+        const withoutExternalField = `
+          <div id="container">
+            <form id="my-form">
+              <input name="own-field" value="own-value">
+            </form>
+          </div>
+        `
+        makeLayers([{ fragment: withoutExternalField }, { fragment: withoutExternalField }])
+        await wait()
+
+        const rootForm = up.fragment.get('#my-form', { layer: 'root' })
+
+        expect(up.Params.fromForm(rootForm).toArray()).toEqual([
+          { name: 'own-field', value: 'own-value' },
+        ])
+      })
+
+      it('does not fail when a duplicate form id and its [form] reference are in the same layer', function() {
+        // Two forms sharing an id is invalid HTML, but the browser and Unpoly resolve it the
+        // same way within one layer, so there is nothing to protect against.
+        const [form] = htmlFixtureList(`
+          <form id="my-form">
+            <input name="own-field" value="own-value">
+          </form>
+        `)
+        htmlFixtureList('<form id="my-form"></form>')
+        htmlFixtureList('<input name="external-field" value="external-value" form="my-form">')
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'own-field', value: 'own-value' },
+          { name: 'external-field', value: 'external-value' },
+        ])
+      })
+    })
+
+    describe('submit buttons', function() {
+
+      it('includes the [name] and [value] of the first submit button', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <button type="submit" name="action" value="save">Save</button>
+            <button type="submit" name="action" value="preview">Preview</button>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+          { name: 'action', value: 'save' },
+        ])
+      })
+
+      it('includes the [name] and [value] of a given { submitButton }', function() {
+        const [form, , , preview] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <button type="submit" name="action" value="save">Save</button>
+            <button type="submit" name="action" value="preview">Preview</button>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form, { submitButton: preview }).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+          { name: 'action', value: 'preview' },
+        ])
+      })
+
+      it('includes no submit button with { submitButton: false }', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <button type="submit" name="action" value="save">Save</button>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form, { submitButton: false }).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
+      it('includes the click coordinates of an <input type="image"> submit button', function() {
+        const [form, , imageButton] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <input type="image" name="place" src="/image.png">
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form, { submitButton: imageButton }).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+          { name: 'place.x', value: '0' },
+          { name: 'place.y', value: '0' },
+        ])
+      })
+
+      it('ignores a <button type="reset"> with a [name]', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <button type="reset" name="action" value="clear">Clear</button>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
+      it('ignores a submit button that the browser associates with another form', function() {
+        // up.form.submitButtons() finds this button by subtree, but its [form] attribute makes
+        // the browser own it elsewhere. Passing it as a submitter would throw a NotFoundError.
+        const [form] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+            <button type="submit" name="action" value="save" form="other-form">Save</button>
+          </form>
+        `)
+        htmlFixtureList('<form id="other-form"></form>')
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+    })
+
+    it('ignores a { includeDisabled } option, which the browser algorithm cannot honor', function() {
+      const [form] = htmlFixtureList(`
+        <form>
+          <input name="email" value="foo@example.com" disabled>
+          <input name="city" value="Berlin">
+        </form>
+      `)
+
+      expect(up.Params.fromForm(form, { includeDisabled: true }).toArray()).toEqual([
+        { name: 'city', value: 'Berlin' },
+      ])
+    })
+
+    describe('custom form fields', function() {
+
+      it('serializes a form-associated custom element', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-form-associated-element name="email" value="foo@example.com"></test-form-associated-element>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
+      it('prefers a { name } property over the [name] attribute', function() {
+        up.form.config.fieldSelectors.push('test-form-field')
+
+        const [form, field] = htmlFixtureList(`
+          <form>
+            <test-form-field name="from-attribute" value="foo@example.com"></test-form-field>
+          </form>
+        `)
+        // A component that does not reflect its property, then has it changed by a script.
+        Object.defineProperty(field, 'name', { configurable: true, get() { return 'from-property' } })
+
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'from-property', value: 'foo@example.com' },
+        ])
+      })
+
+      it('prefers a { disabled } property over the [disabled] attribute', function() {
+        up.form.config.fieldSelectors.push('test-form-field')
+
+        const [form, field] = htmlFixtureList(`
+          <form>
+            <test-form-field name="email" value="foo@example.com" disabled></test-form-field>
+          </form>
+        `)
+        // The property says enabled while the markup still says otherwise. The property is the
+        // author's intent, so the field takes part.
+        Object.defineProperty(field, 'disabled', { configurable: true, get() { return false } })
+
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
+      it('serializes a form-associated custom element that has no { name } property', function() {
+        // The browser reads the [name] attribute, so a custom element has no reason to expose
+        // a property for it. Unpoly's own field walking must fall back to the attribute.
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-attribute-named-field name="email" value="foo@example.com"></test-attribute-named-field>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
+      it('serializes a custom element that is configured in up.form.config.fieldSelectors', function() {
+        up.form.config.fieldSelectors.push('test-form-field')
+
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-form-field name="email" value="foo@example.com"></test-form-field>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
+      it('does not serialize a form-associated custom element inside a <fieldset disabled>', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <fieldset disabled>
+              <test-form-associated-element name="email" value="foo@example.com"></test-form-associated-element>
+            </fieldset>
+            <input name="city" value="Berlin">
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'city', value: 'Berlin' },
+        ])
+      })
+
+      it('does not serialize a configured custom element without a readable value', function() {
+        up.form.config.fieldSelectors.push('test-valueless-field')
+
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-valueless-field name="email"></test-valueless-field>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([])
+      })
+
+      it('does not serialize a custom element that is neither form-associated nor configured', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-form-field name="email" value="foo@example.com"></test-form-field>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([])
+      })
+
+      it('serializes the native field that a custom control keeps hidden and synced', function() {
+        // The pattern that needs nothing from Unpoly: a compiler renders the custom UI,
+        // but the native field stays in the form and carries the value.
+        up.compiler('.pills', function(pills) {
+          let select = pills.querySelector('select')
+          for (let pill of pills.querySelectorAll('button')) {
+            pill.addEventListener('click', () => select.value = pill.textContent)
+          }
+        })
+
+        const [form] = htmlFixtureList(`
+          <form>
+            <div class="pills">
+              <select name="size" hidden>
+                <option value="S">S</option>
+                <option value="M">M</option>
+              </select>
+              <button type="button">M</button>
+            </div>
+          </form>
+        `)
+        up.hello(form)
+
+        Trigger.clickSequence(form.querySelector('button'))
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'size', value: 'M' },
+        ])
+      })
+
+      it('includes values added by a formdata event listener', function() {
+        const [form] = htmlFixtureList('<form><input name="email" value="foo@example.com"></form>')
+        form.addEventListener('formdata', (event) => event.formData.append('csrf', 'token'))
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+          { name: 'csrf', value: 'token' },
+        ])
+      })
+
+    })
+
+  })
+
+  describe('.fromContainer', function() {
+
+    it('serializes the fields within the given container', function() {
+      const [, container] = htmlFixtureList(`
+        <form>
+          <div id="container">
+            <input name="email" value="foo@example.com">
+            <input name="city" value="Berlin">
+          </div>
+        </form>
+      `)
+
+      expect(up.Params.fromContainer(container).toArray()).toEqual([
+        { name: 'email', value: 'foo@example.com' },
+        { name: 'city', value: 'Berlin' },
+      ])
+    })
+
+    it('ignores reset buttons, which a submission would not send either', function() {
+      const [form] = htmlFixtureList(`
+        <form>
+          <input name="email" value="foo@example.com">
+          <button type="reset" name="reset-button" value="clear">Clear</button>
+          <input type="reset" name="reset-input" value="clear">
+        </form>
+      `)
+
+      expect(up.Params.fromContainer(form).toArray()).toEqual([
+        { name: 'email', value: 'foo@example.com' },
+      ])
+    })
+
+    it('ignores fields outside the given container', function() {
+      const [, container] = htmlFixtureList(`
+        <form>
+          <div id="container">
+            <input name="email" value="foo@example.com">
+          </div>
+          <input name="city" value="Berlin">
+        </form>
+      `)
+
+      expect(up.Params.fromContainer(container).toArray()).toEqual([
+        { name: 'email', value: 'foo@example.com' },
+      ])
+    })
+
+    it('serializes the given element if it is itself a field', function() {
+      const [, field] = htmlFixtureList('<form><input name="email" value="foo@example.com"></form>')
+
+      expect(up.Params.fromContainer(field).toArray()).toEqual([
+        { name: 'email', value: 'foo@example.com' },
+      ])
+    })
+
+    it('ignores a [disabled] field', function() {
+      const [form] = htmlFixtureList(`
+        <form>
+          <input name="email" value="foo@example.com" disabled>
+          <input name="city" value="Berlin">
+        </form>
+      `)
+
+      expect(up.Params.fromContainer(form).toArray()).toEqual([
+        { name: 'city', value: 'Berlin' },
+      ])
+    })
+
+    it('includes a [disabled] field with { includeDisabled: true }', function() {
+      const [form] = htmlFixtureList(`
+        <form>
+          <input name="email" value="foo@example.com" disabled>
+          <input name="city" value="Berlin">
+        </form>
+      `)
+
+      expect(up.Params.fromContainer(form, { includeDisabled: true }).toArray()).toEqual([
+        { name: 'email', value: 'foo@example.com' },
+        { name: 'city', value: 'Berlin' },
+      ])
+    })
+
+    describe('custom form fields', function() {
+
+      it('serializes a custom element that is configured in up.form.config.fieldSelectors', function() {
+        up.form.config.fieldSelectors.push('test-form-field')
+
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-form-field name="email" value="foo@example.com"></test-form-field>
+          </form>
+        `)
+
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
+      it('ignores a form-associated custom element that is [disabled] but has no property', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-attribute-named-field name="email" value="foo@example.com" disabled></test-attribute-named-field>
+            <input name="city" value="Berlin">
+          </form>
+        `)
+
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'city', value: 'Berlin' },
+        ])
+      })
+
+      it('includes it with { includeDisabled: true }', function() {
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-attribute-named-field name="email" value="foo@example.com" disabled></test-attribute-named-field>
+          </form>
+        `)
+
+        expect(up.Params.fromContainer(form, { includeDisabled: true }).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
+      it('ignores a configured custom element that is [disabled]', function() {
+        up.form.config.fieldSelectors.push('test-form-field')
+
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-form-field name="email" value="foo@example.com" disabled></test-form-field>
+          </form>
+        `)
+
+        expect(up.Params.fromContainer(form).toArray()).toEqual([])
+      })
+
+      it('includes a [disabled] configured custom element with { includeDisabled: true }', function() {
+        up.form.config.fieldSelectors.push('test-form-field')
+
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-form-field name="email" value="foo@example.com" disabled></test-form-field>
+          </form>
+        `)
+
+        expect(up.Params.fromContainer(form, { includeDisabled: true }).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
+      it('includes a field inside a <fieldset disabled>, unlike a submission', function() {
+        // up.Params.fromForm() honors the browser's algorithm, which omits such a field. The
+        // watch path reads the { disabled } property, which an ancestor fieldset does not set.
+        const [form] = htmlFixtureList(`
+          <form>
+            <fieldset disabled>
+              <input name="email" value="foo@example.com">
+            </fieldset>
+          </form>
+        `)
+
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+        expect(up.Params.fromForm(form).toArray()).toEqual([])
+      })
+
+      it('does not run formdata listeners, which only affect submissions', function() {
+        const [form] = htmlFixtureList('<form><input name="email" value="foo@example.com"></form>')
+        const listener = jasmine.createSpy('formdata listener')
+        form.addEventListener('formdata', listener)
+
+        expect(up.Params.fromContainer(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+        expect(listener).not.toHaveBeenCalled()
+      })
+
+    })
+  })
+
+  describe('.fromFields', function() {
+
+    it('serializes the given list of fields', function() {
+      const [, email, city] = htmlFixtureList(`
+        <form>
+          <input name="email" value="foo@example.com">
+          <input name="city" value="Berlin">
+        </form>
+      `)
+
+      expect(up.Params.fromFields([email, city]).toArray()).toEqual([
+        { name: 'email', value: 'foo@example.com' },
+        { name: 'city', value: 'Berlin' },
+      ])
+    })
+
+    it('serializes a single field that is not wrapped in a list', function() {
+      const [, email] = htmlFixtureList('<form><input name="email" value="foo@example.com"></form>')
+
+      expect(up.Params.fromFields(email).toArray()).toEqual([
+        { name: 'email', value: 'foo@example.com' },
+      ])
+    })
+
+    it('ignores a field without a [name]', function() {
+      const [, unnamed] = htmlFixtureList('<form><input value="foo@example.com"></form>')
+
+      expect(up.Params.fromFields(unnamed).toArray()).toEqual([])
+    })
+
+    it('ignores a [disabled] field', function() {
+      const [, disabled] = htmlFixtureList('<form><input name="email" value="foo@example.com" disabled></form>')
+
+      expect(up.Params.fromFields(disabled).toArray()).toEqual([])
+    })
+
+    it('includes a [disabled] field with { includeDisabled: true }', function() {
+      const [, disabled] = htmlFixtureList('<form><input name="email" value="foo@example.com" disabled></form>')
+
+      expect(up.Params.fromFields(disabled, { includeDisabled: true }).toArray()).toEqual([
+        { name: 'email', value: 'foo@example.com' },
+      ])
+    })
+  })
+
+})

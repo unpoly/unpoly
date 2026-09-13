@@ -139,6 +139,57 @@ describe('up.event', function() {
           expect(listener.calls.count()).toBe(0)
         })
 
+        it('does not call the event listener for a custom element with a { disabled } property', async function() {
+          const listener = jasmine.createSpy()
+          up.on('click', 'test-form-field', listener)
+
+          const [field] = htmlFixtureList('<test-form-field name="email"></test-form-field>')
+          field.disabled = true
+
+          Trigger.click(field)
+          await wait()
+
+          expect(listener.calls.count()).toBe(0)
+        })
+
+        it('does not call the event listener for a custom element with a [disabled] attribute', async function() {
+          // A form-associated custom element gets no { disabled } property from the platform,
+          // so Unpoly disables it through the attribute.
+          const listener = jasmine.createSpy()
+          up.on('click', 'test-attribute-named-field', listener)
+
+          const [field] = htmlFixtureList('<test-attribute-named-field name="email" disabled></test-attribute-named-field>')
+
+          Trigger.click(field)
+          await wait()
+
+          expect(listener.calls.count()).toBe(0)
+        })
+
+        it('does not call the event listener for an element that carries [disabled] although the platform cannot disable it', async function() {
+          const listener = jasmine.createSpy()
+          up.on('click', '.parent', listener)
+
+          const [link] = htmlFixtureList('<a class="parent" disabled>label</a>')
+
+          Trigger.click(link)
+          await wait()
+
+          expect(listener.calls.count()).toBe(0)
+        })
+
+        it('calls the event listener for an element that cannot be disabled', async function() {
+          const listener = jasmine.createSpy()
+          up.on('click', '.parent', listener)
+
+          const [, child] = htmlFixtureList('<div class="parent"><span class="child"></span></div>')
+
+          Trigger.click(child)
+          await wait()
+
+          expect(listener.calls.count()).toBe(1)
+        })
+
         it('allows to bind the listener to a given element while also passing a selector', async function() {
           const element1 = fixture('.element.one')
           const element2 = fixture('.element.two')

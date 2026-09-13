@@ -93,8 +93,11 @@ up.EventListener = class EventListener extends up.Record {
         args.push(data)
       }
 
-      // Do not allow click events from disabled elements to propagate
-      if (this.eventType === 'click' && element.disabled) {
+      // Do not allow click events from disabled elements to propagate.
+      // The platform only suppresses *trusted* clicks, so a click dispatched by a script is
+      // delivered even to a disabled <button>. We use the field accessor outside fields, since
+      // "does this element consider itself disabled" is the same question.
+      if (this.eventType === 'click' && up.form.readFieldDisabled(element)) {
         return
       }
 

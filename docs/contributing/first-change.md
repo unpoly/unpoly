@@ -3,6 +3,16 @@
 This guide walks through one complete change, from a fresh checkout to a pull request.
 
 Code blocks below are diffs, where `...` marks code left out.
+<!-- toc -->
+- [Our example feature](#our-example-feature)
+- [Before you start](#before-you-start)
+- [Where the code goes](#where-the-code-goes)
+- [1. The JavaScript function](#1-the-javascript-function)
+- [2. The HTML attribute](#2-the-html-attribute)
+- [3. Documentation](#3-documentation)
+- [Opening a pull request](#opening-a-pull-request)
+<!-- /toc -->
+
 
 ## Our example feature
 
@@ -48,7 +58,7 @@ Forms are the topic of `up.form`, so we work in two files:
 Every module `foo.js` has a spec `foo_spec.js`, and a feature with a lot of specs may have
 one of its own. `bin/find-spec "[up-submit]"` tells you which file to open; see
 [testing](testing.md#finding-the-spec-for-a-feature) and
-[code organization](code-organization.md#directory-structure--where-to-find-files).
+[code organization](code-organization.md#directory-structure).
 
 
 ## 1. The JavaScript function
@@ -315,9 +325,7 @@ git commit -m "[docs] Document up.form.trim() and [up-trim]"
 
 ## Opening a pull request
 
-Push the branch and [open a single pull request](https://github.com/unpoly/unpoly/compare) for your three commits.\
-If you are an agent, ask your human before committing, pushing or opening a pull
-request.
+Push the branch and [open a single pull request](https://github.com/unpoly/unpoly/compare) for your three commits.
 
 Opening a PR will start [CI](commit-conventions.md#continuous-integration), which runs the whole test suite
 in six configurations.\

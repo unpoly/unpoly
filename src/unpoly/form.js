@@ -10,6 +10,7 @@ The `up.form` module helps you work with non-trivial forms.
 @see reactive-server-forms
 @see disabling-forms
 @see watch-options
+@see custom-form-fields
 
 @see [up-submit]
 @see [up-validate]
@@ -82,13 +83,21 @@ up.form = (function() {
     @param {string} [config.fieldSelectors]
       An array of CSS selectors that represent form fields, such as `input` or `select`.
 
-      When you add custom JavaScript controls to this list, matching elements should respond to the properties `{ name, value, disabled }`.
+      [Form-associated custom elements](/custom-form-fields#form-associated) are matched by
+      default and need not be added.
+
+      Add a selector for a [custom control](/custom-form-fields#configured) that is not
+      form-associated. Matching elements must expose their state as described in
+      [what Unpoly reads from a field](/custom-form-fields#contract).
 
     @param {string} [config.submitButtonSelectors]
       An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.
 
-    @param {string} [config.genericButtonSelectors]
-      An array of CSS selectors that represent push buttons with no default behavior, such as `input[type=button]` or `button[type=button]`.
+    @param {string} [config.anyButtonSelectors]
+      An array of CSS selectors that represent buttons of any kind, such as `button` or `input[type=button]`.
+
+      Unpoly uses this to disable a form's buttons while the form is submitting.
+      To find the button that *submits* a form, see `config.submitButtonSelectors`.
 
       @experimental
 
@@ -146,11 +155,21 @@ up.form = (function() {
    */
   const config = new up.Config(() => ({
     groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
-    fieldSelectors: ['select', 'input:not([type=submit], [type=image], [type=button])', 'button[type]:not([type=submit], [type=button])', 'textarea'],
+    fieldSelectors: [
+      'select',
+      'input:not([type=submit], [type=image], [type=button], [type=reset])',
+      'textarea',
+      // Form-associated custom elements. No selector can name them directly, but they are the only
+      // elements outside this list that :enabled and :disabled match — both states, so that an
+      // element does not stop being a field while it is disabled. CSS defines :enabled by
+      // capability ("can be activated or accept focus"), so `a, area` are excluded in case an
+      // engine reads it that way. Chrome, Firefox and Safari do not.
+      ':is(:enabled, :disabled):not(input, select, textarea, button, fieldset, optgroup, option, a, area)',
+    ],
     submitSelectors: ['form:is([up-submit], [up-target], [up-layer], [up-transition])'],
     noSubmitSelectors: ['[up-submit=false]', '[target]', e.crossOriginSelector('action')],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
-    genericButtonSelectors: ['input[type=button]', 'button[type=button]'],
+    anyButtonSelectors: ['button', 'input:is([type=submit], [type=image], [type=button], [type=reset])'],
     // Although we only need to bind to `input`, we always also bind to `change`
     // in case another script manually triggers it.
     validateBatch: true,
@@ -214,11 +233,72 @@ up.form = (function() {
     return findFormElements(root, fieldSelector)
   }
 
+  // ALWAYS read and write a field's state through the accessors below. Direct property or
+  // attribute access is wrong for at least one kind of field — see /custom-form-fields#contract.
+
+  // Falls back on absence, not falseness: a native field reports '' and means it.
+  function readFieldName(field) {
+    return field.name ?? field.getAttribute('name')
+  }
+
+  // The property is the only source. A form-associated element reports its value to the browser
+  // through setFormValue(), which a script cannot read back.
+  function readFieldValue(field) {
+    return field.value
+  }
+
+  // The field's own state only: an ancestor <fieldset disabled> also disables it for the browser,
+  // which we deliberately don't track. Asks the same question as writeFieldDisabled(), so the two
+  // cannot disagree about which spelling is authoritative.
+  function readFieldDisabled(field) {
+    return 'disabled' in field ? field.disabled : field.hasAttribute('disabled')
+  }
+
+  // Write only the spelling the control implements. Assigning a { disabled } property that a
+  // form-associated element never declared would *create* it, shadowing the attribute in
+  // readFieldDisabled() from then on.
+  //
+  // The undo closure reuses this spelling on purpose, so do not simplify it to
+  // `() => writeFieldDisabled(field, false)`: a custom element that upgrades in between would be
+  // disabled through its attribute and re-enabled through a property that only just appeared,
+  // leaving our attribute on the element for good.
+  function writeFieldDisabled(field, disabled) {
+    if ('disabled' in field) {
+      field.disabled = disabled
+      return () => { field.disabled = !disabled }
+    } else {
+      field.toggleAttribute('disabled', disabled)
+      return () => field.toggleAttribute('disabled', !disabled)
+    }
+  }
+
+  // A browser only submits the button that was pressed. With no submitter we assume the form's
+  // first submit button, which is what the browser itself does for an implicit submission — press
+  // Enter in a text field and event.submitter *is* the first submit button.
+  function defaultSubmitButton(form) {
+    return findSubmitButtons(form)[0]
+  }
+
+  // The browser resolves a field's [form] attribute by document order across the whole page,
+  // while Unpoly resolves it within the field's own layer (see getAssociatedForm()). When the
+  // two disagree, serializing the form would send a field from a layer that the user believes
+  // to be isolated.
+  function assertFieldsInSameLayer(form) {
+    let formLayer = up.layer.get(form)
+
+    for (let field of form.elements) {
+      // Only a [form] attribute can pull in a field from another layer. Anything else in
+      // form.elements is a descendant of the form, and so in the form's own layer.
+      if (field.hasAttribute('form') && up.layer.get(field) !== formLayer) {
+        up.fail('Cannot serialize %o: %o is associated with a form in another layer', form, field)
+      }
+    }
+  }
+
   function findFieldsAndButtons(container) {
     return [
       ...findFields(container),
-      ...findSubmitButtons(container),
-      ...findGenericButtons(container),
+      ...findAnyButtons(container),
     ]
   }
 
@@ -241,10 +321,10 @@ up.form = (function() {
     return findFormElements(root, submitButtonSelector)
   }
 
-  const genericButtonSelector = config.selectorFn('genericButtonSelectors')
+  const anyButtonSelector = config.selectorFn('anyButtonSelectors')
 
-  function findGenericButtons(root) {
-    return findFormElements(root, genericButtonSelector)
+  function findAnyButtons(root) {
+    return findFormElements(root, anyButtonSelector)
   }
 
   /*-
@@ -523,16 +603,14 @@ up.form = (function() {
   function disableControlTemp(control) {
     // Ignore controls that were already disabled before us.
     // This way we don't accidentally re-enable a control that we didn't change.
-    if (control.disabled) return
+    if (readFieldDisabled(control)) return
 
+    // Look the fallback up before disabling, while the control is still focusable.
     let focusFallback
-    if (document.activeElement === control) {
-      focusFallback = findGroup(control)
-      control.disabled = true
-      up.focus(focusFallback, { force: true, preventScroll: true })
-    } else {
-      control.disabled = true
-    }
+    if (document.activeElement === control) focusFallback = findGroup(control)
+
+    let undoDisable = writeFieldDisabled(control, true)
+    if (focusFallback) up.focus(focusFallback, { force: true, preventScroll: true })
 
     // (1) This function is only returned if we didn't early-return above
     //     for a control that is already disabled.
@@ -540,7 +618,7 @@ up.form = (function() {
     //     selection or scroll position here. The up.form.disableTemp() function is *only*
     //     used via up.Preview#disable(), and previews already use a FocusCapsule
     //     to preserve and restore focus-related state.
-    return () => { control.disabled = false }
+    return undoDisable
   }
 
   function getDisableContainers(disable, origin) {
@@ -572,7 +650,7 @@ up.form = (function() {
     // This function is much simpler than disableContainerTemp(), as we only require
     // it for [up-enable-for] / [up-disable-for].
     for (let control of findFieldsAndButtons(container)) {
-      control.disabled = disabled
+      writeFieldDisabled(control, disabled)
     }
   }
 
@@ -587,9 +665,14 @@ up.form = (function() {
     parser.string('contentType', { attr: 'enctype' })
     parser.json('headers')
 
+    // A `submit` event may already have handed us { submitButton: event.submitter }. Resolve this
+    // before parsing params, because the button's [name] and [value] are contributed by the
+    // browser's form-data algorithm inside up.Params.fromForm().
+    const submitButton = (options.submitButton ??= defaultSubmitButton(form))
+
     // Parse params from form fields.
     const paramParts = [
-      up.Params.fromForm(form),
+      up.Params.fromForm(form, options),
       e.jsonAttr(form, 'up-params'),
     ]
 
@@ -597,16 +680,8 @@ up.form = (function() {
       e.jsonAttr(form, 'up-headers'),
     ]
 
-    // (1) When processing a `submit` event, we may have received a { submitButton: event.submitter } option.
-    // (2) When the user submits the form from a focused input via Enter, the browser will also submit
-    //     with the first submit button set as submitter.
-    // (3) For pragmatic calls of up.submit(), we assume the first submit button.
-    const submitButton = (options.submitButton ??= findSubmitButtons(form)[0])
     if (submitButton) {
-      // Submit buttons with a [name] attribute will add to the params.
-      // Note that addField() will only add an entry if the given button has a [name] attribute.
       paramParts.push(
-        up.Params.fromFields(submitButton),
         e.jsonAttr(submitButton, 'up-params')
       )
 
@@ -2320,6 +2395,12 @@ up.form = (function() {
     trackFields,
     isField,
     submitButtons: findSubmitButtons,
+    defaultSubmitButton,
+    assertFieldsInSameLayer,
+    readFieldName,
+    readFieldValue,
+    readFieldDisabled,
+    writeFieldDisabled,
     focusedField,
     // disableWhile,
     disableTemp: disableContainerTemp,

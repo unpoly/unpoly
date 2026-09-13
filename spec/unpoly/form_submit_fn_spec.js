@@ -120,6 +120,96 @@ extendDescribe('up.form', function() {
         })
       })
 
+      describe('cross-layer [form] associations', function() {
+
+        it('aborts the submission when a field from another layer is associated with the form', async function() {
+          const html = `
+            <div id="container">
+              <form id="my-form" action="/action" method="post">
+                <input name="own-field" value="own-value">
+              </form>
+              <input name="external-field" value="external-value" form="my-form">
+            </div>
+          `
+          makeLayers([{ fragment: html }, { fragment: html }])
+          await wait()
+
+          const rootForm = up.fragment.get('#my-form', { layer: 'root' })
+
+          // up.form.submitOptions() builds the params before up.render() is called, so the
+          // error escapes synchronously instead of rejecting a promise.
+          const submit = () => up.submit(rootForm)
+
+          expect(submit).toThrowError(/associated with a form in another layer/i)
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+        })
+      })
+
+      describe('custom form fields', function() {
+
+        it('submits a form-associated custom element without configuration', async function() {
+          const [form] = htmlFixtureList(`
+            <form action="/action" method="post">
+              <test-form-associated-element name="email" value="foo@example.com"></test-form-associated-element>
+            </form>
+          `)
+
+          up.submit(form)
+          await wait()
+
+          expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com' })
+        })
+
+        it('submits a custom element that is configured in up.form.config.fieldSelectors', async function() {
+          up.form.config.fieldSelectors.push('test-form-field')
+
+          const [form] = htmlFixtureList(`
+            <form action="/action" method="post">
+              <test-form-field name="email" value="foo@example.com"></test-form-field>
+            </form>
+          `)
+
+          up.submit(form)
+          await wait()
+
+          expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com' })
+        })
+
+        it('submits the native field that a custom control keeps hidden and synced', async function() {
+          const [form, select] = htmlFixtureList(`
+            <form action="/action" method="post">
+              <select name="size" hidden>
+                <option value="S">S</option>
+                <option value="M">M</option>
+              </select>
+            </form>
+          `)
+
+          // A custom control writes the value, as the compiler in the .fromForm specs does.
+          select.value = 'M'
+
+          up.submit(form)
+          await wait()
+
+          expect(jasmine.lastRequest().data()).toMatchParams({ size: 'M' })
+        })
+
+        it('submits values added by a formdata event listener', async function() {
+          const [form] = htmlFixtureList(`
+            <form action="/action" method="post">
+              <input name="email" value="foo@example.com">
+            </form>
+          `)
+          form.addEventListener('formdata', (event) => event.formData.append('csrf', 'token'))
+
+          up.submit(form)
+          await wait()
+
+          expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com', csrf: 'token' })
+        })
+
+      })
+
       describe('when the server responds with an error', function() {
 
         it('replaces the form', async function() {
@@ -221,6 +311,9 @@ extendDescribe('up.form', function() {
             const input = e.affix(form, 'input[name=email]')
             const submitButton = e.affix(form, 'input[type=submit]')
             const genericButton = e.affix(form, 'button[type=button]')
+            // A reset button is not a field, but it must not stay clickable either.
+            const resetButton = e.affix(form, 'button[type=reset]')
+            const resetInput = e.affix(form, 'input[type=reset]')
 
             up.submit(form, { disable: true })
             await wait()
@@ -228,6 +321,8 @@ extendDescribe('up.form', function() {
             expect(input).toBeDisabled()
             expect(submitButton).toBeDisabled()
             expect(genericButton).toBeDisabled()
+            expect(resetButton).toBeDisabled()
+            expect(resetInput).toBeDisabled()
           })
 
           it('does not disable fields in another form', async function() {
@@ -546,11 +641,42 @@ extendDescribe('up.form', function() {
           expect(jasmine.lastRequest().requestHeaders['Content-Type']).toEqual('application/x-www-form-urlencoded')
         })
 
-        it('defaults to multipart/form-data in a form with file inputs', async function() {
+        it('defaults to multipart/form-data in a form with a file input', async function() {
+          const [form, input] = htmlFixtureList(`
+            <form action="/path" method="post">
+              <input type="file" name="file-input">
+            </form>
+          `)
+          input.files = fileList(new File(['data'], 'data.txt', { type: 'text/plain' }))
+
+          up.submit(form)
+
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['Content-Type']).toBeMissing()
+          expect(jasmine.lastRequest().params).toEqual(jasmine.any(FormData))
+        })
+
+        it('defaults to multipart/form-data in a form with an empty file input', async function() {
+          // The browser's form-data algorithm produces an entry even for a file input with
+          // no selected file. Because that entry is binary, the form is sent as multipart.
+          const [form] = htmlFixtureList(`
+            <form action="/path" method="post">
+              <input type="file" name="file-input">
+            </form>
+          `)
+
+          up.submit(form)
+
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['Content-Type']).toBeMissing()
+          expect(jasmine.lastRequest().params).toEqual(jasmine.any(FormData))
+        })
+
+        it('defaults to multipart/form-data when a binary param is passed explicitly', async function() {
           const form = fixture('form[action="/path"][method=post]')
 
-          // Since this test cannot programmatically append an <input type="file"> with
-          // a value, we pass a binary param with the { params } option.
           const params = { 'file-input': new Blob(['data']) }
           up.submit(form, { params })
 

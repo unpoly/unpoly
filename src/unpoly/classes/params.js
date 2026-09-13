@@ -34,8 +34,7 @@ up.Params = class Params {
   @return {up.Params}
   @stable
   */
-  constructor(raw, options = {}) {
-    this._options = options
+  constructor(raw) {
     this.clear()
     this.addAll(raw)
   }
@@ -51,7 +50,7 @@ up.Params = class Params {
   }
 
   [u.copy.key]() {
-    return new up.Params(this, this._options)
+    return new up.Params(this)
   }
 
   /*-
@@ -211,7 +210,7 @@ up.Params = class Params {
 
   withoutBinaryEntries() {
     let simpleEntries = u.reject(this.entries, this._isBinaryEntry)
-    return new this.constructor(simpleEntries, this._options)
+    return new this.constructor(simpleEntries)
   }
 
   /*-
@@ -463,24 +462,33 @@ up.Params = class Params {
   The returned params may be passed as `{ params }` option to
   `up.request()` or `up.replace()`.
 
-  The constructed `up.Params` will include exactly those form values that would be
-  included in a regular form submission. In particular:
+  The params are built with the browser's own
+  [form-data algorithm](https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData),
+  so they contain exactly what a regular form submission would send:
 
-  - All `<input>` types are suppported
+  - All `<input>` types are supported.
   - Field values are usually strings, but an `<input type="file">` will produce
     [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) values.
-  - An `<input type="radio">` or `<input type="checkbox">` will only be added if it is `[checked]`.
-  - A `<select>` will only be added if at least one value is `[selected]`.
-  - If passed a `<select multiple>` or `<input type="file" multiple>`, all selected values are added.
-  - Fields that are `[disabled]` are ignored.
+  - An `<input type="radio">` or `<input type="checkbox">` is only added if it is checked.
+  - A `<select>` adds every selected option.
+  - Fields that are disabled, or inside a `<fieldset disabled>`, are ignored.
   - Fields without a `[name]` attribute are ignored.
+  - Fields [outside the form](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#form)
+    that reference it with a `[form]` attribute are included.
+  - [Form-associated custom elements](/custom-form-fields#form-associated) are included.
+  - Values appended by a [`formdata`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/formdata_event)
+    event listener are included.
+  - The [submit button](#submit-button) contributes its `[name]` and `[value]`.
+
+  On top of that, [custom controls](/custom-form-fields#configured) configured in
+  `up.form.config.fieldSelectors` are included. The browser cannot know about those.
 
   ### Example
 
   Given this HTML form:
 
   ```html
-  <form>
+  <form id="signup">
     <input type="text" name="email" value="foo@bar.com">
     <input type="password" name="pass" value="secret">
   </form>
@@ -489,25 +497,57 @@ up.Params = class Params {
   This would serialize the form into an array representation:
 
   ```js
-  let params = up.Params.fromForm('input[name=email]')
+  let params = up.Params.fromForm(document.querySelector('#signup'))
   let email = params.get('email') // email is now 'foo@bar.com'
   let pass = params.get('pass') // pass is now 'secret'
   ```
 
+  ### Submit buttons {#submit-button}
+
+  A submit button only contributes params when it is the one that submitted the form.
+  Pass the button as a `{ submitButton }` option, or `false` to submit no button at all.
+  Without the option the first submit button is assumed, which is also what a browser
+  does when the user submits from a field by pressing `Enter`.
+
   @function up.Params.fromForm
   @param {Element} form
     A `<form>` element.
+  @param {Element|false} [options.submitButton]
+    The submit button that submitted the form.
   @return {up.Params}
     A new `up.Params` instance with values from the given form.
   @stable
   */
-  static fromForm(form, options) {
-    return this.fromContainer(form, options)
+  static fromForm(form, options = {}) {
+    form = e.get(form)
+
+    up.form.assertFieldsInSameLayer(form)
+
+    let submitButton = e.get(options.submitButton ?? up.form.defaultSubmitButton(form))
+
+    // The FormData constructor throws unless the submitter is owned by this form, and
+    // up.form.submitButtons() can return a button that carries [form] for another form.
+    if (submitButton?.form !== form) submitButton = undefined
+
+    let params = new this(new FormData(form, submitButton))
+
+    // The browser's algorithm covered every control it knows about, i.e. everything in
+    // form.elements. Add the controls it cannot know about, like custom elements from
+    // up.form.config.fieldSelectors.
+    //
+    // A control that *is* in form.elements but that the browser refuses to serialize (a reset
+    // button, an <output>) is not re-added: entries cannot be mapped back to elements, so
+    // "the browser knows it" is the closest test we have for "the browser handled it".
+    let browserControls = new Set(form.elements)
+    for (let field of up.form.fields(form)) {
+      if (!browserControls.has(field)) params.addField(field)
+    }
+
+    return params
   }
 
   static fromContainer(container, options) {
-    let fields = up.form.fields(container)
-    return this.fromFields(fields, options)
+    return this.fromFields(up.form.fields(container), options)
   }
 
   /*-
@@ -525,10 +565,10 @@ up.Params = class Params {
   @return {up.Params}
   @experimental
   */
-  static fromFields(fields, options) {
-    const params = new this(null, options)
+  static fromFields(fields, { includeDisabled } = {}) {
+    const params = new this()
     for (let field of u.wrapList(fields)) {
-      params.addField(field)
+      params.addField(field, { includeDisabled })
     }
     return params
   }
@@ -544,41 +584,39 @@ up.Params = class Params {
 
   @function up.Params#addField
   @param {Element|jQuery} field
+  @param {boolean} [options.includeDisabled=false]
+    Whether to add a field that is disabled.
   @experimental
   */
-  addField(field) {
+  addField(field, { includeDisabled } = {}) {
     field = e.get(field) // unwrap jQuery
 
-    // Input fields are excluded from form submissions if they have no [name]
-    // or when they are [disabled].
-    let name = field.name
-    if (name && this._considerFieldEnabled(field)) {
-      const { tagName } = field
-      const { type } = field
-      if (tagName === 'SELECT') {
-        for (let option of field.querySelectorAll('option')) {
-          if (option.selected) {
-            this.add(name, option.value)
-          }
-        }
-      } else if ((type === 'checkbox') || (type === 'radio')) {
-        if (field.checked) {
-          this.add(name, field.value)
-        }
-      } else if (type === 'file') {
-        // The value of an input[type=file] is the local path displayed in the form.
-        // The actual File objects are in the #files property.
-        for (let file of field.files) {
-          this.add(name, file)
-        }
-      } else {
-        return this.add(name, field.value)
-      }
-    }
-  }
+    // A field is excluded from a form submission if it has no name, or if it is disabled.
+    let name = up.form.readFieldName(field)
+    if (!name || (up.form.readFieldDisabled(field) && !includeDisabled)) return
 
-  _considerFieldEnabled(field) {
-    return !field.disabled || this._options.includeDisabled
+    let { tagName, type } = field
+    let values = []
+
+    if (tagName === 'SELECT') {
+      // A <select> can have multiple selected options.
+      values = u.map(field.selectedOptions, 'value')
+    } else if ((type === 'checkbox') || (type === 'radio')) {
+      if (field.checked) values = [up.form.readFieldValue(field)]
+    } else if (type === 'file') {
+      // The value of an input[type=file] is the local path displayed in the form.
+      // The actual File objects are in the #files property.
+      values = field.files
+    } else {
+      // A custom control may expose a { name } without a readable { value },
+      // in which case it has nothing to contribute.
+      let value = up.form.readFieldValue(field)
+      if (u.isDefined(value)) values = [value]
+    }
+
+    for (let value of values) {
+      this.add(name, value)
+    }
   }
 
   [u.isEqual.key](other) {

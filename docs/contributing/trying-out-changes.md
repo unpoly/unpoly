@@ -15,6 +15,18 @@ pages, the layout, the stylesheet, the scripts: edit them, break them, delete th
 else in the repository depends on any of it, and no test reads these pages — they are examples,
 not fixtures. Put it back when you are done ([below](#putting-it-back)).
 
+<!-- toc -->
+- [Starting it](#starting-it)
+- [The pages that ship](#the-pages-that-ship)
+- [Writing a page](#writing-a-page)
+  - [`.ejs` — markup](#ejs--markup)
+  - [Setup goes in `assets/scripts.js`, not in the page](#setup-goes-in-assetsscriptsjs-not-in-the-page)
+  - [`.mjs` — a request handler](#mjs--a-request-handler)
+  - [Putting it back](#putting-it-back)
+- [Driving it](#driving-it)
+- [When something looks wrong](#when-something-looks-wrong)
+<!-- /toc -->
+
 
 ## Starting it
 
