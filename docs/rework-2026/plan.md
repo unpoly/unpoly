@@ -69,6 +69,22 @@ so verify claims about the *current* repo state against the repo.
   mentions become plain markdown links. Enforcement: unresolvable slug/anchor fails the
   build; public non-deprecated @selector/@event with zero learn-refs warns; functions/
   properties/headers exempt for now (tighten later toward "every public feature has one").
+- SETTLED 2026-09-13 — Writing rules & slop pass (P1+P2): no new file, no bespoke lint.
+  documentation.md gains two concise sections: "Writing style" (conventions; existing pages
+  are no canon — improve on them) under Writing prose, and "Overview pages" (the job 0-4
+  spec, condensed) under Guide pages. The slop pass is the vendored third-party
+  `humanizer` skill (blader/humanizer, MIT, v3.0.0) at .claude/skills/humanizer/ —
+  kept PRISTINE so `npx skills update` works; the house overrides (passives, semantic
+  adverbs, definition lists, enumeration, lead paragraphs, pedagogical guides, technical
+  terms; never touch code/@directives/anchors) live in documentation.md's Writing style
+  section, which agents read before writing docs and pass as context when running the
+  skill. Workflow line: run humanizer before review.
+  Optional later CI gate: Syntaf/vale-llm-slop (noted, not adopted).
+- SETTLED 2026-09-13 — Review contract (P3): Henning reviews every overview page and
+  every new or rewritten page, like any mostly-new content. Kept pages move without
+  re-review. Automated gates replace eyes elsewhere: the site build, its link checker,
+  the contributing-guides TOC test, and the toc.yml manifest checks. The humanizer pass
+  runs before human review.
 - SETTLED 2026-09-13 — Shipping (P4): big-bang from the two docs-rework branches, no
   preview stage — review happens on a local middleman server. unpoly-site builds from
   vendor/unpoly-local (symlink to ../unpoly), so local checkouts define what builds.
@@ -261,11 +277,14 @@ exemplar). Talk also = draft of "How Unpoly works" (transcribe, don't invent).
 
 ## Writing-agent guardrails (discovery consensus, to be finalized as a skill/doc)
 
-- Voice: imitate src/unpoly/pages/*.md ONLY (human-written) — not docs/contributing
-  (partially AI-written). Exemplars: optimistic-rendering, flashes, reactive-server-forms,
-  lazy-loading, enhancing-elements. Measured traits: 0 em-dashes in 4,400 words,
-  ≤1 rhetorical question/page, gerund task headings, code block per ~100 words,
-  no closing summary, one-sentence definition openers, "we" in walkthroughs.
+- Voice (amended 2026-09-13): the existing guides are NOT a sacrosanct style reference —
+  Henning is not a native speaker and page quality varies. The contract is a short list of
+  conventions (to be added concisely to docs/contributing/documentation.md, P1): definition
+  openers, task-named headings, "you"/"we", code early and often, no closing summaries,
+  avoid AI-slop patterns. Exemplars (flashes, lazy-loading, enhancing-elements, etc.)
+  illustrate the conventions but writers should keep what works and have the courage to
+  improve the style beyond them. (Step 1 still doesn't rewrite kept pages; this applies
+  to new and rewritten text.)
 - Blocklist + prose lint idea (bin/lint-prose): "not X, it's Y", load-bearing, seamless,
   robust, leverage, delve, elegant, "it's worth noting", em-dashes, three-fragment runs,
   intro-about-the-intro, closing punchlines.

@@ -29,14 +29,17 @@ Documentation lives in this repository, beside the code it describes. A sister p
   - [Line breaks](#line-breaks)
   - [Admonitions](#admonitions)
   - [Marking up code blocks](#marking-up-code-blocks)
+  - [Writing style](#writing-style)
 - [Reusing text](#reusing-text)
   - [Markdown partials](#markdown-partials)
   - [Param partials](#param-partials)
   - [Inheriting a single param](#inheriting-a-single-param)
 - [Guide pages](#guide-pages)
+  - [Overview pages](#overview-pages)
 - [The contributing guides](#the-contributing-guides)
 - [Modules and classes](#modules-and-classes)
 - [Previewing your changes](#previewing-your-changes)
+- [Changing the visual presentation on unpoly.com](#changing-the-visual-presentation-on-unpolycom)
 <!-- /toc -->
 
 
@@ -562,6 +565,29 @@ up.util.wrapList([1, 2, 3]) // result: [1, 2, 3]
 ```
 
 
+### Writing style
+
+Pages differ in voice, and the existing pages are no style canon: keep what works,
+improve what doesn't. A few conventions hold everywhere:
+
+- Open with one or two sentences saying what the topic *is*. Never "in this guide you will learn".
+- Headings name tasks or things ("Declaring dependencies"), not meta ("Overview of X").
+- Prefer short declarative sentences. "You" for instructions, "we" in walkthroughs.
+- In guides, show code early and often. A reader should rarely scroll a full screen
+  without passing an example.
+- End on the last technical section. No closing summary.
+- Before review, run the `humanizer` skill to remove AI writing patterns.
+  The skill is vendored unmodified (update with `npx skills update`), so tell it:
+  the conventions in this guide override its rules, and the following are house
+  style here, not tells — passive voice and software-as-actor prose ("the fragment
+  is updated"), adverbs that carry semantics ("automatically", "optionally"),
+  definition lists with bold lead terms, admonitions, "See X for details" pointers,
+  enumeration ("there are three ways to..."), lead paragraphs saying what a page
+  covers, a pedagogical tone in guides, and technical senses of "framework",
+  "robust" or "ecosystem". It must never change code, `@directives`, link targets
+  or `{#anchor}` suffixes.
+
+
 ## Reusing text
 
 Unpoly's documentation repeats itself a lot, and that's intentional. The same option is
@@ -686,6 +712,25 @@ will link to it.
 > ```apache
 > RedirectPermanent /old-page-name /new-page-name
 > ```
+
+
+### Overview pages
+
+Every topic in the Learn section opens with an overview page. An overview is not a
+table of contents — the sidebar already is one. Its jobs, roughly in reading order:
+
+- Open with a standalone paragraph saying what Unpoly offers for this topic,
+  answering "do I want to read this?". It doubles as the topic's blurb elsewhere.
+- Establish the mental model and terms the topic's other pages assume.
+- Show a minimal working example of the most common case. A reader who reads only
+  the overview can already do the basic thing.
+- Map the two to four most common needs — each a situation sentence with a taste
+  of code, linking its detail page. Leave the other pages unlisted.
+- Name a boundary ("infinite scrolling is not here") only where readers will
+  plausibly take a wrong turn. Most overviews need none.
+
+Order sections for comprehension (usually the example before the terminology), and
+stay between 400-800 words. Good exemplars are `loading-state.md` and `overlays.md`.
 
 
 ## The contributing guides
