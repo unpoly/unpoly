@@ -69,6 +69,13 @@ so verify claims about the *current* repo state against the repo.
   mentions become plain markdown links. Enforcement: unresolvable slug/anchor fails the
   build; public non-deprecated @selector/@event with zero learn-refs warns; functions/
   properties/headers exempt for now (tighten later toward "every public feature has one").
+- SETTLED 2026-09-13 — Shipping (P4): big-bang from the two docs-rework branches, no
+  preview stage — review happens on a local middleman server. unpoly-site builds from
+  vendor/unpoly-local (symlink to ../unpoly), so local checkouts define what builds.
+  Merge unpoly master into docs-rework once before the build phases start and once more
+  at the end (the few in-between doc commits are processed/rewritten manually during the
+  final merge). Old site keeps shipping from master meanwhile; at ship time merge both
+  branches and deploy the latest stage.
 - SETTLED 2026-09-13 — /install move (M4): /install becomes the Getting-started page
   Installation (`@page install`, URL unchanged), converted from ERB to markdown.
   server-bindings content moves to the Backend integration page (now ↩ moved, not ✎ new);
