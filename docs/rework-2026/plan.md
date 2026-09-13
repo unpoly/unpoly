@@ -31,7 +31,7 @@ so verify claims about the *current* repo state against the repo.
     PROMOTED_INTERFACE_NAMES and the up.link long-text hack in interface.rb die;
     /learn and /api hub pages are generated from the model (topic titles + blurbs =
     first paragraph of first page), not hand-written.
-  - Manifest: `src/unpoly/pages/learn.yml`, parsed into Unpoly::Guide::Topic objects.
+  - Manifest: `src/unpoly/pages/toc.yml`, parsed into Unpoly::Guide::Topic objects.
     Both topic types satisfy one model contract (#title, #children, #start_page);
     templates never see the type. Entries carry an explicit `type:` key:
       learn:
