@@ -20,16 +20,96 @@ so verify claims about the *current* repo state against the repo.
   Old guide URLs get redirects in `src/unpoly-migrate/.htaccess`.
   DEFERRED LONG-TERM (see Deferred section): eventually move symbols under `/api/...`
   and guides under `/learn/...`.
-- SETTLED 2026-09-13 — Site structure manifest: one YAML file `src/unpoly/pages/learn.yml`
-  with two sections. `learn:` = chapters as `title` + ordered `pages` (slugs); no special
-  treatment for overviews or Getting started; a chapter's first page's first paragraph is
-  its blurb on the /learn hub. `api:` = ordered entries that are either `module: up.foo`
-  (children derived from source; replaces PROMOTED_INTERFACE_NAMES) or ordinary
-  `title` + `pages` groups (e.g. "Formats": url-patterns, relaxed-json). Section membership
-  decides nav tree and prev/next (learn only). Build checks: every @page listed exactly
-  once somewhere; every @module exactly once in api; listed slugs must exist.
-- New directive `@guide-ref` for the reference→guide header slot (repeatable, resolves
-  labels from target page titles/anchors; build-checkable). In-body refs keep `{:.article-ref}`.
+- SETTLED 2026-09-13 — Structure architecture and manifest (final, supersedes earlier drafts):
+  - Division of labor: TEMPLATES are dumb and shared across /learn and /api; they query
+    Unpoly::Guide objects for type and properties, never "which area am I" conditionals.
+    DIRECTIVES own every fact of a single document (@page, @module, @menu-title,
+    @guide-ref, @parent, visibility). The YAML owns only relations (which pages form a
+    topic, in which order; which interfaces are listed, in which order) and area-level
+    presentation (linear reading with prev/next vs. lookup).
+  - Consequences: module @see lists lose their navigation job (pure "see also" content);
+    PROMOTED_INTERFACE_NAMES and the up.link long-text hack in interface.rb die;
+    /learn and /api hub pages are generated from the model (topic titles + blurbs =
+    first paragraph of first page), not hand-written.
+  - Manifest: `src/unpoly/pages/learn.yml`, parsed into Unpoly::Guide::Topic objects.
+    Both topic types satisfy one model contract (#title, #children, #start_page);
+    templates never see the type. Entries carry an explicit `type:` key:
+      learn:
+        reading: linear
+        topics:
+          - type: page-group
+            title: Getting started
+            pages: [how-unpoly-works, install, ...]
+          - type: page-group
+            title: Overlays
+            pages: [overlays, opening-overlays, ...]
+      api:
+        reading: lookup
+        topics:
+          - type: module
+            module: up.link
+          - type: page-group
+            title: Formats
+            start: none
+            pages: [url-patterns, relaxed-json]
+  - `start:` on a page-group: default is the first page (learn overviews are designed
+    entries); `none` renders an expand-only label node (like existing group headers in
+    the reference tree); may also name a specific page. Module topics derive their start
+    (the module doc) and everything else from parsed source.
+  - Build checks: strict shapes per type (unknown/missing keys fail); every @page listed
+    exactly once across both sections; every @module exactly once in api; slugs must exist.
+- SETTLED 2026-09-13 — `@learn-ref`: the single mechanism linking reference docs to Learn
+  pages. Repeatable directive on features and modules: `@learn-ref <slug>[#anchor]`,
+  optional explicit label indented below. Labels are derived: page title, and for anchored
+  refs a composite "Page title › Heading" so labels are self-contextualizing and drift-proof.
+  Rendered by the shared template in one fixed slot: below the lead paragraphs, before the
+  first heading and auto-TOC — for features AND modules (replacing the module "Guides"
+  lists that @see used to drive). `{:.article-ref}` is retired: all ~84 usages migrate
+  (all are intro-slot); the markdown extension is deleted after migration. In-body guide
+  mentions become plain markdown links. Enforcement: unresolvable slug/anchor fails the
+  build; public non-deprecated @selector/@event with zero learn-refs warns; functions/
+  properties/headers exempt for now (tighten later toward "every public feature has one").
+- SETTLED 2026-09-13 — /install move (M4): /install becomes the Getting-started page
+  Installation (`@page install`, URL unchanged), converted from ERB to markdown.
+  server-bindings content moves to the Backend integration page (now ↩ moved, not ✎ new);
+  redirect /install/server-bindings -> /server-bindings. bootstrap and legacy-browsers are
+  too small for pages: they become ## sections of Installation ("Bootstrap integration",
+  "Browser support") with anchor redirects (/install/bootstrap -> /install#bootstrap,
+  /install/legacy-browsers -> /install#browser-support). Version interpolation: the parser
+  replaces the token %UNPOLY_VERSION% (distinct sigil, no collision with mustache examples,
+  no naming rule needed) with the current version — usable in any page, needed in code
+  blocks like `unpoly@%UNPOLY_VERSION%`.
+- SETTLED 2026-09-13 — Redirects (M3): rules live in `src/unpoly-migrate/.htaccess` as
+  RedirectPermanent, per existing convention. Renamed API symbols need none (@deprecated
+  keeps pages). /tutorial redirects to how-unpoly-works. Renamed guide pages get NEW slugs
+  (M3.1A) — but slugs are hand-picked for brevity/clarity, not blindly slugified titles
+  (e.g. a title word may be dropped or changed when it makes a poor slug); old slug
+  redirects. Dissolved pages redirect to the ANCHOR of the absorbing section
+  (e.g. /layer-terminology -> /overlays#layer-modes); absorbing sections carry stable
+  {#custom-slug} anchors, verified against the M2.2 heading index. Split pages redirect to
+  their majority target (/skipping-rendering -> /conditional-requests,
+  /handling-everything -> /handling-all-links). The current /install SUB-PAGES flatten
+  into @page structure and need redirects too: /install/server-bindings -> /server-bindings,
+  /install/bootstrap and /install/legacy-browsers -> their new homes (decide slugs when
+  migrating). Safety net before shipping: a one-time "no lost URL" check — every slug live
+  on unpoly.com today must resolve to a page or match a redirect rule.
+- SETTLED 2026-09-13 — Wikilink page autolinks: `[[slug#hash]]` (Gollum/Obsidian-style)
+  expands to a markdown link with a derived label: page title, or "Page title: Subheadline"
+  for anchored refs. One resolver shared with @learn-ref; heading index must handle ATX and
+  setext headings, kramdown auto-IDs and explicit {#custom-slug} suffixes; unresolvable
+  path/hash fails the build. Works for @page docs AND feature pages (gives #hash support
+  that backtick autolinks lack). Custom labels keep using plain markdown links - one way
+  per job. @see is retired entirely (module Essentials cards die; key features are
+  mentioned in module intro prose with autolinks instead).
+  Migration judgment for existing hand-links: migrate citation-style references where the
+  link stands alone ("See [Using the discarded response](/closing-overlays#...)" ->
+  "See [[closing-overlays#using-the-discarded-response]]"), accepting slightly different
+  derived labels as long as the sentence still works. Do NOT migrate links whose label is
+  a word woven into the sentence ("revalidate [expired](/caching#expiration) responses") -
+  those stay hand-labeled markdown links.
+  @see fate (settled): retired entirely. 63 page-targets -> @learn-ref; 49 module
+  Essentials entries -> intro prose with autolinks (cards removed); 4 feature see-alsos ->
+  prose with wikilinks/backtick autolinks.
 - Tutorial dies; redirect to Getting started. `/install` content moves into this repo.
 - Landing page: remix of Synthesis.pdf copy + talk diagrams ("The Limits of Hypermedia",
   RubyShift 2026). Ships independently. See "Landing page" below.
@@ -138,10 +218,9 @@ Following links, Handling all links/forms, Framework islands, Hungry elements, S
 - Page order within chapters (decide at writing time).
 - (Settled 2026-09-12: chapter titles "Live fragments" and "Scripting", GS page
   "The shape of the API", section name "Learn" confirmed.)
-- Remaining mechanisms (next up): @guide-ref syntax, redirect strategy for
-  renamed/dissolved pages, mechanics of moving /install into this repo.
-- Then: process & shipping (writing skill + prose lint, two-repo shipping),
-  landing-page skeleton. (TOC manifest settled 2026-09-13, see big picture.)
+- Next up: process & shipping (writing skill + prose lint, review contract details,
+  two-repo shipping), then landing-page skeleton. (All mechanisms settled 2026-09-13:
+  manifest, @learn-ref, wikilinks, redirects, /install move — see big picture.)
 
 ## Deferred (only after content changes and the new landing page have shipped)
 
@@ -152,6 +231,7 @@ Following links, Handling all links/forms, Framework islands, Hungry elements, S
   sources (thousands of links); until then, hubs live at `/learn` and `/api` while pages
   stay at root.
 - Step 2 per-page rewrites of kept pages.
+- Rename the `Unpoly::Guide` namespace in unpoly-site to `Unpoly::Site` (added 2026-09-13).
 - Backend language switcher for protocol-chapter code samples.
 - Goal-based index pages ("fast", "resilient") above the chapters.
 
