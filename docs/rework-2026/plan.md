@@ -241,17 +241,37 @@ Following links, Handling all links/forms, Framework islands, Hungry elements, S
 - Page order within chapters (decide at writing time).
 - (Settled 2026-09-12: chapter titles "Live fragments" and "Scripting", GS page
   "The shape of the API", section name "Learn" confirmed.)
-- Next up (open alignment stops): landing-page skeleton, and SEARCH (added 2026-09-13):
-  - Single search across both areas, or one search per area (learn vs. API)?
-  - If single: where does the box live in the split layout?
-  - If single: how do results convey their type (learn page vs. API feature)?
-    May need extra attributes pushed to Algolia.
-  - Keep the two-stage search (instant word-match autocomplete first, then Algolia
-    full-text)? The first stage doubles as fast autocomplete for users who know their
-    target, and Algolia costs per request.
-  - Separate Algolia index? Currently one index per major version (v2, v3) plus one
-    for development (effectively v3 only).
-  (Process & shipping settled 2026-09-13; all mechanisms settled — see big picture.)
+- SETTLED 2026-09-14 — Search (via solution exploration; killed: per-area and two-stage search):
+  UX stakes: global, single-stage, results in a popup, subheadline sections as individual
+  results annotated with their document title, every result labeled with its area
+  (Learn vs API, e.g. right-aligned badge) — but hits are NOT segregated into per-area blocks.
+  PRIMARY: Pagefind + symbol sidecar.
+  - Pagefind indexes the built HTML, hooked into config.rb build hooks. Layout annotations:
+    data-pagefind-body scoping, area filter, weights. Add <html lang="en"> — the benchmark
+    detected "unknown" language, so stemming is currently off.
+  - Symbol sidecar: generated JSON of public FEATURE and PARAM names -> paths/anchors
+    (param entries labeled with their owner, e.g. "up-watch-delay — [up-watch]"). Rendered
+    as an exact/prefix-matched first group in the popup, above full-text hits grouped by
+    page with section sub-hits, pages ordered by score. Grouping is subject to UX testing
+    at build time; if the first group gets noisy, demote param entries by ranking rule.
+  - Widget: slim fake-input pill ("Search docs… ⌘K") in the one-row header between
+    logo/version and the nav links (Learn, API, Demo, Changes, Support, GitHub icon);
+    collapses to an icon at narrow widths; launcher also goes into the hamburger menu
+    (mobile currently has no search entry point at all).
+  - The sidebar tree filter dies with ALL related code (menu.coffee filter/expand-help,
+    two-stage search.coffee + content_search.js).
+  - Dev/test: the middleman preview serves HTTP and emits no files, so search in
+    development needs a build step for the indexer (rake task or similar). Basic search tests.
+  - esbuild + npm migration for unpoly-site (own Procfile + bin/dev) only if it eases the
+    Pagefind spike; otherwise deferred to the very end.
+  - Benchmark (2026-09-14): 832 pages / 9.9 MB HTML indexed in 1.24 s; 4.7 MB chunked index.
+  FALLBACK, only on file-size or result-quality problems: Algolia — either the DocSearch
+  program (eligibility uncertain: unpoly.com promotes paid consulting) or a self-indexed
+  push with section records (~$8-20/month at instant-search volume, legacy free plan may
+  be force-migrated regardless). Old version stages (v2/v3) keep their deployed sites and
+  existing Algolia indexes untouched; retiring the Algolia push for `latest` is a
+  build-time cleanup.
+- Next up: landing-page skeleton — the LAST open alignment stop.
 
 ## Deferred (only after content changes and the new landing page have shipped)
 
