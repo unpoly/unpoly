@@ -286,46 +286,89 @@ Following links, Handling all links/forms, Framework islands, Hungry elements, S
 - Backend language switcher for protocol-chapter code samples.
 - Goal-based index pages ("fast", "resilient") above the chapters.
 
-## Landing page (separate track, discovery only — nothing settled)
+## Landing page (alignment in progress; state as of 2026-09-15)
 
-Structure: PDF funnel (Synthesis.pdf, ~/Documents/Unpoly/2026-06 New Landing Page/) +
-talk's objection frame and diagrams. Hero: "Keep your HTML. Lose the reloads." +
-subtitle w/ hypermedia/progressive-enhancement SEO nouns + "think htmx with a high-level
-API" kicker + slide-12 diagram (request → full response → fragment used, with
-preserved-state glyphs). Sections: update-only-what-changed snippet → pressure paragraph +
-slide 3 bars → backend-stays-in-charge + slide 20 → "Three boring ideas" as fact-check
-questions → client-side logic (slides 33/36/50) → hard parts grid (slide 15) →
-speed ladder (slide 30, honest "mixed" verdict) → no-magic HTTP block →
-fit map (slide 46) + good fit/not-a-fit lists → social proof (Carson Gross first) →
-start small (satellite service / internal tool / admin backend). No backend code on the
-landing page; HTTP is the neutral language. No sidebar on /; keep brand; no icon rows.
-Talk PDF: ~/Downloads/The Limits of Hypermedia (RubyShift 2026).pdf. Diagrams: export
-as SVG from slides (human), agent recolors to site palette (fragment_flow_*.svg as style
-exemplar). Talk also = draft of "How Unpoly works" (transcribe, don't invent).
+CONFIRMED HERO (2026-09-15, survived a night's sleep and two refinement rounds):
 
-## Writing-agent guardrails (discovery consensus, to be finalized as a skill/doc)
+    # The missing application layer for HTML
 
-- Voice (amended 2026-09-13): the existing guides are NOT a sacrosanct style reference —
-  Henning is not a native speaker and page quality varies. The contract is a short list of
-  conventions (to be added concisely to docs/contributing/documentation.md, P1): definition
-  openers, task-named headings, "you"/"we", code early and often, no closing summaries,
-  avoid AI-slop patterns. Exemplars (flashes, lazy-loading, enhancing-elements, etc.)
-  illustrate the conventions but writers should keep what works and have the courage to
-  improve the style beyond them. (Step 1 still doesn't rewrite kept pages; this applies
-  to new and rewritten text.)
-- Blocklist + prose lint idea (bin/lint-prose): "not X, it's Y", load-bearing, seamless,
-  robust, leverage, delve, elegant, "it's worth noting", em-dashes, three-fragment runs,
-  intro-about-the-intro, closing punchlines.
-- Length budgets from comparable existing pages. Outline with facts per section before prose.
-- Separate writer and critic agents. Approved pages join the exemplar set.
-- The guide-vs-reference placement contract is in docs/contributing/documentation.md.
-- **Deslop pass**: whenever a generated page is otherwise done, make a dedicated pass to
-  remove "AI slop" tropes from wording and sentence structure ("not X, it's Y",
-  em-dash chains, three-fragment runs, punchline endings, filler adjectives, etc.).
-  The `/deslop` skill can drive this pass. This is a per-page completion step,
-  in addition to the writer/critic split and any lint. Where deslop rules conflict
-  with the house voice of the exemplar guides (e.g. conventional passives like
-  "when no mode is given", or "See X for details and examples" pointers), house voice wins.
+    Unpoly expands what links, forms and server-rendered pages can do:
+
+    <a href="/tasks/123" up-target="#pane">Details</a>    <!-- updates a fragment -->
+    <a href="/users/new" up-layer="new">Add user</a>      <!-- opens in a modal overlay -->
+    <form up-validate>…</form>                            <!-- validates against your server -->
+    <main up-poll>…</main>                                <!-- keeps itself fresh -->
+
+    The application stays on your server — any language, any framework.
+    The browser learns just enough to feel like an app.
+    Your HTML still reads the same to humans and agents.
+
+    [ Learn Unpoly ]  [ API Reference ]  · or see it running in the demo
+
+  Trailer structure is deliberate: three sentences, three actors (server keeps the app /
+  browser learns just enough / HTML keeps its meaning). "Agents" is stated as a plain
+  architectural fact — never AI-washing tone. Rejected trailer forms: the 44-word version
+  enumerating agents/crawlers/screen readers (list moved to its own segment),
+  "works without JavaScript" framing (dated; degradation story lives in the segment),
+  "in HTML that..." (dangling preposition).
+
+Settled in the 2026-09-14 session:
+
+- PRIMARY VISITOR: the htmx/Hotwire user unhappy with their tool's craft (htmx: verbose,
+  attribute soup, weird glyphs, underbuilt JS API; Hotwire: conceptual weirdness,
+  frames/streams arbitrariness, Stimulus proliferation; both: unhandled edge cases,
+  no graceful degradation story, polish delegated to the developer). Secondary: the
+  backend dev under "maybe we need React" pressure. Explicitly conceded: devs who LIKE
+  explicit/verbose minimalism — they are well served by htmx, and the fit section says so.
+- POSITIONING: stands on its own feet; identity = convention-over-configuration hypermedia
+  ("the application layer" thesis: HTML is a document language, Unpoly is its expansion
+  pack for applications; Henning's framing "a fantasy spec for HTML6, in angle brackets
+  and attributes, not JS" is keeper material). Comparisons only as informative trade-offs
+  (model passage: the PDF's "Some teams want small primitives..." text); one mid-page
+  section may name htmx/Hotwire respectfully; never put-downs.
+- HERO FORMAT: Claim / Byline (resolution-first) / Code (4 lines: fragment update,
+  overlay, validation, polling — the code is the ONLY enumeration in the hero) / Trailer
+  (see confirmed hero above) / buttons [Learn Unpoly] [API Reference] + quiet "see the
+  demo" text link. A hero that explains + a strong Getting started relieve the landing
+  page from explaining everything. No-build-step and backend-agnostic are demoted to the
+  "start small" section (adoption facts, not hero facts).
+- HERO FINALIST ALTERNATES (if the slept-on pick sours):
+  byline "Unpoly teaches links, forms and pages what applications need:" (warm);
+  byline "Unpoly adds the application attributes that HTML never got:" (wistful);
+  claim without "missing"; byline verb A/B "extends"/"multiplies";
+  fallback byline family: SPA-reference ("...the interactivity of a single-page app").
+- KILLED with reasons: "Keep your HTML. Lose the reloads." (category-generic — htmx could
+  run it unchanged; a decade of hero drafts failed this differentiation test);
+  platform-history bylines (too long-winded; lead with value); "application behavior" and
+  "upgrades HTML from documents to applications" (abstract); bylines enumerating 3 features
+  (arbitrary picks; the CODE is the only enumeration — it reads as examples);
+  "completes/finishes HTML" (htmx docs literally say "htmx completes HTML as a hypertext");
+  "primitives"/"building blocks"/"tools" as Unpoly nouns (the other temperament's
+  vocabulary; htmx motto is "high power tools for HTML" — but "Unpoly upgrades the web's
+  canonical set: link, form, page" survives as a concept); "reimagines" (deck cliché).
+- SECTION ORDER (switcher-first re-cut; category education demoted to Learn):
+  hero → "one attribute, everything handled" (Unpoly's own code, defaults enumerated
+  positively — the anti-attribute-soup argument without a comparison) → what the layer
+  contains (slide-15 grid framed as "the quiet parts of a real app") → grown-up escape
+  hatches (JS API, render lifecycle, framework islands) → "your HTML keeps its meaning"
+  segment (NEW, 2026-09-15: Unpoly enhances real HTML elements without changing what they
+  are; consequences: SEO, agents reading HTML without executing JS, screen readers;
+  the up-defer anecdote — lazy loading deliberately modeled as a self-loading hyperlink so
+  content degrades to one click; title still open: "Progressive enhancement, by design" /
+  "A link is still a link, a form is still a form" / "Enhance, don't replace") →
+  "no magic, just HTTP" (wire transparency, DevTools debugging — now a separate sibling
+  segment) → trade-offs (respectful, may name names; NEW material: quote htmx's own
+  motivations "Why should only <a> & <form> be able to make HTTP requests?" as the honest
+  philosophical contrast — htmx generalizes request-making to any element/event, Unpoly
+  makes the canonical elements more capable) → fit/not-fit incl. htmx concession →
+  social proof (Carson Gross first) → start small + CTA. Slide-12 request-flow diagram
+  moves to Learn's "How Unpoly works", not the hero.
+- TEST PROTOCOL for the hero: cold-read the styled candidates with 2-3 makandra devs
+  matching the visitor profile; after an hour, ask them what Unpoly is — the byline they
+  can paraphrase wins.
+- NEXT: pick the "HTML keeps its meaning" segment title → full-page copy draft on the
+  re-cut order + layout mock (agent pre-reads) → diagram exports from the talk slides
+  (Henning) → build.
 
 ## Overview page spec (settled 2026-09-12)
 
