@@ -301,13 +301,17 @@ CONFIRMED HERO (2026-09-15, survived a night's sleep and two refinement rounds):
 
     The application stays on your server — any language, any framework.
     The browser learns just enough to feel like an app.
-    Your HTML still reads the same to humans and agents.
+    Your HTML keeps its meaning — agents and crawlers can read your app
+    without running JavaScript.
 
     [ Learn Unpoly ]  [ API Reference ]  · or see it running in the demo
 
   Trailer structure is deliberate: three sentences, three actors (server keeps the app /
   browser learns just enough / HTML keeps its meaning). "Agents" is stated as a plain
-  architectural fact — never AI-washing tone. Rejected trailer forms: the 44-word version
+  architectural fact — never AI-washing tone. Sentence 3 amended 2026-09-15: the earlier
+  "still reads the same to humans and agents" was ambiguous (read as same-over-time =
+  trivially true, instead of same-across-consumers vs. an SPA's empty div); the fix states
+  the stake explicitly and echoes the section title "Your HTML keeps its meaning". Rejected trailer forms: the 44-word version
   enumerating agents/crawlers/screen readers (list moved to its own segment),
   "works without JavaScript" framing (dated; degradation story lives in the segment),
   "in HTML that..." (dangling preposition).
@@ -366,9 +370,44 @@ Settled in the 2026-09-14 session:
 - TEST PROTOCOL for the hero: cold-read the styled candidates with 2-3 makandra devs
   matching the visitor profile; after an hour, ask them what Unpoly is — the byline they
   can paraphrase wins.
-- NEXT: pick the "HTML keeps its meaning" segment title → full-page copy draft on the
-  re-cut order + layout mock (agent pre-reads) → diagram exports from the talk slides
-  (Henning) → build.
+- LIVING MOCKUP (the copy source of truth for the landing build; iterated through 10
+  versions on 2026-09-15): https://claude.ai/artifact/G1namZkdtXKVjExAQjTBt8
+  Final structure and locked titles: hero (confirmed above, incl. "… and dozens more"
+  code tease) → "Update only what changed" (fragment mechanic + full-pages philosophy,
+  embeds the request-flow diagram from ~/Downloads/fragment_updates.png; carries the
+  no-separate-fragment-endpoints differentiator) → "Edge cases included" (deep up-follow
+  example + checklist + chips trimmed to invisible defaults) → "Built for tough
+  requirements" (3 cards: Reactive server forms, Optimistic rendering, Complex overlay
+  flows; then "… and escape hatches everywhere" coda: layered API, app-centric event
+  chips — "events you wish the platform had", islands as prose mention only) →
+  "Your HTML keeps its meaning" (semantics/degradation, up-defer anecdote) →
+  "Is Unpoly right for you?" (htmx motivation quoted respectfully, fit lists, concession)
+  → proof strip (quotes, logo wall placeholder) → "Start with one screen" closer.
+  Killed during massage: "No magic, just HTTP" strip (endpoint point moved into fragment
+  section); "Raising the ceiling"/other titles; Structured JavaScript card; React island
+  code beat; maturity line (BUT see review below); the standalone Escape hatches screen.
+- COLD REVIEW of the mock (2026-09-15, subagent, two-phase cold-then-informed):
+  How-it-works model lands (quotes confirmed); "Edge cases included" is the strongest
+  section. Findings queued as round 3, in three groups awaiting Henning's go:
+  A (mechanical): 8 slop fixes (restating closers, "One attribute." fragment, staged
+    "Unpoly disagrees", double-statement, dash tails, bold-on-every-item, "just work"),
+    plus "layers all the way down" wording (collides with up-layer concept).
+  B (structural): de-dupe the middle — state preservation said 3x, chips restate bullets,
+    two closers restate their sections.
+  C (judgment): Hotwire refugee unserved (no frames/streams/Stimulus contrast; davisums
+    quote is a put-down laundered through a testimonial — replace); maturity sentence
+    should return (reviewer independently reinvented the line Henning cut — it proves the
+    "maintain for years" fit bullet and is the one uncopyable claim); add early clause
+    that Unpoly IS a single client-side script (certainty currently arrives only in the
+    last section); move Carson Gross quote next to the degradation section.
+- Logo wall: 9 of 10 assets collected as verified SVGs in ../unpoly-site/tmp/logo-wall/
+  (vw, audi, siemens, bosch, arm, zendesk, steady, urban-dictionary, adonisjs — all flat
+  wordmarks/marks that desaturate cleanly; zendesk.svg gained a viewBox, urban-dictionary.svg
+  was recolored from white to dark). TUIfy: NO public asset exists (tuify.de is domain-parked,
+  Wayback shows only parking pages since 2013) — Henning must supply one privately or drop
+  TUIfy from the wall. No brand-terms review, per Henning.
+- NEXT SESSION: decide review groups A/B/C and apply round 3 to the mock → place logo
+  assets → optional cold-reader test at makandra → then the landing build.
 
 ## Overview page spec (settled 2026-09-12)
 
