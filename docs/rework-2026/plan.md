@@ -236,42 +236,28 @@ handling-asset-changes (renamed), tutorial (site-side).
 Tally: Getting started + 12 chapters, ~78 pages, ~21 new (11 overviews, 7 GS pages,
 Following links, Handling all links/forms, Framework islands, Hungry elements, Server bindings).
 
-## Open items
+## Open items (pending task list, refreshed 2026-09-16)
 
-- Page order within chapters (decide at writing time).
-- (Settled 2026-09-12: chapter titles "Live fragments" and "Scripting", GS page
-  "The shape of the API", section name "Learn" confirmed.)
-- SETTLED 2026-09-14 — Search (via solution exploration; killed: per-area and two-stage search):
-  UX stakes: global, single-stage, results in a popup, subheadline sections as individual
-  results annotated with their document title, every result labeled with its area
-  (Learn vs API, e.g. right-aligned badge) — but hits are NOT segregated into per-area blocks.
-  PRIMARY: Pagefind + symbol sidecar.
-  - Pagefind indexes the built HTML, hooked into config.rb build hooks. Layout annotations:
-    data-pagefind-body scoping, area filter, weights. Add <html lang="en"> — the benchmark
-    detected "unknown" language, so stemming is currently off.
-  - Symbol sidecar: generated JSON of public FEATURE and PARAM names -> paths/anchors
-    (param entries labeled with their owner, e.g. "up-watch-delay — [up-watch]"). Rendered
-    as an exact/prefix-matched first group in the popup, above full-text hits grouped by
-    page with section sub-hits, pages ordered by score. Grouping is subject to UX testing
-    at build time; if the first group gets noisy, demote param entries by ranking rule.
-  - Widget: slim fake-input pill ("Search docs… ⌘K") in the one-row header between
-    logo/version and the nav links (Learn, API, Demo, Changes, Support, GitHub icon);
-    collapses to an icon at narrow widths; launcher also goes into the hamburger menu
-    (mobile currently has no search entry point at all).
-  - The sidebar tree filter dies with ALL related code (menu.coffee filter/expand-help,
-    two-stage search.coffee + content_search.js).
-  - Dev/test: the middleman preview serves HTTP and emits no files, so search in
-    development needs a build step for the indexer (rake task or similar). Basic search tests.
-  - esbuild + npm migration for unpoly-site (own Procfile + bin/dev) only if it eases the
-    Pagefind spike; otherwise deferred to the very end.
-  - Benchmark (2026-09-14): 832 pages / 9.9 MB HTML indexed in 1.24 s; 4.7 MB chunked index.
-  FALLBACK, only on file-size or result-quality problems: Algolia — either the DocSearch
-  program (eligibility uncertain: unpoly.com promotes paid consulting) or a self-indexed
-  push with section records (~$8-20/month at instant-search volume, legacy free plan may
-  be force-migrated regardless). Old version stages (v2/v3) keep their deployed sites and
-  existing Algolia indexes untouched; retiring the Algolia push for `latest` is a
-  build-time cleanup.
-- Next up: landing-page skeleton — the LAST open alignment stop.
+Alignment (current session or its compacted continuation):
+- Landing round 3: decide review groups A (mechanical slop fixes), B (middle de-dupe),
+  C (Hotwire paragraph, maturity sentence back, davisums replacement, early "single
+  client-side script" clause, Carson quote relocation) and apply to the mock.
+- CSS/layout liberties (added 2026-09-16): agree on the agent's freedom vs. limits when
+  reworking the application layout, frontend components and stylesheets during the build.
+  Landing page + nav bar changes are agreed; the ~800 existing doc pages must keep working
+  with the reworked CSS. Discuss BEFORE Build·Structure begins.
+- TUIfy logo: Henning supplies an asset privately, or TUIfy leaves the wall.
+- Optional: cold-reader test of the mock with 2-3 makandra developers.
+
+Build phase (fresh sessions per station, see the progress map):
+- Build·Structure: toc.yml + nav split; @learn-ref/wikilink parsing + build checks;
+  retire & redirect (tutorial, install move, .htaccess, "no lost URL" check).
+- Build·Content: Getting started (8), chapter overviews (10), new/seeded pages (4),
+  moves & splits (~15 ops), reference link pass (~60 features).
+- Landing build (parallel track): mock → real Middleman page, logo wall, search pill.
+
+Decide at writing/build time: page order within chapters; search grouping UX (S4);
+hotkeys, empty states, sidecar delivery; retiring the Algolia push for latest.
 
 ## Deferred (only after content changes and the new landing page have shipped)
 
@@ -408,6 +394,45 @@ Settled in the 2026-09-14 session:
   TUIfy from the wall. No brand-terms review, per Henning.
 - NEXT SESSION: decide review groups A/B/C and apply round 3 to the mock → place logo
   assets → optional cold-reader test at makandra → then the landing build.
+
+## Working agreements (how these sessions run; recorded 2026-09-16)
+
+- Alignment runs as numbered decision tables with option codes; a settled decision is
+  recorded in this file, the progress-map artifact is republished, and commits happen
+  only on Henning's word.
+- plan.md is the source of truth; the map artifact is the view; the landing mock artifact
+  (https://claude.ai/artifact/G1namZkdtXKVjExAQjTBt8) is the copy source for the landing build.
+- Mock iteration protocol: feedback in rounds, republish the same artifact URL, yellow
+  "mock-note" tags mark pending meta (never content).
+- Context strategy: compact deliberately at clean boundaries (everything committed first),
+  never mid-thought. Build phases run in FRESH sessions that read this file; heavy
+  reading/writing is delegated to subagents so the orchestrating session stays lean.
+- Henning reviews all new copy and pages; humanizer pass before review; the conventions in
+  docs/contributing/documentation.md override the humanizer skill.
+
+## Henning's copy taste (distilled 2026-09-16 from the landing sessions; binds all future copy)
+
+- Lead with value. Never build up a problem at length — one clause of thesis, maximum.
+- Concrete beats abstract. Rejected as too abstract: "application behavior",
+  "upgrades HTML from documents to applications", "modern/dynamic frontend", "reads the
+  same" (ambiguous axis). Accepted concreteness comes from: a felt reference (single-page
+  app), experiential outcomes (in place, instant, state survives), canonical complete sets
+  (the link, the form, the page), or an explicit stake (agents read your app without
+  running JavaScript).
+- No arbitrary feature enumerations in prose — any pick of three feels random and excludes
+  the rest. CODE is the only enumeration; it reads as examples, not taxonomy.
+- Every claim must pass the differentiation test: could htmx or Hotwire put this sentence
+  on their page unchanged? (Killed this way: "Keep your HTML. Lose the reloads.";
+  "completes HTML" — htmx's literal phrase; "high power tools" vocabulary.)
+- Competitor vocabulary stays with its owner: "primitives"/"tools"/"building blocks" are
+  htmx-temperament words. Quote competitors accurately and generously; concede their fit
+  honestly (informative trade-offs, never put-downs).
+- "Agents" is a plain architectural fact, never AI-hype tone.
+- AI-slop watchlist beyond the humanizer skill: restating one-line closers, staged
+  rebuttals against unattributed beliefs, dramatic fragments, bold-on-every-item,
+  dash-tail clauses.
+- Henning is not a native English speaker: flag non-idiomatic phrasing; he questions vague
+  verbs and dangling prepositions at sentence level. Prefer plain subject-verb-object.
 
 ## Overview page spec (settled 2026-09-12)
 
