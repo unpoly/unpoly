@@ -236,6 +236,61 @@ handling-asset-changes (renamed), tutorial (site-side).
 Tally: Getting started + 12 chapters, ~78 pages, ~21 new (11 overviews, 7 GS pages,
 Following links, Handling all links/forms, Framework islands, Hungry elements, Server bindings).
 
+## Landing round 3 — verdict ledger (2026-09-16; verdicts final, NOT YET APPLIED to the mock)
+
+Apply these to the mock artifact (https://claude.ai/artifact/G1namZkdtXKVjExAQjTBt8, v10;
+fetch via Artifact read_file, strip the publish wrapper, edit, republish to same URL):
+
+- F1a: spec-chip line under hero CTAs: "One JavaScript file · no build step · MIT".
+- F2 (F2e variant): comparison section stays htmx+SPA only. Fit list gains positive bullet
+  "You want one mental model for navigation, overlays and forms — not a kit of separate
+  libraries to combine." Choose-another column gains: "You need native iOS/Android shells
+  around your app and don't want to write your own — Hotwire ships ready-made adapters
+  for that." (single space before dash; "ready-made" per Henning).
+- F3: Carson Gross quote moves to END of "Your HTML keeps its meaning" as pull-quote;
+  that section also RESTATES (fresh words, not verbatim) the full-page/URL-universality
+  point, e.g. "since your server can always answer with a complete page, every screen
+  keeps a working address of its own". davisums + LaundroMat quotes struck. Proof strip
+  becomes label "In production at" + logo wall (assets in ../unpoly-site/tmp/logo-wall/,
+  9/10, TUIfy missing).
+- F4 REJECTED: no maturity/"since 2015" line anywhere (reads as legacy tech; muddies story).
+- F5a: fragment section's survival sentence de-twinned: "The rest of the page simply
+  stays: your scroll position, your focus, the form you were halfway through." Edge-case
+  bullet keeps its technical enumeration.
+- F6c: chip grid = only content said nowhere else. Survivors: Loading indicators, Flaky
+  networks & offline, Animated transitions, Accessible defaults. Add: Preloading,
+  Conditional requests, CSP-compatible scripting, Focus trapping in overlays
+  (roster subject to Henning's veto on sight).
+- F7: cut "You describe the interaction. Strong defaults do the rest — and every default
+  can be changed." entirely. Merge staccato: "A link still navigates and a form still
+  submits — they just learn to do it better."
+- F8a: section intro becomes "These are the screens that usually get an app rewritten in
+  React:" (replaces "are considered out of reach… Unpoly disagrees").
+- F9/coda REWORKED WHOLE (supersedes prior coda). Final text:
+    h3: "… and escape hatches everywhere"
+    P1 (Henning's words): "When attributes aren't enough, you can recompose Unpoly's
+    behavior using its extensive JavaScript API. Every attribute has a JavaScript twin —
+    [up-submit] is up.submit(), modifying attributes become options."
+    CODE (Henning's, + comment): "// Let the user create a record in an overlay, then use
+    the result:" / "let { email } = await up.layer.ask({ url: '/users/new' })" /
+    "up.submit('#invite-form', { params: { email } })"
+    (optional rigor: add acceptLocation: '/users/:email' — Henning decides at review)
+    P2: "Along the way, Unpoly emits the events you wish the platform had:" + event chips.
+    P3: "And your own JavaScript plugs in through compilers: enhance existing HTML tags,
+    invent new elements, integrate third-party libraries, bring server-side data into
+    frontend components — or mount a whole React island." (NO lifecycle/teardown sentence,
+    NO config beat, NO "use them to observe" sentence, NO renderOptions event snippet.)
+    Background (not for the page): a serious JS API is real maintenance cost — which is
+    why it's a credible differentiator vs htmx's attributes-first minimalism.
+- F10 PENDING Henning's verdict; stated leans: (a) keep "One attribute." punch, trim lead
+  to "Here is an enhanced link:"; (b) "…is an optional optimization." (drop "never a
+  requirement"); (c) "your existing routes are enough."; (d) no further dash changes;
+  (e) unbold checklist except aborts/caches/Back/teardown; keep hero triptych bolds.
+- F11 remaining half NOT YET DISCUSSED: frame the two quiet differentiators as design
+  rules ("a full page is fine — no fragment endpoints"; "every feature has a degradation
+  story"); Carson relocation already covered by F3.
+- ALSO PENDING: CSS/layout-liberties discussion (see Open items).
+
 ## Open items (pending task list, refreshed 2026-09-16)
 
 Alignment (current session or its compacted continuation):
