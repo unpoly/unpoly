@@ -236,10 +236,10 @@ handling-asset-changes (renamed), tutorial (site-side).
 Tally: Getting started + 12 chapters, ~78 pages, ~21 new (11 overviews, 7 GS pages,
 Following links, Handling all links/forms, Framework islands, Hungry elements, Server bindings).
 
-## Landing round 3 — verdict ledger (2026-09-16; verdicts final, NOT YET APPLIED to the mock)
+## Landing round 3 — verdict ledger (2026-09-16; ALL APPLIED to mock v11, and Henning
+APPROVED v11 as good enough for implementation)
 
-Apply these to the mock artifact (https://claude.ai/artifact/G1namZkdtXKVjExAQjTBt8, v10;
-fetch via Artifact read_file, strip the publish wrapper, edit, republish to same URL):
+Mock artifact: https://claude.ai/artifact/G1namZkdtXKVjExAQjTBt8 (v11 = all verdicts below).
 
 - F1a: spec-chip line under hero CTAs: "One JavaScript file · no build step · MIT".
 - F2 (F2e variant): comparison section stays htmx+SPA only. Fit list gains positive bullet
@@ -282,25 +282,64 @@ fetch via Artifact read_file, strip the publish wrapper, edit, republish to same
     NO config beat, NO "use them to observe" sentence, NO renderOptions event snippet.)
     Background (not for the page): a serious JS API is real maintenance cost — which is
     why it's a credible differentiator vs htmx's attributes-first minimalism.
-- F10 PENDING Henning's verdict; stated leans: (a) keep "One attribute." punch, trim lead
-  to "Here is an enhanced link:"; (b) "…is an optional optimization." (drop "never a
-  requirement"); (c) "your existing routes are enough."; (d) no further dash changes;
-  (e) unbold checklist except aborts/caches/Back/teardown; keep hero triptych bolds.
-- F11 remaining half NOT YET DISCUSSED: frame the two quiet differentiators as design
-  rules ("a full page is fine — no fragment endpoints"; "every feature has a degradation
-  story"); Carson relocation already covered by F3.
-- ALSO PENDING: CSS/layout-liberties discussion (see Open items).
+- F10 settled: (a) lead keeps "Here is a single enhanced link:", the "One attribute."
+  fragment DIES (Henning read it as AI slop), list intro = "When it's clicked, Unpoly:";
+  (b) Henning's line: "Rendering only the fragment is a simple, optional optimization;
+  most screens never need it." (comma splice fixed to semicolon; "simple but optional"
+  -> "simple, optional"); (c) "You don't build separate fragment endpoints. Unpoly works
+  with the routes you already have." (dash tail then split per d); (d) vary joints with
+  full-sentence splits/parentheses/semicolons where dash tails cluster — applied to the
+  fragment section's closing paragraph (list-dash, split, semicolon); spaced-out single
+  tails elsewhere stay; (e) checklist unbolds items 1-2, keeps aborts/caches/Back/
+  teardown bolds; hero triptych bolds stay.
+- F11 settled: (b) NO design-rule promotion — the full-page fact already appears three
+  times in fresh words (fragment intro parenthetical, closing paragraph, semantics
+  restatement) and the degradation rule was already stated as a rule ("Every feature has
+  a graceful degradation story."). Carson relocation covered by F3.
+- Still open after round 3: CSS/layout-liberties discussion, TUIfy logo, optional
+  makandra cold-reader test (see Open items).
+
+## CSS/layout liberties for the build (settled 2026-09-16, Henning's guardrails verbatim in spirit)
+
+- COLORS: stick with the _constants.sass palette (main/secondary/tertiary/quaternary);
+  new variants via saturation/lightness tweaks are fine. Grays are unrestricted, but
+  re-used grays become Sass variables.
+- SPACING: margins/spacers may be reworked freely, but converge on a small set of
+  predefined spacer levels as Sass variables — no infinite variety.
+- LAYOUT: wide latitude — full-width top bar, sidebar alignment, breakpoints, mobile
+  view are the agent's choice.
+- DO NOT BREAK pages not discussed in this alignment, especially pages that demo a CSS
+  feature or HTML selector: adapt them to the new design or keep them working. Write
+  missing feature specs (spec/features/, Capybara) where regressions need a guard.
+- FONT: keep Roboto (sizes/margins are tuned to it); different weights allowed. Font is
+  vendored via a google-webfonts-helper-style tool (https://gwfh.mranftl.com/fonts) —
+  download new weights with it.
+- ARCHITECTURE: CSS stays isolated BEM blocks (source/stylesheets/guide/blocks/) with
+  minimal global styles (basic typography, spacing utilities). Refresh/modernize blocks
+  freely, but TALK TO HENNING before changing information architecture fundamentally —
+  e.g. parameter groups (@section in the JSDoc dialect) are a recent addition and must
+  not get lost in a redesign.
+- BLOCK JUDGMENT: adapt/extend an existing block vs. new block by judgment. No dozens of
+  modifiers forcing a block into a fundamentally different shape; but no duplicate
+  "button" blocks just for a size difference (that is a modifier).
+- NO CSS FRAMEWORKS (no Bootstrap/Tailwind). Just Sass compiling to CSS.
+- DARK MODE: out of scope for this rework.
+- BROWSER FLOOR (site CSS): last 2 years, same as the framework — :has(), container
+  queries, dvh etc. are allowed.
+- SASS COMPILER: stay on the pinned Ruby Sass by default; if it becomes a wall, the agent
+  may switch to a newer Sass (dart-sass) and migrate the existing files.
+- CONFIRMED ASSUMPTIONS: the mock's colors are placeholders — the landing page is built
+  in the _constants.sass palette (mock = copy-and-structure source, not a pixel spec);
+  blocks orphaned by the restructure (e.g. tree-filter styles) may be deleted after a
+  grep confirms no other use.
+- REGRESSION METHOD (agent's call, noted for continuity): Capybara feature specs for
+  structural invariants (parameter groups/@section rendering, demo pages) + a
+  before/after Playwright screenshot sweep over a hand-picked inventory of tricky pages;
+  Henning sees the inventory before the sweep.
 
 ## Open items (pending task list, refreshed 2026-09-16)
 
 Alignment (current session or its compacted continuation):
-- Landing round 3: decide review groups A (mechanical slop fixes), B (middle de-dupe),
-  C (Hotwire paragraph, maturity sentence back, davisums replacement, early "single
-  client-side script" clause, Carson quote relocation) and apply to the mock.
-- CSS/layout liberties (added 2026-09-16): agree on the agent's freedom vs. limits when
-  reworking the application layout, frontend components and stylesheets during the build.
-  Landing page + nav bar changes are agreed; the ~800 existing doc pages must keep working
-  with the reworked CSS. Discuss BEFORE Build·Structure begins.
 - TUIfy logo: Henning supplies an asset privately, or TUIfy leaves the wall.
 - Optional: cold-reader test of the mock with 2-3 makandra developers.
 
