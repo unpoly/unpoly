@@ -157,3 +157,11 @@ RedirectPermanent /handle-everything /handling-everything
 
 RedirectPermanent /before /targeting-fragments#appending-or-prepending
 RedirectPermanent /after /targeting-fragments#appending-or-prepending
+
+# Docs rework 2026: the tutorial retired in favor of the Getting-started guides,
+# and the /install sub-pages moved into the docs.
+RedirectPermanent /tutorial /start/overview
+RedirectPermanent /start /start/overview
+RedirectPermanent /install/server-bindings /server-bindings
+RedirectPermanent /install/bootstrap /install#bootstrap
+RedirectPermanent /install/legacy-browsers /install#browser-support
