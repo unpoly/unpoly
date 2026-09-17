@@ -546,6 +546,24 @@ escalates only genuine calls to Henning.
 - T6: every move/split lands as TWO commits — mechanical relocation first (verbatim
   text, toc.yml, redirect), then the rewrite/reframe (V2 renames ride in the second).
 
+## Structure station review verdicts (Henning, 2026-09-17)
+
+- Learn-ref slot label: "Learn:" (replaces the reused "Guide:"/"Guides:" wording).
+- Reading nav on Learn pages: `< Previous` and `Next: <title> >` with chevron-left/right
+  icons from the site's icon set; the widget is its own BEM block for the CSS station.
+  The teased title is the next page in reading order; on the last page of a chapter this
+  is the first page of the next chapter.
+- REVISES 2026-09-02: NO separate collapsed "Deprecated" group in the module sidebar —
+  it mixed types and visibilities. Deprecated features return to their type sections.
+- API sidebar top-level nodes and the /api hub show the module NAME only (`up.link`);
+  the prose titles ("Linking and following") are dropped in both. "Formats" renders as
+  an expandable section like the modules.
+- install.md's three pre-existing typos: fixed now in their own commit (not deferred
+  to Content).
+- Approved as-is: server-bindings "edit this page" link retarget; custom-form-fields
+  placed in Forms after handling-all-forms; NO redirects for /up.browser, /up.migrate,
+  /up.tooltip (they 404 per V3).
+
 ## Open items (pending task list, refreshed 2026-09-16)
 
 Alignment (current session or its compacted continuation):

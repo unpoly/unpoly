@@ -756,7 +756,7 @@ so where you insert a page is an editorial decision, not just a technical one.
 ### Linking the reference to a guide
 
 Readers reach a guide from the features it explains. The `@learn-ref` directive on a
-feature or module points at a guide page, and renders as a prominent "Guide:" link
+feature or module points at a guide page, and renders as a prominent "Learn:" link
 below the document's lead paragraphs:
 
 ```js

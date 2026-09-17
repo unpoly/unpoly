@@ -106,12 +106,11 @@ lib edits), `rake docs:check_urls` 78/78, unpoly self-test + lint green.
 
 ### Owed by the next Structure session (batch-6 tail)
 
-- Update docs/contributing/documentation.md where the machinery made it wrong:
-  the {:.article-ref} section, the "add a page to its module's @see list" advice, and
-  new docs for @learn-ref, [[wikilinks]], [[=tokens]] and toc.yml. Terse — the file is
-  a shared human/agent guide, key rules in plain language only.
-- Check unpoly-site README for staleness.
-- Then the station is complete; next station per plan.md is Landing + CSS.
+- ✔ Update docs/contributing/documentation.md (done 2026-09-17, `27c436610`).
+- ✔ Check unpoly-site README for staleness (done 2026-09-17, `95a74de0`).
+- The review queue below was walked with Henning on 2026-09-17; verdicts are in plan.md
+  ("Structure station review verdicts") and applied by the station's final commits.
+  The station is complete; next station per plan.md is Landing + CSS.
 
 ### Review queue for Henning (execution rules 1/3 — reader-visible words introduced)
 
