@@ -337,6 +337,44 @@ Mock artifact: https://claude.ai/artifact/G1namZkdtXKVjExAQjTBt8 (v11 = all verd
   before/after Playwright screenshot sweep over a hand-picked inventory of tricky pages;
   Henning sees the inventory before the sweep.
 
+## Session boundaries (settled 2026-09-17, after the Build·Structure session overreached)
+
+Each build session reads this before starting. Rule of thumb when unsure whether a
+question is in scope: needs taste about wording -> Content session; the build breaks
+without the answer -> Structure session; it's about how things look -> CSS session.
+
+BUILD · STRUCTURE — machinery and naming, ZERO prose:
+- toc.yml + Topic model, Learn/API nav split, /learn and /api hubs, dumb shared templates.
+- @learn-ref and [[wikilink]] PARSING + build checks (not the ~60 insertions).
+- %UNPOLY_VERSION% token, /install move mechanics, deprecated-features folding.
+- Final slugs, titles and STUBS for all new/renamed pages (a stub = final slug + title +
+  one placeholder line; the build checks and redirects need slugs to exist, so slug/title
+  sign-off legitimately happens here). .htaccess redirects; the "no lost URL" check.
+- Must NOT: write or move prose, seed pages from reference material, touch CSS beyond
+  what templates force.
+
+LANDING + CSS FOUNDATION — the visual system:
+- Spacer/gray variables, refreshed BEM blocks, top bar with search pill, layout and
+  breakpoints, tree-filter removal, per the CSS/layout liberties section.
+- The landing page built from mock v11; screenshot sweep + feature specs for the
+  don't-break contract.
+- Must NOT: touch docs prose or structure; no new pages.
+
+BUILD · CONTENT — every sentence:
+- Getting-started pages, chapter overviews, new/seeded pages (fills the stubs), the ~15
+  moves & splits of existing prose.
+- The reference link pass: @learn-ref insertions in doc comments, citation-link ->
+  wikilink migration.
+- Pipeline per page: outline -> write -> critic -> humanizer -> lint -> Henning reviews.
+- Must NOT: invent slugs or structure — it fills the skeleton the Structure session
+  committed. Any prose the Structure session left in stub pages is noise to replace,
+  not a draft to preserve.
+
+SHIP — merges, final master sync, "no lost URL" re-check, deploy. No authoring.
+
+Sequencing: Structure -> Landing+CSS -> Content -> Ship. Never two sessions editing
+unpoly-site at the same time.
+
 ## Open items (pending task list, refreshed 2026-09-16)
 
 Alignment (current session or its compacted continuation):
@@ -344,8 +382,15 @@ Alignment (current session or its compacted continuation):
 - Optional: cold-reader test of the mock with 2-3 makandra developers.
 
 Build phase (fresh sessions per station, see the progress map):
-- Build·Structure: toc.yml + nav split; @learn-ref/wikilink parsing + build checks;
-  retire & redirect (tutorial, install move, .htaccess, "no lost URL" check).
+- Build·Structure: DONE 2026-09-16. toc.yml manifest + Unpoly::Guide::Toc with strict
+  build checks; Learn/API nav split (one node template, one hub template, per-area menu,
+  next/previous widget); @learn-ref directive and [[wikilink]] autolinks sharing one
+  resolver over a Kramdown heading index; `{:.article-ref}` (84) and page-target @see (64)
+  migrated; navigation/analytics/handling-asset-changes renamed with redirects; /install
+  and /install/server-bindings moved into src/unpoly/pages as @page documents;
+  /tutorial retired; %UNPOLY_VERSION% token; `rake docs:check_urls` ("no lost URL") and
+  `rake docs:learn_refs`. Open threads handed to Build·Content in
+  docs/rework-2026/handoff.md — read it before starting a station.
 - Build·Content: Getting started (8), chapter overviews (10), new/seeded pages (4),
   moves & splits (~15 ops), reference link pass (~60 features).
 - Landing build (parallel track): mock → real Middleman page, logo wall, search pill.
@@ -496,6 +541,9 @@ Settled in the 2026-09-14 session:
   only on Henning's word.
 - plan.md is the source of truth; the map artifact is the view; the landing mock artifact
   (https://claude.ai/artifact/G1namZkdtXKVjExAQjTBt8) is the copy source for the landing build.
+- Build stations hand each other open threads in docs/rework-2026/handoff.md: one section
+  per station, appended, and the station that picks an item up ticks it off there. What a
+  station knowingly leaves undone goes in that file, not only in a commit message.
 - Mock iteration protocol: feedback in rounds, republish the same artifact URL, yellow
   "mock-note" tags mark pending meta (never content).
 - Context strategy: compact deliberately at clean boundaries (everything committed first),
