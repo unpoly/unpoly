@@ -20,6 +20,11 @@ function isPreRelease() {
   return /rc|beta|pre|alpha/.test(getVersion())
 }
 
+function changelogPath() {
+  const major = getVersion().split('.')[0]
+  return `docs/changes/CHANGELOG_${major}.x.md`
+}
+
 function run(command, optional = false) {
   console.log(colors.cyan('$ ' + command))
   try {
@@ -88,7 +93,7 @@ async function confirmRelease() {
   console.log()
   console.log("- Bump the version in package.json")
   console.log("- Run `npm install` to update version in package-lock.json")
-  console.log("- Update CHANGELOG.md")
+  console.log(`- Update ${changelogPath()}`)
   console.log("- Commit and push changes")
   console.log("- Check that CI is green (https://github.com/unpoly/unpoly/actions)")
   console.log("- Make sure you're logged into npm")
@@ -118,8 +123,7 @@ async function publishToNpm() {
   console.log()
 
   paths().forEach(file => {
-    const dest = path.join(stagingDir, path.basename(file))
-    fs.copyFileSync(file, dest)
+    fs.copyFileSync(file, path.join(stagingDir, path.basename(file)))
   })
 
   console.log("Package contents:")

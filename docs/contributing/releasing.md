@@ -1,7 +1,7 @@
 # Making a new release
 
 A guided CLI walks you through the process. Before starting, set the new version in
-`package.json` and write its `CHANGELOG.md` entry — the tool reads the version from
+`package.json` and write its changelog entry in `docs/changes/CHANGELOG_<major>.x.md` — the tool reads the version from
 `package.json` and tags with it.
 
 ```
