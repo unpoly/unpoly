@@ -572,7 +572,13 @@ improve what doesn't. A few conventions hold everywhere:
 
 - Open with one or two sentences saying what the topic *is*. Never "in this guide you will learn".
 - Headings name tasks or things ("Declaring dependencies"), not meta ("Overview of X").
-- Prefer short declarative sentences. "You" for instructions, "we" in walkthroughs.
+- Prefer short declarative sentences, usually subject-verb-object. "You" for instructions, "we" in walkthroughs.
+- Lead with value: say what the reader gets before explaining mechanics. Never build up
+  a problem for more than a clause.
+- Concrete beats abstract. Name outcomes and things ("your scroll position survives"),
+  not categories ("application behavior").
+- Don't enumerate features in prose — any pick of three reads as arbitrary.
+  Let code and lists carry enumerations.
 - In guides, show code early and often. A reader should rarely scroll a full screen
   without passing an example.
 - End on the last technical section. No closing summary.
@@ -586,6 +592,9 @@ improve what doesn't. A few conventions hold everywhere:
   covers, a pedagogical tone in guides, and technical senses of "framework",
   "robust" or "ecosystem". It must never change code, `@directives`, link targets
   or `{#anchor}` suffixes.
+- Watch for AI patterns the skill misses: closers that restate their section, staged
+  rebuttals of beliefs nobody stated, dramatic sentence fragments, bold on every list
+  item, clauses dangling after a dash.
 
 
 ## Reusing text
@@ -730,7 +739,8 @@ table of contents — the sidebar already is one. Its jobs, roughly in reading o
   plausibly take a wrong turn. Most overviews need none.
 
 Order sections for comprehension (usually the example before the terminology), and
-stay between 400-800 words. Good exemplars are `loading-state.md` and `overlays.md`.
+stay between 400-800 words. Good exemplars are `src/unpoly/pages/loading-state.md` and the Overlays pilot
+(`docs/rework-2026/pilots/overlays.md`, which becomes the real page during the rework).
 
 
 ## The contributing guides
