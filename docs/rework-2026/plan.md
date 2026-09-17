@@ -436,11 +436,18 @@ Its judgement calls were settled here so the Fable re-attempt executes without o
   loading-state exists. New detail pages: following-links, handling-all-links,
   handling-all-forms, hungry-elements, framework-islands, server-bindings; how-unpoly-works.
   Renames-at-rewrite (Content): navigation -> navigation-defaults, analytics ->
-  tracking-page-views. STILL OPEN: (1) the deployment-page slug (handling-deployments /
-  new-deployments / reacting-to-new-deployments); (2) the Getting-started slug convention —
-  GS pages must be clearly distinguishable from chapter overviews AND from gerund chapter
-  pages (submit-forms vs submitting-forms rejected); a /start/* folder is on the table
-  (AdonisJS precedent: slashes for the tutorial only, flat elsewhere).
+  tracking-page-views; handling-asset-changes KEEPS its slug (matches the API vocabulary
+  [up-asset]/up:assets:changed; only the title changes to "Reacting to new deployments").
+  SETTLED (2026-09-17): Getting-started pages live under a /start/ FOLDER — the only
+  directory; everything else stays flat in pages/ (no folders per chapter; react.dev
+  precedent, and V2 protects existing slugs). GS pages: /start (= How Unpoly works, the
+  chapter entry), /start/links, /start/forms, /start/overlays, /start/elements
+  (Enhance elements), /start/api (The shape of the API), /start/next (Where to go from
+  here); /install stays flat per V2. Mechanics: the @page argument is the FULL slug
+  (@page start/forms), the file path mirrors it (pages/start/forms.md), a build check
+  enforces path == slug; toc.yml, @learn-ref and [[wikilinks]] all use the full slug;
+  URL generation/proxies/redirects handle one path segment. Under the deferred /learn
+  prefix this nests as /learn/start/forms with the standard redirects.
 - PARTIAL-MOVE RULE: old pages stay untouched and listed in toc.yml inside their absorbing
   chapter until Content moves/dissolves them; the commit that removes or renames a page
   carries its redirect (.htaccess edits allowed to Content for exactly this);
