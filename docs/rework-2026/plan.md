@@ -372,6 +372,26 @@ BUILD · CONTENT — every sentence:
 
 SHIP — merges, final master sync, "no lost URL" re-check, deploy. No authoring.
 
+EXECUTION RULES (added 2026-09-17 after the attempt-1 post-mortem; bind every station):
+1. Converted prose stays verbatim. Any sentence a conversion forces you to invent is
+   flagged for Henning's review — never silently written.
+2. Citation-style @see inside @param bodies converts by fixed template — `See [[X]].` —
+   in Structure (a deterministic retag, like {:.article-ref} -> @learn-ref). No free
+   prose beyond the template. The V1 partial-migration handoff is ONLY the module
+   Essentials cards.
+3. Every new reader-visible sentence, anywhere (hub templates included), is either in
+   Henning's review queue or not written.
+4. If you need a convention another station owns (e.g. spacer variables), use a literal
+   plus a TODO(<station>) comment. Never set the convention.
+5. A handoff may only contain work the RECEIVING station owns per these boundaries.
+   Dropping or deferring your own scope requires Henning's sign-off.
+6. An answer from Henning that doesn't pick an option is NOT a verdict. Re-ask or park
+   the thread; never interpret a mandate.
+7. Never leave work in the git index. The staging area is empty except in the act of
+   committing (on Henning's word only).
+8. Planned partial migrations are written down twice: the leaving session's instructions
+   say "stopping here is correct", the receiving session's say "you inherit X, finish it".
+
 Sequencing: Structure -> Landing+CSS -> Content -> Ship. Never two sessions editing
 unpoly-site at the same time.
 
