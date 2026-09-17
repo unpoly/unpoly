@@ -375,6 +375,77 @@ SHIP — merges, final master sync, "no lost URL" re-check, deploy. No authoring
 Sequencing: Structure -> Landing+CSS -> Content -> Ship. Never two sessions editing
 unpoly-site at the same time.
 
+## Alignment round 2 — verdicts on the structure-review (2026-09-17)
+
+Context: the first Build·Structure attempt (opus, saved on branch docs-rework-attempt-1 in
+both repos, reverted from docs-rework) left docs/rework-2026/build-structure-review.md.
+Its judgement calls were settled here so the Fable re-attempt executes without open calls:
+
+- V1 (@see retirement): PARTIAL — Structure converts the 64 page-target @see to @learn-ref;
+  the ~58 module→feature entries keep rendering as Essentials cards until Content replaces
+  each module's cards with intro prose and deletes the @see machinery in that same pass.
+  STANDING RULE: every planned partial migration is written down twice — the leaving
+  session's boundary says "stopping here is correct", the receiving session's says
+  "you inherit X in this state, finish it".
+- V2 (renames): a page migrated without fundamental change KEEPS its master title and slug
+  (Henning's hand-picked). Agents pick titles/slugs only for new pages or pages they
+  fundamentally reshape (move/cut/extend/rewrite). A rename travels WITH the rewrite in
+  the same Content commit. Structure performs no renames.
+- V3 (module manifest): visibility is the signal. up.browser, up.migrate, up.tooltip get
+  @internal in the unpoly sources; Interface#guide_page? becomes !internal? (internal
+  modules render no page/menu node); manifest check = every interface with a guide page
+  appears exactly once under api. A @class up.Layer header is added to
+  src/unpoly-migrate/classes/layer/base.js so merge_interface re-parents isOpen/isClosed
+  (fixes their breadcrumb). Spec fixtures stay excluded by source path.
+- V4 (sidebar): FULL ACCORDION — expanding a node (by navigation or click) collapses
+  everything outside its ancestry; the current node auto-expands ONE level (children,
+  not descendants).
+- V5 (dynamic values): [[=helper arg…]] tokens. Registry, parse-don't-eval: whitelisted
+  names delegating to Middleman helpers; bare-word string args (optional quotes only for
+  args containing spaces); per-helper signatures declared in the registry with coercion;
+  unknown/malformed/mistyped token fails the build listing known tokens; substitution runs
+  everywhere INCLUDING code blocks; escape: \[[=. Initial registry: version, npm_tag
+  (empty on stable / @next on pre-release), size FILE (via unpoly_library_size).
+  Replaces %UNPOLY_VERSION%. Wikilinks stay bare [[slug]] / [[slug#hash]] — no folding
+  into helper syntax, no pipe labels (custom labels = plain markdown links).
+  REJECTED with reasons: raw ERB in .md (ERB is page CONTENT in code examples —
+  context.md, attributes-and-options.md; escaping would poison copy-paste examples);
+  eval-in-cleanroom (arg expressions are still code; collisions can SUCCEED silently —
+  %{name: "Alice"} is valid Ruby); typed call-site args (typing lives in the registry).
+- V6 (changelog links): /changes pages for the CURRENT major are link-checked and fixed to
+  the best-available target; older majors are ignored or fixed the same way — whichever is
+  cleaner — with scoping applied to the Middleman OUTPUT pages (/changes/<version>), not
+  the .md input. Incidental pre-existing fixes (e.g. the broken #options.cache anchor in
+  up.RenderResult#finished) travel in their OWN commit, never buried in a station commit.
+- CHANGELOG SPLIT (done, committed): docs/changes/CHANGELOG_<major>.x.md per major
+  (byte-identical entries, chronology preserved), root CHANGELOG.md = tiny index with
+  absolute links (unpoly.com/changes + GitHub) and the unpoly-migrate upgrade paragraph.
+  Site parser merges the files by git-tag timestamp (the original file interleaves
+  maintenance releases); full site suite green.
+- PACKAGING (done, committed): npm and gem ship essentials only — dist sources, LICENSE,
+  README, manifest, tiny changelog index; no docs/, no tests, no tmp. All sourcemap
+  variants ship in npm (unminified maps were missing); the gem ships maps from the next
+  release (copy_assets + gemspec glob include *.map — do NOT release manually); gemspec
+  homepage + metadata URIs point at unpoly.com (changelog_uri = /changes).
+- V7 (stubs + naming): stubs approach ACCEPTED — Structure creates all new pages as stubs
+  (final slug, final title, @page, one-line "This page is being written." body plus an
+  HTML comment naming the content sources per plan), all listed in toc.yml, strict checks
+  from day one, names reviewed as one set. SETTLED slugs: chapter overviews = chapter
+  nouns: links, forms, overlays, live-fragments, history, network, scrolling-and-focus,
+  animation (single-page chapter), scripting, backend-integration, advanced-rendering;
+  loading-state exists. New detail pages: following-links, handling-all-links,
+  handling-all-forms, hungry-elements, framework-islands, server-bindings; how-unpoly-works.
+  Renames-at-rewrite (Content): navigation -> navigation-defaults, analytics ->
+  tracking-page-views. STILL OPEN: (1) the deployment-page slug (handling-deployments /
+  new-deployments / reacting-to-new-deployments); (2) the Getting-started slug convention —
+  GS pages must be clearly distinguishable from chapter overviews AND from gerund chapter
+  pages (submit-forms vs submitting-forms rejected); a /start/* folder is on the table
+  (AdonisJS precedent: slashes for the tutorial only, flat elsewhere).
+- PARTIAL-MOVE RULE: old pages stay untouched and listed in toc.yml inside their absorbing
+  chapter until Content moves/dissolves them; the commit that removes or renames a page
+  carries its redirect (.htaccess edits allowed to Content for exactly this);
+  rake docs:check_urls enforces on every build.
+
 ## Open items (pending task list, refreshed 2026-09-16)
 
 Alignment (current session or its compacted continuation):
