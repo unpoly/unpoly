@@ -1,3 +1,9 @@
+> **HISTORICAL DOCUMENT — do not execute from this file.** This is the handoff written
+> by the reverted first Build·Structure attempt (branch docs-rework-attempt-1). Several
+> instructions below are superseded by plan.md ("Alignment round 2/3" sections) — notably
+> the page renames were reverted (V2: renames travel with the Content rewrite) and the
+> naming table changed. plan.md is the only source of truth.
+
 # Docs rework 2026 — station handoff
 
 What one build station leaves for the next. `plan.md` holds the decisions; this file holds
