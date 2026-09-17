@@ -29,12 +29,15 @@ Documentation lives in this repository, beside the code it describes. A sister p
   - [Line breaks](#line-breaks)
   - [Admonitions](#admonitions)
   - [Marking up code blocks](#marking-up-code-blocks)
+  - [Dynamic values](#dynamic-values)
   - [Writing style](#writing-style)
 - [Reusing text](#reusing-text)
   - [Markdown partials](#markdown-partials)
   - [Param partials](#param-partials)
   - [Inheriting a single param](#inheriting-a-single-param)
 - [Guide pages](#guide-pages)
+  - [Listing the page in `toc.yml`](#listing-the-page-in-tocyml)
+  - [Linking the reference to a guide](#linking-the-reference-to-a-guide)
   - [Overview pages](#overview-pages)
 - [The contributing guides](#the-contributing-guides)
 - [Modules and classes](#modules-and-classes)
@@ -493,18 +496,32 @@ containing ` = `, and code inside headings or fenced blocks. A mention of the pa
 you're currently on isn't linked either, so you can write `` `up.render()` `` freely in
 its own doc comment.
 
-Guide pages are linked by path. A link to the *main article* for a topic gets a marker
-that styles it as a prominent reference:
+Guide pages have no backtick form, so they get their own autolink: a **wikilink** is
+the page's slug in double brackets, optionally with an anchor:
 
 ```markdown
-[Polling](/polling){:.article-ref}
+For error handling, see [[failed-responses]].
+Expired content is refreshed after rendering. See [[caching#revalidation]].
+```
+
+A wikilink expands to a link labeled with the target's title — `Handling failed responses`
+above, or `Caching: Revalidation` for the anchored form — so the label follows a retitle
+instead of rotting. A slug or anchor that doesn't resolve fails the site build. Wikilinks
+work for feature pages too (`[[up.render#concurrency]]`), which adds the anchor support
+that backtick autolinks lack. They are not expanded inside code blocks or code spans.
+
+When you want your own label, don't use a wikilink — write a plain Markdown link
+with the label woven into the sentence:
+
+```markdown
+Unpoly can revalidate [expired](/caching#expiration) cache entries.
 ```
 
 Give a heading a stable anchor when you intend to link to it, so the URL survives a
 rewording:
 
 ```markdown
-## Callback arguments
+## Callback arguments {#callbacks}
 ```
 
 ### Line breaks
@@ -564,6 +581,21 @@ on its own line at the top of the block.
 up.util.wrapList([1, 2, 3]) // result: [1, 2, 3]
 ```
 
+### Dynamic values
+
+A `[[=token]]` inserts a value that is computed when the site builds:
+
+| Token | Inserts |
+|---|---|
+| `[[=version]]` | The current Unpoly version, e.g. `3.14.3` |
+| `[[=npm_tag]]` | `@next` on a pre-release, nothing on a stable version |
+| `[[=size unpoly.min.js]]` | The gzipped size of a file in `dist/`, e.g. `12.9 KB` |
+
+Unlike wikilinks, tokens are substituted *everywhere*, including code blocks — that's
+their main job, keeping version numbers in install snippets current
+(`unpoly@[[=version]]/unpoly.min.js`). To show the syntax literally, escape the opener
+as `\[[=`. An unknown or malformed token fails the site build with a list of the
+known tokens.
 
 ### Writing style
 
@@ -600,7 +632,7 @@ improve what doesn't. A few conventions hold everywhere:
 ## Reusing text
 
 Unpoly's documentation repeats itself a lot, and that's intentional. The same option is
-explained in a technical reference, in a holistic guide, sometimes in a tutorial,
+explained in a technical reference, in a holistic guide, sometimes in a getting-started page,
 because a reader learning the topic needs it in each place. What's good for the reader
 is punishing for us: the same sentence lives in many spots and has to stay consistent.
 
@@ -706,12 +738,43 @@ You can enhance any form to update the existing page, without making a full page
 @menu-title Submitting forms
 ```
 
-`@page` sets the slug and therefore the URL (`/submitting-forms`). `@menu-title` is
-optional, and gives the navigation a shorter label than the title.
+`@page` sets the slug and therefore the URL (`/submitting-forms`). The slug is the full
+path, and the file must live where the slug says: `@page start/forms` is written in
+`pages/start/forms.md`, or the site build fails. `@menu-title` is optional, and gives
+the navigation a shorter label than the title.
 
-Reference pages point at their main article with an `{:.article-ref}` link, and modules
-list their articles with `@see`. Add a new page to its module's `@see` list, or nothing
-will link to it.
+### Listing the page in `toc.yml`
+
+`src/unpoly/pages/toc.yml` is the site's table of contents: it groups pages into topics
+for the Learn and API sections, in reading order. **A new page needs its entry in the
+same commit that creates it** — the site refuses to build when a page is missing from
+the manifest, listed twice, or when the manifest names a slug that doesn't exist.
+
+The order within a Learn topic drives the previous/next navigation on every Learn page,
+so where you insert a page is an editorial decision, not just a technical one.
+
+### Linking the reference to a guide
+
+Readers reach a guide from the features it explains. The `@learn-ref` directive on a
+feature or module points at a guide page, and renders as a prominent "Guide:" link
+below the document's lead paragraphs:
+
+```js
+@selector [up-poll]
+@learn-ref polling
+```
+
+The directive is repeatable, and the slug can carry an anchor
+(`@learn-ref caching#expiration`). The link label is derived from the target — the page
+title, or "Title › Heading" for anchored refs — so it survives retitles; to override it,
+indent your own label below the directive. A slug or anchor that doesn't resolve fails
+the site build.
+
+When you add a guide page, give the features it explains a `@learn-ref`, or nothing will
+link to it. Be selective: link the one page that explains the feature in a bigger
+context — two only when no single page is clearly it, and none when a page merely
+mentions the feature. `rake docs:learn_refs` in `unpoly-site` lists the public selectors
+and events that still lack one.
 
 > [!IMPORTANT]
 > Renaming a page changes its URL, and unlike a renamed API, we don't keep the old page
@@ -784,8 +847,11 @@ Forms
 
 The `up.form` module helps you work with non-trivial forms.
 
-@see submitting-forms
+@learn-ref submitting-forms
+@learn-ref validation
+
 @see [up-submit]
+@see [up-validate]
 
 @module up.form
 */
@@ -798,10 +864,10 @@ Two things to know:
   would file its features under whichever module happened to be parsed before it.
   `src/unpoly-migrate/form.js` opens with `@module up.form` for exactly this reason;
   repeated declarations of the same module are merged.
-- **`@see` sorts itself by what it points at.** A `@page` target is listed under
-  *Guides*, a feature target under *Essential features*. On a feature, `@see` renders a
-  plain "See also" list — though a Markdown link in the prose is the more common way to
-  do that.
+- **`@see` is being retired.** It now only points at features: on a module it renders
+  the *Essentials* cards, on a feature a plain "See also" list. Guide pages are pointed
+  at with `@learn-ref` instead. The remaining `@see` lists will become intro prose
+  during the docs rework, so don't add new ones.
 
 `@class` blocks also use `@parent` to nest under a module in the menu, e.g.
 `src/unpoly/classes/params.js` declares `@parent up.form`.
