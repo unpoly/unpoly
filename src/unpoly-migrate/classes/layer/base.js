@@ -1,4 +1,8 @@
 /*-
+@class up.Layer
+*/
+
+/*-
 Returns whether this layer is still part of the [layer stack](/up.layer.stack).
 
 A layer is considered "closed" immediately after it has been [dismissed](/up.Layer.prototype.dismiss)

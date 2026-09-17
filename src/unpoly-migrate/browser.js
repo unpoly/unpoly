@@ -1,5 +1,6 @@
 /*-
 @module up.browser
+@internal
 */
 
 up.browser.loadPage = function(...args) {

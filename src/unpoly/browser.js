@@ -5,6 +5,7 @@ Browser interface
 We tunnel some browser APIs through this module for easier mocking in tests.
 
 @module up.browser
+@internal
 */
 up.browser = (function() {
   /*-
