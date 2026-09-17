@@ -104,7 +104,8 @@ so verify claims about the *current* repo state against the repo.
   blocks like `unpoly@%UNPOLY_VERSION%`.
 - SETTLED 2026-09-13 — Redirects (M3): rules live in `src/unpoly-migrate/.htaccess` as
   RedirectPermanent, per existing convention. Renamed API symbols need none (@deprecated
-  keeps pages). /tutorial redirects to how-unpoly-works. Renamed guide pages get NEW slugs
+  keeps pages). /tutorial redirects to /start/overview (originally written as
+  how-unpoly-works, before the /start settlement in V7). Renamed guide pages get NEW slugs
   (M3.1A) — but slugs are hand-picked for brevity/clarity, not blindly slugified titles
   (e.g. a title word may be dropped or changed when it makes a poor slug); old slug
   redirects. Dissolved pages redirect to the ANCHOR of the absorbing section
@@ -392,8 +393,8 @@ EXECUTION RULES (added 2026-09-17 after the attempt-1 post-mortem; bind every st
 8. Planned partial migrations are written down twice: the leaving session's instructions
    say "stopping here is correct", the receiving session's say "you inherit X, finish it".
 
-Sequencing: Structure -> Landing+CSS -> Content -> Ship. Never two sessions editing
-unpoly-site at the same time.
+Sequencing: Structure -> Landing+CSS -> Search -> Content -> Ship (Search station added
+in round 3). Never two sessions editing unpoly-site at the same time.
 
 ## Alignment round 2 — verdicts on the structure-review (2026-09-17)
 
@@ -454,7 +455,9 @@ Its judgement calls were settled here so the Fable re-attempt executes without o
   nouns: links, forms, overlays, live-fragments, history, network, scrolling-and-focus,
   animation (single-page chapter), scripting, backend-integration, advanced-rendering;
   loading-state exists. New detail pages: following-links, handling-all-links,
-  handling-all-forms, hungry-elements, framework-islands, server-bindings; how-unpoly-works.
+  handling-all-forms, hungry-elements, islands (title "Framework islands"; slug shortened
+  by Henning 2026-09-17), server-bindings (see the orchestrator ruling below: converted,
+  not stubbed). how-unpoly-works became /start/overview.
   Renames-at-rewrite (Content): navigation -> navigation-defaults, analytics ->
   tracking-page-views; handling-asset-changes KEEPS its slug (matches the API vocabulary
   [up-asset]/up:assets:changed; only the title changes to "Reacting to new deployments").
@@ -463,11 +466,23 @@ Its judgement calls were settled here so the Fable re-attempt executes without o
   precedent, and V2 protects existing slugs). GS pages: /start (= How Unpoly works, the
   chapter entry), /start/links, /start/forms, /start/overlays, /start/elements
   (Enhance elements), /start/api (The shape of the API), /start/next (Where to go from
-  here); /install stays flat per V2. Mechanics: the @page argument is the FULL slug
+  here); /install stays flat per V2. REVISED (Henning, 2026-09-17): the chapter entry
+  lives INSIDE the folder as /start/overview (= How Unpoly works), so every GS file sits
+  in pages/start/; bare /start redirects to /start/overview via .htaccess, and /tutorial
+  redirects straight to /start/overview (no chain). Under the deferred /learn prefix this
+  becomes /learn/start/overview — three segments accepted (Henning, 2026-09-17). Mechanics: the @page argument is the FULL slug
   (@page start/forms), the file path mirrors it (pages/start/forms.md), a build check
   enforces path == slug; toc.yml, @learn-ref and [[wikilinks]] all use the full slug;
   URL generation/proxies/redirects handle one path segment. Under the deferred /learn
   prefix this nests as /learn/start/forms with the standard redirects.
+- ORCHESTRATOR RULING (2026-09-17, pending Henning's veto): server-bindings is CONVERTED
+  by Structure (verbatim ERB -> pages/server-bindings.md, like /install), not stubbed.
+  M4 explicitly settled the disposition ("now ↩ moved, not ✎ new"; v5 marks it ✎/↩ and
+  the /install/server-bindings redirect must land on real content); V7's stub list only
+  settled its slug. Content later reframes it per v5. Stubbing would park live content
+  offline behind a "This page is being written." line until Content — a ship risk M4
+  already decided against. /tutorial redirects to /start/overview (Q2; target revised
+  with the /start/overview nit).
 - PARTIAL-MOVE RULE: old pages stay untouched and listed in toc.yml inside their absorbing
   chapter until Content moves/dissolves them; the commit that removes or renames a page
   carries its redirect (.htaccess edits allowed to Content for exactly this);
