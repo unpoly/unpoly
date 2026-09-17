@@ -473,6 +473,64 @@ Its judgement calls were settled here so the Fable re-attempt executes without o
   carries its redirect (.htaccess edits allowed to Content for exactly this);
   rake docs:check_urls enforces on every build.
 
+## Alignment round 3 — pre-settled queues for the CSS, Search and Content stations (2026-09-17)
+
+Station order is now: Structure -> Landing+CSS -> Search -> Content -> Ship, with session
+exit points at station boundaries. Coordination: this orchestrator session briefs and
+audits station agents (run as subagents), answers questions covered by this file, and
+escalates only genuine calls to Henning.
+
+- S1 SEARCH is its own station: Pagefind crawler integration (needs STATIC build output —
+  the preview server writes none), HTML annotation for indexing, results popup and match
+  representation. Escalation risk acknowledged: Pagefind fixes, or the Algolia fallback
+  per the settled criteria. Rider for Structure: it may REMOVE existing search
+  functionality where it causes friction, and must not split the old search between
+  Learn/API (the global rewrite obsoletes it).
+- S2 CSS SCOPE (a'): the station owns ALL presentation everywhere — tokens, spacing,
+  type, color, across the frame AND content blocks; docs pages intentionally get the new
+  (airier) density so they match the landing language. It may NOT restructure a block's
+  DOM or information design without escalation (agent -> orchestrator -> Henning).
+- C1: taste tokens (spacer scale, grays, Roboto weights, type scale, breakpoints,
+  per-block modernization) are proposed IN-STATION and frozen only after Henning's
+  rendered-review round (styled landing + 3-4 representative doc pages). Chat alignment
+  is for shape decisions only.
+- C2: ONE global shared header — fixed, full-width, on every page; the mock is the
+  content spec (logo+version, search pill, Learn/API/Demo/Changes/Support/GitHub, burger
+  carrying search on mobile). Version switcher keeps its existing behavior.
+- C3: sidebar pinned to the left edge, content centered in the remaining width (react.dev
+  pattern, screenshot-confirmed). The in-page auto-TOC becomes a right rail on wide
+  screens via CSS-ONLY relocation: DOM position unchanged (still above first h2),
+  media-queried position:fixed + reserved content gutter + max-height with inner scroll;
+  inline below the breakpoint. Scrollspy highlighting is an optional later JS enhancement.
+  The screenshot sweep must include huge-TOC pages (up.render).
+- C4: there is ONE diagram — talk slide 12 IS fragment_updates.png (verified). The
+  Landing agent redraws it as an inline SVG partial with real <text> (site tokens,
+  Roboto) — an <img>-embedded SVG cannot use webfonts. Henning offers a manual Inkscape
+  cleanup as fallback. "How Unpoly works" reuses the same partial later. Logo wall is
+  COMPLETE: 10 SVGs in docs/rework-2026/logos/.
+- Preview mechanics (for all station briefings): `bundle exec middleman server` ->
+  localhost:4567, writes no static files; reboot on frontend-library, config.rb or lib/
+  changes. Design changes are shown via the live preview and screenshot artifacts.
+- T1: toc.yml order — Structure seeds each chapter exactly per the v5 listing; Content
+  may reorder WITHIN a chapter with a one-line rationale surfaced in batch review;
+  cross-chapter moves are taxonomy and stay forbidden.
+- T2: Henning reviews in chapter batches (max 6 pages, larger chapters split), Getting
+  started first, plus an early calibration batch: the first 2-3 overviews come to him
+  before the remaining overviews are written.
+- T3: the writing-style/overview-pages guide sections already existed (Henning-authored,
+  08bc5f81e — the orchestrator's "missing" premise was stale). Post-dating deltas folded
+  2026-09-17 (2c5adfc7f): copy-taste bullets, extended slop watchlist, exemplar paths.
+- T4: code examples are DERIVED from the docs and implementation — never executed or
+  mechanically verified (no lint, no scratch-server checks). Every new example is
+  reviewed by BOTH an agent critic pass and Henning; batches must surface examples
+  prominently.
+- T5: @learn-ref policy — default ONE ref per feature: the page that explains it in a
+  bigger context, with a real-world use case, or as its feature family. TWO only when no
+  single page is clearly authoritative. NEVER three. If no clearly relevant page exists,
+  OMIT — never link a page that mentions the feature as a tangent or footnote.
+- T6: every move/split lands as TWO commits — mechanical relocation first (verbatim
+  text, toc.yml, redirect), then the rewrite/reframe (V2 renames ride in the second).
+
 ## Open items (pending task list, refreshed 2026-09-16)
 
 Alignment (current session or its compacted continuation):
