@@ -1,8 +1,7 @@
-> **HISTORICAL DOCUMENT — do not execute from this file.** This is the handoff written
-> by the reverted first Build·Structure attempt (branch docs-rework-attempt-1). Several
-> instructions below are superseded by plan.md ("Alignment round 2/3" sections) — notably
-> the page renames were reverted (V2: renames travel with the Content rewrite) and the
-> naming table changed. plan.md is the only source of truth.
+> **The "From Build·Structure (2026-09-16)" section below is HISTORICAL — do not execute
+> from it.** It was written by the reverted first Build·Structure attempt (branch
+> docs-rework-attempt-1); the page renames were reverted (V2) and the naming table
+> changed. plan.md decides; sections from attempt 2 onward (2026-09-17+) are live again.
 
 # Docs rework 2026 — station handoff
 
@@ -95,3 +94,55 @@ headers are exempt for now.
   They are exempt from the manifest check because they document no current feature.
   Marking them `@internal` would be the honest fix, but `up.Layer#isOpen`/`#isClosed`
   currently parse under `up.browser` and would lose their breadcrumb.
+
+## From Build·Structure attempt 2 (2026-09-17) — LIVE
+
+Batches 1–5 of the station are done, verified and pushed (unpoly `8c6470580`,
+unpoly-site `07ae0573`): parser/token foundations, 23 stubs + /install and
+/server-bindings conversions + 5 redirects, toc.yml + strict checks, Learn/API nav
+split with full-accordion menu, and the @see/article-ref migrations. Evidence at wrap:
+196 rspec examples green, `middleman build` "All links OK" (re-confirmed after the last
+lib edits), `rake docs:check_urls` 78/78, unpoly self-test + lint green.
+
+### Owed by the next Structure session (batch-6 tail)
+
+- Update docs/contributing/documentation.md where the machinery made it wrong:
+  the {:.article-ref} section, the "add a page to its module's @see list" advice, and
+  new docs for @learn-ref, [[wikilinks]], [[=tokens]] and toc.yml. Terse — the file is
+  a shared human/agent guide, key rules in plain language only.
+- Check unpoly-site README for staleness.
+- Then the station is complete; next station per plan.md is Landing + CSS.
+
+### Review queue for Henning (execution rules 1/3 — reader-visible words introduced)
+
+- Learn-refs slot label reuses the existing "Guide:"/"Guides:" wording ("Learn" would
+  be new copy — Henning's call).
+- Reading-nav labels "Previous"/"Next"; deprecated menu group label "Deprecated".
+- install.md was converted verbatim INCLUDING pre-existing typos ("You know have
+  everything", "Recent versions of Unpoly supports", "files that configures") — left
+  for Content's rewrite, not conversion damage. Structural liberties: colspan tables
+  became 2-column; extension links retarget to #browser-support/#bootstrap//server-bindings.
+- server-bindings.md: the GitHub "edit this page" link now points at the .md in the
+  unpoly repo (the ERB it named is deleted).
+- toc.yml: custom-form-fields is the one page v5 does not place; it sits in Forms after
+  handling-all-forms (one-line change if wanted).
+- /up.browser, /up.migrate, /up.tooltip now 404 (per V3; API symbols are outside the
+  no-lost-URL check). Three .htaccess lines if Henning wants redirects — unruled.
+
+### Inherited by Build·Content (V1 twice-written record, second copy)
+
+- 55 feature-target @see remain and render the module Essentials cards. Content replaces
+  them with intro prose per module (TODO(content) markers at Interface#essential_features),
+  then deletes the @see machinery: REFERENCE_PATTERN/parse_references! in parser.rb,
+  Referencer, essential_features, the essential-features template block, _see_also.erb.
+- `rake docs:learn_refs` lists 39 public selectors/events without a ref — the insertion
+  queue under the T5 one-ref policy.
+- Old-major changelog links: majors 0–2 are scoped out on OUTPUT pages in config.rb
+  (V6 "ignored" chosen); the current major is fixed.
+
+### Riders
+
+- Search station: the sidebar tree filter was KEPT (it filters whichever area's menu is
+  loaded, zero effort spent); removing it stays a Search-station liberty.
+- Site build ~4 min with link check; SKIP_CHECK_LINKS=1 skips it. Preview:
+  `bundle exec middleman server` → localhost:4567, restart after config.rb/lib changes.
