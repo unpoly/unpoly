@@ -1,0 +1,216 @@
+# The structure of unpoly.com.
+#
+# This file owns *relations* only: which pages form a topic, in which order, and
+# which interfaces the API reference lists. Every fact about a single document
+# (its title, slug, menu title, visibility) lives in that document's directives.
+#
+# The site fails to build when a page or module is missing here, listed twice, or
+# names a slug that does not exist. See docs/contributing/documentation.md.
+#
+# During the docs rework, pages that will dissolve stay listed in the chapter that
+# absorbs them, until the Content station moves their text and removes the entry
+# together with a redirect.
+
+learn:
+  title: Learn
+  reading: linear
+
+  topics:
+    - type: page-group
+      title: Getting started
+      pages:
+        - start/overview
+        - install
+        - start/links
+        - start/forms
+        - start/overlays
+        - start/elements
+        - start/api
+        - attributes-and-options # dissolves into start/api
+        - start/next
+
+    - type: page-group
+      title: Links
+      pages:
+        - links
+        - following-links
+        - handling-all-links
+        - handling-everything # splits into handling-all-links / handling-all-forms
+        - preloading
+        - navigation-bars
+        - faux-interactive-elements
+
+    - type: page-group
+      title: Forms
+      pages:
+        - forms
+        - submitting-forms
+        - validation
+        - reactive-server-forms
+        - switching-form-state
+        - disabling-forms
+        - flashes
+        - handling-all-forms
+        - custom-form-fields
+        - watch-options
+
+    - type: page-group
+      title: Overlays
+      pages:
+        - overlays
+        - layer-terminology # dissolves into the overlays overview
+        - opening-overlays
+        - closing-overlays
+        - subinteractions
+        - customizing-overlays
+        - layer-option
+        - context
+        - history-in-overlays
+
+    - type: page-group
+      title: Loading state
+      pages:
+        - loading-state
+        - feedback-classes
+        - placeholders
+        - previews
+        - optimistic-rendering
+        - progress-bar
+
+    - type: page-group
+      title: Live fragments
+      pages:
+        - live-fragments
+        - lazy-loading
+        - infinite-scrolling
+        - polling
+        - hungry-elements
+
+    - type: page-group
+      title: History
+      pages:
+        - history
+        - updating-history
+        - restoring-history
+        - analytics
+
+    - type: page-group
+      title: Scrolling & focus
+      pages:
+        - scrolling-and-focus
+        - scrolling
+        - scroll-tuning
+        - focus
+        - focus-visibility
+
+    - type: page-group
+      title: Network & caching
+      pages:
+        - network
+        - caching
+        - aborting-requests
+        - network-issues
+
+    - type: page-group
+      title: Animation
+      pages:
+        - animation
+        - predefined-animations # dissolves into animation
+        - predefined-transitions # dissolves into animation
+        - motion-tuning # dissolves into animation
+
+    - type: page-group
+      title: Scripting
+      pages:
+        - scripting
+        - enhancing-elements
+        - data
+        - templates
+        - islands
+        - legacy-scripts
+        - script-security
+
+    - type: page-group
+      title: Backend integration
+      pages:
+        - backend-integration
+        - optimizing-responses
+        - conditional-requests
+        - skipping-rendering # dissolves, mostly into conditional-requests
+        - handling-asset-changes
+        - server-bindings
+
+    - type: page-group
+      title: Advanced rendering
+      pages:
+        - advanced-rendering
+        - targeting-fragments
+        - target-derivation
+        - providing-html
+        - navigation
+        - failed-responses
+        - preserving-elements
+        - render-lifecycle
+
+api:
+  title: API reference
+  reading: lookup
+
+  topics:
+    - type: module
+      module: up.link
+
+    - type: module
+      module: up.form
+
+    - type: module
+      module: up.script
+
+    - type: module
+      module: up.layer
+
+    - type: module
+      module: up.fragment
+
+    - type: module
+      module: up.radio
+
+    - type: module
+      module: up.motion
+
+    - type: module
+      module: up.status
+
+    - type: module
+      module: up.network
+
+    - type: module
+      module: up.event
+
+    - type: module
+      module: up.protocol
+
+    - type: module
+      module: up.element
+
+    - type: module
+      module: up.viewport
+
+    - type: module
+      module: up.history
+
+    - type: module
+      module: up.util
+
+    - type: module
+      module: up.framework
+
+    - type: module
+      module: up.log
+
+    - type: page-group
+      title: Formats
+      start: none
+      pages:
+        - url-patterns
+        - relaxed-json
