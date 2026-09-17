@@ -11,7 +11,7 @@
 
   If set to `false`, the history will remain unchanged.
 
-  @see updating-history
+  See [[updating-history]].
 
 @param {boolean|string} [options.failHistory]
   Whether to update history when the server responds with an error code.

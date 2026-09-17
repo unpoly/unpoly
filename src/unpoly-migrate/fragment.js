@@ -110,7 +110,7 @@ Returns `undefined` if no element matches these conditions.
 @param {string} [options.layer='current']
   The the layer in which to find the element.
 
-  @see layer-option
+  See [[layer-option]].
 @param {string|Element|jQuery} [options.origin]
   An second element or selector that can be referenced as `:origin` in the first selector:
 @return {Element|undefined}

@@ -8,10 +8,10 @@ The `up.history` module helps you work with the browser history.
 @see up:location:changed
 @see [up-back]
 
-@see updating-history
-@see restoring-history
-@see history-in-overlays
-@see analytics
+@learn-ref updating-history
+@learn-ref restoring-history
+@learn-ref history-in-overlays
+@learn-ref analytics
 
 @module up.history
 */
@@ -515,7 +515,7 @@ up.history = (function() {
 
   When this event is emitted, the [browser location](/up.history.location) has already been updated.
 
-  [Restoring history](/restoring-history){:.article-ref}
+  @learn-ref restoring-history
 
   @event up:location:restore
   @param {string} event.location
@@ -540,7 +540,7 @@ up.history = (function() {
   /*-
   Configures whether this `<head>` element is updated during [history changes](/updating-history).
 
-  [Updating history](/updating-history){:.article-ref}
+  @learn-ref updating-history
 
   ### Default meta elements
 

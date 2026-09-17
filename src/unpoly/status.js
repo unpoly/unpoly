@@ -7,12 +7,12 @@ Unpoly can apply temporary status effects to your page as the user navigates thr
 For example, you can show arbitrary [loading state](/loading-state) while waiting for the server,
 implement [optimistic rendering](/optimistic-rendering) or highlight current links in [navigation bars](/navigation-bars).
 
-@see navigation-bars
-@see loading-state
-@see feedback-classes
-@see placeholders
-@see previews
-@see optimistic-rendering
+@learn-ref navigation-bars
+@learn-ref loading-state
+@learn-ref feedback-classes
+@learn-ref placeholders
+@learn-ref previews
+@learn-ref optimistic-rendering
 
 @see [up-nav]
 @see .up-current
@@ -202,7 +202,7 @@ up.status = (function() {
   The class remains set while the request is loading.
   It is removed when the request [ends](/up.Request.prototype.ended) for any reason.
 
-  [Feedback classes](/feedback-classes){:.article-ref}
+  @learn-ref feedback-classes
 
   > [tip]
   > If you're looking to style the [targeted](/targeting-fragments) fragment, see `.up-loading`.
@@ -217,7 +217,7 @@ up.status = (function() {
   The class remains set while the request is loading.
   It is removed when the request [ends](/up.Request.prototype.ended) for any reason.
 
-  [Feedback classes](/feedback-classes){:.article-ref}
+  @learn-ref feedback-classes
 
   > [tip]
   > If you're looking to style the [origin](/origin) that targeted the fragment, see `.up-active`.
@@ -233,7 +233,7 @@ up.status = (function() {
   The class remains set while the revalidation request is loading.
   It is removed when the request [ends](/up.Request.prototype.ended) for any reason.
 
-  [Feedback classes](/feedback-classes){:.article-ref}
+  @learn-ref feedback-classes
 
   ## Example
 

@@ -105,7 +105,7 @@ up.Response = class Response extends up.Record {
   /*-
   Changes to the current [context](/context) as [set by the server](/X-Up-Context).
 
-  [Layer context](/context){:.article-ref}
+  @learn-ref context
 
   @property up.Response#context
   @experimental

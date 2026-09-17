@@ -9,11 +9,11 @@ callbacks to [compilers](/enhancing-elements). This will ensure they run both at
 when a new fragment is inserted later. See [Migrating legacy JavaScript](/legacy-scripts)
 for details.
 
-@see enhancing-elements
-@see data
-@see legacy-scripts
-@see handling-asset-changes
-@see script-security
+@learn-ref enhancing-elements
+@learn-ref data
+@learn-ref legacy-scripts
+@learn-ref handling-asset-changes
+@learn-ref script-security
 
 @see up.compiler
 @see [up-data]
@@ -149,7 +149,7 @@ up.script = (function() {
   /*-
   Registers a function to be called when a matching element is inserted into the DOM.
 
-  [Enhancing elements](/enhancing-elements){:.article-ref}
+  @learn-ref enhancing-elements
 
   ## Anatomy of a compiler
 
@@ -738,7 +738,7 @@ up.script = (function() {
 
   Multiple `up.data()` calls for the same element always return the same object reference.
 
-  [Attaching data to elements](/data){:.article-ref}
+  @learn-ref data
 
   ## Use with `[up-data]`
 
@@ -793,7 +793,7 @@ up.script = (function() {
 
   To programmatically parse an `[up-data]` attribute into an object, use `up.data(element)`.
 
-  [Attaching data to elements](/data){:.article-ref}
+  @learn-ref data
 
   ## Example
 
@@ -887,7 +887,7 @@ up.script = (function() {
   When [rendering](/up.render), Unpoly compares the assets on the current page with the new assets
   from the server response. If the assets don't match, an `up:assets:changed` event is emitted.
 
-  [Handling changes in frontend code](/handling-asset-changes){:.article-ref}
+  @learn-ref handling-asset-changes
 
 
   ## Default assets
@@ -981,7 +981,7 @@ up.script = (function() {
 
   The event is emitted on the `document`.
 
-  [Handling changes in frontend code](/handling-asset-changes){:.article-ref}
+  @learn-ref handling-asset-changes
 
   ## Example
 

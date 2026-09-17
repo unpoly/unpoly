@@ -40,7 +40,7 @@ up.Layer = class Layer extends up.Record {
 
   If a layer does not have visible history, its desendant layers cannot have history either.
 
-  [History in overlays](/history-in-overlays){:.article-ref}
+  @learn-ref history-in-overlays
 
   @property up.Layer#history
   @param {boolean} history
@@ -53,7 +53,7 @@ up.Layer = class Layer extends up.Record {
 
   Requests targeting this layer will send the mode value as an `X-Up-Mode` header.
 
-  [Customizing overlays](/customizing-overlays){:.article-ref}
+  @learn-ref customizing-overlays
 
   @property up.Layer#mode
   @param {string} mode
@@ -74,7 +74,7 @@ up.Layer = class Layer extends up.Record {
   console.log(layer.context) // logs "{ message: 'Please select a contact' }"
   ```
 
-  [Layer context](/context){:.article-ref}
+  @learn-ref context
 
   @property up.Layer#context
   @param {Object} context
@@ -143,7 +143,7 @@ up.Layer = class Layer extends up.Record {
 
   To dismiss a layer *without* an accepting intent, use `up.Layer#dismiss()` instead.
 
-  [Closing overlays](/closing-overlays){:.article-ref}
+  @learn-ref closing-overlays
 
   @function up.Layer#accept
   @section Acceptance
@@ -204,7 +204,7 @@ up.Layer = class Layer extends up.Record {
 
   To close an overlay with an accepting intent, use `up.Layer#accept()` instead.
 
-  [Closing overlays](/closing-overlays){:.article-ref}
+  @learn-ref closing-overlays
 
   @function up.Layer#dismiss
   @param {any} [value]
@@ -753,7 +753,7 @@ up.Layer = class Layer extends up.Record {
   If this layer does not [affect browser history](/up.Layer.prototype.history), this property will
   still return the title the layer would otherwise use.
 
-  [History in overlays](/history-in-overlays){:.article-ref}
+  @learn-ref history-in-overlays
 
   @property up.Layer#title
   @param {string} title
@@ -818,7 +818,7 @@ up.Layer = class Layer extends up.Record {
   still returns the URL of the content in the overlay. In this case
   the browser's address bar will show the location of an ancestor layer.
 
-  [History in overlays](/history-in-overlays){:.article-ref}
+  @learn-ref history-in-overlays
 
   @property up.Layer#location
   @param {string} location

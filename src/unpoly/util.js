@@ -9,8 +9,8 @@ You will recognize many functions from other utility libraries like [Lodash](htt
 While feature parity with Lodash is not a goal of `up.util`, you might find it sufficient
 to not include another library in your asset bundle.
 
-@see relaxed-json
-@see url-patterns
+@learn-ref relaxed-json
+@learn-ref url-patterns
 
 @module up.util
 */

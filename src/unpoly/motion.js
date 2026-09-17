@@ -45,9 +45,9 @@ You can define custom animations using `up.transition()` and
 `up.animation()`.
 
 
-@see predefined-animations
-@see predefined-transitions
-@see motion-tuning
+@learn-ref predefined-animations
+@learn-ref predefined-transitions
+@learn-ref motion-tuning
 
 @see [up-transition]
 @see up.animation
@@ -707,7 +707,7 @@ up.motion = (function() {
   @param [up-fail-transition]
     The transition to use when the server responds with an error code.
 
-    @see failed-responses
+    See [[failed-responses]].
   @stable
   */
 

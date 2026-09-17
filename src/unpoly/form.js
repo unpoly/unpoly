@@ -4,13 +4,13 @@ Forms
 
 The `up.form` module helps you work with non-trivial forms.
 
-@see submitting-forms
-@see validation
-@see switching-form-state
-@see reactive-server-forms
-@see disabling-forms
-@see watch-options
-@see custom-form-fields
+@learn-ref submitting-forms
+@learn-ref validation
+@learn-ref switching-form-state
+@learn-ref reactive-server-forms
+@learn-ref disabling-forms
+@learn-ref watch-options
+@learn-ref custom-form-fields
 
 @see [up-submit]
 @see [up-validate]
@@ -368,7 +368,7 @@ up.form = (function() {
 
         By default, failed responses will update the `<form>` element itself.
 
-        @see failed-responses
+        See [[failed-responses]].
 
       @param options.origin
         The element that triggered the form submission.
@@ -1511,7 +1511,7 @@ up.form = (function() {
   A matching element in the current page is then swapped with the new element from the server response.
   The response may include other HTML (even an entire HTML document), but only the matching element will be updated.
 
-  [Submitting forms](/submitting-forms){:.article-ref}
+  @learn-ref submitting-forms
 
   ## Example
 
@@ -1559,7 +1559,7 @@ up.form = (function() {
 
         By default, failed responses will update the `<form>` element itself.
 
-        @see failed-responses
+        See [[failed-responses]].
 
   @section Navigation
     @mix up-follow/navigation
@@ -1637,7 +1637,7 @@ up.form = (function() {
   /*-
   Controls the state of another element when this field changes.
 
-  [Switching form state](/switching-form-state){:.article-ref}
+  @learn-ref switching-form-state
 
   ## Example
 
@@ -1689,7 +1689,7 @@ up.form = (function() {
 
   You can listen to `up:form:switch` to implement [custom switching effects](/switching-form-state#custom-effects).
 
-  [Switching form state](/switching-form-state){:.article-ref}
+  @learn-ref switching-form-state
 
   ## Event targets
 
@@ -1749,7 +1749,7 @@ up.form = (function() {
 
   The element will be hidden for all other values.
 
-  [Switching visibility](/switching-form-state){:.article-ref}
+  @learn-ref switching-form-state
 
   @selector [up-show-for]
   @param [up-show-for]
@@ -1764,7 +1764,7 @@ up.form = (function() {
 
   The element will be shown for all other values.
 
-  [Switching visibility](/switching-form-state#toggle){:.article-ref}
+  @learn-ref switching-form-state#toggle
 
   @selector [up-hide-for]
   @param [up-hide-for]
@@ -1779,7 +1779,7 @@ up.form = (function() {
 
   The element will be enabled for all other values.
 
-  [Switching disabled state](/switching-form-state#disable){:.article-ref}
+  @learn-ref switching-form-state#disable
 
   @selector [up-disable-for]
   @param [up-disable-for]
@@ -1794,7 +1794,7 @@ up.form = (function() {
 
   The element will be disabled for all other values.
 
-  [Switching disabled state](/switching-form-state#disable){:.article-ref}
+  @learn-ref switching-form-state#disable
 
   @selector [up-enable-for]
   @param [up-enable-for]

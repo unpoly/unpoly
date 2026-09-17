@@ -19,13 +19,13 @@ Overlays allow you to break up a complex screen into [subinteractions](/subinter
 Subinteractions take place in overlays and can span one or many pages while the original screen remains open in the background.
 Once the subinteraction is *done*, the overlay is closed, and a result value is communicated back to the parent layer.
 
-@see layer-terminology
-@see layer-option
-@see opening-overlays
-@see closing-overlays
-@see subinteractions
-@see customizing-overlays
-@see context
+@learn-ref layer-terminology
+@learn-ref layer-option
+@learn-ref opening-overlays
+@learn-ref closing-overlays
+@learn-ref subinteractions
+@learn-ref customizing-overlays
+@learn-ref context
 
 @see [up-layer=new]
 @see up.layer.current
@@ -394,7 +394,7 @@ up.layer = (function() {
 
   Opening a layer is considered [navigation](/navigation) by default.
 
-  [Opening overlays](/opening-overlays){:.article-ref}
+  @learn-ref opening-overlays
 
   ## Example
 
@@ -677,7 +677,7 @@ up.layer = (function() {
 
   The event is emitted on the `document`.
 
-  [Opening overlays](/opening-overlays){:.article-ref}
+  @learn-ref opening-overlays
 
   ### Changing layer options
 
@@ -712,7 +712,7 @@ up.layer = (function() {
   /*-
   This event is emitted after a new overlay was placed into the DOM.
 
-  [Opening overlays](/opening-overlays){:.article-ref}
+  @learn-ref opening-overlays
 
   ## Customizing the overlay appearance
 
@@ -751,7 +751,7 @@ up.layer = (function() {
 
   This event is *not* emitted when an overlay is opened. For this, observe `up:layer:opened` instead.
 
-  [History in overlays](/history-in-overlays){:.article-ref}
+  @learn-ref history-in-overlays
 
   @param {string} event.location
     The current layer location.
@@ -771,7 +771,7 @@ up.layer = (function() {
   It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
   that can either be **fulfilled (accepted)** or **rejected (dismissed)**.
 
-  [Opening overlays](/opening-overlays){:.article-ref}
+  @learn-ref opening-overlays
 
   ## Example
 
@@ -840,7 +840,7 @@ up.layer = (function() {
   /*-
   Shows the response to a link click or form submission within [a new overlay](/opening-overlays).
 
-  [Opening overlays](/opening-overlays){:.article-ref}
+  @learn-ref opening-overlays
 
   ## Example
 
@@ -1093,7 +1093,7 @@ up.layer = (function() {
   The [relaxed JSON](/relaxed-json) value of the `[up-dismiss]` attribute becomes the overlay's
   [dismissal value](/closing-overlays#result-values).
 
-  [Closing overlays](/closing-overlays){:.article-ref}
+  @learn-ref closing-overlays
 
   ## On a button
 
@@ -1166,7 +1166,7 @@ up.layer = (function() {
   /*-
   [Accepts](/closing-overlays) the [current layer](/up.layer.current) when this element is clicked or submitted.
 
-  [Closing overlays](/closing-overlays){:.article-ref}
+  @learn-ref closing-overlays
 
   ## On a button
 
@@ -1434,7 +1434,7 @@ up.layer = (function() {
 
   Afterwards the only remaining layer will be the [root layer](/up.layer.root).
 
-  [Closing overlays](/closing-overlays){:.article-ref}
+  @learn-ref closing-overlays
 
   @function up.layer.dismissOverlays
   @param {any} [value]
@@ -1461,7 +1461,7 @@ up.layer = (function() {
   This is a shortcut for `up.layer.current.accept()`.
   See `up.Layer#accept()` for more documentation.
 
-  [Closing overlays](/closing-overlays){:.article-ref}
+  @learn-ref closing-overlays
 
   @function up.layer.accept
   @param {any} [value]
@@ -1476,7 +1476,7 @@ up.layer = (function() {
 
   The event is emitted on the [element of the layer](/up.layer.element) that is about to close.
 
-  [Closing overlays](/closing-overlays){:.article-ref}
+  @learn-ref closing-overlays
 
   @event up:layer:accept
   @param {up.Layer} event.layer
@@ -1510,7 +1510,7 @@ up.layer = (function() {
   > [tip]
   > To prevent a layer from being closed, listen to `up:layer:accept` instead.
 
-  [Closing overlays](/closing-overlays){:.article-ref}
+  @learn-ref closing-overlays
 
   @event up:layer:accepted
   @param {up.Layer} event.layer
@@ -1536,7 +1536,7 @@ up.layer = (function() {
   This is a shortcut for `up.layer.current.dismiss()`.
   See `up.Layer#dismiss()` for more documentation.
 
-  [Closing overlays](/closing-overlays){:.article-ref}
+  @learn-ref closing-overlays
 
   @function up.layer.dismiss
   @param {any} [value]
@@ -1551,7 +1551,7 @@ up.layer = (function() {
 
   The event is emitted on the [element of the layer](/up.layer.element) that is about to close.
 
-  [Closing overlays](/closing-overlays){:.article-ref}
+  @learn-ref closing-overlays
 
   @event up:layer:dismiss
   @param {up.Layer} event.layer
@@ -1585,7 +1585,7 @@ up.layer = (function() {
   > [tip]
   > To prevent a layer from being closed, listen to `up:layer:dismiss` instead.
 
-  [Closing overlays](/closing-overlays){:.article-ref}
+  @learn-ref closing-overlays
 
   @event up:layer:dismissed
   @param {up.Layer} event.layer
@@ -1701,7 +1701,7 @@ up.layer = (function() {
   This is a shortcut for `up.layer.current.history`.
   See `up.Layer#history` for more documentation.
 
-  [History in overlays](/history-in-overlays){:.article-ref}
+  @learn-ref history-in-overlays
 
   @property up.layer.history
   @param history
@@ -1715,7 +1715,7 @@ up.layer = (function() {
   This is a shortcut for `up.layer.current.location`.
   See `up.Layer#location` for more documentation.
 
-  [History in overlays](/history-in-overlays){:.article-ref}
+  @learn-ref history-in-overlays
 
   @property up.layer.location
   @param location
@@ -1730,7 +1730,7 @@ up.layer = (function() {
   This is a shortcut for `up.layer.current.mode`.
   See `up.Layer#mode` for more documentation.
 
-  [Customizing overlays](/customizing-overlays){:.article-ref}
+  @learn-ref customizing-overlays
 
   @property up.layer.mode
   @param mode
@@ -1746,7 +1746,7 @@ up.layer = (function() {
 
   Aliased as `up.context`.
 
-  [Layer context](/context){:.article-ref}
+  @learn-ref context
 
   @property up.layer.context
   @param context

@@ -11,11 +11,11 @@ The default viewport for any web application is the
 [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement).
 An application may define additional viewports by assigning the CSS property `{ overflow-y: scroll }` to any block element.
 
-@see scrolling
-@see scroll-tuning
-@see focus
-@see focus-visibility
-@see infinite-scrolling
+@learn-ref scrolling
+@learn-ref scroll-tuning
+@learn-ref focus
+@learn-ref focus-visibility
+@learn-ref infinite-scrolling
 
 @see [up-viewport]
 @see [up-fixed=top]
@@ -298,7 +298,7 @@ up.viewport = (function() {
 
   You can use this class to [remove an unwanted focus outline](#example).
 
-  [Focus ring visibility](/focus-visibility){:.article-ref}
+  @learn-ref focus-visibility
 
   ## Relation to `:focus-visible`
 
@@ -322,7 +322,7 @@ up.viewport = (function() {
   You can use this class to [give a new component a focus ring](#example) for keyboard users,
   while not rendering a focus ring for mouse or touch users.
 
-  [Focus ring visibility](/focus-visibility){:.article-ref}
+  @learn-ref focus-visibility
 
   ## Relation to `:focus-visible`
 
