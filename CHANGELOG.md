@@ -448,7 +448,7 @@ up.on('up:fragment:inserted', function(event) {
 - When revealing a `#hash` fragment from the address bar or a link, Unpoly now also focuses the matching element (#787).
 - When [appending or prepending](/targeting-fragments#appending-or-prepending), focus is now placed on the first new element instead of the container element.
 - Overlays are now focused before the opening animation starts, rather than after.
-- Unpoly will no longer try to [preserve focus](/focus#keep) when calling the low-level `up.render()` function. Unpoly will still [be smart about setting focus](/focus#auto) when [navigating](/navigation). You can restore the old behavior by setting `up.fragment.config.renderOptions.focus = 'keep'`.
+- Unpoly will no longer try to [preserve focus](/focus#keep) when calling the low-level `up.render()` function. Unpoly will still [be smart about setting focus](/focus#auto) when [navigating](/navigation-defaults). You can restore the old behavior by setting `up.fragment.config.renderOptions.focus = 'keep'`.
 
 
 ### Overlays
@@ -477,7 +477,7 @@ up.on('up:fragment:inserted', function(event) {
 
 ### Frontend assets
 
-- The `up:assets:changed` event now has a `{ response }` property. This is the `up.Response` that contained [new asset versions](/handling-asset-changes) not found on the current page. 
+- The `up:assets:changed` event now has a `{ response }` property. This is the `up.Response` that contained [new asset versions](/new-deployments) not found on the current page. 
 
 
 ### History
@@ -1587,7 +1587,7 @@ Unpoly assigns the `.up-active` class to clicked links and submit buttons, and `
 
 These [feedback classes](/feedback-classes) have been reworked to make it easier to select working elements from CSS and JavaScript:
 
-- `.up-active` and `.up-loading` are now always enabled by default (even when not [navigating](/navigation)). They can still disabled explicitly with an `[up-feedback=false]` attribute or a `{ feedback: false }` option.
+- `.up-active` and `.up-loading` are now always enabled by default (even when not [navigating](/navigation-defaults)). They can still disabled explicitly with an `[up-feedback=false]` attribute or a `{ feedback: false }` option.
 - When submitting a form, the `<form>` element now also receives the `.up-active` class (in addition to the submit button).
 - When submitting a form from a focused field, the default submit button now also receives the `.up-active` class (in addition to the field and the `<form>`).
 - Added a configuration `up.status.config.activeClasses`. This allows to set custom CSS classes for working links and forms.
@@ -1637,7 +1637,7 @@ This release includes the following changes:
 ### [Fragment API](/up.fragment)
 
 - You can now [update element's inner HTML](/targeting-fragments#content) using the `.element:content` pseudo-selector. This swaps all children of `.element`, while preserving the element itself. This feature was previously documented, but didn't work yet.
-- New configuration `up.fragment.config.renderOptions`. This is an object of default render options to always apply, even when not [navigating](/navigation).
+- New configuration `up.fragment.config.renderOptions`. This is an object of default render options to always apply, even when not [navigating](/navigation-defaults).
 - When calling `up.fragment.get()` with multiple search layers (e.g. `{ layer: "current, parent"}`), Unpoly will now search those layers in the given order.
 - Calling `up.fragment.get()` with an `Element`, that element is returned without further lookups.
 - New `[up-use-data]` attribute allows to [override data](/data#override) for the targeted fragment. The corresponding render options is `{ data }`.
@@ -2351,11 +2351,11 @@ See [notification flashes](/flashes) for more details and examples.
 Unpoly now detects changes in your JavaScripts and stylesheets after deploying a new version of your application.
 While rendering new content, Unpoly compares script and style elements in the `<head>` and emits an `up:assets:changed` event if anything changed.
 
-It is up to you to handle new frontend code revisions, e.g. by [loading new assets](/handling-asset-changes#loading-new-assets) or [notifying the user](/handling-asset-changes#notifying-the-user):
+It is up to you to handle new frontend code revisions, e.g. by [loading new assets](/new-deployments#loading-new-assets) or [notifying the user](/new-deployments#notifying-the-user):
 
 ![Notification for a new app version](images/assets-changed-notification.png){:width='305'}
 
-See [handling asset changes](/handling-asset-changes) for more details and examples.
+See [handling asset changes](/new-deployments) for more details and examples.
 
 
 ### Automatic update of meta tags {#meta-tags}
@@ -2688,7 +2688,7 @@ In cases where you don't want this behavior, you now have more options:
 
 ### Build
 
-- `unpoly.js` is now compiled using ES2021 (up from ES2020). The [ES6 build](/install/legacy-browsers) for legacy browsers remains available.
+- `unpoly.js` is now compiled using ES2021 (up from ES2020). The [ES6 build](/install#browser-support) for legacy browsers remains available.
 - Improve compression of minified builds. In particular private object properties are now prefixed with an underscore (`_`) [so they can be mangled safely](https://makandracards.com/makandra/608582-minifying-object-properties-in-javascript-files).
 
   If you are re-bundling the unminified build of Unpoly you can [configure your minifier](https://makandracards.com/makandra/608582-minifying-object-properties-in-javascript-files#section-mangling-private-properties)
@@ -2833,7 +2833,7 @@ This release addresses some issues when upgrading from Unpoly 2 to 3:
 - Fix a bug where kept `[up-keep]` elements would call their destructors if the `<body>` element is swapped
 - [Validation](/validation) now throw an exception if a validation target cannot be matched (fixes [#476](https://github.com/unpoly/unpoly/issues/476))
 - Fix a bug where focused date inputs would trigger a validation when destroyed
-- [Cache revalidation](/caching#revalidation) is now only the default when [navigating](/navigation). If you render cached content without navigating, you must opt into cache revalidation with `{ cache: 'auto', revalidate: 'auto' }`.
+- [Cache revalidation](/caching#revalidation) is now only the default when [navigating](/navigation-defaults). If you render cached content without navigating, you must opt into cache revalidation with `{ cache: 'auto', revalidate: 'auto' }`.
 
 If also fixes some bugs in [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading):
 
@@ -2896,7 +2896,7 @@ Finally we have [reworked Unpoly's documentation](#reworked-documentation) in ou
 When a user clicks faster than a server can respond, multiple concurrent requests may be [targeting](/targeting-fragments) the fragments. Over the years Unpoly has attempted different strategies to deal with this:
 
 - Unpoly 1 did not limit concurrent updates. This would sometimes lead to race conditions where concurrent responses were updating fragments out of order.
-- Unpoly 2 by default aborted *everything* on [navigation](/navigation). While this would guarantee the last update matching the user's last interaction, it sometimes killed background requests (e.g. the preloading of a large navigation menu).
+- Unpoly 2 by default aborted *everything* on [navigation](/navigation-defaults). While this would guarantee the last update matching the user's last interaction, it sometimes killed background requests (e.g. the preloading of a large navigation menu).
 - Unpoly 3 by default only aborts requests conflicting with your update. Requests targeting other fragments are not aborted. See a [visual example here](/aborting-requests#aborting-conflicting-requests).
 
 That said, Unpoly 3 makes the following changes to the way conflicting fragment updates are handled:
@@ -3542,7 +3542,7 @@ In our ongoing efforts to evolve Unpoly's documentation from an API reference to
 - [Handling network issues](/network-issues)
 - [Conditional requests](/conditional-requests)
 - [Progress bar](/progress-bar)
-- [Tracking page views](/analytics)
+- [Tracking page views](/tracking-page-views)
 - [Updating history](/updating-history)
 - [Restoring history](/restoring-history)
 - [Predefined animations](/predefined-animations)
@@ -3554,7 +3554,7 @@ All existing documentation pages from Unpoly 2 remain available:
 - [Tuning the scroll behavior](/scroll-tuning)
 - [Migrating legacy JavaScripts](/legacy-scripts)
 - [Scrolling](/scrolling)
-- [Navigation](/navigation)
+- [Navigation](/navigation-defaults)
 - [Layer terminology](/layer-terminology)
 - [Layer option](/layer-option)
 - [Opening overlays](/opening-overlays)
@@ -3798,8 +3798,8 @@ Users of the [unpoly-rails](https://github.com/unpoly/unpoly-rails) gem can inse
 ### New options for existing features
 
 - `[up-follow]` links may now pass the fragment's new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) using an `[up-content]` attribute. To pass the outer HTML, use the `[up-fragment]` attribute.
-- New option `{ solo }` for `up.render()` and `up.request()` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation).
-- New attribute `[up-solo]` for `[up-follow]` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation).
+- New option `{ solo }` for `up.render()` and `up.request()` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation-defaults).
+- New attribute `[up-solo]` for `[up-follow]` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation-defaults).
 - The `{ clearCache }` option for `up.render()` and `up.request()` now accepts a boolean value, a [URL pattern](/url-patterns) or a function.
 
 
@@ -5094,7 +5094,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Compatible changes
 
-- [npm package](/install/npm) now expresses Unpoly's dependency on `jquery`.
+- [npm package](/install#npm) now expresses Unpoly's dependency on `jquery`.
 - [Modals](/up.modal) no longer close when clicking an element that exists outside the modal's DOM hierarchy.
 - Fix a bug on IE11 where modals would immediately close after opening if the opening link had an `[up-instant]` attribute and the destination page was already cached.
 

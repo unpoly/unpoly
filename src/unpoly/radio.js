@@ -4,8 +4,8 @@ Passive updates
 
 This package contains functionality to passively receive updates from the server.
 
-@see polling
-@see flashes
+@learn-ref polling
+@learn-ref flashes
 
 @see [up-hungry]
 @see [up-poll]
@@ -366,8 +366,6 @@ up.radio = (function() {
   /*-
   Elements with an `[up-poll]` attribute are [reloaded](/up.reload) from the server periodically.
 
-  [Polling](/polling){:.article-ref}
-
   ## Example
 
   This fragment `#score` will be reloaded every 30 seconds:
@@ -437,6 +435,7 @@ up.radio = (function() {
   @section Loading state
     @mix up-follow/loading-state
 
+  @learn-ref polling
   @stable
   */
   up.attribute('up-poll', function(fragment) {

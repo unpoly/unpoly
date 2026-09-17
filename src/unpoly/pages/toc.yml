@@ -1,0 +1,189 @@
+# The structure of unpoly.com.
+#
+# This file owns *relations* only: which pages form a topic, in which order, and
+# which interfaces the API reference lists. Every fact about a single document
+# (its title, slug, menu title, visibility) lives in that document's directives.
+#
+# The site fails to build when a page or module is missing here, listed twice, or
+# names a slug that does not exist. See docs/contributing/documentation.md.
+
+learn:
+  title: Learn
+  reading: linear
+
+  topics:
+    - type: page-group
+      title: Getting started
+      pages:
+        - install
+        - attributes-and-options
+
+    - type: page-group
+      title: Links
+      pages:
+        - handling-everything
+        - preloading
+        - navigation-bars
+        - faux-interactive-elements
+
+    - type: page-group
+      title: Forms
+      pages:
+        - submitting-forms
+        - validation
+        - reactive-server-forms
+        - switching-form-state
+        - disabling-forms
+        - flashes
+        - custom-form-fields
+        - watch-options
+
+    - type: page-group
+      title: Overlays
+      pages:
+        - layer-terminology
+        - opening-overlays
+        - closing-overlays
+        - subinteractions
+        - customizing-overlays
+        - layer-option
+        - context
+        - history-in-overlays
+
+    - type: page-group
+      title: Loading state
+      pages:
+        - loading-state
+        - feedback-classes
+        - placeholders
+        - previews
+        - optimistic-rendering
+        - progress-bar
+
+    - type: page-group
+      title: Live fragments
+      pages:
+        - lazy-loading
+        - infinite-scrolling
+        - polling
+
+    - type: page-group
+      title: History
+      pages:
+        - updating-history
+        - restoring-history
+        - tracking-page-views
+
+    - type: page-group
+      title: Scrolling & focus
+      pages:
+        - scrolling
+        - scroll-tuning
+        - focus
+        - focus-visibility
+
+    - type: page-group
+      title: Network & caching
+      pages:
+        - caching
+        - aborting-requests
+        - network-issues
+
+    - type: page-group
+      title: Animation
+      pages:
+        - predefined-animations
+        - predefined-transitions
+        - motion-tuning
+
+    - type: page-group
+      title: Scripting
+      pages:
+        - enhancing-elements
+        - data
+        - templates
+        - legacy-scripts
+        - script-security
+
+    - type: page-group
+      title: Backend integration
+      pages:
+        - optimizing-responses
+        - conditional-requests
+        - skipping-rendering
+        - new-deployments
+        - server-bindings
+
+    - type: page-group
+      title: Advanced rendering
+      pages:
+        - targeting-fragments
+        - target-derivation
+        - providing-html
+        - navigation-defaults
+        - failed-responses
+        - preserving-elements
+        - render-lifecycle
+
+api:
+  title: API reference
+  reading: lookup
+
+  topics:
+    - type: module
+      module: up.link
+
+    - type: module
+      module: up.form
+
+    - type: module
+      module: up.script
+
+    - type: module
+      module: up.layer
+
+    - type: module
+      module: up.fragment
+
+    - type: module
+      module: up.radio
+
+    - type: module
+      module: up.motion
+
+    - type: module
+      module: up.status
+
+    - type: module
+      module: up.network
+
+    - type: module
+      module: up.event
+
+    - type: module
+      module: up.protocol
+
+    - type: module
+      module: up.element
+
+    - type: module
+      module: up.viewport
+
+    - type: module
+      module: up.history
+
+    - type: module
+      module: up.util
+
+    - type: module
+      module: up.framework
+
+    - type: module
+      module: up.log
+
+    - type: page-group
+      title: Formats
+      start: none
+      pages:
+        - url-patterns
+        - relaxed-json

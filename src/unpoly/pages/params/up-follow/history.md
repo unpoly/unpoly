@@ -12,7 +12,7 @@
 
   If set to `false`, the history will remain unchanged.
 
-  @see updating-history
+  See [[updating-history]].
 
 @param [up-fail-history='auto']
   Whether to update history when the server responds with an error code.

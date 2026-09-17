@@ -4,13 +4,13 @@ Forms
 
 The `up.form` module helps you work with non-trivial forms.
 
-@see submitting-forms
-@see validation
-@see switching-form-state
-@see reactive-server-forms
-@see disabling-forms
-@see watch-options
-@see custom-form-fields
+@learn-ref submitting-forms
+@learn-ref validation
+@learn-ref switching-form-state
+@learn-ref reactive-server-forms
+@learn-ref disabling-forms
+@learn-ref watch-options
+@learn-ref custom-form-fields
 
 @see [up-submit]
 @see [up-validate]
@@ -334,7 +334,7 @@ up.form = (function() {
   The response is parsed for a CSS selector and the matching elements will
   replace corresponding elements on the current page.
 
-  Submitting a form is considered [navigation](/navigation).
+  Submitting a form is considered [navigation](/navigation-defaults).
 
   Emits the event [`up:form:submit`](/up:form:submit).
 
@@ -368,8 +368,7 @@ up.form = (function() {
 
         By default, failed responses will update the `<form>` element itself.
 
-        @see failed-responses
-
+        See [[failed-responses]].
       @param options.origin
         The element that triggered the form submission.
 
@@ -1511,8 +1510,6 @@ up.form = (function() {
   A matching element in the current page is then swapped with the new element from the server response.
   The response may include other HTML (even an entire HTML document), but only the matching element will be updated.
 
-  [Submitting forms](/submitting-forms){:.article-ref}
-
   ## Example
 
   This will submit the form in-page and update a fragment matching `#success`:
@@ -1559,8 +1556,7 @@ up.form = (function() {
 
         By default, failed responses will update the `<form>` element itself.
 
-        @see failed-responses
-
+        See [[failed-responses]].
   @section Navigation
     @mix up-follow/navigation
 
@@ -1616,6 +1612,7 @@ up.form = (function() {
   @section Lifecycle hooks
     @mix up-follow/lifecycle-hooks
 
+  @learn-ref submitting-forms
   @stable
   */
 
@@ -1636,8 +1633,6 @@ up.form = (function() {
 
   /*-
   Controls the state of another element when this field changes.
-
-  [Switching form state](/switching-form-state){:.article-ref}
 
   ## Example
 
@@ -1678,6 +1673,7 @@ up.form = (function() {
   @section Observed events
     @mix up-watch/observed-events
 
+  @learn-ref switching-form-state
   @stable
   */
   up.compiler('[up-switch]', (switcher) => {
@@ -1688,8 +1684,6 @@ up.form = (function() {
   When an `[up-switch]` field changes, this event is emitted on all dependent elements.
 
   You can listen to `up:form:switch` to implement [custom switching effects](/switching-form-state#custom-effects).
-
-  [Switching form state](/switching-form-state){:.article-ref}
 
   ## Event targets
 
@@ -1741,6 +1735,7 @@ up.form = (function() {
 
     @experimental
 
+  @learn-ref switching-form-state
   @stable
   */
 
@@ -1749,13 +1744,12 @@ up.form = (function() {
 
   The element will be hidden for all other values.
 
-  [Switching visibility](/switching-form-state){:.article-ref}
-
   @selector [up-show-for]
   @param [up-show-for]
     A list of input values for which this element should be shown.
 
     @include switch-token-serialization
+  @learn-ref switching-form-state
   @stable
   */
 
@@ -1764,13 +1758,12 @@ up.form = (function() {
 
   The element will be shown for all other values.
 
-  [Switching visibility](/switching-form-state#toggle){:.article-ref}
-
   @selector [up-hide-for]
   @param [up-hide-for]
     A list of input values for which this element should be hidden.
 
     @include switch-token-serialization
+  @learn-ref switching-form-state#toggle
   @stable
   */
 
@@ -1779,13 +1772,12 @@ up.form = (function() {
 
   The element will be enabled for all other values.
 
-  [Switching disabled state](/switching-form-state#disable){:.article-ref}
-
   @selector [up-disable-for]
   @param [up-disable-for]
     A list of input values for which this element should be disabled.
 
     @include switch-token-serialization
+  @learn-ref switching-form-state#disable
   @stable
   */
 
@@ -1794,13 +1786,12 @@ up.form = (function() {
 
   The element will be disabled for all other values.
 
-  [Switching disabled state](/switching-form-state#disable){:.article-ref}
-
   @selector [up-enable-for]
   @param [up-enable-for]
     A list of input values for which this element should be enabled.
 
     @include switch-token-serialization
+  @learn-ref switching-form-state#disable
   @stable
   */
 

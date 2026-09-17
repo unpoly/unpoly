@@ -17,7 +17,7 @@ This sections explains the reasons for these restrictions and shows how to overr
 By default Unpoly only changes history when a [main element](/main) is rendered.
 This is to prevent location changes when rendering a minor fragment, like a table row or a message counter.
 
-This behavior is a [navigation default](/navigation#navigation-defaults) in
+This behavior is a [navigation default](/navigation-defaults#navigation-defaults) in
 `up.fragment.config.navigateOptions.history === 'auto'`.
 
 To cause auto-history to trigger on fragments other than main elements, add a selector to `up.fragment.config.autoHistoryTargets`.
@@ -65,7 +65,7 @@ You may opt into history changes using one of the following:
 
 - Pass a `{ history: true }` option to force a history change.
 - Pass a `{ history: 'auto' }` option to update history if updating a major fragment.
-- Use `up.navigate()` instead of `up.render()` to inherit [navigation defaults](/navigation#navigation-defaults).
+- Use `up.navigate()` instead of `up.render()` to inherit [navigation defaults](/navigation-defaults#navigation-defaults).
 
 
 
@@ -102,7 +102,7 @@ You can tie additional `<head>` elements to history changes, by setting an `[up-
 
 > [note]
 > The linked JavaScript and stylesheet are *not* part of history state and will not be updated.\
-> See [Handling changes in frontend code](/handling-asset-changes) for strategies to detect new app deployments.
+> See [Handling changes in frontend code](/new-deployments) for strategies to detect new app deployments.
 
 
 

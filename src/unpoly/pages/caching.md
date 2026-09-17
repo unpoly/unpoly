@@ -20,7 +20,7 @@ up.network.config.autoCache = function(request) {
 }
 ```
 
-When [navigating](/navigation) the `{ cache: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions).
+When [navigating](/navigation-defaults) the `{ cache: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions).
 
 To force caching regardless of HTTP method, pass `{ cache: true }`.
 
@@ -36,7 +36,7 @@ unless there is an existing cache entry that can be updated.
 
 ### Disabling the cache globally {#diabling-globally} 
 
-[Navigation](/navigation) is the only moment when Unpoly caches by default.
+[Navigation](/navigation-defaults) is the only moment when Unpoly caches by default.
 
 You can disable caching globally like so:
 
@@ -130,7 +130,7 @@ Compilers with side effects may occasionally want to behave differently when the
 reloaded for the purpose of cache revalidation.
 
 To detect revalidation, compilers may accept a third argument with information about the current [render pass](/up.render).
-In the example below a compiler wants to [track a page view](/analytics) in a web analytics tool:
+In the example below a compiler wants to [track a page view](/tracking-page-views) in a web analytics tool:
 
 ```js
 up.compiler('[track-page-view]', function(element, data, meta) { // mark: meta
@@ -145,7 +145,7 @@ up.compiler('[track-page-view]', function(element, data, meta) { // mark: meta
 
 ### Enabling revalidation
 
-When [navigating](/navigation), revalidation is enabled by default.
+When [navigating](/navigation-defaults), revalidation is enabled by default.
 
 When not navigating, you can enable revalidation by setting an `[up-revalidate="auto"]` attribute or passing an `{ revalidate: 'auto' }` option.
 This revalidates only [expired](/up.network.config#config.cacheExpireAge) cache entries. You can configure this default:
@@ -160,7 +160,7 @@ To force revalidation regardless of cache age, pass `{ revalidate: true }`.
 
 ### Disabling revalidation
 
-[Navigation](/navigation) is the only moment when Unpoly revalidates by default.
+[Navigation](/navigation-defaults) is the only moment when Unpoly revalidates by default.
 You can disable cache revalidation while navigating like so:
 
 ```js

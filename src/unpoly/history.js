@@ -8,10 +8,10 @@ The `up.history` module helps you work with the browser history.
 @see up:location:changed
 @see [up-back]
 
-@see updating-history
-@see restoring-history
-@see history-in-overlays
-@see analytics
+@learn-ref updating-history
+@learn-ref restoring-history
+@learn-ref history-in-overlays
+@learn-ref tracking-page-views
 
 @module up.history
 */
@@ -228,7 +228,7 @@ up.history = (function() {
 
   There may be several reasons why the browser location was changed:
 
-  - A fragment update changes history through [navigation](/navigation) or rendering with `{ history: true }`.
+  - A fragment update changes history through [navigation](/navigation-defaults) or rendering with `{ history: true }`.
   - The user uses the back or forward buttons in their browser UI.
   - Programmatic calls to functions like `up.history.push()` or `history.pushState()`.
   - The user navigates to a different `#hash` within the page.
@@ -275,7 +275,7 @@ up.history = (function() {
     @param {boolean} event.alreadyHandled
       Whether Unpoly thinks this change has already been handled and requires no additional processing.
 
-      For example, updating history by [navigating](/navigation) or calling `history.pushState()` is
+      For example, updating history by [navigating](/navigation-defaults) or calling `history.pushState()` is
       considered to be already handled.
 
       @experimental
@@ -380,7 +380,7 @@ up.history = (function() {
   Does not add a history entry if the given URL is already the current browser location.
   If the URL did change, an `up:location:changed` event is emitted.
 
-  When [navigating](/navigation) (or rendering with [`{ history: true }`](/up.render#options.history)),
+  When [navigating](/navigation-defaults) (or rendering with [`{ history: true }`](/up.render#options.history)),
   Unpoly will update the browser location for you. You only need to call `up.history.push()` to push
   a new entry without rendering.
 
@@ -515,8 +515,6 @@ up.history = (function() {
 
   When this event is emitted, the [browser location](/up.history.location) has already been updated.
 
-  [Restoring history](/restoring-history){:.article-ref}
-
   @event up:location:restore
   @param {string} event.location
     The URL for the restored history entry.
@@ -530,6 +528,7 @@ up.history = (function() {
     Prevents Unpoly from restoring content for this history entry.
 
     Preventing the event will *not* stop the browser from restoring the URL in the address bar.
+  @learn-ref restoring-history
   @stable
   */
 
@@ -539,8 +538,6 @@ up.history = (function() {
 
   /*-
   Configures whether this `<head>` element is updated during [history changes](/updating-history).
-
-  [Updating history](/updating-history){:.article-ref}
 
   ### Default meta elements
 
@@ -582,6 +579,7 @@ up.history = (function() {
   To exclude elements by default, configure `up.history.config.noMetaTagSelectors`.
 
   @selector [up-meta]
+  @learn-ref updating-history
   @stable
   */
 

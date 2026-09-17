@@ -28,10 +28,10 @@ The HTTP client offers many quality-of-life improvements, for example:
 Unpoly's HTTP client is used automatically when rendering, e.g. when [following a link](/up-follow)
 or [submitting a form](/submitting-forms). To use the client from your own JavaScripts, use `up.request()`.
 
-@see caching
-@see aborting-requests
-@see network-issues
-@see progress-bar
+@learn-ref caching
+@learn-ref aborting-requests
+@learn-ref network-issues
+@learn-ref progress-bar
 
 @see up.request
 @see up.Response
@@ -680,8 +680,6 @@ up.network = (function() {
   > which matches requests by screen region. Only when requests are aborted by screen region can components
   > [react to being aborted](/up:fragment:aborted).
 
-  [Aborting requests](/aborting-requests){:.article-ref}
-
   ## Effects of aborting
 
   When an `up.request()` is aborted, its returned promise rejects with an `up.AbortError`:
@@ -763,6 +761,7 @@ up.network = (function() {
     An `up.Request` that should not be aborted even if it matches the given `condition`.
 
     @experimental
+  @learn-ref aborting-requests
   @stable
   */
   function abortRequests(...args) {
@@ -803,8 +802,6 @@ up.network = (function() {
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   are taking long to finish loading.
 
-  [Slow server responses](/network-issues#slow-server-responses){:.article-ref}
-
   ## Timing
 
   By default, Unpoly will wait 400 ms for an AJAX request to finish
@@ -825,6 +822,7 @@ up.network = (function() {
   or [implement custom loading indicators](/progress-bar#custom-implementation).
 
   @event up:network:late
+  @learn-ref network-issues#slow-server-responses
   @stable
   */
 
@@ -832,9 +830,8 @@ up.network = (function() {
   This event is [emitted](/up.emit) when [AJAX requests](/up.request)
   have [taken long to finish](/up:network:late), but have finished now.
 
-  [Slow server responses](/network-issues#slow-server-responses){:.article-ref}
-
   @event up:network:recover
+  @learn-ref network-issues#slow-server-responses
   @stable
   */
 

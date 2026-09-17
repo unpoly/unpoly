@@ -145,4 +145,4 @@ If you find that this listener tracks too many events, you may further filter on
 
 
 
-@page analytics
+@page tracking-page-views

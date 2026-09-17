@@ -14,7 +14,7 @@ a `{ focus }` option or `[up-focus]` attribute.
 
 ### Default focus strategy {#auto}
 
-When [navigating](/navigation), Unpoly will try a **sequence of focus strategies** that works for most cases:
+When [navigating](/navigation-defaults), Unpoly will try a **sequence of focus strategies** that works for most cases:
 - Focus a `#hash` in the URL.
 - Focus an `[autofocus]` element in the new fragment.
 - If updating a [main target](/up-main), focus the new fragment.
@@ -23,7 +23,7 @@ When [navigating](/navigation), Unpoly will try a **sequence of focus strategies
 
 You may configure this logic in `up.fragment.config.autoFocus`.
 
-Because following links and submitting forms is considered [navigation](/navigation), is the default focus strategy is applied automatically.
+Because following links and submitting forms is considered [navigation](/navigation-defaults), is the default focus strategy is applied automatically.
 You can explicitly enable the strategy by setting `[up-focus="auto"]`:
 
 ```html

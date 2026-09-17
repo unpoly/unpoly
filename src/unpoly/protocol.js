@@ -7,7 +7,7 @@ Unpoly has an **optional** protocol your backend may implement to inspect and ma
 The protocol mostly works by reading or setting simple HTTP headers (like `X-Up-Target`).
 It's quite straightforward to use in your own code, and you don't have to implement all of it.
 
-You can also use [existing implementations](/install/server-bindings),
+You can also use [existing implementations](/server-bindings),
 which are available for most popular web frameworks.
 
 > [IMPORTANT]
@@ -15,8 +15,8 @@ which are available for most popular web frameworks.
 > implementing it is **entirely optional**. For instance, `unpoly.com` itself is a static site
 > that uses Unpoly on the frontend and doesn't even have an active server component.
 
-@see optimizing-responses
-@see conditional-requests
+@learn-ref optimizing-responses
+@learn-ref conditional-requests
 
 @module up.protocol
 */

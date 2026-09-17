@@ -72,7 +72,7 @@ up.RenderResult = class RenderResult {
   In particular:
 
   - [Animations](/up.motion) have concluded and [transitioned](/up-transition) elements were removed from the DOM tree.
-  - A [cached response](#options.cache) was [revalidated with the server](/caching#revalidation).
+  - A [cached response](/up.render#options.cache) was [revalidated with the server](/caching#revalidation).
     If the server has responded with new content, this content has also been rendered.
 
   The promise resolves to the last `up.RenderResult` that updated a fragment.

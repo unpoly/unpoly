@@ -86,12 +86,12 @@ See [Migrating legacy JavaScripts](/legacy-scripts).
 ## Customizing navigation defaults
 
 [Following a link](/up-follow) or [submitting a form](/submitting-forms) is considered
-[navigation](/navigation) by default.
+[navigation](/navigation-defaults) by default.
 
 When navigating Unpoly will use defaults to satisfy the user's expectation regarding
 scrolling, history, focus, request cancellation, etc.
 
-See [navigation](/navigation) for a detailed breakdown of navigation defaults
+See [navigation](/navigation-defaults) for a detailed breakdown of navigation defaults
 and how to customize them.
 
 

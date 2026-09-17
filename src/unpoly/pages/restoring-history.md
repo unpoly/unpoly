@@ -69,7 +69,7 @@ has already been updated. This cannot be prevented by an event listener.
 By default Unpoly feels responsible for handling history entries that it *owns*:
 
 - The entry of the initial page load, after Unpoly has booted.
-- Locations changed by Unpoly while [navigating](/navigation) or rendering with [`{ history: true }`](/up.render#options.history).
+- Locations changed by Unpoly while [navigating](/navigation-defaults) or rendering with [`{ history: true }`](/up.render#options.history).
 - Entries pushed by changing the `#hash` of a location that Unpoly owns
 
 You can control whether Unpoly will handle a location change by listening to `up:location:changed`

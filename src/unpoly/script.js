@@ -9,11 +9,11 @@ callbacks to [compilers](/enhancing-elements). This will ensure they run both at
 when a new fragment is inserted later. See [Migrating legacy JavaScript](/legacy-scripts)
 for details.
 
-@see enhancing-elements
-@see data
-@see legacy-scripts
-@see handling-asset-changes
-@see script-security
+@learn-ref enhancing-elements
+@learn-ref data
+@learn-ref legacy-scripts
+@learn-ref new-deployments
+@learn-ref script-security
 
 @see up.compiler
 @see [up-data]
@@ -42,7 +42,7 @@ up.script = (function() {
       Unpoly only tracks assets in the `<head>`. Elements in the `<body>` are never tracked,
       even if they match one of the configured selectors.
 
-      See [Tracking assets](/handling-asset-changes#tracking-assets) for examples.
+      See [Tracking assets](/new-deployments#tracking-assets) for examples.
 
     @param {Array<string} [config.noAssetSelectors]
       Exceptions to `up.script.config.assetSelectors`.
@@ -149,8 +149,6 @@ up.script = (function() {
   /*-
   Registers a function to be called when a matching element is inserted into the DOM.
 
-  [Enhancing elements](/enhancing-elements){:.article-ref}
-
   ## Anatomy of a compiler
 
   This code registers a function that is called when an element with a `.foo` class
@@ -219,7 +217,6 @@ up.script = (function() {
     console.debug(`We have ${cards.length} new cards`)
   })
   ```
-
 
   ## Error handling {#errors}
 
@@ -315,7 +312,6 @@ up.script = (function() {
   or manually call `up.hello()` on an element that should be
   [recompiled](/up.hello#recompiling-elements).
 
-
   @function up.compiler
 
   @param {string} selector
@@ -346,6 +342,7 @@ up.script = (function() {
 
     The compiler function can be [`async`](/up.compiler#async).
 
+  @learn-ref enhancing-elements
   @stable
   */
   function registerCompiler(...args) {
@@ -358,7 +355,7 @@ up.script = (function() {
   A macro lets you set attributes that will be compiled afterward.
 
   If you want default attributes for *every* link and form, consider customizing your
-  [navigation options](/navigation) or configuring Unpoly to [handle everything](/handling-everything).
+  [navigation options](/navigation-defaults) or configuring Unpoly to [handle everything](/handling-everything).
 
   ## Example
 
@@ -738,8 +735,6 @@ up.script = (function() {
 
   Multiple `up.data()` calls for the same element always return the same object reference.
 
-  [Attaching data to elements](/data){:.article-ref}
-
   ## Use with `[up-data]`
 
   You have an element with JSON data serialized into an `[up-data]` attribute:
@@ -781,6 +776,7 @@ up.script = (function() {
     Returns an empty object if the element has no attached data.
 
     Multiple `up.data()` calls for the same element always return the same object reference.
+  @learn-ref data
   @stable
   */
 
@@ -792,8 +788,6 @@ up.script = (function() {
   `up.compiler()` functions and `up.on()` callbacks.
 
   To programmatically parse an `[up-data]` attribute into an object, use `up.data(element)`.
-
-  [Attaching data to elements](/data){:.article-ref}
 
   ## Example
 
@@ -842,6 +836,7 @@ up.script = (function() {
   @selector [up-data]
   @param up-data
     A data object serialized as [relaxed JSON](/relaxed-json).
+  @learn-ref data
   @stable
   */
   function readData(element) {
@@ -882,13 +877,10 @@ up.script = (function() {
   }
 
   /*-
-  Tracks an element as a [frontend asset](/handling-asset-changes), usually JavaScript and stylesheets.
+  Tracks an element as a [frontend asset](/new-deployments), usually JavaScript and stylesheets.
 
   When [rendering](/up.render), Unpoly compares the assets on the current page with the new assets
   from the server response. If the assets don't match, an `up:assets:changed` event is emitted.
-
-  [Handling changes in frontend code](/handling-asset-changes){:.article-ref}
-
 
   ## Default assets
 
@@ -912,7 +904,6 @@ up.script = (function() {
   [internal styles](https://www.tutorialspoint.com/How-to-use-internal-CSS-Style-Sheet-in-HTML)
   are not tracked by default, but you can [include them explicitly](#including-assets).
 
-
   ## Excluding assets from tracking {#excluding-assets}
 
   To *exclude* an element in the `<head>` from tracking, mark it with an `[up-asset="false"]` attribute:
@@ -922,7 +913,6 @@ up.script = (function() {
   ```
 
   To exclude assets by default, configure `up.script.config.noAssetSelectors`.
-
 
   ## Tracking additional assets {#including-assets}
 
@@ -952,6 +942,7 @@ up.script = (function() {
   ```
 
   @selector [up-asset]
+  @learn-ref new-deployments
   @stable
   */
 
@@ -981,21 +972,19 @@ up.script = (function() {
 
   The event is emitted on the `document`.
 
-  [Handling changes in frontend code](/handling-asset-changes){:.article-ref}
-
   ## Example
 
   There is no default behavior when assets have changed.
   In particular, no asset elements from the response are updated in the current page.
-  Event listeners may [handle changed frontend code](/handling-asset-changes#handling-changed-assets),
-  e.g., by [notifying the user](/handling-asset-changes#notifying-the-user) or [loading new assets](/handling-asset-changes#loading-new-assets).
+  Event listeners may [handle changed frontend code](/new-deployments#handling-changed-assets),
+  e.g., by [notifying the user](/new-deployments#notifying-the-user) or [loading new assets](/new-deployments#loading-new-assets).
 
   The code below inserts a clickable `<div id="new-version">` banner when assets change.
   The user can then choose to reload at their convenience by clicking on the notification.
 
   @include new-asset-notification-example
 
-  For more examples, see [Handling asset changes](/handling-asset-changes).
+  For more examples, see [Handling asset changes](/new-deployments).
 
   ## Emission time
 
@@ -1015,7 +1004,7 @@ up.script = (function() {
     The list also includes assets that have a matching element on the current page.
 
     By default, no new assets are inserted into the current page.
-    Event listeners must [explicitly load new assets](/handling-asset-changes#loading-new-assets).
+    Event listeners must [explicitly load new assets](/new-deployments#loading-new-assets).
 
   @param {List<Element>} event.oldAssets
     A list of [assets](/up-asset) in the `<head>` of the current page.
@@ -1033,6 +1022,7 @@ up.script = (function() {
   @param event.preventDefault()
     Aborts this render pass before new content is inserted.
 
+  @learn-ref new-deployments
   @stable
   */
 

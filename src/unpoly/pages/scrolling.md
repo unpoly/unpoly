@@ -8,7 +8,7 @@ or by passing a [`{ scroll }`](/up.render#options.scroll) option.
 
 ## Default scrolling strategy {#auto}
 
-When [navigating](/navigation), Unpoly will try a **sequence of scroll strategies** that works for most cases:
+When [navigating](/navigation-defaults), Unpoly will try a **sequence of scroll strategies** that works for most cases:
 
 1. If the URL has a `#hash`, scroll to a fragment matching that hash.
 2. If updating a [main target](/up-main), [scroll to the top](#top-position) of its viewport.
@@ -18,7 +18,7 @@ When [navigating](/navigation), Unpoly will try a **sequence of scroll strategie
 
 You may configure this sequence in `up.fragment.config.autoScroll`.
 
-Because following links and submitting forms are considered [navigation](/navigation), is the default scrolling strategy is applied automatically.
+Because following links and submitting forms are considered [navigation](/navigation-defaults), is the default scrolling strategy is applied automatically.
 You can explicitly enable the strategy by setting `[up-scroll="auto"]`:
 
 ```html
@@ -144,13 +144,13 @@ To scroll to the bottom, but leave a margin of some pixels, set a <i>negative</i
 
 If you don't want Unpoly to touch any scroll positions, set `[up-scroll=false]`.
 For example, if you don't want to use the [default scrolling strategy](#auto)
-when [navigating](/navigation), you can disable it like so:
+when [navigating](/navigation-defaults), you can disable it like so:
 
 ```html
 <a href="/details" up-follow up-scroll="false">Show more</a> <!-- mark: up-scroll="false" -->
 ```
 
-When rendering without [navigation](/navigation), no scrolling will happen by default.
+When rendering without [navigation](/navigation-defaults), no scrolling will happen by default.
 
 > [note]
 > DOM mutations may still cause scrolling, even when Unpoly does not touch scroll positions.\

@@ -1,5 +1,5 @@
-Handling changes in frontend code
-=================================
+Reacting to new deployments
+===========================
 
 When rendering new fragments, Unpoly compares scripts and stylesheets in the `<head>`
 and emits an [event](/up:assets:changed) if anything changed.
@@ -145,4 +145,4 @@ You can configure Unpoly to also emit the `up:assets:changed` event after a new 
 See [Tracking the backend version](/up-asset#tracking-backend-versions) for details.
 
 
-@page handling-asset-changes
+@page new-deployments

@@ -40,11 +40,10 @@ up.Layer = class Layer extends up.Record {
 
   If a layer does not have visible history, its desendant layers cannot have history either.
 
-  [History in overlays](/history-in-overlays){:.article-ref}
-
   @property up.Layer#history
   @param {boolean} history
     Whether this layer renders history.
+  @learn-ref history-in-overlays
   @stable
   */
 
@@ -53,11 +52,10 @@ up.Layer = class Layer extends up.Record {
 
   Requests targeting this layer will send the mode value as an `X-Up-Mode` header.
 
-  [Customizing overlays](/customizing-overlays){:.article-ref}
-
   @property up.Layer#mode
   @param {string} mode
     The layer mode.
+  @learn-ref customizing-overlays
   @stable
   */
 
@@ -74,13 +72,12 @@ up.Layer = class Layer extends up.Record {
   console.log(layer.context) // logs "{ message: 'Please select a contact' }"
   ```
 
-  [Layer context](/context){:.article-ref}
-
   @property up.Layer#context
   @param {Object} context
     The context object.
 
     If no context has been set an empty object is returned.
+  @learn-ref context
   @experimental
   */
 
@@ -143,8 +140,6 @@ up.Layer = class Layer extends up.Record {
 
   To dismiss a layer *without* an accepting intent, use `up.Layer#dismiss()` instead.
 
-  [Closing overlays](/closing-overlays){:.article-ref}
-
   @function up.Layer#accept
   @section Acceptance
     @param {any} [value]
@@ -192,6 +187,7 @@ up.Layer = class Layer extends up.Record {
       in the browser's address bar.
 
       @experimental
+  @learn-ref closing-overlays
   @stable
   */
   accept() {
@@ -203,8 +199,6 @@ up.Layer = class Layer extends up.Record {
   e.g. when a "Cancel" button was clicked.
 
   To close an overlay with an accepting intent, use `up.Layer#accept()` instead.
-
-  [Closing overlays](/closing-overlays){:.article-ref}
 
   @function up.Layer#dismiss
   @param {any} [value]
@@ -218,6 +212,7 @@ up.Layer = class Layer extends up.Record {
     ```
   @param {Object} [options]
     See options for `up.Layer#accept()`.
+  @learn-ref closing-overlays
   @stable
   */
   dismiss() {
@@ -753,11 +748,10 @@ up.Layer = class Layer extends up.Record {
   If this layer does not [affect browser history](/up.Layer.prototype.history), this property will
   still return the title the layer would otherwise use.
 
-  [History in overlays](/history-in-overlays){:.article-ref}
-
   @property up.Layer#title
   @param {string} title
     This layer's title.
+  @learn-ref history-in-overlays
   @experimental
   */
   get title() {
@@ -818,11 +812,10 @@ up.Layer = class Layer extends up.Record {
   still returns the URL of the content in the overlay. In this case
   the browser's address bar will show the location of an ancestor layer.
 
-  [History in overlays](/history-in-overlays){:.article-ref}
-
   @property up.Layer#location
   @param {string} location
     The layer's current location.
+  @learn-ref history-in-overlays
   @experimental
   */
   get location() {

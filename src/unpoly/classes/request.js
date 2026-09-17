@@ -64,10 +64,9 @@ up.Request = class Request extends up.Record {
 
   The selector will be sent as an `X-Up-Target` header.
 
-  [Targeting fragments](/targeting-fragments){:.article-ref}
-
   @property up.Request#target
   @param {string} target
+  @learn-ref targeting-fragments
   @stable
   */
 
@@ -77,10 +76,9 @@ up.Request = class Request extends up.Record {
 
   The selector will be sent as an `X-Up-Fail-Target` header.
 
-  [Rendering failed responses differently](/failed-responses#fail-options){:.article-ref}
-
   @property up.Request#failTarget
   @param {string} failTarget
+  @learn-ref failed-responses#fail-options
   @stable
   */
 
@@ -142,10 +140,9 @@ up.Request = class Request extends up.Record {
 
   The context object will be sent as an `X-Up-Context` header.
 
-  [Layer context](/context){:.article-ref}
-
   @property up.Request#context
   @param {Object} context
+  @learn-ref context
   @experimental
   */
 
@@ -203,10 +200,9 @@ up.Request = class Request extends up.Record {
 
   The value will be sent as an `X-Up-Mode` header.
 
-  [Customizing overlays](/customizing-overlays){:.article-ref}
-
   @property up.Request#mode
   @param {string} mode
+  @learn-ref customizing-overlays
   @stable
   */
 

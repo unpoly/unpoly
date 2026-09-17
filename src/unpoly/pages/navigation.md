@@ -1,5 +1,5 @@
-Navigation
-==========
+Navigation defaults
+===================
 
 When a browser user interacts with a standard hyperlink or form,
 they have certain expectations regarding scrolling, history, focus,
@@ -75,5 +75,5 @@ up.on('up:link:follow', function(event, link) {
 })
 ```
 
-@page navigation
+@page navigation-defaults
 

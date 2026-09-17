@@ -130,8 +130,8 @@ RedirectPermanent /nav /navigation-bars
 RedirectPermanent /up.navigation /up.status
 RedirectPermanent /up.feedback /up.status
 
-RedirectPermanent /navigate /navigation
-RedirectPermanent /navigating /navigation
+RedirectPermanent /navigate /navigation-defaults
+RedirectPermanent /navigating /navigation-defaults
 
 RedirectPermanent /dependent-fields /reactive-server-forms
 RedirectPermanent /dependent-elements /reactive-server-forms
@@ -157,3 +157,18 @@ RedirectPermanent /handle-everything /handling-everything
 
 RedirectPermanent /before /targeting-fragments#appending-or-prepending
 RedirectPermanent /after /targeting-fragments#appending-or-prepending
+
+# Docs rework 2026: pages renamed while the guide was restructured into Learn and
+# API reference. See docs/rework-2026/plan.md.
+RedirectPermanent /navigation /navigation-defaults
+RedirectPermanent /analytics /tracking-page-views
+RedirectPermanent /handling-asset-changes /new-deployments
+
+# Docs rework 2026: /install moved from the unpoly-site repo into this one, and its
+# sub-pages flattened into the guide.
+RedirectPermanent /install/server-bindings /server-bindings
+RedirectPermanent /install/bootstrap /install#bootstrap
+RedirectPermanent /install/legacy-browsers /install#browser-support
+
+# Docs rework 2026: the tutorial was replaced by the Getting started chapter.
+RedirectPermanent /tutorial /how-unpoly-works

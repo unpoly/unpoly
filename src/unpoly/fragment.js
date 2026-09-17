@@ -40,13 +40,13 @@ differs from browser APIs like `document.querySelector()`:
 
 For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
-@see navigation
-@see providing-html
-@see preserving-elements
-@see templates
-@see render-lifecycle
-@see skipping-rendering
-@see target-derivation
+@learn-ref navigation-defaults
+@learn-ref providing-html
+@learn-ref preserving-elements
+@learn-ref templates
+@learn-ref render-lifecycle
+@learn-ref skipping-rendering
+@learn-ref target-derivation
 
 @see up.render
 @see up.destroy
@@ -85,7 +85,7 @@ up.fragment = (function() {
       When no explicit target is given, Unpoly will update the first selector matching both
       the current page and the server response.
 
-      When [navigating](/navigation) to a main target, Unpoly will automatically
+      When [navigating](/navigation-defaults) to a main target, Unpoly will automatically
       [reset scroll positions](/scrolling#auto) and
       [update the browser history](/updating-history).
 
@@ -129,14 +129,14 @@ up.fragment = (function() {
   @section Render options
 
     @param {Object} [config.navigateOptions]
-      An object of default render options to apply when [navigating](/navigation).
+      An object of default render options to apply when [navigating](/navigation-defaults).
 
       To set defaults for *all* render passes (when navigating or not), use `up.fragment.config.renderOptions`.
 
     @param {Object} [config.renderOptions]
       An object of low-level render options to apply to *any* render pass.
 
-      When [navigating](/navigation), the defaults from `up.fragment.config.navigateOptions` will also be applied.
+      When [navigating](/navigation-defaults), the defaults from `up.fragment.config.navigateOptions` will also be applied.
 
       > [!important]
       > By design only a minimal set of options is configured. This is to spare callers from excessive unsetting
@@ -385,14 +385,13 @@ up.fragment = (function() {
   When the fragment is reloaded,
   its modification time is sent as an `If-Modified-Since` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
 
-  [Conditional requests](/conditional-requests){:.article-ref}
-
   @function up.fragment.time
   @param {Element} element
   @return {Date|undefined}
     The fragment's last modification time.
 
     Return `undefined` if the fragment was rendered without a modification time.
+  @learn-ref conditional-requests
   @stable
   */
   function timeOf(element) {
@@ -414,8 +413,6 @@ up.fragment = (function() {
   its known modification time is sent as an `If-Modified-Since` request header.
   The server may check the header and decide to [skip rendering](/skipping-rendering).
 
-  [Conditional requests](/conditional-requests){:.article-ref}
-
   ### How `[up-time]` attributes are set
 
   Unpoly will automatically set an `[up-time]` attribute when a fragment was rendered
@@ -436,6 +433,7 @@ up.fragment = (function() {
 
     You can also set the value to `"false"` to prevent a `If-Modified-Since` request header
     when reloading this fragment.
+  @learn-ref conditional-requests
   @stable
   */
 
@@ -451,14 +449,13 @@ up.fragment = (function() {
   When the fragment is reloaded,
   its ETag is sent as an `If-None-Match` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
 
-  [Conditional requests](/conditional-requests){:.article-ref}
-
   @function up.fragment.etag
   @param {Element} element
   @return {string|undefined}
     The fragment's ETag.
 
     Return `undefined` if the fragment was rendered without an ETag.
+  @learn-ref conditional-requests
   @stable
   */
   function etagOf(element) {
@@ -473,8 +470,6 @@ up.fragment = (function() {
 
   ETags can be used to skip unnecessary rendering of unchanged content.
   This is useful for [reloading](/up.reload), [cache revalidation](/caching#revalidation) and [polling](/up-poll).
-
-  [Conditional requests](/conditional-requests){:.article-ref}
 
   ### How `[up-etag]` attributes are set
 
@@ -493,6 +488,7 @@ up.fragment = (function() {
 
     You can also set the value to `"false"` to prevent a `If-None-Match` request header
     when reloading this fragment.
+  @learn-ref conditional-requests
   @stable
   */
 
@@ -666,10 +662,10 @@ up.fragment = (function() {
   })
 
   /*-
-  [Navigates](/navigation) to the given URL by updating a major fragment in the current page.
+  [Navigates](/navigation-defaults) to the given URL by updating a major fragment in the current page.
 
   `up.navigate()` will mimic a click on a vanilla `<a href>` link to satisfy user expectations
-  regarding scrolling, focus, request cancellation and [many other side effects](/navigation).
+  regarding scrolling, focus, request cancellation and [many other side effects](/navigation-defaults).
   To update a fragment without side effects, use `up.render()`.
 
   Instead of calling `up.navigate()` you may also call `up.render({ navigate: true })`.
@@ -710,8 +706,6 @@ up.fragment = (function() {
   The event is emitted on the targeted layer.
   When [opening an overlay](/opening-overlays), the event is emitted on the parent layer
   of the new overlay.
-
-  [Render lifecycle](/render-lifecycle){:.article-ref}
 
   ### Example: Making a full page load instead
 
@@ -856,6 +850,7 @@ up.fragment = (function() {
     Options for the `up.render()` call that will process the server response.
 
     Listeners may inspect or [modify](#changing-render-options) these options.
+  @learn-ref render-lifecycle
   @stable
   */
 
@@ -866,8 +861,6 @@ up.fragment = (function() {
   See [handling connection loss](/network-issues#disconnects) for more details and examples.
 
   The event is emitted on the targeted layer.
-
-  [Handling disconnects](/network-issues#disconnects){:.article-ref}
 
   ## Example
 
@@ -891,7 +884,6 @@ up.fragment = (function() {
   | Server [renders nothing](/skipping-rendering#rendering-nothing) | ❌ no                         |
   | [Preloading](/preloading) fails                                 | ❌ no                         |
 
-
   @event up:fragment:offline
 
   @param {up.Request} event.request
@@ -911,13 +903,12 @@ up.fragment = (function() {
   @param {Element} [event.origin]
     The link or form element that caused the fragment update.
 
+  @learn-ref network-issues#disconnects
   @stable
   */
 
   /*-
   Elements with an `[up-keep]` attribute will be persisted when rendering.
-
-  [Preserving elements](/preserving-elements){:.article-ref}
 
   ## Basic example
 
@@ -944,7 +935,6 @@ up.fragment = (function() {
     To preserve its playback state in all browsers,
     insert a container element between the `<body>` and the media element.
 
-
   @selector [up-keep]
   @param [up-keep='true']
     How long to keep the element.
@@ -969,6 +959,7 @@ up.fragment = (function() {
 
     The code may use the variables `event` (of type `up:fragment:keep`),
     `this` (the old fragment), `newFragment` and `newData`.
+  @learn-ref preserving-elements
   @stable
   */
 
@@ -985,8 +976,6 @@ up.fragment = (function() {
   Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
   to prevent the element from being persisted. If the event is prevented, the element
   will be replaced with a fragment from the response.
-
-  [Preserving elements](/preserving-elements){:.article-ref}
 
   ### Example
 
@@ -1017,6 +1006,7 @@ up.fragment = (function() {
     The [data](/data) attached to the new element.
   @param {Object} event.renderOptions
     An object with [render options](/up.render#parameters) for the current render pass.
+  @learn-ref preserving-elements
   @stable
   */
 
@@ -1026,8 +1016,6 @@ up.fragment = (function() {
   All [keep conditions](/preserving-elements#conditions) have already been evaluated.
   The keeping can no longer be prevented. For this, use `up:fragment:keep` instead.
 
-  [Preserving elements](/preserving-elements){:.article-ref}
-
   @event up:fragment:kept
   @param {Element} event.target
     The fragment that has been kept.
@@ -1035,6 +1023,7 @@ up.fragment = (function() {
     The response fragment that has been discarded.
   @param {Object} event.newData
     The [data](/data) attached to the discarded element.
+  @learn-ref preserving-elements
   @experimental
   */
 
@@ -1163,8 +1152,6 @@ up.fragment = (function() {
   a selector, use `up.compiler()`.\
   This event is emitted after compilation.
 
-  [Render lifecycle](/render-lifecycle){:.article-ref}
-
   ### Example
 
   ```js
@@ -1183,6 +1170,7 @@ up.fragment = (function() {
   @param {boolean} event.revalidating
     Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation).
 
+  @learn-ref render-lifecycle
   @stable
   */
 
@@ -1203,8 +1191,6 @@ up.fragment = (function() {
   is only emitted once for the entire subtree
   that was removed.
 
-  [Render lifecycle](/render-lifecycle){:.article-ref}
-
   @event up:fragment:destroyed
   @param {Element} event.fragment
     The detached element that has been removed from the DOM.
@@ -1212,6 +1198,7 @@ up.fragment = (function() {
     The former parent element of the fragment that has now been detached from the DOM.
   @param {Element} event.target
     The former parent element of the fragment that has now been detached from the DOM.
+  @learn-ref render-lifecycle
   @stable
   */
 
@@ -1553,8 +1540,6 @@ up.fragment = (function() {
   An optional selector will be omitted from an `X-Up-Target` header unless it
   matches in the current page.
 
-  [Dealing with missing targets](/targeting-fragments#missing-targets){:.article-ref}
-
   ### Example
 
   When [updating multiple fragments](/targeting-fragments#multiple)
@@ -1571,6 +1556,7 @@ up.fragment = (function() {
   without an error.
 
   @selector :maybe
+  @learn-ref targeting-fragments#missing-targets
   @stable
   */
 
@@ -1775,7 +1761,7 @@ up.fragment = (function() {
   /*-
   Replaces the given element with a fresh copy fetched from the server.
 
-  By default, reloading is **not** considered a [user navigation](/navigation) and will not scroll, focus
+  By default, reloading is **not** considered a [user navigation](/navigation-defaults) and will not scroll, focus
   or update the browser location. You may change this with `{ navigate: true }`.
 
   ## Example
@@ -1835,7 +1821,7 @@ up.fragment = (function() {
       Defaults can be configured in `up.fragment.config.reloadOptions` and `up.fragment.config.renderOptions`.
 
     @param {boolean} [options.navigate=false]
-      Whether the reloading constitutes a [user navigation](/navigation).
+      Whether the reloading constitutes a [user navigation](/navigation-defaults).
 
   @section Request
     @mix up.render/request
@@ -1942,7 +1928,7 @@ up.fragment = (function() {
       Most [options for `up.render()`](/up.render#parameters) may be used.
 
     @param {boolean} [options.navigate=true]
-      Whether to apply [navigation defaults](/navigation), such as scrolling and updating history.
+      Whether to apply [navigation defaults](/navigation-defaults), such as scrolling and updating history.
 
   @return
     @like up.render
@@ -2194,8 +2180,6 @@ up.fragment = (function() {
   If the element already has [other attributes that make a good identifier](/target-derivation#derivation-patterns),
   like a good `[id]` or `[class]` attribute, it is not necessary to also set `[up-id]`.
 
-  [Target derivation](/target-derivation){:.article-ref}
-
   ### Example
 
   Take this element:
@@ -2227,6 +2211,7 @@ up.fragment = (function() {
   @selector [up-id]
   @param up-id
     A string that uniquely identifies this element.
+  @learn-ref target-derivation
   @stable
   */
 
@@ -2375,8 +2360,6 @@ up.fragment = (function() {
   Use `:main` to only update the main page content, while keeping static layout elements around it.
   To replace all visible elements of a layer, see `:layer`.
 
-  [Targeting fragments](/targeting-fragments){:.article-ref}
-
   ## Targeting the main element
 
   You can target the main element using the `:main` selector:
@@ -2412,6 +2395,7 @@ up.fragment = (function() {
   You may configure main target selectors in `up.fragment.config.mainTargets`.
 
   @selector :main
+  @learn-ref targeting-fragments
   @stable
   */
 
@@ -2419,8 +2403,6 @@ up.fragment = (function() {
   Marks this element as the primary content element of your application layout.
 
   Unpoly will update a main element when no more specific render target is given.
-
-  [Targeting fragments](/targeting-fragments){:.article-ref}
 
   ## Example
 
@@ -2499,13 +2481,12 @@ up.fragment = (function() {
     Omit the attribute value to define a main target for *all* layer modes.
 
     To use a different main target for all overlays (but not the root layer), set `[up-main=overlay]`.
+  @learn-ref targeting-fragments
   @stable
   */
 
   /*-
   To make a server request without changing a fragment, use the `:none` [target](/targeting-fragments).
-
-  [Targeting fragments](/targeting-fragments){:.article-ref}
 
   ### Example
 
@@ -2516,6 +2497,7 @@ up.fragment = (function() {
   ```
 
   @selector :none
+  @learn-ref targeting-fragments
   @stable
   */
 
@@ -2525,9 +2507,6 @@ up.fragment = (function() {
 
   The `:origin` placeholder will be replaced with a target [derived](/target-derivation)
   from the origin element.
-
-  [Resolving ambiguous selectors](/targeting-fragments#ambiguous-selectors){:.article-ref}
-
 
   ## Example
 
@@ -2566,14 +2545,13 @@ up.fragment = (function() {
   > current [layer](/up.layer).
 
   @selector :origin
+  @learn-ref targeting-fragments#ambiguous-selectors
   @stable
   */
 
   /*-
   Your [target selectors](/targeting-fragments) may use this pseudo-selector
   to replace the layer's topmost swappable element.
-
-  [Targeting fragments](/targeting-fragments){:.article-ref}
 
   ## What is targeted
 
@@ -2606,6 +2584,7 @@ up.fragment = (function() {
   ```
 
   @selector :layer
+  @learn-ref targeting-fragments
   @stable
   */
 
@@ -2703,8 +2682,6 @@ up.fragment = (function() {
   Always emits the event `up:fragment:aborted`, regardless of whether there were requests to abort.
   If a request was aborted, the event `up:request:aborted` will also be emitted.
 
-  [Aborting requests](/aborting-requests){:.article-ref}
-
   ### Aborting requests targeting a fragment
 
   To abort pending requests [targeting](/targeting-fragments) an element or its descendants,
@@ -2743,7 +2720,6 @@ up.fragment = (function() {
   Only when requests are aborted by screen region, components
   can [react to being aborted](/up:fragment:aborted).
 
-
   @function up.fragment.abort
   @section Matching requests
     @param {string|Element|List<Element>} [element]
@@ -2771,6 +2747,7 @@ up.fragment = (function() {
       to help debugging an unexpected aborting.
 
       If omitted, a default message will describe the abort conditions.
+  @learn-ref aborting-requests
   @stable
   */
   function abort(...args) {
@@ -2840,8 +2817,6 @@ up.fragment = (function() {
   If requests for entire layer were aborted, this event is emitted the
   [layer's outmost element](/up.Layer.prototype.element).
 
-  [Aborting requests](/aborting-requests){:.article-ref}
-
   ### Example
 
   This would run code when an element or its descendants were aborted:
@@ -2889,6 +2864,7 @@ up.fragment = (function() {
     Whether the fragment was aborted by a [new overlay opening](/opening-overlays).
 
     @experimental
+  @learn-ref aborting-requests
   @stable
   */
 
@@ -3008,8 +2984,6 @@ up.fragment = (function() {
   Emits the `up:template:clone` event. You can use that event to integrate [template engines](/templates)
   like Mustache, EJS or Handlebars.
 
-  [Templates](/templates){:.article-ref}
-
   ### Example
 
   ```js
@@ -3041,6 +3015,7 @@ up.fragment = (function() {
     the cloned templates.
 
     You can pass this link to any rendering function, like `up.render()` or `up.Preview#insert()`.
+  @learn-ref templates
   @stable
   */
   function cloneTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
@@ -3055,8 +3030,6 @@ up.fragment = (function() {
 
   /*-
   This event is emitted before a [template is cloned](/templates).
-
-  [Templates](/templates){:.article-ref}
 
   ### Integrating template engines
 
@@ -3104,6 +3077,7 @@ up.fragment = (function() {
 
     The value is `null` initially and must be set by a listener.
     When no listener sets `event.nodes`, Unpoly will parse the template's inner HTML.
+  @learn-ref templates
   @stable
   */
 
@@ -3292,13 +3266,12 @@ Returns the current [context](/context).
 
 This is aliased as `up.layer.context`.
 
-[Layer context](/context){:.article-ref}
-
 @property up.context
 @param {Object} context
   The context object.
 
   If no context has been set an empty object is returned.
+@learn-ref context
 @experimental
 */
 u.delegate(up, ['context'], () => up.layer.current)

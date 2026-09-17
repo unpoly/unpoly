@@ -11,11 +11,11 @@ The default viewport for any web application is the
 [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement).
 An application may define additional viewports by assigning the CSS property `{ overflow-y: scroll }` to any block element.
 
-@see scrolling
-@see scroll-tuning
-@see focus
-@see focus-visibility
-@see infinite-scrolling
+@learn-ref scrolling
+@learn-ref scroll-tuning
+@learn-ref focus
+@learn-ref focus-visibility
+@learn-ref infinite-scrolling
 
 @see [up-viewport]
 @see [up-fixed=top]
@@ -298,8 +298,6 @@ up.viewport = (function() {
 
   You can use this class to [remove an unwanted focus outline](#example).
 
-  [Focus ring visibility](/focus-visibility){:.article-ref}
-
   ## Relation to `:focus-visible`
 
   Unpoly will try to unset `:focus-visible` whenever it sets `.up-focus-visible`, but can only do so
@@ -312,6 +310,7 @@ up.viewport = (function() {
   @include focus-ring-hide-example
 
   @selector .up-focus-hidden
+  @learn-ref focus-visibility
   @experimental
   */
 
@@ -321,8 +320,6 @@ up.viewport = (function() {
 
   You can use this class to [give a new component a focus ring](#example) for keyboard users,
   while not rendering a focus ring for mouse or touch users.
-
-  [Focus ring visibility](/focus-visibility){:.article-ref}
 
   ## Relation to `:focus-visible`
 
@@ -336,6 +333,7 @@ up.viewport = (function() {
   @include focus-ring-show-example
 
   @selector .up-focus-visible
+  @learn-ref focus-visibility
   @experimental
   */
 
@@ -526,7 +524,7 @@ up.viewport = (function() {
   at the same URL, or by following a link with an [`[up-scroll="restore"]`](/scrolling#restore)
   attribute.
 
-  Unpoly automatically saves scroll positions before [navigating](/navigation).
+  Unpoly automatically saves scroll positions before [navigating](/navigation-defaults).
 
   @function up.viewport.saveScroll
   @param {Element|Array<Element>} [viewport]
@@ -632,7 +630,7 @@ up.viewport = (function() {
   at the same location, or by following a link with an [`[up-focus="restore"]`](/focus#restore)
   attribute to that same location.
 
-  Unpoly automatically saves focus-related state before [navigating](/navigation).
+  Unpoly automatically saves focus-related state before [navigating](/navigation-defaults).
 
   @function up.viewport.saveFocus
   @param {Element|Array<Element>} [viewport]

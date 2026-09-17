@@ -26,6 +26,8 @@ Documentation lives in this repository, beside the code it describes. A sister p
 - [Writing prose](#writing-prose)
   - [Referring to features](#referring-to-features)
   - [Rely on autolinking](#rely-on-autolinking)
+  - [Linking to guide pages](#linking-to-guide-pages)
+  - [Pointing a reference at its guide](#pointing-a-reference-at-its-guide)
   - [Line breaks](#line-breaks)
   - [Admonitions](#admonitions)
   - [Marking up code blocks](#marking-up-code-blocks)
@@ -35,6 +37,7 @@ Documentation lives in this repository, beside the code it describes. A sister p
   - [Param partials](#param-partials)
   - [Inheriting a single param](#inheriting-a-single-param)
 - [Guide pages](#guide-pages)
+  - [The table of contents](#the-table-of-contents)
   - [Overview pages](#overview-pages)
 - [The contributing guides](#the-contributing-guides)
 - [Modules and classes](#modules-and-classes)
@@ -493,19 +496,66 @@ containing ` = `, and code inside headings or fenced blocks. A mention of the pa
 you're currently on isn't linked either, so you can write `` `up.render()` `` freely in
 its own doc comment.
 
-Guide pages are linked by path. A link to the *main article* for a topic gets a marker
-that styles it as a prominent reference:
-
-```markdown
-[Polling](/polling){:.article-ref}
-```
-
 Give a heading a stable anchor when you intend to link to it, so the URL survives a
 rewording:
 
 ```markdown
-## Callback arguments
+## Callback arguments {#callbacks}
 ```
+
+### Linking to guide pages
+
+Backtick autolinking only resolves API symbols. To link a guide page, write a
+**wikilink** — the page slug in double brackets — and the label is derived from the
+page's title:
+
+```markdown
+Unpoly can keep a fragment fresh with [[polling]].
+```
+
+Add a `#anchor` to point at one of the page's headings. The label then names the
+heading too, so the link carries its own context:
+
+```markdown
+See [[caching#expiration]] for how long a response is reused.
+```
+
+A wikilink that cannot be resolved — an unknown slug, or an anchor that no heading
+produces — fails the build. Use an ordinary Markdown link when you want a label of
+your own, woven into the sentence:
+
+```markdown
+Unpoly will revalidate [expired](/caching#expiration) responses.
+```
+
+### Pointing a reference at its guide
+
+A reference page names the guides that explain its feature in context with the
+`@learn-ref` directive. It is repeatable, takes the same `slug` or `slug#anchor` as a
+wikilink, and renders as a row of links above the page's first heading:
+
+```javascript
+/*-
+Keeps a fragment fresh by reloading it in a fixed interval.
+
+@selector [up-poll]
+@learn-ref polling
+@stable
+*/
+```
+
+The label is derived from the target, so a retitled page updates every reference to
+it. Only override it — indented below the directive — when the derived label does not
+fit:
+
+```javascript
+@learn-ref network-issues#slow-server-responses
+  What the user sees while the server is slow
+```
+
+`@learn-ref` belongs on modules as well as on features. Every public, non-deprecated
+`@selector` and `@event` should have at least one; `bundle exec rake docs:learn_refs`
+in `unpoly-site` lists the ones that don't.
 
 ### Line breaks
 
@@ -700,9 +750,14 @@ You can enhance any form to update the existing page, without making a full page
 `@page` sets the slug and therefore the URL (`/submitting-forms`). `@menu-title` is
 optional, and gives the navigation a shorter label than the title.
 
-Reference pages point at their main article with an `{:.article-ref}` link, and modules
-list their articles with `@see`. Add a new page to its module's `@see` list, or nothing
-will link to it.
+Anywhere in a page, the token `%UNPOLY_VERSION%` is replaced with the version being
+built. It works inside code blocks, where no other mechanism reaches:
+
+```markdown
+    <script src="https://cdn.jsdelivr.net/npm/unpoly@%UNPOLY_VERSION%/unpoly.js"></script>
+```
+
+A new page must be listed in `src/unpoly/pages/toc.yml`, or the site will not build.
 
 > [!IMPORTANT]
 > Renaming a page changes its URL, and unlike a renamed API, we don't keep the old page
@@ -713,6 +768,53 @@ will link to it.
 > RedirectPermanent /old-page-name /new-page-name
 > ```
 
+
+### The table of contents
+
+`src/unpoly/pages/toc.yml` decides what unpoly.com's two halves contain: **Learn**, read
+from front to back with a next-page link on every page, and the **API reference**, a
+lookup tree of modules and their features.
+
+The manifest owns *relations only* — which pages form a topic, in which order. Every
+fact about a single document (its title, slug, menu label, visibility) stays in that
+document's own directives, so a page is never described in two places.
+
+```yaml
+learn:
+  title: Learn
+  reading: linear
+  topics:
+    - type: page-group
+      title: Overlays
+      pages:
+        - overlays
+        - opening-overlays
+        - closing-overlays
+
+api:
+  title: API reference
+  reading: lookup
+  topics:
+    - type: module
+      module: up.layer
+    - type: page-group
+      title: Formats
+      start: none
+      pages:
+        - url-patterns
+        - relaxed-json
+```
+
+A `page-group` is a hand-picked list of guide pages. Clicking the group leads to its
+first page — the topic's overview — and the remaining pages sit below it. `start:`
+overrides that: name another page, or `none` for a label that only expands.
+
+A `module` topic needs nothing but the module's name; its title, summary and features
+all come from the parsed source.
+
+The site build fails when the manifest and the documentation disagree: an unknown key,
+a page listed twice or not at all, a slug that no `@page` declares, or a module that
+documents current features but appears nowhere under `api`.
 
 ### Overview pages
 

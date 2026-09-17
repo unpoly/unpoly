@@ -71,13 +71,13 @@ With these [`[up-target]`](/up-follow#up-target) annotations Unpoly only updates
 The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
-@see attributes-and-options
-@see targeting-fragments
-@see handling-everything
-@see failed-responses
-@see preloading
-@see lazy-loading
-@see faux-interactive-elements
+@learn-ref attributes-and-options
+@learn-ref targeting-fragments
+@learn-ref handling-everything
+@learn-ref failed-responses
+@learn-ref preloading
+@learn-ref lazy-loading
+@learn-ref faux-interactive-elements
 
 @see [up-follow]
 @see [up-instant]
@@ -255,7 +255,7 @@ up.link = (function() {
   will be replaced. Attributes like [`[up-target]`](/up-follow#up-target)
   or [`[up-layer]`](/up-follow#up-layer) will be honored.
 
-  Following a link is considered [navigation](/navigation) by default.
+  Following a link is considered [navigation](/navigation-defaults) by default.
 
   Emits the event `up:link:follow`.
 
@@ -544,8 +544,6 @@ up.link = (function() {
   with pages the user is likely to click or that should be
   [accessible while offline](/network-issues#offline-cache).
 
-  [Preloading links](/preloading){:.article-ref}
-
   @function up.link.preload
 
   @section General
@@ -577,6 +575,7 @@ up.link = (function() {
     A promise that will be fulfilled when the request was loaded and cached.
 
     When the link cannot be preloaded, the promise rejects with an error.
+  @learn-ref preloading
   @stable
   */
   function preload(link, options) {
@@ -615,8 +614,6 @@ up.link = (function() {
   Listeners may prevent this event to stop the link from being preloaded
   or [change render options](/up:link:follow#changing-render-options) for the preload request.
 
-  [Preloading links](/preloading){:.article-ref}
-
   ## Example
 
   The following would disable preloading on slow 2G connections:
@@ -643,6 +640,7 @@ up.link = (function() {
     Listeners may inspect or [modify](/up:link:follow#changing-render-options) these options.
   @param event.preventDefault()
     Prevents the link from being preloaded.
+  @learn-ref preloading
   @stable
   */
 
@@ -752,8 +750,6 @@ up.link = (function() {
 
   It's up to you to make the element appear interactive visually, e.g., by assigning a `.button` class from your design system.
 
-  [Clicking on non-interactive elements](/faux-interactive-elements){:.article-ref}
-
   ## Example
 
   Add the `[up-clickable]` attribute to a non-interactive element, like a `<span>`:
@@ -797,6 +793,7 @@ up.link = (function() {
   @selector [up-clickable]
   @param [up-instant]
     Whether this element is activated on `mousedown` instead of waiting for `click`.
+  @learn-ref faux-interactive-elements
   @experimental
   */
   up.macro(config.selectorFn('clickableSelectors'), makeClickable)
@@ -1028,8 +1025,6 @@ up.link = (function() {
   /*-
   Loads a [`[up-defer="manual"]`](/up-defer) placeholder.
 
-  [Custom timing for lazy-loaded content](/lazy-loading#scripted){:.article-ref}
-
   @function up.deferred.load
 
   @section General
@@ -1070,6 +1065,7 @@ up.link = (function() {
     A promise that fulfills with an `up.RenderResult` once the deferred content
     has been loaded and rendered.
 
+  @learn-ref lazy-loading#scripted
   @stable
   */
   function loadDeferred(link, options) {
@@ -1099,8 +1095,6 @@ up.link = (function() {
   The event can be [prevented](#event.preventDefault) to stop the network request.
   The loading will not be attempted again, but you can use `up.deferred.load()` to load it manually afterwards.
 
-  [Lazy loading content](/lazy-loading){:.article-ref}
-
   @event up:deferred:load
   @param {Element} event.target
     The `[up-defer]` placeholder that is about to load its content.
@@ -1110,6 +1104,7 @@ up.link = (function() {
     Listeners may inspect and modify these options.
   @param event.preventDefault()
     Prevents the deferred content from being loaded.
+  @learn-ref lazy-loading
   @stable
   */
 
@@ -1118,8 +1113,6 @@ up.link = (function() {
 
   By moving expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments into partials,
   you can paint critical content earlier.
-
-  [Lazy loading content](/lazy-loading){:.article-ref}
 
   ## Example
 
@@ -1181,6 +1174,7 @@ up.link = (function() {
   @section Caching
     @mix up-follow/caching
 
+  @learn-ref lazy-loading
   @stable
   */
   up.attribute('up-defer', { defaultValue: 'insert' }, function(link, condition) {
@@ -1191,7 +1185,7 @@ up.link = (function() {
   /*-
   [Follows](/up.follow) this link with JavaScript and updates a fragment with the server response.
 
-  Following a link is considered [navigation](/navigation) by default.
+  Following a link is considered [navigation](/navigation-defaults) by default.
 
   ## Example
 
@@ -1478,8 +1472,6 @@ up.link = (function() {
 
   Links with an `[up-preload]` attribute are always [followed by Unpoly](/up-follow) and will not make a full page load.
 
-  [Preloading links](/preloading){:.article-ref}
-
   ### Example
 
   ```html
@@ -1531,6 +1523,7 @@ up.link = (function() {
       @like [up-follow]
     @param [up-abortable='false']
       @like [up-follow]
+  @learn-ref preloading
   @stable
   */
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {
