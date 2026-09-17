@@ -69,7 +69,7 @@ up.compiler('.click-to-hide', function(element) {
 
 ## Optional extensions {#extensions}
 
-You know have everything you need to start using Unpoly!
+You now have everything you need to start using Unpoly!
 
 We provide a number of **optional** extensions:
 
@@ -81,7 +81,7 @@ We provide a number of **optional** extensions:
 
 ## Bootstrap integration {#bootstrap}
 
-If you're using [Bootstrap](https://getbootstrap.com/), there are some **optional** files that configures
+If you're using [Bootstrap](https://getbootstrap.com/), there are some **optional** files that configure
 Unpoly to use Bootstrap's CSS classes:
 
 | Development | Production |
@@ -96,7 +96,7 @@ Unpoly to use Bootstrap's CSS classes:
 
 ## Browser support {#browser-support}
 
-Recent versions of Unpoly supports [all modern browsers](/up.framework.isSupported).
+Recent versions of Unpoly support [all modern browsers](/up.framework.isSupported).
 
 The last version with support for Internet Explorer 11 is [2.7](https://unpoly.com/changes/2.7.1).
 
