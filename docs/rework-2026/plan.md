@@ -251,8 +251,8 @@ Mock artifact: https://claude.ai/artifact/G1namZkdtXKVjExAQjTBt8 (v11 = all verd
   that section also RESTATES (fresh words, not verbatim) the full-page/URL-universality
   point, e.g. "since your server can always answer with a complete page, every screen
   keeps a working address of its own". davisums + LaundroMat quotes struck. Proof strip
-  becomes label "In production at" + logo wall (assets in ../unpoly-site/tmp/logo-wall/,
-  9/10, TUIfy missing).
+  becomes label "In production at" + logo wall (assets COMPLETE at 10 in
+  docs/rework-2026/logos/ — committed; "TUIfy" was a typo for TUI fly, the airline).
 - F4 REJECTED: no maturity/"since 2015" line anywhere (reads as legacy tech; muddies story).
 - F5a: fragment section's survival sentence de-twinned: "The rest of the page simply
   stays: your scroll position, your focus, the form you were halfway through." Edge-case
@@ -623,12 +623,12 @@ Settled in the 2026-09-14 session:
     "maintain for years" fit bullet and is the one uncopyable claim); add early clause
     that Unpoly IS a single client-side script (certainty currently arrives only in the
     last section); move Carson Gross quote next to the degradation section.
-- Logo wall: 9 of 10 assets collected as verified SVGs in ../unpoly-site/tmp/logo-wall/
-  (vw, audi, siemens, bosch, arm, zendesk, steady, urban-dictionary, adonisjs — all flat
-  wordmarks/marks that desaturate cleanly; zendesk.svg gained a viewBox, urban-dictionary.svg
-  was recolored from white to dark). TUIfy: NO public asset exists (tuify.de is domain-parked,
-  Wayback shows only parking pages since 2013) — Henning must supply one privately or drop
-  TUIfy from the wall. No brand-terms review, per Henning.
+- Logo wall: COMPLETE, 10 verified SVGs committed in docs/rework-2026/logos/ (vw, audi,
+  siemens, bosch, arm, zendesk, steady, urban-dictionary, adonisjs, tuifly — all recolored
+  to uniform #333333, viewBox-only, desaturate cleanly). "TUIfy" was a TYPO for TUI fly
+  (the German airline); mock's placeholder wordmark must be fixed at landing build.
+  No brand-terms review, per Henning. tmp/ dirs proved volatile (assets were lost twice) —
+  keep rework assets in this tracked folder.
 - NEXT SESSION: decide review groups A/B/C and apply round 3 to the mock → place logo
   assets → optional cold-reader test at makandra → then the landing build.
 
