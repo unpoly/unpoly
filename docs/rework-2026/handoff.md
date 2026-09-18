@@ -145,3 +145,66 @@ lib edits), `rake docs:check_urls` 78/78, unpoly self-test + lint green.
   loaded, zero effort spent); removing it stays a Search-station liberty.
 - Site build ~4 min with link check; SKIP_CHECK_LINKS=1 skips it. Preview:
   `bundle exec middleman server` → localhost:4567, restart after config.rb/lib changes.
+
+## From Landing + CSS (2026-09-18)
+
+The visual system is built and committed on `docs-rework` in unpoly-site: tokens and
+vendored fonts, the landing page, the frame, the block refresh with its regression specs,
+and the token rename. `plan.md` holds the decisions; what follows is what the next
+stations pick up.
+
+### Inherited by Search
+
+- **The pill is already there, and it is already the trigger.** The global header carries
+  `source/_search_pill.html.erb`, styled by `guide/blocks/search-pill.sass` and wired by
+  `javascripts/components/search_pill.js`. Today it is a link to `/api` that the compiler
+  upgrades into "focus the sidebar's field" wherever that field exists, so it never
+  promises what the page cannot do. Replace the compiler's body with the popup and the
+  markup, styles and header slot stay as they are.
+- It advertises `/`, the key that actually works. If the new search takes `⌘K`, the `kbd`
+  in the partial is the one place to change.
+- **The tree filter was kept and restyled.** It still filters whichever area's menu is
+  loaded and still expands to the Algolia full-text list on Enter. Removing it remains a
+  Search-station liberty, as the Structure station recorded — but note that two specs in
+  `spec/features/search_spec.rb` now drive it from `/loading-state`, because `/up.render`
+  carries the API menu, which has no "Overlays" or "Forms" to filter.
+- **The drawer carries search now.** `source/menu/narrow.html.erb` gained the same
+  `.menu--search` and `.content-search` the sidebar has. On a phone the burger is the only
+  way in, so a search that lived only in the sidebar was no search at all.
+- The pill is hidden below `$bp-sidebar`, where the burger takes over.
+
+### Inherited by Content
+
+- **The request-flow diagram is a reusable partial.** `source/_fragment_updates_diagram.html.erb`
+  draws it as inline SVG with real text, which is why it can use the site's webfont. C4
+  reserves it for "How Unpoly works" as well: render it with
+  `<%= partial 'fragment_updates_diagram' %>`. Its source image is tracked at
+  `docs/rework-2026/fragment-updates.png`.
+- **The landing page's copy is not editable in place.** `source/index.html.erb` carries
+  mock v11 verbatim and says so at the top; wording changes go through the mock and
+  Henning, not the template.
+- The hub pages still show the Structure station's "This page is being written." stubs.
+  They are styled, so replacing the prose needs no CSS.
+- The token specimen used for the C1 review is deleted, as planned — `source/specimen.html.erb`
+  and its block are gone, and nothing references them.
+
+### Owed to Ship
+
+- Nothing outstanding. The fonts are woff2-only from one Roboto release, so the build no
+  longer ships the eot/ttf/svg variants; if a deployment step ever listed those files by
+  name, it wants checking once.
+
+### Leftovers
+
+- **No block-local breakpoint literals survived.** The shipped stylesheet contains three
+  media-query rules, at `$bp-sidebar` (1024px) and `$bp-toc` (1280px), and nothing else.
+  A third breakpoint needs an argument, not a convenience.
+- **The screenshot harness is not in the repo.** It lives in the station's scratchpad and
+  drives Capybara against `bundle exec middleman server` rather than an in-process rack
+  app — which matters, because the in-process app re-parses the guide on every request and
+  times Selenium out. Adopting it into `spec/` or `bin/` is unruled; without it, the
+  regression evidence for a later restyling has to be rebuilt from scratch.
+- `plan.md` still calls the palette file `_constants.sass` in its guardrails record
+  (2026-09-16). It is `_tokens.sass` now.
+- `hljs.sass` is deliberately outside the token system: it is a third-party syntax theme
+  and its colours answer to the highlighter, not to the site.
