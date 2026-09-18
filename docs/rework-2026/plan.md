@@ -302,7 +302,7 @@ Mock artifact: https://claude.ai/artifact/G1namZkdtXKVjExAQjTBt8 (v11 = all verd
 
 ## CSS/layout liberties for the build (settled 2026-09-16, Henning's guardrails verbatim in spirit)
 
-- COLORS: stick with the _constants.sass palette (main/secondary/tertiary/quaternary);
+- COLORS: stick with the _constants.sass palette (file renamed to _tokens.sass in the CSS station) (main/secondary/tertiary/quaternary);
   new variants via saturation/lightness tweaks are fine. Grays are unrestricted, but
   re-used grays become Sass variables.
 - SPACING: margins/spacers may be reworked freely, but converge on a small set of
@@ -330,7 +330,7 @@ Mock artifact: https://claude.ai/artifact/G1namZkdtXKVjExAQjTBt8 (v11 = all verd
 - SASS COMPILER: stay on the pinned Ruby Sass by default; if it becomes a wall, the agent
   may switch to a newer Sass (dart-sass) and migrate the existing files.
 - CONFIRMED ASSUMPTIONS: the mock's colors are placeholders — the landing page is built
-  in the _constants.sass palette (mock = copy-and-structure source, not a pixel spec);
+  in the _constants.sass palette (file renamed to _tokens.sass in the CSS station) (mock = copy-and-structure source, not a pixel spec);
   blocks orphaned by the restructure (e.g. tree-filter styles) may be deleted after a
   grep confirms no other use.
 - REGRESSION METHOD (agent's call, noted for continuity): Capybara feature specs for
@@ -585,6 +585,10 @@ escalates only genuine calls to Henning.
     claim, verbatim).
   - Buttons: ONE casing consistently, never mixed; direction sentence case (Henning's
     lean + mock v11 is sentence case) — .action restyled site-wide in B3.
+    EXTENDED 2026-09-18: sentence case also in the header nav and the "Edit this page"
+    link (react.dev precedent). CLARIFIED 2026-09-18: the ruling covers buttons and nav
+    items ONLY — uppercase stays legitimate where it feels right for small labels
+    (badges, chips, eyebrows like HTML/EVENTS/CONFIG/OPTIONAL, table heads).
   - Breakpoints: keep the SET MINIMAL — every breakpoint multiplies the visual test
     surface. Prefer breakpoint-less CSS (wrapping flex, grid auto-fit, clamp) wherever
     a rule can express it; breakpoints only where layout fundamentally changes (e.g.
