@@ -356,7 +356,9 @@ BUILD · STRUCTURE — machinery and naming, ZERO prose:
 
 LANDING + CSS FOUNDATION — the visual system:
 - Spacer/gray variables, refreshed BEM blocks, top bar with search pill, layout and
-  breakpoints, tree-filter removal, per the CSS/layout liberties section.
+  breakpoints, per the CSS/layout liberties section. (Tree-filter removal moved to the
+  Search station when it was split out 2026-09-17: search functionality stays intact and
+  restyled until its replacement exists; this line originally predated the split.)
 - The landing page built from mock v11; screenshot sweep + feature specs for the
   don't-break contract.
 - Must NOT: touch docs prose or structure; no new pages.
@@ -546,6 +548,60 @@ escalates only genuine calls to Henning.
 - T6: every move/split lands as TWO commits — mechanical relocation first (verbatim
   text, toc.yml, redirect), then the rewrite/reframe (V2 renames ride in the second).
 
+## Landing+CSS station verdicts (Henning, 2026-09-17, batch 0)
+
+- The release-notification box (latest version + GitHub Discussions + X links on the old
+  landing) DIES with the old landing; mock v11 is the structure source and has none.
+- Install disappears from the global nav (mock's header is the content spec:
+  Learn / API / Demo / Changes / Support / GitHub). Installing is part of Getting
+  started, which the "Learn Unpoly" button leads to; /install stays reachable from the
+  landing and the GS reading order.
+- Gate split: tokens freeze after a rendered specimen review (hero + one landing section
+  + 3-4 doc pages, before/after); the full landing is built only on frozen tokens.
+- Tree filter: kept and restyled by this station; removal is the Search station's call.
+- Search pill until Pagefind: real link, compiler-upgraded (focuses sidebar search where
+  one exists, navigates to /api elsewhere); kbd hint shows `/`, no ⌘K promise.
+- Tokens frozen 2026-09-18 with amendments (one token file; $*_BLOCK_SPACING duplicates
+  deleted; +bold mixin deleted in favor of font-weight: bold; headings get tighter
+  leading than the 1.55 body; woff2 only). Scales stay as proposed — no pruning.
+- Semantic aliases (e.g. $CARD_ROUNDNESS: $RADIUS_M): only where two or more blocks must
+  agree on a value; aliases always point at a token, never a fresh value. When unsure,
+  use the raw token without a semantic mapping (Henning 2026-09-18).
+- Palette restructure + lowercase rename: shape under alignment (hue names for the
+  non-pure brand colors, shades only for hues actually used, anchor/center shade);
+  research round running 2026-09-18. No palette changes until settled.
+  SETTLED after the naming research (Henning 2026-09-18):
+  - Spacing scale: NUMERIC index ($space-1..9). Which index is the "default"/medium
+    spacing: research pending (framework precedence).
+  - Type scale: t-shirt with 2+ letter codes; the middle step is `md`, not `base`.
+  - Shades: hundreds (100..900 family), values COMPARABLE ACROSS HUES by lightness,
+    500 = the average shade. Brand colors SNAP INTO the grid even if hue/lightness
+    shifts slightly — brand colors are not holy (Unpoly's CI is only logo + icon).
+    This supersedes the earlier "brand anchors stay exact" note.
+  - Hues: red, blue, orange, indigo (from $COLOR_SECONDARY), gray; teal/yellow only if
+    their uses survive the merge. Merging similar hues and snapping one-offs onto ramp
+    shades is desired, not a bug. Only steps actually used get defined.
+  - Fallback window title: "Unpoly - The missing application layer for HTML" (the new
+    claim, verbatim).
+  - Buttons: ONE casing consistently, never mixed; direction sentence case (Henning's
+    lean + mock v11 is sentence case) — .action restyled site-wide in B3.
+  - Breakpoints: keep the SET MINIMAL — every breakpoint multiplies the visual test
+    surface. Prefer breakpoint-less CSS (wrapping flex, grid auto-fit, clamp) wherever
+    a rule can express it; breakpoints only where layout fundamentally changes (e.g.
+    sidebar -> hamburger).
+  - SETTLED after the breakpoint/spacer research (Henning 2026-09-18):
+    EXACTLY TWO structural breakpoints, named by capability, not size (MDN precedent):
+    $bp-sidebar (sidebar <-> hamburger; exact px measured from the real sidebar width,
+    in the 920-1044 band where Bootstrap/react.dev/MDN/Polaris all land) and
+    $bp-toc (right TOC rail on/off at ~1280 — NOT 1536; react.dev's maintainers
+    regret 1536 because it hides the TOC on 14" laptops). Cosmetic media queries
+    sparingly, never added to the structural set. Everything else intrinsic
+    (clamp/wrap/auto-fit; Every Layout sidebar pattern as reference).
+    DEFAULT SPACING = $space-5 (index 5 of 9, the ~24px step, inheriting the old
+    $BLOCK_SPACING role) — documented in the token file as THE default, per Carbon's
+    spacing-05-of-9 center anchor and old Polaris's named "base". Deliberately airier
+    than the frameworks' 16px: docs prose, not app chrome.
+
 ## Structure station review verdicts (Henning, 2026-09-17)
 
 - Learn-ref slot label: "Learn:" (replaces the reused "Guide:"/"Guides:" wording).
@@ -565,6 +621,12 @@ escalates only genuine calls to Henning.
   /up.tooltip (they 404 per V3).
 
 ## Open items (pending task list, refreshed 2026-09-16)
+
+- Sass constants rename (logged 2026-09-18, Henning): convert the UPPERCASE_UNDERSCORE
+  constants to lowercase dashed names (e.g. `$space-s`) — one mechanical pass, late in
+  the CSS station or right after, not during the visual work. Possibly bundled with a
+  palette restructure (base hues + shades + semantic aliases; values unchanged) — under
+  discussion, not yet decided.
 
 Alignment (current session or its compacted continuation):
 - TUIfy logo: Henning supplies an asset privately, or TUIfy leaves the wall.
