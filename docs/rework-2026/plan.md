@@ -490,6 +490,178 @@ Its judgement calls were settled here so the Fable re-attempt executes without o
   carries its redirect (.htaccess edits allowed to Content for exactly this);
   rake docs:check_urls enforces on every build.
 
+## Search settlement (settled 2026-09-14; RESTORED 2026-09-18)
+
+This section was settled by Henning in ecd0e509a and accidentally dropped when
+fed42a1b0 rewrote the Open-items section two days later (its open questions were
+kept, its decisions were lost). Restored verbatim; it binds the Search station.
+
+- SETTLED 2026-09-14 — Search (via solution exploration; killed: per-area and two-stage search):
+  UX stakes: global, single-stage, results in a popup, subheadline sections as individual
+  results annotated with their document title, every result labeled with its area
+  (Learn vs API, e.g. right-aligned badge) — but hits are NOT segregated into per-area blocks.
+  PRIMARY: Pagefind + symbol sidecar.
+  - Pagefind indexes the built HTML, hooked into config.rb build hooks. Layout annotations:
+    data-pagefind-body scoping, area filter, weights. Add <html lang="en"> — the benchmark
+    detected "unknown" language, so stemming is currently off.
+  - Symbol sidecar: generated JSON of public FEATURE and PARAM names -> paths/anchors
+    (param entries labeled with their owner, e.g. "up-watch-delay — [up-watch]"). Rendered
+    as an exact/prefix-matched first group in the popup, above full-text hits grouped by
+    page with section sub-hits, pages ordered by score. Grouping is subject to UX testing
+    at build time; if the first group gets noisy, demote param entries by ranking rule.
+  - Widget: slim fake-input pill ("Search docs… ⌘K") in the one-row header between
+    logo/version and the nav links (Learn, API, Demo, Changes, Support, GitHub icon);
+    collapses to an icon at narrow widths; launcher also goes into the hamburger menu
+    (mobile currently has no search entry point at all).
+  - The sidebar tree filter dies with ALL related code (menu.coffee filter/expand-help,
+    two-stage search.coffee + content_search.js).
+  - Dev/test: the middleman preview serves HTTP and emits no files, so search in
+    development needs a build step for the indexer (rake task or similar). Basic search tests.
+  - esbuild + npm migration for unpoly-site (own Procfile + bin/dev) only if it eases the
+    Pagefind spike; otherwise deferred to the very end.
+  - Benchmark (2026-09-14): 832 pages / 9.9 MB HTML indexed in 1.24 s; 4.7 MB chunked index.
+  FALLBACK, only on file-size or result-quality problems: Algolia — either the DocSearch
+  program (eligibility uncertain: unpoly.com promotes paid consulting) or a self-indexed
+  push with section records (~$8-20/month at instant-search volume, legacy free plan may
+  be force-migrated regardless). Old version stages (v2/v3) keep their deployed sites and
+  existing Algolia indexes untouched; retiring the Algolia push for `latest` is a
+  build-time cleanup.
+- Next up: landing-page skeleton — the LAST open alignment stop.
+
+## Landing+CSS quality reset (2026-10-01)
+
+Henning reviewed the built site and found the UI work sloppy in many places; the station
+is REOPENED before any other work continues. His seed list (header color mix and element
+distribution, Learn navigation/width bugs, landing code-block colors, stacked segment
+backgrounds, diagram SVG not honest to the PNG's semi-transparent fills, card padding,
+layout breaking when navigating between the landing and sidebar pages, search results
+opening without the frame, .fineprint) is NOT the work list — "Don't just address the
+listed issues... We need to find a grounded, holistic approach to clean up these issues
+and find more."
+
+Root-cause diagnosis (accepted): (1) layout-state leakage — the page family
+(-full-width, sidebar presence) was rendered server-side into .guide--torso while the
+Unpoly main target sat INSIDE it, so fragment navigation kept a stale frame; (2) design-
+fidelity misses needing a deliberate pass; (3) a verification gap — no spec or screenshot
+exercised cross-family navigation or post-interaction states.
+
+PHASE A SETTLED (Henning 2026-10-01, verified against the Unpoly source):
+- .guide--torso gets [up-main=root]: the sidebar+main container is the default target
+  for root-layer navigation; every server response controls torso modifiers
+  (-full-width) and sidebar presence. .guide--content keeps up-main="modal".
+- [wants-menu-path] is deleted. The sidebar becomes a lazy-loaded placeholder using the
+  documented container pattern: a stable wrapper `<div class="guide--menu"
+  up-keep="same-html">` around `<a href="/api/menu" up-defer>` (plain up-defer — the
+  value "instant" doesn't exist; "insert" is the default). same-html compares the
+  wrapper's INITIAL server HTML (compile-time snapshot), so the loaded menu + scroll
+  state survive same-section navigation (no re-request) and crossing sections swaps the
+  wrapper and re-requests. up-keep on the bare link would self-destruct on first load
+  (up-defer replaces :origin).
+- Implementation spec note: the kept menu must track location changes (.up-current via
+  [up-nav] works on kept elements; the accordion's expand-current logic must react to
+  location, not only compile).
+
+Header spec (settled from Henning's review, binds the fix): ONE background color for the
+whole top bar with all contained elements in white (no blue logo/version segment);
+react.dev arrangement — left: logo + version switch; centered: search box, generous
+width on wide screens; right: all nav sections + GitHub link; "Support" loses its
+special style and becomes a plain nav section.
+
+Process upgrade (binds all future verification): navigation-path feature specs (every
+page family entered via direct load AND via fragment navigation from each other family,
+search results, drawer, logo) and post-navigation screenshots join the evidence
+standard; direct-load-only sweeps are insufficient.
+
+AGENTIC REVIEW ROUNDS (settled 2026-10-01): the screenshot/interaction harness is
+ADOPTED into unpoly-site (bin/shoot + path scripts; it has been rebuilt from session
+scratchpads twice — that ends). Every Phase C batch (and future station batches) gets a
+FRESH-EYES review round by an agent that did not build the work, with three
+ingredients: (1) the scripted interaction matrix with measurement probes (overflow,
+margins, clipping, collisions, element-behind-element, focus rings, state after
+navigation sequences) — probes graduate into permanent specs; (2) a screenshot pass
+judged against NAMED references (the mock, react.dev, the written specs in this file) —
+unanchored "does it look good" is known-blind: the builder's own evidence normalizes
+what it built (the red/blue header sat unflagged in weeks of evidence shots); (3) the
+builder's claims treated as hypotheses to verify, not trust. Builder and reviewer are
+never the same agent.
+
+Phases: A architecture (settled) -> B full defect inventory (interaction-path audit +
+fidelity audit vs mock v11 and the header spec; catalog grouped by root cause; NO fixes)
+-> C fixes by root cause with the upgraded evidence -> D Henning reviews on the live
+preview before the station closes again.
+
+PHASE B DONE (2026-10-01): 38 defects (8 break layout / 21 sloppy / 9 nits), catalog
+with evidence: https://claude.ai/artifact/Lirx3BJtsh9kLf6iuwGnyZ — all seven seeds
+reproduced and mostly broader (stale frame affects EVERY link out of the landing and
+persists until reload; logo clips ~1024-1200px; diagram cut off on phones; phone search
+opened behind the drawer; version switch unreachable <1024px).
+
+TASTE RULINGS A1-A10 (walked one by one with Henning, 2026-10-01, all settled):
+1. (1A) The second landing band gets a light-gray tint — alternating band rhythm.
+2. (2C) Code blocks: ONLY fix the pure-black default text color; tags and attributes
+   keep sharing one color. Unpoly-attribute emphasis is the job of the existing <mark>
+   facilities, never a token color.
+3. (3A) Support/Imprint/Privacy get a sidebar-less, centered article frame (explicit
+   family under Phase A).
+4. (4B) ONE footer site-wide: the mock's centered, muted, small-text line (same links,
+   shared source) replaces the left-aligned fineprint everywhere. Top spacing as
+   margin-top so it can collapse with the last content element's bottom margin; flex/
+   grid parents block collapsing, so verify in the real frame and fall back to padding
+   + zeroed last-child margin if needed.
+5. (5A) Diagram on phones: full-bleed horizontal scroll strip, 620px floor, visible
+   peek/edge-fade. No stacked variant for now.
+6. ONE text column width on every page (the rail-compatible ~670px). Where the
+   contents rail is absent its space stays RESERVED, so the column never moves. On
+   narrow screens the contents stays in its in-body DOM position (the CSS-only lift
+   applies above the breakpoint) and the reserved space disappears. Wide code examples
+   SCROLL, never stick out — the gnarliest code lives on exactly the pages with a rail.
+7. Logo wall: unbalanced 7+3 wrap ACCEPTED, no change (won't-fix).
+8. (8C) Header clamp() typography stays exactly as is (15-18px fluid; the item was
+   thinner than first presented).
+9. (9A) Version switch on phones: an "OLDER VERSIONS" section at the END of the
+   drawer's nav tree, built from the same elements as the LEARN/API sections — no new
+   component.
+10. Search icon permanently in the head bar at EVERY width; the drawer carries no
+    search (supersedes the Sep-14 "launcher also goes into the hamburger menu" line and
+    dissolves the popup-behind-drawer bug by construction). Drawer contents: Learn ->
+    its 12 chapters, API -> its modules (one sub-level, no leaf features/pages), plus
+    Demo / Changes / Support / GitHub as plain links, OLDER VERSIONS last. Enabling
+    requirement: a TEMPLATE-GENERATED complete children index on chapter overviews and
+    module pages (from toc/parser data, zero prose, no review queue), hidden above
+    $bp-sidebar (the index replaces the sidebar, so their visibility is mutually
+    exclusive by definition), data-pagefind-ignore so it never pollutes search
+    excerpts; print reveal noted as a nit, not built. This index does NOT reopen the
+    overview spec's capped map — prose stays capped, the generated block is navigation.
+
+## Search station verdicts (Henning, 2026-09-18, batch 0)
+
+- Pagefind dependency (FINAL 2026-09-18 after an ecosystem-practice research round):
+  pinned `npx pagefind@<version>` as the post-build indexer call — Pagefind's documented
+  first-party path and the Jekyll/Hugo/Eleventy convention; no package.json, no gem
+  (none official exists), no vendored binary, npm provenance checks for free. Version
+  pinned in exactly one place. Node at build time is acceptable (the sibling unpoly
+  repo already requires it; deploys build locally). Supersedes both earlier options
+  (vendor / esbuild migration — the esbuild condition was unmet: Pagefind's runtime is
+  emitted by the indexer, nothing bundles it).
+- Algolia: killed entirely on this branch (code, gem, rake task, deploy step, README);
+  v2/v3 stages deploy from master and keep their indexes.
+- Shortcuts: `/` works and is hinted, nothing else for now. Hard rule: never override
+  browser hotkeys on popular browsers/platforms (Ctrl-K is omnibox search on
+  Chrome/Firefox Win/Linux — out; Mac-only ⌘K may be proposed later).
+- Index scope: /changes excluded entirely; imprint/privacy/landing/examples ignored.
+- UI strings blessed: placeholder "Search docs…", empty state "No results for X",
+  badges "Learn"/"API", NO group headings, footer hints "↑↓ navigate · ↵ open · esc
+  close".
+- Badges refined: ONE badge per row, the most informative — Learn pages `Learn`; API
+  feature rows show the feature's KIND (JS/HTML/CSS/EVENT/CONFIG/…) which subsumes
+  `API`; non-feature API pages `API`. Feature#short_kind is completed and becomes the
+  single canonical kind vocabulary; its value list goes to Henning's review.
+- Vocabulary BLESSED (Henning 2026-09-18): JS, HTML, EVENT, HEADER, CONFIG, CSS, COOKIE
+  — singular EVENT on badges (sidebar group headings stay plural EVENTS, different
+  device); params inherit their owner's badge; unknown kinds raise at build time.
+  Side effect accepted: module Essentials lists and preview cards relabel events/config
+  from JS and headers/cookies from HTTP.
+
 ## Alignment round 3 — pre-settled queues for the CSS, Search and Content stations (2026-09-17)
 
 Station order is now: Structure -> Landing+CSS -> Search -> Content -> Ship, with session
