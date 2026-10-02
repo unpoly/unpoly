@@ -798,6 +798,30 @@ escalates only genuine calls to Henning.
 
 ## Open items (pending task list, refreshed 2026-09-16)
 
+- UNPOLY FRAMEWORK fix, after the redesign ships (logged 2026-10-01, Henning): a request
+  issued synchronously after an abort of its own URL inherits the abort instead of
+  hitting the network — eviction-on-abort trails by a microtask (network.js:596,
+  u.always rejection handler) while cache.track() copies terminal states like 'aborted'
+  onto the new request (classes/request/cache.js:160-163). Bit the site's lazy sidebar
+  (compilers during a swap issue exactly such requests); worked around there with a
+  next-task retry. SKETCH (Henning + source dive 2026-10-01): up.Request#_onSettle()
+  (request.js:761) runs SYNCHRONOUSLY inside _reject/_resolve, before the promise
+  rejects — today it only reverts previews, for exactly the same sync-before-next-DOM-
+  mutation reason. Wire cache eviction there, scoped to settled-WITHOUT-response
+  (abort/offline/timeout only; 2xx stays cached, 4xx/5xx keeps its async evict-by-url),
+  attached the same way network.js:591 already attaches request.onLoading for reindexing.
+  Trackers attached before the abort keep their deliberate terminal-state propagation.
+  Belt-and-braces alternative/addition: cache.track() refusing ended-without-response
+  requests (the cache.js:122 fast path only handles ended-WITH-response). Once shipped,
+  the site's sidebar reduces to ZERO component JS (settled with Henning 2026-10-02):
+  plain up-defer (insert) + up-keep="same-html" + the keep condition moved inline as
+  [up-on-keep] on the wrapper; menu.coffee's placeholder compiler (retry) and the
+  up:fragment:keep handler are deleted. Works because a refused keep inserts a fresh
+  placeholder, and insertion re-arms an insert-mode defer — one attempt per render, no
+  timers. The C1 specs (double-click, race, offline recovery) assert outcomes, not
+  mechanisms, so they verify the swap at upgrade time.
+  Related doc fix: the docs name `up.AbortError`, the code defines `up.Aborted`
+  (name property "AbortError").
 - Sass constants rename (logged 2026-09-18, Henning): convert the UPPERCASE_UNDERSCORE
   constants to lowercase dashed names (e.g. `$space-s`) — one mechanical pass, late in
   the CSS station or right after, not during the visual work. Possibly bundled with a
