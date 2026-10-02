@@ -119,6 +119,19 @@ extendDescribe('up.network', function() {
             await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Response))
           })
 
+          it('makes a new network request when the same URL is requested synchronously after the response (bugfix)', async function() {
+            let request1 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            jasmine.respondWith({ status: 500, responseText: 'error text' })
+            let request2 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Response))
+            await expectAsync(request2).toBePending()
+          })
+
         })
 
         describe('when the request failed due to a fatal network error', function() {
@@ -152,6 +165,61 @@ extendDescribe('up.network', function() {
             expect({ url: '/path' }).toBeCachedWithResponse({ text: 'success text' })
           })
 
+          it('makes a new network request when the same URL is requested synchronously after the network error (bugfix)', async function() {
+            let request1 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            jasmine.lastRequest().responseError()
+            let request2 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Offline))
+            await expectAsync(request2).toBePending()
+          })
+
+        })
+
+        describe('when the request is aborted', function() {
+
+          it('does not cache the request (so the next request will retry)', async function() {
+            let request = up.request({ url: '/path', cache: true })
+            await wait()
+
+            request.abort()
+
+            await expectAsync(request).toBeRejectedWith(jasmine.any(up.Aborted))
+            expect({ url: '/path' }).not.toBeCached()
+          })
+
+          it('makes a new network request when the same URL is requested synchronously after the abort (bugfix)', async function() {
+            let request1 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            request1.abort()
+            let request2 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
+            await expectAsync(request2).toBePending()
+          })
+
+          it('aborts another request that was tracking the aborted request', async function() {
+            let request1 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            let request2 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            request1.abort()
+
+            await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
+            await expectAsync(request2).toBeRejectedWith(jasmine.any(up.Aborted))
+          })
+
         })
 
         describe('when the server responds without content', function() {
@@ -178,6 +246,18 @@ extendDescribe('up.network', function() {
             await wait()
 
             expect({ url: '/foo' }).not.toBeCached()
+          })
+
+          it('makes a new network request when the same URL is requested synchronously after the response (bugfix)', async function() {
+            up.request({ url: '/foo', cache: true })
+            await wait()
+
+            jasmine.respondWith({ status: 204 })
+            let request2 = up.request({ url: '/foo', cache: true })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            await expectAsync(request2).toBePending()
           })
 
           it('does not cache responses with an empty body', async function() {

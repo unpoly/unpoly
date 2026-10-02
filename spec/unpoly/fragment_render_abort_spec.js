@@ -299,6 +299,26 @@ extendDescribe('up.fragment', function() {
             expect('.element').toHaveText('new content')
           })
 
+          it('lets a compiler in the new fragment request the URL of a request that was just aborted (bugfix)', async function() {
+            let compilerRequest
+            up.compiler('.element', function() {
+              compilerRequest = up.request({ url: '/path', cache: true })
+            })
+
+            fixture('.element', { text: 'v1' })
+            const change1Promise = up.render('.element', { url: '/path', cache: true })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            up.render({ fragment: '<div class="element">v2</div>', abort: 'target' })
+            await wait()
+
+            await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            await expectAsync(compilerRequest).toBePending()
+          })
+
           it('aborts existing requests targeting a descendant of the targeted element', async function() {
             fixture('.parent .child')
             const change1Promise = up.render('.child', { url: '/path1' })

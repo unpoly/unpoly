@@ -593,7 +593,11 @@ up.network = (function() {
 
     // Once we receive a response we honor options/headers for eviction/expiration,
     // even if the request was not cachable.
-    u.always(request, function(responseOrError) {
+    //
+    // We do this synchronously, before the request's promise settles. Otherwise a request made
+    // synchronously after an abort (e.g. by a compiler during the render that aborted it)
+    // would hit the aborted request in the cache.
+    request.onSettle = function(responseOrError) {
       cache.expire(responseOrError.expireCache ?? false, { except: request })
       cache.evict(responseOrError.evictCache ?? false, { except: request })
 
@@ -630,7 +634,7 @@ up.network = (function() {
           cache.put(redirectRequest)
         }
       }
-    })
+    }
   }
 
   /*-
@@ -684,15 +688,15 @@ up.network = (function() {
 
   ## Effects of aborting
 
-  When an `up.request()` is aborted, its returned promise rejects with an `up.AbortError`:
+  When an `up.request()` is aborted, its returned promise rejects with an `up.Aborted` error:
 
   ```js
   try {
     let response = await up.request('/path')
     console.log(response.text)
   } catch (error) {
-    if (error instanceof up.AbortError) {
-      console.log('Request was aborted: ' + error.reason)
+    if (error.name === 'AbortError') {
+      console.log('Request was aborted: ' + error.message)
     }
   }
   ```
@@ -758,7 +762,7 @@ up.network = (function() {
 
     If omitted, a generic reason like `"Aborted request to GET /path"` will be used.
 
-    The reason will be set as the `up.AbortError`'s message.
+    The reason will be set as the error's message.
   @param {up.Request} [options.except]
     An `up.Request` that should not be aborted even if it matches the given `condition`.
 

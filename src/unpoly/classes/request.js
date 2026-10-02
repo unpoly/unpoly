@@ -317,6 +317,7 @@ up.Request = class Request extends up.Record {
       'contentType',
       'payload',
       'onLoading',
+      'onSettle',
       'fail',
       'abortable',
       'lateDelay',
@@ -679,7 +680,7 @@ up.Request = class Request extends up.Record {
   /*-
   Aborts this request.
 
-  The request's promise will reject with an `up.AbortError`.
+  The request's promise will reject with an `up.Aborted` error.
 
   ### Example
 
@@ -689,7 +690,7 @@ up.Request = class Request extends up.Record {
   try {
     let response = await request
   } catch (result) {
-    if (result instanceof up.AbortError) {
+    if (result.name === 'AbortError') {
       console.log('Request was aborted.')
     }
   }
@@ -703,7 +704,7 @@ up.Request = class Request extends up.Record {
 
     If omitted, a generic reason like `"Aborted request to GET /path"` will be used.
 
-    The reason will be set as the `up.AbortError`'s message.
+    The reason will be set as the error's message.
   @stable
   */
   abort({ reason } = {}) {
@@ -748,20 +749,26 @@ up.Request = class Request extends up.Record {
     }
   }
 
+  // Settle our promise before running settle callbacks. A callback may settle a u.variant() of this
+  // request (like up.Response#redirectRequest), which shares our deferred and would settle it first.
   _resolve(response) {
-    this._onSettle()
     this._deferred.resolve(response)
+    this._runSettleCallbacks(response)
   }
 
   _reject(responseOrError) {
-    this._onSettle()
     this._deferred.reject(responseOrError)
+    this._runSettleCallbacks(responseOrError)
   }
 
-  _onSettle() {
+  _runSettleCallbacks(responseOrError) {
     // Do this sync so previews are reverted before another DOM mutation.
     // awaiting the response would delay this for too long.
     this._revertPreviews?.()
+
+    // This callback is used by up.network to update the cache before a new request
+    // (made synchronously after this request settles) can hit a stale cache entry.
+    this.onSettle?.(responseOrError)
   }
 
   /*-

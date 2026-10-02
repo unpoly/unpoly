@@ -76,7 +76,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     if (response instanceof up.Response) {
       return this._onRequestSettledWithResponse(response)
     } else {
-      // Value is up.AbortError, up.Offline or another fatal error that can never
+      // Value is up.Aborted, up.Offline or another fatal error that can never
       // be used as a fragment update. At this point up:request:aborted or up:request:offline
       // have already been emitted by up.Request.
       return this._onRequestSettledWithError(response)

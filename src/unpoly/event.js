@@ -350,7 +350,7 @@ up.event = (function() {
   }
 
   /*-
-  [Emits](/up.emit) the given event and throws an `up.AbortError` if it was prevented.
+  [Emits](/up.emit) the given event and throws an `up.Aborted` error if it was prevented.
 
   @function up.event.assertEmitted
   @param {string} eventType

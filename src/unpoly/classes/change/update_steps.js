@@ -46,7 +46,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     return {
       verifyFinished: () => {
         // If our layer was closed while animations are running, don't finish
-        // and reject with an up.AbortError.
+        // and reject with an up.Aborted error.
         for (let step of this._steps) {
           step.layer.assertAlive()
         }

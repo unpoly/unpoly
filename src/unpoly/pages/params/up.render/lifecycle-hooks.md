@@ -6,7 +6,7 @@
   The message will be shown as a [native browser prompt](https://developer.mozilla.org/en-US/docs/Web/API/Window/prompt).
 
   If the user does not confirm, no request is sent and no fragments are updated.
-  In that case the render promise rejects with an `up.AbortError`.
+  In that case the render promise rejects with an `up.Aborted` error.
 
 @param {Function(Event)} [options.onLoaded]
   A callback that will be run when the server responds with new HTML,

@@ -133,7 +133,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // - Update the location to a URL for which { acceptLocation } or { dismissLocation }
     //   will close the layer.
     //
-    // Note that @handleLayerChangeRequests() also throws an `up.AbortError`
+    // Note that @handleLayerChangeRequests() also throws an `up.Aborted` error
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests(
       u.map(this._steps, 'newElement'),
