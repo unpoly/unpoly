@@ -705,7 +705,7 @@ up.layer = (function() {
   @param event.preventDefault()
     Prevents this overlay from opening.
 
-    Programmatic callers will reject with an `up.AbortError`.
+    Programmatic callers will reject with an `up.Aborted` error.
   @stable
   */
 

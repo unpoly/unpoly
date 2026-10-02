@@ -1003,7 +1003,7 @@ extendDescribe('up.fragment', function() {
             expect(location.href).toMatchURL(jasmine.locationBeforeExample)
           })
 
-          it('rejects programmatic callers with an up.AbortError when the event is prevented', async function() {
+          it('rejects programmatic callers with an up.Aborted error when the event is prevented', async function() {
             up.on('up:fragment:loaded', (e) => e.preventDefault())
             fixture('.target', { text: 'old text' })
 

@@ -815,7 +815,7 @@ up.fragment = (function() {
   @param event.preventDefault()
     Aborts this render pass without changes.
 
-    Programmatic callers will reject with an `up.AbortError`.
+    Programmatic callers will reject with an `up.Aborted` error.
 
   @param event.skip()
     Finishes this render pass without changes,

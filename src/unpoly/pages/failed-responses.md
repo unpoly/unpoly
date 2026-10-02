@@ -121,7 +121,19 @@ See [Handling network issues](/network-issues).
 
 When a request was [aborted](/aborting-requests), Unpoly will emit `up:request:aborted` and not render.
 
-A promise for an aborted request will reject with an `up.AbortError`.
+A promise for an aborted request will reject with an `up.Aborted` error.
+Its `{ name }` is `'AbortError'`, like the `DOMException` that `fetch()` and other native APIs reject with when aborted.
+To detect both kinds of aborts, check the error's name:
+
+```js
+try {
+  await up.render({ url: '/path', target: '.content' })
+} catch (error) {
+  if (error.name === 'AbortError') {
+    console.log('Rendering was aborted: ' + error.message)
+  }
+}
+```
 
 [By default](/up.render#options.abort) Unpoly will abort a request when a second request targets the same fragment.
 

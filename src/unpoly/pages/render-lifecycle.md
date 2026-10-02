@@ -127,7 +127,7 @@ You may handle the following error cases:
 | Target selector not found                                     | [`{ fallback }`](/targeting-fragments#missing-targets)                                               | [`[up-fallback]`](/targeting-fragments#missing-targets) |
 | Target selector not found                                     | `up.CannotMatch` (thrown)                                                                   | —                                                                    |
 | Compiler throws error                                         | Global [`error`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event) event | —                                                                    |
-| Fragment update was [aborted](/aborting-requests)             | `up.AbortError`                                                                             | —                                                                    |
+| Fragment update was [aborted](/aborting-requests)             | `up.Aborted`                                                                                | —                                                                    |
 | Fragment update was [aborted](/aborting-requests)             | `up:fragment:aborted`                                                                       | —                                                                    |
 | Any error thrown while rendering                              | [`{ onError }`](/up.render#options.onError)                                                 | [`[up-on-error]`](/up-follow#up-on-error)                            |
 
@@ -197,7 +197,7 @@ Note how we use a `fail`-prefixed render option `{ failTarget }` to update a dif
 Preventing a render pass
 ------------------------
 
-The [render lifecycle](#lifecycle-diagram) emits many events that you can prevent by calling `event.preventDefault()`. When these events are prevented, the render process will abort and no elements will be changed. Focus and scroll positions will be kept. The `up.render()` promise will reject with an `up.AbortError`.
+The [render lifecycle](#lifecycle-diagram) emits many events that you can prevent by calling `event.preventDefault()`. When these events are prevented, the render process will abort and no elements will be changed. Focus and scroll positions will be kept. The `up.render()` promise will reject with an `up.Aborted` error.
 
 The most important preventable events are:
 

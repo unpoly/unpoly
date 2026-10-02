@@ -688,15 +688,15 @@ up.network = (function() {
 
   ## Effects of aborting
 
-  When an `up.request()` is aborted, its returned promise rejects with an `up.AbortError`:
+  When an `up.request()` is aborted, its returned promise rejects with an `up.Aborted` error:
 
   ```js
   try {
     let response = await up.request('/path')
     console.log(response.text)
   } catch (error) {
-    if (error instanceof up.AbortError) {
-      console.log('Request was aborted: ' + error.reason)
+    if (error.name === 'AbortError') {
+      console.log('Request was aborted: ' + error.message)
     }
   }
   ```
@@ -762,7 +762,7 @@ up.network = (function() {
 
     If omitted, a generic reason like `"Aborted request to GET /path"` will be used.
 
-    The reason will be set as the `up.AbortError`'s message.
+    The reason will be set as the error's message.
   @param {up.Request} [options.except]
     An `up.Request` that should not be aborted even if it matches the given `condition`.
 

@@ -680,7 +680,7 @@ up.Request = class Request extends up.Record {
   /*-
   Aborts this request.
 
-  The request's promise will reject with an `up.AbortError`.
+  The request's promise will reject with an `up.Aborted` error.
 
   ### Example
 
@@ -690,7 +690,7 @@ up.Request = class Request extends up.Record {
   try {
     let response = await request
   } catch (result) {
-    if (result instanceof up.AbortError) {
+    if (result.name === 'AbortError') {
       console.log('Request was aborted.')
     }
   }
@@ -704,7 +704,7 @@ up.Request = class Request extends up.Record {
 
     If omitted, a generic reason like `"Aborted request to GET /path"` will be used.
 
-    The reason will be set as the `up.AbortError`'s message.
+    The reason will be set as the error's message.
   @stable
   */
   abort({ reason } = {}) {
