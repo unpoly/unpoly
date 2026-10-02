@@ -798,6 +798,10 @@ escalates only genuine calls to Henning.
 
 ## Open items (pending task list, refreshed 2026-09-16)
 
+- DONE 2026-10-02: the framework fix below SHIPPED on master (12e58c5fd + 4cb7d3cd9,
+  docs/plans/sync-cache-eviction.md was the hand-off) and master was merged into
+  docs-rework (d1bdedcc5); the site's sidebar simplification to zero component JS is
+  running as a batch. Kept for the record:
 - UNPOLY FRAMEWORK fix, after the redesign ships (logged 2026-10-01, Henning): a request
   issued synchronously after an abort of its own URL inherits the abort instead of
   hitting the network — eviction-on-abort trails by a microtask (network.js:596,
