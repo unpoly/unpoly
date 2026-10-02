@@ -329,6 +329,8 @@ up.Response = class Response extends up.Record {
       // The { cacheRoute } prop may no longer be correctly cached
       // TODO: Maybe we can find a way to get rid of this prop?
       cacheRoute: null,
+      // Don't run up.network's cache handling a second time when this variant settles
+      onSettle: null,
     })
 
     up.cache.track(this.request, finalRequest, { force: true })

@@ -317,6 +317,7 @@ up.Request = class Request extends up.Record {
       'contentType',
       'payload',
       'onLoading',
+      'onSettle',
       'fail',
       'abortable',
       'lateDelay',
@@ -748,20 +749,26 @@ up.Request = class Request extends up.Record {
     }
   }
 
+  // Settle our promise before running settle callbacks. A callback may settle a u.variant() of this
+  // request (like up.Response#redirectRequest), which shares our deferred and would settle it first.
   _resolve(response) {
-    this._onSettle()
     this._deferred.resolve(response)
+    this._runSettleCallbacks(response)
   }
 
   _reject(responseOrError) {
-    this._onSettle()
     this._deferred.reject(responseOrError)
+    this._runSettleCallbacks(responseOrError)
   }
 
-  _onSettle() {
+  _runSettleCallbacks(responseOrError) {
     // Do this sync so previews are reverted before another DOM mutation.
     // awaiting the response would delay this for too long.
     this._revertPreviews?.()
+
+    // This callback is used by up.network to update the cache before a new request
+    // (made synchronously after this request settles) can hit a stale cache entry.
+    this.onSettle?.(responseOrError)
   }
 
   /*-

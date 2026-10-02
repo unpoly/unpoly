@@ -352,6 +352,24 @@ extendDescribe('up.network', function() {
 
         describe('when caching', function() {
 
+          it("processes the response's cache instructions only once (bugfix)", async function() {
+            up.request('/foo', { cache: true })
+            await wait()
+
+            spyOn(up.cache, 'expire').and.callThrough()
+
+            jasmine.respondWith({
+              responseHeaders: {
+                'X-Up-Location': '/bar',
+                'X-Up-Method': 'GET',
+                'X-Up-Expire-Cache': '/baz'
+              }
+            })
+            await wait()
+
+            expect(up.cache.expire.calls.count()).toBe(1)
+          })
+
           it('considers a redirection URL an alias for the requested URL', async function() {
             up.request('/foo', { cache: true })
 
@@ -873,6 +891,26 @@ extendDescribe('up.network', function() {
           expect({ url: '/foo/1' }).not.toBeCached()
           expect({ url: '/foo/2' }).not.toBeCached()
           expect({ url: '/bar/1' }).toBeCached()
+        })
+
+        it('evicts the cache before a request made synchronously after a response with an X-Up-Evict-Cache header (bugfix)', async function() {
+          up.request({ url: '/foo', cache: true })
+          up.request({ url: '/other' })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(2)
+
+          jasmine.respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'other',
+            responseHeaders: { 'X-Up-Evict-Cache': '/foo' }
+          })
+          let fooRequest2 = up.request({ url: '/foo', cache: true })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(3)
+          await expectAsync(fooRequest2).toBePending()
         })
 
         it('evicts the entire cache if the server responds with an X-Up-Evict-Cache: * header', async function() {

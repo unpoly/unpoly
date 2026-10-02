@@ -593,7 +593,11 @@ up.network = (function() {
 
     // Once we receive a response we honor options/headers for eviction/expiration,
     // even if the request was not cachable.
-    u.always(request, function(responseOrError) {
+    //
+    // We do this synchronously, before the request's promise settles. Otherwise a request made
+    // synchronously after an abort (e.g. by a compiler during the render that aborted it)
+    // would hit the aborted request in the cache.
+    request.onSettle = function(responseOrError) {
       cache.expire(responseOrError.expireCache ?? false, { except: request })
       cache.evict(responseOrError.evictCache ?? false, { except: request })
 
@@ -630,7 +634,7 @@ up.network = (function() {
           cache.put(redirectRequest)
         }
       }
-    })
+    }
   }
 
   /*-
