@@ -585,8 +585,8 @@ WALK VERDICTS (Henning 2026-10-03, slow-down round over the C1/C2 review items):
   description, not exclusion). Formats' two pages are reachable inside API's disclosure
   (grouped, no third level). The sidebar's max-width no longer caps the drawer menu.
 - Header: 53px tall (the mock's height); the bar becomes $indigo-800 with all elements
-  white — red retreats to accent duty (logo mark, links). Solves the 4.2:1 contrast
-  finding with ~8.7:1.
+  white — red retreats to accent duty (links; the LOGO STAYS ALL-WHITE, Henning f1
+  2026-10-03). Solves the 4.2:1 contrast finding with measured 9.25:1.
 - Children index: ONLY on chapter overviews (module pages already have "All features" —
   Henning's catch, missed by builder and reviewer); titled with a regular
   <h2 toc="false">In this chapter</h2> (TOCInserter skips [toc=false], toc_inserter.rb:122).
@@ -594,7 +594,9 @@ WALK VERDICTS (Henning 2026-10-03, slow-down round over the C1/C2 review items):
   header vocabulary in the drawer; aria-label="Sections".
 - Dropped: the reviewer's "click during drawer-opening causes a full load" — Henning
   could not reproduce it against a throttled server; probe artifact.
-- The sync-eviction hand-off (docs/plans/sync-cache-eviction.md) is committed as record.
+- The sync-eviction hand-off (docs/plans/sync-cache-eviction.md) stays UNTRACKED —
+  docs/plans/* is gitignored by design ("implementation plans are local working notes");
+  plan.md's framework bullet above carries the durable record.
 
 AGENTIC REVIEW ROUNDS (settled 2026-10-01): the screenshot/interaction harness is
 ADOPTED into unpoly-site (bin/shoot + path scripts; it has been rebuilt from session
@@ -656,6 +658,74 @@ TASTE RULINGS A1-A10 (walked one by one with Henning, 2026-10-01, all settled):
     exclusive by definition), data-pagefind-ignore so it never pollutes search
     excerpts; print reveal noted as a nit, not built. This index does NOT reopen the
     overview spec's capped map — prose stays capped, the generated block is navigation.
+
+## Content station frame (settled with Henning 2026-10-03; T1-T6 and the September
+## settlements continue to apply — this adds the operational frame)
+
+- (a1) This orchestrator session runs the station; each chapter batch is a fresh Fable
+  writer-subagent. HARD GATE: no chapter worker spawns without Henning's explicit go,
+  which he gives only after checking that time and Fable quota suffice for the worker
+  to terminate.
+- (b1) Review unit = one chapter batch (<=6 pages) per sitting, ON THE LIVE PREVIEW
+  (real frame, reading order); batch report carries per-page diff links for rewrites
+  and flags every derived code example. One approval covers words + learn-refs +
+  chapter position; fix rounds re-review only changes. Rendered-artifact review stays
+  a travel fallback per batch.
+- (c1) Calibration chapters: LINKS (archetypal; exercises the handling-everything
+  split) and SCRIPTING (hardest register; islands story) — reviewed before any mass
+  production. Getting started is deliberately NOT calibration material; it follows as
+  the first mass-production batch once the voice is proven.
+- (d1 + model map) Moves/splits run as a mechanical pre-pass inside each chapter batch
+  (relocation commit by an OPUS worker; the rewrite half is the Fable writer's).
+  Learn-ref insertion + citation-link->wikilink migration = ONE final OPUS sweep after
+  all chapters exist (T5 authority judgment needs the complete map; ambiguous calls
+  queue to Henning). Essentials-cards -> module intro prose = its own late FABLE batch
+  (new reader-visible sentences, full review round), ending with the @see machinery
+  deletion; it runs BEFORE the final ref sweep (intro prose is often where a ref
+  belongs).
+- (e1) Content starts strictly AFTER the quality reset ships, Phase D included — one
+  review stream at a time; writers render into the final visual frame.
+
+## Search try-out verdicts (Henning, 2026-10-03, after using the popup on the preview)
+
+Queued for the Search finishing batch (runs after the walk batch + retirement):
+- Result display: BOTH groups show the thing's full signature/title (the page h1 form,
+  e.g. `up.follow(link, [options])`), with the typed match highlighted. The sidecar's
+  gray secondary survives ONLY as the owner on param rows (`[up-watch]`); module rows
+  show the bare module name, nothing behind it (learning-topic blurbs are over).
+- The search overlay is REBUILT on `up.layer.open()` as a MODAL (careful: "popup" is a
+  different Unpoly mode — stop calling it popup; rename the block accordingly, e.g.
+  search-dialog). The modal default style is close to what search needs; pass a
+  `{ class }` option for search-specific styling so other modals stay untouched. This
+  replaces the hand-rolled shell: scrollbar compensation (fixes the background shift of
+  html.-search-open), focus trap/restore, Esc, and layer stacking come from the
+  framework. Search internals (groups, matching, keyboard) stay.
+- Reopen behavior: keep the query, RE-RUN the search on open, select-all the input
+  (b2) — returning users refine, typing replaces.
+- Row layout: fixed-width LEFT badge gutter (kind for API features, API for modules,
+  LEARN for pages), titles aligned after it; Learn titles get font-weight 500 so sans
+  prose holds up next to code font. Henning judges the rendered result ("I will need to
+  see it visually"); expect tweaks.
+- BLESSED (Henning 2026-10-03): the disclosure toggles' screen-reader label
+  "Expand <title>" (e.g. "Expand Learn").
+- POST-WALK VERDICTS (Henning 2026-10-03): the header logo stays all-white (no red
+  mark on the indigo bar). FORMATS gets restructured instead of a caption-casing call:
+  a NEW generated index page /formats (model-driven listing of url-patterns and
+  relaxed-json, hub-pattern, zero prose; slug hand-picked by Henning) becomes the
+  Formats topic's start page in toc.yml; drawer AND sidebar then show Formats as one
+  ordinary linked row like a module — no group captions anywhere in the drawer; the
+  start:none special case dies if nothing else uses it. Home: the Search finishing
+  batch (or the walk-batch fix round if it comes first).
+- DEDUP SETTLED (Henning 2026-10-03), revising the Sep-14 two-group shape: one list.
+  A page-level symbol hit whose page also matched full-text is UPGRADED IN PLACE — the
+  full-page row (signature title, sections, excerpt) takes the symbol's rank slot; the
+  bare symbol row survives only when full-text has no match for it (e.g. prefix queries
+  the tokenizer can't serve). Params/anchored symbols are never duplicated and stay.
+  No score merging — position inheritance only (symbol order rules the top region,
+  Pagefind order the rest, already-shown pages removed below). Rendering is an ATOMIC
+  SWAP: previous results stay visible until both streams resolve for the new query,
+  then the list swaps at once (no reflow); Pagefind error/missing index falls back to
+  symbols-only after a short timeout.
 
 ## Search station verdicts (Henning, 2026-09-18, batch 0)
 
@@ -1014,6 +1084,11 @@ Settled in the 2026-09-14 session:
   assets → optional cold-reader test at makandra → then the landing build.
 
 ## Working agreements (how these sessions run; recorded 2026-09-16)
+
+- STANDING PERMISSION (Henning 2026-10-03): commit and push to the docs-rework branches
+  of unpoly and unpoly-site, and to branches/worktrees based on docs-rework, without
+  per-batch asks. The quality gates are unchanged: batches still get fresh-eyes review
+  before committing, slicing stays deliberate, and taste still queues to Henning.
 
 - Alignment runs as numbered decision tables with option codes; a settled decision is
   recorded in this file, the progress-map artifact is republished, and commits happen
