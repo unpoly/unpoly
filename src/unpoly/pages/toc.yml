@@ -210,7 +210,7 @@ api:
 
     - type: page-group
       title: Formats
-      start: none
+      index: formats # a generated page listing the formats, at /formats
       pages:
         - url-patterns
         - relaxed-json
