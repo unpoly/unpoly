@@ -572,6 +572,30 @@ page family entered via direct load AND via fragment navigation from each other 
 search results, drawer, logo) and post-navigation screenshots join the evidence
 standard; direct-load-only sweeps are insufficient.
 
+WALK VERDICTS (Henning 2026-10-03, slow-down round over the C1/C2 review items):
+- Text column: FLUID — minimum 660px (the width where the contents rail fits at the
+  1280 breakpoint), growing with the viewport to an 880px CAP; identical on every page
+  at any given window width (the A-round "same width" ruling was about page-to-page
+  jumps, not about freezing across viewports); rail space stays reserved above $bp-toc;
+  column centers between sidebar and rail once at its cap.
+- Drawer RESTRUCTURED: top level mirrors the header as uniform rows (Learn, API, Demo,
+  Changes, Support, GitHub, Older versions); Learn/API/Older versions are disclosure
+  rows reusing the sidebar accordion (label navigates to the hub, chevron expands);
+  eyebrow captions die. Getting started stays (13 Learn entries — "12 chapters" was
+  description, not exclusion). Formats' two pages are reachable inside API's disclosure
+  (grouped, no third level). The sidebar's max-width no longer caps the drawer menu.
+- Header: 53px tall (the mock's height); the bar becomes $indigo-800 with all elements
+  white — red retreats to accent duty (logo mark, links). Solves the 4.2:1 contrast
+  finding with ~8.7:1.
+- Children index: ONLY on chapter overviews (module pages already have "All features" —
+  Henning's catch, missed by builder and reviewer); titled with a regular
+  <h2 toc="false">In this chapter</h2> (TOCInserter skips [toc=false], toc_inserter.rb:122).
+- Blessed as built: /support/discussions in the article frame; "Older versions" label;
+  header vocabulary in the drawer; aria-label="Sections".
+- Dropped: the reviewer's "click during drawer-opening causes a full load" — Henning
+  could not reproduce it against a throttled server; probe artifact.
+- The sync-eviction hand-off (docs/plans/sync-cache-eviction.md) is committed as record.
+
 AGENTIC REVIEW ROUNDS (settled 2026-10-01): the screenshot/interaction harness is
 ADOPTED into unpoly-site (bin/shoot + path scripts; it has been rebuilt from session
 scratchpads twice — that ends). Every Phase C batch (and future station batches) gets a
