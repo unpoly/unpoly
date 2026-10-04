@@ -686,6 +686,87 @@ TASTE RULINGS A1-A10 (walked one by one with Henning, 2026-10-01, all settled):
 - (e1) Content starts strictly AFTER the quality reset ships, Phase D included — one
   review stream at a time; writers render into the final visual frame.
 
+## Search formalization batch — READY TO DISPATCH after Henning's final rig verdict
+
+Turns the uncommitted experiment rig into reviewed code. Contents:
+- The @signature DIRECTIVE: parsed on features (doc comments) and @page documents,
+  replacing the config.rb stand-in lists (search_signature_pages/_features); curation
+  seeded from the rig's lists (Henning's Learn walk + the generous-features philosophy);
+  a terse entry in docs/contributing/documentation.md (shared-guide constraint).
+- Adopt the experiment: pagefind.yml (include_characters "-.:_"), the two-number
+  ranking (titleWeight 2, tierTitleWeight 10, signatureBoost 1.4, pageLength 0.6,
+  CLIENT-SIDE kind ladder), the in-code explanation blocks, results max-height.
+- SIDECAR DECISION (Henning's word at verdict time): useSymbols was OFF during all rig
+  testing. If off becomes final: delete symbol_index.rb, the sidecar fetch and merge
+  paths and their specs; NOTE the consequence — the symbols-only fallback was the
+  Pagefind-down safety net, so decide the broken-index empty state; the parked r4
+  learn-ref row idea survives only as page-metadata variant (park a note).
+- Ranking mechanism specs against the REAL index (build-backed suite, per the existing
+  Q7 pattern): "layer" recall of its feature pages, density #1s (csp/offline/
+  autosubmit), signature lift, ladder-as-tiebreaker.
+- Dialog micro-items, still awaiting Henning's one-liners (leans recorded):
+  deprecated-below-cap (lean: keep literal), selection preserved across the late swap
+  (lean: fix, keyed by target URL), stripe on selected row (keep as selection marker vs
+  Henning's original hover-only wording), hit+hit margin-top 2px (Henning's
+  instruction, queued), section-row text in the excerpt gray (in flight on the rig).
+- Un-redden the search specs (symbol examples; useSymbols assumptions), full evidence
+  set, fresh-eyes review round, commit slices, push (standing permission).
+
+## Synonym expansion (PARKED enhancement, design captured 2026-10-04/05)
+
+Hand-curated synonym pairs (layer<->overlay, defer<->lazy, element<->fragment...) via
+client-side query enumeration: Pagefind has NO boolean query syntax (verified in docs),
+so (a OR b) expands to parallel searches merged per page by best score (1-3 word
+queries x ~2 synonyms = 2-8 cheap searches sharing cached chunks; cross-expansion
+scores are only approximately calibrated — note per-expansion normalization if a pair
+behaves asymmetrically). CONSTRAINT (Henning): synonyms are BODY evidence only — they
+must never feed the title number (up.element must not title-rank for "fragment";
+a typed name is meant verbatim). Routes, in preference order: (1) zero title/tier_title
+metaWeights on expansion searches IF Pagefind's options() re-call allows per-search
+ranking (probe first); (2) client-side discount of title-driven expansion hits (we hold
+meta.title + the term); (3) regardless: intent gating — never expand a term that
+matches the symbol-name list as name/prefix. AI-generated keywords: declined
+(drift, density pollution, against the curation philosophy).
+
+## Search ranking: balanced defaults (Henning 2026-10-04, ending the per-query tuning)
+
+Henning stopped the trial-query calibration ("we're overfitting on defer/follow...
+accept that the ranking will not always be optimal — sometimes @signature addresses it,
+sometimes the desired result is just further down"). The balanced defaults, each
+grounded in general measurements, none fit to a trial query:
+- titleWeight 2 (h1 index weight already carries titles; count once, keep body density
+  competitive) · no split tokens in meta (Pagefind splits natively — measured) ·
+  signature tier: tierTitleWeight 10, body x1.5, headings x1.22 (passed every guard
+  class) · pageLength 0.6 (docs corpus: long docs are good docs — moderate penalty cut,
+  above the 0.4 tail-cost threshold; within-tier order shifts accepted) · kind ladder
+  1.05/1.04/1.03/1.02/1.01/1.00 (proven pure tie-breaker: one near-tie moved in the
+  whole benchmark). Results max-height: calc(100vh - 150px).
+
+## Search ranking direction (Henning 2026-10-04, contingent on the tokenizer experiment)
+
+- Perceived-importance ranking: selected documents get an index-time weight boost via
+  data-pagefind-weight, driven by a NEW lightweight directive (working name
+  `@signature`) that marks "signature" API features AND selected Learn pages (not all
+  Learn pages are important — the directive subsumes any blanket Learn boost).
+- This deliberately REPLACES the @see/Essentials lists as a ranking signal, so the V1
+  plan (Essentials cards -> intro prose, then delete the @see machinery) proceeds
+  unchanged; the curation moves into the new directive instead of dying with @see.
+  The directive can also guide Content's intro prose (which features a module intro
+  must mention).
+- CURATION PHILOSOPHY (Henning 2026-10-04): the old @see/Essentials lists were picky
+  only because module-hub SPACE was limited; @signature competes for rank, not space,
+  so the feature curation can be more generous (queries discriminate enough). The old
+  lists are a floor, not a ceiling — e.g. the lazy-loading family ([up-defer] etc.)
+  joins although up.link's @see never listed it.
+- SETTLED (Henning 2026-10-04): TWO bands only — @signature (boosted) and unmarked
+  default. A graded A/B/C scheme was discussed and declined ("I already know I can name
+  2... let's stick with 2 until I know I need 3"); revisit only if real demotion
+  candidates accumulate. Naming note stays flagged: "signature" collides with
+  function-signature vocabulary; alternatives if it ever grates: @essential, @core.
+- For the EXPERIMENT the boost tier is seeded provisionally from model data
+  (essential_features ∪ Learn pages) — no doc-comment edits until the ranking idea
+  survives manual testing; the real curation list is Henning's when formalized.
+
 ## Search try-out verdicts (Henning, 2026-10-03, after using the popup on the preview)
 
 Queued for the Search finishing batch (runs after the walk batch + retirement):
@@ -716,6 +797,12 @@ Queued for the Search finishing batch (runs after the walk batch + retirement):
   ordinary linked row like a module — no group captions anywhere in the drawer; the
   start:none special case dies if nothing else uses it. Home: the Search finishing
   batch (or the walk-batch fix round if it comes first).
+- POST-BUILD VERDICTS (Henning 2026-10-04): dialog stays unanimated (launcher feel);
+  Pagefind timeout stays 1500ms; the dismiss button keeps the framework's default
+  label. Gutter stays 64px, PLUS result styling: hits get a hairline separator
+  (~#ddd — snap to the nearest gray token); API and Learn hits separate by color —
+  RED for API, BLUE for Learn — applied to the badges (border + text, not filled)
+  and to a left stripe shown on hover.
 - DEDUP SETTLED (Henning 2026-10-03), revising the Sep-14 two-group shape: one list.
   A page-level symbol hit whose page also matched full-text is UPGRADED IN PLACE — the
   full-page row (signature title, sections, excerpt) takes the symbol's rank slot; the
@@ -1085,6 +1172,9 @@ Settled in the 2026-09-14 session:
 
 ## Working agreements (how these sessions run; recorded 2026-09-16)
 
+- MODEL POLICY (Henning 2026-10-04): subagents default to OPUS; Fable is reserved for
+  text-authoring tasks only (chapter writing, Essentials intro prose — matching the
+  Content station's d1 model map).
 - STANDING PERMISSION (Henning 2026-10-03): commit and push to the docs-rework branches
   of unpoly and unpoly-site, and to branches/worktrees based on docs-rework, without
   per-batch asks. The quality gates are unchanged: batches still get fresh-eyes review
