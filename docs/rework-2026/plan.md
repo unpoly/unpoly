@@ -708,9 +708,23 @@ Turns the uncommitted experiment rig into reviewed code. Contents:
   deprecated-below-cap (lean: keep literal), selection preserved across the late swap
   (lean: fix, keyed by target URL), stripe on selected row (keep as selection marker vs
   Henning's original hover-only wording), hit+hit margin-top 2px (Henning's
-  instruction, queued), section-row text in the excerpt gray (in flight on the rig).
+  instruction, queued). Section-row text in the excerpt gray: DONE on the rig.
 - Un-redden the search specs (symbol examples; useSymbols assumptions), full evidence
   set, fresh-eyes review round, commit slices, push (standing permission).
+
+RIG FINAL STATE (2026-10-04, after the client-side ladder move): the kind ladder lives
+in search_dialog.js (`kindLadder`, keyed by badge meta; linear on the whole score, so
+~half the old squared-index effect, re-validated not re-tuned; applies to BOTH numbers;
+reload-only knob). Index-side `search_weight`/`search_weighted`/guide.erb hooks retired —
+guide.erb is back to master and out of the experiment diff. Rig = 4 files: config.rb
+(tier lists + meta tags), search_dialog.js, pagefind.yml, search-dialog.sass. Snapshot
+moved only near-ties: [up-defer] now edges above up:deferred:load for "defer" (the
+expected consequence), [up-layer=new] above up.layer.on for "layer", up-etag above the
+ETag header for "etag" (the one remaining "known and accepted" comment case). SPEC
+ISOLATION measured: search_spec.rb is 16/30 red purely from the rig's useSymbols:false
++ maxPages:12; with useSymbols:true + maxPages:8 all 30 pass with the ranking active —
+so the batch's spec fixes must land TOGETHER with the sidecar decision, and the ranking
+itself breaks nothing.
 
 ## Synonym expansion (PARKED enhancement, design captured 2026-10-04/05)
 
@@ -739,8 +753,9 @@ grounded in general measurements, none fit to a trial query:
   signature tier: tierTitleWeight 10, body x1.5, headings x1.22 (passed every guard
   class) · pageLength 0.6 (docs corpus: long docs are good docs — moderate penalty cut,
   above the 0.4 tail-cost threshold; within-tier order shifts accepted) · kind ladder
-  1.05/1.04/1.03/1.02/1.01/1.00 (proven pure tie-breaker: one near-tie moved in the
-  whole benchmark). Results max-height: calc(100vh - 150px).
+  Learn 1.05 / HTML 1.04 / CONFIG 1.03 / EVENT 1.02 / JS 1.01 / else 1.00 (proven pure
+  tie-breaker; since 2026-10-04 CLIENT-SIDE and linear on the whole score — see the rig
+  final state under the formalization batch). Results max-height: calc(100vh - 150px).
 
 ## Search ranking direction (Henning 2026-10-04, contingent on the tokenizer experiment)
 
