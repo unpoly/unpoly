@@ -39,16 +39,16 @@ its counterpart from the response.
 The link stays a standard hyperlink. When the user opens it in a new tab,
 or when JavaScript is unavailable, the browser makes a regular full page load.
 
-See [[following-links]] for targets, faster clicks and links that Unpoly won't handle.
+See [[following-links]].
 
 
 Following is navigation
 -----------------------
 
 Following a link counts as [navigation](/navigation).
-Unpoly then meets the expectations of a user moving to a new screen:
-the browser URL is updated, the new content is scrolled into view,
-and focus is moved to the new fragment. Each of these defaults can be [customized](/navigation).
+When a link updates the layer's main element, Unpoly behaves like a full page load would:
+the browser URL and history are updated, and the new content is scrolled into view.
+Each of these defaults can be customized.
 
 
 Handling all links

@@ -102,8 +102,8 @@ Requests sent when preloading differ in some ways from requests sent when follow
 
 - Preloading will not change elements ("render").
 - Preloading a link will *not* [abort](/aborting-requests) pending requests
-  [targeting](/targeting-fragments) the same fragments. Only when the link is clicked later,
-  conflicting requests are aborted.
+  [targeting](/targeting-fragments) the same fragments. Only when the link is clicked later
+  are conflicting requests aborted.
 - Preload requests are considered [background requests](/up.render#options.background)
   and will not show the [progress bar](/progress-bar).
 - Preloaded content is placed into the [cache](/caching) automatically.

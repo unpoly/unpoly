@@ -125,7 +125,7 @@ on their [navigational container](#navigational-containers).
 The attribute value can be any [layer option](/layer-option).
 
 Below you can see a "hamburger menu" that is shown in an overlay. It contains links to the root layer,
-so their `.up-current` classes should match the root layer's location:
+so their `.up-current` classes reflect the root layer's location:
 
 ```html
 <!-- label: Navigation bar in an overlay -->

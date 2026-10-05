@@ -4,8 +4,8 @@ Handling all links
 You can configure Unpoly to handle every link on the page, without
 annotating each link with an `[up-follow]` attribute.
 
-Clicks then update fragments instead of loading full pages, and your HTML
-stays free of `[up-...]` attributes.
+Clicks then update fragments instead of loading full pages, and you need
+fewer `[up-...]` attributes in your HTML.
 
 > [note]
 > Forms can be handled the same way. See [[handling-all-forms]].
@@ -19,7 +19,7 @@ To follow *all* links on a page without requiring an `[up-follow]` attribute:
 up.link.config.followSelectors.push('a[href]')
 ```
 
-Some links will still make a full page load under this setting:
+Some links will fall back to default browser behavior under this setting:
 
 @include no-follow-reasons
 

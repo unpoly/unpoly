@@ -56,9 +56,9 @@ Navigation defaults
 -------------------
 
 Following a link is considered [navigation](/navigation) by default.
-Since the user is moving to a new screen, Unpoly behaves like a full page load would:
-the browser URL and history are updated, the new content is scrolled into view,
-and focus moves to the new fragment.
+When a link updates the layer's main element, Unpoly behaves like a full page load would:
+the browser URL and history are updated, and the new content is scrolled into view.
+Focus moves to the new fragment.
 
 See [[navigation]] for all navigation defaults and how to customize them.
 
@@ -89,7 +89,7 @@ Some links are always handled by the browser, even when they match an `[up-follo
 
 @include no-follow-reasons
 
-Clicking such a link will make a full page load.
+Clicking such a link falls back to default browser behavior.
 
 
 Following links from JavaScript {#scripting}
