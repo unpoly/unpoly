@@ -696,11 +696,15 @@ Turns the uncommitted experiment rig into reviewed code. Contents:
 - Adopt the experiment: pagefind.yml (include_characters "-.:_"), the two-number
   ranking (titleWeight 2, tierTitleWeight 10, signatureBoost 1.4, pageLength 0.6,
   CLIENT-SIDE kind ladder), the in-code explanation blocks, results max-height.
-- SIDECAR DECISION (Henning's word at verdict time): useSymbols was OFF during all rig
-  testing. If off becomes final: delete symbol_index.rb, the sidecar fetch and merge
-  paths and their specs; NOTE the consequence — the symbols-only fallback was the
-  Pagefind-down safety net, so decide the broken-index empty state; the parked r4
-  learn-ref row idea survives only as page-metadata variant (park a note).
+- SIDECAR DECISION — SETTLED (Henning 2026-10-05): DELETE, in its own commit ("Have a
+  worker delete the symbol machinery in a separate commit"). Empty state verdict (a):
+  when Pagefind fails or times out (1500ms), the results area shows a quiet one-liner
+  ("Search is unavailable right now."), no spinner, dialog otherwise intact. The parked
+  r4 learn-ref row idea survives only as page-metadata variant.
+- DISPATCHED 2026-10-05 to a fresh Opus builder (the /exit ended the previous workers):
+  4 unpoly-site slices (adopt rig / delete symbols / @signature directive / ranking
+  specs + micro-item leans) + 1 unpoly [docs] commit (@signature markers + guide entry).
+  Builder commits locally, no push; fresh-eyes review before push.
 - Ranking mechanism specs against the REAL index (build-backed suite, per the existing
   Q7 pattern): "layer" recall of its feature pages, density #1s (csp/offline/
   autosubmit), signature lift, ladder-as-tiebreaker.
