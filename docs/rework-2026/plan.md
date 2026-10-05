@@ -686,9 +686,25 @@ TASTE RULINGS A1-A10 (walked one by one with Henning, 2026-10-01, all settled):
 - (e1) Content starts strictly AFTER the quality reset ships, Phase D included — one
   review stream at a time; writers render into the final visual frame.
 
-## Search formalization batch — READY TO DISPATCH after Henning's final rig verdict
+## Search formalization batch — DONE, PUSHED 2026-10-05
 
-Turns the uncommitted experiment rig into reviewed code. Contents:
+Built by a fresh Opus builder, fresh-eyes reviewed (no blockers), fix round applied,
+verified and pushed. unpoly-site 7481c43d..64247f15 (6 commits: adopt rig / deprecation
+meta prep / sidecar deletion standalone / @signature directive / ranking specs + 2px gap /
+fix round). unpoly 4f1d1d5bb + a7892f964 (90 @signature markers + guide section).
+Full site suite 370 examples 0 failures; index 627 pages, tier 90.
+- NEW IN THE FIX ROUND: parser FIXTURES ARE EXCLUDED from the search index entirely
+  (old leak, made visible by the boost: /test.signature-page ranked #1 for "page");
+  Interface#merge! carries signature_tier; index smoke spec asserts tier/tier_title and
+  catches mashed meta keys; the 1500ms timeout now also covers the pagefind.js import
+  (hang case has no automated spec — needs devtools, declined as a new dependency).
+- PARKED from this batch: selection preserved across QUERY changes (the late-swap case
+  died with the sidecar — new behavior, Henning's call if wanted); SIGNATURE_PATTERN
+  matches inside code fences like every other directive pattern (accepted).
+- Reader-visible for Henning's preview look: "Search is unavailable right now." (blessed
+  (a)), the 2px hit gap, the @signature guide section.
+
+Original spec (as dispatched):
 - The @signature DIRECTIVE: parsed on features (doc comments) and @page documents,
   replacing the config.rb stand-in lists (search_signature_pages/_features); curation
   seeded from the rig's lists (Henning's Learn walk + the generous-features philosophy);
