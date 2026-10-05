@@ -728,6 +728,38 @@ have landed incidentally), fixes what remains, with the usual fresh-eyes round:
   completeness check: any still-reproducible defect joins the batch.
 After this batch: PHASE D — Henning reviews on the live preview; the station closes.
 
+## Content calibration batch 1: LINKS — READY TO DISPATCH on Henning's explicit go
+
+Gated by a1 (Henning checks time + Fable quota) and e1 (quality reset shipped incl.
+Phase D — as of 2026-10-05 the Phase D apply batch is in flight and Henning still
+judges the V6 title screenshots). First real Content work; Scripting is calibration
+batch 2 after this one's review proves the voice.
+
+- SCOPE (toc.yml Links group, reading order): links (chapter overview, replaces the
+  stub), following-links, handling-all-links (absorbs handling-everything's link half),
+  preloading, navigation-bars, faux-interactive-elements. 6 pages = one review sitting.
+- SPLIT HANDLING (lean, flag at dispatch): the Opus relocation pre-pass performs the
+  WHOLE mechanical handling-everything split in one commit (both halves created
+  verbatim, toc.yml, redirect, page deleted) so the split never half-exists; the Fable
+  writer then rewrites only the Links-side pages. handling-all-forms stays verbatim
+  relocated prose until the Forms batch.
+- WORKERS (d1): Opus for the relocation pre-pass commit; a fresh FABLE writer for the
+  chapter prose. Writer inputs: the writing-style + overview-pages guide sections
+  (Henning-authored, 08bc5f81e + 2c5adfc7f deltas), the Overlays pilot
+  (docs/rework-2026/pilots/overlays.md), exemplar loading-state.md, the overview spec
+  (400-800 words, example before terminology, capped map — the generated children
+  index is navigation and does NOT reopen the cap), T4 example rules (derived, never
+  executed; flagged prominently in the report), T5 learn-ref policy (insertions in
+  this chapter's pages only; the global sweep stays the late Opus pass).
+- COMMITS (T6): relocation commit(s) first (mechanical, verbatim), then rewrite
+  commits per page or coherent group; [docs] prefix in unpoly.
+- REVIEW (b1): agent critic pass (fresh eyes, non-writer: prose against the style
+  guide, examples against the implementation, structure against the overview spec) BEFORE
+  Henning; then Henning reviews the chapter ON THE LIVE PREVIEW in reading order, one
+  sitting, per-page diff links + every derived example flagged in the report.
+- EVIDENCE: site builds green ("All links OK"), rake docs:check_urls still 78/78 (+
+  any new redirect), unpoly bin/self-test, the chapter renders in the final frame.
+
 ## Content station frame (settled with Henning 2026-10-03; T1-T6 and the September
 ## settlements continue to apply — this adds the operational frame)
 
