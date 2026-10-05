@@ -659,6 +659,27 @@ TASTE RULINGS A1-A10 (walked one by one with Henning, 2026-10-01, all settled):
     excerpts; print reveal noted as a nit, not built. This index does NOT reopen the
     overview spec's capped map — prose stays capped, the generated block is navigation.
 
+## Quality reset: remaining fix batch (C-tail) — DISPATCHED 2026-10-05
+
+After C1/C2, the walk batch and the search batches, these are the still-unbuilt taste
+rulings and defects. The builder verifies each against the current build first (some may
+have landed incidentally), fixes what remains, with the usual fresh-eyes round:
+- Vertical rhythm pass, incl. Henning's walk complaint: hubs and article pages have ZERO
+  margin between the top navbar and the page title.
+- (2C) Code blocks: fix only the pure-black default text color; tags/attributes keep one
+  shared color; no token color for Unpoly-attribute emphasis.
+- (1A) Second landing band: light-gray tint (alternating band rhythm).
+- (4B) ONE footer site-wide: centered, muted, small-text (mock's line; same links,
+  shared source) replacing the left-aligned fineprint; margin-top for collapsing, verify
+  in the real frame, fall back to padding + zeroed last-child margin.
+- (5A) Diagram on phones: full-bleed horizontal scroll strip, 620px floor, visible peek/
+  edge-fade; PLUS the seed-list fidelity item — the SVG honest to the PNG's
+  semi-transparent fills.
+- Nits: search pill boundary; `/` kbd hint contrast.
+- The Phase B defect catalog (claude.ai/artifact/Lirx3BJtsh9kLf6iuwGnyZ) is the
+  completeness check: any still-reproducible defect joins the batch.
+After this batch: PHASE D — Henning reviews on the live preview; the station closes.
+
 ## Content station frame (settled with Henning 2026-10-03; T1-T6 and the September
 ## settlements continue to apply — this adds the operational frame)
 
