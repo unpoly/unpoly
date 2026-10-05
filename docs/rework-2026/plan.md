@@ -659,7 +659,30 @@ TASTE RULINGS A1-A10 (walked one by one with Henning, 2026-10-01, all settled):
     excerpts; print reveal noted as a nit, not built. This index does NOT reopen the
     overview spec's capped map — prose stays capped, the generated block is navigation.
 
-## Quality reset: remaining fix batch (C-tail) — DISPATCHED 2026-10-05
+## Quality reset: C-tail — DONE, PUSHED 2026-10-05; PHASE D IS NEXT
+
+Built, fresh-eyes reviewed (no blockers), fix round applied, pushed: unpoly-site
+8d71bbe8..d9b9960d (10 commits: 5s timeout rider / rhythm / code ink / footer /
+diagram / pill contrast / catalog nits / hero comment / rhythm specs / review fixes).
+Suite 379 examples 0 failures. Root cause of the zero title gap: the header offset was
+margin-top and swallowed the h1 margin by collapsing; now padding-top, 25px everywhere.
+PHASE D TASTE LIST (queued for Henning's live review, one at a time):
+- Footer text $gray-600 = 3.57:1 on white, below AA body-text 4.5:1 (old fineprint was
+  the same; 4B said "muted" — contrast vs taste call).
+- Logo strip + "Is Unpoly right for you?" band now share the same tint, reading as one
+  gray band split by a hairline (strict alternation vs strip identity).
+- Landing footer gap ~104px (band padding can't collapse) vs 40px on doc pages.
+- P12: inline code in landing prose has no chip — consistent with the docs (no chips
+  anywhere); the mock had chips. Site-wide inline-code taste question.
+- D5 remainder: truncated sidebar titles have no tooltip (title attrs on ~800 nodes
+  grow the menu payload; a JS-on-hover title would be new behavior).
+- Long-title wrap: h1 overflow-wrap:anywhere fixes the rail overflow but breaks inside
+  identifiers ("…prototype.then(o / nFulfilled…") because the floated edit link narrows
+  line 1 (screenshot h1-long.png in builder scratchpad).
+- P9: the landing's up-defer example is 895px in the 880px box at 1280 — a real fix
+  edits mock copy (goes through Henning).
+
+Original dispatch spec:
 
 After C1/C2, the walk batch and the search batches, these are the still-unbuilt taste
 rulings and defects. The builder verifies each against the current build first (some may
