@@ -184,3 +184,4 @@ You can use the implementation of `[up-flashes]` as a template, which looks like
 ```
 
 @page flashes
+@signature

@@ -347,6 +347,7 @@ up.script = (function() {
     The compiler function can be [`async`](/up.compiler#async).
 
   @stable
+  @signature
   */
   function registerCompiler(...args) {
     registerProcessor(args)
@@ -401,6 +402,7 @@ up.script = (function() {
   @param macro
     @like up.compiler/compiler
   @stable
+  @signature
   */
   function registerMacro(...args) {
     registerProcessor(args, { macro: true })
@@ -702,6 +704,7 @@ up.script = (function() {
     The fulfillment value is the `element` argument.
 
   @stable
+  @signature
   */
   function hello(element, options = {}) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
@@ -843,6 +846,7 @@ up.script = (function() {
   @param up-data
     A data object serialized as [relaxed JSON](/relaxed-json).
   @stable
+  @signature
   */
   function readData(element) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.

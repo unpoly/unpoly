@@ -74,6 +74,7 @@ up.framework = (function() {
 
   @function up.boot
   @experimental
+  @signature
   */
   function boot({ mode = 'manual' } = {}) {
     if (readyState !== 'configuring') {
@@ -159,6 +160,7 @@ up.framework = (function() {
 
   @selector [up-boot=manual]
   @experimental
+  @signature
   */
 
   function onEvaled() {
@@ -223,6 +225,7 @@ up.framework = (function() {
 
   @function up.framework.isSupported
   @stable
+  @signature
   */
   function isSupported() {
     return !supportIssue()

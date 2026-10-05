@@ -307,3 +307,4 @@ See [Changing options before rendering](/render-lifecycle#changing-options-befor
 
 
 @page targeting-fragments
+@signature

@@ -179,6 +179,7 @@ up.viewport = (function() {
   @return {undefined}
 
   @stable
+  @signature
   */
   const reveal = up.mockable(function(element, options) {
     // copy options, since we will mutate it below (options.layer = ...).
@@ -853,6 +854,7 @@ up.viewport = (function() {
 
   @selector [up-viewport]
   @stable
+  @signature
   */
 
   /*-
@@ -884,6 +886,7 @@ up.viewport = (function() {
 
   @selector [up-fixed=top]
   @stable
+  @signature
   */
 
   /*-

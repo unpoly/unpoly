@@ -157,6 +157,7 @@ up.history = (function() {
   @property up.history.location
   @param {string} location
   @stable
+  @signature
   */
   function currentLocation() {
     return u.normalizeURL(location.href)
@@ -293,6 +294,7 @@ up.history = (function() {
 
       @experimental
   @stable
+  @signature
   */
 
   function splitLocation(location) {
@@ -747,6 +749,7 @@ up.history = (function() {
 
   @selector [up-back]
   @stable
+  @signature
   */
   up.macro('[up-back]', function(link) {
     if (previousLocation) {

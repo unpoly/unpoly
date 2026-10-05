@@ -501,6 +501,7 @@ up.network = (function() {
     The request object is also a promise for its `up.Response`.
 
   @stable
+  @signature
   */
   function makeRequest(...args) {
     const options = parseRequestOptions(args)
@@ -830,6 +831,7 @@ up.network = (function() {
 
   @event up:network:late
   @stable
+  @signature
   */
 
   /*-

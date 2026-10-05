@@ -659,6 +659,7 @@ up.fragment = (function() {
     errors, or running code after rendering.
 
   @stable
+  @signature
   */
   const render = up.mockable((...args) => {
     let options = parseTargetAndOptions(args)
@@ -970,6 +971,7 @@ up.fragment = (function() {
     The code may use the variables `event` (of type `up:fragment:keep`),
     `this` (the old fragment), `newFragment` and `newData`.
   @stable
+  @signature
   */
 
   function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }) {
@@ -1417,6 +1419,7 @@ up.fragment = (function() {
   @return {Element|undefined}
     The first matching element, or `undefined` if no such element matched.
   @stable
+  @signature
   */
   function getSmart(...args) {
     let [root, selector, options] = parseGetArgs(args)
@@ -1721,6 +1724,7 @@ up.fragment = (function() {
     @param {Function} [options.onFinished]
       A callback that is run when any animations are finished and the element was removed from the DOM.
   @stable
+  @signature
   */
   function destroy(...args) {
     const options = parseTargetAndOptions(args)
@@ -1889,6 +1893,7 @@ up.fragment = (function() {
     @like up.render
 
   @stable
+  @signature
   */
   function reload(...args) {
     const options = { ...config.reloadOptions, ...parseTargetAndOptions(args) }

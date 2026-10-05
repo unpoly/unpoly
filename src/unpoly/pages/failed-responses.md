@@ -147,3 +147,4 @@ See [Render error handling example](/render-lifecycle#error-handling-example).
 
 
 @page failed-responses
+@signature

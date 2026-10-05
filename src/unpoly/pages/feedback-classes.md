@@ -218,3 +218,4 @@ up.follow(link, { feedback: false }) // mark: { feedback: false }
 
 
 @page feedback-classes
+@signature

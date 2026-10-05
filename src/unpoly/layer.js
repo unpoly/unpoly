@@ -808,6 +808,7 @@ up.layer = (function() {
     When the overlay is dismissed, the promise will reject with the overlay's [dismissal reason](/closing-overlays#dismissal-reasons).
 
   @stable
+  @signature
   */
   function ask(options) {
     return new Promise(function(resolve, reject) {
@@ -1085,6 +1086,7 @@ up.layer = (function() {
     @mix up-follow/lifecycle-hooks
 
   @stable
+  @signature
   */
 
   /*-
@@ -1300,6 +1302,7 @@ up.layer = (function() {
   @property up.layer.current
   @param {up.Layer} current
   @stable
+  @signature
   */
 
   /*-
@@ -1651,6 +1654,7 @@ up.layer = (function() {
   @function up.layer.on
   @include up.on/after-element
   @stable
+  @signature
   */
 
   /*-

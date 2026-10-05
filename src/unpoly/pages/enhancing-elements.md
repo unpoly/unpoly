@@ -209,3 +209,4 @@ The following properties are available:
 
 
 @page enhancing-elements
+@signature

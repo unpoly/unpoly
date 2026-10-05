@@ -336,6 +336,7 @@ up.link = (function() {
     @like up.render
 
   @stable
+  @signature
   */
   const follow = up.mockable(function(link, options, parserOptions) {
     return up.render(followOptions(link, options, parserOptions))
@@ -1071,6 +1072,7 @@ up.link = (function() {
     has been loaded and rendered.
 
   @stable
+  @signature
   */
   function loadDeferred(link, options) {
     let guardEvent = up.event.build('up:deferred:load', { log: ['Loading deferred %o', link] })
@@ -1111,6 +1113,7 @@ up.link = (function() {
   @param event.preventDefault()
     Prevents the deferred content from being loaded.
   @stable
+  @signature
   */
 
   /*-
@@ -1182,6 +1185,7 @@ up.link = (function() {
     @mix up-follow/caching
 
   @stable
+  @signature
   */
   up.attribute('up-defer', { defaultValue: 'insert' }, function(link, condition) {
     let doLoad = (options) => up.error.muteUncriticalRejection(loadDeferred(link, options))
@@ -1302,6 +1306,7 @@ up.link = (function() {
     @mix up-follow/lifecycle-hooks
 
   @stable
+  @signature
   */
   up.on('up:click', config.selectorFn('followSelectors'), function(event, link) {
     if (shouldFollowEvent(event, link)) {
@@ -1360,6 +1365,7 @@ up.link = (function() {
 
   @selector [up-instant]
   @stable
+  @signature
   */
 
   /*-
@@ -1532,6 +1538,7 @@ up.link = (function() {
     @param [up-abortable='false']
       @like [up-follow]
   @stable
+  @signature
   */
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {
     if (!isPreloadDisabled(link)) {

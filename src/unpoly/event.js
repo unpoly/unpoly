@@ -170,6 +170,7 @@ up.event = (function() {
   @include up.on/after-element
 
   @stable
+  @signature
   */
   function on(...args) {
     return buildListenerGroup(args).bind()
@@ -304,6 +305,7 @@ up.event = (function() {
   @return {Event}
     The emitted event object.
   @stable
+  @signature
   */
   function emit(...args) {
     return buildEmitter(args).emit()

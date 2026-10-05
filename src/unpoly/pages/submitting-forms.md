@@ -192,5 +192,6 @@ up.submit(form, { target: '#elsewhere', transition: 'cross-fade' })
 
 
 @page submitting-forms
+@signature
 @menu-title Submitting forms
 

@@ -275,6 +275,7 @@ up.radio = (function() {
       `this` (the hungry element), `newFragment` and `renderOptions`.
 
   @stable
+  @signature
   */
 
   /*-
@@ -438,6 +439,7 @@ up.radio = (function() {
     @mix up-follow/loading-state
 
   @stable
+  @signature
   */
   up.attribute('up-poll', function(fragment) {
     up.FragmentPolling.forFragment(fragment).onPollAttributeObserved()

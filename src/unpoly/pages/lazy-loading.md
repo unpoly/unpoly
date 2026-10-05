@@ -201,3 +201,4 @@ The loading will not be attempted again, but you can use `up.deferred.load()` to
 
 
 @page lazy-loading
+@signature

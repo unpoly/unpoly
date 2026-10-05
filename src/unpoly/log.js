@@ -144,6 +144,7 @@ up.log = (function() {
 
   @function up.log.enable
   @stable
+  @signature
   */
   function enable() {
     config.enabled = true
@@ -156,6 +157,7 @@ up.log = (function() {
 
   @function up.log.disable
   @stable
+  @signature
   */
   function disable() {
     config.enabled = false

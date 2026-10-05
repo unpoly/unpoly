@@ -360,4 +360,5 @@ Caching after redirects
 
 
 @page caching
+@signature
 

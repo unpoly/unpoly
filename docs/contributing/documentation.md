@@ -39,6 +39,7 @@ Documentation lives in this repository, beside the code it describes. A sister p
   - [Listing the page in `toc.yml`](#listing-the-page-in-tocyml)
   - [Linking the reference to a guide](#linking-the-reference-to-a-guide)
   - [Overview pages](#overview-pages)
+- [Search ranking](#search-ranking)
 - [The contributing guides](#the-contributing-guides)
 - [Modules and classes](#modules-and-classes)
 - [Previewing your changes](#previewing-your-changes)
@@ -804,6 +805,23 @@ table of contents — the sidebar already is one. Its jobs, roughly in reading o
 Order sections for comprehension (usually the example before the terminology), and
 stay between 400-800 words. Good exemplars are `src/unpoly/pages/loading-state.md` and the Overlays pilot
 (`docs/rework-2026/pilots/overlays.md`, which becomes the real page during the rework).
+
+
+## Search ranking
+
+The search on unpoly.com ranks a few documents higher than the rest: the features and
+guide pages a reader most likely means. Mark one with `@signature`, on a line of its own
+next to the other directives:
+
+```js
+@selector [up-follow]
+@stable
+@signature
+```
+
+There are only two tiers, marked and unmarked. A query only surfaces the documents it
+matches, so the tier can be generous. When a page ranks wrong, fix it here rather than
+in the search code. A change shows in the search only after the index is rebuilt.
 
 
 ## The contributing guides

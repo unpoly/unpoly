@@ -130,6 +130,7 @@ up.motion = (function() {
   @param {Function(element, options): Promise} animation
     The callback function that executes the animation.
   @stable
+  @signature
   */
 
   let namedTransitions = new up.Registry('transition', findTransitionFn)
@@ -175,6 +176,7 @@ up.motion = (function() {
   @param {Function(oldElement, newElement, options): Promise} transition
     The callback function that executes the transition.
   @stable
+  @signature
   */
 
   function reset() {
@@ -709,6 +711,7 @@ up.motion = (function() {
 
     See [[failed-responses]].
   @stable
+  @signature
   */
 
   up.on('up:framework:reset', reset)

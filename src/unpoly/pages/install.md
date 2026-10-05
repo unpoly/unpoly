@@ -113,3 +113,4 @@ you may also use the ES6 build of Unpoly:
 The ES6 build does not contain any polyfills.
 
 @page install
+@signature

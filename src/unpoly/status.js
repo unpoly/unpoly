@@ -209,6 +209,7 @@ up.status = (function() {
 
   @selector .up-active
   @stable
+  @signature
   */
 
   /*-
@@ -224,6 +225,7 @@ up.status = (function() {
 
   @selector .up-loading
   @stable
+  @signature
   */
 
   /*-
@@ -342,6 +344,7 @@ up.status = (function() {
     To call multiple previews, separate names with a comma.
 
   @stable
+  @signature
   */
 
   /*-
@@ -377,6 +380,7 @@ up.status = (function() {
     by setting this attribute to a CSS selector matching
     a `<template>` or `<script>` element.
   @experimental
+  @signature
   */
 
   function getPlaceholderPreviewFn(placeholder) {
@@ -493,6 +497,7 @@ up.status = (function() {
 
     See [Matching the location of other layers](/navigation-bars#layers) for examples.
   @stable
+  @signature
   */
 
   /*-
@@ -573,6 +578,7 @@ up.status = (function() {
 
   @selector .up-current
   @stable
+  @signature
   */
 
   up.on('up:compilers:before', (_event, newFragment) => {

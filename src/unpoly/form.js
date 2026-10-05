@@ -932,6 +932,7 @@ up.form = (function() {
     Watching will stop automatically when the form is [destroyed](/up.destroy).
 
   @stable
+  @signature
   */
   function watch(...args) {
     let [root, options, callback] = u.args(args, 'val', 'options', 'callback')
@@ -1617,6 +1618,7 @@ up.form = (function() {
     @mix up-follow/lifecycle-hooks
 
   @stable
+  @signature
   */
 
   up.on('submit', config.selectorFn('submitSelectors'), function(event, form) {
@@ -1679,6 +1681,7 @@ up.form = (function() {
     @mix up-watch/observed-events
 
   @stable
+  @signature
   */
   up.compiler('[up-switch]', (switcher) => {
     return new up.Switcher(switcher).start()
@@ -2315,6 +2318,7 @@ up.form = (function() {
 
 
   @stable
+  @signature
   */
   up.compiler('[up-validate]', { rerun: true }, function(element) {
     // There are non-intuitive ways that an [up-validate] field can find its way into a <form>,
@@ -2375,6 +2379,7 @@ up.form = (function() {
     @mix up-watch/loading-state
 
   @stable
+  @signature
   */
   up.attribute('up-autosubmit', (formOrField) => autosubmit(formOrField, { logPrefix: '[up-autosubmit]' }))
 

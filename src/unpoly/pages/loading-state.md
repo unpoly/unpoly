@@ -113,3 +113,4 @@ See [Handling network issues](/network-issues) for details and examples.
 
 
 @page loading-state
+@signature
