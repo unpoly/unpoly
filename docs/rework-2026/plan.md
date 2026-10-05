@@ -726,9 +726,10 @@ flexbox?" (yes). Verdicts:
   frame centers with outer margins (torso max-width ~2100 token + auto margins). The
   HEADER contents follow the same frame: the logo stays aligned with the left flank at
   every width (same max-width + margins on the header's inner container).
-- Below $bp-toc/$bp-sidebar a hidden flank's space goes to the column (at 1279 the
-  column reaches ~880). Rail breakpoint STAYS 1280; the resulting column snap
-  (~880 → 660) at the boundary is ACCEPTED (option i).
+- Below $bp-toc/$bp-sidebar a hidden flank's space goes to the column. Rail breakpoint
+  STAYS 1280; the column snap at the boundary is ACCEPTED (option i). With the 3:1
+  weights below 1280 the snap measures ~862 → 660 (the sidebar shares the freed rail
+  space 1:3, so the column peaks at 861.75 at 1279, not 880).
 - Article pages keep phantom flank space so the column width equals docs pages at any
   window width (the standing "identical on every page" ruling).
 - The --up-scrollbar-width formula fix is DROPPED (it was Chrome-right, Firefox-wrong:
