@@ -673,8 +673,10 @@ have landed incidentally), fixes what remains, with the usual fresh-eyes round:
   shared source) replacing the left-aligned fineprint; margin-top for collapsing, verify
   in the real frame, fall back to padding + zeroed last-child margin.
 - (5A) Diagram on phones: full-bleed horizontal scroll strip, 620px floor, visible peek/
-  edge-fade; PLUS the seed-list fidelity item — the SVG honest to the PNG's
-  semi-transparent fills.
+  edge-fade; PLUS the seed-list fidelity item — the SVG honest to the PNG's fills.
+  MEASURED (builder + reviewer, 2026-10-05, independently): the PNG's fills are OPAQUE
+  (#cfe2f3/#f4cccc/#ffe599, identical over band and white) — the seed list's
+  "semi-transparent" was a visual misread; the faithful SVG uses opaque tints.
 - Nits: search pill boundary; `/` kbd hint contrast.
 - The Phase B defect catalog (claude.ai/artifact/Lirx3BJtsh9kLf6iuwGnyZ) is the
   completeness check: any still-reproducible defect joins the batch.
