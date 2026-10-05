@@ -724,6 +724,11 @@ Full site suite 370 examples 0 failures; index 627 pages, tier 90.
   matches inside code fences like every other directive pattern (accepted).
 - Reader-visible for Henning's preview look: "Search is unavailable right now." (blessed
   (a)), the 2px hit gap, the @signature guide section.
+- POST-SHIP VERDICTS (Henning 2026-10-05): the unavailable message waits AT LEAST 5s
+  (was the 1500ms timeout; rider sent to the C-tail builder). The @signature guide
+  section now states usage criteria — core features many apps use, key concepts,
+  beginner/intermediate guides vs edge cases and dry references ("a reader most likely
+  means" was not resolvable) — rewritten and pushed (6ad09d5e5).
 
 Original spec (as dispatched):
 - The @signature DIRECTIVE: parsed on features (doc comments) and @page documents,
