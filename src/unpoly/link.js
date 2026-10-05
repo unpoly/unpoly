@@ -945,6 +945,8 @@ up.link = (function() {
   This is useful for listening to links being activated without needing to know whether
   a link is `[up-instant]`.
 
+  @learn-ref faux-interactive-elements
+
   ## Example
 
   Assume we have two links, one of which is `[up-instant]`:

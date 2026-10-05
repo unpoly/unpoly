@@ -1,37 +1,36 @@
 Clicking non-interactive elements
 =================================
 
-Sometimes you need to add a `click` listener to non-interactive elements (like `<span>`). Unpoly ships with some tools to prevent [accessibility issues](#accessibility)
-when emulating interactivity on non-interactive elements.
+Unpoly can make non-interactive elements (like a `<span>`) act like hyperlinks or buttons.
+The element gets keyboard support and other [accessibility behaviors](#accessibility)
+that a naive `click` listener would lack.
 
 
 ## Acting like a hyperlink
 
-Add an `[up-follow]` attribute on any non-interactive element to make it behave like a hyperlink.
-The element will support keyboard navigation and many other [behaviors for accessibility](#accessibility).
+Set an `[up-follow]` attribute on any non-interactive element to make it behave like a hyperlink.
+Set the destination URL as an `[up-href]` attribute.
 
-The link's destination URL can be set as an `[up-href]` attribute.
 For example, the following `<span>` element will [navigate](/up-follow) to `/details` when clicked:
 
 ```html
-<span up-follow up-href="/details">Read more</span>
+<span up-follow up-href="/details">Read more</span> <!-- mark: up-href="/details" -->
 ```
 
-
-
-The `[up-follow]` element can be used with any hyperlink-related functionality, such as `[up-instant]`, `[up-preload]` or `up.follow()`. 
+Such a faux hyperlink can be used with any link-related functionality,
+such as `[up-instant]`, `[up-preload]` or `up.follow()`.
 
 
 ### Prefer regular hyperlinks
 
-In general you should prefer using regular hyperlinks:
+In general you should prefer regular `<a>` elements:
 
-- Only regular links allow the user to open the destination in a new tab
+- Only regular links let the user open the destination in a new tab.
 - Regular links still work when JavaScript is unavailable.
-- Regular links can be followed from crawlers like Google
+- Regular links can be followed by crawlers like Google.
 - Although `<a>` is an inline element, it may [contain block elements](https://makandracards.com/makandra/43549-it-s-ok-to-put-block-elements-inside-an-a-tag). Hence you can use `<a>` to make a large area clickable.
 
-There are also some use cases for faux links:
+There are also some use cases for faux hyperlinks:
 
 - When you want to *prevent* the user from opening a link in a new tab.
 - When the element cannot be wrapped in an `<a>`, e.g. a `<tr>`.
@@ -40,29 +39,29 @@ There are also some use cases for faux links:
 
 ## Emitting an event on click
 
-You can use `[up-emit]` on any element to have it emit an event when clicked:
+Set an `[up-emit]` attribute on any element to have it emit an event when clicked:
 
 ```html
-<span up-emit="user:select" up-emit-props="{ user_id: 5 }">
+<span up-emit="user:select" up-emit-props="{ id: 5 }"> <!-- mark: up-emit="user:select" -->
   Alice
 </span>
 ```
 
-This can be a good solution to let widely distributed elements communicate with each other.
+This can be a good solution for letting widely distributed elements communicate with each other.
 
-The `[up-emit]` element will support keyboard navigation and many other [behaviors for accessibility](#accessibility).
+Like all faux-interactive elements, the `[up-emit]` element supports keyboard navigation
+and other [accessibility behaviors](#accessibility).
 
 
 ## Arbitrary click effects
 
-Add an `[up-clickable]` attribute on any non-interactive element to make it behave like a button:
+Set an `[up-clickable]` attribute on any non-interactive element to make it behave like a button:
 
 ```html
-<span id="faux-button" up-clickable>Click me</span>
+<span id="faux-button" up-clickable>Click me</span> <!-- mark: up-clickable -->
 ```
 
-This will enable keyboard navigation and many other [behaviors for accessibility](#accessibility).
-It's up to you make the element appear interactive visually, e.g. by assigning a `.button` class from your design system.
+It's up to you to make the element appear interactive visually, e.g. by assigning a `.button` class from your design system.
 
 To react to the element being activated, handle the `up:click` event:
 
@@ -79,11 +78,12 @@ To make elements clickable without an explicit `[up-clickable]` attribute, confi
 
 ## Accessibility
 
-Naively adding a `click` handler on a non-interactive element will cause [accessibility issues](https://keepinguptodate.com/pages/2019/04/accessible-javascript-click-handlers/).
+Naively adding a `click` listener to a non-interactive element causes [accessibility issues](https://keepinguptodate.com/pages/2019/04/accessible-javascript-click-handlers/):
+the element cannot be focused, keyboard users cannot activate it, and screen readers won't announce it as interactive.
 
-To prevent this, Unpoly adds the following behaviors to elements with `[up-follow][up-href]`, `[up-emit]` or `[up-clickable]`:
+To prevent these issues, Unpoly adds the following behaviors to elements with `[up-follow][up-href]`, `[up-emit]` or `[up-clickable]`:
 
-- The element is given an [`[role=link]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/link_role)
+- The element is given a [`[role=link]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/link_role)
   or [`[role=button]`](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/button_role)
   attribute so screen readers announce it as an interactive element. To override Unpoly's choice of role, set a `[role]` attribute manually.
 - Link-like elements show a [`pointer`](https://developer.mozilla.org/en-US/docs/Web/CSS/cursor) cursor when hovered over.

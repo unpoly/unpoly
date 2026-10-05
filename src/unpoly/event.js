@@ -465,8 +465,8 @@ up.event = (function() {
 
   While the `[up-emit]` attribute is often used with an `<a>` or `<button>` element,
   you can also apply it to non-interactive elements, like a `<span>`.
-  See [clicking on non-interactive elements](/faux-interactive-elements) for details and
-  accessibility considerations.
+
+  @learn-ref faux-interactive-elements
 
   ### Example
 
