@@ -743,6 +743,14 @@ batch 2 after this one's review proves the voice.
   verbatim, toc.yml, redirect, page deleted) so the split never half-exists; the Fable
   writer then rewrites only the Links-side pages. handling-all-forms stays verbatim
   relocated prose until the Forms batch.
+- RELOCATION DONE (2026-10-05, unpoly c9a933955, local until site checks pass):
+  three link sections + intro + two both-ish sections (legacy JS, navigation defaults)
+  to handling-all-links; the forms H2 to handling-all-forms. PREMISE CORRECTION for
+  all future batches: redirects live in UNPOLY's src/unpoly-migrate/.htaccess (included
+  by unpoly.com), NOT in unpoly-site — /handling-everything → /handling-all-links,
+  and the old /handle-everything chain collapsed to one hop. OWED TO THE FORMS BATCH:
+  handling-all-forms has no intro (starts at its H2) and may want a pointer to the
+  navigation-defaults section that landed on the links page.
 - WORKERS (d1): Opus for the relocation pre-pass commit; a fresh FABLE writer for the
   chapter prose. Writer inputs: the writing-style + overview-pages guide sections
   (Henning-authored, 08bc5f81e + 2c5adfc7f deltas), the Overlays pilot
