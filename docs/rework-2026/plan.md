@@ -718,6 +718,14 @@ flexbox?" (yes). Verdicts:
   the flanks breathe along (at 1500: column 792, flanks 314; column caps ~1647, full
   400/880/400 picture ~1760 as before). Same weights below 1280 between column and
   sidebar.
+  WIDE-SCREEN RULE (Henning 2026-10-05, correcting the ensemble-centering build; note
+  react.dev does NOT center — its side space grows forever, we deliberately differ):
+  flanks TOUCH THE WINDOW EDGES up to ~2100px; once the three columns hit their maxes
+  (~1760) the leftover becomes growing space AROUND the centered column (flex
+  space-between inside the frame). From ~2100 the ensemble stops growing and the whole
+  frame centers with outer margins (torso max-width ~2100 token + auto margins). The
+  HEADER contents follow the same frame: the logo stays aligned with the left flank at
+  every width (same max-width + margins on the header's inner container).
 - Below $bp-toc/$bp-sidebar a hidden flank's space goes to the column (at 1279 the
   column reaches ~880). Rail breakpoint STAYS 1280; the resulting column snap
   (~880 → 660) at the boundary is ACCEPTED (option i).
