@@ -705,6 +705,24 @@ PHASE D WALK VERDICTS (Henning 2026-10-05, all seven items settled):
    the HTML element and its trailing comment, or place the comment above the element
    (either blessed), to fit the 880px box; exact resulting markup in the report.
 
+FLEX TORSO (Henning 2026-10-05, supersedes the clamp()-formula flanks of verdict 6):
+Henning's diagnosis of the first build: .viewport lost its purpose (no cap, no center),
+the column should grow FASTER than the flanks, below 1280 the column must take the
+space freed by disappearing flanks instead of leaving it empty — "are you reinventing
+flexbox?" (yes). Verdicts:
+- The torso becomes a FLEX ROW with sticky flanks (react.dev pattern): column
+  flex-grows with priority to its 880px max, flanks (270px floor) grow only after,
+  to their 400px max. .viewport becomes the flex container or dies.
+- Below $bp-toc/$bp-sidebar a hidden flank's space goes to the column (at 1279 the
+  column reaches ~880). Rail breakpoint STAYS 1280; the resulting column snap
+  (~880 → 660) at the boundary is ACCEPTED (option i).
+- Article pages keep phantom flank space so the column width equals docs pages at any
+  window width (the standing "identical on every page" ruling).
+- The --up-scrollbar-width formula fix is DROPPED (it was Chrome-right, Firefox-wrong:
+  the browsers disagree on 100vw vs hidden scrollbars — reviewer-measured). Flex sizes
+  by container width, and Unpoly's BodyShifter compensates body width on overlay open,
+  so no shift should remain in either engine; specced as an outcome.
+
 Original dispatch spec:
 
 After C1/C2, the walk batch and the search batches, these are the still-unbuilt taste
