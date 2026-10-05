@@ -38,7 +38,7 @@ all hyperlinks:
 up.link.config.followSelectors.push('a[href]')
 ```
 
-Unpoly will now [handle all links](/handling-everything), even those without
+Unpoly will now [handle all links](/handling-all-links), even those without
 an `[up-follow]` attribute:
 
 ```html

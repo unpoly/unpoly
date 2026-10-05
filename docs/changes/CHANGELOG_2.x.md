@@ -264,7 +264,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 #### Less need for boilerplate configuration
 
 - Fragment links often replace the primary content element of your application layout. For this purpose you can now define [default targets](/up-main) that are automatically updated when no target selector is given.
-- Unpoly can be configured to [handle all links and forms](/handling-everything), without any `[up-...]` attributes.
+- Unpoly can be configured to [handle all links and forms](/handling-all-links), without any `[up-...]` attributes.
 - We have examined many real-world Unpoly apps for repetitive configuration and made these options the new default.
 
 #### New Layer API

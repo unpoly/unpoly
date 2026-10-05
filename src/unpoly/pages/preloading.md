@@ -28,7 +28,7 @@ but will also make the interaction feel less instant.
 
 On touch devices preloading will begin when the user places her finger on the link.
 
-To [preload all links on hover](/handling-everything#preloading-all-links), configure `up.link.config.preloadSelectors`.
+To [preload all links on hover](/handling-all-links#preloading-all-links), configure `up.link.config.preloadSelectors`.
 
 
 Eager preloading on insertion {#on-insert} 

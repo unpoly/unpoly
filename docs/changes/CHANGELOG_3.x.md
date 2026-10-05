@@ -1694,7 +1694,7 @@ This is another maintenance release that addresses some bugs while we're working
 
 - Fix a bug where targeted fragments would show the default [focus outline](/focus-visibility) on Safari. Regression introduced in 3.9.4.
 - Fix a bug where an overlay would show double scrollbars if `<html>` was chosen as the overflow element. Regression introduced in 3.8.0.
-- Prevent Unpoly from following or preloading links with the `tel:` scheme when Unpoly is configured to [handle all links](/handling-everything) (by @begerdom). 
+- Prevent Unpoly from following or preloading links with the `tel:` scheme when Unpoly is configured to [handle all links](/handling-all-links) (by @begerdom). 
 
 
 3.9.4
@@ -3540,7 +3540,7 @@ In our ongoing efforts to evolve Unpoly's documentation from an API reference to
 
 All existing documentation pages from Unpoly 2 remain available:
 
-- [Handling all links and forms](/handling-everything)
+- [Handling all links and forms](/handling-all-links)
 - [Tuning the scroll behavior](/scroll-tuning)
 - [Migrating legacy JavaScripts](/legacy-scripts)
 - [Scrolling](/scrolling)

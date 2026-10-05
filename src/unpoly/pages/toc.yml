@@ -35,7 +35,6 @@ learn:
         - links
         - following-links
         - handling-all-links
-        - handling-everything # splits into handling-all-links / handling-all-forms
         - preloading
         - navigation-bars
         - faux-interactive-elements

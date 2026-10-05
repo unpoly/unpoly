@@ -359,7 +359,7 @@ up.script = (function() {
   A macro lets you set attributes that will be compiled afterward.
 
   If you want default attributes for *every* link and form, consider customizing your
-  [navigation options](/navigation) or configuring Unpoly to [handle everything](/handling-everything).
+  [navigation options](/navigation) or configuring Unpoly to [handle everything](/handling-all-links).
 
   ## Example
 
