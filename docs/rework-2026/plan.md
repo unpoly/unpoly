@@ -705,6 +705,15 @@ PHASE D WALK VERDICTS (Henning 2026-10-05, all seven items settled):
    the HTML element and its trailing comment, or place the comment above the element
    (either blessed), to fit the 880px box; exact resulting markup in the report.
 
+PHASE D APPLY STACK SHIPPED (2026-10-05): unpoly-site 4055d7e7..124b25cc pushed —
+footer / landing / titles / flex torso / 3:1:1 weights / 2100px frame. Suite 393
+examples 0 failures; reviewed in three rounds (full, flex re-review, spot-check), all
+holds. Builder decisions ratified in review: the contents rail is a server-rendered
+twin of the in-text contents (one copy visible per width, display:none hides the
+other from the a11y tree, rail outside the search body); article pages use half
+phantom flanks in 1024-1279 to stay centered at docs-equal width. The station closes
+on Henning's word after his preview pass.
+
 FLEX TORSO (Henning 2026-10-05, supersedes the clamp()-formula flanks of verdict 6):
 Henning's diagnosis of the first build: .viewport lost its purpose (no cap, no center),
 the column should grow FASTER than the flanks, below 1280 the column must take the
