@@ -682,6 +682,29 @@ PHASE D TASTE LIST (queued for Henning's live review, one at a time):
 - P9: the landing's up-defer example is 895px in the 880px box at 1280 — a real fix
   edits mock copy (goes through Henning).
 
+PHASE D WALK VERDICTS (Henning 2026-10-05, all seven items settled):
+1. Footer: color STAYS $gray-600 ("great"); HALVE the bottom padding; "Henning Koch"
+   links to https://triskweline.de/ (replaces the old Twitter URL).
+2. Logo wall MERGES INTO the "Is Unpoly right for you?" band — one band, one tint,
+   alternation self-heals; semantics: after explaining when Unpoly is right, the
+   companies it was right for. Strip's standalone band status and hairlines die.
+3. Landing footer gap ~104px: accepted as built (a).
+4. Inline code: stays bare everywhere (a) — no chips.
+5. Sidebar tooltips: none (a) — superseded by the flank widening below.
+6. LAYOUT (grew out of item 5, Henning's 1900px screenshot): ONE shared fluid FLANK
+   WIDTH for sidebar and contents rail (react.dev precedent, both 320px there) —
+   symmetric flanks mean the column is viewport-centered at every width. Floor measured
+   from the 1280 budget (flanks + 660 column + gutters fit $bp-toc); cap ~380-400px
+   picked empirically so ~95% of real menu entries fit untruncated. Column behavior
+   unchanged. ALSO: h1 titles get <wbr> break opportunities AFTER "(", BEFORE ".",
+   AFTER ", " (Prettier-style; overflow-wrap:anywhere stays backstop) AND fluid h1
+   type via clamp (~26px phone → current desktop size). Builder shoots the worst
+   titles (up.RenderJob.prototype.then etc.) at 390/660/1280 for Henning's judgment;
+   the empty-parens-below-breakpoint idea is PARKED as follow-up if those still grate.
+7. Landing up-defer example (P9): don't shrink code — remove the whitespace between
+   the HTML element and its trailing comment, or place the comment above the element
+   (either blessed), to fit the 880px box; exact resulting markup in the report.
+
 Original dispatch spec:
 
 After C1/C2, the walk batch and the search batches, these are the still-unbuilt taste
