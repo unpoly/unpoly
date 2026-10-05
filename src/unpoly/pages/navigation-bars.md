@@ -1,9 +1,10 @@
 Navigation bars
 ===============
 
-Links within navigational containers are automatically marked as `.up-current` if they point to the current page.
+Unpoly marks links in navigation bars with an `.up-current` class
+when they point to the current location.
 
-This helps highlighting current menu sections using CSS.
+Style that class with your CSS to highlight the current section in a menu.
 
 
 ## Marking links as current
@@ -19,7 +20,6 @@ if they point to the current URL. When the browser location [changes](/up:locati
 existing links will be updated to reflect the new location.
 
 To toggle `.up-current` on content that you manually inserted without Unpoly, use `up.hello()`.
-
 
 
 ## Defining navigational containers {#navigational-containers}
@@ -45,7 +45,7 @@ If you cannot use a `<nav>` element, you can also set the `[up-nav]` attribute o
 </div>
 ```
 
-You may also assign `[up-nav]` to an individual link instead of an navigational container:
+You may also assign `[up-nav]` to an individual link instead of a navigational container:
 
 ```html
 <a href="/foo" up-nav>Foo</a> <!-- mark: up-nav -->
@@ -60,13 +60,12 @@ Matching containers can opt *out* of `.up-current` assignment by setting an `[up
 </nav>
 ```
 
-You can configure additional selectors to automatically match your navigation components
+To automatically match your existing navigation components, configure additional selectors
 in `up.status.config.navSelectors`:
 
 ```js
 up.status.config.navSelectors.push('.navbar')
 ```
-
 
 
 ## Matching the current location {#matching-urls}
@@ -85,7 +84,7 @@ Any `#hash` fragments will be ignored in both link attributes and in the current
 
 ### Matching multiple URLs {#aliases}
 
-You often want to highlight a link for multiple URLs. For example a link to a *Users* section
+You often want to highlight a link for multiple URLs. For example, a link to a *Users* section
 might open a list of users, but should also be "current" for the new user form.
 
 To build this, set an `[up-alias]` attribute to any URL that should also be highlighted as `.up-current`.
@@ -93,11 +92,11 @@ The link below will be highlighted at both `/users` and `/users/new` locations:
 
 ```html
 <nav>
-  <a href="/users" up-alias="/users/new">Users</a>
+  <a href="/users" up-alias="/users/new">Users</a> <!-- mark: up-alias="/users/new" -->
 </nav>
 ```
 
-To pass more than one alternative URLs, set comma-separated values:
+To pass more than one alternative URL, set comma-separated values:
 
 ```html
 <nav>
@@ -117,16 +116,16 @@ You can also use a [URL pattern](/url-patterns):
 ### Matching the location of other layers {#layers}
 
 Each [layer](/up.layer) has a separate location that it considers "current".
-Even when the overlay has [no visible history](/history-in-overlays#configuring-visibility),
-it still tracks the location of the fragment it contains. 
+Even when an overlay has [no visible history](/history-in-overlays#configuring-visibility),
+it still tracks the location of the fragment it contains.
 
-Links are marked as current when they point to location *of their own layer*.
+Links are marked as current when they point to the location *of their own layer*.
 To highlight links that point to the location of *another* layer, set an [`[up-layer]`](/up-nav#up-layer) attribute
-on its [navigational container](#navigational-containers).
+on their [navigational container](#navigational-containers).
 The attribute value can be any [layer option](/layer-option).
 
 Below you can see a "hamburger menu" that is shown in an overlay. It contains links to the root layer,
-whose `.up-current` class also match the root layer's location:
+so their `.up-current` classes should match the root layer's location:
 
 ```html
 <!-- label: Navigation bar in an overlay -->
@@ -162,17 +161,17 @@ Unpoly applies no default styling to `.up-current` links. Use your own CSS inste
 }
 ```
 
-If you have already have a CSS class for current links that you want to reuse, you can tell Unpoly about it:
+If you already have a CSS class for current links that you want to reuse, you can tell Unpoly about it:
 
 ```js
-up.status.config.currentClasses.push('.my-current')
+up.status.config.currentClasses.push('my-current')
 ```
 
 Unpoly will set all configured classes on a current link:
 
 ```html
 <nav>
-  <a href="/foo" class="up-current my-current">Foo</a> <!-- mark: class="up-current selected" -->
+  <a href="/foo" class="up-current my-current">Foo</a> <!-- mark: class="up-current my-current" -->
   <a href="/bar">Bar</a>
 </nav>
 ```
@@ -190,7 +189,7 @@ to convey the emphasis to assistive technologies:
 </nav>
 ```
 
-When using a non-`<nav>` element with `[up-nav]`, we recommend to also set a `[role=navigation]` attribute
+When using a non-`<nav>` element with `[up-nav]`, we recommend also setting a `[role=navigation]` attribute
 to define a navigation landmark:
 
 ```html
@@ -199,7 +198,6 @@ to define a navigation landmark:
   <a href="/bar">Bar</a>
 </div>
 ```
-
 
 
 @page navigation-bars

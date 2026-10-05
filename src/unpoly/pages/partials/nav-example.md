@@ -1,7 +1,7 @@
 Let's look at a simple menu with two links:
 
 ```html
-<nav> <!-- mark: up-nav -->
+<nav> <!-- mark: <nav> -->
   <a href="/foo">Foo</a>
   <a href="/bar">Bar</a>
 </nav>

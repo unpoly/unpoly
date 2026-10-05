@@ -452,7 +452,7 @@ up.status = (function() {
   When a link within an `[up-nav]` element points to [its layer's location](/up.layer.location),
   it is assigned the `.up-current` class. When the browser navigates to another location, the class is removed automatically.
 
-  See [Navigation bars](/navigation-bars) for details and examples.
+  @learn-ref navigation-bars
 
   ## Example
 
@@ -505,7 +505,7 @@ up.status = (function() {
   may use the `[up-alias]` attribute to define alternative URLs for which they
   should also be highlighted as `.up-current`.
 
-  See [Highlighting links for multiple URLs](/navigation-bars#aliases) for more documentation.
+  @learn-ref navigation-bars#aliases
 
   ### Example
 
@@ -570,7 +570,7 @@ up.status = (function() {
   /*-
   When a link within a [navigational container](/navigation-bars) points to the current location, it is assigned the `.up-current` class.
 
-  See [Navigation bars](/navigation-bars) for more documentation and examples.
+  @learn-ref navigation-bars
 
   ## Example
 
