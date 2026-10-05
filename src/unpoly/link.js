@@ -115,7 +115,7 @@ up.link = (function() {
       An array of CSS selectors matching links that will be [followed through Unpoly](/up-follow).
 
       You can customize this property to automatically follow *all* links on a page without requiring an `[up-follow]` attribute.
-      See [Handling all links and forms](/handling-all-links).
+      See [Handling all links](/handling-all-links).
 
     @param {Array<string>} config.noFollowSelectors
       Exceptions to `up.link.config.followSelectors`.
@@ -133,7 +133,7 @@ up.link = (function() {
       instead of on `click`.
 
       You can customize this property to follow *all* links on `mousedown` without requiring an `[up-instant]` attribute.
-      See [Handling all links and forms](/handling-all-links).
+      See [Handling all links](/handling-all-links).
 
       Note that an instant link must also be [followable](/up.link.isFollowable), usually by giving it an
       [`[up-follow]`](/up-follow) attribute or by configuring `up.link.config.followSelectors`.
@@ -154,7 +154,7 @@ up.link = (function() {
       An array of CSS selectors matching links that are [preloaded on hover](/preloading#on-hover).
 
       You can customize this property to preload *all* links on `mousedown` without requiring an `[up-preload]` attribute.
-      See [Handling all links and forms](/handling-all-links).
+      See [Handling all links](/handling-all-links).
 
     @param {Array<string>} config.noPreloadSelectors
       Exceptions to `up.link.config.preloadSelectors`.
@@ -1217,7 +1217,7 @@ up.link = (function() {
 
   You can configure Unpoly to follow *all* links on a page without requiring an `[up-follow]` attribute.
 
-  See [Handling all links and forms](/handling-all-links).
+  See [Handling all links](/handling-all-links).
 
   ## Unfollowable links
 

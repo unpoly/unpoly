@@ -169,7 +169,7 @@ up.form.config.submitSelectors.push(['form'])
 
 You can except individual forms by setting a `[up-submit="false"]` attribute.
 
-See [Handling all links and forms](/handling-all-forms).
+See [Handling all forms](/handling-all-forms).
 
 
 ## Submitting forms with JavaScript {#script}

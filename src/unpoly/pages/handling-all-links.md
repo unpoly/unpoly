@@ -1,69 +1,73 @@
 Handling all links
 ==================
 
-You can configure Unpoly to handle all links and forms on the page.
+You can configure Unpoly to handle every link on the page, without
+annotating each link with an `[up-follow]` attribute.
 
-This avoids full page loads where possible, resulting in a smoother navigation experience.
-For developers this means having to use fewer `[up-...]` attributes.
+Clicks then update fragments instead of loading full pages, and your HTML
+stays free of `[up-...]` attributes.
 
-This guide shows how to make handle Unpoly all interactive elements.
-It also explains how to configure smart defaults that work for most of your links and forms.
+> [note]
+> Forms can be handled the same way. See [[handling-all-forms]].
 
 
 ## Following all links
 
-To follow *all* links on a page without requiring an [`[up-follow]`](/up-follow) attribute:
+To follow *all* links on a page without requiring an `[up-follow]` attribute:
 
 ```js
 up.link.config.followSelectors.push('a[href]')
 ```
 
-There are some exceptions when links will still make a full page load under this setting:
+Some links will still make a full page load under this setting:
 
 @include no-follow-reasons
 
-### Following all links on `mousedown`
 
-To follow links on `mousedown` instead of `click` without an `[up-instant]` attribute:
+## Following all links on `mousedown`
+
+To follow links on `mousedown` instead of `click` without requiring an `[up-instant]` attribute:
 
 ```js
 up.link.config.instantSelectors.push('a[href]')
 ```
 
-Note that an instant link must also by [followable](/up.link.isFollowable), usually by giving it an [`[up-follow]`](/up-follow) attribute or by configuring `up.link.config.followSelectors`.
+Note that an instant link must also be [followable](/up.link.isFollowable), usually by giving it
+an `[up-follow]` attribute or by configuring `up.link.config.followSelectors` as [shown above](#following-all-links).
 
-There are some exceptions when links still activate on `click` under this setting:
+Some links will still activate on `click` under this setting:
 
 - Links with an `[up-instant=false]` attribute.
 - Links that are not [followable](#following-all-links).
-- You have configured additional exceptions in `up.link.config.noInstantSelectors`.
+- Any additional exceptions configured in `up.link.config.noInstantSelectors`.
 
-Note that if you have event listeners bound to `click` on accelerated links, they will
-no longer be called. You need to bind these listeners to `mousedown` or, better, `up:click` instead.
+If you have event listeners bound to `click` on accelerated links, they will no longer be called.
+Bind these listeners to `mousedown` or, better, `up:click` instead.
 
-### Preloading all links
 
-To preload *all* links on when hovering over them, without requiring an `[up-preload]` attribute:
+## Preloading all links
+
+To preload *all* links on hover, without requiring an `[up-preload]` attribute:
 
 ```js
 up.link.config.preloadSelectors.push('a[href]')
 ```
 
-There are some exceptions when links will not be preloaded under this setting:
+Some links will not be preloaded under this setting:
 
 - Links with an `[up-preload=false]` attribute.
 - Links that are not [followable](#following-all-links).
-- When the link destination [cannot be cached](/up.network.config#config.autoCache).
-- You have configured additional exceptions in `up.link.config.noPreloadSelectors`.
+- Links whose destination [cannot be cached](/up.network.config#config.autoCache).
+- Any additional exceptions configured in `up.link.config.noPreloadSelectors`.
 
 
 ## Fixing legacy JavaScript code
 
 Legacy code often contains JavaScript that expects a full page load whenever the
-user interacts with the page. When you configure Unpoly to handle all interaction,
-there will not be additional page loads as the user clicks a link or submits a form.
+user interacts with the page. When Unpoly handles all links, clicking no longer
+causes these additional page loads.
 
-See [Migrating legacy JavaScripts](/legacy-scripts).
+See [[legacy-scripts]] for making such code work with Unpoly.
 
 
 ## Customizing navigation defaults
@@ -71,10 +75,10 @@ See [Migrating legacy JavaScripts](/legacy-scripts).
 [Following a link](/up-follow) or [submitting a form](/submitting-forms) is considered
 [navigation](/navigation) by default.
 
-When navigating Unpoly will use defaults to satisfy the user's expectation regarding
+When navigating, Unpoly uses defaults to satisfy the user's expectations regarding
 scrolling, history, focus, request cancellation, etc.
 
-See [navigation](/navigation) for a detailed breakdown of navigation defaults
+See [[navigation]] for a detailed breakdown of navigation defaults
 and how to customize them.
 
 
