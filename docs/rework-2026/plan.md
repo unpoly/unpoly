@@ -713,6 +713,11 @@ flexbox?" (yes). Verdicts:
 - The torso becomes a FLEX ROW with sticky flanks (react.dev pattern): column
   flex-grows with priority to its 880px max, flanks (270px floor) grow only after,
   to their 400px max. .viewport becomes the flex container or dies.
+  REFINED (Henning 2026-10-05, "Let's try 3:1"): not strict column-first — flex-grow
+  ratio 3:1:1 (column:flank:flank), so the column takes 60% of every extra pixel and
+  the flanks breathe along (at 1500: column 792, flanks 314; column caps ~1647, full
+  400/880/400 picture ~1760 as before). Same weights below 1280 between column and
+  sidebar.
 - Below $bp-toc/$bp-sidebar a hidden flank's space goes to the column (at 1279 the
   column reaches ~880). Rail breakpoint STAYS 1280; the resulting column snap
   (~880 → 660) at the boundary is ACCEPTED (option i).
