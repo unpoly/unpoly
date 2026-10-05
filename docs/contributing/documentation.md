@@ -819,9 +819,17 @@ next to the other directives:
 @signature
 ```
 
+A guide page takes it below `@page`:
+
+```markdown
+@page submitting-forms
+@signature
+```
+
 There are only two tiers, marked and unmarked. A query only surfaces the documents it
 matches, so the tier can be generous. When a page ranks wrong, fix it here rather than
-in the search code. A change shows in the search only after the index is rebuilt.
+in the search code. A change shows in the search only after the index is rebuilt: run
+`SKIP_CHECK_LINKS=1 bundle exec rake search:index` in `unpoly-site`.
 
 
 ## The contributing guides
