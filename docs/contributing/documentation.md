@@ -809,9 +809,13 @@ stay between 400-800 words. Good exemplars are `src/unpoly/pages/loading-state.m
 
 ## Search ranking
 
-The search on unpoly.com ranks a few documents higher than the rest: the features and
-guide pages a reader most likely means. Mark one with `@signature`, on a line of its own
-next to the other directives:
+The search on unpoly.com ranks a few documents higher than the rest. Mark a document
+with `@signature` when it is a core feature that many Unpoly apps will use (like
+`[up-follow]` or `up.render()`), a key concept of the framework, or a guide page for
+beginner and intermediate users. Edge cases, escape hatches and dry reference pages
+stay unmarked — they still surface, below the common answers.
+
+The directive goes on a line of its own, next to the other directives:
 
 ```js
 @selector [up-follow]
