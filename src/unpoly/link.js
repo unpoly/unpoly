@@ -71,6 +71,7 @@ With these [`[up-target]`](/up-follow#up-target) annotations Unpoly only updates
 The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
+@learn-ref following-links
 @learn-ref attributes-and-options
 @learn-ref targeting-fragments
 @learn-ref handling-all-links
@@ -258,6 +259,8 @@ up.link = (function() {
   Following a link is considered [navigation](/navigation) by default.
 
   Emits the event `up:link:follow`.
+
+  @learn-ref following-links
 
   ## Examples
 
@@ -1197,6 +1200,8 @@ up.link = (function() {
 
   Following a link is considered [navigation](/navigation) by default.
 
+  @learn-ref following-links
+
   ## Example
 
   This link will update the `<div class="content">` fragment with the same element
@@ -1347,6 +1352,8 @@ up.link = (function() {
   the `up:click` event to be emitted on `mousedown` instead of `click`.
 
   To apply the instant effect without changing your HTML, configure `up.link.config.instantSelectors`.
+
+  @learn-ref following-links#instant
 
   ## Example
 
