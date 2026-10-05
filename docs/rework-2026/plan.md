@@ -769,7 +769,32 @@ have landed incidentally), fixes what remains, with the usual fresh-eyes round:
   completeness check: any still-reproducible defect joins the batch.
 After this batch: PHASE D — Henning reviews on the live preview; the station closes.
 
-## Content calibration batch 1: LINKS — READY TO DISPATCH on Henning's explicit go
+## Content calibration batch 1: LINKS — WRITTEN + CRITIC-PASSED + PUSHED 2026-10-05;
+## AWAITING HENNING'S CALIBRATION SITTING
+
+7 commits 59086cdcd..dfdd5fec6 (overview new / following-links NEW — it was a stub,
+premise corrected / handling-all-links rewrite / 3 polish passes / critic fixes).
+Critic verdict: good batch, both writer bug-fixes verified correct (.includes(),
+currentClasses class name), all examples implementation-accurate, magic-comment worry
+a false alarm (client-side rewrite in syntax_highlighting.js). Accuracy fixes applied:
+navigation effects qualified to main-element updates; no-follow list "falls back to
+default browser behavior"; "fewer [up-...] attributes". Build "All links OK",
+check_urls 78/78, self-test 206/206.
+SITTING QUEUE (Henning rules during/after reading /links → /following-links →
+/handling-all-links → /preloading → /navigation-bars → /faux-interactive-elements):
+- "Related topics" closing section on the overview: meta-ish heading vs real wrong-turn
+  boundaries (fold into prose / rename / keep).
+- Overview prose ~380 words vs the 400-800 spec: calibration data, reads complete.
+- Module pages and T5: up.link now carries 8 @learn-refs (consistent with up.status's
+  6) — are module pages exempt from the one/two-ref rule? One line wanted.
+- @menu-title Overview on links.md (from the pilot; other overview stubs lack it).
+- no-follow-reasons partial renders on two pages of one chapter (intended reuse).
+- Retitle "Clicking non-interactive elements" (wikilinks read "See Clicking
+  non-interactive elements")? Reader-visible site-wide label.
+- [up-emit] example props aligned to the reference ({ id: 5 }) — neutral, revert if
+  user_id read better.
+
+Original dispatch spec:
 
 Gated by a1 (Henning checks time + Fable quota) and e1 (quality reset shipped incl.
 Phase D — as of 2026-10-05 the Phase D apply batch is in flight and Henning still
