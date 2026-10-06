@@ -68,6 +68,33 @@ up.status.config.navSelectors.push('.navbar')
 ```
 
 
+## Styling current links {#styling}
+
+Unpoly applies no default styling to `.up-current` links. Use your own CSS instead:
+
+```css
+.up-current {
+  font-weight: bold;
+  background-color: yellow;
+}
+```
+
+If you already have a CSS class for current links that you want to reuse, you can tell Unpoly about it:
+
+```js
+up.status.config.currentClasses.push('my-current')
+```
+
+Unpoly will set all configured classes on a current link:
+
+```html
+<nav>
+  <a href="/foo" class="up-current my-current">Foo</a> <!-- mark: class="up-current my-current" -->
+  <a href="/bar">Bar</a>
+</nav>
+```
+
+
 ## Matching the current location {#matching-urls}
 
 The URL shown in the browser's [address bar](https://en.wikipedia.org/wiki/Address_bar) is
@@ -146,33 +173,6 @@ URL matches the location of *any* layer:
   <a href="/users" up-layer="root">Users</a>
   <a href="/posts" up-layer="root">Posts</a>
   <a href="/sitemap" up-layer="current">Full sitemap</a>
-</nav>
-```
-
-
-## Styling current links {#styling}
-
-Unpoly applies no default styling to `.up-current` links. Use your own CSS instead:
-
-```css
-.up-current {
-  font-weight: bold;
-  background-color: yellow;
-}
-```
-
-If you already have a CSS class for current links that you want to reuse, you can tell Unpoly about it:
-
-```js
-up.status.config.currentClasses.push('my-current')
-```
-
-Unpoly will set all configured classes on a current link:
-
-```html
-<nav>
-  <a href="/foo" class="up-current my-current">Foo</a> <!-- mark: class="up-current my-current" -->
-  <a href="/bar">Bar</a>
 </nav>
 ```
 
