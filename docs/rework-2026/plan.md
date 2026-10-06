@@ -875,6 +875,18 @@ leading-"up." glue (0 lone brackets / bare-up lines at all widths). FOR HENNING,
 open from this round: variable-font option (c) decision; spy-marker reservation gap
 (a/b/c, builder leans faux-bold stroke); $frame-edge width trade-off.
 
+ROUND SHIPPED (2026-10-07, unpoly-site a75e276d..a5729803 pushed, spot-check holds,
+suite 425/0): diagram embed mechanism; Edit button (gray outline, responsive label,
+hidden <500px); spy reservation deleted; VARIABLE ROBOTO (vendored 66.8KB, was 90;
+variable reproduces the static cuts pixel-identically — measured); buttons never
+underline (root cause: landing/prose a @extend .hyperlink; two documented !importants);
+INSET ARCHITECTURE per Henning's ruling (frame carries clamp(20,5vw,25px) padding,
+flank margins carry the gaps, flank arithmetic 245/355, text edge == logo everywhere).
+FOR HENNING'S GLANCE (notes, not blockers): capped column left-aligns below 1024
+(930-1023 windows show slack right — logo alignment forces it); below 1024 the Edit
+button aligns with the breadcrumb line, not the title line; Embeds::PATTERN is strict
+(only the exact double-quoted form; variants ship a silent empty div — parked nit).
+
 STYLING ONE-LINERS SETTLED (Henning 2026-10-06/07, slow-down; all dispatched to the
 frame builder's running round alongside the Edit-page outline button with responsive
 label "Edit page" -> "Edit" -> hidden on very narrow screens):
