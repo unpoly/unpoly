@@ -75,7 +75,7 @@ Both pages are unreviewed prose and fall under the review contract.
 
 ### Pending redirect
 
-`RedirectPermanent /tutorial /how-unpoly-works` points at a page Build·Content will write.
+`RedirectPermanent /tutorial /start/overview` points at the Getting-started overview (stale `/how-unpoly-works` plan corrected 2026-10-06).
 `bundle exec rake docs:check_urls` in unpoly-site reports it under PENDING and will stop
 once the page exists. Run that task before shipping; it is the "no lost URL" safety net.
 
