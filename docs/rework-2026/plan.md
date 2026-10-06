@@ -821,6 +821,14 @@ CALIBRATION WALK VERDICTS (Henning 2026-10-06, slow-down in progress):
 - STANDING PERMISSION (Henning 2026-10-06): the content writer may re-organize and
   un-nest sections on its own when it helps the basic->advanced gradient or the
   dependency order (anchors/referrers checked; moves reported).
+- (1A) The no-follow-reasons partial stays on BOTH chapter pages. DOCTRINE (Henning):
+  repetition is a feature, not a bug, for learning; every page must stand on its own —
+  readers enter anywhere via search, never assume linear reading. Where repetition
+  would get excessive, use a fragment link to the other page instead.
+- (2A) { id: 5 } stays. PRINCIPLE (Henning): stand-alone made-up examples are freely
+  changeable when it helps understanding or formatting; attention is only needed when
+  multiple examples ON THE SAME PAGE build on each other. There are no cross-page
+  example scenarios.
 - (4X) MODULE learn-ref GUIDANCE (Henning's wording, 2026-10-06): don't duplicate
   topic chapter lists on module pages. Modules are EXEMPT from max learn-ref counts
   but should work to keep the list low; linking the overview of a highly relevant
