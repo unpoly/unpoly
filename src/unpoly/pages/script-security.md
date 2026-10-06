@@ -45,7 +45,7 @@ These generally work like [`[onclick]`](https://www.w3schools.com/jsref/event_on
   up-follow
   up-on-loaded="console.log('Received response', response)"> <!-- mark: up-on-loaded -->
   Click link
-</>
+</a>
 
 <form>
   <input
@@ -134,8 +134,7 @@ When we don't want to use HTML-based callbacks, we can move them to a `.js` file
 
 Let's say you have a callback like this:
 
-
-```js
+```html
 <a href="/path" up-follow up-on-loaded="alert('Go!')">Click me</a>
 ```
 
@@ -198,7 +197,7 @@ in the `<head>` of the initial page load:
 
 ```html
 <head>
-  <meta name="csp-nonce" content="nonce-secret123"> <!-- mark: nonce-secret123 -->
+  <meta name="csp-nonce" content="secret123"> <!-- mark: secret123 -->
   ...
 </head>
 ```
@@ -250,7 +249,7 @@ in the `<head>` of the initial page load:
 
 ```html
 <head>
-  <meta name="csp-nonce" content="nonce-secret123"> <!-- mark: nonce-secret123 -->
+  <meta name="csp-nonce" content="secret123"> <!-- mark: secret123 -->
   ...
 </head>
 ```
@@ -270,7 +269,7 @@ Content-Security-Policy: script-src 'self' 'nonce-match456'
 ...
 
 <script nonce="match456">
-  // ✔ Nonce will be rewritten to initial123
+  // ✔ Nonce will be rewritten to the document nonce (secret123)
 </script>
 
 <script nonce="wrong789">
@@ -278,7 +277,7 @@ Content-Security-Policy: script-src 'self' 'nonce-match456'
 </script>
 ```
 
-Note how responses in your HTML only need to match the response you're currently rendering.\
+Note how nonces in your HTML only need to match the response you're currently rendering.\
 You do *not* need to track and re-use the nonce of the initial page load.
 
 
