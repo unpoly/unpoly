@@ -21,8 +21,9 @@ The function is called once for each `.current-time` element, when the page firs
 loads and when a matching fragment is rendered later. This replaces listening
 to `DOMContentLoaded`, which only fires for the initial page.
 
-A compiler can return a *destructor* function. Unpoly calls it when the element is
-removed from the page, so effects like timers or global listeners don't outlive their element:
+A compiler can return a *destructor* function. Unpoly calls it when it removes
+the element, e.g. when the surrounding fragment is swapped. This keeps effects
+like timers or global listeners from outliving their element:
 
 ```js
 up.compiler('.current-time', function(element) {

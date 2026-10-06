@@ -2,7 +2,7 @@ Enhancing elements with JavaScript
 ==================================
 
 Unpoly lets you enhance server-rendered HTML with JavaScript behavior.
-For example, every `<div class="map">` should automatically start a map widget.
+For example, every `<div class="map">` could automatically start a map widget.
 
 For this you register *compilers*: functions that are called whenever an element matching
 a CSS selector enters the DOM. Compilers run at the initial page load, and again
@@ -213,10 +213,13 @@ The following properties are available:
 
 ## Defining new attributes with macros {#macros}
 
-Some enhancements configure Unpoly itself, by setting `[up-...]` attributes.
-A regular compiler runs too late for this: by the time it sets an attribute,
-Unpoly has already processed the element. Register the function
-with `up.macro()` instead, which runs before all compilers:
+A *macro* is a compiler that runs before all other compilers, registered
+with `up.macro()`. This lets a macro set `[up-...]` attributes that will be
+compiled afterwards. A regular compiler may set such attributes too late,
+e.g. when the attribute is itself processed by a compiler, like `[up-poll]`.
+
+Macros are useful to define a shorthand for a combination of attributes
+that you keep repeating:
 
 ```js
 up.macro('[shake-modal]', function(link) {
@@ -225,8 +228,7 @@ up.macro('[shake-modal]', function(link) {
 })
 ```
 
-This macro defines a new `[shake-modal]` attribute, replacing a
-combination of attributes that we would otherwise repeat on many links:
+With this macro, links can open a shaking modal with a single attribute:
 
 ```html
 <a href="/contracts/new" shake-modal>New contract</a>

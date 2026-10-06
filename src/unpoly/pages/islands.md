@@ -80,6 +80,9 @@ For example, a row in a client-rendered table could open details in an overlay:
 
 ```js
 <tr onClick={() => up.layer.open({ url: `/orders/${order.id}` })}>
+  <td>{order.date}</td>
+  <td>{order.total}</td>
+</tr>
 ```
 
 
@@ -97,7 +100,9 @@ To preserve an island while the fragment around it is updated, assign it an `[up
 ```
 
 When new content contains a matching element, the existing element remains attached in its
-current position, keeping the mounted component and all its state.
+current position, keeping the mounted component and all its state. Note that this also keeps
+the island when the server sends changed `[up-data]`; to remount with fresh props in that case,
+use [`[up-keep="same-data"]`](/preserving-elements#same-data).
 See [[preserving-elements]] for how elements are matched, and for ways to control what is kept.
 
 
@@ -107,9 +112,9 @@ An island owns its subtree {#boundaries}
 Unpoly and the framework each manage their own side of the island's root element:
 
 - Elements rendered by the framework are not [compiled](/enhancing-elements).
-  An `[up-follow]` link rendered from JSX stays a plain link.
-  To trigger Unpoly from inside the island, call functions like `up.follow()` or `up.layer.open()`
-  from component code, as shown [above](#page-interaction).
+  Attributes that need a compiler, like `[up-preload]` or the selectors of your own compilers,
+  have no effect inside an island. Links and forms are handled through events and still work;
+  component code can also call functions like `up.layer.open()` directly, as shown [above](#page-interaction).
 - Conversely, don't [target](/targeting-fragments) elements inside an island.
   The framework expects to own that DOM. Update an island through its props or state,
   or re-render the entire island element.
