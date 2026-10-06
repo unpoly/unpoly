@@ -808,6 +808,15 @@ CALIBRATION WALK VERDICTS (Henning 2026-10-06, slow-down in progress):
   conversion action and must not drown.
 - PRINCIPLE (Henning): one-off elements (like the aside) are EMBEDDED HTML in the
   Markdown — no new Markdown syntax extensions for occasional constructs.
+- (4X) MODULE learn-ref GUIDANCE (Henning's wording, 2026-10-06): don't duplicate
+  topic chapter lists on module pages. Modules are EXEMPT from max learn-ref counts
+  but should work to keep the list low; linking the overview of a highly relevant
+  topic is a good way. If a topic has low cohesion, prefer linking its individual
+  high-cohesion pages instead, even at more refs. CAUTION (Henning): topics and
+  modules were deliberately separated to evolve independently — today's module<->topic
+  symmetry (up.link <-> Links) will not hold, so "always link the overview" is too
+  crude a rule. Concrete now: up.link prunes to [[links]]; other modules normalize in
+  the final ref sweep under this guidance.
 
 CALIBRATION VERDICTS ROUND 1 (Henning 2026-10-06, "Great result for our first round"):
 - STANDING CONTENT RULE (all future chapters): within each page, the most basic
