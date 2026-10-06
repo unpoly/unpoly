@@ -66,20 +66,10 @@ Some links will not be preloaded under this setting:
 Instead of configuring the same attributes on many elements, you can configure
 Unpoly to apply behavior to all elements matching a given CSS selector.
 
-For example, the following configuration will enable single-page navigation for
-all hyperlinks:
-
-```js
-up.link.config.followSelectors.push('a[href]')
-```
-
-Unpoly will now [handle all links](/handling-all-links), even those without
-an `[up-follow]` attribute:
-
-```html
-<a href="/path">Click for single-page navigation</a>
-```
-
+The configurations on this page are examples of this pattern.
+For instance, pushing a selector to `up.link.config.followSelectors`
+makes Unpoly [follow all matching links](#following-all-links), even those
+without an `[up-follow]` attribute.
 
 > [tip]
 > An alternative way to apply default behavior to many elements is a [macro](/up.macro).
