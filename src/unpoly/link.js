@@ -71,14 +71,7 @@ With these [`[up-target]`](/up-follow#up-target) annotations Unpoly only updates
 The JavaScript environment will persist and the user will not see a white flash while the
 new page is loading.
 
-@learn-ref following-links
-@learn-ref attributes-and-options
-@learn-ref targeting-fragments
-@learn-ref handling-all-links
-@learn-ref failed-responses
-@learn-ref preloading
-@learn-ref lazy-loading
-@learn-ref faux-interactive-elements
+@learn-ref links
 
 @see [up-follow]
 @see [up-instant]
