@@ -26,7 +26,6 @@ learn:
         - start/overlays
         - start/elements
         - start/api
-        - attributes-and-options # dissolves into start/api
         - start/next
 
     - type: page-group

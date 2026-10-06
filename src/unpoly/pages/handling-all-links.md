@@ -61,6 +61,39 @@ Some links will not be preloaded under this setting:
 - Any additional exceptions configured in `up.link.config.noPreloadSelectors`.
 
 
+## Configuring default behavior for all elements {#defaults}
+
+Instead of configuring the same attributes on many elements, you can configure
+Unpoly to apply behavior to all elements matching a given CSS selector.
+
+For example, the following configuration will enable single-page navigation for
+all hyperlinks:
+
+```js
+up.link.config.followSelectors.push('a[href]')
+```
+
+Unpoly will now [handle all links](/handling-all-links), even those without
+an `[up-follow]` attribute:
+
+```html
+<a href="/path">Click for single-page navigation</a>
+```
+
+
+> [tip]
+> An alternative way to apply default behavior to many elements is a [macro](/up.macro).
+
+
+### Making exceptions
+
+You can still make exceptions by setting an `[up-follow=false]` attribute:
+
+```html
+<a href="/path" up-follow="false">Click for full page load</a> <!-- mark: up-follow="false" -->
+```
+
+
 ## Customizing navigation defaults
 
 [Following a link](/up-follow) or [submitting a form](/submitting-forms) is considered

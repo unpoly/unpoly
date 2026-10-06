@@ -358,7 +358,7 @@ up.form = (function() {
       Additional [render options](/up.render#parameters) that should be used for submitting the form.
 
       Unpoly will parse render options from the watched form's attributes.
-      You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
+      You may pass this additional `options` object to [supplement or override](/start/api#options)
       options parsed from attributes.  See `[up-submit]` for a list of supported attributes.
 
   @section Targeting
@@ -987,7 +987,7 @@ up.form = (function() {
       Additional [render options](/up.render#parameters) to use when the form is submitted.
 
       Unpoly will parse render options from the watched form's attributes.
-      You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
+      You may pass this additional `options` object to [supplement or override](/start/api#options)
       options parsed from attributes.  See `[up-submit]` for a list of supported attributes.
 
       Common options are documented below, but most [options for `up.submit()`](/up.submit#parameters) may be used.

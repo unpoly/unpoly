@@ -74,13 +74,13 @@ RedirectPermanent /focus-outline /focus-visibility
 RedirectPermanent /preloading-links /preloading
 RedirectPermanent /preloading-content /preloading
 
-RedirectPermanent /attributes /attributes-and-options
-RedirectPermanent /attrs /attributes-and-options
-RedirectPermanent /options /attributes-and-options
-RedirectPermanent /opts /attributes-and-options
-RedirectPermanent /configuration /attributes-and-options
-RedirectPermanent /config /attributes-and-options
-RedirectPermanent /attributes-options /attributes-and-options
+RedirectPermanent /attributes /start/api
+RedirectPermanent /attrs /start/api
+RedirectPermanent /options /start/api
+RedirectPermanent /opts /start/api
+RedirectPermanent /configuration /start/api
+RedirectPermanent /config /start/api
+RedirectPermanent /attributes-options /start/api
 
 RedirectPermanent /a-up-emit /up-emit
 
@@ -166,3 +166,4 @@ RedirectPermanent /install/server-bindings /server-bindings
 RedirectPermanent /install/bootstrap /install#bootstrap
 RedirectPermanent /install/legacy-browsers /install#browser-support
 RedirectPermanent /handling-everything /handling-all-links
+RedirectPermanent /attributes-and-options /start/api

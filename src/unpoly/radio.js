@@ -291,7 +291,7 @@ up.radio = (function() {
       Options for reloading the fragment.
 
       By default Unpoly will parse options from the fragment's attributes (see `[up-poll]`).
-      You may pass this additional `options` object to [supplement or override](/attributes-and-options#options) options parsed from the fragment's attributes.
+      You may pass this additional `options` object to [supplement or override](/start/api#options) options parsed from the fragment's attributes.
   @section Trigger
     @param {number} [options.interval]
       The reload interval in milliseconds.
