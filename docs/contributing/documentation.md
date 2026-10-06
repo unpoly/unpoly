@@ -798,12 +798,13 @@ table of contents — the sidebar already is one. Its jobs, roughly in reading o
 - Show a minimal working example of the most common case. A reader who reads only
   the overview can already do the basic thing.
 - Map the two to four most common needs — each a situation sentence with a taste
-  of code, linking its detail page. Leave the other pages unlisted.
+  of code, linking its detail page. A feature that will excite readers can take a
+  map section even when it is not a common need. The remaining pages get a one-line
+  mention under a closing "Also in this topic" section.
 - Name a boundary ("infinite scrolling is not here") only where readers will
   plausibly take a wrong turn. Most overviews need none.
 
-Order sections for comprehension (usually the example before the terminology), and
-stay between 400-800 words. Good exemplars are `src/unpoly/pages/loading-state.md` and the Overlays pilot
+Order sections for comprehension, and stay between 400-800 words. Good exemplars are `src/unpoly/pages/loading-state.md` and the Overlays pilot
 (`docs/rework-2026/pilots/overlays.md`, which becomes the real page during the rework).
 
 
