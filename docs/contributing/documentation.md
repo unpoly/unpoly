@@ -612,6 +612,8 @@ improve what doesn't. A few conventions hold everywhere:
   not categories ("application behavior").
 - Don't enumerate features in prose — any pick of three reads as arbitrary.
   Let code and lists carry enumerations.
+- Don't join two statements with an em-dash connective ("takes any JSON — and
+  compilers..."). Write two sentences.
 - In guides, show code early and often. A reader should rarely scroll a full screen
   without passing an example.
 - End on the last technical section. No closing summary.

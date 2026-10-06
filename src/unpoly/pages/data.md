@@ -4,6 +4,10 @@ Attaching data to elements
 Unpoly lets you attach structured data to an element, to be consumed
 by a [compiler](/enhancing-elements) or [event handler](/up.on).
 
+Use HTML5 `data-*` attributes for simple string values. When your data has
+structure, `[up-data]` takes any JSON. Compilers can also read any other
+attribute directly.
+
 
 ## Using data attributes for simple key/value pairs {#data-attributes}
 
