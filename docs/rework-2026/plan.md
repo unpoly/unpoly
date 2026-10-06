@@ -794,6 +794,25 @@ SITTING QUEUE (Henning rules during/after reading /links → /following-links �
 - [up-emit] example props aligned to the reference ({ id: 5 }) — neutral, revert if
   user_id read better.
 
+CALIBRATION VERDICTS ROUND 1 (Henning 2026-10-06, "Great result for our first round"):
+- STANDING CONTENT RULE (all future chapters): within each page, the most basic
+  knowledge comes first; the further down, the more edge-case/technical — readers
+  decide when to stop scrolling. Concrete fix: navigation-bars moves "Styling current
+  links" BEFORE "Matching the current location" (writer).
+- TOC (dispatched): the rail TOC gets a block modifier with font +2px on items AND
+  caption (uses the rail's space, matches the left menu size); the in-content TOC
+  keeps its size. SCROLL SPY in the rail: highlight the currently visible section.
+- SIDEBAR MENU un-compression (dispatched; enabled by the API/Learn split): node
+  labels WRAP into multiple lines (no truncation — "Clicking non-interactive elements"
+  truncates at many widths), icon center-aligned with the FIRST label line, reduced
+  line-height inside a multi-line label without reducing between-item spacing; a
+  separator between depth-1 nodes only and only between two items (margin-bottom 5px,
+  padding-bottom 5px, border-bottom 1px dotted ~#d4d4d4 snapped to the nearest token).
+- OPEN DISCUSSIONS (no build until settled): overview-map strategy (importance
+  threshold vs one-section-per-page); overview identity + uniform "Read more" buttons;
+  sidebar "Overview" first child per chapter (deployed-site pattern) + the /links
+  no-current-state gap.
+
 Original dispatch spec:
 
 Gated by a1 (Henning checks time + Fable quota) and e1 (quality reset shipped incl.
