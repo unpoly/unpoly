@@ -2,8 +2,9 @@ Migrating legacy JavaScripts
 ============================
 
 Legacy code often contains JavaScripts that expect a full page load whenever the
-user interacts with the page. When you configure Unpoly to handle all interaction,
-there will not be additional page loads as the user clicks a link or submits a form.
+user interacts with the page. When you configure Unpoly to handle [all links](/handling-all-links)
+and [forms](/handling-all-forms), there will be no additional page loads as the user
+clicks a link or submits a form.
 
 This may cause some of the following issues:
 
@@ -74,10 +75,10 @@ You may sometimes have a script that enhances the HTML on the current screen:
 ```
 
 To migrate this script, think of an attribute or class that should activate the behavior,
-and add it to the relevant element:  
+and add it to the relevant element:
 
 ```html
-<form action="/orders/new" track-view"> <!-- mark: track-view -->
+<form action="/orders/new" track-view> <!-- mark: track-view -->
    ...
 </form>
 ```
@@ -90,8 +91,7 @@ Any parameters can be [attached to the element](/data):
 </form>
 ```
 
-You can now react to an element in a compiler:
-
+You can now react to the element in a compiler:
 
 ```js
 up.compiler('[track-view]', function(element, data) { // mark: [track-view]
@@ -115,8 +115,7 @@ If you include your global scripts at the end of your `<body>`, swapping the `<b
 </html>
 ```
 
-A better solution is so move the `<script>` to head and [give it an `[defer]` attribute](https://makandracards.com/makandra/504104-you-should-probably-load-your-javascript-with-script-defer
-):
+A better solution is to move the `<script>` into the `<head>` and [give it a `[defer]` attribute](https://makandracards.com/makandra/504104-you-should-probably-load-your-javascript-with-script-defer):
 
 ```html
 <html>
