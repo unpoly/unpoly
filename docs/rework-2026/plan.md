@@ -808,6 +808,19 @@ CALIBRATION WALK VERDICTS (Henning 2026-10-06, slow-down in progress):
   conversion action and must not drown.
 - PRINCIPLE (Henning): one-off elements (like the aside) are EMBEDDED HTML in the
   Markdown — no new Markdown syntax extensions for occasional constructs.
+- (5A) /faux-interactive-elements KEEPS its title "Clicking non-interactive elements"
+  (the gerund is house style; the slug/title mismatch is contributor-side only — if it
+  ever grates, rename the SLUG with a redirect, not the reader-visible title).
+- (6A) navigation-bars keeps containers BEFORE styling — Henning: "you cannot style a
+  link before you named containers, because nothing will be .up-current".
+- (6-APPENDIX, standing rule rider): sections should also not depend on things only
+  explained in later sections; this will sometimes clash with the basic->advanced
+  gradient, and balancing the two is the technical writer's job.
+- (7A) The "Updating .up-current classes" H3 (render-pass mechanics) moves OUT of
+  navigation-bars' first section to a standalone H2 near the bottom.
+- STANDING PERMISSION (Henning 2026-10-06): the content writer may re-organize and
+  un-nest sections on its own when it helps the basic->advanced gradient or the
+  dependency order (anchors/referrers checked; moves reported).
 - (4X) MODULE learn-ref GUIDANCE (Henning's wording, 2026-10-06): don't duplicate
   topic chapter lists on module pages. Modules are EXEMPT from max learn-ref counts
   but should work to keep the list low; linking the overview of a highly relevant
