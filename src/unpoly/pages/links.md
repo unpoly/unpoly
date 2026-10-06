@@ -105,11 +105,11 @@ Unpoly can make any element follow a URL, with keyboard support and other access
 See [[faux-interactive-elements]].
 
 
-Related topics
---------------
-
-A link can also open its destination [in an overlay](/overlays) instead of updating the current layer.\
-To load a fragment without any click at all, use a [lazy-loading placeholder](/lazy-loading).
+<div class="aside">
+<h2>Related chapters</h2>
+<p>Opening a link's destination in a dialog or drawer is covered by the <a href="/overlays">Overlays</a> chapter.</p>
+<p>To load fragments without any click, see <a href="/lazy-loading">Lazy loading</a> in the <a href="/live-fragments">Live fragments</a> chapter.</p>
+</div>
 
 
 @page links
