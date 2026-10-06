@@ -794,6 +794,24 @@ SITTING QUEUE (Henning rules during/after reading /links → /following-links �
 - [up-emit] example props aligned to the reference ({ id: 5 }) — neutral, revert if
   user_id read better.
 
+QUALITY-RESET STATION: CLOSED (Henning 2026-10-06). Final tweak folded in on close:
+guide flank max-width 400px -> 380px. REGIME CHANGE (Henning): further visual tweaks
+arrive informally while he uses the guide — "we'll just tweak it in time then, with
+no new formal station"; they run as ordinary dispatch->review->push rounds.
+INCIDENT LOG (2026-10-06): a builder probe ran `git stash` on a clean unpoly-site tree
+and its pop surfaced Henning's PRE-EXISTING stash (stash@{0} "WIP on master: 7f88a92
+Analytics"). The stash entry SURVIVED (conflicted pops keep it); tracked files were
+restored; the three untracked leftovers (source/.htaccess, _browser.erb, vendored
+jquery) were removed by the orchestrator. Builders no longer use stash for comparisons.
+KNOWN FLAKE needing its own look: drawer_spec "opens Learn to every chapter" failed
+under load twice (passes alone); suspicion: toggle click lands on the label link
+mid-animation and navigates. Queued to the frame builder's next round.
+
+CONTENT CALIBRATION BATCH 2: SCRIPTING — GO given (Henning 2026-10-06, time+quota
+checked). Pages: scripting (overview; links.md is THE template), enhancing-elements,
+data, templates, islands, legacy-scripts, script-security. No dissolving pages, so no
+relocation pre-pass. Fresh Fable writer per a1; all walk doctrines apply.
+
 OVERVIEW-REDESIGN BATCH (dispatched 2026-10-06 on Henning's "Start working on all
 aligned decisions"; built from the blessed design + walk doctrines):
 - Writer (unpoly, links.md as the template case): map restructure under the threshold
