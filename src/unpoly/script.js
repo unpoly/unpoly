@@ -356,6 +356,8 @@ up.script = (function() {
   /*-
   Registers a [compiler](/enhancing-elements) that is run before all other compilers.
 
+  @learn-ref enhancing-elements#macros
+
   A macro lets you set attributes that will be compiled afterward.
 
   If you want default attributes for *every* link and form, consider customizing your
@@ -497,6 +499,8 @@ up.script = (function() {
   Registers a function to be called when the given element
   is destroyed.
 
+  @learn-ref enhancing-elements#destructor
+
   Elements are destroyed when they are swapped during a render pass, when their [layer](/up.layer)
   closes, or when `up.destroy()` is called on the element or its container.
 
@@ -569,6 +573,8 @@ up.script = (function() {
   /*-
   Manually compiles a page fragment that has been inserted into the DOM
   by external code.
+
+  @learn-ref enhancing-elements#hello
 
   All registered [compilers](/enhancing-elements) and [macros](/up.macro) will be called
   with matches in the given `element`.
