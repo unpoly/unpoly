@@ -852,9 +852,17 @@ while Henning is away; his review on return, after Scripting pages 5-7):
   was the alternative). /tutorial already pointed at /start/overview (stale handoff
   note corrected, 99b6e4a8e). Writer dispatched (7 stubs + install + start/api rewrite
   + the handling-all-links duplication rider).
-- OPEN SITE-SIDE TASK (to the frame builder after its spot-check): make the
-  fragment_updates diagram partial embeddable from a markdown page — start/overview
-  carries a TODO(diagram) placeholder until then (C4 reserved the diagram for it).
+- SHIPPED 2026-10-06: full chapter written + critic-passed (accurate, no blockers —
+  defaults section and the three-layer ladder source-verified) + fix round + PUSHED
+  (unpoly 72b223a74..be5319dc4). Diagram EMBED mechanism shipped (unpoly-site a75e276d,
+  specs 6/0): markdown pages splice registered partials via
+  <div embed="fragment-updates-diagram"></div>; guard spec keeps TODO placeholders from
+  shipping; the overview renders the request-flow SVG in the column.
+- SITTING QUEUE (Getting started): "Your first thirty minutes" heading (borderline
+  meta); the overview closer's flavor; start/links teaches two moves (critic + orches-
+  trator lean keep); should the CDN snippet show a file size (install); 422 naming
+  "Unprocessable Content" vs "Entity" (global sweep item); teaser read-more labels read
+  bare ("Read more: Links"); /config aliases → /start/api (orchestrator call, veto-able).
 
 STYLING ROUND SHIPPED (2026-10-06, unpoly-site 299b2c91..5df84efc pushed, spot-check
 "holds", suite 414/0): aside deleted; icons 1px lower; $title-gap 40 over titles with
