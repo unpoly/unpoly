@@ -95,15 +95,6 @@ To convert existing `DOMContentLoaded` scripts to compilers, see [[legacy-script
 
 To control how scripts and callbacks run under a Content Security Policy, see [[script-security]].
 
-
-<div class="aside">
-<h2>Related chapters</h2>
-<p>To run code at specific points of a render pass, like after new content was inserted, see <a href="/render-lifecycle">Render lifecycle</a> in the <a href="/advanced-rendering">Advanced rendering</a> chapter.</p>
-<p>Reacting to user input, like watching fields or validating while typing, is covered by the <a href="/forms">Forms</a> chapter.</p>
-<p>To load or refresh fragments without writing JavaScript, see the <a href="/live-fragments">Live fragments</a> chapter.</p>
-</div>
-
-
 @page scripting
 @menu-title Overview
 @signature

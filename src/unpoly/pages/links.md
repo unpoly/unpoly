@@ -99,14 +99,6 @@ Also in this topic
 
 To make a `<span>` or a table row act like a hyperlink, see [[faux-interactive-elements]].
 
-
-<div class="aside">
-<h2>Related chapters</h2>
-<p>Opening a link's destination in a dialog or drawer is covered by the <a href="/overlays">Overlays</a> chapter.</p>
-<p>To load fragments without any click, see <a href="/lazy-loading">Lazy loading</a> in the <a href="/live-fragments">Live fragments</a> chapter.</p>
-</div>
-
-
 @page links
 @menu-title Overview
 @signature
