@@ -808,10 +808,16 @@ CALIBRATION VERDICTS ROUND 1 (Henning 2026-10-06, "Great result for our first ro
   line-height inside a multi-line label without reducing between-item spacing; a
   separator between depth-1 nodes only and only between two items (margin-bottom 5px,
   padding-bottom 5px, border-bottom 1px dotted ~#d4d4d4 snapped to the nearest token).
-- OPEN DISCUSSIONS (no build until settled): overview-map strategy (importance
-  threshold vs one-section-per-page); overview identity + uniform "Read more" buttons;
-  sidebar "Overview" first child per chapter (deployed-site pattern) + the /links
-  no-current-state gap.
+- BLESSED (Henning 2026-10-06, "We are aligned there"): (a) overview maps use an
+  importance threshold, not one-section-per-page; below-threshold pages shrink to a
+  line UNDER AN "Also in this topic" (or similar) SECTION on the overview itself —
+  REMINDER Henning issued: the generated children index shows ONLY on mobile (it
+  replaces the sidebar), so the overview must carry the long tail on desktop too.
+  (b) Uniform, visually distinct "Read more: <page>" element closes every map section
+  (template-enforced convention). (c) Every chapter gets an explicit "Overview" first
+  child in the sidebar (deployed-site pattern; fixes the /links no-current gap;
+  @menu-title Overview stays). Settled one-liners: overview word count = guidance not
+  gate; @menu-title keep. Build+content batch to be specced after the walk.
 
 Original dispatch spec:
 
