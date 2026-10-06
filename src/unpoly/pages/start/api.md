@@ -1,7 +1,7 @@
 The shape of the API
 ====================
 
-All of Unpoly's features share one shape: the common case is an HTML attribute,
+Most of Unpoly's features share one shape: the common case is an HTML attribute,
 the same feature is also available as a JavaScript function, and its defaults
 can be changed through a global configuration. Learn the pattern once, and every
 feature in the reference will look familiar.
@@ -50,11 +50,11 @@ page's [main element](/main) instead of replacing the full page:
 ### Modifying attributes {#attributes}
 
 Most Unpoly attributes have *modifying attributes* to fine-tune their behavior.
-For example, the `[up-transition]` attribute causes an `[up-follow]` to swap
-using an [animated transition](/up.motion):
+For example, the `[up-confirm]` attribute makes an `[up-follow]` link show
+a confirmation dialog before it is followed:
 
 ```html
-<a href="/path" up-follow up-transition="cross-fade">Click me</a> <!-- mark: up-transition="cross-fade" -->
+<a href="/users/5/delete" up-follow up-confirm="Really delete this user?">Delete user</a> <!-- mark: up-confirm -->
 ```
 
 Modifying attributes are documented with the main attribute they're modifying.
@@ -128,14 +128,17 @@ up.follow(link, { metaTags: true })
 ```
 
 
+<a id="defaults"></a>
+
 Changing defaults globally {#config}
 --------------------------
 
 Most modules have an `up.*.config` property that adjusts their behavior
-for your entire application:
+for your entire application. For example, this makes every new overlay
+open as a drawer instead of a modal dialog:
 
 ```js
-up.fragment.config.navigateOptions.transition = 'cross-fade'
+up.layer.config.mode = 'drawer'
 ```
 
 A configured value becomes the new default. Elements and function calls
@@ -143,7 +146,7 @@ can still override it with their own attributes and options.
 
 Many config properties hold a list of CSS selectors, letting you apply
 a behavior to all matching elements. For example, you can tell Unpoly to
-[handle every link on the page](/handling-all-links#defaults) without
+[handle every link on the page](/handling-all-links#following-all-links) without
 any `[up-follow]` attributes.
 
 

@@ -2,7 +2,7 @@ How Unpoly works
 ================
 
 Unpoly lets your links and forms update fragments of the current page,
-instead of loading full new documents. Screens respond instantly and keep their state.
+instead of loading full new documents. Screens update without a full page load and keep their state.
 Your app stays on the server, rendering HTML with any language and any framework.
 
 
@@ -22,7 +22,7 @@ Unpoly extracts the `.messages` fragment from the response and swaps it into the
 The rest of the page is left untouched: scroll positions, focus, unsaved form fields
 and running scripts all survive the update.
 
-<!-- TODO(diagram): embed the fragment_updates partial here -->
+<div embed="fragment-updates-diagram"></div>
 
 Because the server renders full pages, each screen remains a page of its own.
 When the user opens the link in a new tab, or when JavaScript is unavailable,
@@ -49,9 +49,9 @@ When a link or form updates the main content of the page, Unpoly treats the inte
 as a [navigation](/navigation) and mimics what a full page load would have done:
 
 - The browser URL and history are updated, so the Back button keeps working.
-- The new content is scrolled into view.
+- The page scrolls to the top, as after a full page load.
 - Focus moves to the new fragment, so keyboard and screen reader users don't get lost.
-- Responses are [cached](/caching) and revalidated, so revisits render instantly.
+- Responses to links are [cached](/caching) and revalidated, so revisits render instantly.
 
 Each of these defaults can be changed, per element or globally.
 
