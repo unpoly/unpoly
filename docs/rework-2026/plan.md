@@ -807,7 +807,24 @@ KNOWN FLAKE needing its own look: drawer_spec "opens Learn to every chapter" fai
 under load twice (passes alone); suspicion: toggle click lands on the label link
 mid-animation and navigates. Queued to the frame builder's next round.
 
-CONTENT CALIBRATION BATCH 2: SCRIPTING — GO given (Henning 2026-10-06, time+quota
+CONTENT CALIBRATION BATCH 2: SCRIPTING — WRITTEN + CRITIC-PASSED + PUSHED 2026-10-06;
+AWAITING HENNING'S SITTING. 8 commits bfb75cad9..e2add178b: overview NEW (links.md
+template; map = enhancing-elements lead, data, islands; tail = templates [writer's
+flagged threshold call], legacy-scripts, script-security), islands NEW (React/Vue
+mount/unmount via compiler+destructor, props from up-data, up-keep + same-data note,
+island-owns-its-subtree boundary), core compiler guide reworked (+#macros/#hello
+sections, reorg under standing permission), data/templates/legacy polish, nonce
+ACCURACY FIX (meta carries the BARE nonce — critic-confirmed by independent trace; the
+old prefixed examples were wrong). 6 writer example-bugfixes all critic-verified; 3 new
+learn-refs (up.macro/up.destructor/up.hello). Critic fix round applied (islands
+[up-follow]-in-JSX false claim removed — following is event-delegated and works inside
+islands; only compiler-dependent attributes are inert).
+SITTING QUEUE (Scripting): ratify overview naming "compilers" one sentence before its
+example; islands @signature?; 3-paragraph Related-chapters aside too heavy?; templates
+below the map threshold. Reference nit parked for some sweep: up.template.clone @return
+"pass this link" → "list" (fragment.js ~3047).
+
+(Original go record:) GO given (Henning 2026-10-06, time+quota
 checked). Pages: scripting (overview; links.md is THE template), enhancing-elements,
 data, templates, islands, legacy-scripts, script-security. No dissolving pages, so no
 relocation pre-pass. Fresh Fable writer per a1; all walk doctrines apply.
