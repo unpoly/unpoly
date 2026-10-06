@@ -829,6 +829,21 @@ checked). Pages: scripting (overview; links.md is THE template), enhancing-eleme
 data, templates, islands, legacy-scripts, script-security. No dissolving pages, so no
 relocation pre-pass. Fresh Fable writer per a1; all walk doctrines apply.
 
+RELATED-CHAPTERS REMOVED EVERYWHERE (Henning 2026-10-06, supersedes 3X and the aside
+design): he tried the bleed fix and others — the block "always keeps blocking the
+conversion action (Next page). The overview should get the reader excited for THIS
+chapter, then have them click next page." Asides removed from links.md + scripting.md
+(ae4fa1b58); the .aside CSS block and its spec die in the site (dead code; git has it
+if ever needed). Cross-chapter boundaries, if one is ever truly needed, go inline in a
+map section as prose — no closing block. TOC/id question moot.
+STYLING ROUND (Henning 2026-10-06, dispatched): (a) menu +/- icons sit 1px too high
+everywhere; (b) title-to-header margin too small — the title is closer to the blue bar
+than to its own content (hierarchy violation): increase the top gap for the title AND
+the left menu AND the rail (shared top line), and CHECK whether the horizontal screen-
+edge padding of bar content / menu / rail should grow to match; (c) ARCHITECTURE: the
+header defines frame width via .viewport while the torso carries the same rule inline —
+unify (lean: a Sass mixin used by both BEM elements, .viewport retired).
+
 OVERVIEW-REDESIGN + TWEAK ROUND SHIPPED (2026-10-06, unpoly-site 01be22cb..d2ffbf18
 pushed; spot-check "holds"): flanks capped 380 (99.9% of API titles fit); Overview
 child row per chapter (server-rendered, kept-menu safe; drawer intentionally stops at
