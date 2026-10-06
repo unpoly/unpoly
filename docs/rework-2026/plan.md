@@ -829,6 +829,24 @@ checked). Pages: scripting (overview; links.md is THE template), enhancing-eleme
 data, templates, islands, legacy-scripts, script-security. No dissolving pages, so no
 relocation pre-pass. Fresh Fable writer per a1; all walk doctrines apply.
 
+GETTING STARTED BATCH (mass-production batch 1, authorized 2026-10-06: "Can you
+already prepare the next topic so it is ready when I'm back?" — full pipeline runs
+while Henning is away; his review on return, after Scripting pages 5-7):
+- Relocation pre-pass (Opus): dissolve attributes-and-options VERBATIM into start/api
+  ("The shape of the API" absorbs it; the config-defaults section moves to
+  handling-all-links per trim g), delete page + toc entry, redirect, retarget
+  referrers. Also RESOLVE the /tutorial redirect: the planned /how-unpoly-works page
+  does not exist — start/overview carries the "How Unpoly works" title; verify where
+  /tutorial points today and fix it to the real slug (report).
+- Writer (fresh Fable): write the 7 stubs (start/overview = the chapter overview AND
+  the how-Unpoly-works narrative with the fragment-updates diagram partial reserved
+  for it per C4; start/links, start/forms, start/overlays, start/elements, start/api
+  absorbing the layered-API idea, start/next) + rewrite install (fix the inherited
+  conversion typos; the gzip-column and %UNPOLY_VERSION% questions from handoff.md are
+  REPORT-ONLY). All calibration doctrines apply; links.md + scripting.md are the
+  overview templates; reading order drives the next-page widget, so order = content.
+- Critic pass, fix round, push — ready for Henning's sitting on return.
+
 SITTING p.3+4 (Henning 2026-10-06): /data approved with restructure (H3 "All JSON
 values can be data" + sibling "Merging data attributes", c63060d8d) and a two-sentence
 mechanism chooser in the intro (7d7c537d2). NEW STYLE RULE from his wording fix: no
