@@ -32,7 +32,30 @@ up.compiler('.current-time', function(element) {
 The compiler function is called once for each matching element, when
 the page first loads and when a matching fragment is rendered later.
 
-### Integrating JavaScript libraries {#integrating-libraries}
+### Avoid `DOMContentLoaded` {#no-load-event}
+
+Without Unpoly, the `.current-time` enhancement might have been implemented
+by listening to a `DOMContentLoaded` (or `load`) event:
+
+```js
+document.addEventListener('DOMContentLoaded', function() {
+  for (let element of document.querySelectorAll('.current-time')) {
+    let now = new Date()
+    element.textContent = now.toString()
+  }
+})
+```
+
+A big drawback of this strategy is that elements are only matched once,
+during the initial page load. Since Unpoly updates fragments without
+a new page load, elements that enter the page later are never enhanced.
+Compilers close this gap: they run for the initial page and for every new fragment.
+
+When adding Unpoly to an existing application, we recommend to
+[convert your `DOMContentLoaded` listeners to compilers](/legacy-scripts#migrate-to-compiler).
+
+
+## Integrating JavaScript libraries {#integrating-libraries}
 
 `up.compiler()` is a great way to integrate external JavaScript libraries, like
 maps, date pickers or charts.
@@ -55,28 +78,6 @@ up.compiler('a.lightbox', function(element) {
 ```
 
 To mount components from a frontend framework like React or Vue, see [[islands]].
-
-### Avoid `DOMContentLoaded` {#no-load-event}
-
-Without Unpoly, the `.current-time` enhancement might have been implemented
-by listening to a `DOMContentLoaded` (or `load`) event:
-
-```js
-document.addEventListener('DOMContentLoaded', function() {
-  for (let element of document.querySelectorAll('.current-time')) {
-    let now = new Date()
-    element.textContent = now.toString()
-  }
-})
-```
-
-A big drawback of this strategy is that elements are only matched once,
-during the initial page load. Since Unpoly updates fragments without
-a new page load, elements that enter the page later are never enhanced.
-Compilers close this gap: they run for the initial page and for every new fragment.
-
-When adding Unpoly to an existing application, we recommend to
-[convert your `DOMContentLoaded` listeners to compilers](/legacy-scripts#migrate-to-compiler).
 
 
 ## Passing data to a compiler {#data}
