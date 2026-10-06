@@ -66,6 +66,29 @@ up.compiler('.user', function(element, data) { // mark: data
 <p class="read-more"><a href="/data">Read more: Attaching data to elements</a></p>
 
 
+Rendering templates
+-------------------
+
+The server can embed `<template>` elements into its responses, for the frontend
+to clone without another request. This enables instant UI like [placeholders](/placeholders)
+or [optimistic rendering](/optimistic-rendering):
+
+```html
+<a up-fragment="#tip-template">Show tip</a> <!-- mark: up-fragment -->
+
+<div class="tip">Click for a tip.</div>
+
+<template id="tip-template"> <!-- mark: id="tip-template" -->
+  <div class="tip">Press <kbd>?</kbd> to see all shortcuts.</div>
+</template>
+```
+
+Clicking the link clones the template and swaps it into the matching `.tip` element,
+entirely on the client. Templates can also take [variables](/templates#dynamic).
+
+<p class="read-more"><a href="/templates">Read more: Templates</a></p>
+
+
 Mounting framework components
 -----------------------------
 
@@ -88,8 +111,6 @@ and unmounts when the fragment around it is swapped.
 
 Also in this topic
 ------------------
-
-To clone HTML from `<template>` elements without a server request, see [[templates]].
 
 To convert existing `DOMContentLoaded` scripts to compilers, see [[legacy-scripts]].
 
