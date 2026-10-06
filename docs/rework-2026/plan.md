@@ -875,6 +875,22 @@ leading-"up." glue (0 lone brackets / bare-up lines at all widths). FOR HENNING,
 open from this round: variable-font option (c) decision; spy-marker reservation gap
 (a/b/c, builder leans faux-bold stroke); $frame-edge width trade-off.
 
+STYLING ONE-LINERS SETTLED (Henning 2026-10-06/07, slow-down; all dispatched to the
+frame builder's running round alongside the Edit-page outline button with responsive
+label "Edit page" -> "Edit" -> hidden on very narrow screens):
+- (1A) VARIABLE ROBOTO per option (c): variable upright file (wght 100-900) + static
+  italic-400; retired static cuts deleted (~-23KB vendored, 500 free forever).
+- (2X) INSET ARCHITECTURE CORRECTION: insets 25px shrinking to 20px on very narrow
+  screens, and they live in the =frame MIXIN (the element that caps+centers), NOT as
+  flank padding — Henning caught the regression: with flank-borne insets, flankless
+  widths fell back to the column's 20px padding and the text edge misaligned with the
+  logo. Column loses its own horizontal padding (doubles up); the flank<->column buffer
+  becomes margin-right/left ON THE FLANKS so it vanishes with them. Width arithmetic
+  reworked; alignment spec text-edge == logo-edge at narrow AND 1280.
+- (3C) SPY MARKER: true bold, the width-reservation ghost machinery DELETED; the
+  current item may re-wrap when marked (accepted); other items must not move.
+- (4A) No bold/500-italic cuts until real bold-italic usage appears broken.
+
 SITTING p.3+4 (Henning 2026-10-06): /data approved with restructure (H3 "All JSON
 values can be data" + sibling "Merging data attributes", c63060d8d) and a two-sentence
 mechanism chooser in the intro (7d7c537d2). NEW STYLE RULE from his wording fix: no
