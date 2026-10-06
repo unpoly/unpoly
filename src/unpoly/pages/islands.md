@@ -1,8 +1,118 @@
 Framework islands
 =================
 
-This page is being written.
+Some widgets need heavy client-side interaction, like a rich text editor or an interactive chart.
+You can mount such components from a frontend framework like React or Vue as *islands*:
+self-contained, client-rendered widgets inside a server-rendered page.
 
-<!-- Content sources (see docs/rework-2026/plan.md): new page; React/Vue in compilers; from the RubyShift talk -->
+[Compilers](/enhancing-elements) give each island a managed lifecycle: the component mounts when
+its element enters the page, receives props from server data, and unmounts when Unpoly
+swaps the fragment around it. The rest of the page needs no framework code.
+
+
+Mounting an island {#mounting}
+------------------
+
+The server renders a placeholder element, with initial props serialized into an
+[`[up-data]`](/data) attribute:
+
+```html
+<div class="color-picker" up-data="{ value: '#a2d8ff' }"></div> <!-- mark: up-data -->
+```
+
+A compiler mounts a React component into every matching element.
+By returning a [destructor function](/enhancing-elements#destructor), it also unmounts
+the component when the surrounding fragment is swapped or its overlay closes:
+
+```js
+import { createRoot } from 'react-dom/client'
+import ColorPicker from './components/color-picker'
+
+up.compiler('.color-picker', function(element, data) {
+  let root = createRoot(element)
+  root.render(<ColorPicker value={data.value}/>) // mark: data.value
+  return () => root.unmount() // mark: return
+})
+```
+
+A Vue island works the same way:
+
+```js
+import { createApp } from 'vue'
+import ColorPicker from './components/ColorPicker.vue'
+
+up.compiler('.color-picker', function(element, data) {
+  let app = createApp(ColorPicker, data) // chip: data becomes props
+  app.mount(element)
+  return () => app.unmount() // mark: return
+})
+```
+
+Because islands mount through the regular compiler mechanism, they work on any screen:
+in the initial page, in updated fragments, or in [overlays](/up.layer).
+
+
+Reaching out of the island {#page-interaction}
+--------------------------
+
+A common pattern is an island that edits a form value. Give the island a hidden field
+to maintain, and the surrounding form submits like any other Unpoly form:
+
+```html
+<form method="post" action="/profile" up-submit>
+  <input type="hidden" name="theme-color" value="#a2d8ff"> <!-- mark: name="theme-color" -->
+  <div class="color-picker" up-data="{ field: 'theme-color' }"></div>
+  <button>Save</button>
+</form>
+```
+
+```js
+up.compiler('.color-picker', function(element, data) {
+  let field = element.closest('form').elements[data.field] // mark: data.field
+  let root = createRoot(element)
+  root.render(<ColorPicker value={field.value} onChange={(value) => field.value = value}/>)
+  return () => root.unmount()
+})
+```
+
+Component callbacks can also use Unpoly's JavaScript API directly.
+For example, a row in a client-rendered table could open details in an overlay:
+
+```js
+<tr onClick={() => up.layer.open({ url: `/orders/${order.id}` })}>
+```
+
+
+Keeping an island's state through updates {#keeping}
+-----------------------------------------
+
+When a fragment containing an island is updated, the destructor unmounts the old component,
+and the compiler mounts a new one with fresh props from the server HTML.
+Any client-side state inside the island is reset by this.
+
+To preserve an island while the fragment around it is updated, assign it an `[up-keep]` attribute:
+
+```html
+<div class="color-picker" up-data="{ value: '#a2d8ff' }" up-keep></div> <!-- mark: up-keep -->
+```
+
+When new content contains a matching element, the existing element remains attached in its
+current position, keeping the mounted component and all its state.
+See [[preserving-elements]] for how elements are matched, and for ways to control what is kept.
+
+
+An island owns its subtree {#boundaries}
+--------------------------
+
+Unpoly and the framework each manage their own side of the island's root element:
+
+- Elements rendered by the framework are not [compiled](/enhancing-elements).
+  An `[up-follow]` link rendered from JSX stays a plain link.
+  To trigger Unpoly from inside the island, call functions like `up.follow()` or `up.layer.open()`
+  from component code, as shown [above](#page-interaction).
+- Conversely, don't [target](/targeting-fragments) elements inside an island.
+  The framework expects to own that DOM. Update an island through its props or state,
+  or re-render the entire island element.
+
 
 @page islands
