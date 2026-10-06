@@ -846,6 +846,15 @@ while Henning is away; his review on return, after Scripting pages 5-7):
   REPORT-ONLY). All calibration doctrines apply; links.md + scripting.md are the
   overview templates; reading order drives the next-page widget, so order = content.
 - Critic pass, fix round, push — ready for Henning's sitting on return.
+- PRE-PASS LANDED (06af3f055, pushed): dissolution verbatim, 8 redirects (7 old aliases
+  collapsed; /config + /configuration kept pointing at /start/api — orchestrator call,
+  the layered-API rewrite makes it the config explainer; /handling-all-links#defaults
+  was the alternative). /tutorial already pointed at /start/overview (stale handoff
+  note corrected, 99b6e4a8e). Writer dispatched (7 stubs + install + start/api rewrite
+  + the handling-all-links duplication rider).
+- OPEN SITE-SIDE TASK (to the frame builder after its spot-check): make the
+  fragment_updates diagram partial embeddable from a markdown page — start/overview
+  carries a TODO(diagram) placeholder until then (C4 reserved the diagram for it).
 
 SITTING p.3+4 (Henning 2026-10-06): /data approved with restructure (H3 "All JSON
 values can be data" + sibling "Merging data attributes", c63060d8d) and a two-sentence
