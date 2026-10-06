@@ -829,6 +829,14 @@ checked). Pages: scripting (overview; links.md is THE template), enhancing-eleme
 data, templates, islands, legacy-scripts, script-security. No dissolving pages, so no
 relocation pre-pass. Fresh Fable writer per a1; all walk doctrines apply.
 
+SITTING p.2 + LEARN-BUTTON (Henning 2026-10-06): enhancing-elements approved with one
+move ("Integrating JavaScript libraries" to its own H2 before "Passing data", 6713388d5
+pushed). LEARN-REF SLOT RESTYLE blessed: the stripe + hand icon die; one outline button
+per ref (same shared style as Next/read-more), label "Learn: <target page title>" —
+breadcrumb text compresses to the title, the href keeps its section anchor; two-ref
+features render two buttons side by side. One affordance family: Next / Read more /
+Learn.
+
 SITTING VERDICTS p.1 + MORE TWEAKS (Henning 2026-10-06): compilers-before-example
 RATIFIED and the guide's "(usually the example before the terminology)" parenthesis
 DELETED (never meant as a rule); OVERVIEW SPEC AMENDED (guide + plan): an exciting/cool
