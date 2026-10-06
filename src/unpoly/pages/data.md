@@ -67,7 +67,9 @@ up.compiler('.google-map', function(element, data) { // mark: data
 })
 ```
 
-Note how `[up-data]` lets us attach many value types, like arrays (`pins`), objects (`pin`) and numbers (`pin.lat`).
+### All JSON values can be data
+
+`[up-data]` lets us attach many value types, like arrays (`pins`), objects (`pin`) and numbers (`pin.lat`).
 
 The topmost expression is usually an object, but may be any JSON-serializable value:
 
@@ -80,6 +82,8 @@ up.compiler('.high-scores', function(element, data) {
   console.log(data) // result: [910, 720, 554]
 })
 ```
+
+### Merging data attributes
 
 If `[up-data]` is a JSON object, any HTML5 data attributes will be merged into the parsed value:
 
