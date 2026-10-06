@@ -29,7 +29,6 @@ loads, and again whenever a fragment update inserts a `.current-time` element.
 This replaces listening to `DOMContentLoaded`. Because Unpoly updates fragments,
 the browser keeps the same document through many navigations, and events that
 only fire at the initial page load would miss all content that arrives later.
-A compiler catches every matching element, no matter when it appears.
 
 <p class="read-more"><a href="/scripting">Read more: Scripting</a></p>
 

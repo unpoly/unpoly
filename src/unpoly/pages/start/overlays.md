@@ -30,9 +30,8 @@ One screen, two contexts
 or in a new tab, it renders as a full page. The same screen works embedded
 in an overlay and standing on its own, without knowing the difference.
 
-Overlays can do a lot more: they can close automatically when the user
-completes their task, pass a result value to the page behind them, or
-open as drawers and popups.
+Overlays can also close automatically when the user completes their task,
+passing a result value to the page behind them.
 
 <p class="read-more"><a href="/overlays">Read more: Overlays</a></p>
 

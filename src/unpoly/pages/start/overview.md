@@ -63,7 +63,7 @@ The rest of this chapter is hands-on. After [installing Unpoly](/install),
 you will make one basic move in each area:
 
 - [[start/links]]: Enhance a link to update a fragment.
-- [[start/forms]]: Submit a form in place, including failed validations.
+- [[start/forms]]: Submit a form in place and show validation errors.
 - [[start/overlays]]: Open an existing screen in a modal overlay.
 - [[start/elements]]: Pair your own JavaScript with HTML elements.
 
