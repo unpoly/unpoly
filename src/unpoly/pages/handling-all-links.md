@@ -61,15 +61,6 @@ Some links will not be preloaded under this setting:
 - Any additional exceptions configured in `up.link.config.noPreloadSelectors`.
 
 
-## Fixing legacy JavaScript code
-
-Legacy code often contains JavaScript that expects a full page load whenever the
-user interacts with the page. When Unpoly handles all links, clicking no longer
-causes these additional page loads.
-
-See [[legacy-scripts]] for making such code work with Unpoly.
-
-
 ## Customizing navigation defaults
 
 [Following a link](/up-follow) or [submitting a form](/submitting-forms) is considered
@@ -80,6 +71,15 @@ scrolling, history, focus, request cancellation, etc.
 
 See [[navigation]] for a detailed breakdown of navigation defaults
 and how to customize them.
+
+
+## Fixing legacy JavaScript code
+
+Legacy code often contains JavaScript that expects a full page load whenever the
+user interacts with the page. When Unpoly handles all links, clicking no longer
+causes these additional page loads.
+
+See [[legacy-scripts]] for making such code work with Unpoly.
 
 
 @page handling-all-links
