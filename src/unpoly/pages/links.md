@@ -39,7 +39,7 @@ its counterpart from the response.
 The link stays a standard hyperlink. When the user opens it in a new tab,
 or when JavaScript is unavailable, the browser makes a regular full page load.
 
-See [[following-links]].
+<p class="read-more"><a href="/following-links">Read more: Following links</a></p>
 
 
 Following is navigation
@@ -60,7 +60,7 @@ Instead of annotating every link, you can configure Unpoly to follow all links o
 up.link.config.followSelectors.push('a[href]')
 ```
 
-See [[handling-all-links]].
+<p class="read-more"><a href="/handling-all-links">Read more: Handling all links</a></p>
 
 
 Preloading links
@@ -73,7 +73,8 @@ A link can request its destination before the user clicks, making the interactio
 ```
 
 Hovering over the link already loads the response into the [cache](/caching).
-See [[preloading]].
+
+<p class="read-more"><a href="/preloading">Read more: Preloading links</a></p>
 
 
 Highlighting the current location
@@ -89,20 +90,14 @@ Links in a navigation bar are marked with an `.up-current` class when they point
 ```
 
 Style that class with your CSS to highlight the active menu section.
-See [[navigation-bars]].
+
+<p class="read-more"><a href="/navigation-bars">Read more: Navigation bars</a></p>
 
 
-Making other elements act like links
-------------------------------------
+Also in this topic
+------------------
 
-Sometimes you cannot use an `<a>` element, like for a clickable table row.
-Unpoly can make any element follow a URL, with keyboard support and other accessibility behaviors:
-
-```html
-<span up-follow up-href="/details">Read more</span> <!-- mark: up-href -->
-```
-
-See [[faux-interactive-elements]].
+To make a `<span>` or a table row act like a hyperlink, see [[faux-interactive-elements]].
 
 
 <div class="aside">
