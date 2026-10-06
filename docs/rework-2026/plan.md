@@ -856,6 +856,17 @@ while Henning is away; his review on return, after Scripting pages 5-7):
   fragment_updates diagram partial embeddable from a markdown page — start/overview
   carries a TODO(diagram) placeholder until then (C4 reserved the diagram for it).
 
+STYLING ROUND SHIPPED (2026-10-06, unpoly-site 299b2c91..5df84efc pushed, spot-check
+"holds", suite 414/0): aside deleted; icons 1px lower; $title-gap 40 over titles with
+menu/rail on the same line; $frame-edge 25 everywhere (trade-off: flank labels lose 9px,
+199 vs 150 API labels wrap at 1280 — Henning's preview call, one-line revert); .viewport
+RETIRED (=frame mixin on .guide--bar + .guide--torso); real italic-400 Roboto (+23.7KB;
+NOTE: bold/500 italic still faux — add cuts only if Henning wants); +outline-button
+mixin shared by Next / read-more / Learn-ref buttons (title-only labels, anchors kept);
+leading-"up." glue (0 lone brackets / bare-up lines at all widths). FOR HENNING, still
+open from this round: variable-font option (c) decision; spy-marker reservation gap
+(a/b/c, builder leans faux-bold stroke); $frame-edge width trade-off.
+
 SITTING p.3+4 (Henning 2026-10-06): /data approved with restructure (H3 "All JSON
 values can be data" + sibling "Merging data attributes", c63060d8d) and a two-sentence
 mechanism chooser in the intro (7d7c537d2). NEW STYLE RULE from his wording fix: no
