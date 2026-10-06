@@ -829,6 +829,19 @@ checked). Pages: scripting (overview; links.md is THE template), enhancing-eleme
 data, templates, islands, legacy-scripts, script-security. No dissolving pages, so no
 relocation pre-pass. Fresh Fable writer per a1; all walk doctrines apply.
 
+OVERVIEW-REDESIGN + TWEAK ROUND SHIPPED (2026-10-06, unpoly-site 01be22cb..d2ffbf18
+pushed; spot-check "holds"): flanks capped 380 (99.9% of API titles fit); Overview
+child row per chapter (server-rendered, kept-menu safe; drawer intentionally stops at
+chapters; generated-index chapters get none; unpoly 7c7d59afd labels all 11); read-more
+style (indigo + chevron, quieter than Next); lone-bracket fix (signature-glue span +
+<wbr> before #, spec un-blinded first; /api/menu +16% = 375KB gzip-friendly, shorter
+class name available if wanted); drawer flake CONFIRMED TEST-ONLY (mid-slide WebDriver
+click on stale coordinates; settle helper added, product untouched); Henning's own
+dfc66357 (separators $gray-400) folded in. Suite 411/0.
+FOR HENNING'S INFORMAL LOOK: /links page tail (mockup realized), Overview rows with
+current-state (note: chapter row + Overview child both carry the current CLASS, only
+Overview is filled), read-more weight, his own separator tweak in context.
+
 OVERVIEW-REDESIGN BATCH (dispatched 2026-10-06 on Henning's "Start working on all
 aligned decisions"; built from the blessed design + walk doctrines):
 - Writer (unpoly, links.md as the template case): map restructure under the threshold
