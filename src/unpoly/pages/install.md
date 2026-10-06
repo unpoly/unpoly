@@ -1,12 +1,11 @@
 Installation
 ============
 
-Unpoly consists of one JavaScript file and one CSS file
-that you can require in your `<head>`.
-It has no dependencies and doesn't require a build tool.
+Unpoly is one JavaScript file and one CSS file that you load in your `<head>`.
+It has no dependencies and needs no build step.
 
-Unpoly works with any server that can render HTML, or with static sites.
-You do not need additional software on your backend.
+Unpoly works with any server that renders HTML, and with static sites.
+Your backend needs no additional software.
 
 
 ## Initialization {#initialization}
@@ -24,7 +23,7 @@ Include Unpoly before your own JavaScripts and stylesheets:
   </head>
   <body>
     <!-- Use Unpoly attributes in your HTML -->
-    <a href="/page" up-follow>Follow me with Unpoly<a> <!-- mark: up-follow -->
+    <a href="/page" up-follow>Go to page</a> <!-- mark: up-follow -->
   </body>
 </html>
 ```
@@ -53,11 +52,11 @@ import './your-styles.css'
 
 ## JavaScript API {#javascript-api}
 
-Most of Unpoly's functionality is provided as new attributes
+Most of Unpoly's functionality is available as new attributes
 that you can add to any HTML element.
-Unpoly also provides a JavaScript API to extend Unpoly or [integrate your custom scripts](/up.script).
+There is also a JavaScript API to change defaults or [integrate your custom scripts](/up.script).
 
-Unpoly's JavaScript API can be accessed through the `window.up` global, without an explicit `import`:
+The JavaScript API is accessed through the `window.up` global, without an explicit `import`:
 
 ```js
 up.compiler('.click-to-hide', function(element) {
@@ -74,7 +73,7 @@ You now have everything you need to start using Unpoly!
 We provide a number of **optional** extensions:
 
 - [Optional server bindings](/server-bindings): Inspect or manipulate Unpoly's rendering through HTTP headers
-- [Legacy browsers support](#browser-support): Support for ancient browsers and build tools
+- [Legacy browser support](#browser-support): Builds for old browsers and build tools
 - [Bootstrap integration](#bootstrap): Configure Unpoly to use Bootstrap classes
 - [Upgrade shim](https://unpoly.com/changes/upgrading): Polyfills for deprecated Unpoly APIs
 
@@ -102,9 +101,9 @@ The last version with support for Internet Explorer 11 is [2.7](https://unpoly.c
 
 ### ES6 build {#es6-build}
 
-`unpoly.js` uses ES2020 that may not supported by (very) old browsers or build tools.
+`unpoly.js` uses ES2020 syntax that very old browsers or build tools may not support.
 If you're not already working around this with a transpiler like [Babel](https://babeljs.io/),
-you may also use the ES6 build of Unpoly:
+you can use the ES6 build of Unpoly:
 
 | Development | Production |
 |---|---|
