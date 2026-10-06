@@ -829,6 +829,13 @@ checked). Pages: scripting (overview; links.md is THE template), enhancing-eleme
 data, templates, islands, legacy-scripts, script-security. No dissolving pages, so no
 relocation pre-pass. Fresh Fable writer per a1; all walk doctrines apply.
 
+SITTING p.3+4 (Henning 2026-10-06): /data approved with restructure (H3 "All JSON
+values can be data" + sibling "Merging data attributes", c63060d8d) and a two-sentence
+mechanism chooser in the intro (7d7c537d2). NEW STYLE RULE from his wording fix: no
+em-dash connectives joining statements ("any JSON — and compilers...") — write two
+sentences; added to the guide's style bullets. /templates approved as-is; PARKED NIT:
+its h4 nesting scans poorly, no idea yet ("no idea for avoiding it").
+
 SITTING p.2 + LEARN-BUTTON (Henning 2026-10-06): enhancing-elements approved with one
 move ("Integrating JavaScript libraries" to its own H2 before "Passing data", 6713388d5
 pushed). LEARN-REF SLOT RESTYLE blessed: the stripe + hand icon die; one outline button
