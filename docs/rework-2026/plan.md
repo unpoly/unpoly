@@ -794,6 +794,21 @@ SITTING QUEUE (Henning rules during/after reading /links → /following-links �
 - [up-emit] example props aligned to the reference ({ id: 5 }) — neutral, revert if
   user_id read better.
 
+CALIBRATION WALK VERDICTS (Henning 2026-10-06, slow-down in progress):
+- (3X) The overview's closing block STAYS, retitled "Related chapters"; each sentence
+  names the chapter it leads to ("...is covered by the Overlays chapter"). Henning's
+  concern: readers must realize they are LEAVING the topic. Style-guide lines 607/617
+  read as targeting meta summaries, not cross-reference blocks.
+- (8) Rail scroll-spy marker: BOLD text only — the indigo block is "way too heavy for
+  a soft scroll position indicator". Guard against bold-reflow.
+- (9A/10A) PAGE TAIL hierarchy: Related chapters becomes a QUIET tinted aside
+  (code-block gray, full column, no border/icon); the reading nav loses its separator
+  line; "Next: <title> >" becomes an outlined BUTTON (Previous stays a quiet link,
+  per Henning's mockup); gap to the muted footer grows. Rationale: "Next page" is the
+  conversion action and must not drown.
+- PRINCIPLE (Henning): one-off elements (like the aside) are EMBEDDED HTML in the
+  Markdown — no new Markdown syntax extensions for occasional constructs.
+
 CALIBRATION VERDICTS ROUND 1 (Henning 2026-10-06, "Great result for our first round"):
 - STANDING CONTENT RULE (all future chapters): within each page, the most basic
   knowledge comes first; the further down, the more edge-case/technical — readers
