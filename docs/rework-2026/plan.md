@@ -829,6 +829,17 @@ checked). Pages: scripting (overview; links.md is THE template), enhancing-eleme
 data, templates, islands, legacy-scripts, script-security. No dissolving pages, so no
 relocation pre-pass. Fresh Fable writer per a1; all walk doctrines apply.
 
+SITTING VERDICTS p.1 + MORE TWEAKS (Henning 2026-10-06): compilers-before-example
+RATIFIED and the guide's "(usually the example before the terminology)" parenthesis
+DELETED (never meant as a rule); OVERVIEW SPEC AMENDED (guide + plan): an exciting/cool
+feature earns a map section even when edge-casey — /templates PROMOTED to a scripting.md
+map rung (writer dispatched); the guide's "leave other pages unlisted" updated to the
+"Also in this topic" reality (8a59abc08). READ-MORE RESTYLE (supersedes "quieter than
+Next"): extract the Next button's outline style into a shared mixin/block, apply to
+read-more links (builder). FONTS (builder, Opus): load a real italic-400 Roboto cut
+(italic currently faux-synthesized); RESEARCH ONLY: byte cost of Roboto as a variable
+font vs our static cuts — numbers to Henning.
+
 RELATED-CHAPTERS REMOVED EVERYWHERE (Henning 2026-10-06, supersedes 3X and the aside
 design): he tried the bleed fix and others — the block "always keeps blocking the
 conversion action (Next page). The overview should get the reader excited for THIS
