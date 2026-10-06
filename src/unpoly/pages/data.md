@@ -19,13 +19,13 @@ as a second argument:
 
 ```js
 up.compiler('.user', function(element, data) { // mark: data
-  console.log(data.age)  // result: 18
+  console.log(data.age)  // result: "18"
   console.log(data.name) // result: "Bob"
 })
 ```
 
 > [important]
-> Data attributes always have string values. In the example above `data.age` is a string.
+> Data attributes always have string values. In the example above `data.age` is the string `"18"`.
 
 Data attributes with multiple, dash-separated words in their name can be accessed with `camelCase` keys:
 
@@ -58,7 +58,7 @@ For a more powerful alternative you can set the `[up-data]` attribute to any
 The JSON will be parsed and passed to your compiler function as a second argument:
 
 ```js
-up.compiler('.google-map', function(element, pins) {
+up.compiler('.google-map', function(element, data) { // mark: data
   var map = new google.maps.Map(element)
   for (let pin of data.pins) {
     var position = new google.maps.LatLng(pin.lat, pin.lng)
@@ -67,18 +67,17 @@ up.compiler('.google-map', function(element, pins) {
 })
 ```
 
-Note how `[up-data]` allows us to a attach a multitude of value types, like arrays (`pins`), objects (`pin`) and numbers (`ping.lat`).
+Note how `[up-data]` lets us attach many value types, like arrays (`pins`), objects (`pin`) and numbers (`pin.lat`).
 
-The topmost expression may be any JSON-serializable value, like an object:
+The topmost expression is usually an object, but may be any JSON-serializable value:
 
 ```html
-<span class="user" up-data="{ name: 'Bob', age: 18 }">Bob</span>
+<ol class="high-scores" up-data="[910, 720, 554]">...</ol>
 ```
 
 ```js
-up.compiler('.user', function(element, data) {
-  console.log(data.name) // result: "Bob"
-  console.log(data.age)  // result: 18
+up.compiler('.high-scores', function(element, data) {
+  console.log(data) // result: [910, 720, 554]
 })
 ```
 
@@ -123,7 +122,7 @@ up.compiler('.user', function(element) {
 
 ## Using data in an event handler {#event-handlers}
 
-Any attached data will also be passed to event handler registered with `up.on()`.
+Any attached data will also be passed to event handlers registered with `up.on()`.
 
 For instance, this element has attached data in its `[up-data]` attribute:
 
@@ -167,7 +166,7 @@ The new fragment will compile with the given data, without requiring an `[up-dat
 
 ### Mapping selectors to data {#map}
 
-Use an [`[up-use-data-map]`](/up-follow#up-use-data) attribute or [`{ dataMap }`](/up.render#options.data) option to map selectors to data objects.
+Use an [`[up-use-data-map]`](/up-follow#up-use-data-map) attribute or [`{ dataMap }`](/up.render#options.dataMap) option to map selectors to data objects.
 When a selector matches any element within an updated fragment, the matching element is compiled with the mapped data:
 
 ```html
@@ -221,7 +220,7 @@ up.compiler('.element', function(element, data) {
 })
 ```
 
-As a shortcut may also pass [`{ keepData: true }`](/up.reload#options.keepData) when reloading.
+As a shortcut you may also pass [`{ keepData: true }`](/up.reload#options.keepData) when reloading.
 
 To keep an entire element, you may also use `[up-keep]`.
 The `up:fragment:keep` event lets you inspect the old and new element
