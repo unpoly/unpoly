@@ -794,7 +794,22 @@ SITTING QUEUE (Henning rules during/after reading /links → /following-links �
 - [up-emit] example props aligned to the reference ({ id: 5 }) — neutral, revert if
   user_id read better.
 
-CALIBRATION WALK VERDICTS (Henning 2026-10-06, slow-down in progress):
+OVERVIEW-REDESIGN BATCH (dispatched 2026-10-06 on Henning's "Start working on all
+aligned decisions"; built from the blessed design + walk doctrines):
+- Writer (unpoly, links.md as the template case): map restructure under the threshold
+  — faux-interactive-elements shrinks from a full map rung to one line under a new
+  "Also in this topic" H2 (carries the below-threshold tail on desktop, since the
+  children index is mobile-only); every remaining map section closes with a read-more
+  element as embedded HTML: <p class="read-more"><a href="...">Read more: <title></a></p>
+  (recurring documented pattern, not a new markdown construct); the Related-chapters
+  aside stays the page close.
+- Frame builder (unpoly-site, NEXT round after the current one lands): .read-more
+  block style (visually distinct button-ish link, quieter than the Next button);
+  sidebar/drawer render each chapter's first page as an explicit "Overview" CHILD row
+  (from @menu-title; group header keeps expanding) — fixes the /links no-current gap;
+  specs + the usual review round.
+
+CALIBRATION WALK VERDICTS (Henning 2026-10-06, slow-down walked to completion, all 9 settled):
 - (3X) The overview's closing block STAYS, retitled "Related chapters"; each sentence
   names the chapter it leads to ("...is covered by the Overlays chapter"). Henning's
   concern: readers must realize they are LEAVING the topic. Style-guide lines 607/617
