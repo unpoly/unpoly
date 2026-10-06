@@ -4,7 +4,7 @@ Templates
 By embedding template elements into your responses, your frontend can clone HTML fragments without making
 another server request.
 
-While Unpoly apps render on the server primarily, having client-side templates can be useful
+While Unpoly apps render on the server primarily, client-side templates can be useful
 for [placeholders](/placeholders), small [overlays](/opening-overlays), or [optimistic rendering](/optimistic-rendering).
 
 
@@ -103,8 +103,8 @@ When we reference a template, we can pass a data object for the cloned element a
 </a>
 ```
 
-By defining a matching a [compiler](/enhancing-elements) function, we can post-process the cloned element
-and its data object. When the compiler below is called with the cloned element, it's `data` argument will be set to `{ description: 'Buy toast' }`.
+By defining a matching [compiler](/enhancing-elements) function, we can post-process the cloned element
+and its data object. When the compiler below is called with the cloned element, its `data` argument will be set to `{ description: 'Buy toast' }`:
 
 ```js
 up.compiler('.task', function(task, data) {
@@ -156,13 +156,13 @@ For this example we're going to use templates in the style of
     {{#players}}
       <p>{{name}} has scored {{score}} points.</p>
     {{/players}}
-  </div>>
+  </div>
 </script>
 ```
 
 > [note]
 > We're using a `<script>` element here with a custom `[type]`, because strictly speaking `<template>` elements cannot have a `[type]` attribute.
-> Both are valid methods to embed HTML fragments into larger document, while largely being ignored by the browser.
+> Both are valid methods to embed HTML fragments into a larger document, while largely being ignored by the browser.
 
 
 #### Parsing template expressions
@@ -177,7 +177,7 @@ the template results.
 
 #### Example integrations {#template-engine-example}
 
-An event handler for an Mustache integration would look like this:
+An event handler for a Mustache integration would look like this:
 
 ```js
 up.on('up:template:clone', '[type="text/mustache"]', function(event) {
@@ -228,9 +228,9 @@ up.render({ fragment })
 When matching a template with its CSS selector, Unpoly will start looking in the [origin](/origin) [layer](/up.layer) first.
 The origin is the element that caused an update. In the example above, this would be the clicked hyperlink.
 
-If no template is found in the origin layer, Unpoly will look in ancestor layers, prefering closer layers.
-This allows you to declare global templates to your global application layout (typically rendered into the [root layer](/up.layer.root)),
-but override with more specific templates in overlays.
+If no template is found in the origin layer, Unpoly will look in ancestor layers, preferring closer layers.
+This allows you to declare global templates in your application layout (typically rendered into the [root layer](/up.layer.root)),
+but override them with more specific templates in overlays.
 
 
 @page templates
