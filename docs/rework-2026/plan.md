@@ -921,6 +921,14 @@ label "Edit page" -> "Edit" -> hidden on very narrow screens):
   current item may re-wrap when marked (accepted); other items must not move.
 - (4A) No bold/500-italic cuts until real bold-italic usage appears broken.
 
+SCRIPTING SITTING CLOSED (Henning 2026-10-07): all 7 pages approved. Page 7
+/script-security approved as shipped (nonce correction confirmed by the framework's own
+specs: active meta specs are bare, only a commented-out spec block carries the old
+prefixed form — flagged as a one-line comment fix next time framework specs are
+touched). DEFERRED, no word given: the commented-out "General advice" block stays as
+is. Every earlier Scripting queue item is resolved (compilers-first ratified, islands
+@signature added, asides removed station-wide, templates promoted).
+
 SCRIPTING SITTING p.5+6 (Henning 2026-10-07, pushed 408db97e6+2f1d9197f+0b9178e9e):
 /islands approved with six verdicts — data-attribute props example, bold first
 React/Vue, custom-form-fields pointer, keep-section rebuilt around up:fragment:keep +
