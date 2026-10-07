@@ -27,11 +27,19 @@ implement on his go.
 
 ## Working arrangements (agreed with Henning)
 
-- **Worktree + branch, never the main checkouts.** The docs-rework orchestration owns
-  `/home/henning/Projects/unpoly-site` (branch docs-rework checked out) and its :4567
-  preview. Create a worktree on a new branch:
-  `git -C /home/henning/Projects/unpoly-site worktree add ../unpoly-site-md -b docs-rework-md`
-  (same pattern for unpoly if you ever need it). Work only in the worktree.
+- **Paired worktrees + branches, never the main checkouts.** You will change BOTH
+  repos (Henning's word); the docs-rework orchestration owns both main checkouts
+  (`/home/henning/Projects/unpoly` and `.../unpoly-site`, branch docs-rework) and the
+  :4567 preview. Create sibling worktrees under one parent, named EXACTLY like the
+  originals — unpoly-site finds the framework through a committed symlink
+  (`vendor/unpoly-local -> ../../unpoly`), which then resolves to your unpoly worktree
+  by itself:
+  ```
+  mkdir ~/Projects/md-station
+  git -C ~/Projects/unpoly      worktree add ~/Projects/md-station/unpoly      -b docs-rework-md
+  git -C ~/Projects/unpoly-site worktree add ~/Projects/md-station/unpoly-site -b docs-rework-md
+  ```
+  Work only in the worktrees, both repos.
 - **Your own preview port** (e.g. 4568) from the worktree. Never restart :4567.
 - **Commits and pushes:** Henning's standing permission covers committing and pushing
   to docs-rework-based branches in both repos. Repo conventions: unpoly-site has plain
@@ -40,8 +48,10 @@ implement on his go.
 - **Decision log:** keep yours in `docs/rework-2026/markdown-station-plan.md` on your
   branch. Do NOT edit `docs/rework-2026/plan.md` — it belongs to the orchestrator
   session, which folds in a summary at merge time.
-- **Merge:** when the station ships, coordinate the merge into docs-rework with Henning
-  (the orchestrator session can take it from there).
+- **Merge:** when the station ships, coordinate the merge into docs-rework (BOTH
+  repos) with Henning; the orchestrator session can take it from there. Until then,
+  regularly merge docs-rework INTO docs-rework-md in both worktrees — the content and
+  styling tracks move daily.
 - A new `unpoly/unpoly-skills` repo is part of the stretch goal; creating it on GitHub
   is an ask-first action (Henning's word).
 
