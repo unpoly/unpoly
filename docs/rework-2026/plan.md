@@ -875,6 +875,16 @@ leading-"up." glue (0 lone brackets / bare-up lines at all widths). FOR HENNING,
 open from this round: variable-font option (c) decision; spy-marker reservation gap
 (a/b/c, builder leans faux-bold stroke); $frame-edge width trade-off.
 
+INCIDENTAL LIVE-SITE FIXES (2026-10-07, unpoly-site 3e2d239e+053484b0 pushed): Edit
+links carried %0A (git_revision missing .strip — every live Edit link broken; fixed +
+specced); trailing-slash redirects now name https explicitly (Apache behind TLS-ending
+proxy built http:// Locations); the www/v3 host redirect moved above the index.html
+rewrite (it leaked /index.html into redirects on second pass). OPS ITEMS FOR HENNING:
+(a) the ~185 RedirectPermanent lines still emit http:// Locations — one nginx line fixes
+all: proxy_redirect http://$host/ https://$host/; (or Apache vhost ServerName https://
++ UseCanonicalName On); (b) live /install/rails redirects with a stray /install/ prefix
+— the DEPLOYED .htaccess looks older than the repo's; check after next deploy.
+
 POTENTIAL NEW STATION UNDER RESEARCH (Henning 2026-10-07): "Markdown representation
 of Learn and API content" — every page as agent-friendly .md (suffix URLs, an MD button
 by Edit, Accept-header negotiation via .htaccess), judged by agent-effectiveness vs
