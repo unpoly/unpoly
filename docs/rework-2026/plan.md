@@ -921,6 +921,21 @@ label "Edit page" -> "Edit" -> hidden on very narrow screens):
   current item may re-wrap when marked (accepted); other items must not move.
 - (4A) No bold/500-italic cuts until real bold-italic usage appears broken.
 
+TOPIC-LESS LEARN PAGES (settled with Henning 2026-10-07/08; supersedes the
+move-to-Backend-integration + chapter-rename thread, which DIES): "Bootstrap
+integration" and "Legacy browser support" become their OWN @pages, recovered from the
+pre-rework install material (git), formally part of the LEARN AREA but in NO chapter:
+- toc.yml gains a sanctioned topic-less list (e.g. `loose:`) so the strict check stays
+  strict; topic-less pages never enter the reading chain, the sidebar tree, the /learn
+  hub or any children index.
+- They keep the LEARN badge in search (area classification from the model) and are
+  indexed normally.
+- /install's optional-extensions entries become one-liners whose links open the two
+  pages in MODAL OVERLAYS ([up-layer=new]; .guide--content is up-main=modal by Phase A
+  design) — dogfooding layers; dismiss returns to /install with state intact.
+- DIRECT LOADS (deep links, search, .md agents) render the standard docs frame WITH the
+  Learn menu, no selected node (Henning's refinement — not the article frame).
+
 HUB PAGES BATCH (specced 2026-10-07 on Henning's "OK let's spec it"; his complaint:
 /learn and /api are almost unstyled, links read fat-black non-interactive — the
 Structure station's deliberately dumb templates were never given an identity):
