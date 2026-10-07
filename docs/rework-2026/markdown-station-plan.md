@@ -240,29 +240,166 @@ The `.md` twin still renders its HTML sibling without layout, but the converter 
 - **30.17 admonitions:** generic conversion (`> #### Tip` + text). No GFM alerts.
   Decision 5 dropped.
 
-### Open
+### Settled, second pass (final; overrides earlier sections where they disagree)
 
-- **32 content-coordination** (new): `{:toc="true"}` renames in `closing-overlays.md`,
-  the install-page section (26), template/CSS changes on a branch the styling track
-  moves daily, attribute renames.
-- Remaining table items 4, 6–10, 12–28 (7 and 10 largely covered; 9 keeps only the root
-  and hub links the twin template adds).
+Corrections to earlier entries:
 
-### Previously listed details
+- **30.15:** the module is NOT in the front matter (8.2B dropped it). After the
+  breadcrumb's `data-markdown="ignore"`, the nav one-liner (9) is the only place a
+  feature page names its module — which is why it links the module page, not `/api`.
+- **Search:** the cards script is a donor of ideas and tests, not a spec. The new
+  script is written for the Unpoly docs.
+- The round-1 "description/area/kind in front matter" sketches are superseded by 8.2B.
 
-- Converter rules: parameter format, magic comments (`mark:`, `result:`, `chip:`,
-  `label:`), embeds (diagram text alternatives), API hub group rows.
-- Front matter fields for web and skill files.
-- The full kind-suffix map, and the exact form of the version stamp.
-- How the base URL is configured in development and production.
-- `.md` twins for redirected old slugs (migrate redirects).
-- `.htaccess`: `AddType`, `Vary: Accept`, `X-Robots-Tag: noindex` for `.md`.
-- The URL path for `marketplace.json` and the zip.
-- SKILL.md content and the search script adaptation.
-- Where the Python tests live, and where the ranking tests run.
-- MD button placement on the hubs, and its title wording.
-- Install-page section wording, coordinated with the content track.
+Decisions:
 
+- **4, 6, 7, 10:** covered by 30.7 (magic comments), 30.5 (embeds), generic conversion
+  (hub rows), and 30.7 + highlighting classes (code fences: fence language from the
+  existing `language-*` class).
+- **8 front-matter (8.2B):** identical on web and skill; only what the body doesn't say
+  in a fixed, trivially-extracted spot: `name` (bare symbol, API symbols only — powers
+  the exact-name boost), `area` (API | Learn | Changes | Support — result badge),
+  `visibility` (`deprecated` or `experimental`, absent when stable — rank down),
+  `url` (canonical page URL — provenance), `released` (release pages only). NO title,
+  kind, module, description, names. Search takes the title from the first `# ` line
+  (chip stripped) and shows match-context snippets (8.1C). `names` is added only if
+  the ranking-query tests cannot rank parameter queries without it (reopens 8).
+- **9 nav-block (9C+):** one line between front matter and H1, a one-line `<nav>` so
+  the search's nav-skip rule covers it (renderers show raw link syntax inside; fine):
+  `<nav aria-label="Unpoly docs">[All docs](https://unpoly.com/index.md) · [up.fragment module](https://unpoly.com/up.fragment.md)</nav>`
+  Closest hub: API feature → its module page (labelled "… module"); module/class/API
+  page → `/api.md`; Learn → `/learn.md`; releases + upgrading → `/changes.md`;
+  `/support` and hubs → root link only. Links go through the link resolver (relative in
+  the skill; root link becomes `SKILL.md`).
+- **12 base-url (12A):** `build?` → `https://unpoly.com` (env `BASE_URL` overrides);
+  `server?` → derived per-request from the incoming host and port (4567 and 4568 both
+  just work). Replaces the two hard-coded origins (`config.rb` `fully_qualify_url`,
+  `Documentable#guide_url`).
+- **13 redirect-twins (13C+):** one generic rule: a `.md` request whose file does not
+  exist 301s to the path without `.md`. No retroactive redirect twins (no `.md` URL
+  ever existed). Contributing-docs note: future page renames add `.md` twins of their
+  redirects.
+- **14 htaccess (14A):** `AddType text/markdown; charset=utf-8 .md`; 2A negotiation
+  (Markdown FIRST in Accept, not q=0; `RewriteCond %{DOCUMENT_ROOT}/$1.md -f`); root
+  `/` negotiates to `/index.md`; the 13C fallback; `Header merge Vary Accept` on
+  text/html|markdown; `X-Robots-Tag: noindex` on `.md`. Placed after the trailing-slash
+  redirect, before the index.html rewrite. `/llms.txt` is a second build output of the
+  root index (served text/plain). Verification: the research's curl matrix against
+  staging — deploy-day checklist, see Hand-offs.
+- **15 nginx-cache:** answered — no upstream caching today. `Vary` ships as
+  future-proofing; CDN note in the deploy checklist. Nothing gates negotiation.
+- **16 md-button (16A+):** label `MD`, styled like the Edit link, left of Edit (features,
+  interfaces) and left of the revision button (releases); standalone on every other
+  twinned page (hubs, topic indexes, `/support`, `/changes`, upgrading — CSS places it
+  where the button row sits on doc pages). NOT on the root page. Markup:
+  `link_to 'MD', "#{path}.md", class: 'md-link', type: 'text/markdown', title: 'This page as Markdown — for agents and LLMs', 'data-markdown': 'ignore', 'data-pagefind-ignore': true`.
+  The head `<link rel="alternate" type="text/markdown">` goes on every twinned page via
+  the `head_link` collector (30.12).
+- **17 root-index (17A+):** `/index.md` and `/llms.txt`, same bytes, llmstxt shape
+  (H1, blockquote lead, `##` sections, one-line-described links), ONE level: Learn's
+  chapters, API's modules (each with its one-sentence summary), then Changes and
+  Support. The lead is hand-written copy in the generator template, ideas and tone from
+  the new landing page ("The missing application layer for HTML", fragments not page
+  loads, preserved state, one file / no build step, MIT). No V1/V2 links. Closing
+  paragraphs (Henning's wording):
+  "Unpoly is one JavaScript file with no build step, MIT-licensed." and
+  "Fragment links point at the heading ending in `{#hash}`, e.g. `[label](/path#fragment)`
+  points at `## Headline {#fragment}`." Final lead wording calibrated via Hand-offs.
+- **18 skill-build-cost (18A):** skill pages always register; `SKIP_SKILL=1` skips them
+  for quick local builds (precedent: SKIP_SEARCH_INDEX). Production builds always
+  include the skill (the deploy ships the archives).
+- **19 SKILL.md (19A+):** front matter `name: unpoly-docs`, trigger description:
+  "Unpoly's complete documentation — all guides and API reference — as local Markdown
+  files with a search script. Use when writing, reviewing or debugging anything that
+  uses Unpoly: up-* HTML attributes, up.* JavaScript functions, up:* events, X-Up-*
+  headers, or when upgrading an app to a newer Unpoly version."
+  `metadata.unpoly_version` (documented version) and `metadata.build` (the 21A stamp).
+  Body ~120 lines: what this is (from 17's lead); finding things (search first with
+  usage + try-variations + OR semantics + --limit, grep fallback, then the staged
+  index: embedded one-level index with relative links, module pages list every
+  feature); conventions (≈5 lines: `{#hash}` anchors, sanitized filenames with real
+  symbol in front-matter `name`, `url` = live page); version check (compare
+  metadata.unpoly_version against the app's installed Unpoly via package.json /
+  Gemfile.lock / up.version; on major mismatch tell the user and prefer the app's
+  actual behavior); one support-pointer line to https://unpoly.com/support.md.
+  Skill content scope (round 1): no 0.x/1.x release notes, no /support page copy.
+- **20 kind-suffixes (20A, raw kinds):** suffix = the model's kind verbatim:
+  `-selector -function -event -property -constructor -header -cookie`; interfaces
+  `-module` / `-class`; pages (Learn, @page, changelog) no suffix. With 13F: lowercase,
+  `[a-z0-9-]`, `$` → `dollar-` (`up-dollar-compiler-function.md`), `up:link:follow` →
+  `up-link-follow-event.md`; filename collisions fail the build. Config objects are
+  kind "property" (no special case).
+- **21 version-stamp (21A, calver):** `YYYY.MMDD.HHMM` (UTC, computed once per build),
+  e.g. `2026.1007.1430` — valid, strictly increasing semver. Written to
+  marketplace.json `version` and SKILL.md `metadata.build`. `unpoly_version` stays a
+  separate field.
+- **22 archive-paths:** as verified with the test bundle:
+  `/.well-known/agent-skills/index.json` + `unpoly-docs.tar.gz` (SKILL.md at archive
+  root) and `/claude-plugins/marketplace.json` + `unpoly.zip` (plugin root at zip top,
+  skill under `skills/unpoly-docs/`). All four written by an after_build hook (hard
+  technical reason for living outside source/: they embed digests of build artifacts).
+  marketplace.json content comes from SKILL.md front matter (name/description) + stamp
+  + zip sha256; marketplace and plugin are both named `unpoly` (15.1 revised):
+  install = `/plugin marketplace add https://unpoly.com/claude-plugins/marketplace.json`,
+  then `/plugin install unpoly@unpoly`.
+- **23 search script:** written fresh for Unpoly; stdlib-only Python ≥ 3.8; BM25 with
+  field weights over front matter + body; tokenizer per Amendments (split at
+  whitespace, strip edge punctuation, keep `.-:$` inside; compound parts as weak
+  secondary tokens); exact-`name` boost; `visibility: deprecated` down-weight;
+  changelog-kind down-weight; skips `<nav>` blocks (incl. the 9C+ one-liner) when
+  indexing; match-context snippets; result paths skill-root-relative; cards-style
+  XML-ish output (`<result score path><title><snippet>`). A fixed query set with
+  expected top results (exact symbols + plain English) is part of the tests and is
+  the arbiter for tokenizer/field tuning.
+- **24 test-layout (24X, source-with-ignore):** `search.py`, `test_search.py` and the
+  ranking-query fixtures live together in `source/skills/unpoly-docs/scripts/`; a
+  `config.rb` `ignore` keeps test files out of the build, and an output check (25)
+  fails the build if any `test_*` file reaches the skill output. A rake task runs the
+  Python unit tests plus the ranking queries against a fresh build, wired into the
+  same entry point as the RSpec suite and CI. Principle: the skill concern stays
+  together under `source/skills/` unless technically impossible.
+- **25 output-checks:** stdlib-Ruby build step, hard failures: every relative link in
+  the skill resolves; no case-insensitive filename collisions; < 1000 files; front
+  matter parses flat; no `:` or `$` in filenames; media descriptions present (11);
+  no `test_*` files in the skill. Golden-file specs live in `spec/` as normal RSpec.
+- **26 install-section (26A):** drafted by this station, landed by the content track at
+  ship time (it owns `src/unpoly/pages/install.md`). ONE recommended path:
+  `npx skills add https://unpoly.com` (also covers Claude Code, where it lands as a
+  plain `/unpoly-docs` skill). Collapsed "other ways": the Claude marketplace route,
+  and `.md` URLs + `/llms.txt` for agents without installs. Plus the trigger snippet
+  for the project's AGENTS.md/CLAUDE.md: "When working with Unpoly (`up-*` attributes,
+  `up.*` functions, `up:*` events), consult the unpoly-docs skill before guessing."
+  No `extraKnownMarketplaces` material anywhere (dropped).
+- **27 announce:** short section in the unpoly README; CHANGELOG entry for the next
+  release; contributing-docs notes: the marker map (from "Settled" above), the
+  `data-markdown` role vocabulary, ".md redirect twins on future renames". Drafts at
+  implementation; Henning reviews wording before commit.
+- **28 worktree-setup:** build `dist/` in the md-station unpoly worktree with unpoly's
+  normal build (watcher while working); merge `docs-rework` into `docs-rework-md` in
+  BOTH worktrees before starting and at least daily.
+- **32 content-coordination (32A+):** mechanical edits in content-owned files (the three
+  `{:toc="true"}` → `data-toc-include` renames in `closing-overlays.md`) are done by
+  this station and listed in Hand-offs; prose for content-owned places (install
+  section, root-index lead) goes to the content track as drafts; template/CSS conflicts
+  are ours to resolve; visible-look changes (types pipe, card layout) get Henning's
+  screenshot approval; THE ORCHESTRATOR MERGES our branch — this station never merges
+  into docs-rework itself.
+
+
+## Hand-offs
+
+Kept current during implementation; Henning relays to the orchestrator session.
+
+- For the content track: the install-page section draft (26A); the root-index lead
+  draft (17A+); three mechanical `{:toc="true"}` → `data-toc-include` renames done in
+  `closing-overlays.md` on our branch.
+- For the orchestrator: merge of docs-rework-md (both repos) when the station ships.
+- Deploy-day checklist: run the research's curl test matrix against staging
+  (negotiation, .md types, Vary, redirects, root); confirm nginx stays cache-free; if
+  a CDN is ever added it must honor `Vary: Accept`.
+- Pending Henning approvals during implementation: side-by-side screenshots for the
+  visible types pipe (vs. borders) and the restructured preview cards; wording of
+  SKILL.md, the root-index lead, README/CHANGELOG texts.
 
 ## Setup notes
 
