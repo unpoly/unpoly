@@ -40,6 +40,9 @@ Documentation lives in this repository, beside the code it describes. A sister p
   - [Linking the reference to a guide](#linking-the-reference-to-a-guide)
   - [Overview pages](#overview-pages)
 - [Search ranking](#search-ranking)
+- [Markdown for agents](#markdown-for-agents)
+  - [What a page needs](#what-a-page-needs)
+  - [Markers in the templates](#markers-in-the-templates)
 - [The contributing guides](#the-contributing-guides)
 - [Modules and classes](#modules-and-classes)
 - [Previewing your changes](#previewing-your-changes)
@@ -787,10 +790,11 @@ and events that still lack one.
 > [!IMPORTANT]
 > Renaming a page changes its URL, and unlike a renamed API, we don't keep the old page
 > around as deprecated. Add a redirect to `src/unpoly-migrate/.htaccess`, which
-> unpoly.com includes:
+> unpoly.com includes, and one for the page's [Markdown twin](#markdown-for-agents):
 >
 > ```apache
 > RedirectPermanent /old-page-name /new-page-name
+> RedirectPermanent /old-page-name.md /new-page-name.md
 > ```
 
 
@@ -842,6 +846,74 @@ There are only two tiers, marked and unmarked. A query only surfaces the documen
 matches, so the tier can be generous. When a page ranks wrong, fix it here rather than
 in the search code. A change shows in the search only after the index is rebuilt: run
 `SKIP_CHECK_LINKS=1 bundle exec rake search:index` in `unpoly-site`.
+
+
+## Markdown for agents
+
+Every documentation page on unpoly.com also exists as Markdown, for coding agents and
+LLMs: its URL plus `.md` (`/up.render.md`). An agent that asks for `text/markdown` gets the
+same text at the page's own URL. `/index.md` (also served as `/llms.txt`) lists the
+guide chapters and API modules, and the `unpoly-docs` agent skill bundles all pages as
+files with a search script.
+
+You write nothing extra for this. `unpoly-site` renders each page as usual, then converts
+the HTML to Markdown, so whatever the page says, its Markdown says too. Headings keep
+their ids as `{#id}`, so links to `/up.render#options.target` still find their target.
+
+### What a page needs
+
+The converter can't look at pictures, so a page must describe its media. A build fails
+otherwise.
+
+- An image needs alt text: `![The browser console logging a deprecation](images/log.png)`.
+- A video needs an `aria-label` that says what it shows:
+
+  ```html
+  <video src="images/demo.mp4" controls aria-label="The demo app under high latency"></video>
+  ```
+
+- An embedded diagram (`<div embed="…">`) is an `<svg role="img">` with a `<title>` and a
+  `<desc>`, and an `id` on the svg or its `<figure>`. The Markdown links to the diagram on
+  the HTML page and repeats its description.
+
+The page's contents (the list of headings above the first one) normally shows only the
+top-level headings. To list a lower heading too, give it a `data-toc-include` attribute:
+
+```markdown
+### Closing when a location is reached {#location-condition}
+{:data-toc-include="true"}
+```
+
+### Markers in the templates
+
+The templates in `unpoly-site` say what an element means with standard semantics
+(headings, `<nav>`, ARIA), which screen readers and the converter both understand. Where
+that is not enough, a `data-*` attribute takes over. Each attribute serves one
+consumer:
+
+| Marker | Screen readers | Search (Pagefind) | Contents list | Markdown |
+|---|---|---|---|---|
+| `data-pagefind-body` | – | indexes these pages | – | – |
+| `data-pagefind-ignore` | – | skips the element | – | keeps it (agents want those blocks) |
+| `data-toc-ignore` | – | – | skips the heading | – |
+| `data-toc-include` | – | – | lists a lower heading | – |
+| `h2`–`h4` with `id` | headings | sub-results | lists them | `##` heading with `{#id}` |
+| `role="heading" aria-level` | headings | – | – | heading of that level |
+| `aria-label` on a link | the link's name | – | – | the link's text |
+| `aria-hidden="true"` | hidden | indexed | – | dropped |
+| `data-markdown="ignore"` | read | indexed | – | dropped |
+| `data-markdown="chip"` | read | indexed | – | `(title or text)` |
+| `<svg role="img">` with `<title>`/`<desc>` | reads them | – | – | `[Diagram: title](…)` and the description |
+| `<nav aria-label="…">` | a landmark | – | – | a literal `<nav>` block of links |
+
+`data-markdown` has two values. `ignore` drops chrome that only humans use (the Edit
+link, the MD button, a breadcrumb), with everything inside it. `chip` writes a badge or
+tag as a word in parentheses, preferring its `title`: the kind badge "JS" with
+`title="JavaScript function"` becomes `(JavaScript function)`. Add a value only for a
+case these two can't express.
+
+To see what a change does to the Markdown, open the page's `.md` URL in the preview.
+`unpoly-site` pins the output of its test pages in golden files (see its README).
 
 
 ## The contributing guides

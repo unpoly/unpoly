@@ -124,7 +124,7 @@ in an overlay. The overlay interaction is decoupled from the interaction in the 
 
 
 ### Closing when a location is reached {#location-condition}
-{:toc="true"}
+{:data-toc-include="true"}
 
 To open an overlay that closes once a URL like `/companies/123` is reached, set an [`[up-accept-location]`](/up-layer-new#up-accept-location)
 attribute with a [URL pattern](/url-patterns):
@@ -145,7 +145,7 @@ To *dismiss* an overlay once a given location is reached, use `[up-dismiss-locat
 
 
 ### Closing when an event is emitted {#event-condition}
-{:toc="true"}
+{:data-toc-include="true"}
 
 To open an overlay that closes once a given event is observed on the overlay,
 set an [`[up-accept-event]`](/up-layer-new#up-accept-event) attribute:
@@ -179,7 +179,7 @@ to make a link that emits a closing event in an overlay, but navigates to a diff
 
 
 ### Closing when a fragment is detected {#fragment-condition}
-{:toc="true"}
+{:data-toc-include="true"}
 
 To open an overlay that closes once a fragment matching a selector is observed on the overlay,
 set an [`[up-accept-fragment]`](/up-layer-new#up-accept-fragment) attribute:

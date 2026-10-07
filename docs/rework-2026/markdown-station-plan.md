@@ -390,20 +390,107 @@ Decisions:
 
 Kept current during implementation; Henning relays to the orchestrator session.
 
-- For the content track: the install-page section draft (26A); the root-index lead
-  draft (17A+); three mechanical `{:toc="true"}` → `data-toc-include` renames done in
-  `closing-overlays.md` on our branch.
-- For the orchestrator: merge of docs-rework-md (both repos) when the station ships.
-- Deploy-day checklist: run the research's curl test matrix against staging
-  (negotiation, .md types, Vary, redirects, root); confirm nginx stays cache-free; if
-  a CDN is ever added it must honor `Vary: Accept`.
-- Pending Henning approvals during implementation: side-by-side screenshots for the
-  visible types pipe (vs. borders) and the restructured preview cards; wording of
-  SKILL.md, the root-index lead, README/CHANGELOG texts.
+- **For the content track:**
+  - Drafts in `markdown-station-drafts.md`: the install-page section (26A), the README
+    section and the CHANGELOG entry (27). The root-index lead (17A+) is landed in
+    `unpoly-site/source/root_index.txt.erb`; its wording is also in the drafts file.
+  - Done on our branch: the three `{:toc="true"}` → `{:data-toc-include="true"}` renames
+    in `closing-overlays.md`, and a "Markdown for agents" section in
+    `docs/contributing/documentation.md` (marker map, `data-markdown` roles, the
+    `.md` redirect on page renames). Wording review welcome.
+  - New content rule the build enforces: every image needs alt text and every video an
+    `aria-label` (an empty alt fails too, since Middleman's `image_tag` writes `alt=""`).
+    Today's content passes; `/changes/upgrading`'s screenshot got alt text.
+- **For the orchestrator:** merge of `docs-rework-md` into `docs-rework` (both repos) when
+  the station ships. The unpoly-site merge touches templates the styling track also
+  edits (`interface_template`, `_feature_preview`, `feature_template`, `_reading_nav`,
+  `config.rb` helpers); conflicts there are ours to resolve.
+- **Deploy-day checklist:**
+  - Run the research's curl matrix against staging (negotiation, `.md` types, `Vary`,
+    `X-Robots-Tag`, the `.md` → page 301, `/` with Claude's Accept). Add:
+    `/.well-known/agent-skills/index.json` (rewritten to `/agent-skills/`),
+    `/claude-plugins/marketplace.json`, and `/up.proxy.md` (an old slug: does the generic
+    `.md` 301 or the unpoly-migrate redirect fire first?).
+  - Confirm nginx stays cache-free; a CDN must honor `Vary: Accept`.
+  - `npx skills add https://unpoly.com` and the Claude marketplace route against staging
+    (`BASE_URL=https://<staging-host> bundle exec middleman build` gives a build whose
+    absolute URLs and marketplace archive URL point at staging).
+- **Pending Henning approvals:**
+  - Screenshots in `~/Projects/md-station/screenshots/` (not committed):
+    `side-by-side/*.before-after.png` (all pages of the `markdown` shoot suite, 1280 and
+    390 px), `side-by-side/*.borders-vs-pipe.png` (the types variant). Cards and types are
+    pixel-identical to before; the only visible change is the MD button. The pipe variant
+    (`md-pipe-variant/`) is not applied; the shipped default keeps the borders and a
+    visually hidden pipe.
+  - Wording: SKILL.md (`unpoly-site/source/skills/unpoly-docs/skill.txt.erb`), the root
+    index lead, the drafts file, the contributing-docs section.
 
 ## Setup notes
 
-- The unpoly worktree has no `dist/` of its own; it was copied from the main checkout
-  for the probe. A build watcher for the worktree is needed before real work.
+- The unpoly worktree has its own `node_modules/` and `dist/` (`npm ci && npm run build`,
+  2026-10-07).
 - capistrano-middleman deletes `build/` after a deploy, so nothing may rely on a build
   left behind by a deploy.
+
+
+## Implementation notes (decided by the builder)
+
+Decisions made during implementation without asking, for Henning to confirm or revert.
+
+- **Deploy and `.well-known`:** capistrano-middleman's archive glob (`build/**/{*,.*}`)
+  never descends into dot-directories, so `build/.well-known/` would not deploy. The
+  well-known files are built into `build/agent-skills/`, and `.htaccess` rewrites
+  `/.well-known/agent-skills/*` there. URLs in `index.json` stay `/.well-known/…`.
+- **Calver without leading zeros:** `YYYY.MMDD.HHMM` computed as numbers
+  (`month * 100 + day`, `hour * 100 + minute`), so January 5, 00:05 is `2027.105.5`
+  (semver forbids leading zeros). Still strictly increasing; October looks as decided.
+- **Card headings at level 4:** 30.16 says "level 3 under Essentials/All features"; those
+  are `h3`, so the card titles are `aria-level="4"` (nested under them).
+- **Kind badge inside the heading:** the badge follows the signature *inside* the
+  `role="heading"` element, so the Markdown reads `#### [up.render()](…) (JavaScript
+  function)`. Visibility tags join it as chips; a stable feature renders none (it was
+  hidden by CSS before).
+- **Parameter heading on `.feature--param-info`:** `role="heading"` sits on the wrapper of
+  signature and experimental icon, so a labelled icon lands in the heading:
+  `#### [options.placeholder] (Experimental) {#options.placeholder}`.
+- **"Type:" label:** besides the visually hidden pipe (30.11), the `types` helper writes a
+  visually hidden `Type: ` before the types, for screen readers and the Markdown
+  (`Type: string | Element`). Not asked for; remove it if unwanted.
+- **Images: empty alt fails too.** Middleman's `image_tag` writes `alt=""` by default, so
+  only a non-empty alt counts. Decorative images take `aria-hidden`. `/changes/upgrading`'s
+  screenshot got alt text.
+- **Absolute unpoly.com links in prose** (`https://unpoly.com/changes/upgrading` in
+  release notes) are treated as site links: twin `.md` on the web, relative in the skill.
+- **Links in a link stay one link:** a link that wraps blocks keeps its href and runs its
+  blocks into the link text.
+- **Contents nav:** the auto-TOC `<nav>` got `aria-label="Contents"`.
+- **Fixture pages get web twins** (they are pages in every build); the skill leaves them
+  out. A new fixture page `spec/fixtures/parser/markdown.md` (`/test.markdown`) has one of
+  everything the converter handles, for the golden files.
+- **Golden files** normalize the documented version to `<version>`, so a release doesn't
+  churn them.
+- **search.py:** one tuning beyond decision 23, required by the ranking queries for
+  parameters (`up-accept-location` has no page of its own): an identifier that heads a
+  section (a parameter heading) earns a bonus on its own term's score. Without it,
+  parameter queries ranked their feature outside the top 3; `names` in the front matter
+  stays out (8.2B). Stemming and hub/changelog factors are also the search agent's tuning;
+  all 35 ranking queries pass against the real build.
+- **`[up-target]` has no page:** the ranking query `up-target` expects `[up-follow]`
+  (which documents the attribute) in the top 3, and `up-target targeting fragments` the
+  guide.
+- **Ranking queries in CI:** a second GitHub Actions job builds only the skill
+  (`middleman build --glob 'skills/**/*'`, ~2 min) and runs `rake skill:test`. The RSpec
+  job runs the Python unit tests too (and skips the ranking without a build). CI only
+  runs for pushes to master and pull requests, so neither has run on `docs-rework-md`.
+- **Build time:** a full build went from ~40 s to ~2.5 min wall (every page renders three
+  times: HTML, web twin, skill file). `SKIP_SKILL=1` saves the skill third.
+- **Accept regex:** `q=0` counts anywhere in the first media range's parameters
+  (`text/markdown; charset=utf-8; q=0` stays HTML). Verified in Ruby against a table of
+  real agents' headers, not in Apache (none local); on the deploy-day checklist.
+- **`.md` redirects on renames:** the contributing docs ask for
+  `RedirectPermanent /old.md /new.md` next to the page redirect. If Apache runs the
+  generic `.md` → page 301 (mod_rewrite) before mod_alias, that line never fires and the
+  agent lands on the new page's HTML (or its twin via negotiation). Check `/up.proxy.md`
+  on staging; drop the note if the rewrite wins.
+- **Screenshot suite:** `shoot/markdown.rb` (`bin/shoot markdown`) stays committed for
+  the approval round; delete it afterwards if it has no further use.
