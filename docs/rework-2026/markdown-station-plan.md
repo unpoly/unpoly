@@ -401,6 +401,10 @@ Kept current during implementation; Henning relays to the orchestrator session.
   - New content rule the build enforces: every image needs alt text and every video an
     `aria-label` (an empty alt fails too, since Middleman's `image_tag` writes `alt=""`).
     Today's content passes; `/changes/upgrading`'s screenshot got alt text.
+- **State (2026-10-08):** implemented, reviewed by a non-builder agent and pushed to
+  `docs-rework-md` in both repos (unpoly-site `ea4df53c`, unpoly: the commit carrying this
+  line). Not merged, not deployed. Open items are the review findings, approvals and
+  checks below.
 - **For the orchestrator:** merge of `docs-rework-md` into `docs-rework` (both repos) when
   the station ships. The unpoly-site merge touches templates the styling track also
   edits (`interface_template`, `_feature_preview`, `feature_template`, `_reading_nav`,
