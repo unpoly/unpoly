@@ -1,29 +1,10 @@
 Migrating legacy JavaScripts
 ============================
 
-Legacy code often contains JavaScripts that expect a full page load whenever the
-user interacts with the page. When you configure Unpoly to handle [all links](/handling-all-links)
-and [forms](/handling-all-forms), there will be no additional page loads as the user
-clicks a link or submits a form.
-
-This may cause some of the following issues:
-
-1. The `window` will not emit another `DOMContentLoaded` event when you
-   update the page body through Unpoly. This may cause your legacy JavaScript to not
-   run when you expect it to.
-2. Legacy JavaScript often enhances elements on the entire page
-   instead of scoping its changes to a region of the DOM.
-   When we're updating fragments we only want to enhance elements within the new fragment,
-   and don't want to touch elements that we have already enhanced.
-3. Legacy JavaScript may have [memory leaks](https://nolanlawson.com/2020/02/19/fixing-memory-leaks-in-web-applications/), e.g. by scheduling timers with `setInterval()`
-   but never clearing these timers when they're no longer needed.
-   When you're resetting the page with every click you may never
-   notice the leaks. However, when all links are handled through Unpoly
-   the JavaScript VM may persist for minutes or hours and those leaks
-   are going to stack up.
-
-The cleanest solution to these issues is to call all your JavaScript
-from an [Unpoly compiler](/enhancing-elements).
+Legacy scripts often run on `DOMContentLoaded`, expecting a fresh page load for every interaction.
+Once Unpoly handles your [links](/handling-all-links) and [forms](/handling-all-forms),
+that event fires only once per session, and such scripts stop running.
+The fix is to call them from a [compiler](/enhancing-elements) instead.
 
 
 ## Migrating legacy scripts to a compiler {#migrate-to-compiler}
@@ -52,7 +33,8 @@ up.compiler('a.lightbox', function(element) {
 
 When the page initially loads, Unpoly will call this compiler for every element
 matching `a.lightbox`. When a fragment is updated later, Unpoly will call this compiler
-for new matches within the new fragment.
+for new matches within the new fragment. Each element is only compiled once, so
+elements that an earlier pass already enhanced are left alone.
 
 > [important]
 > Compilers should only process the given element and its children.
@@ -127,6 +109,18 @@ A better solution is to move the `<script>` into the `<head>` and [give it a `[d
   </body>
 </html>
 ```
+
+
+## Memory leaks on long-lived pages {#memory-leaks}
+
+Without full page loads, the browser no longer resets the JavaScript VM with every click.
+The same VM can now persist for minutes or hours, so
+[memory leaks](https://nolanlawson.com/2020/02/19/fixing-memory-leaks-in-web-applications/)
+that a full page load used to hide are going to stack up.
+
+A common leak is scheduling timers with `setInterval()`, but never clearing these timers
+when they are no longer needed. When a compiler sets up something like this, undo it in a
+[destructor function](/enhancing-elements#destructor).
 
 
 @page legacy-scripts

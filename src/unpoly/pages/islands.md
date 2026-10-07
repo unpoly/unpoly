@@ -2,7 +2,7 @@ Framework islands
 =================
 
 Some widgets need heavy client-side interaction, like a rich text editor or an interactive chart.
-You can mount such components from a frontend framework like React or Vue as *islands*:
+You can mount such components from a frontend framework like **React** or **Vue** as *islands*:
 self-contained, client-rendered widgets inside a server-rendered page.
 
 [Compilers](/enhancing-elements) give each island a managed lifecycle: the component mounts when
@@ -48,6 +48,14 @@ up.compiler('.color-picker', function(element, data) {
 })
 ```
 
+Simple string props can also be passed as HTML5 [data attributes](/data#data-attributes):
+
+```html
+<div class="color-picker" data-value="#a2d8ff"></div> <!-- mark: data-value -->
+```
+
+They appear in the same `data` argument, so the compilers above work without changes.
+
 Because islands mount through the regular compiler mechanism, they work on any screen:
 in the initial page, in updated fragments, or in [overlays](/up.layer).
 
@@ -75,6 +83,9 @@ up.compiler('.color-picker', function(element, data) {
 })
 ```
 
+Shadowing a hidden field is only one of several form-association patterns Unpoly supports.
+See [[custom-form-fields]] for the alternatives and their trade-offs.
+
 Component callbacks can also use Unpoly's JavaScript API directly.
 For example, a row in a client-rendered table could open details in an overlay:
 
@@ -100,9 +111,31 @@ To preserve an island while the fragment around it is updated, assign it an `[up
 ```
 
 When new content contains a matching element, the existing element remains attached in its
-current position, keeping the mounted component and all its state. Note that this also keeps
-the island when the server sends changed `[up-data]`; to remount with fresh props in that case,
-use [`[up-keep="same-data"]`](/preserving-elements#same-data).
+current position, keeping the mounted component and all its state. Elements are matched by
+their [derived target](/target-derivation): any element with the same `.color-picker` class
+in the new HTML counts as a match, even when its `[up-data]` differs.
+
+A kept element ignores the new HTML, including changed `[up-data]`. The recommended pattern
+is to listen to `up:fragment:keep` and pass the new props into the already-mounted component.
+The event's `event.newData` property carries the parsed [data](/data) of the new element:
+
+```js
+up.compiler('.color-picker', function(element, data) {
+  let root = createRoot(element)
+  let render = (data) => root.render(<ColorPicker value={data.value}/>)
+  render(data)
+  element.addEventListener('up:fragment:keep', (event) => render(event.newData)) // mark: event.newData
+  return () => root.unmount()
+})
+```
+
+This updates the island in place, without remounting. Component state like cursor positions
+or open popovers survives the fragment update.
+
+A simpler alternative is [`[up-keep="same-data"]`](/preserving-elements#same-data). It keeps
+the island while its data is unchanged, but *remounts* it with fresh props when the server
+sends changed `[up-data]`. Any state inside the component is reset by the remount.
+
 See [[preserving-elements]] for how elements are matched, and for ways to control what is kept.
 
 
@@ -115,9 +148,12 @@ Unpoly and the framework each manage their own side of the island's root element
   Attributes that need a compiler, like `[up-preload]` or the selectors of your own compilers,
   have no effect inside an island. Links and forms are handled through events and still work;
   component code can also call functions like `up.layer.open()` directly, as shown [above](#page-interaction).
+  Don't work around this by calling `up.hello()` on framework-rendered DOM: the framework's
+  next reconciliation will clobber or duplicate any changes a compiler made.
 - Conversely, don't [target](/targeting-fragments) elements inside an island.
   The framework expects to own that DOM. Update an island through its props or state,
   or re-render the entire island element.
 
 
 @page islands
+@signature

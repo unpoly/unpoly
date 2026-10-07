@@ -921,6 +921,65 @@ label "Edit page" -> "Edit" -> hidden on very narrow screens):
   current item may re-wrap when marked (accepted); other items must not move.
 - (4A) No bold/500-italic cuts until real bold-italic usage appears broken.
 
+TOPIC-LESS LEARN PAGES (settled with Henning 2026-10-07/08; supersedes the
+move-to-Backend-integration + chapter-rename thread, which DIES): "Bootstrap
+integration" and "Legacy browser support" become their OWN @pages, recovered from the
+pre-rework install material (git), formally part of the LEARN AREA but in NO chapter:
+- toc.yml gains a sanctioned topic-less list (e.g. `loose:`) so the strict check stays
+  strict; topic-less pages never enter the reading chain, the sidebar tree, the /learn
+  hub or any children index.
+- They keep the LEARN badge in search (area classification from the model) and are
+  indexed normally.
+- /install's optional-extensions entries become one-liners whose links open the two
+  pages in MODAL OVERLAYS ([up-layer=new]; .guide--content is up-main=modal by Phase A
+  design) — dogfooding layers; dismiss returns to /install with state intact.
+- DIRECT LOADS (deep links, search, .md agents) render the standard docs frame WITH the
+  Learn menu, no selected node (Henning's refinement — not the article frame).
+
+HUB PAGES BATCH (specced 2026-10-07 on Henning's "OK let's spec it"; his complaint:
+/learn and /api are almost unstyled, links read fat-black non-interactive — the
+Structure station's deliberately dumb templates were never given an identity):
+- SCOPE: /learn and /api only. Module hubs (/up.link etc.) are EXCLUDED here: their
+  look changes with the late Essentials→intro-prose content batch (plan 1143) and the
+  ref sweep — styling around content that will be rewritten is rework. (One exception
+  allowed: cheap link-interactivity fixes that apply site-wide anyway.)
+- DIRECTION (refined with Henning 2026-10-07, "I like the direction"): two deliberately
+  different temperaments on shared tokens. /learn = PATH + INDEX: a prominent "Start
+  here" block for Getting started on top (course entrance one click deep — the
+  react.dev instinct without losing the map), then chapters in reading order, EACH
+  with its pages inline as a compact link list (model data; on mobile /learn is the
+  only full-curriculum index — no sidebar there). /api = DENSE CATALOG: compact rows
+  per module (code-font name, model description), grouped like the sidebar, each row
+  carrying its module's @signature features as quick links (model-driven, zero new
+  prose), plus a search prompt ("press /"). All link affordances interactive per the
+  existing family; no card-row genericness.
+- NO NEW PROSE: titles, blurbs and module descriptions come from the model (structure
+  station rule 385 already reviewed those words). If a blurb is missing/weak, FLAG it
+  for Henning instead of writing one.
+- PROCESS: builder ships a first rendered proposal on the preview + screenshots;
+  Henning judges pixels and iterates informally (his standing preference: taste calls
+  on rendered results, not prose descriptions).
+
+SCRIPTING SITTING CLOSED (Henning 2026-10-07): all 7 pages approved. Page 7
+/script-security approved as shipped (nonce correction confirmed by the framework's own
+specs: active meta specs are bare, only a commented-out spec block carries the old
+prefixed form — flagged as a one-line comment fix next time framework specs are
+touched). DEFERRED, no word given: the commented-out "General advice" block stays as
+is. Every earlier Scripting queue item is resolved (compilers-first ratified, islands
+@signature added, asides removed station-wide, templates promoted).
+
+SCRIPTING SITTING p.5+6 (Henning 2026-10-07, pushed 408db97e6+2f1d9197f+0b9178e9e):
+/islands approved with six verdicts — data-attribute props example, bold first
+React/Vue, custom-form-fields pointer, keep-section rebuilt around up:fragment:keep +
+event.newData in-place updates (same-data folded in as the remounting alternative),
+caution against up.hello() on framework DOM, @signature ADDED (tier live after next
+index rebuild). /legacy-scripts approved with restructure: 3-sentence problem→solution
+intro (Henning-blessed draft), conversion sections first, scoping folded into them,
+late "Memory leaks on long-lived pages" section (+destructor pointer). BONUS BUG FIX:
+preserving-elements.md's keep example listened on the Maps object instead of the
+element — never fired; fixed. Page 7 /script-security verdict pending (open word:
+the commented-out "General advice" block — resurrect/delete/leave).
+
 SITTING p.3+4 (Henning 2026-10-06): /data approved with restructure (H3 "All JSON
 values can be data" + sibling "Merging data attributes", c63060d8d) and a two-sentence
 mechanism chooser in the intro (7d7c537d2). NEW STYLE RULE from his wording fix: no

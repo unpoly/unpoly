@@ -204,7 +204,7 @@ up.compiler('.map', function(element, data) {
   var map = new google.maps.Map(element)
   map.setCenter(data)
 
-  map.addEventListener('up:fragment:keep', function(event) { // mark-line
+  element.addEventListener('up:fragment:keep', function(event) { // mark-line
     map.setCenter(event.newData) // mark-line
   }) // mark-line
 })
