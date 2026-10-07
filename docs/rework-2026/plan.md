@@ -921,6 +921,18 @@ label "Edit page" -> "Edit" -> hidden on very narrow screens):
   current item may re-wrap when marked (accepted); other items must not move.
 - (4A) No bold/500-italic cuts until real bold-italic usage appears broken.
 
+SCRIPTING SITTING p.5+6 (Henning 2026-10-07, pushed 408db97e6+2f1d9197f+0b9178e9e):
+/islands approved with six verdicts — data-attribute props example, bold first
+React/Vue, custom-form-fields pointer, keep-section rebuilt around up:fragment:keep +
+event.newData in-place updates (same-data folded in as the remounting alternative),
+caution against up.hello() on framework DOM, @signature ADDED (tier live after next
+index rebuild). /legacy-scripts approved with restructure: 3-sentence problem→solution
+intro (Henning-blessed draft), conversion sections first, scoping folded into them,
+late "Memory leaks on long-lived pages" section (+destructor pointer). BONUS BUG FIX:
+preserving-elements.md's keep example listened on the Maps object instead of the
+element — never fired; fixed. Page 7 /script-security verdict pending (open word:
+the commented-out "General advice" block — resurrect/delete/leave).
+
 SITTING p.3+4 (Henning 2026-10-06): /data approved with restructure (H3 "All JSON
 values can be data" + sibling "Merging data attributes", c63060d8d) and a two-sentence
 mechanism chooser in the intro (7d7c537d2). NEW STYLE RULE from his wording fix: no
