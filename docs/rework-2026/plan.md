@@ -875,6 +875,14 @@ leading-"up." glue (0 lone brackets / bare-up lines at all widths). FOR HENNING,
 open from this round: variable-font option (c) decision; spy-marker reservation gap
 (a/b/c, builder leans faux-bold stroke); $frame-edge width trade-off.
 
+POTENTIAL NEW STATION UNDER RESEARCH (Henning 2026-10-07): "Markdown representation
+of Learn and API content" — every page as agent-friendly .md (suffix URLs, an MD button
+by Edit, Accept-header negotiation via .htaccess), judged by agent-effectiveness vs
+double-maintenance burden; stretch: an unpoly/unpoly-skills repo (npx skills add) with
+staged indexes + a BM25 search script adapted from makandra-cards' Bundle export.
+Henning's full brief: /home/henning/Documents/Unpoly/2026-10-07 Unpoly Skill.md.
+Opus research dispatched 2026-10-07; report lands before any station spec.
+
 ROUND SHIPPED (2026-10-07, unpoly-site a75e276d..a5729803 pushed, spot-check holds,
 suite 425/0): diagram embed mechanism; Edit button (gray outline, responsive label,
 hidden <500px); spy reservation deleted; VARIABLE ROBOTO (vendored 66.8KB, was 90;
