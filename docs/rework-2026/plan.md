@@ -928,11 +928,16 @@ Structure station's deliberately dumb templates were never given an identity):
   look changes with the late Essentials→intro-prose content batch (plan 1143) and the
   ref sweep — styling around content that will be rewritten is rework. (One exception
   allowed: cheap link-interactivity fixes that apply site-wide anyway.)
-- DIRECTION: hubs reuse the EXISTING design vocabulary, no new language — the landing's
-  card treatment and the outline-button/link family. /learn: a card per chapter (title,
-  model blurb, linking the chapter Overview), reading order preserved. /api: a card or
-  rich row per module (code-font name, model description), grouped as the sidebar
-  groups them. All link affordances interactive (hover states per the family).
+- DIRECTION (refined with Henning 2026-10-07, "I like the direction"): two deliberately
+  different temperaments on shared tokens. /learn = PATH + INDEX: a prominent "Start
+  here" block for Getting started on top (course entrance one click deep — the
+  react.dev instinct without losing the map), then chapters in reading order, EACH
+  with its pages inline as a compact link list (model data; on mobile /learn is the
+  only full-curriculum index — no sidebar there). /api = DENSE CATALOG: compact rows
+  per module (code-font name, model description), grouped like the sidebar, each row
+  carrying its module's @signature features as quick links (model-driven, zero new
+  prose), plus a search prompt ("press /"). All link affordances interactive per the
+  existing family; no card-row genericness.
 - NO NEW PROSE: titles, blurbs and module descriptions come from the model (structure
   station rule 385 already reviewed those words). If a blurb is missing/weak, FLAG it
   for Henning instead of writing one.
