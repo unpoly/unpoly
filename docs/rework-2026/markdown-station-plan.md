@@ -412,9 +412,39 @@ Kept current during implementation; Henning relays to the orchestrator session.
     `/claude-plugins/marketplace.json`, and `/up.proxy.md` (an old slug: does the generic
     `.md` 301 or the unpoly-migrate redirect fire first?).
   - Confirm nginx stays cache-free; a CDN must honor `Vary: Accept`.
+  - Check that `/.well-known/agent-skills/unpoly-docs.tar.gz` is served without
+    `Content-Encoding: gzip` (an active `AddEncoding x-gzip .gz` would make clients
+    unpack it on the fly and fail the digest check).
+  - A build with `BASE_URL` set moves every absolute URL it writes (twins, marketplace,
+    `guide_url`), not only the skill's.
   - `npx skills add https://unpoly.com` and the Claude marketplace route against staging
     (`BASE_URL=https://<staging-host> bundle exec middleman build` gives a build whose
     absolute URLs and marketplace archive URL point at staging).
+- **Fresh-eyes review findings for Henning** (not resolved by the station: they touch an
+  agreed decision or reserved wording):
+  - **The `.md` rename redirect (13C note) cannot fire.** In `.htaccess` context
+    mod_rewrite runs before mod_alias, so `/old.md` hits the generic `.md` → page 301
+    first, then `/old` → `/new` (HTML, or the twin by negotiation). The line
+    `RedirectPermanent /old-page-name.md /new-page-name.md` in the contributing docs is
+    therefore dead advice. Options: drop the line from the docs (the generic rule already
+    lands on the page), or make the generic rule skip paths with a redirect so agents
+    land on `/new.md`. Confirm on staging with `/up.proxy.md`.
+  - **Reserved wording, suggested edits:**
+    - SKILL.md: "so more terms only help" overclaims (suggest "extra terms rarely hurt");
+      "one file per attribute, function, event, header and module" leaves out classes,
+      properties and selectors (suggest "one file per API symbol and module"); "The first
+      heading is the page title, followed by its kind in parentheses" only holds for API
+      pages; "ranked by matches per file" should be "by matching lines per file".
+    - The AgentIndex line "Release notes for every version of Unpoly" (SKILL.md and
+      `/index.md`): the skill ships only 2.x and later.
+    - Root index lead: "Every page is also available as Markdown" → "Every
+      documentation page …" (the landing page and imprint have no twin).
+    - Install draft: "Claude Code, Codex, Cursor, Copilot, Gemini CLI and about 80 other
+      agents" will go stale; suggest "and most other coding agents".
+  - **Content gap (content track):** nine Learn chapters have no summary yet (Forms,
+    Overlays, Live fragments, History, Scrolling & focus, Network & caching, Animation,
+    Backend integration, Advanced rendering), so `/index.md` and SKILL.md list them
+    without a description (17A+ wants one sentence each).
 - **Pending Henning approvals:**
   - Screenshots in `~/Projects/md-station/screenshots/` (not committed):
     `side-by-side/*.before-after.png` (all pages of the `markdown` shoot suite, 1280 and
@@ -424,6 +454,15 @@ Kept current during implementation; Henning relays to the orchestrator session.
     visually hidden pipe.
   - Wording: SKILL.md (`unpoly-site/source/skills/unpoly-docs/skill.txt.erb`), the root
     index lead, the drafts file, the contributing-docs section.
+  - Simplifications from the trim pass that need a decision (behavior-keeping ones are
+    applied): T1 move the "This page is being written." filter into `Toc::Topic` (touches
+    existing code); T2 let the layout render the MD button from the twin list instead
+    of 9 template calls (risks its placement); T3 give twins their area and hub at
+    registration (the preview would need a restart after a `toc.yml` change); T4 drop
+    the video `title`/`figcaption` fallbacks; T5 drop the "Type:" label; T6 drop
+    search.py tuning beyond decision 23 (stemming, hub/changelog factors, lead
+    snippets), each against the ranking queries; T7 fail instead of skip without
+    python3; T8 delete `shoot/markdown.rb` after the screenshot approval.
 
 ## Setup notes
 
@@ -494,3 +533,23 @@ Decisions made during implementation without asking, for Henning to confirm or r
   on staging; drop the note if the rewrite wins.
 - **Screenshot suite:** `shoot/markdown.rb` (`bin/shoot markdown`) stays committed for
   the approval round; delete it afterwards if it has no further use.
+- **Plan example vs. output (30.1):** the example `` #### `[options.target]` `` has
+  backticks; the generic converter writes `#### [options.target] {#options.target}`
+  (the signature is no `<code>`). SKILL.md describes the real output.
+- **Fresh-eyes review, applied:** the last `<i class="fa">` (`examples/_embed`) now uses
+  `icon()`; specs for `data-toc-ignore`/`data-toc-include` in `TOCInserter` and for
+  `BASE_URL`; a comment that `base_url` reads Middleman's private `@locs[:rack]`; the
+  AgentIndex class comment now admits the one-line descriptions it holds; three
+  wording fixes in the contributing-docs section.
+- **Fresh-eyes review, rejected:**
+  - rubyzip instead of the 30-line ZIP writer: a new default-group dependency.
+  - One rule for the duplicated Accept condition: the two lines read more plainly than
+    an env-flag indirection, and a spec keeps them identical.
+  - Skipping the ranking spec in plain `rspec` without an env var: a stale local build
+    is visible from its README note, and `rake skill:test` (and CI) build fresh.
+  - Caching the layout-less HTML render between a twin and its skill file: build time
+    (~2.5 min) is acceptable for now, and the cache would have to cross Middleman's
+    forked renderers.
+  - The "This page is being written." duplicate and the other trim ideas: reserved for
+    Henning (the trim list).
+

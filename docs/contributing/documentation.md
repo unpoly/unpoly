@@ -876,8 +876,8 @@ otherwise.
   `<desc>`, and an `id` on the svg or its `<figure>`. The Markdown links to the diagram on
   the HTML page and repeats its description.
 
-The page's contents (the list of headings above the first one) normally shows only the
-top-level headings. To list a lower heading too, give it a `data-toc-include` attribute:
+A page's table of contents normally lists only its top-level headings. To list a lower
+heading too, give it a `data-toc-include` attribute:
 
 ```markdown
 ### Closing when a location is reached {#location-condition}
@@ -888,7 +888,7 @@ top-level headings. To list a lower heading too, give it a `data-toc-include` at
 
 The templates in `unpoly-site` say what an element means with standard semantics
 (headings, `<nav>`, ARIA), which screen readers and the converter both understand. Where
-that is not enough, a `data-*` attribute takes over. Each attribute serves one
+that is not enough, a `data-*` attribute takes over. Each `data-*` attribute serves one
 consumer:
 
 | Marker | Screen readers | Search (Pagefind) | Contents list | Markdown |
@@ -897,7 +897,7 @@ consumer:
 | `data-pagefind-ignore` | – | skips the element | – | keeps it (agents want those blocks) |
 | `data-toc-ignore` | – | – | skips the heading | – |
 | `data-toc-include` | – | – | lists a lower heading | – |
-| `h2`–`h4` with `id` | headings | sub-results | lists them | `##` heading with `{#id}` |
+| `h2`–`h4` with `id` | headings | sub-results | lists them | a heading of that level with `{#id}` |
 | `role="heading" aria-level` | headings | – | – | heading of that level |
 | `aria-label` on a link | the link's name | – | – | the link's text |
 | `aria-hidden="true"` | hidden | indexed | – | dropped |
