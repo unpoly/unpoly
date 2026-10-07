@@ -154,7 +154,9 @@ learn:
   # Learn search badge, but appear in no list: not in the menu tree, not on the /learn
   # hub, not on the reading path (they render no Previous/Next). Other pages link to
   # them, e.g. /install opens them in an overlay with [up-layer=new].
-  loose: []
+  loose:
+    - bootstrap-integration
+    - legacy-browsers
 
 api:
   title: API reference

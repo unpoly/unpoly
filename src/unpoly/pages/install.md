@@ -62,15 +62,8 @@ You now have everything you need to start using Unpoly.
 For special needs, there are optional extensions:
 
 - [Server bindings](/server-bindings): Inspect or manipulate Unpoly's rendering through HTTP headers.
-- **Legacy browser support**: All [modern browsers](/up.framework.isSupported) are supported
-  out of the box. For very old browsers or build tools without ES2020 support, use the
-  polyfill-free [`unpoly.es6.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly.es6.js) build
-  ([minified](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly.es6.min.js): [[=size unpoly.es6.min.js]] gzipped).
-  The last version supporting Internet Explorer 11 is [2.7](https://unpoly.com/changes/2.7.1).
-- **Bootstrap integration**: Load [`unpoly-bootstrap5.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.js)
-  and [`unpoly-bootstrap5.css`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.css)
-  after Unpoly to configure it to use [Bootstrap](https://getbootstrap.com/)'s CSS classes.
-  Builds for [Bootstrap 3 and 4](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/) are also included.
+- <a href="/legacy-browsers" up-layer="new">Legacy browser support</a>: Builds for old browsers and build tools.
+- <a href="/bootstrap-integration" up-layer="new">Bootstrap integration</a>: Configure Unpoly to use Bootstrap's CSS classes.
 - [Upgrade shim](https://unpoly.com/changes/upgrading): Polyfills for deprecated Unpoly APIs.
 
 @page install

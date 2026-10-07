@@ -163,7 +163,7 @@ RedirectPermanent /after /targeting-fragments#appending-or-prepending
 RedirectPermanent /tutorial /start/overview
 RedirectPermanent /start /start/overview
 RedirectPermanent /install/server-bindings /server-bindings
-RedirectPermanent /install/bootstrap /install#extensions
-RedirectPermanent /install/legacy-browsers /install#extensions
+RedirectPermanent /install/bootstrap /bootstrap-integration
+RedirectPermanent /install/legacy-browsers /legacy-browsers
 RedirectPermanent /handling-everything /handling-all-links
 RedirectPermanent /attributes-and-options /start/api
