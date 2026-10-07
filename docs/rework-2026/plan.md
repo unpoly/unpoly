@@ -921,6 +921,25 @@ label "Edit page" -> "Edit" -> hidden on very narrow screens):
   current item may re-wrap when marked (accepted); other items must not move.
 - (4A) No bold/500-italic cuts until real bold-italic usage appears broken.
 
+HUB PAGES BATCH (specced 2026-10-07 on Henning's "OK let's spec it"; his complaint:
+/learn and /api are almost unstyled, links read fat-black non-interactive — the
+Structure station's deliberately dumb templates were never given an identity):
+- SCOPE: /learn and /api only. Module hubs (/up.link etc.) are EXCLUDED here: their
+  look changes with the late Essentials→intro-prose content batch (plan 1143) and the
+  ref sweep — styling around content that will be rewritten is rework. (One exception
+  allowed: cheap link-interactivity fixes that apply site-wide anyway.)
+- DIRECTION: hubs reuse the EXISTING design vocabulary, no new language — the landing's
+  card treatment and the outline-button/link family. /learn: a card per chapter (title,
+  model blurb, linking the chapter Overview), reading order preserved. /api: a card or
+  rich row per module (code-font name, model description), grouped as the sidebar
+  groups them. All link affordances interactive (hover states per the family).
+- NO NEW PROSE: titles, blurbs and module descriptions come from the model (structure
+  station rule 385 already reviewed those words). If a blurb is missing/weak, FLAG it
+  for Henning instead of writing one.
+- PROCESS: builder ships a first rendered proposal on the preview + screenshots;
+  Henning judges pixels and iterates informally (his standing preference: taste calls
+  on rendered results, not prose descriptions).
+
 SCRIPTING SITTING CLOSED (Henning 2026-10-07): all 7 pages approved. Page 7
 /script-security approved as shipped (nonce correction confirmed by the framework's own
 specs: active meta specs are bare, only a commented-out spec block carries the old
