@@ -21,10 +21,12 @@ in both repos). The orchestrator folds a summary into `plan.md` at merge time.
   keep `.`, `-`, `:`, `$` inside tokens (`up.render`, `[up-target]` → `up-target`).
   Additionally index the parts (`up.layer` → `up`, `layer`) so plain-English queries
   still match. A fixed query set with expected top results is part of the search tests.
-- **Converter registry:** every element signature (tag + classes) in converted content
-  has a rule: keep, drop, unwrap or custom. An unknown signature fails the build, as does
-  raw HTML left in the output. A dropped element covers all its descendants. Runs over
-  all pages at build time, plus a spec over the parser fixtures.
+- **Noticing unwanted output:** originally a strict converter registry (unknown elements
+  and leaked raw HTML fail the build). REPLACED in detailed alignment (30.8): no registry;
+  golden-file specs over representative fixture pages make every output change a
+  reviewable diff. Layout elements can't leak anyway (twins render with `layout: false`).
+  Raw HTML or pseudo-tags in the output are fine when a converter rule emits them on
+  purpose. Dropping an element always drops its descendants.
 
 
 ## Decisions
@@ -118,9 +120,99 @@ in both repos). The orchestrator folds a summary into `plan.md` at merge time.
   In Claude Code the skill shows as `/unpoly:unpoly-docs`.
 
 
-## Open for detailed alignment
+## Detailed alignment (in progress)
 
-To settle with `/agree-on-everything`:
+Numbers refer to the `/agree-on-everything` decision table.
+
+### Conversion approach (29, revises "Generation" above)
+
+The `.md` twin still renders its HTML sibling without layout, but the converter is
+**generic HTML → Markdown**. Guiderails (Henning):
+
+- Only a few custom rules, and they must be generic (e.g. SVG → title + URL). No custom
+  handlers for complex blocks such as parameter groups; they would need maintenance with
+  every block change.
+- The bar is "key information stays understandable for agents", not perfection.
+- Missing semantics go into the HTML, **ARIA first**, so screen readers and the converter
+  both benefit. Restructure markup only where ARIA can't help; new elements become BEM
+  blocks. Global `h1`–`h4` styles exist, so prefer `role="heading"` over real heading tags
+  that would need CSS resets.
+- Toolkit, in order of preference: semantics/ARIA → generic rules → embedded HTML or
+  made-up pseudo-tags (e.g. BEM block `param` → `<param>`, element `param--type` →
+  `<param-type>`) → custom rules.
+- Low-relevance elements are simply removed.
+
+### Settled
+
+- **1 twin-inclusion:** central list in `config.rb`. The doc-proxy loops register a twin
+  next to each page; a short list names the plain pages (`/learn`, `/api`, `/changes`,
+  `/changes/upgrading`, `/support`). Release proxies register twins too.
+- **2 converter-home:** `Unpoly::Guide::HtmlToMarkdown` in `lib/unpoly/guide/`, used for
+  web twins and the skill alike. Differences are injected: a link resolver
+  (`WebLinks(base_url)` / `SkillLinks(file_map, from)`); front matter and page lists come
+  from the calling template. A `RULES` hash maps CSS selectors to actions (a method name,
+  or a lambda for edge cases). Failures are hard errors in builds and in the preview.
+- **3 param-format:** dropped. Parameters get whatever generic conversion produces from
+  the improved semantics (30.9 ff.).
+- **11 media:** images → `![alt](https://unpoly.com/images/…)`; videos →
+  `[Video: <description>](https://unpoly.com/images/….webm)`, description from
+  `aria-label`, `title` or `<figcaption>`. The skill ships no media. The build fails when a
+  content image lacks `alt` or a video lacks a description (today all 16 images and 4
+  videos have one).
+- **31 skip-marker:** `data-markdown="skip"` for chrome humans use (Edit/MD buttons,
+  in-text TOC, …). `aria-hidden="true"` for decorative or duplicate content. Both dropped.
+- **30.1 headings:** `h1`–`h6` and `[role="heading"][aria-level]` → `#`. A link target's
+  `id` (the heading's own, or that of its `[anchor-link]` wrapper) is appended Kramdown
+  style: `` #### `[options.target]` {#options.target} ``. `<a id>` only as a fallback for
+  non-heading targets. SKILL.md and `/index.md` explain the convention in one line.
+  (Docs have ~190 same-page and ~780 cross-page fragment links.)
+- **30.2 aria-label links:** a link's `aria-label` always becomes its Markdown text.
+- **30.3 navs:** `nav` and `[role="navigation"]` → literal `<nav aria-label="…">` blocks
+  with a bullet list of links inside (blank lines around it); headings inside stay.
+  `search.py` skips `<nav>` blocks when indexing (as Pagefind skips them via
+  `data-pagefind-ignore`).
+- **30.4 drop rules:** `[data-markdown="skip"]`, `[aria-hidden="true"]`, `[hidden]`,
+  `script`/`style`/`template`/`noscript`. No controls rule (the only control in content
+  is the video play button, which converts to nothing).
+- **30.8 noticing changes:** golden-file specs (see Amendments).
+- **Marker map** (for the contributing docs, see 27):
+
+  | Marker | Screen readers | Pagefind | Auto-TOC | Markdown |
+  |---|---|---|---|---|
+  | `data-pagefind-body` | – | indexes these pages | – | – |
+  | `data-pagefind-ignore` | – | skips | – | – (agents want those blocks) |
+  | `toc="false"` | – | – | skips heading | – |
+  | `h2`–`h4` with `id` | headings | sub-results | lists | `#` + `{#id}` |
+  | `role="heading" aria-level` | headings | – | – | `#` |
+  | `aria-label` on links | name | – | – | link text |
+  | `aria-hidden="true"` | hidden | indexed | – | dropped |
+  | `data-markdown="skip"` | read | indexed | – | dropped |
+  | `svg[role=img]` + title/desc | reads title/desc | – | – | "Diagram: …" |
+
+  Pagefind sub-results only use real `h1`–`h6` with `id`; the auto-TOC only real heading
+  tags with `id`. Neither needs `role="heading"` support.
+
+### Open
+
+- **30.5 svg-diagram** (discussing; lean: `[Diagram: <title>](<HTML page URL>)` plus
+  `<desc>` as a paragraph; `svg[role=img]` without a name fails the build).
+- **30.6** `role="img"` + `aria-label` → `(label)`.
+- **30.7 magic comments** (lean: strip `mark:`/`mark-line` because agents would copy them
+  and they look like framework syntax; keep `result:`/`chip:`; `label:` → caption line
+  above the fence).
+- **30.9** parameter signature `role="heading" aria-level="4"`.
+- **30.10** experimental icon `role="img" aria-label="Experimental"`.
+- **30.11** types: visually hidden `<span class="types--or"> or </span>` separators.
+- **30.12** reading nav: `aria-label="Previous: <title>"`, icons `aria-hidden`.
+- **30.13** `data-markdown="skip"` on Edit link, MD button, in-text TOC, param minitoc.
+- **30.14** `aria-hidden` on icon fonts we touch.
+- **30.15–30.17** accepted quirks: H1 runs together (breadcrumb stays inside for
+  Pagefind; front matter carries `kind`/`module`), preview cards as long link texts,
+  admonitions as plain blockquotes (makes 5 unnecessary).
+- Remaining table items 4–10, 12–28 (several shrink or vanish after 29: 5, 7, 10; 9 keeps
+  only the root and hub links the twin template adds).
+
+### Previously listed details
 
 - Converter rules: parameter format, magic comments (`mark:`, `result:`, `chip:`,
   `label:`), embeds (diagram text alternatives), API hub group rows.
