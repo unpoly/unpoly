@@ -159,8 +159,9 @@ The `.md` twin still renders its HTML sibling without layout, but the converter 
   `aria-label`, `title` or `<figcaption>`. The skill ships no media. The build fails when a
   content image lacks `alt` or a video lacks a description (today all 16 images and 4
   videos have one).
-- **31 skip-marker:** `data-markdown="skip"` for chrome humans use (Edit/MD buttons,
-  in-text TOC, …). `aria-hidden="true"` for decorative or duplicate content. Both dropped.
+- **31 skip-marker:** a dedicated attribute for chrome humans use, now
+  `data-markdown="ignore"` (see 33). `aria-hidden="true"` for decorative or duplicate
+  content. Both dropped.
 - **30.1 headings:** `h1`–`h6` and `[role="heading"][aria-level]` → `#`. A link target's
   `id` (the heading's own, or that of its `[anchor-link]` wrapper) is appended Kramdown
   style: `` #### `[options.target]` {#options.target} ``. `<a id>` only as a fallback for
@@ -171,7 +172,7 @@ The `.md` twin still renders its HTML sibling without layout, but the converter 
   with a bullet list of links inside (blank lines around it); headings inside stay.
   `search.py` skips `<nav>` blocks when indexing (as Pagefind skips them via
   `data-pagefind-ignore`).
-- **30.4 drop rules:** `[data-markdown="skip"]`, `[aria-hidden="true"]`, `[hidden]`,
+- **30.4 drop rules:** `[data-markdown="ignore"]`, `[aria-hidden="true"]`, `[hidden]`,
   `script`/`style`/`template`/`noscript`. No controls rule (the only control in content
   is the video play button, which converts to nothing).
 - **30.8 noticing changes:** golden-file specs (see Amendments).
@@ -186,31 +187,66 @@ The `.md` twin still renders its HTML sibling without layout, but the converter 
   | `role="heading" aria-level` | headings | – | – | `#` |
   | `aria-label` on links | name | – | – | link text |
   | `aria-hidden="true"` | hidden | indexed | – | dropped |
-  | `data-markdown="skip"` | read | indexed | – | dropped |
+  | `data-markdown="ignore"` | read | indexed | – | dropped |
+  | `data-markdown="chip"` | read | indexed | – | `(title or text)` |
   | `svg[role=img]` + title/desc | reads title/desc | – | – | "Diagram: …" |
 
   Pagefind sub-results only use real `h1`–`h6` with `id`; the auto-TOC only real heading
   tags with `id`. Neither needs `role="heading"` support.
 
+- **Attribute naming:** `data-<scope>-ignore` for single-purpose switches:
+  `data-pagefind-ignore` (unchanged), `data-toc-ignore` (replaces `toc="false"`),
+  `data-toc-include` (replaces `toc="true"`, used 3× in `closing-overlays.md`).
+- **33 markdown-roles** (supersedes 31's attribute): one attribute `data-markdown` with
+  a small vocabulary. `ignore` drops the element and its contents. `chip` writes
+  `(<title or text>)`, using `title` when present (kind badge "JS" with
+  `title="JavaScript function"` → `(JavaScript function)`; visibility and optionality
+  tags → `(deprecated)`, `(optional)`). New values only for real cases; no
+  multi-attribute schemes.
+- **30.5 svg-diagram:** `[Diagram: <title>](<HTML page URL>#<id>)` plus `<desc>` as a
+  paragraph. The diagram's `<figure>` gets `id="fragment-updates-diagram"`. An
+  `svg[role=img]` without a name or without an id (on itself or its figure) fails the
+  build. Inline SVG stays on the site (webfont, palette colors, computed layout).
+- **30.6:** non-SVG `[role="img"][aria-label]` → `(<label>)`.
+- **30.7 magic comments:** remove `mark:` and `mark-line` comments. For `chip:` and
+  `label:` remove only the directive prefix (`<!-- chip: foo -->` → `<!-- foo -->`).
+  Keep `result:` unchanged.
+- **30.9:** parameter signature gets `role="heading"`, `aria-level` 4 under titled
+  parameter groups, 3 otherwise. No real `h4` (global heading styles). Parameter groups
+  stay (outline for long lists). Optionality tags get `data-markdown="chip"`.
+- **30.10 / 30.14 icons:** one helper `icon(name, label: nil)` (backed by
+  `Unpoly::Guide::Icon` for `lib/`). Without label: `aria-hidden="true"`. With label:
+  `role="img" aria-label=… title=…` → `(label)` in Markdown. All 18 `<i class="fa …">`
+  usages switch to it; CSS pseudo-element icons stay.
+- **30.11 types:** a `<span class="types--or"> | </span>` between type chips, visually
+  hidden by default. During implementation, try showing the pipe in place of the
+  separating borders; Henning decides visually from side-by-side screenshots.
+- **30.12 reading nav:** `prev_link(page)` / `next_link(page)` helpers render the links
+  (`aria-label="Previous: <title>"`, icons via `icon`) and record head links emitted as
+  `<link rel="prev">` / `<link rel="next">`. All head links (incl. the Markdown
+  alternate) go through one `head_link(rel:, href:, type: nil)` collector. The nav gets
+  `aria-label="Reading order"`.
+- **30.13:** `data-markdown="ignore"` on Edit link, MD button, parameter minitoc items,
+  "Revision on GitHub" button. The in-text auto-TOC stays (agents peek at the first
+  lines of long pages).
+- **30.15 H1:** breadcrumb `data-markdown="ignore"` (the module is the closest hub
+  linked by 9, and in front matter), subtitle `data-markdown="chip"` →
+  `# up.render([target], [options]) (JavaScript function)`. Structure unchanged
+  (Pagefind titles).
+- **30.16 preview cards:** a container (`li`) with `[up-expand]`; title is
+  `role="heading"` (level 3 under "Essentials"/"All features"), the link only on the
+  signature, the kind badge after the signature in the DOM (CSS keeps its visual
+  position) with `data-markdown="chip"`, summary as a paragraph.
+- **30.17 admonitions:** generic conversion (`> #### Tip` + text). No GFM alerts.
+  Decision 5 dropped.
+
 ### Open
 
-- **30.5 svg-diagram** (discussing; lean: `[Diagram: <title>](<HTML page URL>)` plus
-  `<desc>` as a paragraph; `svg[role=img]` without a name fails the build).
-- **30.6** `role="img"` + `aria-label` → `(label)`.
-- **30.7 magic comments** (lean: strip `mark:`/`mark-line` because agents would copy them
-  and they look like framework syntax; keep `result:`/`chip:`; `label:` → caption line
-  above the fence).
-- **30.9** parameter signature `role="heading" aria-level="4"`.
-- **30.10** experimental icon `role="img" aria-label="Experimental"`.
-- **30.11** types: visually hidden `<span class="types--or"> or </span>` separators.
-- **30.12** reading nav: `aria-label="Previous: <title>"`, icons `aria-hidden`.
-- **30.13** `data-markdown="skip"` on Edit link, MD button, in-text TOC, param minitoc.
-- **30.14** `aria-hidden` on icon fonts we touch.
-- **30.15–30.17** accepted quirks: H1 runs together (breadcrumb stays inside for
-  Pagefind; front matter carries `kind`/`module`), preview cards as long link texts,
-  admonitions as plain blockquotes (makes 5 unnecessary).
-- Remaining table items 4–10, 12–28 (several shrink or vanish after 29: 5, 7, 10; 9 keeps
-  only the root and hub links the twin template adds).
+- **32 content-coordination** (new): `{:toc="true"}` renames in `closing-overlays.md`,
+  the install-page section (26), template/CSS changes on a branch the styling track
+  moves daily, attribute renames.
+- Remaining table items 4, 6–10, 12–28 (7 and 10 largely covered; 9 keeps only the root
+  and hub links the twin template adds).
 
 ### Previously listed details
 
