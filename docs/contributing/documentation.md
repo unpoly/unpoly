@@ -756,6 +756,11 @@ the manifest, listed twice, or when the manifest names a slug that doesn't exist
 The order within a Learn topic drives the previous/next navigation on every Learn page,
 so where you insert a page is an editorial decision, not just a technical one.
 
+A Learn page that belongs to no chapter goes in the area's `loose:` list instead. It
+still counts as a Learn page (Learn menu, Learn search badge), but nothing lists it: not
+the sidebar, not the `/learn` hub, not the previous/next path. Readers reach it only
+through links from other pages, e.g. a link that opens it in an overlay.
+
 ### Linking the reference to a guide
 
 Readers reach a guide from the features it explains. The `@learn-ref` directive on a
