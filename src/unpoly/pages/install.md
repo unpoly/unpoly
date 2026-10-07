@@ -4,13 +4,14 @@ Installation
 Unpoly is one JavaScript file and one CSS file that you load in your `<head>`.
 It has no dependencies and needs no build step.
 
-Unpoly works with any server that renders HTML, and with static sites.
-Your backend needs no additional software.
+Unpoly works with any language and any web framework. Your backend keeps rendering
+HTML and needs no additional software. Static sites work, too.
 
 
-## Initialization {#initialization}
+## Loading Unpoly from a CDN {#initialization}
 
-Include Unpoly before your own JavaScripts and stylesheets:
+For a quick test drive, load both files from a CDN.
+Include them before your own JavaScripts and stylesheets:
 
 ```html
 <!DOCTYPE html>
@@ -29,12 +30,14 @@ Include Unpoly before your own JavaScripts and stylesheets:
 ```
 
 Unpoly initializes on [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event)
-and enhances the HTML on your page. You can also [boot Unpoly manually](/up-boot-manual) at a time of your choice.
+and enhances the HTML on your page. This is all you need to use Unpoly attributes,
+like the `[up-follow]` link above. Other installation methods, like npm, are explained below.
 
 
 ## Installing from npm {#npm}
 
-Instead of loading Unpoly from a CDN, you can install it as an [npm package](https://www.npmjs.com/package/unpoly):
+To make Unpoly a permanent part of your app, you can install it as an
+[npm package](https://www.npmjs.com/package/unpoly):
 
 ```nohighlight
 npm install unpoly[[=npm_tag]] --save
@@ -49,67 +52,26 @@ import './your-scripts.js'
 import './your-styles.css'
 ```
 
-
-## JavaScript API {#javascript-api}
-
-Most of Unpoly's functionality is available as new attributes
-that you can add to any HTML element.
-There is also a JavaScript API to change defaults or [integrate your custom scripts](/up.script).
-
-The JavaScript API is accessed through the `window.up` global, without an explicit `import`:
-
-```js
-up.compiler('.click-to-hide', function(element) {
-  let hide = () => element.style.display = 'none'
-  element.addEventListener('click', hide)
-})
-```
+Your own code then accesses Unpoly's JavaScript API through the `window.up` global,
+without an explicit `import`.
 
 
 ## Optional extensions {#extensions}
 
-You now have everything you need to start using Unpoly!
+You now have everything you need to start using Unpoly.
+For special needs, there are optional extensions:
 
-We provide a number of **optional** extensions:
-
-- [Optional server bindings](/server-bindings): Inspect or manipulate Unpoly's rendering through HTTP headers
-- [Legacy browser support](#browser-support): Builds for old browsers and build tools
-- [Bootstrap integration](#bootstrap): Configure Unpoly to use Bootstrap classes
-- [Upgrade shim](https://unpoly.com/changes/upgrading): Polyfills for deprecated Unpoly APIs
-
-
-## Bootstrap integration {#bootstrap}
-
-If you're using [Bootstrap](https://getbootstrap.com/), there are some **optional** files that configure
-Unpoly to use Bootstrap's CSS classes:
-
-| Development | Production |
-|---|---|
-| [`unpoly-bootstrap3.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap3.js) | [`unpoly-bootstrap3.min.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap3.min.js) ([[=size unpoly-bootstrap3.min.js]] gzipped) |
-| [`unpoly-bootstrap3.css`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap3.css) | [`unpoly-bootstrap3.min.css`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap3.min.css) ([[=size unpoly-bootstrap3.min.css]] gzipped) |
-| [`unpoly-bootstrap4.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap4.js) | [`unpoly-bootstrap4.min.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap4.min.js) ([[=size unpoly-bootstrap4.min.js]] gzipped) |
-| [`unpoly-bootstrap4.css`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap4.css) | [`unpoly-bootstrap4.min.css`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap4.min.css) ([[=size unpoly-bootstrap4.min.css]] gzipped) |
-| [`unpoly-bootstrap5.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.js) | [`unpoly-bootstrap5.min.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.min.js) ([[=size unpoly-bootstrap5.min.js]] gzipped) |
-| [`unpoly-bootstrap5.css`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.css) | [`unpoly-bootstrap5.min.css`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.min.css) ([[=size unpoly-bootstrap5.min.css]] gzipped) |
-
-
-## Browser support {#browser-support}
-
-Recent versions of Unpoly support [all modern browsers](/up.framework.isSupported).
-
-The last version with support for Internet Explorer 11 is [2.7](https://unpoly.com/changes/2.7.1).
-
-### ES6 build {#es6-build}
-
-`unpoly.js` uses ES2020 syntax that very old browsers or build tools may not support.
-If you're not already working around this with a transpiler like [Babel](https://babeljs.io/),
-you can use the ES6 build of Unpoly:
-
-| Development | Production |
-|---|---|
-| [`unpoly.es6.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly.es6.js) | [`unpoly.es6.min.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly.es6.min.js) ([[=size unpoly.es6.min.js]] gzipped) |
-
-The ES6 build does not contain any polyfills.
+- [Server bindings](/server-bindings): Inspect or manipulate Unpoly's rendering through HTTP headers.
+- **Legacy browser support**: All [modern browsers](/up.framework.isSupported) are supported
+  out of the box. For very old browsers or build tools without ES2020 support, use the
+  polyfill-free [`unpoly.es6.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly.es6.js) build
+  ([minified](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly.es6.min.js): [[=size unpoly.es6.min.js]] gzipped).
+  The last version supporting Internet Explorer 11 is [2.7](https://unpoly.com/changes/2.7.1).
+- **Bootstrap integration**: Load [`unpoly-bootstrap5.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.js)
+  and [`unpoly-bootstrap5.css`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.css)
+  after Unpoly to configure it to use [Bootstrap](https://getbootstrap.com/)'s CSS classes.
+  Builds for [Bootstrap 3 and 4](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/) are also included.
+- [Upgrade shim](https://unpoly.com/changes/upgrading): Polyfills for deprecated Unpoly APIs.
 
 @page install
 @signature
