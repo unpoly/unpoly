@@ -62,8 +62,8 @@ You now have everything you need to start using Unpoly.
 For special needs, there are optional extensions:
 
 - [Server bindings](/server-bindings): Inspect or manipulate Unpoly's rendering through HTTP headers.
-- <a href="/legacy-browsers" up-layer="new">Legacy browser support</a>: Builds for old browsers and build tools.
-- <a href="/bootstrap-integration" up-layer="new">Bootstrap integration</a>: Configure Unpoly to use Bootstrap's CSS classes.
+- [Legacy browser support](/legacy-browsers): Builds for old browsers and build tools.
+- [Bootstrap integration](/bootstrap-integration): Configure Unpoly to use Bootstrap's CSS classes.
 - [Upgrade shim](https://unpoly.com/changes/upgrading): Polyfills for deprecated Unpoly APIs.
 
 @page install
