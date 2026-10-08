@@ -937,6 +937,21 @@ revisited: server-bindings may retitle "The server protocol" and protocol-
 implementations may inherit "Server bindings" (option (a) chosen now to avoid the
 collision). Dispatched to builder (structure) + writer (five files) 2026-10-08.
 
+TOKEN ECONOMY (Henning 2026-10-09, after blowing the weekly quota in 3 days):
+- The ORCHESTRATOR session and the Markdown-station session switch to OPUS 5.5
+  (compact first); Fable is reserved for FRESH CHAPTER-REGISTER PROSE subagents only —
+  small content edits (blurbs, section moves, verdict application) go to Opus too.
+- AGENT HYGIENE: spawn FRESH short-lived agents per round instead of resuming
+  long-lived ones (a resumed agent re-processes its whole accumulated context every
+  wake-up; the old reviewer reached ~650k tokens). Continuity lives in plan.md and
+  self-contained briefs, never in an agent's memory.
+- LEANER REPORTING: numbers-only reports, detail on request; reviewers don't re-run
+  suites the builder just ran green; spot-checks for small rounds, full fresh-eyes
+  rounds only for new architecture or new prose.
+NEXT MAJOR TASK (Henning): the Markdown station is finishing in its own session —
+merging docs-rework-md into docs-rework (both repos) and closing that station comes
+next; the orchestrator takes the merge per markdown-station-handoff.md.
+
 GETTING-STARTED SITTING CLOSED + HUB POLISH VERDICTS (Henning 2026-10-08, slow-down):
 hub: h1 "Learn Unpoly" (template copy); "+N more" counts what #all-features lists (6A);
 modules with no signature features say "N features" WITHOUT a plus (2X); hover stays
