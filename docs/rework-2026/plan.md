@@ -935,6 +935,23 @@ revisited: server-bindings may retitle "The server protocol" and protocol-
 implementations may inherit "Server bindings" (option (a) chosen now to avoid the
 collision). Dispatched to builder (structure) + writer (five files) 2026-10-08.
 
+HUB DESIGN SETTLED (Henning 2026-10-08, "happy with the current look and feel"):
+the NAMED REFERENCE is the Design canvas https://claude.ai/artifact/KCzLYLgPJLygjHygUknWAA
+at version 1791452212-ba6c (boards Main.dc.html = /learn, Api.dc.html = /api; mock
+sidebar/header are SCENERY, not spec). Settled choices: /learn = intro cross-linking
+/api; Start-here block on #f2f3f8 wash (radius 10, caption START HERE, indigo
+"Getting started ›" 24px bold, blurb, page links); numbered path (46px circled numbers
++ connector line), chapter title indigo bold 20px + ›, blurb, FULL page lists as red
+lightly-underlined links (decoration 40%); per-chapter Overview link = REDICON style
+(bold red, light red underline, 2x2-grid icon). /api = rows: gray cube icon, mono bold
+indigo module name WITH light indigo underline as the link (NO per-row Overview link),
+model description, signature features as red lightly-underlined mono links (max 6,
+"+ N more" gray, counts real), Formats row with brackets icon, intro naming Learn.
+Mock copy = content spec per the v11 precedent (intros); chapter blurbs: 10 stubs get
+one seeded summary sentence (from the mock, Henning-seen) via a writer + review.
+Dispatched: builder implements against the reference (iterating its draft 122b7799);
+writer seeds the blurbs.
+
 TOPIC-LESS LEARN PAGES (settled with Henning 2026-10-07/08; supersedes the
 move-to-Backend-integration + chapter-rename thread, which DIES): "Bootstrap
 integration" and "Legacy browser support" become their OWN @pages, recovered from the
