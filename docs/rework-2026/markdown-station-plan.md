@@ -557,3 +557,93 @@ Decisions made during implementation without asking, for Henning to confirm or r
   - The "This page is being written." duplicate and the other trim ideas: reserved for
     Henning (the trim list).
 
+
+## Round 2: skill page, promotion, agent-operable search (settled 2026-10-08)
+
+Prerequisite: merge docs-rework into docs-rework-md in both worktrees (upstream added the
+/skill stub page — in toc, menu and reading chain, with /agent-skill and /agent
+redirects — reserved for this station to fill).
+
+- **34 skill-page:** /skill becomes the canonical skill page; install page, AI-tools
+  corner, search tip and llms.txt all link here. Structure: lead · "## Install with
+  `npx skills`" (recommended; links github.com/vercel-labs/skills; update path below) ·
+  "## Install as a Claude Code plugin" (marketplace add + install; links
+  code.claude.com/docs/en/plugins/install; update + auto-update note; "### Team setup"
+  with the extraKnownMarketplaces snippet — its new home) · "## Make your agent use it"
+  (the AGENTS.md/CLAUDE.md trigger snippet, moved off the install page) · "## Use
+  without installing" (every page has an .md twin; or paste https://unpoly.com/llms.txt
+  into any chat). Each install method ends with a reworded "optionally nudge your agent
+  into using the skill for all Unpoly work" line fragment-linking
+  #make-your-agent-use-it. No "how it works" section.
+  - New SKILL.md description (replaces skill.txt.erb:9): "All of Unpoly's documentation
+    as searchable local Markdown: every guide, the full API reference, and release
+    notes. Use when writing, reviewing, debugging or upgrading anything that uses
+    Unpoly — up-* HTML attributes, up.* JavaScript functions, up:* events, X-Up-*
+    headers — to look up how Unpoly works, its best practices and common patterns, and
+    exact API details instead of guessing."
+  - Page lead: same ideas addressed to the human; benefits include "faster than
+    fetching pages from the web and works offline". Draft agreed in session; final
+    wording on Henning's review list.
+- **35 install-rework (revises 26A):** the install-page draft shrinks to: recommend the
+  skill, the npx command, and "The [skill page](/skill) has other install methods and
+  ways to use the docs from a plain chat." Everything else moved to /skill. Still
+  drafted by us, landed by the content track.
+- **36 ai-tools-corner (revises 16A+):** the title-row corner becomes
+  `[markdown-logo] [copy icon] Skill · [pencil]` — AI items grouped left, Edit
+  right-most and icon-only (drops the edit-link--etc machinery), "Skill" the only text
+  item (links /skill). Markdown logo is a site-local SVG: the icon() helper learns
+  registered SVG icons with the same ARIA treatment. Copy button: real <button>,
+  fetches the page's .md twin, clipboard-writes, checkmark feedback ~2 s; hides itself
+  without navigator.clipboard. aria-labels/titles: MD "This page as Markdown — for
+  agents and LLMs"; Copy "Copy this page as Markdown — paste it into any AI chat";
+  Skill "Install the Unpoly docs as an agent skill"; Edit "Edit this page on GitHub".
+  As the screen narrows items disappear in order Edit → Skill → Markdown-link → Copy
+  (per-item breakpoints; Copy survives longest). Same pages as the old MD button (all
+  twinned pages except root); data-markdown="ignore" + data-pagefind-ignore; BEM block
+  ai-tools.
+- **37 search-empty-tip:** the dialog's empty state shows one static line — TIP (styled
+  like the admonition label): "Your coding agent can search these docs locally with the
+  [Unpoly agent skill](/skill)" (link up-layer="root"). Gone at the first keystroke.
+  TIP styling on Henning's review list.
+- **38 llms-extras:** two preamble paragraphs in the shared root-index text (/index.md
+  = /llms.txt, same bytes), after the fragment-link convention, before ## Learn:
+  "Most pages are available as both HTML and Markdown: append `.md` to any page URL,
+  e.g. `https://unpoly.com/up.render.md`." and "An [agent skill](https://unpoly.com/skill.md)
+  lets you read and search all of this documentation offline." The skill's embedded
+  index omits both.
+- **39 search trigger:** search_dialog.js upgrades the pill on boot:
+  aria-haspopup="dialog", aria-keyshortcuts="/", aria-label "Search docs — opens the
+  search dialog" (contains the visible text), title "Press / to search". Without JS the
+  pill stays a plain link to /api. (aria-label wins name computation; title is the
+  tooltip — identical values are not double-announced.)
+- **40 dialog ARIA:** input gains aria-activedescendant tracking the selected option
+  (options get stable ids); a visually hidden role="status" aria-live="polite" line
+  announces "N results for 'q'" / "No results", debounced with the search; the 37 tip,
+  no-results message and status line live OUTSIDE the role="listbox" element (listbox
+  children must be options); section hits get aria-labels including their page
+  ("up.render — Parameters"); verify (not assume) the Unpoly layer provides
+  role="dialog" + aria-modal + focus trap, and that autofocus works in the layer.
+- **41 WebMCP (verified 2026-10-08):** W3C WebML CG draft; Chrome origin trial since
+  149 (flag since Canary 146); ChatGPT desktop app supports it (imperative tools only,
+  GPT-5.6 Sol/Terra); API spelled document.modelContext with navigator.modelContext as
+  older alias — feature-detect both, register whichever exists. No polyfill (new
+  dependency; skipped). New compiler webmcp.js (~70–90 lines) + search_core.js
+  extraction: the module-level pipeline (SEARCH config, loadPagefind, rankPages,
+  searchPages — ~90 lines of search_dialog.js) moves to its own file required by both
+  the dialog and webmcp.js; zero duplicated search logic. Tools:
+  - search_docs(query, limit?): pure data via searchPages → {title, kind, url, mdUrl,
+    excerpt}. Appends ONCE per page load: "Tip: this documentation is installable as an
+    agent skill for offline search — https://unpoly.com/skill.md".
+  - get_page_markdown(url?): fetches a page's .md twin; without url, the CURRENT page,
+    twin-checked via the <link rel="alternate" type="text/markdown"> in the head (the
+    landing page has one → /index.md); for passed URLs the .md fetch status decides;
+    on failure returns an error pointing at search_docs and /index.md.
+  - Descriptions are task-only prompts ("Prefer this over navigating and reading
+    pages."). No get_agent_skill tool (an advertising tool would rarely be called and
+    costs trust); the tip line carries the nudge. Re-register across fragment
+    navigation if the API requires it (checked at implementation). Chrome
+    origin-trial registration for unpoly.com is Henning's external step; the meta
+    token is one template line later.
+
+Henning's review list from this round: /skill lead + full page wording, the new SKILL.md
+description, the TIP styling, the ai-tools corner (screenshots), tool descriptions.
