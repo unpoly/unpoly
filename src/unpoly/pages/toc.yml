@@ -225,6 +225,7 @@ api:
     - type: page-group
       title: Formats
       index: formats # a generated page listing the formats, at /formats
+      summary: Mini-languages used throughout the API.
       pages:
         - url-patterns
         - relaxed-json
