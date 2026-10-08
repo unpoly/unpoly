@@ -594,6 +594,7 @@ A `[[=token]]` inserts a value that is computed when the site builds:
 | `[[=version]]` | The current Unpoly version, e.g. `3.14.3` |
 | `[[=npm_tag]]` | `@next` on a pre-release, nothing on a stable version |
 | `[[=size unpoly.min.js]]` | The gzipped size of a file in `dist/`, e.g. `12.9 KB` |
+| `[[=base_url]]` | The site's origin, e.g. `https://unpoly.com` (the preview's own origin while previewing) |
 
 Unlike wikilinks, tokens are substituted *everywhere*, including code blocks — that's
 their main job, keeping version numbers in install snippets current
