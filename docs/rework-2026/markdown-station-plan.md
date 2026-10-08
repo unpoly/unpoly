@@ -445,10 +445,9 @@ Kept current during implementation; Henning relays to the orchestrator session.
       documentation page …" (the landing page and imprint have no twin).
     - Install draft: "Claude Code, Codex, Cursor, Copilot, Gemini CLI and about 80 other
       agents" will go stale; suggest "and most other coding agents".
-  - **Content gap (content track):** nine Learn chapters have no summary yet (Forms,
-    Overlays, Live fragments, History, Scrolling & focus, Network & caching, Animation,
-    Backend integration, Advanced rendering), so `/index.md` and SKILL.md list them
-    without a description (17A+ wants one sentence each).
+  - ~~Content gap (content track): nine Learn chapters had no summary.~~ Closed by the
+    chapter blurbs merged from docs-rework (2026-10-08): `/index.md` and SKILL.md now
+    describe every Learn chapter.
 - **Pending Henning approvals:**
   - Screenshots in `~/Projects/md-station/screenshots/` (not committed):
     `side-by-side/*.before-after.png` (all pages of the `markdown` shoot suite, 1280 and
@@ -478,11 +477,12 @@ Kept current during implementation; Henning relays to the orchestrator session.
     check against the Claude Code docs before landing.
   - The new SKILL.md description (34), landed in `skill.txt.erb`.
   - The search tip's TIP styling (`.search-dialog--tip-label`).
-  - The ai-tools corner: screenshots in `~/Projects/md-station/screenshots/round2/`
-    (`side-by-side/*.round1-vs-round2.png`, and
-    `side-by-side/corner-widths-1280-800-600-500-390.png` for the per-item breakpoints:
-    Edit goes below 700 px, Skill below 560 px, the Markdown link below 460 px, Copy
-    stays). The search tip is `shots/w1280-markdown-14-search-tip.png`.
+  - The ai-tools corner, revised per Henning's mockup (36 revised): screenshots in
+    `~/Projects/md-station/screenshots/round2-revised/` (`mockup-vs-implementation.png`,
+    `w1280-`/`w390-selector.round1-round2-revised.png`,
+    `corner-widths-1280-600-390.png`). SKILL drops below 460 px, the Markdown mark below
+    360 px; Copy always stays (at 390 px the phone keeps both icons). The search tip is
+    `~/Projects/md-station/screenshots/round2/shots/w1280-markdown-14-search-tip.png`.
   - The WebMCP tool titles and descriptions (`source/javascripts/components/webmcp.js`).
   - The root-index lead lost its sentence "Every page is also available as Markdown:
     append `.md` to its URL.", which 38's first preamble paragraph now says.
@@ -699,16 +699,18 @@ redirects — reserved for this station to fill).
     origin-trial registration for unpoly.com is Henning's external step; the meta
     token is one template line later.
 
+- **36 revised per Henning's mockup 2026-10-08:** Edit removed (also the release pages'
+  code link), quiet inline row `SKILL · [M↓] · [⧉]` without button chrome. Narrow
+  screens drop SKILL below 460 px and the Markdown mark below 360 px; Copy stays.
+
 Henning's review list from this round: /skill lead + full page wording, the new SKILL.md
 description, the TIP styling, the ai-tools corner (screenshots), tool descriptions.
 
 
 ## Round 2 implementation notes (decided by the builder)
 
-- **Releases in the ai-tools corner:** the pencil's place shows a code icon linking the
-  release's code on GitHub ("This version’s code on GitHub"); 36 only names Edit.
-  Pages without a source (hubs, `/support`, `/changes`) end at Skill, without the
-  separator.
+- **Releases in the ai-tools corner:** superseded by 36 revised (no Edit or code link
+  anywhere).
 - **Copy button:** uses a `ClipboardItem` with a promise where available, so Safari keeps
   the click's permission across the fetch; `writeText` otherwise. While the checkmark
   shows, its aria-label is "Copied". It is a real `<button hidden>` that only
@@ -716,8 +718,8 @@ description, the TIP styling, the ai-tools corner (screenshots), tool descriptio
 - **SVG icons:** `Icon::SVG` registers inline SVGs (only the Markdown mark, CC0) with the
   same ARIA treatment as webfont icons; the converter writes a labelled SVG icon as
   `(label)` like any other icon (a diagram rule would have demanded an id).
-- **Corner buttons are one height** (`$ai-tools-height`), so the icon buttons line up
-  with "Skill".
+- **Corner items share one line height** (`$ai-tools-height`), so the icons line up with
+  SKILL.
 - **Dialog ARIA, verified:** Unpoly puts `role="dialog"` and `aria-modal="true"` on the
   overlay's box (`up-modal-box`, `OverlayFocus`), not on `up-modal`. The dialog's
   aria-label was on `up-modal` and is now on the box. Focus trap and autofocus are

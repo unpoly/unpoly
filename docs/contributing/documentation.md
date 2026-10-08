@@ -907,8 +907,8 @@ consumer:
 | `<svg role="img">` with `<title>`/`<desc>` | reads them | – | – | `[Diagram: title](…)` and the description |
 | `<nav aria-label="…">` | a landmark | – | – | a literal `<nav>` block of links |
 
-`data-markdown` has two values. `ignore` drops chrome that only humans use (the Edit
-link, the MD button, a breadcrumb), with everything inside it. `chip` writes a badge or
+`data-markdown` has two values. `ignore` drops chrome that only humans use (the
+corner with the Markdown and copy buttons, a breadcrumb), with everything inside it. `chip` writes a badge or
 tag as a word in parentheses, preferring its `title`: the kind badge "JS" with
 `title="JavaScript function"` becomes `(JavaScript function)`. Add a value only for a
 case these two can't express.
