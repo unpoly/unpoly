@@ -66,5 +66,17 @@ For special needs, there are optional extensions:
 - [Bootstrap integration](/bootstrap-integration): Configure Unpoly to use Bootstrap's CSS classes.
 - [Upgrade shim](https://unpoly.com/changes/upgrading): Polyfills for deprecated Unpoly APIs.
 
+
+## Docs for coding agents {#agents}
+
+Coding agents work better with Unpoly when they read its documentation instead of
+guessing. Install the docs as an agent skill:
+
+```nohighlight
+npx skills add --global https://unpoly.com
+```
+
+The [skill page](/skill) has other ways to install the skill, and shows how to use the docs in an AI chat.
+
 @page install
 @signature

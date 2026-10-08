@@ -45,6 +45,16 @@ Getting started
 - See [notable changes](https://unpoly.com/changes).
 
 
+Docs for coding agents
+----------------------
+
+Install Unpoly's documentation as an agent skill:
+
+```
+npx skills add --global https://unpoly.com
+```
+
+
 Contributing
 ------------
 

@@ -30,6 +30,14 @@ Unpoly now builds a form's request params with the browser's own [form-data algo
 - ⚠️ When Unpoly [focuses](/focus) a form-associated custom element, it now assigns `.up-focus-visible` instead of `.up-focus-hidden`, even when the user interacted with a mouse or touch. `up.viewport.config.autoFocusVisible` shows a [focus ring](/focus-visibility) for every [field](/up.form.config#config.fieldSelectors), and such an element is now a field.
 - `up.form.config.genericButtonSelectors` was renamed to `up.form.config.anyButtonSelectors` and now matches every kind of button, including submit and reset buttons. Unpoly uses it to disable a form's buttons while the form is submitting. The old name still works with [`unpoly-migrate.js`](/changes/upgrading).
 
+### Docs for coding agents
+
+Unpoly's documentation is now available to coding agents and LLMs:
+
+- Every documentation page on unpoly.com is also available as Markdown. Append `.md` to its URL, e.g. [`/up.render.md`](https://unpoly.com/up.render.md). Agents that list `text/markdown` first in their `Accept` header get the Markdown at the page's own URL.
+- [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules.
+- An [agent skill](/skill) bundles all guides, the API reference and the release notes, with a search script. Install it with `npx skills add --global https://unpoly.com`, or as a Claude Code plugin.
+
 
 3.14.3
 ------
