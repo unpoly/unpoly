@@ -1,5 +1,5 @@
-Submit forms
-============
+Submit a form
+=============
 
 Forms can update fragments the same way links do.
 One convention on your server also makes failed validations work.

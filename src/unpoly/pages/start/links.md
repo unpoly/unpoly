@@ -1,5 +1,5 @@
-Link to fragments
-=================
+Link to a fragment
+==================
 
 Your first move with Unpoly is a link that updates a fragment,
 instead of loading a full new page.

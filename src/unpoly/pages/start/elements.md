@@ -1,5 +1,5 @@
-Enhance elements
-================
+Enhance an element
+==================
 
 For your own JavaScript, Unpoly pairs behavior with HTML elements.
 Instead of running scripts once per page load, you register a *compiler*

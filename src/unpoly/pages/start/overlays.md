@@ -1,5 +1,5 @@
-Open overlays
-=============
+Open an overlay
+===============
 
 Any link can open its destination in an overlay, like a modal dialog.
 The linked screen needs no changes for this: it stays a regular page
