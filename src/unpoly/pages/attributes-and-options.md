@@ -3,8 +3,11 @@ Attributes and options
 
 Most of Unpoly's features share one shape: the common case is an HTML attribute,
 the same feature is also available as a JavaScript function, and its defaults
-can be changed through a global configuration. Learn the pattern once, and every
-feature in the reference will look familiar.
+can be changed through a global configuration.
+
+This page covers the pattern in detail: how attributes and their modifiers are
+parsed, which values they accept, and how JavaScript options and configured
+defaults override them.
 
 
 One feature, three layers {#layers}
