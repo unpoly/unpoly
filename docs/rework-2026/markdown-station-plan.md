@@ -323,6 +323,7 @@ Decisions:
   Gemfile.lock / up.version; on major mismatch tell the user and prefer the app's
   actual behavior); one support-pointer line to https://unpoly.com/support.md.
   Skill content scope (round 1): no 0.x/1.x release notes, no /support page copy.
+  (Release notes: revised 2026-10-08, the skill ships every major.)
 - **20 kind-suffixes (20A, raw kinds):** suffix = the model's kind verbatim:
   `-selector -function -event -property -constructor -header -cookie`; interfaces
   `-module` / `-class`; pages (Learn, @page, changelog) no suffix. With 13F: lowercase,
@@ -439,12 +440,14 @@ Kept current during implementation; Henning relays to the orchestrator session.
       properties and selectors (suggest "one file per API symbol and module"); "The first
       heading is the page title, followed by its kind in parentheses" only holds for API
       pages; "ranked by matches per file" should be "by matching lines per file".
-    - The AgentIndex line "Release notes for every version of Unpoly" (SKILL.md and
-      `/index.md`): the skill ships only 2.x and later.
+    - ~~The AgentIndex line "Release notes for every version of Unpoly" (SKILL.md and
+      `/index.md`): the skill ships only 2.x and later.~~ Resolved: the skill now ships
+      every major (decision of 2026-10-08, below).
     - Root index lead: "Every page is also available as Markdown" → "Every
       documentation page …" (the landing page and imprint have no twin).
-    - Install draft: "Claude Code, Codex, Cursor, Copilot, Gemini CLI and about 80 other
-      agents" will go stale; suggest "and most other coding agents".
+    - ~~Install draft: "about 80 other agents" will go stale.~~ Resolved: the npx route
+      on `/skill` now says "This works with all coding agents."
+
   - ~~Content gap (content track): nine Learn chapters had no summary.~~ Closed by the
     chapter blurbs merged from docs-rework (2026-10-08): `/index.md` and SKILL.md now
     describe every Learn chapter.
@@ -457,15 +460,8 @@ Kept current during implementation; Henning relays to the orchestrator session.
     visually hidden pipe.
   - Wording: SKILL.md (`unpoly-site/source/skills/unpoly-docs/skill.txt.erb`), the root
     index lead, the drafts file, the contributing-docs section.
-  - Simplifications from the trim pass that need a decision (behavior-keeping ones are
-    applied): T1 move the "This page is being written." filter into `Toc::Topic` (touches
-    existing code); T2 let the layout render the MD button from the twin list instead
-    of 9 template calls (risks its placement); T3 give twins their area and hub at
-    registration (the preview would need a restart after a `toc.yml` change); T4 drop
-    the video `title`/`figcaption` fallbacks; T5 drop the "Type:" label; T6 drop
-    search.py tuning beyond decision 23 (stemming, hub/changelog factors, lead
-    snippets), each against the ranking queries; T7 fail instead of skip without
-    python3; T8 delete `shoot/markdown.rb` after the screenshot approval.
+  - ~~Simplifications T1–T8~~ decided by Henning 2026-10-08 and applied (see "Parked
+    ideas, decided" in the implementation notes).
 
 - **Round 2 (34–41), state (2026-10-08):** implemented, trimmed, reviewed by a
   non-builder agent and pushed to `docs-rework-md` in both repos (unpoly-site `b520153a`,
@@ -486,18 +482,8 @@ Kept current during implementation; Henning relays to the orchestrator session.
   - The WebMCP tool titles and descriptions (`source/javascripts/components/webmcp.js`).
   - The root-index lead lost its sentence "Every page is also available as Markdown:
     append `.md` to its URL.", which 38's first preamble paragraph now says.
-- **Round 2 simplifications awaiting a decision** (the behavior-keeping trims are
-  applied; U1, de-duplicating once in `searchPages`, was applied after the review
-  because 41 asks for zero duplicated search logic): U2 also sink deprecated pages
-  there, so agents get the reader's order (changes search_docs' order; results now
-  carry `deprecated: true` instead); U3 let
-  `search_docs` wait for a slow first index load (`late`) instead of answering
-  "unavailable" after 5 s; U4 drop `get_page_markdown`'s foreign-origin error (the fetch
-  always stays on this origin anyway); U5 drop the copy button's `writeText` fallback
-  (every browser with `navigator.clipboard` of the last two years has `ClipboardItem`);
-  U6 drop the tools' `title` and `readOnlyHint` (not named in 41); U7 drop the `limit`
-  cap of 20; U8 drop the "Copied" aria-label swap (not named in 36; recommended to
-  keep).
+- ~~Round 2 simplifications U2–U8~~ decided by Henning 2026-10-08 and applied (see
+  "Parked ideas, decided" in the implementation notes).
 - **Round 2 review findings for Henning** (reserved wording or unverifiable here):
   - WebMCP tools return plain JSON objects, as the current draft serializes whatever
     `execute` resolves with; older explainers and polyfills expected an MCP
@@ -505,13 +491,25 @@ Kept current during implementation; Henning relays to the orchestrator session.
   - `/skill`: does `/plugin marketplace update unpoly` also update the installed plugin,
     or only the catalogue? Is `"source": "url"` right for `extraKnownMarketplaces`?
     Suggested wording: explain "Agents that ask for Markdown …" (it is the
-    `Accept: text/markdown` header); "add `-g`" → "instead of just this one"; "Every page
-    of these docs" vs. the llms preamble's "Most pages" — pick one.
+    `Accept: text/markdown` header); "add `-g`" → "instead of just this one".
+    ~~"Every page of these docs" vs. "Most pages"~~ resolved: `/skill` keeps "Every page
+    is also available as Markdown" (Henning, 2026-10-08).
   - Skill tip in `search_docs`: "You can install this documentation as an agent skill
     for offline search: https://unpoly.com/skill.md" (no dash before the URL).
   - The fragment-link convention moved up into the llms preamble (my reading of 38).
   - The origin-trial token is bound to https://unpoly.com; staging needs Chrome's
     WebMCP flag instead.
+- **For the orchestrator (2026-10-08):**
+  - The "This page is being written." filter in `source/learn/index.html.erb` (the
+    `blurb` lambda) is the content track's transition scaffolding; the station's own copy
+    in AgentIndex is gone (stubs never ship). Remove it at close.
+  - `spec/features/hubs_spec.rb` ("counts the features … under All features") now also
+    counts previews inside the `<ul>` the station's card markup wraps them in.
+- **Close-out list (at station close):**
+  - Delete `shoot/markdown.rb` after Henning's last visual approval (8A).
+  - The types pipe (30.11, final): visible pipes between the types inside one outlined
+    box; screenshots `~/Projects/md-station/screenshots/round2-revised/*.borders-vs-pipe-final.png`
+    for Henning's final look.
 - **For the content track (round 2):** the install-page draft shrank per 35
   (`markdown-station-drafts.md`, section 1); the README and CHANGELOG drafts now link
   `/skill` instead of `/install#agents`.
@@ -763,3 +761,49 @@ description, the TIP styling, the ai-tools corner (screenshots), tool descriptio
   watched console stands in); `www.unpoly.com` URLs in `get_page_markdown` (they
   redirect to unpoly.com anyway); `target=_blank` warnings (predates this round).
 
+## Decisions of 2026-10-08 (Henning, after round 2)
+
+- **Changelog scope (revises the round-1 amendment "the skill ships 2.x and 3.x
+  only"):** the skill ships the release notes of every major (0.x to 3.x). Users may use
+  the skill to revive old Unpoly apps, and no other skill covers old majors. Old notes
+  link pages of their time that no longer exist; those links stay extension-less
+  absolute URLs (no twin). The skill now holds 813 files (177 in `references/changes/`),
+  under the 1000 cap; all ranking queries still pass.
+- **30.11 final (types):** visible pipes between the types, inside one outlined box
+  around the whole union (the outer border stays). The "Type:" label stays visually
+  hidden.
+
+## Parked ideas, decided (2026-10-08) and applied
+
+- 16A: the `.md` rename-redirect line is gone from the contributing docs (the generic
+  `.md` → page 301 covers renames).
+- 1X: AgentIndex no longer filters "This page is being written." (stubs never ship).
+- 2X: `page_title` renders a page's title row: the `<h1>` and, on twinned pages, the
+  ai-tools corner (before the heading, which keeps the float layout and the heading's
+  sibling rhythm). `<%= page_title 'Text' %>`, or `<% page_title 'Window title' do %>…<% end %>`
+  for headings with a breadcrumb or subtitle. All nine corner pages and the three
+  untwinned pages with a title row use it. `spec/build/ai_tools_spec.rb` checks every
+  built twinned page for the corner.
+- T3, T4, T5, U6: rejected (kept as they were).
+- 6X: all search.py extras stay; ranking queries now pin stemming (`polled`,
+  `preloaded links`) and the hub factor (two queries a hub would win without it).
+  Verified: each case fails with stemming or the hub factor switched off.
+- 7A: `rake skill:test` aborts without `python3`, naming what to install; `SKIP_SKILL=1`
+  skips it.
+- 8A: `shoot/markdown.rb` stays until close (close-out list).
+- 9A: `searchPages` sinks deprecated pages for the dialog and the tools alike; tool
+  results keep `deprecated: true`.
+- 10X: `search_docs` waits up to 15 s for the index, then says retrying may work.
+- 11X: `get_page_markdown` accepts root-relative paths and full URLs of the current
+  origin only; any other host (unpoly.com included) gets an error naming the accepted
+  forms.
+- 12A: the copy button writes a `ClipboardItem` only; without `navigator.clipboard.write`
+  and `ClipboardItem` it stays hidden.
+- 14X: `limit` capped at 25 (default 8); the description says to repeat the call with a
+  higher limit.
+- U8: the "Copied" aria-label stays, and a visually hidden `role="status"` line next to
+  the button announces "Copied".
+
+- Corner contrast: the ai-tools items are one step darker (`$gray-600`, hover `$gray-800`).
+- Corner size: one size variable (`$ai-tools-size`, `$text-md`) drives the row; SKILL is `$text-xs`, the Markdown mark 0.9em tall, the copy glyph 1em, all centred on one line (screenshot `round2-revised/corner-final-1280-390.png`).
+- Markdown links stay with the browser: the corner's Markdown link has `up-follow="false"`, and `unpoly_config.coffee` adds `a[href$=".md"]`, `a[href*=".md#"]` and `a[href$=".txt"]` to `up.link.config.noFollowSelectors` (Unpoly renders HTML only).

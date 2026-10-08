@@ -12,8 +12,7 @@ faster than fetching pages from the web, and works offline.
 
 ## Install with `npx skills` {#npx-skills}
 
-This works with Claude Code, Codex, Cursor, GitHub Copilot, Gemini CLI and most other
-coding agents. In your project, run:
+This works with all coding agents. In your project, run:
 
 ```bash
 npx skills add https://unpoly.com
