@@ -5,10 +5,11 @@ says where it goes. Wording is open for Henning's review; the content track land
 install section at ship time.
 
 
-## 1. Install page section (26A)
+## 1. Install page section (26A, shrunk by 35)
 
 Goes into `src/unpoly/pages/install.md`, after "Installing from npm" and before "Optional
-extensions". Owner: content track.
+extensions". Owner: content track. Everything else the round-1 draft had (the Claude
+Code plugin, the `AGENTS.md` line, `.md` URLs and `llms.txt`) now lives on `/skill`.
 
 ~~~~markdown
 ## Docs for coding agents {#agents}
@@ -20,34 +21,7 @@ guessing. Install the docs as an agent skill in your project:
 npx skills add https://unpoly.com
 ```
 
-The skill holds every guide and API page of Unpoly [[=version]] as Markdown files, with a
-search script your agent can run. It works with Claude Code, Codex, Cursor, Copilot,
-Gemini CLI and about 80 other agents.
-
-Then tell your agent when to use it. Add this line to your project's `AGENTS.md` or
-`CLAUDE.md`:
-
-```markdown
-When working with Unpoly (`up-*` attributes, `up.*` functions, `up:*` events), consult the unpoly-docs skill before guessing.
-```
-
-<details>
-<summary>Other ways to give your agent the docs</summary>
-
-**Claude Code plugin.** Instead of `npx skills`, you can install the skill from Unpoly's
-plugin marketplace:
-
-```text
-/plugin marketplace add https://unpoly.com/claude-plugins/marketplace.json
-/plugin install unpoly@unpoly
-```
-
-**Markdown on unpoly.com.** Every page of these docs is also available as Markdown: append
-`.md` to its URL, e.g. <https://unpoly.com/up.render.md>. Start with
-<https://unpoly.com/llms.txt>, which lists all guides and API modules. Agents that ask for
-Markdown get it at the page's own URL.
-
-</details>
+The [skill page](/skill) has other install methods and ways to use the docs from a plain chat.
 ~~~~
 
 
@@ -65,7 +39,9 @@ Landed with this wording; calibrate there:
 > look things up in. Every page is also available as Markdown: append `.md` to its URL.
 
 SKILL.md (`unpoly-site/source/skills/unpoly-docs/skill.txt.erb`) opens with a shorter
-version of the same lead.
+version of the same lead. Round 2 (38) added two preamble paragraphs after the
+fragment-link convention, and dropped the lead's own "append `.md`" sentence, which the
+first of them now says.
 
 
 ## 3. README section (27)
@@ -79,8 +55,8 @@ Docs for coding agents
 - Install Unpoly's documentation as an agent skill: `npx skills add https://unpoly.com`.
 - Every page on unpoly.com is also available as Markdown: append `.md` to its URL.
   [llms.txt](https://unpoly.com/llms.txt) lists them all.
-- See [Docs for coding agents](https://unpoly.com/install#agents) for the Claude Code plugin and the
-  line to add to your `AGENTS.md`.
+- See the [skill page](https://unpoly.com/skill) for the Claude Code plugin and the line to add
+  to your `AGENTS.md`.
 ```
 
 
@@ -95,5 +71,5 @@ Unpoly's documentation is now available to coding agents and LLMs:
 
 - Every page on unpoly.com is also available as Markdown. Append `.md` to its URL, e.g. [`/up.render.md`](https://unpoly.com/up.render.md). Agents that ask for `text/markdown` get it at the page's own URL.
 - [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules.
-- An agent skill bundles all pages with a search script. Install it with `npx skills add https://unpoly.com`, or as a Claude Code plugin. See [Docs for coding agents](/install#agents).
+- An agent skill bundles all pages with a search script. Install it with `npx skills add https://unpoly.com`, or as a Claude Code plugin. See the [skill page](/skill).
 ```

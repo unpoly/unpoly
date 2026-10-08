@@ -468,6 +468,58 @@ Kept current during implementation; Henning relays to the orchestrator session.
     snippets), each against the ranking queries; T7 fail instead of skip without
     python3; T8 delete `shoot/markdown.rb` after the screenshot approval.
 
+- **Round 2 (34–41), state:** implemented on `docs-rework-md` in both repos; see the
+  report for commits. Not merged, not deployed.
+- **Round 2 review list for Henning** (written, not blocking):
+  - `/skill` page (`src/unpoly/pages/skill.md`): the lead and all wording; the
+    `extraKnownMarketplaces` snippet uses `"source": "url"` for a marketplace.json URL —
+    check against the Claude Code docs before landing.
+  - The new SKILL.md description (34), landed in `skill.txt.erb`.
+  - The search tip's TIP styling (`.search-dialog--tip-label`).
+  - The ai-tools corner: screenshots in `~/Projects/md-station/screenshots/round2/`
+    (`side-by-side/*.round1-vs-round2.png`, and
+    `side-by-side/corner-widths-1280-800-600-500-390.png` for the per-item breakpoints:
+    Edit goes below 700 px, Skill below 560 px, the Markdown link below 460 px, Copy
+    stays). The search tip is `shots/w1280-markdown-14-search-tip.png`.
+  - The WebMCP tool titles and descriptions (`source/javascripts/components/webmcp.js`).
+  - The root-index lead lost its sentence "Every page is also available as Markdown:
+    append `.md` to its URL.", which 38's first preamble paragraph now says.
+- **Round 2 simplifications awaiting a decision** (the behavior-keeping trims are
+  applied; U1, de-duplicating once in `searchPages`, was applied after the review
+  because 41 asks for zero duplicated search logic): U2 also sink deprecated pages
+  there, so agents get the reader's order (changes search_docs' order; results now
+  carry `deprecated: true` instead); U3 let
+  `search_docs` wait for a slow first index load (`late`) instead of answering
+  "unavailable" after 5 s; U4 drop `get_page_markdown`'s foreign-origin error (the fetch
+  always stays on this origin anyway); U5 drop the copy button's `writeText` fallback
+  (every browser with `navigator.clipboard` of the last two years has `ClipboardItem`);
+  U6 drop the tools' `title` and `readOnlyHint` (not named in 41); U7 drop the `limit`
+  cap of 20; U8 drop the "Copied" aria-label swap (not named in 36; recommended to
+  keep).
+- **Round 2 review findings for Henning** (reserved wording or unverifiable here):
+  - WebMCP tools return plain JSON objects, as the current draft serializes whatever
+    `execute` resolves with; older explainers and polyfills expected an MCP
+    `{ content: [{ type: 'text', text }] }`. Check against a real Chrome with the trial.
+  - `/skill`: does `/plugin marketplace update unpoly` also update the installed plugin,
+    or only the catalogue? Is `"source": "url"` right for `extraKnownMarketplaces`?
+    Suggested wording: explain "Agents that ask for Markdown …" (it is the
+    `Accept: text/markdown` header); "add `-g`" → "instead of just this one"; "Every page
+    of these docs" vs. the llms preamble's "Most pages" — pick one.
+  - Skill tip in `search_docs`: "You can install this documentation as an agent skill
+    for offline search: https://unpoly.com/skill.md" (no dash before the URL).
+  - The fragment-link convention moved up into the llms preamble (my reading of 38).
+  - The origin-trial token is bound to https://unpoly.com; staging needs Chrome's
+    WebMCP flag instead.
+- **For the content track (round 2):** the install-page draft shrank per 35
+  (`markdown-station-drafts.md`, section 1); the README and CHANGELOG drafts now link
+  `/skill` instead of `/install#agents`.
+- **Deploy-day checklist (round 2):**
+  - The WebMCP origin-trial token in `source/layouts/_head.html.erb` is for Chrome 162
+    only. Renew it on Chrome's origin-trial console with the next Chrome release, and
+    replace the meta line (it is not a secret).
+  - On staging, open a page in a Chrome with WebMCP and list the tools (`search_docs`,
+    `get_page_markdown`); check the copy button in Safari and Firefox.
+
 ## Setup notes
 
 - The unpoly worktree has its own `node_modules/` and `dist/` (`npm ci && npm run build`,
@@ -647,3 +699,63 @@ redirects — reserved for this station to fill).
 
 Henning's review list from this round: /skill lead + full page wording, the new SKILL.md
 description, the TIP styling, the ai-tools corner (screenshots), tool descriptions.
+
+
+## Round 2 implementation notes (decided by the builder)
+
+- **Releases in the ai-tools corner:** the pencil's place shows a code icon linking the
+  release's code on GitHub ("This version’s code on GitHub"); 36 only names Edit.
+  Pages without a source (hubs, `/support`, `/changes`) end at Skill, without the
+  separator.
+- **Copy button:** uses a `ClipboardItem` with a promise where available, so Safari keeps
+  the click's permission across the fetch; `writeText` otherwise. While the checkmark
+  shows, its aria-label is "Copied". It is a real `<button hidden>` that only
+  `navigator.clipboard` unhides.
+- **SVG icons:** `Icon::SVG` registers inline SVGs (only the Markdown mark, CC0) with the
+  same ARIA treatment as webfont icons; the converter writes a labelled SVG icon as
+  `(label)` like any other icon (a diagram rule would have demanded an id).
+- **Corner buttons are one height** (`$ai-tools-height`), so the icon buttons line up
+  with "Skill".
+- **Dialog ARIA, verified:** Unpoly puts `role="dialog"` and `aria-modal="true"` on the
+  overlay's box (`up-modal-box`, `OverlayFocus`), not on `up-modal`. The dialog's
+  aria-label was on `up-modal` and is now on the box. Focus trap and autofocus are
+  covered by a spec.
+- **Search tip:** hidden at the first keystroke and not shown again until the page
+  reloads; hidden right away when the dialog reopens with a remembered query.
+- **Status line:** "1 result for q" / "N results for q" / "No results" (or the
+  unavailable message), set when the list renders, so it follows the search's
+  debounce.
+- **search_core.js:** holds SEARCH, normalizePath, the index loader (renamed
+  `loadSearchIndex`), rankPages and searchPages; the dialog keeps MESSAGES, listRows and
+  rendering. Both are classic scripts sharing globals, as before.
+- **WebMCP:**
+  - Registered once at script load (tools belong to the document, so fragment updates
+    keep them); registration errors are logged only where an API exists. Without one,
+    `registerWebMCP()` returns false with no output (a spec watches the console).
+  - Results are JSON objects (the draft serializes the resolved value). Errors are
+    returned as `{ error }`, not thrown, so the agent reads the hint.
+  - `search_docs` de-duplicates pages, strips Pagefind's `<mark>` by parsing (never
+    inserting) the excerpt, caps `limit` at 20 (default 8), and adds the skill tip to the
+    first answer only.
+  - `get_page_markdown` reads URLs of this origin or of unpoly.com (mapped onto the
+    current origin, so the preview and staging work); anything else gets an error.
+  - `annotations.readOnlyHint` on both tools.
+- **llms preamble (38):** the fragment-link convention moved up, before the two new
+  paragraphs and `## Learn`, as 38 describes; "Unpoly is one JavaScript file …" stays
+  last.
+- **Round 2 fresh-eyes review, applied:** de-duplication moved into `searchPages` (U1;
+  `listRows` only sinks deprecated pages now); `search_docs` flags deprecated pages,
+  clamps `limit` (NaN, 0 and negatives fall back to the default) and its description
+  names `mdUrl`; `get_page_markdown` answers a malformed URL with the hint instead of
+  throwing; section hits name their page in a visually hidden span (an aria-label hid
+  the excerpt); the status line quotes the query as in 40; a labelled SVG icon gets a
+  `<title>` child; the corner's Skill link has `aria-current="page"` on `/skill`; the TIP
+  ink is a shared token (`$tip-ink`) with the admonitions; the origin-trial comment
+  names its expiry (2027-03-30); specs for the corner's look, unavailable search,
+  malformed URLs and limits.
+- **Round 2 fresh-eyes review, rejected or deferred:** a live region and failure
+  feedback for the copy button (the aria-label swap stays; U8); a boot-time no-error
+  check (no console capture at page load in our Selenium setup; the re-run under a
+  watched console stands in); `www.unpoly.com` URLs in `get_page_markdown` (they
+  redirect to unpoly.com anyway); `target=_blank` warnings (predates this round).
+
