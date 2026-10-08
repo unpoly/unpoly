@@ -52,7 +52,7 @@ Goes into `README.md` of the unpoly repo, as a new section after "Getting starte
 Docs for coding agents
 ----------------------
 
-- Install Unpoly's documentation as an agent skill: `npx skills add https://unpoly.com`.
+- Install Unpoly's documentation as an agent skill: `npx skills add --global https://unpoly.com`.
 - Every page on unpoly.com is also available as Markdown: append `.md` to its URL.
   [llms.txt](https://unpoly.com/llms.txt) lists them all.
 - See the [skill page](https://unpoly.com/skill) for the Claude Code plugin and the line to add
@@ -71,5 +71,5 @@ Unpoly's documentation is now available to coding agents and LLMs:
 
 - Every page on unpoly.com is also available as Markdown. Append `.md` to its URL, e.g. [`/up.render.md`](https://unpoly.com/up.render.md). Agents that ask for `text/markdown` get it at the page's own URL.
 - [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules.
-- An agent skill bundles all pages with a search script. Install it with `npx skills add https://unpoly.com`, or as a Claude Code plugin. See the [skill page](/skill).
+- An agent skill bundles all pages with a search script. Install it with `npx skills add --global https://unpoly.com`, or as a Claude Code plugin. See the [skill page](/skill).
 ```

@@ -422,7 +422,7 @@ Kept current during implementation; Henning relays to the orchestrator session.
     unpack it on the fly and fail the digest check).
   - A build with `BASE_URL` set moves every absolute URL it writes (twins, marketplace,
     `guide_url`), not only the skill's.
-  - `npx skills add https://unpoly.com` and the Claude marketplace route against staging
+  - `npx skills add --global https://unpoly.com` and the Claude marketplace route against staging
     (`BASE_URL=https://<staging-host> bundle exec middleman build` gives a build whose
     absolute URLs and marketplace archive URL point at staging).
 - **Fresh-eyes review findings for Henning** (not resolved by the station: they touch an
