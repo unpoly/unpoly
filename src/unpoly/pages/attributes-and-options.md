@@ -176,3 +176,4 @@ up.network.config.autoCache = function(request) {
 
 
 @page attributes-and-options
+@signature
