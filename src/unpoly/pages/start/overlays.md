@@ -33,7 +33,6 @@ in an overlay and standing on its own, without knowing the difference.
 Overlays can also close automatically when the user completes their task,
 passing a result value to the page behind them.
 
-<p class="read-more"><a href="/overlays">Read more: Overlays</a></p>
 
 
 @page start/overlays

@@ -47,7 +47,6 @@ your error messages next to their input:
 The form's values and messages all come from your server-rendered HTML.
 Unpoly only decides which fragment to show them in.
 
-<p class="read-more"><a href="/forms">Read more: Forms</a></p>
 
 
 @page start/forms

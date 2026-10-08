@@ -44,7 +44,6 @@ its counterpart from the response. Everything around it keeps its state.
 
 An `[up-target]` attribute implies `[up-follow]`, so you don't need to set both.
 
-<p class="read-more"><a href="/links">Read more: Links</a></p>
 
 
 @page start/links
