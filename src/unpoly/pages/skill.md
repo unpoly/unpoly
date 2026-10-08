@@ -5,26 +5,29 @@ Unpoly's documentation is available as an agent skill for AI coding tools. Once
 installed, your coding agent can look up how Unpoly works, its best practices and
 exact API details, instead of guessing from what it remembers.
 
-The skill holds every guide, the full API reference and the release notes of Unpoly
-[[=version]] as Markdown files, with a search script your agent runs locally. That is
-faster than fetching pages from the web, and works offline.
+The skill holds every guide, the full API reference and the release notes of all
+versions as Markdown files, with a search script your agent runs locally. That is
+faster than fetching pages from the web, and works offline. The release notes also help
+when your agent upgrades an app from an older Unpoly version.
 
 
 ## Install with `npx skills` {#npx-skills}
 
-This works with all coding agents. In your project, run:
+This works with all coding agents and needs [Node.js](https://nodejs.org). Run:
 
 ```bash
-npx skills add https://unpoly.com
+npx skills add --global https://unpoly.com
 ```
 
 The [skills CLI](https://github.com/vercel-labs/skills) asks which agents to install
-the skill for. To install it for all your projects instead, add `-g`.
+the skill for. To share the skill with your team instead, run the command in your
+project's directory without `--global` and commit the skill's files. Teammates then get
+it with your repository.
 
-**The skill does not update itself.** To get the docs of a newer Unpoly version, run:
+**The skill does not update itself.** To get the latest docs, run:
 
 ```bash
-npx skills update
+npx skills update --global
 ```
 
 Optionally, [nudge your agent into using the skill](#make-your-agent-use-it) for all
@@ -33,7 +36,8 @@ Unpoly work.
 
 ## Install as a Claude Code plugin {#claude-code}
 
-In Claude Code you can also install the skill as a plugin from Unpoly's marketplace:
+If you use Claude Code, you can instead install the skill as a plugin. Plugins can update
+automatically, and you don't need Node.js:
 
 ```text
 /plugin marketplace add https://unpoly.com/claude-plugins/marketplace.json
@@ -52,9 +56,9 @@ Unpoly work.
 
 ### Team setup
 
-To offer the plugin to everyone working on your project, add the marketplace to the
-project's `.claude/settings.json`. Claude Code then asks each team member to install it
-when they trust the project folder:
+To offer the plugin to everyone working on your project, add the marketplace and the
+plugin to the project's `.claude/settings.json`. Once a team member trusts the project
+folder, Claude Code installs the plugin for them:
 
 ```json
 {
@@ -80,18 +84,21 @@ Agents don't always reach for a skill on their own. Add this line to your projec
 Unpoly:
 
 ```markdown
-When working with Unpoly (`up-*` attributes, `up.*` functions, `up:*` events), consult the unpoly-docs skill before guessing.
+When working with Unpoly (`up-*` attributes, `up.*` functions, `up:*` events), consult the `/unpoly-docs` skill before guessing.
 ```
 
 
 ## Use without installing {#without-installing}
 
-Every page of these docs is also available as Markdown. Append `.md` to its URL, e.g.
-[[[=base_url]]/up.render**.md**]([[=base_url]]/up.render.md). Agents that ask for Markdown get it at the page's own
-URL.
+Every page of these docs is also available as Markdown. Click the Markdown icon next to
+the page title, or append `.md` to the page's URL, e.g.
+[[[=base_url]]/up.render**.md**]([[=base_url]]/up.render.md).
 
-In a plain AI chat, paste <https://unpoly.com/llms.txt>. It lists all guides and API
-modules, with links the chat can follow.
+To give an AI chat a single page, use the copy button next to the page title. It copies
+the page as Markdown, ready to paste.
+
+To give an AI chat broad context about Unpoly, paste <https://unpoly.com/llms.txt>. It
+lists all guides and API modules, with links the chat can follow.
 
 
 @page skill

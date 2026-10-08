@@ -18,7 +18,7 @@ Coding agents work better with Unpoly when they read its documentation instead o
 guessing. Install the docs as an agent skill in your project:
 
 ```bash
-npx skills add https://unpoly.com
+npx skills add --global https://unpoly.com
 ```
 
 The [skill page](/skill) has other install methods and ways to use the docs from a plain chat.

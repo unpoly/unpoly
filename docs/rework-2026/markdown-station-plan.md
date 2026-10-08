@@ -458,8 +458,9 @@ Kept current during implementation; Henning relays to the orchestrator session.
     pixel-identical to before; the only visible change is the MD button. The pipe variant
     (`md-pipe-variant/`) is not applied; the shipped default keeps the borders and a
     visually hidden pipe.
-  - Wording: SKILL.md (`unpoly-site/source/skills/unpoly-docs/skill.txt.erb`), the root
-    index lead, the drafts file, the contributing-docs section.
+  - Wording: ~~SKILL.md (`unpoly-site/source/skills/unpoly-docs/skill.txt.erb`)~~ (done:
+    Henning's reading pass, 2026-10-08), the root index lead, the drafts file, the
+    contributing-docs section.
   - ~~Simplifications T1–T8~~ decided by Henning 2026-10-08 and applied (see "Parked
     ideas, decided" in the implementation notes).
 
@@ -468,10 +469,14 @@ Kept current during implementation; Henning relays to the orchestrator session.
   unpoly `15b112e5b` plus the commit carrying this line; Henning's `874238185` is pushed
   with it). Not merged, not deployed.
 - **Round 2 review list for Henning** (written, not blocking):
-  - `/skill` page (`src/unpoly/pages/skill.md`): the lead and all wording; the
-    `extraKnownMarketplaces` snippet uses `"source": "url"` for a marketplace.json URL —
-    check against the Claude Code docs before landing.
-  - The new SKILL.md description (34), landed in `skill.txt.erb`.
+  - ~~`/skill` page (`src/unpoly/pages/skill.md`): the lead and all wording~~ (done:
+    Henning's reading pass, 2026-10-08; npx route now `--global` by default, project
+    install for teams). Still open: the `extraKnownMarketplaces` snippet uses
+    `"source": "url"` for a marketplace.json URL — check against the Claude Code docs
+    before landing.
+  - ~~SKILL.md body wording~~ (done: reading pass, 2026-10-08: search advice for plain
+    words, phrases and exclusions, the version section, support link to the HTML page).
+    The SKILL.md description (34) itself was not part of the pass.
   - The search tip's TIP styling (`.search-dialog--tip-label`).
   - The ai-tools corner, revised per Henning's mockup (36 revised): screenshots in
     `~/Projects/md-station/screenshots/round2-revised/` (`mockup-vs-implementation.png`,
@@ -490,8 +495,8 @@ Kept current during implementation; Henning relays to the orchestrator session.
     `{ content: [{ type: 'text', text }] }`. Check against a real Chrome with the trial.
   - `/skill`: does `/plugin marketplace update unpoly` also update the installed plugin,
     or only the catalogue? Is `"source": "url"` right for `extraKnownMarketplaces`?
-    Suggested wording: explain "Agents that ask for Markdown …" (it is the
-    `Accept: text/markdown` header); "add `-g`" → "instead of just this one".
+    ~~Suggested wording: explain "Agents that ask for Markdown …"; "add `-g`"~~ resolved
+    by the reading pass (sentence removed; `--global` is now the default command).
     ~~"Every page of these docs" vs. "Most pages"~~ resolved: `/skill` keeps "Every page
     is also available as Markdown" (Henning, 2026-10-08).
   - Skill tip in `search_docs`: "You can install this documentation as an agent skill
@@ -760,6 +765,21 @@ description, the TIP styling, the ai-tools corner (screenshots), tool descriptio
   check (no console capture at page load in our Selenium setup; the re-run under a
   watched console stands in); `www.unpoly.com` URLs in `get_page_markdown` (they
   redirect to unpoly.com anyway); `target=_blank` warnings (predates this round).
+
+- **search.py phrases and exclusions (reading pass, 2026-10-08):**
+  - A query argument of several words is also a phrase: a page containing it gets
+    `PHRASE_BONUS` (1.5, per matching phrase). Matching runs on the page's token
+    sequence (title and body), so case, whitespace, punctuation and Markdown emphasis
+    don't break a phrase. OR semantics unchanged; separate arguments are no phrase.
+  - A word with a leading `-` (own argument or inside a quoted one) removes every page in
+    that token's postings, i.e. pages containing the word, also as part of an identifier
+    (`up-modal`) or inflected (`modals`). Inner dashes (`x-up-target`) are no exclusion.
+  - CLI: `main()` sets aside every single-dash argument except `-h` and the values of
+    `--limit`/`--root` before argparse sees it; the script's own options all start with
+    `--`. Exclusions alone are a usage error (exit 2).
+  - Ranking pin: `history state` puts `updating-history.md` first only with the bonus.
+  - The WebMCP `search_docs` description now says Pagefind's semantics (AND, short
+    queries, several calls, quoted phrases, no exclusion).
 
 ## Decisions of 2026-10-08 (Henning, after round 2)
 
