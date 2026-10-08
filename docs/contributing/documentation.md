@@ -614,6 +614,9 @@ improve what doesn't. A few conventions hold everywhere:
   a problem for more than a clause.
 - Concrete beats abstract. Name outcomes and things ("your scroll position survives"),
   not categories ("application behavior").
+- The first prose paragraph of every documentable — guide page, module or feature —
+  doubles as its short description on hubs, previews and indexes: one value-first
+  sentence that stands alone.
 - Don't enumerate features in prose — any pick of three reads as arbitrary.
   Let code and lists carry enumerations.
 - Don't join two statements with an em-dash connective ("takes any JSON — and
@@ -820,6 +823,11 @@ table of contents — the sidebar already is one. Its jobs, roughly in reading o
 
 Order sections for comprehension, and stay between 400-800 words. Good exemplars are `src/unpoly/pages/loading-state.md` and the Overlays pilot
 (`docs/rework-2026/pilots/overlays.md`, which becomes the real page during the rework).
+
+Pages in a tutorial register, like the Getting started chapter, may bold one phrase per
+section: always the behavioral outcome ("updates **the `<form>` itself**"), never a feature
+name or code. Bold marks importance in prose; [`mark:` annotations](#marking-up-code-blocks)
+stay the device for drawing attention to code.
 
 
 ## Search ranking

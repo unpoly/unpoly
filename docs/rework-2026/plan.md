@@ -879,11 +879,13 @@ INCIDENTAL LIVE-SITE FIXES (2026-10-07, unpoly-site 3e2d239e+053484b0 pushed): E
 links carried %0A (git_revision missing .strip — every live Edit link broken; fixed +
 specced); trailing-slash redirects now name https explicitly (Apache behind TLS-ending
 proxy built http:// Locations); the www/v3 host redirect moved above the index.html
-rewrite (it leaked /index.html into redirects on second pass). OPS ITEMS FOR HENNING:
-(a) the ~185 RedirectPermanent lines still emit http:// Locations — one nginx line fixes
-all: proxy_redirect http://$host/ https://$host/; (or Apache vhost ServerName https://
-+ UseCanonicalName On); (b) live /install/rails redirects with a stray /install/ prefix
-— the DEPLOYED .htaccess looks older than the repo's; check after next deploy.
+rewrite (it leaked /index.html into redirects on second pass). OPS ITEMS (updated 2026-10-08 with Henning): (a) DOWNGRADED TO COSMETIC — the live
+site sends HSTS (max-age 1y, measured; no preload token), so primed browsers upgrade
+the http:// Locations internally with zero insecure hops; only first-contact-
+via-old-URL visitors and non-HSTS clients (curl, crawlers, agents) see the extra hop.
+The one-line nginx proxy_redirect fix stays a someday nicety. (b) DROPPED — only the
+repo's .htaccess is deployed (Henning); the live /install/rails oddity is simply
+MASTER's older rule, and heals when docs-rework ships.
 
 POTENTIAL NEW STATION UNDER RESEARCH (Henning 2026-10-07): "Markdown representation
 of Learn and API content" — every page as agent-friendly .md (suffix URLs, an MD button
@@ -934,6 +936,29 @@ BACKEND INTEGRATION chapter batch — at that moment the deferred vocabulary swa
 revisited: server-bindings may retitle "The server protocol" and protocol-
 implementations may inherit "Server bindings" (option (a) chosen now to avoid the
 collision). Dispatched to builder (structure) + writer (five files) 2026-10-08.
+
+GETTING-STARTED SITTING CLOSED + HUB POLISH VERDICTS (Henning 2026-10-08, slow-down):
+hub: h1 "Learn Unpoly" (template copy); "+N more" counts what #all-features lists (6A);
+modules with no signature features say "N features" WITHOUT a plus (2X); hover stays
+color-stable underline-solid (4); Formats name underlined (5); "Mini-languages used
+throughout the API." becomes the generated /formats intro, feeding its hub summary (3A).
+Getting started: pages 11-14+16 verdicts — links/forms/overlays/elements approved
+(two moves on start/links stay); /start/next REWRITTEN (16X: de-slop the language;
+order = See a complete app -> Start with one screen -> Next chapter promoting Links;
+"Look up any feature" killed). TITLES 12.2A: singular imperatives "Link to a fragment",
+"Submit a form", "Open an overlay", "Enhance an element" (gerunds collide with deep
+pages). 12.1A: BOLD PASS over the GS register — at most one bolded phrase per section,
+always the behavioral outcome, never names/labels; rule joins the guide; bold vs <mark>
+settled: bold = prose importance, mark = code attention. READ-MORES leave all four
+teasers (10A; Next is the conversion; the pattern stays on chapter overviews).
+15A'': the full "Shape of the API" is COPIED to attributes-and-options as ADVANCED
+RENDERING's second page (stands alone, duplication OK; chapter order per Henning:
+overview, attributes-and-options, navigation, targeting-fragments, target-derivation,
+failed-responses, preserving-elements, providing-html, render-lifecycle); the
+/attributes-and-options redirect UNWINDS (native slug again; aliases /config etc. +
+the 8 referrers retarget there); /start/api trims to the ~320-word teaser (ladder +
+one taste per layer + closing pointer). Blurbs (7) and install one-worders (8, 9)
+accepted. Ten blurb sentences stand as pushed.
 
 HUB DESIGN SETTLED (Henning 2026-10-08, "happy with the current look and feel"):
 the NAMED REFERENCE is the Design canvas https://claude.ai/artifact/KCzLYLgPJLygjHygUknWAA

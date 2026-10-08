@@ -1609,7 +1609,7 @@ Unpoly has several methods to detect and process changes in form fields, most no
 - The `[up-watch]` callback can now use an `options` argument. It contains an object of all [watch options](/watch-options) parsed from that field, e.g. `{ disable, preview, placeholder }`.
 - The watch options `{ event, delay }` will no longer be passed to callbacks of `up.watch()` and `[up-watch]`, as these options have already been processed by Unpoly.
 - ❌ `up.watch()` and `[up-watch]` will no longer process an `[up-watch-disable]` attribute. Instead the attribute is only parsed and passed to the callback as a `{ disable }` option. It is up to the callback to forward the option it to any rendering function that supports `{ disable }`.
-- Fix a bug where `up.autosubmit()` options did not override options parsed from `[up-watch-...]` prefixed attributes. It is convention in Unpoly that JavaScript options [always take precedence](/start/api#options) over HTML attributes.
+- Fix a bug where `up.autosubmit()` options did not override options parsed from `[up-watch-...]` prefixed attributes. It is convention in Unpoly that JavaScript options [always take precedence](/attributes-and-options#options) over HTML attributes.
 
 
 ### Target derivation

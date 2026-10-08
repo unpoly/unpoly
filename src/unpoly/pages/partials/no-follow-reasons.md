@@ -1,4 +1,4 @@
-- Links with an `[up-follow=false]` attribute. Also see [boolean attributes](/start/api#boolean-attributes).
+- Links with an `[up-follow=false]` attribute. Also see [boolean attributes](/attributes-and-options#boolean-attributes).
 - Links with a [`[download]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-download) attribute.
 - Links with a [`[target]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-target) attribute (to target an iframe or open new browser tab).
 - Links with a `javascript:`, `mailto:` or `tel:` scheme.

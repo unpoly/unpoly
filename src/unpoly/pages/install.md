@@ -30,7 +30,7 @@ Include them before your own JavaScripts and stylesheets:
 ```
 
 Unpoly initializes on [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event)
-and enhances the HTML on your page. This is all you need to use Unpoly attributes,
+and **enhances the HTML on your page**. This is all you need to use Unpoly attributes,
 like the `[up-follow]` link above. Other installation methods, like npm, are explained below.
 
 
