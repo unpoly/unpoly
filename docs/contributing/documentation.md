@@ -791,12 +791,14 @@ and events that still lack one.
 > [!IMPORTANT]
 > Renaming a page changes its URL, and unlike a renamed API, we don't keep the old page
 > around as deprecated. Add a redirect to `src/unpoly-migrate/.htaccess`, which
-> unpoly.com includes, and one for the page's [Markdown twin](#markdown-for-agents):
+> unpoly.com includes:
 >
 > ```apache
 > RedirectPermanent /old-page-name /new-page-name
-> RedirectPermanent /old-page-name.md /new-page-name.md
 > ```
+>
+> The page's [Markdown twin](#markdown-for-agents) needs no redirect of its own: a `.md`
+> URL without a file redirects to its page.
 
 
 ### Overview pages
