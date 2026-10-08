@@ -879,11 +879,13 @@ INCIDENTAL LIVE-SITE FIXES (2026-10-07, unpoly-site 3e2d239e+053484b0 pushed): E
 links carried %0A (git_revision missing .strip — every live Edit link broken; fixed +
 specced); trailing-slash redirects now name https explicitly (Apache behind TLS-ending
 proxy built http:// Locations); the www/v3 host redirect moved above the index.html
-rewrite (it leaked /index.html into redirects on second pass). OPS ITEMS FOR HENNING:
-(a) the ~185 RedirectPermanent lines still emit http:// Locations — one nginx line fixes
-all: proxy_redirect http://$host/ https://$host/; (or Apache vhost ServerName https://
-+ UseCanonicalName On); (b) live /install/rails redirects with a stray /install/ prefix
-— the DEPLOYED .htaccess looks older than the repo's; check after next deploy.
+rewrite (it leaked /index.html into redirects on second pass). OPS ITEMS (updated 2026-10-08 with Henning): (a) DOWNGRADED TO COSMETIC — the live
+site sends HSTS (max-age 1y, measured; no preload token), so primed browsers upgrade
+the http:// Locations internally with zero insecure hops; only first-contact-
+via-old-URL visitors and non-HSTS clients (curl, crawlers, agents) see the extra hop.
+The one-line nginx proxy_redirect fix stays a someday nicety. (b) DROPPED — only the
+repo's .htaccess is deployed (Henning); the live /install/rails oddity is simply
+MASTER's older rule, and heals when docs-rework ships.
 
 POTENTIAL NEW STATION UNDER RESEARCH (Henning 2026-10-07): "Markdown representation
 of Learn and API content" — every page as agent-friendly .md (suffix URLs, an MD button
