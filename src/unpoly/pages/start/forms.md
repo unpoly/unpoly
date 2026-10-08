@@ -33,7 +33,7 @@ code like [HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/42
 (Unprocessable Content).
 
 The error code tells Unpoly that the submission failed. Instead of updating
-the main element, Unpoly now updates the `<form>` itself, so the user sees
+the main element, Unpoly now updates **the `<form>` itself**, so the user sees
 your error messages next to their input:
 
 ```html
@@ -46,7 +46,6 @@ your error messages next to their input:
 
 The form's values and messages all come from your server-rendered HTML.
 Unpoly only decides which fragment to show them in.
-
 
 
 @page start/forms

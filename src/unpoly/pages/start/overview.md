@@ -20,7 +20,7 @@ Your server handles the request like any other, and responds with a full HTML pa
 Unpoly extracts the `.messages` fragment from the response and swaps it into the current page.
 
 The rest of the page is left untouched: scroll positions, focus, unsaved form fields
-and running scripts all survive the update.
+and running scripts **all survive the update**.
 
 <div embed="fragment-updates-diagram"></div>
 
@@ -32,7 +32,7 @@ the browser makes a regular full page load.
 The server stays in charge
 --------------------------
 
-To your backend, requests from Unpoly look like any browser request.
+To your backend, requests from Unpoly **look like any browser request**.
 There is no JSON API to build and no client-side templates to maintain.
 You keep rendering HTML on the server, with the routes and templates you already have.
 
@@ -46,7 +46,7 @@ Strong defaults
 ---------------
 
 When a link or form updates the main content of the page, Unpoly treats the interaction
-as a [navigation](/navigation) and mimics what a full page load would have done:
+as a [navigation](/navigation) and **mimics what a full page load would have done**:
 
 - The browser URL and history are updated, so the Back button keeps working.
 - The page scrolls to the top, as after a full page load.

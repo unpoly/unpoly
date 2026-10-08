@@ -23,13 +23,12 @@ up.compiler('.current-time', function(element) { // mark: .current-time
 })
 ```
 
-The function is called once for each matching element: when the page first
+The function is called **once for each matching element**: when the page first
 loads, and again whenever a fragment update inserts a `.current-time` element.
 
 This replaces listening to `DOMContentLoaded`. Because Unpoly updates fragments,
 the browser keeps the same document through many navigations, and events that
 only fire at the initial page load would miss all content that arrives later.
-
 
 
 @page start/elements

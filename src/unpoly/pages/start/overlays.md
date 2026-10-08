@@ -17,7 +17,7 @@ Add an `[up-layer=new]` attribute to a link:
 
 When clicked, Unpoly fetches `/users/new`, extracts the response's
 [main element](/main) and shows it in a modal overlay. The page behind
-the overlay keeps its state, including unsaved form fields and scroll positions.
+the overlay **keeps its state**, including unsaved form fields and scroll positions.
 
 The user can dismiss the overlay by pressing `Escape`, by clicking outside
 the dialog, or with its close button.
@@ -28,11 +28,10 @@ One screen, two contexts
 
 `/users/new` remains a working route. When the user opens it directly,
 or in a new tab, it renders as a full page. The same screen works embedded
-in an overlay and standing on its own, without knowing the difference.
+in an overlay and standing on its own, **without knowing the difference**.
 
 Overlays can also close automatically when the user completes their task,
 passing a result value to the page behind them.
-
 
 
 @page start/overlays
