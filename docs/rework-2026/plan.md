@@ -978,15 +978,14 @@ wins); drafts in markdown-station-drafts.md. What shipped onto docs-rework:
   token in _head.html.erb (Chrome 162, renew with each Chrome release).
 - `.md` links bypass Unpoly (noFollowSelectors) since Unpoly renders HTML only.
 OPEN FROM THE STATION (content track, i.e. ours):
-- Land the install-page section from markdown-station-drafts.md §1 into install.md (shape
-  settled: recommend the skill, the npx command, link /skill); README section +
-  CHANGELOG entry from the same file — calibrate wording to our doctrines, Henning
-  reviews before commit.
-- Calibrate the root-index lead (live in source/root_index.txt.erb).
+- DONE 2026-10-08 (Henning approved wording): install.md "Docs for coding agents" section,
+  CHANGELOG_3.x.md Unreleased entry, README reduced to the npx command only ("README is
+  minimal, we don't want to duplicate the docs site"), root-index lead calibrated and its
+  skill link on base_url (all links may use the dynamic host). Closing line stays "one
+  JavaScript file" (no CSS mention, Henning).
 - REMOVE the "This page is being written." filter (the `blurb` lambda in
   source/learn/index.html.erb) before ship — stubs never ship.
-- Unresolved review findings: SKILL.md wording nits ("extra terms rarely hurt", "one file
-  per API symbol and module", "matching lines per file"); verify `"source": "url"` for
+- SKILL.md wording nits applied 2026-10-08 (1A). Still to verify `"source": "url"` for
   extraKnownMarketplaces and whether `/plugin marketplace update` updates the plugin.
 DEPLOY-DAY CHECKLIST (rides with the docs-rework deploy; detail in the station plan's
 Hand-offs): staging curl matrix (negotiation, .md types, Vary, X-Robots-Tag, .md→page 301,
