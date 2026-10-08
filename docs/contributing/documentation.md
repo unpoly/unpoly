@@ -759,7 +759,7 @@ so where you insert a page is an editorial decision, not just a technical one.
 A Learn page that belongs to no chapter goes in the area's `loose:` list instead. It
 still counts as a Learn page (Learn menu, Learn search badge), but nothing lists it: not
 the sidebar, not the `/learn` hub, not the previous/next path. Readers reach it only
-through links from other pages, e.g. a link that opens it in an overlay.
+through links from other pages.
 
 ### Linking the reference to a guide
 

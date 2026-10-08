@@ -152,8 +152,8 @@ learn:
 
   # Pages of the Learn area that belong to no chapter. They get the Learn menu and the
   # Learn search badge, but appear in no list: not in the menu tree, not on the /learn
-  # hub, not on the reading path (they render no Previous/Next). Other pages link to
-  # them, e.g. /install opens them in an overlay with [up-layer=new].
+  # hub, not on the reading path (they render no Previous/Next). Readers reach them
+  # through links from other pages.
   loose:
     - bootstrap-integration
     - legacy-browsers
