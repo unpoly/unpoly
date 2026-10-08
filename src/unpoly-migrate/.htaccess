@@ -167,3 +167,5 @@ RedirectPermanent /install/bootstrap /bootstrap-integration
 RedirectPermanent /install/legacy-browsers /legacy-browsers
 RedirectPermanent /handling-everything /handling-all-links
 RedirectPermanent /attributes-and-options /start/api
+RedirectPermanent /agent-skill /skill
+RedirectPermanent /agent /skill
