@@ -142,12 +142,13 @@ learn:
       title: Advanced rendering
       pages:
         - advanced-rendering
+        - attributes-and-options
+        - navigation
         - targeting-fragments
         - target-derivation
-        - providing-html
-        - navigation
         - failed-responses
         - preserving-elements
+        - providing-html
         - render-lifecycle
 
     - type: page-group
