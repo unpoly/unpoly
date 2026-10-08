@@ -468,8 +468,10 @@ Kept current during implementation; Henning relays to the orchestrator session.
     snippets), each against the ranking queries; T7 fail instead of skip without
     python3; T8 delete `shoot/markdown.rb` after the screenshot approval.
 
-- **Round 2 (34–41), state:** implemented on `docs-rework-md` in both repos; see the
-  report for commits. Not merged, not deployed.
+- **Round 2 (34–41), state (2026-10-08):** implemented, trimmed, reviewed by a
+  non-builder agent and pushed to `docs-rework-md` in both repos (unpoly-site `b520153a`,
+  unpoly `15b112e5b` plus the commit carrying this line; Henning's `874238185` is pushed
+  with it). Not merged, not deployed.
 - **Round 2 review list for Henning** (written, not blocking):
   - `/skill` page (`src/unpoly/pages/skill.md`): the lead and all wording; the
     `extraKnownMarketplaces` snippet uses `"source": "url"` for a marketplace.json URL —
