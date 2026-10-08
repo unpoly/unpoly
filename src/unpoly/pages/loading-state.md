@@ -1,7 +1,7 @@
 Loading state
 =============
 
-Unpoly offers many tools to show loading state after a user interaction.
+Show placeholders, previews and optimistic UI while the server responds.
 
 This is an overview of all available strategies to signal that the app is working,
 or to provide clues for how the page will ultimately look. Techniques can be applied
