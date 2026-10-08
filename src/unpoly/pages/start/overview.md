@@ -73,5 +73,4 @@ at any point and already have a better app.
 
 
 @page start/overview
-@menu-title Overview
 @signature
