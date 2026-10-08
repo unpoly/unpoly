@@ -287,7 +287,7 @@ The revalidation preview is run after the expired content has been rendered.
 Hence the preview can modify a DOM tree showing the destination screen (albeit with stale data).
 
 To use the `[up-preview]` attribute for both the initial render pass, and the revalidation request, set `[up-revalidate-preview]`
-to a [true value](/start/api#boolean-attributes):
+to a [true value](/attributes-and-options#boolean-attributes):
 
 
 ```html

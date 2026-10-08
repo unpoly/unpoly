@@ -285,7 +285,7 @@ up.link = (function() {
       See `[up-follow]` for a list of supported attributes.
 
       You may pass this additional `options` object to
-      [supplement or override](/start/api#options)
+      [supplement or override](/attributes-and-options#options)
       options parsed from the link attributes.
 
   @section Targeting
@@ -1039,7 +1039,7 @@ up.link = (function() {
       [Render options](/up.render#parameters) that should be used for loading the placeholder.
 
       Unpoly will parse render options from the given placeholder's attributes.
-      You may pass this additional `options` object to [supplement or override](/start/api#options)
+      You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
       options parsed from the placeholder attributes. See `[up-follow]` for a list of supported attributes.
 
       Common options are documented below, but most [options for `up.follow()`](/up.follow#parameters) may be used.
@@ -1232,7 +1232,7 @@ up.link = (function() {
 
   To force a [full page load](/up.network.loadPage) when a followable link is clicked:
 
-  - Set an [`[up-follow=false]`](/start/api#boolean-attributes) attribute on the link element
+  - Set an [`[up-follow=false]`](/attributes-and-options#boolean-attributes) attribute on the link element
   - Prevent the `up:link:follow` event, then call `up.network.loadPage(event.renderOptions)`
 
   ## Making non-interactive elements act as hyperlinks
