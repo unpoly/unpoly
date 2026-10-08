@@ -610,6 +610,9 @@ improve what doesn't. A few conventions hold everywhere:
   a problem for more than a clause.
 - Concrete beats abstract. Name outcomes and things ("your scroll position survives"),
   not categories ("application behavior").
+- The first prose paragraph of every documentable — guide page, module or feature —
+  doubles as its short description on hubs, previews and indexes: one value-first
+  sentence that stands alone.
 - Don't enumerate features in prose — any pick of three reads as arbitrary.
   Let code and lists carry enumerations.
 - Don't join two statements with an em-dash connective ("takes any JSON — and
