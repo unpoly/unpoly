@@ -55,6 +55,14 @@ implement on his go.
 - A new `unpoly/unpoly-skills` repo is part of the stretch goal; creating it on GitHub
   is an ask-first action (Henning's word).
 
+## Reserved for you: the /skill page
+
+The Learn area now has an "Extensions" chapter whose first page is `/skill`
+("Agent skill", `src/unpoly/pages/skill.md`) — a deliberately near-empty stub
+reserved for this station to fill (redirects `/agent-skill` and `/agent` already
+point at it). Write the skill's user-facing docs THERE on your branch; the page is
+already in the toc, menu and reading chain.
+
 ## Known coupling to watch
 
 - The site evolves under you: the docs-rework branch receives content and styling
