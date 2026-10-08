@@ -7,7 +7,7 @@ Unpoly has an **optional** protocol your backend may implement to inspect and ma
 The protocol mostly works by reading or setting simple HTTP headers (like `X-Up-Target`).
 It's quite straightforward to use in your own code, and you don't have to implement all of it.
 
-You can also use [existing implementations](/server-bindings),
+You can also use [existing implementations](/protocol-implementations),
 which are available for most popular web frameworks.
 
 > [IMPORTANT]
