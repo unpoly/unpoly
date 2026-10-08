@@ -948,9 +948,53 @@ TOKEN ECONOMY (Henning 2026-10-09, after blowing the weekly quota in 3 days):
 - LEANER REPORTING: numbers-only reports, detail on request; reviewers don't re-run
   suites the builder just ran green; spot-checks for small rounds, full fresh-eyes
   rounds only for new architecture or new prose.
-NEXT MAJOR TASK (Henning): the Markdown station is finishing in its own session —
-merging docs-rework-md into docs-rework (both repos) and closing that station comes
-next; the orchestrator takes the merge per markdown-station-handoff.md.
+MARKDOWN STATION MERGED + CLOSED (2026-10-08): docs-rework-md merged into docs-rework in
+both repos (unpoly 038fa7189, unpoly-site 0829f1e7); shoot/markdown.rb deleted. The
+binding record stays markdown-station-plan.md (where it and this summary disagree, it
+wins); drafts in markdown-station-drafts.md. What shipped onto docs-rework:
+- MARKDOWN TWINS: every doc page has a `.md` twin (HTML rendered with layout:false, then
+  converted; golden-file specs, no element registry); one-line `<nav>` context line,
+  front matter only name/area/visibility/url/released; links go to `.md` only where a
+  twin exists; absolute URLs on a BASE_URL (build → https://unpoly.com, preview → own
+  host). `/index.md` == `/llms.txt` (root index: hand-written lead in
+  source/root_index.txt.erb, Learn chapters, API modules, Changes, Support).
+- SERVING (.htaccess): extension-less URL negotiates to the twin only when text/markdown
+  is FIRST in Accept; `/` → /index.md; missing `.md` 301s to the page; Vary: Accept;
+  noindex on `.md`. Build enforces alt text on images / aria-label on videos.
+- SKILL `unpoly-docs` (marketplace + plugin `unpoly`): built in unpoly-site
+  (source/skills/), all majors' release notes, ~813 files, stdlib-Python BM25 search.py
+  with ranking-query tests (`rake skill:test`, needs python3). Install routes:
+  `npx skills add --global https://unpoly.com` (recommended) and the Claude marketplace
+  at /claude-plugins/marketplace.json. Calver build stamp. Only the archives deploy.
+  `SKIP_SKILL=1` skips it locally; full build now ~3.5–4 min.
+- /SKILL PAGE (34): canonical page for everything agent-related (install, team setup,
+  "make your agent use it", use without installing). Henning did its reading pass.
+- AI-TOOLS CORNER (36 rev.): quiet title-row `SKILL · [M↓] · [⧉]` via the `page_title`
+  helper; the EDIT LINK IS GONE (replaces our quiet gray Edit button); copy button copies
+  the page's Markdown. Narrow: SKILL hides <460px, Markdown mark <360px, Copy stays.
+- SEARCH: dialog empty-state TIP links /skill (37); trigger + dialog ARIA (39, 40);
+  search logic extracted to search_core.js.
+- WEBMCP (41): `search_docs` + `get_page_markdown` tools in webmcp.js; Chrome origin-trial
+  token in _head.html.erb (Chrome 162, renew with each Chrome release).
+- `.md` links bypass Unpoly (noFollowSelectors) since Unpoly renders HTML only.
+OPEN FROM THE STATION (content track, i.e. ours):
+- Land the install-page section from markdown-station-drafts.md §1 into install.md (shape
+  settled: recommend the skill, the npx command, link /skill); README section +
+  CHANGELOG entry from the same file — calibrate wording to our doctrines, Henning
+  reviews before commit.
+- Calibrate the root-index lead (live in source/root_index.txt.erb).
+- REMOVE the "This page is being written." filter (the `blurb` lambda in
+  source/learn/index.html.erb) before ship — stubs never ship.
+- Unresolved review findings: SKILL.md wording nits ("extra terms rarely hurt", "one file
+  per API symbol and module", "matching lines per file"); verify `"source": "url"` for
+  extraKnownMarketplaces and whether `/plugin marketplace update` updates the plugin.
+DEPLOY-DAY CHECKLIST (rides with the docs-rework deploy; detail in the station plan's
+Hand-offs): staging curl matrix (negotiation, .md types, Vary, X-Robots-Tag, .md→page 301,
+/ with Claude's Accept, both agent-skill index URLs, /up.proxy.md redirect order); both
+install routes against a BASE_URL=staging build; tar.gz served WITHOUT Content-Encoding:
+gzip; WebMCP tool shape in a real Chrome (staging needs the WebMCP flag, token is bound to
+unpoly.com); copy button in Safari + Firefox; nginx stays cache-free (a CDN must honor
+Vary: Accept); renew the origin-trial token.
 
 GETTING-STARTED SITTING CLOSED + HUB POLISH VERDICTS (Henning 2026-10-08, slow-down):
 hub: h1 "Learn Unpoly" (template copy); "+N more" counts what #all-features lists (6A);
