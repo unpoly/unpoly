@@ -921,6 +921,20 @@ label "Edit page" -> "Edit" -> hidden on very narrow screens):
   current item may re-wrap when marked (accepted); other items must not move.
 - (4A) No bold/500-italic cuts until real bold-italic usage appears broken.
 
+EXTENSIONS TOPIC (Henning's plan 2026-10-08, supersedes the loose placement of the two
+pages; the loose MECHANICS stay as capability): new LAST Learn chapter "Extensions",
+order: overview (extensions.md) -> skill ("Agent skill", near-empty stub reserved for
+the Markdown station; .htaccess /agent-skill + /agent -> /skill) -> protocol-
+implementations ("Protocol implementations", the table moved out of server-bindings;
+cross-links back) -> legacy-browsers -> bootstrap-integration. /install's modal links
+become REGULAR links (both content-modal taste calls die). /server-bindings stays in
+Backend integration, loses only the table now; its refocus on the pure protocol
+(liberating the header reference from the up.protocol module index) belongs to the
+BACKEND INTEGRATION chapter batch — at that moment the deferred vocabulary swap is
+revisited: server-bindings may retitle "The server protocol" and protocol-
+implementations may inherit "Server bindings" (option (a) chosen now to avoid the
+collision). Dispatched to builder (structure) + writer (five files) 2026-10-08.
+
 TOPIC-LESS LEARN PAGES (settled with Henning 2026-10-07/08; supersedes the
 move-to-Backend-integration + chapter-rename thread, which DIES): "Bootstrap
 integration" and "Legacy browser support" become their OWN @pages, recovered from the
