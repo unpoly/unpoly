@@ -1,19 +1,13 @@
 Placeholders
 ============
 
-Placeholders are temporary spinners or UI skeletons shown while a fragment is loading.
-
-Placeholders appear instantly after a user interaction, without waiting for the server.
-By providing clues for how the page will ultimately look, placeholders can make long-loading interactions appear more responsive.
+Placeholders are temporary spinners or UI skeletons shown within a fragment while it is loading.
+They appear instantly after the user's interaction and are replaced by the server response.
 
 <video src="images/placeholders.webm" controls width="600" aria-label="UI skeletons are shown while screens are loading"></video>
 
-Like all [preview effects](/previews), placeholders only temporarily displace a fragment.
-When the associated request [ends for any reason](/previews#ending), the placeholder is removed
-and the original screen state is restored before the response is processed.
-
-When [targeting multiple fragments](/targeting-fragments#multiple),
-the placeholder will be shown in the first fragment.
+By providing clues for how the page will ultimately look,
+placeholders make long-loading interactions feel more responsive.
 
 
 Basic placeholders {#basic-example}
@@ -25,7 +19,7 @@ with the placeholder's HTML as its value:
 ```html
 <a href="/path" up-target="#target" up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark: up-placeholder="<p>Loading…</p>" -->
 
-<div id="#target">
+<div id="target">
   Old content
 </div>
 ```
@@ -34,8 +28,8 @@ When the link is clicked, the [targeted](/targeting-fragments) fragment's conten
 is [hidden](/hidden). In its place the placeholder is inserted as the only visible child of `#target`:
 
 ```html
-<div id="#target">
-  <p>Loading…</p>
+<div id="target">
+  <p>Loading…</p> <!-- mark-line -->
   <up-wrapper hidden>Old content</up-wrapper>
 </div>
 ```
@@ -43,10 +37,19 @@ is [hidden](/hidden). In its place the placeholder is inserted as the only visib
 When the response is received, `#target` is updated with new HTML from the server:
 
 ```html
-<div id="#target">
+<div id="target">
   New content from server
 </div>
 ```
+
+Like all [preview effects](/previews), a placeholder only temporarily displaces a fragment.
+When the request [ends for any reason](/previews#ending), the placeholder is removed
+and the original content is restored before the response is processed.
+This also happens when the server responds with an error, or when the request is aborted.
+
+Forms can show placeholders the same way, by setting `[up-placeholder]` on the `<form>` element.
+When [targeting multiple fragments](/targeting-fragments#multiple),
+the placeholder is shown in the first fragment.
 
 ### From JavaScript
 
@@ -60,24 +63,24 @@ up.navigate({
 })
 ```
 
-Instead of passing a HTML snippet you may also pass an `Element` or a [template reference](#from-template). 
+Instead of passing an HTML snippet you may also pass an `Element` or a [template reference](#from-template).
 
 
-Placeholder from templates {#from-template}
---------------------------
+Placeholders from templates {#from-template}
+---------------------------
 
-Instead of passing the placeholder HTML directly, you can also refer to any [template](/templates)
-by its CSS selector. This is useful when you don't want to set long HTML string
-as attribute value, or when you want to re-use the same placeholder multiple times:
+Instead of passing the placeholder HTML directly, you can refer to any [template](/templates)
+by its CSS selector. This is useful when you don't want to set a long HTML string
+as an attribute value, or when you want to reuse the same placeholder many times:
 
 ```html
 <a href="/path" up-target="#target" up-placeholder="#loading-template">Show story</a> <!-- mark: up-placeholder="#loading-template" -->
 
-<div id="#target">
+<div id="target">
   Old content
 </div>
 
-<template id="loading-template">
+<template id="loading-template"> <!-- mark: id="loading-template" -->
   <p>
     Loading…
   </p>
@@ -87,58 +90,33 @@ as attribute value, or when you want to re-use the same placeholder multiple tim
 ### Dynamic templates {#dynamic-templates}
 
 You may need to customize placeholder markup to better fit the targeted fragment.
-For example, a spinner animations should be larger when updating a larger content area.
+For example, a spinner animation should be larger when updating a larger content area.
 Also when building a UI skeleton, its shapes must resemble the eventual screen state to be believable.
 
-To limit the proliferation of template variants, you can also make a few templates that are
-[customizable with variables](/templates#dynamic). When refering to a template, we
-can append variables as a data object after the template selector:
+To limit the proliferation of template variants, you can make a few templates that are
+[customizable with variables](/templates#dynamic). When referring to a template, append
+the variables as a data object after the template selector:
 
 ```html
 <a
   href="/path"
   up-target="#target"
-  up-placeholder="#loading-template { size: 'xl', text: 'Please wait' }"> <!-- mark: #loading-template { size: 'xl', text: 'Please wait' } -->
+  up-placeholder="#loading-template { size: 'xl', message: 'Please wait' }"> <!-- mark: #loading-template { size: 'xl', message: 'Please wait' } -->
   Show story
 </a>
 ```
 
-There are [many ways](/templates#dynamic) to process template variables, including
-the [use of compilers](/templates#compiler-postprocessing) or [template engines](/templates#template-engine).
-This example uses the minimal `text/minimustache` templating function
-that you can [copy into your project](/templates#template-engine-example):
+The template can then use the variables:
 
 ```html
-<script id="loading-template" type="text/minumustache">
-  <p class="{{ size }}">
-    {{ message }}
+<script id="loading-template" type="text/minimustache">
+  <p class="{{size}}">
+    {{message}}
   </p>
 </script>
 ```
 
-
-Abitrary placeholder logic {#from-preview}
---------------------------
-
-Sometimes we want something even more advanced than what [templates and variables](#dynamic-templates) can give us:
-
-- Complex placeholder construction logic
-- Showing a placeholder in a fragment that wasn't targeted
-- Placeholders that affect multiple fragments
-
-In such cases we can fall back to using a [preview](/previews), which allow to define arbitrary loading state using JavaScript.
-
-In addition to allowing arbitrary setup and DOM manipulation, previews can use
-the `up.Preview#showPlaceholder()` method to apply the existing placeholder logic
-to any element:
-
-```js
-up.preview('loading-message', function(preview) {
-  // ...
-  preview.showPlaceholder(element, html)
-})
-```
-
+@include minimustache-tip
 
 
 Placeholders for new overlays {#overlays}
@@ -147,18 +125,42 @@ Placeholders for new overlays {#overlays}
 You can use placeholders with [links that open an overlay](/up-layer-new):
 
 ```html
-<a href="/path" up-follow up-layer="new" up-placeholder="<p>Loading…</p>">Open overlay</a>
+<a href="/path" up-follow up-layer="new" up-placeholder="<p>Loading…</p>">Open overlay</a> <!-- mark: up-placeholder="<p>Loading…</p>" -->
 ```
 
-This will open a temporary overlay with the same [visual style](/customizing-overlays) and open animation
-as the link overlay would have shown.
+This opens a temporary overlay with the same [visual style](/customizing-overlays) and open animation
+as the link's overlay would have shown.
 
 When the server response is received, the temporary overlay is closed and another overlay is opened with
-the response content. To make that switch appear seamless to the user, animations are disabled.
+the response content. To make that switch appear seamless to the user, the close and open animations are disabled.
 
-In cases when the response ends up *not* opening an overlay (e.g. the server responds with an [error code](/failed-responses),
-the placeholder overlay will be closed.
+When the response ends up *not* opening an overlay (e.g. the server responds with an [error code](/failed-responses)),
+the placeholder overlay is closed.
 
+If the user dismisses the placeholder overlay before the server responds,
+the request is [aborted](/aborting-requests).
+
+
+Arbitrary placeholder logic {#from-preview}
+--------------------------
+
+Sometimes you need more than [templates and variables](#dynamic-templates) can give you:
+
+- Complex placeholder construction logic
+- Showing a placeholder in a fragment that wasn't targeted
+- Placeholders that affect multiple fragments
+
+In such cases you can define a [preview](/previews), which describes arbitrary loading state in JavaScript.
+A preview can show a placeholder in any element with `up.Preview#showPlaceholder()`.
+For example, this preview shows a loading message in a `#sidebar` element while the targeted fragment is loading:
+
+```js
+up.preview('sidebar-loading', function(preview) {
+  preview.showPlaceholder('#sidebar', '<p>Loading…</p>') // mark: showPlaceholder
+})
+```
+
+The placeholder is removed when the preview ends, just like a placeholder set with `[up-placeholder]`.
 
 
 @page placeholders
