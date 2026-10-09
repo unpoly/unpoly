@@ -19,3 +19,9 @@ Rename navigation → navigation-defaults done (60 links; /navigate,/navigating 
 Fixed: navigateOptions fallback ':main' → true; class=".content" dots; [up-link=region] → [up-match=region]; target-derivation real deriver list.
 Unverified: navigation-defaults focus 'auto' row simplification; validate/poll rows non-navigation.
 Ref bugs: fragment.js ~2595 :layer doc says :target twice; up:fragment:loaded example uses headers['X'] vs header(); renderOptions experimental omitted.
+
+## Advanced rendering batch 2 (226820591, 6e8cb3d3a, 37636c860) — critic NOT yet run (paused for quota)
+Fixed: event.newElement → newFragment; class=".target" dots; onFinished link; up-target="/target".
+render-lifecycle: #skipping-responses leads with event.skip(); failed response rejects with RenderResult, onError not run.
+Unverified: same-data "client changes to data ignored" (macro order TODO fragment.js ~1138).
+Ref bugs: fragment.js up:fragment:keep example (~998) element/newElement; render_job.js example invalid JS + job.options → renderOptions; lifecycle-hooks.md onError note.
