@@ -18,8 +18,8 @@ set an `[up-layer]` attribute:
 ```
 
 Unpoly fetches `/users` and swaps the `.user-list` element in the parent layer.
-Because the overlay now obstructs the updated content, it is closed once the
-parent layer was updated. This is called [peeling](/closing-overlays#peeling).
+Because the overlay now obstructs the updated content, it is closed when the
+parent layer is updated. This is called [peeling](/closing-overlays#peeling).
 To keep the overlay open, set an `[up-peel="false"]` attribute.
 
 Forms work the same way. This form in an overlay creates a user, then updates the root layer:

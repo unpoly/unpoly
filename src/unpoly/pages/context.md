@@ -51,7 +51,7 @@ serialized as JSON:
 X-Up-Context: { "project": "Hosting 2021" }
 ```
 
-Every request from that layer carries the header, so the server can render the contact list with
+Every request targeting that layer carries the header, so the server can render the contact list with
 an additional heading. This [ERB](https://github.com/ruby/erb) template uses the [`unpoly-rails`](https://github.com/unpoly/unpoly-rails) gem:
 
 ```erb
@@ -110,7 +110,7 @@ X-Up-Context: { "lives": 2 }
 ```
 
 Unpoly merges the given keys into the layer's context, adding or replacing them.
-Keys not mentioned in the header remain unchanged. To remove a key, send it with a `null` value.
+Keys not mentioned in the header remain unchanged. To clear a key, send it with a `null` value.
 
 Only send the keys you changed. If the server echoed the entire context,
 client-side changes made while the request was in flight would be overwritten.
@@ -141,7 +141,7 @@ The web platform offers other ways to persist state across requests, but none of
 | Local storage      | Domain             | Permanentish   | String     | Yes               | -                 |
 | Cookies            | Domain             | Configurable   | String     | Configurable      | Yes               |
 | Session storage    | Tab                | Session        | String     | Yes               | -                 |
-| Layer context      | [Layer](/up.layer) | Session        | Object     | Yes               | Yes               |
+| Layer context      | [Layer](/up.layer) | Layer          | Object     | Yes               | Yes               |
 
 
 @page context
