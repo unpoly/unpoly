@@ -10,11 +10,9 @@ Picking a mode {#modes}
 --------------
 
 An overlay's default look and behavior come from its [mode](/overlays#layer-modes),
-which is [chosen when the overlay is opened](/opening-overlays#modes):
-
-@include overlay-modes-table
-
+which is [chosen when the overlay is opened](/opening-overlays#modes).
 Every customization below applies on top of a mode, so start with the mode closest to what you need.
+
 Defaults for all overlays live in `up.layer.config.overlay`. Each mode has its own
 defaults in `up.layer.config.modal`, `up.layer.config.drawer`, `up.layer.config.popup` and `up.layer.config.cover`.
 
