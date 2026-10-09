@@ -1,46 +1,59 @@
 Progress bar
 ============
 
-When requests are [taking long](/up:network:late) to load, Unpoly will show a thin progress bar at the top edge of the screen.
+When a request takes longer than 400 ms, Unpoly shows a thin progress bar at the top edge of the screen.
+This mimics the loading indicator that browsers show during full page loads.
 
 ![Progress bar animation](images/progress-bar.gif)
 
-This mimics similar loading indicators by browsers, which only appear during full page loads.
-You can also [customize the style](#styling) or implement a [custom loading indicator](#custom-implementation).
+The progress bar requires no setup. You can [style it](#styling), [control when it appears](#timing),
+[disable it](#disabling) or replace it with a [custom loading indicator](#custom-implementation).
+
+The progress bar is a global indicator and does not point at the fragment being updated.
+To show loading state within a fragment, see [[loading-state]].
 
 
 ## Styling the progress bar {#styling}
 
 The progress bar is implemented as a single `<up-progress-bar>` element.
-Unpoly will automatically insert and remove this element as requests
-are [late](/up:network:late) or [recovered](up:network:recover).
+Unpoly automatically inserts the element when requests are [late](/up:network:late),
+and removes it when they have [recovered](/up:network:recover).
 
-You may style the progress bar element using CSS:
+By default the bar is 3 pixels high and blue. You may style the element using CSS:
 
 ```css
 up-progress-bar {
+  height: 5px;
   background-color: red;
 }
 ```
 
 
-## Controlling when the progress bar appears
+## Controlling when the progress bar appears {#timing}
 
-Unpoly will show the progress bar when a request is taking longer to respond
-than `up.network.config.lateDelay`.
+Unpoly shows the progress bar when a request takes longer to respond
+than `up.network.config.lateDelay`. The default is 400 milliseconds:
 
-You may override this per-request by using the [`{ lateDelay }`](/up.render#options.lateDelay)
-option or [`[up-late-delay]`](/up-follow#up-late-delay) attribute. Passing `{ lateDelay: false }` will
-never show a progress bar for that request.
+```js
+up.network.config.lateDelay = 1000
+```
 
-Requests that are loading in the background should never show the progress bar. 
-You may move a request into the background by passing an [`{ background: true }`](/up.render#options.background) option
-or setting an [`[up-background]`](/up-follow#up-background) attribute.  Requests from [preloading](/preloading) or [polling](/up-poll) are automatically
+You may override this per request by setting an [`[up-late-delay]`](/up-follow#up-late-delay) attribute
+or passing a [`{ lateDelay }`](/up.request#options.lateDelay) option.
+Passing `{ lateDelay: false }` never shows a progress bar for that request:
+
+```html
+<a href="/report" up-follow up-late-delay="false">Generate report</a> <!-- mark: up-late-delay="false" -->
+```
+
+Requests that are loading in the background never show the progress bar.
+You can move a request into the background by setting an [`[up-background]`](/up-follow#up-background) attribute
+or passing a [`{ background: true }`](/up.render#options.background) option.
+Requests from [preloading](/preloading) or [polling](/up-poll) are automatically
 marked as background requests.
 
-To disable the progress bar globally, configure `up.network.config.progressBar = false`.
 
-## Disabling
+## Disabling the progress bar {#disabling}
 
 The progress bar can be disabled entirely:
 
@@ -49,12 +62,11 @@ up.network.config.progressBar = false
 ```
 
 
-
 Custom loading indicators {#custom-implementation}
 -------------------------
 
 If you don't like the default progress bar, you can observe the `up:network:late`
-and [`up:network:recover`](/up:network:recover) events to implement a custom
+and `up:network:recover` events to implement a custom
 loading indicator that appears during long-running requests.
 
 To build a custom loading indicator, place an element like this in your application layout:
@@ -77,23 +89,14 @@ up.compiler('loading-indicator', function(indicator) {
   hide()
 
   return [
-    up.on('up:network:late', show),
-    up.on('up:network:recover', hide)
+    up.on('up:network:late', show), // mark: up:network:late
+    up.on('up:network:recover', hide) // mark: up:network:recover
   ]
 })
 ```
 
-When you have implemented a custom loading indicator, you may want to disable the default progress bar
-by configuring `up.network.config.progressBar = false`.
-
-
-
-### Advanced loading state
-
-Unpoly allows you to make arbitrary changes to individual fragments while they are loading.
-
-See [Loading state](/loading-state) for details.
-
+The compiler returns the functions that unbind the event listeners, so the listeners are removed
+when the indicator element is [destroyed](/enhancing-elements#destructor).
 
 
 @page progress-bar
