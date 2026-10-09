@@ -13,3 +13,9 @@ Fixed: overclaims "never full page load"; X-Up-Expire-Cache can't narrow/disable
 Judgment calls (lean): 1 server-bindings bold lead-ins (keep or H3s); 2 conditional-requests blurb (lead with 304 benefit); 3 ETag tip vs Rails masked CSRF tokens (caveat or drop); 4 render-lifecycle #skipping-responses lead with event.skip() (Advanced rendering batch 2); 5 no objection to writer's recommendations.
 Ref bug for Henning: X-Up-Expire-Cache: false documented as override in protocol.js + caching.md:134 but can't undo request-time expiry (code or docs?).
 For batch 2 writer: render-lifecycle #skipping-responses integrate, lead with event.skip().
+
+## Advanced rendering batch 1 (67f119ca8..2b4aff63e; site 533fb4a5)
+Rename navigation → navigation-defaults done (60 links; /navigate,/navigating collapse). Title "Navigation" → "Navigation defaults".
+Fixed: navigateOptions fallback ':main' → true; class=".content" dots; [up-link=region] → [up-match=region]; target-derivation real deriver list.
+Unverified: navigation-defaults focus 'auto' row simplification; validate/poll rows non-navigation.
+Ref bugs: fragment.js ~2595 :layer doc says :target twice; up:fragment:loaded example uses headers['X'] vs header(); renderOptions experimental omitted.
