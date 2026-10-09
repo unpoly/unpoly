@@ -90,7 +90,7 @@ up.Request = class Request extends up.Record {
   Unpoly will by default send a number of custom request headers.
   See `up.protocol` for details.
 
-  @see up.Request.prototype.header
+  To read a single header, use `up.Request#header()`.
 
   @property up.Request#headers
   @param {Object} headers
@@ -430,7 +430,7 @@ up.Request = class Request extends up.Record {
 
   When this request will [open a new overlay](/opening-overlays), an empty array is returned.
 
-  @see up.RenderResult.prototype.fragments
+  See also `up.RenderResult#fragments`.
 
   @property up.Request#fragments
   @param {List<Element>} fragments
@@ -470,7 +470,7 @@ up.Request = class Request extends up.Record {
 
   When this request will [open a new overlay](/opening-overlays), `undefined` is returned.
 
-  @see up.RenderResult.prototype.fragment
+  See also `up.RenderResult#fragment`.
 
   @property up.Request#fragment
   @param {Element} fragment

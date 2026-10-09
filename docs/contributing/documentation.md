@@ -971,9 +971,6 @@ The `up.form` module helps you work with non-trivial forms.
 @learn-ref submitting-forms
 @learn-ref validation
 
-@see [up-submit]
-@see [up-validate]
-
 @module up.form
 */
 ```
@@ -985,10 +982,9 @@ Two things to know:
   would file its features under whichever module happened to be parsed before it.
   `src/unpoly-migrate/form.js` opens with `@module up.form` for exactly this reason;
   repeated declarations of the same module are merged.
-- **`@see` is being retired.** It now only points at features: on a module it renders
-  the *Essentials* cards, on a feature a plain "See also" list. Guide pages are pointed
-  at with `@learn-ref` instead. The remaining `@see` lists will become intro prose
-  during the docs rework, so don't add new ones.
+- **There is no `@see` directive.** Point at related features in the prose, e.g.
+  "See also `up.network.isBusy()`.", and at guide pages with `@learn-ref`.
+  The parser rejects a leftover `@see`.
 
 `@class` blocks also use `@parent` to nest under a module in the menu, e.g.
 `src/unpoly/classes/params.js` declares `@parent up.form`.

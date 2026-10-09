@@ -149,7 +149,7 @@ up.RenderResult = class RenderResult {
   When [multiple fragments](/targeting-fragments#multiple) were inserted, the first fragment is returned.
   To get a list of all inserted fragments, use the [`{ fragments }`](/up.RenderResult.prototype.fragments) property.
 
-  @see up.Request.prototype.fragment
+  See also `up.Request#fragment`.
 
   @property up.RenderResult#fragment
   @param {Element} fragment

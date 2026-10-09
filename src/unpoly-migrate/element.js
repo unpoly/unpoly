@@ -175,7 +175,7 @@ up.element.toSelector = function(...args) {
 /*-
 Returns whether the given element is attached to the DOM tree.
 
-@see up.element.isDetached
+See also `up.element.isDetached()`.
 
 @function up.element.isAttached
 @param {Element} element
