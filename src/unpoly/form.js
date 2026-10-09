@@ -338,6 +338,8 @@ up.form = (function() {
 
   Emits the event [`up:form:submit`](/up:form:submit).
 
+  @learn-ref submitting-forms
+
   ### Example
 
   ```js
@@ -1065,6 +1067,8 @@ up.form = (function() {
   /*-
   Marks this element as a form group, which (usually) contains a label, input and error message.
 
+  @learn-ref validation#form-groups
+
   You are not required to use form groups to [submit forms through Unpoly](/submitting-forms).
   However, structuring your form into groups will help Unpoly make smaller changes to the DOM when
   working with complex forms. For instance, when [validating](/validation#validating-after-changing-a-field) a field,
@@ -1131,6 +1135,8 @@ up.form = (function() {
 
   Typical use cases are to [show validation errors](/validation#validating-after-changing-a-field)
   after a field was changed or to update forms where one field depends on the value of another.
+
+  @learn-ref reactive-server-forms
 
   `up.validate()` submits the given element's form with an additional `X-Up-Validate`
   HTTP header. Upon seeing this header, the server is expected to validate (but not commit)
@@ -1692,7 +1698,7 @@ up.form = (function() {
 
   You can listen to `up:form:switch` to implement [custom switching effects](/switching-form-state#custom-effects).
 
-  @learn-ref switching-form-state
+  @learn-ref switching-form-state#custom-effects
 
   ## Event targets
 
@@ -1907,6 +1913,9 @@ up.form = (function() {
   This quickly signals whether a change is valid,
   without the need to scroll for error messages or to backtrack to
   fields completed earlier.
+
+  @learn-ref validation
+  @learn-ref reactive-server-forms
 
   > [NOTE]
   > `[up-validate]` is a tool to implement highly dynamic forms that must update

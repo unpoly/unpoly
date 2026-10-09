@@ -1,72 +1,95 @@
-Submitting forms in-place
-=========================
+Submitting forms
+================
 
-You can enhance any form to update the existing page, without making a full page load.
+Any form can update a fragment of the current page, instead of loading a full new document.
+Your server handles the submission like any other, and Unpoly swaps the response into the page.
 
 
-## Forms that update fragments {#submit}
+## Submitting a form {#submit}
 
 Begin with a regular `<form>` element, with standard `[method]` and `[action]` attributes.
-To have Unpoly handle the form submission, set an `[up-submit]` attribute.
-This will cause Unpoly to submit the form using JavaScript and update the [main element](/main)
-with the response:
+To have Unpoly handle the submission, set an `[up-submit]` attribute:
 
 ```html
-<form method="post" action="/path" up-submit> <!-- mark: up-submit -->
-  ...
+<form method="post" action="/subscribers" up-submit> <!-- mark: up-submit -->
+  <input type="email" name="email">
+  <button type="submit">Subscribe</button>
 </form>
-
-<main>
-  <!-- chip: Content will appear here -->
-</main>
 ```
 
-The server response must contain at least the targeted `<main>` element.
-It's OK for the response to contain other HTML, or even the entire application layout.
-However, only the `<main>` element will be extracted and placed into the page.
-Other elements will be discarded from the response and will be kept unchanged on the page.
+When the user submits, Unpoly sends the form data in the background.
+The server responds with a full HTML page, the same way it would for any browser request.
+Unpoly extracts the response's [main element](/main) and replaces the main element
+on the current page. The rest of the page stays untouched.
 
-### Updating other fragments {#target}
+The response may contain other HTML, or even the entire application layout.
+Only the main element is extracted. Other elements are discarded from the response,
+and their counterparts on the page are kept unchanged.
 
-Instead of updating the [main element](/main), you can [target any fragment](/targeting-fragments) in the page.
-To do so, set an [`[up-target]`](/up-submit#up-target) attribute with a CSS selector matching the element you want to swap:
+The form remains a standard form. When JavaScript is unavailable,
+the browser submits it with a full page load.
+
+> [tip]
+> Instead of annotating individual forms, you can also configure Unpoly
+> to [handle all forms on the page](/handling-all-forms).
+
+
+## Updating a specific fragment {#target}
+
+To update an element other than the main element, set an [`[up-target]`](/up-submit#up-target)
+attribute with a CSS selector:
 
 ```html
-<form method="post" action="/path" up-submit up-target="#success"> <!-- mark: up-target="#success" -->
-  ...
+<form method="post" action="/comments" up-submit up-target="#comments"> <!-- mark: up-target="#comments" -->
+  <textarea name="text"></textarea>
+  <button type="submit">Post comment</button>
 </form>
 
-<div id="success"> <!-- mark: id="success" -->
+<div id="comments"> <!-- mark: id="comments" -->
   <!-- chip: Content will appear here -->
 </div>
 ```
+
+Unpoly finds the `#comments` element in the server response and swaps it into the current page.
+
+An `[up-target]` attribute already implies `[up-submit]`, so you don't need to set both.
+The same goes for other rendering attributes like `[up-layer]` or `[up-transition]`.
+
+A target can also address multiple fragments, append to an existing element,
+or resolve relative to the form. See [[targeting-fragments]] for everything
+a target selector can express.
 
 
 ## Handling validation errors {#validation}
 
 When the form could not be submitted due to invalid user input,
-Unpoly defaults to re-rendering the form to show validation errors.
+your server should re-render the form with error messages and respond with
+a non-200 status code. We recommend
+[HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Content).
 
-For Unpoly to be able to detect a failed form submission, the backend must respond with a non-200 HTTP status code.
-We recommend to use [HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Entity).
-You can also [configure other methods for detecting failed responses](/failed-responses#customizing-failure-detection). 
-
-If the server responds with any error code, Unpoly will ignore the `[up-target]` attribute
-and update the `<form>` element:
+The error code tells Unpoly that the submission failed. Unpoly then ignores
+the `[up-target]` attribute and updates the `<form>` element instead,
+so the user sees your error messages next to their input:
 
 ```html
-<form method="post" action="/path" up-submit up-target="#success">
+<form method="post" action="/comments" up-submit up-target="#comments">
   <!-- chip: ❌ Failed responses will appear here -->
 </form>
 
-<div id="success">
+<div id="comments">
   <!-- chip: ✔️ Successful responses will appear here -->
 </div>
 ```
 
+The form's values and messages all come from your server-rendered HTML.
+Unpoly only decides which fragment to show them in.
+
+If your server cannot respond with error codes, you can
+[configure other ways to detect failed responses](/failed-responses#customizing-failure-detection).
+
 > [tip]
-> See [validating forms](/validation) for many methods of validating user input,
-> including live server validation while the user is completing fields.
+> Unpoly can also validate fields while the user is still filling in the form.
+> See [[validation]].
 
 ### Rendering error messages elsewhere {#fail-target}
 
@@ -74,29 +97,43 @@ Instead of re-rendering the form, you can update any fragment on the page by set
 [`[up-fail-target]`](/up-submit#up-fail-target) attribute:
 
 ```html
-<form method="post" action="/path" up-submit up-target="#success" up-fail-target="#failure"> <!-- mark: up-fail-target="#failure" -->
+<form method="post" action="/comments" up-submit up-target="#comments" up-fail-target="#errors"> <!-- mark: up-fail-target="#errors" -->
+  ...
 </form>
 
-<div id="success">
+<div id="comments">
   <!-- chip: ✔️ Successful responses will appear here -->
 </div>
 
-<div id="failure"> <!-- mark: id="failure" -->
+<div id="errors"> <!-- mark: id="errors" -->
   <!-- chip: ❌ Failed responses will appear here -->
 </div>
 ```
 
+Most render options have such a `fail`-prefixed variant.
+See [[failed-responses]] for details.
+
+
+## Navigation defaults
+
+Submitting a form is considered [navigation](/navigation) by default.
+When a form updates the layer's main element, Unpoly behaves like a full page load would:
+the browser URL and history are updated, and the new content is scrolled into view.
+Focus moves to the new fragment.
+
+See [[navigation]] for all navigation defaults and how to customize them.
+
 
 ## Multiple submit buttons {#submit-buttons}
 
-Just like in regular HTML, you can have multiple submit buttons on a form.
-Unpoly will submit the form when any of the buttons is clicked. Submitting the form
-by pressing the `Enter` key will submit using the first submit button.
+Just like in regular HTML, a form can have multiple submit buttons.
+Unpoly submits the form when any of the buttons is clicked. Pressing `Enter` in a text field
+submits using the first submit button.
 
 ### Per-button parameters {#per-button-params}
 
-If a submit button has a `[name]` and `[value]` attribute, it will be included
-in the form parameters sent to the server:
+A submit button with `[name]` and `[value]` attributes contributes its value
+to the form parameters sent to the server:
 
 ```html
 <form method="post" action="/proposal" up-submit>
@@ -105,7 +142,7 @@ in the form parameters sent to the server:
 </form>
 ```
 
-To include multiple params, set an [`[up-params]`](/up-submit#up-params) attribute on the button:
+To send multiple params, set an [`[up-params]`](/up-submit#up-params) attribute on the button:
 
 ```html
 <button type="submit" up-params="{ decision: 'reject', reason: 'Poor quality' }">Reject</button> <!-- mark: up-params="{ decision: 'reject', reason: 'Poor quality' }" -->
@@ -113,33 +150,32 @@ To include multiple params, set an [`[up-params]`](/up-submit#up-params) attribu
 
 ### Per-button actions {#per-button-action}
 
-Submit buttons can cause the form to submit to a different server endpoint,
-by setting `[formaction]` and `[formaction]` attributes:
+A submit button can send the form to a different server endpoint,
+by setting standard `[formaction]` and `[formmethod]` attributes:
 
 ```html
 <form method="post" action="/proposal/accept" up-submit> <!-- mark: action="/proposal/accept" -->
   <button type="submit">Accept</button>
-  <button type="submit" formaction="/proposal/reject">Reject> <!-- mark: formaction="/proposal/reject" -->
+  <button type="submit" formaction="/proposal/reject">Reject</button> <!-- mark: formaction="/proposal/reject" -->
 </form>
 ```
 
 ### Overriding render options {#per-button-options}
 
-Submit buttons can supplement or override most Unpoly attributes from the form:
+A submit button can supplement or override most `[up-...]` attributes from the form:
 
 ```html
-<form method="post" action="/proposal/accept" up-submit>
-  <button type="submit" up-target="#success">Accept</button>
-  <button type="submit" up-target="#failure" up-confirm="Really reject?">Reject</button> <!-- mark: up-confirm="Really reject?" -->
+<form method="post" action="/proposal" up-submit up-target="#status">
+  <button type="submit" name="decision" value="accept">Accept</button>
+  <button type="submit" name="decision" value="reject" up-confirm="Really reject?">Reject</button> <!-- mark: up-confirm="Really reject?" -->
 </form>
 ```
 
-See [`[up-submit]`](/up-submit#attributes) for a list of overridable attributes 
-
+See [`[up-submit]`](/up-submit#attributes) for a list of overridable attributes.
 
 ### Opting into a full page load {#per-button-opt-out}
 
-Individual submit buttons can opt for a full page load, by setting an `[up-submit="false"]` attribute:
+An individual submit button can opt for a full page load, by setting an `[up-submit="false"]` attribute:
 
 ```html
 <form method="post" action="/report/update" up-submit>
@@ -148,15 +184,44 @@ Individual submit buttons can opt for a full page load, by setting an `[up-submi
 </form>
 ```
 
-  
-
-
 
 ## Showing that the form is processing {#loading}
 
-You can apply arbitrary effects while a form is submitting, such as disabling controls or previewing the final page state.
+While a submission is loading, you can disable the form's fields and buttons.
+This prevents duplicate submissions and signals that the form is busy:
 
-See [Loading state](/loading-state) and [Disabling form while working](/disabling-forms).
+```html
+<form method="post" action="/subscribers" up-submit up-disable> <!-- mark: up-disable -->
+  <input type="email" name="email">
+  <button type="submit">Subscribe</button>
+</form>
+```
+
+See [[disabling-forms]] for disabling only some controls.
+
+Unpoly also sets [feedback classes](/feedback-classes) on the form while it is submitting,
+and can show [placeholders](/placeholders) or run arbitrary [previews](/previews).
+See [[loading-state]] for an overview.
+
+
+## Submitting forms from JavaScript {#script}
+
+To submit a form element programmatically, pass it to `up.submit()`:
+
+```js
+let form = document.querySelector('form.subscribe')
+up.submit(form)
+```
+
+The form's `[up-...]` attributes are honored, as if the user had submitted the form.
+You can pass additional [render options](/up.render#parameters) to supplement
+or override the form's attributes:
+
+```js
+up.submit(form, { target: '#elsewhere', transition: 'cross-fade' })
+```
+
+To update fragments without a form element, use `up.render()`.
 
 
 ## Handling all forms automatically {#unobtrusive}
@@ -164,34 +229,13 @@ See [Loading state](/loading-state) and [Disabling form while working](/disablin
 You can configure Unpoly to handle *all* forms on a page without requiring an `[up-submit]` attribute:
 
 ```js
-up.form.config.submitSelectors.push(['form'])
+up.form.config.submitSelectors.push('form')
 ```
 
-You can except individual forms by setting a `[up-submit="false"]` attribute.
+Individual forms can opt out by setting an `[up-submit="false"]` attribute.
 
-See [Handling all forms](/handling-all-forms).
-
-
-## Submitting forms with JavaScript {#script}
-
-You can use the `up.submit()` function to submit a form from a script:
-
-```js
-let form = document.querySelector('form#my-form')
-up.form.submit(form)
-```
-
-The `up.submit()` call will parse all modifying attributes for `[up-submit]` from the given form element. You can pass additional options to override (or supplement) any options parsed from the form's attributes:
-
-```js
-// This overrides any [up-target] or [up-transition] attributes
-up.submit(form, { target: '#elsewhere', transition: 'cross-fade' })
-```
-
-
+See [[handling-all-forms]] for the exceptions under this setting.
 
 
 @page submitting-forms
 @signature
-@menu-title Submitting forms
-
