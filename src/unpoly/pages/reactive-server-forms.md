@@ -1,27 +1,26 @@
 Reactive server forms
 =====================
 
-Unpoly makes it easy to implement server-rendered forms where sections depend on the value of other fields.
+Unpoly lets you build forms where one field re-renders other parts of the form when it changes.
+The new form state is rendered on the server, with your regular HTML templates and no additional JavaScript.
 
-Common use cases for dynamic forms include:
+Common use cases for such forms are:
 
 - Picking a `<select>` value fetches options for another `<select>`.
-- Changing a field can make dependent form sections appear or disappear.
-- Typing into a field can preview the effects of a form submission, e.g. show an order total.
-- Picking a value can show related data, like existing booking for a selected customer.
+- Changing a field makes dependent form sections appear or disappear.
+- Typing into a field previews the effects of a submission, e.g. shows an order total.
+- Picking a value shows related data, like existing bookings for a selected customer.
 
-By using the `[up-validate]` attribute we can implement logic like this on the server, using regular HTML templates
-and no additional JavaScript.
+All of these are implemented with the `[up-validate]` attribute.
 
 > [tip]
-> For light, client-side effects (like toggling visibility) no server request is required.
-> See [Switching form state](/switching-form-state).
+> For light, client-side effects like toggling visibility, no server request is required.
+> See [[switching-form-state]].
 
 
-Declaring dependencies
-----------------------
+## Declaring dependencies {#declaring-dependencies}
 
-This is a form to purchase postage for international parcels: 
+This is a form to purchase postage for international parcels:
 
 ![A form with many dependent elements](images/form-with-dependent-fields.svg){:width='625'}
 
@@ -39,17 +38,17 @@ We can implement this form with three `[up-validate]` attributes and no addition
     <label for="continent">Continent</label>
     <select name="continent" id="continent" up-validate="#country">...</select> <!-- mark: up-validate="#country" -->
   </fieldset>
-  
+
   <fieldset>
     <label for="country">Country</label>
     <select name="country" id="country" up-validate="#price">...</select> <!-- mark: up-validate="#price" -->
   </fieldset>
-  
+
   <fieldset>
     <label for="weight">Weight</label>
     <input name="weight" id="weight" up-validate="#price"> kg <!-- mark: up-validate="#price" -->
   </fieldset>
-  
+
   <fieldset>
     <label for="price">Price</label>
     <output id="price">23 €</output>
@@ -59,19 +58,50 @@ We can implement this form with three `[up-validate]` attributes and no addition
 </form>
 ```
 
-When a field is changed, Unpoly will automatically submit the form with an additional `X-Up-Validate`
-HTTP header. Upon seeing this header, the server is expected to render a new form state from the
-form values in the request parameters. See [this example](/up-validate#backend-protocol)
-for control flow on the server.
+When a field is changed, Unpoly submits the form with an additional `X-Up-Validate`
+HTTP header. Upon seeing this header, the server renders a new form state from the
+form values in the request parameters.
 
-When the server responds with the re-rendered form state, Unpoly will update the
-[target selector](/targeting-fragments) from the changed field's `[up-validate]` attribute.
-For instance, when the continent is field is changed, the country field is updated.
+When the server responds with the re-rendered form, Unpoly updates only
+the [target](/targeting-fragments) from the changed field's `[up-validate]` attribute.
+For instance, when the continent is changed, only the country select is updated.
+Everything else in the form keeps its state, including unsaved input in other fields.
 
 
+## Rendering the form state on the server {#server}
 
-Multiple dependent fragments
--------------------------------------
+The server needs to handle a validation request differently from a regular submission.
+When it sees an `X-Up-Validate` header, it must not save the submitted data.
+Instead it renders the form again from the request parameters, with dependent elements
+reflecting the new values.
+
+In a Ruby on Rails app this would look like this:
+
+```ruby
+class PurchasesController < ApplicationController
+
+  def create
+    @purchase = Purchase.new(purchase_params)
+    if request.headers['X-Up-Validate'] # mark-line
+      render 'form' # mark-line
+    elsif @purchase.save
+      redirect_to @purchase
+    else
+      render 'form', status: :unprocessable_entity
+    end
+  end
+
+end
+```
+
+The template for `form` renders the country options and the price from the `@purchase` object.
+It does not need to know which field changed, since Unpoly extracts only the targeted fragment
+from the response.
+
+See [`[up-validate]`](/up-validate#backend-protocol) for the request and response in detail.
+
+
+## Multiple dependent fragments {#multiple-dependent-fragments}
 
 A field with `[up-validate]` may [update multiple fragments](/targeting-fragments#multiple)
 by separating their target selectors with a comma.
@@ -89,7 +119,6 @@ To update another fragment *in addition* to the field's [form group](/up-form-gr
 the group in the target list.\
 You can refer to the changed field as `:origin`:
 
-
 ```html
 <fieldset>
   <select name="continent" up-validate="fieldset:has(:origin), #country, #price"> <!-- mark: fieldset:has(:origin) -->
@@ -99,16 +128,15 @@ You can refer to the changed field as `:origin`:
 ```
 
 
-Preventing race conditions {#race-conditions}
---------------------------
+## Preventing race conditions {#race-conditions}
 
-Custom implementations of dependent elements will often exhibit race conditions, e.g. when the user
+Custom implementations of dependent elements often exhibit race conditions, e.g. when the user
 is quickly changing fields while requests are still in flight.
 
 Such issues are solved with `[up-validate]`. The form will eventually show a consistent state,
 regardless of how fast the user clicks or how slow the network is. In particular:
 
-- Unpoly guarantees only a single validation request is in flight concurrently (per form).
+- Unpoly guarantees that only a single validation request is in flight concurrently (per form).
   Additional validations are queued until the current validation request has loaded.
 - Multiple updates from `[up-validate]` or `up.validate()`
   are [batched](/up.validate#batching) into a single request with multiple targets.
@@ -118,19 +146,19 @@ regardless of how fast the user clicks or how slow the network is. In particular
 
 Let's walk through a challenging scenario using the [postage form example](#declaring-dependencies) above:
 
-- User selects a continent. A request for the country select is sent, but takes a while to load.
-- User inputs a parcel weight. Because a request is still in flight, no additional request is sent.
-- User changes continent again. While a request is still in flight, no additional request is sent.
+- The user selects a continent. A request for the country select is sent, but takes a while to load.
+- The user inputs a parcel weight. Because a request is still in flight, no additional request is sent.
+- The user changes the continent again. While a request is still in flight, no additional request is sent.
 - The response is received. The country select is updated.
-- A request for the the country select and price preview is sent.
+- A request for the country select and price preview is sent.
 - The next response is received. The price preview and country select are updated.
 
 Once the last response is processed, all fields and the price preview show consistent values.
 
-### Disabling fields during validation
+### Disabling fields during validation {#disabling-fields-during-validation}
 
 If you prefer to completely prevent user input during validation, give the form an
-`[up-watch-disable]` attribute. This will disable all form fields while validation requests are in flight: 
+`[up-watch-disable]` attribute. This disables all form fields while validation requests are in flight:
 
 ```html
 <form method="post" action="/purchases" up-watch-disable> <!-- mark: up-watch-disable -->
@@ -138,15 +166,29 @@ If you prefer to completely prevent user input during validation, give the form 
 </form>
 ```
 
-You may also assign `[up-watch-disable]` to individual fields, or any element that contains fields.
+You may also set `[up-watch-disable]` on individual fields, or on any element that contains fields.
 
-Also see [disabling fields while working](/watch-options#disabling).
+See [disabling fields while working](/watch-options#disabling) for details.
 
 
-Rendering from other URLs {#urls}
---------------------------------
+## Updating from JavaScript {#script}
 
-By default, validation requests will use `[method]` and `[action]` attributes from the form element.
+To re-render a fragment of the form from your own code, pass it to `up.validate()`:
+
+```js
+up.validate('#price')
+```
+
+This submits the form with an `X-Up-Validate` header, like a change to an `[up-validate]` field would,
+and updates the `#price` element with the response. You can combine `[up-validate]` attributes
+and `up.validate()` calls within the same form. Their updates
+are [batched together](/up.validate#batching) and follow the same rules for
+[preventing race conditions](#race-conditions).
+
+
+## Rendering from other URLs {#urls}
+
+By default, validation requests use the `[method]` and `[action]` attributes from the form element.
 
 You can render content from another server endpoint by setting an
 [`[up-validate-url]`](/up-validate#up-validate-url) attribute on a form or field:
@@ -154,14 +196,14 @@ You can render content from another server endpoint by setting an
 ```html
 <form method="post" action="/order">
   <input name="quantity" up-validate="#preview" up-validate-url="/preview-order"> <!-- mark: up-validate-url="/preview-order" -->
-  
+
   <div id="preview">
     Order total: €190
   </div>
 </form>
 ```
 
-Multiple validations to the same URL will be [batched together](/up.validate#batching).
+Multiple validations to the same URL are [batched together](/up.validate#batching).
 
 
 @page reactive-server-forms
