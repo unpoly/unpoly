@@ -24,10 +24,14 @@
   A JavaScript snippet that is executed when the fragment could not be loaded
   due to a [disconnect or timeout](/network-issues).
 
+  The snippet runs in the following scope:
+
   | Expression | Value                                         |
   |------------|-----------------------------------------------|
   | `this`     | The link being followed                       |
-  | `error`    | An `up.Offline` error                         |
+  | `event`    | An `up:fragment:offline` event                |
+
+  To try again, call `event.retry()`.
 
 @param [up-on-rendered]
   A JavaScript snippet that is executed when Unpoly has updated fragments.

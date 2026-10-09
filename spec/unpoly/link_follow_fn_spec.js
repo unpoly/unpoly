@@ -95,6 +95,29 @@ extendDescribe('up.link', function() {
         expect(result.state).toBe('fulfilled')
       })
 
+      it('runs an [up-on-offline] snippet with the up:fragment:offline event as `event`', async function() {
+        window.onOfflineCallback = jasmine.createSpy('onOffline callback')
+        fixture('#target', { text: 'old text' })
+        const [link] = htmlFixtureList(`
+          <a href="/path" up-target="#target" up-on-offline="nonce-specs-nonce window.onOfflineCallback(this, event)">label</a>
+        `)
+
+        const renderJob = up.follow(link)
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        jasmine.lastRequest().responseError()
+
+        await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Offline))
+        expect(window.onOfflineCallback).toHaveBeenCalledWith(link, jasmine.any(Event))
+        const event = window.onOfflineCallback.calls.argsFor(0)[1]
+        expect(event.type).toBe('up:fragment:offline')
+        expect(event.retry).toEqual(jasmine.any(Function))
+        expect('#target').toHaveText('old text')
+
+        delete window.onOfflineCallback
+      })
+
       describe('up:link:follow events', function() {
 
         it('emits a preventable up:link:follow event', async function() {

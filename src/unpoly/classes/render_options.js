@@ -108,7 +108,7 @@ up.RenderOptions = (function() {
     onLoaded: EVENT_CALLBACK,
     onRendered: RESULT_CALLBACK,
     onFinished: RESULT_CALLBACK,
-    onOffline: ERROR_CALLBACK,
+    onOffline: EVENT_CALLBACK,
     onError: ERROR_CALLBACK,
     onOpened: OPEN_LAYER_CALLBACK,
     onDismissed: CLOSE_LAYER_CALLBACK,

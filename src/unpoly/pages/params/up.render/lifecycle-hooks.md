@@ -20,7 +20,7 @@
   A callback that will be run when the fragment could not be loaded
   due to a [disconnect or timeout](/network-issues).
 
-  The callback argument is a preventable `up:fragment:offline` event.
+  The callback argument is an `up:fragment:offline` event. To try again, call `event.retry()`.
 
 @param {Function(up.RenderResult)} [options.onRendered]
   A function to call when Unpoly has updated fragments.

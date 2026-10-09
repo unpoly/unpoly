@@ -38,6 +38,10 @@ Unpoly's documentation is now available to coding agents and LLMs:
 - [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules.
 - An [agent skill](/skill) bundles all guides, the API reference and the release notes, with a search script. Install it with `npx skills add --global https://unpoly.com`, or as a Claude Code plugin.
 
+### Other changes
+
+- An [`[up-on-offline]`](/up-follow#up-on-offline) snippet now receives the `up:fragment:offline` event as `event`, so it can call `event.retry()`. It used to receive the event under the name `error`.
+
 
 3.14.3
 ------
