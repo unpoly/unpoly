@@ -54,6 +54,8 @@ Install Unpoly's documentation as an agent skill:
 npx skills add --global https://unpoly.com
 ```
 
+See [unpoly.com/skill](https://unpoly.com/skill) for more options.
+
 
 Contributing
 ------------
