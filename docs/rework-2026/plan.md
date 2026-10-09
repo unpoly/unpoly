@@ -992,7 +992,7 @@ Hand-offs): staging curl matrix (negotiation, .md types, Vary, X-Robots-Tag, .md
 / with Claude's Accept, both agent-skill index URLs, /up.proxy.md redirect order); both
 install routes against a BASE_URL=staging build; tar.gz served WITHOUT Content-Encoding:
 gzip; WebMCP tool shape in a real Chrome (staging needs the WebMCP flag, token is bound to
-unpoly.com); copy button in Safari + Firefox; nginx stays cache-free (a CDN must honor
+unpoly.com); copy button in Safari + Firefox; redirects with a #fragment target (/layer-terminology, /predefined-*, /motion-tuning) land on the anchor, not a percent-encoded %23; nginx stays cache-free (a CDN must honor
 Vary: Accept); renew the origin-trial token.
 
 START PAGE BOLD RULE (Henning 2026-10-09, supersedes "no bold on the start page"): bold
