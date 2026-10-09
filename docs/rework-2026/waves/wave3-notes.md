@@ -25,3 +25,9 @@ Fixed: event.newElement → newFragment; class=".target" dots; onFinished link; 
 render-lifecycle: #skipping-responses leads with event.skip(); failed response rejects with RenderResult, onError not run.
 Unverified: same-data "client changes to data ignored" (macro order TODO fragment.js ~1138).
 Ref bugs: fragment.js up:fragment:keep example (~998) element/newElement; render_job.js example invalid JS + job.options → renderOptions; lifecycle-hooks.md onError note.
+
+## Advanced rendering critic (af02b6244): all 8 READY. Build OK, URLs 78/78.
+Fixed: overview navigation claim qualified (main swaps); <select value> → <option selected>; providing-html up.navigate claim; render-lifecycle up.layer.ask(string) → options.
+Judgment calls (lean): 1 #skipping-responses "not an error" only for successful responses (add half sentence); 2 failed-responses "request aborted" bullet (drop/reword); 3 fallback as fail variant (leave); 4 error example addEventListener inside try (move above); 5 #handling-fatal-network-errors mention up:fragment:offline too.
+Ref bug: fragment.js:765 up.layer.ask('/sign_in', {...}) string arg (fix example or accept (url, options)).
+Hub specs adjusted for single-page Animation + up.util signatures (site fc39f038). Border radii unified (site 4d5a4c17).
