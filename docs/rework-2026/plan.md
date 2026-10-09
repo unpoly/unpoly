@@ -1015,8 +1015,14 @@ PRE-SHIP TASKS (Henning 2026-10-09):
 - PERSONA REVIEW of the new homepage: 2-3 subagents with personas ("backend developer
   frustrated with MPA limitations", "developer coming from htmx or Hotwire looking for
   alternatives", "React/SPA developer curious about an alternative paradigm") read the site
-  starting from the root page for a while, then report whether they understood Unpoly's
-  shape and niche, and what confused them.
+  starting from the root page and then exploring the docs freely (not only the landing
+  page), then report whether they understood Unpoly's shape and niche, and what confused
+  them. Timing (Henning 2026-10-09): after the fix round / sweeps / em-dash pass, BEFORE
+  the last mechanical steps (namespace rename, URL move).
+PRE-SHIP ORDER: Advanced rendering critic → Henning's sittings (+ module-intro Fable batch
+in parallel) → fix round → final learn-ref sweep → em-dash/AI-trope pass → persona review
+→ Unpoly::Guide→Unpoly::Site rename → URL move (/api/…, /learn/…) → release sync (FACE
+review, CHANGELOG, promotion) → launch: Unpoly release, unpoly-rails release, unpoly.com deploy.
 LOGGED TASK (Henning 2026-10-09): an em-dash and AI-trope pass over the ENTIRE docs site
 (guides, API doc comments, start page copy), after the chapter sittings; Opus with the
 humanizer/deslop checklists. Start page em-dashes known: "Every attribute has a JavaScript
