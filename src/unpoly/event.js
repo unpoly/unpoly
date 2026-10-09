@@ -2,26 +2,9 @@
 Events
 ======
 
-This module contains functions to [emit](/up.emit) and [observe](/up.on) DOM events.
+Functions to emit and observe DOM events, with event delegation, automatic cleanup and support for Unpoly's own `up:` events. Events like `up:link:follow` are emitted through the same functions, so your code can observe or prevent them like any other event.
 
-While the browser also has built-in functions to work with events,
-you will find Unpoly's functions to be very concise and feature-rich.
-
-### Events emitted by Unpoly
-
-Most Unpoly features emit events that are prefixed with `up:`.
-
-Unpoly's own events are documented in their respective modules, for example:
-
-| Event                 | Module             |
-|-----------------------|--------------------|
-| `up:link:follow`      | `up.link`          |
-| `up:form:submit`      | `up.form`          |
-| `up:layer:open`       | `up.layer`         |
-| `up:network:late`     | `up.network`       |
-
-@see up.on
-@see up.emit
+`up.on()` listens on `document` or a given element, and can delegate to a selector so it also catches events from elements inserted later. It returns a function that unbinds the listener, and unbinds automatically when the element is destroyed. `up.emit()` emits a custom event with the given properties and returns it, so you can check whether a listener prevented it. An `[up-emit]` attribute emits a custom event when the element is clicked.
 
 @module up.event
 */

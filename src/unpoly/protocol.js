@@ -2,21 +2,11 @@
 Server protocol
 ===============
 
-Unpoly has an **optional** protocol your backend may implement to inspect and manipulate Unpoly's rendering.
+Optional HTTP headers through which your server can inspect and steer Unpoly's rendering. Unpoly sends headers like `X-Up-Target` with its requests and reads headers like `X-Up-Accept-Layer` from the response.
 
-The protocol mostly works by reading or setting simple HTTP headers (like `X-Up-Target`).
-It's quite straightforward to use in your own code, and you don't have to implement all of it.
+None of this is required: Unpoly works with any backend that renders HTML, and unpoly.com itself is a static site without a server component. Each header is useful on its own. Reading `X-Up-Target` lets the server render only the targeted fragment, `ETag` and `Last-Modified` let it skip unchanged content, and `X-Up-Events` or `X-Up-Accept-Layer` let it emit an event or close an overlay from the response. Ready-made implementations exist for popular frameworks, see [[protocol-implementations]]. `up.protocol.config` holds the CSRF token settings.
 
-You can also use [existing implementations](/protocol-implementations),
-which are available for most popular web frameworks.
-
-> [IMPORTANT]
-> While the protocol can help you optimize performance and handle some edge cases,
-> implementing it is **entirely optional**. For instance, `unpoly.com` itself is a static site
-> that uses Unpoly on the frontend and doesn't even have an active server component.
-
-@learn-ref optimizing-responses
-@learn-ref conditional-requests
+@learn-ref backend-integration
 
 @module up.protocol
 */

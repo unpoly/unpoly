@@ -6,36 +6,13 @@ const u = up.util
 Network requests
 ================
 
-This package implements an optimized HTTP client
-that is used for all requests made through Unpoly.
+The HTTP client behind every request Unpoly makes. It caches responses, revalidates cached content after rendering, aborts requests that would race each other, and tells you when the network is slow or gone.
 
-The HTTP client offers many quality-of-life improvements, for example:
+Unpoly uses this client automatically when following a link or submitting a form. To make a request from your own code, call `up.request()`. It returns an `up.Request` that fulfills with an `up.Response` and that can be aborted. Responses can be cached so that a later request for the same URL renders instantly, and cached content is revalidated after rendering. The cache is managed through `up.cache.get()`, `up.cache.expire()` and `up.cache.evict()`.
 
-- Requests may be [cached](/caching) to re-use responses and enable [preloading](/preloading).
-  Cached content is [revalidated](/caching#revalidation) after rendering, so the user never
-  sees stale content.
-- You may [handle network issues](/network-issues), such as disconnects, flaky connections or low bandwidth.
-- A [progress bar](/progress-bar) is shown when requests take too long to finish.
-- When two requests [target](/targeting-fragments) the same element,
-  Unpoly will [abort the earlier request](/aborting-requests).
-- Requests send [additional HTTP headers](/up.protocol) that the server may use to [optimize its response](/optimizing-responses).
-  For example, when [updating a fragment](/targeting-fragments), the target selector is automatically sent
-  as an `X-Up-Target` header. The server may choose to only render the targeted fragment.
-- Useful events like `up:request:loaded` or `up:network:late` are emitted throughout the request/response lifecycle.
-- When too many requests are sent concurrently, excessive requests are [queued](/up.network.config#config.concurrency).
-  This prevents exhausting the user's bandwidth and limits race conditions in end-to-end tests.
+Events are emitted throughout the request lifecycle. `up:network:late` fires when requests take longer than expected and drives the default progress bar; `up:request:offline` fires when a request fails without a response. Defaults for timeouts, concurrency and caching live in `up.network.config`.
 
-Unpoly's HTTP client is used automatically when rendering, e.g. when [following a link](/up-follow)
-or [submitting a form](/submitting-forms). To use the client from your own JavaScripts, use `up.request()`.
-
-@learn-ref caching
-@learn-ref aborting-requests
-@learn-ref network-issues
-@learn-ref progress-bar
-
-@see up.request
-@see up.Response
-@see up:network:late
+@learn-ref network
 
 @module up.network
 */
