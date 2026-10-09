@@ -2,7 +2,7 @@ Caching
 =======
 
 Unpoly caches responses so that pages the user has already visited this session render instantly on their next visit.
-Cached content is [revalidated with the server](#revalidation) after rendering, so the user never keeps looking at stale content.
+Cached content is [revalidated with the server](#revalidation) after rendering, so stale content is quickly replaced.
 Cached pages also [remain accessible](/network-issues#offline-cache) after a [disconnect](/network-issues#disconnects).
 
 
