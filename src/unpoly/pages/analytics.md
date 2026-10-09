@@ -1,23 +1,30 @@
 Tracking page views
 ===================
 
-This guide shows how to track page views using web analytics tools like
-[Matomo](https://matomo.org/) or [Google Analytics](https://analytics.google.com/).
-
-Web analytics tools usually track a page visit during the initial page load.
-When you [follow links with Unpoly](/up-follow) your app only has a single page load when the user begins their session.
-After that [only fragments are updated](/up.link) within the same page and no additional visits are tracked.
-These *in-page navigations* may be missing from your statistics.
+Web analytics tools like [Matomo](https://matomo.org/) or [Google Analytics](https://analytics.google.com/)
+count a page view on every page load. With Unpoly the page loads once, and the rest of the session
+is fragment updates that the tool never sees. To keep your statistics complete,
+track a page view whenever the browser location changes.
 
 
-## Tracking in-page navigations
+Tracking location changes {#location-changes}
+-------------------------
 
-Below you will find multiple approaches to track in-page navigations. 
-Choose and adapt the strategy that fits the amount of data you want to track.
+After Unpoly updates the address bar, it emits an `up:location:changed` event.
+Track a page view in a listener:
 
-All code examples assume that a function `trackPageView(url)` is used to track a page view.
-The implementation differs between analytics tools. For instance, in Matomo you
-would use:
+```js
+up.on('up:location:changed', function(event) {
+  trackPageView(event.location) // mark-line
+})
+```
+
+The event is emitted for every change of the address bar: when a link is followed,
+when a form submission redirects, or when the user presses the Back button.
+It is *not* emitted for the initial page load. Your tracking snippet already counts that, as it does on any site.
+
+The `trackPageView()` function depends on your analytics tool.
+All examples on this page assume it exists. For Matomo it would look like this:
 
 ```js
 function trackPageView(url) {
@@ -26,82 +33,81 @@ function trackPageView(url) {
 }
 ```
 
-### Tracking when the address bar changes
 
-The most straightforward solution is observing the `up:location:changed` event:
+### Ignoring jumps within the page {#hash-changes}
+
+A click on a link to a `#section` within the page also changes the address bar.
+If you don't want to count those as page views, check `event.reason`:
 
 ```js
-// Track initial page load. Your old tracking code may already do this.
-trackPageView(location.href)
-
-// Track a visit when the address bar changes.
-up.on('up:location:changed', ({ location }) => trackPageView(location))
+up.on('up:location:changed', function(event) {
+  if (event.reason !== 'hash') { // mark-line
+    trackPageView(event.location)
+  }
+})
 ```
 
-This behavior is close to that of classic tracking codes from tools like Google Analytics.
+Other reasons are `'push'` for a new history entry, `'replace'` for a changed entry
+and `'pop'` for the user going back or forward.
 
 
-#### Tracking navigation within overlays
+Tracking navigation in overlays {#overlays}
+-------------------------------
 
-Unpoly lets you render content in [multiple layers](/up.layer). However, not all overlays have [visible history](/up.Layer.prototype.history).
-When an overlay without visible history is opened or the user navigates to a new location, the browser's address bar will not change and no `up:location:changed` event will be emitted.
+Not every [overlay](/up.layer) has [visible history](/history-in-overlays).
+When an overlay without visible history opens or navigates, the address bar does not change
+and no `up:location:changed` event is emitted.
 
-If you want to track navigation within overlays, observe `up:layer:location:changed` instead: 
+To also track navigation within such overlays, observe `up:layer:location:changed` instead:
 
 ```js
-// Track initial page load. Your old tracking code may already do this.
-trackPageView(location.href)
-
 // Track when a layer changes its location.
-// This includes location changes on the root layer. 
-up.on('up:layer:location:changed', ({ location }) => trackPageView(location))
+// This includes location changes on the root layer.
+up.on('up:layer:location:changed', function(event) {
+  trackPageView(event.location)
+})
 
 // When an overlay opens, track the overlay's initial location.
-up.on('up:layer:opened', ({ layer }) => {
+up.on('up:layer:opened', function(event) {
   // Don't track overlays that were opened from local string content.
-  if (layer.location) {
-    trackPageView(layer.location)
+  if (event.layer.location) {
+    trackPageView(event.layer.location)
   }
 })
 ```
 
 
-### Tracking updates to major fragments
+Tracking rendered fragments instead {#fragments}
+----------------------------------
 
-Instead of observing changes of the browser's address bar, we may track a page view whenever we render a significant
-fragment.
-
-For example, we could decide to track a page view whenever an element with a `[track-page-view]` attribute
-is rendered:
-
+Instead of observing the address bar, you can track a page view whenever a significant fragment is rendered.
+For example, mark the elements that count as a page with a `[track-page-view]` attribute:
 
 ```html
-<main track-page-view>
+<main track-page-view> <!-- mark: track-page-view -->
   ...
 </main>
 ```
 
-We can implement this using a [compiler](/enhancing-elements):
+Then track a page view from a [compiler](/enhancing-elements):
 
 ```js
 up.compiler('[track-page-view]', function(element, data, meta) {
-  // Don't track duplicate page views if we just reloaded for cache revalidation. 
+  // Don't track duplicate page views if we just reloaded for cache revalidation.
   if (!meta.revalidating) {
-    // Send an event to our web analytics tool.
-    trackPageView(meta.layer.location)
+    trackPageView(meta.layer.location) // mark-line
   }
 })
 ```
 
-> [important]
-> With a compiler you do not need to explicitly track the initial page view.
-> The compiler will be called for both the initial page and all subsequent updates.
+The compiler runs for the initial page as well as for every later update,
+so your tracking snippet should not count the initial page load a second time.
 
 
-#### Passing custom dimensions
+### Passing custom dimensions {#dimensions}
 
-Using a compiler makes it easy to track custom event properties ("dimensions") along with the page view.
-Encode it in an `[up-data]` attribute:
+A compiler makes it easy to send custom event properties ("dimensions") along with the page view.
+Encode them in an `[up-data]` attribute:
 
 ```html
 <main track-page-view up-data="{ course: 'ruby-basics', page: 1 }"> <!-- mark: up-data="{ course: 'ruby-basics', page: 1 }" -->
@@ -109,40 +115,34 @@ Encode it in an `[up-data]` attribute:
 </main>
 ```
 
-The element's parsed [data object](/data) is passed to your compiler as a second argument. The compiler can
-forward the data to the `trackPageView()` function:
-
+The parsed [data object](/data) is passed to your compiler as a second argument.
+Forward it to your tracking function:
 
 ```js
 up.compiler('[track-page-view]', function(element, data, meta) { // mark: data
-  // Don't track duplicate page views if we just reloaded for cache revalidation. 
   if (!meta.revalidating) {
-    // Send an event to our web analytics tool.
     trackPageView(meta.layer.location, data) // mark: data
   }
-}
+})
 ```
 
 
-
-### Tracking updates to *any* fragment
+Tracking every fragment update {#all-fragments}
+-----------------------------
 
 To track *all* fragment updates, observe the `up:fragment:loaded` event:
 
 ```js
-// Track initial page load. Your old tracking code may already do this.
-trackPageView(location.href)
-
-up.on('up:fragment:loaded', (event) => {
-  // Don't track revalidation of cached content. 
+up.on('up:fragment:loaded', function(event) {
+  // Don't track revalidation of cached content.
   if (!event.revalidating) {
     trackPageView(event.response.url)
   }
 })
 ```
 
-If you find that this listener tracks too many events, you may further filter on the [properties](/up.Request) of [`event.request`](/up:fragment:loaded#event.request).
-
+If this tracks too many events, filter further on the properties of [`event.request`](/up:fragment:loaded#event.request),
+such as its `{ target }` or `{ layer }`.
 
 
 @page analytics
