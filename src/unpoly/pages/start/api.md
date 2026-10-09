@@ -34,43 +34,6 @@ up.fragment.config.navigateOptions.transition = 'cross-fade'
 All three layers **set the same option**. They differ in scope: one element,
 one call, or every navigation in your app.
 
-
-Unpoly attributes
------------------
-
-Attributes carry their options as string values. Simple values are plain
-strings; structured values are written in [relaxed JSON](/relaxed-json):
-
-```html
-<a href="/path" up-follow up-headers="{ 'X-Requested-From': 'sidebar' }">Click me</a> <!-- mark: up-headers -->
-```
-
-
-JavaScript options
-------------------
-
-A function like `up.follow(link)` parses the link's attributes into an options
-object. Options you pass yourself override anything parsed from the element:
-
-```js
-up.follow(link, { transition: 'move-left' }) // overrides [up-transition]
-```
-
-
-Changing defaults globally {#config}
---------------------------
-
-Most modules have an `up.*.config` property that adjusts their behavior
-for your entire application. For example, this makes every new overlay
-open as a drawer instead of a modal dialog:
-
-```js
-up.layer.config.mode = 'drawer'
-```
-
-Many config properties hold a list of CSS selectors, letting you
-[apply a behavior to all matching elements](/handling-all-links#defaults).
-
 For all parsing rules, boolean attributes and `"auto"` values,
 see [[attributes-and-options]].
 

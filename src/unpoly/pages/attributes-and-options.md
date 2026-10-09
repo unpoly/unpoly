@@ -96,6 +96,17 @@ link_to 'Click me', '/path', 'up-follow': true # mark: true
 ```
 
 
+### Structured values {#relaxed-json}
+
+A few attributes take a structured value, like an object or an array.
+These values are written in [relaxed JSON](/relaxed-json), which allows single quotes
+and unquoted keys:
+
+```html
+<a href="/path" up-follow up-headers="{ 'X-Requested-From': 'sidebar' }">Click me</a> <!-- mark: up-headers -->
+```
+
+
 Overriding attributes with JavaScript options {#options}
 ---------------------------------------------
 
@@ -149,7 +160,7 @@ can still override it with their own attributes and options.
 
 Many config properties hold a list of CSS selectors, letting you apply
 a behavior to all matching elements. For example, you can tell Unpoly to
-[handle every link on the page](/handling-all-links#following-all-links) without
+[handle every link on the page](/handling-all-links#defaults) without
 any `[up-follow]` attributes.
 
 
