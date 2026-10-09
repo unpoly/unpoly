@@ -112,9 +112,6 @@ learn:
       title: Animation
       pages:
         - animation
-        - predefined-animations # dissolves into animation
-        - predefined-transitions # dissolves into animation
-        - motion-tuning # dissolves into animation
 
     - type: page-group
       title: Scripting

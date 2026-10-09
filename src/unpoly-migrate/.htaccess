@@ -173,3 +173,6 @@ RedirectPermanent /analytics /tracking-page-views
 RedirectPermanent /navigation /navigation-defaults
 RedirectPermanent /layer-terminology /overlays#layer-modes
 RedirectPermanent /skipping-rendering /conditional-requests
+RedirectPermanent /predefined-animations /animation#animations
+RedirectPermanent /predefined-transitions /animation#transitions
+RedirectPermanent /motion-tuning /animation#duration-and-easing

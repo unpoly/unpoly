@@ -963,7 +963,7 @@ up.layer = (function() {
 
   @section Animation
     @param [up-animation='fade-in']
-      The [name](/predefined-animations) of the opening animation.
+      The [name](/animation#available-animations) of the opening animation.
 
     @param [up-easing='ease']
       The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
@@ -973,7 +973,7 @@ up.layer = (function() {
       The duration of the opening animation in milliseconds.
 
     @param [up-close-animation='fade-out']
-      The [name](/predefined-animations) of the closing animation.
+      The [name](/animation#available-animations) of the closing animation.
 
     @param [up-close-easing='ease']
       The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)

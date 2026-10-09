@@ -3543,8 +3543,8 @@ In our ongoing efforts to evolve Unpoly's documentation from an API reference to
 - [Tracking page views](/tracking-page-views)
 - [Updating history](/updating-history)
 - [Restoring history](/restoring-history)
-- [Predefined animations](/predefined-animations)
-- [Predefined transitions](/predefined-transitions)
+- [Predefined animations](/animation#available-animations)
+- [Predefined transitions](/animation#available-transitions)
 
 All existing documentation pages from Unpoly 2 remain available:
 
@@ -3560,7 +3560,7 @@ All existing documentation pages from Unpoly 2 remain available:
 - [Closing overlays](/closing-overlays)
 - [Customizing overlays](/customizing-overlays)
 - [Layer context](/context)
-- [Motion tuning](/motion-tuning)
+- [Motion tuning](/animation#duration-and-easing)
 - [URL patterns](/url-patterns)
 - Working with strict Content Security Policies
 
