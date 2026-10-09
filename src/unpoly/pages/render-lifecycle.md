@@ -213,21 +213,23 @@ The most important preventable events are:
 ### Skipping a loaded response {#skipping-responses}
 
 Even after the server has sent a response, you may still prevent rendering at the last second
-by canceling the `up:fragment:loaded` event.  This gives you a chance to inspect the response
+by canceling the `up:fragment:loaded` event. This gives you a chance to inspect the response
 or DOM state right before a fragment would be inserted:
 
-  ```js
-  up.on('up:fragment:loaded', async function(event) {
-    if (event.response.header('X-User-Created')) {
-      // If we see an X-User-Created header, abort the rendering pass
-      event.preventDefault()
+```js
+up.on('up:fragment:loaded', async function(event) {
+  if (event.response.header('X-User-Created')) {
+    // If we see an X-User-Created header, abort the rendering pass
+    event.preventDefault()
 
-      // Show an alert instead
-      alert('The user was created successfully')
-    }
-  })
-  ```
+    // Show an alert instead
+    alert('The user was created successfully')
+  }
+})
+```
 
+Canceling the event aborts the render pass, and the `up.render()` promise rejects with an `up.Aborted` error.
+To finish the render pass without changes instead, call `event.skip()`.
 See `up:fragment:loaded` for more examples.
 
 
@@ -240,7 +242,7 @@ By default Unpoly skips the following responses:
 
 - Responses without text in their body.
   Such responses occur when a [conditional request](/conditional-requests)
-  in answered with HTTP status `304 Not Modified` or `204 No Content`.
+  is answered with HTTP status `304 Not Modified` or `204 No Content`.
 - When [revalidating](/caching#revalidation), if the expired response and fresh response
   have the exact same text.
 
