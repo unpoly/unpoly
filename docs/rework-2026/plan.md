@@ -995,6 +995,19 @@ gzip; WebMCP tool shape in a real Chrome (staging needs the WebMCP flag, token i
 unpoly.com); copy button in Safari + Firefox; nginx stays cache-free (a CDN must honor
 Vary: Accept); renew the origin-trial token.
 
+SEARCH RESULT PRESENTATION (Henning 2026-10-09, from a "link to" screenshot where three
+"Links"-ish results were indistinguishable): (a) every result shows its closest hub as a
+small gray line UNDER the title (Learn page → topic title; API feature → module; module →
+"API"; release notes → "Changes"); same lookup as the Markdown twins' context line; the
+WebMCP search_docs results gain the same field. (b) topic overview pages get "(overview)"
+after their title IN SEARCH RESULTS ONLY (not the sidebar), and skip the breadcrumb.
+(c) "Read more" button text is cut from the search index. Marker comments
+(`<!-- mark: … -->`) leaking into snippets: Henning doesn't care, leave them.
+START PAGE DESIGN POLISH (Henning 2026-10-09, queued): content stays; polish the visuals —
+badges/chips not pretty, oversized margin above "… and escape hatches everywhere", some
+sections lack visual identity vs. their siblings (especially "Your HTML keeps its
+meaning"). Iterate visually (screenshots/canvas), not in prose.
+
 GETTING-STARTED SITTING CLOSED + HUB POLISH VERDICTS (Henning 2026-10-08, slow-down):
 hub: h1 "Learn Unpoly" (template copy); "+N more" counts what #all-features lists (6A);
 modules with no signature features say "N features" WITHOUT a plus (2X); hover stays
