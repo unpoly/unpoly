@@ -995,6 +995,11 @@ gzip; WebMCP tool shape in a real Chrome (staging needs the WebMCP flag, token i
 unpoly.com); copy button in Safari + Firefox; nginx stays cache-free (a CDN must honor
 Vary: Accept); renew the origin-trial token.
 
+START PAGE BOLD RULE (Henning 2026-10-09, supersedes "no bold on the start page"): bold
+marks where a new sub-topic starts inside a long section, never stress. In a one-line
+lead-in, bold the keyword ("events", "compilers"); at the start of a longer paragraph, bold
+the opening phrase ("Every feature has a graceful degradation story."). At most one per
+sub-topic, only in sections long enough to need it. The three current bolds stay.
 PRE-SHIP TASKS (Henning 2026-10-09):
 - RELEASE SYNC: docs-rework forked from Unpoly master, which carries unreleased work, so
   the unpoly.com deploy must ship together with a new Unpoly release. Includes one last
