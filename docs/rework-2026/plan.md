@@ -1774,6 +1774,11 @@ hotkeys, empty states, sidecar delivery; retiring the Algolia push for latest.
 - Rename the `Unpoly::Guide` namespace in unpoly-site to `Unpoly::Site` (added 2026-09-13) — PULLED INTO PRE-SHIP (Henning 2026-10-09).
 - ~~Backend language switcher for protocol-chapter code samples.~~ STRUCK (Henning 2026-10-09).
 - ~~Goal-based index pages ("fast", "resilient") above the chapters.~~ STRUCK (Henning 2026-10-09).
+- **Docs-vs-code audit** (added 2026-10-09, AFTER LAUNCH): per module, an Opus agent checks
+  every @param type, default and doc example against code and specs (the chapter writers
+  found many doc/code mismatches this way: wrong names, non-runnable examples, stale
+  defaults, documented signatures without code support). Candidate for a recurring
+  pre-release step.
 
 ## Landing page (alignment in progress; state as of 2026-09-15)
 
