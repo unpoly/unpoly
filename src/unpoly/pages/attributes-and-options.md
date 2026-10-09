@@ -36,7 +36,7 @@ Here the script skips the animation altogether:
 up.follow(link, { transition: 'none' }) // mark: transition: 'none'
 ```
 
-When Unpoly navigates, it starts with the configured defaults, then applies the attributes
+When Unpoly navigates, it starts with the [configured defaults](/navigation-defaults), then applies the attributes
 it parsed from the element, and finally the options you passed. Each layer only replaces the
 values it actually sets, so the script above still gets the link's URL and every other attribute.
 
