@@ -994,6 +994,10 @@ install routes against a BASE_URL=staging build; tar.gz served WITHOUT Content-E
 gzip; WebMCP tool shape in a real Chrome (staging needs the WebMCP flag, token is bound to
 unpoly.com); copy button in Safari + Firefox; redirects with a #fragment target (/layer-terminology, /predefined-*, /motion-tuning) land on the anchor, not a percent-encoded %23; nginx stays cache-free (a CDN must honor
 Vary: Accept); renew the origin-trial token.
+Skill download (station follow-up 2026-10-10, site 67984020 + unpoly dfe84a475): the zip is
+served at https://unpoly.com/agent-skills/unpoly-docs.zip as application/zip (skill folder at
+the zip root); ChatGPT's skill upload may cap at 500 files (unverified OpenAI limit; the skill
+has 810), so failed ChatGPT uploads are likely that.
 
 START PAGE BOLD RULE (Henning 2026-10-09, supersedes "no bold on the start page"): bold
 marks where a new sub-topic starts inside a long section, never stress. In a one-line
