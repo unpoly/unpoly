@@ -73,6 +73,7 @@ Other values focus the new `target`, `keep` the focus in a re-rendered form fiel
 or `restore` the focus from an earlier visit of the same URL.
 
 In an overlay, focus is trapped: tabbing past the last element wraps around to the start of the overlay.
+Only [popups](/overlays#layer-modes) let focus leave.
 When the overlay closes, focus returns to the link that opened it.
 
 <p class="read-more"><a href="/focus">Read more: Controlling focus</a></p>

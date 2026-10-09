@@ -5,7 +5,7 @@ When Unpoly [scrolls an element into view](/scrolling#target), you can tune the 
 declare fixed layout elements that obstruct the viewport, animate the scroll, add padding,
 snap to the screen edge or limit how far a large element is revealed.
 
-Every option is available as a JavaScript option (like `{ revealSnap }`),
+Most options are available as a JavaScript option (like `{ revealSnap }`),
 as an HTML attribute (like `[up-reveal-snap]`) and as a global default in `up.viewport.config`.
 
 
