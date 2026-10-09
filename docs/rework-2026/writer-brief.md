@@ -59,6 +59,25 @@ You write one Learn topic (or one batch of it) for the Unpoly docs rework. Repo:
 - Fix real bugs you find in examples; report reference-doc bugs outside your files instead
   of fixing them.
 
+## Maintainer patterns (learned in the Forms sitting, 2026-10-10; apply up front)
+1. Every section must be THIS page's job. Cut "related concerns" tails that belong to a
+   neighbour (navigation defaults, legacy scripts, error handling on a submit page) down to a
+   one-sentence pointer. Test: would a reader miss it here if it were a link?
+2. Answer the expert's "but what if…?" where it arises (concurrency, hidden fields still
+   submitted, focus lost on disable), in one sentence + link to the page that owns it.
+   One page owns each explanation.
+3. A teaser shows the whole family of options (disable, feedback classes, placeholders,
+   previews), not one member with an example.
+4. Headings describe the normal case. Don't title the default behavior like a special case.
+5. Repeated content is fine when it teaches from a new angle (scope vs. precedence); a
+   literal copy is not. Prefer re-angling over deleting.
+6. Code examples: the simplest correct version. Add guards only when correctness needs them,
+   and say why.
+7. Chapters group pages by mechanism (what a feature is), not by where it's used; task pages
+   link to it.
+8. Backend examples in Ruby on Rails carry a short note that it works similarly with any
+   other backend.
+
 ## Evidence
 `cd /home/henning/Projects/unpoly-site && bundle exec rspec spec/lib` stays 0 failures.
 Your pages render 200 on the preview, and every /path#anchor link in them resolves.
