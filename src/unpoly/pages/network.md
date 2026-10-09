@@ -2,7 +2,7 @@ Network & caching
 =================
 
 All of Unpoly's requests go through one HTTP client. It caches responses so revisited pages
-render instantly, revalidates cached content so the user never keeps looking at stale data,
+render instantly, revalidates cached content so stale data is quickly replaced,
 aborts requests that would race each other, and handles disconnects without the browser's error screen.
 This works without setup, and every part can be changed for a single link, a form or your whole app.
 
