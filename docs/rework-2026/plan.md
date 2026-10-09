@@ -1027,7 +1027,10 @@ PRE-SHIP TASKS (Henning 2026-10-09):
   the last mechanical steps (namespace rename, URL move).
 - REVISIT SEARCH RANKING (Henning 2026-10-09): after the chapter rewrites, the guide
   /layer-option ("Targeting other layers") ranks 6th for "layer", behind five API features
-  (up.layer.current, [up-layer=new], …); the title no longer contains "layer" as a word.
+  (up.layer.current, [up-layer=new], …), 0.2 points behind #5. Not the plural (Pagefind
+  stems English; "layers" finds the same pages): the five are signature-tier pages
+  (title weight 2+10, ×1.4 boost), and the guide is not; the old title "Layer option" was
+  also a shorter, exact match. Likely fix: @signature on /layer-option.
   The ranking spec now uses "overlay" for the boost example, and "cache requests" accepts
   learn/network.md in the top 3 (site 1754892f). Decide whether to address this by title,
   @signature, or a ranking rule, and re-check the other expectations touched that day.
