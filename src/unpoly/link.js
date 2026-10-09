@@ -1,9 +1,6 @@
 require('./link.sass')
 
 /*-
-Linking to fragments
-====================
-
 Links that update a fragment of the current page instead of loading a new document. The server keeps rendering full pages; Unpoly swaps in the targeted fragment and leaves the rest of the page, with its scroll positions, focus and running scripts, untouched.
 
 Set an `[up-follow]` attribute to let Unpoly handle a link, and an [`[up-target]`](/up-follow#up-target) attribute to choose the fragment it updates. The same behavior is available from JavaScript through `up.follow()`, and `up:link:follow` lets your code observe or prevent any link Unpoly follows.

@@ -1,9 +1,6 @@
 require('./viewport.sass')
 
 /*-
-Scrolling and focus
-===================
-
 Controls scrolling and focus within scrollable containers ("viewports") when fragments are updated. Following a link scrolls the new content into view and focuses it, the way a full page load would; a minor update leaves everything in place.
 
 The default viewport is the [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement). Mark additional scrolling containers, like a pane that scrolls on its own, with `[up-viewport]` so Unpoly can scroll them when revealing an element and save their scroll positions for history restoration. Elements fixed to the screen edge, like a sticky header, get `[up-fixed=top]` so revealed content is not hidden behind them.

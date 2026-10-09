@@ -1,7 +1,4 @@
 /*-
-Forms
-=====
-
 Forms that submit in the background and update a fragment of the current page with the server's response, including validation errors. Fields can also re-render parts of the form while the user is still filling it in.
 
 Set an `[up-submit]` attribute to let Unpoly handle a form, or call `up.submit()` from JavaScript. The `up:form:submit` event lets your code observe or prevent any submission.

@@ -1,7 +1,4 @@
 /*-
-History
-=======
-
 Keeps the browser history working while Unpoly updates fragments. Updating a page's main content changes the address bar and window title like a full page load would, and the Back button restores the earlier content.
 
 `up.history.location` is the current URL as Unpoly sees it, and `up:location:changed` is emitted whenever it changes, for example to track page views. When the user goes back, `up:location:restore` is emitted before Unpoly fetches the restored URL and renders it; listeners can prevent this to handle restoration themselves. An `[up-back]` link points to the previous URL. To change history from your own code, call `up.history.push()` or `up.history.replace()`.

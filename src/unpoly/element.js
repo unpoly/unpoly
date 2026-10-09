@@ -1,9 +1,6 @@
 require('./element.sass')
 
 /*-
-DOM helpers
-===========
-
 Low-level utilities for raw DOM access and manipulation, complementing the browser's native API. They know nothing about layers or animation; for a fragment-aware API, prefer `up.fragment`.
 
 `up.element.get()` and `up.element.subtree()` look up elements. `up.element.createFromHTML()` and `up.element.createFromSelector()` build elements, and `up.element.affix()` builds one and attaches it to a parent. Functions like `up.element.attr()`, `up.element.numberAttr()` and `up.element.jsonAttr()` parse attribute values into typed values, and `up.element.toggle()` or `up.element.hide()` change visibility through the `[hidden]` attribute.

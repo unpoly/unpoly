@@ -1,7 +1,4 @@
 /*-
-Animation
-=========
-
 Animates fragment updates: the old content fades or slides out while the new content comes in. Effects are picked by name in an HTML attribute, or defined with a few lines of JavaScript.
 
 A *transition* morphs an old element into its new version. Set an `[up-transition]` attribute on a link or form, or pass a `{ transition }` option to `up.render()`. An *animation* shows or hides a single element without a counterpart, for example when an overlay opens with an [`[up-animation]`](/up-layer-new#up-animation) attribute, or when `up.destroy()` removes a fragment.

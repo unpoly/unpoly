@@ -1,7 +1,4 @@
 /*-
-Events
-======
-
 Functions to emit and observe DOM events, with event delegation, automatic cleanup and support for Unpoly's own `up:` events. Events like `up:link:follow` are emitted through the same functions, so your code can observe or prevent them like any other event.
 
 `up.on()` listens on `document` or a given element, and can delegate to a selector so it also catches events from elements inserted later. It returns a function that unbinds the listener, and unbinds automatically when the element is destroyed. `up.emit()` emits a custom event with the given properties and returns it, so you can check whether a listener prevented it. An `[up-emit]` attribute emits a custom event when the element is clicked.

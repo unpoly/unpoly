@@ -1,7 +1,4 @@
 /*-
-Server protocol
-===============
-
 Optional HTTP headers through which your server can inspect and steer Unpoly's rendering. Unpoly sends headers like `X-Up-Target` with its requests and reads headers like `X-Up-Accept-Layer` from the response.
 
 None of this is required: Unpoly works with any backend that renders HTML, and unpoly.com itself is a static site without a server component. Each header is useful on its own. Reading `X-Up-Target` lets the server render only the targeted fragment, `ETag` and `Last-Modified` let it skip unchanged content, and `X-Up-Events` or `X-Up-Accept-Layer` let it emit an event or close an overlay from the response. Ready-made implementations exist for popular frameworks, see [[protocol-implementations]]. `up.protocol.config` holds the CSRF token settings.

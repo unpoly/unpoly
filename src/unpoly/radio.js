@@ -1,7 +1,4 @@
 /*-
-Passive updates
-===============
-
 Fragments that update without the user clicking anything, because the server sent a matching element or a timer ran out.
 
 An element with `[up-hungry]` is updated whenever a server response contains a matching element, even when the response was requested for a different target. This keeps things like unread counters current with every request. `[up-flashes]` builds on this to show confirmations and alerts from any response, including responses rendered in an overlay. An element with `[up-poll]` reloads itself from the server periodically, and `up:fragment:poll` lets your code skip a scheduled reload.

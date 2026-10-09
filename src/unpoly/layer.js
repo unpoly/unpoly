@@ -3,9 +3,6 @@ require('./layer.sass')
 const u = up.util
 
 /*-
-Layers
-======
-
 Opens page fragments in overlays like modal dialogs, drawers or popups, stacked on top of the page. Each layer is isolated: links, forms and lookups only see the layer they are in, so a screen can branch into a subtask and return without losing its state.
 
 Add `[up-layer=new]` to a link or form to show its response in a new overlay, or open one from JavaScript with `up.layer.open()`. An overlay closes when the user dismisses it, or when an `[up-accept]` link or form closes it with a result value. `up.layer.ask()` opens an overlay and returns a promise for that value, so a subinteraction reads like a function call.

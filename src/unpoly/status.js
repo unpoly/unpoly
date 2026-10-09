@@ -1,7 +1,4 @@
 /*-
-Status effects
-==============
-
 Temporary classes and effects that Unpoly applies while the user navigates: a highlighted button while its request loads, a placeholder in the targeted fragment, or a `.up-current` class on links to the current page.
 
 While a request is loading, the origin element that triggered it gets an `.up-active` class and the targeted fragments get `.up-loading`. For richer loading state, a link or form can show an `[up-placeholder]` inside the fragment it targets, or name an `[up-preview]` function registered with `up.preview()`. A preview can change the page in any way, up to rendering the expected result before the server confirms it. Every effect is reverted when the request ends.

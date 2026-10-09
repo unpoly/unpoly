@@ -1,7 +1,4 @@
 /*-
-Framework initialization
-========================
-
 Controls when Unpoly boots. By default Unpoly boots on `DOMContentLoaded`, after your own scripts had a chance to configure it and register compilers.
 
 You rarely need this module. Boot manually with `up.boot()` only when you load Unpoly with `<script async>`, or when you set `[up-boot=manual]` on the `<html>` element and boot later yourself. `up.framework.isSupported()` returns whether Unpoly can boot in the current browser. On an unsupported browser Unpoly stays inactive, leaving a server-side web application without JavaScript enhancements.

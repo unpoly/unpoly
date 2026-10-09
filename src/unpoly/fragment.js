@@ -4,9 +4,6 @@ const u = up.util
 const e = up.element
 
 /*-
-Fragment API
-============
-
 The JavaScript API to render, look up and destroy page fragments. Every link, form, overlay or poll that Unpoly handles ends in `up.render()`, and your own code can call it with the same options.
 
 `up.render()` replaces elements on the current page with matching elements from a server response or an HTML string. `up.navigate()` does the same with the defaults of a user navigation, like updating history and scrolling to the new content. `up.reload()` fetches a fresh copy of a fragment from the URL it was loaded from, and `up.destroy()` removes a fragment, with an optional animation.

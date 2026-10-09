@@ -1,7 +1,4 @@
 /*-
-Custom JavaScript
-=================
-
 Pairs HTML elements with JavaScript behavior. Instead of running scripts once per page load, you register compilers that enhance matching elements whenever they enter the page: at the initial load, and again with every fragment update.
 
 Register a compiler with `up.compiler()`. It can return a destructor that cleans up when the element is removed, or you register one with `up.destructor()`. Elements pass structured data to their compilers through an `[up-data]` attribute, which `up.data()` reads. Macros registered with `up.macro()` run before all other compilers, usually to set other Unpoly attributes on the element.
