@@ -56,7 +56,6 @@ learn:
       title: Overlays
       pages:
         - overlays
-        - layer-terminology # dissolves into the overlays overview
         - opening-overlays
         - closing-overlays
         - subinteractions

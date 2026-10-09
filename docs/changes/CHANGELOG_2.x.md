@@ -272,7 +272,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 - A new [layer API](/up.layer) replaces modals and popups.
 - Layers can be stacked infinitely.
 - Layers are fully isolated, meaning a screen in one layer will not accidentally see elements or events from another layer. For instance, [fragment links](/up.link) will only update elements from the [current layer](/up.layer.current) unless you [explicitly target another layer](/layer-option).
-- A variety of [overlay modes](/layer-terminology) are supported, such as modal dialogs, popup overlays or drawers. You may [customize their appearance and behavior](/customizing-overlays).
+- A variety of [overlay modes](/overlays#layer-modes) are supported, such as modal dialogs, popup overlays or drawers. You may [customize their appearance and behavior](/customizing-overlays).
 
 #### Subinteractions
 

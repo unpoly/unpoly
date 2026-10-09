@@ -8,7 +8,7 @@ Layers
 
 Unpoly allows you to [open page fragments in an overlay](/opening-overlays). Overlays can be stacked infinitely.
 
-A variety of [overlay modes](/layer-terminology) are supported,
+A variety of [overlay modes](/overlays#layer-modes) are supported,
 such as modal dialogs, popup overlays, or drawers. You can [customize their appearance and behavior](/customizing-overlays).
 
 Layers are isolated, meaning a screen in one layer will not accidentally see elements
@@ -19,7 +19,7 @@ Overlays allow you to break up a complex screen into [subinteractions](/subinter
 Subinteractions take place in overlays and can span one or many pages while the original screen remains open in the background.
 Once the subinteraction is *done*, the overlay is closed, and a result value is communicated back to the parent layer.
 
-@learn-ref layer-terminology
+@learn-ref overlays
 @learn-ref layer-option
 @learn-ref opening-overlays
 @learn-ref closing-overlays
@@ -50,7 +50,7 @@ up.layer = (function() {
   All options for `up.layer.open()` can be configured.
   The configuration will also be used for `[up-layer=new]` links.
 
-  Defaults are configured separately for each [layer mode](/layer-terminology):
+  Defaults are configured separately for each [layer mode](/overlays#layer-modes):
 
   | Object                    | Effect                       |
   |---------------------------|------------------------------|
@@ -92,7 +92,7 @@ up.layer = (function() {
   @property up.layer.config
 
   @param {string} [config.mode='modal']
-    The default [mode](/layer-terminology) used when opening a new overlay.
+    The default [mode](/overlays#layer-modes) used when opening a new overlay.
 
   @param {Object} config.any
     Defaults for all layer modes.
@@ -103,16 +103,16 @@ up.layer = (function() {
     This is an alias for `up.fragment.config.mainTargets`.
 
   @param {Object} config.root
-    Defaults for the [root layer](/layer-terminology).
+    Defaults for the [root layer](/overlays#layer-modes).
 
     Inherits from `up.layer.config.any`.
 
   @param {Object} config.root.mainTargets
     An array of CSS selectors matching default [render targets](/targeting-fragments)
-    for the [root layer](/layer-terminology), but not for overlays.
+    for the [root layer](/overlays#layer-modes), but not for overlays.
 
   @param {Object} config.overlay
-    Defaults for all [overlays](/layer-terminology).
+    Defaults for all [overlays](/overlays#layer-modes).
 
     In addition to the options documented here,
     all options for `up.layer.open()` may also be configured.
@@ -156,7 +156,7 @@ up.layer = (function() {
   @param {boolean} config.overlay.trapFocus
     Whether to [trap focus](/focus#overlay-focus-trap) within the overlay while it is in [front](/up.layer.front).
 
-    By default focus is trapped for all overlays except [popups](/layer-terminology#available-modes).
+    By default focus is trapped for all overlays except [popups](/overlays#layer-modes).
 
   @param {string} [config.overlay.class]
     An HTML class for the overlay's container element.
@@ -164,22 +164,22 @@ up.layer = (function() {
     See [overlay classes](/customizing-overlays#overlay-classes).
 
   @param {Object} config.modal
-    Defaults for [modal overlays](/layer-terminology).
+    Defaults for [modal overlays](/overlays#layer-modes).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
   @param {Object} config.cover
-    Defaults for [cover overlays](/layer-terminology).
+    Defaults for [cover overlays](/overlays#layer-modes).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
   @param {Object} config.drawer
-    Defaults for [drawer overlays](/layer-terminology).
+    Defaults for [drawer overlays](/overlays#layer-modes).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
   @param {Object} config.popup
-    Defaults for [popup overlays](/layer-terminology).
+    Defaults for [popup overlays](/overlays#layer-modes).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
@@ -479,7 +479,7 @@ up.layer = (function() {
     @param {string} [options.mode]
       The kind of overlay to open.
 
-      See [available layer modes](/layer-terminology#available-modes).
+      See [available layer modes](/overlays#layer-modes).
 
     @param {string} [options.size]
       The size of the overlay.
@@ -513,7 +513,7 @@ up.layer = (function() {
     @param {boolean}[options.trapFocus]
       Whether to [trap focus](/focus#overlay-focus-trap) within the overlay while it is in [front](/up.layer.front).
 
-      By default focus is trapped for all overlays except [popups](/layer-terminology#available-modes).
+      By default focus is trapped for all overlays except [popups](/overlays#layer-modes).
 
   @section Client state
     @param {Object} [options.data]
@@ -747,7 +747,7 @@ up.layer = (function() {
   has reached a new location. If you are only interested in changes that are visible in
   the browser's address bar, observe `up:location:changed` instead.
 
-  The event is also emitted for location changes on the [root layer](/layer-terminology).
+  The event is also emitted for location changes on the [root layer](/overlays#layer-modes).
 
   This event is *not* emitted when an overlay is opened. For this, observe `up:layer:opened` instead.
 
@@ -911,7 +911,7 @@ up.layer = (function() {
 
       Defaults to `up.layer.config.mode`, which defaults to `'modal'`.
 
-      See [available layer modes](/layer-terminology#available-modes).
+      See [available layer modes](/overlays#layer-modes).
 
     @param [up-size='medium']
       The size of the overlay.
@@ -1395,7 +1395,7 @@ up.layer = (function() {
   */
 
   /*-
-  Returns the [root layer](/layer-terminology).
+  Returns the [root layer](/overlays#layer-modes).
 
   The root layer represents the initial page before any overlay was [opened](/opening-overlays).
   The root layer always exists and cannot be closed.
@@ -1406,7 +1406,7 @@ up.layer = (function() {
   */
 
   /*-
-  Returns an array of all [overlays](/layer-terminology).
+  Returns an array of all [overlays](/overlays#layer-modes).
 
   If no overlay is open, an empty array is returned.
 

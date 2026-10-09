@@ -32,7 +32,7 @@ To override this default, use one of the following methods:
   For example, a link with `[up-history=false]` will open an overlay that never changes the address bar. 
 - Configure [`up.layer.config.overlay.history`](/up.layer.config#config.overlay.history). This will be the default for future overlays. The default can
   be overridden with an `[up-history]` attribute or `{ history }` option.
-- You may also configure different defaults for different [layer modes](/layer-terminology).
+- You may also configure different defaults for different [layer modes](/overlays#layer-modes).
   E.g. setting `up.layer.configure.popup.history = false` will disable history visibility for all future popups.
 - When opening an overlay from your JavaScript using `up.layer.open()` or `up.layer.ask()`,
   pass a [`{ history }`](/up.layer.open#options.history) option to configure history visibility for that new overlay.

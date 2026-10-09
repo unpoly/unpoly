@@ -2463,7 +2463,7 @@ up.fragment = (function() {
 
   Overlays often use a different default selector, e.g. to exclude a navigation bar.
 
-  To define a different main target for an overlay, set the [layer mode](/layer-terminology) as the
+  To define a different main target for an overlay, set the [layer mode](/overlays#layer-modes) as the
   value of the `[up-main]` attribute:
 
   ```html
@@ -2499,7 +2499,7 @@ up.fragment = (function() {
 
   @selector [up-main]
   @param [up-main]
-    A space-separated list of [layer modes](/layer-terminology) for which to use this main target.
+    A space-separated list of [layer modes](/overlays#layer-modes) for which to use this main target.
 
     Omit the attribute value to define a main target for *all* layer modes.
 

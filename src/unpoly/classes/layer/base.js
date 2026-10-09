@@ -318,7 +318,7 @@ up.Layer = class Layer extends up.Record {
 
   A layer that is alive can be [targeted](/targeting-fragments) with fragment changes, or [queried](/up.fragment.get) for containing elements.
 
-  The [root layer](/layer-terminology) is always alive.
+  The [root layer](/overlays#layer-modes) is always alive.
   An overlay is alive as soon as it enters the DOM, even when it is still playing its opening animation.
 
   An overlay becomes "unalive" immediately when it starts [closing](/closing-overlays).

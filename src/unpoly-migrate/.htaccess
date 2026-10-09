@@ -169,3 +169,4 @@ RedirectPermanent /handling-everything /handling-all-links
 RedirectPermanent /agent-skill /skill
 RedirectPermanent /agent /skill
 RedirectPermanent /analytics /tracking-page-views
+RedirectPermanent /layer-terminology /overlays#layer-modes

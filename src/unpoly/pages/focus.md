@@ -160,7 +160,7 @@ When opening an [overlay](/up.layer), the first applicable strategy will be used
 
 ### Focus is trapped within an overlay {#overlay-focus-trap}
 
-By default focus is trapped for all overlays except [popups](/layer-terminology#available-modes).
+By default focus is trapped for all overlays except [popups](/overlays#layer-modes).
 Moving a trapped focus outside the overlay will immediately re-focus it. This prevents keyboard users from accidentally skipping to content from other layers.
 
 Occasionally the focus trap may conflict with overlays opened by overlays opened by other JavaScript libraries. You can address this by configuring `up.layer.config.foreignOverlaySelectors`.

@@ -54,9 +54,11 @@ Layer modes {#layer-modes}
 
 The current page and its overlays form a stack of *layers*.
 The initial page is called the *root layer*. An *overlay* is any layer
-that is not the root layer. Overlays can be stacked without limit.
+that is not the root layer. Overlays can be stacked without limit,
+and the whole stack is available as `up.layer.stack`.
 
-The appearance and behavior of an overlay is called its *mode*:
+The appearance and behavior of a layer is called its *mode*.
+The root layer's mode is always `root`. For overlays, these modes are available:
 
 @include overlay-modes-table
 
@@ -68,6 +70,8 @@ To choose a different mode, append it to the `[up-layer]` attribute:
 ```
 
 You can change the default mode in `up.layer.config.mode`.
+Defaults for each mode are configured in `up.layer.config`,
+like `up.layer.config.drawer` for drawers or `up.layer.config.overlay` for all overlays.
 
 
 Closing with a result

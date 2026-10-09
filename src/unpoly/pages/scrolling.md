@@ -89,8 +89,8 @@ To reveal the container element of the updated [layer](/up.layer), set `[up-scro
 <a href="/details" up-layer="new" up-scroll="layer">Show more</a> <!-- mark: up-scroll="layer" -->
 ```
 
-Most [layer modes](/layer-terminology) bring their own scrollbar, and will effectively be scrolled to the top.\
-A [popup](/layer-terminology#available-modes) has no scrollbar, so its parent layer will scroll to reveal the popup frame.
+Most [layer modes](/overlays#layer-modes) bring their own scrollbar, and will effectively be scrolled to the top.\
+A [popup](/overlays#layer-modes) has no scrollbar, so its parent layer will scroll to reveal the popup frame.
 
 
 ### Revealing the main element {#main}

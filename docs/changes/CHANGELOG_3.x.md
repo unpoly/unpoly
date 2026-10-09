@@ -3553,7 +3553,7 @@ All existing documentation pages from Unpoly 2 remain available:
 - [Migrating legacy JavaScripts](/legacy-scripts)
 - [Scrolling](/scrolling)
 - [Navigation](/navigation)
-- [Layer terminology](/layer-terminology)
+- [Layer terminology](/overlays#layer-modes)
 - [Layer option](/layer-option)
 - [Opening overlays](/opening-overlays)
 - [Subinteractions](/subinteractions)

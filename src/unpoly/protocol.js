@@ -223,7 +223,7 @@ up.protocol = (function() {
 
   ### Example
 
-  The user updates a fragment `main` within a [drawer overlay](/layer-terminology).
+  The user updates a fragment `main` within a [drawer overlay](/overlays#layer-modes).
   Unpoly automatically includes the following request headers:
 
   ```http
