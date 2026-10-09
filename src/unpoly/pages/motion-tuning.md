@@ -108,7 +108,7 @@ Running code after an animation
 
 The promise returned by `up.render()` fulfills when the new fragment is in the DOM,
 while its transition may still be playing. To run code after all effects have ended,
-await the `up.RenderResult#finished` promise, or pass an `{ onFinished }` callback:
+await the `up.RenderJob#finished` promise, or pass an `{ onFinished }` callback:
 
 ```js
 let result = await up.render({ target: '.list', url: '/users', transition: 'cross-fade' }).finished // mark: .finished

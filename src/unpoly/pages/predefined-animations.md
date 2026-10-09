@@ -1,7 +1,7 @@
 Predefined animations
 =====================
 
-An animation reveals or removes a single element: it fades, or it moves in from a screen edge.
+An animation reveals or removes a single element: it fades, or it moves to or from a screen edge.
 Unpoly ships with a set of animations you can use by name, in an `[up-animation]` attribute
 or an `{ animation }` option, wherever an element appears or disappears without a counterpart to morph from.
 
