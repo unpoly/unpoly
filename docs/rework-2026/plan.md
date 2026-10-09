@@ -1000,6 +1000,9 @@ marks where a new sub-topic starts inside a long section, never stress. In a one
 lead-in, bold the keyword ("events", "compilers"); at the start of a longer paragraph, bold
 the opening phrase ("Every feature has a graceful degradation story."). At most one per
 sub-topic, only in sections long enough to need it. The three current bolds stay.
+NO-JS DOCTRINE (Henning 2026-10-09): accept some degradation without JavaScript. Prose
+never promises full parity, only a degraded but still workable default experience. Syntax
+highlighting stays client-side (no build-time highlighting).
 PRE-SHIP TASKS (Henning 2026-10-09):
 - RELEASE SYNC: docs-rework forked from Unpoly master, which carries unreleased work, so
   the unpoly.com deploy must ship together with a new Unpoly release. Includes one last
