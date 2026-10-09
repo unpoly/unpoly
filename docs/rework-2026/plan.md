@@ -1003,6 +1003,10 @@ sub-topic, only in sections long enough to need it. The three current bolds stay
 NO-JS DOCTRINE (Henning 2026-10-09): accept some degradation without JavaScript. Prose
 never promises full parity, only a degraded but still workable default experience. Syntax
 highlighting stays client-side (no build-time highlighting).
+THIRD REPO + LAUNCH SEQUENCE (Henning 2026-10-09): unpoly-rails is in the relaunch scope,
+on its own `docs-rework` branch (created from master; standing permission to branch, commit
+and push there for the relaunch work). Launch order: (1) release the new Unpoly version,
+(2) release the new unpoly-rails version, (3) deploy the unpoly.com rework.
 PRE-SHIP TASKS (Henning 2026-10-09):
 - RELEASE SYNC: docs-rework forked from Unpoly master, which carries unreleased work, so
   the unpoly.com deploy must ship together with a new Unpoly release. Includes one last
