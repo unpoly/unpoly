@@ -5,7 +5,7 @@ These libraries implement Unpoly's [optional server protocol](/up.protocol) for 
 specific language or framework, so your backend can inspect and manipulate Unpoly's
 rendering without handling raw HTTP headers itself.
 
-All of them are optional. See [[server-bindings]] for what the protocol does
+All of them are optional. See [[server-protocol]] for what the protocol does
 and when your app benefits from it.
 
 

@@ -134,7 +134,7 @@ learn:
         - optimizing-responses
         - conditional-requests
         - handling-asset-changes
-        - server-bindings
+        - server-protocol
 
     - type: page-group
       title: Advanced rendering

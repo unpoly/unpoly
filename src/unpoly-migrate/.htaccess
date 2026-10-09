@@ -162,7 +162,8 @@ RedirectPermanent /after /targeting-fragments#appending-or-prepending
 # and the /install sub-pages moved into the docs.
 RedirectPermanent /tutorial /start/overview
 RedirectPermanent /start /start/overview
-RedirectPermanent /install/server-bindings /server-bindings
+RedirectPermanent /install/server-bindings /server-protocol
+RedirectPermanent /server-bindings /server-protocol
 RedirectPermanent /install/bootstrap /bootstrap-integration
 RedirectPermanent /install/legacy-browsers /legacy-browsers
 RedirectPermanent /handling-everything /handling-all-links

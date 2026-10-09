@@ -164,6 +164,7 @@ up.protocol = (function() {
 
   @header X-Up-Target
   @stable
+  @signature
   */
 
   /*-
@@ -704,6 +705,7 @@ up.protocol = (function() {
 
   @header X-Up-Validate
   @stable
+  @signature
   */
 
   function eventPlansFromXHR(xhr) {
@@ -867,6 +869,7 @@ up.protocol = (function() {
 
   @header X-Up-Accept-Layer
   @stable
+  @signature
   */
 
   function dismissLayerFromXHR(xhr) {

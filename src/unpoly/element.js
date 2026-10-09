@@ -316,6 +316,7 @@ up.element = (function() {
 
     If omitted, the element will be hidden if shown and shown if hidden.
   @stable
+  @signature
   */
   function toggle(element, newVisible = !isVisible(element)) {
     setVisible(element, newVisible)
@@ -675,6 +676,7 @@ up.element = (function() {
       @include adjacent-positions
   @include up.element.createFromSelector/all
   @stable
+  @signature
   */
   function affix(...args) {
     let [parent, position = 'beforeend', selector, attributes] = u.args(args, 'val', u.isAdjacentPosition, 'val', 'options')
@@ -806,6 +808,7 @@ up.element = (function() {
   @return {Element}
     The root element of the parsed DOM tree.
   @stable
+  @signature
   */
   function createFromHTML(html) {
     return extractSingular(createNodesFromHTML(html))

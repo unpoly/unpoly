@@ -520,6 +520,7 @@ up.util = (function() {
   @param {any} value
   @return {boolean}
   @stable
+  @signature
   */
   const isPresent = negate(isBlank)
 
@@ -1081,6 +1082,7 @@ up.util = (function() {
   @param {Array<T>} array
   @return {Array<T>}
   @stable
+  @signature
   */
   function uniq(array) {
     if (array.length < 2) { return array }
@@ -1143,6 +1145,7 @@ up.util = (function() {
   @param {Function(element, index): boolean} tester
   @return {Array}
   @stable
+  @signature
   */
   function reject(list, tester) {
     tester = negate(iteratee(tester))
@@ -1309,6 +1312,7 @@ up.util = (function() {
   @param {Array} keys
   @return {Object}
   @stable
+  @signature
   */
   function pick(object, keys) {
     const filtered = {}

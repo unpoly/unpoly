@@ -1,10 +1,10 @@
-Optional server bindings
-========================
+Server protocol
+===============
 
 Your backend can inspect and manipulate Unpoly's rendering through plain HTTP headers:
 request headers tell the server what Unpoly is about to render,
 and response headers let the server change what happens on the client.
-This exchange is the [server protocol](/up.protocol). None of it is required, and you can implement only the parts you need.
+This exchange is Unpoly's server protocol, documented header by header in [`up.protocol`](/up.protocol). None of it is required, and you can implement only the parts you need.
 
 Libraries that implement the protocol exist for many languages and frameworks. See [[protocol-implementations]].
 
@@ -123,4 +123,4 @@ A protocol implementation for your framework wraps all of this in helpers.
 Most handle the `_up_method` cookie for you, and some, like `unpoly-rails`, also set the `Vary` header when you read a request header.
 See [[protocol-implementations]] for the list.
 
-@page server-bindings
+@page server-protocol

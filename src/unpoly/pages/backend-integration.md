@@ -103,7 +103,7 @@ The full set of headers is small, and you only implement what you use.
 Libraries for many languages and frameworks wrap it in helpers.
 See [[protocol-implementations]].
 
-<p class="read-more"><a href="/server-bindings">Read more: Optional server bindings</a></p>
+<p class="read-more"><a href="/server-protocol">Read more: Server protocol</a></p>
 
 @page backend-integration
 @menu-title Overview
