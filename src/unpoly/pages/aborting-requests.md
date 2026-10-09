@@ -1,74 +1,116 @@
 Aborting requests
 =================
 
-When two requests [target](/targeting-fragments) the same element, Unpoly will abort the earlier request.
-
+When two requests [target](/targeting-fragments) the same element, Unpoly aborts the earlier request.
+Only the later response is rendered, regardless of the order in which responses arrive.
 This prevents non-deterministic updates when two requests race to render the same fragment.
-Note that responses may or may not arrive in the same order as they were requested.
 
 
-## Controlling what's aborted
+Conflicting requests are aborted {#aborting-conflicting-requests}
+--------------------------------
 
-To control which requests are aborted, you may pass an `{ abort }` option to rendering functions
-like `up.follow()`, `up.submit()` or `up.render()`. In your HTML you may use
-an `[up-abort]` attribute with the same values.
+By default, a render pass aborts earlier requests targeting fragments within *its own* targeted fragments.
+Requests targeting other fragments are not aborted.
 
-### Don't abort anything
-
-Pass `{ abort: false }` to not abort any request.
-
-If two requests would target the same fragment with `{ abort: false }`, they
-will be rendered in the order of their response. If the first response removes
-the fragment targeted by the second request, it may cause the second request
-to fail or update a [fallback target](/up.render#options.fallback).
-
-### Aborting all requests
-
-Pass `{ abort: 'all' }` to abort all requests targeting any fragment on any layer.
-
-### Aborting requests on your layer
-
-Pass `{ abort: 'layer' }` to abort all requests targeting a fragment on the same
-[layer](/up.layer) as you.
-
-### Aborting conflicting requests
-
-The default is `{ abort: 'target' }`, which aborts earlier requests targeting
-fragments within *your* targeted fragments. Requests targeting other fragments are not aborted.
-
-To visualize the effects of `{ abort: 'target' }`, observe the layout below.
-The screen is split into a sidebar (`#side`) and a content area (`#main`). Contained within
-`#main` is a smaller fragment `#box`.
+To visualize this, consider a layout with a sidebar (`#side`) and a content area (`#main`).
+Contained within `#main` is a smaller fragment `#box`:
 
 ![Layout with #side, #main and #box fragments](images/side-main-box.svg){:width='350'}
 
-In this layout rendering with `{ abort: 'target' }` has the following effect:
+In this layout, rendering has the following effects:
 
-- Concurrent requests targeting `#side` and `#main` will not abort each other.
-- When two requests target `#main`, the first request will be aborted by the second request.
-- Rendering `#main` will abort an earlier request targeting `#box`.
-- Rendering `#box` will *not* abort an earlier request targeting `#main`.
+- Concurrent requests targeting `#side` and `#main` do not abort each other.
+- When two requests target `#main`, the first request is aborted by the second request.
+- Rendering `#main` aborts an earlier request targeting `#box`.
+- Rendering `#box` does *not* abort an earlier request targeting `#main`.
 
-## Preventing requests from being aborted {#preventing}
+Other work waiting on a fragment stops as well when the fragment is aborted:
+[polling](/polling) ends, and pending [validations](/validation) are dropped.
 
-In some cases you may want to protect a request from being aborted through `{ abort }`.\
-You may do so by passing an `{ abortable: false }` option.
 
-## Aborting imperatively
+Controlling what is aborted {#controlling}
+---------------------------
 
-To imperatively abort requests targeting a fragment or layer, use the `up.fragment.abort()` function.
+To control which requests are aborted, pass an [`{ abort }`](/up.render#options.abort) option to rendering functions
+like `up.follow()`, `up.submit()` or `up.render()`. In your HTML, set an `[up-abort]` attribute with the same values:
 
-There is also a low-level `up.network.abort()` function, which aborts requests
-matching arbitrary conditions.
+```html
+<a href="/dashboard" up-follow up-abort="layer">Dashboard</a> <!-- mark: up-abort="layer" -->
+```
 
-## Reacting to aborted requests
+| Value | Effect |
+|-------|--------|
+| `'target'` | Aborts earlier requests targeting fragments within *your* targeted fragments. This is the default. |
+| `'layer'` | Aborts all requests targeting a fragment on the same [layer](/up.layer) as you. |
+| `'all'` | Aborts all requests targeting any fragment on any layer. |
+| `false` | Aborts nothing. |
 
-When aborting requests using the `{ abort }` option or through `up.fragment.abort()`,
-the events `up:fragment:aborted` and `up:request:aborted` are emitted.
+With `{ abort: false }`, two requests targeting the same fragment are rendered in the order of their responses.
+If the first response removes the fragment targeted by the second request, the second request
+fails or updates a [fallback target](/up.render#options.fallback).
 
-To simplify the registration of code when a fragment or its ancestor is aborted, use `up.fragment.onAborted()`.
 
-## Aborting rules in layers {#layers}
+Protecting a request from being aborted {#preventing}
+---------------------------------------
+
+To protect a request from being aborted through `{ abort }`, pass an [`{ abortable: false }`](/up.render#options.abortable) option
+or set an `[up-abortable="false"]` attribute:
+
+```html
+<form method="post" action="/orders" up-submit up-abortable="false"> <!-- mark: up-abortable="false" -->
+  ...
+</form>
+```
+
+Submitting this form is not interrupted when the user navigates to another page while the request is loading.
+
+[Preload](/preloading) requests are not abortable by default, so navigating does not cancel a menu
+that is still preloading in the background.
+
+
+Aborting from JavaScript {#aborting-imperatively}
+------------------------
+
+To abort requests targeting a fragment, pass the element or a selector to `up.fragment.abort()`:
+
+```js
+up.fragment.abort('.content')
+```
+
+To abort all requests targeting a [layer](/up.layer), pass a `{ layer }` option:
+
+```js
+up.fragment.abort({ layer: 'root' })
+up.fragment.abort({ layer: 'any' }) // aborts requests on all layers
+```
+
+There is also a low-level `up.network.abort()` function, which aborts requests matching a
+[URL pattern](/url-patterns) or an arbitrary condition. Prefer `up.fragment.abort()` when you can:
+only requests aborted by screen region let components [react to being aborted](#reacting).
+
+
+Reacting to aborted requests {#reacting}
+----------------------------
+
+When requests are aborted through `{ abort }` or `up.fragment.abort()`, an `up:fragment:aborted` event
+is emitted on the element for which requests were aborted, and an `up:request:aborted` event for each aborted request.
+
+A rendering function whose request was aborted rejects with an `up.Aborted` error.
+See [handling aborted requests](/failed-responses#handling-aborted-requests).
+
+To run code when an element *or one of its ancestors* was aborted, use `up.fragment.onAborted()`.
+For example, a timer that reloads an element after 10 seconds should not fire once the element's requests were aborted:
+
+```js
+let timeout = setTimeout(() => up.reload(element), 10000)
+up.fragment.onAborted(element, () => clearTimeout(timeout)) // mark: up.fragment.onAborted
+```
+
+The callback is unsubscribed automatically when the element is destroyed.
+
+
+Aborting rules in layers {#layers}
+------------------------
 
 The following rules apply when opening or closing [overlays](/up.layer):
 
@@ -78,11 +120,14 @@ The following rules apply when opening or closing [overlays](/up.layer):
 - When a layer is closed, all pending requests targeting that layer are aborted. This is regardless of the `{ abort }` option used.
 
 
-## Destroyed fragments are aborted
+Destroyed fragments are aborted {#destroyed}
+-------------------------------
 
-When a fragment is removed from the DOM (by [rendering](/up.render) or explicit [destroying](/up.destroy)),
-any request targeting this fragment (or its descendants) is aborted.
+When a fragment is removed from the DOM with `up.destroy()`, any request targeting this fragment (or its descendants)
+is aborted. This is regardless of the `{ abort }` option used.
 
-This is regardless of the `{ abort }` option used for the render pass.
+A render pass that replaces a fragment also aborts requests targeting the removed elements,
+unless it was given `{ abort: false }`.
+
 
 @page aborting-requests
