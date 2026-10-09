@@ -995,6 +995,9 @@ gzip; WebMCP tool shape in a real Chrome (staging needs the WebMCP flag, token i
 unpoly.com); copy button in Safari + Firefox; nginx stays cache-free (a CDN must honor
 Vary: Accept); renew the origin-trial token.
 
+PARALLELISM CAP (Henning 2026-10-09, after 4 parallel Fable writers + Opus critics
+exhausted his 5h window in ~2h): at most TWO writers in parallel; space out critics; the
+5h window, not the weekly quota, is the binding limit during sprints.
 CHAPTER PRODUCTION SPRINT (2026-10-09, Henning: "drive this site rework as far as we can"
 within a banked quota until Monday evening): parallel Fable writers per topic under the
 shared docs/rework-2026/writer-brief.md; one Opus critic per wave (fixes clear errors,
