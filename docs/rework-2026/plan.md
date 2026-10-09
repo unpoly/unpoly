@@ -1039,6 +1039,12 @@ PRE-SHIP TASKS (Henning 2026-10-09):
   learn/network.md in the top 3 (site 1754892f). Decide whether to address this by title,
   @signature, or a ranking rule, and re-check the other expectations touched that day.
   Timing: with the fix round, so later title changes are already in.
+PRE-PASS (Henning 2026-10-10, option c): Opus agents checked every chapter after Forms
+against the writer brief's "Maintainer patterns"; report-only, one file per chapter pair in
+docs/rework-2026/prepass/ (~85 findings, incl. real doc-vs-code errors: feedback classes on
+[up-validate], close-by-location value, fail-transition default, X-Up-Target vs hungry,
+templates example, tracking-page-views double count). Use them as the agenda for each
+sitting; claims marked "unverified" need a spec/scratch-server check before writing.
 PRE-SHIP ORDER: Advanced rendering critic → Henning's sittings (+ module-intro Fable batch
 in parallel) → fix round → final learn-ref sweep → em-dash/AI-trope pass → persona review
 → Unpoly::Guide→Unpoly::Site rename → URL move (/api/…, /learn/…) → release sync (FACE
