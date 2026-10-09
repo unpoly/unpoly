@@ -1744,7 +1744,9 @@ hotkeys, empty states, sidecar delivery; retiring the Algolia push for latest.
 
 ## Deferred (only after content changes and the new landing page have shipped)
 
-- **URL prefixes** (added 2026-09-12): move API symbols under `/api` (e.g. `/api/up.render`)
+- **URL prefixes** — PULLED INTO PRE-SHIP (Henning 2026-10-09: "Do it before shipping";
+  last mechanical step after content is final; verified by rake docs:check_urls). Original
+  note (added 2026-09-12): move API symbols under `/api` (e.g. `/api/up.render`)
   and guide pages under `/learn` (e.g. `/learn/subinteractions`). Old root URLs keep
   working via `.htaccess` redirects (e.g. `/up-submit` -> `/api/up-submit`), but our own
   docs must link with the prefixes. Deferred because it causes heavy churn in the Unpoly
