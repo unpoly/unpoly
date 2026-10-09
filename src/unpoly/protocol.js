@@ -441,13 +441,19 @@ up.protocol = (function() {
   X-Up-Evict-Cache: *
   ```
 
+  To evict nothing, send `false`:
+
+  ```http
+  X-Up-Evict-Cache: false
+  ```
+
   @header X-Up-Evict-Cache
   @stable
   */
 
 
   function expireCacheFromXHR(xhr) {
-    return extractHeader(xhr, 'expireCache') || up.migrate.clearCacheFromXHR?.(xhr)
+    return extractHeader(xhr, 'expireCache', parseModifyCacheValue) ?? up.migrate.clearCacheFromXHR?.(xhr)
   }
 
   /*-
@@ -466,6 +472,12 @@ up.protocol = (function() {
 
   ```http
   X-Up-Expire-Cache: *
+  ```
+
+  To expire nothing beyond what the client has already expired, send `false`:
+
+  ```http
+  X-Up-Expire-Cache: false
   ```
 
   ### Relation to the client-side default

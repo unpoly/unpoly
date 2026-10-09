@@ -940,6 +940,29 @@ extendDescribe('up.network', function() {
           expect({ url: '/bar' }).not.toBeCached()
         })
 
+        it('evicts nothing if the server responds with an X-Up-Evict-Cache: false header', async function() {
+          up.request({ url: '/false', cache: true })
+          up.request({ url: '/foo', cache: true })
+          await wait()
+
+          let otherRequest = up.request({ url: '/other' })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(3)
+
+          jasmine.respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'foo',
+            responseHeaders: { 'X-Up-Evict-Cache': 'false' }
+          })
+          let response = await otherRequest
+
+          expect(response.evictCache).toBe(false)
+          expect({ url: '/false' }).toBeCached()
+          expect({ url: '/foo' }).toBeCached()
+        })
+
         it('defaults to a rule in up.network.config.evictCache() if neither request nor server set a { evictCache } option', async function() {
           up.network.config.evictCache = function(request) {
             expect(request).toEqual(jasmine.any(up.Request))
@@ -1142,6 +1165,31 @@ extendDescribe('up.network', function() {
 
           expect({ url: '/foo' }).toBeExpired()
           expect({ url: '/bar' }).toBeExpired()
+        })
+
+        it('expires nothing if the server responds with an X-Up-Expire-Cache: false header', async function() {
+          up.request({ url: '/false', cache: true })
+          up.request({ url: '/foo', cache: true })
+          await wait()
+
+          let otherRequest = up.request({ url: '/other' })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(3)
+
+          jasmine.respondWith({
+            status: 200,
+            contentType: 'text/html',
+            responseText: 'foo',
+            responseHeaders: { 'X-Up-Expire-Cache': 'false' }
+          })
+          let response = await otherRequest
+
+          expect(response.expireCache).toBe(false)
+          expect({ url: '/false' }).toBeCached()
+          expect({ url: '/false' }).not.toBeExpired()
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/foo' }).not.toBeExpired()
         })
 
         it('defaults to a rule in up.network.config.expireCache() if neither request nor server set a { expireCache } option', async function() {
