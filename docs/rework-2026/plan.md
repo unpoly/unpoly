@@ -995,6 +995,16 @@ gzip; WebMCP tool shape in a real Chrome (staging needs the WebMCP flag, token i
 unpoly.com); copy button in Safari + Firefox; nginx stays cache-free (a CDN must honor
 Vary: Accept); renew the origin-trial token.
 
+PRE-SHIP TASKS (Henning 2026-10-09):
+- RELEASE SYNC: docs-rework forked from Unpoly master, which carries unreleased work, so
+  the unpoly.com deploy must ship together with a new Unpoly release. Includes one last
+  review of the form-associated custom elements feature (the one big change), a CHANGELOG
+  rework, and using the release to promote the new homepage and the agent skill.
+- PERSONA REVIEW of the new homepage: 2-3 subagents with personas ("backend developer
+  frustrated with MPA limitations", "developer coming from htmx or Hotwire looking for
+  alternatives", "React/SPA developer curious about an alternative paradigm") read the site
+  starting from the root page for a while, then report whether they understood Unpoly's
+  shape and niche, and what confused them.
 LOGGED TASK (Henning 2026-10-09): an em-dash and AI-trope pass over the ENTIRE docs site
 (guides, API doc comments, start page copy), after the chapter sittings; Opus with the
 humanizer/deslop checklists. Start page em-dashes known: "Every attribute has a JavaScript
