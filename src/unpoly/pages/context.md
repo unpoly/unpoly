@@ -1,106 +1,64 @@
 Layer context
 =============
 
-The web platform gives you several tools to persist state across requests,
-like cookies or session storage.
-
-But with overlays you need to store state *per layer*.
-
-Unpoly adds *layer context*, a key/value store that exists for
-the lifetime of a layer:
-
-| Store              | Scope              | Persistence    | Values     | Client-manageable | Server-manageable |
-|--------------------|--------------------|----------------|------------|-------------------|-------------------|
-| Local storage      | Domain             | Permanentish   | String     | Yes               | –                 |
-| Cookies            | Domain             | Configurable   | String     | Configurable      | Yes               |
-| Session storage    | Tab                | Session        | String     | Yes               | –                 |
-| Unpoly context     | [Layer](/up.layer) | Session        | Object     | Yes               | Yes               |
+Layer context is a key/value object that lives as long as its layer. Use it to pass data to a screen
+you open in an overlay, like the record a picker is choosing for, without changing the screen's URL.
+Both your JavaScript and your server can read and change it.
 
 
-Initializing the context object
--------------------------------
+Passing context to an overlay {#initializing}
+-----------------------------
 
-The default context is an empty object (`{}`).
-
-You may initialize the context object when opening a layer:
-
-```js
-up.layer.open({ url: '/games/new', context: { lives: 3 } })
-```
-
-Or from HTML:
+To give a new overlay a context, set an `[up-context]` attribute with a [relaxed JSON](/relaxed-json) object
+on the link that opens it:
 
 ```html
-<a href="/games/new" up-layer="new" up-context="{ lives: 3 }">
-  Start a new game
+<a href="/contacts" up-layer="new" up-context="{ project: 'Hosting 2021' }"> <!-- mark: up-context="{ project: 'Hosting 2021' }" -->
+  Pick a contact
 </a>
 ```
 
-
-Working with the context object
--------------------------------
-
-You may read and change the context from your client-side JavaScript:
+From JavaScript, pass a `{ context }` option to `up.layer.open()`:
 
 ```js
-up.layer.on('heart:collected', function() {
-  up.context.lives++
-})
+up.layer.open({ url: '/contacts', context: { project: 'Hosting 2021' } }) // mark: context: { project: 'Hosting 2021' }
 ```
 
-You may read and change the context from the server:
+Every layer has its own context, which starts as an empty object (`{}`).
+When an overlay closes, its context is discarded with it.
 
-```ruby
-class GamesController < ApplicationController
 
-  def restart
-    up.context[:lives] = 3
-    render 'stage1'
-  end
+Varying a reused screen {#reuse-interaction-with-variation}
+-----------------------
 
-end
+Context is most useful when you [reuse an existing screen](/subinteractions#reusing-existing-screens) in an overlay,
+but want a small variation. Say a project form lets the user pick a contact. Instead of building a picker widget,
+it opens the existing `/contacts` list in an overlay:
+
+```html
+<a href="/contacts"
+  up-layer="new"
+  up-accept-location="/contacts/$id"
+  up-context="{ project: 'Hosting 2021' }"> <!-- mark: up-context="{ project: 'Hosting 2021' }" -->
+  Pick a contact
+</a>
 ```
 
+When the overlay requests `/contacts`, Unpoly sends the layer's context as an `X-Up-Context` request header,
+serialized as JSON:
 
-Re-using interactions in an overlay, but with a variation {#reuse-interaction-with-variation}
---------------------------------------------------------------------------------------------
-
-Context is useful when you want to re-use an existing interaction in an overlay, but make a slight variation.
-
-### Example
-
-Assume you want to re-use your existing `/contacts` list for a contact picker widget. The contact picker opens the context index in an overlay where the user can choose a contact.
-
-In this case the contact index should show an additional message "Pick a contact for project Foo", replacing `Foo` with the actual name of the project.
-
-We can implement such an contact picker with this [ERB](https://github.com/ruby/erb) template:
-
-```erb
-<% form_for @project do |form| %>
-
-  Contact: <%= form.object.contact %>
-
-  <a href='/contacts'
-    up-layer='new'
-    up-accept-location='/contacts/*'
-    up-context='<%= { project: @project.name }.to_json %>'>
-    Pick a contact
-  </a>
-
-  ...
-<% end %>
+```http
+X-Up-Context: { "project": "Hosting 2021" }
 ```
 
-Our effective contact object would now be something like `{ project: 'Hosting 2021' }`.
-
-When rendering the `/contacts`, the server can access the current layer context through the `X-Up-Context` header.
-It can then decide to render a different title:
+Every request from that layer carries the header, so the server can render the contact list with
+an additional heading. This [ERB](https://github.com/ruby/erb) template uses the [`unpoly-rails`](https://github.com/unpoly/unpoly-rails) gem:
 
 ```erb
 <% if up.context[:project] %>
-  Pick a contact for <%= up.context[:project] %>
+  <h1>Pick a contact for <%= up.context[:project] %></h1> <!-- mark: up.context[:project] -->
 <% else %>
-  List of contacts
+  <h1>Contacts</h1>
 <% end %>
 
 <% @contacts.each do |contact| %>
@@ -108,6 +66,82 @@ It can then decide to render a different title:
 <% end %>
 ```
 
+Opened on its own, `/contacts` has no context and shows the regular heading.
+The list needs no changes to work in both places.
+
 @include vary-header-note
+
+
+Working with context in JavaScript {#scripting}
+---------------------------------
+
+`up.context` returns the context of the [current layer](/up.layer.current).
+Read and change it like any JavaScript object:
+
+```js
+up.context.project // result: "Hosting 2021"
+up.context.selected = 123 // mark: up.context.selected
+```
+
+To access the context of another layer, use the `up.Layer#context` property
+of an `up.Layer` object, like `up.layer.root.context` or `up.layer.get('parent').context`.
+
+Any link or form can also add to its layer's context once it has rendered.
+This updates the current layer rather than opening a new one:
+
+```html
+<a href="/contacts?letter=B" up-follow up-context="{ letter: 'B' }">B</a> <!-- mark: up-context="{ letter: 'B' }" -->
+```
+
+
+Changing context from the server {#server-updates}
+--------------------------------
+
+The server can change the context of the updated layer by sending an `X-Up-Context` response header
+with the changed keys:
+
+```http
+Content-Type: text/html
+X-Up-Context: { "lives": 2 }
+
+<html>
+  ...
+</html>
+```
+
+Unpoly merges the given keys into the layer's context, adding or replacing them.
+Keys not mentioned in the header remain unchanged. To remove a key, send it with a `null` value.
+
+Only send the keys you changed. If the server echoed the entire context,
+client-side changes made while the request was in flight would be overwritten.
+
+With the `unpoly-rails` gem, assigning a key in the controller sets this header for you:
+
+```ruby
+class GamesController < ApplicationController
+
+  def restart
+    up.context[:lives] = 3 # mark-line
+    render 'stage1'
+  end
+
+end
+```
+
+Context updates are applied for both successful and [failed](/failed-responses) responses.
+
+
+Context compared to other stores {#comparison}
+--------------------------------
+
+The web platform offers other ways to persist state across requests, but none of them is scoped to a layer:
+
+| Store              | Scope              | Persistence    | Values     | Client-manageable | Server-manageable |
+|--------------------|--------------------|----------------|------------|-------------------|-------------------|
+| Local storage      | Domain             | Permanentish   | String     | Yes               | -                 |
+| Cookies            | Domain             | Configurable   | String     | Configurable      | Yes               |
+| Session storage    | Tab                | Session        | String     | Yes               | -                 |
+| Layer context      | [Layer](/up.layer) | Session        | Object     | Yes               | Yes               |
+
 
 @page context
