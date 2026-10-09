@@ -155,6 +155,17 @@ The server may send additional `ETag` or `Last-Modified` response headers. Howev
 To prevent a fragment from inheriting a version from an ancestor, assign it an `[up-etag=false]` or `[up-time=false]` attribute.
 
 
+## Rendering nothing {#rendering-nothing}
+
+If the server wants to render nothing they can do one of the following:
+
+- Send a response header [`X-Up-Target: :none`](/X-Up-Target).
+- Send a HTTP status [`204 No Content`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204).
+- Send a HTTP status [`304 Not Modified`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304).
+
+No response body is required.
+
+
 ## Resources
 
 - [MDN: Conditional requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests)

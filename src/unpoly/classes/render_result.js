@@ -129,7 +129,7 @@ up.RenderResult = class RenderResult {
 
   There are some cases where no fragments were rendered:
 
-  - The server sent HTTP status `304 Not Modified` to [avoid re-rendering unchanged content](/skipping-rendering).
+  - The server sent HTTP status `304 Not Modified` to [avoid re-rendering unchanged content](/conditional-requests).
   - The server sent HTTP status `204 No Content`.
   - The target selector was set to `':none'` by either client or server.
   - The server sent an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.

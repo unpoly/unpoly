@@ -243,7 +243,7 @@ up.on('up:fragment:loaded', function(event) {
 })
 ```
 
-See [skipping unnecessary rendering](/skipping-rendering) for more details and examples.
+See [skipping a loaded response](/render-lifecycle#skipping-responses) for more details and examples.
 
 
 ### Detecting revalidation from a compiler

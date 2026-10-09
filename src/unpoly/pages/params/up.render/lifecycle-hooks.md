@@ -27,7 +27,7 @@
 
   This callback may be called zero, one or two times:
 
-  - When the server rendered an [empty response](/skipping-rendering#rendering-nothing), no fragments are updated. `{ onRendered }` is not called.
+  - When the server rendered an [empty response](/conditional-requests#rendering-nothing), no fragments are updated. `{ onRendered }` is not called.
   - When the server rendered a matching fragment, it will be updated on the page. `{ onRendered }` is called with the [result](/up.RenderResult).
   - When [revalidation](/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
 

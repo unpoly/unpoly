@@ -3201,7 +3201,7 @@ Unpoly 3 lets you configure selectors matching foreign overlays using `up.layer.
   - To opt out of the focus restoration, use `up.render({ focus: false })`.
 - When rendering without navigation or an explicit [focus strategy](/focus), Unpoly will now preserve focus by default.
 - Links with an `[up-instant]` attribute are now focused when being followed on `mousedown`. This is to mimic the behavior of standard links.
-- When a render pass finishes [without new content](/skipping-rendering#rendering-nothing), the `{ focus }` option now is still processed.
+- When a render pass finishes [without new content](/conditional-requests#rendering-nothing), the `{ focus }` option now is still processed.
 - Fix a bug where focus loss was not detected when it occurred in a secondary fragment in a multi-fragment update.
 - `<label for="id">` elements now always focus a matching field in the same layer, even when fields with the same IDs exist in other layers.
 
@@ -3525,7 +3525,7 @@ In our ongoing efforts to evolve Unpoly's documentation from an API reference to
 
 - [Targeting fragments](/targeting-fragments)
 - [Target derivation](/target-derivation)
-- [Skipping unnecessary rendering](/skipping-rendering)
+- [Skipping unnecessary rendering](/conditional-requests)
 - [Render hooks](/render-lifecycle)
 - [Aborting requests](/aborting-requests)
 - [Handling failed responses](/failed-responses)

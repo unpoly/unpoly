@@ -133,7 +133,6 @@ learn:
         - backend-integration
         - optimizing-responses
         - conditional-requests
-        - skipping-rendering # dissolves, mostly into conditional-requests
         - handling-asset-changes
         - server-bindings
 

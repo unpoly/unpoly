@@ -45,7 +45,6 @@ For low-level DOM utilities that complement the browser's native API, see `up.el
 @learn-ref preserving-elements
 @learn-ref templates
 @learn-ref render-lifecycle
-@learn-ref skipping-rendering
 @learn-ref target-derivation
 
 @see up.render
@@ -220,7 +219,7 @@ up.fragment = (function() {
 
     @param {Function(Object): boolean} [config.skipResponse]
       When to finish a render pass without changes,
-      usually to [not re-insert identical content](/skipping-rendering).
+      usually to [not re-insert identical content](/render-lifecycle#skipping-responses).
 
       By default Unpoly skips the following responses:
 
@@ -383,7 +382,7 @@ up.fragment = (function() {
   If no ancestor fragment with an `[up-time]` attribute exists, `undefined` is returned.
 
   When the fragment is reloaded,
-  its modification time is sent as an `If-Modified-Since` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
+  its modification time is sent as an `If-Modified-Since` request header. The server may check the header and decide to [skip rendering](/conditional-requests).
 
   @learn-ref conditional-requests
 
@@ -412,7 +411,7 @@ up.fragment = (function() {
 
   When the fragment is reloaded,
   its known modification time is sent as an `If-Modified-Since` request header.
-  The server may check the header and decide to [skip rendering](/skipping-rendering).
+  The server may check the header and decide to [skip rendering](/conditional-requests).
 
   @learn-ref conditional-requests
 
@@ -449,7 +448,7 @@ up.fragment = (function() {
   If no ancestor fragment with an `[up-etag]` attribute exists, `undefined` is returned.
 
   When the fragment is reloaded,
-  its ETag is sent as an `If-None-Match` request header. The server may check the header and decide to [skip rendering](/skipping-rendering).
+  its ETag is sent as an `If-None-Match` request header. The server may check the header and decide to [skip rendering](/conditional-requests).
 
   @learn-ref conditional-requests
 
@@ -794,7 +793,7 @@ up.fragment = (function() {
   })
   ```
 
-  Also see [skipping unnecessary rendering](/skipping-rendering).
+  Also see [skipping a loaded response](/render-lifecycle#skipping-responses).
 
   ### Cases that trigger the event {#cases}
 
@@ -807,7 +806,7 @@ up.fragment = (function() {
   | Server responds with an [error code](/failed-responses)         | ✔️ yes                           |
   | Rendering from [cache](/caching)                                | ✔️ yes                           |
   | Rendering a [string of HTML](/providing-html#string)            | ❌ no                            |
-  | Server [renders nothing](/skipping-rendering#rendering-nothing) | ❌ no                            |
+  | Server [renders nothing](/conditional-requests#rendering-nothing) | ❌ no                            |
   | [Fatal network error](/network-issues#disconnects)              | ❌ no                            |
   | [Preloading](/preloading)                                       | ❌ no                            |
 
@@ -820,7 +819,7 @@ up.fragment = (function() {
 
   @param event.skip()
     Finishes this render pass without changes,
-    usually to [not re-insert identical content](/skipping-rendering).
+    usually to [not re-insert identical content](/render-lifecycle#skipping-responses).
 
     Programmatic callers will fulfill with an [empty](/up.RenderResult.prototype.none) `up.RenderResult`.
 
@@ -842,7 +841,7 @@ up.fragment = (function() {
      that is being reloaded to ensure that the user never sees stale content.
 
      You may compare the `{ response }` and `{ expiredResponse }` properties to prevent
-     [re-insertion of identical content](/skipping-rendering).
+     [re-insertion of identical content](/render-lifecycle#skipping-responses).
 
      Also see `up.fragment.config.skipResponse`.
 
@@ -889,7 +888,7 @@ up.fragment = (function() {
   |-----------------------------------------------------------------|--------------------------------|
   | [Fatal network error](/network-issues#disconnects)              | ✔️ yes                        |
   | Server responds with an [error code](/failed-responses)         | ❌ no                         |
-  | Server [renders nothing](/skipping-rendering#rendering-nothing) | ❌ no                         |
+  | Server [renders nothing](/conditional-requests#rendering-nothing) | ❌ no                         |
   | [Preloading](/preloading) fails                                 | ❌ no                         |
 
 

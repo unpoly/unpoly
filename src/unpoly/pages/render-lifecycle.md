@@ -57,7 +57,7 @@ In HTML you can set an [`[up-on-finished]`](/up-follow#up-on-finished) attribute
 To run code after every render pass, use the [`{ onRendered }`](/up.render#options.onRendered) callback.
 This callback may be called zero, one or two times:
 
-- When the server rendered an [empty response](/skipping-rendering#rendering-nothing), no fragments are updated. `{ onRendered }` is not called.
+- When the server rendered an [empty response](/conditional-requests#rendering-nothing), no fragments are updated. `{ onRendered }` is not called.
 - When the server rendered a matching fragment, it will be updated on the page. `{ onRendered }` is called with the [result](/up.RenderResult).
 - When [revalidation](/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
 
@@ -210,7 +210,39 @@ The most important preventable events are:
 > [TIP]
 > The last preventable event is `up:fragment:loaded`. It is emitted after a response is loaded but before any elements were changed.
 
-Also see [skipping unnecessary rendering](/skipping-rendering).
+### Skipping a loaded response {#skipping-responses}
+
+Even after the server has sent a response, you may still prevent rendering at the last second
+by canceling the `up:fragment:loaded` event.  This gives you a chance to inspect the response
+or DOM state right before a fragment would be inserted:
+
+  ```js
+  up.on('up:fragment:loaded', async function(event) {
+    if (event.response.header('X-User-Created')) {
+      // If we see an X-User-Created header, abort the rendering pass
+      event.preventDefault()
+
+      // Show an alert instead
+      alert('The user was created successfully')
+    }
+  })
+  ```
+
+See `up:fragment:loaded` for more examples.
+
+
+#### Global skipping rules
+
+To configure global rules for responses that should not be rendered, you may
+also set `up.fragment.config.skipResponse`.
+
+By default Unpoly skips the following responses:
+
+- Responses without text in their body.
+  Such responses occur when a [conditional request](/conditional-requests)
+  in answered with HTTP status `304 Not Modified` or `204 No Content`.
+- When [revalidating](/caching#revalidation), if the expired response and fresh response
+  have the exact same text.
 
 
 Changing options before rendering
