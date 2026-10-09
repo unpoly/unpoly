@@ -5,53 +5,15 @@ const e = up.element
 
 /*-
 Fragment API
-===========
+============
 
-The `up.fragment` module offers a high-level JavaScript API to work with DOM elements.
+The JavaScript API to render, look up and destroy page fragments. Every link, form, overlay or poll that Unpoly handles ends in `up.render()`, and your own code can call it with the same options.
 
-## Anatomy of a fragment
+`up.render()` replaces elements on the current page with matching elements from a server response or an HTML string. `up.navigate()` does the same with the defaults of a user navigation, like updating history and scrolling to the new content. `up.reload()` fetches a fresh copy of a fragment from the URL it was loaded from, and `up.destroy()` removes a fragment, with an optional animation.
 
-A fragment is a standard DOM [`Element`](https://developer.mozilla.org/en-US/docs/Web/API/Element)
-with some additional properties that are useful in the context of a server-rendered web application:
+Lookup functions like `up.fragment.get()` differ from `document.querySelector()`: they only see the [current layer](/up.layer.current), ignore elements that are playing out their exit animation, and understand Unpoly's own selectors like `:main` or `:origin`. Elements marked `[up-keep]` are preserved across updates. For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
-- Fragments are [identified by a CSS selector](/target-derivation), like a `.class` or `#id`.
-- Fragments are usually updated by a [link](/up-follow) or a [form](/submitting-forms) that targets their selector.
-  When the server renders HTML with a matching element, the fragment is swapped with a new version.
-- As fragments enter the page they are automatically [compiled](/enhancing-elements) to activate [JavaScript behavior](/up.script).
-- Fragment changes may be [animated](/up.motion).
-- Fragments are placed on a [layer](/up.layer) that is isolated from other layers.
-  Unpoly features will only see or change fragments from the [current layer](/up.layer.current)
-  unless you [explicitly target another layer](/layer-option).
-- Fragments [know the URL from where they were loaded](/up.fragment.source).
-  They can be [reloaded](/up.reload) or [polled periodically](/up-poll).
-
-> [note]
-> Unpoly uses regular [`Element`](https://developer.mozilla.org/en-US/docs/Web/API/Element) objects
-> to reference fragments and store client-side state. There is no separate component tree as in frameworks like React.
-
-## Differences to the DOM API
-
-While `up.fragment` contains many functions to look up CSS selectors, their behavior
-differs from browser APIs like `document.querySelector()`:
-
-- Functions in `up.fragment` will only see elements on the [current layer](/up.layer.current). Other layers are only visible when an [`{ layer }` option](/layer-option) is passed explicitly.
-- Functions in `up.fragment` [ignore destroyed elements](/up-destroying) that are playing out their exit animation.
-- Functions in `up.fragment` can find elements using Unpoly-specific CSS selectors like `:main` or `:layer`.
-
-For low-level DOM utilities that complement the browser's native API, see `up.element`.
-
-@learn-ref navigation-defaults
-@learn-ref providing-html
-@learn-ref preserving-elements
-@learn-ref templates
-@learn-ref render-lifecycle
-@learn-ref target-derivation
-
-@see up.render
-@see up.destroy
-@see up.reload
-@see up.fragment.get
-@see [up-keep]
+@learn-ref advanced-rendering
 
 @module up.fragment
 */

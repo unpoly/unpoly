@@ -2,24 +2,14 @@
 Status effects
 ==============
 
-Unpoly can apply temporary status effects to your page as the user navigates through your site.
+Temporary classes and effects that Unpoly applies while the user navigates: a highlighted button while its request loads, a placeholder in the targeted fragment, or a `.up-current` class on links to the current page.
 
-For example, you can show arbitrary [loading state](/loading-state) while waiting for the server,
-implement [optimistic rendering](/optimistic-rendering) or highlight current links in [navigation bars](/navigation-bars).
+While a request is loading, the origin element that triggered it gets an `.up-active` class and the targeted fragments get `.up-loading`. For richer loading state, a link or form can show an `[up-placeholder]` inside the fragment it targets, or name an `[up-preview]` function registered with `up.preview()`. A preview can change the page in any way, up to rendering the expected result before the server confirms it. Every effect is reverted when the request ends.
 
-@learn-ref navigation-bars
+Within an `[up-nav]` container, links pointing to the current location are marked `.up-current`, and the class moves as the user navigates.
+
 @learn-ref loading-state
-@learn-ref feedback-classes
-@learn-ref placeholders
-@learn-ref previews
-@learn-ref optimistic-rendering
-
-@see [up-nav]
-@see .up-current
-@see .up-active
-@see .up-loading
-@see [up-placeholder]
-@see [up-preview]
+@learn-ref navigation-bars
 
 @module up.status
 */

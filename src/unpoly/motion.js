@@ -2,54 +2,13 @@
 Animation
 =========
 
-When you [update a page fragment](/up.link) you can animate the change.
+Animates fragment updates: the old content fades or slides out while the new content comes in. Effects are picked by name in an HTML attribute, or defined with a few lines of JavaScript.
 
-## Transitions
+A *transition* morphs an old element into its new version. Set an `[up-transition]` attribute on a link or form, or pass a `{ transition }` option to `up.render()`. An *animation* shows or hides a single element without a counterpart, for example when an overlay opens with an [`[up-animation]`](/up-layer-new#up-animation) attribute, or when `up.destroy()` removes a fragment.
 
-When we morph between an old and a new element, we call it a *transition*.
-
-For instance, you may add an `[up-transition]` attribute to your
-links or forms to smoothly fade out the old element while fading in the new element:
-
-```html
-<a href="/users"
-  up-target=".list"
-  up-transition="cross-fade">
-  Show users
-</a>
-```
-
-## Animations
-
-In contrast, when we animate a new element without simultaneously removing an
-old element, we call it an *animation*.
-
-An example for an animation is opening a new overlay. We can animate the appearance
-of the dialog by adding an [`[up-animation]`](/up-layer-new#up-animation) attribute to the opening link:
-
-```html
-<a href="/users"
-  up-target=".list"
-  up-layer="new"
-  up-animation="move-from-top">
-  Show users
-</a>
-```
-
-## Which animations are available?
-
-Unpoly ships with a number of [predefined transitions](/up.morph#named-transitions)
-and [predefined animations](/up.animate#named-animations).
-
-You can define custom animations using `up.transition()` and
-`up.animation()`.
-
+Unpoly ships with [predefined transitions](/up.morph#named-transitions) and [predefined animations](/up.animate#named-animations). Define your own with `up.transition()` and `up.animation()`. To play an effect outside a render pass, call `up.animate()` or `up.morph()` directly.
 
 @learn-ref animation
-
-@see [up-transition]
-@see up.animation
-@see up.transition
 
 @module up.motion
 */
