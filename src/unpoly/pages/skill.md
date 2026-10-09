@@ -47,9 +47,10 @@ automatically, and you don't need Node.js:
 See [Discover and install plugins](https://code.claude.com/docs/en/plugins/install) in
 the Claude Code documentation for more.
 
-**To update**, run `/plugin marketplace update unpoly`. Claude Code doesn't update plugins
-from third-party marketplaces automatically, unless you turn on auto-update for the
-`unpoly` marketplace in the `/plugin` menu.
+**To update**, run `claude plugin update unpoly@unpoly` in your shell. In Claude Code, open
+the **Marketplaces** tab in `/plugin`, select `unpoly` and choose **Update marketplace**.
+Claude Code doesn't update plugins from third-party marketplaces automatically, unless you
+choose **Enable auto-update** there.
 
 Optionally, [nudge your agent into using the skill](#make-your-agent-use-it) for all
 Unpoly work.
@@ -58,7 +59,7 @@ Unpoly work.
 
 To offer the plugin to everyone working on your project, add the marketplace and the
 plugin to the project's `.claude/settings.json`. Once a team member trusts the project
-folder, Claude Code installs the plugin for them:
+folder, Claude Code knows the `unpoly` marketplace:
 
 ```json
 {
@@ -67,13 +68,20 @@ folder, Claude Code installs the plugin for them:
       "source": {
         "source": "url",
         "url": "https://unpoly.com/claude-plugins/marketplace.json"
-      }
+      },
+      "autoUpdate": true
     }
   },
   "enabledPlugins": {
     "unpoly@unpoly": true
   }
 }
+```
+
+Each team member then installs the plugin once:
+
+```text
+claude plugin install unpoly@unpoly --scope project
 ```
 
 
