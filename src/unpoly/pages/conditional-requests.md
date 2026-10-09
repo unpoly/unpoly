@@ -1,9 +1,10 @@
 Conditional requests
 ====================
 
-Unpoly reloads fragments when [polling](/polling), [revalidating the cache](/caching#revalidation) or calling `up.reload()`.
-With *conditional requests*, your server can answer such a reload with an empty `304 Not Modified` when nothing has changed.
+When Unpoly reloads a fragment that has not changed, your server can answer with an empty `304 Not Modified`.
 The exchange then costs about 1 KB and no rendering time.
+This works for every reload, whether from [polling](/polling), [cache revalidation](/caching#revalidation) or `up.reload()`,
+and uses standard HTTP *conditional requests*.
 
 Supporting conditional requests is optional. Reloading, polling and revalidation also work
 with a server that always renders the full response.
@@ -22,6 +23,8 @@ The server compares it with the current version of its data. When nothing change
 > Many web servers add a default `ETag` by hashing the response body.
 > With such a server, identical HTML already results in a short `304 Not Modified` response,
 > without any changes to your application code.
+> This only works when your pages render identical HTML for unchanged data. Rails, for example, renders a
+> differently masked CSRF token into every response, so the body hash never matches.
 
 
 Using a content hash {#etag-condition}
