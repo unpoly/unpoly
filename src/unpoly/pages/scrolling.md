@@ -300,7 +300,7 @@ When a scroll map is given, the `[up-scroll]` attribute or `{ scroll }` option i
 
 To implement your own scrolling logic, pass a function as `{ scroll }` option.
 
-The function is called with the updated fragment and is expected to **either**:
+The function is called with the updated fragment and is expected to either:
 
 - Scroll the viewport to the desired position (without animation).
 - Return one of the scroll options on this page.

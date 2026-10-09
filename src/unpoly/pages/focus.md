@@ -201,7 +201,7 @@ To implement other conditions, [pass a function](#function) instead.
 To implement your own focus logic, pass a function as `{ focus }` option.
 
 The function is called with the updated fragment and an options object.
-The function is expected to **either**:
+The function is expected to either:
 
 - Focus an element. Focusing must not change scroll positions,
   since scrolling is governed by a separate [`{ scroll }` option](/scrolling).
