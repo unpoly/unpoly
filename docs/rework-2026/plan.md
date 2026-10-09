@@ -1752,10 +1752,10 @@ hotkeys, empty states, sidecar delivery; retiring the Algolia push for latest.
   docs must link with the prefixes. Deferred because it causes heavy churn in the Unpoly
   sources (thousands of links); until then, hubs live at `/learn` and `/api` while pages
   stay at root.
-- Step 2 per-page rewrites of kept pages.
-- Rename the `Unpoly::Guide` namespace in unpoly-site to `Unpoly::Site` (added 2026-09-13).
-- Backend language switcher for protocol-chapter code samples.
-- Goal-based index pages ("fast", "resilient") above the chapters.
+- ~~Step 2 per-page rewrites of kept pages.~~ STRUCK (Henning 2026-10-09).
+- Rename the `Unpoly::Guide` namespace in unpoly-site to `Unpoly::Site` (added 2026-09-13) — PULLED INTO PRE-SHIP (Henning 2026-10-09).
+- ~~Backend language switcher for protocol-chapter code samples.~~ STRUCK (Henning 2026-10-09).
+- ~~Goal-based index pages ("fast", "resilient") above the chapters.~~ STRUCK (Henning 2026-10-09).
 
 ## Landing page (alignment in progress; state as of 2026-09-15)
 
