@@ -46,7 +46,7 @@ Strong defaults
 ---------------
 
 When a link or form updates the main content of the page, Unpoly treats the interaction
-as a [navigation](/navigation) and **mimics what a full page load would have done**:
+as a [navigation](/navigation-defaults) and **mimics what a full page load would have done**:
 
 - The browser URL and history are updated, so the Back button keeps working.
 - The page scrolls to the top, as after a full page load.

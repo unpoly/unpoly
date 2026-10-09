@@ -116,12 +116,12 @@ See [[failed-responses]] for details.
 
 ## Navigation defaults
 
-Submitting a form is considered [navigation](/navigation) by default.
+Submitting a form is considered [navigation](/navigation-defaults) by default.
 When a form updates the layer's main element, Unpoly behaves like a full page load would:
 the browser URL and history are updated, and the new content is scrolled into view.
 Focus moves to the new fragment.
 
-See [[navigation]] for all navigation defaults and how to customize them.
+See [[navigation-defaults]] for all navigation defaults and how to customize them.
 
 
 ## Multiple submit buttons {#submit-buttons}

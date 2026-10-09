@@ -1,7 +1,7 @@
 @partial up.render/navigation
 
 @param {boolean} [options.navigate=false]
-  Whether this fragment update is considered [navigation](/navigation).
+  Whether this fragment update is considered [navigation](/navigation-defaults).
 
   Setting this to `true` will enable many side effects,
   like [updating history](/updating-history) or [scrolling](/scrolling).

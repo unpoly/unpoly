@@ -115,7 +115,7 @@ To offer a *Back* link inside the page, set an `[up-back]` attribute:
 <a href="/posts" up-back>Back</a> <!-- mark: up-back -->
 ```
 
-When Unpoly knows the previous URL, clicking the link [navigates](/navigation) there
+When Unpoly knows the previous URL, clicking the link [navigates](/navigation-defaults) there
 and restores the earlier scroll position. When no previous URL is known, for example right after the initial page load,
 the link follows its `[href]` as usual.
 

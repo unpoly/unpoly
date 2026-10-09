@@ -76,7 +76,7 @@ To render remote content from JavaScript, pass a `{ url }` option to the `up.ren
 up.render({ url: '/path', target: '.target' })
 ```
 
-When the fragment change represents a [navigation](/navigation), use `up.navigate()` instead.
+When the fragment change represents a [navigation](/navigation-defaults), use `up.navigate()` instead.
 This will update the browser location, scroll position and focus.
 
 ```js

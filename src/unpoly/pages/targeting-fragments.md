@@ -277,7 +277,7 @@ To fallback to the main target you can set an empty `[up-fallback]` attribute or
 up.render({ url: '/path', target: '.content', fallback: true })
 ```
 
-Falling back to the main target is the default when [navigating](/navigation). Therefore you don't need to include an empty `[up-fallback]` attribute with your links and forms, which are considered navigation by default.
+Falling back to the main target is the default when [navigating](/navigation-defaults). Therefore you don't need to include an empty `[up-fallback]` attribute with your links and forms, which are considered navigation by default.
 
 
 ### Making targets optional

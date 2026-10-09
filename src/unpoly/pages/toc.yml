@@ -141,7 +141,7 @@ learn:
       pages:
         - advanced-rendering
         - attributes-and-options
-        - navigation
+        - navigation-defaults
         - targeting-fragments
         - target-derivation
         - failed-responses

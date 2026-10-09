@@ -75,5 +75,5 @@ up.on('up:link:follow', function(event, link) {
 })
 ```
 
-@page navigation
+@page navigation-defaults
 

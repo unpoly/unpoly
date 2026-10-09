@@ -334,7 +334,7 @@ up.form = (function() {
   The response is parsed for a CSS selector and the matching elements will
   replace corresponding elements on the current page.
 
-  Submitting a form is considered [navigation](/navigation).
+  Submitting a form is considered [navigation](/navigation-defaults).
 
   Emits the event [`up:form:submit`](/up:form:submit).
 

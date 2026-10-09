@@ -8,7 +8,7 @@ By default, following a link scrolls like a full page load would, and a minor up
 
 ## Default scrolling strategy {#auto}
 
-When [navigating](/navigation), Unpoly tries a sequence of scroll strategies that works for most cases:
+When [navigating](/navigation-defaults), Unpoly tries a sequence of scroll strategies that works for most cases:
 
 1. If the URL has a `#hash`, scroll to the element matching that hash.
 2. If updating a [main target](/up-main), scroll the layer to the top.\
@@ -18,7 +18,7 @@ When [navigating](/navigation), Unpoly tries a sequence of scroll strategies tha
 
 You can change this sequence in `up.fragment.config.autoScroll`.
 
-Following links and submitting forms are considered [navigation](/navigation), so the default strategy is applied without further configuration.
+Following links and submitting forms are considered [navigation](/navigation-defaults), so the default strategy is applied without further configuration.
 You can also enable it explicitly by setting `[up-scroll="auto"]`:
 
 ```html
@@ -152,7 +152,7 @@ To scroll to the bottom, but leave a margin of some pixels, set a *negative* num
 
 If you don't want Unpoly to touch any scroll positions, set `[up-scroll="false"]`.
 For example, this link opts out of the [default scrolling strategy](#auto) that
-[navigation](/navigation) would apply:
+[navigation](/navigation-defaults) would apply:
 
 ```html
 <a href="/details" up-follow up-scroll="false">Show more</a> <!-- mark: up-scroll="false" -->

@@ -249,7 +249,7 @@ up.link = (function() {
   will be replaced. Attributes like [`[up-target]`](/up-follow#up-target)
   or [`[up-layer]`](/up-follow#up-layer) will be honored.
 
-  Following a link is considered [navigation](/navigation) by default.
+  Following a link is considered [navigation](/navigation-defaults) by default.
 
   Emits the event `up:link:follow`.
 
@@ -1193,7 +1193,7 @@ up.link = (function() {
   /*-
   [Follows](/up.follow) this link with JavaScript and updates a fragment with the server response.
 
-  Following a link is considered [navigation](/navigation) by default.
+  Following a link is considered [navigation](/navigation-defaults) by default.
 
   @learn-ref following-links
 

@@ -47,7 +47,7 @@ the browser submits it with a full page load.
 Submitting is navigation
 ------------------------
 
-Submitting a form counts as [navigation](/navigation).
+Submitting a form counts as [navigation](/navigation-defaults).
 When a form updates the layer's main element, Unpoly behaves like a full page load would:
 the browser URL and history are updated, and the new content is scrolled into view.
 Each of these defaults can be customized.

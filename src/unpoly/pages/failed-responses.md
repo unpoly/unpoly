@@ -102,7 +102,7 @@ login form. In these cases a specific target selector may not match in the serve
 
 With `{ fallback: true }` or `[up-fallback=true]` Unpoly will try to match a [main target](/up-main)
 before giving up. This will show the server content in the application's main content area,
-which is often preferred to a link appearing dead. Fallback targets are enabled by default when [navigating](/navigation).
+which is often preferred to a link appearing dead. Fallback targets are enabled by default when [navigating](/navigation-defaults).
 
 To configure a custom handling of unexpected content, use the `up:fragment:loaded` event.
 

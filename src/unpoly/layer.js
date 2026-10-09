@@ -392,7 +392,7 @@ up.layer = (function() {
   /*-
   [Opens a new overlay](/opening-overlays).
 
-  Opening a layer is considered [navigation](/navigation) by default.
+  Opening a layer is considered [navigation](/navigation-defaults) by default.
 
   @learn-ref opening-overlays
 
@@ -416,7 +416,7 @@ up.layer = (function() {
       while options in `up.layer.config.drawer` become defaults for all drawers.
 
     @param {boolean} [options.navigate=true]
-      Whether to apply [navigation defaults](/navigation).
+      Whether to apply [navigation defaults](/navigation-defaults).
 
   @section Placement
     @param {string} [options.target]

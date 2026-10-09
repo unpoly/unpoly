@@ -12,7 +12,7 @@ would be left somewhere in the old content, unaware that the page has changed.
 
 ## Default focus strategy {#auto}
 
-When [navigating](/navigation), Unpoly tries a sequence of focus strategies that works for most cases:
+When [navigating](/navigation-defaults), Unpoly tries a sequence of focus strategies that works for most cases:
 
 1. If the URL has a `#hash`, focus the element matching that hash.
 2. Focus an `[autofocus]` element in the new fragment.
@@ -22,7 +22,7 @@ When [navigating](/navigation), Unpoly tries a sequence of focus strategies that
 
 You can change this sequence in `up.fragment.config.autoFocus`.
 
-Following links and submitting forms are considered [navigation](/navigation), so the default strategy is applied without further configuration.
+Following links and submitting forms are considered [navigation](/navigation-defaults), so the default strategy is applied without further configuration.
 You can also enable it explicitly by setting `[up-focus="auto"]`:
 
 ```html
@@ -142,7 +142,7 @@ See [[restoring-history]].
 
 If you don't want Unpoly to touch the focus, set `[up-focus="false"]`.
 For example, this link opts out of the [default focus strategy](#auto) that
-[navigation](/navigation) would apply:
+[navigation](/navigation-defaults) would apply:
 
 ```html
 <a href="/details" up-follow up-focus="false">Show more</a> <!-- mark: up-focus="false" -->

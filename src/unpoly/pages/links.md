@@ -45,7 +45,7 @@ or when JavaScript is unavailable, the browser makes a regular full page load.
 Following is navigation
 -----------------------
 
-Following a link counts as [navigation](/navigation).
+Following a link counts as [navigation](/navigation-defaults).
 When a link updates the layer's main element, Unpoly behaves like a full page load would:
 the browser URL and history are updated, and the new content is scrolled into view.
 Each of these defaults can be customized.

@@ -40,7 +40,7 @@ differs from browser APIs like `document.querySelector()`:
 
 For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
-@learn-ref navigation
+@learn-ref navigation-defaults
 @learn-ref providing-html
 @learn-ref preserving-elements
 @learn-ref templates
@@ -84,7 +84,7 @@ up.fragment = (function() {
       When no explicit target is given, Unpoly will update the first selector matching both
       the current page and the server response.
 
-      When [navigating](/navigation) to a main target, Unpoly will automatically
+      When [navigating](/navigation-defaults) to a main target, Unpoly will automatically
       [reset scroll positions](/scrolling#auto) and
       [update the browser history](/updating-history).
 
@@ -128,14 +128,14 @@ up.fragment = (function() {
   @section Render options
 
     @param {Object} [config.navigateOptions]
-      An object of default render options to apply when [navigating](/navigation).
+      An object of default render options to apply when [navigating](/navigation-defaults).
 
       To set defaults for *all* render passes (when navigating or not), use `up.fragment.config.renderOptions`.
 
     @param {Object} [config.renderOptions]
       An object of low-level render options to apply to *any* render pass.
 
-      When [navigating](/navigation), the defaults from `up.fragment.config.navigateOptions` will also be applied.
+      When [navigating](/navigation-defaults), the defaults from `up.fragment.config.navigateOptions` will also be applied.
 
       > [!important]
       > By design only a minimal set of options is configured. This is to spare callers from excessive unsetting
@@ -666,10 +666,10 @@ up.fragment = (function() {
   })
 
   /*-
-  [Navigates](/navigation) to the given URL by updating a major fragment in the current page.
+  [Navigates](/navigation-defaults) to the given URL by updating a major fragment in the current page.
 
   `up.navigate()` will mimic a click on a vanilla `<a href>` link to satisfy user expectations
-  regarding scrolling, focus, request cancellation and [many other side effects](/navigation).
+  regarding scrolling, focus, request cancellation and [many other side effects](/navigation-defaults).
   To update a fragment without side effects, use `up.render()`.
 
   Instead of calling `up.navigate()` you may also call `up.render({ navigate: true })`.
@@ -1778,7 +1778,7 @@ up.fragment = (function() {
   /*-
   Replaces the given element with a fresh copy fetched from the server.
 
-  By default, reloading is **not** considered a [user navigation](/navigation) and will not scroll, focus
+  By default, reloading is **not** considered a [user navigation](/navigation-defaults) and will not scroll, focus
   or update the browser location. You may change this with `{ navigate: true }`.
 
   ## Example
@@ -1838,7 +1838,7 @@ up.fragment = (function() {
       Defaults can be configured in `up.fragment.config.reloadOptions` and `up.fragment.config.renderOptions`.
 
     @param {boolean} [options.navigate=false]
-      Whether the reloading constitutes a [user navigation](/navigation).
+      Whether the reloading constitutes a [user navigation](/navigation-defaults).
 
   @section Request
     @mix up.render/request
@@ -1946,7 +1946,7 @@ up.fragment = (function() {
       Most [options for `up.render()`](/up.render#parameters) may be used.
 
     @param {boolean} [options.navigate=true]
-      Whether to apply [navigation defaults](/navigation), such as scrolling and updating history.
+      Whether to apply [navigation defaults](/navigation-defaults), such as scrolling and updating history.
 
   @return
     @like up.render

@@ -87,12 +87,12 @@ You can still make exceptions by setting an `[up-follow=false]` attribute:
 ## Customizing navigation defaults
 
 [Following a link](/up-follow) or [submitting a form](/submitting-forms) is considered
-[navigation](/navigation) by default.
+[navigation](/navigation-defaults) by default.
 
 When navigating, Unpoly uses defaults to satisfy the user's expectations regarding
 scrolling, history, focus, request cancellation, etc.
 
-See [[navigation]] for a detailed breakdown of navigation defaults
+See [[navigation-defaults]] for a detailed breakdown of navigation defaults
 and how to customize them.
 
 

@@ -10,7 +10,7 @@ Enabling caching {#enabling}
 ----------------
 
 Caching is controlled by the [`{ cache }`](/up.render#options.cache) render option or an `[up-cache]` attribute.
-When [navigating](/navigation), the `{ cache: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions).
+When [navigating](/navigation-defaults), the `{ cache: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions).
 It caches all responses to `GET` requests, so following a link or submitting a `GET` form fills the cache without any setup.
 
 A render pass that does not navigate, like a plain `up.render()` call, only caches when you ask for it:
@@ -68,7 +68,7 @@ By supporting [conditional requests](/conditional-requests), it can answer a rev
 ### Controlling revalidation {#controlling-revalidation}
 
 Revalidation is controlled by the [`{ revalidate }`](/up.render#options.revalidate) render option or an `[up-revalidate]` attribute.
-When [navigating](/navigation), `{ revalidate: 'auto' }` is the default. It revalidates only [expired](#expiration) cache entries.
+When [navigating](/navigation-defaults), `{ revalidate: 'auto' }` is the default. It revalidates only [expired](#expiration) cache entries.
 You can configure both the expiry age and the rule:
 
 ```js
@@ -83,7 +83,7 @@ When not navigating, pass `{ revalidate: 'auto' }` or set an `[up-revalidate="au
 
 ### Disabling revalidation {#disabling-revalidation}
 
-[Navigation](/navigation) is the only moment when Unpoly revalidates by default.
+[Navigation](/navigation-defaults) is the only moment when Unpoly revalidates by default.
 To disable revalidation while navigating:
 
 ```js
@@ -152,7 +152,7 @@ unless there is an existing cache entry that can be updated with a fresher respo
 
 ### Disabling the cache globally {#disabling-globally}
 
-[Navigation](/navigation) is the only moment when Unpoly caches by default.
+[Navigation](/navigation-defaults) is the only moment when Unpoly caches by default.
 
 You can disable caching globally like so:
 

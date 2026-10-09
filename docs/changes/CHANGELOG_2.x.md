@@ -165,8 +165,8 @@ Users of the [unpoly-rails](https://github.com/unpoly/unpoly-rails) gem can inse
 ### New options for existing features
 
 - `[up-follow]` links may now pass the fragment's new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML) using an `[up-content]` attribute. To pass the outer HTML, use the `[up-fragment]` attribute.
-- New option `{ solo }` for `up.render()` and `up.request()` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation).
-- New attribute `[up-solo]` for `[up-follow]` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation).
+- New option `{ solo }` for `up.render()` and `up.request()` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation-defaults).
+- New attribute `[up-solo]` for `[up-follow]` lets you quickly abort all previous requests before making the new request. This is a default [navigation option](/navigation-defaults).
 - The `{ clearCache }` option for `up.render()` and `up.request()` now accepts a boolean value, a [URL pattern](/url-patterns) or a function.
 
 

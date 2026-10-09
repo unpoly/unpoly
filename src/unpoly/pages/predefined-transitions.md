@@ -32,7 +32,7 @@ From JavaScript, pass a `{ transition }` option to `up.render()` or any function
 up.render({ target: '#story', url: '/stories/2', transition: 'move-left' }) // mark: transition
 ```
 
-To use a transition for every [navigation](/navigation), set a default in `up.fragment.config.navigateOptions`:
+To use a transition for every [navigation](/navigation-defaults), set a default in `up.fragment.config.navigateOptions`:
 
 ```js
 up.fragment.config.navigateOptions.transition = 'cross-fade'

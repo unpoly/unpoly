@@ -229,7 +229,7 @@ up.history = (function() {
 
   There may be several reasons why the browser location was changed:
 
-  - A fragment update changes history through [navigation](/navigation) or rendering with `{ history: true }`.
+  - A fragment update changes history through [navigation](/navigation-defaults) or rendering with `{ history: true }`.
   - The user uses the back or forward buttons in their browser UI.
   - Programmatic calls to functions like `up.history.push()` or `history.pushState()`.
   - The user navigates to a different `#hash` within the page.
@@ -276,7 +276,7 @@ up.history = (function() {
     @param {boolean} event.alreadyHandled
       Whether Unpoly thinks this change has already been handled and requires no additional processing.
 
-      For example, updating history by [navigating](/navigation) or calling `history.pushState()` is
+      For example, updating history by [navigating](/navigation-defaults) or calling `history.pushState()` is
       considered to be already handled.
 
       @experimental
@@ -382,7 +382,7 @@ up.history = (function() {
   Does not add a history entry if the given URL is already the current browser location.
   If the URL did change, an `up:location:changed` event is emitted.
 
-  When [navigating](/navigation) (or rendering with [`{ history: true }`](/up.render#options.history)),
+  When [navigating](/navigation-defaults) (or rendering with [`{ history: true }`](/up.render#options.history)),
   Unpoly will update the browser location for you. You only need to call `up.history.push()` to push
   a new entry without rendering.
 

@@ -55,12 +55,12 @@ a target selector can express.
 Navigation defaults
 -------------------
 
-Following a link is considered [navigation](/navigation) by default.
+Following a link is considered [navigation](/navigation-defaults) by default.
 When a link updates the layer's main element, Unpoly behaves like a full page load would:
 the browser URL and history are updated, and the new content is scrolled into view.
 Focus moves to the new fragment.
 
-See [[navigation]] for all navigation defaults and how to customize them.
+See [[navigation-defaults]] for all navigation defaults and how to customize them.
 
 
 Acting on press {#instant}

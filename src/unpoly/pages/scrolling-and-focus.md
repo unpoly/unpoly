@@ -31,7 +31,7 @@ so the user is not dropped at the `<body>`.
 
 Both behaviors are controlled by the `[up-scroll]` and `[up-focus]` attributes
 (or the `{ scroll }` and `{ focus }` options in JavaScript).
-Their default value `auto` is the sequence above. It applies whenever a link or form [navigates](/navigation).
+Their default value `auto` is the sequence above. It applies whenever a link or form [navigates](/navigation-defaults).
 Low-level calls like `up.render()` do not scroll or focus unless told to.
 
 Scrolling an element into view is called *revealing* it.

@@ -69,13 +69,13 @@ Submitting this form makes a full page load, as if Unpoly had not been loaded.
 ## Customizing navigation defaults
 
 [Submitting a form](/up-submit) or [following a link](/following-links) is considered
-[navigation](/navigation) by default.
+[navigation](/navigation-defaults) by default.
 
 When navigating, Unpoly uses defaults to satisfy the user's expectations regarding
 scrolling, history, focus, request cancellation, etc.
 
 See [navigation defaults](/submitting-forms#navigation-defaults) for how a submission behaves,
-and [[navigation]] for a detailed breakdown of all defaults and how to customize them.
+and [[navigation-defaults]] for a detailed breakdown of all defaults and how to customize them.
 
 
 ## Fixing legacy JavaScript code

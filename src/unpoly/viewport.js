@@ -529,7 +529,7 @@ up.viewport = (function() {
   at the same URL, or by following a link with an [`[up-scroll="restore"]`](/scrolling#restore)
   attribute.
 
-  Unpoly automatically saves scroll positions before [navigating](/navigation).
+  Unpoly automatically saves scroll positions before [navigating](/navigation-defaults).
 
   @function up.viewport.saveScroll
   @param {Element|Array<Element>} [viewport]
@@ -635,7 +635,7 @@ up.viewport = (function() {
   at the same location, or by following a link with an [`[up-focus="restore"]`](/focus#restore)
   attribute to that same location.
 
-  Unpoly automatically saves focus-related state before [navigating](/navigation).
+  Unpoly automatically saves focus-related state before [navigating](/navigation-defaults).
 
   @function up.viewport.saveFocus
   @param {Element|Array<Element>} [viewport]

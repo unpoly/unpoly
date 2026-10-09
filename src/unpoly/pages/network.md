@@ -36,7 +36,7 @@ and one set of [events](/up.network).
 Instant revisits from the cache
 -------------------------------
 
-When [navigating](/navigation), responses to `GET` requests are cached. When the user returns
+When [navigating](/navigation-defaults), responses to `GET` requests are cached. When the user returns
 to a page they already saw this session, the fragment renders from the cache,
 without waiting for the network:
 

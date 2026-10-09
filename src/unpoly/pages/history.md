@@ -40,7 +40,7 @@ and the parent page's URL returns when the overlay closes. This is covered in [[
 History is a navigation default
 -------------------------------
 
-Updating history is one of the [navigation defaults](/navigation) that links and forms get out of the box.
+Updating history is one of the [navigation defaults](/navigation-defaults) that links and forms get out of the box.
 The low-level `up.render()` function only changes history when you pass a `{ history }` option.
 
 Only a `GET` response can change history, since only `GET` URLs can be reloaded.

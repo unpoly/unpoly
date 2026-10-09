@@ -10,7 +10,7 @@ Updates to minor fragments leave history untouched.
 When history is updated {#when-history-is-changed}
 -----------------------
 
-Following a link or submitting a form counts as [navigation](/navigation).
+Following a link or submitting a form counts as [navigation](/navigation-defaults).
 When navigation updates the layer's [main element](/main), Unpoly adds a history entry for the new URL:
 
 ```html
@@ -110,7 +110,7 @@ up.render({ target: '.content', url: '/path', history: true })   // Always updat
 up.render({ target: '.content', url: '/path', history: 'auto' }) // Update if a main element is rendered
 ```
 
-To render with all [navigation defaults](/navigation#navigation-defaults), including `{ history: 'auto' }`,
+To render with all [navigation defaults](/navigation-defaults#navigation-defaults), including `{ history: 'auto' }`,
 use `up.navigate()` instead of `up.render()`.
 
 
