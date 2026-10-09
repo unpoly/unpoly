@@ -1,10 +1,9 @@
 Custom form fields
 ==================
 
-Sometimes a native `<input>` or `<select>` cannot express the control your design needs: a
-date picker, a tag editor, a rich text area, a set of clickable pills.
-
-This page shows four ways to build one, and what each costs. They differ in how the value
+A custom control like a date picker, a tag editor or a set of clickable pills can take part
+in Unpoly's form features the same way a native `<input>` or `<select>` does.
+There are four ways to build one. They differ in how the value
 reaches the server, and in how much Unpoly needs to know about your control.
 
 | Pattern | Submitted | Watched, validated, switched, disabled |
@@ -51,7 +50,7 @@ Because a real form field carries the value, everything works with no further
 configuration: the field is submitted, [watched](/up.watch), [validated](/validation),
 [switched](/switching-form-state) and [disabled](/disabling-forms) like any other.
 
-The one thing to remember is the `change` event. Setting `select.value` from a script does
+Don't forget the `change` event. Setting `select.value` from a script does
 not emit one, so nothing would notice the new value.
 
 
@@ -111,13 +110,13 @@ field, however it takes part in a submission.
 | `disabled` | the property, else the `[disabled]` attribute | whichever one you have | nothing |
 
 **A `value` getter is the one thing to remember.** The browser reads your value through
-`setFormValue()`, which a script cannot read back — so without a getter your element is
+`setFormValue()`, which a script cannot read back. Without a getter your element is
 submitted correctly but never watched.
 
 The other two need nothing from you, because of how component authoring actually works. Authors
 declare properties that are fed *from* attributes and rarely reflect them back, so the property
 holds the live value wherever one exists. A hand-rolled form-associated element declares nothing
-at all, and there the attribute is guaranteed — the browser reads it to name and disable your
+at all, and there the attribute is guaranteed, because the browser reads it to name and disable your
 element. So Unpoly prefers the property and falls back to the attribute.
 
 Both fall back on *absence*, not falseness. A native field reports `name === ''` and
@@ -129,7 +128,7 @@ property you never declared would create it, and it would shadow your attribute 
 
 The same rule cuts the other way when re-enabling. If your element declares an unreflected
 `disabled` property and its markup also carries `[disabled]`, Unpoly writes only the property
-and leaves the attribute alone — it never removes an attribute it did not set. Your element will
+and leaves the attribute alone. It never removes an attribute it did not set. Your element will
 report itself enabled while any CSS keyed on `[disabled]` still applies, so reflect the property
 if you style from the attribute.
 
