@@ -43,3 +43,14 @@
 - Section order (field-type sections): keep. Client vs. server line: clear. Custom effects: distinct, keep.
 - #reacting-to-different-events: leave the topic to [[watch-options]]. Shrink to one or two sentences (default is the `input` event; other events and debouncing via [[watch-options]]), keep the anchor.
 - After "A hidden element gets a `[hidden]` attribute." add that fields inside it are still submitted with the form. Draft: "Fields inside a hidden element are still submitted with the form. To exclude them from the submission, [disable](#disable) them instead." (Verified: up.Params excludes only disabled fields, params.js:594.)
+
+## /disabling-forms
+- Title stays "Disabling forms while working" (page and menu). Nothing to do: the sidebar already uses the page title (my "menu says Disabling forms" pointer was wrong).
+- Duplicates with watch-options#disabling, previews, reactive-server-forms: accepted.
+- #from-link: explained well enough ("prevents unwanted user input in the form while the link is navigating away").
+- #focus-preservation: make it clearer that disabling a field takes away existing focus, not only that it can't receive focus. Draft opening: "A disabled field cannot have focus. When a focused field becomes disabled, the browser takes focus away from it." Then Unpoly's group/form fallback and the restore.
+
+## /submitting-forms (follow-up from /disabling-forms)
+- #loading ("Showing that the form is processing"): reduce to a teaser of disabling + the other loading state methods, no single-method example. Draft:
+  > While the form is submitting, you can show the user that it is processing: [disable](/disabling-forms) its fields and buttons, style it with [feedback classes](/feedback-classes), show a [placeholder](/placeholders) or run a [preview](/previews). See [[loading-state]] for an overview.
+  Keep the #loading anchor.
