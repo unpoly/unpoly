@@ -3540,7 +3540,7 @@ In our ongoing efforts to evolve Unpoly's documentation from an API reference to
 - [Handling network issues](/network-issues)
 - [Conditional requests](/conditional-requests)
 - [Progress bar](/progress-bar)
-- [Tracking page views](/analytics)
+- [Tracking page views](/tracking-page-views)
 - [Updating history](/updating-history)
 - [Restoring history](/restoring-history)
 - [Predefined animations](/predefined-animations)

@@ -90,7 +90,7 @@ learn:
         - history
         - updating-history
         - restoring-history
-        - analytics
+        - tracking-page-views
 
     - type: page-group
       title: Scrolling & focus

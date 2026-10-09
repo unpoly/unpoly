@@ -81,7 +81,7 @@ up.on('up:location:changed', function(event) {
 The event is emitted after every change of the address bar, whether from a followed link,
 a redirecting form submission or the Back button.
 
-<p class="read-more"><a href="/analytics">Read more: Tracking page views</a></p>
+<p class="read-more"><a href="/tracking-page-views">Read more: Tracking page views</a></p>
 
 
 @page history

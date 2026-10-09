@@ -145,4 +145,4 @@ If this tracks too many events, filter further on the properties of [`event.requ
 such as its `{ target }` or `{ layer }`.
 
 
-@page analytics
+@page tracking-page-views

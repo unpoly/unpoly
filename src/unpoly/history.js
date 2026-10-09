@@ -11,7 +11,7 @@ The `up.history` module helps you work with the browser history.
 @learn-ref updating-history
 @learn-ref restoring-history
 @learn-ref history-in-overlays
-@learn-ref analytics
+@learn-ref tracking-page-views
 
 @module up.history
 */

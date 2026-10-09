@@ -130,7 +130,7 @@ Compilers with side effects may occasionally want to behave differently when the
 reloaded for the purpose of cache revalidation.
 
 To detect revalidation, compilers may accept a third argument with information about the current [render pass](/up.render).
-In the example below a compiler wants to [track a page view](/analytics) in a web analytics tool:
+In the example below a compiler wants to [track a page view](/tracking-page-views) in a web analytics tool:
 
 ```js
 up.compiler('[track-page-view]', function(element, data, meta) { // mark: meta

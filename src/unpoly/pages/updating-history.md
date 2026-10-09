@@ -233,7 +233,7 @@ up.on('up:location:changed', function(event) {
 
 The event has a `{ reason }` property that tells whether an entry was pushed or replaced,
 whether the user went back, or whether only the `#hash` changed.
-See [[analytics]] for using this event to track page views.
+See [[tracking-page-views]] for using this event to track page views.
 
 
 @page updating-history
