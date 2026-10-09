@@ -80,8 +80,8 @@ and any error messages:
 ```html
 <fieldset id="department-group" up-keep="same-html"> <!-- mark: up-keep="same-html" -->
   <label for="department">Department</label>
-  <select id="department" name="department" value="IT">
-    <option>IT</option>
+  <select id="department" name="department">
+    <option selected>IT</option>
     <option>Sales</option>
     <option>Production</option>
     <option>Accounting</option>

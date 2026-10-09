@@ -60,8 +60,8 @@ to the origin, so a link inside the second card updates the second card.
 Navigation defaults
 -------------------
 
-Following a link or submitting a form counts as *navigation*. Unpoly then behaves
-like a full page load would: the URL and history are updated, the page scrolls to the top,
+Following a link or submitting a form counts as *navigation*. When a navigation swaps
+the main content, Unpoly behaves like a full page load would: the URL and history are updated, the page scrolls to the top,
 focus moves to the new fragment, and the response is cached. A plain `up.render()` call
 only updates the fragment, with none of these side effects.
 
