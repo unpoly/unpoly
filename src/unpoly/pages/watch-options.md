@@ -1,41 +1,50 @@
 Watch options
 =============
 
-When watching a form for changes, you can configure how to observe events
-and process callbacks.
+Every feature that watches form fields for changes shares the same options:
+which events to observe, how long to wait before reacting, and what to show
+while a change is being processed. You set them as `[up-watch-...]` attributes
+in HTML, or pass them as options from JavaScript.
 
-The options shown below apply to all features that watch form fields:
+The options on this page apply to all of these features:
 
-| HTML              | JavaScript        | Purpose                              |
-|-------------------|-------------------|--------------------------------------|
-| `[up-watch]`      | `up.watch()`      | Run a callback after change          |
-| `[up-validate]`   | `up.validate()`   | Render a new form state after change |
-| `[up-autosubmit]` | `up.autosubmit()` | Submit a form after change           |
-
+| HTML              | JavaScript        | Purpose                                     |
+|-------------------|-------------------|---------------------------------------------|
+| `[up-watch]`      | `up.watch()`      | Run a callback after a change               |
+| `[up-validate]`   | `up.validate()`   | Render a new form state after a change      |
+| `[up-autosubmit]` | `up.autosubmit()` | Submit a form after a change                |
+| `[up-switch]`     |                   | Switch other elements after a change        |
 
 
 Which events to watch {#events}
 ---------------------
 
-Most features watch the `input` event by default. Only [validation](/up-validate) watches the `change` event by default.
+Most features watch the `input` event by default, so they react while the user is typing.
+Only [validation](/up-validate) watches the `change` event by default, which fires when
+the user is done editing and leaves the field.
 
-You may control which events are observed by setting an `[up-watch-event]` attribute or passing
-an `{ event }` option:
+You can control which events are observed by setting an `[up-watch-event]` attribute:
 
 ```html
 <form action="/search">
-  <input name="query" up-autosubmit up-watch-event="change">
+  <input name="query" up-autosubmit up-watch-event="change"> <!-- mark: up-watch-event="change" -->
 </form>
 ```
 
+From JavaScript you can pass an `{ event }` option instead:
+
+```js
+up.autosubmit(field, { event: 'change' })
+```
+
 Multiple events can be passed as a comma-separated string or as an array.
-It's OK to name multiple events that may result in the same field (e.g. `keydown keyup change`).
+It's OK to name multiple events that may result from the same change (e.g. `keydown keyup change`).
 Unpoly guarantees the callback is run only once per unique changed value.
 
-### Normalizing non-standard events
+### Normalizing non-standard events {#normalizing-non-standard-events}
 
 Sometimes fields emit non-standard events instead of `change` and `input`.
-You may configure Unpoly to normalize field events so they become
+You can configure Unpoly to normalize field events so they become
 observable as `change` or `input`.
 
 For example, if a custom select component emits a `myselect:chosen` event on selection:
@@ -52,14 +61,13 @@ to make it observable with `[up-watch-event="input"]`.
 Instead of configuring an array of event types, you may also set a function that accepts
 a form field and returns an array of event types to watch for that field.
 
-For example,
-on Desktop browsers date pickers inconveniently emit a `change` event when any date *component*
-changes, causing multiple events as the user picks a date, month and year. In this case
-we can configure the watched event to `blur` like this:
+For example, on desktop browsers date pickers inconveniently emit a `change` event when any date *component*
+changes, causing multiple events as the user picks a day, month and year. In this case
+we can watch `blur` instead of `change` for such fields:
 
 ```js
-up.form.config.watchChangeEvents = function(field) { 
-  if (field.matches('input[type=date]') && isDesktop()) {
+up.form.config.watchChangeEvents = function(field) {
+  if (field.matches('input[type=date]') && isDesktop()) { // isDesktop() is your own check
     return ['blur']
   } else {
     return ['change']
@@ -81,41 +89,41 @@ typing before running a callback. You can do so by setting an `[up-watch-delay]`
 </form>
 ```
 
+From JavaScript you can pass a `{ delay }` option instead.
+
 For watchers of `input` the default delay is `up.form.config.watchInputDelay` (which defaults to `0`).
 For watchers of other events there is no default delay.
 
 If the field's form is [aborted](/aborting-requests) or destroyed while waiting for a delay,
 the callback is unscheduled.
 
-> [INFO]
-> Regardless of the delay, Unpoly will guarantee that only one async callback is running concurrently.
+> [info]
+> Regardless of the delay, Unpoly guarantees that only one async callback is running concurrently.
 > If the form is changed while an async callback is still processing,
-> Unpoly will wait until the callback concludes and then re-run it with the latest field values.
-
+> Unpoly waits until the callback concludes and then re-runs it with the latest field values.
 
 
 Disabling fields while working {#disabling}
 ------------------------------
 
-To prevent user input while processing changes, you may [disable form fields](/disabling-forms)
+To prevent user input while processing changes, you can [disable form fields](/disabling-forms)
 while an async callback is running.
 
 For this set an `[up-watch-disable]` attribute on the form or field being watched:
 
 ```html
 <form action="/search">
-  <!-- Wait until the user has stopped typing for 100 milliseconds -->
   <input name="query" up-autosubmit up-watch-disable> <!-- mark: up-watch-disable -->
 </form>
 ```
 
-By default, setting `[up-watch-disable]` will cause all fields in a form to be disabled while processing.
+By default, setting `[up-watch-disable]` will cause all fields in the form to be disabled while processing.
 To [only disable some form controls](/disabling-forms#disabling-some-controls-only),
 set the value of `[up-watch-disable]` to any selector that matches fields or buttons.
 
 From JavaScript you can pass a `{ disable }` option instead.
 
-> [TIP]
+> [tip]
 > To disable fields while *submitting* (instead of while watching), use [`[up-disable]`](/disabling-forms) instead.
 
 
@@ -143,6 +151,10 @@ To show a [placeholder](/placeholders) while working, use an `[up-watch-placehol
 
 From JavaScript you can pass a `{ preview }` or `{ placeholder }` option instead.
 
+While a validation or autosubmit request is loading, [feedback classes](/feedback-classes)
+like `.up-active` and `.up-loading` are set by default.
+To not set them, use an `[up-watch-feedback="false"]` attribute or pass a `{ feedback: false }` option.
+
 
 Setting options for multiple fields {#multiple-fields}
 ----------------------------------
@@ -154,11 +166,12 @@ By setting attributes on the `<form>` you can configure defaults for *all* watch
 
 ```html
 <form action="/search" up-watch-disable> <!-- mark: up-watch-disable -->
+  <input name="department" up-autosubmit>
   <input name="query" up-autosubmit>
 </form>
 ```
 
-Form-wide options can be overridden at the input level:
+Form-wide options can be overridden at the field level:
 
 ```html
 <form action="/search" up-watch-disable> <!-- mark: up-watch-disable -->
@@ -172,12 +185,18 @@ This is particularly useful for [watching a group of radio buttons](/up-watch#wa
 
 ```html
 <form action="/search">
-  <fieldset up-autosubmit up-watch-disable>
+  <fieldset up-autosubmit up-watch-disable> <!-- mark: up-watch-disable -->
     <input type="radio" name="format" value="html"> HTML format
     <input type="radio" name="format" value="pdf"> PDF format
     <input type="radio" name="format" value="txt"> Text format
   </fieldset>
 </form>
+```
+
+Options passed from JavaScript override all attributes:
+
+```js
+up.validate(field, { disable: true })
 ```
 
 
