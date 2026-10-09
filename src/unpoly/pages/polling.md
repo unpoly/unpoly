@@ -72,7 +72,7 @@ The element below is polled with the selector `#score`:
 </div>
 ```
 
-When you see an error `Cannot poll untargetable fragment`, Unpoly could not derive a
+When you see a warning `Cannot poll untargetable fragment`, Unpoly could not derive a
 selector that identifies the element. Give the element a unique `[id]` or `[up-id]` attribute.
 
 
@@ -146,7 +146,7 @@ it tries again after the configured interval.
 
 ## Saving bandwidth when nothing changed {#detecting-unchanged-content}
 
-Most polling requests find that nothing has changed. The server can skip rendering
+Many polling requests find that nothing has changed. The server can skip rendering
 in that case and answer with an empty response, which costs about 1 KB (one packet)
 and no CPU time for rendering.
 

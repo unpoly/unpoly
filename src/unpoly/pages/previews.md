@@ -1,7 +1,7 @@
 Previews
 ========
 
-Previews are temporary page changes while waiting for a network request.
+Previews are temporary page changes shown while waiting for a network request.
 They signal that the app is working, or hint at how the page will ultimately look.
 When the request ends, Unpoly reverts the changes before rendering the response.
 
@@ -79,7 +79,6 @@ The `up.Preview` object provides getters to learn more about the current render 
 ```js
 up.preview('my-preview', function(preview) {
   preview.origin         // The link or form that caused the request
-  preview.target         // The target selector
   preview.fragment       // The fragment being updated
   preview.layer          // The layer being updated
   preview.request        // The request we're waiting for

@@ -169,7 +169,7 @@ appends the next page to the list, then replaces itself with a link to the page 
 
 Unpoly caches [responses to `GET` requests](/caching) on the client.
 When deferred content is already cached, it is rendered synchronously and the
-`[up-defer]` placeholder never appears in the DOM.
+`[up-defer]` placeholder is replaced before the browser paints it.
 
 This means Unpoly caches complete pages, including their lazy-loaded fragments.
 Navigating back to such a page renders it instantly, without a flash of [fallback state](#pending).
