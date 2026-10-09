@@ -1,115 +1,125 @@
 Loading state
 =============
 
-Show placeholders, previews and optimistic UI while the server responds.
-
-This is an overview of all available strategies to signal that the app is working,
-or to provide clues for how the page will ultimately look. Techniques can be applied
-to both [link clicks](/up.link) and [form submissions](/submitting-forms).
+While Unpoly waits for the server, it can show loading state: a highlighted button,
+a dimmed fragment, a spinner, a skeleton screen or even the expected result.
+Every effect appears instantly after the user's interaction and is reverted when the request ends.
 
 
 Styling loading elements
 ------------------------
 
-Unpoly adds CSS classes to interactive elements that are loading content,
-and to the fragments they are targeting:
+When the user clicks a link or submits a form, Unpoly adds an `.up-active` class to that element,
+and an `.up-loading` class to the fragment it is targeting:
 
 ```html
-<a href="/bar" up-target="#target" class="up-active">Bar</a> <!-- mark: class="up-active" -->
+<a href="/stories/5" up-target="#story" class="up-active">Read story</a> <!-- mark: class="up-active" -->
 
-<div id="target" class="up-loading"> <!-- mark: class="up-loading" -->
-  Initial content
+<div id="story" class="up-loading"> <!-- mark: class="up-loading" -->
+  Old content
 </div>
 ```
 
-See [Feedback classes](/feedback-classes) for details and examples.
+Style these classes in your CSS to show that the app is working:
+
+```css
+.up-active {
+  outline: 2px solid blue;
+}
+
+.up-loading {
+  opacity: 0.6;
+}
+```
+
+Both classes are removed when the response arrives.
+To also disable a form's fields and buttons while it submits, see [[disabling-forms]].
+
+<p class="read-more"><a href="/feedback-classes">Read more: Feedback classes</a></p>
 
 
 Showing placeholders
 --------------------
 
-Placeholders are temporary spinners or UI skeletons shown while a fragment is loading:
+A placeholder is a spinner or UI skeleton shown within the targeted fragment while it is loading.
+Set the placeholder's HTML as an `[up-placeholder]` attribute:
 
 ```html
-<a href="/path" up-target="#target" up-placeholder="Loading…">Show story</a> <!-- mark: Loading… -->
+<a href="/stories/5" up-target="#story" up-placeholder="<p>Loading…</p>">Read story</a> <!-- mark: up-placeholder="<p>Loading…</p>" -->
+```
 
-<div id="#target">
-  Loading… <!-- mark: Loading… -->
+While the request is loading, the existing content of `#story` is hidden
+and the placeholder is shown in its place:
+
+```html
+<div id="story">
+  <p>Loading…</p> <!-- mark-line -->
+  <up-wrapper hidden>Old content</up-wrapper>
 </div>
 ```
 
-See [Placeholders](/placeholders) for details and examples.
+Placeholders can also be cloned from a [template](/templates),
+so you can reuse the same skeleton for many links.
+
+<p class="read-more"><a href="/placeholders">Read more: Placeholders</a></p>
 
 
-Arbitrary status effects
-------------------------
+Previews: arbitrary temporary changes
+-------------------------------------
 
-Using previews you can make arbitrary page changes while waiting for a network request.
+Feedback classes and placeholders are *previews*: temporary page changes that Unpoly
+applies when a request starts, and reverts when the request ends.
+You can define your own preview with `up.preview()`:
 
 ```js
 up.preview('link-spinner', function(preview) {
-  let link = preview.origin
-  preview.insert(link, '<img src="spinner.gif">')
+  preview.insert(preview.origin, '<img src="spinner.gif">')
 })
 ```
 
-When the request ends for any reason, all preview changes will be reverted before
-the server response is processed. This ensures a consistent screen state in cases when
-a request is aborted, or when we end up updating a different fragment.
+Links and forms refer to a preview by its name:
 
-See [Previews](/previews) for details and examples.
+```html
+<a href="/stories/5" up-follow up-preview="link-spinner">Read story</a> <!-- mark: up-preview="link-spinner" -->
+```
+
+When the user clicks, the spinner is appended to the link. When the request ends,
+the spinner is removed. This holds for any outcome: when the server responds with an error,
+when the request is aborted, or when the server ends up updating a different fragment.
+The page is always restored to a consistent state before the response is rendered.
+
+<p class="read-more"><a href="/previews">Read more: Previews</a></p>
 
 
 Optimistic rendering
 --------------------
 
-Optimistic rendering is an advanced pattern where we update the page
-without waiting for the server. When the server eventually does respond, the optimistic change
-is reverted and replaced by the server-confirmed content.
-
-See [Optimistic rendering](/previews) for details and examples.
-
-
-Disabling forms while working
-------------------------------
-
-Unpoly lets you disable fields and buttons while a form is submitting:
-
-```html
-<form up-submit up-disable action="/session"> <!-- mark: up-disable -->
-  <input type="text" name="email">        <!-- will be disabled -->
-  <input type="password" name="password"> <!-- will be disabled -->
-  <button type="submit">Sign in</button>  <!-- will be disabled -->
-</form>
-```
-
-See [Disabling forms while working](/disabling-forms) for details and examples.
-
-
-Global progress bar
--------------------
-
-When requests are taking long to load, Unpoly will show a thin progress bar at the top edge of the screen:
-
-![Progress bar animation](images/progress-bar.gif)
-
-This mimics similar loading indicators by browsers, which only appear during full page loads.
-
-See [Progress bar](/progress-bar) for details and examples.
-
-
-Signaling severe network problems
----------------------------------
-
-Unpoly provides events to handle network issues like disconnects or flaky connections:
+A preview can go beyond signaling and show the expected result before the server confirms it.
+This is called *optimistic rendering*. For example, a preview can read the submitted
+form data from `preview.params` and append a new item to a list:
 
 ```js
-up.on('up:fragment:offline', function(event) { // mark: up:fragment:offline
-  if (confirm('You are offline. Retry?')) event.retry()
+up.preview('add-task', function(preview) {
+  let text = preview.params.get('text') // mark: preview.params
+  let task = `<div class="task">${up.util.escapeHTML(text)}</div>`
+  preview.insert('#tasks', task)
 })
 ```
 
-See [Handling network issues](/network-issues) for details and examples.
+The item appears instantly. When the server responds, the optimistic change is reverted
+and replaced by the server-rendered list.
+
+<p class="read-more"><a href="/optimistic-rendering">Read more: Optimistic rendering</a></p>
+
+
+Also in this topic
+------------------
+
+When a request takes longer than 400 ms, Unpoly shows a thin progress bar at the top of the screen.
+To style, disable or replace it, see [[progress-bar]].
+
+Loading state ends when the request ends. Requests that fail because the user is offline
+are handled in [[network-issues]].
 
 
 @page loading-state
