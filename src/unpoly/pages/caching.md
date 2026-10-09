@@ -48,7 +48,7 @@ When re-visiting pages, Unpoly often renders twice:
 
 The user sees the cached version instantly and the fresh version a moment later. This has some benefits:
 
-- The user always ends up with fresh content. If another user has added an item to a list we have cached, we see that new item after revalidation.
+- The user always ends up with fresh content. If another user has added an item to a cached list, the user sees that new item after revalidation.
 - Cache entries can be kept for a long time, allowing instant navigation for 90 minutes, even when offline or on a flaky connection.
 - Nothing needs to clear the cache after a form submission. Cache entries are only marked as expired.
 
@@ -226,8 +226,8 @@ Reacting to revalidation in code {#reacting-to-revalidation}
 
 ### Preventing rendering of revalidation responses
 
-To discard revalidated HTML *after* the server has responded, you may prevent the
-`up:fragment:loaded` event when it has an `{ revalidating: true }` property.
+To discard revalidated HTML *after* the server has responded, you may call `event.skip()`
+on an `up:fragment:loaded` event with a `{ revalidating: true }` property.
 This gives you a chance to inspect the response or DOM state right before a fragment would be inserted:
 
 ```js

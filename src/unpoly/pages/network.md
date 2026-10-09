@@ -49,8 +49,8 @@ Following this link the first time fills the cache. Following it again renders i
 A cache entry is only considered fresh for 15 seconds. When Unpoly renders older content,
 it reloads the fragment from the server right after. This is called *revalidation*:
 the user sees the cached version immediately and the fresh version a moment later.
-When a form is submitted, the entire cache is expired, since the submission has probably
-changed data on the server.
+When a form is submitted with a method like `POST`, the entire cache is expired,
+since the submission has probably changed data on the server.
 
 <p class="read-more"><a href="/caching">Read more: Caching</a></p>
 
