@@ -144,8 +144,8 @@ When a focused field is disabled by `[up-disable]` or `{ disable }`, it loses fo
 focuses the closest [form group](/up-form-group) around the field. If the field is not within a form group,
 the containing `<form>` is focused.
 
-When the render pass ends, Unpoly restores focus, selection range and scroll position of any element that lost focus through disabling.
-When the user focuses something else during the render pass, no focus-related state is restored after rendering.
+When the request ends, Unpoly restores focus, selection range and scroll position of any element that lost focus through disabling.
+When the user focuses something else while the request is loading, no focus-related state is restored.
 
 
 @page disabling-forms

@@ -113,7 +113,7 @@ field, however it takes part in a submission.
 `setFormValue()`, which a script cannot read back. Without a getter your element is
 submitted correctly but never watched.
 
-The other two need nothing from you, because of how component authoring actually works. Authors
+The other two need nothing from you, because of how component authoring works. Authors
 declare properties that are fed *from* attributes and rarely reflect them back, so the property
 holds the live value wherever one exists. A hand-rolled form-associated element declares nothing
 at all, and there the attribute is guaranteed, because the browser reads it to name and disable your

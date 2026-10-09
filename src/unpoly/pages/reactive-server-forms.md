@@ -142,7 +142,8 @@ regardless of how fast the user clicks or how slow the network is. In particular
   are [batched](/up.validate#batching) into a single request with multiple targets.
 - When one of the target elements is an ancestor of another target, Unpoly will only request the ancestor.
 - If the user submits the form while validation requests are still in flight,
-  the validation requests are [aborted](/aborting-requests).
+  the validation requests are [aborted](/aborting-requests). This happens when the submission
+  updates the form or an element around it, like the [main element](/main).
 
 Let's walk through a challenging scenario using the [postage form example](#declaring-dependencies) above:
 
