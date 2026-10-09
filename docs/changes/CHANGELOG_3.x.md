@@ -1404,7 +1404,7 @@ This release fixes an error in the minified Javascript (`unpoly.min.js`) (issue 
 
 Unpoly 3.10 is a major feature relase, adding support for [client-side templates](/templates), [arbitrary loading state](/loading-state) and [optimistic rendering](/optimistic-rendering). It also contains many bug fixes and quality-of-life improvements, like [Relaxed JSON](/relaxed-json).
 
-This release contains some minor breaking changes, which are marked with the ❌ emoji in this CHANGELOG. All breaking changes are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
+This release contains some minor breaking changes, which are marked with the ⚠️ emoji in this CHANGELOG. All breaking changes are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
 
 ### Arbitrary loading state with previews
 
@@ -1616,7 +1616,7 @@ Unpoly has several methods to detect and process changes in form fields, most no
 
 - The `[up-watch]` callback can now use an `options` argument. It contains an object of all [watch options](/watch-options) parsed from that field, e.g. `{ disable, preview, placeholder }`.
 - The watch options `{ event, delay }` will no longer be passed to callbacks of `up.watch()` and `[up-watch]`, as these options have already been processed by Unpoly.
-- ❌ `up.watch()` and `[up-watch]` will no longer process an `[up-watch-disable]` attribute. Instead the attribute is only parsed and passed to the callback as a `{ disable }` option. It is up to the callback to forward the option it to any rendering function that supports `{ disable }`.
+- ⚠️ `up.watch()` and `[up-watch]` will no longer process an `[up-watch-disable]` attribute. Instead the attribute is only parsed and passed to the callback as a `{ disable }` option. It is up to the callback to forward the option it to any rendering function that supports `{ disable }`.
 - Fix a bug where `up.autosubmit()` options did not override options parsed from `[up-watch-...]` prefixed attributes. It is convention in Unpoly that JavaScript options [always take precedence](/attributes-and-options#options) over HTML attributes.
 
 
@@ -1766,8 +1766,8 @@ This release improves the handling of faux-interactive elements:
 
 ### Making links followable
 
-- Links with only an `[up-href]` attribute are no longer followable by default. They also require an `[up-follow]` attribute or a match in `up.link.config.followSelectors`. This change was made to remove confusion with other features that use `[up-href]`, such as `[up-defer]` and (since this release) `[up-poll]`.
-- Links with only an `[up-instant]` attribute are no longer followable by default. They also require an `[up-follow]` attribute or a match in `up.link.config.followSelectors`. This change was made to remove confusion with other features that use `[up-instant]`, in particular `up:click` on [faux-interactive elements](/faux-interactive-elements).
+- ⚠️ Links with only an `[up-href]` attribute are no longer followable by default. They also require an `[up-follow]` attribute or a match in `up.link.config.followSelectors`. This change was made to remove confusion with other features that use `[up-href]`, such as `[up-defer]` and (since this release) `[up-poll]`.
+- ⚠️ Links with only an `[up-instant]` attribute are no longer followable by default. They also require an `[up-follow]` attribute or a match in `up.link.config.followSelectors`. This change was made to remove confusion with other features that use `[up-instant]`, in particular `up:click` on [faux-interactive elements](/faux-interactive-elements).
 
 
 
@@ -2092,7 +2092,7 @@ up.element.setStyle(div, { '--custom-prop': 'value' })
 
 In earlier versions Unpoly functions accepted property names in either [camelCase](https://developer.mozilla.org/en-US/docs/Glossary/Camel_case) or [kebab-case](https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case).
 
-As custom properties don't have a camelCase equivalent, now only kebab-case is supported:
+⚠️ As custom properties don't have a camelCase equivalent, now only kebab-case is supported:
 
 ```js
 // ❌ camelCase property names are no longer supported
@@ -2109,7 +2109,7 @@ To help with upgrading, [`unpoly-migrate.js`](/changes/upgrading) Unpoly will re
 
 CSS requires length values (like `width`, `top` or `margin`) to have a unit, e.g. `width: 200px`. In earlier versions Unpoly silently added a `px` unit to length values that were missing a unit.
 
-This approach required Unpoly to keep a list of CSS properties that denote lengths, which was unsustainable. You now always need to pass length values with a unit: 
+⚠️ This approach required Unpoly to keep a list of CSS properties that denote lengths, which was unsustainable. You now always need to pass length values with a unit: 
 
 ```js
 // ❌ Length values without unit is uo longer supported

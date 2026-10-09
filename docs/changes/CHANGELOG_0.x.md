@@ -1113,8 +1113,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Incompatible changes
 
-- Drop support for IE 9, which hasn't been supported on any platform since January 2016.
-- Drop support for IE 10, which hasn't been supported since January 2016 on any platform except
+- ⚠️ Drop support for IE 9, which hasn't been supported on any platform since January 2016.
+- ⚠️ Drop support for IE 10, which hasn't been supported since January 2016 on any platform except
   Windows Vista, and Vista is end-of-life in April 2017.
 
 
@@ -1158,8 +1158,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- `up.proxy.config.wrapMethodParam` is now [`up.protocol.config.methodParam`](/up.protocol.config#config.methodParam).
-- The event [`up:history:restored`](/up:history:restored) is no longer emitted when a history state
+- ⚠️ `up.proxy.config.wrapMethodParam` is now [`up.protocol.config.methodParam`](/up.protocol.config#config.methodParam).
+- ⚠️ The event [`up:history:restored`](/up:history:restored) is no longer emitted when a history state
   was not created by Unpoly.
 
 
@@ -1194,11 +1194,11 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- [`up.replace()`](/up.replace) now returns a rejected promise if the server returns a non-200 status code.
-- `up.util.merge()` has been replaced with [`up.util.assign()`](/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
-- The `up.flow` module has been renamed to [`up.dom`](/up.dom).
-- The `up.navigation` module has been renamed to [`up.status`](/up.status).
-- Functions that measure position, dimensions or margin now return floats instead of rounded integers.
+- ⚠️ [`up.replace()`](/up.replace) now returns a rejected promise if the server returns a non-200 status code.
+- ⚠️ `up.util.merge()` has been replaced with [`up.util.assign()`](/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
+- ⚠️ The `up.flow` module has been renamed to [`up.dom`](/up.dom).
+- ⚠️ The `up.navigation` module has been renamed to [`up.status`](/up.status).
+- ⚠️ Functions that measure position, dimensions or margin now return floats instead of rounded integers.
 
 
 0.32.0
@@ -1222,8 +1222,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- [Modals](/up.modal) can no longer grow wider than the screen
-- The spacing around a modal dialog is longer implemented as a `margin` of `.up-modal-dialog`.
+- ⚠️ [Modals](/up.modal) can no longer grow wider than the screen
+- ⚠️ The spacing around a modal dialog is longer implemented as a `margin` of `.up-modal-dialog`.
   It is now a padding of `.up-modal-viewport`. This makes it easier to set the `width` or `max-width` of the dialog box.
 
   If your project has custom Unpoly styles, you should grep your CSS files for changes to the `margin`
@@ -1249,7 +1249,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- The [`up.modal.flavor()`](/up.modal.flavor) function was deprecated. Set values on the
+- ⚠️ The [`up.modal.flavor()`](/up.modal.flavor) function was deprecated. Set values on the
   [`up.modal.flavors`](/up.modal.flavors) property instead.
 
 
@@ -1269,8 +1269,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- If you are using Unpoly's Boostrap integration, you now need to include `unpoly-bootstrap3.js` *after* you include the Bootstrap CSS.
-- Fix some issues when using Unpoly together with Bootstrap modals.
+- ⚠️ If you are using Unpoly's Boostrap integration, you now need to include `unpoly-bootstrap3.js` *after* you include the Bootstrap CSS.
+- ⚠️ Fix some issues when using Unpoly together with Bootstrap modals.
 
 
 
@@ -1287,7 +1287,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- Events handled by Unpoly selectors will no longer bubble up the DOM.
+- ⚠️ Events handled by Unpoly selectors will no longer bubble up the DOM.
 
 
 0.28.1
@@ -1318,7 +1318,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- `up.error()` has been renamed to [`up.fail()`](/up.fail) in order to prevent confusion with [`up.log.error()`](/up.log.error).
+- ⚠️ `up.error()` has been renamed to [`up.fail()`](/up.fail) in order to prevent confusion with [`up.log.error()`](/up.log.error).
 
 
 0.27.3
@@ -1334,7 +1334,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- The `{ url }` option for [`up.destroy()`](/up.destroy) has been renamed to `{ history }` to be more
+- ⚠️ The `{ url }` option for [`up.destroy()`](/up.destroy) has been renamed to `{ history }` to be more
   in line with [`up.replace()`](/up.replace).
 
 
@@ -1350,7 +1350,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- Links with [`up-target`](/up.target) now prefer to update elements within their own layer (page, modal, or popup).
+- ⚠️ Links with [`up-target`](/up.target) now prefer to update elements within their own layer (page, modal, or popup).
   Only when the target element doesn't exist within the link's layer, Unpoly will look through all layers
   from top to bottom.
 
@@ -1368,7 +1368,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- When [replacing](/up.replace) multiple page fragments at once, only the first fragment is revealed within its viewport
+- ⚠️ When [replacing](/up.replace) multiple page fragments at once, only the first fragment is revealed within its viewport
 
 
 0.27.0
@@ -1398,9 +1398,9 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- Tooltips now open and close much quicker.
-- Popups now open and close much quicker.
-- `.up-current` now considers two URLs different if they have different query strings.
+- ⚠️ Tooltips now open and close much quicker.
+- ⚠️ Popups now open and close much quicker.
+- ⚠️ `.up-current` now considers two URLs different if they have different query strings.
 
 
 
@@ -1420,7 +1420,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- When inserting a page fragment with a `<script src="...">` tag, the linked JavaScript is no longer loaded and executed. Inline scripts will still be executed. You can configure this behavior using the new [`up.flow.config`](/up.flow.config) property.
+- ⚠️ When inserting a page fragment with a `<script src="...">` tag, the linked JavaScript is no longer loaded and executed. Inline scripts will still be executed. You can configure this behavior using the new [`up.flow.config`](/up.flow.config) property.
 
 
 
@@ -1487,9 +1487,9 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- When opening a modal while another modal is open, the first modal will be closed (with animation) before the second modal opens (with animation)
-- When opening a popup while another popup is open, the first popup will be closed (with animation) before the second popup opens (with animation)
-- User-defined macros are now always run *before* built-in macros.
+- ⚠️ When opening a modal while another modal is open, the first modal will be closed (with animation) before the second modal opens (with animation)
+- ⚠️ When opening a popup while another popup is open, the first popup will be closed (with animation) before the second popup opens (with animation)
+- ⚠️ User-defined macros are now always run *before* built-in macros.
   This way you can set `[up-dash]` and `[up-expand]` from your own macros.
 
 
@@ -1527,10 +1527,10 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- Animations when opening or closing a [modal](/up.modal) now only affect the viewport around the dialog.
+- ⚠️ Animations when opening or closing a [modal](/up.modal) now only affect the viewport around the dialog.
   The backdrop is animated separately. This allows animations like "zoom in", which would look strange if
   the backdrop would zoom in together with the dialog.
-- The modal's HTML structure has been changed to include a `.up-modal-backdrop` element:
+- ⚠️ The modal's HTML structure has been changed to include a `.up-modal-backdrop` element:
 
   ```
   <div class="up-modal">
@@ -1546,11 +1546,11 @@ This is a major update with some breaking changes. Expect a few more updates lik
   </div>
   ```
 
-- The `z-index` properties for modal elements have been [changed](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/modal.css.sass).
+- ⚠️ The `z-index` properties for modal elements have been [changed](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/modal.css.sass).
   They might change again in the future.
-- The modal will now take over the document's scrollbars after the open animation has finished.
+- ⚠️ The modal will now take over the document's scrollbars after the open animation has finished.
   In earlier versions the modal took over as soon as the animation had started.
-- Calling [`up.motion.finish()`](/up.motion.finish) with an element will now also
+- ⚠️ Calling [`up.motion.finish()`](/up.motion.finish) with an element will now also
   complete animations/transitions on children of the given element.
 
 
@@ -1579,8 +1579,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- Tooltips have a darker background color.
-- The tooltip CSS has been changed to be easier to override.
+- ⚠️ Tooltips have a darker background color.
+- ⚠️ The tooltip CSS has been changed to be easier to override.
 
 
 0.22.1
@@ -1610,10 +1610,10 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- `up.proxy.idle()` is now [`up.proxy.isIdle()`](/up.proxy.isIdle)
-- `up.proxy.busy()` is now [`up.proxy.isBusy()`](/up.proxy.isBusy)
-- Event `up:proxy:busy` is now [`up:proxy:slow`](/up:proxy:slow)
-- Event `up:proxy:idle` is now [`up:proxy:idle`](/up:proxy:recover)
+- ⚠️ `up.proxy.idle()` is now [`up.proxy.isIdle()`](/up.proxy.isIdle)
+- ⚠️ `up.proxy.busy()` is now [`up.proxy.isBusy()`](/up.proxy.isBusy)
+- ⚠️ Event `up:proxy:busy` is now [`up:proxy:slow`](/up:proxy:slow)
+- ⚠️ Event `up:proxy:idle` is now [`up:proxy:idle`](/up:proxy:recover)
 
 
 0.21.0
@@ -1628,7 +1628,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- `up-toggle` has been renamed to `up-switch`
+- ⚠️ `up-toggle` has been renamed to `up-switch`
 
 
 0.20.0
@@ -1662,7 +1662,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- `up.implant()` has been renamed to [`up.extract()`](/up.extract).
+- ⚠️ `up.implant()` has been renamed to [`up.extract()`](/up.extract).
 
 
 0.18.1
@@ -1702,7 +1702,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- By default Unpoly now converts `PUT`, `PATCH` and `DELETE` requests to `POST` requests
+- ⚠️ By default Unpoly now converts `PUT`, `PATCH` and `DELETE` requests to `POST` requests
   that carry their original method in a form parameter named `_method`.
   This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
 
@@ -1711,7 +1711,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
   You can configure this behavior in [`up.proxy.config.wrapMethods`](/up.proxy.config)
   and [`up.proxy.config.wrapMethodParam`](/up.proxy.config).
-- The requested selector is now sent to the server as a request header `X-Up-Target`
+- ⚠️ The requested selector is now sent to the server as a request header `X-Up-Target`
   (this used to be `X-Up-Selector`). If you are using `unpoly-rails`, you can access it
   through `up.target` (this used to be `up.selector`).
 
@@ -1728,7 +1728,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- When [`up.observe()`](/up.observe) is used with a delay of zero, the callback is invoked instantly (instead of
+- ⚠️ When [`up.observe()`](/up.observe) is used with a delay of zero, the callback is invoked instantly (instead of
   being invoked in the next animation frame).
 
 
@@ -1753,12 +1753,12 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- Popups and modals used to close automatically whenever an element behind the overlay was replaced.
+- ⚠️ Popups and modals used to close automatically whenever an element behind the overlay was replaced.
   This behavior is still in effect, but only if the replacement was triggered by a link or element from
   within the popup or modal.
-- Popups and modals no longer raise an error if their (hidden) overlay was closed before the
+- ⚠️ Popups and modals no longer raise an error if their (hidden) overlay was closed before the
   response was received.
-- Popups and modals are now compiled before they are animated.
+- ⚠️ Popups and modals are now compiled before they are animated.
 
 
 0.15.1
@@ -1793,7 +1793,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- [`up.observe()`](/up.observe) now takes the callback function as a last argument.
+- ⚠️ [`up.observe()`](/up.observe) now takes the callback function as a last argument.
   The callback can now longer be passed as a `.change` option.
 
 
@@ -1862,8 +1862,8 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- `up.bus.emit()` is now [`up.emit()`](/up.emit)
-- When `up.first()` finds no match, return `undefined` instead of `null`.
+- ⚠️ `up.bus.emit()` is now [`up.emit()`](/up.emit)
+- ⚠️ When `up.first()` finds no match, return `undefined` instead of `null`.
 
 
 0.12.1
@@ -1887,9 +1887,9 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- Remove `up.slot`, which was poorly implemented, untested, and not much better than the `:empty` pseudo-selector
+- ⚠️ Remove `up.slot`, which was poorly implemented, untested, and not much better than the `:empty` pseudo-selector
   which has great browser support
-- Replaced the `up.bus.on(...)` event registry with vanilla DOM events bound to `document`. Also renamed
+- ⚠️ Replaced the `up.bus.on(...)` event registry with vanilla DOM events bound to `document`. Also renamed
   events in the process.
 
   Instead of the old ...
@@ -1910,13 +1910,13 @@ Refactored internals. No API changes.
       up.on('up:fragment:inserted', function(event, $fragment) {
          ...
       };
-- Renamed `up.ready()` to `up.hello()`. This will emit an `up:event:inserted` event for the given element,
+- ⚠️ Renamed `up.ready()` to `up.hello()`. This will emit an `up:event:inserted` event for the given element,
   causing it to be compiled etc.
-- `up.popup.open()` has been renamed to `up.popup.attach()`.
-- `up.modal.open()` has been split into two methods `up.modal.visit(url)` and `up.modal.follow($link)`.
-- `up.tooltip.open()` has been renamed to `up.tooltip.attach()`.
-- Tooltips now escape HTML by default; To use HTML content, use an `[up-tooltip-html]` attribute instead.
-- Module configurations are now simple properties like `up.layout.config` instead of methods like `up.layout.defaults(...)`.
+- ⚠️ `up.popup.open()` has been renamed to `up.popup.attach()`.
+- ⚠️ `up.modal.open()` has been split into two methods `up.modal.visit(url)` and `up.modal.follow($link)`.
+- ⚠️ `up.tooltip.open()` has been renamed to `up.tooltip.attach()`.
+- ⚠️ Tooltips now escape HTML by default; To use HTML content, use an `[up-tooltip-html]` attribute instead.
+- ⚠️ Module configurations are now simple properties like `up.layout.config` instead of methods like `up.layout.defaults(...)`.
 
   Instead of the old ...
 
@@ -1960,7 +1960,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- Interactions that would result in an URL change ("pushState") now fall back to a full page load
+- ⚠️ Interactions that would result in an URL change ("pushState") now fall back to a full page load
   if Unpoly was booted from a non-GET request. [More information about the reasons for this](https://github.com/unpoly/unpoly/commit/d81d9007aa3bfae0fca8c55a71d180d1044acae5).
 
   This currently works out of the box if you're using Unpoly via the `unpoly-rails` Rubygem.
@@ -1998,7 +1998,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- While following links and submitting forms will still reveal elements by default,
+- ⚠️ While following links and submitting forms will still reveal elements by default,
   direct calls of [`up.replace()`](/up.replace) no longer do.
   This behavior can be activated using the `{ reveal: true }` option.
 
@@ -2017,7 +2017,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- [`up.reveal()`](/up.reveal) now only reveals the first 150 pixels of an element.
+- ⚠️ [`up.reveal()`](/up.reveal) now only reveals the first 150 pixels of an element.
 
 
 0.10.0
@@ -2033,10 +2033,10 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- The option `options.scroll` and attribute `up-scroll` have been removed. Instead you can use the
+- ⚠️ The option `options.scroll` and attribute `up-scroll` have been removed. Instead you can use the
   boolean option `options.reveal` or `up-reveal` to indicate whether an element should be revealed
   within the viewport before replacement.
-- The string `up.history.defaults('popTarget')` is now an array of selectors `up.history.defaults('popTargets')`
+- ⚠️ The string `up.history.defaults('popTarget')` is now an array of selectors `up.history.defaults('popTargets')`
 
 
 0.9.1
@@ -2078,7 +2078,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- Like Bootstrap, the Unpoly modal will now scroll the main document viewport instead of the modal dialog box.
+- ⚠️ Like Bootstrap, the Unpoly modal will now scroll the main document viewport instead of the modal dialog box.
 
 
 
@@ -2175,7 +2175,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- Rename option `.origin` to `.position` in `up.popup` and `up.tooltip`
+- ⚠️ Rename option `.origin` to `.position` in `up.popup` and `up.tooltip`
 
 
 0.6.4
@@ -2195,7 +2195,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- Rename method `up.awaken()` to `up.compiler()`
+- ⚠️ Rename method `up.awaken()` to `up.compiler()`
 
 
 0.6.2

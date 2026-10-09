@@ -337,19 +337,19 @@ There's a short list of changes that we cannot fix with aliases.
 
 #### Overlays (modals, popups) have different HTML
 
-But it's similar. E.g. `<div class="modal">` becomes `<up-modal>`.
+⚠️ But it's similar. E.g. `<div class="modal">` becomes `<up-modal>`.
 
 #### Unpoly only sees the current layer
 
-You can target other layers with `{ layer: 'any' }`.
+⚠️ You can target other layers with `{ layer: 'any' }`.
 
 #### Async functions no longer wait for animations
 
-You might or might not notice. In cases where you absolutely do need to wait, an `{ onFinished }` callback can be used.
+⚠️ You might or might not notice. In cases where you absolutely do need to wait, an `{ onFinished }` callback can be used.
 
 #### Tooltips are no longer built-in
 
-But there are a million better libraries.
+⚠️ But there are a million better libraries.
 
 
 ### Unpoly 1 maintenance
