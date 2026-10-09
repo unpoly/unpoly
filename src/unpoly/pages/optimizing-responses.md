@@ -98,8 +98,7 @@ Vary: X-Up-Mode
 ```
 
 For the root layer the header is `X-Up-Mode: root`.
-When a failed response may render into a different layer,
-its mode is sent as `X-Up-Fail-Mode`.
+The mode of the layer that renders a failed response is sent as `X-Up-Fail-Mode`.
 
 
 Rendering different content for Unpoly requests {#version}
@@ -161,7 +160,7 @@ Vary: X-Up-Target, X-Up-Mode
 After seeing `Vary: X-Up-Target`, a cached response for `.menu` is no longer a cache hit for a request targeting a different selector.
 
 You can set the `Vary` header from your own server code.
-Many [protocol implementations](/protocol-implementations) set it for you once you read a header.
+Some [protocol implementations](/protocol-implementations), like `unpoly-rails`, set it for you once you read a header.
 
 
 ### How cache entries are matched {#cache-matching}

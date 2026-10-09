@@ -2,7 +2,7 @@ Reacting to new deployments
 ===========================
 
 After you deploy a new version of your app, users with an open page keep running the old JavaScript and CSS,
-since Unpoly never makes a full page load. Unpoly detects new asset versions in server responses
+since Unpoly updates fragments instead of loading new pages. Unpoly detects new asset versions in server responses
 and emits an event, so you can prompt the user to reload, reload at the next opportunity, or load the new files.
 
 

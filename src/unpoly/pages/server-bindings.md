@@ -31,7 +31,7 @@ When the server responds with an error status, Unpoly renders a different target
 which is sent as `X-Up-Fail-Target`.
 
 **The targeted layer** is described by `X-Up-Mode`, the [mode](/up.layer.mode) of the layer being updated,
-and `X-Up-Fail-Mode` for failed responses. `X-Up-Origin-Mode` names the layer of the link or form that made the request,
+and `X-Up-Fail-Mode` for failed responses. `X-Up-Origin-Mode` is the mode of the layer containing the link or form that made the request,
 in case it targets another layer. A server may [render leaner pages for overlays](/optimizing-responses#mode).
 
 **The layer's context** arrives as JSON in `X-Up-Context` (and `X-Up-Fail-Context`),
@@ -92,8 +92,8 @@ in a new overlay. See [[subinteractions]] for the pattern these headers enable.
 **Updating the layer context.** An `X-Up-Context` response header carries the changed keys.
 See [Changing context from the server](/context#server-updates).
 
-**Controlling the cache.** After a request that changed data on the server, Unpoly expires its entire cache.
-`X-Up-Expire-Cache` and `X-Up-Evict-Cache` narrow this to a [URL pattern](/url-patterns), or disable it with `false`:
+**Controlling the cache.** After a non-`GET` request, Unpoly expires its entire cache.
+`X-Up-Expire-Cache` and `X-Up-Evict-Cache` expire or evict additional cache entries matching a [URL pattern](/url-patterns):
 
 ```http
 HTTP/1.1 200 OK
@@ -113,13 +113,14 @@ A few parts of the protocol are not headers:
 
 - Unpoly sends a [CSRF token](/up.protocol.config#config.csrfToken) with unsafe requests, read from a `<meta name="csrf-token">` tag.
   The header name defaults to `X-CSRF-Token` and is configured in `up.protocol.config.csrfHeader`.
-- When Unpoly makes a full page load with a method other than `GET` or `POST`,
-  it sends a `POST` with the original method in a `_method` [parameter](/up.protocol.config#config.methodParam).
+- Unpoly sends a request with a method other than `GET` or `POST` as a `POST`,
+  with the original method in a `_method` [parameter](/up.protocol.config#config.methodParam).
+  Fragment updates can opt out with [`up.network.config.wrapMethod`](/up.network.config#config.wrapMethod).
 - A server can set a [`_up_method` cookie](/_up_method) to tell Unpoly the method of the initial page load.
   This lets Unpoly handle pages that were loaded with a `POST` request.
 
-A protocol implementation for your framework typically wraps all of this in helpers,
-sets the `Vary` header when you read a request header, and handles the `_up_method` cookie for you.
+A protocol implementation for your framework wraps all of this in helpers.
+Most handle the `_up_method` cookie for you, and some, like `unpoly-rails`, also set the `Vary` header when you read a request header.
 See [[protocol-implementations]] for the list.
 
 @page server-bindings

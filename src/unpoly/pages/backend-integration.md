@@ -71,7 +71,7 @@ The exchange then costs about 1 KB and no rendering time.
 Reacting to new deployments
 ---------------------------
 
-Since Unpoly never makes a full page load, users keep running the JavaScript and CSS they loaded
+Since Unpoly updates fragments instead of loading new pages, users keep running the JavaScript and CSS they loaded
 when they opened the page. When a response contains scripts or stylesheets that differ from the current page,
 Unpoly emits an `up:assets:changed` event:
 
