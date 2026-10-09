@@ -212,46 +212,6 @@ If the fragment has no data, the acceptance value is an empty object (`{}`).
 To *dismiss* an overlay once a fragment is detected, use `[up-dismiss-fragment]` and `[up-on-dismissed]` in the same fashion.
 
 
-### Rendering discarded notification flashes
-
-When an overlay closes in reaction to a server response, the content of that response is discarded.
-Any [confirmation flashes](/flashes) in that response would be lost.
-
-An `[up-flashes]` element picks up flashes from a closing overlay and
-[renders them into the parent layer](/flashes#from-closing-overlays).
-
-
-### Using the discarded response
-
-When a server response closes an overlay, nothing from that response is rendered.
-Sometimes you need the discarded response anyway, e.g. to render its content in another layer.
-
-One way is an `[up-hungry]` element with an `[up-if-layer=subtree]` attribute in a parent layer.
-Such an element is updated with the discarded response of a closing overlay.
-
-For more control, access the response through the `{ response }` property of the `up:layer:accepted` and `up:layer:dismissed` events.
-
-In the example below, the link opens an overlay with a form to create a new company (`/companies/new`).
-After successful creation the form redirects to the list of companies (`/companies`).
-That response already contains the updated list, so we render it into the parent layer
-instead of making another request:
-
-```html
-<a href="/companies/new"
-   up-layer="new"
-   up-accept-location="/companies"
-   up-on-accepted="up.render('.companies', { response: event.response })"> <!-- mark: event.response -->
-  New company
-</a>
-```
-
-The `{ response }` property is set whenever a server response causes an overlay to close:
-
-- When a [server-sent event](/X-Up-Events) matches a [close condition](#close-conditions).
-- When the new location matches a [close condition](#close-conditions).
-- When the server [explicitly closes](#from-server) an overlay with an HTTP header.
-
-
 Closing when a button is clicked {#on-click}
 --------------------------------
 
@@ -435,6 +395,51 @@ on the link or form that targets the background layer:
   ...
 </form>
 ```
+
+
+Discarded responses {#discarded-responses}
+-------------------
+
+When a server response closes an overlay, nothing from that response is rendered.
+This happens when the response matches a [close condition](#close-conditions),
+or when the server [explicitly closes](#from-server) the overlay.
+
+### Using the discarded response {#using-the-discarded-response}
+
+Sometimes you need the discarded response anyway, e.g. to render its content in another layer.
+
+One way is an `[up-hungry]` element with an `[up-if-layer=subtree]` attribute in a parent layer.
+Such an element is updated with the discarded response of a closing overlay.
+
+For more control, access the response through the `{ response }` property of the `up:layer:accepted` and `up:layer:dismissed` events.
+
+In the example below, the link opens an overlay with a form to create a new company (`/companies/new`).
+After successful creation the form redirects to the list of companies (`/companies`).
+That response already contains the updated list, so we render it into the parent layer
+instead of making another request:
+
+```html
+<a href="/companies/new"
+   up-layer="new"
+   up-accept-location="/companies"
+   up-on-accepted="up.render('.companies', { response: event.response })"> <!-- mark: event.response -->
+  New company
+</a>
+```
+
+The `{ response }` property is set whenever a server response causes an overlay to close:
+
+- When a [server-sent event](/X-Up-Events) matches a [close condition](#close-conditions).
+- When the new location matches a [close condition](#close-conditions).
+- When the server [explicitly closes](#from-server) an overlay with an HTTP header.
+
+
+### Rendering discarded notification flashes {#rendering-discarded-notification-flashes}
+
+[Confirmation flashes](/flashes) in a discarded response would be lost as well.
+
+An `[up-flashes]` element picks up flashes from a closing overlay and
+[renders them into the parent layer](/flashes#from-closing-overlays).
 
 
 Customizing dismiss controls

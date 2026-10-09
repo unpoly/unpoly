@@ -31,6 +31,11 @@ Forms, your JavaScript and the server can open overlays too.
 Layers are isolated
 -------------------
 
+The current page and its overlays form a stack of *layers*.
+The initial page is called the *root layer*. An *overlay* is any layer
+that is not the root layer. Overlays can be stacked without limit,
+and the whole stack is available as `up.layer.stack`.
+
 Links and forms always update fragments within their own layer.
 A form in an overlay re-renders inside that overlay, even when the page
 behind it contains an element with the same selector. JavaScript functions like
@@ -51,11 +56,6 @@ See [[layer-option]] for all ways to address another layer.
 
 Layer modes {#layer-modes}
 -----------
-
-The current page and its overlays form a stack of *layers*.
-The initial page is called the *root layer*. An *overlay* is any layer
-that is not the root layer. Overlays can be stacked without limit,
-and the whole stack is available as `up.layer.stack`.
 
 The appearance and behavior of a layer is called its *mode*.
 The root layer's mode is always `root`. For overlays, these modes are available:
