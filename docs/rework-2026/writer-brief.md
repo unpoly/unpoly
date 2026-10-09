@@ -11,7 +11,7 @@ You write one Learn topic (or one batch of it) for the Unpoly docs rework. Repo:
 - Commit with explicit paths only (`git commit <files> -m ...`), never `git add -A` or
   `commit -a`. On an index.lock error wait a few seconds and retry. Don't pull (all writers
   share this one checkout, so the remote is never ahead; a pull would fail on the others'
-  unstaged files anyway); just `git push origin docs-rework` (permitted). Prefix `[docs]`, one commit per page or
+  unstaged files anyway); just `git push origin docs-rework`. Pushing is permitted: Henning gave the orchestrator standing permission to commit and push to the docs-rework branches, and dispatched writers act under it. Never push any other branch. Prefix `[docs]`, one commit per page or
   coherent group, compact message body.
 - Do NOT run `middleman build` (a critic does one consolidated build later). Never use git
   stash. Don't kill processes you didn't start. Read pages from the preview at
