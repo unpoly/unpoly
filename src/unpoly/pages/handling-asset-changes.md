@@ -1,19 +1,16 @@
-Handling changes in frontend code
-=================================
+Reacting to new deployments
+===========================
 
-When rendering new fragments, Unpoly compares scripts and stylesheets in the `<head>`
-and emits an [event](/up:assets:changed) if anything changed.
-
-It is up to your code to [handle new asset versions](#handling-changed-assets),
-e.g. by [notifying the user](#notifying-the-user) or [loading new assets](#loading-new-assets).
+After you deploy a new version of your app, users with an open page keep running the old JavaScript and CSS,
+since Unpoly never makes a full page load. Unpoly detects new asset versions in server responses
+and emits an event, so you can prompt the user to reload, reload at the next opportunity, or load the new files.
 
 
-## Tracking assets
+Detecting a new version {#tracking-assets}
+-----------------------
 
-To detect changes in your frontend code, Unpoly must track your application's *assets*.
-By default an *asset* is either a script or a stylesheet with a remote source.
-
-In the example document below, the highlighted elements are considered to be *assets*:
+Unpoly tracks your application's *assets*: by default every script or stylesheet with a remote source in the `<head>`.
+In the document below, the highlighted elements are assets:
 
 ```html
 <html>
@@ -30,42 +27,44 @@ In the example document below, the highlighted elements are considered to be *as
 </html>
 ```
 
-Note how the inline `<script>` is not considered an asset by default.
-See `[up-asset]` for ways to include or exclude elements for asset tracking.
+Whenever Unpoly renders a response with a `<head>`, it compares the assets on the current page
+with the assets in the response. After a deployment, the fingerprinted file names differ,
+and Unpoly emits an `up:assets:changed` event on the `document`:
+
+```js
+up.on('up:assets:changed', function(event) {
+  console.log('A new version was deployed')
+})
+```
+
+**There is no default behavior when assets have changed.** In particular, Unpoly does not insert
+the new asset elements into the current page. The sections below show popular ways to react.
+
+To include elements like inline scripts or `<meta>` tags, mark them with an `[up-asset]` attribute.
+To exclude an asset, set `[up-asset="false"]`. See `[up-asset]` for details.
 
 
-## Handling new asset versions {#handling-changed-assets}
+Notifying the user {#notifying-the-user}
+------------------
 
-When [rendering](/up.render), Unpoly compares the current assets on the page with the new assets
-from the server response. If the assets don't match, an `up:assets:changed` event is emitted.
-
-**There is no default behavior when assets have changed.**
-In particular no asset elements from the response
-are updated in the current page. It is up to the developer to observe the `up:assets:changed` event and
-implement a behavior that fits their app. 
-
-Below you can find some popular ways to handle new asset versions.
-
-
-### Notifying the user of new app versions {#notifying-the-user}
-
-A friendly way to handle new asset version is to show a notification banner informing that a new app version is available.
-The user can then choose to reload at their convenience, by clicking on the notification:
+A friendly way to handle a new version is a notification banner, offering to reload the page.
+The user can reload at their convenience, without losing their work:
 
 ![Notification for a new app version](images/assets-changed-notification.png){:width='305'}
 
-The code below inserts a clickable `<div id="new-version">` banner when assets change:
+The code below inserts a clickable `#new-version` banner when assets change:
 
 @include new-asset-notification-example
 
 > [tip]
-> The code snippet uses the `up.element.affix()` function to quickly create a DOM element from a CSS selector.
+> The code uses `up.element.affix()` to quickly create a DOM element from a CSS selector.
 
 
-### Reloading the app at the next opportunity
+Reloading at the next navigation {#reloading-at-next-navigation}
+--------------------------------
 
-An invisible way to handle new app versions if to make a full page load when the user follows
-the next link. This will unload all scripts and stylesheets, and reload your app from scratch.
+An invisible way to handle a new version is to make a full page load when the user follows the next link.
+This unloads all scripts and stylesheets and boots the app from scratch:
 
 ```js
 let assetsChanged = false
@@ -79,7 +78,7 @@ up.on('up:link:follow', function(event) {
     // Prevent the render pass
     event.preventDefault()
 
-    // Make full page load without Unpoly
+    // Make a full page load without Unpoly
     up.network.loadPage(event.renderOptions)
   }
 })
@@ -88,21 +87,22 @@ function isLoadPageSafe({ url, layer, method }) {
   // Default to 'GET' and uppercase the method string
   let isSafeRequest = url && up.util.normalizeMethod(method) === 'GET'
 
-   // To prevent any overlays from closing, we only make a full page load
-   // when the link is changing the root layer.
+  // To prevent any overlays from closing, we only make a full page load
+  // when the link is changing the root layer.
   let isRootLayer = up.layer.current.isRoot() && layer !== 'new'
 
-   return isSafeRequest && isRootLayer
+  return isSafeRequest && isRootLayer
 }
 ```
 
 
-### Loading new assets
+Loading new assets {#loading-new-assets}
+------------------
 
-The `up:assets:changed` event has `{ oldAssets, newAssets }` properties that you can use to manually
-insert the new assets into the page.
+The `up:assets:changed` event has `{ oldAssets, newAssets }` properties
+that you can use to insert the new assets yourself.
 
-The code below will update all `<link rel="stylesheet">` elements whenever there is a change:
+The code below replaces all `<link rel="stylesheet">` elements whenever they change:
 
 ```js
 function isStylesheet(asset) {
@@ -114,7 +114,7 @@ up.on('up:assets:changed', function({ oldAssets, newAssets }) {
   for (let oldStylesheet of oldStylesheets) {
     oldStylesheet.remove()
   }
-  
+
   let newStylesheets = up.util.filter(newAssets, isStylesheet)
   for (let newStylesheet of newStylesheets) {
     document.head.append(newStylesheet)
@@ -122,28 +122,46 @@ up.on('up:assets:changed', function({ oldAssets, newAssets }) {
 })
 ```
 
-Unfortunately updating `<script>` elements in that fashion is not as straightforward.
-Scripts cannot be "unloaded" by removing a `<script>` element.
-For this reason, script changes are better handled using one of the other techniques demonstrated above.
+Scripts cannot be swapped in the same way. Removing a `<script>` element does not unload
+its code, so a new script version would run next to the old one.
+Handle script changes with one of the other techniques on this page.
 
 
-## Detecting new versions without a user interaction
+Detecting a new version without user interaction {#polling}
+------------------------------------------------
 
-If you want to detect asset changes without a user interaction, use [polling](/up-poll)
-to reload an empty fragment every few minutes.
-
-This will reload an empty fragment `#version-detector` from a URL `/version` every 2 minutes:
+Unpoly only compares assets when it renders a response. To detect a deployment
+while the user is idle, [poll](/polling) an empty fragment every few minutes:
 
 ```html
 <div id="version-detector" up-poll up-interval="120_000" up-source="/version"></div>
 ```
 
-## Detecting changes in backend code
+This reloads the `#version-detector` element from `/version` every two minutes.
+The `/version` route must render a full HTML page with your assets in the `<head>`
+and an empty `<div id="version-detector">` in the `<body>`.
 
-You can configure Unpoly to also emit the `up:assets:changed` event after a new version of your backend code was deployed.
 
-See [Tracking the backend version](/up-asset#tracking-backend-versions) for details.
+Detecting a new backend version {#backend-versions}
+-------------------------------
 
+A deployment may only change backend code, leaving the frontend assets untouched.
+To detect such a deployment, render the deployed commit hash in a `<meta>` tag
+and mark it as an asset with `[up-asset]`:
+
+```html
+<meta name="backend-version" content="d50c6dd629e9bbc80304e14a6ba99a18c32ba738" up-asset> <!-- mark: up-asset -->
+```
+
+When the hash changes, `up:assets:changed` is emitted like for any other asset.
+
+
+Aborting the render pass {#aborting}
+------------------------
+
+The `up:assets:changed` event is emitted after the response was loaded, but before any fragment is changed
+and before the browser history is updated. If you cannot allow rendering with changed assets,
+call `event.preventDefault()`. The render pass is then aborted and no elements are changed.
 
 @page handling-asset-changes
 @signature
