@@ -13,29 +13,32 @@ defaults override them.
 One feature, three layers {#layers}
 -------------------------
 
-The quickest layer is an attribute in your HTML. This link swaps the
-[main element](/main) with an animated transition:
+You can set most options in three places: a [configuration default](#config) for your entire app,
+an attribute on one element, or an [option](#options) in one JavaScript call.
+When more than one place sets the same option, the most specific one wins.
 
-```html
-<a href="/path" up-follow up-transition="cross-fade">Click me</a> <!-- mark: up-transition="cross-fade" -->
-```
-
-The same feature exists as a JavaScript function, for when your own code
-triggers the behavior. Attributes become camel-cased options:
-
-```js
-up.follow(link, { transition: 'cross-fade' }) // mark: transition
-```
-
-When your whole app should behave that way, set a configuration default
-instead of repeating the attribute:
+Let's say your app animates every navigation with a cross-fade:
 
 ```js
 up.fragment.config.navigateOptions.transition = 'cross-fade'
 ```
 
-All three layers set the same option. They differ in scope: one element,
-one call, or every navigation in your app.
+One link prefers to slide in from the right. Its attribute overrides the default for this link only:
+
+```html
+<a href="/next" up-follow up-transition="move-left">Next page</a> <!-- mark: up-transition="move-left" -->
+```
+
+When your own script follows that link, it can override the attribute again.
+Here the script skips the animation altogether:
+
+```js
+up.follow(link, { transition: 'none' }) // mark: transition: 'none'
+```
+
+When Unpoly navigates, it starts with the configured defaults, then applies the attributes
+it parsed from the element, and finally the options you passed. Each layer only replaces the
+values it actually sets, so the script above still gets the link's URL and every other attribute.
 
 
 Unpoly attributes

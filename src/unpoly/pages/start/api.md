@@ -34,9 +34,6 @@ up.fragment.config.navigateOptions.transition = 'cross-fade'
 All three layers **set the same option**. They differ in scope: one element,
 one call, or every navigation in your app.
 
-For all parsing rules, boolean attributes and `"auto"` values,
-see [[attributes-and-options]].
-
 
 @page start/api
 @signature
