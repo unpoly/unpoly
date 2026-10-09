@@ -1003,6 +1003,10 @@ WebMCP search_docs results gain the same field. (b) topic overview pages get "(o
 after their title IN SEARCH RESULTS ONLY (not the sidebar), and skip the breadcrumb.
 (c) "Read more" button text is cut from the search index. Marker comments
 (`<!-- mark: … -->`) leaking into snippets: Henning doesn't care, leave them.
+LANDED (site ce563c4b): hub and overview flag are Pagefind FILTERS, not metadata (metadata
+is searchable and would add matches); the hub is config.rb#search_hub, one step closer than
+the twin's nav line for guide pages (topic, not area); the twin's nav line is unchanged.
+search_docs gains `hub` (null for overviews and pages without one).
 START PAGE DESIGN POLISH (Henning 2026-10-09, queued): content stays; polish the visuals —
 badges/chips not pretty, oversized margin above "… and escape hatches everywhere", some
 sections lack visual identity vs. their siblings (especially "Your HTML keeps its
