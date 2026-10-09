@@ -146,44 +146,11 @@ it tries again after the configured interval.
 
 ## Saving bandwidth when nothing changed {#detecting-unchanged-content}
 
-Many polling requests find that nothing has changed. The server can skip rendering
-in that case and answer with an empty response, which costs about 1 KB (one packet)
-and no CPU time for rendering.
+Many polling requests find that nothing has changed. Your server can then skip rendering
+and respond with an empty `304 Not Modified`, which costs about 1 KB and no rendering time.
+Unpoly keeps polling at the configured interval.
 
-For this, deliver the initial fragment with an `ETag` header.
-An ETag is a hash of the data that was used to produce the HTML:
-
-```http
-HTTP/1.1 200 OK
-ETag: "x234dff"
-
-<html>
-  ...
-  <div class='messages'>
-    ...
-  </div>
-  ...
-</html>
-```
-
-When Unpoly polls the fragment, it echoes the ETag in an `If-None-Match` header:
-
-```http
-GET /messages HTTP/1.1
-If-None-Match: "x234dff"
-```
-
-The server compares the ETag from the request with the ETag of the underlying data.
-If no more recent data is available, it skips rendering and responds with `304 Not Modified`.
-No response body is required:
-
-```http
-HTTP/1.1 304 Not Modified
-```
-
-When an update is skipped, Unpoly polls again after the configured interval.
-
-See [[conditional-requests]] for more details, and for an alternative based on modification times.
+See [[conditional-requests]] for how to set this up with an `ETag` or a modification time.
 
 
 ## Skipping updates on the client {#preventing-request}
