@@ -1,15 +1,21 @@
 Optimistic rendering
 ====================
 
-Optimistic rendering is a pattern where we update the page
-without waiting for the server. When the server eventually responds, the optimistic change
-is reverted and replaced by the server-confirmed content.
+Optimistic rendering is a pattern where the page is updated without waiting for the server.
+When the server eventually responds, the optimistic change is reverted
+and replaced by the server-confirmed content.
+
+In Unpoly, optimistic rendering is an application of [previews](/previews):
+temporary page changes that are reverted when a request ends.
+A preview can produce a screen state resembling the ultimate server response,
+so the user sees the effect of their interaction instantly, even under high latency.
+
+> [note]
+> Optimistic rendering is a recent feature in Unpoly, and is inherently difficult in a server-driven approach.
+> Expect more changes as we're looking for the best patterns.
 
 
 ## Suitable use cases {#use-cases}
-
-Optimistic rendering is an application of [previews](/previews).
-Previews are temporary page changes that are reverted when a request ends.
 
 Rendering optimistically can involve heavy DOM mutations to produce a screen state resembling the ultimate server response.
 Since this requires additional code, we recommend to use
@@ -24,39 +30,12 @@ Some suitable use cases include:
 To limit the duplication of view logic, you may [use templates](#templates).
 By embedding templates into your responses, the server stays in control of HTML rendering.
 
-> [note]
-> Optimistic rendering is a recent feature in Unpoly, and is inherently difficult in a server-driven approach.
-> Expect more changes as we're looking for the best patterns.
-
-
-## Understanding the demo app
-
-For a demonstration of optimistic rendering in Unpoly, check out the [*Tasks* tab](https://demo.unpoly.com/tasks)
-in the official [demo app](https://demo.unpoly.com). The entire TODO list is rendered optimistically.
-This includes the following interactions:
-
-- Adding a task
-- Checking and unchecking a task
-- Re-ordering tasks with drag'n'drop
-- Clearing done tasks
-
-To see how it behaves under high latency, check the `[×] Disable cache` and `[×] Extra server delay` options in the bottom bar.
-You will see that everything reacts instantly, despite an [RTT](https://en.wikipedia.org/wiki/Round-trip_delay)
-of ≈1200 ms (depending on your location). The `X tasks left` indicator is not rendering optimistically on purpose,
-so you see when an actual server response replaces the optimistic update:
-
-<video src="images/optimistic-rendering-demo.mp4" controls width="600" aria-label="The demo app reacting instantly under high latency"></video>
-
-The code for the demo app is [available on GitHub](https://github.com/unpoly/unpoly-demo).
-Although it is a implemented as a Rails application,
-the [JavaScript code](https://github.com/unpoly/unpoly-demo/blob/master/app/assets/javascripts/application.js)
-will be the same in any language or framework.
-
 
 ## Previewing form submissions {#previewing-form-submissions}
 
-Let's take a closer look at how the [demo app](https://demo.unpoly.com) optimistically adds a task
-to the TODO list. This involves processing form data and rendering a major fragment on the client.
+Let's look at how a TODO list optimistically adds a task when its form is submitted.
+This involves processing form data and rendering a major fragment on the client.
+The example is taken from the [demo app](#demo), which you can try in your browser.
 
 The HTML for the TODO list is structured like this:
 
@@ -76,36 +55,36 @@ The HTML for the TODO list is structured like this:
 ```
 
 When the user submits a new task, we want to immediately add a new `.task` element to the list
-below the form. To do so the preview function `add-task` can access the submitting form data
+below the form. To do so the preview function `add-task` can access the submitted form data
 through [`preview.params`](/up.Preview.prototype.params). The input value is then used to
-construct a new `.task` element and prepend it to the list:
+construct a new `.task` element and insert it after the form:
 
 ```js
 up.preview('add-task', function(preview) {
   let form = preview.origin.closest('form')
-  let text = preview.params.get('text')
+  let text = preview.params.get('text') // mark: preview.params
   let newTask = `<div class="task">${up.util.escapeHTML(text)}</div>`
   preview.insert(form, 'afterend', newTask)
   form.reset()
 })
 ```
 
-Because we're using the `up.Preview#insert` function to prepend the new `.task` element,
-the element will automatically be removed when the preview [ends](/previews#overview).
+Because we're using the `up.Preview#insert()` function to insert the new `.task` element,
+the element is automatically removed when the preview [ends](/previews#ending).
 This ensures a consistent screen state in cases where we end up *not* updating the entire `#tasks` fragment,
 e.g. when the form submission [fails](/failed-responses).
 
 
-### Handling validation errors
+## Handling validation errors
 
 When a previewed form submission ends up [failing](/failed-responses) due to a [validation](/validation) error,
-the preview will be reverted and the form is shown in an error state. Whenever possible, we want to avoid
+the preview is reverted and the form is shown in an error state. Whenever possible, we want to avoid
 the jarring effect of a quickly changing screen state.
 
 For simple constraints, consider [native HTML validations](https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation) that run on the client,
 such as [`[required]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/required), [`[pattern]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern)
 or [`[maxlength]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/maxlength).
-For example, the example above uses the `[required]` attribute to block form submission until
+For example, the form above uses the `[required]` attribute to block form submission until
 the task text has been filled in:
 
 ```html
@@ -115,11 +94,11 @@ the task text has been filled in:
 </form>
 ```
 
-#### Server-validated constraints
+### Server-validated constraints
 
 Some constraints can only be checked on the server, such as uniqueness or authorization.
-If a server-validated constraint is violated, the optimistic preview will be briefly visible, only to be replaced by the
-server-provided form state. For example, the TODO list from the [demo app](https://demo.unpoly.com) has a server-validated constraints
+If a server-validated constraint is violated, the optimistic preview is briefly visible, only to be replaced by the
+server-provided form state. For example, the TODO list from the [demo app](#demo) has a server-validated constraint
 that task items must be unique:
 
 <video src="images/optimistic-validation-failure.webm" controls width="600" aria-label="An optimistic form submission showing a server-provided validation error"></video>
@@ -135,20 +114,20 @@ the form is submitted.
 ## Reducing view duplication with templates {#templates}
 
 When a preview function needs to update a major fragment, this can lead to a duplication of view logic.
-A HTML fragment that used to only be rendered by the server is now also found in the JavaScript.
+An HTML fragment that used to only be rendered by the server is now also found in the JavaScript.
 
 By embedding [templates](/templates) into our responses, we can confine HTML rendering to the server.
-Since the server already knows how to render a task, we can now re-use that knowledge for optimistic rendering
+Since the server already knows how to render a task, we can reuse that knowledge for optimistic rendering
 on the client.
 
-In the example above, we would include a template with the rest of our markup: 
+In the example above, we would include a template with the rest of our markup:
 
 ```html
 <div id="tasks">
   ...
 </div>
 
-<script type="text/minimustache" id="task-template">
+<script type="text/minimustache" id="task-template"> <!-- mark: id="task-template" -->
   <div class="task">
     {{text}}
   </div>
@@ -173,7 +152,28 @@ up.preview('add-task', function(preview) {
 ```
 
 
+## Exploring the demo app {#demo}
 
+For a demonstration of optimistic rendering in Unpoly, check out the [*Tasks* tab](https://demo.unpoly.com/tasks)
+in the official [demo app](https://demo.unpoly.com). The entire TODO list is rendered optimistically.
+This includes the following interactions:
+
+- Adding a task
+- Checking and unchecking a task
+- Re-ordering tasks with drag'n'drop
+- Clearing done tasks
+
+To see how it behaves under high latency, check the `[×] Disable cache` and `[×] Extra server delay` options in the bottom bar.
+You will see that everything reacts instantly, despite an [RTT](https://en.wikipedia.org/wiki/Round-trip_delay)
+of ≈1200 ms (depending on your location). The `X tasks left` indicator is not rendered optimistically on purpose,
+so you see when an actual server response replaces the optimistic update:
+
+<video src="images/optimistic-rendering-demo.mp4" controls width="600" aria-label="The demo app reacting instantly under high latency"></video>
+
+The code for the demo app is [available on GitHub](https://github.com/unpoly/unpoly-demo).
+Although it is implemented as a Rails application,
+the [JavaScript code](https://github.com/unpoly/unpoly-demo/blob/master/app/assets/javascripts/application.js)
+would be the same in any language or framework.
 
 
 @page optimistic-rendering
