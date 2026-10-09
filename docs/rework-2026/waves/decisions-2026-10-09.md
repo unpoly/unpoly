@@ -24,3 +24,8 @@
 6A  The orchestrator owns the :4567 preview.
 Pre-ship additions: URL prefix move (/api/…, /learn/…) last; Unpoly::Guide → Unpoly::Site
 rename; release sync; persona review.
+
+## Applied (2026-10-09)
+1A+2A: 74ef1f2d3..cdc5ede17. 3X: 03c55452e (+ site bcba1a1b). 4X: b239b6e1a (spec in link_follow_fn_spec.js). 5B+: 4f7a5a5ad (default expiry at send time since 3.11.0).
+Suspected code issues for Henning: (1) clicking [up-follow] offline leaves an unhandled up.Offline rejection (isCritical treats up.Offline as critical); (2) expireCacheFromXHR skips parseModifyCacheValue, so "X-Up-Expire-Cache: false" becomes pattern 'false' (harmless, inconsistent).
+unpoly-rails README: line 374 "after every non-GET request" timing; line 393 stray expire sentence in evict section.
