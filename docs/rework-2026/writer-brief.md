@@ -16,6 +16,9 @@ You write one Learn topic (or one batch of it) for the Unpoly docs rework. Repo:
 - Do NOT run `middleman build` (a critic does one consolidated build later). Never use git
   stash. Don't kill processes you didn't start. Read pages from the preview at
   http://localhost:4567/<page> (serves current sources of existing pages).
+- The shared preview resolves links across ALL pages: one dangling [[page#anchor]] in a
+  saved draft makes every page return 500 for everyone. Keep every link resolvable each
+  time you save: write the target anchor first, then the link.
 - KEEP EVERY EXISTING ANCHOR that anything links to. Before finishing, grep both repos
   (unpoly src/ + docs/changes/, unpoly-site source/) for `/<your-page>#` and check each
   target still exists (explicit {#anchor} or a shim, as the templates do).
