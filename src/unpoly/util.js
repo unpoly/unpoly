@@ -2,15 +2,11 @@
 Utility functions
 =================
 
-The `up.util` module contains functions to facilitate the work with basic JavaScript
-values like lists, strings or functions.
+Helpers for basic JavaScript values like lists, strings, objects and functions, in the spirit of [Lodash](https://lodash.com/). Unpoly uses them internally and exposes them so you might not need another utility library in your bundle.
 
-You will recognize many functions from other utility libraries like [Lodash](https://lodash.com/).
-While feature parity with Lodash is not a goal of `up.util`, you might find it sufficient
-to not include another library in your asset bundle.
+Most functions are predicates like `up.util.isPresent()` or `up.util.isBlank()`, or list helpers like `up.util.uniq()`, `up.util.reject()` and `up.util.pick()`. Feature parity with Lodash is not a goal. The module also parses the formats used in Unpoly's attributes: `up.util.parseRelaxedJSON()` reads [[relaxed-json]], and `up.util.normalizeURL()` and `up.util.parseURL()` work with URLs.
 
 @learn-ref relaxed-json
-@learn-ref url-patterns
 
 @module up.util
 */

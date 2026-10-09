@@ -4,22 +4,13 @@ require('./viewport.sass')
 Scrolling and focus
 ===================
 
-The `up.viewport` module controls [scrolling](/scrolling)
-and [focus](/focus) within scrollable containers ("viewports").
+Controls scrolling and focus within scrollable containers ("viewports") when fragments are updated. Following a link scrolls the new content into view and focuses it, the way a full page load would; a minor update leaves everything in place.
 
-The default viewport for any web application is the
-[document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement).
-An application may define additional viewports by assigning the CSS property `{ overflow-y: scroll }` to any block element.
+The default viewport is the [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement). Mark additional scrolling containers, like a pane that scrolls on its own, with `[up-viewport]` so Unpoly can scroll them when revealing an element and save their scroll positions for history restoration. Elements fixed to the screen edge, like a sticky header, get `[up-fixed=top]` so revealed content is not hidden behind them.
 
-@learn-ref scrolling
-@learn-ref scroll-tuning
-@learn-ref focus
-@learn-ref focus-visibility
-@learn-ref infinite-scrolling
+From JavaScript, `up.reveal()` scrolls an element into view, and `up.viewport.saveScroll()` and `up.viewport.restoreScroll()` save and restore scroll positions. Defaults like the reveal padding live in `up.viewport.config`.
 
-@see [up-viewport]
-@see [up-fixed=top]
-@see up.reveal
+@learn-ref scrolling-and-focus
 
 @module up.viewport
 */
