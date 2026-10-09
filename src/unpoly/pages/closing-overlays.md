@@ -453,8 +453,8 @@ has a close button (`×`), but cannot be dismissed by pressing `Escape` or click
 
 The following control names are available:
 
-| Control name | Effect                                           | Dismiss value |
-|--------------|--------------------------------------------------| ------------- |
+| Control name | Effect                                           | Dismissal reason |
+|--------------|--------------------------------------------------|------------------|
 | `key`        | Enables dismissing with the `Escape` key         | `":key"`      |
 | `outside`    | Enables dismissing by clicking on the background | `":outside"`  |
 | `button`     | Adds a close button (`×`) to the layer           | `":button"`   |
@@ -486,7 +486,7 @@ Close animation
 
 When an overlay closes, its element disappears with the `{ closeAnimation }` [configured](/up.layer.config) for its mode.
 
-To use a different animation for one overlay, pass an `[up-close-animation]` attribute or `{ closeAnimation }` option
+To use a different animation for one overlay, set an `[up-close-animation]` attribute or pass a `{ closeAnimation }` option
 when opening it. You can also pass an `{ animation }` option to `up.layer.accept()` or `up.layer.dismiss()`,
 or set an `[up-animation]` attribute on an `[up-accept]` or `[up-dismiss]` element.
 

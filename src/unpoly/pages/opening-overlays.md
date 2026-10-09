@@ -193,7 +193,7 @@ Replacing existing overlays {#replacing-existing-overlays}
 
 By default the new overlay is stacked on top of the current layer. There is no limit to the number of stacked layers.
 
-To replace existing overlays instead, pass `[up-layer="swap"]` or `[up-layer="shatter"]`:
+To replace existing overlays instead, set `[up-layer="swap"]` or `[up-layer="shatter"]`:
 
 @include new-overlay-placement-table
 
