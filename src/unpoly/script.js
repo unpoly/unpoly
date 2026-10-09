@@ -958,7 +958,7 @@ up.script = (function() {
   By marking the `<meta>` tag with `[up-asset]`, it will also emit an `up:assets:changed` event when the commit hash changes:
 
   ```html
-  <meta name="backend-version" value="d50c6dd629e9bbc80304e14a6ba99a18c32ba738" up-asset>
+  <meta name="backend-version" content="d50c6dd629e9bbc80304e14a6ba99a18c32ba738" up-asset>
   ```
 
   @selector [up-asset]
@@ -997,7 +997,7 @@ up.script = (function() {
 
   There is no default behavior when assets have changed.
   In particular, no asset elements from the response are updated in the current page.
-  Event listeners may [handle changed frontend code](/handling-asset-changes#handling-changed-assets),
+  Event listeners may [handle changed frontend code](/handling-asset-changes#tracking-assets),
   e.g., by [notifying the user](/handling-asset-changes#notifying-the-user) or [loading new assets](/handling-asset-changes#loading-new-assets).
 
   The code below inserts a clickable `<div id="new-version">` banner when assets change.
