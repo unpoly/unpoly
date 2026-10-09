@@ -23,3 +23,8 @@ Removed material: up.link Motivation essay + SVGs (→ /links); up.fragment anat
 Unverified: up.radio flashes-from-overlays phrasing; up.network "revalidates after rendering"; up.log "which requests are made".
 Ref bug: framework.js up.boot / [up-boot=manual] link /install#initialization (shim on CDN heading).
 Remaining @see: unpoly-migrate/network.js:148, unpoly-migrate/element.js:178, classes/render_result.js:152, classes/request.js:93,433,473. Site machinery: parser.rb, interface.rb #essential_features, interface_template Essentials block, fixtures, interface_spec (fails now: :39, :44).
+
+@see retired (unpoly f63ae6da0, site e2139374); parser rejects @see. OPEN for Henning: module pages now show h2 "Features" directly followed by h3 "All features" — merge? (#all-features anchor used by hub "+ N more" links and specs).
+
+Glyph tiles (variant B) implemented: site 544d9e5f (tokens), fd44b31e (tiles). All 7 glyphs inline SVG (Lucide-style, ISC credit). HEADER ink uses $orange-900 (canvas had off-ladder #8a5a07). Label 10px (below type scale, commented).
+OPEN for Henning: should search badges follow (agent: tinted chip in kind ink, optional inline glyph; not tiles) and feature page subtitle (glyph + long kind in kind ink)?
