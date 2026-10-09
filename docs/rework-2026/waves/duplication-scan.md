@@ -6,3 +6,12 @@
 5. validation #backend/#script ↔ reactive-server-forms #server/#script (~35 lines). Owner validation; reactive shows only what differs + link.
 6. overlay modes table in overlays, opening-overlays, customizing-overlays. customizing-overlays #modes → one sentence + link (keep config sentence).
 Borderline accepted: history overview generous (best tightening candidate); scrolling-and-focus nav defaults; network cache section; handling-all-links/forms sibling sections; islands/preserving-elements keep; providing-html/templates; others (see agent report).
+
+## Outcomes (Henning 2026-10-09, one by one)
+1. Applied: polling section cut to a teaser (701968b94).
+2. Left as is.
+3. Changed: start/api trimmed to intro + three layers (no attributes/options/config sections, no link line); attributes-and-options #layers rewritten to teach precedence (config < attribute < option), new #relaxed-json subsection, dead #following-all-links anchor fixed (e5508ec0b, 9bed81093, follow-up link to /navigation-defaults).
+4. (b) only: enhancing-elements uses a date picker example; lightbox stays on legacy-scripts (19eea2daf). (a) left.
+5. Left as is (different examples, pages stand alone). /validation must state the second use case of [up-validate] and link reactive-server-forms (sitting note).
+6. Applied: modes table dropped from customizing-overlays (7eafff276).
+Borderline list: not pursued.
