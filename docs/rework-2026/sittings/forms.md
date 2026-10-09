@@ -60,3 +60,28 @@
 - Overlay subsections: keep. Caching gotcha: explained. Screenshot: fine.
 - DECISION: /flashes moves to the Live fragments chapter, after hungry-elements (toc.yml moved in the sitting). Fix round: Live fragments overview gets a short mention/link (e.g. at the end of the hungry elements section: flashes are a ready-made hungry element); Forms overview line "To show confirmations or errors after a submission, see [[flashes]]" stays.
 - /submitting-forms gets a SHORT section "Showing confirmation or error flashes" (pointer to [[flashes]]: render an [up-flashes] element in the response, it updates with any response; one tiny example at most).
+
+## /handling-all-forms (restructure, Henning: "not a great page")
+- Keep intro. Sections:
+  - **Submitting all forms** {#submitting-all-forms}: config line + built-in exceptions list, then ONE sentence: "Scripts that expect a full page load after every submission need adjusting, see [[legacy-scripts]]."
+  - **Making exceptions** {#exceptions}: merge form-level `[up-submit=false]` example and the per-button Download PDF example.
+  - **Using a macro instead** {#macro} (replaces #defaults; no inbound links to it):
+    > Instead of changing `up.form.config.submitSelectors`, you can register a [macro](/up.macro) that sets `[up-submit]` on every form. A macro can set other attributes in the same pass, like disabling the form while it submits:
+    > ```js
+    > up.macro('form:not([up-submit=false])', function(form) {
+    >   form.setAttribute('up-submit', '')
+    >   form.setAttribute('up-disable', '')
+    > })
+    > ```
+    > Forms with `[up-submit=false]` are left alone. The [exceptions above](#exceptions) still apply: forms with a `[target]` or a cross-origin `[action]` load a full page.
+    (Verified: noSubmitSelectors is applied on top of any match, classes/config.js:25. Exclude ONLY the opt-out; re-setting existing [up-submit] is fine, but setAttribute would overwrite [up-submit=false].)
+- Remove: "Configuring default behavior for all elements" prose, "Customizing navigation defaults", "Fixing legacy JavaScript code" section.
+
+## /handling-all-links (same restructure, decided in the Forms sitting)
+- **Following all links** {#following-all-links}: config line + @include no-follow-reasons + one-sentence [[legacy-scripts]] pointer.
+- **Following all links on `mousedown`** {#following-all-links-on-mousedown}: unchanged.
+- **Preloading all links** {#preloading-all-links}: unchanged (preloading.md links here).
+- **Making exceptions** {#exceptions}: `[up-follow=false]` example + one sentence that `[up-instant=false]` and `[up-preload=false]` work the same way.
+- **Using a macro instead** {#macro}: `up.macro('a[href]:not([up-follow=false])', …)` setting `[up-follow]` and `[up-preload]`; same wording pattern as forms.
+- Remove: #defaults section, "Customizing navigation defaults", "Fixing legacy JavaScript code" section.
+- CORRECTION: attributes-and-options.md links /handling-all-links#defaults (my wrong "dead anchor" fix in e5508ec0b; auto anchors exist). Point it back to /handling-all-links#following-all-links.
