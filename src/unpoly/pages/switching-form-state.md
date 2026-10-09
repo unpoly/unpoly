@@ -42,13 +42,7 @@ A hidden element gets a `[hidden]` attribute.
 
 By default the entire form is searched for matching elements. This can be [configured](#region).
 
-To toggle an element [for multiple values](#multiple-values), separate the values with a space or comma:
-
-```html
-<div class="level-dependent" up-show-for="intermediate expert"> <!-- mark: up-show-for="intermediate expert" -->
-  only shown for intermediate and expert levels
-</div>
-```
+You can also toggle an element [for multiple values](#multiple-values).
 
 
 ## Disabling or enabling fields {#disable}

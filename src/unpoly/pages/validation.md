@@ -78,7 +78,7 @@ In a Ruby on Rails app this would look like this:
 class UsersController < ApplicationController
 
   def create
-    user_params = params.require(:user).permit(:email, :password)
+    user_params = params.permit(:email, :password)
     @user = User.new(user_params)
     if @user.save
       sign_in @user
@@ -162,7 +162,7 @@ a new form state from the request parameters when it sees an `X-Up-Validate` hea
 class UsersController < ApplicationController
 
   def create
-    user_params = params.require(:user).permit(:email, :password)
+    user_params = params.permit(:email, :password)
     @user = User.new(user_params)
     if request.headers['X-Up-Validate'] # mark-line
       @user.validate # mark-line

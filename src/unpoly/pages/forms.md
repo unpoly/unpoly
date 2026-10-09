@@ -3,7 +3,7 @@ Forms
 
 Unpoly submits forms in the background and updates a fragment of the current page
 with the response. Your server keeps rendering plain HTML, and one convention
-on your backend also makes validation errors work. Fields can then re-render
+on your backend also makes validation errors work. Fields can also re-render
 parts of the form while the user is still filling it in.
 
 

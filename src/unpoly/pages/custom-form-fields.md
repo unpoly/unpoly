@@ -105,7 +105,7 @@ field, however it takes part in a submission.
 
 | | Unpoly reads | Unpoly writes | You must provide |
 |---|---|---|---|
-| `value` | the property | never | **a getter** |
+| `value` | the property | never | a getter |
 | `name` | the property, else the `[name]` attribute | never | nothing |
 | `disabled` | the property, else the `[disabled]` attribute | whichever one you have | nothing |
 
