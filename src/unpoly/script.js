@@ -2,23 +2,13 @@
 Custom JavaScript
 =================
 
-The `up.script` package lets you pair HTML elements with JavaScript behavior.
+Pairs HTML elements with JavaScript behavior. Instead of running scripts once per page load, you register compilers that enhance matching elements whenever they enter the page: at the initial load, and again with every fragment update.
 
-Unpoly encourages you to migrate all your custom JavaScript from `DOMContentLoaded`
-callbacks to [compilers](/enhancing-elements). This will ensure they run both at page load and
-when a new fragment is inserted later. See [Migrating legacy JavaScript](/legacy-scripts)
-for details.
+Register a compiler with `up.compiler()`. It can return a destructor that cleans up when the element is removed, or you register one with `up.destructor()`. Elements pass structured data to their compilers through an `[up-data]` attribute, which `up.data()` reads. Macros registered with `up.macro()` run before all other compilers, usually to set other Unpoly attributes on the element.
 
-@learn-ref enhancing-elements
-@learn-ref data
-@learn-ref legacy-scripts
-@learn-ref handling-asset-changes
-@learn-ref script-security
+When your own code inserts HTML into the page, call `up.hello()` on the new element so its compilers run. Elements marked `[up-asset]` track your scripts and stylesheets, so Unpoly can notice when a new version was deployed.
 
-@see up.compiler
-@see [up-data]
-@see up.macro
-@see up.hello
+@learn-ref scripting
 
 @module up.script
 */

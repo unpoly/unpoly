@@ -6,31 +6,13 @@ const u = up.util
 Layers
 ======
 
-Unpoly allows you to [open page fragments in an overlay](/opening-overlays). Overlays can be stacked infinitely.
+Opens page fragments in overlays like modal dialogs, drawers or popups, stacked on top of the page. Each layer is isolated: links, forms and lookups only see the layer they are in, so a screen can branch into a subtask and return without losing its state.
 
-A variety of [overlay modes](/overlays#layer-modes) are supported,
-such as modal dialogs, popup overlays, or drawers. You can [customize their appearance and behavior](/customizing-overlays).
+Add `[up-layer=new]` to a link or form to show its response in a new overlay, or open one from JavaScript with `up.layer.open()`. An overlay closes when the user dismisses it, or when an `[up-accept]` link or form closes it with a result value. `up.layer.ask()` opens an overlay and returns a promise for that value, so a subinteraction reads like a function call.
 
-Layers are isolated, meaning a screen in one layer will not accidentally see elements
-or events from another layer. For instance, [fragment links](/up.link) will only update elements from the [current layer](/up.layer.current)
-unless you [explicitly target another layer](/layer-option).
-
-Overlays allow you to break up a complex screen into [subinteractions](/subinteractions).
-Subinteractions take place in overlays and can span one or many pages while the original screen remains open in the background.
-Once the subinteraction is *done*, the overlay is closed, and a result value is communicated back to the parent layer.
+`up.layer.current` is the layer your code is working with, and most functions in this module operate on it: `up.layer.on()` listens to events from the current layer only, and `up.layer.dismiss()` closes it. The layers themselves are `up.Layer` objects, listed in `up.layer.stack`.
 
 @learn-ref overlays
-@learn-ref layer-option
-@learn-ref opening-overlays
-@learn-ref closing-overlays
-@learn-ref subinteractions
-@learn-ref customizing-overlays
-@learn-ref context
-
-@see [up-layer=new]
-@see up.layer.current
-@see up.layer.on
-@see up.layer.ask
 
 @module up.layer
 */

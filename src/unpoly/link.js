@@ -4,79 +4,13 @@ require('./link.sass')
 Linking to fragments
 ====================
 
-The `up.link` module lets you build links that update fragments instead of entire pages.
+Links that update a fragment of the current page instead of loading a new document. The server keeps rendering full pages; Unpoly swaps in the targeted fragment and leaves the rest of the page, with its scroll positions, focus and running scripts, untouched.
 
-## Motivation
+Set an `[up-follow]` attribute to let Unpoly handle a link, and an [`[up-target]`](/up-follow#up-target) attribute to choose the fragment it updates. The same behavior is available from JavaScript through `up.follow()`, and `up:link:follow` lets your code observe or prevent any link Unpoly follows.
 
-In a traditional web application, the entire page is destroyed and re-created when the
-user follows a link:
-
-![Traditional page flow](/images/tutorial/fragment_flow_vanilla.svg){:width="620" class="picture -border -sepia -padding"}
-
-This makes for an unfriendly experience:
-
-- State changes caused by AJAX updates are lost during the page transition.
-- Unsaved form changes are lost during the page transition.
-- The JavaScript VM is reset during the page transition.
-- If the page layout is composed of multiple scrollable containers
-  (e.g. a pane view), the scroll positions are lost during the page transition.
-- The user sees a "flash" as the browser loads and renders the new page,
-  even if large portions of the old and new pages are the same (navigation, layout, etc.).
-
-Unpoly fixes this by letting you annotate links with an [`[up-target]`](/up-follow#up-target)
-attribute. The value of this attribute is a CSS selector that indicates which page
-fragment to update. The server **still renders full HTML pages**, but we only use
-the targeted fragments and discard the rest:
-
-![Unpoly page flow](/images/tutorial/fragment_flow_unpoly.svg){:width="620" class="picture -border -sepia -padding"}
-
-With this model, following links feels smooth. All DOM state outside the updated fragment is preserved.
-Pages also load much faster since the DOM, CSS, and JavaScript environments do not need to be
-destroyed and recreated for every request.
-
-
-## Example
-
-Let's say we are rendering three pages with a tabbed navigation to switch between screens:
-
-Your HTML could look like this:
-
-```html
-<nav>
-  <a href="/pages/a">A</a>
-  <a href="/pages/b">B</a>
-  <a href="/pages/c">C</a>
-</nav>
-
-<article>
-  Page A
-</article>
-```
-
-Since we only want to update the `<article>` tag, we annotate the links
-with an `up-target` attribute:
-
-```html
-<nav>
-  <a href="/pages/a" up-target="article">A</a>
-  <a href="/pages/b" up-target="article">B</a>
-  <a href="/pages/c" up-target="article">C</a>
-</nav>
-```
-
-> [NOTE]
-> Instead of `article` you can use any other CSS selector like `#main .article`.
-
-With these [`[up-target]`](/up-follow#up-target) annotations Unpoly only updates the targeted part of the screen.
-The JavaScript environment will persist and the user will not see a white flash while the
-new page is loading.
+Links feel faster with `[up-instant]`, which follows on `mousedown` instead of `click`, and `[up-preload]`, which fetches the response before the user clicks. An `[up-defer]` placeholder loads its content from another URL after the page has rendered, or when it is scrolled into view.
 
 @learn-ref links
-
-@see [up-follow]
-@see [up-instant]
-@see [up-preload]
-@see up.follow
 
 @module up.link
 */

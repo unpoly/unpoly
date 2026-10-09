@@ -2,21 +2,13 @@
 Forms
 =====
 
-The `up.form` module helps you work with non-trivial forms.
+Forms that submit in the background and update a fragment of the current page with the server's response, including validation errors. Fields can also re-render parts of the form while the user is still filling it in.
 
-@learn-ref submitting-forms
-@learn-ref validation
-@learn-ref switching-form-state
-@learn-ref reactive-server-forms
-@learn-ref disabling-forms
-@learn-ref watch-options
-@learn-ref custom-form-fields
+Set an `[up-submit]` attribute to let Unpoly handle a form, or call `up.submit()` from JavaScript. The `up:form:submit` event lets your code observe or prevent any submission.
 
-@see [up-submit]
-@see [up-validate]
-@see [up-switch]
-@see [up-autosubmit]
-@see up.watch
+To render a new form state while the user is still typing, mark fields with `[up-validate]`. This shows validation errors as the user moves through the form, and can update other fields that depend on the changed value. `[up-switch]` shows, hides or disables other elements depending on a field's value, without a server request. `[up-autosubmit]` submits the form whenever a field changes, and `up.watch()` runs your own callback instead.
+
+@learn-ref forms
 
 @module up.form
 */
