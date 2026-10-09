@@ -31,7 +31,7 @@ Only the `#comments` element is replaced. The URL keeps its value,
 so the user does not collect a history entry for every minor update.
 To override this default for a link or form, set `[up-history=true]` or `[up-history=false]`.
 
-Overlays add one rule of their own: an overlay only shows its URL while its content is a main element,
+Overlays add one rule of their own: an overlay only shows its URL when it opens with a main element,
 and the parent page's URL returns when the overlay closes. This is covered in [[history-in-overlays]].
 
 <p class="read-more"><a href="/updating-history">Read more: Updating history</a></p>

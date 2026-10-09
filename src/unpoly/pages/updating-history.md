@@ -35,7 +35,7 @@ By default that is the layer's main element.
 
 > [note]
 > An overlay only shows its URL in the address bar when it has [visible history](/history-in-overlays).
-> This page describes the root layer, which always has.
+> This page describes the root layer, which always has visible history.
 
 
 ### Forcing or preventing a change {#forcing}
@@ -85,7 +85,7 @@ updates history without an explicit `[up-history=true]`.
 ### Only `GET` requests update history {#get-requests}
 
 Only a `GET` request can be reloaded or restored by the browser, so only a `GET` response updates history.
-A form that submits with `POST`, `PUT` or `PATCH` never changes history, even with `[up-history=true]`.
+A response to a `POST`, `PUT` or `PATCH` request never changes history, even with `[up-history=true]`.
 
 When a successful submission redirects to a `GET` URL, the redirect's response updates history
 with the new URL. Unpoly detects the redirect from the response URL, or from an `X-Up-Method` header
@@ -133,7 +133,7 @@ In the document below, the highlighted nodes are updated when history changes, i
     <title>AcmeCorp</title> <!-- mark-line -->
     <link rel="canonical" href="https://example.com/dresses/green-dresses"> <!-- mark-line -->
     <meta name="description" content="About the AcmeCorp team"> <!-- mark-line -->
-    <meta prop="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
+    <meta property="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
     <script src="/assets/app.js"></script>
     <link rel="stylesheet" href="/assets/app.css">
     <script type="application/ld+json">...</script> <!-- mark-line -->
