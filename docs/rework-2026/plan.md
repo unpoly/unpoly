@@ -1007,6 +1007,12 @@ THIRD REPO + LAUNCH SEQUENCE (Henning 2026-10-09): unpoly-rails is in the relaun
 on its own `docs-rework` branch (created from master; standing permission to branch, commit
 and push there for the relaunch work). Launch order: (1) release the new Unpoly version,
 (2) release the new unpoly-rails version, (3) deploy the unpoly.com rework.
+MODULE PAGES (Henning 2026-10-09): Essentials cards retired with @see; module pages have ONE
+h2 "Features" (#features); #all-features is NOT kept, all links repointed. No separate
+signature list or highlight on module pages. A module's page title is just its name in
+monospace (`up.form`); modules have no prose title anywhere (no @title on modules; remnant
+of modules doubling as content hubs). Feature-type icons in feature lists get a redesign via
+a Design canvas (current gray squares don't discriminate types).
 PRE-SHIP TASKS (Henning 2026-10-09):
 - RELEASE SYNC: docs-rework forked from Unpoly master, which carries unreleased work, so
   the unpoly.com deploy must ship together with a new Unpoly release. Includes one last
