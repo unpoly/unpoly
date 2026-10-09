@@ -10,7 +10,7 @@ There is no persistent connection and nothing new to run on the server.
 Reloading a fragment
 --------------------
 
-Every feature in this topic builds on the same move: request a URL, pick an element
+Most features in this topic build on the same move: request a URL, pick an element
 from the response, swap it into the page. You can make that move yourself with `up.reload()`:
 
 ```js
@@ -30,7 +30,7 @@ Loading content later
 ---------------------
 
 Some parts of a page are expensive to render, but not needed right away.
-Move such a part to its own URL and leave a placeholder with an `[up-defer]` attribute:
+Move such a part to its own URL and leave a deferred element with an `[up-defer]` attribute:
 
 ```html
 <div id="menu" up-defer up-href="/menu"> <!-- mark: up-defer -->
@@ -38,10 +38,10 @@ Move such a part to its own URL and leave a placeholder with an `[up-defer]` att
 </div>
 ```
 
-The page renders without the menu. As soon as the placeholder is inserted, Unpoly
+The page renders without the menu. As soon as the deferred element is inserted, Unpoly
 fetches `/menu` and swaps the `#menu` element from the response into the page.
 
-To load only when the placeholder is scrolled into view, set `[up-defer="reveal"]`:
+To load only when the deferred element is scrolled into view, set `[up-defer="reveal"]`:
 
 ```html
 <div id="comments" up-defer="reveal" up-href="/posts/5/comments"> <!-- mark: up-defer="reveal" -->
