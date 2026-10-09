@@ -54,3 +54,9 @@
 - #loading ("Showing that the form is processing"): reduce to a teaser of disabling + the other loading state methods, no single-method example. Draft:
   > While the form is submitting, you can show the user that it is processing: [disable](/disabling-forms) its fields and buttons, style it with [feedback classes](/feedback-classes), show a [placeholder](/placeholders) or run a [preview](/previews). See [[loading-state]] for an overview.
   Keep the #loading anchor.
+
+## /flashes
+- Verified: "keeps its messages until new ones arrive" is correct ([up-flashes] = hungry + keep; keep is only prevented when the new fragment is non-empty, radio.js:517).
+- Overlay subsections: keep. Caching gotcha: explained. Screenshot: fine.
+- DECISION: /flashes moves to the Live fragments chapter, after hungry-elements (toc.yml moved in the sitting). Fix round: Live fragments overview gets a short mention/link (e.g. at the end of the hungry elements section: flashes are a ready-made hungry element); Forms overview line "To show confirmations or errors after a submission, see [[flashes]]" stays.
+- /submitting-forms gets a SHORT section "Showing confirmation or error flashes" (pointer to [[flashes]]: render an [up-flashes] element in the response, it updates with any response; one tiny example at most).

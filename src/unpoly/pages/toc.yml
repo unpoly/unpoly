@@ -47,7 +47,6 @@ learn:
         - reactive-server-forms
         - switching-form-state
         - disabling-forms
-        - flashes
         - handling-all-forms
         - custom-form-fields
         - watch-options
@@ -82,6 +81,7 @@ learn:
         - infinite-scrolling
         - polling
         - hungry-elements
+        - flashes
 
     - type: page-group
       title: History
