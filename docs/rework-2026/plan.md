@@ -995,6 +995,13 @@ gzip; WebMCP tool shape in a real Chrome (staging needs the WebMCP flag, token i
 unpoly.com); copy button in Safari + Firefox; nginx stays cache-free (a CDN must honor
 Vary: Accept); renew the origin-trial token.
 
+LOGGED TASK (Henning 2026-10-09): an em-dash and AI-trope pass over the ENTIRE docs site
+(guides, API doc comments, start page copy), after the chapter sittings; Opus with the
+humanizer/deslop checklists. Start page em-dashes known: "Every attribute has a JavaScript
+twin —", and three in "Your HTML keeps its meaning".
+START PAGE CANVAS (https://claude.ai/artifact/Caea9oZ8fHaTshK7j3V8eE): Henning iterates via
+comments + this session (the canvas's own chat panel is a separate Claude). Every change to
+port is listed in docs/rework-2026/startpage-port-log.md.
 PARALLELISM CAP (Henning 2026-10-09, after 4 parallel Fable writers + Opus critics
 exhausted his 5h window in ~2h): at most TWO writers in parallel; space out critics; the
 5h window, not the weekly quota, is the binding limit during sprints.
