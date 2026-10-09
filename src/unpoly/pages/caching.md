@@ -123,15 +123,19 @@ Expired pages also [remain accessible](/network-issues#offline-cache) after a [c
 ### Expiring content after an interaction
 
 `GET` requests don't expire any content. When the user makes a non-`GET` request (usually a form submission with `POST`),
-the *entire cache* is expired. A non-`GET` request has probably changed data on the server,
+the *entire cache* is expired as soon as the request is sent. A non-`GET` request has probably changed data on the server,
 so all cache entries should be [revalidated](#revalidation) before they are shown again.
 
-There are multiple ways to override this behavior:
+To change what a request expires, use any of the following. A value of `false` expires nothing:
 
 - Configure which requests should cause expiration in `up.network.config.expireCache`
 - Pass an [`{ expireCache }`](/up.render#options.expireCache) option to the rendering function
 - Set an [`[up-expire-cache]`](/up-follow#up-expire-cache) attribute on a link or form
-- Send an `X-Up-Expire-Cache` response header from the server
+
+To expire additional entries later:
+
+- Send an `X-Up-Expire-Cache` response header from the server.
+  It cannot undo the expiration that happened when the request was sent.
 - Expire cache entries from JavaScript with `up.cache.expire()`
 
 Each of these accepts a [URL pattern](/url-patterns) to expire only matching entries:
@@ -202,7 +206,8 @@ Evicted content is gone from the cache entirely, and a new network request is ne
 ### Evicting content after an interaction
 
 Eviction is the right choice when it is not acceptable for the user to see even a brief flash of stale content
-before [revalidation](#revalidation) finishes. The controls mirror those for expiration:
+before [revalidation](#revalidation) finishes. By default no request evicts content.
+The controls mirror those for expiration:
 
 - Configure which requests should cause eviction in `up.network.config.evictCache`
 - Pass an [`{ evictCache }`](/up.render#options.evictCache) option to the rendering function
@@ -211,6 +216,8 @@ before [revalidation](#revalidation) finishes. The controls mirror those for exp
 - Evict cache entries from JavaScript with `up.cache.evict()`
 
 Each of these accepts a [URL pattern](/url-patterns) to evict only matching entries.
+The configuration, option and attribute take effect when the request is sent.
+The response header takes effect when the response is received.
 
 
 ### Capping memory usage

@@ -32,16 +32,18 @@
   @experimental
 
 @param [up-expire-cache]
-  Whether existing [cache](/caching) entries will be [expired](/caching#expiration) with this request.
+  Whether existing [cache](/caching) entries will be [expired](/caching#expiration) when this request is sent.
 
   By default a non-GET request will expire the entire cache.
+  Set `[up-expire-cache="false"]` to not expire any cache entries.
   You may also pass a [URL pattern](/url-patterns) to only expire matching requests.
 
   Also see [`up.request({ expireCache })`](/up.request#options.expireCache) and `up.network.config.expireCache`.
 
 @param [up-evict-cache]
-  Whether existing [cache](/caching) entries will be [evicted](/caching#eviction) with this request.
+  Whether existing [cache](/caching) entries will be [evicted](/caching#eviction) when this request is sent.
 
+  By default no cache entries are evicted.
   You may also pass a [URL pattern](/url-patterns) to only evict matching requests.
 
   Also see [`up.request({ evictCache })`](/up.request#options.evictCache) and `up.network.config.evictCache`.

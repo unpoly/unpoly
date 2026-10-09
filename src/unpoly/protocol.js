@@ -425,11 +425,11 @@ up.protocol = (function() {
 
   /*-
   The server may send this optional response header to control which previously [cached](/caching)
-  responses should be [evicted](/caching#eviction) after this response.
+  responses should be [evicted](/caching#eviction) when this response is received.
 
   The value of this header is a [URL pattern](/url-patterns) matching responses that should be evicted.
 
-  For example, to expire all responses to URLs starting with `/notes/`:
+  For example, to evict all responses to URLs starting with `/notes/`:
 
   ```http
   X-Up-Evict-Cache: /notes/*
@@ -452,7 +452,7 @@ up.protocol = (function() {
 
   /*-
   The server may send this optional response header to control which previously [cached](/caching)
-  responses should be [expired](/caching#expiration) after this response.
+  responses should be [expired](/caching#expiration) when this response is received.
 
   The value of this header is a [URL pattern](/url-patterns) matching responses that should be expired.
 
@@ -468,15 +468,15 @@ up.protocol = (function() {
   X-Up-Expire-Cache: *
   ```
 
-  ### Overriding the client-side default
+  ### Relation to the client-side default
 
-  If the server does not send an `X-Up-Expire-Cache` header, Unpoly will [expire the entire cache](/up.network.config#config.expireCache) after a non-GET request.
+  When Unpoly sends a non-GET request, it [expires the entire cache](/up.network.config#config.expireCache)
+  before the server responds. This header can only expire *additional* entries.
+  It cannot undo an expiration that has already happened.
 
-  You may force Unpoly to keep the cache fresh after a non-GET request:
-
-  ```http
-  X-Up-Expire-Cache: false
-  ```
+  To keep the cache fresh after a non-GET request, configure the client instead.
+  For example, set an [`[up-expire-cache="false"]`](/up-follow#up-expire-cache) attribute
+  on the link or form, or customize `up.network.config.expireCache`.
 
   @header X-Up-Expire-Cache
   @stable

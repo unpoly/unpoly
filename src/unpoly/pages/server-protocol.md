@@ -92,7 +92,7 @@ in a new overlay. See [[subinteractions]] for the pattern these headers enable.
 **Updating the layer context.** An `X-Up-Context` response header carries the changed keys.
 See [Changing context from the server](/context#server-updates).
 
-**Controlling the cache.** After a non-`GET` request, Unpoly expires its entire cache.
+**Controlling the cache.** When Unpoly sends a non-`GET` request, it expires its entire cache.
 `X-Up-Expire-Cache` and `X-Up-Evict-Cache` expire or evict additional cache entries matching a [URL pattern](/url-patterns):
 
 ```http

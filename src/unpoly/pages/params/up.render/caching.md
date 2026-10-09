@@ -32,24 +32,25 @@
   @experimental
 
 @param {boolean|string} [options.expireCache]
-  Whether existing [cache](/caching) entries will be [expired](/caching#expiration) with this request.
+  Whether existing [cache](/caching) entries will be [expired](/caching#expiration) when this request is sent.
 
   Expired content remains in the cache, but will be [revalidated](/caching#revalidation) with the server
   after rendering.
 
   By default, any non-GET request will expire the entire cache.
   This can be configured with `up.network.config.expireCache`.
+  Pass `false` to not expire any cache entries.
 
-  To only expire some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
+  To only expire some requests, pass a [URL pattern](/url-patterns) that matches requests to uncache.
   You may also pass a function that accepts an existing `up.Request` and returns a boolean value.
 
 @param {boolean|string} [options.evictCache]
-  Whether existing [cache](/caching) entries will be [evicted](/caching#eviction) with this request.
+  Whether existing [cache](/caching) entries will be [evicted](/caching#eviction) when this request is sent.
 
   By default, Unpoly will never evict entries while the cache has
   [space](/up.network.config#config.cacheSize),
   preferring [expiration](/caching#expiration) instead.
   This can be configured with `up.network.config.evictCache`.
 
-  To only evict some requests, pass an [URL pattern](/url-patterns) that matches requests to uncache.
+  To only evict some requests, pass a [URL pattern](/url-patterns) that matches requests to uncache.
   You may also pass a function that accepts an existing `up.Request` and returns a boolean value.

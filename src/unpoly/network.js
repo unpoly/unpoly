@@ -130,13 +130,13 @@ up.network = (function() {
       ```
 
     @param {(Function(up.Request): boolean|string)|boolean} [config.expireCache]
-      A function that controls [cache expiration](/caching#expiration) before the given request loads.
+      A function that controls [cache expiration](/caching#expiration) when the given request is sent.
 
       Returning `true` will expire the entire cache.\
       Returning `false` will not expire any cache entries.\
       Returning a [URL pattern](/url-patterns) will expire matching cache entries only.
 
-      By default, Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method:
+      By default, Unpoly will expire the entire cache when it sends a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method:
 
       ```js
       up.request({ url: '/path', method: 'get' })  // no cache entries expired
@@ -144,13 +144,13 @@ up.network = (function() {
       ```
 
     @param {(Function(up.Request): boolean|string)|boolean} [config.evictCache=false]
-      A function that controls [cache eviction](/caching#eviction) before the given request loads.
+      A function that controls [cache eviction](/caching#eviction) when the given request is sent.
 
       Returning `true` will evict the entire cache.\
       Returning `false` will not evict any cache entries.\
       Returning a [URL pattern](/url-patterns) will evict matching cache entries only.
 
-      By default, Unpoly will *not* evict any cache entries when a request is made.
+      By default, Unpoly will *not* evict any cache entries when a request is sent.
 
     @param {boolean|Function(): boolean} [config.progressBar]
       Whether to show a [progress bar](/progress-bar) for [late requests](#config.lateDelay).
@@ -245,7 +245,7 @@ up.network = (function() {
   Expired entries remain in the cache, but will be [revalidated](/caching#revalidation)
   after rendering.
 
-  By default, Unpoly automatically expires the entire cache whenever it processes
+  By default, Unpoly automatically expires the entire cache whenever it sends
   a request with a non-GET HTTP method. To customize this rule, use `up.network.config.expireCache`.
 
   The server may also expire cache entries by sending an [`X-Up-Expire-Cache`](/X-Up-Expire-Cache) header.
@@ -458,14 +458,15 @@ up.network = (function() {
       With `{ cache: false }` (the default), Unpoly will always make a network request.
 
     @param {boolean|string} [options.expireCache]
-      Whether to [expire](/caching#expiration) the [cache](/caching) after this request.
+      Whether to [expire](/caching#expiration) the [cache](/caching) when this request is sent.
 
-      Defaults to the result of `up.network.config.expireCache`, which defaults to expiring the entire cache after a non-GET request.
+      Defaults to the result of `up.network.config.expireCache`, which defaults to expiring the entire cache for a non-GET request.
+      Pass `false` to not expire any cache entries.
 
       You may also pass a [URL pattern](/url-patterns) to only expire matching responses.
 
     @param {boolean|string} [options.evictCache]
-      Whether to [evict](/caching#eviction) the [cache](/caching) after this request.
+      Whether to [evict](/caching#eviction) the [cache](/caching) when this request is sent.
 
       Defaults to the result of `up.network.config.evictCache`, which defaults to `false`.
 
