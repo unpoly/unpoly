@@ -1,103 +1,48 @@
 Customizing overlays
 ====================
 
-Overlays ship with minimal styling and common default behavior.
-That look and feel can be customized.
+Overlays ship with minimal styling. When opening an overlay, you can pick a size,
+assign a CSS class, position popups and drawers, and choose open and close animations.
+Beyond that, you can override Unpoly's CSS or change the overlay's elements with JavaScript.
 
 
-Picking the right mode {#modes}
-----------------------
+Picking a mode {#modes}
+--------------
 
-The default appearance and behavior is governed by the overlay's *mode*.
-The mode is [set when the overlay is opened](/opening-overlays#modes).
-
-The following modes are available:
+An overlay's default look and behavior come from its [mode](/overlays#layer-modes),
+which is [chosen when the overlay is opened](/opening-overlays#modes):
 
 @include overlay-modes-table
 
-When building a custom overlay, start with the closest mode and customize
-the look and feel using one of the methods below.
+Every customization below applies on top of a mode, so start with the mode closest to what you need.
+Defaults for all overlays live in `up.layer.config.overlay`. Each mode has its own
+defaults in `up.layer.config.modal`, `up.layer.config.drawer`, `up.layer.config.popup` and `up.layer.config.cover`.
 
 
-Understanding the HTML structure
---------------------------------
-
-The various [overlay modes](#modes) have an HTML structure like this:
-
-```html
-<up-modal size="medium">                     <!-- container with attributes -->
-  <up-modal-backdrop></up-modal-backdrop>    <!-- semi-transparent background -->
-  <up-modal-viewport>                        <!-- scroll bar -->
-    <up-modal-box>                           <!-- white box with padding -->
-      <up-modal-content>...</div>            <!-- content parent (unstyled) -->
-      <up-modal-dismiss>×</up-modal-dismiss> <!-- dismiss icon -->
-    </up-modal-box>
-  </up-modal-viewport>
-</up-modal>
-```
-
-For drawers and cover modals replace the `<up-modal>` elements with `<up-drawer>` or `<up-cover>` accordingly.
-
-Popups have a simpler markup as they don't have a backdrop, scroll bar or dismiss icon:
-
-```html
-<up-popup size="medium" position="bottom" align="left">
-  <up-popup-box>
-    <up-popup-content>...</div>
-  </up-popup-box>
-</up-popup>
-```
-
-
-Customizing overlays with CSS
------------------------------
-
-Unpoly ships with some basic CSS styles for the various overlay modes.
-
-You may override Unpoly's default styles in your CSS:
-
-```css
-up-modal-box {
-  background-color: #eeeeee;
-  padding: 20px;
-}
-```
-
-You may also style overlays with a particular property.
-E.g. the following selector would only match the box of a right-aligned popup:
-
-```css
-up-popup[align=right] up-popup-box {
-  ...
-}
-```
-
-
-Overlay sizes
+Overlay sizes {#overlay-sizes}
 -------------
 
-When opening an overlay you may pass an `[up-size]` attribute or `{ size }` option that give the overlay a width:
+To give an overlay a width, set an `[up-size]` attribute on the link that opens it:
 
 ```html
-<a href="/path" up-layer="new" up-size="small">open small modal</a>
-<a href="/path" up-layer="new" up-size="medium">open medium modal</a>
-<a href="/path" up-layer="new" up-size="large">open large modal</a>
-<a href="/path" up-layer="new" up-size="grow">open growing modal</a>
-<a href="/path" up-layer="new" up-size="full">open full-width modal</a>
+<a href="/terms" up-layer="new" up-size="large">Show terms</a> <!-- mark: up-size="large" -->
 ```
 
-If you don't pass a size you get a `medium` overlay.
+From JavaScript, pass a `{ size }` option to `up.layer.open()`.
 
-Sizes set a maximum width for the overlay's box element (e.g. `<up-modal-box>`). The default widths are:
+When no size is given, the overlay is `medium`. A size sets the width of the overlay's box element.
+The default widths are:
 
-| Mode     | small   | medium  | large     | full   | grow              |
-|----------|--------:|--------:|----------:|-------:|-------------------|
-| `modal`  | `350px` | `650px` | `1000px`  | `100%` | grow with content |
-| `popup`  | `180px` | `300px` | `550px`   | `100%` | grow with content |
-| `drawer` | `150px` | `340px` | `600px`   | `100%` | grow with content |
-| `cover`  | -       | -       | -         | `100%` | -                 |
+| Mode     | `small` | `medium` | `large`  | `full` | `grow`             |
+|----------|--------:|---------:|---------:|-------:|--------------------|
+| `modal`  | `350px` | `650px`  | `1000px` | `100%` | grows with content |
+| `popup`  | `180px` | `300px`  | `550px`  | `100%` | grows with content |
+| `drawer` | `150px` | `340px`  | `600px`  | `100%` | grows with content |
+| `cover`  | -       | -        | -        | `100%` | -                  |
 
-You can customize sizes with CSS:
+Regardless of size, an overlay never grows wider than the screen.
+
+To change the width of a size, override Unpoly's CSS:
 
 ```css
 up-modal[size=medium] up-modal-box {
@@ -105,100 +50,50 @@ up-modal[size=medium] up-modal-box {
 }
 ```
 
-Regardless of size, overlays never grow wider than the screen width.
 
-
-Customizing dismiss controls
-----------------------------
-
-By default the user can dismiss an overlay user by pressing `Escape`, by clicking outside the overlay box
-or by pressing an "X" icon in the top-right corner.
-
-You may [customize the dismiss controls](/closing-overlays#customizing-dismiss-controls)
-available to the user.
-
-
-
-Overlay classes
+Overlay classes {#overlay-classes}
 ---------------
 
-Overlays are currently limited to the built-in overlay modes.
-
-You may however make a variant of an existing mode, by passing an `[up-class]` attribute or `{ class }` option
-when opening an overlay:
+To make a variant of a mode, like a modal with a warning color, set an `[up-class]` attribute
+when opening the overlay:
 
 ```html
-<a href="/confirm-erase"
-   up-method="delete"
-   up-layer="new"
-   up-class="warning">
-  Erase disk
-</a>
+<a href="/confirm-erase" up-method="delete" up-layer="new" up-class="warning">Erase disk</a> <!-- mark: up-class="warning" -->
 ```
 
-The class will be assigned to the overlay's container element:
+From JavaScript, pass a `{ class }` option to `up.layer.open()`.
+
+The class is assigned to the overlay's container element:
 
 ```html
-<up-modal class="warning">
-...
+<up-modal class="warning"> <!-- mark: class="warning" -->
+  ...
 </up-modal>
 ```
 
-You can now style "warning modals" in your CSS:
+You can now style warning modals in your CSS:
 
 ```css
 up-modal.warning up-modal-box {
-  background-color: yellow
+  background-color: #fff3cd;
 }
 ```
 
-
-Customizing overlay elements
-----------------------------
-
-The overlay HTML structure is static and cannot be changed through an option.
-
-If you need to customize the overlay elements, you may use the `up:layer:opened` event.
-The event is emitted after the overlay was inserted into the DOM, but before it is
-being rendered by the browser.
-
-```js
-up.on('up:layer:opened', function(event) {
-  if (isChristmas()) {
-    up.element.affix(event.layer.element, '.santa-hat', { text: 'Merry Christmas!' })
-  }
-})
-```
-
-Make sure to not remove any of the existing overlay elements or things will break.
+To give every overlay a class, configure `up.layer.config.overlay.class`.
 
 
-Open and close animatios {#animation}
-------------------------
-
-When opening an overlay, you can configure an [animation](/up.motion#animations) for the opening and closing sequence:
-
-```html
-<a href="/details" up-layer="new" up-animation="move-from-top" up-close-animation="move-to-bottom">
-  Open details
-</a> 
-```
-
-Default animations can be configured in `up.layer.config`.
-
-
-Popup position
+Popup position {#popup-position}
 --------------
 
-By default popups will open below the link that opened it (the `{ origin }`).
-You may control the position of the popup relative to the origin by assigning
-`[up-position]` and `[up-align]` attributes to the opening link:
+A popup is anchored to the link or button that opened it (the `{ origin }`).
+By default it opens below that element, with their left edges aligned.
+To change this, set `[up-position]` and `[up-align]` attributes on the opening link:
 
 ```html
-<a href="/help" up-layer="new popup" up-position="top" up-align="right">Show help</a>
+<a href="/help" up-layer="new popup" up-position="top" up-align="right">Show help</a> <!-- mark: up-position="top" up-align="right" -->
 ```
 
-When opening an overlay with JavaScript, use `{ position, align }` options.
+From JavaScript, pass `{ position, align }` options to `up.layer.open()`.
 
 The following combinations are supported:
 
@@ -210,26 +105,138 @@ The following combinations are supported:
 | `bottom`       | `left`      | Popup sits below the origin. Left edges align.          |
 | `bottom`       | `right`     | Popup sits below the origin. Right edges align.         |
 | `bottom`       | `center`    | Popup sits below the origin. Horizontal centers align.  |
-| `left`         | `top`       | Popup sits left to the origin. Top edges align          |
-| `left`         | `bottom`    | Popup sits left to the origin. Bottom edges align.      |
-| `left`         | `center`    | Popup sits left to the origin. Vertical centers align.  |
-| `right`        | `top`       | Popup sits right to the origin. Top edges align.        |
-| `right`        | `bottom`    | Popup sits right to the origin. Bottom edges align.     |
-| `right`        | `center`    | Popup sits right to the origin. Vertical centers align. |
+| `left`         | `top`       | Popup sits left of the origin. Top edges align.         |
+| `left`         | `bottom`    | Popup sits left of the origin. Bottom edges align.      |
+| `left`         | `center`    | Popup sits left of the origin. Vertical centers align.  |
+| `right`        | `top`       | Popup sits right of the origin. Top edges align.        |
+| `right`        | `bottom`    | Popup sits right of the origin. Bottom edges align.     |
+| `right`        | `center`    | Popup sits right of the origin. Vertical centers align. |
+
+To change the default for all popups, configure `up.layer.config.popup.position` and `up.layer.config.popup.align`.
 
 
-Drawer position
+Drawer position {#drawer-position}
 ---------------
 
-By default, drawers will slide in on the left edge of the screen.
-
-You can open a drawer on the edge by setting an `[up-position="right"]` attribute:
+By default a drawer slides in from the left edge of the screen.
+To open it on the right edge, set an `[up-position="right"]` attribute:
 
 ```html
-<a href="/settings" up-layer="new drawer" up-position="right">Settings</a>
+<a href="/settings" up-layer="new drawer" up-position="right">Settings</a> <!-- mark: up-position="right" -->
 ```
 
-From JavaScript, pass a `{ position: 'right' }` option.
+From JavaScript, pass a `{ position: 'right' }` option to `up.layer.open()`.
+The drawer's open and close animations follow its position.
+
+To open all drawers on the right, configure `up.layer.config.drawer.position`.
+
+
+Open and close animations {#animation}
+-------------------------
+
+Overlays fade in and out by default. Drawers slide in from their screen edge.
+
+To use different [animations](/animation) for one overlay, set `[up-animation]` and `[up-close-animation]`
+attributes on the link that opens it:
+
+```html
+<a href="/details" up-layer="new" up-animation="move-from-top" up-close-animation="move-to-bottom"> <!-- mark: up-animation="move-from-top" up-close-animation="move-to-bottom" -->
+  Open details
+</a>
+```
+
+From JavaScript, pass `{ animation, closeAnimation }` options to `up.layer.open()`.
+Both directions can also be timed with `[up-duration]`, `[up-easing]`, `[up-close-duration]` and `[up-close-easing]`
+attributes, or the matching `up.layer.open()` options.
+
+To change the defaults for all overlays, configure `up.layer.config.overlay.openAnimation`
+and `up.layer.config.overlay.closeAnimation`. Each mode can override these in its own config,
+like `up.layer.config.modal.openAnimation`.
+
+A single call to `up.layer.accept()` or `up.layer.dismiss()` can also pick
+[its own close animation](/closing-overlays#close-animation).
+
+
+Dismiss controls {#customizing-dismiss-controls}
+----------------
+
+By default the user can dismiss an overlay by pressing `Escape`, by clicking outside the overlay box,
+or by clicking the `×` button in the top-right corner. Popups have no `×` button.
+
+To enable only some of these controls, or to change the `×` symbol and its accessibility label,
+see [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls).
+
+
+Styling overlays with CSS {#css}
+-------------------------
+
+Unpoly ships with some basic CSS for each overlay mode. You can override it in your own stylesheet.
+
+### The overlay HTML structure {#html-structure}
+
+A modal overlay is built from these elements:
+
+```html
+<up-modal size="medium">                                   <!-- container with attributes -->
+  <up-modal-backdrop></up-modal-backdrop>                  <!-- semi-transparent background -->
+  <up-modal-viewport>                                      <!-- scrolls the box -->
+    <up-modal-box>                                         <!-- white box with padding -->
+      <up-modal-content>...</up-modal-content>             <!-- parent of your fragment (unstyled) -->
+      <up-modal-dismiss>×</up-modal-dismiss>               <!-- dismiss button -->
+    </up-modal-box>
+  </up-modal-viewport>
+</up-modal>
+```
+
+Drawers have the same structure with `<up-drawer>`, `<up-drawer-box>` and so on.
+Cover overlays use `<up-cover>` elements and have no backdrop.
+
+Popups are simpler. They have no backdrop, no viewport and no dismiss button,
+and the container is the box itself:
+
+```html
+<up-popup size="medium" position="bottom" align="left">
+  <up-popup-content>...</up-popup-content>
+</up-popup>
+```
+
+### Overriding the default styles {#overriding-styles}
+
+Target these elements in your CSS to restyle a mode:
+
+```css
+up-modal-box {
+  background-color: #eeeeee;
+  padding: 20px;
+}
+```
+
+Your settings for size, position and alignment are reflected as attributes on the container element,
+so you can style a particular variant. The selector below only matches the box of a drawer on the right edge:
+
+```css
+up-drawer[position=right] up-drawer-box {
+  border-left: 1px solid #ccc;
+}
+```
+
+
+Customizing overlay elements {#customizing-overlay-elements}
+----------------------------
+
+The overlay structure [above](#html-structure) is fixed and cannot be changed through an option.
+To add your own elements, listen to `up:layer:opened`. The event is emitted
+after the overlay was inserted into the DOM, but before it is painted by the browser:
+
+```js
+up.on('up:layer:opened', function(event) {
+  if (isChristmas()) {
+    up.element.affix(event.layer.element, '.santa-hat', { text: 'Merry Christmas!' })
+  }
+})
+```
+
+Do not remove any of the existing overlay elements, or the overlay will break.
 
 
 @page customizing-overlays
