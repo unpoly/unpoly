@@ -4,8 +4,9 @@ A guided CLI walks you through the process. Before starting, set the new version
 `package.json` and write its changelog entry in `docs/changes/CHANGELOG_<major>.x.md` — the tool reads the version from
 `package.json` and tags with it.
 
-In the changelog entry, mark breaking changes with ⚠️ at the start of the item.
-Changes handled by `unpoly-migrate.js` are not considered breaking.
+In the changelog entry, start an item with ⚠️ when it may require changes to user code but `unpoly-migrate.js`
+polyfills the old usage, or with ❌ when it breaks code without a polyfill. Scripts find these markers only at the
+start of an item or paragraph.
 
 ```
 bin/release
