@@ -60,20 +60,18 @@ When adding Unpoly to an existing application, we recommend to
 `up.compiler()` is a great way to integrate external JavaScript libraries, like
 maps, date pickers or charts.
 
-Let's say your JavaScript plugin wants you to call `lightboxify()`
-on links that should open a lightbox. You decide to
-do this for all links with a `lightbox` class:
+Let's say a date picker library wants you to call `new DatePicker()` on every input
+that should show a calendar. You decide to do this for all inputs with a `date-picker` class:
 
 ```html
-<a href="river.png" class="lightbox">River</a>
-<a href="ocean.png" class="lightbox">Ocean</a>
+<input name="birthday" class="date-picker">
 ```
 
-We can register a compiler that calls `lightboxify()` on all matching elements:
+We can register a compiler that creates a date picker for every matching input:
 
 ```js
-up.compiler('a.lightbox', function(element) {
-  lightboxify(element)
+up.compiler('input.date-picker', function(input) {
+  new DatePicker(input)
 })
 ```
 
