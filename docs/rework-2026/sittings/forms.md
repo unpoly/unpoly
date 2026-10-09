@@ -38,3 +38,8 @@
   | | Request 2 for country select and price | |
   | | Request 2 loads | Country select and price updated |
   Keep the one-line lead-in pointing at the postage example and the closing "consistent values" sentence.
+
+## /switching-form-state
+- Section order (field-type sections): keep. Client vs. server line: clear. Custom effects: distinct, keep.
+- #reacting-to-different-events: leave the topic to [[watch-options]]. Shrink to one or two sentences (default is the `input` event; other events and debouncing via [[watch-options]]), keep the anchor.
+- After "A hidden element gets a `[hidden]` attribute." add that fields inside it are still submitted with the form. Draft: "Fields inside a hidden element are still submitted with the form. To exclude them from the submission, [disable](#disable) them instead." (Verified: up.Params excludes only disabled fields, params.js:594.)
