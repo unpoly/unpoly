@@ -995,6 +995,23 @@ gzip; WebMCP tool shape in a real Chrome (staging needs the WebMCP flag, token i
 unpoly.com); copy button in Safari + Firefox; nginx stays cache-free (a CDN must honor
 Vary: Accept); renew the origin-trial token.
 
+CHAPTER PRODUCTION SPRINT (2026-10-09, Henning: "drive this site rework as far as we can"
+within a banked quota until Monday evening): parallel Fable writers per topic under the
+shared docs/rework-2026/writer-brief.md; one Opus critic per wave (fixes clear errors,
+reports judgment calls); writer + critic reports condensed in docs/rework-2026/waves/.
+WRITTEN + CRITIC-PASSED: Forms (10 pages, 2 batches), Loading state, Live fragments (wave 1);
+History, Overlays (8 pages; layer-terminology folded into overlays#layer-modes), Scrolling &
+focus, Network & caching, Animation (wave 2). WRITTEN, critic running: Backend integration
+(skipping-rendering dissolved → conditional-requests; Vary tables → optimizing-responses;
+handling-asset-changes titled "Reacting to new deployments"). RUNNING: Advanced rendering
+batch 1 (incl. navigation → navigation-defaults rename). Renames done: analytics →
+tracking-page-views. layer-option titled "Targeting other layers". PENDING HENNING: sittings
+(wave 1 first), Animation one page vs four (plan says one; writer wrote four), critics'
+judgment calls, server-bindings vocabulary swap + header-reference liberation (writer
+recommends: no full swap; API-index "HTTP headers" group), [up-on-offline] implementation
+bug (ERROR_CALLBACK vs event; code fix). Reference-doc bugs collected in waves/ for one
+fix round.
+
 SEARCH RESULT PRESENTATION (Henning 2026-10-09, from a "link to" screenshot where three
 "Links"-ish results were indistinguishable): (a) every result shows its closest hub as a
 small gray line UNDER the title (Learn page → topic title; API feature → module; module →
