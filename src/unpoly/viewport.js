@@ -138,6 +138,7 @@ up.viewport = (function() {
   - give the element an attribute [`up-fixed="top"`](/up-fixed-top) or [`up-fixed="bottom"`](/up-fixed-bottom)
   - [configure default options](/up.viewport.config) for `{ fixedTopSelectors }` or `{ fixedBottomSelectors }`
 
+  @learn-ref scrolling#reveal
   @function up.reveal
 
   @param {string|Element|jQuery} element
@@ -209,6 +210,7 @@ up.viewport = (function() {
 
   Focusing an element will also [reveal](/up.reveal) it, unless `{ preventScroll: true }` is passed.
 
+  @learn-ref focus#js
   @function up.focus
 
   @param {string|Element|jQuery} element
@@ -852,6 +854,7 @@ up.viewport = (function() {
   </div>
   ```
 
+  @learn-ref scrolling#multiple-viewports
   @selector [up-viewport]
   @stable
   @signature
@@ -884,6 +887,7 @@ up.viewport = (function() {
   Unpoly will measure sticky element like permanently fixed elements.
   The current scroll position is not taken into account.
 
+  @learn-ref scroll-tuning#fixed-layout-elements-obstructing-the-viewport
   @selector [up-fixed=top]
   @stable
   @signature
@@ -916,6 +920,7 @@ up.viewport = (function() {
   Unpoly will measure sticky element like permanently fixed elements.
   The current scroll position is not taken into account.
 
+  @learn-ref scroll-tuning#fixed-layout-elements-obstructing-the-viewport
   @selector [up-fixed=bottom]
   @stable
   */
