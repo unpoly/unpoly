@@ -85,6 +85,15 @@ claude plugin install unpoly@unpoly --scope project
 ```
 
 
+## Download skill {#download}
+
+To use the skill in a chat interface that supports skills, like claude.ai or chatgpt.com, download
+[unpoly-docs.zip]([[=base_url]]/agent-skills/unpoly-docs.zip) and upload it in your chat's settings. The chat needs
+code execution turned on to run the skill's search script.
+
+**An uploaded skill does not update itself.** To get the latest docs, download it again and replace your upload.
+
+
 ## Make your agent use it {#make-your-agent-use-it}
 
 Agents don't always reach for a skill on their own. Add this line to your project's
