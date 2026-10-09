@@ -17,3 +17,24 @@
   > Users can change fields faster than your server responds, or submit the form while a validation is still loading. Unpoly keeps the form consistent: it merges validations into a single request, queues new validations while one is in flight, and aborts pending validations when the form is submitted. See [preventing race conditions](/reactive-server-forms#race-conditions) for details.
   Verify each claim against the code first (esp. the abort condition: only when the submission updates the form or an ancestor).
 - Retitle of #form-groups agreed; Rails disclaimer agreed (all pages).
+
+## /reactive-server-forms
+- #server: add `@purchase.validate` to the validation branch of the Rails example (and make the prose match).
+- #urls ("Rendering from other URLs"): keep on this page.
+- [up-watch-disable] subsection: stays under race conditions.
+- #race-conditions restructure (owner of concurrency, see /validation decision):
+  (1) Lead with the promise, then three bold-keyword guarantees (ancestor rule folded into batching):
+  > Users can change fields faster than your server responds. Unpoly keeps the form consistent, however fast the user is and however slow the network:
+  > - **One request at a time.** Each form has at most one validation request in flight. Later changes wait until it has loaded.
+  > - **Batched updates.** Changes that waited are sent together, in a single request for all their targets. When one target contains another, only the outer one is requested.
+  > - **Submitting wins.** When the user submits while a validation is loading, the validation is aborted. (Verify the exact abort condition in code; keep the qualifier if it only applies when the submission updates the form or an ancestor.)
+  (2) Replace the six-step prose scenario with a timeline table, headings "User input | Network | Form changes":
+  | User input | Network | Form changes |
+  |---|---|---|
+  | Selects a continent | Request 1 for the country select | |
+  | Enters a parcel weight | *waits for request 1* | |
+  | Changes the continent again | *waits for request 1* | |
+  | | Request 1 loads | Country select updated |
+  | | Request 2 for country select and price | |
+  | | Request 2 loads | Country select and price updated |
+  Keep the one-line lead-in pointing at the postage example and the closing "consistent values" sentence.
