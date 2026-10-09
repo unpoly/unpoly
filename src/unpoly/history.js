@@ -747,6 +747,8 @@ up.history = (function() {
   </a>
   ```
 
+  @learn-ref restoring-history#back-link
+
   @selector [up-back]
   @stable
   @signature
