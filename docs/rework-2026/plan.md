@@ -1025,6 +1025,13 @@ PRE-SHIP TASKS (Henning 2026-10-09):
   page), then report whether they understood Unpoly's shape and niche, and what confused
   them. Timing (Henning 2026-10-09): after the fix round / sweeps / em-dash pass, BEFORE
   the last mechanical steps (namespace rename, URL move).
+- REVISIT SEARCH RANKING (Henning 2026-10-09): after the chapter rewrites, the guide
+  /layer-option ("Targeting other layers") ranks 6th for "layer", behind five API features
+  (up.layer.current, [up-layer=new], …); the title no longer contains "layer" as a word.
+  The ranking spec now uses "overlay" for the boost example, and "cache requests" accepts
+  learn/network.md in the top 3 (site 1754892f). Decide whether to address this by title,
+  @signature, or a ranking rule, and re-check the other expectations touched that day.
+  Timing: with the fix round, so later title changes are already in.
 PRE-SHIP ORDER: Advanced rendering critic → Henning's sittings (+ module-intro Fable batch
 in parallel) → fix round → final learn-ref sweep → em-dash/AI-trope pass → persona review
 → Unpoly::Guide→Unpoly::Site rename → URL move (/api/…, /learn/…) → release sync (FACE
