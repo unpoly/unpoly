@@ -1,129 +1,207 @@
 Lazy loading content
 ====================
 
-Unpoly lets you load additional fragments when a placeholder enters the DOM or viewport.
+Unpoly can load parts of a page after the page itself has rendered.
+A placeholder with an `[up-defer]` attribute fetches its content from a separate URL,
+either right away, when it is scrolled into view, or when your JavaScript decides.
+Expensive or rarely seen fragments no longer delay the first paint.
 
-By deferring the loading of non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments
-with a separate URL, you can paint important content earlier.
+
+## Deferring a fragment {#on-insert}
+
+Look for fragments that are expensive to render on the server, but aren't needed immediately.
+For example, a large navigation menu that only appears once the user clicks a menu icon:
+
+```html
+<div id="menu">
+  Hundreds of links here
+</div>
+```
+
+Move the menu's content to its own route, like `/menu`.
+In the page, leave only a placeholder with an `[up-defer]` attribute.
+An `[up-href]` attribute says where to load the content from:
+
+```html
+<div id="menu" up-defer up-href="/menu"> <!-- mark: up-defer -->
+  Loading...
+</div>
+```
+
+As soon as the placeholder is inserted into the page, Unpoly requests `/menu`:
+
+```http
+GET /menu HTTP/1.1
+X-Up-Target: #menu
+```
+
+The server responds with a page containing the `#menu` element with its full content:
+
+```html
+<div id="menu">
+  Hundreds of links here
+</div>
+```
+
+Unpoly swaps the placeholder with the element from the response.
+Other elements in the response are discarded, so the server is free to send
+a full HTML document.
+
+Note the following:
+
+- The placeholder [targets itself](/targeting-fragments) by default, so it must have a
+  [derivable target selector](/target-derivation) like a unique `[id]`.
+- The `#menu` element in the response must *not* have an `[up-defer]` attribute,
+  or it would load itself again, forever.
+- The placeholder's children (`Loading...`) are shown until the content arrives.
+  See [showing a fallback](#pending) below.
 
 
-## Extracting deferred fragments {#on-insert}
+## Loading when scrolled into view {#on-reveal}
 
-@include defer-example
-
-## Loading as the placeholder scrolls into view {#on-reveal}
-
-Instead of loading deferred content right away, you may also wait until the placeholder is scrolled into its [viewport](/up.viewport).
-
+Instead of loading right away, a placeholder can wait until it is scrolled into its [viewport](/up.viewport).
 For this set an `[up-defer="reveal"]` attribute:
 
 ```html
-<div id="menu" up-defer="reveal" up-href="/menu"> <!-- mark: up-defer="reveal" -->
+<div id="comments" up-defer="reveal" up-href="/posts/5/comments"> <!-- mark: up-defer="reveal" -->
   Loading...
 </div>
 ```
 
-To shift the load timing to an earlier or later moment, set an `[up-intersect-margin]` attribute.
+A placeholder that is already visible when inserted loads immediately.
 
-You can use the loading of deferred placeholders to [implement infinite scrolling](/infinite-scrolling) without custom JavaScript.
+To load some pixels before the placeholder becomes visible, set an `[up-intersect-margin]` attribute.
+A positive margin loads earlier, a negative margin requires the user to scroll into the element.
+
+A placeholder that loads when revealed can also [implement infinite scrolling](/infinite-scrolling)
+without custom JavaScript.
 
 > [note]
-> Safari requires an `[up-defer="reveal"]` element to have a non-zero width and height to be able to
-> track its scrolling position.
+> Safari requires an `[up-defer="reveal"]` element to have a non-zero width and height
+> to track its scrolling position.
 
 
-## Custom load timing {#scripted}
+## Loading from JavaScript {#scripted}
 
-By setting an `[up-defer="manual"]` attribute, the deferred content will not load on its own:
+With an `[up-defer="manual"]` attribute, a placeholder does not load on its own:
 
 ```html
-<div up-defer="manual" id="menu" up-href="/menu">
+<div id="menu" up-defer="manual" up-href="/menu"> <!-- mark: up-defer="manual" -->
   Loading...
 </div>
 ```
 
-You can now control the load timing by calling `up.deferred.load()` from your own JavaScripts.
-The code below uses a [compiler](/enhancing-elements) to load the fragment after two seconds:
+Load it whenever you like by passing it to `up.deferred.load()`.
+The [compiler](/enhancing-elements) below loads the menu after two seconds:
 
 ```js
 up.compiler('#menu[up-defer]', function(placeholder) {
-  setTimeout(() => up.deferred.load(placeholder), 2000)
+  setTimeout(() => up.deferred.load(placeholder), 2000) // mark: up.deferred.load
 })
 ```
 
-
-## Performance considerations
-
-By deferring the loading of expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments,
-you can paint critical content earlier. This will generally improve metrics like 
-[First Contentful Paint](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint) (FCP) and 
-[Interaction to Next Paint](https://web.dev/articles/inp) (INP).
-
-Note, however, that when lazy loaded content is inserted later, it may cause [layout shift](https://web.dev/articles/cls) by pushing
-down subsequent elements in the [flow](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Normal_Flow).
-This can force a browser to re-layout parts of the page.
-
-Layout shift is rarely a problem if lazy loaded content appears [below the fold](https://www.abtasty.com/blog/above-the-fold/),
-or when it has absolute positioning that removes it from the flow.
+`up.deferred.load()` returns a promise for the [render result](/up.RenderResult),
+so you can wait for the content to arrive.
 
 
-## SEO considerations {#seo}
+## Showing a fallback while loading {#pending}
 
-Search engines may not realiably index lazy loaded content. Avoid lazy loading heavily optimized keywords,
-or [use Google's URL inspection tool to test your implementation](https://developers.google.com/search/docs/crawling-indexing/javascript/lazy-loading). 
-
-To allow crawlers to discover and index lazy loaded content *as a separate URL*, you can use `[up-defer]` on a standard hyperlink:
+The initial children of an `[up-defer]` element are shown until its content has loaded:
 
 ```html
-<a id="menu" up-defer href="/menu">load menu</a>
+<div id="menu" up-defer up-href="/menu">
+  Loading... <!-- mark: Loading... -->
+</div>
 ```
 
-Since this will index `/menu` as a separate page, it should render with a full application layout. You can optionally
-omit the layout if an `X-Up-Target` header is present on the request.
+While the content is loading, the placeholder is also assigned an `.up-loading` class.
+All [loading state](/loading-state) techniques for regular links, like [placeholders](/placeholders)
+and [previews](/previews), work with `[up-defer]` elements as well.
+
+> [note]
+> When the deferred content is already [cached](#caching), the placeholder is
+> replaced immediately and its fallback children are never shown.
 
 
+## Loading multiple fragments from one URL {#loading-multiple-fragments-from-the-same-url}
 
-## Caching considerations {#caching}
+Placeholders may be scattered across the page, but load from the same URL:
+
+```html
+<div id="editorial-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark: id="editorial-controls" -->
+
+... other HTML ...
+
+<div id="analytics-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark: id="analytics-controls" -->
+```
+
+Unpoly [sends a single request](/X-Up-Target#merging) with both targets:
+
+```http
+GET /articles/123/deferred HTTP/1.1
+X-Up-Target: #editorial-controls, #analytics-controls
+```
+
+The response must contain both elements.
 
 
-### Cached partials are rendered instantly
+## Updating other fragments {#distant}
 
-Unpoly caches [responses to GET requests](/caching) on the client. When deferred content is already cached, it is rendered synchronously.
-The `[up-defer]` placeholder will never appear in the DOM.
+Instead of replacing itself, a placeholder can target one or [multiple](/targeting-fragments#multiple)
+other fragments. For this set an [`[up-target]`](/up-defer#up-target) attribute.
 
-This means Unpoly will cache complete pages, including any lazy-loaded fragments. Navigating to such pages will render them instantly,
-without showing a flash of [fallback state](#pending). Such pages will also remain accessible in the event of [network issues](/network-issues).
+The following placeholder updates `#editorial-controls` and `#analytics-controls`
+when it is scrolled into view:
 
-Deferred content that is rendered from the cache will be [revalidated](/caching#revalidation) unless you also set an
-[`[up-revalidate=false]`](/up-follow#up-revalidate) attribute.
+```html
+<a href="/articles/123/controls" up-defer="reveal" up-target="#editorial-controls, #analytics-controls"> <!-- mark: up-target="#editorial-controls, #analytics-controls" -->
+  Load controls
+</a>
+```
+
+[Infinite scrolling](/infinite-scrolling) is built on this technique: a link at the end of a list
+appends the next page to the list, then replaces itself with a link to the page after that.
 
 
-### Improving cacheability on the server
+## Caching {#caching}
 
-Many apps have a server-side cache with HTML that is expensive to render.
+### Cached partials are rendered instantly {#cached-partials-are-rendered-instantly}
 
-It can be challenging to cache pages that mix content specific to a some users with content shared by many users.
-While you can use complex cache keys to capture all the differences, this may duplicate logic and cause frequent cache misses.
-By [extracting user-specific fragments into deferred partials](#on-insert), you can improve the cacheability of a larger page or component.
+Unpoly caches [responses to `GET` requests](/caching) on the client.
+When deferred content is already cached, it is rendered synchronously and the
+`[up-defer]` placeholder never appears in the DOM.
 
-For example, the `<article>` below almost has the some content for all users. However, only administrators
-get buttons to edit or delete the article:
+This means Unpoly caches complete pages, including their lazy-loaded fragments.
+Navigating back to such a page renders it instantly, without a flash of [fallback state](#pending).
+The page also stays accessible during [network issues](/network-issues).
+
+Deferred content rendered from the cache is [revalidated](/caching#revalidation)
+unless you also set an [`[up-revalidate=false]`](/up-follow#up-revalidate) attribute.
+
+### Improving cacheability on the server {#server-cache}
+
+Many apps have a server-side cache for HTML that is expensive to render.
+Pages that mix content shared by all users with content specific to one user are hard to cache.
+Complex cache keys that capture all the differences duplicate logic and cause frequent cache misses.
+
+For example, the `<article>` below has the same content for all users.
+Only administrators get buttons to edit or delete the article:
 
 ```html
 <article>
   <h1>Article title</h1>
-    <nav id="controls"> <!-- mark-line -->
-      <% if current_user.admin? %> <!-- mark-line -->
-        <a href="...">Edit</a> <!-- mark-line -->
-        <a href="...">Delete</a> <!-- mark-line -->
-      <% end %> <!-- mark-line -->
-    </nav> <!-- mark-line -->
+  <nav id="controls"> <!-- mark-line -->
+    <% if current_user.admin? %> <!-- mark-line -->
+      <a href="...">Edit</a> <!-- mark-line -->
+      <a href="...">Delete</a> <!-- mark-line -->
+    <% end %> <!-- mark-line -->
+  </nav> <!-- mark-line -->
   <p>Lorem ipsum dolor sit amet ...</p>
 </article>
 ```
 
-By extracting the admin-only buttons into a separate fragment, we can easily cache the entire `<article>`
-element:
+By extracting the admin-only buttons into a deferred fragment, the entire `<article>`
+element becomes the same for everyone, and can be cached as a whole:
 
 ```html
 <article>
@@ -134,70 +212,50 @@ element:
 ```
 
 
+## Performance considerations {#performance}
 
-## Showing a fallback for unloaded content {#pending}
+Deferring expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments
+paints critical content earlier. This generally improves metrics like
+[First Contentful Paint](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint) (FCP) and
+[Interaction to Next Paint](https://web.dev/articles/inp) (INP).
 
-The initial children of an `[up-defer]` element are shown before its deferred content has loaded:
+When lazy-loaded content is inserted later, it may cause [layout shift](https://web.dev/articles/cls)
+by pushing down subsequent elements in the [flow](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Normal_Flow).
+This forces the browser to re-layout parts of the page.
 
-```html
-<div id="menu" up-defer up-href="/menu">
-  Loading... <!-- mark: Loading... -->
-</div>
-```
-
-If you need to implement advanced request effects, all [Loading state](/loading-state)
-techniques for regular hyperlinks are also applicable to `[up-defer]` elements.
-
-> [note]
-> If the deferred content is already [cached](/caching), its children will [immediately be replaced](#cached-partials-are-rendered-instantly) by the cached content.
+Layout shift is rarely a problem when lazy-loaded content appears below the fold,
+or when it is positioned absolutely and removed from the flow.
+Giving the placeholder the height of its coming content also avoids it.
 
 
+## SEO considerations {#seo}
 
-## Loading multiple fragments from the same URL
+Search engines may not reliably index lazy-loaded content. Avoid lazy loading heavily optimized keywords,
+or [use Google's URL inspection tool to test your implementation](https://developers.google.com/search/docs/crawling-indexing/javascript/lazy-loading).
 
-Deferred placeholders may be scattered throughout the page, but load from the same URL:
-
-
-```html
-<div id="editorial-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark: id="editorial-controls" -->
-
-... other HTML ...
-
-<div id="analytics-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark: id="analytics-controls" -->
-```
-
-When loading the deferred content, Unpoly will [send a *single request*](/X-Up-Target#merging) with both targets:
-
-```http
-GET /articles/123/deferred HTTP/1.1
-X-Up-Target: #editorial-controls, #analytics-controls
-```
-
-
-## Triggering distant updates
-
-Instead of replacing itself, a placeholder can target one or [multiple](/targeting-fragments#multiple) other fragments.
-To do so, set an `[up-target]` attribute matching the elements you want to update.
-
-The following placeholder would update the fragments `#editorial-controls` and `#analytics-controls` when
-the placeholder is scrolled into view:
+To let crawlers discover and index lazy-loaded content *as a separate URL*, use `[up-defer]` on a standard hyperlink:
 
 ```html
-<a href="/articles/123/controls" up-defer="reveal" up-target="#editorial-controls, #analytics-controls"> <!-- mark: up-target="#editorial-controls, #analytics-controls" -->
-  load controls
-</div>
+<a id="menu" up-defer href="/menu">Load menu</a> <!-- mark: href="/menu" -->
 ```
 
-See [infinite scrolling](/infinite-scrolling) for another example of this technique.
+Since this indexes `/menu` as a separate page, it should render with a full application layout.
+You can omit the layout when an [`X-Up-Target`](/optimizing-responses) header is present on the request.
 
 
-## Events
+## Preventing a placeholder from loading {#events}
 
-Before a placeholder loads its deferred content, an `up:deferred:load` event is emitted.
+Before a placeholder loads its content, an `up:deferred:load` event is emitted on the placeholder.
+Prevent the event to stop the request:
 
-The event can be [prevented](/up:deferred:load#event.preventDefault) to stop the network request.
-The loading will not be attempted again, but you can use `up.deferred.load()` to manually load afterwards.
+```js
+up.on('up:deferred:load', '#menu', function(event) {
+  if (!navigator.onLine) event.preventDefault() // mark: event.preventDefault()
+})
+```
 
+The loading will not be attempted again on its own.
+You can still load the placeholder later by passing it to `up.deferred.load()`.
 
 
 @page lazy-loading
