@@ -1013,7 +1013,7 @@ up.protocol = (function() {
   /*-
   Request headers that influenced a response should be listed in a `Vary` response header.
 
-  This tells Unpoly to [partition its cache](/caching#caching-optimized-responses) for that URL so that each
+  This tells Unpoly to [partition its cache](/optimizing-responses#vary) for that URL so that each
   request header value gets a separate cache entries.
 
   You can set a `Vary` header manually from your server-side code. You may also be using
@@ -1029,7 +1029,7 @@ up.protocol = (function() {
 
   @include vary-header-example
 
-  See [How cache entries are matched](/caching#how-cache-entries-are-matched) for more examples.
+  See [How cache entries are matched](/optimizing-responses#cache-matching) for more examples.
 
   ### Resources
 

@@ -265,118 +265,20 @@ up.compiler('[track-page-view]', function(element, data, meta) { // mark: meta
 ```
 
 
-Caching optimized responses
+Caching optimized responses {#caching-optimized-responses}
 ---------------------------
 
 Servers may inspect [request headers](/up.protocol) to [optimize responses](/optimizing-responses),
 e.g. by omitting a navigation bar that is not targeted.
-
-Request headers that influenced a response should be listed in a `Vary` response header.
-This tells Unpoly to partition its cache for that URL so that each
-request header value gets a separate cache entry.
-
-### Example
-
-@include vary-header-example
+Request headers that influenced a response should be listed in a `Vary` response header,
+so Unpoly can partition its cache by header value.
+See [Caching optimized responses](/optimizing-responses#vary) for details and examples.
 
 
-### How cache entries are matched
+### How cache entries are matched {#how-cache-entries-are-matched}
 
-By default cached responses will match all requests to the same URL.
-
-When a response has a `Vary` header, matching requests must additionally have the same values for all listed headers:
-
-<table>
-  <tr>
-    <th class="split-table-head">
-    </th>
-    <th>
-      🠦 <code>X-Up-Target: .foo</code><br>
-      🠤 <code>Vary: X-Up-Target</code>
-    </th>
-  </tr>
-  <tr>
-    <th>🠦 <code>X-Up-Target: .foo</code></th>
-    <td>✔️ cache hit</td>
-  </tr>
-  <tr>
-    <th>🠦 <code>X-Up-Target: .bar</code></th>
-    <td>❌ cache miss</td>
-  </tr>
-  <tr>
-    <th>🠦 <i>No <code autolink="false">X-Up-Target</code></i></th>
-    <td>❌ cache miss</td>
-  </tr>
-</table>
-
-
-When a response has *no* `Vary` header, that response is a cache hit for <i>all</i> requests to the URL, regardless of target:
-
-<table>
-  <tr>
-    <th class="split-table-head">
-    </th>
-    <th>
-      🠦 <code>X-Up-Target: .foo</code><br>
-      🠤 <i>No <code autolink="false">Vary</code></i>
-    </th>
-  </tr>
-  <tr>
-    <th>🠦 <code>X-Up-Target: .foo</code></th>
-    <td>✔️ cache hit</td>
-  </tr>
-  <tr>
-    <th>🠦 <code>X-Up-Target: .bar</code></th>
-    <td>✔️ cache hit</td>
-  </tr>
-  <tr>
-    <th>🠦 <i>No <code autolink="false">X-Up-Target</code></i></th>
-    <td>✔️ cache hit</td>
-  </tr>
-</table>
-
-
-Requests can [target multiple fragments](/targeting-fragments#multiple) by separating selectors
-with a comma. If the server replies with `Vary: X-Up-Target`, that response is a cache hit for each individual selector:
-
-<table>
-  <tr>
-    <th class="split-table-head">
-    </th>
-    <th>
-      🠦 <code>X-Up-Target: .foo, .bar</code><br>
-      🠤 <code>Vary: X-Up-Target</code>
-    </th>
-  </tr>
-  <tr>
-    <th>🠦 <code>X-Up-Target: .foo</code></th>
-    <td>✔️ cache hit</td>
-  </tr>
-  <tr>
-    <th>🠦 <code>X-Up-Target: .bar</code></th>
-    <td>✔️ cache hit</td>
-  </tr>
-  <tr>
-    <th>🠦 <code>X-Up-Target: .foo, .bar</code></th>
-    <td>✔️ cache hit</td>
-  </tr>
-  <tr>
-    <th>🠦 <code>X-Up-Target: .bar, .foo</code></th>
-    <td>✔️ cache hit</td>
-  </tr>
-  <tr>
-    <th>🠦 <code>X-Up-Target: .baz</code></th>
-    <td>❌ cache miss</td>
-  </tr>
-  <tr>
-    <th>🠦 <code>X-Up-Target: .foo, .baz</code></th>
-    <td>❌ cache miss</td>
-  </tr>
-  <tr>
-    <th>🠦 <i>No <code autolink="false">X-Up-Target</code></i></th>
-    <td>❌ cache miss</td>
-  </tr>
-</table>
+When a response has a `Vary` header, matching cache entries must have the same values for all listed headers.
+See [How cache entries are matched](/optimizing-responses#cache-matching) for tables of hits and misses.
 
 
 Caching after redirects
