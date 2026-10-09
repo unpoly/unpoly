@@ -1,23 +1,33 @@
 Polling
 =======
 
-You can reload fragments from the server periodically. This will pick up changes made by other users, or by background tasks.
+A fragment can reload itself from the server periodically.
+This picks up changes made by other users or by background jobs,
+using regular HTTP requests instead of a persistent connection.
 
 
-## Basic example {#example}
+## Polling a fragment {#example}
 
-The `.unread-count` fragment below shows the number of unread message.
-You can use `[up-poll]` to refresh the counter every 30 seconds:
+The `.unread-count` fragment below shows the number of unread messages.
+Set an `[up-poll]` attribute to refresh it every 30 seconds:
 
 ```html
-<div class="unread-count" up-poll>
+<div class="unread-count" up-poll> <!-- mark: up-poll -->
   2 new messages
 </div>
 ```
 
+Every 30 seconds Unpoly requests the URL the fragment was loaded from,
+finds the `.unread-count` element in the response and swaps it into the page.
+The rest of the page is left alone. Reloading does not scroll, move focus or change the browser URL.
+
+The response is expected to again contain an `[up-poll]` attribute on the fragment.
+This is how the server keeps polling going, or [stops it](#stopping).
+
+
 ## Controlling the reload interval {#interval}
 
-You may set an optional `[up-interval]` attribute to set the reload interval in milliseconds:
+Set an `[up-interval]` attribute with a number of milliseconds:
 
 ```html
 <div class="unread-count" up-poll up-interval="10000"> <!-- mark: up-interval="10000" -->
@@ -25,17 +35,20 @@ You may set an optional `[up-interval]` attribute to set the reload interval in 
 </div>
 ```
 
-If the value is omitted, a global default is used. You may configure the default like this:
+Without the attribute, the global default of 30 seconds is used.
+You can change it by configuring `up.radio.config.pollInterval`:
 
 ```js
 up.radio.config.pollInterval = 10000
 ```
 
-## Controlling the source URL {#source}
 
-The element will be reloaded from the URL from which it was originally loaded.
+## Reloading from another URL {#source}
 
-To reload from another URL, set an `[up-source]` attribute on the polling element:
+The fragment is reloaded from the URL it was originally loaded from.
+Unpoly remembers that URL in an `[up-source]` attribute when the fragment is inserted.
+
+To reload from a different URL, set the `[up-source]` attribute yourself:
 
 ```html
 <div class="unread-count" up-poll up-source="/unread-count"> <!-- mark: up-source="/unread-count" -->
@@ -43,11 +56,15 @@ To reload from another URL, set an `[up-source]` attribute on the polling elemen
 </div>
 ```
 
+A dedicated route like `/unread-count` can render just the fragment,
+which is cheaper than rendering the full page it was first loaded with.
+
+
 ## The target selector is derived {#target}
 
-A target selector will be [derived](/target-derivation) from the polling element.
-
-For example, the following element will be polled with the selector `#score`:
+Unpoly [derives](/target-derivation) a target selector from the polling element,
+so it can find the element's counterpart in the response.
+The element below is polled with the selector `#score`:
 
 ```html
 <div id="score" up-poll> <!-- mark: id="score" -->
@@ -55,17 +72,63 @@ For example, the following element will be polled with the selector `#score`:
 </div>
 ```
 
-When you see an error `Cannot poll untargetable fragment`, it means Unpoly cannot derive a good
-selector that identifies the element. In that case, set a unique `[id]` or `[up-id]` attribute.
+When you see an error `Cannot poll untargetable fragment`, Unpoly could not derive a
+selector that identifies the element. Give the element a unique `[id]` or `[up-id]` attribute.
+
+
+## Polling pauses in the background {#pausing}
+
+Polling pauses while the browser tab is hidden, and resumes when the user returns to the tab.
+
+Polling also pauses while the fragment's [layer](/up.layer) is covered by an overlay,
+and resumes when the overlay closes. To keep polling under an overlay,
+set an [`[up-if-layer=any]`](/up-poll#up-if-layer) attribute.
+
+When the user returns after at least one interval was spent in the background,
+Unpoly reloads the fragment immediately. You can use this to refresh a page when the user
+comes back after working on something else for a while. The following reloads
+your [main element](/main) after an absence of five minutes or more:
+
+```html
+<main up-poll up-interval="300_000"> <!-- mark: up-interval="300_000" -->
+  ...
+</main>
+```
+
+
+## Stopping polling {#stopping}
+
+Polling stops when any of the following happens:
+
+- The fragment from the server response no longer has an `[up-poll]` attribute.
+- The fragment from the server response has an `[up-poll="false"]` attribute.
+- Your JavaScript calls `up.radio.stopPolling()` with the polling element.
+
+The first two let the server end polling once the work is done. A fragment that
+shows the progress of a background job can poll until the job has finished:
+
+```html
+<div id="export-status" up-poll up-interval="2000">
+  Exporting 43 of 120 records...
+</div>
+```
+
+The response for the finished job renders the same element without `[up-poll]`:
+
+```html
+<div id="export-status"> <!-- mark-line -->
+  <a href="/exports/5/download">Download your export</a>
+</div>
+```
 
 
 ## Handling failed responses {#failed-responses}
 
-By default polling will *not* render server responses with an error code,
-even when the response contains a matching fragment. After the configured
-interval, the server will be polled again.
+By default polling will *not* render responses with an error code,
+even when the response contains a matching fragment.
+The server is polled again after the configured interval.
 
-In order to *any* response that contains a matching fragment,
+To render *any* response that contains a matching fragment,
 set an [`[up-fail=false]`](/up-poll#up-fail) attribute:
 
 ```html
@@ -74,60 +137,21 @@ set an [`[up-fail=false]`](/up-poll#up-fail) attribute:
 </div>
 ```
 
-This will update the fragment with any response that contains
-a `.download-status` element, even when that response has a 4xx or 5xx status code.
+This updates the fragment with any response containing a `.download-status` element,
+even when that response has a 4xx or 5xx status code.
 
-When polling encounters a fatal error (like a timeout or loss of network connectivity),
-it will try again after the configured interval.
+When polling encounters a fatal error, like a timeout or a lost network connection,
+it tries again after the configured interval.
 
-
-## Polling is paused in the background {#pausing}
-
-By default polling will pause while the fragment's [layer](/up.layer) is covered by an overlay.
-When the layer is uncovered, polling will resume.
-To keep polling on background layers, set [`[up-if-layer=any]`](/up-poll#up-if-layer).
-
-Polling will also pause automatically while the browser tab is hidden.
-When the browser tab is re-activated, polling will resume.
-
-When at least one poll interval was spent paused in the background and the user
-then returns to the layer or tab, Unpoly will immediately reload the fragment.
-You can use this to load recent data when the user returns to your app after working on something else for a while. For example, the following
-would reload your [main](/main) element after an absence of 5 minutes or more:
-
-```html
-<main up-poll up-interval="300_000">
-  ...
-</main>
- ```
-
-## Skipping updates on the client {#preventing-request}
-
-Client-side code may prevent a polling request by preventing an `up:fragment:poll` event
-on the polling fragment:
-
-```js
-up.on('up:fragment:poll', function(event) {
-  // Don't reload a fragment that contains a playing video
-  let video = event.target.querySelector('video')
-  if (video && !video.paused) {
-    event.preventDefault()
-  }
-})
-```
-
-The server will be polled again after the configured interval, emitting another `up:fragment:poll` event.
-
-To not use a polling response that has already been received, use the `up:fragment:loaded` event or `[up-keep]` attribute.
 
 ## Saving bandwidth when nothing changed {#detecting-unchanged-content}
 
-When polling a fragment periodically we want to avoid rendering unchanged content.
-This saves <b>CPU time</b> and reduces the <b>bandwidth cost</b> for a
-request/response exchange to about 1 KB (1 packet).
+Most polling requests find that nothing has changed. The server can skip rendering
+in that case and answer with an empty response, which costs about 1 KB (one packet)
+and no CPU time for rendering.
 
-A good way to detect unchanged content is to deliver the initial fragment
-with an `ETag` header. An ETag is a hash of the data that was used to produce the HTML:
+For this, deliver the initial fragment with an `ETag` header.
+An ETag is a hash of the data that was used to produce the HTML:
 
 ```http
 HTTP/1.1 200 OK
@@ -149,25 +173,57 @@ GET /messages HTTP/1.1
 If-None-Match: "x234dff"
 ```
 
-The server can compare the ETag from the request with the ETag of the underlying data.
-If no more recent data is available, the server can skip rendering and
-respond with `304 Not Modified`. No response body is required.
+The server compares the ETag from the request with the ETag of the underlying data.
+If no more recent data is available, it skips rendering and responds with `304 Not Modified`.
+No response body is required:
 
 ```http
 HTTP/1.1 304 Not Modified
 ```
 
-See [Conditional requests](/conditional-requests) for more details and examples.
+When an update is skipped, Unpoly polls again after the configured interval.
 
-When an update is skipped, Unpoly will try to poll again after the configured interval.
+See [[conditional-requests]] for more details, and for an alternative based on modification times.
 
-## Stopping polling {#stopping}
 
-There are multiple ways to stop the polling interval:
+## Skipping updates on the client {#preventing-request}
 
-- The fragment from the server response no longer has an `[up-poll]` attribute.
-- The fragment from the server response has an `[up-poll="false"]` attribute.
-- Client-side code has called `up.radio.stopPolling()` with the polling element.
+Before each reload, an `up:fragment:poll` event is emitted on the polling fragment.
+Prevent the event to skip a single update:
+
+```js
+up.on('up:fragment:poll', function(event) {
+  // Don't reload a fragment that contains a playing video
+  let video = event.target.querySelector('video')
+  if (video && !video.paused) {
+    event.preventDefault() // mark: event.preventDefault()
+  }
+})
+```
+
+The server is polled again after the configured interval, emitting another `up:fragment:poll` event.
+
+To discard a response that has already been received, use the `up:fragment:loaded` event.
+To preserve individual elements within the reloaded fragment, give them an `[up-keep]` attribute.
+
+
+## Polling from JavaScript {#scripting}
+
+To start polling an element that has no `[up-poll]` attribute, pass it to `up.radio.startPolling()`:
+
+```js
+let element = document.querySelector('.unread-count')
+up.radio.startPolling(element, { interval: 10000 }) // mark: up.radio.startPolling
+```
+
+The options object may contain any option from `[up-poll]`, like `{ url }` or `{ ifLayer }`.
+
+To stop, pass the element to `up.radio.stopPolling()`:
+
+```js
+up.radio.stopPolling(element)
+```
 
 
 @page polling
+@signature
