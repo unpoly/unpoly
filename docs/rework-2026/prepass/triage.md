@@ -192,3 +192,8 @@ Verified during triage (were unverified or marked "worth a check"):
   ```
   (Key must stay ABSENT: u.merge is Object.assign, so `feedback: undefined` would also override the default.) Specs: default case sets feedback classes without [up-watch-feedback]; [up-watch-feedback=false] still opts out; mixed true/false → feedback. Docs stay as they are, except the A10 fix (the field itself never gets .up-active; the origin is the form).
 - Q2 → DOCS NOW, CODE AFTER LAUNCH. A validator dedupe touches the concurrency core (queued batches read values at send time; aborted/failed validations must not count as validated; server re-renders reset the baseline), all to save one redundant request. Fix round: narrow the watch-options promise ("only once per unique changed value") to `up.watch()`, `[up-autosubmit]` and `[up-switch]`; state that `[up-validate]` validates on every watched event, so watching `input` also validates once more on `change` (watch-options + partials/validating-while-typing.md). Code dedupe logged under plan.md Deferred.
+- Q3 → CODE, submissions only. In `up.Params.fromForm()` (params.js:541), skip configured fields inside a disabled fieldset, so they match the browser's handling of form-associated elements:
+  ```js
+  if (!browserControls.has(field) && !field.closest('fieldset:disabled')) params.addField(field)
+  ```
+  Watchers and `[up-switch]` stay as documented; the custom-form-fields note stays as written. Accepted edge case: a configured field inside a disabled fieldset's first `<legend>` is omitted (the browser would submit it). Spec: configured vs. form-associated vs. native field inside `<fieldset disabled>`.
