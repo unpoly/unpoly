@@ -181,3 +181,13 @@ Verified during triage (were unverified or marked "worth a check"):
 - B22. providing-html "Rendering a `<template>`": shrink to a pointer at templates, keeping `{#template}`. (P1/P5; AR /providing-html 1)
 - B23. script-security: in #callback-nonces and #script-element-nonces, replace the repeated `<meta name="csp-nonce">` block and the "only need to match" sentence with a pointer to #meta-csp-nonce. (P5; AR /script-security 1)
 - B24. validation concurrency paragraph (sitting draft): qualify the abort claim to "when a submission replaces the form" (form_submit_fn_spec.js:509). The other draft claims hold. (FF planned additions)
+
+## Henning's answers (2026-10-10)
+- Q1 → CODE (not a design choice): the validator's merge (form_validator.js:284) turns "unset" into an explicit `false`, which beats the global `renderOptions.feedback: true` (introduced for all render passes in c2c63c286, 3.10). Fix, decided wording:
+  ```js
+  // If any solution wants feedback, they all get it.
+  // When no solution has an opinion we leave { feedback } unset, so the render default applies.
+  let feedbacks = u.compact(u.map(dirtyRenderOptionsList, 'feedback'))
+  if (feedbacks.length) options.feedback = feedbacks.includes(true)
+  ```
+  (Key must stay ABSENT: u.merge is Object.assign, so `feedback: undefined` would also override the default.) Specs: default case sets feedback classes without [up-watch-feedback]; [up-watch-feedback=false] still opts out; mixed true/false → feedback. Docs stay as they are, except the A10 fix (the field itself never gets .up-active; the origin is the form).
