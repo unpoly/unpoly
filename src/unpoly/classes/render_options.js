@@ -111,8 +111,10 @@ up.RenderOptions = (function() {
     onOffline: EVENT_CALLBACK,
     onError: ERROR_CALLBACK,
     onOpened: OPEN_LAYER_CALLBACK,
-    onDismissed: CLOSE_LAYER_CALLBACK,
+    onAccept: CLOSE_LAYER_CALLBACK,
     onAccepted: CLOSE_LAYER_CALLBACK,
+    onDismiss: CLOSE_LAYER_CALLBACK,
+    onDismissed: CLOSE_LAYER_CALLBACK,
   }
 
   function parseCallback(key, code) {

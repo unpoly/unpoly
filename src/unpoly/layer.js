@@ -612,10 +612,34 @@ up.layer = (function() {
       To be called when the opening animation is done, pass an
       [`{ onFinished }`](/up.render#options.onFinished) option.
 
+    @param {Function(Event)} [options.onAccept]
+      A function that is called when the overlay is about to be [accepted](/closing-overlays).
+
+      The function argument is an `up:layer:accept` event.
+      The overlay's [acceptance value](/closing-overlays#acceptance-values) is available as `event.value`.
+
+      To keep the overlay open, call `event.preventDefault()`.
+      This has no effect when the overlay is closed because a background layer is being
+      [updated](/closing-overlays#peeling).
+
+      To run code after the overlay closed, use `{ onAccepted }` instead.
+
     @param {Function(Event)} [options.onAccepted]
       A function that is called when the overlay was [accepted](/closing-overlays).
 
       The function argument is an `up:layer:accepted` event.
+
+    @param {Function(Event)} [options.onDismiss]
+      A function that is called when the overlay is about to be [dismissed](/closing-overlays).
+
+      The function argument is an `up:layer:dismiss` event.
+      The overlay's [dismissal value](/closing-overlays#dismissal-reasons) is available as `event.value`.
+
+      To keep the overlay open, call `event.preventDefault()`.
+      This has no effect when the overlay is closed because a background layer is being
+      [updated](/closing-overlays#peeling).
+
+      To run code after the overlay closed, use `{ onDismissed }` instead.
 
     @param {Function(Event)} [options.onDismissed]
       A function that is called when the overlay was [dismissed](/closing-overlays).
@@ -1036,6 +1060,25 @@ up.layer = (function() {
       | `layer`    | An `up.Layer` object for the new overlay |
       | `event`    | An `up:layer:opened` event               |
 
+    @param [up-on-accept]
+      A JavaScript snippet that is called when the overlay is about to be [accepted](/closing-overlays).
+
+      The snippet runs in the following scope:
+
+      | Expression | Value                                         |
+      |------------|-----------------------------------------------|
+      | `this`     | The link that originally opened the overlay   |
+      | `layer`    | An `up.Layer` object for the closing overlay  |
+      | `value`    | The overlay's [acceptance value](/closing-overlays#result-values) |
+      | `response` | The server response that is causing the overlay to close |
+      | `event`    | An `up:layer:accept` event                    |
+
+      To keep the overlay open, call `event.preventDefault()`.
+      This has no effect when the overlay is closed because a background layer is being
+      [updated](/closing-overlays#peeling).
+
+      To run code after the overlay closed, use `[up-on-accepted]` instead.
+
     @param [up-on-accepted]
       A JavaScript snippet that is called when the overlay was [accepted](/closing-overlays).
 
@@ -1048,6 +1091,25 @@ up.layer = (function() {
       | `value`    | The overlay's [acceptance value](/closing-overlays#result-values) |
       | `response` | The server response that caused the overlay to close |
       | `event`    | An `up:layer:accepted` event                  |
+
+    @param [up-on-dismiss]
+      A JavaScript snippet that is called when the overlay is about to be [dismissed](/closing-overlays).
+
+      The snippet runs in the following scope:
+
+      | Expression | Value                                          |
+      |------------|------------------------------------------------|
+      | `this`     | The link that originally opened the overlay    |
+      | `layer`    | An `up.Layer` object for the closing overlay   |
+      | `value`    | The overlay's [dismissal value](/closing-overlays#result-values) |
+      | `response` | The server response that is causing the overlay to close |
+      | `event`    | An `up:layer:dismiss` event                    |
+
+      To keep the overlay open, call `event.preventDefault()`.
+      This has no effect when the overlay is closed because a background layer is being
+      [updated](/closing-overlays#peeling).
+
+      To run code after the overlay closed, use `[up-on-dismissed]` instead.
 
     @param [up-on-dismissed]
       A JavaScript snippet that is called when the overlay was [dismissed](/closing-overlays).

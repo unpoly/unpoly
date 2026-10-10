@@ -1703,6 +1703,30 @@ extendDescribe('up.fragment', function() {
                 expect(window.callbackSpy).toHaveBeenCalledWith(jasmine.anyEvent('up:layer:dismissed'))
               })
 
+              it('allows to pass a callback string as { onDismiss }', async function() {
+                fixture('#target', { text: 'old target' })
+                up.render('#target', { url: '/path' })
+                await wait()
+
+                let openLayerOptions = {
+                  target: '#overlay',
+                  onDismiss: 'nonce-specs-nonce window.callbackSpy(event, value); event.preventDefault()'
+                }
+
+                jasmine.respondWith({
+                  responseText: '<div id="overlay">overlay</div>',
+                  responseHeaders: { 'X-Up-Open-Layer': JSON.stringify(openLayerOptions) }
+                })
+                await wait()
+
+                expect(up.layer.current).toBeOverlay()
+
+                expect(() => up.layer.dismiss('dismissal value')).toThrowError(up.Aborted)
+
+                expect(window.callbackSpy).toHaveBeenCalledWith(jasmine.anyEvent('up:layer:dismiss'), 'dismissal value')
+                expect(up.layer.current).toBeOverlay()
+              })
+
             })
 
           })

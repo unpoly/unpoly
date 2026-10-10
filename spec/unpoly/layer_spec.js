@@ -1047,6 +1047,103 @@ describe('up.layer', function() {
         expect(up.layer.current).toHaveText('content two')
       })
 
+      describe('close callbacks', function() {
+
+        beforeEach(function() {
+          window.closeCallbackSpy = jasmine.createSpy('close callback spy')
+        })
+
+        afterEach(function() {
+          delete window.closeCallbackSpy
+        })
+
+        async function openOverlay(attrs) {
+          const [link] = htmlFixtureList(`
+            <a up-layer="new" up-target=".target" up-content="overlay text" ${attrs}>open</a>
+          `)
+          Trigger.clickSequence(link)
+          await wait()
+          expect(up.layer.isOverlay()).toBe(true)
+          return [link, up.layer.current]
+        }
+
+        describe('[up-on-accept]', function() {
+
+          it('runs the callback before the overlay is accepted, with event, value, layer and this in scope', async function() {
+            const [link, overlay] = await openOverlay(`up-on-accept="nonce-specs-nonce closeCallbackSpy(this, event, value, layer, up.layer.isOverlay())"`)
+
+            overlay.accept('acceptance value')
+
+            expect(window.closeCallbackSpy).toHaveBeenCalledWith(link, jasmine.anything(), 'acceptance value', overlay, true)
+            expect(window.closeCallbackSpy.calls.mostRecent().args[1]).toBeEvent('up:layer:accept', { value: 'acceptance value' })
+            expect(up.layer.isRoot()).toBe(true)
+          })
+
+          it('keeps the overlay open when the callback calls event.preventDefault()', async function() {
+            const [_link, overlay] = await openOverlay(`up-on-accept="nonce-specs-nonce event.preventDefault()"`)
+
+            expect(() => overlay.accept('acceptance value')).toThrowError(up.Aborted)
+
+            expect(overlay).toBeAlive()
+            expect(up.layer.current).toBe(overlay)
+          })
+
+        })
+
+        describe('[up-on-dismiss]', function() {
+
+          it('runs the callback before the overlay is dismissed, with event, value, layer and this in scope', async function() {
+            const [link, overlay] = await openOverlay(`up-on-dismiss="nonce-specs-nonce closeCallbackSpy(this, event, value, layer, up.layer.isOverlay())"`)
+
+            overlay.dismiss('dismissal value')
+
+            expect(window.closeCallbackSpy).toHaveBeenCalledWith(link, jasmine.anything(), 'dismissal value', overlay, true)
+            expect(window.closeCallbackSpy.calls.mostRecent().args[1]).toBeEvent('up:layer:dismiss', { value: 'dismissal value' })
+            expect(up.layer.isRoot()).toBe(true)
+          })
+
+          it('keeps the overlay open when the callback calls event.preventDefault()', async function() {
+            const [_link, overlay] = await openOverlay(`up-on-dismiss="nonce-specs-nonce event.preventDefault()"`)
+
+            expect(() => overlay.dismiss('dismissal value')).toThrowError(up.Aborted)
+
+            expect(overlay).toBeAlive()
+            expect(up.layer.current).toBe(overlay)
+          })
+
+          it('keeps the overlay open when the user presses Escape', async function() {
+            const [_link, overlay] = await openOverlay(`up-on-dismiss="nonce-specs-nonce event.preventDefault()"`)
+
+            Trigger.escapeSequence(document.body)
+            await wait()
+
+            expect(overlay).toBeAlive()
+            expect(up.layer.current).toBe(overlay)
+          })
+
+        })
+
+        it('parses [up-on-dismiss] on a form that opens an overlay', async function() {
+          const [_form, button] = htmlFixtureList(`
+            <form action="/path" up-submit up-layer="new" up-target=".target" up-on-dismiss="nonce-specs-nonce closeCallbackSpy(value)">
+              <button type="submit">submit</button>
+            </form>
+          `)
+
+          Trigger.clickSequence(button)
+          await wait()
+
+          jasmine.respondWithSelector('.target', { text: 'overlay text' })
+          await wait()
+
+          expect(up.layer.isOverlay()).toBe(true)
+          up.layer.dismiss('dismissal value')
+
+          expect(window.closeCallbackSpy).toHaveBeenCalledWith('dismissal value')
+        })
+
+      })
+
       describe('history', function() {
 
         beforeEach(function() {

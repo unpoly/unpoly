@@ -68,6 +68,9 @@ up.on('up:layer:dismiss', function(event) {
 })
 ```
 
+To keep only one particular overlay open, pass an [`{ onDismiss }`](/up.layer.open#options.onDismiss) callback
+or set an [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attribute on the opening link instead.
+
 
 Result values {#result-values}
 -------------

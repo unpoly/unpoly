@@ -536,6 +536,20 @@ extendDescribe('up.script', function() {
             itBehavesLikeBlock({ pageNonce: null })
           })
 
+          for (let attr of ['up-on-accept', 'up-on-dismiss']) {
+            it(`rewrites a callback nonce in an [${attr}] attribute`, function() {
+              up.script.config.cspNonce = 'page000'
+              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const link = up.element.createFromHTML(`
+                <a href="/foo" up-layer="new" ${attr}="nonce-response123 console.log('hi')"></a>
+              `)
+
+              up.script.adoptNewFragment(link, cspInfo)
+
+              expect(link.getAttribute(attr)).toBe("nonce-page000 console.log('hi')")
+            })
+          }
+
         })
 
         describe('with up.script.config.evalCallbackPolicy = "auto"', function() {

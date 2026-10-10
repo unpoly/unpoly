@@ -464,6 +464,88 @@ extendDescribe('up.layer', function() {
 
         }
 
+        describe('{ onAccept }', function() {
+
+          it('runs the given callback with an up:layer:accept event before the layer is accepted', async function() {
+            const callback = jasmine.createSpy('onAccept callback').and.callFake(() => {
+              expect(up.layer.isOverlay()).toBe(true)
+            })
+            const overlay = await up.layer.open({ onAccept: callback })
+
+            overlay.accept('acceptance value')
+
+            expect(callback).toHaveBeenCalled()
+            expect(callback.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', { value: 'acceptance value', layer: overlay })
+            expect(up.layer.isRoot()).toBe(true)
+          })
+
+          it('keeps the overlay open when the callback prevents the event', async function() {
+            const overlay = await up.layer.open({ onAccept: (event) => event.preventDefault() })
+
+            expect(() => overlay.accept('acceptance value')).toThrowError(up.Aborted)
+
+            expect(overlay).toBeAlive()
+            expect(up.layer.current).toBe(overlay)
+          })
+
+          it('does not run the given callback when the layer is dismissed', async function() {
+            const callback = jasmine.createSpy('onAccept callback')
+            const overlay = await up.layer.open({ onAccept: callback })
+
+            overlay.dismiss('dismissal value')
+
+            expect(callback).not.toHaveBeenCalled()
+          })
+
+        })
+
+        describe('{ onDismiss }', function() {
+
+          it('runs the given callback with an up:layer:dismiss event before the layer is dismissed', async function() {
+            const callback = jasmine.createSpy('onDismiss callback').and.callFake(() => {
+              expect(up.layer.isOverlay()).toBe(true)
+            })
+            const overlay = await up.layer.open({ onDismiss: callback })
+
+            overlay.dismiss('dismissal value')
+
+            expect(callback).toHaveBeenCalled()
+            expect(callback.calls.mostRecent().args[0]).toBeEvent('up:layer:dismiss', { value: 'dismissal value', layer: overlay })
+            expect(up.layer.isRoot()).toBe(true)
+          })
+
+          it('keeps the overlay open when the callback prevents the event', async function() {
+            const onDismissed = jasmine.createSpy('onDismissed callback')
+            const overlay = await up.layer.open({ onDismiss: (event) => event.preventDefault(), onDismissed })
+
+            expect(() => overlay.dismiss('dismissal value')).toThrowError(up.Aborted)
+            await wait()
+
+            expect(overlay).toBeAlive()
+            expect(up.layer.current).toBe(overlay)
+            expect(onDismissed).not.toHaveBeenCalled()
+          })
+
+          it('cannot keep the overlay open when it is peeled', async function() {
+            const overlay = await up.layer.open({ onDismiss: (event) => event.preventDefault() })
+
+            up.layer.root.peel()
+
+            expect(overlay).not.toBeAlive()
+            expect(up.layer.isRoot()).toBe(true)
+          })
+
+          it('does not run the given callback when the layer is accepted', async function() {
+            const callback = jasmine.createSpy('onDismiss callback')
+            const overlay = await up.layer.open({ onDismiss: callback })
+
+            overlay.accept('acceptance value')
+
+            expect(callback).not.toHaveBeenCalled()
+          })
+
+        })
+
         describe('{ onAccepted }', function() {
 
           it('runs the given callback when they layer is accepted', async function() {
