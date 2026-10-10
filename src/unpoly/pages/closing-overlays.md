@@ -491,11 +491,9 @@ up.layer.config.overlay.dismissARIALabel // result: 'Dismiss dialog'
 Close animation
 ---------------
 
-When an overlay closes, its element disappears with the `{ closeAnimation }` [configured](/up.layer.config) for its mode.
-
-To use a different animation for one overlay, set an `[up-close-animation]` attribute or pass a `{ closeAnimation }` option
-when opening it. You can also pass an `{ animation }` option to `up.layer.accept()` or `up.layer.dismiss()`,
-or set an `[up-animation]` attribute on an `[up-accept]` or `[up-dismiss]` element.
+To close with a different animation than the one configured for the overlay, pass an `{ animation }`
+option to `up.layer.accept()` or `up.layer.dismiss()`, or set an `[up-animation]` attribute on an
+`[up-accept]` or `[up-dismiss]` element. See [[customizing-overlays#animation]] for the default animations.
 
 
 @page closing-overlays
