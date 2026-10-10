@@ -1045,6 +1045,15 @@ docs/rework-2026/prepass/ (~85 findings, incl. real doc-vs-code errors: feedback
 [up-validate], close-by-location value, fail-transition default, X-Up-Target vs hungry,
 templates example, tracking-page-views double count). Use them as the agenda for each
 sitting; claims marked "unverified" need a spec/scratch-server check before writing.
+DOCS-VS-CODE DOCTRINE (Henning 2026-10-10): code and specs are higher signal than docs
+written after the fact, but "code is always right" does not hold. Clearly incorrect docs
+(typo, wrong param type, missing return docs, example that cannot work) are auto-fixed.
+When both the documented and the implemented behavior would make sense on their own, it
+is an "intended behavior?" question for Henning. Check specs for an example of the
+behavior when researching. FACTS-ONLY PASS over the pre-reviewed chapters (Getting
+started, Links, Forms) completes the facts report; then one triage of all prepass files
+into A (facts, auto-fix) / B (decided patterns, fix round) / C (judgment, sittings) /
+intended-behavior questions (Henning, one by one, first).
 PRE-SHIP ORDER: Advanced rendering critic → Henning's sittings (+ module-intro Fable batch
 in parallel) → fix round → final learn-ref sweep → em-dash/AI-trope pass → persona review
 → Unpoly::Guide→Unpoly::Site rename → URL move (/api/…, /learn/…) → release sync (FACE
