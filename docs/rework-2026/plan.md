@@ -1814,6 +1814,11 @@ hotkeys, empty states, sidecar delivery; retiring the Algolia push for latest.
   found many doc/code mismatches this way: wrong names, non-runnable examples, stale
   defaults, documented signatures without code support). Candidate for a recurring
   pre-release step.
+- **Dedupe `[up-validate]` by value** (added 2026-10-10, AFTER LAUNCH; triage Q2): the
+  validator validates on every watched event, so `input` + `change` with the same value sends
+  two requests. Dedupe per field element (not name), reset on abort and error, never dedupe
+  `up.validate()` calls. Specs first: change A→B→A while A is in flight, abort/offline then
+  same value again, server-normalized value. Then widen the watch-options promise again.
 
 ## Landing page (alignment in progress; state as of 2026-09-15)
 
