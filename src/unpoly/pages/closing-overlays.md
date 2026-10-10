@@ -55,6 +55,19 @@ In HTML, set `[up-on-accepted]` and `[up-on-dismissed]` attributes on the link t
 Instead of passing callbacks, you can also open an overlay with `up.layer.ask()`
 and `await` a promise for its result. See [[subinteractions#awaiting-subinteractions-from-javascript]].
 
+To keep an overlay open, for example when it has unsaved changes, prevent its
+[`up:layer:dismiss`](/up:layer:dismiss) event. This also blocks the Escape key, backdrop clicks
+and the close button:
+
+```js
+up.on('up:layer:dismiss', function(event) {
+  let hasForm = event.layer.element.querySelector('form')
+  if (hasForm && !confirm('Discard your unsaved changes?')) {
+    event.preventDefault() // mark-line
+  }
+})
+```
+
 
 Result values {#result-values}
 -------------
