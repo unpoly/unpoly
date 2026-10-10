@@ -201,3 +201,4 @@ Verified during triage (were unverified or marked "worth a check"):
 - C2 → (a): drop `form.reset()` from both optimistic-rendering previews (a successful response replaces the form anyway). Note for Henning: unpoly-demo application.js:239 has the same line (repo outside our scope).
 - C3 → applied with B6, B7 and A23, A24 (history overview re-angled, navigation-default section removed, `[up-back]` pointer; updating-history gets the same-URL and error-response sentences). Henning dropped the B7 family sentence ("treat other fragments as major, …"): edge cases don't belong on the overview. Fix round: skip B6, B7, A23, A24.
 - C4 → applied: the overlays teaser shows the family of ways to close; Subinteractions owns the close-condition example.
+- C5 → applied: the overview keeps the progressive-enhancement paragraphs; opening-overlays#link re-angled to mechanics + X-Up-Mode.
