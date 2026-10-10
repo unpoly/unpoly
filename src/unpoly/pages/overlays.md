@@ -81,22 +81,16 @@ An overlay can be *accepted* (the user completed their task) or *dismissed*
 (the user canceled). When an overlay is accepted, it can pass a result value
 back to the layer that opened it, like the ID of a newly created record.
 
-Users usually open an overlay to complete a small task. You can give the link a
-*close condition* for when that task is done:
+Users dismiss an overlay with its close button, the Escape key or a click on the backdrop.
+To accept it, give a button an [`[up-accept]`](/closing-overlays#on-click) attribute with the result value:
 
 ```html
-<a href="/users/new"
-  up-layer="new"
-  up-accept-location="/users/$id"
-  up-on-accepted="up.reload('.user-list')"> <!-- mark: up-on-accepted -->
-  Add user
-</a>
+<button up-accept="{ id: 5 }">Choose user #5</button> <!-- mark: up-accept -->
 ```
 
-When the user submits the form and the server redirects to the new
-user's URL (like `/users/123`), the overlay is accepted automatically. The callback
-then reloads the list behind the overlay. The user form needs no changes for
-this, and it keeps working as a regular screen outside an overlay.
+An overlay can also close itself when a [close condition](/closing-overlays#close-conditions) is met,
+like reaching a URL, emitting an event or rendering a fragment. Your JavaScript and the server
+can close overlays, too.
 
 <p class="read-more"><a href="/closing-overlays">Read more: Closing overlays</a></p>
 
