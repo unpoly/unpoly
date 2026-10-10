@@ -85,3 +85,4 @@
 - **Using a macro instead** {#macro}: `up.macro('a[href]:not([up-follow=false])', …)` setting `[up-follow]` and `[up-preload]`; same wording pattern as forms.
 - Remove: #defaults section, "Customizing navigation defaults", "Fixing legacy JavaScript code" section.
 - CORRECTION: attributes-and-options.md links /handling-all-links#defaults (my wrong "dead anchor" fix in e5508ec0b; auto anchors exist). Point it back to /handling-all-links#following-all-links.
+- AMENDMENT (macro example, both handling-all-forms and handling-all-links): (c) the macro sets ONLY [up-submit] / [up-follow]; no [up-disable] / [up-preload] in the code (setAttribute would overwrite an element's own value). The sentence "A macro can set other attributes in the same pass" carries the idea. Keep the :not([up-submit=false]) / :not([up-follow=false]) selector.
