@@ -202,3 +202,4 @@ Verified during triage (were unverified or marked "worth a check"):
 - C3 → applied with B6, B7 and A23, A24 (history overview re-angled, navigation-default section removed, `[up-back]` pointer; updating-history gets the same-URL and error-response sentences). Henning dropped the B7 family sentence ("treat other fragments as major, …"): edge cases don't belong on the overview. Fix round: skip B6, B7, A23, A24.
 - C4 → applied: the overlays teaser shows the family of ways to close; Subinteractions owns the close-condition example.
 - C5 → applied: the overview keeps the progressive-enhancement paragraphs; opening-overlays#link re-angled to mechanics + X-Up-Mode.
+- C6 → applied with Henning's example (form check + confirm, no peel guard: examples illustrate, they need not be perfect). Henning: support and document `{ onAccept }`/`{ onDismiss }` and `[up-on-accept]`/`[up-on-dismiss]` (agent implementing).
