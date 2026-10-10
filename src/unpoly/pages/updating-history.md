@@ -32,6 +32,7 @@ so the user does not collect a history entry for every minor update.
 This is the `auto` setting of the [`[up-history]`](/up-follow#up-history) attribute, which is the default for links and forms.
 History is updated when the targeted fragment contains an element matching `up.fragment.config.autoHistoryTargets`.
 By default that is the layer's main element.
+When the new URL is the one already in the address bar, no entry is added.
 
 > [note]
 > An overlay only shows its URL in the address bar when it has [visible history](/history-in-overlays).
@@ -93,6 +94,10 @@ that your server can set.
 
 The exception is an explicit location: when you set [`[up-location]`](/up-follow#up-location)
 or pass a [`{ location }`](/up.render#options.location) option, Unpoly pushes that URL even after a non-`GET` request.
+
+The same rules apply to error responses. When a failed `GET` request renders an error page into the
+main element, the address bar shows its URL, like after a full page load. A form submission that fails
+with a validation error does not change history. See [[failed-responses]].
 
 
 ### Rendering from JavaScript {#scripting}
