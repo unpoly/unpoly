@@ -424,21 +424,10 @@ Sometimes you need the discarded response anyway, e.g. to render its content in 
 One way is an `[up-hungry]` element with an `[up-if-layer=subtree]` attribute in a parent layer.
 Such an element is updated with the discarded response of a closing overlay.
 
-For more control, access the response through the `{ response }` property of the `up:layer:accepted` and `up:layer:dismissed` events.
-
-In the example below, the link opens an overlay with a form to create a new company (`/companies/new`).
-After successful creation the form redirects to the list of companies (`/companies`).
-That response already contains the updated list, so we render it into the parent layer
-instead of making another request:
-
-```html
-<a href="/companies/new"
-   up-layer="new"
-   up-accept-location="/companies"
-   up-on-accepted="up.render('.companies', { response: event.response })"> <!-- mark: event.response -->
-  New company
-</a>
-```
+For more control, read the response from the `{ response }` property of the `up:layer:accepted`
+and `up:layer:dismissed` events, and pass it to `up.render()`.
+See [[subinteractions#reloading-on-acceptance]] for an example that updates a list
+without making another request.
 
 The `{ response }` property is set whenever a server response causes an overlay to close:
 
