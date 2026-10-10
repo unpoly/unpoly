@@ -204,3 +204,4 @@ Verified during triage (were unverified or marked "worth a check"):
 - C5 → applied: the overview keeps the progressive-enhancement paragraphs; opening-overlays#link re-angled to mechanics + X-Up-Mode.
 - C6 → applied with Henning's example (form check + confirm, no peel guard: examples illustrate, they need not be perfect). Henning: support and document `{ onAccept }`/`{ onDismiss }` and `[up-on-accept]`/`[up-on-dismiss]` (agent implementing).
 - C7 → applied: closing-overlays keeps prose + bullet list and points to the subinteractions example.
+- C8 → applied: closing-overlays 'Close animation' keeps only the per-close override.
