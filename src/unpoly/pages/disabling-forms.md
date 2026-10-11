@@ -138,9 +138,9 @@ Like all preview changes, the controls are re-enabled when the request ends.
 
 ## Focus preservation {#focus-preservation}
 
-Disabled fields cannot have focus. This is a browser limitation.
+A disabled field cannot have focus. When a focused field becomes disabled, the browser takes focus away from it.
 
-When a focused field is disabled by `[up-disable]` or `{ disable }`, it loses focus. In this case Unpoly
+When `[up-disable]` or `{ disable }` takes focus away from a field, Unpoly
 focuses the closest [form group](/up-form-group) around the field. If the field is not within a form group,
 the containing `<form>` is focused.
 

@@ -39,6 +39,7 @@ attributes to declare for which values they are shown or hidden:
 
 Elements are switched when the page loads and whenever the field changes.
 A hidden element gets a `[hidden]` attribute.
+Fields inside a hidden element are still submitted with the form. To exclude them from the submission, [disable](#disable) them instead.
 
 By default the entire form is searched for matching elements. This can be [configured](#region).
 
@@ -205,33 +206,7 @@ To match all elements within the current [layer](/up.layer), set the region to `
 ## Reacting to different events {#reacting-to-different-events}
 
 By default switch effects are applied for every [`input`](https://developer.mozilla.org/en-US/docs/Web/API/Element/input_event) event.
-For example, text fields switch other elements as the user is typing:
-
-```html
-<input type="text" name="user" up-switch=".user-dependent">
-
-<div class="user-dependent" up-show-for="alice">
-  only shown for user alice
-</div>
-```
-
-You can watch for other events by setting an [`[up-watch-event]`](/up-switch#up-watch-event) attribute.
-For example, listening to `change` waits until the text field is blurred
-before applying any switching effects:
-
-```html
-<input type="text" name="user" up-switch=".user-dependent" up-watch-event="change"> <!-- mark: up-watch-event="change" -->
-```
-
-When watching a fast-firing event like `input`,
-you can debounce the switching effect
-with an [`[up-watch-delay]`](/up-switch#up-watch-delay) attribute:
-
-```html
-<input type="text" name="user" up-switch=".user-dependent" up-watch-event="input" up-watch-delay="150"> <!-- mark: up-watch-delay="150" -->
-```
-
-See [[watch-options]] for all options to control how changes are observed.
+To react to other events like `change`, or to debounce the switching effect, see [[watch-options]].
 
 
 ## Custom switching effects {#custom-effects}
