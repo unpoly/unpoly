@@ -26,7 +26,7 @@ Set an `[up-target]` attribute with a CSS selector on a link or form:
 
 The server response is expected to include an element matching `.content`.
 The response may include other HTML, even an entire HTML document, but only the
-element matching `.content` is updated on the page. Other elements from the response are discarded.
+element matching `.content` is updated on the page. Other elements from the response are discarded, except [hungry elements](/hungry-elements).
 
 Many [JavaScript functions](/up.fragment) take a `{ target }` option to indicate what fragment should be updated:
 

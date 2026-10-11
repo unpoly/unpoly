@@ -204,7 +204,7 @@ footer.note { color: var(--muted); font-size: 12.5px }
 
 <script>
 const TRACK = [
-  { t: "Chapter sittings", s: "3 of 13 chapters reviewed; Overlays packet ready", p: 0.27, state: "here" },
+  { t: "Chapter sittings", s: "3 of 13 reviewed; packets ready for all 10 remaining", p: 0.27, state: "here" },
   { t: "Fix round", s: "facts, code bugs, Forms notes done; items 5, 9, 15 left", p: 0.9 },
   { t: "Learn-ref sweep", s: "not started", p: 0 },
   { t: "Em-dash & AI-trope pass", s: "whole site, after sittings", p: 0 },
@@ -275,8 +275,8 @@ const CHAPTERS = [
   { t: "Network & caching", pages: ["network","caching","aborting-requests","network-issues"], rev: 0, dup: ["C9 overview copies revalidation, offline listener, slow server","C10 caching copies the tracking example","C12 merge network-issues sections","B14 caching teaser family sentence","extra: aborting sentences, up.request examples, A/B markup (lean: leave)"], note: "Sitting packet ready: 7 pointers (network 4, caching 2, network-issues 1). Item 5 decided. docs/rework-2026/sittings/packets/network.md" },
   { t: "Animation", pages: ["animation"], rev: 0, dup: ["C13 overlay example copies customizing-overlays","B18 repeated size-shift sentence"], note: "Sitting packet ready: 2 pointers. C13 is the same item as in the Overlays packet; decide once. docs/rework-2026/sittings/packets/animation.md" },
   { t: "Scripting", pages: ["scripting","enhancing-elements","data","templates","islands","legacy-scripts","script-security"], rev: 0, dup: ["C20 overview repeats start/elements; re-angle to element lifetime","B22 providing-html template section","B23 repeated CSP meta block"], note: "Pages approved in the 10-06/07 sitting. Packet: 3 pointers on deferred items (C20, B22, B23). Item 15 decided. docs/rework-2026/sittings/packets/scripting.md" },
-  { t: "Backend integration", pages: ["backend-integration","optimizing-responses","conditional-requests","handling-asset-changes","server-protocol"], rev: 0, dup: ["C14 overview has three literal copies (the 1 KB sentence 3×)"], note: "Item 9 decided (X-Up-Version section)." },
-  { t: "Advanced rendering", pages: ["advanced-rendering","attributes-and-options","navigation-defaults","targeting-fragments","target-derivation","failed-responses","preserving-elements","providing-html","render-lifecycle"], rev: 0, dup: ["C16 overview copies three detail passages","C17 #options and #config re-teach precedence","C18 origin example shared with render-lifecycle","C19 element-object example repeats target derivation"], note: "" },
+  { t: "Backend integration", pages: ["backend-integration","optimizing-responses","conditional-requests","handling-asset-changes","server-protocol"], rev: 0, dup: ["C14 overview has three literal copies (the 1 KB sentence 3×)"], note: "Sitting packet ready: 2 pointers. Item 9 decided. docs/rework-2026/sittings/packets/backend-integration.md" },
+  { t: "Advanced rendering", pages: ["advanced-rendering","attributes-and-options","navigation-defaults","targeting-fragments","target-derivation","failed-responses","preserving-elements","providing-html","render-lifecycle"], rev: 0, dup: ["C16 overview copies three detail passages","C17 #options and #config re-teach precedence","C18 origin example shared with render-lifecycle","C19 element-object example repeats target derivation"], note: "Sitting packet ready: 7 pointers. docs/rework-2026/sittings/packets/advanced-rendering.md" },
 ];
 
 const DEPLOY = [
@@ -292,6 +292,7 @@ const DEPLOY = [
 ];
 
 const LOG = [
+  ["Sun", "Packets for Backend integration and Advanced rendering; 4 clear fixes (hungry claims, 204 wording)"],
   ["Sun", "URL move dry run: 627 documents to /learn and /api, 3,277 links rewritten, all old URLs redirect in one hop"],
   ["Sun", "Packets for Network, Animation, Scripting; 2 clear fixes (wrong config name for cache expiry, grammar)"],
   ["Sun", "Packets for History and Scrolling & focus; 6 clear fixes (scroll-to-top wording, [up-validate] keeps focus, param types)"],

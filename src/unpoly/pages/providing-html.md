@@ -36,7 +36,7 @@ The server is expected to respond with HTML that contains an element matching th
 ```
 
 The response may contain other HTML, but only the element matching `.target` is extracted and placed into the page.
-Other elements in the response are discarded, and the corresponding elements on the page stay unchanged.
+Apart from [hungry elements](/hungry-elements), other elements in the response are discarded, and the corresponding elements on the page stay unchanged.
 
 > [tip]
 > See [targeting fragments](/targeting-fragments) for ways of controlling how the

@@ -344,7 +344,7 @@ since `_handleResult()` returns true for an `up.RenderResult` (render_job.js:67-
 is a guard event and can be prevented (form_validator.js:314).)
 
 
-## Clear fixes (apply without asking)
+## Clear fixes (APPLIED by the orchestrator)
 
 1. targeting-fragments.md:28-29. Hungry elements in the response are updated too. Every render pass has
    `hungry: true` (fragment.js:249), and radio_hungry_spec.js:34-41 shows `up.render('.target', { url })`
