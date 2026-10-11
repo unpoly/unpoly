@@ -213,27 +213,7 @@ The task pattern: open a screen in an overlay, wait for acceptance, continue wit
 **Changed since writing**
 - 09db32d44 (A34): the location row of the result-value table now shows `{ id: 123, location: '/companies/123' }`.
 
-### 1. Missed fix-round sentence: what if the company form has errors? (A34 leftover)
-
-> When the user submits the company form and the server redirects to the new company's URL
-> (like `/companies/123`), the overlay is accepted automatically. The callback then reloads
-> the list behind the overlay.
-
-(subinteractions.md:63-65)
-
-A34 asked for "one sentence after 'accepted automatically'" here as well. Only the closing-overlays
-half and the table row were applied (09db32d44). The reader's first question is what happens on a
-validation error. The owner already says it (closing-overlays.md:170-172). (Pattern 2)
-
-- **A.** Add the sentence with a link to the owner.
-- **B.** Leave it to closing-overlays.
-
-**Lean: A (strong).** Draft, append to subinteractions.md:65:
-
-```md
-When the company form has validation errors, it re-renders within the overlay, which stays open
-until the company is created. See [closing when a location is reached](/closing-overlays#location-condition).
-```
+### (Applied by the orchestrator: A34 leftover sentence on validation errors, since A34 was already decided.)
 
 ### 2. "Working with result values" copies the two snippets of closing-overlays#acceptance-values
 

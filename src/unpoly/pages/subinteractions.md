@@ -63,6 +63,8 @@ and an acceptance callback:
 When the user submits the company form and the server redirects to the new company's URL
 (like `/companies/123`), the overlay is accepted automatically. The callback then reloads
 the list behind the overlay.
+When the company form has validation errors, it re-renders within the overlay, which stays open
+until the company is created. See [closing when a location is reached](/closing-overlays#location-condition).
 
 The overlay can show any screen of your app. It takes no part in ending the subinteraction:
 the link that opened the overlay defines when the task is done, and what happens then.
