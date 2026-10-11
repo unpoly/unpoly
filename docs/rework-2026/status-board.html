@@ -210,7 +210,7 @@ const TRACK = [
   { t: "Em-dash & AI-trope pass", s: "whole site, after sittings", p: 0 },
   { t: "Persona review", s: "3 personas read the site", p: 0 },
   { t: "Namespace rename", s: "Unpoly::Site merged", p: 1, done: true },
-  { t: "URL move", s: "script dry run running", p: 0.3 },
+  { t: "URL move", s: "script tested; replay on launch day", p: 0.7 },
   { t: "Release sync", s: "CHANGELOG, feature review, promotion", p: 0.1 },
   { t: "Launch", s: "Unpoly, unpoly-rails, site", p: 0 },
 ];
@@ -237,6 +237,13 @@ const NEED = [
   { tag: "26", t: "Code bug: [up-reveal-padding] does nothing when rendering", body: `
     <p><code>up.FragmentScrolling</code> drops <code>revealPadding</code> because it is missing from its keys (fragment_scrolling.js:5-14).</p>
     <div class="opt"><b>26A</b><span>Add the key, with a spec. <span class="lean">Lean, strong.</span></span><b>26B</b><span>Remove the option from the docs.</span></div>` },
+  { tag: "27-31", t: "URL move: five launch questions", body: `
+    <ul><li><b>27</b> Move /install and /skill under /learn too? <span class="lean">Lean: yes, weak.</span></li>
+    <li><b>28</b> The script rewrote two URLs in library error messages; those would 404 between the Unpoly release and the site deploy. <span class="lean">Lean: exclude JS code, strong.</span></li>
+    <li><b>29</b> Delete three dead redirect rules? <span class="lean">Lean: yes, medium.</span></li>
+    <li><b>30</b> Rewrite links in old 0.x-2.x release notes? <span class="lean">Lean: yes, medium.</span></li>
+    <li><b>31</b> Push the dry-run branches? My push was blocked; they are local only.</li></ul>
+    <p class="src">docs/rework-2026/open-items.md</p>` },
   { tag: "MI", t: "Module intros: 17 new first paragraphs", body: `
     <p>New intros for every module page (they double as /api hub summaries) await your read. Three claims are unverified (up.radio, up.network, up.log phrasing). Open question: should search badges follow the new glyph tiles?</p>
     <p class="src">docs/rework-2026/waves/module-intros.md</p>` },
@@ -246,8 +253,6 @@ const NEED = [
 ];
 
 const RUN = [
-  { tag: "UM", t: "URL move dry run", body: `
-    <p>Script that moves symbols to <code>/api/…</code> and guides to <code>/learn/…</code>: link rewrite, site routing, redirects without chains. Runs in throwaway worktrees with check_urls and a full build. Produces a launch-day runbook. Nothing gets merged.</p>` },
 ];
 
 const READY = [
@@ -282,11 +287,12 @@ const DEPLOY = [
   [false, "Copy button in Safari and Firefox"],
   [false, "Redirects with a #fragment target land on the anchor (/layer-terminology, /predefined-*, /motion-tuning)"],
   [false, "nginx stays cache-free (a CDN must honor Vary: Accept)"],
-  [false, "URL move: re-run the script on final content, check_urls, build"],
+  [false, "URL move: follow docs/rework-2026/url-move-runbook.md (rake docs:url_move, check_urls, build, Apache spot checks)"],
   [true,  "check_urls 78/78 and HTMLProofer green on current content"],
 ];
 
 const LOG = [
+  ["Sun", "URL move dry run: 627 documents to /learn and /api, 3,277 links rewritten, all old URLs redirect in one hop"],
   ["Sun", "Packets for Network, Animation, Scripting; 2 clear fixes (wrong config name for cache expiry, grammar)"],
   ["Sun", "Packets for History and Scrolling & focus; 6 clear fixes (scroll-to-top wording, [up-validate] keeps focus, param types)"],
   ["Sun", "Packets for Loading state and Live fragments; 4 clear doc fixes (wrong openOverlay example, typos, hungry claim on lazy-loading)"],
