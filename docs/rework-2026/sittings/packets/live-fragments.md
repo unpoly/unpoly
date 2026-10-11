@@ -142,7 +142,7 @@ Checked the new sentences: `[up-flashes]` sets `[up-if-layer=subtree]`, radio.js
 fail options, render_options.js:78.)
 
 
-## Clear fixes (apply without asking)
+## Clear fixes (APPLIED by the orchestrator in f811b6ff0) (apply without asking)
 
 1. lazy-loading.md:46-48 says the rest of the response is discarded, but hungry elements in it are updated too.
    Every render pass has `hungry: true` (fragment.js:249), and deferred loads don't change it (link.js:1008-1025).

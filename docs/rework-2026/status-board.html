@@ -260,8 +260,8 @@ const CHAPTERS = [
   { t: "Links", pages: ["links","following-links","handling-all-links","preloading","navigation-bars","faux-interactive-elements"], rev: 6, note: "Reviewed. handling-all-links restructure applied." },
   { t: "Forms", pages: ["forms","submitting-forms","validation","reactive-server-forms","switching-form-state","disabling-forms","handling-all-forms","custom-form-fields","watch-options"], rev: 7, partial: ["custom-form-fields"], note: "custom-form-fields waits on items 16-20. watch-options not read yet. Sitting notes for pages 1-7 applied (2026-10-11)." },
   { t: "Overlays", pages: ["overlays","opening-overlays","closing-overlays","subinteractions","customizing-overlays","layer-option","context","history-in-overlays"], rev: 0, dup: ["B10 per-mode config lines on the overview","B11 third copy of close conditions on opening-overlays","B12 modes table included twice"], note: "Sitting packet ready: 10 pointers with leans and drafts (docs/rework-2026/sittings/packets/overlays.md). Most important: explain [up-on-dismiss] vs [up-on-dismissed]; Back button still closes overlays. C4-C8 already applied." },
-  { t: "Loading state", pages: ["loading-state","feedback-classes","placeholders","previews","optimistic-rendering","progress-bar"], rev: 0, note: "No open judgment items. Fix round applied." },
-  { t: "Live fragments", pages: ["live-fragments","lazy-loading","infinite-scrolling","polling","hungry-elements","flashes"], rev: 0, note: "No open judgment items. Flashes moved here from Forms." },
+  { t: "Loading state", pages: ["loading-state","feedback-classes","placeholders","previews","optimistic-rendering","progress-bar"], rev: 0, note: "Sitting packet ready: 3 pointers (optimistic-rendering 2, feedback-classes 1). docs/rework-2026/sittings/packets/loading-state.md" },
+  { t: "Live fragments", pages: ["live-fragments","lazy-loading","infinite-scrolling","polling","hungry-elements","flashes"], rev: 0, note: "Sitting packet ready: 2 pointers (hungry-elements 1, polling 1 = C14 duplication). Flashes moved here from Forms. docs/rework-2026/sittings/packets/live-fragments.md" },
   { t: "History", pages: ["history","updating-history","restoring-history","tracking-page-views"], rev: 0, note: "Overview re-angled in advance (C3)." },
   { t: "Scrolling & focus", pages: ["scrolling-and-focus","scrolling","scroll-tuning","focus","focus-visibility"], rev: 0, note: "No open judgment items." },
   { t: "Network & caching", pages: ["network","caching","aborting-requests","network-issues"], rev: 0, dup: ["C9 overview copies revalidation, offline listener, slow server","C10 caching copies the tracking example","C12 merge network-issues sections","B14 caching teaser family sentence","extra: aborting sentences, up.request examples, A/B markup (lean: leave)"], note: "Item 5 decided (autoCache example)." },
@@ -284,6 +284,7 @@ const DEPLOY = [
 ];
 
 const LOG = [
+  ["Sun", "Packets for Loading state and Live fragments; 4 clear doc fixes (wrong openOverlay example, typos, hungry claim on lazy-loading)"],
   ["Sun", "Sitting packets for /watch-options and Overlays; full site build green"],
   ["Sun", "Forms sitting notes applied: race conditions table, handling-all-forms/links restructure, flashes section, Rails notes, non-2xx"],
   ["Sun", "Search: /layer-option ranks 1st for \"layer\"; skill search finds updating-history for \"history state\""],

@@ -186,7 +186,7 @@ No pointers. (Checked: 400 ms default, network.js:140; 3 px blue bar, network.sa
 and background requests never become late, classes/request.js:403-412; `config.progressBar`, network.js:145.)
 
 
-## Clear fixes (apply without asking)
+## Clear fixes (APPLIED by the orchestrator in f811b6ff0) (apply without asking)
 
 Reference doc comments in `src/unpoly/classes/preview.js`, found while checking the Previews page:
 
