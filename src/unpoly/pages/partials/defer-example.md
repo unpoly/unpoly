@@ -24,7 +24,7 @@ When the `[up-defer]` placeholder is rendered, it will immediately make a reques
 its content from `/menu`:
 
 ```http
-GET /path HTTP/1.1
+GET /menu HTTP/1.1
 X-Up-Target: #menu
 ```
 
