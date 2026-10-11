@@ -83,6 +83,7 @@ class PurchasesController < ApplicationController
   def create
     @purchase = Purchase.new(purchase_params)
     if request.headers['X-Up-Validate'] # mark-line
+      @purchase.validate # mark-line
       render 'form' # mark-line
     elsif @purchase.save
       redirect_to @purchase
@@ -94,9 +95,12 @@ class PurchasesController < ApplicationController
 end
 ```
 
-The template for `form` renders the country options and the price from the `@purchase` object.
+The controller validates `@purchase` without saving it, so the form can also show error messages
+for the current values. The template for `form` renders the country options and the price from the `@purchase` object.
 It does not need to know which field changed, since Unpoly extracts only the targeted fragment
 from the response.
+
+The examples use Ruby on Rails, but work similarly with any other backend.
 
 See [`[up-validate]`](/up-validate#backend-protocol) for the request and response in detail.
 
@@ -130,29 +134,26 @@ You can refer to the changed field as `:origin`:
 
 ## Preventing race conditions {#race-conditions}
 
-Custom implementations of dependent elements often exhibit race conditions, e.g. when the user
-is quickly changing fields while requests are still in flight.
+Users can change fields faster than your server responds. Unpoly keeps the form consistent,
+however fast the user is and however slow the network:
 
-Such issues are solved with `[up-validate]`. The form will eventually show a consistent state,
-regardless of how fast the user clicks or how slow the network is. In particular:
-
-- Unpoly guarantees that only a single validation request is in flight concurrently (per form).
-  Additional validations are queued until the current validation request has loaded.
-- Multiple updates from `[up-validate]` or `up.validate()`
-  are [batched](/up.validate#batching) into a single request with multiple targets.
-- When one of the target elements is an ancestor of another target, Unpoly will only request the ancestor.
-- If the user submits the form while validation requests are still in flight,
-  the validation requests are [aborted](/aborting-requests). This happens when the submission
-  updates the form or an element around it, like the [main element](/main).
+- **One request at a time.** Each form has at most one validation request in flight.
+  Later changes wait until it has loaded.
+- **Batched updates.** Changes that waited are [sent together](/up.validate#batching),
+  in a single request for all their targets. When one target contains another, only the outer one is requested.
+- **Submitting wins.** When the user submits while a validation is loading, the validation is [aborted](/aborting-requests).
+  This happens when the submission updates the form or an element around it, like the [main element](/main).
 
 Let's walk through a challenging scenario using the [postage form example](#declaring-dependencies) above:
 
-- The user selects a continent. A request for the country select is sent, but takes a while to load.
-- The user inputs a parcel weight. Because a request is still in flight, no additional request is sent.
-- The user changes the continent again. While a request is still in flight, no additional request is sent.
-- The response is received. The country select is updated.
-- A request for the country select and price preview is sent.
-- The next response is received. The price preview and country select are updated.
+| User input | Network | Form changes |
+|---|---|---|
+| Selects a continent | Request 1 for the country select | |
+| Enters a parcel weight | *waits for request 1* | |
+| Changes the continent again | *waits for request 1* | |
+| | Request 1 loads | Country select updated |
+| | Request 2 for country select and price | |
+| | Request 2 loads | Country select and price updated |
 
 Once the last response is processed, all fields and the price preview show consistent values.
 
