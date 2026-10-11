@@ -49,6 +49,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
 
 ### Other changes
 
+- ⚠️ While a [validation](/validation) request is loading, [feedback classes](/feedback-classes) like `.up-loading` are now set by default, as for every other render pass. Formerly a validation only set them with an `[up-watch-feedback]` attribute. To not set them, use `[up-watch-feedback="false"]` or pass `{ feedback: false }`.
 - An [`[up-on-offline]`](/up-follow#up-on-offline) snippet now receives the `up:fragment:offline` event as `event`, so it can call `event.retry()`. It used to receive the event under the name `error`.
 - An [`X-Up-Expire-Cache: false`](/X-Up-Expire-Cache) response header now expires no further cache entries, like [`X-Up-Evict-Cache: false`](/X-Up-Evict-Cache). It used to be treated as a URL pattern matching `/false`. As before, the header cannot undo the expiration that a non-GET request triggers before the server responds.
 

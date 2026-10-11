@@ -850,6 +850,67 @@ extendDescribe('up.form', function() {
 
       describe('feedback classes', function() {
 
+        it('sets feedback classes by default while a validation request is in flight', async function() {
+          const [form, group, input] = htmlFixtureList(`
+            <form>
+              <div up-form-group>
+                <input name="email">
+              </div>
+            </form>
+          `)
+
+          up.validate(input)
+          await wait()
+
+          expect(group).toHaveClass('up-loading')
+          expect(form).toHaveClass('up-active')
+
+          jasmine.respondWithSelector('[up-form-group] input[name="email"]')
+          await wait()
+
+          expect(form).not.toHaveClass('up-active')
+          expect(document.querySelector('[up-form-group]')).not.toHaveClass('up-loading')
+        })
+
+        it('does not set feedback classes with [up-watch-feedback=false]', async function() {
+          const [form, group, input] = htmlFixtureList(`
+            <form up-watch-feedback="false">
+              <div up-form-group>
+                <input name="email">
+              </div>
+            </form>
+          `)
+
+          up.validate(input)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(group).not.toHaveClass('up-loading')
+          expect(form).not.toHaveClass('up-active')
+        })
+
+        it('sets feedback classes for all targets of a batched validation if one field wants feedback and another does not', async function() {
+          const [form, fooGroup, fooInput, barGroup, barInput] = htmlFixtureList(`
+            <form>
+              <div up-form-group>
+                <input name="foo" up-watch-feedback="false">
+              </div>
+              <div up-form-group>
+                <input name="bar" up-watch-feedback="true">
+              </div>
+            </form>
+          `)
+
+          up.validate(fooInput)
+          up.validate(barInput)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBe('foo bar')
+          expect(fooGroup).toHaveClass('up-loading')
+          expect(barGroup).toHaveClass('up-loading')
+        })
+
         it("executes the form's [up-watch-feedback] option while a validation request is in flight", async function() {
           const form = fixture('form[up-watch-feedback]')
           const group = e.affix(form, '[up-form-group]')

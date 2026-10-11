@@ -281,7 +281,9 @@ up.FormValidator = class FormValidator {
     this._addValidateHeader(options.headers, dirtyNames)
 
     // If any solution wants feedback, they all get it.
-    options.feedback = u.some(dirtyRenderOptionsList, 'feedback')
+    // When no solution has an opinion we leave { feedback } unset, so the render default applies.
+    let feedbacks = u.compact(u.map(dirtyRenderOptionsList, 'feedback'))
+    if (feedbacks.length) options.feedback = feedbacks.includes(true)
 
     // Each up.validate({ data }) call should only apply to the targeted element,
     options.data = undefined
