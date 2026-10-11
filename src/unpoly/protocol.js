@@ -199,6 +199,8 @@ up.protocol = (function() {
   end
   ```
 
+  The example uses Ruby on Rails, but works similarly with any other backend.
+
   @header X-Up-Fail-Target
   @stable
   */

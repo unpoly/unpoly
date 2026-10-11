@@ -2039,6 +2039,8 @@ up.form = (function() {
   end
   ```
 
+  The examples use Ruby on Rails, but work similarly with any other backend.
+
   To honor the validation protocol, our backend needs to handle a third case:
 
   <ol start="3">
@@ -2077,7 +2079,7 @@ up.form = (function() {
 
   The server is free to respond with any HTTP status code, regardless of the validation result.
   Unpoly will always consider a validation request to be successful, even if the
-  server responds with a non-200 status code.
+  server responds with a non-2xx status code.
 
   Upon seeing an `X-Up-Validate` header, the server now renders a new state form from request parameters,
   showing eventual validation errors and updating [dependent elements](/reactive-server-forms):
