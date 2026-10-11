@@ -9,7 +9,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
     this.layer = up.layer.get(options)
     this._origin = options.origin
     this._value = options.value
-    this._preventable = options.preventable ?? true
+    this._force = options.force
     this._response = options.response
     this._history = options.history ?? true
   }
@@ -22,9 +22,17 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
 
     up.browser.assertConfirmed(this.options)
 
-    if (this._emitCloseEvent().defaultPrevented && this._preventable) {
+    if (this._emitCloseEvent().defaultPrevented && !this._force) {
       throw new up.Aborted('Close event was prevented')
     }
+
+    // Close any child layers we might have.
+    //
+    // (1) We do this before changing any state of this layer. When a child layer
+    //     prevents its close event, up.Aborted is thrown and this layer stays open.
+    // (2) We don't wait for peeling to finish, since changes that affect the
+    //     layer stack should happen sync.
+    this.layer.peel({ force: this._force })
 
     this._emitClosingEvent()
 
@@ -39,11 +47,6 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
     // Remember the parent, which will no longer be accessible once we
     // remove @layer from the @stack.
     const { parent } = this.layer
-
-    // Close any child-layers we might have.
-    // We don't wait for peeling to finish, since changes that affect the
-    // layer stack should happen sync:
-    this.layer.peel()
 
     // Move focus before destroying elements, as this involves checking if the closing
     // overlay had focus.

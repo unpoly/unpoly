@@ -53,6 +53,53 @@ describe('up.Layer.Overlay', function() {
       expect(listener.calls.argsFor(2)[0]).toBeEvent('up:layer:accepted', { layer: this.layers[1] })
     })
 
+    describe('when a descendant prevents its dismissal', function() {
+
+      it('keeps this layer open and throws an up.Aborted error', function() {
+        const [root, overlay1, overlay2] = makeLayers(3)
+        overlay2.on('up:layer:dismiss', (event) => event.preventDefault())
+        const closingListener = jasmine.createSpy('up:layer:accepting listener')
+        overlay1.on('up:layer:accepting', closingListener)
+        const acceptedListener = jasmine.createSpy('up:layer:accepted listener')
+        up.on('up:layer:accepted', acceptedListener)
+
+        expect(() => overlay1.accept()).toThrowError(up.Aborted, /prevented/i)
+
+        expect(overlay1).toBeAlive()
+        expect(overlay1.state).toBe('opened')
+        expect(overlay2).toBeAlive()
+        expect(up.layer.count).toBe(3)
+        expect(closingListener).not.toHaveBeenCalled()
+        expect(acceptedListener).not.toHaveBeenCalled()
+      })
+
+      it('does not abort requests targeting this layer', async function() {
+        const [root, overlay1, overlay2] = makeLayers(3)
+        overlay2.on('up:layer:dismiss', (event) => event.preventDefault())
+        const abortedListener = jasmine.createSpy('up:request:aborted listener')
+        up.on('up:request:aborted', abortedListener)
+
+        up.render('.element', { url: '/overlay1-url', layer: overlay1, peel: false })
+        await wait()
+
+        expect(() => overlay1.accept()).toThrowError(up.Aborted)
+
+        expect(abortedListener).not.toHaveBeenCalled()
+      })
+
+      it('closes both layers with { force: true }', function() {
+        const [root, overlay1, overlay2] = makeLayers(3)
+        overlay2.on('up:layer:dismiss', (event) => event.preventDefault())
+
+        overlay1.accept(null, { force: true })
+
+        expect(overlay2).not.toBeAlive()
+        expect(overlay1).not.toBeAlive()
+        expect(up.layer.count).toBe(1)
+      })
+
+    })
+
     it('throws an AbortError is the layer is already closing, but is still playing its closing animation', async function() {
       up.motion.config.enabled = true
       let overlay = await up.layer.open()
@@ -768,6 +815,20 @@ describe('up.Layer.Overlay', function() {
         expect(acceptedListener.calls.argsFor(0)[0].value).toBe('replaced')
       })
 
+      it('closes the layer with { force: true }, even if an up:layer:accept event handler prevents the event', function() {
+        makeLayers(2)
+        const acceptListener = jasmine.createSpy('up:layer:accept listener').and.callFake((event) => event.preventDefault())
+        const acceptedListener = jasmine.createSpy('up:layer:accepted listener')
+        up.layer.current.on('up:layer:accept', acceptListener)
+        up.on('up:layer:accepted', acceptedListener)
+
+        up.layer.current.accept('value', { force: true })
+
+        expect(acceptListener).toHaveBeenCalled()
+        expect(acceptedListener).toHaveBeenCalled()
+        expect(up.layer.count).toBe(1)
+      })
+
       it('lets an up:layer:accept event handler cancel the acceptance and throws an AbortError', function() {
         makeLayers(2)
         expect(up.layer.count).toBe(2)
@@ -794,6 +855,28 @@ describe('up.Layer.Overlay', function() {
       up.layer.current.dismiss()
 
       expect(modes()).toEqual(['root'])
+    })
+
+    it('closes this layer with { force: true }, even if an up:layer:dismiss event handler prevents the event', function() {
+      const [root, overlay] = makeLayers(2)
+      overlay.on('up:layer:dismiss', (event) => event.preventDefault())
+
+      expect(() => overlay.dismiss()).toThrowError(up.Aborted)
+      expect(overlay).toBeAlive()
+
+      overlay.dismiss(null, { force: true })
+
+      expect(overlay).not.toBeAlive()
+      expect(up.layer.count).toBe(1)
+    })
+
+    it('closes this layer with up.layer.dismiss({ force: true }), even if an up:layer:dismiss event handler prevents the event', function() {
+      const [root, overlay] = makeLayers(2)
+      overlay.on('up:layer:dismiss', (event) => event.preventDefault())
+
+      up.layer.dismiss(null, { force: true })
+
+      expect(overlay).not.toBeAlive()
     })
 
     it('takes a dismissal value that is passed to onDismissed handlers', function() {

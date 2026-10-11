@@ -181,8 +181,6 @@ up.viewport = (function() {
       up.fail('Cannot reveal a detached element')
     }
 
-    if (options.peel) { options.layer.peel() }
-
     const motion = new up.RevealMotion(element, options)
     motion.start()
 

@@ -71,6 +71,9 @@ up.on('up:layer:dismiss', function(event) {
 To keep only one particular overlay open, pass an [`{ onDismiss }`](/up.layer.open#options.onDismiss) callback
 or set an [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attribute on the opening link instead.
 
+When an overlay closes because a layer below it is [updated](#peeling), `event.value` is `":peel"`,
+so a listener can treat that case differently.
+
 
 Result values {#result-values}
 -------------
@@ -394,6 +397,9 @@ after a successful submission:
 ```
 
 A successful submission dismisses the form's own overlay with a [dismissal reason](#dismissal-reasons) of `":peel"`.
+
+If a listener [keeps the overlay open](#callbacks), the background layer is not updated.
+To close the overlay anyway, set an `[up-peel="force"]` attribute.
 
 > [note]
 > The form still updates its own layer when the [server responds with an error code](/failed-responses)

@@ -746,6 +746,39 @@ extendDescribe('up.history', function() {
         expect(destructorSpy).toHaveBeenCalled()
       })
 
+      describe('overlays', function() {
+
+        it('closes overlays when restoring the root layer, even if an up:layer:dismiss listener prevents it', async function() {
+          const waitForBrowser = 100
+          fixture('main', { text: 'original content' })
+          up.history.config.restoreTargets = [':main']
+
+          up.history.push('/page1')
+          await wait()
+
+          up.history.push('/page2')
+          await wait()
+
+          up.layer.open({ content: 'overlay content' })
+          await wait()
+          expect(up.layer.count).toBe(2)
+
+          const dismissListener = jasmine.createSpy('up:layer:dismiss listener').and.callFake((event) => event.preventDefault())
+          up.on('up:layer:dismiss', dismissListener)
+
+          history.back()
+          await wait(waitForBrowser)
+
+          jasmine.respondWithSelector('main', { text: 'restored content' })
+          await wait()
+
+          expect(dismissListener).toHaveBeenCalled()
+          expect(up.layer.count).toBe(1)
+          expect('main').toHaveText('restored content')
+        })
+
+      })
+
       describe('up:location:restore event', function() {
 
         it('emits an up:location:restore event that users can prevent and substitute their own restoration logic', async function() {

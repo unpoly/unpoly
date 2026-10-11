@@ -43,5 +43,18 @@ describe('up.Layer.OverlayWithTether', function() {
       expect(up.layer.count).toBe(1)
       expect(onDismissed).toHaveBeenCalled()
     })
+
+    it('dismisses the overlay when its anchor has been removed, even if an up:layer:dismiss listener prevents it', async function() {
+      const opener = fixture('.opener')
+      up.layer.open({ origin: opener, mode: 'popup', animation: false })
+      up.on('up:layer:dismiss', (event) => event.preventDefault())
+
+      expect(up.layer.count).toBe(2)
+
+      up.destroy(opener)
+      await wait()
+
+      expect(up.layer.count).toBe(1)
+    })
   })
 })

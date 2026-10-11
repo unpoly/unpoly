@@ -20,3 +20,8 @@
   By default, obstructing overlays will be [dismissed](/closing-overlays#intents).\
   To [accept](/closing-overlays#intents) them instead, set `[up-peel="accept"]`.\
   To not peel, set `[up-peel="false"]`.
+
+  A listener can [prevent](/closing-overlays#callbacks) an obstructing overlay from closing.
+  The target layer is then not updated.
+  To close obstructing overlays even when a listener prevents it, add the word `force`,
+  e.g. `[up-peel="force"]` or `[up-peel="accept force"]`.

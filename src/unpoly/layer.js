@@ -619,8 +619,9 @@ up.layer = (function() {
       The overlay's [acceptance value](/closing-overlays#acceptance-values) is available as `event.value`.
 
       To keep the overlay open, call `event.preventDefault()`.
-      This has no effect when the overlay is closed because a background layer is being
-      [updated](/closing-overlays#peeling).
+      This also works when the overlay is closed because a background layer is being
+      [updated](/closing-overlays#peeling). It has no effect when the overlay is
+      [closed by force](/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
 
       To run code after the overlay closed, use `{ onAccepted }` instead.
 
@@ -636,8 +637,9 @@ up.layer = (function() {
       The overlay's [dismissal value](/closing-overlays#dismissal-reasons) is available as `event.value`.
 
       To keep the overlay open, call `event.preventDefault()`.
-      This has no effect when the overlay is closed because a background layer is being
-      [updated](/closing-overlays#peeling).
+      This also works when the overlay is closed because a background layer is being
+      [updated](/closing-overlays#peeling). It has no effect when the overlay is
+      [closed by force](/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
 
       To run code after the overlay closed, use `{ onDismissed }` instead.
 
@@ -839,6 +841,26 @@ up.layer = (function() {
   function isWithinForeignOverlay(element) {
     let selector = config.selector('foreignOverlaySelectors')
     return !!(selector && element.closest(selector))
+  }
+
+  /*-
+  Parses a `{ peel }` render option into options for `up.Layer#peel()`.
+
+  The option may contain the words `accept`, `dismiss` and `force`, e.g. `'accept force'`.
+  Any other value (like `true`) dismisses without force.
+
+  @function up.layer.parsePeelOption
+  @param {boolean|string} peel
+  @return {Object}
+    An object with `{ intent }` (`'accept'` or `'dismiss'`) and `{ force }` (boolean) properties.
+  @internal
+  */
+  function parsePeelOption(peel) {
+    let tokens = u.getSimpleTokens(peel)
+    return {
+      intent: tokens.includes('accept') ? 'accept' : 'dismiss',
+      force: tokens.includes('force'),
+    }
   }
 
   /*-
@@ -1074,8 +1096,9 @@ up.layer = (function() {
       | `event`    | An `up:layer:accept` event                    |
 
       To keep the overlay open, call `event.preventDefault()`.
-      This has no effect when the overlay is closed because a background layer is being
-      [updated](/closing-overlays#peeling).
+      This also works when the overlay is closed because a background layer is being
+      [updated](/closing-overlays#peeling). It has no effect when the overlay is
+      [closed by force](/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
 
       To run code after the overlay closed, use `[up-on-accepted]` instead.
 
@@ -1106,8 +1129,9 @@ up.layer = (function() {
       | `event`    | An `up:layer:dismiss` event                    |
 
       To keep the overlay open, call `event.preventDefault()`.
-      This has no effect when the overlay is closed because a background layer is being
-      [updated](/closing-overlays#peeling).
+      This also works when the overlay is closed because a background layer is being
+      [updated](/closing-overlays#peeling). It has no effect when the overlay is
+      [closed by force](/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
 
       To run code after the overlay closed, use `[up-on-dismissed]` instead.
 
@@ -1304,7 +1328,8 @@ up.layer = (function() {
     anySelector,
     optionToString,
     get stack() { return stack.layers },
-    isWithinForeignOverlay
+    isWithinForeignOverlay,
+    parsePeelOption,
   }
 
   /*-
@@ -1541,6 +1566,15 @@ up.layer = (function() {
     See [Using the discarded response](/closing-overlays#using-the-discarded-response).
   @param event.preventDefault()
     Prevents the overlay from closing.
+
+    This also works when the overlay is closed because a background layer is being
+    [updated](/closing-overlays#peeling). In that case `event.value` is `':peel'`.
+
+    It has no effect when the overlay is [closed by force](/up.Layer.prototype.accept#options.force),
+    e.g. when the user navigates back in history.
+
+    To prevent closing for a single overlay, pass an [`{ onAccept }`](/up.layer.open#options.onAccept) option
+    or set an [`[up-on-accept]`](/up-layer-new#up-on-accept) attribute when opening it.
   @stable
   */
 
@@ -1616,6 +1650,15 @@ up.layer = (function() {
     See [Using the discarded response](/closing-overlays#using-the-discarded-response).
   @param event.preventDefault()
     Event listeners can call this method to prevent the overlay from closing.
+
+    This also works when the overlay is closed because a background layer is being
+    [updated](/closing-overlays#peeling). In that case `event.value` is `':peel'`.
+
+    It has no effect when the overlay is [closed by force](/up.Layer.prototype.accept#options.force),
+    e.g. when the user navigates back in history.
+
+    To prevent closing for a single overlay, pass an [`{ onDismiss }`](/up.layer.open#options.onDismiss) option
+    or set an [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attribute when opening it.
   @stable
   */
 

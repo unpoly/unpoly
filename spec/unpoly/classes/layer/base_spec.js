@@ -221,6 +221,69 @@ describe('up.Layer', function() {
 
     })
 
+    describe('when a listener prevents a descendant from closing', function() {
+
+      it('throws an up.Aborted error and keeps the descendant open', function() {
+        up.on('up:layer:dismiss', (event) => event.preventDefault())
+        const [root, overlay] = makeLayers(2)
+
+        expect(() => root.peel()).toThrowError(up.Aborted, /prevented/i)
+
+        expect(overlay).toBeAlive()
+        expect(up.layer.count).toBe(2)
+      })
+
+      it('passes a value of ":peel" so listeners can tell a peel apart from other dismissals', function() {
+        up.on('up:layer:dismiss', (event) => {
+          if (event.value === ':peel') event.preventDefault()
+        })
+        const [root, overlay] = makeLayers(2)
+
+        expect(() => root.peel()).toThrowError(up.Aborted)
+        expect(overlay).toBeAlive()
+
+        overlay.dismiss(':button')
+        expect(overlay).not.toBeAlive()
+      })
+
+      it('keeps descendants closed that were closed before the blocking descendant', function() {
+        const [root, overlay1, overlay2, overlay3] = makeLayers(4)
+        overlay1.on('up:layer:dismiss', (event) => event.preventDefault())
+
+        expect(() => root.peel()).toThrowError(up.Aborted)
+
+        expect(overlay3).not.toBeAlive()
+        expect(overlay2).not.toBeAlive()
+        expect(overlay1).toBeAlive()
+        expect(up.layer.count).toBe(2)
+      })
+
+      it('closes the descendant with { force: true }', function() {
+        const dismissListener = jasmine.createSpy('up:layer:dismiss listener').and.callFake((event) => event.preventDefault())
+        up.on('up:layer:dismiss', dismissListener)
+        const [root, overlay] = makeLayers(2)
+
+        root.peel({ force: true })
+
+        expect(dismissListener).toHaveBeenCalled()
+        expect(overlay).not.toBeAlive()
+        expect(up.layer.count).toBe(1)
+      })
+
+      it('accepts the descendant with { intent: "accept", force: true }', function() {
+        up.on('up:layer:accept', (event) => event.preventDefault())
+        const acceptedListener = jasmine.createSpy('up:layer:accepted listener')
+        up.on('up:layer:accepted', acceptedListener)
+        const [root, overlay] = makeLayers(2)
+
+        root.peel({ intent: 'accept', force: true })
+
+        expect(acceptedListener).toHaveBeenCalled()
+        expect(overlay).not.toBeAlive()
+      })
+
+    })
+
     describe('when a destructor throws an error', function() {
       it('still dismisses all descendants', async function() {
         const destroyError = new Error('error from destructor')

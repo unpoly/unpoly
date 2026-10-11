@@ -526,10 +526,21 @@ extendDescribe('up.layer', function() {
             expect(onDismissed).not.toHaveBeenCalled()
           })
 
-          it('cannot keep the overlay open when it is peeled', async function() {
+          it('keeps the overlay open when it is peeled', async function() {
+            const callback = jasmine.createSpy('onDismiss callback').and.callFake((event) => event.preventDefault())
+            const overlay = await up.layer.open({ onDismiss: callback })
+
+            expect(() => up.layer.root.peel()).toThrowError(up.Aborted)
+
+            expect(callback.calls.mostRecent().args[0]).toBeEvent('up:layer:dismiss', { value: ':peel' })
+            expect(overlay).toBeAlive()
+            expect(up.layer.current).toBe(overlay)
+          })
+
+          it('cannot keep the overlay open when it is peeled with { force: true }', async function() {
             const overlay = await up.layer.open({ onDismiss: (event) => event.preventDefault() })
 
-            up.layer.root.peel()
+            up.layer.root.peel({ force: true })
 
             expect(overlay).not.toBeAlive()
             expect(up.layer.isRoot()).toBe(true)

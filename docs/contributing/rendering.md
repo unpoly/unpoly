@@ -217,7 +217,9 @@ three overlays would otherwise leave the user staring at overlays built on conte
 longer exists. `peel: 'dismiss'` is a **navigate** default, so following a link peels while a
 bare `up.render({ target, content })` does not. `OpenLayer` is different: it peels its base
 layer *unconditionally* — `{ peel: false }` cannot prevent it, because the stack must remain
-a sequence; the option only chooses the intent.
+a sequence; the option only chooses the intent. Either way an `up:layer:dismiss` or
+`up:layer:accept` listener can keep an overlay open, unless the option contains `force`
+(`{ peel: 'force' }`). A prevented peel throws `up.Aborted`, which rejects the render pass.
 
 **The server can close a layer.** `up.Change.Addition#handleLayerChangeRequests()` tries the
 close reasons in a fixed order — `X-Up-Accept-Layer`, then the `{ acceptLocation }` close

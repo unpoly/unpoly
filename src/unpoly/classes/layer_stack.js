@@ -20,23 +20,25 @@ up.LayerStack = class LayerStack {
     // recursive calls of peel().
     const descendants = layer.descendants.toReversed()
 
-    // Callers expect the effects of peel() to manipulate the layer stack sync.
-    // Because of this we will dismiss alle descendants sync rather than waiting
-    // for each descendant to finish its closing animation.
-    const closeOptions = { ...options, preventable: false }
-
-    // We allow to dismiss using either { peel: 'dismiss' } (explicit) or { peel: true } (don't care).
+    // Render passes have already parsed their { peel } option to { intent, force }
+    // using up.layer.parsePeelOption().
     const closeMethod = options.intent === 'accept' ? 'accept' : 'dismiss'
 
     const closeValue = options.value ?? ':peel'
 
+    // (1) Callers expect the effects of peel() to manipulate the layer stack sync.
+    //     Because of this we will dismiss all descendants sync rather than waiting
+    //     for each descendant to finish its closing animation.
+    // (2) Unless we're passed { force: true }, a listener may prevent a descendant from closing.
+    //     In that case up.Aborted is thrown and we stop peeling. Descendants that were already
+    //     closed stay closed.
     for (let descendant of descendants) {
-      descendant[closeMethod](closeValue, closeOptions)
+      descendant[closeMethod](closeValue, options)
     }
   }
 
   reset() {
-    this.peel(this.root, { animation: false })
+    this.peel(this.root, { animation: false, force: true })
     this._currentOverrides = []
     this.root.reset()
   }

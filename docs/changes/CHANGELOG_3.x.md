@@ -38,6 +38,15 @@ Unpoly's documentation is now available to coding agents and LLMs:
 - [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules.
 - An [agent skill](/skill) bundles all guides, the API reference and the release notes, with a search script. Install it with `npx skills add --global https://unpoly.com`, or as a Claude Code plugin.
 
+### Preventing peeled overlays from closing
+
+- ⚠️ When a render pass closes overlays above the updated layer ([peeling](/closing-overlays#peeling)), an `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open. The render pass then rejects with `up.Aborted` and the layer is not updated. Formerly peeling ignored prevented events. Listeners can recognize a peel by its `event.value` of `":peel"`.
+- When a parent overlay closes, a child overlay that is kept open now also keeps its parent open.
+- `up.Layer#accept()`, `up.Layer#dismiss()` and `up.Layer#peel()` take a new `{ force: true }` option to close overlays even when a listener prevents it.
+- The [`[up-peel]`](/up-follow#up-peel) attribute and `{ peel }` option accept the word `force`, alone or combined with an intent, e.g. `[up-peel="accept force"]`.
+- Restoring history when the user presses the back button still closes overlays, even when a listener prevents it.
+- `up.reveal()` no longer takes an undocumented `{ peel }` option.
+
 ### Other changes
 
 - An [`[up-on-offline]`](/up-follow#up-on-offline) snippet now receives the `up:fragment:offline` event as `event`, so it can call `event.retry()`. It used to receive the event under the name `error`.

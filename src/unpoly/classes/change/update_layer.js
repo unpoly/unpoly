@@ -109,7 +109,10 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       //
       // (3) Only restore the base layer's history if the fragment update adds a
       //     history entry (issue #397).
-      this.layer.peel({ history: !this._hasHistory(), intent: peel })
+      //
+      // (4) Unless we're peeling with { peel: 'force' }, a listener may prevent an overlay from closing.
+      //     The up.Aborted error will then reject the render pass.
+      this.layer.peel({ history: !this._hasHistory(), ...up.layer.parsePeelOption(peel) })
     }
 
     // Unless the user has explicitly opted out of the default { abort: 'target' }

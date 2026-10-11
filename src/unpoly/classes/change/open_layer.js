@@ -100,7 +100,11 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // (2) Only restore the base layer's history if the new overlay does not add one of its own.
     //     Otherwise we would add an intermediate history entries when swapping overlays
     //     with { layer: 'swap' } (issue #397).
-    this._baseLayer.peel({ history: !this.layer.history, intent: this.options.peel })
+    //
+    // (3) Unless we're peeling with { peel: 'force' }, a listener may prevent an overlay from closing.
+    //     The up.Aborted error will then reject the render pass before the new overlay is
+    //     pushed to the stack.
+    this._baseLayer.peel({ history: !this.layer.history, ...up.layer.parsePeelOption(this.options.peel) })
 
     // (1) The parent's saved history will be restored when this new overlay is closed.
     // (2) Save the parent's history as long as it is the topmost layer in the stack,

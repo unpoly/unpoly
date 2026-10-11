@@ -389,6 +389,54 @@ describe('up.link', function() {
           expect(options.peel).toBe("dismiss")
         })
 
+        it('parses [up-peel="accept force"] as "accept force"', function() {
+          const link = fixture('a[href="/foo"][up-peel="accept force"]')
+          const options = up.link.followOptions(link)
+          expect(options.peel).toBe("accept force")
+        })
+
+        it('closes overlays with [up-peel="force"], even if an up:layer:dismiss listener prevents it', async function() {
+          up.on('up:layer:dismiss', (event) => event.preventDefault())
+          makeLayers([
+            { target: '.element', content: 'old text in root' },
+            { target: '.element', content: 'old text in overlay' },
+          ])
+          await wait()
+
+          const [link] = htmlFixtureList('<a href="/path" up-target=".element" up-layer="root" up-peel="force">link</a>')
+          up.layer.current.getContentElement().append(link)
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          jasmine.respondWithSelector('.element', { text: 'new text' })
+          await wait()
+
+          expect(up.layer.count).toBe(1)
+          expect(up.layer.root).toHaveText(/new text/)
+        })
+
+        it('keeps the overlay open without [up-peel="force"] when an up:layer:dismiss listener prevents it', async function() {
+          up.on('up:layer:dismiss', (event) => event.preventDefault())
+          makeLayers([
+            { target: '.element', content: 'old text in root' },
+            { target: '.element', content: 'old text in overlay' },
+          ])
+          await wait()
+
+          const [link] = htmlFixtureList('<a href="/path" up-target=".element" up-layer="root">link</a>')
+          up.layer.current.getContentElement().append(link)
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          jasmine.respondWithSelector('.element', { text: 'new text' })
+          await wait()
+
+          expect(up.layer.count).toBe(2)
+          expect(up.layer.root).toHaveText(/old text in root/)
+        })
+
       })
 
       describe('[up-accept-fragment]', function() {
