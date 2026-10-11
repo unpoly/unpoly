@@ -1,7 +1,7 @@
 URL patterns
 ============
 
-Some Unpoly features let you match an URL using *URL patterns*. You can use them to define [overlay close conditions](/closing-overlays#close-conditions), or when [adding aliases to navigation items](/up-alias).
+Some Unpoly features let you match a URL using *URL patterns*. You can use them to define [overlay close conditions](/closing-overlays#close-conditions), or when [adding aliases to navigation items](/up-alias).
 
 This guide describes the expression system Unpoly uses to match URL patterns. Please note that regular expressions ("regexes") are not supported. You must use the expression system described on this page.
 
@@ -15,7 +15,7 @@ Pass any absolute path or fully qualified URL to only match this exact value:
 
 ### Example
 
-Let's look at a very simple use of an URL pattern, which matches one (and only one) specific URL:
+Let's look at a very simple use of a URL pattern, which matches one (and only one) specific URL:
 
 ```html
 <!-- Closes the new overlay when user visits "/users/new" -->
@@ -39,7 +39,7 @@ The asterisk (`*`) matches one or many arbitrary characters:
 
 In the above URL pattern, anything after `/users/` will be considered a match. For example, URLS like `/users/`, `/users/new`, `/users/123/edit`, etc. would all be considered a match for the URL pattern listed above.
 
-You can put asterisks anywhere in an URL pattern (you and even use more than one asterisk in a single URL pattern). For instance, to match any URL that ends in `/new` you can use the URL pattern below:
+You can put asterisks anywhere in a URL pattern (you can even use more than one asterisk in a single URL pattern). For instance, to match any URL that ends in `/new` you can use the URL pattern below:
 
 ```text
 */new
@@ -47,7 +47,7 @@ You can put asterisks anywhere in an URL pattern (you and even use more than one
 
 The above URL pattern will match `/users/new`, `/admin/123/new`, etc.
 
-You may also place and asterisk in the middle of an URL pattern to match URLs with a given prefix and suffix:
+You may also place an asterisk in the middle of a URL pattern to match URLs with a given prefix and suffix:
 
 ```text
 /users/*/edit
@@ -119,7 +119,7 @@ up.layer.open({ url: '/users', acceptLocation: ["/users/*", "/account"] })
 
 ## Excluding patterns from matching
 
-To exclude an URL or pattern from matching, prefix the URL pattern with a minus (`-`) character.
+To exclude a URL or pattern from matching, prefix the URL pattern with a minus (`-`) character.
 
 The following URL pattern will match the URL `/users/123` but not `/users/456`:
 
