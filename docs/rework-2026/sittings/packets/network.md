@@ -291,7 +291,7 @@ see [[failed-responses]].
 ```
 
 
-## Clear fixes (apply without asking)
+## Clear fixes (APPLIED by the orchestrator)
 
 1. fragment.js:167 (doc comment of `up.fragment.config.autoRevalidate`). There is no `up.fragment.config.expireAge`;
    the expiry age is `up.network.config.cacheExpireAge` (network.js:77, :138).

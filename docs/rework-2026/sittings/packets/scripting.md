@@ -221,7 +221,7 @@ Unpoly will now block any script without a matching nonce:
 ```
 
 
-## Clear fixes (apply without asking)
+## Clear fixes (APPLIED by the orchestrator)
 
 1. legacy-scripts.md:41. The subject is "Compilers" (plural) in the line before.
    `> It should not use \`document.querySelectorAll()\` to process elements` →

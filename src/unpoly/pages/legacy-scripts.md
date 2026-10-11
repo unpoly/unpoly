@@ -38,7 +38,7 @@ elements that an earlier pass already enhanced are left alone.
 
 > [important]
 > Compilers should only process the given element and its children.
-> It should not use `document.querySelectorAll()` to process elements
+> They should not use `document.querySelectorAll()` to process elements
 > elsewhere on the page, since these may already have been compiled.
 
 

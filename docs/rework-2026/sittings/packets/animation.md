@@ -97,6 +97,6 @@ motion.js:41-42; the "Animations are disabled" log line, motion.js:525-531; `{ o
 opening animation, layer.js:606-613; `up.layer.config.overlay.openDuration` exists, layer.js:104.)
 
 
-## Clear fixes (apply without asking)
+## Clear fixes (APPLIED by the orchestrator)
 
 None.

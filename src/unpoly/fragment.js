@@ -164,7 +164,7 @@ up.fragment = (function() {
     @param {boolean|Function(up.Response): boolean} [config.autoRevalidate]
       Whether to reload a fragment after it was rendered from a cached response with `{ revalidate: 'auto' }`.
 
-      By default Unpoly verifies cached responses that are older than `up.fragment.config.expireAge`:
+      By default Unpoly verifies cached responses that are older than `up.network.config.cacheExpireAge`:
 
       ```js
       up.fragment.config.autoRevalidate = (response) => response.expired
