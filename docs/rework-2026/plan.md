@@ -1795,6 +1795,10 @@ Build phase (fresh sessions per station, see the progress map):
 Decide at writing/build time: page order within chapters; search grouping UX (S4);
 hotkeys, empty states, sidecar delivery; retiring the Algolia push for latest.
 
+## Budget push (Henning 2026-10-11)
+Approved: (a) fix round A+B now (worktree agent; P5/duplication items, A8 and overlay-closing items skipped), (b) decided CODE fixes Q1, Q3, Space key with specs (after the peeling agent, main checkout), (d) mechanical pre-ship tasks: Unpoly::Guide→Unpoly::Site rename (worktree), /layer-option search ranking, sidebar_spec.rb:260, site-wide link/anchor check, (e) sitting packets per chapter before each sitting (C items + duplications per page, both sides quoted, lean + ready draft), (f) URL move (/api, /learn) as a repeatable script, dry-run in a throwaway worktree with check_urls + site build; not merged until launch day. DEFERRED: (c) running every example; agents only reproduce examples that look clearly wrong.
+In flight: preventable peeling (decisions 1, 1.1A, 1.2C parsePeelOption, 1.3B remove up.reveal peel).
+
 ## Deferred (only after content changes and the new landing page have shipped)
 
 - **URL prefixes** — PULLED INTO PRE-SHIP (Henning 2026-10-09: "Do it before shipping";
