@@ -1358,7 +1358,7 @@ up.fragment = (function() {
 
   @section Region awareness
     @param {string} [options.match='region']
-      Controls which fragment to return when the [`{ target }`](#options.target) selector yields multiple results.
+      Controls which fragment to return when the [`selector`](#selector) yields multiple results.
 
       When set to `'region'` Unpoly will prefer to match fragments in the
       [region](/targeting-fragments#ambiguous-selectors) of the [origin element](#options.origin).

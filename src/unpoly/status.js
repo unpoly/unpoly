@@ -313,7 +313,7 @@ up.status = (function() {
   <a href="/edit" up-follow up-preview="spinner, dim-page">Edit page</a> <!-- mark: up-preview="spinner, dim-page" -->
   ```
 
-  [Preview options](#parameters) can be appended after each preview name, encoded as [Relaxed JSON](/relaxed-json):
+  [Preview options](/previews#parameters) can be appended after each preview name, encoded as [Relaxed JSON](/relaxed-json):
 
   ```html
   <a href="/edit"

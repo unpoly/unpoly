@@ -571,7 +571,7 @@ up.compiler('.element', async function(element) {
 
 #### Cleaning up async work {#async-destructors}
 
-Like synchronous compilers, async compiler functions can return a [destructor function](#destructor):
+Like synchronous compilers, async compiler functions can return a [destructor function](/up.compiler#destructor):
 
 ```js
 up.compiler('textarea.wysiwyg', async function(textarea) {
