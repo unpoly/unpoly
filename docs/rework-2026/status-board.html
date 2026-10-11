@@ -205,7 +205,7 @@ footer.note { color: var(--muted); font-size: 12.5px }
 <script>
 const TRACK = [
   { t: "Chapter sittings", s: "Getting started, Links, Forms (8 of 9) reviewed; packets ready for the other 10", p: 0.3, state: "here" },
-  { t: "Fix round", s: "done; items 5, 9, 15 decided but not applied yet", p: 0.95 },
+  { t: "Fix round", s: "done", p: 1, done: true },
   { t: "Code example check", s: "~1,150 examples, ~60 fixes, reviewed; 13 questions queued", p: 0.85 },
   { t: "Learn-ref sweep", s: "unblocked (module intros done), not started", p: 0 },
   { t: "Em-dash & AI-trope pass", s: "ran on current text: API clean, 2 guide edits; recheck after sittings", p: 0.8 },
@@ -218,7 +218,7 @@ const TRACK = [
 
 const NEED = [
   { tag: "36", t: "Glyphs in search chips, subtitles and the Learn sidebar", body: `
-    <p>Third prototype round is being built (uncommitted in unpoly-site): ghost chips with glyphs, Learn takes HTML's blue and HTML gets a new color, MODULE/CLASS chips with the package glyph, more chip padding, overview glyph for chapter overviews in the sidebar, glyph-only subtitles.</p>
+    <p>Round 3 ready for approval (uncommitted in unpoly-site, specs green): ghost chips with glyphs, Learn in the old HTML blue, HTML in a new leaf green, MODULE/CLASS chips with the package glyph, chip padding, overview glyph in the sidebar, glyph-only subtitles. Restart your :4567 docs server to see the glyphs live.</p>
     <p class="src">Screenshots: scratchpad/glyphs/compare.html</p>` },
   { tag: "P1-P8", t: "Persona review findings", body: `
     <ul><li><b>P1</b> No comparison with Turbo/Hotwire; htmx only on the start page</li>
@@ -243,19 +243,18 @@ const NEED = [
     <li><b>E11</b> [up-alias] never matches absolute same-origin URLs</li>
     <li><b>E7-E10, E12</b> small: mark comments, detached element, typo'd preview name, prose typos (mostly clear fixes)</li></ul>
     <p class="src">docs/rework-2026/open-items.md</p>` },
+  { tag: "PU", t: "Push updates guide: 4 open questions", body: `
+    <p>Reviewed draft (SSE and WebSocket via a compiler). Open: signal shape, abort on reload, own heading for token streaming, placement.</p>
+    <p class="src">https://claude.ai/artifact/8KYQWqVMqKQcpm6FNE1JfX · docs/rework-2026/drafts/push-updates.md</p>` },
   { tag: "SC", t: "/watch-options: Forms page 9 of 9", body: `
     <p>The last Forms page has not been read in a sitting. A packet with 2 pointers (leans and ready drafts) is ready.</p>
     <p class="src">docs/rework-2026/sittings/packets/watch-options.md</p>` },
 ];
 
 const RUN = [
-  { tag: "36", t: "Glyph prototype, round 3", body: `<p>Refinements, docs server restart, new screenshots. Nothing is committed until you approve.</p>` },
 ];
 
 const READY = [
-  { tag: "5", t: "/caching: drop the first autoCache example", body: `<p>Link "configure this default" to #disabling-route instead.</p>` },
-  { tag: "9", t: "/optimizing-responses: \"Detecting a full page load\"", body: `<p>#version explains <code>X-Up-Version</code> as the way to detect a full page load (unpoly-rails <code>up.target?</code> example). #title adds: no <code>&lt;head&gt;</code> means no meta tag updates and no deployment detection.</p>` },
-  { tag: "15", t: "/script-security: delete the hidden \"General advice\" block", body: `<p>Git keeps the text.</p>` },
   { tag: "27/29", t: "URL move script: short links and dead rules", body: `<p>/install and /skill move under /learn, references switch to the new URLs, and .htaccess keeps both short URLs as permanent redirects (27X). Delete the three dead redirect rules (29A). 28X: keep the rewrite in library error messages. 30A: rewrite old release notes.</p>` },
   { tag: "TR", t: "Trope pass leftovers into sitting packets", body: `<p>Four weak style questions (reactive-server-forms, network-issues, extensions, enhancing-elements/data wording) go into their chapters' packets.</p>` },
   { tag: "FX", t: "Small fixes from earlier sittings", body: `
@@ -291,6 +290,9 @@ const DEPLOY = [
 ];
 
 const LOG = [
+  ["Sun", "Push updates guide drafted and reviewed (3 bugs fixed by the review)"],
+  ["Sun", "Items 5, 9, 15 applied; German MDN links and small example details fixed"],
+  ["Sun", "FACE selector in fieldSelectors verified in Chrome and Firefox: no false matches"],
   ["Sun", "Module intros: all 17 shortened to \"Features to [job].\""],
   ["Sun", "Fixed [up-reveal-padding] being ignored when rendering (spec + changelog)"],
   ["Sun", "/custom-form-fields restructured: four Option headings, Needs JS column, plain <div> example, DatePicker emits change on user input"],
