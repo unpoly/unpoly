@@ -131,13 +131,13 @@ The following URL pattern will match the URL `/users/123` but not `/users/456`:
 
 ```html
 <!-- Closes layer when user visits any URL beginning with "/users/", but not "/users/456" -->
-<a href="/users/" up-accept-location="/users/* /users/456" up-layer="new">Users</a>
+<a href="/users/" up-accept-location="/users/* -/users/456" up-layer="new">Users</a>
 ```
 
 The same pattern can be used from JavaScript:
 
 ```js
-up.layer.open({ acceptLocation: "/users/* /users/456" })
+up.layer.open({ acceptLocation: "/users/* -/users/456" })
 ```
 
 ## Capturing named segments
@@ -162,7 +162,7 @@ Then the user name from the URL (`foo`) becomes the overlay's [result value](/cl
 <a href="/users/"
   up-accept-location="/users/:name"
   up-layer="new"
-  up-on-accepted="console.log(`Reached user ${value.name}`!)">
+  up-on-accepted="console.log(`Reached user ${value.name}!`)">
   Users
 </a>
 ```
