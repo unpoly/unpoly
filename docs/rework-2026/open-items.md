@@ -70,6 +70,17 @@ Branches `url-move-dryrun` exist locally in unpoly and unpoly-site (worktrees in
 - 31A push both branches (nothing merges); you can run `! git -C /home/henning/Projects/urlmove/unpoly push -u origin url-move-dryrun` and the same for urlmove/unpoly-site, or allow me to.
 - 31B keep them local until launch day.
 
+## Persona review findings (2026-10-11, full report: prepass/persona-review-2026-10-11.md)
+Not yet numbered; to be walked through after the current list. All three personas understood Unpoly's shape within ~5 pages; the start page's "Is Unpoly right for you?" did most of the work.
+- P1 No Turbo/Hotwire comparison anywhere; htmx comparison only on /. Suggests a Getting-started page "Coming from htmx or Turbo" (concept mapping + what Unpoly lacks).
+- P2 [up-validate] server work understated ("the one thing Unpoly asks of your backend" on /start/forms, "one convention" on /backend-integration); only /validation#backend says "don't save on X-Up-Validate".
+- P3 Push/real-time never addressed (/live-fragments). Suggest one paragraph: no push channel; your WebSocket/EventSource handler can call up.reload()/up.render().
+- P4 / overclaims Back: "restores the exact screen state" vs re-fetch + scroll/focus restore.
+- P5 up.compiler summary "called when a matching element is inserted into the DOM" reads like a MutationObserver.
+- P6 Optimistic rendering is a headline card on / but its page says experimental.
+- P7 Unpoly's own size is never stated (only unpoly-migrate.js 9.2 KB).
+- P8 Eight guide pages link to German MDN (/de/) → clear fix, apply after the trope pass merges.
+
 ## Status notes (no decision needed)
 - 2026-10-11: code fixes pushed: dfa0712e0 (Q1 validation feedback default), aea7978a1 (Q3 configured fields in disabled fieldset, changelog bullet extended), 714a4b519 (Space key). Full suite 4329 passed, 1 failed: link_target_spec.js:752 transition transform spec, passes alone and in its group (looks flaky, unrelated).
 - Fix round merged (7 commits) + overlay leftovers (09db32d44). Changelog entry for [up-on-accept]/[up-on-dismiss] added.
