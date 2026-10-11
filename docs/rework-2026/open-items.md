@@ -81,6 +81,23 @@ Not yet numbered; to be walked through after the current list. All three persona
 - P7 Unpoly's own size is never stated (only unpoly-migrate.js 9.2 KB).
 - P8 Eight guide pages link to German MDN (/de/) → clear fix, apply after the trope pass merges.
 
+## Code example check findings (2026-10-11; ~1,150 examples, ~60 fixes pushed in 10 commits 80d1c6b5b..3ff80b8c3; log in session scratchpad)
+Not yet numbered. Code bug (lean: fix + spec, strong):
+- E0 script.js parseCallback: with expandObject, the closure's `argNames` is reassigned on every call, so a parsed callback called twice gets duplicate arg names (layer/value/response undefined). Likely hits onAccepted/onDismissed etc.
+Questions:
+- E1 url-patterns.md:81-89 numeric wildcard `/users/$` doesn't work as documented (bare `$` literal; reproduced).
+- E2 form.js:2026,2057 `params.require(:user)` but fields aren't nested.
+- E3 fragment.js:2166-2188 [up-id] example claims toTarget() throws for `<a href="/">`; it doesn't.
+- E4 render_result.js:44-46 renderOptions.target is the resolved selector, not ':main' (docs or code?).
+- E5 base.js:896-907 up.Layer#affix appends to first swappable element, not outmost.
+- E6 subinteractions.md up.validate('select', {params}) re-renders the whole group.
+- E7 script.js:651 up.hello() on detached element.
+- E8 script.js:251,273 `// mark: await` on lines without await.
+- E9 `up-animation="shake"` isn't built in.
+- E10 preview.js:473 preview named '.sign-in'.
+- E11 [up-alias] absolute same-origin URLs never match.
+- E12 prose bits: script.js:53 broken link; script.js:21,34,41 `Array<string`; params.js fromURL @return; response.js #header text.
+
 ## Status notes (no decision needed)
 - 2026-10-11: code fixes pushed: dfa0712e0 (Q1 validation feedback default), aea7978a1 (Q3 configured fields in disabled fieldset, changelog bullet extended), 714a4b519 (Space key). Full suite 4329 passed, 1 failed: link_target_spec.js:752 transition transform spec, passes alone and in its group (looks flaky, unrelated).
 - Fix round merged (7 commits) + overlay leftovers (09db32d44). Changelog entry for [up-on-accept]/[up-on-dismiss] added.
