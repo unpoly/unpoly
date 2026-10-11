@@ -72,7 +72,7 @@ the user hovers over a `<main>` element:
 
 ```js
 up.compiler('link[rel=next]', (link) => {
-  return up.on('mouseenter', 'main', () => up.link.preload(link))
+  return up.on('mouseover', 'main', () => up.link.preload(link))
 })
 ```
 
@@ -88,10 +88,10 @@ To preload a given URL without a link element, make a [background](/up.render#op
 up.request('/menu', { cache: true, background: true })
 ```
 
-The cached response will be used by any link to the same URL:
+The cached response will be used by any [followed](/up-follow) link to the same URL:
 
 ```html
-<a href="/menu">Menu</a>
+<a href="/menu" up-follow>Menu</a>
 ```
 
 

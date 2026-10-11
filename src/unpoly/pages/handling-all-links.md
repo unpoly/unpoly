@@ -39,6 +39,7 @@ Some links will still activate on `click` under this setting:
 
 - Links with an `[up-instant=false]` attribute.
 - Links that are not [followable](#following-all-links).
+- Links with an `[onclick]` attribute.
 - Any additional exceptions configured in `up.link.config.noInstantSelectors`.
 
 If you have event listeners bound to `click` on accelerated links, they will no longer be called.

@@ -15,6 +15,10 @@ The options on this page apply to all of these features:
 | `[up-autosubmit]` | `up.autosubmit()` | Submit a form after a change                |
 | `[up-switch]`     |                   | Switch other elements after a change        |
 
+Event and delay options apply to all of them. Options for loading state, like `[up-watch-disable]`,
+apply to `[up-validate]` and `[up-autosubmit]`. An `[up-watch]` callback must
+[forward its options](/up.watch#callback-arguments) to the function that renders.
+
 
 Which events to watch {#events}
 ---------------------
@@ -39,7 +43,8 @@ up.autosubmit(field, { event: 'change' })
 
 Multiple events can be passed as a space- or comma-separated string, or as an array.
 It's OK to name multiple events that may result from the same change (e.g. `keydown keyup change`).
-Unpoly guarantees the callback is run only once per unique changed value.
+For `up.watch()`, `[up-autosubmit]` and `[up-switch]`, Unpoly guarantees the callback is run only once per unique changed value.
+`[up-validate]` validates on every watched event, so watching `input` also validates once more on `change`.
 
 ### Normalizing non-standard events {#normalizing-non-standard-events}
 

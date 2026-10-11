@@ -64,7 +64,7 @@ a target selector can express.
 
 When the form could not be submitted due to invalid user input,
 your server should re-render the form with error messages and respond with
-a non-200 status code. We recommend
+a status code outside the 2xx range. We recommend
 [HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Content).
 
 The error code tells Unpoly that the submission failed. Unpoly then ignores

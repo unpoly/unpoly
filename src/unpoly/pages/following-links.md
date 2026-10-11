@@ -17,8 +17,7 @@ To have Unpoly handle a link, set an `[up-follow]` attribute:
 When the user clicks, Unpoly requests `/posts/5` in the background.
 The server responds with a full HTML page, the same way it would for any browser request.
 Unpoly extracts the response's [main element](/main) and replaces the main element
-on the current page. The rest of the page stays untouched: scroll positions, focus
-and unsaved form fields all survive.
+on the current page. Elements outside the updated fragment keep their state, like unsaved input in other forms.
 
 The link remains a standard hyperlink. When the user opens it in a new tab,
 or when JavaScript is unavailable, the browser loads the destination as a full page.
@@ -57,7 +56,7 @@ Navigation defaults
 
 Following a link is considered [navigation](/navigation-defaults) by default.
 When a link updates the layer's main element, Unpoly behaves like a full page load would:
-the browser URL and history are updated, and the new content is scrolled into view.
+the browser URL and history are updated, and the page scrolls to the top.
 Focus moves to the new fragment.
 
 See [[navigation-defaults]] for all navigation defaults and how to customize them.

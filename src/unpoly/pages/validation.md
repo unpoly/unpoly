@@ -69,7 +69,7 @@ In the second case, we render the form again with the submitted values and a mes
 
 ### Signaling a failed submission {#signaling-a-failed-submission}
 
-For Unpoly to detect the failed submission, the backend must respond with a non-200 HTTP status code.
+For Unpoly to detect the failed submission, the backend must respond with an HTTP status code outside the 2xx range.
 We recommend [HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Content).
 
 In a Ruby on Rails app this would look like this:

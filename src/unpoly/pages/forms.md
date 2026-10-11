@@ -24,7 +24,7 @@ When the user submits, Unpoly sends the form data in the background.
 Your server processes it like any form submission, usually responding with
 a redirect to the next screen. Unpoly extracts the response's
 [main element](/main) and swaps it into the current page.
-The rest of the page keeps its state: scroll positions, focus and other forms all survive.
+Elements outside the updated fragment keep their state, like unsaved input in other forms.
 
 To update a different fragment, add an [`[up-target]`](/up-submit#up-target) attribute with a CSS selector:
 
@@ -49,7 +49,7 @@ Submitting is navigation
 
 Submitting a form counts as [navigation](/navigation-defaults).
 When a form updates the layer's main element, Unpoly behaves like a full page load would:
-the browser URL and history are updated, and the new content is scrolled into view.
+the browser URL and history are updated, and the page scrolls to the top.
 Each of these defaults can be customized.
 
 
