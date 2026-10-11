@@ -540,7 +540,7 @@ up.Params = class Params {
     // "the browser knows it" is the closest test we have for "the browser handled it".
     let browserControls = new Set(form.elements)
     for (let field of up.form.fields(form)) {
-      if (!browserControls.has(field)) params.addField(field)
+      if (!browserControls.has(field) && !field.closest('fieldset:disabled')) params.addField(field)
     }
 
     return params

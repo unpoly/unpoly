@@ -944,6 +944,25 @@ describe('up.Params', function() {
         ])
       })
 
+      it('does not serialize a configured custom element inside a <fieldset disabled>, like the browser omits native and form-associated fields there', function() {
+        up.form.config.fieldSelectors.push('test-form-field')
+
+        const [form] = htmlFixtureList(`
+          <form>
+            <fieldset disabled>
+              <input name="native-inside" value="native-inside-value">
+              <test-form-associated-element name="associated-inside" value="associated-inside-value"></test-form-associated-element>
+              <test-form-field name="configured-inside" value="configured-inside-value"></test-form-field>
+            </fieldset>
+            <test-form-field name="configured-outside" value="configured-outside-value"></test-form-field>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'configured-outside', value: 'configured-outside-value' },
+        ])
+      })
+
       it('does not serialize a configured custom element without a readable value', function() {
         up.form.config.fieldSelectors.push('test-valueless-field')
 

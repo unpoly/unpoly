@@ -237,8 +237,9 @@ up.form = (function() {
   }
 
   // The field's own state only: an ancestor <fieldset disabled> also disables it for the browser,
-  // which we deliberately don't track. Asks the same question as writeFieldDisabled(), so the two
-  // cannot disagree about which spelling is authoritative.
+  // which we deliberately don't track here. Only up.Params.fromForm() honors it, for request params.
+  // Asks the same question as writeFieldDisabled(), so the two cannot disagree about which
+  // spelling is authoritative.
   function readFieldDisabled(field) {
     return 'disabled' in field ? field.disabled : field.hasAttribute('disabled')
   }
