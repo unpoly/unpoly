@@ -45,6 +45,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
 - `up.Layer#accept()`, `up.Layer#dismiss()` and `up.Layer#peel()` take a new `{ force: true }` option to close overlays even when a listener prevents it.
 - The [`[up-peel]`](/up-follow#up-peel) attribute and `{ peel }` option accept the word `force`, alone or combined with an intent, e.g. `[up-peel="accept force"]`.
 - Restoring history when the user presses the back button still closes overlays, even when a listener prevents it.
+- New [`[up-on-accept]`](/up-layer-new#up-on-accept) and [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attributes run code before an overlay closes, and can keep it open with `event.preventDefault()`. The matching [`{ onAccept }`](/up.layer.open#options.onAccept) and [`{ onDismiss }`](/up.layer.open#options.onDismiss) options already existed and are now documented.
 - `up.reveal()` no longer takes an undocumented `{ peel }` option.
 
 ### Other changes
