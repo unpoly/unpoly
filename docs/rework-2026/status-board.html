@@ -242,32 +242,18 @@ const NEED = [
 ];
 
 const RUN = [
-  { tag: "SR", t: "Search ranking", body: `
-    <ul><li>/layer-option should rank in the top 5 for "layer" (likely <code>@signature</code>).</li>
-    <li>Agent skill search: "history state" should find updating-history.md first.</li></ul>
-    <p class="src">Commits locally, I review and push.</p>` },
+  { tag: "FS", t: "Applying the Forms sitting notes", body: `
+    <p>Pages 1-7 of Forms plus /handling-all-links, /flashes pointers, "non-2xx", and the Rails disclaimer on every page with Ruby examples. Runs in a worktree; I review and merge.</p>` },
   { tag: "UM", t: "URL move dry run", body: `
     <p>Script that moves symbols to <code>/api/…</code> and guides to <code>/learn/…</code>: link rewrite, site routing, redirects without chains. Runs in throwaway worktrees with check_urls and a full build. Produces a launch-day runbook. Nothing gets merged.</p>` },
 ];
 
 const READY = [
-  { tag: "FS", t: "Forms sitting notes (pages 1-7)", body: `
-    <p>Decided in the sitting, mostly not in the pages yet:</p>
-    <ul><li>/validation: concurrency sentence + link to race conditions</li>
-    <li>/reactive-server-forms: race conditions restructure (three guarantees + table), <code>@purchase.validate</code></li>
-    <li>/switching-form-state: hidden fields are still submitted; trim #reacting-to-different-events</li>
-    <li>/disabling-forms: clearer focus wording</li>
-    <li>/submitting-forms: loading teaser, short flashes section</li>
-    <li>/handling-all-forms and /handling-all-links: restructure with "Making exceptions" and macro</li>
-    <li>Rails disclaimer on all pages with Ruby/ERB examples</li></ul>
-    <p class="src">docs/rework-2026/sittings/forms.md</p>` },
   { tag: "5", t: "/caching: drop the first autoCache example", body: `<p>Link "configure this default" to #disabling-route instead.</p>` },
   { tag: "9", t: "/optimizing-responses: \"Detecting a full page load\"", body: `<p>#version explains <code>X-Up-Version</code> as the way to detect a full page load (unpoly-rails <code>up.target?</code> example). #title adds: no <code>&lt;head&gt;</code> means no meta tag updates and no deployment detection.</p>` },
   { tag: "15", t: "/script-security: delete the hidden \"General advice\" block", body: `<p>Git keeps the text.</p>` },
   { tag: "FX", t: "Small fixes from earlier sittings", body: `
-    <ul><li>"non-200" → "non-2xx" (2 places)</li>
-    <li>attributes-and-options: link back to /handling-all-links#following-all-links</li>
-    <li>Remove the "This page is being written." filter before ship</li></ul>` },
+    <ul><li>Remove the "This page is being written." filter before ship</li></ul>` },
 ];
 
 const CHAPTERS = [
@@ -299,6 +285,7 @@ const DEPLOY = [
 ];
 
 const LOG = [
+  ["Sun", "Search: /layer-option ranks 1st for \"layer\"; skill search finds updating-history for \"history state\""],
   ["Sun", "Site namespace renamed to Unpoly::Site; sidebar spec fixed (syntax highlighter crash)"],
   ["Sun", "Bug fixes with specs: validation feedback by default, custom fields in disabled fieldsets, Space key on faux buttons"],
   ["Sun", "Overlays: peeling can be prevented, { force }, [up-peel=\"accept force\"], Back always closes"],
