@@ -204,61 +204,60 @@ footer.note { color: var(--muted); font-size: 12.5px }
 
 <script>
 const TRACK = [
-  { t: "Chapter sittings", s: "3 of 13 reviewed; packets ready for all 10 remaining", p: 0.27, state: "here" },
-  { t: "Fix round", s: "facts, code bugs, Forms notes done; items 5, 9, 15 left", p: 0.9 },
-  { t: "Learn-ref sweep", s: "not started", p: 0 },
-  { t: "Em-dash & AI-trope pass", s: "whole site, after sittings", p: 0 },
-  { t: "Persona review", s: "3 personas read the site", p: 0 },
+  { t: "Chapter sittings", s: "Getting started, Links, Forms (8 of 9) reviewed; packets ready for the other 10", p: 0.3, state: "here" },
+  { t: "Fix round", s: "done; items 5, 9, 15 decided but not applied yet", p: 0.95 },
+  { t: "Code example check", s: "~1,150 examples, ~60 fixes, reviewed; 13 questions queued", p: 0.85 },
+  { t: "Learn-ref sweep", s: "unblocked (module intros done), not started", p: 0 },
+  { t: "Em-dash & AI-trope pass", s: "ran on current text: API clean, 2 guide edits; recheck after sittings", p: 0.8 },
+  { t: "Persona review", s: "done; 8 findings queued (P1-P8)", p: 0.6 },
   { t: "Namespace rename", s: "Unpoly::Site merged", p: 1, done: true },
-  { t: "URL move", s: "script tested; replay on launch day", p: 0.7 },
+  { t: "URL move", s: "script tested, branches pushed, launch questions 27-31 decided", p: 0.8 },
   { t: "Release sync", s: "CHANGELOG, feature review, promotion", p: 0.1 },
   { t: "Launch", s: "Unpoly, unpoly-rails, site", p: 0 },
 ];
 
 const NEED = [
-  { tag: "16", t: "/custom-form-fields: pattern table", body: `
-    <p>The table says custom elements need a <code>value</code> getter to be watched, validated, switched and disabled. Only watching and switching read <code>value</code>. A <em>configured</em> element needs the getter even to be submitted.</p>
-    <div class="opt"><b>16A</b><span>Columns "Submitted and validated | Watched and switched | Disabled". <span class="lean">Lean, medium.</span></span><b>16B</b><span>Keep two columns, reword cells.</span></div>` },
-  { tag: "17", t: "/custom-form-fields: implementation rationale", body: `
-    <p>Cut "The other two need nothing from you, because of how component authoring works…" and "Both fall back on absence, not falseness…". The table already says what the reader must provide.</p>
-    <div class="opt"><b>17A</b><span>Cut both. <span class="lean">Lean.</span></span><b>17B</b><span>Keep.</span></div>` },
-  { tag: "18", t: "/custom-form-fields: re-enabling edge case", body: `
-    <p>Replace the paragraph "The same rule cuts the other way when re-enabling…" with: "If you style your element from the <code>[disabled]</code> attribute, reflect your <code>disabled</code> property to it."</p>
-    <div class="opt"><b>18A</b><span>One sentence. <span class="lean">Lean.</span></span><b>18B</b><span>Keep the paragraph.</span></div>` },
-  { tag: "19", t: "/custom-form-fields: lazy-loading tip", body: `
-    <p>The tip about registering lazily loaded elements in <code>fieldSelectors</code> sits in #contract, but it is about choosing a configured element.</p>
-    <div class="opt"><b>19A</b><span>Move into #configured. <span class="lean">Lean.</span></span><b>19B</b><span>Leave.</span></div>` },
-  { tag: "20", t: "/custom-form-fields: section order", body: `
-    <p>hidden field → form-associated → contract → configured → formdata. #configured relies on #contract ("as described above").</p>
-    <div class="opt"><b>20A</b><span>Keep. <span class="lean">Strong lean (🤖).</span></span><b>20B</b><span>Move #contract after all four patterns.</span></div>` },
-  { tag: "25", t: "Changelog marker for preventable peeling", body: `
-    <p>The legend says ⚠️ means "polyfilled by unpoly-migrate". There is no polyfill. But this release already marks five unpolyfilled form changes with ⚠️.</p>
-    <div class="opt"><b>25A</b><span>Keep ⚠️ like the others, add an upgrade hint. <span class="lean">Lean.</span></span><b>25B</b><span>❌ by the legend (then review the other five).</span><b>25C</b><span>Reword the legend.</span></div>` },
-  { tag: "26", t: "Code bug: [up-reveal-padding] does nothing when rendering", body: `
-    <p><code>up.FragmentScrolling</code> drops <code>revealPadding</code> because it is missing from its keys (fragment_scrolling.js:5-14).</p>
-    <div class="opt"><b>26A</b><span>Add the key, with a spec. <span class="lean">Lean, strong.</span></span><b>26B</b><span>Remove the option from the docs.</span></div>` },
-  { tag: "27-31", t: "URL move: five launch questions", body: `
-    <ul><li><b>27</b> Move /install and /skill under /learn too? <span class="lean">Lean: yes, weak.</span></li>
-    <li><b>28</b> The script rewrote two URLs in library error messages; those would 404 between the Unpoly release and the site deploy. <span class="lean">Lean: exclude JS code, strong.</span></li>
-    <li><b>29</b> Delete three dead redirect rules? <span class="lean">Lean: yes, medium.</span></li>
-    <li><b>30</b> Rewrite links in old 0.x-2.x release notes? <span class="lean">Lean: yes, medium.</span></li>
-    <li><b>31</b> Push the dry-run branches? My push was blocked; they are local only.</li></ul>
+  { tag: "36", t: "Glyphs in search chips, subtitles and the Learn sidebar", body: `
+    <p>Third prototype round is being built (uncommitted in unpoly-site): ghost chips with glyphs, Learn takes HTML's blue and HTML gets a new color, MODULE/CLASS chips with the package glyph, more chip padding, overview glyph for chapter overviews in the sidebar, glyph-only subtitles.</p>
+    <p class="src">Screenshots: scratchpad/glyphs/compare.html</p>` },
+  { tag: "P1-P8", t: "Persona review findings", body: `
+    <ul><li><b>P1</b> No comparison with Turbo/Hotwire; htmx only on the start page</li>
+    <li><b>P2</b> Server work for [up-validate] understated ("the one thing Unpoly asks of your backend")</li>
+    <li><b>P3</b> Push/real-time never addressed</li>
+    <li><b>P4</b> Start page overclaims Back ("exact screen state")</li>
+    <li><b>P5</b> up.compiler summary reads like a MutationObserver</li>
+    <li><b>P6</b> Optimistic rendering is a headline card but marked experimental</li>
+    <li><b>P7</b> Unpoly's own size is never stated</li>
+    <li><b>P8</b> Eight guide pages link to German MDN (clear fix)</li></ul>
+    <p class="src">docs/rework-2026/open-items.md, prepass/persona-review-2026-10-11.md</p>` },
+  { tag: "E0", t: "Code bug: parsed callbacks break on the second call", body: `
+    <p><code>parseCallback</code> in script.js reassigns its <code>argNames</code> on every call, so callbacks like <code>[up-on-accepted]</code> get <code>undefined</code> for <code>value</code>, <code>layer</code> etc. when they run twice.</p>
+    <div class="opt"><b>E0A</b><span>Fix with a spec. <span class="lean">Lean, strong.</span></span></div>` },
+  { tag: "E1-E12", t: "Questions from the code example check", body: `
+    <ul><li><b>E1</b> /url-patterns numeric wildcard <code>$</code> doesn't work as documented (reproduced)</li>
+    <li><b>E2</b> Rails example uses <code>params.require(:user)</code> for non-nested fields</li>
+    <li><b>E3</b> [up-id] example claims toTarget() throws; it doesn't</li>
+    <li><b>E4</b> renderOptions.target shows the resolved selector, not ":main" (docs or code?)</li>
+    <li><b>E5</b> up.Layer#affix appends to the first swappable element</li>
+    <li><b>E6</b> up.validate('select') re-renders the whole form group</li>
+    <li><b>E11</b> [up-alias] never matches absolute same-origin URLs</li>
+    <li><b>E7-E10, E12</b> small: mark comments, detached element, typo'd preview name, prose typos (mostly clear fixes)</li></ul>
     <p class="src">docs/rework-2026/open-items.md</p>` },
-  { tag: "MI", t: "Module intros: 17 new first paragraphs", body: `
-    <p>New intros for every module page (they double as /api hub summaries) await your read. Three claims are unverified (up.radio, up.network, up.log phrasing). Open question: should search badges follow the new glyph tiles?</p>
-    <p class="src">docs/rework-2026/waves/module-intros.md</p>` },
   { tag: "SC", t: "/watch-options: Forms page 9 of 9", body: `
-    <p>The last Forms page has not been read in a sitting. It already got the Q2 docs change. A packet with 2 pointers (leans and ready drafts) is ready.</p>
+    <p>The last Forms page has not been read in a sitting. A packet with 2 pointers (leans and ready drafts) is ready.</p>
     <p class="src">docs/rework-2026/sittings/packets/watch-options.md</p>` },
 ];
 
 const RUN = [
+  { tag: "36", t: "Glyph prototype, round 3", body: `<p>Refinements, docs server restart, new screenshots. Nothing is committed until you approve.</p>` },
 ];
 
 const READY = [
   { tag: "5", t: "/caching: drop the first autoCache example", body: `<p>Link "configure this default" to #disabling-route instead.</p>` },
   { tag: "9", t: "/optimizing-responses: \"Detecting a full page load\"", body: `<p>#version explains <code>X-Up-Version</code> as the way to detect a full page load (unpoly-rails <code>up.target?</code> example). #title adds: no <code>&lt;head&gt;</code> means no meta tag updates and no deployment detection.</p>` },
   { tag: "15", t: "/script-security: delete the hidden \"General advice\" block", body: `<p>Git keeps the text.</p>` },
+  { tag: "27/29", t: "URL move script: short links and dead rules", body: `<p>/install and /skill move under /learn, references switch to the new URLs, and .htaccess keeps both short URLs as permanent redirects (27X). Delete the three dead redirect rules (29A). 28X: keep the rewrite in library error messages. 30A: rewrite old release notes.</p>` },
+  { tag: "TR", t: "Trope pass leftovers into sitting packets", body: `<p>Four weak style questions (reactive-server-forms, network-issues, extensions, enhancing-elements/data wording) go into their chapters' packets.</p>` },
   { tag: "FX", t: "Small fixes from earlier sittings", body: `
     <ul><li>Remove the "This page is being written." filter before ship</li></ul>` },
 ];
@@ -266,12 +265,12 @@ const READY = [
 const CHAPTERS = [
   { t: "Getting started", pages: ["start/overview","install","start/links","start/forms","start/overlays","start/elements","start/api","start/next"], rev: 8, note: "Reviewed. start/api trimmed to the three-layer example." },
   { t: "Links", pages: ["links","following-links","handling-all-links","preloading","navigation-bars","faux-interactive-elements"], rev: 6, note: "Reviewed. handling-all-links restructure applied." },
-  { t: "Forms", pages: ["forms","submitting-forms","validation","reactive-server-forms","switching-form-state","disabling-forms","handling-all-forms","custom-form-fields","watch-options"], rev: 7, partial: ["custom-form-fields"], note: "custom-form-fields waits on items 16-20. watch-options not read yet. Sitting notes for pages 1-7 applied (2026-10-11)." },
+  { t: "Forms", pages: ["forms","submitting-forms","validation","reactive-server-forms","switching-form-state","disabling-forms","handling-all-forms","custom-form-fields","watch-options"], rev: 8, note: "custom-form-fields restructured around four options (items 16-23, 37). watch-options not read yet." },
   { t: "Overlays", pages: ["overlays","opening-overlays","closing-overlays","subinteractions","customizing-overlays","layer-option","context","history-in-overlays"], rev: 0, dup: ["B10 per-mode config lines on the overview","B11 third copy of close conditions on opening-overlays","B12 modes table included twice"], note: "Sitting packet ready: 10 pointers with leans and drafts (docs/rework-2026/sittings/packets/overlays.md). Most important: explain [up-on-dismiss] vs [up-on-dismissed]; Back button still closes overlays. C4-C8 already applied." },
   { t: "Loading state", pages: ["loading-state","feedback-classes","placeholders","previews","optimistic-rendering","progress-bar"], rev: 0, note: "Sitting packet ready: 3 pointers (optimistic-rendering 2, feedback-classes 1). docs/rework-2026/sittings/packets/loading-state.md" },
   { t: "Live fragments", pages: ["live-fragments","lazy-loading","infinite-scrolling","polling","hungry-elements","flashes"], rev: 0, note: "Sitting packet ready: 2 pointers (hungry-elements 1, polling 1 = C14 duplication). Flashes moved here from Forms. docs/rework-2026/sittings/packets/live-fragments.md" },
   { t: "History", pages: ["history","updating-history","restoring-history","tracking-page-views"], rev: 0, note: "Sitting packet ready: 2 pointers on tracking-page-views (one is C10). Overview re-angled in advance (C3). docs/rework-2026/sittings/packets/history.md" },
-  { t: "Scrolling & focus", pages: ["scrolling-and-focus","scrolling","scroll-tuning","focus","focus-visibility"], rev: 0, note: "Sitting packet ready: 2 pointers (scrolling, scroll-tuning). The revealPadding code bug is item 26. docs/rework-2026/sittings/packets/scrolling-and-focus.md" },
+  { t: "Scrolling & focus", pages: ["scrolling-and-focus","scrolling","scroll-tuning","focus","focus-visibility"], rev: 0, note: "Sitting packet ready: 2 pointers (scrolling, scroll-tuning). The revealPadding bug is fixed (item 26). docs/rework-2026/sittings/packets/scrolling-and-focus.md" },
   { t: "Network & caching", pages: ["network","caching","aborting-requests","network-issues"], rev: 0, dup: ["C9 overview copies revalidation, offline listener, slow server","C10 caching copies the tracking example","C12 merge network-issues sections","B14 caching teaser family sentence","extra: aborting sentences, up.request examples, A/B markup (lean: leave)"], note: "Sitting packet ready: 7 pointers (network 4, caching 2, network-issues 1). Item 5 decided. docs/rework-2026/sittings/packets/network.md" },
   { t: "Animation", pages: ["animation"], rev: 0, dup: ["C13 overlay example copies customizing-overlays","B18 repeated size-shift sentence"], note: "Sitting packet ready: 2 pointers. C13 is the same item as in the Overlays packet; decide once. docs/rework-2026/sittings/packets/animation.md" },
   { t: "Scripting", pages: ["scripting","enhancing-elements","data","templates","islands","legacy-scripts","script-security"], rev: 0, dup: ["C20 overview repeats start/elements; re-angle to element lifetime","B22 providing-html template section","B23 repeated CSP meta block"], note: "Pages approved in the 10-06/07 sitting. Packet: 3 pointers on deferred items (C20, B22, B23). Item 15 decided. docs/rework-2026/sittings/packets/scripting.md" },
@@ -292,6 +291,14 @@ const DEPLOY = [
 ];
 
 const LOG = [
+  ["Sun", "Module intros: all 17 shortened to \"Features to [job].\""],
+  ["Sun", "Fixed [up-reveal-padding] being ignored when rendering (spec + changelog)"],
+  ["Sun", "/custom-form-fields restructured: four Option headings, Needs JS column, plain <div> example, DatePicker emits change on user input"],
+  ["Sun", "URL move decisions 27-31; dry-run branches pushed"],
+  ["Sun", "Code example check: ~1,150 examples, ~60 fixes, second review found no wrong fixes"],
+  ["Sun", "Persona review: all three personas understood Unpoly; 8 findings"],
+  ["Sun", "Em-dash/AI-trope pass: API docs clean, 2 guide edits"],
+  ["Sun", "Roboto Mono served as one variable font; inline code inherits bold"],
   ["Sun", "Packets for Backend integration and Advanced rendering; 4 clear fixes (hungry claims, 204 wording)"],
   ["Sun", "URL move dry run: 627 documents to /learn and /api, 3,277 links rewritten, all old URLs redirect in one hop"],
   ["Sun", "Packets for Network, Animation, Scripting; 2 clear fixes (wrong config name for cache expiry, grammar)"],
