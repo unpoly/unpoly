@@ -2547,7 +2547,7 @@ up.fragment = (function() {
 
   ## Example
 
-  We open an overlay with a target selector `#target`:
+  We open an overlay with a target selector `#foo`:
 
   ```
   up.layer.open({ target: '#foo', content: 'Hello from overlay' })

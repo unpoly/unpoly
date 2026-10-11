@@ -390,7 +390,6 @@ up.Params = class Params {
   ### Example
 
   ```js
-  var params = new up.Params({ foo: 'fooValue', bar: 'barValue' })
   var params = new up.Params([
     { name: 'foo', value: 'fooValue' },
     { name: 'bar[]', value: 'barValue1' },

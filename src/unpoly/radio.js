@@ -235,8 +235,8 @@ up.radio = (function() {
 
       Relative references like `'parent'` or `'child'` will be resolved in relation to the hungry element's layer.
 
-      To match a hungry element when updating one of multiple layers, separate the references using an `or` delimiter.
-      For example, `'current or child'` will match for updates on either the hungry element's layer or
+      To match a hungry element when updating one of multiple layers, separate the references with a comma.
+      For example, `'current, child'` will match for updates on either the hungry element's layer or
       its direct child.
 
       To match a hungry element when updating *any* layer, set this attribute to `'any'`.
