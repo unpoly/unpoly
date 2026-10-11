@@ -91,7 +91,7 @@ up.Preview = class Preview {
   up.preview('my-preview', function(preview) {
     if (preview.fragment.hasAttribute('foo')) return
     preview.fragment.setAttribute('foo', 'foo-value')
-    return () => preview.fragment.removeAttribute('foo')) // mark: return
+    return () => preview.fragment.removeAttribute('foo') // mark: return
   })
   ```
 
@@ -549,7 +549,7 @@ up.Preview = class Preview {
 
   ```js
   up.preview('spinner', function(preview) {
-    let spinnerElement = up.template.clone('#spinner-template', { message: "One moment..." }),
+    let [spinnerElement] = up.template.clone('#spinner-template', { message: "One moment..." })
     spinnerElement.classList.add('big')
     preview.insert(spinnerElement)
   })
@@ -731,7 +731,7 @@ up.Preview = class Preview {
 
   ```js
   up.preview('skeleton', function(preview) {
-    preview.showPlaceholder('<span class=".skeleton">...</span>')
+    preview.showPlaceholder('<span class="skeleton">...</span>')
   })
   ```
 
@@ -747,7 +747,7 @@ up.Preview = class Preview {
 
   ```js
   up.preview('showPlaceholder', function(preview) {
-    preview.swapContent('body', '#skeleton-template')
+    preview.showPlaceholder('body', '#skeleton-template')
   })
   ```
 

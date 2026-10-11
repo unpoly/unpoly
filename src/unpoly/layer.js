@@ -728,7 +728,7 @@ up.layer = (function() {
   ```js
   up.on('up:layer:opened', function(event) {
     if (isChristmas()) {
-      up.element.affix(event.layer.element, '.santa-hat', text: 'Merry Christmas!')
+      up.element.affix(event.layer.element, '.santa-hat', { text: 'Merry Christmas!' })
     }
   })
   ```
@@ -1415,11 +1415,11 @@ up.layer = (function() {
   up.layer.get('front') // returns the front layer
   ```
 
-  To look up one of multiple layer options, separate the values using `or`:
+  To look up one of multiple layer options, separate the values using a comma:
 
   ```js
   // returns the parent layer, or the root if we're already on root:
-  up.layer.get('parent or root')
+  up.layer.get('parent, root')
   ```
 
   ### Existing `up.Layer` objects are returned

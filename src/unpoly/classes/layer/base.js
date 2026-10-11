@@ -426,7 +426,7 @@ up.Layer = class Layer extends up.Record {
   up.layer.open({ mode: 'drawer' })
   up.layer.open({ mode: 'modal' })
 
-  up.layer.parent // returns [up.Layer.Drawer, up.Layer.Root]
+  up.layer.current.ancestors // returns [up.Layer.Drawer, up.Layer.Root]
   ```
 
   @property up.Layer#ancestors
@@ -706,7 +706,7 @@ up.Layer = class Layer extends up.Record {
   up.layer.current // returns up.Layer.Modal
 
   up.layer.parent.asCurrent(function() {
-    up.layer.current // returns up.layer.Root
+    up.layer.current // returns up.Layer.Root
   })
 
   up.layer.current // returns up.Layer.Modal
@@ -901,8 +901,8 @@ up.Layer = class Layer extends up.Record {
   ### Example
 
   ```js
-  layer = up.layer.open()
-  element = layer.affix(.klass')
+  layer = await up.layer.open()
+  element = layer.affix('.klass')
   element.parentElement // returns 'main'
   element.className // returns 'klass'
   ```

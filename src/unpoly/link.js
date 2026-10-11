@@ -309,7 +309,7 @@ up.link = (function() {
   ```js
   let link = document.querySelector('a[href="/foo"]')
   let options = up.link.followOptions(link)
-  // result: { url: '/foo', method: 'GET', target: '.content', layer: 'new', ... }'
+  // result: { url: '/foo', method: 'GET', target: '.content', layer: 'new', ... }
   ```
 
   @function up.link.followOptions
@@ -706,7 +706,7 @@ up.link = (function() {
 
   To activate the element on `mousedown` instead of `click`, also set an `[up-instant]` attribute:
 
-    ```html
+  ```html
   <span id="faux-button" up-clickable up-instant>Click me</span> <!-- mark: up-instant -->
   ```
 
