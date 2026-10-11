@@ -153,7 +153,7 @@ every element Unpoly focuses, viewport.js:262-263; the default stylesheet hides 
 `.up-focus-hidden:focus-visible`, viewport.sass:4-12; `up.focus()` takes `{ focusVisible }`, viewport.js:239.)
 
 
-## Clear fixes (apply without asking)
+## Clear fixes (APPLIED by the orchestrator in 84d45e640)
 
 1. scrolling-and-focus.md:5, the blurb. Following a link to a main target scrolls the layer to the top
    (`layer-if-main`, fragment.js:280), as the page itself says at :19. Same correction as A1 on links.md.

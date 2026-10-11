@@ -40,6 +40,11 @@ docs/changes/CHANGELOG_3.x.md, Unreleased, "Preventing peeled overlays from clos
 - 25B ❌ for this one (strictly by the legend; then lines 14-19 would need the same review).
 - 25C reword the legend so ⚠️ covers unpolyfilled behavior changes that rarely affect apps.
 
+### 26 `[up-reveal-padding]` / `{ revealPadding }` ignored when rendering (code bug)
+`up.FragmentScrolling` only passes its known keys to `up.reveal()` (classes/fragment_scrolling.js:5-14), and `revealPadding` is missing, so the documented render option and attribute do nothing. `up.reveal(element, { padding })` itself works.
+- 26A (lean, strong) add `'revealPadding'` to the keys (and map it to `padding` if needed), with a spec. One line plus spec.
+- 26B remove the option from the render docs.
+
 ## Status notes (no decision needed)
 - 2026-10-11: code fixes pushed: dfa0712e0 (Q1 validation feedback default), aea7978a1 (Q3 configured fields in disabled fieldset, changelog bullet extended), 714a4b519 (Space key). Full suite 4329 passed, 1 failed: link_target_spec.js:752 transition transform spec, passes alone and in its group (looks flaky, unrelated).
 - Fix round merged (7 commits) + overlay leftovers (09db32d44). Changelog entry for [up-on-accept]/[up-on-dismiss] added.

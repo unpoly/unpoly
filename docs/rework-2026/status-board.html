@@ -234,6 +234,9 @@ const NEED = [
   { tag: "25", t: "Changelog marker for preventable peeling", body: `
     <p>The legend says ⚠️ means "polyfilled by unpoly-migrate". There is no polyfill. But this release already marks five unpolyfilled form changes with ⚠️.</p>
     <div class="opt"><b>25A</b><span>Keep ⚠️ like the others, add an upgrade hint. <span class="lean">Lean.</span></span><b>25B</b><span>❌ by the legend (then review the other five).</span><b>25C</b><span>Reword the legend.</span></div>` },
+  { tag: "26", t: "Code bug: [up-reveal-padding] does nothing when rendering", body: `
+    <p><code>up.FragmentScrolling</code> drops <code>revealPadding</code> because it is missing from its keys (fragment_scrolling.js:5-14).</p>
+    <div class="opt"><b>26A</b><span>Add the key, with a spec. <span class="lean">Lean, strong.</span></span><b>26B</b><span>Remove the option from the docs.</span></div>` },
   { tag: "MI", t: "Module intros: 17 new first paragraphs", body: `
     <p>New intros for every module page (they double as /api hub summaries) await your read. Three claims are unverified (up.radio, up.network, up.log phrasing). Open question: should search badges follow the new glyph tiles?</p>
     <p class="src">docs/rework-2026/waves/module-intros.md</p>` },
@@ -262,8 +265,8 @@ const CHAPTERS = [
   { t: "Overlays", pages: ["overlays","opening-overlays","closing-overlays","subinteractions","customizing-overlays","layer-option","context","history-in-overlays"], rev: 0, dup: ["B10 per-mode config lines on the overview","B11 third copy of close conditions on opening-overlays","B12 modes table included twice"], note: "Sitting packet ready: 10 pointers with leans and drafts (docs/rework-2026/sittings/packets/overlays.md). Most important: explain [up-on-dismiss] vs [up-on-dismissed]; Back button still closes overlays. C4-C8 already applied." },
   { t: "Loading state", pages: ["loading-state","feedback-classes","placeholders","previews","optimistic-rendering","progress-bar"], rev: 0, note: "Sitting packet ready: 3 pointers (optimistic-rendering 2, feedback-classes 1). docs/rework-2026/sittings/packets/loading-state.md" },
   { t: "Live fragments", pages: ["live-fragments","lazy-loading","infinite-scrolling","polling","hungry-elements","flashes"], rev: 0, note: "Sitting packet ready: 2 pointers (hungry-elements 1, polling 1 = C14 duplication). Flashes moved here from Forms. docs/rework-2026/sittings/packets/live-fragments.md" },
-  { t: "History", pages: ["history","updating-history","restoring-history","tracking-page-views"], rev: 0, note: "Overview re-angled in advance (C3)." },
-  { t: "Scrolling & focus", pages: ["scrolling-and-focus","scrolling","scroll-tuning","focus","focus-visibility"], rev: 0, note: "No open judgment items." },
+  { t: "History", pages: ["history","updating-history","restoring-history","tracking-page-views"], rev: 0, note: "Sitting packet ready: 2 pointers on tracking-page-views (one is C10). Overview re-angled in advance (C3). docs/rework-2026/sittings/packets/history.md" },
+  { t: "Scrolling & focus", pages: ["scrolling-and-focus","scrolling","scroll-tuning","focus","focus-visibility"], rev: 0, note: "Sitting packet ready: 2 pointers (scrolling, scroll-tuning). The revealPadding code bug is item 26. docs/rework-2026/sittings/packets/scrolling-and-focus.md" },
   { t: "Network & caching", pages: ["network","caching","aborting-requests","network-issues"], rev: 0, dup: ["C9 overview copies revalidation, offline listener, slow server","C10 caching copies the tracking example","C12 merge network-issues sections","B14 caching teaser family sentence","extra: aborting sentences, up.request examples, A/B markup (lean: leave)"], note: "Item 5 decided (autoCache example)." },
   { t: "Animation", pages: ["animation"], rev: 0, dup: ["C13 overlay example copies customizing-overlays","B18 repeated size-shift sentence"], note: "" },
   { t: "Scripting", pages: ["scripting","enhancing-elements","data","templates","islands","legacy-scripts","script-security"], rev: 0, dup: ["C20 overview repeats start/elements; re-angle to element lifetime","B22 providing-html template section","B23 repeated CSP meta block"], note: "Item 15 decided (delete hidden block)." },
@@ -284,6 +287,7 @@ const DEPLOY = [
 ];
 
 const LOG = [
+  ["Sun", "Packets for History and Scrolling & focus; 6 clear fixes (scroll-to-top wording, [up-validate] keeps focus, param types)"],
   ["Sun", "Packets for Loading state and Live fragments; 4 clear doc fixes (wrong openOverlay example, typos, hungry claim on lazy-loading)"],
   ["Sun", "Sitting packets for /watch-options and Overlays; full site build green"],
   ["Sun", "Forms sitting notes applied: race conditions table, handling-all-forms/links restructure, flashes section, Rails notes, non-2xx"],

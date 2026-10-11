@@ -151,7 +151,7 @@ such as its `{ target }` or `{ layer }`.
 ```
 
 
-## Clear fixes (apply without asking)
+## Clear fixes (APPLIED by the orchestrator in 84d45e640)
 
 1. tracking-page-views.md:66. The A28 paragraph inserted at :62-64 is about overlays *with* visible history,
    so "such overlays" now points at the wrong group. The sentence means overlays without visible history (:58-60).
