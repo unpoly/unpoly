@@ -1,0 +1,362 @@
+<title>Relaunch Control Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a launch track across the top (where we are), then three working columns
+   (waiting on Henning, in motion, decided but not applied), then the chapter map and the
+   launch checklist. Every block is a <details> so the summary reads at a glance and opens for detail. */
+:root {
+  --bg: #f6f5f2;
+  --surface: #ffffff;
+  --sunken: #eceae4;
+  --ink: #1d1c19;
+  --muted: #67645c;
+  --line: #d9d6cd;
+  --accent: #d2550f;          /* Unpoly-ish orange, used for "you are here" */
+  --accent-soft: #fbe6d8;
+  --need: #a8640a;  --need-bg: #fdf0d6;   /* waiting on Henning */
+  --run: #1f5fa8;   --run-bg: #e1ecf8;    /* agents running */
+  --ready: #6a4bb0; --ready-bg: #ece6f8;  /* decided, not applied */
+  --done: #2c7a4b;  --done-bg: #dff1e6;
+  --todo: #8a877e;  --todo-bg: #ebe9e3;
+  --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #161614; --surface: #1f1f1c; --sunken: #2a2925; --ink: #ecebe6; --muted: #a7a398; --line: #3a3934;
+  --accent: #f07a3a; --accent-soft: #3d2416;
+  --need: #f0b452; --need-bg: #3a2c12; --run: #7fb2ec; --run-bg: #16273c; --ready: #b9a2ee; --ready-bg: #2a2140;
+  --done: #74c995; --done-bg: #16301f; --todo: #8f8c83; --todo-bg: #2a2925; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #161614; --surface: #1f1f1c; --sunken: #2a2925; --ink: #ecebe6; --muted: #a7a398; --line: #3a3934;
+  --accent: #f07a3a; --accent-soft: #3d2416;
+  --need: #f0b452; --need-bg: #3a2c12; --run: #7fb2ec; --run-bg: #16273c; --ready: #b9a2ee; --ready-bg: #2a2140;
+  --done: #74c995; --done-bg: #16301f; --todo: #8f8c83; --todo-bg: #2a2925; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; margin: 0 }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0 }
+h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.02em }
+h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted) }
+code, .mono { font-family: var(--mono); font-size: 0.88em }
+a { color: inherit }
+.head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px }
+.head p { margin: 0; color: var(--muted) }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted) }
+.legend span { display: inline-flex; align-items: center; gap: 6px }
+
+/* status chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; font-variant-numeric: tabular-nums }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor }
+.need { color: var(--need); background: var(--need-bg) }
+.run { color: var(--run); background: var(--run-bg) }
+.ready { color: var(--ready); background: var(--ready-bg) }
+.done { color: var(--done); background: var(--done-bg) }
+.todo { color: var(--todo); background: var(--todo-bg) }
+
+/* launch track */
+.track { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden }
+.step { padding: 14px 12px 12px; border-right: 1px solid var(--line); display: grid; gap: 6px; align-content: start; min-width: 0; position: relative }
+.step:last-child { border-right: 0 }
+.step .n { font-family: var(--mono); font-size: 11px; color: var(--muted) }
+.step .t { font-weight: 700; font-size: 14px; line-height: 1.25 }
+.step .s { font-size: 12px; color: var(--muted) }
+.step .bar { height: 4px; border-radius: 2px; background: var(--sunken); overflow: hidden }
+.step .bar i { display: block; height: 100%; background: var(--done) }
+.step.here { background: var(--accent-soft) }
+.step.here::after { content: "WE ARE HERE"; position: absolute; top: 0; right: 0; font-size: 9px; font-weight: 800; letter-spacing: 0.08em; color: #fff; background: var(--accent); padding: 2px 6px; border-bottom-left-radius: 6px }
+.step.isdone .t { color: var(--done) }
+@media (max-width: 900px) { .track { grid-template-columns: 1fr } .step { border-right: 0; border-bottom: 1px solid var(--line); grid-template-columns: 2.2em 1fr auto; align-items: center } .step .bar { grid-column: 2 / 4 } .step .s { grid-column: 2 / 4 } }
+
+/* three columns */
+.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px }
+@media (max-width: 900px) { .cols { grid-template-columns: 1fr } }
+.col { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; display: grid; align-content: start; min-width: 0 }
+.col > header { padding: 14px 16px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line) }
+.col > header h3 { font-size: 16px }
+.col .big { font-family: var(--display); font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1 }
+.col.c-need { border-top: 4px solid var(--need) } .col.c-need .big { color: var(--need) }
+.col.c-run { border-top: 4px solid var(--run) } .col.c-run .big { color: var(--run) }
+.col.c-ready { border-top: 4px solid var(--ready) } .col.c-ready .big { color: var(--ready) }
+
+details.item { border-bottom: 1px solid var(--line) }
+details.item:last-child { border-bottom: 0 }
+details.item > summary { list-style: none; cursor: pointer; padding: 10px 16px; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: baseline }
+details.item > summary::-webkit-details-marker { display: none }
+details.item > summary:hover { background: var(--sunken) }
+details.item > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px }
+.tag { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 2.4em }
+.sum-t { font-weight: 600; min-width: 0 }
+.caret { color: var(--muted); font-size: 12px; transition: transform .15s }
+details[open] > summary .caret { transform: rotate(90deg) }
+.body { padding: 0 16px 14px 16px; color: var(--ink); font-size: 14px; display: grid; gap: 8px; min-width: 0 }
+.body p { margin: 0 }
+.body ul { margin: 0; padding-left: 18px; display: grid; gap: 3px }
+.opt { display: grid; grid-template-columns: 3.2em 1fr; gap: 4px 8px }
+.opt b { font-family: var(--mono); font-size: 12px; font-weight: 500 }
+.lean { color: var(--accent); font-weight: 600 }
+.src { color: var(--muted); font-size: 12px }
+
+/* chapter map */
+.chapters { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px }
+details.ch { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; min-width: 0 }
+details.ch > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: grid; gap: 8px }
+details.ch > summary::-webkit-details-marker { display: none }
+details.ch > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 10px }
+.ch-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px }
+.ch-top h3 { font-size: 16px }
+.pages { display: flex; gap: 3px; flex-wrap: wrap }
+.pages i { width: 14px; height: 14px; border-radius: 3px; background: var(--todo-bg); border: 1px solid var(--line) }
+.pages i.d { background: var(--done); border-color: var(--done) }
+.pages i.p { background: var(--need); border-color: var(--need) }
+.ch-meta { display: flex; flex-wrap: wrap; gap: 6px }
+.ch .body { padding-top: 2px }
+.plist { display: grid; gap: 2px; font-family: var(--mono); font-size: 12.5px }
+.plist div { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; border-bottom: 1px dashed var(--line) }
+.plist div:last-child { border-bottom: 0 }
+.plist em { font-style: normal; color: var(--muted); font-family: var(--body); font-size: 12px; text-align: right }
+
+/* lower grid */
+.lower { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px }
+@media (max-width: 900px) { .lower { grid-template-columns: 1fr } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; min-width: 0 }
+.panel > header { padding: 14px 16px 10px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 8px }
+.panel > header h3 { font-size: 16px }
+.seq { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-bottom: 1px solid var(--line) }
+.seq div { padding: 12px 14px; border-right: 1px solid var(--line); display: grid; gap: 4px }
+.seq div:last-child { border-right: 0 }
+.seq .n { font-family: var(--mono); font-size: 11px; color: var(--muted) }
+.seq b { font-size: 14px }
+@media (max-width: 560px) { .seq { grid-template-columns: 1fr } .seq div { border-right: 0; border-bottom: 1px solid var(--line) } }
+.checks { list-style: none; margin: 0; padding: 8px 16px 14px; display: grid; gap: 6px; font-size: 14px }
+.checks li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; align-items: start }
+.box { width: 14px; height: 14px; border: 1.5px solid var(--muted); border-radius: 3px; margin-top: 3px }
+.box.ok { background: var(--done); border-color: var(--done) }
+.log { list-style: none; margin: 0; padding: 8px 16px 14px; display: grid; gap: 7px; font-size: 13.5px }
+.log li { display: grid; grid-template-columns: 6.6em 1fr; gap: 8px }
+.log .mono { color: var(--muted) }
+footer.note { color: var(--muted); font-size: 12.5px }
+@media (prefers-reduced-motion: reduce) { .caret { transition: none } }
+</style>
+
+<div class="wrap">
+
+  <div class="head">
+    <div>
+      <h1>Relaunch Control Board</h1>
+      <p>unpoly.com docs rework, as of Sunday 2026-10-11, afternoon. Click any row to open it.</p>
+    </div>
+    <div class="legend">
+      <span><span class="chip need">waiting on you</span></span>
+      <span><span class="chip run">agent running</span></span>
+      <span><span class="chip ready">decided, not applied</span></span>
+      <span><span class="chip done">done</span></span>
+      <span><span class="chip todo">not started</span></span>
+    </div>
+  </div>
+
+  <section style="display:grid;gap:10px" aria-labelledby="h-track">
+    <h2 id="h-track">Pre-ship order</h2>
+    <div class="track" id="track"></div>
+  </section>
+
+  <section class="cols" aria-label="Work in flight">
+    <div class="col c-need">
+      <header><h3>Waiting on you</h3><span class="big" id="n-need"></span></header>
+      <div id="list-need"></div>
+    </div>
+    <div class="col c-run">
+      <header><h3>In motion</h3><span class="big" id="n-run"></span></header>
+      <div id="list-run"></div>
+    </div>
+    <div class="col c-ready">
+      <header><h3>Decided, not applied</h3><span class="big" id="n-ready"></span></header>
+      <div id="list-ready"></div>
+    </div>
+  </section>
+
+  <section style="display:grid;gap:10px" aria-labelledby="h-ch">
+    <div class="head"><h2 id="h-ch">Chapter sittings</h2><span class="legend"><span><i style="width:12px;height:12px;border-radius:3px;background:var(--done);display:inline-block"></i> page reviewed</span><span><i style="width:12px;height:12px;border-radius:3px;background:var(--need);display:inline-block"></i> partly</span><span><i style="width:12px;height:12px;border-radius:3px;background:var(--todo-bg);border:1px solid var(--line);display:inline-block"></i> not yet</span></span></div>
+    <div class="chapters" id="chapters"></div>
+  </section>
+
+  <section class="lower">
+    <div class="panel">
+      <header><h3>Launch</h3><span class="chip todo">after release sync</span></header>
+      <div class="seq">
+        <div><span class="n">1</span><b>Unpoly release</b><span class="src">CHANGELOG rework, last review of form-associated custom elements</span></div>
+        <div><span class="n">2</span><b>unpoly-rails release</b><span class="src">branch <code>docs-rework</code> ready, nothing pending yet</span></div>
+        <div><span class="n">3</span><b>unpoly.com deploy</b><span class="src">needs your OK (remote infra)</span></div>
+      </div>
+      <ul class="checks" id="deploy"></ul>
+    </div>
+    <div class="panel">
+      <header><h3>Done since Friday</h3><span class="chip done" id="n-done"></span></header>
+      <ul class="log" id="log"></ul>
+    </div>
+  </section>
+
+  <footer class="note">Sources: docs/rework-2026/plan.md, open-items.md, prepass/triage.md, sittings/forms.md and the git logs of unpoly, unpoly-site and unpoly-rails (branch <code>docs-rework</code>). This page is a snapshot. Ask Claude to refresh it.</footer>
+</div>
+
+<script>
+const TRACK = [
+  { t: "Chapter sittings", s: "3 of 13 chapters reviewed", p: 0.27, state: "here" },
+  { t: "Fix round", s: "A/B facts, code bugs done; sitting notes left", p: 0.75 },
+  { t: "Learn-ref sweep", s: "not started", p: 0 },
+  { t: "Em-dash & AI-trope pass", s: "whole site, after sittings", p: 0 },
+  { t: "Persona review", s: "3 personas read the site", p: 0 },
+  { t: "Namespace rename", s: "Unpoly::Site merged", p: 1, done: true },
+  { t: "URL move", s: "script dry run running", p: 0.3 },
+  { t: "Release sync", s: "CHANGELOG, feature review, promotion", p: 0.1 },
+  { t: "Launch", s: "Unpoly, unpoly-rails, site", p: 0 },
+];
+
+const NEED = [
+  { tag: "16", t: "/custom-form-fields: pattern table", body: `
+    <p>The table says custom elements need a <code>value</code> getter to be watched, validated, switched and disabled. Only watching and switching read <code>value</code>. A <em>configured</em> element needs the getter even to be submitted.</p>
+    <div class="opt"><b>16A</b><span>Columns "Submitted and validated | Watched and switched | Disabled". <span class="lean">Lean, medium.</span></span><b>16B</b><span>Keep two columns, reword cells.</span></div>` },
+  { tag: "17", t: "/custom-form-fields: implementation rationale", body: `
+    <p>Cut "The other two need nothing from you, because of how component authoring works…" and "Both fall back on absence, not falseness…". The table already says what the reader must provide.</p>
+    <div class="opt"><b>17A</b><span>Cut both. <span class="lean">Lean.</span></span><b>17B</b><span>Keep.</span></div>` },
+  { tag: "18", t: "/custom-form-fields: re-enabling edge case", body: `
+    <p>Replace the paragraph "The same rule cuts the other way when re-enabling…" with: "If you style your element from the <code>[disabled]</code> attribute, reflect your <code>disabled</code> property to it."</p>
+    <div class="opt"><b>18A</b><span>One sentence. <span class="lean">Lean.</span></span><b>18B</b><span>Keep the paragraph.</span></div>` },
+  { tag: "19", t: "/custom-form-fields: lazy-loading tip", body: `
+    <p>The tip about registering lazily loaded elements in <code>fieldSelectors</code> sits in #contract, but it is about choosing a configured element.</p>
+    <div class="opt"><b>19A</b><span>Move into #configured. <span class="lean">Lean.</span></span><b>19B</b><span>Leave.</span></div>` },
+  { tag: "20", t: "/custom-form-fields: section order", body: `
+    <p>hidden field → form-associated → contract → configured → formdata. #configured relies on #contract ("as described above").</p>
+    <div class="opt"><b>20A</b><span>Keep. <span class="lean">Strong lean (🤖).</span></span><b>20B</b><span>Move #contract after all four patterns.</span></div>` },
+  { tag: "25", t: "Changelog marker for preventable peeling", body: `
+    <p>The legend says ⚠️ means "polyfilled by unpoly-migrate". There is no polyfill. But this release already marks five unpolyfilled form changes with ⚠️.</p>
+    <div class="opt"><b>25A</b><span>Keep ⚠️ like the others, add an upgrade hint. <span class="lean">Lean.</span></span><b>25B</b><span>❌ by the legend (then review the other five).</span><b>25C</b><span>Reword the legend.</span></div>` },
+  { tag: "MI", t: "Module intros: 17 new first paragraphs", body: `
+    <p>New intros for every module page (they double as /api hub summaries) await your read. Three claims are unverified (up.radio, up.network, up.log phrasing). Open question: should search badges follow the new glyph tiles?</p>
+    <p class="src">docs/rework-2026/waves/module-intros.md</p>` },
+  { tag: "SC", t: "/watch-options: Forms page 9 of 9", body: `
+    <p>The last Forms page has not been read in a sitting. It already got the Q2 docs change (dedupe promise narrowed to <code>up.watch()</code>, autosubmit and switch).</p>` },
+];
+
+const RUN = [
+  { tag: "SR", t: "Search ranking", body: `
+    <ul><li>/layer-option should rank in the top 5 for "layer" (likely <code>@signature</code>).</li>
+    <li>Agent skill search: "history state" should find updating-history.md first.</li></ul>
+    <p class="src">Commits locally, I review and push.</p>` },
+  { tag: "UM", t: "URL move dry run", body: `
+    <p>Script that moves symbols to <code>/api/…</code> and guides to <code>/learn/…</code>: link rewrite, site routing, redirects without chains. Runs in throwaway worktrees with check_urls and a full build. Produces a launch-day runbook. Nothing gets merged.</p>` },
+];
+
+const READY = [
+  { tag: "FS", t: "Forms sitting notes (pages 1-7)", body: `
+    <p>Decided in the sitting, mostly not in the pages yet:</p>
+    <ul><li>/validation: concurrency sentence + link to race conditions</li>
+    <li>/reactive-server-forms: race conditions restructure (three guarantees + table), <code>@purchase.validate</code></li>
+    <li>/switching-form-state: hidden fields are still submitted; trim #reacting-to-different-events</li>
+    <li>/disabling-forms: clearer focus wording</li>
+    <li>/submitting-forms: loading teaser, short flashes section</li>
+    <li>/handling-all-forms and /handling-all-links: restructure with "Making exceptions" and macro</li>
+    <li>Rails disclaimer on all pages with Ruby/ERB examples</li></ul>
+    <p class="src">docs/rework-2026/sittings/forms.md</p>` },
+  { tag: "5", t: "/caching: drop the first autoCache example", body: `<p>Link "configure this default" to #disabling-route instead.</p>` },
+  { tag: "9", t: "/optimizing-responses: \"Detecting a full page load\"", body: `<p>#version explains <code>X-Up-Version</code> as the way to detect a full page load (unpoly-rails <code>up.target?</code> example). #title adds: no <code>&lt;head&gt;</code> means no meta tag updates and no deployment detection.</p>` },
+  { tag: "15", t: "/script-security: delete the hidden \"General advice\" block", body: `<p>Git keeps the text.</p>` },
+  { tag: "FX", t: "Small fixes from earlier sittings", body: `
+    <ul><li>"non-200" → "non-2xx" (2 places)</li>
+    <li>attributes-and-options: link back to /handling-all-links#following-all-links</li>
+    <li>Remove the "This page is being written." filter before ship</li></ul>` },
+];
+
+const CHAPTERS = [
+  { t: "Getting started", pages: ["start/overview","install","start/links","start/forms","start/overlays","start/elements","start/api","start/next"], rev: 8, note: "Reviewed. start/api trimmed to the three-layer example." },
+  { t: "Links", pages: ["links","following-links","handling-all-links","preloading","navigation-bars","faux-interactive-elements"], rev: 6, note: "Reviewed. handling-all-links restructure decided, not applied yet." },
+  { t: "Forms", pages: ["forms","submitting-forms","validation","reactive-server-forms","switching-form-state","disabling-forms","handling-all-forms","custom-form-fields","watch-options"], rev: 7, partial: ["custom-form-fields"], note: "custom-form-fields waits on items 16-20. watch-options not read yet. Sitting notes for pages 1-7 not applied yet." },
+  { t: "Overlays", pages: ["overlays","opening-overlays","closing-overlays","subinteractions","customizing-overlays","layer-option","context","history-in-overlays"], rev: 0, dup: ["B10 per-mode config lines on the overview","B11 third copy of close conditions on opening-overlays","B12 modes table included twice"], note: "C4-C8 already decided and applied. Peeling is now preventable; [up-on-accept] and [up-on-dismiss] are new." },
+  { t: "Loading state", pages: ["loading-state","feedback-classes","placeholders","previews","optimistic-rendering","progress-bar"], rev: 0, note: "No open judgment items. Fix round applied." },
+  { t: "Live fragments", pages: ["live-fragments","lazy-loading","infinite-scrolling","polling","hungry-elements","flashes"], rev: 0, note: "No open judgment items. Flashes moved here from Forms." },
+  { t: "History", pages: ["history","updating-history","restoring-history","tracking-page-views"], rev: 0, note: "Overview re-angled in advance (C3)." },
+  { t: "Scrolling & focus", pages: ["scrolling-and-focus","scrolling","scroll-tuning","focus","focus-visibility"], rev: 0, note: "No open judgment items." },
+  { t: "Network & caching", pages: ["network","caching","aborting-requests","network-issues"], rev: 0, dup: ["C9 overview copies revalidation, offline listener, slow server","C10 caching copies the tracking example","C12 merge network-issues sections","B14 caching teaser family sentence","extra: aborting sentences, up.request examples, A/B markup (lean: leave)"], note: "Item 5 decided (autoCache example)." },
+  { t: "Animation", pages: ["animation"], rev: 0, dup: ["C13 overlay example copies customizing-overlays","B18 repeated size-shift sentence"], note: "" },
+  { t: "Scripting", pages: ["scripting","enhancing-elements","data","templates","islands","legacy-scripts","script-security"], rev: 0, dup: ["C20 overview repeats start/elements; re-angle to element lifetime","B22 providing-html template section","B23 repeated CSP meta block"], note: "Item 15 decided (delete hidden block)." },
+  { t: "Backend integration", pages: ["backend-integration","optimizing-responses","conditional-requests","handling-asset-changes","server-protocol"], rev: 0, dup: ["C14 overview has three literal copies (the 1 KB sentence 3×)"], note: "Item 9 decided (X-Up-Version section)." },
+  { t: "Advanced rendering", pages: ["advanced-rendering","attributes-and-options","navigation-defaults","targeting-fragments","target-derivation","failed-responses","preserving-elements","providing-html","render-lifecycle"], rev: 0, dup: ["C16 overview copies three detail passages","C17 #options and #config re-teach precedence","C18 origin example shared with render-lifecycle","C19 element-object example repeats target derivation"], note: "" },
+];
+
+const DEPLOY = [
+  [false, "Staging curl matrix: content negotiation, .md types, Vary, X-Robots-Tag, .md → page 301, agent-skill index URLs"],
+  [false, "Both skill install routes against a staging build; tar.gz without Content-Encoding: gzip"],
+  [false, "Skill zip at /agent-skills/unpoly-docs.zip (ChatGPT may cap uploads at 500 files; skill has 810)"],
+  [false, "WebMCP tool shape in a real Chrome; renew the origin-trial token"],
+  [false, "Copy button in Safari and Firefox"],
+  [false, "Redirects with a #fragment target land on the anchor (/layer-terminology, /predefined-*, /motion-tuning)"],
+  [false, "nginx stays cache-free (a CDN must honor Vary: Accept)"],
+  [false, "URL move: re-run the script on final content, check_urls, build"],
+  [true,  "check_urls 78/78 and HTMLProofer green on current content"],
+];
+
+const LOG = [
+  ["Sun", "Site namespace renamed to Unpoly::Site; sidebar spec fixed (syntax highlighter crash)"],
+  ["Sun", "Bug fixes with specs: validation feedback by default, custom fields in disabled fieldsets, Space key on faux buttons"],
+  ["Sun", "Overlays: peeling can be prevented, { force }, [up-peel=\"accept force\"], Back always closes"],
+  ["Sun", "New [up-on-accept] and [up-on-dismiss] attributes"],
+  ["Sun", "Fix round: ~75 fact and pattern fixes across all chapters"],
+  ["Sun", "3 broken anchors fixed; skill twins spec updated"],
+  ["Sat", "Overlays C4-C8, history overview, closing-overlays keep-open example"],
+  ["Sat", "Triage of ~110 pre-pass findings; Q1-Q3 decided"],
+  ["Sat", "Duplication scan resolved; skill offered as a zip"],
+];
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+$("track").innerHTML = TRACK.map((s, i) => `
+  <div class="step ${s.state === "here" ? "here" : ""} ${s.done ? "isdone" : ""}">
+    <span class="n">${String(i + 1).padStart(2, "0")}</span>
+    <span class="t">${s.t}</span>
+    <span class="bar" aria-hidden="true"><i style="width:${Math.round(s.p * 100)}%"></i></span>
+    <span class="s">${s.s}</span>
+  </div>`).join("");
+
+function items(list, cls) {
+  return list.map((it) => `
+    <details class="item">
+      <summary><span class="tag">${it.tag}</span><span class="sum-t">${it.t}</span><span class="caret" aria-hidden="true">▶</span></summary>
+      <div class="body">${it.body}</div>
+    </details>`).join("");
+}
+$("list-need").innerHTML = items(NEED); $("n-need").textContent = NEED.length;
+$("list-run").innerHTML = items(RUN); $("n-run").textContent = RUN.length;
+$("list-ready").innerHTML = items(READY); $("n-ready").textContent = READY.length;
+
+$("chapters").innerHTML = CHAPTERS.map((c) => {
+  const n = c.pages.length;
+  const partial = c.partial || [];
+  const reviewedSet = new Set(c.pages.slice(0, c.rev).filter((p) => !partial.includes(p)));
+  const sq = c.pages.map((p) => `<i class="${reviewedSet.has(p) ? "d" : partial.includes(p) ? "p" : ""}" title="${p}"></i>`).join("");
+  const state = c.rev === n ? `<span class="chip done">reviewed</span>` : c.rev > 0 ? `<span class="chip need">${reviewedSet.size} of ${n}</span>` : `<span class="chip todo">sitting pending</span>`;
+  const dupChip = c.dup ? `<span class="chip ready">${c.dup.length} duplication${c.dup.length > 1 ? "s" : ""} for the sitting</span>` : "";
+  const plist = c.pages.map((p) => `<div><span>/${p}</span><em>${reviewedSet.has(p) ? "reviewed" : partial.includes(p) ? "items 16-20" : ""}</em></div>`).join("");
+  const dups = c.dup ? `<p><b>Raise in the sitting:</b></p><ul>${c.dup.map((d) => `<li>${esc(d)}</li>`).join("")}</ul>` : "";
+  return `
+  <details class="ch">
+    <summary>
+      <div class="ch-top"><h3>${c.t}</h3><span class="mono" style="color:var(--muted)">${n} p.</span></div>
+      <div class="pages" aria-label="${reviewedSet.size} of ${n} pages reviewed">${sq}</div>
+      <div class="ch-meta">${state}${dupChip}</div>
+    </summary>
+    <div class="body">
+      ${c.note ? `<p>${esc(c.note)}</p>` : ""}
+      ${dups}
+      <div class="plist">${plist}</div>
+    </div>
+  </details>`;
+}).join("");
+
+$("deploy").innerHTML = DEPLOY.map(([ok, t]) => `<li><span class="box ${ok ? "ok" : ""}" aria-label="${ok ? "done" : "open"}"></span><span>${esc(t)}</span></li>`).join("");
+$("log").innerHTML = LOG.map(([d, t]) => `<li><span class="mono">${d}</span><span>${esc(t)}</span></li>`).join("");
+$("n-done").textContent = LOG.length + " entries";
+</script>
