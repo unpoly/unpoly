@@ -480,7 +480,7 @@ up.Params = class Params {
     event listener are included.
   - The [submit button](#submit-button) contributes its `[name]` and `[value]`.
 
-  On top of that, [custom controls](/custom-form-fields#configured) configured in
+  On top of that, [elements registered as fields](/custom-form-fields#registering) in
   `up.form.config.fieldSelectors` are included. The browser cannot know about those.
 
   ### Example

@@ -7,7 +7,7 @@ Unpoly now builds a form's request params with the browser's own [form-data algo
 
 - [Form-associated custom elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements#form-associated_custom_elements) are now submitted, without any configuration. (by @kmmbvnr)
 - Values appended by a [`formdata`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/formdata_event) event listener are now submitted. (by @kmmbvnr)
-- A form-associated custom element is now also [watched](/up.watch), [validated](/validation), [switched](/switching-form-state) and [disabled](/disabling-forms), if it [exposes its state to a script](/custom-form-fields#contract).
+- A form-associated custom element is now also [watched](/up.watch), [validated](/validation), [switched](/switching-form-state) and [disabled](/disabling-forms), if it [exposes its state to a script](/custom-form-fields#form-associated).
 - A new guide explains the [patterns for building a custom form field](/custom-form-fields).
 - A `formdata` listener affects what Unpoly *sends*, not what it *watches*. See [`formdata` listeners](/custom-form-fields#formdata).
 - A form-associated custom element that never calls `setFormValue()` submits no value, even when it is listed in `up.form.config.fieldSelectors`.
@@ -23,7 +23,7 @@ Unpoly now builds a form's request params with the browser's own [form-data algo
 - ⚠️ A field inside a `<fieldset disabled>` is no longer submitted or validated, matching a native form submission. This includes custom elements listed in `up.form.config.fieldSelectors`, which the browser does not know about. A field inside a disabled fieldset is still reported by [watchers](/up.watch) and [`[up-switch]`](/switching-form-state).
 - A custom control that exposes a `{ name }` but no readable `{ value }` no longer contributes an `undefined` param when watched.
 - [Disabling a form](/disabling-forms) now also disables a form-associated custom element.
-- The requirements for a [custom form field](/custom-form-fields#contract) are relaxed. A `value` getter is the only thing a custom control must provide.
+- The requirements for a [custom form field](/custom-form-fields) are relaxed. A `value` getter is the only thing a custom control must provide.
 - ⚠️ When Unpoly disables a custom control that exposes no `{ disabled }` property, it now sets the control's `[disabled]` attribute instead of assigning the property.
 - ⚠️ A validation request no longer sends the params of the form's first submit button, and no longer honors that button's `[formaction]`, `[formmethod]`, `[up-params]` or `[up-headers]`. Nothing pressed the button, so only the `<form>` element decides where a validation goes.
 - ⚠️ A `click` event dispatched by a script is no longer passed to [`up.on()`](/up.on) callbacks when the element carries a `[disabled]` attribute, even if the platform cannot disable that kind of element. Formerly only a `{ disabled }` property had this effect.

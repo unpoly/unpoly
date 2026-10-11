@@ -75,9 +75,8 @@ up.form = (function() {
       [Form-associated custom elements](/custom-form-fields#form-associated) are matched by
       default and need not be added.
 
-      Add a selector for a [custom control](/custom-form-fields#configured) that is not
-      form-associated. Matching elements must expose their state as described in
-      [what Unpoly reads from a field](/custom-form-fields#contract).
+      Add a selector to [register any element as a field](/custom-form-fields#registering).
+      Matching elements must provide a `value` getter.
 
     @param {string} [config.submitButtonSelectors]
       An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.
@@ -223,7 +222,7 @@ up.form = (function() {
   }
 
   // ALWAYS read and write a field's state through the accessors below. Direct property or
-  // attribute access is wrong for at least one kind of field — see /custom-form-fields#contract.
+  // attribute access is wrong for at least one kind of field.
 
   // Falls back on absence, not falseness: a native field reports '' and means it.
   function readFieldName(field) {

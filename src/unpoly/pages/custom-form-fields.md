@@ -6,45 +6,46 @@ in Unpoly's form features the same way a native `<input>` or `<select>` does.
 There are four ways to build one. They differ in how the value
 reaches the server, and in how much Unpoly needs to know about your control.
 
-| Pattern | Submitted | Watched, validated, switched, disabled |
-|---|---|---|
-| [A hidden native field](#hidden-field) | Yes | Yes |
-| [A form-associated custom element](#form-associated) | Yes | With a `value` getter |
-| [A configured custom element](#configured) | Yes | With a `value` getter |
-| [A `formdata` listener](#formdata) | Yes | No |
+| Pattern | Submitted | Watched, validated, switched | Disabled |
+|---|---|---|---|
+| [A hidden native field](#hidden-field) | Yes | Yes | Yes |
+| [A form-associated element](#form-associated) | Yes | With a `value` getter | Yes |
+| [A registered element](#registering) | With a `value` getter | With a `value` getter | Yes |
+| [A `formdata` listener](#formdata) | Yes | No | No |
 
 If you can keep a native field in the form, do. It is the only pattern where nothing about
-Unpoly, or about the browser's form APIs, needs to be considered at all.
+Unpoly, or about the browser's form APIs, needs to be considered at all, and it keeps working
+without JavaScript.
 
 
-## A hidden native field {#hidden-field}
+## <em class="heading-prefix">Option 1</em> Keeping a hidden native field {#hidden-field}
 
-Render your control with a [compiler](/up.compiler), and keep a native field in the form to
-carry the value. The control is what the user sees; the field is what the form submits.
+Start with a native field that carries the value. A [compiler](/up.compiler) hides it and
+renders your control in its place. The user sees the control; the form submits the field.
 
 ```html
-<div class="pills">
-  <select name="size" hidden> <!-- mark: hidden -->
-    <option value="s">Small</option>
-    <option value="m">Medium</option>
-  </select>
-  <button type="button" value="s">Small</button>
-  <button type="button" value="m">Medium</button>
-</div>
+<select name="size" class="pills">
+  <option value="s">Small</option>
+  <option value="m">Medium</option>
+</select>
 ```
 
 ```js
-up.compiler('.pills', function(pills) {
-  let select = pills.querySelector('select')
+up.compiler('select.pills', function(select) {
+  up.element.hide(select)
 
-  for (let pill of pills.querySelectorAll('button')) {
+  for (let option of select.options) {
+    let pill = up.element.affix(select, 'beforebegin', 'button', { type: 'button', text: option.text })
     pill.addEventListener('click', () => {
-      select.value = pill.value
+      select.value = option.value
       up.emit(select, 'change') // let watchers and validations see the change
     })
   }
 })
 ```
+
+This is the only option that still works without JavaScript. The user then sees the native
+`<select>`, and the form submits it.
 
 Because a real form field carries the value, everything works with no further
 configuration: the field is submitted, [watched](/up.watch), [validated](/validation),
@@ -54,7 +55,7 @@ Don't forget the `change` event. Setting `select.value` from a script does
 not emit one, so nothing would notice the new value.
 
 
-## A form-associated custom element {#form-associated}
+## <em class="heading-prefix">Option 2</em> Making a custom element form-associated {#form-associated}
 
 A [custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements)
 can join a form the way a native control does, by declaring itself form-associated and
@@ -96,71 +97,37 @@ for free.
 > A form-associated element is only submitted if it calls `setFormValue()`. Declaring
 > `formAssociated` alone makes the browser aware of your element, but with no value to send.
 
-
-## What Unpoly reads from a field {#contract}
-
-Submission is all the browser can do for you. To also be watched, validated, switched or
-disabled, your element must be readable from a script. This applies to every kind of custom
-field, however it takes part in a submission.
-
-| | Unpoly reads | Unpoly writes | You must provide |
-|---|---|---|---|
-| `value` | the property | never | a getter |
-| `name` | the property, else the `[name]` attribute | never | nothing |
-| `disabled` | the property, else the `[disabled]` attribute | whichever one you have | nothing |
-
-**A `value` getter is the one thing to remember.** The browser reads your value through
-`setFormValue()`, which a script cannot read back. Without a getter your element is
-submitted correctly but never watched.
-
-The other two need nothing from you, because of how component authoring works. Authors
-declare properties that are fed *from* attributes and rarely reflect them back, so the property
-holds the live value wherever one exists. A hand-rolled form-associated element declares nothing
-at all, and there the attribute is guaranteed, because the browser reads it to name and disable your
-element. So Unpoly prefers the property and falls back to the attribute.
-
-Both fall back on *absence*, not falseness. A native field reports `name === ''` and
-`disabled === false`, which are answers rather than gaps.
-
-When Unpoly [disables a form](/disabling-forms) it writes whichever spelling your element
-implements, never both: the property if you declared one, otherwise the attribute. Assigning a
-property you never declared would create it, and it would shadow your attribute from then on.
-
-The same rule cuts the other way when re-enabling. If your element declares an unreflected
-`disabled` property and its markup also carries `[disabled]`, Unpoly writes only the property
-and leaves the attribute alone. It never removes an attribute it did not set. Your element will
-report itself enabled while any CSS keyed on `[disabled]` still applies, so reflect the property
-if you style from the attribute.
-
-> [note]
-> Unpoly only looks at a field's own disabled state. A field inside a `<fieldset disabled>` is
-> omitted from a submission, because the browser omits it, but it is still reported to
-> [watchers](/up.watch) and to [`[up-switch]`](/switching-form-state).
-
-> [tip]
-> If your element's definition is loaded lazily, register its tag name in
-> `up.form.config.fieldSelectors` as described [below](#configured). A tag name matches
-> before the definition arrives, while `formAssociated` cannot be known until it does.
+Unpoly reads your element's value through a `value` getter, because a script cannot read back
+what you passed to `setFormValue()`. To take part in watching and validation, emit `input`
+while the value changes and `change` when the user commits it, like a native text field.
 
 
-## A configured custom element {#configured}
+## <em class="heading-prefix">Option 3</em> Registering any element as a field {#registering}
 
-A custom element that is *not* form-associated can still take part, if you tell Unpoly what to
-look for and make its state readable [as described above](#contract):
+Any element can act as a field, even a plain `<div>` that a [compiler](/up.compiler) gives
+`name`, `value` and `disabled` properties. Tell Unpoly which elements to treat as fields:
 
 ```js
 up.form.config.fieldSelectors.push('date-picker')
 ```
 
 Unpoly then treats `<date-picker>` as a field everywhere: it is submitted, watched,
-validated, switched and disabled. The browser knows nothing about it, so this registration
-is also what makes it submittable.
+validated, switched and disabled.
+
+Give the element a `value` getter like the `DatePicker` above. The browser knows nothing
+about this element, so Unpoly also uses the getter to submit it. Emit `input` and `change`
+the same way.
+
+> [tip]
+> If the definition of a form-associated element is loaded lazily, register its tag name
+> in `up.form.config.fieldSelectors`. A tag name matches before the definition arrives,
+> while `formAssociated` cannot be known until it does.
 
 Prefer [a form-associated element](#form-associated) for a control you are writing today.
 It needs no configuration, and it works in forms that are submitted without Unpoly.
 
 
-## A `formdata` listener {#formdata}
+## <em class="heading-prefix">Option 4</em> Adding values with a `formdata` listener {#formdata}
 
 To add a value that no element carries, append it while the form data is being built:
 
