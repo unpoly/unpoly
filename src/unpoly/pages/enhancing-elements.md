@@ -246,8 +246,8 @@ With this macro, links can open a shaking modal with a single attribute:
 
 ## Compiling elements inserted by other code {#hello}
 
-When you render with Unpoly — by following a link, submitting a form or calling
-a function like `up.render()` — new elements are compiled automatically.
+When you render with Unpoly (by following a link, submitting a form or calling
+a function like `up.render()`), new elements are compiled automatically.
 
 When elements are created by other means, e.g. by setting an `innerHTML` property
 or through a third-party library, pass the new element to `up.hello()`:
