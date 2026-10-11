@@ -1117,7 +1117,7 @@ describe('up.event', function() {
           const fooListener = jasmine.createSpy('fooListener')
           fauxButton.addEventListener('foo', fooListener)
 
-          Trigger.keySequence(fauxButton, 'Space')
+          Trigger.keySequence(fauxButton, ' ')
 
           expect(fooListener).toHaveBeenCalled()
         })

@@ -670,7 +670,7 @@ up.link = (function() {
       // (2) Links are expected to be triggered using the Enter key
       // (3) We use the element's current role (instead of the `role` variable above)
       //     to honor any custom [role] attribute set by the user.
-      if ((event.key === 'Enter') || (element.role === 'button' && event.key === 'Space')) {
+      if ((event.key === 'Enter') || (element.role === 'button' && event.key === ' ')) {
         return forkEventAsUpClick(event)
       }
     })
