@@ -785,9 +785,9 @@ up.Preview = class Preview {
   /*-
   Visually replaces the children of an element with new content for the duration of this preview.
 
-  The visual effect is achieved by [hidden existing children](/up.Preview.prototype.hideContent)
+  The visual effect is achieved by [hiding existing children](/up.Preview.prototype.hideContent)
    and [inserting a new element](/up.Preview.prototype.insert) as the
-   only visible child. When the preview [ends](/previews#ending) all changes will ber reverted.
+   only visible child. When the preview [ends](/previews#ending) all changes will be reverted.
 
   > [tip]
   > To visually remove elements during a preview, prefer hiding over detaching. See [Prefer additive changes](/previews#prefer-additive-changes).
@@ -849,7 +849,7 @@ up.Preview = class Preview {
 
   ```js
   up.preview('spinner-overlay', function(preview) {
-    preview.openOverlay('Please wait...')
+    preview.openLayer('Please wait...')
   })
   ```
 

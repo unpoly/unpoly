@@ -44,8 +44,8 @@ The server responds with a page containing the `#menu` element with its full con
 ```
 
 Unpoly swaps the deferred element with the element from the response.
-Other elements in the response are discarded, so the server is free to send
-a full HTML document.
+Apart from [hungry elements](/hungry-elements), other elements in the response are discarded,
+so the server is free to send a full HTML document.
 
 Note the following:
 
