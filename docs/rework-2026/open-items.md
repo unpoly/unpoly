@@ -74,12 +74,12 @@ Branches `url-move-dryrun` exist locally in unpoly and unpoly-site (worktrees in
 Not yet numbered; to be walked through after the current list. All three personas understood Unpoly's shape within ~5 pages; the start page's "Is Unpoly right for you?" did most of the work.
 - P1 No Turbo/Hotwire comparison anywhere; htmx comparison only on /. Suggests a Getting-started page "Coming from htmx or Turbo" (concept mapping + what Unpoly lacks).
 - P2 [up-validate] server work understated ("the one thing Unpoly asks of your backend" on /start/forms, "one convention" on /backend-integration); only /validation#backend says "don't save on X-Up-Validate".
-- P3 Push/real-time never addressed (/live-fragments). Suggest one paragraph: no push channel; your WebSocket/EventSource handler can call up.reload()/up.render().
+- P3 Push/real-time never addressed. → Henning wants a guide (no framework support). Draft + agent review: drafts/push-updates.md, drafts/push-updates-review.md, artifact https://claude.ai/artifact/8KYQWqVMqKQcpm6FNE1JfX. Open: (a) signal reloads element's child vs selector in message, (b) abort:false on signal reload, (c) own heading for token streaming, (d) placement in Live fragments after Hungry elements.
 - P4 / overclaims Back: "restores the exact screen state" vs re-fetch + scroll/focus restore.
 - P5 up.compiler summary "called when a matching element is inserted into the DOM" reads like a MutationObserver.
 - P6 Optimistic rendering is a headline card on / but its page says experimental.
 - P7 Unpoly's own size is never stated (only unpoly-migrate.js 9.2 KB).
-- P8 Eight guide pages link to German MDN (/de/) → clear fix, apply after the trope pass merges.
+- P8 German MDN links → FIXED (unpoly util.js, unpoly-site repository.rb type autolinks).
 
 ## Code example check findings (2026-10-11; ~1,150 examples, ~60 fixes pushed in 10 commits 80d1c6b5b..3ff80b8c3; log in session scratchpad)
 Not yet numbered. Code bug (lean: fix + spec, strong):
@@ -92,11 +92,11 @@ Questions:
 - E5 base.js:896-907 up.Layer#affix appends to first swappable element, not outmost.
 - E6 subinteractions.md up.validate('select', {params}) re-renders the whole group.
 - E7 script.js:651 up.hello() on detached element.
-- E8 script.js:251,273 `// mark: await` on lines without await.
+- E8 → FIXED.
 - E9 `up-animation="shake"` isn't built in.
-- E10 preview.js:473 preview named '.sign-in'.
+- E10 → FIXED.
 - E11 [up-alias] absolute same-origin URLs never match.
-- E12 prose bits: script.js:53 broken link; script.js:21,34,41 `Array<string`; params.js fromURL @return; response.js #header text.
+- E12 prose bits: script.js broken link and `Array<string` FIXED; still open: params.js fromURL @return; response.js #header text.
 
 ## Status notes (no decision needed)
 - 2026-10-11: code fixes pushed: dfa0712e0 (Q1 validation feedback default), aea7978a1 (Q3 configured fields in disabled fieldset, changelog bullet extended), 714a4b519 (Space key). Full suite 4329 passed, 1 failed: link_target_spec.js:752 transition transform spec, passes alone and in its group (looks flaky, unrelated).
