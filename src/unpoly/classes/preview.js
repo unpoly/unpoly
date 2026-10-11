@@ -470,7 +470,7 @@ up.Preview = class Preview {
   This preview disables an `input[name=email]` and all controls within a container matching `.button-bar`:
 
   ```js
-  up.preview('.sign-in', function(preview) {
+  up.preview('sign-in', function(preview) {
     preview.disable('input[name=email]')
     preview.disable('.button-bar')
   })

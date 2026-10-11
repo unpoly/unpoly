@@ -599,7 +599,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns whether the given argument is a [DOM element](https://developer.mozilla.org/de/docs/Web/API/Element).
+  Returns whether the given argument is a [DOM element](https://developer.mozilla.org/en-US/docs/Web/API/Element).
 
   @function up.util.isElement
   @param {any} value
@@ -688,7 +688,7 @@ up.util = (function() {
   @return {boolean}
   @stable
   */
-  // https://developer.mozilla.org/de/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
   const { isArray } = Array
 
   /*-

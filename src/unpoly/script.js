@@ -18,7 +18,7 @@ up.script = (function() {
   Configures defaults for script handling and asset tracking.
 
   @section Assets
-    @param {Array<string} [config.assetSelectors]
+    @param {Array<string>} [config.assetSelectors]
       An array of CSS selectors matching default [assets](/up-asset).
 
       By default, all remote scripts and stylesheets in the `<head>` are considered assets.
@@ -31,14 +31,14 @@ up.script = (function() {
 
       See [Tracking assets](/handling-asset-changes#tracking-assets) for examples.
 
-    @param {Array<string} [config.noAssetSelectors]
+    @param {Array<string>} [config.noAssetSelectors]
       Exceptions to `up.script.config.assetSelectors`.
 
       Matching elements will *not* be considered [assets](/up-asset),
       even if they match `up.script.config.assetSelectors`.
 
   @section Scripts
-    @param {Array<string} [config.scriptSelectors]
+    @param {Array<string>} [config.scriptSelectors]
       An array of CSS selectors matching elements that run JavaScript.
 
       By default, this matches all `<script>` elements with a JavaScript type.
@@ -46,11 +46,11 @@ up.script = (function() {
       This configuration does not affect what Unpoly considers [assets](/up-asset).
       For this, configure `up.script.config.assetSelectors`.
 
-    @param {Array<string} [config.noScriptSelectors]
+    @param {Array<string>} [config.noScriptSelectors]
       Exceptions to `up.script.config.scriptSelectors`.
 
     @param {string} [config.evalCallbackPolicy='auto']
-      Whether Unpoly will [run callbacks in HTML attributes](/script-security#callbacks) like (`[up-on-loaded]`)(/up-follow#up-on-loaded).
+      Whether Unpoly will [run callbacks in HTML attributes](/script-security#callbacks) like [`[up-on-loaded]`](/up-follow#up-on-loaded).
 
     @param {string} [config.scriptElementPolicy='auto']
       Whether Unpoly will [run `<script>` elements in new fragments](/script-security#script-elements).
@@ -248,7 +248,7 @@ up.script = (function() {
   ```js
   up.compiler('textarea.wysiwyg', async function(textarea) { // mark: async
     let editor = await import('wysiwyg-editor') // mark: await
-    editor.init(textarea) // mark: await
+    editor.init(textarea)
   })
   ```
 
@@ -270,7 +270,7 @@ up.script = (function() {
   ```js
   up.compiler('textarea.wysiwyg', async function(textarea) {
     let editor = await import('wysiwyg-editor')
-    editor.init(textarea) // mark: await
+    editor.init(textarea)
     return () => editor.destroy(textarea) // mark-line
   })
   ```
