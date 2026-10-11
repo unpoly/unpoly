@@ -21,13 +21,7 @@ up.render({ target: '.content', url: '/stories/5', cache: 'auto' }) // mark: cac
 
 Which requests `'auto'` caches is decided by `up.network.config.autoCache`.
 By default it caches requests with a [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method like `GET`.
-You can configure this default:
-
-```js
-up.network.config.autoCache = function(request) {
-  return request.method === 'GET'
-}
-```
+You can [configure this default](#disabling-route).
 
 To force caching regardless of HTTP method, pass `{ cache: true }` or set `[up-cache="true"]`.
 

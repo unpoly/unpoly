@@ -62,6 +62,9 @@ X-Up-Title: "Sitemap"
 <div class="menu">...</div>
 ```
 
+A response without a `<head>` has two more limits: Unpoly keeps the current
+[meta tags](/updating-history#meta-tags), and it cannot [detect a new deployment](/handling-asset-changes).
+
 
 ### Failed responses target a different fragment {#fail-target}
 
@@ -105,8 +108,8 @@ For the root layer the header is `X-Up-Mode: root`.
 The mode of the layer that renders a failed response is sent as `X-Up-Fail-Mode`.
 
 
-Rendering different content for Unpoly requests {#version}
------------------------------------------------
+Detecting a full page load {#version}
+--------------------------
 
 Every request made through Unpoly carries an `X-Up-Version` header with the frontend's version:
 
@@ -114,20 +117,13 @@ Every request made through Unpoly carries an `X-Up-Version` header with the fron
 X-Up-Version: [[=version]]
 ```
 
-Server code can check for the header to tell fragment updates from full page loads,
-e.g. to render only the `<body>` for Unpoly:
+A request without this header is a full page load, where the browser renders the entire page.
+Server-side libraries use this to answer questions about the request safely. For example,
+[`unpoly-rails`](https://github.com/unpoly/unpoly-rails) answers `up.target?('.sidebar')` with `true`
+for every request that isn't from Unpoly, so a template never omits content from a full page load.
 
-```http
-HTTP/1.1 200 OK
-Vary: X-Up-Version
-
-<body>
-  ...
-</body>
-```
-
-Prefer `X-Up-Target` when you only want to omit untargeted content.
-`X-Up-Version` is for differences that apply to *all* Unpoly requests.
+To omit content from a response, check [`X-Up-Target`](#target) instead.
+It tells you exactly which fragments Unpoly needs.
 
 
 Rendering content that depends on layer context {#context}

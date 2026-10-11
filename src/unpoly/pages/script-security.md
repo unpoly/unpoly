@@ -6,32 +6,6 @@ This page explains how Unpoly's scripting facilities affect security, and how to
 Unpoly extends HTML with [attributes that contain JavaScript](#callbacks), and might also run [`<script>` elements in new fragments](#script-elements). An existing Content Security Policy is generally honored. You can configure Unpoly to be more permissive or more restrictive when executing scripts.
 
 
-<!--
-General advice
---------------
-
-This advice is not specific to Unpoly.
-
-### Escape untrusted input {#escape-html}
-
-Any value read from a request or from the database should be considered untrusted user input.
-Escape it before rendering it in HTML. This prevents malicious users from injecting `<script>` tags or attributes like `onclick`.
-
-Some templating libraries escape variables by default, and only allow HTML in explicitly marked interpolations. This way you cannot accidentally
-forget to escape.
-
-### Use a Content Security Policy (CSP)
-
-Use the `Content-Security-Policy` header to globally restrict what scripts may execute in your page. 
-
-This is a not a replacement for [escaping untrusted strings](#escape-html), but rather a secondary safety net. 
-
-### Sanitize rich text
-
-When user input can contain HTML (e.g. from a WYSIWYG editor), you cannot escape it for rendering.
-You must instead sanitize it against a list of allowed tags, attributes and URL protocols.
--->
-
 Callbacks {#callbacks}
 ------------------
 
