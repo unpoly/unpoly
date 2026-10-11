@@ -2,7 +2,7 @@ Infinite scrolling
 ==================
 
 A long list can load its next page when the user scrolls to its end, without custom JavaScript.
-The "load more" link at the bottom is a [deferred placeholder](/lazy-loading)
+The "load more" link at the bottom is a [deferred link](/lazy-loading)
 that [loads when revealed](/lazy-loading#on-reveal), appends the next page to the list
 and replaces itself with a link to the page after that.
 
@@ -24,7 +24,7 @@ a link to the next page carries an `[up-defer="reveal"]` attribute:
 
 Note the following:
 
-- The link is an `[up-defer]` placeholder that loads [when it enters the viewport](/lazy-loading#on-reveal).
+- The link is a deferred element that loads [when it enters the viewport](/lazy-loading#on-reveal).
 - Its [`[up-target]`](/up-defer#up-target) names two fragments: the link itself (`#next-page`) and the list of pages (`#pages`).
 - Instead of [swapping](/targeting-fragments#swapping) the `#pages` container, the `:after` suffix
   [appends](/targeting-fragments#appending-or-prepending) the children of the response's `#pages` to it.
@@ -71,8 +71,11 @@ The page now looks like this:
 </a>
 ```
 
-The new link is again an `[up-defer="reveal"]` placeholder.
+The new link is again deferred with `[up-defer="reveal"]`.
 When the user keeps scrolling, it loads page 3 the same way.
+
+Pages loaded by scrolling are not part of the URL.
+When the user navigates away and comes back, the list starts again with the first page.
 
 
 ## Handling the last page {#handling-the-last-page}

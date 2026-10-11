@@ -2,7 +2,7 @@ Loading state
 =============
 
 While Unpoly waits for the server, it can show loading state: a highlighted button,
-a dimmed fragment, a spinner, a skeleton screen or even the expected result.
+disabled form fields, a dimmed fragment, a spinner, a skeleton screen or even the expected result.
 Every effect appears instantly after the user's interaction and is reverted when the request ends.
 
 
@@ -67,7 +67,7 @@ so you can reuse the same skeleton for many links.
 Previews: arbitrary temporary changes
 -------------------------------------
 
-Feedback classes and placeholders are *previews*: temporary page changes that Unpoly
+Feedback classes, placeholders and [disabling](/disabling-forms) are *previews*: temporary page changes that Unpoly
 applies when a request starts, and reverts when the request ends.
 You can define your own preview with `up.preview()`:
 

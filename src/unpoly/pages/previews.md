@@ -6,7 +6,8 @@ They signal that the app is working, or hint at how the page will ultimately loo
 When the request ends, Unpoly reverts the changes before rendering the response.
 
 Because a preview appears immediately after the user's interaction, it makes your application feel more responsive.
-Unpoly's [feedback classes](/feedback-classes) and [placeholders](/placeholders) are built on previews.
+Unpoly's [feedback classes](/feedback-classes), [placeholders](/placeholders) and
+[disabling](/disabling-forms) are built on previews.
 [Optimistic rendering](/optimistic-rendering) is a preview that renders the expected result.
 Use `up.preview()` directly when these don't cover your case.
 
@@ -105,6 +106,9 @@ A preview ends when its associated request ends for *any* reason. Reasons includ
 When the preview ends, all its page changes are reverted before the server response is processed.
 This ensures a consistent screen state in cases when a request is aborted, or when we end up
 updating a different fragment.
+
+When a preview takes focus away from an element, Unpoly focuses it again after the preview is reverted,
+unless the user has focused another element in the meantime.
 
 To manually end a preview, [abort](/aborting-requests) its associated request.
 

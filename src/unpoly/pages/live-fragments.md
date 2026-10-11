@@ -89,6 +89,8 @@ is updated along with the targeted fragment. When a response doesn't contain
 the element, nothing happens. You no longer need to name the counter in every link's
 `[up-target]`.
 
+To show confirmations or errors from any response, use a ready-made hungry element for [notification flashes](/flashes).
+
 <p class="read-more"><a href="/hungry-elements">Read more: Hungry elements</a></p>
 
 

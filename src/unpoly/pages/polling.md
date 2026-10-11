@@ -24,6 +24,12 @@ The rest of the page is left alone. Reloading does not scroll, move focus or cha
 The response is expected to again contain an `[up-poll]` attribute on the fragment.
 This is how the server keeps polling going, or [stops it](#stopping).
 
+A reload is a regular render pass: it [aborts](/aborting-requests) earlier requests targeting the fragment or its descendants,
+and is itself aborted when the user updates the fragment or a container around it.
+
+While the reload is loading, the fragment gets the [`.up-loading`](/feedback-classes) class.
+To prevent this, set an `[up-feedback=false]` attribute on the fragment.
+
 
 ## Controlling the reload interval {#interval}
 

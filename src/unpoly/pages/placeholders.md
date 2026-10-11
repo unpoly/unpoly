@@ -47,6 +47,8 @@ When the request [ends for any reason](/previews#ending), the placeholder is rem
 and the original content is restored before the response is processed.
 This also happens when the server responds with an error, or when the request is aborted.
 
+Placeholders are not shown when content is rendered from the cache. See [using previews with caching](/previews#using-previews-with-caching).
+
 Forms can show placeholders the same way, by setting `[up-placeholder]` on the `<form>` element.
 When [targeting multiple fragments](/targeting-fragments#multiple),
 the placeholder is shown in the first fragment.

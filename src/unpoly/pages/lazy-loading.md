@@ -118,6 +118,11 @@ While the content is loading, the deferred element is also assigned an `.up-load
 All [loading state](/loading-state) techniques for regular links, like [placeholders](/placeholders)
 and [previews](/previews), work with `[up-defer]` elements as well.
 
+A slow deferred request also shows the [progress bar](/progress-bar). To load quietly, set an `[up-background]` attribute.
+
+When the server responds with an error code, nothing is rendered and the fallback stays.
+To show the error, set an [`[up-fail-target]`](/failed-responses#fail-options) attribute.
+
 > [note]
 > When the deferred content is already [cached](#caching), the deferred element is
 > replaced immediately and its fallback children are never shown.
@@ -199,6 +204,8 @@ Only administrators get buttons to edit or delete the article:
   <p>Lorem ipsum dolor sit amet ...</p>
 </article>
 ```
+
+The example uses Ruby on Rails, but works similarly with any other backend.
 
 By extracting the admin-only buttons into a deferred fragment, the entire `<article>`
 element becomes the same for everyone, and can be cached as a whole:

@@ -692,7 +692,7 @@ up.Preview = class Preview {
 
   ```js
   up.preview('spinner', function(preview) {
-    preview.hideChildren()
+    preview.hideContent()
     preview.insert('<span class="spinner">Please wait...</span>')
   })
   ```

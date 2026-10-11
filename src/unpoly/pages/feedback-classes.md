@@ -107,7 +107,6 @@ Sometimes a form is not submitted by pressing a submit button, but by interactin
 
 - The user submits by pressing `Return` inside a focused field.
 - A field with `[up-autosubmit]` is changed.
-- A field with `[up-validate]` is changed.
 
 In these cases, that field is considered the [origin](/origin) element that
 caused the submission. It is also marked as `.up-active`, in addition to the form and its default submit button:
@@ -140,6 +139,8 @@ for all reasons that end a request.
 
 
 ## Feedback during cache revalidation {#cache-revalidation}
+
+When content is rendered from the [cache](/caching), no `.up-active` or `.up-loading` classes are set, since there is nothing to wait for.
 
 When rendering content from a stale [cache](/caching) entry,
 Unpoly [automatically reloads the fragment](/caching#revalidation) to ensure that the user never sees expired content.

@@ -65,7 +65,6 @@ up.preview('add-task', function(preview) {
   let text = preview.params.get('text') // mark: preview.params
   let newTask = `<div class="task">${up.util.escapeHTML(text)}</div>`
   preview.insert(form, 'afterend', newTask)
-  form.reset()
 })
 ```
 
@@ -73,6 +72,9 @@ Because we're using the `up.Preview#insert()` function to insert the new `.task`
 the element is automatically removed when the preview [ends](/previews#ending).
 This ensures a consistent screen state in cases where we end up *not* updating the entire `#tasks` fragment,
 e.g. when the form submission [fails](/failed-responses).
+
+When the user submits again before the server responds, the new submission [aborts](/aborting-requests)
+the earlier request and reverts its preview.
 
 
 ## Handling validation errors
@@ -143,11 +145,8 @@ up.preview('add-task', function(preview) {
   let form = preview.origin.closest('form')
   let text = preview.params.get('text')
 
-  if (text) {
-    let newTask = up.template.clone('#task-template', { text }) // mark-line
-    preview.insert(form, 'afterend', newTask)
-    form.reset()
-  }
+  let newTask = up.template.clone('#task-template', { text }) // mark-line
+  preview.insert(form, 'afterend', newTask)
 })
 ```
 
