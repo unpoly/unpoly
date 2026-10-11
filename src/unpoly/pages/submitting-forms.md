@@ -62,56 +62,30 @@ a target selector can express.
 
 ## Handling validation errors {#validation}
 
-When the form could not be submitted due to invalid user input,
-your server should re-render the form with error messages and respond with
-a status code outside the 2xx range. We recommend
+<a id="fail-target"></a>
+
+When the user submitted invalid data, your server should re-render the form with error messages
+and respond with a status code outside the 2xx range, like
 [HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Content).
+Unpoly then ignores the `[up-target]` attribute and updates the `<form>` element instead,
+so the user sees your error messages next to their input.
+See [[validation]] for rendering errors elsewhere, validating single fields while the user
+fills in the form, and other ways to detect a failed submission.
 
-The error code tells Unpoly that the submission failed. Unpoly then ignores
-the `[up-target]` attribute and updates the `<form>` element instead,
-so the user sees your error messages next to their input:
+
+## Showing confirmation or error flashes {#flashes}
+
+To confirm a successful submission or show an error, include an [`[up-flashes]`](/up-flashes)
+element with your message in the response:
 
 ```html
-<form method="post" action="/comments" up-submit up-target="#comments">
-  <!-- chip: ❌ Failed responses will appear here -->
-</form>
-
-<div id="comments">
-  <!-- chip: ✔️ Successful responses will appear here -->
+<div up-flashes>
+  <strong>Your comment was posted!</strong> <!-- mark-line -->
 </div>
 ```
 
-The form's values and messages all come from your server-rendered HTML.
-Unpoly only decides which fragment to show them in.
-
-If your server cannot respond with error codes, you can
-[configure other ways to detect failed responses](/failed-responses#customizing-failure-detection).
-
-> [tip]
-> Unpoly can also validate fields while the user is still filling in the form.
-> See [[validation]].
-
-### Rendering error messages elsewhere {#fail-target}
-
-Instead of re-rendering the form, you can update any fragment on the page by setting an
-[`[up-fail-target]`](/up-submit#up-fail-target) attribute:
-
-```html
-<form method="post" action="/comments" up-submit up-target="#comments" up-fail-target="#errors"> <!-- mark: up-fail-target="#errors" -->
-  ...
-</form>
-
-<div id="comments">
-  <!-- chip: ✔️ Successful responses will appear here -->
-</div>
-
-<div id="errors"> <!-- mark: id="errors" -->
-  <!-- chip: ❌ Failed responses will appear here -->
-</div>
-```
-
-Most render options have such a `fail`-prefixed variant.
-See [[failed-responses]] for details.
+The `[up-flashes]` element on the page is updated with any response, even when the form targets
+a different fragment. See [[flashes]] for placing it in your layout and clearing old messages.
 
 
 ## Navigation defaults
@@ -187,20 +161,9 @@ An individual submit button can opt for a full page load, by setting an `[up-sub
 
 ## Showing that the form is processing {#loading}
 
-While a submission is loading, you can disable the form's fields and buttons.
-This prevents duplicate submissions and signals that the form is busy:
-
-```html
-<form method="post" action="/subscribers" up-submit up-disable> <!-- mark: up-disable -->
-  <input type="email" name="email">
-  <button type="submit">Subscribe</button>
-</form>
-```
-
-See [[disabling-forms]] for disabling only some controls.
-
-Unpoly also sets [feedback classes](/feedback-classes) on the form while it is submitting,
-and can show [placeholders](/placeholders) or run arbitrary [previews](/previews).
+While the form is submitting, you can show the user that it is processing:
+[disable](/disabling-forms) its fields and buttons, style it with [feedback classes](/feedback-classes),
+show a [placeholder](/placeholders) or run a [preview](/previews).
 See [[loading-state]] for an overview.
 
 
