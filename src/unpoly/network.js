@@ -3,7 +3,7 @@ require('./network.sass')
 const u = up.util
 
 /*-
-The HTTP client behind every request Unpoly makes. It caches responses, revalidates cached content after rendering, aborts requests that would race each other, and tells you when the network is slow or gone.
+Features to make HTTP requests and cache their responses.
 
 Unpoly uses this client automatically when following a link or submitting a form. To make a request from your own code, call `up.request()`. It returns an `up.Request` that fulfills with an `up.Response` and that can be aborted. Responses can be cached so that a later request for the same URL renders instantly, and cached content is revalidated after rendering. The cache is managed through `up.cache.get()`, `up.cache.expire()` and `up.cache.evict()`.
 

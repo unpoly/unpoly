@@ -1,7 +1,7 @@
 /*-
-Helpers for basic JavaScript values like lists, strings, objects and functions, in the spirit of [Lodash](https://lodash.com/). Unpoly uses them internally and exposes them so you might not need another utility library in your bundle.
+Helper functions for basic JavaScript values.
 
-Most functions are predicates like `up.util.isPresent()` or `up.util.isBlank()`, or list helpers like `up.util.uniq()`, `up.util.reject()` and `up.util.pick()`. Feature parity with Lodash is not a goal. The module also parses the formats used in Unpoly's attributes: `up.util.parseRelaxedJSON()` reads [[relaxed-json]], and `up.util.normalizeURL()` and `up.util.parseURL()` work with URLs.
+Most functions are predicates like `up.util.isPresent()` or `up.util.isBlank()`, or list helpers like `up.util.uniq()`, `up.util.reject()` and `up.util.pick()`. They are similar to [Lodash](https://lodash.com/), but feature parity is not a goal. The module also parses the formats used in Unpoly's attributes: `up.util.parseRelaxedJSON()` reads [[relaxed-json]], and `up.util.normalizeURL()` and `up.util.parseURL()` work with URLs.
 
 @learn-ref relaxed-json
 
