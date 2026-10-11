@@ -1029,7 +1029,7 @@ PRE-SHIP TASKS (Henning 2026-10-09):
   page), then report whether they understood Unpoly's shape and niche, and what confused
   them. Timing (Henning 2026-10-09): after the fix round / sweeps / em-dash pass, BEFORE
   the last mechanical steps (namespace rename, URL move).
-- REVISIT SEARCH RANKING (Henning 2026-10-09): after the chapter rewrites, the guide
+- RESOLVED 2026-10-11 (unpoly 120a6e909 @signature on /layer-option, now 1st for "layer"; site 02877e70 skill search counts heading ids that name a section, fixing "history state"; side effect: "scripting" now lists pages with "…from JavaScript {#scripting}" headings at ranks 3-5). REVISIT SEARCH RANKING (Henning 2026-10-09): after the chapter rewrites, the guide
   /layer-option ("Targeting other layers") ranks 6th for "layer", behind five API features
   (up.layer.current, [up-layer=new], …), 0.2 points behind #5. Not the plural (Pagefind
   stems English; "layers" finds the same pages): the five are signature-tier pages
