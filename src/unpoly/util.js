@@ -84,8 +84,8 @@ up.util = (function() {
   You may pass options to exclude URL components from the normalized string:
 
   ```js
-  up.util.normalizeURL('/foo?query=bar', { query: false }) => '/foo'
-  up.util.normalizeURL('/bar#hash', { hash: false }) => '/bar'
+  up.util.normalizeURL('/foo?query=bar', { search: false }) // result: '/foo'
+  up.util.normalizeURL('/bar#hash', { hash: false }) // result: '/bar'
   ```
 
   ### Limitations
@@ -197,7 +197,7 @@ up.util = (function() {
   ```js
   let parsed = up.util.parseURL('/path?foo=value')
   parsed.pathname // result: '/path'
-  parsed.search // result: '/?foo=value'
+  parsed.search // result: '?foo=value'
   parsed.hash // result: ''
   ```
 
@@ -864,7 +864,7 @@ up.util = (function() {
   We may now use `Account` instances with `up.util.copy()`:
 
   ```js
-  original = new User('foo@foo.com')
+  original = new Account('foo@foo.com')
 
   copy = up.util.copy(original)
   console.log(copy.email) // prints 'foo@foo.com'
@@ -1825,9 +1825,9 @@ up.util = (function() {
   We may now use `Account` instances with `up.util.isEqual()`:
 
   ```js
-  let one = new User('foo@foo.com')
-  let two = new User('foo@foo.com')
-  let three = new User('bar@bar.com')
+  let one = new Account('foo@foo.com')
+  let two = new Account('foo@foo.com')
+  let three = new Account('bar@bar.com')
 
   up.util.isEqual(one, two)   // returns true
   up.util.isEqual(one, three) // returns false

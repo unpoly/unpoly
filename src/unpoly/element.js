@@ -480,7 +480,7 @@ up.element = (function() {
 
   ```js
   element = up.element.createFromSelector('div', { content: '<span>inner text</span>' })
-  // element is <div>inner text</div>
+  // element is <div><span>inner text</span></div>
   ```
 
   ### Setting inline styles
@@ -564,18 +564,20 @@ up.element = (function() {
   ```js
   up.element.parseSelector('.content > form[action="/"]:not(.bar)')
   => {
-       include: [
-         { classNames: ['.content'],
+       includePath: [
+         { tagName: null,
+           classNames: ['content'],
+           id: null,
            attributes: {}
          },
          { tagName: 'form',
            classNames: [],
+           id: null,
            attributes: { action: "/" }
          }
        ],
-       exclude: {
-         raw: ".bar"
-       }
+       includeRaw: '.content > form[action="/"]',
+       excludeRaw: ':not(.bar)'
      }
   ```
 
@@ -842,7 +844,7 @@ up.element = (function() {
   list.length // result: 3
   list[0] // result: Text "foo "
   list[1] // result: Element "<p>bar</p>"
-  list[3] // result: Text " bar"
+  list[2] // result: Text " baz"
   ```
 
   ## Whitespace trimming {#whitespace}
@@ -1212,7 +1214,7 @@ up.element = (function() {
   let element = up.element.createFromSelector('.foo')
   element.className // => 'foo'
 
-  let undo = up.element.addClassTemp('bar')
+  let undo = up.element.addClassTemp(element, 'bar')
   element.className // => 'foo bar'
 
   undo()
@@ -1290,7 +1292,7 @@ up.element = (function() {
   let value = up.element.style(element, 'font-size')
   // value is '16px'
 
-  let value = up.element.styleNumber(element, 'font-size')
+  value = up.element.styleNumber(element, 'font-size')
   // value is 16
   ```
 
@@ -1494,10 +1496,10 @@ up.element = (function() {
 
   /*-
   ```
-  up.element.unionSelector(['input', 'textarea']) // result: ':is(input, textarea)'
-  up.element.unionSelector(['input', 'textarea'], undefined) // result: ':is(input, textarea)'
-  up.element.unionSelector(['input', 'textarea'], ['.disabled', '[disabled]']) // result: ':is(input, textarea):not(.disabled, [disabled])'
-  up.element.unionSelector(['input', 'textarea'], ['.disabled', '[disabled]'], '.active') // result: ':is(input, textarea):not(.disabled, [disabled]):is(.active)'
+  up.element.unionSelector(['input', 'textarea']) // result: ':is(input,textarea)'
+  up.element.unionSelector(['input', 'textarea'], undefined) // result: ':is(input,textarea)'
+  up.element.unionSelector(['input', 'textarea'], ['.disabled', '[disabled]']) // result: ':is(input,textarea):not(.disabled,[disabled])'
+  up.element.unionSelector(['input', 'textarea'], ['.disabled', '[disabled]'], '.active') // result: ':is(input,textarea):not(.disabled,[disabled]):is(.active)'
   ```
 
   @function up.element.unionSelector
