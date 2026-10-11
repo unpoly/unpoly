@@ -40,7 +40,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
 
 ### Preventing peeled overlays from closing
 
-- ⚠️ When a render pass closes overlays above the updated layer ([peeling](/closing-overlays#peeling)), an `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open. The render pass then rejects with `up.Aborted` and the layer is not updated. Formerly peeling ignored prevented events. Listeners can recognize a peel by its `event.value` of `":peel"`.
+- ⚠️ When a render pass closes overlays above the updated layer ([peeling](/closing-overlays#peeling)), an `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open. The render pass then rejects with `up.Aborted` and the layer is not updated. Formerly peeling ignored prevented events. Listeners can recognize a peel by its `event.value` of `":peel"`. To let peeling proceed as before, return early from your listener when `event.value === ":peel"`, or render with [`[up-peel="force"]`](/up-follow#up-peel).
 - When a parent overlay closes, a child overlay that is kept open now also keeps its parent open.
 - `up.Layer#accept()`, `up.Layer#dismiss()` and `up.Layer#peel()` take a new `{ force: true }` option to close overlays even when a listener prevents it.
 - The [`[up-peel]`](/up-follow#up-peel) attribute and `{ peel }` option accept the word `force`, alone or combined with an intent, e.g. `[up-peel="accept force"]`.
@@ -50,6 +50,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
 
 ### Other changes
 
+- Fix [`[up-reveal-padding]`](/up-follow#up-reveal-padding) and the `{ revealPadding }` render option being ignored. Only `up.viewport.config.revealPadding` was used.
 - ⚠️ While a [validation](/validation) request is loading, [feedback classes](/feedback-classes) like `.up-loading` are now set by default, as for every other render pass. Formerly a validation only set them with an `[up-watch-feedback]` attribute. To not set them, use `[up-watch-feedback="false"]` or pass `{ feedback: false }`.
 - Pressing the Space key now activates a [faux button](/faux-interactive-elements), e.g. an element with [`[up-emit]`](/up-emit) or [`[up-clickable]`](/up-clickable). Formerly only the Enter key worked.
 - An [`[up-on-offline]`](/up-follow#up-on-offline) snippet now receives the `up:fragment:offline` event as `event`, so it can call `event.retry()`. It used to receive the event under the name `error`.

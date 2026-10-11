@@ -102,6 +102,20 @@ extendDescribe('up.fragment', function() {
             expect(this.revealedText).toEqual(['other text'])
           })
 
+          it('passes a { revealPadding } option to the reveal', async function() {
+            fixture('.target')
+            up.render('.target', { url: '/path', scroll: 'target', revealPadding: 50 })
+
+            await wait()
+
+            jasmine.respondWithSelector('.target', { text: 'new text' })
+
+            await wait()
+
+            expect(this.revealedText).toEqual(['new text'])
+            expect(this.revealOptions.revealPadding).toBe(50)
+          })
+
           it('allows to refer to the replacement { origin } as ":origin" in the { scroll } selector', async function() {
             const target = fixture('.target', { text: 'target text' })
             const origin = fixture('.origin', { text: 'origin text' })
