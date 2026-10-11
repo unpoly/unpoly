@@ -19,6 +19,9 @@ When it later reloads the fragment, it sends the version back in an `If-None-Mat
 The server compares it with the current version of its data. When nothing changed, it responds with
 `304 Not Modified` and an empty body, and Unpoly finishes the render pass without changes.
 
+The headers of the initial page load are not visible to scripts. To make the first reload of such a fragment
+conditional, render its version into an [`[up-etag]` or `[up-time]` attribute](#fragment-versions).
+
 > [tip]
 > Many web servers add a default `ETag` by hashing the response body.
 > With such a server, identical HTML already results in a short `304 Not Modified` response,

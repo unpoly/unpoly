@@ -37,6 +37,9 @@ up.on('up:assets:changed', function(event) {
 })
 ```
 
+Responses without a `<head>`, like [shortened responses](/optimizing-responses#target), are not compared.
+If your server shortens every response, use the [polling detector](#polling) below.
+
 **There is no default behavior when assets have changed.** In particular, Unpoly does not insert
 the new asset elements into the current page. The sections below show popular ways to react.
 

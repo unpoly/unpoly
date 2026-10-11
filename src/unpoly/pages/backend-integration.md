@@ -19,7 +19,8 @@ X-Up-Target: .profile
 ```
 
 The server renders the page for `/users/5` the same way it would for a full page load.
-Unpoly extracts the `.profile` element from the response and discards the rest.
+Unpoly extracts the `.profile` element from the response and discards the rest,
+except [hungry elements](/hungry-elements) and the `<head>`.
 
 There is no JSON API to build and no separate fragment endpoint to maintain.
 Forms work the same way, with one convention: respond to an invalid submission with an error status like `422`,
@@ -90,8 +91,9 @@ Steering the frontend from the server
 -------------------------------------
 
 Response headers let the server change what Unpoly does with a response.
-It can emit events on the client, update the document title, or close an overlay with a result value
-instead of rendering anything:
+It can change the target or render nothing, emit events on the client, update the title or the layer context,
+expire cache entries, or open or close an overlay.
+This response emits an event and closes an overlay with a result value, instead of rendering anything:
 
 ```http
 HTTP/1.1 200 OK

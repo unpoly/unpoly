@@ -193,7 +193,7 @@ up.motion = (function() {
       - The name of a [registered](/up.animation) animation
       - A function performing the animation (same contract as a function passed to `up.animation()`)
       - An object of CSS attributes describing the last frame of the animation (using kebab-case property names)
-    @param {number} [options.duration=300]
+    @param {number} [options.duration=175]
       The duration of the animation, in milliseconds.
     @param {string} [options.easing='ease']
       The timing function that controls the animation's acceleration.
@@ -266,7 +266,7 @@ up.motion = (function() {
     The element to animate.
   @param {Object} lastFrame
     The CSS properties that should be transitioned to.
-  @param {number} [options.duration=300]
+  @param {number} [options.duration=175]
     The duration of the animation, in milliseconds.
   @param {string} [options.easing='ease']
     The timing function that controls the animation's acceleration.
@@ -396,7 +396,7 @@ up.motion = (function() {
 
       - The name of a [registered](/up.transition) transition
       - A function performing the transition (same contract as a function passed to `up.transition()`)
-    @param {number} [options.duration=300]
+    @param {number} [options.duration=175]
       The duration of the animation, in milliseconds.
     @param {string} [options.easing='ease']
       The timing function that controls the transition's acceleration.

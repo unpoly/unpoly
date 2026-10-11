@@ -41,6 +41,9 @@ To use a transition for every [navigation](/navigation-defaults), set a default 
 up.fragment.config.navigateOptions.transition = 'cross-fade'
 ```
 
+When a [cached](/caching#revalidation) page is revalidated, the fresh content replaces it without a second transition.
+Pages restored by the *Back* button are not animated.
+
 
 ### Available transitions {#available-transitions}
 
@@ -63,15 +66,17 @@ You can also [combine any two animations](#combining-animations) into a transiti
 
 ### Transitions for failed responses {#fail-transition}
 
-When the server responds with an error code, Unpoly renders the response
-with [different options](/failed-responses#fail-options). To animate that case differently,
-set an `[up-fail-transition]` attribute:
+A failed response does not use `[up-transition]`. When the server responds with an error code, Unpoly renders
+the response with [different options](/failed-responses#fail-options), and the form with validation errors
+appears instantly. To animate that case, set an `[up-fail-transition]` attribute:
 
 ```html
 <form action="/tasks" up-target=".tasks" up-transition="cross-fade" up-fail-transition="move-down"> <!-- mark: up-fail-transition="move-down" -->
   ...
 </form>
 ```
+
+A default transition in `up.fragment.config.navigateOptions` applies to both cases.
 
 
 Animations: revealing a single element {#animations}
@@ -200,8 +205,8 @@ Any CSS timing function works, including `cubic-bezier()` curves.
 To change the default for all animations, set `up.motion.config.easing`.
 
 
-Disabling animation globally {#disabling-animation-globally}
-----------------------------
+Reduced motion and disabling animation {#disabling-animation-globally}
+---------------------------------------
 
 Animations are enabled unless the user has asked their system to
 [minimize non-essential motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion).
@@ -287,6 +292,9 @@ During a transition both elements occupy the same spot on the screen:
 
 The new element takes the old one's place in the document flow, so elements after the fragment
 only shift when the new version has a different size.
+
+While the transition plays, the old element is still in the DOM with an [`.up-destroying`](/up-destroying) class.
+Unpoly functions like `up.fragment.get()` ignore it, but `document.querySelector()` may still find it.
 
 A transition cannot replace the `<body>` element, which Unpoly never animates.
 To transition the entire page, target a container inside `<body>`.

@@ -4,6 +4,7 @@ Optimizing responses
 Your server can shorten or customize its responses by reading the request headers that Unpoly sends,
 like the targeted selector or the mode of the updating layer.
 This is optional: Unpoly only takes the targeted fragment from any response and discards the rest,
+except [hungry elements](/hungry-elements) and the `<head>`,
 so a full HTML page is always a valid answer.
 
 
@@ -32,6 +33,9 @@ Vary: X-Up-Target
 
 A typical use is to skip expensive parts of the layout, like a sidebar or a navigation bar,
 when they are not part of the target.
+
+`X-Up-Target` does not list [hungry elements](/hungry-elements) like [flashes](/flashes).
+Keep rendering them in shortened responses, or they stop updating.
 
 A request may target [multiple fragments](/targeting-fragments#multiple).
 The header then lists all selectors, separated by commas, and the response should contain an element for each:
@@ -158,6 +162,10 @@ Vary: X-Up-Target, X-Up-Mode
 ```
 
 After seeing `Vary: X-Up-Target`, a cached response for `.menu` is no longer a cache hit for a request targeting a different selector.
+
+`Vary` is a standard HTTP header, so it also keeps the browser's HTTP cache and shared caches like CDNs from
+serving a shortened response to a full page load. Check that your CDN honors `Vary` for custom headers,
+or don't let it cache these responses.
 
 You can set the `Vary` header from your own server code.
 Some [protocol implementations](/protocol-implementations), like `unpoly-rails`, set it for you once you read a header.
