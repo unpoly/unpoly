@@ -49,6 +49,11 @@ Everything else is updated as usual:
 
 The kept element is the *old* element, so it still plays `song1.mp3`.
 Its event listeners and any state set by a [compiler](/enhancing-elements) survive the update.
+Its compilers don't run again and its destructors are not called. Once an update no longer contains a
+match, the element is destroyed like any other, and its destructors run.
+
+When you target an `[up-keep]` element directly, it is kept as well, so the update changes nothing.
+To replace it, [force an update](#forcing-updates).
 
 > [important]
 > The `[up-keep]` element needs a [derivable target selector](/target-derivation), like an `[id]`.

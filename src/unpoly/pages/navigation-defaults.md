@@ -72,6 +72,8 @@ To follow a link or submit a form without navigation defaults, set an `[up-navig
 
 Clicking the link updates the `.users` list and nothing else. The URL stays the same,
 the scroll position is kept and the response is not cached.
+The link also no longer falls back to the main element. When the server responds with an error,
+nothing is rendered unless you set an [`[up-fail-target]`](/failed-responses#fail-options).
 
 With `[up-navigate=false]` you can still enable individual effects, like `[up-history=true]`
 or `[up-scroll=top]`. See the attributes for [links](/up-follow) and [forms](/up-submit) for all options.

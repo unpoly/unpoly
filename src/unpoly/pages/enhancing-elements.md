@@ -32,6 +32,9 @@ up.compiler('.current-time', function(element) {
 The compiler function is called once for each matching element, when
 the page first loads and when a matching fragment is rendered later.
 
+Compilers run in the order they were registered, each for all its matches in the new fragment.
+To change the order, pass a [`{ priority }`](/up.compiler#order).
+
 ### Avoid `DOMContentLoaded` {#no-load-event}
 
 Without Unpoly, the `.current-time` enhancement might have been implemented
@@ -74,6 +77,9 @@ up.compiler('input.date-picker', function(input) {
   new DatePicker(input)
 })
 ```
+
+If the library adds elements or listeners outside the input, like a calendar popup in the `<body>`,
+return a [destructor](#destructor) that calls the library's clean-up method.
 
 To mount components from a frontend framework like React or Vue, see [[islands]].
 
@@ -148,6 +154,10 @@ up.compiler('.scroll-to-hide', function(element) {
 ```
 
 This compiler function is now safe for garbage collection.
+
+Destructors run when Unpoly removes the element, e.g. when its fragment is swapped, when it is destroyed
+with `up.destroy()`, or when its overlay closes. When your own code removes an element, use `up.destroy()`
+so its destructors run.
 
 > [important]
 > The destructor function is *not* expected to remove the element from the DOM.

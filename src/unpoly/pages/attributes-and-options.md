@@ -98,6 +98,8 @@ and want to pass a `true` literal as an attribute value:
 link_to 'Click me', '/path', 'up-follow': true # mark: true
 ```
 
+The examples use Ruby on Rails, but work similarly with any other backend.
+
 
 ### Structured values {#relaxed-json}
 

@@ -85,7 +85,9 @@ up.compiler('[track-view]', function(element, data) { // mark: [track-view]
 
 ### Avoid loading your application scripts in the `<body>`
 
-When allowing inline scripts to run, mind that the `<body>` element is a default [main target](/main).
+Unpoly runs `<script>` elements in new fragments, as long as your CSP allows them
+(see [script elements](/script-security#script-elements)). Mind that the `<body>` element is a default
+[main target](/main).
 If you include your global scripts at the end of your `<body>`, swapping the `<body>` will re-execute these scripts:
 
 ```html

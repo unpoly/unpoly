@@ -118,7 +118,7 @@ While the content is loading, the deferred element is also assigned an `.up-load
 All [loading state](/loading-state) techniques for regular links, like [placeholders](/placeholders)
 and [previews](/previews), work with `[up-defer]` elements as well.
 
-A slow deferred request also shows the [progress bar](/progress-bar). To load quietly, set an `[up-background]` attribute.
+A slow deferred request also shows the [progress bar](/progress-bar). To load quietly, set an [`[up-background]`](/up-defer#up-background) attribute.
 
 When the server responds with an error code, nothing is rendered and the fallback stays.
 To show the error, set an [`[up-fail-target]`](/failed-responses#fail-options) attribute.

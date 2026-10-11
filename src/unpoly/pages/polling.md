@@ -28,7 +28,7 @@ A reload is a regular render pass: it [aborts](/aborting-requests) earlier reque
 and is itself aborted when the user updates the fragment or a container around it.
 
 While the reload is loading, the fragment gets the [`.up-loading`](/feedback-classes) class.
-To prevent this, set an `[up-feedback=false]` attribute on the fragment.
+To prevent this, set an [`[up-feedback=false]`](/up-poll#up-feedback) attribute on the fragment.
 
 
 ## Controlling the reload interval {#interval}

@@ -11,7 +11,6 @@ Some examples of failed responses are:
 - A form submission fails due to invalid user input. The server re-renders the form with validation errors.
 - The server renders unexpected content, like a login screen or a maintenance page.
 - The server-side app crashes with an HTTP 500 server error.
-- The request is [aborted](/aborting-requests) by a second request [targeting](/targeting-fragments) the same fragment.
 
 
 Rendering failed responses differently {#fail-options}
@@ -149,8 +148,9 @@ See [[render-lifecycle]] for examples.
 Handling fatal network errors {#handling-fatal-network-errors}
 -----------------------------
 
-When a request encounters a fatal error (like a timeout or loss of network connectivity), Unpoly
-emits `up:request:offline` and does not render.
+When a request encounters a fatal error (like a timeout or loss of network connectivity), nothing
+is rendered. You can handle this with an [`[up-on-offline]`](/up-follow#up-on-offline) callback or an `up:fragment:offline`
+listener, which can also retry the request.
 
 Because there never was a server response, `up:fragment:loaded` is *not* emitted in this case.
 

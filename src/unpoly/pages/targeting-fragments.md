@@ -83,7 +83,7 @@ Optional targets {#optional-targets}
 ----------------
 
 By default Unpoly expects all targeted fragments to be present in both the current page and the server response.
-If a target selector doesn't match in either, an error `up.CannotMatch` is thrown.
+If a target selector is missing in the current page or in the response, an error `up.CannotMatch` is thrown.
 
 Mark a target as optional with the `:maybe` pseudo-selector:
 
@@ -264,7 +264,7 @@ Dealing with missing targets {#missing-targets}
 ----------------------------
 
 By default Unpoly requires targets to match in both the current page and the server response.
-If no matching element is found in either, an error `up.CannotMatch` is thrown.
+If no matching element is found in the current page or in the response, an error `up.CannotMatch` is thrown.
 
 For individual fragments that may be missing, [make the target optional](#optional-targets) with `:maybe`.
 When the *primary* target may be missing, configure a fallback instead.
@@ -279,7 +279,7 @@ Pass it as an `[up-fallback]` attribute or `{ fallback }` option:
 up.render({ url: '/path', target: '.content', fallback: 'body' }) // mark: fallback: 'body'
 ```
 
-If no element matches `.content` in either page or response, Unpoly updates the `body` element.
+If `.content` is missing in the current page or in the response, Unpoly updates the `body` element.
 
 If neither the primary nor the fallback target can be matched, the render pass fails with an error `up.CannotMatch`.
 

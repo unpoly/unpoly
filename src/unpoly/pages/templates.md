@@ -98,7 +98,7 @@ When we reference a template, we can pass a data object for the cloned element a
 [`[up-use-data]`](/up-follow#up-use-data) attribute:
 
 ```html
-<a up-fragment="#my-template" up-use-data="{ description: 'Buy toast' }">
+<a up-fragment="#task-template" up-use-data="{ description: 'Buy toast' }">
   Click me
 </a>
 ```

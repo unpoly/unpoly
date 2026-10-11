@@ -12,7 +12,7 @@ let element = document.querySelector('#foo')
 up.reload(element) // Derives the target '#foo' from the given element
 ```
 
-Features that must derive targets include `[up-poll]`, `[up-hungry]`, `[up-viewport]`,
+Features that must derive targets include `[up-poll]`, `[up-hungry]`, `[up-keep]`, `[up-validate]`, `[up-viewport]`,
 [`up.reload(Element)`](/up.reload) and [`up.render(Element)`](/up.render).
 
 

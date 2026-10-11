@@ -102,6 +102,8 @@ up.compiler('.user', function(element, data) {
 })
 ```
 
+When both set the same key, the value from `[up-data]` wins.
+
 ## Using arbitrary attributes {#attribute-functions}
 
 Your compilers and event handlers may access any HTML attribute
@@ -171,6 +173,8 @@ The new fragment will compile with the given data, without requiring an `[up-dat
   <!-- chip: Will compile with data { startScore: 1500 } -->
 </div>
 ```
+
+Keys from `[up-use-data]` win over the element's own data.
 
 ### Mapping selectors to data {#map}
 

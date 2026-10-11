@@ -101,6 +101,9 @@ A successful response updates `.content`. A failed response updates the `<form>`
 so the user sees the validation errors next to their input. In HTML the same option
 is `[up-fail-target]`. For forms, Unpoly already defaults to re-rendering the form itself.
 
+You can also ignore error codes with [`[up-fail=false]`](/up-follow#up-fail), decide yourself what counts as a failure,
+or react to requests that were aborted or never reached the server.
+
 <p class="read-more"><a href="/failed-responses">Read more: Handling failed responses</a></p>
 
 

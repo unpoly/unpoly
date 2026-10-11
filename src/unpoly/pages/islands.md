@@ -107,13 +107,13 @@ Any client-side state inside the island is reset by this.
 To preserve an island while the fragment around it is updated, assign it an `[up-keep]` attribute:
 
 ```html
-<div class="color-picker" up-data="{ value: '#a2d8ff' }" up-keep></div> <!-- mark: up-keep -->
+<div id="theme-color" class="color-picker" up-data="{ value: '#a2d8ff' }" up-keep></div> <!-- mark: up-keep -->
 ```
 
 When new content contains a matching element, the existing element remains attached in its
 current position, keeping the mounted component and all its state. Elements are matched by
-their [derived target](/target-derivation): any element with the same `.color-picker` class
-in the new HTML counts as a match, even when its `[up-data]` differs.
+their [derived target](/target-derivation), here `#theme-color`. A matching element
+in the new HTML counts, even when its `[up-data]` differs.
 
 A kept element ignores the new HTML, including changed `[up-data]`. The recommended pattern
 is to listen to `up:fragment:keep` and pass the new props into the already-mounted component.
