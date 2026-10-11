@@ -12,9 +12,9 @@ and how to handle errors.
 ## Example
 
 ```js
-let job = up.render('.foo', url: '/users')
-console.log(job.options.target) // logs ".foo"
-console.log(job.options.url) // logs "/users"
+let job = up.render('.foo', { url: '/users' })
+console.log(job.renderOptions.target) // logs ".foo"
+console.log(job.renderOptions.url) // logs "/users"
 let renderResult = await job // fragments were updated
 console.log(renderResult.fragment) // logs the updated fragment
 let finalResult = await job.finished // animations are done and cached content was revalidated

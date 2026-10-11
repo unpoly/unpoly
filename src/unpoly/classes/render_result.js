@@ -7,7 +7,7 @@ Functions like `up.render()`, `up.follow()` or `up.submit()` return a promise
 that resolves with an `up.RenderResult`:
 
 ```js
-let result = await up.render('.target', content: 'foo')
+let result = await up.render('.target', { content: 'foo' })
 console.log(result.fragments)     // result: [<div class="target">...</div>]
 console.log(result.layer)         // result: up.Layer.Root
 console.log(result.renderOptions) // result: { target: '.target', content: 'foo', ... }

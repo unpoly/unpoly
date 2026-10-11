@@ -703,7 +703,7 @@ up.fragment = (function() {
   ```js
   up.on('up:fragment:loaded', async function(event) {
     // If we see an X-Course-Completed header, render the main target
-    if (event.response.headers['X-Course-Completed']) {
+    if (event.response.header('X-Course-Completed')) {
       event.renderOptions.target = ':main' // mark-line
     }
   })
@@ -721,7 +721,7 @@ up.fragment = (function() {
       event.preventDefault() // mark-line
 
       // Sign in using a modal overlay
-      await up.layer.ask('/sign_in', { acceptEvent: 'app:session:created' })
+      await up.layer.ask({ url: '/sign_in', acceptEvent: 'app:session:created' })
 
       // Now that we're signed in, retry the original request
       up.render(event.renderOptions) // mark-line
@@ -954,8 +954,8 @@ up.fragment = (function() {
   the same song (as identified by the tag's `src` attribute):
 
   ```js
-  up.on('up:fragment:keep', 'audio', function(event) {
-    if (element.getAttribute('src') !== event.newElement.getAttribute('src')) {
+  up.on('up:fragment:keep', 'audio', function(event, element) {
+    if (element.getAttribute('src') !== event.newFragment.getAttribute('src')) {
       // Preventing the event forces an update
       event.preventDefault()
     }
@@ -2509,7 +2509,7 @@ up.fragment = (function() {
 
   ```js
   element.addEventListener('click', function(event) {
-    up.render('.preview', { origin: element })
+    up.render('.preview', { url: '/preview', origin: element })
   })
   ```
 
@@ -2556,12 +2556,12 @@ up.fragment = (function() {
   The topmost swappable element is now `#foo`, which we can select with `:layer`:
 
   ```js
-  // targets '#foo`'
+  // targets '#foo'
   up.render({ target: ':layer', url: '/page2' })
   ```
 
-  The resolution of `:target` depends on the targeted layer. For example, when rendering in
-  the root layer, `:target` will resolve to the `<body>`:
+  The resolution of `:layer` depends on the targeted layer. For example, when rendering in
+  the root layer, `:layer` will resolve to the `<body>`:
 
   ```js
   // targets the body

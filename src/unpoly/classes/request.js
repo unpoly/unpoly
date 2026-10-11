@@ -687,6 +687,8 @@ up.Request = class Request extends up.Record {
   ```javascript
   let request = up.request('/path')
 
+  request.abort()
+
   try {
     let response = await request
   } catch (result) {
@@ -694,8 +696,6 @@ up.Request = class Request extends up.Record {
       console.log('Request was aborted.')
     }
   }
-
-  request.abort()
   ```
 
   @function up.Request#abort
