@@ -53,8 +53,8 @@ and the placeholder is shown in its place:
 
 ```html
 <div id="story">
-  <p>Loading…</p> <!-- mark-line -->
   <up-wrapper hidden>Old content</up-wrapper>
+  <p>Loading…</p> <!-- mark-line -->
 </div>
 ```
 

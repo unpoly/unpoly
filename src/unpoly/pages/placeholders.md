@@ -29,8 +29,8 @@ is [hidden](/hidden). In its place the placeholder is inserted as the only visib
 
 ```html
 <div id="target">
-  <p>Loading…</p> <!-- mark-line -->
   <up-wrapper hidden>Old content</up-wrapper>
+  <p>Loading…</p> <!-- mark-line -->
 </div>
 ```
 
