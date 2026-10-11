@@ -35,8 +35,8 @@ From JavaScript, pass `{ focus: 'auto' }`:
 up.render({ url: '/path', focus: 'auto' }) // mark: focus: 'auto'
 ```
 
-When rendering without navigation, e.g. with `up.render()` or `[up-validate]`, focus is not changed by default.
-`up.reload()` [keeps the current focus](#keep).
+When rendering without navigation, e.g. with `up.render()`, focus is not changed by default.
+`up.reload()` and `[up-validate]` [keep the current focus](#keep).
 
 
 ## Focusing the new fragment {#target}

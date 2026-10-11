@@ -63,7 +63,7 @@ When an overlay with visible history closes, the address bar returns to the pare
 This emits `up:location:changed` and counts another view of the parent page.
 The `up:layer:location:changed` listener below does not.
 
-To also track navigation within such overlays, observe `up:layer:location:changed` instead:
+To also track navigation within overlays without visible history, observe `up:layer:location:changed` instead:
 
 ```js
 // Track when a layer changes its location.

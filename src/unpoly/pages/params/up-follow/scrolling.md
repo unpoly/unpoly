@@ -18,8 +18,7 @@
   See [Scrolling multiple viewports](/scrolling#multiple-viewports) for examples.
 
 @param [up-scroll-behavior='instant']
-  Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion)
-  when [prepending or appending](/targeting-fragments#appending-or-prepending) content.
+  Whether to [animate the scroll motion](/scroll-tuning#animating-the-scroll-motion).
 
 @param [up-reveal-snap]
   When to [snap to the top](/scroll-tuning#snapping-to-the-screen-edge)
@@ -34,7 +33,7 @@
   when scrolling to an element.
 
 @param [up-reveal-max]
-  How many pixel lines of a [high element to reveal](/scroll-tuning#revealing-with-padding) when scrolling to an element.
+  How many pixel lines of a [tall element to reveal](/scroll-tuning#revealing-large-elements) when scrolling to an element.
 
 @param [up-save-scroll='true']
   Whether to [save scroll positions](/up.viewport.saveScroll) before updating the fragment.

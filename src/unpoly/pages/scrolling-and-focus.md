@@ -2,7 +2,7 @@ Scrolling & focus
 =================
 
 After a fragment update, Unpoly decides what scrolls and what gets focus.
-Following a link scrolls the new content into view and focuses it, the way a full page load would.
+Following a link scrolls to the top and focuses the new content, the way a full page load would.
 A minor update leaves scroll positions and focus where they are.
 Every default can be changed per link, per form or globally.
 
