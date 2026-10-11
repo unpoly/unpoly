@@ -24,6 +24,9 @@ Acceptance usually continues a larger interaction in the parent layer, like
 Dismissal usually means cancellation. When you wait for a subtask to finish,
 you are interested in acceptance, but not in dismissal.
 
+When an overlay closes, overlays it has opened are closed with it, its pending requests are
+[aborted](/aborting-requests#layers), and [focus returns](/focus#overlays) to the link that opened it.
+
 
 Running code when an overlay closes {#callbacks}
 -----------------------------------
@@ -161,7 +164,12 @@ attribute with a [URL pattern](/url-patterns):
 
 When the user submits the company form and the server redirects to `/companies/123`,
 the overlay is accepted. Named segments captured by the [URL pattern](/url-patterns) (`$id`) become
-the overlay's [acceptance value](#acceptance-values), here `{ id: 123 }`.
+the overlay's [acceptance value](#acceptance-values), along with the matched `location`:
+here `{ id: 123, location: '/companies/123' }`.
+
+The condition is checked whenever the overlay's location changes. When the form fails validation,
+the server re-renders it without changing the location, so the overlay stays open until the
+submission succeeds.
 
 A `$id` segment only matches digits, so the overlay's own URL `/companies/new` does not match the pattern.
 
@@ -374,6 +382,7 @@ X-Up-Accept-Layer: { id: 123 }
 ```
 
 With the `unpoly-rails` gem, you can produce these headers with `up.layer.accept(value)` or `up.layer.dismiss(value)`.
+Libraries for other backends offer similar helpers, or you can set the headers yourself.
 
 The server can check whether a request targets an overlay by looking at the `X-Up-Mode` request header.
 
@@ -390,7 +399,7 @@ The form below uses an [`[up-layer]`](/layer-option) attribute to update the par
 after a successful submission:
 
 ```html
-<form method="post" action="/users" up-submit up-layer="parent"> <!-- mark: up-layer="parent" -->
+<form method="post" action="/users" up-layer="parent"> <!-- mark: up-layer="parent" -->
   <input type="text" name="email">
   <button type="submit">Create user</button>
 </form>
@@ -413,7 +422,7 @@ By default, peeled overlays are [dismissed](#intents). To [accept](#intents) the
 on the link or form that targets the background layer:
 
 ```html
-<form method="post" action="/users" up-submit up-layer="parent" up-peel="accept"> <!-- mark: up-peel="accept" -->
+<form method="post" action="/users" up-layer="parent" up-peel="accept"> <!-- mark: up-peel="accept" -->
   ...
 </form>
 ```

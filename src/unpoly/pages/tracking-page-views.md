@@ -22,6 +22,7 @@ up.on('up:location:changed', function(event) {
 The event is emitted for every change of the address bar: when a link is followed,
 when a form submission redirects, or when the user presses the Back button.
 It is *not* emitted for the initial page load. Your tracking snippet already counts that, as it does on any site.
+Nor is it emitted when a link renders the URL that is already in the address bar.
 
 The `trackPageView()` function depends on your analytics tool.
 All examples on this page assume it exists. For Matomo it would look like this:
@@ -57,6 +58,10 @@ Tracking navigation in overlays {#overlays}
 Not every [overlay](/up.layer) has [visible history](/history-in-overlays).
 When an overlay without visible history opens or navigates, the address bar does not change
 and no `up:location:changed` event is emitted.
+
+When an overlay with visible history closes, the address bar returns to the parent page's URL.
+This emits `up:location:changed` and counts another view of the parent page.
+The `up:layer:location:changed` listener below does not.
 
 To also track navigation within such overlays, observe `up:layer:location:changed` instead:
 

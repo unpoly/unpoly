@@ -76,7 +76,7 @@ Where the value comes from depends on how the overlay was closed:
 
 | Overlay is accepted by                                                        | Acceptance value                                  |
 |-------------------------------------------------------------------------------|---------------------------------------------------|
-| Reaching a [location](/closing-overlays#location-condition) like `/companies/$id` | The captured segments, e.g. `{ id: 123 }`     |
+| Reaching a [location](/closing-overlays#location-condition) like `/companies/$id` | The captured segments and the `location`, e.g. `{ id: 123, location: '/companies/123' }` |
 | An [event](/closing-overlays#event-condition) like `company:created`          | The event object                                  |
 | A [fragment](/closing-overlays#fragment-condition) like `.company-profile`    | The fragment's [data](/data)                      |
 | A button with [`[up-accept="{ id: 123 }"]`](/closing-overlays#on-click)       | The attribute's [relaxed JSON](/relaxed-json) value |
