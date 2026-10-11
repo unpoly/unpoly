@@ -68,7 +68,7 @@ up.Params = class Params {
   // object is now: {
   //   foo: 'bar',
   //   baz: 'bam'
-  // ]
+  // }
   ```
 
   @function up.Params#toObject
@@ -400,7 +400,7 @@ up.Params = class Params {
   var foo = params.get('foo')
   // foo is now 'fooValue'
 
-  var bar = params.get('bar')
+  var bar = params.get('bar[]')
   // bar is now ['barValue1', 'barValue2']
   ```
 
@@ -662,7 +662,7 @@ up.Params = class Params {
 
   ```js
   var url = up.Params.stripURL('http://foo.com?key=value')
-  // url is now: 'http://foo.com'
+  // url is now: 'http://foo.com/'
   ```
 
   @function up.Params.stripURL

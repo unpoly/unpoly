@@ -434,7 +434,7 @@ up.form = (function() {
   ```js
   let form = document.querySelector('form')
   let options = up.form.submitOptions(form)
-  // result: { url: /foo', method: 'POST', target: '.content', ... }'
+  // result: { url: '/foo', method: 'POST', target: '.content', ... }
   ```
 
   @param {Element|jQuery|string} form
@@ -848,7 +848,7 @@ up.form = (function() {
 
   ```js
   up.watch('input.query', function(value, name, options) {
-    let url = '/search?query=' + escapeURIFragment(value)
+    let url = '/search?query=' + encodeURIComponent(value)
     return up.render('.results', { url, ...options }) // mark: return
   })
   ```
@@ -861,7 +861,7 @@ up.form = (function() {
 
   ```js
   up.watch('input.query', async function(value, name, options) { // mark: async
-    let url = '/search?query=' + escapeURIFragment(value)
+    let url = '/search?query=' + encodeURIComponent(value)
     await up.render('.results', { url, ...options }) // mark: await
   })
   ```
@@ -1920,7 +1920,7 @@ up.form = (function() {
   an optional error message:
 
   ```html
-  <form action="/users">
+  <form method="post" action="/users">
 
     <fieldset> <!-- mark: <fieldset> -->
       <label for="email">E-mail</label>
@@ -1949,7 +1949,7 @@ up.form = (function() {
   We're going to render validation errors using the following HTML:
 
     ```html
-  <form action="/users">
+  <form method="post" action="/users">
 
     <fieldset>
       <label for="email">E-mail</label>
@@ -1969,7 +1969,7 @@ up.form = (function() {
   We can implement this by giving both fields an `[up-validate]` attribute:
 
   ```html
-  <form action="/users">
+  <form method="post" action="/users">
 
     <fieldset>
       <label for="email">E-mail</label>
@@ -2085,7 +2085,7 @@ up.form = (function() {
   showing eventual validation errors and updating [dependent elements](/reactive-server-forms):
 
   ```html
-  <form action="/users">
+  <form method="post" action="/users">
 
     <fieldset>
       <label for="email">E-mail</label>
@@ -2174,7 +2174,7 @@ up.form = (function() {
   instead of setting `[up-validate]` on each individual `<input>`, we can also set it on the `<form>`:
 
   ```html
-  <form action="/users" up-validate> <!-- mark: up-validate -->
+  <form method="post" action="/users" up-validate> <!-- mark: up-validate -->
 
     <fieldset>
       <label for="email">E-mail</label>
@@ -2195,7 +2195,7 @@ up.form = (function() {
 
 
   ```html
-  <form action="/users">
+  <form method="post" action="/users">
 
     <div up-validate> <!-- mark: up-validate -->
       <fieldset>
@@ -2211,7 +2211,7 @@ up.form = (function() {
 
     <fieldset>
       <label for="name">Name</label>
-      <input type="name" id="name" name="name"> <!-- chip "will NOT validate" -->
+      <input type="text" id="name" name="name"> <!-- chip "will NOT validate" -->
     </fieldset>
 
     <button type="submit">Register</button>
