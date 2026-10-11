@@ -61,7 +61,7 @@ Unpoly has two kinds of documentation, and they do different jobs:
 | Purpose | Technical reference for one symbol | Holistic article about one topic |
 | Written as | A `/*- … */` comment beside the code | A Markdown file in `src/unpoly/pages/*.md` |
 | Reader intent | *"What arguments are accepted?"* | *"How do I implement this requirement?"* |
-| Example | [`/up.submit`](https://unpoly.com/up.submit) | [`/submitting-forms`](https://unpoly.com/submitting-forms) |
+| Example | [`/api/up.submit`](https://unpoly.com/api/up.submit) | [`/learn/submitting-forms`](https://unpoly.com/learn/submitting-forms) |
 
 Both kinds deliberately overlap, but they are written for different readers:
 
@@ -175,18 +175,23 @@ function verb() {
 
 ### Every symbol gets its own URL
 
-The site derives a path by slugifying the declared name:
+The site derives a path by slugifying the declared name. API symbols live under `/api`,
+guide pages under `/learn` (or under `/api` when `toc.yml` lists them in the API area):
 
 | Declaration | URL on doc site |
 |---|---|
-| `@function up.render` | `/up.render` |
-| `@function up.Layer#accept` | `/up.Layer.prototype.accept` |
-| `@selector [up-submit]` | `/up-submit` |
-| `@selector .up-current` | `/up-current` |
-| `@event up:form:submit` | `/up:form:submit` |
-| `@property up.form.config` | `/up.form.config` |
-| `@header X-Up-Target` | `/X-Up-Target` |
-| `@page submitting-forms` | `/submitting-forms` |
+| `@function up.render` | `/api/up.render` |
+| `@function up.Layer#accept` | `/api/up.Layer.prototype.accept` |
+| `@selector [up-submit]` | `/api/up-submit` |
+| `@selector .up-current` | `/api/up-current` |
+| `@event up:form:submit` | `/api/up:form:submit` |
+| `@property up.form.config` | `/api/up.form.config` |
+| `@header X-Up-Target` | `/api/X-Up-Target` |
+| `@page submitting-forms` | `/learn/submitting-forms` |
+
+Links in the docs spell out the prefix: `[label](/learn/caching#expiration)`. Before
+the docs moved under these prefixes, documents lived at the root (`/up.render`); those
+paths still redirect, but don't link to them.
 
 
 ## The feature types
@@ -279,7 +284,7 @@ partials](#param-partials). That's what keeps one option's description consisten
 [Reusing text](#reusing-text).
 
 The prose is worth a look too: a feature this large gets `##` sections explaining
-concepts before the parameter list, because someone landing on `/up.render` needs to
+concepts before the parameter list, because someone landing on `/api/up.render` needs to
 understand targeting before any individual option means anything.
 
 
@@ -794,7 +799,7 @@ You can enhance any form to update the existing page, without making a full page
 @menu-title Submitting forms
 ```
 
-`@page` sets the slug and therefore the URL (`/submitting-forms`). The slug is the full
+`@page` sets the slug and therefore the URL (`/learn/submitting-forms`). The slug is the full
 path, and the file must live where the slug says: `@page start/forms` is written in
 `pages/start/forms.md`, or the site build fails. `@menu-title` is optional, and gives
 the navigation a shorter label than the title.
@@ -848,8 +853,12 @@ that still lack one.
 > unpoly.com includes:
 >
 > ```apache
-> RedirectPermanent /old-page-name /new-page-name
+> RedirectPermanent /learn/old-page-name /learn/new-page-name
 > ```
+>
+> Also point every redirect that led to the old page at the new one, including the
+> generated rule for the page's pre-prefix path (`RedirectMatch 301 ^/old-page-name/?$`):
+> `rake docs:check_urls` in unpoly-site fails on a chain of redirects.
 >
 > The page's [Markdown twin](#markdown-for-agents) needs no redirect of its own: a `.md`
 > URL without a file redirects to its page.
@@ -952,14 +961,14 @@ Most pages need no keywords. Never change the prose to use a reader's word inste
 ## Markdown for agents
 
 Every documentation page on unpoly.com also exists as Markdown, for coding agents and
-LLMs: its URL plus `.md` (`/up.render.md`). An agent that asks for `text/markdown` gets the
+LLMs: its URL plus `.md` (`/api/up.render.md`). An agent that asks for `text/markdown` gets the
 same text at the page's own URL. `/index.md` (also served as `/llms.txt`) lists the
 guide chapters and API modules, and the `unpoly-docs` agent skill bundles all pages as
 files with a search script.
 
 You write nothing extra for this. `unpoly-site` renders each page as usual, then converts
 the HTML to Markdown, so whatever the page says, its Markdown says too. Headings keep
-their ids as `{#id}`, so links to `/up.render#options.target` still find their target.
+their ids as `{#id}`, so links to `/api/up.render#options.target` still find their target.
 
 ### What a page needs
 

@@ -281,7 +281,7 @@ into the section it belongs to, at the section's indentation:
 
 The comment says `@function up.submit`, not `up.form.submit`, because the function is
 [aliased](code-organization.md#main-module-pattern) onto the `up` global — which is
-also why its doc page is `/up.submit`.
+also why its doc page is `/api/up.submit`.
 
 Same for the `[up-submit]` selector, which gains a new attribute. Note how prose
 [refers to features](documentation.md#referring-to-features) by a CSS-like syntax:
