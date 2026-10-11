@@ -6,12 +6,12 @@ in Unpoly's form features the same way a native `<input>` or `<select>` does.
 There are four ways to build one. They differ in how the value
 reaches the server, and in how much Unpoly needs to know about your control.
 
-| Pattern | Submitted | Watched, validated, switched | Disabled |
-|---|---|---|---|
-| [A hidden native field](#hidden-field) | Yes | Yes | Yes |
-| [A form-associated element](#form-associated) | Yes | With a `value` getter | Yes |
-| [A registered element](#registering) | With a `value` getter | With a `value` getter | Yes |
-| [A `formdata` listener](#formdata) | Yes | No | No |
+| Pattern | Needs JavaScript | Submitted | Watched, validated, switched | Disabled |
+|---|---|---|---|---|
+| [A hidden native field](#hidden-field) | No | Yes | Yes | Yes |
+| [A form-associated element](#form-associated) | Yes | Yes | With a `value` getter | Yes |
+| [A registered element](#registering) | Yes | With a `value` getter | With a `value` getter | Yes |
+| [A `formdata` listener](#formdata) | Yes | Yes | No | No |
 
 If you can keep a native field in the form, do. It is the only pattern where nothing about
 Unpoly, or about the browser's form APIs, needs to be considered at all, and it keeps working
@@ -98,25 +98,41 @@ for free.
 > `formAssociated` alone makes the browser aware of your element, but with no value to send.
 
 Unpoly reads your element's value through a `value` getter, because a script cannot read back
-what you passed to `setFormValue()`. To take part in watching and validation, emit `input`
-while the value changes and `change` when the user commits it, like a native text field.
+what you passed to `setFormValue()`. Emit a `change` event whenever the value changes, so
+watchers and validations notice it.
 
 
 ## <em class="heading-prefix">Option 3</em> Registering any element as a field {#registering}
 
-Any element can act as a field, even a plain `<div>` that a [compiler](/up.compiler) gives
-`name`, `value` and `disabled` properties. Tell Unpoly which elements to treat as fields:
+Any element can act as a field, even a plain `<div>`. Tell Unpoly which elements to treat as
+fields, and give them a `value` getter with a [compiler](/up.compiler):
 
-```js
-up.form.config.fieldSelectors.push('date-picker')
+```html
+<div class="rating" name="stars"></div>
 ```
 
-Unpoly then treats `<date-picker>` as a field everywhere: it is submitted, watched,
-validated, switched and disabled.
+```js
+up.form.config.fieldSelectors.push('.rating') // mark: fieldSelectors
 
-Give the element a `value` getter like the `DatePicker` above. The browser knows nothing
-about this element, so Unpoly also uses the getter to submit it. Emit `input` and `change`
-the same way.
+up.compiler('.rating', function(rating) {
+  let value = ''
+  Object.defineProperty(rating, 'value', { get: () => value }) // mark: value
+
+  for (let stars of ['1', '2', '3', '4', '5']) {
+    let button = up.element.affix(rating, 'button', { type: 'button', text: '★' })
+    button.addEventListener('click', () => {
+      value = stars
+      up.emit(rating, 'change') // let watchers and validations see the change
+    })
+  }
+})
+```
+
+Unpoly then treats the `<div>` as a field everywhere: it is submitted, watched,
+validated, switched and disabled. Its name comes from the `[name]` attribute, as on an `<input>`.
+
+The browser knows nothing about this element, so Unpoly uses the `value` getter to submit it.
+Emit a `change` event whenever the value changes.
 
 > [tip]
 > If the definition of a form-associated element is loaded lazily, register its tag name
