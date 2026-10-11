@@ -15,6 +15,8 @@ In a vanilla HTML document, clicking a link while offline will replace your app 
 
 Interacting with an Unpoly-enhanced [link](/up-follow) or [form](/submitting-forms) while offline will *not* change the page.
 Instead Unpoly emits an `up:fragment:offline` event and lets you decide how to handle the connection loss.
+Without a listener, the page stays as it is and the user gets no feedback, so most apps
+should register one.
 
 
 ### Retrying failed requests {#retrying}

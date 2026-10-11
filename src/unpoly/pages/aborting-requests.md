@@ -64,6 +64,9 @@ or set an `[up-abortable="false"]` attribute:
 
 Submitting this form is not interrupted when the user navigates to another page while the request is loading.
 
+An aborted request may already have reached your server. For a form that changes data, aborting
+only means that its response is not rendered.
+
 [Preload](/preloading) requests are not abortable by default, so navigating does not cancel a menu
 that is still preloading in the background.
 

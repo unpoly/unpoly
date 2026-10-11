@@ -63,6 +63,10 @@ To change the default for all overlays, configure `up.layer.config.overlay.histo
 A mode can have its own default, like `up.layer.config.popup.history` for all popups.
 Links and options still override the configured default.
 
+An overlay that shows the response to a `POST` form has invisible history for as long as it is open,
+since its URL cannot be reloaded. When the server redirects to a `GET` URL, the overlay shows that URL.
+See [[updating-history#get-requests]].
+
 The root layer always has visible history. This cannot be configured.
 
 

@@ -30,6 +30,13 @@ To show a different fragment in the overlay, add an [`[up-target]`](/up-layer-ne
 Unpoly then extracts the `.menu-items` element from the response and places it in the overlay.
 The overlay's [main target](/up-main#overlays) can be configured per [mode](#modes).
 
+When the server responds with an [error code](/failed-responses), the error page is rendered in
+the link's own layer, not in an overlay. To show errors in an overlay, set
+[`[up-fail-layer=new]`](/layer-option#fail-layer).
+
+When the user clicks a second overlay link while the first is still loading, only the second
+overlay opens. See [aborting rules in layers](/aborting-requests#layers).
+
 
 ### Choosing the overlay mode {#modes}
 

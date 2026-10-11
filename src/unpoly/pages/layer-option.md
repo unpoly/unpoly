@@ -25,7 +25,7 @@ To keep the overlay open, set an `[up-peel="false"]` attribute.
 Forms work the same way. This form in an overlay creates a user, then updates the root layer:
 
 ```html
-<form method="post" action="/users" up-submit up-layer="root" up-target=".user-list"> <!-- mark: up-layer="root" -->
+<form method="post" action="/users" up-layer="root" up-target=".user-list"> <!-- mark: up-layer="root" -->
   ...
 </form>
 ```

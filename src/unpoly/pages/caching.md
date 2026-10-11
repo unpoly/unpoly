@@ -6,8 +6,8 @@ Cached content is [revalidated with the server](#revalidation) after rendering, 
 Cached pages also [remain accessible](/network-issues#offline-cache) after a [disconnect](/network-issues#disconnects).
 
 
-Enabling caching {#enabling}
-----------------
+Which responses are cached {#enabling}
+--------------------------
 
 Caching is controlled by the [`{ cache }`](/up.render#options.cache) render option or an `[up-cache]` attribute.
 When [navigating](/navigation-defaults), the `{ cache: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions).
@@ -32,6 +32,10 @@ up.network.config.autoCache = function(request) {
 To force caching regardless of HTTP method, pass `{ cache: true }` or set `[up-cache="true"]`.
 
 [Preloading](/preloading) a link also writes its response to the cache.
+
+Error responses are not cached. They also evict an earlier cached response for the same URL.
+When a request for the same URL is already loading, a second request waits for it instead of
+making another network request.
 
 
 Revalidation
@@ -279,13 +283,10 @@ Servers may inspect [request headers](/up.protocol) to [optimize responses](/opt
 e.g. by omitting a navigation bar that is not targeted.
 Request headers that influenced a response should be listed in a `Vary` response header,
 so Unpoly can partition its cache by header value.
-See [Caching optimized responses](/optimizing-responses#vary) for details and examples.
 
-
-### How cache entries are matched {#how-cache-entries-are-matched}
-
-When a response has a `Vary` header, matching cache entries must have the same values for all listed headers.
-See [How cache entries are matched](/optimizing-responses#cache-matching) for tables of hits and misses.
+Matching cache entries must then have the same values for all listed headers.
+See [Caching optimized responses](/optimizing-responses#vary) for details, and [How cache entries are matched](/optimizing-responses#cache-matching) for tables of hits and misses.
+{:#how-cache-entries-are-matched}
 
 
 Caching after redirects

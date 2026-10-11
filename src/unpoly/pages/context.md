@@ -66,6 +66,8 @@ an additional heading. This [ERB](https://github.com/ruby/erb) template uses the
 <% end %>
 ```
 
+Other backends can read the `X-Up-Context` request header the same way.
+
 Opened on its own, `/contacts` has no context and shows the regular heading.
 The list needs no changes to work in both places.
 
@@ -127,6 +129,8 @@ class GamesController < ApplicationController
 
 end
 ```
+
+Without `unpoly-rails`, set the `X-Up-Context` response header yourself.
 
 Context updates are applied for both successful and [failed](/failed-responses) responses.
 
