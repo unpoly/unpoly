@@ -26,6 +26,21 @@ Some forms will still submit with a full page load under this setting:
 - Forms with a cross-origin `[action]` attribute.
 - Any additional exceptions configured in `up.form.config.noSubmitSelectors`.
 
+Scripts that expect a full page load after every submission need adjusting, see [[legacy-scripts]].
+
+
+## Making exceptions {#exceptions}
+
+You can still make exceptions by setting an `[up-submit=false]` attribute on a form:
+
+```html
+<form method="post" action="/report" up-submit="false"> <!-- mark: up-submit="false" -->
+  ...
+</form>
+```
+
+Submitting this form makes a full page load, as if Unpoly had not been loaded.
+
 A single [submit button](/submitting-forms#submit-buttons) can also opt for a full page load
 by setting an `[up-submit=false]` attribute on the button:
 
@@ -40,51 +55,22 @@ The form is still submitted through Unpoly when the user presses *Save report*.
 Only *Download PDF* loads a full page.
 
 
-## Configuring default behavior for all elements {#defaults}
+## Using a macro instead {#macro}
 
-Instead of configuring the same attributes on many elements, you can configure
-Unpoly to apply behavior to all elements matching a given CSS selector.
+Instead of changing `up.form.config.submitSelectors`, you can register a [macro](/up.macro)
+that sets `[up-submit]` on every form:
 
-Pushing a selector to `up.form.config.submitSelectors` is an example of this pattern.
-Other examples are `up.link.config.followSelectors` for [links](/handling-all-links)
-or `up.form.config.fieldSelectors` for [custom form fields](/custom-form-fields#configured).
-
-> [tip]
-> An alternative way to apply default behavior to many elements is a [macro](/up.macro).
-
-
-### Making exceptions
-
-You can still make exceptions by setting an `[up-submit=false]` attribute:
-
-```html
-<form method="post" action="/report" up-submit="false"> <!-- mark: up-submit="false" -->
-  ...
-</form>
+```js
+up.macro('form:not([up-submit=false])', function(form) {
+  form.setAttribute('up-submit', '')
+})
 ```
 
-Submitting this form makes a full page load, as if Unpoly had not been loaded.
+Forms with `[up-submit=false]` are left alone. The [exceptions above](#submitting-all-forms) still apply:
+forms with a `[target]` or a cross-origin `[action]` load a full page.
 
-
-## Customizing navigation defaults
-
-[Submitting a form](/up-submit) or [following a link](/following-links) is considered
-[navigation](/navigation-defaults) by default.
-
-When navigating, Unpoly uses defaults to satisfy the user's expectations regarding
-scrolling, history, focus, request cancellation, etc.
-
-See [navigation defaults](/submitting-forms#navigation-defaults) for how a submission behaves,
-and [[navigation-defaults]] for a detailed breakdown of all defaults and how to customize them.
-
-
-## Fixing legacy JavaScript code
-
-Legacy code often contains JavaScript that expects a full page load whenever the
-user submits a form. When Unpoly handles all forms, submitting no longer
-causes these additional page loads.
-
-See [[legacy-scripts]] for making such code work with Unpoly.
+A macro can set other attributes in the same pass, like [`[up-disable]`](/up-submit#up-disable)
+to disable the form while it submits.
 
 
 @page handling-all-forms

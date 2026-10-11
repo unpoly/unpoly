@@ -165,7 +165,7 @@ can still override it with their own attributes and options.
 
 Many config properties hold a list of CSS selectors, letting you apply
 a behavior to all matching elements. For example, you can tell Unpoly to
-[handle every link on the page](/handling-all-links#defaults) without
+[handle every link on the page](/handling-all-links#following-all-links) without
 any `[up-follow]` attributes.
 
 
