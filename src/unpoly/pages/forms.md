@@ -44,15 +44,6 @@ the browser submits it with a full page load.
 <p class="read-more"><a href="/submitting-forms">Read more: Submitting forms</a></p>
 
 
-Submitting is navigation
-------------------------
-
-Submitting a form counts as [navigation](/navigation-defaults).
-When a form updates the layer's main element, Unpoly behaves like a full page load would:
-the browser URL and history are updated, and the page scrolls to the top.
-Each of these defaults can be customized.
-
-
 Showing validation errors
 -------------------------
 
@@ -61,7 +52,7 @@ respond with an error code like [HTTP 422](https://developer.mozilla.org/en-US/d
 Unpoly then ignores the `[up-target]` and updates the `<form>` element itself,
 so the user sees your messages next to their input.
 
-To validate a field before the form is submitted, set an `[up-validate]` attribute:
+To validate a field *before* the form is submitted, set an `[up-validate]` attribute:
 
 ```html
 <form method="post" action="/users" up-submit>
@@ -83,9 +74,9 @@ Only the `<fieldset>` around the field is updated, now with any error message.
 Forms that react on the server
 ------------------------------
 
-Since `[up-validate]` can target any fragment, a field can re-render other parts
-of the form when it changes. Pick a continent, and the country select
-is filled with the matching countries:
+`[up-validate]` has a second use besides showing errors. Since it can target any fragment,
+a field can re-render other parts of the form when it changes.
+Pick a continent, and the country select is filled with the matching countries:
 
 ```html
 <select name="continent" up-validate="#country"> <!-- mark: up-validate="#country" -->
