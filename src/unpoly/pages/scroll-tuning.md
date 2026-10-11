@@ -50,11 +50,6 @@ From JavaScript, pass `{ scrollBehavior: 'smooth' }`.
 When `{ scrollBehavior: 'auto' }` is passed, the behavior is determined by the CSS property
 [`scroll-behavior`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior) of the viewport element.
 
-> [important]
-> When [swapping a fragment](/targeting-fragments#swapping), the scroll motion cannot be animated.
-> You *can* animate the scroll motion when [prepending, appending](/targeting-fragments#appending-or-prepending)
-> or [destroying](/up.destroy) a fragment.
-
 
 ## Revealing with padding {#revealing-with-padding}
 

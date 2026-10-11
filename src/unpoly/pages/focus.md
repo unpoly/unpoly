@@ -134,6 +134,9 @@ Set `[up-focus="restore"]` to restore the last known focus state for the updated
 Before every fragment update, Unpoly [saves focus-related state](/up.viewport.saveFocus) for the current URL.\
 You can prevent this by setting [`[up-save-focus="false"]`](/up-follow#up-save-focus).
 
+Focus state is remembered for each layer until the next full page load.
+When nothing is known for the URL, focus is not changed. Add a fallback with `[up-focus="restore, target"]`.
+
 When the user presses the back button, Unpoly restores focus the same way.
 See [[restoring-history]].
 

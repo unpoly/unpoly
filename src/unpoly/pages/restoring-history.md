@@ -18,8 +18,17 @@ The browser changes the address bar on its own. Unpoly then restores the content
 5. Focus and text selection are restored to the element the user was in.
 6. If the cached content has [expired](/caching#revalidation), it is revalidated with the server.
 
+Scroll positions and focus are remembered for each layer until the next full page load.
+If no positions are known, for example after a full page reload, Unpoly scrolls and focuses
+as it does when [following a link](/scrolling#auto).
+
+Requests that are still loading for the restored fragment are aborted, so a late response
+cannot overwrite the restored page. See [[aborting-requests]].
+
 Unpoly renders whatever the server responds, even an error page.
 The browser has already changed the URL, so the page must follow.
+When the server cannot be reached, the address bar shows the restored URL while the page keeps its content.
+You can handle this case like any other [connection loss](/network-issues).
 
 When only the `#hash` changed between two history entries, nothing is rendered.
 Unpoly scrolls to the element matching the hash, honoring any [obstructing layout elements](/scroll-tuning#fixed-layout-elements-obstructing-the-viewport).

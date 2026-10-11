@@ -7,8 +7,8 @@ A minor update leaves scroll positions and focus where they are.
 Every default can be changed per link, per form or globally.
 
 
-Navigation defaults
--------------------
+What happens after following a link {#navigation-defaults}
+-----------------------------------
 
 Take a link that updates the page's [main element](/main):
 
@@ -26,8 +26,8 @@ Now take a link that updates a minor fragment:
 ```
 
 Nothing scrolls. Focus stays where it was, unless the user's focus was inside the old `#comments` element.
-In that case focus moves to the new fragment (or to the counterpart of the element the user was in),
-so the user is not dropped at the `<body>`.
+In that case focus moves to the counterpart of the element the user was in, or to the new fragment
+if there is none, so the user is not dropped at the `<body>`.
 
 Both behaviors are controlled by the `[up-scroll]` and `[up-focus]` attributes
 (or the `{ scroll }` and `{ focus }` options in JavaScript).
@@ -94,6 +94,9 @@ interacted with the keyboard, and with `.up-focus-hidden` after a mouse or touch
 
 Style these classes in your CSS to show rings for keyboard users only.
 Unpoly's default stylesheet already removes the outline from `.up-focus-hidden` elements.
+
+You can change which elements get which class in `up.viewport.config.autoFocusVisible`,
+or override it for a single link with [`[up-focus-visible]`](/up-follow#up-focus-visible).
 
 <p class="read-more"><a href="/focus-visibility">Read more: Focus ring visibility</a></p>
 

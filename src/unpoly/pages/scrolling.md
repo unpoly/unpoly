@@ -194,6 +194,9 @@ Set `[up-scroll="restore"]` to restore the last known scroll positions for the u
 Before every fragment update, Unpoly saves the scroll positions for the current URL.\
 You can prevent this by setting [`[up-save-scroll="false"]`](/up-follow#up-save-scroll).
 
+Scroll positions are remembered for each layer until the next full page load.
+When no positions are known for the URL, nothing scrolls. Add a fallback with `[up-scroll="restore, top"]`.
+
 When the user presses the back button, Unpoly restores scroll positions the same way.
 See [[restoring-history]].
 
