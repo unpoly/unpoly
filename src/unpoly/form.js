@@ -76,7 +76,7 @@ up.form = (function() {
       default and need not be added.
 
       Add a selector to [register any element as a field](/custom-form-fields#registering).
-      Matching elements must provide a `value` getter.
+      Matching elements must have a `value` property.
 
     @param {string} [config.submitButtonSelectors]
       An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.

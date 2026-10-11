@@ -6,11 +6,11 @@ in Unpoly's form features the same way a native `<input>` or `<select>` does.
 There are four ways to build one. They differ in how the value
 reaches the server, and in how much Unpoly needs to know about your control.
 
-| Pattern | Needs JavaScript | Submitted | Watched, validated, switched | Disabled |
+| Pattern | Needs JS | Submitted | Watched, validated, switched | Disabled |
 |---|---|---|---|---|
 | [A hidden native field](#hidden-field) | No | Yes | Yes | Yes |
-| [A form-associated element](#form-associated) | Yes | Yes | With a `value` getter | Yes |
-| [A registered element](#registering) | Yes | With a `value` getter | With a `value` getter | Yes |
+| [A form-associated element](#form-associated) | Yes | Yes | With `value` prop | Yes |
+| [A registered element](#registering) | Yes | With `value` prop | With `value` prop | Yes |
 | [A `formdata` listener](#formdata) | Yes | Yes | No | No |
 
 If you can keep a native field in the form, do. It is the only pattern where nothing about
@@ -97,7 +97,7 @@ for free.
 > A form-associated element is only submitted if it calls `setFormValue()`. Declaring
 > `formAssociated` alone makes the browser aware of your element, but with no value to send.
 
-Unpoly reads your element's value through a `value` getter, because a script cannot read back
+Unpoly reads your element's value through its `value` property, because a script cannot read back
 what you passed to `setFormValue()`. Emit a `change` event whenever the value changes, so
 watchers and validations notice it.
 
@@ -105,7 +105,7 @@ watchers and validations notice it.
 ## <em class="heading-prefix">Option 3</em> Registering any element as a field {#registering}
 
 Any element can act as a field, even a plain `<div>`. Tell Unpoly which elements to treat as
-fields, and give them a `value` getter with a [compiler](/up.compiler):
+fields, and give them a `value` property with a [compiler](/up.compiler):
 
 ```html
 <div class="rating" name="stars"></div>
@@ -115,13 +115,12 @@ fields, and give them a `value` getter with a [compiler](/up.compiler):
 up.form.config.fieldSelectors.push('.rating') // mark: fieldSelectors
 
 up.compiler('.rating', function(rating) {
-  let value = ''
-  Object.defineProperty(rating, 'value', { get: () => value }) // mark: value
+  rating.value = '' // mark: rating.value
 
   for (let stars of ['1', '2', '3', '4', '5']) {
     let button = up.element.affix(rating, 'button', { type: 'button', text: '★' })
     button.addEventListener('click', () => {
-      value = stars
+      rating.value = stars
       up.emit(rating, 'change') // let watchers and validations see the change
     })
   }
@@ -131,7 +130,7 @@ up.compiler('.rating', function(rating) {
 Unpoly then treats the `<div>` as a field everywhere: it is submitted, watched,
 validated, switched and disabled. Its name comes from the `[name]` attribute, as on an `<input>`.
 
-The browser knows nothing about this element, so Unpoly uses the `value` getter to submit it.
+The browser knows nothing about this element, so Unpoly uses the `value` property to submit it.
 Emit a `change` event whenever the value changes.
 
 > [tip]
