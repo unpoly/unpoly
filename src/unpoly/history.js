@@ -309,12 +309,14 @@ up.history = (function() {
   up.history.isLocation('/other') // result: false
   ```
 
-  By default, a trailing `#hash` will be ignored for the comparison. A `?query` string will not:
+  By default, a trailing `#hash` and a `?query` string are considered for the comparison.
+  To ignore the `#hash`, pass `{ hash: false }`:
 
   ```js
   location.pathname // => '/path'
 
-  up.history.isLocation('/path#hash') // result: true
+  up.history.isLocation('/path#hash') // result: false
+  up.history.isLocation('/path#hash', { hash: false }) // result: true
   up.history.isLocation('/path?query') // result: false
   ```
 
@@ -322,7 +324,7 @@ up.history = (function() {
   will match:
 
   ```js
-  location.hostname // result: '/current-host'
+  location.hostname // result: 'current-host'
   location.pathname // => '/foo'
 
   up.history.isLocation('/foo') // result: true
@@ -546,7 +548,7 @@ up.history = (function() {
   ```html
   <link rel="canonical" href="https://example.com/dresses/green-dresses"> <!-- mark-line -->
   <meta name="description" content="About the AcmeCorp team"> <!-- mark-line -->
-  <meta prop="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
+  <meta property="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
   <script src="/assets/app.js"></script>
   <link rel="stylesheet" href="/assets/app.css">
   ```
@@ -735,7 +737,7 @@ up.history = (function() {
   ... will be transformed to:
 
   ```html
-  <a href="/default" up-follow up-href="/previous-page" up-scroll="restore" up-follow>
+  <a href="/default" up-follow up-href="/previous-page" up-scroll="restore">
     Go back
   </a>
   ```

@@ -189,7 +189,7 @@ up.protocol = (function() {
     def create
       user_params = params[:user].permit(:email, :password)
       @user = User.new(user_params)
-      if @user.save?
+      if @user.save
         sign_in @user
       else
         render 'form', status: :unprocessable_entity
@@ -655,13 +655,13 @@ up.protocol = (function() {
   <form action="/users">
 
     <fieldset>
-      <label for="email" up-validate>E-mail</label> <!-- mark: up-validate -->
-      <input type="text" id="email" name="email">
+      <label for="email">E-mail</label>
+      <input type="text" id="email" name="email" up-validate> <!-- mark: up-validate -->
     </fieldset>
 
     <fieldset>
-      <label for="password" up-validate>Password</label> <!-- mark: up-validate -->
-      <input type="password" id="password" name="password">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" up-validate> <!-- mark: up-validate -->
     </fieldset>
 
     <button type="submit">Register</button>
@@ -791,7 +791,7 @@ up.protocol = (function() {
 
   ```http
   Content-Type: text/html
-  X-Up-Open-Layer: { target: '#menu', mode: 'drawer', animation: 'move-to-right' }
+  X-Up-Open-Layer: { target: '#menu', mode: 'drawer', animation: 'fade-in' }
 
   <div id="menu">
     Overlay content
