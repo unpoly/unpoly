@@ -64,6 +64,7 @@ reporting its value to the browser:
 ```js
 class DatePicker extends HTMLElement {
   static formAssociated = true // mark: formAssociated
+  #value = ''
 
   constructor() {
     super()
@@ -71,13 +72,18 @@ class DatePicker extends HTMLElement {
   }
 
   get value() {
-    return this.getAttribute('value')
+    return this.#value
   }
 
   set value(newValue) {
-    this.setAttribute('value', newValue)
+    this.#value = newValue
     this.internals.setFormValue(newValue) // mark: setFormValue
-    this.dispatchEvent(new Event('change', { bubbles: true }))
+  }
+
+  // Called when the user picks a day in the calendar sheet
+  onDayPicked(day) {
+    this.value = day
+    this.dispatchEvent(new Event('change', { bubbles: true })) // mark: change
   }
 }
 
