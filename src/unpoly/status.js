@@ -88,8 +88,8 @@ up.status = (function() {
   For example, the following preview accepts a `{ size }` option to show a spinner of varying size:
 
   ```js
-  up.preview('spinner', function(preview, { width = 50 }) {
-    let spinner = up.element.createFromSelector('img', { src: 'spinner.gif', width })
+  up.preview('spinner', function(preview, { size = 50 }) {
+    let spinner = up.element.createFromSelector('img', { src: 'spinner.gif', width: size })
     preview.insert(preview.fragment, spinner)
   })
   ```
@@ -352,7 +352,7 @@ up.status = (function() {
   ```html
   <a href="/path" up-target="#target" up-placeholder="<p>Loading…</p>">Show story</a> <!-- mark: up-placeholder="<p>Loading…</p>" -->
 
-  <div id="#target">
+  <div id="target">
     Old content
   </div>
   ```
@@ -515,8 +515,8 @@ up.status = (function() {
 
   ```html
   <nav class="main-nav">
-    <a href="/companies" data-section="companies"> <!-- mark: data-section="companies"-->
-    <a href="/users" data-section="users"> <!-- mark: data-section="users"-->
+    <a href="/companies" data-section="companies">Companies</a> <!-- mark: data-section="companies"-->
+    <a href="/users" data-section="users">Users</a> <!-- mark: data-section="users"-->
   </nav>
   ```
 
@@ -541,8 +541,8 @@ up.status = (function() {
 
   ```js
   up.macro('.main-nav a', function(link, { section }) {
-    let subLinks = document.querySelectorAll(`.sub-nav[data-section="${section}"]`)
-    let subURLs = up.util.map(subLinks, 'href')
+    let subLinks = document.querySelectorAll(`.sub-nav[data-section="${section}"] a`)
+    let subURLs = up.util.map(subLinks, (subLink) => subLink.getAttribute('href'))
     link.setAttribute('up-alias', subURLs.join())
   })
   ```

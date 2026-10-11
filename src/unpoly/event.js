@@ -381,7 +381,7 @@ up.event = (function() {
   ### Example
 
   ```js
-  up.on('click', 'link.disabled', function(event) {
+  up.on('click', 'a.disabled', function(event) {
     up.event.halt(event)
   })
   ```
@@ -450,7 +450,7 @@ up.event = (function() {
 
   ### Example
 
-  This button will emit a `menu:open` event when pressed:
+  This button will emit a `user:select` event when pressed:
 
   ```html
   <button type="button" up-emit='user:select'>Alice</button>

@@ -358,8 +358,8 @@ up.script = (function() {
 
   ```html
   <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 1</a>
-  <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 2</a>
-  <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 3</a>
+  <a href="/page2" up-layer="new modal" up-class="warning" up-animation="shake">Page 2</a>
+  <a href="/page3" up-layer="new modal" up-class="warning" up-animation="shake">Page 3</a>
   ```
 
   We would much rather define a new `[shake-modal]` attribute that lets us
@@ -522,8 +522,8 @@ up.script = (function() {
   ```js
   let fn = (element) => console.log('Element %o was destroyed', element)
 
-  for (let element of document.querySelector('div')) {
-    up.destructor(fn)
+  for (let element of document.querySelectorAll('div')) {
+    up.destructor(element, fn)
   }
   ```
 
@@ -614,8 +614,8 @@ up.script = (function() {
   and emit an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event):
 
   ```js
-  window.addEventListener('error', function(error) {
-    alert("Got an error " + error.name)
+  window.addEventListener('error', function(event) {
+    alert("Got an error " + event.error.name)
   })
 
   up.hello(element)
@@ -640,6 +640,7 @@ up.script = (function() {
 
   ```js
   let textarea = up.element.createFromHTML('<textarea class="wysiwyg"></textarea>')
+  document.body.append(textarea)
   await up.hello(textarea) // mark: await
   // chip: WYSIWYG editor is now initialized
   ```
@@ -832,9 +833,9 @@ up.script = (function() {
 
   ```js
   let data = up.data('.google-map')
-  data[0].lat // result: 48.36
-  data[0].lng // result: 10.99
-  data[0].title // result: 'Friedberg'
+  data.pins[0].lat // result: 48.36
+  data.pins[0].lng // result: 10.99
+  data.pins[0].title // result: 'Friedberg'
   ```
 
   @selector [up-data]
