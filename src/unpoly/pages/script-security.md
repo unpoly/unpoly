@@ -43,7 +43,7 @@ These generally work like [`[onclick]`](https://www.w3schools.com/jsref/event_on
 <a
   href="/path"
   up-follow
-  up-on-loaded="console.log('Received response', response)"> <!-- mark: up-on-loaded -->
+  up-on-loaded="console.log('Received response', event.response)"> <!-- mark: up-on-loaded -->
   Click link
 </a>
 
@@ -110,11 +110,11 @@ in the `<head>` of the initial page load:
 Now only callbacks with a matching nonce will be executed:
 
 ```html
-<a href="/path" up-on-loaded="nonce-secret123 console.log('Hi world')">
+<a href="/path" up-follow up-on-loaded="nonce-secret123 console.log('Hi world')">
   ✔ Callback will run
 </a>
 
-<a href="/path" up-on-loaded="nonce-wrong789 console.log('Hi world')">
+<a href="/path" up-follow up-on-loaded="nonce-wrong789 console.log('Hi world')">
   ❌ Callback will NOT run
 </a>
 ```

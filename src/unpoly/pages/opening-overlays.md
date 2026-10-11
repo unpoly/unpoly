@@ -164,7 +164,7 @@ with render options:
 
 ```http
 Content-Type: text/html
-X-Up-Open-Layer: { target: '#menu', mode: 'drawer', animation: 'move-to-right' }
+X-Up-Open-Layer: { target: '#menu', mode: 'drawer', animation: 'fade-in' }
 
 <div id="menu">
   Overlay content
