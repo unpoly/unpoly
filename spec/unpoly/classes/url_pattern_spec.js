@@ -90,6 +90,13 @@ describe('up.URLPattern', function() {
       expect(pattern.test('/users/new')).toBe(false)
     })
 
+    it('matches a named number segment followed by a wildcard', function() {
+      const pattern = new up.URLPattern('/users/$id/*')
+      expect(pattern.test('/users/123/edit')).toBe(true)
+      expect(pattern.test('/users/new/edit')).toBe(false)
+      expect(new up.URLPattern('/users/$id').test('/users/123/edit')).toBe(false)
+    })
+
     describe('multiple patterns', function() {
 
       it('returns true if the given URL test either of two space-separated URLs', function() {

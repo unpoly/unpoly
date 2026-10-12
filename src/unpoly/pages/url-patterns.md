@@ -80,13 +80,22 @@ up.layer.open({ acceptLocation: "/users/*" })
 
 ### Numeric-only wildcards
 
-The dollar sign (`$`) will match any digit (`0-9`), or a series of digits:
+A dollar sign (`$`) followed by a name will match one or more digits (`0-9`):
 
 ```text
-/users/$
+/users/$id
 ```
 
-The above URL pattern will match `/users/123`, `/users/123/edit`, but not `/users/new`.
+The above URL pattern will match `/users/123`, but not `/users/new` or `/users/123/edit`.
+The value is also captured, see [Capturing number segments](#capturing-number-segments) below.
+
+To also match URLs underneath, append a wildcard:
+
+```text
+/users/$id/*
+```
+
+The above URL pattern will match `/users/123/edit`.
 
 
 ## Matching one of multiple alternatives
