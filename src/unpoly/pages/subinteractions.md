@@ -138,7 +138,10 @@ See [[closing-overlays#using-the-discarded-response]].
 Another common callback reloads the options of a `<select>` and selects the new record:
 
 ```html
-<select name="company">...</select>
+<fieldset>
+  <label for="company">Company</label>
+  <select id="company" name="company">...</select>
+</fieldset>
 
 <a href="/companies/new"
   up-layer="new"
@@ -148,8 +151,8 @@ Another common callback reloads the options of a `<select>` and selects the new 
 </a>
 ```
 
-This uses `up.validate()` to re-render the select from the server, as if the user
-had already picked the new company. The form is not saved by this.
+This uses `up.validate()` to re-render the select's [form group](/up-form-group) from the server,
+as if the user had already picked the new company. The form is not saved by this.
 
 
 ### Navigating away
