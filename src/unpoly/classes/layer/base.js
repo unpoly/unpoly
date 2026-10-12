@@ -893,17 +893,19 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  Creates an element with the given `selector` and appends it to this layer's
-  [outmost element](/up.Layer.prototype.element).
+  Creates an element with the given `selector` and appends it to this layer's content.
+
+  For the [root layer](/up.layer.root) the element is appended to the `<body>`.
+  For an overlay it is appended to the overlay's top-level content element, like its `<main>`.
 
   Also see `up.element.affix()`.
 
   ### Example
 
   ```js
-  layer = await up.layer.open()
+  layer = await up.layer.open({ content: '<main></main>' })
   element = layer.affix('.klass')
-  element.parentElement // returns 'main'
+  element.parentElement // returns the <main> element
   element.className // returns 'klass'
   ```
 
