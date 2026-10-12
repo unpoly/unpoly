@@ -1424,6 +1424,14 @@ describe('up.script', function() {
           expect(window.callbackSpy).toHaveBeenCalledWith('value1', 'value2')
         })
 
+        it('exposes properties of the first arg with { expandObject } option when the function is called again', function() {
+          let code = 'nonce-specs-nonce window.callbackSpy(prop1, prop2)'
+          let fn = up.script.parseCallback(code, { expandObject: ['prop1', 'prop2'] })
+          fn({ prop1: 'first1', prop2: 'first2' })
+          fn({ prop1: 'second1', prop2: 'second2' })
+          expect(window.callbackSpy.calls.allArgs()).toEqual([['first1', 'first2'], ['second1', 'second2']])
+        })
+
         it('allows to configure arg names with { argNames } option', function() {
           let code = 'nonce-specs-nonce window.callbackSpy(arg1, arg2)'
           let fn = up.script.parseCallback(code, { argNames: ['arg1', 'arg2'] })

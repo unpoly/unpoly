@@ -1074,14 +1074,16 @@ up.script = (function() {
   function parseCallback(code, { argNames = ['event'], expandObject = false } = {}) {
     // Return an unbound function so callers can bind to an object of their choice.
     return function(...argValues) {
+      let callArgNames = argNames
+
       if (expandObject) {
         let object = argValues[0]
-        argNames = [...argNames, ...expandObject]
+        callArgNames = [...argNames, ...expandObject]
         argValues = [object, ...Object.values(u.pick(object, expandObject))]
       }
 
       const nonceableCallback = up.NonceableCallback.fromString(code)
-      const evalEnv = { thisContext: this, argNames, argValues }
+      const evalEnv = { thisContext: this, argNames: callArgNames, argValues }
       return new up.ScriptGate().evalCallback(nonceableCallback, evalEnv)
     }
   }
