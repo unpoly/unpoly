@@ -42,8 +42,7 @@ up.RenderResult = class RenderResult {
 
   ```js
   let result = await up.render({ target: ':main' })
-  result.renderOptions.target // result: ":main"
-  result.target               // result: "[up-main='']"
+  result.target // result: "[up-main='']"
   ```
 
   If any `[up-hungry]` elements were added to the render pass, they
