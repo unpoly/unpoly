@@ -354,7 +354,8 @@ up.script = (function() {
 
   ## Example
 
-  You will sometimes find yourself setting the same combination of UJS attributes again and again:
+  You will sometimes find yourself setting the same combination of UJS attributes again and again.
+  Here every link opens a modal with a [custom animation](/up.animation) `shake`:
 
   ```html
   <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 1</a>

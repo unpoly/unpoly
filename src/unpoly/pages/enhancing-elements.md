@@ -228,7 +228,7 @@ compiled afterwards. A regular compiler may set such attributes too late,
 e.g. when the attribute is itself processed by a compiler, like `[up-poll]`.
 
 Macros are useful to define a shorthand for a combination of attributes
-that you keep repeating:
+that you keep repeating. This macro opens a modal with a [custom animation](/up.animation) `shake`:
 
 ```js
 up.macro('[shake-modal]', function(link) {
