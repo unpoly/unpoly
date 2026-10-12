@@ -648,8 +648,8 @@ up.script = (function() {
   The fulfillment value is the same element that was passed as an argument:
 
   ```js
-  let html = '<textarea class="wysiwyg"></textarea>'
-  let textarea = await up.hello(up.element.createFromHTML(html))
+  let textarea = up.element.affix(document.body, 'textarea.wysiwyg')
+  let compiled = await up.hello(textarea) // compiled === textarea
   ```
 
   @function up.hello
