@@ -100,6 +100,14 @@ extendDescribe('up.status', function() {
         expect($otherLink).not.toHaveClass('up-current')
       })
 
+      it("marks a link as .up-current if its [up-alias] is a full URL with the page's own origin", function() {
+        replaceURL('/foo')
+        const nav = fixture('div[up-nav]')
+        const link = e.affix(nav, 'a[href="/x"]', { 'up-alias': `${location.origin}/foo` })
+        up.hello(nav)
+        expect(link).toHaveClass('up-current')
+      })
+
       it('does not throw if the current location does not match an [up-alias] wildcard (bugfix)', function() {
         const inserter = () => helloFixture('a[up-nav][up-alias="/qqqq*"]')
         expect(inserter).not.toThrow()

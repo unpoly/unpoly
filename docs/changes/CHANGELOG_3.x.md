@@ -55,6 +55,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
 - Pressing the Space key now activates a [faux button](/faux-interactive-elements), e.g. an element with [`[up-emit]`](/up-emit) or [`[up-clickable]`](/up-clickable). Formerly only the Enter key worked.
 - An [`[up-on-offline]`](/up-follow#up-on-offline) snippet now receives the `up:fragment:offline` event as `event`, so it can call `event.retry()`. It used to receive the event under the name `error`.
 - An [`X-Up-Expire-Cache: false`](/X-Up-Expire-Cache) response header now expires no further cache entries, like [`X-Up-Evict-Cache: false`](/X-Up-Evict-Cache). It used to be treated as a URL pattern matching `/false`. As before, the header cannot undo the expiration that a non-GET request triggers before the server responds.
+- [URL patterns](/url-patterns) now match full URLs on the page's own origin, like `https://example.com/users/*`. Such patterns never matched before.
 
 
 3.14.3

@@ -156,6 +156,9 @@ up.util = (function() {
   }
 
   function matchableURLPatternAtom(patternAtom) {
+    // Convert "https://our-host/foo" to "/foo", like matchableURL() normalizes same-origin URLs
+    if (patternAtom.startsWith(APP_ORIGIN + '/')) patternAtom = patternAtom.slice(APP_ORIGIN.length)
+
     // Convert "/foo/" to ["/foo/", "/foo"]
     if (patternAtom.endsWith('/')) return [patternAtom, patternAtom.slice(0, -1)]
 
@@ -174,6 +177,7 @@ up.util = (function() {
   // https://jsben.ch/kBATt
   const APP_PROTOCOL = location.protocol
   const APP_HOSTNAME = location.hostname
+  const APP_ORIGIN = location.origin
 
   function isCrossOrigin(urlOrAnchor) {
     // If the given URL does not contain a hostname we know it cannot be cross-origin.

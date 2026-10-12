@@ -121,6 +121,35 @@ describe('up.URLPattern', function() {
         expect(pattern.test('/baz')).toBe(false)
       })
     })
+
+    describe('patterns with a protocol and host', function() {
+
+      it("matches a pattern with the page's own origin", function() {
+        const pattern = new up.URLPattern(`${location.origin}/foo/bar`)
+        expect(pattern.test('/foo/bar')).toBe(true)
+        expect(pattern.test(`${location.origin}/foo/bar`)).toBe(true)
+        expect(pattern.test('/foo/baz')).toBe(false)
+      })
+
+      it("matches a pattern with the page's own origin and a wildcard", function() {
+        const pattern = new up.URLPattern(`${location.origin}/foo/*`)
+        expect(pattern.test('/foo/bar')).toBe(true)
+        expect(pattern.test('/foo')).toBe(true)
+        expect(pattern.test('/bar')).toBe(false)
+      })
+
+      it('only matches URLs on the host of a pattern with another origin', function() {
+        const pattern = new up.URLPattern('https://other.com/foo')
+        expect(pattern.test('https://other.com/foo')).toBe(true)
+        expect(pattern.test('/foo')).toBe(false)
+      })
+
+      it("excludes URLs matching a minus-prefixed pattern with the page's own origin", function() {
+        const pattern = new up.URLPattern(`/foo/* -${location.origin}/foo/bar`)
+        expect(pattern.test('/foo/bar')).toBe(false)
+        expect(pattern.test('/foo/baz')).toBe(true)
+      })
+    })
   })
 
   describe('#recognize', function() {
