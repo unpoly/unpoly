@@ -83,7 +83,7 @@ Not yet numbered; to be walked through after the current list. All three persona
 
 ## Code example check findings (2026-10-11; ~1,150 examples, ~60 fixes pushed in 10 commits 80d1c6b5b..3ff80b8c3; log in session scratchpad)
 Not yet numbered. Code bug (lean: fix + spec, strong):
-- E0 script.js parseCallback: with expandObject, the closure's `argNames` is reassigned on every call, so a parsed callback called twice gets duplicate arg names (layer/value/response undefined). Likely hits onAccepted/onDismissed etc.
+- E0 → FIXED (E0A). script.js parseCallback: with expandObject, the closure's `argNames` is reassigned on every call, so a parsed callback called twice gets duplicate arg names (layer/value/response undefined). Likely hits onAccepted/onDismissed etc.
 Questions:
 - E1 url-patterns.md:81-89 numeric wildcard `/users/$` doesn't work as documented (bare `$` literal; reproduced).
 - E2 form.js:2026,2057 `params.require(:user)` but fields aren't nested.
