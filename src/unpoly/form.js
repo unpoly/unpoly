@@ -2022,7 +2022,7 @@ up.form = (function() {
 
     def create
       # Instantiate model from request parameters
-      user_params = params.require(:user).permit(:email, :password)
+      user_params = params.permit(:email, :password)
       @user = User.new(user_params)
 
       if @user.save
@@ -2053,7 +2053,7 @@ up.form = (function() {
 
     def create
       # Instantiate model from request parameters
-      user_params = params.require(:user).permit(:email, :password)
+      user_params = params.permit(:email, :password)
       @user = User.new(user_params)
 
       if request.headers['X-Up-Validate'] # mark-line
