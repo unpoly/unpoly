@@ -2164,7 +2164,9 @@ up.fragment = (function() {
   Take this element:
 
   ```html
-  <a href="/">Homepage</a>
+  <section>
+    <h2>Latest news</h2>
+  </section>
   ```
 
   Unpoly cannot generate a good CSS selector for this element:
@@ -2177,14 +2179,16 @@ up.fragment = (function() {
   We can improve this by assigning an `[up-id]`:
 
   ```html
-  <a href="/" up-id="link-to-home">Homepage</a>
+  <section up-id="latest-news">
+    <h2>Latest news</h2>
+  </section>
   ```
 
   The attribute value is used to create a better selector:
 
   ```js
   up.fragment.toTarget(element)
-  // returns '[up-id="link-to-home"]'
+  // returns '[up-id="latest-news"]'
   ```
 
   @selector [up-id]
