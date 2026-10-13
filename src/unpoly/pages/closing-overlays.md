@@ -71,8 +71,10 @@ up.on('up:layer:dismiss', function(event) {
 })
 ```
 
-To keep only one particular overlay open, pass an [`{ onDismiss }`](/up.layer.open#options.onDismiss) callback
-or set an [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attribute on the opening link instead.
+To keep only one particular overlay open, set an [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attribute
+on the opening link, or pass an [`{ onDismiss }`](/up.layer.open#options.onDismiss) callback, and call `event.preventDefault()` in it.
+Mind the tense: `[up-on-dismiss]` runs *before* the overlay closes,
+<code>[up-on-dismiss<b>ed</b>]</code> (past tense) runs *after* it closed.
 
 When an overlay closes because a layer below it is [updated](#peeling), `event.value` is `":peel"`,
 so a listener can treat that case differently.
