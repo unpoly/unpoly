@@ -96,7 +96,7 @@ Questions:
 - E9 → FIXED 2026-10-12. `up-animation="shake"` isn't built in.
 - E10 → FIXED.
 - E11 → FIXED 2026-10-12. [up-alias] absolute same-origin URLs never match.
-- E12 prose bits: script.js broken link and `Array<string` FIXED; still open: params.js fromURL @return; response.js #header text.
+- E12 → FIXED 2026-10-13. prose bits: script.js broken link and `Array<string` FIXED; still open: params.js fromURL @return; response.js #header text.
 
 ## Status notes (no decision needed)
 - 2026-10-11: code fixes pushed: dfa0712e0 (Q1 validation feedback default), aea7978a1 (Q3 configured fields in disabled fieldset, changelog bullet extended), 714a4b519 (Space key). Full suite 4329 passed, 1 failed: link_target_spec.js:752 transition transform spec, passes alone and in its group (looks flaky, unrelated).
