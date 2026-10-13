@@ -2,8 +2,11 @@
 
 Moves guide pages from `/caching` to `/learn/caching` and API symbols from `/up.render`
 to `/api/up.render`. Old root URLs keep working through redirects. Rehearsed as a dry run
-on 2026-10-11 in throwaway worktrees (branches `url-move-dryrun` in both repos); nothing
-from that run is merged.
+on 2026-10-11 and again on 2026-10-13 in throwaway worktrees (branches `url-move-dryrun`
+in both repos, pushed); nothing from those runs is merged.
+
+The script lives only on unpoly-site's `url-move-dryrun` branch (commit "Add the URL
+move script"), so changes to it go there; launch day rebases that branch.
 
 ## What does what
 
@@ -20,14 +23,21 @@ Two kinds of change, handled differently:
 - **The script handles what is written as a URL.** `script/url_move.rb` in unpoly-site
   (`bundle exec rake docs:url_move`) loads the site's model and, in `../unpoly`:
   - rewrites `[label](/path)` and `href="/path"` outside code blocks and code spans,
-    and `[[=base_url]]/path` and `https://unpoly.com/path` everywhere. Only paths of
+    and `[[=base_url]]/path`, `https://unpoly.com/path` and `unpoly.com/path` spelled
+    out as text (the README's link label) everywhere. In `.js` files it rewrites only
+    comments: URLs in strings (two error messages) ship with the release before the
+    site moves, and the old URL redirects anyway. Only paths of
     documents are touched; `/changes/...`, `/support`, `/images/...`, unknown paths and
     anchor-only links are left alone. Files: `src/**`, `docs/changes/*.md`, `README.md`,
     `CHANGELOG.md`, plus `docs/contributing/*.md`, `dist/README.md`, `dist/CHANGELOG.md`
     and `.github/**/*.yml`, where it also rewrites inside code (they show the syntax).
   - writes one exact redirect per old document path at the top of
     `src/unpoly-migrate/.htaccess`, between `# BEGIN URL MOVE` and `# END URL MOVE`:
-    `RedirectMatch 301 ^/up\.render/?$ /api/up.render`.
+    `RedirectMatch 301 ^/up\.render/?$ /api/up.render`. Every document that moves gets
+    one, and `rake docs:check_urls` fails if one is missing.
+  - lists the rules for `/install` and `/skill` first in that block, under a comment
+    that marks them as permanent (see "Permanent short URLs"), and aborts if either
+    would go missing.
   - retargets every hand-written `RedirectPermanent` (in that file and in the site's
     `source/.htaccess.erb`) to its final page, following chains, so each old URL takes
     one hop.
@@ -56,8 +66,9 @@ the two repositories are siblings (`unpoly`, `unpoly-site`).
    git rebase docs-rework
    ```
 
-   The branch holds five commits (`git log docs-rework..url-move-dryrun`): the model
-   change, the script, the landing page and example links, and two spec commits. The
+   The branch holds six commits (`git log docs-rework..url-move-dryrun`): the model
+   change, the script, the landing page and example links, two spec commits, and the
+   script's 2026-10-13 changes (permanent short URLs, comments only in `.js`). The
    script commit also contains the dry run's rewrite of `source/.htaccess.erb`. If that
    conflicts, take the `docs-rework` side: the script rewrites it again in step 3.
 
@@ -104,7 +115,8 @@ the two repositories are siblings (`unpoly`, `unpoly-site`).
 
    Then spot-check redirects against real Apache (see "Apache check" below): a few old
    symbols (`/up.render`, `/up-follow`, `/up:link:follow`, `/up.$compiler`), old
-   guides (`/caching`, `/start/overview`, `/start/links`), old aliases (`/tutorial`,
+   guides (`/caching`, `/start/overview`, `/start/links`), the permanent short URLs
+   (`/install`, `/skill`), old aliases (`/tutorial`,
    `/cache`, `/install/rails`, `/layer-terminology`), and pages that stay
    (`/changes`, `/support`, `/learn`, `/api`). Each old URL must answer 301 with the
    final page as Location, and that page 200.
@@ -129,6 +141,14 @@ docker stop urlmove-apache
 with a `site.conf` that says `Listen 8089` and serves `/srv/build` in a
 `<VirtualHost *:8089>` with `AllowOverride All`.
 
+## Permanent short URLs
+
+`/install` and `/skill` are printed on slides and in talks. They move to
+`/learn/install` and `/learn/skill` like every other page, and their redirects are
+**permanent: never remove them**, even if the other old paths are retired one day.
+Browsers keep the fragment across a redirect, so `/install#npm` lands on
+`/learn/install#npm`. (Decision 27X, 2026-10-13.)
+
 ## Dry-run numbers (2026-10-11)
 
 - 627 documents moved (83 to `/learn`, 544 to `/api`), 627 generated redirects.
@@ -143,6 +163,11 @@ with a `site.conf` that says `Listen 8089` and serves `/srv/build` in a
 - Replayed: after unpoly's `docs-rework` moved on, the dry run was redone by resetting
   the branch, running the script and cherry-picking the two manual commits. Both
   cherry-picks applied cleanly; the second script run changed nothing.
+- Rerun 2026-10-13 with decisions 27X, 28X and 29A: 628 documents (84 to `/learn`,
+  544 to `/api`), 3,295 links rewritten (the two error-message strings no longer, the
+  README label now), 140 hand-written redirects retargeted, none shadowed, 177 files
+  changed; the second run changed nothing. `rake docs:check_urls`: 78 published
+  addresses and 628 old paths resolve, 786 redirects take one hop.
 
 ## Rollback
 
@@ -165,10 +190,12 @@ with a `site.conf` that says `Listen 8089` and serves `/srv/build` in a
   slash already worked, and the old `/start/overview` gets its own exact rule.
 - **`$` in paths.** `up.$compiler` and `up.$macro` are escaped in the rule's pattern and
   target (`\$`), since Apache reads `$1` in a target as a backreference.
-- **Shadowed redirects.** `/up-href`, `/up.observe` and `/up.layer.context` are both a
+- **Shadowed redirects.** `/up-href`, `/up.observe` and `/up.layer.context` were both a
   documented (deprecated) symbol and the source of a hand-written redirect. The
-  document wins, as before: the generated rule comes first and sends them to their own
-  `/api/...` page. The hand-written rules are dead; delete them if you want.
+  document won, so the hand-written rules never fired. They are deleted on
+  `docs-rework` (decision 29A, dafc7b416), so the script's "Hand-written redirects
+  from a path that is also a document" list is empty now. If it lists something
+  again, delete that rule too.
 - **The site had hardcoded paths** the model did not reach: the landing page's "Get
   started" and "Learn more" links and its event diagram (`href="/<%= event %>"`), the
   search dialog's skill link, `/install#npm` and `/up.on` in `changes/upgrading`, the
@@ -179,15 +206,19 @@ with a `site.conf` that says `Listen 8089` and serves `/srv/build` in a
   model change found the rest as 25 broken links.
 - **Skill file names** were derived from the path; they now drop the `/learn`, `/api`
   and `/changes` prefix, so the skill's files keep their names.
-- **Link labels that spell a URL** are not links and are left alone, e.g. the README's
-  `[unpoly.com/skill](https://unpoly.com/learn/skill)` and the documentation guide's
-  table labels (fixed by hand in the cherry-picked commit).
-- **Old release notes** (`CHANGELOG_0.x`, `1.x`, `2.x`) link to symbols that no longer
-  exist (`/up.modal`, `/up.proxy`, ...). They are left alone and listed as "Root paths
-  left alone"; those notes are not link-checked.
+- **Link labels that spell a URL.** The script rewrites `unpoly.com/path` written as
+  text, which only the README's `[unpoly.com/skill](...)` label does (now
+  `unpoly.com/learn/skill`). The documentation guide's table labels are fixed by hand
+  in the cherry-picked commit.
+- **Old release notes** (`CHANGELOG_0.x`, `1.x`, `2.x`) get their links rewritten where
+  the target still exists (decision 30A). Links to symbols that no longer exist
+  (`/up.modal`, `/up.proxy`, ...) are left alone and listed as "Root paths left alone";
+  those notes are not link-checked.
 - **Library strings.** Two error messages in `src/unpoly/classes/change/` mention
-  `https://unpoly.com/failed-responses`; the script rewrites them to
-  `/learn/failed-responses`, which changes `dist/` on the next build.
+  `https://unpoly.com/failed-responses`. The release goes out before the site moves,
+  so a rewritten URL would 404 in between. The script leaves strings in `.js` files
+  alone and rewrites only comments (decision 28X); the old URL redirects after the
+  deploy.
 - **Markdown twins of old paths** (`/up.render.md`) take two hops (`.md` rule, then the
   page's redirect). No `.md` URL was ever public before this release, so nothing old
   is affected.
@@ -208,6 +239,7 @@ Not documents, so they stay where they are: `/` (landing), `/learn` and `/api` (
 `/menu/narrow`, `/index.md`, `/llms.txt`, `/skills/...`, `/agent-skills/...`,
 `/.well-known/agent-skills/...`, `/claude-plugins/...`, `/pagefind/...`, `/images/...`,
 `/examples/...`, `robots.txt`, and the assets. The `/install` page is a Learn page and
-moves to `/learn/install`; `/skill` moves to `/learn/skill`. Both keep redirects.
+moves to `/learn/install`; `/skill` moves to `/learn/skill`. Both keep permanent
+redirects (see "Permanent short URLs").
 
 The site has no sitemap and no canonical URLs, so there was nothing to adjust there.
