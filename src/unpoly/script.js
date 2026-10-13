@@ -136,14 +136,25 @@ up.script = (function() {
   let registeredMacros = []
 
   /*-
-  Registers a function to be called when a matching element is inserted into the DOM.
+  Registers a function to be called when Unpoly inserts a matching element.
 
   @learn-ref enhancing-elements
+
+  ## When compilers are called
+
+  A compiler is called for matching elements:
+
+  - on the initial page, when Unpoly [boots](/up.boot)
+  - in every new fragment that Unpoly renders
+  - in elements that you pass to [`up.hello()`](/up.hello)
+
+  Elements that other code inserts, e.g. a framework like React, are not compiled automatically.
+  See [compiling elements inserted by other code](/enhancing-elements#hello).
 
   ## Anatomy of a compiler
 
   This code registers a function that is called when an element with a `.foo` class
-  enters the DOM:
+  is inserted:
 
   ```js
   up.compiler('.foo', function(element, data, meta) {
