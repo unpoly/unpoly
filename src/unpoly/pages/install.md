@@ -3,6 +3,7 @@ Installation
 
 Unpoly is one JavaScript file and one CSS file that you load in your `<head>`.
 It has no dependencies and needs no build step.
+Compressed with gzip, the JavaScript weighs [[=size unpoly.min.js]] and the CSS [[=size unpoly.min.css]].
 
 Unpoly works with any language and any web framework. Your backend keeps rendering
 HTML and needs no additional software. Static sites work, too.
