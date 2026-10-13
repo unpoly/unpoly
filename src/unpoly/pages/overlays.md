@@ -70,8 +70,6 @@ To choose a different mode, append it to the `[up-layer]` attribute:
 ```
 
 You can change the default mode in `up.layer.config.mode`.
-Defaults for each mode are configured in `up.layer.config`,
-like `up.layer.config.drawer` for drawers or `up.layer.config.overlay` for all overlays.
 
 
 Closing with a result
