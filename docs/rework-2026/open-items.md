@@ -73,12 +73,12 @@ Branches `url-move-dryrun` exist locally in unpoly and unpoly-site (worktrees in
 ## Persona review findings (2026-10-11, full report: prepass/persona-review-2026-10-11.md)
 Not yet numbered; to be walked through after the current list. All three personas understood Unpoly's shape within ~5 pages; the start page's "Is Unpoly right for you?" did most of the work.
 - P1 No Turbo/Hotwire comparison anywhere; htmx comparison only on /. Suggests a Getting-started page "Coming from htmx or Turbo" (concept mapping + what Unpoly lacks).
-- P2 [up-validate] server work understated ("the one thing Unpoly asks of your backend" on /start/forms, "one convention" on /backend-integration); only /validation#backend says "don't save on X-Up-Validate".
+- P2 → DONE 2026-10-13. [up-validate] server work understated ("the one thing Unpoly asks of your backend" on /start/forms, "one convention" on /backend-integration); only /validation#backend says "don't save on X-Up-Validate".
 - P3 → DEFERRED 2026-10-12 (whole guide, incl. its four questions). Push/real-time never addressed. Henning wants a guide (no framework support). Draft + agent review: drafts/push-updates.md, drafts/push-updates-review.md, artifact https://claude.ai/artifact/8KYQWqVMqKQcpm6FNE1JfX. Open: (a) signal reloads element's child vs selector in message, (b) abort:false on signal reload, (c) own heading for token streaming, (d) placement in Live fragments after Hungry elements. → DONE 2026-10-13: /real-time-updates
-- P4 / overclaims Back: "restores the exact screen state" vs re-fetch + scroll/focus restore.
-- P5 up.compiler summary "called when a matching element is inserted into the DOM" reads like a MutationObserver.
-- P6 Optimistic rendering is a headline card on / but its page says experimental.
-- P7 Unpoly's own size is never stated (only unpoly-migrate.js 9.2 KB).
+- P4 → DONE 2026-10-13. / overclaims Back: "restores the exact screen state" vs re-fetch + scroll/focus restore.
+- P5 → DONE 2026-10-13. up.compiler summary "called when a matching element is inserted into the DOM" reads like a MutationObserver.
+- P6 → DONE 2026-10-13. Optimistic rendering is a headline card on / but its page says experimental.
+- P7 → DONE 2026-10-13. Unpoly's own size is never stated (only unpoly-migrate.js 9.2 KB).
 - P8 German MDN links → FIXED (unpoly util.js, unpoly-site repository.rb type autolinks).
 
 ## Code example check findings (2026-10-11; ~1,150 examples, ~60 fixes pushed in 10 commits 80d1c6b5b..3ff80b8c3; log in session scratchpad)
