@@ -102,7 +102,10 @@ company in an overlay, without leaving the half-completed form.
 The project form opens the company form, waits for the new record, and selects it:
 
 ```html
-<select name="company">...</select>
+<fieldset>
+  <label for="company">Company</label>
+  <select id="company" name="company">...</select>
+</fieldset>
 
 <a href="/companies/new"
   up-layer="new"
