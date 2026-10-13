@@ -80,6 +80,7 @@ learn:
         - lazy-loading
         - infinite-scrolling
         - polling
+        - real-time-updates
         - hungry-elements
         - flashes
 

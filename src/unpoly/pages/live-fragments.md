@@ -99,6 +99,8 @@ Also in this topic
 
 To load the next page of a long list when the user scrolls to its end, see [[infinite-scrolling]].
 
+To reload a fragment as soon as your server signals a change, see [[real-time-updates]].
+
 @page live-fragments
 @menu-title Overview
 @signature
