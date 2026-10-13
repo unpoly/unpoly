@@ -176,11 +176,11 @@ up.Response = class Response extends up.Record {
 
   The search for the header is case-insensitive.
 
-  Returns `undefined` if the given header name was not included in the response.
+  Returns `null` or `undefined` if the given header name was not included in the response.
 
   @function up.Response#header
   @param {string} name
-  @return {string|undefined}
+  @return {string|null|undefined}
     The value of the header.
   @stable
   */

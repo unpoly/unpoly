@@ -639,8 +639,8 @@ up.Params = class Params {
   @function up.Params.fromURL
   @param {string} url
     The URL from which to extract the query string.
-  @return {string|undefined}
-    The given URL's query string, or `undefined` if the URL has no query component.
+  @return {up.Params}
+    The params from the given URL's query string.
   @stable
   */
   static fromURL(url) {
