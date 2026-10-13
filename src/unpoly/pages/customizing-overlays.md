@@ -138,7 +138,7 @@ To use different [animations](/animation) for one overlay, set `[up-animation]` 
 attributes on the link that opens it:
 
 ```html
-<a href="/details" up-layer="new" up-animation="move-from-top" up-close-animation="move-to-bottom"> <!-- mark: up-animation="move-from-top" up-close-animation="move-to-bottom" -->
+<a href="/details" up-layer="new" up-animation="move-from-top" up-close-animation="move-to-top"> <!-- mark: up-animation="move-from-top" up-close-animation="move-to-top" -->
   Open details
 </a>
 ```
