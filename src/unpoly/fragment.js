@@ -1737,6 +1737,8 @@ up.fragment = (function() {
   /*-
   Replaces the given element with a fresh copy fetched from the server.
 
+  @learn-ref live-fragments
+
   By default, reloading is **not** considered a [user navigation](/navigation-defaults) and will not scroll, focus
   or update the browser location. You may change this with `{ navigate: true }`.
 
