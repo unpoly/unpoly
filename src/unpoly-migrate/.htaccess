@@ -24,8 +24,6 @@ RedirectPermanent /up.bus /up.event
 RedirectPermanent /up.bus.onEscape /up.event.onEscape
 RedirectPermanent /up.params /up.Params
 
-RedirectPermanent /up.layer.context /up.context
-
 RedirectPermanent /up.cache /caching
 RedirectPermanent /a-up-follow /up-follow
 RedirectPermanent /form-up-submit /up-submit
@@ -35,7 +33,6 @@ RedirectPermanent /form-up-observe /up-watch
 RedirectPermanent /input-up-observe /up-watch
 RedirectPermanent /form-up-autosubmit /up-autosubmit
 RedirectPermanent /input-up-autosubmit /up-autosubmit
-RedirectPermanent /up.observe /up.watch
 
 RedirectPermanent /server-errors /failed-responses
 RedirectPermanent /offline /network-issues
@@ -83,8 +80,6 @@ RedirectPermanent /config /attributes-and-options
 RedirectPermanent /attributes-options /attributes-and-options
 
 RedirectPermanent /a-up-emit /up-emit
-
-RedirectPermanent /up-href /faux-interactive-elements
 
 RedirectPermanent /script-up-boot-manual /up-boot-manual
 RedirectPermanent /a-up-alias /up-alias
