@@ -184,8 +184,8 @@ Form-wide options can be overridden at the field level:
 </form>
 ```
 
-You may also set options on any element containing fields.
-This is particularly useful for [watching a group of radio buttons](/up-watch#watching-radio-buttons):
+The feature attribute itself can sit on a container, too. Unpoly then watches all fields inside it.
+This is how you [watch a group of radio buttons](/up-watch#watching-radio-buttons):
 
 ```html
 <form action="/search">
