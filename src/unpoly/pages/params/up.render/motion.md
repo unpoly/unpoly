@@ -1,16 +1,16 @@
 @partial up.render/motion
 
 @param {string} [options.transition]
-  The name of a [transition](/up.motion) to morph between the old and new fragment.
+  The name of a [transition](/api/up.motion) to morph between the old and new fragment.
 
-  If you are [prepending or appending content](/targeting-fragments#appending-or-prepending),
+  If you are [prepending or appending content](/learn/targeting-fragments#appending-or-prepending),
   use the `{ animation }` option instead.
 
 @param {string} [options.animation]
-  The name of an [animation](/up.motion) to reveal a new fragment when
-  [prepending or appending content](/targeting-fragments#appending-or-prepending).
+  The name of an [animation](/api/up.motion) to reveal a new fragment when
+  [prepending or appending content](/learn/targeting-fragments#appending-or-prepending).
 
-  If you are [swapping a fragment](/targeting-fragments#swapping) (the default), use the `{ transition }` option instead.
+  If you are [swapping a fragment](/learn/targeting-fragments#swapping) (the default), use the `{ transition }` option instead.
 
 @param {number} [options.duration]
   The duration of the transition or animation (in milliseconds).

@@ -24,7 +24,7 @@ The controlling form field gets an `[up-switch]` attribute with a selector for t
 </select>
 ```
 
-The target elements use [`[up-show-for]`](/up-show-for) and [`[up-hide-for]`](/up-hide-for)
+The target elements use [`[up-show-for]`](/api/up-show-for) and [`[up-hide-for]`](/api/up-hide-for)
 attributes to declare for which values they are shown or hidden:
 
 ```html
@@ -58,7 +58,7 @@ for the fields to disable or enable:
 </select>
 ```
 
-The target fields use [`[up-enable-for]`](/up-enable-for) and [`[up-disable-for]`](/up-disable-for)
+The target fields use [`[up-enable-for]`](/api/up-enable-for) and [`[up-disable-for]`](/api/up-disable-for)
 attributes to declare for which values they are enabled or disabled:
 
 ```html
@@ -82,7 +82,7 @@ To switch for multiple values, separate them with a space or comma:
 </div>
 ```
 
-If your values might contain spaces, you may also serialize them as a [relaxed JSON](/relaxed-json) array:
+If your values might contain spaces, you may also serialize them as a [relaxed JSON](/api/relaxed-json) array:
 
 ```html
 <div class='level-dependent' up-show-for='["John Doe", "Jane Doe"]'> <!-- mark: up-show-for='["John Doe", "Jane Doe"]' -->
@@ -140,7 +140,7 @@ You may also match against the `[value]` attribute of the checkbox element:
 
 ### Array fields {#array-fields}
 
-When you have multiple checkboxes for a single [array field](/up.form.config#config.arrayParam),
+When you have multiple checkboxes for a single [array field](/api/up.form.config#config.arrayParam),
 set `[up-switch]` on an element containing all checkboxes:
 
 ```html
@@ -180,10 +180,10 @@ Use `[up-switch]` on a container for a radio button group:
 ## Changing the switched region {#region}
 
 By default the entire form is searched for matching elements.
-You can narrow or expand the search scope by setting an [`[up-switch-region]`](/up-switch#up-switch-region)
+You can narrow or expand the search scope by setting an [`[up-switch-region]`](/api/up-switch#up-switch-region)
 attribute on the controlling field.
 
-To match all elements within the current [layer](/up.layer), set the region to `:layer`:
+To match all elements within the current [layer](/api/up.layer), set the region to `:layer`:
 
 ```html
 <form method="post" action="/order">

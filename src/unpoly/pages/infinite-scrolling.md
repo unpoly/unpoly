@@ -2,8 +2,8 @@ Infinite scrolling
 ==================
 
 A long list can load its next page when the user scrolls to its end, without custom JavaScript.
-The "load more" link at the bottom is a [deferred link](/lazy-loading)
-that [loads when revealed](/lazy-loading#on-reveal), appends the next page to the list
+The "load more" link at the bottom is a [deferred link](/learn/lazy-loading)
+that [loads when revealed](/learn/lazy-loading#on-reveal), appends the next page to the list
 and replaces itself with a link to the page after that.
 
 
@@ -24,10 +24,10 @@ a link to the next page carries an `[up-defer="reveal"]` attribute:
 
 Note the following:
 
-- The link is a deferred element that loads [when it enters the viewport](/lazy-loading#on-reveal).
-- Its [`[up-target]`](/up-defer#up-target) names two fragments: the link itself (`#next-page`) and the list of pages (`#pages`).
-- Instead of [swapping](/targeting-fragments#swapping) the `#pages` container, the `:after` suffix
-  [appends](/targeting-fragments#appending-or-prepending) the children of the response's `#pages` to it.
+- The link is a deferred element that loads [when it enters the viewport](/learn/lazy-loading#on-reveal).
+- Its [`[up-target]`](/api/up-defer#up-target) names two fragments: the link itself (`#next-page`) and the list of pages (`#pages`).
+- Instead of [swapping](/learn/targeting-fragments#swapping) the `#pages` container, the `:after` suffix
+  [appends](/learn/targeting-fragments#appending-or-prepending) the children of the response's `#pages` to it.
 
 The link remains a standard hyperlink to `/items?page=2`, so every page has a URL that can be
 shared or indexed. This follows
@@ -95,7 +95,7 @@ Without an `[up-defer]` attribute, nothing more is loaded:
 ## Loading before the end is reached {#intersect-margin}
 
 By default the next page loads when the link becomes visible.
-To start loading earlier, set an [`[up-intersect-margin]`](/up-defer#up-intersect-margin) attribute
+To start loading earlier, set an [`[up-intersect-margin]`](/api/up-defer#up-intersect-margin) attribute
 with a number of pixels:
 
 ```html

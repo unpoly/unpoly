@@ -2,11 +2,11 @@ Preloading links
 ================
 
 Links can be preloaded before the user clicks them.
-When a preloaded link is clicked, the response is already [cached](/caching)
+When a preloaded link is clicked, the response is already [cached](/learn/caching)
 and the interaction feels instant.
 
 [Eager preloading](#on-insert) can also populate the cache to keep
-links [accessible while offline](/network-issues#offline-cache).
+links [accessible while offline](/learn/network-issues#offline-cache).
 
 
 Preloading on hover {#on-hover}
@@ -22,19 +22,19 @@ over it, set an `[up-preload]` attribute:
 By default Unpoly waits for 90 milliseconds of hovering before making the preload request.
 This prevents accidental preloading when the mouse moves over a link that the user doesn't intend to click.
 
-To change the delay, set an [`[up-preload-delay]`](/up-preload#up-preload-delay) attribute
+To change the delay, set an [`[up-preload-delay]`](/api/up-preload#up-preload-delay) attribute
 or configure `up.link.config.preloadDelay`. Increasing the delay will lower the load on your server,
 but will also make the interaction feel less instant.
 
 On touch devices preloading begins when the user places their finger on the link.
 
-To [preload all links on hover](/handling-all-links#preloading-all-links), configure `up.link.config.preloadSelectors`.
+To [preload all links on hover](/learn/handling-all-links#preloading-all-links), configure `up.link.config.preloadSelectors`.
 
 
 Eager preloading on insertion {#on-insert}
 ----------------------------
 
-To preload a link as soon as it appears in the DOM, set an [`[up-preload="insert"]`](/up-preload#up-preload) attribute.
+To preload a link as soon as it appears in the DOM, set an [`[up-preload="insert"]`](/api/up-preload#up-preload) attribute.
 
 This is useful for links with a high probability of being clicked, like a navigation menu:
 
@@ -43,14 +43,14 @@ This is useful for links with a high probability of being clicked, like a naviga
 ```
 
 When an eagerly preloading link is inserted multiple times, only a single request is made.
-All subsequent render passes will render from the [cache](/caching).
+All subsequent render passes will render from the [cache](/learn/caching).
 
 
 Preloading when a link scrolls into view {#on-reveal}
 ------------------------------------------
 
-To "lazy preload" a link when it is scrolled into the [viewport](/up-viewport),
-set an [`[up-preload="reveal"]`](/up-preload#up-preload) attribute.
+To "lazy preload" a link when it is scrolled into the [viewport](/api/up-viewport),
+set an [`[up-preload="reveal"]`](/api/up-preload#up-preload) attribute.
 
 This is useful when a link is [below the fold](https://www.optimizely.com/optimization-glossary/below-the-fold/)
 and is unlikely to be clicked until the user scrolls:
@@ -67,7 +67,7 @@ Custom preload conditions {#scripted}
 
 To programmatically preload any link element at a time of your choosing, use the `up.link.preload()` function.
 
-The following [compiler](/enhancing-elements) would preload a link with a `[rel=next]` attribute when
+The following [compiler](/learn/enhancing-elements) would preload a link with a `[rel=next]` attribute when
 the user hovers over a `<main>` element:
 
 ```js
@@ -82,13 +82,13 @@ A link that is preloaded in that fashion does not require an `[up-preload]` attr
 Preloading a URL
 ----------------
 
-To preload a given URL without a link element, make a [background](/up.render#options.background) request that [caches](/caching):
+To preload a given URL without a link element, make a [background](/api/up.render#options.background) request that [caches](/learn/caching):
 
 ```js
 up.request('/menu', { cache: true, background: true })
 ```
 
-The cached response will be used by any [followed](/up-follow) link to the same URL:
+The cached response will be used by any [followed](/api/up-follow) link to the same URL:
 
 ```html
 <a href="/menu" up-follow>Menu</a>
@@ -101,14 +101,14 @@ Preload request behavior
 Requests sent when preloading differ in some ways from requests sent when following a link directly:
 
 - Preloading will not change elements ("render").
-- Preloading a link will *not* [abort](/aborting-requests) pending requests
-  [targeting](/targeting-fragments) the same fragments. Only when the link is clicked later
+- Preloading a link will *not* [abort](/learn/aborting-requests) pending requests
+  [targeting](/learn/targeting-fragments) the same fragments. Only when the link is clicked later
   are conflicting requests aborted.
-- Preload requests are considered [background requests](/up.render#options.background)
-  and will not show the [progress bar](/progress-bar).
-- Preloaded content is placed into the [cache](/caching) automatically.
-- When a link destination is already cached, preloading will *not* make another request, even if the cache entry is [expired](/caching#expiration).
-  When the link is clicked and the cached content is rendered into the page, the fragment will be [revalidated](/caching#revalidation)
+- Preload requests are considered [background requests](/api/up.render#options.background)
+  and will not show the [progress bar](/learn/progress-bar).
+- Preloaded content is placed into the [cache](/learn/caching) automatically.
+- When a link destination is already cached, preloading will *not* make another request, even if the cache entry is [expired](/learn/caching#expiration).
+  When the link is clicked and the cached content is rendered into the page, the fragment will be [revalidated](/learn/caching#revalidation)
   if the cache entry is expired.
 
 

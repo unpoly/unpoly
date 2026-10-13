@@ -44,7 +44,7 @@ The diagram shows the difference between the two control flows:
 Starting a subinteraction
 -------------------------
 
-To start a subinteraction, open an overlay with a [close condition](/closing-overlays#close-conditions)
+To start a subinteraction, open an overlay with a [close condition](/learn/closing-overlays#close-conditions)
 and an acceptance callback:
 
 ```html
@@ -64,7 +64,7 @@ When the user submits the company form and the server redirects to the new compa
 (like `/companies/123`), the overlay is accepted automatically. The callback then reloads
 the list behind the overlay.
 When the company form has validation errors, it re-renders within the overlay, which stays open
-until the company is created. See [closing when a location is reached](/closing-overlays#location-condition).
+until the company is created. See [closing when a location is reached](/learn/closing-overlays#location-condition).
 
 The overlay can show any screen of your app. It takes no part in ending the subinteraction:
 the link that opened the overlay defines when the task is done, and what happens then.
@@ -78,11 +78,11 @@ Where the value comes from depends on how the overlay was closed:
 
 | Overlay is accepted by                                                        | Acceptance value                                  |
 |-------------------------------------------------------------------------------|---------------------------------------------------|
-| Reaching a [location](/closing-overlays#location-condition) like `/companies/$id` | The captured segments and the `location`, e.g. `{ id: 123, location: '/companies/123' }` |
-| An [event](/closing-overlays#event-condition) like `company:created`          | The event object                                  |
-| A [fragment](/closing-overlays#fragment-condition) like `.company-profile`    | The fragment's [data](/data)                      |
-| A button with [`[up-accept="{ id: 123 }"]`](/closing-overlays#on-click)       | The attribute's [relaxed JSON](/relaxed-json) value |
-| A form with [`[up-accept]`](/closing-overlays#on-submit)                      | The form's params as an `up.Params` object        |
+| Reaching a [location](/learn/closing-overlays#location-condition) like `/companies/$id` | The captured segments and the `location`, e.g. `{ id: 123, location: '/companies/123' }` |
+| An [event](/learn/closing-overlays#event-condition) like `company:created`          | The event object                                  |
+| A [fragment](/learn/closing-overlays#fragment-condition) like `.company-profile`    | The fragment's [data](/learn/data)                      |
+| A button with [`[up-accept="{ id: 123 }"]`](/learn/closing-overlays#on-click)       | The attribute's [relaxed JSON](/api/relaxed-json) value |
+| A form with [`[up-accept]`](/learn/closing-overlays#on-submit)                      | The form's params as an `up.Params` object        |
 
 In an `[up-on-accepted]` attribute, the value is available as `value`:
 
@@ -106,7 +106,7 @@ up.layer.open({
 ```
 
 When the user cancels the subinteraction, the overlay is *dismissed* instead.
-Dismissal also carries a value, which indicates the [reason for dismissal](/closing-overlays#dismissal-reasons).
+Dismissal also carries a value, which indicates the [reason for dismissal](/learn/closing-overlays#dismissal-reasons).
 A subinteraction is usually interested in acceptance only.
 
 
@@ -151,7 +151,7 @@ Another common callback reloads the options of a `<select>` and selects the new 
 </a>
 ```
 
-This uses `up.validate()` to re-render the select's [form group](/up-form-group) from the server,
+This uses `up.validate()` to re-render the select's [form group](/api/up-form-group) from the server,
 as if the user had already picked the new company. The form is not saved by this.
 
 
@@ -177,18 +177,18 @@ It has no idea that it is sometimes opened from a project form, and it needs no 
 The link that opens the overlay carries the acceptance condition and the callback,
 so the same form works on its own, in an overlay, and in a new tab.
 
-This works because [layers are isolated](/overlays#layers-are-isolated): the form in the overlay
+This works because [layers are isolated](/learn/overlays#layers-are-isolated): the form in the overlay
 re-renders within that overlay, even when the project form behind it has elements with the same selectors.
 
 Some screens have an element that should close the overlay, but still make sense on a full page.
-A *Finish* link can [close the overlay when followed](/closing-overlays#on-follow), and navigate
+A *Finish* link can [close the overlay when followed](/learn/closing-overlays#on-follow), and navigate
 to its `[href]` when clicked on the root layer:
 
 ```html
 <a href="/companies" up-accept>Finish</a> <!-- mark: up-accept -->
 ```
 
-A form with an `[up-accept]` attribute closes the overlay [when submitted](/closing-overlays#on-submit),
+A form with an `[up-accept]` attribute closes the overlay [when submitted](/learn/closing-overlays#on-submit),
 and makes a regular submission when it is not in an overlay.
 
 To vary a reused screen slightly, like showing "Pick a company for project Foo" in the overlay only,
@@ -207,7 +207,7 @@ console.log('New company ID is', company.id)
 ```
 
 When the overlay is dismissed instead of accepted, the promise rejects with the
-[dismissal reason](/closing-overlays#dismissal-reasons). You can `catch` it to handle a canceled subinteraction:
+[dismissal reason](/learn/closing-overlays#dismissal-reasons). You can `catch` it to handle a canceled subinteraction:
 
 ```js
 try {

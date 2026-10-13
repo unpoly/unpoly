@@ -16,8 +16,8 @@ To show loading state within a fragment, see [[loading-state]].
 ## Styling the progress bar {#styling}
 
 The progress bar is implemented as a single `<up-progress-bar>` element.
-Unpoly automatically inserts the element when requests are [late](/up:network:late),
-and removes it when they have [recovered](/up:network:recover).
+Unpoly automatically inserts the element when requests are [late](/api/up:network:late),
+and removes it when they have [recovered](/api/up:network:recover).
 
 By default the bar is 3 pixels high and blue. You may style the element using CSS:
 
@@ -38,8 +38,8 @@ than `up.network.config.lateDelay`. The default is 400 milliseconds:
 up.network.config.lateDelay = 1000
 ```
 
-You may override this per request by setting an [`[up-late-delay]`](/up-follow#up-late-delay) attribute
-or passing a [`{ lateDelay }`](/up.request#options.lateDelay) option.
+You may override this per request by setting an [`[up-late-delay]`](/api/up-follow#up-late-delay) attribute
+or passing a [`{ lateDelay }`](/api/up.request#options.lateDelay) option.
 Passing `{ lateDelay: false }` never shows a progress bar for that request:
 
 ```html
@@ -47,11 +47,11 @@ Passing `{ lateDelay: false }` never shows a progress bar for that request:
 ```
 
 Requests that are loading in the background never show the progress bar.
-You can move a request into the background by setting an [`[up-background]`](/up-follow#up-background) attribute
-or passing a [`{ background: true }`](/up.render#options.background) option.
-Requests from [preloading](/preloading), [polling](/polling) and [cache revalidation](/caching#revalidation)
+You can move a request into the background by setting an [`[up-background]`](/api/up-follow#up-background) attribute
+or passing a [`{ background: true }`](/api/up.render#options.background) option.
+Requests from [preloading](/learn/preloading), [polling](/learn/polling) and [cache revalidation](/learn/caching#revalidation)
 are automatically marked as background requests.
-[Deferred content](/lazy-loading) loads in the foreground unless you set `[up-background]`.
+[Deferred content](/learn/lazy-loading) loads in the foreground unless you set `[up-background]`.
 
 
 ## Disabling the progress bar {#disabling}
@@ -76,7 +76,7 @@ To build a custom loading indicator, place an element like this in your applicat
 <loading-indicator>Please wait!</loading-indicator>
 ```
 
-Now add a [compiler](/enhancing-elements) that hides the `<loading-indicator>` element
+Now add a [compiler](/learn/enhancing-elements) that hides the `<loading-indicator>` element
 while there are no long-running requests:
 
 ```js
@@ -97,7 +97,7 @@ up.compiler('loading-indicator', function(indicator) {
 ```
 
 The compiler returns the functions that unbind the event listeners, so the listeners are removed
-when the indicator element is [destroyed](/enhancing-elements#destructor).
+when the indicator element is [destroyed](/learn/enhancing-elements#destructor).
 
 
 @page progress-bar

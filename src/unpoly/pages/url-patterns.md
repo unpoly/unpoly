@@ -1,7 +1,7 @@
 URL patterns
 ============
 
-Some Unpoly features let you match a URL using *URL patterns*. You can use them to define [overlay close conditions](/closing-overlays#close-conditions), or when [adding aliases to navigation items](/up-alias).
+Some Unpoly features let you match a URL using *URL patterns*. You can use them to define [overlay close conditions](/learn/closing-overlays#close-conditions), or when [adding aliases to navigation items](/api/up-alias).
 
 This guide describes the expression system Unpoly uses to match URL patterns. Please note that regular expressions ("regexes") are not supported. You must use the expression system described on this page.
 
@@ -152,8 +152,8 @@ up.layer.open({ acceptLocation: "/users/* -/users/456" })
 ## Capturing named segments
 
 Sometimes it's useful to capture the value of the wildcard that was matched.
-For example, when closing an overlay [once a location is reached](/closing-overlays#location-condition),
-you can use a part of the URL as the overlay's [result value](/closing-overlays#result-values).
+For example, when closing an overlay [once a location is reached](/learn/closing-overlays#location-condition),
+you can use a part of the URL as the overlay's [result value](/learn/closing-overlays#result-values).
 
 To define a captured segment, prefix it with a `:` like this:
 
@@ -164,7 +164,7 @@ To define a captured segment, prefix it with a `:` like this:
 ### Example
 
 The example below will keep an overlay until a user's detail page is reached (like `/users/foo`).
-Then the user name from the URL (`foo`) becomes the overlay's [result value](/closing-overlays#result-values) as `{ name: 'foo' }`:
+Then the user name from the URL (`foo`) becomes the overlay's [result value](/learn/closing-overlays#result-values) as `{ name: 'foo' }`:
 
 ```html
 <!-- Closes layer when user visits any URL beginning with "/users/" and captures the suffix as { name } -->
@@ -177,7 +177,7 @@ Then the user name from the URL (`foo`) becomes the overlay's [result value](/cl
 ```
 
 We can use the same pattern from JavaScript. Here we're using the `up.layer.ask()` function which opens an overlay
-and returns a promise for its [result value](/closing-overlays#result-values):
+and returns a promise for its [result value](/learn/closing-overlays#result-values):
 
 ```js
 var { name } = await up.layer.ask({

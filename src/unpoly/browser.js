@@ -21,7 +21,7 @@ up.browser = (function() {
   Returns whether this browser supports manipulation of the current URL
   via [`history.pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState).
 
-  When `pushState` is not supported (e.g. through [`up.follow()`](/up.follow)), Unpoly will gracefully
+  When `pushState` is not supported (e.g. through [`up.follow()`](/api/up.follow)), Unpoly will gracefully
   fall back to a full page load.
 
   > [NOTE]

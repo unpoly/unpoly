@@ -8,7 +8,7 @@ up.motion.finish = function(...args) {
 /*-
 Returns whether Unpoly will perform animations and transitions.
 
-Set [`up.motion.config.enabled = false`](/up.motion.config#config.enabled) in order to disable animations globally.
+Set [`up.motion.config.enabled = false`](/api/up.motion.config#config.enabled) in order to disable animations globally.
 
 @function up.motion.isEnabled
 @return {boolean}

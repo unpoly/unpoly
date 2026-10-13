@@ -11,7 +11,7 @@ One feature, three layers {#layers}
 -------------------------
 
 The quickest layer is an attribute in your HTML. This link swaps the
-[main element](/main) with an animated transition:
+[main element](/api/main) with an animated transition:
 
 ```html
 <a href="/path" up-follow up-transition="cross-fade">Click me</a> <!-- mark: up-transition="cross-fade" -->

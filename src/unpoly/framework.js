@@ -45,7 +45,7 @@ up.framework = (function() {
   }
 
   /*-
-  This event is [emitted](/up.emit) when Unpoly is [reset](/up.framework.reset) during unit tests.
+  This event is [emitted](/api/up.emit) when Unpoly is [reset](/up.framework.reset) during unit tests.
 
   @event up:framework:reset
   @internal
@@ -54,17 +54,17 @@ up.framework = (function() {
   /*-
   Manually boots the Unpoly framework.
 
-  It is not usually necessary to call `up.boot()` yourself. When you load [Unpoly's JavaScript file](/install),
+  It is not usually necessary to call `up.boot()` yourself. When you load [Unpoly's JavaScript file](/learn/install),
   Unpoly will automatically boot on [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
   There are only two cases when you would boot manually:
 
   - When you load Unpoly with `<script async>`
-  - When you explicitly ask to manually boot by setting an [`<html up-boot="manual">`](/up-boot-manual) attribute.
+  - When you explicitly ask to manually boot by setting an [`<html up-boot="manual">`](/api/up-boot-manual) attribute.
 
   Before you manually boot, Unpoly should be configured and compilers should be registered.
-  Booting will cause Unpoly to [compile](/up.hello) the initial page.
+  Booting will cause Unpoly to [compile](/api/up.hello) the initial page.
 
-  Unpoly will refuse to boot if the current browser is [not supported](/up.framework.isSupported).
+  Unpoly will refuse to boot if the current browser is [not supported](/api/up.framework.isSupported).
   This leaves you with a classic server-side application on legacy browsers.
 
   @function up.boot
@@ -121,11 +121,11 @@ up.framework = (function() {
   }
 
   /*-
-  This event is emitted after Unpoly has [booted](/up.boot).
+  This event is emitted after Unpoly has [booted](/api/up.boot).
 
   For most apps this event will be emitted in the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
   as [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
-  All [compilers](/up.script) will already have run on the initial page content.
+  All [compilers](/api/up.script) will already have run on the initial page content.
 
   @event up:framework:booted
   @param {string} event.mode
@@ -133,7 +133,7 @@ up.framework = (function() {
 
     If set to `'auto'`, Unpoly was booted automatically on `DOMContentLoaded`.
 
-    If set to `'manual'`, Unpoly was booted [manually](/up-boot-manual).
+    If set to `'manual'`, Unpoly was booted [manually](/api/up-boot-manual).
 
     @experimental
   @experimental
@@ -142,7 +142,7 @@ up.framework = (function() {
   /*-
   Prevent Unpoly from booting automatically.
 
-  By default Unpoly [automatically boots](/install#initialization)
+  By default Unpoly [automatically boots](/learn/install#initialization)
   on [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
   To prevent this, add an `[up-boot="manual"]` attribute to the `<html>` element:
 
@@ -191,14 +191,14 @@ up.framework = (function() {
   /*-
   Returns whether Unpoly can boot in the current browser.
 
-  If this returns `false` Unpoly will not automatically [boot](/up.boot)
-  and will not [compile](/enhancing-elements) the initial page.
+  If this returns `false` Unpoly will not automatically [boot](/api/up.boot)
+  and will not [compile](/learn/enhancing-elements) the initial page.
   This leaves you with a server-side web application without any JavaScript enhancements.
 
   The support check is very cursory. While it will exclude most legacy browsers
   like Internet Explorer, there may be cases where `up.framework.isSupported()`
   returns `true` on a browser with other support issues.
-  To use your own conditions for browser support, [boot manually](/up-boot-manual).
+  To use your own conditions for browser support, [boot manually](/api/up-boot-manual).
 
   ### Browser support
 

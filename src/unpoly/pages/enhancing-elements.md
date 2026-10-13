@@ -33,7 +33,7 @@ The compiler function is called once for each matching element, when
 the page first loads and when a matching fragment is rendered later.
 
 Compilers run in the order they were registered, each for all its matches in the new fragment.
-To change the order, pass a [`{ priority }`](/up.compiler#order).
+To change the order, pass a [`{ priority }`](/api/up.compiler#order).
 
 ### Avoid `DOMContentLoaded` {#no-load-event}
 
@@ -55,7 +55,7 @@ a new page load, elements that enter the page later are never enhanced.
 Compilers close this gap: they run for the initial page and for every new fragment.
 
 When adding Unpoly to an existing application, we recommend to
-[convert your `DOMContentLoaded` listeners to compilers](/legacy-scripts#migrate-to-compiler).
+[convert your `DOMContentLoaded` listeners to compilers](/learn/legacy-scripts#migrate-to-compiler).
 
 
 ## Integrating JavaScript libraries {#integrating-libraries}
@@ -87,13 +87,13 @@ To mount components from a frontend framework like React or Vue, see [[islands]]
 ## Passing data to a compiler {#data}
 
 You may attach data to an element using HTML5 data attributes
-or encoded as [relaxed JSON](/relaxed-json) in an `[up-data]` attribute:
+or encoded as [relaxed JSON](/api/relaxed-json) in an `[up-data]` attribute:
 
 ```html
 <span class="user" up-data="{ age: 31, name: 'Alice' }">Alice</span>
 ```
 
-An object with the element's attached data will be passed to your [compilers](/up.compiler)
+An object with the element's attached data will be passed to your [compilers](/api/up.compiler)
 as a second argument:
 
 ```js
@@ -201,7 +201,7 @@ up.compiler('.auto-hide', function(element) {
 
 ## Accessing information about the render pass {#meta}
 
-Compilers may accept a third argument with information about the current [render pass](/up.render):
+Compilers may accept a third argument with information about the current [render pass](/api/up.render):
 
 ```js
 up.compiler('.user', function(element, data, meta) { // mark: meta
@@ -215,9 +215,9 @@ The following properties are available:
 
 | Property            | Type          | Description                                                                                                        |
 |---------------------|---------------|--------------------------------------------------------------------------------------------------------------------|
-| `meta.layer`        | `up.Layer`    | The [layer](/up.layer) of the compiling fragment.<br>This has the same value as `up.layer.current`. |
-| `meta.ok`           | `boolean`     | Whether the element was loaded from a [successful response](/failed-responses#fail-options).                       |
-| `meta.revalidating` | `boolean`     | Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation).                   |
+| `meta.layer`        | `up.Layer`    | The [layer](/api/up.layer) of the compiling fragment.<br>This has the same value as `up.layer.current`. |
+| `meta.ok`           | `boolean`     | Whether the element was loaded from a [successful response](/learn/failed-responses#fail-options).                       |
+| `meta.revalidating` | `boolean`     | Whether the element was reloaded for the purpose of [cache revalidation](/learn/caching#revalidation).                   |
 
 
 ## Defining new attributes with macros {#macros}
@@ -228,7 +228,7 @@ compiled afterwards. A regular compiler may set such attributes too late,
 e.g. when the attribute is itself processed by a compiler, like `[up-poll]`.
 
 Macros are useful to define a shorthand for a combination of attributes
-that you keep repeating. This macro opens a modal with a [custom animation](/up.animation) `shake`:
+that you keep repeating. This macro opens a modal with a [custom animation](/api/up.animation) `shake`:
 
 ```js
 up.macro('[shake-modal]', function(link) {

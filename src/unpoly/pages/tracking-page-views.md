@@ -55,7 +55,7 @@ and `'pop'` for the user going back or forward.
 Tracking navigation in overlays {#overlays}
 -------------------------------
 
-Not every [overlay](/up.layer) has [visible history](/history-in-overlays).
+Not every [overlay](/api/up.layer) has [visible history](/learn/history-in-overlays).
 When an overlay without visible history opens or navigates, the address bar does not change
 and no `up:location:changed` event is emitted.
 
@@ -94,7 +94,7 @@ For example, mark the elements that count as a page with a `[track-page-view]` a
 </main>
 ```
 
-Then track a page view from a [compiler](/enhancing-elements):
+Then track a page view from a [compiler](/learn/enhancing-elements):
 
 ```js
 up.compiler('[track-page-view]', function(element, data, meta) {
@@ -120,7 +120,7 @@ Encode them in an `[up-data]` attribute:
 </main>
 ```
 
-The parsed [data object](/data) is passed to your compiler as a second argument.
+The parsed [data object](/learn/data) is passed to your compiler as a second argument.
 Forward it to your tracking function:
 
 ```js
@@ -146,7 +146,7 @@ up.on('up:fragment:loaded', function(event) {
 })
 ```
 
-If this tracks too many events, filter further on the properties of [`event.request`](/up:fragment:loaded#event.request),
+If this tracks too many events, filter further on the properties of [`event.request`](/api/up:fragment:loaded#event.request),
 such as its `{ target }` or `{ layer }`.
 Polling and form validation also load fragments. Polling requests have `event.request.background` set,
 so you can skip them by checking that property.

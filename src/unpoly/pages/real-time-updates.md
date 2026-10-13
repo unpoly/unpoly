@@ -2,10 +2,10 @@ Streaming real-time updates
 ===========================
 
 Your server can tell the page when something changed, for example when a new message arrives in an inbox.
-A [compiler](/up.compiler) of a few lines connects to [Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) or a [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), and reloads the affected fragment with `up.reload()`.
+A [compiler](/api/up.compiler) of a few lines connects to [Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) or a [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), and reloads the affected fragment with `up.reload()`.
 
 > [tip]
-> If a delay of a few seconds is acceptable, [polling](/polling) is simpler.
+> If a delay of a few seconds is acceptable, [polling](/learn/polling) is simpler.
 > It needs no open connection and works with every server.
 
 
@@ -48,9 +48,9 @@ Sending a selector is a convention of this example. Your server can send whateve
 
 When the page has an `#inbox` element, `up.reload()` requests the URL that element was loaded from, and swaps it with the new `#inbox` from the response.
 When the page has no such element, the message is ignored.
-With `{ layer: element }` Unpoly looks for the fragment in the layer of the `[data-stream]` element, so the fragment is found and reloaded even while an [overlay](/opening-overlays) is open.
+With `{ layer: element }` Unpoly looks for the fragment in the layer of the `[data-stream]` element, so the fragment is found and reloaded even while an [overlay](/learn/opening-overlays) is open.
 
-Like [polling](/polling), the reload [aborts](/aborting-requests) pending requests that target the fragment,
+Like [polling](/learn/polling), the reload [aborts](/learn/aborting-requests) pending requests that target the fragment,
 for example when the user just clicked a link that updates only the inbox.
 To keep such requests, call `up.reload(fragment, { abort: false })`.
 
@@ -64,7 +64,7 @@ When nothing changed for this user, the server can respond with `304 Not Modifie
 
 ### Where to put the connection {#placement}
 
-The compiler returns a [destructor](/up.destructor) that closes the connection when its element leaves the page.
+The compiler returns a [destructor](/api/up.destructor) that closes the connection when its element leaves the page.
 
 If you put `[data-stream]` on an element that gets swapped, for example the `#inbox` itself, each swap closes the connection and opens a new one.
 So put it in your layout, outside the elements that get updated.
@@ -180,7 +180,7 @@ Every open page holds one connection to your server. Keep the following in mind:
   Each open `EventSource` uses one of them. Serve event streams over HTTP/2, which allows many more (usually 100).
 - A signal to many users causes many reloads at the same time.
 
-To push rendered HTML instead of a signal, pass it to [`up.render({ fragment })`](/up.render).
+To push rendered HTML instead of a signal, pass it to [`up.render({ fragment })`](/api/up.render).
 
 @page real-time-updates
 @menu-title Real-time updates

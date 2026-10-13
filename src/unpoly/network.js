@@ -24,7 +24,7 @@ up.network = (function() {
     @param {number|Function(): number} [config.concurrency]
       The maximum number of concurrently loading requests.
 
-      Additional requests are queued. [Preload](/preloading) requests are
+      Additional requests are queued. [Preload](/learn/preloading) requests are
       always queued behind non-preload requests.
 
       By default Unpoly allows 6 concurrent requests.
@@ -43,20 +43,20 @@ up.network = (function() {
       a 303 status code (rather than 302).
 
     @param {number|Function(up.Request): number|boolean} [config.lateDelay=400]
-      The number of milliseconds to wait before emitting the [`up:network:late` event](/up:network:late) and showing
-      the [progress bar](/progress-bar).
+      The number of milliseconds to wait before emitting the [`up:network:late` event](/api/up:network:late) and showing
+      the [progress bar](/learn/progress-bar).
 
       To never consider a request to be late, configure a function that returns `false` for that request.
 
     @param {number|undefined} [config.timeout=90_000]
-      A default [timeout](/up.request#options.timeout) for [requests](/up.request) in milliseconds.
+      A default [timeout](/api/up.request#options.timeout) for [requests](/api/up.request) in milliseconds.
 
       Set `undefined` to not use a timeout.
 
     @param {boolean|Function(up.Response): boolean} [config.fail]
-      Whether Unpoly will consider a response to constitute a [failed response](/failed-responses).
+      Whether Unpoly will consider a response to constitute a [failed response](/learn/failed-responses).
 
-      By default, Unpoly will consider any status code other than HTTP 2xx or [304](/conditional-requests#rendering-nothing) to represent a failed response.
+      By default, Unpoly will consider any status code other than HTTP 2xx or [304](/learn/conditional-requests#rendering-nothing) to represent a failed response.
       You may use this option to customize this behavior. For instance, you can fail a response if it contains a given header or body text.
 
       The following configuration will fail all responses with an `X-Unauthorized` header:
@@ -66,7 +66,7 @@ up.network = (function() {
       up.network.config.fail = (response) => badStatus(response) || response.header('X-Unauthorized')
       ```
 
-      Also see [Customizing failure detection](/failed-responses#customizing-failure-detection).
+      Also see [Customizing failure detection](/learn/failed-responses#customizing-failure-detection).
 
   @section Caching
     @param {number} [config.cacheSize=70]
@@ -75,21 +75,21 @@ up.network = (function() {
       If the size is exceeded, the oldest responses will be dropped from the cache.
 
     @param {number} [config.cacheExpireAge=15_000]
-      The number of milliseconds after which a cache entry is considered [expired](/caching#expiration) and will trigger [revalidation](/caching#revalidation) when used.
+      The number of milliseconds after which a cache entry is considered [expired](/learn/caching#expiration) and will trigger [revalidation](/learn/caching#revalidation) when used.
 
-      The configured age should at least cover the average time between [preloading](/preloading) and following a link.
+      The configured age should at least cover the average time between [preloading](/learn/preloading) and following a link.
 
       Defaults to 15 seconds.
 
     @param {number} [config.cacheEvictAge=90*60*1000]
-      The number of milliseconds after which a cache entry is [evicted](/caching#eviction).
+      The number of milliseconds after which a cache entry is [evicted](/learn/caching#eviction).
 
-      In practice you will often prefer [*expiration*](/caching#expiration) over *eviction*.
+      In practice you will often prefer [*expiration*](/learn/caching#expiration) over *eviction*.
 
       Defaults to 90 minutes.
 
     @param {Function(up.Request): boolean} [config.autoCache]
-      Whether to [cache](/caching) the given request with `{ cache: 'auto' }`.
+      Whether to [cache](/learn/caching) the given request with `{ cache: 'auto' }`.
 
       By default, Unpoly will auto-cache requests with [safe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP methods like `GET`.
 
@@ -104,11 +104,11 @@ up.network = (function() {
       ```
 
     @param {(Function(up.Request): boolean|string)|boolean} [config.expireCache]
-      A function that controls [cache expiration](/caching#expiration) when the given request is sent.
+      A function that controls [cache expiration](/learn/caching#expiration) when the given request is sent.
 
       Returning `true` will expire the entire cache.\
       Returning `false` will not expire any cache entries.\
-      Returning a [URL pattern](/url-patterns) will expire matching cache entries only.
+      Returning a [URL pattern](/api/url-patterns) will expire matching cache entries only.
 
       By default, Unpoly will expire the entire cache when it sends a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method:
 
@@ -118,16 +118,16 @@ up.network = (function() {
       ```
 
     @param {(Function(up.Request): boolean|string)|boolean} [config.evictCache=false]
-      A function that controls [cache eviction](/caching#eviction) when the given request is sent.
+      A function that controls [cache eviction](/learn/caching#eviction) when the given request is sent.
 
       Returning `true` will evict the entire cache.\
       Returning `false` will not evict any cache entries.\
-      Returning a [URL pattern](/url-patterns) will evict matching cache entries only.
+      Returning a [URL pattern](/api/url-patterns) will evict matching cache entries only.
 
       By default, Unpoly will *not* evict any cache entries when a request is sent.
 
     @param {boolean|Function(): boolean} [config.progressBar]
-      Whether to show a [progress bar](/progress-bar) for [late requests](#config.lateDelay).
+      Whether to show a [progress bar](/learn/progress-bar) for [late requests](#config.lateDelay).
 
   @stable
   */
@@ -153,14 +153,14 @@ up.network = (function() {
   let progressBar = null
 
   /*-
-  Returns a [cached](/caching) request matching the given request options.
+  Returns a [cached](/learn/caching) request matching the given request options.
 
   The request may still be in flight.
 
   Returns `undefined` if the given request is not currently cached.
 
   > [important]
-  > `up.request()` and `up.render()` will only write to the cache when a [`{ cache }`](/up.request#options.cache)
+  > `up.request()` and `up.render()` will only write to the cache when a [`{ cache }`](/api/up.request#options.cache)
   > option is set.
 
   ## Example
@@ -187,9 +187,9 @@ up.network = (function() {
   */
 
   /*-
-  [Evicts](/caching#eviction) responses in the [cache](/caching).
+  [Evicts](/learn/caching#eviction) responses in the [cache](/learn/caching).
 
-  The server may also evict cache entries by sending an [`X-Up-Evict-Cache`](/X-Up-Evict-Cache) header.
+  The server may also evict cache entries by sending an [`X-Up-Evict-Cache`](/api/X-Up-Evict-Cache) header.
 
   ## Example
 
@@ -199,7 +199,7 @@ up.network = (function() {
   up.cache.evict()
   ```
 
-  To only remove some cache entries, pass a [URL pattern](/url-patterns):
+  To only remove some cache entries, pass a [URL pattern](/api/url-patterns):
 
   ```js
   up.cache.evict('/users/*')
@@ -207,22 +207,22 @@ up.network = (function() {
 
   @function up.cache.evict
   @param {string} [pattern]
-    A [URL pattern](/url-patterns) matching cache entries that should be removed.
+    A [URL pattern](/api/url-patterns) matching cache entries that should be removed.
 
     If omitted, the entire cache is evicted.
   @stable
   */
 
   /*-
-  [Expires](/caching#expiration) entries in the [cache](/caching).
+  [Expires](/learn/caching#expiration) entries in the [cache](/learn/caching).
 
-  Expired entries remain in the cache, but will be [revalidated](/caching#revalidation)
+  Expired entries remain in the cache, but will be [revalidated](/learn/caching#revalidation)
   after rendering.
 
   By default, Unpoly automatically expires the entire cache whenever it sends
   a request with a non-GET HTTP method. To customize this rule, use `up.network.config.expireCache`.
 
-  The server may also expire cache entries by sending an [`X-Up-Expire-Cache`](/X-Up-Expire-Cache) header.
+  The server may also expire cache entries by sending an [`X-Up-Expire-Cache`](/api/X-Up-Expire-Cache) header.
 
   ## Example
 
@@ -232,7 +232,7 @@ up.network = (function() {
   up.cache.expire()
   ```
 
-  To only expire some cache entries, pass a [URL pattern](/url-patterns):
+  To only expire some cache entries, pass a [URL pattern](/api/url-patterns):
 
   ```js
   up.cache.expire('/users/*')
@@ -240,14 +240,14 @@ up.network = (function() {
 
   @function up.cache.expire
   @param {string} [pattern]
-    A [URL pattern](/url-patterns) matching cache entries that should be expired.
+    A [URL pattern](/api/url-patterns) matching cache entries that should be expired.
 
     If omitted, the entire cache is expired.
   @stable
   */
 
   /*-
-  Makes the [cache](/caching) assume that `newRequest` has the same response as the
+  Makes the [cache](/learn/caching) assume that `newRequest` has the same response as the
   already cached `oldRequest`.
 
   Unpoly uses this internally when the user is redirected from `/old` to `/new`.
@@ -255,9 +255,9 @@ up.network = (function() {
 
   @function up.cache.alias
   @param {Object|up.Request} oldRequest
-    The earlier request or [request options](/up.request).
+    The earlier request or [request options](/api/up.request).
   @param {Object|up.Request|undefined} newRequest
-    The new request or [request options](/up.request).
+    The new request or [request options](/api/up.request).
   @return {up.Request|undefined}
     If an alias could be registered, `newRequest` is returned.
 
@@ -266,7 +266,7 @@ up.network = (function() {
   */
 
   /*-
-  Manually stores a request in the [cache](/caching).
+  Manually stores a request in the [cache](/learn/caching).
 
   Future calls to `up.request()` will try to reuse this request before
   making a new request.
@@ -331,10 +331,10 @@ up.network = (function() {
 
   ### Caching
 
-  You may [cache](/caching) responses by passing a `{ cache }` option. Responses for a cached
+  You may [cache](/learn/caching) responses by passing a `{ cache }` option. Responses for a cached
   request will resolve instantly.
 
-  See [Caching](/caching) for more details and examples.
+  See [Caching](/learn/caching) for more details and examples.
 
   @function up.request
 
@@ -351,7 +351,7 @@ up.network = (function() {
       The HTTP method for the request.
 
     @param {Object|up.Params|FormData|string|Array} [options.params={}]
-      [Parameters](/up.Params) that should be sent as the request's
+      [Parameters](/api/up.Params) that should be sent as the request's
       [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
       When making a `GET` request to a URL with a query string, the given `{ params }` will be added
@@ -369,12 +369,12 @@ up.network = (function() {
       If this is set, methods other than GET and POST will be converted to a `POST` request
       and will carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
 
-      Defaults to [`up.network.config`](/up.network.config#config.wrapMethod).
+      Defaults to [`up.network.config`](/api/up.network.config#config.wrapMethod).
 
     @param {string} [options.timeout]
       A timeout in milliseconds.
 
-      If the request is queued due to [many concurrent requests](/up.network.config#config.concurrency),
+      If the request is queued due to [many concurrent requests](/api/up.network.config#config.concurrency),
       the timeout will not include the time spent waiting in the queue.
 
     @param {Element} [options.contentType]
@@ -402,7 +402,7 @@ up.network = (function() {
 
       Background requests are deprioritized over foreground requests.
       Background requests also won't emit `up:network:late` events and won't trigger
-      the [progress bar](/progress-bar).
+      the [progress bar](/learn/progress-bar).
 
     @param {number} [options.lateDelay]
       The number of milliseconds after which this request can cause
@@ -411,16 +411,16 @@ up.network = (function() {
       Defaults to `up.network.config.lateDelay`.
 
     @param {string|boolean|Function(up.Response): boolean} [options.fail]
-      Whether the response to this request should be considered [failed](/failed-responses).
+      Whether the response to this request should be considered [failed](/learn/failed-responses).
 
-      By [default](/up.network.config#config.fail), any HTTP status code other than 2xx or 304 is considered an error code.
+      By [default](/api/up.network.config#config.fail), any HTTP status code other than 2xx or 304 is considered an error code.
       Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.
 
       A failed response will cause the [returned promise](#return-value) to reject.
 
   @section Caching
     @param {boolean} [options.cache=false]
-      Whether to read from and write to the [cache](/caching).
+      Whether to read from and write to the [cache](/learn/caching).
 
       With `{ cache: true }`, Unpoly will try to reuse a cached response before connecting
       to the network. If no cached response exists, Unpoly will make a request and cache
@@ -432,40 +432,40 @@ up.network = (function() {
       With `{ cache: false }` (the default), Unpoly will always make a network request.
 
     @param {boolean|string} [options.expireCache]
-      Whether to [expire](/caching#expiration) the [cache](/caching) when this request is sent.
+      Whether to [expire](/learn/caching#expiration) the [cache](/learn/caching) when this request is sent.
 
       Defaults to the result of `up.network.config.expireCache`, which defaults to expiring the entire cache for a non-GET request.
       Pass `false` to not expire any cache entries.
 
-      You may also pass a [URL pattern](/url-patterns) to only expire matching responses.
+      You may also pass a [URL pattern](/api/url-patterns) to only expire matching responses.
 
     @param {boolean|string} [options.evictCache]
-      Whether to [evict](/caching#eviction) the [cache](/caching) when this request is sent.
+      Whether to [evict](/learn/caching#eviction) the [cache](/learn/caching) when this request is sent.
 
       Defaults to the result of `up.network.config.evictCache`, which defaults to `false`.
 
-      You may also pass a [URL pattern](/url-patterns) to only evict matching responses.
+      You may also pass a [URL pattern](/api/url-patterns) to only evict matching responses.
 
 
   @section Render context
     @param {string} [options.target='body']
       The CSS selector that will be sent as an `X-Up-Target` header.
 
-      The targets of concurrent requests to the same URL [may be merged](/X-Up-Target#merging).
+      The targets of concurrent requests to the same URL [may be merged](/api/X-Up-Target#merging).
 
     @param {string} [options.failTarget='body']
       The CSS selector that will be sent as an `X-Up-Fail-Target` header.
 
     @param {string} [options.layer='current']
-      The [layer](/up.layer) this request is associated with.
+      The [layer](/api/up.layer) this request is associated with.
 
       If this request is intended to update an existing fragment, this is that fragment's layer.
 
-      If this request is intended to [open an overlay](/opening-overlays),
+      If this request is intended to [open an overlay](/learn/opening-overlays),
       the associated layer is the future overlay's parent layer.
 
     @param {string} [options.failLayer='current']
-      The [layer](/up.layer) this request is associated with if the server [sends a HTTP status code](/failed-responses).
+      The [layer](/api/up.layer) this request is associated with if the server [sends a HTTP status code](/learn/failed-responses).
 
     @param {Element} [options.origin]
       The DOM element that caused this request to be sent, e.g. a hyperlink or form element.
@@ -614,9 +614,9 @@ up.network = (function() {
   }
 
   /*-
-  Returns whether Unpoly is currently loading a [request](/up.request).
+  Returns whether Unpoly is currently loading a [request](/api/up.request).
 
-  The network is also considered busy while requests are [loading in the background](/up.request#options.background).
+  The network is also considered busy while requests are [loading in the background](/api/up.request#options.background).
 
   @function up.network.isBusy
   @return {boolean}
@@ -642,7 +642,7 @@ up.network = (function() {
   @param options.params
     @like up.render
 
-    Additional [parameters](/up.Params) that should be sent as the request's
+    Additional [parameters](/api/up.Params) that should be sent as the request's
     [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
     Binary values from file inputs will be removed from the given params.
@@ -653,12 +653,12 @@ up.network = (function() {
   }
 
   /*-
-  Aborts pending [requests](/up.request) matching a condition.
+  Aborts pending [requests](/api/up.request) matching a condition.
 
   > [important]
   > This is a low-level API for matching requests by their properties. If possible, use `up.fragment.abort()`,
   > which matches requests by screen region. Only when requests are aborted by screen region can components
-  > [react to being aborted](/up:fragment:aborted).
+  > [react to being aborted](/api/up:fragment:aborted).
 
   @learn-ref aborting-requests
 
@@ -700,7 +700,7 @@ up.network = (function() {
 
   ## Aborting requests matching a pattern
 
-  To abort all requests matching an [URL pattern](/url-patterns), pass it as the first argument:
+  To abort all requests matching an [URL pattern](/api/url-patterns), pass it as the first argument:
 
   ```js
   up.network.abort('/path/*')
@@ -724,7 +724,7 @@ up.network = (function() {
   @param {string|Function(up.Request): boolean|up.Request|boolean} [condition=true]
     A condition that controls which requests to abort.
 
-    If set to a string, it is interpreted as a [URL pattern](/url-patterns). All requests
+    If set to a string, it is interpreted as a [URL pattern](/api/url-patterns). All requests
     matching that pattern will be aborted.
 
     If set to an `up.Request` object, that one request is aborted.
@@ -751,8 +751,8 @@ up.network = (function() {
   }
 
   /*-
-  This event is [emitted](/up.emit) when an [AJAX request](/up.request)
-  was [aborted](/aborting-requests).
+  This event is [emitted](/api/up.emit) when an [AJAX request](/api/up.request)
+  was [aborted](/learn/aborting-requests).
 
   The event is emitted on the layer that caused the request.
 
@@ -764,11 +764,11 @@ up.network = (function() {
     The aborted request.
 
   @param {up.Layer} [event.layer]
-    The [layer](/up.layer) this request is associated with.
+    The [layer](/api/up.layer) this request is associated with.
 
     If this request was intended to update an existing fragment, this is that fragment's layer.
 
-    If this request was intended to [open an overlay](/opening-overlays),
+    If this request was intended to [open an overlay](/learn/opening-overlays),
     the associated layer is the future overlay's parent layer.
 
   @param {Element} [event.origin]
@@ -780,7 +780,7 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/up.emit) when [AJAX requests](/up.request)
+  This event is [emitted](/api/up.emit) when [AJAX requests](/api/up.request)
   are taking long to finish loading.
 
   @learn-ref network-issues#slow-server-responses
@@ -789,10 +789,10 @@ up.network = (function() {
 
   By default, Unpoly will wait 400 ms for an AJAX request to finish
   before emitting `up:network:late`. You may configure this delay
-  [globally](/up.network.config#config.lateDelay),
-  for [individual links](/up-follow#up-late-delay), or for [specific requests](/up.request#options.lateDelay).
+  [globally](/api/up.network.config#config.lateDelay),
+  for [individual links](/api/up-follow#up-late-delay), or for [specific requests](/api/up.request#options.lateDelay).
 
-  Once all responses have been received, an [`up:network:recover`](/up:network:recover)
+  Once all responses have been received, an [`up:network:recover`](/api/up:network:recover)
   event will be emitted.
 
   If additional requests are made while Unpoly is already busy waiting,
@@ -800,9 +800,9 @@ up.network = (function() {
 
   ## Default behavior
 
-  By default, Unpoly will show a [progress bar](/progress-bar) while late requests
-  are pending. You can [disable](/progress-bar#disabling) the progress bar
-  or [implement custom loading indicators](/progress-bar#custom-implementation).
+  By default, Unpoly will show a [progress bar](/learn/progress-bar) while late requests
+  are pending. You can [disable](/learn/progress-bar#disabling) the progress bar
+  or [implement custom loading indicators](/learn/progress-bar#custom-implementation).
 
   @event up:network:late
   @stable
@@ -810,8 +810,8 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/up.emit) when [AJAX requests](/up.request)
-  have [taken long to finish](/up:network:late), but have finished now.
+  This event is [emitted](/api/up.emit) when [AJAX requests](/api/up.request)
+  have [taken long to finish](/api/up:network:late), but have finished now.
 
   @learn-ref network-issues#slow-server-responses
 
@@ -820,7 +820,7 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/up.emit) before an [AJAX request](/up.request)
+  This event is [emitted](/api/up.emit) before an [AJAX request](/api/up.request)
   is sent over the network.
 
   Only requests that are sent via Unpoly features
@@ -832,7 +832,7 @@ up.network = (function() {
   ## Changing requests before loading {#changing-requests}
 
   Listeners to `up:request:load` can inspect or
-  mutate the [request options](/up.request#parameters-request)
+  mutate the [request options](/api/up.request#parameters-request)
   before the request is loaded.
 
   For example, this listener changes requests to `/stocks`
@@ -853,21 +853,21 @@ up.network = (function() {
 
     Listeners can [inspect or mutate request options](#changing-requests) before the request is sent.
   @param {up.Layer} [event.layer]
-    The [layer](/up.layer) this request is associated with.
+    The [layer](/api/up.layer) this request is associated with.
 
     If this request is intended to update an existing fragment, this is that fragment's layer.
 
-    If this request is intended to [open an overlay](/opening-overlays),
+    If this request is intended to [open an overlay](/learn/opening-overlays),
     the associated layer is the future overlay's parent layer.
   @param {Element} [event.origin]
     The link or form element that caused the request.
   @param event.preventDefault()
-    [Aborts](/up.Request.prototype.abort) the request before it is sent.
+    [Aborts](/api/up.Request.prototype.abort) the request before it is sent.
   @stable
   */
 
   /*-
-  This event is [emitted](/up.emit) when the response to an [AJAX request](/up.request)
+  This event is [emitted](/api/up.emit) when the response to an [AJAX request](/api/up.request)
   has been received.
 
   Note that this event will also be emitted when the server signals an
@@ -890,11 +890,11 @@ up.network = (function() {
     The response that was received from the server.
 
   @param {up.Layer} [event.layer]
-    The [layer](/up.layer) this request is associated with.
+    The [layer](/api/up.layer) this request is associated with.
 
     If this request is intended to update an existing fragment, this is that fragment's layer.
 
-    If this request is intended to [open an overlay](/opening-overlays),
+    If this request is intended to [open an overlay](/learn/opening-overlays),
     the associated layer is the future overlay's parent layer.
 
   @param {Element} [event.origin]
@@ -904,17 +904,17 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/up.emit) when an [AJAX request](/up.request)
-  encounters a fatal error, like a [timeout](/up.network.config#config.timeout) or loss of network connectivity.
+  This event is [emitted](/api/up.emit) when an [AJAX request](/api/up.request)
+  encounters a fatal error, like a [timeout](/api/up.network.config#config.timeout) or loss of network connectivity.
 
   > [note]
   > This event will *not* be emitted when the server produces
   > an error message with an HTTP status like `500`. When the server can produce
-  > any response, [`up:request:loaded`](/up:request:loaded) is emitted instead.
+  > any response, [`up:request:loaded`](/api/up:request:loaded) is emitted instead.
 
   The event is emitted on the layer that caused the request.
 
-  To effectively [handle disconnects while rendering](/network-issues#disconnects), use the `up:fragment:offline` event instead.
+  To effectively [handle disconnects while rendering](/learn/network-issues#disconnects), use the `up:fragment:offline` event instead.
 
   @event up:request:offline
 
@@ -922,11 +922,11 @@ up.network = (function() {
     The failed request.
 
   @param {up.Layer} [event.layer]
-    The [layer](/up.layer) this request is associated with.
+    The [layer](/api/up.layer) this request is associated with.
 
     If this request was intended to update an existing fragment, this is that fragment's layer.
 
-    If this request was intended to [open an overlay](/opening-overlays),
+    If this request was intended to [open an overlay](/learn/opening-overlays),
     the associated layer is the future overlay's parent layer.
 
   @param {Element} [event.origin]

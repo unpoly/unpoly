@@ -1,7 +1,7 @@
 const u = up.util
 
 /*-
-Instances of `up.RenderResult` describe the effects of [rendering](/up.render).
+Instances of `up.RenderResult` describe the effects of [rendering](/api/up.render).
 
 Functions like `up.render()`, `up.follow()` or `up.submit()` return a promise
 that resolves with an `up.RenderResult`:
@@ -27,7 +27,7 @@ up.RenderResult = class RenderResult {
   */
 
   /*-
-  The updated [layer](/up.layer).
+  The updated [layer](/api/up.layer).
 
   @property up.RenderResult#layer
   @param {up.Layer} layer
@@ -35,7 +35,7 @@ up.RenderResult = class RenderResult {
   */
 
   /*-
-  The [target selector](/targeting-fragments) for the rendered fragments.
+  The [target selector](/learn/targeting-fragments) for the rendered fragments.
 
   When the given target contains an abstract selector like `:main` or `:layer`,
   this property describes the specific selector that matched:
@@ -54,10 +54,10 @@ up.RenderResult = class RenderResult {
   */
 
   /*-
-  The [render](/up.render) options used to produce this result.
+  The [render](/api/up.render) options used to produce this result.
 
-  If this result was produced from a [failed response](/failed-responses),
-  [`fail` prefixes](/failed-responses#fail-options)
+  If this result was produced from a [failed response](/learn/failed-responses),
+  [`fail` prefixes](/learn/failed-responses#fail-options)
   have been removed from the render options.
 
   @property up.RenderResult#renderOptions
@@ -70,19 +70,19 @@ up.RenderResult = class RenderResult {
 
   In particular:
 
-  - [Animations](/up.motion) have concluded and [transitioned](/up-transition) elements were removed from the DOM tree.
-  - A [cached response](/up.render#options.cache) was [revalidated with the server](/caching#revalidation).
+  - [Animations](/api/up.motion) have concluded and [transitioned](/api/up-transition) elements were removed from the DOM tree.
+  - A [cached response](/api/up.render#options.cache) was [revalidated with the server](/learn/caching#revalidation).
     If the server has responded with new content, this content has also been rendered.
 
   The promise resolves to the last `up.RenderResult` that updated a fragment.
-  If [revalidation](/caching#revalidation) re-rendered the fragment, it is the result from the
-  second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
+  If [revalidation](/learn/caching#revalidation) re-rendered the fragment, it is the result from the
+  second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/learn/caching#when-nothing-changed),
   it is the result from the initial render pass.
 
   The promise will reject if the server sends an error status,
   if there is a network issue, or if targets could not be matched.
 
-  Also see [Awaiting postprocessing](/render-lifecycle#postprocessing).
+  Also see [Awaiting postprocessing](/learn/render-lifecycle#postprocessing).
 
   ### Example
 
@@ -128,11 +128,11 @@ up.RenderResult = class RenderResult {
 
   There are some cases where no fragments were rendered:
 
-  - The server sent HTTP status `304 Not Modified` to [avoid re-rendering unchanged content](/conditional-requests).
+  - The server sent HTTP status `304 Not Modified` to [avoid re-rendering unchanged content](/learn/conditional-requests).
   - The server sent HTTP status `204 No Content`.
   - The target selector was set to `':none'` by either client or server.
   - The server sent an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
-    This [closes an overlay](/closing-overlays#from-server) before content is rendered.
+    This [closes an overlay](/learn/closing-overlays#from-server) before content is rendered.
 
   @property up.RenderResult#none
   @param {boolean} none
@@ -145,8 +145,8 @@ up.RenderResult = class RenderResult {
   /*-
   Returns the inserted fragment.
 
-  When [multiple fragments](/targeting-fragments#multiple) were inserted, the first fragment is returned.
-  To get a list of all inserted fragments, use the [`{ fragments }`](/up.RenderResult.prototype.fragments) property.
+  When [multiple fragments](/learn/targeting-fragments#multiple) were inserted, the first fragment is returned.
+  To get a list of all inserted fragments, use the [`{ fragments }`](/api/up.RenderResult.prototype.fragments) property.
 
   See also `up.Request#fragment`.
 
@@ -162,9 +162,9 @@ up.RenderResult = class RenderResult {
   Whether this render pass has rendered a successful response.
 
   By default responses with a `2xx` status code are considered successful.
-  Other HTTP codes (like `500` or `404`) are considered [failed responses](/failed-responses#fail-options).
+  Other HTTP codes (like `500` or `404`) are considered [failed responses](/learn/failed-responses#fail-options).
 
-  Rendering a [string of HTML](/providing-html#string) is always successful.
+  Rendering a [string of HTML](/learn/providing-html#string) is always successful.
 
   @property up.RenderResult#ok
   @param {boolean} up.RenderResult#ok

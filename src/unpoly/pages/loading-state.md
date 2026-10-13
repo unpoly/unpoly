@@ -35,7 +35,7 @@ Style these classes in your CSS to show that the app is working:
 Both classes are removed when the response arrives.
 To also disable a form's fields and buttons while it submits, see [[disabling-forms]].
 
-<p class="read-more"><a href="/feedback-classes">Read more: Feedback classes</a></p>
+<p class="read-more"><a href="/learn/feedback-classes">Read more: Feedback classes</a></p>
 
 
 Showing placeholders
@@ -58,16 +58,16 @@ and the placeholder is shown in its place:
 </div>
 ```
 
-Placeholders can also be cloned from a [template](/templates),
+Placeholders can also be cloned from a [template](/learn/templates),
 so you can reuse the same skeleton for many links.
 
-<p class="read-more"><a href="/placeholders">Read more: Placeholders</a></p>
+<p class="read-more"><a href="/learn/placeholders">Read more: Placeholders</a></p>
 
 
 Previews: arbitrary temporary changes
 -------------------------------------
 
-Feedback classes, placeholders and [disabling](/disabling-forms) are *previews*: temporary page changes that Unpoly
+Feedback classes, placeholders and [disabling](/learn/disabling-forms) are *previews*: temporary page changes that Unpoly
 applies when a request starts, and reverts when the request ends.
 You can define your own preview with `up.preview()`:
 
@@ -88,7 +88,7 @@ the spinner is removed. This holds for any outcome: when the server responds wit
 when the request is aborted, or when the server ends up updating a different fragment.
 The page is always restored to a consistent state before the response is rendered.
 
-<p class="read-more"><a href="/previews">Read more: Previews</a></p>
+<p class="read-more"><a href="/learn/previews">Read more: Previews</a></p>
 
 
 Optimistic rendering
@@ -109,7 +109,7 @@ up.preview('add-task', function(preview) {
 The item appears instantly. When the server responds, the optimistic change is reverted
 and replaced by the server-rendered list.
 
-<p class="read-more"><a href="/optimistic-rendering">Read more: Optimistic rendering</a></p>
+<p class="read-more"><a href="/learn/optimistic-rendering">Read more: Optimistic rendering</a></p>
 
 
 Also in this topic

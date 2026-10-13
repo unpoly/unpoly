@@ -26,17 +26,17 @@ X-Up-Target: .content
 
 The server renders a full HTML page, as it would for any browser request. Unpoly extracts
 the `.content` fragment from the response and swaps it into the page. A server may use
-the headers to [omit content that is not targeted](/optimizing-responses), but it never has to.
+the headers to [omit content that is not targeted](/learn/optimizing-responses), but it never has to.
 
-Requests from links, forms, [polling](/polling) and [preloading](/preloading) all pass
+Requests from links, forms, [polling](/learn/polling) and [preloading](/learn/preloading) all pass
 through the same client. They share one cache, one queue that limits concurrent requests,
-and one set of [events](/up.network).
+and one set of [events](/api/up.network).
 
 
 Instant revisits from the cache
 -------------------------------
 
-When [navigating](/navigation-defaults), responses to `GET` requests are cached. When the user returns
+When [navigating](/learn/navigation-defaults), responses to `GET` requests are cached. When the user returns
 to a page they already saw this session, the fragment renders from the cache,
 without waiting for the network:
 
@@ -52,7 +52,7 @@ the user sees the cached version immediately and the fresh version a moment late
 When a form is submitted with a method like `POST`, the entire cache is expired,
 since the submission has probably changed data on the server.
 
-<p class="read-more"><a href="/caching">Read more: Caching</a></p>
+<p class="read-more"><a href="/learn/caching">Read more: Caching</a></p>
 
 
 Aborting conflicting requests
@@ -73,7 +73,7 @@ Requests targeting other fragments are not affected.
 Links and forms can change this rule with an `[up-abort]` attribute.
 For example, `[up-abort="layer"]` aborts every request on the current layer.
 
-<p class="read-more"><a href="/aborting-requests">Read more: Aborting requests</a></p>
+<p class="read-more"><a href="/learn/aborting-requests">Read more: Aborting requests</a></p>
 
 
 Handling disconnects
@@ -91,10 +91,10 @@ up.on('up:fragment:offline', function(event) {
 
 Requests that time out are handled the same way. Pages already in the cache remain accessible while offline.
 
-A server that is slow to respond is not a network issue. Unpoly shows a [progress bar](/progress-bar)
-after 400 ms, and can show [loading state](/loading-state) in the targeted fragment while the user waits.
+A server that is slow to respond is not a network issue. Unpoly shows a [progress bar](/learn/progress-bar)
+after 400 ms, and can show [loading state](/learn/loading-state) in the targeted fragment while the user waits.
 
-<p class="read-more"><a href="/network-issues">Read more: Handling network issues</a></p>
+<p class="read-more"><a href="/learn/network-issues">Read more: Handling network issues</a></p>
 
 
 Making requests from JavaScript

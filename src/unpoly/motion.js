@@ -1,9 +1,9 @@
 /*-
 Features to animate fragment updates.
 
-A *transition* morphs an old element into its new version. Set an `[up-transition]` attribute on a link or form, or pass a `{ transition }` option to `up.render()`. An *animation* shows or hides a single element without a counterpart, for example when an overlay opens with an [`[up-animation]`](/up-layer-new#up-animation) attribute, or when `up.destroy()` removes a fragment.
+A *transition* morphs an old element into its new version. Set an `[up-transition]` attribute on a link or form, or pass a `{ transition }` option to `up.render()`. An *animation* shows or hides a single element without a counterpart, for example when an overlay opens with an [`[up-animation]`](/api/up-layer-new#up-animation) attribute, or when `up.destroy()` removes a fragment.
 
-Unpoly ships with [predefined transitions](/up.morph#named-transitions) and [predefined animations](/up.animate#named-animations). Define your own with `up.transition()` and `up.animation()`. To play an effect outside a render pass, call `up.animate()` or `up.morph()` directly.
+Unpoly ships with [predefined transitions](/api/up.morph#named-transitions) and [predefined animations](/api/up.animate#named-animations). Define your own with `up.transition()` and `up.animation()`. To play an effect outside a render pass, call `up.animate()` or `up.morph()` directly.
 
 @learn-ref animation
 
@@ -62,7 +62,7 @@ up.motion = (function() {
   ## Callback contract
 
   For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
-  we recommend that your definitions end by calling [`up.animate()`](/up.animate) with an object argument,
+  we recommend that your definitions end by calling [`up.animate()`](/api/up.animate) with an object argument,
   passing along your `options` and returning the result.
 
   If you choose to *not* use `up.animate()` and roll your own
@@ -75,7 +75,7 @@ up.motion = (function() {
      the given element, the transition instantly jumps to the last frame
      and resolves the returned promise.
 
-  Calling [`up.animate()`](/up.animate) with an object argument
+  Calling [`up.animate()`](/api/up.animate) with an object argument
   will take care of all these points.
 
   @function up.animation
@@ -90,7 +90,7 @@ up.motion = (function() {
   let namedTransitions = new up.Registry('transition', findTransitionFn)
 
   /*-
-  Defines a named transition that [morphs](/up.morph) from one element to another.
+  Defines a named transition that [morphs](/api/up.morph) from one element to another.
 
   ## Example
 
@@ -108,7 +108,7 @@ up.motion = (function() {
   ## Callback contract
 
   For animations that can be expressed through [CSS transitions](https://www.w3schools.com/css/css3_transitions.asp),
-  we recommend that your definitions end by calling [`up.animate()`](/up.animate) with an object argument,
+  we recommend that your definitions end by calling [`up.animate()`](/api/up.animate) with an object argument,
   passing along your `options` and returning the result.
 
   If you choose to *not* use `up.animate()` and roll your own
@@ -121,7 +121,7 @@ up.motion = (function() {
      either element, the transition instantly jumps to the last frame
      and resolves the returned promise.
 
-  Calling [`up.animate()`](/up.animate) with an object argument
+  Calling [`up.animate()`](/api/up.animate) with an object argument
   will take care of all these points.
 
   @function up.transition
@@ -157,9 +157,9 @@ up.motion = (function() {
 
   ## Named animations
 
-  Unpoly ships with a number of [predefined animations](/animation#available-animations)
+  Unpoly ships with a number of [predefined animations](/learn/animation#available-animations)
 
-  You can define additional named animations using [`up.animation()`](/up.animation).
+  You can define additional named animations using [`up.animation()`](/api/up.animation).
 
   ## Animating CSS properties directly
 
@@ -190,7 +190,7 @@ up.motion = (function() {
     @param {string|Function(element, options): Promise|Object} animation
       Can either be:
 
-      - The name of a [registered](/up.animation) animation
+      - The name of a [registered](/api/up.animation) animation
       - A function performing the animation (same contract as a function passed to `up.animation()`)
       - An object of CSS attributes describing the last frame of the animation (using kebab-case property names)
     @param {number} [options.duration=175]
@@ -298,7 +298,7 @@ up.motion = (function() {
   }
 
   /*-
-  Completes [animations](/up.animate) and [transitions](/up.morph).
+  Completes [animations](/api/up.animate) and [transitions](/api/up.morph).
 
   If called without arguments, all animations on the screen are completed.
   If given an element (or selector), animations on that element and its children
@@ -328,13 +328,13 @@ up.motion = (function() {
   This event is emitted on an animating element by `up.motion.finish()` to
   request the animation to instantly finish and skip to the last frame.
 
-  Custom [animation](/up.animation) and [transition](/up.transition) functions are expected
+  Custom [animation](/api/up.animation) and [transition](/api/up.transition) functions are expected
   to instantly settle their promises when this event is observed on the
   animating element.
 
   > [IMPORTANT]
   > The `up:motion:finish` event does **not** signal the end of an animation.
-  > For this see [awaiting postprocessing](/render-lifecycle#postprocessing).
+  > For this see [awaiting postprocessing](/learn/render-lifecycle#postprocessing).
 
   @event up:motion:finish
   @param {Element} event.target
@@ -356,9 +356,9 @@ up.motion = (function() {
 
   ## Named transitions
 
-  Unpoly ships with a number of [predefined transitions](/animation#available-transitions).
+  Unpoly ships with a number of [predefined transitions](/learn/animation#available-transitions).
 
-  You can define additional named transitions using [`up.transition()`](/up.transition).
+  You can define additional named transitions using [`up.transition()`](/api/up.transition).
 
 
   ## Implementation details
@@ -394,7 +394,7 @@ up.motion = (function() {
     @param {Function(oldElement, newElement, options)|string} transition
       Can either be:
 
-      - The name of a [registered](/up.transition) transition
+      - The name of a [registered](/api/up.transition) transition
       - A function performing the transition (same contract as a function passed to `up.transition()`)
     @param {number} [options.duration=175]
       The duration of the animation, in milliseconds.
@@ -616,7 +616,7 @@ up.motion = (function() {
   /*-
   Swaps a fragment with an animated transition.
 
-  You can use a [predefined transition](/animation#available-transitions) or [define your own](/up.transition).
+  You can use a [predefined transition](/learn/animation#available-transitions) or [define your own](/api/up.transition).
 
   > [NOTE]
   > Transitions are not possible when replacing the `<body>` element.
@@ -654,7 +654,7 @@ up.motion = (function() {
   @params-note
     All modifying attributes for `[up-follow]` (links) or `[up-submit]` (forms) may also be used.
   @param [up-transition]
-    The [name of a transition](/animation#available-transitions).
+    The [name of a transition](/learn/animation#available-transitions).
   @param [up-duration]
       The duration of the transition in milliseconds.
   @param [up-easing]

@@ -16,7 +16,7 @@ up.viewport.config.patch(function(config) {
 /*-
 Returns the scrolling container for the given element.
 
-Returns the [document's scrolling element](/up.viewport.root)
+Returns the [document's scrolling element](/api/up.viewport.root)
 if no closer viewport exists.
 
 @function up.viewport.closest

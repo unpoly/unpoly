@@ -5,8 +5,8 @@ const e = up.element
 The `up.Params` class offers a consistent API to read and manipulate request parameters
 independent of their type.
 
-Request parameters are used in [form submissions](/up.Params.fromForm) and
-[URLs](/up.Params.fromURL). Methods like `up.submit()` or `up.replace()` accept
+Request parameters are used in [form submissions](/api/up.Params.fromForm) and
+[URLs](/api/up.Params.fromURL). Methods like `up.submit()` or `up.replace()` accept
 request parameters as a `{ params }` option.
 
 ### Supported parameter types
@@ -30,7 +30,7 @@ up.Params = class Params {
   @param {Object|Array|string|FormData|up.Params} [params]
     An existing list of params with which to initialize the new `up.Params` object.
 
-    The given params value may be of any [supported type](/up.Params).
+    The given params value may be of any [supported type](/api/up.Params).
   @return {up.Params}
   @stable
   */
@@ -264,7 +264,7 @@ up.Params = class Params {
   /*-
   Adds all entries from the given list of params.
 
-  The given params value may be of any [supported type](/up.Params).
+  The given params value may be of any [supported type](/api/up.Params).
 
   @function up.Params#addAll
   @param {Object|Array|string|FormData|up.Params|undefined} params
@@ -345,7 +345,7 @@ up.Params = class Params {
   Sets the `value` for the entry with given `name`.
 
   An `up.Params` instance can hold multiple entries with the same name.
-  All existing entries with the given `name` are [deleted](/up.Params.prototype.delete) before the
+  All existing entries with the given `name` are [deleted](/api/up.Params.prototype.delete) before the
   new entry is set. To add a new entry even if the `name` is taken, use `up.Params#add()`.
 
   @function up.Params#set
@@ -474,12 +474,12 @@ up.Params = class Params {
   - Fields without a `[name]` attribute are ignored.
   - Fields [outside the form](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#form)
     that reference it with a `[form]` attribute are included.
-  - [Form-associated custom elements](/custom-form-fields#form-associated) are included.
+  - [Form-associated custom elements](/learn/custom-form-fields#form-associated) are included.
   - Values appended by a [`formdata`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/formdata_event)
     event listener are included.
   - The [submit button](#submit-button) contributes its `[name]` and `[value]`.
 
-  On top of that, [elements registered as fields](/custom-form-fields#registering) in
+  On top of that, [elements registered as fields](/learn/custom-form-fields#registering) in
   `up.form.config.fieldSelectors` are included. The browser cannot know about those.
 
   ### Example

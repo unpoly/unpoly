@@ -23,7 +23,7 @@ element in the response and replaces the one on the page. Everything around it s
 
 The server renders the same HTML it would for a regular request.
 It may respond with a full page or with only the targeted fragment, as the
-[`X-Up-Target`](/optimizing-responses) header tells it what Unpoly is going to use.
+[`X-Up-Target`](/learn/optimizing-responses) header tells it what Unpoly is going to use.
 
 
 Loading content later
@@ -49,7 +49,7 @@ To load only when the deferred element is scrolled into view, set `[up-defer="re
 </div>
 ```
 
-<p class="read-more"><a href="/lazy-loading">Read more: Lazy loading content</a></p>
+<p class="read-more"><a href="/learn/lazy-loading">Read more: Lazy loading content</a></p>
 
 
 Polling for changes
@@ -68,7 +68,7 @@ The element is reloaded every 30 seconds. Polling pauses while the browser tab i
 or the fragment's layer is covered by an overlay, and resumes when the user comes back.
 The interval, source URL and many other details can be configured.
 
-<p class="read-more"><a href="/polling">Read more: Polling</a></p>
+<p class="read-more"><a href="/learn/polling">Read more: Polling</a></p>
 
 
 Updating elements outside the target
@@ -89,9 +89,9 @@ is updated along with the targeted fragment. When a response doesn't contain
 the element, nothing happens. You no longer need to name the counter in every link's
 `[up-target]`.
 
-To show confirmations or errors from any response, use a ready-made hungry element for [notification flashes](/flashes).
+To show confirmations or errors from any response, use a ready-made hungry element for [notification flashes](/learn/flashes).
 
-<p class="read-more"><a href="/hungry-elements">Read more: Hungry elements</a></p>
+<p class="read-more"><a href="/learn/hungry-elements">Read more: Hungry elements</a></p>
 
 
 Also in this topic

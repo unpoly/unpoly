@@ -2,7 +2,7 @@ Target derivation
 =================
 
 When Unpoly is given an element instead of a selector, it guesses a CSS selector that
-[matches that element](/targeting-fragments). This is called *target derivation*.
+[matches that element](/learn/targeting-fragments). This is called *target derivation*.
 A good guess needs an identifying attribute like `[id]`, and you can configure how the guess is made.
 
 In the example below, Unpoly derives a target selector for an element that is being reloaded:
@@ -13,14 +13,14 @@ up.reload(element) // Derives the target '#foo' from the given element
 ```
 
 Features that must derive targets include `[up-poll]`, `[up-hungry]`, `[up-keep]`, `[up-validate]`, `[up-viewport]`,
-[`up.reload(Element)`](/up.reload) and [`up.render(Element)`](/up.render).
+[`up.reload(Element)`](/api/up.reload) and [`up.render(Element)`](/api/up.render).
 
 
 Identifying properties
 ----------------------
 
 To build a good selector, the element needs an *identifying property* that distinguishes it
-from other elements on the same [layer](/up.layer). The most important properties that Unpoly looks for are:
+from other elements on the same [layer](/api/up.layer). The most important properties that Unpoly looks for are:
 
 - The element's `[id]` or `[up-id]` attribute
 - The tag name of a page-unique element (`<html>`, `<head>`, `<body>`, `<main>`)
@@ -104,7 +104,7 @@ Verification rejects `.card` and moves on to the next pattern. If no pattern pro
 an error `up.CannotTarget` is thrown. In such cases, give the element an `[id]` attribute,
 or configure a new [derivation pattern](#derivation-patterns).
 
-Verification can be [disabled](/up.fragment.config#config.verifyDerivedTarget) with
+Verification can be [disabled](/api/up.fragment.config#config.verifyDerivedTarget) with
 `up.fragment.config.verifyDerivedTarget = false`, which is almost always a bad idea.
 
 
@@ -118,7 +118,7 @@ let element = up.element.createFromHTML('<span class="klass">...</span>')
 let selector = up.fragment.toTarget(element) // result: ".klass"
 ```
 
-Also see the [options for `up.fragment.toTarget()`](/up.fragment.toTarget#parameters).
+Also see the [options for `up.fragment.toTarget()`](/api/up.fragment.toTarget#parameters).
 
 To test whether a selector can be derived from an element, use `up.fragment.isTargetable()`.
 

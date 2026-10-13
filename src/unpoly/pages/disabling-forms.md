@@ -116,13 +116,13 @@ on the watched field, on the `<form>` or on any container that contains fields:
 </form>
 ```
 
-See [disabling fields while working](/watch-options#disabling) for details.
+See [disabling fields while working](/learn/watch-options#disabling) for details.
 
 
 ## Disabling controls from a preview {#from-preview}
 
-When [previewing a request](/previews), you can use the
-[`preview.disable()`](/up.Preview.prototype.disable) method to temporarily disable controls.
+When [previewing a request](/learn/previews), you can use the
+[`preview.disable()`](/api/up.Preview.prototype.disable) method to temporarily disable controls.
 
 For example, this preview disables an `input[name=email]` and all controls within a container matching `.button-bar`:
 
@@ -141,7 +141,7 @@ Like all preview changes, the controls are re-enabled when the request ends.
 A disabled field cannot have focus. When a focused field becomes disabled, the browser takes focus away from it.
 
 When `[up-disable]` or `{ disable }` takes focus away from a field, Unpoly
-focuses the closest [form group](/up-form-group) around the field. If the field is not within a form group,
+focuses the closest [form group](/api/up-form-group) around the field. If the field is not within a form group,
 the containing `<form>` is focused.
 
 When the request ends, Unpoly restores focus, selection range and scroll position of any element that lost focus through disabling.

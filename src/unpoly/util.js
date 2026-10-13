@@ -250,7 +250,7 @@ up.util = (function() {
   }
 
   /*-
-  Maps all items in a [list](/List) to a new array of items.
+  Maps all items in a [list](/api/List) to a new array of items.
 
   ## Example
 
@@ -322,7 +322,7 @@ up.util = (function() {
 
   /*-
   Calls the given function for each element (and optional index)
-  of the given [list](/List) or iterator.
+  of the given [list](/api/List) or iterator.
 
   @function up.util.each
   @param {List|Iterator} list
@@ -382,7 +382,7 @@ up.util = (function() {
 
   Note that empty strings or zero are *not* considered to be "missing".
 
-  For the opposite of `up.util.isMissing()` see [`up.util.isGiven()`](/up.util.isGiven).
+  For the opposite of `up.util.isMissing()` see [`up.util.isGiven()`](/api/up.util.isGiven).
 
   @function up.util.isMissing
   @param {any} value
@@ -396,7 +396,7 @@ up.util = (function() {
   /*-
   Returns whether the given argument is neither `undefined` nor `null`.
 
-  For the opposite of `up.util.isGiven()` see [`up.util.isMissing()`](/up.util.isMissing).
+  For the opposite of `up.util.isGiven()` see [`up.util.isMissing()`](/api/up.util.isMissing).
 
   > [IMPORTANT]
   > Unpoly's concept of "given" does not correspond to JavaScript's concept of [truthy](https://developer.mozilla.org/en-US/docs/Glossary/Truthy).
@@ -494,7 +494,7 @@ up.util = (function() {
   isBlank.key = 'up.util.isBlank'
 
   /*-
-  Returns the given argument if the argument is [present](/up.util.isPresent),
+  Returns the given argument if the argument is [present](/api/up.util.isPresent),
   otherwise returns `undefined`.
 
   @function up.util.presence
@@ -511,7 +511,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns whether the given argument is not [blank](/up.util.isBlank).
+  Returns whether the given argument is not [blank](/api/up.util.isBlank).
 
   @function up.util.isPresent
   @param {any} value
@@ -710,7 +710,7 @@ up.util = (function() {
   }
 
   /*-
-  Converts the given [array-like value](/List) into an array.
+  Converts the given [array-like value](/api/List) into an array.
 
   If the given value is already an array, it is returned unchanged.
 
@@ -724,9 +724,9 @@ up.util = (function() {
   }
 
   /*-
-  Returns whether the given argument is an [array-like value](/List).
+  Returns whether the given argument is an [array-like value](/api/List).
 
-  To test whether a value is an actual `Array`, use [`up.util.isArray()`](/up.util.isArray).
+  To test whether a value is an actual `Array`, use [`up.util.isArray()`](/api/up.util.isArray).
 
   @function up.util.isList
   @param {any} value
@@ -776,7 +776,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns the given value if it is [array-like](/List), otherwise
+  Returns the given value if it is [array-like](/api/List), otherwise
   returns an array with the given value as its only element.
 
   Returns an empty array if called with `null` or `undefined`.
@@ -810,7 +810,7 @@ up.util = (function() {
 
   ### Copying protocol
 
-  - By default `up.util.copy()` can copy [array-like values](/List),
+  - By default `up.util.copy()` can copy [array-like values](/api/List),
     plain objects and `Date` instances.
   - Array-like objects are copied into new arrays.
   - Unsupported types of values are returned unchanged.
@@ -965,7 +965,7 @@ up.util = (function() {
   }
 
   /*-
-  Passes each element in the given [array-like value](/List) to the given function.
+  Passes each element in the given [array-like value](/api/List) to the given function.
   Returns the first element for which the function returns a truthy value.
 
   If no element matches, returns `undefined`.
@@ -990,7 +990,7 @@ up.util = (function() {
 
   /*-
   Returns whether the given function returns a truthy value
-  for any element in the given [array-like value](/List).
+  for any element in the given [array-like value](/api/List).
 
   @function up.util.some
   @param {List} list
@@ -1032,7 +1032,7 @@ up.util = (function() {
 
   /*-
   Returns whether the given function returns a truthy value
-  for all elements in the given [list](/List) or iterator.
+  for all elements in the given [list](/api/List) or iterator.
 
   @function up.util.every
   @param {List|Iterator} list
@@ -1056,7 +1056,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns all elements from the given [list](/List) that are
+  Returns all elements from the given [list](/api/List) that are
   neither `null` or `undefined`.
 
   @function up.util.compact
@@ -1087,7 +1087,7 @@ up.util = (function() {
   }
 
   /*-
-  This function is like [`uniq`](/up.util.uniq), except that
+  This function is like [`uniq`](/api/up.util.uniq), except that
   the given function is invoked for each element to generate the value
   for which uniqueness is computed.
 
@@ -1113,7 +1113,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns all elements from the given [list](/List) that return
+  Returns all elements from the given [list](/api/List) that return
   a truthy value when passed to the given function.
 
   @function up.util.filter
@@ -1134,7 +1134,7 @@ up.util = (function() {
   }
 
   /*-
-  Returns all elements from the given [array-like value](/List) that do not return
+  Returns all elements from the given [array-like value](/api/List) that do not return
   a truthy value when passed to the given function.
 
   @function up.util.reject
@@ -1167,7 +1167,7 @@ up.util = (function() {
   This function works like the built-in [`setTimeout()`](https://developer.mozilla.org/en-US/docs/Web/API/setTimeout), except that the argument order is flipped for
   ergonomic reasons.
 
-  Instead of `up.util.timer(0, fn)` you can also use [`up.util.task(fn)`](/up.util.task).
+  Instead of `up.util.timer(0, fn)` you can also use [`up.util.task(fn)`](/api/up.util.task).
 
   ### Example
 
@@ -1623,7 +1623,7 @@ up.util = (function() {
   /*-
   Flattens the given `array` a single depth level.
 
-  Will also flatten [array-like](/List) values, like a `NodeList`.
+  Will also flatten [array-like](/api/List) values, like a `NodeList`.
 
   ### Example
 
@@ -1659,7 +1659,7 @@ up.util = (function() {
 
   /*-
   Maps each element using a mapping function,
-  then [flattens](/up.util.flatten) the result into a new array.
+  then [flattens](/api/up.util.flatten) the result into a new array.
 
   @function up.util.flatMap
   @param {List|Iterator} list
@@ -1746,7 +1746,7 @@ up.util = (function() {
   ### Comparison protocol
 
   - By default `up.util.isEqual()` can compare strings, numbers,
-    [array-like values](/List), plain objects and `Date` objects.
+    [array-like values](/api/List), plain objects and `Date` objects.
   - To make the comparison protocol work with user-defined classes,
     see `up.util.isEqual.key`.
   - Objects without a defined comparison protocol are
@@ -2287,7 +2287,7 @@ up.util = (function() {
   }
 
   /*-
-  Parses a string of [relaxed JSON](/relaxed-json) into a JavaScript value.
+  Parses a string of [relaxed JSON](/api/relaxed-json) into a JavaScript value.
 
   ## Example
 

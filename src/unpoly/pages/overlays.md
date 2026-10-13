@@ -16,7 +16,7 @@ Any link can open its destination in a new overlay:
 ```
 
 The server renders `/users/new` as a full HTML page, the same way it would for
-a regular page load. Unpoly extracts the page's [main element](/main) and shows it
+a regular page load. Unpoly extracts the page's [main element](/api/main) and shows it
 in a modal dialog. The user can dismiss the dialog by pressing `Escape`,
 by clicking outside the box, or with its close button.
 
@@ -25,7 +25,7 @@ or when JavaScript is unavailable, the browser loads `/users/new` as a full page
 
 Forms, your JavaScript and the server can open overlays too.
 
-<p class="read-more"><a href="/opening-overlays">Read more: Opening overlays</a></p>
+<p class="read-more"><a href="/learn/opening-overlays">Read more: Opening overlays</a></p>
 
 
 Layers are isolated
@@ -80,17 +80,17 @@ An overlay can be *accepted* (the user completed their task) or *dismissed*
 back to the layer that opened it, like the ID of a newly created record.
 
 Users dismiss an overlay with its close button, the Escape key or a click on the backdrop.
-To accept it, give a button an [`[up-accept]`](/closing-overlays#on-click) attribute with the result value:
+To accept it, give a button an [`[up-accept]`](/learn/closing-overlays#on-click) attribute with the result value:
 
 ```html
 <button up-accept="{ id: 5 }">Choose user #5</button> <!-- mark: up-accept -->
 ```
 
-An overlay can also close itself when a [close condition](/closing-overlays#close-conditions) is met,
+An overlay can also close itself when a [close condition](/learn/closing-overlays#close-conditions) is met,
 like reaching a URL, emitting an event or rendering a fragment. Your JavaScript and the server
 can close overlays, too.
 
-<p class="read-more"><a href="/closing-overlays">Read more: Closing overlays</a></p>
+<p class="read-more"><a href="/learn/closing-overlays">Read more: Closing overlays</a></p>
 
 
 Subinteractions
@@ -118,7 +118,7 @@ The project form opens the company form, waits for the new record, and selects i
 The company form has no idea it is part of a project form. It is the same
 screen the user would see when creating a company on its own.
 
-<p class="read-more"><a href="/subinteractions">Read more: Subinteractions</a></p>
+<p class="read-more"><a href="/learn/subinteractions">Read more: Subinteractions</a></p>
 
 
 Changing an overlay's appearance
@@ -133,7 +133,7 @@ and assign your own CSS classes to style it:
 
 Drawers and popups can be positioned, and opening and closing can be animated.
 
-<p class="read-more"><a href="/customizing-overlays">Read more: Customizing overlays</a></p>
+<p class="read-more"><a href="/learn/customizing-overlays">Read more: Customizing overlays</a></p>
 
 
 Also in this topic

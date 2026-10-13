@@ -5,7 +5,7 @@
 up.migrate.renamedPackage('bus', 'event')
 
 /*-
-[Emits an event](/up.emit) and returns whether no listener
+[Emits an event](/api/up.emit) and returns whether no listener
 has prevented the default action.
 
 ### Example
@@ -67,7 +67,7 @@ up.$on('click', 'a', function(event, $link) {
   The listener function that should be called.
 
   The function takes the observed element as the first argument.
-  The element's [attached data](/data) is passed as a third argument.
+  The element's [attached data](/learn/data) is passed as a third argument.
 @return {Function()}
   A function that unbinds the event listeners when called.
 @deprecated

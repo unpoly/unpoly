@@ -11,7 +11,7 @@ that a naive `click` listener would lack.
 Set an `[up-follow]` attribute on any non-interactive element to make it behave like a hyperlink.
 Set the destination URL as an `[up-href]` attribute.
 
-For example, the following `<span>` element will [navigate](/up-follow) to `/details` when clicked:
+For example, the following `<span>` element will [navigate](/api/up-follow) to `/details` when clicked:
 
 ```html
 <span up-follow up-href="/details">Read more</span> <!-- mark: up-href="/details" -->

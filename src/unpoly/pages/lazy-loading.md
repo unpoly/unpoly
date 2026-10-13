@@ -44,13 +44,13 @@ The server responds with a page containing the `#menu` element with its full con
 ```
 
 Unpoly swaps the deferred element with the element from the response.
-Apart from [hungry elements](/hungry-elements), other elements in the response are discarded,
+Apart from [hungry elements](/learn/hungry-elements), other elements in the response are discarded,
 so the server is free to send a full HTML document.
 
 Note the following:
 
-- The deferred element [targets itself](/targeting-fragments) by default, so it must have a
-  [derivable target selector](/target-derivation) like a unique `[id]`.
+- The deferred element [targets itself](/learn/targeting-fragments) by default, so it must have a
+  [derivable target selector](/learn/target-derivation) like a unique `[id]`.
 - The `#menu` element in the response must *not* have an `[up-defer]` attribute,
   or it would load itself again, forever.
 - The deferred element's children (`Loading...`) are shown until the content arrives.
@@ -59,7 +59,7 @@ Note the following:
 
 ## Loading when scrolled into view {#on-reveal}
 
-Instead of loading right away, a deferred element can wait until it is scrolled into its [viewport](/up.viewport).
+Instead of loading right away, a deferred element can wait until it is scrolled into its [viewport](/api/up.viewport).
 For this set an `[up-defer="reveal"]` attribute:
 
 ```html
@@ -73,7 +73,7 @@ A deferred element that is already visible when inserted loads immediately.
 To load some pixels before the deferred element becomes visible, set an `[up-intersect-margin]` attribute.
 A positive margin loads earlier, a negative margin requires the user to scroll into the element.
 
-A deferred element that loads when revealed can also [implement infinite scrolling](/infinite-scrolling)
+A deferred element that loads when revealed can also [implement infinite scrolling](/learn/infinite-scrolling)
 without custom JavaScript.
 
 > [note]
@@ -92,7 +92,7 @@ With an `[up-defer="manual"]` attribute, a deferred element does not load on its
 ```
 
 Load it whenever you like by passing it to `up.deferred.load()`.
-The [compiler](/enhancing-elements) below loads the menu after two seconds:
+The [compiler](/learn/enhancing-elements) below loads the menu after two seconds:
 
 ```js
 up.compiler('#menu[up-defer]', function(element) {
@@ -100,7 +100,7 @@ up.compiler('#menu[up-defer]', function(element) {
 })
 ```
 
-`up.deferred.load()` returns a promise for the [render result](/up.RenderResult),
+`up.deferred.load()` returns a promise for the [render result](/api/up.RenderResult),
 so you can wait for the content to arrive.
 
 
@@ -115,13 +115,13 @@ The initial children of an `[up-defer]` element are shown until its content has 
 ```
 
 While the content is loading, the deferred element is also assigned an `.up-loading` class.
-All [loading state](/loading-state) techniques for regular links, like [placeholders](/placeholders)
-and [previews](/previews), work with `[up-defer]` elements as well.
+All [loading state](/learn/loading-state) techniques for regular links, like [placeholders](/learn/placeholders)
+and [previews](/learn/previews), work with `[up-defer]` elements as well.
 
-A slow deferred request also shows the [progress bar](/progress-bar). To load quietly, set an [`[up-background]`](/up-defer#up-background) attribute.
+A slow deferred request also shows the [progress bar](/learn/progress-bar). To load quietly, set an [`[up-background]`](/api/up-defer#up-background) attribute.
 
 When the server responds with an error code, nothing is rendered and the fallback stays.
-To show the error, set an [`[up-fail-target]`](/failed-responses#fail-options) attribute.
+To show the error, set an [`[up-fail-target]`](/learn/failed-responses#fail-options) attribute.
 
 > [note]
 > When the deferred content is already [cached](#caching), the deferred element is
@@ -140,7 +140,7 @@ Deferred elements may be scattered across the page, but load from the same URL:
 <div id="analytics-controls" up-defer up-href="/articles/123/deferred"></div> <!-- mark: id="analytics-controls" -->
 ```
 
-Unpoly [sends a single request](/X-Up-Target#merging) with both targets:
+Unpoly [sends a single request](/api/X-Up-Target#merging) with both targets:
 
 ```http
 GET /articles/123/deferred HTTP/1.1
@@ -152,8 +152,8 @@ The response must contain both elements.
 
 ## Updating other fragments {#distant}
 
-Instead of replacing itself, a deferred element can target one or [multiple](/targeting-fragments#multiple)
-other fragments. For this set an [`[up-target]`](/up-defer#up-target) attribute.
+Instead of replacing itself, a deferred element can target one or [multiple](/learn/targeting-fragments#multiple)
+other fragments. For this set an [`[up-target]`](/api/up-defer#up-target) attribute.
 
 The following deferred element updates `#editorial-controls` and `#analytics-controls`
 when it is scrolled into view:
@@ -164,7 +164,7 @@ when it is scrolled into view:
 </a>
 ```
 
-[Infinite scrolling](/infinite-scrolling) is built on this technique: a link at the end of a list
+[Infinite scrolling](/learn/infinite-scrolling) is built on this technique: a link at the end of a list
 appends the next page to the list, then replaces itself with a link to the page after that.
 
 
@@ -172,16 +172,16 @@ appends the next page to the list, then replaces itself with a link to the page 
 
 ### Cached partials are rendered instantly {#cached-partials-are-rendered-instantly}
 
-Unpoly caches [responses to `GET` requests](/caching) on the client.
+Unpoly caches [responses to `GET` requests](/learn/caching) on the client.
 When deferred content is already cached, it is rendered synchronously and the
 `[up-defer]` element is replaced before the browser paints it.
 
 This means Unpoly caches complete pages, including their lazy-loaded fragments.
 Navigating back to such a page renders it instantly, without a flash of [fallback state](#pending).
-The page also stays accessible during [network issues](/network-issues).
+The page also stays accessible during [network issues](/learn/network-issues).
 
-Deferred content rendered from the cache is [revalidated](/caching#revalidation)
-unless you also set an [`[up-revalidate=false]`](/up-follow#up-revalidate) attribute.
+Deferred content rendered from the cache is [revalidated](/learn/caching#revalidation)
+unless you also set an [`[up-revalidate=false]`](/api/up-follow#up-revalidate) attribute.
 
 ### Improving cacheability on the server {#server-cache}
 
@@ -247,7 +247,7 @@ To let crawlers discover and index lazy-loaded content *as a separate URL*, use 
 ```
 
 Since this indexes `/menu` as a separate page, it should render with a full application layout.
-You can omit the layout when an [`X-Up-Target`](/optimizing-responses) header is present on the request.
+You can omit the layout when an [`X-Up-Target`](/learn/optimizing-responses) header is present on the request.
 
 
 ## Preventing a deferred element from loading {#events}

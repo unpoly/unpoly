@@ -18,32 +18,32 @@ up.history = (function() {
   @property up.history.config
   @section History
     @param {Array} [config.restoreTargets=['body']]
-      A list of possible CSS selectors to [replace](/up.render)
-      when the user [goes back or forward in history](/restoring-history).
+      A list of possible CSS selectors to [replace](/api/up.render)
+      when the user [goes back or forward in history](/learn/restoring-history).
 
       If more than one target is configured, the first selector matching both
       the current page and server response will be updated.
 
       If nothing is configured, the `<body>` element will be replaced.
     @param {boolean} [config.enabled=true]
-      Configures whether [fragment updates](/up.render) can [update history](/updating-history).
+      Configures whether [fragment updates](/api/up.render) can [update history](/learn/updating-history).
 
       If set to `false`, Unpoly will never change history.
 
   @section Meta tags
     @param {boolean} [config.updateMetaTags=true]
-      Configures whether [history changes](/updating-history) update
-      [meta tags](/updating-history#history-state) in addition
+      Configures whether [history changes](/learn/updating-history) update
+      [meta tags](/learn/updating-history#history-state) in addition
       to the document's title and URL.
 
       Instead of disabling meta tag synchronization globally, you may also disable it
-      per render pass. To do so, pass a [`{ metaTags: false }`](/up.render#options.metaTags) option
-      or set an [`[up-meta-tags="false"]`](/up-follow#up-meta-tags) attribute
+      per render pass. To do so, pass a [`{ metaTags: false }`](/api/up.render#options.metaTags) option
+      or set an [`[up-meta-tags="false"]`](/api/up-follow#up-meta-tags) attribute
       on a link.
 
     @param {Array<string>} [config.metaTagSelectors]
-      An array of CSS selectors matching default [meta tags](/up-meta)
-      that are updated during [history changes](/updating-history).
+      An array of CSS selectors matching default [meta tags](/api/up-meta)
+      that are updated during [history changes](/learn/updating-history).
 
       By default, the following elements are matched:
 
@@ -53,7 +53,7 @@ up.history = (function() {
       - A `link[rel="icon"]` element
       - [JSON-LD](https://json-ld.org/) annotations
 
-      You can [include additional elements](/up-meta#including-meta-tags) by assigning an `[up-meta]` attribute
+      You can [include additional elements](/api/up-meta#including-meta-tags) by assigning an `[up-meta]` attribute
       or by pushing their selector into this configuration array.
 
       Only elements in the `<head>` can be matched. Elements in the `<body>` are never considered,
@@ -62,7 +62,7 @@ up.history = (function() {
     @param {Array<string>} [config.noMetaTagSelectors]
       Exceptions to `up.history.config.metaTagSelectors`.
 
-      Matching elements will *not* be considered [meta tags](/up-meta)
+      Matching elements will *not* be considered [meta tags](/api/up-meta)
       even if they match `up.history.config.metaTagSelectors`.
 
   @stable
@@ -142,7 +142,7 @@ up.history = (function() {
   It will include a `#hash` fragment and query string, if present.
 
   > [NOTE]
-  > If the current [layer](/up.layer) does not have [visible history](/up.Layer.prototype.history),
+  > If the current [layer](/api/up.layer) does not have [visible history](/api/up.Layer.prototype.history),
   > the browser's address bar will show the location of an ancestor layer.
   > To get the location of the current layer, use `up.layer.location`.
 
@@ -217,11 +217,11 @@ up.history = (function() {
   }
 
   /*-
-  This event is [emitted](/up.emit) after the browser's address bar has been updated with a new URL.
+  This event is [emitted](/api/up.emit) after the browser's address bar has been updated with a new URL.
 
   There may be several reasons why the browser location was changed:
 
-  - A fragment update changes history through [navigation](/navigation-defaults) or rendering with `{ history: true }`.
+  - A fragment update changes history through [navigation](/learn/navigation-defaults) or rendering with `{ history: true }`.
   - The user uses the back or forward buttons in their browser UI.
   - Programmatic calls to functions like `up.history.push()` or `history.pushState()`.
   - The user navigates to a different `#hash` within the page.
@@ -238,17 +238,17 @@ up.history = (function() {
 
   Overlays can configure whether their history state is reflected in the browser's address bar.
 
-  When a [layer](/up.layer) has no [visible history](/up.Layer.prototype.history), no `up:location:changed` event will be emitted.
+  When a [layer](/api/up.layer) has no [visible history](/api/up.Layer.prototype.history), no `up:location:changed` event will be emitted.
   However, an `up:layer:location:changed` will be emitted even if the address bar did not change.
 
-  Also see [History in overlays](/history-in-overlays).
+  Also see [History in overlays](/learn/history-in-overlays).
 
   @event up:location:changed
   @section Change
     @param {string} event.location
       The new URL after the change.
 
-      When this event is emitted, the [browser location](/up.history.location) has already been updated.
+      When this event is emitted, the [browser location](/api/up.history.location) has already been updated.
     @param {string} event.previousLocation
       The URL before the change.
 
@@ -260,7 +260,7 @@ up.history = (function() {
 
       | Value | Reason |
       |-------|--------|
-      | `'hash'`    | The location was changed, but only the `#hash` changed from the [previous location](/up.history.previousLocation). |
+      | `'hash'`    | The location was changed, but only the `#hash` changed from the [previous location](/api/up.history.previousLocation). |
       | `'push'`    | A new history entry was added via `up.history.push()` or `history.pushState()`.                |
       | `'replace'` | The current history update was changed via `up.history.replace()` or `history.replaceState()`. |
       | `'pop'`     | The user navigated back to the current location. |
@@ -268,14 +268,14 @@ up.history = (function() {
     @param {boolean} event.alreadyHandled
       Whether Unpoly thinks this change has already been handled and requires no additional processing.
 
-      For example, updating history by [navigating](/navigation-defaults) or calling `history.pushState()` is
+      For example, updating history by [navigating](/learn/navigation-defaults) or calling `history.pushState()` is
       considered to be already handled.
 
       @experimental
     @param {boolean} event.willHandle
       Whether Unpoly thinks it is responsible for handling this change.
 
-      By default Unpoly feels responsible for [owned locations](/restoring-history#handled-entries)
+      By default Unpoly feels responsible for [owned locations](/learn/restoring-history#handled-entries)
       when the change has not [already been handled](#event.alreadyHandled).
 
       Listeners can tell Unpoly to *not* handle a change by setting `event.willHandle = false`.
@@ -298,7 +298,7 @@ up.history = (function() {
   }
 
   /*-
-  Returns whether the given URL matches the [current browser location](/up.history.location).
+  Returns whether the given URL matches the [current browser location](/api/up.history.location).
 
   ### Examples
 
@@ -320,7 +320,7 @@ up.history = (function() {
   up.history.isLocation('/path?query') // result: false
   ```
 
-  The given URL is [normalized](/up.util.normalizeURL), so any URL string pointing to the browser location
+  The given URL is [normalized](/api/up.util.normalizeURL), so any URL string pointing to the browser location
   will match:
 
   ```js
@@ -356,7 +356,7 @@ up.history = (function() {
 
   The replaced history entry will be owned by Unpoly.
   When the user navigates back to this history entry,
-  Unpoly will [restore the content](/restoring-history) at that URL.
+  Unpoly will [restore the content](/learn/restoring-history) at that URL.
 
   To replace a history entry that you want to restore yourself, use the browser's
   [`history.replaceState()`](https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState) function
@@ -376,7 +376,7 @@ up.history = (function() {
   Does not add a history entry if the given URL is already the current browser location.
   If the URL did change, an `up:location:changed` event is emitted.
 
-  When [navigating](/navigation-defaults) (or rendering with [`{ history: true }`](/up.render#options.history)),
+  When [navigating](/learn/navigation-defaults) (or rendering with [`{ history: true }`](/api/up.render#options.history)),
   Unpoly will update the browser location for you. You only need to call `up.history.push()` to push
   a new entry without rendering.
 
@@ -384,7 +384,7 @@ up.history = (function() {
 
   The new history entry will be owned by Unpoly.
   When the user navigates back to this history entry,
-  Unpoly will [restore the content](/restoring-history) at that URL.
+  Unpoly will [restore the content](/learn/restoring-history) at that URL.
 
   To push a history entry that you want to restore yourself, use the browser's
   [`history.pushState()`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState) function
@@ -504,13 +504,13 @@ up.history = (function() {
 
 
   /*-
-  This event is emitted when the user is [restoring a previous history entry](/restoring-history),
+  This event is emitted when the user is [restoring a previous history entry](/learn/restoring-history),
   usually by pressing the back button.
 
   Listeners may prevent `up:location:restore` or mutate `event.renderOptions`
-  to [customize the restoration behavior](/restoring-history#custom-behavior).
+  to [customize the restoration behavior](/learn/restoring-history#custom-behavior).
 
-  When this event is emitted, the [browser location](/up.history.location) has already been updated.
+  When this event is emitted, the [browser location](/api/up.history.location) has already been updated.
 
   @learn-ref restoring-history
 
@@ -518,7 +518,7 @@ up.history = (function() {
   @param {string} event.location
     The URL for the restored history entry.
   @param {Object} event.renderOptions
-    An object with [render options](/up.render#parameters) for the render pass
+    An object with [render options](/api/up.render#parameters) for the render pass
     that will restore content for this history entry.
 
     Listeners may inspect and modify these options.
@@ -535,13 +535,13 @@ up.history = (function() {
   }
 
   /*-
-  Configures whether this `<head>` element is updated during [history changes](/updating-history).
+  Configures whether this `<head>` element is updated during [history changes](/learn/updating-history).
 
   @learn-ref updating-history
 
   ### Default meta elements
 
-  By [default](/up.history.config#config.metaTagSelectors), popular `<meta>` and certain `<link>`
+  By [default](/api/up.history.config#config.metaTagSelectors), popular `<meta>` and certain `<link>`
   elements in the `<head>` are considered meta tags.
   They will be updated when history is changed, in addition to the document's title and URL.
 
@@ -722,7 +722,7 @@ up.history = (function() {
 
   > [NOTE]
   > Clicking an `[up-back]` link will *not* call [`history.back()`](https://developer.mozilla.org/en-US/docs/Web/API/History/back).
-  > Instead, the link will [navigate](/up.navigate) to the previous URL.
+  > Instead, the link will [navigate](/api/up.navigate) to the previous URL.
 
   ### Example
 

@@ -3,14 +3,14 @@ Caching
 
 Unpoly caches responses so that pages the user has already visited this session render instantly on their next visit.
 Cached content is [revalidated with the server](#revalidation) after rendering, so stale content is quickly replaced.
-Cached pages also [remain accessible](/network-issues#offline-cache) after a [disconnect](/network-issues#disconnects).
+Cached pages also [remain accessible](/learn/network-issues#offline-cache) after a [disconnect](/learn/network-issues#disconnects).
 
 
 Which responses are cached {#enabling}
 --------------------------
 
-Caching is controlled by the [`{ cache }`](/up.render#options.cache) render option or an `[up-cache]` attribute.
-When [navigating](/navigation-defaults), the `{ cache: 'auto' }` option is already set by [default](/up.fragment.config#config.navigateOptions).
+Caching is controlled by the [`{ cache }`](/api/up.render#options.cache) render option or an `[up-cache]` attribute.
+When [navigating](/learn/navigation-defaults), the `{ cache: 'auto' }` option is already set by [default](/api/up.fragment.config#config.navigateOptions).
 It caches all responses to `GET` requests, so following a link or submitting a `GET` form fills the cache without any setup.
 
 A render pass that does not navigate, like a plain `up.render()` call, only caches when you ask for it:
@@ -25,7 +25,7 @@ You can [configure this default](#disabling-route).
 
 To force caching regardless of HTTP method, pass `{ cache: true }` or set `[up-cache="true"]`.
 
-[Preloading](/preloading) a link also writes its response to the cache.
+[Preloading](/learn/preloading) a link also writes its response to the cache.
 
 Error responses are not cached. They also evict an earlier cached response for the same URL.
 When a request for the same URL is already loading, a second request waits for it instead of
@@ -35,7 +35,7 @@ making another network request.
 Revalidation
 ------------
 
-Cache entries are only considered *fresh* for [15 seconds](/up.network.config#config.cacheExpireAge).
+Cache entries are only considered *fresh* for [15 seconds](/api/up.network.config#config.cacheExpireAge).
 When Unpoly renders older content from the cache, it reloads the fragment from the server right after.
 This process is called *cache revalidation*.
 
@@ -52,21 +52,21 @@ The user sees the cached version instantly and the fresh version a moment later.
 
 > [note]
 > Revalidation only happens after expired content was rendered into the page.
-> No revalidation occurs when expired cache entries are accessed without rendering, e.g. when [preloading](/preloading) a cached URL.
+> No revalidation occurs when expired cache entries are accessed without rendering, e.g. when [preloading](/learn/preloading) a cached URL.
 
 
 ### When nothing changed
 
 Your server-side app is not required to re-render a page when the cached content is still current.
 
-By supporting [conditional requests](/conditional-requests), it can answer a revalidation request with an empty
+By supporting [conditional requests](/learn/conditional-requests), it can answer a revalidation request with an empty
 `304 Not Modified` response. Unpoly then keeps the fragment it has already rendered.
 
 
 ### Controlling revalidation {#controlling-revalidation}
 
-Revalidation is controlled by the [`{ revalidate }`](/up.render#options.revalidate) render option or an `[up-revalidate]` attribute.
-When [navigating](/navigation-defaults), `{ revalidate: 'auto' }` is the default. It revalidates only [expired](#expiration) cache entries.
+Revalidation is controlled by the [`{ revalidate }`](/api/up.render#options.revalidate) render option or an `[up-revalidate]` attribute.
+When [navigating](/learn/navigation-defaults), `{ revalidate: 'auto' }` is the default. It revalidates only [expired](#expiration) cache entries.
 You can configure both the expiry age and the rule:
 
 ```js
@@ -81,7 +81,7 @@ When not navigating, pass `{ revalidate: 'auto' }` or set an `[up-revalidate="au
 
 ### Disabling revalidation {#disabling-revalidation}
 
-[Navigation](/navigation-defaults) is the only moment when Unpoly revalidates by default.
+[Navigation](/learn/navigation-defaults) is the only moment when Unpoly revalidates by default.
 To disable revalidation while navigating:
 
 ```js
@@ -112,10 +112,10 @@ Expiration
 ----------
 
 Cached content expires after 15 seconds. This can be configured in `up.network.config.cacheExpireAge`.
-The configured age should at least cover the typical time between [preloading](/preloading) a link and following it.
+The configured age should at least cover the typical time between [preloading](/learn/preloading) a link and following it.
 
 Expired content stays in the cache, but triggers [revalidation](#revalidation) when rendered.
-Expired pages also [remain accessible](/network-issues#offline-cache) after a [connection loss](/network-issues#disconnects).
+Expired pages also [remain accessible](/learn/network-issues#offline-cache) after a [connection loss](/learn/network-issues#disconnects).
 
 
 ### Expiring content after an interaction
@@ -127,8 +127,8 @@ so all cache entries should be [revalidated](#revalidation) before they are show
 To change what a request expires, use any of the following. A value of `false` expires nothing:
 
 - Configure which requests should cause expiration in `up.network.config.expireCache`
-- Pass an [`{ expireCache }`](/up.render#options.expireCache) option to the rendering function
-- Set an [`[up-expire-cache]`](/up-follow#up-expire-cache) attribute on a link or form
+- Pass an [`{ expireCache }`](/api/up.render#options.expireCache) option to the rendering function
+- Set an [`[up-expire-cache]`](/api/up-follow#up-expire-cache) attribute on a link or form
 
 To expire additional entries later:
 
@@ -136,7 +136,7 @@ To expire additional entries later:
   It cannot undo the expiration that happened when the request was sent.
 - Expire cache entries from JavaScript with `up.cache.expire()`
 
-Each of these accepts a [URL pattern](/url-patterns) to expire only matching entries:
+Each of these accepts a [URL pattern](/api/url-patterns) to expire only matching entries:
 
 ```js
 up.cache.expire('/users/*')
@@ -154,7 +154,7 @@ unless there is an existing cache entry that can be updated with a fresher respo
 
 ### Disabling the cache globally {#disabling-globally}
 
-[Navigation](/navigation-defaults) is the only moment when Unpoly caches by default.
+[Navigation](/learn/navigation-defaults) is the only moment when Unpoly caches by default.
 
 You can disable caching globally like so:
 
@@ -208,12 +208,12 @@ before [revalidation](#revalidation) finishes. By default no request evicts cont
 The controls mirror those for expiration:
 
 - Configure which requests should cause eviction in `up.network.config.evictCache`
-- Pass an [`{ evictCache }`](/up.render#options.evictCache) option to the rendering function
-- Set an [`[up-evict-cache]`](/up-follow#up-evict-cache) attribute on a link or form
+- Pass an [`{ evictCache }`](/api/up.render#options.evictCache) option to the rendering function
+- Set an [`[up-evict-cache]`](/api/up-follow#up-evict-cache) attribute on a link or form
 - Send an `X-Up-Evict-Cache` response header from the server
 - Evict cache entries from JavaScript with `up.cache.evict()`
 
-Each of these accepts a [URL pattern](/url-patterns) to evict only matching entries.
+Each of these accepts a [URL pattern](/api/url-patterns) to evict only matching entries.
 The configuration, option and attribute take effect when the request is sent.
 The response header takes effect when the response is received.
 
@@ -248,7 +248,7 @@ up.on('up:fragment:loaded', function(event) {
 })
 ```
 
-See [skipping a loaded response](/render-lifecycle#skipping-responses) for more details and examples.
+See [skipping a loaded response](/learn/render-lifecycle#skipping-responses) for more details and examples.
 
 
 ### Detecting revalidation from a compiler
@@ -256,8 +256,8 @@ See [skipping a loaded response](/render-lifecycle#skipping-responses) for more 
 Compilers with side effects may want to behave differently when the compiled element is being
 reloaded for the purpose of cache revalidation.
 
-To detect revalidation, compilers may accept a third argument with information about the current [render pass](/up.render).
-In the example below a compiler wants to [track a page view](/tracking-page-views) in a web analytics tool:
+To detect revalidation, compilers may accept a third argument with information about the current [render pass](/api/up.render).
+In the example below a compiler wants to [track a page view](/learn/tracking-page-views) in a web analytics tool:
 
 ```js
 up.compiler('[track-page-view]', function(element, data, meta) { // mark: meta
@@ -273,13 +273,13 @@ up.compiler('[track-page-view]', function(element, data, meta) { // mark: meta
 Caching optimized responses {#caching-optimized-responses}
 ---------------------------
 
-Servers may inspect [request headers](/up.protocol) to [optimize responses](/optimizing-responses),
+Servers may inspect [request headers](/api/up.protocol) to [optimize responses](/learn/optimizing-responses),
 e.g. by omitting a navigation bar that is not targeted.
 Request headers that influenced a response should be listed in a `Vary` response header,
 so Unpoly can partition its cache by header value.
 
 Matching cache entries must then have the same values for all listed headers.
-See [Caching optimized responses](/optimizing-responses#vary) for details, and [How cache entries are matched](/optimizing-responses#cache-matching) for tables of hits and misses.
+See [Caching optimized responses](/learn/optimizing-responses#vary) for details, and [How cache entries are matched](/learn/optimizing-responses#cache-matching) for tables of hits and misses.
 {:#how-cache-entries-are-matched}
 
 

@@ -35,13 +35,13 @@ From JavaScript, pass a `{ transition }` option to `up.render()` or any function
 up.render({ target: '#story', url: '/stories/2', transition: 'move-left' }) // mark: transition
 ```
 
-To use a transition for every [navigation](/navigation-defaults), set a default in `up.fragment.config.navigateOptions`:
+To use a transition for every [navigation](/learn/navigation-defaults), set a default in `up.fragment.config.navigateOptions`:
 
 ```js
 up.fragment.config.navigateOptions.transition = 'cross-fade'
 ```
 
-When a [cached](/caching#revalidation) page is revalidated, the fresh content replaces it without a second transition.
+When a [cached](/learn/caching#revalidation) page is revalidated, the fresh content replaces it without a second transition.
 Pages restored by the *Back* button are not animated.
 
 
@@ -67,7 +67,7 @@ You can also [combine any two animations](#combining-animations) into a transiti
 ### Transitions for failed responses {#fail-transition}
 
 A failed response does not use `[up-transition]`. When the server responds with an error code, Unpoly renders
-the response with [different options](/failed-responses#fail-options), and the form with validation errors
+the response with [different options](/learn/failed-responses#fail-options), and the form with validation errors
 appears instantly. To animate that case, set an `[up-fail-transition]` attribute:
 
 ```html
@@ -86,7 +86,7 @@ Some updates have no old element to morph from: appending to a list, opening an 
 or removing an element. These play an *animation* on a single element.
 An animation fades the element, or moves it to or from a screen edge.
 
-When [appending or prepending](/targeting-fragments#appending-or-prepending) content,
+When [appending or prepending](/learn/targeting-fragments#appending-or-prepending) content,
 set an `[up-animation]` attribute to reveal the new children:
 
 ```html
@@ -182,7 +182,7 @@ To change the default for all animations, set `up.motion.config.duration`:
 up.motion.config.duration = 300
 ```
 
-Overlays have their own defaults for opening and closing, which you can set per [mode](/overlays#layer-modes).
+Overlays have their own defaults for opening and closing, which you can set per [mode](/learn/overlays#layer-modes).
 See `up.layer.config` for options like `up.layer.config.overlay.openDuration`.
 
 ### Changing the easing {#easing}
@@ -210,7 +210,7 @@ Reduced motion and disabling animation {#disabling-animation-globally}
 
 Animations are enabled unless the user has asked their system to
 [minimize non-essential motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion).
-In that case `up.motion.config.enabled` is `false`. When [logging](/up.log.enable) is enabled,
+In that case `up.motion.config.enabled` is `false`. When [logging](/api/up.log.enable) is enabled,
 Unpoly prints *Animations are disabled* to the console when it boots.
 
 A disabled animation jumps to its last frame instantly.
@@ -293,7 +293,7 @@ During a transition both elements occupy the same spot on the screen:
 The new element takes the old one's place in the document flow, so elements after the fragment
 only shift when the new version has a different size.
 
-While the transition plays, the old element is still in the DOM with an [`.up-destroying`](/up-destroying) class.
+While the transition plays, the old element is still in the DOM with an [`.up-destroying`](/api/up-destroying) class.
 Unpoly functions like `up.fragment.get()` ignore it, but `document.querySelector()` may still find it.
 
 A transition cannot replace the `<body>` element, which Unpoly never animates.

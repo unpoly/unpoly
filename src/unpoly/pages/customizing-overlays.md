@@ -9,8 +9,8 @@ Beyond that, you can override Unpoly's CSS or change the overlay's elements with
 Picking a mode {#modes}
 --------------
 
-An overlay's default look and behavior come from its [mode](/overlays#layer-modes),
-which is [chosen when the overlay is opened](/opening-overlays#modes).
+An overlay's default look and behavior come from its [mode](/learn/overlays#layer-modes),
+which is [chosen when the overlay is opened](/learn/opening-overlays#modes).
 Every customization below applies on top of a mode, so start with the mode closest to what you need.
 
 Defaults for all overlays live in `up.layer.config.overlay`. Each mode has its own
@@ -134,7 +134,7 @@ Open and close animations {#animation}
 
 Overlays fade in and out by default. Drawers slide in from their screen edge.
 
-To use different [animations](/animation) for one overlay, set `[up-animation]` and `[up-close-animation]`
+To use different [animations](/learn/animation) for one overlay, set `[up-animation]` and `[up-close-animation]`
 attributes on the link that opens it:
 
 ```html
@@ -152,7 +152,7 @@ and `up.layer.config.overlay.closeAnimation`. Each mode can override these in it
 like `up.layer.config.modal.openAnimation`.
 
 A single call to `up.layer.accept()` or `up.layer.dismiss()` can also pick
-[its own close animation](/closing-overlays#close-animation).
+[its own close animation](/learn/closing-overlays#close-animation).
 
 
 Dismiss controls {#customizing-dismiss-controls}
@@ -162,7 +162,7 @@ By default the user can dismiss an overlay by pressing `Escape`, by clicking out
 or by clicking the `×` button in the top-right corner. Popups have no `×` button.
 
 To enable only some of these controls, or to change the `×` symbol and its accessibility label,
-see [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls).
+see [customizing dismiss controls](/learn/closing-overlays#customizing-dismiss-controls).
 
 
 Styling overlays with CSS {#css}

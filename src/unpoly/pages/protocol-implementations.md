@@ -1,7 +1,7 @@
 Protocol implementations
 ========================
 
-These libraries implement Unpoly's [optional server protocol](/up.protocol) for a
+These libraries implement Unpoly's [optional server protocol](/api/up.protocol) for a
 specific language or framework, so your backend can inspect and manipulate Unpoly's
 rendering without handling raw HTTP headers itself.
 

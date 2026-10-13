@@ -21,7 +21,7 @@ and add an `[up-submit]` attribute:
 When the user submits, Unpoly sends the form data in the background.
 Your server processes it like any form submission, usually responding with
 a redirect to the next screen. Unpoly extracts the response's
-[main element](/main) and swaps it into the current page.
+[main element](/api/main) and swaps it into the current page.
 
 
 Showing validation errors

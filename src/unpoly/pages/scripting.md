@@ -33,7 +33,7 @@ up.compiler('.current-time', function(element) {
 })
 ```
 
-<p class="read-more"><a href="/enhancing-elements">Read more: Enhancing elements with JavaScript</a></p>
+<p class="read-more"><a href="/learn/enhancing-elements">Read more: Enhancing elements with JavaScript</a></p>
 
 
 The page is long-lived
@@ -48,7 +48,7 @@ listeners or timers.
 Attaching data to elements
 --------------------------
 
-The server can attach structured data to an element, as [relaxed JSON](/relaxed-json)
+The server can attach structured data to an element, as [relaxed JSON](/api/relaxed-json)
 in an `[up-data]` attribute:
 
 ```html
@@ -63,15 +63,15 @@ up.compiler('.user', function(element, data) { // mark: data
 })
 ```
 
-<p class="read-more"><a href="/data">Read more: Attaching data to elements</a></p>
+<p class="read-more"><a href="/learn/data">Read more: Attaching data to elements</a></p>
 
 
 Rendering templates
 -------------------
 
 The server can embed `<template>` elements into its responses, for the frontend
-to clone without another request. This enables instant UI like [placeholders](/placeholders)
-or [optimistic rendering](/optimistic-rendering):
+to clone without another request. This enables instant UI like [placeholders](/learn/placeholders)
+or [optimistic rendering](/learn/optimistic-rendering):
 
 ```html
 <a up-fragment="#tip-template">Show tip</a> <!-- mark: up-fragment -->
@@ -84,9 +84,9 @@ or [optimistic rendering](/optimistic-rendering):
 ```
 
 Clicking the link clones the template and swaps it into the matching `.tip` element,
-entirely on the client. Templates can also take [variables](/templates#dynamic).
+entirely on the client. Templates can also take [variables](/learn/templates#dynamic).
 
-<p class="read-more"><a href="/templates">Read more: Templates</a></p>
+<p class="read-more"><a href="/learn/templates">Read more: Templates</a></p>
 
 
 Mounting framework components
@@ -106,7 +106,7 @@ up.compiler('.color-picker', function(element, data) {
 The component mounts when its element enters the page, receives props from server data,
 and unmounts when the fragment around it is swapped.
 
-<p class="read-more"><a href="/islands">Read more: Framework islands</a></p>
+<p class="read-more"><a href="/learn/islands">Read more: Framework islands</a></p>
 
 
 Also in this topic

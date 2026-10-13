@@ -20,13 +20,13 @@ X-Up-Target: .profile
 
 The server renders the page for `/users/5` the same way it would for a full page load.
 Unpoly extracts the `.profile` element from the response and discards the rest,
-except [hungry elements](/hungry-elements) and the `<head>`.
+except [hungry elements](/learn/hungry-elements) and the `<head>`.
 
 There is no JSON API to build and no separate fragment endpoint to maintain.
 Forms work the same way, with one convention: respond to an invalid submission with an error status like `422`,
 so Unpoly knows to re-render the form instead of the success target.
 See [[submitting-forms#validation]].
-If you use [`[up-validate]`](/up-validate), also check for an `X-Up-Validate` header:
+If you use [`[up-validate]`](/api/up-validate), also check for an `X-Up-Validate` header:
 validate the input and render the form again, but don't save it.
 
 The `X-Up-*` headers above are the start of an optional protocol. A server that ignores them
@@ -50,13 +50,13 @@ Vary: X-Up-Target
 Other headers tell the server which layer is updating, so an overlay can get a page without site navigation,
 and whether the request comes from Unpoly at all.
 
-<p class="read-more"><a href="/optimizing-responses">Read more: Optimizing responses</a></p>
+<p class="read-more"><a href="/learn/optimizing-responses">Read more: Optimizing responses</a></p>
 
 
 Skipping unchanged content
 --------------------------
 
-Unpoly reloads fragments when [polling](/polling), [revalidating the cache](/caching#revalidation) or calling `up.reload()`.
+Unpoly reloads fragments when [polling](/learn/polling), [revalidating the cache](/learn/caching#revalidation) or calling `up.reload()`.
 When the first response carried an `ETag`, Unpoly sends it back with the reload:
 
 ```http
@@ -68,7 +68,7 @@ When nothing changed, the server can answer with an empty `304 Not Modified`
 and Unpoly finishes the render pass without changes.
 The exchange then costs about 1 KB and no rendering time.
 
-<p class="read-more"><a href="/conditional-requests">Read more: Conditional requests</a></p>
+<p class="read-more"><a href="/learn/conditional-requests">Read more: Conditional requests</a></p>
 
 
 Reacting to new deployments
@@ -86,7 +86,7 @@ up.on('up:assets:changed', function() {
 
 You decide how to react: notify the user, reload at the next navigation, or swap in the new stylesheets.
 
-<p class="read-more"><a href="/handling-asset-changes">Read more: Reacting to new deployments</a></p>
+<p class="read-more"><a href="/learn/handling-asset-changes">Read more: Reacting to new deployments</a></p>
 
 
 Steering the frontend from the server
@@ -107,7 +107,7 @@ The full set of headers is small, and you only implement what you use.
 Libraries for many languages and frameworks wrap it in helpers.
 See [[protocol-implementations]].
 
-<p class="read-more"><a href="/server-protocol">Read more: Server protocol</a></p>
+<p class="read-more"><a href="/learn/server-protocol">Read more: Server protocol</a></p>
 
 @page backend-integration
 @menu-title Overview

@@ -29,7 +29,7 @@ Everything else that a render pass does, from caching to scrolling, is a *render
 An option is available in three forms: as an `[up-*]` attribute on a link or form,
 as a camel-cased option for a function like `up.render()`, and as a global default in a config object.
 
-<p class="read-more"><a href="/attributes-and-options">Read more: Attributes and options</a></p>
+<p class="read-more"><a href="/learn/attributes-and-options">Read more: Attributes and options</a></p>
 
 
 Targeting fragments
@@ -54,7 +54,7 @@ Clicking the link appends the next page's `<li>` children to the list and replac
 When a selector like `.card` matches several elements, Unpoly prefers the match closest
 to the origin, so a link inside the second card updates the second card.
 
-<p class="read-more"><a href="/targeting-fragments">Read more: Targeting fragments</a></p>
+<p class="read-more"><a href="/learn/targeting-fragments">Read more: Targeting fragments</a></p>
 
 
 Navigation defaults
@@ -78,7 +78,7 @@ up.render({ target: '.post', url: '/posts/5', navigate: true }) // mark: navigat
 To change what navigation means for your entire app, set the defaults in
 `up.fragment.config.navigateOptions`.
 
-<p class="read-more"><a href="/navigation-defaults">Read more: Navigation defaults</a></p>
+<p class="read-more"><a href="/learn/navigation-defaults">Read more: Navigation defaults</a></p>
 
 
 Handling failed responses
@@ -101,10 +101,10 @@ A successful response updates `.content`. A failed response updates the `<form>`
 so the user sees the validation errors next to their input. In HTML the same option
 is `[up-fail-target]`. For forms, Unpoly already defaults to re-rendering the form itself.
 
-You can also ignore error codes with [`[up-fail=false]`](/up-follow#up-fail), decide yourself what counts as a failure,
+You can also ignore error codes with [`[up-fail=false]`](/api/up-follow#up-fail), decide yourself what counts as a failure,
 or react to requests that were aborted or never reached the server.
 
-<p class="read-more"><a href="/failed-responses">Read more: Handling failed responses</a></p>
+<p class="read-more"><a href="/learn/failed-responses">Read more: Handling failed responses</a></p>
 
 
 Hooking into the render lifecycle
@@ -130,7 +130,7 @@ up.on('up:fragment:loaded', function(event) {
 })
 ```
 
-<p class="read-more"><a href="/render-lifecycle">Read more: Render lifecycle</a></p>
+<p class="read-more"><a href="/learn/render-lifecycle">Read more: Render lifecycle</a></p>
 
 
 Also in this topic

@@ -59,7 +59,7 @@ Unpoly has two kinds of documentation, and they do different jobs:
 | Purpose | Technical reference for one symbol | Holistic article about one topic |
 | Written as | A `/*- … */` comment beside the code | A Markdown file in `src/unpoly/pages/*.md` |
 | Reader intent | *"What arguments are accepted?"* | *"How do I implement this requirement?"* |
-| Example | [`/up.submit`](https://unpoly.com/up.submit) | [`/submitting-forms`](https://unpoly.com/submitting-forms) |
+| Example | [`/up.submit`](https://unpoly.com/api/up.submit) | [`/submitting-forms`](https://unpoly.com/learn/submitting-forms) |
 
 Both kinds deliberately overlap, but they are written for different readers:
 
@@ -199,7 +199,7 @@ document the things JSDoc has no concept of — attributes, events, headers:
 | `@event` | A DOM event Unpoly emits | `up:form:submit` |
 | `@property` | A JavaScript value, including every `up.*.config` | `up.form.config`, `up.Layer#size` |
 | `@constructor` | A class constructor | `up.Params` |
-| `@header` | An HTTP header in the [server protocol](https://unpoly.com/up.protocol) | `X-Up-Target` |
+| `@header` | An HTTP header in the [server protocol](https://unpoly.com/api/up.protocol) | `X-Up-Target` |
 | `@cookie` | A cookie in the server protocol | `_up_method` |
 
 `@selector` covers all three CSS-ish shapes, because that's how a developer reaches the
@@ -243,7 +243,7 @@ Replaces elements on the current page with matching elements from a server respo
 
 @section Targeting
   @param {string|Element|jQuery|Array<string>} [target]
-    The [target selector](/targeting-fragments) to update.
+    The [target selector](/learn/targeting-fragments) to update.
 
     Instead of passing the target as the first argument, you may also pass it as
     a `{ target }` option. See [`{ target }`](#options.target) for details.
@@ -449,12 +449,12 @@ under the param:
 
 ```js
 @param {boolean|string} [options.focusVisible='auto']
-  Whether the focused element should have a [visible focus ring](/focus-visibility).
+  Whether the focused element should have a [visible focus ring](/learn/focus-visibility).
 
   @experimental
 
 @param {string} [options.inputDevice]
-  The [input device](/up.event.inputDevice) used for the current interaction.
+  The [input device](/api/up.event.inputDevice) used for the current interaction.
 
   @internal
 ```
@@ -483,7 +483,7 @@ to distinguish DOM elements, attributes, classes, JS functions and non-function 
 
 Code in backticks becomes a link automatically. The docs are densely cross-referenced,
 and hand-linking every mention would be unbearable — so **don't** write
-`` [`up.render()`](/up.render) ``, just write `` `up.render()` ``.
+`` [`up.render()`](/api/up.render) ``, just write `` `up.render()` ``.
 
 This resolves:
 
@@ -518,7 +518,7 @@ When you want your own label, don't use a wikilink — write a plain Markdown li
 with the label woven into the sentence:
 
 ```markdown
-Unpoly can revalidate [expired](/caching#expiration) cache entries.
+Unpoly can revalidate [expired](/learn/caching#expiration) cache entries.
 ```
 
 Give a heading a stable anchor when you intend to link to it, so the URL survives a

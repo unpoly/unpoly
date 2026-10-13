@@ -4,11 +4,11 @@ const e = up.element
 /*-
 Instances of `up.Preview` can describe temporary changes to a page.
 
-You can use this to describe [arbitrary loading state](/previews) or [implement optimistic rendering](/optimistic-rendering).
+You can use this to describe [arbitrary loading state](/learn/previews) or [implement optimistic rendering](/learn/optimistic-rendering).
 
 Previews are usually defined using `up.preview()` (lowercase)
-and then applied using the `[up-preview]` attribute or [`{ preview }`](/up.render#options.preview) option.
-See [Previews](/previews) for an overview.
+and then applied using the `[up-preview]` attribute or [`{ preview }`](/api/up.render#options.preview) option.
+See [Previews](/learn/previews) for an overview.
 
 @class up.Preview
 @parent up.status
@@ -29,9 +29,9 @@ up.Preview = class Preview {
   /*-
   The targeted `Element` that is being previewed.
 
-  When [updating multiple fragments](/targeting-fragments#multiple), the first targeted fragment will be previewed.
+  When [updating multiple fragments](/learn/targeting-fragments#multiple), the first targeted fragment will be previewed.
 
-  Also see [inspecting the preview context](/previews#inspecting-the-preview-context).
+  Also see [inspecting the preview context](/learn/previews#inspecting-the-preview-context).
 
   @property up.Preview#fragment
   @return {Element}
@@ -39,12 +39,12 @@ up.Preview = class Preview {
   */
 
   /*-
-  The [request](/up.Request) that is loading.
+  The [request](/api/up.Request) that is loading.
 
-  When the request ends for [any reason](/previews#ending), all preview changes will be reverted
+  When the request ends for [any reason](/learn/previews#ending), all preview changes will be reverted
   before the server response is processed further.
 
-  Also see [inspecting the preview context](/previews#inspecting-the-preview-context).
+  Also see [inspecting the preview context](/learn/previews#inspecting-the-preview-context).
 
   @property up.Preview#request
   @return {up.Request}
@@ -52,13 +52,13 @@ up.Preview = class Preview {
   */
 
   /*-
-  The [render options](/up.render#parameters) for this render pass.
+  The [render options](/api/up.render#parameters) for this render pass.
 
   Preview functions may mutate this object to influence
   the render pass after the request ends. Note that the request has already been queued
   when previews run. Thus, setting request-related render options will have no effect.
 
-  Also see [inspecting the preview context](/previews#inspecting-the-preview-context).
+  Also see [inspecting the preview context](/learn/previews#inspecting-the-preview-context).
 
   @property up.Preview#renderOptions
   @return {Object}
@@ -67,9 +67,9 @@ up.Preview = class Preview {
 
   /*-
   Register a function that will revert this preview's effects
-  when the preview [ends](/previews#ending).
+  when the preview [ends](/learn/previews#ending).
 
-  See [Advanced preview mutations](/previews#advanced-mutations) for an elaborate example.
+  See [Advanced preview mutations](/learn/previews#advanced-mutations) for an elaborate example.
 
   ## Example
 
@@ -125,7 +125,7 @@ up.Preview = class Preview {
   }
 
   /*-
-  The [origin](/origin) element that triggered this render pass.
+  The [origin](/api/origin) element that triggered this render pass.
 
   For example, when the user clicked a link with a preview effect, `preview.origin` will be the
   clicked `a[href]` element.
@@ -141,7 +141,7 @@ up.Preview = class Preview {
   /*-
   Form data for the request being previewed.
 
-  See [Previewing form submissions](/optimistic-rendering#previewing-form-submissions) for an example.
+  See [Previewing form submissions](/learn/optimistic-rendering#previewing-form-submissions) for an example.
 
   @property up.Preview#params
   @return {up.Params}
@@ -152,9 +152,9 @@ up.Preview = class Preview {
   }
 
   /*-
-  The [layer](/up.layer) that the previewed render pass is going to update.
+  The [layer](/api/up.layer) that the previewed render pass is going to update.
 
-  When [opening a new overlay](/opening-overlays), this property has the value `"new"`:
+  When [opening a new overlay](/learn/opening-overlays), this property has the value `"new"`:
 
   ```js
   up.preview('my-preview', function(preview) {
@@ -175,13 +175,13 @@ up.Preview = class Preview {
   }
 
   /*-
-  Whether this preview has [ended](/previews#ending).
+  Whether this preview has [ended](/learn/previews#ending).
 
-  When a [preview function](/up.preview) is called, its associated
+  When a [preview function](/api/up.preview) is called, its associated
   request has just been queued and `preview.ended` is always `false`.
 
   Only if the preview function is async, `preview.ended` can be `true`.
-  See [Delaying previews](/previews#delaying) for an example.
+  See [Delaying previews](/learn/previews#delaying) for an example.
 
   @property up.Preview#ended
   @return {boolean}
@@ -192,7 +192,7 @@ up.Preview = class Preview {
   }
 
   /*-
-  When [revalidating a cache entry](/up.Preview.prototype.revalidating),
+  When [revalidating a cache entry](/api/up.Preview.prototype.revalidating),
   this property is the cached response with expired content.
 
   When not revalidating, this property is `undefined`.
@@ -207,11 +207,11 @@ up.Preview = class Preview {
   }
 
   /*-
-  Whether the previewed render pass is a [revalidation of an expired cache entry](/caching#revalidation).
+  Whether the previewed render pass is a [revalidation of an expired cache entry](/learn/caching#revalidation).
 
   Cache revalidation is only previewed when an
-  [`[up-revalidate-preview]`](/up-follow#up-revalidate-preview) attribute is set
-  or when a [`{ revalidatePreview: true }`](/up.render#options.revalidatePreview)
+  [`[up-revalidate-preview]`](/api/up-follow#up-revalidate-preview) attribute is set
+  or when a [`{ revalidatePreview: true }`](/api/up.render#options.revalidatePreview)
   render option is passed.
 
   When revalidating, the preview will be called *after* the expired content has been rendered
@@ -246,11 +246,11 @@ up.Preview = class Preview {
 
   ## Undo callbacks are merged
 
-  All [undo callbacks](/up.Preview.prototype.undo) from the other
+  All [undo callbacks](/api/up.Preview.prototype.undo) from the other
   preview will be added to this preview.
 
   In the example below, `preview2` will call both `undo1()` and
-  `undo2()` when the preview [ends](/previews#ending):
+  `undo2()` when the preview [ends](/learn/previews#ending):
 
   ```js
   function undo1() { ... }
@@ -268,7 +268,7 @@ up.Preview = class Preview {
 
   ## Passing options
 
-  To call a [preview with parameters](/previews#parameters),
+  To call a [preview with parameters](/learn/previews#parameters),
   pass an options object as a second argument:
 
   ```js
@@ -307,9 +307,9 @@ up.Preview = class Preview {
 
   @function up.Preview#run
   @param {string|Function(up.Preview, Object)} nameOrFn
-    Another preview function or its [registered name](/up.preview).
+    Another preview function or its [registered name](/api/up.preview).
   @param {Object} options
-    [Parameters](/previews#parameters) that will be passed
+    [Parameters](/learn/previews#parameters) that will be passed
     to the other preview function.
   @experimental
   */
@@ -335,7 +335,7 @@ up.Preview = class Preview {
   Temporarily changes an element's attributes.
 
   The element's original attributes will be restored
-  when the preview [ends](/previews#ending).
+  when the preview [ends](/learn/previews#ending).
 
   ## Example
 
@@ -351,7 +351,7 @@ up.Preview = class Preview {
   @param {Element|string} [element=this.fragment]
     The element or selector to change.
 
-    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
+    If omitted, the [targeted fragment](/api/up.Preview.prototype.fragment) will be changed.
   @param {Object} attributes
     An object of attribute names and values to set.
 
@@ -368,7 +368,7 @@ up.Preview = class Preview {
   /*-
   Temporarily adds a CSS class to an element.
 
-  The class will be removed once the preview [ends](/previews#ending).
+  The class will be removed once the preview [ends](/learn/previews#ending).
 
   ## Example
 
@@ -384,7 +384,7 @@ up.Preview = class Preview {
   @param {Element|string} [element=this.fragment]
     The element or selector to change.
 
-    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
+    If omitted, the [targeted fragment](/api/up.Preview.prototype.fragment) will be changed.
   @param {string} className
     The CSS class to add.
   @stable
@@ -411,13 +411,13 @@ up.Preview = class Preview {
   /*-
   Temporarily removes a CSS class from an element.
 
-  The removed class will be restored once the preview [ends](/previews#ending).
+  The removed class will be restored once the preview [ends](/learn/previews#ending).
 
   @function up.Preview#removeClass
   @param {Element|string} [element=this.fragment]
     The element or selector to change.
 
-    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
+    If omitted, the [targeted fragment](/api/up.Preview.prototype.fragment) will be changed.
   @param {string} className
     The CSS class to remove.
   @stable
@@ -448,7 +448,7 @@ up.Preview = class Preview {
   @param {Element|string} [element=this.fragment]
     The element or selector to change.
 
-    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
+    If omitted, the [targeted fragment](/api/up.Preview.prototype.fragment) will be changed.
   @param {Object} styles
     One or more CSS properties with kebab-case keys.
   @stable
@@ -461,9 +461,9 @@ up.Preview = class Preview {
   /*-
   Temporarily disables fields and buttons.
 
-  The disabled controls will be re-enabled when the preview [ends](/previews#ending).
+  The disabled controls will be re-enabled when the preview [ends](/learn/previews#ending).
 
-  Also see [Disabling forms while working](/disabling-forms).
+  Also see [Disabling forms while working](/learn/disabling-forms).
 
   ## Example
 
@@ -479,7 +479,7 @@ up.Preview = class Preview {
   @param {Element|string} [element=this.fragment]
     The element (or selector) within which fields and buttons should be disabled.
 
-    If omitted, fields and buttons within the [targeted fragment](/up.Preview.prototype.fragment) will be disabled.
+    If omitted, fields and buttons within the [targeted fragment](/api/up.Preview.prototype.fragment) will be disabled.
   @function up.Preview#disable
   @stable
   */
@@ -491,7 +491,7 @@ up.Preview = class Preview {
   /*-
   Temporarily inserts an element.
 
-  The element will be removed when the preview [ends](/previews#ending).
+  The element will be removed when the preview [ends](/learn/previews#ending).
 
   ## Providing the new element
 
@@ -516,7 +516,7 @@ up.Preview = class Preview {
 
   ## Cloning templates {#templates}
 
-  If the given element is a [template](/templates), it will be cloned before insertion.
+  If the given element is a [template](/learn/templates), it will be cloned before insertion.
 
   Let's say we have a template for the spinner element:
 
@@ -536,8 +536,8 @@ up.Preview = class Preview {
   })
   ```
 
-  Any [template variables](/templates#dynamic) can be appended after the
-  selector as [relaxed JSON](/relaxed-json):
+  Any [template variables](/learn/templates#dynamic) can be appended after the
+  selector as [relaxed JSON](/api/relaxed-json):
 
   ```js
   up.preview('spinner', function(preview) {
@@ -573,15 +573,15 @@ up.Preview = class Preview {
   @include adjacent-positions
 
   If the reference element is omitted, the new element will be inserted relative to
-  the [targeted fragment](/up.Preview.prototype.fragment).
+  the [targeted fragment](/api/up.Preview.prototype.fragment).
 
   If the adjacent position is omitted, the new element will become the new last child
   of the reference element (`'beforeend'`).
 
   ## Compilation
 
-  When this function inserts a new element, it is [compiled](/enhancing-elements).\
-  When the preview [ends](/previews#ending), the element is [destroyed](/enhancing-elements#destructor).
+  When this function inserts a new element, it is [compiled](/learn/enhancing-elements).\
+  When the preview [ends](/learn/previews#ending), the element is [destroyed](/learn/enhancing-elements#destructor).
 
   ## Moving existing elements
 
@@ -621,9 +621,9 @@ up.Preview = class Preview {
   }
 
   /*-
-  Temporarily [shows](/up.element.show) a hidden element.
+  Temporarily [shows](/api/up.element.show) a hidden element.
 
-  The element will be [hidden](/up.element.hide) when the preview [ends](/previews#ending).
+  The element will be [hidden](/api/up.element.hide) when the preview [ends](/learn/previews#ending).
 
   ## Example
 
@@ -639,7 +639,7 @@ up.Preview = class Preview {
   @param {Element|string} [element=this.fragment]
     The element or selector to change.
 
-    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
+    If omitted, the [targeted fragment](/api/up.Preview.prototype.fragment) will be changed.
   @stable
   */
   show(...args) {
@@ -648,12 +648,12 @@ up.Preview = class Preview {
   }
 
   /*-
-  Temporarily [hides](/up.element.hide) an element.
+  Temporarily [hides](/api/up.element.hide) an element.
 
-  The element will be [shown](/up.element.show) when the preview [ends](/previews#ending).
+  The element will be [shown](/api/up.element.show) when the preview [ends](/learn/previews#ending).
 
   > [tip]
-  > To visually remove elements during a preview, prefer hiding over detaching. See [Prefer additive changes](/previews#prefer-additive-changes).
+  > To visually remove elements during a preview, prefer hiding over detaching. See [Prefer additive changes](/learn/previews#prefer-additive-changes).
 
   ## Example
 
@@ -669,7 +669,7 @@ up.Preview = class Preview {
   @param {Element|string} [element=this.fragment]
     The element or selector to change.
 
-    If omitted, the [targeted fragment](/up.Preview.prototype.fragment) will be changed.
+    If omitted, the [targeted fragment](/api/up.Preview.prototype.fragment) will be changed.
   @stable
   */
   hide(...args) {
@@ -678,16 +678,16 @@ up.Preview = class Preview {
   }
 
   /*-
-  Temporarily [hides](/up.element.hide) the children of an element.
+  Temporarily [hides](/api/up.element.hide) the children of an element.
 
-  The children will be [shown](/up.element.show) when the preview [ends](/previews#ending).
+  The children will be [shown](/api/up.element.show) when the preview [ends](/learn/previews#ending).
 
   > [tip]
-  > To visually remove elements during a preview, prefer hiding over detaching. See [Prefer additive changes](/previews#prefer-additive-changes).
+  > To visually remove elements during a preview, prefer hiding over detaching. See [Prefer additive changes](/learn/previews#prefer-additive-changes).
 
   ## Example
 
-  This preview visually replaces the children of the [targeted fragment](/up.Preview.prototype.fragment)
+  This preview visually replaces the children of the [targeted fragment](/api/up.Preview.prototype.fragment)
   with a `.spinner` element:
 
   ```js
@@ -698,13 +698,13 @@ up.Preview = class Preview {
   ```
 
   For a more concise way to temporarily swap children with a temporary element,
-  see the [`swapContent()`](/up.Preview.prototype.swapContent) method.
+  see the [`swapContent()`](/api/up.Preview.prototype.swapContent) method.
 
   @function up.Preview#hideContent
   @param {Element|string} [element=this.fragment]
     The element or selector to hide the children of.
 
-    If omitted, the children of the [targeted fragment](/up.Preview.prototype.fragment) will be hidden.
+    If omitted, the children of the [targeted fragment](/api/up.Preview.prototype.fragment) will be hidden.
   @experimental
   */
   hideContent(...args) {
@@ -716,18 +716,18 @@ up.Preview = class Preview {
   }
 
   /*-
-  Shows a temporary [placeholder](/placeholders) within an element.
+  Shows a temporary [placeholder](/learn/placeholders) within an element.
 
   The element's existing children will be hidden for the duration of this preview.
   When the preview ends, the placeholder will be removed and the element's original children
   are shown again.
 
-  If the previewed render pass [opens a new overlay](/opening-overlays), the placeholder
-  will be shown temporary overlay with the same [visual style](/customizing-overlays) and open animation.
+  If the previewed render pass [opens a new overlay](/learn/opening-overlays), the placeholder
+  will be shown temporary overlay with the same [visual style](/learn/customizing-overlays) and open animation.
 
   ## Example
 
-  This preview shows a `.skeleton` element within the [targeted fragment](/up.Preview.prototype.fragment):
+  This preview shows a `.skeleton` element within the [targeted fragment](/api/up.Preview.prototype.fragment):
 
   ```js
   up.preview('skeleton', function(preview) {
@@ -735,7 +735,7 @@ up.Preview = class Preview {
   })
   ```
 
-  You may also clone a [template](/templates):
+  You may also clone a [template](/learn/templates):
 
   ```js
   up.preview('skeleton', function(preview) {
@@ -759,7 +759,7 @@ up.Preview = class Preview {
 
     You may pass an `Element`, a CSS selector or a snippet of HTML.
 
-    If the given element is a [template](/templates), it will be cloned before insertion.
+    If the given element is a [template](/learn/templates), it will be cloned before insertion.
   @experimental
   */
   showPlaceholder(...args) {
@@ -785,16 +785,16 @@ up.Preview = class Preview {
   /*-
   Visually replaces the children of an element with new content for the duration of this preview.
 
-  The visual effect is achieved by [hiding existing children](/up.Preview.prototype.hideContent)
-   and [inserting a new element](/up.Preview.prototype.insert) as the
-   only visible child. When the preview [ends](/previews#ending) all changes will be reverted.
+  The visual effect is achieved by [hiding existing children](/api/up.Preview.prototype.hideContent)
+   and [inserting a new element](/api/up.Preview.prototype.insert) as the
+   only visible child. When the preview [ends](/learn/previews#ending) all changes will be reverted.
 
   > [tip]
-  > To visually remove elements during a preview, prefer hiding over detaching. See [Prefer additive changes](/previews#prefer-additive-changes).
+  > To visually remove elements during a preview, prefer hiding over detaching. See [Prefer additive changes](/learn/previews#prefer-additive-changes).
 
   ## Example
 
-  This preview visually replaces the children of the [targeted fragment](/up.Preview.prototype.fragment)
+  This preview visually replaces the children of the [targeted fragment](/api/up.Preview.prototype.fragment)
   with a `.spinner` element:
 
   ```js
@@ -815,13 +815,13 @@ up.Preview = class Preview {
   @param {Element|string} [element=this.fragment]
     The element or selector to visually swap children of.
 
-    If omitted, the children of the [targeted fragment](/up.Preview.prototype.fragment) will be swapped.
+    If omitted, the children of the [targeted fragment](/api/up.Preview.prototype.fragment) will be swapped.
   @param {Element|string} newContent
     The new content to insert.
 
     You may pass an `Element`, a CSS selector or a snippet of HTML.
 
-    If the given element is a [template](/templates), it will be cloned before insertion.
+    If the given element is a [template](/learn/templates), it will be cloned before insertion.
 
   @experimental
   */
@@ -834,14 +834,14 @@ up.Preview = class Preview {
   /*-
   Opens a temporary overlay.
 
-  When the preview ends, the overlay will be [dismissed](/closing-overlays)
-  with a [dismissal reason](/closing-overlays#dismissal-reasons) of `":undo-preview"`.
+  When the preview ends, the overlay will be [dismissed](/learn/closing-overlays)
+  with a [dismissal reason](/learn/closing-overlays#dismissal-reasons) of `":undo-preview"`.
 
   When the user dismisses the temporary overlay before the server responds,
-  the previewed request will be [aborted](/aborting-requests).
+  the previewed request will be [aborted](/learn/aborting-requests).
 
-  When previewing a render pass that is going to [open an overlay](/opening-overlays),
-  the temporary overlay will use the same [visual style](/customizing-overlays) and animations.
+  When previewing a render pass that is going to [open an overlay](/learn/opening-overlays),
+  the temporary overlay will use the same [visual style](/learn/customizing-overlays) and animations.
 
   ## Example
 

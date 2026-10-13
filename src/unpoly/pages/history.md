@@ -10,7 +10,7 @@ Your scripts can observe every location change, for example to track page views.
 Updating the address bar
 ------------------------
 
-An update counts as a page change when it swaps the page's [main element](/main).
+An update counts as a page change when it swaps the page's [main element](/api/main).
 Only then does Unpoly push a history entry, so users can bookmark, share and reload
 each URL as usual.
 
@@ -26,7 +26,7 @@ To override this default for a link or form, set `[up-history=true]` or `[up-his
 Overlays add one rule of their own: an overlay only shows its URL when it opens with a main element,
 and the parent page's URL returns when the overlay closes. This is covered in [[history-in-overlays]].
 
-<p class="read-more"><a href="/updating-history">Read more: Updating history</a></p>
+<p class="read-more"><a href="/learn/updating-history">Read more: Updating history</a></p>
 
 
 Restoring the previous page
@@ -34,7 +34,7 @@ Restoring the previous page
 
 When the user presses the Back button, Unpoly fetches the earlier URL and renders its `<body>` into the current page.
 Scroll positions and focus are restored to where the user left them.
-Since responses are [cached](/caching), going back is usually instant.
+Since responses are [cached](/learn/caching), going back is usually instant.
 
 To keep parts of your layout alive, restore a smaller fragment:
 
@@ -44,9 +44,9 @@ up.history.config.restoreTargets = ['.content', 'body'] // mark: ['.content', 'b
 
 To customize the render pass, or to restore the page with your own code,
 listen to `up:location:restore`.
-To offer a *Back* link inside the page, use an [`[up-back]`](/restoring-history#back-link) attribute.
+To offer a *Back* link inside the page, use an [`[up-back]`](/learn/restoring-history#back-link) attribute.
 
-<p class="read-more"><a href="/restoring-history">Read more: Restoring history</a></p>
+<p class="read-more"><a href="/learn/restoring-history">Read more: Restoring history</a></p>
 
 
 Tracking page views
@@ -64,7 +64,7 @@ up.on('up:location:changed', function(event) {
 One listener covers every way the location can change: followed links,
 redirecting forms and the Back button.
 
-<p class="read-more"><a href="/tracking-page-views">Read more: Tracking page views</a></p>
+<p class="read-more"><a href="/learn/tracking-page-views">Read more: Tracking page views</a></p>
 
 
 @page history

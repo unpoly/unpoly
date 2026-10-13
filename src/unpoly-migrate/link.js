@@ -89,13 +89,13 @@ up.migrate.transformAttribute('up-restore-scroll', function(link, restoreScroll)
 })
 
 /*-
-[Follows](/up.follow) this link as fast as possible.
+[Follows](/api/up.follow) this link as fast as possible.
 
 This is done by:
 
-- [Following the link through AJAX](/up-follow) instead of a full page load
-- [Preloading the link's destination URL](/preloading)
-- [Triggering the link on `mousedown`](/up-instant) instead of on `click`
+- [Following the link through AJAX](/api/up-follow) instead of a full page load
+- [Preloading the link's destination URL](/learn/preloading)
+- [Triggering the link on `mousedown`](/api/up-instant) instead of on `click`
 
 ## Example
 
@@ -132,11 +132,11 @@ up.on('up:link:preload', function(event) {
 })
 
 /*-
-Makes any element [behave like a hyperlink](/faux-interactive-elements).
+Makes any element [behave like a hyperlink](/learn/faux-interactive-elements).
 
 ## Example
 
-The following `<span>` element will [navigate](/up-follow) to `/details` when clicked:
+The following `<span>` element will [navigate](/api/up-follow) to `/details` when clicked:
 
 ```html
 <span up-href="/details">Read more</span>

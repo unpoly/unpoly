@@ -29,8 +29,8 @@ X-Up-Target: #menu
 ```
 
 > [note]
-> By default the placeholder is [targeting](/targeting-fragments) itself (`#menu`).
-> For this the element must have a [derivable target selector](/target-derivation).
+> By default the placeholder is [targeting](/learn/targeting-fragments) itself (`#menu`).
+> For this the element must have a [derivable target selector](/learn/target-derivation).
 
 The server is now expected to respond with a page containing `#menu` with content:
 

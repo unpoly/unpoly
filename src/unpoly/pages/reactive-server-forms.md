@@ -63,7 +63,7 @@ HTTP header. Upon seeing this header, the server renders a new form state from t
 form values in the request parameters.
 
 When the server responds with the re-rendered form, Unpoly updates only
-the [target](/targeting-fragments) from the changed field's `[up-validate]` attribute.
+the [target](/learn/targeting-fragments) from the changed field's `[up-validate]` attribute.
 For instance, when the continent is changed, only the country select is updated.
 Everything else in the form keeps its state, including unsaved input in other fields.
 
@@ -102,12 +102,12 @@ from the response.
 
 The examples use Ruby on Rails, but work similarly with any other backend.
 
-See [`[up-validate]`](/up-validate#backend-protocol) for the request and response in detail.
+See [`[up-validate]`](/api/up-validate#backend-protocol) for the request and response in detail.
 
 
 ## Multiple dependent fragments {#multiple-dependent-fragments}
 
-A field with `[up-validate]` may [update multiple fragments](/targeting-fragments#multiple)
+A field with `[up-validate]` may [update multiple fragments](/learn/targeting-fragments#multiple)
 by separating their target selectors with a comma.
 
 For instance, when the user changes the continent, the following would update the price preview
@@ -119,7 +119,7 @@ in addition to the country select:
 </select>
 ```
 
-To update another fragment *in addition* to the field's [form group](/up-form-group), include
+To update another fragment *in addition* to the field's [form group](/api/up-form-group), include
 the group in the target list.\
 You can refer to the changed field as `:origin`:
 
@@ -139,10 +139,10 @@ however fast the user is and however slow the network:
 
 - **One request at a time.** Each form has at most one validation request in flight.
   Later changes wait until it has loaded.
-- **Batched updates.** Changes that waited are [sent together](/up.validate#batching),
+- **Batched updates.** Changes that waited are [sent together](/api/up.validate#batching),
   in a single request for all their targets. When one target contains another, only the outer one is requested.
-- **Submitting wins.** When the user submits while a validation is loading, the validation is [aborted](/aborting-requests).
-  This happens when the submission updates the form or an element around it, like the [main element](/main).
+- **Submitting wins.** When the user submits while a validation is loading, the validation is [aborted](/learn/aborting-requests).
+  This happens when the submission updates the form or an element around it, like the [main element](/api/main).
 
 Let's walk through a challenging scenario using the [postage form example](#declaring-dependencies) above:
 
@@ -170,7 +170,7 @@ If you prefer to completely prevent user input during validation, give the form 
 
 You may also set `[up-watch-disable]` on individual fields, or on any element that contains fields.
 
-See [disabling fields while working](/watch-options#disabling) for details.
+See [disabling fields while working](/learn/watch-options#disabling) for details.
 
 
 ## Updating from JavaScript {#script}
@@ -184,7 +184,7 @@ up.validate('#price')
 This submits the form with an `X-Up-Validate` header, like a change to an `[up-validate]` field would,
 and updates the `#price` element with the response. You can combine `[up-validate]` attributes
 and `up.validate()` calls within the same form. Their updates
-are [batched together](/up.validate#batching) and follow the same rules for
+are [batched together](/api/up.validate#batching) and follow the same rules for
 [preventing race conditions](#race-conditions).
 
 
@@ -193,7 +193,7 @@ are [batched together](/up.validate#batching) and follow the same rules for
 By default, validation requests use the `[method]` and `[action]` attributes from the form element.
 
 You can render content from another server endpoint by setting an
-[`[up-validate-url]`](/up-validate#up-validate-url) attribute on a form or field:
+[`[up-validate-url]`](/api/up-validate#up-validate-url) attribute on a form or field:
 
 ```html
 <form method="post" action="/order">
@@ -205,7 +205,7 @@ You can render content from another server endpoint by setting an
 </form>
 ```
 
-Multiple validations to the same URL are [batched together](/up.validate#batching).
+Multiple validations to the same URL are [batched together](/api/up.validate#batching).
 
 
 @page reactive-server-forms

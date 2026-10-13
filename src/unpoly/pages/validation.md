@@ -10,7 +10,7 @@ your backend, with the same templates that render the form.
 
 When a server-side app cannot save a form submission due to invalid user input,
 it usually re-renders the form with validation errors. This pattern also works
-for forms that are [submitted through Unpoly](/submitting-forms).
+for forms that are [submitted through Unpoly](/learn/submitting-forms).
 
 Let's look at a registration form that asks for an e-mail address and a password:
 
@@ -94,11 +94,11 @@ end
 The examples use Ruby on Rails, but work similarly with any other backend.
 
 If your server-side code cannot communicate status codes like that,
-you may [customize Unpoly's failure detection](/failed-responses#customizing-failure-detection).
+you may [customize Unpoly's failure detection](/learn/failed-responses#customizing-failure-detection).
 
 ### Changing how validation errors are rendered {#changing-how-validation-errors-are-rendered}
 
-When Unpoly detects a failed submission, it ignores the form's [target](/targeting-fragments)
+When Unpoly detects a failed submission, it ignores the form's [target](/learn/targeting-fragments)
 and updates the `<form>` element instead. This way validation errors always appear next to the user's input:
 
 ```html
@@ -114,7 +114,7 @@ and updates the `<form>` element instead. This way validation errors always appe
 The form's values and messages all come from your server-rendered HTML.
 Unpoly only decides which fragment to show them in.
 
-To render a failed response somewhere else, set an [`[up-fail-target]`](/up-submit#up-fail-target) attribute on the `<form>` element:
+To render a failed response somewhere else, set an [`[up-fail-target]`](/api/up-submit#up-fail-target) attribute on the `<form>` element:
 
 ```html
 <form method="post" action="/comments" up-submit up-target="#comments" up-fail-target="#errors"> <!-- mark: up-fail-target="#errors" -->
@@ -131,7 +131,7 @@ To render a failed response somewhere else, set an [`[up-fail-target]`](/up-subm
 ```
 
 Most render options have such a `fail`-prefixed variant.
-See [rendering failed responses differently](/failed-responses#fail-options) for details.
+See [rendering failed responses differently](/learn/failed-responses#fail-options) for details.
 
 ### HTML5 validations {#html5-validations}
 
@@ -140,7 +140,7 @@ HTML5 added a number of validations through attributes like
 [`[pattern]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern).
 These validations are checked by the browser when the form is submitted.
 
-You may also use HTML5 validation attributes for forms that are [submitted through Unpoly](/submitting-forms).
+You may also use HTML5 validation attributes for forms that are [submitted through Unpoly](/learn/submitting-forms).
 A failed HTML5 validation prevents the form from being submitted.
 
 > [caution]
@@ -186,7 +186,7 @@ You can also set it on any container to validate the fields within.
 Users can change fields faster than your server responds, or submit the form while a validation
 is still loading. Unpoly keeps the form consistent: it merges validations into a single request,
 queues new validations while one is in flight, and aborts pending validations when a submission
-replaces the form. See [preventing race conditions](/reactive-server-forms#race-conditions) for details.
+replaces the form. See [preventing race conditions](/learn/reactive-server-forms#race-conditions) for details.
 
 ### Handling validation requests on the server {#backend}
 
@@ -216,7 +216,7 @@ end
 The status code does not matter for validation requests.
 Unpoly always renders the response of a validation request, even with an error code.
 
-See [`[up-validate]`](/up-validate#backend-protocol) for the request and response in detail.
+See [`[up-validate]`](/api/up-validate#backend-protocol) for the request and response in detail.
 
 ### Which fragment is updated {#form-groups}
 
@@ -269,7 +269,7 @@ in the form to re-render it from the current field values:
 up.validate('.email-errors')
 ```
 
-Multiple validations within the same form are [batched](/up.validate#batching) into a single request.
+Multiple validations within the same form are [batched](/api/up.validate#batching) into a single request.
 
 
 @page validation

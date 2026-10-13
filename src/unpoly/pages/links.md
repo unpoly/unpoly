@@ -17,10 +17,10 @@ To let Unpoly handle a link, set an `[up-follow]` attribute:
 
 When the user clicks, Unpoly fetches `/preferences` in the background.
 The server renders a full HTML page, the same way it would for a regular page load.
-Unpoly then extracts the response's [main element](/main) and swaps it into the current page,
+Unpoly then extracts the response's [main element](/api/main) and swaps it into the current page,
 leaving everything around it untouched.
 
-To update a different fragment, add an [`[up-target]`](/up-follow#up-target) attribute with a CSS selector:
+To update a different fragment, add an [`[up-target]`](/api/up-follow#up-target) attribute with a CSS selector:
 
 ```html
 <nav>
@@ -39,7 +39,7 @@ its counterpart from the response.
 The link stays a standard hyperlink. When the user opens it in a new tab,
 or when JavaScript is unavailable, the browser makes a regular full page load.
 
-<p class="read-more"><a href="/following-links">Read more: Following links</a></p>
+<p class="read-more"><a href="/learn/following-links">Read more: Following links</a></p>
 
 
 Handling all links
@@ -51,7 +51,7 @@ Instead of annotating every link, you can configure Unpoly to follow all links o
 up.link.config.followSelectors.push('a[href]')
 ```
 
-<p class="read-more"><a href="/handling-all-links">Read more: Handling all links</a></p>
+<p class="read-more"><a href="/learn/handling-all-links">Read more: Handling all links</a></p>
 
 
 Preloading links
@@ -63,9 +63,9 @@ A link can request its destination before the user clicks, making the interactio
 <a href="/stories/5" up-preload>Full story</a> <!-- mark: up-preload -->
 ```
 
-Hovering over the link already loads the response into the [cache](/caching).
+Hovering over the link already loads the response into the [cache](/learn/caching).
 
-<p class="read-more"><a href="/preloading">Read more: Preloading links</a></p>
+<p class="read-more"><a href="/learn/preloading">Read more: Preloading links</a></p>
 
 
 Highlighting the current location
@@ -82,7 +82,7 @@ Links in a navigation bar are marked with an `.up-current` class when they point
 
 Style that class with your CSS to highlight the active menu section.
 
-<p class="read-more"><a href="/navigation-bars">Read more: Navigation bars</a></p>
+<p class="read-more"><a href="/learn/navigation-bars">Read more: Navigation bars</a></p>
 
 
 Also in this topic

@@ -16,15 +16,15 @@ Some examples of failed responses are:
 Rendering failed responses differently {#fail-options}
 --------------------------------------
 
-Any HTTP status other than 2xx or [304](/conditional-requests#rendering-nothing) marks a response as *failed*.
+Any HTTP status other than 2xx or [304](/learn/conditional-requests#rendering-nothing) marks a response as *failed*.
 For a failed response you can pass different render options than for a successful one.
 
-A common use case is a [form submission](/submitting-forms). A successful response
+A common use case is a [form submission](/learn/submitting-forms). A successful response
 should show a follow-up screen, but a failed response should re-render the form with validation errors.
 A good HTTP status code for an invalid form submission is
 [422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Content).
 
-To use a different [render option](/up.render) for a failed response, prefix the option with `fail`:
+To use a different [render option](/api/up.render) for a failed response, prefix the option with `fail`:
 
 ```js
 up.render({
@@ -41,7 +41,7 @@ up.render({
 
 Event handlers still begin with `on` for failed responses, so `{ onRendered }` becomes `{ onFailRendered }`.
 
-When using Unpoly's HTML attributes with [links](/up-follow) or [forms](/up-submit),
+When using Unpoly's HTML attributes with [links](/api/up-follow) or [forms](/api/up-submit),
 infix the attribute with `fail`:
 
 ```text
@@ -58,7 +58,7 @@ infix the attribute with `fail`:
 > [tip]
 > When Unpoly handles a form, the default `[up-fail-target]` is the form itself.
 > This makes sure that any validation errors appear within the `<form>` element,
-> so you rarely need to set the attribute. See [validating forms](/validation) for examples.
+> so you rarely need to set the attribute. See [validating forms](/learn/validation) for examples.
 
 
 ### Which options have a fail variant {#fail-variants}
@@ -69,14 +69,14 @@ Some options, like `{ history, fallback }`, are used for both successful and fai
 but may be overridden with a fail-prefixed variant, e.g. `{ history: true, failHistory: false }`.
 
 Options related to layers, scrolling or focus are never shared.
-A failed response uses `{ failLayer, failScroll, failFocus }`, or the [configured defaults](/up.fragment.config#config.navigateOptions)
+A failed response uses `{ failLayer, failScroll, failFocus }`, or the [configured defaults](/api/up.fragment.config#config.navigateOptions)
 when these are not given.
 
 
 ### Fail targets for links {#links}
 
 Unlike a form, a link has no natural fragment to show an error in.
-When a link's response fails, Unpoly updates the [main target](/main) instead of the link's `[up-target]`.
+When a link's response fails, Unpoly updates the [main target](/api/main) instead of the link's `[up-target]`.
 This way a server error page shows up in the main content area, where the user expects it.
 
 To re-render a different fragment, set an `[up-fail-target]` attribute.
@@ -101,7 +101,7 @@ The error page is now rendered into `.content`, as if the server had responded w
 Customizing failure detection {#customizing-failure-detection}
 -----------------------------
 
-By default any HTTP 2xx or [304](/conditional-requests#rendering-nothing) status code is considered successful,
+By default any HTTP 2xx or [304](/learn/conditional-requests#rendering-nothing) status code is considered successful,
 and any other status code is considered failed. You can customize this behavior.
 For instance, you can fail a response if it contains a given header or body text.
 
@@ -136,9 +136,9 @@ Handling unexpected content {#unexpected-content}
 A server might sometimes respond with unexpected content, like a maintenance page or a
 login form. In these cases a specific target selector may not match in the server response.
 
-With `{ fallback: true }` or `[up-fallback=true]` Unpoly tries to match a [main target](/main)
+With `{ fallback: true }` or `[up-fallback=true]` Unpoly tries to match a [main target](/api/main)
 before giving up. This shows the server content in the application's main content area,
-which is often preferred to a link appearing dead. Fallback targets are enabled by default when [navigating](/navigation-defaults).
+which is often preferred to a link appearing dead. Fallback targets are enabled by default when [navigating](/learn/navigation-defaults).
 
 To handle unexpected content in your own way, use the `up:fragment:loaded` event.
 It can inspect the response, change the render options, or make a full page load instead.
@@ -149,7 +149,7 @@ Handling fatal network errors {#handling-fatal-network-errors}
 -----------------------------
 
 When a request encounters a fatal error (like a timeout or loss of network connectivity), nothing
-is rendered. You can handle this with an [`[up-on-offline]`](/up-follow#up-on-offline) callback or an `up:fragment:offline`
+is rendered. You can handle this with an [`[up-on-offline]`](/api/up-follow#up-on-offline) callback or an `up:fragment:offline`
 listener, which can also retry the request.
 
 Because there never was a server response, `up:fragment:loaded` is *not* emitted in this case.
@@ -160,7 +160,7 @@ See [[network-issues]].
 Handling aborted requests {#handling-aborted-requests}
 -------------------------
 
-When a request was [aborted](/aborting-requests), Unpoly emits `up:request:aborted` and does not render.
+When a request was [aborted](/learn/aborting-requests), Unpoly emits `up:request:aborted` and does not render.
 
 A promise for an aborted request rejects with an `up.Aborted` error.
 Its `{ name }` is `'AbortError'`, like the `DOMException` that `fetch()` and other native APIs reject with when aborted.
@@ -176,7 +176,7 @@ try {
 }
 ```
 
-[By default](/up.render#options.abort) Unpoly aborts a request when a second request targets the same fragment.
+[By default](/api/up.render#options.abort) Unpoly aborts a request when a second request targets the same fragment.
 
 
 Detecting a failed response programmatically {#detecting-failure}
@@ -185,7 +185,7 @@ Detecting a failed response programmatically {#detecting-failure}
 Rendering functions like `up.render()`, `up.follow()` or `up.submit()` return a promise that rejects when the server
 sends a failed response, or when there is another error.
 
-See [Render error handling example](/render-lifecycle#error-handling-example).
+See [Render error handling example](/learn/render-lifecycle#error-handling-example).
 
 
 @page failed-responses

@@ -2,7 +2,7 @@ Feedback classes
 ================
 
 Unpoly adds CSS classes to links and forms that are loading content,
-and to the fragments they are [targeting](/targeting-fragments).
+and to the fragments they are [targeting](/learn/targeting-fragments).
 Style these classes to instantly signal that the app is working.
 
 
@@ -19,7 +19,7 @@ We have a link targeting a fragment `#target`:
 ```
 
 When the user clicks the link, the link is instantly assigned the `.up-active` class.
-The [targeted](/targeting-fragments) fragment (the `#target` element) gets the `.up-loading` class:
+The [targeted](/learn/targeting-fragments) fragment (the `#target` element) gets the `.up-loading` class:
 
 ```html
 <a href="/path" up-target="#target" class="up-active">Link</a> <!-- mark: class="up-active" -->
@@ -63,7 +63,7 @@ You can show a hidden loading message while a form is submitting:
 }
 ```
 
-If CSS alone is not enough, [previews](/previews) let you make arbitrary changes to the page
+If CSS alone is not enough, [previews](/learn/previews) let you make arbitrary changes to the page
 while a request is loading. See [[loading-state]] for all strategies.
 
 
@@ -108,7 +108,7 @@ Sometimes a form is not submitted by pressing a submit button, but by interactin
 - The user submits by pressing `Return` inside a focused field.
 - A field with `[up-autosubmit]` is changed.
 
-In these cases, that field is considered the [origin](/origin) element that
+In these cases, that field is considered the [origin](/api/origin) element that
 caused the submission. It is also marked as `.up-active`, in addition to the form and its default submit button:
 
 ```html
@@ -133,17 +133,17 @@ Once the response is received, the `.up-active` and `.up-loading` classes are re
 ```
 
 Feedback classes are also removed if the request ends for any other reason,
-such as the [server rendering an error code](/failed-responses#fail-options)
-or the request being [aborted](/aborting-requests). See [How previews end](/previews#ending)
+such as the [server rendering an error code](/learn/failed-responses#fail-options)
+or the request being [aborted](/learn/aborting-requests). See [How previews end](/learn/previews#ending)
 for all reasons that end a request.
 
 
 ## Feedback during cache revalidation {#cache-revalidation}
 
-When content is rendered from the [cache](/caching), no `.up-active` or `.up-loading` classes are set, since there is nothing to wait for.
+When content is rendered from the [cache](/learn/caching), no `.up-active` or `.up-loading` classes are set, since there is nothing to wait for.
 
-When rendering content from a stale [cache](/caching) entry,
-Unpoly [automatically reloads the fragment](/caching#revalidation) to ensure that the user never sees expired content.
+When rendering content from a stale [cache](/learn/caching) entry,
+Unpoly [automatically reloads the fragment](/learn/caching#revalidation) to ensure that the user never sees expired content.
 
 During this cache revalidation Unpoly marks the targeted fragment as `.up-revalidating`:
 
@@ -158,7 +158,7 @@ Note that the `.up-loading` and `.up-active` classes are *not* set during cache 
 
 ## Feedback classes from JavaScript
 
-When rendering from JavaScript, Unpoly sets `.up-active` on the [origin](/origin) element
+When rendering from JavaScript, Unpoly sets `.up-active` on the [origin](/api/origin) element
 that caused the interaction. For example, when following a link with `up.follow()`, that link
 is `.up-active` while loading:
 
@@ -178,7 +178,7 @@ up.on('click', '.my-button', function(event) {
 
 ## Custom feedback classes {#custom-classes}
 
-To set additional classes on activated [origins](/origin), push a class name to `up.status.config.activeClasses`:
+To set additional classes on activated [origins](/api/origin), push a class name to `up.status.config.activeClasses`:
 
 ```js
 up.status.config.activeClasses.push('activated')
@@ -201,13 +201,13 @@ up.status.config.revalidatingClasses.push('checking')
 ## Disabling feedback classes
 
 To disable feedback classes, set an
-[`[up-feedback=false]`](/up-follow#up-feedback) attribute:
+[`[up-feedback=false]`](/api/up-follow#up-feedback) attribute:
 
 ```html
 <a href="/path" up-follow up-feedback="false">Link</a> <!-- mark: up-feedback="false" -->
 ```
 
-From JavaScript you may pass a [`{ feedback: false }`](/up.render#options.feedback) option:
+From JavaScript you may pass a [`{ feedback: false }`](/api/up.render#options.feedback) option:
 
 ```js
 up.follow(link, { feedback: false }) // mark: { feedback: false }

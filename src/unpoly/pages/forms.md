@@ -23,10 +23,10 @@ and add an `[up-submit]` attribute:
 When the user submits, Unpoly sends the form data in the background.
 Your server processes it like any form submission, usually responding with
 a redirect to the next screen. Unpoly extracts the response's
-[main element](/main) and swaps it into the current page.
+[main element](/api/main) and swaps it into the current page.
 Elements outside the updated fragment keep their state, like unsaved input in other forms.
 
-To update a different fragment, add an [`[up-target]`](/up-submit#up-target) attribute with a CSS selector:
+To update a different fragment, add an [`[up-target]`](/api/up-submit#up-target) attribute with a CSS selector:
 
 ```html
 <form method="post" action="/comments" up-submit up-target="#comments"> <!-- mark: up-target="#comments" -->
@@ -41,7 +41,7 @@ To update a different fragment, add an [`[up-target]`](/up-submit#up-target) att
 The form stays a standard form. When JavaScript is unavailable,
 the browser submits it with a full page load.
 
-<p class="read-more"><a href="/submitting-forms">Read more: Submitting forms</a></p>
+<p class="read-more"><a href="/learn/submitting-forms">Read more: Submitting forms</a></p>
 
 
 Showing validation errors
@@ -68,7 +68,7 @@ When the user leaves the field, Unpoly submits the form with an `X-Up-Validate` 
 Your server validates the input without saving it and renders the form again.
 Only the `<fieldset>` around the field is updated, now with any error message.
 
-<p class="read-more"><a href="/validation">Read more: Validating forms</a></p>
+<p class="read-more"><a href="/learn/validation">Read more: Validating forms</a></p>
 
 
 Forms that react on the server
@@ -93,7 +93,7 @@ the same HTML templates as always. Unpoly swaps in only the `#country` element.
 When the user changes fields faster than the network responds, the form still
 ends up in a consistent state.
 
-<p class="read-more"><a href="/reactive-server-forms">Read more: Reactive server forms</a></p>
+<p class="read-more"><a href="/learn/reactive-server-forms">Read more: Reactive server forms</a></p>
 
 
 Switching state on the client
@@ -114,7 +114,7 @@ for which values they are shown:
 
 The card number field is shown while *Credit card* is selected and hidden otherwise.
 
-<p class="read-more"><a href="/switching-form-state">Read more: Switching form state</a></p>
+<p class="read-more"><a href="/learn/switching-form-state">Read more: Switching form state</a></p>
 
 
 Also in this topic

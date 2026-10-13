@@ -19,7 +19,7 @@ set an `[up-layer]` attribute:
 
 Unpoly fetches `/users` and swaps the `.user-list` element in the parent layer.
 Because the overlay now obstructs the updated content, it is closed when the
-parent layer is updated. This is called [peeling](/closing-overlays#peeling).
+parent layer is updated. This is called [peeling](/learn/closing-overlays#peeling).
 To keep the overlay open, set an `[up-peel="false"]` attribute.
 
 Forms work the same way. This form in an overlay creates a user, then updates the root layer:
@@ -59,12 +59,12 @@ which is usually the layer of the link or form:
 | `overlay`    | Any overlay, preferring layers closer to the front                            |
 | `any`        | Any layer, preferring the current layer, then layers closer to the front      |
 | `origin`     | The layer of the element passed as `{ origin }`                               |
-| `new`        | Opens a [new overlay](/opening-overlays) instead of updating an existing layer |
+| `new`        | Opens a [new overlay](/learn/opening-overlays) instead of updating an existing layer |
 
 Passing `any` disables layer isolation for that call.
 
 To replace existing overlays instead of stacking a new one on top, use `swap` or `shatter`.
-See [replacing existing overlays](/opening-overlays#replacing-existing-overlays).
+See [replacing existing overlays](/learn/opening-overlays#replacing-existing-overlays).
 
 
 The default layer {#default}
@@ -103,7 +103,7 @@ Addressing a layer by index {#index}
 ---------------------------
 
 Layers are numbered from the root layer upwards. Pass a number to address a layer by its position
-in the [layer stack](/up.layer.stack):
+in the [layer stack](/api/up.layer.stack):
 
 ```js
 up.render({ url: '/users', target: '.user-list', layer: 0 }) // updates the root layer
@@ -153,7 +153,7 @@ up.layer.getAll('ancestor') // result: all ancestors, closest first
 
 Other features that take a layer option include:
 
-- A [navigation bar](/navigation-bars#layers) with an `[up-layer]` attribute highlights
+- A [navigation bar](/learn/navigation-bars#layers) with an `[up-layer]` attribute highlights
   links that point to another layer's location.
 - An `[up-hungry]` element with an `[up-if-layer]` attribute is updated by responses
   that were rendered into other layers.
@@ -166,7 +166,7 @@ Current layer vs. frontmost layer {#current-vs-front}
 Most of the time, the *current* layer (`up.layer.current`) and the *frontmost* layer (`up.layer.front`)
 are the same: the last layer in the stack. There are cases where the current layer is a layer in the background:
 
-- While an element in a background layer is being [compiled](/enhancing-elements).
+- While an element in a background layer is being [compiled](/learn/enhancing-elements).
 - While an Unpoly event like `up:request:loaded` is being emitted from a background layer.
 - While an event listener bound to a background layer with `up.Layer#on()` is being called.
 
@@ -179,7 +179,7 @@ Rendering failed responses in another layer {#fail-layer}
 -------------------------------------------
 
 Like most render options, `[up-layer]` only applies when the server responds successfully.
-When the server [responds with an error code](/failed-responses), like a form with validation errors,
+When the server [responds with an error code](/learn/failed-responses), like a form with validation errors,
 the response is rendered in the link's or form's own layer.
 
 To render failed responses in another layer, set an `[up-fail-layer]` attribute or pass a `{ failLayer }` option.

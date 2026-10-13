@@ -1,30 +1,30 @@
 @partial up-follow/loading-state
 
 @param [up-disable]
-  [Disables form controls](/disabling-forms#from-link) while the link is loading.
+  [Disables form controls](/learn/disabling-forms#from-link) while the link is loading.
 
 @param [up-placeholder]
-  A [placeholder](/placeholders) to show in the targeted fragment while new content is loading.
+  A [placeholder](/learn/placeholders) to show in the targeted fragment while new content is loading.
 
-  Existing children of the targeted fragment [will be hidden](/placeholders#basic-example) during the request.
+  Existing children of the targeted fragment [will be hidden](/learn/placeholders#basic-example) during the request.
   When the request ends for any reason, all changes will be reverted.
 
-  You can either [pass a HTML string](/placeholders#basic-example)
-  or [refer to a template](/placeholders#from-template), optionally with
-  [variables](/placeholders#dynamic-templates).
+  You can either [pass a HTML string](/learn/placeholders#basic-example)
+  or [refer to a template](/learn/placeholders#from-template), optionally with
+  [variables](/learn/placeholders#dynamic-templates).
 
-  If this link [opens a new overlay](/opening-overlays), the placeholder
-  will be shown temporary overlay with the same [visual style](/customizing-overlays) and open animation.
+  If this link [opens a new overlay](/learn/opening-overlays), the placeholder
+  will be shown temporary overlay with the same [visual style](/learn/customizing-overlays) and open animation.
 
   @experimental
 
 @param [up-preview]
-  The name of a [preview](/previews) that temporarily changes the page
+  The name of a [preview](/learn/previews) that temporarily changes the page
   while new content is loading.
 
   The preview changes will be reverted automatically
-  when the request ends for [any reason](/previews#ending).
+  when the request ends for [any reason](/learn/previews#ending).
 
 @param [up-feedback='true']
-  Whether to set [feedback classes](/feedback-classes)
+  Whether to set [feedback classes](/learn/feedback-classes)
   while loading content.

@@ -3,7 +3,7 @@ Conditional requests
 
 When Unpoly reloads a fragment that has not changed, your server can answer with an empty `304 Not Modified`.
 The exchange then costs about 1 KB and no rendering time.
-This works for every reload, whether from [polling](/polling), [cache revalidation](/caching#revalidation) or `up.reload()`,
+This works for every reload, whether from [polling](/learn/polling), [cache revalidation](/learn/caching#revalidation) or `up.reload()`,
 and uses standard HTTP *conditional requests*.
 
 Supporting conditional requests is optional. Reloading, polling and revalidation also work
@@ -165,14 +165,14 @@ Rendering nothing {#rendering-nothing}
 A `304 Not Modified` is one of three responses that finish a render pass without changes.
 The server can send any of them, with an empty body:
 
-- A response header [`X-Up-Target: :none`](/X-Up-Target)
+- A response header [`X-Up-Target: :none`](/api/X-Up-Target)
 - An HTTP status [`204 No Content`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204)
 - An HTTP status [`304 Not Modified`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304)
 
-A `304` counts as a successful response, not as a [failed response](/failed-responses), even though its status is not `2xx`.
+A `304` counts as a successful response, not as a [failed response](/learn/failed-responses), even though its status is not `2xx`.
 
 When nothing is rendered, no `up:fragment:loaded` event is emitted and no `{ onRendered }` callback is called.
-The `up.render()` promise still fulfills, with an [empty](/up.RenderResult.prototype.none) `up.RenderResult`.
+The `up.render()` promise still fulfills, with an [empty](/api/up.RenderResult.prototype.none) `up.RenderResult`.
 Loading state is reverted and `{ onFinished }` callbacks run as usual.
 
 To skip a response on the client after it was loaded, see [[render-lifecycle#skipping-responses]].

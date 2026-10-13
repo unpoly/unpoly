@@ -2,7 +2,7 @@ const u = up.util
 const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
 
 /*-
-A response to an [HTTP request](/up.request).
+A response to an [HTTP request](/api/up.request).
 
 ### Example
 
@@ -36,7 +36,7 @@ up.Response = class Response extends up.Record {
   /*-
   The URL from which the response was loaded.
 
-  This is usually the [requested URL](/up.Request.prototype.url), or the final URL after the server redirected.
+  This is usually the [requested URL](/api/up.Request.prototype.url), or the final URL after the server redirected.
 
   @property up.Response#url
   @param {string} url
@@ -64,7 +64,7 @@ up.Response = class Response extends up.Record {
   */
 
   /*-
-  The original [request](/up.Request) that triggered this response.
+  The original [request](/api/up.Request) that triggered this response.
 
   @property up.Response#request
   @param {up.Request} request
@@ -81,7 +81,7 @@ up.Response = class Response extends up.Record {
   */
 
   /*-
-  A [document title pushed by the server](/X-Up-Title).
+  A [document title pushed by the server](/api/X-Up-Title).
 
   If the server pushed no title via HTTP header, this will be `undefined`.
 
@@ -92,7 +92,7 @@ up.Response = class Response extends up.Record {
   */
 
   /*-
-  A [render target pushed by the server](/X-Up-Target).
+  A [render target pushed by the server](/api/X-Up-Target).
 
   If the server pushed no target via HTTP header, this will be `undefined`.
 
@@ -103,7 +103,7 @@ up.Response = class Response extends up.Record {
   */
 
   /*-
-  Changes to the current [context](/context) as [set by the server](/X-Up-Context).
+  Changes to the current [context](/learn/context) as [set by the server](/api/X-Up-Context).
 
   @learn-ref context
 
@@ -205,7 +205,7 @@ up.Response = class Response extends up.Record {
   }
 
   /*-
-  Returns whether the response has a [content-type](/up.Response.prototype.contentType)
+  Returns whether the response has a [content-type](/api/up.Response.prototype.contentType)
   for HTML or XHTML.
 
   This method tests if the `Content-Type` header is either `text/html` or `application/xhtml+xml`.
@@ -267,7 +267,7 @@ up.Response = class Response extends up.Record {
   so multiple accesses will call `JSON.parse()` only once.
 
   > [note]
-  > This method can only parse regular JSON values. [Relaxed JSON](/relaxed-json) is not supported here.
+  > This method can only parse regular JSON values. [Relaxed JSON](/api/relaxed-json) is not supported here.
 
   ### Example
 
@@ -297,9 +297,9 @@ up.Response = class Response extends up.Record {
   }
 
   /*-
-  Returns whether this [cached](/caching) response has expired.
+  Returns whether this [cached](/learn/caching) response has expired.
 
-  Content rendered from an expired response is [revalidated](/caching#revalidation) with the server.
+  Content rendered from an expired response is [revalidated](/learn/caching#revalidation) with the server.
 
   @property up.Response#expired
   @param {boolean} expired

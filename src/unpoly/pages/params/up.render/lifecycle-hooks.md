@@ -14,11 +14,11 @@
 
   The callback argument is a preventable `up:fragment:loaded` event.
 
-  This callback will also run for [failed responses](/failed-responses).
+  This callback will also run for [failed responses](/learn/failed-responses).
 
 @param {Function(Event)} [options.onOffline]
   A callback that will be run when the fragment could not be loaded
-  due to a [disconnect or timeout](/network-issues).
+  due to a [disconnect or timeout](/learn/network-issues).
 
   The callback argument is an `up:fragment:offline` event. To try again, call `event.retry()`.
 
@@ -27,11 +27,11 @@
 
   This callback may be called zero, one or two times:
 
-  - When the server rendered an [empty response](/conditional-requests#rendering-nothing), no fragments are updated. `{ onRendered }` is not called.
-  - When the server rendered a matching fragment, it will be updated on the page. `{ onRendered }` is called with the [result](/up.RenderResult).
-  - When [revalidation](/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
+  - When the server rendered an [empty response](/learn/conditional-requests#rendering-nothing), no fragments are updated. `{ onRendered }` is not called.
+  - When the server rendered a matching fragment, it will be updated on the page. `{ onRendered }` is called with the [result](/api/up.RenderResult).
+  - When [revalidation](/learn/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
 
-  Also see [Running code after rendering](/render-lifecycle#running-code-after-rendering).
+  Also see [Running code after rendering](/learn/render-lifecycle#running-code-after-rendering).
 
 @param {Function(up.RenderResult)} [options.onFinished]
   A function to call when no further DOM changes will be caused by this render pass.
@@ -39,16 +39,16 @@
   @include finished-state
 
   The callback argument is the last `up.RenderResult` that updated a fragment.
-  If [revalidation](/caching#revalidation) re-rendered the fragment, it is the result from the
-  second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
+  If [revalidation](/learn/caching#revalidation) re-rendered the fragment, it is the result from the
+  second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/learn/caching#when-nothing-changed),
   it is the result from the initial render pass.
 
-  Also see [Awaiting post-processing](/render-lifecycle#postprocessing).
+  Also see [Awaiting post-processing](/learn/render-lifecycle#postprocessing).
 
 @param {Function(Error)} [options.onError]
   A callback that will be run when any error is thrown during the rendering process.
 
-  The callback is also called when the render pass fails due to [network issues](/network-issues),
-  or [aborts](/aborting-requests).
+  The callback is also called when the render pass fails due to [network issues](/learn/network-issues),
+  or [aborts](/learn/aborting-requests).
 
-  Also see [Handling errors](/render-lifecycle#handling-errors).
+  Also see [Handling errors](/learn/render-lifecycle#handling-errors).

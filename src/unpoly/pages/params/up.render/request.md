@@ -3,7 +3,7 @@
 @param {string} [options.url]
   The URL to request from the server.
 
-  See [loading content from a URL](/providing-html#url).
+  See [loading content from a URL](/learn/providing-html#url).
 
 @param {string} [options.method='get']
   The HTTP method to use for the request.
@@ -12,7 +12,7 @@
   The value is case-insensitive.
 
 @param {Object|up.Params|FormData|string|Array} [options.params]
-  Additional [parameters](/up.Params) that should be sent as the request's
+  Additional [parameters](/api/up.Params) that should be sent as the request's
   [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
   When making a `GET` request to a URL with a query string, the given `{ params }` will be added
@@ -22,30 +22,30 @@
   An object with additional request headers.
 
   Unpoly will by default send a number of custom request headers.
-  For example, the `X-Up-Target` header includes the [targeted](/targeting-fragments) CSS selector.
+  For example, the `X-Up-Target` header includes the [targeted](/learn/targeting-fragments) CSS selector.
   See `up.protocol` for details.
 
 @param {boolean|string|Function(request): boolean} [options.abort='target']
   Whether to abort existing requests before rendering.
 
-  See [aborting requests](/aborting-requests) for details and a list of options.
+  See [aborting requests](/learn/aborting-requests) for details and a list of options.
 
 @param {boolean} [options.abortable=true]
-  Whether the request may be aborted by other requests [targeting](/targeting-fragments)
+  Whether the request may be aborted by other requests [targeting](/learn/targeting-fragments)
   the same fragments or layer.
 
-  See [Aborting rules in layers](/aborting-requests#layers).
+  See [Aborting rules in layers](/learn/aborting-requests#layers).
 
 @param {boolean} [options.background=false]
   Whether this request will load in the background.
 
   Background requests are deprioritized over foreground requests.
   Background requests also won't emit `up:network:late` events and won't trigger
-  the [progress bar](/progress-bar).
+  the [progress bar](/learn/progress-bar).
 
 @param {number|boolean} [options.lateDelay]
   The number of milliseconds after which this request can cause
-  an `up:network:late` event and show the [progress bar](/progress-bar).
+  an `up:network:late` event and show the [progress bar](/learn/progress-bar).
 
   To prevent the event and progress bar, pass `{ lateDelay: false }`.
 
@@ -57,9 +57,9 @@
   Defaults to `up.network.config.timeout`.
 
 @param {boolean|Function(up.Response): boolean} [options.fail]
-  Whether to render [failed responses](/failed-responses) differently.
+  Whether to render [failed responses](/learn/failed-responses) differently.
 
   Failed responses will be rendered using options prefixed with `fail`, e.g. `{ failTarget }`.
 
-  By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or 304 is considered failed.
+  By [default](/api/up.network.config#config.fail) any HTTP status code other than 2xx or 304 is considered failed.
   Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.

@@ -29,7 +29,7 @@ up.layer = (function() {
   All options for `up.layer.open()` can be configured.
   The configuration will also be used for `[up-layer=new]` links.
 
-  Defaults are configured separately for each [layer mode](/overlays#layer-modes):
+  Defaults are configured separately for each [layer mode](/learn/overlays#layer-modes):
 
   | Object                    | Effect                       |
   |---------------------------|------------------------------|
@@ -59,7 +59,7 @@ up.layer = (function() {
   up.layer.config.modal.openAnimation = 'move-from-top'
   ```
 
-  To configure an additional [main target](/up-main)
+  To configure an additional [main target](/api/up-main)
   for overlays of any mode:
 
   ```js
@@ -71,27 +71,27 @@ up.layer = (function() {
   @property up.layer.config
 
   @param {string} [config.mode='modal']
-    The default [mode](/overlays#layer-modes) used when opening a new overlay.
+    The default [mode](/learn/overlays#layer-modes) used when opening a new overlay.
 
   @param {Object} config.any
     Defaults for all layer modes.
 
   @param {Array<string>} config.any.mainTargets
-    An array of CSS selectors matching default [render targets](/targeting-fragments).
+    An array of CSS selectors matching default [render targets](/learn/targeting-fragments).
 
     This is an alias for `up.fragment.config.mainTargets`.
 
   @param {Object} config.root
-    Defaults for the [root layer](/overlays#layer-modes).
+    Defaults for the [root layer](/learn/overlays#layer-modes).
 
     Inherits from `up.layer.config.any`.
 
   @param {Object} config.root.mainTargets
-    An array of CSS selectors matching default [render targets](/targeting-fragments)
-    for the [root layer](/overlays#layer-modes), but not for overlays.
+    An array of CSS selectors matching default [render targets](/learn/targeting-fragments)
+    for the [root layer](/learn/overlays#layer-modes), but not for overlays.
 
   @param {Object} config.overlay
-    Defaults for all [overlays](/overlays#layer-modes).
+    Defaults for all [overlays](/learn/overlays#layer-modes).
 
     In addition to the options documented here,
     all options for `up.layer.open()` may also be configured.
@@ -127,38 +127,38 @@ up.layer = (function() {
     address bar and window title.
 
     If set to `'auto'`, the overlay will render history if its initial fragment
-    is an [auto history target](/up.fragment.config#config.autoHistoryTargets).
+    is an [auto history target](/api/up.fragment.config#config.autoHistoryTargets).
 
     If set to `true`, the overlay will always render history.
     If set to `false`, the overlay will never render history.
 
   @param {boolean} config.overlay.trapFocus
-    Whether to [trap focus](/focus#overlay-focus-trap) within the overlay while it is in [front](/up.layer.front).
+    Whether to [trap focus](/learn/focus#overlay-focus-trap) within the overlay while it is in [front](/api/up.layer.front).
 
-    By default focus is trapped for all overlays except [popups](/overlays#layer-modes).
+    By default focus is trapped for all overlays except [popups](/learn/overlays#layer-modes).
 
   @param {string} [config.overlay.class]
     An HTML class for the overlay's container element.
 
-    See [overlay classes](/customizing-overlays#overlay-classes).
+    See [overlay classes](/learn/customizing-overlays#overlay-classes).
 
   @param {Object} config.modal
-    Defaults for [modal overlays](/overlays#layer-modes).
+    Defaults for [modal overlays](/learn/overlays#layer-modes).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
   @param {Object} config.cover
-    Defaults for [cover overlays](/overlays#layer-modes).
+    Defaults for [cover overlays](/learn/overlays#layer-modes).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
   @param {Object} config.drawer
-    Defaults for [drawer overlays](/overlays#layer-modes).
+    Defaults for [drawer overlays](/learn/overlays#layer-modes).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
   @param {Object} config.popup
-    Defaults for [popup overlays](/overlays#layer-modes).
+    Defaults for [popup overlays](/learn/overlays#layer-modes).
 
     Inherits from `up.layer.config.overlay` and `up.layer.config.any`.
 
@@ -248,8 +248,8 @@ up.layer = (function() {
   /*-
   A list of layers that are currently open.
 
-  The first element in the list is the [root layer](/up.layer.root).
-  The last element is the [frontmost layer](/up.layer.front).
+  The first element in the list is the [root layer](/api/up.layer.root).
+  The last element is the [frontmost layer](/api/up.layer.front).
 
   @property up.layer.stack
   @param {List<up.Layer>} stack
@@ -369,9 +369,9 @@ up.layer = (function() {
   }
 
   /*-
-  [Opens a new overlay](/opening-overlays).
+  [Opens a new overlay](/learn/opening-overlays).
 
-  Opening a layer is considered [navigation](/navigation-defaults) by default.
+  Opening a layer is considered [navigation](/learn/navigation-defaults) by default.
 
   @learn-ref opening-overlays
 
@@ -388,14 +388,14 @@ up.layer = (function() {
     @param {Object} [options]
       Render options to apply when opening the new overlay.
 
-      Common options are documented below, but most [options for `up.render()`](/up.render#parameters) can be used.
+      Common options are documented below, but most [options for `up.render()`](/api/up.render#parameters) can be used.
 
       You can configure default layer options in `up.layer.config`.
       For example, options in `up.layer.config.overlay` become defaults for all overlays,
       while options in `up.layer.config.drawer` become defaults for all drawers.
 
     @param {boolean} [options.navigate=true]
-      Whether to apply [navigation defaults](/navigation-defaults).
+      Whether to apply [navigation defaults](/learn/navigation-defaults).
 
   @section Placement
     @param {string} [options.target]
@@ -403,7 +403,7 @@ up.layer = (function() {
 
       The given `{ target }` must be matchable within the HTML provided by either the `{ url }`, `{ content }`, `{ fragment }`, or `{ document }` option.
 
-      If the `{ target }` option is omitted, Unpoly will use the first matching [main target](/up-main) configured for the overlay mode. For example, the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/up-main#overlays).
+      If the `{ target }` option is omitted, Unpoly will use the first matching [main target](/api/up-main) configured for the overlay mode. For example, the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/api/up-main#overlays).
 
     @param {string} [options.layer="new"]
       Whether to stack the new overlay or replace existing overlays.
@@ -415,30 +415,30 @@ up.layer = (function() {
     @param {Element} [options.origin]
       The link or button element that caused this overlay to open.
 
-      The origin [will be re-focused](/focus#overlays) when the overlay closes.
+      The origin [will be re-focused](/learn/focus#overlays) when the overlay closes.
 
       When opening a popup, the overlay will be anchored relative to the origin element.
 
     @param {string} [options.position]
       For **popups**, the position of the popup relative to the link or button that opened
-      the overlay. See [popup position](/customizing-overlays#popup-position).
+      the overlay. See [popup position](/learn/customizing-overlays#popup-position).
 
       For **drawers**, the screen edge on which to position the drawer (`left` or `right`).
-      See [drawer position](/customizing-overlays#drawer-position).
+      See [drawer position](/learn/customizing-overlays#drawer-position).
 
     @param {string} [options.align]
       For **popups**, the alignment of the popup within its `{ position }`.
-      See [popup position](/customizing-overlays#popup-position).
+      See [popup position](/learn/customizing-overlays#popup-position).
 
   @section Request
     @mix up.render/request
       @param options.abort
         Whether to abort existing requests before rendering.
 
-        By default, opening a new overlay will abort all requests within the [main](/main) element
+        By default, opening a new overlay will abort all requests within the [main](/api/main) element
         of its base layer.
 
-        See [aborting requests](/aborting-requests) for details and a list of options.
+        See [aborting requests](/learn/aborting-requests) for details and a list of options.
 
       @param options.abortable
         Whether the request may be aborted by other requests.
@@ -446,9 +446,9 @@ up.layer = (function() {
         By default, the request will be aborted:
 
         - By another request opening another overlay from the same base layer
-        - By another request targeting the base layer's [main](/main) element
+        - By another request targeting the base layer's [main](/api/main) element
 
-        See [Preventing a request from being aborted](/aborting-requests#preventing).
+        See [Preventing a request from being aborted](/learn/aborting-requests#preventing).
 
   @section Local content
     @mix up.render/local-content
@@ -458,24 +458,24 @@ up.layer = (function() {
     @param {string} [options.mode]
       The kind of overlay to open.
 
-      See [available layer modes](/overlays#layer-modes).
+      See [available layer modes](/learn/overlays#layer-modes).
 
     @param {string} [options.size]
       The size of the overlay.
 
       Supported values are `'small'`, `'medium'`, `'large'`, and `'grow'`.\
-      See [overlay sizes](/customizing-overlays#overlay-sizes) for details.
+      See [overlay sizes](/learn/customizing-overlays#overlay-sizes) for details.
 
     @param {string} [options.class]
       An optional HTML class for the overlay's container element.
 
-      See [overlay classes](/customizing-overlays#overlay-classes).
+      See [overlay classes](/learn/customizing-overlays#overlay-classes).
 
     @param {boolean|string|Array<string>} [options.dismissible=true]
-      How the overlay can be [dismissed](/closing-overlays) by the user.
+      How the overlay can be [dismissed](/learn/closing-overlays) by the user.
 
       Supported values are `'key'`, `'outside'`, and `'button'`.\
-      See [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls)
+      See [customizing dismiss controls](/learn/closing-overlays#customizing-dismiss-controls)
       for details.
 
       You can enable multiple dismiss controls by passing an array or
@@ -490,36 +490,36 @@ up.layer = (function() {
       The accessibility label for the dismiss icon in the top-right corner.
 
     @param {boolean}[options.trapFocus]
-      Whether to [trap focus](/focus#overlay-focus-trap) within the overlay while it is in [front](/up.layer.front).
+      Whether to [trap focus](/learn/focus#overlay-focus-trap) within the overlay while it is in [front](/api/up.layer.front).
 
-      By default focus is trapped for all overlays except [popups](/overlays#layer-modes).
+      By default focus is trapped for all overlays except [popups](/learn/overlays#layer-modes).
 
   @section Client state
     @param {Object} [options.data]
-      The [data object](/data) for the overlay's root content element (`{ target }`).
+      The [data object](/learn/data) for the overlay's root content element (`{ target }`).
 
       If the content element already has an `[up-data]` attribute, properties from `{ data }` take precedence.
 
     @param {Object} [options.context={}]
-      The initial [context](/up.layer.context) object for the new overlay.
+      The initial [context](/api/up.layer.context) object for the new overlay.
 
       @experimental
 
   @section History
     @mix up.render/history
       @param {boolean|string} [options.history]
-        Whether the overlay has [visible history](/history-in-overlays).
+        Whether the overlay has [visible history](/learn/history-in-overlays).
 
         If set to `true`, the overlay location, title, and meta tags will be shown
         while the overlay is open. When the overlay is closed, the parent layer's history is restored.
 
         If set to `'auto'`, history will be visible if the initial overlay
-        content matches a [main target](/up-main).
+        content matches a [main target](/api/up-main).
 
         If set to `false`, fragment changes within the overlay will *never* update the address bar.
         You can still access the overlay's current location using `up.layer.location`.
 
-        See [History in overlays](/history-in-overlays).
+        See [History in overlays](/learn/history-in-overlays).
 
   @section Animation
     @param {string|Function|boolean} [options.animation='fade-in']
@@ -546,61 +546,61 @@ up.layer = (function() {
 
     @param {string|Array<string>} [options.acceptEvent]
       One or more event types that will cause this overlay to automatically be
-      [accepted](/closing-overlays) when a matching event occurs within the overlay.
+      [accepted](/learn/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/learn/closing-overlays#result-values)
       is the event object that caused the overlay to close.
 
-      See [Closing when an event is emitted](/closing-overlays#event-condition).
+      See [Closing when an event is emitted](/learn/closing-overlays#event-condition).
 
     @param {string|Array<string>} [options.dismissEvent]
       One or more event types that will cause this overlay to automatically be
-      [dismissed](/closing-overlays) when a matching event occurs within the overlay.
+      [dismissed](/learn/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/learn/closing-overlays#result-values)
       is the event object that caused the overlay to close.
 
-      See [Closing when an event is emitted](/closing-overlays#event-condition).
+      See [Closing when an event is emitted](/learn/closing-overlays#event-condition).
 
     @param {string|Array<string>} [options.acceptLocation]
-      One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
-      [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
+      One or more [URL patterns](/api/url-patterns) that will cause this overlay to automatically be
+      [accepted](/learn/closing-overlays) when the overlay reaches a matching [location](/api/up.layer.location).
 
-      The [overlay result value](/closing-overlays#result-values)
-      is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
+      The [overlay result value](/learn/closing-overlays#result-values)
+      is an object of [named segments matches](/api/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
-      See [Closing when a location is reached](/closing-overlays#event-condition).
+      See [Closing when a location is reached](/learn/closing-overlays#event-condition).
 
     @param {string|Array<string>} [options.dismissLocation]
-      One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
-      [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
+      One or more [URL patterns](/api/url-patterns) that will cause this overlay to automatically be
+      [dismissed](/learn/closing-overlays) when the overlay reaches a matching [location](/api/up.layer.location).
 
-      The [overlay result value](/closing-overlays#result-values)
-      is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
+      The [overlay result value](/learn/closing-overlays#result-values)
+      is an object of [named segments matches](/api/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
-      See [Closing when a location is reached](/closing-overlays#location-condition).
+      See [Closing when a location is reached](/learn/closing-overlays#location-condition).
 
     @param {string} [options.acceptFragment]
       An CSS selector that will cause this overlay to automatically be
-      [accepted](/closing-overlays) when a matching element is observed within the overlay.
+      [accepted](/learn/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
-      is the matching fragment's [data](/data) object.\
+      The [overlay result value](/learn/closing-overlays#result-values)
+      is the matching fragment's [data](/learn/data) object.\
       If the fragment has no data, the value is an empty object.
 
-      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+      See [Closing when a fragment is detected](/learn/closing-overlays#fragment-condition).
 
     @param {string} [options.dismissFragment]
       An CSS selector that will cause this overlay to automatically be
-      [dismissed](/closing-overlays) when a matching element is observed within the overlay.
+      [dismissed](/learn/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
-      is the matching fragment's [data](/data) object.\
+      The [overlay result value](/learn/closing-overlays#result-values)
+      is the matching fragment's [data](/learn/data) object.\
       If the fragment has no data, the value is an empty object.
 
-      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+      See [Closing when a fragment is detected](/learn/closing-overlays#fragment-condition).
 
   @section Callbacks
     @param {Function(Event)} [options.onOpened]
@@ -610,41 +610,41 @@ up.layer = (function() {
 
       The overlay may still play an opening animation when this function is called.
       To be called when the opening animation is done, pass an
-      [`{ onFinished }`](/up.render#options.onFinished) option.
+      [`{ onFinished }`](/api/up.render#options.onFinished) option.
 
     @param {Function(Event)} [options.onAccept]
-      A function that is called when the overlay is about to be [accepted](/closing-overlays).
+      A function that is called when the overlay is about to be [accepted](/learn/closing-overlays).
 
       The function argument is an `up:layer:accept` event.
-      The overlay's [acceptance value](/closing-overlays#acceptance-values) is available as `event.value`.
+      The overlay's [acceptance value](/learn/closing-overlays#acceptance-values) is available as `event.value`.
 
       To keep the overlay open, call `event.preventDefault()`.
       This also works when the overlay is closed because a background layer is being
-      [updated](/closing-overlays#peeling). It has no effect when the overlay is
-      [closed by force](/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
+      [updated](/learn/closing-overlays#peeling). It has no effect when the overlay is
+      [closed by force](/api/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
 
       To run code after the overlay closed, use `{ onAccepted }` instead.
 
     @param {Function(Event)} [options.onAccepted]
-      A function that is called when the overlay was [accepted](/closing-overlays).
+      A function that is called when the overlay was [accepted](/learn/closing-overlays).
 
       The function argument is an `up:layer:accepted` event.
 
     @param {Function(Event)} [options.onDismiss]
-      A function that is called when the overlay is about to be [dismissed](/closing-overlays).
+      A function that is called when the overlay is about to be [dismissed](/learn/closing-overlays).
 
       The function argument is an `up:layer:dismiss` event.
-      The overlay's [dismissal value](/closing-overlays#dismissal-reasons) is available as `event.value`.
+      The overlay's [dismissal value](/learn/closing-overlays#dismissal-reasons) is available as `event.value`.
 
       To keep the overlay open, call `event.preventDefault()`.
       This also works when the overlay is closed because a background layer is being
-      [updated](/closing-overlays#peeling). It has no effect when the overlay is
-      [closed by force](/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
+      [updated](/learn/closing-overlays#peeling). It has no effect when the overlay is
+      [closed by force](/api/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
 
       To run code after the overlay closed, use `{ onDismissed }` instead.
 
     @param {Function(Event)} [options.onDismissed]
-      A function that is called when the overlay was [dismissed](/closing-overlays).
+      A function that is called when the overlay was [dismissed](/learn/closing-overlays).
 
       The function argument is an `up:layer:dismissed` event.
 
@@ -674,9 +674,9 @@ up.layer = (function() {
   }
 
   /*-
-  This event is emitted before an overlay is [opened](/opening-overlays).
+  This event is emitted before an overlay is [opened](/learn/opening-overlays).
 
-  At emission time, the overlay is not yet part of the [layer stack](/up.layer.stack).
+  At emission time, the overlay is not yet part of the [layer stack](/api/up.layer.stack).
   The overlay's elements have not yet been placed in the DOM.
   Listeners can prevent this event to prevent the overlay from opening.
 
@@ -723,7 +723,7 @@ up.layer = (function() {
 
   The event is emitted right before the opening animation starts. Because the overlay
   has not yet been painted by the browser, this is a good occasion to
-  [customize overlay elements](/customizing-overlays#customizing-overlay-elements):
+  [customize overlay elements](/learn/customizing-overlays#customizing-overlay-elements):
 
   ```js
   up.on('up:layer:opened', function(event) {
@@ -733,26 +733,26 @@ up.layer = (function() {
   })
   ```
 
-  See [Customizing overlays](/customizing-overlays) for other methods to change
+  See [Customizing overlays](/learn/customizing-overlays) for other methods to change
   the overlay appearance.
 
   @event up:layer:opened
   @param {Element} event.origin
     The link element that is opening the overlay.
   @param {up.Layer} event.layer
-    The [layer object](/up.Layer) that is opening.
+    The [layer object](/api/up.Layer) that is opening.
   @stable
   */
 
   /*-
-  This event is emitted after a layer's [location property](/up.Layer.prototype.location)
+  This event is emitted after a layer's [location property](/api/up.Layer.prototype.location)
   has changed value.
 
-  This event is *also* emitted when a layer [without visible history](/up.Layer.prototype.history)
+  This event is *also* emitted when a layer [without visible history](/api/up.Layer.prototype.history)
   has reached a new location. If you are only interested in changes that are visible in
   the browser's address bar, observe `up:location:changed` instead.
 
-  The event is also emitted for location changes on the [root layer](/overlays#layer-modes).
+  The event is also emitted for location changes on the [root layer](/learn/overlays#layer-modes).
 
   This event is *not* emitted when an overlay is opened. For this, observe `up:layer:opened` instead.
 
@@ -765,13 +765,13 @@ up.layer = (function() {
 
     May be `undefined` if the layer was opened without a known location.
   @param {up.Layer} event.layer
-    The [layer object](/up.Layer) that had its location changed.
+    The [layer object](/api/up.Layer) that had its location changed.
   @event up:layer:location:changed
   @stable
   */
 
   /*-
-  [Opens an overlay](/opening-overlays) and returns a promise for its [acceptance](/closing-overlays).
+  [Opens an overlay](/learn/opening-overlays) and returns a promise for its [acceptance](/learn/closing-overlays).
 
   It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
   that can either be **fulfilled (accepted)** or **rejected (dismissed)**.
@@ -781,7 +781,7 @@ up.layer = (function() {
   ## Example
 
   Instead of using `up.layer.open()` and passing callbacks, you can use `up.layer.ask()`.
-  `up.layer.ask()` returns a promise for the [acceptance value](/closing-overlays#acceptance-values), which you can `await`:
+  `up.layer.ask()` returns a promise for the [acceptance value](/learn/closing-overlays#acceptance-values), which you can `await`:
 
   ```js
   let user = await up.layer.ask({ url: '/users/new' })
@@ -789,7 +789,7 @@ up.layer = (function() {
   ```
 
   To handle the case where the overlay wasn't completed successfully, you
-  can `catch` the rejected promise [reason](/closing-overlays#dismissal-reasons):
+  can `catch` the rejected promise [reason](/learn/closing-overlays#dismissal-reasons):
 
   ```js
   try {
@@ -808,9 +808,9 @@ up.layer = (function() {
   @return {Promise}
     A promise that settles when the overlay closes.
 
-    When the overlay is accepted, the promise will fulfill with the overlay's [acceptance value](/closing-overlays#acceptance-values).
+    When the overlay is accepted, the promise will fulfill with the overlay's [acceptance value](/learn/closing-overlays#acceptance-values).
 
-    When the overlay is dismissed, the promise will reject with the overlay's [dismissal reason](/closing-overlays#dismissal-reasons).
+    When the overlay is dismissed, the promise will reject with the overlay's [dismissal reason](/learn/closing-overlays#dismissal-reasons).
 
   @stable
   @signature
@@ -864,7 +864,7 @@ up.layer = (function() {
   }
 
   /*-
-  Shows the response to a link click or form submission within [a new overlay](/opening-overlays).
+  Shows the response to a link click or form submission within [a new overlay](/learn/opening-overlays).
 
   @learn-ref opening-overlays
 
@@ -876,7 +876,7 @@ up.layer = (function() {
   <a href="/menu" up-layer="new">Open menu</a> <!-- mark: up-layer="new" -->
   ```
 
-  This form will show error messages from a [failed submission](/failed-responses) within a modal overlay:
+  This form will show error messages from a [failed submission](/learn/failed-responses) within a modal overlay:
 
   ```html
   <form action="/submit" up-fail-layer="new"> <!-- mark: up-fail-layer="new" -->
@@ -896,7 +896,7 @@ up.layer = (function() {
 
       The target must be matchable within the HTML provided by either the `[href]`, `[up-content]`, `[up-fragment]`, or `[up-document]` attribute.
 
-      If the attribute is omitted, Unpoly will use the first matching [main target](/up-main) configured for the overlay mode. For example, the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/up-main#overlays).
+      If the attribute is omitted, Unpoly will use the first matching [main target](/api/up-main) configured for the overlay mode. For example, the default selectors for modals are configured in `up.layer.config.modal.mainTargets`. See [main targets in overlays](/api/up-main#overlays).
 
     @param [up-layer="new"]
       @like up.layer.open/options.layer
@@ -912,10 +912,10 @@ up.layer = (function() {
       @param [up-abort]
         Whether to abort existing requests before rendering.
 
-        By default, opening a new overlay will abort all requests within the [main](/main) element
+        By default, opening a new overlay will abort all requests within the [main](/api/main) element
         of its base layer.
 
-        See [aborting requests](/aborting-requests) for details and a list of options.
+        See [aborting requests](/learn/aborting-requests) for details and a list of options.
 
       @param [up-abortable]
         Whether the request may be aborted by other requests.
@@ -923,9 +923,9 @@ up.layer = (function() {
         By default, the request will be aborted:
 
         - By another request opening another overlay from the same base layer
-        - By another request targeting the base layer's [main](/main) element
+        - By another request targeting the base layer's [main](/api/main) element
 
-        See [Preventing a request from being aborted](/aborting-requests#preventing).
+        See [Preventing a request from being aborted](/learn/aborting-requests#preventing).
 
   @section Local content
     @mix up-follow/local-content
@@ -936,22 +936,22 @@ up.layer = (function() {
 
       Defaults to `up.layer.config.mode`, which defaults to `'modal'`.
 
-      See [available layer modes](/overlays#layer-modes).
+      See [available layer modes](/learn/overlays#layer-modes).
 
     @param [up-size='medium']
       The size of the overlay.
 
-      See [overlay sizes](/customizing-overlays#overlay-sizes) for details.
+      See [overlay sizes](/learn/customizing-overlays#overlay-sizes) for details.
 
     @param [up-class]
       An optional HTML class for the overlay's container element.
 
-      See [overlay classes](/customizing-overlays#overlay-classes).
+      See [overlay classes](/learn/customizing-overlays#overlay-classes).
 
     @param [up-dismissible]
-      How the overlay can be [dismissed](/closing-overlays) by the user.
+      How the overlay can be [dismissed](/learn/closing-overlays) by the user.
 
-      See [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls)
+      See [customizing dismiss controls](/learn/closing-overlays#customizing-dismiss-controls)
       for details.
 
       You can enable multiple dismiss controls by separating values with a space or comma character.
@@ -960,35 +960,35 @@ up.layer = (function() {
 
   @section Client state
     @param [up-use-data]
-      The [data object](/data) for the overlay's root content element (`[up-target]`),
-      encoded as [relaxed JSON](/relaxed-json).
+      The [data object](/learn/data) for the overlay's root content element (`[up-target]`),
+      encoded as [relaxed JSON](/api/relaxed-json).
 
       If the content element already has an `[up-data]` attribute, properties from `[up-use-data]` take precedence.
 
     @param [up-context]
-      The new overlay's [context](/up.layer.context) object, encoded as [relaxed JSON](/relaxed-json).
+      The new overlay's [context](/api/up.layer.context) object, encoded as [relaxed JSON](/api/relaxed-json).
 
       @experimental
 
   @section History
     @mix up-follow/history
       @param [up-history]
-        Whether the overlay has [visible history](/history-in-overlays).
+        Whether the overlay has [visible history](/learn/history-in-overlays).
 
         If set to `'true'`, the overlay location, title, and meta tags will be shown
         while the overlay is open. When the overlay is closed, the parent layer's history is restored.
 
         If set to `'auto'`, history will be visible if the initial overlay
-        content matches a [main target](/up-main).
+        content matches a [main target](/api/up-main).
 
         If set to `'false'`, fragment changes within the overlay will *never* update the address bar.
         You can still access the overlay's current location using `up.layer.location`.
 
-        See [History in overlays](/history-in-overlays).
+        See [History in overlays](/learn/history-in-overlays).
 
   @section Animation
     @param [up-animation='fade-in']
-      The [name](/animation#available-animations) of the opening animation.
+      The [name](/learn/animation#available-animations) of the opening animation.
 
     @param [up-easing='ease']
       The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
@@ -998,7 +998,7 @@ up.layer = (function() {
       The duration of the opening animation in milliseconds.
 
     @param [up-close-animation='fade-out']
-      The [name](/animation#available-animations) of the closing animation.
+      The [name](/learn/animation#available-animations) of the closing animation.
 
     @param [up-close-easing='ease']
       The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
@@ -1010,65 +1010,65 @@ up.layer = (function() {
   @section Close conditions
     @param [up-accept-event]
       An event type that will cause this overlay to automatically be
-      [accepted](/closing-overlays) when a matching event occurs within the overlay.
+      [accepted](/learn/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/learn/closing-overlays#result-values)
       is the event object that caused the overlay to close.
 
       You can listen to multiple event types by separating types with a space or comma.
 
-      See [Closing when an event is emitted](/closing-overlays#event-condition).
+      See [Closing when an event is emitted](/learn/closing-overlays#event-condition).
 
     @param [up-dismiss-event]
       An event type that will cause this overlay to automatically be
-      [dismissed](/closing-overlays) when a matching event occurs within the overlay.
+      [dismissed](/learn/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/learn/closing-overlays#result-values)
       is the event object that caused the overlay to close.
 
       You can listen to multiple event types by separating types with a space or comma.
 
-      See [Closing when an event is emitted](/closing-overlays#event-condition).
+      See [Closing when an event is emitted](/learn/closing-overlays#event-condition).
 
     @param [up-accept-location]
-      One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
-      [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
+      One or more space-separated [URL patterns](/api/url-patterns) that will cause this overlay to automatically be
+      [accepted](/learn/closing-overlays) when the overlay reaches a matching [location](/api/up.layer.location).
 
-      The [overlay result value](/closing-overlays#result-values)
-      is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
+      The [overlay result value](/learn/closing-overlays#result-values)
+      is an object of [named segments matches](/api/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
-      See [Closing when a location is reached](/closing-overlays#location-condition).
+      See [Closing when a location is reached](/learn/closing-overlays#location-condition).
 
     @param [up-dismiss-location]
-      One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
-      [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
+      One or more space-separated [URL patterns](/api/url-patterns) that will cause this overlay to automatically be
+      [dismissed](/learn/closing-overlays) when the overlay reaches a matching [location](/api/up.layer.location).
 
-      The [overlay result value](/closing-overlays#result-values)
-      is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
+      The [overlay result value](/learn/closing-overlays#result-values)
+      is an object of [named segments matches](/api/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
-      See [Closing when a location is reached](/closing-overlays#location-condition).
+      See [Closing when a location is reached](/learn/closing-overlays#location-condition).
 
     @param [up-accept-fragment]
       An CSS selector that will cause this overlay to automatically be
-      [accepted](/closing-overlays) when a matching element is observed within the overlay.
+      [accepted](/learn/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
-      is the matching fragment's [data](/data) object.\
+      The [overlay result value](/learn/closing-overlays#result-values)
+      is the matching fragment's [data](/learn/data) object.\
       If the fragment has no data, the value is an empty object.
 
-      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+      See [Closing when a fragment is detected](/learn/closing-overlays#fragment-condition).
 
     @param [up-dismiss-fragment]
       An CSS selector that will cause this overlay to automatically be
-      [dismissed](/closing-overlays) when a matching element is observed within the overlay.
+      [dismissed](/learn/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
-      is the matching fragment's [data](/data) object.\
+      The [overlay result value](/learn/closing-overlays#result-values)
+      is the matching fragment's [data](/learn/data) object.\
       If the fragment has no data, the value is an empty object.
 
-      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+      See [Closing when a fragment is detected](/learn/closing-overlays#fragment-condition).
 
   @section Callbacks
     @param [up-on-opened]
@@ -1083,7 +1083,7 @@ up.layer = (function() {
       | `event`    | An `up:layer:opened` event               |
 
     @param [up-on-accept]
-      A JavaScript snippet that is called when the overlay is about to be [accepted](/closing-overlays).
+      A JavaScript snippet that is called when the overlay is about to be [accepted](/learn/closing-overlays).
 
       The snippet runs in the following scope:
 
@@ -1091,19 +1091,19 @@ up.layer = (function() {
       |------------|-----------------------------------------------|
       | `this`     | The link that originally opened the overlay   |
       | `layer`    | An `up.Layer` object for the closing overlay  |
-      | `value`    | The overlay's [acceptance value](/closing-overlays#result-values) |
+      | `value`    | The overlay's [acceptance value](/learn/closing-overlays#result-values) |
       | `response` | The server response that is causing the overlay to close |
       | `event`    | An `up:layer:accept` event                    |
 
       To keep the overlay open, call `event.preventDefault()`.
       This also works when the overlay is closed because a background layer is being
-      [updated](/closing-overlays#peeling). It has no effect when the overlay is
-      [closed by force](/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
+      [updated](/learn/closing-overlays#peeling). It has no effect when the overlay is
+      [closed by force](/api/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
 
       To run code after the overlay closed, use `[up-on-accepted]` instead.
 
     @param [up-on-accepted]
-      A JavaScript snippet that is called when the overlay was [accepted](/closing-overlays).
+      A JavaScript snippet that is called when the overlay was [accepted](/learn/closing-overlays).
 
       The snippet runs in the following scope:
 
@@ -1111,12 +1111,12 @@ up.layer = (function() {
       |------------|-----------------------------------------------|
       | `this`     | The link that originally opened the overlay   |
       | `layer`    | An `up.Layer` object for the accepted overlay |
-      | `value`    | The overlay's [acceptance value](/closing-overlays#result-values) |
+      | `value`    | The overlay's [acceptance value](/learn/closing-overlays#result-values) |
       | `response` | The server response that caused the overlay to close |
       | `event`    | An `up:layer:accepted` event                  |
 
     @param [up-on-dismiss]
-      A JavaScript snippet that is called when the overlay is about to be [dismissed](/closing-overlays).
+      A JavaScript snippet that is called when the overlay is about to be [dismissed](/learn/closing-overlays).
 
       The snippet runs in the following scope:
 
@@ -1124,19 +1124,19 @@ up.layer = (function() {
       |------------|------------------------------------------------|
       | `this`     | The link that originally opened the overlay    |
       | `layer`    | An `up.Layer` object for the closing overlay   |
-      | `value`    | The overlay's [dismissal value](/closing-overlays#result-values) |
+      | `value`    | The overlay's [dismissal value](/learn/closing-overlays#result-values) |
       | `response` | The server response that is causing the overlay to close |
       | `event`    | An `up:layer:dismiss` event                    |
 
       To keep the overlay open, call `event.preventDefault()`.
       This also works when the overlay is closed because a background layer is being
-      [updated](/closing-overlays#peeling). It has no effect when the overlay is
-      [closed by force](/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
+      [updated](/learn/closing-overlays#peeling). It has no effect when the overlay is
+      [closed by force](/api/up.Layer.prototype.accept#options.force), e.g. when the user navigates back in history.
 
       To run code after the overlay closed, use `[up-on-dismissed]` instead.
 
     @param [up-on-dismissed]
-      A JavaScript snippet that is called when the overlay was [dismissed](/closing-overlays).
+      A JavaScript snippet that is called when the overlay was [dismissed](/learn/closing-overlays).
 
       The snippet runs in the following scope:
 
@@ -1144,7 +1144,7 @@ up.layer = (function() {
       |------------|------------------------------------------------|
       | `this`     | The link that originally opened the overlay    |
       | `layer`    | An `up.Layer` object for the dismissed overlay |
-      | `value`    | The overlay's [dismissal value](/closing-overlays#result-values) |
+      | `value`    | The overlay's [dismissal value](/learn/closing-overlays#result-values) |
       | `response` | The server response that caused the overlay to close |
       | `event`    | An `up:layer:dismissed` event                  |
 
@@ -1155,16 +1155,16 @@ up.layer = (function() {
   */
 
   /*-
-  [Dismisses](/closing-overlays) the [current layer](/up.layer.current) when this element is clicked or submitted.
+  [Dismisses](/learn/closing-overlays) the [current layer](/api/up.layer.current) when this element is clicked or submitted.
 
-  The [relaxed JSON](/relaxed-json) value of the `[up-dismiss]` attribute becomes the overlay's
-  [dismissal value](/closing-overlays#result-values).
+  The [relaxed JSON](/api/relaxed-json) value of the `[up-dismiss]` attribute becomes the overlay's
+  [dismissal value](/learn/closing-overlays#result-values).
 
   @learn-ref closing-overlays
 
   ## On a button
 
-  To dismiss the [current layer](/up.layer.current) when a button is clicked, use an `[up-dismiss]` attribute:
+  To dismiss the [current layer](/api/up.layer.current) when a button is clicked, use an `[up-dismiss]` attribute:
 
   ```html
   <button up-dismiss>Close overlay</button>
@@ -1176,11 +1176,11 @@ up.layer = (function() {
   <button up-dismiss="{ id: 5 }">Choose user #5</button>
   ```
 
-  See [Closing when a button is clicked](/closing-overlays#on-click).
+  See [Closing when a button is clicked](/learn/closing-overlays#on-click).
 
   ## On a hyperlink
 
-  When [reusing a page within an overlay](/subinteractions#reusing-existing-screens),
+  When [reusing a page within an overlay](/learn/subinteractions#reusing-existing-screens),
   it can be useful to have a button that closes the overlay but navigates somewhere else on the root layer.
 
   In this case, you can use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
@@ -1189,10 +1189,10 @@ up.layer = (function() {
   <a href="/list" up-dismiss>Finish</a>
   ```
 
-  Unpoly will only navigate to `/list` when this link is clicked in the [root layer](/up.layer).
+  Unpoly will only navigate to `/list` when this link is clicked in the [root layer](/api/up.layer).
   In an overlay, the `click` event is prevented and the overlay is dismissed.
 
-  See [Closing when a link is followed](/closing-overlays#on-follow).
+  See [Closing when a link is followed](/learn/closing-overlays#on-follow).
 
   ## On a form
 
@@ -1205,17 +1205,17 @@ up.layer = (function() {
   </form>
   ```
 
-  The form's field values will become the [dismissal value](/closing-overlays#result-values) of the closed overlay
+  The form's field values will become the [dismissal value](/learn/closing-overlays#result-values) of the closed overlay
   as an `up.Params` value.
 
-  See [Closing when a form is submitted](/closing-overlays#on-submit).
+  See [Closing when a form is submitted](/learn/closing-overlays#on-submit).
 
   @selector [up-dismiss]
 
   @section Dismissal
     @param [up-dismiss]
-      On buttons on links, the overlay's [dismissal value](/closing-overlays#result-values)
-      as a [relaxed JSON](/relaxed-json) string.
+      On buttons on links, the overlay's [dismissal value](/learn/closing-overlays#result-values)
+      as a [relaxed JSON](/api/relaxed-json) string.
 
     @param [up-confirm]
       A message the user needs to confirm before the layer is closed.
@@ -1231,13 +1231,13 @@ up.layer = (function() {
   */
 
   /*-
-  [Accepts](/closing-overlays) the [current layer](/up.layer.current) when this element is clicked or submitted.
+  [Accepts](/learn/closing-overlays) the [current layer](/api/up.layer.current) when this element is clicked or submitted.
 
   @learn-ref closing-overlays
 
   ## On a button
 
-  To accept the [current layer](/up.layer.current) when a button is clicked, use an `[up-accept]` attribute:
+  To accept the [current layer](/api/up.layer.current) when a button is clicked, use an `[up-accept]` attribute:
 
   ```html
   <button up-accept>Close overlay</button>
@@ -1249,11 +1249,11 @@ up.layer = (function() {
   <button up-accept="{ id: 5 }">Choose user #5</button>
   ```
 
-  See [Closing when a button is clicked](/closing-overlays#on-click).
+  See [Closing when a button is clicked](/learn/closing-overlays#on-click).
 
   ## On a hyperlink
 
-  When [reusing a page within an overlay](/subinteractions#reusing-existing-screens),
+  When [reusing a page within an overlay](/learn/subinteractions#reusing-existing-screens),
   it can be useful to have a button that closes the overlay but navigates somewhere else on the root layer.
 
   In this case, you can use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
@@ -1262,10 +1262,10 @@ up.layer = (function() {
   <a href="/list" up-accept>Finish</a>
   ```
 
-  Unpoly will only navigate to `/list` when this link is clicked in the [root layer](/up.layer).
+  Unpoly will only navigate to `/list` when this link is clicked in the [root layer](/api/up.layer).
   In an overlay, the `click` event is prevented and the overlay is accepted.
 
-  See [Closing when a link is followed](/closing-overlays#on-follow).
+  See [Closing when a link is followed](/learn/closing-overlays#on-follow).
 
   ## On a form
 
@@ -1278,17 +1278,17 @@ up.layer = (function() {
   </form>
   ```
 
-  The form's field values will become the [acceptance value](/closing-overlays#result-values) of the closed overlay
+  The form's field values will become the [acceptance value](/learn/closing-overlays#result-values) of the closed overlay
   as an `up.Params` value.
 
-  See [Closing when a form is submitted](/closing-overlays#on-submit).
+  See [Closing when a form is submitted](/learn/closing-overlays#on-submit).
 
   @selector [up-accept]
 
   @section Acceptance
     @param [up-accept]
-      On buttons and links, the overlay's [acceptance value](/closing-overlays#result-values)
-      as a [relaxed JSON](/relaxed-json) string.
+      On buttons and links, the overlay's [acceptance value](/learn/closing-overlays#result-values)
+      as a [relaxed JSON](/api/relaxed-json) string.
 
       If the attribute value is omitted, a value `null` will be used.
     @param [up-confirm]
@@ -1333,12 +1333,12 @@ up.layer = (function() {
   }
 
   /*-
-  Returns the current layer in the [layer stack](/up.layer.stack).
+  Returns the current layer in the [layer stack](/api/up.layer.stack).
 
-  The *current* layer is usually the [frontmost layer](/up.layer.front).
+  The *current* layer is usually the [frontmost layer](/api/up.layer.front).
   However, there are some cases where the current layer is a layer in the background:
 
-  - While an element in a background layer is being [compiled](/enhancing-elements).
+  - While an element in a background layer is being [compiled](/learn/enhancing-elements).
   - While an Unpoly event like `up:request:loaded` is being triggered from a background layer.
   - While an event listener bound to a background layer using `up.Layer#on()` is being called.
 
@@ -1372,9 +1372,9 @@ up.layer = (function() {
   */
 
   /*-
-  Returns the number of layers in the [layer stack](/up.layer.stack).
+  Returns the number of layers in the [layer stack](/api/up.layer.stack).
 
-  The count includes the [root layer](/up.layer.root).
+  The count includes the [root layer](/api/up.layer.root).
   Hence a page with a single overlay would return a count of 2.
 
   @property up.layer.count
@@ -1384,7 +1384,7 @@ up.layer = (function() {
   */
 
   /*-
-  Returns an `up.Layer` object for the given element or [layer option](/layer-option).
+  Returns an `up.Layer` object for the given element or [layer option](/learn/layer-option).
 
   ### Looking up the layer of an element
 
@@ -1408,7 +1408,7 @@ up.layer = (function() {
 
   ### Resolving a layer option
 
-  Pass any [layer option](/layer-option) to return the `up.Layer` object
+  Pass any [layer option](/learn/layer-option) to return the `up.Layer` object
   of the first layer matching that option:
 
   ```js
@@ -1433,7 +1433,7 @@ up.layer = (function() {
 
   ### Missing values return the current layer
 
-  Passing `null` or `undefined` will return the [current layer](/up.layer.current):
+  Passing `null` or `undefined` will return the [current layer](/api/up.layer.current):
 
   ```js
   up.layer.get(undefined) // returns the current layer
@@ -1441,7 +1441,7 @@ up.layer = (function() {
 
   @function up.layer.get
   @param {string|up.Layer|number} [value='current']
-    The [layer option](/layer-option) to look up.
+    The [layer option](/learn/layer-option) to look up.
   @return {up.Layer|undefined}
     The layer matching the given option.
 
@@ -1450,20 +1450,20 @@ up.layer = (function() {
   */
 
   /*-
-  Returns an array of `up.Layer` objects matching the given [layer option](/layer-option).
+  Returns an array of `up.Layer` objects matching the given [layer option](/learn/layer-option).
 
   @function up.layer.getAll
   @param {string|up.Layer|number} [layer='current']
-    The [layer option](/layer-option) to look up.
+    The [layer option](/learn/layer-option) to look up.
   @return {Array<up.Layer>}
     An array of matching layers.
   @experimental
   */
 
   /*-
-  Returns the [root layer](/overlays#layer-modes).
+  Returns the [root layer](/learn/overlays#layer-modes).
 
-  The root layer represents the initial page before any overlay was [opened](/opening-overlays).
+  The root layer represents the initial page before any overlay was [opened](/learn/opening-overlays).
   The root layer always exists and cannot be closed.
 
   @property up.layer.root
@@ -1472,11 +1472,11 @@ up.layer = (function() {
   */
 
   /*-
-  Returns an array of all [overlays](/overlays#layer-modes).
+  Returns an array of all [overlays](/learn/overlays#layer-modes).
 
   If no overlay is open, an empty array is returned.
 
-  To get an array of *all* layers including the [root layer](/up.layer.root),
+  To get an array of *all* layers including the [root layer](/api/up.layer.root),
   use `up.layer.stack`.
 
   @property up.layer.overlays
@@ -1485,13 +1485,13 @@ up.layer = (function() {
   */
 
   /*-
-  Returns the frontmost layer in the [layer stack](/up.layer.stack).
+  Returns the frontmost layer in the [layer stack](/api/up.layer.stack).
 
   The frontmost layer is the layer directly facing the user. If an overlay is
   stacked on top of the frontmost layer, that overlay becomes the new frontmost layer.
 
   In most cases, you don't want to refer to the frontmost layer
-  but to the [current layer](/up.layer.current) instead.
+  but to the [current layer](/api/up.layer.current) instead.
 
   @property up.layer.front
   @param {up.Layer} front
@@ -1499,9 +1499,9 @@ up.layer = (function() {
   */
 
   /*-
-  [Dismisses](/up.layer.dismiss) all overlays.
+  [Dismisses](/api/up.layer.dismiss) all overlays.
 
-  Afterwards the only remaining layer will be the [root layer](/up.layer.root).
+  Afterwards the only remaining layer will be the [root layer](/api/up.layer.root).
 
   @learn-ref closing-overlays
 
@@ -1525,7 +1525,7 @@ up.layer = (function() {
   ], () => stack)
 
   /*-
-  [Accepts](/closing-overlays) the [current layer](/up.layer.current).
+  [Accepts](/learn/closing-overlays) the [current layer](/api/up.layer.current).
 
   This is a shortcut for `up.layer.current.accept()`.
   See `up.Layer#accept()` for more documentation.
@@ -1536,14 +1536,14 @@ up.layer = (function() {
   @param {any} [value]
     @like up.Layer#accept
   @param {Object} [options]
-    See [options for `up.Layer#accept()`](/up.Layer.prototype.accept#parameters).
+    See [options for `up.Layer#accept()`](/api/up.Layer.prototype.accept#parameters).
   @stable
   */
 
   /*-
-  This event is emitted *before* a layer is [accepted](/closing-overlays).
+  This event is emitted *before* a layer is [accepted](/learn/closing-overlays).
 
-  The event is emitted on the [element of the layer](/up.layer.element) that is about to close.
+  The event is emitted on the [element of the layer](/api/up.layer.element) that is about to close.
 
   @learn-ref closing-overlays
 
@@ -1551,7 +1551,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that is about to close.
   @param {any} [event.value]
-    The overlay's [acceptance value](/closing-overlays#result-values).
+    The overlay's [acceptance value](/learn/closing-overlays#result-values).
 
     Listeners can replace or mutate this value.
   @param {Element} [event.origin]
@@ -1563,25 +1563,25 @@ up.layer = (function() {
 
     Will be `undefined` if the overlay is not closing in reaction to a server response.
 
-    See [Using the discarded response](/closing-overlays#using-the-discarded-response).
+    See [Using the discarded response](/learn/closing-overlays#using-the-discarded-response).
   @param event.preventDefault()
     Prevents the overlay from closing.
 
     This also works when the overlay is closed because a background layer is being
-    [updated](/closing-overlays#peeling). In that case `event.value` is `':peel'`.
+    [updated](/learn/closing-overlays#peeling). In that case `event.value` is `':peel'`.
 
-    It has no effect when the overlay is [closed by force](/up.Layer.prototype.accept#options.force),
+    It has no effect when the overlay is [closed by force](/api/up.Layer.prototype.accept#options.force),
     e.g. when the user navigates back in history.
 
-    To prevent closing for a single overlay, pass an [`{ onAccept }`](/up.layer.open#options.onAccept) option
-    or set an [`[up-on-accept]`](/up-layer-new#up-on-accept) attribute when opening it.
+    To prevent closing for a single overlay, pass an [`{ onAccept }`](/api/up.layer.open#options.onAccept) option
+    or set an [`[up-on-accept]`](/api/up-layer-new#up-on-accept) attribute when opening it.
   @stable
   */
 
   /*-
-  This event is emitted *after* a layer was [accepted](/closing-overlays).
+  This event is emitted *after* a layer was [accepted](/learn/closing-overlays).
 
-  The event is emitted on the [layer element](/up.layer.element) when the close animation
+  The event is emitted on the [layer element](/api/up.layer.element) when the close animation
   is starting. If the layer has no close animation and was already removed from the DOM,
   the event is emitted a second time on the `document`.
 
@@ -1594,7 +1594,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that was closed.
   @param {any} [event.value]
-    The overlay's final [acceptance value](/closing-overlays#result-values).
+    The overlay's final [acceptance value](/learn/closing-overlays#result-values).
   @param {Element} [event.origin]
     The element that caused the layer to close.
 
@@ -1604,12 +1604,12 @@ up.layer = (function() {
 
     Will be `undefined` if the overlay was not closed in reaction to a server response.
 
-    See [Using the discarded response](/closing-overlays#using-the-discarded-response).
+    See [Using the discarded response](/learn/closing-overlays#using-the-discarded-response).
   @stable
   */
 
   /*-
-  [Dismisses](/closing-overlays) the [current layer](/up.layer.current).
+  [Dismisses](/learn/closing-overlays) the [current layer](/api/up.layer.current).
 
   This is a shortcut for `up.layer.current.dismiss()`.
   See `up.Layer#dismiss()` for more documentation.
@@ -1620,14 +1620,14 @@ up.layer = (function() {
   @param {any} [value]
     @like up.Layer#dismiss
   @param {Object} [options]
-    See [options for `up.Layer#dismiss()`](/up.Layer.prototype.dismiss#parameters).
+    See [options for `up.Layer#dismiss()`](/api/up.Layer.prototype.dismiss#parameters).
   @stable
   */
 
   /*-
-  This event is emitted *before* a layer is [dismissed](/closing-overlays).
+  This event is emitted *before* a layer is [dismissed](/learn/closing-overlays).
 
-  The event is emitted on the [element of the layer](/up.layer.element) that is about to close.
+  The event is emitted on the [element of the layer](/api/up.layer.element) that is about to close.
 
   @learn-ref closing-overlays
 
@@ -1635,7 +1635,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that is about to close.
   @param {any} [event.value]
-    The overlay's [dismissal value](/closing-overlays#result-values).
+    The overlay's [dismissal value](/learn/closing-overlays#result-values).
 
     Listeners can replace or mutate this value.
   @param {Element} [event.origin]
@@ -1647,25 +1647,25 @@ up.layer = (function() {
 
     Will be `undefined` if the overlay is not closing in reaction to a server response.
 
-    See [Using the discarded response](/closing-overlays#using-the-discarded-response).
+    See [Using the discarded response](/learn/closing-overlays#using-the-discarded-response).
   @param event.preventDefault()
     Event listeners can call this method to prevent the overlay from closing.
 
     This also works when the overlay is closed because a background layer is being
-    [updated](/closing-overlays#peeling). In that case `event.value` is `':peel'`.
+    [updated](/learn/closing-overlays#peeling). In that case `event.value` is `':peel'`.
 
-    It has no effect when the overlay is [closed by force](/up.Layer.prototype.accept#options.force),
+    It has no effect when the overlay is [closed by force](/api/up.Layer.prototype.accept#options.force),
     e.g. when the user navigates back in history.
 
-    To prevent closing for a single overlay, pass an [`{ onDismiss }`](/up.layer.open#options.onDismiss) option
-    or set an [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attribute when opening it.
+    To prevent closing for a single overlay, pass an [`{ onDismiss }`](/api/up.layer.open#options.onDismiss) option
+    or set an [`[up-on-dismiss]`](/api/up-layer-new#up-on-dismiss) attribute when opening it.
   @stable
   */
 
   /*-
-  This event is emitted *after* a layer was [dismissed](/closing-overlays).
+  This event is emitted *after* a layer was [dismissed](/learn/closing-overlays).
 
-  The event is emitted on the [layer element](/up.layer.element) when the close animation
+  The event is emitted on the [layer element](/api/up.layer.element) when the close animation
   is starting. If the layer has no close animation and was already removed from the DOM,
   the event is emitted a second time on the `document`.
 
@@ -1678,7 +1678,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that was closed.
   @param {any} [event.value]
-    The overlay's final [dismissal value](/closing-overlays#result-values).
+    The overlay's final [dismissal value](/learn/closing-overlays#result-values).
   @param {Element} [event.origin]
     The element that caused the layer to close.
 
@@ -1688,12 +1688,12 @@ up.layer = (function() {
 
     Will be `undefined` if the overlay was not closed in reaction to a server response.
 
-    See [Using the discarded response](/closing-overlays#using-the-discarded-response).
+    See [Using the discarded response](/learn/closing-overlays#using-the-discarded-response).
   @stable
   */
 
   /*-
-  Returns whether the [current layer](/up.layer.current) is the [root layer](/up.layer.root).
+  Returns whether the [current layer](/api/up.layer.current) is the [root layer](/api/up.layer.root).
 
   This is a shortcut for `up.layer.current.isRoot()`.
   See `up.Layer#isRoot()` for more documentation.
@@ -1705,7 +1705,7 @@ up.layer = (function() {
   */
 
   /*-
-  Returns whether the [current layer](/up.layer.current) is *not* the [root layer](/up.layer.root).
+  Returns whether the [current layer](/api/up.layer.current) is *not* the [root layer](/api/up.layer.root).
 
   This is a shortcut for `up.layer.current.isOverlay()`.
   See `up.Layer#isOverlay()` for more documentation.
@@ -1717,7 +1717,7 @@ up.layer = (function() {
   */
 
   /*-
-  Returns whether the [current layer](/up.layer.current) is the [frontmost layer](/up.layer.front).
+  Returns whether the [current layer](/api/up.layer.current) is the [frontmost layer](/api/up.layer.front).
 
   This is a shortcut for `up.layer.current.isFront()`.
   See `up.Layer#isFront()` for more documentation.
@@ -1730,7 +1730,7 @@ up.layer = (function() {
 
   /*-
   Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events)
-  that originated on an element [contained](/up.Layer.prototype.contains) by the [current layer](/up.layer.current).
+  that originated on an element [contained](/api/up.Layer.prototype.contains) by the [current layer](/api/up.layer.current).
 
   This is a shortcut for `up.layer.current.on()`.
   See `up.Layer#on()` for more documentation.
@@ -1742,7 +1742,7 @@ up.layer = (function() {
   */
 
   /*-
-  Unbinds an event listener previously bound to the [current layer](/up.layer.current).
+  Unbinds an event listener previously bound to the [current layer](/api/up.layer.current).
 
   This is a shortcut for `up.layer.current.off()`.
   See `up.Layer#off()` for more documentation.
@@ -1753,7 +1753,7 @@ up.layer = (function() {
   */
 
   /*-
-  [Emits](/up.emit) an event on the [current layer](/up.layer.current)'s [element](/up.layer.element).
+  [Emits](/api/up.emit) an event on the [current layer](/api/up.layer.current)'s [element](/api/up.layer.element).
 
   This is a shortcut for `up.layer.current.emit()`.
   See `up.Layer#emit()` for more documentation.
@@ -1771,7 +1771,7 @@ up.layer = (function() {
   */
 
   /*-
-  Returns the parent layer of the [current layer](/up.layer.current).
+  Returns the parent layer of the [current layer](/api/up.layer.current).
 
   This is a shortcut for `up.layer.current.parent`.
   See `up.Layer#parent` for more documentation.
@@ -1783,7 +1783,7 @@ up.layer = (function() {
   */
 
   /*-
-  Whether fragment updates within the [current layer](/up.layer.current)
+  Whether fragment updates within the [current layer](/api/up.layer.current)
   can affect the browser history and window title.
 
   This is a shortcut for `up.layer.current.history`.
@@ -1798,7 +1798,7 @@ up.layer = (function() {
   */
 
   /*-
-  The location URL of the [current layer](/up.layer.current).
+  The location URL of the [current layer](/api/up.layer.current).
 
   This is a shortcut for `up.layer.current.location`.
   See `up.Layer#location` for more documentation.
@@ -1812,8 +1812,8 @@ up.layer = (function() {
   */
 
   /*-
-  The [current layer](/up.layer.current)'s [mode](/up.layer.mode),
-  which governs its [appearance and behavior](/customizing-overlays).
+  The [current layer](/api/up.layer.current)'s [mode](/api/up.layer.mode),
+  which governs its [appearance and behavior](/learn/customizing-overlays).
 
   This is a shortcut for `up.layer.current.mode`.
   See `up.Layer#mode` for more documentation.
@@ -1827,7 +1827,7 @@ up.layer = (function() {
   */
 
   /*-
-  The [context](/context) of the [current layer](/up.layer.current).
+  The [context](/learn/context) of the [current layer](/api/up.layer.current).
 
   This is a shortcut for `up.layer.current.context`.
   See `up.Layer#context` for more documentation.
@@ -1843,7 +1843,7 @@ up.layer = (function() {
   */
 
   /*-
-  The outmost element of the [current layer](/up.layer.current).
+  The outmost element of the [current layer](/api/up.layer.current).
 
   This is a shortcut for `up.layer.current.element`.
   See `up.Layer#element` for more documentation.
@@ -1855,7 +1855,7 @@ up.layer = (function() {
   */
 
   /*-
-  Returns whether the given `element` is contained by the [current layer](/up.layer.current).
+  Returns whether the given `element` is contained by the [current layer](/api/up.layer.current).
 
   This is a shortcut for `up.layer.current.contains(element)`.
   See `up.Layer#contains` for more documentation.
@@ -1870,7 +1870,7 @@ up.layer = (function() {
 
 
   /*-
-  The [size](/customizing-overlays#overlay-sizes) of the [current layer](/up.layer.current).
+  The [size](/learn/customizing-overlays#overlay-sizes) of the [current layer](/api/up.layer.current).
 
   This is a shortcut for `up.layer.current.size`.
   See `up.Layer#size` for more documentation.
@@ -1882,8 +1882,8 @@ up.layer = (function() {
   */
 
   /*-
-  Creates an element with the given `selector` and appends it to the [current layer's](/up.layer.current)
-  [outmost element](/up.Layer.prototype.element).
+  Creates an element with the given `selector` and appends it to the [current layer's](/api/up.layer.current)
+  [outmost element](/api/up.Layer.prototype.element).
 
   This is a shortcut for `up.layer.current.affix(selector)`.
   See `up.Layer#affix` for more documentation.

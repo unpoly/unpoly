@@ -19,7 +19,7 @@ We can simplify the `[up-target]` by referencing the followed link as `:origin`:
 <div>Task 2 will appear here</div>
 ```
 
-When a link is clicked, `:origin` is replaced with a target [derived](/target-derivation) from the link element.
+When a link is clicked, `:origin` is replaced with a target [derived](/learn/target-derivation) from the link element.
 For example, clicking on the second link will target `a[href='/tasks/2']`.
 
 @partial origin-selector-example

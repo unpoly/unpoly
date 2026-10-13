@@ -5,7 +5,7 @@ Some widgets need heavy client-side interaction, like a rich text editor or an i
 You can mount such components from a frontend framework like **React** or **Vue** as *islands*:
 self-contained, client-rendered widgets inside a server-rendered page.
 
-[Compilers](/enhancing-elements) give each island a managed lifecycle: the component mounts when
+[Compilers](/learn/enhancing-elements) give each island a managed lifecycle: the component mounts when
 its element enters the page, receives props from server data, and unmounts when Unpoly
 swaps the fragment around it. The rest of the page needs no framework code.
 
@@ -14,14 +14,14 @@ Mounting an island {#mounting}
 ------------------
 
 The server renders a placeholder element, with initial props serialized into an
-[`[up-data]`](/data) attribute:
+[`[up-data]`](/learn/data) attribute:
 
 ```html
 <div class="color-picker" up-data="{ value: '#a2d8ff' }"></div> <!-- mark: up-data -->
 ```
 
 A compiler mounts a React component into every matching element.
-By returning a [destructor function](/enhancing-elements#destructor), it also unmounts
+By returning a [destructor function](/learn/enhancing-elements#destructor), it also unmounts
 the component when the surrounding fragment is swapped or its overlay closes:
 
 ```js
@@ -48,7 +48,7 @@ up.compiler('.color-picker', function(element, data) {
 })
 ```
 
-Simple string props can also be passed as HTML5 [data attributes](/data#data-attributes):
+Simple string props can also be passed as HTML5 [data attributes](/learn/data#data-attributes):
 
 ```html
 <div class="color-picker" data-value="#a2d8ff"></div> <!-- mark: data-value -->
@@ -57,7 +57,7 @@ Simple string props can also be passed as HTML5 [data attributes](/data#data-att
 They appear in the same `data` argument, so the compilers above work without changes.
 
 Because islands mount through the regular compiler mechanism, they work on any screen:
-in the initial page, in updated fragments, or in [overlays](/up.layer).
+in the initial page, in updated fragments, or in [overlays](/api/up.layer).
 
 
 Reaching out of the island {#page-interaction}
@@ -112,12 +112,12 @@ To preserve an island while the fragment around it is updated, assign it an `[up
 
 When new content contains a matching element, the existing element remains attached in its
 current position, keeping the mounted component and all its state. Elements are matched by
-their [derived target](/target-derivation), here `#theme-color`. A matching element
+their [derived target](/learn/target-derivation), here `#theme-color`. A matching element
 in the new HTML counts, even when its `[up-data]` differs.
 
 A kept element ignores the new HTML, including changed `[up-data]`. The recommended pattern
 is to listen to `up:fragment:keep` and pass the new props into the already-mounted component.
-The event's `event.newData` property carries the parsed [data](/data) of the new element:
+The event's `event.newData` property carries the parsed [data](/learn/data) of the new element:
 
 ```js
 up.compiler('.color-picker', function(element, data) {
@@ -132,7 +132,7 @@ up.compiler('.color-picker', function(element, data) {
 This updates the island in place, without remounting. Component state like cursor positions
 or open popovers survives the fragment update.
 
-A simpler alternative is [`[up-keep="same-data"]`](/preserving-elements#same-data). It keeps
+A simpler alternative is [`[up-keep="same-data"]`](/learn/preserving-elements#same-data). It keeps
 the island while its data is unchanged, but *remounts* it with fresh props when the server
 sends changed `[up-data]`. Any state inside the component is reset by the remount.
 
@@ -144,13 +144,13 @@ An island owns its subtree {#boundaries}
 
 Unpoly and the framework each manage their own side of the island's root element:
 
-- Elements rendered by the framework are not [compiled](/enhancing-elements).
+- Elements rendered by the framework are not [compiled](/learn/enhancing-elements).
   Attributes that need a compiler, like `[up-preload]` or the selectors of your own compilers,
   have no effect inside an island. Links and forms are handled through events and still work;
   component code can also call functions like `up.layer.open()` directly, as shown [above](#page-interaction).
   Don't work around this by calling `up.hello()` on framework-rendered DOM: the framework's
   next reconciliation will clobber or duplicate any changes a compiler made.
-- Conversely, don't [target](/targeting-fragments) elements inside an island.
+- Conversely, don't [target](/learn/targeting-fragments) elements inside an island.
   The framework expects to own that DOM. Update an island through its props or state,
   or re-render the entire island element.
 

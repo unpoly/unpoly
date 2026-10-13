@@ -91,7 +91,7 @@ test `[up-boot=manual]`, a CSP `<meta>`, or a deliberately broken script order.
 A `<script>` inside a page **re-runs every time that page's fragment is updated**, because the
 script is part of the fragment. Unpoly runs scripts in new fragments by default
 (`up.script.config.scriptElementPolicy`), and its own guide warns about this: see
-[legacy scripts](/legacy-scripts). What it costs:
+[legacy scripts](/learn/legacy-scripts). What it costs:
 
 - a `customElements.define()` throws on the second render — `Identifier 'X' has already been
   declared`, misleadingly, since the render itself succeeds

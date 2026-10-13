@@ -40,7 +40,7 @@ Getting started
 
 - See [unpoly.com](https://unpoly.com) for guides and documentation.
 - See [demo.unpoly.com](https://demo.unpoly.com) for an example application using Unpoly.
-- See [installation instructions](https://unpoly.com/install) for many different package managers and languages.
+- See [installation instructions](https://unpoly.com/learn/install) for many different package managers and languages.
 - See [discussions](https://github.com/unpoly/unpoly/discussions) for our community forum.
 - See [notable changes](https://unpoly.com/changes).
 
@@ -54,7 +54,7 @@ Install Unpoly's documentation as an agent skill:
 npx skills add --global https://unpoly.com
 ```
 
-See [unpoly.com/skill](https://unpoly.com/skill) for more options.
+See [unpoly.com/learn/skill](https://unpoly.com/learn/skill) for more options.
 
 
 Contributing
