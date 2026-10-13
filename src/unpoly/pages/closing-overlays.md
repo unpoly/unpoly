@@ -76,6 +76,9 @@ on the opening link, or pass an [`{ onDismiss }`](/up.layer.open#options.onDismi
 Mind the tense: `[up-on-dismiss]` runs *before* the overlay closes,
 <code>[up-on-dismiss<b>ed</b>]</code> (past tense) runs *after* it closed.
 
+No listener can keep an overlay open when the user presses the Back button, since
+[going back](/history-in-overlays#restoration) closes all overlays.
+
 When an overlay closes because a layer below it is [updated](#peeling), `event.value` is `":peel"`,
 so a listener can treat that case differently.
 
