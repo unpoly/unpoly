@@ -177,21 +177,8 @@ Many options from `up.layer.open()` are supported. [Callbacks can be passed as s
 Close conditions {#close-conditions}
 ----------------
 
-When opening an overlay, you can define a *condition* for when the overlay's task is done.
-When the condition occurs, the overlay closes automatically and a callback runs:
-
-```html
-<a href="/users/new"
-  up-layer="new"
-  up-accept-location="/users/$id"
-  up-on-accepted="up.reload('.user-list')"> <!-- mark: up-accept-location="/users/$id" -->
-  Add user
-</a>
-```
-
-When the overlay reaches a URL like `/users/123`, it closes and the list behind it is reloaded.
-
-See [[closing-overlays#close-conditions]] for all conditions and how to use the result value.
+When opening an overlay, you can also define when its task is done, like when it reaches a URL.
+The overlay then closes automatically. See [close conditions](/closing-overlays#close-conditions).
 
 
 Replacing existing overlays {#replacing-existing-overlays}
