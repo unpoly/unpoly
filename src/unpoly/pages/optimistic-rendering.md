@@ -10,11 +10,6 @@ temporary page changes that are reverted when a request ends.
 A preview can produce a screen state resembling the ultimate server response,
 so the user sees the effect of their interaction instantly, even under high latency.
 
-> [note]
-> Optimistic rendering is a recent feature in Unpoly, and is inherently difficult in a server-driven approach.
-> Expect more changes as we're looking for the best patterns.
-
-
 ## Suitable use cases {#use-cases}
 
 Rendering optimistically can involve heavy DOM mutations to produce a screen state resembling the ultimate server response.
