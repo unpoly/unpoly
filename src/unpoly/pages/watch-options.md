@@ -42,7 +42,6 @@ up.autosubmit(field, { event: 'change' })
 ```
 
 Multiple events can be passed as a space- or comma-separated string, or as an array.
-It's OK to name multiple events that may result from the same change (e.g. `keydown keyup change`).
 For `up.watch()`, `[up-autosubmit]` and `[up-switch]`, Unpoly guarantees the callback is run only once per unique changed value.
 `[up-validate]` validates on every watched event, so watching `input` also validates once more on `change`.
 
