@@ -61,7 +61,7 @@ RedirectPermanent /back-button /restoring-history
 RedirectPermanent /notifications /flashes
 RedirectPermanent /notification-flashes /flashes
 
-RedirectPermanent /layer-reference /layer-option
+RedirectPermanent /layer-reference /targeting-other-layers
 RedirectPermanent /focus-ring-visibility /focus-visibility
 RedirectPermanent /focus-outline-visibility /focus-visibility
 RedirectPermanent /focus-visible /focus-visibility
@@ -171,3 +171,4 @@ RedirectPermanent /skipping-rendering /conditional-requests
 RedirectPermanent /predefined-animations /animation#animations
 RedirectPermanent /predefined-transitions /animation#transitions
 RedirectPermanent /motion-tuning /animation#duration-and-easing
+RedirectPermanent /layer-option /targeting-other-layers

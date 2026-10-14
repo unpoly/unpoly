@@ -285,7 +285,7 @@ Closing by targeting a background layer {#peeling}
 When a link or form in an overlay targets a background layer, the overlay
 is [dismissed](#intents) once the background layer is updated. This behavior is called *peeling*.
 
-The form below uses an [`[up-layer]`](/layer-option) attribute to update the parent layer
+The form below uses an [`[up-layer]`](/targeting-other-layers) attribute to update the parent layer
 after a successful submission:
 
 ```html

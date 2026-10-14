@@ -124,7 +124,7 @@ the link updates history *and* the updated layer has visible history:
 | no                    | yes                        | ❌ no                 |
 | no                    | no                         | ❌ no                 |
 
-When a link [updates another layer](/layer-option), only the history visibility of the *targeted* layer is considered.
+When a link [updates another layer](/targeting-other-layers), only the history visibility of the *targeted* layer is considered.
 The visibility of the link's own layer is not relevant.
 
 

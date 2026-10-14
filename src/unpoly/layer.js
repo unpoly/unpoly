@@ -1384,7 +1384,7 @@ up.layer = (function() {
   */
 
   /*-
-  Returns an `up.Layer` object for the given element or [layer option](/layer-option).
+  Returns an `up.Layer` object for the given element or [layer option](/targeting-other-layers).
 
   ### Looking up the layer of an element
 
@@ -1408,7 +1408,7 @@ up.layer = (function() {
 
   ### Resolving a layer option
 
-  Pass any [layer option](/layer-option) to return the `up.Layer` object
+  Pass any [layer option](/targeting-other-layers) to return the `up.Layer` object
   of the first layer matching that option:
 
   ```js
@@ -1441,7 +1441,7 @@ up.layer = (function() {
 
   @function up.layer.get
   @param {string|up.Layer|number} [value='current']
-    The [layer option](/layer-option) to look up.
+    The [layer option](/targeting-other-layers) to look up.
   @return {up.Layer|undefined}
     The layer matching the given option.
 
@@ -1450,11 +1450,11 @@ up.layer = (function() {
   */
 
   /*-
-  Returns an array of `up.Layer` objects matching the given [layer option](/layer-option).
+  Returns an array of `up.Layer` objects matching the given [layer option](/targeting-other-layers).
 
   @function up.layer.getAll
   @param {string|up.Layer|number} [layer='current']
-    The [layer option](/layer-option) to look up.
+    The [layer option](/targeting-other-layers) to look up.
   @return {Array<up.Layer>}
     An array of matching layers.
   @experimental

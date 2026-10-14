@@ -52,7 +52,7 @@ When it doesn't, use the first of these options that fits:
 
 When the server responds with an [error code](/failed-responses), the error page is rendered in
 the link's own layer, not in an overlay. To show errors in an overlay, set
-[`[up-fail-layer=new]`](/layer-option#fail-layer).
+[`[up-fail-layer=new]`](/targeting-other-layers#fail-layer).
 
 When the user clicks a second overlay link while the first is still loading, only the second
 overlay opens. See [aborting rules in layers](/aborting-requests#layers).

@@ -1,10 +1,30 @@
 Targeting other layers
 ======================
 
-Links, forms and JavaScript functions work within their own layer by default: a form in an overlay
-re-renders inside that overlay, and `up.fragment.get()` only sees elements in the current layer.
+Links, forms and JavaScript functions work within their own layer by default.
 An `[up-layer]` attribute or `{ layer }` option lets you address another layer instead,
 like the page behind an overlay or the root layer.
+
+
+Layer isolation {#isolation}
+---------------
+
+Layers are isolated from each other. Without an `[up-layer]` attribute, a link or form only updates its own layer.
+
+Say an overlay and the page behind it both show a `.user-list`. This link inside the overlay
+updates the overlay's `.user-list`:
+
+```html
+<a href="/users" up-target=".user-list">Reload users</a>
+```
+
+The `.user-list` in the page behind the overlay stays unchanged, even though it matches the selector, too.
+
+Lookup functions work the same way. `up.fragment.get()` and `up.fragment.all()` only see elements in the current layer:
+
+```js
+up.fragment.get('.user-list') // result: the .user-list in the current layer
+```
 
 
 Updating another layer {#rendering}
@@ -59,15 +79,16 @@ which is usually the layer of the link or form:
 | `overlay`    | Any overlay, preferring layers closer to the front                            |
 | `any`        | Any layer, preferring the current layer, then layers closer to the front      |
 | `origin`     | The layer of the element passed as `{ origin }`                               |
+| `0`, `1`, …  | The layer at that index in the [layer stack](/up.layer.stack), `0` being the root layer |
 | `new`        | Opens a [new overlay](/opening-overlays) instead of updating an existing layer |
 
-Passing `any` disables layer isolation for that call.
+Passing `any` disables [layer isolation](#isolation) for that call.
 
 To replace existing overlays instead of stacking a new one on top, use `swap` or `shatter`.
 See [replacing existing overlays](/opening-overlays#replacing-existing-overlays).
 
 
-The default layer {#default}
+The current layer {#current}
 -----------------
 
 When no layer is given, Unpoly matches and renders in the layer the interaction started in:
@@ -76,7 +97,28 @@ When no layer is given, Unpoly matches and renders in the layer the interaction 
   sets that element as the `{ origin }`, and the origin's layer is used.
 - When an `Element` is passed as `{ target }` or `{ origin }` to a JavaScript function,
   that element's layer is used.
-- Otherwise the [current layer](#current-vs-front) is used.
+- Otherwise `up.layer.current` is used.
+
+While a [compiler](/enhancing-elements) runs, `up.layer.current` is the layer of the compiled element,
+even when that layer is in the background. This is only guaranteed for the code that runs
+synchronously when the compiler is called. Code that runs later has no such guarantee.
+This includes event listeners added by the compiler, `setTimeout()` callbacks and code after an `await`.
+To use the element's layer in such code, remember `up.layer.current` while the compiler runs,
+or [pass the element](#layer-object) as `{ layer }`.
+
+
+### Current layer vs. frontmost layer {#current-vs-front}
+
+Most of the time, the *current* layer (`up.layer.current`) and the *frontmost* layer (`up.layer.front`)
+are the same: the last layer in the stack. There are cases where the current layer is a layer in the background:
+
+- While an element in a background layer is being [compiled](/enhancing-elements).
+- While an Unpoly event like `up:request:loaded` is being emitted from a background layer.
+- While an event listener bound to a background layer with `up.Layer#on()` is being called.
+
+In these cases `{ layer: 'current' }` and relative names like `parent` resolve from that background layer,
+which is what you usually want. To address the layer facing the user regardless, pass `{ layer: 'front' }`.
+To temporarily change the current layer in your own code, use `up.Layer#asCurrent()`.
 
 
 Trying multiple layers {#multiple}
@@ -99,36 +141,26 @@ up.render({ url: '/users', target: '.user-list', layer: ['parent', 'root'] })
 ```
 
 
-Addressing a layer by index {#index}
----------------------------
-
-Layers are numbered from the root layer upwards. Pass a number to address a layer by its position
-in the [layer stack](/up.layer.stack):
-
-```js
-up.render({ url: '/users', target: '.user-list', layer: 0 }) // updates the root layer
-```
-
-Here `0` is the root layer and `1` the first overlay.
-
-
-Passing a layer object {#layer-object}
-----------------------
+Passing a layer object or element {#layer-object}
+---------------------------------
 
 Functions like `up.layer.get()` return an `up.Layer` object, and `up.layer.current`
 or `up.layer.root` are such objects, too. Any of them can be passed as a `{ layer }` option.
 
+You can also pass an `Element` as `{ layer }`. Unpoly then uses the layer that contains the element.
+
 This is useful in async code, where the current layer may have changed by the time
-your callback runs:
+your callback runs. A compiler already has its element, so it can pass the element
+instead of remembering the layer:
 
 ```js
-let layer = up.layer.current // mark: up.layer.current
-
-setTimeout(function() {
-  // Ten seconds later, up.layer.current may be a different layer.
-  let headline = up.fragment.get('h1', { layer }) // mark: { layer }
-  console.log('Headline is', headline)
-}, 10000)
+up.compiler('.user-list', function(element) {
+  setTimeout(function() {
+    // Ten seconds later, up.layer.current may be a different layer.
+    let headline = up.fragment.get('h1', { layer: element }) // mark: { layer: element }
+    console.log('Headline is', headline)
+  }, 10000)
+})
 ```
 
 
@@ -160,21 +192,6 @@ Other features that take a layer option include:
 - `up.fragment.abort()` can abort the requests of a given layer.
 
 
-Current layer vs. frontmost layer {#current-vs-front}
----------------------------------
-
-Most of the time, the *current* layer (`up.layer.current`) and the *frontmost* layer (`up.layer.front`)
-are the same: the last layer in the stack. There are cases where the current layer is a layer in the background:
-
-- While an element in a background layer is being [compiled](/enhancing-elements).
-- While an Unpoly event like `up:request:loaded` is being emitted from a background layer.
-- While an event listener bound to a background layer with `up.Layer#on()` is being called.
-
-In these cases `{ layer: 'current' }` and relative names like `parent` resolve from that background layer,
-which is what you usually want. To address the layer facing the user regardless, pass `{ layer: 'front' }`.
-To temporarily change the current layer in your own code, use `up.Layer#asCurrent()`.
-
-
 Rendering failed responses in another layer {#fail-layer}
 -------------------------------------------
 
@@ -185,5 +202,5 @@ the response is rendered in the link's or form's own layer.
 To render failed responses in another layer, set an `[up-fail-layer]` attribute or pass a `{ failLayer }` option.
 
 
-@page layer-option
+@page targeting-other-layers
 @signature

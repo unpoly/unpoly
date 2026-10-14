@@ -139,7 +139,7 @@ it still tracks the location of the fragment it contains.
 Links are marked as current when they point to the location *of their own layer*.
 To highlight links that point to the location of *another* layer, set an [`[up-layer]`](/up-nav#up-layer) attribute
 on their [navigational container](#navigational-containers).
-The attribute value can be any [layer option](/layer-option).
+The attribute value can be any [layer option](/targeting-other-layers).
 
 Below you can see a "hamburger menu" that is shown in an overlay. It contains links to the root layer,
 so their `.up-current` classes reflect the root layer's location:

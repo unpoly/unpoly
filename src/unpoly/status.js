@@ -477,7 +477,7 @@ up.status = (function() {
 
     By default, links are only marked as current when they point to location *of their own layer*.
     To highlight links that point to the location of *another* layer, set this attribute to
-    any [layer option](/layer-option).
+    any [layer option](/targeting-other-layers).
 
     If the configured option matches multiple layers (e.g. `any` or `current, root`),
     links are highlighted if they match the location of any matching layer.

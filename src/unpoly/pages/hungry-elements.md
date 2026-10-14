@@ -122,7 +122,7 @@ with `[up-if-layer="subtree"]`:
 </div>
 ```
 
-The attribute takes a [layer reference](/layer-option) relative to the hungry element's layer.
+The attribute takes a [layer reference](/targeting-other-layers) relative to the hungry element's layer.
 Use `any` to piggy-back on render passes for all layers, or combine references like `current, child`.
 
 This also works when a response [closes an overlay](/closing-overlays): the content of that

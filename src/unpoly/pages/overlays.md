@@ -46,7 +46,7 @@ For example, a link inside an overlay can update the root layer:
 <a href="/users" up-layer="root">Show all users</a> <!-- mark: up-layer="root" -->
 ```
 
-See [[layer-option]] for all ways to address another layer.
+See [[targeting-other-layers]] for all ways to address another layer.
 
 
 Layer modes {#layer-modes}
@@ -135,7 +135,7 @@ Drawers and popups can be positioned, and opening and closing can be animated.
 Also in this topic
 ------------------
 
-To address a layer other than the current one, like the page behind an overlay, see [[layer-option]].
+To address a layer other than the current one, like the page behind an overlay, see [[targeting-other-layers]].
 
 To keep state for the lifetime of an overlay, like the record a reused screen is picking for, see [[context]].
 

@@ -3,7 +3,7 @@
 @param {string|up.Layer|Element} [options.layer='origin, current']
   The [layer](/up.layer) in which to match and render the fragment.
 
-  See [layer option](/layer-option) for a list of allowed values.
+  See [layer option](/targeting-other-layers) for a list of allowed values.
 
   To [open the fragment in a new overlay](/opening-overlays), pass `{ layer: 'new' }`.
   In this case options for `up.layer.open()` may also be used.

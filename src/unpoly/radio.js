@@ -231,7 +231,7 @@ up.radio = (function() {
 
   @section Layer
     @param [up-if-layer='current']
-      Only piggy-back on updates on [layers](/up.layer) that match the given [layer reference](/layer-option).
+      Only piggy-back on updates on [layers](/up.layer) that match the given [layer reference](/targeting-other-layers).
 
       Relative references like `'parent'` or `'child'` will be resolved in relation to the hungry element's layer.
 

@@ -2483,7 +2483,7 @@ Many edge cases have been addressed for render passes that affect multiple layer
   the discarded response can now be rendered into matching hungry elements on other layers.
 - When hungry elements on different [layers](/up.layer) target the same fragment in the response,
   the layer closest to the rendering layer will be chosen.
-- Hungry elements can use arbitrary [layer references](/layer-option) in [`[up-if-layer]`](/up-hungry#up-if-layer).
+- Hungry elements can use arbitrary [layer references](/targeting-other-layers) in [`[up-if-layer]`](/up-hungry#up-if-layer).
   For example, `[up-if-layer="current child"]` would only piggy-back on render passes for the current layer or its direct overlay.
 
 #### More control over updates
@@ -2670,7 +2670,7 @@ In cases where you don't want this behavior, you now have more options:
 
 ### Layers
 
-- You may now use a new [layer reference](/layer-option) `subtree` in your `{ layer }` options or `[up-layer]` attributes.
+- You may now use a new [layer reference](/targeting-other-layers) `subtree` in your `{ layer }` options or `[up-layer]` attributes.
   This matches fragments in either the current layer or its descendant overlays.
 - `up.Layer` objects now support a new method [`#subtree()`](/up.Layer.prototype.subtree). It returns an array of `up.Layer` containing this layer and its descendant overlays.
 - Fix a bug where the layer stack would sometimes be corrupted by after looking up ancestors or descendants.
@@ -3573,7 +3573,7 @@ All existing documentation pages from Unpoly 2 remain available:
 - [Scrolling](/scrolling)
 - [Navigation](/navigation-defaults)
 - [Layer terminology](/overlays#layer-modes)
-- [Layer option](/layer-option)
+- [Layer option](/targeting-other-layers)
 - [Opening overlays](/opening-overlays)
 - [Subinteractions](/subinteractions)
 - [Closing overlays](/closing-overlays)

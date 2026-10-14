@@ -2689,7 +2689,7 @@ up.fragment = (function() {
   ### Aborting requests targeting a layer
 
   To abort all requests targeting elements on a given layer,
-  pass a [`{ layer }` option](/layer-option):
+  pass a [`{ layer }` option](/targeting-other-layers):
 
   ```js
   up.fragment.abort({ layer: 'root' })
@@ -2720,7 +2720,7 @@ up.fragment = (function() {
 
       May be omitted with `{ layer }` option.
     @param {string|up.Layer} [options.layer]
-      The [layer](/layer-option) for which requests should be aborted.
+      The [layer](/targeting-other-layers) for which requests should be aborted.
 
       May be omitted with `element` argument.
     @param {Element} [options.origin]
