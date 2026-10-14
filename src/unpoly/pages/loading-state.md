@@ -1,9 +1,10 @@
 Loading state
 =============
 
-While Unpoly waits for the server, it can show loading state: a highlighted button,
-disabled form fields, a dimmed fragment, a spinner, a skeleton screen or even the expected result.
+While Unpoly waits for the server, it can show loading state, like a spinner,
+a skeleton screen or even the expected result.
 Every effect appears instantly after the user's interaction and is reverted when the request ends.
+This makes your app feel responsive, even when the server takes a moment to answer.
 
 
 Styling loading elements
