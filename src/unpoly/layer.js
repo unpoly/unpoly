@@ -475,7 +475,7 @@ up.layer = (function() {
       How the overlay can be [dismissed](/closing-overlays) by the user.
 
       Supported values are `'key'`, `'outside'`, and `'button'`.\
-      See [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls)
+      See [customizing dismiss controls](/customizing-overlays#customizing-dismiss-controls)
       for details.
 
       You can enable multiple dismiss controls by passing an array or
@@ -951,7 +951,7 @@ up.layer = (function() {
     @param [up-dismissible]
       How the overlay can be [dismissed](/closing-overlays) by the user.
 
-      See [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls)
+      See [customizing dismiss controls](/customizing-overlays#customizing-dismiss-controls)
       for details.
 
       You can enable multiple dismiss controls by separating values with a space or comma character.

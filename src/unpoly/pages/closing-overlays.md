@@ -60,7 +60,10 @@ In the opener's `[up-on-accepted]` attribute, the value is available as `value`:
 When an overlay is dismissed, the result value indicates the reason for dismissal.
 For instance, clicking the `×` button dismisses with the value `":button"`.
 
-The [standard dismiss controls](#customizing-dismiss-controls) set these reasons:
+<a id="customizing-dismiss-controls"></a>
+<a id="customizing-the-dismiss-icon"></a>
+
+The [standard dismiss controls](/customizing-overlays#customizing-dismiss-controls) set these reasons:
 
 | User interaction                                    | Dismissal reason |
 |-----------------------------------------------------|------------------|
@@ -347,50 +350,6 @@ The `{ response }` property is set whenever a server response causes an overlay 
 
 An `[up-flashes]` element picks up flashes from a closing overlay and
 [renders them into the parent layer](/flashes#from-closing-overlays).
-
-
-Customizing dismiss controls
-----------------------------
-
-By default the user can dismiss an overlay by pressing `Escape`, by clicking outside the overlay box
-or by clicking the `×` button in the top-right corner.
-
-To change which of these controls are available, pass a `{ dismissible }` option
-or `[up-dismissible]` attribute when opening the overlay. The link below opens an overlay that
-has a close button (`×`), but cannot be dismissed by pressing `Escape` or clicking on the background:
-
-```html
-<a href="/terms" up-layer="new" up-dismissible="button">Show terms</a> <!-- mark: up-dismissible="button" -->
-```
-
-The following control names are available:
-
-| Control name | Effect                                           | Dismissal reason |
-|--------------|--------------------------------------------------|------------------|
-| `key`        | Enables dismissing with the `Escape` key         | `":key"`      |
-| `outside`    | Enables dismissing by clicking on the background | `":outside"`  |
-| `button`     | Adds a close button (`×`) to the layer           | `":button"`   |
-
-To enable multiple dismiss controls, separate their names with a comma or space:
-
-```html
-<a href="/terms" up-layer="new" up-dismissible="button key">Show terms</a> <!-- mark: up-dismissible="button key" -->
-```
-
-Regardless of which dismiss controls are enabled, an overlay can always be dismissed with
-`up.layer.dismiss()` or an `[up-dismiss]` element.
-
-
-### Customizing the dismiss icon
-
-Most overlay modes have a button (`×`) in the top-right corner that dismisses the overlay.
-
-You can change the symbol and accessibility label for that button:
-
-```js
-up.layer.config.overlay.dismissLabel // result: '×'
-up.layer.config.overlay.dismissARIALabel // result: 'Dismiss dialog'
-```
 
 
 Close animation

@@ -158,11 +158,45 @@ A single call to `up.layer.accept()` or `up.layer.dismiss()` can also pick
 Dismiss controls {#customizing-dismiss-controls}
 ----------------
 
-By default the user can dismiss an overlay by pressing `Escape`, by clicking outside the overlay box,
+By default the user can dismiss an overlay by pressing `Escape`, by clicking outside the overlay box
 or by clicking the `×` button in the top-right corner. Popups have no `×` button.
 
-To enable only some of these controls, or to change the `×` symbol and its accessibility label,
-see [customizing dismiss controls](/closing-overlays#customizing-dismiss-controls).
+To change which of these controls are available, pass a `{ dismissible }` option
+or `[up-dismissible]` attribute when opening the overlay. The link below opens an overlay that
+has a close button (`×`), but cannot be dismissed by pressing `Escape` or clicking on the background:
+
+```html
+<a href="/terms" up-layer="new" up-dismissible="button">Show terms</a> <!-- mark: up-dismissible="button" -->
+```
+
+The following control names are available:
+
+| Control name | Effect                                           | Dismissal reason |
+|--------------|--------------------------------------------------|------------------|
+| `key`        | Enables dismissing with the `Escape` key         | `":key"`      |
+| `outside`    | Enables dismissing by clicking on the background | `":outside"`  |
+| `button`     | Adds a close button (`×`) to the layer           | `":button"`   |
+
+To enable multiple dismiss controls, separate their names with a comma or space:
+
+```html
+<a href="/terms" up-layer="new" up-dismissible="button key">Show terms</a> <!-- mark: up-dismissible="button key" -->
+```
+
+Regardless of which dismiss controls are enabled, an overlay can always be dismissed with
+`up.layer.dismiss()` or an `[up-dismiss]` element.
+
+
+### Dismiss icon {#customizing-the-dismiss-icon}
+
+Most overlay modes have a button (`×`) in the top-right corner that dismisses the overlay.
+
+You can change the symbol and accessibility label for that button:
+
+```js
+up.layer.config.overlay.dismissLabel // result: '×'
+up.layer.config.overlay.dismissARIALabel // result: 'Dismiss dialog'
+```
 
 
 Styling overlays with CSS {#css}
