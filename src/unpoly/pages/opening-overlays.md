@@ -194,13 +194,6 @@ X-Up-Open-Layer: { target: '#menu', mode: 'drawer', animation: 'fade-in' }
 Many options from `up.layer.open()` are supported. [Callbacks can be passed as strings](/X-Up-Open-Layer#callbacks).
 
 
-Close conditions {#close-conditions}
-----------------
-
-When opening an overlay, you can also define when its task is done, like when it reaches a URL.
-The overlay then closes automatically. See [close conditions](/closing-overlays#close-conditions).
-
-
 Replacing existing overlays {#replacing-existing-overlays}
 ---------------------------
 
