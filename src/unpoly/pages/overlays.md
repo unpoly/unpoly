@@ -1,9 +1,9 @@
 Overlays
 ========
 
-Unpoly can open any page in an overlay, like a modal dialog or a drawer.
-Overlays let users branch off into a subtask, then return to their original screen
-without losing unsaved changes or scroll positions.
+Unpoly can open any URL in an overlay, like a modal dialog or a drawer.
+An overlay can show a single fragment or host an interaction that spans multiple pages.
+When it closes, an overlay can pass a result value back to the layer that opened it.
 
 
 Opening an overlay
@@ -30,11 +30,6 @@ Forms, your JavaScript and the server can open overlays too.
 
 Layers are isolated
 -------------------
-
-The current page and its overlays form a stack of *layers*.
-The initial page is called the *root layer*. An *overlay* is any layer
-that is not the root layer. Overlays can be stacked without limit,
-and the whole stack is available as `up.layer.stack`.
 
 Links and forms always update fragments within their own layer.
 A form in an overlay re-renders inside that overlay, even when the page
