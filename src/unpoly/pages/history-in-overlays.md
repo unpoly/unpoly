@@ -127,20 +127,19 @@ The visibility of the link's own layer is not relevant.
 Going back while an overlay is open {#restoration}
 -----------------------------------
 
-The browser's Back button moves between history entries, and only overlays with
-[visible history](#visible-history) add entries:
+When the user presses Back, Unpoly closes all overlays and renders the
+[restored URL](/restoring-history) as a full page in the root layer.
 
-- When the front overlay has visible history, Back returns to the URL that was shown before it opened.
-- When the front overlay has invisible history, it added no entry. Back then returns to the entry
-  before the page behind the overlay, as if the overlay wasn't there.
+Which URL the browser goes back to depends on whether the overlay added a history entry.
+Say the user went from `/home` to `/projects`, then opened `/users/5` in an overlay:
 
-In both cases Unpoly closes all overlays and renders the [restored URL](/restoring-history) in the root layer,
-even when that URL belonged to another overlay.
+| Overlay history                  | Back shows                                 |
+|----------------------------------|--------------------------------------------|
+| [visible](#visible-history)      | `/projects`, the page behind the overlay   |
+| [invisible](#invisible-history)  | `/home`, as if the overlay wasn't there    |
 
-A user who opens `/users/5` in an overlay with visible history, presses Back and then Forward,
-sees `/users/5` as a full page. In a canonical Unpoly app this is often an acceptable default,
-since every route can render a full page anyway. [Subinteractions](/subinteractions) in particular
-work the same on the root layer and in an overlay.
+This is often an acceptable default, since every route in an Unpoly app can render a full page anyway.
+[Subinteractions](/subinteractions) in particular work the same on the root layer and in an overlay.
 
 If you cannot work with this, you have the following options:
 
