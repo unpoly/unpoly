@@ -4,7 +4,7 @@ History in overlays
 An overlay can show its own URL in the browser's address bar while it is open, or leave
 the address bar on the page behind it. By default an overlay shows its URL when it contains
 a main element, so a page opened in a dialog gets a shareable address while a small popup menu does not.
-You can override this for a single overlay or for all. This setting is called the overlay's *history visibility*.
+This setting is called the overlay's *history visibility*. You can override it globally or for individual overlays.
 
 
 Overlays with visible history {#visible-history}
@@ -62,10 +62,6 @@ Setting `true` instead of `false` makes an overlay show its history even when it
 To change the default for all overlays, configure `up.layer.config.overlay.history`.
 A mode can have its own default, like `up.layer.config.popup.history` for all popups.
 Links and options still override the configured default.
-
-An overlay that shows the response to a `POST` form has invisible history for as long as it is open,
-since its URL cannot be reloaded. When the server redirects to a `GET` URL, the overlay shows that URL.
-See [[updating-history#get-requests]].
 
 The root layer always has visible history. This cannot be configured.
 
@@ -131,11 +127,18 @@ The visibility of the link's own layer is not relevant.
 Going back while an overlay is open {#restoration}
 -----------------------------------
 
-When the user presses the browser's Back button while an overlay is open,
-all overlays are closed. The [restored URL](/restoring-history) is rendered in the root layer.
+The browser's Back button moves between history entries, and only overlays with
+[visible history](#visible-history) add entries:
 
-A user who opens `/users/5` in an overlay, presses Back and then Forward,
-sees `/users/5` as a full page. In a canonical Unpoly app this is a good default,
+- When the front overlay has visible history, Back returns to the URL that was shown before it opened.
+- When the front overlay has invisible history, it added no entry. Back then returns to the entry
+  before the page behind the overlay, as if the overlay wasn't there.
+
+In both cases Unpoly closes all overlays and renders the [restored URL](/restoring-history) in the root layer,
+even when that URL belonged to another overlay.
+
+A user who opens `/users/5` in an overlay with visible history, presses Back and then Forward,
+sees `/users/5` as a full page. In a canonical Unpoly app this is often an acceptable default,
 since every route can render a full page anyway. [Subinteractions](/subinteractions) in particular
 work the same on the root layer and in an overlay.
 
