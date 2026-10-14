@@ -64,8 +64,8 @@ so you can reuse the same skeleton for many links.
 [[more: placeholders]]
 
 
-Previews: arbitrary temporary changes
--------------------------------------
+Arbitrary temporary changes
+---------------------------
 
 Feedback classes, placeholders and [disabling](/disabling-forms) are *previews*: temporary page changes that Unpoly
 applies when a request starts, and reverts when the request ends.
@@ -117,9 +117,6 @@ Also in this topic
 
 When a request takes longer than 400 ms, Unpoly shows a thin progress bar at the top of the screen.
 To style, disable or replace it, see [[progress-bar]].
-
-Loading state ends when the request ends. Requests that fail because the user is offline
-are handled in [[network-issues]].
 
 
 @page loading-state
