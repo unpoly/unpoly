@@ -548,59 +548,59 @@ up.layer = (function() {
       One or more event types that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is the event object that caused the overlay to close.
 
-      See [Closing when an event is emitted](/closing-overlays#event-condition).
+      See [Closing when an event is emitted](/subinteractions#event-condition).
 
     @param {string|Array<string>} [options.dismissEvent]
       One or more event types that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is the event object that caused the overlay to close.
 
-      See [Closing when an event is emitted](/closing-overlays#event-condition).
+      See [Closing when an event is emitted](/subinteractions#event-condition).
 
     @param {string|Array<string>} [options.acceptLocation]
       One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
-      See [Closing when a location is reached](/closing-overlays#location-condition).
+      See [Closing when a location is reached](/subinteractions#location-condition).
 
     @param {string|Array<string>} [options.dismissLocation]
       One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
-      See [Closing when a location is reached](/closing-overlays#location-condition).
+      See [Closing when a location is reached](/subinteractions#location-condition).
 
     @param {string} [options.acceptFragment]
       An CSS selector that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is the matching fragment's [data](/data) object.\
       If the fragment has no data, the value is an empty object.
 
-      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+      See [Closing when a fragment is detected](/subinteractions#fragment-condition).
 
     @param {string} [options.dismissFragment]
       An CSS selector that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is the matching fragment's [data](/data) object.\
       If the fragment has no data, the value is an empty object.
 
-      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+      See [Closing when a fragment is detected](/subinteractions#fragment-condition).
 
   @section Callbacks
     @param {Function(Event)} [options.onOpened]
@@ -776,12 +776,12 @@ up.layer = (function() {
   It's useful to think of overlays as [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
   that can either be **fulfilled (accepted)** or **rejected (dismissed)**.
 
-  @learn-ref opening-overlays
+  @learn-ref subinteractions#awaiting-subinteractions-from-javascript
 
   ## Example
 
   Instead of using `up.layer.open()` and passing callbacks, you can use `up.layer.ask()`.
-  `up.layer.ask()` returns a promise for the [acceptance value](/closing-overlays#acceptance-values), which you can `await`:
+  `up.layer.ask()` returns a promise for the [acceptance value](/subinteractions#result-values), which you can `await`:
 
   ```js
   let user = await up.layer.ask({ url: '/users/new' })
@@ -808,7 +808,7 @@ up.layer = (function() {
   @return {Promise}
     A promise that settles when the overlay closes.
 
-    When the overlay is accepted, the promise will fulfill with the overlay's [acceptance value](/closing-overlays#acceptance-values).
+    When the overlay is accepted, the promise will fulfill with the overlay's [acceptance value](/subinteractions#result-values).
 
     When the overlay is dismissed, the promise will reject with the overlay's [dismissal reason](/closing-overlays#dismissal-reasons).
 
@@ -1012,63 +1012,63 @@ up.layer = (function() {
       An event type that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is the event object that caused the overlay to close.
 
       You can listen to multiple event types by separating types with a space or comma.
 
-      See [Closing when an event is emitted](/closing-overlays#event-condition).
+      See [Closing when an event is emitted](/subinteractions#event-condition).
 
     @param [up-dismiss-event]
       An event type that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is the event object that caused the overlay to close.
 
       You can listen to multiple event types by separating types with a space or comma.
 
-      See [Closing when an event is emitted](/closing-overlays#event-condition).
+      See [Closing when an event is emitted](/subinteractions#event-condition).
 
     @param [up-accept-location]
       One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
-      See [Closing when a location is reached](/closing-overlays#location-condition).
+      See [Closing when a location is reached](/subinteractions#location-condition).
 
     @param [up-dismiss-location]
       One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
-      See [Closing when a location is reached](/closing-overlays#location-condition).
+      See [Closing when a location is reached](/subinteractions#location-condition).
 
     @param [up-accept-fragment]
       An CSS selector that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is the matching fragment's [data](/data) object.\
       If the fragment has no data, the value is an empty object.
 
-      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+      See [Closing when a fragment is detected](/subinteractions#fragment-condition).
 
     @param [up-dismiss-fragment]
       An CSS selector that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/closing-overlays#result-values)
+      The [overlay result value](/subinteractions#result-values)
       is the matching fragment's [data](/data) object.\
       If the fragment has no data, the value is an empty object.
 
-      See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+      See [Closing when a fragment is detected](/subinteractions#fragment-condition).
 
   @section Callbacks
     @param [up-on-opened]

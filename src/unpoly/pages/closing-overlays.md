@@ -1,8 +1,9 @@
 Closing overlays
 ================
 
-An overlay closes when the user is done with it: by pressing `Escape`, by clicking a button,
-or automatically when the overlay reaches a URL or emits an event.
+An overlay closes when the user is done with it. The user can dismiss it with the `Escape` key
+or the `×` button, and the overlay's own content can close it from a button, a link, a form,
+JavaScript or a server response.
 When it closes, the overlay can pass a result value back to the layer that opened it,
 so the original screen can continue where the user left off.
 
@@ -28,61 +29,6 @@ When an overlay closes, overlays it has opened are closed with it, its pending r
 [aborted](/aborting-requests#layers), and [focus returns](/focus#overlays) to the link that opened it.
 
 
-Running code when an overlay closes {#callbacks}
------------------------------------
-
-When opening an overlay, you can pass separate `{ onAccepted }` and `{ onDismissed }` callbacks
-for the two [intents](#intents):
-
-```js
-up.layer.open({
-  url: '/users/new',
-  onAccepted: (event) => console.log('User was created'), // mark: onAccepted
-  onDismissed: (event) => console.log('User creation was canceled') // mark: onDismissed
-})
-```
-
-Both callbacks are optional.
-
-In HTML, set `[up-on-accepted]` and `[up-on-dismissed]` attributes on the link that opens the overlay:
-
-```html
-<a href="/users/new"
-  up-layer="new"
-  up-on-accepted="console.log('User was created')"
-  up-on-dismissed="console.log('User creation was canceled')"> <!-- mark: up-on-dismissed -->
-  Add user
-</a>
-```
-
-Instead of passing callbacks, you can also open an overlay with `up.layer.ask()`
-and `await` a promise for its result. See [[subinteractions#awaiting-subinteractions-from-javascript]].
-
-To keep an overlay open, for example when it has unsaved changes, prevent its
-[`up:layer:dismiss`](/up:layer:dismiss) event. This also blocks the Escape key, backdrop clicks
-and the close button:
-
-```js
-up.on('up:layer:dismiss', function(event) {
-  let hasForm = event.layer.element.querySelector('form')
-  if (hasForm && !confirm('Discard your unsaved changes?')) {
-    event.preventDefault() // mark-line
-  }
-})
-```
-
-To keep only one particular overlay open, set an [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attribute
-on the opening link, or pass an [`{ onDismiss }`](/up.layer.open#options.onDismiss) callback, and call `event.preventDefault()` in it.
-Mind the tense: `[up-on-dismiss]` runs *before* the overlay closes,
-<code>[up-on-dismiss<b>ed</b>]</code> (past tense) runs *after* it closed.
-
-No listener can keep an overlay open when the user presses the Back button, since
-[going back](/history-in-overlays#restoration) closes all overlays.
-
-When an overlay closes because a layer below it is [updated](#peeling), `event.value` is `":peel"`,
-so a listener can treat that case differently.
-
-
 Result values {#result-values}
 -------------
 
@@ -90,22 +36,16 @@ An overlay can close with a *result value*. The value is passed to the layer tha
 opened the overlay, which can use it to continue its own interaction:
 [select a new option](/subinteractions#adding-options-to-an-existing-select),
 [navigate to another screen](/subinteractions#navigating-away), or reload a list.
+See [[subinteractions#result-values]] for how the opener receives the value.
 
 ### Acceptance values {#acceptance-values}
 
 When the user selects a value, creates a record or confirms an action,
-the overlay is *accepted with that value*.
+the overlay is *accepted with that value*. The sections below show how a
+[button](#on-click), a [form](#on-submit), [JavaScript](#from-script) or the [server](#from-server)
+pass a value when closing.
 
-An `{ onAccepted }` callback receives the value as `event.value`:
-
-```js
-up.layer.open({
-  url: '/select-user',
-  onAccepted: (event) => console.log('Got user', event.value) // mark: event.value
-})
-```
-
-In an `[up-on-accepted]` attribute, the value is available as `value`:
+In the opener's `[up-on-accepted]` attribute, the value is available as `value`:
 
 ```html
 <a href="/select-user"
@@ -120,7 +60,18 @@ In an `[up-on-accepted]` attribute, the value is available as `value`:
 When an overlay is dismissed, the result value indicates the reason for dismissal.
 For instance, clicking the `×` button dismisses with the value `":button"`.
 
-The reason is available in an `{ onDismissed }` callback or `[up-on-dismissed]` attribute:
+The [standard dismiss controls](#customizing-dismiss-controls) set these reasons:
+
+| User interaction                                    | Dismissal reason |
+|-----------------------------------------------------|------------------|
+| User presses the `Escape` key                       | `":key"`         |
+| User clicks on the background ("light dismiss")     | `":outside"`     |
+| User clicks on the `×` button in the overlay corner | `":button"`      |
+
+An overlay that closes because a layer below it is [updated](#peeling) is dismissed with `":peel"`.
+You can provide your own dismissal reason when closing an overlay with `up.layer.dismiss()` or `[up-dismiss]`.
+
+The opener receives the reason in an `{ onDismissed }` callback or `[up-on-dismissed]` attribute:
 
 ```html
 <a href="/select-user"
@@ -130,118 +81,19 @@ The reason is available in an `{ onDismissed }` callback or `[up-on-dismissed]` 
 </a>
 ```
 
-You can provide your own dismissal reason when closing an overlay with `up.layer.dismiss()` or `[up-dismiss]`.
-The [standard dismiss controls](#customizing-dismiss-controls) set these reasons:
 
-| User interaction                                    | Dismissal reason |
-|-----------------------------------------------------|------------------|
-| User presses the `Escape` key                       | `":key"`         |
-| User clicks on the background ("light dismiss")     | `":outside"`     |
-| User clicks on the `×` button in the overlay corner | `":button"`      |
+Letting the opener decide {#close-conditions}
+-------------------------
 
+<a id="location-condition"></a>
+<a id="event-condition"></a>
+<a id="fragment-condition"></a>
 
-Close conditions {#close-conditions}
-----------------
-
-When opening an overlay, you can define a *condition* for when the overlay's task is done.
-When the condition occurs, the overlay closes automatically and your callback runs.
-
-We recommend close conditions over explicit commands like [`up.layer.accept()`](#from-script)
-or [`X-Up-Accept-Layer`](#from-server). With a close condition, the overlay content does not need
-to know that it is running in an overlay. The same screen works as a full page and as
-a [subinteraction](/subinteractions) of another screen.
-
-
-### Closing when a location is reached {#location-condition}
-{:data-toc-include="true"}
-
-To close an overlay once it reaches a URL like `/companies/123`, set an [`[up-accept-location]`](/up-layer-new#up-accept-location)
-attribute with a [URL pattern](/url-patterns):
-
-```html
-<a href="/companies/new"
-  up-layer="new"
-  up-accept-location="/companies/$id"
-  up-on-accepted="alert('New company with ID ' + value.id)"> <!-- mark: up-accept-location="/companies/$id" -->
-  New company
-</a>
-```
-
-When the user submits the company form and the server redirects to `/companies/123`,
-the overlay is accepted. Named segments captured by the [URL pattern](/url-patterns) (`$id`) become
-the overlay's [acceptance value](#acceptance-values), along with the matched `location`:
-here `{ id: 123, location: '/companies/123' }`.
-
-The condition is checked whenever the overlay's location changes. When the form fails validation,
-the server re-renders it without changing the location, so the overlay stays open until the
-submission succeeds.
-
-A `$id` segment only matches digits, so the overlay's own URL `/companies/new` does not match the pattern.
-
-To *dismiss* an overlay once a location is reached, use `[up-dismiss-location]` and `[up-on-dismissed]` in the same fashion.
-
-
-### Closing when an event is emitted {#event-condition}
-{:data-toc-include="true"}
-
-To close an overlay once an event is observed within it, set an [`[up-accept-event]`](/up-layer-new#up-accept-event) attribute:
-
-```html
-<a href="/users/new"
-  up-layer="new"
-  up-accept-event="user:created"
-  up-on-accepted="alert('Hello user #' + value.id)"> <!-- mark: up-accept-event="user:created" -->
-  Add a user
-</a>
-```
-
-When a `user:created` event is emitted within the overlay, the event's
-[default action is prevented](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault) and the overlay is accepted.
-The event object becomes the overlay's [acceptance value](#acceptance-values).
-
-To *dismiss* an overlay once an event is observed, use `[up-dismiss-event]` and `[up-on-dismissed]` in the same fashion.
-
-There are several ways to emit an event:
-
-| Method            | Description             |
-|-------------------|-------------------------|
-| `up.emit()`       | JavaScript function to emit an event on any element |
-| `up.layer.emit()` | JavaScript function to emit an event on the [current layer](/up.layer.current) |
-| `[up-emit]`       | HTML attribute to emit an event on click |
-| `X-Up-Events`     | HTTP header sent from the server |
-| [`Element#dispatchEvent()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent) | Standard DOM API to emit an event on an element |
-
-Since the closing event's default is prevented, an `[up-emit]` link with a [fallback URL](/up-emit#fallback)
-can close an overlay, but navigate to a different page when clicked on the [root layer](/up.layer.root).
-
-
-### Closing when a fragment is detected {#fragment-condition}
-{:data-toc-include="true"}
-
-To close an overlay once an element matching a selector appears within it,
-set an [`[up-accept-fragment]`](/up-layer-new#up-accept-fragment) attribute:
-
-```html
-<a href="/users/new"
-  up-layer="new"
-  up-accept-fragment=".user-profile"
-  up-on-accepted="alert('Hello user #' + value.id)"> <!-- mark: up-accept-fragment=".user-profile" -->
-  Add a user
-</a>
-```
-
-When an element in the overlay matches `.user-profile`, the overlay is accepted.
-The fragment's [data](/data) becomes the [acceptance value](#acceptance-values):
-
-```html
-<div class="user-profile" data-id="123"> <!-- mark: data-id="123" -->
-  ...
-</div>
-```
-
-If the fragment has no data, the acceptance value is an empty object (`{}`).
-
-To *dismiss* an overlay once a fragment is detected, use `[up-dismiss-fragment]` and `[up-on-dismissed]` in the same fashion.
+Instead of closing the overlay from its content, the link that opens it can define a
+*close condition*, like reaching a URL. The overlay then closes automatically when its task is done.
+We recommend close conditions over the explicit commands on this page, since the
+overlay content then does not need to know that it is running in an overlay.
+See [[subinteractions#close-conditions]].
 
 
 Closing when a button is clicked {#on-click}
@@ -312,7 +164,7 @@ This lets the opener see *which* button was pressed:
 </form>
 ```
 
-The values arrive as an `up.Params` object in your `{ onAccepted }` or `{ onDismissed }` callback:
+The values arrive as an `up.Params` object in the opener's `{ onAccepted }` or `{ onDismissed }` callback:
 
 ```js
 up.layer.open({
@@ -346,8 +198,8 @@ an `[up-accept]` or `[up-dismiss]` attribute. Make a regular form that is handle
 
 After the server has processed the request, it can close the overlay in several ways:
 
-- Redirecting to a [location that is a close condition](#location-condition)
-- Emitting an [event that is a close condition](#event-condition)
+- Redirecting to a [location that is a close condition](/subinteractions#location-condition)
+- Emitting an [event that is a close condition](/subinteractions#event-condition)
 - Sending a [response header that closes the overlay](#from-server)
 
 
@@ -394,6 +246,36 @@ The server can check whether a request targets an overlay by looking at the `X-U
 When an overlay closes in reaction to a server response, you can [access the discarded response](#using-the-discarded-response).
 
 
+Keeping an overlay open {#keeping-open}
+-----------------------
+
+<a id="callbacks"></a>
+
+To keep an overlay open, for example when it has unsaved changes, prevent its
+[`up:layer:dismiss`](/up:layer:dismiss) event. This also blocks the Escape key, backdrop clicks
+and the close button:
+
+```js
+up.on('up:layer:dismiss', function(event) {
+  let hasForm = event.layer.element.querySelector('form')
+  if (hasForm && !confirm('Discard your unsaved changes?')) {
+    event.preventDefault() // mark-line
+  }
+})
+```
+
+To keep only one particular overlay open, set an [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attribute
+on the opening link, or pass an [`{ onDismiss }`](/up.layer.open#options.onDismiss) callback, and call `event.preventDefault()` in it.
+Mind the tense: `[up-on-dismiss]` runs *before* the overlay closes,
+<code>[up-on-dismiss<b>ed</b>]</code> (past tense) runs *after* it closed.
+
+No listener can keep an overlay open when the user presses the Back button, since
+[going back](/history-in-overlays#restoration) closes all overlays.
+
+When an overlay closes because a layer below it is [updated](#peeling), `event.value` is `":peel"`,
+so a listener can treat that case differently.
+
+
 Closing by targeting a background layer {#peeling}
 ---------------------------------------
 
@@ -412,7 +294,7 @@ after a successful submission:
 
 A successful submission dismisses the form's own overlay with a [dismissal reason](#dismissal-reasons) of `":peel"`.
 
-If a listener [keeps the overlay open](#callbacks), the background layer is not updated.
+If a listener [keeps the overlay open](#keeping-open), the background layer is not updated.
 To close the overlay anyway, set an `[up-peel="force"]` attribute.
 
 > [note]
@@ -437,7 +319,7 @@ Discarded responses {#discarded-responses}
 -------------------
 
 When a server response closes an overlay, nothing from that response is rendered.
-This happens when the response matches a [close condition](#close-conditions),
+This happens when the response matches a [close condition](/subinteractions#close-conditions),
 or when the server [explicitly closes](#from-server) the overlay.
 
 ### Using the discarded response {#using-the-discarded-response}
@@ -454,8 +336,8 @@ without making another request.
 
 The `{ response }` property is set whenever a server response causes an overlay to close:
 
-- When a [server-sent event](/X-Up-Events) matches a [close condition](#close-conditions).
-- When the new location matches a [close condition](#close-conditions).
+- When a [server-sent event](/X-Up-Events) matches a [close condition](/subinteractions#close-conditions).
+- When the new location matches a [close condition](/subinteractions#close-conditions).
 - When the server [explicitly closes](#from-server) an overlay with an HTTP header.
 
 

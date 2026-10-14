@@ -160,7 +160,7 @@ up.Layer = class Layer extends up.Record {
       A message the user needs to confirm before the overlay is closed.
 
     @param {boolean} [options.force=false]
-      Whether to close the overlay even if a listener [prevents](/closing-overlays#callbacks)
+      Whether to close the overlay even if a listener [prevents](/closing-overlays#keeping-open)
       the close event.
 
       Overlays stacked on top of this overlay will also be closed by force.
@@ -233,7 +233,7 @@ up.Layer = class Layer extends up.Record {
 
   Descendant overlays will be dismissed with value `':peel'`.
 
-  A listener may [keep a descendant overlay open](/closing-overlays#callbacks) by preventing its
+  A listener may [keep a descendant overlay open](/closing-overlays#keeping-open) by preventing its
   `up:layer:dismiss` or `up:layer:accept` event. In that case this function throws an `up.Aborted` error.
   Overlays in front of the blocking overlay stay closed. To ignore prevented events, pass `{ force: true }`.
 
@@ -250,7 +250,7 @@ up.Layer = class Layer extends up.Record {
       accept them instead.
 
     @param {boolean} [options.force=false]
-      Whether to close descendant overlays even if a listener [prevents](/closing-overlays#callbacks)
+      Whether to close descendant overlays even if a listener [prevents](/closing-overlays#keeping-open)
       their close event.
 
       @experimental

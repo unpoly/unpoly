@@ -506,7 +506,7 @@ up.event = (function() {
   to the `/menu` path.
 
   > [tip]
-  > When an [event closes an overlay](/closing-overlays#event-condition) via `[up-accept-event]` or `[up-dismiss-event]`, its default is prevented.
+  > When an [event closes an overlay](/subinteractions#event-condition) via `[up-accept-event]` or `[up-dismiss-event]`, its default is prevented.
   > You can use fallback URLs to make a link that emits a closing event in an overlay, but navigates to a different page on the [root layer](/up.layer.root).
 
 

@@ -122,7 +122,7 @@ Only when the overlay is closing, its
 ### Flashes from closing overlays are shown on a parent layer {#from-closing-overlays}
 
 Sometimes a fragment update will cause an overlay to [close](/closing-overlays), e.g. when a
-[close condition](/closing-overlays#close-conditions) is reached. In that case no new elements
+[close condition](/subinteractions#close-conditions) is reached. In that case no new elements
 will be rendered into the closing overlay. Any confirmation flashes from the final overlay interaction
 would be lost.
 

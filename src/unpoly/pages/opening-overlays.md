@@ -149,7 +149,7 @@ Choose a different layer mode by passing a `{ mode }` option:
 up.layer.open({ url: '/menu', mode: 'drawer' }) // mark: mode: 'drawer'
 ```
 
-To get a promise for the overlay's [result value](/closing-overlays#result-values) instead,
+To get a promise for the overlay's [result value](/subinteractions#result-values) instead,
 use `up.layer.ask()`:
 
 ```js

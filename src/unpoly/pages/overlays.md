@@ -67,23 +67,20 @@ To choose a different mode, append it to the `[up-layer]` attribute:
 You can change the default mode in `up.layer.config.mode`.
 
 
-Closing with a result
----------------------
+Closing overlays
+----------------
 
-An overlay can be *accepted* (the user completed their task) or *dismissed*
-(the user canceled). When an overlay is accepted, it can pass a result value
-back to the layer that opened it, like the ID of a newly created record.
+There are many ways to close an overlay. The user can press `Escape`, click the backdrop
+or use the close button. A button, link or form inside the overlay can close it,
+and so can your JavaScript or the server.
 
-Users dismiss an overlay with its close button, the Escape key or a click on the backdrop.
-To accept it, give a button an [`[up-accept]`](/closing-overlays#on-click) attribute with the result value:
+Every close has an intent: an overlay is *accepted* when the user completed their task,
+or *dismissed* when they canceled. An accepted overlay can pass a result value back to the
+layer that opened it, like the ID of a newly created record:
 
 ```html
 <button up-accept="{ id: 5 }">Choose user #5</button> <!-- mark: up-accept -->
 ```
-
-An overlay can also close itself when a [close condition](/closing-overlays#close-conditions) is met,
-like reaching a URL, emitting an event or rendering a fragment. Your JavaScript and the server
-can close overlays, too.
 
 [[more: closing-overlays]]
 
@@ -91,9 +88,13 @@ can close overlays, too.
 Subinteractions
 ---------------
 
-With close conditions and result values, you can embed any existing screen as a step
-of a larger interaction. A user filling in a project form can create a missing
-company in an overlay, without leaving the half-completed form.
+The link that opens an overlay can also decide when the overlay's task is done,
+like when it reaches a URL, emits an event or renders a fragment.
+The overlay then closes automatically, and a callback on the link receives the result value.
+
+With this, you can embed any existing screen as a step of a larger interaction.
+A user filling in a project form can create a missing company in an overlay,
+without leaving the half-completed form.
 The project form opens the company form, waits for the new record, and selects it:
 
 ```html

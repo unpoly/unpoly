@@ -183,7 +183,7 @@ It still defaults to reading `<meta name="csp-nonce">`.
 
 ### Closing overlays when a fragment matches a selector
 
-You can now auto-close an overlay once it reaches a fragment that matches a CSS selector. This is an alternative close condition similar to observing [events](/closing-overlays#event-condition) or [locations](/closing-overlays#location-condition).
+You can now auto-close an overlay once it reaches a fragment that matches a CSS selector. This is an alternative close condition similar to observing [events](/subinteractions#event-condition) or [locations](/subinteractions#location-condition).
 
 To wait for a fragment, set an [`[up-accept-fragment]`](/up-layer-new#up-accept-fragment) attribute on the link that opens an overlay:
 
@@ -204,7 +204,7 @@ When an element in the new overlay matches the `.user-profile` selector, the ove
 </div>
 ```
 
-See [Closing when a fragment is detected](/closing-overlays#fragment-condition).
+See [Closing when a fragment is detected](/subinteractions#fragment-condition).
 
 
 
@@ -499,7 +499,7 @@ up.on('up:fragment:inserted', function(event) {
 
 ### History
 
-- When an overlay [close condition](/closing-overlays#close-conditions) is reached, Unpoly no longer pushes a history entry for the closing response, preventing phantom entries in the browser history.
+- When an overlay [close condition](/subinteractions#close-conditions) is reached, Unpoly no longer pushes a history entry for the closing response, preventing phantom entries in the browser history.
 - The `up:location:changed` event now has a `{ previousLocation }` property.
 
 
@@ -2321,7 +2321,7 @@ This releases fixes two regressions introduced by [3.5.0](https://unpoly.com/cha
 
 - Fix a bug where a [new overlay](/opening-overlays) would immediately close if the *parent* layer's location
   happened to match the overlay's location-based close condition.
-- When a new overlay's initial location matches its [location-based close condition](/closing-overlays#location-condition),
+- When a new overlay's initial location matches its [location-based close condition](/subinteractions#location-condition),
   the overlay again immediately closes without rendering its initial content.
 
 
@@ -2357,7 +2357,7 @@ An `[up-flashes]` element comes with useful default behavior for rendering notif
   You can use a compiler to [clear messages after a delay](/flashes#clearing-after-delay). 
 - You are free to place the flashes anywhere in your layout, inside or outside the [main](/main) element you're usually updating.
 - You can have a single flashes container on your [root layer](/up.layer), or one on each layer.
-- When a response [causes an overlay to close](/closing-overlays#close-conditions), the flashes from the discarded response
+- When a response [causes an overlay to close](/subinteractions#close-conditions), the flashes from the discarded response
   will be shown on a parent layer.
 
 See [notification flashes](/flashes) for more details and examples.
@@ -2479,7 +2479,7 @@ There is now defined behavior when multiple targets want to render the same new 
 
 Many edge cases have been addressed for render passes that affect multiple layers:
 
-- When a server response reaches a [close condition](/closing-overlays#close-conditions) and causes an overlay to close,
+- When a server response reaches a [close condition](/subinteractions#close-conditions) and causes an overlay to close,
   the discarded response can now be rendered into matching hungry elements on other layers.
 - When hungry elements on different [layers](/up.layer) target the same fragment in the response,
   the layer closest to the rendering layer will be chosen.
@@ -2564,7 +2564,7 @@ Unpoly's rendering engine has been reworked to address many edge cases found in 
 #### More practical callback order
 
 - Compilers now see updated [feedback classes](/feedback-classes) for the current render pass. In particular `.up-current` classes are updated before compilers are called.
-- Hungry elements on other layers are now updated *before* [`{ onAccepted }` and `{ onDismissed }` callbacks](/closing-overlays#callbacks) fire.
+- Hungry elements on other layers are now updated *before* [`{ onAccepted }` and `{ onDismissed }` callbacks](/subinteractions#callbacks) fire.
   This allows callbacks to observe all fragment changes made by a closing overlay.
 
 #### Matching in destroyed elements
@@ -2782,8 +2782,8 @@ we can use the HTML from the response and render it into the parent layer:
 
 The `{ response }` property is available whenever a server response causes an overlay to close:
 
-- When a [server-sent event](/X-Up-Events) matches a [close condition](/closing-overlays#close-conditions).
-- When the new location matches a [close condition](/closing-overlays#close-conditions).
+- When a [server-sent event](/X-Up-Events) matches a [close condition](/subinteractions#close-conditions).
+- When the new location matches a [close condition](/subinteractions#close-conditions).
 - When the server [explicitly closes](/closing-overlays#from-server) an overlay using an HTTP header.
 
 ### Rendering `up.Response` objects
