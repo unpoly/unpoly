@@ -14,3 +14,6 @@
 
 - Closing split folded in, by who decides: /closing-overlays = the user or the overlay's content closes it (new #keeping-open); /subinteractions = the opener decides (close conditions, callbacks, receiving result values). Moved anchors left as `<a id>` shims; links, CHANGELOG and the up.layer.ask() @learn-ref retargeted. Overview sections follow the split.
 - Dismiss controls (control table, dismiss icon) moved from /closing-overlays to /customizing-overlays#customizing-dismiss-controls; shims left on /closing-overlays.
+
+## Full read (2026-10-14, decision R1)
+All 8 pages read by Henning. /overlays (new intro, stack paragraph removed), /opening-overlays (intro "any link or form", "Choosing what the overlay shows" ordered [up-main=overlay] > [up-target] > X-Up-Mode, close conditions pointer removed), /closing-overlays + /subinteractions (split by who decides; full drafts read and approved), /customizing-overlays (dismiss controls moved here), /targeting-other-layers (renamed from /layer-option; isolation section, "The current layer" with compiler rule, index row, Element as { layer }), /layer-context (renamed from /context), /history-in-overlays (Back section corrected and simplified). Overlays chapter done.
