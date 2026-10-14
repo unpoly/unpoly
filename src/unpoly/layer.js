@@ -570,7 +570,7 @@ up.layer = (function() {
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
-      See [Closing when a location is reached](/closing-overlays#event-condition).
+      See [Closing when a location is reached](/closing-overlays#location-condition).
 
     @param {string|Array<string>} [options.dismissLocation]
       One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
