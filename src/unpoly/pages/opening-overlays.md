@@ -1,7 +1,7 @@
 Opening overlays
 ================
 
-Instead of updating the current page, a link, a form or your JavaScript can open
+Instead of updating the current page, any link or form can open
 content in a new overlay, like a modal dialog or a drawer. The linked screen stays
 a regular page on your server, and the page behind the overlay keeps its state.
 
@@ -18,17 +18,37 @@ To open a link's destination in a modal overlay, set an `[up-layer=new]` attribu
 When the user clicks, Unpoly requests `/menu` and shows the response's [main element](/main)
 in the overlay. Your server renders the same full page it would for a regular page load,
 so the link keeps working in a new tab or without JavaScript.
-The request carries an [`X-Up-Mode`](/X-Up-Mode) header, in case your server wants to
-render something different for overlays.
 
-To show a different fragment in the overlay, add an [`[up-target]`](/up-layer-new#up-target) attribute with a CSS selector:
 
-```html
-<a href="/menu" up-layer="new" up-target=".menu-items">Open menu</a> <!-- mark: up-target=".menu-items" -->
-```
+### Choosing what the overlay shows {#content}
 
-Unpoly then extracts the `.menu-items` element from the response and places it in the overlay.
-The overlay's [main target](/up-main#overlays) can be configured per [mode](#modes).
+Often the page's main element works well in an overlay as it is.
+When it doesn't, use the first of these options that fits:
+
+1. Mark a different [main element](/up-main#overlays) for overlays.
+   Set `[up-main=overlay]` for all overlays, or name a [mode](#modes) like `[up-main=modal]`:
+
+   ```html
+   <body>
+     <div class="layout" up-main="root"> <!-- mark: up-main="root" -->
+       <nav class="layout--side">...</nav>
+       <div class="layout--content" up-main="overlay"> <!-- mark: up-main="overlay" -->
+         ...
+       </div>
+     </div>
+   </body>
+   ```
+
+   The root layer keeps updating the whole `.layout`, while overlays only show `.layout--content`.
+
+2. Choose a fragment for a single link with an [`[up-target]`](/up-layer-new#up-target) attribute:
+
+   ```html
+   <a href="/menu" up-layer="new" up-target=".menu-items">Open menu</a> <!-- mark: up-target=".menu-items" -->
+   ```
+
+3. Render something different on the server. Requests for an overlay carry an
+   [`X-Up-Mode`](/X-Up-Mode) header with the overlay's mode.
 
 When the server responds with an [error code](/failed-responses), the error page is rendered in
 the link's own layer, not in an overlay. To show errors in an overlay, set
