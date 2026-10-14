@@ -26,7 +26,7 @@ To override this default for a link or form, set `[up-history=true]` or `[up-his
 Overlays add one rule of their own: an overlay only shows its URL when it opens with a main element,
 and the parent page's URL returns when the overlay closes. This is covered in [[history-in-overlays]].
 
-<p class="read-more"><a href="/updating-history">Read more: Updating history</a></p>
+[[more: updating-history]]
 
 
 Restoring the previous page
@@ -46,7 +46,7 @@ To customize the render pass, or to restore the page with your own code,
 listen to `up:location:restore`.
 To offer a *Back* link inside the page, use an [`[up-back]`](/restoring-history#back-link) attribute.
 
-<p class="read-more"><a href="/restoring-history">Read more: Restoring history</a></p>
+[[more: restoring-history]]
 
 
 Tracking page views
@@ -64,7 +64,7 @@ up.on('up:location:changed', function(event) {
 One listener covers every way the location can change: followed links,
 redirecting forms and the Back button.
 
-<p class="read-more"><a href="/tracking-page-views">Read more: Tracking page views</a></p>
+[[more: tracking-page-views]]
 
 
 @page history

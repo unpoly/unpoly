@@ -35,7 +35,7 @@ Style these classes in your CSS to show that the app is working:
 Both classes are removed when the response arrives.
 To also disable a form's fields and buttons while it submits, see [[disabling-forms]].
 
-<p class="read-more"><a href="/feedback-classes">Read more: Feedback classes</a></p>
+[[more: feedback-classes]]
 
 
 Showing placeholders
@@ -61,7 +61,7 @@ and the placeholder is shown in its place:
 Placeholders can also be cloned from a [template](/templates),
 so you can reuse the same skeleton for many links.
 
-<p class="read-more"><a href="/placeholders">Read more: Placeholders</a></p>
+[[more: placeholders]]
 
 
 Previews: arbitrary temporary changes
@@ -88,7 +88,7 @@ the spinner is removed. This holds for any outcome: when the server responds wit
 when the request is aborted, or when the server ends up updating a different fragment.
 The page is always restored to a consistent state before the response is rendered.
 
-<p class="read-more"><a href="/previews">Read more: Previews</a></p>
+[[more: previews]]
 
 
 Optimistic rendering
@@ -109,7 +109,7 @@ up.preview('add-task', function(preview) {
 The item appears instantly. When the server responds, the optimistic change is reverted
 and replaced by the server-rendered list.
 
-<p class="read-more"><a href="/optimistic-rendering">Read more: Optimistic rendering</a></p>
+[[more: optimistic-rendering]]
 
 
 Also in this topic

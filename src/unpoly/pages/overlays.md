@@ -25,7 +25,7 @@ or when JavaScript is unavailable, the browser loads `/users/new` as a full page
 
 Forms, your JavaScript and the server can open overlays too.
 
-<p class="read-more"><a href="/opening-overlays">Read more: Opening overlays</a></p>
+[[more: opening-overlays]]
 
 
 Layers are isolated
@@ -90,7 +90,7 @@ An overlay can also close itself when a [close condition](/closing-overlays#clos
 like reaching a URL, emitting an event or rendering a fragment. Your JavaScript and the server
 can close overlays, too.
 
-<p class="read-more"><a href="/closing-overlays">Read more: Closing overlays</a></p>
+[[more: closing-overlays]]
 
 
 Subinteractions
@@ -118,7 +118,7 @@ The project form opens the company form, waits for the new record, and selects i
 The company form has no idea it is part of a project form. It is the same
 screen the user would see when creating a company on its own.
 
-<p class="read-more"><a href="/subinteractions">Read more: Subinteractions</a></p>
+[[more: subinteractions]]
 
 
 Changing an overlay's appearance
@@ -133,7 +133,7 @@ and assign your own CSS classes to style it:
 
 Drawers and popups can be positioned, and opening and closing can be animated.
 
-<p class="read-more"><a href="/customizing-overlays">Read more: Customizing overlays</a></p>
+[[more: customizing-overlays]]
 
 
 Also in this topic

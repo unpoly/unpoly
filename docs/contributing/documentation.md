@@ -514,6 +514,18 @@ instead of rotting. A slug or anchor that doesn't resolve fails the site build. 
 work for feature pages too (`[[up.render#concurrency]]`), which adds the anchor support
 that backtick autolinks lack. They are not expanded inside code blocks or code spans.
 
+A section of a chapter overview closes with a button to the page that tells the whole
+story. Write it as a paragraph that holds nothing but a wikilink with a `more:` prefix:
+
+```markdown
+[[more: following-links]]
+```
+
+It renders as a button labeled with the target's title, `More: Following links`, the
+same way an `@learn-ref` renders on an API page. It takes an anchor like any wikilink.
+The search index skips it. Never write its HTML by hand. A `[[more: …]]` within a
+sentence fails the site build.
+
 When you want your own label, don't use a wikilink — write a plain Markdown link
 with the label woven into the sentence:
 

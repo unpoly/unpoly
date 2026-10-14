@@ -33,7 +33,7 @@ up.compiler('.current-time', function(element) {
 })
 ```
 
-<p class="read-more"><a href="/enhancing-elements">Read more: Enhancing elements with JavaScript</a></p>
+[[more: enhancing-elements]]
 
 
 The page is long-lived
@@ -63,7 +63,7 @@ up.compiler('.user', function(element, data) { // mark: data
 })
 ```
 
-<p class="read-more"><a href="/data">Read more: Attaching data to elements</a></p>
+[[more: data]]
 
 
 Rendering templates
@@ -86,7 +86,7 @@ or [optimistic rendering](/optimistic-rendering):
 Clicking the link clones the template and swaps it into the matching `.tip` element,
 entirely on the client. Templates can also take [variables](/templates#dynamic).
 
-<p class="read-more"><a href="/templates">Read more: Templates</a></p>
+[[more: templates]]
 
 
 Mounting framework components
@@ -106,7 +106,7 @@ up.compiler('.color-picker', function(element, data) {
 The component mounts when its element enters the page, receives props from server data,
 and unmounts when the fragment around it is swapped.
 
-<p class="read-more"><a href="/islands">Read more: Framework islands</a></p>
+[[more: islands]]
 
 
 Also in this topic

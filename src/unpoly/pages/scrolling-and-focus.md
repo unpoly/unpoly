@@ -55,7 +55,7 @@ Other values scroll to the `top` or `bottom`, reveal an element matching a CSS s
 or `keep` the current positions through an update that would otherwise reset them.
 Strategies can be combined, and `[up-scroll="false"]` turns scrolling off for a navigating link.
 
-<p class="read-more"><a href="/scrolling">Read more: Scrolling</a></p>
+[[more: scrolling]]
 
 
 Moving focus
@@ -76,7 +76,7 @@ In an overlay, focus is trapped: tabbing past the last element wraps around to t
 Only [popups](/overlays#layer-modes) let focus leave.
 When the overlay closes, focus returns to the link that opened it.
 
-<p class="read-more"><a href="/focus">Read more: Controlling focus</a></p>
+[[more: focus]]
 
 
 Showing or hiding focus rings
@@ -98,7 +98,7 @@ Unpoly's default stylesheet already removes the outline from `.up-focus-hidden` 
 You can change which elements get which class in `up.viewport.config.autoFocusVisible`,
 or override it for a single link with [`[up-focus-visible]`](/up-follow#up-focus-visible).
 
-<p class="read-more"><a href="/focus-visibility">Read more: Focus ring visibility</a></p>
+[[more: focus-visibility]]
 
 
 Also in this topic

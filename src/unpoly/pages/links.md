@@ -39,7 +39,7 @@ its counterpart from the response.
 The link stays a standard hyperlink. When the user opens it in a new tab,
 or when JavaScript is unavailable, the browser makes a regular full page load.
 
-<p class="read-more"><a href="/following-links">Read more: Following links</a></p>
+[[more: following-links]]
 
 
 Handling all links
@@ -51,7 +51,7 @@ Instead of annotating every link, you can configure Unpoly to follow all links o
 up.link.config.followSelectors.push('a[href]')
 ```
 
-<p class="read-more"><a href="/handling-all-links">Read more: Handling all links</a></p>
+[[more: handling-all-links]]
 
 
 Preloading links
@@ -65,7 +65,7 @@ A link can request its destination before the user clicks, making the interactio
 
 Hovering over the link already loads the response into the [cache](/caching).
 
-<p class="read-more"><a href="/preloading">Read more: Preloading links</a></p>
+[[more: preloading]]
 
 
 Highlighting the current location
@@ -82,7 +82,7 @@ Links in a navigation bar are marked with an `.up-current` class when they point
 
 Style that class with your CSS to highlight the active menu section.
 
-<p class="read-more"><a href="/navigation-bars">Read more: Navigation bars</a></p>
+[[more: navigation-bars]]
 
 
 Also in this topic

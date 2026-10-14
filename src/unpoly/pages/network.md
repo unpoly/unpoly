@@ -52,7 +52,7 @@ the user sees the cached version immediately and the fresh version a moment late
 When a form is submitted with a method like `POST`, the entire cache is expired,
 since the submission has probably changed data on the server.
 
-<p class="read-more"><a href="/caching">Read more: Caching</a></p>
+[[more: caching]]
 
 
 Aborting conflicting requests
@@ -73,7 +73,7 @@ Requests targeting other fragments are not affected.
 Links and forms can change this rule with an `[up-abort]` attribute.
 For example, `[up-abort="layer"]` aborts every request on the current layer.
 
-<p class="read-more"><a href="/aborting-requests">Read more: Aborting requests</a></p>
+[[more: aborting-requests]]
 
 
 Handling disconnects
@@ -94,7 +94,7 @@ Requests that time out are handled the same way. Pages already in the cache rema
 A server that is slow to respond is not a network issue. Unpoly shows a [progress bar](/progress-bar)
 after 400 ms, and can show [loading state](/loading-state) in the targeted fragment while the user waits.
 
-<p class="read-more"><a href="/network-issues">Read more: Handling network issues</a></p>
+[[more: network-issues]]
 
 
 Making requests from JavaScript

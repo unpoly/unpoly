@@ -49,7 +49,7 @@ To load only when the deferred element is scrolled into view, set `[up-defer="re
 </div>
 ```
 
-<p class="read-more"><a href="/lazy-loading">Read more: Lazy loading content</a></p>
+[[more: lazy-loading]]
 
 
 Polling for changes
@@ -68,7 +68,7 @@ The element is reloaded every 30 seconds. Polling pauses while the browser tab i
 or the fragment's layer is covered by an overlay, and resumes when the user comes back.
 The interval, source URL and many other details can be configured.
 
-<p class="read-more"><a href="/polling">Read more: Polling</a></p>
+[[more: polling]]
 
 
 Updating elements outside the target
@@ -91,7 +91,7 @@ the element, nothing happens. You no longer need to name the counter in every li
 
 To show confirmations or errors from any response, use a ready-made hungry element for [notification flashes](/flashes).
 
-<p class="read-more"><a href="/hungry-elements">Read more: Hungry elements</a></p>
+[[more: hungry-elements]]
 
 
 Also in this topic

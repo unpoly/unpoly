@@ -50,7 +50,7 @@ Vary: X-Up-Target
 Other headers tell the server which layer is updating, so an overlay can get a page without site navigation,
 and whether the request comes from Unpoly at all.
 
-<p class="read-more"><a href="/optimizing-responses">Read more: Optimizing responses</a></p>
+[[more: optimizing-responses]]
 
 
 Skipping unchanged content
@@ -68,7 +68,7 @@ When nothing changed, the server can answer with an empty `304 Not Modified`
 and Unpoly finishes the render pass without changes.
 The exchange then costs about 1 KB and no rendering time.
 
-<p class="read-more"><a href="/conditional-requests">Read more: Conditional requests</a></p>
+[[more: conditional-requests]]
 
 
 Reacting to new deployments
@@ -86,7 +86,7 @@ up.on('up:assets:changed', function() {
 
 You decide how to react: notify the user, reload at the next navigation, or swap in the new stylesheets.
 
-<p class="read-more"><a href="/handling-asset-changes">Read more: Reacting to new deployments</a></p>
+[[more: handling-asset-changes]]
 
 
 Steering the frontend from the server
@@ -107,7 +107,7 @@ The full set of headers is small, and you only implement what you use.
 Libraries for many languages and frameworks wrap it in helpers.
 See [[protocol-implementations]].
 
-<p class="read-more"><a href="/server-protocol">Read more: Server protocol</a></p>
+[[more: server-protocol]]
 
 @page backend-integration
 @menu-title Overview

@@ -41,7 +41,7 @@ To update a different fragment, add an [`[up-target]`](/up-submit#up-target) att
 The form stays a standard form. When JavaScript is unavailable,
 the browser submits it with a full page load.
 
-<p class="read-more"><a href="/submitting-forms">Read more: Submitting forms</a></p>
+[[more: submitting-forms]]
 
 
 Showing validation errors
@@ -68,7 +68,7 @@ When the user leaves the field, Unpoly submits the form with an `X-Up-Validate` 
 Your server validates the input without saving it and renders the form again.
 Only the `<fieldset>` around the field is updated, now with any error message.
 
-<p class="read-more"><a href="/validation">Read more: Validating forms</a></p>
+[[more: validation]]
 
 
 Forms that react on the server
@@ -93,7 +93,7 @@ the same HTML templates as always. Unpoly swaps in only the `#country` element.
 When the user changes fields faster than the network responds, the form still
 ends up in a consistent state.
 
-<p class="read-more"><a href="/reactive-server-forms">Read more: Reactive server forms</a></p>
+[[more: reactive-server-forms]]
 
 
 Switching state on the client
@@ -114,7 +114,7 @@ for which values they are shown:
 
 The card number field is shown while *Credit card* is selected and hidden otherwise.
 
-<p class="read-more"><a href="/switching-form-state">Read more: Switching form state</a></p>
+[[more: switching-form-state]]
 
 
 Also in this topic
