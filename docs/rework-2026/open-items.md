@@ -54,3 +54,6 @@ Questions:
 - Anchor scan of the built site: 3 broken anchors on current pages fixed (c2835e615). 118 more are in old release notes /changes/0.x and 2.x (the build skips them on purpose; e.g. /up.popup, /up.modal links). Left alone.
 - Running: search ranking (/layer-option for "layer"; skill search "history state"), URL move dry run.
 - URL move dry run done: script `bundle exec rake docs:url_move` (unpoly-site, branch url-move-dryrun), 627 documents moved (83 /learn, 544 /api), 3,277 links rewritten, 627 generated redirects + 154 retargeted, no chains, idempotent; build "All links OK", check_urls green (now also checks missing redirects and chains), real Apache 2.4: 782 old URLs → 301 → 200. Site code stays as commits to rebase on launch day (as planned). Runbook: docs/rework-2026/url-move-runbook.md.
+
+## Rework decisions (2026-10-14)
+- R1 → R1C+: Henning reads every remaining Learn page (9 chapters, 48 pages), plus the 8 Overlays pages (the 2026-10-13 sitting covered only packet notes). For each page Claude lists what deserves the most attention. Order: Overlays first.
