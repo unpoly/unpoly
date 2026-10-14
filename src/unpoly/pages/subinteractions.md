@@ -331,7 +331,7 @@ A form with an `[up-accept]` attribute closes the overlay [when submitted](/clos
 and makes a regular submission when it is not in an overlay.
 
 To vary a reused screen slightly, like showing "Pick a company for project Foo" in the overlay only,
-pass data to the overlay with [[context]].
+pass data to the overlay with [[layer-context]].
 
 
 Awaiting subinteractions from JavaScript {#awaiting-subinteractions-from-javascript}

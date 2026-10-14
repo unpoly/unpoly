@@ -488,7 +488,7 @@ up.protocol = (function() {
   }
 
   /*-
-  This request header contains the targeted layer's [context](/context), serialized as JSON.
+  This request header contains the targeted layer's [context](/layer-context), serialized as JSON.
 
   ### Example
 
@@ -550,7 +550,7 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the [context](/context) of the layer
+  This request header contains the [context](/layer-context) of the layer
   targeted for a failed fragment update, serialized as JSON.
 
   A fragment update is considered *failed* if the server responds with a

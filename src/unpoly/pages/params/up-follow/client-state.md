@@ -22,7 +22,7 @@
   @experimental
 
 @param [up-context]
-  A [relaxed JSON](/relaxed-json) object that will be merged into the [context](/context)
+  A [relaxed JSON](/relaxed-json) object that will be merged into the [context](/layer-context)
   of the current layer once the fragment is rendered.
 
   @experimental

@@ -3257,11 +3257,11 @@ up.visit = up.fragment.visit
 up.template = { clone: up.fragment.cloneTemplate }
 
 /*-
-Returns the current [context](/context).
+Returns the current [context](/layer-context).
 
 This is aliased as `up.layer.context`.
 
-@learn-ref context
+@learn-ref layer-context
 
 @property up.context
 @param {Object} context

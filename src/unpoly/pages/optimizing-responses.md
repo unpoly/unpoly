@@ -129,7 +129,7 @@ It tells you exactly which fragments Unpoly needs.
 Rendering content that depends on layer context {#context}
 -----------------------------------------------
 
-A layer can carry a [context](/context) object, e.g. to reuse a screen in an overlay
+A layer can carry a [context](/layer-context) object, e.g. to reuse a screen in an overlay
 with a different heading. Unpoly sends it as JSON in an `X-Up-Context` request header:
 
 ```http
@@ -137,7 +137,7 @@ X-Up-Context: { "title": "Choose a company contact" }
 X-Up-Target: main
 ```
 
-A response that depends on the context lists it in its `Vary` header. See [[context]] for the full exchange.
+A response that depends on the context lists it in its `Vary` header. See [[layer-context]] for the full exchange.
 
 
 Caching optimized responses {#vary}

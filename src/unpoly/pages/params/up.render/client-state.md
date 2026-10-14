@@ -25,7 +25,7 @@
   @experimental
 
 @param {Object} [options.context]
-  An object that will be merged into the [context](/context) of the current layer once the fragment is rendered.
+  An object that will be merged into the [context](/layer-context) of the current layer once the fragment is rendered.
 
   @experimental
   

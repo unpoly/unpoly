@@ -1827,14 +1827,14 @@ up.layer = (function() {
   */
 
   /*-
-  The [context](/context) of the [current layer](/up.layer.current).
+  The [context](/layer-context) of the [current layer](/up.layer.current).
 
   This is a shortcut for `up.layer.current.context`.
   See `up.Layer#context` for more documentation.
 
   Aliased as `up.context`.
 
-  @learn-ref context
+  @learn-ref layer-context
 
   @property up.layer.context
   @param context

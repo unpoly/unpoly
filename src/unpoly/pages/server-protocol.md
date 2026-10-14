@@ -35,7 +35,7 @@ and `X-Up-Fail-Mode` for failed responses. `X-Up-Origin-Mode` is the mode of the
 in case it targets another layer. A server may [render leaner pages for overlays](/optimizing-responses#mode).
 
 **The layer's context** arrives as JSON in `X-Up-Context` (and `X-Up-Fail-Context`),
-so a server can [vary a reused screen](/context#reuse-interaction-with-variation) by the data a layer was opened with.
+so a server can [vary a reused screen](/layer-context#reuse-interaction-with-variation) by the data a layer was opened with.
 
 **Validation requests** carry the names of the fields being validated in `X-Up-Validate`.
 The server is expected to validate the submission without saving it and to render the form again,
@@ -90,7 +90,7 @@ with the given result value, instead of rendering the response. `X-Up-Open-Layer
 in a new overlay. See [[subinteractions]] for the pattern these headers enable.
 
 **Updating the layer context.** An `X-Up-Context` response header carries the changed keys.
-See [Changing context from the server](/context#server-updates).
+See [Changing context from the server](/layer-context#server-updates).
 
 **Controlling the cache.** When Unpoly sends a non-`GET` request, it expires its entire cache.
 `X-Up-Expire-Cache` and `X-Up-Evict-Cache` expire or evict additional cache entries matching a [URL pattern](/url-patterns):

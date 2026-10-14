@@ -60,7 +60,7 @@ learn:
         - subinteractions
         - customizing-overlays
         - targeting-other-layers
-        - context
+        - layer-context
         - history-in-overlays
 
     - type: page-group

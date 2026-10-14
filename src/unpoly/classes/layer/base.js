@@ -62,7 +62,7 @@ up.Layer = class Layer extends up.Record {
   */
 
   /*-
-  This layer's [context](/context).
+  This layer's [context](/layer-context).
 
   ### Example
 
@@ -74,7 +74,7 @@ up.Layer = class Layer extends up.Record {
   console.log(layer.context) // logs "{ message: 'Please select a contact' }"
   ```
 
-  @learn-ref context
+  @learn-ref layer-context
 
   @property up.Layer#context
   @param {Object} context

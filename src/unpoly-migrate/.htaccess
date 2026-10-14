@@ -172,3 +172,4 @@ RedirectPermanent /predefined-animations /animation#animations
 RedirectPermanent /predefined-transitions /animation#transitions
 RedirectPermanent /motion-tuning /animation#duration-and-easing
 RedirectPermanent /layer-option /targeting-other-layers
+RedirectPermanent /context /layer-context

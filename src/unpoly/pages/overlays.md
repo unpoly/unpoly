@@ -137,7 +137,7 @@ Also in this topic
 
 To address a layer other than the current one, like the page behind an overlay, see [[targeting-other-layers]].
 
-To keep state for the lifetime of an overlay, like the record a reused screen is picking for, see [[context]].
+To keep state for the lifetime of an overlay, like the record a reused screen is picking for, see [[layer-context]].
 
 To control whether an overlay's location shows in the address bar, see [[history-in-overlays]].
 

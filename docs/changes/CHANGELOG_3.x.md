@@ -3578,7 +3578,7 @@ All existing documentation pages from Unpoly 2 remain available:
 - [Subinteractions](/subinteractions)
 - [Closing overlays](/closing-overlays)
 - [Customizing overlays](/customizing-overlays)
-- [Layer context](/context)
+- [Layer context](/layer-context)
 - [Motion tuning](/animation#duration-and-easing)
 - [URL patterns](/url-patterns)
 - Working with strict Content Security Policies

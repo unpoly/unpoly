@@ -138,11 +138,11 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [context](/context) of the layer targeted by this request.
+  The [context](/layer-context) of the layer targeted by this request.
 
   The context object will be sent as an `X-Up-Context` header.
 
-  @learn-ref context
+  @learn-ref layer-context
 
   @property up.Request#context
   @param {Object} context
@@ -150,7 +150,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [context](/context) of the layer targeted by this request in case the server responds with an [error code](/failed-responses).
+  The [context](/layer-context) of the layer targeted by this request in case the server responds with an [error code](/failed-responses).
 
   The context object will be sent as an `X-Up-Fail-Context` header.
 

@@ -140,12 +140,12 @@ Context compared to other stores {#comparison}
 
 The web platform offers other ways to persist state across requests, but none of them is scoped to a layer:
 
-| Store              | Scope              | Persistence    | Values     | Client-manageable | Server-manageable |
-|--------------------|--------------------|----------------|------------|-------------------|-------------------|
-| Local storage      | Domain             | Permanentish   | String     | Yes               | -                 |
-| Cookies            | Domain             | Configurable   | String     | Configurable      | Yes               |
-| Session storage    | Tab                | Session        | String     | Yes               | -                 |
-| Layer context      | [Layer](/up.layer) | Layer          | Object     | Yes               | Yes               |
+| Store           | Scope              | Persistence       | Values | Client-manageable | Server-manageable |
+|-----------------|--------------------|-------------------|--------|-------------------|-------------------|
+| Local storage   | Domain             | Multiple sessions | String | Yes               | -                 |
+| Cookies         | Domain             | Configurable      | String | Configurable      | Yes               |
+| Session storage | Tab                | Session           | String | Yes               | -                 |
+| Layer context   | [Layer](/up.layer) | Layer             | Object | Yes               | Yes               |
 
 
-@page context
+@page layer-context
