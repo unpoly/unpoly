@@ -74,22 +74,19 @@ the earlier request and reverts its preview.
 
 ## Handling validation errors
 
-When a previewed form submission ends up [failing](/failed-responses) due to a [validation](/validation) error,
-the preview is reverted and the form is shown in an error state. Whenever possible, we want to avoid
-the jarring effect of a quickly changing screen state.
+When a previewed form submission [fails](/failed-responses) with a [validation](/validation) error,
+the server's error messages still appear reliably. Every preview is [reverted when its request ends](/previews#ending),
+so Unpoly removes the optimistic change before it renders the form with its errors.
+The user never keeps seeing a change that the server rejected.
+
+What remains is a quick change from the optimistic state to the error state.
+Whenever possible, we want to avoid this jarring effect.
 
 For simple constraints, consider [native HTML validations](https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation) that run on the client,
 such as [`[required]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/required), [`[pattern]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/pattern)
 or [`[maxlength]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/maxlength).
 For example, the form above uses the `[required]` attribute to block form submission until
-the task text has been filled in:
-
-```html
-<form up-target="#tasks" up-preview="add-task">
-  <input type="text" name="text" required> <!-- mark: required -->
-  <button type="submit">Save</button>
-</form>
-```
+the task text has been filled in.
 
 ### Server-validated constraints
 
@@ -113,7 +110,7 @@ the form is submitted.
 When a preview function needs to update a major fragment, this can lead to a duplication of view logic.
 An HTML fragment that used to only be rendered by the server is now also found in the JavaScript.
 
-By embedding [templates](/templates) into our responses, we can confine HTML rendering to the server.
+There is a way to mitigate that. By embedding [templates](/templates) into our responses, we can confine HTML rendering to the server.
 Since the server already knows how to render a task, we can reuse that knowledge for optimistic rendering
 on the client.
 
