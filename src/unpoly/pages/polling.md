@@ -5,6 +5,9 @@ A fragment can reload itself from the server periodically.
 This picks up changes made by other users or by background jobs,
 using regular HTTP requests instead of a persistent connection.
 
+> [tip]
+> When a delay of a few seconds is too much, your server can [signal changes as they happen](/real-time-updates).
+
 
 ## Polling a fragment {#example}
 
