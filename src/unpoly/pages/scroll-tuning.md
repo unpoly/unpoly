@@ -54,11 +54,13 @@ When `{ scrollBehavior: 'auto' }` is passed, the behavior is determined by the C
 ## Revealing with padding {#revealing-with-padding}
 
 To leave space between a [revealed](/up.reveal) element and the closest viewport edge,
-pass a pixel value as `{ revealPadding }` option:
+set an `[up-reveal-padding]` attribute with a pixel value:
 
 ```html
 <a href="/comments" up-target="#comments" up-scroll="target" up-reveal-padding="20">Comments</a> <!-- mark: up-reveal-padding="20" -->
 ```
+
+From JavaScript, pass a `{ revealPadding }` option.
 
 The default is `{ revealPadding: 0 }`.
 You can change this default in `up.viewport.config.revealPadding`.
