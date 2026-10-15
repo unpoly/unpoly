@@ -3,7 +3,8 @@ Feedback classes
 
 Unpoly adds CSS classes to links and forms that are loading content,
 and to the fragments they are [targeting](/targeting-fragments).
-Style these classes to instantly signal that the app is working.
+The classes have no effect on their own. They exist so you can style them,
+to instantly signal that the app is working.
 
 
 ## Feedback when following links {#link}
@@ -30,41 +31,6 @@ The [targeted](/targeting-fragments) fragment (the `#target` element) gets the `
 ```
 
 Both classes are [removed](#classes-are-removed-when-the-request-ends) when the request ends.
-
-
-## Conveying feedback with CSS styles {#styling}
-
-To instantly signal that a user interaction has been registered,
-consider highlighting active links and submit buttons in your CSS:
-
-```css
-.up-active:is(a, [up-follow], input[type=submit], button[type=submit], button:not([type])) {
-  outline: 2px solid blue;
-}
-```
-
-To convey which parts of the page have a pending update, consider styling targeted fragments:
-
-```css
-.up-loading {
-  opacity: 0.6;
-}
-```
-
-You can show a hidden loading message while a form is submitting:
-
-```css
-.spinner {
-  display: none;
-
-  form.up-active & {
-    display: block;
-  }
-}
-```
-
-If CSS alone is not enough, [previews](/previews) let you make arbitrary changes to the page
-while a request is loading. See [[loading-state]] for all strategies.
 
 
 ## Feedback when submitting forms {#form}
@@ -119,6 +85,41 @@ caused the submission. It is also marked as `.up-active`, in addition to the for
 ```
 
 
+## Conveying feedback with CSS styles {#styling}
+
+To instantly signal that a user interaction has been registered,
+consider highlighting active links and submit buttons in your CSS:
+
+```css
+.up-active:is(a, [up-follow], input[type=submit], button[type=submit], button:not([type])) {
+  outline: 2px solid blue;
+}
+```
+
+To convey which parts of the page have a pending update, consider styling targeted fragments:
+
+```css
+.up-loading {
+  opacity: 0.6;
+}
+```
+
+You can show a hidden loading message while a form is submitting:
+
+```css
+.spinner {
+  display: none;
+
+  form.up-active & {
+    display: block;
+  }
+}
+```
+
+If CSS alone is not enough, [previews](/previews) let you make arbitrary changes to the page
+while a request is loading. See [[loading-state]] for all strategies.
+
+
 ## Classes are removed when the request ends
 
 Feedback classes remain set while the request is loading.
@@ -142,18 +143,15 @@ for all reasons that end a request.
 
 When content is rendered from the [cache](/caching), no `.up-active` or `.up-loading` classes are set, since there is nothing to wait for.
 
-When rendering content from a stale [cache](/caching) entry,
-Unpoly [automatically reloads the fragment](/caching#revalidation) to ensure that the user never sees expired content.
-
-During this cache revalidation Unpoly marks the targeted fragment as `.up-revalidating`:
+When the cache entry is stale, Unpoly [automatically reloads the fragment](/caching#revalidation)
+to ensure that the user never sees expired content.
+During this cache revalidation Unpoly marks the targeted fragment as `.up-revalidating` instead of `.up-loading`:
 
 ```html
 <div id="target" class="up-revalidating"> <!-- mark: class="up-revalidating" -->
   Possibly stale content
 </div>
 ```
-
-Note that the `.up-loading` and `.up-active` classes are *not* set during cache revalidation.
 
 
 ## Feedback classes from JavaScript
