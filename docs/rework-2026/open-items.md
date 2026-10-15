@@ -57,3 +57,4 @@ Questions:
 
 ## Rework decisions (2026-10-14)
 - R1 → R1C+: Henning reads every remaining Learn page (9 chapters, 48 pages), plus the 8 Overlays pages (the 2026-10-13 sitting covered only packet notes). For each page Claude lists what deserves the most attention. Order: Overlays first.
+- R7 (landing claim, 2026-10-15) → keep "The missing application layer for HTML". Challenger "HTML from the future" (imagined HTML6 for applications, polyfilled by Unpoly) was weighed over several rounds: it evokes instead of describing, needs its byline to decode, weakens the htmx differentiation ("layer" signals the higher-level temperament that "Is Unpoly right for you?" names), and adds a metaphor to decode on a page that already carries a nuanced explanation. Ideas from it may move below the fold.
