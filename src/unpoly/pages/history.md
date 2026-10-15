@@ -4,7 +4,6 @@ History
 Unpoly keeps the browser history working while it updates fragments.
 When a link or form changes the page's main content, the address bar and window title
 change as they would for a full page load, and the Back button brings the earlier page back.
-Your scripts can observe every location change, for example to track page views.
 
 
 Updating the address bar
