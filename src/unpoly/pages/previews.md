@@ -283,6 +283,29 @@ up.preview('spinner', function(preview) {
 ```
 
 
+## Delaying previews {#delaying}
+
+When your backend responds quickly, a preview will only be shown for a short time
+before it is reverted. To avoid a flash of preview state, you may want to
+run some previews for long-running requests only.
+
+To do this, a preview function can set a timer using `setTimeout()` or `up.util.timer()`.
+After the timer expires, the preview must [check if it is still running](/up.Preview.prototype.ended) before changing the page:
+
+```js
+up.preview('delayed-spinner', (preview) => {
+  up.util.timer(1000, function() {
+    if (!preview.ended) { // mark: ended
+      preview.insert('<img src="spinner.gif">')
+    }
+  })
+})
+```
+
+> [important]
+> When a preview changes the DOM after the preview has ended, these changes will not be reverted.
+
+
 ## Using previews with caching
 
 Previews are *not* shown when rendering content that is already [cached](/caching).
@@ -315,29 +338,6 @@ to a [true value](/attributes-and-options#boolean-attributes):
   Clients
 </a>
 ```
-
-
-## Delaying previews {#delaying}
-
-When your backend responds quickly, a preview will only be shown for a short time
-before it is reverted. To avoid a flash of preview state, you may want to
-run some previews for long-running requests only.
-
-To do this, a preview function can set a timer using `setTimeout()` or `up.util.timer()`.
-After the timer expires, the preview must [check if it is still running](/up.Preview.prototype.ended) before changing the page:
-
-```js
-up.preview('delayed-spinner', (preview) => {
-  up.util.timer(1000, function() {
-    if (!preview.ended) { // mark: ended
-      preview.insert('<img src="spinner.gif">')
-    }
-  })
-})
-```
-
-> [important]
-> When a preview changes the DOM after the preview has ended, these changes will not be reverted.
 
 
 @page previews
