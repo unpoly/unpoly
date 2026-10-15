@@ -111,9 +111,12 @@ learn:
         - network-issues
 
     - type: page-group
-      title: Animation
+      title: Motion
       pages:
-        - animation
+        - motion
+        - transitions
+        - animations
+        - controlling-motion
 
     - type: page-group
       title: Scripting

@@ -134,7 +134,7 @@ Open and close animations {#animation}
 
 Overlays fade in and out by default. Drawers slide in from their screen edge.
 
-To use different [animations](/animation) for one overlay, set `[up-animation]` and `[up-close-animation]`
+To use different [animations](/animations) for one overlay, set `[up-animation]` and `[up-close-animation]`
 attributes on the link that opens it:
 
 ```html

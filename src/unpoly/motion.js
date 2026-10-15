@@ -5,7 +5,7 @@ A *transition* morphs an old element into its new version. Set an `[up-transitio
 
 Unpoly ships with [predefined transitions](/up.morph#named-transitions) and [predefined animations](/up.animate#named-animations). Define your own with `up.transition()` and `up.animation()`. To play an effect outside a render pass, call `up.animate()` or `up.morph()` directly.
 
-@learn-ref animation
+@learn-ref motion
 
 @module up.motion
 */
@@ -157,7 +157,7 @@ up.motion = (function() {
 
   ## Named animations
 
-  Unpoly ships with a number of [predefined animations](/animation#available-animations)
+  Unpoly ships with a number of [predefined animations](/animations#available-animations)
 
   You can define additional named animations using [`up.animation()`](/up.animation).
 
@@ -356,7 +356,7 @@ up.motion = (function() {
 
   ## Named transitions
 
-  Unpoly ships with a number of [predefined transitions](/animation#available-transitions).
+  Unpoly ships with a number of [predefined transitions](/transitions#available-transitions).
 
   You can define additional named transitions using [`up.transition()`](/up.transition).
 
@@ -616,7 +616,7 @@ up.motion = (function() {
   /*-
   Swaps a fragment with an animated transition.
 
-  You can use a [predefined transition](/animation#available-transitions) or [define your own](/up.transition).
+  You can use a [predefined transition](/transitions#available-transitions) or [define your own](/up.transition).
 
   > [NOTE]
   > Transitions are not possible when replacing the `<body>` element.
@@ -654,7 +654,7 @@ up.motion = (function() {
   @params-note
     All modifying attributes for `[up-follow]` (links) or `[up-submit]` (forms) may also be used.
   @param [up-transition]
-    The [name of a transition](/animation#available-transitions).
+    The [name of a transition](/transitions#available-transitions).
   @param [up-duration]
       The duration of the transition in milliseconds.
   @param [up-easing]
