@@ -63,8 +63,8 @@ redirecting forms and the Back button.
 [[more: tracking-page-views]]
 
 
-In other topics
----------------
+See also
+--------
 
 To control whether an overlay's URL shows in the address bar, see [[history-in-overlays]].
 

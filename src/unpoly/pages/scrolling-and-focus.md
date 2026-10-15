@@ -101,8 +101,8 @@ or override it for a single link with [`[up-focus-visible]`](/up-follow#up-focus
 [[more: focus-visibility]]
 
 
-Also in this topic
-------------------
+See also
+--------
 
 To declare navigation bars that obstruct the viewport, animate the scroll motion, or add padding when revealing an element, see [[scroll-tuning]].
 

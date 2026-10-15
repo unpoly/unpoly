@@ -133,8 +133,8 @@ up.on('up:fragment:loaded', function(event) {
 [[more: render-lifecycle]]
 
 
-Also in this topic
-------------------
+See also
+--------
 
 When Unpoly updates an element without being given a selector, it guesses one from the element's
 `[id]`, `[name]` or classes. To tune that guess, see [[target-derivation]].

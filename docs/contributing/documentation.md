@@ -829,7 +829,8 @@ table of contents — the sidebar already is one. Its jobs, roughly in reading o
 - Map the two to four most common needs — each a situation sentence with a taste
   of code, linking its detail page. A feature that will excite readers can take a
   map section even when it is not a common need. The remaining pages get a one-line
-  mention under a closing "Also in this topic" section.
+  mention under a closing "See also" section. Pages in other topics that readers
+  will look for here go in the same section, never in a read-more box.
 - Name a boundary ("infinite scrolling is not here") only where readers will
   plausibly take a wrong turn. Most overviews need none.
 

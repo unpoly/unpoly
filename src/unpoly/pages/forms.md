@@ -117,8 +117,8 @@ The card number field is shown while *Credit card* is selected and hidden otherw
 [[more: switching-form-state]]
 
 
-Also in this topic
-------------------
+See also
+--------
 
 To disable fields and buttons while a form is submitting, see [[disabling-forms]].
 

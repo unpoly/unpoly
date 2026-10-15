@@ -132,8 +132,8 @@ Drawers and popups can be positioned, and opening and closing can be animated.
 [[more: customizing-overlays]]
 
 
-Also in this topic
-------------------
+See also
+--------
 
 To address a layer other than the current one, like the page behind an overlay, see [[targeting-other-layers]].
 

@@ -85,8 +85,8 @@ Style that class with your CSS to highlight the active menu section.
 [[more: navigation-bars]]
 
 
-Also in this topic
-------------------
+See also
+--------
 
 To make a `<span>` or a table row act like a hyperlink, see [[faux-interactive-elements]].
 

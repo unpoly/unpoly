@@ -113,8 +113,8 @@ and replaced by the server-rendered list.
 [[more: optimistic-rendering]]
 
 
-Also in this topic
-------------------
+See also
+--------
 
 When a request takes longer than 400 ms, Unpoly shows a thin progress bar at the top of the screen.
 To style, disable or replace it, see [[progress-bar]].

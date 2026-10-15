@@ -109,8 +109,8 @@ and unmounts when the fragment around it is swapped.
 [[more: islands]]
 
 
-Also in this topic
-------------------
+See also
+--------
 
 To convert existing `DOMContentLoaded` scripts to compilers, see [[legacy-scripts]].
 
