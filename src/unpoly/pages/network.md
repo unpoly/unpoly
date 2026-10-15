@@ -7,16 +7,16 @@ aborts requests that would race each other, and handles disconnects without the 
 This works without setup, and every part can be changed for a single link, a form or your whole app.
 
 
-Requests in the background
---------------------------
+How Unpoly makes requests
+-------------------------
 
-When the user follows a link or submits a form, Unpoly requests the URL in the background:
+When the user follows a link or submits a form, Unpoly requests the URL without leaving the page:
 
 ```html
 <a href="/preferences" up-target=".content">Preferences</a> <!-- mark: up-target=".content" -->
 ```
 
-The request is a plain HTTP request. It carries extra headers that tell the server
+The request is a plain HTTP request. It carries [extra headers](/up.protocol) that tell the server
 what Unpoly intends to do with the response, like the targeted selector:
 
 ```http
