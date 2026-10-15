@@ -1,10 +1,9 @@
 Live fragments
 ==============
 
-Unpoly can load and refresh fragments without the user clicking anything,
-like a menu that loads after the page has rendered, or a counter that reloads itself every 30 seconds.
-Each update is a regular HTTP request for a fragment, the same kind a link makes.
-There is no persistent connection and nothing new to run on the server.
+Live fragments are elements that update without being targeted by a link or form.
+They load lazily, poll, react to server events, or piggy-back on other responses.
+Your server renders their content like any other page.
 
 
 Reloading a fragment
@@ -22,8 +21,7 @@ set when the fragment was inserted. Reloading requests that URL again, finds the
 element in the response and replaces the one on the page. Everything around it stays as it is.
 
 The server renders the same HTML it would for a regular request.
-It may respond with a full page or with only the targeted fragment, as the
-[`X-Up-Target`](/optimizing-responses) header tells it what Unpoly is going to use.
+To render only the fragment Unpoly needs, see [[optimizing-responses]].
 
 
 Loading content later
@@ -52,6 +50,29 @@ To load only when the deferred element is scrolled into view, set `[up-defer="re
 [[more: lazy-loading]]
 
 
+Infinite scrolling
+------------------
+
+A long list can load its next page when the user scrolls to its end.
+The "load more" link at the bottom is a deferred element that loads when revealed:
+
+```html
+<div id="pages">
+  <div class="page">items for page 1</div>
+</div>
+
+<a id="next-page" href="/items?page=2" up-defer="reveal" up-target="#next-page, #pages:after"> <!-- mark: #pages:after -->
+  Load next page
+</a>
+```
+
+The `:after` suffix appends the next page to the list, instead of replacing it.
+The link swaps itself with a link to the page after that.
+Without JavaScript, it is a regular link to page 2.
+
+[[more: infinite-scrolling]]
+
+
 Polling for changes
 -------------------
 
@@ -69,6 +90,31 @@ or the fragment's layer is covered by an overlay, and resumes when the user come
 The interval, source URL and many other details can be configured.
 
 [[more: polling]]
+
+
+Real-time updates
+-----------------
+
+When a few seconds of delay are too much, your server can tell the page when something changed.
+Put an element like `<div data-stream="/updates">` in your layout.
+A [compiler](/up.compiler) of a few lines connects it to [Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)
+and reloads the fragment the server names:
+
+```js
+up.compiler('[data-stream]', function(element, { stream: url }) {
+  let source = new EventSource(url)
+  source.addEventListener('message', function(event) {
+    let fragment = up.fragment.get(event.data, { layer: element })
+    if (fragment) up.reload(fragment) // mark: up.reload(fragment)
+  })
+  return () => source.close()
+})
+```
+
+The message only names a fragment. The new content comes from a regular request, so the server renders it
+with the same code as before. This needs an open connection to your server, so polling is simpler when a delay is acceptable.
+
+[[more: real-time-updates]]
 
 
 Updating elements outside the target
@@ -92,14 +138,6 @@ the element, nothing happens. You no longer need to name the counter in every li
 To show confirmations or errors from any response, use a ready-made hungry element for [notification flashes](/flashes).
 
 [[more: hungry-elements]]
-
-
-Also in this topic
-------------------
-
-To load the next page of a long list when the user scrolls to its end, see [[infinite-scrolling]].
-
-To reload a fragment as soon as your server signals a change, see [[real-time-updates]].
 
 @page live-fragments
 @menu-title Overview
