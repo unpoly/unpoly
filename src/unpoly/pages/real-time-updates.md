@@ -55,11 +55,17 @@ for example when the user just clicked a link that updates only the inbox.
 To keep such requests, call `up.reload(fragment, { abort: false })`.
 
 
-### Why reload instead of sending HTML {#why-reload}
+### Reloading or pushing HTML {#reload-vs-push}
 
-The message only says *what* changed. Each user's browser then loads the new HTML with a normal request.
-Your server renders that response like any other, for the current user, with its usual layout and authorization checks.
-When nothing changed for this user, the server can respond with `304 Not Modified`. See [[conditional-requests]].
+The message in this example only says *what* changed. Each user's browser then loads the new HTML with a normal request.
+Your server renders that response with its existing routes and templates, for the current user, with its usual authorization checks.
+
+The cost is one extra request per browser. A signal to many users causes many reloads at the same time.
+To keep them cheap, let your server answer with `304 Not Modified` when nothing changed for a user. See [[conditional-requests]].
+
+You can also push rendered HTML instead of a signal, and pass it to [`up.render({ fragment })`](/up.render).
+This saves the extra request. Your server then renders the HTML outside of a request,
+and must make sure each user only receives what they may see.
 
 
 ### Where to put the connection {#placement}
@@ -178,9 +184,6 @@ Every open page holds one connection to your server. Keep the following in mind:
   To keep a quiet event stream open, send a comment line like `: ping` every 30 seconds.
 - Over HTTP/1.1, a browser opens at most six connections to the same host, across all tabs.
   Each open `EventSource` uses one of them. Serve event streams over HTTP/2, which allows many more (usually 100).
-- A signal to many users causes many reloads at the same time.
-
-To push rendered HTML instead of a signal, pass it to [`up.render({ fragment })`](/up.render).
 
 @page real-time-updates
 @menu-title Real-time updates
