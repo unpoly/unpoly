@@ -6,6 +6,9 @@ contains a matching element, even when the render pass targeted something else.
 This keeps elements in your application layout fresh, like an unread counter
 or a notification bar, without naming them in every link's target.
 
+Keep hungry elements to a few elements in your layout.
+For everything else, name the fragments in the link's or form's [target](/targeting-fragments).
+
 
 ## Marking an element as hungry {#marking}
 
@@ -78,8 +81,8 @@ You can also set `[up-duration]` and `[up-easing]` attributes, as on a link.
 Before a hungry element is added to a render pass, an `up:fragment:hungry` event is emitted on the element.
 Prevent the event to skip the hungry element for that render pass.
 
-For example, a subnavigation should only update when the user navigates to another page.
-A form validation that targets a fieldset should not replace it.
+For example, a subnavigation should update when the user navigates to another page,
+but not when a form validation updates a fieldset.
 The following only updates `#side-nav` for render passes that [update history](/updating-history):
 
 ```js
@@ -127,7 +130,7 @@ Use `any` to piggy-back on render passes for all layers, or combine references l
 
 This also works when a response [closes an overlay](/closing-overlays): the content of that
 response is discarded for the overlay, but hungry elements on other layers still pick up their matches.
-The `[up-flashes]` element uses this to show confirmation messages from a closing overlay in the parent layer.
+The [`[up-flashes]`](/flashes) element uses this to show confirmation messages from a closing overlay in the parent layer.
 
 
 ## Disabling hungry updates {#disabling}
@@ -164,9 +167,6 @@ with each other or with the primary target, Unpoly decides as follows:
 2. When hungry elements are nested within each other, the outermost element is updated.
 3. When hungry elements on different layers match the same element in the response,
    the layer closest to the rendering layer wins.
-
-Keep hungry elements to a few layout elements, and prefer explicit render targets for everything else.
-
 
 @page hungry-elements
 @signature
