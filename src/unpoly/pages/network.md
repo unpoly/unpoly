@@ -46,11 +46,10 @@ without waiting for the network:
 
 Following this link the first time fills the cache. Following it again renders instantly.
 
-A cache entry is only considered fresh for 15 seconds. When Unpoly renders older content,
-it reloads the fragment from the server right after. This is called *revalidation*:
-the user sees the cached version immediately and the fresh version a moment later.
-When a form is submitted with a method like `POST`, the entire cache is expired,
-since the submission has probably changed data on the server.
+When the cached content may be outdated, Unpoly reloads the fragment from the server right after rendering it.
+The user sees the cached version immediately and the fresh version a moment later.
+This is called *revalidation*. Content counts as outdated after 15 seconds, or as soon as the user
+submits a form with a method like `POST`, since that has probably changed data on the server.
 
 [[more: caching]]
 
@@ -90,9 +89,6 @@ up.on('up:fragment:offline', function(event) {
 ```
 
 Requests that time out are handled the same way. Pages already in the cache remain accessible while offline.
-
-A server that is slow to respond is not a network issue. Unpoly shows a [progress bar](/progress-bar)
-after 400 ms, and can show [loading state](/loading-state) in the targeted fragment while the user waits.
 
 [[more: network-issues]]
 
