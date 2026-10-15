@@ -15,7 +15,7 @@ To let Unpoly handle a link, set an `[up-follow]` attribute:
 <a href="/preferences" up-follow>Preferences</a> <!-- mark: up-follow -->
 ```
 
-When the user clicks, Unpoly fetches `/preferences` in the background.
+When the user clicks, Unpoly fetches `/preferences`.
 The server renders a full HTML page, the same way it would for a regular page load.
 Unpoly then extracts the response's [main element](/main) and swaps it into the current page,
 leaving everything around it untouched.

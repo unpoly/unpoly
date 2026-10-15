@@ -1,7 +1,7 @@
 Forms
 =====
 
-Unpoly submits forms in the background and updates a fragment of the current page
+Unpoly submits forms and updates a fragment of the current page
 with the response. Your server keeps rendering plain HTML, and one convention
 on your backend also makes validation errors work. Fields can also re-render
 parts of the form while the user is still filling it in.
@@ -20,7 +20,7 @@ and add an `[up-submit]` attribute:
 </form>
 ```
 
-When the user submits, Unpoly sends the form data in the background.
+When the user submits, Unpoly sends the form data to the server.
 Your server processes it like any form submission, usually responding with
 a redirect to the next screen. Unpoly extracts the response's
 [main element](/main) and swaps it into the current page.

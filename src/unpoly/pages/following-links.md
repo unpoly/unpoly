@@ -14,7 +14,7 @@ To have Unpoly handle a link, set an `[up-follow]` attribute:
 <a href="/posts/5" up-follow>Read post</a> <!-- mark: up-follow -->
 ```
 
-When the user clicks, Unpoly requests `/posts/5` in the background.
+When the user clicks, Unpoly requests `/posts/5`.
 The server responds with a full HTML page, the same way it would for any browser request.
 Unpoly extracts the response's [main element](/main) and replaces the main element
 on the current page. Elements outside the updated fragment keep their state, like unsaved input in other forms.

@@ -17,7 +17,7 @@ To have Unpoly handle the submission, set an `[up-submit]` attribute:
 </form>
 ```
 
-When the user submits, Unpoly sends the form data in the background.
+When the user submits, Unpoly sends the form data to the server.
 The server responds with a full HTML page, the same way it would for any browser request.
 Unpoly extracts the response's [main element](/main) and replaces the main element
 on the current page. The rest of the page stays untouched.
