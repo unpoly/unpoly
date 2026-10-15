@@ -240,13 +240,6 @@ up.focus(field)
 ```
 
 
-## Styling focus states {#focus-visibility}
-
-Because Unpoly often focuses new content, focus rings may appear in places where you don't expect them.
-Unpoly lets you control whether a focused fragment shows a visible focus ring.
-See [[focus-visibility]].
-
-
 ## Focus in overlays {#overlays}
 
 ### When an overlay is opened
