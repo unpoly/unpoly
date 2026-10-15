@@ -22,9 +22,6 @@ so the Back button skips straight to the previous page:
 
 To override this default for a link or form, set `[up-history=true]` or `[up-history=false]`.
 
-Overlays add one rule of their own: an overlay only shows its URL when it opens with a main element,
-and the parent page's URL returns when the overlay closes. This is covered in [[history-in-overlays]].
-
 [[more: updating-history]]
 
 
@@ -65,6 +62,11 @@ redirecting forms and the Back button.
 
 [[more: tracking-page-views]]
 
+
+In other topics
+---------------
+
+To control whether an overlay's URL shows in the address bar, see [[history-in-overlays]].
 
 @page history
 @menu-title Overview
