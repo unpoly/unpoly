@@ -91,8 +91,7 @@ While Unpoly lets you handle disconnects, some parts are missing for full "offli
 - To fill up the cache the device must be online for the first part of the session (warm start)
 - The cache is still in-memory and dies with the browser tab
 
-For a comprehensive offline experience (cold start) we recommend a [service worker](https://web.dev/offline-fallback-page/)
-or a canned solution like [UpUp](https://www.talater.com/upup/) (no relation to Unpoly).
+For a comprehensive offline experience (cold start) we recommend a [service worker](https://web.dev/articles/offline-cookbook).
 
 
 Flaky connections

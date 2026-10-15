@@ -506,6 +506,8 @@ up.link = (function() {
   @return {Promise}
     A promise that will be fulfilled when the request was loaded and cached.
 
+    When [caching is disabled](/caching#disabling-globally), no request is made and the promise fulfills right away.
+
     When the link cannot be preloaded, the promise rejects with an error.
   @stable
   */
