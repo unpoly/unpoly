@@ -47,15 +47,15 @@ or delay the user's clicks:
 </form>
 ```
 
-A [compiler](/enhancing-elements) watches the form and submits it to the draft URL in the background:
+A [compiler](/enhancing-elements) watches the form and sends its fields to the draft URL in the background:
 
 ```js
 up.compiler('form[data-autosave]', function(form, { autosave: url }) {
-  up.watch(form, { delay: 2000 }, () => up.submit(form, { url, target: ':none', background: true })) // mark: background: true
+  up.watch(form, { delay: 2000 }, function() {
+    up.request(url, { method: 'post', params: up.Params.fromForm(form), background: true }) // mark: background: true
+  })
 })
 ```
-
-The [`:none`](/targeting-fragments#targeting-nothing) target sends the request without rendering its response.
 
 To load a request in the foreground that would load in the background by default, set `[up-background="false"]`.
 
