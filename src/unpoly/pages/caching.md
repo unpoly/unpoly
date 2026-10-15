@@ -71,7 +71,11 @@ You can configure both the expiry age and the rule:
 
 ```js
 up.network.config.cacheExpireAge = 20_000 // expire after 20 seconds
-up.fragment.config.autoRevalidate = (response) => response.expired
+
+let defaultAutoRevalidate = up.fragment.config.autoRevalidate
+up.fragment.config.autoRevalidate = function(response) {
+  return defaultAutoRevalidate(response) && response.url !== '/dashboard'
+}
 ```
 
 To revalidate regardless of a cache entry's age, pass `{ revalidate: true }`.
@@ -86,12 +90,6 @@ To disable revalidation while navigating:
 
 ```js
 up.fragment.config.navigateOptions.revalidate = false
-```
-
-To keep the navigation default, but exempt some responses, configure `up.fragment.config.autoRevalidate`:
-
-```js
-up.fragment.config.autoRevalidate = (response) => response.expired && response.url != '/dashboard'
 ```
 
 To keep the default, but disable revalidation for an individual link, set an `[up-revalidate="false"]` attribute:
@@ -154,13 +152,13 @@ unless there is an existing cache entry that can be updated with a fresher respo
 
 ### Disabling the cache globally {#disabling-globally}
 
-[Navigation](/navigation-defaults) is the only moment when Unpoly caches by default.
-
-You can disable caching globally like so:
+To turn off caching entirely, e.g. while debugging, set the cache size to zero:
 
 ```js
-up.fragment.config.navigateOptions.cache = false
+up.network.config.cacheSize = 0
 ```
+
+No response is cached, including responses from [preloading](/preloading).
 
 ### Disabling the cache for selected routes {#disabling-route}
 
