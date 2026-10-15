@@ -146,10 +146,10 @@ up.on('up:fragment:loaded', function(event) {
 })
 ```
 
-If this tracks too many events, filter further on the properties of [`event.request`](/up:fragment:loaded#event.request),
+Polling and [form validation](/validation) also load fragments, so this listener counts them too.
+To skip polling, check `event.request.background`, which is set for polling requests.
+To filter further, inspect other properties of [`event.request`](/up:fragment:loaded#event.request),
 such as its `{ target }` or `{ layer }`.
-Polling and form validation also load fragments. Polling requests have `event.request.background` set,
-so you can skip them by checking that property.
 
 
 @page tracking-page-views
