@@ -135,10 +135,10 @@ In the document below, the highlighted nodes are updated when history changes, i
 ```html
 <html lang="en"> <!-- mark: lang="en" -->
   <head>
-    <title>AcmeCorp</title> <!-- mark-line -->
-    <link rel="canonical" href="https://example.com/dresses/green-dresses"> <!-- mark-line -->
+    <title>Our team · AcmeCorp</title> <!-- mark-line -->
+    <link rel="canonical" href="https://example.com/team"> <!-- mark-line -->
     <meta name="description" content="About the AcmeCorp team"> <!-- mark-line -->
-    <meta property="og:image" content="https://app.com/og.jpg"> <!-- mark-line -->
+    <meta property="og:image" content="https://example.com/team.jpg"> <!-- mark-line -->
     <script src="/assets/app.js"></script>
     <link rel="stylesheet" href="/assets/app.css">
     <script type="application/ld+json">...</script> <!-- mark-line -->
