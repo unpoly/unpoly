@@ -6,12 +6,12 @@ the new content comes in. You pick an effect by name in an HTML attribute,
 or define your own with a few lines of JavaScript. Users who have asked their
 system to reduce motion get instant updates instead.
 
-Unpoly knows two kinds of effects. A *transition* morphs an old element into its new version.
+Unpoly has two kinds of effects. A *transition* morphs an old element into its new version.
 An *animation* plays on a single element that has no counterpart, like a new list item or an opening overlay.
 
 
-Morphing between old and new {#transitions}
-----------------------------
+Transitions {#transitions}
+-----------
 
 <a id="available-transitions"></a>
 <a id="fail-transition"></a>
@@ -33,8 +33,8 @@ any two animations into a new transition.
 [[more: transitions]]
 
 
-Revealing a single element {#animations}
---------------------------
+Animations {#animations}
+----------
 
 <a id="available-animations"></a>
 <a id="custom-effects"></a>
@@ -66,7 +66,11 @@ Controlling motion {#controlling-motion}
 <a id="finishing-running-animations"></a>
 
 You can change the duration and easing of every effect, per element or for the whole app,
-and users who prefer reduced motion see no animations at all.
+and users who prefer reduced motion see no animations at all:
+
+```html
+<a href="/stories/2" up-target="#story" up-transition="move-left" up-duration="300">Next story</a> <!-- mark: up-duration="300" -->
+```
 
 [[more: controlling-motion]]
 
