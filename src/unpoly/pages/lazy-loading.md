@@ -73,9 +73,6 @@ A deferred element that is already visible when inserted loads immediately.
 To load some pixels before the deferred element becomes visible, set an `[up-intersect-margin]` attribute.
 A positive margin loads earlier, a negative margin requires the user to scroll into the element.
 
-A deferred element that loads when revealed can also [implement infinite scrolling](/infinite-scrolling)
-without custom JavaScript.
-
 > [note]
 > Safari requires an `[up-defer="reveal"]` element to have a non-zero width and height
 > to track its scrolling position.
@@ -223,8 +220,7 @@ element becomes the same for everyone, and can be cached as a whole:
 
 Deferring expensive but non-[critical](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path) fragments
 paints critical content earlier. This generally improves metrics like
-[First Contentful Paint](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint) (FCP) and
-[Interaction to Next Paint](https://web.dev/articles/inp) (INP).
+[First Contentful Paint](https://developer.chrome.com/docs/lighthouse/performance/first-contentful-paint) (FCP).
 
 When lazy-loaded content is inserted later, it may cause [layout shift](https://web.dev/articles/cls)
 by pushing down subsequent elements in the [flow](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Normal_Flow).
