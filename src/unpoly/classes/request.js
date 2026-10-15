@@ -264,7 +264,9 @@ up.Request = class Request extends up.Record {
 
   Background requests are deprioritized over foreground requests.
   Background requests also won't emit `up:network:late` events and won't trigger
-  the [progress bar](/up.network.config#config.progressBar).
+  the [progress bar](/progress-bar).
+
+  @learn-ref background-requests
 
   @property up.Request#background
   @param {boolean} [background=false]

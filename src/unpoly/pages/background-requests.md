@@ -97,16 +97,3 @@ The property is `false` for a background request that was moved into the [foregr
 
 
 @page background-requests
-
----
-
-## Follow-ups
-
-- **progress-bar.md** (~49-54, "Requests that are loading in the background..."): keep one sentence and link `[[background-requests]]`; the defaults list and opt-in now live here.
-- **preloading.md** (~85, ~105): "background request" links point to `/up.render#options.background`; point them to `/background-requests` instead. Consider a sentence in "Preload request behavior" that clicking a link while it preloads reuses the request and moves it into the foreground (link to `#promotion`).
-- **lazy-loading.md** (~118): link "load quietly" to `/background-requests`.
-- **tracking-page-views.md** (~150): optionally link `event.request.background` to `/background-requests#detecting`.
-- **Reference copies** (identical "deprioritized ... won't trigger the progress bar" text): `pages/params/up.render/request.md` (~39-45), `pages/params/up-follow/request-extras.md` (~25-30), `src/unpoly/network.js` (~411-416, `up.request` `{ background }`). Shorten to one sentence plus a link to `/background-requests`. `up.Request#background` in `src/unpoly/classes/request.js` (~263-270) still links the progress bar to `/up.network.config#config.progressBar`; point it to `/progress-bar` and `/background-requests`, and add `@learn-ref background-requests`.
-- `[up-defer]` `[up-background]` description (`src/unpoly/link.js` ~1113) and `up.network.isBusy()` (`network.js` ~630) link to `/up.render#options.background` / `/up.request#options.background`; could link the guide.
-- **network.md overview**: has no "See also"/"Also in this topic" tail yet. Add one mentioning background requests, or a sentence in "How Unpoly makes requests" after "one queue that limits concurrent requests".
-- **toc.yml**: add `background-requests` after `aborting-requests` in "Network & caching" when the page moves to `src/unpoly/pages/`.

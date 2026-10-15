@@ -119,6 +119,12 @@ up.on('up:request:load', function(event) {
 ```
 
 
+See also
+--------
+
+Requests the user is not waiting for, like preloading or polling, load in the background. See [[background-requests]].
+
+
 @page network
 @menu-title Overview
 @signature

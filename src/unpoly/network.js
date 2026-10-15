@@ -411,9 +411,8 @@ up.network = (function() {
     @param {boolean} [options.background=false]
       Whether this request will load in the background.
 
-      Background requests are deprioritized over foreground requests.
-      Background requests also won't emit `up:network:late` events and won't trigger
-      the [progress bar](/progress-bar).
+      Background requests are deprioritized and won't show the [progress bar](/progress-bar).
+      See [[background-requests]].
 
     @param {number} [options.lateDelay]
       The number of milliseconds after which this request can cause
@@ -627,7 +626,7 @@ up.network = (function() {
   /*-
   Returns whether Unpoly is currently loading a [request](/up.request).
 
-  The network is also considered busy while requests are [loading in the background](/up.request#options.background).
+  The network is also considered busy while requests are [loading in the background](/background-requests).
 
   @function up.network.isBusy
   @return {boolean}

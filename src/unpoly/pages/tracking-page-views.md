@@ -147,7 +147,7 @@ up.on('up:fragment:loaded', function(event) {
 ```
 
 Polling and [form validation](/validation) also load fragments, so this listener counts them too.
-To skip polling, check `event.request.background`, which is set for polling requests.
+To skip polling, check [`event.request.background`](/background-requests#detecting), which is set for polling requests.
 To filter further, inspect other properties of [`event.request`](/up:fragment:loaded#event.request),
 such as its `{ target }` or `{ layer }`.
 

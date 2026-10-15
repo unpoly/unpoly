@@ -25,9 +25,8 @@
 @param [up-background='false']
   Whether this request will load in the background.
 
-  Background requests are deprioritized over foreground requests.
-  Background requests also won't emit `up:network:late` events and won't trigger
-  the [progress bar](/progress-bar).
+  Background requests are deprioritized and won't show the [progress bar](/progress-bar).
+  See [[background-requests]].
 
 @param [up-late-delay]
   The number of milliseconds after which this request can cause

@@ -107,6 +107,7 @@ learn:
         - network
         - caching
         - aborting-requests
+        - background-requests
         - network-issues
 
     - type: page-group

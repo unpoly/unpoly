@@ -1113,7 +1113,7 @@ up.link = (function() {
       A [relaxed JSON](/relaxed-json) object with additional request headers.
 
     @param [up-background='false']
-      Whether to load the deferred content [in the background](/up.render#options.background).
+      Whether to load the deferred content [in the background](/background-requests).
 
       Background requests will not show the [global progress bar](/progress-bar).
 

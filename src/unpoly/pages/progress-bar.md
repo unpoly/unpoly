@@ -46,12 +46,7 @@ Passing `{ lateDelay: false }` never shows a progress bar for that request:
 <a href="/report" up-follow up-late-delay="false">Generate report</a> <!-- mark: up-late-delay="false" -->
 ```
 
-Requests that are loading in the background never show the progress bar.
-You can move a request into the background by setting an [`[up-background]`](/up-follow#up-background) attribute
-or passing a [`{ background: true }`](/up.render#options.background) option.
-Requests from [preloading](/preloading), [polling](/polling) and [cache revalidation](/caching#revalidation)
-are automatically marked as background requests.
-[Deferred content](/lazy-loading) loads in the foreground unless you set `[up-background]`.
+Requests that are loading in the background never show the progress bar. See [[background-requests]].
 
 
 ## Disabling the progress bar {#disabling}

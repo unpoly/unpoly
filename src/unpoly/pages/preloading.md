@@ -82,7 +82,7 @@ A link that is preloaded in that fashion does not require an `[up-preload]` attr
 Preloading a URL
 ----------------
 
-To preload a given URL without a link element, make a [background](/up.render#options.background) request that [caches](/caching):
+To preload a given URL without a link element, make a [background](/background-requests) request that [caches](/caching):
 
 ```js
 up.request('/menu', { cache: true, background: true })
@@ -104,7 +104,7 @@ Requests sent when preloading differ in some ways from requests sent when follow
 - Preloading a link will *not* [abort](/aborting-requests) pending requests
   [targeting](/targeting-fragments) the same fragments. Only when the link is clicked later
   are conflicting requests aborted.
-- Preload requests are considered [background requests](/up.render#options.background)
+- Preload requests are considered [background requests](/background-requests)
   and will not show the [progress bar](/progress-bar).
 - Preloaded content is placed into the [cache](/caching) automatically.
 - When a link destination is already cached, preloading will *not* make another request, even if the cache entry is [expired](/caching#expiration).
