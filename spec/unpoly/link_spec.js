@@ -751,6 +751,15 @@ describe('up.link', function() {
         }).toBeCached()
       })
 
+      it('makes no request with up.network.config.cacheEnabled = false', async function() {
+        up.network.config.cacheEnabled = false
+        const [link] = htmlFixtureList('<a href="/path" up-target="#target">label</a>')
+
+        await expectAsync(up.link.preload(link)).toBeResolved()
+
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+      })
+
       it('accepts options that overrides those options that were parsed from the link', async function() {
         fixture('.target')
         const link = fixture('a[href="/path"][up-target=".target"]')

@@ -518,6 +518,9 @@ up.link = (function() {
       return Promise.reject(new up.Error(issue))
     }
 
+    // Preloading only serves to fill the cache
+    if (!up.network.config.cacheEnabled) return Promise.resolve()
+
     const guardEvent = up.event.build('up:link:preload', { log: ['Preloading link %o', link] })
 
     return follow(link, {

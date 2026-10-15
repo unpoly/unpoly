@@ -342,6 +342,42 @@ extendDescribe('up.network', function() {
           expect(jasmine.Ajax.requests.count()).toEqual(4)
         })
 
+        describe('with up.network.config.cacheEnabled = false', function() {
+
+          beforeEach(function() {
+            up.network.config.cacheEnabled = false
+          })
+
+          it('makes a network request for every request, even with { cache: true }', async function() {
+            up.request({ url: '/foo', cache: true })
+            up.request({ url: '/foo', cache: true })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            expect({ url: '/foo' }).not.toBeCached()
+
+            jasmine.respondWith('response text', { request: 0 })
+            jasmine.respondWith('response text', { request: 1 })
+            await wait()
+
+            expect({ url: '/foo' }).not.toBeCached()
+
+            up.request({ url: '/foo', cache: true })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(3)
+          })
+
+          it('does not throw when the cache is expired or evicted', async function() {
+            up.request({ url: '/foo', method: 'post', cache: true, expireCache: true, evictCache: true })
+            await wait()
+
+            expect(() => up.cache.expire()).not.toThrow()
+            expect(() => up.cache.evict()).not.toThrow()
+          })
+
+        })
+
         describe('matching requests', function() {
 
           it('reuses a request with the same URL but a different #hash', async function() {

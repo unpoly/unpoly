@@ -152,13 +152,13 @@ unless there is an existing cache entry that can be updated with a fresher respo
 
 ### Disabling the cache globally {#disabling-globally}
 
-To turn off caching entirely, e.g. while debugging, set the cache size to zero:
+To turn off caching entirely, e.g. while debugging, disable the cache:
 
 ```js
-up.network.config.cacheSize = 0
+up.network.config.cacheEnabled = false
 ```
 
-No response is cached, including responses from [preloading](/preloading).
+No response is read from or written to the cache. [Preloading](/preloading) is disabled as well.
 
 ### Disabling the cache for selected routes {#disabling-route}
 

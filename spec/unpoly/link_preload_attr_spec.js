@@ -6,6 +6,18 @@ extendDescribe('up.link', function() {
 
     describe('[up-preload]', function() {
 
+      it('does not preload with up.network.config.cacheEnabled = false', async function() {
+        up.network.config.cacheEnabled = false
+        up.link.config.preloadDelay = 0
+        const [link] = htmlFixtureList('<a href="/foo" up-target="#target" up-preload>label</a>')
+        up.hello(link)
+
+        Trigger.hoverSequence(link)
+        await wait(20)
+
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+      })
+
       it('preloads the link destination when hovering, after a delay', async function() {
         up.link.config.preloadDelay = 100
 

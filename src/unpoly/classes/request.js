@@ -560,7 +560,7 @@ up.Request = class Request extends up.Record {
   }
 
   willCache() {
-    return u.evalAutoOption(this.cache, up.network.config.autoCache, this)
+    return up.network.config.cacheEnabled && u.evalAutoOption(this.cache, up.network.config.autoCache, this)
   }
 
   runQueuedCallbacks() {

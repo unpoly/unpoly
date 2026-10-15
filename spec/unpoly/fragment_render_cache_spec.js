@@ -53,6 +53,31 @@ extendDescribe('up.fragment', function() {
           expect(jasmine.Ajax.requests.count()).toBe(2)
         })
 
+        it('does not render from the cache when navigating a second time with up.network.config.cacheEnabled = false', async function() {
+          up.network.config.cacheEnabled = false
+          htmlFixtureList('<div id="target">old text</div>')
+
+          up.navigate('#target', { url: '/path' })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWithSelector('#target', { text: 'first response' })
+          await wait()
+
+          expect('#target').toHaveText('first response')
+
+          up.navigate('#target', { url: '/path' })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect('#target').toHaveText('first response')
+
+          jasmine.respondWithSelector('#target', { text: 'second response' })
+          await wait()
+
+          expect('#target').toHaveText('second response')
+        })
+
         it('does not reuse a cached request when no { cache } option is given', async function() {
           fixture('.element')
 

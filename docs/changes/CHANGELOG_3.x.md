@@ -50,6 +50,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
 
 ### Other changes
 
+- New config [`up.network.config.cacheEnabled`](/up.network.config#config.cacheEnabled) turns off the [cache](/caching) entirely, e.g. for debugging. When set to `false`, no response is read from or written to the cache, even for requests with `{ cache: true }`, and [preloading](/preloading) is disabled. Setting `up.network.config.cacheSize = 0` remains unsupported.
 - Fix [`[up-reveal-padding]`](/up-follow#up-reveal-padding) and the `{ revealPadding }` render option being ignored. Only `up.viewport.config.revealPadding` was used.
 - ⚠️ While a [validation](/validation) request is loading, [feedback classes](/feedback-classes) like `.up-loading` are now set by default, as for every other render pass. Formerly a validation only set them with an `[up-watch-feedback]` attribute. To not set them, use `[up-watch-feedback="false"]` or pass `{ feedback: false }`.
 - Pressing the Space key now activates a [faux button](/faux-interactive-elements), e.g. an element with [`[up-emit]`](/up-emit) or [`[up-clickable]`](/up-clickable). Formerly only the Enter key worked.

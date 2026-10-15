@@ -69,6 +69,16 @@ up.network = (function() {
       Also see [Customizing failure detection](/failed-responses#customizing-failure-detection).
 
   @section Caching
+    @param {boolean} [config.cacheEnabled=true]
+      Whether to use the [cache](/caching).
+
+      When set to `false`, no response is read from or written to the cache,
+      even for requests with `{ cache: true }`. [Preloading](/preloading) is disabled as well.
+
+      See [Disabling the cache globally](/caching#disabling-globally).
+
+      @experimental
+
     @param {number} [config.cacheSize=70]
       The maximum number of responses to cache.
 
@@ -134,6 +144,7 @@ up.network = (function() {
   const config = new up.Config(() => ({
     concurrency: 6,
     wrapMethod: true,
+    cacheEnabled: true,
     cacheSize: 70,
     cacheExpireAge: 15 * 1000,
     cacheEvictAge: 90 * 60 * 1000,
