@@ -116,27 +116,21 @@ or by setting an [`[up-timeout]`](/up-follow#up-timeout) attribute:
 ```
 
 
-Slow server responses
+Slow server responses {#slow-server-responses}
 ---------------------
 
-Even with a great connection, your server may take long to render expensive pages.
-This is not a network error. The request eventually succeeds, and no `up:fragment:offline` event is emitted.
+Even with a good connection, your server may take long to render an expensive page.
+This is what happens while the user waits:
 
-While the user waits, Unpoly shows an animated [progress bar](/progress-bar) when a request takes
-[longer than 400 ms](/up.network.config#config.lateDelay).
-You may also show [loading state](/loading-state) within the targeted fragment, like a dimmed element or a placeholder.
+1. When a request takes [longer than 400 ms](/up.network.config#config.lateDelay), Unpoly emits `up:network:late`
+   and shows the [progress bar](/progress-bar).
+2. When the response arrives, Unpoly emits `up:request:loaded`. For a request that renders a fragment,
+   `up:fragment:loaded` follows, and the response is processed like any other.
+3. When no response arrives within the [timeout](#flaky-connections), Unpoly emits `up:request:offline`
+   and `up:fragment:offline`, as it would for a [disconnect](#disconnects).
 
+Once no slow requests are left, Unpoly emits `up:network:recover` and hides the progress bar.
 
-HTTP error codes
-----------------
-
-When the server responds with an error code (like `500 Server Error`), no `up:fragment:offline` event is emitted.
-Instead you can tell Unpoly to [render such responses differently](/failed-responses#fail-options) from a successful response.
-
-By default, [navigation](/navigation-defaults) (like clicking a link or submitting a form) will render an error response's
-[main element](/main) in order to convey an error message from the server.
-
-See [Handling failed responses](/failed-responses) for details.
-
+While the user waits, you can also show [loading state](/loading-state) within the targeted fragment.
 
 @page network-issues
