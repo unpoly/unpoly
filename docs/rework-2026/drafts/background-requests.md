@@ -34,33 +34,30 @@ Loading in the background {#opting-in}
 -------------------------
 
 To load a link, form or deferred element in the background, set an [`[up-background]`](/up-follow#up-background) attribute.
+From JavaScript, pass a [`{ background: true }`](/up.render#options.background) option to a rendering function or to `up.request()`.
 
-For example, a form that saves a draft on every change does not need to show the progress bar.
-The user keeps typing while the draft is saved:
+For example, a form that publishes a post can save a draft while the user types.
+The user is not waiting for the draft to be saved, so it should not show the progress bar
+or delay the user's clicks:
 
 ```html
-<form method="post" action="/drafts/5" up-autosubmit up-background> <!-- mark: up-background -->
+<form method="post" action="/posts" data-autosave="/drafts">
   <textarea name="text"></textarea>
+  <button type="submit">Publish</button>
 </form>
 ```
 
-A [deferred](/lazy-loading) sidebar that shows recommendations can load quietly as well:
-
-```html
-<div id="recommendations" up-defer up-href="/recommendations" up-background> <!-- mark: up-background -->
-  Loading recommendations...
-</div>
-```
-
-From JavaScript, pass a [`{ background: true }`](/up.render#options.background) option to a rendering function, or to `up.request()`:
+A [compiler](/enhancing-elements) watches the form and sends its fields to the draft URL in the background:
 
 ```js
-up.reload('#notifications', { background: true })
-up.request('/menu', { cache: true, background: true })
+up.compiler('form[data-autosave]', function(form, { autosave: url }) {
+  up.watch(form, { delay: 2000 }, function() {
+    up.request(url, { method: 'post', params: up.Params.fromForm(form), background: true }) // mark: background: true
+  })
+})
 ```
 
-To make a default background request load in the foreground, set `[up-background="false"]`.
-For example, a polling fragment with `[up-poll][up-background="false"]` shows the progress bar when a reload is slow.
+To load a request in the foreground that would load in the background by default, set `[up-background="false"]`.
 
 
 When the user waits for a background request {#promotion}
