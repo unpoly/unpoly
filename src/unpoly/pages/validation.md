@@ -183,7 +183,7 @@ which is the `<fieldset>` here.
 To validate all fields in a form, set `[up-validate]` on the `<form>` element instead.
 You can also set it on any container to validate the fields within.
 
-To submit the form for real whenever a field changes, like in a filter bar,
+To submit the form whenever a field changes, like in a filter bar,
 see [Submitting when a field changes](/submitting-forms#autosubmit).
 
 Users can change fields faster than your server responds, or submit the form while a validation
