@@ -360,6 +360,45 @@ extendDescribe('up.fragment', function() {
           expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue', newKey: 'newValue' })
         })
 
+        it('sets a key to null when the server sends it with a null value, keeping other keys', async function() {
+          makeLayers([
+            { target: '.target', context: { rootKey: 'rootValue' } },
+            { target: '.target', context: { keptKey: 'keptValue', clearedKey: 'clearedValue' } }
+          ])
+
+          up.render('.target', { layer: up.layer.get(1), url: '/path1' })
+          await wait()
+
+          jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Context': JSON.stringify({ clearedKey: null }) } })
+          await wait()
+
+          expect(up.layer.get(1).context).toEqual({ keptKey: 'keptValue', clearedKey: null })
+        })
+
+        it('merges a { context } option into the context of the updated layer', async function() {
+          makeLayers([
+            { target: '.target', context: { rootKey: 'rootValue' } },
+            { target: '.target', context: { overlayKey: 'overlayValue', changedKey: 'oldValue' } }
+          ])
+
+          await up.render('.target', { layer: up.layer.get(1), content: 'new content', context: { changedKey: 'newValue', newKey: 'newValue' } })
+
+          expect(up.layer.get(0).context).toEqual({ rootKey: 'rootValue' })
+          expect(up.layer.get(1).context).toEqual({ overlayKey: 'overlayValue', changedKey: 'newValue', newKey: 'newValue' })
+        })
+
+        it('sends the context merged with a { context } option as an X-Up-Context request header', async function() {
+          makeLayers([
+            { target: '.target', context: { rootKey: 'rootValue' } },
+            { target: '.target', context: { overlayKey: 'overlayValue', changedKey: 'oldValue' } }
+          ])
+
+          up.render('.target', { layer: up.layer.get(1), url: '/path1', context: { changedKey: 'newValue', newKey: 'newValue' } })
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Context']).toEqual(JSON.stringify({ overlayKey: 'overlayValue', changedKey: 'newValue', newKey: 'newValue' }))
+        })
+
         it('uses updates from an X-Up-Context header for failed responses', async function() {
           fixture('.success-target', { text: 'success target' })
           fixture('.failure-target', { text: 'failure target' })

@@ -735,6 +735,15 @@ extendDescribe('up.layer', function() {
             expect(callback.calls.mostRecent().args[0].value).toBe(fooEvent)
           })
 
+          it('prevents the default action of the accepting event', async function() {
+            await up.layer.open({ acceptEvent: 'foo' })
+
+            const event = up.layer.emit('foo')
+
+            expect(event.defaultPrevented).toBe(true)
+            expect(up.layer.isRoot()).toBe(true)
+          })
+
           describe('when the server sends a matching event via X-Up-Events', function() {
 
             it('accepts the overlay', async function() {
@@ -834,7 +843,30 @@ extendDescribe('up.layer', function() {
           })
 
           it('allows the accepted response body to be consumed by a hungry element on another layer', async function() {
-            pending("test me")
+            htmlFixtureList('<div id="hungry" up-hungry up-if-layer="any">old hungry</div>')
+
+            const callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({ onAccepted: callback, acceptEvent: 'my:event', fragment: '<div id="target">old target</div>' })
+            await wait()
+
+            const closingJob = up.render({ target: '#target', url: '/path' })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: `
+                <div id="target">new target</div>
+                <div id="hungry">new hungry</div>
+              `,
+              responseHeaders: {
+                'X-Up-Events': JSON.stringify([{ type: 'my:event', layer: 'current' }])
+              }
+            })
+
+            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            expect(callback).toHaveBeenCalled()
+            expect(up.layer.isRoot()).toBe(true)
+            expect('#hungry').toHaveText('new hungry')
           })
 
           it('does not push a history entry if an X-Up-Events response header accepts the overlay', async function() {
@@ -890,6 +922,15 @@ extendDescribe('up.layer', function() {
         })
 
         describe('{ dismissEvent }', function() {
+
+          it('prevents the default action of the dismissing event', async function() {
+            await up.layer.open({ dismissEvent: 'foo' })
+
+            const event = up.layer.emit('foo')
+
+            expect(event.defaultPrevented).toBe(true)
+            expect(up.layer.isRoot()).toBe(true)
+          })
 
           it('dismisses the layer when an event of the given type was emitted on the layer', async function() {
             const callback = jasmine.createSpy('onDismissed callback')
@@ -1657,7 +1698,25 @@ extendDescribe('up.layer', function() {
           })
 
           it('allows the accepted response body to be consumed by a hungry element on another layer', async function() {
-            pending("test me")
+            htmlFixtureList('<div id="hungry" up-hungry up-if-layer="any">old hungry</div>')
+
+            const callback = jasmine.createSpy('onAccepted callback')
+            up.layer.open({ onAccepted: callback, acceptLocation: '/acceptable-location', fragment: '<div id="target">old target</div>' })
+            await wait()
+
+            const closingJob = up.navigate({ target: '#target', url: '/acceptable-location' })
+            await wait()
+
+            jasmine.respondWith(`
+              <div id="target">new target</div>
+              <div id="hungry">new hungry</div>
+            `)
+
+            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            expect(callback).toHaveBeenCalled()
+            expect(up.layer.isRoot()).toBe(true)
+            expect('#hungry').toHaveText('new hungry')
           })
 
           it('does not push a history entry if the response accepts the overlay', async function() {

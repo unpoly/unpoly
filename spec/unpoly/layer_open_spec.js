@@ -450,6 +450,16 @@ extendDescribe('up.layer', function() {
           expect(renderedElement).toHaveText('foo bar baz')
           expect(renderedElement.childNodes).toEqual(givenNodes)
         })
+
+        it('wraps the content in a container matching the main target of the overlay mode when no { target } is given', async function() {
+          await up.layer.open({ mode: 'drawer', content: '<p>drawer text</p>' })
+
+          expect(up.layer.mode).toBe('drawer')
+
+          const container = up.layer.current.getFirstSwappableElement()
+          expect(container).toMatchSelector('[up-main~=drawer]')
+          expect(container).toHaveText('drawer text')
+        })
       })
 
       describe('compilation', function() {
@@ -551,6 +561,23 @@ extendDescribe('up.layer', function() {
 
           expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
 
+        })
+
+        it('slides a drawer in from and out to the right edge with { position: "right" }', async function() {
+          // Restore the default animations, which a global beforeEach() disables
+          up.layer.config.reset()
+          up.layer.config.drawer.openDuration = 5
+          up.layer.config.drawer.closeDuration = 5
+          spyOn(up, 'animate').and.callThrough()
+
+          // Wait until the open animation has finished, so the drawer also animates when closing
+          await new Promise((resolve) => up.layer.open({ mode: 'drawer', position: 'right', onFinished: resolve }))
+
+          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-right', jasmine.anything())
+
+          await up.layer.dismiss()
+
+          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-right', jasmine.anything())
         })
       })
 
@@ -1037,6 +1064,27 @@ extendDescribe('up.layer', function() {
 
           expect(up.layer.isOverlay()).toBe(true)
           expect(document).toHaveSelector('up-modal .target-from-config-dot-modal')
+        })
+
+        it('extracts an [up-main=overlay] element by default, ignoring an enclosing [up-main=root] element', async function() {
+          // Undo the beforeEach() block, which empties the main targets
+          up.layer.config.reset()
+
+          up.layer.open({ url: '/path' })
+          await wait()
+
+          jasmine.respondWith(`
+            <div class="layout" up-main="root">
+              <nav class="navigation">navigation</nav>
+              <div class="content" up-main="overlay">overlay content</div>
+            </div>
+          `)
+          await wait()
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveSelector('.content')
+          expect(up.layer.current).not.toHaveSelector('.layout')
+          expect(up.layer.current).not.toHaveSelector('.navigation')
         })
       })
 

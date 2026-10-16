@@ -466,6 +466,96 @@ describe('up.link', function() {
 
       })
 
+      describe('[up-accept-location]', function() {
+
+        it('parses as a string', function() {
+          const [link] = htmlFixtureList('<a href="/foo" up-accept-location="/users/$id">label</a>')
+          const options = up.link.followOptions(link)
+          expect(options.acceptLocation).toBe('/users/$id')
+        })
+
+      })
+
+      describe('[up-dismiss-location]', function() {
+
+        it('parses as a string', function() {
+          const [link] = htmlFixtureList('<a href="/foo" up-dismiss-location="/users">label</a>')
+          const options = up.link.followOptions(link)
+          expect(options.dismissLocation).toBe('/users')
+        })
+
+      })
+
+      describe('[up-accept-event]', function() {
+
+        it('parses as a string', function() {
+          const [link] = htmlFixtureList('<a href="/foo" up-accept-event="user:created">label</a>')
+          const options = up.link.followOptions(link)
+          expect(options.acceptEvent).toBe('user:created')
+        })
+
+      })
+
+      describe('[up-dismiss-event]', function() {
+
+        it('parses as a string', function() {
+          const [link] = htmlFixtureList('<a href="/foo" up-dismiss-event="user:canceled">label</a>')
+          const options = up.link.followOptions(link)
+          expect(options.dismissEvent).toBe('user:canceled')
+        })
+
+      })
+
+      it('parses an [up-context] attribute as a relaxed JSON object', function() {
+        const [link] = htmlFixtureList(`<a href="/foo" up-layer="new" up-context="{ project: 'Hosting 2021' }">label</a>`)
+        const options = up.link.followOptions(link)
+        expect(options.context).toEqual({ project: 'Hosting 2021' })
+      })
+
+      it('parses an [up-size] attribute', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-layer="new" up-size="large">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.size).toBe('large')
+      })
+
+      it('parses an [up-class] attribute', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-layer="new" up-class="warning">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.class).toBe('warning')
+      })
+
+      it('parses an [up-position] attribute', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-layer="new popup" up-position="right">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.position).toBe('right')
+      })
+
+      it('parses an [up-align] attribute', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-layer="new popup" up-align="top">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.align).toBe('top')
+      })
+
+      it('parses an [up-mode] attribute', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-layer="new" up-mode="drawer">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.mode).toBe('drawer')
+      })
+
+      it('parses [up-close-animation], [up-close-easing] and [up-close-duration] attributes', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-layer="new" up-close-animation="fade-out" up-close-easing="linear" up-close-duration="300">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.closeAnimation).toBe('fade-out')
+        expect(options.closeEasing).toBe('linear')
+        expect(options.closeDuration).toBe(300)
+      })
+
+      it('parses an [up-base-layer] attribute', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-layer="new" up-base-layer="root">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.baseLayer).toBe('root')
+      })
+
       if (up.migrate.loaded) {
         it('parses an [up-reset-scroll] attribute as { scroll: "top" }', function() {
           const link = fixture('a[href="/foo"][up-reset-scroll]')

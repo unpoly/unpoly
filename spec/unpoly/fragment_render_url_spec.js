@@ -1567,8 +1567,8 @@ extendDescribe('up.fragment', function() {
             expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value: 123 }))
           })
 
-          it('makes the discarded response available to up:layer:accepted listeners as a { response } property', async function() {
-            const callback = jasmine.createSpy('onAccepted callback')
+          it('makes the discarded response available to up:layer:dismissed listeners as a { response } property', async function() {
+            const callback = jasmine.createSpy('onDismissed callback')
             up.layer.open({ onDismissed: callback, target: '.target', content: 'Initial content' })
 
             await wait()
@@ -1619,6 +1619,25 @@ extendDescribe('up.fragment', function() {
               expect(up.layer.current.mode).toBe('drawer')
               expect(up.layer.current.size).toBe('small')
               expect('#overlay').toHaveText('overlay')
+            })
+
+            it('applies navigation defaults to the new overlay, even if the original render pass was not a navigation', async function() {
+              up.layer.config.modal.mainTargets = ['#overlay-target']
+
+              const [target] = htmlFixtureList('<div id="target">old target</div>')
+              up.render('#target', { url: '/path', navigate: false })
+              await wait()
+
+              // Only the navigation default { fallback: true } lets us render :main when the explicit target is missing
+              jasmine.respondWith({
+                responseText: '<div id="overlay-target">overlay</div>',
+                responseHeaders: { 'X-Up-Open-Layer': JSON.stringify({ target: '#missing' }) }
+              })
+              await wait()
+
+              expect(up.layer.current).toBeOverlay()
+              expect(up.layer.current).toHaveSelector('#overlay-target')
+              expect(target).toHaveText('old target')
             })
 
             it("resolves a :main target using the new overlay mode", async function() {
