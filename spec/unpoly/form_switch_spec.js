@@ -96,6 +96,24 @@ extendDescribe('up.form', function() {
 
       describe('emitting up:form:switch on changes', function() {
 
+        it('emits up:form:switch on a switchee without a built-in switch attribute, so custom effects can use it', async function() {
+          const listener = jasmine.createSpy('up:form:switch listener')
+          up.on('up:form:switch', (event) => listener(event))
+
+          let [form, field, target] = htmlFixtureList(`
+            <form>
+              <input name="role" up-switch=".role-dependent" value="user">
+              <div class="role-dependent" highlight-for="admin">target</div>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect(listener).toHaveBeenCalled()
+          expect(listener.calls.mostRecent().args[0].target).toBe(target)
+          expect(listener.calls.mostRecent().args[0].fieldTokens).toEqual(['user', ':present'])
+        })
+
         it('emits up:form:switch on switchees with { field, fieldTokens }', async function() {
           const listener = jasmine.createSpy('up:form:switch listener')
           up.on('up:form:switch', (event) => listener(event))
@@ -976,6 +994,28 @@ extendDescribe('up.form', function() {
             await wait()
 
             expect($target).toBeHidden()
+          })
+
+          it("matches the checkbox's [value] against an [up-show-for] token", async function() {
+            let [form, checkbox, target] = htmlFixtureList(`
+              <form>
+                <input type="checkbox" name="status" value="active" up-switch="#target">
+                <div id="target" up-show-for="active"></div>
+              </form>
+            `)
+            up.hello(form)
+
+            expect(target).toBeHidden()
+
+            Trigger.toggleCheckSequence(checkbox)
+            await wait()
+
+            expect(target).toBeVisible()
+
+            Trigger.toggleCheckSequence(checkbox)
+            await wait()
+
+            expect(target).toBeHidden()
           })
 
           it('shows the target element is an array checkbox contains an [up-show-for] token', async function() {

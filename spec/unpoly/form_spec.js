@@ -503,6 +503,33 @@ describe('up.form', function() {
         expect(options.event).toBe('my:event')
       })
 
+      it('falls back to up.form.config.watchInputDelay for the input event, but sets no delay for other events', function() {
+        up.form.config.watchInputDelay = 77
+        const [form, inputField, changeField] = htmlFixtureList(`
+          <form>
+            <input name="foo" up-watch-event="input">
+            <input name="bar" up-watch-event="change">
+          </form>
+        `)
+
+        expect(up.form.watchOptions(inputField).delay).toBe(77)
+        expect(up.form.watchOptions(changeField).delay).toBeMissing()
+      })
+
+      it('accepts a function for up.form.config.watchChangeEvents and watchInputEvents', function() {
+        up.form.config.watchChangeEvents = (field) => field.matches('.datepicker') ? ['blur'] : ['change']
+        up.form.config.watchInputEvents = (field) => field.matches('.datepicker') ? ['input', 'blur'] : ['input']
+        const [form, datepicker, textField] = htmlFixtureList(`
+          <form>
+            <input name="date" class="datepicker" up-watch-event="change">
+            <input name="text" up-watch-event="input">
+          </form>
+        `)
+
+        expect(up.form.watchOptions(datepicker).event).toEqual(['blur'])
+        expect(up.form.watchOptions(textField).event).toEqual(['input'])
+      })
+
       it('expands [up-watch-event="change"] into up.form.config.watchChangeEvents', function() {
         const form = fixture('form')
         const field = e.affix(form, 'input[type="text"][name="foo"][up-watch-event="change"]')
@@ -581,6 +608,20 @@ describe('up.form', function() {
         expect(options.url).toBe('/path2')
       })
 
+      it('parses the closest [up-validate-method] attribute into a { method } option', function() {
+        const [form, container, field] = htmlFixtureList(`
+          <form action="/path" method="post">
+            <div up-validate-method="get">
+              <input name="foo">
+            </div>
+          </form>
+        `)
+
+        const options = up.form.validateOptions(field)
+
+        expect(options.method).toBe('GET')
+      })
+
       it('parses the closest [up-validate-batch] attribute into a { batch } option', function() {
         const form = fixture('form[action="/path1"]')
         const container = e.affix(form, 'div[up-validate-batch="false"]')
@@ -652,6 +693,18 @@ describe('up.form', function() {
         expect(options.method).toEqual('PUT')
         expect(options.layer).toEqual('new')
         expect(options.params.toQuery()).toBe('name=value')
+      })
+
+      it('defaults { failTarget } to the form', function() {
+        const [form] = htmlFixtureList('<form id="my-form" action="/path" up-target=".target"></form>')
+        const options = up.form.submitOptions(form)
+        expect(options.failTarget).toBe('#my-form')
+      })
+
+      it('parses an [up-fail-target] attribute into a { failTarget } option', function() {
+        const [form] = htmlFixtureList('<form id="my-form" action="/path" up-target=".target" up-fail-target=".errors"></form>')
+        const options = up.form.submitOptions(form)
+        expect(options.failTarget).toBe('.errors')
       })
 
       it('does not render', function() {
@@ -1499,6 +1552,18 @@ describe('up.form', function() {
       it('returns true for a form with [up-submit]', function() {
         const form = fixture('form[action="/path"][up-submit]')
         expect(up.form.isSubmittable(form)).toBe(true)
+      })
+
+      it('returns true for a form with [up-target], [up-layer] or [up-transition], even without [up-submit]', function() {
+        const [targetForm, layerForm, transitionForm] = htmlFixtureList(`
+          <form action="/path" up-target=".target"></form>
+          <form action="/path" up-layer="new"></form>
+          <form action="/path" up-transition="cross-fade"></form>
+        `)
+
+        expect(up.form.isSubmittable(targetForm)).toBe(true)
+        expect(up.form.isSubmittable(layerForm)).toBe(true)
+        expect(up.form.isSubmittable(transitionForm)).toBe(true)
       })
 
       it('returns true for a form that matches up.form.config.submitSelectors', function() {

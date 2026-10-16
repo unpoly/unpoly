@@ -357,6 +357,25 @@ extendDescribe('up.form', function() {
           })
         })
 
+        describe('with an array of elements', function() {
+          it('disables each given element while submitting, and nothing else', async function() {
+            const [form, button, field, otherField] = htmlFixtureList(`
+              <form action="/path">
+                <button type="submit">Submit</button>
+                <input name="email">
+                <input name="password">
+              </form>
+            `)
+
+            up.submit(form, { disable: [button, field] })
+            await wait()
+
+            expect(button).toBeDisabled()
+            expect(field).toBeDisabled()
+            expect(otherField).not.toBeDisabled()
+          })
+        })
+
         describe('with a CSS selector', function() {
 
           it("disables fields within the given selector while submitting", async function() {
