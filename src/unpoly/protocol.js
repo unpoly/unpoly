@@ -1,7 +1,7 @@
 /*-
 HTTP headers that let your server inspect and steer Unpoly's rendering.
 
-None of this is required: Unpoly works with any backend that renders HTML, and unpoly.com itself is a static site without a server component. Each header is useful on its own. Reading `X-Up-Target` lets the server render only the targeted fragment, `ETag` and `Last-Modified` let it skip unchanged content, and `X-Up-Events` or `X-Up-Accept-Layer` let it emit an event or close an overlay from the response. Ready-made implementations exist for popular frameworks, see [[protocol-implementations]]. `up.protocol.config` holds the CSRF token settings.
+Request headers tell your server what Unpoly is about to render, and response headers let the server change what Unpoly does with the response. Ready-made implementations exist for popular frameworks, see [[protocol-implementations]]. `up.protocol.config` holds the CSRF token settings.
 
 @learn-ref backend-integration
 
