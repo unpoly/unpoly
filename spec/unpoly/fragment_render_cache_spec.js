@@ -441,8 +441,6 @@ extendDescribe('up.fragment', function() {
             expect('.target').toHaveText('text changed on client')
           })
 
-          it('allows to define which responses to verify in up.fragment.config.autoRevalidate')
-
           it('revalidates after the initial round of render callbacks', async function() {
             fixture('#target', { text: 'initial text' })
             await jasmine.populateCache('/foo', '<div id="target">expired text</div>')
@@ -796,7 +794,18 @@ extendDescribe('up.fragment', function() {
               expect('.target').toHaveText('cached text')
             })
 
-            it('fulfills up.render().finished promise with the up.RenderResult from the first render pass')
+            it('fulfills up.render().finished promise with the up.RenderResult from the first render pass', async function() {
+              const job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+              const firstResult = await job
+              await wait()
+
+              expect('.target').toHaveText('cached text')
+              expect(up.network.isBusy()).toBe(true)
+
+              jasmine.respondWith({ status: 304 })
+
+              await expectAsync(job.finished).toBeResolvedTo(firstResult)
+            })
 
             it('calls { onFinished } with the cached up.RenderResult from the first render pass', async function() {
               const onFinished = jasmine.createSpy('onFinished handler')

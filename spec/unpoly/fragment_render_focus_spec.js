@@ -671,7 +671,52 @@ extendDescribe('up.fragment', function() {
         }
 
         describe('with { focus: "restore" }', function() {
-          it('restores earlier focus-related state at this location')
+
+          beforeEach(function() {
+            up.history.config.enabled = true
+          })
+
+          it('restores earlier focus-related state at this location', async function() {
+            up.history.replace('/path1')
+            const [main, input] = htmlFixtureList(`
+              <main>
+                <input type="text" name="email">
+              </main>
+            `)
+            input.focus()
+
+            await up.render('main', { location: '/path2', history: true, document: '<main>page 2</main>' })
+
+            expect(up.history.location).toMatchURL('/path2')
+            expect(input).not.toBeAttached()
+
+            await up.render('main', {
+              location: '/path1',
+              history: true,
+              focus: 'restore',
+              document: '<main><input type="text" name="email"></main>',
+            })
+
+            expect('main input[name=email]').toBeFocused()
+          })
+
+          it('does not change focus when nothing is known for the location', async function() {
+            const [outside, main] = htmlFixtureList(`
+              <input type="text" name="outside">
+              <main>old main</main>
+            `)
+            outside.focus()
+
+            await up.render('main', {
+              location: '/never-visited',
+              history: true,
+              focus: 'restore',
+              document: '<main>new main</main>',
+            })
+
+            expect(outside).toBeFocused()
+          })
+
         })
 
         describe('with { focus: "auto" }', function() {

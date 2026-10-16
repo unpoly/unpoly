@@ -554,10 +554,6 @@ describe('up.link', function() {
       })
     })
 
-    describe('up.visit', function() {
-      it('should have tests')
-    })
-
     describe('up.link.isFollowable', function() {
 
       it('returns true for an [up-target] link', function() {

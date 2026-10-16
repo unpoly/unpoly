@@ -30,7 +30,17 @@ extendDescribe('up.fragment', function() {
           expect('.two').toHaveText('new two')
         })
 
-        it('uses a selector given as first argument')
+        it('uses a selector given as first argument', function() {
+          htmlFixtureList(`
+            <div class="one">old one</div>
+            <div class="two">old two</div>
+          `)
+
+          up.render('.two', { content: 'new two' })
+
+          expect('.one').toHaveText('old one')
+          expect('.two').toHaveText('new two')
+        })
 
         it('derives a selector from an element given as first argument', async function() {
           const element = fixture('#element')
@@ -300,7 +310,28 @@ extendDescribe('up.fragment', function() {
             expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.bar')
           })
 
-          it('allows to combine :maybe and :after pseudo-selectors')
+          it('allows to combine :maybe and :after pseudo-selectors', async function() {
+            htmlFixtureList(`
+              <div class="foo">old foo</div>
+              <div class="bar">old bar</div>
+            `)
+
+            await up.render('.foo, .bar:after:maybe', { document: `
+              <div class="foo">new foo</div>
+              <div class="bar">new bar</div>
+            ` })
+
+            expect('.foo').toHaveText('new foo')
+            expect('.bar').toHaveText('old barnew bar')
+
+            // Also in reverse order, and with .bar missing from the response
+            await up.render('.foo, .bar:maybe:after', { document: `
+              <div class="foo">newer foo</div>
+            ` })
+
+            expect('.foo').toHaveText('newer foo')
+            expect('.bar').toHaveText('old barnew bar')
+          })
         })
 
         describe('matching old fragments around the origin', function() {
