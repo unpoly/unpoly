@@ -53,6 +53,19 @@ describe('up.fragment', function() {
       })
     })
 
+    describe('up.visit()', function() {
+      it("navigates to the given URL, updating the layer's main target", async function() {
+        up.fragment.config.mainTargets.unshift('.main-target')
+        fixture('.main-target')
+
+        up.visit('/path2')
+
+        await wait()
+        expect(jasmine.lastRequest().url).toMatchURL('/path2')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('.main-target')
+      })
+    })
+
     describe('up.destroy()', function() {
       it('removes the element with the given selector', async function() {
         $fixture('.element')

@@ -1407,9 +1407,29 @@ extendDescribe('up.fragment', function() {
           expect(document.querySelector('#keepable')).toBe(keepable)
         })
 
-        it('keeps an element with an empty [up-data] object when the new element has no [up-data] attribute at all')
+        it('keeps an element with an empty [up-data] object when the new element has no [up-data] attribute at all', async function() {
+          let keepable = keepableFixture('<div id="keepable" up-keep="same-data" up-data="{}">text</div>')
 
-        it('merges [up-data] and [data-*] attribute in both elements before comparison')
+          up.render({ fragment: `<div id="keepable" up-keep="same-data">changed text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+        })
+
+        it('merges [up-data] and [data-*] attribute in both elements before comparison', async function() {
+          let keepable = keepableFixture('<div id="keepable" up-keep="same-data" up-data="{ foo: 1 }" data-bar="2">text</div>')
+
+          up.render({ fragment: `<div id="keepable" up-keep="same-data" up-data="{ foo: 1 }" data-bar="2">changed text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).toBe(keepable)
+
+          up.render({ fragment: `<div id="keepable" up-keep="same-data" up-data="{ foo: 1 }" data-bar="3">changed text</div>` })
+          await wait()
+
+          expect(document.querySelector('#keepable')).not.toBe(keepable)
+          expect('#keepable').toHaveText('changed text')
+        })
 
         it('ignores data mutated after rendering', async function() {
           let keepable = keepableFixture('<div id="keepable" up-keep="same-data" up-data="{ foo: 1 }">text</div>')
