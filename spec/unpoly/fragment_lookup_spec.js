@@ -759,7 +759,19 @@ extendDescribe('up.fragment', function() {
         expect(results).toEqual([activeChild])
       })
 
-      it('supports non-standard selector extensions')
+      it('supports non-standard selector extensions', function() {
+        up.fragment.config.mainTargets = ['.main-element']
+        const [root, main, other] = htmlFixtureList(`
+          <div class="root">
+            <div class="main-element"></div>
+            <div class="other"></div>
+          </div>
+        `)
+
+        const results = up.fragment.subtree(root, ':main')
+
+        expect(results).toEqual([main])
+      })
 
       it('matches descendants in a detached tree', function() {
         const detachedTree = fixture('.element')

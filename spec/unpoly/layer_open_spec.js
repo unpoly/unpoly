@@ -956,7 +956,12 @@ extendDescribe('up.layer', function() {
           expect(up.layer.mode).toEqual('cover')
         })
 
-        it("sends the layer's mode as an X-Up-Mode request header")
+        it("sends the layer's mode as an X-Up-Mode request header", async function() {
+          up.layer.open({ mode: 'drawer', url: '/path', target: '.target' })
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Mode']).toBe('drawer')
+        })
       })
 
       describe('styling', function() {

@@ -781,7 +781,15 @@ describe('up.Layer.Overlay', function() {
 
     describe('events', function() {
 
-      it('emits an up:layer:accept event with the acceptance value')
+      it('emits an up:layer:accept event with the acceptance value', function() {
+        makeLayers(2)
+        const acceptListener = jasmine.createSpy('up:layer:accept listener')
+        up.on('up:layer:accept', acceptListener)
+
+        up.layer.current.accept('value')
+
+        expect(acceptListener).toHaveBeenCalledWith(jasmine.objectContaining({ value: 'value' }), jasmine.anything(), jasmine.anything())
+      })
 
       it('emits an up:layer:accepted event with the acceptance value', function(done) {
         makeLayers(2)
@@ -797,7 +805,16 @@ describe('up.Layer.Overlay', function() {
         up.layer.current.accept('value')
       })
 
-      it('lets an up:layer:accept event handler mutate the acceptance value')
+      it('lets an up:layer:accept event handler mutate the acceptance value', function() {
+        makeLayers(2)
+        const acceptedListener = jasmine.createSpy('up:layer:accepted listener')
+        up.layer.current.on('up:layer:accept', (event) => event.value.mutated = true)
+        up.layer.current.on('up:layer:accepted', acceptedListener)
+
+        up.layer.current.accept({ original: true })
+
+        expect(acceptedListener.calls.argsFor(0)[0].value).toEqual({ original: true, mutated: true })
+      })
 
       it('lets an up:layer:accept event handler replace the acceptance value', function() {
         makeLayers(2)
@@ -1232,7 +1249,20 @@ describe('up.Layer.Overlay', function() {
 
     describe('with { trapFocus: false }', function() {
 
-      it('does not cycle focus within the overlay')
+      it('does not cycle focus within the overlay', async function() {
+        await up.layer.open({ trapFocus: false, content: '<a href="/one">link</a>' })
+        const overlay = up.layer.current
+        let focusLeftOverlay = false
+
+        // Tab past every focusable element in the overlay
+        for (let i = 0; i < 4; i++) {
+          Trigger.tabSequence()
+          await wait()
+          focusLeftOverlay ||= !overlay.contains(document.activeElement)
+        }
+
+        expect(focusLeftOverlay).toBe(true)
+      })
 
       it('does not recapture focus outside the overlay', async function() {
         const rootInput = fixture('input[name=email][type=text]')
