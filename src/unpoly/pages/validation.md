@@ -183,6 +183,9 @@ which is the `<fieldset>` here.
 To validate all fields in a form, set `[up-validate]` on the `<form>` element instead.
 You can also set it on any container to validate the fields within.
 
+To submit the form for real whenever a field changes, like in a filter bar,
+see [Submitting when a field changes](/submitting-forms#autosubmit).
+
 Users can change fields faster than your server responds, or submit the form while a validation
 is still loading. Unpoly keeps the form consistent: it merges validations into a single request,
 queues new validations while one is in flight, and aborts pending validations when a submission

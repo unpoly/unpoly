@@ -128,6 +128,8 @@ To submit all forms through Unpoly without annotating each one, see [[handling-a
 
 To build a date picker, tag editor or other control that works with these features, see [[custom-form-fields]].
 
+To submit a form whenever a field changes, like in a search or filter bar, see [Submitting when a field changes](/submitting-forms#autosubmit).
+
 To fine-tune which events trigger a validation and how changes are debounced, see [[watch-options]].
 
 @page forms

@@ -157,6 +157,36 @@ An individual submit button can opt for a full page load, by setting an `[up-sub
 ```
 
 
+## Submitting when a field changes {#autosubmit}
+
+A search or filter form often has no submit button. It updates its results as soon as the user
+changes a field. For this, set an [`[up-autosubmit]`](/up-autosubmit) attribute on the form:
+
+```html
+<form method="get" action="/projects" up-autosubmit up-target=".projects"> <!-- mark: up-autosubmit -->
+  <input type="search" name="query">
+  <select name="status">
+    <option value="active">Active</option>
+    <option value="archived">Archived</option>
+  </select>
+</form>
+
+<div class="projects">
+  <!-- chip: Filtered projects will appear here -->
+</div>
+```
+
+Every change to a field submits the form, even each keystroke in the search field.
+Your server renders the filtered list, and Unpoly swaps the `.projects` element into the page.
+To submit only when a particular field changes, set `[up-autosubmit]` on that field instead of the form.
+
+To wait until the user has stopped typing, or to react to other events, see [[watch-options]].
+To run your own JavaScript when a field changes, use [`[up-watch]`](/up-watch).
+
+To update parts of the form while the user is still filling it in, without saving anything,
+use [`[up-validate]`](/validation) instead.
+
+
 ## Showing that the form is processing {#loading}
 
 While the form is submitting, you can show the user that it is processing:

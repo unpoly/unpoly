@@ -1809,6 +1809,8 @@ up.form = (function() {
   /*-
   Watches form fields and runs a callback when a value changes.
 
+  @learn-ref submitting-forms#autosubmit
+
   Only fields with a `[name]` attribute can be watched.
 
   ## Example
@@ -2333,6 +2335,8 @@ up.form = (function() {
 
   /*-
   Automatically submits a form when a field changes.
+
+  @learn-ref submitting-forms#autosubmit
 
   ## Example
 
