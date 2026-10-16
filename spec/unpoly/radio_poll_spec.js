@@ -147,53 +147,37 @@ extendDescribe('up.radio', function() {
 
       describe('when the server responds with an error status', function() {
 
-        it('tries again after the next interval', async function() {
-          up.radio.config.pollInterval = 250
+        it('tries again after the next interval, without throwing an error', async function() {
+          up.radio.config.pollInterval = 30
 
           helloFixture('.element[up-poll][up-source="/source"]')
 
-          await wait(50)
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-
-          await wait(250)
+          await wait(60)
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
           await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
             jasmine.respondWith({ status: 404, responseText: 'Not found' })
+            await wait()
 
-            await wait(50)
-            expect(jasmine.Ajax.requests.count()).toBe(1)
-
-            // up.FragmentPolling#onReloadFailure() will throw critical errors
-            expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.any(up.CannotMatch))
+            expect(globalErrorSpy).not.toHaveBeenCalled()
           })
 
-          await wait(250)
+          await wait(60)
           expect(jasmine.Ajax.requests.count()).toBe(2)
         })
 
         it('does not update a matching fragment from the response', async function() {
-          up.radio.config.pollInterval = 250
+          up.radio.config.pollInterval = 30
 
           helloFixture('.element[up-poll][up-source="/source"]', { text: 'original text' })
 
-          await wait(50)
-          expect(jasmine.Ajax.requests.count()).toBe(0)
-
-          await wait(250)
+          await wait(60)
           expect(jasmine.Ajax.requests.count()).toBe(1)
 
-          await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
-            jasmine.respondWithSelector('.element', { status: 404, text: 'response text' })
+          jasmine.respondWithSelector('.element', { status: 404, text: 'response text' })
+          await wait()
 
-            await wait(50)
-            expect(jasmine.Ajax.requests.count()).toBe(1)
-
-            // up.FragmentPolling#onReloadFailure() will throw critical errors
-            expect(globalErrorSpy).toHaveBeenCalledWith(jasmine.any(up.CannotMatch))
-
-            expect('.element').not.toHaveText('response text')
-          })
+          expect('.element').toHaveText('original text')
         })
 
         it('updates a matching fragment from the response with [up-fail="false"]', async function() {

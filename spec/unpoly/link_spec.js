@@ -1158,6 +1158,19 @@ describe('up.link', function() {
         expect('#slow').toHaveText('partial content')
       })
 
+      it('rejects with an up.RenderResult when the server responds with an error status', async function() {
+        const [placeholder] = htmlFixtureList('<a id="slow" href="/slow-path" up-defer="manual">fallback</a>')
+        up.hello(placeholder)
+
+        const job = up.deferred.load(placeholder)
+        await wait()
+
+        jasmine.respondWithSelector('#slow', { status: 500, text: 'error page' })
+
+        await expectAsync(job).toBeRejectedWith(jasmine.any(up.RenderResult))
+        expect('#slow').toHaveText('fallback')
+      })
+
       it('returns an up.RenderJob that resolves with the render pass', async function() {
         const [placeholder] = htmlFixtureList('<a id="slow" href="/slow-path" up-defer="manual"></a>')
         up.hello(placeholder)

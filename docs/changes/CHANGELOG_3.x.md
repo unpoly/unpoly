@@ -62,6 +62,12 @@ Unpoly's documentation is now available to coding agents and LLMs:
 - Fix: [Target derivation](/target-derivation) for an SVG element with a camelCase tag name, like `<clipPath>`, now produces a selector that matches the element. Formerly the tag name was lowercased, which CSS does not match for SVG elements.
 - [URL patterns](/url-patterns) now match full URLs on the page's own origin, like `https://example.com/users/*`. Such patterns never matched before.
 - Fix [`[up-focus-visible]`](/up-follow#up-focus-visible) and the `{ focusVisible }` option being ignored when opening an overlay.
+- When the server responds to [polling](/up-poll) or a [deferred](/up-defer) placeholder with an error code, Unpoly no longer throws an uncaught `up.CannotMatch` error. The response is not rendered: polling tries again after the next interval, and a deferred placeholder keeps its fallback content. A promise returned by `up.reload()` or `up.deferred.load()` still rejects, now with an `up.RenderResult`. To render error responses anyway, use these attributes:
+
+  | To | Set |
+  |---|---|
+  | render an error response like a successful one | [`[up-fail=false]`](/failed-responses) on the `[up-poll]` or `[up-defer]` element |
+  | render an error response into another fragment | [`[up-fail-target]`](/up-defer#up-fail-target) on the `[up-defer]` element |
 
 
 3.14.3

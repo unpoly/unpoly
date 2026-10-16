@@ -41,6 +41,51 @@ extendDescribe('up.link', function() {
         expect('#target').toHaveText('new target')
       })
 
+      describe('when the server responds with an error status', function() {
+
+        it('keeps the placeholder without throwing an error', async function() {
+          const [placeholder] = htmlFixtureList('<a id="slow" href="/slow-path" up-defer>fallback</a>')
+          up.hello(placeholder)
+          await wait()
+
+          await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
+            jasmine.respondWithSelector('#slow', { status: 500, text: 'error page' })
+            await wait()
+
+            expect(globalErrorSpy).not.toHaveBeenCalled()
+          })
+
+          expect('#slow').toHaveText('fallback')
+        })
+
+        it('renders the response with [up-fail=false]', async function() {
+          const [placeholder] = htmlFixtureList('<a id="slow" href="/slow-path" up-defer up-fail="false">fallback</a>')
+          up.hello(placeholder)
+          await wait()
+
+          jasmine.respondWithSelector('#slow', { status: 500, text: 'error page' })
+          await wait()
+
+          expect('#slow').toHaveText('error page')
+        })
+
+        it('renders the response into an [up-fail-target]', async function() {
+          const [errors, placeholder] = htmlFixtureList(`
+            <div id="errors">old errors</div>
+            <a id="slow" href="/slow-path" up-defer up-fail-target="#errors">fallback</a>
+          `)
+          up.hello(placeholder)
+          await wait()
+
+          jasmine.respondWithSelector('#errors', { status: 500, text: 'new errors' })
+          await wait()
+
+          expect('#errors').toHaveText('new errors')
+          expect('#slow').toHaveText('fallback')
+        })
+
+      })
+
       describe('progress bar', function() {
 
         it('makes a foreground request by default', async function() {
