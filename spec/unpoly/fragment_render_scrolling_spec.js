@@ -555,7 +555,7 @@ extendDescribe('up.fragment', function() {
           })
         })
 
-        if (up.migrate.load) {
+        if (up.migrate.loaded) {
           describe('with a string of "or"-separated { scroll } options', function() {
 
             mockRevealBeforeEach()
