@@ -893,12 +893,38 @@ their ids as `{#id}`, so links to `/up.render#options.target` still find their t
 The converter can't look at pictures, so a page must describe its media. A build fails
 otherwise.
 
-- An image needs alt text: `![The browser console logging a deprecation](images/log.png)`.
-- A video needs an `aria-label` that says what it shows:
+Every image and video is a `<figure>`. Its `alt` (an `aria-label` for a video) names
+the medium in a few words. Its `<figcaption>` describes what the reader should learn
+from it, so a screen reader or an agent misses nothing:
 
-  ```html
-  <video src="images/demo.mp4" controls aria-label="The demo app under high latency"></video>
-  ```
+```html
+<figure>
+  <img src="images/render-lifecycle.svg" alt="Flowchart of the render lifecycle" width="900">
+  <figcaption markdown="1">
+
+A render pass moves through these stages:
+
+1. A guard event is emitted, like `up:link:follow`.
+2. …
+
+  </figcaption>
+</figure>
+```
+
+- The `alt` or `aria-label` says what kind of medium it is: "Flowchart of …",
+  "Screenshot of …", "Video: …". It does not repeat the caption.
+- The caption describes content, not looks. Two to eight sentences are usual, a list
+  works for stages or steps, and one sentence is enough for a simple screenshot. Don't
+  repeat the text around the figure; say what the medium adds.
+- A width goes in the `width` attribute. A video keeps its `controls`, `loop` and `width`.
+- Write `images/…` paths relative to the sources, as for any image.
+- `markdown="1"` makes kramdown read the caption as Markdown, which needs the blank lines
+  around it. The [commonmarker migration](../rework-2026/commonmarker-migration-plan.md)
+  will make the attribute unnecessary.
+
+On the site the caption is visually hidden, but screen readers read it and search
+indexes it. The Markdown twin keeps the `<figure>` with the caption as Markdown, so it
+stays next to its medium.
 
 - An embedded diagram (`<div embed="…">`) is an `<svg role="img">` with a `<title>` and a
   `<desc>`, and an `id` on the svg or its `<figure>`. The Markdown links to the diagram on
