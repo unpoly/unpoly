@@ -1477,10 +1477,6 @@ up.link = (function() {
       The URL to preload.
     @param [up-headers]
       @like [up-follow]
-    @param [up-background='true']
-      @like [up-follow]
-    @param [up-abortable='false']
-      @like [up-follow]
   @stable
   @signature
   */
