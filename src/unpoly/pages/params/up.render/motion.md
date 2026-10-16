@@ -7,7 +7,7 @@
   use the `{ animation }` option instead.
 
 @param {string} [options.animation]
-  The name of an [animation](/up.motion) to reveal a new fragment when
+  The name of an [animation](/animations) to play on the new content when
   [prepending or appending content](/targeting-fragments#appending-or-prepending).
 
   If you are [swapping a fragment](/targeting-fragments#swapping) (the default), use the `{ transition }` option instead.

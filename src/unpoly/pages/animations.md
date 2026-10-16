@@ -6,11 +6,11 @@ or removing an element. These play an *animation* on a single element.
 An animation fades the element, or moves it to or from a screen edge.
 
 
-Revealing a single element {#animations}
---------------------------
+Using an animation {#animations}
+------------------
 
 When [appending or prepending](/targeting-fragments#appending-or-prepending) content,
-set an `[up-animation]` attribute to reveal the new children:
+set an `[up-animation]` attribute to animate the new children:
 
 ```html
 <a href="/tasks?page=2" up-target=".tasks:after" up-animation="fade-in">Load more</a> <!-- mark: up-animation="fade-in" -->
@@ -60,7 +60,7 @@ Unpoly ships with the following animations, which you can use by name:
 | `move-from-left`   | Moves the element rightwards from beyond the left edge of the screen until it reaches its current position |
 | `move-to-right`    | Moves the element rightwards until it exits the screen at the right edge |
 | `move-from-right`  | Moves the element leftwards from beyond the right edge of the screen until it reaches its current position |
-| `none`             | Shows or removes the element instantly, with no visible effect. |
+| `none`             | Shows or removes the element instantly, with no visible effect |
 
 The `none` animation is useful when a default animation is configured
 and a single element should appear instantly. Setting `[up-animation=false]` has the same effect.

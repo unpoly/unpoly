@@ -7,7 +7,7 @@
   use the `[up-animation]` attribute instead.
 
 @param [up-animation]
-  The name of an [animation](/up.motion) to reveal a new fragment when
+  The name of an [animation](/animations) to play on the new content when
   [prepending or appending content](/targeting-fragments#appending-or-prepending).
 
   If you are replacing content (the default), use the `[up-transition]` attribute instead.
