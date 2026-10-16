@@ -33,7 +33,7 @@ The others have a page of their own:
 | Modify new elements                 | [`{ onRendered }`](/up.render#options.onRendered)         | [`[up-on-rendered]`](/up-follow#up-on-rendered) |
 | Modify new elements                 | `up.compiler()`                                           | —                                               |
 | Modify new elements                 | `up:fragment:inserted`                                    | —                                               |
-| Preserve elements within a fragment | [`{ keep }`](/up.render#options.keep)                     | `[up-keep]`                                     |
+| Keep elements within a fragment     | [`{ keep }`](/up.render#options.keep)                     | [`[up-keep]`](/keeping-elements)                |
 | Control scrolling                   | [`{ scroll }`](/scrolling)                                | [`[up-scroll]`](/scrolling)                     |
 | Control focus                       | [`{ focus }`](/focus)                                     | [`[up-focus]`](/focus)                          |
 
@@ -269,8 +269,8 @@ You may handle the following error cases:
 | Fragment update was [aborted](/aborting-requests)             | `up:fragment:aborted`                                                                       | —                                                                    |
 | Any error thrown while rendering                              | [`{ onError }`](/up.render#options.onError)                                                 | [`[up-on-error]`](/up-follow#up-on-error)                            |
 
-A failed response is rendered with `fail`-prefixed options and then *rejects* the promise with its `up.RenderResult`.
-It does not count as an error for `{ onError }`. To run code after a failed response was rendered,
+An error response is rendered with `fail`-prefixed options and then *rejects* the promise with its `up.RenderResult`.
+It does not count as an error for `{ onError }`. To run code after an error response was rendered,
 pass an [`{ onFailRendered }`](/error-responses#fail-options) callback.
 
 
@@ -279,11 +279,11 @@ pass an [`{ onFailRendered }`](/error-responses#fail-options) callback.
 To demonstrate control flow in case of error, the code below handles many different error cases:
 
 ```js
-try {
-  window.addEventListener('error', function(event) {
-    console.log('Compiler threw error', event.error)
-  })
+window.addEventListener('error', function(event) {
+  console.log('Compiler threw error', event.error)
+})
 
+try {
   let result = await up.render({
     url: '/path',
     target: '.target',    // selector to replace for 2xx status
