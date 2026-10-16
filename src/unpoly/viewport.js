@@ -789,11 +789,11 @@ up.viewport = (function() {
   Marks this element as a scrolling container ("viewport").
 
   Apply this attribute if your app uses a custom panel layout with fixed positioning
-  instead of scrolling the `<body>` element. Alternatively, you can also push a selector
+  instead of scrolling the [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement). Alternatively, you can also push a selector
   matching your custom viewport to the `up.viewport.config.viewportSelectors` array.
 
   When [scrolling](/scrolling), Unpoly will always scroll the viewport closest
-  to the updated element. By default this is the `<body>` element.
+  to the updated element. By default this is the document's scrolling element.
 
   Elements with the `[up-viewport]` attribute must also have a [derivable target selector](/target-derivation).
 
