@@ -69,8 +69,11 @@ You write one Learn topic (or one batch of it) for the Unpoly docs rework. Repo:
 3. A teaser shows the whole family of options (disable, feedback classes, placeholders,
    previews), not one member with an example.
 4. Headings describe the normal case. Don't title the default behavior like a special case.
-5. Repeated content is fine when it teaches from a new angle (scope vs. precedence); a
-   literal copy is not. Prefer re-angling over deleting.
+5. One page owns each concern: the best description, all variants, the in-depth behavior.
+   Other pages may touch the same concern in a shorter form and link to the owner.
+   Repetition between Getting started, the topic overview and the owner page is expected
+   (tuned 2026-10-16). Flag it only when a non-owner re-teaches in depth, copies the owner
+   literally at length, or a page repeats itself. Prefer re-angling over deleting.
 6. Code examples: the simplest correct version. Add guards only when correctness needs them,
    and say why.
 7. Chapters group pages by mechanism (what a feature is), not by where it's used; task pages
