@@ -9,7 +9,7 @@ extendDescribe('up.status', function() {
     history.replaceState({}, 'title', url)
   }
 
-  extendDescribe('unobtrusive behavior', function() {
+  extendDescribe('HTML', function() {
 
     describe('[up-nav]', function() {
 

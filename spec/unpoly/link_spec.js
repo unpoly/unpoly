@@ -6,7 +6,7 @@ describe('up.link', function() {
 
   u = up.util
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     require('./link_follow_fn_spec')
 
@@ -1049,7 +1049,7 @@ describe('up.link', function() {
     })
   })
 
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
 
     require('./link_target_spec')
 

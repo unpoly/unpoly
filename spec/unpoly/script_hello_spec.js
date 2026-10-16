@@ -3,7 +3,7 @@ const e = up.element
 
 extendDescribe('up.script', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     describe('up.hello()', function() {
 

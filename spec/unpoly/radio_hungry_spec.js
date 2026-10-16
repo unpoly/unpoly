@@ -2,7 +2,7 @@ const e = up.element
 
 extendDescribe('up.radio', function() {
 
-  extendDescribe('unobtrusive behavior', function() {
+  extendDescribe('HTML', function() {
 
     describe('[up-hungry]', function() {
 

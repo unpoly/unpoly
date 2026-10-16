@@ -4,7 +4,7 @@ const $ = jQuery
 
 extendDescribe('up.fragment', function() {
 
-  extendDescribe('unobtrusive behavior', function() {
+  extendDescribe('HTML', function() {
 
     describe('[up-keep]', function() {
 

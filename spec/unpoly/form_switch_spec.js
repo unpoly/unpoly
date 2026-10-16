@@ -2,7 +2,7 @@ const e = up.element
 
 extendDescribe('up.form', function() {
 
-  extendDescribe('unobtrusive behavior', function() {
+  extendDescribe('HTML', function() {
 
     describe('[up-switch]', function() {
 

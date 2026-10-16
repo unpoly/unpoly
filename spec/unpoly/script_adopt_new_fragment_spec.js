@@ -2,7 +2,7 @@ const u = up.util
 
 extendDescribe('up.script', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     describe('up.script.adoptNewFragment()', function() {
 

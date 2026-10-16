@@ -6,7 +6,7 @@
 //
 //     // fragment_render_url_spec.js
 //     extendDescribe('up.fragment', function() {
-//       extendDescribe('JavaScript functions', function() {
+//       extendDescribe('JavaScript', function() {
 //         extendDescribe('up.render()', function() {
 //
 //           describe('with { url } option', function() { ... })

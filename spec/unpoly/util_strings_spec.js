@@ -3,7 +3,7 @@ const $ = jQuery
 
 extendDescribe('up.util', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     describe('up.util.sprintf', function() {
 

@@ -28,7 +28,7 @@ if (up.migrate.loaded) {
       })
     })
 
-    describe('unobtrusive behavior', function() {
+    describe('HTML', function() {
       describe('[up-modal]', function() {
 
         it('is converted to [up-layer="new modal"][up-follow] without target', function() {

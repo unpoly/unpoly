@@ -4,7 +4,7 @@ const $ = jQuery
 
 describe('up.radio', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     describe('up.radio.startPolling()', function() {
 
@@ -312,7 +312,7 @@ describe('up.radio', function() {
     })
   })
 
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
 
     require('./radio_hungry_spec')
 

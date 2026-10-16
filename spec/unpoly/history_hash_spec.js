@@ -2,7 +2,7 @@ const e = up.element
 
 extendDescribe('up.history', function() {
 
-  extendDescribe('unobtrusive behavior', function() {
+  extendDescribe('HTML', function() {
 
     describe('changing the location #hash', function() {
 

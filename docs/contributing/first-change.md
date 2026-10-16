@@ -63,14 +63,13 @@ one of its own. `bin/find-spec "[up-submit]"` tells you which file to open; see
 
 ## 1. The JavaScript function
 
-Start with the spec. `form_spec.js` keeps JavaScript functions and unobtrusive
-behavior in separate example groups, so a function spec goes under
-`JavaScript functions`:
+Start with the spec. `form_spec.js` keeps its JavaScript API and its HTML API in separate
+example groups, so a function spec goes under `JavaScript`:
 
 ```diff
  describe('up.form', function() {
  
-   describe('JavaScript functions', function() {
+   describe('JavaScript', function() {
      ...
  
 +    describe('up.form.trim()', function() {
@@ -145,7 +144,7 @@ git commit -m "[form] Add up.form.trim()"
 
 ## 2. The HTML attribute
 
-Again, start with the spec. This one goes into the `unobtrusive behavior` group, nested
+Again, start with the spec. This one goes into the `HTML` group, nested
 under the selector it modifies — which lives in `spec/unpoly/form_submit_attr_spec.js`.
 That file names the groups it belongs to with `extendDescribe()` instead of `describe()`,
 because it was extracted from `form_spec.js`; nothing else about writing the spec changes.
@@ -153,7 +152,7 @@ because it was extracted from `form_spec.js`; nothing else about writing the spe
 ```diff
  extendDescribe('up.form', function() {
  
-   extendDescribe('unobtrusive behavior', function() {
+   extendDescribe('HTML', function() {
  
      describe('[up-submit]', function() {
        ...

@@ -3,7 +3,7 @@ const e = up.element
 
 extendDescribe('up.form', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     describe('up.submit()', function() {
 

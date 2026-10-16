@@ -3,7 +3,7 @@ const $ = jQuery
 
 extendDescribe('up.history', function() {
 
-  extendDescribe('unobtrusive behavior', function() {
+  extendDescribe('HTML', function() {
 
     describe('navigating history with back and forward buttons', function() {
 

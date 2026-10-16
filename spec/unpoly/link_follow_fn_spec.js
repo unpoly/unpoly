@@ -2,7 +2,7 @@ const e = up.element
 
 extendDescribe('up.link', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     describe('up.follow()', function() {
 
