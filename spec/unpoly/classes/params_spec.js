@@ -890,6 +890,20 @@ describe('up.Params', function() {
         ])
       })
 
+      it('serializes a form-associated custom element only once when its tag is also configured in up.form.config.fieldSelectors', function() {
+        // The guide recommends configuring the tag of a lazily defined element, which later becomes form-associated.
+        up.form.config.fieldSelectors.push('test-form-associated-element')
+        const [form] = htmlFixtureList(`
+          <form>
+            <test-form-associated-element name="email" value="foo@example.com"></test-form-associated-element>
+          </form>
+        `)
+
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'email', value: 'foo@example.com' },
+        ])
+      })
+
       it('prefers a { name } property over the [name] attribute', function() {
         up.form.config.fieldSelectors.push('test-form-field')
 

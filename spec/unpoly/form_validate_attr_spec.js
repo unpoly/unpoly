@@ -256,6 +256,41 @@ extendDescribe('up.form', function() {
       })
 
       describe('when no selector is given', function() {
+        it("updates the form group even when the server responds with an error status, ignoring the form's [up-fail-target]", async function() {
+          const [errors, form, group, input] = htmlFixtureList(`
+            <div id="errors">old errors</div>
+            <form action="/users" method="post" up-target="#target" up-fail-target="#errors">
+              <div up-form-group>
+                <input type="text" name="email" up-validate>
+              </div>
+            </form>
+          `)
+          up.hello(form)
+
+          input.value = 'taken@example.com'
+          Trigger.change(input)
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="email"])')
+
+          jasmine.respondWith({
+            status: 422,
+            responseText: `
+              <div id="errors">new errors</div>
+              <form action="/users" method="post">
+                <div up-form-group>
+                  Email is already taken
+                  <input type="text" name="email" up-validate>
+                </div>
+              </form>
+            `
+          })
+          await wait()
+
+          expect('[up-form-group]').toHaveText('Email is already taken')
+          expect('#errors').toHaveText('old errors')
+        })
+
         it('automatically finds a form group enclosing the field and only updates that', async function() {
           const form = htmlFixture(`
             <form action="/users">
