@@ -125,7 +125,17 @@ if (up.migrate.loaded) {
         expect(spy.calls.count()).toBe(1)
       })
 
-      it('allows substitution')
+      it('allows substitution', function() {
+        const spy = spyOn(up.log, 'warn')
+        up.migrate.warn('%s is a substituted warning', 'foo')
+        up.migrate.warn('%s is a substituted warning', 'bar')
+
+        // Messages with different substitutions are not deduplicated
+        expect(spy.calls.allArgs()).toEqual([
+          ['unpoly-migrate', '%s is a substituted warning', 'foo'],
+          ['unpoly-migrate', '%s is a substituted warning', 'bar'],
+        ])
+      })
 
       describe('log level', function() {
         it('uses the log level from up.migrate.config.logLevel', function() {

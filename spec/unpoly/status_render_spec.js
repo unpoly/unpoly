@@ -352,8 +352,6 @@ extendDescribe('up.status', function() {
 
         describe('reverting preview effects', function() {
 
-          it('considers the return value of a preview function to be a revertible effect')
-
           it('reverts an preview before rendering', async function() {
             fixture('#target', { text: 'old target' })
             let revertSpy = jasmine.createSpy('revert fn')

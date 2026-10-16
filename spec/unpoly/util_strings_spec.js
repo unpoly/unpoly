@@ -543,7 +543,14 @@ extendDescribe('up.util', function() {
           expect(restored).toBe(input)
         })
 
-        it('ignores a single quote within a double-quoted strings')
+        it('ignores a single quote within a double-quoted string', function() {
+          let input = `foo "bar's" baz`
+          let { masked, restore } = up.util.expressionOutline(input)
+          expect(masked).toBe(`foo "§0" baz`)
+
+          let restored = restore(masked)
+          expect(restored).toBe(input)
+        })
 
       })
 

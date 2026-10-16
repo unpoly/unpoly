@@ -19,11 +19,29 @@ describe('up.history', function() {
   describe('JavaScript', function() {
 
     describe('up.history.push()', () => {
-      it('should have tests')
+      it('adds a history entry and changes up.history.location', function() {
+        const pushSpy = spyOn(history, 'pushState').and.callThrough()
+
+        up.history.push('/push-path')
+
+        expect(pushSpy).toHaveBeenCalled()
+        expect(up.history.location).toMatchURL('/push-path')
+        expect(location.href).toMatchURL('/push-path')
+      })
     })
 
-    describe('up.history.replace', () => {
-      it('should have tests')
+    describe('up.history.replace()', () => {
+      it('changes up.history.location without adding a history entry', function() {
+        const pushSpy = spyOn(history, 'pushState').and.callThrough()
+        const replaceSpy = spyOn(history, 'replaceState').and.callThrough()
+
+        up.history.replace('/replace-path')
+
+        expect(replaceSpy).toHaveBeenCalled()
+        expect(pushSpy).not.toHaveBeenCalled()
+        expect(up.history.location).toMatchURL('/replace-path')
+        expect(location.href).toMatchURL('/replace-path')
+      })
     })
 
     describe('up.history.location', function() {
@@ -690,11 +708,36 @@ describe('up.history', function() {
         expect(element).toBeFollowable()
       })
 
-      it('restores the previous URL when clicked')
+      it('navigates to the previous URL when clicked', async function() {
+        up.history.push('/path1')
+        up.history.push('/path2')
+        htmlFixtureList('<div class="target">old target</div>')
+        const [link] = htmlFixtureList('<a href="/path3" up-back up-target=".target">back</a>')
+        up.hello(link)
 
-      it('does not overwrite an existing up-href or up-restore-scroll attribute')
+        Trigger.clickSequence(link)
+        await wait()
 
-      it('does not set an up-href attribute if there is no previous URL')
+        expect(jasmine.lastRequest().url).toMatchURL('/path1')
+      })
+
+      it('does not overwrite an existing up-href or up-scroll attribute', function() {
+        up.history.push('/path1')
+        up.history.push('/path2')
+        const [link] = htmlFixtureList('<a href="/path3" up-back up-href="/custom-path" up-scroll="top">back</a>')
+        up.hello(link)
+
+        expect(link.getAttribute('up-href')).toMatchURL('/custom-path')
+        expect(link.getAttribute('up-scroll')).toBe('top')
+      })
+
+      it('does not set an up-href attribute if there is no previous URL', function() {
+        expect(up.history.previousLocation).toBeMissing()
+        const [link] = htmlFixtureList('<a href="/path3" up-back>back</a>')
+        up.hello(link)
+
+        expect(link).not.toHaveAttribute('up-href')
+      })
     })
   })
 })

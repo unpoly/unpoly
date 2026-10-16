@@ -80,8 +80,6 @@ extendDescribe('up.script', function() {
 
       })
 
-      it("sets the compiled fragment's layer as layer.current, even if the fragment is not in the front layer")
-
       describe('up:fragment:inserted event', function() {
 
         it('emits an up:fragment:inserted event', function() {
