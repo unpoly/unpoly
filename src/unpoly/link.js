@@ -422,7 +422,7 @@ up.link = (function() {
 
   The event is emitted on the `<a>` element that is being followed.
 
-  @learn-ref render-lifecycle
+  @learn-ref following-links
 
   ## Changing render options
 
@@ -1312,6 +1312,8 @@ up.link = (function() {
 
   /*-
   Enlarges the click area of a descendant link.
+
+  @learn-ref links
 
   `[up-expand]` honors all the Unpoly attributes in expanded links, like
   [`[up-target]`](/up-follow#up-target), `[up-instant]`, or `[up-preload]`.

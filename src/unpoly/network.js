@@ -835,6 +835,8 @@ up.network = (function() {
   This event is [emitted](/up.emit) before an [AJAX request](/up.request)
   is sent over the network.
 
+  @learn-ref network
+
   Only requests that are sent via Unpoly features
   (like `[up-follow]` or `up.request()`) will trigger this event.
   When making requests using `fetch()` or `XMLHttpRequest`, no event is emitted.
@@ -918,6 +920,8 @@ up.network = (function() {
   /*-
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
   encounters a fatal error, like a [timeout](/up.network.config#config.timeout) or loss of network connectivity.
+
+  @learn-ref network-issues#disconnects
 
   > [note]
   > This event will *not* be emitted when the server produces
