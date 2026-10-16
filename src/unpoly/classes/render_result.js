@@ -56,8 +56,8 @@ up.RenderResult = class RenderResult {
   /*-
   The [render](/up.render) options used to produce this result.
 
-  If this result was produced from a [failed response](/failed-responses),
-  [`fail` prefixes](/failed-responses#fail-options)
+  If this result was produced from a [error response](/error-responses),
+  [`fail` prefixes](/error-responses#fail-options)
   have been removed from the render options.
 
   @property up.RenderResult#renderOptions
@@ -162,7 +162,7 @@ up.RenderResult = class RenderResult {
   Whether this render pass has rendered a successful response.
 
   By default responses with a `2xx` status code are considered successful.
-  Other HTTP codes (like `500` or `404`) are considered [failed responses](/failed-responses#fail-options).
+  Other HTTP codes (like `500` or `404`) are considered [error responses](/error-responses#fail-options).
 
   Rendering a [string of HTML](/providing-html#string) is always successful.
 

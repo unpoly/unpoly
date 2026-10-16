@@ -216,7 +216,7 @@ The following properties are available:
 | Property            | Type          | Description                                                                                                        |
 |---------------------|---------------|--------------------------------------------------------------------------------------------------------------------|
 | `meta.layer`        | `up.Layer`    | The [layer](/up.layer) of the compiling fragment.<br>This has the same value as `up.layer.current`. |
-| `meta.ok`           | `boolean`     | Whether the element was loaded from a [successful response](/failed-responses#fail-options).                       |
+| `meta.ok`           | `boolean`     | Whether the element was loaded from a [successful response](/error-responses#fail-options).                       |
 | `meta.revalidating` | `boolean`     | Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation).                   |
 
 

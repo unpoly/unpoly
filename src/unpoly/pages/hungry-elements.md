@@ -44,7 +44,7 @@ and Unpoly looks for matches in whatever the response contains. If your server
 [renders only the targeted fragments](/optimizing-responses), make sure to still
 include hungry elements in the response.
 
-Hungry elements are also updated from responses with an [error code](/failed-responses),
+Hungry elements are also updated from responses with an [error code](/error-responses),
 like a form re-rendered with validation errors.
 
 

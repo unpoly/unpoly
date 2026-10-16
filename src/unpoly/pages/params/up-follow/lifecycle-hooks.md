@@ -18,7 +18,7 @@
   | `this`     | The link being followed                       |
   | `event`    | A preventable `up:fragment:loaded` event      |
 
-  The snippet will also run for [failed responses](/failed-responses).
+  The snippet will also run for [error responses](/error-responses).
 
 @param [up-on-offline]
   A JavaScript snippet that is executed when the fragment could not be loaded

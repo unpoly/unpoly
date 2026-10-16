@@ -762,7 +762,7 @@ up.fragment = (function() {
   | Case                                                            | `up:fragment:loaded` emitted? |
   |-----------------------------------------------------------------|-------------------------------|
   | Server responds with 200 OK                                     | ✔️ yes                           |
-  | Server responds with an [error code](/failed-responses)         | ✔️ yes                           |
+  | Server responds with an [error code](/error-responses)         | ✔️ yes                           |
   | Rendering from [cache](/caching)                                | ✔️ yes                           |
   | Rendering a [string of HTML](/providing-html#string)            | ❌ no                            |
   | Server [renders nothing](/conditional-requests#rendering-nothing) | ❌ no                            |
@@ -846,7 +846,7 @@ up.fragment = (function() {
   | Case                                                            | `up:fragment:offline` emitted? |
   |-----------------------------------------------------------------|--------------------------------|
   | [Fatal network error](/network-issues#disconnects)              | ✔️ yes                        |
-  | Server responds with an [error code](/failed-responses)         | ❌ no                         |
+  | Server responds with an [error code](/error-responses)         | ❌ no                         |
   | Server [renders nothing](/conditional-requests#rendering-nothing) | ❌ no                         |
   | [Preloading](/preloading) fails                                 | ❌ no                         |
 
@@ -1139,7 +1139,7 @@ up.fragment = (function() {
   @param {up.Layer} event.layer
     The [layer](/up.layer) of the new fragment.
   @param {boolean} event.ok
-    Whether the element was loaded from a [successful response](/failed-responses#fail-options).
+    Whether the element was loaded from a [successful response](/error-responses#fail-options).
   @param {boolean} event.revalidating
     Whether the element was reloaded for the purpose of [cache revalidation](/caching#revalidation).
 

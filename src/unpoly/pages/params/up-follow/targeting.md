@@ -8,7 +8,7 @@
 @param [up-fail-target=':main']
   The [target selector](/targeting-fragments) to update when the server responds with an error code.
 
-  See [Rendering failed responses differently](/failed-responses#fail-options) for details.
+  See [Rendering error responses differently](/error-responses#fail-options) for details.
 
   If omitted, a failed response will *not* update the [`[up-target]`](#up-target),
   but update the [main target](/up-main) instead.

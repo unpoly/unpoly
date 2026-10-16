@@ -124,6 +124,8 @@ See also
 
 Requests the user is not waiting for, like preloading or polling, load in the background. See [[background-requests]].
 
+When the server responds with an error code, Unpoly renders the response with separate options. See [[error-responses]].
+
 
 @page network
 @menu-title Overview

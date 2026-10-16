@@ -11,7 +11,7 @@
 @param {boolean|string|number|Element|Function} [options.failScroll]
   How to scroll after the new fragment was rendered from a failed response.
 
-  See [Rendering failed responses differently](/failed-responses#fail-options).
+  See [Rendering error responses differently](/error-responses#fail-options).
 
 @param {Object} [options.scrollMap]
   An object mapping fragment selectors to a [scrolling option](/scrolling).

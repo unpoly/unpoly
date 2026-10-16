@@ -52,7 +52,7 @@ console.log("Updated fragment is", document.querySelector('.target'))
 ```
 
 The promise rejects when there is a [network issue](/network-issues),
-or if the server [responds with an HTTP error code](/failed-responses). See [Handling errors](#handling-errors).
+or if the server [responds with an HTTP error code](/error-responses). See [Handling errors](#handling-errors).
 
 
 ### Inspecting the render result
@@ -251,14 +251,14 @@ See `up:fragment:loaded` for more examples.
 Handling errors
 ---------------
 
-The promises returned by `up.render()` and [`up.render().finished`](/up.RenderJob.prototype.finished) reject if any error is thrown during rendering, or if the server responds with an [HTTP error code](/failed-responses).
+The promises returned by `up.render()` and [`up.render().finished`](/up.RenderJob.prototype.finished) reject if any error is thrown during rendering, or if the server responds with an [HTTP error code](/error-responses).
 
 You may handle the following error cases:
 
 | Error case                                                    | JavaScript                                                                                  | HTML                                                                 |
 |---------------------------------------------------------------|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| Server responds with [non-2xx HTTP status](/failed-responses) | [`fail`-prefixed options](/failed-responses)                                                | [`up-fail`-prefixed attributes](/failed-responses)                   |
-| Server responds with [non-2xx HTTP status](/failed-responses) | `up.RenderResult` (thrown)                                                                  | —                                                                    |
+| Server responds with [non-2xx HTTP status](/error-responses) | [`fail`-prefixed options](/error-responses)                                                | [`up-fail`-prefixed attributes](/error-responses)                   |
+| Server responds with [non-2xx HTTP status](/error-responses) | `up.RenderResult` (thrown)                                                                  | —                                                                    |
 | Disconnect or timeout                                         | [`{ onOffline }`](/network-issues)                                                          | [`[up-on-offline]`](/network-issues)                                 |
 | Disconnect or timeout                                         | `up.Offline` (thrown)                                                                       | —                                                                    |
 | Disconnect or timeout                                         | `up:fragment:offline`                                                                       | —                                                                    |
@@ -271,7 +271,7 @@ You may handle the following error cases:
 
 A failed response is rendered with `fail`-prefixed options and then *rejects* the promise with its `up.RenderResult`.
 It does not count as an error for `{ onError }`. To run code after a failed response was rendered,
-pass an [`{ onFailRendered }`](/failed-responses#fail-options) callback.
+pass an [`{ onFailRendered }`](/error-responses#fail-options) callback.
 
 
 ### Error handling example
@@ -306,7 +306,7 @@ try {
 ```
 
 Note how we use a `fail`-prefixed render option `{ failTarget }` to update a different fragment in case the server responds with an error code.
-See [Handling failed responses](/failed-responses) for more details on handling server responses with an error code.
+See [Handling error responses](/error-responses) for more details on handling server responses with an error code.
 
 
 ### Errors in user code

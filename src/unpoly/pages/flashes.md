@@ -54,7 +54,7 @@ In the example above, rendering `main` would also update the `[up-flashes]` elem
 This works like a [hungry element](/hungry-elements): the container piggy-backs on every
 render pass in its layer and in overlays above it. You don't need to name it in any `[up-target]` attribute.
 
-This also works for [failed responses](/failed-responses), so an error flash rendered with a form's validation errors is shown too.
+This also works for [error responses](/error-responses), so an error flash rendered with a form's validation errors is shown too.
 
 
 Clearing flashes

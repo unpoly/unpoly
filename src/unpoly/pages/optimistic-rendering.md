@@ -66,7 +66,7 @@ up.preview('add-task', function(preview) {
 Because we're using the `up.Preview#insert()` function to insert the new `.task` element,
 the element is automatically removed when the preview [ends](/previews#ending).
 This ensures a consistent screen state in cases where we end up *not* updating the entire `#tasks` fragment,
-e.g. when the form submission [fails](/failed-responses).
+e.g. when the form submission [fails](/error-responses).
 
 When the user submits again before the server responds, the new submission [aborts](/aborting-requests)
 the earlier request and reverts its preview.
@@ -74,7 +74,7 @@ the earlier request and reverts its preview.
 
 ## Handling validation errors
 
-When a previewed form submission [fails](/failed-responses) with a [validation](/validation) error,
+When a previewed form submission [fails](/error-responses) with a [validation](/validation) error,
 the server's error messages still appear reliably. Every preview is [reverted when its request ends](/previews#ending),
 so Unpoly removes the optimistic change before it renders the form with its errors.
 The user never keeps seeing a change that the server rejected.

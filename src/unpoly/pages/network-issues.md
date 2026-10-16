@@ -5,6 +5,8 @@ Unpoly keeps your application usable as the user's connection becomes [flaky](#f
 A failed request never replaces your page with the browser's error screen. Instead you decide what happens:
 show a message, offer a retry, or serve pages the user has already visited from the cache.
 
+When the server does respond, but with an error code, see [[error-responses]].
+
 
 Disconnects
 -----------
@@ -127,6 +129,7 @@ This is what happens while the user waits:
    `up:fragment:loaded` follows, and the response is processed like any other.
 3. When no response arrives within the [timeout](#flaky-connections), Unpoly emits `up:request:offline`
    and `up:fragment:offline`, as it would for a [disconnect](#disconnects).
+   Since no response arrived, `up:fragment:loaded` is not emitted.
 
 Once no slow requests are left, Unpoly emits `up:network:recover` and hides the progress bar.
 

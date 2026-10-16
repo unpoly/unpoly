@@ -54,7 +54,7 @@ up.network = (function() {
       Set `undefined` to not use a timeout.
 
     @param {boolean|Function(up.Response): boolean} [config.fail]
-      Whether Unpoly will consider a response to constitute a [failed response](/failed-responses).
+      Whether Unpoly will consider a response to constitute a [error response](/error-responses).
 
       By default, Unpoly will consider any status code other than HTTP 2xx or [304](/conditional-requests#rendering-nothing) to represent a failed response.
       You may use this option to customize this behavior. For instance, you can fail a response if it contains a given header or body text.
@@ -66,7 +66,7 @@ up.network = (function() {
       up.network.config.fail = (response) => badStatus(response) || response.header('X-Unauthorized')
       ```
 
-      Also see [Customizing failure detection](/failed-responses#customizing-failure-detection).
+      Also see [Customizing failure detection](/error-responses#customizing-failure-detection).
 
   @section Caching
     @param {boolean} [config.cacheEnabled=true]
@@ -421,7 +421,7 @@ up.network = (function() {
       Defaults to `up.network.config.lateDelay`.
 
     @param {string|boolean|Function(up.Response): boolean} [options.fail]
-      Whether the response to this request should be considered [failed](/failed-responses).
+      Whether the response to this request should be considered [failed](/error-responses).
 
       By [default](/up.network.config#config.fail), any HTTP status code other than 2xx or 304 is considered an error code.
       Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.
@@ -475,7 +475,7 @@ up.network = (function() {
       the associated layer is the future overlay's parent layer.
 
     @param {string} [options.failLayer='current']
-      The [layer](/up.layer) this request is associated with if the server [sends a HTTP status code](/failed-responses).
+      The [layer](/up.layer) this request is associated with if the server [sends a HTTP status code](/error-responses).
 
     @param {Element} [options.origin]
       The DOM element that caused this request to be sent, e.g. a hyperlink or form element.

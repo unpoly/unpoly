@@ -98,8 +98,8 @@ In particular `preview.params` is helpful to
 A preview ends when its associated request ends for *any* reason. Reasons include:
 
 - The server responds with new HTML.
-- The server [renders an error code](/failed-responses#fail-options).
-- The request encounters a [fatal error](/failed-responses#handling-fatal-network-errors), like a timeout or loss of network connectivity.
+- The server [renders an error code](/error-responses#fail-options).
+- The request encounters a [fatal error](/network-issues), like a timeout or loss of network connectivity.
 - The server [updates a different fragment](/X-Up-Target).
 - The request is [aborted](/aborting-requests), e.g. by a different link targeting the same fragment.
 

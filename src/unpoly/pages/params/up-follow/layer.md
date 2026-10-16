@@ -11,7 +11,7 @@
 @param [up-fail-layer='origin, current']
   The [layer](/up.layer) in which to render if the server responds with an error code.
 
-  See [Rendering failed responses differently](/failed-responses#fail-options).
+  See [Rendering error responses differently](/error-responses#fail-options).
 
 @param [up-peel='dismiss']
   Whether to close overlays obstructing the target layer,

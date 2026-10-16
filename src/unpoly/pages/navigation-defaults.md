@@ -57,7 +57,7 @@ is significant. A link that swaps the layer's main element gets a new history en
 scrolls to the top. A link that only updates a sidebar keeps the URL and the scroll position,
 even though it navigates.
 
-The same defaults also apply when the server responds with an [error code](/failed-responses),
+The same defaults also apply when the server responds with an [error code](/error-responses),
 so a failed form submission gets the same `'auto'` scroll and focus behavior.
 
 
@@ -73,7 +73,7 @@ To follow a link or submit a form without navigation defaults, set an `[up-navig
 Clicking the link updates the `.users` list and nothing else. The URL stays the same,
 the scroll position is kept and the response is not cached.
 The link also no longer falls back to the main element. When the server responds with an error,
-nothing is rendered unless you set an [`[up-fail-target]`](/failed-responses#fail-options).
+nothing is rendered unless you set an [`[up-fail-target]`](/error-responses#fail-options).
 
 With `[up-navigate=false]` you can still enable individual effects, like `[up-history=true]`
 or `[up-scroll=top]`. See the attributes for [links](/up-follow) and [forms](/up-submit) for all options.

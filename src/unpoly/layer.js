@@ -876,7 +876,7 @@ up.layer = (function() {
   <a href="/menu" up-layer="new">Open menu</a> <!-- mark: up-layer="new" -->
   ```
 
-  This form will show error messages from a [failed submission](/failed-responses) within a modal overlay:
+  This form will show error messages from a [failed submission](/error-responses) within a modal overlay:
 
   ```html
   <form action="/submit" up-fail-layer="new"> <!-- mark: up-fail-layer="new" -->

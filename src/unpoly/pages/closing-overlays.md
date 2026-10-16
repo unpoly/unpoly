@@ -292,7 +292,7 @@ If a listener [keeps the overlay open](#keeping-open), the background layer is n
 To close the overlay anyway, set an `[up-peel="force"]` attribute.
 
 > [note]
-> The form still updates its own layer when the [server responds with an error code](/failed-responses)
+> The form still updates its own layer when the [server responds with an error code](/error-responses)
 > due to a validation error.\
 > To update another layer in this case, set an [`[up-fail-layer]`](/up-follow#up-fail-layer) attribute.
 

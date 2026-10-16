@@ -8,7 +8,7 @@
 @param [up-fail-scroll='auto']
   How to scroll after the new fragment was rendered from a failed response.
 
-  See [Rendering failed responses differently](/failed-responses#fail-options).
+  See [Rendering error responses differently](/error-responses#fail-options).
 
 @param [up-scroll-map]
   A [relaxed JSON](/relaxed-json) object mapping fragment selectors to a [scrolling option](/scrolling).

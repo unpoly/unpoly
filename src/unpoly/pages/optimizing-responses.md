@@ -68,7 +68,7 @@ A response without a `<head>` has two more limits: Unpoly keeps the current
 
 ### Failed responses target a different fragment {#fail-target}
 
-When the server responds with an error code, Unpoly renders a [different target](/failed-responses#fail-options).
+When the server responds with an error code, Unpoly renders a [different target](/error-responses#fail-options).
 Form submissions use this to update the `<form>` with validation errors instead of the success target.
 The fail target is sent as a separate `X-Up-Fail-Target` header:
 

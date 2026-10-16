@@ -34,7 +34,7 @@ RedirectPermanent /input-up-observe /up-watch
 RedirectPermanent /form-up-autosubmit /up-autosubmit
 RedirectPermanent /input-up-autosubmit /up-autosubmit
 
-RedirectPermanent /server-errors /failed-responses
+RedirectPermanent /server-errors /error-responses
 RedirectPermanent /offline /network-issues
 RedirectPermanent /handling-disconnects /network-issues
 RedirectPermanent /cache /caching
@@ -174,3 +174,4 @@ RedirectPermanent /layer-option /targeting-other-layers
 RedirectPermanent /context /layer-context
 RedirectPermanent /animation /motion
 RedirectPermanent /preserving-elements /keeping-elements
+RedirectPermanent /failed-responses /error-responses

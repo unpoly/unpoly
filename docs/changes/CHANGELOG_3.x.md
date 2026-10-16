@@ -755,7 +755,7 @@ Two changes were made to [preserving elements](/keeping-elements) using the `[up
 - Fix a bug where Unpoly would no longer restore history entries after the page is reloaded (issue #773).
 - Added an experimental method `up.Response#isHTML()`. It returns whether the response has a [content-type](/up.Response.prototype.contentType) of `text/html` or `application/xml+html`. It doesn't test if the response body actual contains a valid HTML document.
 - Fix a crash when `up.render({ response })` is called while another request is in flight.
-- When rendering, and request with the same [`{ failTarget }`](/failed-responses#fail-options) was made while waiting for the network, and the first request responded with an error status and updates , the second request is now aborted.
+- When rendering, and request with the same [`{ failTarget }`](/error-responses#fail-options) was made while waiting for the network, and the first request responded with an error status and updates , the second request is now aborted.
 
 
 
@@ -1267,7 +1267,7 @@ Fixed a bug where [prepending or appending](/targeting-fragments#appending-or-pr
 
 ### JavaScript rendering API
 
-- Added a property `up.RenderResult#ok`. It indicated whether the render pass has rendered a [successful response](/failed-responses).
+- Added a property `up.RenderResult#ok`. It indicated whether the render pass has rendered a [successful response](/error-responses).
 - Added a property `up.RenderResult#renderOptions`. It contains the effective render options used to produce this result.
 - ⚠️ Renamed the property `up.RenderJob#options` to `up.RenderJob#renderOptions`
 - When `up.hello()` is called on an element that has been compiled before, `up:fragment:inserted` is no longer emitted a second time.
@@ -1701,7 +1701,7 @@ The `up.feedback` package has been renamed to `up.status`. This package exposed 
 
 - You can now [embed CSP nonces](/script-security#callback-nonces) into the attribute callbacks `[up-on-keep]`, `[up-on-hungry]` and `[up-on-opened]`.
 - New property `up.Request#ended` indicates whether this request is no longer waiting for the network for any reason. It is `true` when the server has responded or when the request
-  [failed](/failed-responses) or was [aborted](/aborting-requests).
+  [failed](/error-responses) or was [aborted](/aborting-requests).
 - The attribute `[up-flashes]` is now stable (discussion #679)
 - Clicking a link with a page-local `#hash` in the `[href]` will now honor [fixed layout obstructions](/up-fixed-top) if the browser location is already on that `#hash`.
 - Fix a bug where a link with `[up-confirm]` would show the confirmation dialog before [preloading](/preloading).
@@ -1738,7 +1738,7 @@ This is a maintenance release that addresses some bugs while we're working on th
 
 ### Changes
 
-- Fix an error being thrown when a caching request is tracking an existing request to the same URL, and that existing request responds with an [error status](/failed-responses) (issue #676).
+- Fix an error being thrown when a caching request is tracking an existing request to the same URL, and that existing request responds with an [error status](/error-responses) (issue #676).
 - Fix a bug where a modal overlay could not be closed when a child popup would be open below the screen fold.
 - Focus is no longer trapped in popup overlays. Focus remains trapped in all other overlay modes, but this can be disabled by setting `up.layer.config.overlay.trapFocus = false`.
 - The dismiss button in overlays now has a hand cursor (by @apollo13).
@@ -3037,7 +3037,7 @@ Unpoly 3 expands your options to [hook into specific stages](/render-lifecycle) 
 
     Such responses occur when a [conditional request](/conditional-requests) in answered with HTTP status `304 Not Modified` or `204 No Content`.
   - When [revalidating](/caching#revalidation), if the expired response and fresh response have the exact same text.
-- Callbacks to handle [failed responses](/failed-responses), now begin with the prefix `onFail`, e.g. `{ failOnFinished }` becomes `{ onFailFinished }`.
+- Callbacks to handle [failed responses](/error-responses), now begin with the prefix `onFail`, e.g. `{ failOnFinished }` becomes `{ onFailFinished }`.
 
 
 #### Various changes
@@ -3173,7 +3173,7 @@ Unpoly 3 lets you configure selectors matching foreign overlays using `up.layer.
 - `up.emit()` now only prints user events when the user has enabled logging.
 - Unpoly now logs when an event like `up:link:follow` or `up:form:submit` has prevented a render pass.
 - Unpoly now logs when there was no new content to render.
-- Unpoly now logs when we're rendering a [failed response](/failed-responses) using fail-prefixed options.
+- Unpoly now logs when we're rendering a [failed response](/error-responses) using fail-prefixed options.
 
 
 
@@ -3548,7 +3548,7 @@ In our ongoing efforts to evolve Unpoly's documentation from an API reference to
 - [Skipping unnecessary rendering](/conditional-requests)
 - [Render hooks](/render-lifecycle)
 - [Aborting requests](/aborting-requests)
-- [Handling failed responses](/failed-responses)
+- [Handling failed responses](/error-responses)
 - [Attaching data to elements](/data)
 - [Optimizing responses](/optimizing-responses)
 - [Controlling focus](/focus)

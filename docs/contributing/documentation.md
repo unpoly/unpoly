@@ -504,11 +504,11 @@ Guide pages have no backtick form, so they get their own autolink: a **wikilink*
 the page's slug in double brackets, optionally with an anchor:
 
 ```markdown
-For error handling, see [[failed-responses]].
+For error handling, see [[error-responses]].
 Expired content is refreshed after rendering. See [[caching#revalidation]].
 ```
 
-A wikilink expands to a link labeled with the target's title — `Handling failed responses`
+A wikilink expands to a link labeled with the target's title — `Handling error responses`
 above, or `Caching: Revalidation` for the anchored form — so the label follows a retitle
 instead of rotting. A slug or anchor that doesn't resolve fails the site build. Wikilinks
 work for feature pages too (`[[up.render#concurrency]]`), which adds the anchor support

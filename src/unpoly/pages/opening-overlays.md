@@ -50,7 +50,7 @@ When it doesn't, use the first of these options that fits:
 3. Render something different on the server. Requests for an overlay carry an
    [`X-Up-Mode`](/X-Up-Mode) header with the overlay's mode.
 
-When the server responds with an [error code](/failed-responses), the error page is rendered in
+When the server responds with an [error code](/error-responses), the error page is rendered in
 the link's own layer, not in an overlay. To show errors in an overlay, set
 [`[up-fail-layer=new]`](/targeting-other-layers#fail-layer).
 
@@ -91,7 +91,7 @@ To show the response to a successful form submission in an overlay, set an `[up-
 </form>
 ```
 
-To only use an overlay for error messages from a [failed submission](/failed-responses),
+To only use an overlay for error messages from a [failed submission](/error-responses),
 set an `[up-fail-layer=new]` attribute instead:
 
 ```html

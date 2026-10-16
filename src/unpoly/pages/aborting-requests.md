@@ -99,7 +99,18 @@ When requests are aborted through `{ abort }` or `up.fragment.abort()`, an `up:f
 is emitted on the element for which requests were aborted, and an `up:request:aborted` event for each aborted request.
 
 A rendering function whose request was aborted rejects with an `up.Aborted` error.
-See [handling aborted requests](/failed-responses#handling-aborted-requests).
+Its `{ name }` is `'AbortError'`, like the `DOMException` that `fetch()` and other native APIs reject with when aborted.
+To detect both kinds of aborts, check the error's name:
+
+```js
+try {
+  await up.render({ url: '/path', target: '.content' })
+} catch (error) {
+  if (error.name === 'AbortError') { // mark: error.name === 'AbortError'
+    console.log('Rendering was aborted: ' + error.message)
+  }
+}
+```
 
 To run code when an element *or one of its ancestors* was aborted, use `up.fragment.onAborted()`.
 For example, a timer that reloads an element after 10 seconds should not fire once the element's requests were aborted:

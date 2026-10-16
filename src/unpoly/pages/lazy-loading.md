@@ -118,7 +118,7 @@ and [previews](/previews), work with `[up-defer]` elements as well.
 A slow deferred request also shows the [progress bar](/progress-bar). To [load quietly](/background-requests), set an [`[up-background]`](/up-defer#up-background) attribute.
 
 When the server responds with an error code, nothing is rendered and the fallback stays.
-To show the error, set an [`[up-fail-target]`](/failed-responses#fail-options) attribute.
+To show the error, set an [`[up-fail-target]`](/error-responses#fail-options) attribute.
 
 > [note]
 > When the deferred content is already [cached](#caching), the deferred element is

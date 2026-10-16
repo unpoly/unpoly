@@ -196,7 +196,7 @@ Rendering failed responses in another layer {#fail-layer}
 -------------------------------------------
 
 Like most render options, `[up-layer]` only applies when the server responds successfully.
-When the server [responds with an error code](/failed-responses), like a form with validation errors,
+When the server [responds with an error code](/error-responses), like a form with validation errors,
 the response is rendered in the link's or form's own layer.
 
 To render failed responses in another layer, set an `[up-fail-layer]` attribute or pass a `{ failLayer }` option.

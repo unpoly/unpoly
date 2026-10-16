@@ -63,7 +63,7 @@ When the form is submitted, the server is expected to respond with HTML that con
 
 If the server responds with an error code, Unpoly ignores the `[up-target]` attribute
 and updates the selector in the `[up-fail-target]` attribute instead. The default fail target
-is the form itself. See [Handling failed responses](/failed-responses) for details.
+is the form itself. See [Handling error responses](/error-responses) for details.
 
 See [Submitting forms in-place](/submitting-forms) for an expanded example.
 

@@ -132,7 +132,7 @@ end
 
 Without `unpoly-rails`, set the `X-Up-Context` response header yourself.
 
-Context updates are applied for both successful and [failed](/failed-responses) responses.
+Context updates are applied for both successful and [failed](/error-responses) responses.
 
 
 Context compared to other stores {#comparison}

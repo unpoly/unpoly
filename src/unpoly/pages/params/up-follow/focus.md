@@ -8,7 +8,7 @@
 @param [up-fail-focus='auto']
   What to focus after the new fragment was rendered from a failed response.
 
-  See [Rendering failed responses differently](/failed-responses#fail-options).
+  See [Rendering error responses differently](/error-responses#fail-options).
 
 @param [up-focus-visible='auto']
   Whether the focused element should have a [visible focus ring](/focus-visibility).

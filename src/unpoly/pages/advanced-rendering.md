@@ -81,8 +81,8 @@ To change what navigation means for your entire app, set the defaults in
 [[more: navigation-defaults]]
 
 
-Handling failed responses
--------------------------
+Handling error responses
+------------------------
 
 When the server responds with an error status, a different fragment often needs to change.
 A failed form submission should re-render the form instead of showing the next screen.
@@ -101,7 +101,7 @@ A successful response updates `.content`. A failed response updates the `<form>`
 so the user sees the validation errors next to their input. In HTML the same option
 is `[up-fail-target]`. For forms, Unpoly already defaults to re-rendering the form itself.
 
-[[more: failed-responses]]
+[[more: error-responses]]
 
 
 Keeping elements

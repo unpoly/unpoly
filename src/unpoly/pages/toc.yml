@@ -146,7 +146,7 @@ learn:
         - navigation-defaults
         - targeting-fragments
         - target-derivation
-        - failed-responses
+        - error-responses
         - keeping-elements
         - providing-html
         - render-lifecycle

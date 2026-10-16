@@ -359,7 +359,7 @@ up.form = (function() {
 
         By default, failed responses will update the `<form>` element itself.
 
-        See [[failed-responses]].
+        See [[error-responses]].
 
       @param options.origin
         The element that triggered the form submission.
@@ -736,7 +736,7 @@ up.form = (function() {
   Listeners may inspect and manipulate [render options](/up.render#parameters) for the coming fragment update.
 
   The code below will use a custom [transition](/up-transition)
-  when a form submission [fails](/failed-responses):
+  when a form submission [fails](/error-responses):
 
   ```js
   up.on('up:form:submit', function(event) {
@@ -1555,7 +1555,7 @@ up.form = (function() {
 
         By default, failed responses will update the `<form>` element itself.
 
-        See [[failed-responses]].
+        See [[error-responses]].
 
   @section Navigation
     @mix up-follow/navigation

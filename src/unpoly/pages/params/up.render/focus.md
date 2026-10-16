@@ -8,7 +8,7 @@
 @param {boolean|string|Element|Function} [options.failFocus]
   What to focus after the new fragment was rendered from a failed response.
 
-  See [Rendering failed responses differently](/failed-responses#fail-options).
+  See [Rendering error responses differently](/error-responses#fail-options).
 
 @param {boolean|string} [options.focusVisible='auto']
   Whether the focused element should have a [visible focus ring](/focus-visibility).

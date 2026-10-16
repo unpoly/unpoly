@@ -14,7 +14,7 @@
 
   The callback argument is a preventable `up:fragment:loaded` event.
 
-  This callback will also run for [failed responses](/failed-responses).
+  This callback will also run for [error responses](/error-responses).
 
 @param {Function(Event)} [options.onOffline]
   A callback that will be run when the fragment could not be loaded

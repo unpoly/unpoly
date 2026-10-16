@@ -97,7 +97,7 @@ or pass a [`{ location }`](/up.render#options.location) option, Unpoly pushes th
 
 The same rules apply to error responses. When a failed `GET` request renders an error page into the
 main element, the address bar shows its URL, like after a full page load. A form submission that fails
-with a validation error does not change history. See [[failed-responses]].
+with a validation error does not change history. See [[error-responses]].
 
 
 ### Rendering from JavaScript {#scripting}

@@ -136,7 +136,7 @@ as the link's overlay would have shown.
 When the server response is received, the temporary overlay is closed and another overlay is opened with
 the response content. To make that switch appear seamless to the user, the close and open animations are disabled.
 
-When the response ends up *not* opening an overlay (e.g. the server responds with an [error code](/failed-responses)),
+When the response ends up *not* opening an overlay (e.g. the server responds with an [error code](/error-responses)),
 the placeholder overlay is closed.
 
 If the user dismisses the placeholder overlay before the server responds,

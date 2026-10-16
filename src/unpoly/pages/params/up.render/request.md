@@ -56,7 +56,7 @@
   Defaults to `up.network.config.timeout`.
 
 @param {boolean|Function(up.Response): boolean} [options.fail]
-  Whether to render [failed responses](/failed-responses) differently.
+  Whether to render [error responses](/error-responses) differently.
 
   Failed responses will be rendered using options prefixed with `fail`, e.g. `{ failTarget }`.
 

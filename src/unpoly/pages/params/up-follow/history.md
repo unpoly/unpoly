@@ -17,7 +17,7 @@
 @param [up-fail-history='auto']
   Whether to update history when the server responds with an error code.
 
-  See [Rendering failed responses differently](/failed-responses#fail-options).
+  See [Rendering error responses differently](/error-responses#fail-options).
 
 @param [up-title]
   An explicit document title to set before rendering.

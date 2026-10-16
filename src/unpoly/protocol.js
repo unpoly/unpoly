@@ -74,7 +74,7 @@ up.protocol = (function() {
   expensive sidebar if the sidebar is not targeted.
 
   > [note]
-  > Unpoly will often [update a different selector in case the request fails](/failed-responses#fail-options).
+  > Unpoly will often [update a different selector in case the request fails](/error-responses#fail-options).
   > The target selector for failed responses is sent as a separate request header (`X-Up-Fail-Target`).
 
 

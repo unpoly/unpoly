@@ -663,7 +663,7 @@ up.motion = (function() {
   @param [up-fail-transition]
     The transition to use when the server responds with an error code.
 
-    See [[failed-responses]].
+    See [[error-responses]].
   @stable
   @signature
   */

@@ -94,7 +94,7 @@ end
 The examples use Ruby on Rails, but work similarly with any other backend.
 
 If your server-side code cannot communicate status codes like that,
-you may [customize Unpoly's failure detection](/failed-responses#customizing-failure-detection).
+you may [customize Unpoly's failure detection](/error-responses#customizing-failure-detection).
 
 ### Changing how validation errors are rendered {#changing-how-validation-errors-are-rendered}
 
@@ -131,7 +131,7 @@ To render a failed response somewhere else, set an [`[up-fail-target]`](/up-subm
 ```
 
 Most render options have such a `fail`-prefixed variant.
-See [rendering failed responses differently](/failed-responses#fail-options) for details.
+See [rendering error responses differently](/error-responses#fail-options) for details.
 
 ### HTML5 validations {#html5-validations}
 
