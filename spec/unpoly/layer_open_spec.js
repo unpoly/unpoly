@@ -640,6 +640,14 @@ extendDescribe('up.layer', function() {
 
         })
 
+        it('honors a { focusVisible } option', async function() {
+          await up.layer.open({ content: 'overlay text', focusVisible: true, animation: false })
+
+          expect(up.layer.current.getBoxElement()).toBeFocused()
+          expect(up.layer.current.getBoxElement()).toHaveClass('up-focus-visible')
+          expect(up.layer.current.getBoxElement()).toHaveOutline()
+        })
+
         it("hides a focus ring on the new overlay's box", function(done) {
           const assertFocus = function() {
             expect(up.layer.current.getBoxElement()).toBeFocused()

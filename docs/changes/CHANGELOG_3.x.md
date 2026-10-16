@@ -61,6 +61,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
 - An [`X-Up-Expire-Cache: false`](/X-Up-Expire-Cache) response header now expires no further cache entries, like [`X-Up-Evict-Cache: false`](/X-Up-Evict-Cache). It used to be treated as a URL pattern matching `/false`. As before, the header cannot undo the expiration that a non-GET request triggers before the server responds.
 - Fix: [Target derivation](/target-derivation) for an SVG element with a camelCase tag name, like `<clipPath>`, now produces a selector that matches the element. Formerly the tag name was lowercased, which CSS does not match for SVG elements.
 - [URL patterns](/url-patterns) now match full URLs on the page's own origin, like `https://example.com/users/*`. Such patterns never matched before.
+- Fix [`[up-focus-visible]`](/up-follow#up-focus-visible) and the `{ focusVisible }` option being ignored when opening an overlay.
 
 
 3.14.3
