@@ -165,9 +165,10 @@ up.form = (function() {
       // Form-associated custom elements. No selector can name them directly, but they are the only
       // elements outside this list that :enabled and :disabled match — both states, so that an
       // element does not stop being a field while it is disabled. CSS defines :enabled by
-      // capability ("can be activated or accept focus"), so `a, area` are excluded in case an
-      // engine reads it that way. Chrome, Firefox and Safari do not.
-      ':is(:enabled, :disabled):not(input, select, textarea, button, fieldset, optgroup, option, a, area)',
+      // capability ("can be activated or accept focus"), and older HTML counted `a, area, link`
+      // with an [href] among the elements that :enabled matches. They are excluded in case an
+      // engine still reads it that way. Chrome, Firefox and Safari do not.
+      ':is(:enabled, :disabled):not(input, select, textarea, button, fieldset, optgroup, option, a, area, link)',
     ],
     noFieldSelectors: [],
     submitSelectors: ['form:is([up-submit], [up-target], [up-layer], [up-transition])'],
