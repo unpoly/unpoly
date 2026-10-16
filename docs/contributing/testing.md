@@ -243,24 +243,27 @@ Every module has a spec file at the mirrored path. `src/unpoly/form.js` is teste
 there, it moved into a sibling file that shares the module's prefix — see
 [extracted spec files](#extracted-spec-files) below.
 
-Inside a [main module](code-organization.md#responsibilities) spec, the outermost groups
-separate the two kinds of API a module exposes:
+Inside a [main module](code-organization.md#responsibilities) spec, groups nest by
+module, kind and feature:
 
 ```js
-describe('up.form', function() {
+describe('up.link', function() {                                     // module
 
-  describe('JavaScript', function() {
+  describe('JavaScript', function() {                                // kind
 
-    describe('up.form.submit()', function() {
-      it('...', async function() { ... })
+    describe('up.follow()', function() {                             // feature
+      it('...', async function() { ... })                            // general behavior
+      describe('with { confirm } option', function() { ... })        // option
+      describe("when the link's [href] is '#'", function() { ... })  // aspect
     })
 
   })
 
-  describe('HTML', function() {
+  describe('HTML', function() {                                      // kind
 
-    describe('[up-submit]', function() {
-      it('...', async function() { ... })
+    describe('[up-follow]', function() {                             // feature
+      it('...', async function() { ... })                            // general behavior
+      describe('with [up-instant] modifier', function() { ... })     // modifier
     })
 
   })
@@ -268,20 +271,25 @@ describe('up.form', function() {
 })
 ```
 
-Functions are named with parentheses (`up.form.submit()`), selectors in brackets
-(`[up-submit]`). A feature with many options often gets one more nesting level, grouped
-by topic or by the option under test.
+Features are named as in the API docs: functions with parentheses (`up.follow()`), selectors
+in brackets (`[up-follow]`). JavaScript and HTML are the only kinds; events and config objects
+go under JavaScript, and the rare feature without any API under HTML. Modules with a single
+kind may skip that level, as do classes, which go straight from `describe('up.Params')` to a
+group per method.
 
-Class specs skip the JavaScript/HTML split — a class has no HTML API, so
-`params_spec.js` goes straight from `describe('up.Params')` to a group per method.
+**Below the feature**, ungrouped specs describe its general behavior. Small features need
+nothing else. Larger features group the rest by one main axis, usually per option or
+modifier. Occasionally a cohesive cluster cuts across that axis and gets its own group: the
+specs `when the server responds with an error` read better together than spread over the
+modifiers they involve. Nest deeper only in the largest features, like `up.render()`.
 
 Nested group names concatenate with spaces to form a spec's *full name*, which is what
 `--spec` matches against. So the example above can be narrowed at any depth:
 
 ```
-bin/test --spec="up.form"                       # the whole module
-bin/test --spec="up.form HTML"                  # only the attribute specs
-bin/test --spec="up.form.submit()"              # one function
+bin/test --spec="up.link"                       # the whole module
+bin/test --spec="up.link HTML"                  # only the attribute specs
+bin/test --spec="up.follow()"                   # one function
 ```
 
 Full names never change when specs move between files, so a filter is always safe to
@@ -356,6 +364,10 @@ Put it in the `describe()` group it belongs to. The file follows from the group 
 don't pick a file, and you very rarely create one. If that group happens to live in an
 extracted file, add it there; nothing else changes, because the group's full name is the
 same either way.
+
+When a feature groups by option, specs for a new option get their own `with …` group too.
+Otherwise, if no group fits, leave the spec ungrouped. Don't open a new aspect group for a
+single requirement: regrouping a feature is a deliberate act, best agreed with a human.
 
 Only extract a group into a new file when it has grown to a size that makes its module
 file hard to read — a few dozen KB. That is a rare, deliberate act, not something to do
