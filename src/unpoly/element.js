@@ -686,6 +686,7 @@ up.element = (function() {
     return element
   }
 
+  // Not covered by specs: rendering into <html> or <body> would replace the Jasmine runner.
   const SINGLETON_TAG_NAMES = ['HTML', 'BODY', 'HEAD', 'TITLE']
 
   /*-
