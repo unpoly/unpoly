@@ -100,11 +100,14 @@ When no layer is given, Unpoly matches and renders in the layer the interaction 
 - Otherwise `up.layer.current` is used.
 
 While a [compiler](/enhancing-elements) runs, `up.layer.current` is the layer of the compiled element,
-even when that layer is in the background. This is only guaranteed for the code that runs
-synchronously when the compiler is called. Code that runs later has no such guarantee.
-This includes event listeners added by the compiler, `setTimeout()` callbacks and code after an `await`.
-To use the element's layer in such code, remember `up.layer.current` while the compiler runs,
-or [pass the element](#layer-object) as `{ layer }`.
+even when that layer is in the background. This only holds for code that runs synchronously
+when the compiler is called. It does not hold for code that runs later:
+
+- event listeners added by the compiler
+- `setTimeout()` callbacks
+- code after an `await`
+
+In such code, [pass the element](#layer-object) as `{ layer }`.
 
 
 ### Current layer vs. frontmost layer {#current-vs-front}

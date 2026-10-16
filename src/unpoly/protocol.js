@@ -937,11 +937,22 @@ up.protocol = (function() {
   /*-
   The server may set this optional cookie to echo the HTTP method of the initial request.
 
+  When the initial page was loaded with a method other than `GET`, set a cookie with that method:
+
+  ```http
+  Set-Cookie: _up_method=POST
+  ```
+
+  The **simplest implementation** is to set this cookie for every request that is neither
+  `GET` nor an [Unpoly request](/X-Up-Version). For all other requests
+  an existing `_up_method` cookie should be deleted.
+
+  When Unpoly boots it will look for this cookie and configure itself accordingly.
+  The cookie is then deleted in order to not affect following requests.
+
   If the initial page was loaded with a non-`GET` HTTP method, Unpoly prefers to make a full
   page load when you try to update a fragment. Once the next page was loaded with a `GET` method,
-  Unpoly will again update fragments.
-
-  This fixes two edge cases you might or might not care about:
+  Unpoly will again update fragments. This fixes two edge cases:
 
   1. Unpoly replaces the initial page state so it can later restore it when the user
      goes back to that initial URL. However, if the initial request was a POST,
@@ -949,22 +960,7 @@ up.protocol = (function() {
   2. Some browsers have a bug where the initial request method is used for all
      subsequently pushed states. That means if the user reloads the page on a later
      GET state, the browser will wrongly attempt a POST request.
-     This issue affects Safari 9-12 (last tested in 2019-03).
-     Modern Firefoxes, Chromes and IE10+ don't have this behavior.
-
-  In order to allow Unpoly to detect the HTTP method of the initial page load,
-  the server must set a cookie:
-
-  ```http
-  Set-Cookie: _up_method=POST
-  ```
-
-  When Unpoly boots it will look for this cookie and configure itself accordingly.
-  The cookie is then deleted in order to not affect following requests.
-
-  The **simplest implementation** is to set this cookie for every request that is neither
-  `GET` nor an [Unpoly request](/X-Up-Version). For all other requests
-  an existing `_up_method` cookie should be deleted.
+     This issue affected Safari 9-12.
 
   @cookie _up_method
   @stable

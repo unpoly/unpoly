@@ -15,9 +15,8 @@ The options on this page apply to all of these features:
 | `[up-autosubmit]` | `up.autosubmit()` | Submit a form after a change                |
 | `[up-switch]`     |                   | Switch other elements after a change        |
 
-Event and delay options apply to all of them. Options for loading state, like `[up-watch-disable]`,
-apply to `[up-validate]` and `[up-autosubmit]`. An `[up-watch]` callback must
-[forward its options](/up.watch#callback-arguments) to the function that renders.
+Options for events and delays apply to all of them. Options for disabling and loading state
+apply to features that render, like `[up-validate]` and `[up-autosubmit]`.
 
 
 Which events to watch {#events}
@@ -126,6 +125,16 @@ To [only disable some form controls](/disabling-forms#disabling-some-controls-on
 set the value of `[up-watch-disable]` to any selector that matches fields or buttons.
 
 From JavaScript you can pass a `{ disable }` option instead.
+
+When a callback for `[up-watch]` or `up.watch()` renders, it must pass these options on.
+Its third argument holds the options parsed from the field's `[up-watch-...]` attributes.
+Forward them to the function that renders (see [callback arguments](/up.watch#callback-arguments)):
+
+```js
+up.watch('input.query', function(value, name, options) { // mark: options
+  return up.reload('main', { ...options, params: { query: value }}) // mark: options
+})
+```
 
 > [tip]
 > To disable fields while *submitting* (instead of while watching), use [`[up-disable]`](/disabling-forms) instead.
