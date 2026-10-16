@@ -742,6 +742,27 @@ describe('up.motion', function() {
 
     describe('up.morph()', function() {
 
+      describe('with a transition of two animations joined by a slash', function() {
+
+        beforeEach(function() {
+          up.motion.config.enabled = true
+          this.oldAnimation = jasmine.createSpy('old animation').and.returnValue(Promise.resolve())
+          this.newAnimation = jasmine.createSpy('new animation').and.returnValue(Promise.resolve())
+          up.animation('old-animation', this.oldAnimation)
+          up.animation('new-animation', this.newAnimation)
+          ;[this.oldElement] = htmlFixtureList('<div class="old">old</div>')
+          this.newElement = up.element.createFromHTML('<div class="new">new</div>')
+        })
+
+        it('plays the first animation on the old element and the second animation on the new element', async function() {
+          await up.morph(this.oldElement, this.newElement, 'old-animation/new-animation', { duration: 10 })
+
+          expect(this.oldAnimation).toHaveBeenCalledWith(this.oldElement, jasmine.anything())
+          expect(this.newAnimation).toHaveBeenCalledWith(this.newElement, jasmine.anything())
+        })
+
+      })
+
       it('transitions between two element by absolutely positioning one element above the other', async function() {
         let tolerance
         const $old = $fixture('.old').text('old content').css({ width: '200px', height: '200px' })
