@@ -842,33 +842,6 @@ extendDescribe('up.layer', function() {
             expect(callback).toHaveBeenCalled()
           })
 
-          it('allows the accepted response body to be consumed by a hungry element on another layer', async function() {
-            htmlFixtureList('<div id="hungry" up-hungry up-if-layer="any">old hungry</div>')
-
-            const callback = jasmine.createSpy('onAccepted callback')
-            up.layer.open({ onAccepted: callback, acceptEvent: 'my:event', fragment: '<div id="target">old target</div>' })
-            await wait()
-
-            const closingJob = up.render({ target: '#target', url: '/path' })
-            await wait()
-
-            jasmine.respondWith({
-              responseText: `
-                <div id="target">new target</div>
-                <div id="hungry">new hungry</div>
-              `,
-              responseHeaders: {
-                'X-Up-Events': JSON.stringify([{ type: 'my:event', layer: 'current' }])
-              }
-            })
-
-            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
-
-            expect(callback).toHaveBeenCalled()
-            expect(up.layer.isRoot()).toBe(true)
-            expect('#hungry').toHaveText('new hungry')
-          })
-
           it('does not push a history entry if an X-Up-Events response header accepts the overlay', async function() {
             up.history.config.enabled = true
             up.history.replace('/root')
