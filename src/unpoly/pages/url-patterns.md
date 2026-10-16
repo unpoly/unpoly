@@ -31,7 +31,7 @@ up.layer.open({ acceptLocation: "/users/new" })
 
 ## Matching with wildcards
 
-The asterisk (`*`) matches one or many arbitrary characters:
+The asterisk (`*`) matches zero or more arbitrary characters:
 
 ```text
 /users/*
