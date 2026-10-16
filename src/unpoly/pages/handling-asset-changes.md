@@ -15,11 +15,11 @@ In the document below, the highlighted elements are assets:
 ```html
 <html>
   <head>
-    <title>AcmeCorp</title>
+    <title>Our team · AcmeCorp</title>
     <link rel="stylesheet" href="/assets/frontend-5f3aa101.css"> <!-- mark-line -->
     <script src="/assets/frontend-81ba23a9.js"></script> <!-- mark-line -->
     <script>console.log('loaded!')</script>
-    <link rel="canonical" href="https://example.com/dresses/green-dresses">
+    <link rel="canonical" href="https://example.com/team">
   </head>
   <body>
     ...
