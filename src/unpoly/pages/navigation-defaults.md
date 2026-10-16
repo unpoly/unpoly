@@ -1,10 +1,10 @@
 Navigation defaults
 ===================
 
-When a link or form updates the main content of the page, Unpoly behaves like a full page load would:
-the URL and history change, the page scrolls to the top, focus moves to the new content and the
-response is cached. We call such an update a *navigation*. A plain `up.render()` call only
-swaps the fragment, and you opt into each side effect on your own.
+Following a link or submitting a form is a *navigation*. Navigation adds a preset of render options
+that make the update feel like a full page load: responses are cached, and when the main content changes,
+the URL updates, the page scrolls to the top and focus moves to the new content.
+A plain `up.render()` call only swaps the fragment, and you opt into each side effect on your own.
 
 
 What counts as navigation {#navigating-features}
@@ -125,14 +125,14 @@ Sometimes a default should depend on the link or form that was activated.
 Events like `up:link:follow` or `up:form:submit` have a `{ renderOptions }` property
 that lets you change the render options for the coming fragment update.
 
-The code below opens all links inside a form in an overlay, so the user does not lose their form data:
+The code below keeps the scroll position when the user switches tabs, even though each tab swaps the main element:
 
 ```js
-up.on('up:link:follow', function(event, link) {
-  if (link.closest('form')) {
-    event.renderOptions.layer = 'new' // mark-line
-  }
+up.on('up:link:follow', '.tabs a', function(event) {
+  event.renderOptions.scroll = false // mark-line
 })
 ```
+
+See [changing options before rendering](/render-lifecycle#changing-options-before-rendering) for more.
 
 @page navigation-defaults
