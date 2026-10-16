@@ -6,8 +6,8 @@ Unpoly ships with a few transitions that you can use by name.
 You can also combine two animations into a transition, or define your own in JavaScript.
 
 
-Morphing between old and new {#transitions}
-----------------------------
+Using a transition {#transitions}
+------------------
 
 To animate the swap of a fragment, set an `[up-transition]` attribute on a link:
 
@@ -17,7 +17,6 @@ To animate the swap of a fragment, set an `[up-transition]` attribute on a link:
 
 When the response arrives, the old `#story` moves out to the left while the new one moves in from the right.
 
-An effect that morphs between an old and a new element is called a *transition*.
 Transitions work on any fragment update. Forms take the same attribute:
 
 ```html
