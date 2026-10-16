@@ -133,6 +133,7 @@ up.RenderResult = class RenderResult {
   - The target selector was set to `':none'` by either client or server.
   - The server sent an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
     This [closes an overlay](/closing-overlays#from-server) before content is rendered.
+  - Every targeted element was [kept](/keeping-elements) by `[up-keep]`.
 
   @property up.RenderResult#none
   @param {boolean} none

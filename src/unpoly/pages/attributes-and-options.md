@@ -10,8 +10,8 @@ parsed, which values they accept, and how JavaScript options and configured
 defaults override them.
 
 
-One feature, three layers {#layers}
--------------------------
+One option, three places {#places}
+------------------------
 
 You can set most options in three places: a [configuration default](#config) for your entire app,
 an attribute on one element, or an [option](#options) in one JavaScript call.
@@ -37,7 +37,7 @@ up.follow(link, { transition: 'none' }) // mark: transition: 'none'
 ```
 
 When Unpoly navigates, it starts with the [configured defaults](/navigation-defaults), then applies the attributes
-it parsed from the element, and finally the options you passed. Each layer only replaces the
+it parsed from the element, and finally the options you passed. Each place only replaces the
 values it actually sets, so the script above still gets the link's URL and every other attribute.
 
 

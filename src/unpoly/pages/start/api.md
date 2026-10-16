@@ -7,10 +7,10 @@ can be changed through a global configuration. Learn the pattern once, and every
 feature in the reference will look familiar.
 
 
-One feature, three layers {#layers}
--------------------------
+Every attribute has a JavaScript counterpart {#javascript-counterparts}
+--------------------------------------------
 
-The quickest layer is an attribute in your HTML. This link swaps the
+The quickest way is an attribute in your HTML. This link swaps the
 [main element](/main) with an animated transition:
 
 ```html
@@ -31,7 +31,7 @@ instead of repeating the attribute:
 up.fragment.config.navigateOptions.transition = 'cross-fade'
 ```
 
-All three layers **set the same option**. They differ in scope: one element,
+All three **set the same option**. They differ in scope: one element,
 one call, or every navigation in your app.
 
 
