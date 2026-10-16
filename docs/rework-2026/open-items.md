@@ -69,3 +69,7 @@ Questions:
 - Tooling: bin/test --spec filters containing parentheses run 0 specs (e.g. "up.popup (deprecated)").
 - R4 (CHANGELOG rework) → DECIDED 2026-10-16: release notes rewritten as a high-level, partly marketing overview; see docs/rework-2026/release-notes-brief.md. Draft in drafts/release-notes.md, replaces `Unreleased` at release.
 - Later (not pre-launch): consider publishing `up:element:defined` (internal since 2026-10-16). Today it fires once per tag, only for tags Unpoly saw undefined in a mutate scan, so its contract depends on scan timing. Publishing would need a clean contract (track every definition) and maybe a per-element shape. Native customElements.whenDefined() covers known tags.
+- R3 (version) → DECIDED 2026-10-16: 3.15.0 (pre-release 3.15.0-rc1). Compatibility policy: polyfills instead of majors; only one ❌ (peeling).
+- R6 (launch date) → DECIDED 2026-10-16: no fixed date; launch as soon as the pre-launch tasks are done.
+- R5 (promotion) → DECIDED 2026-10-16: the established process. (1) A prose intro paragraph in the release notes. (2) Post the release notes as a GitHub Discussion. (3) Twitter: one announcement tweet, then a few tweets highlighting individual features. Claude drafts the intro and the tweet texts at release time; Henning posts.
+
