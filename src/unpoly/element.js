@@ -95,6 +95,9 @@ up.element = (function() {
   }
 
   function around(element, selector) {
+    // Only the closest match around the element, not all ancestors. This is intentional for viewports:
+    // outer viewports show other content (a page around a scrolling sidebar, the page behind an overlay),
+    // and scrolling them when a fragment updates would be an unexpected side effect.
     return getList(element.closest(selector), subtree(element, selector))
   }
 

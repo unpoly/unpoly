@@ -433,10 +433,10 @@ up.viewport = (function() {
   }
 
   /*-
-  Returns a list of all viewports that are either contained within
-  the given element or are ancestors of the given element.
+  Returns the closest viewport around the given element, and all viewports
+  contained within the given element.
 
-  This is relevant when updating a fragment with `{ scroll: 'restore' | 'reset' }`.
+  This is relevant when updating a fragment with `{ scroll: 'top' | 'bottom' | 'restore' }` or a pixel value.
   In that case we restore / reset the scroll tops of all viewports around the fragment.
 
   @function up.viewport.around
