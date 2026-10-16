@@ -23,6 +23,26 @@ extendDescribe('up.status', function() {
         expect($otherLink).not.toHaveClass('up-current')
       })
 
+      it('sets [aria-current=page] on a current link and removes it when the link is no longer current', async function() {
+        replaceURL('/page1')
+        const [content] = htmlFixtureList('<div id="content">content1</div>')
+        const [nav, link1, link2] = htmlFixtureList(`
+          <nav up-nav>
+            <a href="/page1">page 1</a>
+            <a href="/page2">page 2</a>
+          </nav>
+        `)
+        up.hello(nav)
+
+        expect(link1).toHaveAttribute('aria-current', 'page')
+        expect(link2).not.toHaveAttribute('aria-current')
+
+        await up.render('#content', { content: 'content2', history: true, location: '/page2' })
+
+        expect(link1).not.toHaveAttribute('aria-current')
+        expect(link2).toHaveAttribute('aria-current', 'page')
+      })
+
       it('sets the .up-current class before compilers run', function(done) {
         replaceURL('/foo')
         const $nav = $fixture('#container[up-nav]')
@@ -248,6 +268,37 @@ extendDescribe('up.status', function() {
           expect('#content').toHaveText('content2')
           expect(link1).not.toHaveClass('up-current')
           expect(link2).toHaveClass('up-current')
+        })
+
+        it('updates .up-current when the user goes back in history', async function() {
+          up.history.config.enabled = true
+          up.fragment.config.mainTargets = ['#content']
+          up.history.config.restoreTargets = [':main']
+          const waitForBrowser = 100
+          // Unlike replaceURL(), this makes an entry that Unpoly restores on back
+          up.history.replace('/page1')
+          htmlFixtureList('<div id="content">content1</div>')
+          const [nav, link1, link2] = htmlFixtureList(`
+            <nav up-nav>
+              <a href="/page1">page 1</a>
+              <a href="/page2">page 2</a>
+            </nav>
+          `)
+          up.hello(nav)
+
+          await up.render('#content', { content: 'content2', history: true, location: '/page2' })
+
+          expect(link2).toHaveClass('up-current')
+
+          history.back()
+          await wait(waitForBrowser)
+
+          jasmine.respondWithSelector('#content', { text: 'restored content1' })
+          await wait()
+
+          expect('#content').toHaveText('restored content1')
+          expect(link1).toHaveClass('up-current')
+          expect(link2).not.toHaveClass('up-current')
         })
 
         it('marks an existing expanded link as .up-current as it becomes current', async function() {

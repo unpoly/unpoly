@@ -95,7 +95,7 @@ extendDescribe('up.link', function() {
           expect(link).toHaveBeenDefaultFollowed()
         })
 
-        it('never preloads a link with a [target] attribute (which updates a frame or opens a tab)', async function() {
+        it('never follows a link with a [target] attribute (which updates a frame or opens a tab)', async function() {
           const link = helloFixture('a[href="/path"][up-target=".target"][target="_blank"]')
 
           Trigger.click(link)
@@ -559,57 +559,70 @@ extendDescribe('up.link', function() {
             expect(followSpy.calls.count()).toBe(2)
             expect(link).toHaveOutline()
           })
+        })
 
-          describe('handling of up.link.config.instantSelectors', function() {
+        describe('handling of up.link.config.instantSelectors', function() {
 
-            it('follows matching links without an [up-instant] attribute', async function() {
-              this.followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-              const link = fixture('a[up-follow][href="/foo"].link')
-              up.link.config.instantSelectors.push('.link')
+          it('follows matching links without an [up-instant] attribute', async function() {
+            this.followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+            const link = fixture('a[up-follow][href="/foo"].link')
+            up.link.config.instantSelectors.push('.link')
 
-              Trigger.mousedown(link)
+            Trigger.mousedown(link)
 
-              await wait()
+            await wait()
 
-              expect(this.followSpy).toHaveBeenCalled()
-            })
+            expect(this.followSpy).toHaveBeenCalled()
+          })
 
-            it('allows individual links to opt out with [up-instant=false]', async function() {
-              const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-              const link = fixture('a[up-follow][href="/foo"][up-instant=false].link')
-              up.link.config.instantSelectors.push('.link')
+          it('does not prevent the click on a matching link with an exception in up.link.config.noFollowSelectors', async function() {
+            up.link.config.followSelectors.push('a[href]')
+            up.link.config.instantSelectors.push('a[href]')
+            const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+            const [link] = htmlFixtureList('<a href="/file.pdf" download>Download</a>')
 
-              Trigger.mousedown(link)
+            Trigger.clickSequence(link)
+            await wait()
 
-              await wait()
+            expect(followSpy).not.toHaveBeenCalled()
+            expect(link).toHaveBeenDefaultFollowed()
+          })
 
-              expect(followSpy).not.toHaveBeenCalled()
-            })
+          it('allows individual links to opt out with [up-instant=false]', async function() {
+            const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+            const link = fixture('a[up-follow][href="/foo"][up-instant=false].link')
+            up.link.config.instantSelectors.push('.link')
 
-            it('allows to configure exceptions in up.link.config.noInstantSelectors', async function() {
-              up.link.config.instantSelectors.push('.include')
-              up.link.config.noInstantSelectors.push('.exclude')
-              const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-              const link = fixture('a.include.exclude[up-follow][href="/foo"]')
+            Trigger.mousedown(link)
 
-              Trigger.mousedown(link)
+            await wait()
 
-              await wait()
+            expect(followSpy).not.toHaveBeenCalled()
+          })
 
-              expect(followSpy).not.toHaveBeenCalled()
-            })
+          it('allows to configure exceptions in up.link.config.noInstantSelectors', async function() {
+            up.link.config.instantSelectors.push('.include')
+            up.link.config.noInstantSelectors.push('.exclude')
+            const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+            const link = fixture('a.include.exclude[up-follow][href="/foo"]')
 
-            it('allows individual links to opt out of all Unpoly link handling with [up-follow=false]', async function() {
-              this.followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
-              const link = fixture('a[up-follow][href="/foo"][up-follow=false].link')
-              up.link.config.instantSelectors.push('.link')
+            Trigger.mousedown(link)
 
-              Trigger.mousedown(link)
+            await wait()
 
-              await wait()
+            expect(followSpy).not.toHaveBeenCalled()
+          })
 
-              expect(this.followSpy).not.toHaveBeenCalled()
-            })
+          it('allows individual links to opt out of all Unpoly link handling with [up-follow=false]', async function() {
+            this.followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+            const link = fixture('a[up-follow][href="/foo"][up-follow=false].link')
+            up.link.config.instantSelectors.push('.link')
+
+            Trigger.mousedown(link)
+
+            await wait()
+
+            expect(this.followSpy).not.toHaveBeenCalled()
           })
         })
       })
