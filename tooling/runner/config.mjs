@@ -1,7 +1,8 @@
+// Also takes a parsed boolean, since a Config is rebuilt from its own values (see --file).
 function parseBoolean(str, defaultValue = undefined) {
-  if (str === 'true' || str === '1') {
+  if (str === true || str === 'true' || str === '1') {
     return true
-  } else if (str === 'false' || str === '0') {
+  } else if (str === false || str === 'false' || str === '0') {
     return false
   } else {
     return defaultValue
