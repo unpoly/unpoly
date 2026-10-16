@@ -2,11 +2,11 @@ Motion
 ======
 
 Unpoly can animate a fragment update: the old content fades or slides out while
-the new content comes in. You pick an effect by name in an HTML attribute,
+the new content comes in. You pick a motion effect by name in an HTML attribute,
 or define your own with a few lines of JavaScript. Users who have asked their
 system to reduce motion get instant updates instead.
 
-Unpoly has two kinds of effects. A *transition* morphs an old element into its new version.
+Unpoly has two kinds of motion effects. A *transition* morphs an old element into its new version.
 An *animation* plays on a single element that has no counterpart, like a new list item or an opening overlay.
 
 
@@ -46,8 +46,8 @@ To animate any element from JavaScript, call `up.animate()`.
 Controlling motion {#controlling-motion}
 ------------------
 
-You can change the duration and easing of every effect, per element or for the whole app,
-and users who prefer reduced motion see no effects at all:
+You can change the duration and easing of every motion effect, per element or for the whole app,
+and users who prefer reduced motion see no motion at all:
 
 ```html
 <a href="/stories/2" up-target="#story" up-transition="move-left" up-duration="300">Next story</a> <!-- mark: up-duration="300" -->

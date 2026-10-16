@@ -2,8 +2,8 @@ Controlling motion
 ==================
 
 Every [transition](/transitions) and [animation](/animations) plays with a duration and easing
-that you can change per element or for the whole app. Users who prefer reduced motion see no effects,
-and you can turn them off yourself. When your code needs the final state, wait for running effects to end
+that you can change per element or for the whole app. Users who prefer reduced motion see no motion,
+and you can turn them off yourself. When your code needs the final state, wait for running motion effects to end
 or finish them right away.
 
 
@@ -12,7 +12,7 @@ Duration and easing {#duration-and-easing}
 
 ### Changing the duration {#duration}
 
-Effects take 175 milliseconds by default.
+Motion effects take 175 milliseconds by default.
 To change the duration for one element, set an `[up-duration]` attribute:
 
 ```html
@@ -25,7 +25,7 @@ From JavaScript, pass a `{ duration }` option to `up.render()`, `up.animate()` o
 up.animate('.warning', 'fade-in', { duration: 400 }) // mark: duration
 ```
 
-To change the default for all effects, set `up.motion.config.duration`:
+To change the default for all motion effects, set `up.motion.config.duration`:
 
 ```js
 up.motion.config.duration = 300
@@ -37,7 +37,7 @@ See `up.layer.config` for options like `up.layer.config.overlay.openDuration`.
 ### Changing the easing {#easing}
 
 The *easing* is a [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
-that controls how an effect accelerates. The default is `ease`.
+that controls how a motion effect accelerates. The default is `ease`.
 To change it for one element, set an `[up-easing]` attribute:
 
 ```html
@@ -51,21 +51,21 @@ up.animate('.warning', 'fade-in', { easing: 'linear' }) // mark: easing
 ```
 
 Any CSS timing function works, including `cubic-bezier()` curves.
-To change the default for all effects, set `up.motion.config.easing`.
+To change the default for all motion effects, set `up.motion.config.easing`.
 
 
-Reduced motion and disabling effects {#disabling-animation-globally}
-------------------------------------
+Reduced motion and disabling motion {#disabling-animation-globally}
+-----------------------------------
 
-Effects are enabled unless the user has asked their system to
+Motion is enabled unless the user has asked their system to
 [minimize non-essential motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion).
 In that case `up.motion.config.enabled` is `false`. When [logging](/up.log.enable) is enabled,
 Unpoly prints *Animations are disabled* to the console when it boots.
 
-A disabled effect jumps to its last frame instantly.
+With motion disabled, a motion effect jumps to its last frame instantly.
 The page ends up in the same state either way, so your code never needs to check the setting.
 
-To disable effects for all users, set the option yourself:
+To disable motion for all users, set the option yourself:
 
 ```js
 up.motion.config.enabled = false
@@ -75,16 +75,16 @@ This is useful in automated integration tests, where a test might otherwise asse
 while an element is still fading in. It also removes a source of
 [flaky tests](https://makandracards.com/makandra/47336-fixing-flaky-integration-tests).
 
-To force-enable effects even for users who prefer reduced motion, set `up.motion.config.enabled = true`.
+To force-enable motion even for users who prefer reduced motion, set `up.motion.config.enabled = true`.
 
-To skip a single effect while others keep playing, pass `none` or `false` as the animation or transition.
+To skip a single motion effect while others keep playing, pass `none` or `false` as the animation or transition.
 
 
-Running code after an effect {#running-code-after-an-animation}
-----------------------------
+Running code after a motion effect {#running-code-after-an-animation}
+----------------------------------
 
 The promise returned by `up.render()` fulfills when the new fragment is in the DOM,
-while its transition may still be playing. To run code after all effects have ended,
+while its transition may still be playing. To run code after all motion effects have ended,
 await the `up.RenderJob#finished` promise, or pass an `{ onFinished }` callback:
 
 ```js
@@ -107,24 +107,24 @@ up.destroy('.flash', {
 See [[render-lifecycle#postprocessing]] for everything that may still change a fragment after rendering.
 
 
-Finishing running effects {#finishing-running-animations}
--------------------------
+Finishing running motion effects {#finishing-running-animations}
+--------------------------------
 
-To complete all effects on the screen, call `up.motion.finish()`.
-Every running effect jumps to its last frame and its promise settles:
+To complete all motion effects on the screen, call `up.motion.finish()`.
+Every running motion effect jumps to its last frame and its promise settles:
 
 ```js
 up.motion.finish()
 ```
 
-Pass an element to only finish effects on that element and its children:
+Pass an element to only finish motion effects on that element and its children:
 
 ```js
 up.motion.finish('.list')
 ```
 
-Unpoly also finishes effects by itself when they would collide. When you animate
-an element that is already animating, the running effect is completed before the new one starts.
+Unpoly also finishes motion effects by itself when they would collide. When you animate
+an element that is already animating, the running one is completed before the new one starts.
 The same happens when a fragment is updated again while its transition is still playing.
 
 
