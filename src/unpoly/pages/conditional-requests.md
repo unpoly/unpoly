@@ -120,6 +120,12 @@ An `ETag` is the more flexible choice. It is easy to mix additional data into th
 like the ID of the signed-in user or the hash of the deployed commit,
 so that a change in either produces new content.
 
+> [tip]
+> Many frameworks compare versions and send the `304` response for you.
+> In Rails, use [`fresh_when` or `stale?`](https://api.rubyonrails.org/classes/ActionController/ConditionalGet.html).
+> In Django, use the [`@condition` decorator](https://docs.djangoproject.com/en/stable/topics/conditional-view-processing/).
+> In Symfony and Laravel, call [`$response->isNotModified($request)`](https://symfony.com/doc/current/http_cache/validation.html).
+
 
 Individual versions per fragment {#fragment-versions}
 --------------------------------
@@ -182,7 +188,7 @@ Resources
 ---------
 
 - [MDN: Conditional requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests)
-- [RFC 7232: Conditional requests](https://datatracker.ietf.org/doc/html/rfc7232)
+- [RFC 9110: Conditional requests](https://httpwg.org/specs/rfc9110.html#conditional.requests)
 
 
 @page conditional-requests
