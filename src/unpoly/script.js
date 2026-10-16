@@ -296,7 +296,17 @@ up.script = (function() {
   the browser will render between tasks. If you have render-blocking mutations that should be hidden from the user,
   they must happen in the first task.
 
-  ![Timing of compiler tasks and browser render frames](images/compiler-tasks.svg){:width='670'}
+  <figure>
+    <img src="images/compiler-tasks.svg" alt="Timing diagram of compiler tasks and browser renders" width="670">
+    <figcaption markdown="1">
+
+  After Unpoly updates the DOM, it runs synchronous compilers and the first task of each async compiler.
+  Only then does the browser render. The promise returned by `up.render()` fulfills after this first task.
+  The second task of an async compiler runs after the browser has rendered.
+  `up.render().finished` fulfills only after that task is done.
+
+    </figcaption>
+  </figure>
 
   Async compilers will not delay the promise returned by rendering functions `up.render()` or `up.layer.open()`.\
   Async compilers *will* delay the promise returned by [`up.render().finished`](/render-lifecycle#postprocessing)

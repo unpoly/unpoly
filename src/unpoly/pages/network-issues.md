@@ -13,7 +13,15 @@ Disconnects
 
 In a vanilla HTML document, clicking a link while offline will replace your app with a standard error screen, no questions asked:
 
-![Browser error when offline](images/browser-offline.png){:width='500'}
+<figure>
+  <img src="images/browser-offline.png" alt="Screenshot of Chrome's offline error page" width="500">
+  <figcaption markdown="1">
+
+Chrome's "No internet" page, with suggestions to check the network cables and reconnect to Wi-Fi,
+and the error code `ERR_INTERNET_DISCONNECTED`.
+
+  </figcaption>
+</figure>
 
 Interacting with an Unpoly-enhanced [link](/up-follow) or [form](/submitting-forms) while offline will *not* change the page.
 Instead Unpoly emits an `up:fragment:offline` event and lets you decide how to handle the connection loss.

@@ -4,7 +4,16 @@ Progress bar
 When a request takes longer than 400 ms, Unpoly shows a thin progress bar at the top edge of the screen.
 This mimics the loading indicator that browsers show during full page loads.
 
-![Progress bar animation](images/progress-bar.gif)
+<figure>
+  <img src="images/progress-bar.gif" alt="Animation of the progress bar">
+  <figcaption markdown="1">
+
+The user clicks a link in the navigation bar of a demo app. While the next page is loading,
+a blue bar grows from left to right along the top edge of the screen.
+When the new page appears, the bar is gone.
+
+  </figcaption>
+</figure>
 
 The progress bar requires no setup. You can [style it](#styling), [control when it appears](#timing),
 [disable it](#disabling) or replace it with a [custom loading indicator](#custom-implementation).

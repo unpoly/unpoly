@@ -4,7 +4,17 @@ Placeholders
 Placeholders are temporary spinners or UI skeletons shown within a fragment while it is loading.
 They appear instantly after the user's interaction and are replaced by the server response.
 
-<video src="images/placeholders.webm" controls width="600" aria-label="UI skeletons are shown while screens are loading"></video>
+<figure>
+  <video src="images/placeholders.webm" controls width="600" aria-label="Video: UI skeletons while screens are loading"></video>
+  <figcaption markdown="1">
+
+In a demo app, the user clicks "Projects" in the navigation bar. While the list is loading,
+gray bars in the shape of a heading, a button and table rows take the place of the content.
+Then the user clicks "New project". A modal overlay opens with the skeleton of a form,
+which the real form replaces when it has loaded.
+
+  </figcaption>
+</figure>
 
 By providing clues for how the page will ultimately look,
 placeholders make long-loading interactions feel more responsive.

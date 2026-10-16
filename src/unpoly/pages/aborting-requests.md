@@ -15,7 +15,15 @@ Requests targeting other fragments are not aborted.
 To visualize this, consider a layout with a sidebar (`#side`) and a content area (`#main`).
 Contained within `#main` is a smaller fragment `#box`:
 
-![Layout with #side, #main and #box fragments](images/side-main-box.svg){:width='350'}
+<figure>
+  <img src="images/side-main-box.svg" alt="Diagram of a layout with three fragments" width="350">
+  <figcaption markdown="1">
+
+The sidebar `#side` is on the left and the content area `#main` on the right, side by side.
+The smaller `#box` sits inside `#main`.
+
+  </figcaption>
+</figure>
 
 In this layout, rendering has the following effects:
 

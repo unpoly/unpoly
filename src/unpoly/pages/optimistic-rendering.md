@@ -95,7 +95,17 @@ If a server-validated constraint is violated, the optimistic preview is briefly 
 server-provided form state. For example, the TODO list from the [demo app](#demo) has a server-validated constraint
 that task items must be unique:
 
-<video src="images/optimistic-validation-failure.webm" controls width="600" aria-label="An optimistic form submission showing a server-provided validation error"></video>
+<figure>
+  <video src="images/optimistic-validation-failure.webm" controls width="600" aria-label="Video: An optimistic submission that fails validation on the server"></video>
+  <figcaption markdown="1">
+
+The TODO list already has a task "Buy toast". The user types "Buy toast" again and clicks Save.
+The new task appears at the top of the list right away, in gray and without an Edit button,
+while the Save button shows a spinner. When the server responds, the optimistic task is gone,
+and the form shows the error "has already been taken" below the text field.
+
+  </figcaption>
+</figure>
 
 If a server-validated constraint violation is likely to occur, consider conveying previewed state
 as "pending", e.g. by reducing its opacity or using gray text.
@@ -159,7 +169,17 @@ You will see that everything reacts instantly, despite an [RTT](https://en.wikip
 of ≈1200 ms (depending on your location). The `X tasks left` indicator is not rendered optimistically on purpose,
 so you see when an actual server response replaces the optimistic update:
 
-<video src="images/optimistic-rendering-demo.mp4" controls width="600" aria-label="The demo app reacting instantly under high latency"></video>
+<figure>
+  <video src="images/optimistic-rendering-demo.mp4" controls width="600" aria-label="Video: The demo app reacting instantly under high latency"></video>
+  <figcaption markdown="1">
+
+In a task list, the user adds the tasks "Rake lawn" and "Buy honey", drags "Buy honey" to a new position,
+checks off two tasks and clicks "Clear done". Every change appears the moment the user makes it.
+The "tasks left" counter is not rendered optimistically. It changes a moment later,
+when the server response arrives.
+
+  </figcaption>
+</figure>
 
 The code for the demo app is [available on GitHub](https://github.com/unpoly/unpoly-demo).
 Although it is implemented as a Rails application,

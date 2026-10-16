@@ -15,7 +15,56 @@ Lifecycle diagram
 
 The diagram below visualizes the sequence of render steps, edge cases and error states:
 
-![Render lifecycle diagram](images/render-lifecycle.svg){:width='900'}
+<figure>
+  <img src="images/render-lifecycle.svg" alt="Flowchart of the render lifecycle" width="900">
+  <figcaption markdown="1">
+
+The diagram has three columns: the regular flow in the middle, edge cases on the left
+and error states on the right. A render pass moves through these stages:
+
+1. A guard event is emitted, like `up:link:follow` or `up:form:submit`.
+   Preventing it rejects `up.render()` with an `up.AbortError`.
+2. Default render options are applied from `up.fragment.config.navigateOptions`.
+3. Conflicting requests are aborted.
+4. With `{ cache: true }`, Unpoly checks the cache. A cache hit skips the request
+   and continues with `up:fragment:loaded`.
+5. Status effects are applied: previews, placeholders, disabling and `.up-active`.
+6. The HTTP request is sent. When the response is received, the status effects are reverted.
+   On a network issue or timeout, the status effects are reverted and `up.render()` rejects with `up.Offline`,
+   emitting `up:fragment:offline` and calling `onOffline()`.
+   When another request targets the same fragment, the status effects are reverted and `up.render()` rejects with an `up.AbortError`.
+7. `up:fragment:loaded` is emitted and `onLoaded()` is called. Preventing the event rejects `up.render()`
+   with an `up.AbortError`. When the server responds with an error status, the render pass continues
+   with the fail-prefixed options, like `failTarget` and `onFailFinished`.
+   An empty response skips ahead to focus.
+8. Required targets are matched. When neither the page nor the response has a match, fallback targets
+   like `:main` are tried. When no fallback matches, `up.render()` rejects with `up.CannotMatch`.
+9. When opening a new layer, the layer is created (`up:layer:open`, `up:layer:opened`).
+   When updating an existing layer, optional targets are matched (`[up-hungry]`, `:maybe`).
+10. Asset versions are compared. When assets have changed, `up:assets:changed` is emitted.
+11. History is updated (`up:location:changed`, `up:layer:location:changed`).
+12. Layer close conditions are checked. When the layer closes, `up.render()` rejects with an `up.AbortError`.
+13. DOM elements are updated. For `[up-keep]` elements, `up:fragment:keep` is emitted.
+    Preventing that event updates the element after all.
+14. Compilers run on new elements (`up:fragment:inserted`), destructors on old elements (`up:fragment:destroyed`).
+    When a compiler or destructor throws, an `error` event is emitted on `window` and the render pass continues.
+15. Focus and scroll position are updated.
+16. After a successful response, `up.render()` fulfills and `onRendered()` is called with an `up.RenderResult`.
+    After a failed response, `up.render()` rejects and `onFailRendered()` is called.
+17. The browser renders the changes. Then the transition (or `failTransition`) runs and async compilers settle.
+18. `up.render().finished` fulfills and `onFinished()` is called with the latest `up.RenderResult`.
+    After a failed response, `up.render().finished` rejects and `onFailFinished()` is called.
+
+Every rejection of `up.render()` also calls `onError()`.
+
+When the rendered content was expired cache content, Unpoly sends a revalidation request
+(a conditional GET) after async compilers have settled. Its response goes through matching targets,
+updating the DOM and running compilers, and `onRendered()` is called a second time.
+`up.render().finished` waits for the revalidation. When it fails from a network issue or timeout,
+`up.render().finished` rejects with `up.Offline`, emitting `up:fragment:offline` and calling `onOffline()`.
+
+  </figcaption>
+</figure>
 
 Each stage has an option or event to hook into. Many of them are explained on this page.
 The others have a page of their own:

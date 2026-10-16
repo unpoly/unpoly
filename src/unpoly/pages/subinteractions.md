@@ -16,7 +16,15 @@ Imagine an application that manages *projects* and *companies*:
 - Each company may have multiple projects.
 - The application has [CRUD interfaces](https://en.wikipedia.org/wiki/CRUD) for projects and companies.
 
-![Screenshot of a CRUD interface](images/crud-companies-projects.png){:width='500'}
+<figure>
+  <img src="images/crud-companies-projects.png" alt="Screenshot of a company page in a CRUD app" width="500">
+  <figcaption markdown="1">
+
+The page for a company shows its name and address, Edit and Delete buttons, and a list of the company's projects.
+A navigation bar links to the lists of all companies and all projects.
+
+  </figcaption>
+</figure>
 
 With a sequential screen flow, a missing company breaks the user's work:
 
@@ -38,7 +46,20 @@ With a *subinteraction*, the project form stays open:
 
 The diagram shows the difference between the two control flows:
 
-![Differences between sequential screen flow and subinteractions](images/subinteraction-flow.svg){:width='600'}
+<figure>
+  <img src="images/subinteraction-flow.svg" alt="Flowchart comparing a sequential screen flow with a subinteraction" width="600">
+  <figcaption markdown="1">
+
+Both flows go from "List projects" to "New project" and end at "Show project".
+
+In the sequential flow, the user leaves "New project" for "New company" and "Save company",
+then arrives at a second "New project" screen. The state of the first project form is lost between the two.
+
+With a subinteraction, there is only one "New project" screen. "New company" and "Save company" happen
+while it stays open, and saving the company passes `{ companyID: 3 }` back to the project form.
+
+  </figcaption>
+</figure>
 
 
 Starting a subinteraction

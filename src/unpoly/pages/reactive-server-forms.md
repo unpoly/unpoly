@@ -22,7 +22,16 @@ All of these are implemented with the `[up-validate]` attribute.
 
 This is a form to purchase postage for international parcels:
 
-![A form with many dependent elements](images/form-with-dependent-fields.svg){:width='625'}
+<figure>
+  <img src="images/form-with-dependent-fields.svg" alt="Mockup of a form to buy postage" width="625">
+  <figcaption markdown="1">
+
+The form has a select for the continent (Europe), a select for the country (Switzerland),
+a text field for the weight in grams (3500), and the price (23,00 €) shown as text, not as a field.
+A "Buy stamps" button submits the form.
+
+  </figcaption>
+</figure>
 
 The fields in this form have many dependencies between them:
 

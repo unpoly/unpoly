@@ -16,7 +16,15 @@ Use `up.preview()` directly when these don't cover your case.
 
 We want to show a spinner animation within a button while it is loading:
 
-<video src="images/button-spinner.mp4" controls loop width="350" aria-label="A button showing a spinning animation when pressed"></video>
+<figure>
+  <video src="images/button-spinner.mp4" controls loop width="350" aria-label="Video: A button showing a spinner while loading"></video>
+  <figcaption markdown="1">
+
+The user clicks a "Save changes" button. While the request is loading, the button turns darker
+and a spinner turns next to its label. When the request ends, the spinner is gone.
+
+  </figcaption>
+</figure>
 
 To achieve this effect, we define a *preview* named `link-spinner` with `up.preview()`:
 

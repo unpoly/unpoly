@@ -474,7 +474,16 @@ up.radio = (function() {
   /*-
   Use an `[up-flashes]` element to show confirmations, alerts or warnings.
 
-  ![A confirmation flash, an error flash and a warning flash](images/flashes.png){:width='480'}
+  <figure>
+    <img src="images/flashes.png" alt="Screenshot of three flash messages" width="480">
+    <figcaption markdown="1">
+
+  Three flash messages stacked on top of each other: a confirmation ("User created successfully!"),
+  an error ("Could not save your changes!") and a warning ("Your credit card is expiring in 3 days.").
+  Each kind has its own color, so the user can tell them apart at a glance.
+
+    </figcaption>
+  </figure>
 
   Your application layout should have an empty `[up-flashes]` element to indicate where flash messages should be inserted:
 

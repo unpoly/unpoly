@@ -53,7 +53,14 @@ Notifying the user {#notifying-the-user}
 A friendly way to handle a new version is a notification banner, offering to reload the page.
 The user can reload at their convenience, without losing their work:
 
-![Notification for a new app version](images/assets-changed-notification.png){:width='305'}
+<figure>
+  <img src="images/assets-changed-notification.png" alt="Screenshot of a new version banner" width="305">
+  <figcaption markdown="1">
+
+A banner reads "A newer version is available!" next to a Reload button.
+
+  </figcaption>
+</figure>
 
 The code below inserts a clickable `#new-version` banner when assets change:
 
