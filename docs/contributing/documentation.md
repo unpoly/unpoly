@@ -814,6 +814,10 @@ and events that still lack one.
 >
 > The page's [Markdown twin](#markdown-for-agents) needs no redirect of its own: a `.md`
 > URL without a file redirects to its page.
+>
+> Anchors (`#section`) need no such care. When you rename or move a section, update the
+> links in this repository and don't leave an `<a id="…">` shim behind. An external link
+> to the old anchor still opens the page, just at the top.
 
 
 ### Overview pages

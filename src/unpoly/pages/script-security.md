@@ -32,8 +32,6 @@ To provide the nonce some other way, configure `up.script.config.cspNonce()`.
 Callbacks in attributes {#attribute-callbacks}
 -----------------------
 
-<a id="callbacks"></a>
-
 Unpoly introduces new HTML attributes that can execute JavaScript code.\
 These generally work like [`[onclick]`](https://www.w3schools.com/jsref/event_onclick.asp) or
 [`[onload]`](https://www.w3schools.com/tags/ev_onload.asp) attributes in vanilla HTML.
