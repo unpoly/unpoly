@@ -289,6 +289,26 @@ extendDescribe('up.network', function() {
           await expectAsync(request).toBeRejectedWith(jasmine.objectContaining({ status: 500, ok: false }))
         })
 
+        it('fulfills with an error response when { fail: false } is passed', async function() {
+          const request = up.request('/url', { fail: false })
+          await wait()
+
+          jasmine.respondWith('error text', { status: 500 })
+
+          await expectAsync(request).toBeResolvedTo(jasmine.objectContaining({ status: 500, text: 'error text' }))
+        })
+
+        it('decides with a { fail } function that receives the response', async function() {
+          const fail = jasmine.createSpy('fail function').and.callFake((response) => response.status === 500)
+          const request = up.request('/url', { fail })
+          await wait()
+
+          jasmine.respondWith('validation errors', { status: 422 })
+
+          await expectAsync(request).toBeResolvedTo(jasmine.objectContaining({ status: 422 }))
+          expect(fail).toHaveBeenCalledWith(jasmine.objectContaining({ status: 422, text: 'validation errors' }))
+        })
+
         describe('with { timeout } option', function() {
 
           it('rejects with up.Offline when the request times out', async function() {
@@ -320,6 +340,15 @@ extendDescribe('up.network', function() {
             up.network.config.timeout = 456789
             const request = up.request('/url')
             expect(request.timeout).toBe(456789)
+          })
+
+          it('does not use a timeout when up.network.config.timeout is set to undefined', async function() {
+            up.network.config.timeout = undefined
+            const request = up.request('/url')
+            await wait()
+
+            expect(request.timeout).toBeMissing()
+            expect(jasmine.lastRequest().timeout).toBeFalsy()
           })
 
         })
@@ -776,6 +805,39 @@ extendDescribe('up.network', function() {
               done()
             })
           })
+        })
+      })
+
+      describe('with { payload } option', function() {
+
+        it('sends the given payload with the given { contentType } instead of encoding { params }', async function() {
+          const payload = JSON.stringify({ foo: 'bar' })
+          up.request({ url: '/path', method: 'post', payload, contentType: 'application/json', params: { other: 'value' } })
+          await wait()
+
+          expect(jasmine.lastRequest().params).toBe(payload)
+          expect(jasmine.lastRequest().requestHeaders['Content-Type']).toBe('application/json')
+        })
+      })
+
+      describe('with { contentType } option', function() {
+
+        it('encodes params as URL-encoded by default when there are no binary values', async function() {
+          up.request({ url: '/path', method: 'post', params: { foo: 'bar' } })
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['Content-Type']).toBe('application/x-www-form-urlencoded')
+          expect(jasmine.lastRequest().params).toBe('foo=bar')
+        })
+
+        it("encodes params as FormData with { contentType: 'multipart/form-data' }, even without binary values", async function() {
+          up.request({ url: '/path', method: 'post', params: { foo: 'bar' }, contentType: 'multipart/form-data' })
+          await wait()
+
+          // The browser sets a Content-Type header with a MIME boundary for a FormData payload
+          expect(jasmine.lastRequest().requestHeaders['Content-Type']).toBeMissing()
+          expect(jasmine.lastRequest().params).toEqual(jasmine.any(FormData))
+          expect(jasmine.lastRequest().params.get('foo')).toBe('bar')
         })
       })
 

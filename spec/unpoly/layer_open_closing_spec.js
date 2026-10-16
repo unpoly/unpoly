@@ -842,6 +842,16 @@ extendDescribe('up.layer', function() {
             expect(callback).toHaveBeenCalled()
           })
 
+          it('accepts the layer when one of multiple event types given as an array was emitted on the layer', async function() {
+            const callback = jasmine.createSpy('onAccepted callback')
+            await up.layer.open({ onAccepted: callback, acceptEvent: ['foo', 'bar'] })
+
+            up.layer.emit('bar')
+            await wait()
+
+            expect(callback).toHaveBeenCalled()
+          })
+
           it('does not push a history entry if an X-Up-Events response header accepts the overlay', async function() {
             up.history.config.enabled = true
             up.history.replace('/root')
@@ -961,6 +971,16 @@ extendDescribe('up.layer', function() {
 
             up.layer.emit('bar')
 
+            await wait()
+
+            expect(callback).toHaveBeenCalled()
+          })
+
+          it('dismisses the layer when one of multiple event types given as an array was emitted on the layer', async function() {
+            const callback = jasmine.createSpy('onDismissed callback')
+            await up.layer.open({ onDismissed: callback, dismissEvent: ['foo', 'bar'] })
+
+            up.layer.emit('bar')
             await wait()
 
             expect(callback).toHaveBeenCalled()
@@ -1507,6 +1527,23 @@ extendDescribe('up.layer', function() {
             expect(callback).toHaveBeenCalledWith(jasmine.objectContaining({ value }))
           })
 
+          it('accepts the layer when the layer has reached one of multiple locations given as an array', async function() {
+            const callback = jasmine.createSpy('onAccepted callback')
+            await up.layer.open({
+              target: '.overlay-content',
+              content: 'start content',
+              location: '/start-location',
+              onAccepted: callback,
+              acceptLocation: ['/users', '/records/*']
+            })
+
+            const closingJob = up.navigate('.overlay-content', { content: 'record content', location: '/records/5' })
+
+            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+            expect(up.layer.isRoot()).toBe(true)
+            expect(callback).toHaveBeenCalled()
+          })
+
           it('accepts the layer when the layer has reached the given location pattern', async function() {
             const callback = jasmine.createSpy('onAccepted callback')
             up.layer.open({
@@ -1901,6 +1938,23 @@ extendDescribe('up.layer', function() {
 
           beforeEach(function() {
             up.history.config.enabled = true
+          })
+
+          it('dismisses the layer when the layer has reached one of multiple locations given as an array', async function() {
+            const callback = jasmine.createSpy('onDismissed callback')
+            await up.layer.open({
+              target: '.overlay-content',
+              content: 'start content',
+              location: '/start-location',
+              onDismissed: callback,
+              dismissLocation: ['/users', '/records/*']
+            })
+
+            const closingJob = up.navigate('.overlay-content', { content: 'record content', location: '/records/5' })
+
+            await expectAsync(closingJob).toBeRejectedWith(jasmine.any(up.Aborted))
+            expect(up.layer.isRoot()).toBe(true)
+            expect(callback).toHaveBeenCalled()
           })
 
           it('dismisses the layer when the layer has reached the given location', async function() {

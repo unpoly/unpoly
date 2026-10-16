@@ -540,6 +540,15 @@ describe('up.script', function() {
         expect(up.script.findAssets()).not.toContain(link)
       })
 
+      it('finds elements matching a selector pushed to up.script.config.assetSelectors', function() {
+        const meta = fixture(document.head, 'meta[name="app-version"][content="1.2.3"]')
+        expect(up.script.findAssets()).not.toContain(meta)
+
+        up.script.config.assetSelectors.push('meta[name="app-version"]')
+
+        expect(up.script.findAssets()).toContain(meta)
+      })
+
       it('allows to opt out by configuring up.script.config.noAssetSelectors', function() {
         const link = fixture(document.head, 'link[rel="stylesheet"][href="/excluded.css"]')
         up.script.config.noAssetSelectors.push('link[href="/excluded.css"]')
@@ -595,6 +604,17 @@ describe('up.script', function() {
         'unsafe-inline': "script-src 'unsafe-inline'",
         'unsafe-eval': "script-src 'unsafe-eval'",
       }
+
+      it('does not warn with up.script.config.cspWarnings = false', function() {
+        up.script.config.scriptElementPolicy = 'pass'
+        up.script.config.evalCallbackPolicy = 'pass'
+        up.script.config.cspWarnings = false
+        let cspInfo = up.CSPInfo.fromHeader(CSP_PRESETS['strict-dynamic'])
+
+        up.script.warnOfUnsafeCSP(cspInfo)
+
+        expect(warnSpy).not.toHaveBeenCalled()
+      })
 
       describe('unexpectedly liberal script execution', function() {
 

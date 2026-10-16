@@ -288,6 +288,27 @@ describe('up.Layer.Overlay', function() {
       expect(location.href).toMatchURL(jasmine.locationBeforeExample)
     })
 
+    it("does not restore the parent layer's location and title with { history: false }", async function() {
+      up.history.config.enabled = true
+      document.title = 'Root title'
+
+      await up.layer.open({
+        location: '/path/to/modal',
+        title: 'Overlay title',
+        content: 'element text',
+        history: true
+      })
+
+      expect(location.href).toMatchURL('/path/to/modal')
+      expect(document.title).toBe('Overlay title')
+
+      up.layer.current.accept(null, { history: false })
+
+      expect(up.layer.isRoot()).toBe(true)
+      expect(location.href).toMatchURL('/path/to/modal')
+      expect(document.title).toBe('Overlay title')
+    })
+
     it("emits up:location:changed, but not up:layer:location:changed, when restoring the parent layer's location", async function() {
       up.history.config.enabled = true
       up.history.replace('/root-path')
@@ -554,6 +575,27 @@ describe('up.Layer.Overlay', function() {
 
       expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-top', jasmine.anything())
       expect(up.animate).not.toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
+    })
+
+    it('uses { duration } and { easing } options instead of the configured close duration and easing', async function() {
+      up.motion.config.enabled = true
+      await up.layer.open({ mode: 'modal', openAnimation: false, closeAnimation: 'fade-out', closeDuration: 5, closeEasing: 'linear' })
+      spyOn(up, 'animate').and.callThrough()
+
+      up.layer.current.accept(null, { duration: 7, easing: 'ease-in' })
+
+      expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'fade-out', jasmine.objectContaining({ duration: 7, easing: 'ease-in' }))
+    })
+
+    it('uses the configured close easing', async function() {
+      up.motion.config.enabled = true
+      up.layer.config.overlay.closeEasing = 'linear'
+      await up.layer.open({ mode: 'modal', openAnimation: false, closeAnimation: 'fade-out', closeDuration: 5 })
+      spyOn(up, 'animate').and.callThrough()
+
+      up.layer.current.accept()
+
+      expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'fade-out', jasmine.objectContaining({ easing: 'linear' }))
     })
 
     it("uses the overlay instance's close duration when the global animation duration has been set to zero (bugfix)", async function() {
@@ -1200,6 +1242,29 @@ describe('up.Layer.Overlay', function() {
         expect(up.layer.stack[1].location).toEqual('/ol1#hash')
         expect(up.layer.stack[2].location).toEqual('/ol2#hash')
       })
+    })
+  })
+
+  describe('#title', function() {
+
+    beforeEach(function() { up.history.config.enabled = true })
+
+    it('returns the document title if the layer is the frontmost layer with visible history', async function() {
+      await up.layer.open({ content: 'overlay content', location: '/overlay', title: 'Overlay title', history: true })
+
+      document.title = 'Title changed by a script'
+
+      expect(up.layer.current.title).toBe('Title changed by a script')
+    })
+
+    it('returns the title of the last fragment update for an overlay that does not render history', async function() {
+      document.title = 'Root title'
+      await up.layer.open({ content: 'step1', history: false })
+
+      await up.render({ content: 'step2', history: true, location: '/step2', title: 'Step 2 title', target: ':layer' })
+
+      expect(up.layer.current.title).toBe('Step 2 title')
+      expect(document.title).toBe('Root title')
     })
   })
 

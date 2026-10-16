@@ -557,6 +557,24 @@ extendDescribe('up.fragment', function() {
 
           itBehavesLikeBlock()
 
+          it('does not block a script matching a selector pushed to up.script.config.noScriptSelectors', async function() {
+            up.script.config.noScriptSelectors.push('script[data-keep]')
+            htmlFixtureList('<div id="target">old text</div>')
+
+            await up.render({
+              fragment: `
+                <div id="target">
+                  <script type="text/javascript" data-keep nonce="specs-nonce">window.scriptTagExecuted()</script>
+                  <script type="text/javascript" nonce="specs-nonce">window.scriptTagExecuted()</script>
+                </div>
+              `
+            })
+
+            const [keptScript, blockedScript] = document.querySelectorAll('#target script')
+            expect(keptScript).toHaveAttribute('type', 'text/javascript')
+            expect(blockedScript).toHaveAttribute('type', 'up-blocked-script')
+          })
+
         })
 
         describe('with up.script.config.scriptElementPolicy = "pass"', function() {

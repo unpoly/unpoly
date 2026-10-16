@@ -852,6 +852,33 @@ describe('up.event', function() {
       })
     })
 
+    describe('up.event.onClosest()', function() {
+
+      it('runs the callback for an event on the element or an ancestor, but not on a descendant or sibling', function() {
+        const [ancestor, element, descendant, sibling] = htmlFixtureList(`
+          <div id="ancestor">
+            <div id="element">
+              <div id="descendant"></div>
+            </div>
+            <div id="sibling"></div>
+          </div>
+        `)
+        const callback = jasmine.createSpy('callback')
+
+        up.event.onClosest(element, 'my:event', callback)
+
+        up.emit(descendant, 'my:event')
+        up.emit(sibling, 'my:event')
+        expect(callback).not.toHaveBeenCalled()
+
+        up.emit(element, 'my:event')
+        expect(callback.calls.count()).toBe(1)
+
+        up.emit(ancestor, 'my:event')
+        expect(callback.calls.count()).toBe(2)
+      })
+    })
+
     describe('up.event.isModified()', function() {
 
       it('returns false for a click event with the left mouse button', function() {

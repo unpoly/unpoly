@@ -285,6 +285,30 @@ describe('up.radio', function() {
         expect(lateListener).not.toHaveBeenCalled()
       })
 
+      it('overrides an [up-if-layer] attribute with an { ifLayer } option', async function() {
+        const [element] = htmlFixtureList('<div class="element" up-if-layer="front">content</div>')
+        up.radio.startPolling(element, { interval: 20, ifLayer: 'any' })
+
+        up.layer.open()
+        await wait(80)
+
+        expect(up.layer.isOverlay()).toBe(true)
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+      })
+
+      it('overrides [up-params] and [up-headers] attributes with { params } and { headers } options', async function() {
+        const [element] = htmlFixtureList(`
+          <div class="element" up-params="{ foo: 'attr' }" up-headers="{ 'X-Custom': 'attr' }">content</div>
+        `)
+        up.radio.startPolling(element, { interval: 20, params: { foo: 'option' }, headers: { 'X-Custom': 'option' } })
+
+        await wait(80)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(up.Params.fromURL(jasmine.lastRequest().url).getAll('foo')).toEqual(['option'])
+        expect(jasmine.lastRequest().requestHeaders['X-Custom']).toBe('option')
+      })
+
     })
 
     describe('up.radio.stopPolling()', function() {

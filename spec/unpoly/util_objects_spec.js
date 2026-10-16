@@ -106,6 +106,21 @@ extendDescribe('up.util', function() {
       })
     })
 
+    describe('up.util.pickBy()', function() {
+
+      it('returns a copy of the object with only the properties for which the tester returns true', function() {
+        const object = { foo: 1, bar: 2, baz: 3 }
+        const tester = jasmine.createSpy('tester').and.callFake((value, key) => value > 1 && key !== 'baz')
+
+        const result = up.util.pickBy(object, tester)
+
+        expect(result).toEqual({ bar: 2 })
+        expect(result).not.toBe(object)
+        expect(object).toEqual({ foo: 1, bar: 2, baz: 3 })
+        expect(tester).toHaveBeenCalledWith(1, 'foo')
+      })
+    })
+
     describe('up.util.omit', function() {
 
       it('returns a copy of the given object but omits the given blacklisted properties', function() {

@@ -80,6 +80,18 @@ describe('up.layer', function() {
         expect(up.layer.isRoot()).toBe(true)
       })
 
+      it('dismisses each overlay with the given value', function() {
+        makeLayers(3)
+        const listener = jasmine.createSpy('up:layer:dismissed listener')
+        up.on('up:layer:dismissed', listener)
+
+        up.layer.dismissOverlays('dismissal value')
+
+        expect(listener.calls.count()).toBe(2)
+        expect(listener.calls.argsFor(0)[0].value).toBe('dismissal value')
+        expect(listener.calls.argsFor(1)[0].value).toBe('dismissal value')
+      })
+
       it('manipulates the layer stack synchronously', function() {
         makeLayers(2)
 
@@ -1276,6 +1288,18 @@ describe('up.layer', function() {
           expect(acceptListener).toHaveBeenCalled()
         })
 
+        it('accepts with a null value if the attribute has no value', function() {
+          const acceptListener = jasmine.createSpy('accept listener')
+          up.on('up:layer:accept', acceptListener)
+          makeLayers(2)
+          const link = up.layer.affix('a[href="#"][up-accept]')
+
+          Trigger.clickSequence(link)
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accept', { value: null })
+        })
+
         it('accepts an overlay with the attribute value as JSON', function() {
           const acceptListener = jasmine.createSpy('accept listener')
           up.on('up:layer:accept', acceptListener)
@@ -1371,11 +1395,13 @@ describe('up.layer', function() {
           link.setAttribute('up-accept', '')
           link.setAttribute('up-animation', 'move-to-right')
           link.setAttribute('up-duration', '654')
+          link.setAttribute('up-easing', 'linear')
           Trigger.clickSequence(link)
 
           expect(overlay.accept).toHaveBeenCalledWith(undefined, jasmine.objectContaining({
             animation: 'move-to-right',
-            duration: 654
+            duration: 654,
+            easing: 'linear'
           }))
         })
 

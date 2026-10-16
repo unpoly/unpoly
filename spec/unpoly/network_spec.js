@@ -466,6 +466,21 @@ describe('up.network', function() {
         expect(listener).not.toHaveBeenCalled()
       })
 
+      describe('with { except } option', function() {
+
+        it('does not abort the request passed as { except }, even if it matches the condition', async function() {
+          const request1 = up.request('/foo')
+          const request2 = up.request('/bar')
+          await wait()
+
+          up.network.abort(true, { except: request1 })
+
+          await expectAsync(request2).toBeRejectedWith(jasmine.any(up.Aborted))
+          expect((await promiseState(request1)).state).toBe('pending')
+        })
+
+      })
+
       describe('with { reason } option', function() {
 
         it("sets the given reason as the AbortError's message", async function() {
@@ -869,6 +884,16 @@ describe('up.network', function() {
         up.request('/slow')
         await wait(100)
 
+        expect(document).not.toHaveSelector('up-progress-bar')
+      })
+
+      it('does not show a progress bar when up.network.config.progressBar is a function returning false', async function() {
+        up.network.config.lateDelay = 10
+        up.network.config.progressBar = jasmine.createSpy('progressBar function').and.returnValue(false)
+        up.request('/slow')
+        await wait(60)
+
+        expect(up.network.config.progressBar).toHaveBeenCalled()
         expect(document).not.toHaveSelector('up-progress-bar')
       })
 
