@@ -28,7 +28,8 @@ up.history = (function() {
     @param {boolean} [config.enabled=true]
       Configures whether [fragment updates](/up.render) can [update history](/updating-history).
 
-      If set to `false`, Unpoly will never change history.
+      If set to `false`, Unpoly will never change the browser URL, the window title,
+      [meta tags](/updating-history#history-state) or the `<html>` element's `[lang]` attribute.
 
   @section Meta tags
     @param {boolean} [config.updateMetaTags=true]

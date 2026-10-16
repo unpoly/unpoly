@@ -726,8 +726,14 @@ up.Layer = class Layer extends up.Record {
   updateHistory(options) {
     // Set unless { location: false }
     if (u.isString(options.location)) {
+      // With up.history.config.enabled = false this still tracks the location internally,
+      // but up.history.push() leaves the browser URL unchanged.
       this.updateLocation(options.location, { push: true })
     }
+
+    // With up.history.config.enabled = false the page must not show a title, meta tags or language
+    // that don't match the unchanged browser URL.
+    if (!up.history.config.enabled) return
 
     // Set unless { metaTags: false }
     if (up.history.config.updateMetaTags && u.isList(options.metaTags)) {

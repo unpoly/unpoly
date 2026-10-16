@@ -68,6 +68,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
   |---|---|
   | render an error response like a successful one | [`[up-fail=false]`](/failed-responses) on the `[up-poll]` or `[up-defer]` element |
   | render an error response into another fragment | [`[up-fail-target]`](/up-defer#up-fail-target) on the `[up-defer]` element |
+- ⚠️ With [`up.history.config.enabled = false`](/up.history.config#config.enabled), a render pass no longer changes the window title, meta tags or `html[lang]`. Formerly only the browser URL stayed unchanged, so the page could show the title of one page with the URL of another.
 
 
 3.14.3
