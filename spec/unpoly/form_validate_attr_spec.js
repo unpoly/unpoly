@@ -712,9 +712,56 @@ extendDescribe('up.form', function() {
 
       describe('with [up-watch-preview]', function() {
 
-        it('shows a preview')
+        it('shows a preview', async function() {
+          const undoFn = jasmine.createSpy('undo preview')
+          const previewFn = jasmine.createSpy('apply preview').and.returnValue(undoFn)
+          up.preview('my:preview', previewFn)
 
-        it('shows multiple previews')
+          const [form, fieldset, input] = htmlFixtureList(`
+            <form action="/path" method="post">
+              <fieldset>
+                <input name="email" up-validate up-watch-preview="my:preview">
+              </fieldset>
+            </form>
+          `)
+          up.hello(form)
+
+          input.value = 'changed'
+          Trigger.change(input)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(previewFn).toHaveBeenCalledWith(jasmine.objectContaining({ fragment: fieldset }), {})
+          expect(undoFn).not.toHaveBeenCalled()
+
+          jasmine.respondWithSelector('fieldset', { text: 'validated' })
+          await wait()
+
+          expect(undoFn).toHaveBeenCalled()
+        })
+
+        it('shows multiple previews', async function() {
+          const preview1Fn = jasmine.createSpy('apply preview1')
+          const preview2Fn = jasmine.createSpy('apply preview2')
+          up.preview('my:preview1', preview1Fn)
+          up.preview('my:preview2', preview2Fn)
+
+          const [form, fieldset, input] = htmlFixtureList(`
+            <form action="/path" method="post">
+              <fieldset>
+                <input name="email" up-validate up-watch-preview="my:preview1, my:preview2">
+              </fieldset>
+            </form>
+          `)
+          up.hello(form)
+
+          input.value = 'changed'
+          Trigger.change(input)
+          await wait()
+
+          expect(preview1Fn).toHaveBeenCalled()
+          expect(preview2Fn).toHaveBeenCalled()
+        })
       })
 
       describe('validating while typing with [up-keep]', function() {

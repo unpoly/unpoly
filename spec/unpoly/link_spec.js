@@ -1018,7 +1018,21 @@ describe('up.link', function() {
         expect('#slow').toHaveText('partial content')
       })
 
-      it('returns an up.RenderJob that resolves with the render pass')
+      it('returns an up.RenderJob that resolves with the render pass', async function() {
+        const [placeholder] = htmlFixtureList('<a id="slow" href="/slow-path" up-defer="manual"></a>')
+        up.hello(placeholder)
+
+        const job = up.deferred.load(placeholder)
+
+        expect(job).toEqual(jasmine.any(up.RenderJob))
+        await wait()
+
+        jasmine.respondWithSelector('#slow', { text: 'partial content' })
+
+        await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
+        const result = await job
+        expect(result.fragments).toEqual([document.querySelector('#slow')])
+      })
     })
   })
 

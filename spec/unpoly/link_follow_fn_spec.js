@@ -659,13 +659,6 @@ extendDescribe('up.link', function() {
             expect($viewport.scrollTop()).toBeAround(65, 1)
           })
         })
-
-        describe("when the browser is already on the link's destination", function() {
-
-          it("doesn't make a request and reveals the target container")
-
-          it("doesn't make a request and reveals the target of a #hash in the URL")
-        })
       })
 
       describe('with { confirm } option', function() {
