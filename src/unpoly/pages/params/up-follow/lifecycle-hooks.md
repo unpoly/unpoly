@@ -67,6 +67,9 @@
   second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
   it is the result from the initial render pass.
 
+  To run a snippet after an [error response](/error-responses) has finished rendering,
+  set an `[up-on-fail-finished]` attribute instead.
+
   Also see [Awaiting post-processing](/render-lifecycle#postprocessing).
 
 @param [up-on-error]

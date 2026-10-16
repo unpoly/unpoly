@@ -539,6 +539,42 @@ extendDescribe('up.fragment', function() {
             expect(onFailRendered).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
           })
 
+          it('runs an onFailFinished callback after the error response has finished rendering', async function() {
+            fixture('.success-target', { text: 'old text' })
+            fixture('.failure-target', { text: 'old text' })
+            const onFinished = jasmine.createSpy('onFinished callback')
+            const onFailFinished = jasmine.createSpy('onFailFinished callback')
+
+            const renderJob = up.render('.success-target', {
+              url: '/path',
+              failTarget: '.failure-target',
+              failTransition: 'cross-fade',
+              failDuration: 100,
+              onFinished,
+              onFailFinished,
+            })
+
+            await wait()
+
+            jasmine.respondWithSelector('.failure-target', { status: 500, text: 'new text' })
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+            expect(onFailFinished).not.toHaveBeenCalled()
+
+            await expectAsync(renderJob.finished).toBeRejectedWith(jasmine.any(up.RenderResult))
+            await wait()
+
+            expect(onFinished).not.toHaveBeenCalled()
+            expect(onFailFinished.calls.count()).toBe(1)
+
+            const result = onFailFinished.calls.argsFor(0)[0]
+            expect(result).toEqual(jasmine.any(up.RenderResult))
+            expect(result.ok).toBe(false)
+            expect(result.fragment).toMatchSelector('.failure-target')
+            expect(result.fragment).toHaveText('new text')
+            expect(result.fragment).not.toMatchSelector('.up-destroying')
+          })
+
           describe('with { fail } option', function() {
 
             it('always uses success options with { fail: false }', async function() {

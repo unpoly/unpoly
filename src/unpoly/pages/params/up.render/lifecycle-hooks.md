@@ -43,6 +43,9 @@
   second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
   it is the result from the initial render pass.
 
+  To run a callback after an [error response](/error-responses) has finished rendering,
+  pass an `{ onFailFinished }` option instead.
+
   Also see [Awaiting post-processing](/render-lifecycle#postprocessing).
 
 @param {Function(Error)} [options.onError]

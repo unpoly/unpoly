@@ -75,6 +75,24 @@ describe('up.link', function() {
         delete window.onFinishedCallback
       })
 
+      it('runs an [up-on-fail-finished] attribute after an error response has finished rendering', async function() {
+        window.onFailFinishedCallback = jasmine.createSpy('onFailFinished callback')
+        fixture('.success-target', { text: 'old text' })
+        fixture('.failure-target', { text: 'old text' })
+        const link = fixture('a[href="/path"][up-target=".success-target"][up-fail-target=".failure-target"][up-on-fail-finished="nonce-specs-nonce window.onFailFinishedCallback(result)"]')
+
+        up.follow(link)
+        await wait()
+
+        jasmine.respondWithSelector('.failure-target', { status: 500, text: 'new text' })
+        await wait()
+
+        expect('.failure-target').toHaveText('new text')
+        expect(window.onFailFinishedCallback).toHaveBeenCalledWith(jasmine.any(up.RenderResult))
+
+        delete window.onFailFinishedCallback
+      })
+
       it('parses an [up-background] attribute', function() {
         const link = fixture('a[href="/foo"][up-background="true"]')
         const options = up.link.followOptions(link)

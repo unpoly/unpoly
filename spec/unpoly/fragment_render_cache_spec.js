@@ -662,6 +662,25 @@ extendDescribe('up.fragment', function() {
             expect('.fail-target').toHaveText('new failure text')
           })
 
+          it('does not call { onFinished } if the revalidation response has an error code', async function() {
+            fixture('.fail-target', { text: 'old failure text' })
+            const onFinished = jasmine.createSpy('onFinished callback')
+
+            const job = up.render({ target: '.target', failTarget: '.fail-target', url: '/cached-path', cache: true, revalidate: true, onFinished })
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+            expect(up.network.isBusy()).toBe(true)
+
+            jasmine.respondWithSelector('.fail-target', { text: 'new failure text', status: 500 })
+
+            await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.RenderResult))
+            await wait()
+
+            expect('.fail-target').toHaveText('new failure text')
+            expect(onFinished).not.toHaveBeenCalled()
+          })
+
           it('revalidates when a link in an overlay is loading cached content into a parent layer (bugfix)', async function() {
             expect('.target').toHaveText('initial text')
 

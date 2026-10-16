@@ -87,6 +87,9 @@ up.RenderJob = class RenderJob {
       // Run an { onFinished } callback if revalidation succeeds.
       // There is no callback for a failed revalidation.
       //
+      // After an error response, this.finished rejects with the failed up.RenderResult.
+      // We run its { onFinished } (the user's { onFailFinished }) then.
+      //
       // We need to pay attention to not creating unnecessary promises that will fail with unhandled rejections:
       //
       // (1) Only access result.finished through this.finished to avoid creating new promises
@@ -96,7 +99,7 @@ up.RenderJob = class RenderJob {
         up.error.guard(() => onFinished?.(result))
       }
 
-      // Handling errors with `u.noop` prevents Chrome from logging an `unhandledrejection` event
+      // Ignoring other rejections prevents Chrome from logging an `unhandledrejection` event
       // to the error console, hiding details about a failed revalidation. We could fix this by
       // handling errors with `up.error.throwCritical` instead.
       //
@@ -110,7 +113,7 @@ up.RenderJob = class RenderJob {
       //
       // Although Chrome will fail to log error traces that way, we still log the error name and message
       // in _handleError().
-      this.finished.then(guardedOnFinished, u.noop)
+      this.finished.then(guardedOnFinished, (reason) => !result.ok && reason instanceof up.RenderResult && guardedOnFinished(reason))
 
       return true
     }
