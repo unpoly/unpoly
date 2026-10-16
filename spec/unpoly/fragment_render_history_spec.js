@@ -1046,6 +1046,44 @@ extendDescribe('up.fragment', function() {
           }
         })
 
+        describe('with up.history.config.enabled = false', function() {
+
+          it('changes neither the URL, the title, meta tags nor html[lang], but still tracks the location internally', async function() {
+            up.history.config.enabled = false
+            const oldURL = location.href
+            const oldTitle = document.title
+            const oldLang = document.documentElement.getAttribute('lang')
+            fixture(document.head, 'meta[name="description"][content="old description"]')
+            fixture('.container', { text: 'old container text' })
+            const locationListener = jasmine.createSpy('up:layer:location:changed listener')
+            up.on('up:layer:location:changed', locationListener)
+
+            up.render('.container', { url: '/path', history: true })
+            await wait()
+
+            jasmine.respondWith(`
+              <html lang="fr">
+                <head>
+                  <title>New title</title>
+                  <meta name="description" content="new description">
+                </head>
+                <body>
+                  <div class="container">new container text</div>
+                </body>
+              </html>
+            `)
+            await wait()
+
+            expect('.container').toHaveText('new container text')
+            expect(location.href).toMatchURL(oldURL)
+            expect(document.title).toBe(oldTitle)
+            expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+            expect(document.documentElement.getAttribute('lang')).toBe(oldLang)
+            expect(locationListener).toHaveBeenCalledWith(jasmine.objectContaining({ location: jasmine.stringMatching(/\/path$/) }), jasmine.anything(), jasmine.anything())
+          })
+
+        })
+
         describe('html[lang]', function() {
 
           it('updates the html[lang] attribute with the language from the response', async function() {
