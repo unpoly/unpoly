@@ -245,7 +245,20 @@ describe('up.Layer.Overlay', function() {
     })
 
     // Pending: CloseLayer#_handleFocus() focuses the parent's non-focusable layer.element instead of its focus element.
-    it('focuses the parent layer if the overlay was opened without an { origin }')
+    it('focuses the parent layer if the overlay was opened without an { origin }', async function() {
+      up.specUtil.assertTabFocused()
+      const parentOverlay = await up.layer.open({ content: 'parent overlay' })
+      const childOverlay = await up.layer.open({ content: '<input type="text" name="email">' })
+      const input = childOverlay.element.querySelector('input')
+      input.focus()
+      expect(input).toBeFocused()
+
+      childOverlay.accept()
+      await wait()
+
+      expect(up.layer.current).toBe(parentOverlay)
+      expect(parentOverlay).toBeFocused()
+    })
 
     it('pops this layer from the stack synchronously to prevent race conditions', function() {
       makeLayers(2)

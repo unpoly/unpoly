@@ -71,6 +71,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
 - ⚠️ With [`up.history.config.enabled = false`](/up.history.config#config.enabled), a render pass no longer changes the window title, meta tags or `html[lang]`. Formerly only the browser URL stayed unchanged, so the page could show the title of one page with the URL of another.
 - Fix [`[up-scroll-behavior]`](/up-follow#up-scroll-behavior) and the `{ scrollBehavior }` option being ignored when scrolling to the `top` or `bottom`, to a pixel position, to a `#hash` or when restoring a scroll position. Only revealing an element honored it.
 - `up.template.clone()` with an `{ origin }` now also finds a template in an ancestor layer, as described in [template lookup](/templates#lookup). Formerly it only looked in the origin's layer.
+- When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent overlay, as described in [focus in overlays](/focus#overlays). Formerly focus fell back to the `<body>`.
 
 
 3.14.3
