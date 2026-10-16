@@ -594,7 +594,7 @@ Unpoly guarantees that the destructor is called, even if the element gets destro
 
 Unpoly will run the first [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/) of every compiler function before allowing the browser to render DOM changes. If an async compiler function runs for multiple tasks, the browser will render between tasks. If you have render-blocking mutations that should be hidden from the user, these must happen in the first task.
 
-![Timing of compiler tasks and browser render frames](images/compiler-tasks.svg){:width='670'}
+<img src="images/compiler-tasks.svg" alt="Timing of compiler tasks and browser render frames" width="670">
 
 Async compilers will not delay the promise returned by rendering functions `up.render()` or `up.layer.open()`.\
 Async compilers *will* delay the promise returned by [`up.render().finished`](/render-lifecycle#postprocessing)
@@ -2019,7 +2019,7 @@ When requests [target multiple fragments](/targeting-fragments#multiple) and the
 </table>
 
 
-See [how cache entries are matched](/caching#how-cache-entries-are-matched) for a detailed example.
+See [how cache entries are matched](/optimizing-responses#cache-matching) for a detailed example.
 
 
 ### Cached content is retained while offline
@@ -2340,7 +2340,7 @@ Unpoly 3.5 brings major quality-of-life improvements and addresses numerous edge
 
 You can now use an `[up-flashes]` element to render confirmations, alerts or warnings:
 
-![A confirmation flash, an error flash and a warning flash](images/flashes.png){:width='480'}
+<img src="images/flashes.png" alt="A confirmation flash, an error flash and a warning flash" width="480">
 
 To render a flash message, include an `[up-flashes]` element in your response.
 The element's content should be the messages you want to render:
@@ -2375,7 +2375,7 @@ While rendering new content, Unpoly compares script and style elements in the `<
 
 It is up to you to handle new frontend code revisions, e.g. by [loading new assets](/handling-asset-changes#loading-new-assets) or [notifying the user](/handling-asset-changes#notifying-the-user):
 
-![Notification for a new app version](images/assets-changed-notification.png){:width='305'}
+<img src="images/assets-changed-notification.png" alt="Notification for a new app version" width="305">
 
 See [handling asset changes](/handling-asset-changes) for more details and examples.
 

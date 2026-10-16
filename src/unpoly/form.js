@@ -826,7 +826,7 @@ up.form = (function() {
 
   The watch callback may accept up to three arguments that describe the observed change:
 
-    ```js
+  ```js
   up.watch('input.query', function(value, name, options) {
     console.log('Query is now', value)
   })
@@ -1891,7 +1891,7 @@ up.form = (function() {
   When your callback does async work (like fetching data over the network), it must return a promise
   that settles once the work concludes:
 
-    ```html
+  ```html
   <input name="query" up-watch="return asyncWork()"> <!-- mark: return -->
   ```
 
@@ -1970,7 +1970,7 @@ up.form = (function() {
 
   We're going to render validation errors using the following HTML:
 
-    ```html
+  ```html
   <form method="post" action="/users">
 
     <fieldset>

@@ -728,7 +728,7 @@ up.history = (function() {
 
   ### Example
 
-  This link ...
+  This link …
 
   ```html
   <a href="/default" up-back>
@@ -736,7 +736,7 @@ up.history = (function() {
   </a>
   ```
 
-  ... will be transformed to:
+  … will be transformed to:
 
   ```html
   <a href="/default" up-follow up-href="/previous-page" up-scroll="restore">

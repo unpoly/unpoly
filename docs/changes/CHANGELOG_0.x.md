@@ -160,6 +160,8 @@ A new, experimental `up.element` module offers convience functions for DOM manip
 
 It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_obj_all.asp) and works across all [supported browsers](/up.browser) without polyfills.
 
+| Function | Description |
+| --- | --- |
 | `up.element.first()` |  Returns the first descendant element matching the given selector.|
 | `up.element.all()` |  Returns all descendant elements matching the given selector.|
 | `up.element.subtree()` |  Returns a list of the given parent's descendants matching the given selector. The list will also include the parent element if it matches the selector itself.|
@@ -403,6 +405,8 @@ The following types of parameter representation are supported:
 
 Supported methods are:
 
+| Function | Description |
+| --- | --- |
 | `new up.Params()` | Constructor. |
 | `up.Params#add()` | Adds a new entry with the given `name` and `value`. |
 | `up.Params#addAll()` | Adds all entries from the given list of params. |
@@ -2171,7 +2175,7 @@ Refactored internals. No API changes.
 ### Compatible changes
 
 - Animation options for `up.tooltip.open`
-- Consider the left mouse button clicked when `event.button` is undefined (as happens with `.click()``)
+- Consider the left mouse button clicked when `event.button` is undefined (as happens with `.click()`)
 
 ### Breaking changes
 
