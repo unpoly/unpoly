@@ -41,7 +41,7 @@ Only fields with a `[name]` attribute can be watched.
 
 ## Example
 
-The following would run a log whenever the `<input>` changes:
+The following logs a message whenever the `<input>` changes:
 
 ```html
 <input name="query" up-observe="console.log('New value', value)">
@@ -49,17 +49,17 @@ The following would run a log whenever the `<input>` changes:
 
 ## Callback context
 
-The script given to `[up-watch]` runs with the following context:
+The script given to `[up-observe]` runs with the following context:
 
 | Name     | Type      | Description                           |
 | -------- | --------- | ------------------------------------- |
 | `this`   | `Element` | The changed form field                |
-| `name`   | `Element` | The `[name]` of the changed field     |
+| `name`   | `string`  | The `[name]` of the changed field     |
 | `value`  | `string`  | The new value of the changed field    |
 
 ## Watching multiple fields
 
-You can set `[up-watch]` on any element to observe all contained fields.
+You can set `[up-observe]` on any element to observe all contained fields.
 The `name` argument contains the name of the field that was changed.
 
 @selector [up-observe]
@@ -123,7 +123,7 @@ up.observe('input.query', function(value) {
   The callback to run when the field's value changes.
 
   If given as a function, it receives two arguments (`value`, `name`).
-  `value` is a string with the new attribute value and `string` is the name
+  `value` is a string with the new field value and `name` is the name
   of the form field that changed. If given as a string, it will be evaled as
   JavaScript code in a context where (`value`, `name`) are set.
 

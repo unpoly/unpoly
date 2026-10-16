@@ -42,7 +42,7 @@ event handlers with a native element.
 
 ```
 up.$on('click', 'a', function(event, $link) {
-  console.log("Click on a link with destination %s", $element.attr('href'))
+  console.log("Click on a link with destination %s", $link.attr('href'))
 })
 ```
 
@@ -66,7 +66,7 @@ up.$on('click', 'a', function(event, $link) {
 @param {Function(event, [element], [data])} listener
   The listener function that should be called.
 
-  The function takes the observed element as the first argument.
+  The function takes the event as the first argument and the observed element as the second argument.
   The element's [attached data](/data) is passed as a third argument.
 @return {Function()}
   A function that unbinds the event listeners when called.

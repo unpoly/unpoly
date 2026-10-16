@@ -148,7 +148,8 @@ The following `<span>` element will [navigate](/up-follow) to `/details` when cl
 @params-note
   All modifying attributes for `[up-follow]` may also be used.
 @deprecated
-  You must also set an `[up-follow]` attribute on the same link.
+  Following an element with only an `[up-href]` attribute is deprecated.
+  Also set an `[up-follow]` attribute on the same element.
 */
 
 const LEGACY_UP_HREF_FOLLOW_SELECTOR = '[up-href]:not([up-follow], [up-poll], [up-defer], [up-expand])'

@@ -34,7 +34,7 @@ up.viewport.closest = function(...args) {
 Scrolls the given viewport to the given Y-position.
 
 A "viewport" is an element that has scrollbars, e.g. `<body>` or
-a container with `overflow-x: scroll`.
+a container with `overflow-y: scroll`.
 
 ### Example
 

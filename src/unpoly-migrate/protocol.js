@@ -68,9 +68,9 @@ See `[up-time]` for a detailed example.
 
 ### Format
 
-The time is encoded is the number of seconds elapsed since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
+The time is encoded as the number of seconds elapsed since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time).
 
-For instance, a modification date of December 23th, 1:40:18 PM UTC would produce the following header:
+For instance, a modification date of December 23rd 2020, 1:40:18 PM UTC would produce the following header:
 
 ```http
 X-Up-Target: .unread-count

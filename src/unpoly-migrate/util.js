@@ -25,7 +25,7 @@ the given keys.
 @param {Object} object
 @param {Array} ...keys
 @deprecated
-  Use `up.util.omit(object, keys)` (with an array argument) instead of `up.util.object(...keys)` (with rest arguments).
+  Use `up.util.omit(object, keys)` (with an array argument) instead of `up.util.except(object, ...keys)` (with rest arguments).
 */
 up.util.except = function(object, ...keys) {
   up.migrate.deprecated('up.util.except(object, ...keys)', 'up.util.omit(object, keys)')

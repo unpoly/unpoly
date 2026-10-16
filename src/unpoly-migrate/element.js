@@ -33,7 +33,7 @@ up.element.createFromHtml = function(...args) {
 Removes the given element from the DOM tree.
 
 > [IMPORTANT]
-> This function *not* run [destructor functions](/enhancing-elements#destructor)
+> This function does *not* run [destructor functions](/enhancing-elements#destructor)
 > on the removed elements. For this use `up.destroy()`.
 
 @function up.element.remove
@@ -184,7 +184,7 @@ See also `up.element.isDetached()`.
   Use `element.isConnected` instead.
 */
 up.element.isAttached = function(element) {
-  up.migrate.deprecated('up.element.isAttached()', 'document.contains(element)')
+  up.migrate.deprecated('up.element.isAttached()', 'element.isConnected')
   return document.contains(element)
 }
 
@@ -195,10 +195,10 @@ Returns whether the given element has been removed from the DOM tree.
 @param {Element} element
 @return {boolean}
 @deprecated
-  User `!element.isConnected` instead.
+  Use `!element.isConnected` instead.
 */
 up.element.isDetached = function(element) {
-  up.migrate.deprecated('up.element.isDetached()', '!document.contains(element)')
+  up.migrate.deprecated('up.element.isDetached()', '!element.isConnected')
   return !up.element.isAttached(element)
 }
 

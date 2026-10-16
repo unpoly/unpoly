@@ -90,11 +90,11 @@ the macro function with a native element.
 
 ```js
 up.$macro('[content-link]', function($link) {
-  $link.attr(
+  $link.attr({
     'up-target': '.content',
     'up-transition': 'cross-fade',
-    'up-duration':'300'
-  )
+    'up-duration': '300'
+  })
 })
 ```
 
