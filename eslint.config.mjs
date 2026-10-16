@@ -76,6 +76,7 @@ export default tseslint.config(
         makeLayers: 'readonly',
         Trigger: 'readonly',
         promiseState: 'readonly',
+        lateFormAssociatedElement: 'readonly',
         allowGlobalErrors: 'readonly',
         describeFallback: 'readonly',
         extendDescribe: 'readonly',

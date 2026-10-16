@@ -2074,6 +2074,61 @@ describe('up.element', function() {
     })
   })
 
+  describe('up.element.awaitDefinitions()', function() {
+
+    it('emits up:element:defined with the { localName } when a custom element on the page gets defined', async function() {
+      const { tagName, define } = lateFormAssociatedElement()
+      htmlFixtureList(`<${tagName}></${tagName}>`)
+      const listener = jasmine.createSpy('up:element:defined listener')
+      up.on('up:element:defined', (event) => listener(event.localName))
+
+      up.element.awaitDefinitions()
+      await wait()
+
+      expect(listener).not.toHaveBeenCalledWith(tagName)
+
+      define()
+      await wait()
+
+      expect(listener.calls.allArgs().filter(([localName]) => localName === tagName)).toEqual([[tagName]])
+    })
+
+    it('only waits once for each tag name', async function() {
+      const { tagName, define } = lateFormAssociatedElement()
+      htmlFixtureList(`
+        <div>
+          <${tagName}></${tagName}>
+          <${tagName}></${tagName}>
+        </div>
+      `)
+      const whenDefinedSpy = spyOn(customElements, 'whenDefined').and.callThrough()
+      const listener = jasmine.createSpy('up:element:defined listener')
+      up.on('up:element:defined', (event) => listener(event.localName))
+
+      up.element.awaitDefinitions()
+      up.element.awaitDefinitions()
+      define()
+      await wait()
+
+      expect(whenDefinedSpy.calls.allArgs().filter(([name]) => name === tagName)).toEqual([[tagName]])
+      expect(listener.calls.allArgs().filter(([localName]) => localName === tagName)).toEqual([[tagName]])
+    })
+
+    it('waits for custom elements inserted by a render pass', async function() {
+      const { tagName, define } = lateFormAssociatedElement()
+      htmlFixtureList('<div id="target"></div>')
+      const listener = jasmine.createSpy('up:element:defined listener')
+      up.on('up:element:defined', (event) => listener(event.localName))
+
+      await up.render({ fragment: `<div id="target"><${tagName}></${tagName}></div>` })
+      define()
+      await wait()
+
+      expect(listener).toHaveBeenCalledWith(tagName)
+    })
+
+  })
+
   if (up.migrate.loaded) {
     describe('up.element.isAttached()', function() {
 

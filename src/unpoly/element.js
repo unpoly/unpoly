@@ -1557,6 +1557,48 @@ up.element = (function() {
     return html
   }
 
+  // Tag names for which awaitDefinitions() is already waiting.
+  //
+  // Unlike all other module state, this is never reset on up:framework:reset.
+  // A custom element definition cannot be undone, so forgetting a tag name would only
+  // start a second promise for the same definition. A tag name that is never defined
+  // (e.g. a custom element that only exists for CSS) leaves one pending promise that
+  // references nothing else.
+  const awaitedTagNames = new Set()
+
+  /*-
+  Emits `up:element:defined` when a custom element on the page gets defined.
+
+  Looks for elements in the entire document that are not yet [defined](https://developer.mozilla.org/en-US/docs/Web/CSS/:defined),
+  and waits for their definitions. Each tag name is only awaited once.
+
+  Some selectors only match a custom element once it is defined. E.g. a [form-associated custom element](/custom-form-fields#form-associated)
+  only matches `:enabled` after `customElements.define()`.
+
+  @function up.element.awaitDefinitions
+  @internal
+  */
+  function awaitDefinitions() {
+    for (let { localName } of document.querySelectorAll(':not(:defined)')) {
+      if (!awaitedTagNames.has(localName)) {
+        awaitedTagNames.add(localName)
+        customElements.whenDefined(localName).then(() => up.emit('up:element:defined', { localName, log: false }))
+      }
+    }
+  }
+
+  /*-
+  This event is emitted when a custom element on the page gets defined.
+
+  Only tag names that were on the page before their definition are observed.
+  See `up.element.awaitDefinitions()`.
+
+  @event up:element:defined
+  @param {string} event.localName
+    The tag name of the custom element that was defined.
+  @internal
+  */
+
   return {
     subtree,
     subtreeFirst,
@@ -1624,5 +1666,6 @@ up.element = (function() {
     isFullDocumentHTML,
     leadingElement,
     removeAttrsFromHTML,
+    awaitDefinitions,
   }
 })()
