@@ -53,7 +53,25 @@ extendDescribe('up.fragment', function() {
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#element')
         })
 
-        it('uses a default target for the layer that is being updated if no other option suggests a target')
+        it("uses the layer's main target without a { target } when { fallback: true } is given", async function() {
+          htmlFixtureList('<div class="main-element">old main</div>')
+          up.layer.config.root.mainTargets = ['.main-element']
+
+          up.render({ url: '/path', fallback: true })
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.main-element')
+        })
+
+        it('rejects without a { target } or { fallback }', async function() {
+          htmlFixtureList('<div class="main-element">old main</div>')
+          up.layer.config.root.mainTargets = ['.main-element']
+
+          const promise = up.render({ url: '/path' })
+
+          await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/No target selector given/))
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+        })
 
         it("ignores an element that matches the selector but also matches .up-destroying", async function() {
           const document = '<div class="foo-bar">text</div>'

@@ -13,9 +13,29 @@ describe('up.layer', function() {
 
     describe('up.layer.build()', function() {
 
-      it('merges all applicable layer configs')
+      it('merges all applicable layer configs', function() {
+        up.layer.config.any.class = 'from-any'
+        up.layer.config.overlay.align = 'from-overlay'
+        up.layer.config.drawer.size = 'from-drawer'
 
-      it('prioritizes the config for a particular mode over the config for all overlays or any modes')
+        const layer = up.layer.build({ mode: 'drawer' })
+
+        expect(layer.class).toBe('from-any')
+        expect(layer.align).toBe('from-overlay')
+        expect(layer.size).toBe('from-drawer')
+      })
+
+      it('prioritizes the config for a particular mode over the config for all overlays or any modes', function() {
+        up.layer.config.any.align = 'from-any'
+        up.layer.config.overlay.align = 'from-overlay'
+        up.layer.config.overlay.class = 'from-overlay'
+        up.layer.config.drawer.class = 'from-drawer'
+
+        const layer = up.layer.build({ mode: 'drawer' })
+
+        expect(layer.align).toBe('from-overlay')
+        expect(layer.class).toBe('from-drawer')
+      })
 
       if (up.migrate.loaded) {
         it('prints a deprecation warning if the user configured { historyVisible } (which is now { history })', function() {
@@ -671,12 +691,7 @@ describe('up.layer', function() {
         await wait(50)
       })
 
-      describe('when rendering', function() {
-
-        // See specs for 'up.render() with { history option }'
-        it('is tested elsewhere')
-
-      })
+      // For changes by rendering, see the specs for up.render() with { history } option.
 
       describe('when scripts call window.history.pushState()', function() {
 
@@ -1606,7 +1621,25 @@ describe('up.layer', function() {
 
       describe('on a form', function() {
 
-        it('dismisses the overlay, using the form params as the dismissal reason')
+        it('dismisses the overlay, using the form params as the dismissal reason', function() {
+          const dismissListener = jasmine.createSpy('dismiss listener')
+          up.on('up:layer:dismiss', dismissListener)
+          const [root, overlay] = makeLayers(2)
+
+          const form = overlay.affix('form[up-dismiss]')
+          form.innerHTML = `
+            <input name="foo" value="foo-value">
+            <input name="bar" value="bar-value">
+            <input type="submit">
+          `
+          Trigger.clickSequence(form.querySelector('[type=submit]'))
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(dismissListener).toHaveBeenCalled()
+          const value = dismissListener.calls.mostRecent().args[0].value
+          expect(value).toEqual(jasmine.any(up.Params))
+          expect(value).toMatchParams({ foo: 'foo-value', bar: 'bar-value' })
+        })
 
       })
     })
