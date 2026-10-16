@@ -323,6 +323,14 @@ describe('up.network', function() {
           })
         })
       })
+
+      describe('up.network.shouldReduceRequests()', function() {
+        it('prints a warning and returns false', function() {
+          const warnSpy = spyOn(up.migrate, 'warn')
+          expect(up.network.shouldReduceRequests()).toBe(false)
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.network.shouldReduceRequests() has been removed'))
+        })
+      })
     }
 
     describe('up.network.abort()', function() {

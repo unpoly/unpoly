@@ -201,7 +201,7 @@ Defaults to `up.network.config.lateDelay`.
 @property up.Request#badResponseTime
 @param {number} [badResponseTime]
 @deprecated
-  Use `up.Response#lateDelay` instead.
+  Use `up.Request#lateDelay` instead.
 */
 up.migrate.renamedProperty(up.Request.prototype, 'badResponseTime', 'lateDelay')
 
@@ -263,7 +263,7 @@ const progressBarDefault = up.network.config.progressBar
 up.network.config.patch(function(config) {
   config.progressBar = function() {
     if (mayHaveCustomIndicator()) {
-      up.migrate.warn('Disabled the default progress bar as may have built a custom loading indicator with your up:network:late listener. Please set up.network.config.progressBar to true or false.')
+      up.migrate.warn('Disabled the default progress bar as you may have built a custom loading indicator with your up:network:late listener. Please set up.network.config.progressBar to true or false.')
       return false
     } else {
       return progressBarDefault
@@ -272,7 +272,7 @@ up.network.config.patch(function(config) {
 })
 
 up.network.shouldReduceRequests = function() {
-  up.migrate('up.network.shouldReduceRequests() has been removed without replacement')
+  up.migrate.warn('up.network.shouldReduceRequests() has been removed without replacement')
   return false
 }
 
