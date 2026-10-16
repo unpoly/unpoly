@@ -694,10 +694,6 @@ up.element = (function() {
   */
   const isSingleton = up.mockable((element) => element.matches(SINGLETON_TAG_NAMES.join()))
 
-  function elementTagName(element) {
-    return element.tagName.toLowerCase()
-  }
-
   /*-
   @function up.element.attrSelector
   @internal
@@ -1585,7 +1581,6 @@ up.element = (function() {
     classSelector,
     isSingleton,
     attrSelector,
-    tagName: elementTagName,
     createBrokenDocumentFromHTML,
     revivedClone,
     createNodesFromHTML,

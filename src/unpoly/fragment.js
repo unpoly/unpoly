@@ -17,7 +17,7 @@ Lookup functions like `up.fragment.get()` differ from `document.querySelector()`
 up.fragment = (function() {
 
   function upTagName(element) {
-    let tagName = e.tagName(element)
+    let tagName = element.localName
     if (tagName.startsWith('up-')) {
       return tagName
     }
@@ -2047,7 +2047,7 @@ up.fragment = (function() {
   }
 
   function untargetableMessage(element) {
-    return `Cannot derive good target selector from a <${e.tagName(element)}> element without identifying attributes. Try setting an [id] or configure up.fragment.config.targetDerivers.`
+    return `Cannot derive good target selector from a <${element.localName}> element without identifying attributes. Try setting an [id] or configure up.fragment.config.targetDerivers.`
   }
 
   function cannotTarget(element) {
@@ -2107,7 +2107,9 @@ up.fragment = (function() {
 
     if (tagName === '*') {
       // In a deriver '*' means to include the actual tag name in the target-
-      result += e.tagName(element)
+      // Use the local name, which keeps the case of camelCase SVG elements like <clipPath>.
+      // Type selectors match those case-sensitively, so tagName.toLowerCase() would not match.
+      result += element.localName
     } else if (tagName) {
       // If a deriver contains an actual tag name like 'main' it becomes
       // part of the target selector.

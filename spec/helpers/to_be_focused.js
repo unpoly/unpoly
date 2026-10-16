@@ -3,7 +3,7 @@ const e = up.element
 const $ = jQuery
 
 function describeElement(element) {
-  return up.fragment.tryToTarget(element) || e.tagName(element)
+  return up.fragment.tryToTarget(element) || element.localName
 }
 
 function matcher(util, customEqualityTesters) {

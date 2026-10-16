@@ -85,6 +85,19 @@ extendDescribe('up.fragment', function() {
         expect(up.fragment.toTarget(element)).toBe('input[name="name-value"]')
       })
 
+      it("keeps the case of a camelCase SVG tag name, which type selectors match case-sensitively", function() {
+        const [_svg, clipPath] = htmlFixtureList(`
+          <svg>
+            <clipPath name="clip-value"></clipPath>
+          </svg>
+        `)
+
+        const target = up.fragment.toTarget(clipPath)
+
+        expect(target).toBe('clipPath[name="clip-value"]')
+        expect(clipPath).toMatchSelector(target)
+      })
+
       it("refers to meta tags by both tag name and [name] attribute", function() {
         const element = fixture('meta[name="csrf-token"]')
         expect(up.fragment.toTarget(element)).toBe('meta[name="csrf-token"]')
