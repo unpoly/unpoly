@@ -774,6 +774,10 @@ extendDescribe('up.util', function() {
 
       })
 
+      it('throws a SyntaxError for an invalid string', function() {
+        expect(() => up.util.parseRelaxedJSON('{ foo: ')).toThrowError(SyntaxError)
+      })
+
     })
 
     describe('up.util.parseScalarJSONPairs()', function() {

@@ -224,6 +224,31 @@ describe('up.Request', function() {
     })
   })
 
+  describe('#loadPage()', function() {
+
+    afterEach(function() {
+      // We're preventing the form submission, so we need to remove the form ourselves.
+      document.querySelector('form.up-request-loader')?.remove()
+    })
+
+    it('aborts pending requests and loads the request URL with its method and params in a full page load', async function() {
+      const submitForm = spyOn(up.browser, 'submitForm')
+      const pendingRequest = up.request('/pending')
+      await wait()
+
+      const request = new up.Request({ url: '/foo', method: 'POST', params: { param1: 'param1 value' } })
+      request.loadPage()
+
+      await expectAsync(pendingRequest).toBeRejectedWith(jasmine.any(up.Aborted))
+      expect(submitForm).toHaveBeenCalled()
+      const form = document.querySelector('form.up-request-loader')
+      expect(form.getAttribute('action')).toMatchURL('/foo')
+      expect(form.getAttribute('method')).toBe('POST')
+      expect(form).toHaveSelector('input[name="param1"][value="param1 value"]')
+    })
+
+  })
+
   describe('#header()', function() {
 
     it('returns the value of a header set via { headers } option', async function() {

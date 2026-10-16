@@ -130,6 +130,46 @@ extendDescribe('up.fragment', function() {
           expect(location.href).toMatchURL('/response-url')
         })
 
+        it('honors an X-Up-Target header of the given response', async function() {
+          htmlFixtureList(`
+            <div class="target">old target</div>
+            <div class="other">old other</div>
+          `)
+          const request = up.request('/response-url')
+          await wait()
+
+          jasmine.respondWith({
+            responseText: `
+              <div class="target">new target</div>
+              <div class="other">new other</div>
+            `,
+            responseHeaders: { 'X-Up-Target': '.other' }
+          })
+          const response = await request
+
+          await up.render({ target: '.target', response })
+
+          expect('.target').toHaveText('old target')
+          expect('.other').toHaveText('new other')
+        })
+
+        it('emits up:fragment:loaded for the given response', async function() {
+          const loadedListener = jasmine.createSpy('up:fragment:loaded listener')
+          up.on('up:fragment:loaded', loadedListener)
+          htmlFixtureList('<div class="target">old text</div>')
+          const request = up.request('/response-url')
+          await wait()
+
+          jasmine.respondWith('<div class="target">new text</div>')
+          const response = await request
+          expect(loadedListener).not.toHaveBeenCalled()
+
+          await up.render({ target: '.target', response })
+
+          expect(loadedListener).toHaveBeenCalledWith(jasmine.objectContaining({ response }), jasmine.anything(), jasmine.anything())
+          expect('.target').toHaveText('new text')
+        })
+
         it('does not crash if another request is in flight (bugfix)', async function() {
           const target = fixture('.target', { text: 'old text' })
           const request = up.request('/response-url')

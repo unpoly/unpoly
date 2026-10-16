@@ -464,6 +464,47 @@ extendDescribe('up.fragment', function() {
             expect('.fallback').toHaveText('new fallback text')
           })
 
+          it('updates the main target when navigating without a { failTarget }', async function() {
+            up.fragment.config.mainTargets = ['.main']
+            fixture('.main', { text: 'old main text' })
+            fixture('.success-target', { text: 'old success text' })
+
+            const renderJob = up.render('.success-target', { url: '/path', navigate: true })
+            await wait()
+
+            jasmine.respondWith({
+              status: 500,
+              responseText: `
+                <div class="main">new main text</div>
+                <div class="success-target">new success text</div>
+              `
+            })
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect('.success-target').toHaveText('old success text')
+            expect('.main').toHaveText('new main text')
+          })
+
+          it('does not call an { onError } callback', async function() {
+            const onError = jasmine.createSpy('onError callback')
+            const onFailRendered = jasmine.createSpy('onFailRendered callback')
+            htmlFixtureList(`
+              <div class="success-target">old success text</div>
+              <div class="failure-target">old failure text</div>
+            `)
+
+            const renderJob = up.render('.success-target', { url: '/path', failTarget: '.failure-target', onError, onFailRendered })
+            await wait()
+
+            jasmine.respondWith({ status: 500, responseText: '<div class="failure-target">new failure text</div>' })
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+            expect('.failure-target').toHaveText('new failure text')
+            expect(onFailRendered).toHaveBeenCalled()
+            expect(onError).not.toHaveBeenCalled()
+          })
+
           it('rejects the returned promise with an up.RenderResult describing the updated fragments and layer', async function() {
             fixture('.success-target')
             fixture('.failure-target')
@@ -1077,6 +1118,19 @@ extendDescribe('up.fragment', function() {
               none: true,
               renderOptions: jasmine.objectContaining({ target: ':none', url: '/url' }),
             }))
+          })
+
+          it('skips a response for which up.fragment.config.skipResponse returns true', async function() {
+            up.fragment.config.skipResponse = ({ response }) => response.text.includes('maintenance')
+            htmlFixtureList('<div class="target">old text</div>')
+
+            const renderJob = up.render({ target: '.target', url: '/url' })
+            await wait()
+
+            jasmine.respondWithSelector('.target', { text: 'maintenance' })
+
+            await expectAsync(renderJob).toBeResolvedTo(jasmine.objectContaining({ ok: true, none: true }))
+            expect('.target').toHaveText('old text')
           })
 
           it('allows listeners to mutate up.render() options to target another fragment', async function() {
@@ -1758,6 +1812,30 @@ extendDescribe('up.fragment', function() {
                 expect(window.callbackSpy).toHaveBeenCalledWith(jasmine.anyEvent('up:layer:dismissed'))
               })
 
+              it('keeps an { onAccepted } callback that an up:fragment:loaded listener added to event.renderOptions', async function() {
+                up.on('up:fragment:loaded', (event) => {
+                  event.renderOptions.onAccepted = window.callbackSpy
+                })
+                fixture('#target', { text: 'old target' })
+                up.render('#target', { url: '/path' })
+                await wait()
+
+                jasmine.respondWith({
+                  responseText: '<div id="overlay">overlay</div>',
+                  responseHeaders: { 'X-Up-Open-Layer': JSON.stringify({ target: '#overlay' }) }
+                })
+                await wait()
+
+                expect(up.layer.current).toBeOverlay()
+                expect(window.callbackSpy).not.toHaveBeenCalled()
+
+                up.layer.accept('acceptance value')
+                await wait()
+
+                expect(up.layer.current).toBeRootLayer()
+                expect(window.callbackSpy).toHaveBeenCalledWith(jasmine.objectContaining({ value: 'acceptance value' }))
+              })
+
               it('allows to pass a callback string as { onDismiss }', async function() {
                 fixture('#target', { text: 'old target' })
                 up.render('#target', { url: '/path' })
@@ -1888,6 +1966,21 @@ extendDescribe('up.fragment', function() {
 
             expect('.one').toHaveText('old one')
             expect(onRendered).not.toHaveBeenCalled()
+          })
+
+          it('fulfills with an empty up.RenderResult and calls { onFinished } when the server responds with 304 Not Modified', async function() {
+            htmlFixtureList('<div class="target">old text</div>')
+            const onFinished = jasmine.createSpy('onFinished callback')
+
+            const renderJob = up.render({ target: '.target', url: '/path', onFinished })
+            await wait()
+
+            jasmine.respondWith({ status: 304, responseText: '' })
+
+            await expectAsync(renderJob).toBeResolvedTo(jasmine.objectContaining({ none: true, fragments: [] }))
+            await expectAsync(renderJob.finished).toBeResolved()
+            expect(onFinished).toHaveBeenCalledWith(jasmine.objectContaining({ none: true }))
+            expect('.target').toHaveText('old text')
           })
         })
 

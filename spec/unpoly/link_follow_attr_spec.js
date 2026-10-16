@@ -43,6 +43,22 @@ extendDescribe('up.link', function() {
         expect(link).not.toHaveBeenDefaultFollowed()
       })
 
+      it('follows an a[up-fragment] link without [href] or [up-target] by cloning the template into the derived target', async function() {
+        htmlFixtureList(`
+          <div id="tip">old tip</div>
+          <template id="tip-template">
+            <div id="tip">new tip</div>
+          </template>
+        `)
+        const [link] = htmlFixtureList('<a up-fragment="#tip-template">Show tip</a>')
+
+        Trigger.clickSequence(link)
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+        expect('#tip').toHaveText('new tip')
+      })
+
       it('follows a link that is immediately removed after clicking', async function() {
         fixture('#main')
         const link = fixture('a[href="/follow-path"][up-follow=true][up-target="#main"]')

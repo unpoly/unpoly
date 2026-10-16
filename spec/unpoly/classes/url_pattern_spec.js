@@ -40,6 +40,27 @@ describe('up.URLPattern', function() {
       expect(pattern.test('/foo/bar/baz')).toBe(true)
     })
 
+    it('has a wildcard (*) match multiple path segments', function() {
+      const pattern = new up.URLPattern('/users/*/edit')
+      expect(pattern.test('/users/123/edit')).toBe(true)
+      expect(pattern.test('/users/123/name/edit/')).toBe(true)
+      expect(pattern.test('/users/123/name/show')).toBe(false)
+    })
+
+    it('returns true if the given URL matches a pattern with a leading wildcard (*)', function() {
+      const pattern = new up.URLPattern('*/new')
+      expect(pattern.test('/users/new')).toBe(true)
+      expect(pattern.test('/admin/123/new')).toBe(true)
+      expect(pattern.test('/users/edit')).toBe(false)
+    })
+
+    it('matches a query string with a wildcard after /?', function() {
+      const pattern = new up.URLPattern('/users/?*')
+      expect(pattern.test('/users/?sort=username')).toBe(true)
+      expect(pattern.test('/users?page=3')).toBe(true)
+      expect(pattern.test('/admins?page=3')).toBe(false)
+    })
+
     it('has a trailing wildcard match a query string', function() {
       const pattern = new up.URLPattern('/foo/*')
       expect(pattern.test('/foo/?whatever')).toBe(true)
@@ -109,6 +130,13 @@ describe('up.URLPattern', function() {
         const pattern = new up.URLPattern('/foo, /bar')
         expect(pattern.test('/foo')).toBe(true)
         expect(pattern.test('/bar')).toBe(true)
+      })
+
+      it('returns true if the given URL matches either of two patterns given as an array', function() {
+        const pattern = new up.URLPattern(['/users/*', '/account'])
+        expect(pattern.test('/users/123')).toBe(true)
+        expect(pattern.test('/account')).toBe(true)
+        expect(pattern.test('/settings')).toBe(false)
       })
 
       it('returns false if the given URL matchers neither of two space-separated URLs', function() {

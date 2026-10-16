@@ -96,6 +96,17 @@ extendDescribe('up.fragment', function() {
           expect('fake-body').toHaveOwnOpacity(1.0)
         })
 
+        it('ignores an { animation } option when swapping a fragment', async function() {
+          const animationFn = jasmine.createSpy('animation').and.returnValue(Promise.resolve())
+          up.animation('spy-animation', animationFn)
+          fixture('.element', { text: 'old text' })
+
+          await up.render('.element', { document: '<div class="element">new text</div>', animation: 'spy-animation' })
+
+          expect('.element').toHaveText('new text')
+          expect(animationFn).not.toHaveBeenCalled()
+        })
+
         it('marks the old fragment as .up-destroying during the transition', async function() {
           fixture('.element', { text: 'version 1' })
           up.render({

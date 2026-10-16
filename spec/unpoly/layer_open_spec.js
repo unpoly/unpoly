@@ -30,6 +30,17 @@ extendDescribe('up.layer', function() {
         expect(up.layer.current.isOverlay()).toBe(true)
       })
 
+      it('applies navigation defaults from up.fragment.config.navigateOptions', async function() {
+        up.fragment.config.navigateOptions.cache = true
+        await jasmine.populateCache('/overlay', '<div id="overlay">cached overlay</div>')
+
+        await up.layer.open({ url: '/overlay', target: '#overlay' })
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(up.layer.current).toBeOverlay()
+        expect(up.layer.current).toHaveSelector('#overlay')
+      })
+
       describe('if there are existing overlays over the { baseLayer }', function() {
 
         it('dismisses existing overlays over the { baseLayer }', async function() {
@@ -596,6 +607,27 @@ extendDescribe('up.layer', function() {
 
           expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
 
+        })
+
+        it('runs an { onOpened } callback before and an { onFinished } callback after the opening animation', async function() {
+          up.motion.config.enabled = true
+          let endAnimation
+          up.animation('controlled-animation', () => new Promise((resolve) => { endAnimation = resolve }))
+          const onOpened = jasmine.createSpy('onOpened callback')
+          const onFinished = jasmine.createSpy('onFinished callback')
+
+          // The backdrop fades in with the same duration
+          up.layer.open({ content: 'overlay content', animation: 'controlled-animation', duration: 5, onOpened, onFinished })
+          await wait(50)
+
+          expect(onOpened).toHaveBeenCalled()
+          expect(onFinished).not.toHaveBeenCalled()
+
+          endAnimation()
+          // { onFinished } settles a few tasks later, which can take longer on a busy runner
+          await wait(30)
+
+          expect(onFinished).toHaveBeenCalled()
         })
 
         it('slides a drawer in from and out to the right edge with { position: "right" }', async function() {

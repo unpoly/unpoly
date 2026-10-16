@@ -53,6 +53,27 @@ extendDescribe('up.fragment', function() {
           expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#element')
         })
 
+        it('uses an element given as first argument as the { origin }', async function() {
+          const [element] = htmlFixtureList('<div id="element">old text</div>')
+
+          const result = await up.render(element, { content: 'new text' })
+
+          expect(element).toHaveText('new text')
+          expect(result.renderOptions.origin).toBe(element)
+        })
+
+        it('updates the given element when its derived selector also matches an earlier element', async function() {
+          const [_card1, card2] = htmlFixtureList(`
+            <div class="card">old card1</div>
+            <div class="card">old card2</div>
+          `)
+
+          await up.render(card2, { content: 'new card2' })
+
+          expect(document.querySelectorAll('.card')[0]).toHaveText('old card1')
+          expect(document.querySelectorAll('.card')[1]).toHaveText('new card2')
+        })
+
         it("uses the layer's main target without a { target } when { fallback: true } is given", async function() {
           htmlFixtureList('<div class="main-element">old main</div>')
           up.layer.config.root.mainTargets = ['.main-element']
@@ -1462,6 +1483,18 @@ extendDescribe('up.fragment', function() {
               jasmine.respondWith('<div class="unexpected">new unexpected</div>')
 
               await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
+            })
+
+            it('calls an { onError } callback with the up.CannotMatch error', async function() {
+              const onError = jasmine.createSpy('onError callback')
+              htmlFixtureList('<div class="target">old target</div>')
+              const promise = up.render('.target', { url: '/path', onError })
+              await wait()
+
+              jasmine.respondWith('<div class="unexpected">new unexpected</div>')
+
+              await expectAsync(promise).toBeRejectedWith(jasmine.any(up.CannotMatch))
+              expect(onError).toHaveBeenCalledWith(jasmine.any(up.CannotMatch))
             })
           })
 

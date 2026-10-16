@@ -321,6 +321,29 @@ extendDescribe('up.fragment', function() {
       })
     })
 
+    describe('up.fragment.isTargetable()', function() {
+
+      it('returns true for an element with an identifying attribute', function() {
+        const [element] = htmlFixtureList('<div id="foo">content</div>')
+        expect(up.fragment.isTargetable(element)).toBe(true)
+      })
+
+      it('returns false for an element from which no target can be derived', function() {
+        const [element] = htmlFixtureList('<span>content</span>')
+        expect(up.fragment.isTargetable(element)).toBe(false)
+      })
+
+      it('returns false if the only derivable target would match a different element', function() {
+        const [_element1, element2] = htmlFixtureList(`
+          <div id="foo">content</div>
+          <div id="foo">content</div>
+        `)
+        expect(up.fragment.isTargetable(element2)).toBe(false)
+        expect(up.fragment.isTargetable(element2, { verify: false })).toBe(true)
+      })
+
+    })
+
     describe('up.fragment.expandTargets', function() {
 
       beforeEach(function() {
