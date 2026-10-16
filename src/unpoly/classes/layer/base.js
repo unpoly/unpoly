@@ -38,7 +38,7 @@ up.Layer = class Layer extends up.Record {
   /*-
   Whether fragment updates within this layer can affect browser history and window title.
 
-  If a layer does not have visible history, its desendant layers cannot have history either.
+  If a layer does not have visible history, its descendant layers cannot have history either.
 
   @learn-ref history-in-overlays
 
@@ -191,7 +191,7 @@ up.Layer = class Layer extends up.Record {
 
   @section History
     @param {number} [options.history=true]
-      Whether to restore the the parent layer's [history state](/updating-history#history-state)
+      Whether to restore the parent layer's [history state](/updating-history#history-state)
       in the browser's address bar.
 
       @experimental
@@ -623,7 +623,7 @@ up.Layer = class Layer extends up.Record {
   /*-
   [Emits](/up.emit) an event on [this layer's element](/up.Layer.prototype.element).
 
-  The value of [up.layer.current](/up.layer.current) will be set to the this layer
+  The value of [up.layer.current](/up.layer.current) will be set to this layer
   while event listeners are running.
 
   ## Example

@@ -117,7 +117,7 @@ Here is an example of a URL pattern with alternatives:
 <a href="/users/" up-accept-location="/users/* /account" up-layer="new">Users</a>
 ```
 
-JavaScript functions that URL patterns will accept multiple patterns
+JavaScript functions that take URL patterns accept multiple patterns
 as either a space-separated string, a comma-separated string or as an array of patterns:
 
 ```js

@@ -21,7 +21,7 @@ up.Response = class Response extends up.Record {
   The HTTP method used for the request that produced this response.
 
   This is usually the HTTP method used by the initial request, but if the server
-  redirected multiple requests may have been involved. In this case this property reflects
+  redirected, multiple requests may have been involved. In this case this property reflects
   the method used by the last request.
 
   If the response's URL changed from the request's URL,
@@ -214,7 +214,7 @@ up.Response = class Response extends up.Record {
 
   @function up.Response#isHTML
   @return {boolean}
-    Whether the response has a HTML mime type.
+    Whether the response has an HTML mime type.
   @experimental
   */
   isHTML() {

@@ -112,7 +112,7 @@ up.fragment = (function() {
       @experimental
 
     @param {Array<string>} [config.autoHistoryTargets]
-      When an updated fragments contain an element matching one of the given [target selectors](/targeting-fragments),
+      When an updated fragment contains an element matching one of the given [target selectors](/targeting-fragments),
       history will be updated with `{ history: 'auto' }`.
 
       By default Unpoly will auto-update history when updating a [main target](#config.mainTargets).
@@ -350,7 +350,7 @@ up.fragment = (function() {
   @return {Date|undefined}
     The fragment's last modification time.
 
-    Return `undefined` if the fragment was rendered without a modification time.
+    Returns `undefined` if the fragment was rendered without a modification time.
   @stable
   */
   function timeOf(element) {
@@ -381,7 +381,7 @@ up.fragment = (function() {
   Unpoly will set `[up-time=false]` to indicate that its modification time is unknown.
 
   A large response may contain multiple fragments that are later reloaded individually
-  and should each have their own modification time. In this case the server may also also render multiple
+  and should each have their own modification time. In this case the server may also render multiple
   fragments with each their own `[up-time]` attribute.
   See [Individual versions per fragment](/conditional-requests#fragment-versions) for an example.
 
@@ -416,7 +416,7 @@ up.fragment = (function() {
   @return {string|undefined}
     The fragment's ETag.
 
-    Return `undefined` if the fragment was rendered without an ETag.
+    Returns `undefined` if the fragment was rendered without an ETag.
   @stable
   */
   function etagOf(element) {
@@ -441,7 +441,7 @@ up.fragment = (function() {
   Unpoly will set `[up-etag=false]` to indicate that its ETag is unknown.
 
   A large response may contain multiple fragments that are later reloaded individually
-  and should each have their own ETag. In this case the server may also also render multiple
+  and should each have their own ETag. In this case the server may also render multiple
   fragments with each their own `[up-etag]` attribute.
   See [Individual versions per fragment](/conditional-requests#fragment-versions) for an example.
 
@@ -519,7 +519,7 @@ up.fragment = (function() {
   ```
 
   Unpoly looks for the selector `.two` in the response and places it
-  the current page. The current page now looks like this:
+  in the current page. The current page now looks like this:
 
   ```html
   <div class="one">old one</div>
@@ -681,7 +681,7 @@ up.fragment = (function() {
 
   This is useful to detect an entirely different page layout
   (like a maintenance page or fatal server error)
-  which should be open with a full page load:
+  which should be opened with a full page load:
 
   ```js
   up.on('up:fragment:loaded', (event) => {
@@ -758,7 +758,7 @@ up.fragment = (function() {
 
   ### Cases that trigger the event {#cases}
 
-  The `up:fragment:loaded` event is emitted when we have a HTML response from the server
+  The `up:fragment:loaded` event is emitted when we have an HTML response from the server
   *and* we are about to render elements:
 
   | Case                                                            | `up:fragment:loaded` emitted? |
@@ -1115,7 +1115,7 @@ up.fragment = (function() {
   }
 
   /*-
-  When a page fragment has been [inserted or updated](/up.replace),
+  When a page fragment has been [inserted or updated](/up.render),
   this event is [emitted](/up.emit) on the new element.
 
   When an element with children is inserted, `up:fragment:inserted` is only
@@ -1204,7 +1204,7 @@ up.fragment = (function() {
 
   - The `.up-destroying` class is automatically assigned to elements in their exit animation.
   - All `up.fragment` functions (like `up.fragment.get()`) ignore elements in their exit animation.
-  - The `up.Layer#isAlive()` method checks if an overlay is is attached to the DOM and also not in a closing animation.
+  - The `up.Layer#isAlive()` method checks if an overlay is attached to the DOM and also not in a closing animation.
 
   @function up.fragment.isAlive
   @param {Element} fragment
@@ -1452,7 +1452,7 @@ up.fragment = (function() {
   ### Similar features
 
   - The [`.up-destroying`](/up-destroying) class is assigned to elements during their removal animation.
-  - The [`up.element.all()`](/up.element.all) function simply returns the all elements matching a selector
+  - The [`up.element.all()`](/up.element.all) function simply returns all elements matching a selector
     without further filtering.
 
   @function up.fragment.all
@@ -1622,7 +1622,7 @@ up.fragment = (function() {
 
   You may animate the element's removal by passing an option like `{ animation: 'fade-out' }`.
   Unpoly ships with a number of [predefined animations](/up.animate#named-animations) and
-  you may so define [custom animations](/up.animation).
+  you may also define [custom animations](/up.animation).
 
   If the element's removal is animated, the element will remain in the DOM until after the animation
   has completed. While the animation is running the element will be given the `.up-destroying` class.
@@ -1716,7 +1716,7 @@ up.fragment = (function() {
 
   ### Destroying elements are ignored
 
-  Destroyed element remain attached to the DOM while they are playing out their exit animation.
+  Destroyed elements remain attached to the DOM while they are playing out their exit animation.
   To prevent accidental selection of destroying elements, they are ignored by
   Unpoly features like [`[up-target]`](/targeting-fragments) or `up.fragment.get()`.
 
@@ -1886,7 +1886,7 @@ up.fragment = (function() {
   }
 
   /*-
-  Fetches this given URL with JavaScript and [replaces](/up.replace) the
+  Fetches the given URL with JavaScript and [replaces](/up.render) the
   [current layer](/up.layer.current)'s [main fragment](/up.fragment.config#config.mainTargets)
   with a matching fragment from the server response.
 
@@ -2810,7 +2810,7 @@ up.fragment = (function() {
   This event is emitted when requests for an element were [aborted](/aborting-requests).
 
   This event is emitted on the element for which requests were aborted.
-  If requests for entire layer were aborted, this event is emitted the
+  If requests for an entire layer were aborted, this event is emitted on the
   [layer's outmost element](/up.Layer.prototype.element).
 
   @learn-ref aborting-requests

@@ -117,7 +117,7 @@ up.viewport = (function() {
   ### Fixed elements obstructing the viewport
 
   Many applications have a navigation bar fixed to the top or bottom,
-  obstructing the view on an element.
+  obstructing the view of an element.
 
   You can make `up.reveal()` aware of these fixed elements
   so it can scroll the viewport far enough so the revealed element is fully visible.
@@ -850,7 +850,7 @@ up.viewport = (function() {
   Marks this element as being fixed to the top edge of the screen
   using `position: fixed`.
 
-  When [following a fragment link](/up-follow), the viewport is scrolled
+  When [following a link](/up-follow), the viewport is scrolled
   so the targeted element becomes visible. By using this attribute you can make
   Unpoly aware of fixed elements that are obstructing the viewport contents.
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
@@ -870,7 +870,7 @@ up.viewport = (function() {
 
   You can use `[up-fixed]` on elements with [`position: sticky`](https://www.w3schools.com/howto/howto_css_sticky_element.asp).
 
-  Unpoly will measure sticky element like permanently fixed elements.
+  Unpoly will measure sticky elements like permanently fixed elements.
   The current scroll position is not taken into account.
 
   @learn-ref scroll-tuning#fixed-layout-elements-obstructing-the-viewport
@@ -883,7 +883,7 @@ up.viewport = (function() {
   Marks this element as being fixed to the bottom edge of the screen
   using `position: fixed`.
 
-  When [following a fragment link](/up-follow), the viewport is scrolled
+  When [following a link](/up-follow), the viewport is scrolled
   so the targeted element becomes visible. By using this attribute you can make
   Unpoly aware of fixed elements that are obstructing the viewport contents.
   Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
@@ -903,7 +903,7 @@ up.viewport = (function() {
 
   You can use `[up-fixed]` on elements with [`position: sticky`](https://www.w3schools.com/howto/howto_css_sticky_element.asp).
 
-  Unpoly will measure sticky element like permanently fixed elements.
+  Unpoly will measure sticky elements like permanently fixed elements.
   The current scroll position is not taken into account.
 
   @learn-ref scroll-tuning#fixed-layout-elements-obstructing-the-viewport
@@ -914,7 +914,7 @@ up.viewport = (function() {
 
   /*-
   Marks this element as being anchored to the right edge of the screen,
-  such as fixed navigation bars.
+  like a fixed navigation bar.
 
   @learn-ref overlays
 

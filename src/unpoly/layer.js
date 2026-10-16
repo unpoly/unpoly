@@ -583,7 +583,7 @@ up.layer = (function() {
       See [Closing when a location is reached](/subinteractions#location-condition).
 
     @param {string} [options.acceptFragment]
-      An CSS selector that will cause this overlay to automatically be
+      A CSS selector that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching element is observed within the overlay.
 
       The [overlay result value](/subinteractions#result-values)
@@ -593,7 +593,7 @@ up.layer = (function() {
       See [Closing when a fragment is detected](/subinteractions#fragment-condition).
 
     @param {string} [options.dismissFragment]
-      An CSS selector that will cause this overlay to automatically be
+      A CSS selector that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching element is observed within the overlay.
 
       The [overlay result value](/subinteractions#result-values)
@@ -1051,7 +1051,7 @@ up.layer = (function() {
       See [Closing when a location is reached](/subinteractions#location-condition).
 
     @param [up-accept-fragment]
-      An CSS selector that will cause this overlay to automatically be
+      A CSS selector that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching element is observed within the overlay.
 
       The [overlay result value](/subinteractions#result-values)
@@ -1061,7 +1061,7 @@ up.layer = (function() {
       See [Closing when a fragment is detected](/subinteractions#fragment-condition).
 
     @param [up-dismiss-fragment]
-      An CSS selector that will cause this overlay to automatically be
+      A CSS selector that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching element is observed within the overlay.
 
       The [overlay result value](/subinteractions#result-values)
@@ -1214,7 +1214,7 @@ up.layer = (function() {
 
   @section Dismissal
     @param [up-dismiss]
-      On buttons on links, the overlay's [dismissal value](/closing-overlays#result-values)
+      On buttons or links, the overlay's [dismissal value](/closing-overlays#result-values)
       as a [relaxed JSON](/relaxed-json) string.
 
     @param [up-confirm]

@@ -1,7 +1,7 @@
 /*-
 Features to control when Unpoly boots.
 
-By default Unpoly boots on `DOMContentLoaded`, after your own scripts had a chance to configure it and register compilers. You rarely need this module. Boot manually with `up.boot()` only when you load Unpoly with `<script async>`, or when you set `[up-boot=manual]` on the `<html>` element and boot later yourself. `up.framework.isSupported()` returns whether Unpoly can boot in the current browser. On an unsupported browser Unpoly stays inactive, leaving a server-side web application without JavaScript enhancements.
+By default Unpoly boots on `DOMContentLoaded`, after your own scripts have had a chance to configure it and register compilers. You rarely need this module. Boot manually with `up.boot()` only when you load Unpoly with `<script async>`, or when you set `[up-boot=manual]` on the `<html>` element and boot later yourself. `up.framework.isSupported()` returns whether Unpoly can boot in the current browser. On an unsupported browser Unpoly stays inactive, leaving a server-side web application without JavaScript enhancements.
 
 @module up.framework
 */
@@ -218,7 +218,7 @@ up.framework = (function() {
 
   #### Internet Explorer
 
-  Internet Explorer 11 or lower are [no longer supported](https://github.com/unpoly/unpoly/discussions/340).
+  Internet Explorer 11 or lower is [no longer supported](https://github.com/unpoly/unpoly/discussions/340).
 
   If you need to support Internet Explorer 11, use Unpoly 2.
 

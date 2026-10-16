@@ -549,11 +549,11 @@ up.Params = class Params {
 
   /*-
   Constructs a new `up.Params` instance from one or more
-  [HTML form field](https://www.w3schools.com/html/html_form_elements.asp).
+  [HTML form fields](https://www.w3schools.com/html/html_form_elements.asp).
 
   The constructed `up.Params` will include exactly those form values that would be
   included for the given fields in a regular form submission. If a given field wouldn't
-  submit a value (like an unchecked `<input type="checkbox">`, nothing will be added.
+  submit a value (like an unchecked `<input type="checkbox">`), nothing will be added.
 
   See `up.Params.fromForm()` for more details and examples.
 

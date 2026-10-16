@@ -1103,7 +1103,7 @@ up.link = (function() {
       For this the element must have a [derivable target selector](/target-derivation).
 
       You may target one or [multiple](/targeting-fragments#multiple) fragments.
-      To target the placeholder itself, you can use `:origin` target instead of spelling out a selector.
+      To target the placeholder itself, you can use the `:origin` target instead of spelling out a selector.
 
   @section Request
     @param [up-href]
@@ -1327,7 +1327,7 @@ up.link = (function() {
   </div>
   ```
 
-  In the example above, clicking anywhere within `.notification` element
+  In the example above, clicking anywhere within the `.notification` element
   would [follow](/up.follow) the *Close* link.
 
   ## Multiple contained links

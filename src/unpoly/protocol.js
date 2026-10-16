@@ -66,7 +66,7 @@ up.protocol = (function() {
   */
 
   /*-
-  The `X-Up-Target` request and response headers allow the server [read](#request) or [change](#response)
+  The `X-Up-Target` request and response headers allow the server to [read](#request) or [change](#response)
   the [target selector](/targeting-fragments) for a fragment update.
 
   Server-side code is free to [optimize its response](/optimizing-responses) by only rendering HTML
@@ -1014,7 +1014,7 @@ up.protocol = (function() {
   Request headers that influenced a response should be listed in a `Vary` response header.
 
   This tells Unpoly to [partition its cache](/optimizing-responses#vary) for that URL so that each
-  request header value gets a separate cache entries.
+  request header value gets a separate cache entry.
 
   You can set a `Vary` header manually from your server-side code. You may also be using
   a library like [unpoly-rails](https://github.com/unpoly/unpoly-rails) that sets the `Vary` header automatically.

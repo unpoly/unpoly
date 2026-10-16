@@ -575,7 +575,7 @@ up.util = (function() {
   /*-
   Returns whether the given argument is an options hash.
 
-  Differently from [`up.util.isObject()`], this returns false for
+  Unlike [`up.util.isObject()`], this returns false for
   functions, jQuery collections, promises, `FormData` instances and arrays.
 
   @function up.util.isOptions
@@ -1057,7 +1057,7 @@ up.util = (function() {
 
   /*-
   Returns all elements from the given [list](/List) that are
-  neither `null` or `undefined`.
+  neither `null` nor `undefined`.
 
   @function up.util.compact
   @param {List<T>} list

@@ -275,9 +275,9 @@ up.history = (function() {
 
       @experimental
     @param {boolean} event.willHandle
-      Whether Unpoly thinks it is responsible for handling this change.
+      Whether Unpoly will handle this change.
 
-      By default Unpoly feels responsible for [owned locations](/restoring-history#handled-entries)
+      By default Unpoly handles changes to [owned locations](/restoring-history#handled-entries)
       when the change has not [already been handled](#event.alreadyHandled).
 
       Listeners can tell Unpoly to *not* handle a change by setting `event.willHandle = false`.

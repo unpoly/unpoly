@@ -754,7 +754,7 @@ up.form = (function() {
       The form that is being submitted.
 
     @param {up.Params} event.params
-      The [form parameters](/up.Params) that will be send as the form's request payload.
+      The [form parameters](/up.Params) that will be sent as the form's request payload.
 
       Listeners may inspect and modify params before they are sent.
 
@@ -1090,7 +1090,7 @@ up.form = (function() {
   The form above also uses the `[up-validate]` attribute to [validate](/validation#validating-after-changing-a-field)
   form groups after changing a field:
 
-  - After changing the *E-Mail* field, Unpoly will validate the `[up-form-group]:has(#email)` target.
+  - After changing the *E-mail* field, Unpoly will validate the `[up-form-group]:has(#email)` target.
   - After changing the *Password* field, Unpoly will validate the `[up-form-group]:has(#password)` target.
 
   @selector [up-form-group]
@@ -1121,7 +1121,7 @@ up.form = (function() {
 
 
   /*-
-  Render a new form state from its current field values, to show validation errors or
+  Renders a new form state from its current field values, to show validation errors or
   update [dependent elements](/reactive-server-forms).
 
   Typical use cases are to [show validation errors](/validation#validating-after-changing-a-field)
@@ -1858,7 +1858,7 @@ up.form = (function() {
 
   Multiple radio buttons with the same `[name]` produce a single value for the form.
 
-  To watch radio buttons group, use the `[up-watch]` attribute on an
+  To watch a group of radio buttons, use the `[up-watch]` attribute on an
   element that contains all radio button elements with a given name:
 
   ```html
@@ -2086,7 +2086,7 @@ up.form = (function() {
   Unpoly will always consider a validation request to be successful, even if the
   server responds with a non-2xx status code.
 
-  Upon seeing an `X-Up-Validate` header, the server now renders a new state form from request parameters,
+  Upon seeing an `X-Up-Validate` header, the server now renders a new form state from request parameters,
   showing eventual validation errors and updating [dependent elements](/reactive-server-forms):
 
   ```html
@@ -2228,7 +2228,7 @@ up.form = (function() {
 
   Multiple radio buttons with the same `[name]` produce a single value for the form.
 
-  To watch radio buttons group, use the `[up-validate]` attribute on an
+  To validate a group of radio buttons, use the `[up-validate]` attribute on an
   element that contains all radio button elements with a given name:
 
   ```html
@@ -2278,7 +2278,7 @@ up.form = (function() {
     @param [up-validate]
       The [target selector](/targeting-fragments) to update with the server response.
 
-      Defaults the closest [form group](/up-form-group) around the validating field.
+      Defaults to the closest [form group](/up-form-group) around the validating field.
 
       You can set another selector to [update a different fragment](/up-validate#target).
       To refer to the changed field, use the `:origin` pseudo-selector.
@@ -2367,7 +2367,7 @@ up.form = (function() {
   Multiple radio buttons with the same `[name]` (a radio button group)
   produce a single value for the form.
 
-  To auto-submit group of radio buttons, use the `[up-autosubmit]` attribute on an
+  To auto-submit a group of radio buttons, use the `[up-autosubmit]` attribute on an
   element containing the entire button group:
 
   ```html

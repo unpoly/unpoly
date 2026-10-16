@@ -439,7 +439,7 @@ up.event = (function() {
   /*-
   Emits a custom event when this element is clicked.
 
-  The event is emitted on this element and bubbles up the `document`.
+  The event is emitted on this element and bubbles up to the `document`.
   To listen to the event, use [`addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener) or `up.on()`
   on the element, or on its ancestors.
 

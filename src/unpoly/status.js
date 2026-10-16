@@ -315,7 +315,7 @@ up.status = (function() {
   <a href="/edit" up-follow up-preview="spinner, dim-page">Edit page</a> <!-- mark: up-preview="spinner, dim-page" -->
   ```
 
-  [Preview options](/previews#parameters) can be appended after each preview name, encoded as [Relaxed JSON](/relaxed-json):
+  [Preview options](/previews#parameters) can be appended after each preview name, encoded as [relaxed JSON](/relaxed-json):
 
   ```html
   <a href="/edit"
@@ -342,7 +342,7 @@ up.status = (function() {
 
   All other children of the targeted fragment will be hidden while
   the request is in flight. When the request [ends](/up.Request.prototype.ended) for any reason,
-  the placeholder will be removed and the original fragment children will be un-hidden.
+  the placeholder will be removed and the original fragment children will be shown again.
 
   When [targeting multiple fragments](/targeting-fragments#multiple),
   the placeholder will be shown in the first fragment.
@@ -479,7 +479,7 @@ up.status = (function() {
   @param [up-layer="origin"]
     The [layers](/up.layer) for which to match link locations.
 
-    By default, links are only marked as current when they point to location *of their own layer*.
+    By default, links are only marked as current when they point to the location *of their own layer*.
     To highlight links that point to the location of *another* layer, set this attribute to
     any [layer option](/targeting-other-layers).
 

@@ -108,13 +108,13 @@ Returns `undefined` if no element matches these conditions.
 @param {string} selector
   The selector to match
 @param {string} [options.layer='current']
-  The the layer in which to find the element.
+  The layer in which to find the element.
 
   See [[targeting-other-layers]].
 @param {string|Element|jQuery} [options.origin]
-  An second element or selector that can be referenced as `:origin` in the first selector:
+  A second element or selector that can be referenced as `:origin` in the first selector.
 @return {Element|undefined}
-  The first element that is neither a ghost or being destroyed,
+  The first element that is not being destroyed,
   or `undefined` if no such element was found.
 @deprecated
   Use `up.fragment.get()` instead.
