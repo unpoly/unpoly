@@ -769,6 +769,30 @@ extendDescribe('up.history', function() {
         expect('main').toHaveText('error page')
       })
 
+      it('does not play a transition configured in up.fragment.config.navigateOptions when restoring a location', async function() {
+        const waitForBrowser = 100
+        const transitionFn = jasmine.createSpy('transition').and.returnValue(Promise.resolve())
+        up.transition('spy-transition', transitionFn)
+        up.fragment.config.navigateOptions.transition = 'spy-transition'
+        up.history.config.restoreTargets = ['main']
+        fixture('main', { text: 'original content' })
+
+        up.history.push('/page1')
+        await wait()
+
+        up.history.push('/page2')
+        await wait()
+
+        history.back()
+        await wait(waitForBrowser)
+
+        jasmine.respondWithSelector('main', { text: 'restored content' })
+        await wait()
+
+        expect('main').toHaveText('restored content')
+        expect(transitionFn).not.toHaveBeenCalled()
+      })
+
       describe('overlays', function() {
 
         it('closes overlays when restoring the root layer, even if an up:layer:dismiss listener prevents it', async function() {

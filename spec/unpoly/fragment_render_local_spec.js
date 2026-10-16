@@ -189,6 +189,28 @@ extendDescribe('up.fragment', function() {
           expect('#target').toHaveVisibleText('one two three')
         })
 
+        it("prefers a <template> in the { origin }'s layer over templates with the same selector in other layers", async function() {
+          htmlFixtureList('<template id="target-template">from root</template>')
+          const overlay = await up.layer.open({ content: '<div id="target">old text</div><template id="target-template">from overlay</template>' })
+          const origin = overlay.getFirstSwappableElement().querySelector('#target')
+          // A front layer with the same template must not be preferred either
+          await up.layer.open({ content: '<template id="target-template">from front overlay</template>' })
+
+          await up.render({ target: '#target', content: '#target-template', origin })
+
+          expect(overlay.getFirstSwappableElement().querySelector('#target')).toHaveText('from overlay')
+        })
+
+        it('falls back to a <template> in an ancestor layer of the { origin }', async function() {
+          htmlFixtureList('<template id="target-template">from root</template>')
+          const overlay = await up.layer.open({ content: '<div id="target">old text</div>' })
+          const origin = overlay.getFirstSwappableElement().querySelector('#target')
+
+          await up.render({ target: '#target', content: '#target-template', origin })
+
+          expect(overlay.getFirstSwappableElement().querySelector('#target')).toHaveText('from root')
+        })
+
         it('can render a string containing a text node without an enclosing element', async function() {
           const target = htmlFixture(`
             <div id="target">
@@ -414,6 +436,26 @@ extendDescribe('up.fragment', function() {
           await wait()
 
           expect('.target').toHaveText('new text')
+        })
+
+        it('moves an attached Element to the target position without compiling it again', async function() {
+          const compiler = jasmine.createSpy('compiler')
+          up.compiler('.target', compiler)
+          const [_oldTarget, holder, newTarget] = htmlFixtureList(`
+            <div class="target">old text</div>
+            <div class="holder">
+              <div class="target">new text</div>
+            </div>
+          `)
+          up.hello(newTarget)
+          expect(compiler.calls.count()).toBe(1)
+
+          await up.render('.target', { fragment: newTarget })
+
+          expect(document.querySelector('.target')).toBe(newTarget)
+          expect(document.querySelectorAll('.target').length).toBe(1)
+          expect(holder.children.length).toBe(0)
+          expect(compiler.calls.count()).toBe(1)
         })
 
         it("rejects if the given { fragment } does not match an element on the current page", async function() {

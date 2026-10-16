@@ -401,6 +401,78 @@ describe('up.link', function() {
         expect(options.transition).toBe(false)
       })
 
+      it('parses an [up-duration] attribute as a number', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-duration="300">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.duration).toBe(300)
+      })
+
+      it('parses an [up-easing] attribute', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-easing="ease-in-out">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.easing).toBe('ease-in-out')
+      })
+
+      it('parses an [up-fragment] attribute', function() {
+        const [link] = htmlFixtureList('<a up-fragment="#tip-template">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.fragment).toBe('#tip-template')
+      })
+
+      it('parses an [up-document] attribute', function() {
+        const [link] = htmlFixtureList('<a up-document="#page-template">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.document).toBe('#page-template')
+      })
+
+      it('parses an empty [up-fallback] attribute as { fallback: true }', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-fallback>label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.fallback).toBe(true)
+      })
+
+      it('parses an [up-fallback] attribute with a selector as a string', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-fallback=".fallback">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.fallback).toBe('.fallback')
+      })
+
+      it('parses an [up-on-loaded] attribute into a function that receives the event', function() {
+        window.onLoadedCallback = jasmine.createSpy('onLoaded callback')
+        const [link] = htmlFixtureList('<a href="/foo" up-on-loaded="nonce-specs-nonce window.onLoadedCallback(this, event)">label</a>')
+        const options = up.link.followOptions(link)
+        const event = up.event.build('up:fragment:loaded')
+
+        options.onLoaded(event)
+
+        expect(window.onLoadedCallback).toHaveBeenCalledWith(link, event)
+        delete window.onLoadedCallback
+      })
+
+      it('parses an [up-on-rendered] attribute into a function that receives the result', function() {
+        window.onRenderedCallback = jasmine.createSpy('onRendered callback')
+        const [link] = htmlFixtureList('<a href="/foo" up-on-rendered="nonce-specs-nonce window.onRenderedCallback(this, result)">label</a>')
+        const options = up.link.followOptions(link)
+        const result = new up.RenderResult()
+
+        options.onRendered(result)
+
+        expect(window.onRenderedCallback).toHaveBeenCalledWith(link, result)
+        delete window.onRenderedCallback
+      })
+
+      it('parses an [up-on-error] attribute into a function that receives the error', function() {
+        window.onErrorCallback = jasmine.createSpy('onError callback')
+        const [link] = htmlFixtureList('<a href="/foo" up-on-error="nonce-specs-nonce window.onErrorCallback(this, error)">label</a>')
+        const options = up.link.followOptions(link)
+        const error = new Error('message')
+
+        options.onError(error)
+
+        expect(window.onErrorCallback).toHaveBeenCalledWith(link, error)
+        delete window.onErrorCallback
+      })
+
       describe('[up-use-data-map]', function() {
 
         it('parses a relaxed JSON value into a { dataMap } option (not { useDataMap })', function() {
@@ -754,6 +826,11 @@ describe('up.link', function() {
       it('returns true for an [up-target] link', function() {
         const link = fixture('a[href="/foo"][up-target=".target"]')
         up.hello(link)
+        expect(up.link.isFollowable(link)).toBe(true)
+      })
+
+      it('returns true for an a[up-fragment] link without [href]', function() {
+        const [link] = htmlFixtureList('<a up-fragment="#tip-template">label</a>')
         expect(up.link.isFollowable(link)).toBe(true)
       })
 

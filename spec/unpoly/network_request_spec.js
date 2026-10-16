@@ -733,6 +733,17 @@ extendDescribe('up.network', function() {
           expect(headers['csrf-header']).toBeMissing()
         })
 
+        it('sends the token from <meta name="csrf-token"> in an X-CSRF-Token header by default', async function() {
+          // Undo the custom config from the beforeEach() block
+          up.protocol.config.reset()
+          registerFixture(up.element.affix(document.head, 'meta[name="csrf-token"][content="token-from-meta"]'))
+
+          up.request('/path', { method: 'post' })
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-CSRF-Token']).toBe('token-from-meta')
+        })
+
       })
 
       describe('with { params } option', function() {
@@ -1362,6 +1373,16 @@ extendDescribe('up.network', function() {
               expect(request.data()['_method']).toBeUndefined()
             })
           })
+        })
+
+        it('does not wrap the method when up.network.config.wrapMethod is false', async function() {
+          up.network.config.wrapMethod = false
+          up.request({ url: '/foo', method: 'PUT' })
+          await wait()
+
+          const request = jasmine.lastRequest()
+          expect(request.method).toEqual('PUT')
+          expect(request.data()['_method']).toBeUndefined()
         })
       })
 

@@ -141,6 +141,33 @@ extendDescribe('up.fragment', function() {
           })
         }
 
+        it('compiles matching elements in each target of a multi-target update with their mapped { dataMap }', async function() {
+          const compiler = jasmine.createSpy('compiler')
+          up.compiler('.child', (element, data) => compiler(element.id, data))
+
+          let html = (prefix) => `
+            <div id="fragment1">
+              <div class="child" id="child1">${prefix} child1</div>
+            </div>
+            <div id="fragment2">
+              <div class="child" id="child2">${prefix} child2</div>
+            </div>
+          `
+          htmlFixtureList(html('old'))
+
+          await up.render({
+            target: '#fragment1, #fragment2',
+            document: html('new'),
+            dataMap: {
+              '#child1': { foo: 'data for child1' },
+              '#child2': { foo: 'data for child2' },
+            }
+          })
+
+          expect(compiler).toHaveBeenCalledWith('child1', { foo: 'data for child1' })
+          expect(compiler).toHaveBeenCalledWith('child2', { foo: 'data for child2' })
+        })
+
         describe('when a compiler throws an error', function() {
 
           it('emits an error event, but does not reject the up.render() promise', async function() {

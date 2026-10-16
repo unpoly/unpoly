@@ -522,6 +522,23 @@ extendDescribe('up.fragment', function() {
             expect('.target').toHaveText('verified text')
           })
 
+          it('does not play the transition again when rendering revalidated content', async function() {
+            const transitionFn = jasmine.createSpy('transition').and.returnValue(Promise.resolve())
+            up.transition('spy-transition', transitionFn)
+
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true, transition: 'spy-transition' })
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+            expect(transitionFn.calls.count()).toBe(1)
+
+            jasmine.respondWithSelector('.target', { text: 'verified text' })
+            await wait()
+
+            expect('.target').toHaveText('verified text')
+            expect(transitionFn.calls.count()).toBe(1)
+          })
+
           it('delays up.render().finished promise until the fragment was verified', async function() {
             const finishedCallback = jasmine.createSpy('finished callback')
 

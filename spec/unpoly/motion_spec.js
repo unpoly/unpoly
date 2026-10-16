@@ -396,6 +396,39 @@ describe('up.motion', function() {
 
           expect(element).toHaveOwnOpacity(1.0)
         })
+
+        it('calls the animation function with { duration: 0 } when motion is disabled', async function() {
+          up.motion.config.enabled = false
+          const animationFn = jasmine.createSpy('animation function').and.returnValue(Promise.resolve())
+          const [element] = htmlFixtureList('<div class="element">content</div>')
+
+          await up.animate(element, animationFn, { duration: 200 })
+
+          expect(animationFn).toHaveBeenCalledWith(element, jasmine.objectContaining({ duration: 0 }))
+        })
+      })
+
+      describe('{ easing } option', function() {
+
+        it('passes the given easing to the animation function', async function() {
+          const animationFn = jasmine.createSpy('animation function').and.returnValue(Promise.resolve())
+          const [element] = htmlFixtureList('<div class="element">content</div>')
+
+          await up.animate(element, animationFn, { duration: 10, easing: 'linear' })
+
+          expect(animationFn).toHaveBeenCalledWith(element, jasmine.objectContaining({ easing: 'linear' }))
+        })
+
+        it('defaults to up.motion.config.easing if no { easing } is given', async function() {
+          up.motion.config.easing = 'ease-in-out'
+          const animationFn = jasmine.createSpy('animation function').and.returnValue(Promise.resolve())
+          const [element] = htmlFixtureList('<div class="element">content</div>')
+
+          await up.animate(element, animationFn, { duration: 10 })
+
+          expect(animationFn).toHaveBeenCalledWith(element, jasmine.objectContaining({ easing: 'ease-in-out' }))
+        })
+
       })
 
       describe('when up.animate() is called from inside an animation function', function() {
@@ -1079,6 +1112,41 @@ describe('up.motion', function() {
           expect($new).toBeAttached()
           expect($new).toHaveOwnOpacity(1.0)
         })
+
+        it('calls a transition function with { duration: 0 }', async function() {
+          const transitionFn = jasmine.createSpy('transition function').and.returnValue(Promise.resolve())
+          const [oldElement] = htmlFixtureList('<div class="old">old</div>')
+          const newElement = up.element.createFromHTML('<div class="new">new</div>')
+
+          await up.morph(oldElement, newElement, transitionFn, { duration: 200 })
+
+          expect(transitionFn).toHaveBeenCalledWith(oldElement, newElement, jasmine.objectContaining({ duration: 0 }))
+        })
+      })
+
+      describe('{ easing } option', function() {
+
+        it('passes the given easing to the transition function', async function() {
+          const transitionFn = jasmine.createSpy('transition function').and.returnValue(Promise.resolve())
+          const [oldElement] = htmlFixtureList('<div class="old">old</div>')
+          const newElement = up.element.createFromHTML('<div class="new">new</div>')
+
+          await up.morph(oldElement, newElement, transitionFn, { duration: 10, easing: 'linear' })
+
+          expect(transitionFn).toHaveBeenCalledWith(oldElement, newElement, jasmine.objectContaining({ easing: 'linear' }))
+        })
+
+        it('defaults to up.motion.config.easing if no { easing } is given', async function() {
+          up.motion.config.easing = 'ease-in-out'
+          const transitionFn = jasmine.createSpy('transition function').and.returnValue(Promise.resolve())
+          const [oldElement] = htmlFixtureList('<div class="old">old</div>')
+          const newElement = up.element.createFromHTML('<div class="new">new</div>')
+
+          await up.morph(oldElement, newElement, transitionFn, { duration: 10 })
+
+          expect(transitionFn).toHaveBeenCalledWith(oldElement, newElement, jasmine.objectContaining({ easing: 'ease-in-out' }))
+        })
+
       })
 
       for (let noneTransition of  [false, null, undefined, 'none', 'none/none', '', [], [undefined, null], ['none', 'none'], ['none', {}]]) {
@@ -1132,6 +1200,28 @@ describe('up.motion', function() {
 
         expect(animationFn).toHaveBeenCalledWith(element, jasmine.objectContaining({ duration: 10 }))
       })
+    })
+
+    describe('up.motion.config', function() {
+
+      function stubReducedMotion(reduce) {
+        spyOn(window, 'matchMedia').and.callFake((query) => ({ matches: reduce && query === '(prefers-reduced-motion: reduce)' }))
+      }
+
+      it('sets { enabled: false } when the user prefers reduced motion', function() {
+        stubReducedMotion(true)
+        up.motion.config.reset()
+
+        expect(up.motion.config.enabled).toBe(false)
+      })
+
+      it('sets { enabled: true } when the user does not prefer reduced motion', function() {
+        stubReducedMotion(false)
+        up.motion.config.reset()
+
+        expect(up.motion.config.enabled).toBe(true)
+      })
+
     })
   })
 })

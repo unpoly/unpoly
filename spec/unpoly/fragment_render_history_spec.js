@@ -452,6 +452,21 @@ extendDescribe('up.fragment', function() {
             expect(document.title).toBe('Title from header')
           })
 
+          it('sets the document title to a single-quoted X-Up-Title header', async function() {
+            htmlFixtureList('<div class="container">old container text</div>')
+            up.render('.container', { url: '/path', history: true })
+            await wait()
+
+            jasmine.respondWith({
+              responseHeaders: { 'X-Up-Title': "'Title from header'" },
+              responseText: '<div class="container">new container text</div>'
+            })
+            await wait()
+
+            expect('.container').toHaveText('new container text')
+            expect(document.title).toBe('Title from header')
+          })
+
           it("prefers the X-Up-Title header to the response <title>", async function() {
             fixture('.container', { text: 'old container text' })
             up.render('.container', { url: '/path', history: true })
