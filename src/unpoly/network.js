@@ -282,7 +282,7 @@ up.network = (function() {
   Future calls to `up.request()` will try to reuse this request before
   making a new request.
 
-  @function up.cache.set
+  @function up.cache.put
   @param {up.Request} request
     The request to cache. The request is also a promise for the response.
   @internal
