@@ -979,7 +979,7 @@ describe('up.layer', function() {
     })
 
 
-    describe('link with [up-layer=new]', function() {
+    describe('[up-layer=new]', function() {
 
       it('opens a new overlay loaded from the given [href]', async function() {
         const link = fixture('a[href="/overlay-path"][up-target=".target"][up-layer="new"]')

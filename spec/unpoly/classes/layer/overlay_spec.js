@@ -1271,150 +1271,150 @@ describe('up.Layer.Overlay', function() {
       expect(up.layer.current.getFocusElement()).toHaveAttribute('role', 'dialog')
       expect(up.layer.current.getFocusElement()).toHaveAttribute('aria-modal', 'false')
     })
-  })
 
-  describe('label[for] when an input with that ID exists in both overlay and parent layer', function() {
+    describe('label[for] when an input with that ID exists in both overlay and parent layer', function() {
 
-    describe('for an input[type=text]', function() {
-      it('focuses the input in the same layer as the label', async function() {
-        const form = `
-          <form>
-            <label for="foo">label</label>
-            <input type="text" id="foo">
-          </form>
-        `
+      describe('for an input[type=text]', function() {
+        it('focuses the input in the same layer as the label', async function() {
+          const form = `
+            <form>
+              <label for="foo">label</label>
+              <input type="text" id="foo">
+            </form>
+          `
 
-        makeLayers([
-          { content: form },
-          { content: form }
-        ])
+          makeLayers([
+            { content: form },
+            { content: form }
+          ])
 
-        const rootLabel = up.fragment.get('label', { layer: 'root' })
-        const rootInput = up.fragment.get('#foo', { layer: 'root' })
-        const overlayLabel = up.fragment.get('label', { layer: 'overlay' })
-        const overlayInput = up.fragment.get('#foo', { layer: 'overlay' })
+          const rootLabel = up.fragment.get('label', { layer: 'root' })
+          const rootInput = up.fragment.get('#foo', { layer: 'root' })
+          const overlayLabel = up.fragment.get('label', { layer: 'overlay' })
+          const overlayInput = up.fragment.get('#foo', { layer: 'overlay' })
 
-        await wait()
+          await wait()
 
-        expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.isOverlay()).toBe(true)
 
-        Trigger.clickSequence(overlayLabel)
-        await wait()
+          Trigger.clickSequence(overlayLabel)
+          await wait()
 
-        expect(overlayInput).toBeFocused()
+          expect(overlayInput).toBeFocused()
 
-        up.layer.dismiss()
-        await wait()
+          up.layer.dismiss()
+          await wait()
 
-        expect(up.layer.isRoot()).toBe(true)
+          expect(up.layer.isRoot()).toBe(true)
 
-        Trigger.clickSequence(rootLabel)
-        await wait()
+          Trigger.clickSequence(rootLabel)
+          await wait()
 
-        expect(rootInput).toBeFocused()
+          expect(rootInput).toBeFocused()
+        })
       })
-    })
 
-    describe('for an input[type=checkbox]', function() {
-      it('toggles the input in the same layer as the label', async function() {
-        const form = `
-          <form>
-            <label for="foo">label</label>
-            <input type="checkbox" id="foo">
-          </form>
-        `
+      describe('for an input[type=checkbox]', function() {
+        it('toggles the input in the same layer as the label', async function() {
+          const form = `
+            <form>
+              <label for="foo">label</label>
+              <input type="checkbox" id="foo">
+            </form>
+          `
 
-        makeLayers([
-          { content: form },
-          { content: form }
-        ])
+          makeLayers([
+            { content: form },
+            { content: form }
+          ])
 
-        const rootLabel = up.fragment.get('label', { layer: 'root' })
-        const rootInput = up.fragment.get('#foo', { layer: 'root' })
-        const overlayLabel = up.fragment.get('label', { layer: 'overlay' })
-        const overlayInput = up.fragment.get('#foo', { layer: 'overlay' })
+          const rootLabel = up.fragment.get('label', { layer: 'root' })
+          const rootInput = up.fragment.get('#foo', { layer: 'root' })
+          const overlayLabel = up.fragment.get('label', { layer: 'overlay' })
+          const overlayInput = up.fragment.get('#foo', { layer: 'overlay' })
 
-        expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.isOverlay()).toBe(true)
 
-        Trigger.clickSequence(overlayLabel)
-        expect(overlayInput).toBeFocused()
-        expect(overlayInput).toBeChecked()
-        expect(rootInput).not.toBeChecked()
+          Trigger.clickSequence(overlayLabel)
+          expect(overlayInput).toBeFocused()
+          expect(overlayInput).toBeChecked()
+          expect(rootInput).not.toBeChecked()
 
-        Trigger.clickSequence(overlayLabel)
-        expect(overlayInput).toBeFocused()
-        expect(overlayInput).not.toBeChecked()
+          Trigger.clickSequence(overlayLabel)
+          expect(overlayInput).toBeFocused()
+          expect(overlayInput).not.toBeChecked()
 
-        up.layer.dismiss()
+          up.layer.dismiss()
 
-        await wait()
+          await wait()
 
-        expect(up.layer.isRoot()).toBe(true)
+          expect(up.layer.isRoot()).toBe(true)
 
-        Trigger.clickSequence(rootLabel)
-        expect(rootInput).toBeFocused()
-        expect(rootInput).toBeChecked()
+          Trigger.clickSequence(rootLabel)
+          expect(rootInput).toBeFocused()
+          expect(rootInput).toBeChecked()
 
-        // Overlay input was not changed
-        expect(overlayInput).not.toBeChecked()
+          // Overlay input was not changed
+          expect(overlayInput).not.toBeChecked()
+        })
       })
-    })
 
-    describe('for an input[type=radio]', function() {
-      it('selects the input in the same layer as the label', async function() {
-        const form = `
-          <form>
-            <label for="format_pdf">PDF</label>
-            <input type="radio" id="format_pdf" name='format' value='pdf'>
-            <label for="format_xls">XLS</label>
-            <input type="radio" id="format_xls" name='format' value='xls'>
-          </form>
-        `
+      describe('for an input[type=radio]', function() {
+        it('selects the input in the same layer as the label', async function() {
+          const form = `
+            <form>
+              <label for="format_pdf">PDF</label>
+              <input type="radio" id="format_pdf" name='format' value='pdf'>
+              <label for="format_xls">XLS</label>
+              <input type="radio" id="format_xls" name='format' value='xls'>
+            </form>
+          `
 
-        makeLayers([
-          { content: form },
-          { content: form }
-        ])
+          makeLayers([
+            { content: form },
+            { content: form }
+          ])
 
-        const rootLabelPDF = up.fragment.get('label[for=format_pdf]', { layer: 'root' })
-        const rootLabelXLS = up.fragment.get('label[for=format_xls]', { layer: 'root' })
-        const rootInputPDF = up.fragment.get('#format_pdf', { layer: 'root' })
-        const rootInputXLS = up.fragment.get('#format_xls', { layer: 'root' })
-        const overlayLabelPDF = up.fragment.get('label[for=format_pdf]', { layer: 'overlay' })
-        const overlayLabelXLS = up.fragment.get('label[for=format_xls]', { layer: 'overlay' })
-        const overlayInputPDF = up.fragment.get('#format_pdf', { layer: 'overlay' })
-        const overlayInputXLS = up.fragment.get('#format_xls', { layer: 'overlay' })
+          const rootLabelPDF = up.fragment.get('label[for=format_pdf]', { layer: 'root' })
+          const rootLabelXLS = up.fragment.get('label[for=format_xls]', { layer: 'root' })
+          const rootInputPDF = up.fragment.get('#format_pdf', { layer: 'root' })
+          const rootInputXLS = up.fragment.get('#format_xls', { layer: 'root' })
+          const overlayLabelPDF = up.fragment.get('label[for=format_pdf]', { layer: 'overlay' })
+          const overlayLabelXLS = up.fragment.get('label[for=format_xls]', { layer: 'overlay' })
+          const overlayInputPDF = up.fragment.get('#format_pdf', { layer: 'overlay' })
+          const overlayInputXLS = up.fragment.get('#format_xls', { layer: 'overlay' })
 
-        expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.isOverlay()).toBe(true)
 
-        Trigger.clickSequence(overlayLabelPDF)
-        expect(overlayInputPDF).toBeFocused()
-        expect(overlayInputPDF).toBeChecked()
-        expect(overlayInputXLS).not.toBeChecked()
-        expect(rootInputPDF).not.toBeChecked()
-        expect(rootInputXLS).not.toBeChecked()
+          Trigger.clickSequence(overlayLabelPDF)
+          expect(overlayInputPDF).toBeFocused()
+          expect(overlayInputPDF).toBeChecked()
+          expect(overlayInputXLS).not.toBeChecked()
+          expect(rootInputPDF).not.toBeChecked()
+          expect(rootInputXLS).not.toBeChecked()
 
-        Trigger.clickSequence(overlayLabelXLS)
-        expect(overlayInputXLS).toBeFocused()
-        expect(overlayInputXLS).toBeChecked()
-        expect(overlayInputPDF).not.toBeChecked()
-        expect(rootInputPDF).not.toBeChecked()
-        expect(rootInputXLS).not.toBeChecked()
+          Trigger.clickSequence(overlayLabelXLS)
+          expect(overlayInputXLS).toBeFocused()
+          expect(overlayInputXLS).toBeChecked()
+          expect(overlayInputPDF).not.toBeChecked()
+          expect(rootInputPDF).not.toBeChecked()
+          expect(rootInputXLS).not.toBeChecked()
 
-        up.layer.dismiss()
+          up.layer.dismiss()
 
-        await wait()
+          await wait()
 
-        expect(up.layer.isRoot()).toBe(true)
+          expect(up.layer.isRoot()).toBe(true)
 
-        Trigger.clickSequence(rootLabelPDF)
-        expect(rootInputPDF).toBeFocused()
-        expect(rootInputPDF).toBeChecked()
-        expect(rootInputXLS).not.toBeChecked()
+          Trigger.clickSequence(rootLabelPDF)
+          expect(rootInputPDF).toBeFocused()
+          expect(rootInputPDF).toBeChecked()
+          expect(rootInputXLS).not.toBeChecked()
 
-        // Overlay inputs were not changed
-        expect(overlayInputPDF).not.toBeChecked()
-        expect(overlayInputXLS).toBeChecked()
+          // Overlay inputs were not changed
+          expect(overlayInputPDF).not.toBeChecked()
+          expect(overlayInputXLS).toBeChecked()
+        })
       })
     })
   })
