@@ -88,7 +88,7 @@ describe('up.status', function() {
         expect(link).not.toHaveClass('up-current')
       })
 
-      it('removes .up-current classes from all nav links in overlays without history', async function() {
+      it('removes .up-current classes from all nav links in an overlay without a location', async function() {
         const overlay = await up.layer.open({ history: false, content: `
           <nav>
             <a id="overlay-link" href='/bar'></a>

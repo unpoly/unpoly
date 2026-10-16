@@ -18,6 +18,18 @@ extendDescribe('up.link', function() {
         expect(jasmine.Ajax.requests.count()).toBe(0)
       })
 
+      it('waits for the delay given in an [up-preload-delay] attribute instead of up.link.config.preloadDelay', async function() {
+        // A long configured delay that the spec never waits out
+        up.link.config.preloadDelay = 10000
+        const [link] = htmlFixtureList('<a href="/foo" up-target=".target" up-preload up-preload-delay="10">label</a>')
+        up.hello(link)
+
+        Trigger.hoverSequence(link)
+        await wait(60)
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+      })
+
       it('preloads the link destination when hovering, after a delay', async function() {
         up.link.config.preloadDelay = 100
 
@@ -711,6 +723,18 @@ extendDescribe('up.link', function() {
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toEqual(1)
+        })
+
+        it('does not preload a matching link that is not followable', async function() {
+          up.link.config.followSelectors.push('a[href]')
+          up.link.config.preloadSelectors.push('a[href]')
+          const [link] = htmlFixtureList('<a href="/file.pdf" download>Download</a>')
+          up.hello(link)
+
+          Trigger.hoverSequence(link)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
         })
 
         it('allows individual links to opt out with [up-preload=false]', async function() {

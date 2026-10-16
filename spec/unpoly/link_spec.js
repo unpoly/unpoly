@@ -39,6 +39,18 @@ describe('up.link', function() {
         expect(options.url).toEqual('/bar')
       })
 
+      it('defaults to { navigate: true }', function() {
+        const [link] = htmlFixtureList('<a href="/path">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.navigate).toBe(true)
+      })
+
+      it('parses an [up-navigate=false] attribute as { navigate: false }', function() {
+        const [link] = htmlFixtureList('<a href="/path" up-navigate="false">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.navigate).toBe(false)
+      })
+
       it('parses an [up-on-finished] attribute', function() {
         window.onFinishedCallback = jasmine.createSpy('onFinished callback')
         const link = fixture('a[href="/path"][up-on-finished="nonce-specs-nonce window.onFinishedCallback(this)"]')
@@ -562,6 +574,11 @@ describe('up.link', function() {
         expect(up.link.isFollowable(link)).toBe(true)
       })
 
+      it('returns true for an [up-transition] link', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-transition="cross-fade">label</a>')
+        expect(up.link.isFollowable(link)).toBe(true)
+      })
+
       it('returns true for an [up-follow] link', function() {
         const link = fixture('a[href="/foo"][up-follow]')
         up.hello(link)
@@ -693,7 +710,7 @@ describe('up.link', function() {
         expect(up.link.isFollowable(link)).toBe(false)
       })
 
-      it('returns false for an #anchor link with a path, even if the link has [up-follow]', function() {
+      it('returns true for an #anchor link with a path', function() {
         const link = fixture('a[up-follow][href="/other/page#details"]')
         expect(up.link.isFollowable(link)).toBe(true)
       })
@@ -806,6 +823,39 @@ describe('up.link', function() {
         await expectAsync(promise).toBeResolved()
 
         expect(onRendered).not.toHaveBeenCalled()
+      })
+
+      it('emits a preventable up:link:preload event', async function() {
+        const [link] = htmlFixtureList('<a href="/path" up-target=".target">label</a>')
+        const listener = jasmine.createSpy('up:link:preload listener').and.callFake((event) => event.preventDefault())
+        up.on('up:link:preload', listener)
+
+        const promise = up.link.preload(link)
+        await wait()
+
+        expect(listener).toHaveBeenCalledWith(jasmine.objectContaining({ target: link }), jasmine.anything(), jasmine.anything())
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+        await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
+      })
+
+      it('allows up:link:preload listeners to mutate event.renderOptions', async function() {
+        const [link] = htmlFixtureList('<a href="/path" up-target=".target">label</a>')
+        up.on('up:link:preload', (event) => event.renderOptions.headers = { 'Custom-Header': 'custom-value' })
+
+        up.link.preload(link)
+        await wait()
+
+        expect(jasmine.lastRequest().requestHeaders['Custom-Header']).toBe('custom-value')
+      })
+
+      it('sends a { background: true } request', async function() {
+        const requestSpy = spyOn(up, 'request').and.callThrough()
+        const [link] = htmlFixtureList('<a href="/path" up-target=".target">label</a>')
+
+        up.link.preload(link)
+        await wait()
+
+        expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining({ background: true }))
       })
 
       describe('for an [up-target] link', function() {
@@ -1812,6 +1862,13 @@ describe('up.link', function() {
         Trigger.clickSequence(fauxButton)
 
         expect(clickListener.calls.count()).toBe(1)
+      })
+
+      it('does not override an existing [tabindex] attribute', function() {
+        const [fauxButton] = htmlFixtureList('<span up-clickable tabindex="-1">label</span>')
+        up.hello(fauxButton)
+
+        expect(fauxButton).toHaveAttribute('tabindex', '-1')
       })
 
       it('makes the element emit up:click events on Enter', async function() {
