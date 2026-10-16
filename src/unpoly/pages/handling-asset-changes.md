@@ -164,7 +164,16 @@ Aborting the render pass {#aborting}
 
 The `up:assets:changed` event is emitted after the response was loaded, but before any fragment is changed
 and before the browser history is updated. If you cannot allow rendering with changed assets,
-call `event.preventDefault()`. The render pass is then aborted and no elements are changed.
+prevent the event and make a full page load instead:
+
+```js
+up.on('up:assets:changed', function(event) {
+  event.preventDefault() // mark: event.preventDefault()
+  up.network.loadPage(event.renderOptions)
+})
+```
+
+The render pass is aborted, and the browser loads the new page with the new assets instead.
 
 @page handling-asset-changes
 @signature
