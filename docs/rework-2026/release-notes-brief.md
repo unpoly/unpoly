@@ -13,11 +13,11 @@ The `Unreleased` section in docs/changes/CHANGELOG_3.x.md reads like a commit lo
    - **Docs for coding agents** (own section although one deliverable with the site: Markdown twin of every page, /llms.txt, the agent skill).
    - **Custom form fields** (form-associated custom elements, formdata listeners, the new guide; short and exciting, ~5 lines of prose + example).
 2. Grouped short items by topic (Forms, Overlays incl. the peeling change, Caching, Rendering, Network, …), one line each, linking the guide.
-3. **"Form submissions now match the browser"** as a group section: one sentence on why (Unpoly now uses the browser's form-data algorithm, so edge cases behave like a native submission), then every ⚠️ serialization edge case in one line each. Not inside the headline section.
+3. **"Form submissions now match the browser"** as a group section: one sentence on why (Unpoly now uses the browser's form-data algorithm, so edge cases behave like a native submission), then every serialization edge case in one line each (no markers: browser alignment). Not inside the headline section.
 4. "Smaller fixes and changes", "Upgrading".
 
 ## Filter for every item
-Include: new API, user-visible behavior, bugs users may have hit, every ⚠️ change. Exclude: refactorings, spec-only changes, docs typos, internal renames without users. Each section starts with one plain sentence on what changes for the user, no internal terms.
+Include: new API, user-visible behavior, bugs users may have hit, every breaking change. Marker rule (docs/contributing/releasing.md, 2026-10-16): only intentional changes to documented API/behavior are breaking (⚠️ polyfilled, ❌ not); bug fixes, browser alignment and undocumented behavior get no marker but are still listed. Exclude: refactorings, spec-only changes, docs typos, internal renames without users. Each section starts with one plain sentence on what changes for the user, no internal terms.
 
 ## Process
 - Draft in docs/rework-2026/drafts/release-notes.md. Do NOT edit CHANGELOG_3.x.md until the release (avoids conflicts with hk/refine-tests-2026-10, which also adds entries).
