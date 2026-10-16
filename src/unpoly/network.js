@@ -382,13 +382,13 @@ up.network = (function() {
 
       Defaults to [`up.network.config`](/up.network.config#config.wrapMethod).
 
-    @param {string} [options.timeout]
+    @param {number} [options.timeout]
       A timeout in milliseconds.
 
       If the request is queued due to [many concurrent requests](/up.network.config#config.concurrency),
       the timeout will not include the time spent waiting in the queue.
 
-    @param {Element} [options.contentType]
+    @param {string} [options.contentType]
       The format in which to encode the request params.
 
       Allowed values are `application/x-www-form-urlencoded` and `multipart/form-data`.

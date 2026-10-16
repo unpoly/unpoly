@@ -182,7 +182,7 @@ up.Layer = class Layer extends up.Record {
       Defaults to the close animation [configured](/up.layer.config) for this layer mode.
     @param {number} [options.duration]
       The duration for the close animation in milliseconds.
-    @param {number} [options.easing]
+    @param {string} [options.easing]
       The [timing function](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
       that controls the acceleration of the close animation.
     @param {Function} [options.onFinished]
@@ -191,7 +191,7 @@ up.Layer = class Layer extends up.Record {
       If the layer has a close animation, the callback will run after the animation has finished.
 
   @section History
-    @param {number} [options.history=true]
+    @param {boolean} [options.history=true]
       Whether to restore the parent layer's [history state](/updating-history#history-state)
       in the browser's address bar.
 

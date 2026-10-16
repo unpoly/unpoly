@@ -86,7 +86,7 @@ up.layer = (function() {
 
     Inherits from `up.layer.config.any`.
 
-  @param {Object} config.root.mainTargets
+  @param {Array<string>} config.root.mainTargets
     An array of CSS selectors matching default [render targets](/targeting-fragments)
     for the [root layer](/overlays#layer-modes), but not for overlays.
 
@@ -570,7 +570,7 @@ up.layer = (function() {
 
       The [acceptance value](/closing-overlays#acceptance-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
-      by the URL pattern.
+      by the URL pattern. It also contains the matched URL as a `location` key.
 
       See [Closing when a location is reached](/subinteractions#location-condition).
 
@@ -580,7 +580,7 @@ up.layer = (function() {
 
       The [dismissal value](/closing-overlays#dismissal-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
-      by the URL pattern.
+      by the URL pattern. It also contains the matched URL as a `location` key.
 
       See [Closing when a location is reached](/subinteractions#location-condition).
 
@@ -1038,7 +1038,7 @@ up.layer = (function() {
 
       The [acceptance value](/closing-overlays#acceptance-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
-      by the URL pattern.
+      by the URL pattern. It also contains the matched URL as a `location` key.
 
       See [Closing when a location is reached](/subinteractions#location-condition).
 
@@ -1048,7 +1048,7 @@ up.layer = (function() {
 
       The [dismissal value](/closing-overlays#dismissal-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
-      by the URL pattern.
+      by the URL pattern. It also contains the matched URL as a `location` key.
 
       See [Closing when a location is reached](/subinteractions#location-condition).
 
@@ -1726,7 +1726,7 @@ up.layer = (function() {
 
   @function up.layer.isFront
   @return
-    @like up.Layer#isOverlay
+    @like up.Layer#isFront
   @stable
   */
 
