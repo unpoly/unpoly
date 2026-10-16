@@ -995,7 +995,57 @@ describe('up.viewport', function() {
       })
     })
 
+    describe('up.viewport.restoreFocus()', function() {
+
+      beforeEach(up.specUtil.assertTabFocused)
+
+      it('restores the focus saved for the current layer when called without options', function() {
+        const [input] = htmlFixtureList('<input type="text" name="email">')
+        input.focus()
+        up.viewport.saveFocus()
+        input.blur()
+
+        expect(up.viewport.restoreFocus()).toBe(true)
+        expect(input).toBeFocused()
+      })
+
+      it('accepts a layer name as { layer } option', function() {
+        const [input] = htmlFixtureList('<input type="text" name="email">')
+        input.focus()
+        up.viewport.saveFocus({ layer: 'root' })
+        input.blur()
+
+        expect(up.viewport.restoreFocus({ layer: 'root' })).toBe(true)
+        expect(input).toBeFocused()
+      })
+
+      it('restores the focus saved for a given { location }', function() {
+        const [input] = htmlFixtureList('<input type="text" name="email">')
+        input.focus()
+        up.viewport.saveFocus({ location: '/other-path' })
+        input.blur()
+
+        expect(up.viewport.restoreFocus({ location: '/other-path' })).toBe(true)
+        expect(input).toBeFocused()
+      })
+
+    })
+
     describe('up.viewport.restoreScroll()', function() {
+
+      it('restores the scroll positions saved for a given { location }', function() {
+        const [viewport] = htmlFixtureList(`
+          <div id="viewport" up-viewport style="height: 100px; overflow-y: scroll">
+            <div style="height: 1000px"></div>
+          </div>
+        `)
+        viewport.scrollTop = 150
+        up.viewport.saveScroll({ location: '/other-path' })
+        viewport.scrollTop = 0
+
+        expect(up.viewport.restoreScroll({ location: '/other-path' })).toBe(true)
+        expect(viewport.scrollTop).toBe(150)
+      })
 
       it("restores a viewport's previously saved scroll position", function() {
         const $viewport = $fixture('#viewport[up-viewport]').css({ height: '100px', overflowY: 'scroll' })

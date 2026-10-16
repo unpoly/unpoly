@@ -597,7 +597,8 @@ up.viewport = (function() {
   */
   function restoreScroll(...args) {
     const [viewports, options] = parseOptions(args)
-    const scrollTops = options.scrollTops ?? options.layer.lastScrollTops.get(options.layer.location)
+    const location = options.location || options.layer.location
+    const scrollTops = options.scrollTops ?? options.layer.lastScrollTops.get(location)
     if (scrollTops) {
       setScrollPositions(viewports, scrollTops, 0)
       up.puts('up.viewport.restoreScroll()', 'Restored scroll positions to %o', scrollTops)
@@ -624,10 +625,6 @@ up.viewport = (function() {
   Unpoly automatically saves focus-related state before [navigating](/navigation-defaults).
 
   @function up.viewport.saveFocus
-  @param {Element|Array<Element>} [viewport]
-    The viewports for which to save focus state.
-
-    Defaults to all viewports within the given layer.
   @param {string} [options.location]
     The URL for which to save focus state.
 
@@ -655,10 +652,6 @@ up.viewport = (function() {
   Unpoly automatically restores focus-related state when the user [presses the back button](/restoring-history).
 
   @function up.viewport.restoreFocus
-  @param {Element|Array<Element>} [viewport]
-    The viewports for which to restore focus-related state.
-
-    Defaults to all viewports within the given layer.
   @param {up.Layer|string} [options.layer='current']
     The layer on which to restore focus-related state.
   @param {string} [options.location]
@@ -672,7 +665,7 @@ up.viewport = (function() {
   function restoreFocus(options = {}) {
     const layer = up.layer.get(options)
     const location = options.location || layer.location
-    const locationCapsule = options.layer.lastFocusCapsules.get(location)
+    const locationCapsule = layer.lastFocusCapsules.get(location)
     // The capsule returns `true` if we could rediscover and focus the previous element.
     if (locationCapsule && locationCapsule.restore(layer)) {
       up.puts('up.viewport.restoreFocus()', 'Restored focus to "%s"', locationCapsule.target)

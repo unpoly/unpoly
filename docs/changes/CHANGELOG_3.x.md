@@ -74,6 +74,8 @@ Unpoly's documentation is now available to coding agents and LLMs:
 - When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent overlay, as described in [focus in overlays](/focus#overlays). Formerly focus fell back to the `<body>`.
 - Fix a [combined transition](/transitions#combining-animations) like `move-to-bottom/none` swapping the elements instantly. When one half is `none`, the other half is now animated.
 - Fix the `{ duration }` and `{ easing }` options of `up.layer.open()` being ignored for the opening animation. This also affects `[up-duration]` and `[up-easing]` on a link that opens an overlay. Formerly only `up.layer.config` was used.
+- Fix `up.viewport.restoreFocus()` throwing an error when called without a `{ layer }` option or with a layer name like `{ layer: 'root' }`.
+- Fix `up.viewport.restoreScroll()` ignoring its `{ location }` option. It always restored the positions saved for the layer's current location.
 
 
 3.14.3
