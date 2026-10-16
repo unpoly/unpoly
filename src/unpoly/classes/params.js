@@ -526,15 +526,26 @@ up.Params = class Params {
     // up.form.submitButtons() can return a button that carries [form] for another form.
     if (submitButton?.form !== form) submitButton = undefined
 
+    // We let the browser serialize the form, instead of iterating over up.form.fields():
+    //
+    // - Only the browser can read the value of a form-associated custom element. The element
+    //   reports it through ElementInternals.setFormValue(), which no script can read back.
+    // - The browser knows the full serialization rules: files, <select multiple>, the submitter
+    //   (including an image button's click coordinates), [dirname], fields in a
+    //   <fieldset disabled>, newline normalization, and whatever comes next.
     let params = new this(new FormData(form, submitButton))
 
-    // The browser's algorithm covered every control it knows about, i.e. everything in
-    // form.elements. Add the controls it cannot know about, like custom elements from
-    // up.form.config.fieldSelectors.
+    // up.form.fields() can still find fields that the browser did not serialize:
     //
+    // - Elements registered through up.form.config.fieldSelectors. The browser doesn't know
+    //   they are fields.
+    // - Fields in the form's layer with a [form] attribute that the browser resolved to a form
+    //   with the same ID in another layer. Unpoly resolves [form] within the field's own layer.
+    //
+    // We recognize the fields the browser already handled by their membership in form.elements,
+    // since a FormData entry cannot be mapped back to the element that contributed it.
     // A control that *is* in form.elements but that the browser refuses to serialize (a reset
-    // button, an <output>) is not re-added: entries cannot be mapped back to elements, so
-    // "the browser knows it" is the closest test we have for "the browser handled it".
+    // button, an <output>) is therefore not re-added.
     let browserControls = new Set(form.elements)
     for (let field of up.form.fields(form)) {
       if (!browserControls.has(field) && !field.closest('fieldset:disabled')) params.addField(field)
