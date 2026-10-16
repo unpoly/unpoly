@@ -673,6 +673,27 @@ extendDescribe('up.util', function() {
       })
     })
 
+    describe('up.util.toArray()', function() {
+
+      it('returns an array unchanged', function() {
+        const array = ['a', 'b']
+        expect(up.util.toArray(array)).toBe(array)
+      })
+
+      it('converts an array-like value into an array', function() {
+        const [first, second] = htmlFixtureList(`
+          <div class="item"></div>
+          <div class="item"></div>
+        `)
+        const nodeList = document.querySelectorAll('.item')
+
+        const result = up.util.toArray(nodeList)
+
+        expect(Array.isArray(result)).toBe(true)
+        expect(result).toEqual([first, second])
+      })
+    })
+
     describe('up.util.last', function() {
 
       it('returns the last element of an array', function() {

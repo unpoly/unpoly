@@ -132,6 +132,26 @@ describe('up.Layer', function() {
     })
   })
 
+  describe('#affix()', function() {
+
+    it("appends an element with the given selector to an overlay's first swappable element", async function() {
+      const overlay = await up.layer.open({ fragment: '<main>overlay content</main>' })
+
+      const element = overlay.affix('.klass')
+
+      expect(element).toMatchSelector('.klass')
+      expect(element.parentElement).toMatchSelector('main')
+      expect(element.parentElement.parentElement).toBe(overlay.getContentElement())
+    })
+
+    it('appends an element to the <body> for the root layer', function() {
+      const element = up.layer.root.affix('.klass')
+      registerFixture(element)
+
+      expect(element.parentElement).toBe(document.body)
+    })
+  })
+
   describe('#peel()', function() {
 
     // Additional specs can be found for up.render({ peel })
@@ -152,6 +172,19 @@ describe('up.Layer', function() {
       expect(dismissedSpy.calls.count()).toBe(2)
       expect(acceptedSpy.calls.count()).toBe(0)
       expect(up.layer.count).toBe(2)
+    })
+
+    it('closes descendants with a given { animation }', async function() {
+      up.motion.config.enabled = true
+      await up.layer.open({ openAnimation: false, closeAnimation: 'fade-out', closeDuration: 5 })
+      await up.layer.open({ openAnimation: false, closeAnimation: 'fade-out', closeDuration: 5 })
+      spyOn(up, 'animate').and.callThrough()
+
+      up.layer.root.peel({ animation: 'move-to-top' })
+
+      expect(up.layer.count).toBe(1)
+      // Each overlay box animates with the given animation. Backdrops always fade out.
+      expect(up.animate.calls.allArgs().filter((args) => args[1] === 'move-to-top').length).toBe(2)
     })
 
     describe('close intent', function() {

@@ -732,6 +732,15 @@ describe('up.link', function() {
         expect(options.mode).toBe('drawer')
       })
 
+      it('parses an [up-dismissible] attribute as boolean or string', function() {
+        const [falseLink, stringLink] = htmlFixtureList(`
+          <a href="/foo" up-layer="new" up-dismissible="false">label</a>
+          <a href="/foo" up-layer="new" up-dismissible="button key">label</a>
+        `)
+        expect(up.link.followOptions(falseLink).dismissible).toBe(false)
+        expect(up.link.followOptions(stringLink).dismissible).toBe('button key')
+      })
+
       it('parses [up-close-animation], [up-close-easing] and [up-close-duration] attributes', function() {
         const [link] = htmlFixtureList('<a href="/foo" up-layer="new" up-close-animation="fade-out" up-close-easing="linear" up-close-duration="300">label</a>')
         const options = up.link.followOptions(link)

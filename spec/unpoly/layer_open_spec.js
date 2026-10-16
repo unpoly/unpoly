@@ -698,6 +698,42 @@ extendDescribe('up.layer', function() {
           up.layer.open({ history: true, location: '/overlay-path' })
 
         })
+
+        it('does not open the overlay and rejects with up.Aborted when an up:layer:open listener prevents the event', async function() {
+          up.on('up:layer:open', (event) => event.preventDefault())
+
+          const promise = up.layer.open({ content: 'overlay content' })
+
+          await expectAsync(promise).toBeRejectedWith(jasmine.any(up.Aborted))
+          expect(up.layer.count).toBe(1)
+          expect(document).not.toHaveSelector('up-modal')
+        })
+
+        it('sets the { origin } element as event.origin on up:layer:open and up:layer:opened, and as layer.origin', async function() {
+          const [origin] = htmlFixtureList('<a href="#">origin</a>')
+          const openListener = jasmine.createSpy('up:layer:open listener')
+          const openedListener = jasmine.createSpy('up:layer:opened listener')
+          up.on('up:layer:open', openListener)
+          up.on('up:layer:opened', openedListener)
+
+          const layer = await up.layer.open({ content: 'overlay content', origin })
+
+          expect(openListener).toHaveBeenCalledWith(jasmine.anyEvent('up:layer:open', { origin }), jasmine.anything(), jasmine.anything())
+          expect(openedListener).toHaveBeenCalledWith(jasmine.anyEvent('up:layer:opened', { origin }), jasmine.anything(), jasmine.anything())
+          expect(layer.origin).toBe(origin)
+        })
+
+        it('runs an { onOpened } callback with the up:layer:opened event after the overlay was inserted', async function() {
+          let contentAttachedWhenCalled
+          const onOpened = jasmine.createSpy('onOpened callback').and.callFake(function(event) {
+            contentAttachedWhenCalled = event.layer.element.isConnected && event.layer.element.textContent.includes('overlay content')
+          })
+
+          const layer = await up.layer.open({ content: 'overlay content', onOpened })
+
+          expect(onOpened).toHaveBeenCalledWith(jasmine.anyEvent('up:layer:opened', { layer }))
+          expect(contentAttachedWhenCalled).toBe(true)
+        })
       })
 
       describe('focus', function() {

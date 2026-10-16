@@ -954,6 +954,23 @@ describe('up.util', () => {
       })
     })
 
+    describe('up.util.presence()', function() {
+
+      it('returns the given value if it is present', function() {
+        expect(up.util.presence('foo')).toBe('foo')
+      })
+
+      it('returns undefined if the given value is blank', function() {
+        expect(up.util.presence('')).toBeUndefined()
+      })
+
+      it('uses a custom tester function to decide whether the value is present', function() {
+        const isPositive = (value) => value > 0
+        expect(up.util.presence(5, isPositive)).toBe(5)
+        expect(up.util.presence(-5, isPositive)).toBeUndefined()
+      })
+    })
+
     describe('up.util.normalizeURL', function() {
 
       it('normalizes a relative path', function() {

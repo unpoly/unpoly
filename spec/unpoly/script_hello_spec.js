@@ -253,6 +253,21 @@ extendDescribe('up.script', function() {
 
       describe('meta information about the render pass', function() {
 
+        it('passes a given { meta } object to compilers, filling in defaults for missing keys', async function() {
+          const compiler = jasmine.createSpy('compiler')
+          up.compiler('.target', compiler)
+          const [target] = htmlFixtureList('<div class="target"></div>')
+
+          await up.hello(target, { meta: { ok: false, custom: 'value' } })
+
+          expect(compiler.calls.mostRecent().args[2]).toEqual({
+            ok: false,
+            custom: 'value',
+            layer: up.layer.root,
+            revalidating: false,
+          })
+        })
+
         describe('meta.layer', function() {
 
           it('points to the layer in which we render', async function() {

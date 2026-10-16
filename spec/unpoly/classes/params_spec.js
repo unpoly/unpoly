@@ -325,6 +325,44 @@ describe('up.Params', function() {
     })
   })
 
+  describe('#addAll', function() {
+
+    it('appends entries from the given params without removing existing entries', function() {
+      const params = new up.Params({ foo: 'one' })
+      const formData = new FormData()
+      formData.append('foo', 'four')
+
+      params.addAll({ foo: 'two' })
+      params.addAll('foo=three')
+      params.addAll(formData)
+      params.addAll(new up.Params({ foo: 'five' }))
+
+      expect(params.getAll('foo')).toEqual(['one', 'two', 'three', 'four', 'five'])
+    })
+  })
+
+  describe('#clear', function() {
+    it('removes all entries', function() {
+      const params = new up.Params({ foo: 'one', bar: 'two' })
+
+      params.clear()
+
+      expect(params.toArray()).toEqual([])
+    })
+  })
+
+  describe('#getFirst', function() {
+    it('returns the first value for the given name', function() {
+      const params = new up.Params('foo=one&foo=two')
+      expect(params.getFirst('foo')).toEqual('one')
+    })
+
+    it('returns undefined if no value is set for the given name', function() {
+      const params = new up.Params({ foo: 'one' })
+      expect(params.getFirst('bar')).toBeUndefined()
+    })
+  })
+
   describe('#get', function() {
     describe('(with object)', function() {
 
@@ -432,6 +470,12 @@ describe('up.Params', function() {
       const base = 'http://foo.bar/path'
       const params = new up.Params([])
       expect(params.toURL(base)).toEqual('http://foo.bar/path')
+    })
+  })
+
+  describe('.stripURL', function() {
+    it('returns the given URL without its query string', function() {
+      expect(up.Params.stripURL('http://foo.com/path?key=value')).toEqual('http://foo.com/path')
     })
   })
 
