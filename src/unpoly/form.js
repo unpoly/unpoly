@@ -807,7 +807,7 @@ up.form = (function() {
   Watches form fields and runs a callback when a value changes.
 
   While you can also listen to a [standard `input` event](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/input_event),
-  using `up.watch()` comes with a number of quality of life improvements:
+  `up.watch()` adds the following behavior:
 
   - The callback only runs when a value was actually changed. Multiple events resulting in the same value will only run the callback once.
   - The callback's execution frequency can be [debounced](/watch-options#debouncing).

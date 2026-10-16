@@ -49,7 +49,7 @@ up.compiler('.user', function(element, data) {
 HTML5 data attributes cannot express structured data, like an array or object.
 Also their values are always strings.
 
-For a more powerful alternative you can set the `[up-data]` attribute to any
+To pass structured values, set the `[up-data]` attribute to any
 [relaxed JSON](/relaxed-json) value:
 
 ```html

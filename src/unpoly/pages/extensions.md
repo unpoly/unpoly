@@ -1,7 +1,7 @@
 Extensions
 ==========
 
-Unpoly works without extensions: no server library, no build step, no CSS framework.
+Unpoly works without extensions.
 This chapter collects the optional tooling around the core, for when it saves you work.
 
 

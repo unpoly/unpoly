@@ -375,8 +375,7 @@ up.script = (function() {
 
   ## Example
 
-  You will sometimes find yourself setting the same combination of `[up-*]` attributes again and again.
-  Here every link opens a modal with a [custom animation](/up.animation) `shake`:
+  In this example every link opens a modal with a [custom animation](/up.animation) `shake`:
 
   ```html
   <a href="/page1" up-layer="new modal" up-class="warning" up-animation="shake">Page 1</a>
@@ -384,8 +383,7 @@ up.script = (function() {
   <a href="/page3" up-layer="new modal" up-class="warning" up-animation="shake">Page 3</a>
   ```
 
-  We would much rather define a new `[shake-modal]` attribute that lets us
-  write the same links like this:
+  A new `[shake-modal]` attribute would make the same links shorter:
 
   ```html
   <a href="/page1" shake-modal>Page 1</a>

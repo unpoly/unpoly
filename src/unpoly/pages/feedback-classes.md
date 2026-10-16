@@ -143,8 +143,7 @@ for all reasons that end a request.
 
 When content is rendered from the [cache](/caching), no `.up-active` or `.up-loading` classes are set, since there is nothing to wait for.
 
-When the cache entry is stale, Unpoly [automatically reloads the fragment](/caching#revalidation)
-to ensure that the user never sees expired content.
+When the cache entry is stale, Unpoly [automatically reloads the fragment](/caching#revalidation).
 During this cache revalidation Unpoly marks the targeted fragment as `.up-revalidating` instead of `.up-loading`:
 
 ```html

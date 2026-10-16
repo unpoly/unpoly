@@ -799,7 +799,7 @@ up.fragment = (function() {
 
   @param {up.Response|undefined} event.expiredResponse
      When [revalidating](/caching#revalidation), this property is set to the expired content
-     that is being reloaded to ensure that the user never sees stale content.
+     that is being reloaded.
 
      You may compare the `{ response }` and `{ expiredResponse }` properties to prevent
      [re-insertion of identical content](/render-lifecycle#skipping-responses).

@@ -91,8 +91,8 @@ There are multiple methods to implement template variables, including [compilers
 ### <em class="heading-prefix">Option 1</em> Processing compiler data {#compiler-postprocessing}
 
 Templates can be cloned with a [data object](/data), which is passed to any compiler function
-that compiles the cloned element. This is a very low-tech way to implement template variables
-without using a [template engine](#template-engine).
+that compiles the cloned element. This lets you implement template variables
+without a [template engine](#template-engine).
 
 When we reference a template, we can pass a data object for the cloned element as an
 [`[up-use-data]`](/up-follow#up-use-data) attribute:
@@ -143,7 +143,7 @@ Sometimes we want to render a complex data object:
 
 For this we need a more expressive template with variables, loops or conditions.
 
-There are [countless template engines](https://awesome-javascript.js.org/resources/templating-engines.html) to choose from.
+There are [many template engines](https://awesome-javascript.js.org/resources/templating-engines.html) to choose from.
 For this example we're going to use templates in the style of
 [Mustache.js](https://github.com/janl/mustache.js) or [Handlebars](https://handlebarsjs.com/):
 

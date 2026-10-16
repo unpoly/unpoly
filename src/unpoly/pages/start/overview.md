@@ -68,8 +68,8 @@ you will make one basic move in each area:
 - [[start/elements]]: Pair your own JavaScript with HTML elements.
 
 You will then learn [the shape of the API](/start/api): one pattern that all
-of Unpoly's features follow. Every move works on its own, so you can stop
-at any point and already have a better app.
+of Unpoly's features follow. Each step works on its own, so you can stop
+after any of them.
 
 
 @page start/overview

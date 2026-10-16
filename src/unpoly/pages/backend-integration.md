@@ -29,8 +29,8 @@ See [[submitting-forms#validation]].
 If you use [`[up-validate]`](/up-validate), also check for an `X-Up-Validate` header:
 validate the input and render the form again, but don't save it.
 
-The `X-Up-*` headers above are the start of an optional protocol. A server that ignores them
-gets a working app. A server that reads them can do less work, as the sections below show.
+The `X-Up-*` headers above are part of an optional protocol.
+The sections below show how your server can use it to do less work.
 
 
 Rendering only what is targeted
