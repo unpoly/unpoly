@@ -4,8 +4,9 @@ X.Y.0
 This release comes with a new documentation site, written for people and for coding agents.
 Unpoly now also works with custom form fields, like date pickers built as web components.
 
-Changes that may require changes to your code are marked with a ⚠️ emoji. Where
-[`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) polyfills a change, the item says so.
+Breaking changes are marked with ⚠️ when [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) polyfills them,
+and with ❌ when they need a change to your code. Bug fixes and changes that align Unpoly with native browser behavior
+are listed in their topic without a marker.
 
 > [note]
 > Our sponsor [makandra](https://makandra.de/en) funded this release ❤️\
@@ -119,34 +120,34 @@ Thanks to @kmmbvnr for contributing form-associated custom elements and `formdat
 
 Unpoly now uses the browser's form-data algorithm, so edge cases behave like a native form submission:
 
-- ⚠️ A form with an `<input type="file">` is now submitted as `multipart/form-data`, even when no file is selected.
-- ⚠️ An `<input type="image">` used as the submit button now sends its `name.x` and `name.y` coordinates instead of its `[value]`.
-- ⚠️ A `<button type="reset">` or `<input type="reset">` with a `[name]` no longer sends a param. It is no longer watched or validated, but [`[up-disable]`](/up-submit#up-disable) still disables it.
-- ⚠️ A field inside a `<fieldset disabled>` is no longer submitted or validated. This includes custom elements in `up.form.config.fieldSelectors`. [Watchers](/up.watch) and [`[up-switch]`](/switching-form-state) still see the field.
-- ⚠️ Params now arrive in the order the browser produces them: the form's fields in document order, then values from `formdata` listeners, then custom elements registered in `up.form.config.fieldSelectors`. A submit button's `[name]` and `[value]` now appear at the button's position, not after the form's `[up-params]`.
-- ⚠️ A [validation](/validation) request no longer sends the params of the form's first submit button, and no longer uses that button's `[formaction]`, `[formmethod]`, `[up-params]` or `[up-headers]`. Nobody pressed the button, so only the `<form>` decides where a validation goes.
-- ⚠️ Unpoly now throws an error when a field uses a `[form]` attribute to join a form in another [layer](/up.layer). The browser would submit that field with the wrong layer's form. If you render the same page in an overlay, give each form a unique `[id]`, or move the field into the form. The error message suggests these fixes.
-- ⚠️ `up.Params.fromForm()` now requires a `<form>` element. To read params from any container, use `up.Params.fromContainer()`.
+- A form with an `<input type="file">` is now submitted as `multipart/form-data`, even when no file is selected.
+- An `<input type="image">` used as the submit button now sends its `name.x` and `name.y` coordinates instead of its `[value]`.
+- A `<button type="reset">` or `<input type="reset">` with a `[name]` no longer sends a param. It is no longer watched or validated, but [`[up-disable]`](/up-submit#up-disable) still disables it.
+- A field inside a `<fieldset disabled>` is no longer submitted or validated. This includes custom elements in `up.form.config.fieldSelectors`. [Watchers](/up.watch) and [`[up-switch]`](/switching-form-state) still see the field.
+- Params now arrive in the order the browser produces them: the form's fields in document order, then values from `formdata` listeners, then custom elements registered in `up.form.config.fieldSelectors`. A submit button's `[name]` and `[value]` now appear at the button's position, not after the form's `[up-params]`.
+- A [validation](/validation) request no longer sends the params of the form's first submit button, and no longer uses that button's `[formaction]`, `[formmethod]`, `[up-params]` or `[up-headers]`. Nobody pressed the button, so only the `<form>` decides where a validation goes.
+- Unpoly now throws an error when a field uses a `[form]` attribute to join a form in another [layer](/up.layer). The browser would submit that field with the wrong layer's form. If you render the same page in an overlay, give each form a unique `[id]`, or move the field into the form. The error message suggests these fixes.
+- `up.Params.fromForm()` now requires a `<form>` element, as documented. To read params from any other container, use `up.Params.fromContainer()`.
 - `up.Params.fromForm()` takes a new `{ submitButton }` option. It defaults to the form's first submit button. Pass `false` to send no button. The `{ includeDisabled }` option is ignored here, because the browser never sends a disabled field.
 - When a form with [`[up-accept]` or `[up-dismiss]`](/closing-overlays#result-values) closes an overlay, the result value now also contains the `[name]` and `[value]` of the submit button the user pressed.
 
 
 ### Forms
 
-- ⚠️ While a [validation](/validation) request is loading, [feedback classes](/feedback-classes) like `.up-loading` are now set by default, as for every other request. To turn them off, set `[up-watch-feedback="false"]` or pass `{ feedback: false }`.
+- While a [validation](/validation) request is loading, [feedback classes](/feedback-classes) like `.up-loading` are now set by default, as for every other request. To turn them off, set `[up-watch-feedback="false"]` or pass `{ feedback: false }`.
 - A custom control only needs a `value` property to work as a [custom form field](/custom-form-fields).
 - A form-associated custom element is only submitted when it calls `setFormValue()`, even when it is listed in `up.form.config.fieldSelectors`.
 - A `formdata` listener changes what Unpoly sends, not what it watches. See [Adding values with a `formdata` listener](/custom-form-fields#formdata).
 - New experimental config [`up.form.config.noFieldSelectors`](/up.form.config#config.noFieldSelectors) excludes elements from being treated as fields, e.g. a form-associated custom element that renders a button.
-- ⚠️ When Unpoly disables a custom control that has no `disabled` property, it now sets the `[disabled]` attribute.
-- ⚠️ When Unpoly [focuses](/focus) a form-associated custom element, it now sets `.up-focus-visible`, even after a mouse or touch interaction. Such an element is now a field, and `up.viewport.config.autoFocusVisible` shows a [focus ring](/focus-visibility) for every field.
+- When Unpoly disables a custom control that has no `disabled` property, it now sets the `[disabled]` attribute.
+- When Unpoly [focuses](/focus) a form-associated custom element, it now sets `.up-focus-visible`, even after a mouse or touch interaction. Such an element is now a field, and `up.viewport.config.autoFocusVisible` shows a [focus ring](/focus-visibility) for every field.
 - A custom control with a `[name]` but no readable value no longer reports an `undefined` value to watchers.
 - ⚠️ `up.form.config.genericButtonSelectors` was renamed to `up.form.config.anyButtonSelectors`. It now matches every kind of button, including submit and reset buttons. The old name is polyfilled by `unpoly-migrate.js`.
 
 
 ### Overlays
 
-- ⚠️ An `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open when a link or form in a parent layer would close it ([peeling](/closing-overlays#peeling)). The render pass then fails with `up.Aborted` and nothing is updated. See [Upgrading](#upgrading) for how to keep the old behavior.
+- ❌ An `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open when a link or form in a parent layer would close it ([peeling](/closing-overlays#peeling)). The render pass then fails with `up.Aborted` and nothing is updated. See [Upgrading](#upgrading) for how to keep the old behavior.
 - When a listener keeps an overlay open, the overlays below it now also stay open.
 - To close overlays even when a listener prevents it, use [`[up-peel="force"]`](/up-follow#up-peel), or pass `{ force: true }` to `up.Layer#accept()`, `up.Layer#dismiss()` or `up.Layer#peel()`. You can combine `force` with an intent, e.g. `[up-peel="accept force"]`.
 - Pressing the back button still closes overlays, even when a listener prevents it.
@@ -177,7 +178,7 @@ Unpoly now uses the browser's form-data algorithm, so edge cases behave like a n
 
 ### Smaller fixes and changes
 
-- ⚠️ A `click` event dispatched by a script is no longer passed to [`up.on()`](/up.on) callbacks when the element has a `[disabled]` attribute, even for elements that browsers cannot disable. Before, only a `disabled` property had this effect.
+- A `click` event dispatched by a script is no longer passed to [`up.on()`](/up.on) callbacks when the element has a `[disabled]` attribute, even for elements that browsers cannot disable. Before, only a `disabled` property had this effect.
 - The npm package now also includes source maps for the unminified files, like `unpoly.js.map`.
 - Fix: The `unpoly-migrate.js` polyfills for `up.popup.attach()`, `up.modal.follow()` and `up.modal.extract()` now open a new overlay again.
 - Fix: The `unpoly-migrate.js` polyfill for `up.network.shouldReduceRequests()` now logs a warning instead of throwing an error.

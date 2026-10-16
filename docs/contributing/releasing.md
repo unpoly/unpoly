@@ -11,6 +11,10 @@ In the changelog entry, start an item with ⚠️ when it may require changes to
 polyfills the old usage, or with ❌ when it breaks code without a polyfill. Scripts find these markers only at the
 start of an item or paragraph.
 
+Only intentional changes to *documented* API or behavior are breaking changes. Bug fixes, changes that align Unpoly
+with native browser behavior, and changes to undocumented behavior get no marker. List them in their topic group,
+so users who relied on the old behavior can still find them.
+
 ```
 bin/release
 ```
