@@ -60,9 +60,6 @@ In the opener's `[up-on-accepted]` attribute, the value is available as `value`:
 When an overlay is dismissed, the result value indicates the reason for dismissal.
 For instance, clicking the `×` button dismisses with the value `":button"`.
 
-<a id="customizing-dismiss-controls"></a>
-<a id="customizing-the-dismiss-icon"></a>
-
 The [standard dismiss controls](/customizing-overlays#customizing-dismiss-controls) set these reasons:
 
 | User interaction                                    | Dismissal reason |
@@ -87,10 +84,6 @@ The opener receives the reason in an `{ onDismissed }` callback or `[up-on-dismi
 
 Letting the opener decide {#close-conditions}
 -------------------------
-
-<a id="location-condition"></a>
-<a id="event-condition"></a>
-<a id="fragment-condition"></a>
 
 Instead of closing the overlay from its content, the link that opens it can define a
 *close condition*, like reaching a URL. The overlay then closes automatically when its task is done.
@@ -251,8 +244,6 @@ When an overlay closes in reaction to a server response, you can [access the dis
 
 Keeping an overlay open {#keeping-open}
 -----------------------
-
-<a id="callbacks"></a>
 
 To keep an overlay open, for example when it has unsaved changes, prevent its
 [`up:layer:dismiss`](/up:layer:dismiss) event. This also blocks the Escape key, backdrop clicks

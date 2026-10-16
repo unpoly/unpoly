@@ -62,8 +62,6 @@ a target selector can express.
 
 ## Handling validation errors {#validation}
 
-<a id="fail-target"></a>
-
 When the user submitted invalid data, your server should re-render the form with error messages
 and respond with a status code outside the 2xx range, like
 [HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Content).

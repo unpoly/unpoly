@@ -147,8 +147,6 @@ up.follow(link, { metaTags: true })
 ```
 
 
-<a id="defaults"></a>
-
 Changing defaults globally {#config}
 --------------------------
 
