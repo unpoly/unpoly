@@ -731,6 +731,8 @@ up.form = (function() {
   When the form is being [validated](/up-validate), this event is not emitted.
   Instead, an `up:form:validate` event is emitted.
 
+  @learn-ref render-lifecycle
+
   ## Changing render options
 
   Listeners may inspect and manipulate [render options](/up.render#parameters) for the coming fragment update.
@@ -1807,6 +1809,8 @@ up.form = (function() {
 
   Only fields with a `[name]` attribute can be watched.
 
+  @learn-ref watch-options
+
   ## Example
 
   The following would log a message whenever the `<input>` changes:
@@ -2329,6 +2333,8 @@ up.form = (function() {
 
   /*-
   Automatically submits a form when a field changes.
+
+  @learn-ref watch-options
 
   ## Example
 

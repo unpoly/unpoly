@@ -463,6 +463,8 @@ up.fragment = (function() {
 
   The `[up-source]` attribute is only set for `GET` requests.
 
+  @learn-ref polling#source
+
   ## Using an explicit source URL
 
   To indicate a different source URL for a fragment (and its descendants),

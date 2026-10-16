@@ -118,6 +118,8 @@ up.radio = (function() {
   /*-
   Before an `[up-hungry]` element is added to a render pass, an event `up:fragment:hungry` is emitted on that element.
 
+  @learn-ref hungry-elements#conditions
+
   ## Preventing hungry elements from being updated
 
   You may prevent the `up:fragment:hungry` event to exclude a hungry element from the render pass.
@@ -161,6 +163,8 @@ up.radio = (function() {
   Hungry elements are optional in the same way as `:maybe` targets.
   When an `[up-hungry]` element does not match in the server response, the element will not be updated,
   but no error is thrown.
+
+  @learn-ref hungry-elements
 
   ## Use cases
 
@@ -444,6 +448,8 @@ up.radio = (function() {
   /*-
   This event is emitted before a [polling](/up-poll) fragment is reloaded from the server.
 
+  @learn-ref polling#preventing-request
+
   Listeners may prevent the `up:fragment:poll` event to prevent the fragment from being reloaded.
   Preventing the event will only skip a single update:
 
@@ -473,6 +479,8 @@ up.radio = (function() {
 
   /*-
   Use an `[up-flashes]` element to show confirmations, alerts or warnings.
+
+  @learn-ref flashes
 
   <figure>
     <img src="images/flashes.png" alt="Screenshot of three flash messages" width="480">

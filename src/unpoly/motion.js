@@ -622,6 +622,8 @@ up.motion = (function() {
   > Transitions are not possible when replacing the `<body>` element.
   > To transition the entire page, wrap it in a container element.
 
+  @learn-ref transitions
+
   ## Following a link with animation
 
   The link will load the fragment `#story` from the URL `/page2`.

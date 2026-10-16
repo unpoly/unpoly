@@ -299,6 +299,8 @@ up.status = (function() {
 
   See [Previews](/previews) for details and examples.
 
+  @learn-ref previews
+
   ## Usage
 
   To refer to a preview function, set its name as an `[up-preview]` attribute:
@@ -344,6 +346,8 @@ up.status = (function() {
 
   When [targeting multiple fragments](/targeting-fragments#multiple),
   the placeholder will be shown in the first fragment.
+
+  @learn-ref placeholders
 
   ## Example
 

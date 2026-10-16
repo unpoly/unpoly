@@ -764,6 +764,8 @@ up.network = (function() {
   This event is [emitted](/up.emit) when an [AJAX request](/up.request)
   was [aborted](/aborting-requests).
 
+  @learn-ref aborting-requests#reacting
+
   The event is emitted on the layer that caused the request.
 
   Also see `up:fragment:aborted`.

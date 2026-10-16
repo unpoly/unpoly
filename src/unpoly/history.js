@@ -229,6 +229,8 @@ up.history = (function() {
   The `up:location:changed` event is *not* emitted when the page is loaded initially.
   For this, observe `up:framework:booted`.
 
+  @learn-ref updating-history#observing
+
   ## Handling the change {#handling}
 
   This event cannot be prevented, but you can mutate the `event.willHandle` property to decide whether

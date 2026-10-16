@@ -422,6 +422,8 @@ up.link = (function() {
 
   The event is emitted on the `<a>` element that is being followed.
 
+  @learn-ref render-lifecycle
+
   ## Changing render options
 
   Listeners may inspect and manipulate [render options](/up.render#parameters) for the coming fragment update.
