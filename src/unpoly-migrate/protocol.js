@@ -81,8 +81,8 @@ If no timestamp is known, Unpoly will send a value of zero (`X-Up-Reload-From-Ti
 
 @header X-Up-Reload-From-Time
 @deprecated
-  Use the standard [`Last-Modified`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified) header instead.
-@stable
+  Read the standard [`If-Modified-Since`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-Modified-Since) request header instead.
+  Unpoly sends it when the fragment has a `Last-Modified` time. See [conditional requests](/conditional-requests).
 */
 
 up.protocol.config.patch(function() {
