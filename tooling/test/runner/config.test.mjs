@@ -101,3 +101,12 @@ test('default lists do not show up as changed settings in a debug link', () => {
   // toParams() compares against the defaults; two empty arrays are not "!==" equal.
   assert.deepEqual(Config.fromObject({}).toParams(), {})
 })
+
+test('a config rebuilt from its own values keeps its boolean options', () => {
+  // `--file` resolves to `spec` filters and rebuilds the config from the parsed values.
+  // It used to reset --migrate, --minify etc. to their defaults on the way.
+  let config = Config.fromArgv(['--migrate', '--headless=false', '--file=x_spec.js'])
+  let rebuilt = Config.fromObject({ ...config, file: [] })
+  assert.equal(rebuilt.migrate, true)
+  assert.equal(rebuilt.headless, false)
+})
