@@ -35,13 +35,13 @@ A typical use is to skip expensive parts of the layout, like a sidebar or a navi
 when they are not part of the target.
 
 `X-Up-Target` does not list [hungry elements](/hungry-elements) like [flashes](/flashes).
-Keep rendering them in shortened responses, or they stop updating.
+They are updated whenever a response happens to contain them.
 
 A request may target [multiple fragments](/targeting-fragments#multiple).
 The header then lists all selectors, separated by commas, and the response should contain an element for each:
 
 ```http
-X-Up-Target: .menu, .flashes
+X-Up-Target: .menu, .breadcrumbs
 ```
 
 A request made without a target, like a plain `up.request('/sitemap')` call, has no `X-Up-Target` header.
