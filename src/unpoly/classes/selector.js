@@ -14,11 +14,17 @@ up.Selector = class Selector {
       this._filters.push(up.fragment.isNotDestroying)
     }
 
-    this._ignoreLayers = matchingInExternalDocument || options.layer === 'any' || up.layer.count === 1
+    // A layer that is about to open does not exist yet, so we cannot filter by it.
+    let newLayer = options.layer === 'new'
+
+    this._ignoreLayers = newLayer || matchingInExternalDocument || options.layer === 'any' || up.layer.count === 1
 
     let expandTargetLayer
 
-    if (this._ignoreLayers) {
+    if (newLayer) {
+      // Expand layer-specific selectors like `:main` for the new layer's { mode }
+      expandTargetLayer = 'new'
+    } else if (this._ignoreLayers) {
       // Use the root layer to expand layer-specific selectors like `:main` or `:layer`
       expandTargetLayer = up.layer.root
     } else {
