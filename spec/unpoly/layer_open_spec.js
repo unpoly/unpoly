@@ -298,7 +298,7 @@ extendDescribe('up.layer', function() {
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toBe(2)
-          await expectAsync(openJob).toBePending()
+          expect((await promiseState(openJob)).state).toBe('pending')
         })
 
         it('runs a { preview } function while the server request is loading', async function() {

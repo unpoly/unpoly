@@ -549,7 +549,7 @@ extendDescribe('up.status', function() {
               await wait()
               expect(previewFn).toHaveBeenCalled()
               expect(globalErrorSpy).toHaveBeenCalledWith(error)
-              await expectAsync(renderPromise).toBePending()
+              expect((await promiseState(renderPromise)).state).toBe('pending')
             })
           })
 
@@ -569,7 +569,7 @@ extendDescribe('up.status', function() {
               expect(globalErrorSpy).not.toHaveBeenCalled()
               jasmine.respondWithSelector('#target', { text: 'new target' })
               await wait()
-              await expectAsync(renderPromise).toBePending()
+              await expectAsync(renderPromise).toBeResolvedTo(jasmine.any(up.RenderResult))
               expect(globalErrorSpy).toHaveBeenCalledWith(error)
             })
           })

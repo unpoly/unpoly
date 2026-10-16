@@ -650,7 +650,7 @@ extendDescribe('up.fragment', function() {
 
             // Allow the request. In the common case that the request is successful, we would have aborted for no reason.
             // We can still throw if the server does end up responding with a failure.
-            await expectAsync(promise).toBePending()
+            expect((await promiseState(promise)).state).toBe('pending')
             expect(jasmine.Ajax.requests.count()).toBe(1)
 
             // When the server does end up responding with a failure, we cannot process it and must throw up.CannotMatch.

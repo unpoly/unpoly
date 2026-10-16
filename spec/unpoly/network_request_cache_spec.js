@@ -139,7 +139,7 @@ extendDescribe('up.network', function() {
 
             expect(jasmine.Ajax.requests.count()).toBe(2)
             await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Response))
-            await expectAsync(request2).toBePending()
+            expect((await promiseState(request2)).state).toBe('pending')
           })
 
         })
@@ -185,7 +185,7 @@ extendDescribe('up.network', function() {
 
             expect(jasmine.Ajax.requests.count()).toBe(2)
             await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Offline))
-            await expectAsync(request2).toBePending()
+            expect((await promiseState(request2)).state).toBe('pending')
           })
 
         })
@@ -212,7 +212,7 @@ extendDescribe('up.network', function() {
 
             expect(jasmine.Ajax.requests.count()).toBe(2)
             await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
-            await expectAsync(request2).toBePending()
+            expect((await promiseState(request2)).state).toBe('pending')
           })
 
           it('aborts another request that was tracking the aborted request', async function() {
@@ -267,7 +267,7 @@ extendDescribe('up.network', function() {
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toBe(2)
-            await expectAsync(request2).toBePending()
+            expect((await promiseState(request2)).state).toBe('pending')
           })
 
           it('does not cache responses with an empty body', async function() {

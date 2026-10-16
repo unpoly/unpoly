@@ -640,11 +640,13 @@ Prefer Jasmine's `expectAsync()`:
 ```js
 await expectAsync(promise).toBeResolvedTo(value)
 await expectAsync(promise).toBeRejected()
+await expectAsync(promise).toBePending()
 ```
 
-`promiseState(promise)` resolves to `{ state, value }` with `state` being `'pending'`,
-`'fulfilled'` or `'rejected'`. Reach for it when you need to assert that a promise
-*hasn't* settled yet, which `expectAsync()` can't express.
+This also works for an `up.Request` or `up.RenderJob`, which are thenables rather than
+native promises. Jasmine's own `toBePending()` always passed for those, so a spec helper
+replaces it. `promiseState(promise)` resolves to `{ state, value }` with `state` being
+`'pending'`, `'fulfilled'` or `'rejected'`, for when you need the state or value itself.
 
 ### When async/await isn't enough
 

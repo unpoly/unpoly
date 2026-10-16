@@ -759,7 +759,7 @@ extendDescribe('up.fragment', function() {
             // See that the correct timeout value has been set on the XHR instance
             expect(jasmine.lastRequest().timeout).toEqual(500)
 
-            await expectAsync(renderJob).toBePending()
+            expect((await promiseState(renderJob)).state).toBe('pending')
 
             jasmine.lastRequest().responseTimeout()
 
@@ -778,7 +778,7 @@ extendDescribe('up.fragment', function() {
             // See that the correct timeout value has been set on the XHR instance
             expect(jasmine.lastRequest().timeout).toEqual(50)
 
-            await expectAsync(renderJob).toBePending()
+            expect((await promiseState(renderJob)).state).toBe('pending')
 
             jasmine.lastRequest().responseError()
 

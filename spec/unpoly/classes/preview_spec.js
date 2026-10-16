@@ -1047,7 +1047,7 @@ describe('up.Preview', function() {
         await wait()
         expect(preview1Fn).toHaveBeenCalled()
         expect(preview2Fn).toHaveBeenCalled()
-        await expectAsync(renderPromise).toBePending()
+        expect((await promiseState(renderPromise)).state).toBe('pending')
       })
     })
 
@@ -1824,7 +1824,7 @@ describe('up.Preview', function() {
       await wait()
 
       expect(up.layer.count).toBe(2)
-      await expectAsync(renderPromise).toBePending()
+      expect((await promiseState(renderPromise)).state).toBe('pending')
 
       Trigger.clickSequence('up-modal-dismiss')
 
