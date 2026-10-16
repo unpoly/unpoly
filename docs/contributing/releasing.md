@@ -4,6 +4,9 @@ A guided CLI walks you through the process. Before starting, set the new version
 `package.json` and write its changelog entry in `docs/changes/CHANGELOG_<major>.x.md` — the tool reads the version from
 `package.json` and tags with it.
 
+Before a regular release, publish a pre-release (like `3.13.0-rc1`) and upgrade at least one
+real app to it. The tool reminds you of this unless the version you release is itself a pre-release.
+
 In the changelog entry, start an item with ⚠️ when it may require changes to user code but `unpoly-migrate.js`
 polyfills the old usage, or with ❌ when it breaks code without a polyfill. Scripts find these markers only at the
 start of an item or paragraph.

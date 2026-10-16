@@ -96,6 +96,9 @@ async function confirmRelease() {
   console.log(`- Update ${changelogPath()}`)
   console.log("- Commit and push changes")
   console.log("- Check that CI is green (https://github.com/unpoly/unpoly/actions)")
+  if (!isPreRelease()) {
+    console.log("- Publish a pre-release (e.g. 3.13.0-rc1) and upgrade at least one real app to it")
+  }
   console.log("- Make sure you're logged into npm")
   console.log()
   console.log("Continuing will make a fresh build and publish a new version to npm.")
