@@ -2068,7 +2068,30 @@ describe('up.form', function() {
         window.watchCallbackSpy = undefined
       })
 
-      it('runs the callback when any contained field changes')
+      it('runs the callback when any contained field changes', async function() {
+        const [form, container, field1, field2] = htmlFixtureList(`
+          <form>
+            <div up-watch="nonce-specs-nonce watchCallbackSpy(value, name)">
+              <input name="field1">
+              <input name="field2">
+            </div>
+          </form>
+        `)
+        up.hello(form)
+
+        field1.value = 'value1'
+        Trigger.change(field1)
+        await wait()
+
+        field2.value = 'value2'
+        Trigger.change(field2)
+        await wait()
+
+        expect(window.watchCallbackSpy.calls.allArgs()).toEqual([
+          ['value1', 'field1'],
+          ['value2', 'field2'],
+        ])
+      })
 
       it("runs the callback when (1) in a render pass and (2) another compiler changes the watched field's initial value (bugfix)", async function() {
         up.compiler('.field', { priority: -100 }, function(field) {

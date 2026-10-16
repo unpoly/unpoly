@@ -62,10 +62,6 @@ extendDescribe('up.link', function() {
 
       describe('when the server responds with an error', function() {
 
-        it('updates the [up-fail-target] instead')
-
-        it('updates a main target if no [up-fail-target] is given')
-
         it('updates the [up-fail-target] if the link is immediately removed after clicking', async function() {
           fixture('#success', { text: 'initial content' })
           fixture('#failure', { text: 'initial content' })

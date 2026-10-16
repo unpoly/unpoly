@@ -1035,7 +1035,34 @@ extendDescribe('up.form', function() {
           expect((await promiseState(promise4)).state).toBe('fulfilled')
         })
 
-        it('does not batch requests with a different { method }')
+        it('does not batch requests with a different { method }', async function() {
+          const formHTML = `
+            <form action="/path" method="post">
+              <fieldset><input name="foo"></fieldset>
+              <fieldset><input name="bar" up-validate-method="get"></fieldset>
+              <fieldset><input name="baz"></fieldset>
+              <fieldset><input name="qux" up-validate-method="get"></fieldset>
+            </form>
+          `
+          const [form, fooGroup, fooField, barGroup, barField, bazGroup, bazField, quxGroup, quxField] = htmlFixtureList(formHTML)
+
+          up.validate(fooField)
+          up.validate(barField)
+          up.validate(bazField)
+          up.validate(quxField)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().method).toBe('POST')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('foo baz')
+
+          jasmine.respondWith(formHTML)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(jasmine.lastRequest().method).toBe('GET')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('bar qux')
+        })
 
         it('honors the { disable } option of each batched validation, resolving the :origin for each field', async function() {
           const form = fixture('form[action=/path][up-watch-disable=":origin"]')
