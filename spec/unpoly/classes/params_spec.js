@@ -277,6 +277,16 @@ describe('up.Params', function() {
       "bar": "2"
     }))
 
+    it('builds an array value for a key matching a custom up.form.config.arrayParam function', function() {
+      up.form.config.arrayParam = (name) => name.startsWith('list-')
+
+      expect(toObject("list-foo=1&bar=2&list-foo=3&foo[]=4")).toEqual({
+        "list-foo": ["1", "3"],
+        "bar": "2",
+        "foo[]": "4"
+      })
+    })
+
     it('ignores keys that would overwrite an Object prototype property', function() {
       const obj = toObject("foo=bar&hasOwnProperty=baz")
       expect(obj['foo']).toEqual('bar')

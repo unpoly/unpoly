@@ -358,6 +358,19 @@ extendDescribe('up.fragment', function() {
             expect(up.network.queue.allRequests.length).toBe(1)
           })
 
+          it('calls an { onError } callback of the aborted render pass with an up.Aborted error', async function() {
+            htmlFixtureList('<div id="element">old text</div>')
+            const onError = jasmine.createSpy('onError callback')
+
+            const job1 = up.render('#element', { url: '/path1', onError })
+            await wait()
+
+            up.render('#element', { url: '/path2', abort: 'target' })
+
+            await expectAsync(job1).toBeRejectedWith(jasmine.any(up.Aborted))
+            expect(onError).toHaveBeenCalledOnceWith(jasmine.any(up.Aborted))
+          })
+
           describe('up:fragment:aborted event', function() {
 
             it('emits with a { jid } property so listeners can exclude their own update', async function() {
@@ -436,6 +449,25 @@ extendDescribe('up.fragment', function() {
                 target: originalElement,
               }))
               expect('.element').toHaveText('v2')
+            })
+
+            it('is emitted with { newLayer: true } when opening a new overlay', async function() {
+              htmlFixtureList('<main>root content</main>')
+
+              let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
+              up.on('up:fragment:aborted', abortedListener)
+
+              await up.render({ fragment: '<main>new root content</main>', abort: 'target' })
+
+              expect(abortedListener).toHaveBeenCalled()
+              expect(abortedListener.calls.mostRecent().args[0].newLayer).toBeFalsy()
+              abortedListener.calls.reset()
+
+              up.render('.overlay-content', { url: '/path2', layer: 'new', abort: 'target' })
+              await wait()
+
+              expect(abortedListener).toHaveBeenCalled()
+              expect(abortedListener.calls.mostRecent().args[0].newLayer).toBe(true)
             })
 
             it('is emitted before an element is swapped from local HTML and no requests are in flight', async function() {

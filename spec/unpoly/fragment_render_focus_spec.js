@@ -927,6 +927,16 @@ extendDescribe('up.fragment', function() {
             expect('.focused').toHaveText('new focused')
             expect('.focused').toBeFocused()
           })
+
+          it('uses the strategies configured in up.fragment.config.autoFocus', async function() {
+            up.fragment.config.autoFocus = ['target']
+            htmlFixtureList('<div id="minor">old minor</div>')
+
+            await up.render({ target: '#minor', document: '<div id="minor">new minor</div>', focus: 'auto' })
+
+            expect('#minor').toHaveText('new minor')
+            expect('#minor').toBeFocused()
+          })
         })
 
         describe('with an Element as { focus } option', function() {
@@ -940,6 +950,50 @@ extendDescribe('up.fragment', function() {
             await up.render({ target: '.target', document: '<div class="target">new target</div>', focus: other })
 
             expect(other).toBeFocused()
+          })
+
+        })
+
+        describe('with { focusVisible } option', function() {
+
+          it('sets .up-focus-visible on the focused fragment with { focusVisible: true }', async function() {
+            htmlFixtureList('<div id="target">old target</div>')
+
+            await up.render({ target: '#target', document: '<div id="target">new target</div>', focus: 'target', focusVisible: true })
+
+            expect('#target').toBeFocused()
+            expect('#target').toHaveClass('up-focus-visible')
+            expect('#target').not.toHaveClass('up-focus-hidden')
+          })
+
+          it('sets .up-focus-hidden on the focused fragment with { focusVisible: false }', async function() {
+            htmlFixtureList('<div id="target">old target</div>')
+
+            // Keyboard interaction would make focus visible with the default { focusVisible: 'auto' }
+            Trigger.keySequence(document.body, 'Enter')
+            await up.render({ target: '#target', document: '<div id="target">new target</div>', focus: 'target', focusVisible: false })
+
+            expect('#target').toBeFocused()
+            expect('#target').toHaveClass('up-focus-hidden')
+            expect('#target').not.toHaveClass('up-focus-visible')
+          })
+
+          it('uses the input device from when the render pass started for { focusVisible: "auto" }', async function() {
+            htmlFixtureList('<div id="target">old target</div>')
+
+            Trigger.keySequence(document.body, 'Enter')
+            expect(up.event.inputDevice).toBe('key')
+            up.render({ target: '#target', url: '/path', focus: 'target' })
+            await wait()
+
+            // The keyboard interaction is over by the time the response arrives
+            expect(up.event.inputDevice).toBe('unknown')
+            jasmine.respondWith('<div id="target">new target</div>')
+            await wait()
+
+            expect('#target').toHaveText('new target')
+            expect('#target').toBeFocused()
+            expect('#target').toHaveClass('up-focus-visible')
           })
 
         })

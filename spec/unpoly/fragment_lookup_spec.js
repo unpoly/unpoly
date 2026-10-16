@@ -654,6 +654,15 @@ extendDescribe('up.fragment', function() {
         expect(up.fragment.matches(foo, ':main')).toBe(true)
         expect(up.fragment.matches(bar, ':main')).toBe(false)
       })
+
+      it('returns whether the fragment matches a target derived from a second element', function() {
+        const [fragment] = htmlFixtureList('<div id="foo">fragment</div>')
+        const sameID = up.element.createFromHTML('<div id="foo">other element with same ID</div>')
+        const otherID = up.element.createFromHTML('<div id="bar">other element with other ID</div>')
+
+        expect(up.fragment.matches(fragment, sameID)).toBe(true)
+        expect(up.fragment.matches(fragment, otherID)).toBe(false)
+      })
     })
 
     describe('up.fragment.closest()', function() {

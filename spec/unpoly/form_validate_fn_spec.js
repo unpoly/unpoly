@@ -244,6 +244,36 @@ extendDescribe('up.form', function() {
 
           expect(jasmine.lastRequest().data()['foo']).toEqual(['two'])
         })
+
+        it('does not send a validation request when the event is prevented', async function() {
+          const [_form, input] = htmlFixtureList(`
+            <form action="/path">
+              <input type="text" name="email">
+            </form>
+          `)
+          up.on('up:form:validate', (event) => event.preventDefault())
+
+          const validatePromise = up.validate(input)
+
+          await expectAsync(validatePromise).toBeRejectedWith(jasmine.any(up.Aborted))
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+        })
+
+        it('lets listeners change event.renderOptions', async function() {
+          const [_form, input] = htmlFixtureList(`
+            <form action="/path">
+              <input type="text" name="email">
+            </form>
+          `)
+          up.on('up:form:validate', (event) => {
+            event.renderOptions.headers = { ...event.renderOptions.headers, 'X-Custom': 'custom-value' }
+          })
+
+          up.validate(input)
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Custom']).toBe('custom-value')
+        })
       })
 
       it('allows to override the { data } for the new element', async function() {

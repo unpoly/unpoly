@@ -196,6 +196,27 @@ extendDescribe('up.form', function() {
 
           expect(submitEvent).toBeEvent('up:form:submit', { target: submitButton })
         })
+
+        it('is emitted on the form without a { submitButton } when the form has no submit button', async function() {
+          const [form] = htmlFixtureList(`
+            <form action="/form-target" up-submit>
+              <input type="text" name="email" value="foo@example.com">
+            </form>
+          `)
+          up.hello(form)
+
+          const listener = jasmine.createSpy('up:form:submit listener')
+          up.on('up:form:submit', listener)
+
+          form.requestSubmit()
+          await wait()
+
+          expect(listener.calls.count()).toBe(1)
+          const submitEvent = listener.calls.argsFor(0)[0]
+          expect(submitEvent.target).toBe(form)
+          expect(submitEvent.submitButton).toBeMissing()
+          expect(jasmine.lastRequest().url).toMatchURL('/form-target?email=foo%40example.com')
+        })
       })
 
       it('allows to refer to the origin as ":origin" in the target selector', async function() {

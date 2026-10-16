@@ -277,6 +277,19 @@ extendDescribe('up.fragment', function() {
           expect(up.fragment.config.verifyDerivedTarget).toBe(true)
           expect(up.fragment.toTarget(elementInClosingOverlay)).toBe('#foo')
         })
+
+        it('uses a derived target that would match an earlier element if it matches the given element in the region of { origin }', function() {
+          const [_one, two, origin] = htmlFixtureList(`
+            <div class="element">one</div>
+            <div class="element">
+              two
+              <a class="origin" href="#">origin</a>
+            </div>
+          `)
+
+          expect(() => up.fragment.toTarget(two)).toThrowError(/Cannot derive good target selector/)
+          expect(up.fragment.toTarget(two, { origin })).toBe('.element')
+        })
       })
 
       describe('with { strong: true }', function() {

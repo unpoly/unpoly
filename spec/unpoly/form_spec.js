@@ -315,6 +315,23 @@ describe('up.form', function() {
           jasmine.objectContaining({ headers: { 'Custom-Header': 'Custom-Value' }, params: { 'custom-param': 'custom-value' } })
         )
       })
+
+      it('returns a function that stops auto-submitting', async function() {
+        const [_form, field] = htmlFixtureList(`
+          <form action="/path">
+            <input type="text" name="email" value="old@example.com">
+          </form>
+        `)
+        const submitSpy = up.form.submit.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
+        const stopAutosubmit = up.autosubmit(field)
+
+        stopAutosubmit()
+        field.value = 'new@example.com'
+        Trigger.change(field)
+        await wait()
+
+        expect(submitSpy).not.toHaveBeenCalled()
+      })
     })
 
     describe('up.form.groupSolution()', function() {
@@ -438,6 +455,19 @@ describe('up.form', function() {
         const outsideButton = fixture('input[type=submit][form=form-id][value="Submit outside"]')
         const results = up.form.submitButtons(form)
         expect(results).toMatchList([insideButton, outsideButton])
+      })
+
+      it('includes elements matching a custom up.form.config.submitButtonSelectors', function() {
+        up.form.config.submitButtonSelectors.push('.custom-submit')
+        const [form, submitButton, customButton] = htmlFixtureList(`
+          <form>
+            <button type="submit">Submit</button>
+            <button type="button" class="custom-submit">Custom submit</button>
+            <button type="button">Other</button>
+          </form>
+        `)
+
+        expect(up.form.submitButtons(form)).toMatchList([submitButton, customButton])
       })
     })
 

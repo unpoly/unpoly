@@ -92,6 +92,23 @@ extendDescribe('up.fragment', function() {
             expect(document.querySelector('#hash').getBoundingClientRect().top).toBeAround(0, 1)
           })
 
+          it('uses the strategies configured in up.fragment.config.autoScroll', async function() {
+            up.fragment.config.autoScroll = ['top']
+            htmlFixtureList(`
+              <main>
+                <div style="height: 3000px"></div>
+                <div id="minor">old minor</div>
+                <div style="height: 3000px"></div>
+              </main>
+            `)
+            up.viewport.root.scrollTop = 1000
+
+            await up.render({ target: '#minor', document: '<div id="minor">new minor</div>', scroll: 'auto' })
+
+            expect('#minor').toHaveText('new minor')
+            expect(up.viewport.root.scrollTop).toBe(0)
+          })
+
         })
 
         describe('with { scroll: "top-if-main" }', function() {
