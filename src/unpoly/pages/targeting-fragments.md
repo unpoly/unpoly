@@ -150,7 +150,7 @@ To keep the target element, but replace all of its child content, use the `:cont
 The server is still expected to render an element matching `.card`, but only its child content is used.
 The `.card` element itself keeps its attributes, event listeners and any state your scripts attached to it.
 
-For more advanced strategies for keeping elements, see [[preserving-elements]].
+For more advanced strategies for keeping elements, see [[keeping-elements]].
 
 
 Targeting nothing {#targeting-nothing}

@@ -490,7 +490,7 @@ up.on('up:fragment:inserted', function(event) {
 ### Event utilities
 
 - New experimental function `up.event.onClosest()`. This runs a callback when an event is observed on an element or its ancestors.
-- New experimental function `up.fragment.onKept()`. This runs a callback when an element or its ancestors are [kept](/preserving-elements) during a render pass.
+- New experimental function `up.fragment.onKept()`. This runs a callback when an element or its ancestors are [kept](/keeping-elements) during a render pass.
 
 
 ### Frontend assets
@@ -721,9 +721,9 @@ When a non-expanded link is clicked, now only that link becomes `.up-active`:
 
 ### Preserving fragments
 
-Two changes were made to [preserving elements](/preserving-elements) using the `[up-keep]` attribute:
+Two changes were made to [preserving elements](/keeping-elements) using the `[up-keep]` attribute:
 
-- Added an experimental event `up:fragment:kept`. This event is emitted after all [keep conditions](/preserving-elements#conditions) are evaluated and preservation can no longer be prevented. A listener can be sure that the element is going to be kept.
+- Added an experimental event `up:fragment:kept`. This event is emitted after all [keep conditions](/keeping-elements#conditions) are evaluated and preservation can no longer be prevented. A listener can be sure that the element is going to be kept.
 - Fragments with both `[up-poll]` and `[up-keep]` now continue polling when the element is kept (fixes #763)
 
 
@@ -763,7 +763,7 @@ Two changes were made to [preserving elements](/preserving-elements) using the `
 3.11.0
 ------
 
-This is a big release, shipping many features and quality-of-life improvements requested by the community. Highlights include a complete overhaul of [history handling](#history-handling), [form state switching](/switching-form-state) and the [preservation of `[up-keep]` elements](/preserving-elements). We also [reworked major parts of the documentation](#reworked-documentation) and [stabilized 89 experimental features](#stabilization-of-experimental-features).
+This is a big release, shipping many features and quality-of-life improvements requested by the community. Highlights include a complete overhaul of [history handling](#history-handling), [form state switching](/switching-form-state) and the [preservation of `[up-keep]` elements](/keeping-elements). We also [reworked major parts of the documentation](#reworked-documentation) and [stabilized 89 experimental features](#stabilization-of-experimental-features).
 
 We had to make some breaking changes, which are marked with a ⚠️ emoji in this CHANGELOG.\
 Most incompatibilities are polyfilled by [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading).
@@ -1114,7 +1114,7 @@ Now most inherited options are now explicitly documented with the inheriting fea
 
 A number of guides have been added or overhauled:
 
-- [Preserving elements](/preserving-elements)
+- [Preserving elements](/keeping-elements)
 - [Polling](/polling)
 - [Switching form state](/switching-form-state)
 - [Reactive server forms](/reactive-server-forms)
@@ -1160,7 +1160,7 @@ See [Matching the location of other layers](/navigation-bars#layers).
 
 The `[up-keep]` element now gives you more control over how long an element is kept.
 
-Also see our new guide [Preserving elements](/preserving-elements).
+Also see our new guide [Keeping elements](/keeping-elements).
 
 
 #### Keeping an element until its HTML changes {#same-html}
@@ -1208,7 +1208,7 @@ Client-side changes to the data object (e.g. by a [compiler](/up.compiler)) are 
 
 We're providing `[up-keep="same-html"]` and `[up-keep="same-data"]` as shortcuts for common keep constraints.
 
-You can still implement [arbitrary keep conditions](/preserving-elements#custom-keep-condition) by listening to the `up:fragment:keep` event or setting an [`[up-on-keep]`](/up-keep#up-on-keep) attribute.
+You can still implement [arbitrary keep conditions](/keeping-elements#custom-keep-condition) by listening to the `up:fragment:keep` event or setting an [`[up-on-keep]`](/up-keep#up-on-keep) attribute.
 
 
 

@@ -132,11 +132,11 @@ up.compiler('.color-picker', function(element, data) {
 This updates the island in place, without remounting. Component state like cursor positions
 or open popovers survives the fragment update.
 
-A simpler alternative is [`[up-keep="same-data"]`](/preserving-elements#same-data). It keeps
+A simpler alternative is [`[up-keep="same-data"]`](/keeping-elements#same-data). It keeps
 the island while its data is unchanged, but *remounts* it with fresh props when the server
 sends changed `[up-data]`. Any state inside the component is reset by the remount.
 
-See [[preserving-elements]] for how elements are matched, and for ways to control what is kept.
+See [[keeping-elements]] for how elements are matched, and for ways to control what is kept.
 
 
 An island owns its subtree {#boundaries}

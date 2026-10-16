@@ -1,5 +1,5 @@
-Preserving elements
-===================
+Keeping elements
+================
 
 An element with an `[up-keep]` attribute survives when the fragment around it is replaced.
 A playing `<video>` or a map widget with its pan and zoom state stays where it is
@@ -222,4 +222,4 @@ It is emitted after all keep conditions have been evaluated and can no longer pr
 > [preserve an element's data through reloads](/data#preserving).
 
 
-@page preserving-elements
+@page keeping-elements

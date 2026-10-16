@@ -147,7 +147,7 @@ learn:
         - targeting-fragments
         - target-derivation
         - failed-responses
-        - preserving-elements
+        - keeping-elements
         - providing-html
         - render-lifecycle
 

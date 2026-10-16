@@ -104,6 +104,25 @@ is `[up-fail-target]`. For forms, Unpoly already defaults to re-rendering the fo
 [[more: failed-responses]]
 
 
+Keeping elements
+----------------
+
+Some elements carry state that a swap would lose, like a playing video or a map with its pan and zoom.
+Mark such an element with `[up-keep]`, and it survives when the fragment around it is replaced:
+
+```html
+<div id="article">
+  <p>Article 1</p>
+  <audio id="player" up-keep src="song1.mp3"></audio> <!-- mark: up-keep -->
+</div>
+```
+
+When the response contains a matching `#player`, Unpoly moves the existing element into the new
+fragment, so the song keeps playing. You can also keep an element only until its HTML or data changes.
+
+[[more: keeping-elements]]
+
+
 Hooking into the render lifecycle
 ---------------------------------
 
@@ -135,9 +154,6 @@ See also
 
 When Unpoly updates an element without being given a selector, it guesses one from the element's
 `[id]`, `[name]` or classes. To tune that guess, see [[target-derivation]].
-
-To keep a video player, a map or an open menu alive while the fragment around it is replaced,
-see [[preserving-elements]].
 
 To render HTML that you already have, without a request to the server, see [[providing-html]].
 

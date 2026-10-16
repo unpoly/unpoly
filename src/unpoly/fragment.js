@@ -143,7 +143,7 @@ up.fragment = (function() {
   @section Preprocessing
 
     @param {Function(string): string} [config.normalizeKeepHTML]
-      A function that normalizes a HTML string before comparison with [`[up-keep="same-html"]`](/preserving-elements#same-html).
+      A function that normalizes a HTML string before comparison with [`[up-keep="same-html"]`](/keeping-elements#same-html).
 
       By default only light normalization is applied:
 
@@ -157,7 +157,7 @@ up.fragment = (function() {
       up.fragment.config.normalizeKeepHTML = (str) => str.trim()
       ```
 
-      See [Keeping an element until its HTML changes](/preserving-elements#same-html) for context.
+      See [Keeping an element until its HTML changes](/keeping-elements#same-html) for context.
 
   @section Responses
 
@@ -876,7 +876,7 @@ up.fragment = (function() {
   /*-
   Elements with an `[up-keep]` attribute will be persisted when rendering.
 
-  @learn-ref preserving-elements
+  @learn-ref keeping-elements
 
   ## Basic example
 
@@ -893,7 +893,7 @@ up.fragment = (function() {
   its playback state will be the same before and after the update. All other elements (like the `<p>`)
   will be updated with new content.
 
-  See [Preserving elements](/preserving-elements) for elaborate examples.
+  See [Keeping elements](/keeping-elements) for elaborate examples.
 
   ## Limitations
 
@@ -912,14 +912,14 @@ up.fragment = (function() {
     [derived target](/target-derivation) can be correlated in both the old and new content.
 
     When set to `'same-html'`, the element is kept as long as its outer HTML
-    does not change between versions. See [Keeping an element until its HTML changes](/preserving-elements#same-html).
+    does not change between versions. See [Keeping an element until its HTML changes](/keeping-elements#same-html).
 
     When set to `'same-data'`, the element is kept as long as its [data](/data)
-    does not change between versions. See [Keeping an element until its data changes](/preserving-elements#same-data).
+    does not change between versions. See [Keeping an element until its data changes](/keeping-elements#same-data).
 
     When set to `'false'` the element is never kept. A new element with `[up-keep="false"]`
     will always replace an existing element, even if that existing element has `[up-keep="true"]`.
-    See [Forcing an update](/preserving-elements#forcing-updates).
+    See [Forcing an update](/keeping-elements#forcing-updates).
   @param [up-on-keep]
     Code to run before an existing element is kept during a page update.
 
@@ -939,14 +939,14 @@ up.fragment = (function() {
   }
 
   /*-
-  This event is emitted before an existing element is [kept](/preserving-elements)
+  This event is emitted before an existing element is [kept](/keeping-elements)
   during a render pass.
 
   Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
   to prevent the element from being persisted. If the event is prevented, the element
   will be replaced with a fragment from the response.
 
-  @learn-ref preserving-elements
+  @learn-ref keeping-elements
 
   ### Example
 
@@ -981,12 +981,12 @@ up.fragment = (function() {
   */
 
   /*-
-  The `up:fragment:kept` event is emitted *after* an existing element has been [kept](/preserving-elements) during a render pass.
+  The `up:fragment:kept` event is emitted *after* an existing element has been [kept](/keeping-elements) during a render pass.
 
-  All [keep conditions](/preserving-elements#conditions) have already been evaluated.
+  All [keep conditions](/keeping-elements#conditions) have already been evaluated.
   The keeping can no longer be prevented. For this, use `up:fragment:keep` instead.
 
-  @learn-ref preserving-elements
+  @learn-ref keeping-elements
 
   @event up:fragment:kept
   @param {Element} event.target
@@ -2895,7 +2895,7 @@ up.fragment = (function() {
   }
 
   /*-
-  Runs a callback when the given element *or its ancestors* were [kept](/preserving-elements).
+  Runs a callback when the given element *or its ancestors* were [kept](/keeping-elements).
 
   @function up.fragment.onKept
   @param {Element} element

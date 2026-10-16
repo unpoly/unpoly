@@ -132,11 +132,10 @@ RedirectPermanent /dependent-fields /reactive-server-forms
 RedirectPermanent /dependent-elements /reactive-server-forms
 RedirectPermanent /dependent-forms /reactive-server-forms
 
-RedirectPermanent /preserving-fragments /preserving-elements
-RedirectPermanent /keeping-fragments /preserving-elements
-RedirectPermanent /keeping-elements /preserving-elements
-RedirectPermanent /persisting-fragments /preserving-elements
-RedirectPermanent /persisting-elements /preserving-elements
+RedirectPermanent /preserving-fragments /keeping-elements
+RedirectPermanent /keeping-fragments /keeping-elements
+RedirectPermanent /persisting-fragments /keeping-elements
+RedirectPermanent /persisting-elements /keeping-elements
 
 RedirectPermanent /javascript-sprinkles /enhancing-elements
 RedirectPermanent /compiler /enhancing-elements
@@ -174,3 +173,4 @@ RedirectPermanent /motion-tuning /controlling-motion#duration-and-easing
 RedirectPermanent /layer-option /targeting-other-layers
 RedirectPermanent /context /layer-context
 RedirectPermanent /animation /motion
+RedirectPermanent /preserving-elements /keeping-elements
