@@ -17,8 +17,6 @@ describe('up.Record', function() {
 
       expect(record.foo).toBe('given foo')
     })
-
-    it('always copies in case #defaults() always returns the same object')
   })
 })
 

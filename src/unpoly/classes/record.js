@@ -6,6 +6,8 @@ up.Record = class Record {
     throw 'Return an array of keys'
   }
 
+  // Return a new object on every call. The constructor copies its top-level properties,
+  // but nested values (like an object or array) are shared with the defaults object.
   defaults(_options) {
     return {}
   }

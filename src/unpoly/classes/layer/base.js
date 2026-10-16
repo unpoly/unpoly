@@ -842,7 +842,9 @@ up.Layer = class Layer extends up.Record {
   @experimental
   */
   get location() {
-    // TODO: Maybe we can always return savedLocation now
+    // With up.history.config.enabled = false, this returns the unchanged browser URL, while
+    // up:layer:location:changed reports the location from the render pass. This is intentional:
+    // what the page shows (address bar, title, .up-current) stays consistent with the browser URL.
     if (this.showsLiveHistory()) {
       // Allow Unpoly-unaware code to use the pushState API directly.
       // This will implicitly change the front layer's location.

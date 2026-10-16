@@ -124,8 +124,6 @@ extendDescribe('up.fragment', function() {
           expect($($elements.get(1)).text()).toEqual('')
         })
 
-        it('replaces the body if asked to replace the "html" selector')
-
         describe('updating children', function() {
 
           it('replaces the children with :content, but keeps the element itself', function() {
