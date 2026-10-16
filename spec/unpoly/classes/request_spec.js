@@ -6,9 +6,25 @@ describe('up.Request', function() {
   describe('constructor', function() {
     describe('{ layer } option', function() {
 
-      it('sets the { context } from that layer')
+      it('sets the { context } from that layer', function() {
+        makeLayers([{}, { context: { key: 'overlay' } }])
+        up.layer.root.context.key = 'root'
 
-      it('uses the current layer if no { layer } is given')
+        const request = new up.Request({ url: '/path', layer: 'root' })
+
+        expect(request.layer).toBe(up.layer.root)
+        expect(request.context).toEqual({ key: 'root' })
+      })
+
+      it('uses the current layer if a { target } but no { layer } is given', function() {
+        makeLayers([{}, { context: { key: 'overlay' } }])
+
+        const request = new up.Request({ url: '/path', target: '.target' })
+
+        expect(request.layer).toBe(up.layer.current)
+        expect(request.layer).toBeOverlay()
+        expect(request.context).toEqual({ key: 'overlay' })
+      })
 
     })
 
