@@ -1309,6 +1309,36 @@ extendDescribe('up.radio', function() {
           })
         })
 
+        describe('with [up-if-layer=subtree]', function() {
+
+          it('updates the [up-hungry] element with the discarded content of a child overlay closed by the response', async function() {
+            const [hungry] = htmlFixtureList('<div id="hungry" up-hungry up-if-layer="subtree">old hungry</div>')
+
+            up.layer.open({ fragment: '<div id="target">old target</div>' })
+            await wait()
+
+            expect(up.layer.count).toBe(2)
+
+            const renderJob = up.render({ target: '#target', url: '/path' })
+            await wait()
+
+            jasmine.respondWith({
+              responseText: `
+                <div id="target">new target</div>
+                <div id="hungry">new hungry</div>
+              `,
+              responseHeaders: { 'X-Up-Accept-Layer': 'null' }
+            })
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            expect(up.layer.count).toBe(1)
+            expect('#hungry').toHaveText('new hungry')
+            expect(hungry).toBeDetached()
+          })
+
+        })
+
         describe('with [up-if-layer] set to a relative layer option', () => {
           it('resolves the option from the perspective of the hungry layer, not of the updating layer', async function() {
             makeLayers([

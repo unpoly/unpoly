@@ -500,6 +500,17 @@ describe('up.Layer.Overlay', function() {
       expect(document).not.toHaveSelector('up-modal')
     })
 
+    it('uses an { animation } option instead of the configured close animation', async function() {
+      up.motion.config.enabled = true
+      await up.layer.open({ mode: 'modal', openAnimation: false, closeAnimation: 'move-to-bottom', closeDuration: 5 })
+      spyOn(up, 'animate').and.callThrough()
+
+      up.layer.current.accept(null, { animation: 'move-to-top' })
+
+      expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-top', jasmine.anything())
+      expect(up.animate).not.toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
+    })
+
     it("uses the overlay instance's close duration when the global animation duration has been set to zero (bugfix)", async function() {
       up.motion.config.enabled = true
       up.motion.config.duration = 0
@@ -894,6 +905,17 @@ describe('up.Layer.Overlay', function() {
       up.layer.dismiss(null, { force: true })
 
       expect(overlay).not.toBeAlive()
+    })
+
+    it('uses an { animation } option instead of the configured close animation', async function() {
+      up.motion.config.enabled = true
+      await up.layer.open({ mode: 'modal', openAnimation: false, closeAnimation: 'move-to-bottom', closeDuration: 5 })
+      spyOn(up, 'animate').and.callThrough()
+
+      up.layer.current.dismiss(null, { animation: 'move-to-top' })
+
+      expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-top', jasmine.anything())
+      expect(up.animate).not.toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
     })
 
     it('takes a dismissal value that is passed to onDismissed handlers', function() {

@@ -610,6 +610,31 @@ extendDescribe('up.fragment', function() {
             expect(document.title).toEqual(oldTitle)
           })
 
+          it('does not update the document title when rendering into an overlay without visible history', async function() {
+            const oldTitle = document.title
+            await up.layer.open({ target: '.container', content: 'old overlay text', history: false })
+
+            up.render('.container', { url: '/path', history: true })
+            await wait()
+
+            jasmine.respondWith(`
+              <html>
+                <head>
+                  <title>Title from HTML</title>
+                </head>
+                <body>
+                  <div class='container'>
+                    new overlay text
+                  </div>
+                </body>
+              </html>
+            `)
+            await wait()
+
+            expect(up.layer.current).toHaveText('new overlay text')
+            expect(document.title).toBe(oldTitle)
+          })
+
           it('allows to pass an explicit title as { title } option', async function() {
             $fixture('.container').text('old container text')
             up.render('.container', { url: '/path', history: true, title: 'Title from options' })
@@ -767,6 +792,36 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
+            expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+          })
+
+          it('does not update meta tags when rendering into an overlay without visible history', async function() {
+            fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
+            fixture(document.head, 'meta[name="description"][content="old description"]')
+
+            await up.layer.open({ target: '.container', content: 'old overlay text', history: false })
+
+            up.render('.container', { url: '/path', history: true })
+            await wait()
+
+            jasmine.respondWith(`
+              <html>
+                <head>
+                  <link rel='canonical' href='/new-canonical'>
+                  <meta name='description' content='new description'>
+                </head>
+                <body>
+                  <div class='container'>
+                    new overlay text
+                  </div>
+                </body>
+              </html>
+            `)
+            await wait()
+
+            expect(up.layer.current).toHaveText('new overlay text')
+            expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
+            expect(document.head).not.toHaveSelector('link[rel="canonical"][href="/new-canonical"]')
             expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
           })
 

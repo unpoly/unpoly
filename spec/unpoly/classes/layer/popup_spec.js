@@ -3,6 +3,39 @@ const e = up.element
 
 describe('up.Layer.Popup', function() {
 
+  it('has no dismiss button by default', async function() {
+    const [opener] = htmlFixtureList('<a href="#">opener</a>')
+    await up.layer.open({ mode: 'popup', origin: opener, content: 'popup content' })
+
+    expect(up.layer.mode).toBe('popup')
+    expect(up.layer.current.element).not.toHaveSelector('up-popup-dismiss')
+  })
+
+  it('can be dismissed by pressing Escape by default', async function() {
+    const [opener] = htmlFixtureList('<a href="#">opener</a>')
+    await up.layer.open({ mode: 'popup', origin: opener, content: 'popup content' })
+    expect(up.layer.mode).toBe('popup')
+
+    Trigger.escapeSequence(document.body)
+    await wait()
+
+    expect(up.layer.isRoot()).toBe(true)
+  })
+
+  it('can be dismissed by clicking outside by default', async function() {
+    const [opener, outside] = htmlFixtureList(`
+      <a href="#">opener</a>
+      <div class="outside">outside</div>
+    `)
+    await up.layer.open({ mode: 'popup', origin: opener, content: 'popup content' })
+    expect(up.layer.mode).toBe('popup')
+
+    Trigger.clickSequence(outside)
+    await wait()
+
+    expect(up.layer.isRoot()).toBe(true)
+  })
+
   describe('positioning', function() {
 
     const setPopupMargin = function(margins) {

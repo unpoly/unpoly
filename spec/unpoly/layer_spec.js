@@ -1138,6 +1138,38 @@ describe('up.layer', function() {
 
         })
 
+        describe('[up-on-accepted]', function() {
+
+          it('runs the callback after the overlay was accepted, with event, value, response, layer and this in scope', async function() {
+            const [link, overlay] = await openOverlay(`up-accept-location="/users/$id" up-on-accepted="nonce-specs-nonce closeCallbackSpy(this, event, value, response, layer, up.layer.isOverlay())"`)
+
+            const renderJob = up.navigate({ url: '/users/5', target: '.target' })
+            await wait()
+
+            jasmine.respondWithSelector('.target', { text: 'user 5' })
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            expect(window.closeCallbackSpy).toHaveBeenCalledWith(link, jasmine.anything(), { id: 5, location: '/users/5' }, jasmine.any(up.Response), overlay, false)
+            expect(window.closeCallbackSpy.calls.mostRecent().args[1]).toBeEvent('up:layer:accepted')
+            expect(window.closeCallbackSpy.calls.mostRecent().args[3].text).toContain('user 5')
+          })
+
+        })
+
+        describe('[up-on-dismissed]', function() {
+
+          it('runs the callback after the overlay was dismissed, with the dismissal reason as value', async function() {
+            const [link, overlay] = await openOverlay(`up-on-dismissed="nonce-specs-nonce closeCallbackSpy(this, event, value, layer, up.layer.isOverlay())"`)
+
+            Trigger.escapeSequence(document.body)
+            await wait()
+
+            expect(window.closeCallbackSpy).toHaveBeenCalledWith(link, jasmine.anything(), ':key', overlay, false)
+            expect(window.closeCallbackSpy.calls.mostRecent().args[1]).toBeEvent('up:layer:dismissed', { value: ':key' })
+          })
+
+        })
+
         it('parses [up-on-dismiss] on a form that opens an overlay', async function() {
           const [_form, button] = htmlFixtureList(`
             <form action="/path" up-submit up-layer="new" up-target=".target" up-on-dismiss="nonce-specs-nonce closeCallbackSpy(value)">
