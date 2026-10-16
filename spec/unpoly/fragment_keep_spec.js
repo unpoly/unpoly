@@ -823,194 +823,198 @@ extendDescribe('up.fragment', function() {
         expect(destructor).toHaveBeenCalled()
       })
 
-      it('emits an up:fragment:keep event that lets listeners inspect the new element and its data', async function() {
-        const $keeper = $fixture('.keeper[up-keep]').text('old-inside')
-        const listener = jasmine.createSpy('event listener')
-        $keeper[0].addEventListener('up:fragment:keep', listener)
-        up.render('.keeper', { document: `
-          <div class='keeper new' up-keep up-data='{ "key": "new-value" }'>new-inside</div>
-        ` })
+      describe('events', function() {
 
-        await wait()
+        it('emits an up:fragment:keep event that lets listeners inspect the new element and its data', async function() {
+          const $keeper = $fixture('.keeper[up-keep]').text('old-inside')
+          const listener = jasmine.createSpy('event listener')
+          $keeper[0].addEventListener('up:fragment:keep', listener)
+          up.render('.keeper', { document: `
+            <div class='keeper new' up-keep up-data='{ "key": "new-value" }'>new-inside</div>
+          ` })
 
-        expect(listener).toHaveBeenCalledWith(
-          jasmine.objectContaining({
-            newFragment: jasmine.objectContaining({ className: 'keeper new' }),
-            newData: jasmine.objectContaining({ key: 'new-value' }),
-            target: $keeper[0]
-          })
-        )
-      })
+          await wait()
 
-      it('emits an up:fragment:keep event with information about the render pass', async function() {
-        const keeper = fixture('.keeper[up-keep]', { text: 'old inside' })
-        const listener = jasmine.createSpy('event listener')
-        keeper.addEventListener('up:fragment:keep', listener)
-        up.render('.keeper', { document: `
-          <div class='keeper new' up-keep>new-inside</div>
-        `, abort: 'all', scroll: 'top' })
-
-        await wait()
-
-        expect(listener).toHaveBeenCalledWith(
-          jasmine.objectContaining({
-            renderOptions: jasmine.objectContaining({ abort: 'all', scroll: 'top' })
-          })
-        )
-      })
-
-      it('emits an up:fragment:keep with { newData: {} } if the new element had no up-data value', async function() {
-        const keepListener = jasmine.createSpy()
-        up.on('up:fragment:keep', keepListener)
-        const $container = $fixture('.container')
-        const $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
-        up.render('.keeper', { document: `
-          <div class='container'>
-            <div class='keeper' up-keep>new-inside</div>
-          </div>
-        ` })
-
-        await wait()
-
-        expect('.keeper').toHaveText('old-inside')
-        expect(keepListener).toEqual(jasmine.anything(), $('.keeper'), {})
-      })
-
-      it('allows to define a listener in an [up-on-keep] attribute', async function() {
-        const keeper = fixture('.keeper[up-keep][up-on-keep="nonce-specs-nonce this.onKeepSpy(this, event, newFragment, newData)"]', { text: 'old-inside' })
-
-        keeper.onKeepSpy = jasmine.createSpy('onKeep spy')
-
-        up.render('.keeper', { document: `
-          <div class='keeper new' up-keep up-data='{ "key": "new-value" }'>new-inside</div>
-        ` })
-
-        await wait()
-
-        expect(keeper.onKeepSpy).toHaveBeenCalledWith(
-          keeper,
-          jasmine.anyEvent('up:fragment:keep'),
-          jasmine.objectContaining({ className: 'keeper new' }),
-          jasmine.objectContaining({ key: 'new-value' })
-        )
-      })
-
-      it('lets listeners cancel the keeping by preventing default on an up:fragment:keep event', async function() {
-        const $keeper = $fixture('.keeper[up-keep]').text('old-inside')
-        $keeper.on('up:fragment:keep', (event) => event.preventDefault())
-        up.render({ fragment: `
-          <div class='keeper' up-keep>new-inside</div>
-        ` })
-
-        await wait()
-
-        expect('.keeper').toHaveText('new-inside')
-      })
-
-      it('emits an up:fragment:kept event if up:fragment:keep is not prevented', async function() {
-        let html = `
-          <div id="container">
-            <div id="keeper" up-keep></div>
-          </div>
-        `
-        let [container, keeper] = htmlFixtureList(html)
-        let keptSpy = jasmine.createSpy('up:fragment:kept listener')
-        document.addEventListener('up:fragment:kept', keptSpy)
-
-        up.render({ fragment: html })
-        await wait()
-
-        expect(keptSpy).toHaveBeenCalledWith(jasmine.objectContaining({
-          type: 'up:fragment:kept',
-          target: keeper,
-        }))
-      })
-
-      it('does not emit an up:fragment:kept event if up:fragment:keep is prevented', async function() {
-        let html = `
-          <div id="container">
-            <div id="keeper" up-keep></div>
-          </div>
-        `
-        let [container, keeper] = htmlFixtureList(html)
-        keeper.addEventListener('up:fragment:keep', (event) => event.preventDefault())
-        let keptSpy = jasmine.createSpy('up:fragment:kept listener')
-        document.addEventListener('up:fragment:kept', keptSpy)
-
-        up.render({ fragment: html })
-        await wait()
-
-        expect(keptSpy).not.toHaveBeenCalled()
-      })
-
-      it('lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', async function() {
-        const $keeper = $fixture('.keeper[up-keep]').text('version 1')
-        $keeper[0].addEventListener('up:fragment:keep', function(event) {
-          if (event.newFragment.textContent.trim() === 'version 3') { event.preventDefault() }
+          expect(listener).toHaveBeenCalledWith(
+            jasmine.objectContaining({
+              newFragment: jasmine.objectContaining({ className: 'keeper new' }),
+              newData: jasmine.objectContaining({ key: 'new-value' }),
+              target: $keeper[0]
+            })
+          )
         })
 
-        up.render({ fragment: `
-          <div class='keeper' up-keep>version 2</div>
-        ` })
-        await wait()
+        it('emits an up:fragment:keep event with information about the render pass', async function() {
+          const keeper = fixture('.keeper[up-keep]', { text: 'old inside' })
+          const listener = jasmine.createSpy('event listener')
+          keeper.addEventListener('up:fragment:keep', listener)
+          up.render('.keeper', { document: `
+            <div class='keeper new' up-keep>new-inside</div>
+          `, abort: 'all', scroll: 'top' })
 
-        expect('.keeper').toHaveText('version 1')
+          await wait()
 
-        up.render({ fragment: `
-          <div class='keeper' up-keep>version 3</div>
-        ` })
-        await wait()
+          expect(listener).toHaveBeenCalledWith(
+            jasmine.objectContaining({
+              renderOptions: jasmine.objectContaining({ abort: 'all', scroll: 'top' })
+            })
+          )
+        })
 
-        expect('.keeper').toHaveText('version 3')
-      })
+        it('emits an up:fragment:keep with { newData: {} } if the new element had no up-data value', async function() {
+          const keepListener = jasmine.createSpy()
+          up.on('up:fragment:keep', keepListener)
+          const $container = $fixture('.container')
+          const $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
+          up.render('.keeper', { document: `
+            <div class='container'>
+              <div class='keeper' up-keep>new-inside</div>
+            </div>
+          ` })
 
-      it('emits an up:fragment:keep event on a keepable element and up:fragment:inserted on the targeted parent', async function() {
-        const insertedListener = jasmine.createSpy()
-        up.on('up:fragment:inserted', insertedListener)
-        const keepListener = jasmine.createSpy()
-        up.on('up:fragment:keep', keepListener)
+          await wait()
 
-        const $container = $fixture('.container')
-        $container.html(`
-          <div class="keeper" up-keep></div>
-        `)
+          expect('.keeper').toHaveText('old-inside')
+          expect(keepListener).toEqual(jasmine.anything(), $('.keeper'), {})
+        })
 
-        up.render({ fragment: `
-          <div class='container'>
+        it('allows to define a listener in an [up-on-keep] attribute', async function() {
+          const keeper = fixture('.keeper[up-keep][up-on-keep="nonce-specs-nonce this.onKeepSpy(this, event, newFragment, newData)"]', { text: 'old-inside' })
+
+          keeper.onKeepSpy = jasmine.createSpy('onKeep spy')
+
+          up.render('.keeper', { document: `
+            <div class='keeper new' up-keep up-data='{ "key": "new-value" }'>new-inside</div>
+          ` })
+
+          await wait()
+
+          expect(keeper.onKeepSpy).toHaveBeenCalledWith(
+            keeper,
+            jasmine.anyEvent('up:fragment:keep'),
+            jasmine.objectContaining({ className: 'keeper new' }),
+            jasmine.objectContaining({ key: 'new-value' })
+          )
+        })
+
+        it('lets listeners cancel the keeping by preventing default on an up:fragment:keep event', async function() {
+          const $keeper = $fixture('.keeper[up-keep]').text('old-inside')
+          $keeper.on('up:fragment:keep', (event) => event.preventDefault())
+          up.render({ fragment: `
+            <div class='keeper' up-keep>new-inside</div>
+          ` })
+
+          await wait()
+
+          expect('.keeper').toHaveText('new-inside')
+        })
+
+        it('emits an up:fragment:kept event if up:fragment:keep is not prevented', async function() {
+          let html = `
+            <div id="container">
+              <div id="keeper" up-keep></div>
+            </div>
+          `
+          let [container, keeper] = htmlFixtureList(html)
+          let keptSpy = jasmine.createSpy('up:fragment:kept listener')
+          document.addEventListener('up:fragment:kept', keptSpy)
+
+          up.render({ fragment: html })
+          await wait()
+
+          expect(keptSpy).toHaveBeenCalledWith(jasmine.objectContaining({
+            type: 'up:fragment:kept',
+            target: keeper,
+          }))
+        })
+
+        it('does not emit an up:fragment:kept event if up:fragment:keep is prevented', async function() {
+          let html = `
+            <div id="container">
+              <div id="keeper" up-keep></div>
+            </div>
+          `
+          let [container, keeper] = htmlFixtureList(html)
+          keeper.addEventListener('up:fragment:keep', (event) => event.preventDefault())
+          let keptSpy = jasmine.createSpy('up:fragment:kept listener')
+          document.addEventListener('up:fragment:kept', keptSpy)
+
+          up.render({ fragment: html })
+          await wait()
+
+          expect(keptSpy).not.toHaveBeenCalled()
+        })
+
+        it('lets listeners prevent up:fragment:keep event if the element was kept before (bugfix)', async function() {
+          const $keeper = $fixture('.keeper[up-keep]').text('version 1')
+          $keeper[0].addEventListener('up:fragment:keep', function(event) {
+            if (event.newFragment.textContent.trim() === 'version 3') { event.preventDefault() }
+          })
+
+          up.render({ fragment: `
+            <div class='keeper' up-keep>version 2</div>
+          ` })
+          await wait()
+
+          expect('.keeper').toHaveText('version 1')
+
+          up.render({ fragment: `
+            <div class='keeper' up-keep>version 3</div>
+          ` })
+          await wait()
+
+          expect('.keeper').toHaveText('version 3')
+        })
+
+        it('emits an up:fragment:keep event on a keepable element and up:fragment:inserted on the targeted parent', async function() {
+          const insertedListener = jasmine.createSpy()
+          up.on('up:fragment:inserted', insertedListener)
+          const keepListener = jasmine.createSpy()
+          up.on('up:fragment:keep', keepListener)
+
+          const $container = $fixture('.container')
+          $container.html(`
             <div class="keeper" up-keep></div>
-          </div>
-        ` })
+          `)
 
-        await wait()
+          up.render({ fragment: `
+            <div class='container'>
+              <div class="keeper" up-keep></div>
+            </div>
+          ` })
 
-        expect(insertedListener).toHaveBeenCalledWith(jasmine.anything(), $('.container')[0], jasmine.anything())
-        expect(keepListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper')[0], jasmine.anything())
-      })
+          await wait()
 
-      it('reuses the same element and emits up:fragment:keep during multiple extractions', async function() {
-        const keepListener = jasmine.createSpy()
-        up.on('up:fragment:keep', (event) => keepListener(event.target, event.newData))
-        const $container = $fixture('.container')
-        let $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
+          expect(insertedListener).toHaveBeenCalledWith(jasmine.anything(), $('.container')[0], jasmine.anything())
+          expect(keepListener).toHaveBeenCalledWith(jasmine.anything(), $('.container .keeper')[0], jasmine.anything())
+        })
 
-        up.render('.keeper', { document: `
-          <div class='container'>
-            <div class='keeper' up-keep up-data='{ "key": "value1" }'>new-inside</div>
-          </div>
-        ` })
-        await wait()
+        it('reuses the same element and emits up:fragment:keep during multiple extractions', async function() {
+          const keepListener = jasmine.createSpy()
+          up.on('up:fragment:keep', (event) => keepListener(event.target, event.newData))
+          const $container = $fixture('.container')
+          let $keeper = $container.affix('.keeper[up-keep]').text('old-inside')
 
-        up.render('.keeper', { document: `
-          <div class='container'>
-            <div class='keeper' up-keep up-data='{ "key": "value2" }'>new-inside</div>
-          </div>
-        ` })
-        await wait()
+          up.render('.keeper', { document: `
+            <div class='container'>
+              <div class='keeper' up-keep up-data='{ "key": "value1" }'>new-inside</div>
+            </div>
+          ` })
+          await wait()
 
-        $keeper = $('.keeper')
-        expect($keeper).toHaveText('old-inside')
-        expect(keepListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ key: 'value1' }))
-        expect(keepListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ key: 'value2' }))
+          up.render('.keeper', { document: `
+            <div class='container'>
+              <div class='keeper' up-keep up-data='{ "key": "value2" }'>new-inside</div>
+            </div>
+          ` })
+          await wait()
+
+          $keeper = $('.keeper')
+          expect($keeper).toHaveText('old-inside')
+          expect(keepListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ key: 'value1' }))
+          expect(keepListener).toHaveBeenCalledWith($keeper[0], jasmine.objectContaining({ key: 'value2' }))
+        })
+
       })
 
       it("doesn't let the discarded element appear in a transition", async function() {
