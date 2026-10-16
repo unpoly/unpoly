@@ -1709,6 +1709,26 @@ describe('up.form', function() {
         expect(submitSpy).toHaveBeenCalled()
       })
 
+      it('submits the form when a form-associated custom element changes that was defined after the form was compiled', async function() {
+        const { tagName, define } = lateFormAssociatedElement()
+        const [form, field] = htmlFixtureList(`
+          <form up-autosubmit action="/action" method="post" up-target="#target">
+            <${tagName} name="email" value="old@example.com"></${tagName}>
+          </form>
+        `)
+        htmlFixtureList('<div id="target">old target</div>')
+        up.hello(form)
+
+        define()
+        await wait()
+
+        field.value = 'new@example.com'
+        Trigger.change(field)
+        await wait()
+
+        expect(jasmine.lastRequest().data()).toMatchParams({ email: 'new@example.com' })
+      })
+
       it('detects a change in a field that was added dynamically later', async function() {
         up.form.config.watchInputDelay = 0
         const form = fixture('form[up-autosubmit][up-target="#target"]')

@@ -30,7 +30,10 @@ up.SelectorTracker = class SelectorTracker {
   }
 
   _trackFragments() {
-    return up.on('up:fragment:inserted up:fragment:destroyed', () => this._scheduleSync())
+    // A custom element may only match our selector after its definition, which can arrive
+    // after the element was inserted (e.g. a form-associated custom element only matches
+    // :enabled once defined).
+    return up.on('up:fragment:inserted up:fragment:destroyed up:element:defined', () => this._scheduleSync())
   }
 
   _scheduleSync() {

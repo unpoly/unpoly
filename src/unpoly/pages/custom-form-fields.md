@@ -107,6 +107,9 @@ Unpoly reads your element's value through its `value` property, because a script
 what you passed to `setFormValue()`. Emit a `change` event whenever the value changes, so
 watchers and validations notice it.
 
+An element that is defined after the form was rendered, e.g. by a lazily loaded component,
+is picked up automatically.
+
 
 ## <em class="heading-prefix">Option 3</em> Registering any element as a field {#registering}
 
@@ -138,11 +141,6 @@ validated, switched and disabled. Its name comes from the `[name]` attribute, as
 
 The browser knows nothing about this element, so Unpoly uses the `value` property to submit it.
 Emit a `change` event whenever the value changes.
-
-> [tip]
-> If the definition of a form-associated element is loaded lazily, register its tag name
-> in `up.form.config.fieldSelectors`. A tag name matches before the definition arrives,
-> while `formAssociated` cannot be known until it does.
 
 Prefer [a form-associated element](#form-associated) for a control you are writing today.
 It needs no configuration, and it works in forms that are submitted without Unpoly.

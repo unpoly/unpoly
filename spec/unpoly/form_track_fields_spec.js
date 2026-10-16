@@ -235,6 +235,67 @@ extendDescribe('up.form', function() {
         expect(attachSpy.calls.allArgs()).toEqual([['field1']])
       })
 
+      describe('custom elements that are defined late', function() {
+
+        it('runs the callback for a form-associated custom element that is defined after the form was rendered', async function() {
+          const attachSpy = jasmine.createSpy('attach callback')
+          const { tagName, define } = lateFormAssociatedElement()
+
+          const [form] = htmlFixtureList(`
+            <form>
+              <input type="text" name="field1">
+              <div id="target"></div>
+            </form>
+          `)
+
+          up.form.trackFields(form, (field) => attachSpy(field.getAttribute('name')))
+          await up.render({ fragment: `
+            <div id="target">
+              <${tagName} name="field2"></${tagName}>
+            </div>
+          ` })
+          await wait()
+
+          expect(attachSpy.calls.allArgs()).toEqual([['field1']])
+
+          define()
+          await wait()
+
+          expect(attachSpy.calls.allArgs()).toEqual([['field1'], ['field2']])
+        })
+
+        it('does not run the callback for a custom element that is never defined', async function() {
+          const attachSpy = jasmine.createSpy('attach callback')
+          const { tagName } = lateFormAssociatedElement()
+
+          const [form] = htmlFixtureList(`
+            <form>
+              <input type="text" name="field1">
+              <div id="target"></div>
+            </form>
+          `)
+
+          up.form.trackFields(form, (field) => attachSpy(field.getAttribute('name')))
+          await up.render({ fragment: `
+            <div id="target">
+              <${tagName} name="styled-only"></${tagName}>
+            </div>
+          ` })
+          await wait()
+
+          await up.render({ fragment: `
+            <div id="target">
+              <${tagName} name="styled-only"></${tagName}>
+              <input type="text" name="field2">
+            </div>
+          ` })
+          await wait()
+
+          expect(attachSpy.calls.allArgs()).toEqual([['field1'], ['field2']])
+        })
+
+      })
+
       describe('with [up-keep] fields', function() {
 
         it('runs undo and re-attach callbacks when an [up-keep] field is transported into another form', async function() {

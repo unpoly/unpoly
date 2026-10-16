@@ -954,6 +954,28 @@ extendDescribe('up.form', function() {
         expect($labels[1]).toHaveText('Validation message')
       })
 
+      it('validates a form-associated custom element that was defined after the form was compiled', async function() {
+        const { tagName, define } = lateFormAssociatedElement()
+        const [form, _group, field] = htmlFixtureList(`
+          <form action="/users" method="post" up-validate>
+            <div up-form-group>
+              <${tagName} name="email" value="old@example.com"></${tagName}>
+            </div>
+          </form>
+        `)
+        up.hello(form)
+
+        define()
+        await wait()
+
+        field.value = 'new@example.com'
+        Trigger.change(field)
+        await wait()
+
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+        expect(jasmine.lastRequest().data()).toMatchParams({ email: 'new@example.com' })
+      })
+
       it('allows to validate against a different endpoint using [up-validate-url] and [up-validate-method] attributes', async function() {
         up.network.config.wrapMethod = false
 
