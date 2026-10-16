@@ -172,7 +172,7 @@ has a close button (`×`), but cannot be dismissed by pressing `Escape` or click
 
 The following control names are available:
 
-| Control name | Effect                                           | Dismissal reason |
+| Control name | Effect                                           | Dismissal value |
 |--------------|--------------------------------------------------|------------------|
 | `key`        | Enables dismissing with the `Escape` key         | `":key"`      |
 | `outside`    | Enables dismissing by clicking the backdrop      | `":outside"`  |

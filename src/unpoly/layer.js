@@ -548,7 +548,7 @@ up.layer = (function() {
       One or more event types that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/subinteractions#result-values)
+      The [acceptance value](/closing-overlays#acceptance-values)
       is the event object that caused the overlay to close.
 
       See [Closing when an event is emitted](/subinteractions#event-condition).
@@ -557,7 +557,7 @@ up.layer = (function() {
       One or more event types that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/subinteractions#result-values)
+      The [dismissal value](/closing-overlays#dismissal-values)
       is the event object that caused the overlay to close.
 
       See [Closing when an event is emitted](/subinteractions#event-condition).
@@ -566,7 +566,7 @@ up.layer = (function() {
       One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/subinteractions#result-values)
+      The [acceptance value](/closing-overlays#acceptance-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
@@ -576,7 +576,7 @@ up.layer = (function() {
       One or more [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/subinteractions#result-values)
+      The [dismissal value](/closing-overlays#dismissal-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
@@ -586,7 +586,7 @@ up.layer = (function() {
       A CSS selector that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/subinteractions#result-values)
+      The [acceptance value](/closing-overlays#acceptance-values)
       is the matching fragment's [data](/data) object.\
       If the fragment has no data, the value is an empty object.
 
@@ -596,7 +596,7 @@ up.layer = (function() {
       A CSS selector that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/subinteractions#result-values)
+      The [dismissal value](/closing-overlays#dismissal-values)
       is the matching fragment's [data](/data) object.\
       If the fragment has no data, the value is an empty object.
 
@@ -634,7 +634,7 @@ up.layer = (function() {
       A function that is called when the overlay is about to be [dismissed](/closing-overlays).
 
       The function argument is an `up:layer:dismiss` event.
-      The overlay's [dismissal value](/closing-overlays#dismissal-reasons) is available as `event.value`.
+      The overlay's [dismissal value](/closing-overlays#dismissal-values) is available as `event.value`.
 
       To keep the overlay open, call `event.preventDefault()`.
       This also works when the overlay is closed because a background layer is being
@@ -781,7 +781,7 @@ up.layer = (function() {
   ## Example
 
   Instead of using `up.layer.open()` and passing callbacks, you can use `up.layer.ask()`.
-  `up.layer.ask()` returns a promise for the [acceptance value](/subinteractions#result-values), which you can `await`:
+  `up.layer.ask()` returns a promise for the [acceptance value](/closing-overlays#acceptance-values), which you can `await`:
 
   ```js
   let user = await up.layer.ask({ url: '/users/new' })
@@ -789,7 +789,7 @@ up.layer = (function() {
   ```
 
   To handle the case where the overlay wasn't completed successfully, you
-  can `catch` the rejected promise [reason](/closing-overlays#dismissal-reasons):
+  can `catch` the rejected promise. It rejects with the [dismissal value](/closing-overlays#dismissal-values):
 
   ```js
   try {
@@ -808,9 +808,9 @@ up.layer = (function() {
   @return {Promise}
     A promise that settles when the overlay closes.
 
-    When the overlay is accepted, the promise will fulfill with the overlay's [acceptance value](/subinteractions#result-values).
+    When the overlay is accepted, the promise will fulfill with the overlay's [acceptance value](/closing-overlays#acceptance-values).
 
-    When the overlay is dismissed, the promise will reject with the overlay's [dismissal reason](/closing-overlays#dismissal-reasons).
+    When the overlay is dismissed, the promise will reject with the overlay's [dismissal value](/closing-overlays#dismissal-values).
 
   @stable
   @signature
@@ -1012,7 +1012,7 @@ up.layer = (function() {
       An event type that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/subinteractions#result-values)
+      The [acceptance value](/closing-overlays#acceptance-values)
       is the event object that caused the overlay to close.
 
       You can listen to multiple event types by separating types with a space or comma.
@@ -1023,7 +1023,7 @@ up.layer = (function() {
       An event type that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching event occurs within the overlay.
 
-      The [overlay result value](/subinteractions#result-values)
+      The [dismissal value](/closing-overlays#dismissal-values)
       is the event object that caused the overlay to close.
 
       You can listen to multiple event types by separating types with a space or comma.
@@ -1034,7 +1034,7 @@ up.layer = (function() {
       One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [accepted](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/subinteractions#result-values)
+      The [acceptance value](/closing-overlays#acceptance-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
@@ -1044,7 +1044,7 @@ up.layer = (function() {
       One or more space-separated [URL patterns](/url-patterns) that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when the overlay reaches a matching [location](/up.layer.location).
 
-      The [overlay result value](/subinteractions#result-values)
+      The [dismissal value](/closing-overlays#dismissal-values)
       is an object of [named segments matches](/url-patterns#capturing-named-segments) captured
       by the URL pattern.
 
@@ -1054,7 +1054,7 @@ up.layer = (function() {
       A CSS selector that will cause this overlay to automatically be
       [accepted](/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/subinteractions#result-values)
+      The [acceptance value](/closing-overlays#acceptance-values)
       is the matching fragment's [data](/data) object.\
       If the fragment has no data, the value is an empty object.
 
@@ -1064,7 +1064,7 @@ up.layer = (function() {
       A CSS selector that will cause this overlay to automatically be
       [dismissed](/closing-overlays) when a matching element is observed within the overlay.
 
-      The [overlay result value](/subinteractions#result-values)
+      The [dismissal value](/closing-overlays#dismissal-values)
       is the matching fragment's [data](/data) object.\
       If the fragment has no data, the value is an empty object.
 
@@ -1091,7 +1091,7 @@ up.layer = (function() {
       |------------|-----------------------------------------------|
       | `this`     | The link that originally opened the overlay   |
       | `layer`    | An `up.Layer` object for the closing overlay  |
-      | `value`    | The overlay's [acceptance value](/closing-overlays#result-values) |
+      | `value`    | The overlay's [acceptance value](/closing-overlays#acceptance-values) |
       | `response` | The server response that is causing the overlay to close |
       | `event`    | An `up:layer:accept` event                    |
 
@@ -1111,7 +1111,7 @@ up.layer = (function() {
       |------------|-----------------------------------------------|
       | `this`     | The link that originally opened the overlay   |
       | `layer`    | An `up.Layer` object for the accepted overlay |
-      | `value`    | The overlay's [acceptance value](/closing-overlays#result-values) |
+      | `value`    | The overlay's [acceptance value](/closing-overlays#acceptance-values) |
       | `response` | The server response that caused the overlay to close |
       | `event`    | An `up:layer:accepted` event                  |
 
@@ -1124,7 +1124,7 @@ up.layer = (function() {
       |------------|------------------------------------------------|
       | `this`     | The link that originally opened the overlay    |
       | `layer`    | An `up.Layer` object for the closing overlay   |
-      | `value`    | The overlay's [dismissal value](/closing-overlays#result-values) |
+      | `value`    | The overlay's [dismissal value](/closing-overlays#dismissal-values) |
       | `response` | The server response that is causing the overlay to close |
       | `event`    | An `up:layer:dismiss` event                    |
 
@@ -1144,7 +1144,7 @@ up.layer = (function() {
       |------------|------------------------------------------------|
       | `this`     | The link that originally opened the overlay    |
       | `layer`    | An `up.Layer` object for the dismissed overlay |
-      | `value`    | The overlay's [dismissal value](/closing-overlays#result-values) |
+      | `value`    | The overlay's [dismissal value](/closing-overlays#dismissal-values) |
       | `response` | The server response that caused the overlay to close |
       | `event`    | An `up:layer:dismissed` event                  |
 
@@ -1158,7 +1158,7 @@ up.layer = (function() {
   [Dismisses](/closing-overlays) the [current layer](/up.layer.current) when this element is clicked or submitted.
 
   The [relaxed JSON](/relaxed-json) value of the `[up-dismiss]` attribute becomes the overlay's
-  [dismissal value](/closing-overlays#result-values).
+  [dismissal value](/closing-overlays#dismissal-values).
 
   @learn-ref closing-overlays
 
@@ -1205,7 +1205,7 @@ up.layer = (function() {
   </form>
   ```
 
-  The form's field values will become the [dismissal value](/closing-overlays#result-values) of the closed overlay
+  The form's field values will become the [dismissal value](/closing-overlays#dismissal-values) of the closed overlay
   as an `up.Params` value.
 
   See [Closing when a form is submitted](/closing-overlays#on-submit).
@@ -1214,7 +1214,7 @@ up.layer = (function() {
 
   @section Dismissal
     @param [up-dismiss]
-      On buttons or links, the overlay's [dismissal value](/closing-overlays#result-values)
+      On buttons or links, the overlay's [dismissal value](/closing-overlays#dismissal-values)
       as a [relaxed JSON](/relaxed-json) string.
 
     @param [up-confirm]
@@ -1278,7 +1278,7 @@ up.layer = (function() {
   </form>
   ```
 
-  The form's field values will become the [acceptance value](/closing-overlays#result-values) of the closed overlay
+  The form's field values will become the [acceptance value](/closing-overlays#acceptance-values) of the closed overlay
   as an `up.Params` value.
 
   See [Closing when a form is submitted](/closing-overlays#on-submit).
@@ -1287,7 +1287,7 @@ up.layer = (function() {
 
   @section Acceptance
     @param [up-accept]
-      On buttons and links, the overlay's [acceptance value](/closing-overlays#result-values)
+      On buttons and links, the overlay's [acceptance value](/closing-overlays#acceptance-values)
       as a [relaxed JSON](/relaxed-json) string.
 
       If the attribute value is omitted, a value `null` will be used.
@@ -1551,7 +1551,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that is about to close.
   @param {any} [event.value]
-    The overlay's [acceptance value](/closing-overlays#result-values).
+    The overlay's [acceptance value](/closing-overlays#acceptance-values).
 
     Listeners can replace or mutate this value.
   @param {Element} [event.origin]
@@ -1594,7 +1594,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that was closed.
   @param {any} [event.value]
-    The overlay's final [acceptance value](/closing-overlays#result-values).
+    The overlay's final [acceptance value](/closing-overlays#acceptance-values).
   @param {Element} [event.origin]
     The element that caused the layer to close.
 
@@ -1635,7 +1635,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that is about to close.
   @param {any} [event.value]
-    The overlay's [dismissal value](/closing-overlays#result-values).
+    The overlay's [dismissal value](/closing-overlays#dismissal-values).
 
     Listeners can replace or mutate this value.
   @param {Element} [event.origin]
@@ -1678,7 +1678,7 @@ up.layer = (function() {
   @param {up.Layer} event.layer
     The layer that was closed.
   @param {any} [event.value]
-    The overlay's final [dismissal value](/closing-overlays#result-values).
+    The overlay's final [dismissal value](/closing-overlays#dismissal-values).
   @param {Element} [event.origin]
     The element that caused the layer to close.
 

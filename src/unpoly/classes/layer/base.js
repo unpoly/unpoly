@@ -211,7 +211,7 @@ up.Layer = class Layer extends up.Record {
 
   @function up.Layer#dismiss
   @param {any} [value]
-    The dismissal value that will be passed to `{ onDismissed }` callbacks.
+    The [dismissal value](/closing-overlays#dismissal-values) that will be passed to `{ onDismissed }` callbacks.
 
     If there isn't a dismissal value, omit this argument.
     If you need to pass options without a dismissal value, pass `null`:

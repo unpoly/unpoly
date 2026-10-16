@@ -65,23 +65,23 @@ In the opener's `[up-on-accepted]` attribute, the value is available as `value`:
 </a>
 ```
 
-### Dismissal reasons {#dismissal-reasons}
+### Dismissal values {#dismissal-values}
 
-When an overlay is dismissed, the result value indicates the reason for dismissal.
-For instance, clicking the `×` button dismisses with the value `":button"`.
+A dismissed overlay can pass a value too. When Unpoly's own
+[dismiss controls](/customizing-overlays#customizing-dismiss-controls) close an overlay,
+they set the reason for dismissal as the value.
+For instance, clicking the `×` button dismisses with the value `":button"`:
 
-The [standard dismiss controls](/customizing-overlays#customizing-dismiss-controls) set these reasons:
-
-| User interaction                                    | Dismissal reason |
+| User interaction                                    | Dismissal value  |
 |-----------------------------------------------------|------------------|
 | User presses the `Escape` key                       | `":key"`         |
 | User clicks the backdrop ("light dismiss")          | `":outside"`     |
 | User clicks on the `×` button in the overlay corner | `":button"`      |
 
 An overlay that closes because a layer below it is [updated](#peeling) is dismissed with `":peel"`.
-You can provide your own dismissal reason when closing an overlay with `up.layer.dismiss()` or `[up-dismiss]`.
+You can provide your own dismissal value when closing an overlay with `up.layer.dismiss()` or `[up-dismiss]`.
 
-The opener receives the reason in an `{ onDismissed }` callback or `[up-on-dismissed]` attribute:
+The opener receives the value in an `{ onDismissed }` callback or `[up-on-dismissed]` attribute:
 
 ```html
 <a href="/select-user"
@@ -296,7 +296,7 @@ after a successful submission:
 </form>
 ```
 
-A successful submission dismisses the form's own overlay with a [dismissal reason](#dismissal-reasons) of `":peel"`.
+A successful submission dismisses the form's own overlay with a [dismissal value](#dismissal-values) of `":peel"`.
 
 If a listener [keeps the overlay open](#keeping-open), the background layer is not updated.
 To close the overlay anyway, set an `[up-peel="force"]` attribute.

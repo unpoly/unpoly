@@ -228,7 +228,8 @@ and `await` a promise for its result. See [awaiting subinteractions](#awaiting-s
 Working with result values {#result-values}
 --------------------------
 
-When an overlay is accepted, it passes a *result value* to the layer that opened it.
+When an overlay is accepted, it passes a *result value* to the layer that opened it,
+called the *acceptance value*.
 Where the value comes from depends on how the overlay was closed:
 
 | Overlay is accepted by                                                        | Acceptance value                                  |
@@ -263,7 +264,7 @@ up.layer.open({
 ```
 
 When the user cancels the subinteraction, the overlay is *dismissed* instead.
-Dismissal also carries a value, which indicates the [reason for dismissal](/closing-overlays#dismissal-reasons).
+Dismissal also carries a [dismissal value](/closing-overlays#dismissal-values), like `":key"` when the user pressed `Escape`.
 A subinteraction is usually interested in acceptance only.
 
 
@@ -364,7 +365,7 @@ console.log('New company ID is', company.id)
 ```
 
 When the overlay is dismissed instead of accepted, the promise rejects with the
-[dismissal reason](/closing-overlays#dismissal-reasons). You can `catch` it to handle a canceled subinteraction:
+[dismissal value](/closing-overlays#dismissal-values). You can `catch` it to handle a canceled subinteraction:
 
 ```js
 try {

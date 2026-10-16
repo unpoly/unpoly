@@ -835,7 +835,7 @@ up.Preview = class Preview {
   Opens a temporary overlay.
 
   When the preview ends, the overlay will be [dismissed](/closing-overlays)
-  with a [dismissal reason](/closing-overlays#dismissal-reasons) of `":undo-preview"`.
+  with a [dismissal value](/closing-overlays#dismissal-values) of `":undo-preview"`.
 
   When the user dismisses the temporary overlay before the server responds,
   the previewed request will be [aborted](/aborting-requests).
