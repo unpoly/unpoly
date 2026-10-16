@@ -125,6 +125,8 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       })
     }
 
+    // A key that the server sends with a null value is set to null, not deleted.
+    // This is intentional: a null value may be meaningful, and there is no need to delete keys over the protocol.
     Object.assign(this.layer.context, this._context)
 
     // If the update causes the overlay to close, we don't want to render changes.

@@ -528,6 +528,9 @@ up.link = (function() {
     const guardEvent = up.event.build('up:link:preload', { log: ['Preloading link %o', link] })
 
     return follow(link, {
+      // These are forced, so [up-background] or [up-abortable] attributes on the link have no effect.
+      // This is intentional: a preload only fills the cache. It should never show the progress bar,
+      // and must survive other render passes to be useful.
       abort: false,
       abortable: false,
       background: true,
@@ -769,6 +772,9 @@ up.link = (function() {
     //     convertClicks() needs to check if a given link is instant.
     // (2) We cannot implement this as !isFollowable(link) because [up-clickable] can add
     //     instant support for non-followable elements.
+    // (3) A link that matches config.instantSelectors, but neither config.followSelectors nor
+    //     config.noFollowSelectors, stays instant even though nothing follows it. This is intentional:
+    //     users may handle its up:click themselves. The docs ask that instant links are also followable.
     return config.matches(link, 'noInstantSelectors') || config.matches(link, 'noFollowSelectors')
   }
 
