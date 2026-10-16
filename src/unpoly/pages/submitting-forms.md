@@ -90,7 +90,7 @@ a different fragment. See [[flashes]] for placing it in your layout and clearing
 
 Submitting a form is considered [navigation](/navigation-defaults) by default.
 When a form updates the layer's main fragment, Unpoly behaves like a full page load would:
-the browser URL and history are updated, and the new content is scrolled into view.
+the browser URL and history are updated, and the page scrolls to the top.
 Focus moves to the new fragment.
 
 See [[navigation-defaults]] for all navigation defaults and how to customize them.
