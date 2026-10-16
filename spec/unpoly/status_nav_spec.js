@@ -90,118 +90,6 @@ extendDescribe('up.status', function() {
         expect($currentLink).not.toHaveClass('up-current')
       })
 
-      it('marks any link as .up-current if any of its space-separated [up-alias] values matches the current URL', function() {
-        replaceURL('/foo')
-        const $nav = $fixture('div[up-nav]')
-        const $currentLink = $nav.affix('a[href="/x"][up-alias="/aaa /foo /bbb"]')
-        const $otherLink = $nav.affix('a[href="/y"][up-alias="/bar"]')
-        up.hello($nav)
-        expect($currentLink).toHaveClass('up-current')
-        expect($otherLink).not.toHaveClass('up-current')
-      })
-
-      it("marks a link as .up-current if its [up-alias] is a full URL with the page's own origin", function() {
-        replaceURL('/foo')
-        const nav = fixture('div[up-nav]')
-        const link = e.affix(nav, 'a[href="/x"]', { 'up-alias': `${location.origin}/foo` })
-        up.hello(nav)
-        expect(link).toHaveClass('up-current')
-      })
-
-      it('does not throw if the current location does not match an [up-alias] wildcard (bugfix)', function() {
-        const inserter = () => helloFixture('a[up-nav][up-alias="/qqqq*"]')
-        expect(inserter).not.toThrow()
-      })
-
-      describe('setting [up-alias] from a macro', function() {
-
-        it('works with up.hello()', async function() {
-          replaceURL('/bar')
-
-          up.macro('#link', (link) => link.setAttribute('up-alias', '/bar'))
-
-          const nav = htmlFixture(`
-            <div up-nav>
-              <a id="link" href="/foo">label</a>
-            </div>
-          `)
-
-          await up.hello(nav)
-
-          expect('#link').toHaveAttribute('up-alias', '/bar')
-          expect('#link').toHaveClass('up-current')
-        })
-
-        it('works when rendering the nav', async function() {
-          replaceURL('/bar')
-
-          up.macro('#link', (link) => link.setAttribute('up-alias', '/bar'))
-
-          await up.hello(htmlFixture(`
-            <div up-nav id="nav">
-              navigation will render here
-            </div>
-          `))
-
-          await up.render({
-            fragment: `
-              <div up-nav id="nav">
-                <a id="link" href="/foo">label</a>
-              </div>
-            `
-          })
-
-          expect('#link').toHaveAttribute('up-alias', '/bar')
-          expect('#link').toHaveClass('up-current')
-        })
-
-        it('works when navigating to another page', async function() {
-          replaceURL('/qux')
-
-          up.macro('#link', (link) => link.setAttribute('up-alias', '/bar'))
-
-          const [app, nav, content] = htmlFixtureList(`
-            <div id="app">
-              <div up-nav>
-                <a id="link" href="/foo">label</a>
-              </div>
-
-              <div id="content">
-                old content
-              </div>
-            </div>
-          `)
-
-          await up.hello(app)
-
-          expect(up.history.location).toMatchURL('/qux')
-          expect('#link').toHaveAttribute('up-alias', '/bar')
-          expect('#link').not.toHaveClass('up-current')
-
-          await up.render({
-            history: true,
-            location: '/bar',
-            fragment: `
-              <div id="content">
-                new content
-              </div>
-            `
-          })
-
-          expect(up.history.location).toMatchURL('/bar')
-          expect('#link').toHaveClass('up-current')
-        })
-
-      })
-
-      it('has an [up-alias] ending in "/*" match a query string (#542)', function() {
-        replaceURL('/test/?whatever')
-        const nav = fixture('div[up-nav]')
-        const currentLink = e.affix(nav, 'a[href="/foo"][up-alias="/test/*"]')
-        up.hello(nav)
-        expect(currentLink).toHaveClass('up-current')
-      })
-
       it('does not highlight a link to "#" (commonly used for JS-only buttons)', function() {
         const $nav = $fixture('div[up-nav]')
         const $link = $nav.affix('a[href="#"]')
@@ -228,82 +116,54 @@ extendDescribe('up.status', function() {
         expect($deleteLink).not.toHaveClass('up-current')
       })
 
-      it('marks URL prefixes as .up-current if an up-alias value ends in *', function() {
-        replaceURL('/foo/123')
 
-        const $nav = $fixture('div[up-nav]')
-        const $currentLink = $nav.affix('a[href="/x"][up-alias="/aaa /foo/* /bbb"]')
-        const $otherLink = $nav.affix('a[href="/y"][up-alias="/bar"]')
-        up.hello($nav)
+      describe('configuration', function() {
 
-        expect($currentLink).toHaveClass('up-current')
-        expect($otherLink).not.toHaveClass('up-current')
-      })
+        it('allows to configure a custom "current" class in addition to .up-current', function() {
+          up.status.config.currentClasses.push('highlight')
+          replaceURL('/foo')
+          const $nav = $fixture('div[up-nav]')
+          const $currentLink = $nav.affix('a[href="/foo"]')
+          up.hello($nav)
 
-      it('marks URL prefixes as .up-current if an up-alias has multiple * placeholders', function() {
-        replaceURL('/a-foo-b-bar-c')
+          expect($currentLink).toHaveClass('highlight')
+          expect($currentLink).toHaveClass('up-current')
+        })
 
-        const $nav = $fixture('div[up-nav]')
-        const $currentLink = $nav.affix('a[href="/x"][up-alias="*-foo-*-bar-*"]')
-        const $otherLink1 = $nav.affix('a[href="/y"][up-alias="/foo-bar"]')
-        const $otherLink2 = $nav.affix('a[href="/y"][up-alias="/foo-b-bar"]')
-        const $otherLink3 = $nav.affix('a[href="/y"][up-alias="/a-foo-b-bar"]')
-        const $otherLink4 = $nav.affix('a[href="/y"][up-alias="/foo-b-bar-c"]')
-        const $otherLink5 = $nav.affix('a[href="/y"][up-alias="/a-foo-b-bar-c-d"]')
-        up.hello($nav)
+        it('allows to configure multiple additional "current" classes', function() {
+          up.status.config.currentClasses.push('highlight1')
+          up.status.config.currentClasses.push('highlight2')
+          replaceURL('/foo')
+          const $nav = $fixture('div[up-nav]')
+          const $currentLink = $nav.affix('a[href="/foo"]')
+          up.hello($nav)
 
-        expect($currentLink).toHaveClass('up-current')
-        expect($otherLink1).not.toHaveClass('up-current')
-        expect($otherLink2).not.toHaveClass('up-current')
-        expect($otherLink3).not.toHaveClass('up-current')
-        expect($otherLink4).not.toHaveClass('up-current')
-        expect($otherLink5).not.toHaveClass('up-current')
-      })
+          expect($currentLink).toHaveClass('highlight1')
+          expect($currentLink).toHaveClass('highlight2')
+          expect($currentLink).toHaveClass('up-current')
+        })
 
+        it('allows to configure additional nav selectors in up.status.config.navSelectors', function() {
+          replaceURL('/foo')
+          up.status.config.navSelectors.push('.navi')
+          const $nav = $fixture('div.navi')
+          const $currentLink = $nav.affix('a[href="/foo"]')
+          const $otherLink = $nav.affix('a[href="/bar"]')
+          up.hello($nav)
+          expect($currentLink).toHaveClass('up-current')
+          expect($otherLink).not.toHaveClass('up-current')
+        })
 
-      it('allows to configure a custom "current" class in addition to .up-current', function() {
-        up.status.config.currentClasses.push('highlight')
-        replaceURL('/foo')
-        const $nav = $fixture('div[up-nav]')
-        const $currentLink = $nav.affix('a[href="/foo"]')
-        up.hello($nav)
+        it('does not process containers with [up-nav=false], even if they match up.status.config.navSelectors', function() {
+          replaceURL('/foo')
+          up.status.config.navSelectors.push('.navi')
+          const noNav = fixture('div.navi[up-nav=false]')
+          const currentLink = e.affix(noNav, 'a[href="/foo"]')
+          up.hello(noNav)
 
-        expect($currentLink).toHaveClass('highlight')
-        expect($currentLink).toHaveClass('up-current')
-      })
+          expect(currentLink).not.toHaveClass('up-current')
+        })
 
-      it('allows to configure multiple additional "current" classes', function() {
-        up.status.config.currentClasses.push('highlight1')
-        up.status.config.currentClasses.push('highlight2')
-        replaceURL('/foo')
-        const $nav = $fixture('div[up-nav]')
-        const $currentLink = $nav.affix('a[href="/foo"]')
-        up.hello($nav)
-
-        expect($currentLink).toHaveClass('highlight1')
-        expect($currentLink).toHaveClass('highlight2')
-        expect($currentLink).toHaveClass('up-current')
-      })
-
-      it('allows to configure additional nav selectors in up.status.config.navSelectors', function() {
-        replaceURL('/foo')
-        up.status.config.navSelectors.push('.navi')
-        const $nav = $fixture('div.navi')
-        const $currentLink = $nav.affix('a[href="/foo"]')
-        const $otherLink = $nav.affix('a[href="/bar"]')
-        up.hello($nav)
-        expect($currentLink).toHaveClass('up-current')
-        expect($otherLink).not.toHaveClass('up-current')
-      })
-
-      it('does not process containers with [up-nav=false], even if they match up.status.config.navSelectors', function() {
-        replaceURL('/foo')
-        up.status.config.navSelectors.push('.navi')
-        const noNav = fixture('div.navi[up-nav=false]')
-        const currentLink = e.affix(noNav, 'a[href="/foo"]')
-        up.hello(noNav)
-
-        expect(currentLink).not.toHaveClass('up-current')
       })
 
       it('marks a link as .up-current if the current URL is "/" (bugfix)', function() {
@@ -738,6 +598,154 @@ extendDescribe('up.status', function() {
         })
 
       })
+    })
+
+    describe('[up-alias]', function() {
+
+      it('marks any link as .up-current if any of its space-separated [up-alias] values matches the current URL', function() {
+        replaceURL('/foo')
+        const $nav = $fixture('div[up-nav]')
+        const $currentLink = $nav.affix('a[href="/x"][up-alias="/aaa /foo /bbb"]')
+        const $otherLink = $nav.affix('a[href="/y"][up-alias="/bar"]')
+        up.hello($nav)
+        expect($currentLink).toHaveClass('up-current')
+        expect($otherLink).not.toHaveClass('up-current')
+      })
+
+      it("marks a link as .up-current if its [up-alias] is a full URL with the page's own origin", function() {
+        replaceURL('/foo')
+        const nav = fixture('div[up-nav]')
+        const link = e.affix(nav, 'a[href="/x"]', { 'up-alias': `${location.origin}/foo` })
+        up.hello(nav)
+        expect(link).toHaveClass('up-current')
+      })
+
+      it('does not throw if the current location does not match an [up-alias] wildcard (bugfix)', function() {
+        const inserter = () => helloFixture('a[up-nav][up-alias="/qqqq*"]')
+        expect(inserter).not.toThrow()
+      })
+
+      describe('setting [up-alias] from a macro', function() {
+
+        it('works with up.hello()', async function() {
+          replaceURL('/bar')
+
+          up.macro('#link', (link) => link.setAttribute('up-alias', '/bar'))
+
+          const nav = htmlFixture(`
+            <div up-nav>
+              <a id="link" href="/foo">label</a>
+            </div>
+          `)
+
+          await up.hello(nav)
+
+          expect('#link').toHaveAttribute('up-alias', '/bar')
+          expect('#link').toHaveClass('up-current')
+        })
+
+        it('works when rendering the nav', async function() {
+          replaceURL('/bar')
+
+          up.macro('#link', (link) => link.setAttribute('up-alias', '/bar'))
+
+          await up.hello(htmlFixture(`
+            <div up-nav id="nav">
+              navigation will render here
+            </div>
+          `))
+
+          await up.render({
+            fragment: `
+              <div up-nav id="nav">
+                <a id="link" href="/foo">label</a>
+              </div>
+            `
+          })
+
+          expect('#link').toHaveAttribute('up-alias', '/bar')
+          expect('#link').toHaveClass('up-current')
+        })
+
+        it('works when navigating to another page', async function() {
+          replaceURL('/qux')
+
+          up.macro('#link', (link) => link.setAttribute('up-alias', '/bar'))
+
+          const [app, nav, content] = htmlFixtureList(`
+            <div id="app">
+              <div up-nav>
+                <a id="link" href="/foo">label</a>
+              </div>
+
+              <div id="content">
+                old content
+              </div>
+            </div>
+          `)
+
+          await up.hello(app)
+
+          expect(up.history.location).toMatchURL('/qux')
+          expect('#link').toHaveAttribute('up-alias', '/bar')
+          expect('#link').not.toHaveClass('up-current')
+
+          await up.render({
+            history: true,
+            location: '/bar',
+            fragment: `
+              <div id="content">
+                new content
+              </div>
+            `
+          })
+
+          expect(up.history.location).toMatchURL('/bar')
+          expect('#link').toHaveClass('up-current')
+        })
+
+      })
+
+      it('has an [up-alias] ending in "/*" match a query string (#542)', function() {
+        replaceURL('/test/?whatever')
+        const nav = fixture('div[up-nav]')
+        const currentLink = e.affix(nav, 'a[href="/foo"][up-alias="/test/*"]')
+        up.hello(nav)
+        expect(currentLink).toHaveClass('up-current')
+      })
+
+      it('marks URL prefixes as .up-current if an up-alias value ends in *', function() {
+        replaceURL('/foo/123')
+
+        const $nav = $fixture('div[up-nav]')
+        const $currentLink = $nav.affix('a[href="/x"][up-alias="/aaa /foo/* /bbb"]')
+        const $otherLink = $nav.affix('a[href="/y"][up-alias="/bar"]')
+        up.hello($nav)
+
+        expect($currentLink).toHaveClass('up-current')
+        expect($otherLink).not.toHaveClass('up-current')
+      })
+
+      it('marks URL prefixes as .up-current if an up-alias has multiple * placeholders', function() {
+        replaceURL('/a-foo-b-bar-c')
+
+        const $nav = $fixture('div[up-nav]')
+        const $currentLink = $nav.affix('a[href="/x"][up-alias="*-foo-*-bar-*"]')
+        const $otherLink1 = $nav.affix('a[href="/y"][up-alias="/foo-bar"]')
+        const $otherLink2 = $nav.affix('a[href="/y"][up-alias="/foo-b-bar"]')
+        const $otherLink3 = $nav.affix('a[href="/y"][up-alias="/a-foo-b-bar"]')
+        const $otherLink4 = $nav.affix('a[href="/y"][up-alias="/foo-b-bar-c"]')
+        const $otherLink5 = $nav.affix('a[href="/y"][up-alias="/a-foo-b-bar-c-d"]')
+        up.hello($nav)
+
+        expect($currentLink).toHaveClass('up-current')
+        expect($otherLink1).not.toHaveClass('up-current')
+        expect($otherLink2).not.toHaveClass('up-current')
+        expect($otherLink3).not.toHaveClass('up-current')
+        expect($otherLink4).not.toHaveClass('up-current')
+        expect($otherLink5).not.toHaveClass('up-current')
+      })
+
     })
 
   })

@@ -221,131 +221,257 @@ extendDescribe('up.radio', function() {
 
       })
 
-      it('does not reload if the tab is hidden', async function() {
-        up.radio.config.pollInterval = 50
-        spyOnProperty(document, 'hidden', 'get').and.returnValue(true)
-        spyOnProperty(document, 'visibilityState', 'get').and.returnValue('hidden')
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+      describe('pausing', function() {
 
-        helloFixture('.element[up-poll]')
+        it('does not reload if the tab is hidden', async function() {
+          up.radio.config.pollInterval = 50
+          spyOnProperty(document, 'hidden', 'get').and.returnValue(true)
+          spyOnProperty(document, 'visibilityState', 'get').and.returnValue('hidden')
+          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
 
-        await wait(100)
-        expect(reloadSpy).not.toHaveBeenCalled()
+          helloFixture('.element[up-poll]')
+
+          await wait(100)
+          expect(reloadSpy).not.toHaveBeenCalled()
+        })
+
+        it("pauses polling while the browser tab is hidden", async function() {
+          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+
+          let currentHidden = false
+          let currentVisibilityState = 'visible'
+          spyOnProperty(document, 'hidden', 'get').and.callFake(() => currentHidden)
+          spyOnProperty(document, 'visibilityState', 'get').and.callFake(() => currentVisibilityState)
+
+          const element = fixture('.unread[up-poll][up-interval=100]')
+          up.hello(element) // start polling
+
+          await wait(125)
+
+          expect(reloadSpy.calls.count()).toBe(1)
+
+          currentHidden = true
+          currentVisibilityState = 'hidden'
+          up.emit(document, 'visibilitychange')
+
+          await wait(250)
+
+          expect(reloadSpy.calls.count()).toBe(1)
+
+          currentHidden = false
+          currentVisibilityState = 'visible'
+          up.emit(document, 'visibilitychange')
+
+          // Since we spent the entire interval in the background layer, we now load immediately
+          await wait(10)
+
+          expect(reloadSpy.calls.count()).toBe(2)
+        })
+
+        it('pauses polling when an up:fragment:poll event is prevented', async function() {
+          let interval
+          up.radio.config.pollInterval = (interval = 70)
+          const timingTolerance = 20
+
+          helloFixture('.element[up-poll]')
+          let eventCount = 0
+
+          up.on('up:fragment:poll', '.element', function(event) {
+            eventCount++
+            // Prevent the second event
+            if (eventCount === 1) {
+              event.preventDefault()
+            }
+          })
+
+          await wait(timingTolerance)
+          expect(eventCount).toBe(0)
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          await wait(interval)
+          expect(eventCount).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
+          await wait(interval + timingTolerance)
+          expect(eventCount).toBe(2)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+        })
+
+        it("pauses polling while the element's layer is in the background", async function() {
+          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+
+          const element = fixture('.unread[up-poll][up-interval=100]')
+          up.hello(element) // start polling
+
+          await wait(125)
+
+          expect(reloadSpy.calls.count()).toBe(1)
+
+          up.layer.open()
+
+          // Spend two intervals on a background layer
+          await wait(250)
+
+          expect(reloadSpy.calls.count()).toBe(1)
+
+          up.layer.dismiss()
+
+          // Since we spent the entire interval on the overlay, we now load immediately
+          await wait(10)
+
+          expect(reloadSpy.calls.count()).toBe(2)
+        })
+
+        it("keeps polling on background layers with [up-if-layer='any']", async function() {
+          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+
+          const element = fixture('.unread[up-poll][up-interval=100][up-if-layer=any]')
+          up.hello(element) // start polling
+
+          await wait(150)
+
+          expect(reloadSpy.calls.count()).toBe(1)
+
+          up.layer.open()
+
+          await wait(100)
+
+          expect(reloadSpy.calls.count()).toBe(2)
+        })
+
+        it('does not poll when it was paused for a full interval on a background layer, but an { onAccepted } or { onDismissed } callback renders the polling layer', async function() {
+          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+
+          const container = fixture('.container')
+          const element = e.affix(container, '.unread[up-poll][up-interval=100]')
+          up.hello(container) // start polling
+
+          await wait(125)
+
+          expect(reloadSpy.calls.count()).toBe(1)
+
+          up.layer.open({ onDismissed: () => up.render('.container', { url: '/page2' }) })
+
+          // Spend two intervals on a background layer
+          await wait(250)
+
+          expect(reloadSpy.calls.count()).toBe(1)
+
+          up.layer.dismiss()
+
+          await wait(10)
+
+          // Polling was aborted by the onAccepted callback
+          expect(reloadSpy.calls.count()).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/page2')
+        })
+
       })
 
-      it("pauses polling while the browser tab is hidden", async function() {
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+      describe('stopping', function() {
 
-        let currentHidden = false
-        let currentVisibilityState = 'visible'
-        spyOnProperty(document, 'hidden', 'get').and.callFake(() => currentHidden)
-        spyOnProperty(document, 'visibilityState', 'get').and.callFake(() => currentVisibilityState)
+        it('stops polling when the element is destroyed', async function() {
+          up.radio.config.pollInterval = 75
+          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
 
-        const element = fixture('.unread[up-poll][up-interval=100]')
-        up.hello(element) // start polling
+          const element = helloFixture('.element[up-poll]')
 
-        await wait(125)
+          await wait(125)
+          expect(reloadSpy.calls.count()).toBe(1)
+          up.destroy(element)
 
-        expect(reloadSpy.calls.count()).toBe(1)
+          await wait(75)
+          expect(reloadSpy.calls.count()).toBe(1)
+        })
 
-        currentHidden = true
-        currentVisibilityState = 'hidden'
-        up.emit(document, 'visibilitychange')
+        it('stops polling when the element is detached by an external script', async function() {
+          up.radio.config.pollInterval = 75
+          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
 
-        await wait(250)
+          const element = helloFixture('.element[up-poll]')
 
-        expect(reloadSpy.calls.count()).toBe(1)
+          await wait(125)
+          expect(reloadSpy.calls.count()).toBe(1)
 
-        currentHidden = false
-        currentVisibilityState = 'visible'
-        up.emit(document, 'visibilitychange')
+          // Detach without going through up.destroy()
+          element.remove()
 
-        // Since we spent the entire interval in the background layer, we now load immediately
-        await wait(10)
+          await wait(75)
+          expect(reloadSpy.calls.count()).toBe(1)
+        })
 
-        expect(reloadSpy.calls.count()).toBe(2)
-      })
+        it('stops polling when the server responds without an [up-poll] attribute', async function() {
+          let interval
+          up.radio.config.pollInterval = (interval = 150)
+          const timingTolerance = interval / 3
 
-      it('stops polling when the element is destroyed', async function() {
-        up.radio.config.pollInterval = 75
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+          const element = helloFixture('.element[up-poll]', { text: 'old text' })
 
-        const element = helloFixture('.element[up-poll]')
+          await wait(timingTolerance)
 
-        await wait(125)
-        expect(reloadSpy.calls.count()).toBe(1)
-        up.destroy(element)
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        await wait(75)
-        expect(reloadSpy.calls.count()).toBe(1)
-      })
+          await wait(interval)
 
-      it('stops polling when the element is detached by an external script', async function() {
-        up.radio.config.pollInterval = 75
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWithSelector('.element', { text: 'new text' })
 
-        const element = helloFixture('.element[up-poll]')
+          await wait()
 
-        await wait(125)
-        expect(reloadSpy.calls.count()).toBe(1)
+          expect('.element').toHaveText('new text')
 
-        // Detach without going through up.destroy()
-        element.remove()
+          await wait(timingTolerance + interval)
 
-        await wait(75)
-        expect(reloadSpy.calls.count()).toBe(1)
-      })
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+        })
 
-      it('stops polling when the server responds without an [up-poll] attribute', async function() {
-        let interval
-        up.radio.config.pollInterval = (interval = 150)
-        const timingTolerance = interval / 3
+        it('stops polling when the server responds without an [up-poll=false] attribute', async function() {
+          let interval
+          up.radio.config.pollInterval = (interval = 150)
+          const timingTolerance = interval / 3
 
-        const element = helloFixture('.element[up-poll]', { text: 'old text' })
+          const element = helloFixture('.element[up-poll]', { text: 'old text' })
 
-        await wait(timingTolerance)
+          await wait(timingTolerance)
 
-        expect('.element').toHaveText('old text')
-        expect(jasmine.Ajax.requests.count()).toBe(0)
+          expect('.element').toHaveText('old text')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
 
-        await wait(interval)
+          await wait(interval)
 
-        expect(jasmine.Ajax.requests.count()).toBe(1)
-        jasmine.respondWithSelector('.element', { text: 'new text' })
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWithSelector('.element[up-poll=false]', { text: 'new text' })
 
-        await wait()
+          await wait()
 
-        expect('.element').toHaveText('new text')
+          expect('.element').toHaveText('new text')
 
-        await wait(timingTolerance + interval)
+          await wait(timingTolerance + interval)
 
-        expect(jasmine.Ajax.requests.count()).toBe(1)
-      })
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+        })
 
-      it('stops polling when the server responds without an [up-poll=false] attribute', async function() {
-        let interval
-        up.radio.config.pollInterval = (interval = 150)
-        const timingTolerance = interval / 3
+        it('stops polling when the element is destroyed while waiting for a previous request (bugfix)', async function() {
+          up.radio.config.pollInterval = 75
+          const element = helloFixture('.element[up-poll]')
 
-        const element = helloFixture('.element[up-poll]', { text: 'old text' })
+          await wait(125)
 
-        await wait(timingTolerance)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
 
-        expect('.element').toHaveText('old text')
-        expect(jasmine.Ajax.requests.count()).toBe(0)
+          up.destroy(element)
 
-        await wait(interval)
+          await wait()
 
-        expect(jasmine.Ajax.requests.count()).toBe(1)
-        jasmine.respondWithSelector('.element[up-poll=false]', { text: 'new text' })
+          jasmine.respondWithSelector('.element[up-poll]')
 
-        await wait()
+          await wait(125)
 
-        expect('.element').toHaveText('new text')
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+        })
 
-        await wait(timingTolerance + interval)
-
-        expect(jasmine.Ajax.requests.count()).toBe(1)
       })
 
       it("lets the server change the [up-interval] (bugfix)", async function() {
@@ -383,25 +509,6 @@ extendDescribe('up.radio', function() {
         expect(jasmine.Ajax.requests.count()).toBe(2)
       })
 
-      it('stops polling when the element is destroyed while waiting for a previous request (bugfix)', async function() {
-        up.radio.config.pollInterval = 75
-        const element = helloFixture('.element[up-poll]')
-
-        await wait(125)
-
-        expect(jasmine.Ajax.requests.count()).toBe(1)
-
-        up.destroy(element)
-
-        await wait()
-
-        jasmine.respondWithSelector('.element[up-poll]')
-
-        await wait(125)
-
-        expect(jasmine.Ajax.requests.count()).toBe(1)
-      })
-
       it('allows to pass a polling interval per [up-interval] attribute', async function() {
         const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
 
@@ -414,35 +521,6 @@ extendDescribe('up.radio', function() {
 
         await wait(90)
         expect(reloadSpy).toHaveBeenCalled()
-      })
-
-      it('pauses polling when an up:fragment:poll event is prevented', async function() {
-        let interval
-        up.radio.config.pollInterval = (interval = 70)
-        const timingTolerance = 20
-
-        helloFixture('.element[up-poll]')
-        let eventCount = 0
-
-        up.on('up:fragment:poll', '.element', function(event) {
-          eventCount++
-          // Prevent the second event
-          if (eventCount === 1) {
-            event.preventDefault()
-          }
-        })
-
-        await wait(timingTolerance)
-        expect(eventCount).toBe(0)
-        expect(jasmine.Ajax.requests.count()).toBe(0)
-
-        await wait(interval)
-        expect(eventCount).toBe(1)
-        expect(jasmine.Ajax.requests.count()).toBe(0)
-
-        await wait(interval + timingTolerance)
-        expect(eventCount).toBe(2)
-        expect(jasmine.Ajax.requests.count()).toBe(1)
       })
 
       it('lets up:fragment:poll listeners mutate render options for the reload pass', async function() {
@@ -458,76 +536,6 @@ extendDescribe('up.radio', function() {
 
         expect(jasmine.Ajax.requests.count()).toBe(1)
         expect(jasmine.lastRequest().url).toMatchURL('/mutated-path')
-      })
-
-      it("pauses polling while the element's layer is in the background", async function() {
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
-
-        const element = fixture('.unread[up-poll][up-interval=100]')
-        up.hello(element) // start polling
-
-        await wait(125)
-
-        expect(reloadSpy.calls.count()).toBe(1)
-
-        up.layer.open()
-
-        // Spend two intervals on a background layer
-        await wait(250)
-
-        expect(reloadSpy.calls.count()).toBe(1)
-
-        up.layer.dismiss()
-
-        // Since we spent the entire interval on the overlay, we now load immediately
-        await wait(10)
-
-        expect(reloadSpy.calls.count()).toBe(2)
-      })
-
-      it("keeps polling on background layers with [up-if-layer='any']", async function() {
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
-
-        const element = fixture('.unread[up-poll][up-interval=100][up-if-layer=any]')
-        up.hello(element) // start polling
-
-        await wait(150)
-
-        expect(reloadSpy.calls.count()).toBe(1)
-
-        up.layer.open()
-
-        await wait(100)
-
-        expect(reloadSpy.calls.count()).toBe(2)
-      })
-
-      it('does not poll when it was paused for a full interval on a background layer, but an { onAccepted } or { onDismissed } callback renders the polling layer', async function() {
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
-
-        const container = fixture('.container')
-        const element = e.affix(container, '.unread[up-poll][up-interval=100]')
-        up.hello(container) // start polling
-
-        await wait(125)
-
-        expect(reloadSpy.calls.count()).toBe(1)
-
-        up.layer.open({ onDismissed: () => up.render('.container', { url: '/page2' }) })
-
-        // Spend two intervals on a background layer
-        await wait(250)
-
-        expect(reloadSpy.calls.count()).toBe(1)
-
-        up.layer.dismiss()
-
-        await wait(10)
-
-        // Polling was aborted by the onAccepted callback
-        expect(reloadSpy.calls.count()).toBe(1)
-        expect(jasmine.Ajax.requests.count()).toBe(1)
-        expect(jasmine.lastRequest().url).toMatchURL('/page2')
       })
 
       it('does not poll a fragment with a weak selector', async function() {
