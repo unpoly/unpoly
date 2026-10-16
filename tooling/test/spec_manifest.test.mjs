@@ -1,59 +1,31 @@
-// spec/specs.js lists every spec file by hand (see the comment there). These tests are
-// what makes that list safe: they compare it against the files on disk, so a spec file
-// nobody loads, or an extracted file that would load at the root of the suite, fails here
-// instead of silently not running.
+// spec/specs.js lists every spec file by hand (see the comment there), and extracted files
+// are required from the group they were extracted from. These tests are what makes that
+// safe: a spec file nobody loads, a require() of a file that is gone, or an extracted file
+// whose extendDescribe() chain names the wrong place fails here instead of silently
+// misbehaving. They read the real suite through the parser behind bin/find-spec.
 
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync, readdirSync } from 'node:fs'
-import { join, relative } from 'node:path'
+import { parseSuite, readSources, staleChains } from '../find_spec.mjs'
 
 const ROOT = new URL('../../', import.meta.url).pathname
-const SPEC_DIR = join(ROOT, 'spec/unpoly')
+const sources = readSources(ROOT)
+const suite = parseSuite(sources)
 
-function specFiles(dir = SPEC_DIR) {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    let path = join(dir, entry.name)
-    if (entry.isDirectory()) return specFiles(path)
-    return entry.name.endsWith('_spec.js') ? [relative(SPEC_DIR, path)] : []
-  })
-}
-
-// A file is extracted when it names its ancestry with extendDescribe() instead of
-// declaring a top-level describe(). Such a file is required by the file it was extracted
-// from, never by spec/specs.js.
-function isExtracted(path) {
-  return /^extendDescribe\(/m.test(readFileSync(join(SPEC_DIR, path), 'utf8'))
-}
-
-const required = new Set(
-  [...readFileSync(join(ROOT, 'spec/specs.js'), 'utf8')
-    .matchAll(/require\('\.\/unpoly\/(.+?)'\)/g)].map((match) => match[1])
-)
-
-const onDisk = specFiles()
-
-test('every spec file is either required by spec/specs.js or extracted', () => {
-  let missing = onDisk.filter((path) => !required.has(path) && !isExtracted(path))
-  assert.deepEqual(missing, [], `not loaded by spec/specs.js: ${missing.join(', ')}`)
+test('every spec file is loaded, by spec/specs.js or by the file it was extracted from', () => {
+  let unloaded = Object.keys(sources).filter((file) => file !== 'spec/specs.js' && !suite.loaded.has(file))
+  assert.deepEqual(unloaded, [], `not loaded by anything: ${unloaded.join(', ')}`)
 })
 
-test('no extracted spec file is required by spec/specs.js', () => {
-  let misplaced = onDisk.filter((path) => required.has(path) && isExtracted(path))
-  assert.deepEqual(misplaced, [], `would load at the root of the suite: ${misplaced.join(', ')}`)
-})
-
-test('spec/specs.js requires no spec file that is gone', () => {
-  let stale = [...required].filter((path) => !onDisk.includes(path))
+test('every required spec file exists', () => {
+  let stale = suite.missing.map(({ file, line, required }) => `${file}:${line} → ${required}`)
   assert.deepEqual(stale, [], `required but missing from disk: ${stale.join(', ')}`)
 })
 
-test('every extracted spec file is required by another spec file', () => {
-  let sources = onDisk.map((path) => readFileSync(join(SPEC_DIR, path), 'utf8'))
-  let orphans = onDisk.filter((path) => {
-    if (!isExtracted(path)) return false
-    let name = path.replace(/\.js$/, '').split('/').pop()
-    return !sources.some((source) => source.includes(`require('./${name}')`))
-  })
-  assert.deepEqual(orphans, [], `extracted but nothing requires them: ${orphans.join(', ')}`)
+test("every extracted file's extendDescribe() chain names the group it is required into", () => {
+  // Also fails for an extracted file required by spec/specs.js (it would load at the root
+  // of the suite) and for a module file required from inside a group.
+  let stale = staleChains(suite).map(({ file, line, chain, titles }) =>
+    `${file}:${line} names [${chain.join(' › ')}] but is required into [${titles.slice(0, -1).join(' › ')}]`)
+  assert.deepEqual(stale, [], stale.join('\n'))
 })

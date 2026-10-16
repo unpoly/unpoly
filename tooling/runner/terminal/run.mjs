@@ -8,7 +8,7 @@
 
 import puppeteer from 'puppeteer'
 import path from 'node:path'
-import { existsSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import pc from 'picocolors'
 import { Config } from '../config.mjs'
@@ -20,7 +20,7 @@ import { createRemapper } from './source_map.mjs'
 import { createReceiver } from './receiver.mjs'
 import { buildFailure } from './formatter.mjs'
 import { specsURL } from './urls.mjs'
-import { specFiltersFor } from '../../find_spec.mjs'
+import { parseSuite, readSources, specFiltersFor } from '../../find_spec.mjs'
 import { isDevEnvRunning, startDevEnv } from '../../dev_env.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -48,15 +48,18 @@ function parseConfig(argv, env) {
 function resolveFileOption(config) {
   if (!config.file.length) return config
 
+  const suite = parseSuite(readSources(projectRoot))
   const filters = []
   for (let location of config.file) {
     const [, name, lineText] = /^(.*?)(?::(\d+))?$/.exec(location)
     const line = lineText ? Number(lineText) : null
-    const absolute = path.isAbsolute(name) ? name : path.join(projectRoot, name)
+    const absolute = path.resolve(projectRoot, name)
+    const file = path.relative(projectRoot, absolute).split(path.sep).join('/')
 
     if (!existsSync(absolute)) throw new Error(`No such file: ${name}`)
+    if (!suite.loaded.has(file)) throw new Error(`${name} is not loaded by spec/specs.js, so none of its specs run.`)
 
-    const resolved = specFiltersFor(readFileSync(absolute, 'utf8'), line)
+    const resolved = specFiltersFor(suite, file, line)
     if (!resolved) {
       throw new Error(line
         ? `Nothing is declared at ${name}:${line} — point at a describe() or it() line.`
@@ -64,8 +67,10 @@ function resolveFileOption(config) {
     }
 
     console.error(pc.blue(`--file=${location} →`))
-    for (let filter of resolved) console.error(pc.blue(`  --spec="${filter}"`))
-    filters.push(...resolved)
+    for (let { name: filter, condition } of resolved) {
+      console.error(pc.blue(`  --spec="${filter}"`) + (condition ? pc.dim(`  (only runs if ${condition})`) : ''))
+      filters.push(filter)
+    }
   }
 
   const spec = [...new Set([...config.spec, ...filters])]

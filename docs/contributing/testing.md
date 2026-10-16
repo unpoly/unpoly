@@ -323,7 +323,8 @@ spec/unpoly/fragment_keep_spec.js:143 "up.fragment unobtrusive behavior [up-keep
 ```
 
 The quoted string *is* the spec's full name, so you can paste it straight into `--spec` —
-or any part of it, to widen the filter. Passing a feature name also shows every file it is
+or any part of it, to widen the filter. A spec that only runs under a condition, like
+`(if up.migrate.loaded)`, says so after the quotes; run it with the matching option (`--migrate`). Passing a feature name also shows every file it is
 spread across, which for a big feature like `up.render()` is more than a dozen.
 
 Or skip the copying: `--file` takes a location and works out the filter itself.
@@ -391,9 +392,9 @@ extendDescribe('up.fragment', function() {
 So the split is invisible from the outside: one suite per module, unchanged full names,
 and `beforeEach` hooks from the module file still apply.
 
-If you ever add such a file, the tooling keeps you honest: `bin/self-test` fails if it is
-listed in `spec/specs.js` (or if nothing loads it), and `bin/lint` names any alias you need
-to redeclare, since an extracted file is its own module.
+If you ever add such a file, the tooling keeps you honest: `bin/self-test` fails if nothing
+loads it, or if its `extendDescribe()` chain doesn't name the group it is required into, and
+`bin/lint` names any alias you need to redeclare, since an extracted file is its own module.
 
 
 ## Anatomy of a spec
