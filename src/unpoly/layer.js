@@ -350,9 +350,11 @@ up.layer = (function() {
       configs.forEach(handleDeprecatedConfig)
     }
 
-    // We allow to pass the open animation as up.layer.open({ animation })
-    // or a[up-animation] options.
+    // We allow to pass the open animation as up.layer.open({ animation, duration, easing })
+    // or a[up-animation][up-duration][up-easing] options.
     options.openAnimation ??= u.pluckKey(options, 'animation')
+    options.openDuration ??= u.pluckKey(options, 'duration')
+    options.openEasing ??= u.pluckKey(options, 'easing')
 
     options = u.mergeDefined(...configs, { mode, stack }, options)
 
