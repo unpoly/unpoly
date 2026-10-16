@@ -134,7 +134,8 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
 
     if (hadFocus) {
       // A11Y: Focus the element that originally opened this layer.
-      let newFocusElement = this.layer.origin || formerParent.element
+      // Otherwise focus the parent layer. Its focus element was made focusable by moveToFront() above.
+      let newFocusElement = this.layer.origin || formerParent.getFocusElement()
 
       up.focus(newFocusElement, { preventScroll: true })
     }
