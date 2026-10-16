@@ -31,7 +31,7 @@ When the server responds with an error status, Unpoly renders a different target
 which is sent as `X-Up-Fail-Target`.
 
 **The targeted layer** is described by `X-Up-Mode`, the [mode](/up.layer.mode) of the layer being updated,
-and `X-Up-Fail-Mode` for failed responses. `X-Up-Origin-Mode` is the mode of the layer containing the link or form that made the request,
+and `X-Up-Fail-Mode` for error responses. `X-Up-Origin-Mode` is the mode of the layer containing the link or form that made the request,
 in case it targets another layer. A server may [render leaner pages for overlays](/optimizing-responses#mode).
 
 **The layer's context** arrives as JSON in `X-Up-Context` (and `X-Up-Fail-Context`),

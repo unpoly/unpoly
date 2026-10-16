@@ -9,7 +9,7 @@
   will only be applied to the *first* fragment. To scroll other fragments, use [`{ scrollMap }`](#options.scrollMap).
 
 @param {boolean|string|number|Element|Function} [options.failScroll]
-  How to scroll after the new fragment was rendered from a failed response.
+  How to scroll after the new fragment was rendered from an error response.
 
   See [Rendering error responses differently](/error-responses#fail-options).
 

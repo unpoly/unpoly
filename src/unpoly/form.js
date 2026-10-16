@@ -357,7 +357,7 @@ up.form = (function() {
       @param options.failTarget
         The [target selector](/targeting-fragments) to update when the server responds with an error code.
 
-        By default, failed responses will update the `<form>` element itself.
+        By default, error responses will update the `<form>` element itself.
 
         See [[error-responses]].
 
@@ -1557,7 +1557,7 @@ up.form = (function() {
       @param up-fail-target
         The [target selector](/targeting-fragments) to update when the server responds with an error code.
 
-        By default, failed responses will update the `<form>` element itself.
+        By default, error responses will update the `<form>` element itself.
 
         See [[error-responses]].
 

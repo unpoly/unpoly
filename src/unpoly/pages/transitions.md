@@ -73,9 +73,9 @@ The predefined transitions are such combinations. For example, `move-left`
 is `move-to-left/move-from-right`.
 
 
-### Transitions for failed responses {#fail-transition}
+### Transitions for error responses {#fail-transition}
 
-A failed response does not use `[up-transition]`. When the server responds with an error code, Unpoly renders
+An error response does not use `[up-transition]`. When the server responds with an error code, Unpoly renders
 the response with [different options](/error-responses#fail-options), and the form with validation errors
 appears instantly. To animate that case, set an `[up-fail-transition]` attribute:
 

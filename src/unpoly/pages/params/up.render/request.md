@@ -58,7 +58,7 @@
 @param {boolean|Function(up.Response): boolean} [options.fail]
   Whether to render [error responses](/error-responses) differently.
 
-  Failed responses will be rendered using options prefixed with `fail`, e.g. `{ failTarget }`.
+  Error responses will be rendered using options prefixed with `fail`, e.g. `{ failTarget }`.
 
-  By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or 304 is considered failed.
+  By [default](/up.network.config#config.fail) any HTTP status code other than 2xx or 304 is considered an error response.
   Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.

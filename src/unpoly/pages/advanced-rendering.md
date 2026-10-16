@@ -86,7 +86,7 @@ Handling error responses
 
 When the server responds with an error status, a different fragment often needs to change.
 A failed form submission should re-render the form instead of showing the next screen.
-Prefix any render option with `fail` to apply it only to failed responses:
+Prefix any render option with `fail` to apply it only to error responses:
 
 ```js
 up.render({
@@ -97,7 +97,7 @@ up.render({
 })
 ```
 
-A successful response updates `.content`. A failed response updates the `<form>` instead,
+A successful response updates `.content`. An error response updates the `<form>` instead,
 so the user sees the validation errors next to their input. In HTML the same option
 is `[up-fail-target]`. For forms, Unpoly already defaults to re-rendering the form itself.
 

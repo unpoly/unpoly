@@ -95,7 +95,7 @@ that your server can set.
 The exception is an explicit location: when you set [`[up-location]`](/up-follow#up-location)
 or pass a [`{ location }`](/up.render#options.location) option, Unpoly pushes that URL even after a non-`GET` request.
 
-The same rules apply to error responses. When a failed `GET` request renders an error page into the
+The same rules apply to error responses. When an error response to a `GET` request renders an error page into the
 main fragment, the address bar shows its URL, like after a full page load. A form submission that fails
 with a validation error does not change history. See [[error-responses]].
 

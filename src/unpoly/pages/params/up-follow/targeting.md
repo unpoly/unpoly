@@ -10,7 +10,7 @@
 
   See [Rendering error responses differently](/error-responses#fail-options) for details.
 
-  If omitted, a failed response will *not* update the [`[up-target]`](#up-target),
+  If omitted, an error response will *not* update the [`[up-target]`](#up-target),
   but update the [main fragment](/up-main) instead.
 
 @param [up-fallback='true']

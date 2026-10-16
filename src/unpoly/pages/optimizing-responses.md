@@ -66,7 +66,7 @@ A response without a `<head>` has two more limits: Unpoly keeps the current
 [meta tags](/updating-history#meta-tags), and it cannot [detect a new deployment](/handling-asset-changes).
 
 
-### Failed responses target a different fragment {#fail-target}
+### Error responses target a different fragment {#fail-target}
 
 When the server responds with an error code, Unpoly renders a [different target](/error-responses#fail-options).
 Form submissions use this to update the `<form>` with validation errors instead of the success target.
@@ -105,7 +105,7 @@ Vary: X-Up-Mode
 ```
 
 For the root layer the header is `X-Up-Mode: root`.
-The mode of the layer that renders a failed response is sent as `X-Up-Fail-Mode`.
+The mode of the layer that renders an error response is sent as `X-Up-Fail-Mode`.
 
 
 Detecting a full page load {#version}

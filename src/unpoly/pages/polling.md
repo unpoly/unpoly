@@ -131,7 +131,7 @@ The response for the finished job renders the same element without `[up-poll]`:
 ```
 
 
-## Handling failed responses {#failed-responses}
+## Handling error responses {#failed-responses}
 
 By default polling will *not* render responses with an error code,
 even when the response contains a matching fragment.

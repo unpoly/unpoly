@@ -512,7 +512,7 @@ extendDescribe('up.fragment', function() {
 
             jasmine.respondWithSelector('.unexpected', { status: 500 })
 
-            await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/No target selector given for failed responses/i))
+            await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/No target selector given for error responses/i))
           })
 
           it('runs an onFailRendered callback', async function() {

@@ -54,9 +54,9 @@ up.network = (function() {
       Set `undefined` to not use a timeout.
 
     @param {boolean|Function(up.Response): boolean} [config.fail]
-      Whether Unpoly will consider a response to constitute a [error response](/error-responses).
+      Whether Unpoly will consider a response to constitute an [error response](/error-responses).
 
-      By default, Unpoly will consider any status code other than HTTP 2xx or [304](/conditional-requests#rendering-nothing) to represent a failed response.
+      By default, Unpoly will consider any status code other than HTTP 2xx or [304](/conditional-requests#rendering-nothing) to represent an error response.
       You may use this option to customize this behavior. For instance, you can fail a response if it contains a given header or body text.
 
       The following configuration will fail all responses with an `X-Unauthorized` header:
@@ -421,12 +421,12 @@ up.network = (function() {
       Defaults to `up.network.config.lateDelay`.
 
     @param {string|boolean|Function(up.Response): boolean} [options.fail]
-      Whether the response to this request should be considered [failed](/error-responses).
+      Whether the response to this request should be considered an [error response](/error-responses).
 
       By [default](/up.network.config#config.fail), any HTTP status code other than 2xx or 304 is considered an error code.
       Pass `{ fail: false }` to handle *any* response as successful, even with a 4xx or 5xx status code.
 
-      A failed response will cause the [returned promise](#return-value) to reject.
+      An error response will cause the [returned promise](#return-value) to reject.
 
   @section Caching
     @param {boolean} [options.cache=false]

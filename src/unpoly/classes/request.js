@@ -976,7 +976,7 @@ up.Request = class Request extends up.Record {
   A request is *fulfilled* with an `up.Response` when the server sends a response
   with a status code of 2xx or [304](/conditional-requests#rendering-nothing).
 
-  The promise will reject for responses with a failed HTTP status,
+  The promise will reject for responses with an [HTTP error status](/error-responses),
   when the request is [aborted](/aborting-requests) or when there is a
   [network issue](/network-issues).
 

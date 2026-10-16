@@ -56,7 +56,7 @@ up.RenderResult = class RenderResult {
   /*-
   The [render](/up.render) options used to produce this result.
 
-  If this result was produced from a [error response](/error-responses),
+  If this result was produced from an [error response](/error-responses),
   [`fail` prefixes](/error-responses#fail-options)
   have been removed from the render options.
 

@@ -419,7 +419,7 @@ up.radio = (function() {
       to the query parameters.
 
     @param [up-fail]
-      How to handle [failed server responses](/error-responses).
+      How to handle [error responses](/error-responses).
 
       By default, polling will skip server responses with an error code,
       even when the response contains a matching fragment. After the configured

@@ -6,7 +6,7 @@
   See [Controlling focus](/focus) for a list of allowed values.
 
 @param {boolean|string|Element|Function} [options.failFocus]
-  What to focus after the new fragment was rendered from a failed response.
+  What to focus after the new fragment was rendered from an error response.
 
   See [Rendering error responses differently](/error-responses#fail-options).
 

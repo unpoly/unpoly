@@ -175,7 +175,7 @@ The server can send any of them, with an empty body:
 - An HTTP status [`204 No Content`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204)
 - An HTTP status [`304 Not Modified`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304)
 
-A `304` counts as a successful response, not as a [error response](/error-responses), even though its status is not `2xx`.
+A `304` counts as a successful response, not as an [error response](/error-responses), even though its status is not `2xx`.
 
 When nothing is rendered, no `up:fragment:loaded` event is emitted and no `{ onRendered }` callback is called.
 The `up.render()` promise still fulfills, with an [empty](/up.RenderResult.prototype.none) `up.RenderResult`.

@@ -6,7 +6,7 @@
   See [Scrolling](/scrolling) for a list of allowed values.
 
 @param [up-fail-scroll='auto']
-  How to scroll after the new fragment was rendered from a failed response.
+  How to scroll after the new fragment was rendered from an error response.
 
   See [Rendering error responses differently](/error-responses#fail-options).
 

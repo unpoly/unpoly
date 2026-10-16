@@ -103,7 +103,7 @@ and updates the `<form>` element instead. This way validation errors always appe
 
 ```html
 <form method="post" action="/comments" up-submit up-target="#comments">
-  <!-- chip: ❌ Failed responses will appear here -->
+  <!-- chip: ❌ Error responses will appear here -->
 </form>
 
 <div id="comments">
@@ -114,7 +114,7 @@ and updates the `<form>` element instead. This way validation errors always appe
 The form's values and messages all come from your server-rendered HTML.
 Unpoly only decides which fragment to show them in.
 
-To render a failed response somewhere else, set an [`[up-fail-target]`](/up-submit#up-fail-target) attribute on the `<form>` element:
+To render an error response somewhere else, set an [`[up-fail-target]`](/up-submit#up-fail-target) attribute on the `<form>` element:
 
 ```html
 <form method="post" action="/comments" up-submit up-target="#comments" up-fail-target="#errors"> <!-- mark: up-fail-target="#errors" -->
@@ -126,7 +126,7 @@ To render a failed response somewhere else, set an [`[up-fail-target]`](/up-subm
 </div>
 
 <div id="errors"> <!-- mark: id="errors" -->
-  <!-- chip: ❌ Failed responses will appear here -->
+  <!-- chip: ❌ Error responses will appear here -->
 </div>
 ```
 

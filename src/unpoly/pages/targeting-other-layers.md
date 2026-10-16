@@ -192,14 +192,14 @@ Other features that take a layer option include:
 - `up.fragment.abort()` can abort the requests of a given layer.
 
 
-Rendering failed responses in another layer {#fail-layer}
--------------------------------------------
+Rendering error responses in another layer {#fail-layer}
+------------------------------------------
 
 Like most render options, `[up-layer]` only applies when the server responds successfully.
 When the server [responds with an error code](/error-responses), like a form with validation errors,
 the response is rendered in the link's or form's own layer.
 
-To render failed responses in another layer, set an `[up-fail-layer]` attribute or pass a `{ failLayer }` option.
+To render error responses in another layer, set an `[up-fail-layer]` attribute or pass a `{ failLayer }` option.
 
 
 @page targeting-other-layers

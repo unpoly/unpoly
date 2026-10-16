@@ -74,8 +74,8 @@ up.protocol = (function() {
   expensive sidebar if the sidebar is not targeted.
 
   > [note]
-  > Unpoly will often [update a different selector in case the request fails](/error-responses#fail-options).
-  > The target selector for failed responses is sent as a separate request header (`X-Up-Fail-Target`).
+  > Unpoly will often [update a different selector for an error response](/error-responses#fail-options).
+  > The target selector for error responses is sent as a separate request header (`X-Up-Fail-Target`).
 
 
   ## Detecting the targeted fragment on the server {#request}
@@ -139,7 +139,7 @@ up.protocol = (function() {
   ```
 
   The frontend will use the `X-Up-Target` selector for both successful (HTTP status `200 OK`)
-  and failed (status `4xx` or `5xx`) responses. There is no <code autolink="false">X-Up-Fail-Target</code>
+  and error (status `4xx` or `5xx`) responses. There is no <code autolink="false">X-Up-Fail-Target</code>
   header in the response.
 
 
@@ -155,12 +155,11 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the [target selector](/targeting-fragments) for a failed fragment update.
+  This request header contains the [target selector](/targeting-fragments) that Unpoly updates when the server sends an [error response](/error-responses).
 
-  A fragment update is considered *failed* if the server responds with a status code other than 2xx,
-  but still renders HTML.
+  An error response has a status code other than 2xx, but still contains HTML.
 
-  Server-side code is free to [optimize its response](/optimizing-responses) to a failed request by only rendering HTML
+  Server-side code is free to [optimize its response](/optimizing-responses) to an error response by only rendering HTML
   that matches the provided selector. For example, you might prefer to not render an
   expensive sidebar if the sidebar is not targeted.
 
@@ -238,10 +237,9 @@ up.protocol = (function() {
 
   /*-
   This request header contains the [mode](/up.layer.mode) of the layer
-  targeted for a failed fragment update.
+  that Unpoly updates when the server sends an [error response](/error-responses).
 
-  A fragment update is considered *failed* if the server responds with a
-  status code other than 2xx, but still renders HTML.
+  An error response has a status code other than 2xx, but still contains HTML.
 
   Server-side code is free to render different HTML for different modes.
   For example, you might prefer to not render a site navigation for overlays.
@@ -538,7 +536,7 @@ up.protocol = (function() {
   with a `null` value to effectively remove a key.
 
   The frontend will use the server-provided context updates for both successful (HTTP status `200 OK`)
-  and failed (status `4xx` or `5xx`) responses.  If no `X-Up-Context` response header is set,
+  and error (status `4xx` or `5xx`) responses.  If no `X-Up-Context` response header is set,
   the updating layer's context will not be changed.
 
   It is recommended that the server only places changed key/value pairs into the `X-Up-Context`
@@ -551,10 +549,9 @@ up.protocol = (function() {
 
   /*-
   This request header contains the [context](/layer-context) of the layer
-  targeted for a failed fragment update, serialized as JSON.
+  that Unpoly updates when the server sends an [error response](/error-responses), serialized as JSON.
 
-  A fragment update is considered *failed* if the server responds with a
-  status code other than 2xx, but still renders HTML.
+  An error response has a status code other than 2xx, but still contains HTML.
 
   Server-side code is free to render different HTML for different contexts.
   For example, you might prefer to not render a site navigation for overlays.
