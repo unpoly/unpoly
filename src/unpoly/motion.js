@@ -465,8 +465,8 @@ up.motion = (function() {
 
   function composeTransitionFn(oldAnimation, newAnimation) {
     // A composition of two null-animations is a null-transform
-    // and should be skipped.
-    if (!isNone(oldAnimation) && !isNone(newAnimation)) {
+    // and should be skipped. If only one half is a null-animation, we animate the other half.
+    if (!isNone(oldAnimation) || !isNone(newAnimation)) {
       const oldAnimationFn = findAnimationFn(oldAnimation) || u.asyncNoop
       const newAnimationFn = findAnimationFn(newAnimation) || u.asyncNoop
       return (oldElement, newElement, options) => Promise.all([
@@ -521,8 +521,8 @@ up.motion = (function() {
   @internal
   */
   function isNone(motionValue) {
-    // false, undefined, '', null and the string "none" are all ways to skip animations
-    return !motionValue || motionValue === 'none'
+    // false, undefined, '', null, the string "none" and an empty object of CSS properties are all ways to skip animations
+    return !motionValue || motionValue === 'none' || (u.isOptions(motionValue) && u.isBlank(motionValue))
   }
 
   function registerOpacityAnimation(name, from, to) {
