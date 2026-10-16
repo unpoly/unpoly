@@ -105,7 +105,8 @@ an error `up.CannotTarget` is thrown. In such cases, give the element an `[id]` 
 or configure a new [derivation pattern](#derivation-patterns).
 
 Verification can be [disabled](/up.fragment.config#config.verifyDerivedTarget) with
-`up.fragment.config.verifyDerivedTarget = false`, which is almost always a bad idea.
+`up.fragment.config.verifyDerivedTarget = false`.
+Unpoly may then update a different element than the one you passed.
 
 
 Deriving a target programmatically
