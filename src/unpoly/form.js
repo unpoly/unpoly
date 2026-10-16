@@ -78,6 +78,21 @@ up.form = (function() {
       Add a selector to [register any element as a field](/custom-form-fields#registering).
       Matching elements must have a `value` property.
 
+      You may configure exceptions in `config.noFieldSelectors`.
+
+    @param {Array<string>} [config.noFieldSelectors]
+      Exceptions to `up.form.config.fieldSelectors`.
+
+      Matching elements will *not* be considered a form field, even if they match `up.form.config.fieldSelectors`.
+
+      For example, a form-associated custom element that renders a button should not count as a field:
+
+      ```js
+      up.form.config.noFieldSelectors.push('my-submit-button')
+      ```
+
+      @experimental
+
     @param {string} [config.submitButtonSelectors]
       An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.
 
@@ -154,6 +169,7 @@ up.form = (function() {
       // engine reads it that way. Chrome, Firefox and Safari do not.
       ':is(:enabled, :disabled):not(input, select, textarea, button, fieldset, optgroup, option, a, area)',
     ],
+    noFieldSelectors: [],
     submitSelectors: ['form:is([up-submit], [up-target], [up-layer], [up-transition])'],
     noSubmitSelectors: ['[up-submit=false]', '[target]', e.crossOriginSelector('action')],
     submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],

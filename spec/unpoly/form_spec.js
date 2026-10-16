@@ -167,6 +167,21 @@ describe('up.form', function() {
           expect(up.form.fields(form)).toMatchList([])
         })
 
+        it('does not include a form-associated custom element that matches up.form.config.noFieldSelectors', function() {
+          up.form.config.noFieldSelectors.push('.not-a-field')
+
+          const [form, excluded, included] = htmlFixtureList(`
+            <form>
+              <test-form-associated-element class="not-a-field" name="action" value="save"></test-form-associated-element>
+              <test-form-associated-element name="email" value="foo@example.com"></test-form-associated-element>
+            </form>
+          `)
+
+          expect(up.form.fields(form)).toMatchList([included])
+          expect(up.form.isField(excluded)).toBe(false)
+          expect(up.form.isField(included)).toBe(true)
+        })
+
         it("includes a configured custom element outside the form with a [form] attribute matching the form's ID", function() {
           up.form.config.fieldSelectors.push('test-form-field')
 
