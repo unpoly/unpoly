@@ -24,6 +24,7 @@ Documentation lives in this repository, beside the code it describes. A sister p
   - [Return values](#return-values)
 - [Visibility](#visibility)
 - [Writing prose](#writing-prose)
+  - [Markdown flavor](#markdown-flavor)
   - [Referring to features](#referring-to-features)
   - [Rely on autolinking](#rely-on-autolinking)
   - [Line breaks](#line-breaks)
@@ -467,6 +468,26 @@ function keeps an argument that only Unpoly itself passes.
 
 ## Writing prose
 
+### Markdown flavor
+
+`unpoly-site` renders doc comments and guide pages with
+[commonmarker](https://github.com/gjtorikian/commonmarker), so the Markdown is
+[CommonMark](https://commonmark.org/) with the GitHub extensions for tables, strikethrough and
+autolinks. Raw HTML passes through. On top of that come the extras described in this guide:
+heading attributes, wikilinks, admonitions, partials and code marks.
+
+A few CommonMark rules catch authors who know other flavors:
+
+- A list is *loose* when a blank line separates any two of its items, or two blocks inside
+  one item (like a paragraph and a code block). Then every item becomes a paragraph, with
+  more space between items. Leave out blank lines between short items.
+- An HTML block ends at the first blank line. Markdown after that blank line is parsed as
+  Markdown again, which is how a `<figcaption>` holds Markdown (see [What a page needs](#what-a-page-needs)).
+- Indent the code of a fenced block like its opening fence. CommonMark strips the fence's
+  indentation from every line inside.
+- A table needs a header row.
+- Quotes, dashes and `...` stay as typed. Type `…` or `–` when you want them.
+
 ### Referring to features
 
 Because Unpoly has many similar-sounding APIs, the documentation uses consistent syntax
@@ -540,11 +561,23 @@ rewording:
 ## Callback arguments {#callbacks}
 ```
 
+The braces at the end of a heading line hold its attributes, in
+[Pandoc's syntax](https://pandoc.org/MANUAL.html#heading-identifiers): `#name` sets the `id`,
+`.name` adds a class, `key=value` (or `key="value"`) sets an attribute, and a bare `key` sets
+a boolean attribute. This works for `#` headings and for underlined (setext) headings:
+
+```markdown
+### Closing when a location is reached {#location-condition data-toc-include}
+```
+
+Without an `#id`, a heading still gets an id generated from its text. Only headings take
+attributes. Other elements that need attributes are written in HTML.
+
 ### Line breaks
 
-The renderer keeps single newlines as line breaks, so how you wrap a paragraph in the
-source is how it reads on the site. There is no line-length convention to maintain and
-no reason to rewrap a paragraph you edited.
+A single newline inside a paragraph renders as a space, so you can wrap a paragraph in
+the source however you like. There is no line-length convention to maintain and no
+reason to rewrap a paragraph you edited.
 
 A trailing backslash forces a break where the source has none:
 
@@ -905,7 +938,7 @@ from it, so a screen reader or an agent misses nothing:
 ```html
 <figure>
   <img src="images/render-lifecycle.svg" alt="Flowchart of the render lifecycle" width="900">
-  <figcaption markdown="1">
+  <figcaption>
 
 A render pass moves through these stages:
 
@@ -923,9 +956,8 @@ A render pass moves through these stages:
   repeat the text around the figure; say what the medium adds.
 - A width goes in the `width` attribute. A video keeps its `controls`, `loop` and `width`.
 - Write `images/…` paths relative to the sources, as for any image.
-- `markdown="1"` makes kramdown read the caption as Markdown, which needs the blank lines
-  around it. The [commonmarker migration](../rework-2026/commonmarker-migration-plan.md)
-  will make the attribute unnecessary.
+- Leave a blank line after `<figcaption>` and before `</figcaption>`. The blank line ends
+  the HTML block, so the caption in between is read as Markdown.
 
 On the site the caption is visually hidden, but screen readers read it and search
 indexes it. The Markdown twin keeps the `<figure>` with the caption as Markdown, so it
@@ -939,8 +971,7 @@ A page's table of contents normally lists only its top-level headings. To list a
 heading too, give it a `data-toc-include` attribute:
 
 ```markdown
-### Closing when a location is reached {#location-condition}
-{:data-toc-include="true"}
+### Closing when a location is reached {#location-condition data-toc-include}
 ```
 
 ### Markers in the templates
