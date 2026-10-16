@@ -1763,9 +1763,7 @@ up.fragment = (function() {
 
   ## Skipping updates when nothing changed
 
-  Your server-side app is not required to re-render a request if there are no changes to the cached content.
-
-  By supporting [conditional HTTP requests](/conditional-requests) you can quickly produce an empty response for unchanged content.
+  The server can answer `304 Not Modified` when the fragment hasn't changed. See [conditional requests](/conditional-requests).
 
   ## Restoring content from cache
 
@@ -1813,11 +1811,11 @@ up.fragment = (function() {
         Defaults to the [URL from which the fragment was originally loaded](/up.fragment.source).
 
   @section Caching
-    @param {boolean|string} [options.cache=false]
-      Whether to restore a fragment from its cached state.
+    @param {boolean} [options.cache=false]
+      Whether to restore the fragment from the [cache](/caching).
 
       By default the cache is ignored and a new HTTP request is sent.
-      You can pass `{ cache: 'auto' }` to restore a fragment to its previously cached state.
+      Pass `{ cache: true }` to restore the fragment from the cache.
 
     @param {boolean|string} [options.revalidate=false]
       @like up.render
