@@ -334,11 +334,12 @@ up.form = (function() {
   }
 
   /*-
-  Submits a form via AJAX and updates a page fragment with the response.
+  Submits a form via JavaScript and updates a fragment with the server response.
 
-  Instead of loading a new page, the form is submitted via AJAX.
-  The response is parsed for a CSS selector and the matching elements will
-  replace corresponding elements on the current page.
+  The server must render an element matching the [target selector](/targeting-fragments) from the `{ target }` option
+  or the form's `[up-target]` attribute.
+  A matching element in the current page is then swapped with the new element from the server response.
+  The response may include other HTML (even an entire HTML document), but only the matching element will be updated.
 
   Submitting a form is considered [navigation](/navigation-defaults).
 
@@ -1967,26 +1968,6 @@ up.form = (function() {
     the minimum password length.
 
   If validation fails, we want to show validation errors *as soon as the user blurs the field*.
-
-  We're going to render validation errors using the following HTML:
-
-  ```html
-  <form method="post" action="/users">
-
-    <fieldset>
-      <label for="email">E-mail</label>
-      <input type="text" id="email" name="email" value="foo@bar.com" up-validate>
-      <div class="error">E-mail has already been taken!</div> <!-- mark-line -->
-    </fieldset>
-
-    <fieldset>
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" value="secret" up-validate>
-      <div class="error">Password is too short!</div> <!-- mark-line -->
-    </fieldset>
-
-  </form>
-  ```
 
   We can implement this by giving both fields an `[up-validate]` attribute:
 
