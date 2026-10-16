@@ -891,9 +891,29 @@ extendDescribe('up.network', function() {
               expect(response.text).toEqual('new response text')
             })
 
-            it('evicts an existing cache entry after a network error')
+            it('keeps an existing cache entry after a network error', async function() {
+              await jasmine.populateCache('/cache-me', 'cached text')
 
-            it('evicts an existing cache entry after an error response')
+              up.request({ url: '/cache-me', cache: false }).catch(u.noop)
+              await wait()
+
+              jasmine.lastRequest().responseError()
+              await wait()
+
+              expect({ url: '/cache-me' }).toBeCachedWithResponse({ text: 'cached text' })
+            })
+
+            it('evicts an existing cache entry after an error response', async function() {
+              await jasmine.populateCache('/cache-me', 'cached text')
+
+              up.request({ url: '/cache-me', cache: false }).catch(u.noop)
+              await wait()
+
+              jasmine.respondWith({ status: 500, responseText: 'error text' })
+              await wait()
+
+              expect({ url: '/cache-me' }).not.toBeCached()
+            })
 
           })
         })

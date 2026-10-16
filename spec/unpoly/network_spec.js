@@ -499,14 +499,20 @@ describe('up.network', function() {
     })
 
     describe('up.cache.put()', function() {
-      it('should have tests')
-    })
 
-    describe('up.cache.remove()', function() {
+      it('makes a later up.request() for the same URL reuse the given request', async function() {
+        const cachedRequest = new up.Request({ url: '/foo' })
+        up.cache.put(cachedRequest)
 
-      it('removes the cache entry for the given request')
+        const laterRequest = up.request({ url: '/foo', cache: true })
+        await wait()
 
-      it('does nothing if the given request is not cached')
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        cachedRequest.respondWith(new up.Response({ request: cachedRequest, text: 'cached text', status: 200 }))
+
+        await expectAsync(laterRequest).toBeResolvedTo(jasmine.objectContaining({ text: 'cached text' }))
+      })
     })
 
     describe('up.cache.evict()', function() {
@@ -712,15 +718,55 @@ describe('up.network', function() {
 
     describe('up.network.isBusy()', function() {
 
-      it('returns true while a request is loading')
+      it('returns true while a request is loading', async function() {
+        up.request('/path')
+        await wait()
 
-      it('returns true in the same microtask that scheduled a request')
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(up.network.isBusy()).toBe(true)
+      })
 
-      it('returns false before any requests have been schedule')
+      it('returns true in the same microtask that scheduled a request', function() {
+        up.request('/path')
 
-      it('returns false after all requests succeeded')
+        expect(up.network.isBusy()).toBe(true)
+      })
 
-      it('returns false after all requests failed')
+      it('returns false before any requests have been scheduled', function() {
+        expect(up.network.isBusy()).toBe(false)
+      })
+
+      it('returns false after all requests succeeded', async function() {
+        up.request('/path1')
+        up.request('/path2')
+        await wait()
+
+        jasmine.respondWith('response1', { request: 0 })
+        await wait()
+
+        expect(up.network.isBusy()).toBe(true)
+
+        jasmine.respondWith('response2', { request: 1 })
+        await wait()
+
+        expect(up.network.isBusy()).toBe(false)
+      })
+
+      it('returns false after all requests failed', async function() {
+        up.request('/path1').catch(u.noop)
+        up.request('/path2').catch(u.noop)
+        await wait()
+
+        jasmine.respondWith({ status: 500, request: 0 })
+        await wait()
+
+        expect(up.network.isBusy()).toBe(true)
+
+        jasmine.Ajax.requests.at(1).responseError()
+        await wait()
+
+        expect(up.network.isBusy()).toBe(false)
+      })
 
     })
 
@@ -769,7 +815,29 @@ describe('up.network', function() {
         expect(document).not.toHaveSelector('up-progress-bar')
       })
 
-      it('delays removal of the progress bar as more pending requests become late')
+      it('delays removal of the progress bar as more pending requests become late', async function() {
+        up.network.config.lateDelay = 10
+
+        up.request('/slow1')
+        await wait(60)
+
+        expect(document).toHaveSelector('up-progress-bar')
+
+        up.request('/slow2')
+        await wait()
+
+        // up:network:recover is checked one task after a request settles.
+        jasmine.respondWith('response1', { request: 0 })
+        await jasmine.waitTasks(2)
+
+        // A concluding bar moves to its full width before it is removed.
+        expect('up-progress-bar').not.toHaveInlineStyle({ width: '100vw' })
+
+        jasmine.respondWith('response2', { request: 1 })
+        await jasmine.waitTasks(2)
+
+        expect('up-progress-bar').toHaveInlineStyle({ width: '100vw' })
+      })
 
       it('does not show a progress bar with up.network.config.progressBar = false', async function() {
         up.network.config.lateDelay = 10

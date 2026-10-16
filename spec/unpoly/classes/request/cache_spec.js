@@ -1,8 +1,28 @@
 describe('up.Request.Cache', function() {
   describe('#track', function() {
-    it('resolves the given new request when the given cached request is resolved')
+    it('resolves the given new request when the given cached request is resolved', async function() {
+      let sourceRequest = new up.Request({ url: '/foo' })
+      up.cache.put(sourceRequest)
+      let followingRequest = new up.Request({ url: '/foo' })
+      up.cache.track(sourceRequest, followingRequest)
+      await wait()
 
-    it('rejects the given new request when the given cached request is rejected')
+      sourceRequest.respondWith(new up.Response({ request: sourceRequest, status: 200, text: 'response text' }))
+
+      await expectAsync(followingRequest).toBeResolvedTo(jasmine.objectContaining({ text: 'response text' }))
+    })
+
+    it('rejects the given new request when the given cached request is rejected', async function() {
+      let sourceRequest = new up.Request({ url: '/foo' })
+      up.cache.put(sourceRequest)
+      let followingRequest = new up.Request({ url: '/foo' })
+      up.cache.track(sourceRequest, followingRequest)
+      await wait()
+
+      sourceRequest.respondWith(new up.Response({ request: sourceRequest, status: 500, text: 'error text' }))
+
+      await expectAsync(followingRequest).toBeRejectedWith(jasmine.objectContaining({ status: 500, text: 'error text' }))
+    })
 
     it('aborts the given new request when the given cached request is aborted', async function() {
       let sourceRequest = new up.Request({ url: '/foo' })
