@@ -246,6 +246,19 @@ describe('up.status', function() {
         expect('.target').toHaveClass('custom-loading')
       })
 
+      it('gives every targeted fragment an .up-loading class when targeting multiple fragments', async function() {
+        htmlFixtureList(`
+          <div id="target1">old target1</div>
+          <div id="target2">old target2</div>
+        `)
+
+        up.render('#target1, #target2', { url: '/path', feedback: true })
+        await wait()
+
+        expect('#target1').toHaveClass('up-loading')
+        expect('#target2').toHaveClass('up-loading')
+      })
+
     })
 
     describe('.up-revalidating', function() {
@@ -313,6 +326,21 @@ describe('up.status', function() {
         expect('#target').toHaveVisibleText('expired target')
         expect(up.network.isBusy()).toBe(false)
         expect('#target').not.toHaveClass('up-revalidating')
+      })
+
+      it('allows to set additional revalidating classes via up.status.config.revalidatingClasses', async function() {
+        up.status.config.revalidatingClasses.push('custom-revalidating')
+        await jasmine.populateCache('/foo', '<div id="target">expired target</div>')
+        up.cache.expire()
+        htmlFixtureList('<div id="target">old target</div>')
+
+        up.render('#target', { url: '/foo', feedback: true, cache: true, revalidate: true })
+        await wait()
+
+        expect('#target').toHaveVisibleText('expired target')
+        expect(up.network.isBusy()).toBe(true)
+        expect('#target').toHaveClass('up-revalidating')
+        expect('#target').toHaveClass('custom-revalidating')
       })
 
     })

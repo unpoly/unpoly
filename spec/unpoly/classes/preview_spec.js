@@ -256,6 +256,27 @@ describe('up.Preview', function() {
 
   })
 
+  describe('#ended', function() {
+
+    it('returns whether the previewed request has ended', async function() {
+      htmlFixtureList('<div id="target">old target</div>')
+      let preview
+      let previewFn = (p) => { preview = p }
+
+      up.render({ preview: previewFn, url: '/url', target: '#target' })
+      await wait()
+
+      expect(preview.ended).toBe(false)
+
+      jasmine.respondWithSelector('#target', { text: 'new target' })
+      await wait()
+
+      expect('#target').toHaveText('new target')
+      expect(preview.ended).toBe(true)
+    })
+
+  })
+
   describe('#setAttrs()', function() {
 
     it('temporarily sets attributes on an element', async function() {
@@ -1476,6 +1497,22 @@ describe('up.Preview', function() {
         expect(up.layer.current.getFirstSwappableElement()).toMatchSelector('#target')
         expect(up.layer.current.getFirstSwappableElement()).toHaveText('server content')
         expect(animateCount).toBe(1)
+      })
+
+      it('closes the placeholder overlay when the server responds with an error code', async function() {
+        htmlFixtureList('<div id="target">old target</div>')
+
+        let renderPromise = up.render({ placeholder: '<div>placeholder content</div>', url: '/url', target: '#target', failTarget: '#target', layer: 'new' })
+        await wait()
+
+        expect(up.layer.count).toBe(2)
+        expect(up.layer.current).toHaveText('placeholder content')
+
+        jasmine.respondWithSelector('#target', { text: 'error message', status: 500 })
+        await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+        expect(up.layer.count).toBe(1)
+        expect('#target').toHaveText('error message')
       })
 
       // See more specs for #openLayer() below

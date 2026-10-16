@@ -356,6 +356,27 @@ describe('up.radio', function() {
         expect('#flashes').toHaveText('new flashes')
       })
 
+      it('updates a flashes container without an [id]', async function() {
+        let html = (prefix) => `
+          <div up-flashes>${prefix} flashes</div>
+          <div id="target">${prefix} target</div>
+        `
+        const [flashes] = htmlFixtureList(html('old'))
+        up.hello(flashes)
+
+        await up.render('#target', { document: html('new') })
+
+        expect('#target').toHaveText('new target')
+        expect('[up-flashes]').toHaveText('new flashes')
+      })
+
+      it('sets [role=alert] on the container', function() {
+        const [flashes] = htmlFixtureList('<div id="flashes" up-flashes></div>')
+        up.hello(flashes)
+
+        expect(flashes).toHaveAttribute('role', 'alert')
+      })
+
       it('does not overwrite existing flashes with empty flashes', function() {
         up.hello(htmlFixture(`
           <div id='container'>

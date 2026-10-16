@@ -62,6 +62,46 @@ extendDescribe('up.history', function() {
           expect('#element').toBeFocused()
         })
 
+        it('reveals and focuses a matching fragment when the link also has [up-follow]', async function() {
+          location.hash = ''
+          await wait()
+
+          const [_high, _element, link] = htmlFixtureList(`
+            <div class="high" style="height: 10000px"></div>
+            <div id="element" style="position: absolute; top: 5000px">content</div>
+            <a href="#element" up-follow up-target="#element">link</a>
+          `)
+
+          // Firefox will only do native #anchor processing when we use link.click(),
+          // but not when we emit a synthetic 'click' event.
+          link.click()
+          await wait(100)
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+          expect(up.viewport.root.scrollTop).toBe(5000)
+          expect(location.hash).toBe('#element')
+          expect('#element').toBeFocused()
+        })
+
+        it("emits up:location:changed with { reason: 'hash' }", async function() {
+          up.history.replace('/path')
+          await wait()
+
+          const [_element, link] = htmlFixtureList(`
+            <div id="element">content</div>
+            <a href="#element">link</a>
+          `)
+
+          const listener = jasmine.createSpy('up:location:changed listener')
+          up.on('up:location:changed', listener)
+
+          link.click()
+          await wait()
+
+          expect(listener.calls.count()).toBe(1)
+          expect(listener.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ reason: 'hash', location: '/path#element', previousLocation: '/path' }))
+        })
+
         it("reveals and focuses fragment when the location is already on the link's #hash", async function() {
           location.hash = '#element'
           await wait()

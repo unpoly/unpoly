@@ -746,6 +746,29 @@ extendDescribe('up.history', function() {
         expect(destructorSpy).toHaveBeenCalled()
       })
 
+      it('renders an error response when restoring a location', async function() {
+        const waitForBrowser = 100
+        up.network.config.autoCache = false
+        up.history.config.restoreTargets = ['main']
+        htmlFixtureList('<main>initial text</main>')
+
+        up.history.replace('/path1')
+        up.history.push('/path2')
+        await wait()
+
+        history.back()
+        await wait(waitForBrowser)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/path1')
+
+        jasmine.respondWith({ status: 500, responseText: '<main>error page</main>' })
+        await wait()
+
+        expect(location.href).toMatchURL('/path1')
+        expect('main').toHaveText('error page')
+      })
+
       describe('overlays', function() {
 
         it('closes overlays when restoring the root layer, even if an up:layer:dismiss listener prevents it', async function() {
@@ -964,6 +987,27 @@ extendDescribe('up.history', function() {
 
           expect(document).toHaveSelector('main a[href="/focus-path2"]')
           expect('a[href="/focus-path2"]').toBeFocused()
+        })
+
+        it('focuses the restored fragment when no earlier focus is known for the location', async function() {
+          const waitForBrowser = 100
+          up.fragment.config.mainTargets = ['main']
+          up.history.config.restoreTargets = [':main']
+          htmlFixtureList('<main>initial text</main>')
+
+          up.history.replace('/focus-path1')
+          up.history.push('/focus-path2')
+          await wait()
+
+          history.back()
+          await wait(waitForBrowser)
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          jasmine.respondWithSelector('main', { text: 'restored text' })
+          await wait()
+
+          expect('main').toHaveText('restored text')
+          expect('main').toBeFocused()
         })
       })
 

@@ -272,6 +272,35 @@ describe('up.Layer.Overlay', function() {
       expect(location.href).toMatchURL(jasmine.locationBeforeExample)
     })
 
+    it("emits up:location:changed, but not up:layer:location:changed, when restoring the parent layer's location", async function() {
+      up.history.config.enabled = true
+      up.history.replace('/root-path')
+
+      up.layer.open({
+        target: '.element',
+        location: '/overlay-path',
+        content: 'element text',
+        history: true
+      })
+      await wait()
+
+      expect(location.href).toMatchURL('/overlay-path')
+
+      const locationChangedListener = jasmine.createSpy('up:location:changed listener')
+      up.on('up:location:changed', locationChangedListener)
+      const layerLocationChangedListener = jasmine.createSpy('up:layer:location:changed listener')
+      up.on('up:layer:location:changed', layerLocationChangedListener)
+
+      up.layer.current.accept()
+      await wait()
+
+      expect(up.layer.isRoot()).toBe(true)
+      expect(location.href).toMatchURL('/root-path')
+      expect(locationChangedListener.calls.count()).toBe(1)
+      expect(locationChangedListener.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ location: '/root-path', previousLocation: '/overlay-path' }))
+      expect(layerLocationChangedListener).not.toHaveBeenCalled()
+    })
+
     it("restores the parent layer's title", async function() {
       up.history.config.enabled = true
 
