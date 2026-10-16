@@ -73,4 +73,5 @@ Questions:
 - R3 (version) → DECIDED 2026-10-16: 3.15.0 (pre-release 3.15.0-rc1). Compatibility policy: polyfills instead of majors; only one ❌ (peeling).
 - R6 (launch date) → DECIDED 2026-10-16: no fixed date; launch as soon as the pre-launch tasks are done.
 - R5 (promotion) → DECIDED 2026-10-16: the established process. (1) A prose intro paragraph in the release notes. (2) Post the release notes as a GitHub Discussion. (3) Twitter: one announcement tweet, then a few tweets highlighting individual features. Claude drafts the intro and the tweet texts at release time; Henning posts.
+- Judgement-call list (prose sweep) APPLIED 2026-10-16: unpoly 07c555603..d1531d208, site 7b2b3072..7dae41af (incl. vendored Font Awesome 4.7, privacy page cleanup in its own commit 383cd78b — awaiting Henning's look at the diff). Search spec status after this: search_ranking:50 expects /layer-option for "layer" (page was renamed to /targeting-other-layers, spec likely outdated), search_ranking:79 defer near-tie, skill_search_spec:44 ran against a stale skill build. Belongs to the PRE-LAUNCH search specs item.
 
