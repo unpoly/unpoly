@@ -570,6 +570,7 @@ would have sent, and decide what the server says:
 | `jasmine.respondWith(html)` | Answer with an HTML body |
 | `jasmine.respondWith({ status, responseHeaders, responseText, … })` | Answer with a specific status or headers |
 | `jasmine.respondWithSelector('#target', { text: 'new' })` | Answer with a body built from a selector — the common case |
+| `await jasmine.populateCache('/path', 'response text')` | Request a URL and answer it, so its response is in the cache |
 
 `jasmine.respondWith()` answers the last request by default; pass `{ request }` (an
 index, or a request object) to answer an earlier one when several are in flight.
@@ -608,6 +609,22 @@ ticks. Reach for one only when `wait()` genuinely can't express the timing.
 Wait for actual time **only when the thing you're testing is time-based** — an
 animation, or a configured delay like `up.form.config.watchInputDelay`. Everywhere else
 a real-time wait just makes the suite slower and flakier.
+
+Every millisecond you wait is paid on every run of a suite with thousands of specs, so
+keep real-time waits as short as the browser allows:
+
+- **Stubbed work needs tasks, not time.** With the network mocked, a response is handled
+  within a task or two. When code defers by a task on purpose (`u.task()`), wait exactly
+  that many: `await jasmine.waitTasks(2)`, not `await wait(100)`.
+- **Shrink configured delays.** Set `up.network.config.lateDelay`, `watchInputDelay`,
+  animation durations and the like to a few milliseconds instead of waiting out their
+  defaults.
+- **Allow for timer inaccuracy, but no more.** Browser timers fire late, especially on a
+  busy CI machine. Wait the configured time plus 50–100 ms: with `lateDelay = 10`, a
+  `wait(60)` is enough to see the progress bar.
+- **Assert an earlier sign instead of the end state.** A progress bar that is concluding
+  moves to full width before it is removed after an animation. Asserting the width saves
+  waiting for the removal.
 
 `jasmine.clock()` is not the tool for this either. Don't install it, with one exception:
 making a mocked request time out. `jasmine.lastRequest().responseTimeout()` comes from
