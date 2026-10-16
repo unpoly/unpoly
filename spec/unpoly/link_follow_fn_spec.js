@@ -705,6 +705,29 @@ extendDescribe('up.link', function() {
           expect(up.render).toHaveBeenCalled()
         })
       })
+
+      describe("when the link's [href] is '#'", function() {
+
+        it('does not follow the link', async function() {
+          fixture('.target', { text: 'old text' })
+
+          const link = fixture('a[href="#"][up-target=".target"]')
+          const renderJob = up.follow(link)
+
+          await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Error))
+          expect('.target').toHaveText('old text')
+        })
+
+        it('does follow the link if it has a local content attribute', async function() {
+          fixture('.target', { text: 'old text' })
+
+          const link = fixture('a[href="#"][up-target=".target"][up-content="new text"]')
+          const promise = up.follow(link)
+
+          await expectAsync(promise).toBeResolvedTo(jasmine.any(up.RenderResult))
+          expect('.target').toHaveText('new text')
+        })
+      })
     })
 
   })
