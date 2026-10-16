@@ -448,6 +448,9 @@ up.history = (function() {
 
   function restoreLocation(location) {
 
+    // An up.Offline error (the server could not be reached) is critical and surfaces as an
+    // unhandled rejection, while the page keeps its content. This is intentional: losing the
+    // connection while restoring is worth reporting, unlike an error status, which we render.
     up.error.muteUncriticalRejection(up.render({
       guardEvent: up.event.build('up:location:restore', { location, log: `Restoring location ${location}` }),
 
