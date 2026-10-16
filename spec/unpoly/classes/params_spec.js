@@ -363,14 +363,39 @@ describe('up.Params', function() {
   })
 
   describe('#delete', function() {
-    it('deletes all entries with the given name')
+    it('deletes all entries with the given name', function() {
+      const params = new up.Params()
+      params.add('foo', '1')
+      params.add('bar', '2')
+      params.add('foo', '3')
+
+      params.delete('foo')
+
+      expect(params.toArray()).toEqual([{ name: 'bar', value: '2' }])
+    })
   })
 
   describe('#set', function() {
 
-    it('adds an entry with the given name and value')
+    it('adds an entry with the given name and value', function() {
+      const params = new up.Params()
 
-    it('deletes any previous entries with the same name')
+      params.set('foo', '1')
+
+      expect(params.toArray()).toEqual([{ name: 'foo', value: '1' }])
+    })
+
+    it('deletes any previous entries with the same name', function() {
+      const params = new up.Params()
+      params.add('foo', '1')
+      params.add('bar', '2')
+      params.add('foo', '3')
+
+      params.set('foo', '4')
+
+      expect(params.getAll('foo')).toEqual(['4'])
+      expect(params.get('bar')).toEqual('2')
+    })
   })
 
   describe('#toURL', function() {

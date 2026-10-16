@@ -1087,11 +1087,30 @@ describe('up.motion', function() {
     })
 
     describe('up.transition()', () => {
-      it('should have tests')
+      it('registers a named transition that up.morph() can use', async function() {
+        up.motion.config.enabled = true
+        const transitionFn = jasmine.createSpy('transition').and.returnValue(Promise.resolve())
+        up.transition('my-transition', transitionFn)
+        const [oldElement] = htmlFixtureList('<div class="old">old</div>')
+        const newElement = up.element.createFromHTML('<div class="new">new</div>')
+
+        await up.morph(oldElement, newElement, 'my-transition', { duration: 10 })
+
+        expect(transitionFn).toHaveBeenCalledWith(oldElement, newElement, jasmine.objectContaining({ duration: 10 }))
+      })
     })
 
     describe('up.animation()', () => {
-      it('should have tests')
+      it('registers a named animation that up.animate() can use', async function() {
+        up.motion.config.enabled = true
+        const animationFn = jasmine.createSpy('animation').and.returnValue(Promise.resolve())
+        up.animation('my-animation', animationFn)
+        const [element] = htmlFixtureList('<div class="element">text</div>')
+
+        await up.animate(element, 'my-animation', { duration: 10 })
+
+        expect(animationFn).toHaveBeenCalledWith(element, jasmine.objectContaining({ duration: 10 }))
+      })
     })
   })
 })
