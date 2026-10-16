@@ -65,7 +65,7 @@ function, so its tests live in Node with the rest.
   *applied* in the browser by `spec/helpers/spec_filter.js`, which replaces Jasmine's
   single-value regex filter with a verbatim match against any of the values.
   (`Config.fromArgv`, `--key=value`, CLI > env > default, strict on unknown flags).
-- `find_spec.mjs` — PURE: spec titles → their group path (`bin/find-spec`, `--file=path:line`).
+- `find_spec.mjs` — PURE (except `readSources()`): parses the suite from `spec/specs.js` with acorn → every spec's real full name (`bin/find-spec`, `--file=path:line`, the spec manifest self-test).
   For an `extendDescribe()` it returns the blocks *below* it, so `--file` on an extracted
   file runs that file rather than its whole module.
 - `dev_env.mjs` — the dev environment: one process table, one supervisor, one pid

@@ -37,6 +37,7 @@
   "devDependencies": {
     "@eslint/js": "^9",
     "@stylistic/eslint-plugin": "^4",
+    "acorn": "^8.19.0",
     "css-loader": "*",
     "ejs": "^3.1.10",
     "eslint": "^9",
