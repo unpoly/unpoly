@@ -3,7 +3,7 @@ const e = up.element
 
 describe('up.layer', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     beforeEach(function() { // Provoke concurrency issues by enabling animations, but don't slow down tests too much
       up.motion.config.duration = 5
@@ -655,7 +655,7 @@ describe('up.layer', function() {
     })
   })
 
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
 
     describe('up:layer:location:changed event', function() {
 

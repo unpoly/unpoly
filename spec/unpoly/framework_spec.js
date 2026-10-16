@@ -3,7 +3,7 @@ const $ = jQuery
 
 describe('up.framework', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     describe('up.framework.isSupported', function() {
 

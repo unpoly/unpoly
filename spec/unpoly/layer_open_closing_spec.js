@@ -2,7 +2,7 @@ const u = up.util
 
 extendDescribe('up.layer', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     extendDescribe('up.layer.open()', function() {
 

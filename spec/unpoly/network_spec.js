@@ -3,7 +3,7 @@ const $ = jQuery
 
 describe('up.network', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     require('./network_request_spec')
 
@@ -726,7 +726,7 @@ describe('up.network', function() {
 
   })
 
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
 
     describe('progress bar', function() {
 

@@ -4,7 +4,7 @@ const $ = jQuery
 
 extendDescribe('up.script', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     describe('up.compiler()', function() {
 

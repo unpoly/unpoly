@@ -2,7 +2,7 @@ const u = up.util
 const $ = jQuery
 
 describe('up.log', () => {
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     describe('up.log.puts()', function() {
 

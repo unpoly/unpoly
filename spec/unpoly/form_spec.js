@@ -4,7 +4,7 @@ const $ = jQuery
 
 describe('up.form', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     describe('up.form.get()', function() {
 
@@ -1546,7 +1546,7 @@ describe('up.form', function() {
     })
   })
 
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
 
     require('./form_submit_attr_spec')
 

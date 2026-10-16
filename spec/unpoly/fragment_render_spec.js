@@ -4,7 +4,7 @@ const $ = jQuery
 
 extendDescribe('up.fragment', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     describe('up.render()', function() {
 

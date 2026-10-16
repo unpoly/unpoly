@@ -16,7 +16,7 @@ describe('up.history', function() {
     await wait(50)
   })
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     describe('up.history.push()', () => {
       it('should have tests')
@@ -215,7 +215,7 @@ describe('up.history', function() {
     })
   })
 
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
 
     require('./history_navigation_spec')
 

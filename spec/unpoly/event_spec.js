@@ -4,7 +4,7 @@ const $ = jQuery
 
 describe('up.event', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     describe('up.on()', function() {
 
@@ -981,7 +981,7 @@ describe('up.event', function() {
   })
 
 
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
 
     describe('[up-emit]', function() {
 

@@ -3,7 +3,7 @@ const $ = jQuery
 
 extendDescribe('up.link', function() {
 
-  extendDescribe('unobtrusive behavior', function() {
+  extendDescribe('HTML', function() {
 
     describe('a[up-target]', function() {
 

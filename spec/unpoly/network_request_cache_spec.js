@@ -2,7 +2,7 @@ const u = up.util
 
 extendDescribe('up.network', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     extendDescribe('up.request()', function() {
 

@@ -4,7 +4,7 @@ const $ = jQuery
 
 describe('up.motion', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     describe('up.animate()', function() {
 

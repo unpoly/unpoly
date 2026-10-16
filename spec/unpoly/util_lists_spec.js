@@ -2,7 +2,7 @@ const u = up.util
 
 extendDescribe('up.util', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     describe('up.util.compact()', function() {
 

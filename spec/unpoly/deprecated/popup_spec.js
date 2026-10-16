@@ -14,7 +14,7 @@ if (up.migrate.loaded) {
       })
     })
 
-    describe('unobtrusive behavior', function() {
+    describe('HTML', function() {
       describe('[up-popup]', function() {
 
         it('is converted to [up-layer="new popup"][up-follow] without target', function() {

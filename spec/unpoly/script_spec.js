@@ -4,7 +4,7 @@ const $ = jQuery
 
 describe('up.script', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     require('./script_compiler_spec')
 

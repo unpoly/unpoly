@@ -2,7 +2,7 @@ const u = up.util
 
 extendDescribe('up.form', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     describe('up.form.trackFields()', function() {
 

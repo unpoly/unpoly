@@ -17,7 +17,7 @@ const titlesOf = (matches) => matches.map((match) => match.titles)
 test('builds the full group path down to the matching spec', () => {
   let matches = findSpecs(suite(`
 describe('up.form', function() {
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
     describe('[up-switch]', function() {
       it('switches a target', function() {})
     })
@@ -26,7 +26,7 @@ describe('up.form', function() {
 `), 'switches')
 
   assert.equal(matches.length, 1)
-  assert.deepEqual(matches[0].titles, ['up.form', 'unobtrusive behavior', '[up-switch]', 'switches a target'])
+  assert.deepEqual(matches[0].titles, ['up.form', 'HTML', '[up-switch]', 'switches a target'])
   assert.equal(matches[0].line, 5)
   assert.equal(matches[0].file, 'spec/unpoly/form_spec.js')
 })
@@ -189,7 +189,7 @@ describe('up.script', function() {
 
 const MODULE = `
 describe('up.fragment', function() {
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
     describe('up.render()', function() {
       require('./fragment_render_url_spec')
     })
@@ -200,7 +200,7 @@ describe('up.fragment', function() {
 const EXTRACTED = `
 extendDescribe('up.fragment', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     extendDescribe('up.render()', function() {
 
@@ -230,12 +230,12 @@ test('an extracted file gets the path of the position it is required from', () =
   let matches = findSpecs(extracted(), 'fetches')
 
   assert.deepEqual(matches[0].titles,
-    ['up.fragment', 'JavaScript functions', 'up.render()', 'with { url } option', 'fetches the URL'])
+    ['up.fragment', 'JavaScript', 'up.render()', 'with { url } option', 'fetches the URL'])
   assert.equal(matches[0].file, 'spec/unpoly/fragment_render_url_spec.js')
 })
 
 test('extendDescribe() titles are documentation and never match', () => {
-  assert.deepEqual(findSpecs(extracted(), 'JavaScript functions').map((match) => match.kind), ['describe'])
+  assert.deepEqual(findSpecs(extracted(), 'JavaScript').map((match) => match.kind), ['describe'])
 })
 
 test('a stale extendDescribe() chain is reported', () => {
@@ -372,8 +372,8 @@ test('a module file resolves to the module, which includes its extracted files',
 
 test('an extracted file resolves to the blocks it declares, not to the module', () => {
   assert.deepEqual(names(specFiltersFor(extracted(), URL_FILE)), [
-    'up.fragment JavaScript functions up.render() with { url } option',
-    'up.fragment JavaScript functions up.render() with { method } option',
+    'up.fragment JavaScript up.render() with { url } option',
+    'up.fragment JavaScript up.render() with { method } option',
   ])
 })
 
@@ -383,7 +383,7 @@ test('pointing at an extendDescribe() line resolves to the blocks the file decla
 
 test('pointing at a real block inside an extracted file resolves to that block alone', () => {
   assert.deepEqual(names(specFiltersFor(extracted(), URL_FILE, 8)),
-    ['up.fragment JavaScript functions up.render() with { url } option'])
+    ['up.fragment JavaScript up.render() with { url } option'])
 })
 
 test('a block expanded at several calls resolves to one filter per call', () => {

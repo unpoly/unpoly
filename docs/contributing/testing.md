@@ -249,7 +249,7 @@ separate the two kinds of API a module exposes:
 ```js
 describe('up.form', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     describe('up.form.submit()', function() {
       it('...', async function() { ... })
@@ -257,7 +257,7 @@ describe('up.form', function() {
 
   })
 
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
 
     describe('[up-submit]', function() {
       it('...', async function() { ... })
@@ -272,7 +272,7 @@ Functions are named with parentheses (`up.form.submit()`), selectors in brackets
 (`[up-submit]`). A feature with many options often gets one more nesting level, grouped
 by topic or by the option under test.
 
-Class specs skip the functions/behavior split — a class has no unobtrusive behavior, so
+Class specs skip the JavaScript/HTML split — a class has no HTML API, so
 `params_spec.js` goes straight from `describe('up.Params')` to a group per method.
 
 Nested group names concatenate with spaces to form a spec's *full name*, which is what
@@ -280,7 +280,7 @@ Nested group names concatenate with spaces to form a spec's *full name*, which i
 
 ```
 bin/test --spec="up.form"                       # the whole module
-bin/test --spec="unobtrusive behavior"          # only the attribute specs
+bin/test --spec="up.form HTML"                  # only the attribute specs
 bin/test --spec="up.form.submit()"              # one function
 ```
 
@@ -316,9 +316,9 @@ spec code that happens to call the feature:
 
 ```
 $ bin/find-spec "kept element"
-spec/unpoly/fragment_keep_spec.js:47  "up.fragment unobtrusive behavior [up-keep] does not run destructors within kept elements"
-spec/unpoly/fragment_keep_spec.js:73  "up.fragment unobtrusive behavior [up-keep] does not run destructors within kept elements when the <body> is targeted (bugfix)"
-spec/unpoly/fragment_keep_spec.js:143 "up.fragment unobtrusive behavior [up-keep] omits a kept element from the returned up.RenderResult"
+spec/unpoly/fragment_keep_spec.js:47  "up.fragment HTML [up-keep] does not run destructors within kept elements"
+spec/unpoly/fragment_keep_spec.js:73  "up.fragment HTML [up-keep] does not run destructors within kept elements when the <body> is targeted (bugfix)"
+spec/unpoly/fragment_keep_spec.js:143 "up.fragment HTML [up-keep] omits a kept element from the returned up.RenderResult"
 …
 ```
 
@@ -383,7 +383,7 @@ wherever the `require()` sits:
 ```js
 // fragment_render_url_spec.js
 extendDescribe('up.fragment', function() {
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
     extendDescribe('up.render()', function() {
 
       describe('with { url } option', function() { ... })
@@ -399,7 +399,7 @@ loads it, or if its `extendDescribe()` chain doesn't name the group it is requir
 
 ## Anatomy of a spec
 
-Most specs for unobtrusive behavior follow the same five beats: build the HTML, act on
+Most specs for HTML attributes follow the same five beats: build the HTML, act on
 it, assert what was requested, answer the request, assert what changed.
 
 ```js

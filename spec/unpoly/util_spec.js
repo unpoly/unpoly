@@ -4,7 +4,7 @@ const $ = jQuery
 
 describe('up.util', () => {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     describe('up.util.task()', function() {
 

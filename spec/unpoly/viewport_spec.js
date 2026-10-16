@@ -4,7 +4,7 @@ const $ = jQuery
 
 describe('up.viewport', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     describe('up.focus()', function() {
       describe('focus ring visibility', function() {
@@ -1048,7 +1048,7 @@ describe('up.viewport', function() {
     })
   })
 
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
 
     it('does not add focus-related classes to the <html> or <body> element (bugfix)', function() {
       expect(document.body).not.toHaveClass('up-focus-hidden')

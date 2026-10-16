@@ -4,7 +4,7 @@ const $ = jQuery
 
 describe('up.fragment', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     require('./fragment_lookup_spec')
 
@@ -1657,7 +1657,7 @@ describe('up.fragment', function() {
 
   })
 
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
 
     require('./fragment_keep_spec')
 

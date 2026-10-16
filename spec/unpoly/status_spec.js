@@ -15,7 +15,7 @@ describe('up.status', function() {
     up.motion.config.enabled = false
   })
 
-  describe('JavaScript functions', () => {
+  describe('JavaScript', () => {
     describe('up.hello() updating .up-current', function() {
 
       it('sets .up-current classes on nav links that refer to the current URL', function() {
@@ -141,7 +141,7 @@ describe('up.status', function() {
 
   })
 
-  describe('unobtrusive behavior', function() {
+  describe('HTML', function() {
 
     require('./status_nav_spec')
 

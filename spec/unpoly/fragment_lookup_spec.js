@@ -2,7 +2,7 @@ const e = up.element
 
 extendDescribe('up.fragment', function() {
 
-  extendDescribe('JavaScript functions', function() {
+  extendDescribe('JavaScript', function() {
 
     describe('up.fragment.get()', function() {
 

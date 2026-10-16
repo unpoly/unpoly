@@ -3,7 +3,7 @@ const $ = jQuery
 
 describe('up.browser', function() {
 
-  describe('JavaScript functions', function() {
+  describe('JavaScript', function() {
 
     describe('up.browser.assertConfirmed', function() {
 

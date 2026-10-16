@@ -4,7 +4,7 @@ const $ = jQuery
 
 extendDescribe('up.form', function() {
 
-  extendDescribe('unobtrusive behavior', function() {
+  extendDescribe('HTML', function() {
 
     describe('input[up-validate]', function() {
 
