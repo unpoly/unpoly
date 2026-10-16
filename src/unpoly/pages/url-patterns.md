@@ -3,7 +3,7 @@ URL patterns
 
 Some Unpoly features let you match a URL using *URL patterns*. You can use them to define [overlay close conditions](/subinteractions#close-conditions), or when [adding aliases to navigation items](/up-alias).
 
-This guide describes the expression system Unpoly uses to match URL patterns. Please note that regular expressions ("regexes") are not supported. You must use the expression system described on this page.
+This page describes the syntax of URL patterns. URL patterns are not regular expressions.
 
 ## Matching an exact URL
 
@@ -15,7 +15,7 @@ Pass any absolute path or fully qualified URL to only match this exact value:
 
 ### Example
 
-Let's look at a very simple use of a URL pattern, which matches one (and only one) specific URL:
+This pattern matches one specific URL:
 
 ```html
 <!-- Closes the new overlay when user visits "/users/new" -->
@@ -37,35 +37,35 @@ The asterisk (`*`) matches one or many arbitrary characters:
 /users/*
 ```
 
-In the above URL pattern, anything after `/users/` will be considered a match. For example, URLS like `/users/`, `/users/new`, `/users/123/edit`, etc. would all be considered a match for the URL pattern listed above.
+This pattern matches anything after `/users/`, like `/users/`, `/users/new` or `/users/123/edit`.
 
-You can put asterisks anywhere in a URL pattern (you can even use more than one asterisk in a single URL pattern). For instance, to match any URL that ends in `/new` you can use the URL pattern below:
+You can put asterisks anywhere in a URL pattern, and use more than one. To match any URL that ends in `/new`:
 
 ```text
 */new
 ```
 
-The above URL pattern will match `/users/new`, `/admin/123/new`, etc.
+This pattern matches `/users/new` or `/admin/123/new`.
 
-You may also place an asterisk in the middle of a URL pattern to match URLs with a given prefix and suffix:
+An asterisk in the middle of a URL pattern matches URLs with a given prefix and suffix:
 
 ```text
 /users/*/edit
 ```
 
-The above URL pattern will match `/users/123/edit`, `/users/David/edit`, `/users/123/name/edit/`, etc.
+This pattern matches `/users/123/edit`, `/users/David/edit` or `/users/123/name/edit/`.
 
-By putting the asterisk after `?` (the start of the querystring) you can match for urls with a querystring:
+An asterisk after `?` (the start of the query string) matches URLs with a query string:
 
 ```text
 /users/?*
 ```
 
-The above URL pattern will match `/users/?sort=username`, `/users/?page=3` etc.
+This pattern matches `/users/?sort=username` or `/users/?page=3`.
 
 ### Example
 
-Here is an example of a URL pattern with a wildcard suffix:
+A URL pattern with a wildcard suffix:
 
 ```html
 <!-- Closes the new overlay when user visits anything underneath "/users/" -->
@@ -80,13 +80,13 @@ up.layer.open({ acceptLocation: "/users/*" })
 
 ### Numeric-only wildcards
 
-A dollar sign (`$`) followed by a name will match one or more digits (`0-9`):
+A dollar sign (`$`) followed by a name matches one or more digits (`0-9`):
 
 ```text
 /users/$id
 ```
 
-The above URL pattern will match `/users/123`, but not `/users/new` or `/users/123/edit`.
+This pattern matches `/users/123`, but not `/users/new` or `/users/123/edit`.
 The value is also captured, see [Capturing number segments](#capturing-number-segments) below.
 
 To also match URLs underneath, append a wildcard:
@@ -95,14 +95,14 @@ To also match URLs underneath, append a wildcard:
 /users/$id/*
 ```
 
-The above URL pattern will match `/users/123/edit`.
+This pattern matches `/users/123/edit`.
 
 
 ## Matching one of multiple alternatives
 
-To match one of multiple URL patterns, separate the URLs by a space or comma character.
+To match one of multiple URL patterns, separate them with a space or comma.
 
-The URL pattern below will match either the `/users/123` or `/account` URLs:
+The URL pattern below matches both `/users/123` and `/account`:
 
 ```text
 /users/*, /account
@@ -110,7 +110,7 @@ The URL pattern below will match either the `/users/123` or `/account` URLs:
 
 ### Examples
 
-Here is an example of a URL pattern with alternatives:
+A URL pattern with alternatives:
 
 ```html
 <!-- Closes layer when user visits either /account or anything underneath "/users/" -->
@@ -130,7 +130,7 @@ up.layer.open({ url: '/users', acceptLocation: ["/users/*", "/account"] })
 
 To exclude a URL or pattern from matching, prefix the URL pattern with a minus (`-`) character.
 
-The following URL pattern will match the URL `/users/123` but not `/users/456`:
+The following URL pattern matches `/users/123`, but not `/users/456`:
 
 ```text
 /users/* -/users/456
@@ -151,9 +151,9 @@ up.layer.open({ acceptLocation: "/users/* -/users/456" })
 
 ## Capturing named segments
 
-Sometimes it's useful to capture the value of the wildcard that was matched.
+You can capture the value that a wildcard matched.
 For example, when closing an overlay [once a location is reached](/subinteractions#location-condition),
-you can use a part of the URL as the overlay's [result value](/subinteractions#result-values).
+you can use a part of the URL as the overlay's [acceptance value](/closing-overlays#acceptance-values).
 
 To define a captured segment, prefix it with a `:` like this:
 
@@ -163,8 +163,8 @@ To define a captured segment, prefix it with a `:` like this:
 
 ### Example
 
-The example below will keep an overlay until a user's detail page is reached (like `/users/foo`).
-Then the user name from the URL (`foo`) becomes the overlay's [result value](/subinteractions#result-values) as `{ name: 'foo' }`:
+The example below keeps an overlay open until it reaches a user's detail page (like `/users/foo`).
+Then the user name from the URL (`foo`) becomes the overlay's [acceptance value](/closing-overlays#acceptance-values) as `{ name: 'foo' }`:
 
 ```html
 <!-- Closes layer when user visits any URL beginning with "/users/" and captures the suffix as { name } -->
@@ -176,8 +176,8 @@ Then the user name from the URL (`foo`) becomes the overlay's [result value](/su
 </a>
 ```
 
-We can use the same pattern from JavaScript. Here we're using the `up.layer.ask()` function which opens an overlay
-and returns a promise for its [result value](/subinteractions#result-values):
+The same pattern works from JavaScript. `up.layer.ask()` opens an overlay
+and returns a promise for its [acceptance value](/closing-overlays#acceptance-values):
 
 ```js
 let { name } = await up.layer.ask({
@@ -194,7 +194,7 @@ To define a captured segment consisting of digits only, prefix it with a `$` lik
 /users/$id
 ```
 
-The above URL pattern will match `/users/123` as `{ id: 123 }`. It will not match `/users/new`.
+This pattern matches `/users/123` and captures `{ id: 123 }`. It does not match `/users/new`.
 
 
 @page url-patterns

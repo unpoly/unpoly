@@ -29,10 +29,10 @@ Syntax rules
 - Relaxed JSON allows [trailing commas](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Trailing_commas) in object literals and array literals.
 
 
-Postel's law
--------------
+What Unpoly sends
+-----------------
 
-When Unpoly outputs HTML (e.g. for the `X-Up-Context` header) it always produces regular JSON.
+When Unpoly sends JSON (e.g. in the `X-Up-Context` header), it always produces regular JSON.
 
 If you implement the [optional server protocol](/up.protocol) you only need to deal with regular JSON strings.
 
