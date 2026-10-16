@@ -209,6 +209,8 @@ up.element = (function() {
   /*-
   Elements with this attribute are hidden from the page.
 
+  @learn-ref switching-form-state
+
   When Unpoly hides an element for any reason, it will set an `[hidden]` attribute
   instead of using an inline style like `display: none`.
   This allows users to customize the hiding implementation using CSS.

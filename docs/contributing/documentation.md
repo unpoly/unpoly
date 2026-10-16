@@ -797,11 +797,16 @@ title, or "Title › Heading" for anchored refs — so it survives retitles; to 
 indent your own label below the directive. A slug or anchor that doesn't resolve fails
 the site build.
 
-When you add a guide page, give the features it explains a `@learn-ref`, or nothing will
-link to it. Be selective: link the one page that explains the feature in a bigger
-context — two only when no single page is clearly it, and none when a page merely
-mentions the feature. `rake docs:learn_refs` in `unpoly-site` lists the public selectors
-and events that still lack one.
+A `@learn-ref` points to the Learn page that covers the symbol's wider topic.
+Readers often land on a very specific API page from a search result. The ref helps them
+find the overview of the topic the symbol belongs to. So the page doesn't need to explain
+or even mention the symbol: `up:request:loaded` belongs to `/network`, `[up-anchored=right]`
+to `/overlays`. Link one page, two only when the symbol belongs to two topics equally.
+Leave the ref out only when no Learn page covers the topic.
+
+When you add a guide page, give the features of its topic a `@learn-ref`, or nothing will
+link to it. `rake docs:learn_refs` in `unpoly-site` lists the public selectors and events
+that still lack one.
 
 > [!IMPORTANT]
 > Renaming a page changes its URL, and unlike a renamed API, we don't keep the old page

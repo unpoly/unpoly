@@ -916,6 +916,8 @@ up.viewport = (function() {
   Marks this element as being anchored to the right edge of the screen,
   such as fixed navigation bars.
 
+  @learn-ref overlays
+
   Since [overlays](/up.layer) hide the document scroll bar,
   elements anchored to the right appear to jump when an overlay opens or
   closes. Applying this attribute to anchored elements will make Unpoly
@@ -955,6 +957,8 @@ up.viewport = (function() {
   /*-
   This class is assigned to the `<body>` and [right-anchored](/up-anchored-right)
   elements while an [overlay](/up.layer) with a scrolling viewport is open.
+
+  @learn-ref overlays
 
   Overlays temporarily hide the document's main scroll bar to prevent multiple scrollbars from being rendered.
   Without a scrollbar, the `<body>` becomes wider. This may cause elements to jump in width as the overlay opens and

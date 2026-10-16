@@ -123,6 +123,8 @@ up.framework = (function() {
   /*-
   This event is emitted after Unpoly has [booted](/up.boot).
 
+  @learn-ref install
+
   For most apps this event will be emitted in the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
   as [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
   All [compilers](/up.script) will already have run on the initial page content.
@@ -141,6 +143,8 @@ up.framework = (function() {
 
   /*-
   Prevent Unpoly from booting automatically.
+
+  @learn-ref install
 
   By default Unpoly [automatically boots](/install#initialization)
   on [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).

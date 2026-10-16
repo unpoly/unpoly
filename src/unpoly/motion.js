@@ -328,6 +328,8 @@ up.motion = (function() {
   This event is emitted on an animating element by `up.motion.finish()` to
   request the animation to instantly finish and skip to the last frame.
 
+  @learn-ref controlling-motion#finishing-running-animations
+
   Custom [animation](/up.animation) and [transition](/up.transition) functions are expected
   to instantly settle their promises when this event is observed on the
   animating element.

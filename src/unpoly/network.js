@@ -884,6 +884,8 @@ up.network = (function() {
   This event is [emitted](/up.emit) when the response to an [AJAX request](/up.request)
   has been received.
 
+  @learn-ref network
+
   Note that this event will also be emitted when the server signals an
   error with an HTTP status like `500`. Only if the request
   encounters a fatal error (like a loss of network connectivity),

@@ -1709,6 +1709,8 @@ up.fragment = (function() {
   Elements are assigned the `.up-destroying` class before they are [destroyed](/up.destroy)
   or while they are being removed by a [transition](/up.morph).
 
+  @learn-ref transitions#how-a-transition-plays
+
   If the removal is [animated](/up.destroy#animating-the-removal),
   the class is assigned before the animation starts.
 

@@ -1342,6 +1342,8 @@ up.form = (function() {
   /*-
   This event is emitted before a form is being [validated](/up-validate).
 
+  @learn-ref validation
+
   Listeners can [inspect](#properties), [modify](#event.renderOptions), or [prevent](#event.preventDefault)
   the render pass that will load and show the validation results.
 
