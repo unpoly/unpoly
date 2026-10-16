@@ -1585,6 +1585,26 @@ describe('up.fragment', function() {
         expect(nodes[2]).not.toBe(template.content.childNodes[2])
       })
 
+      it("looks up a template by selector in an ancestor layer of the { origin }", async function() {
+        htmlFixtureList('<template id="my-template">from root</template>')
+        const overlay = await up.layer.open({ content: '<div id="origin">origin</div>' })
+        const origin = overlay.getFirstSwappableElement().querySelector('#origin')
+
+        const nodes = up.template.clone('#my-template', {}, { origin })
+
+        expect(nodes[0]).toBeTextNode('from root')
+      })
+
+      it("prefers a template in the { origin }'s own layer", async function() {
+        htmlFixtureList('<template id="my-template">from root</template>')
+        const overlay = await up.layer.open({ content: '<div id="origin">origin</div><template id="my-template">from overlay</template>' })
+        const origin = overlay.getFirstSwappableElement().querySelector('#origin')
+
+        const nodes = up.template.clone('#my-template', {}, { origin })
+
+        expect(nodes[0]).toBeTextNode('from overlay')
+      })
+
       it('looks up a template by selector', function() {
         const template = htmlFixture(`
           <template id="my-template">

@@ -3019,7 +3019,8 @@ up.fragment = (function() {
   @stable
   */
   function cloneTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
-    let template = getSmart(templateOrSelector, { origin }) || up.fail('Template not found: %o', templateOrSelector)
+    // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
+    let template = getSmart(templateOrSelector, { origin, layer: 'closest' }) || up.fail('Template not found: %o', templateOrSelector)
     let event = up.emit(template, 'up:template:clone', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
     let nodes = event.nodes ?? defaultTemplateNodes(template, htmlParser)
     for (let node of nodes) {
