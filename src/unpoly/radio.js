@@ -188,7 +188,7 @@ up.radio = (function() {
 
   ## Derivable target required {#derivable-target-required}
 
-  When an `[up-hungry]` fragment piggy-backs on another fragment update, Unpoly
+  When an `[up-hungry]` element piggy-backs on another fragment update, Unpoly
   will [derive a target selector](/target-derivation) for the hungry element.
 
   For this to work the hungry element must have an [identifying attribute](/target-derivation#derivation-patterns),
@@ -211,24 +211,24 @@ up.radio = (function() {
   ## Conflict resolution
 
   When Unpoly renders new content, each element in that content can only be inserted once.
-  When multiple hungry elements conflict with each other or with the [primary render target](/targeting-fragments),
+  When hungry elements conflict with each other or with the [target selector](/targeting-fragments),
   the conflict is resolved using the following rules:
 
-  1. When both a [target selector](/targeting-fragments) and a hungry element target the same fragment in the response, only the direct render target will be updated.
-  2. When hungry elements are nested within each other, the outermost fragment will be updated. Note that we recommend not overusing the hungry mechanism, and preferring explicit render targets instead.
-  3. When hungry elements on different layers target the same fragment in the response,
-     the layer closest to the rendering layer will be chosen.
+  1. When the target selector and a hungry element match the same element in the response, the element is updated once, as part of the target selector.
+  2. When hungry elements are nested within each other, only the outermost hungry element is updated. We recommend using hungry elements sparingly, and adding elements to the target selector instead.
+  3. When hungry elements on different layers match the same element in the response,
+     only the hungry element on the layer closest to the rendering layer is updated.
 
   ## Disabling
 
-  By default hungry fragments are processed for all updates of the current layer.
-  You can disable the processing of hungry fragments using one of the following methods:
+  By default hungry elements are processed for all updates of the current layer.
+  You can disable the processing of hungry elements using one of the following methods:
 
-  - Rendering with an [`{ hungry: false }`](/up.render#options.hungry) option will not process any hungry fragments.
-  - Setting an [`[up-use-hungry="false"]`](/up-follow#up-use-hungry) attribute on a link or form will not update hungry fragments when the element is activated.
-  - Preventing an `up:fragment:hungry` event will prevent the hungry fragment
+  - Rendering with an [`{ hungry: false }`](/up.render#options.hungry) option will not process any hungry elements.
+  - Setting an [`[up-use-hungry="false"]`](/up-follow#up-use-hungry) attribute on a link or form will not update hungry elements when the element is activated.
+  - Preventing an `up:fragment:hungry` event will prevent the hungry element
     from being updated.
-  - Calling `event.preventDefault()` in an `[up-on-hungry]` attribute handler will prevent the hungry fragment
+  - Calling `event.preventDefault()` in an `[up-on-hungry]` attribute handler will prevent the hungry element
     from being updated.
 
   @selector [up-hungry]
