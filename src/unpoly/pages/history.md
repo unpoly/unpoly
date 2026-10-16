@@ -2,14 +2,14 @@ History
 =======
 
 Unpoly keeps the browser history working while it updates fragments.
-When a link or form changes the page's main content, the address bar and window title
+When a link or form changes the page's main fragment, the address bar and window title
 change as they would for a full page load, and the Back button brings the earlier page back.
 
 
 Updating the address bar
 ------------------------
 
-An update counts as a page change when it swaps the page's [main element](/main).
+An update counts as a page change when it swaps the page's [main fragment](/main).
 Only then does Unpoly push a history entry, so users can bookmark, share and reload
 each URL as usual.
 

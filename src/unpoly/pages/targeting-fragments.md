@@ -35,10 +35,10 @@ up.render({ target: '.content', url: '/posts/5' })
 ```
 
 
-Targeting the main element {#targeting-the-main-element}
---------------------------
+Targeting the main fragment {#targeting-the-main-element}
+---------------------------
 
-Most links and forms update the site's primary content area, called the [main element](/main).
+Most links and forms update the site's primary content area, called the [main fragment](/main).
 Omit the target to update it:
 
 ```html
@@ -49,16 +49,16 @@ Omit the target to update it:
 </main>
 ```
 
-The `:main` selector names the main element explicitly, which is useful when it is one of multiple targets.
-Likewise, a JavaScript function that omits its `{ target }` option updates the main element:
+The `:main` selector names the main fragment explicitly, which is useful when it is one of multiple targets.
+Likewise, a JavaScript function that omits its `{ target }` option updates the main fragment:
 
 ```js
 up.render({ url: '/posts/5' })
 ```
 
-By default the main element is any element with an `[up-main]` attribute, the HTML5 `<main>` element,
-or the layer's [topmost swappable element](#targeting-the-entire-layer).
-You can configure other selectors in `up.fragment.config.mainTargets`.
+The main fragment is often, but not always, the HTML `<main>` element.
+Any element with an `[up-main]` attribute can be the main fragment, and so can the layer's [topmost swappable element](#targeting-the-entire-layer).
+The selectors that find it are the *main targets* in `up.fragment.config.mainTargets`.
 
 
 Updating multiple fragments {#multiple}

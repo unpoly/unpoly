@@ -185,7 +185,7 @@ If you have compilers that only set default attributes, consider using a single 
 It's much leaner than a compiler, which needs to run for every new fragment.
 
 The `up:fragment:loaded` event is emitted after the server has responded, but before the response is rendered.
-Here you can inspect the response and change how it is rendered. The example below renders the main target
+Here you can inspect the response and change how it is rendered. The example below renders the main fragment
 when the server flags the response with a header:
 
 ```js

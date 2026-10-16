@@ -62,7 +62,7 @@ up.viewport.config.autoFocusVisible = ({ element, inputDevice }) =>
 See `up.event.inputDevice` for a list of values for the `{ inputDevice }` property.
 
 You can replace or extend the default strategy. For example, the following configuration
-keeps the default strategy, but never shows a focus ring on [main elements](/main):
+keeps the default strategy, but never shows a focus ring on a [main fragment](/main):
 
 ```js
 let defaultVisible = up.viewport.config.autoFocusVisible

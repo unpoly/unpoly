@@ -61,7 +61,7 @@ Navigation defaults
 -------------------
 
 Following a link or submitting a form is a *navigation*. A navigation adds a preset of render options
-that make the update feel like a full page load: responses are cached, and when the main content changes,
+that make the update feel like a full page load: responses are cached, and when the main fragment changes,
 the URL updates, the page scrolls to the top and focus moves to the new content.
 A plain `up.render()` call has none of these defaults.
 

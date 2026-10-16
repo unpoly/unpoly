@@ -10,13 +10,13 @@ Every default can be changed per link, per form or globally.
 What happens after following a link {#navigation-defaults}
 -----------------------------------
 
-Take a link that updates the page's [main element](/main):
+Take a link that updates the page's [main fragment](/main):
 
 ```html
 <a href="/posts/5" up-follow>Read post</a>
 ```
 
-When the new `<main>` is rendered, the page scrolls to the top and the main element receives focus.
+When the new `<main>` is rendered, the page scrolls to the top and the main fragment receives focus.
 A screen reader starts reading the new post, and a keyboard user continues tabbing from there.
 
 Now take a link that updates a minor fragment:

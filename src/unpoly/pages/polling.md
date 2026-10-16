@@ -96,7 +96,7 @@ set an [`[up-if-layer=any]`](/up-poll#up-if-layer) attribute.
 When the user returns after at least one interval was spent in the background,
 Unpoly reloads the fragment immediately. You can use this to refresh a page when the user
 comes back after working on something else for a while. The following reloads
-your [main element](/main) after an absence of five minutes or more:
+your [main fragment](/main) after an absence of five minutes or more:
 
 ```html
 <main up-poll up-interval="300_000"> <!-- mark: up-interval="300_000" -->

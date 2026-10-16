@@ -100,9 +100,9 @@ Most [layer modes](/overlays#layer-modes) bring their own scrollbar, and will ef
 A [popup](/overlays#layer-modes) has no scrollbar, so its parent layer will scroll to reveal the popup frame.
 
 
-### Revealing the main element {#main}
+### Revealing the main fragment {#main}
 
-To reveal the updated layer's [main element](/up-main), set `[up-scroll="main"]`:
+To reveal the updated layer's [main fragment](/up-main), set `[up-scroll="main"]`:
 
 ```html
 <a href="/contact" up-follow up-scroll="main">Contact us</a> <!-- mark: up-scroll="main" -->
@@ -230,7 +230,7 @@ append `-if-main` to any string option on this page:
 <a href="/list" up-follow up-scroll="top-if-main">Back to list</a> <!-- mark: up-scroll="top-if-main" -->
 ```
 
-This scrolls to the top, but only if the updated fragment contains a main element.
+This scrolls to the top, but only if the updated fragment contains the main fragment.
 When a link targets a minor fragment, nothing scrolls.
 
 To implement other conditions, [pass a function](#function) instead.

@@ -49,7 +49,7 @@ up.fragment = (function() {
 
       This property is aliased as [`up.layer.config.any.mainTargets`](/up.layer.config#config.any.mainTargets).
 
-      Also see [targeting the main element](/targeting-fragments#targeting-the-main-element).
+      Also see [targeting the main fragment](/targeting-fragments#targeting-the-main-element).
 
     @param {Array<string|Function<Element>: string|undefined>} [config.targetDerivers]
       An array of [target derivation patterns](/target-derivation#derivation-patterns)
@@ -1885,7 +1885,7 @@ up.fragment = (function() {
 
   /*-
   Fetches this given URL with JavaScript and [replaces](/up.replace) the
-  [current layer](/up.layer.current)'s [main element](/up.fragment.config#config.mainTargets)
+  [current layer](/up.layer.current)'s [main fragment](/up.fragment.config#config.mainTargets)
   with a matching fragment from the server response.
 
   ### Example
@@ -2341,16 +2341,16 @@ up.fragment = (function() {
   }
 
   /*-
-  A pseudo-selector that matches the layer's [main content area](/up-main).
+  A pseudo-selector that matches the layer's [main fragment](/up-main).
 
-  Use `:main` to only update the main page content, while keeping static layout elements around it.
+  Use `:main` to only update the main fragment, while keeping static layout elements around it.
   To replace all visible elements of a layer, see `:layer`.
 
   @learn-ref targeting-fragments
 
-  ## Targeting the main element
+  ## Targeting the main fragment
 
-  You can target the main element using the `:main` selector:
+  You can target the main fragment using the `:main` selector:
 
   ```html
   <a href="/cards/5" up-target=":main">Load post</a>
@@ -2370,7 +2370,7 @@ up.fragment = (function() {
   </main>
   ```
 
-  Also see [targeting the main element](/targeting-fragments#targeting-the-main-element).
+  Also see [targeting the main fragment](/targeting-fragments#targeting-the-main-element).
 
   ## Default main targets
 
@@ -2387,17 +2387,17 @@ up.fragment = (function() {
   */
 
   /*-
-  Marks this element as the primary content element of your application layout.
+  Marks this element as the [main fragment](/targeting-fragments#targeting-the-main-element) of your application layout.
 
-  Unpoly will update a main element when no more specific render target is given.
+  Unpoly will update the main fragment when no more specific render target is given.
 
   @learn-ref targeting-fragments
 
   ## Example
 
-  Many links simply replace the primary content element in your application layout.
+  Many links simply replace the main fragment in your application layout.
 
-  Unpoly lets you mark this elements as a default target using the `[up-main]` attribute:
+  Unpoly lets you mark this element as a default target using the `[up-main]` attribute:
 
   ```html
   <body>
@@ -2412,7 +2412,7 @@ up.fragment = (function() {
   </body>
   ```
 
-  Once a main target is configured, you no longer need `[up-target]` in a link.\
+  Once the main fragment is marked, you no longer need `[up-target]` in a link.\
   Use `[up-follow]` and the `[up-main]` element will be replaced:
 
   ```html
@@ -2425,11 +2425,11 @@ up.fragment = (function() {
   <a href="/foo" up-target=".profile">...</a>
   ```
 
-  ## Overlays can use different main targets {#overlays}
+  ## Overlays can use a different main fragment {#overlays}
 
   Overlays often use a different default selector, e.g. to exclude a navigation bar.
 
-  To define a different main target for an overlay, set the [layer mode](/overlays#layer-modes) as the
+  To mark a different main fragment for an overlay, set the [layer mode](/overlays#layer-modes) as the
   value of the `[up-main]` attribute:
 
   ```html
@@ -2465,11 +2465,11 @@ up.fragment = (function() {
 
   @selector [up-main]
   @param [up-main]
-    A space-separated list of [layer modes](/overlays#layer-modes) for which to use this main target.
+    A space-separated list of [layer modes](/overlays#layer-modes) for which this element is the main fragment.
 
-    Omit the attribute value to define a main target for *all* layer modes.
+    Omit the attribute value to make this the main fragment for *all* layer modes.
 
-    To use a different main target for all overlays (but not the root layer), set `[up-main=overlay]`.
+    To use a different main fragment for all overlays (but not the root layer), set `[up-main=overlay]`.
   @stable
   */
 
@@ -2550,7 +2550,7 @@ up.fragment = (function() {
 
   @include topmost-swappable-layer-element
 
-  Use `:layer` to replace all visible elements of a layer. To only update a layer's main content area
+  Use `:layer` to replace all visible elements of a layer. To only update a layer's main fragment
   while keeping static layout elements around it, see `:main`.
 
   ## Example

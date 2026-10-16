@@ -15,17 +15,17 @@ To open a link's destination in a modal overlay, set an `[up-layer=new]` attribu
 <a href="/menu" up-layer="new">Open menu</a> <!-- mark: up-layer="new" -->
 ```
 
-When the user clicks, Unpoly requests `/menu` and shows the response's [main element](/main)
+When the user clicks, Unpoly requests `/menu` and shows the response's [main fragment](/main)
 in the overlay. Your server renders the same full page it would for a regular page load,
 so the link keeps working in a new tab or without JavaScript.
 
 
 ### Choosing what the overlay shows {#content}
 
-Often the page's main element works well in an overlay as it is.
+Often the page's main fragment works well in an overlay as it is.
 When it doesn't, use the first of these options that fits:
 
-1. Mark a different [main element](/up-main#overlays) for overlays.
+1. Mark a different [main fragment](/up-main#overlays) for overlays.
    Set `[up-main=overlay]` for all overlays, or name a [mode](#modes) like `[up-main=modal]`:
 
    ```html

@@ -19,11 +19,11 @@ To have Unpoly handle the submission, set an `[up-submit]` attribute:
 
 When the user submits, Unpoly sends the form data to the server.
 The server responds with a full HTML page, the same way it would for any browser request.
-Unpoly extracts the response's [main element](/main) and replaces the main element
+Unpoly extracts the response's [main fragment](/main) and replaces the main fragment
 on the current page. The rest of the page stays untouched.
 
 The response may contain other HTML, or even the entire application layout.
-Only the main element is extracted. Other elements are discarded from the response,
+Only the main fragment is extracted. Other elements are discarded from the response,
 and their counterparts on the page are kept unchanged.
 
 The form remains a standard form. When JavaScript is unavailable,
@@ -36,7 +36,7 @@ the browser submits it with a full page load.
 
 ## Updating a specific fragment {#target}
 
-To update an element other than the main element, set an [`[up-target]`](/up-submit#up-target)
+To update an element other than the main fragment, set an [`[up-target]`](/up-submit#up-target)
 attribute with a CSS selector:
 
 ```html
@@ -89,7 +89,7 @@ a different fragment. See [[flashes]] for placing it in your layout and clearing
 ## Navigation defaults
 
 Submitting a form is considered [navigation](/navigation-defaults) by default.
-When a form updates the layer's main element, Unpoly behaves like a full page load would:
+When a form updates the layer's main fragment, Unpoly behaves like a full page load would:
 the browser URL and history are updated, and the new content is scrolled into view.
 Focus moves to the new fragment.
 

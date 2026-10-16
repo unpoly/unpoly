@@ -136,9 +136,9 @@ Aborting rules in layers {#layers}
 
 The following rules apply when opening or closing [overlays](/up.layer):
 
-- A request to open a new overlay will abort existing requests targeting the base layer's [main element](/main) or its descendants.
+- A request to open a new overlay will abort existing requests targeting the base layer's [main fragment](/main) or its descendants.
 - When two requests attempt to [open a new overlay](/up-layer-new) over the same base layer, the first request will be aborted by the second request.
-- A request to open a new overlay is aborted when the base layer's [main element](/main) is targeted by a second request.
+- A request to open a new overlay is aborted when the base layer's [main fragment](/main) is targeted by a second request.
 - When a layer is closed, all pending requests targeting that layer are aborted. This is regardless of the `{ abort }` option used.
 
 

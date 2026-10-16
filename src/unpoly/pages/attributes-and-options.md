@@ -46,7 +46,7 @@ Unpoly attributes
 
 Unpoly provides `up-`prefixed attributes that enable additional behavior on HTML elements.
 For example, the `[up-follow]` attribute will cause a clicked link to swap the
-page's [main element](/main) instead of replacing the full page:
+page's [main fragment](/main) instead of replacing the full page:
 
 ```html
 <a href="/path" up-follow>Click me</a> <!-- mark: up-follow -->

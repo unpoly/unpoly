@@ -151,7 +151,7 @@ however fast the user is and however slow the network:
 - **Batched updates.** Changes that waited are [sent together](/up.validate#batching),
   in a single request for all their targets. When one target contains another, only the outer one is requested.
 - **Submitting wins.** When the user submits while a validation is loading, the validation is [aborted](/aborting-requests).
-  This happens when the submission updates the form or an element around it, like the [main element](/main).
+  This happens when the submission updates the form or an element around it, like the [main fragment](/main).
 
 Let's walk through a challenging scenario using the [postage form example](#declaring-dependencies) above:
 

@@ -2,7 +2,7 @@ Navigation defaults
 ===================
 
 Following a link or submitting a form is a *navigation*. Navigation adds a preset of render options
-that make the update feel like a full page load: responses are cached, and when the main content changes,
+that make the update feel like a full page load: responses are cached, and when the main fragment changes,
 the URL updates, the page scrolls to the top and focus moves to the new content.
 A plain `up.render()` call only swaps the fragment, and you opt into each side effect on your own.
 
@@ -53,7 +53,7 @@ When navigating, Unpoly applies the following render options:
 | `{ peel: 'dismiss' }`    | Dismiss overlays when [targeting a background layer](/closing-overlays#peeling)           |
 
 Most of these options have an `'auto'` value, meaning the effect only applies when the update
-is significant. A link that swaps the layer's main element gets a new history entry and
+is significant. A link that swaps the layer's main fragment gets a new history entry and
 scrolls to the top. A link that only updates a sidebar keeps the URL and the scroll position,
 even though it navigates.
 
@@ -72,7 +72,7 @@ To follow a link or submit a form without navigation defaults, set an `[up-navig
 
 Clicking the link updates the `.users` list and nothing else. The URL stays the same,
 the scroll position is kept and the response is not cached.
-The link also no longer falls back to the main element. When the server responds with an error,
+The link also no longer falls back to the main fragment. When the server responds with an error,
 nothing is rendered unless you set an [`[up-fail-target]`](/error-responses#fail-options).
 
 With `[up-navigate=false]` you can still enable individual effects, like `[up-history=true]`
@@ -125,7 +125,7 @@ Sometimes a default should depend on the link or form that was activated.
 Events like `up:link:follow` or `up:form:submit` have a `{ renderOptions }` property
 that lets you change the render options for the coming fragment update.
 
-The code below keeps the scroll position when the user switches tabs, even though each tab swaps the main element:
+The code below keeps the scroll position when the user switches tabs, even though each tab swaps the main fragment:
 
 ```js
 up.on('up:link:follow', '.tabs a', function(event) {

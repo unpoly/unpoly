@@ -176,7 +176,7 @@ up.link = (function() {
   /*-
   Follows the given link with JavaScript and updates a fragment with the server response.
 
-  By default, the layer's [main element](/up-main)
+  By default, the layer's [main fragment](/up-main)
   will be replaced. Attributes like [`[up-target]`](/up-follow#up-target)
   or [`[up-layer]`](/up-follow#up-layer) will be honored.
 
@@ -1146,7 +1146,7 @@ up.link = (function() {
   <a href="/posts/5" up-follow up-target=".content">Read post</a>
   ```
 
-  If no `[up-target]` attribute is set, the [main target](/up-main) is updated.
+  If no `[up-target]` attribute is set, the [main fragment](/up-main) is updated.
 
   ## Following all links automatically
 

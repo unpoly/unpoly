@@ -23,7 +23,7 @@ Placing flashes into the layout {#placement}
 In your application layout, place an empty element with an `[up-flashes]` attribute.
 This indicates where future flash messages should be inserted.
 
-A popular place for flashes is outside your [main element](/main):
+A popular place for flashes is outside your [main fragment](/main):
 
 ```html
 <nav>
@@ -35,7 +35,7 @@ A popular place for flashes is outside your [main element](/main):
 </main>
 ```
 
-You may also place the container inside your main element.
+You may also place the container inside your main fragment.
 See [flashes in overlays](#overlays) for how that choice affects pages with overlays.
 
 
@@ -103,13 +103,13 @@ where your `[up-flashes]` containers are.
 
 ### One container for all layers
 
-With the container [outside the main element](#placement), only the root layer has an
+With the container [outside the main fragment](#placement), only the root layer has an
 `[up-flashes]` element. Flashes from any overlay are rendered into that one container,
 on the root layer.
 
 ### One container per layer
 
-For styling reasons you may also wish to place the `[up-flashes]` container inside your [main element](/main):
+For styling reasons you may also wish to place the `[up-flashes]` container inside your [main fragment](/main):
 
 ```html
 <nav>
@@ -122,7 +122,7 @@ For styling reasons you may also wish to place the `[up-flashes]` container insi
 </main>
 ```
 
-Each overlay that renders a main element then brings its own `[up-flashes]` container.
+Each overlay that renders a main fragment then brings its own `[up-flashes]` container.
 Flash messages from overlay content are rendered into the overlay's own container.
 Only when the overlay is closing, its
 [flashes are rendered into the parent layer](#from-closing-overlays) instead of being discarded.

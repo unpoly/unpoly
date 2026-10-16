@@ -78,7 +78,7 @@ up.render({ url: '/path', target: '.target' })
 
 When the fragment change represents a [navigation](/navigation-defaults), use `up.navigate()` instead.
 It applies the navigation defaults, which update the browser location, scroll position and focus
-when the main element changes:
+when the main fragment changes:
 
 ```js
 up.navigate({ url: '/path', target: '.target' })

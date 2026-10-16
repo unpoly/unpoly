@@ -23,7 +23,7 @@ and add an `[up-submit]` attribute:
 When the user submits, Unpoly sends the form data to the server.
 Your server processes it like any form submission, usually responding with
 a redirect to the next screen. Unpoly extracts the response's
-[main element](/main) and swaps it into the current page.
+[main fragment](/main) and swaps it into the current page.
 Elements outside the updated fragment keep their state, like unsaved input in other forms.
 
 To update a different fragment, add an [`[up-target]`](/up-submit#up-target) attribute with a CSS selector:

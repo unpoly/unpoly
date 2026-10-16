@@ -1,7 +1,7 @@
 Updating history
 ================
 
-When Unpoly updates a page's main content, it also updates the browser's address bar,
+When Unpoly updates a page's main fragment, it also updates the browser's address bar,
 the window title and the meta tags in the `<head>`. The result looks and behaves like a full page load:
 the user can bookmark the URL, share it, or return to it with the Back button.
 Updates to minor fragments leave history untouched.
@@ -11,13 +11,13 @@ When history is updated {#when-history-is-changed}
 -----------------------
 
 Following a link or submitting a form counts as [navigation](/navigation-defaults).
-When navigation updates the layer's [main element](/main), Unpoly adds a history entry for the new URL:
+When navigation updates the layer's [main fragment](/main), Unpoly adds a history entry for the new URL:
 
 ```html
 <a href="/posts/5" up-follow>Read post</a> <!-- mark: up-follow -->
 ```
 
-Clicking the link fetches `/posts/5` and swaps the main element.
+Clicking the link fetches `/posts/5` and swaps the main fragment.
 The address bar now shows `/posts/5`, and the window title is taken from the response's `<title>`.
 
 A link that updates a smaller fragment does not change history:
@@ -31,7 +31,7 @@ so the user does not collect a history entry for every minor update.
 
 This is the `auto` setting of the [`[up-history]`](/up-follow#up-history) attribute, which is the default for links and forms.
 History is updated when the targeted fragment contains an element matching `up.fragment.config.autoHistoryTargets`.
-By default that is the layer's main element.
+By default that is the layer's main fragment.
 When the new URL is the one already in the address bar, no entry is added.
 
 > [note]
@@ -72,7 +72,7 @@ To stop Unpoly from ever changing the browser URL, set `up.history.config.enable
 
 ### Treating other fragments as major {#auto-history-targets}
 
-If your app has a significant element that is not a main element,
+If your app has a significant element that is not the main fragment,
 you can add its selector to `up.fragment.config.autoHistoryTargets`:
 
 ```js
@@ -96,7 +96,7 @@ The exception is an explicit location: when you set [`[up-location]`](/up-follow
 or pass a [`{ location }`](/up.render#options.location) option, Unpoly pushes that URL even after a non-`GET` request.
 
 The same rules apply to error responses. When a failed `GET` request renders an error page into the
-main element, the address bar shows its URL, like after a full page load. A form submission that fails
+main fragment, the address bar shows its URL, like after a full page load. A form submission that fails
 with a validation error does not change history. See [[error-responses]].
 
 
@@ -112,7 +112,7 @@ Pass a `{ history }` option to opt in:
 
 ```js
 up.render({ target: '.content', url: '/path', history: true })   // Always update
-up.render({ target: '.content', url: '/path', history: 'auto' }) // Update if a main element is rendered
+up.render({ target: '.content', url: '/path', history: 'auto' }) // Update if the main fragment is rendered
 ```
 
 To render with all [navigation defaults](/navigation-defaults#navigation-defaults), including `{ history: 'auto' }`,

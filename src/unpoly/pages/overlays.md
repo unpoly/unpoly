@@ -16,7 +16,7 @@ Any link can open its destination in a new overlay:
 ```
 
 The server renders `/users/new` as a full HTML page, the same way it would for
-a regular page load. Unpoly extracts the page's [main element](/main) and shows it
+a regular page load. Unpoly extracts the page's [main fragment](/main) and shows it
 in a modal dialog. The user can dismiss the dialog by pressing `Escape`,
 by clicking outside the box, or with its close button.
 

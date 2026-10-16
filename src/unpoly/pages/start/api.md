@@ -11,7 +11,7 @@ Every attribute has a JavaScript counterpart {#javascript-counterparts}
 --------------------------------------------
 
 The quickest way is an attribute in your HTML. This link swaps the
-[main element](/main) with an animated transition:
+[main fragment](/main) with an animated transition:
 
 ```html
 <a href="/path" up-follow up-transition="cross-fade">Click me</a> <!-- mark: up-transition="cross-fade" -->

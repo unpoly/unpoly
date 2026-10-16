@@ -3,7 +3,7 @@ History in overlays
 
 An overlay can show its own URL in the browser's address bar while it is open, or leave
 the address bar on the page behind it. By default an overlay shows its URL when it contains
-a main element, so a page opened in a dialog gets a shareable address while a small popup menu does not.
+the main fragment, so a page opened in a dialog gets a shareable address while a small popup menu does not.
 This setting is called the overlay's *history visibility*. You can override it globally or for individual overlays.
 
 
@@ -20,7 +20,7 @@ In the example below, we start with a root layer at `/`:
 location.pathname // result: "/"
 ```
 
-We now open an overlay from `/users/5`. Its content is a [main element](/main), so the overlay has visible history.
+We now open an overlay from `/users/5`. Its content is a [main fragment](/main), so the overlay has visible history.
 Note how its URL is reflected in the browser's address bar:
 
 ```js
@@ -46,7 +46,7 @@ location.pathname // result: "/"
 Hiding an overlay's history {#configuring-visibility}
 ---------------------------
 
-By default an overlay has visible history when its initial fragment is a [main element](/main).
+By default an overlay has visible history when its initial fragment is a [main fragment](/main).
 This reveals the location of significant content to the user, but hides the internal location
 of smaller popups or menus.
 
@@ -57,7 +57,7 @@ To hide the history of one overlay, set an `[up-history=false]` attribute on the
 ```
 
 When opening an overlay from JavaScript, pass a `{ history: false }` option to `up.layer.open()` or `up.layer.ask()`.
-Setting `true` instead of `false` makes an overlay show its history even when its content is not a main element.
+Setting `true` instead of `false` makes an overlay show its history even when its content is not a main fragment.
 
 To change the default for all overlays, configure `up.layer.config.overlay.history`.
 A mode can have its own default, like `up.layer.config.popup.history` for all popups.
@@ -110,7 +110,7 @@ When a link in an overlay updates the address bar {#update-conditions}
 
 Once an overlay is open, links and forms inside it follow the usual rules for
 [when history is updated](/updating-history#when-history-is-changed): a link updates history when it targets
-a main element, or when it sets `[up-history=true]`. The address bar only changes when *both*
+the main fragment, or when it sets `[up-history=true]`. The address bar only changes when *both*
 the link updates history *and* the updated layer has visible history:
 
 | Link updates history? | Layer has visible history? | Address bar changed? |

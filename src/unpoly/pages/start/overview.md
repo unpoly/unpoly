@@ -45,7 +45,7 @@ Most screens never need it.
 Strong defaults
 ---------------
 
-When a link or form updates the main content of the page, Unpoly treats the interaction
+When a link or form updates the main fragment of the page, Unpoly treats the interaction
 as a [navigation](/navigation-defaults) and **mimics what a full page load would have done**:
 
 - The browser URL and history are updated, so the Back button keeps working.

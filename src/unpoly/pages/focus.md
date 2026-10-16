@@ -16,7 +16,7 @@ When [navigating](/navigation-defaults), Unpoly tries a sequence of focus strate
 
 1. If the URL has a `#hash`, focus the element matching that hash.
 2. Focus an `[autofocus]` element in the new fragment.
-3. If updating a [main target](/up-main), focus the main element.
+3. If updating a [main target](/up-main), focus the main fragment.
 4. If focus was lost with the old fragment, re-focus a [similar](/target-derivation) element in the new content.
 5. If focus was lost with the old fragment, and no similar element was found, focus the new fragment.
 
@@ -81,9 +81,9 @@ To focus the element matching the `#hash` in the updated URL, set `[up-focus="ha
 When the URL has no hash, or no element matches it, focus is not changed.
 
 
-## Focusing the main element {#main}
+## Focusing the main fragment {#main}
 
-To focus the updated layer's [main element](/up-main), set `[up-focus="main"]`:
+To focus the updated layer's [main fragment](/up-main), set `[up-focus="main"]`:
 
 ```html
 <a href="/contact" up-follow up-focus="main">Contact us</a> <!-- mark: up-focus="main" -->

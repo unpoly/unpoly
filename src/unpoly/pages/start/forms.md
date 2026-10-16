@@ -21,7 +21,7 @@ and add an `[up-submit]` attribute:
 When the user submits, Unpoly sends the form data in the background.
 Your server processes it like any form submission, usually responding with
 a redirect to the next screen. Unpoly extracts the response's
-[main element](/main) and swaps it into the current page.
+[main fragment](/main) and swaps it into the current page.
 
 
 Showing validation errors
@@ -33,7 +33,7 @@ code like [HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/42
 (Unprocessable Content).
 
 The error code tells Unpoly that the submission failed. Instead of updating
-the main element, Unpoly now updates **the `<form>` itself**, so the user sees
+the main fragment, Unpoly now updates **the `<form>` itself**, so the user sees
 your error messages next to their input:
 
 ```html

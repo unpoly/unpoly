@@ -17,7 +17,7 @@ To let Unpoly handle a link, set an `[up-follow]` attribute:
 
 When the user clicks, Unpoly fetches `/preferences`.
 The server renders a full HTML page, the same way it would for a regular page load.
-Unpoly then extracts the response's [main element](/main) and swaps it into the current page,
+Unpoly then extracts the response's [main fragment](/main) and swaps it into the current page,
 leaving everything around it untouched.
 
 To update a different fragment, add an [`[up-target]`](/up-follow#up-target) attribute with a CSS selector:

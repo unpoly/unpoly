@@ -70,8 +70,8 @@ when these are not given.
 ### Fail targets for links {#links}
 
 Unlike a form, a link has no natural fragment to show an error in.
-When a link receives an error response, Unpoly updates the [main target](/main) instead of the link's `[up-target]`.
-This way a server error page shows up in the main content area, where the user expects it.
+When a link receives an error response, Unpoly updates the [main fragment](/main) instead of the link's `[up-target]`.
+This way a server error page shows up in the main fragment, where the user expects it.
 
 To re-render a different fragment, set an `[up-fail-target]` attribute.
 

@@ -11,7 +11,7 @@
   See [Rendering error responses differently](/error-responses#fail-options) for details.
 
   If omitted, a failed response will *not* update the [`[up-target]`](#up-target),
-  but update the [main target](/up-main) instead.
+  but update the [main fragment](/up-main) instead.
 
 @param [up-fallback='true']
   Specifies behavior if the [target selector](/up.render#options.target) is missing from the current page or the server response.
