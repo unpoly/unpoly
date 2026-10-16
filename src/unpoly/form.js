@@ -1028,7 +1028,7 @@ up.form = (function() {
   /*-
   Returns the [form group](/up-form-group) for the given element.
 
-  By default, a form group is a `<fieldset>` element or any container with an `[up-form-group]` attribute.
+  By default, a form group is a container with an `[up-form-group]` attribute, a `<fieldset>` or a `<label>`.
   This can be configured in `up.form.config.groupSelectors`.
 
   Form groups may be nested. This function returns the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) group around the given element.
