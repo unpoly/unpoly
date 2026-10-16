@@ -27,6 +27,180 @@ extendDescribe('up.fragment', function() {
           })
         }
 
+        // A main element with a #hash target far below the fold.
+        const tallMainHTML = (text) => `
+          <main>
+            <div style="height: 3000px">${text}</div>
+            <div id="hash" style="height: 50px">hash target</div>
+            <div style="height: 3000px"></div>
+          </main>
+        `
+
+        it('does not scroll without a { scroll } option, even when updating a main target with a #hash URL', async function() {
+          htmlFixtureList(tallMainHTML('old main'))
+          up.viewport.root.scrollTop = 1000
+
+          up.render('main', { url: '/path#hash' })
+          await wait()
+
+          jasmine.respondWith(tallMainHTML('new main'))
+          await wait()
+
+          expect('main').toHaveText(/new main/)
+          expect(up.viewport.root.scrollTop).toBe(1000)
+        })
+
+        describe('with { scroll: "auto" }', function() {
+
+          it('scrolls the layer to the top when updating a main target', async function() {
+            htmlFixtureList(tallMainHTML('old main'))
+            up.viewport.root.scrollTop = 1000
+
+            await up.render({ target: 'main', document: tallMainHTML('new main'), scroll: 'auto' })
+
+            expect('main').toHaveText(/new main/)
+            expect(up.viewport.root.scrollTop).toBe(0)
+          })
+
+          it('does not scroll when updating a non-main target', async function() {
+            htmlFixtureList(`
+              <main>
+                <div style="height: 3000px"></div>
+                <div id="minor">old minor</div>
+                <div style="height: 3000px"></div>
+              </main>
+            `)
+            up.viewport.root.scrollTop = 1000
+
+            await up.render({ target: '#minor', document: '<div id="minor">new minor</div>', scroll: 'auto' })
+
+            expect('#minor').toHaveText('new minor')
+            expect(up.viewport.root.scrollTop).toBe(1000)
+          })
+
+          it('reveals the element matching the URL #hash, even when updating a main target', async function() {
+            htmlFixtureList(tallMainHTML('old main'))
+            up.viewport.root.scrollTop = 1000
+
+            up.render('main', { url: '/path#hash', scroll: 'auto' })
+            await wait()
+
+            jasmine.respondWith(tallMainHTML('new main'))
+            await wait()
+
+            expect('main').toHaveText(/new main/)
+            expect(document.querySelector('#hash').getBoundingClientRect().top).toBeAround(0, 1)
+          })
+
+        })
+
+        describe('with { scroll: "top-if-main" }', function() {
+
+          it('does not scroll when updating a non-main target', async function() {
+            const [viewport] = htmlFixtureList(`
+              <div up-viewport style="height: 200px; overflow-y: scroll">
+                <div style="height: 1000px">
+                  <div id="minor">old minor</div>
+                </div>
+              </div>
+            `)
+            viewport.scrollTop = 333
+
+            await up.render({ target: '#minor', document: '<div id="minor">new minor</div>', scroll: 'top-if-main' })
+
+            expect('#minor').toHaveText('new minor')
+            expect(viewport.scrollTop).toBe(333)
+          })
+
+        })
+
+        describe('with { scroll: "main" }', function() {
+
+          mockRevealBeforeEach()
+
+          it("reveals the layer's main element", async function() {
+            up.fragment.config.mainTargets.unshift('.custom-main')
+            htmlFixtureList(`
+              <div class="custom-main">
+                main text
+                <div class="target">old target</div>
+              </div>
+            `)
+
+            await up.render({ target: '.target', document: '<div class="target">new target</div>', scroll: 'main' })
+
+            expect(this.revealedText).toEqual([jasmine.stringContaining('main text')])
+          })
+
+        })
+
+        describe('with { scroll: "layer" }', function() {
+
+          it("scrolls a modal overlay's viewport to the top", async function() {
+            const overlay = await up.layer.open({
+              mode: 'modal',
+              content: `
+                <div style="height: 3000px"></div>
+                <div id="child">old child</div>
+                <div style="height: 3000px"></div>
+              `
+            })
+            const overlayViewport = overlay.viewportElement
+            overlayViewport.scrollTop = 1000
+            expect(overlayViewport.scrollTop).toBe(1000)
+
+            await up.render({ target: '#child', document: '<div id="child">new child</div>', layer: overlay, scroll: 'layer' })
+
+            expect('#child').toHaveText('new child')
+            expect(overlayViewport.scrollTop).toBe(0)
+          })
+
+        })
+
+        describe('with an Element as { scroll } option', function() {
+
+          mockRevealBeforeEach()
+
+          it('reveals the given element', async function() {
+            const [_target, other] = htmlFixtureList(`
+              <div class="target">old target</div>
+              <div class="other">other text</div>
+            `)
+
+            await up.render({ target: '.target', document: '<div class="target">new target</div>', scroll: other })
+
+            expect(this.revealedText).toEqual(['other text'])
+          })
+
+        })
+
+        describe('with { saveScroll: false }', function() {
+
+          it('does not save scroll positions for the current location', async function() {
+            up.history.config.enabled = true
+            const html = (text) => `
+              <div up-viewport id="viewport" style="height: 100px; overflow-y: scroll">
+                <div style="height: 1000px">${text}</div>
+              </div>
+            `
+            const [viewport] = htmlFixtureList(html('page 1'))
+            up.history.replace('/page1')
+            viewport.scrollTop = 65
+
+            await up.render({ target: '#viewport', document: html('page 2'), location: '/page2', history: true, saveScroll: false })
+
+            expect(up.history.location).toMatchURL('/page2')
+            document.querySelector('#viewport').scrollTop = 10
+
+            await up.render({ target: '#viewport', document: html('page 1 again'), location: '/page1', history: true, scroll: 'restore' })
+
+            expect('#viewport').toHaveText('page 1 again')
+            // Without a saved position for /page1 the new viewport keeps its initial scroll position.
+            expect('#viewport').toBeScrolledTo(0)
+          })
+
+        })
+
         describe('with { scroll: false }', function() {
 
           mockRevealBeforeEach()
@@ -344,6 +518,26 @@ extendDescribe('up.fragment', function() {
 
             expect('#child').toHaveText('new child')
             expect(viewport.scrollTop).toBe(0)
+          })
+
+          it('does not scroll a viewport that is not around the fragment', async function() {
+            const [viewport, _content, _child, otherViewport] = htmlFixtureList(`
+              <div up-viewport id="viewport" style="height: 200px; overflow-y: scroll">
+                <div style="height: 1000px">
+                  <div id="child">old child</div>
+                </div>
+              </div>
+              <div up-viewport id="other-viewport" style="height: 200px; overflow-y: scroll">
+                <div style="height: 1000px"></div>
+              </div>
+            `)
+            viewport.scrollTop = 333
+            otherViewport.scrollTop = 444
+
+            await up.render({ fragment: '<div id="child">new child</div>', scroll: 'top' })
+
+            expect(viewport.scrollTop).toBe(0)
+            expect(otherViewport.scrollTop).toBe(444)
           })
 
         })

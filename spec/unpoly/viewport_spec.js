@@ -124,6 +124,93 @@ describe('up.viewport', function() {
               expect(div).toHaveOutline()
             })
           })
+
+          it('calls up.viewport.config.autoFocusVisible with the element and input device to decide visibility', function() {
+            useMouse()
+            const autoFocusVisible = jasmine.createSpy('autoFocusVisible').and.returnValue(true)
+            up.viewport.config.autoFocusVisible = autoFocusVisible
+            const [div] = htmlFixtureList('<div>text</div>')
+
+            up.focus(div, { focusVisible: 'auto', force: true })
+
+            expect(autoFocusVisible).toHaveBeenCalledWith({ element: div, inputDevice: 'pointer' })
+            expect(div).toHaveClass('up-focus-visible')
+          })
+        })
+
+        it('sets an .up-focus-visible class when using the keyboard', function() {
+          useKeyboard()
+          const [div] = htmlFixtureList('<div>text</div>')
+
+          up.focus(div, { force: true })
+
+          expect(div).toHaveClass('up-focus-visible')
+          expect(div).not.toHaveClass('up-focus-hidden')
+        })
+
+        it('sets an .up-focus-hidden class when using the mouse', function() {
+          useMouse()
+          const [div] = htmlFixtureList('<div>text</div>')
+
+          up.focus(div, { force: true })
+
+          expect(div).toHaveClass('up-focus-hidden')
+          expect(div).not.toHaveClass('up-focus-visible')
+        })
+      })
+
+      it('reveals the focused element', async function() {
+        const [viewport, _spacer, element] = htmlFixtureList(`
+          <div up-viewport style="height: 100px; overflow-y: scroll">
+            <div style="height: 500px"></div>
+            <div tabindex="0" style="height: 50px">element</div>
+          </div>
+        `)
+        expect(viewport.scrollTop).toBe(0)
+
+        up.focus(element)
+        await wait()
+
+        expect(element).toBeFocused()
+        // The element's bottom edge (500 + 50) aligns with the viewport's bottom edge (100)
+        expect(viewport.scrollTop).toBe(450)
+      })
+
+      describe('with { preventScroll: true }', function() {
+        it('does not scroll', async function() {
+          const [viewport, _spacer, element] = htmlFixtureList(`
+            <div up-viewport style="height: 100px; overflow-y: scroll">
+              <div style="height: 500px"></div>
+              <div tabindex="0" style="height: 50px">element</div>
+            </div>
+          `)
+
+          up.focus(element, { preventScroll: true })
+          await wait()
+
+          expect(element).toBeFocused()
+          expect(viewport.scrollTop).toBe(0)
+        })
+      })
+
+      describe('with { force: true }', function() {
+
+        it('sets [tabindex=-1] on an element that is not focusable by default', function() {
+          const [div] = htmlFixtureList('<div>text</div>')
+
+          up.focus(div, { force: true })
+
+          expect(div).toHaveAttribute('tabindex', '-1')
+          expect(div).toBeFocused()
+        })
+
+        it('does not set [tabindex] on an element that is focusable by default', function() {
+          const [button] = htmlFixtureList('<button type="button">label</button>')
+
+          up.focus(button, { force: true })
+
+          expect(button).not.toHaveAttribute('tabindex')
+          expect(button).toBeFocused()
         })
       })
     })
@@ -633,6 +720,41 @@ describe('up.viewport', function() {
           // [4] 200..249
           // [5] 250..299
           expect($viewport.scrollTop()).toBe(50)
+        })
+      })
+
+      describe('with { padding } option', function() {
+
+        const buildViewport = function() {
+          return htmlFixtureList(`
+            <div style="height: 100px; overflow-y: scroll">
+              <div style="height: 50px">0</div>
+              <div style="height: 50px">1</div>
+              <div style="height: 50px">2</div>
+              <div style="height: 50px">3</div>
+              <div style="height: 50px">4</div>
+            </div>
+          `)
+        }
+
+        it('leaves the given number of pixels between the element and the viewport edge', async function() {
+          const [viewport, ...elements] = buildViewport()
+
+          up.reveal(elements[3], { viewport, padding: 10 })
+          await wait()
+
+          // Without padding we would scroll to 100, so element 3 (150..199) touches the bottom edge.
+          expect(viewport.scrollTop).toBe(100 + 10)
+        })
+
+        it('defaults to up.viewport.config.revealPadding', async function() {
+          up.viewport.config.revealPadding = 15
+          const [viewport, ...elements] = buildViewport()
+
+          up.reveal(elements[3], { viewport })
+          await wait()
+
+          expect(viewport.scrollTop).toBe(100 + 15)
         })
       })
 

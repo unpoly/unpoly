@@ -1360,6 +1360,28 @@ describe('up.fragment', function() {
 
         expect(callback).not.toHaveBeenCalled()
       })
+
+      it('stops running the callback after the fragment was destroyed', async function() {
+        const [container, fragment] = htmlFixtureList(`
+          <div class="container">
+            <div class="fragment">fragment</div>
+          </div>
+        `)
+        const callback = jasmine.createSpy('aborted callback')
+        up.fragment.onAborted(fragment, callback)
+
+        up.destroy(fragment)
+        await wait()
+        expect(fragment).toBeDetached()
+        // Destroying the fragment may itself abort requests for the fragment
+        callback.calls.reset()
+
+        // Re-attach the element so a listener that is still subscribed would be observable
+        container.append(fragment)
+        up.fragment.abort(fragment)
+
+        expect(callback).not.toHaveBeenCalled()
+      })
     })
 
     describe('up.fragment.provideNodes()', function() {

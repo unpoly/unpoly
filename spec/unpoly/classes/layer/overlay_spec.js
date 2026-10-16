@@ -244,6 +244,9 @@ describe('up.Layer.Overlay', function() {
       expect(opener).toBeFocused()
     })
 
+    // Pending: CloseLayer#_handleFocus() focuses the parent's non-focusable layer.element instead of its focus element.
+    it('focuses the parent layer if the overlay was opened without an { origin }')
+
     it('pops this layer from the stack synchronously to prevent race conditions', function() {
       makeLayers(2)
 

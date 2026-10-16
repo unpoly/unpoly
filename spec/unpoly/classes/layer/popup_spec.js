@@ -36,6 +36,22 @@ describe('up.Layer.Popup', function() {
     expect(up.layer.isRoot()).toBe(true)
   })
 
+  it('does not trap focus by default', async function() {
+    up.specUtil.assertTabFocused()
+    const [opener, rootInput] = htmlFixtureList(`
+      <a href="#">opener</a>
+      <input type="text" name="email">
+    `)
+    await up.layer.open({ mode: 'popup', origin: opener, content: 'popup content' })
+    expect(up.layer.current).toBeFocused()
+
+    rootInput.focus()
+    await wait()
+
+    expect(up.layer.mode).toBe('popup')
+    expect(rootInput).toBeFocused()
+  })
+
   describe('positioning', function() {
 
     const setPopupMargin = function(margins) {

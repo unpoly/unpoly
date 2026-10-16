@@ -132,6 +132,18 @@ extendDescribe('up.fragment', function() {
             expect('.target').toHaveText('verified text')
           })
 
+          it('loads the revalidation request in the background', async function() {
+            const loadListener = jasmine.createSpy('up:request:load listener')
+            up.on('up:request:load', loadListener)
+
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true })
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+            expect(loadListener).toHaveBeenCalledTimes(1)
+            expect(loadListener.calls.argsFor(0)[0].request.background).toBe(true)
+          })
+
           it('reloads expired content that was rendered into a new overlay', async function() {
             up.render('.target', { layer: 'new', url: '/cached-path', cache: true, revalidate: true })
 

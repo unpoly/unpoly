@@ -553,6 +553,30 @@ describe('up.network', function() {
       })
     })
 
+    describe('up.cache.expire()', function() {
+
+      it('expires all cache entries, but keeps them in the cache', async function() {
+        await jasmine.populateCache('/foo', 'foo')
+        expect({ url: '/foo' }).not.toBeExpired()
+
+        up.cache.expire()
+
+        expect({ url: '/foo' }).toBeCached()
+        expect({ url: '/foo' }).toBeExpired()
+      })
+
+      it('accepts an URL pattern that determines which entries are expired', async function() {
+        await jasmine.populateCache('/foo/1', 'foo 1')
+        await jasmine.populateCache('/bar/1', 'bar 1')
+
+        up.cache.expire('/foo/*')
+
+        expect({ url: '/foo/1' }).toBeExpired()
+        expect({ url: '/bar/1' }).toBeCached()
+        expect({ url: '/bar/1' }).not.toBeExpired()
+      })
+    })
+
     describe('up.network.loadPage', function() {
 
       afterEach(function() {
