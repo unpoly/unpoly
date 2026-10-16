@@ -7,9 +7,7 @@ up.RevealMotion = class RevealMotion {
     this._element = element
     this._viewport = e.get(options.viewport) || up.viewport.get(this._element)
     this._obstructionsLayer = up.layer.get(this._viewport)
-    // (1) When called with options parsed from up.link.followOptions() we get { scrollBehavior }
-    // (2) When called from up.reveal() we get { behavior }
-    this._behavior = options.scrollBehavior ?? options.behavior ?? 'instant'
+    this._behavior = options.behavior ?? 'instant'
 
     const viewportConfig = up.viewport.config
     this._snap    = options.snap    ?? options.revealSnap    ?? viewportConfig.revealSnap

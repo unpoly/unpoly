@@ -903,7 +903,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(this.revealOptions.scrollBehavior).toEqual('smooth')
+            expect(this.revealOptions.behavior).toEqual('smooth')
           })
 
           it('animates the revealing when appending an element', async function() {
@@ -918,7 +918,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(this.revealOptions.scrollBehavior).toEqual('smooth')
+            expect(this.revealOptions.behavior).toEqual('smooth')
           })
 
           it('animates the revealing when swapping out an element', async function() {
@@ -940,6 +940,38 @@ extendDescribe('up.fragment', function() {
             await wait(1500)
 
             expect(document.scrollingElement.scrollTop).toBe(finalScrollTop)
+          })
+
+          it('animates scrolling to the top with { scroll: "top" }', async function() {
+            const scrollSpy = spyOn(up.viewport.root, 'scrollTo').and.callThrough()
+            fixture('.element', { text: 'version 1' })
+
+            up.render('.element', {
+              document: '<div class="element">version 2</div>',
+              scroll: 'top',
+              scrollBehavior: 'smooth'
+            })
+            await wait()
+
+            expect(scrollSpy).toHaveBeenCalledWith(jasmine.objectContaining({ top: 0, behavior: 'smooth' }))
+          })
+
+          it('animates revealing a #hash with { scroll: "hash" }', async function() {
+            const scrollSpy = spyOn(up.viewport.root, 'scrollTo').and.callThrough()
+            fixture('.high', { style: { height: '10000px' } }) // ensure we can scroll
+            fixture('.element', { text: 'version 1' })
+
+            up.render('.element', {
+              url: '/path#section',
+              scroll: 'hash',
+              scrollBehavior: 'smooth'
+            })
+            await wait()
+
+            jasmine.respondWith('<div class="element"><div id="section" style="margin-top: 5000px">section</div></div>')
+            await wait()
+
+            expect(scrollSpy).toHaveBeenCalledWith(jasmine.objectContaining({ behavior: 'smooth' }))
           })
         })
 

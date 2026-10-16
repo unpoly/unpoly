@@ -188,7 +188,6 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     let compilePromise = this._welcomeElement(wrapper, step)
 
     // Reveal the element that was being prepended/appended.
-    // Since we will animate (not morph) it's OK to allow animation of scrolling with { scrollBehavior }.
     this._handleScroll(wrapper, step)
 
     let animatePromise = up.animate(wrapper, step.animation, {

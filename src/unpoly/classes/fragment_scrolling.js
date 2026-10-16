@@ -10,9 +10,15 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
       'revealMax',
       'revealSnap',
       'revealPadding',
-      'scrollBehavior',
+      'behavior',
       'oldScrollTops',
     ])
+  }
+
+  constructor(options) {
+    // Render options call it { scrollBehavior } to stand out among many other options.
+    // The viewport functions we call only take scrolling options, and call it { behavior }.
+    super({ ...options, behavior: options.scrollBehavior })
   }
 
   processPrimitive(opt) {
