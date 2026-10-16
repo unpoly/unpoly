@@ -1253,8 +1253,7 @@ up.form = (function() {
 
   ## Preventing race conditions
 
-  Unpoly guarantees that many concurrent validations will eventually show a consistent form state,
-  regardless of how fast the user clicks or how slow the network is.
+  Unpoly sends one validation request per form at a time and batches the rest.
 
   See [preventing race conditions](/reactive-server-forms#race-conditions) for details.
 
@@ -2162,10 +2161,7 @@ up.form = (function() {
 
   ## Preventing race conditions
 
-  Custom dynamic form implementations will often exhibit race conditions, e.g., when the user
-  is quickly changing fields while requests are still in flight.
-  Such issues are solved with `[up-validate]`. The form will eventually show a consistent state,
-  regardless of how fast the user clicks or how slow the network is.
+  Unpoly sends one validation request per form at a time and batches the rest.
 
   See [preventing race conditions](/reactive-server-forms#race-conditions) for more details.
 

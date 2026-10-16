@@ -21,7 +21,7 @@ without JavaScript.
 ## <em class="heading-prefix">Option 1</em> Keeping a hidden native field {#hidden-field}
 
 Start with a native field that carries the value. A [compiler](/up.compiler) hides it and
-renders your control in its place. The user sees the control; the form submits the field.
+renders your control in its place. The form submits the hidden field; the control only sets its value.
 
 ```html
 <select name="size" class="pills">
@@ -161,10 +161,8 @@ and Unpoly honors it because it builds request params with the browser's own for
 algorithm.
 
 > [important]
-> A `formdata` listener affects what Unpoly **sends**, not what it **watches**. Values it
-> appends belong to the whole form rather than to any field, so they cannot be attributed to
-> the [form group](/up-form-group) that a watcher or validation is looking at. Use it
-> for data that is derived, not edited.
+> Values appended here belong to the whole form, so watchers and validations cannot attribute
+> them to a field. Use it for values your code computes.
 
 
 @page custom-form-fields

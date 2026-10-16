@@ -143,8 +143,8 @@ You can refer to the changed field as `:origin`:
 
 ## Preventing race conditions {#race-conditions}
 
-Users can change fields faster than your server responds. Unpoly keeps the form consistent,
-however fast the user is and however slow the network:
+Users can change fields faster than your server responds. Unpoly keeps the form consistent
+with these rules:
 
 - **One request at a time.** Each form has at most one validation request in flight.
   Later changes wait until it has loaded.
