@@ -1005,12 +1005,12 @@ up.script = (function() {
 
   @learn-ref handling-asset-changes
 
-  ## Example
-
   There is no default behavior when assets have changed.
   In particular, no asset elements from the response are updated in the current page.
   Event listeners may [handle changed frontend code](/handling-asset-changes#tracking-assets),
   e.g., by [notifying the user](/handling-asset-changes#notifying-the-user) or [loading new assets](/handling-asset-changes#loading-new-assets).
+
+  ## Example
 
   The code below inserts a clickable `<div id="new-version">` banner when assets change.
   The user can then choose to reload at their convenience by clicking on the notification.

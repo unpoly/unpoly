@@ -47,6 +47,8 @@ up.layer = (function() {
   | `up.layer.config.any`     | Defaults for all layers      |
   | `up.layer.config.overlay` | Defaults for all overlays    |
 
+  ### Configuration inheritance
+
   Options configured this way are inherited.
   For example, when you open a new drawer overlay, defaults from `up.layer.config.drawer`,
   `up.layer.config.overlay`, and `up.layer.config.any` will be used (in decreasing priority).
@@ -65,8 +67,6 @@ up.layer = (function() {
   ```js
   up.layer.config.overlay.mainTargets.unshift('.content')
   ```
-
-  ### Configuration inheritance
 
   @property up.layer.config
 
@@ -1181,9 +1181,9 @@ up.layer = (function() {
   ## On a hyperlink
 
   When [reusing a page within an overlay](/subinteractions#reusing-existing-screens),
-  it can be useful to have a button that closes the overlay but navigates somewhere else on the root layer.
+  the same link may need to close the overlay, but navigate somewhere else when the page is shown on the root layer.
 
-  In this case, you can use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
+  In this case, use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
 
   ```html
   <a href="/list" up-dismiss>Finish</a>
@@ -1254,9 +1254,9 @@ up.layer = (function() {
   ## On a hyperlink
 
   When [reusing a page within an overlay](/subinteractions#reusing-existing-screens),
-  it can be useful to have a button that closes the overlay but navigates somewhere else on the root layer.
+  the same link may need to close the overlay, but navigate somewhere else when the page is shown on the root layer.
 
-  In this case, you can use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
+  In this case, use a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
 
   ```html
   <a href="/list" up-accept>Finish</a>

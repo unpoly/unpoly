@@ -828,8 +828,6 @@ up.protocol = (function() {
   in response to a fragment update.
 
   Upon seeing the header, Unpoly will cancel the fragment update and accept the layer instead.
-  If the root layer is targeted, the header is ignored and the fragment is updated with
-  the response's HTML content.
 
   The header value is the acceptance value serialized as a [relaxed JSON](/relaxed-json) value.
   To accept an overlay without value, set the header value to the string `null`.
@@ -880,10 +878,8 @@ up.protocol = (function() {
   in response to a fragment update.
 
   Upon seeing the header, Unpoly will cancel the fragment update and dismiss the layer instead.
-  If the root layer is targeted, the header is ignored and the fragment is updated with
-  the response's HTML content.
 
-  The header value is the dismissal value serialized as a JSON object.
+  The header value is the dismissal value serialized as a [relaxed JSON](/relaxed-json) value.
   To dismiss an overlay without value, set the header value to the string `null`.
 
   @include unicode-header-values

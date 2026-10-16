@@ -328,16 +328,15 @@ up.Layer = class Layer extends up.Record {
   /*-
   Returns whether this layer is part of the [layer stack](/up.layer.stack) and can be interacted with.
 
-  ## Understanding aliveness
+  ## When a layer is alive
 
   A layer that is alive can be [targeted](/targeting-fragments) with fragment changes, or [queried](/up.fragment.get) for containing elements.
 
   The [root layer](/overlays#layer-modes) is always alive.
   An overlay is alive as soon as it enters the DOM, even when it is still playing its opening animation.
 
-  An overlay becomes "unalive" immediately when it starts [closing](/closing-overlays).
-  If the closing is animated, a layer is considered "unalive" while
-  closing animation is still playing.
+  An overlay stops being alive as soon as it starts [closing](/closing-overlays),
+  even while its closing animation is still playing.
 
   | Overlay state             | `up.Layer#isAlive()` |
   |---------------------------|----------------------|
