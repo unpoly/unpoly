@@ -42,7 +42,7 @@
 
   This option is only used when [updating history](#options.history).
 
-@param {boolean|Array<Element>} [options.lang]
+@param {boolean|string} [options.lang]
   An explicit language code to set as the [`html[lang]`](https://www.tpgi.com/using-the-html-lang-attribute/) attribute.
 
   By default Unpoly will extract the language from the response and update the `html[lang]`

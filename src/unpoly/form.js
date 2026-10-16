@@ -69,7 +69,7 @@ up.form = (function() {
       </fieldset>
       ```
 
-    @param {string} [config.fieldSelectors]
+    @param {Array<string>} [config.fieldSelectors]
       An array of CSS selectors that represent form fields, such as `input` or `select`.
 
       [Form-associated custom elements](/custom-form-fields#form-associated) are matched by
@@ -93,10 +93,10 @@ up.form = (function() {
 
       @experimental
 
-    @param {string} [config.submitButtonSelectors]
+    @param {Array<string>} [config.submitButtonSelectors]
       An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.
 
-    @param {string} [config.anyButtonSelectors]
+    @param {Array<string>} [config.anyButtonSelectors]
       An array of CSS selectors that represent buttons of any kind, such as `button` or `input[type=button]`.
 
       Unpoly uses this to disable a form's buttons while the form is submitting.

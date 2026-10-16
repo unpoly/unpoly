@@ -21,7 +21,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   Returns a string like `'medium'` or `'large'`.
 
   @property up.Layer#size
-  @param {Element} size
+  @param {string} size
     This layer's size setting.
   @stable
   */
@@ -32,7 +32,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   Returns a string like `'top'`, '`right`', `'bottom'` or `'left'`.
 
   @property up.Layer#position
-  @param {Element} [position]
+  @param {string} [position]
     This layer's position setting.
   @stable
   */
@@ -45,7 +45,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   Returns `undefined` for an overlay that isn't a popup.
 
   @property up.Layer#align
-  @param {Element} align
+  @param {string} align
     This layer's alignment setting.
   @stable
   */

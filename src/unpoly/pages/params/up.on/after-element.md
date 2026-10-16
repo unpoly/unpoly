@@ -25,7 +25,7 @@
     This in particular may improve the frame rate when registering
     `touchstart` and `touchmove` events.
   
-  @param {boolean} [options.once=true]
+  @param {boolean} [options.once=false]
     Whether the listener should run at most once.
 
     If `true` the listener will automatically be unbound
