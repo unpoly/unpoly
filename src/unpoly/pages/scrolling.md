@@ -119,7 +119,7 @@ To reset scroll positions to the top, set `[up-scroll="top"]`:
 <a href="/list" up-follow up-scroll="top">Back to list</a> <!-- mark: up-scroll="top" -->
 ```
 
-This affects all viewports that are ancestors or descendants of the updated fragment.
+This affects the closest viewport around the updated fragment, and all viewports within it.
 
 ### Scrolling to the bottom {#bottom-position}
 
@@ -129,7 +129,7 @@ To scroll to the bottom, set `[up-scroll="bottom"]`:
 <a href="/chat" up-follow up-scroll="bottom">Open chat</a> <!-- mark: up-scroll="bottom" -->
 ```
 
-This affects all viewports that are ancestors or descendants of the updated fragment.
+This affects the closest viewport around the updated fragment, and all viewports within it.
 
 ### Scrolling to a pixel position {#pixel-position}
 

@@ -57,7 +57,7 @@ up.compiler('form[data-autosave]', function(form, { autosave: url }) {
 })
 ```
 
-To load a request in the foreground that would load in the background by default, set `[up-background="false"]`.
+To load a [polling](/polling) request in the foreground, set `[up-background="false"]` on the `[up-poll]` element.
 
 
 When the user waits for a background request {#promotion}
