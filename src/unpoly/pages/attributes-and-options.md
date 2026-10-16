@@ -152,7 +152,7 @@ Changing defaults globally {#config}
 
 Most modules have an `up.*.config` property that adjusts their behavior
 for your entire application. For example, this makes every new overlay
-open as a drawer instead of a modal dialog:
+open as a drawer instead of a modal:
 
 ```js
 up.layer.config.mode = 'drawer'

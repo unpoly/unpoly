@@ -19,8 +19,8 @@ When clicked, Unpoly fetches `/users/new`, extracts the response's
 [main fragment](/main) and shows it in a modal overlay. The page behind
 the overlay **keeps its state**, including unsaved form fields and scroll positions.
 
-The user can dismiss the overlay by pressing `Escape`, by clicking outside
-the dialog, or with its close button.
+The user can dismiss the overlay by pressing `Escape`, by clicking the
+backdrop, or with its close button.
 
 
 One screen, two contexts

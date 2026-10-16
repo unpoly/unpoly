@@ -16,7 +16,7 @@ Unpoly distinguishes two intents when an overlay closes:
 1. **Accepting** an overlay: the user picked a value, confirmed with *OK*, or completed their task.
    An overlay can be accepted with a value.
 2. **Dismissing** an overlay: the user clicked *Cancel* or the `×` button, pressed `Escape`,
-   or clicked on the background.
+   or clicked the backdrop.
 
 <figure>
   <img src="images/close-intent.png" alt="Annotated screenshot of a modal overlay and the ways to close it" width="600">
@@ -24,7 +24,7 @@ Unpoly distinguishes two intents when an overlay closes:
 
 A modal overlay asks the user to "Pick a character" from four buttons.
 Each button accepts the overlay with a different value, labeled `accept(3)` to `accept(6)`.
-Pressing Escape, clicking the `×` button, clicking the Cancel button or clicking the background
+Pressing Escape, clicking the `×` button, clicking the Cancel button or clicking the backdrop
 all dismiss the overlay, labeled `dismiss()`.
 
   </figcaption>
@@ -75,7 +75,7 @@ The [standard dismiss controls](/customizing-overlays#customizing-dismiss-contro
 | User interaction                                    | Dismissal reason |
 |-----------------------------------------------------|------------------|
 | User presses the `Escape` key                       | `":key"`         |
-| User clicks on the background ("light dismiss")     | `":outside"`     |
+| User clicks the backdrop ("light dismiss")          | `":outside"`     |
 | User clicks on the `×` button in the overlay corner | `":button"`      |
 
 An overlay that closes because a layer below it is [updated](#peeling) is dismissed with `":peel"`.

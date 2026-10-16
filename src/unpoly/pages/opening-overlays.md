@@ -2,7 +2,7 @@ Opening overlays
 ================
 
 Instead of updating the current page, any link or form can open
-content in a new overlay, like a modal dialog or a drawer. The linked screen stays
+content in a new overlay, like a modal or a drawer. The linked screen stays
 a regular page on your server, and the page behind the overlay keeps its state.
 
 
@@ -60,7 +60,7 @@ overlay opens. See [aborting rules in layers](/aborting-requests#layers).
 
 ### Choosing the overlay mode {#modes}
 
-By default the overlay opens as a modal dialog. To use a different [mode](/overlays#layer-modes),
+By default the overlay opens as a `modal`. To use a different [mode](/overlays#layer-modes),
 like a `popup` or `drawer`, set an `[up-mode]` attribute:
 
 ```html

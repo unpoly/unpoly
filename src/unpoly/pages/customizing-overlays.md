@@ -158,12 +158,13 @@ A single call to `up.layer.accept()` or `up.layer.dismiss()` can also pick
 Dismiss controls {#customizing-dismiss-controls}
 ----------------
 
-By default the user can dismiss an overlay by pressing `Escape`, by clicking outside the overlay box
-or by clicking the `×` button in the top-right corner. Popups have no `×` button.
+By default the user can dismiss an overlay by pressing `Escape`, by clicking the backdrop
+or by clicking the `×` button in the top-right corner. Popups have no backdrop and no `×` button.
+They close when the user clicks anywhere outside the popup.
 
 To change which of these controls are available, pass a `{ dismissible }` option
 or `[up-dismissible]` attribute when opening the overlay. The link below opens an overlay that
-has a close button (`×`), but cannot be dismissed by pressing `Escape` or clicking on the background:
+has a close button (`×`), but cannot be dismissed by pressing `Escape` or clicking the backdrop:
 
 ```html
 <a href="/terms" up-layer="new" up-dismissible="button">Show terms</a> <!-- mark: up-dismissible="button" -->
@@ -174,7 +175,7 @@ The following control names are available:
 | Control name | Effect                                           | Dismissal reason |
 |--------------|--------------------------------------------------|------------------|
 | `key`        | Enables dismissing with the `Escape` key         | `":key"`      |
-| `outside`    | Enables dismissing by clicking on the background | `":outside"`  |
+| `outside`    | Enables dismissing by clicking the backdrop      | `":outside"`  |
 | `button`     | Adds a close button (`×`) to the layer           | `":button"`   |
 
 To enable multiple dismiss controls, separate their names with a comma or space:
@@ -210,7 +211,7 @@ A modal overlay is built from these elements:
 
 ```html
 <up-modal size="medium">                                   <!-- container with attributes -->
-  <up-modal-backdrop></up-modal-backdrop>                  <!-- semi-transparent background -->
+  <up-modal-backdrop></up-modal-backdrop>                  <!-- dims the page behind the box -->
   <up-modal-viewport>                                      <!-- scrolls the box -->
     <up-modal-box>                                         <!-- white box with padding -->
       <up-modal-content>...</up-modal-content>             <!-- parent of your fragment (unstyled) -->

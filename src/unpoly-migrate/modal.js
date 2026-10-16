@@ -158,7 +158,7 @@ up.migrate.renamedEvent('up:modal:close', 'up:layer:dismiss')
 up.migrate.renamedEvent('up:modal:closed', 'up:layer:dismissed')
 
 /*-
-Clicking this link will load the destination via AJAX and open
+Clicking this link will load the destination and open
 the given selector in a modal overlay.
 
 @selector [up-modal]
@@ -172,8 +172,8 @@ the given selector in a modal overlay.
 up.migrate.targetMacro('up-modal', { 'up-layer': 'new modal' }, () => up.migrate.deprecated('[up-modal]', '[up-layer="new modal"]'))
 
 /*-
-Clicking this link will load the destination via AJAX and open
-the given selector in a modal drawer that slides in from the edge of the screen.
+Clicking this link will load the destination and open
+the given selector in a drawer overlay that slides in from the edge of the screen.
 
 @selector [up-drawer]
 @params-note

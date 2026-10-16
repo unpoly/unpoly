@@ -115,7 +115,7 @@ up.migrate.renamedEvent('up:popup:close', 'up:layer:dismiss')
 up.migrate.renamedEvent('up:popup:closed', 'up:layer:dismissed')
 
 /*-
-Clicking this link will load the destination via AJAX and open
+Clicking this link will load the destination and open
 the given selector in a popup overlay.
 
 @selector [up-popup]

@@ -3,7 +3,7 @@ History in overlays
 
 An overlay can show its own URL in the browser's address bar while it is open, or leave
 the address bar on the page behind it. By default an overlay shows its URL when it contains
-the main fragment, so a page opened in a dialog gets a shareable address while a small popup menu does not.
+the main fragment, so a page opened in a modal gets a shareable address while a small popup menu does not.
 This setting is called the overlay's *history visibility*. You can override it globally or for individual overlays.
 
 
