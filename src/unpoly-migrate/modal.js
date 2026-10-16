@@ -33,11 +33,11 @@ up.modal = {
   @return {Promise}
     A promise that will be fulfilled when the modal has been opened.
   @deprecated
-    Use `up.follow(link, { layer: "modal" })` instead.
+    Use `up.follow(link, { layer: "new modal" })` instead.
   */
   follow(link, options = {}) {
-    up.migrate.deprecated('up.modal.follow(link)', 'up.follow(link, { layer: "modal" })')
-    return up.follow(link, { ...options, layer: 'modal' })
+    up.migrate.deprecated('up.modal.follow(link)', 'up.follow(link, { layer: "new modal" })')
+    return up.follow(link, { ...options, layer: 'new', mode: 'modal' })
   },
 
   /*-
@@ -58,7 +58,7 @@ up.modal = {
   */
   extract(target, html, options = {}) {
     up.migrate.deprecated('up.modal.extract(target, document)', 'up.layer.open({ document, mode: "modal" })')
-    return up.layer.open({ ...options, target, html, layer: 'modal' })
+    return up.layer.open({ ...options, target, html, layer: 'new', mode: 'modal' })
   },
 
   /*-
@@ -165,7 +165,7 @@ the given selector in a modal overlay.
 @params-note
   All modifying attributes for `[up-layer=new]` may also be used.
 @param {string} up-modal
-  The CSS selector that will be extracted from the response and displayed in a modal dialog.
+  The CSS selector that will be extracted from the response and displayed in a modal overlay.
 @deprecated
   Use `[up-layer="new modal"]` instead.
 */
@@ -179,7 +179,7 @@ the given selector in a modal drawer that slides in from the edge of the screen.
 @params-note
   All modifying attributes for `[up-layer=new]` may also be used.
 @param {string} up-drawer
-  The CSS selector that will be extracted from the response and displayed in a modal dialog.
+  The CSS selector that will be extracted from the response and displayed in a drawer overlay.
 @deprecated
   Use `[up-layer="new drawer"]` instead.
 */

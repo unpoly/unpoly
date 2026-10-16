@@ -3,6 +3,17 @@ const e = up.element
 
 if (up.migrate.loaded) {
   describe('up.popup (deprecated)', function() {
+    describe('up.popup.attach()', function() {
+      it('opens a new popup overlay', async function() {
+        const origin = fixture('a#origin', { text: 'origin' })
+        await up.popup.attach(origin, { content: 'popup content' })
+
+        expect(up.layer.count).toBe(2)
+        expect(up.layer.mode).toBe('popup')
+        expect(up.layer.current).toHaveText('popup content')
+      })
+    })
+
     describe('unobtrusive behavior', function() {
       describe('[up-popup]', function() {
 

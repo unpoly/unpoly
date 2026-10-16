@@ -13,12 +13,12 @@ up.popup = {
     See options for `up.render()`.
   @return {Promise}
   @deprecated
-    Use `up.layer.open({ origin, layer: 'popup' })` instead.
+    Use `up.layer.open({ origin, mode: 'popup' })` instead.
   */
   attach(origin, options = {}) {
     origin = up.fragment.get(origin)
-    up.migrate.deprecated('up.popup.attach(origin)', "up.layer.open({ origin, layer: 'popup' })")
-    return up.layer.open({ ...options, origin, layer: 'popup' })
+    up.migrate.deprecated('up.popup.attach(origin)', "up.layer.open({ origin, mode: 'popup' })")
+    return up.layer.open({ ...options, origin, layer: 'new', mode: 'popup' })
   },
 
   /*-
