@@ -3,7 +3,9 @@
 @param {string|Element|jQuery|Array<string>} [options.target]
   The [target selector](/targeting-fragments) to update after a successful response.
 
-  If omitted, a [main target](/up-main) will be rendered.
+  If omitted, a [main target](/up-main) will be rendered when [`{ fallback: true }`](#options.fallback) is set.
+  [Navigation](/navigation-defaults) sets `{ fallback: true }`, so following a link or submitting a form
+  without a target renders a main target. A plain `up.render()` needs a `{ target }` or `{ fallback }`.
 
   You may also pass a DOM element or jQuery element here, in which case a selector
   will be [derived](/target-derivation).
