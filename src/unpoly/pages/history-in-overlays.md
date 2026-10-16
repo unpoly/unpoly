@@ -47,7 +47,7 @@ Hiding an overlay's history {#configuring-visibility}
 ---------------------------
 
 By default an overlay has visible history when its initial fragment is a [main fragment](/main).
-This reveals the location of significant content to the user, but hides the internal location
+This shows the location of significant content to the user, but hides the internal location
 of smaller popups or menus.
 
 To hide the history of one overlay, set an `[up-history=false]` attribute on the link or form that opens it:

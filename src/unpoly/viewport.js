@@ -67,7 +67,7 @@ up.viewport = (function() {
 
       @experimental
     @param {number} [config.revealTop=false]
-      Whether to always scroll a [revealing](/up.reveal) element to the top.
+      Whether to always scroll a [revealed](/up.reveal) element to the top.
 
       By default Unpoly will scroll as little as possible to make the element visible.
 

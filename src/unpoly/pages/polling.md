@@ -180,7 +180,7 @@ up.on('up:fragment:poll', function(event) {
 The server is polled again after the configured interval, emitting another `up:fragment:poll` event.
 
 To discard a response that has already been received, use the `up:fragment:loaded` event.
-To preserve individual elements within the reloaded fragment, give them an `[up-keep]` attribute.
+To keep individual elements within the reloaded fragment, give them an `[up-keep]` attribute.
 
 
 ## Polling from JavaScript {#scripting}

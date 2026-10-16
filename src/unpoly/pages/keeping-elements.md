@@ -41,7 +41,7 @@ Everything else is updated as usual:
 <!-- label: Page after update -->
 <div id="article">                                    <!-- mark-line -->
   <p>Article 2</p>                                    <!-- mark-line -->
-  <audio id="player" up-keep src="song1.mp3"></audio> <!-- chip: preserved -->
+  <audio id="player" up-keep src="song1.mp3"></audio> <!-- chip: kept -->
 </div>                                                <!-- mark-line -->
 
 <a href="/article2" up-target="#article">Go to article 2</a> <!-- chip: not targeted -->

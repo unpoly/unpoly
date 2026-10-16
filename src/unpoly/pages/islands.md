@@ -104,7 +104,7 @@ When a fragment containing an island is updated, the destructor unmounts the old
 and the compiler mounts a new one with fresh props from the server HTML.
 Any client-side state inside the island is reset by this.
 
-To preserve an island while the fragment around it is updated, assign it an `[up-keep]` attribute:
+To keep an island while the fragment around it is updated, assign it an `[up-keep]` attribute:
 
 ```html
 <div id="theme-color" class="color-picker" up-data="{ value: '#a2d8ff' }" up-keep></div> <!-- mark: up-keep -->

@@ -11,7 +11,7 @@ Note that we set some additional [watch options](/watch-options) to improve the 
 
 - The [`[up-watch-delay]`](/watch-options#debouncing)
   attribute delays validation until the user has stopped typing for 100 milliseconds.
-- The `[up-keep]` attribute preserves additional user input while the validation request is in flight.
+- The `[up-keep]` attribute keeps additional user input while the validation request is in flight.
 
 Watching `input` also watches `change`. Since `[up-validate]` validates on every watched event,
 leaving the field sends one more validation request.

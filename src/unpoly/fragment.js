@@ -8,7 +8,7 @@ The JavaScript API to render, look up and destroy page fragments. Every link, fo
 
 `up.render()` replaces elements on the current page with matching elements from a server response or an HTML string. `up.navigate()` does the same with the defaults of a user navigation, like updating history and scrolling to the new content. `up.reload()` fetches a fresh copy of a fragment from the URL it was loaded from, and `up.destroy()` removes a fragment, with an optional animation.
 
-Lookup functions like `up.fragment.get()` differ from `document.querySelector()`: they only see the [current layer](/up.layer.current), ignore elements that are playing out their exit animation, and understand Unpoly's own selectors like `:main` or `:origin`. Elements marked `[up-keep]` are preserved across updates. For low-level DOM utilities that complement the browser's native API, see `up.element`.
+Lookup functions like `up.fragment.get()` differ from `document.querySelector()`: they only see the [current layer](/up.layer.current), ignore elements that are playing out their exit animation, and understand Unpoly's own selectors like `:main` or `:origin`. Elements marked `[up-keep]` are kept across updates. For low-level DOM utilities that complement the browser's native API, see `up.element`.
 
 @learn-ref advanced-rendering
 
@@ -876,13 +876,13 @@ up.fragment = (function() {
   */
 
   /*-
-  Elements with an `[up-keep]` attribute will be persisted when rendering.
+  Elements with an `[up-keep]` attribute will be kept when rendering.
 
   @learn-ref keeping-elements
 
   ## Basic example
 
-  A common use case is to preserve the playback state of media elements:
+  A common use case is to keep the playback state of media elements:
 
   ```html
   <article>
@@ -902,7 +902,7 @@ up.fragment = (function() {
   - The `[up-keep]` attribute is only supported for elements within the `<body>`.
   - If an `<audio up-keep>` or `<video up-keep>` element is a *direct* child of the `<body>`,
     it will lose its playback state during a fragment update.
-    To preserve its playback state in all browsers,
+    To keep its playback state in all browsers,
     insert a container element between the `<body>` and the media element.
 
 
@@ -945,7 +945,7 @@ up.fragment = (function() {
   during a render pass.
 
   Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
-  to prevent the element from being persisted. If the event is prevented, the element
+  to prevent the element from being kept. If the event is prevented, the element
   will be replaced with a fragment from the response.
 
   @learn-ref keeping-elements

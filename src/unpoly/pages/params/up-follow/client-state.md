@@ -17,7 +17,7 @@
   @experimental
 
 @param [up-use-keep='true']
-  Whether [`[up-keep]`](/up-keep) elements will be preserved in the updated fragments.
+  Whether [`[up-keep]`](/up-keep) elements will be kept in the updated fragments.
 
   @experimental
 

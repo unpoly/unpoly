@@ -14,7 +14,7 @@ Take any link in your app and add an `[up-follow]` attribute:
 <a href="/preferences" up-follow>Preferences</a> <!-- mark: up-follow -->
 ```
 
-Click it. Unpoly fetches `/preferences` in the background, and your server
+Click it. Unpoly fetches `/preferences` without leaving the page, and your server
 responds with a full HTML page, the same way it would for a regular page load.
 Unpoly extracts the response's [main fragment](/main) and **swaps it into the
 current page**. The URL and history are updated, and the Back button keeps working.

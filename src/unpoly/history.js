@@ -572,7 +572,7 @@ up.history = (function() {
 
   ### Excluding elements {#excluding-meta-tags}
 
-  To preserve a `<head>` element during history changes, set an `[up-meta=false]` attribute:
+  To leave a `<head>` element unchanged during history changes, set an `[up-meta=false]` attribute:
 
   ```html
   <meta charset="utf-8" up-meta="false">

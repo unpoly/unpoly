@@ -15,7 +15,7 @@ Here is a link enhanced with an Unpoly attribute:
 <a href="/messages" up-target=".messages">Messages</a> <!-- mark: up-target=".messages" -->
 ```
 
-When the user clicks, Unpoly fetches `/messages` in the background.
+When the user clicks, Unpoly fetches `/messages` without leaving the page.
 Your server handles the request like any other, and responds with a full HTML page.
 Unpoly extracts the `.messages` fragment from the response and swaps it into the current page.
 
