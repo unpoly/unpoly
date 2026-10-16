@@ -7,7 +7,7 @@ and keeps its messages until new ones arrive.
 
 <figure>
   <img src="images/flashes.png" alt="Screenshot of three flash messages" width="480">
-  <figcaption markdown="1">
+  <figcaption>
 
 Three flash messages stacked on top of each other: a confirmation ("User created successfully!"),
 an error ("Could not save your changes!") and a warning ("Your credit card is expiring in 3 days.").

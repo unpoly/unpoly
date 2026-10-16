@@ -5,7 +5,7 @@ By default only errors are logged. Call `up.log.enable()` to turn on debug loggi
 
 <figure>
   <img src="images/log-interaction-event.png" alt="Screenshot of Unpoly's log in the browser console" width="800">
-  <figcaption markdown="1">
+  <figcaption>
 
 The log of a user hovering over a link and then clicking it. The link opens a modal overlay.
 Each line starts with a badge that names the event or function that logged it, followed by a message.

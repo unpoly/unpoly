@@ -97,7 +97,7 @@ that task items must be unique:
 
 <figure>
   <video src="images/optimistic-validation-failure.webm" controls width="600" aria-label="Video: An optimistic submission that fails validation on the server"></video>
-  <figcaption markdown="1">
+  <figcaption>
 
 The TODO list already has a task "Buy toast". The user types "Buy toast" again and clicks Save.
 The new task appears at the top of the list right away, in gray and without an Edit button,
@@ -171,7 +171,7 @@ so you see when an actual server response replaces the optimistic update:
 
 <figure>
   <video src="images/optimistic-rendering-demo.mp4" controls width="600" aria-label="Video: The demo app reacting instantly under high latency"></video>
-  <figcaption markdown="1">
+  <figcaption>
 
 In a task list, the user adds the tasks "Rake lawn" and "Buy honey", drags "Buy honey" to a new position,
 checks off two tasks and clicks "Clear done". Every change appears the moment the user makes it.

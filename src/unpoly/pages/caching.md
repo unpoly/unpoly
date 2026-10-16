@@ -278,7 +278,6 @@ so Unpoly can partition its cache by header value.
 
 Matching cache entries must then have the same values for all listed headers.
 See [Caching optimized responses](/optimizing-responses#vary) for details, and [How cache entries are matched](/optimizing-responses#cache-matching) for tables of hits and misses.
-{:#how-cache-entries-are-matched}
 
 
 Caching after redirects

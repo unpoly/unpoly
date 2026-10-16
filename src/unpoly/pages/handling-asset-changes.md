@@ -55,7 +55,7 @@ The user can reload at their convenience, without losing their work:
 
 <figure>
   <img src="images/assets-changed-notification.png" alt="Screenshot of a new version banner" width="305">
-  <figcaption markdown="1">
+  <figcaption>
 
 A banner reads "A newer version is available!" next to a Reload button.
 

@@ -17,7 +17,7 @@ The diagram below visualizes the sequence of render steps, edge cases and error 
 
 <figure>
   <img src="images/render-lifecycle.svg" alt="Flowchart of the render lifecycle" width="900">
-  <figcaption markdown="1">
+  <figcaption>
 
 The diagram has three columns: the regular flow in the middle, edge cases on the left
 and error states on the right. A render pass moves through these stages:

@@ -24,7 +24,7 @@ This is a form to purchase postage for international parcels:
 
 <figure>
   <img src="images/form-with-dependent-fields.svg" alt="Mockup of a form to buy postage" width="625">
-  <figcaption markdown="1">
+  <figcaption>
 
 The form has a select for the continent (Europe), a select for the country (Switzerland),
 a text field for the weight in grams (3500), and the price (23,00 €) shown as text, not as a field.

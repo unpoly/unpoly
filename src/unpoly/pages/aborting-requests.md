@@ -17,7 +17,7 @@ Contained within `#main` is a smaller fragment `#box`:
 
 <figure>
   <img src="images/side-main-box.svg" alt="Diagram of a layout with three fragments" width="350">
-  <figcaption markdown="1">
+  <figcaption>
 
 The sidebar `#side` is on the left and the content area `#main` on the right, side by side.
 The smaller `#box` sits inside `#main`.

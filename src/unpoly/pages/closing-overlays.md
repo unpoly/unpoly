@@ -20,7 +20,7 @@ Unpoly distinguishes two intents when an overlay closes:
 
 <figure>
   <img src="images/close-intent.png" alt="Annotated screenshot of a modal overlay and the ways to close it" width="600">
-  <figcaption markdown="1">
+  <figcaption>
 
 A modal overlay asks the user to "Pick a character" from four buttons.
 Each button accepts the overlay with a different value, labeled `accept(3)` to `accept(6)`.

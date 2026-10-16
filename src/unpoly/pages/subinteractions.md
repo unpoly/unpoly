@@ -18,7 +18,7 @@ Imagine an application that manages *projects* and *companies*:
 
 <figure>
   <img src="images/crud-companies-projects.png" alt="Screenshot of a company page in a CRUD app" width="500">
-  <figcaption markdown="1">
+  <figcaption>
 
 The page for a company shows its name and address, Edit and Delete buttons, and a list of the company's projects.
 A navigation bar links to the lists of all companies and all projects.
@@ -48,7 +48,7 @@ The diagram shows the difference between the two control flows:
 
 <figure>
   <img src="images/subinteraction-flow.svg" alt="Flowchart comparing a sequential screen flow with a subinteraction" width="600">
-  <figcaption markdown="1">
+  <figcaption>
 
 Both flows go from "List projects" to "New project" and end at "Show project".
 
@@ -100,8 +100,7 @@ to know that it is running in an overlay. The same screen works as a full page a
 a step of another screen's interaction.
 
 
-### Closing when a location is reached {#location-condition}
-{:data-toc-include="true"}
+### Closing when a location is reached {#location-condition data-toc-include}
 
 To close an overlay once it reaches a URL like `/companies/123`, set an [`[up-accept-location]`](/up-layer-new#up-accept-location)
 attribute with a [URL pattern](/url-patterns):
@@ -129,8 +128,7 @@ A `$id` segment only matches digits, so the overlay's own URL `/companies/new` d
 To *dismiss* an overlay once a location is reached, use `[up-dismiss-location]` and `[up-on-dismissed]` in the same fashion.
 
 
-### Closing when an event is emitted {#event-condition}
-{:data-toc-include="true"}
+### Closing when an event is emitted {#event-condition data-toc-include}
 
 To close an overlay once an event is observed within it, set an [`[up-accept-event]`](/up-layer-new#up-accept-event) attribute:
 
@@ -163,8 +161,7 @@ Since the closing event's default is prevented, an `[up-emit]` link with a [fall
 can close an overlay, but navigate to a different page when clicked on the [root layer](/up.layer.root).
 
 
-### Closing when a fragment is detected {#fragment-condition}
-{:data-toc-include="true"}
+### Closing when a fragment is detected {#fragment-condition data-toc-include}
 
 To close an overlay once an element matching a selector appears within it,
 set an [`[up-accept-fragment]`](/up-layer-new#up-accept-fragment) attribute:

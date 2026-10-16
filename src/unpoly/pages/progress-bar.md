@@ -6,7 +6,7 @@ This mimics the loading indicator that browsers show during full page loads.
 
 <figure>
   <img src="images/progress-bar.gif" alt="Animation of the progress bar">
-  <figcaption markdown="1">
+  <figcaption>
 
 The user clicks a link in the navigation bar of a demo app. While the next page is loading,
 a blue bar grows from left to right along the top edge of the screen.

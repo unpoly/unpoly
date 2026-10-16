@@ -6,7 +6,7 @@ They appear instantly after the user's interaction and are replaced by the serve
 
 <figure>
   <video src="images/placeholders.webm" controls width="600" aria-label="Video: UI skeletons while screens are loading"></video>
-  <figcaption markdown="1">
+  <figcaption>
 
 In a demo app, the user clicks "Projects" in the navigation bar. While the list is loading,
 gray bars in the shape of a heading, a button and table rows take the place of the content.

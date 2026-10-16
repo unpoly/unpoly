@@ -298,7 +298,7 @@ up.script = (function() {
 
   <figure>
     <img src="images/compiler-tasks.svg" alt="Timing diagram of compiler tasks and browser renders" width="670">
-    <figcaption markdown="1">
+    <figcaption>
 
   After Unpoly updates the DOM, it runs synchronous compilers and the first task of each async compiler.
   Only then does the browser render. The promise returned by `up.render()` fulfills after this first task.

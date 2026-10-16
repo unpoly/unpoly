@@ -15,7 +15,7 @@ In a vanilla HTML document, clicking a link while offline will replace your app 
 
 <figure>
   <img src="images/browser-offline.png" alt="Screenshot of Chrome's offline error page" width="500">
-  <figcaption markdown="1">
+  <figcaption>
 
 Chrome's "No internet" page, with suggestions to check the network cables and reconnect to Wi-Fi,
 and the error code `ERR_INTERNET_DISCONNECTED`.
