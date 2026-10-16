@@ -36,15 +36,16 @@ up.Layer = class Layer extends up.Record {
   */
 
   /*-
-  Whether fragment updates within this layer can affect browser history and window title.
+  Whether this layer has [visible history](/history-in-overlays).
 
-  If a layer does not have visible history, its descendant layers cannot have history either.
+  When it does, fragment updates within this layer can change the browser's address bar and window title.
+  If a layer does not have visible history, its descendant layers cannot have visible history either.
 
   @learn-ref history-in-overlays
 
   @property up.Layer#history
   @param {boolean} history
-    Whether this layer renders history.
+    Whether this layer has visible history.
   @stable
   */
 
@@ -759,12 +760,9 @@ up.Layer = class Layer extends up.Record {
   /*-
   This layer's window title.
 
-  If the [frontmost layer](/up.layer.front) does not have [visible history](/up.Layer.prototype.history),
-  the browser window will show the title of an ancestor layer.
-  This property will return the title the layer would use if it had visible history.
-
-  If this layer does not [affect browser history](/up.Layer.prototype.history), this property will
-  still return the title the layer would otherwise use.
+  If this layer does not have [visible history](/up.Layer.prototype.history),
+  the browser window shows the title of an ancestor layer.
+  This property still returns the title the layer would use if it had visible history.
 
   @learn-ref history-in-overlays
 

@@ -126,11 +126,11 @@ up.layer = (function() {
     Whether the layer's location or title will be visible in the browser's
     address bar and window title.
 
-    If set to `'auto'`, the overlay will render history if its initial fragment
+    If set to `'auto'`, the overlay has [visible history](/history-in-overlays) if its initial fragment
     is an [auto history target](/up.fragment.config#config.autoHistoryTargets).
 
-    If set to `true`, the overlay will always render history.
-    If set to `false`, the overlay will never render history.
+    If set to `true`, the overlay always has visible history.
+    If set to `false`, the overlay never has visible history.
 
   @param {boolean} config.overlay.trapFocus
     Whether to [trap focus](/focus#overlay-focus-trap) within the overlay while it is in [front](/up.layer.front).
@@ -1783,8 +1783,9 @@ up.layer = (function() {
   */
 
   /*-
-  Whether fragment updates within the [current layer](/up.layer.current)
-  can affect the browser history and window title.
+  Whether the [current layer](/up.layer.current) has [visible history](/history-in-overlays).
+
+  When it does, fragment updates within the layer can change the browser's address bar and window title.
 
   This is a shortcut for `up.layer.current.history`.
   See `up.Layer#history` for more documentation.
