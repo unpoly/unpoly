@@ -10,6 +10,17 @@ describe('up.RenderOptions', function() {
       expect(options.abort).toBe('target')
     })
 
+    it('allows to configure defaults for all render passes using up.fragment.config.renderOptions', function() {
+      up.fragment.config.renderOptions.hungry = false
+      up.fragment.config.renderOptions.easing = 'linear'
+
+      for (let navigate of [false, true]) {
+        const options = up.RenderOptions.preprocess({ navigate })
+        expect(options.hungry).toBe(false)
+        expect(options.easing).toBe('linear')
+      }
+    })
+
     it('normalizes a { layer } shortcut like "new drawer"', function() {
       const givenOptions = { layer: 'new drawer' }
       const options = up.RenderOptions.preprocess(givenOptions)

@@ -473,6 +473,31 @@ describe('up.link', function() {
         delete window.onErrorCallback
       })
 
+      it('parses an [up-on-opened] attribute into a function that receives the event and layer', function() {
+        window.onOpenedCallback = jasmine.createSpy('onOpened callback')
+        const [link] = htmlFixtureList('<a href="/foo" up-layer="new" up-on-opened="nonce-specs-nonce window.onOpenedCallback(this, event, layer)">label</a>')
+        const options = up.link.followOptions(link)
+        const layer = up.layer.root
+        const event = up.event.build('up:layer:opened', { layer })
+
+        options.onOpened(event)
+
+        expect(window.onOpenedCallback).toHaveBeenCalledWith(link, event, layer)
+        delete window.onOpenedCallback
+      })
+
+      it('parses an [up-headers] attribute as a relaxed JSON object', function() {
+        const [link] = htmlFixtureList(`<a href="/foo" up-headers="{ 'X-Custom': 'custom-value' }">label</a>`)
+        const options = up.link.followOptions(link)
+        expect(options.headers).toEqual({ 'X-Custom': 'custom-value' })
+      })
+
+      it('parses an [up-params] attribute as a relaxed JSON object', function() {
+        const [link] = htmlFixtureList(`<a href="/foo" up-params="{ foo: 'foo-value' }">label</a>`)
+        const options = up.link.followOptions(link)
+        expect(options.params).toEqual({ foo: 'foo-value' })
+      })
+
       describe('[up-use-data-map]', function() {
 
         it('parses a relaxed JSON value into a { dataMap } option (not { useDataMap })', function() {
@@ -997,6 +1022,21 @@ describe('up.link', function() {
       })
     })
 
+    describe('up.link.isSafe()', function() {
+
+      it('returns whether the link will be followed with a safe HTTP method', function() {
+        const [getLink, postLink, deleteLink] = htmlFixtureList(`
+          <a href="/path">GET</a>
+          <a href="/path" up-method="post">POST</a>
+          <a href="/path" data-method="delete">DELETE</a>
+        `)
+
+        expect(up.link.isSafe(getLink)).toBe(true)
+        expect(up.link.isSafe(postLink)).toBe(false)
+        expect(up.link.isSafe(deleteLink)).toBe(false)
+      })
+    })
+
     describe('up.link.preload()', function() {
 
       beforeEach(function() {
@@ -1116,6 +1156,24 @@ describe('up.link', function() {
         await wait()
 
         expect(requestSpy).toHaveBeenCalledWith(jasmine.objectContaining({ background: true }))
+      })
+
+      it('rejects without making a request for a link with an unsafe method', async function() {
+        const [link] = htmlFixtureList('<a href="/path" up-method="post" up-target="#target">label</a>')
+
+        await expectAsync(up.link.preload(link)).toBeRejectedWith(jasmine.any(up.Error))
+
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+      })
+
+      it('preloads a link with [up-preload=false]', async function() {
+        const [link] = htmlFixtureList('<a href="/path" up-preload="false" up-target="#target">label</a>')
+
+        up.link.preload(link)
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/path')
       })
 
       describe('for an [up-target] link', function() {
@@ -1355,6 +1413,20 @@ describe('up.link', function() {
         await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
         const result = await job
         expect(result.fragments).toEqual([document.querySelector('#slow')])
+      })
+
+      it('uses the given options over attributes parsed from the placeholder', async function() {
+        const [placeholder, _other] = htmlFixtureList(`
+          <a id="slow" href="/slow-path" up-target="#slow" up-defer="manual">placeholder</a>
+          <div id="other">old other</div>
+        `)
+        up.hello(placeholder)
+
+        up.deferred.load(placeholder, { url: '/other-path', target: '#other' })
+        await wait()
+
+        expect(jasmine.lastRequest().url).toMatchURL('/other-path')
+        expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#other')
       })
     })
   })
@@ -1708,6 +1780,21 @@ describe('up.link', function() {
           link.addEventListener('up:click', listener)
           Trigger.click(link)
           expect(listener).toHaveBeenCalled()
+          expect(link).toHaveBeenDefaultFollowed()
+        })
+
+        it('exposes the underlying click event as event.originalEvent', function() {
+          const [link] = htmlFixtureList('<a href="/path">label</a>')
+          let clickEvent = null
+          link.addEventListener('click', (event) => clickEvent = event)
+          const listener = jasmine.createSpy('up:click listener')
+          link.addEventListener('up:click', listener)
+
+          Trigger.click(link)
+
+          expect(listener).toHaveBeenCalled()
+          expect(clickEvent).toBeEvent('click')
+          expect(listener.calls.argsFor(0)[0].originalEvent).toBe(clickEvent)
           expect(link).toHaveBeenDefaultFollowed()
         })
 
@@ -2124,6 +2211,16 @@ describe('up.link', function() {
         const fauxButton = helloFixture('.hyperlink[up-clickable]')
 
         expect(fauxButton).toBeKeyboardFocusable()
+      })
+
+      it('does not make an element clickable that matches up.link.config.noClickableSelectors', function() {
+        up.link.config.noClickableSelectors.push('.not-clickable')
+        const [fauxButton] = htmlFixtureList('<span class="not-clickable" up-clickable>label</span>')
+        up.hello(fauxButton)
+
+        expect(fauxButton).not.toHaveAttribute('tabindex')
+        expect(fauxButton).not.toHaveAttribute('role')
+        expect(fauxButton).not.toBeKeyboardFocusable()
       })
 
       it('gives the element a pointer cursor if it has [up-follow] and hence looks like a link', function() {

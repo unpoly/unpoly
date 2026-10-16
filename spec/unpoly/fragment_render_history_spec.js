@@ -1189,6 +1189,25 @@ extendDescribe('up.fragment', function() {
             expect(document.documentElement).toHaveAttribute('lang', 'it')
           })
 
+          it('sets the html[lang] attribute to a language code given as { lang } option', async function() {
+            document.documentElement.setAttribute('lang', 'it')
+            htmlFixtureList('<div id="container">old container text</div>')
+            up.render('#container', { url: '/path', history: true, lang: 'de' })
+            await wait()
+
+            jasmine.respondWith(`
+              <html lang="fr">
+                <body>
+                  <div id="container">new container text</div>
+                </body>
+              </html>
+            `)
+            await wait()
+
+            expect('#container').toHaveText('new container text')
+            expect(document.documentElement).toHaveAttribute('lang', 'de')
+          })
+
           it('does not update the html[lang] attribute when not updating history', async function() {
             document.documentElement.setAttribute('lang', 'it')
             fixture('.container', { text: 'old container text' })

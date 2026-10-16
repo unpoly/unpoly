@@ -38,6 +38,21 @@ extendDescribe('up.form', function() {
         expect(params['id']).toEqual(['value'])
       })
 
+      it('submits the closest form when given an element within the form', async function() {
+        const [_form, field] = htmlFixtureList(`
+          <form action="/path" method="post">
+            <input type="text" name="email" value="foo@example.com">
+          </form>
+        `)
+
+        up.submit(field)
+        await wait()
+
+        expect(jasmine.lastRequest().url).toMatchURL('/path')
+        expect(jasmine.lastRequest().method).toBe('POST')
+        expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com' })
+      })
+
       it('loads a form with a cross-origin [action] in a new page', async function() {
         const form = fixture('form#form-id[action="https://external-domain.com/path"][up-submit][method=post]')
         e.affix(form, 'input[name="field-name"][value="field-value"]')

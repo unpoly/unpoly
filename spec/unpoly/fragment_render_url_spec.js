@@ -415,6 +415,24 @@ extendDescribe('up.fragment', function() {
             await expectAsync(renderPromise).toBeRejectedWith(jasmine.anyError(/Cannot render response with content-type "image\/svg\+xml"/i))
           })
 
+          it('renders a plain text response when up.fragment.config.renderableResponse returns true', async function() {
+            const renderableResponse = jasmine.createSpy('renderableResponse').and.returnValue(true)
+            up.fragment.config.renderableResponse = renderableResponse
+            htmlFixtureList('<div id="target">old text</div>')
+
+            const renderPromise = up.render('#target', { url: '/path' })
+            await wait()
+
+            jasmine.respondWith({
+              contentType: 'text/plain',
+              responseText: '<div id="target">new text</div>'
+            })
+
+            await expectAsync(renderPromise).toBeResolvedTo(jasmine.any(up.RenderResult))
+            expect(renderableResponse).toHaveBeenCalledWith(jasmine.any(up.Response))
+            expect('#target').toHaveText('new text')
+          })
+
         })
 
         describe('when the server responds with an error or unexpected HTML', function() {
@@ -619,28 +637,32 @@ extendDescribe('up.fragment', function() {
           describe('with { fail } option', function() {
 
             it('always uses success options with { fail: false }', async function() {
-              fixture('.success-target', { text: 'old success text' })
-              fixture('.failure-target', { text: 'old failure text' })
+              htmlFixtureList(`
+                <div class="success-target">old success text</div>
+                <div class="failure-target">old failure text</div>
+              `)
 
               const renderJob = up.render({
                 target: '.success-target',
                 failTarget: '.failure-target',
                 url: '/path',
-                status: 200,
-                fail: true
+                fail: false
               })
 
               await wait()
 
-              jasmine.respondWith(`
-                <div class="success-target">new success text</div>
-                <div class="failure-target">new failure text</div>
-              `)
+              jasmine.respondWith({
+                status: 500,
+                responseText: `
+                  <div class="success-target">new success text</div>
+                  <div class="failure-target">new failure text</div>
+                `
+              })
 
-              await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.RenderResult))
+              await expectAsync(renderJob).toBeResolvedTo(jasmine.any(up.RenderResult))
 
-              expect('.success-target').toHaveText('old success text')
-              expect('.failure-target').toHaveText('new failure text')
+              expect('.success-target').toHaveText('new success text')
+              expect('.failure-target').toHaveText('old failure text')
             })
 
             it('always uses failure options with { fail: true }', async function() {
@@ -668,33 +690,39 @@ extendDescribe('up.fragment', function() {
               expect('.failure-target').toHaveText('new failure text')
             })
 
-            it('accepts a function as { fail } option', async function() {
-              const failFn = jasmine.createSpy('fail function').and.returnValue(false)
+            it('accepts a function as { fail } option that decides per response', async function() {
+              const failFn = jasmine.createSpy('fail function').and.callFake((response) => response.text.includes('Validation error'))
 
-              fixture('.success-target', { text: 'old success text' })
-              fixture('.failure-target', { text: 'old failure text' })
+              let html = (successText, failureText) => `
+                <div class="success-target">${successText}</div>
+                <div class="failure-target">${failureText}</div>
+              `
 
-              up.render({
+              htmlFixtureList(html('old success text', 'old failure text'))
+
+              let renderOptions = {
                 target: '.success-target',
                 failTarget: '.failure-target',
                 url: '/path',
-                status: 500,
                 fail: failFn
-              })
+              }
 
+              const job1 = up.render(renderOptions)
               await wait()
+              jasmine.respondWith({ status: 500, responseText: html('Saved', 'Saved') })
+              await expectAsync(job1).toBeResolvedTo(jasmine.any(up.RenderResult))
 
-              jasmine.respondWith(`
-                <div class="success-target">new success text</div>
-                <div class="failure-target">old failure text</div>
-              `)
-
-              await wait()
-
-              expect(failFn).toHaveBeenCalled
-
-              expect('.success-target').toHaveText('new success text')
+              expect(failFn).toHaveBeenCalledWith(jasmine.any(up.Response))
+              expect('.success-target').toHaveText('Saved')
               expect('.failure-target').toHaveText('old failure text')
+
+              const job2 = up.render(renderOptions)
+              await wait()
+              jasmine.respondWith({ status: 200, responseText: html('Validation error', 'Validation error') })
+              await expectAsync(job2).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+              expect('.success-target').toHaveText('Saved')
+              expect('.failure-target').toHaveText('Validation error')
             })
 
             it('lets up:fragment:loaded listeners force a failure response by setting event.renderOptions.fail = true', async function() {
@@ -781,6 +809,25 @@ extendDescribe('up.fragment', function() {
             expect(event.renderOptions.url).toMatchURL('/other-path')
           })
 
+          it('emits up:fragment:offline on the targeted layer with the { origin } of the render pass', async function() {
+            const overlay = await up.layer.open({ fragment: '<div id="overlay-target">old text <a href="/path">link</a></div>' })
+            const origin = overlay.element.querySelector('a')
+            const listener = jasmine.createSpy('up:fragment:offline listener')
+            up.on('up:fragment:offline', listener)
+
+            const renderJob = up.render('#overlay-target', { url: '/path', layer: overlay, origin })
+            await wait()
+
+            jasmine.lastRequest().responseError()
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Offline))
+            expect(listener.calls.count()).toBe(1)
+            const event = listener.calls.argsFor(0)[0]
+            expect(event.target).toBe(overlay.element)
+            expect(event.layer).toBe(overlay)
+            expect(event.origin).toBe(origin)
+          })
+
           it('calls an { onOffline } listener with an up:fragment:offline event', async function() {
             const listener = jasmine.createSpy('onOffline callback')
 
@@ -799,6 +846,19 @@ extendDescribe('up.fragment', function() {
             expect(listener).toHaveBeenCalled()
             const event = listener.calls.argsFor(0)[0]
             expect(event.type).toBe('up:fragment:offline')
+          })
+
+          it('calls an { onError } callback with the up.Offline error', async function() {
+            htmlFixtureList('<div id="target">old text</div>')
+            const onError = jasmine.createSpy('onError callback')
+
+            const renderJob = up.render('#target', { url: '/path', onError })
+            await wait()
+
+            jasmine.lastRequest().responseError()
+
+            await expectAsync(renderJob).toBeRejectedWith(jasmine.any(up.Offline))
+            expect(onError).toHaveBeenCalledOnceWith(jasmine.any(up.Offline))
           })
 
           it('allows up:fragment:offline listeners to retry the rendering by calling event.retry()', async function() {

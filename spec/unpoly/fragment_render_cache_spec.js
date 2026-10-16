@@ -393,6 +393,17 @@ extendDescribe('up.fragment', function() {
             expect(up.network.isBusy()).toBe(false)
           })
 
+          it('does not revalidate an expired cached response with { revalidate: false }', async function() {
+            up.cache.expire()
+            expect({ url: '/cached-path' }).toBeExpired()
+
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: false })
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+            expect(up.network.isBusy()).toBe(false)
+          })
+
           it("does not verify a fragment that wasn't rendered from a cached response", async function() {
             up.render('.target', { url: '/uncached-path', cache: true, revalidate: true })
             await wait()
@@ -706,6 +717,28 @@ extendDescribe('up.fragment', function() {
 
             expect('.fail-target').toHaveText('new failure text')
             expect(onFinished).not.toHaveBeenCalled()
+          })
+
+          it('calls { onFailRendered } and { onFailFinished } if the revalidation response has an error code', async function() {
+            htmlFixtureList('<div class="fail-target">old failure text</div>')
+            const onFailRendered = jasmine.createSpy('onFailRendered callback')
+            const onFailFinished = jasmine.createSpy('onFailFinished callback')
+
+            const job = up.render({ target: '.target', failTarget: '.fail-target', url: '/cached-path', cache: true, revalidate: true, onFailRendered, onFailFinished })
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+            expect(onFailRendered).not.toHaveBeenCalled()
+
+            jasmine.respondWithSelector('.fail-target', { text: 'new failure text', status: 500 })
+
+            await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.RenderResult))
+            await wait()
+
+            expect(onFailRendered.calls.count()).toBe(1)
+            expect(onFailRendered.calls.argsFor(0)[0].fragment).toHaveText('new failure text')
+            expect(onFailFinished.calls.count()).toBe(1)
+            expect(onFailFinished.calls.argsFor(0)[0].fragment).toHaveText('new failure text')
           })
 
           it('revalidates when a link in an overlay is loading cached content into a parent layer (bugfix)', async function() {

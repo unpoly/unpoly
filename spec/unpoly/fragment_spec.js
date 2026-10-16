@@ -256,25 +256,27 @@ describe('up.fragment', function() {
           expect(listener).toHaveBeenCalled()
         })
 
-        it('awaits an exit animation before emitting up:fragment:destroyed', async function() {
-          const parent = fixture('.parent')
-          const element = e.affix(parent, '.element')
-          expect(element).toBeAttached()
+        it('emits the event once on the former parent with { fragment, parent } properties', async function() {
+          const [parent, element] = htmlFixtureList(`
+            <div id="parent">
+              <div id="element">
+                <div id="child">child</div>
+              </div>
+            </div>
+          `)
 
           const listener = jasmine.createSpy('event listener')
-          parent.addEventListener('up:fragment:destroyed', listener)
+          up.on('up:fragment:destroyed', listener)
 
-          up.destroy(element, { animation: 'fade-out', duration: 60 })
+          up.destroy(element)
           await wait()
 
-          expect(element).toMatchSelector('.up-destroying')
-          expect(element).toBeAttached()
-          expect(listener).not.toHaveBeenCalled()
-
-          await wait(100)
-
           expect(element).toBeDetached()
-          expect(listener).toHaveBeenCalled()
+          expect(listener.calls.count()).toBe(1)
+          const event = listener.calls.argsFor(0)[0]
+          expect(event.target).toBe(parent)
+          expect(event.fragment).toBe(element)
+          expect(event.parent).toBe(parent)
         })
 
       })
@@ -425,6 +427,47 @@ describe('up.fragment', function() {
         element.remove() // detach from document
 
         await expectAsync(up.reload(element)).toBeRejectedWith(jasmine.anyError(/detached/))
+      })
+
+      it('reloads from a URL given as { url } option instead of the fragment source', async function() {
+        htmlFixtureList('<div id="element" up-source="/source">old text</div>')
+
+        up.reload('#element', { url: '/other' })
+        await wait()
+
+        expect(jasmine.lastRequest().url).toMatchURL('/other')
+        jasmine.respondWithSelector('#element', { text: 'new text' })
+        await wait()
+
+        expect('#element').toHaveText('new text')
+      })
+
+      it('sends given { headers } along with the conditional request headers', async function() {
+        htmlFixtureList(`
+          <div id="element" up-source="/source" up-etag='"abc"' up-time="1445412480">old text</div>
+        `)
+
+        up.reload('#element', { headers: { 'X-Custom': 'custom-value' } })
+        await wait()
+
+        const { requestHeaders } = jasmine.lastRequest()
+        expect(requestHeaders['X-Custom']).toBe('custom-value')
+        expect(requestHeaders['If-None-Match']).toBe('"abc"')
+        expect(requestHeaders['If-Modified-Since']).toBe('Wed, 21 Oct 2015 07:28:00 GMT')
+      })
+
+      it('uses defaults from up.fragment.config.reloadOptions', async function() {
+        up.fragment.config.reloadOptions.focus = 'target'
+        htmlFixtureList('<div id="element" up-source="/source">old text</div>')
+
+        up.reload('#element')
+        await wait()
+
+        jasmine.respondWithSelector('#element', { text: 'new text' })
+        await wait()
+
+        expect('#element').toHaveText('new text')
+        expect('#element').toBeFocused()
       })
 
       if (up.migrate.loaded) {
@@ -1380,6 +1423,47 @@ describe('up.fragment', function() {
         container.append(fragment)
         up.fragment.abort(fragment)
 
+        expect(callback).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('up.fragment.onKept()', function() {
+
+      let html = (text) => `
+        <div id="target">
+          <div id="keeper" up-keep>
+            <div id="child">${text} child</div>
+          </div>
+        </div>
+      `
+
+      it('runs the callback with the up:fragment:kept event when the element or its ancestor is kept', async function() {
+        htmlFixtureList(html('old'))
+        const keeper = document.querySelector('#keeper')
+        const child = document.querySelector('#child')
+        const keeperCallback = jasmine.createSpy('kept callback for keeper')
+        const childCallback = jasmine.createSpy('kept callback for child')
+        up.fragment.onKept(keeper, keeperCallback)
+        up.fragment.onKept(child, childCallback)
+
+        await up.render({ target: '#target', document: html('new') })
+
+        expect('#child').toHaveText('old child')
+        expect(keeperCallback.calls.count()).toBe(1)
+        expect(keeperCallback.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ type: 'up:fragment:kept', target: keeper }))
+        expect(childCallback.calls.count()).toBe(1)
+        expect(childCallback.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ type: 'up:fragment:kept', target: keeper }))
+      })
+
+      it('returns a function that unsubscribes the callback', async function() {
+        htmlFixtureList(html('old'))
+        const callback = jasmine.createSpy('kept callback')
+        const unsubscribe = up.fragment.onKept(document.querySelector('#child'), callback)
+
+        unsubscribe()
+        await up.render({ target: '#target', document: html('new') })
+
+        expect('#child').toHaveText('old child')
         expect(callback).not.toHaveBeenCalled()
       })
     })

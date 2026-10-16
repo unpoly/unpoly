@@ -13,6 +13,29 @@ extendDescribe('up.form', function() {
       // if another script manually triggers `change` on the element.
       const defaultInputEvents = ['input', 'change']
 
+      it('returns a function that stops watching', async function() {
+        const [_form, field] = htmlFixtureList(`
+          <form>
+            <input type="text" name="email" value="old@example.com">
+          </form>
+        `)
+        const callback = jasmine.createSpy('watch callback')
+        const unwatch = up.watch(field, callback)
+
+        field.value = 'new1@example.com'
+        Trigger.change(field)
+        await wait()
+
+        expect(callback.calls.count()).toBe(1)
+
+        unwatch()
+        field.value = 'new2@example.com'
+        Trigger.change(field)
+        await wait()
+
+        expect(callback.calls.count()).toBe(1)
+      })
+
       describe('custom form fields', function() {
 
         it('watches a form-associated custom element that has no { name } property', async function() {
