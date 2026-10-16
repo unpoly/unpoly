@@ -76,6 +76,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
 - Fix the `{ duration }` and `{ easing }` options of `up.layer.open()` being ignored for the opening animation. This also affects `[up-duration]` and `[up-easing]` on a link that opens an overlay. Formerly only `up.layer.config` was used.
 - Fix `up.viewport.restoreFocus()` throwing an error when called without a `{ layer }` option or with a layer name like `{ layer: 'root' }`.
 - Fix `up.viewport.restoreScroll()` ignoring its `{ location }` option. It always restored the positions saved for the layer's current location.
+- Fix `up.fragment.matches()` with `{ layer: 'new', mode }` options. A selector like `:main` was expanded for the root layer, or the function threw an error while an overlay was open.
 
 
 3.14.3

@@ -640,6 +640,25 @@ extendDescribe('up.fragment', function() {
 
     describe('up.fragment.matches()', function() {
 
+      describe('with { layer: "new" } and { mode } options', function() {
+
+        it('expands :main to the main targets of the given mode', function() {
+          up.layer.config.modal.mainTargets = ['.modal-main']
+          const element = up.element.createFromHTML('<div class="modal-main"></div>')
+
+          expect(up.fragment.matches(element, ':main', { layer: 'new', mode: 'modal' })).toBe(true)
+        })
+
+        it('expands :main for the given mode while an overlay is open', async function() {
+          up.layer.config.modal.mainTargets = ['.modal-main']
+          await up.layer.open({ mode: 'drawer', content: 'drawer content' })
+          const element = up.element.createFromHTML('<div class="modal-main"></div>')
+
+          expect(up.fragment.matches(element, ':main', { layer: 'new', mode: 'modal' })).toBe(true)
+        })
+
+      })
+
       it('returns whether the fragment matches the selector', function() {
         const fragment = fixture('.foo')
         expect(up.fragment.matches(fragment, '.foo')).toBe(true)
