@@ -202,8 +202,8 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _onReloadFailure(reason) {
-    // Because we didn't supply a { failTarget } or { fallback } option, we can only reach
-    // this branch for a fatal render error.
+    // An error response rejects with an up.RenderResult (rendered into { failTarget: ':none' }),
+    // which is not critical. Only a fatal render error will be thrown below.
     this._loading = false
     this._satisfyInterval()
     this._scheduleRemainingTime()

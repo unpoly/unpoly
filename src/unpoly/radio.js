@@ -361,6 +361,9 @@ up.radio = (function() {
     parser.string('ifLayer', { default: 'front' })
     parser.include(up.link.requestOptions)
     parser.include(up.status.statusOptions)
+    // An error response renders nothing, unless the fragment has [up-fail=false].
+    // Polling then tries again after the next interval.
+    options.failTarget ??= ':none'
     return options
   }
 

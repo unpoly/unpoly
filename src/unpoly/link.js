@@ -1025,6 +1025,9 @@ up.link = (function() {
     // These defaults can be overridden using [up-...] attributes.
     let defaults = {
       target: ':origin',
+      // An error response renders nothing and keeps the placeholder, unless the placeholder
+      // has an [up-fail-target] or [up-fail=false] attribute.
+      failTarget: ':none',
       cache: 'auto',
       revalidate: 'auto',
       feedback: true,
@@ -1104,6 +1107,20 @@ up.link = (function() {
 
       You may target one or [multiple](/targeting-fragments#multiple) fragments.
       To target the placeholder itself, you can use the `:origin` target instead of spelling out a selector.
+
+    @param [up-fail]
+      How to handle [failed server responses](/failed-responses).
+
+      By default, a server response with an error code is not rendered,
+      and the placeholder keeps its fallback content.
+
+      Set `[up-fail=false]` to render *any* response that contains a matching fragment,
+      even with a 4xx or 5xx status code.
+
+    @param [up-fail-target]
+      A selector for the fragment to render a [failed server response](/failed-responses) in.
+
+      By default, a server response with an error code is not rendered.
 
   @section Request
     @param [up-href]
