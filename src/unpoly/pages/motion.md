@@ -66,7 +66,7 @@ Controlling motion {#controlling-motion}
 <a id="finishing-running-animations"></a>
 
 You can change the duration and easing of every effect, per element or for the whole app,
-and users who prefer reduced motion see no animations at all:
+and users who prefer reduced motion see no effects at all:
 
 ```html
 <a href="/stories/2" up-target="#story" up-transition="move-left" up-duration="300">Next story</a> <!-- mark: up-duration="300" -->
