@@ -433,8 +433,8 @@ extendDescribe('up.radio', function() {
 
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.target')
 
-        await expectAsync(renderHungryPromise).toBePending()
-        await expectAsync(renderTargetPromise).toBePending()
+        expect((await promiseState(renderHungryPromise)).state).toBe('pending')
+        expect((await promiseState(renderTargetPromise)).state).toBe('pending')
 
         jasmine.respondWith(`
           <div class="target">

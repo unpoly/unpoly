@@ -295,7 +295,7 @@ extendDescribe('up.fragment', function() {
             up.render('.element', { content: 'new content', abort: 'target' })
 
             await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
-            await expectAsync(change2Promise).toBePending()
+            expect((await promiseState(change2Promise)).state).toBe('pending')
             expect('.element').toHaveText('new content')
           })
 
@@ -316,7 +316,7 @@ extendDescribe('up.fragment', function() {
 
             await expectAsync(change1Promise).toBeRejectedWith(jasmine.any(up.Aborted))
             expect(jasmine.Ajax.requests.count()).toBe(2)
-            await expectAsync(compilerRequest).toBePending()
+            expect((await promiseState(compilerRequest)).state).toBe('pending')
           })
 
           it('aborts existing requests targeting a descendant of the targeted element', async function() {
@@ -338,7 +338,7 @@ extendDescribe('up.fragment', function() {
 
             up.render('.child', { url: '/path2', abort: 'target' })
 
-            await expectAsync(parentChangePromise).toBePending()
+            expect((await promiseState(parentChangePromise)).state).toBe('pending')
           })
 
           it('does not abort its own preloading request', async function() {
@@ -353,8 +353,8 @@ extendDescribe('up.fragment', function() {
             const followPromise = up.link.follow(link)
             await wait()
 
-            await expectAsync(preloadPromise).toBePending()
-            await expectAsync(followPromise).toBePending()
+            expect((await promiseState(preloadPromise)).state).toBe('pending')
+            expect((await promiseState(followPromise)).state).toBe('pending')
             expect(up.network.queue.allRequests.length).toBe(1)
           })
 

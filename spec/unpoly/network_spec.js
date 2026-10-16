@@ -345,7 +345,7 @@ describe('up.network', function() {
 
         await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
 
-        await expectAsync(request2).toBePending()
+        expect((await promiseState(request2)).state).toBe('pending')
 
       })
 
@@ -365,7 +365,7 @@ describe('up.network', function() {
         up.network.abort(matcher)
 
         await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
-        await expectAsync(request2).toBePending()
+        expect((await promiseState(request2)).state).toBe('pending')
       })
 
       it('aborts all requests matching the given URL pattern', async function() {
@@ -377,7 +377,7 @@ describe('up.network', function() {
         up.network.abort('/foo/*')
 
         await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
-        await expectAsync(request1).toBePending()
+        expect((await promiseState(request2)).state).toBe('pending')
       })
 
       it('emits an up:request:aborted event', async function() {

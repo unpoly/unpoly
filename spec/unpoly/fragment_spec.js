@@ -355,7 +355,7 @@ describe('up.fragment', function() {
 
           up.destroy(child)
 
-          await expectAsync(promise).toBePending()
+          expect((await promiseState(promise)).state).toBe('pending')
         })
       })
     })

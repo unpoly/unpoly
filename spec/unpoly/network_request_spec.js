@@ -893,7 +893,7 @@ extendDescribe('up.network', function() {
 
           expect(jasmine.Ajax.requests.count()).toBe(2)
           expect({ url: '/path' }).toBeCached() // Cache has been expired and immediately replaced with the new request
-          await expectAsync(up.cache.get({ url: '/path' })).toBePending()
+          expect((await promiseState(up.cache.get({ url: '/path' }))).state).toBe('pending')
 
           jasmine.respondWith('fresh content')
           await wait()
@@ -1010,7 +1010,7 @@ extendDescribe('up.network', function() {
           await wait()
 
           expect(jasmine.Ajax.requests.count()).toEqual(3)
-          await expectAsync(fooRequest2).toBePending()
+          expect((await promiseState(fooRequest2)).state).toBe('pending')
         })
 
         it('evicts the entire cache if the server responds with an X-Up-Evict-Cache: * header', async function() {

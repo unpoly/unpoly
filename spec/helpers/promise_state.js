@@ -7,18 +7,22 @@ function raceThenables(promises) {
     var finished = false
 
     promises.forEach(function(promise) {
-      promise.then(function(value) {
-        if (!finished) {
-          finished = true
-          resolve(value)
+      // Pass both callbacks to a single then() call. A separate then(onFulfilled) would
+      // return a derived promise that rejects unhandled when the observed promise rejects later.
+      promise.then(
+        function(value) {
+          if (!finished) {
+            finished = true
+            resolve(value)
+          }
+        },
+        function(reason) {
+          if (!finished) {
+            finished = true
+            reject(reason)
+          }
         }
-      })
-      promise.catch(function(value) {
-        if (!finished) {
-          finished = true
-          reject(value)
-        }
-      })
+      )
     })
   })
 }
