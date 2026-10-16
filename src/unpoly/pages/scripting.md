@@ -23,26 +23,9 @@ to `DOMContentLoaded`, which only fires for the initial page.
 
 A compiler can return a *destructor* function. Unpoly calls it when it removes
 the element, e.g. when the surrounding fragment is swapped. This keeps effects
-like timers or global listeners from outliving their element:
-
-```js
-up.compiler('.current-time', function(element) {
-  let update = () => element.textContent = new Date().toString()
-  let timer = setInterval(update, 1000)
-  return () => clearInterval(timer) // mark: return
-})
-```
+like timers or global listeners from outliving their element.
 
 [[more: enhancing-elements]]
-
-
-The page is long-lived
-----------------------
-
-When Unpoly updates a fragment, the browser keeps the same document and JavaScript
-environment, often through many navigations. Compilers and destructors scope your
-behavior to an element's lifetime, so the long-lived page accumulates no stale
-listeners or timers.
 
 
 Attaching data to elements
