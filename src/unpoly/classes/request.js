@@ -332,6 +332,7 @@ up.Request = class Request extends up.Record {
     return {
       state: 'new',
       abortable: true,
+      expired: false,
       headers: {},
       timeout: config.timeout,
       builtAt: new Date(),

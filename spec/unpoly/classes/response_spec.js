@@ -152,7 +152,7 @@ describe('up.Response', function() {
       const freshResponse = new up.Response({ request, loadedAt: new Date(Date.now() - 900) })
       const oldResponse = new up.Response({ request, loadedAt: new Date(Date.now() - 1100) })
 
-      expect(freshResponse.expired).toBeFalsy()
+      expect(freshResponse.expired).toBe(false)
       expect(oldResponse.expired).toBe(true)
     })
 
@@ -162,7 +162,7 @@ describe('up.Response', function() {
 
       jasmine.respondWith('response text')
       const response = await request
-      expect(response.expired).toBeFalsy()
+      expect(response.expired).toBe(false)
 
       up.cache.expire('/foo')
 
