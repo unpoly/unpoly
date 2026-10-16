@@ -50,7 +50,7 @@ up.script = (function() {
       Exceptions to `up.script.config.scriptSelectors`.
 
     @param {string} [config.evalCallbackPolicy='auto']
-      Whether Unpoly will [run callbacks in HTML attributes](/script-security#callbacks) like [`[up-on-loaded]`](/up-follow#up-on-loaded).
+      Whether Unpoly will [run callbacks in HTML attributes](/script-security#attribute-callbacks) like [`[up-on-loaded]`](/up-follow#up-on-loaded).
 
     @param {string} [config.scriptElementPolicy='auto']
       Whether Unpoly will [run `<script>` elements in new fragments](/script-security#script-elements).

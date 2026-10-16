@@ -159,7 +159,7 @@ You can configure `up.script.config.callbackPolicy` to block all callbacks, or t
 | `block`              | Never              | Never                 | Never                                                                            |
 | `nonce`              | With allowed nonce | With allowed nonce    | With allowed nonce                                                               |
 
-See [Security for callbacks](/script-security#callbacks).
+See [Security for callbacks](/script-security#attribute-callbacks).
 
 
 

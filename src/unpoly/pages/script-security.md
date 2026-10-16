@@ -3,11 +3,36 @@ Script security
 
 This page explains how Unpoly's scripting facilities affect security, and how to make them work with a strict [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) (or CSP).
 
-Unpoly extends HTML with [attributes that contain JavaScript](#callbacks), and might also run [`<script>` elements in new fragments](#script-elements). An existing Content Security Policy is generally honored. You can configure Unpoly to be more permissive or more restrictive when executing scripts.
+Unpoly extends HTML with [attributes that contain JavaScript](#attribute-callbacks), and might also run [`<script>` elements in new fragments](#script-elements). An existing Content Security Policy is generally honored. You can configure Unpoly to be more permissive or more restrictive when executing scripts.
 
 
-Callbacks {#callbacks}
-------------------
+Providing the CSP nonce {#meta-csp-nonce}
+-----------------------
+
+The sections below show several ways to run Unpoly's JavaScript under a strict CSP.
+Those that use nonces have one thing in common: Unpoly must know which nonce your CSP allows
+for the current page. To provide this *CSP nonce*, include a `<meta name="csp-nonce">` tag
+in the `<head>` of the initial page load:
+
+```html
+<head>
+  <meta name="csp-nonce" content="secret123"> <!-- mark: secret123 -->
+  ...
+</head>
+```
+
+Its value is the nonce from the CSP header of the same response.
+To provide the nonce some other way, configure `up.script.config.cspNonce()`.
+
+> [important]
+> Once Unpoly knows your CSP nonce, it will enforce nonces in all [callbacks](#attribute-callbacks).\
+> [Script elements](#script-elements) without nonces are still allowed, as long as they pass your CSP checks.
+
+
+Callbacks in attributes {#attribute-callbacks}
+-----------------------
+
+<a id="callbacks"></a>
 
 Unpoly introduces new HTML attributes that can execute JavaScript code.\
 These generally work like [`[onclick]`](https://www.w3schools.com/jsref/event_onclick.asp) or
@@ -27,13 +52,6 @@ These generally work like [`[onclick]`](https://www.w3schools.com/jsref/event_on
     name="title"
     up-watch="console.log('Field has new value', value)"> <!-- mark: up-watch -->
 </form>
-```
-
-Some [response headers](/up.protocol) can also contain callbacks encoded as a JSON string:
-
-```http
-Content-Type: text/html
-X-Up-Open-Layer: { "mode": "drawer", "onDismissed": "console.log('Closed overlay', layer)" }
 ```
 
 ### What callbacks are allowed? {#callback-policy}
@@ -71,17 +89,7 @@ This allows you to selectively allow callbacks, even with a strict CSP.
 up.script.config.evalCallbackPolicy = 'nonce'
 ```
 
-For Unpoly to be able to verify nonces, you must include a `<meta name="csp-nonce">` tag
-in the `<head>` of the initial page load:
-
-```html
-<head>
-  <meta name="csp-nonce" content="secret123"> <!-- mark: secret123 -->
-  ...
-</head>
-```
-
-Now only callbacks with a matching nonce will be executed:
+With a [CSP nonce](#meta-csp-nonce) of `secret123`, only callbacks with a matching nonce will be executed:
 
 ```html
 <a href="/path" up-follow up-on-loaded="nonce-secret123 console.log('Hi world')">
@@ -127,6 +135,37 @@ up.on('up:link:follow', '.alert-on-loaded', (event) => {
 ```
 
 
+Callbacks in headers {#header-callbacks}
+--------------------
+
+When the server [opens an overlay](/X-Up-Open-Layer), its `X-Up-Open-Layer` header can pass
+callbacks like `{ onAccepted }` as a string of JavaScript:
+
+```http
+X-Up-Open-Layer: { onAccepted: 'up.reload("#users-list")' }
+```
+
+These callbacks follow the same [policy](#callback-policy) as callbacks in attributes.
+With a strict CSP, [prefix them with your CSP nonce](#callback-nonces):
+
+```http
+X-Up-Open-Layer: { onAccepted: 'nonce-secret123 up.reload("#users-list")' }
+```
+
+To keep JavaScript out of your response headers, send a custom header with the data your callback needs,
+like `X-Reload-On-Accept` below. A listener in a script file reads it and sets the callback:
+
+```http
+X-Up-Open-Layer: {}
+X-Reload-On-Accept: #users-list
+```
+
+```js
+up.on('up:fragment:loaded', function(event) {
+  let selector = event.response.header('X-Reload-On-Accept')
+  if (selector) event.renderOptions.onAccepted = () => up.reload(selector) // mark: event.renderOptions.onAccepted
+})
+```
 
 
 Script elements {#script-elements}
@@ -166,17 +205,7 @@ you can configure Unpoly to only run scripts with an allowed `[nonce]` attribute
 up.script.config.scriptElementPolicy = 'nonce'
 ```
 
-For Unpoly to be able to verify nonces, you must include a `<meta name="csp-nonce">` tag
-in the `<head>` of the initial page load:
-
-```html
-<head>
-  <meta name="csp-nonce" content="secret123"> <!-- mark: secret123 -->
-  ...
-</head>
-```
-
-Unpoly will now block any script without a matching nonce:
+With a [CSP nonce](#meta-csp-nonce) of `secret123`, Unpoly will block any script without a matching nonce:
 
 ```html
 <div id="fragment">
@@ -208,32 +237,13 @@ To prevent this, Unpoly requires [matching CSP nonces](#script-element-nonces)
 in any response with a `strict-dynamic` CSP.
 
 
-
 Nonces are rewritten {#nonce-rewriting}
 --------------------
 
 The CSP header from the initial page load exclusively defines the nonces allowed for the lifetime of the document.
 When Unpoly loads new fragments from the server, any nonces will match their own response, but not the existing
 document. To address this, Unpoly will verify and rewrite nonces before a fragment is placed into the page.
-
-### Providing the document nonce to Unpoly {#meta-csp-nonce}
-
-For Unpoly to be able to rewrite response nonces, you must include a `<meta name="csp-nonce">` tag
-in the `<head>` of the initial page load:
-
-```html
-<head>
-  <meta name="csp-nonce" content="secret123"> <!-- mark: secret123 -->
-  ...
-</head>
-```
-
-To provide the nonce through another method, configure `up.script.config.cspNonce()`.
-
-> [important]
-> Once Unpoly knows your document nonce, it will enforce nonces in all [callbacks](#callbacks).\
-> [Script elements](#script-elements) without nonces are still allowed, as long as they pass your CSP checks.
-
+For this Unpoly needs to know your [CSP nonce](#meta-csp-nonce).
 
 ### How responses are altered {#response-processing} 
 
@@ -243,7 +253,7 @@ Content-Security-Policy: script-src 'self' 'nonce-match456'
 ...
 
 <script nonce="match456">
-  // ✔ Nonce will be rewritten to the document nonce (secret123)
+  // ✔ Nonce will be rewritten to the CSP nonce (secret123)
 </script>
 
 <script nonce="wrong789">
