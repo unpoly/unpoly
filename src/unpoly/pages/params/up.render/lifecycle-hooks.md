@@ -46,6 +46,9 @@
   To run a callback after an [error response](/error-responses) has finished rendering,
   pass an `{ onFailFinished }` option instead.
 
+  When a [revalidation](/caching#revalidation) receives an error response, `{ onFinished }` is not called.
+  Instead `{ onFailRendered }` and `{ onFailFinished }` are called for the revalidation's error response.
+
   Also see [Awaiting post-processing](/render-lifecycle#postprocessing).
 
 @param {Function(Error)} [options.onError]
