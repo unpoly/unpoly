@@ -61,7 +61,6 @@ and no `up:location:changed` event is emitted.
 
 When an overlay with visible history closes, the address bar returns to the parent page's URL.
 This emits `up:location:changed` and counts another view of the parent page.
-The `up:layer:location:changed` listener below does not.
 
 To also track navigation within overlays without visible history, observe `up:layer:location:changed` instead:
 
@@ -80,6 +79,8 @@ up.on('up:layer:opened', function(event) {
   }
 })
 ```
+
+These listeners do not count the parent page again when an overlay closes.
 
 
 Tracking rendered fragments instead {#fragments}
