@@ -540,6 +540,27 @@ extendDescribe('up.fragment', function() {
             expect(otherViewport.scrollTop).toBe(444)
           })
 
+          it('only scrolls the closest viewport around the fragment, not an outer viewport around it', async function() {
+            const [outerViewport, _outerContent, innerViewport, _innerContent, _child] = htmlFixtureList(`
+              <div up-viewport id="outer-viewport" style="height: 200px; overflow-y: scroll">
+                <div style="height: 1000px">
+                  <div up-viewport id="inner-viewport" style="height: 100px; overflow-y: scroll">
+                    <div style="height: 1000px">
+                      <div id="child">old child</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `)
+            outerViewport.scrollTop = 333
+            innerViewport.scrollTop = 444
+
+            await up.render({ fragment: '<div id="child">new child</div>', scroll: 'top' })
+
+            expect(innerViewport.scrollTop).toBe(0)
+            expect(outerViewport.scrollTop).toBe(333)
+          })
+
         })
 
         describe('with { scroll: "bottom" }', function() {
