@@ -348,6 +348,33 @@ extendDescribe('up.status', function() {
             expect('#target').toHaveText('revalidated target')
           })
 
+          it('runs a { revalidatePreview } on the fragment rendered from the expired cache entry', async function() {
+            htmlFixtureList('<div id="target">old target</div>')
+            await jasmine.populateCache('/path', '<div id="target">cached target</div>')
+            up.cache.expire()
+
+            let previewedFragment
+            let previewedText
+            let revalidatePreview = (preview) => {
+              previewedFragment = preview.fragment
+              previewedText = preview.fragment.textContent
+              preview.addClass('revalidating-preview')
+            }
+
+            up.render({ target: '#target', url: '/path', cache: true, revalidate: true, revalidatePreview })
+            await wait()
+
+            expect(up.network.isBusy()).toBe(true)
+            expect(previewedText).toBe('cached target')
+            expect(previewedFragment).toBe(document.querySelector('#target'))
+            expect('#target').toHaveClass('revalidating-preview')
+
+            jasmine.respondWithSelector('#target', { text: 'revalidated target' })
+            await wait()
+
+            expect('#target').toHaveText('revalidated target')
+          })
+
         })
 
         describe('reverting preview effects', function() {
@@ -365,6 +392,29 @@ extendDescribe('up.status', function() {
             await wait()
 
             expect(revertSpy).toHaveBeenCalled()
+          })
+
+          it('reverts a preview before rendering a failed response', async function() {
+            htmlFixtureList('<div id="target">old target</div>')
+            let actions = []
+
+            let previewFn = function() {
+              actions.push('preview:apply')
+              return () => actions.push('preview:revert')
+            }
+
+            up.on('up:fragment:inserted', () => actions.push('fragment:inserted'))
+
+            let renderPromise = up.render({ url: '/path', target: '#target', failTarget: '#target', preview: previewFn })
+            await wait()
+
+            expect(actions).toEqual(['preview:apply'])
+
+            jasmine.respondWithSelector('#target', { text: 'validation errors', status: 422 })
+            await expectAsync(renderPromise).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect('#target').toHaveText('validation errors')
+            expect(actions).toEqual(['preview:apply', 'preview:revert', 'fragment:inserted'])
           })
 
           it('reverts a preview when the targeted fragment is aborted', async function() {

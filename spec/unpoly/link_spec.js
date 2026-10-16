@@ -236,6 +236,12 @@ describe('up.link', function() {
         expect(options.placeholder).toBe('loading...')
       })
 
+      it('parses an [up-feedback=false] attribute as { feedback: false }', function() {
+        const [link] = htmlFixtureList('<a href="/foo" up-feedback="false">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.feedback).toBe(false)
+      })
+
       it('parses an [up-late-delay=Number] attribute as a number', function() {
         const link = fixture('a[href="/foo"][up-late-delay=123]')
         up.hello(link)

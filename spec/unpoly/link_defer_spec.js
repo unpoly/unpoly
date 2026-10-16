@@ -246,6 +246,19 @@ extendDescribe('up.link', function() {
           expect('div#partial').toHaveText('revalidated partial')
         })
 
+        it('does not revalidate expired cached content with [up-revalidate=false]', async function() {
+          await jasmine.populateCache('/slow-path', '<div id="partial">cached partial</div>')
+          up.cache.expire()
+
+          const [partial] = htmlFixtureList('<a id="partial" up-defer href="/slow-path" up-revalidate="false">initial content</a>')
+          up.hello(partial)
+          await wait()
+
+          expect('div#partial').toHaveText('cached partial')
+          expect(up.network.isBusy()).toBe(false)
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+        })
+
         it('does not use the cache with [up-cache=false]', async function() {
           await jasmine.populateCache('/slow-path', '<div id="partial">partial content</div>')
 
@@ -464,6 +477,39 @@ extendDescribe('up.link', function() {
           await wait()
 
           expect('#slow').toHaveText('partial content')
+        })
+
+        it('appends the next page and re-arms the swapped link for infinite scrolling', async function() {
+          let html = ({ page, height }) => `
+            <div id="pages">
+              <div class="page" style="height: ${height}">items for page ${page}</div>
+            </div>
+            <a id="next-page" href="/items?page=${page + 1}" up-defer="reveal" up-target="#next-page, #pages:after">Load next page</a>
+          `
+
+          let [_pages, _page1, nextPageLink] = htmlFixtureList(html({ page: 1, height: '10px' }))
+          up.hello(nextPageLink)
+          await wait(MUTATION_OBSERVER_LAG)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/items?page=2')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#next-page, #pages')
+
+          jasmine.respondWith(html({ page: 2, height: '50000px' }))
+          await wait(MUTATION_OBSERVER_LAG)
+
+          expect(document.querySelectorAll('#pages .page').length).toBe(2)
+          expect('#pages').toHaveText('items for page 1 items for page 2')
+          expect('#next-page').toHaveAttribute('href', '/items?page=3')
+          // The new link is not yet revealed
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+          document.querySelector('#next-page').scrollIntoView()
+          await wait(MUTATION_OBSERVER_LAG)
+
+          expect(jasmine.Ajax.requests.count()).toEqual(2)
+          expect(jasmine.lastRequest().url).toMatchURL('/items?page=3')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#next-page, #pages')
         })
 
         describe('with [up-intersect-margin]', function() {
@@ -723,6 +769,47 @@ extendDescribe('up.link', function() {
 
           expect(listener).toHaveBeenCalled()
           expect(jasmine.Ajax.requests.count()).toEqual(0)
+        })
+
+        it('does not try again on a later reveal after up:deferred:load was prevented, but can still be loaded with up.deferred.load()', async function() {
+          // MutationObserver does not fire within a task
+          const MUTATION_OBSERVER_LAG = 30
+          let preventLoad = true
+          let loadEventCount = 0
+          up.on('up:deferred:load', (event) => {
+            loadEventCount++
+            if (preventLoad) event.preventDefault()
+          })
+
+          const [before, partial] = htmlFixtureList(`
+            <div id="before" style="height: 50000px">before</div>
+            <a id="partial" up-defer="reveal" href="/slow-path">initial content</a>
+          `)
+          up.hello(partial)
+
+          partial.scrollIntoView()
+          await wait(MUTATION_OBSERVER_LAG)
+
+          before.scrollIntoView()
+          await wait(MUTATION_OBSERVER_LAG)
+
+          partial.scrollIntoView()
+          await wait(MUTATION_OBSERVER_LAG)
+
+          expect(loadEventCount).toBe(1)
+          expect(jasmine.Ajax.requests.count()).toEqual(0)
+
+          preventLoad = false
+          up.deferred.load(partial)
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toEqual(1)
+          expect(jasmine.lastRequest().url).toMatchURL('/slow-path')
+
+          jasmine.respondWithSelector('#partial', { text: 'partial content' })
+          await wait()
+
+          expect('#partial').toHaveText('partial content')
         })
 
         it('allows listener to change render options', async function() {

@@ -275,6 +275,59 @@ extendDescribe('up.radio', function() {
         )
       })
 
+      it('does not update a hungry element whose match in the response is contained by the explicitly targeted element', async function() {
+        const [target, hungry] = htmlFixtureList(`
+          <div id="target">old target</div>
+          <div id="hungry" up-hungry>old hungry</div>
+        `)
+
+        await up.render({
+          target: '#target',
+          document: `
+            <div id="target">
+              new target
+              <div id="hungry">new hungry</div>
+            </div>
+          `
+        })
+
+        expect(target).toBeDetached()
+        expect(document.querySelector('#target')).toHaveText('new target new hungry')
+        expect(hungry).toBeAttached()
+        expect(hungry).toHaveText('old hungry')
+      })
+
+      it('updates elements matching up.radio.config.hungrySelectors', async function() {
+        up.radio.config.hungrySelectors.push('.unread-count')
+        let html = (prefix) => `
+          <div id="target">${prefix} target</div>
+          <div id="count" class="unread-count">${prefix} count</div>
+        `
+        htmlFixtureList(html('old'))
+
+        await up.render({ target: '#target', document: html('new') })
+
+        expect('#target').toHaveText('new target')
+        expect('#count').toHaveText('new count')
+      })
+
+      it('does not update elements matching up.radio.config.noHungrySelectors', async function() {
+        up.radio.config.hungrySelectors.push('.unread-count')
+        up.radio.config.noHungrySelectors.push('.static')
+        let html = (prefix) => `
+          <div id="target">${prefix} target</div>
+          <div id="count1" class="unread-count">${prefix} count1</div>
+          <div id="count2" class="unread-count static">${prefix} count2</div>
+        `
+        htmlFixtureList(html('old'))
+
+        await up.render({ target: '#target', document: html('new') })
+
+        expect('#target').toHaveText('new target')
+        expect('#count1').toHaveText('new count1')
+        expect('#count2').toHaveText('old count2')
+      })
+
       it("replaces the element when the explicit target is :none", async function() {
         $fixture('.hungry[up-hungry]').text('old hungry')
         $fixture('.target').text('old target')
@@ -1471,6 +1524,28 @@ extendDescribe('up.radio', function() {
           }))
         })
 
+        it('exposes whether the render pass updates history as a boolean event.renderOptions.history', async function() {
+          up.fragment.config.mainTargets = ['#main']
+          let html = (prefix) => `
+            <div id="hungry" up-hungry>${prefix} hungry</div>
+            <main id="main">
+              <div id="child">${prefix} child</div>
+            </main>
+          `
+          htmlFixtureList(html('old'))
+
+          const hungryListener = jasmine.createSpy('up:fragment:hungry listener')
+          up.on('up:fragment:hungry', (event) => hungryListener(event.renderOptions.history))
+
+          await up.render({ target: '#main', history: 'auto', document: html('new') })
+          expect(hungryListener.calls.mostRecent().args[0]).toBe(true)
+
+          await up.render({ target: '#child', history: 'auto', document: html('newer') })
+          expect(hungryListener.calls.mostRecent().args[0]).toBe(false)
+
+          expect(hungryListener.calls.count()).toBe(2)
+        })
+
         it('does not update the element if up:fragment:hungry is prevented', async function() {
           fixture('#hungry[up-hungry]', { text: 'old hungry' })
           fixture('#target', { text: 'old target' })
@@ -1516,6 +1591,28 @@ extendDescribe('up.radio', function() {
           expect(window.attributeListener.calls.argsFor(0)[0]).toBeEvent('up:fragment:hungry')
           expect(window.attributeListener.calls.argsFor(0)[1]).toEqual(jasmine.any(Element))
           expect(window.attributeListener.calls.argsFor(0)[1]).toHaveText('new hungry')
+          delete window.attributeListener
+        })
+
+        it('exposes the render pass options as a renderOptions variable to an [up-on-hungry] callback', async function() {
+          window.attributeListener = jasmine.createSpy('attribute listener')
+          htmlFixtureList(`
+            <div id="hungry" up-hungry up-on-hungry="nonce-specs-nonce window.attributeListener(renderOptions)">old hungry</div>
+            <div id="target">old target</div>
+          `)
+
+          await up.render({
+            target: '#target',
+            scroll: '#target',
+            document: `
+              <div id="hungry">new hungry</div>
+              <div id="target">new target</div>
+            `
+          })
+
+          expect('#hungry').toHaveText('new hungry')
+          expect(window.attributeListener.calls.count()).toBe(1)
+          expect(window.attributeListener.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ target: '#target', scroll: '#target' }))
           delete window.attributeListener
         })
 

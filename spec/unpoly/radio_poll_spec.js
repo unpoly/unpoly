@@ -896,6 +896,65 @@ extendDescribe('up.radio', function() {
 
       })
 
+      it('aborts a pending reload when the user updates a container, and keeps polling the new fragment', async function() {
+        let html = (prefix) => `
+          <div id="container">
+            <div id="poller" up-poll up-interval="20" up-source="/poll">${prefix} poller</div>
+          </div>
+        `
+        const [container] = htmlFixtureList(html('old'))
+        up.hello(container)
+
+        await wait(60)
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/poll')
+
+        const abortedListener = jasmine.createSpy('up:request:aborted listener')
+        up.on('up:request:aborted', abortedListener)
+
+        up.render('#container', { url: '/user' })
+        await wait()
+
+        expect(abortedListener.calls.count()).toBe(1)
+        expect(abortedListener.calls.argsFor(0)[0].request.url).toMatchURL('/poll')
+        expect(jasmine.lastRequest().url).toMatchURL('/user')
+
+        jasmine.respondWith(html('new'))
+        await wait()
+
+        expect('#poller').toHaveText('new poller')
+
+        await wait(60)
+
+        expect(jasmine.Ajax.requests.count()).toBe(3)
+        expect(jasmine.lastRequest().url).toMatchURL('/poll')
+      })
+
+      describe('feedback classes', function() {
+
+        it('sets .up-loading on the fragment while reloading', async function() {
+          const [element] = htmlFixtureList('<div id="element" up-poll up-interval="20" up-source="/poll">old text</div>')
+          up.hello(element)
+
+          await wait(60)
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(element).toHaveClass('up-loading')
+        })
+
+        it('does not set .up-loading on the fragment while reloading with [up-feedback=false]', async function() {
+          const [element] = htmlFixtureList('<div id="element" up-poll up-interval="20" up-source="/poll" up-feedback="false">old text</div>')
+          up.hello(element)
+
+          await wait(60)
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(element).not.toHaveClass('up-loading')
+        })
+
+      })
+
       describe('with [up-preview]', function() {
         it('shows a preview while the fragment is reloading', async function() {
           const interval = 60

@@ -19,6 +19,17 @@ describe('up.history', function() {
   describe('JavaScript', function() {
 
     describe('up.history.push()', () => {
+      it('changes neither the document title nor meta tags', function() {
+        const oldTitle = document.title
+        const meta = fixture(document.head, 'meta[name="description"][content="old description"]')
+
+        up.history.push('/push-path')
+
+        expect(document.title).toBe(oldTitle)
+        expect(meta).toBeAttached()
+        expect(meta).toHaveAttribute('content', 'old description')
+      })
+
       it('adds a history entry and changes up.history.location', function() {
         const pushSpy = spyOn(history, 'pushState').and.callThrough()
 
@@ -28,9 +39,31 @@ describe('up.history', function() {
         expect(up.history.location).toMatchURL('/push-path')
         expect(location.href).toMatchURL('/push-path')
       })
+
+      it('does not change the browser URL with up.history.config.enabled = false', function() {
+        up.history.config.enabled = false
+        const locationBefore = location.href
+        const pushSpy = spyOn(history, 'pushState').and.callThrough()
+
+        up.history.push('/push-path')
+
+        expect(pushSpy).not.toHaveBeenCalled()
+        expect(location.href).toMatchURL(locationBefore)
+      })
     })
 
     describe('up.history.replace()', () => {
+      it('changes neither the document title nor meta tags', function() {
+        const oldTitle = document.title
+        const meta = fixture(document.head, 'meta[name="description"][content="old description"]')
+
+        up.history.replace('/replace-path')
+
+        expect(document.title).toBe(oldTitle)
+        expect(meta).toBeAttached()
+        expect(meta).toHaveAttribute('content', 'old description')
+      })
+
       it('changes up.history.location without adding a history entry', function() {
         const pushSpy = spyOn(history, 'pushState').and.callThrough()
         const replaceSpy = spyOn(history, 'replaceState').and.callThrough()
@@ -141,6 +174,11 @@ describe('up.history', function() {
     })
 
     describe('up.history.findMetaTags()', function() {
+
+      it('does not find an [up-meta] element in the <body>', function() {
+        const [element] = htmlFixtureList('<div up-meta>text</div>')
+        expect(up.history.findMetaTags()).not.toContain(element)
+      })
 
       it('finds a meta[name=description]', function() {
         const head = document.createElement('head')
@@ -692,6 +730,67 @@ describe('up.history', function() {
           expect(up.network.isBusy()).toBe(false)
         })
 
+      })
+
+      it('restores a location pushed by foreign JavaScript when a listener sets event.willHandle = true', async function() {
+        const waitForBrowser = 100
+        up.network.config.autoCache = false
+        up.history.config.restoreTargets = ['main']
+        htmlFixtureList('<main>initial text</main>')
+
+        up.on('up:location:changed', function(event) {
+          if (event.location.startsWith('/gallery/')) {
+            event.willHandle = true
+          }
+        })
+
+        up.history.replace('/path1')
+        history.pushState({}, '', '/gallery/1')
+        await wait()
+        up.history.push('/path2')
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+
+        history.back()
+        await wait(waitForBrowser)
+
+        expect(location.href).toMatchURL('/gallery/1')
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/gallery/1')
+
+        jasmine.respondWith('<main>gallery text</main>')
+        await wait()
+
+        expect('main').toHaveText('gallery text')
+      })
+
+      it('does not restore an owned location when a listener sets event.willHandle = false', async function() {
+        const waitForBrowser = 100
+        up.network.config.autoCache = false
+        up.history.config.restoreTargets = ['main']
+        htmlFixtureList('<main>initial text</main>')
+
+        const restoreListener = jasmine.createSpy('up:location:restore listener')
+        up.on('up:location:restore', restoreListener)
+
+        up.on('up:location:changed', function(event) {
+          if (event.location === '/path1') {
+            event.willHandle = false
+          }
+        })
+
+        up.history.replace('/path1')
+        up.history.push('/path2')
+        await wait()
+
+        history.back()
+        await wait(waitForBrowser)
+
+        expect(location.href).toMatchURL('/path1')
+        expect(restoreListener).not.toHaveBeenCalled()
+        expect(jasmine.Ajax.requests.count()).toBe(0)
+        expect('main').toHaveText('initial text')
       })
 
     })
