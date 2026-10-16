@@ -230,6 +230,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       layer: this.layer,
       autoMeans: ['autofocus', 'layer'],
       inputDevice: this.options.inputDevice,
+      focusVisible: this.options.focusVisible,
     })
 
     fragmentFocus.process(this.options.focus)
