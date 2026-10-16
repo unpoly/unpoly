@@ -172,7 +172,7 @@ up.protocol = (function() {
 
   ### Signaling failed form submissions
 
-  When [submitting a form via AJAX](/submitting-forms)
+  When [submitting a form](/submitting-forms),
   Unpoly needs to know whether the form submission has failed (to update the form with
   validation errors) or succeeded (to update the `[up-target]` selector).
 
@@ -1050,12 +1050,12 @@ up.protocol = (function() {
     @param {string} [config.csrfHeader='X-CSRF-Token']
       The name of the HTTP header that will include the
       [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
-      for AJAX requests.
+      for requests made by Unpoly.
 
     @param {string|Function(): string} [config.csrfParam]
       The `name` of the hidden `<input>` used for sending a
       [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) when
-      submitting a default, non-AJAX form. For AJAX requests the token is sent as an
+      the browser submits a form without Unpoly. For requests made by Unpoly the token is sent as an
       [HTTP header](/up.protocol.config#config.csrfHeader) instead.
 
       The parameter name can be configured as a string or as function that returns the parameter name.
@@ -1069,8 +1069,8 @@ up.protocol = (function() {
 
     @param {string|Function(): string} [config.csrfToken]
       The [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
-      to send for unsafe requests. The token will be sent as either an HTTP header (for AJAX requests)
-      or a hidden form `<input>` (for default, non-AJAX form submissions).
+      to send for unsafe requests. The token will be sent as either an HTTP header (for requests made by Unpoly)
+      or a hidden form `<input>` (for form submissions without Unpoly).
 
       The token can either be configured as a string or as function that returns the token.
       If no token is set, no token will be sent.

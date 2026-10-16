@@ -63,7 +63,7 @@ up.on('up:request:loaded', function(event) {
 })
 
 /*-
-Makes an AJAX request to the given URL and caches the response.
+Makes a request to the given URL and caches the response.
 
 The function returns a promise that fulfills with the response text.
 

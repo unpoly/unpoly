@@ -1280,7 +1280,7 @@ up.link = (function() {
   Activates this link-like element on `mousedown` instead of `click` ("Act on press").
 
   For links with `[up-follow]`, this will save time that would otherwise be spent
-  waiting for the user to release the mouse button. Since an AJAX request will be triggered right away,
+  waiting for the user to release the mouse button. Since the request starts right away,
   the interaction will appear faster.
 
   For [faux-interactive elements](/faux-interactive-elements), setting `[up-instant]` will cause

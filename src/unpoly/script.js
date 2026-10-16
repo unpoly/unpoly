@@ -375,7 +375,7 @@ up.script = (function() {
 
   ## Example
 
-  You will sometimes find yourself setting the same combination of UJS attributes again and again.
+  You will sometimes find yourself setting the same combination of `[up-*]` attributes again and again.
   Here every link opens a modal with a [custom animation](/up.animation) `shake`:
 
   ```html
@@ -594,7 +594,7 @@ up.script = (function() {
 
   ## Unpoly automatically calls `up.hello()`
 
-  When the page is manipulated using Unpoly functions or HTML selectors,
+  When the page is manipulated using Unpoly functions or `[up-*]` attributes,
   Unpoly will automatically call `up.hello()` on new fragments:
 
   ```js
@@ -610,7 +610,7 @@ up.script = (function() {
   - Parsing HTML into elements using browser APIs like `DOMParser()`
   - Elements created by other libraries
 
-  In this case, compilers will *not* run automatically and some of Unpoly's own HTML selectors will not be active.
+  In this case, compilers will *not* run automatically and some of Unpoly's own `[up-*]` attributes will not be active.
   We can address this by manually calling `up.hello()` on new elements:
 
   ```js

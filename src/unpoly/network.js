@@ -297,7 +297,7 @@ up.network = (function() {
   }
 
   /*-
-  Makes an AJAX request to the given URL.
+  Makes a request to the given URL.
 
   Returns an `up.Request` object which contains information about the request.
   This request object is also a promise for an `up.Response` that contains
@@ -761,7 +761,7 @@ up.network = (function() {
   }
 
   /*-
-  This event is [emitted](/up.emit) when an [AJAX request](/up.request)
+  This event is [emitted](/up.emit) when an [request](/up.request)
   was [aborted](/aborting-requests).
 
   @learn-ref aborting-requests#reacting
@@ -792,14 +792,14 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/up.emit) when [AJAX requests](/up.request)
+  This event is [emitted](/up.emit) when [requests](/up.request)
   are taking long to finish loading.
 
   @learn-ref network-issues#slow-server-responses
 
   ## Timing
 
-  By default, Unpoly will wait 400 ms for an AJAX request to finish
+  By default, Unpoly will wait 400 ms for a request to finish
   before emitting `up:network:late`. You may configure this delay
   [globally](/up.network.config#config.lateDelay),
   for [individual links](/up-follow#up-late-delay), or for [specific requests](/up.request#options.lateDelay).
@@ -822,7 +822,7 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/up.emit) when [AJAX requests](/up.request)
+  This event is [emitted](/up.emit) when [requests](/up.request)
   have [taken long to finish](/up:network:late), but have finished now.
 
   @learn-ref network-issues#slow-server-responses
@@ -832,7 +832,7 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/up.emit) before an [AJAX request](/up.request)
+  This event is [emitted](/up.emit) before an [request](/up.request)
   is sent over the network.
 
   @learn-ref network
@@ -881,7 +881,7 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/up.emit) when the response to an [AJAX request](/up.request)
+  This event is [emitted](/up.emit) when the response to an [request](/up.request)
   has been received.
 
   @learn-ref network
@@ -920,7 +920,7 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/up.emit) when an [AJAX request](/up.request)
+  This event is [emitted](/up.emit) when an [request](/up.request)
   encounters a fatal error, like a [timeout](/up.network.config#config.timeout) or loss of network connectivity.
 
   @learn-ref network-issues#disconnects
