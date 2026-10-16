@@ -617,7 +617,7 @@ up.viewport = (function() {
   State can only be preserved if the focused element is [targetable](/up.fragment.isTargetable).
 
   Saved state will be associated with the given layer's location.
-  It can later be restored by calling `up.viewport.restoreScroll()`
+  It can later be restored by calling `up.viewport.restoreFocus()`
   at the same location, or by following a link with an [`[up-focus="restore"]`](/focus#restore)
   attribute to that same location.
 
@@ -633,7 +633,7 @@ up.viewport = (function() {
 
     If omitted, the given [layer's location](/up.Layer.prototype.location) is used.
   @param {string} [options.layer = 'current']
-    The layer for which to save scroll positions.
+    The layer for which to save focus state.
 
     If omitted, state for the current layer will be saved.
   @stable

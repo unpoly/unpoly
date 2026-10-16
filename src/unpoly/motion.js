@@ -70,9 +70,9 @@ up.motion = (function() {
 
   1. It must honor the options `{ duration, easing }`, if given.
   2. It must *not* remove any of the given elements from the DOM.
-  3. It returns a promise that is fulfilled when the transition has ended
+  3. It returns a promise that is fulfilled when the animation has ended.
   4. If during the animation an event `up:motion:finish` is emitted on
-     the given element, the transition instantly jumps to the last frame
+     the given element, the animation instantly jumps to the last frame
      and resolves the returned promise.
 
   Calling [`up.animate()`](/up.animate) with an object argument
@@ -94,7 +94,7 @@ up.motion = (function() {
 
   ## Example
 
-  Here is the definition of the pre-defined `cross-fade` animation:
+  Here is the definition of the pre-defined `cross-fade` transition:
 
   ```js
   up.transition('cross-fade', function(oldElement, newElement, options) {
@@ -117,7 +117,7 @@ up.motion = (function() {
   1. It must honor the options `{ duration, easing }` if given.
   2. It must *not* remove any of the given elements from the DOM.
   3. It returns a promise that is fulfilled when the transition has ended.
-  4. If during the animation an event `up:motion:finish` is emitted on
+  4. If during the transition an event `up:motion:finish` is emitted on
      either element, the transition instantly jumps to the last frame
      and resolves the returned promise.
 
@@ -192,7 +192,7 @@ up.motion = (function() {
 
       - The name of a [registered](/up.animation) animation
       - A function performing the animation (same contract as a function passed to `up.animation()`)
-      - An object of CSS attributes describing the last frame of the animation (using kebab-case property names)
+      - An object of CSS properties describing the last frame of the animation (using kebab-case property names)
     @param {number} [options.duration=175]
       The duration of the animation, in milliseconds.
     @param {string} [options.easing='ease']
@@ -309,7 +309,7 @@ up.motion = (function() {
 
   Emits the `up:motion:finish` event that is handled by `up.animate()`.
 
-  Does nothing if there are no animation to complete.
+  Does nothing if there are no animations to complete.
 
   @function up.motion.finish
   @param {Element|jQuery|string} [element]
@@ -363,31 +363,12 @@ up.motion = (function() {
   You can define additional named transitions using [`up.transition()`](/up.transition).
 
 
-  ## Implementation details
-
-  During a transition, both the old and new element occupy
-  the same position on the screen.
-
-  Since the CSS layout flow will usually not allow two elements to
-  overlay the same space, Unpoly does the following:
-
-  - The old and new elements are cloned
-  - The old element is removed from the layout flow using `display: hidden`
-  - The new element is hidden, but still leaves space in the layout flow by setting `visibility: hidden`
-  - The clones are [absolutely positioned](https://developer.mozilla.org/en-US/docs/Web/CSS/position#Absolute_positioning)
-    over the original elements.
-  - The transition is applied to the cloned elements.
-    At no point will the hidden, original elements be animated.
-  - When the transition has finished, the clones are removed from the DOM and the new element is shown.
-    The old element remains hidden in the DOM.
-
   @function up.morph
   @section Elements
     @param {Element|jQuery|string} oldElement
       The old element to transition away from.
 
-      It will remain attached when the transition finishes, but may be hidden or
-      be located outside the visible viewport.
+      It will be removed from the DOM when the transition finishes.
     @param {Element|jQuery|string} newElement
       The new element that will remain in the DOM once the transition finishes.
 
@@ -399,7 +380,7 @@ up.motion = (function() {
       - The name of a [registered](/up.transition) transition
       - A function performing the transition (same contract as a function passed to `up.transition()`)
     @param {number} [options.duration=175]
-      The duration of the animation, in milliseconds.
+      The duration of the transition, in milliseconds.
     @param {string} [options.easing='ease']
       The timing function that controls the transition's acceleration.
 

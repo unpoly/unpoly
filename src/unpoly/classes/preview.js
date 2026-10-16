@@ -180,7 +180,7 @@ up.Preview = class Preview {
   When a [preview function](/up.preview) is called, its associated
   request has just been queued and `preview.ended` is always `false`.
 
-  Only if the preview function is async, `preview.ended` can be `true`.
+  `preview.ended` can only be `true` if the preview function is async.
   See [Delaying previews](/previews#delaying) for an example.
 
   @property up.Preview#ended
@@ -375,7 +375,7 @@ up.Preview = class Preview {
   This preview sets a temporary `.loading` class on the targeted fragment:
 
   ```js
-  up.preview('loading-attr', function(preview) {
+  up.preview('loading-class', function(preview) {
     preview.addClass('loading')
   })
   ```
@@ -557,7 +557,7 @@ up.Preview = class Preview {
 
   ## Controlling the insert position
 
-  You can control where the new element by providing a *reference element* and an *adjacent position* relative
+  You can control where the new element is inserted by providing a *reference element* and an *adjacent position* relative
   to the reference argument.
 
   For example, this preview will create a `.spinner` element as the *first* child of the `<body>`:
@@ -723,7 +723,7 @@ up.Preview = class Preview {
   are shown again.
 
   If the previewed render pass [opens a new overlay](/opening-overlays), the placeholder
-  will be shown temporary overlay with the same [visual style](/customizing-overlays) and open animation.
+  will be shown in a temporary overlay with the same [visual style](/customizing-overlays) and open animation.
 
   ## Example
 

@@ -102,7 +102,7 @@ Returns `undefined` if no element matches these conditions.
 
 @function up.fragment.first
 @param {Element|jQuery} [root=document]
-  The root element for the search. Only the root's children will be matched.
+  The root element for the search. Only the root's descendants will be matched.
 
   May be omitted to search through all elements in the current `document`.
 @param {string} selector

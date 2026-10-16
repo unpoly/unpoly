@@ -348,7 +348,7 @@ up.form = (function() {
     @param {Object} [options]
       Additional [render options](/up.render#parameters) that should be used for submitting the form.
 
-      Unpoly will parse render options from the watched form's attributes.
+      Unpoly will parse render options from the form's attributes.
       You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
       options parsed from attributes.  See `[up-submit]` for a list of supported attributes.
 
@@ -428,7 +428,7 @@ up.form = (function() {
   </form>
   ```
 
-  We can parse the link's render options like this:
+  We can parse the form's render options like this:
 
   ```js
   let form = document.querySelector('form')
@@ -1307,7 +1307,7 @@ up.form = (function() {
   @section Loading state
     @mix up.submit/loading-state
 
-  @return {Promise<up.RenderResult}
+  @return {Promise<up.RenderResult>}
     A promise that fulfills when the server-side validation is received and the form was updated.
 
   @stable
@@ -1482,7 +1482,7 @@ up.form = (function() {
   Returns whether the given form will be [submitted](/submitting-forms) through Unpoly
   instead of making a full page load.
 
-  By default, Unpoly will follow forms if the element has
+  By default, Unpoly will submit forms if the element has
   one of the following attributes:
 
   - [`[up-submit]`](/up-submit)

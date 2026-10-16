@@ -6,7 +6,7 @@ The `up.Params` class offers a consistent API to read and manipulate request par
 independent of their type.
 
 Request parameters are used in [form submissions](/up.Params.fromForm) and
-[URLs](/up.Params.fromURL). Methods like `up.submit()` or `up.replace()` accept
+[URLs](/up.Params.fromURL). Methods like `up.submit()` or `up.render()` accept
 request parameters as a `{ params }` option.
 
 ### Supported parameter types
@@ -95,7 +95,7 @@ up.Params = class Params {
   Returns an array representation of this `up.Params` instance.
 
   The returned value is a JavaScript array with elements that are objects with
-  `{ key }` and `{ value }` properties.
+  `{ name }` and `{ value }` properties.
 
   ### Example
 
@@ -165,10 +165,8 @@ up.Params = class Params {
   ```
 
   @function up.Params#toQuery
-  @param {Object|FormData|string|Array|undefined} params
-    the params to convert
   @return {string}
-    a query string built from the given params
+    A query string built from this `up.Params` instance.
   @stable
   */
   toQuery() {
@@ -459,7 +457,7 @@ up.Params = class Params {
   Constructs a new `up.Params` instance from the given `<form>`.
 
   The returned params may be passed as `{ params }` option to
-  `up.request()` or `up.replace()`.
+  `up.request()` or `up.render()`.
 
   The params are built with the browser's own
   [form-data algorithm](https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData),
@@ -493,7 +491,7 @@ up.Params = class Params {
   </form>
   ```
 
-  This would serialize the form into an array representation:
+  This serializes the form into params:
 
   ```js
   let params = up.Params.fromForm(document.querySelector('#signup'))

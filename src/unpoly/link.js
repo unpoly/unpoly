@@ -77,7 +77,7 @@ up.link = (function() {
     @param {Array<string>} config.preloadSelectors
       An array of CSS selectors matching links that are [preloaded on hover](/preloading#on-hover).
 
-      You can customize this property to preload *all* links on `mousedown` without requiring an `[up-preload]` attribute.
+      You can customize this property to preload *all* links on hover without requiring an `[up-preload]` attribute.
       See [Handling all links](/handling-all-links).
 
     @param {Array<string>} config.noPreloadSelectors
@@ -1467,9 +1467,9 @@ up.link = (function() {
       With `[up-preload=reveal]`, this enlarges the viewport by the given number of pixels before
       computing the intersection.
 
-      A positive number will load the deferred content some pixels before it becomes visible.
+      A positive number will preload the link some pixels before it becomes visible.
 
-      A negative number will require the user to scroll some pixels into the element before it is loaded.
+      A negative number will require the user to scroll some pixels into the link before it is preloaded.
 
       @experimental
   @section Request

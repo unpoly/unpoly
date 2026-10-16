@@ -14,7 +14,7 @@
   [variables](/placeholders#dynamic-templates).
 
   If this link [opens a new overlay](/opening-overlays), the placeholder
-  will be shown temporary overlay with the same [visual style](/customizing-overlays) and open animation.
+  will be shown in a temporary overlay with the same [visual style](/customizing-overlays) and open animation.
 
   @experimental
 

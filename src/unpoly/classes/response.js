@@ -261,7 +261,7 @@ up.Response = class Response extends up.Record {
   }
 
   /*-
-  The response body parsed as a JSON string.
+  The response body parsed from JSON.
 
   The parsed JSON object is cached with the response object,
   so multiple accesses will call `JSON.parse()` only once.

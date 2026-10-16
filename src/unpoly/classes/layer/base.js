@@ -213,7 +213,7 @@ up.Layer = class Layer extends up.Record {
   @param {any} [value]
     The dismissal value that will be passed to `{ onDismissed }` callbacks.
 
-    If there isn't an acceptance value, omit this argument.
+    If there isn't a dismissal value, omit this argument.
     If you need to pass options without a dismissal value, pass `null`:
 
     ```js

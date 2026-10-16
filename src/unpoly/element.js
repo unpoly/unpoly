@@ -101,7 +101,7 @@ up.element = (function() {
   /*-
   Returns the native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) for the given value.
 
-  This function is not aware of [layers](/up.layer) or [transitions](/up-destroying)
+  This function is not aware of [layers](/up.layer) or [elements being destroyed](/up-destroying)
   and does not support non-standard selectors like `:main`. For this, use `up.fragment.get()`.
 
   ### Casting rules
@@ -1305,7 +1305,7 @@ up.element = (function() {
   @param {string} prop
     A single property name in kebab-case.
   @return {number|undefined|NaN}
-    The cast attribute value.
+    The cast property value.
   @stable
   */
   function computedStyleNumber(element, prop) {

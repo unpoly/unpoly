@@ -610,8 +610,8 @@ up.fragment = (function() {
 
     The promise rejects when one of the following conditions occur:
 
-    - the form element was [aborted](/aborting-requests)
-    - the server sends an error status
+    - the render pass was [aborted](/aborting-requests)
+    - the server sends an [error status](/error-responses)
     - there is a [network issue](/network-issues)
     - [targets](/targeting-fragments) could not be matched
 
@@ -739,7 +739,7 @@ up.fragment = (function() {
   To prevent the insertion of [revalidated](/caching#revalidation) content *after* the
   server responded you may prevent the `up:fragment:loaded` event with an `{ revalidating: true }` property.
 
-  The following would skip rendering a validation response if it has the same `X-Version` header as
+  The following would skip rendering a revalidation response if it has the same `X-Version` header as
   the original, stale response:
 
   ```js
@@ -1338,7 +1338,7 @@ up.fragment = (function() {
   @function up.fragment.get
   @section Search scope
     @param {Element|jQuery|Document} [root=document]
-      The root element for the search. Only the root's children will be matched.
+      The root element for the search. Only the root's descendants will be matched.
 
       May be omitted to search through all elements in the current `document`.
     @param {string|Element} selector
@@ -1459,7 +1459,7 @@ up.fragment = (function() {
 
   @section Search scope
     @param {Element|jQuery|Document} [root=document]
-      The root element for the search. Only the root's children will be matched.
+      The root element for the search. Only the root's descendants will be matched.
 
       May be omitted to search through all elements in the given [layer](#options.layer).
 
@@ -1665,7 +1665,7 @@ up.fragment = (function() {
 
   If a [destructor](/enhancing-elements#destructor) throws an error, `up.destroy()` will still remove the element and *not* throw an error.
 
-  Instead compiler errors will print to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error)
+  Instead destructor errors will print to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error)
   and emit an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event).
 
   See [errors in user code](/render-lifecycle#errors-in-user-code) for details.
@@ -1837,10 +1837,10 @@ up.fragment = (function() {
     @param [options.focus='keep']
       What to focus after the fragment was reloaded.
 
-      By default Unpoly will [keep scroll positions](/scrolling#keep) of all viewports
-      around the updated fragment.
+      By default Unpoly will [keep the current focus](/focus#keep)
+      within the updated fragment.
 
-      See [scrolling](/scrolling) for a list of allowed values.
+      See [focus](/focus) for a list of allowed values.
 
       @like up.render
 
@@ -2004,7 +2004,7 @@ up.fragment = (function() {
       The element for which to create a selector.
 
       When a string is given, it is returned unchanged.
-    @param {Element} [options.strong=false]
+    @param {boolean} [options.strong=false]
       Whether to provide a more unique selector by only considering the element's `[id]` and `[up-id]` attributes.
 
       Weaker target derivers, like the element's class, are not considered in strong mode.
@@ -2012,7 +2012,7 @@ up.fragment = (function() {
 
       @experimental
   @section Verification
-    @param {Element} [options.verify]
+    @param {boolean} [options.verify]
       Whether to verify that the derived selector matches the given element.
 
       Defaults to `up.fragment.config.verifyDerivedTarget`.
@@ -3013,7 +3013,7 @@ up.fragment = (function() {
     A [list](/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects that represent
     the cloned templates.
 
-    You can pass this link to any rendering function, like `up.render()` or `up.Preview#insert()`.
+    You can pass this list to any rendering function, like `up.render()` or `up.Preview#insert()`.
   @stable
   */
   function cloneTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {

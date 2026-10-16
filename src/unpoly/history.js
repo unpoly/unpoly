@@ -264,7 +264,7 @@ up.history = (function() {
       |-------|--------|
       | `'hash'`    | The location was changed, but only the `#hash` changed from the [previous location](/up.history.previousLocation). |
       | `'push'`    | A new history entry was added via `up.history.push()` or `history.pushState()`.                |
-      | `'replace'` | The current history update was changed via `up.history.replace()` or `history.replaceState()`. |
+      | `'replace'` | The current history entry was replaced via `up.history.replace()` or `history.replaceState()`. |
       | `'pop'`     | The user navigated back to the current location. |
   @section Handling
     @param {boolean} event.alreadyHandled

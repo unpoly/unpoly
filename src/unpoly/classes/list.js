@@ -37,13 +37,13 @@ Sometimes you may want to convert an array-like value into an actual `Array` so 
 methods like [`map()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
 or [`flat()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat).
 
-One way to do this is to destructure the array-like value:
+One way to do this is to spread the array-like value into a new array:
 
 ```js
 let array = [...list]
 ```
 
-One drawback of destructuring is that it always creates a new array, even if the given `list` is already an `Array`.
+One drawback of spreading is that it always creates a new array, even if the given `list` is already an `Array`.
 To only convert non-`Array` values, use `up.util.toArray()`:
 
 ```js

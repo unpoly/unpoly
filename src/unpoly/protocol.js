@@ -554,12 +554,11 @@ up.protocol = (function() {
   An error response has a status code other than 2xx, but still contains HTML.
 
   Server-side code is free to render different HTML for different contexts.
-  For example, you might prefer to not render a site navigation for overlays.
 
   ### Example
 
   ```http
-  X-Up-Fail-Context: { "context": "Choose a company contact" }
+  X-Up-Fail-Context: { "lives": 3 }
   ```
 
   @header X-Up-Fail-Context

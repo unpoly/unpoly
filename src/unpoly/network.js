@@ -475,7 +475,7 @@ up.network = (function() {
       the associated layer is the future overlay's parent layer.
 
     @param {string} [options.failLayer='current']
-      The [layer](/up.layer) this request is associated with if the server [sends a HTTP status code](/error-responses).
+      The [layer](/up.layer) this request is associated with if the server [sends an HTTP error status](/error-responses).
 
     @param {Element} [options.origin]
       The DOM element that caused this request to be sent, e.g. a hyperlink or form element.
