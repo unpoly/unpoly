@@ -709,7 +709,7 @@ describe('up.Params', function() {
         const rootForm = up.fragment.get('#my-form', { layer: 'root' })
         const serialize = () => up.Params.fromForm(rootForm)
 
-        expect(serialize).toThrowError(/associated with a form in another layer/i)
+        expect(serialize).toThrowError(/associated with a form in another layer\. Give the forms unique IDs, or avoid \[form\] attributes in pages that open in overlays/i)
       })
 
       it('does not fail when both layers repeat the id but no field uses a [form] attribute', async function() {

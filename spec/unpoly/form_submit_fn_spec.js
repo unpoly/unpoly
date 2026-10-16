@@ -140,7 +140,7 @@ extendDescribe('up.form', function() {
           // error escapes synchronously instead of rejecting a promise.
           const submit = () => up.submit(rootForm)
 
-          expect(submit).toThrowError(/associated with a form in another layer/i)
+          expect(submit).toThrowError(/associated with a form in another layer\. Give the forms unique IDs, or avoid \[form\] attributes in pages that open in overlays/i)
           expect(jasmine.Ajax.requests.count()).toBe(0)
         })
       })

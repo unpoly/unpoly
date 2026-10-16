@@ -279,7 +279,7 @@ up.form = (function() {
       // Only a [form] attribute can pull in a field from another layer. Anything else in
       // form.elements is a descendant of the form, and so in the form's own layer.
       if (field.hasAttribute('form') && up.layer.get(field) !== formLayer) {
-        up.fail('Cannot serialize %o: %o is associated with a form in another layer', form, field)
+        up.fail('Cannot serialize %o: %o is associated with a form in another layer. Give the forms unique IDs, or avoid [form] attributes in pages that open in overlays.', form, field)
       }
     }
   }
