@@ -72,6 +72,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
 - Fix [`[up-scroll-behavior]`](/up-follow#up-scroll-behavior) and the `{ scrollBehavior }` option being ignored when scrolling to the `top` or `bottom`, to a pixel position, to a `#hash` or when restoring a scroll position. Only revealing an element honored it.
 - `up.template.clone()` with an `{ origin }` now also finds a template in an ancestor layer, as described in [template lookup](/templates#lookup). Formerly it only looked in the origin's layer.
 - When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent overlay, as described in [focus in overlays](/focus#overlays). Formerly focus fell back to the `<body>`.
+- Fix a [combined transition](/transitions#combining-animations) like `move-to-bottom/none` swapping the elements instantly. When one half is `none`, the other half is now animated.
 
 
 3.14.3

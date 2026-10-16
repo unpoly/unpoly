@@ -794,6 +794,18 @@ describe('up.motion', function() {
           expect(this.newAnimation).toHaveBeenCalledWith(this.newElement, jasmine.anything())
         })
 
+        it("animates only the old element when the second animation is 'none'", async function() {
+          await up.morph(this.oldElement, this.newElement, 'old-animation/none', { duration: 10 })
+
+          expect(this.oldAnimation).toHaveBeenCalledWith(this.oldElement, jasmine.anything())
+        })
+
+        it("animates only the new element when the first animation is 'none'", async function() {
+          await up.morph(this.oldElement, this.newElement, 'none/new-animation', { duration: 10 })
+
+          expect(this.newAnimation).toHaveBeenCalledWith(this.newElement, jasmine.anything())
+        })
+
       })
 
       it('transitions between two element by absolutely positioning one element above the other', async function() {
