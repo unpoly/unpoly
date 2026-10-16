@@ -561,6 +561,15 @@ extendDescribe('up.layer', function() {
 
       describe('animation', function() {
 
+        it('uses the given { duration } and { easing } for the opening animation', async function() {
+          up.motion.config.enabled = true
+          const animateSpy = spyOn(up, 'animate').and.callThrough()
+
+          await up.layer.open({ mode: 'modal', animation: 'fade-in', duration: 33, easing: 'linear' })
+
+          expect(animateSpy).toHaveBeenCalledWith(jasmine.any(Element), jasmine.anything(), jasmine.objectContaining({ duration: 33, easing: 'linear' }))
+        })
+
         it('uses the configured open animation', async function() {
           up.motion.config.enabled = true
           up.layer.config.modal.openAnimation = 'fade-in'

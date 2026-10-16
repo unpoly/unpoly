@@ -73,6 +73,7 @@ Unpoly's documentation is now available to coding agents and LLMs:
 - `up.template.clone()` with an `{ origin }` now also finds a template in an ancestor layer, as described in [template lookup](/templates#lookup). Formerly it only looked in the origin's layer.
 - When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent overlay, as described in [focus in overlays](/focus#overlays). Formerly focus fell back to the `<body>`.
 - Fix a [combined transition](/transitions#combining-animations) like `move-to-bottom/none` swapping the elements instantly. When one half is `none`, the other half is now animated.
+- Fix the `{ duration }` and `{ easing }` options of `up.layer.open()` being ignored for the opening animation. This also affects `[up-duration]` and `[up-easing]` on a link that opens an overlay. Formerly only `up.layer.config` was used.
 
 
 3.14.3
