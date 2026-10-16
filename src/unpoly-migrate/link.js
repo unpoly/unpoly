@@ -173,6 +173,15 @@ up.link.config.patch(function(config) {
   config.followSelectors.push(LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR)
 })
 
-up.compiler(LEGACY_UP_HREF_FOLLOW_SELECTOR, function(element) {
-  up.migrate.warn('Following links with only [up-instant] has been deprecated. You must now also set an [up-follow] on the same link (found in %o).', element)
+// Only warn about links that the legacy selector alone makes followable.
+function isFollowableWithoutLegacyInstant(element) {
+  let { followSelectors, noFollowSelectors } = up.link.config
+  let modernFollowSelectors = followSelectors.filter((selector) => selector !== LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR)
+  return element.matches(up.element.unionSelector(modernFollowSelectors, noFollowSelectors))
+}
+
+up.compiler(LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR, function(element) {
+  if (up.link.isFollowable(element) && !isFollowableWithoutLegacyInstant(element)) {
+    up.migrate.warn('Following links with only [up-instant] has been deprecated. You must now also set an [up-follow] on the same link (found in %o).', element)
+  }
 })

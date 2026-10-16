@@ -1081,6 +1081,40 @@ describe('up.link', function() {
           expect($link.attr('up-dash')).toBeMissing()
         })
       })
+
+      describe('legacy [up-instant] links', function() {
+
+        it('warns about a link with only [href] and [up-instant]', function() {
+          const warnSpy = spyOn(up.migrate, 'warn')
+          const link = fixture('a[href="/path"][up-instant]')
+          up.hello(link)
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Following links with only [up-instant] has been deprecated'), link)
+        })
+
+        it('does not warn about an [up-instant] link that also has [up-follow]', function() {
+          const warnSpy = spyOn(up.migrate, 'warn')
+          const link = fixture('a[href="/path"][up-follow][up-instant]')
+          up.hello(link)
+          expect(warnSpy).not.toHaveBeenCalled()
+        })
+
+        it('does not warn about an [up-instant] link that also has [up-target]', function() {
+          const warnSpy = spyOn(up.migrate, 'warn')
+          const link = fixture('a[href="/path"][up-target=".target"][up-instant]')
+          up.hello(link)
+          expect(warnSpy).not.toHaveBeenCalled()
+        })
+      })
+
+      describe('legacy [up-href] elements without [up-follow]', function() {
+
+        it('warns once', function() {
+          const warnSpy = spyOn(up.migrate, 'warn')
+          const element = fixture('span[up-href="/path"]')
+          up.hello(element)
+          expect(warnSpy).toHaveBeenCalledOnceWith(jasmine.stringContaining('Following links with only [up-href] has been deprecated'), element)
+        })
+      })
     }
 
     describe('[up-expand]', function() {
