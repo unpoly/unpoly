@@ -568,6 +568,32 @@ extendDescribe('up.radio', function() {
         expect(jasmine.lastRequest().requestHeaders['App-Header']).toBe('header-value')
       })
 
+      it('loads in the background', async function() {
+        up.radio.config.pollInterval = 10
+        const loadListener = jasmine.createSpy('up:request:load listener')
+        up.on('up:request:load', loadListener)
+
+        const [element] = htmlFixtureList('<div id="element" up-poll up-source="/path">old text</div>')
+        up.hello(element)
+        await wait(60)
+
+        expect(loadListener).toHaveBeenCalled()
+        expect(loadListener.calls.argsFor(0)[0].request.background).toBe(true)
+      })
+
+      it('loads in the foreground with [up-background=false]', async function() {
+        up.radio.config.pollInterval = 10
+        const loadListener = jasmine.createSpy('up:request:load listener')
+        up.on('up:request:load', loadListener)
+
+        const [element] = htmlFixtureList('<div id="element" up-poll up-source="/path" up-background="false">old text</div>')
+        up.hello(element)
+        await wait(60)
+
+        expect(loadListener).toHaveBeenCalled()
+        expect(loadListener.calls.argsFor(0)[0].request.background).toBe(false)
+      })
+
       describe('controlling the reload URL', function() {
 
         it('uses a URL from an [up-source] attribute on the [up-poll] element', async function() {

@@ -88,6 +88,93 @@ describe('up.link', function() {
         expect(options.background).toBe(true)
       })
 
+      it('parses an [up-cache] attribute as boolean or string', function() {
+        const [falseLink, autoLink] = htmlFixtureList(`
+          <a href="/path" up-cache="false">label</a>
+          <a href="/path" up-cache="auto">label</a>
+        `)
+        expect(up.link.followOptions(falseLink).cache).toBe(false)
+        expect(up.link.followOptions(autoLink).cache).toBe('auto')
+      })
+
+      it('parses an [up-revalidate] attribute as boolean or string', function() {
+        const [falseLink, autoLink] = htmlFixtureList(`
+          <a href="/path" up-revalidate="false">label</a>
+          <a href="/path" up-revalidate="auto">label</a>
+        `)
+        expect(up.link.followOptions(falseLink).revalidate).toBe(false)
+        expect(up.link.followOptions(autoLink).revalidate).toBe('auto')
+      })
+
+      it('parses an [up-abort] attribute as boolean or string', function() {
+        const [layerLink, falseLink] = htmlFixtureList(`
+          <a href="/path" up-abort="layer">label</a>
+          <a href="/path" up-abort="false">label</a>
+        `)
+        expect(up.link.followOptions(layerLink).abort).toBe('layer')
+        expect(up.link.followOptions(falseLink).abort).toBe(false)
+      })
+
+      it('parses an [up-abortable=false] attribute as { abortable: false }', function() {
+        const [link] = htmlFixtureList('<a href="/path" up-abortable="false">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.abortable).toBe(false)
+      })
+
+      it('parses an [up-expire-cache] attribute as boolean or URL pattern', function() {
+        const [falseLink, patternLink] = htmlFixtureList(`
+          <a href="/path" up-expire-cache="false">label</a>
+          <a href="/path" up-expire-cache="/users/*">label</a>
+        `)
+        expect(up.link.followOptions(falseLink).expireCache).toBe(false)
+        expect(up.link.followOptions(patternLink).expireCache).toBe('/users/*')
+      })
+
+      it('parses an [up-evict-cache] attribute as boolean or URL pattern', function() {
+        const [trueLink, patternLink] = htmlFixtureList(`
+          <a href="/path" up-evict-cache="true">label</a>
+          <a href="/path" up-evict-cache="/users/*">label</a>
+        `)
+        expect(up.link.followOptions(trueLink).evictCache).toBe(true)
+        expect(up.link.followOptions(patternLink).evictCache).toBe('/users/*')
+      })
+
+      it('parses an [up-reveal-top] attribute as boolean', function() {
+        const [link] = htmlFixtureList('<a href="/path" up-reveal-top="true">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.revealTop).toBe(true)
+      })
+
+      it('parses an [up-reveal-max] attribute as number', function() {
+        const [link] = htmlFixtureList('<a href="/path" up-reveal-max="150">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.revealMax).toBe(150)
+      })
+
+      it('parses an [up-reveal-padding] attribute as number', function() {
+        const [link] = htmlFixtureList('<a href="/path" up-reveal-padding="20">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.revealPadding).toBe(20)
+      })
+
+      it('parses an [up-reveal-snap] attribute as number', function() {
+        const [link] = htmlFixtureList('<a href="/path" up-reveal-snap="0">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.revealSnap).toBe(0)
+      })
+
+      it('parses an [up-save-scroll=false] attribute as boolean', function() {
+        const [link] = htmlFixtureList('<a href="/path" up-save-scroll="false">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.saveScroll).toBe(false)
+      })
+
+      it('parses an [up-save-focus=false] attribute as boolean', function() {
+        const [link] = htmlFixtureList('<a href="/path" up-save-focus="false">label</a>')
+        const options = up.link.followOptions(link)
+        expect(options.saveFocus).toBe(false)
+      })
+
       it('parses an [up-use-keep] attribute as { keep }', function() {
         const link = fixture('a[href="/foo"][up-use-keep="false"]')
         const options = up.link.followOptions(link)

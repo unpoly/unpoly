@@ -255,6 +255,41 @@ extendDescribe('up.layer', function() {
           expect(abortedURLs[0]).toMatchURL('/path1')
         })
 
+        it("is aborted when the base layer's main element is targeted by another render pass", async function() {
+          up.fragment.config.mainTargets.unshift('.root-main')
+          htmlFixtureList(`
+            <div class="root-main">old main</div>
+          `)
+
+          const openJob = up.layer.open({ url: '/overlay' })
+          await wait()
+
+          up.render('.root-main', { url: '/main' })
+          await wait()
+
+          const { state, value } = await promiseState(openJob)
+          expect(state).toBe('rejected')
+          expect(value).toEqual(jasmine.any(up.Aborted))
+        })
+
+        it('is not aborted when a non-main element on the base layer is targeted by another render pass', async function() {
+          up.fragment.config.mainTargets.unshift('.root-main')
+          htmlFixtureList(`
+            <div class="root-main">
+              <div class="minor">old minor</div>
+            </div>
+          `)
+
+          const openJob = up.layer.open({ url: '/overlay' })
+          await wait()
+
+          up.render('.minor', { url: '/minor' })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          await expectAsync(openJob).toBePending()
+        })
+
         it('runs a { preview } function while the server request is loading', async function() {
           const undoFn = jasmine.createSpy('undo fn')
           const previewFn = jasmine.createSpy('preview function').and.returnValue(undoFn)
@@ -672,6 +707,17 @@ extendDescribe('up.layer', function() {
             }
           })
 
+        })
+
+        it('focuses an [autofocus] element in the new overlay', async function() {
+          await up.layer.open({
+            content: `
+              <input type="text" name="first">
+              <input type="text" name="second" autofocus>
+            `
+          })
+
+          expect('up-modal input[name=second]').toBeFocused()
         })
       })
 

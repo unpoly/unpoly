@@ -144,6 +144,32 @@ describe('up.Response', function() {
     })
   })
 
+  describe('#expired', function() {
+
+    it('returns true when the response is older than up.network.config.cacheExpireAge', function() {
+      up.network.config.cacheExpireAge = 1000
+      const request = new up.Request({ url: '/foo' })
+      const freshResponse = new up.Response({ request, loadedAt: new Date(Date.now() - 900) })
+      const oldResponse = new up.Response({ request, loadedAt: new Date(Date.now() - 1100) })
+
+      expect(freshResponse.expired).toBeFalsy()
+      expect(oldResponse.expired).toBe(true)
+    })
+
+    it('returns true when the request was expired with up.cache.expire()', async function() {
+      const request = up.request({ url: '/foo', cache: true })
+      await wait()
+
+      jasmine.respondWith('response text')
+      const response = await request
+      expect(response.expired).toBeFalsy()
+
+      up.cache.expire('/foo')
+
+      expect(response.expired).toBe(true)
+    })
+  })
+
   describe('#isHTML()', function() {
 
     async function responseWithContentType(contentType) {

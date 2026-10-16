@@ -9,6 +9,29 @@ extendDescribe('up.fragment', function() {
 
       describe('focus', function() {
 
+        it('does not change focus without a { focus } option, even when updating a main target with a #hash URL', async function() {
+          const [outside] = htmlFixtureList(`
+            <input type="text" name="outside">
+            <main>old main</main>
+          `)
+          outside.focus()
+
+          up.render('main', { url: '/path#hash' })
+          await wait()
+
+          jasmine.respondWith(`
+            <main>
+              new main
+              <input type="text" name="inside" autofocus>
+              <div id="hash" tabindex="0">hash target</div>
+            </main>
+          `)
+          await wait()
+
+          expect('main').toHaveText(/new main/)
+          expect(outside).toBeFocused()
+        })
+
         describe('with { focus: "autofocus" }', function() {
           it('focuses an [autofocus] element in the new fragment', async function() {
             fixture('form.foo-bar')
@@ -43,6 +66,20 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect('.foo-bar').toBeFocused()
+          })
+
+          it('does not scroll the focused fragment into view', async function() {
+            const [viewport] = htmlFixtureList(`
+              <div up-viewport style="height: 100px; overflow-y: scroll">
+                <div style="height: 500px"></div>
+                <div id="target">old target</div>
+              </div>
+            `)
+
+            await up.render({ fragment: '<div id="target">new target</div>', focus: 'target' })
+
+            expect('#target').toBeFocused()
+            expect(viewport.scrollTop).toBe(0)
           })
 
           it('focuses the fragment even if its element type is not focusable by default', async function() {
@@ -206,6 +243,26 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect('.element').toBeFocused()
+          })
+
+          it('prefers a match within the new fragment over a match earlier in the layer', async function() {
+            htmlFixtureList(`
+              <input type="text" class="input" name="earlier">
+              <form class="target">
+                <input type="text" class="input" name="old">
+              </form>
+            `)
+
+            await up.render({
+              focus: '.input',
+              fragment: `
+                <form class="target">
+                  <input type="text" class="input" name="new">
+                </form>
+              `
+            })
+
+            expect('.target .input').toBeFocused()
           })
 
           it('does not focus a matching element in another layer', async function() {
@@ -812,6 +869,44 @@ extendDescribe('up.fragment', function() {
             expect('#hash').toBeFocused()
           })
 
+          it('focuses a non-main target if focus was lost with the old fragment and cannot be rediscovered', async function() {
+            const [_container, oldFocused] = htmlFixtureList(`
+              <div class="container">
+                <div class="focused" tabindex="0">old focused</div>
+              </div>
+            `)
+            oldFocused.focus()
+            expect(oldFocused).toBeFocused()
+
+            await up.render('.container', {
+              focus: 'auto',
+              document: `
+                <div class="container">
+                  <div class="other">new content without the focused element</div>
+                </div>
+              `
+            })
+
+            expect('.container').toHaveText('new content without the focused element')
+            expect('.container').toBeFocused()
+          })
+
+          it('keeps focus on an element outside an updated non-main target', async function() {
+            const [outside] = htmlFixtureList(`
+              <input type="text" name="outside">
+              <div class="container">old container</div>
+            `)
+            outside.focus()
+
+            await up.render('.container', {
+              focus: 'auto',
+              document: '<div class="container">new container</div>'
+            })
+
+            expect('.container').toHaveText('new container')
+            expect(outside).toBeFocused()
+          })
+
           it('preserves focus within a non-main fragment', async function() {
             const container = fixture('.container')
             const oldFocused = e.affix(container, '.focused[tabindex=0]', { text: 'old focused' })
@@ -834,7 +929,64 @@ extendDescribe('up.fragment', function() {
           })
         })
 
+        describe('with an Element as { focus } option', function() {
+
+          it('focuses the given element', async function() {
+            const [_target, other] = htmlFixtureList(`
+              <div class="target">old target</div>
+              <input type="text" class="other">
+            `)
+
+            await up.render({ target: '.target', document: '<div class="target">new target</div>', focus: other })
+
+            expect(other).toBeFocused()
+          })
+
+        })
+
+        describe('with { saveFocus: false }', function() {
+
+          beforeEach(function() {
+            up.history.config.enabled = true
+          })
+
+          it('does not save focus-related state for the current location', async function() {
+            up.history.replace('/path1')
+            const [_main, input] = htmlFixtureList(`
+              <main>
+                <input type="text" name="email">
+              </main>
+            `)
+            input.focus()
+
+            await up.render('main', { location: '/path2', history: true, saveFocus: false, document: '<main>page 2</main>' })
+
+            expect(up.history.location).toMatchURL('/path2')
+
+            await up.render('main', {
+              location: '/path1',
+              history: true,
+              focus: 'restore',
+              document: '<main><input type="text" name="email"></main>',
+            })
+
+            expect('main input[name=email]').not.toBeFocused()
+          })
+
+        })
+
         describe('with a function passed as { focus } option', function() {
+
+          it('processes a focus option returned by the function', async function() {
+            htmlFixtureList(`
+              <div class="element">old text</div>
+              <div class="other" tabindex="0">other</div>
+            `)
+
+            await up.render('.element', { content: 'new text', focus: () => '.other' })
+
+            expect('.other').toBeFocused()
+          })
 
           it('calls the function', async function() {
             const focusHandler = jasmine.createSpy('focus handler')

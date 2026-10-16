@@ -75,6 +75,16 @@ extendDescribe('up.network', function() {
           await expectAsync(request1).toBeResolvedTo(jasmine.any(up.Response))
         })
 
+        it('caches a POST request with { cache: true }', async function() {
+          const request = up.request({ url: '/path', method: 'POST', cache: true })
+          await wait()
+
+          jasmine.respondWith('response text')
+          await expectAsync(request).toBeResolvedTo(jasmine.any(up.Response))
+
+          expect({ url: '/path', method: 'POST' }).toBeCached()
+        })
+
         describe('when the server responds with an error status code', function() {
 
           it('does not cache the response', async function() {

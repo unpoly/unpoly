@@ -39,6 +39,7 @@ describe('up.RenderOptions', function() {
         expect(options.fallback).toBe(true)
         expect(options.peel).toBe('dismiss')
         expect(options.cache).toBe('auto')
+        expect(options.revalidate).toBe('auto')
       })
 
       it('allows to configure defaults using up.fragment.config.navigateOptions', function() {

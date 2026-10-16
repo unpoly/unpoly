@@ -254,6 +254,19 @@ extendDescribe('up.network', function() {
           await expectAsync(request).toBeRejectedWith(jasmine.anyError('up.Offline', /Network error/i))
         })
 
+        it('emits an up:request:offline event when there was a network error', async function() {
+          const listener = jasmine.createSpy('up:request:offline listener')
+          up.on('up:request:offline', listener)
+          const request = up.request('/url')
+          await wait()
+
+          jasmine.lastRequest().responseError()
+
+          await expectAsync(request).toBeRejected()
+          expect(listener).toHaveBeenCalledTimes(1)
+          expect(listener.calls.argsFor(0)[0].request).toBe(request)
+        })
+
         it('rejects with a non-ok up.Response when the server sends a 404 status code', async function() {
           const request = up.request('/url')
 
@@ -287,6 +300,20 @@ extendDescribe('up.network', function() {
             jasmine.lastRequest().responseTimeout()
 
             await expectAsync(request).toBeRejectedWith(jasmine.anyError('up.Offline', /time ?out/i))
+          })
+
+          it('emits an up:request:offline event when the request times out', async function() {
+            const listener = jasmine.createSpy('up:request:offline listener')
+            up.on('up:request:offline', listener)
+            const request = up.request('/url')
+            await wait()
+
+            jasmine.clock().install() // required by responseTimeout()
+            jasmine.lastRequest().responseTimeout()
+
+            await expectAsync(request).toBeRejected()
+            expect(listener).toHaveBeenCalledTimes(1)
+            expect(listener.calls.argsFor(0)[0].request).toBe(request)
           })
 
           it('uses a default timeout from up.network.config.timeout', function() {
@@ -1271,6 +1298,32 @@ extendDescribe('up.network', function() {
 
         })
 
+        it('expires the entire cache when a POST request is sent, before it receives a response', async function() {
+          await jasmine.populateCache('/foo', 'foo')
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/foo' }).not.toBeExpired()
+
+          up.request({ url: '/action', method: 'POST' })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect({ url: '/foo' }).toBeExpired()
+        })
+
+        it('keeps entries expired by a POST request when the response has an X-Up-Expire-Cache: false header', async function() {
+          await jasmine.populateCache('/foo', 'foo')
+
+          const request = up.request({ url: '/action', method: 'POST' })
+          await wait()
+
+          jasmine.respondWith({ responseText: 'response', responseHeaders: { 'X-Up-Expire-Cache': 'false' } })
+          const response = await request
+
+          expect(response.expireCache).toBe(false)
+          expect({ url: '/foo' }).toBeCached()
+          expect({ url: '/foo' }).toBeExpired()
+        })
+
       })
 
 
@@ -1340,6 +1393,42 @@ extendDescribe('up.network', function() {
           await wait()
 
           expect(responses).toEqual(['first response', 'second response'])
+        })
+
+        it('sends a queued foreground request before a background request that was queued earlier', async function() {
+          up.request({ url: '/first' })
+          up.request({ url: '/background', background: true })
+          up.request({ url: '/foreground' })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWith('first response', { request: 0 })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(jasmine.lastRequest().url).toMatchURL('/foreground')
+        })
+
+        it('sends a queued background request ahead of other background requests once a foreground request reuses it from the cache, and sets its #background to false', async function() {
+          up.request({ url: '/first' })
+          up.request({ url: '/background1', background: true, cache: true })
+          const background2 = up.request({ url: '/background2', background: true, cache: true })
+          await wait()
+
+          expect(background2.background).toBe(true)
+
+          up.request({ url: '/background2', cache: true })
+          await wait()
+
+          expect(background2.background).toBe(false)
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+
+          jasmine.respondWith('first response', { request: 0 })
+          await wait()
+
+          expect(jasmine.Ajax.requests.count()).toBe(2)
+          expect(jasmine.lastRequest().url).toMatchURL('/background2')
         })
       })
 
