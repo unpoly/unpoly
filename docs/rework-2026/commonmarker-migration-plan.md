@@ -1,6 +1,26 @@
 # Migrating the docs site from kramdown to commonmarker
 
-Status: planned 2026-10-16, to be done before the docs site rework is released.
+Status: **done 2026-10-16** (decision 12B). unpoly 3faf8cdc3..4aa0d8d2c, unpoly-site 5b584eac..526ecfec.
+Research and diff results: [reviews/commonmarker-research-report.md](reviews/commonmarker-research-report.md).
+
+Summary of what was decided and built:
+
+- Headings take Pandoc-style attributes on the heading line: `{#id data-toc-include}`, and also
+  without an id (`{data-toc-include}`, the id is then generated). Braces that don't form an attribute
+  list stay heading text. Attributes are matched to rendered headings by commonmarker's source positions.
+- Headings without `#id` get kramdown's GFM id algorithm (ported), so no existing anchor changed.
+- commonmarker runs with `unsafe`, no smart punctuation, no hard breaks, no header ids, no syntax
+  highlighting, no shortcodes or tag filter; code blocks keep `<pre><code class="language-…">`.
+- Doc source fixes for Markdown that only kramdown rendered as intended (fence indentation,
+  unbalanced backticks, header-less tables, `{:width}`); `markdown="1"` removed from figcaptions.
+- A `<video>` alone on a line is unwrapped from its paragraph (as kramdown did).
+- Accepted differences: loose lists in old release notes (CommonMark has no mixed tight/loose lists),
+  `...` in 0.12.0 notes, lone `<img>` lines without `<p>`, `align="right"` in table cells (styled
+  already), empty table cells without `&nbsp;`.
+- `kramdown-parser-gfm` removed; `kramdown` remains only as a dependency of middleman-core. The
+  lockfile lists `ruby` and `x86_64-linux` so CI gets the precompiled gem.
+
+The original plan follows.
 Repos: `unpoly-site` (renderer, specs), `unpoly` (doc sources).
 
 
