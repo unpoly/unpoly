@@ -167,7 +167,7 @@ up.motion = (function() {
   the CSS properties of the given element:
 
   ```js
-  var warning = document.querySelector('.warning')
+  let warning = document.querySelector('.warning')
   warning.style.opacity = 0
   up.animate(warning, { opacity: 1 })
   ```

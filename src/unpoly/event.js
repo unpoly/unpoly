@@ -50,7 +50,7 @@ up.event = (function() {
   You may also bind the listener to a given element instead of `document`:
 
   ```js
-  var form = document.querySelector('form')
+  let form = document.querySelector('form')
   up.on(form, 'click', function(event, form) {
     console.log("Click within %o", form)
   })
@@ -65,7 +65,7 @@ up.event = (function() {
   but only calls the listener when the clicked element is a `select` element:
 
   ```
-  var form = document.querySelector('form')
+  let form = document.querySelector('form')
   up.on(form, 'click', 'select', function(event, select) {
     console.log("Click on select %o within %o", select, form)
   })
@@ -95,10 +95,10 @@ up.event = (function() {
 
   ```js
   // Define the listener
-  var listener =  function(event) { ... }
+  let listener =  function(event) { ... }
 
   // Binding the listener returns an unbind function
-  var unbind = up.on('click', listener)
+  let unbind = up.on('click', listener)
 
   // Unbind the listener
   unbind()
@@ -108,7 +108,7 @@ up.event = (function() {
 
   ```js
   // Define the listener
-  var listener =  function(event) { ... }
+  let listener =  function(event) { ... }
 
   // Bind the listener
   up.on('click', listener)
@@ -198,7 +198,7 @@ up.event = (function() {
   Let's say you are listening to clicks on `.button` elements:
 
   ```js
-  var listener = function() { ... }
+  let listener = function() { ... }
   up.on('click', '.button', listener)
   ```
 

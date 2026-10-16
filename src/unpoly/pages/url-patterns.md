@@ -180,7 +180,7 @@ We can use the same pattern from JavaScript. Here we're using the `up.layer.ask(
 and returns a promise for its [result value](/subinteractions#result-values):
 
 ```js
-var { name } = await up.layer.ask({
+let { name } = await up.layer.ask({
   url: '/users',
   acceptLocation: '/users/:name'
 });

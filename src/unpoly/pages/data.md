@@ -63,9 +63,9 @@ The JSON will be parsed and passed to your compiler function as a second argumen
 
 ```js
 up.compiler('.google-map', function(element, data) { // mark: data
-  var map = new google.maps.Map(element)
+  let map = new google.maps.Map(element)
   for (let pin of data.pins) {
-    var position = new google.maps.LatLng(pin.lat, pin.lng)
+    let position = new google.maps.LatLng(pin.lat, pin.lng)
     new google.maps.Marker({ position, map, title: pin.title })
   }
 })

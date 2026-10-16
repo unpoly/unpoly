@@ -194,7 +194,7 @@ We can initialize the map using a [compiler](/enhancing-elements) like this:
 
 ```js
 up.compiler('.map', function(element, data) {
-  var map = new google.maps.Map(element)
+  let map = new google.maps.Map(element)
   map.setCenter(data)
 })
 ```
@@ -205,7 +205,7 @@ and reading the new element's data from `event.newData`:
 
 ```js
 up.compiler('.map', function(element, data) {
-  var map = new google.maps.Map(element)
+  let map = new google.maps.Map(element)
   map.setCenter(data)
 
   element.addEventListener('up:fragment:keep', function(event) { // mark-line

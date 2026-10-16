@@ -62,8 +62,8 @@ up.Params = class Params {
   ### Example
 
   ```js
-  var params = new up.Params('foo=bar&baz=bam')
-  var object = params.toObject()
+  let params = new up.Params('foo=bar&baz=bam')
+  let object = params.toObject()
 
   // object is now: {
   //   foo: 'bar',
@@ -100,8 +100,8 @@ up.Params = class Params {
   ### Example
 
   ```js
-  var params = new up.Params('foo=bar&baz=bam')
-  var array = params.toArray()
+  let params = new up.Params('foo=bar&baz=bam')
+  let array = params.toArray()
 
   // array is now: [
   //   { name: 'foo', value: 'bar' },
@@ -124,8 +124,8 @@ up.Params = class Params {
   ### Example
 
   ```js
-  var params = new up.Params('foo=bar&baz=bam')
-  var formData = params.toFormData()
+  let params = new up.Params('foo=bar&baz=bam')
+  let formData = params.toFormData()
 
   formData.get('foo') // 'bar'
   formData.get('baz') // 'bam'
@@ -158,8 +158,8 @@ up.Params = class Params {
   ### Example
 
   ```js
-  var params = new up.Params({ foo: 'bar', baz: 'bam' })
-  var query = params.toQuery()
+  let params = new up.Params({ foo: 'bar', baz: 'bam' })
+  let query = params.toQuery()
 
   // query is now: 'foo=bar&baz=bam'
   ```
@@ -243,10 +243,10 @@ up.Params = class Params {
   ### Example
 
   ```js
-  var params = new up.Params()
+  let params = new up.Params()
   params.add('foo', 'fooValue')
 
-  var foo = params.get('foo')
+  let foo = params.get('foo')
   // foo is now 'fooValue'
   ```
 
@@ -390,16 +390,16 @@ up.Params = class Params {
   ### Example
 
   ```js
-  var params = new up.Params([
+  let params = new up.Params([
     { name: 'foo', value: 'fooValue' },
     { name: 'bar[]', value: 'barValue1' },
     { name: 'bar[]', value: 'barValue2' }
   ])
 
-  var foo = params.get('foo')
+  let foo = params.get('foo')
   // foo is now 'fooValue'
 
-  var bar = params.get('bar[]')
+  let bar = params.get('bar[]')
   // bar is now ['barValue1', 'barValue2']
   ```
 
@@ -631,8 +631,8 @@ up.Params = class Params {
   ### Example
 
   ```js
-  var params = up.Params.fromURL('http://foo.com?foo=fooValue&bar=barValue')
-  var foo = params.get('foo')
+  let params = up.Params.fromURL('http://foo.com?foo=fooValue&bar=barValue')
+  let foo = params.get('foo')
   // foo is now: 'fooValue'
   ```
 
@@ -660,7 +660,7 @@ up.Params = class Params {
   ### Example
 
   ```js
-  var url = up.Params.stripURL('http://foo.com?key=value')
+  let url = up.Params.stripURL('http://foo.com?key=value')
   // url is now: 'http://foo.com/'
   ```
 

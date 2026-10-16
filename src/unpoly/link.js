@@ -198,7 +198,7 @@ up.link = (function() {
   as if the user had clicked on the link:
 
   ```js
-  var link = document.querySelector('a')
+  let link = document.querySelector('a')
   up.follow(link)
   ```
 

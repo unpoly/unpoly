@@ -1443,8 +1443,8 @@ up.fragment = (function() {
   To select in the descendants of an element, pass a root element as the first argument:
 
   ```js
-  var container = up.fragment.get('.container')
-  var foosInContainer = up.fragment.all(container, '.foo')
+  let container = up.fragment.get('.container')
+  let foosInContainer = up.fragment.all(container, '.foo')
   ```
 
   ### Similar features

@@ -51,7 +51,7 @@ This jQuery compiler will insert the current time into a
 
 ```js
 up.$compiler('.current-time', function($element) {
-  var now = new Date()
+  let now = new Date()
   $element.text(now.toString())
 })
 ```
