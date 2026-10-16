@@ -6,6 +6,8 @@ fragments are swapped, then animations and cache revalidation settle.
 Your code can hook into each stage to run code after rendering, change render options on the fly,
 skip a response, or handle errors.
 
+A render pass is one call to `up.render()`. It updates one or more fragments.
+
 The techniques below apply to all functions and attributes that render, most notably `up.render()`, `[up-follow]` and `[up-submit]`.
 For brevity we only use `up.render()` in examples.
 
@@ -319,8 +321,8 @@ You may handle the following error cases:
 | Target selector not found                                     | [`{ fallback }`](/targeting-fragments#missing-targets)                                      | [`[up-fallback]`](/targeting-fragments#missing-targets)              |
 | Target selector not found                                     | `up.CannotMatch` (thrown)                                                                   | —                                                                    |
 | Compiler throws error                                         | Global [`error`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event) event | —                                                                    |
-| Fragment update was [aborted](/aborting-requests)             | `up.Aborted` (thrown)                                                                       | —                                                                    |
-| Fragment update was [aborted](/aborting-requests)             | `up:fragment:aborted`                                                                       | —                                                                    |
+| Render pass was [aborted](/aborting-requests)                 | `up.Aborted` (thrown)                                                                       | —                                                                    |
+| Render pass was [aborted](/aborting-requests)                 | `up:fragment:aborted`                                                                       | —                                                                    |
 | Any error thrown while rendering                              | [`{ onError }`](/up.render#options.onError)                                                 | [`[up-on-error]`](/up-follow#up-on-error)                            |
 
 An error response is rendered with `fail`-prefixed options and then *rejects* the promise with its `up.RenderResult`.
