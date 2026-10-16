@@ -60,10 +60,10 @@ to the origin, so a link inside the second card updates the second card.
 Navigation defaults
 -------------------
 
-Following a link or submitting a form counts as *navigation*. When a navigation swaps
-the main content, Unpoly behaves like a full page load would: the URL and history are updated, the page scrolls to the top,
-focus moves to the new fragment, and the response is cached. A plain `up.render()` call
-only updates the fragment, with none of these side effects.
+Following a link or submitting a form is a *navigation*. A navigation adds a preset of render options
+that make the update feel like a full page load: responses are cached, and when the main content changes,
+the URL updates, the page scrolls to the top and focus moves to the new content.
+A plain `up.render()` call has none of these defaults.
 
 Each default can be turned off per element, and your JavaScript can opt in:
 
@@ -100,9 +100,6 @@ up.render({
 A successful response updates `.content`. A failed response updates the `<form>` instead,
 so the user sees the validation errors next to their input. In HTML the same option
 is `[up-fail-target]`. For forms, Unpoly already defaults to re-rendering the form itself.
-
-You can also ignore error codes with [`[up-fail=false]`](/up-follow#up-fail), decide yourself what counts as a failure,
-or react to requests that were aborted or never reached the server.
 
 [[more: failed-responses]]
 
