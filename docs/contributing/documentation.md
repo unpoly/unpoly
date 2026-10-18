@@ -925,8 +925,8 @@ Readers don't know these terms and search for their own words ("modal", "preserv
 ```
 
 Keywords only help the search find a page. They are never shown, neither on the page,
-nor in search results, nor in the page's Markdown. A keyword counts like one word of the
-page's text, so it fills a gap but doesn't outrank pages whose prose discusses the word.
+nor in search results, nor in the page's Markdown. A keyword counts less than a word in the
+page's title, so it fills a gap but doesn't overrule pages whose prose discusses the word.
 
 Keywords cover clear gaps in the prose. They are not a list of the page's important words.
 Add a keyword only when all of these are true:
