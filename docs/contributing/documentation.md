@@ -926,14 +926,16 @@ Readers don't know these terms and search for their own words ("modal", "preserv
 
 Keywords only help the search find a page. They are never shown, neither on the page,
 nor in search results, nor in the page's Markdown. A keyword counts less than a word in the
-page's title, so it fills a gap but doesn't overrule pages whose prose discusses the word.
+page's title. It fills a gap and gives the page a slight push, but doesn't overrule pages
+whose prose discusses the word. Don't tune keywords to win a particular search: readers and
+agents pick the right result once it is among the first few.
 
 Keywords cover clear gaps in the prose. They are not a list of the page's important words.
 Add a keyword only when all of these are true:
 
 - A reader would plausibly type the word when they need this page.
 - The page's prose doesn't use the word, in any form.
-- The search doesn't already rank the page in the top 3 for that word.
+- The search doesn't already show the page among the first results, without scrolling (about the top 5).
 
 A page has two budgets:
 
