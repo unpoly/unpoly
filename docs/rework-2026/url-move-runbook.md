@@ -27,9 +27,9 @@ Two kinds of change, handled differently:
   (`bundle exec rake docs:url_move`) loads the site's model and, in `../unpoly`:
   - rewrites `[label](/path)` and `href="/path"` outside code blocks and code spans,
     and `[[=base_url]]/path`, `https://unpoly.com/path` and `unpoly.com/path` spelled
-    out as text (the README's link label) everywhere. In `.js` files it rewrites only
-    comments: URLs in strings (two error messages) ship with the release before the
-    site moves, and the old URL redirects anyway. Only paths of
+    out as text (the README's link label) everywhere. In `.js` files it rewrites
+    comments, and outside of them only full `https://unpoly.com/...` URLs (the two
+    error messages; decision of 2026-10-18, superseding 28X). Only paths of
     documents are touched; `/changes/...`, `/support`, `/images/...`, unknown paths and
     anchor-only links are left alone. Files: `src/**`, `docs/changes/*.md`, `README.md`,
     `CHANGELOG.md`, plus `docs/contributing/*.md`, `dist/README.md`, `dist/CHANGELOG.md`
@@ -70,8 +70,8 @@ Two kinds of change, handled differently:
   links go to `/learn/install` and `/learn/skill` too. The build runs this check
   before HTMLProofer (it stops the build), and a spec
   (`spec/lib/unpoly/site/legacy_links_spec.rb`) runs it on the real sources.
-  Exception: strings in `.js` files are not checked (decision 28X, see "Library
-  strings").
+  In `.js` files it reads comments, and full unpoly.com URLs outside of them (see
+  "Library strings").
 
 The build also fails when a slug is served under both `/learn` and `/api` (Toc
 `validate_short_paths!`): its short path would be ambiguous.
@@ -344,6 +344,26 @@ suite), `read-more.sass` was deleted on `docs-rework`, and the landing page's ne
   (DANGLING); a page slug under both prefixes, simulated by stubbing a guide's slug to
   `up.render` (Toc fails).
 
+## Done (2026-10-18)
+
+The move was made on the `docs-rework` branches of both repositories (not pushed at the
+time of writing). The site side was cherry-picked from `url-move-dryrun-2` without
+conflicts, plus a `doc_path` for the landing page's new closing section; in unpoly the
+script ran fresh on the current content.
+
+- 631 documents (88 to `/learn`, 543 to `/api`). 3,319 links rewritten (3,305 Markdown
+  links, 11 `https://unpoly.com/...` including the two error messages, 2
+  `[[=base_url]]`, 1 as text), 144 hand-written redirects retargeted, 181 files
+  changed. The second run changed nothing.
+- `rake docs:check_urls`: 78 published addresses and 631 old document paths resolve,
+  162 hand-written redirects take one hop, no legacy link. Build: "No legacy link",
+  717 files link-checked, "All links OK." `bin/self-test` and `bin/lint` pass.
+- `rake docs:check_redirects` against Apache 2.4.57: 1,893 old-path variants, 2
+  short URLs and 162 redirect sources in one hop to a 200, 10 root pages 200, an
+  unknown path 404.
+
+Left to do: deploy unpoly and the site right after each other (step 7), then step 8.
+
 ## Rollback
 
 - Before deploy: drop the branches. Nothing else has changed.
@@ -392,20 +412,22 @@ suite), `read-more.sass` was deleted on `docs-rework`, and the landing page's ne
   (`/up.modal`, `/up.proxy`, ...) are left alone and listed as "Root paths left alone";
   those notes are not link-checked.
 - **Library strings.** Two error messages in `src/unpoly/classes/change/` mention
-  `https://unpoly.com/error-responses`. The release goes out before the site moves,
-  so a rewritten URL would 404 in between. The script leaves strings in `.js` files
-  alone and rewrites only comments (decision 28X); the old URL redirects after the
-  deploy. The legacy link check skips them for the same reason, so they are the one
-  kind of old-style link it lets through.
+  the error responses guide. Decision 28X kept their old URL, since the release might
+  go out before the site moves. Superseded on 2026-10-18: unpoly and the site deploy
+  minutes apart, so the messages say `https://unpoly.com/learn/error-responses`. The
+  script rewrites full unpoly.com URLs in `.js` code (not other paths: `'/users'` in
+  code is an app's URL), and the legacy link check covers them too.
 - **Markdown twins of old paths** (`/up.render.md`) now take one hop to
   `/api/up.render.md`. A twin of a renamed page (`/failed-responses.md`) still takes
   two (`.md` fallback, then the rename). No `.md` URL was ever public before this
   release.
 - **Locations are http://** for the hand-written `RedirectPermanent` rules: mod_alias
   builds its Location from what Apache sees behind the TLS proxy, so it says
-  `http://unpoly.com/...`. HSTS upgrades it in browsers (see the plan's ops note); the
-  one-line nginx `proxy_redirect` fix would clean it up. The general rule names
-  https itself, so the 631 old document paths are no longer affected.
+  `http://unpoly.com/...`. Decided 2026-10-18: leave them, HSTS upgrades them in
+  browsers (see the plan's ops note). The one-line nginx `proxy_redirect` fix would
+  clean it up if ever wanted. The general rule names https itself, so the 631 old
+  document paths are not affected. `spec/features/htaccess_spec.rb` demands https only
+  of RewriteRules.
 - **Specs.** About 400 path literals in the site's specs, the parser fixture
   `spec/fixtures/parser/markdown.md` and the golden Markdown files needed new paths. A
   relative-link spec (`../up.render` from a page) needed a real change, since pages now
