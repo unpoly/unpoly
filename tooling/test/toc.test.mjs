@@ -127,7 +127,8 @@ test('every anchor link between contributor docs resolves', () => {
   let broken = []
   for (let file of files) {
     for (let { target, anchor } of linksOf(readFileSync(file, 'utf8'))) {
-      if (/^[a-z]+:/.test(target)) continue
+      // Absolute paths (`/learn/caching#expiration`) link into unpoly.com, not to a contributor doc.
+      if (/^[a-z]+:/.test(target) || target.startsWith('/')) continue
       let dest = target ? path.resolve(path.dirname(file), target) : file
       let found = anchorsFor(dest)
       if (found === null) broken.push(`${path.basename(file)} -> missing file ${target}`)
