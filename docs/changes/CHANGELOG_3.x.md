@@ -16,6 +16,7 @@ Contents:
 
 - [A relaunched documentation site](#a-relaunched-documentation-site)
 - [Docs for coding agents](#docs-for-coding-agents)
+- [A guide for contributors](#a-guide-for-contributors)
 - [Custom form fields](#custom-form-fields)
 - [Form submissions now match the browser](#form-submissions-now-match-the-browser)
 - [Forms](#forms)
@@ -60,6 +61,21 @@ Agents can also read the docs without the skill:
 - Every page is also available as Markdown. Append `.md` to its URL, e.g. [`https://unpoly.com/api/up.render.md`](https://unpoly.com/api/up.render.md). Agents that ask for `text/markdown` first in their `Accept` header get Markdown at the page's own URL.
 - [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules, with links an agent can follow.
 - To give a chat a single page, use the copy button next to a page's title. It copies the page as Markdown.
+
+
+### A guide for contributors
+
+If you want to change Unpoly itself, start with [`CONTRIBUTING.md`](https://github.com/unpoly/unpoly/blob/master/CONTRIBUTING.md).
+It links 13 guides, written for people and for coding agents. They explain how to set up a development environment, where code lives, and how we test, document and release Unpoly. Two deep-dives explain the rendering core and the selector engine.
+A walkthrough takes you through a first change: a new `[up-*]` attribute, its spec, its documentation and its commit.
+
+Coding agents find the guide on their own, because `AGENTS.md` and `CLAUDE.md` point to the same file.
+
+The guides come with new tools:
+
+- `bin/dev` starts a build watcher, a test server and the documentation site with one command.
+- `bin/test` runs the specs in a real browser from the terminal, and `bin/find-spec` finds the specs relevant to your change, so you don't need to run the whole suite.
+- A scratch server shows your change on a few real pages, for things a spec cannot show, like how an overlay looks.
 
 
 ### Custom form fields
