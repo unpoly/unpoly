@@ -60,7 +60,7 @@ up.$compiler('.current-time', function($element) {
 @param {string} selector
   The selector to match.
 @param {Object} [options]
-  See [`options` argument for `up.compiler()`](/up.compiler#parameters).
+  See [`options` argument for `up.compiler()`](/api/up.compiler#parameters).
 @param {Function($element, data)} compiler
   @like up.compiler
 @deprecated
@@ -79,7 +79,7 @@ up.$compiler = function(...definitionArgs) {
 
 
 /*-
-Registers a [compiler](/up.compiler) that is run before all other compilers.
+Registers a [compiler](/api/up.compiler) that is run before all other compilers.
 The compiler function is called with each matching element as a
 [jQuery object](https://learn.jquery.com/using-jquery-core/jquery-object/).
 
@@ -102,7 +102,7 @@ up.$macro('[content-link]', function($link) {
 @param {string} selector
   The selector to match.
 @param {Object} options
-  See [`options` argument for `up.compiler()`](/up.compiler#parameters).
+  See [`options` argument for `up.compiler()`](/api/up.compiler#parameters).
 @param {Function($element, data)} macro
   @like up.macro
 @deprecated

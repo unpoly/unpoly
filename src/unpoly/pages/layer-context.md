@@ -9,7 +9,7 @@ Both your JavaScript and your server can read and change it.
 Passing context to an overlay {#initializing}
 -----------------------------
 
-To give a new overlay a context, set an `[up-context]` attribute with a [relaxed JSON](/relaxed-json) object
+To give a new overlay a context, set an `[up-context]` attribute with a [relaxed JSON](/api/relaxed-json) object
 on the link that opens it:
 
 ```html
@@ -31,7 +31,7 @@ When an overlay closes, its context is discarded with it.
 Varying a reused screen {#reuse-interaction-with-variation}
 -----------------------
 
-Context is most useful when you [reuse an existing screen](/subinteractions#reusing-existing-screens) in an overlay,
+Context is most useful when you [reuse an existing screen](/learn/subinteractions#reusing-existing-screens) in an overlay,
 but want a small variation. Say a project form lets the user pick a contact. Instead of building a picker widget,
 it opens the existing `/contacts` list in an overlay:
 
@@ -77,7 +77,7 @@ The list needs no changes to work in both places.
 Working with context in JavaScript {#scripting}
 ---------------------------------
 
-`up.context` returns the context of the [current layer](/up.layer.current).
+`up.context` returns the context of the [current layer](/api/up.layer.current).
 Read and change it like any JavaScript object:
 
 ```js
@@ -132,7 +132,7 @@ end
 
 Without `unpoly-rails`, set the `X-Up-Context` response header yourself.
 
-Context updates are applied for both successful responses and [error responses](/error-responses).
+Context updates are applied for both successful responses and [error responses](/learn/error-responses).
 
 
 Context compared to other stores {#comparison}
@@ -145,7 +145,7 @@ The web platform offers other ways to persist state across requests, but none of
 | Local storage   | Domain             | Multiple sessions | String | Yes               | -                 |
 | Cookies         | Domain             | Configurable      | String | Configurable      | Yes               |
 | Session storage | Tab                | Session           | String | Yes               | -                 |
-| Layer context   | [Layer](/up.layer) | Layer             | Object | Yes               | Yes               |
+| Layer context   | [Layer](/api/up.layer) | Layer             | Object | Yes               | Yes               |
 
 
 @page layer-context

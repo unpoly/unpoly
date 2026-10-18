@@ -11,16 +11,16 @@ What happens when the user goes back {#default-behavior}
 
 The browser changes the address bar on its own. Unpoly then restores the content for the restored URL:
 
-1. The restored URL is requested with `GET`. A [cached](/caching) response is used when available.
-2. Any open [overlays](/history-in-overlays#restoration) are closed. The restored page is rendered in the root layer.
+1. The restored URL is requested with `GET`. A [cached](/learn/caching) response is used when available.
+2. Any open [overlays](/learn/history-in-overlays#restoration) are closed. The restored page is rendered in the root layer.
 3. The response's `<body>` replaces the current `<body>`.
 4. Scroll positions are restored to where they were when the user left the page.
 5. Focus and text selection are restored to the element the user was in.
-6. If the cached content has [expired](/caching#revalidation), it is revalidated with the server.
+6. If the cached content has [expired](/learn/caching#revalidation), it is revalidated with the server.
 
 Scroll positions and focus are remembered for each layer until the next full page load.
 If no positions are known, for example after a full page reload, Unpoly scrolls and focuses
-as it does when [following a link](/scrolling#auto).
+as it does when [following a link](/learn/scrolling#auto).
 
 Requests that are still loading for the restored fragment are aborted, so a late response
 cannot overwrite the restored page. See [[aborting-requests]].
@@ -28,10 +28,10 @@ cannot overwrite the restored page. See [[aborting-requests]].
 Unpoly renders whatever the server responds, even an error page.
 The browser has already changed the URL, so the page must follow.
 When the server cannot be reached, the address bar shows the restored URL while the page keeps its content.
-You can handle this case like any other [connection loss](/network-issues).
+You can handle this case like any other [connection loss](/learn/network-issues).
 
 When only the `#hash` changed between two history entries, nothing is rendered.
-Unpoly scrolls to the element matching the hash, honoring any [obstructing layout elements](/scroll-tuning#fixed-layout-elements-obstructing-the-viewport).
+Unpoly scrolls to the element matching the hash, honoring any [obstructing layout elements](/learn/scroll-tuning#fixed-layout-elements-obstructing-the-viewport).
 
 
 Restoring a different fragment {#restore-targets}
@@ -53,7 +53,7 @@ Customizing the restoration {#custom-behavior}
 ---------------------------
 
 Before Unpoly renders the restored content, it emits an `up:location:restore` event.
-Listeners can inspect and change the [render options](/up.render#parameters) in `event.renderOptions`:
+Listeners can inspect and change the [render options](/api/up.render#parameters) in `event.renderOptions`:
 
 ```js
 up.on('up:location:restore', function(event) {
@@ -77,7 +77,7 @@ up.on('up:location:restore', function(event) {
 })
 ```
 
-When `up:location:restore` is emitted, the [browser location](/up.history.location)
+When `up:location:restore` is emitted, the [browser location](/api/up.history.location)
 has already been updated. Neither preventing the event nor changing render options can undo that.
 
 > [important]
@@ -90,7 +90,7 @@ Which entries Unpoly restores {#handled-entries}
 Unpoly restores history entries that it *owns*:
 
 - The entry of the initial page load.
-- Entries placed by Unpoly while [updating history](/updating-history), or through `up.history.push()` and `up.history.replace()`.
+- Entries placed by Unpoly while [updating history](/learn/updating-history), or through `up.history.push()` and `up.history.replace()`.
 - Entries for a changed `#hash` on a location that Unpoly owns, whether from a link or typed into the address bar.
 
 An entry that another script pushed with `history.pushState()` is left alone.
@@ -124,7 +124,7 @@ To offer a *Back* link inside the page, set an `[up-back]` attribute:
 <a href="/posts" up-back>Back</a> <!-- mark: up-back -->
 ```
 
-When Unpoly knows the previous URL, clicking the link [navigates](/navigation-defaults) there
+When Unpoly knows the previous URL, clicking the link [navigates](/learn/navigation-defaults) there
 and restores the earlier scroll position. When no previous URL is known, for example right after the initial page load,
 the link follows its `[href]` as usual.
 

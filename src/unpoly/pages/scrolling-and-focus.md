@@ -10,7 +10,7 @@ Every default can be changed per link, per form or globally.
 What happens after following a link {#navigation-defaults}
 -----------------------------------
 
-Take a link that updates the page's [main fragment](/main):
+Take a link that updates the page's [main fragment](/api/main):
 
 ```html
 <a href="/posts/5" up-follow>Read post</a>
@@ -31,7 +31,7 @@ if there is none, so the user is not dropped at the `<body>`.
 
 Both behaviors are controlled by the `[up-scroll]` and `[up-focus]` attributes
 (or the `{ scroll }` and `{ focus }` options in JavaScript).
-Their default value `auto` is the sequence above. It applies whenever a link or form [navigates](/navigation-defaults).
+Their default value `auto` is the sequence above. It applies whenever a link or form [navigates](/learn/navigation-defaults).
 Low-level calls like `up.render()` do not scroll or focus unless told to.
 
 Scrolling an element into view is called *revealing* it.
@@ -73,7 +73,7 @@ Other values focus the new `target`, `keep` the focus in a re-rendered form fiel
 or `restore` the focus from an earlier visit of the same URL.
 
 In an overlay, focus is trapped: tabbing past the last element wraps around to the start of the overlay.
-Only [popups](/overlays#layer-modes) let focus leave.
+Only [popups](/learn/overlays#layer-modes) let focus leave.
 When the overlay closes, focus returns to the link that opened it.
 
 [[more: focus]]
@@ -96,7 +96,7 @@ Style these classes in your CSS to show rings for keyboard users only.
 Unpoly's default stylesheet already removes the outline from `.up-focus-hidden` elements.
 
 You can change which elements get which class in `up.viewport.config.autoFocusVisible`,
-or override it for a single link with [`[up-focus-visible]`](/up-follow#up-focus-visible).
+or override it for a single link with [`[up-focus-visible]`](/api/up-follow#up-focus-visible).
 
 [[more: focus-visibility]]
 
@@ -108,7 +108,7 @@ To declare navigation bars that obstruct the viewport, animate the scroll motion
 
 When the user presses the back button, scroll positions and focus are restored to where they were. See [[restoring-history]].
 
-Loading more items as the user scrolls down is a [live fragment](/live-fragments) rather than a scroll option. See [[infinite-scrolling]].
+Loading more items as the user scrolls down is a [live fragment](/learn/live-fragments) rather than a scroll option. See [[infinite-scrolling]].
 
 @page scrolling-and-focus
 @menu-title Overview

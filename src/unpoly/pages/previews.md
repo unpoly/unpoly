@@ -6,9 +6,9 @@ They signal that the app is working, or hint at how the page will ultimately loo
 When the request ends, Unpoly reverts the changes before rendering the response.
 
 Because a preview appears immediately after the user's interaction, it makes your application feel more responsive.
-Unpoly's [feedback classes](/feedback-classes), [placeholders](/placeholders) and
-[disabling](/disabling-forms) are built on previews.
-[Optimistic rendering](/optimistic-rendering) is a preview that renders the expected result.
+Unpoly's [feedback classes](/learn/feedback-classes), [placeholders](/learn/placeholders) and
+[disabling](/learn/disabling-forms) are built on previews.
+[Optimistic rendering](/learn/optimistic-rendering) is a preview that renders the expected result.
 Use `up.preview()` directly when these don't cover your case.
 
 
@@ -39,17 +39,17 @@ The `preview` argument is an `up.Preview` instance that offers many utilities to
 
 | Function                                                               | Effect                                               |
 |------------------------------------------------------------------------|------------------------------------------------------|
-| [`preview.insert()`](/up.Preview.prototype.insert)                     | Inserts an element.                                  |
-| [`preview.addClass()`](/up.Preview.prototype.addClass)                 | Adds a CSS class.                                    |
-| [`preview.removeClass()`](/up.Preview.prototype.removeClass)           | Removes a CSS class.                                 |
-| [`preview.setAttrs()`](/up.Preview.prototype.setAttrs)                 | Changes an element's attributes.                     |
-| [`preview.setStyle()`](/up.Preview.prototype.setStyle)                 | Sets inline CSS styles.                              |
-| [`preview.hide()`](/up.Preview.prototype.hide)                         | Hides an element.                                    |
-| [`preview.show()`](/up.Preview.prototype.show)                         | Shows a hidden element.                              |
-| [`preview.swapContent()`](/up.Preview.prototype.swapContent)           | Replaces an element's children.                      |
-| [`preview.showPlaceholder()`](/up.Preview.prototype.showPlaceholder)   | Shows a [placeholder](/placeholders).                |
-| [`preview.disable()`](/up.Preview.prototype.disable)                   | [Disables](/disabling-forms) fields and buttons.     |
-| [`preview.openLayer()`](/up.Preview.prototype.openLayer)               | Opens an overlay.                                    |
+| [`preview.insert()`](/api/up.Preview.prototype.insert)                     | Inserts an element.                                  |
+| [`preview.addClass()`](/api/up.Preview.prototype.addClass)                 | Adds a CSS class.                                    |
+| [`preview.removeClass()`](/api/up.Preview.prototype.removeClass)           | Removes a CSS class.                                 |
+| [`preview.setAttrs()`](/api/up.Preview.prototype.setAttrs)                 | Changes an element's attributes.                     |
+| [`preview.setStyle()`](/api/up.Preview.prototype.setStyle)                 | Sets inline CSS styles.                              |
+| [`preview.hide()`](/api/up.Preview.prototype.hide)                         | Hides an element.                                    |
+| [`preview.show()`](/api/up.Preview.prototype.show)                         | Shows a hidden element.                              |
+| [`preview.swapContent()`](/api/up.Preview.prototype.swapContent)           | Replaces an element's children.                      |
+| [`preview.showPlaceholder()`](/api/up.Preview.prototype.showPlaceholder)   | Shows a [placeholder](/learn/placeholders).                |
+| [`preview.disable()`](/api/up.Preview.prototype.disable)                   | [Disables](/learn/disabling-forms) fields and buttons.     |
+| [`preview.openLayer()`](/api/up.Preview.prototype.openLayer)               | Opens an overlay.                                    |
 
 All these changes are reverted automatically when the preview ends.
 
@@ -98,7 +98,7 @@ up.preview('my-preview', function(preview) {
 ```
 
 In particular `preview.params` is helpful to
-[preview the effects of a form submission](/optimistic-rendering#previewing-form-submissions).
+[preview the effects of a form submission](/learn/optimistic-rendering#previewing-form-submissions).
 
 
 ## How previews end {#ending}
@@ -106,10 +106,10 @@ In particular `preview.params` is helpful to
 A preview ends when its associated request ends for *any* reason. Reasons include:
 
 - The server responds with new HTML.
-- The server [renders an error code](/error-responses#fail-options).
-- The request encounters a [fatal error](/network-issues), like a timeout or loss of network connectivity.
-- The server [updates a different fragment](/X-Up-Target).
-- The request is [aborted](/aborting-requests), e.g. by a different link targeting the same fragment.
+- The server [renders an error code](/learn/error-responses#fail-options).
+- The request encounters a [fatal error](/learn/network-issues), like a timeout or loss of network connectivity.
+- The server [updates a different fragment](/api/X-Up-Target).
+- The request is [aborted](/learn/aborting-requests), e.g. by a different link targeting the same fragment.
 
 When the preview ends, all its page changes are reverted before the server response is processed.
 This ensures a consistent screen state in cases when a request is aborted, or when we end up
@@ -118,10 +118,10 @@ updating a different fragment.
 When a preview takes focus away from an element, Unpoly focuses it again after the preview is reverted,
 unless the user has focused another element in the meantime.
 
-To manually end a preview, [abort](/aborting-requests) its associated request.
+To manually end a preview, [abort](/learn/aborting-requests) its associated request.
 
-To test whether a request has ended from an async [preview function](/up.preview),
-access the [`preview.ended`](/up.Preview.prototype.ended) property.
+To test whether a request has ended from an async [preview function](/api/up.preview),
+access the [`preview.ended`](/api/up.Preview.prototype.ended) property.
 
 
 ## Preview parameters {#parameters}
@@ -155,7 +155,7 @@ up.navigate({
 })
 ```
 
-As an alternative, you can pass a function that calls [`preview.run()`](/up.Preview.prototype.run)
+As an alternative, you can pass a function that calls [`preview.run()`](/api/up.Preview.prototype.run)
 with a preview name and options.
 This makes it easier to pass option values that already exist in your scope:
 
@@ -253,7 +253,7 @@ up.preview('my-preview', function(preview) {
 ### Prefer additive changes
 
 While previews can change the DOM arbitrarily, we recommend to not remove the targeted
-fragment from the DOM. A detached fragment cannot be [aborted](/aborting-requests).
+fragment from the DOM. A detached fragment cannot be [aborted](/learn/aborting-requests).
 
 ```js
 // label: ❌ Detached fragments cannot be aborted
@@ -298,7 +298,7 @@ before it is reverted. To avoid a flash of preview state, you may want to
 run some previews for long-running requests only.
 
 To do this, a preview function can set a timer using `setTimeout()` or `up.util.timer()`.
-After the timer expires, the preview must [check if it is still running](/up.Preview.prototype.ended) before changing the page:
+After the timer expires, the preview must [check if it is still running](/api/up.Preview.prototype.ended) before changing the page:
 
 ```js
 up.preview('delayed-spinner', (preview) => {
@@ -316,11 +316,11 @@ up.preview('delayed-spinner', (preview) => {
 
 ## Using previews with caching
 
-Previews are *not* shown when rendering content that is already [cached](/caching).
+Previews are *not* shown when rendering content that is already [cached](/learn/caching).
 This avoids a flash when a preview is shown and immediately reverted.
 
-After rendering cached content that is [expired](/caching#expiration),
-Unpoly will usually [revalidate](/caching#revalidation) the fragment by reloading it.
+After rendering cached content that is [expired](/learn/caching#expiration),
+Unpoly will usually [revalidate](/learn/caching#revalidation) the fragment by reloading it.
 To show a preview for the revalidating request, use the `[up-revalidate-preview]` attribute instead:
 
 ```html
@@ -336,7 +336,7 @@ The revalidation preview is run after the expired content has been rendered.
 Hence the preview can modify a DOM tree showing the destination screen (albeit with stale data).
 
 To use the `[up-preview]` attribute for both the initial render pass and the revalidation request, set `[up-revalidate-preview]`
-to a [true value](/attributes-and-options#boolean-attributes):
+to a [true value](/learn/attributes-and-options#boolean-attributes):
 
 ```html
 <a href="/clients"

@@ -3,20 +3,20 @@
 @param [up-focus='auto']
   What to focus after the new fragment was rendered.
 
-  See [Controlling focus](/focus) for a list of allowed values.
+  See [Controlling focus](/learn/focus) for a list of allowed values.
 
 @param [up-fail-focus='auto']
   What to focus after the new fragment was rendered from an error response.
 
-  See [Rendering error responses differently](/error-responses#fail-options).
+  See [Rendering error responses differently](/learn/error-responses#fail-options).
 
 @param [up-focus-visible='auto']
-  Whether the focused element should have a [visible focus ring](/focus-visibility).
+  Whether the focused element should have a [visible focus ring](/learn/focus-visibility).
 
   By default focus will be visible if `up.viewport.config.autoFocusVisible()`
-  returns `true` for the focused element and [current input device](/up.event.inputDevice).
+  returns `true` for the focused element and [current input device](/api/up.event.inputDevice).
 
 @param [up-save-focus='true']
-  Whether to [save focus-related state](/up.viewport.saveFocus) before updating the fragment.
+  Whether to [save focus-related state](/api/up.viewport.saveFocus) before updating the fragment.
 
-  Saved focus state can later be restored with [`[up-focus=restore]`](/focus#restore).
+  Saved focus state can later be restored with [`[up-focus=restore]`](/learn/focus#restore).

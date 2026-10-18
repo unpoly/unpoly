@@ -36,7 +36,7 @@ Here the script skips the animation altogether:
 up.follow(link, { transition: 'none' }) // mark: transition: 'none'
 ```
 
-When Unpoly navigates, it starts with the [configured defaults](/navigation-defaults), then applies the attributes
+When Unpoly navigates, it starts with the [configured defaults](/learn/navigation-defaults), then applies the attributes
 it parsed from the element, and finally the options you passed. Each place only replaces the
 values it actually sets, so the script above still gets the link's URL and every other attribute.
 
@@ -46,7 +46,7 @@ Unpoly attributes
 
 Unpoly provides `up-`prefixed attributes that enable additional behavior on HTML elements.
 For example, the `[up-follow]` attribute will cause a clicked link to swap the
-page's [main fragment](/main) instead of replacing the full page:
+page's [main fragment](/api/main) instead of replacing the full page:
 
 ```html
 <a href="/path" up-follow>Click me</a> <!-- mark: up-follow -->
@@ -64,7 +64,7 @@ a confirmation dialog before it is followed:
 ```
 
 Modifying attributes are documented with the main attribute they're modifying.
-For example, see [modifying attributes for `[up-follow]`](/up-follow#attributes).
+For example, see [modifying attributes for `[up-follow]`](/api/up-follow#attributes).
 
 
 ### Boolean attributes {#boolean-attributes}
@@ -104,7 +104,7 @@ The examples use Ruby on Rails, but work similarly with any other backend.
 ### Structured values {#relaxed-json}
 
 A few attributes take a structured value, like an object or an array.
-These values are written in [relaxed JSON](/relaxed-json), which allows single quotes
+These values are written in [relaxed JSON](/api/relaxed-json), which allows single quotes
 and unquoted keys:
 
 ```html
@@ -163,7 +163,7 @@ can still override it with their own attributes and options.
 
 Many config properties hold a list of CSS selectors, letting you apply
 a behavior to all matching elements. For example, you can tell Unpoly to
-[handle every link on the page](/handling-all-links#following-all-links) without
+[handle every link on the page](/learn/handling-all-links#following-all-links) without
 any `[up-follow]` attributes.
 
 
@@ -172,7 +172,7 @@ Auto-attributes
 
 Some attributes default to a value `"auto"`. This indicates a more complex default.
 
-For example, the [`[up-cache=auto]`](/up-follow#up-cache) attribute caches all links with a `GET` method:
+For example, the [`[up-cache=auto]`](/api/up-follow#up-cache) attribute caches all links with a `GET` method:
 
 ```html
 <a href="/path" up-follow up-cache="auto">Click me</a> <!-- mark: up-cache="auto" -->

@@ -172,7 +172,7 @@ up.Change.FromContent = class FromContent extends up.Change {
     } else if (this._layers.length === 0) {
       this._cannotMatchLayer()
     } else if (this.options.didForceFailOptions) {
-      throw new up.CannotMatch('No target selector given for error responses (https://unpoly.com/error-responses)')
+      throw new up.CannotMatch('No target selector given for error responses (https://unpoly.com/learn/error-responses)')
     } else {
       throw new up.CannotMatch('No target selector given')
     }

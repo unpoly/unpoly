@@ -1,7 +1,7 @@
 const u = up.util
 
 /*-
-A normalized description of an [HTTP request](/up.request).
+A normalized description of an [HTTP request](/api/up.request).
 
 You can queue a request using the `up.request()` method:
 
@@ -52,7 +52,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  [Parameters](/up.Params) that should be sent as the request's payload.
+  [Parameters](/api/up.Params) that should be sent as the request's payload.
 
   @property up.Request#params
   @param {Object|FormData|string|Array} params
@@ -60,7 +60,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The CSS selector [targeted](/targeting-fragments) by this request.
+  The CSS selector [targeted](/learn/targeting-fragments) by this request.
 
   The selector will be sent as an `X-Up-Target` header.
 
@@ -72,8 +72,8 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The CSS selector [targeted](/targeting-fragments) by this request in case
-  the server responds with an [error code](/error-responses).
+  The CSS selector [targeted](/learn/targeting-fragments) by this request in case
+  the server responds with an [error code](/learn/error-responses).
 
   The selector will be sent as an `X-Up-Fail-Target` header.
 
@@ -116,7 +116,7 @@ up.Request = class Request extends up.Record {
   /*-
   A timeout in milliseconds.
 
-  If the request is queued due to [many concurrent requests](/up.network.config#config.concurrency),
+  If the request is queued due to [many concurrent requests](/api/up.network.config#config.concurrency),
   the timeout will not include the time spent waiting in the queue.
 
   @property up.Request#timeout
@@ -130,7 +130,7 @@ up.Request = class Request extends up.Record {
   If this is set, methods other than GET and POST will be converted to a `POST` request
   and carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
 
-  Defaults to [`up.network.config`](/up.network.config#config.wrapMethod).
+  Defaults to [`up.network.config`](/api/up.network.config#config.wrapMethod).
 
   @property up.Request#wrapMethod
   @param {boolean} wrapMethod
@@ -138,7 +138,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [context](/layer-context) of the layer targeted by this request.
+  The [context](/learn/layer-context) of the layer targeted by this request.
 
   The context object will be sent as an `X-Up-Context` header.
 
@@ -150,7 +150,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [context](/layer-context) of the layer targeted by this request in case the server responds with an [error code](/error-responses).
+  The [context](/learn/layer-context) of the layer targeted by this request in case the server responds with an [error code](/learn/error-responses).
 
   The context object will be sent as an `X-Up-Fail-Context` header.
 
@@ -160,11 +160,11 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [layer](/up.layer) targeted by this request.
+  The [layer](/api/up.layer) targeted by this request.
 
   Setting the `{ layer }` property will automatically derive `{ context }` and `{ mode }` properties.
 
-  When this request will [open a new overlay](/opening-overlays), the string `"new"` is returned.
+  When this request will [open a new overlay](/learn/opening-overlays), the string `"new"` is returned.
 
   To prevent memory leaks, this property is removed shortly after the response is received.
 
@@ -174,7 +174,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [layer](/up.layer) targeted by this request in case the server responds with an [error code](/error-responses).
+  The [layer](/api/up.layer) targeted by this request in case the server responds with an [error code](/learn/error-responses).
 
   Setting the `{ failLayer }` property will automatically derive `{ failContext }` and `{ failMode }` properties.
 
@@ -199,7 +199,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [mode](/up.Layer.prototype.mode) of the layer targeted by this request.
+  The [mode](/api/up.Layer.prototype.mode) of the layer targeted by this request.
 
   The value will be sent as an `X-Up-Mode` header.
 
@@ -211,7 +211,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [mode](/up.Layer.prototype.mode) of the layer targeted by this request in case the server responds with an [error code](/error-responses).
+  The [mode](/api/up.Layer.prototype.mode) of the layer targeted by this request in case the server responds with an [error code](/learn/error-responses).
 
   The value will be sent as an `X-Up-Fail-Mode` header.
 
@@ -221,7 +221,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The [mode](/up.Layer.prototype.mode) of the layer from which the interaction [originated](/origin).
+  The [mode](/api/up.Layer.prototype.mode) of the layer from which the interaction [originated](/api/origin).
 
   The value will be sent as an `X-Up-Origin-Mode` header.
 
@@ -231,7 +231,7 @@ up.Request = class Request extends up.Record {
   */
 
   /*-
-  The format in which the [request params](/up.Request.prototype.params) will be encoded.
+  The format in which the [request params](/api/up.Request.prototype.params) will be encoded.
 
   @property up.Request#contentType
   @param {string} contentType
@@ -264,7 +264,7 @@ up.Request = class Request extends up.Record {
 
   Background requests are deprioritized over foreground requests.
   Background requests also won't emit `up:network:late` events and won't trigger
-  the [progress bar](/progress-bar).
+  the [progress bar](/learn/progress-bar).
 
   @learn-ref background-requests
 
@@ -275,7 +275,7 @@ up.Request = class Request extends up.Record {
 
   /*-
   The number of milliseconds after which this request can cause
-  an `up:network:late` event and show the [progress bar](/progress-bar).
+  an `up:network:late` event and show the [progress bar](/learn/progress-bar).
 
   Defaults to `up.network.config.lateDelay`.
 
@@ -429,9 +429,9 @@ up.Request = class Request extends up.Record {
   }
 
   /*-
-  Returns the fragments matched by this request's [target selector](/up.Request.prototype.target).
+  Returns the fragments matched by this request's [target selector](/api/up.Request.prototype.target).
 
-  When this request will [open a new overlay](/opening-overlays), an empty array is returned.
+  When this request will [open a new overlay](/learn/opening-overlays), an empty array is returned.
 
   See also `up.RenderResult#fragments`.
 
@@ -466,12 +466,12 @@ up.Request = class Request extends up.Record {
   }
 
   /*-
-  Returns the fragment matched by this request's [target selector](/up.Request.prototype.target).
+  Returns the fragment matched by this request's [target selector](/api/up.Request.prototype.target).
 
-  When [multiple fragments](/targeting-fragments#multiple) are targeted, the first fragment is returned.
-  To get a list of all targeted fragments, use the [`{ fragments }`](/up.Request.prototype.fragments) property.
+  When [multiple fragments](/learn/targeting-fragments#multiple) are targeted, the first fragment is returned.
+  To get a list of all targeted fragments, use the [`{ fragments }`](/api/up.Request.prototype.fragments) property.
 
-  When this request will [open a new overlay](/opening-overlays), `undefined` is returned.
+  When this request will [open a new overlay](/learn/opening-overlays), `undefined` is returned.
 
   See also `up.RenderResult#fragment`.
 
@@ -625,8 +625,8 @@ up.Request = class Request extends up.Record {
   Loads this request object as a full-page request, replacing the entire browser environment
   with a new page from the server response.
 
-  The full-page request will be loaded with the [URL](/up.Request.prototype.url),
-  [method](/up.Request.prototype.method) and [params](/up.Request.prototype.params)
+  The full-page request will be loaded with the [URL](/api/up.Request.prototype.url),
+  [method](/api/up.Request.prototype.method) and [params](/api/up.Request.prototype.params)
   from this request object.
 
   Aborts all pending requests.
@@ -779,9 +779,9 @@ up.Request = class Request extends up.Record {
 
   A request is considered to have ended in one of the following states:
 
-  - A response has been loaded, with any [status code](/up.Response.prototype.status).
-  - It has been [aborted](/aborting-requests).
-  - It failed due to a [network issue](/network-issues).
+  - A response has been loaded, with any [status code](/api/up.Response.prototype.status).
+  - It has been [aborted](/learn/aborting-requests).
+  - It failed due to a [network issue](/learn/network-issues).
   - It failed due to a timeout.
 
   @property up.Request#ended
@@ -975,11 +975,11 @@ up.Request = class Request extends up.Record {
   An `up.Request` is also a promise for the server response.
 
   A request is *fulfilled* with an `up.Response` when the server sends a response
-  with a status code of 2xx or [304](/conditional-requests#rendering-nothing).
+  with a status code of 2xx or [304](/learn/conditional-requests#rendering-nothing).
 
-  The promise will reject for responses with an [HTTP error status](/error-responses),
-  when the request is [aborted](/aborting-requests) or when there is a
-  [network issue](/network-issues).
+  The promise will reject for responses with an [HTTP error status](/learn/error-responses),
+  when the request is [aborted](/learn/aborting-requests) or when there is a
+  [network issue](/learn/network-issues).
 
   ### Example
 

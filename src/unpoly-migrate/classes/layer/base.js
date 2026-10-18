@@ -3,10 +3,10 @@
 */
 
 /*-
-Returns whether this layer is still part of the [layer stack](/up.layer.stack).
+Returns whether this layer is still part of the [layer stack](/api/up.layer.stack).
 
-A layer is considered "closed" immediately after it has been [dismissed](/up.Layer.prototype.dismiss)
-or [accepted](/up.Layer.prototype.accept). If the closing is animated, a layer may be considered "closed" while
+A layer is considered "closed" immediately after it has been [dismissed](/api/up.Layer.prototype.dismiss)
+or [accepted](/api/up.Layer.prototype.accept). If the closing is animated, a layer may be considered "closed" while
 the closing animation is still playing.
 
 @function up.Layer#isOpen
@@ -21,10 +21,10 @@ up.Layer.prototype.isOpen = function() {
 }
 
 /*-
-Returns whether this layer is no longer part of the [layer stack](/up.layer.stack).
+Returns whether this layer is no longer part of the [layer stack](/api/up.layer.stack).
 
-A layer is considered "closed" immediately after it has been [dismissed](/up.Layer.prototype.dismiss)
-or [accepted](/up.Layer.prototype.accept). If the closing is animated, a layer may be considered "closed" while
+A layer is considered "closed" immediately after it has been [dismissed](/api/up.Layer.prototype.dismiss)
+or [accepted](/api/up.Layer.prototype.accept). If the closing is animated, a layer may be considered "closed" while
 the closing animation is still playing.
 
 @function up.Layer#isClosed

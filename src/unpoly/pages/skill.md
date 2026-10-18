@@ -109,7 +109,7 @@ When working with Unpoly (`up-*` attributes, `up.*` functions, `up:*` events), c
 
 Every page of these docs is also available as Markdown. Click the Markdown icon next to
 the page title, or append `.md` to the page's URL, e.g.
-[[[=base_url]]/up.render<strong>.md</strong>]([[=base_url]]/up.render.md).
+[[[=base_url]]/api/up.render<strong>.md</strong>]([[=base_url]]/api/up.render.md).
 
 To give an AI chat a single page, use the copy button next to the page title. It copies
 the page as Markdown, ready to paste.

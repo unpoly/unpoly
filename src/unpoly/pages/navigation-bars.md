@@ -93,7 +93,7 @@ generally considered the "current" location ([except with overlays](#layers)).
 A link is marked as `.up-current` when the current location matches either:
 
 - the link's `[href]` attribute
-- the link's `[up-href]` attribute on a [faux hyperlink](/faux-interactive-elements#acting-like-a-hyperlink)
+- the link's `[up-href]` attribute on a [faux hyperlink](/learn/faux-interactive-elements#acting-like-a-hyperlink)
 - one of the link's [alias URLs](#aliases)
 
 Any `#hash` fragments will be ignored in both link attributes and in the current location.
@@ -121,7 +121,7 @@ To pass more than one alternative URL, set comma-separated values:
 </nav>
 ```
 
-You can also use a [URL pattern](/url-patterns):
+You can also use a [URL pattern](/api/url-patterns):
 
 ```html
 <nav>
@@ -132,14 +132,14 @@ You can also use a [URL pattern](/url-patterns):
 
 ### Matching the location of other layers {#layers}
 
-Each [layer](/up.layer) has a separate location that it considers "current".
-Even when an overlay has [no visible history](/history-in-overlays#configuring-visibility),
+Each [layer](/api/up.layer) has a separate location that it considers "current".
+Even when an overlay has [no visible history](/learn/history-in-overlays#configuring-visibility),
 it still tracks the location of the fragment it contains.
 
 Links are marked as current when they point to the location *of their own layer*.
-To highlight links that point to the location of *another* layer, set an [`[up-layer]`](/up-nav#up-layer) attribute
+To highlight links that point to the location of *another* layer, set an [`[up-layer]`](/api/up-nav#up-layer) attribute
 on their [navigational container](#navigational-containers).
-The attribute value can be any [layer option](/targeting-other-layers).
+The attribute value can be any [layer option](/learn/targeting-other-layers).
 
 Below you can see a "hamburger menu" that is shown in an overlay. It contains links to the root layer,
 so their `.up-current` classes reflect the root layer's location:
@@ -193,9 +193,9 @@ to define a navigation landmark:
 ## Updating `.up-current` classes
 
 The `.up-current` class is toggled automatically within all content that Unpoly renders.
-For example, when Unpoly [follows a link](/up-follow), [submits a form](/submitting-forms)
-or [renders from a script](/up.render), any newly inserted hyperlinks will get `.up-current`
-if they point to the current URL. When the browser location [changes](/up:location:changed),
+For example, when Unpoly [follows a link](/api/up-follow), [submits a form](/learn/submitting-forms)
+or [renders from a script](/api/up.render), any newly inserted hyperlinks will get `.up-current`
+if they point to the current URL. When the browser location [changes](/api/up:location:changed),
 existing links will be updated to reflect the new location.
 
 To toggle `.up-current` on content that you manually inserted without Unpoly, use `up.hello()`.

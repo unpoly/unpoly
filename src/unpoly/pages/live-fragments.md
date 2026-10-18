@@ -97,7 +97,7 @@ Real-time updates
 
 When a few seconds of delay are too much, your server can tell the page when something changed.
 Put an element like `<div data-stream="/updates">` in your layout.
-A [compiler](/up.compiler) of a few lines connects it to [Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)
+A [compiler](/api/up.compiler) of a few lines connects it to [Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)
 and reloads the fragment the server names:
 
 ```js
@@ -135,7 +135,7 @@ is updated along with the targeted fragment. When a response doesn't contain
 the element, nothing happens. You no longer need to name the counter in every link's
 `[up-target]`.
 
-To show confirmations or errors from any response, use a ready-made hungry element for [notification flashes](/flashes).
+To show confirmations or errors from any response, use a ready-made hungry element for [notification flashes](/learn/flashes).
 
 [[more: hungry-elements]]
 

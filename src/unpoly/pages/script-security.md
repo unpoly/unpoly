@@ -136,7 +136,7 @@ up.on('up:link:follow', '.alert-on-loaded', (event) => {
 Callbacks in headers {#header-callbacks}
 --------------------
 
-When the server [opens an overlay](/X-Up-Open-Layer), its `X-Up-Open-Layer` header can pass
+When the server [opens an overlay](/api/X-Up-Open-Layer), its `X-Up-Open-Layer` header can pass
 callbacks like `{ onAccepted }` as a string of JavaScript:
 
 ```http

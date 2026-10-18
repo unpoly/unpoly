@@ -94,16 +94,16 @@ Close conditions {#close-conditions}
 When opening an overlay, you can define a *condition* for when the overlay's task is done.
 When the condition occurs, the overlay closes automatically and your callback runs.
 
-We recommend close conditions over explicit commands like [`up.layer.accept()`](/closing-overlays#from-script)
-or [`X-Up-Accept-Layer`](/closing-overlays#from-server). With a close condition, the overlay content does not need
+We recommend close conditions over explicit commands like [`up.layer.accept()`](/learn/closing-overlays#from-script)
+or [`X-Up-Accept-Layer`](/learn/closing-overlays#from-server). With a close condition, the overlay content does not need
 to know that it is running in an overlay. The same screen works as a full page and as
 a step of another screen's interaction.
 
 
 ### Closing when a location is reached {#location-condition data-toc-include}
 
-To close an overlay once it reaches a URL like `/companies/123`, set an [`[up-accept-location]`](/up-layer-new#up-accept-location)
-attribute with a [URL pattern](/url-patterns):
+To close an overlay once it reaches a URL like `/companies/123`, set an [`[up-accept-location]`](/api/up-layer-new#up-accept-location)
+attribute with a [URL pattern](/api/url-patterns):
 
 ```html
 <a href="/companies/new"
@@ -115,7 +115,7 @@ attribute with a [URL pattern](/url-patterns):
 ```
 
 When the user submits the company form and the server redirects to `/companies/123`,
-the overlay is accepted. Named segments captured by the [URL pattern](/url-patterns) (`$id`) become
+the overlay is accepted. Named segments captured by the [URL pattern](/api/url-patterns) (`$id`) become
 the overlay's [acceptance value](#result-values), along with the matched `location`:
 here `{ id: 123, location: '/companies/123' }`.
 
@@ -130,7 +130,7 @@ To *dismiss* an overlay once a location is reached, use `[up-dismiss-location]` 
 
 ### Closing when an event is emitted {#event-condition data-toc-include}
 
-To close an overlay once an event is observed within it, set an [`[up-accept-event]`](/up-layer-new#up-accept-event) attribute:
+To close an overlay once an event is observed within it, set an [`[up-accept-event]`](/api/up-layer-new#up-accept-event) attribute:
 
 ```html
 <a href="/companies/new"
@@ -152,19 +152,19 @@ There are several ways to emit an event:
 | Method            | Description             |
 |-------------------|-------------------------|
 | `up.emit()`       | JavaScript function to emit an event on any element |
-| `up.layer.emit()` | JavaScript function to emit an event on the [current layer](/up.layer.current) |
+| `up.layer.emit()` | JavaScript function to emit an event on the [current layer](/api/up.layer.current) |
 | `[up-emit]`       | HTML attribute to emit an event on click |
 | `X-Up-Events`     | HTTP header sent from the server |
 | [`Element#dispatchEvent()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/dispatchEvent) | Standard DOM API to emit an event on an element |
 
-Since the closing event's default is prevented, an `[up-emit]` link with a [fallback URL](/up-emit#fallback)
-can close an overlay, but navigate to a different page when clicked on the [root layer](/up.layer.root).
+Since the closing event's default is prevented, an `[up-emit]` link with a [fallback URL](/api/up-emit#fallback)
+can close an overlay, but navigate to a different page when clicked on the [root layer](/api/up.layer.root).
 
 
 ### Closing when a fragment is detected {#fragment-condition data-toc-include}
 
 To close an overlay once an element matching a selector appears within it,
-set an [`[up-accept-fragment]`](/up-layer-new#up-accept-fragment) attribute:
+set an [`[up-accept-fragment]`](/api/up-layer-new#up-accept-fragment) attribute:
 
 ```html
 <a href="/companies/new"
@@ -176,7 +176,7 @@ set an [`[up-accept-fragment]`](/up-layer-new#up-accept-fragment) attribute:
 ```
 
 When an element in the overlay matches `.company-profile`, the overlay is accepted.
-The fragment's [data](/data) becomes the [acceptance value](#result-values):
+The fragment's [data](/learn/data) becomes the [acceptance value](#result-values):
 
 ```html
 <div class="company-profile" data-id="123"> <!-- mark: data-id="123" -->
@@ -193,7 +193,7 @@ Running code when an overlay closes {#callbacks}
 -----------------------------------
 
 When opening an overlay, you can pass separate `{ onAccepted }` and `{ onDismissed }` callbacks
-for [accepting and dismissing](/closing-overlays#intents):
+for [accepting and dismissing](/learn/closing-overlays#intents):
 
 ```js
 up.layer.open({
@@ -236,11 +236,11 @@ Where the value comes from depends on how the overlay was closed:
 |-------------------------------------------------------------------------------|---------------------------------------------------|
 | Reaching a [location](#location-condition) like `/companies/$id`              | The captured segments and the `location`, e.g. `{ id: 123, location: '/companies/123' }` |
 | An [event](#event-condition) like `company:created`                           | The event object                                  |
-| A [fragment](#fragment-condition) like `.company-profile`                     | The fragment's [data](/data)                      |
-| A button with [`[up-accept="{ id: 123 }"]`](/closing-overlays#on-click)       | The attribute's [relaxed JSON](/relaxed-json) value |
-| A form with [`[up-accept]`](/closing-overlays#on-submit)                      | The form's params as an `up.Params` object        |
-| A script calling [`up.layer.accept(value)`](/closing-overlays#from-script)    | The `value` argument                              |
-| An [`X-Up-Accept-Layer`](/closing-overlays#from-server) response header       | The header's [relaxed JSON](/relaxed-json) value  |
+| A [fragment](#fragment-condition) like `.company-profile`                     | The fragment's [data](/learn/data)                      |
+| A button with [`[up-accept="{ id: 123 }"]`](/learn/closing-overlays#on-click)       | The attribute's [relaxed JSON](/api/relaxed-json) value |
+| A form with [`[up-accept]`](/learn/closing-overlays#on-submit)                      | The form's params as an `up.Params` object        |
+| A script calling [`up.layer.accept(value)`](/learn/closing-overlays#from-script)    | The `value` argument                              |
+| An [`X-Up-Accept-Layer`](/learn/closing-overlays#from-server) response header       | The header's [relaxed JSON](/api/relaxed-json) value  |
 
 In an `[up-on-accepted]` attribute, the value is available as `value`:
 
@@ -264,7 +264,7 @@ up.layer.open({
 ```
 
 When the user cancels the subinteraction, the overlay is *dismissed* instead.
-Dismissal also carries a [dismissal value](/closing-overlays#dismissal-values), like `":key"` when the user pressed `Escape`.
+Dismissal also carries a [dismissal value](/learn/closing-overlays#dismissal-values), like `":key"` when the user pressed `Escape`.
 A subinteraction is usually interested in acceptance only.
 
 
@@ -309,7 +309,7 @@ Another common callback reloads the options of a `<select>` and selects the new 
 </a>
 ```
 
-This uses `up.validate()` to re-render the select's [form group](/up-form-group) from the server,
+This uses `up.validate()` to re-render the select's [form group](/api/up-form-group) from the server,
 as if the user had already picked the new company. The form is not saved by this.
 
 
@@ -335,18 +335,18 @@ It has no idea that it is sometimes opened from a project form, and it needs no 
 The link that opens the overlay carries the acceptance condition and the callback,
 so the same form works on its own, in an overlay, and in a new tab.
 
-This works because [layers are isolated](/overlays#layers-are-isolated): the form in the overlay
+This works because [layers are isolated](/learn/overlays#layers-are-isolated): the form in the overlay
 re-renders within that overlay, even when the project form behind it has elements with the same selectors.
 
 Some screens have an element that should close the overlay, but still make sense on a full page.
-A *Finish* link can [close the overlay when followed](/closing-overlays#on-follow), and navigate
+A *Finish* link can [close the overlay when followed](/learn/closing-overlays#on-follow), and navigate
 to its `[href]` when clicked on the root layer:
 
 ```html
 <a href="/companies" up-accept>Finish</a> <!-- mark: up-accept -->
 ```
 
-A form with an `[up-accept]` attribute closes the overlay [when submitted](/closing-overlays#on-submit),
+A form with an `[up-accept]` attribute closes the overlay [when submitted](/learn/closing-overlays#on-submit),
 and makes a regular submission when it is not in an overlay.
 
 To vary a reused screen slightly, like showing "Pick a company for project Foo" in the overlay only,
@@ -365,7 +365,7 @@ console.log('New company ID is', company.id)
 ```
 
 When the overlay is dismissed instead of accepted, the promise rejects with the
-[dismissal value](/closing-overlays#dismissal-values). You can `catch` it to handle a canceled subinteraction:
+[dismissal value](/learn/closing-overlays#dismissal-values). You can `catch` it to handle a canceled subinteraction:
 
 ```js
 try {

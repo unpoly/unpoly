@@ -1,13 +1,13 @@
 @partial up.render/history
 
 @param {boolean|string} [options.history]
-  Whether the browser URL, window title and meta tags will be [updated](/updating-history).
+  Whether the browser URL, window title and meta tags will be [updated](/learn/updating-history).
 
   If set to `true`, the history will always be updated.
 
   If set to `'auto'` history will be updated if the `{ target }` matches
   a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all
-  [main targets](/main).
+  [main targets](/api/main).
 
   If set to `false`, the history will remain unchanged.
 
@@ -16,7 +16,7 @@
 @param {boolean|string} [options.failHistory]
   Whether to update history when the server responds with an error code.
 
-  See [Rendering error responses differently](/error-responses#fail-options).
+  See [Rendering error responses differently](/learn/error-responses#fail-options).
 
 @param {boolean|string} [options.title]
   An explicit document title to set before rendering.
@@ -35,7 +35,7 @@
   This option is only used when [updating history](#options.history).
 
 @param {boolean|Array<Element>} [options.metaTags]
-  Whether to update [meta tags](/up-meta) in the `<head>`.
+  Whether to update [meta tags](/api/up-meta) in the `<head>`.
 
   By default Unpoly will extract meta tags from the response's `<head>`.
   To prevent meta tags from being updated, pass `{ metaTags: false }`.

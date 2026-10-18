@@ -31,13 +31,13 @@ From JavaScript, pass a `{ transition }` option to `up.render()` or any function
 up.render({ target: '#story', url: '/stories/2', transition: 'move-left' }) // mark: transition
 ```
 
-To use a transition for every [navigation](/navigation-defaults), set a default in `up.fragment.config.navigateOptions`:
+To use a transition for every [navigation](/learn/navigation-defaults), set a default in `up.fragment.config.navigateOptions`:
 
 ```js
 up.fragment.config.navigateOptions.transition = 'cross-fade'
 ```
 
-When a [cached](/caching#revalidation) page is revalidated, the fresh content replaces it without a second transition.
+When a [cached](/learn/caching#revalidation) page is revalidated, the fresh content replaces it without a second transition.
 Pages restored by the *Back* button are not animated.
 
 To change a transition's duration or easing, or to run code after it has ended, see [[controlling-motion]].
@@ -62,7 +62,7 @@ and a single link should update instantly. Setting `[up-transition=false]` has t
 ### Combining two animations into a transition {#combining-animations}
 
 A transition is two animations playing at once:
-one on the old element, one on the new. To combine any two [animation names](/animations#available-animations) into a transition,
+one on the old element, one on the new. To combine any two [animation names](/learn/animations#available-animations) into a transition,
 join them with a slash. The first animation plays on the old element, the second on the new:
 
 ```html
@@ -76,7 +76,7 @@ is `move-to-left/move-from-right`.
 ### Transitions for error responses {#fail-transition}
 
 An error response does not use `[up-transition]`. When the server responds with an error code, Unpoly renders
-the response with [different options](/error-responses#fail-options), and the form with validation errors
+the response with [different options](/learn/error-responses#fail-options), and the form with validation errors
 appears instantly. To animate that case, set an `[up-fail-transition]` attribute:
 
 ```html
@@ -102,7 +102,7 @@ During a transition both elements occupy the same spot on the screen:
 The new element takes the old one's place in the document flow, so elements after the fragment
 only shift when the new version has a different size.
 
-While the transition plays, the old element is still in the DOM with an [`.up-destroying`](/up-destroying) class.
+While the transition plays, the old element is still in the DOM with an [`.up-destroying`](/api/up-destroying) class.
 Unpoly functions like `up.fragment.get()` ignore it, but `document.querySelector()` may still find it.
 
 A transition cannot replace the `<body>` element, which Unpoly never animates.

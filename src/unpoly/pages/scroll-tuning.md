@@ -1,7 +1,7 @@
 Tuning the scroll behavior
 ==========================
 
-When Unpoly [scrolls an element into view](/scrolling#target), you can tune the motion:
+When Unpoly [scrolls an element into view](/learn/scrolling#target), you can tune the motion:
 declare fixed layout elements that obstruct the viewport, animate the scroll, add padding,
 snap to the screen edge or limit how far a large element is revealed.
 
@@ -12,7 +12,7 @@ as an HTML attribute (like `[up-reveal-snap]`) and as a global default in `up.vi
 ## Fixed layout elements obstructing the viewport {#fixed-layout-elements-obstructing-the-viewport}
 
 Fixed layout elements (like navigation bars) may obstruct the view on
-an element that is being [revealed](/up.reveal). Unpoly would scroll until the element
+an element that is being [revealed](/api/up.reveal). Unpoly would scroll until the element
 is at the top of the viewport, where it ends up hidden behind the bar.
 
 To make Unpoly aware of a fixed element, give it an `[up-fixed="top"]`
@@ -53,7 +53,7 @@ When `{ scrollBehavior: 'auto' }` is passed, the behavior is determined by the C
 
 ## Revealing with padding {#revealing-with-padding}
 
-To leave space between a [revealed](/up.reveal) element and the closest viewport edge,
+To leave space between a [revealed](/api/up.reveal) element and the closest viewport edge,
 set an `[up-reveal-padding]` attribute with a pixel value:
 
 ```html
@@ -68,7 +68,7 @@ You can change this default in `up.viewport.config.revealPadding`.
 
 ## Snapping to the screen edge {#snapping-to-the-screen-edge}
 
-When [revealing](/up.reveal) an element near the top of a viewport's scroll buffer,
+When [revealing](/api/up.reveal) an element near the top of a viewport's scroll buffer,
 you often want to scroll to the very top for aesthetic reasons. For example, if you reveal a navigation
 bar that sits 50px below the top logo, you probably want to scroll to zero (instead of 50) pixels.
 
@@ -83,7 +83,7 @@ To disable snapping, use `{ revealSnap: 0 }`.
 
 ## Revealing large elements {#revealing-large-elements}
 
-When [revealing](/up.reveal) an element, the viewport scrolls
+When [revealing](/api/up.reveal) an element, the viewport scrolls
 as far as necessary to make the element visible.
 
 For an element taller than the viewport, this would move the top edge of the element
@@ -103,7 +103,7 @@ To always reveal as much of the element as the viewport allows, pass `{ revealMa
 
 ## Moving revealed elements to the top {#moving-revealed-elements-to-the-top}
 
-When [revealing](/up.reveal) an element, the viewport only scrolls
+When [revealing](/api/up.reveal) an element, the viewport only scrolls
 *as little as possible* to make the element visible. For instance, if the element is
 already fully visible, the scroll position does not change.
 

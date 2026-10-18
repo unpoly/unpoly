@@ -17,10 +17,10 @@ To let Unpoly handle a link, set an `[up-follow]` attribute:
 
 When the user clicks, Unpoly fetches `/preferences`.
 The server renders a full HTML page, the same way it would for a regular page load.
-Unpoly then extracts the response's [main fragment](/main) and swaps it into the current page,
+Unpoly then extracts the response's [main fragment](/api/main) and swaps it into the current page,
 leaving everything around it untouched.
 
-To update a different fragment, add an [`[up-target]`](/up-follow#up-target) attribute with a CSS selector:
+To update a different fragment, add an [`[up-target]`](/api/up-follow#up-target) attribute with a CSS selector:
 
 ```html
 <nav>
@@ -63,7 +63,7 @@ A link can request its destination before the user clicks, making the interactio
 <a href="/stories/5" up-preload>Full story</a> <!-- mark: up-preload -->
 ```
 
-Hovering over the link already loads the response into the [cache](/caching).
+Hovering over the link already loads the response into the [cache](/learn/caching).
 
 [[more: preloading]]
 

@@ -29,12 +29,12 @@ up.event = (function() {
 
   - You may pass a selector for [event delegation](https://davidwalsh.name/event-delegate).
   - The [event target](https://developer.mozilla.org/en-US/docs/Web/API/Event/target) is automatically passed as a second argument.
-  - Your event listener will not be called when Unpoly has not [booted](/up.boot) in an unsupported browser
+  - Your event listener will not be called when Unpoly has not [booted](/api/up.boot) in an unsupported browser
   - You may register a listener to multiple events by passing a space-separated list of event names (e.g. `"click mousedown"`)
-  - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/List) of elements.
-  - Any [data attached to the observed element](/data) will be passed as a third argument to your handler function.
+  - You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/api/List) of elements.
+  - Any [data attached to the observed element](/learn/data) will be passed as a third argument to your handler function.
 
-  You can prevent the event from being processed further with [up.event.halt(event)](/up.event.halt).
+  You can prevent the event from being processed further with [up.event.halt(event)](/api/up.event.halt).
 
   ### Basic example
 
@@ -73,7 +73,7 @@ up.event = (function() {
 
   ### Attaching data
 
-  Any [data attached to the observed element](/data) will be passed to your event handler.
+  Any [data attached to the observed element](/learn/data) will be passed to your event handler.
 
   For instance, this element has attached data in its `[up-data]` attribute:
 
@@ -104,7 +104,7 @@ up.event = (function() {
   unbind()
   ```
 
-  There is also a function [`up.off()`](/up.off) which you can use for the same purpose:
+  There is also a function [`up.off()`](/api/up.off) which you can use for the same purpose:
 
   ```js
   // Define the listener
@@ -119,7 +119,7 @@ up.event = (function() {
 
   ### Binding to multiple elements
 
-  You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/List) of elements:
+  You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/api/List) of elements:
 
   ```js
   let allForms = document.querySelectorAll('form')
@@ -235,7 +235,7 @@ up.event = (function() {
 
   You can listen to events of that type using
   [`addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
-  or [`up.on()`](/up.on).
+  or [`up.on()`](/api/up.on).
 
   ### Example
 
@@ -264,10 +264,10 @@ up.event = (function() {
 
   @section Options
     @param {up.Layer|string|number} [props.layer]
-      The [layer](/up.layer) on which to emit this event.
+      The [layer](/api/up.layer) on which to emit this event.
 
-      If this property is set, the event will be emitted on the [layer's outmost element](/up.Layer.prototype.element).
-      Also [up.layer.current](/up.layer.current) will be set to the given layer while event listeners
+      If this property is set, the event will be emitted on the [layer's outmost element](/api/up.Layer.prototype.element).
+      Also [up.layer.current](/api/up.layer.current) will be set to the given layer while event listeners
       are running.
 
     @param {Element|jQuery} [props.target=document]
@@ -276,7 +276,7 @@ up.event = (function() {
       Alternatively the target element may be passed as the first argument.
 
     @param {string|Array} [props.log]
-      A message to print to the [log](/up.log) when the event is emitted.
+      A message to print to the [log](/api/up.log) when the event is emitted.
 
       Pass `false` to not log this event emission.
 
@@ -294,7 +294,7 @@ up.event = (function() {
   /*-
   Builds an event with the given type and properties.
 
-  The returned event is not [emitted](/up.emit).
+  The returned event is not [emitted](/api/up.emit).
 
   ## Example
 
@@ -332,7 +332,7 @@ up.event = (function() {
   }
 
   /*-
-  [Emits](/up.emit) the given event and throws an `up.Aborted` error if it was prevented.
+  [Emits](/api/up.emit) the given event and throws an `up.Aborted` error if it was prevented.
 
   @function up.event.assertEmitted
   @param {string} eventType
@@ -468,7 +468,7 @@ up.event = (function() {
 
   By default `[up-emit]` will emit an event with only basic properties like [`{ target }`](https://developer.mozilla.org/en-US/docs/Web/API/Event/target).
 
-  To set custom properties on the event object, encode them as [relaxed JSON](/relaxed-json) in an `[up-emit-props]` attribute:
+  To set custom properties on the event object, encode them as [relaxed JSON](/api/relaxed-json) in an `[up-emit-props]` attribute:
 
   ```html
   <button type="button"
@@ -502,19 +502,19 @@ up.event = (function() {
   })
   ```
 
-  If no listener prevents the `menu:open` event, the browser will [navigate](/up-follow)
+  If no listener prevents the `menu:open` event, the browser will [navigate](/api/up-follow)
   to the `/menu` path.
 
   > [tip]
-  > When an [event closes an overlay](/subinteractions#event-condition) via `[up-accept-event]` or `[up-dismiss-event]`, its default is prevented.
-  > You can use fallback URLs to make a link that emits a closing event in an overlay, but navigates to a different page on the [root layer](/up.layer.root).
+  > When an [event closes an overlay](/learn/subinteractions#event-condition) via `[up-accept-event]` or `[up-dismiss-event]`, its default is prevented.
+  > You can use fallback URLs to make a link that emits a closing event in an overlay, but navigates to a different page on the [root layer](/api/up.layer.root).
 
 
   @selector [up-emit]
   @param up-emit
     The [type](https://developer.mozilla.org/en-US/docs/Web/API/Event/type) of the event to be emitted, e.g. `my:event`.
   @param [up-emit-props='{}']
-    The event properties, serialized as [relaxed JSON](/relaxed-json).
+    The event properties, serialized as [relaxed JSON](/api/relaxed-json).
   @stable
   */
   function executeEmitAttr(event, element) {

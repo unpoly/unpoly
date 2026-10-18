@@ -7,12 +7,12 @@ We can validate while the user is typing by setting an `[up-watch-event="input"]
 <input name="email" up-validate up-watch-event="input" up-watch-delay="100" up-keep>
 ```
 
-Note that we set some additional [watch options](/watch-options) to improve the experience:
+Note that we set some additional [watch options](/learn/watch-options) to improve the experience:
 
-- The [`[up-watch-delay]`](/watch-options#debouncing)
+- The [`[up-watch-delay]`](/learn/watch-options#debouncing)
   attribute delays validation until the user has stopped typing for 100 milliseconds.
 - The `[up-keep]` attribute keeps additional user input while the validation request is in flight.
 
-If you're using this pattern a lot, you may want to configure a [macro](/up.macro) for it.
+If you're using this pattern a lot, you may want to configure a [macro](/api/up.macro) for it.
 
 @partial validating-while-typing

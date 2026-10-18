@@ -16,7 +16,7 @@ Take any link in your app and add an `[up-follow]` attribute:
 
 Click it. Unpoly fetches `/preferences` without leaving the page, and your server
 responds with a full HTML page, the same way it would for a regular page load.
-Unpoly extracts the response's [main fragment](/main) and **swaps it into the
+Unpoly extracts the response's [main fragment](/api/main) and **swaps it into the
 current page**. The URL and history are updated, and the Back button keeps working.
 
 Your backend saw a normal request and rendered a normal page.

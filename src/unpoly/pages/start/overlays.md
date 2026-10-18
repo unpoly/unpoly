@@ -16,7 +16,7 @@ Add an `[up-layer=new]` attribute to a link:
 ```
 
 When clicked, Unpoly fetches `/users/new`, extracts the response's
-[main fragment](/main) and shows it in a modal overlay. The page behind
+[main fragment](/api/main) and shows it in a modal overlay. The page behind
 the overlay **keeps its state**, including unsaved form fields and scroll positions.
 
 The user can dismiss the overlay by pressing `Escape`, by clicking the

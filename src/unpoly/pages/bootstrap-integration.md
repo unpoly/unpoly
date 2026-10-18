@@ -20,7 +20,7 @@ Builds for Bootstrap 3, 4 and 5 are available from a CDN:
 | [`unpoly-bootstrap5.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.js) | [`unpoly-bootstrap5.min.js`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.min.js) ([[=size unpoly-bootstrap5.min.js]] gzipped) |
 | [`unpoly-bootstrap5.css`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.css) | [`unpoly-bootstrap5.min.css`](https://cdn.jsdelivr.net/npm/unpoly@[[=version]]/unpoly-bootstrap5.min.css) ([[=size unpoly-bootstrap5.min.css]] gzipped) |
 
-The same files ship with Unpoly's [npm package](/install#npm):
+The same files ship with Unpoly's [npm package](/learn/install#npm):
 
 ```js
 import 'unpoly/unpoly.js'
@@ -34,22 +34,22 @@ import 'unpoly/unpoly-bootstrap5.css' // mark-line
 
 The JavaScript file adjusts Unpoly's configuration to Bootstrap's conventions:
 
-- [Navigation feedback](/navigation-bars) uses Bootstrap's `active` class to mark
+- [Navigation feedback](/learn/navigation-bars) uses Bootstrap's `active` class to mark
   current links and running interactions, and `.nav` and `.navbar` elements count
   as navigational containers. See `up.status.config`.
 - Fixed navbars are registered as fixed layout elements, so Unpoly can account for
   them when scrolling and positioning overlays. See `up.viewport.config`.
 - Bootstrap's grid and spacing utility classes, like `.row` and `.col-*`, are ignored
-  when Unpoly [derives a target selector](/target-derivation) from an element.
+  when Unpoly [derives a target selector](/learn/target-derivation) from an element.
   See `up.fragment.config.badTargetClasses`.
 - Overlays that Bootstrap renders itself, like its modals, popovers and dropdown menus,
   are registered as foreign overlays that Unpoly will not close or adopt.
   See `up.layer.config.foreignOverlaySelectors`.
-- With Bootstrap 3 and 4, `.form-group` elements are used as [form groups](/up-form-group)
-  when [validating forms](/validation). Bootstrap 5 has no form group class,
+- With Bootstrap 3 and 4, `.form-group` elements are used as [form groups](/api/up-form-group)
+  when [validating forms](/learn/validation). Bootstrap 5 has no form group class,
   so configure `up.form.config.groupSelectors` to match your own markup.
 
 The stylesheet lets `.container` and `.container-fluid` elements fill Unpoly
-[overlays](/up.layer) without Bootstrap's page padding.
+[overlays](/api/up.layer) without Bootstrap's page padding.
 
 @page bootstrap-integration

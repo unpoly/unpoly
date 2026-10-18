@@ -36,9 +36,9 @@ up.protocol = (function() {
   This request header contains the current Unpoly version to mark this request as a fragment update.
 
   Server-side code may check for the presence of an `X-Up-Version` header to
-  distinguish [fragment updates](/up.link) from full page loads.
+  distinguish [fragment updates](/api/up.link) from full page loads.
 
-  The `X-Up-Version` header is guaranteed to be set for all [requests made through Unpoly](/up.request).
+  The `X-Up-Version` header is guaranteed to be set for all [requests made through Unpoly](/api/up.request).
 
   ### Example
 
@@ -67,14 +67,14 @@ up.protocol = (function() {
 
   /*-
   The `X-Up-Target` request and response headers allow the server to [read](#request) or [change](#response)
-  the [target selector](/targeting-fragments) for a fragment update.
+  the [target selector](/learn/targeting-fragments) for a fragment update.
 
-  Server-side code is free to [optimize its response](/optimizing-responses) by only rendering HTML
+  Server-side code is free to [optimize its response](/learn/optimizing-responses) by only rendering HTML
   that matches the selector. For example, you might prefer to not render an
   expensive sidebar if the sidebar is not targeted.
 
   > [note]
-  > Unpoly will often [update a different selector for an error response](/error-responses#fail-options).
+  > Unpoly will often [update a different selector for an error response](/learn/error-responses#fail-options).
   > The target selector for error responses is sent as a separate request header (`X-Up-Fail-Target`).
 
 
@@ -97,7 +97,7 @@ up.protocol = (function() {
 
   ### Merging of request targets {#merging}
 
-  When two [caching](/caching) requests are sent to the same URL within the same [microtask](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide),
+  When two [caching](/learn/caching) requests are sent to the same URL within the same [microtask](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide),
   only a single request is sent. The request will contain both targets in its `X-Up-Target` header.
 
   For example, these two render passes render different selectors from `/path`:
@@ -147,7 +147,7 @@ up.protocol = (function() {
 
   The server may send an `X-Up-Target: :none` response header with an empty body to skip the current render pass.
 
-  Also see [rendering nothing](/conditional-requests#rendering-nothing).
+  Also see [rendering nothing](/learn/conditional-requests#rendering-nothing).
 
   @header X-Up-Target
   @stable
@@ -155,11 +155,11 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the [target selector](/targeting-fragments) that Unpoly updates when the server sends an [error response](/error-responses).
+  This request header contains the [target selector](/learn/targeting-fragments) that Unpoly updates when the server sends an [error response](/learn/error-responses).
 
   An error response has a status code other than 2xx, but still contains HTML.
 
-  Server-side code is free to [optimize its response](/optimizing-responses) to an error response by only rendering HTML
+  Server-side code is free to [optimize its response](/learn/optimizing-responses) to an error response by only rendering HTML
   that matches the provided selector. For example, you might prefer to not render an
   expensive sidebar if the sidebar is not targeted.
 
@@ -172,7 +172,7 @@ up.protocol = (function() {
 
   ### Signaling failed form submissions
 
-  When [submitting a form](/submitting-forms),
+  When [submitting a form](/learn/submitting-forms),
   Unpoly needs to know whether the form submission has failed (to update the form with
   validation errors) or succeeded (to update the `[up-target]` selector).
 
@@ -205,14 +205,14 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the targeted layer's [mode](/up.layer.mode).
+  This request header contains the targeted layer's [mode](/api/up.layer.mode).
 
   Server-side code is free to render different HTML for different modes.
   For example, you might prefer to not render a site navigation for overlays.
 
   ### Example
 
-  The user updates a fragment `main` within a [drawer overlay](/overlays#layer-modes).
+  The user updates a fragment `main` within a [drawer overlay](/learn/overlays#layer-modes).
   Unpoly automatically includes the following request headers:
 
   ```http
@@ -236,8 +236,8 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the [mode](/up.layer.mode) of the layer
-  that Unpoly updates when the server sends an [error response](/error-responses).
+  This request header contains the [mode](/api/up.layer.mode) of the layer
+  that Unpoly updates when the server sends an [error response](/learn/error-responses).
 
   An error response has a status code other than 2xx, but still contains HTML.
 
@@ -256,7 +256,7 @@ up.protocol = (function() {
   </form>
   ```
 
-  Because [failed form submissions update the `<form>` element](/validation#changing-how-validation-errors-are-rendered),
+  Because [failed form submissions update the `<form>` element](/learn/validation#changing-how-validation-errors-are-rendered),
   submitting this form will send the following headers:
 
   ```http
@@ -269,8 +269,8 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the [mode](/up.layer.mode) of the layer
-  from which the interaction [originated](/origin).
+  This request header contains the [mode](/api/up.layer.mode) of the layer
+  from which the interaction [originated](/api/origin).
 
   Links or forms may target another layer than their own.
   The targeted layer is sent as an `X-Up-Mode` header.
@@ -311,7 +311,7 @@ up.protocol = (function() {
   or a hash of the data's last modification time.
 
   ETags can be used to prevent unnecessary re-rendering of unchanged content.
-  See [Conditional requests](/conditional-requests) for details and examples.
+  See [Conditional requests](/learn/conditional-requests) for details and examples.
 
   ### Format
 
@@ -336,7 +336,7 @@ up.protocol = (function() {
   This request header contains the ETag of a fragment that is being reloaded.
 
   The server can use the header value to prevent unnecessary re-rendering of unchanged content.
-  See [Conditional requests](/conditional-requests) for details and examples.
+  See [Conditional requests](/learn/conditional-requests) for details and examples.
 
   The header is only set when Unpoly knows the ETag of the loading fragment.
   For this the fragment must have been rendered with an `ETag` response header or `[up-etag]` attribute.
@@ -357,7 +357,7 @@ up.protocol = (function() {
   This response header contains the time when the content in the response body was last modified.
 
   Last modification times can be used to prevent unnecessary re-rendering of unchanged content.
-  See [Conditional requests](/conditional-requests) for details and examples.
+  See [Conditional requests](/learn/conditional-requests) for details and examples.
 
   ### Format
 
@@ -381,7 +381,7 @@ up.protocol = (function() {
   This request header contains the last modification time of a fragment that is being reloaded.
 
   The server can use the header value to prevent unnecessary re-rendering of unchanged content.
-  See [Conditional requests](/conditional-requests) for details and examples.
+  See [Conditional requests](/learn/conditional-requests) for details and examples.
 
   The header is only set when Unpoly knows the last modification time of the loading fragment.
   For this the fragment must have been rendered with an `Last-Modified` response header or `[up-time]` attribute.
@@ -411,10 +411,10 @@ up.protocol = (function() {
   }
 
   /*-
-  The server may send this optional response header to control which previously [cached](/caching)
-  responses should be [evicted](/caching#eviction) when this response is received.
+  The server may send this optional response header to control which previously [cached](/learn/caching)
+  responses should be [evicted](/learn/caching#eviction) when this response is received.
 
-  The value of this header is a [URL pattern](/url-patterns) matching responses that should be evicted.
+  The value of this header is a [URL pattern](/api/url-patterns) matching responses that should be evicted.
 
   For example, to evict all responses to URLs starting with `/notes/`:
 
@@ -444,10 +444,10 @@ up.protocol = (function() {
   }
 
   /*-
-  The server may send this optional response header to control which previously [cached](/caching)
-  responses should be [expired](/caching#expiration) when this response is received.
+  The server may send this optional response header to control which previously [cached](/learn/caching)
+  responses should be [expired](/learn/caching#expiration) when this response is received.
 
-  The value of this header is a [URL pattern](/url-patterns) matching responses that should be expired.
+  The value of this header is a [URL pattern](/api/url-patterns) matching responses that should be expired.
 
   For example, to expire all responses to URLs starting with `/notes/`:
 
@@ -469,12 +469,12 @@ up.protocol = (function() {
 
   ### Relation to the client-side default
 
-  When Unpoly sends a non-GET request, it [expires the entire cache](/up.network.config#config.expireCache)
+  When Unpoly sends a non-GET request, it [expires the entire cache](/api/up.network.config#config.expireCache)
   before the server responds. This header can only expire *additional* entries.
   It cannot undo an expiration that has already happened.
 
   To keep the cache fresh after a non-GET request, configure the client instead.
-  For example, set an [`[up-expire-cache="false"]`](/up-follow#up-expire-cache) attribute
+  For example, set an [`[up-expire-cache="false"]`](/api/up-follow#up-expire-cache) attribute
   on the link or form, or customize `up.network.config.expireCache`.
 
   @header X-Up-Expire-Cache
@@ -486,7 +486,7 @@ up.protocol = (function() {
   }
 
   /*-
-  This request header contains the targeted layer's [context](/layer-context), serialized as JSON.
+  This request header contains the targeted layer's [context](/learn/layer-context), serialized as JSON.
 
   ### Example
 
@@ -548,8 +548,8 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the [context](/layer-context) of the layer
-  that Unpoly updates when the server sends an [error response](/error-responses), serialized as JSON.
+  This request header contains the [context](/learn/layer-context) of the layer
+  that Unpoly updates when the server sends an [error response](/learn/error-responses), serialized as JSON.
 
   An error response has a status code other than 2xx, but still contains HTML.
 
@@ -576,7 +576,7 @@ up.protocol = (function() {
   /*-
   The server may set this optional response header to change the HTTP method after a fragment update.
 
-  Without this header Unpoly will use the [requested method](/up.Request.prototype.method).
+  Without this header Unpoly will use the [requested method](/api/up.Request.prototype.method).
 
   ### Signaling the HTTP method after a redirect
 
@@ -612,11 +612,11 @@ up.protocol = (function() {
   /*-
   The server may set this optional response header to change the document title after a fragment update.
 
-  The title must be encoded as a [relaxed JSON](/relaxed-json) string.
+  The title must be encoded as a [relaxed JSON](/api/relaxed-json) string.
 
   Without this header Unpoly will extract the `<title>` from the server response.
 
-  This header is useful when you [optimize your response](/optimizing-responses) to not render
+  This header is useful when you [optimize your response](/learn/optimizing-responses) to not render
   the application layout unless targeted. When your shortened response
   no longer includes a `<title>`, you can instead use this HTTP header to pass the document title.
 
@@ -635,9 +635,9 @@ up.protocol = (function() {
   */
 
   /*-
-  This request header contains the names of the [form fields being validated](/up-validate).
+  This request header contains the names of the [form fields being validated](/api/up-validate).
 
-  When seeing this header, the server is [expected](/up-validate#backend-protocol)
+  When seeing this header, the server is [expected](/api/up-validate#backend-protocol)
   to validate (but not save) the form submission and render a new form state with validation errors.
   See the documentation for `[up-validate]` for more information
   on how server-side validation works in Unpoly.
@@ -675,7 +675,7 @@ up.protocol = (function() {
 
   ### Batched validations
 
-  If multiple validations are [batched](/up.validate#batching) into a single request,
+  If multiple validations are [batched](/api/up.validate#batching) into a single request,
   `X-Up-Validate` contains a space-separated list of all validating field names:
 
   ```http
@@ -710,10 +710,10 @@ up.protocol = (function() {
   }
 
   /*-
-  The server may set this response header to [emit events](/up.emit) with the
-  requested [fragment update](/up-follow).
+  The server may set this response header to [emit events](/api/up.emit) with the
+  requested [fragment update](/api/up-follow).
 
-  The header value is a [relaxed JSON](/relaxed-json) array.
+  The header value is a [relaxed JSON](/api/relaxed-json) array.
   Each element in the array is an object representing an event to be emitted
   on the `document`.
 
@@ -736,7 +736,7 @@ up.protocol = (function() {
   ### Emitting an event on a layer
 
   Instead of emitting an event on the `document`, the server may also choose to
-  [emit the event on the layer being updated](/up.layer.emit). To do so, add a property
+  [emit the event on the layer being updated](/api/up.layer.emit). To do so, add a property
   `{ layer: 'current' }` to the JSON object of an event:
 
   ```http
@@ -759,11 +759,11 @@ up.protocol = (function() {
   }
 
   /*-
-  The server can send this response header to force its response to [open a new overlay](/opening-overlays).
+  The server can send this response header to force its response to [open a new overlay](/learn/opening-overlays).
 
   ## Basic example
 
-  The following will select the [main](/main) element from the HTML payload
+  The following will select the [main](/api/main) element from the HTML payload
   and open it with a basic `modal` overlay:
 
   ```http
@@ -779,10 +779,10 @@ up.protocol = (function() {
 
   ## Custom layer options {#options}
 
-  When `X-Up-Open-Layer` is used without options, the new overlay will have the [default mode](/up.layer.config#config.mode) (`modal`), select a [main target](/main)
-  and use [default navigation options](/up.fragment.config#config.navigateOptions).
+  When `X-Up-Open-Layer` is used without options, the new overlay will have the [default mode](/api/up.layer.config#config.mode) (`modal`), select a [main target](/api/main)
+  and use [default navigation options](/api/up.fragment.config#config.navigateOptions).
 
-  You can customize the target and appearance of the new overlay, by setting the header value to a [relaxed JSON](/relaxed-json) string
+  You can customize the target and appearance of the new overlay, by setting the header value to a [relaxed JSON](/api/relaxed-json) string
   with render options:
 
   ```http
@@ -805,7 +805,7 @@ up.protocol = (function() {
   X-Up-Open-Layer: { onAccepted: 'up.reload("#users-list")' }
   ```
 
-  With a strict CSP you can [prefix your callback with a nonce](/script-security#callback-nonces):
+  With a strict CSP you can [prefix your callback with a nonce](/learn/script-security#callback-nonces):
 
   ```http
   Content-Type: text/html
@@ -824,12 +824,12 @@ up.protocol = (function() {
   }
 
   /*-
-  The server may set this response header to [accept](/up.layer.accept) the targeted overlay
+  The server may set this response header to [accept](/api/up.layer.accept) the targeted overlay
   in response to a fragment update.
 
   Upon seeing the header, Unpoly will cancel the fragment update and accept the layer instead.
 
-  The header value is the acceptance value serialized as a [relaxed JSON](/relaxed-json) value.
+  The header value is the acceptance value serialized as a [relaxed JSON](/api/relaxed-json) value.
   To accept an overlay without value, set the header value to the string `null`.
 
   @include unicode-header-values
@@ -874,12 +874,12 @@ up.protocol = (function() {
   }
 
   /*-
-  The server may set this response header to [dismiss](/up.layer.dismiss) the targeted overlay
+  The server may set this response header to [dismiss](/api/up.layer.dismiss) the targeted overlay
   in response to a fragment update.
 
   Upon seeing the header, Unpoly will cancel the fragment update and dismiss the layer instead.
 
-  The header value is the dismissal value serialized as a [relaxed JSON](/relaxed-json) value.
+  The header value is the dismissal value serialized as a [relaxed JSON](/api/relaxed-json) value.
   To dismiss an overlay without value, set the header value to the string `null`.
 
   @include unicode-header-values
@@ -940,7 +940,7 @@ up.protocol = (function() {
   ```
 
   The **simplest implementation** is to set this cookie for every request that is neither
-  `GET` nor an [Unpoly request](/X-Up-Version). For all other requests
+  `GET` nor an [Unpoly request](/api/X-Up-Version). For all other requests
   an existing `_up_method` cookie should be deleted.
 
   When Unpoly boots it will look for this cookie and configure itself accordingly.
@@ -986,7 +986,7 @@ up.protocol = (function() {
   The server may set this response header to set a custom browser location after a fragment update.
 
   Without an `X-Up-Location` header Unpoly will set the browser location to the
-  [requested URL](/up.Request.prototype.url). After a redirect the URL of the last request is used.
+  [requested URL](/api/up.Request.prototype.url). After a redirect the URL of the last request is used.
   You only need to set `X-Up-Location` when you want to explicitly set a different URL.
 
   When setting `X-Up-Location` it is recommended to also set `X-Up-Method`.
@@ -1005,7 +1005,7 @@ up.protocol = (function() {
   /*-
   Request headers that influenced a response should be listed in a `Vary` response header.
 
-  This tells Unpoly to [partition its cache](/optimizing-responses#vary) for that URL so that each
+  This tells Unpoly to [partition its cache](/learn/optimizing-responses#vary) for that URL so that each
   request header value gets a separate cache entry.
 
   You can set a `Vary` header manually from your server-side code. You may also be using
@@ -1013,15 +1013,15 @@ up.protocol = (function() {
 
 
   > [tip]
-  > Server-side Unpoly apps may inspect [request headers](/up.protocol) to [customize or shorten responses](/optimizing-responses),
-  > e.g. by omitting content that isn't [targeted](/targeting-fragments).
+  > Server-side Unpoly apps may inspect [request headers](/api/up.protocol) to [customize or shorten responses](/learn/optimizing-responses),
+  > e.g. by omitting content that isn't [targeted](/learn/targeting-fragments).
   > When a response is optimized in that fashion, a `Vary` header should be sent.
 
   ### Example
 
   @include vary-header-example
 
-  See [How cache entries are matched](/optimizing-responses#cache-matching) for more examples.
+  See [How cache entries are matched](/learn/optimizing-responses#cache-matching) for more examples.
 
   ### Resources
 
@@ -1034,7 +1034,7 @@ up.protocol = (function() {
   */
 
   /*-
-  Configures strings used in the optional [server protocol](/up.protocol).
+  Configures strings used in the optional [server protocol](/api/up.protocol).
 
   @property up.protocol.config
 
@@ -1048,7 +1048,7 @@ up.protocol = (function() {
       The `name` of the hidden `<input>` used for sending a
       [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) when
       the browser submits a form without Unpoly. For requests made by Unpoly the token is sent as an
-      [HTTP header](/up.protocol.config#config.csrfHeader) instead.
+      [HTTP header](/api/up.protocol.config#config.csrfHeader) instead.
 
       The parameter name can be configured as a string or as function that returns the parameter name.
       If no name is set, no token will be sent.
@@ -1076,9 +1076,9 @@ up.protocol = (function() {
   @section Method wrapping
     @param {string} [config.methodParam='_method']
       The name of request parameter containing the original request method when Unpoly needs to
-      [wrap](/up.network.config#config.wrapMethod) the method.
+      [wrap](/api/up.network.config#config.wrapMethod) the method.
 
-      Methods must be wrapped when making a [full page request](/up.network.loadPage) with a methods other
+      Methods must be wrapped when making a [full page request](/api/up.network.loadPage) with a methods other
       than GET or POST. In this case Unpoly will make a POST request with the original request method
       in a form parameter named `_method`:
 

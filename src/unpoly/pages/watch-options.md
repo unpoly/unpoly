@@ -23,7 +23,7 @@ Which events to watch {#events}
 ---------------------
 
 Most features watch the `input` event by default, so they react while the user is typing.
-Only [validation](/up-validate) watches the `change` event by default, which fires when
+Only [validation](/api/up-validate) watches the `change` event by default, which fires when
 the user is done editing and leaves the field.
 
 You can control which events are observed by setting an `[up-watch-event]` attribute:
@@ -97,7 +97,7 @@ From JavaScript you can pass a `{ delay }` option instead.
 For watchers of `input` the default delay is `up.form.config.watchInputDelay` (which defaults to `0`).
 For watchers of other events there is no default delay.
 
-If the field's form is [aborted](/aborting-requests) or destroyed while waiting for a delay,
+If the field's form is [aborted](/learn/aborting-requests) or destroyed while waiting for a delay,
 the callback is unscheduled.
 
 > [info]
@@ -109,7 +109,7 @@ the callback is unscheduled.
 Disabling fields while working {#disabling}
 ------------------------------
 
-To prevent user input while processing changes, you can [disable form fields](/disabling-forms)
+To prevent user input while processing changes, you can [disable form fields](/learn/disabling-forms)
 while an async callback is running.
 
 For this set an `[up-watch-disable]` attribute on the form or field being watched:
@@ -121,14 +121,14 @@ For this set an `[up-watch-disable]` attribute on the form or field being watche
 ```
 
 By default, setting `[up-watch-disable]` will cause all fields in the form to be disabled while processing.
-To [only disable some form controls](/disabling-forms#disabling-some-controls-only),
+To [only disable some form controls](/learn/disabling-forms#disabling-some-controls-only),
 set the value of `[up-watch-disable]` to any selector that matches fields or buttons.
 
 From JavaScript you can pass a `{ disable }` option instead.
 
 When a callback for `[up-watch]` or `up.watch()` renders, it must pass these options on.
 Its third argument holds the options parsed from the field's `[up-watch-...]` attributes.
-Forward them to the function that renders (see [callback arguments](/up.watch#callback-arguments)):
+Forward them to the function that renders (see [callback arguments](/api/up.watch#callback-arguments)):
 
 ```js
 up.watch('input.query', function(value, name, options) { // mark: options
@@ -137,16 +137,16 @@ up.watch('input.query', function(value, name, options) { // mark: options
 ```
 
 > [tip]
-> To disable fields while *submitting* (instead of while watching), use [`[up-disable]`](/disabling-forms) instead.
+> To disable fields while *submitting* (instead of while watching), use [`[up-disable]`](/learn/disabling-forms) instead.
 
 
 Showing loading state while working {#loading-state}
 -----------------------------------
 
-To signal to users that you're processing changes, you can show arbitrary [loading state](/loading-state)
+To signal to users that you're processing changes, you can show arbitrary [loading state](/learn/loading-state)
 while an async callback is running.
 
-To apply a [preview](/previews), set an `[up-watch-preview]` attribute on the form or field being watched:
+To apply a [preview](/learn/previews), set an `[up-watch-preview]` attribute on the form or field being watched:
 
 ```html
 <form action="/search">
@@ -154,7 +154,7 @@ To apply a [preview](/previews), set an `[up-watch-preview]` attribute on the fo
 </form>
 ```
 
-To show a [placeholder](/placeholders) while working, use an `[up-watch-placeholder]` attribute:
+To show a [placeholder](/learn/placeholders) while working, use an `[up-watch-placeholder]` attribute:
 
 ```html
 <form action="/search">
@@ -164,7 +164,7 @@ To show a [placeholder](/placeholders) while working, use an `[up-watch-placehol
 
 From JavaScript you can pass a `{ preview }` or `{ placeholder }` option instead.
 
-While a validation or autosubmit request is loading, [feedback classes](/feedback-classes)
+While a validation or autosubmit request is loading, [feedback classes](/learn/feedback-classes)
 like `.up-active` and `.up-loading` are set by default.
 To not set them, use an `[up-watch-feedback="false"]` attribute or pass a `{ feedback: false }` option.
 
@@ -194,7 +194,7 @@ Form-wide options can be overridden at the field level:
 ```
 
 The feature attribute itself can sit on a container, too. Unpoly then watches all fields inside it.
-This is how you [watch a group of radio buttons](/up-watch#watching-radio-buttons):
+This is how you [watch a group of radio buttons](/api/up-watch#watching-radio-buttons):
 
 ```html
 <form action="/search">

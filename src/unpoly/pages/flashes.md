@@ -23,7 +23,7 @@ Placing flashes into the layout {#placement}
 In your application layout, place an empty element with an `[up-flashes]` attribute.
 This indicates where future flash messages should be inserted.
 
-A popular place for flashes is outside your [main fragment](/main):
+A popular place for flashes is outside your [main fragment](/api/main):
 
 ```html
 <nav>
@@ -57,21 +57,21 @@ The element's content should be the messages you want to render:
 
 ### Flashes are targeted automatically
 
-The flashes are always updated, even if they aren't [targeted](/targeting-fragments) directly.
+The flashes are always updated, even if they aren't [targeted](/learn/targeting-fragments) directly.
 In the example above, rendering `main` would also update the `[up-flashes]` element.
 
-This works like a [hungry element](/hungry-elements): the container piggy-backs on every
+This works like a [hungry element](/learn/hungry-elements): the container piggy-backs on every
 render pass in its layer and in overlays above it. You don't need to name it in any `[up-target]` attribute.
 
-This also works for [error responses](/error-responses), so an error flash rendered with a form's validation errors is shown too.
+This also works for [error responses](/learn/error-responses), so an error flash rendered with a form's validation errors is shown too.
 
 
 Clearing flashes
 ----------------
 
-By default flash messages are [kept](/up-keep) until they are replaced by new messages.
+By default flash messages are [kept](/api/up-keep) until they are replaced by new messages.
 
-An [empty](/up.element.isEmpty) `[up-flashes]` element will **not** clear existing messages.
+An [empty](/api/up.element.isEmpty) `[up-flashes]` element will **not** clear existing messages.
 Hence it is safe to always include an empty `[up-flashes]` element in your application layout
 to indicate where future flashes should be placed.
 
@@ -79,7 +79,7 @@ to indicate where future flashes should be placed.
 ### Removing messages after a delay {#clearing-after-delay}
 
 Typically you want to clear flash messages after some time.
-This [compiler](/enhancing-elements) removes child elements of your `[up-flashes]` container after 5 seconds:
+This [compiler](/learn/enhancing-elements) removes child elements of your `[up-flashes]` container after 5 seconds:
 
 ```js
 up.compiler('[up-flashes] > *', function(message) {
@@ -91,13 +91,13 @@ up.compiler('[up-flashes] > *', function(message) {
 > We're only removing the contents of `[up-flashes]`, but not the container itself.
 > The empty flashes container must remain in the layout to indicate where future flashes should be [placed](#placement).
 
-To animate the removal, pass an [`{ animation }`](/up.destroy#options.animation) option to `up.destroy()`.
+To animate the removal, pass an [`{ animation }`](/api/up.destroy#options.animation) option to `up.destroy()`.
 
 
 Flashes in overlays {#overlays}
 -------------------
 
-When you [open an overlay](/opening-overlays), its content is rendered from a server response
+When you [open an overlay](/learn/opening-overlays), its content is rendered from a server response
 like any other fragment. Where flash messages from that response appear depends on
 where your `[up-flashes]` containers are.
 
@@ -109,7 +109,7 @@ on the root layer.
 
 ### One container per layer
 
-For styling reasons you may also wish to place the `[up-flashes]` container inside your [main fragment](/main):
+For styling reasons you may also wish to place the `[up-flashes]` container inside your [main fragment](/api/main):
 
 ```html
 <nav>
@@ -130,8 +130,8 @@ Only when the overlay is closing, its
 
 ### Flashes from closing overlays are shown on a parent layer {#from-closing-overlays}
 
-Sometimes a fragment update will cause an overlay to [close](/closing-overlays), e.g. when a
-[close condition](/subinteractions#close-conditions) is reached. In that case no new elements
+Sometimes a fragment update will cause an overlay to [close](/learn/closing-overlays), e.g. when a
+[close condition](/learn/subinteractions#close-conditions) is reached. In that case no new elements
 will be rendered into the closing overlay. Any confirmation flashes from the final overlay interaction
 would be lost.
 
@@ -142,7 +142,7 @@ them into the parent layer.
 Caching considerations {#caching}
 ---------------------------------
 
-Responses with notification flashes don't [cache](/caching) well.
+Responses with notification flashes don't [cache](/learn/caching) well.
 When such a response is re-used, old flash messages will be shown again.
 
 There are several workarounds for this:
@@ -155,7 +155,7 @@ There are several workarounds for this:
 
 ### Suppressing cached flashes {#suppressing-cached-flashes}
 
-You can write a [compiler](/enhancing-elements) that removes the DOM elements for flashes that have already been shown.
+You can write a [compiler](/learn/enhancing-elements) that removes the DOM elements for flashes that have already been shown.
 This allows you to keep caching responses with flashes, but only show each message once.
 
 To give each flash message an identity that we can track, render it with a random attribute, such as `[data-nonce]`:
@@ -211,10 +211,10 @@ You can use the implementation of `[up-flashes]` as a template, which looks like
 </div>
 ```
 
-The [`[up-hungry]`](/up-hungry) attribute makes the container update with every render pass.
-Its [`[up-if-layer="subtree"]`](/up-hungry#up-if-layer) setting also catches updates from overlays,
+The [`[up-hungry]`](/api/up-hungry) attribute makes the container update with every render pass.
+Its [`[up-if-layer="subtree"]`](/api/up-hungry#up-if-layer) setting also catches updates from overlays,
 which is how [flashes from a closing overlay](#from-closing-overlays) reach the parent layer.
-The [`[up-keep]`](/up-keep) attribute keeps existing messages, but the [`[up-on-keep]`](/up-keep#up-on-keep)
+The [`[up-keep]`](/api/up-keep) attribute keeps existing messages, but the [`[up-on-keep]`](/api/up-keep#up-on-keep)
 callback lets a non-empty container replace them.
 
 @page flashes

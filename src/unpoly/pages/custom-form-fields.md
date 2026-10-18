@@ -20,7 +20,7 @@ without JavaScript.
 
 ## <em class="heading-prefix">Option 1</em> Keeping a hidden native field {#hidden-field}
 
-Start with a native field that carries the value. A [compiler](/up.compiler) hides it and
+Start with a native field that carries the value. A [compiler](/api/up.compiler) hides it and
 renders your control in its place. The form submits the hidden field; the control only sets its value.
 
 ```html
@@ -48,8 +48,8 @@ This is the only option that still works without JavaScript. The user then sees 
 `<select>`, and the form submits it.
 
 Because a real form field carries the value, everything works with no further
-configuration: the field is submitted, [watched](/up.watch), [validated](/validation),
-[switched](/switching-form-state) and [disabled](/disabling-forms) like any other.
+configuration: the field is submitted, [watched](/api/up.watch), [validated](/learn/validation),
+[switched](/learn/switching-form-state) and [disabled](/learn/disabling-forms) like any other.
 
 Don't forget the `change` event. Setting `select.value` from a script does
 not emit one, so nothing would notice the new value.
@@ -128,7 +128,7 @@ is picked up automatically.
 ## <em class="heading-prefix">Option 3</em> Registering any element as a field {#registering}
 
 Any element can act as a field, even a plain `<div>`. Tell Unpoly which elements to treat as
-fields, and give them a `value` property with a [compiler](/up.compiler):
+fields, and give them a `value` property with a [compiler](/api/up.compiler):
 
 ```html
 <div class="rating" name="stars"></div>

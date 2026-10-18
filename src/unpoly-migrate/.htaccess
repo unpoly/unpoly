@@ -1,177 +1,182 @@
 # These Apache directives are included in the .htaccess for unpoly.com (repo unpoly-site)
 
-RedirectPermanent /a-up-dash /up-dash
-RedirectPermanent /a-up-instant /up-instant
-RedirectPermanent /a-up-preload /up-preload
-RedirectPermanent /a.up-active /up-active
-RedirectPermanent /form.up-active /up-active
-RedirectPermanent /a.up-current /up-current
-RedirectPermanent /up-nav-a.up-current /up-current
-RedirectPermanent /input-up-validate /up-validate
-RedirectPermanent /form-up-validate /up-validate
-RedirectPermanent /a-up-back /up-back
-RedirectPermanent /input-up-switch /up-switch
-RedirectPermanent /select-up-switch /up-switch
-RedirectPermanent /up.proxy /up.network
-RedirectPermanent /up.layout /up.viewport
-RedirectPermanent /up.layout.config /up.viewport.config
-RedirectPermanent /up.dom /up.fragment
-RedirectPermanent /up.dom.config /up.fragment.config
-RedirectPermanent /up.flow /up.fragment
-RedirectPermanent /up.syntax /up.script
-RedirectPermanent /up.script.data /up.data
-RedirectPermanent /up.bus /up.event
-RedirectPermanent /up.bus.onEscape /up.event.onEscape
-RedirectPermanent /up.params /up.Params
+# Documents moved under /learn and /api in the docs rework 2026. Their old paths
+# (/caching, /up.render) need no rule here: unpoly-site's .htaccess redirects every
+# /foo to /learn/foo, else to /api/foo. Only renamed or removed pages go below.
+# Never redirect from a path that is also a document's slug: that rule would never fire.
 
-RedirectPermanent /up.cache /caching
-RedirectPermanent /a-up-follow /up-follow
-RedirectPermanent /form-up-submit /up-submit
-RedirectPermanent /a-up-target /up-follow
-RedirectPermanent /form-up-target /up-submit
-RedirectPermanent /form-up-observe /up-watch
-RedirectPermanent /input-up-observe /up-watch
-RedirectPermanent /form-up-autosubmit /up-autosubmit
-RedirectPermanent /input-up-autosubmit /up-autosubmit
+RedirectPermanent /a-up-dash /api/up-dash
+RedirectPermanent /a-up-instant /api/up-instant
+RedirectPermanent /a-up-preload /api/up-preload
+RedirectPermanent /a.up-active /api/up-active
+RedirectPermanent /form.up-active /api/up-active
+RedirectPermanent /a.up-current /api/up-current
+RedirectPermanent /up-nav-a.up-current /api/up-current
+RedirectPermanent /input-up-validate /api/up-validate
+RedirectPermanent /form-up-validate /api/up-validate
+RedirectPermanent /a-up-back /api/up-back
+RedirectPermanent /input-up-switch /api/up-switch
+RedirectPermanent /select-up-switch /api/up-switch
+RedirectPermanent /up.proxy /api/up.network
+RedirectPermanent /up.layout /api/up.viewport
+RedirectPermanent /up.layout.config /api/up.viewport.config
+RedirectPermanent /up.dom /api/up.fragment
+RedirectPermanent /up.dom.config /api/up.fragment.config
+RedirectPermanent /up.flow /api/up.fragment
+RedirectPermanent /up.syntax /api/up.script
+RedirectPermanent /up.script.data /api/up.data
+RedirectPermanent /up.bus /api/up.event
+RedirectPermanent /up.bus.onEscape /api/up.event.onEscape
+RedirectPermanent /up.params /api/up.Params
 
-RedirectPermanent /server-errors /error-responses
-RedirectPermanent /offline /network-issues
-RedirectPermanent /handling-disconnects /network-issues
-RedirectPermanent /cache /caching
-RedirectPermanent /targeting-elements /targeting-fragments
-RedirectPermanent /targeting /targeting-fragments
-RedirectPermanent /target /targeting-fragments
-RedirectPermanent /targets /targeting-fragments
+RedirectPermanent /up.cache /learn/caching
+RedirectPermanent /a-up-follow /api/up-follow
+RedirectPermanent /form-up-submit /api/up-submit
+RedirectPermanent /a-up-target /api/up-follow
+RedirectPermanent /form-up-target /api/up-submit
+RedirectPermanent /form-up-observe /api/up-watch
+RedirectPermanent /input-up-observe /api/up-watch
+RedirectPermanent /form-up-autosubmit /api/up-autosubmit
+RedirectPermanent /input-up-autosubmit /api/up-autosubmit
 
-RedirectPermanent /focus-option /focus
-RedirectPermanent /focusing /focus
-RedirectPermanent /scroll-option /scrolling
-RedirectPermanent /validating /validation
-RedirectPermanent /validating-forms /validation
-RedirectPermanent /validations /validation
-RedirectPermanent /disable /disabling-forms
-RedirectPermanent /disabling /disabling-forms
+RedirectPermanent /server-errors /learn/error-responses
+RedirectPermanent /offline /learn/network-issues
+RedirectPermanent /handling-disconnects /learn/network-issues
+RedirectPermanent /cache /learn/caching
+RedirectPermanent /targeting-elements /learn/targeting-fragments
+RedirectPermanent /targeting /learn/targeting-fragments
+RedirectPermanent /target /learn/targeting-fragments
+RedirectPermanent /targets /learn/targeting-fragments
 
-RedirectPermanent /changing-history /updating-history
-RedirectPermanent /changing-location /updating-history
-RedirectPermanent /updating-location /updating-history
-RedirectPermanent /history-restoration /restoring-history
-RedirectPermanent /back-button /restoring-history
+RedirectPermanent /focus-option /learn/focus
+RedirectPermanent /focusing /learn/focus
+RedirectPermanent /scroll-option /learn/scrolling
+RedirectPermanent /validating /learn/validation
+RedirectPermanent /validating-forms /learn/validation
+RedirectPermanent /validations /learn/validation
+RedirectPermanent /disable /learn/disabling-forms
+RedirectPermanent /disabling /learn/disabling-forms
 
-RedirectPermanent /notifications /flashes
-RedirectPermanent /notification-flashes /flashes
+RedirectPermanent /changing-history /learn/updating-history
+RedirectPermanent /changing-location /learn/updating-history
+RedirectPermanent /updating-location /learn/updating-history
+RedirectPermanent /history-restoration /learn/restoring-history
+RedirectPermanent /back-button /learn/restoring-history
 
-RedirectPermanent /layer-reference /targeting-other-layers
-RedirectPermanent /focus-ring-visibility /focus-visibility
-RedirectPermanent /focus-outline-visibility /focus-visibility
-RedirectPermanent /focus-visible /focus-visibility
-RedirectPermanent /focus-ring /focus-visibility
-RedirectPermanent /focus-outline /focus-visibility
+RedirectPermanent /notifications /learn/flashes
+RedirectPermanent /notification-flashes /learn/flashes
 
-RedirectPermanent /preloading-links /preloading
-RedirectPermanent /preloading-content /preloading
+RedirectPermanent /layer-reference /learn/targeting-other-layers
+RedirectPermanent /focus-ring-visibility /learn/focus-visibility
+RedirectPermanent /focus-outline-visibility /learn/focus-visibility
+RedirectPermanent /focus-visible /learn/focus-visibility
+RedirectPermanent /focus-ring /learn/focus-visibility
+RedirectPermanent /focus-outline /learn/focus-visibility
 
-RedirectPermanent /attributes /attributes-and-options
-RedirectPermanent /attrs /attributes-and-options
-RedirectPermanent /options /attributes-and-options
-RedirectPermanent /opts /attributes-and-options
-RedirectPermanent /configuration /attributes-and-options
-RedirectPermanent /config /attributes-and-options
-RedirectPermanent /attributes-options /attributes-and-options
+RedirectPermanent /preloading-links /learn/preloading
+RedirectPermanent /preloading-content /learn/preloading
 
-RedirectPermanent /a-up-emit /up-emit
+RedirectPermanent /attributes /learn/attributes-and-options
+RedirectPermanent /attrs /learn/attributes-and-options
+RedirectPermanent /options /learn/attributes-and-options
+RedirectPermanent /opts /learn/attributes-and-options
+RedirectPermanent /configuration /learn/attributes-and-options
+RedirectPermanent /config /learn/attributes-and-options
+RedirectPermanent /attributes-options /learn/attributes-and-options
 
-RedirectPermanent /script-up-boot-manual /up-boot-manual
-RedirectPermanent /a-up-alias /up-alias
-RedirectPermanent /a-up-popup /up-popup
-RedirectPermanent /a-up-modal /up-modal
-RedirectPermanent /a-up-layer-new /up-layer-new
-RedirectPermanent /a-up-drawer /up-drawer
-RedirectPermanent /a-up-dismiss /up-dismiss
-RedirectPermanent /a-up-close /up-close
-RedirectPermanent /a-up-accept /up-accept
-RedirectPermanent /a-up-transition /up-transition
-RedirectPermanent /form-up-transition /up-transition
+RedirectPermanent /a-up-emit /api/up-emit
 
-RedirectPermanent /fragment-placement /targeting-fragments
+RedirectPermanent /script-up-boot-manual /api/up-boot-manual
+RedirectPermanent /a-up-alias /api/up-alias
+RedirectPermanent /a-up-popup /api/up-popup
+RedirectPermanent /a-up-modal /api/up-modal
+RedirectPermanent /a-up-layer-new /api/up-layer-new
+RedirectPermanent /a-up-drawer /api/up-drawer
+RedirectPermanent /a-up-dismiss /api/up-dismiss
+RedirectPermanent /a-up-close /api/up-close
+RedirectPermanent /a-up-accept /api/up-accept
+RedirectPermanent /a-up-transition /api/up-transition
+RedirectPermanent /form-up-transition /api/up-transition
 
-RedirectPermanent /render-content /providing-html
+RedirectPermanent /fragment-placement /learn/targeting-fragments
+
+RedirectPermanent /render-content /learn/providing-html
 
 RedirectPermanent /has https://developer.mozilla.org/en-US/docs/Web/CSS/:has
 
-RedirectPermanent /preview /previews
-RedirectPermanent /placeholder /placeholders
-RedirectPermanent /skeleton /placeholders
-RedirectPermanent /skeletons /placeholders
+RedirectPermanent /preview /learn/previews
+RedirectPermanent /placeholder /learn/placeholders
+RedirectPermanent /skeleton /learn/placeholders
+RedirectPermanent /skeletons /learn/placeholders
 
-RedirectPermanent /render-hooks /render-lifecycle
-RedirectPermanent /rendering-lifecycle /render-lifecycle
+RedirectPermanent /render-hooks /learn/render-lifecycle
+RedirectPermanent /rendering-lifecycle /learn/render-lifecycle
 
-RedirectPermanent /template /templates
-RedirectPermanent /templating /templates
+RedirectPermanent /template /learn/templates
+RedirectPermanent /templating /learn/templates
 
-RedirectPermanent /optimistic-updates /optimistic-rendering
-RedirectPermanent /optimistic-ui /optimistic-rendering
-RedirectPermanent /speculative-rendering /optimistic-rendering
-RedirectPermanent /opportunistic-rendering /optimistic-rendering
-RedirectPermanent /eager-rendering /optimistic-rendering
+RedirectPermanent /optimistic-updates /learn/optimistic-rendering
+RedirectPermanent /optimistic-ui /learn/optimistic-rendering
+RedirectPermanent /speculative-rendering /learn/optimistic-rendering
+RedirectPermanent /opportunistic-rendering /learn/optimistic-rendering
+RedirectPermanent /eager-rendering /learn/optimistic-rendering
 
-RedirectPermanent /nav-bars /navigation-bars
-RedirectPermanent /nav-bar /navigation-bars
-RedirectPermanent /navbars /navigation-bars
-RedirectPermanent /navbar /navigation-bars
-RedirectPermanent /nav /navigation-bars
+RedirectPermanent /nav-bars /learn/navigation-bars
+RedirectPermanent /nav-bar /learn/navigation-bars
+RedirectPermanent /navbars /learn/navigation-bars
+RedirectPermanent /navbar /learn/navigation-bars
+RedirectPermanent /nav /learn/navigation-bars
 
-RedirectPermanent /up.navigation /up.status
-RedirectPermanent /up.feedback /up.status
+RedirectPermanent /up.navigation /api/up.status
+RedirectPermanent /up.feedback /api/up.status
 
-RedirectPermanent /navigate /navigation-defaults
-RedirectPermanent /navigating /navigation-defaults
+RedirectPermanent /navigate /learn/navigation-defaults
+RedirectPermanent /navigating /learn/navigation-defaults
 
-RedirectPermanent /dependent-fields /reactive-server-forms
-RedirectPermanent /dependent-elements /reactive-server-forms
-RedirectPermanent /dependent-forms /reactive-server-forms
+RedirectPermanent /dependent-fields /learn/reactive-server-forms
+RedirectPermanent /dependent-elements /learn/reactive-server-forms
+RedirectPermanent /dependent-forms /learn/reactive-server-forms
 
-RedirectPermanent /preserving-fragments /keeping-elements
-RedirectPermanent /keeping-fragments /keeping-elements
-RedirectPermanent /persisting-fragments /keeping-elements
-RedirectPermanent /persisting-elements /keeping-elements
+RedirectPermanent /preserving-fragments /learn/keeping-elements
+RedirectPermanent /keeping-fragments /learn/keeping-elements
+RedirectPermanent /persisting-fragments /learn/keeping-elements
+RedirectPermanent /persisting-elements /learn/keeping-elements
 
-RedirectPermanent /javascript-sprinkles /enhancing-elements
-RedirectPermanent /compiler /enhancing-elements
-RedirectPermanent /compilers /enhancing-elements
-RedirectPermanent /compilation /enhancing-elements
+RedirectPermanent /javascript-sprinkles /learn/enhancing-elements
+RedirectPermanent /compiler /learn/enhancing-elements
+RedirectPermanent /compilers /learn/enhancing-elements
+RedirectPermanent /compilation /learn/enhancing-elements
 
-RedirectPermanent /up-fixed /up-fixed-top
+RedirectPermanent /up-fixed /api/up-fixed-top
 
-RedirectPermanent /csp /script-security
-RedirectPermanent /scripting-security /script-security
+RedirectPermanent /csp /learn/script-security
+RedirectPermanent /scripting-security /learn/script-security
 
-RedirectPermanent /handle-everything /handling-all-links
+RedirectPermanent /handle-everything /learn/handling-all-links
 
-RedirectPermanent /before /targeting-fragments#appending-or-prepending
-RedirectPermanent /after /targeting-fragments#appending-or-prepending
+RedirectPermanent /before /learn/targeting-fragments#appending-or-prepending
+RedirectPermanent /after /learn/targeting-fragments#appending-or-prepending
 
 # Docs rework 2026: the tutorial retired in favor of the Getting-started guides,
 # and the /install sub-pages moved into the docs.
-RedirectPermanent /tutorial /start/overview
-RedirectPermanent /start /start/overview
-RedirectPermanent /install/server-bindings /server-protocol
-RedirectPermanent /server-bindings /server-protocol
-RedirectPermanent /install/bootstrap /bootstrap-integration
-RedirectPermanent /install/legacy-browsers /legacy-browsers
-RedirectPermanent /handling-everything /handling-all-links
-RedirectPermanent /agent-skill /skill
-RedirectPermanent /agent /skill
-RedirectPermanent /analytics /tracking-page-views
-RedirectPermanent /navigation /navigation-defaults
-RedirectPermanent /layer-terminology /overlays#layer-modes
-RedirectPermanent /skipping-rendering /conditional-requests
-RedirectPermanent /predefined-animations /animations#available-animations
-RedirectPermanent /predefined-transitions /transitions#available-transitions
-RedirectPermanent /motion-tuning /controlling-motion#duration-and-easing
-RedirectPermanent /layer-option /targeting-other-layers
-RedirectPermanent /context /layer-context
-RedirectPermanent /animation /motion
-RedirectPermanent /preserving-elements /keeping-elements
-RedirectPermanent /failed-responses /error-responses
+RedirectPermanent /tutorial /learn/start/overview
+RedirectPermanent /start /learn/start/overview
+RedirectPermanent /install/server-bindings /learn/server-protocol
+RedirectPermanent /server-bindings /learn/server-protocol
+RedirectPermanent /install/bootstrap /learn/bootstrap-integration
+RedirectPermanent /install/legacy-browsers /learn/legacy-browsers
+RedirectPermanent /handling-everything /learn/handling-all-links
+RedirectPermanent /agent-skill /learn/skill
+RedirectPermanent /agent /learn/skill
+RedirectPermanent /analytics /learn/tracking-page-views
+RedirectPermanent /navigation /learn/navigation-defaults
+RedirectPermanent /layer-terminology /learn/overlays#layer-modes
+RedirectPermanent /skipping-rendering /learn/conditional-requests
+RedirectPermanent /predefined-animations /learn/animations#available-animations
+RedirectPermanent /predefined-transitions /learn/transitions#available-transitions
+RedirectPermanent /motion-tuning /learn/controlling-motion#duration-and-easing
+RedirectPermanent /layer-option /learn/targeting-other-layers
+RedirectPermanent /context /learn/layer-context
+RedirectPermanent /animation /learn/motion
+RedirectPermanent /preserving-elements /learn/keeping-elements
+RedirectPermanent /failed-responses /learn/error-responses

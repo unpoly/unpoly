@@ -18,11 +18,11 @@
   | `this`     | The link being followed                       |
   | `event`    | A preventable `up:fragment:loaded` event      |
 
-  The snippet will also run for [error responses](/error-responses).
+  The snippet will also run for [error responses](/learn/error-responses).
 
 @param [up-on-offline]
   A JavaScript snippet that is executed when the fragment could not be loaded
-  due to a [disconnect or timeout](/network-issues).
+  due to a [disconnect or timeout](/learn/network-issues).
 
   The snippet runs in the following scope:
 
@@ -45,11 +45,11 @@
 
   The snippet will be called zero, one or two times:
 
-  - When the server rendered an [empty response](/conditional-requests#rendering-nothing), no fragments are updated. `[up-on-rendered]` is not called.
-  - When the server rendered a matching fragment, it will be updated on the page. `[up-on-rendered]` is called with the [result](/up.RenderResult).
-  - When [revalidation](/caching#revalidation) renders a second time, `[up-on-rendered]` is called again with the final result.
+  - When the server rendered an [empty response](/learn/conditional-requests#rendering-nothing), no fragments are updated. `[up-on-rendered]` is not called.
+  - When the server rendered a matching fragment, it will be updated on the page. `[up-on-rendered]` is called with the [result](/api/up.RenderResult).
+  - When [revalidation](/learn/caching#revalidation) renders a second time, `[up-on-rendered]` is called again with the final result.
 
-  Also see [Running code after rendering](/render-lifecycle#running-code-after-rendering).
+  Also see [Running code after rendering](/learn/render-lifecycle#running-code-after-rendering).
 
 @param [up-on-finished]
   A JavaScript snippet that is executed when no further DOM changes will be caused by this render pass.
@@ -63,14 +63,14 @@
   | `this`     | The link being followed                                                |
   | `result`   | The `up.RenderResult` for the last render pass that updated a fragment |
 
-  If [revalidation](/caching#revalidation) re-rendered the fragment, `result` describes updates from the
-  second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
+  If [revalidation](/learn/caching#revalidation) re-rendered the fragment, `result` describes updates from the
+  second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/learn/caching#when-nothing-changed),
   it is the result from the initial render pass.
 
-  To run a snippet after an [error response](/error-responses) has finished rendering,
+  To run a snippet after an [error response](/learn/error-responses) has finished rendering,
   set an `[up-on-fail-finished]` attribute instead.
 
-  Also see [Awaiting post-processing](/render-lifecycle#postprocessing).
+  Also see [Awaiting post-processing](/learn/render-lifecycle#postprocessing).
 
 @param [up-on-error]
   A JavaScript snippet that is run when any error is thrown during the rendering process.
@@ -80,7 +80,7 @@
   | `this`     | The link being followed                       |
   | `error`    | An `Error` object                             |
 
-  The callback is also called when the render pass fails due to [network issues](/network-issues)
-  or [aborts](/aborting-requests).
+  The callback is also called when the render pass fails due to [network issues](/learn/network-issues)
+  or [aborts](/learn/aborting-requests).
 
-  Also see [Handling errors](/render-lifecycle#handling-errors).
+  Also see [Handling errors](/learn/render-lifecycle#handling-errors).

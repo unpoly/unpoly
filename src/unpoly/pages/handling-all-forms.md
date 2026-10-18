@@ -41,7 +41,7 @@ You can still make exceptions by setting an `[up-submit=false]` attribute on a f
 
 Submitting this form makes a full page load, as if Unpoly had not been loaded.
 
-A single [submit button](/submitting-forms#submit-buttons) can also opt for a full page load
+A single [submit button](/learn/submitting-forms#submit-buttons) can also opt for a full page load
 by setting an `[up-submit=false]` attribute on the button:
 
 ```html
@@ -57,7 +57,7 @@ Only *Download PDF* loads a full page.
 
 ## Using a macro instead {#macro}
 
-Instead of changing `up.form.config.submitSelectors`, you can register a [macro](/up.macro)
+Instead of changing `up.form.config.submitSelectors`, you can register a [macro](/api/up.macro)
 that sets `[up-submit]` on every form:
 
 ```js
@@ -69,7 +69,7 @@ up.macro('form:not([up-submit=false])', function(form) {
 Forms with `[up-submit=false]` are left alone. The [exceptions above](#submitting-all-forms) still apply:
 forms with a `[target]` or a cross-origin `[action]` load a full page.
 
-A macro can set other attributes in the same pass, like [`[up-disable]`](/up-submit#up-disable)
+A macro can set other attributes in the same pass, like [`[up-disable]`](/api/up-submit#up-disable)
 to disable the form while it submits.
 
 

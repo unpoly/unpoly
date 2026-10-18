@@ -37,7 +37,7 @@ up.on('up:assets:changed', function(event) {
 })
 ```
 
-Responses without a `<head>`, like [shortened responses](/optimizing-responses#target), are not compared.
+Responses without a `<head>`, like [shortened responses](/learn/optimizing-responses#target), are not compared.
 If your server shortens every response, use the [polling detector](#polling) below.
 
 **There is no default behavior when assets have changed.** In particular, Unpoly does not insert
@@ -141,7 +141,7 @@ Detecting a new version without user interaction {#polling}
 ------------------------------------------------
 
 Unpoly only compares assets when it renders a response. To detect a deployment
-while the user is idle, [poll](/polling) an empty fragment every few minutes:
+while the user is idle, [poll](/learn/polling) an empty fragment every few minutes:
 
 ```html
 <div id="version-detector" up-poll up-interval="120_000" up-source="/version"></div>

@@ -34,7 +34,7 @@ To follow links on `mousedown` instead of `click` without requiring an `[up-inst
 up.link.config.instantSelectors.push('a[href]')
 ```
 
-Note that an instant link must also be [followable](/up.link.isFollowable), usually by giving it
+Note that an instant link must also be [followable](/api/up.link.isFollowable), usually by giving it
 an `[up-follow]` attribute or by configuring `up.link.config.followSelectors` as [shown above](#following-all-links).
 
 Some links will still activate on `click` under this setting:
@@ -60,7 +60,7 @@ Some links will not be preloaded under this setting:
 
 - Links with an `[up-preload=false]` attribute.
 - Links that are not [followable](#following-all-links).
-- Links whose destination [cannot be cached](/up.network.config#config.autoCache).
+- Links whose destination [cannot be cached](/api/up.network.config#config.autoCache).
 - Any additional exceptions configured in `up.link.config.noPreloadSelectors`.
 
 
@@ -77,7 +77,7 @@ You can still make exceptions by setting an `[up-follow=false]` attribute:
 
 ## Using a macro instead {#macro}
 
-Instead of changing `up.link.config.followSelectors`, you can register a [macro](/up.macro)
+Instead of changing `up.link.config.followSelectors`, you can register a [macro](/api/up.macro)
 that sets `[up-follow]` on every link:
 
 ```js
@@ -89,7 +89,7 @@ up.macro('a[href]:not([up-follow=false])', function(link) {
 Links with `[up-follow=false]` are left alone. The [exceptions above](#following-all-links) still apply:
 links with a `[target]` or a cross-origin `[href]` load a full page.
 
-A macro can set other attributes in the same pass, like [`[up-preload]`](/up-preload)
+A macro can set other attributes in the same pass, like [`[up-preload]`](/api/up-preload)
 to preload the link on hover.
 
 

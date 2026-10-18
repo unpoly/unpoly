@@ -31,7 +31,7 @@ like timers or global listeners from outliving their element.
 Attaching data to elements
 --------------------------
 
-The server can attach structured data to an element, as [relaxed JSON](/relaxed-json)
+The server can attach structured data to an element, as [relaxed JSON](/api/relaxed-json)
 in an `[up-data]` attribute:
 
 ```html
@@ -53,8 +53,8 @@ Rendering templates
 -------------------
 
 The server can embed `<template>` elements into its responses, for the frontend
-to clone without another request. This enables instant UI like [placeholders](/placeholders)
-or [optimistic rendering](/optimistic-rendering):
+to clone without another request. This enables instant UI like [placeholders](/learn/placeholders)
+or [optimistic rendering](/learn/optimistic-rendering):
 
 ```html
 <a up-fragment="#tip-template">Show tip</a> <!-- mark: up-fragment -->
@@ -67,7 +67,7 @@ or [optimistic rendering](/optimistic-rendering):
 ```
 
 Clicking the link clones the template and swaps it into the matching `.tip` element,
-entirely on the client. Templates can also take [variables](/templates#dynamic).
+entirely on the client. Templates can also take [variables](/learn/templates#dynamic).
 
 [[more: templates]]
 

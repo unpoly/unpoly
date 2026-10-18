@@ -20,13 +20,13 @@ X-Up-Target: .profile
 
 The server renders the page for `/users/5` the same way it would for a full page load.
 Unpoly extracts the `.profile` element from the response and discards the rest,
-except [hungry elements](/hungry-elements) and the `<head>`.
+except [hungry elements](/learn/hungry-elements) and the `<head>`.
 
 There is no JSON API to build and no separate fragment endpoint to maintain.
 Forms work the same way, with one convention: respond to an invalid submission with an error status like `422`,
 so Unpoly knows to re-render the form instead of the success target.
 See [[submitting-forms#validation]].
-If you use [`[up-validate]`](/up-validate), also check for an `X-Up-Validate` header:
+If you use [`[up-validate]`](/api/up-validate), also check for an `X-Up-Validate` header:
 validate the input and render the form again, but don't save it.
 
 The `X-Up-*` headers above are part of an optional protocol.
@@ -56,7 +56,7 @@ and whether the request comes from Unpoly at all.
 Skipping unchanged content
 --------------------------
 
-Unpoly reloads fragments when [polling](/polling), [revalidating the cache](/caching#revalidation) or calling `up.reload()`.
+Unpoly reloads fragments when [polling](/learn/polling), [revalidating the cache](/learn/caching#revalidation) or calling `up.reload()`.
 When the first response carried an `ETag`, Unpoly sends it back with the reload:
 
 ```http

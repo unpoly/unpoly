@@ -141,9 +141,9 @@ up.migrate.preprocessAbortArgs = function(args) {
 }
 
 /*-
-Returns whether Unpoly is *not* currently loading a [request](/up.request).
+Returns whether Unpoly is *not* currently loading a [request](/api/up.request).
 
-The network is also considered [busy](/up.network.isBusy) while requests are [loading in the background](/up.request#options.background).
+The network is also considered [busy](/api/up.network.isBusy) while requests are [loading in the background](/api/up.request#options.background).
 
 See also `up.network.isBusy()`.
 
@@ -165,8 +165,8 @@ up.network.isIdle = function() {
 Loads this request object as a full-page request, replacing the entire browser environment
 with a new page from the server response.
 
-The full-page request will be loaded with the [URL](/up.Request.prototype.url),
-[method](/up.Request.prototype.method) and [params](/up.Request.prototype.params)
+The full-page request will be loaded with the [URL](/api/up.Request.prototype.url),
+[method](/api/up.Request.prototype.method) and [params](/api/up.Request.prototype.params)
 from this request object.
 Properties that are not possible in a full-page request (such as custom HTTP headers)
 will be ignored.
@@ -183,7 +183,7 @@ up.Request.prototype.navigate = function() {
 }
 
 /*-
-Whether this request is [preloading](/preloading) content.
+Whether this request is [preloading](/learn/preloading) content.
 
 @property up.Request#preload
 @param {boolean} [preload=false]
@@ -194,7 +194,7 @@ up.migrate.renamedProperty(up.Request.prototype, 'preload', 'background')
 
 /*-
 The number of milliseconds after which this request can cause
-an `up:network:late` event and show the [progress bar](/progress-bar).
+an `up:network:late` event and show the [progress bar](/learn/progress-bar).
 
 Defaults to `up.network.config.lateDelay`.
 
@@ -242,7 +242,7 @@ up.Response.prototype.getHeader = function(name) {
 }
 
 /*-
-Returns whether the response was not [successful](/up.Response.prototype.ok).
+Returns whether the response was not [successful](/api/up.Response.prototype.ok).
 
 @function up.Response#isError
 @return {boolean}

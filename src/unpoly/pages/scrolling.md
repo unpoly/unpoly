@@ -1,24 +1,24 @@
 Scrolling
 =========
 
-When updating a fragment, you control how Unpoly scrolls by setting an [`[up-scroll]`](/up-follow#up-scroll) attribute
-or by passing a [`{ scroll }`](/up.render#options.scroll) option.
+When updating a fragment, you control how Unpoly scrolls by setting an [`[up-scroll]`](/api/up-follow#up-scroll) attribute
+or by passing a [`{ scroll }`](/api/up.render#options.scroll) option.
 By default, following a link scrolls like a full page load would, and a minor update leaves all scroll positions alone.
 
 
 ## Default scrolling strategy {#auto}
 
-When [navigating](/navigation-defaults), Unpoly tries a sequence of scroll strategies that works for most cases:
+When [navigating](/learn/navigation-defaults), Unpoly tries a sequence of scroll strategies that works for most cases:
 
 1. If the URL has a `#hash`, scroll to the element matching that hash.
-2. If updating a [main target](/up-main), scroll the layer to the top.\
+2. If updating a [main target](/api/up-main), scroll the layer to the top.\
    The assumption is that we navigated to a new screen.
 3. Otherwise don't scroll.\
    The assumption is that we updated a minor fragment.
 
 You can change this sequence in `up.fragment.config.autoScroll`.
 
-Following links and submitting forms are considered [navigation](/navigation-defaults), so the default strategy is applied without further configuration.
+Following links and submitting forms are considered [navigation](/learn/navigation-defaults), so the default strategy is applied without further configuration.
 You can also enable it explicitly by setting `[up-scroll="auto"]`:
 
 ```html
@@ -41,7 +41,7 @@ We often want to draw attention to updated elements, by making sure they are vis
 This is called *revealing* an element.
 
 > [tip]
-> When revealing an element, consider also [focusing it](/focus) to set the reading position
+> When revealing an element, consider also [focusing it](/learn/focus) to set the reading position
 > for screen readers.
 
 ### Revealing the new fragment {#target}
@@ -82,7 +82,7 @@ To reveal the element matching the `#hash` in the updated URL, set `[up-scroll="
 <a href="/product/12#features" up-follow up-scroll="hash">Show features</a> <!-- mark: #features -->
 ```
 
-This works like the browser's own hash scrolling, but honors [fixed layout elements](/scroll-tuning#fixed-layout-elements-obstructing-the-viewport)
+This works like the browser's own hash scrolling, but honors [fixed layout elements](/learn/scroll-tuning#fixed-layout-elements-obstructing-the-viewport)
 that would otherwise obstruct the revealed element. The element is aligned with the top edge of the viewport.
 
 When the URL has no hash, or no element matches it, nothing scrolls.
@@ -90,19 +90,19 @@ When the URL has no hash, or no element matches it, nothing scrolls.
 
 ### Revealing the layer {#layer}
 
-To reveal the container element of the updated [layer](/up.layer), set `[up-scroll="layer"]`:
+To reveal the container element of the updated [layer](/api/up.layer), set `[up-scroll="layer"]`:
 
 ```html
 <a href="/details" up-layer="new" up-scroll="layer">Show more</a> <!-- mark: up-scroll="layer" -->
 ```
 
-Most [layer modes](/overlays#layer-modes) bring their own scrollbar, and will effectively be scrolled to the top.\
-A [popup](/overlays#layer-modes) has no scrollbar, so its parent layer will scroll to reveal the popup frame.
+Most [layer modes](/learn/overlays#layer-modes) bring their own scrollbar, and will effectively be scrolled to the top.\
+A [popup](/learn/overlays#layer-modes) has no scrollbar, so its parent layer will scroll to reveal the popup frame.
 
 
 ### Revealing the main fragment {#main}
 
-To reveal the updated layer's [main fragment](/up-main), set `[up-scroll="main"]`:
+To reveal the updated layer's [main fragment](/api/up-main), set `[up-scroll="main"]`:
 
 ```html
 <a href="/contact" up-follow up-scroll="main">Contact us</a> <!-- mark: up-scroll="main" -->
@@ -152,7 +152,7 @@ To scroll to the bottom, but leave a margin of some pixels, set a *negative* num
 
 If you don't want Unpoly to touch any scroll positions, set `[up-scroll="false"]`.
 For example, this link opts out of the [default scrolling strategy](#auto) that
-[navigation](/navigation-defaults) would apply:
+[navigation](/learn/navigation-defaults) would apply:
 
 ```html
 <a href="/details" up-follow up-scroll="false">Show more</a> <!-- mark: up-scroll="false" -->
@@ -168,7 +168,7 @@ For example, this link opts out of the [default scrolling strategy](#auto) that
 Scroll positions reset when you insert a new viewport element (as opposed to updating a child element).
 This is default browser behavior for newly inserted elements.
 
-You can ask Unpoly to preserve the scroll positions of all [viewports](/up.viewport) around the updated fragment.
+You can ask Unpoly to preserve the scroll positions of all [viewports](/api/up.viewport) around the updated fragment.
 To do so, set `[up-scroll="keep"]`:
 
 ```html
@@ -176,7 +176,7 @@ To do so, set `[up-scroll="keep"]`:
 ```
 
 Internally, Unpoly measures scroll positions before the update, and restores the same positions after the update.
-For this to work, viewports must have a [derivable target selector](/target-derivation),
+For this to work, viewports must have a [derivable target selector](/learn/target-derivation),
 e.g. by setting an `[id]` attribute.
 
 `up.reload()` uses this strategy by default, so a reloaded list stays where the user left it.
@@ -192,7 +192,7 @@ Set `[up-scroll="restore"]` to restore the last known scroll positions for the u
 ```
 
 Before every fragment update, Unpoly saves the scroll positions for the current URL.\
-You can prevent this by setting [`[up-save-scroll="false"]`](/up-follow#up-save-scroll).
+You can prevent this by setting [`[up-save-scroll="false"]`](/api/up-follow#up-save-scroll).
 
 Scroll positions are remembered for each layer until the next full page load.
 When no positions are known for the URL, nothing scrolls. Add a fallback with `[up-scroll="restore, top"]`.
@@ -223,7 +223,7 @@ The [default strategy](#auto) is such a sequence.
 
 ## Conditional strategies {#conditions}
 
-To only scroll when a [main target](/up-main) is updated,
+To only scroll when a [main target](/api/up-main) is updated,
 append `-if-main` to any string option on this page:
 
 ```html
@@ -238,11 +238,11 @@ To implement other conditions, [pass a function](#function) instead.
 
 ## Scrolling multiple viewports {#multiple-viewports}
 
-Unpoly scrolls the [viewport](/up.viewport) closest to the updated fragment.
+Unpoly scrolls the [viewport](/api/up.viewport) closest to the updated fragment.
 By default the only viewport is the document itself.
 An app with its own scrolling panels marks each panel with an `[up-viewport]` attribute.
 
-When [updating multiple fragments](/targeting-fragments#multiple), any `[up-scroll]` attribute (or `{ scroll }` option)
+When [updating multiple fragments](/learn/targeting-fragments#multiple), any `[up-scroll]` attribute (or `{ scroll }` option)
 is only applied to the *first* fragment. This is what you want when you only have a single viewport,
 and you don't want secondary fragments to influence the one scroll bar.
 
@@ -264,8 +264,8 @@ However, when you update fragments within multiple viewports, you can only scrol
 </div>
 ```
 
-To scroll multiple viewports, set an [`[up-scroll-map]`](/up-follow#up-scroll-map) attribute.\
-Its value is a [relaxed JSON](/relaxed-json) object mapping selectors to scroll options:
+To scroll multiple viewports, set an [`[up-scroll-map]`](/api/up-follow#up-scroll-map) attribute.\
+Its value is a [relaxed JSON](/api/relaxed-json) object mapping selectors to scroll options:
 
 ```html
 <a
@@ -284,7 +284,7 @@ You can also select viewports by any contained fragment. The following two scrol
 <a … up-scroll-map="{ '#viewport1': 'bottom', '#viewport2': 'bottom' }">…</a>
 ```
 
-In JavaScript you can pass an object as a [`{ scrollMap }`](/up.render#options.scrollMap) option:
+In JavaScript you can pass an object as a [`{ scrollMap }`](/api/up.render#options.scrollMap) option:
 
 ```js
 up.render({
@@ -322,7 +322,7 @@ up.render({
 ### Scrolling without a render pass {#reveal}
 
 Outside a fragment update, call `up.reveal()` to scroll an element into view.
-It uses the same logic as `[up-scroll="target"]`, including the handling of [fixed layout elements](/scroll-tuning#fixed-layout-elements-obstructing-the-viewport):
+It uses the same logic as `[up-scroll="target"]`, including the handling of [fixed layout elements](/learn/scroll-tuning#fixed-layout-elements-obstructing-the-viewport):
 
 ```js
 up.reveal('#comments')

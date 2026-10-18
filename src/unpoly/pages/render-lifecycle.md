@@ -79,27 +79,27 @@ The others have a page of their own:
 | Intent                              | JavaScript                                                | HTML                                            |
 |-------------------------------------|-----------------------------------------------------------|-------------------------------------------------|
 | Intervene on interaction            | Guard events like<br>`up:link:follow` or `up:form:submit` | —                                               |
-| Control concurrency                 | [`{ abort }`](/aborting-requests)                         | [`[up-abort]`](/aborting-requests)              |
-| Control concurrency                 | [`{ abortable }`](/aborting-requests)                     | [`[up-abortable]`](/aborting-requests)          |
-| Change page during request          | [`{ disable }`](/disabling-forms)                         | [`[up-disable]`](/disabling-forms)              |
-| Change page during request          | [`{ placeholder }`](/placeholders)                        | [`[up-placeholder]`](/placeholders)             |
-| Change page during request          | [`{ preview }`](/previews)                                | [`[up-preview]`](/previews)                     |
-| Intervene before rendering          | [`{ onLoaded }`](/up.render#options.onLoaded)             | [`[up-on-loaded]`](/up-follow#up-on-loaded)     |
+| Control concurrency                 | [`{ abort }`](/learn/aborting-requests)                         | [`[up-abort]`](/learn/aborting-requests)              |
+| Control concurrency                 | [`{ abortable }`](/learn/aborting-requests)                     | [`[up-abortable]`](/learn/aborting-requests)          |
+| Change page during request          | [`{ disable }`](/learn/disabling-forms)                         | [`[up-disable]`](/learn/disabling-forms)              |
+| Change page during request          | [`{ placeholder }`](/learn/placeholders)                        | [`[up-placeholder]`](/learn/placeholders)             |
+| Change page during request          | [`{ preview }`](/learn/previews)                                | [`[up-preview]`](/learn/previews)                     |
+| Intervene before rendering          | [`{ onLoaded }`](/api/up.render#options.onLoaded)             | [`[up-on-loaded]`](/api/up-follow#up-on-loaded)     |
 | Intervene before rendering          | `up:fragment:loaded`                                      | —                                               |
-| Modify new elements                 | [`{ onRendered }`](/up.render#options.onRendered)         | [`[up-on-rendered]`](/up-follow#up-on-rendered) |
+| Modify new elements                 | [`{ onRendered }`](/api/up.render#options.onRendered)         | [`[up-on-rendered]`](/api/up-follow#up-on-rendered) |
 | Modify new elements                 | `up.compiler()`                                           | —                                               |
 | Modify new elements                 | `up:fragment:inserted`                                    | —                                               |
-| Keep elements within a fragment     | [`{ keep }`](/up.render#options.keep)                     | [`[up-keep]`](/keeping-elements)                |
-| Control scrolling                   | [`{ scroll }`](/scrolling)                                | [`[up-scroll]`](/scrolling)                     |
-| Control focus                       | [`{ focus }`](/focus)                                     | [`[up-focus]`](/focus)                          |
+| Keep elements within a fragment     | [`{ keep }`](/api/up.render#options.keep)                     | [`[up-keep]`](/learn/keeping-elements)                |
+| Control scrolling                   | [`{ scroll }`](/learn/scrolling)                                | [`[up-scroll]`](/learn/scrolling)                     |
+| Control focus                       | [`{ focus }`](/learn/focus)                                     | [`[up-focus]`](/learn/focus)                          |
 
-For a full list of available options see [`up.render()` parameters](/up.render#parameters).
+For a full list of available options see [`up.render()` parameters](/api/up.render#parameters).
 
 
 Running code after rendering
 ----------------------------
 
-Rendering functions return a promise that fulfills when fragments were inserted and [compiled](/up.hello).
+Rendering functions return a promise that fulfills when fragments were inserted and [compiled](/api/up.hello).
 To run code after fragments were updated, `await` that promise:
 
 ```js
@@ -107,8 +107,8 @@ await up.render({ url: '/path', target: '.target' })
 console.log("Updated fragment is", document.querySelector('.target'))
 ```
 
-The promise rejects when there is a [network issue](/network-issues),
-or if the server [responds with an HTTP error code](/error-responses). See [Handling errors](#handling-errors).
+The promise rejects when there is a [network issue](/learn/network-issues),
+or if the server [responds with an HTTP error code](/learn/error-responses). See [Handling errors](#handling-errors).
 
 
 ### Inspecting the render result
@@ -127,14 +127,14 @@ When the pass updated a single fragment, `result.fragment` returns it directly.
 
 ### Running code after each render pass
 
-To run code after every render pass, pass an [`{ onRendered }`](/up.render#options.onRendered) callback.
+To run code after every render pass, pass an [`{ onRendered }`](/api/up.render#options.onRendered) callback.
 This callback may be called zero, one or two times:
 
-- When the server rendered an [empty response](/conditional-requests#rendering-nothing), no fragments are updated. `{ onRendered }` is not called.
-- When the server rendered a matching fragment, it is updated on the page. `{ onRendered }` is called with the [result](/up.RenderResult).
-- When [revalidation](/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
+- When the server rendered an [empty response](/learn/conditional-requests#rendering-nothing), no fragments are updated. `{ onRendered }` is not called.
+- When the server rendered a matching fragment, it is updated on the page. `{ onRendered }` is called with the [result](/api/up.RenderResult).
+- When [revalidation](/learn/caching#revalidation) renders a second time, `{ onRendered }` is called again with the final result.
 
-In HTML you can set an [`[up-on-rendered]`](/up-follow#up-on-rendered) attribute on a [link](/up-follow) or [form](/submitting-forms):
+In HTML you can set an [`[up-on-rendered]`](/api/up-follow#up-on-rendered) attribute on a [link](/api/up-follow) or [form](/learn/submitting-forms):
 
 ```html
 <a
@@ -149,7 +149,7 @@ In HTML you can set an [`[up-on-rendered]`](/up-follow#up-on-rendered) attribute
 ### Awaiting postprocessing {#postprocessing}
 
 After the `up.render()` promise fulfills, fragments may still change due to asynchronous postprocessing.
-To run code after postprocessing has concluded, await the [`up.render().finished`](/up.RenderJob.prototype.finished) promise:
+To run code after postprocessing has concluded, await the [`up.render().finished`](/api/up.RenderJob.prototype.finished) promise:
 
 ```js
 let result = await up.render({ target: '.target', url: '/path' }).finished // mark: .finished
@@ -160,13 +160,13 @@ console.log("Final fragments: ", result.fragments)
 
 The `up.render().finished` promise resolves to the last `up.RenderResult` that updated a fragment.
 If revalidation re-rendered the fragment, it is the result from the
-second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/caching#when-nothing-changed),
+second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/learn/caching#when-nothing-changed),
 it is the result from the initial render pass.
 
 The promise rejects when there is any error during the initial render pass or during revalidation.
 
-Instead of awaiting a promise you may also pass an [`{ onFinished }`](/up.render#options.onFinished) callback.
-In HTML you can set an [`[up-on-finished]`](/up-follow#up-on-finished) attribute on a [link](/up-follow) or [form](/submitting-forms).
+Instead of awaiting a promise you may also pass an [`{ onFinished }`](/api/up.render#options.onFinished) callback.
+In HTML you can set an [`[up-on-finished]`](/api/up-follow#up-on-finished) attribute on a [link](/api/up-follow) or [form](/learn/submitting-forms).
 
 
 Changing options before rendering
@@ -207,7 +207,7 @@ Assume we give a new attribute `[require-session]` to links that require a signe
 <a href="/projects" require-session>My projects</a>
 ```
 
-When clicking the link without a session, a login form should open in a [modal overlay](/up.layer).
+When clicking the link without a session, a login form should open in a [modal overlay](/api/up.layer).
 When the user has signed in successfully, the overlay closes and the original link is followed.
 
 We can implement this with the following handler:
@@ -262,15 +262,15 @@ up.on('up:fragment:loaded', function(event) {
 ```
 
 A skipped render pass is not an error. The `up.render()` promise fulfills with an
-[empty](/up.RenderResult.prototype.none) `up.RenderResult`, and no `{ onRendered }` callback is called.
+[empty](/api/up.RenderResult.prototype.none) `up.RenderResult`, and no `{ onRendered }` callback is called.
 
 To skip responses by a global rule instead of an event listener, configure `up.fragment.config.skipResponse`.
 By default Unpoly skips the following responses:
 
 - Responses without text in their body.
-  Such responses occur when the server answers a [conditional request](/conditional-requests)
+  Such responses occur when the server answers a [conditional request](/learn/conditional-requests)
   with `304 Not Modified`, or responds with `204 No Content`.
-- When [revalidating](/caching#revalidation), if the expired response and fresh response
+- When [revalidating](/learn/caching#revalidation), if the expired response and fresh response
   have the exact same text.
 
 To abort the render pass instead, call `event.preventDefault()`.
@@ -307,27 +307,27 @@ See `up:fragment:loaded` for more examples.
 Handling errors
 ---------------
 
-The promises returned by `up.render()` and [`up.render().finished`](/up.RenderJob.prototype.finished) reject if any error is thrown during rendering, or if the server responds with an [HTTP error code](/error-responses).
+The promises returned by `up.render()` and [`up.render().finished`](/api/up.RenderJob.prototype.finished) reject if any error is thrown during rendering, or if the server responds with an [HTTP error code](/learn/error-responses).
 
 You may handle the following error cases:
 
 | Error case                                                    | JavaScript                                                                                  | HTML                                                                 |
 |---------------------------------------------------------------|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| Server responds with [non-2xx HTTP status](/error-responses) | [`fail`-prefixed options](/error-responses)                                                | [`up-fail`-prefixed attributes](/error-responses)                   |
-| Server responds with [non-2xx HTTP status](/error-responses) | `up.RenderResult` (thrown)                                                                  | —                                                                    |
-| Disconnect or timeout                                         | [`{ onOffline }`](/network-issues)                                                          | [`[up-on-offline]`](/network-issues)                                 |
+| Server responds with [non-2xx HTTP status](/learn/error-responses) | [`fail`-prefixed options](/learn/error-responses)                                                | [`up-fail`-prefixed attributes](/learn/error-responses)                   |
+| Server responds with [non-2xx HTTP status](/learn/error-responses) | `up.RenderResult` (thrown)                                                                  | —                                                                    |
+| Disconnect or timeout                                         | [`{ onOffline }`](/learn/network-issues)                                                          | [`[up-on-offline]`](/learn/network-issues)                                 |
 | Disconnect or timeout                                         | `up.Offline` (thrown)                                                                       | —                                                                    |
 | Disconnect or timeout                                         | `up:fragment:offline`                                                                       | —                                                                    |
-| Target selector not found                                     | [`{ fallback }`](/targeting-fragments#missing-targets)                                      | [`[up-fallback]`](/targeting-fragments#missing-targets)              |
+| Target selector not found                                     | [`{ fallback }`](/learn/targeting-fragments#missing-targets)                                      | [`[up-fallback]`](/learn/targeting-fragments#missing-targets)              |
 | Target selector not found                                     | `up.CannotMatch` (thrown)                                                                   | —                                                                    |
 | Compiler throws error                                         | Global [`error`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event) event | —                                                                    |
-| Render pass was [aborted](/aborting-requests)                 | `up.Aborted` (thrown)                                                                       | —                                                                    |
-| Render pass was [aborted](/aborting-requests)                 | `up:fragment:aborted`                                                                       | —                                                                    |
-| Any error thrown while rendering                              | [`{ onError }`](/up.render#options.onError)                                                 | [`[up-on-error]`](/up-follow#up-on-error)                            |
+| Render pass was [aborted](/learn/aborting-requests)                 | `up.Aborted` (thrown)                                                                       | —                                                                    |
+| Render pass was [aborted](/learn/aborting-requests)                 | `up:fragment:aborted`                                                                       | —                                                                    |
+| Any error thrown while rendering                              | [`{ onError }`](/api/up.render#options.onError)                                                 | [`[up-on-error]`](/api/up-follow#up-on-error)                            |
 
 An error response is rendered with `fail`-prefixed options and then *rejects* the promise with its `up.RenderResult`.
 It does not count as an error for `{ onError }`. To run code after an error response was rendered,
-pass an [`{ onFailRendered }`](/error-responses#fail-options) callback.
+pass an [`{ onFailRendered }`](/learn/error-responses#fail-options) callback.
 
 
 ### Error handling example
@@ -362,7 +362,7 @@ try {
 ```
 
 Note how we use a `fail`-prefixed render option `{ failTarget }` to update a different fragment in case the server responds with an error code.
-See [Handling error responses](/error-responses) for more details on handling server responses with an error code.
+See [Handling error responses](/learn/error-responses) for more details on handling server responses with an error code.
 
 
 ### Errors in user code

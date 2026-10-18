@@ -37,7 +37,7 @@ There is no JSON API to build and no client-side templates to maintain.
 You keep rendering HTML on the server, with the routes and templates you already have.
 
 You also don't need separate fragment endpoints: Unpoly takes the fragment it needs
-and discards the rest of the response. A server [can choose](/optimizing-responses)
+and discards the rest of the response. A server [can choose](/learn/optimizing-responses)
 to render only the requested fragment, but that is an optional optimization.
 Most screens never need it.
 
@@ -46,12 +46,12 @@ Strong defaults
 ---------------
 
 When a link or form updates the main fragment of the page, Unpoly treats the interaction
-as a [navigation](/navigation-defaults) and **mimics what a full page load would have done**:
+as a [navigation](/learn/navigation-defaults) and **mimics what a full page load would have done**:
 
 - The browser URL and history are updated, so the Back button keeps working.
 - The page scrolls to the top, as after a full page load.
 - Focus moves to the new fragment, so keyboard and screen reader users don't get lost.
-- Responses to links are [cached](/caching) and revalidated, so revisits render instantly.
+- Responses to links are [cached](/learn/caching) and revalidated, so revisits render instantly.
 
 Each of these defaults can be changed, per element or globally.
 
@@ -59,7 +59,7 @@ Each of these defaults can be changed, per element or globally.
 Your first thirty minutes
 -------------------------
 
-The rest of this chapter is hands-on. After [installing Unpoly](/install),
+The rest of this chapter is hands-on. After [installing Unpoly](/learn/install),
 you will make one basic move in each area:
 
 - [[start/links]]: Enhance a link to update a fragment.
@@ -67,7 +67,7 @@ you will make one basic move in each area:
 - [[start/overlays]]: Open an existing screen in a modal overlay.
 - [[start/elements]]: Pair your own JavaScript with HTML elements.
 
-You will then learn [the shape of the API](/start/api): one pattern that all
+You will then learn [the shape of the API](/learn/start/api): one pattern that all
 of Unpoly's features follow. Each step works on its own, so you can stop
 after any of them.
 

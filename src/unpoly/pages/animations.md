@@ -9,7 +9,7 @@ An animation fades the element, or moves it to or from a screen edge.
 Using an animation {#animations}
 ------------------
 
-When [appending or prepending](/targeting-fragments#appending-or-prepending) content,
+When [appending or prepending](/learn/targeting-fragments#appending-or-prepending) content,
 set an `[up-animation]` attribute to animate the new children:
 
 ```html
@@ -17,7 +17,7 @@ set an `[up-animation]` attribute to animate the new children:
 ```
 
 The new items fade in below the existing ones.
-When a fragment is *swapped*, use a [transition](/transitions) instead.
+When a fragment is *swapped*, use a [transition](/learn/transitions) instead.
 An `[up-animation]` attribute has no effect on a link that swaps a fragment.
 
 When opening an overlay, `[up-animation]` sets the opening animation and `[up-close-animation]` the closing animation:
@@ -97,7 +97,7 @@ up.animation('fade-in', function(element, options) {
 ```
 
 The name is now available in `[up-animation]` attributes, `{ animation }` options
-and as one half of a [combined transition](/transitions#combining-animations).
+and as one half of a [combined transition](/learn/transitions#combining-animations).
 
 ### Honoring the caller's options {#custom-effect-contract}
 

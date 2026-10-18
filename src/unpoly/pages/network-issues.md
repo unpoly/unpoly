@@ -23,7 +23,7 @@ and the error code `ERR_INTERNET_DISCONNECTED`.
   </figcaption>
 </figure>
 
-Interacting with an Unpoly-enhanced [link](/up-follow) or [form](/submitting-forms) while offline will *not* change the page.
+Interacting with an Unpoly-enhanced [link](/api/up-follow) or [form](/learn/submitting-forms) while offline will *not* change the page.
 Instead Unpoly emits an `up:fragment:offline` event and lets you decide how to handle the connection loss.
 Without a listener, the page stays as it is and the user gets no feedback, so most apps
 should register one.
@@ -39,7 +39,7 @@ up.on('up:fragment:offline', function(event) {
 })
 ```
 
-To handle connection loss for a single link or form, pass an [`{ onOffline }`](/up.render#options.onOffline) option
+To handle connection loss for a single link or form, pass an [`{ onOffline }`](/api/up.render#options.onOffline) option
 to the rendering function. The callback receives the same event:
 
 ```js
@@ -50,7 +50,7 @@ up.follow(link, {
 })
 ```
 
-In HTML, set an [`[up-on-offline]`](/up-follow#up-on-offline) attribute with a JavaScript snippet:
+In HTML, set an [`[up-on-offline]`](/api/up-follow#up-on-offline) attribute with a JavaScript snippet:
 
 ```html
 <a href="/bids" up-follow up-on-offline="alert('You are offline. Please try again later.')"> <!-- mark: up-on-offline -->
@@ -75,10 +75,10 @@ Their promise rejects with an `up.Offline` error, and an `up:request:offline` ev
 
 ### Expired pages remain accessible while offline {#offline-cache}
 
-Even without a connection, [cached content](/caching) remains navigable for [90 minutes](/up.network.config#config.cacheEvictAge).
+Even without a connection, [cached content](/learn/caching) remains navigable for [90 minutes](/api/up.network.config#config.cacheEvictAge).
 This means that an offline user can instantly access pages that they already visited this session.
 
-While offline, [cache revalidation](/caching#revalidation) of expired content will fail.
+While offline, [cache revalidation](/learn/caching#revalidation) of expired content will fail.
 
 When revalidation fails, or when accessing uncached content, Unpoly runs `onOffline()` callbacks and emits `up:fragment:offline`.
 The page will not be changed unless your code says so.
@@ -86,7 +86,7 @@ The page will not be changed unless your code says so.
 
 ### Preloading links before disconnects
 
-You can use an [`[up-preload="insert"]`](/up-preload#up-preload) attribute
+You can use an [`[up-preload="insert"]`](/api/up-preload#up-preload) attribute
 to eagerly preload links as soon as they are inserted into the DOM. This way they remain navigable while offline:
 
 ```html
@@ -116,9 +116,9 @@ Often the device reports a connection, but we're *effectively offline*:
 Unpoly handles flaky connections with *timeouts*. A request that times out also runs `onOffline()` callbacks and emits `up:fragment:offline`.
 This means that your [disconnect handling](#disconnects) covers flaky connections as well.
 
-All requests have a [default timeout of 90 seconds](/up.network.config#config.timeout).
-You may use different timeouts for individual requests by passing a [`{ timeout }`](/up.render#options.timeout) option
-or by setting an [`[up-timeout]`](/up-follow#up-timeout) attribute:
+All requests have a [default timeout of 90 seconds](/api/up.network.config#config.timeout).
+You may use different timeouts for individual requests by passing a [`{ timeout }`](/api/up.render#options.timeout) option
+or by setting an [`[up-timeout]`](/api/up-follow#up-timeout) attribute:
 
 ```html
 <a href="/report" up-follow up-timeout="10000">Generate report</a> <!-- mark: up-timeout="10000" -->
@@ -131,8 +131,8 @@ Slow server responses {#slow-server-responses}
 Even with a good connection, your server may take long to render an expensive page.
 This is what happens while the user waits:
 
-1. When a request takes [longer than 400 ms](/up.network.config#config.lateDelay), Unpoly emits `up:network:late`
-   and shows the [progress bar](/progress-bar).
+1. When a request takes [longer than 400 ms](/api/up.network.config#config.lateDelay), Unpoly emits `up:network:late`
+   and shows the [progress bar](/learn/progress-bar).
 2. When the response arrives, Unpoly emits `up:request:loaded`. For a request that renders a fragment,
    `up:fragment:loaded` follows, and the response is processed like any other.
 3. When no response arrives within the [timeout](#flaky-connections), Unpoly emits `up:request:offline`
@@ -141,6 +141,6 @@ This is what happens while the user waits:
 
 Once no slow requests are left, Unpoly emits `up:network:recover` and hides the progress bar.
 
-While the user waits, you can also show [loading state](/loading-state) within the targeted fragment.
+While the user waits, you can also show [loading state](/learn/loading-state) within the targeted fragment.
 
 @page network-issues

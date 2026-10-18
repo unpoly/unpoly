@@ -33,7 +33,7 @@ When the link is clicked, Unpoly requests `/article2` and receives HTML like thi
 ```
 
 Before the new HTML is rendered, Unpoly looks for `[up-keep]` elements in the fragment that is about to be replaced.
-For each one it [derives a target selector](/target-derivation) (here `#player`) and looks for a match in the new content.
+For each one it [derives a target selector](/learn/target-derivation) (here `#player`) and looks for a match in the new content.
 When it finds one, the existing element is moved into the new fragment and its counterpart from the response is discarded.
 Everything else is updated as usual:
 
@@ -48,7 +48,7 @@ Everything else is updated as usual:
 ```
 
 The kept element is the *old* element, so it still plays `song1.mp3`.
-Its event listeners and any state set by a [compiler](/enhancing-elements) survive the update.
+Its event listeners and any state set by a [compiler](/learn/enhancing-elements) survive the update.
 Its compilers don't run again and its destructors are not called. Once an update no longer contains a
 match, the element is destroyed like any other, and its destructors run.
 
@@ -56,7 +56,7 @@ When you target an `[up-keep]` element directly, it is kept as well, so the upda
 To replace it, [force an update](#forcing-updates).
 
 > [important]
-> The `[up-keep]` element needs a [derivable target selector](/target-derivation), like an `[id]`.
+> The `[up-keep]` element needs a [derivable target selector](/learn/target-derivation), like an `[id]`.
 > If Unpoly cannot uniquely identify the element within both the old and the new content,
 > the element is replaced like any other.
 
@@ -96,7 +96,7 @@ and any error messages:
 ```
 
 Unpoly compares the element's **initial HTML** as it was rendered by the server.
-Changes made on the client, like elements inserted by a [compiler](/enhancing-elements), are ignored.
+Changes made on the client, like elements inserted by a [compiler](/learn/enhancing-elements), are ignored.
 
 Before the HTML is compared, light normalization is applied: indentation and fluctuating attributes like CSP nonces are ignored.
 You can customize this with `up.fragment.config.normalizeKeepHTML`.
@@ -104,11 +104,11 @@ You can customize this with `up.fragment.config.normalizeKeepHTML`.
 
 ### Keeping an element until its data changes {#same-data}
 
-To keep an element only as long as its [data](/data) stays the same, set `[up-keep="same-data"]`.
+To keep an element only as long as its [data](/learn/data) stays the same, set `[up-keep="same-data"]`.
 The element is only replaced when its `[up-data]` attribute differs between versions.
 Changes in other attributes or in its children are ignored.
 
-The example below uses a [compiler](/enhancing-elements) to render an interactive map into elements with a `.map` class.
+The example below uses a [compiler](/learn/enhancing-elements) to render an interactive map into elements with a `.map` class.
 The initial map location is passed as an `[up-data]` attribute.
 Because we don't want to lose client-side state like pan or zoom, we keep the map widget as long as possible.
 Only when the map's initial location changes, we re-render the map around the new location:
@@ -124,7 +124,7 @@ Instead of `[up-data]` we can also use HTML5 [`[data-*]` attributes](https://dev
 ```
 
 Unpoly compares the element's **initial data** as it was rendered by the server.
-Changes to the data object made on the client, e.g. by a [compiler](/enhancing-elements), are ignored.
+Changes to the data object made on the client, e.g. by a [compiler](/learn/enhancing-elements), are ignored.
 
 > [tip]
 > Instead of re-rendering when data changes you can [inspect the data of the new version](#updating-data)
@@ -152,7 +152,7 @@ up.on('up:fragment:keep', 'audio', function(event) {
 })
 ```
 
-Short conditions can also be inlined as an [`[up-on-keep]`](/up-keep#up-on-keep) attribute.
+Short conditions can also be inlined as an [`[up-on-keep]`](/api/up-keep#up-on-keep) attribute.
 The snippet can access the old element as `this`, and the new element as `newFragment`:
 
 ```html
@@ -168,19 +168,19 @@ There are several ways to replace an `[up-keep]` element despite its attribute:
 - Give the new element an `[up-keep="false"]` attribute. It then replaces the existing element,
   even if that element has `[up-keep]`.
 - Give the new element a different `[id]` or `[up-id]` attribute,
-  so its [derived target](/target-derivation) no longer matches the existing element.
+  so its [derived target](/learn/target-derivation) no longer matches the existing element.
 - Prevent the `up:fragment:keep` event that is emitted on the existing element.
 
 You can also render without keeping any elements at all:
 
-- Links or forms can force a swap of all `[up-keep]` elements by setting an [`[up-use-keep="false"]`](/up-follow#up-use-keep) attribute.
-- Rendering functions can force a swap by passing a [`{ keep: false }`](/up.render#options.keep) option.
+- Links or forms can force a swap of all `[up-keep]` elements by setting an [`[up-use-keep="false"]`](/api/up-follow#up-use-keep) attribute.
+- Rendering functions can force a swap by passing a [`{ keep: false }`](/api/up.render#options.keep) option.
 
 
 Updating data for kept elements {#updating-data}
 -------------------------------
 
-Even when keeping an element, you may want to pick up the [data](/data)
+Even when keeping an element, you may want to pick up the [data](/learn/data)
 from the new element that was discarded.
 
 Let's say you want to display a map within an element. The center of the map
@@ -190,7 +190,7 @@ is encoded as an `[up-data]` attribute:
 <div class="map" up-keep up-data="{ lat: 50.86, lng: 7.40 }"></div>
 ```
 
-We can initialize the map using a [compiler](/enhancing-elements) like this:
+We can initialize the map using a [compiler](/learn/enhancing-elements) like this:
 
 ```js
 up.compiler('.map', function(element, data) {
@@ -219,7 +219,7 @@ It is emitted after all keep conditions have been evaluated and can no longer pr
 
 > [tip]
 > Instead of keeping an element and updating its data, you may also
-> [preserve an element's data through reloads](/data#preserving).
+> [preserve an element's data through reloads](/learn/data#preserving).
 
 
 @page keeping-elements

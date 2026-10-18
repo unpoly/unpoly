@@ -23,10 +23,10 @@ and add an `[up-submit]` attribute:
 When the user submits, Unpoly sends the form data to the server.
 Your server processes it like any form submission, usually responding with
 a redirect to the next screen. Unpoly extracts the response's
-[main fragment](/main) and swaps it into the current page.
+[main fragment](/api/main) and swaps it into the current page.
 Elements outside the updated fragment keep their state, like unsaved input in other forms.
 
-To update a different fragment, add an [`[up-target]`](/up-submit#up-target) attribute with a CSS selector:
+To update a different fragment, add an [`[up-target]`](/api/up-submit#up-target) attribute with a CSS selector:
 
 ```html
 <form method="post" action="/comments" up-submit up-target="#comments"> <!-- mark: up-target="#comments" -->
@@ -128,7 +128,7 @@ To submit all forms through Unpoly without annotating each one, see [[handling-a
 
 To build a date picker, tag editor or other control that works with these features, see [[custom-form-fields]].
 
-To submit a form whenever a field changes, like in a search or filter bar, see [Submitting when a field changes](/submitting-forms#autosubmit).
+To submit a form whenever a field changes, like in a search or filter bar, see [Submitting when a field changes](/learn/submitting-forms#autosubmit).
 
 To fine-tune which events trigger a validation and how changes are debounced, see [[watch-options]].
 

@@ -5,13 +5,13 @@ By embedding template elements into your responses, your frontend can clone HTML
 another server request.
 
 While Unpoly apps render on the server primarily, client-side templates can be useful
-for [placeholders](/placeholders), small [overlays](/opening-overlays), or [optimistic rendering](/optimistic-rendering).
+for [placeholders](/learn/placeholders), small [overlays](/learn/opening-overlays), or [optimistic rendering](/learn/optimistic-rendering).
 
 
 Rendering a template
 --------------------
 
-Instead of [rendering an HTML string](/providing-html#string), you may also refer to a [`<template>` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template).
+Instead of [rendering an HTML string](/learn/providing-html#string), you may also refer to a [`<template>` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template).
 This is useful for using the same HTML multiple times, or when you don't
 want to embed long HTML strings into attributes.
 
@@ -39,8 +39,8 @@ All of this happens locally, without making a server request.
 
 ### Shorthand
 
-Since the target can be [derived](/target-derivation) from the template's root element (`.target`), and since
-[we can omit `[href]`](/providing-html#omitting-href), we can shorten the link to this:
+Since the target can be [derived](/learn/target-derivation) from the template's root element (`.target`), and since
+[we can omit `[href]`](/learn/providing-html#omitting-href), we can shorten the link to this:
 
 ```html
 <a up-fragment="#my-template">Click me</a>
@@ -90,12 +90,12 @@ There are multiple methods to implement template variables, including [compilers
 
 ### <em class="heading-prefix">Option 1</em> Processing compiler data {#compiler-postprocessing}
 
-Templates can be cloned with a [data object](/data), which is passed to any compiler function
+Templates can be cloned with a [data object](/learn/data), which is passed to any compiler function
 that compiles the cloned element. This lets you implement template variables
 without a [template engine](#template-engine).
 
 When we reference a template, we can pass a data object for the cloned element as an
-[`[up-use-data]`](/up-follow#up-use-data) attribute:
+[`[up-use-data]`](/api/up-follow#up-use-data) attribute:
 
 ```html
 <a up-fragment="#task-template" up-use-data="{ description: 'Buy toast' }">
@@ -103,7 +103,7 @@ When we reference a template, we can pass a data object for the cloned element a
 </a>
 ```
 
-By defining a matching [compiler](/enhancing-elements) function, we can post-process the cloned element
+By defining a matching [compiler](/learn/enhancing-elements) function, we can post-process the cloned element
 and its data object. When the compiler below is called with the cloned element, its `data` argument will be set to `{ description: 'Buy toast' }`:
 
 ```js
@@ -114,7 +114,7 @@ up.compiler('.task', function(task, data) {
 })
 ```
 
-Sometimes we cannot use the `[up-use-data]` attribute, e.g. when configuring a [placeholder](/placeholders).
+Sometimes we cannot use the `[up-use-data]` attribute, e.g. when configuring a [placeholder](/learn/placeholders).
 In that case we can append the data object after the template selector:
 
 ```html
@@ -172,7 +172,7 @@ or integrate your own:
 
 - Listen to the `up:template:clone` event on your custom template elements.
 - Process the given template and data using a templating function of your choice.
-- Set `event.nodes` to a [list](/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
+- Set `event.nodes` to a [list](/api/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
 the template results.
 
 #### Example integrations {#template-engine-example}
@@ -201,7 +201,7 @@ up.on('up:template:clone', '[type="text/minimustache"]', function(event) { // ma
 
 ### <em class="heading-prefix">Option 3</em> Modifying the element programmatically {#callback-postprocessing}
 
-You can use the [`[up-on-rendered]`](/up-follow#up-on-rendered) attribute to change the template element
+You can use the [`[up-on-rendered]`](/api/up-follow#up-on-rendered) attribute to change the template element
 after it was cloned and inserted. The callback is provided with an `up.RenderResult` which
 references the element we want to customize:
 
@@ -214,7 +214,7 @@ references the element we want to customize:
 </a>
 ```
 
-From JavaScript you can [manually clone](/up.template.clone) a template and then modify the result:
+From JavaScript you can [manually clone](/api/up.template.clone) a template and then modify the result:
 
 ```js
 let [fragment] = up.template.clone('#task-template')
@@ -225,11 +225,11 @@ up.render({ fragment })
 
 ## Template lookup order {#lookup}
 
-When matching a template with its CSS selector, Unpoly will start looking in the [origin](/origin) [layer](/up.layer) first.
+When matching a template with its CSS selector, Unpoly will start looking in the [origin](/api/origin) [layer](/api/up.layer) first.
 The origin is the element that caused an update. In the example above, this would be the clicked hyperlink.
 
 If no template is found in the origin layer, Unpoly will look in ancestor layers, preferring closer layers.
-This allows you to declare global templates in your application layout (typically rendered into the [root layer](/up.layer.root)),
+This allows you to declare global templates in your application layout (typically rendered into the [root layer](/api/up.layer.root)),
 but override them with more specific templates in overlays.
 
 

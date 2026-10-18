@@ -30,8 +30,8 @@ up.log = (function() {
   @param {boolean} [config.enabled=false]
     Whether Unpoly will print debugging information to the developer console.
 
-    Debugging information includes which elements are being [compiled](/up.script)
-    and which [events](/up.event) are being emitted.
+    Debugging information includes which elements are being [compiled](/api/up.script)
+    and which [events](/api/up.event) are being emitted.
     Note that errors will always be printed, regardless of this setting.
   @param {boolean} [config.banner=true]
     Print the Unpoly banner to the developer console.
@@ -137,8 +137,8 @@ up.log = (function() {
   /*-
   Starts printing debugging information to the developer console.
 
-  Debugging information includes which elements are being [compiled](/up.script)
-  and which [events](/up.event) are being emitted.
+  Debugging information includes which elements are being [compiled](/api/up.script)
+  and which [events](/api/up.event) are being emitted.
 
   Errors will always be printed, regardless of this setting.
 

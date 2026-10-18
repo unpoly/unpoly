@@ -31,12 +31,12 @@ all dismiss the overlay, labeled `dismiss()`.
 </figure>
 
 Acceptance usually continues a larger interaction in the parent layer, like
-[selecting a record that was just created](/subinteractions).
+[selecting a record that was just created](/learn/subinteractions).
 Dismissal usually means cancellation. When you wait for a subtask to finish,
 you are interested in acceptance, but not in dismissal.
 
 When an overlay closes, overlays it has opened are closed with it, its pending requests are
-[aborted](/aborting-requests#layers), and [focus returns](/focus#overlays) to the link that opened it.
+[aborted](/learn/aborting-requests#layers), and [focus returns](/learn/focus#overlays) to the link that opened it.
 
 
 Result values {#result-values}
@@ -44,8 +44,8 @@ Result values {#result-values}
 
 An overlay can close with a *result value*. The value is passed to the layer that
 opened the overlay, which can use it to continue its own interaction:
-[select a new option](/subinteractions#adding-options-to-an-existing-select),
-[navigate to another screen](/subinteractions#navigating-away), or reload a list.
+[select a new option](/learn/subinteractions#adding-options-to-an-existing-select),
+[navigate to another screen](/learn/subinteractions#navigating-away), or reload a list.
 See [[subinteractions#result-values]] for how the opener receives the value.
 
 ### Acceptance values {#acceptance-values}
@@ -68,7 +68,7 @@ In the opener's `[up-on-accepted]` attribute, the value is available as `value`:
 ### Dismissal values {#dismissal-values}
 
 A dismissed overlay can pass a value too. When Unpoly's own
-[dismiss controls](/customizing-overlays#customizing-dismiss-controls) close an overlay,
+[dismiss controls](/learn/customizing-overlays#customizing-dismiss-controls) close an overlay,
 they set the reason for dismissal as the value.
 For instance, clicking the `×` button dismisses with the value `":button"`:
 
@@ -105,13 +105,13 @@ See [[subinteractions#close-conditions]].
 Closing when a button is clicked {#on-click}
 --------------------------------
 
-To close the [current layer](/up.layer.current) when a button is clicked, set an `[up-accept]` or `[up-dismiss]` attribute:
+To close the [current layer](/api/up.layer.current) when a button is clicked, set an `[up-accept]` or `[up-dismiss]` attribute:
 
 ```html
 <button up-accept>Close overlay</button> <!-- mark: up-accept -->
 ```
 
-To close with a [result value](#result-values), set the attribute to a [relaxed JSON](/relaxed-json) value:
+To close with a [result value](#result-values), set the attribute to a [relaxed JSON](/api/relaxed-json) value:
 
 ```html
 <button up-accept="{ id: 5 }">Choose user #5</button> <!-- mark: { id: 5 } -->
@@ -121,7 +121,7 @@ To close with a [result value](#result-values), set the attribute to a [relaxed 
 Closing when a link is followed {#on-follow}
 -------------------------------
 
-When [reusing a page within an overlay](/subinteractions#reusing-existing-screens),
+When [reusing a page within an overlay](/learn/subinteractions#reusing-existing-screens),
 you may want a link that closes the overlay, but navigates somewhere else when clicked on the root layer.
 
 For this, set `[up-accept]` or `[up-dismiss]` on a hyperlink (`<a>`) with a fallback URL in its `[href]` attribute:
@@ -131,7 +131,7 @@ For this, set `[up-accept]` or `[up-dismiss]` on a hyperlink (`<a>`) with a fall
 ```
 
 Clicked in an overlay, the link accepts the overlay and the `click` event is prevented.
-Clicked on the [root layer](/up.layer.root), the link navigates to `/list`.
+Clicked on the [root layer](/api/up.layer.root), the link navigates to `/list`.
 
 
 Closing when a form is submitted {#on-submit}
@@ -159,8 +159,8 @@ For example, this form has two fields named `foo` and `bar`:
 </form>
 ```
 
-The params are exactly those a [regular submission](/up.Params.fromForm) would send, so a
-[submit button](/up.Params.fromForm#submit-button) with a `[name]` also contributes its value.
+The params are exactly those a [regular submission](/api/up.Params.fromForm) would send, so a
+[submit button](/api/up.Params.fromForm#submit-button) with a `[name]` also contributes its value.
 This lets the opener see *which* button was pressed:
 
 ```html
@@ -189,7 +189,7 @@ is prevented and no request is made.
 
 When the same form is submitted on the root layer, there is no overlay to close.
 The form is then submitted regularly, e.g. with a `POST` request.
-This lets you [reuse an existing form within an overlay](/subinteractions#reusing-existing-screens).
+This lets you [reuse an existing form within an overlay](/learn/subinteractions#reusing-existing-screens).
 
 ### Closing after the submission request
 
@@ -204,8 +204,8 @@ an `[up-accept]` or `[up-dismiss]` attribute. Make a regular form that is handle
 
 After the server has processed the request, it can close the overlay in several ways:
 
-- Redirecting to a [location that is a close condition](/subinteractions#location-condition)
-- Emitting an [event that is a close condition](/subinteractions#event-condition)
+- Redirecting to a [location that is a close condition](/learn/subinteractions#location-condition)
+- Emitting an [event that is a close condition](/learn/subinteractions#event-condition)
 - Sending a [response header that closes the overlay](#from-server)
 
 
@@ -213,7 +213,7 @@ Closing from JavaScript {#from-script}
 -----------------------
 
 When you cannot use a [close condition](#close-conditions), call `up.layer.accept()`
-to accept the [current layer](/up.layer.current):
+to accept the [current layer](/api/up.layer.current):
 
 ```js
 up.layer.accept()
@@ -233,7 +233,7 @@ Closing from the server {#from-server}
 
 When you cannot use a [close condition](#close-conditions),
 the server can close the targeted overlay by sending an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` response header.
-The header value is the [result value](#result-values) as [relaxed JSON](/relaxed-json), or `null` for no value:
+The header value is the [result value](#result-values) as [relaxed JSON](/api/relaxed-json), or `null` for no value:
 
 ```http
 Content-Type: text/html
@@ -256,7 +256,7 @@ Keeping an overlay open {#keeping-open}
 -----------------------
 
 To keep an overlay open, for example when it has unsaved changes, prevent its
-[`up:layer:dismiss`](/up:layer:dismiss) event. This also blocks the Escape key, backdrop clicks
+[`up:layer:dismiss`](/api/up:layer:dismiss) event. This also blocks the Escape key, backdrop clicks
 and the close button:
 
 ```js
@@ -268,13 +268,13 @@ up.on('up:layer:dismiss', function(event) {
 })
 ```
 
-To keep only one particular overlay open, set an [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attribute
-on the opening link, or pass an [`{ onDismiss }`](/up.layer.open#options.onDismiss) callback, and call `event.preventDefault()` in it.
+To keep only one particular overlay open, set an [`[up-on-dismiss]`](/api/up-layer-new#up-on-dismiss) attribute
+on the opening link, or pass an [`{ onDismiss }`](/api/up.layer.open#options.onDismiss) callback, and call `event.preventDefault()` in it.
 Mind the tense: `[up-on-dismiss]` runs *before* the overlay closes,
 <code>[up-on-dismiss<b>ed</b>]</code> (past tense) runs *after* it closed.
 
 No listener can keep an overlay open when the user presses the Back button, since
-[going back](/history-in-overlays#restoration) closes all overlays.
+[going back](/learn/history-in-overlays#restoration) closes all overlays.
 
 When an overlay closes because a layer below it is [updated](#peeling), `event.value` is `":peel"`,
 so a listener can treat that case differently.
@@ -286,7 +286,7 @@ Closing by targeting a background layer {#peeling}
 When a link or form in an overlay targets a background layer, the overlay
 is [dismissed](#intents) once the background layer is updated. This behavior is called *peeling*.
 
-The form below uses an [`[up-layer]`](/targeting-other-layers) attribute to update the parent layer
+The form below uses an [`[up-layer]`](/learn/targeting-other-layers) attribute to update the parent layer
 after a successful submission:
 
 ```html
@@ -302,9 +302,9 @@ If a listener [keeps the overlay open](#keeping-open), the background layer is n
 To close the overlay anyway, set an `[up-peel="force"]` attribute.
 
 > [note]
-> The form still updates its own layer when the [server responds with an error code](/error-responses)
+> The form still updates its own layer when the [server responds with an error code](/learn/error-responses)
 > due to a validation error.\
-> To update another layer in this case, set an [`[up-fail-layer]`](/up-follow#up-fail-layer) attribute.
+> To update another layer in this case, set an [`[up-fail-layer]`](/api/up-follow#up-fail-layer) attribute.
 
 
 ### Accepting peeled overlays
@@ -323,7 +323,7 @@ Discarded responses {#discarded-responses}
 -------------------
 
 When a server response closes an overlay, nothing from that response is rendered.
-This happens when the response matches a [close condition](/subinteractions#close-conditions),
+This happens when the response matches a [close condition](/learn/subinteractions#close-conditions),
 or when the server [explicitly closes](#from-server) the overlay.
 
 ### Using the discarded response {#using-the-discarded-response}
@@ -340,17 +340,17 @@ without making another request.
 
 The `{ response }` property is set whenever a server response causes an overlay to close:
 
-- When a [server-sent event](/X-Up-Events) matches a [close condition](/subinteractions#close-conditions).
-- When the new location matches a [close condition](/subinteractions#close-conditions).
+- When a [server-sent event](/api/X-Up-Events) matches a [close condition](/learn/subinteractions#close-conditions).
+- When the new location matches a [close condition](/learn/subinteractions#close-conditions).
 - When the server [explicitly closes](#from-server) an overlay with an HTTP header.
 
 
 ### Rendering discarded notification flashes {#rendering-discarded-notification-flashes}
 
-[Confirmation flashes](/flashes) in a discarded response would be lost as well.
+[Confirmation flashes](/learn/flashes) in a discarded response would be lost as well.
 
 An `[up-flashes]` element picks up flashes from a closing overlay and
-[renders them into the parent layer](/flashes#from-closing-overlays).
+[renders them into the parent layer](/learn/flashes#from-closing-overlays).
 
 
 Close animation

@@ -23,7 +23,7 @@ Also set an `[up-target]` attribute indicating which fragment to update:
 </div>
 ```
 
-The server is expected to respond with HTML that contains an element matching the [target selector](/targeting-fragments) (`.target`):
+The server is expected to respond with HTML that contains an element matching the [target selector](/learn/targeting-fragments) (`.target`):
 
 ```html
 <html>
@@ -36,11 +36,11 @@ The server is expected to respond with HTML that contains an element matching th
 ```
 
 The response may contain other HTML, but only the element matching `.target` is extracted and placed into the page.
-Apart from [hungry elements](/hungry-elements), other elements in the response are discarded, and the corresponding elements on the page stay unchanged.
+Apart from [hungry elements](/learn/hungry-elements), other elements in the response are discarded, and the corresponding elements on the page stay unchanged.
 
 > [tip]
-> See [targeting fragments](/targeting-fragments) for ways of controlling how the
-> new fragment is inserted. For instance, you can choose to [append](/targeting-fragments#appending-or-prepending)
+> See [targeting fragments](/learn/targeting-fragments) for ways of controlling how the
+> new fragment is inserted. For instance, you can choose to [append](/learn/targeting-fragments#appending-or-prepending)
 > the fragment instead of swapping it.
 
 
@@ -63,9 +63,9 @@ When the form is submitted, the server is expected to respond with HTML that con
 
 If the server responds with an error code, Unpoly ignores the `[up-target]` attribute
 and updates the selector in the `[up-fail-target]` attribute instead. The default fail target
-is the form itself. See [Handling error responses](/error-responses) for details.
+is the form itself. See [Handling error responses](/learn/error-responses) for details.
 
-See [Submitting forms in-place](/submitting-forms) for an expanded example.
+See [Submitting forms in-place](/learn/submitting-forms) for an expanded example.
 
 
 ### Programmatic API
@@ -76,7 +76,7 @@ To render remote content from JavaScript, pass a `{ url }` option to the `up.ren
 up.render({ url: '/path', target: '.target' })
 ```
 
-When the fragment change represents a [navigation](/navigation-defaults), use `up.navigate()` instead.
+When the fragment change represents a [navigation](/learn/navigation-defaults), use `up.navigate()` instead.
 It applies the navigation defaults, which update the browser location, scroll position and focus
 when the main fragment changes:
 
@@ -95,7 +95,7 @@ You can render such a string without a server request.
 ### Replacing a fragment's children {#content}
 
 To replace only an element's children, pass the new [inner HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML)
-as an [`[up-content]`](/up-follow#up-content) attribute or [`{ content }`](/up.render#options.content) option.
+as an [`[up-content]`](/api/up-follow#up-content) attribute or [`{ content }`](/api/up.render#options.content) option.
 
 For example, take the following HTML:
 
@@ -119,14 +119,14 @@ Clicking the link changes the targeted element's inner HTML to the attribute val
 </div>
 ```
 
-Only the new inner HTML is inserted and [compiled](/enhancing-elements).
+Only the new inner HTML is inserted and [compiled](/learn/enhancing-elements).
 The element node itself, including its attributes and event listeners, stays unchanged.
 
 
 ### Rendering a string that only contains the fragment {#fragment}
 
 To render a string of HTML comprising *only* the new fragment's [outer HTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/outerHTML),
-pass it as a [`{ fragment }`](/up.render#options.fragment) option:
+pass it as a [`{ fragment }`](/api/up.render#options.fragment) option:
 
 ```js
 // This will update .target
@@ -134,9 +134,9 @@ up.render({ fragment: '<div class="target">New content</div>' }) // mark: fragme
 ```
 
 Note how we omitted a `{ target }` option.
-The target is [derived](/target-derivation) from the root element in the given HTML, yielding `.target` in the example above.
+The target is [derived](/learn/target-derivation) from the root element in the given HTML, yielding `.target` in the example above.
 
-In HTML, embed the fragment in an [`[up-fragment]`](/up-follow#up-fragment) attribute:
+In HTML, embed the fragment in an [`[up-fragment]`](/api/up-follow#up-fragment) attribute:
 
 ```html
 <a href="#" up-fragment='<div class="target">New content</div>'>Click me</a> <!-- mark: up-fragment='<div class="target">New content</div>' -->
@@ -173,7 +173,7 @@ up.render({ target: '.foo, .bar', document: html })
 Only the targeted elements are extracted and placed into the page.
 Other elements parsed from the document string are discarded.
 
-In HTML, the same option is available as an [`[up-document]`](/up-follow#up-document) attribute.
+In HTML, the same option is available as an [`[up-document]`](/api/up-follow#up-document) attribute.
 
 
 ### Omitting `[href]` for local updates {#omitting-href}
@@ -184,7 +184,7 @@ When updating fragments from a string or `<template>`, you may omit the `[href="
 <a up-target=".target" up-content="New content">Click me</a> <!-- mark: up-content="New content" -->
 ```
 
-Unpoly [makes sure](/up.link.config#config.clickableSelectors) that such a link is focusable and supports keyboard activation.
+Unpoly [makes sure](/api/up.link.config#config.clickableSelectors) that such a link is focusable and supports keyboard activation.
 
 Most browsers only tint and underline an `a[href]` element. You may need to update your CSS to also style links without an `[href]` attribute:
 
@@ -208,7 +208,7 @@ let userText = document.querySelector('wysiwyg-textarea').value
 up.render({ fragment: '<div class="foo">' + up.util.escapeHTML(userText) + '</div>' })
 ```
 
-We also recommend a [Content Security Policy](/script-security).
+We also recommend a [Content Security Policy](/learn/script-security).
 
 
 Rendering a `<template>` {#template}
@@ -233,7 +233,7 @@ in any attribute or option that accepts HTML:
 
 The template is cloned and the `.target` is updated with a matching element from the clone.
 
-See [Templates](/templates) for many more examples, including ways to define [dynamic templates](/templates#dynamic) with variables, loops or conditions.
+See [Templates](/learn/templates) for many more examples, including ways to define [dynamic templates](/learn/templates#dynamic) with variables, loops or conditions.
 
 
 Rendering an `Element` object {#element}
@@ -251,10 +251,10 @@ up.render({ target: '.target', content: element })
 If the element was already [attached](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected)
 before rendering, it is moved to the target position in the DOM tree.
 
-The element is [compiled](/enhancing-elements) after insertion.
-If the element has been compiled before, it is [not re-compiled](/up.hello#recompiling-elements).
+The element is [compiled](/learn/enhancing-elements) after insertion.
+If the element has been compiled before, it is [not re-compiled](/api/up.hello#recompiling-elements).
 
-If the element is a [template](/templates), it is cloned before insertion.
+If the element is a [template](/learn/templates), it is cloned before insertion.
 
 
 Rendering an `up.Response` object {#response}
@@ -267,13 +267,13 @@ let response = await up.request('/path')
 up.render({ target: '.target', response })
 ```
 
-In addition to matching `.target` in the [response text](/up.Response.prototype.text), the response headers are processed.
+In addition to matching `.target` in the [response text](/api/up.Response.prototype.text), the response headers are processed.
 For example, when the response was sent with an `X-Up-Target` header, that header changes the rendered selector.
 The `up:fragment:loaded` event is emitted as if the response had been loaded by the render pass itself.
 
 > [tip]
 > Rendering an `up.Response` is useful when
-> [accessing the discarded response](/closing-overlays#using-the-discarded-response) of an overlay that was closed by the server.
+> [accessing the discarded response](/learn/closing-overlays#using-the-discarded-response) of an overlay that was closed by the server.
 
 
 @page providing-html

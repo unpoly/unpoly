@@ -6,7 +6,7 @@ This picks up changes made by other users or by background jobs,
 using regular HTTP requests instead of a persistent connection.
 
 > [tip]
-> When a delay of a few seconds is too much, your server can [signal changes as they happen](/real-time-updates).
+> When a delay of a few seconds is too much, your server can [signal changes as they happen](/learn/real-time-updates).
 
 
 ## Polling a fragment {#example}
@@ -27,11 +27,11 @@ The rest of the page is left alone. Reloading does not scroll, move focus or cha
 The response is expected to again contain an `[up-poll]` attribute on the fragment.
 This is how the server keeps polling going, or [stops it](#stopping).
 
-A reload is a regular render pass: it [aborts](/aborting-requests) earlier requests targeting the fragment or its descendants,
+A reload is a regular render pass: it [aborts](/learn/aborting-requests) earlier requests targeting the fragment or its descendants,
 and is itself aborted when the user updates the fragment or a container around it.
 
-While the reload is loading, the fragment gets the [`.up-loading`](/feedback-classes) class.
-To prevent this, set an [`[up-feedback=false]`](/up-poll#up-feedback) attribute on the fragment.
+While the reload is loading, the fragment gets the [`.up-loading`](/learn/feedback-classes) class.
+To prevent this, set an [`[up-feedback=false]`](/api/up-poll#up-feedback) attribute on the fragment.
 
 
 ## Controlling the reload interval {#interval}
@@ -71,7 +71,7 @@ which is cheaper than rendering the full page it was first loaded with.
 
 ## The target selector is derived {#target}
 
-Unpoly [derives](/target-derivation) a target selector from the polling element,
+Unpoly [derives](/learn/target-derivation) a target selector from the polling element,
 so it can find the element's counterpart in the response.
 The element below is polled with the selector `#score`:
 
@@ -89,14 +89,14 @@ selector that identifies the element. Give the element a unique `[id]` or `[up-i
 
 Polling pauses while the browser tab is hidden, and resumes when the user returns to the tab.
 
-Polling also pauses while the fragment's [layer](/up.layer) is covered by an overlay,
+Polling also pauses while the fragment's [layer](/api/up.layer) is covered by an overlay,
 and resumes when the overlay closes. To keep polling under an overlay,
-set an [`[up-if-layer=any]`](/up-poll#up-if-layer) attribute.
+set an [`[up-if-layer=any]`](/api/up-poll#up-if-layer) attribute.
 
 When the user returns after at least one interval was spent in the background,
 Unpoly reloads the fragment immediately. You can use this to refresh a page when the user
 comes back after working on something else for a while. The following reloads
-your [main fragment](/main) after an absence of five minutes or more:
+your [main fragment](/api/main) after an absence of five minutes or more:
 
 ```html
 <main up-poll up-interval="300_000"> <!-- mark: up-interval="300_000" -->
@@ -138,7 +138,7 @@ even when the response contains a matching fragment.
 The server is polled again after the configured interval.
 
 To render *any* response that contains a matching fragment,
-set an [`[up-fail=false]`](/up-poll#up-fail) attribute:
+set an [`[up-fail=false]`](/api/up-poll#up-fail) attribute:
 
 ```html
 <div class="download-status" up-poll up-fail="false"> <!-- mark: up-fail="false" -->

@@ -52,7 +52,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
 
   _updateContentFromResponse(finalRenderOptions) {
     if (finalRenderOptions.didForceFailOptions) {
-      up.puts('up.render()', 'Rendering error response using fail-prefixed options (https://unpoly.com/error-responses)')
+      up.puts('up.render()', 'Rendering error response using fail-prefixed options (https://unpoly.com/learn/error-responses)')
     }
 
     // The response might carry some updates for our change options,

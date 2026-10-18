@@ -22,25 +22,25 @@ up.status = (function() {
 
   @section Feedback classes
     @param {Array<string>} [config.activeClasses=['up-active']]
-      An array of classes to set on [activated links or form elements](/up-active).
+      An array of classes to set on [activated links or form elements](/api/up-active).
 
     @param {Array<string>} [config.loadingClasses=['up-loading']]
-      An array of classes to set on [loading fragments](/up-loading).
+      An array of classes to set on [loading fragments](/api/up-loading).
 
     @param {Array<string>} [config.revalidatingClasses=['up-revalidating']]
-      An array of classes to set on [revalidating fragments](/up-revalidating).
+      An array of classes to set on [revalidating fragments](/api/up-revalidating).
 
       @experimental
 
   @section Navigational containers
     @param {Array<string>} [config.navSelectors=['[up-nav]', 'nav']]
-      An array of CSS selectors that match [navigational containers](/navigation-bars).
+      An array of CSS selectors that match [navigational containers](/learn/navigation-bars).
 
     @param {Array<string>} [config.noNavSelectors=['[up-nav=false]']]
       Exceptions to `up.status.config.navSelectors`.
 
     @param {Array<string>} [config.currentClasses=['up-current']]
-      An array of classes to set on [links that point the current location](/up-current).
+      An array of classes to set on [links that point the current location](/api/up-current).
 
   @stable
   */
@@ -56,10 +56,10 @@ up.status = (function() {
   let namedPreviewFns = new up.Registry('preview')
 
   /*-
-  Registers a named [preview](/previews) function.
+  Registers a named [preview](/learn/previews) function.
 
-  Preview functions are applied using the `[up-preview]` attribute or [`{ preview }`](/up.render#options.preview) option.
-  See [Previews](/previews) for an overview.
+  Preview functions are applied using the `[up-preview]` attribute or [`{ preview }`](/api/up.render#options.preview) option.
+  See [Previews](/learn/previews) for an overview.
 
   ## Example
 
@@ -184,15 +184,15 @@ up.status = (function() {
   }
 
   /*-
-  While rendering, the `.up-active` class is added to the [origin](/origin) element that triggered the change.
+  While rendering, the `.up-active` class is added to the [origin](/api/origin) element that triggered the change.
 
   The class remains set while the request is loading.
-  It is removed when the request [ends](/up.Request.prototype.ended) for any reason.
+  It is removed when the request [ends](/api/up.Request.prototype.ended) for any reason.
 
   @learn-ref feedback-classes
 
   > [tip]
-  > If you're looking to style the [targeted](/targeting-fragments) fragment, see `.up-loading`.
+  > If you're looking to style the [targeted](/learn/targeting-fragments) fragment, see `.up-loading`.
 
   @selector .up-active
   @stable
@@ -200,15 +200,15 @@ up.status = (function() {
   */
 
   /*-
-  While rendering, all [targeted fragments](/targeting-fragments) are assigned the `.up-loading` class.
+  While rendering, all [targeted fragments](/learn/targeting-fragments) are assigned the `.up-loading` class.
 
   The class remains set while the request is loading.
-  It is removed when the request [ends](/up.Request.prototype.ended) for any reason.
+  It is removed when the request [ends](/api/up.Request.prototype.ended) for any reason.
 
   @learn-ref feedback-classes
 
   > [tip]
-  > If you're looking to style the [origin](/origin) that targeted the fragment, see `.up-active`.
+  > If you're looking to style the [origin](/api/origin) that targeted the fragment, see `.up-active`.
 
   @selector .up-loading
   @stable
@@ -216,11 +216,11 @@ up.status = (function() {
   */
 
   /*-
-  While [revalidating](/caching#revalidation) content rendered from a stale cache entry,
-  all [targeted fragments](/targeting-fragments) are assigned the `.up-revalidating` class.
+  While [revalidating](/learn/caching#revalidation) content rendered from a stale cache entry,
+  all [targeted fragments](/learn/targeting-fragments) are assigned the `.up-revalidating` class.
 
   The class remains set while the revalidation request is loading.
-  It is removed when the request [ends](/up.Request.prototype.ended) for any reason.
+  It is removed when the request [ends](/api/up.Request.prototype.ended) for any reason.
 
   @learn-ref feedback-classes
 
@@ -288,16 +288,16 @@ up.status = (function() {
   }
 
   /*-
-  Links or forms can name a [preview function](/previews) that is called while
+  Links or forms can name a [preview function](/learn/previews) that is called while
   loading content from the server.
 
   When the user interacts with a link or form, its preview function is invoked immediately.
-  The function will usually [mutate the DOM](/previews#basic-mutations) to signal that the app is working
+  The function will usually [mutate the DOM](/learn/previews#basic-mutations) to signal that the app is working
   or to provide clues for how the page will ultimately look.
   For example, if the user is deleting an item from a list, the preview
   function could hide that item visually.
 
-  See [Previews](/previews) for details and examples.
+  See [Previews](/learn/previews) for details and examples.
 
   @learn-ref previews
 
@@ -309,13 +309,13 @@ up.status = (function() {
   <a href="/edit" up-follow up-preview="spinner">Edit page</a> <!-- mark: up-preview="spinner" -->
   ```
 
-  To [call multiple previews](/previews#multiple), separate their names with a comma:
+  To [call multiple previews](/learn/previews#multiple), separate their names with a comma:
 
   ```html
   <a href="/edit" up-follow up-preview="spinner, dim-page">Edit page</a> <!-- mark: up-preview="spinner, dim-page" -->
   ```
 
-  [Preview options](/previews#parameters) can be appended after each preview name, encoded as [relaxed JSON](/relaxed-json):
+  [Preview options](/learn/previews#parameters) can be appended after each preview name, encoded as [relaxed JSON](/api/relaxed-json):
 
   ```html
   <a href="/edit"
@@ -337,14 +337,14 @@ up.status = (function() {
   */
 
   /*-
-  Links or forms can define a [placeholder](/placeholders) that will be shown within the targeted
+  Links or forms can define a [placeholder](/learn/placeholders) that will be shown within the targeted
   fragment while loading content from the server.
 
   All other children of the targeted fragment will be hidden while
-  the request is in flight. When the request [ends](/up.Request.prototype.ended) for any reason,
+  the request is in flight. When the request [ends](/api/up.Request.prototype.ended) for any reason,
   the placeholder will be removed and the original fragment children will be shown again.
 
-  When [targeting multiple fragments](/targeting-fragments#multiple),
+  When [targeting multiple fragments](/learn/targeting-fragments#multiple),
   the placeholder will be shown in the first fragment.
 
   @learn-ref placeholders
@@ -361,13 +361,13 @@ up.status = (function() {
   </div>
   ```
 
-  See [Placeholders](/placeholders) for details and elaborate examples.
+  See [Placeholders](/learn/placeholders) for details and elaborate examples.
 
   @selector [up-placeholder]
   @param up-placeholder
     The HTML string for the placeholder.
 
-    You can also [use a template](/placeholders#from-template)
+    You can also [use a template](/learn/placeholders#from-template)
     by setting this attribute to a CSS selector matching
     a `<template>` or `<script>` element.
   @experimental
@@ -438,9 +438,9 @@ up.status = (function() {
   }
 
   /*-
-  Marks this element as a [navigational container](/navigation-bars), such as a menu or navigation bar.
+  Marks this element as a [navigational container](/learn/navigation-bars), such as a menu or navigation bar.
 
-  When a link within an `[up-nav]` element points to [its layer's location](/up.layer.location),
+  When a link within an `[up-nav]` element points to [its layer's location](/api/up.layer.location),
   it is assigned the `.up-current` class. When the browser navigates to another location, the class is removed automatically.
 
   @learn-ref navigation-bars
@@ -477,22 +477,22 @@ up.status = (function() {
 
   @selector [up-nav]
   @param [up-layer="origin"]
-    The [layers](/up.layer) for which to match link locations.
+    The [layers](/api/up.layer) for which to match link locations.
 
     By default, links are only marked as current when they point to the location *of their own layer*.
     To highlight links that point to the location of *another* layer, set this attribute to
-    any [layer option](/targeting-other-layers).
+    any [layer option](/learn/targeting-other-layers).
 
     If the configured option matches multiple layers (e.g. `any` or `current, root`),
     links are highlighted if they match the location of any matching layer.
 
-    See [Matching the location of other layers](/navigation-bars#layers) for examples.
+    See [Matching the location of other layers](/learn/navigation-bars#layers) for examples.
   @stable
   @signature
   */
 
   /*-
-  Links within [navigational containers](/navigation-bars)
+  Links within [navigational containers](/learn/navigation-bars)
   may use the `[up-alias]` attribute to define alternative URLs for which they
   should also be highlighted as `.up-current`.
 
@@ -508,11 +508,11 @@ up.status = (function() {
   </nav>
   ```
 
-  To configure multiple alternative URLs, use a [URL pattern](/url-patterns).
+  To configure multiple alternative URLs, use a [URL pattern](/api/url-patterns).
 
   ### Setting URL aliases from macros {#from-macro}
 
-  An `[up-alias]` attribute can be set by a [macro](/up.macro).
+  An `[up-alias]` attribute can be set by a [macro](/api/up.macro).
 
   This can be useful to link nested navigation trees programmatically.\
   Let's say we have a main navigation linking to two sections:
@@ -554,12 +554,12 @@ up.status = (function() {
 
   @selector [up-alias]
   @param up-alias
-    A [URL pattern](/url-patterns) with alternative URLs.
+    A [URL pattern](/api/url-patterns) with alternative URLs.
   @stable
   */
 
   /*-
-  When a link within a [navigational container](/navigation-bars) points to the current location, it is assigned the `.up-current` class.
+  When a link within a [navigational container](/learn/navigation-bars) points to the current location, it is assigned the `.up-current` class.
 
   @learn-ref navigation-bars
 

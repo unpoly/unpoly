@@ -13,7 +13,7 @@ supported, as are the last two major versions of Safari.
 See `up.framework.isSupported()` for how Unpoly checks the current browser.
 
 On a browser it cannot support, Unpoly does not boot and does not
-[enhance](/enhancing-elements) the page. Links and forms fall back to default
+[enhance](/learn/enhancing-elements) the page. Links and forms fall back to default
 browser behavior, leaving you with a classic server-side application.
 
 

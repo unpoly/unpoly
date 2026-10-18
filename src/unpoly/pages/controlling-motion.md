@@ -1,7 +1,7 @@
 Controlling motion
 ==================
 
-Every [transition](/transitions) and [animation](/animations) plays with a duration and easing
+Every [transition](/learn/transitions) and [animation](/learn/animations) plays with a duration and easing
 that you can change per element or for the whole app. Users who prefer reduced motion see no motion,
 and you can turn them off yourself. When your code needs the final state, wait for running motion effects to end
 or finish them right away.
@@ -31,7 +31,7 @@ To change the default for all motion effects, set `up.motion.config.duration`:
 up.motion.config.duration = 300
 ```
 
-Overlays have their own defaults for opening and closing, which you can set per [mode](/overlays#layer-modes).
+Overlays have their own defaults for opening and closing, which you can set per [mode](/learn/overlays#layer-modes).
 See `up.layer.config` for options like `up.layer.config.overlay.openDuration`.
 
 ### Changing the easing {#easing}
@@ -59,7 +59,7 @@ Reduced motion and disabling motion {#disabling-animation-globally}
 
 Motion is enabled unless the user has asked their system to
 [minimize non-essential motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion).
-In that case `up.motion.config.enabled` is `false`. When [logging](/up.log.enable) is enabled,
+In that case `up.motion.config.enabled` is `false`. When [logging](/api/up.log.enable) is enabled,
 Unpoly prints *Animations are disabled* to the console when it boots.
 
 With motion disabled, a motion effect jumps to its last frame instantly.

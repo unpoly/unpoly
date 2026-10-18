@@ -82,7 +82,7 @@ discarded, since it didn't match the selector.
 @param {string|Element|jQuery} target
 @param {string} html
 @param {Object} [options]
-  See options for [`up.render()`](/up.render).
+  See options for [`up.render()`](/api/up.render).
 @return {Promise}
   A promise that will be fulfilled when the selector was updated.
 @deprecated
@@ -95,8 +95,8 @@ up.extract = function(target, document, options) {
 
 /*-
 Returns the first element matching the given selector, but
-ignores elements that are being [destroyed](/up.destroy) or that are being
-removed by a [transition](/up.morph).
+ignores elements that are being [destroyed](/api/up.destroy) or that are being
+removed by a [transition](/api/up.morph).
 
 Returns `undefined` if no element matches these conditions.
 

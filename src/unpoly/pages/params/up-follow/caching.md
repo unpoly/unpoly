@@ -1,7 +1,7 @@
 @partial up-follow/caching
 
 @param [up-cache='auto']
-  Whether to read from and write to the [cache](/caching).
+  Whether to read from and write to the [cache](/learn/caching).
 
   With `[up-cache=true]` Unpoly will try to re-use a cached response before connecting
   to the network. To prevent display of stale content, cached responses are
@@ -14,10 +14,10 @@
   With `[up-cache=false]` Unpoly will always make a network request.
 
 @param [up-revalidate='auto']
-  Whether to [reload the targeted fragment](/caching#revalidation)
+  Whether to [reload the targeted fragment](/learn/caching#revalidation)
   after it was rendered from a cached response.
 
-  With `[up-revalidate='auto']`, Unpoly will revalidate [expired](/caching#expiration) responses.
+  With `[up-revalidate='auto']`, Unpoly will revalidate [expired](/learn/caching#expiration) responses.
   This behavior can be configured with `up.fragment.config.autoRevalidate(response)`.
 
   With `[up-revalidate='true']`, Unpoly will always revalidate cached content, regardless
@@ -26,24 +26,24 @@
   With `[up-revalidate='false']`, Unpoly will never revalidate cached content.
 
 @param [up-revalidate-preview]
-  The name of a [preview](/previews) that runs
-  while [revalidating cached content](/caching#revalidation).
+  The name of a [preview](/learn/previews) that runs
+  while [revalidating cached content](/learn/caching#revalidation).
 
   @experimental
 
 @param [up-expire-cache]
-  Whether existing [cache](/caching) entries will be [expired](/caching#expiration) when this request is sent.
+  Whether existing [cache](/learn/caching) entries will be [expired](/learn/caching#expiration) when this request is sent.
 
   By default a non-GET request will expire the entire cache.
   Set `[up-expire-cache="false"]` to not expire any cache entries.
-  You may also pass a [URL pattern](/url-patterns) to only expire matching requests.
+  You may also pass a [URL pattern](/api/url-patterns) to only expire matching requests.
 
-  Also see [`up.request({ expireCache })`](/up.request#options.expireCache) and `up.network.config.expireCache`.
+  Also see [`up.request({ expireCache })`](/api/up.request#options.expireCache) and `up.network.config.expireCache`.
 
 @param [up-evict-cache]
-  Whether existing [cache](/caching) entries will be [evicted](/caching#eviction) when this request is sent.
+  Whether existing [cache](/learn/caching) entries will be [evicted](/learn/caching#eviction) when this request is sent.
 
   By default no cache entries are evicted.
-  You may also pass a [URL pattern](/url-patterns) to only evict matching requests.
+  You may also pass a [URL pattern](/api/url-patterns) to only evict matching requests.
 
-  Also see [`up.request({ evictCache })`](/up.request#options.evictCache) and `up.network.config.evictCache`.
+  Also see [`up.request({ evictCache })`](/api/up.request#options.evictCache) and `up.network.config.evictCache`.

@@ -9,7 +9,7 @@ change as they would for a full page load, and the Back button brings the earlie
 Updating the address bar
 ------------------------
 
-An update counts as a page change when it swaps the page's [main fragment](/main).
+An update counts as a page change when it swaps the page's [main fragment](/api/main).
 Only then does Unpoly push a history entry, so users can bookmark, share and reload
 each URL as usual.
 
@@ -30,7 +30,7 @@ Restoring the previous page
 
 When the user presses the Back button, Unpoly fetches the earlier URL and renders its `<body>` into the current page.
 Scroll positions and focus are restored to where the user left them.
-Since responses are [cached](/caching), going back is usually instant.
+Since responses are [cached](/learn/caching), going back is usually instant.
 
 To keep parts of your layout alive, restore a smaller fragment:
 
@@ -40,7 +40,7 @@ up.history.config.restoreTargets = ['.content', 'body'] // mark: ['.content', 'b
 
 To customize the render pass, or to restore the page with your own code,
 listen to `up:location:restore`.
-To offer a *Back* link inside the page, use an [`[up-back]`](/restoring-history#back-link) attribute.
+To offer a *Back* link inside the page, use an [`[up-back]`](/learn/restoring-history#back-link) attribute.
 
 [[more: restoring-history]]
 

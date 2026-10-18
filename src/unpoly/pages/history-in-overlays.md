@@ -11,7 +11,7 @@ Overlays with visible history {#visible-history}
 -----------------------------
 
 When an overlay has visible history, its location and title are shown in the browser window
-while the overlay is open. [Meta tags](/updating-history#history-state) from the overlay content
+while the overlay is open. [Meta tags](/learn/updating-history#history-state) from the overlay content
 are placed into the `<head>`.
 
 In the example below, we start with a root layer at `/`:
@@ -20,7 +20,7 @@ In the example below, we start with a root layer at `/`:
 location.pathname // result: "/"
 ```
 
-We now open an overlay from `/users/5`. Its content is a [main fragment](/main), so the overlay has visible history.
+We now open an overlay from `/users/5`. Its content is a [main fragment](/api/main), so the overlay has visible history.
 Note how its URL is reflected in the browser's address bar:
 
 ```js
@@ -46,7 +46,7 @@ location.pathname // result: "/"
 Hiding an overlay's history {#configuring-visibility}
 ---------------------------
 
-By default an overlay has visible history when its initial fragment is a [main fragment](/main).
+By default an overlay has visible history when its initial fragment is a [main fragment](/api/main).
 This shows the location of significant content to the user, but hides the internal location
 of smaller popups or menus.
 
@@ -95,7 +95,7 @@ Unlike `up:location:changed`, this event is also emitted for layers with invisib
 ### Navigation bars work with invisible history
 
 History visibility is not required for `.up-current` classes to be set.
-When a [navigation bar](/navigation-bars) looks for links pointing to the current page,
+When a [navigation bar](/learn/navigation-bars) looks for links pointing to the current page,
 it compares a link's `[href]` with the location of its own layer, not with the address bar.
 
 
@@ -109,7 +109,7 @@ When a link in an overlay updates the address bar {#update-conditions}
 -------------------------------------------------
 
 Once an overlay is open, links and forms inside it follow the usual rules for
-[when history is updated](/updating-history#when-history-is-changed): a link updates history when it targets
+[when history is updated](/learn/updating-history#when-history-is-changed): a link updates history when it targets
 the main fragment, or when it sets `[up-history=true]`. The address bar only changes when *both*
 the link updates history *and* the updated layer has visible history:
 
@@ -120,7 +120,7 @@ the link updates history *and* the updated layer has visible history:
 | no                    | yes                        | ❌ no                 |
 | no                    | no                         | ❌ no                 |
 
-When a link [updates another layer](/targeting-other-layers), only the history visibility of the *targeted* layer is considered.
+When a link [updates another layer](/learn/targeting-other-layers), only the history visibility of the *targeted* layer is considered.
 The visibility of the link's own layer is not relevant.
 
 
@@ -128,7 +128,7 @@ Going back while an overlay is open {#restoration}
 -----------------------------------
 
 When the user presses Back, Unpoly closes all overlays and renders the
-[restored URL](/restoring-history) as a full page in the root layer.
+[restored URL](/learn/restoring-history) as a full page in the root layer.
 
 Which URL the browser goes back to depends on whether the overlay added a history entry.
 Say the user went from `/home` to `/projects`, then opened `/users/5` in an overlay:
@@ -139,13 +139,13 @@ Say the user went from `/home` to `/projects`, then opened `/users/5` in an over
 | [invisible](#invisible-history)  | `/home`, as if the overlay wasn't there    |
 
 This is often an acceptable default, since every route in an Unpoly app can render a full page anyway.
-[Subinteractions](/subinteractions) in particular work the same on the root layer and in an overlay.
+[Subinteractions](/learn/subinteractions) in particular work the same on the root layer and in an overlay.
 
 If you cannot work with this, you have the following options:
 
 - Hide the history of all overlays with `up.layer.config.overlay.history = false`.
   Then no overlay ever adds a history entry.
-- Implement a [custom restoration behavior](/restoring-history#custom-behavior).
+- Implement a [custom restoration behavior](/learn/restoring-history#custom-behavior).
 
 
 @page history-in-overlays

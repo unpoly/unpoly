@@ -2,7 +2,7 @@ Attaching data to elements
 ==========================
 
 Unpoly lets you attach structured data to an element, to be consumed
-by a [compiler](/enhancing-elements) or [event handler](/up.on).
+by a [compiler](/learn/enhancing-elements) or [event handler](/api/up.on).
 
 Use HTML5 `data-*` attributes for simple string values. When your data has
 structure, `[up-data]` takes any JSON. Compilers can also read any other
@@ -18,7 +18,7 @@ to attach simple string values:
 <span class='user' data-age='18' data-name='Bob'>Bob</span>
 ```
 
-An object with all data attributes will be passed to your [compilers](/enhancing-elements)
+An object with all data attributes will be passed to your [compilers](/learn/enhancing-elements)
 as a second argument:
 
 ```js
@@ -50,7 +50,7 @@ HTML5 data attributes cannot express structured data, like an array or object.
 Also their values are always strings.
 
 To pass structured values, set the `[up-data]` attribute to any
-[relaxed JSON](/relaxed-json) value:
+[relaxed JSON](/api/relaxed-json) value:
 
 ```html
 <div class="google-map" up-data="{ pins: [
@@ -151,7 +151,7 @@ up.on('click', '.user', function(event, element, data) {
 
 ## Accessing data programmatically {#read}
 
-Use [`up.data(element)`](/up-data) to retrieve an object with the given element's data:
+Use [`up.data(element)`](/api/up-data) to retrieve an object with the given element's data:
 
 ```js
 up.data('.user') // result: { age: 18, name: 'Bob' }
@@ -161,7 +161,7 @@ up.data('.user') // result: { age: 18, name: 'Bob' }
 ## Overriding data for a render pass {#override}
 
 When rendering a single fragment, you can override data keys
-from the server HTML. For this use an [`[up-use-data]`](/up-follow#up-use-data) attribute or [`{ data }`](/up.render#options.data) option.
+from the server HTML. For this use an [`[up-use-data]`](/api/up-follow#up-use-data) attribute or [`{ data }`](/api/up.render#options.data) option.
 The new fragment will compile with the given data, without requiring an `[up-data]` attribute in the HTML:
 
 ```html
@@ -178,7 +178,7 @@ Keys from `[up-use-data]` win over the element's own data.
 
 ### Mapping selectors to data {#map}
 
-Use an [`[up-use-data-map]`](/up-follow#up-use-data-map) attribute or [`{ dataMap }`](/up.render#options.dataMap) option to map selectors to data objects.
+Use an [`[up-use-data-map]`](/api/up-follow#up-use-data-map) attribute or [`{ dataMap }`](/api/up.render#options.dataMap) option to map selectors to data objects.
 When a selector matches any element within an updated fragment, the matching element is compiled with the mapped data:
 
 ```html
@@ -200,7 +200,7 @@ When a selector matches any element within an updated fragment, the matching ele
 </div>
 ```
 
-You can also map data objects when updating [multiple fragments](/targeting-fragments#multiple) using a comma-separated target:
+You can also map data objects when updating [multiple fragments](/learn/targeting-fragments#multiple) using a comma-separated target:
 
 ```html
 <a
@@ -215,8 +215,8 @@ You can also map data objects when updating [multiple fragments](/targeting-frag
 
 ## Preserving data through reloads {#preserving}
 
-When [reloading](/up.reload) or [validating](/up.validate) an element,
-you may keep an existing data object by passing it as a [`{ data }`](/up.render#options.data) option.
+When [reloading](/api/up.reload) or [validating](/api/up.validate) an element,
+you may keep an existing data object by passing it as a [`{ data }`](/api/up.render#options.data) option.
 
 In the example below, `data.counter` is increased by `1` for every compiler pass,
 regardless of what the server renders into `[up-data]`:
@@ -232,7 +232,7 @@ up.compiler('.element', function(element, data) {
 })
 ```
 
-As a shortcut you may also pass [`{ keepData: true }`](/up.reload#options.keepData) when reloading.
+As a shortcut you may also pass [`{ keepData: true }`](/api/up.reload#options.keepData) when reloading.
 
 To keep an entire element, you may also use `[up-keep]`.
 The `up:fragment:keep` event lets you inspect the old and new element

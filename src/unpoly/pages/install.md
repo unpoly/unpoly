@@ -62,9 +62,9 @@ without an explicit `import`.
 You now have everything you need to start using Unpoly.
 For special needs, there are optional extensions:
 
-- [Server protocol](/server-protocol): Inspect or manipulate Unpoly's rendering through HTTP headers.
-- [Legacy browser support](/legacy-browsers): Builds for old browsers and build tools.
-- [Bootstrap integration](/bootstrap-integration): Configure Unpoly to use Bootstrap's CSS classes.
+- [Server protocol](/learn/server-protocol): Inspect or manipulate Unpoly's rendering through HTTP headers.
+- [Legacy browser support](/learn/legacy-browsers): Builds for old browsers and build tools.
+- [Bootstrap integration](/learn/bootstrap-integration): Configure Unpoly to use Bootstrap's CSS classes.
 - [Upgrade shim](https://unpoly.com/changes/upgrading): Polyfills for deprecated Unpoly APIs.
 
 
@@ -77,7 +77,7 @@ guessing. Install the docs as an agent skill:
 npx skills add --global https://unpoly.com
 ```
 
-The [skill page](/skill) has other ways to install the skill, and shows how to use the docs in an AI chat.
+The [skill page](/learn/skill) has other ways to install the skill, and shows how to use the docs in an AI chat.
 
 @page install
 @signature

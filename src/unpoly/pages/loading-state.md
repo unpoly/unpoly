@@ -59,7 +59,7 @@ and the placeholder is shown in its place:
 </div>
 ```
 
-Placeholders can also be cloned from a [template](/templates),
+Placeholders can also be cloned from a [template](/learn/templates),
 so you can reuse the same skeleton for many links.
 
 [[more: placeholders]]
@@ -68,7 +68,7 @@ so you can reuse the same skeleton for many links.
 Arbitrary temporary changes
 ---------------------------
 
-Feedback classes, placeholders and [disabling](/disabling-forms) are *previews*: temporary page changes that Unpoly
+Feedback classes, placeholders and [disabling](/learn/disabling-forms) are *previews*: temporary page changes that Unpoly
 applies when a request starts, and reverts when the request ends.
 You can define your own preview with `up.preview()`:
 

@@ -7,7 +7,7 @@ This keeps elements in your application layout fresh, like an unread counter
 or a notification bar, without naming them in every link's target.
 
 Keep hungry elements to a few elements in your layout.
-For everything else, name the fragments in the link's or form's [target](/targeting-fragments).
+For everything else, name the fragments in the link's or form's [target](/learn/targeting-fragments).
 
 
 ## Marking an element as hungry {#marking}
@@ -19,7 +19,7 @@ and forms usually target. Examples include:
 - Page-specific subnavigation
 - Account-wide notifications, e.g. about an expired credit card
 
-Instead of including such elements in every [target selector](/targeting-fragments),
+Instead of including such elements in every [target selector](/learn/targeting-fragments),
 like `.content, .unread-count:maybe`, mark the element as `[up-hungry]`:
 
 ```html
@@ -41,21 +41,21 @@ No error is thrown.
 
 The server is not told about hungry elements. It renders its page as usual,
 and Unpoly looks for matches in whatever the response contains. If your server
-[renders only the targeted fragments](/optimizing-responses), make sure to still
+[renders only the targeted fragments](/learn/optimizing-responses), make sure to still
 include hungry elements in the response.
 
-Hungry elements are also updated from responses with an [error code](/error-responses),
+Hungry elements are also updated from responses with an [error code](/learn/error-responses),
 like a form re-rendered with validation errors.
 
 
 ## A derivable target is required {#derivable-target}
 
-To find a hungry element's counterpart in the response, Unpoly [derives a target selector](/target-derivation)
-from the element. For this the element needs an [identifying attribute](/target-derivation#derivation-patterns),
+To find a hungry element's counterpart in the response, Unpoly [derives a target selector](/learn/target-derivation)
+from the element. For this the element needs an [identifying attribute](/learn/target-derivation#derivation-patterns),
 such as an `[id]` or a unique `[class]`.
 
 When no good target can be derived, the element is excluded from the update and a message
-like this is [logged](/up.log):
+like this is [logged](/api/up.log):
 
 ```text
 [up-hungry] Ignoring untargetable fragment <div>
@@ -64,7 +64,7 @@ like this is [logged](/up.log):
 
 ## Animating the update {#animation}
 
-A hungry element can define its own [transition](/up-transition) to morph between
+A hungry element can define its own [transition](/api/up-transition) to morph between
 its old and new content, independent of the primary target:
 
 ```html
@@ -83,7 +83,7 @@ Prevent the event to skip the hungry element for that render pass.
 
 For example, a subnavigation should update when the user navigates to another page,
 but not when a form validation updates a fieldset.
-The following only updates `#side-nav` for render passes that [update history](/updating-history):
+The following only updates `#side-nav` for render passes that [update history](/learn/updating-history):
 
 ```js
 up.on('up:fragment:hungry', '#side-nav', function(event) {
@@ -112,10 +112,10 @@ up.on('up:fragment:hungry', '.unread-count', function(event) {
 
 ## Hungry elements on other layers {#layers}
 
-By default a hungry element is only updated by render passes on its own [layer](/up.layer).
+By default a hungry element is only updated by render passes on its own [layer](/api/up.layer).
 When an overlay renders, a hungry element on the root layer is left alone.
 
-To also update a hungry element when other layers render, set an [`[up-if-layer]`](/up-hungry#up-if-layer) attribute.
+To also update a hungry element when other layers render, set an [`[up-if-layer]`](/api/up-hungry#up-if-layer) attribute.
 A notification bar in the root layout can pick up notifications from any overlay
 with `[up-if-layer="subtree"]`:
 
@@ -125,20 +125,20 @@ with `[up-if-layer="subtree"]`:
 </div>
 ```
 
-The attribute takes a [layer reference](/targeting-other-layers) relative to the hungry element's layer.
+The attribute takes a [layer reference](/learn/targeting-other-layers) relative to the hungry element's layer.
 Use `any` to piggy-back on render passes for all layers, or combine references like `current, child`.
 
-This also works when a response [closes an overlay](/closing-overlays): the content of that
+This also works when a response [closes an overlay](/learn/closing-overlays): the content of that
 response is discarded for the overlay, but hungry elements on other layers still pick up their matches.
-The [`[up-flashes]`](/flashes) element uses this to show confirmation messages from a closing overlay in the parent layer.
+The [`[up-flashes]`](/learn/flashes) element uses this to show confirmation messages from a closing overlay in the parent layer.
 
 
 ## Disabling hungry updates {#disabling}
 
 Hungry elements are processed for all updates on their layer. To exclude them from a render pass:
 
-- Set an [`[up-use-hungry="false"]`](/up-follow#up-use-hungry) attribute on a link or form.
-- Pass a [`{ hungry: false }`](/up.render#options.hungry) option when rendering from JavaScript.
+- Set an [`[up-use-hungry="false"]`](/api/up-follow#up-use-hungry) attribute on a link or form.
+- Pass a [`{ hungry: false }`](/api/up.render#options.hungry) option when rendering from JavaScript.
 - Prevent the `up:fragment:hungry` event, as [shown above](#conditions).
 
 To exclude a single element, set `[up-hungry="false"]` on the element.
@@ -162,7 +162,7 @@ Exceptions go into `up.radio.config.noHungrySelectors`.
 Each element in a response can only be inserted once. When hungry elements conflict
 with each other or with the primary target, Unpoly decides as follows:
 
-1. When both a [target selector](/targeting-fragments) and a hungry element match the same element
+1. When both a [target selector](/learn/targeting-fragments) and a hungry element match the same element
    in the response, only the direct render target is updated.
 2. When hungry elements are nested within each other, the outermost element is updated.
 3. When hungry elements on different layers match the same element in the response,

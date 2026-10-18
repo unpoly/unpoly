@@ -39,7 +39,7 @@ set an `[up-layer]` attribute:
 
 Unpoly fetches `/users` and swaps the `.user-list` element in the parent layer.
 Because the overlay now obstructs the updated content, it is closed when the
-parent layer is updated. This is called [peeling](/closing-overlays#peeling).
+parent layer is updated. This is called [peeling](/learn/closing-overlays#peeling).
 To keep the overlay open, set an `[up-peel="false"]` attribute.
 
 Forms work the same way. This form in an overlay creates a user, then updates the root layer:
@@ -79,13 +79,13 @@ which is usually the layer of the link or form:
 | `overlay`    | Any overlay, preferring layers closer to the front                            |
 | `any`        | Any layer, preferring the current layer, then layers closer to the front      |
 | `origin`     | The layer of the element passed as `{ origin }`                               |
-| `0`, `1`, …  | The layer at that index in the [layer stack](/up.layer.stack), `0` being the root layer |
-| `new`        | Opens a [new overlay](/opening-overlays) instead of updating an existing layer |
+| `0`, `1`, …  | The layer at that index in the [layer stack](/api/up.layer.stack), `0` being the root layer |
+| `new`        | Opens a [new overlay](/learn/opening-overlays) instead of updating an existing layer |
 
 Passing `any` disables [layer isolation](#isolation) for that call.
 
 To replace existing overlays instead of stacking a new one on top, use `swap` or `shatter`.
-See [replacing existing overlays](/opening-overlays#replacing-existing-overlays).
+See [replacing existing overlays](/learn/opening-overlays#replacing-existing-overlays).
 
 
 The current layer {#current}
@@ -99,7 +99,7 @@ When no layer is given, Unpoly matches and renders in the layer the interaction 
   that element's layer is used.
 - Otherwise `up.layer.current` is used.
 
-While a [compiler](/enhancing-elements) runs, `up.layer.current` is the layer of the compiled element,
+While a [compiler](/learn/enhancing-elements) runs, `up.layer.current` is the layer of the compiled element,
 even when that layer is in the background. This only holds for code that runs synchronously
 when the compiler is called. It does not hold for code that runs later:
 
@@ -115,7 +115,7 @@ In such code, [pass the element](#layer-object) as `{ layer }`.
 Most of the time, the *current* layer (`up.layer.current`) and the *frontmost* layer (`up.layer.front`)
 are the same: the last layer in the stack. There are cases where the current layer is a layer in the background:
 
-- While an element in a background layer is being [compiled](/enhancing-elements).
+- While an element in a background layer is being [compiled](/learn/enhancing-elements).
 - While an Unpoly event like `up:request:loaded` is being emitted from a background layer.
 - While an event listener bound to a background layer with `up.Layer#on()` is being called.
 
@@ -188,7 +188,7 @@ up.layer.getAll('ancestor') // result: all ancestors, closest first
 
 Other features that take a layer option include:
 
-- A [navigation bar](/navigation-bars#layers) with an `[up-layer]` attribute highlights
+- A [navigation bar](/learn/navigation-bars#layers) with an `[up-layer]` attribute highlights
   links that point to another layer's location.
 - An `[up-hungry]` element with an `[up-if-layer]` attribute is updated by responses
   that were rendered into other layers.
@@ -199,7 +199,7 @@ Rendering error responses in another layer {#fail-layer}
 ------------------------------------------
 
 Like most render options, `[up-layer]` only applies when the server responds successfully.
-When the server [responds with an error code](/error-responses), like a form with validation errors,
+When the server [responds with an error code](/learn/error-responses), like a form with validation errors,
 the response is rendered in the link's or form's own layer.
 
 To render error responses in another layer, set an `[up-fail-layer]` attribute or pass a `{ failLayer }` option.

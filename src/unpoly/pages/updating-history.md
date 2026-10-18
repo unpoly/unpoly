@@ -10,8 +10,8 @@ Updates to minor fragments leave history untouched.
 When history is updated {#when-history-is-changed}
 -----------------------
 
-Following a link or submitting a form counts as [navigation](/navigation-defaults).
-When navigation updates the layer's [main fragment](/main), Unpoly adds a history entry for the new URL:
+Following a link or submitting a form counts as [navigation](/learn/navigation-defaults).
+When navigation updates the layer's [main fragment](/api/main), Unpoly adds a history entry for the new URL:
 
 ```html
 <a href="/posts/5" up-follow>Read post</a> <!-- mark: up-follow -->
@@ -29,13 +29,13 @@ A link that updates a smaller fragment does not change history:
 Clicking this link replaces only the `#comments` element. The address bar keeps its URL,
 so the user does not collect a history entry for every minor update.
 
-This is the `auto` setting of the [`[up-history]`](/up-follow#up-history) attribute, which is the default for links and forms.
+This is the `auto` setting of the [`[up-history]`](/api/up-follow#up-history) attribute, which is the default for links and forms.
 History is updated when the targeted fragment contains an element matching `up.fragment.config.autoHistoryTargets`.
 By default that is the layer's main fragment.
 When the new URL is the one already in the address bar, no entry is added.
 
 > [note]
-> An overlay only shows its URL in the address bar when it has [visible history](/history-in-overlays).
+> An overlay only shows its URL in the address bar when it has [visible history](/learn/history-in-overlays).
 > This page describes the root layer, which always has visible history.
 
 
@@ -53,8 +53,8 @@ To never update history, set `[up-history=false]`:
 <a href="/posts/5" up-follow up-history="false">Peek at post</a> <!-- mark: up-history="false" -->
 ```
 
-Forms accept the same [`[up-history]`](/up-submit#up-history) attribute.
-When rendering from JavaScript, pass a [`{ history }`](/up.render#options.history) option instead.
+Forms accept the same [`[up-history]`](/api/up-submit#up-history) attribute.
+When rendering from JavaScript, pass a [`{ history }`](/api/up.render#options.history) option instead.
 
 To change the default for all links and forms, configure `up.fragment.config.navigateOptions.history`.
 To decide per link, listen to `up:link:follow` or `up:form:submit` and set `event.renderOptions.history`:
@@ -92,8 +92,8 @@ When a successful submission redirects to a `GET` URL, the redirect's response u
 with the new URL. Unpoly detects the redirect from the response URL, or from an `X-Up-Method` header
 that your server can set.
 
-The exception is an explicit location: when you set [`[up-location]`](/up-follow#up-location)
-or pass a [`{ location }`](/up.render#options.location) option, Unpoly pushes that URL even after a non-`GET` request.
+The exception is an explicit location: when you set [`[up-location]`](/api/up-follow#up-location)
+or pass a [`{ location }`](/api/up.render#options.location) option, Unpoly pushes that URL even after a non-`GET` request.
 
 The same rules apply to error responses. When an error response to a `GET` request renders an error page into the
 main fragment, the address bar shows its URL, like after a full page load. A form submission that fails
@@ -115,7 +115,7 @@ up.render({ target: '.content', url: '/path', history: true })   // Always updat
 up.render({ target: '.content', url: '/path', history: 'auto' }) // Update if the main fragment is rendered
 ```
 
-To render with all [navigation defaults](/navigation-defaults#navigation-defaults), including `{ history: 'auto' }`,
+To render with all [navigation defaults](/learn/navigation-defaults#navigation-defaults), including `{ history: 'auto' }`,
 use `up.navigate()` instead of `up.render()`.
 
 
@@ -178,10 +178,10 @@ Each part has an attribute for links and forms, and a render option for JavaScri
 
 | Keep unchanged | Attribute                                        | Render option                                  |
 |----------------|--------------------------------------------------|------------------------------------------------|
-| URL            | [`[up-location=false]`](/up-follow#up-location)  | [`{ location: false }`](/up.render#options.location) |
-| Title          | [`[up-title=false]`](/up-follow#up-title)        | [`{ title: false }`](/up.render#options.title)       |
-| Meta tags      | [`[up-meta-tags=false]`](/up-follow#up-meta-tags) | [`{ metaTags: false }`](/up.render#options.metaTags) |
-| `html[lang]`   | [`[up-lang=false]`](/up-follow#up-lang)          | [`{ lang: false }`](/up.render#options.lang)         |
+| URL            | [`[up-location=false]`](/api/up-follow#up-location)  | [`{ location: false }`](/api/up.render#options.location) |
+| Title          | [`[up-title=false]`](/api/up-follow#up-title)        | [`{ title: false }`](/api/up.render#options.title)       |
+| Meta tags      | [`[up-meta-tags=false]`](/api/up-follow#up-meta-tags) | [`{ metaTags: false }`](/api/up.render#options.metaTags) |
+| `html[lang]`   | [`[up-lang=false]`](/api/up-follow#up-lang)          | [`{ lang: false }`](/api/up.render#options.lang)         |
 
 For example, this link updates the URL and title, but leaves the meta tags alone:
 
@@ -204,7 +204,7 @@ Give `[up-location]` or `[up-title]` a string instead of `false`:
 ```
 
 The server can do the same by responding with an `X-Up-Location` or `X-Up-Title` header.
-This is useful when you [optimize a response](/optimizing-responses) to omit the layout,
+This is useful when you [optimize a response](/learn/optimizing-responses) to omit the layout,
 and the response no longer includes a `<title>`.
 
 
@@ -221,7 +221,7 @@ To change the URL of the current entry, call `up.history.replace()`.
 Neither function updates the title or meta tags.
 
 Entries placed this way are owned by Unpoly. When the user goes back to such an entry,
-Unpoly [restores the content](/restoring-history) at that URL.
+Unpoly [restores the content](/learn/restoring-history) at that URL.
 To push an entry that your own script will restore, use the browser's `history.pushState()` instead.
 
 

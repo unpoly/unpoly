@@ -1,8 +1,8 @@
 Background requests
 ===================
 
-A background request is a request the user is not actively waiting for, like [preloading](/preloading) a link or [polling](/polling) a fragment.
-Background requests never show the [progress bar](/progress-bar), and they wait while requests for the user's own clicks and submissions are sent first.
+A background request is a request the user is not actively waiting for, like [preloading](/learn/preloading) a link or [polling](/learn/polling) a fragment.
+Background requests never show the [progress bar](/learn/progress-bar), and they wait while requests for the user's own clicks and submissions are sent first.
 
 
 What changes for a background request {#effects}
@@ -10,10 +10,10 @@ What changes for a background request {#effects}
 
 Unpoly treats a background request differently in two ways:
 
-- **It never shows the progress bar.** A background request does not emit an `up:network:late` event, no matter how long it takes. The [progress bar](/progress-bar) only appears for requests the user is waiting for.
-- **It has a lower priority.** Unpoly sends at most [6 requests](/up.network.config#config.concurrency) at the same time. When more requests are waiting, requests in the foreground are sent first. A background request is only sent when no foreground request is waiting.
+- **It never shows the progress bar.** A background request does not emit an `up:network:late` event, no matter how long it takes. The [progress bar](/learn/progress-bar) only appears for requests the user is waiting for.
+- **It has a lower priority.** Unpoly sends at most [6 requests](/api/up.network.config#config.concurrency) at the same time. When more requests are waiting, requests in the foreground are sent first. A background request is only sent when no foreground request is waiting.
 
-Loading in the background does not change how a request is [aborted](/aborting-requests), [cached](/caching) or styled with [feedback classes](/feedback-classes).
+Loading in the background does not change how a request is [aborted](/learn/aborting-requests), [cached](/learn/caching) or styled with [feedback classes](/learn/feedback-classes).
 `up.network.isBusy()` also returns `true` while a background request is loading.
 
 
@@ -22,19 +22,19 @@ Which requests load in the background {#defaults}
 
 The following requests load in the background by default:
 
-- Requests from [preloading](/preloading) a link.
-- Requests from [polling](/polling) a fragment.
-- Requests that [revalidate](/caching#revalidation) cached content after it was rendered.
+- Requests from [preloading](/learn/preloading) a link.
+- Requests from [polling](/learn/polling) a fragment.
+- Requests that [revalidate](/learn/caching#revalidation) cached content after it was rendered.
 
-Links, forms and [deferred content](/lazy-loading) load in the foreground by default.
+Links, forms and [deferred content](/learn/lazy-loading) load in the foreground by default.
 A slow request from one of them shows the progress bar.
 
 
 Loading in the background {#opting-in}
 -------------------------
 
-To load a link, form or deferred element in the background, set an [`[up-background]`](/up-follow#up-background) attribute.
-From JavaScript, pass a [`{ background: true }`](/up.render#options.background) option to a rendering function or to `up.request()`.
+To load a link, form or deferred element in the background, set an [`[up-background]`](/api/up-follow#up-background) attribute.
+From JavaScript, pass a [`{ background: true }`](/api/up.render#options.background) option to a rendering function or to `up.request()`.
 
 For example, a form that publishes a post can save a draft while the user types.
 The user is not waiting for the draft to be saved, so it should not show the progress bar
@@ -47,7 +47,7 @@ or delay the user's clicks:
 </form>
 ```
 
-A [compiler](/enhancing-elements) watches the form and sends its fields to the draft URL in the background:
+A [compiler](/learn/enhancing-elements) watches the form and sends its fields to the draft URL in the background:
 
 ```js
 up.compiler('form[data-autosave]', function(form, { autosave: url }) {
@@ -57,20 +57,20 @@ up.compiler('form[data-autosave]', function(form, { autosave: url }) {
 })
 ```
 
-To load a [polling](/polling) request in the foreground, set `[up-background="false"]` on the `[up-poll]` element.
+To load a [polling](/learn/polling) request in the foreground, set `[up-background="false"]` on the `[up-poll]` element.
 
 
 When the user waits for a background request {#promotion}
 --------------------------------------------
 
 Sometimes the user needs the response of a request that is still loading in the background.
-For example, the user hovers over a link and Unpoly starts [preloading](/preloading) it.
+For example, the user hovers over a link and Unpoly starts [preloading](/learn/preloading) it.
 Before the preload request has finished, the user clicks the link.
 
-Unpoly does not make a second request in this case. The click reuses the preload request from the [cache](/caching),
+Unpoly does not make a second request in this case. The click reuses the preload request from the [cache](/learn/caching),
 and the preload request is moved into the foreground. From then on it is treated like any other foreground request:
 
-- When the request takes longer than [usual](/progress-bar#timing), the progress bar appears.
+- When the request takes longer than [usual](/learn/progress-bar#timing), the progress bar appears.
 - When the request is still waiting to be sent, it is sent before any background request.
 
 This happens whenever a foreground request reuses a cached request that is still loading in the background.

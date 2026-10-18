@@ -16,7 +16,7 @@ When the user follows a link or submits a form, Unpoly requests the URL without 
 <a href="/preferences" up-target=".content">Preferences</a> <!-- mark: up-target=".content" -->
 ```
 
-The request is a plain HTTP request. It carries [extra headers](/up.protocol) that tell the server
+The request is a plain HTTP request. It carries [extra headers](/api/up.protocol) that tell the server
 what Unpoly intends to do with the response, like the targeted selector:
 
 ```http
@@ -26,17 +26,17 @@ X-Up-Target: .content
 
 The server renders a full HTML page, as it would for any browser request. Unpoly extracts
 the `.content` fragment from the response and swaps it into the page. A server may use
-the headers to [omit content that is not targeted](/optimizing-responses), but it never has to.
+the headers to [omit content that is not targeted](/learn/optimizing-responses), but it never has to.
 
-Requests from links, forms, [polling](/polling) and [preloading](/preloading) all pass
+Requests from links, forms, [polling](/learn/polling) and [preloading](/learn/preloading) all pass
 through the same client. They share one cache, one queue that limits concurrent requests,
-and one set of [events](/up.network).
+and one set of [events](/api/up.network).
 
 
 Instant revisits from the cache
 -------------------------------
 
-When [navigating](/navigation-defaults), responses to `GET` requests are cached. When the user returns
+When [navigating](/learn/navigation-defaults), responses to `GET` requests are cached. When the user returns
 to a page they already saw this session, the fragment renders from the cache,
 without waiting for the network:
 

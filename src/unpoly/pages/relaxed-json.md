@@ -34,7 +34,7 @@ What Unpoly sends
 
 When Unpoly sends JSON (e.g. in the `X-Up-Context` header), it always produces regular JSON.
 
-If you implement the [optional server protocol](/up.protocol) you only need to deal with regular JSON strings.
+If you implement the [optional server protocol](/api/up.protocol) you only need to deal with regular JSON strings.
 
 
 Parsing relaxed JSON

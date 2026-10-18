@@ -5,7 +5,7 @@ Optimistic rendering is a pattern where the page is updated without waiting for 
 When the server eventually responds, the optimistic change is reverted
 and replaced by the server-confirmed content.
 
-In Unpoly, optimistic rendering is an application of [previews](/previews):
+In Unpoly, optimistic rendering is an application of [previews](/learn/previews):
 temporary page changes that are reverted when a request ends.
 A preview can produce a screen state resembling the ultimate server response,
 so the user sees the effect of their interaction instantly, even under high latency.
@@ -51,7 +51,7 @@ The HTML for the TODO list is structured like this:
 
 When the user submits a new task, we want to immediately add a new `.task` element to the list
 below the form. To do so the preview function `add-task` can access the submitted form data
-through [`preview.params`](/up.Preview.prototype.params). The input value is then used to
+through [`preview.params`](/api/up.Preview.prototype.params). The input value is then used to
 construct a new `.task` element and insert it after the form:
 
 ```js
@@ -64,18 +64,18 @@ up.preview('add-task', function(preview) {
 ```
 
 Because we're using the `up.Preview#insert()` function to insert the new `.task` element,
-the element is automatically removed when the preview [ends](/previews#ending).
+the element is automatically removed when the preview [ends](/learn/previews#ending).
 This ensures a consistent screen state in cases where we end up *not* updating the entire `#tasks` fragment,
-e.g. when the form submission [fails](/error-responses).
+e.g. when the form submission [fails](/learn/error-responses).
 
-When the user submits again before the server responds, the new submission [aborts](/aborting-requests)
+When the user submits again before the server responds, the new submission [aborts](/learn/aborting-requests)
 the earlier request and reverts its preview.
 
 
 ## Handling validation errors
 
-When a previewed form submission [fails](/error-responses) with a [validation](/validation) error,
-the server's error messages still appear reliably. Every preview is [reverted when its request ends](/previews#ending),
+When a previewed form submission [fails](/learn/error-responses) with a [validation](/learn/validation) error,
+the server's error messages still appear reliably. Every preview is [reverted when its request ends](/learn/previews#ending),
 so Unpoly removes the optimistic change before it renders the form with its errors.
 The user never keeps seeing a change that the server rejected.
 
@@ -110,7 +110,7 @@ and the form shows the error "has already been taken" below the text field.
 If a server-validated constraint violation is likely to occur, consider conveying previewed state
 as "pending", e.g. by reducing its opacity or using gray text.
 
-Sometimes you can also use the `[up-validate]` attribute to [validate with the server while typing](/validation#validating-while-typing).
+Sometimes you can also use the `[up-validate]` attribute to [validate with the server while typing](/learn/validation#validating-while-typing).
 This increases the chance that a server-provided validation error is noticed before
 the form is submitted.
 
@@ -120,7 +120,7 @@ the form is submitted.
 When a preview function needs to update a major fragment, this can lead to a duplication of view logic.
 An HTML fragment that used to only be rendered by the server is now also found in the JavaScript.
 
-There is a way to mitigate that. By embedding [templates](/templates) into our responses, we can confine HTML rendering to the server.
+There is a way to mitigate that. By embedding [templates](/learn/templates) into our responses, we can confine HTML rendering to the server.
 Since the server already knows how to render a task, we can reuse that knowledge for optimistic rendering
 on the client.
 

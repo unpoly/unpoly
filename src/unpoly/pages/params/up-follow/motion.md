@@ -1,14 +1,14 @@
 @partial up-follow/motion
 
 @param [up-transition]
-  The name of a [transition](/up.motion) to morph between the old and new fragment.
+  The name of a [transition](/api/up.motion) to morph between the old and new fragment.
 
-  If you are [prepending or appending content](/targeting-fragments#appending-or-prepending),
+  If you are [prepending or appending content](/learn/targeting-fragments#appending-or-prepending),
   use the `[up-animation]` attribute instead.
 
 @param [up-animation]
-  The name of an [animation](/animations) to play on the new content when
-  [prepending or appending content](/targeting-fragments#appending-or-prepending).
+  The name of an [animation](/learn/animations) to play on the new content when
+  [prepending or appending content](/learn/targeting-fragments#appending-or-prepending).
 
   If you are replacing content (the default), use the `[up-transition]` attribute instead.
 

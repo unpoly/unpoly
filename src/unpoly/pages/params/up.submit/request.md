@@ -14,13 +14,13 @@
     The value is case-insensitive.
 
     You can also use methods that would not be allowed on a `<form>` element,
-    such as `'patch'` or `'delete'`. These will be [wrapped in a POST request](/up.network.config#config.wrapMethod).
+    such as `'patch'` or `'delete'`. These will be [wrapped in a POST request](/api/up.network.config#config.wrapMethod).
 
   @param options.params
-    Additional [Form parameters](/up.Params) that should be sent as the request's
+    Additional [Form parameters](/api/up.Params) that should be sent as the request's
     [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
 
-    The given value will be added to params [parsed](/up.Params.fromForm)
+    The given value will be added to params [parsed](/api/up.Params.fromForm)
     from the form's input fields. If a param with the same name already
     existed in the form, it will be deleted and overridden with the given value.
 

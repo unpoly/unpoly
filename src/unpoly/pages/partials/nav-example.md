@@ -16,7 +16,7 @@ When the browser location changes to `/foo`, the first link is automatically mar
 </nav>
 ```
 
-Unpoly doesn't style `.up-current` links by default, but we can [style highlighted links](/navigation-bars#styling) using CSS.
+Unpoly doesn't style `.up-current` links by default, but we can [style highlighted links](/learn/navigation-bars#styling) using CSS.
 
 When the browser location changes to `/bar`, the first link loses its `.up-current` class.\
 Now the second link is automatically marked as `.up-current`:

@@ -41,7 +41,7 @@
     The listener function that should be called.
 
     The function takes the observed element as a second argument.
-    The element's [attached data](/data) is passed as a third argument.
+    The element's [attached data](/learn/data) is passed as a third argument.
 
 @return {Function()}
   A function that unbinds the event listeners when called.

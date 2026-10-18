@@ -10,15 +10,15 @@ You can also decide which responses count as errors.
 Rendering error responses differently {#fail-options}
 -------------------------------------
 
-Any HTTP status other than 2xx or [304](/conditional-requests#rendering-nothing) makes a response an *error response*.
+Any HTTP status other than 2xx or [304](/learn/conditional-requests#rendering-nothing) makes a response an *error response*.
 For an error response you can pass different render options than for a successful one.
 
-A common use case is a [form submission](/submitting-forms). A successful response
+A common use case is a [form submission](/learn/submitting-forms). A successful response
 should show a follow-up screen, but an error response should re-render the form with validation errors.
 A good HTTP status code for an invalid form submission is
 [422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Content).
 
-To use a different [render option](/up.render) for an error response, prefix the option with `fail`:
+To use a different [render option](/api/up.render) for an error response, prefix the option with `fail`:
 
 ```js
 up.render({
@@ -35,7 +35,7 @@ up.render({
 
 Event handlers still begin with `on`, so `{ onRendered }` becomes `{ onFailRendered }`.
 
-When using Unpoly's HTML attributes with [links](/up-follow) or [forms](/up-submit),
+When using Unpoly's HTML attributes with [links](/api/up-follow) or [forms](/api/up-submit),
 infix the attribute with `fail`:
 
 ```text
@@ -52,7 +52,7 @@ infix the attribute with `fail`:
 > [tip]
 > When Unpoly handles a form, the default `[up-fail-target]` is the form itself.
 > This makes sure that any validation errors appear within the `<form>` element,
-> so you rarely need to set the attribute. See [validating forms](/validation) for examples.
+> so you rarely need to set the attribute. See [validating forms](/learn/validation) for examples.
 
 
 ### Which options have a fail variant {#fail-variants}
@@ -63,14 +63,14 @@ Some options, like `{ history, fallback }`, are used for both successful and err
 but may be overridden with a fail-prefixed variant, e.g. `{ history: true, failHistory: false }`.
 
 Options related to layers, scrolling or focus are never shared.
-An error response uses `{ failLayer, failScroll, failFocus }`, or the [configured defaults](/up.fragment.config#config.navigateOptions)
+An error response uses `{ failLayer, failScroll, failFocus }`, or the [configured defaults](/api/up.fragment.config#config.navigateOptions)
 when these are not given.
 
 
 ### Fail targets for links {#links}
 
 Unlike a form, a link has no natural fragment to show an error in.
-When a link receives an error response, Unpoly updates the [main fragment](/main) instead of the link's `[up-target]`.
+When a link receives an error response, Unpoly updates the [main fragment](/api/main) instead of the link's `[up-target]`.
 This way a server error page shows up in the main fragment, where the user expects it.
 
 To re-render a different fragment, set an `[up-fail-target]` attribute.
@@ -129,7 +129,7 @@ Detecting an error response programmatically {#detecting-failure}
 Rendering functions like `up.render()`, `up.follow()` or `up.submit()` return a promise that rejects when the server
 sends an error response, or when there is another error.
 
-See [Render error handling example](/render-lifecycle#error-handling-example).
+See [Render error handling example](/learn/render-lifecycle#error-handling-example).
 
 
 See also

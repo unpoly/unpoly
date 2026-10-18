@@ -25,8 +25,8 @@ To show loading state within a fragment, see [[loading-state]].
 ## Styling the progress bar {#styling}
 
 The progress bar is implemented as a single `<up-progress-bar>` element.
-Unpoly automatically inserts the element when requests are [late](/up:network:late),
-and removes it when they have [recovered](/up:network:recover).
+Unpoly automatically inserts the element when requests are [late](/api/up:network:late),
+and removes it when they have [recovered](/api/up:network:recover).
 
 By default the bar is 3 pixels high and blue. You may style the element using CSS:
 
@@ -47,8 +47,8 @@ than `up.network.config.lateDelay`. The default is 400 milliseconds:
 up.network.config.lateDelay = 1000
 ```
 
-You may override this per request by setting an [`[up-late-delay]`](/up-follow#up-late-delay) attribute
-or passing a [`{ lateDelay }`](/up.request#options.lateDelay) option.
+You may override this per request by setting an [`[up-late-delay]`](/api/up-follow#up-late-delay) attribute
+or passing a [`{ lateDelay }`](/api/up.request#options.lateDelay) option.
 Passing `{ lateDelay: false }` never shows a progress bar for that request:
 
 ```html
@@ -80,7 +80,7 @@ To build a custom loading indicator, place an element like this in your applicat
 <loading-indicator>Please wait!</loading-indicator>
 ```
 
-Now add a [compiler](/enhancing-elements) that hides the `<loading-indicator>` element
+Now add a [compiler](/learn/enhancing-elements) that hides the `<loading-indicator>` element
 while there are no long-running requests:
 
 ```js
@@ -101,7 +101,7 @@ up.compiler('loading-indicator', function(indicator) {
 ```
 
 The compiler returns the functions that unbind the event listeners, so the listeners are removed
-when the indicator element is [destroyed](/enhancing-elements#destructor).
+when the indicator element is [destroyed](/learn/enhancing-elements#destructor).
 
 
 @page progress-bar

@@ -4,14 +4,14 @@ Optimizing responses
 Your server can shorten or customize its responses by reading the request headers that Unpoly sends,
 like the targeted selector or the mode of the updating layer.
 This is optional: Unpoly only takes the targeted fragment from any response and discards the rest,
-except [hungry elements](/hungry-elements) and the `<head>`,
+except [hungry elements](/learn/hungry-elements) and the `<head>`,
 so a full HTML page is always a valid answer.
 
 
 Rendering only the targeted fragment {#target}
 ------------------------------------
 
-Unpoly sends the [target selector](/targeting-fragments) in an `X-Up-Target` request header.
+Unpoly sends the [target selector](/learn/targeting-fragments) in an `X-Up-Target` request header.
 When a link targets a `.menu` element, the server sees a request like this:
 
 ```http
@@ -34,10 +34,10 @@ Vary: X-Up-Target
 A typical use is to skip expensive parts of the layout, like a sidebar or a navigation bar,
 when they are not part of the target.
 
-`X-Up-Target` does not list [hungry elements](/hungry-elements) like [flashes](/flashes).
+`X-Up-Target` does not list [hungry elements](/learn/hungry-elements) like [flashes](/learn/flashes).
 They are updated whenever a response happens to contain them.
 
-A request may target [multiple fragments](/targeting-fragments#multiple).
+A request may target [multiple fragments](/learn/targeting-fragments#multiple).
 The header then lists all selectors, separated by commas, and the response should contain an element for each:
 
 ```http
@@ -52,7 +52,7 @@ Treat a missing header as a request for the full page.
 
 A shortened response usually has no `<head>` and therefore no `<title>`.
 To still update the document title, send it as an `X-Up-Title` response header,
-encoded as a [relaxed JSON](/relaxed-json) string:
+encoded as a [relaxed JSON](/api/relaxed-json) string:
 
 ```http
 HTTP/1.1 200 OK
@@ -63,12 +63,12 @@ X-Up-Title: "Sitemap"
 ```
 
 A response without a `<head>` has two more limits: Unpoly keeps the current
-[meta tags](/updating-history#meta-tags), and it cannot [detect a new deployment](/handling-asset-changes).
+[meta tags](/learn/updating-history#meta-tags), and it cannot [detect a new deployment](/learn/handling-asset-changes).
 
 
 ### Error responses target a different fragment {#fail-target}
 
-When the server responds with an error code, Unpoly renders a [different target](/error-responses#fail-options).
+When the server responds with an error code, Unpoly renders a [different target](/learn/error-responses#fail-options).
 Form submissions use this to update the `<form>` with validation errors instead of the success target.
 The fail target is sent as a separate `X-Up-Fail-Target` header:
 
@@ -85,7 +85,7 @@ and for `X-Up-Fail-Target` when it responds with an error status like `422`.
 Rendering different content for overlays {#mode}
 ----------------------------------------
 
-Unpoly sends the [mode](/up.layer.mode) of the updating layer in an `X-Up-Mode` request header.
+Unpoly sends the [mode](/api/up.layer.mode) of the updating layer in an `X-Up-Mode` request header.
 A link that opens a drawer overlay produces a request like this:
 
 ```http
@@ -129,7 +129,7 @@ It tells you exactly which fragments Unpoly needs.
 Rendering content that depends on layer context {#context}
 -----------------------------------------------
 
-A layer can carry a [context](/layer-context) object, e.g. to reuse a screen in an overlay
+A layer can carry a [context](/learn/layer-context) object, e.g. to reuse a screen in an overlay
 with a different heading. Unpoly sends it as JSON in an `X-Up-Context` request header:
 
 ```http
@@ -143,7 +143,7 @@ A response that depends on the context lists it in its `Vary` header. See [[laye
 Caching optimized responses {#vary}
 ---------------------------
 
-Unpoly [caches](/caching) responses and reuses them for later requests to the same URL.
+Unpoly [caches](/learn/caching) responses and reuses them for later requests to the same URL.
 A response that was tailored to a request header must not be reused for a request with a different header value:
 a response that only contains `.menu` cannot serve a request for `.sidebar`.
 
@@ -164,7 +164,7 @@ serving a shortened response to a full page load. Check that your CDN honors `Va
 or don't let it cache these responses.
 
 You can set the `Vary` header from your own server code.
-Some [protocol implementations](/protocol-implementations), like `unpoly-rails`, set it for you once you read a header.
+Some [protocol implementations](/learn/protocol-implementations), like `unpoly-rails`, set it for you once you read a header.
 
 
 ### How cache entries are matched {#cache-matching}
@@ -223,7 +223,7 @@ When a response has *no* `Vary` header, that response is a cache hit for <i>all<
 </table>
 
 
-Requests can [target multiple fragments](/targeting-fragments#multiple) by separating selectors
+Requests can [target multiple fragments](/learn/targeting-fragments#multiple) by separating selectors
 with a comma. If the server replies with `Vary: X-Up-Target`, that response is a cache hit for each individual selector:
 
 <table>

@@ -17,7 +17,7 @@ Protocol implementations
 ------------------------
 
 Your server can inspect and manipulate Unpoly's rendering through simple
-[HTTP headers](/up.protocol). Libraries implementing this protocol exist for
+[HTTP headers](/api/up.protocol). Libraries implementing this protocol exist for
 many languages and frameworks, like Rails, Django, Laravel or Phoenix.
 
 [[more: protocol-implementations]]

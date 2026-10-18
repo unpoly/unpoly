@@ -41,7 +41,7 @@ up.modal = {
   },
 
   /*-
-  [Extracts](/up.extract) the given CSS selector from the given HTML string and
+  [Extracts](/api/up.extract) the given CSS selector from the given HTML string and
   opens the results in a modal overlay.
 
   @function up.modal.extract
@@ -50,7 +50,7 @@ up.modal = {
   @param {string} document
     The HTML containing the modal content.
   @param {Object} options
-    See options for [`up.modal.follow()`](/up.modal.follow).
+    See options for [`up.modal.follow()`](/api/up.modal.follow).
   @return {Promise}
     A promise that will be fulfilled when the modal has been opened.
   @deprecated

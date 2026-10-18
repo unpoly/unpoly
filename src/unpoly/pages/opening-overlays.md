@@ -15,7 +15,7 @@ To open a link's destination in a modal overlay, set an `[up-layer=new]` attribu
 <a href="/menu" up-layer="new">Open menu</a> <!-- mark: up-layer="new" -->
 ```
 
-When the user clicks, Unpoly requests `/menu` and shows the response's [main fragment](/main)
+When the user clicks, Unpoly requests `/menu` and shows the response's [main fragment](/api/main)
 in the overlay. Your server renders the same full page it would for a regular page load,
 so the link keeps working in a new tab or without JavaScript.
 
@@ -25,7 +25,7 @@ so the link keeps working in a new tab or without JavaScript.
 Often the page's main fragment works well in an overlay as it is.
 When it doesn't, use the first of these options that fits:
 
-1. Mark a different [main fragment](/up-main#overlays) for overlays.
+1. Mark a different [main fragment](/api/up-main#overlays) for overlays.
    Set `[up-main=overlay]` for all overlays, or name a [mode](#modes) like `[up-main=modal]`:
 
    ```html
@@ -41,26 +41,26 @@ When it doesn't, use the first of these options that fits:
 
    The root layer keeps updating the whole `.layout`, while overlays only show `.layout--content`.
 
-2. Choose a fragment for a single link with an [`[up-target]`](/up-layer-new#up-target) attribute:
+2. Choose a fragment for a single link with an [`[up-target]`](/api/up-layer-new#up-target) attribute:
 
    ```html
    <a href="/menu" up-layer="new" up-target=".menu-items">Open menu</a> <!-- mark: up-target=".menu-items" -->
    ```
 
 3. Render something different on the server. Requests for an overlay carry an
-   [`X-Up-Mode`](/X-Up-Mode) header with the overlay's mode.
+   [`X-Up-Mode`](/api/X-Up-Mode) header with the overlay's mode.
 
-When the server responds with an [error code](/error-responses), the error page is rendered in
+When the server responds with an [error code](/learn/error-responses), the error page is rendered in
 the link's own layer, not in an overlay. To show errors in an overlay, set
-[`[up-fail-layer=new]`](/targeting-other-layers#fail-layer).
+[`[up-fail-layer=new]`](/learn/targeting-other-layers#fail-layer).
 
 When the user clicks a second overlay link while the first is still loading, only the second
-overlay opens. See [aborting rules in layers](/aborting-requests#layers).
+overlay opens. See [aborting rules in layers](/learn/aborting-requests#layers).
 
 
 ### Choosing the overlay mode {#modes}
 
-By default the overlay opens as a `modal`. To use a different [mode](/overlays#layer-modes),
+By default the overlay opens as a `modal`. To use a different [mode](/learn/overlays#layer-modes),
 like a `popup` or `drawer`, set an `[up-mode]` attribute:
 
 ```html
@@ -91,7 +91,7 @@ To show the response to a successful form submission in an overlay, set an `[up-
 </form>
 ```
 
-To only use an overlay for error messages from a [failed submission](/error-responses),
+To only use an overlay for error messages from a [failed submission](/learn/error-responses),
 set an `[up-fail-layer=new]` attribute instead:
 
 ```html
@@ -104,7 +104,7 @@ set an `[up-fail-layer=new]` attribute instead:
 Opening overlays from local content {#string}
 -----------------------------------
 
-The [`[up-content]`](/up-follow#up-content) attribute opens an overlay without going through the server:
+The [`[up-content]`](/api/up-follow#up-content) attribute opens an overlay without going through the server:
 
 ```html
 <a up-layer="new popup" up-content="<p>Helpful instructions here</p>"> <!-- mark: up-content="<p>Helpful instructions here</p>" -->
@@ -112,9 +112,9 @@ The [`[up-content]`](/up-follow#up-content) attribute opens an overlay without g
 </a>
 ```
 
-Since no `[up-target]` selector is given, the content is wrapped in a container matching the overlay's [main target](/main).
+Since no `[up-target]` selector is given, the content is wrapped in a container matching the overlay's [main target](/api/main).
 
-Instead of embedding an HTML string, you can also refer to a [template](/templates):
+Instead of embedding an HTML string, you can also refer to a [template](/learn/templates):
 
 ```html
 <a up-layer="new popup" up-content="#help"> <!-- mark: up-content="#help" -->
@@ -149,7 +149,7 @@ Choose a different layer mode by passing a `{ mode }` option:
 up.layer.open({ url: '/menu', mode: 'drawer' }) // mark: mode: 'drawer'
 ```
 
-To get a promise for the overlay's [result value](/subinteractions#result-values) instead,
+To get a promise for the overlay's [result value](/learn/subinteractions#result-values) instead,
 use `up.layer.ask()`:
 
 ```js
@@ -165,8 +165,8 @@ Opening overlays from the server {#server}
 
 The server can force its response to open an overlay by sending an `X-Up-Open-Layer: {}` response header.
 
-This opens an overlay with the [default mode](/up.layer.config#config.mode), selects a [main target](/main)
-and uses [default navigation options](/up.fragment.config#config.navigateOptions):
+This opens an overlay with the [default mode](/api/up.layer.config#config.mode), selects a [main target](/api/main)
+and uses [default navigation options](/api/up.fragment.config#config.navigateOptions):
 
 ```http
 Content-Type: text/html
@@ -179,7 +179,7 @@ X-Up-Open-Layer: {}
 </html>
 ```
 
-To customize the target and appearance of the new overlay, set the header value to a [relaxed JSON](/relaxed-json) string
+To customize the target and appearance of the new overlay, set the header value to a [relaxed JSON](/api/relaxed-json) string
 with render options:
 
 ```http
@@ -191,7 +191,7 @@ X-Up-Open-Layer: { target: '#menu', mode: 'drawer', animation: 'fade-in' }
 </div>
 ```
 
-Many options from `up.layer.open()` are supported. [Callbacks can be passed as strings](/X-Up-Open-Layer#callbacks).
+Many options from `up.layer.open()` are supported. [Callbacks can be passed as strings](/api/X-Up-Open-Layer#callbacks).
 
 
 Replacing existing overlays {#replacing-existing-overlays}

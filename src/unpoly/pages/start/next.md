@@ -22,7 +22,7 @@ attributes keep making full page loads, and **both can coexist** for as long
 as the migration takes.
 
 When you are ready to go all in, configure Unpoly to handle
-[all links](/handling-all-links) and [all forms](/handling-all-forms)
+[all links](/learn/handling-all-links) and [all forms](/learn/handling-all-forms)
 without annotating each element.
 
 

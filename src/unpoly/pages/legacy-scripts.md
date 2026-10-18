@@ -2,9 +2,9 @@ Migrating legacy JavaScripts
 ============================
 
 Legacy scripts often run on `DOMContentLoaded`, expecting a fresh page load for every interaction.
-Once Unpoly handles your [links](/handling-all-links) and [forms](/handling-all-forms),
+Once Unpoly handles your [links](/learn/handling-all-links) and [forms](/learn/handling-all-forms),
 that event fires only once per session, and such scripts stop running.
-The fix is to call them from a [compiler](/enhancing-elements) instead.
+The fix is to call them from a [compiler](/learn/enhancing-elements) instead.
 
 
 ## Migrating legacy scripts to a compiler {#migrate-to-compiler}
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 Since the code only runs after the initial page load, links contained in
 a fragment update will not be "lightboxified".
 
-You can fix this by moving your code to a [compiler](/enhancing-elements):
+You can fix this by moving your code to a [compiler](/learn/enhancing-elements):
 
 ```js
 up.compiler('a.lightbox', function(element) {
@@ -65,7 +65,7 @@ and add it to the relevant element:
 </form>
 ```
 
-Any parameters can be [attached to the element](/data):
+Any parameters can be [attached to the element](/learn/data):
 
 ```html
 <form action="/orders/new" track-view up-data="{ screen: 'order-form', step: 1 }"> <!-- mark: up-data="{ screen: 'order-form', step: 1 }" -->
@@ -86,8 +86,8 @@ up.compiler('[track-view]', function(element, data) { // mark: [track-view]
 ### Avoid loading your application scripts in the `<body>`
 
 Unpoly runs `<script>` elements in new fragments, as long as your CSP allows them
-(see [script elements](/script-security#script-elements)). Mind that the `<body>` element is a default
-[main target](/main).
+(see [script elements](/learn/script-security#script-elements)). Mind that the `<body>` element is a default
+[main target](/api/main).
 If you include your global scripts at the end of your `<body>`, swapping the `<body>` will re-execute these scripts:
 
 ```html
@@ -122,7 +122,7 @@ that a full page load used to hide are going to stack up.
 
 A common leak is scheduling timers with `setInterval()`, but never clearing these timers
 when they are no longer needed. When a compiler sets up something like this, undo it in a
-[destructor function](/enhancing-elements#destructor).
+[destructor function](/learn/enhancing-elements#destructor).
 
 
 @page legacy-scripts

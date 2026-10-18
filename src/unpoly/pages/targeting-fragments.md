@@ -26,9 +26,9 @@ Set an `[up-target]` attribute with a CSS selector on a link or form:
 
 The server response is expected to include an element matching `.content`.
 The response may include other HTML, even an entire HTML document, but only the
-element matching `.content` is updated on the page. Other elements from the response are discarded, except [hungry elements](/hungry-elements).
+element matching `.content` is updated on the page. Other elements from the response are discarded, except [hungry elements](/learn/hungry-elements).
 
-Many [JavaScript functions](/up.fragment) take a `{ target }` option to indicate what fragment should be updated:
+Many [JavaScript functions](/api/up.fragment) take a `{ target }` option to indicate what fragment should be updated:
 
 ```js
 up.render({ target: '.content', url: '/posts/5' })
@@ -38,7 +38,7 @@ up.render({ target: '.content', url: '/posts/5' })
 Targeting the main fragment {#targeting-the-main-element}
 ---------------------------
 
-Most links and forms update the site's primary content area, called the [main fragment](/main).
+Most links and forms update the site's primary content area, called the [main fragment](/api/main).
 Omit the target to update it:
 
 ```html
@@ -166,7 +166,7 @@ To make a server request without changing a fragment, target the `:none` selecto
 Targeting the entire layer {#targeting-the-entire-layer}
 --------------------------
 
-To replace all visible elements of a [layer](/up.layer), use the `:layer` selector.
+To replace all visible elements of a [layer](/api/up.layer), use the `:layer` selector.
 It targets the layer's topmost swappable element:
 
 ```html
@@ -187,12 +187,12 @@ Sometimes there are multiple components with the same selector on the page:
 <div class="card">...</div>
 ```
 
-While you can [set `[id]` attributes to uniquely identify an element](/target-derivation),
+While you can [set `[id]` attributes to uniquely identify an element](/learn/target-derivation),
 this is often not necessary. When an ambiguous selector like `.card` matches more than one element,
 Unpoly prefers to match a fragment near the link or form that the user interacted with (the *origin*).
-If there is no match in close proximity, Unpoly updates the first match in the [layer](/up.layer).
+If there is no match in close proximity, Unpoly updates the first match in the [layer](/api/up.layer).
 
-When rendering programmatically, pass the interaction's origin element as [`{ origin }`](/up.render#options.origin) option.
+When rendering programmatically, pass the interaction's origin element as [`{ origin }`](/api/up.render#options.origin) option.
 
 Below are examples of ambiguous selectors that Unpoly resolves by proximity to the origin.
 A more elaborate example is the [Tasks list](https://demo.unpoly.com/tasks) of the [Unpoly Demo App](https://demo.unpoly.com/).
@@ -243,7 +243,7 @@ only known in the current page.
 ### Referring to the origin element {#referring-to-the-origin-element}
 
 Instead of relying on proximity, your targets can use `:origin` to refer to the
-interaction's origin element. The `:origin` placeholder is replaced with a target [derived](/target-derivation)
+interaction's origin element. The `:origin` placeholder is replaced with a target [derived](/learn/target-derivation)
 from the origin element.
 
 @include origin-selector-example
@@ -286,7 +286,7 @@ If neither the primary nor the fallback target can be matched, the render pass f
 
 ### Falling back to the main target {#falling-back-to-the-main-target}
 
-It is often useful to render the [main target](/main) when the primary target cannot be matched.
+It is often useful to render the [main target](/api/main) when the primary target cannot be matched.
 Missing targets are often caused by the server rendering an error message, or an unexpected
 screen like a login form. Falling back to the main target shows that screen,
 instead of the link or form failing silently.
@@ -297,14 +297,14 @@ To fall back to the main target, set an empty `[up-fallback]` attribute or pass 
 up.render({ url: '/path', target: '.content', fallback: true }) // mark: fallback: true
 ```
 
-Falling back to the main target is the default when [navigating](/navigation-defaults).
+Falling back to the main target is the default when [navigating](/learn/navigation-defaults).
 Links and forms navigate by default, so they don't need an `[up-fallback]` attribute.
 
 
 Targeting an element object {#targeting-an-element-object}
 ---------------------------
 
-When you pass an `Element` object to a rendering function, Unpoly [derives](/target-derivation)
+When you pass an `Element` object to a rendering function, Unpoly [derives](/learn/target-derivation)
 a selector that matches the element:
 
 ```js
@@ -324,7 +324,7 @@ The server may elect to render a different target by setting an `X-Up-Target` re
 
 Events like `up:link:follow`, `up:form:submit` and `up:fragment:loaded` also let you change the target
 by setting `event.renderOptions.target` to a new selector.
-See [Changing options before rendering](/render-lifecycle#changing-options-before-rendering) for an example.
+See [Changing options before rendering](/learn/render-lifecycle#changing-options-before-rendering) for an example.
 
 
 @page targeting-fragments

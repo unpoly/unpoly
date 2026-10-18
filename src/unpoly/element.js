@@ -104,7 +104,7 @@ up.element = (function() {
   /*-
   Returns the native [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) for the given value.
 
-  This function is not aware of [layers](/up.layer) or [elements being destroyed](/up-destroying)
+  This function is not aware of [layers](/api/up.layer) or [elements being destroyed](/api/up-destroying)
   and does not support non-standard selectors like `:main`. For this, use `up.fragment.get()`.
 
   ### Casting rules
@@ -158,7 +158,7 @@ up.element = (function() {
   ### Casting rules
 
   - If given a string, returns all elements matching that string.
-  - If given any other argument, returns the argument [wrapped as a list](/up.util.wrapList).
+  - If given any other argument, returns the argument [wrapped as a list](/api/up.util.wrapList).
 
   ### Example
 
@@ -308,7 +308,7 @@ up.element = (function() {
   }
 
   /*-
-  Changes whether the given element is [shown](/up.element.show) or [hidden](/up.element.hide).
+  Changes whether the given element is [shown](/api/up.element.show) or [hidden](/api/up.element.hide).
 
   @function up.element.toggle
   @param {Element} element
@@ -425,7 +425,7 @@ up.element = (function() {
   Attach it with [`Element#appendChild()`](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild),
   or use `up.element.affix()` to create an already-attached element.
 
-  Use `up.hello()` to activate [JavaScript behavior](/up.script) within the created element.
+  Use `up.hello()` to activate [JavaScript behavior](/api/up.script) within the created element.
 
   ### Examples
 
@@ -658,7 +658,7 @@ up.element = (function() {
 
   To create a detached element from a selector, see `up.element.createFromSelector()`.
 
-  Use `up.hello()` to activate [JavaScript behavior](/up.script) within the created element.
+  Use `up.hello()` to activate [JavaScript behavior](/api/up.script) within the created element.
 
   ### Example
 
@@ -790,7 +790,7 @@ up.element = (function() {
   /*-
   Parses an element from the given HTML fragment string.
 
-  Use `up.hello()` to activate [JavaScript behavior](/up.script) within the created element.
+  Use `up.hello()` to activate [JavaScript behavior](/api/up.script) within the created element.
 
   ### Example
 
@@ -837,7 +837,7 @@ up.element = (function() {
   }
 
   /*-
-  Parses a [list](/List) of [nodes](https://developer.mozilla.org/en-US/docs/Web/API/Node) from a string of HTML.
+  Parses a [list](/api/List) of [nodes](https://developer.mozilla.org/en-US/docs/Web/API/Node) from a string of HTML.
 
   The returned list can be a mixed list of `Element`, `Text`, or `Comment` nodes.
 
@@ -1169,9 +1169,9 @@ up.element = (function() {
   }
 
   /*-
-  Reads the given attribute from the element, parsed as [relaxed JSON](/relaxed-json).
+  Reads the given attribute from the element, parsed as [relaxed JSON](/api/relaxed-json).
 
-  Returns `undefined` if the attribute value is [blank](/up.util.isBlank) or only consists of whitespace.
+  Returns `undefined` if the attribute value is [blank](/api/up.util.isBlank) or only consists of whitespace.
 
   Throws a `SyntaxError` if the attribute value is an invalid JSON string.
 
@@ -1576,7 +1576,7 @@ up.element = (function() {
   Looks for elements in the entire document that are not yet [defined](https://developer.mozilla.org/en-US/docs/Web/CSS/:defined),
   and waits for their definitions. Each tag name is only awaited once.
 
-  Some selectors only match a custom element once it is defined. E.g. a [form-associated custom element](/custom-form-fields#form-associated)
+  Some selectors only match a custom element once it is defined. E.g. a [form-associated custom element](/learn/custom-form-fields#form-associated)
   only matches `:enabled` after `customElements.define()`.
 
   @function up.element.awaitDefinitions

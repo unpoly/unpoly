@@ -44,20 +44,20 @@ When navigating, Unpoly applies the following render options:
 
 | Option                   | Effect                                                                                    |
 |--------------------------|-------------------------------------------------------------------------------------------|
-| `{ history: 'auto' }`    | [Update history](/updating-history) if rendering a [main target](/main)                   |
-| `{ scroll: 'auto' }`     | [Reset scroll positions](/scrolling#auto) if rendering a main target                      |
-| `{ focus: 'auto' }`      | [Focus](/focus#auto) the new fragment if rendering a main target                          |
-| `{ fallback: true }`     | Render a main target if the response doesn't contain the given [target](/targeting-fragments#missing-targets) |
-| `{ cache: 'auto' }`      | [Cache](/caching) responses to `GET` requests                                             |
-| `{ revalidate: 'auto' }` | Reload [expired](/caching#revalidation) cache entries after rendering                     |
-| `{ peel: 'dismiss' }`    | Dismiss overlays when [targeting a background layer](/closing-overlays#peeling)           |
+| `{ history: 'auto' }`    | [Update history](/learn/updating-history) if rendering a [main target](/api/main)                   |
+| `{ scroll: 'auto' }`     | [Reset scroll positions](/learn/scrolling#auto) if rendering a main target                      |
+| `{ focus: 'auto' }`      | [Focus](/learn/focus#auto) the new fragment if rendering a main target                          |
+| `{ fallback: true }`     | Render a main target if the response doesn't contain the given [target](/learn/targeting-fragments#missing-targets) |
+| `{ cache: 'auto' }`      | [Cache](/learn/caching) responses to `GET` requests                                             |
+| `{ revalidate: 'auto' }` | Reload [expired](/learn/caching#revalidation) cache entries after rendering                     |
+| `{ peel: 'dismiss' }`    | Dismiss overlays when [targeting a background layer](/learn/closing-overlays#peeling)           |
 
 Most of these options have an `'auto'` value, meaning the effect only applies when the update
 is significant. A link that swaps the layer's main fragment gets a new history entry and
 scrolls to the top. A link that only updates a sidebar keeps the URL and the scroll position,
 even though it navigates.
 
-The same defaults also apply when the server responds with an [error code](/error-responses),
+The same defaults also apply when the server responds with an [error code](/learn/error-responses),
 so a failed form submission gets the same `'auto'` scroll and focus behavior.
 
 
@@ -73,10 +73,10 @@ To follow a link or submit a form without navigation defaults, set an `[up-navig
 Clicking the link updates the `.users` list and nothing else. The URL stays the same,
 the scroll position is kept and the response is not cached.
 The link also no longer falls back to the main fragment. When the server responds with an error,
-nothing is rendered unless you set an [`[up-fail-target]`](/error-responses#fail-options).
+nothing is rendered unless you set an [`[up-fail-target]`](/learn/error-responses#fail-options).
 
 With `[up-navigate=false]` you can still enable individual effects, like `[up-history=true]`
-or `[up-scroll=top]`. See the attributes for [links](/up-follow) and [forms](/up-submit) for all options.
+or `[up-scroll=top]`. See the attributes for [links](/api/up-follow) and [forms](/api/up-submit) for all options.
 
 
 Opting into navigation {#opting-in}
@@ -133,6 +133,6 @@ up.on('up:link:follow', '.tabs a', function(event) {
 })
 ```
 
-See [changing options before rendering](/render-lifecycle#changing-options-before-rendering) for more.
+See [changing options before rendering](/learn/render-lifecycle#changing-options-before-rendering) for more.
 
 @page navigation-defaults

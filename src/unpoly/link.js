@@ -3,7 +3,7 @@ require('./link.sass')
 /*-
 Features to follow links without a full page load.
 
-Set an `[up-follow]` attribute to let Unpoly handle a link, and an [`[up-target]`](/up-follow#up-target) attribute to choose the fragment it updates. The same behavior is available from JavaScript through `up.follow()`, and `up:link:follow` lets your code observe or prevent any link Unpoly follows.
+Set an `[up-follow]` attribute to let Unpoly handle a link, and an [`[up-target]`](/api/up-follow#up-target) attribute to choose the fragment it updates. The same behavior is available from JavaScript through `up.follow()`, and `up:link:follow` lets your code observe or prevent any link Unpoly follows.
 
 Links feel faster with `[up-instant]`, which follows on `mousedown` instead of `click`, and `[up-preload]`, which fetches the response before the user clicks. An `[up-defer]` placeholder loads its content from another URL after the page has rendered, or when it is scrolled into view.
 
@@ -28,7 +28,7 @@ up.link = (function() {
   /*-
   Configures defaults for link handling.
 
-  In particular, you can configure Unpoly to handle [all links on the page](/handling-all-links)
+  In particular, you can configure Unpoly to handle [all links on the page](/learn/handling-all-links)
   without requiring developers to set `[up-...]` attributes.
 
   @property up.link.config
@@ -36,15 +36,15 @@ up.link = (function() {
   @section Followable links
 
     @param {Array<string>} config.followSelectors
-      An array of CSS selectors matching links that will be [followed through Unpoly](/up-follow).
+      An array of CSS selectors matching links that will be [followed through Unpoly](/api/up-follow).
 
       You can customize this property to automatically follow *all* links on a page without requiring an `[up-follow]` attribute.
-      See [Handling all links](/handling-all-links).
+      See [Handling all links](/learn/handling-all-links).
 
     @param {Array<string>} config.noFollowSelectors
       Exceptions to `up.link.config.followSelectors`.
 
-      Matching links will *not* be [followed through Unpoly](/up-follow), even if they match `up.link.config.followSelectors`.
+      Matching links will *not* be [followed through Unpoly](/api/up-follow), even if they match `up.link.config.followSelectors`.
 
       By default Unpoly excludes:
 
@@ -53,19 +53,19 @@ up.link = (function() {
   @section Instant click
 
     @param {Array<string>} config.instantSelectors
-      An array of CSS selectors matching elements that are [activated on `mousedown`](/up-instant)
+      An array of CSS selectors matching elements that are [activated on `mousedown`](/api/up-instant)
       instead of on `click`.
 
       You can customize this property to follow *all* links on `mousedown` without requiring an `[up-instant]` attribute.
-      See [Handling all links](/handling-all-links).
+      See [Handling all links](/learn/handling-all-links).
 
-      Note that an instant link must also be [followable](/up.link.isFollowable), usually by giving it an
-      [`[up-follow]`](/up-follow) attribute or by configuring `up.link.config.followSelectors`.
+      Note that an instant link must also be [followable](/api/up.link.isFollowable), usually by giving it an
+      [`[up-follow]`](/api/up-follow) attribute or by configuring `up.link.config.followSelectors`.
 
     @param {Array<string>} config.noInstantSelectors
       Exceptions to `up.link.config.instantSelectors`.
 
-      Matching links will *not* be [followed on `mousedown`](/up-instant), even if they match `up.link.config.instantSelectors`.
+      Matching links will *not* be [followed on `mousedown`](/api/up-instant), even if they match `up.link.config.instantSelectors`.
 
       By default Unpoly excludes:
 
@@ -75,39 +75,39 @@ up.link = (function() {
   @section Preloading
 
     @param {Array<string>} config.preloadSelectors
-      An array of CSS selectors matching links that are [preloaded on hover](/preloading#on-hover).
+      An array of CSS selectors matching links that are [preloaded on hover](/learn/preloading#on-hover).
 
       You can customize this property to preload *all* links on hover without requiring an `[up-preload]` attribute.
-      See [Handling all links](/handling-all-links).
+      See [Handling all links](/learn/handling-all-links).
 
     @param {Array<string>} config.noPreloadSelectors
       Exceptions to `up.link.config.preloadSelectors`.
 
-      Matching links will *not* be [preloaded on hover](/preloading#on-hover), even if they match `up.link.config.preloadSelectors`.
+      Matching links will *not* be [preloaded on hover](/learn/preloading#on-hover), even if they match `up.link.config.preloadSelectors`.
 
       By default Unpoly excludes:
 
       - Links with an `[up-preload=false]` attribute.
       - Links that are [not followable](#config.noFollowSelectors).
-      - Links with an [unsafe method](/up.link.isSafe).
-      - When the link destination [cannot be cached](/up.network.config#config.autoCache).
+      - Links with an [unsafe method](/api/up.link.isSafe).
+      - When the link destination [cannot be cached](/api/up.network.config#config.autoCache).
 
     @param {number} [config.preloadDelay=90]
-      The number of milliseconds to wait before [preloading on hover](/preloading#on-hover).
+      The number of milliseconds to wait before [preloading on hover](/learn/preloading#on-hover).
 
   @section Interactive elements
 
     @param {Array<string>} [config.clickableSelectors]
       A list of CSS selectors matching elements that should behave like links or buttons.
 
-      See [Clicking on non-interactive elements](/faux-interactive-elements).
+      See [Clicking on non-interactive elements](/learn/faux-interactive-elements).
 
       @experimental
 
     @param {Array<string>} [config.noClickableSelectors]
       Exceptions to `up.link.config.clickableSelectors`.
 
-      Matching elements will *not* receive [interactive behavior](/up-follow),
+      Matching elements will *not* receive [interactive behavior](/api/up-follow),
       even if they match `up.link.config.clickableSelectors`.
 
       @experimental
@@ -176,11 +176,11 @@ up.link = (function() {
   /*-
   Follows the given link with JavaScript and updates a fragment with the server response.
 
-  By default, the layer's [main fragment](/up-main)
-  will be replaced. Attributes like [`[up-target]`](/up-follow#up-target)
-  or [`[up-layer]`](/up-follow#up-layer) will be honored.
+  By default, the layer's [main fragment](/api/up-main)
+  will be replaced. Attributes like [`[up-target]`](/api/up-follow#up-target)
+  or [`[up-layer]`](/api/up-follow#up-layer) will be honored.
 
-  Following a link is considered [navigation](/navigation-defaults) by default.
+  Following a link is considered [navigation](/learn/navigation-defaults) by default.
 
   Emits the event `up:link:follow`.
 
@@ -188,7 +188,7 @@ up.link = (function() {
 
   ## Examples
 
-  Assume we have a link with an [`[up-target]`](/up-follow#up-target) attribute:
+  Assume we have a link with an [`[up-target]`](/api/up-follow#up-target) attribute:
 
   ```html
   <a href="/users" up-target=".main">Users</a>
@@ -209,14 +209,14 @@ up.link = (function() {
       The link to follow.
 
     @param {Object} [options]
-      [Render options](/up.render#parameters) that should be used for following the link.
+      [Render options](/api/up.render#parameters) that should be used for following the link.
 
       Unpoly will parse render options from the given link's attributes.
       E.g. the `[up-target]` attribute will be parsed into a `{ target }` option.
       See `[up-follow]` for a list of supported attributes.
 
       You may pass this additional `options` object to
-      [supplement or override](/attributes-and-options#options)
+      [supplement or override](/learn/attributes-and-options#options)
       options parsed from the link attributes.
 
   @section Targeting
@@ -293,8 +293,8 @@ up.link = (function() {
   }
 
   /*-
-  Parses the [render](/up.render) options that would be used to
-  [follow](/up.follow) the given link, but does not render.
+  Parses the [render](/api/up.render) options that would be used to
+  [follow](/api/up.follow) the given link, but does not render.
 
   ## Example
 
@@ -321,7 +321,7 @@ up.link = (function() {
     Values from this object will override any attributes set on the link element.
     @internal
   @return {Object}
-    An object of [render options](/up.render#parameters).
+    An object of [render options](/api/up.render#parameters).
   @stable
   */
   function followOptions(link, options, parserOptions) {
@@ -418,7 +418,7 @@ up.link = (function() {
   }
 
   /*-
-  This event is [emitted](/up.emit) when a link is [followed](/up.follow) through Unpoly.
+  This event is [emitted](/api/up.emit) when a link is [followed](/api/up.follow) through Unpoly.
 
   The event is emitted on the `<a>` element that is being followed.
 
@@ -426,7 +426,7 @@ up.link = (function() {
 
   ## Changing render options
 
-  Listeners may inspect and manipulate [render options](/up.render#parameters) for the coming fragment update.
+  Listeners may inspect and manipulate [render options](/api/up.render#parameters) for the coming fragment update.
 
   The code below will open all form-contained links in an overlay so as not to
   lose the user's form data:
@@ -439,8 +439,8 @@ up.link = (function() {
   })
   ```
 
-  When changing render options for a [preloaded link](/preloading), consider making the
-  same change for `up:link:preload` so the [preload request](/preloading#preload-request-behavior) sends the same [HTTP headers](/up.protocol).
+  When changing render options for a [preloaded link](/learn/preloading), consider making the
+  same change for `up:link:preload` so the [preload request](/learn/preloading#preload-request-behavior) sends the same [HTTP headers](/api/up.protocol).
 
   In the example above, we want to ensure an `X-Up-Mode: modal` header is sent, so we modify
   both events:
@@ -457,7 +457,7 @@ up.link = (function() {
   @param {Element} event.target
     The link element that will be followed.
   @param {Object} event.renderOptions
-    An object with [render options](/up.render#parameters) for the coming fragment update.
+    An object with [render options](/api/up.render#parameters) for the coming fragment update.
 
     Listeners may inspect and modify these options. It is recommended that
     render options for `up:link:preload` be changed in the same way.
@@ -467,14 +467,14 @@ up.link = (function() {
   */
 
   /*-
-  [Preloads](/preloading) a `GET` link.
+  [Preloads](/learn/preloading) a `GET` link.
 
-  When the link is clicked later, the response will already be [cached](/caching),
+  When the link is clicked later, the response will already be [cached](/learn/caching),
   making the interaction feel instant.
 
-  You may use this function to [programmatically populate the cache](/preloading#scripted)
+  You may use this function to [programmatically populate the cache](/learn/preloading#scripted)
   with pages the user is likely to click or that should be
-  [accessible while offline](/network-issues#offline-cache).
+  [accessible while offline](/learn/network-issues#offline-cache).
 
   @learn-ref preloading
 
@@ -485,9 +485,9 @@ up.link = (function() {
       The element or selector whose destination should be preloaded.
 
     @param {Object} [options]
-      [Render options](/up.render#parameters) to apply when preloading this link.
+      [Render options](/api/up.render#parameters) to apply when preloading this link.
 
-      Most [options for `up.follow()`](/up.follow#parameters) can be used,
+      Most [options for `up.follow()`](/api/up.follow#parameters) can be used,
       but no elements will be changed while preloading.
 
   @section Request
@@ -508,7 +508,7 @@ up.link = (function() {
   @return {Promise}
     A promise that will be fulfilled when the request was loaded and cached.
 
-    When [caching is disabled](/caching#disabling-globally), no request is made and the promise fulfills right away.
+    When [caching is disabled](/learn/caching#disabling-globally), no request is made and the promise fulfills right away.
 
     When the link cannot be preloaded, the promise rejects with an error.
   @stable
@@ -550,10 +550,10 @@ up.link = (function() {
   }
 
   /*-
-  This event is [emitted](/up.emit) before a link is [preloaded](/preloading).
+  This event is [emitted](/api/up.emit) before a link is [preloaded](/learn/preloading).
 
   Listeners may prevent this event to stop the link from being preloaded
-  or [change render options](/up:link:follow#changing-render-options) for the preload request.
+  or [change render options](/api/up:link:follow#changing-render-options) for the preload request.
 
   @learn-ref preloading
 
@@ -578,16 +578,16 @@ up.link = (function() {
   @param {Element} event.target
     The link element that will be preloaded.
   @param {Object} event.renderOptions
-    An object with [render options](/up.render#parameters) for the preloading.
+    An object with [render options](/api/up.render#parameters) for the preloading.
 
-    Listeners may inspect or [modify](/up:link:follow#changing-render-options) these options.
+    Listeners may inspect or [modify](/api/up:link:follow#changing-render-options) these options.
   @param event.preventDefault()
     Prevents the link from being preloaded.
   @stable
   */
 
   /*-
-  Returns the HTTP method that Unpoly will use when [following](/up-follow) the given link.
+  Returns the HTTP method that Unpoly will use when [following](/api/up-follow) the given link.
 
   Looks at the link's `[up-method]` or `[data-method]` attributes. Defaults to `"get"`.
 
@@ -617,7 +617,7 @@ up.link = (function() {
   }
 
   /*-
-  Returns whether the given link will be [followed](/up.follow) by Unpoly
+  Returns whether the given link will be [followed](/api/up.follow) by Unpoly
   instead of making a full page load.
 
   By default Unpoly will follow links if the element has
@@ -647,10 +647,10 @@ up.link = (function() {
   }
 
   /*-
-  Makes sure that the given link will be [followed](/up.follow)
+  Makes sure that the given link will be [followed](/api/up.follow)
   by Unpoly instead of making a full page load.
 
-  If the link is not already [followable](/up.link.isFollowable), the link
+  If the link is not already [followable](/api/up.link.isFollowable), the link
   will receive an `[up-follow]` attribute.
 
   @function up.link.makeFollowable
@@ -687,7 +687,7 @@ up.link = (function() {
   }
 
   /*-
-  Enables [keyboard interaction and other accessibility behaviors](/faux-interactive-elements#accessibility)
+  Enables [keyboard interaction and other accessibility behaviors](/learn/faux-interactive-elements#accessibility)
   for non-interactive elements that represent clickable buttons.
 
   It's up to you to make the element appear interactive visually, e.g., by assigning a `.button` class from your design system.
@@ -728,7 +728,7 @@ up.link = (function() {
   up.link.config.clickableSelectors.push('.button')
   ```
 
-  Any matching element will now gain [keyboard interaction and other accessibility behaviors](/faux-interactive-elements#accessibility):
+  Any matching element will now gain [keyboard interaction and other accessibility behaviors](/learn/faux-interactive-elements#accessibility):
 
   ```html
   <span class="button">I can be used with the keyboard</span>
@@ -907,7 +907,7 @@ up.link = (function() {
 
   You may cancel an `up:click` event using `event.preventDefault()`.
 
-  Canceling `up:click` on a hyperlink will prevent Unpoly from [following](/up-follow) that link.
+  Canceling `up:click` on a hyperlink will prevent Unpoly from [following](/api/up-follow) that link.
 
   The underlying `click` or `mousedown` event will also be canceled.
 
@@ -937,7 +937,7 @@ up.link = (function() {
   Returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
   HTTP method like `GET`.
 
-  You can configure links to use unsafe methods like `POST` or `DELETE` by setting an [`[up-method]`](/up-follow#up-method) attribute.
+  You can configure links to use unsafe methods like `POST` or `DELETE` by setting an [`[up-method]`](/api/up-follow#up-method) attribute.
 
   @function up.link.isSafe
   @param {Element} link
@@ -971,7 +971,7 @@ up.link = (function() {
   }
 
   /*-
-  Loads a [`[up-defer="manual"]`](/up-defer) placeholder.
+  Loads a [`[up-defer="manual"]`](/api/up-defer) placeholder.
 
   @learn-ref lazy-loading#scripted
 
@@ -982,13 +982,13 @@ up.link = (function() {
       The `[up-defer]` placeholder to load.
 
     @param {Object} [options]
-      [Render options](/up.render#parameters) that should be used for loading the placeholder.
+      [Render options](/api/up.render#parameters) that should be used for loading the placeholder.
 
       Unpoly will parse render options from the given placeholder's attributes.
-      You may pass this additional `options` object to [supplement or override](/attributes-and-options#options)
+      You may pass this additional `options` object to [supplement or override](/learn/attributes-and-options#options)
       options parsed from the placeholder attributes. See `[up-follow]` for a list of supported attributes.
 
-      Common options are documented below, but most [options for `up.follow()`](/up.follow#parameters) may be used.
+      Common options are documented below, but most [options for `up.follow()`](/api/up.follow#parameters) may be used.
 
   @section Targeting
     @param {string} [options.target=':origin']
@@ -998,7 +998,7 @@ up.link = (function() {
     @param [options.url]
       The URL from which to load the deferred content.
 
-      Defaults to the placeholder's [`[up-href]`](/up-defer#up-href) or `[href]` attribute.
+      Defaults to the placeholder's [`[up-href]`](/api/up-defer#up-href) or `[href]` attribute.
 
       @like up.follow
 
@@ -1054,7 +1054,7 @@ up.link = (function() {
   @param {Element} event.target
     The `[up-defer]` placeholder that is about to load its content.
   @param {Object} event.renderOptions
-    An object with [render options](/up.render#parameters) for the coming fragment update.
+    An object with [render options](/api/up.render#parameters) for the coming fragment update.
 
     Listeners may inspect and modify these options.
   @param event.preventDefault()
@@ -1088,8 +1088,8 @@ up.link = (function() {
       the `[up-defer]` element is inserted into the DOM.
 
       When set to `'reveal'`, the deferred content will load when the `[up-defer]` placeholder is scrolled
-      into the [viewport](/up-viewport). If the element is already visible when
-      inserted, loading will start immediately. Also see [loading as the placeholder becomes visible](/lazy-loading#on-reveal).
+      into the [viewport](/api/up-viewport). If the element is already visible when
+      inserted, loading will start immediately. Also see [loading as the placeholder becomes visible](/learn/lazy-loading#on-reveal).
 
       When set to `'manual'`, the deferred content will not load on its own.
       You can control the load timing by calling `up.deferred.load()` from your own JavaScript.
@@ -1109,13 +1109,13 @@ up.link = (function() {
       A selector for the fragment to render the content in.
 
       By default the `[up-defer]` element itself will be replaced with the loaded content.
-      For this the element must have a [derivable target selector](/target-derivation).
+      For this the element must have a [derivable target selector](/learn/target-derivation).
 
-      You may target one or [multiple](/targeting-fragments#multiple) fragments.
+      You may target one or [multiple](/learn/targeting-fragments#multiple) fragments.
       To target the placeholder itself, you can use the `:origin` target instead of spelling out a selector.
 
     @param [up-fail]
-      How to handle [error responses](/error-responses).
+      How to handle [error responses](/learn/error-responses).
 
       By default, a server response with an error code is not rendered,
       and the placeholder keeps its fallback content.
@@ -1124,7 +1124,7 @@ up.link = (function() {
       even with a 4xx or 5xx status code.
 
     @param [up-fail-target]
-      A selector for the fragment to render an [error response](/error-responses) in.
+      A selector for the fragment to render an [error response](/learn/error-responses) in.
 
       By default, a server response with an error code is not rendered.
 
@@ -1132,15 +1132,15 @@ up.link = (function() {
     @param [up-href]
       The URL from which to load the deferred content.
 
-      If your `[up-defer]` placeholder is a [standard hyperlink](/lazy-loading#seo), you can use an `[href]` attribute instead.
+      If your `[up-defer]` placeholder is a [standard hyperlink](/learn/lazy-loading#seo), you can use an `[href]` attribute instead.
 
     @param [up-headers]
-      A [relaxed JSON](/relaxed-json) object with additional request headers.
+      A [relaxed JSON](/api/relaxed-json) object with additional request headers.
 
     @param [up-background='false']
-      Whether to load the deferred content [in the background](/background-requests).
+      Whether to load the deferred content [in the background](/learn/background-requests).
 
-      Background requests will not show the [global progress bar](/progress-bar).
+      Background requests will not show the [global progress bar](/learn/progress-bar).
 
   @section Caching
     @mix up-follow/caching
@@ -1154,9 +1154,9 @@ up.link = (function() {
   })
 
   /*-
-  [Follows](/up.follow) this link with JavaScript and updates a fragment with the server response.
+  [Follows](/api/up.follow) this link with JavaScript and updates a fragment with the server response.
 
-  Following a link is considered [navigation](/navigation-defaults) by default.
+  Following a link is considered [navigation](/learn/navigation-defaults) by default.
 
   @learn-ref following-links
 
@@ -1169,13 +1169,13 @@ up.link = (function() {
   <a href="/posts/5" up-follow up-target=".content">Read post</a>
   ```
 
-  If no `[up-target]` attribute is set, the [main fragment](/up-main) is updated.
+  If no `[up-target]` attribute is set, the [main fragment](/api/up-main) is updated.
 
   ## Following all links automatically
 
   You can configure Unpoly to follow *all* links on a page without requiring an `[up-follow]` attribute.
 
-  See [Handling all links](/handling-all-links).
+  See [Handling all links](/learn/handling-all-links).
 
   ## Unfollowable links
 
@@ -1193,9 +1193,9 @@ up.link = (function() {
   - Prevent the `up:link:follow` event on the link element
   - Prevent the `up:click` event on the link element
 
-  To force a [full page load](/up.network.loadPage) when a followable link is clicked:
+  To force a [full page load](/api/up.network.loadPage) when a followable link is clicked:
 
-  - Set an [`[up-follow=false]`](/attributes-and-options#boolean-attributes) attribute on the link element
+  - Set an [`[up-follow=false]`](/learn/attributes-and-options#boolean-attributes) attribute on the link element
   - Prevent the `up:link:follow` event, then call `up.network.loadPage(event.renderOptions)`
 
   ## Making non-interactive elements act as hyperlinks
@@ -1206,13 +1206,13 @@ up.link = (function() {
   <span up-follow up-href="/details">Read more</span>
   ```
 
-  See [Acting like a hyperlink](/faux-interactive-elements) for details.
+  See [Acting like a hyperlink](/learn/faux-interactive-elements) for details.
 
   ## Advanced fragment changes
 
   Links can update multiple fragments or append content to an existing element.
 
-  See [Fragment placement](/targeting-fragments) for details.
+  See [Fragment placement](/learn/targeting-fragments) for details.
 
   ## Short notation
 
@@ -1306,7 +1306,7 @@ up.link = (function() {
   waiting for the user to release the mouse button. Since the request starts right away,
   the interaction will appear faster.
 
-  For [faux-interactive elements](/faux-interactive-elements), setting `[up-instant]` will cause
+  For [faux-interactive elements](/learn/faux-interactive-elements), setting `[up-instant]` will cause
   the `up:click` event to be emitted on `mousedown` instead of `click`.
 
   To apply the instant effect without changing your HTML, configure `up.link.config.instantSelectors`.
@@ -1321,7 +1321,7 @@ up.link = (function() {
 
   ## Accessibility
 
-  Links or [faux-interactive elements](/faux-interactive-elements) with `[up-instant]`
+  Links or [faux-interactive elements](/learn/faux-interactive-elements) with `[up-instant]`
   can still be activated with the keyboard.
 
   With `[up-instant]`, users can no longer cancel a click by dragging the pressed mouse away from the element.
@@ -1339,7 +1339,7 @@ up.link = (function() {
   @learn-ref links
 
   `[up-expand]` honors all the Unpoly attributes in expanded links, like
-  [`[up-target]`](/up-follow#up-target), `[up-instant]`, or `[up-preload]`.
+  [`[up-target]`](/api/up-follow#up-target), `[up-instant]`, or `[up-preload]`.
 
   ## Example
 
@@ -1351,7 +1351,7 @@ up.link = (function() {
   ```
 
   In the example above, clicking anywhere within the `.notification` element
-  would [follow](/up.follow) the *Close* link.
+  would [follow](/api/up.follow) the *Close* link.
 
   ## Multiple contained links
 
@@ -1442,14 +1442,14 @@ up.link = (function() {
   })
 
   /*-
-  [Preloads](/preloading) this link before the user clicks it.
-  When the link is clicked, the response will already be [cached](/caching),
+  [Preloads](/learn/preloading) this link before the user clicks it.
+  When the link is clicked, the response will already be [cached](/learn/caching),
   making the interaction feel instant.
 
-  Unpoly will only preload [links with safe methods](/up.link.isSafe). The `[up-preload]` attribute
+  Unpoly will only preload [links with safe methods](/api/up.link.isSafe). The `[up-preload]` attribute
   has no effect on unsafe links.
 
-  Links with an `[up-preload]` attribute are always [followed by Unpoly](/up-follow) and will not make a full page load.
+  Links with an `[up-preload]` attribute are always [followed by Unpoly](/api/up-follow) and will not make a full page load.
 
   @learn-ref preloading
 
@@ -1468,14 +1468,14 @@ up.link = (function() {
 
       When set to `'hover'` (the default), preloading will start when the user hovers
       over this link [for a while](#up-preload-delay). On touch devices, preloading will
-      begin when the user places their finger on the link. Also see [preloading on hover](/preloading#on-hover).
+      begin when the user places their finger on the link. Also see [preloading on hover](/learn/preloading#on-hover).
 
       When set to `'insert'`, preloading will start immediately when this
-      link is inserted into the DOM. Also see [eagerly preloading on insertion](/preloading#on-insert).
+      link is inserted into the DOM. Also see [eagerly preloading on insertion](/learn/preloading#on-insert).
 
       When set to `'reveal'`, preloading will start when the link is scrolled
-      into the [viewport](/up-viewport). If the link is already visible when
-      inserted, preloading will start immediately. Also see [preloading when a link becomes visible](/preloading#on-reveal).
+      into the [viewport](/api/up-viewport). If the link is already visible when
+      inserted, preloading will start immediately. Also see [preloading when a link becomes visible](/learn/preloading#on-reveal).
 
       When set to `'false'`, the link will not be preloaded.
       You can still preload this link programmatically using `up.link.preload()`.

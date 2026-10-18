@@ -4,7 +4,7 @@ const u = up.util
 /*-
 Each layer has an `up.Layer` instance.
 
-Most functions in the `up.layer` package interact with the [current layer](/up.layer.current).
+Most functions in the `up.layer` package interact with the [current layer](/api/up.layer.current).
 For example, `up.layer.dismiss()` is a shortcut for `up.layer.current.dismiss()`.
 
 `up.layer.current` is set to the right layer in compilers and most events,
@@ -36,7 +36,7 @@ up.Layer = class Layer extends up.Record {
   */
 
   /*-
-  Whether this layer has [visible history](/history-in-overlays).
+  Whether this layer has [visible history](/learn/history-in-overlays).
 
   When it does, fragment updates within this layer can change the browser's address bar and window title.
   If a layer does not have visible history, its descendant layers cannot have visible history either.
@@ -63,7 +63,7 @@ up.Layer = class Layer extends up.Record {
   */
 
   /*-
-  This layer's [context](/layer-context).
+  This layer's [context](/learn/layer-context).
 
   ### Example
 
@@ -139,7 +139,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  [Closes this overlay](/closing-overlays) with an accepting intent,
+  [Closes this overlay](/learn/closing-overlays) with an accepting intent,
   e.g. when a change was confirmed or when a value was selected.
 
   To dismiss a layer *without* an accepting intent, use `up.Layer#dismiss()` instead.
@@ -149,7 +149,7 @@ up.Layer = class Layer extends up.Record {
   @function up.Layer#accept
   @section Acceptance
     @param {any} [value]
-      The [acceptance value](/closing-overlays#acceptance-values) that will be passed to `{ onAccepted }` callbacks.
+      The [acceptance value](/learn/closing-overlays#acceptance-values) that will be passed to `{ onAccepted }` callbacks.
 
       If there isn't an acceptance value, omit this argument.
       If you need to pass options without an acceptance value, pass `null`:
@@ -161,7 +161,7 @@ up.Layer = class Layer extends up.Record {
       A message the user needs to confirm before the overlay is closed.
 
     @param {boolean} [options.force=false]
-      Whether to close the overlay even if a listener [prevents](/closing-overlays#keeping-open)
+      Whether to close the overlay even if a listener [prevents](/learn/closing-overlays#keeping-open)
       the close event.
 
       Overlays stacked on top of this overlay will also be closed by force.
@@ -173,13 +173,13 @@ up.Layer = class Layer extends up.Record {
 
       May be left blank if the overlay was not closed in reaction to a server response.
 
-      See [Using the discarded response](/closing-overlays#using-the-discarded-response).
+      See [Using the discarded response](/learn/closing-overlays#using-the-discarded-response).
 
   @section Animation
     @param {string|Function(Element, Object)} [options.animation]
-      The [animation](/up.animate) to use for closing this layer.
+      The [animation](/api/up.animate) to use for closing this layer.
 
-      Defaults to the close animation [configured](/up.layer.config) for this layer mode.
+      Defaults to the close animation [configured](/api/up.layer.config) for this layer mode.
     @param {number} [options.duration]
       The duration for the close animation in milliseconds.
     @param {string} [options.easing]
@@ -192,7 +192,7 @@ up.Layer = class Layer extends up.Record {
 
   @section History
     @param {boolean} [options.history=true]
-      Whether to restore the parent layer's [history state](/updating-history#history-state)
+      Whether to restore the parent layer's [history state](/learn/updating-history#history-state)
       in the browser's address bar.
 
       @experimental
@@ -203,7 +203,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  [Closes this overlay](/closing-overlays) *without* an accepting intent,
+  [Closes this overlay](/learn/closing-overlays) *without* an accepting intent,
   e.g. when a "Cancel" button was clicked.
 
   To close an overlay with an accepting intent, use `up.Layer#accept()` instead.
@@ -212,7 +212,7 @@ up.Layer = class Layer extends up.Record {
 
   @function up.Layer#dismiss
   @param {any} [value]
-    The [dismissal value](/closing-overlays#dismissal-values) that will be passed to `{ onDismissed }` callbacks.
+    The [dismissal value](/learn/closing-overlays#dismissal-values) that will be passed to `{ onDismissed }` callbacks.
 
     If there isn't a dismissal value, omit this argument.
     If you need to pass options without a dismissal value, pass `null`:
@@ -229,38 +229,38 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  [Dismisses](/up.Layer.prototype.dismiss) all descendant overlays,
-  making this layer the [frontmost layer](/up.layer.front) in the [layer stack](/up.layer.stack).
+  [Dismisses](/api/up.Layer.prototype.dismiss) all descendant overlays,
+  making this layer the [frontmost layer](/api/up.layer.front) in the [layer stack](/api/up.layer.stack).
 
   Descendant overlays will be dismissed with value `':peel'`.
 
-  A listener may [keep a descendant overlay open](/closing-overlays#keeping-open) by preventing its
+  A listener may [keep a descendant overlay open](/learn/closing-overlays#keeping-open) by preventing its
   `up:layer:dismiss` or `up:layer:accept` event. In that case this function throws an `up.Aborted` error.
   Overlays in front of the blocking overlay stay closed. To ignore prevented events, pass `{ force: true }`.
 
   @function up.Layer#peel
   @section Closing
     @param {any} [options.value=":peel"]
-      The [result value](/closing-overlays#result-values) for the descendant overlays.
+      The [result value](/learn/closing-overlays#result-values) for the descendant overlays.
 
     @param {string} [options.intent="dismiss"]
-      The [close intent](/closing-overlays#intents) for the descendant overlays.
+      The [close intent](/learn/closing-overlays#intents) for the descendant overlays.
 
       By default descendant overlays will be dismissed.\
       You can pass `{ intent: "accept" }` to
       accept them instead.
 
     @param {boolean} [options.force=false]
-      Whether to close descendant overlays even if a listener [prevents](/closing-overlays#keeping-open)
+      Whether to close descendant overlays even if a listener [prevents](/learn/closing-overlays#keeping-open)
       their close event.
 
       @experimental
 
   @section Animation
     @param {string|Function(Element, Object)} [options.animation]
-      The [animation](/up.animate) to use for closing descendant overlays.
+      The [animation](/api/up.animate) to use for closing descendant overlays.
 
-      Defaults to the close animation [configured](/up.layer.config) for the respective layer modes.
+      Defaults to the close animation [configured](/api/up.layer.config) for the respective layer modes.
 
     @param [options.duration]
       @like up.Layer#accept
@@ -279,7 +279,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  Returns whether this layer is the [current layer](/up.layer.current).
+  Returns whether this layer is the [current layer](/api/up.layer.current).
 
   @function up.Layer#isCurrent
   @return {boolean}
@@ -291,7 +291,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  Returns whether this layer is the [frontmost layer](/up.layer.front).
+  Returns whether this layer is the [frontmost layer](/api/up.layer.front).
 
   @function up.Layer#isFront
     Whether this layer is the front layer.
@@ -303,7 +303,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  Returns whether this layer is the [root layer](/up.layer.root).
+  Returns whether this layer is the [root layer](/api/up.layer.root).
 
   @function up.Layer#isRoot
   @return {boolean}
@@ -315,7 +315,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  Returns whether this layer is *not* the [root layer](/up.layer.root).
+  Returns whether this layer is *not* the [root layer](/api/up.layer.root).
 
   @function up.Layer#isOverlay
   @return {boolean}
@@ -326,16 +326,16 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  Returns whether this layer is part of the [layer stack](/up.layer.stack) and can be interacted with.
+  Returns whether this layer is part of the [layer stack](/api/up.layer.stack) and can be interacted with.
 
   ## When a layer is alive
 
-  A layer that is alive can be [targeted](/targeting-fragments) with fragment changes, or [queried](/up.fragment.get) for containing elements.
+  A layer that is alive can be [targeted](/learn/targeting-fragments) with fragment changes, or [queried](/api/up.fragment.get) for containing elements.
 
-  The [root layer](/overlays#layer-modes) is always alive.
+  The [root layer](/learn/overlays#layer-modes) is always alive.
   An overlay is alive as soon as it enters the DOM, even when it is still playing its opening animation.
 
-  An overlay stops being alive as soon as it starts [closing](/closing-overlays),
+  An overlay stops being alive as soon as it starts [closing](/learn/closing-overlays),
   even while its closing animation is still playing.
 
   | Overlay state             | `up.Layer#isAlive()` |
@@ -374,7 +374,7 @@ up.Layer = class Layer extends up.Record {
 
   The parent layer is the layer that opened this layer. It is visually in the background of this layer.
 
-  Returns `undefined` for the [root layer](/up.layer.root).
+  Returns `undefined` for the [root layer](/api/up.layer.root).
 
   ## Example
 
@@ -417,7 +417,7 @@ up.Layer = class Layer extends up.Record {
 
   The array elements are ordered by distance to this layer.
   The first element is this layer's direct parent. The last element
-  is the [root layer](/up.layer.root).
+  is the [root layer](/api/up.layer.root).
 
   ## Example
 
@@ -445,7 +445,7 @@ up.Layer = class Layer extends up.Record {
 
   The array elements are ordered by distance to this layer.
   The first element is this layer's direct child. The last element
-  is the [frontmost layer](/up.layer.front).
+  is the [frontmost layer](/api/up.layer.front).
 
   ## Example
 
@@ -474,7 +474,7 @@ up.Layer = class Layer extends up.Record {
   The array elements are ordered by distance to this layer.
   The first element is this layer.
   The second element is this layer's direct child. The last element
-  is the [frontmost layer](/up.layer.front).
+  is the [frontmost layer](/api/up.layer.front).
 
   @property up.Layer#subtree
   @return {Array<up.Layer>} subtree
@@ -486,11 +486,11 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  Returns the zero-based position of this layer in the [layer stack](/up.layer.stack).
+  Returns the zero-based position of this layer in the [layer stack](/api/up.layer.stack).
 
-  The [root layer](/up.layer.root) has an index of `0`, its child overlay has an index of `1`, and so on.
+  The [root layer](/api/up.layer.root) has an index of `0`, its child overlay has an index of `1`, and so on.
 
-  This property has no defined behavior for layers that are [closed or are being closed](/up.Layer.prototype.isAlive).
+  This property has no defined behavior for layers that are [closed or are being closed](/api/up.Layer.prototype.isAlive).
 
   @property up.Layer#index
   @return {number} index
@@ -520,7 +520,7 @@ up.Layer = class Layer extends up.Record {
   /*-
   Returns whether the given `element` is contained by this layer.
 
-  This function will always return `false` for elements in [descendant](/up.Layer.prototype.descendants) overlays,
+  This function will always return `false` for elements in [descendant](/api/up.Layer.prototype.descendants) overlays,
   even if the descendant overlay's element is nested into the DOM tree of this layer.
 
   @function up.Layer#contains
@@ -538,9 +538,9 @@ up.Layer = class Layer extends up.Record {
 
   /*-
   Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events) that originated
-  on an element [contained](/up.Layer.prototype.contains) by this layer.
+  on an element [contained](/api/up.Layer.prototype.contains) by this layer.
 
-  This will ignore events emitted on elements in [descendant](/up.Layer.prototype.descendants) overlays,
+  This will ignore events emitted on elements in [descendant](/api/up.Layer.prototype.descendants) overlays,
   even if the descendant overlay's element is nested into the DOM tree of this layer.
 
   The arguments for this function are the same as for `up.on()`.
@@ -562,7 +562,7 @@ up.Layer = class Layer extends up.Record {
   Whenever possible Unpoly will emit its events on associated layers instead of `document`.
   This way you can listen to events on one layer without receiving events from other layers.
 
-  E.g. to listen to all [requests](/up.request) originating from a given layer:
+  E.g. to listen to all [requests](/api/up.request) originating from a given layer:
 
   ```js
   let rootLayer = up.layer.root
@@ -621,9 +621,9 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  [Emits](/up.emit) an event on [this layer's element](/up.Layer.prototype.element).
+  [Emits](/api/up.emit) an event on [this layer's element](/api/up.Layer.prototype.element).
 
-  The value of [up.layer.current](/up.layer.current) will be set to this layer
+  The value of [up.layer.current](/api/up.layer.current) will be set to this layer
   while event listeners are running.
 
   ## Example
@@ -691,7 +691,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   /*-
-  Temporarily changes the [current layer](/up.layer.current) while the given
+  Temporarily changes the [current layer](/api/up.layer.current) while the given
   function is running.
 
   Calls the given function and restores the original current layer when the function
@@ -765,7 +765,7 @@ up.Layer = class Layer extends up.Record {
   /*-
   This layer's window title.
 
-  If this layer does not have [visible history](/up.Layer.prototype.history),
+  If this layer does not have [visible history](/api/up.Layer.prototype.history),
   the browser window shows the title of an ancestor layer.
   This property still returns the title the layer would use if it had visible history.
 
@@ -830,7 +830,7 @@ up.Layer = class Layer extends up.Record {
   /*-
   This layer's location URL.
 
-  If the layer has [no visible history](/up.Layer.prototype.history), this property
+  If the layer has [no visible history](/api/up.Layer.prototype.history), this property
   still returns the URL of the content in the overlay. In this case
   the browser's address bar will show the location of an ancestor layer.
 
@@ -900,7 +900,7 @@ up.Layer = class Layer extends up.Record {
   /*-
   Creates an element with the given `selector` and appends it to this layer's content.
 
-  For the [root layer](/up.layer.root) the element is appended to the `<body>`.
+  For the [root layer](/api/up.layer.root) the element is appended to the `<body>`.
   For an overlay it is appended to the overlay's top-level content element, like its `<main>`.
 
   Also see `up.element.affix()`.

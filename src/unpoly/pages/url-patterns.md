@@ -1,7 +1,7 @@
 URL patterns
 ============
 
-Some Unpoly features let you match a URL using *URL patterns*. You can use them to define [overlay close conditions](/subinteractions#close-conditions), or when [adding aliases to navigation items](/up-alias).
+Some Unpoly features let you match a URL using *URL patterns*. You can use them to define [overlay close conditions](/learn/subinteractions#close-conditions), or when [adding aliases to navigation items](/api/up-alias).
 
 This page describes the syntax of URL patterns. URL patterns are not regular expressions.
 
@@ -152,8 +152,8 @@ up.layer.open({ acceptLocation: "/users/* -/users/456" })
 ## Capturing named segments
 
 You can capture the value that a wildcard matched.
-For example, when closing an overlay [once a location is reached](/subinteractions#location-condition),
-you can use a part of the URL as the overlay's [acceptance value](/closing-overlays#acceptance-values).
+For example, when closing an overlay [once a location is reached](/learn/subinteractions#location-condition),
+you can use a part of the URL as the overlay's [acceptance value](/learn/closing-overlays#acceptance-values).
 
 To define a captured segment, prefix it with a `:` like this:
 
@@ -164,7 +164,7 @@ To define a captured segment, prefix it with a `:` like this:
 ### Example
 
 The example below keeps an overlay open until it reaches a user's detail page (like `/users/foo`).
-Then the user name from the URL (`foo`) becomes the overlay's [acceptance value](/closing-overlays#acceptance-values) as `{ name: 'foo' }`:
+Then the user name from the URL (`foo`) becomes the overlay's [acceptance value](/learn/closing-overlays#acceptance-values) as `{ name: 'foo' }`:
 
 ```html
 <!-- Closes layer when user visits any URL beginning with "/users/" and captures the suffix as { name } -->
@@ -177,7 +177,7 @@ Then the user name from the URL (`foo`) becomes the overlay's [acceptance value]
 ```
 
 The same pattern works from JavaScript. `up.layer.ask()` opens an overlay
-and returns a promise for its [acceptance value](/closing-overlays#acceptance-values):
+and returns a promise for its [acceptance value](/learn/closing-overlays#acceptance-values):
 
 ```js
 let { name } = await up.layer.ask({

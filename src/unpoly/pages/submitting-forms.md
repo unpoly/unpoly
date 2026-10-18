@@ -19,7 +19,7 @@ To have Unpoly handle the submission, set an `[up-submit]` attribute:
 
 When the user submits, Unpoly sends the form data to the server.
 The server responds with a full HTML page, the same way it would for any browser request.
-Unpoly extracts the response's [main fragment](/main) and replaces the main fragment
+Unpoly extracts the response's [main fragment](/api/main) and replaces the main fragment
 on the current page. The rest of the page stays untouched.
 
 The response may contain other HTML, or even the entire application layout.
@@ -31,12 +31,12 @@ the browser submits it with a full page load.
 
 > [tip]
 > Instead of annotating individual forms, you can also configure Unpoly
-> to [handle all forms on the page](/handling-all-forms).
+> to [handle all forms on the page](/learn/handling-all-forms).
 
 
 ## Updating a specific fragment {#target}
 
-To update an element other than the main fragment, set an [`[up-target]`](/up-submit#up-target)
+To update an element other than the main fragment, set an [`[up-target]`](/api/up-submit#up-target)
 attribute with a CSS selector:
 
 ```html
@@ -73,7 +73,7 @@ fills in the form, and other ways to detect a failed submission.
 
 ## Showing confirmation or error flashes {#flashes}
 
-To confirm a successful submission or show an error, include an [`[up-flashes]`](/up-flashes)
+To confirm a successful submission or show an error, include an [`[up-flashes]`](/api/up-flashes)
 element with your message in the response:
 
 ```html
@@ -88,7 +88,7 @@ a different fragment. See [[flashes]] for placing it in your layout and clearing
 
 ## Navigation defaults
 
-Submitting a form is considered [navigation](/navigation-defaults) by default.
+Submitting a form is considered [navigation](/learn/navigation-defaults) by default.
 When a form updates the layer's main fragment, Unpoly behaves like a full page load would:
 the browser URL and history are updated, and the page scrolls to the top.
 Focus moves to the new fragment.
@@ -114,7 +114,7 @@ to the form parameters sent to the server:
 </form>
 ```
 
-To send multiple params, set an [`[up-params]`](/up-submit#up-params) attribute on the button:
+To send multiple params, set an [`[up-params]`](/api/up-submit#up-params) attribute on the button:
 
 ```html
 <button type="submit" up-params="{ decision: 'reject', reason: 'Poor quality' }">Reject</button> <!-- mark: up-params="{ decision: 'reject', reason: 'Poor quality' }" -->
@@ -143,7 +143,7 @@ A submit button can supplement or override most `[up-...]` attributes from the f
 </form>
 ```
 
-See [`[up-submit]`](/up-submit#attributes) for a list of overridable attributes.
+See [`[up-submit]`](/api/up-submit#attributes) for a list of overridable attributes.
 
 ### Opting into a full page load {#per-button-opt-out}
 
@@ -160,7 +160,7 @@ An individual submit button can opt for a full page load, by setting an `[up-sub
 ## Submitting when a field changes {#autosubmit}
 
 A search or filter form often has no submit button. It updates its results as soon as the user
-changes a field. For this, set an [`[up-autosubmit]`](/up-autosubmit) attribute on the form:
+changes a field. For this, set an [`[up-autosubmit]`](/api/up-autosubmit) attribute on the form:
 
 ```html
 <form method="get" action="/projects" up-autosubmit up-target=".projects"> <!-- mark: up-autosubmit -->
@@ -181,17 +181,17 @@ Your server renders the filtered list, and Unpoly swaps the `.projects` element 
 To submit only when a particular field changes, set `[up-autosubmit]` on that field instead of the form.
 
 To wait until the user has stopped typing, or to react to other events, see [[watch-options]].
-To run your own JavaScript when a field changes, use [`[up-watch]`](/up-watch).
+To run your own JavaScript when a field changes, use [`[up-watch]`](/api/up-watch).
 
 To update parts of the form while the user is still filling it in, without saving anything,
-use [`[up-validate]`](/validation) instead.
+use [`[up-validate]`](/learn/validation) instead.
 
 
 ## Showing that the form is processing {#loading}
 
 While the form is submitting, you can show the user that it is processing:
-[disable](/disabling-forms) its fields and buttons, style it with [feedback classes](/feedback-classes),
-show a [placeholder](/placeholders) or run a [preview](/previews).
+[disable](/learn/disabling-forms) its fields and buttons, style it with [feedback classes](/learn/feedback-classes),
+show a [placeholder](/learn/placeholders) or run a [preview](/learn/previews).
 See [[loading-state]] for an overview.
 
 
@@ -205,7 +205,7 @@ up.submit(form)
 ```
 
 The form's `[up-...]` attributes are honored, as if the user had submitted the form.
-You can pass additional [render options](/up.render#parameters) to supplement
+You can pass additional [render options](/api/up.render#parameters) to supplement
 or override the form's attributes:
 
 ```js
