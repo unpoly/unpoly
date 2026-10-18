@@ -225,6 +225,9 @@ up.form = (function() {
 
   If the given element is itself a form field, a list of that given element is returned.
 
+  If the given element is a `<form>` with an `[id]`, the list also includes fields outside the form
+  that are associated with it through a [`[form]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#form) attribute.
+
   Fields in another [layer](/up.layer) and fields that are being [destroyed](/up.destroy) are ignored.
 
   @function up.form.fields
