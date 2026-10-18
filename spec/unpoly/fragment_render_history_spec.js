@@ -723,6 +723,32 @@ extendDescribe('up.fragment', function() {
 
         describe('meta tags', function() {
 
+          it('uses an explicit array of elements given as { metaTags } instead of meta tags from the response', async function() {
+            fixture(document.head, 'meta[name="description"][content="old description"]')
+            fixture('.container', { text: 'old container text' })
+            const explicitMeta = up.element.createFromHTML('<meta name="description" content="explicit description">')
+
+            await up.render('.container', {
+              history: true,
+              location: '/path',
+              metaTags: [explicitMeta],
+              document: `
+                <html>
+                  <head>
+                    <meta name="description" content="response description">
+                  </head>
+                  <body>
+                    <div class="container">new container text</div>
+                  </body>
+                </html>
+              `
+            })
+
+            expect(document.head).toHaveSelector('meta[name="description"][content="explicit description"]')
+            expect(document.head).not.toHaveSelector('meta[name="description"][content="response description"]')
+            expect(document.head).not.toHaveSelector('meta[name="description"][content="old description"]')
+          })
+
           beforeEach(function() { up.history.config.enabled = true })
 
           it("updates meta tags from the response", async function() {

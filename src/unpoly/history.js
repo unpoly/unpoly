@@ -117,10 +117,11 @@ up.history = (function() {
   // Values we want to keep:
   // - false (no update)
   // - string (forced update)
+  // - list of elements (forced update of meta tags)
   // Values we want to override:
   // - true (do update with defaults)
   function refineOption(existingValue, newValue) {
-    if ((existingValue === false) || u.isString(existingValue)) {
+    if ((existingValue === false) || u.isString(existingValue) || u.isList(existingValue)) {
       return existingValue
     } else {
       return newValue
