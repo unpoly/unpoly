@@ -390,6 +390,7 @@ Never roll back only one repo: unpoly's `.htaccess` retargets its renames to
 `%{DOCUMENT_ROOT}` already run in production. To rule out the 500, add both lines to
 the live `.htaccess` on one app server, check that `curl -sI https://unpoly.com/`
 answers 200 with `Vary: ... Accept`, and remove them again.
+Done 2026-10-18: production answered 200 with `vary: Accept-Encoding,Accept` (plus the proxy's own `vary: Accept-Encoding`), so the live server accepts both.
 
 ## Surprises from the dry run
 
