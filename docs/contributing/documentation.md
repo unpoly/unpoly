@@ -41,6 +41,7 @@ Documentation lives in this repository, beside the code it describes. A sister p
   - [Linking the reference to a guide](#linking-the-reference-to-a-guide)
   - [Overview pages](#overview-pages)
 - [Search ranking](#search-ranking)
+  - [Keywords](#keywords)
 - [Markdown for agents](#markdown-for-agents)
   - [What a page needs](#what-a-page-needs)
   - [Markers in the templates](#markers-in-the-templates)
@@ -913,7 +914,7 @@ matches, so the tier can be generous. When a page ranks wrong, fix it here rathe
 in the search code. A change shows in the search only after the index is rebuilt: run
 `SKIP_CHECK_LINKS=1 bundle exec rake search:index` in `unpoly-site`.
 
-### Keywords {#keywords}
+### Keywords
 
 Our prose uses one term per concept ("overlay", "keeping elements", "error response").
 Readers don't know these terms and search for their own words ("modal", "preserve").

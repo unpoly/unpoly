@@ -53,13 +53,28 @@ export function headings(markdown) {
   return result
 }
 
+// Headings underlined with === or --- (setext), which site pages under src/unpoly/pages/ use.
+function setextHeadings(markdown) {
+  let seen = new Map()
+  let result = []
+  let previous = ''
+  for (let line of proseLines(markdown)) {
+    if (/^(=+|-+)\s*$/.test(line) && previous.trim() && !/^\s*[-*|]/.test(previous)) {
+      let text = previous.trim()
+      result.push({ text, slug: githubSlug(text, seen) })
+    }
+    previous = line
+  }
+  return result
+}
+
 // The anchors a link in another file may point at. Site pages under src/unpoly/pages/ declare
-// theirs explicitly, so honor both spellings there.
+// theirs explicitly, often on an underlined heading, so honor both spellings there.
 export function anchorsOf(markdown) {
   let anchors = new Set()
-  for (let { text, slug } of headings(markdown)) {
+  for (let { text, slug } of [...headings(markdown), ...setextHeadings(markdown)]) {
     anchors.add(slug)
-    let explicit = /\{#([^}]+)\}/.exec(text)
+    let explicit = /\{#([^}\s]+)[^}]*\}/.exec(text)
     if (explicit) anchors.add(explicit[1])
   }
   return anchors

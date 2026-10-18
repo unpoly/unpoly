@@ -50,6 +50,18 @@ test('links inside an indented example are not links', () => {
   assert.deepEqual(linksOf(markdown), [{ target: 'other.md', anchor: 'anchor' }])
 })
 
+test('a site page declares anchors on underlined headings, with or without attributes', () => {
+  let anchors = anchorsOf('Intro\n\nResolving ambiguous selectors {#ambiguous-selectors}\n-----\n\nText\n\nOther {#other data-toc-include}\n===\n')
+  assert.ok(anchors.has('ambiguous-selectors'))
+  assert.ok(anchors.has('other'))
+  assert.ok(!anchors.has('text'))
+})
+
+test('a list item or table row above a --- line is not a heading', () => {
+  let anchors = anchorsOf('- an item\n---\n\n| a | b |\n|---|---|\n')
+  assert.equal(anchors.size, 0)
+})
+
 test('a TOC lists h2 and h3, nesting the h3s', () => {
   let markdown = ['# T', '', '## One', '', '### Under one', '', '#### Too deep', '', '## Two'].join('\n')
   assert.deepEqual(tocLines(markdown), [
