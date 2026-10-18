@@ -2,36 +2,13 @@ Unreleased
 ----------
 
 A lot has changed for everyone who builds software since our last release. Many of us now write code together with AI agents.
-This release makes Unpoly work better for this new way of building software:
-the relaunched documentation site is written for people and for coding agents,
-and a new guide helps both of them contribute to Unpoly itself.
 
-We believe that hypermedia-based apps fit this new age well. They need less code, fewer dependencies and fewer moving parts.
-That makes an app easier to understand and change, for humans and agents alike.
+This release makes Unpoly work better for this new way of building software. A [completely rewritten documentation site](https://unpoly.com) helps humans and agents learn Unpoly best practices and look up API details. It is available as HTML, as Markdown and as an offline skill. A new contributor guide helps both contribute to the project. We believe that hypermedia-driven apps (HDAs) fit this new age well. They need less code and fewer dependencies, and have fewer moving parts.
+That makes HDAs straightforward to understand and change, for humans and agents alike.
 
-Unpoly now also works with custom form fields, like date pickers built as web components.
+We also made some changes to Unpoly itself. A major new feature is the ability to implement custom form fields as web components ("form-associated custom elements"). We fixed a ton of minor bugs and inconsistencies that had accumulated over Unpoly's 10+ years, and meaningfully improved our test coverage.
 
-Breaking changes are marked with ⚠️ when [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) polyfills them,
-and with ❌ when they need a change to your code. Bug fixes and changes that align Unpoly with native browser behavior
-are listed in their topic without a marker.
-
-> [note]
-> Our sponsor [makandra](https://makandra.de/en) funded this release ❤️\
-> You can hire makandra for [Unpoly support](https://unpoly.com/support).
-
-Contents:
-
-- [A relaunched documentation site](#a-relaunched-documentation-site)
-- [Docs for coding agents](#docs-for-coding-agents)
-- [A guide for contributors](#a-guide-for-contributors)
-- [Custom form fields](#custom-form-fields)
-- [Form submissions now match the browser](#form-submissions-now-match-the-browser)
-- [Forms](#forms)
-- [Overlays](#overlays)
-- [Caching](#caching)
-- [Rendering](#rendering)
-- [Links and URLs](#links-and-urls)
-- [Smaller fixes and changes](#smaller-fixes-and-changes)
+Breaking changes are marked with ⚠️ when [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) polyfills them, and with ❌ when they need a change to your code.
 
 
 ### A relaunched documentation site
@@ -226,6 +203,11 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - Fix: `up.fragment.matches()` with `{ layer: 'new', mode }` options expanded a selector like `:main` for the root layer, or threw an error while an overlay was open.
 - Fix: The `unpoly-migrate.js` polyfills for `up.popup.attach()`, `up.modal.follow()` and `up.modal.extract()` now open a new overlay again.
 - Fix: The `unpoly-migrate.js` polyfill for `up.network.shouldReduceRequests()` now logs a warning instead of throwing an error.
+
+
+> [note]
+> Our sponsor [makandra](https://makandra.de/en) funded this release ❤️\
+> You can hire makandra for [Unpoly support](https://unpoly.com/support).
 
 
 3.14.3
