@@ -23,10 +23,10 @@
 </p>
 
 
-Progressive enhancement for HTML
---------------------------------
+The missing application layer for HTML
+--------------------------------------
 
-[Unpoly](https://unpoly.com) enhances your HTML with attributes to build dynamic UI on the server.
+[Unpoly](https://unpoly.com) expands what links, forms and server-rendered pages can do, while your application stays on the server.
 
 Unpoly works with any language or framework. It plays nice with existing code, and gracefully degrades without JavaScript.
 
