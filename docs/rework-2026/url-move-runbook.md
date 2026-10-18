@@ -362,15 +362,34 @@ script ran fresh on the current content.
 
 Left to do: deploy unpoly and the site right after each other (step 7), then step 8.
 
-## Rollback
+## When something goes wrong after deploy
 
-- Before deploy: drop the branches. Nothing else has changed.
-- After deploy: redeploy the previous build of both repos. The old site serves root
-  paths again; the new `/learn/...` and `/api/...` URLs then 404, which only matters for
-  links made in the meantime. For a softer rollback, keep the new build and add
-  reverse redirects instead of reverting.
-- Never roll back only one repo: unpoly's `.htaccess` retargets its renames to
-  `/learn/...` and `/api/...`, which only the new site build serves.
+**Fix forward by default.** If some redirects are wrong (an old address answers 404,
+or takes two hops), the new site and every link in the npm package still work, since
+they use the final `/learn/...` and `/api/...` paths. Only old bookmarks and external
+links are affected. Fix the rule, deploy again, and confirm with
+`rake docs:check_redirects BASE_URL=https://unpoly.com`.
+
+**Roll back only when Apache refuses the `.htaccess` as a whole**, which answers every
+request with a 500. That means the server doesn't allow a directive in it, which is a
+server setting, not something our repos can fix. Two ways out, the first one faster:
+
+- Deploy the new build without the general rule for short paths (and, if Apache names
+  them, without the directives it refuses). The new pages work; old addresses 404 until
+  the server allows the rules.
+- Redeploy the previous build of both repos. The old site serves root paths again; the
+  new `/learn/...` and `/api/...` URLs then 404, which only matters for links made in
+  the meantime.
+
+Never roll back only one repo: unpoly's `.htaccess` retargets its renames to
+`/learn/...` and `/api/...`, which only the new site build serves.
+
+**Before launch:** compared to the live `.htaccess`, only two directives are new:
+`AddType` (needs `AllowOverride FileInfo`, like the rewrite rules already in use) and
+`Header merge Vary Accept "expr=..."` (needs Apache 2.4.10+). File tests against
+`%{DOCUMENT_ROOT}` already run in production. To rule out the 500, add both lines to
+the live `.htaccess` on one app server, check that `curl -sI https://unpoly.com/`
+answers 200 with `Vary: ... Accept`, and remove them again.
 
 ## Surprises from the dry run
 
