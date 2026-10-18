@@ -211,6 +211,7 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 
 ### Smaller fixes and changes
 
+- `unpoly.js` is now compiled using ES2024 (up from ES2021). It needs Chrome 119, Firefox 121 or Safari 17.4, all released by March 2024. The [ES6 build](/legacy-browsers#es6-build) for legacy browsers remains available.
 - A `click` event dispatched by a script is no longer passed to [`up.on()`](/up.on) callbacks when the element has a `[disabled]` attribute, even for elements that browsers cannot disable. Before, only a `disabled` property had this effect.
 - The npm package now also includes source maps for the unminified files, like `unpoly.js.map`.
 - `up.template.clone()` with an `{ origin }` now also finds a template in an ancestor layer, as described in [template lookup](/templates#lookup). It used to only look in the origin's layer.

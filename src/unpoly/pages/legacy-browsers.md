@@ -19,7 +19,7 @@ browser behavior, leaving you with a classic server-side application.
 
 ## ES6 build {#es6-build}
 
-`unpoly.js` uses ES2021 syntax that very old browsers or build tools may not support.
+`unpoly.js` uses ES2024 syntax that very old browsers or build tools may not support.
 If you're not already working around this with a transpiler like [Babel](https://babeljs.io/),
 you can use the ES6 build of Unpoly:
 

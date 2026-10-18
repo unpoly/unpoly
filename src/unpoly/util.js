@@ -1703,15 +1703,8 @@ up.util = (function() {
   @internal
   */
   function newDeferred() {
-    let resolveFn
-    let rejectFn
-    const nativePromise = new Promise(function(givenResolve, givenReject) {
-      resolveFn = givenResolve
-      rejectFn = givenReject
-    })
-    nativePromise.resolve = resolveFn
-    nativePromise.reject = rejectFn
-    return nativePromise
+    let { promise, resolve, reject } = Promise.withResolvers()
+    return Object.assign(promise, { resolve, reject })
   }
 
 //  ###**
@@ -1737,7 +1730,7 @@ up.util = (function() {
 //    totalValue
 
   function isBasicObjectProperty(k) {
-    return Object.prototype.hasOwnProperty(k) // eslint-disable-line no-prototype-builtins
+    return Object.hasOwn(Object.prototype, k)
   }
 
   /*-

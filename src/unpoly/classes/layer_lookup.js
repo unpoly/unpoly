@@ -43,7 +43,7 @@ up.LayerLookup = class LayerLookup {
 
   _forElement(element) {
     element = e.get(element) // unwrap jQuery
-    return u.find(this._stack.reversed(), (layer) => layer.contains(element))
+    return this._stack.layers.findLast((layer) => layer.contains(element))
   }
 
   _forIndex(value) {

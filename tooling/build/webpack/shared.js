@@ -54,7 +54,7 @@ function file(srcPath, output) {
 
 function scriptPipeline({ es, lint = true }) {
   if (es === 'modern') {
-    es = 'es2021'
+    es = 'es2024'
   }
 
   let erbLoader = {
