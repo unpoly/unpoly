@@ -514,6 +514,55 @@ extendDescribe('up.form', function() {
 
       describe('scope of switchee matching', function() {
 
+        it('only looks for new switchees in its own form when an unrelated fragment is updated (for performance reasons)', async function() {
+          const FORM_COUNT = 100
+
+          let forms = [...Array(FORM_COUNT).keys()].map(() => `
+            <form>
+              <input type="checkbox" name="active" value="yes" up-switch=".target">
+              <div class="target" up-show-for="yes">target</div>
+            </form>
+          `)
+          htmlFixtureList(forms.join('') + '<div id="counter">0</div>')
+          up.hello(document.querySelector('#fixtures'))
+
+          let queryResultCount = countQueryResults()
+
+          await up.render({ fragment: '<div id="counter">1</div>' })
+
+          // Looking for switchees in the entire document for every switcher would be FORM_COUNT * FORM_COUNT = 10,000.
+          expect(queryResultCount()).toBeLessThan(FORM_COUNT * 10)
+        })
+
+        it("does not switch a matching element in a popup overlay whose element is nested into the form's DOM", async function() {
+          const listener = jasmine.createSpy('up:form:switch listener')
+          up.on('up:form:switch', (event) => listener(event.target.id))
+
+          // A popup is attached to the closest viewport of its origin, which here is within the form.
+          const [form, field, formTarget, viewport, opener] = htmlFixtureList(`
+            <form>
+              <input name="foo" up-switch=".target" value="active">
+              <div class="target" id="form-target" up-show-for="active">form target</div>
+              <div up-viewport style="height: 100px; overflow-y: scroll">
+                <a href="#" id="opener">open popup</a>
+              </div>
+            </form>
+          `)
+          up.hello(form)
+          await wait()
+
+          expect(listener.calls.allArgs()).toEqual([['form-target']])
+
+          await up.layer.open({ mode: 'popup', origin: opener, fragment: `
+            <div id="popup-content">
+              <div class="target" id="popup-target" up-show-for="active">popup target</div>
+            </div>
+          ` })
+
+          expect(form).toContain(up.layer.current.element)
+          expect(listener.calls.allArgs()).toEqual([['form-target']])
+        })
+
         it('only switches a target in the same form', async function() {
           const form1 = fixture('form')
           const form1Input = e.affix(form1, 'input[name="foo"][up-switch=".target"]')

@@ -128,6 +128,34 @@ extendDescribe('up.form', function() {
         expect(attachSpy.calls.allArgs()).toEqual([['field1']])
       })
 
+      it("does not run the callback for fields in a popup overlay whose element is nested into the form's DOM", async function() {
+        let attachSpy = jasmine.createSpy('attach callback')
+
+        // A popup is attached to the closest viewport of its origin, which here is within the form.
+        const [form, field1, viewport, opener] = htmlFixtureList(`
+          <form name="form1">
+            <input type="text" name="field1">
+            <div up-viewport style="height: 100px; overflow-y: scroll">
+              <a href="#" id="opener">open popup</a>
+            </div>
+          </form>
+        `)
+
+        up.form.trackFields(form, (field) => attachSpy(field.name))
+
+        expect(attachSpy.calls.allArgs()).toEqual([['field1']])
+
+        await up.layer.open({ mode: 'popup', origin: opener, fragment: `
+          <div id="popup-content">
+            <input type="text" name="popupField">
+          </div>
+        ` })
+
+        expect(up.layer.current.mode).toBe('popup')
+        expect(form).toContain(up.layer.current.element)
+        expect(attachSpy.calls.allArgs()).toEqual([['field1']])
+      })
+
       it('runs an undo callback when the field is destroyed with up.destroy()', async function() {
         let detachCallback = jasmine.createSpy('detach callback')
         let attachCallback = jasmine.createSpy('attach callback').and.returnValue(detachCallback)
@@ -431,7 +459,7 @@ extendDescribe('up.form', function() {
           let changeSpy = jasmine.createSpy('change spy')
 
           const [form, root, field1, field2] = htmlFixtureList(`
-            <form id="form" name="form1">
+            <form id="form1" name="form1">
               <div id="root">
                 <input type="text" name="field1">
               </div>
@@ -577,6 +605,24 @@ extendDescribe('up.form', function() {
             ['attach', 'form1', 'field2'],
             ['attach', 'form2', 'field3'],
           ])
+        })
+
+        it("runs the callback once for a field within the form that also references the form's [id]", async function() {
+          let attachSpy = jasmine.createSpy('attach callback')
+
+          const [form, field] = htmlFixtureList(`
+            <form id="form1">
+              <input type="text" name="field1" form="form1">
+            </form>
+          `)
+
+          up.form.trackFields(form, attachSpy)
+          expect(attachSpy.calls.allArgs()).toEqual([[field]])
+
+          up.hello(up.element.affix(document.body, 'div'))
+          await wait()
+
+          expect(attachSpy.calls.allArgs()).toEqual([[field]])
         })
 
         it('runs the callback for a form-external field that is inserted later', async function() {
@@ -782,6 +828,82 @@ extendDescribe('up.form', function() {
           expect(result.fragments.length).toBe(2)
 
           expect(syncSpy.calls.count()).toBe(1)
+        })
+
+        describe('with many tracked forms on the page', function() {
+
+          // A list of many small forms, each with its own tracker, e.g. from [up-autosubmit] on every <form>.
+          // Each tracker should only look at the fields of its own form, not at every field on the page.
+          const FORM_COUNT = 100
+
+          function htmlWithForms({ ids = false } = {}) {
+            let forms = [...Array(FORM_COUNT).keys()].map((i) => `
+              <form ${ids ? `id="form${i}"` : ''}>
+                <input type="hidden" name="id" value="${i}">
+                <input type="checkbox" name="done">
+              </form>
+            `)
+            return forms.join('') + '<div id="counter">0</div>'
+          }
+
+          it('only inspects the fields of each form when starting to track', async function() {
+            htmlFixtureList(htmlWithForms())
+            let queryResultCount = countQueryResults()
+
+            for (let form of document.querySelectorAll('form')) {
+              up.form.trackFields(form, u.noop)
+            }
+
+            // Inspecting all fields for every tracker would be FORM_COUNT * FORM_COUNT * 2 = 20,000.
+            expect(queryResultCount()).toBeLessThan(FORM_COUNT * 10)
+          })
+
+          it('only inspects the fields of each form when an unrelated fragment is updated', async function() {
+            htmlFixtureList(htmlWithForms())
+
+            for (let form of document.querySelectorAll('form')) {
+              up.form.trackFields(form, u.noop)
+            }
+
+            let queryResultCount = countQueryResults()
+
+            await up.render({ fragment: '<div id="counter">1</div>' })
+
+            expect(queryResultCount()).toBeLessThan(FORM_COUNT * 10)
+          })
+
+          // Each form with an [id] still runs one document-wide [form="…"] query for form-external fields.
+          // That query runs natively and usually returns nothing, so it is not counted here.
+          it("only inspects form-external fields that reference a form's [id], not every field on the page", async function() {
+            htmlFixtureList(htmlWithForms({ ids: true }))
+
+            for (let form of document.querySelectorAll('form')) {
+              up.form.trackFields(form, u.noop)
+            }
+
+            let queryResultCount = countQueryResults()
+
+            await up.render({ fragment: '<div id="counter">1</div>' })
+
+            expect(queryResultCount()).toBeLessThan(FORM_COUNT * 10)
+          })
+
+          it('only inspects the fields of each container when tracking containers within the forms', async function() {
+            htmlFixtureList(htmlWithForms())
+
+            for (let form of document.querySelectorAll('form')) {
+              let container = up.element.affix(form, 'div.container')
+              container.append(...form.querySelectorAll('input'))
+              up.form.trackFields(container, u.noop)
+            }
+
+            let queryResultCount = countQueryResults()
+
+            await up.render({ fragment: '<div id="counter">1</div>' })
+
+            expect(queryResultCount()).toBeLessThan(FORM_COUNT * 10)
+          })
+
         })
 
       })

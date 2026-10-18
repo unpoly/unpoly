@@ -2,11 +2,9 @@ const u = up.util
 
 up.SelectorTracker = class SelectorTracker {
 
-  constructor(selector, options, addCallback) {
-    this._selector = selector
+  constructor(selectFn, addCallback) {
+    this._selectFn = selectFn
     this._addCallback = addCallback
-    this._layer = options.layer || 'any'
-    this._filter = options.filter || u.identity
     this._knownMatches = new Map()
     this._syncScheduled = false
   }
@@ -53,7 +51,7 @@ up.SelectorTracker = class SelectorTracker {
     let removeMap = new Map(this._knownMatches)
     this._knownMatches.clear()
 
-    for (let newMatch of this._currentMatches) {
+    for (let newMatch of this._selectFn()) {
       let knownRemoveCallback = removeMap.get(newMatch)
       removeMap.delete(newMatch)
       let removeCallback = knownRemoveCallback || this._addCallback(newMatch) || u.noop
@@ -61,11 +59,6 @@ up.SelectorTracker = class SelectorTracker {
     }
 
     this._runRemoveCallbacks(removeMap)
-  }
-
-  get _currentMatches() {
-    let allMatches = up.fragment.all(this._selector, { layer: this._layer })
-    return this._filter(allMatches)
   }
 
   _removeAllMatches() {

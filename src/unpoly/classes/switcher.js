@@ -35,13 +35,8 @@ up.Switcher = class Switcher {
   }
 
   _trackNewSwitchees() {
-    let filter = (matches) => {
-      let scope = this._scope
-      return u.filter(matches, (match) => scope?.contains(match))
-    }
-
     let onSwitcheeAdded = (switchee) => this._switchSwitchee(switchee)
-    return up.fragment.trackSelector(this._switcheeSelector, { filter }, onSwitcheeAdded)
+    return up.fragment.trackSelector(() => this._findSwitchees(), onSwitcheeAdded)
   }
 
   _onFieldChanged() {

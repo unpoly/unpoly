@@ -187,7 +187,7 @@ up.form = (function() {
 
   function findFormElements(root, selectorFn) {
     root = e.get(root) // unwrap jQuery
-    let elements = e.subtree(root, selectorFn())
+    let elements = up.fragment.subtree(root, selectorFn())
 
     // If findFormElements() is called with an entire form, gather fields outside the form
     // element that are associated with the form (through <input form="id-of-form">, which
@@ -224,6 +224,8 @@ up.form = (function() {
   `up.form.config.fieldSelectors` array.
 
   If the given element is itself a form field, a list of that given element is returned.
+
+  Fields in another [layer](/up.layer) and fields that are being [destroyed](/up.destroy) are ignored.
 
   @function up.form.fields
   @param {Element|jQuery} root
@@ -293,8 +295,9 @@ up.form = (function() {
     let formLayer = up.layer.get(form)
 
     for (let field of form.elements) {
-      // Only a [form] attribute can pull in a field from another layer. Anything else in
-      // form.elements is a descendant of the form, and so in the form's own layer.
+      // We only check fields that a [form] attribute pulls in from another layer.
+      // A descendant of the form may also be in another layer, when a popup is attached
+      // within the form's DOM. We don't detect that case yet.
       if (field.hasAttribute('form') && up.layer.get(field) !== formLayer) {
         up.fail('Cannot serialize %o: %o is associated with a form in another layer. Give the forms unique IDs, or avoid [form] attributes in pages that open in overlays.', form, field)
       }
@@ -315,6 +318,8 @@ up.form = (function() {
 
   You can configure what Unpoly considers a submit button by adding CSS selectors to the
   `up.form.config.submitButtonSelectors` array.
+
+  Buttons in another [layer](/up.layer) and buttons that are being [destroyed](/up.destroy) are ignored.
 
   @function up.form.submitButtons
   @param {Element|jQuery} root
@@ -1479,16 +1484,22 @@ up.form = (function() {
   const trackFields = up.mockable(function(...args) {
     let [root, { guard }, callback] = u.args(args, 'val', 'options', 'callback')
 
-    let filter = function(fields) {
+    let selectFn = function() {
+      // A detached root has no fields left to track.
+      if (!root.isConnected) return []
+
       let region = getRegion(root)
-      return u.filter(fields, function(field) {
-        return (root === region || root.contains(field))
-          && (getRegion(field) === region) // will also match external fields with [form]
+
+      // Only look at fields that can belong to the root, instead of every field on the page.
+      // With many trackers (e.g. many small forms with [up-autosubmit]) the latter would cost
+      // trackers × fields after every render pass.
+      return u.filter(findFields(root), function(field) {
+        return (getRegion(field) === region) // will also match external fields with [form]
           && (!guard || guard(field)) // user-provided condition
       })
     }
 
-    return up.fragment.trackSelector(fieldSelector(), { filter }, callback)
+    return up.fragment.trackSelector(selectFn, callback)
   })
 
   function focusedField() {

@@ -3148,18 +3148,18 @@ up.fragment = (function() {
 
   /*-
   @function up.fragment.trackSelector
-  @param {string|Function} selector
-    The selector to track
-  @param {Function(List<Element>): List<Element>} options.filter
-    Filters a list of potential matches.
+  @param {Function(): List<Element>} selectFn
+    A function that returns the elements that currently match.
+
+    It is called again after every render pass. To keep this cheap, look up elements
+    within a small root instead of the entire document.
   @param {Function(Element): Function(Element)} callback
     A callback that is called when we discover a new match.
     The callback can return another function that is called when that element no longer matches.
   @internal
   */
-  function trackSelector(...args) {
-    let parsedArgs = u.args(args, 'val', 'options', 'callback')
-    let tracker = new up.SelectorTracker(...parsedArgs)
+  function trackSelector(selectFn, callback) {
+    let tracker = new up.SelectorTracker(selectFn, callback)
     return tracker.start()
   }
 
