@@ -1,7 +1,7 @@
 Unreleased
 ----------
 
-This release relaunches the documentation site, written for people and for coding agents.
+This release comes with a relaunched documentation site, for people and for coding agents.
 Unpoly now also works with custom form fields, like date pickers built as web components.
 
 Breaking changes are marked with ⚠️ when [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) polyfills them,
@@ -28,13 +28,13 @@ Contents:
 
 ### A relaunched documentation site
 
-We relaunched unpoly.com, so you can learn Unpoly from start to finish, and look up details when you need them.
+You can now learn Unpoly on unpoly.com from start to finish, and look up details when you need them.
 
-- **A new Learn area.** The guides are now a course: [Getting started](/start/overview) takes you from how Unpoly works to your first links, forms, overlays and compilers. After it, 13 chapters cover everything from [Links](/links) and [Forms](/forms) to [Backend integration](/backend-integration) and [Advanced rendering](/advanced-rendering). Each chapter opens with an overview, and every page links to the next one, so you can read the docs like a book.
-- **Every guide revised.** We rewrote the existing guides, split long pages into focused ones, merged pages that overlapped, and added pages for topics that had no home before. We checked the code examples against the source code and fixed the ones that did not work.
-- **A clearer layout.** The sidebar shows where you are in a chapter or module, longer pages show their contents, and a new menu makes the site usable on a phone. Diagrams and videos show what happens on the page.
-- **Reference and guides connected.** The **API reference** at `/api` documents every attribute, function, event and option. Every API page links to the Learn page that explains its topic.
-- **A new search.** It shows whether a result is a Learn page or an API page, and where it sits in the docs.
+- The new Learn area is a course: [Getting started](/start/overview) takes you from how Unpoly works to your first links, forms, overlays and compilers. After it, 13 chapters cover everything from [Links](/links) and [Forms](/forms) to [Backend integration](/backend-integration) and [Advanced rendering](/advanced-rendering). Each chapter opens with an overview, and every page links to the next one, so you can read the docs like a book.
+- We rewrote the existing guides, split long pages into focused ones, merged pages that overlapped, and added pages for topics that had no home before. We checked the code examples against the source code and fixed the ones that did not work.
+- The sidebar shows where you are in a chapter or module, longer pages show their contents, and a new menu makes the site usable on a phone. Diagrams and videos show what happens on the page.
+- The API reference at `/api` documents every attribute, function, event and option. Every API page links to the Learn page that explains its topic.
+- The new search shows whether a result is a Learn page or an API page, and where it sits in the docs.
 
 Guides now live under `/learn`, like `/learn/caching`. API pages live under `/api`, like `/api/up.render`.
 Some pages also got a new name, e.g. *Handling failed responses* is now [Error responses](/error-responses), and *Preserving elements* is now [Keeping elements](/keeping-elements).
@@ -43,10 +43,8 @@ Old URLs redirect to the new pages, so your links and bookmarks keep working.
 
 ### Docs for coding agents
 
-Your coding agent can now use the same documentation as you.
-
-An [agent skill](/skill) gives your agent every guide and the full API reference, with a search script that works offline.
-With it, your agent follows Unpoly's common patterns for links, forms and overlays, and looks up the exact attributes, options and edge cases instead of guessing them.
+An [agent skill](/skill) gives your coding agent the same documentation as you: every guide and the full API reference, with a search script that works offline.
+With it, your agent follows Unpoly's common patterns for links, forms and overlays, and can look up the exact attributes, options and edge cases.
 The skill also contains the release notes of every version, for when your agent upgrades an app.
 
 Install the skill with the [skills CLI](https://github.com/vercel-labs/skills):
