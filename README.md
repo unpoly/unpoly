@@ -26,7 +26,18 @@
 The missing application layer for HTML
 --------------------------------------
 
-[Unpoly](https://unpoly.com) expands what links, forms and server-rendered pages can do, while your application stays on the server.
+[Unpoly](https://unpoly.com) expands what links, forms and server-rendered pages can do, while your application stays on the server:
+
+```html
+<a href="/tasks/123" up-target="#pane">Details</a>   <!-- updates a fragment -->
+<a href="/users/new" up-layer="new">Add user</a>     <!-- opens in a modal overlay -->
+<form up-validate>…</form>                           <!-- validates against your server -->
+<main up-poll>…</main>                               <!-- keeps itself fresh -->
+```
+
+When the user follows an Unpoly link, the server responds with HTML (a full page is fine), and Unpoly updates only the targeted fragment. Everything outside the fragment stays as it is, including scroll positions and unsaved form input. Every URL keeps working on its own, so you don't need separate endpoints for fragments.
+
+When attributes aren't enough, a JavaScript API and [compilers](https://unpoly.com/api/up.compiler) let you recompose Unpoly's behavior and plug in your own code.
 
 Unpoly works with any language or framework. It plays nice with existing code, and gracefully degrades without JavaScript.
 
