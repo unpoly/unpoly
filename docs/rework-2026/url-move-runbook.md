@@ -259,14 +259,12 @@ checkout the build used, nothing else. It checks every old document path as `/fo
 Location by its path on the base URL, since Apache names the host it saw. Exits 1
 and lists each problem. Takes 5 seconds for about 2,100 requests.
 
-A CI job would: check out both repos side by side (the site's tracked symlink
-`vendor/unpoly-local -> ../../unpoly`), build unpoly's `dist/` and the site
-(`bundle exec middleman build`), serve `build/` with the official `httpd:2.4` image
-(its `httpd.conf` needs `LoadModule rewrite_module` uncommented and `AllowOverride All`
-for the htdocs directory, e.g. with `sed` into a mounted copy; mod_alias and
-mod_headers are loaded by default), and run
-`bundle exec rake docs:check_redirects BASE_URL=http://localhost:<port>`. Not tried
-with `httpd:2.4` here: the image is not on this machine.
+The site's CI runs this as the "Redirects" job (`.github/workflows/test.yml`): it builds
+unpoly's `dist/` and the site (`bundle exec middleman build`, which also runs the link
+check and the legacy link check), serves `build/` with the official `httpd:2.4` image
+through `script/serve_build_with_apache start 8089` (it switches on mod_rewrite and sets
+`AllowOverride All`), and runs `bundle exec rake docs:check_redirects
+BASE_URL=http://localhost:8089`. The same two commands work locally.
 
 with a `site.conf` that says `Listen 8089` and serves `/srv/build` in a
 `<VirtualHost *:8089>` with `DocumentRoot /srv/build` and `AllowOverride All`. The
