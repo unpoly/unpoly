@@ -44,8 +44,8 @@ spec `spec/unpoly/foo_spec.js`.
 Unpoly's specs run in a real browser, driven from your terminal:
 
 ```
-bin/test --spec="up.form"            # only specs whose full name contains this
-bin/test --all                       # the whole suite (~9 minutes)
+bin/test --spec="up.form HTML [up-switch]"   # only specs whose full name contains this
+bin/test --all                               # the whole suite (~9 minutes)
 ```
 
 `bin/test` needs a running [dev environment](dev-environment.md) and starts one in
@@ -178,8 +178,13 @@ Then run the groups you found. `--spec` and `--file` are repeatable and union, s
 filters make a single run:
 
 ```
-bin/test --spec="up.form" --spec="up.Params"
+bin/test --spec="up.form HTML [up-switch]" --spec="up.Params"
 ```
+
+**A whole module is not a narrow filter.** `--spec="up.fragment"` passes the filter check,
+but runs a large part of the suite: `up.fragment` alone takes about five minutes. Name the
+groups that cover your change instead, like `up.form HTML [up-switch]` rather than `up.form`.
+Run a whole module only when you changed logic that most of that module re-uses.
 
 **Run the full suite only when the blast radius is genuinely wide:** a change to logic that
 most of the framework re-uses (`up.fragment`, `up.network`, `up.script`, `up.layer`,
@@ -200,13 +205,14 @@ suite to look for a failure you have no reason to expect. Run one locally when
   `--csp=nonce-only` and `--csp=strict-dynamic`, a new `unpoly-migrate.js` polyfill earns
   `--migrate`.
 
-Even then, filter. `bin/test --migrate --spec="up.form"` answers the question in seconds.
+Even then, filter. `bin/test --migrate --spec="up.form HTML [up-switch]"` answers the question in seconds.
 
 
 ## If you are an agent
 
 **Filter before you run.** [The full suite is slow](#the-full-test-suite-is-slow): find the groups that cover your
-change with `bin/find-spec` and run only those. Save the unfiltered run for a wide blast
+change with `bin/find-spec` and run only those. A whole module like `up.fragment` is not a
+narrow filter: it runs for minutes. Save module runs and the unfiltered run for a wide blast
 radius, and leave the build variants to CI.
 
 **Give the command a generous timeout.** The full suite takes minutes, and nothing caps
@@ -349,9 +355,9 @@ because it is the difference between 13 seconds and three minutes:
   files contribute to as well. Its own name would run the whole module, so `--file` runs
   the blocks *this* file declares instead.
 - A **module's own spec file** starts with a real `describe()`, and naming it runs that
-  module — extracted files included. That is deliberate: after changing
-  `src/unpoly/form.js` you want all of `up.form`, and skipping the extracted specs would
-  report a green run over a fraction of the coverage.
+  module — extracted files included, since skipping them would report a green run over a
+  fraction of the module's coverage. That is a [whole module](#the-full-test-suite-is-slow),
+  so for an ordinary change, point at the line of the group you need instead.
 
 So `--file` on a part means "this chunk", and on a module's file means "this module". The
 runner echoes the filters it derived, so you can always see which you got. Pointing at a
