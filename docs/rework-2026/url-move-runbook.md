@@ -22,7 +22,7 @@ Two kinds of change, handled differently:
   `[[wikilinks]]`, `@learn-ref`, `toc.yml`, backtick autolinks, menus, hubs, reading
   nav, search (Pagefind indexes the built paths), Markdown twins, the skill. Templates
   link documents through a new `doc_path('slug')` helper instead of spelling paths.
-  This is ordinary site code, in the commits on unpoly-site `url-move-dryrun`.
+  This is ordinary site code, in the commits on unpoly-site `url-move-dryrun-2`.
 - **The script handles what is written as a URL.** `script/url_move.rb` in unpoly-site
   (`bundle exec rake docs:url_move`) loads the site's model and, in `../unpoly`:
   - rewrites `[label](/path)` and `href="/path"` outside code blocks and code spans,
@@ -156,20 +156,23 @@ the two repositories are siblings (`unpoly`, `unpoly-site`).
 
    ```sh
    cd unpoly-site
-   git checkout -b url-move url-move-dryrun
+   git checkout -b url-move url-move-dryrun-2
    git rebase docs-rework
    ```
 
-   The branch holds six commits (`git log docs-rework..url-move-dryrun`): the model
-   change, the script, the landing page and example links, two spec commits, and the
-   script's 2026-10-13 changes (permanent short URLs, comments only in `.js`). The
-   script commit also contains the dry run's rewrite of `source/.htaccess.erb`. If that
-   conflicts, take the `docs-rework` side: the script rewrites it again in step 3.
+   The branch holds nine commits (`git log docs-rework..url-move-dryrun-2`): the model
+   change, the script, the landing page and example links, two spec commits, the
+   script's 2026-10-13 changes (permanent short URLs, comments only in `.js`), the
+   general rule with the clash and legacy link checks, a spec commit, and
+   `rake docs:check_redirects`. The script commit also contains the dry run's rewrite
+   of `source/.htaccess.erb`'s redirect targets. If that conflicts, take the
+   `docs-rework` side for the targets: the script rewrites them again in step 3. Spec
+   and golden-file conflicts: take `docs-rework`, then fix the specs in step 5.
 
-   After the rebase, grep the site for paths added since the dry run, which the model can't
-   reach: `grep -rnE "(href=|hyperlink|link_to).*['\"]/[a-z]" source examples` and look
-   for documents, and `grep -rn "unpoly.com/" source` for full URLs. Link them with
-   `doc_path('slug')` (plain JS files can't, so spell the new path there).
+   After the rebase, `bundle exec rake docs:check_urls` lists every link to an old
+   path in the site's templates (LEGACY LINKS, under `source/`). Link them with
+   `doc_path('slug')` (plain JS files can't, so spell the new path there). The
+   unpoly side is still unconverted at this point, so ignore its entries until step 3.
 
 3. In unpoly, start a fresh branch from `docs-rework` (the dry run's script commit is
    not reused; it is regenerated from the final content). Then, in unpoly-site, run the
