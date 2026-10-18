@@ -1115,7 +1115,7 @@ up.link = (function() {
       To target the placeholder itself, you can use the `:origin` target instead of spelling out a selector.
 
     @param [up-fail]
-      How to handle [failed server responses](/failed-responses).
+      How to handle [error responses](/error-responses).
 
       By default, a server response with an error code is not rendered,
       and the placeholder keeps its fallback content.
@@ -1124,7 +1124,7 @@ up.link = (function() {
       even with a 4xx or 5xx status code.
 
     @param [up-fail-target]
-      A selector for the fragment to render a [failed server response](/failed-responses) in.
+      A selector for the fragment to render an [error response](/error-responses) in.
 
       By default, a server response with an error code is not rendered.
 
