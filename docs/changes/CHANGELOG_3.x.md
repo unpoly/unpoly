@@ -1,7 +1,7 @@
 Unreleased
 ----------
 
-This release comes with a new documentation site, written for people and for coding agents.
+This release relaunches the documentation site, written for people and for coding agents.
 Unpoly now also works with custom form fields, like date pickers built as web components.
 
 Breaking changes are marked with ⚠️ when [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) polyfills them,
@@ -14,7 +14,7 @@ are listed in their topic without a marker.
 
 Contents:
 
-- [A new documentation site](#a-new-documentation-site)
+- [A relaunched documentation site](#a-relaunched-documentation-site)
 - [Docs for coding agents](#docs-for-coding-agents)
 - [Custom form fields](#custom-form-fields)
 - [Form submissions now match the browser](#form-submissions-now-match-the-browser)
@@ -24,22 +24,17 @@ Contents:
 - [Rendering](#rendering)
 - [Links and URLs](#links-and-urls)
 - [Smaller fixes and changes](#smaller-fixes-and-changes)
-- [Upgrading](#upgrading)
 
 
-### A new documentation site
+### A relaunched documentation site
 
-We rewrote unpoly.com so you can learn Unpoly from start to finish, and look up details when you need them.
+We relaunched unpoly.com, so you can learn Unpoly from start to finish, and look up details when you need them.
 
-The site now has two areas. **Learn** at `/learn` explains concepts and shows how to combine features for common tasks.
-The **API reference** at `/api` documents every attribute, function, event and option.
-
-- [Getting started](/start/overview) replaces the old tutorial. Eight short pages take you from how Unpoly works to your first links, forms, overlays and compilers.
-- After Getting started, the Learn area has 13 chapters, from [Links](/links) and [Forms](/forms) to [Backend integration](/backend-integration) and [Advanced rendering](/advanced-rendering). Each chapter opens with an overview page. Every page ends with a link to the next one, so you can read the docs like a book.
-- Every API page links to the Learn pages that explain its topic.
-- New guides cover [following links](/following-links), [handling all links](/handling-all-links) and [all forms](/handling-all-forms), [hungry elements](/hungry-elements), [streaming real-time updates](/real-time-updates) over Server-Sent Events or WebSockets, [background requests](/background-requests), [React or Vue components as islands](/islands), [custom form fields](/custom-form-fields) and the [server protocol](/server-protocol).
-- The search was rebuilt. It shows whether a result is a Learn page or an API page, and where it sits in the docs.
-- We checked many code examples against the source code and fixed the ones that did not work.
+- **A new Learn area.** The guides are now a course: [Getting started](/start/overview) takes you from how Unpoly works to your first links, forms, overlays and compilers. After it, 13 chapters cover everything from [Links](/links) and [Forms](/forms) to [Backend integration](/backend-integration) and [Advanced rendering](/advanced-rendering). Each chapter opens with an overview, and every page links to the next one, so you can read the docs like a book.
+- **Every guide revised.** We rewrote the existing guides, split long pages into focused ones, merged pages that overlapped, and added pages for topics that had no home before. We checked the code examples against the source code and fixed the ones that did not work.
+- **A clearer layout.** The sidebar shows where you are in a chapter or module, longer pages show their contents, and a new menu makes the site usable on a phone. Diagrams and videos show what happens on the page.
+- **Reference and guides connected.** The **API reference** at `/api` documents every attribute, function, event and option. Every API page links to the Learn page that explains its topic.
+- **A new search.** It shows whether a result is a Learn page or an API page, and where it sits in the docs.
 
 Guides now live under `/learn`, like `/learn/caching`. API pages live under `/api`, like `/api/up.render`.
 Some pages also got a new name, e.g. *Handling failed responses* is now [Error responses](/error-responses), and *Preserving elements* is now [Keeping elements](/keeping-elements).
@@ -48,11 +43,11 @@ Old URLs redirect to the new pages, so your links and bookmarks keep working.
 
 ### Docs for coding agents
 
-Your coding agent can now read the same documentation as you, in a format it can use well.
+Your coding agent can now use the same documentation as you.
 
-- Every page is also available as Markdown. Append `.md` to its URL, e.g. [`https://unpoly.com/api/up.render.md`](https://unpoly.com/api/up.render.md). Agents that ask for `text/markdown` first in their `Accept` header get Markdown at the page's own URL.
-- [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules, with links an agent can follow.
-- An [agent skill](/skill) bundles every guide, the API reference and the release notes of all versions, with a search script that works offline. The release notes help your agent upgrade an app from an older Unpoly version.
+An [agent skill](/skill) gives your agent every guide and the full API reference, with a search script that works offline.
+With it, your agent follows Unpoly's common patterns for links, forms and overlays, and looks up the exact attributes, options and edge cases instead of guessing them.
+The skill also contains the release notes of every version, for when your agent upgrades an app.
 
 Install the skill with the [skills CLI](https://github.com/vercel-labs/skills):
 
@@ -61,7 +56,12 @@ npx skills add --global https://unpoly.com
 ```
 
 If you use Claude Code, you can also [install the skill as a plugin](/skill#claude-code).
-To give a chat a single page, use the copy button next to a page's title. It copies the page as Markdown.
+
+Agents can also read the docs without the skill:
+
+- Every page is also available as Markdown. Append `.md` to its URL, e.g. [`https://unpoly.com/api/up.render.md`](https://unpoly.com/api/up.render.md). Agents that ask for `text/markdown` first in their `Accept` header get Markdown at the page's own URL.
+- [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules, with links an agent can follow.
+- To give a chat a single page, use the copy button next to a page's title. It copies the page as Markdown.
 
 
 ### Custom form fields
@@ -118,7 +118,8 @@ Thanks to @kmmbvnr for contributing form-associated custom elements and `formdat
 
 ### Form submissions now match the browser
 
-Unpoly now uses the browser's form-data algorithm, so edge cases behave like a native form submission:
+Unpoly now uses the browser's form-data algorithm, so edge cases behave like a native form submission.
+These changes cannot be polyfilled. If your server or your tests depend on the exact params of a submission, review them:
 
 - A form with an `<input type="file">` is now submitted as `multipart/form-data`, even when no file is selected.
 - An `<input type="image">` used as the submit button now sends its `name.x` and `name.y` coordinates instead of its `[value]`.
@@ -147,7 +148,17 @@ Unpoly now uses the browser's form-data algorithm, so edge cases behave like a n
 
 ### Overlays
 
-- ❌ An `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open when a link or form in a parent layer would close it ([peeling](/closing-overlays#peeling)). The render pass then fails with `up.Aborted` and nothing is updated. See [Upgrading](#upgrading) for how to keep the old behavior.
+- ❌ An `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open when a link or form in a parent layer would close it ([peeling](/closing-overlays#peeling)). The render pass then fails with `up.Aborted` and nothing is updated.
+  This affects listeners that prevent closing, e.g. to confirm unsaved changes. To let links in a parent layer close the overlay as before, return early when `event.value` is `':peel'`:
+
+  ```js
+  up.on('up:layer:dismiss', function(event) {
+    if (event.value === ':peel') return // mark-line
+    if (!confirm('Discard your changes?')) event.preventDefault()
+  })
+  ```
+
+  To force a single link, set [`[up-peel="force"]`](/up-follow#up-peel) instead.
 - When a listener keeps an overlay open, the overlays below it now also stay open.
 - To close overlays even when a listener prevents it, use [`[up-peel="force"]`](/up-follow#up-peel), or pass `{ force: true }` to `up.Layer#accept()`, `up.Layer#dismiss()` or `up.Layer#peel()`. You can combine `force` with an intent, e.g. `[up-peel="accept force"]`.
 - Pressing the back button still closes overlays, even when a listener prevents it.
@@ -159,7 +170,7 @@ Unpoly now uses the browser's form-data algorithm, so edge cases behave like a n
 
 ### Caching
 
-- New config [`up.network.config.cacheEnabled`](/up.network.config#config.cacheEnabled) turns off the [cache](/caching) entirely, e.g. for debugging. When it is `false`, no response is read from or written to the cache, and [preloading](/preloading) is disabled.
+- New config [`up.network.config.cacheEnabled`](/up.network.config#config.cacheEnabled) turns off the [cache](/caching) entirely, e.g. for debugging. When it is `false`, no response is read from or written to the cache, and [preloading](/preloading) is disabled. If you used `up.network.config.cacheSize = 0` to turn off caching, [`unpoly-migrate.js`](/changes/upgrading) now tells you to use this setting instead.
 - An [`X-Up-Expire-Cache: false`](/X-Up-Expire-Cache) response header now expires no cache entries, like [`X-Up-Evict-Cache: false`](/X-Up-Evict-Cache). It used to be treated as a URL pattern matching `/false`.
 - Fix: When a compiler requested the URL of a request that had just been aborted or had just finished, it sometimes got the old request from the cache. It now makes a new request.
 
@@ -194,29 +205,6 @@ Unpoly now uses the browser's form-data algorithm, so edge cases behave like a n
 - Fix: `up.fragment.matches()` with `{ layer: 'new', mode }` options expanded a selector like `:main` for the root layer, or threw an error while an overlay was open.
 - Fix: The `unpoly-migrate.js` polyfills for `up.popup.attach()`, `up.modal.follow()` and `up.modal.extract()` now open a new overlay again.
 - Fix: The `unpoly-migrate.js` polyfill for `up.network.shouldReduceRequests()` now logs a warning instead of throwing an error.
-
-
-### Upgrading
-
-Most changes in this release need no changes to your code. Check these cases:
-
-- **Overlays that refuse to close.** If you have an `up:layer:dismiss` or `up:layer:accept` listener that prevents closing, e.g. to confirm unsaved changes, it now also runs when a link in a parent layer closes the overlay. To let those links close the overlay as before, return early when `event.value` is `':peel'`:
-
-  ```js
-  up.on('up:layer:dismiss', function(event) {
-    if (event.value === ':peel') return // mark-line
-    if (!confirm('Discard your changes?')) event.preventDefault()
-  })
-  ```
-
-  To force a single link, set [`[up-peel="force"]`](/up-follow#up-peel) instead.
-
-- **Form params.** If your server or your tests depend on the exact params of a submission, review the items in [Form submissions now match the browser](#form-submissions-now-match-the-browser). The browser's form-data algorithm cannot be polyfilled.
-- **Overlays that reuse a page with `[form]` fields.** If a page uses the `[form]` attribute and you also open it in an overlay, give each form a unique `[id]`, or move the field into the form.
-- **Validation styles.** Validations now set `.up-loading` and other [feedback classes](/feedback-classes). If your styles should not apply during a validation, set `[up-watch-feedback="false"]` on the form.
-
-[`unpoly-migrate.js`](/changes/upgrading) polyfills the renamed `up.form.config.genericButtonSelectors`.
-If you used `up.network.config.cacheSize = 0` to turn off caching, it now tells you to set `up.network.config.cacheEnabled = false` instead.
 
 
 3.14.3
