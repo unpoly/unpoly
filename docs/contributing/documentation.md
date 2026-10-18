@@ -854,11 +854,13 @@ that still lack one.
 >
 > ```apache
 > RedirectPermanent /learn/old-page-name /learn/new-page-name
+> RedirectPermanent /old-page-name /learn/new-page-name
 > ```
 >
-> Also point every redirect that led to the old page at the new one, including the
-> generated rule for the page's pre-prefix path (`RedirectMatch 301 ^/old-page-name/?$`):
-> `rake docs:check_urls` in unpoly-site fails on a chain of redirects.
+> The second line keeps the short path working: unpoly.com sends `/foo` to `/learn/foo`
+> (else to `/api/foo`) only while that page exists. Also point every redirect that led
+> to the old page at the new one: `rake docs:check_urls` in unpoly-site fails on a chain
+> of redirects.
 >
 > The page's [Markdown twin](#markdown-for-agents) needs no redirect of its own: a `.md`
 > URL without a file redirects to its page.
