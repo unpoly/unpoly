@@ -186,4 +186,5 @@ Every open page holds one connection to your server. Keep the following in mind:
   Each open `EventSource` uses one of them. Serve event streams over HTTP/2, which allows many more (usually 100).
 
 @page real-time-updates
+@keywords SSE, Turbo Streams
 @menu-title Real-time updates

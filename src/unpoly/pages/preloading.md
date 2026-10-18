@@ -135,3 +135,4 @@ up.on('up:link:preload', function(event) {
 
 
 @page preloading
+@keywords prefetch

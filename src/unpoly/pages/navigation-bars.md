@@ -202,4 +202,5 @@ To toggle `.up-current` on content that you manually inserted without Unpoly, us
 
 
 @page navigation-bars
+@keywords active
 @signature

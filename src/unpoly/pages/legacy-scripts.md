@@ -126,3 +126,4 @@ when they are no longer needed. When a compiler sets up something like this, und
 
 
 @page legacy-scripts
+@keywords jQuery

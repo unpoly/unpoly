@@ -202,4 +202,5 @@ up.radio.stopPolling(element)
 
 
 @page polling
+@keywords auto-refresh
 @signature

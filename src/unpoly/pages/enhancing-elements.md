@@ -264,4 +264,5 @@ to run only once for each matching element.
 
 
 @page enhancing-elements
+@keywords Stimulus, sprinkles
 @signature

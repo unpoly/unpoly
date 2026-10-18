@@ -229,4 +229,5 @@ See [[handling-all-forms]] for the exceptions under this setting.
 
 
 @page submitting-forms
+@keywords ajax
 @signature

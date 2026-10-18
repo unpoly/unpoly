@@ -218,4 +218,5 @@ The [`[up-keep]`](/up-keep) attribute keeps existing messages, but the [`[up-on-
 callback lets a non-empty container replace them.
 
 @page flashes
+@keywords toast, snackbar
 @signature

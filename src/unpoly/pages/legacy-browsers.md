@@ -36,3 +36,4 @@ an API that Unpoly uses, you need to load a polyfill yourself.
 The last version with support for Internet Explorer 11 is [2.7](https://unpoly.com/changes/2.7.1).
 
 @page legacy-browsers
+@keywords IE11

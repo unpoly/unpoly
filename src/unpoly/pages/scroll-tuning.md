@@ -119,3 +119,4 @@ You can change this default in `up.viewport.config.revealTop`.
 
 
 @page scroll-tuning
+@keywords sticky header

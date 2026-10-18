@@ -113,4 +113,5 @@ To update fragments without a link element, use `up.render()`.
 
 
 @page following-links
+@keywords ajax
 @signature

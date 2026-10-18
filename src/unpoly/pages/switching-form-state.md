@@ -240,4 +240,5 @@ See `up:form:switch` for all event properties and when it is emitted.
 
 
 @page switching-form-state
+@keywords conditional
 @signature

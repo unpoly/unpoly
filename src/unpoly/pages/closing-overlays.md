@@ -362,4 +362,5 @@ option to `up.layer.accept()` or `up.layer.dismiss()`, or set an `[up-animation]
 
 
 @page closing-overlays
+@keywords dialog
 @signature

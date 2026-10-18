@@ -142,5 +142,6 @@ To keep state for the lifetime of an overlay, like the record a reused screen is
 To control whether an overlay's location shows in the address bar, see [[history-in-overlays]].
 
 @page overlays
+@keywords popover, lightbox
 @menu-title Overview
 @signature

@@ -169,4 +169,5 @@ with each other or with the primary target, Unpoly decides as follows:
    the layer closest to the rendering layer wins.
 
 @page hungry-elements
+@keywords hx-swap-oob, out-of-band
 @signature

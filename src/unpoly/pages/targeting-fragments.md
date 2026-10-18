@@ -328,4 +328,5 @@ See [Changing options before rendering](/render-lifecycle#changing-options-befor
 
 
 @page targeting-fragments
+@keywords hx-target, hx-select, hx-swap, Turbo Frames
 @signature

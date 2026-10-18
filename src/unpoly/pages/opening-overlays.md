@@ -206,3 +206,4 @@ To replace existing overlays instead, set `[up-layer="swap"]` or `[up-layer="sha
 
 @page opening-overlays
 @signature
+@keywords dialog

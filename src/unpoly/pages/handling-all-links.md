@@ -94,4 +94,5 @@ to preload the link on hover.
 
 
 @page handling-all-links
+@keywords hx-boost, Turbo Drive
 @signature
