@@ -80,7 +80,21 @@ class DatePicker extends HTMLElement {
     this.internals.setFormValue(newValue) // mark: setFormValue
   }
 
-  // Called when the user picks a day in the calendar sheet
+  // Called when the element is inserted into the page
+  connectedCallback() {
+    // Render a calendar with a button for each day
+    this.innerHTML = `
+      <button type="button" data-day="2026-11-01">1</button>
+      <button type="button" data-day="2026-11-02">2</button>
+      …
+    `
+    this.addEventListener('click', (event) => {
+      let dayButton = event.target.closest('[data-day]')
+      if (dayButton) this.onDayPicked(dayButton.dataset.day)
+    })
+  }
+
+  // Called when the user clicks a day
   onDayPicked(day) {
     this.value = day
     this.dispatchEvent(new Event('change', { bubbles: true })) // mark: change

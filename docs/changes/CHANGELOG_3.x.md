@@ -87,7 +87,21 @@ class DatePicker extends HTMLElement {
     this.#internals.setFormValue(newValue) // mark: setFormValue
   }
 
-  // Called when the user picks a day in the calendar
+  // Called when the element is inserted into the page
+  connectedCallback() {
+    // Render a calendar with a button for each day
+    this.innerHTML = `
+      <button type="button" data-day="2026-11-01">1</button>
+      <button type="button" data-day="2026-11-02">2</button>
+      …
+    `
+    this.addEventListener('click', (event) => {
+      let dayButton = event.target.closest('[data-day]')
+      if (dayButton) this.onDayPicked(dayButton.dataset.day)
+    })
+  }
+
+  // Called when the user clicks a day
   onDayPicked(day) {
     this.value = day
     this.dispatchEvent(new Event('change', { bubbles: true }))
@@ -141,6 +155,8 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - When Unpoly disables a custom control that has no `disabled` property, it now sets the `[disabled]` attribute.
 - When Unpoly [focuses](/focus) a form-associated custom element, it now sets `.up-focus-visible`, even after a mouse or touch interaction. Such an element is now a field, and `up.viewport.config.autoFocusVisible` shows a [focus ring](/focus-visibility) for every field.
 - A custom control with a `[name]` but no readable value no longer reports an `undefined` value to watchers.
+- Pages with many watched forms are much faster. Before, every `[up-autosubmit]`, `[up-validate]`, `[up-switch]` or `up.watch()` looked at every field on the page after each fragment update. A page with hundreds of small forms could freeze for a second after each update.
+- `up.form.fields()` and `up.form.submitButtons()` now ignore elements in another [layer](/up.layer) and elements that are being [destroyed](/up.destroy), like other `up.fragment` lookups. A field in a popup that is attached inside a form is no longer watched by that form.
 - ⚠️ `up.form.config.genericButtonSelectors` was renamed to `up.form.config.anyButtonSelectors`. It now matches every kind of button, including submit and reset buttons. The old name is polyfilled by `unpoly-migrate.js`.
 
 
