@@ -913,6 +913,38 @@ matches, so the tier can be generous. When a page ranks wrong, fix it here rathe
 in the search code. A change shows in the search only after the index is rebuilt: run
 `SKIP_CHECK_LINKS=1 bundle exec rake search:index` in `unpoly-site`.
 
+### Keywords {#keywords}
+
+Our prose uses one term per concept ("overlay", "keeping elements", "error response").
+Readers don't know these terms and search for their own words ("modal", "preserve").
+`@keywords` lists such words for one page, so the search finds the page anyway:
+
+```markdown
+@page closing-overlays
+@keywords dialog, modal
+```
+
+Keywords only help the search find a page. They are never shown, neither on the page,
+nor in search results, nor in the page's Markdown. A keyword counts like one word of the
+page's text, so it fills a gap but doesn't outrank pages whose prose discusses the word.
+
+Keywords cover clear gaps in the prose. They are not a list of the page's important words.
+Add a keyword only when all of these are true:
+
+- A reader would plausibly type the word when they need this page.
+- The page's prose doesn't use the word, in any form.
+- The search doesn't already rank the page in the top 3 for that word.
+
+A page has two budgets:
+
+- **0–2 synonyms**: other names for the term the page is about ("dialog" for overlay, "preserve" for keep).
+  Each page that the reader may mean gets its own: "closing dialog" should find `/closing-overlays`,
+  not only `/overlays`.
+- **0–4 page-specific keywords**: concepts, actions or names from other frameworks that this one
+  page answers ("toast" for flashes).
+
+Most pages need no keywords. Never change the prose to use a reader's word instead of our term.
+
 
 ## Markdown for agents
 
