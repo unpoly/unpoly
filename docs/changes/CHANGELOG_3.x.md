@@ -1,83 +1,222 @@
 Unreleased
 ----------
 
-### Custom form fields
+This release comes with a new documentation site, written for people and for coding agents.
+Unpoly now also works with custom form fields, like date pickers built as web components.
 
-Unpoly now builds a form's request params with the browser's own [form-data algorithm](https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData), instead of walking the form's fields itself.
+Breaking changes are marked with ⚠️ when [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) polyfills them,
+and with ❌ when they need a change to your code. Bug fixes and changes that align Unpoly with native browser behavior
+are listed in their topic without a marker.
 
-- [Form-associated custom elements](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements#form-associated_custom_elements) are now submitted, without any configuration. (by @kmmbvnr)
-- Values appended by a [`formdata`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/formdata_event) event listener are now submitted. (by @kmmbvnr)
-- A form-associated custom element is now also [watched](/up.watch), [validated](/validation), [switched](/switching-form-state) and [disabled](/disabling-forms), if it [exposes its state to a script](/custom-form-fields#form-associated).
-- A new guide explains the [patterns for building a custom form field](/custom-form-fields).
-- A `formdata` listener affects what Unpoly *sends*, not what it *watches*. See [`formdata` listeners](/custom-form-fields#formdata).
-- A form-associated custom element that never calls `setFormValue()` submits no value, even when it is listed in `up.form.config.fieldSelectors`.
-- A form-associated custom element that is defined after its form was rendered, e.g. by a lazily loaded component, is watched, validated and switched as soon as it is defined.
-- New config [`up.form.config.noFieldSelectors`](/up.form.config#config.noFieldSelectors) excludes elements from `up.form.config.fieldSelectors`, e.g. a form-associated custom element that renders a button.
-- ⚠️ A form containing an `<input type="file">` is now submitted as `multipart/form-data` even when no file is selected, because the browser's form-data algorithm produces an entry for every file input.
-- ⚠️ An `<input type="image">` used as the submit button now contributes its `name.x` and `name.y` coordinates rather than its `[value]`, matching a native form submission.
-- ⚠️ A `<button type="reset">` or `<input type="reset">` with a `[name]` is no longer treated as a form field, so it contributes no param to submissions, validations or watched values — matching a native form submission. It is still disabled by [`[up-disable]`](/up-submit#up-disable).
-- When an overlay is closed by submitting a form with `[up-accept]` or `[up-dismiss]`, the [result value](/closing-overlays#result-values) now also contains the `[name]` and `[value]` of the submit button the user pressed. Formerly it contained only the form's fields.
-- ⚠️ `up.Params.fromForm()` now requires a `<form>` element. It used to accept any container, which `up.Params.fromContainer()` does.
-- ⚠️ Params now arrive in the order the browser produces them: the form's own fields in tree order, then values appended by a `formdata` listener, then controls that only Unpoly knows about (custom elements listed in `up.form.config.fieldSelectors`). In particular a submit button's `[name]` and `[value]` now appear at the button's position in the form, rather than after the form's `[up-params]`.
-- `up.Params.fromForm()` now takes a `{ submitButton }` option, and assumes the form's first submit button when it is omitted. Pass `false` to submit no button at all. A button that the browser associates with a different form is ignored rather than crashing.
-- `up.Params.fromForm()` ignores an `{ includeDisabled }` option. The browser's algorithm never includes a disabled control. The option still works with `up.Params.fromContainer()`, which is what form watching uses.
-- ⚠️ Unpoly now throws an error when a field uses a `[form]` attribute to associate with a form in another [layer](/up.layer). The browser resolves such an attribute by document order and ignores layers, so it would submit one layer's field with another layer's form. If you render the same page into an overlay and it uses `[form]`, either give the form a unique `[id]` per layer, or move the field inside the form. Two forms sharing an `[id]` within a single layer are unaffected. The error message suggests these fixes.
-- ⚠️ A field inside a `<fieldset disabled>` is no longer submitted or validated, matching a native form submission. This includes custom elements listed in `up.form.config.fieldSelectors`, which the browser does not know about. A field inside a disabled fieldset is still reported by [watchers](/up.watch) and [`[up-switch]`](/switching-form-state).
-- A custom control that exposes a `{ name }` but no readable `{ value }` no longer contributes an `undefined` param when watched.
-- [Disabling a form](/disabling-forms) now also disables a form-associated custom element.
-- The requirements for a [custom form field](/custom-form-fields) are relaxed. A `value` property is the only thing a custom control must provide.
-- ⚠️ When Unpoly disables a custom control that exposes no `{ disabled }` property, it now sets the control's `[disabled]` attribute instead of assigning the property.
-- ⚠️ A validation request no longer sends the params of the form's first submit button, and no longer honors that button's `[formaction]`, `[formmethod]`, `[up-params]` or `[up-headers]`. Nothing pressed the button, so only the `<form>` element decides where a validation goes.
-- ⚠️ A `click` event dispatched by a script is no longer passed to [`up.on()`](/up.on) callbacks when the element carries a `[disabled]` attribute, even if the platform cannot disable that kind of element. Formerly only a `{ disabled }` property had this effect.
-- ⚠️ When Unpoly [focuses](/focus) a form-associated custom element, it now assigns `.up-focus-visible` instead of `.up-focus-hidden`, even when the user interacted with a mouse or touch. `up.viewport.config.autoFocusVisible` shows a [focus ring](/focus-visibility) for every [field](/up.form.config#config.fieldSelectors), and such an element is now a field.
-- `up.form.config.genericButtonSelectors` was renamed to `up.form.config.anyButtonSelectors` and now matches every kind of button, including submit and reset buttons. Unpoly uses it to disable a form's buttons while the form is submitting. The old name still works with [`unpoly-migrate.js`](/changes/upgrading).
+> [note]
+> Our sponsor [makandra](https://makandra.de/en) funded this release ❤️\
+> You can hire makandra for [Unpoly support](https://unpoly.com/support).
+
+Contents:
+
+- [A new documentation site](#a-new-documentation-site)
+- [Docs for coding agents](#docs-for-coding-agents)
+- [Custom form fields](#custom-form-fields)
+- [Form submissions now match the browser](#form-submissions-now-match-the-browser)
+- [Forms](#forms)
+- [Overlays](#overlays)
+- [Caching](#caching)
+- [Rendering](#rendering)
+- [Links and URLs](#links-and-urls)
+- [Smaller fixes and changes](#smaller-fixes-and-changes)
+- [Upgrading](#upgrading)
+
+
+### A new documentation site
+
+We rewrote unpoly.com so you can learn Unpoly from start to finish, and look up details when you need them.
+
+The site now has two areas. **Learn** at `/learn` explains concepts and shows how to combine features for common tasks.
+The **API reference** at `/api` documents every attribute, function, event and option.
+
+- [Getting started](/start/overview) replaces the old tutorial. Eight short pages take you from how Unpoly works to your first links, forms, overlays and compilers.
+- After Getting started, the Learn area has 13 chapters, from [Links](/links) and [Forms](/forms) to [Backend integration](/backend-integration) and [Advanced rendering](/advanced-rendering). Each chapter opens with an overview page. Every page ends with a link to the next one, so you can read the docs like a book.
+- Every API page links to the Learn pages that explain its topic.
+- New guides cover [following links](/following-links), [handling all links](/handling-all-links) and [all forms](/handling-all-forms), [hungry elements](/hungry-elements), [streaming real-time updates](/real-time-updates) over Server-Sent Events or WebSockets, [background requests](/background-requests), [React or Vue components as islands](/islands), [custom form fields](/custom-form-fields) and the [server protocol](/server-protocol).
+- The search was rebuilt. It shows whether a result is a Learn page or an API page, and where it sits in the docs.
+- We checked many code examples against the source code and fixed the ones that did not work.
+
+Guides now live under `/learn`, like `/learn/caching`. API pages live under `/api`, like `/api/up.render`.
+Some pages also got a new name, e.g. *Handling failed responses* is now [Error responses](/error-responses), and *Preserving elements* is now [Keeping elements](/keeping-elements).
+Old URLs redirect to the new pages, so your links and bookmarks keep working.
+
 
 ### Docs for coding agents
 
-Unpoly's documentation is now available to coding agents and LLMs:
+Your coding agent can now read the same documentation as you, in a format it can use well.
 
-- Every documentation page on unpoly.com is also available as Markdown. Append `.md` to its URL, e.g. [`/up.render.md`](https://unpoly.com/up.render.md). Agents that list `text/markdown` first in their `Accept` header get the Markdown at the page's own URL.
-- [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules.
-- An [agent skill](/skill) bundles all guides, the API reference and the release notes, with a search script. Install it with `npx skills add --global https://unpoly.com`, or as a Claude Code plugin.
+- Every page is also available as Markdown. Append `.md` to its URL, e.g. [`https://unpoly.com/api/up.render.md`](https://unpoly.com/api/up.render.md). Agents that ask for `text/markdown` first in their `Accept` header get Markdown at the page's own URL.
+- [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules, with links an agent can follow.
+- An [agent skill](/skill) bundles every guide, the API reference and the release notes of all versions, with a search script that works offline. The release notes help your agent upgrade an app from an older Unpoly version.
 
-### Preventing peeled overlays from closing
+Install the skill with the [skills CLI](https://github.com/vercel-labs/skills):
 
-- ⚠️ When a render pass closes overlays above the updated layer ([peeling](/closing-overlays#peeling)), an `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open. The render pass then rejects with `up.Aborted` and the layer is not updated. Formerly peeling ignored prevented events. Listeners can recognize a peel by its `event.value` of `":peel"`. To let peeling proceed as before, return early from your listener when `event.value === ":peel"`, or render with [`[up-peel="force"]`](/up-follow#up-peel).
-- When a parent overlay closes, a child overlay that is kept open now also keeps its parent open.
-- `up.Layer#accept()`, `up.Layer#dismiss()` and `up.Layer#peel()` take a new `{ force: true }` option to close overlays even when a listener prevents it.
-- The [`[up-peel]`](/up-follow#up-peel) attribute and `{ peel }` option accept the word `force`, alone or combined with an intent, e.g. `[up-peel="accept force"]`.
-- Restoring history when the user presses the back button still closes overlays, even when a listener prevents it.
-- New [`[up-on-accept]`](/up-layer-new#up-on-accept) and [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attributes run code before an overlay closes, and can keep it open with `event.preventDefault()`. The matching [`{ onAccept }`](/up.layer.open#options.onAccept) and [`{ onDismiss }`](/up.layer.open#options.onDismiss) options already existed and are now documented.
-- `up.reveal()` no longer takes an undocumented `{ peel }` option.
+```bash
+npx skills add --global https://unpoly.com
+```
 
-### Other changes
+If you use Claude Code, you can also [install the skill as a plugin](/skill#claude-code).
+To give a chat a single page, use the copy button next to a page's title. It copies the page as Markdown.
 
-- New config [`up.network.config.cacheEnabled`](/up.network.config#config.cacheEnabled) turns off the [cache](/caching) entirely, e.g. for debugging. When set to `false`, no response is read from or written to the cache, even for requests with `{ cache: true }`, and [preloading](/preloading) is disabled. Setting `up.network.config.cacheSize = 0` remains unsupported.
-- Fix: The `{ onFailFinished }` callback and `[up-on-fail-finished]` attribute are now called after an [error response](/error-responses) has finished rendering. Previously they were never called.
-- Fix [`[up-reveal-padding]`](/up-follow#up-reveal-padding) and the `{ revealPadding }` render option being ignored. Only `up.viewport.config.revealPadding` was used.
-- ⚠️ While a [validation](/validation) request is loading, [feedback classes](/feedback-classes) like `.up-loading` are now set by default, as for every other render pass. Formerly a validation only set them with an `[up-watch-feedback]` attribute. To not set them, use `[up-watch-feedback="false"]` or pass `{ feedback: false }`.
-- Pressing the Space key now activates a [faux button](/faux-interactive-elements), e.g. an element with [`[up-emit]`](/up-emit) or [`[up-clickable]`](/up-clickable). Formerly only the Enter key worked.
-- An [`[up-on-offline]`](/up-follow#up-on-offline) snippet now receives the `up:fragment:offline` event as `event`, so it can call `event.retry()`. It used to receive the event under the name `error`.
-- An [`X-Up-Expire-Cache: false`](/X-Up-Expire-Cache) response header now expires no further cache entries, like [`X-Up-Evict-Cache: false`](/X-Up-Evict-Cache). It used to be treated as a URL pattern matching `/false`. As before, the header cannot undo the expiration that a non-GET request triggers before the server responds.
-- Fix: [Target derivation](/target-derivation) for an SVG element with a camelCase tag name, like `<clipPath>`, now produces a selector that matches the element. Formerly the tag name was lowercased, which CSS does not match for SVG elements.
+
+### Custom form fields
+
+Custom controls like date pickers or tag editors can now take part in Unpoly forms like a native `<input>`.
+Unpoly now builds request params with the browser's own form-data algorithm, so a
+[form-associated custom element](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements#form-associated_custom_elements)
+is submitted without any configuration.
+When it also has a `value` property, Unpoly can [watch](/up.watch), [validate](/validation) and [switch](/switching-form-state) it like any other field, and [`[up-disable]`](/disabling-forms) disables it while the form is submitting.
+
+Here is a minimal date picker that reports its value to the form:
+
+```js
+class DatePicker extends HTMLElement {
+  static formAssociated = true // mark: formAssociated
+  #internals = this.attachInternals()
+  #value = ''
+
+  get value() {
+    return this.#value
+  }
+
+  set value(newValue) {
+    this.#value = newValue
+    this.#internals.setFormValue(newValue) // mark: setFormValue
+  }
+
+  // Called when the user picks a day in the calendar
+  onDayPicked(day) {
+    this.value = day
+    this.dispatchEvent(new Event('change', { bubbles: true }))
+  }
+}
+
+customElements.define('date-picker', DatePicker)
+```
+
+You can use it in a form like a native field, including with [`[up-validate]`](/up-validate):
+
+```html
+<form method="post" action="/events" up-submit up-validate>
+  <date-picker name="starts_at"></date-picker> <!-- mark: date-picker -->
+  <input type="text" name="title">
+</form>
+```
+
+An element that is defined after the form was rendered, e.g. by a lazily loaded component, is picked up as soon as it is defined.
+Values appended by a [`formdata`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/formdata_event) listener are now sent as well.
+
+The new guide [Custom form fields](/custom-form-fields) compares four ways to build a custom control, from a hidden native field to a plain `<div>` that you register as a field.
+
+Thanks to @kmmbvnr for contributing form-associated custom elements and `formdata` support.
+
+
+### Form submissions now match the browser
+
+Unpoly now uses the browser's form-data algorithm, so edge cases behave like a native form submission:
+
+- A form with an `<input type="file">` is now submitted as `multipart/form-data`, even when no file is selected.
+- An `<input type="image">` used as the submit button now sends its `name.x` and `name.y` coordinates instead of its `[value]`.
+- A `<button type="reset">` or `<input type="reset">` with a `[name]` no longer sends a param. It is no longer watched or validated, but [`[up-disable]`](/up-submit#up-disable) still disables it.
+- A field inside a `<fieldset disabled>` is no longer submitted or validated. This includes custom elements in `up.form.config.fieldSelectors`. [Watchers](/up.watch) and [`[up-switch]`](/switching-form-state) still see the field.
+- Params now arrive in the order the browser produces them: the form's fields in document order, then values from `formdata` listeners, then custom elements registered in `up.form.config.fieldSelectors`. A submit button's `[name]` and `[value]` now appear at the button's position, not after the form's `[up-params]`.
+- A [validation](/validation) request no longer sends the params of the form's first submit button, and no longer uses that button's `[formaction]`, `[formmethod]`, `[up-params]` or `[up-headers]`. Nobody pressed the button, so only the `<form>` decides where a validation goes.
+- Unpoly now throws an error when a field uses a `[form]` attribute to join a form in another [layer](/up.layer). The browser would submit that field with the wrong layer's form. If you render the same page in an overlay, give each form a unique `[id]`, or move the field into the form. The error message suggests these fixes.
+- `up.Params.fromForm()` now requires a `<form>` element, as documented. To read params from any other container, use `up.Params.fromContainer()`.
+- `up.Params.fromForm()` takes a new `{ submitButton }` option. It defaults to the form's first submit button. Pass `false` to send no button. The `{ includeDisabled }` option is ignored here, because the browser never sends a disabled field.
+- When a form with [`[up-accept]` or `[up-dismiss]`](/closing-overlays#result-values) closes an overlay, the result value now also contains the `[name]` and `[value]` of the submit button the user pressed.
+
+
+### Forms
+
+- While a [validation](/validation) request is loading, [feedback classes](/feedback-classes) like `.up-loading` are now set by default, as for every other request. To turn them off, set `[up-watch-feedback="false"]` or pass `{ feedback: false }`.
+- A custom control only needs a `value` property to work as a [custom form field](/custom-form-fields).
+- A form-associated custom element is only submitted when it calls `setFormValue()`, even when it is listed in `up.form.config.fieldSelectors`.
+- A `formdata` listener changes what Unpoly sends, not what it watches. See [Adding values with a `formdata` listener](/custom-form-fields#formdata).
+- New experimental config [`up.form.config.noFieldSelectors`](/up.form.config#config.noFieldSelectors) excludes elements from being treated as fields, e.g. a form-associated custom element that renders a button.
+- When Unpoly disables a custom control that has no `disabled` property, it now sets the `[disabled]` attribute.
+- When Unpoly [focuses](/focus) a form-associated custom element, it now sets `.up-focus-visible`, even after a mouse or touch interaction. Such an element is now a field, and `up.viewport.config.autoFocusVisible` shows a [focus ring](/focus-visibility) for every field.
+- A custom control with a `[name]` but no readable value no longer reports an `undefined` value to watchers.
+- ⚠️ `up.form.config.genericButtonSelectors` was renamed to `up.form.config.anyButtonSelectors`. It now matches every kind of button, including submit and reset buttons. The old name is polyfilled by `unpoly-migrate.js`.
+
+
+### Overlays
+
+- ❌ An `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open when a link or form in a parent layer would close it ([peeling](/closing-overlays#peeling)). The render pass then fails with `up.Aborted` and nothing is updated. See [Upgrading](#upgrading) for how to keep the old behavior.
+- When a listener keeps an overlay open, the overlays below it now also stay open.
+- To close overlays even when a listener prevents it, use [`[up-peel="force"]`](/up-follow#up-peel), or pass `{ force: true }` to `up.Layer#accept()`, `up.Layer#dismiss()` or `up.Layer#peel()`. You can combine `force` with an intent, e.g. `[up-peel="accept force"]`.
+- Pressing the back button still closes overlays, even when a listener prevents it.
+- New [`[up-on-accept]`](/up-layer-new#up-on-accept) and [`[up-on-dismiss]`](/up-layer-new#up-on-dismiss) attributes run code before an overlay closes, and can keep it open with `event.preventDefault()`. The matching [`{ onAccept }`](/up.layer.open#options.onAccept) and [`{ onDismiss }`](/up.layer.open#options.onDismiss) options are now documented.
+- When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent overlay, as described in [focus in overlays](/focus#overlays). It used to fall back to the `<body>`.
+- Fix: [`[up-focus-visible]`](/up-follow#up-focus-visible) and the `{ focusVisible }` option were ignored when opening an overlay.
+- Fix: The `{ duration }` and `{ easing }` options of `up.layer.open()` were ignored for the opening animation. This also affected `[up-duration]` and `[up-easing]` on a link that opens an overlay. Only `up.layer.config` was used.
+
+
+### Caching
+
+- New config [`up.network.config.cacheEnabled`](/up.network.config#config.cacheEnabled) turns off the [cache](/caching) entirely, e.g. for debugging. When it is `false`, no response is read from or written to the cache, and [preloading](/preloading) is disabled.
+- An [`X-Up-Expire-Cache: false`](/X-Up-Expire-Cache) response header now expires no cache entries, like [`X-Up-Evict-Cache: false`](/X-Up-Evict-Cache). It used to be treated as a URL pattern matching `/false`.
+- Fix: When a compiler requested the URL of a request that had just been aborted or had just finished, it sometimes got the old request from the cache. It now makes a new request.
+
+
+### Rendering
+
+- Fix: The `{ onFailFinished }` callback and `[up-on-fail-finished]` attribute are now called after an [error response](/error-responses) has finished rendering. They used to never be called.
+- Fix: [`[up-reveal-padding]`](/up-follow#up-reveal-padding) and the `{ revealPadding }` render option were ignored. Only `up.viewport.config.revealPadding` was used.
+- Fix: [Target derivation](/target-derivation) for an SVG element with a camelCase tag name, like `<clipPath>`, now produces a selector that matches the element.
+- Fix: While an overlay was open, `up.fragment.get(root, selector)` could return an element outside the given root.
+- When the server responds to [polling](/up-poll) or a [deferred](/up-defer) placeholder with an error code, Unpoly no longer throws an uncaught `up.CannotMatch` error. The response is not rendered: polling tries again after the next interval, and a deferred placeholder keeps its fallback content. A promise returned by `up.reload()` or `up.deferred.load()` still rejects, now with an `up.RenderResult`. To render error responses anyway, set [`[up-fail=false]`](/error-responses) on the `[up-poll]` or `[up-defer]` element, or render them into another fragment with [`[up-fail-target]`](/up-defer#up-fail-target).
+- With [`up.history.config.enabled = false`](/up.history.config#config.enabled), a render pass no longer changes the window title, meta tags or `html[lang]`. Before, only the browser URL stayed unchanged, so the page could show the title of one page with the URL of another.
+- Fix: An explicit list of elements passed as [`{ metaTags }`](/up.render#options.metaTags) was replaced by the meta tags from the response.
+- Fix: [`[up-scroll-behavior]`](/up-follow#up-scroll-behavior) and the `{ scrollBehavior }` option were ignored when scrolling to the `top` or `bottom`, to a pixel position, to a `#hash` or when restoring a scroll position. Only revealing an element honored them.
+- Fix: A [combined transition](/transitions#combining-animations) like `move-to-bottom/none` swapped the elements instantly. When one half is `none`, the other half is now animated.
+
+
+### Links and URLs
+
+- Pressing the Space key now activates a [faux button](/faux-interactive-elements), e.g. an element with [`[up-emit]`](/up-emit) or [`[up-clickable]`](/up-clickable). Before, only the Enter key worked.
+- An [`[up-on-offline]`](/up-follow#up-on-offline) callback now receives the `up:fragment:offline` event as `event`, so it can call `event.retry()`. It used to receive the event as `error`.
 - [URL patterns](/url-patterns) now match full URLs on the page's own origin, like `https://example.com/users/*`. Such patterns never matched before.
-- Fix [`[up-focus-visible]`](/up-follow#up-focus-visible) and the `{ focusVisible }` option being ignored when opening an overlay.
-- When the server responds to [polling](/up-poll) or a [deferred](/up-defer) placeholder with an error code, Unpoly no longer throws an uncaught `up.CannotMatch` error. The response is not rendered: polling tries again after the next interval, and a deferred placeholder keeps its fallback content. A promise returned by `up.reload()` or `up.deferred.load()` still rejects, now with an `up.RenderResult`. To render error responses anyway, use these attributes:
 
-  | To | Set |
-  |---|---|
-  | render an error response like a successful one | [`[up-fail=false]`](/failed-responses) on the `[up-poll]` or `[up-defer]` element |
-  | render an error response into another fragment | [`[up-fail-target]`](/up-defer#up-fail-target) on the `[up-defer]` element |
-- ⚠️ With [`up.history.config.enabled = false`](/up.history.config#config.enabled), a render pass no longer changes the window title, meta tags or `html[lang]`. Formerly only the browser URL stayed unchanged, so the page could show the title of one page with the URL of another.
-- Fix [`[up-scroll-behavior]`](/up-follow#up-scroll-behavior) and the `{ scrollBehavior }` option being ignored when scrolling to the `top` or `bottom`, to a pixel position, to a `#hash` or when restoring a scroll position. Only revealing an element honored it.
-- `up.template.clone()` with an `{ origin }` now also finds a template in an ancestor layer, as described in [template lookup](/templates#lookup). Formerly it only looked in the origin's layer.
-- When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent overlay, as described in [focus in overlays](/focus#overlays). Formerly focus fell back to the `<body>`.
-- Fix a [combined transition](/transitions#combining-animations) like `move-to-bottom/none` swapping the elements instantly. When one half is `none`, the other half is now animated.
-- Fix the `{ duration }` and `{ easing }` options of `up.layer.open()` being ignored for the opening animation. This also affects `[up-duration]` and `[up-easing]` on a link that opens an overlay. Formerly only `up.layer.config` was used.
-- Fix `up.viewport.restoreFocus()` throwing an error when called without a `{ layer }` option or with a layer name like `{ layer: 'root' }`.
-- Fix `up.viewport.restoreScroll()` ignoring its `{ location }` option. It always restored the positions saved for the layer's current location.
-- Fix `up.fragment.matches()` with `{ layer: 'new', mode }` options. A selector like `:main` was expanded for the root layer, or the function threw an error while an overlay was open.
-- Fix an explicit list of elements passed as [`{ metaTags }`](/up.render#options.metaTags) being replaced by the meta tags from the response.
+
+### Smaller fixes and changes
+
+- A `click` event dispatched by a script is no longer passed to [`up.on()`](/up.on) callbacks when the element has a `[disabled]` attribute, even for elements that browsers cannot disable. Before, only a `disabled` property had this effect.
+- The npm package now also includes source maps for the unminified files, like `unpoly.js.map`.
+- `up.template.clone()` with an `{ origin }` now also finds a template in an ancestor layer, as described in [template lookup](/templates#lookup). It used to only look in the origin's layer.
+- Fix: `up.viewport.restoreFocus()` threw an error when called without a `{ layer }` option, or with a layer name like `{ layer: 'root' }`.
+- Fix: `up.viewport.restoreScroll()` ignored its `{ location }` option. It always restored the positions saved for the layer's current location.
+- Fix: `up.fragment.matches()` with `{ layer: 'new', mode }` options expanded a selector like `:main` for the root layer, or threw an error while an overlay was open.
+- Fix: The `unpoly-migrate.js` polyfills for `up.popup.attach()`, `up.modal.follow()` and `up.modal.extract()` now open a new overlay again.
+- Fix: The `unpoly-migrate.js` polyfill for `up.network.shouldReduceRequests()` now logs a warning instead of throwing an error.
+
+
+### Upgrading
+
+Most changes in this release need no changes to your code. Check these cases:
+
+- **Overlays that refuse to close.** If you have an `up:layer:dismiss` or `up:layer:accept` listener that prevents closing, e.g. to confirm unsaved changes, it now also runs when a link in a parent layer closes the overlay. To let those links close the overlay as before, return early when `event.value` is `':peel'`:
+
+  ```js
+  up.on('up:layer:dismiss', function(event) {
+    if (event.value === ':peel') return // mark-line
+    if (!confirm('Discard your changes?')) event.preventDefault()
+  })
+  ```
+
+  To force a single link, set [`[up-peel="force"]`](/up-follow#up-peel) instead.
+
+- **Form params.** If your server or your tests depend on the exact params of a submission, review the items in [Form submissions now match the browser](#form-submissions-now-match-the-browser). The browser's form-data algorithm cannot be polyfilled.
+- **Overlays that reuse a page with `[form]` fields.** If a page uses the `[form]` attribute and you also open it in an overlay, give each form a unique `[id]`, or move the field into the form.
+- **Validation styles.** Validations now set `.up-loading` and other [feedback classes](/feedback-classes). If your styles should not apply during a validation, set `[up-watch-feedback="false"]` on the form.
+
+[`unpoly-migrate.js`](/changes/upgrading) polyfills the renamed `up.form.config.genericButtonSelectors`.
+If you used `up.network.config.cacheSize = 0` to turn off caching, it now tells you to set `up.network.config.cacheEnabled = false` instead.
 
 
 3.14.3

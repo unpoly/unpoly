@@ -20,7 +20,7 @@ The `Unreleased` section in docs/changes/CHANGELOG_3.x.md reads like a commit lo
 Include: new API, user-visible behavior, bugs users may have hit, every breaking change. Marker rule (docs/contributing/releasing.md, 2026-10-16): only intentional changes to documented API/behavior are breaking (⚠️ polyfilled, ❌ not); bug fixes, browser alignment and undocumented behavior get no marker but are still listed. Exclude: refactorings, spec-only changes, docs typos, internal renames without users. Each section starts with one plain sentence on what changes for the user, no internal terms.
 
 ## Process
-- Draft in docs/rework-2026/drafts/release-notes.md. Do NOT edit CHANGELOG_3.x.md until the release (avoids conflicts with hk/refine-tests-2026-10, which also adds entries).
+- MERGED 2026-10-18 into the `Unreleased` section of docs/changes/CHANGELOG_3.x.md, including the entries of hk/refine-tests-2026-10. Edit it there.
 - Sources: current `Unreleased` section, `git log v3.14.3..docs-rework`, decision logs in docs/rework-2026/ (sittings/, open-items.md) for the why.
 - At release: merge the test branch, sort its new `Unreleased` entries into the draft with the same filter, replace `Unreleased` with the draft. Version number per R3.
 - Start the drafting agent after the FACE review agent has committed (so its entries are in `Unreleased`).
