@@ -1,7 +1,14 @@
 Unreleased
 ----------
 
-This release comes with a relaunched documentation site, for people and for coding agents.
+A lot has changed for everyone who builds software since our last release. Many of us now write code together with AI agents.
+This release makes Unpoly work better for this new way of building software:
+the relaunched documentation site is written for people and for coding agents,
+and a new guide helps both of them contribute to Unpoly itself.
+
+We believe that hypermedia-based apps fit this new age well. They need less code, fewer dependencies and fewer moving parts.
+That makes an app easier to understand and change, for humans and agents alike.
+
 Unpoly now also works with custom form fields, like date pickers built as web components.
 
 Breaking changes are marked with ⚠️ when [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) polyfills them,
