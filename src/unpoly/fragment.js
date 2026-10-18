@@ -1908,9 +1908,6 @@ up.fragment = (function() {
 
       Most [options for `up.render()`](/up.render#parameters) may be used.
 
-    @param {boolean} [options.navigate=true]
-      Whether to apply [navigation defaults](/navigation-defaults), such as scrolling and updating history.
-
   @return
     @like up.render
 

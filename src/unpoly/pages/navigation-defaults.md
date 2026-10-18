@@ -24,8 +24,8 @@ position or add a history entry.
 |-------------------|-----------------------|
 | `[up-follow]`     | yes                   |
 | `up.follow()`     | yes                   |
-| `up.navigate()`   | yes                   |
-| `up.visit()`      | yes                   |
+| `up.navigate()`   | always                |
+| `up.visit()`      | always                |
 | `[up-layer=new]`  | yes                   |
 | `up.layer.open()` | yes                   |
 | `[up-submit]`     | yes                   |

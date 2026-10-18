@@ -258,25 +258,6 @@ up.network = (function() {
   */
 
   /*-
-  Makes the [cache](/caching) assume that `newRequest` has the same response as the
-  already cached `oldRequest`.
-
-  Unpoly uses this internally when the user is redirected from `/old` to `/new`.
-  In that case, both `/old` and `/new` will cache the same response from `/new`.
-
-  @function up.cache.alias
-  @param {Object|up.Request} oldRequest
-    The earlier request or [request options](/up.request).
-  @param {Object|up.Request|undefined} newRequest
-    The new request or [request options](/up.request).
-  @return {up.Request|undefined}
-    If an alias could be registered, `newRequest` is returned.
-
-    If `oldRequest` was not found in the cache, `undefined` is returned.
-  @experimental
-  */
-
-  /*-
   Manually stores a request in the [cache](/caching).
 
   Future calls to `up.request()` will try to reuse this request before

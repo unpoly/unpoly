@@ -14,7 +14,8 @@
   Whether the focused element should have a [visible focus ring](/focus-visibility).
 
   By default focus will be visible if `up.viewport.config.autoFocusVisible()`
-  returns `true` for the focused element and [current input device](/up.event.inputDevice).
+  returns `true` for the focused element and the [input device](/up.event.inputDevice)
+  of the interaction that started the render pass.
 
 @param {boolean} [options.saveFocus=true]
   Whether to [save focus-related state](/up.viewport.saveFocus) before updating the fragment.
