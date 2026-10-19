@@ -300,6 +300,7 @@ A successful submission dismisses the form's own overlay with a [dismissal value
 
 If a listener [keeps the overlay open](#keeping-open), the background layer is not updated.
 To close the overlay anyway, set an `[up-peel="force"]` attribute.
+To ignore such listeners whenever an overlay is peeled, set [`up.layer.config.forcePeel = true`](/api/up.layer.config#config.forcePeel).
 
 > [note]
 > The form still updates its own layer when the [server responds with an error code](/learn/error-responses)

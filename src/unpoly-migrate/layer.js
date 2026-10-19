@@ -40,6 +40,44 @@ up.migrate.handleLayerOptions = function(options) {
 
 }
 
+// Until 3.14, listeners could not prevent peeling. Keep that behavior, and track whether the app
+// has chosen a value, so we can warn when a listener tries to prevent peeling.
+//
+// up.Config#reset() assigns the default after every up:framework:reset, which would go through our
+// setter and count as chosen. Because patch() runs again after each reset, we set the value here.
+up.layer.config.patch(function() {
+  this.forcePeelValue = true
+  this.forcePeelSet = false
+
+  Object.defineProperty(this, 'forcePeel', {
+    configurable: true,
+    get() {
+      return this.forcePeelValue
+    },
+    set(value) {
+      this.forcePeelValue = value
+      this.forcePeelSet = true
+    }
+  })
+})
+
+// A capture listener on the document runs before any listener of the app.
+function warnOfPreventedPeel(event) {
+  if (event.value !== ':peel') return
+
+  let preventDefault = event.preventDefault
+  event.preventDefault = function() {
+    if (!up.layer.config.forcePeelSet) {
+      up.migrate.warn('A listener prevented peeling an overlay. Set up.layer.config.forcePeel to true to keep closing overlays, or to false to let listeners prevent peeling.')
+    }
+    return preventDefault.call(this)
+  }
+}
+
+for (let type of ['up:layer:dismiss', 'up:layer:accept']) {
+  document.addEventListener(type, warnOfPreventedPeel, { capture: true })
+}
+
 up.migrate.handleTetherOptions = function(options) {
   const [position, align] = options.position.split('-')
 

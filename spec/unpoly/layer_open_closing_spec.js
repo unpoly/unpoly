@@ -527,6 +527,8 @@ extendDescribe('up.layer', function() {
           })
 
           it('keeps the overlay open when it is peeled', async function() {
+            // unpoly-migrate.js defaults to true, which ignores prevented close events when peeling.
+            up.layer.config.forcePeel = false
             const callback = jasmine.createSpy('onDismiss callback').and.callFake((event) => event.preventDefault())
             const overlay = await up.layer.open({ onDismiss: callback })
 

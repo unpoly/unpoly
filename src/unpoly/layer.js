@@ -175,6 +175,20 @@ up.layer = (function() {
     By default, this contains a selector matching the
     [`<dialog>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog) element.
 
+  @param {boolean} [config.forcePeel=false]
+    Whether [peeling](/learn/closing-overlays#peeling) closes overlays even when an
+    `up:layer:dismiss` or `up:layer:accept` listener prevents it.
+
+    By default a listener can keep an overlay open by calling `event.preventDefault()`.
+    The render pass then fails with `up.Aborted`.
+
+    When set to `true`, listeners cannot prevent peeling. A link cannot make peeling preventable again:
+    an [`[up-peel]`](/api/up-follow#up-peel) attribute without `force` keeps this default.
+
+    [`unpoly-migrate.js`](/changes/upgrading) sets this to `true`, which restores the behavior of Unpoly 3.14 and earlier.
+
+    @experimental
+
   @stable
   */
   const config = new up.Config(function() {
@@ -235,7 +249,8 @@ up.layer = (function() {
         dismissible: 'outside key',
         trapFocus: false,
       },
-      foreignOverlaySelectors: ['dialog']
+      foreignOverlaySelectors: ['dialog'],
+      forcePeel: false,
     }
 
     for (let Class of LAYER_CLASSES) {

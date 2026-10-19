@@ -35,8 +35,10 @@ up.LayerStack = class LayerStack {
     // (2) Unless we're passed { force: true }, a listener may prevent a descendant from closing.
     //     In that case up.Aborted is thrown and we stop peeling. Descendants that were already
     //     closed stay closed.
+    // (3) Peeling ignores prevented close events when configured to.
+    let force = options.force || up.layer.config.forcePeel
     for (let descendant of descendants) {
-      descendant[closeMethod](closeValue, options)
+      descendant[closeMethod](closeValue, { ...options, force })
     }
   }
 

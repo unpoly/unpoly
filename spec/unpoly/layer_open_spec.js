@@ -97,6 +97,8 @@ extendDescribe('up.layer', function() {
         })
 
         it('does not open the overlay when an up:layer:dismiss listener prevents the peeling', async function() {
+          // unpoly-migrate.js defaults to true, which ignores prevented close events when peeling.
+          up.layer.config.forcePeel = false
           const [root, overlay1, overlay2] = makeLayers(3)
           await wait()
 
@@ -117,6 +119,8 @@ extendDescribe('up.layer', function() {
         })
 
         it('does not open the overlay when an up:layer:dismiss listener prevents the peeling after a server response', async function() {
+          // unpoly-migrate.js defaults to true, which ignores prevented close events when peeling.
+          up.layer.config.forcePeel = false
           const [root, overlay1, overlay2] = makeLayers(3)
           await wait()
 

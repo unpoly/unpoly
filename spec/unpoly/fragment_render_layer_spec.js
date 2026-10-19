@@ -165,6 +165,11 @@ extendDescribe('up.fragment', function() {
 
               describe('when an up:layer:dismiss listener prevents the peeling', function() {
 
+                beforeEach(function() {
+                  // unpoly-migrate.js defaults to true, which ignores prevented close events when peeling.
+                  up.layer.config.forcePeel = false
+                })
+
                 it('rejects with up.Aborted and keeps the overlay open', async function() {
                   let dismissListener = jasmine.createSpy('up:layer:dismiss listener').and.callFake((event) => event.preventDefault())
                   up.on('up:layer:dismiss', dismissListener)

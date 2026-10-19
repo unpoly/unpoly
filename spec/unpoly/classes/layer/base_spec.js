@@ -285,6 +285,11 @@ describe('up.Layer', function() {
 
     describe('when a listener prevents a descendant from closing', function() {
 
+      beforeEach(function() {
+        // unpoly-migrate.js defaults to true, which ignores prevented close events when peeling.
+        up.layer.config.forcePeel = false
+      })
+
       it('throws an up.Aborted error and keeps the descendant open', function() {
         up.on('up:layer:dismiss', (event) => event.preventDefault())
         const [root, overlay] = makeLayers(2)
