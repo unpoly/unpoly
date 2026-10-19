@@ -7,7 +7,7 @@ const u = up.util
 up.migrate = (function() {
 
   const config = new up.Config(() => ({
-    logLevel: 'warn'
+    logLevel: 'error'
   }))
 
   function renamedProperty(object, oldKey, newKey, customWarning) {

@@ -170,21 +170,21 @@ if (up.migrate.loaded) {
 
     describe('up.migrate.warn()', function() {
 
-      it('prepends a deprecation prefix to the given message and prints it to the warning log', function() {
-        const spy = spyOn(up.log, 'warn')
+      it('prepends a deprecation prefix to the given message and prints it to the error log', function() {
+        const spy = spyOn(up.log, 'error')
         up.migrate.warn("a legacy warning")
         expect(spy).toHaveBeenCalledWith('unpoly-migrate', 'a legacy warning')
       })
 
       it('only prints a given message once', function() {
-        const spy = spyOn(up.log, 'warn')
+        const spy = spyOn(up.log, 'error')
         up.migrate.warn("a very unique legacy warning")
         up.migrate.warn("a very unique legacy warning")
         expect(spy.calls.count()).toBe(1)
       })
 
       it('allows substitution', function() {
-        const spy = spyOn(up.log, 'warn')
+        const spy = spyOn(up.log, 'error')
         up.migrate.warn('%s is a substituted warning', 'foo')
         up.migrate.warn('%s is a substituted warning', 'bar')
 
@@ -196,13 +196,21 @@ if (up.migrate.loaded) {
       })
 
       describe('log level', function() {
-        it('uses the log level from up.migrate.config.logLevel', function() {
-          up.migrate.config.logLevel = 'error'
+        it('logs errors by default, so test suites that fail on console errors find deprecations', function() {
           const warnSpy = spyOn(up.log, 'warn')
           const errorSpy = spyOn(up.log, 'error')
           up.migrate.warn("a legacy warning")
           expect(errorSpy).toHaveBeenCalledWith('unpoly-migrate', 'a legacy warning')
           expect(warnSpy).not.toHaveBeenCalled()
+        })
+
+        it('logs warnings with up.migrate.config.logLevel = "warn"', function() {
+          up.migrate.config.logLevel = 'warn'
+          const warnSpy = spyOn(up.log, 'warn')
+          const errorSpy = spyOn(up.log, 'error')
+          up.migrate.warn("a legacy warning")
+          expect(warnSpy).toHaveBeenCalledWith('unpoly-migrate', 'a legacy warning')
+          expect(errorSpy).not.toHaveBeenCalled()
         })
 
         it('does not log anything with up.migrate.config.logLevel = "none"', function() {
