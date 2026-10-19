@@ -1788,8 +1788,7 @@ describe('up.form', function() {
 
     describe('form[up-autosubmit]', function() {
 
-      it('ignores a nested [up-autosubmit] and warns, so a change submits the form only once', async function() {
-        const warnSpy = spyOn(up, 'warn')
+      it('ignores a nested [up-autosubmit], so a change submits the form only once', async function() {
         const [form, field] = htmlFixtureList(`
           <form up-autosubmit up-target="#target">
             <input up-autosubmit name="input-name" value="old-value">
@@ -1805,7 +1804,6 @@ describe('up.form', function() {
         await wait()
 
         expect(submitSpy.calls.count()).toBe(1)
-        expect(warnSpy).toHaveBeenCalledWith('[up-autosubmit]', jasmine.stringContaining('nested [up-autosubmit]'), field, form)
       })
 
       it('does not ignore an [up-autosubmit] field in a form with [up-autosubmit=false]', async function() {

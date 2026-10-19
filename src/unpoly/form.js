@@ -2426,11 +2426,8 @@ up.form = (function() {
   up.attribute('up-autosubmit', function(formOrField) {
     // An outer [up-autosubmit] already submits when our fields change, honoring our [up-watch-*] attributes.
     // A second watcher would submit the form twice for the same change.
-    let outer = up.fragment.closest(formOrField.parentElement, '[up-autosubmit]:not([up-autosubmit=false])')
-    if (outer) {
-      up.warn('[up-autosubmit]', 'Ignoring nested [up-autosubmit] on %o, since %o already submits when its fields change. Remove the inner attribute.', formOrField, outer)
-      return
-    }
+    // We don't warn, since a partial with [up-autosubmit] may be rendered with or without an outer one.
+    if (up.fragment.closest(formOrField.parentElement, '[up-autosubmit]:not([up-autosubmit=false])')) return
 
     return autosubmit(formOrField, { logPrefix: '[up-autosubmit]' })
   })
