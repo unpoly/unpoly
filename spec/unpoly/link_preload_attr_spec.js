@@ -405,8 +405,10 @@ extendDescribe('up.link', function() {
       it('does not abort and repeat a loading preload request on mousedown after hovering', async function() {
         up.link.config.preloadDelay = 50
 
-        fixture('.target')
-        const link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        const [target, link] = htmlFixtureList(`
+          <div class="target"></div>
+          <a href="/foo" up-target=".target" up-preload>link</a>
+        `)
         up.hello(link)
 
         Trigger.hoverSequence(link)
