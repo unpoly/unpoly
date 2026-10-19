@@ -1788,6 +1788,38 @@ describe('up.form', function() {
 
     describe('form[up-autosubmit]', function() {
 
+      it('ignores a nested [up-autosubmit] and warns, so a change submits the form only once', async function() {
+        const warnSpy = spyOn(up, 'warn')
+        const form = fixture('form[up-autosubmit][up-target="#target"]')
+        fixture('#target')
+        const field = e.affix(form, 'input[up-autosubmit][name="input-name"][value="old-value"]')
+        const submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
+        up.hello(form)
+
+        field.value = 'new-value'
+        Trigger.change(field)
+
+        await wait()
+
+        expect(submitSpy.calls.count()).toBe(1)
+        expect(warnSpy).toHaveBeenCalledWith('[up-autosubmit]', jasmine.stringContaining('nested [up-autosubmit]'), field, form)
+      })
+
+      it('does not ignore an [up-autosubmit] field in a form with [up-autosubmit=false]', async function() {
+        const form = fixture('form[up-autosubmit=false][up-target="#target"]')
+        fixture('#target')
+        const field = e.affix(form, 'input[up-autosubmit][name="input-name"][value="old-value"]')
+        const submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
+        up.hello(form)
+
+        field.value = 'new-value'
+        Trigger.change(field)
+
+        await wait()
+
+        expect(submitSpy.calls.count()).toBe(1)
+      })
+
       it('submits the form when a change is observed in any of its fields', async function() {
         up.form.config.watchInputDelay = 0
         const form = fixture('form[up-autosubmit][up-target="#target"]')

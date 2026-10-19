@@ -2403,7 +2403,17 @@ up.form = (function() {
   @stable
   @signature
   */
-  up.attribute('up-autosubmit', (formOrField) => autosubmit(formOrField, { logPrefix: '[up-autosubmit]' }))
+  up.attribute('up-autosubmit', function(formOrField) {
+    // An outer [up-autosubmit] already submits when our fields change, honoring our [up-watch-*] attributes.
+    // A second watcher would submit the form twice for the same change.
+    let outer = formOrField.parentElement?.closest('[up-autosubmit]:not([up-autosubmit=false])')
+    if (outer) {
+      up.warn('[up-autosubmit]', 'Ignoring nested [up-autosubmit] on %o, since %o already submits when its fields change. Remove the inner attribute.', formOrField, outer)
+      return
+    }
+
+    return autosubmit(formOrField, { logPrefix: '[up-autosubmit]' })
+  })
 
   return {
     config,
