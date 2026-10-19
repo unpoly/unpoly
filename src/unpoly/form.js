@@ -612,12 +612,12 @@ up.form = (function() {
   @internal
   */
 
-  function disableContainerTemp(container) {
+  function disableContainerTemp(container, { preview } = {}) {
     let controls = findFieldsAndButtons(container)
-    return u.sequence(u.map(controls, disableControlTemp))
+    return u.sequence(u.map(controls, (control) => disableControlTemp(control, preview)))
   }
 
-  function disableControlTemp(control) {
+  function disableControlTemp(control, preview) {
     // Ignore controls that were already disabled before us.
     // This way we don't accidentally re-enable a control that we didn't change.
     if (readFieldDisabled(control)) return
@@ -628,6 +628,17 @@ up.form = (function() {
 
     let undoDisable = writeFieldDisabled(control, true)
     if (focusFallback) up.focus(focusFallback, { force: true, preventScroll: true })
+
+    if (preview) {
+      // Disabled by a preview to block input while a request is loading.
+      // Still counts as enabled when we read params or watch values.
+      control.upPreviewDisabled = true
+      let undoPreviewDisable = undoDisable
+      undoDisable = () => {
+        delete control.upPreviewDisabled
+        undoPreviewDisable()
+      }
+    }
 
     // (1) This function is only returned if we didn't early-return above
     //     for a control that is already disabled.
@@ -661,6 +672,13 @@ up.form = (function() {
         preview.disable(container)
       }
     }
+  }
+
+  // Re-enables the controls that a preview has disabled, e.g. to read their params.
+  // Returns a function that disables them again.
+  function enablePreviewDisabledTemp(form) {
+    let controls = findFieldsAndButtons(form).filter((control) => control.upPreviewDisabled && readFieldDisabled(control))
+    return u.sequence(u.map(controls, (control) => writeFieldDisabled(control, false)))
   }
 
   function setContainerDisabled(container, disabled) {
@@ -2441,6 +2459,7 @@ up.form = (function() {
     focusedField,
     // disableWhile,
     disableTemp: disableContainerTemp,
+    enablePreviewDisabledTemp,
     setDisabled: setContainerDisabled,
     getDisablePreviewFn,
     // handleDisableOption,

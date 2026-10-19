@@ -355,6 +355,145 @@ extendDescribe('up.form', function() {
           })
         })
 
+        describe('when the form is submitted again while a preview has disabled its fields', function() {
+
+          it('sends the params of the disabled fields and the submit button', async function() {
+            const [form] = htmlFixtureList(`
+              <form method="post" action="/endpoint" up-target=".target" up-disable>
+                <input name="email" value="foo@example.com">
+                <button type="submit" name="commit" value="save">Save</button>
+              </form>
+              <div class="target"></div>
+            `)
+
+            up.submit(form).catch(u.noop)
+            await wait()
+
+            expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com', commit: 'save' })
+
+            up.submit(form)
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+            expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com', commit: 'save' })
+          })
+
+          it('passes the complete params to up:form:submit listeners', async function() {
+            const [form] = htmlFixtureList(`
+              <form method="post" action="/endpoint" up-target=".target" up-disable>
+                <input name="email" value="foo@example.com">
+              </form>
+              <div class="target"></div>
+            `)
+
+            up.submit(form).catch(u.noop)
+            await wait()
+
+            const listener = jasmine.createSpy('up:form:submit listener')
+            up.on('up:form:submit', (event) => listener(event.params.toObject()))
+            up.submit(form)
+            await wait()
+
+            expect(listener).toHaveBeenCalledWith({ email: 'foo@example.com' })
+          })
+
+          it('sends a field that a custom preview disabled', async function() {
+            up.preview('disable-email', (preview) => preview.disable('input[name=email]'))
+            const [form] = htmlFixtureList(`
+              <form method="post" action="/endpoint" up-target=".target" up-preview="disable-email">
+                <input name="email" value="foo@example.com">
+              </form>
+              <div class="target"></div>
+            `)
+
+            up.submit(form).catch(u.noop)
+            await wait()
+
+            expect(form.querySelector('input')).toBeDisabled()
+
+            up.submit(form)
+            await wait()
+
+            expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com' })
+          })
+
+          it('sends custom fields that the preview disabled', async function() {
+            up.form.config.fieldSelectors.push('test-form-field')
+            const [form] = htmlFixtureList(`
+              <form method="post" action="/endpoint" up-target=".target" up-disable>
+                <test-form-associated-element name="associated" value="a"></test-form-associated-element>
+                <test-form-field name="configured" value="b"></test-form-field>
+              </form>
+              <div class="target"></div>
+            `)
+
+            up.submit(form).catch(u.noop)
+            await wait()
+
+            up.submit(form)
+            await wait()
+
+            expect(jasmine.lastRequest().data()).toMatchParams({ associated: 'a', configured: 'b' })
+          })
+
+          it('does not send a field that was disabled before the preview', async function() {
+            const [form] = htmlFixtureList(`
+              <form method="post" action="/endpoint" up-target=".target" up-disable>
+                <input name="email" value="foo@example.com">
+                <input name="disabled-field" value="value" disabled>
+              </form>
+              <div class="target"></div>
+            `)
+
+            up.submit(form).catch(u.noop)
+            await wait()
+
+            up.submit(form)
+            await wait()
+
+            expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com' })
+          })
+
+          it('sends the disabled fields when the form is validated', async function() {
+            const [form, input] = htmlFixtureList(`
+              <form method="post" action="/endpoint" up-target=".target" up-disable>
+                <input name="email" value="foo@example.com">
+              </form>
+              <div class="target"></div>
+            `)
+
+            up.submit(form).catch(u.noop)
+            await wait()
+
+            up.validate(input).catch(u.noop)
+            await wait()
+
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toBe('email')
+            expect(jasmine.lastRequest().data()).toMatchParams({ email: 'foo@example.com' })
+          })
+
+          it('keeps the fields disabled after reading their params, and re-enables them when the request ends', async function() {
+            const [form, input] = htmlFixtureList(`
+              <form method="post" action="/endpoint" up-target=".target" up-disable>
+                <input name="email" value="foo@example.com">
+              </form>
+              <div class="target"></div>
+            `)
+
+            up.submit(form).catch(u.noop)
+            await wait()
+
+            expect(up.Params.fromForm(form).toObject()).toEqual({ email: 'foo@example.com' })
+            expect(input).toBeDisabled()
+
+            up.network.abort()
+            await wait()
+
+            expect(input).not.toBeDisabled()
+            expect(input.upPreviewDisabled).toBeUndefined()
+          })
+        })
+
         describe('with an Element', function() {
           it("disables fields within the given container element while submitting", async function() {
             const form = fixture('form')

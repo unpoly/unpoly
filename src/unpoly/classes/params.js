@@ -506,6 +506,13 @@ up.Params = class Params {
   Without the option the first submit button is assumed, which is also what a browser
   does when the user submits from a field by pressing `Enter`.
 
+  ### Disabled fields {#disabled-fields}
+
+  Like in a browser submission, a disabled field contributes no params.
+  The exception are fields and buttons that a [preview](/api/up.Preview.prototype.disable) disabled while a request is loading,
+  e.g. with [`[up-disable]`](/api/up-submit#up-disable). These still count as part of the form,
+  so a second submission sends the same params as the first one.
+
   @function up.Params.fromForm
   @param {Element} form
     A `<form>` element.
@@ -526,32 +533,39 @@ up.Params = class Params {
     // up.form.submitButtons() can return a button that carries [form] for another form.
     if (submitButton?.form !== form) submitButton = undefined
 
-    // We let the browser serialize the form, instead of iterating over up.form.fields():
-    //
-    // - Only the browser can read the value of a form-associated custom element. The element
-    //   reports it through ElementInternals.setFormValue(), which no script can read back.
-    // - The browser knows the full serialization rules: files, <select multiple>, the submitter
-    //   (including an image button's click coordinates), [dirname], fields in a
-    //   <fieldset disabled>, newline normalization, and whatever comes next.
-    let params = new this(new FormData(form, submitButton))
+    // Fields and buttons that a preview disabled still count, e.g. for a second submission
+    // while the first one is loading.
+    let disableAgain = up.form.enablePreviewDisabledTemp(form)
 
-    // up.form.fields() can still find fields that the browser did not serialize:
-    //
-    // - Elements registered through up.form.config.fieldSelectors. The browser doesn't know
-    //   they are fields.
-    // - Fields in the form's layer with a [form] attribute that the browser resolved to a form
-    //   with the same ID in another layer. Unpoly resolves [form] within the field's own layer.
-    //
-    // We recognize the fields the browser already handled by their membership in form.elements,
-    // since a FormData entry cannot be mapped back to the element that contributed it.
-    // A control that *is* in form.elements but that the browser refuses to serialize (a reset
-    // button, an <output>) is therefore not re-added.
-    let browserControls = new Set(form.elements)
-    for (let field of up.form.fields(form)) {
-      if (!browserControls.has(field) && !field.closest('fieldset:disabled')) params.addField(field)
+    try {
+      // We let the browser serialize the form, instead of iterating over up.form.fields():
+      //
+      // - Only the browser can read the value of a form-associated custom element. The element
+      //   reports it through ElementInternals.setFormValue(), which no script can read back.
+      // - The browser knows the full serialization rules: files, <select multiple>, the submitter
+      //   (including an image button's click coordinates), [dirname], fields in a
+      //   <fieldset disabled>, newline normalization, and whatever comes next.
+      let params = new this(new FormData(form, submitButton))
+
+      // up.form.fields() can still find fields that the browser did not serialize:
+      //
+      // - Elements registered through up.form.config.fieldSelectors. The browser doesn't know
+      //   they are fields.
+      // - Fields in the form's layer with a [form] attribute that the browser resolved to a form
+      //   with the same ID in another layer. Unpoly resolves [form] within the field's own layer.
+      //
+      // We recognize the fields the browser already handled by their membership in form.elements,
+      // since a FormData entry cannot be mapped back to the element that contributed it.
+      // A control that *is* in form.elements but that the browser refuses to serialize (a reset
+      // button, an <output>) is therefore not re-added.
+      let browserControls = new Set(form.elements)
+      for (let field of up.form.fields(form)) {
+        if (!browserControls.has(field) && !field.closest('fieldset:disabled')) params.addField(field)
+      }
+      return params
+    } finally {
+      disableAgain()
     }
-
-    return params
   }
 
   static fromContainer(container, options) {
@@ -594,6 +608,8 @@ up.Params = class Params {
   @param {Element|jQuery} field
   @param {boolean} [options.includeDisabled=false]
     Whether to add a field that is disabled.
+
+    A field that a [preview](/api/up.Preview.prototype.disable) disabled is always added.
   @experimental
   */
   addField(field, { includeDisabled } = {}) {
@@ -601,7 +617,7 @@ up.Params = class Params {
 
     // A field is excluded from a form submission if it has no name, or if it is disabled.
     let name = up.form.readFieldName(field)
-    if (!name || (up.form.readFieldDisabled(field) && !includeDisabled)) return
+    if (!name || (up.form.readFieldDisabled(field) && !includeDisabled && !field.upPreviewDisabled)) return
 
     let { tagName, type } = field
     let values = []

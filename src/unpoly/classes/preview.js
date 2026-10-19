@@ -485,7 +485,7 @@ up.Preview = class Preview {
   */
   disable(...args) {
     let [element] = this._parseMutatorArgs(args, 'val')
-    this.undo(up.form.disableTemp(element))
+    this.undo(up.form.disableTemp(element, { preview: true }))
   }
 
   /*-

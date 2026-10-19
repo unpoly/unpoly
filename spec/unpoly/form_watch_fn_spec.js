@@ -987,6 +987,28 @@ extendDescribe('up.form', function() {
       })
 
       describe('with a form element', function() {
+
+        it('does not run the callback when a preview disables a field, e.g. while the form is submitting', async function() {
+          const [form, input] = htmlFixtureList(`
+            <form method="post" action="/endpoint" up-target=".target">
+              <input name="email" value="foo@example.com">
+            </form>
+            <div class="target"></div>
+          `)
+          const callback = jasmine.createSpy('change callback')
+          up.watch(form, callback)
+
+          up.submit(form, { disable: true }).catch(u.noop)
+          await wait()
+
+          expect(input).toBeDisabled()
+
+          // E.g. a blur after typing fires a change event while the form is disabled
+          Trigger.change(input)
+          await wait()
+
+          expect(callback).not.toHaveBeenCalled()
+        })
         u.each(defaultInputEvents, function(eventType) {
           describe(`when any of the form's fields receives a ${eventType} event`, function() {
 
