@@ -74,7 +74,9 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   _isApplicablePlanError(error) {
-    return !(error instanceof up.CannotMatch)
+    // (1) Only an up.CannotMatch means "this plan doesn't fit, try the next one".
+    // (2) Once a plan has started to change the page, we cannot try another plan on top of it.
+    return !(error instanceof up.CannotMatch) || this._planApplied
   }
 
   // Final preparations before elements are being changed.
@@ -91,6 +93,10 @@ up.Change.FromContent = class FromContent extends up.Change {
 
     // Used by up.RenderJob
     this.options.handleAbort(this.getPreflightProps())
+
+    // From here on the plan changes the page. Set this last: getPreflightProps() above
+    // also uses _seekPlan(), and must still be able to skip plans that don't fit.
+    this._planApplied = true
   }
 
   _getResponseDoc() {

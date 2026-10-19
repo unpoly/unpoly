@@ -1545,6 +1545,80 @@ extendDescribe('up.fragment', function() {
             await expectAsync(promise).toBeRejectedWith(jasmine.anyError(/Could not find common target/i))
           })
         })
+
+        describe('when an error is thrown after a target was matched', function() {
+
+          it('rejects with an up.CannotMatch error thrown while changing the page, and does not render a fallback target', async function() {
+            htmlFixtureList(`
+              <div class="target">old target</div>
+              <div class="fallback">old fallback</div>
+            `)
+
+            // Throw while the first plan is changing the page. We spy on a method that the plan
+            // looks up at call time, and that runs after up.Change.FromContent has called onApplicable().
+            const error = new up.CannotMatch('Error while rendering')
+            const originalUpdateHistory = up.Layer.prototype.updateHistory
+            const updateHistorySpy = spyOn(up.Layer.prototype, 'updateHistory').and.callFake(function(...args) {
+              if (updateHistorySpy.calls.count() === 1) throw error
+              return originalUpdateHistory.apply(this, args)
+            })
+
+            const job = up.render({
+              target: '.target',
+              fallback: '.fallback',
+              document: `
+                <div class="target">new target</div>
+                <div class="fallback">new fallback</div>
+              `
+            })
+
+            await expectAsync(job).toBeRejectedWith(error)
+            expect(updateHistorySpy.calls.count()).toBe(1)
+            expect('.fallback').toHaveText('old fallback')
+          })
+
+          it("still falls back to the layer's main target when the primary target is missing on the page", async function() {
+            htmlFixtureList('<main>old main</main>')
+
+            const job = up.render({
+              target: '.target',
+              fallback: true,
+              document: `
+                <div class="target">new target</div>
+                <main>new main</main>
+              `
+            })
+
+            await expectAsync(job).toBeResolved()
+            expect('main').toHaveText('new main')
+          })
+
+          it('still renders when a hungry element is missing in the response', async function() {
+            htmlFixtureList(`
+              <div class="target">old target</div>
+              <div id="hungry" up-hungry>old hungry</div>
+            `)
+
+            const job = up.render({ target: '.target', document: '<div class="target">new target</div>' })
+
+            await expectAsync(job).toBeResolved()
+            expect('.target').toHaveText('new target')
+            expect('#hungry').toHaveText('old hungry')
+          })
+
+          it('still renders when a hungry element on another layer is missing in the response', async function() {
+            htmlFixtureList('<div id="hungry" up-hungry up-if-layer="any">old hungry</div>')
+            const overlay = await up.layer.open({ fragment: '<div class="target">old target</div>' })
+
+            const job = up.render({ target: '.target', document: '<div class="target">new target</div>' })
+
+            await expectAsync(job).toBeResolved()
+            expect(overlay).toBeAlive()
+            expect(up.fragment.get('.target', { layer: overlay })).toHaveText('new target')
+            expect('#hungry').toHaveText('old hungry')
+          })
+
+        })
       })
 
     })
