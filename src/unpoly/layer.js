@@ -179,14 +179,6 @@ up.layer = (function() {
     Whether [peeling](/learn/closing-overlays#peeling) closes overlays even when an
     `up:layer:dismiss` or `up:layer:accept` listener prevents it.
 
-    By default a listener can keep an overlay open by calling `event.preventDefault()`.
-    The render pass then fails with `up.Aborted`.
-
-    When set to `true`, listeners cannot prevent peeling. A link cannot make peeling preventable again:
-    an [`[up-peel]`](/api/up-follow#up-peel) attribute without `force` keeps this default.
-
-    [`unpoly-migrate.js`](/changes/upgrading) sets this to `true`, which restores the behavior of Unpoly 3.14 and earlier.
-
     @experimental
 
   @stable
@@ -846,15 +838,11 @@ up.layer = (function() {
   // The layer classes' selectors never change, so we only build this once.
   const ANY_SELECTOR = u.map(LAYER_CLASSES, (Class) => Class.selector()).join()
 
-  function anySelector() {
-    return ANY_SELECTOR
-  }
-
   // Returns the closest ancestor (or self) that is a layer element. This looks at the DOM, not the
   // layer stack: for an element in a closing overlay it returns that overlay's element, while
   // up.layer.get(element) returns nothing.
   function closestLayerElement(element) {
-    return element.closest(anySelector())
+    return element.closest(ANY_SELECTOR)
   }
 
   function optionToString(option) {
@@ -1352,7 +1340,6 @@ up.layer = (function() {
     build,
     ask,
     normalizeOptions,
-    anySelector,
     closestLayerElement,
     optionToString,
     get stack() { return stack.layers },
