@@ -335,3 +335,15 @@ afterEach(function() {
     originalCSPNonceMetaElement.content = originalCSPNonceValue
   }
 })
+
+// Restore the runner's .up-booted class, which Unpoly sets only once, when it boots before the first spec.
+// Other helpers remove all classes from <html> after each spec.
+let bootedBeforeSuite = false
+
+beforeAll(function() {
+  bootedBeforeSuite = document.documentElement.classList.contains('up-booted')
+})
+
+afterEach(function() {
+  if (bootedBeforeSuite) document.documentElement.classList.add('up-booted')
+})
