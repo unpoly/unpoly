@@ -5,6 +5,15 @@ describe('up.framework', function() {
 
   describe('JavaScript', function() {
 
+    describe('.up-booted', function() {
+
+      it('is set on the <html> element after booting', function() {
+        expect(up.framework.booted).toBe(true)
+        expect(document.documentElement).toHaveClass('up-booted')
+      })
+
+    })
+
     describe('up.framework.isSupported', function() {
 
       it('returns true on a supported browser', function() {

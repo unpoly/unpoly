@@ -210,6 +210,28 @@ To react to other events like `change`, see [[watch-options]].
 Switching effects are applied immediately and are never debounced, even when you configure a delay for other watchers.
 
 
+## Hiding switched elements before booting {#before-booting}
+
+Elements are switched when Unpoly boots, usually on `DOMContentLoaded`. When your scripts load after the browser has rendered the page,
+users may briefly see elements that are hidden a moment later.
+
+To prevent this, you can render the initial `[hidden]` attributes on the server. If you'd rather not repeat your switching rules in your templates,
+hide all switched elements until Unpoly has [booted](/api/up-booted):
+
+```css
+html:not(.up-booted) :is([up-show-for], [up-hide-for]) {
+  display: none;
+}
+```
+
+When Unpoly boots, it switches all elements and sets the `.up-booted` class on the `<html>` element.
+Matching elements are then shown, and the others keep their `[hidden]` attribute.
+
+> [important]
+> When Unpoly cannot boot, e.g. on an [unsupported browser](/api/up.framework.isSupported) or when a script fails to load,
+> these elements stay hidden.
+
+
 ## Custom switching effects {#custom-effects}
 
 `[up-switch]` lets you implement your own switching effects.

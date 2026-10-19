@@ -89,6 +89,8 @@ up.framework = (function() {
       readyState = 'booting'
       up.emit('up:framework:boot', { mode, log: false })
       readyState = 'booted'
+      // The initial page has been compiled, so CSS can stop hiding unprocessed elements.
+      document.documentElement.classList.add('up-booted')
       up.emit('up:framework:booted', { mode, log: false })
     } else {
       console.error("Unpoly cannot boot: %s", issue)
@@ -138,6 +140,27 @@ up.framework = (function() {
     If set to `'manual'`, Unpoly was booted [manually](/api/up-boot-manual).
 
     @experimental
+  @experimental
+  */
+
+  /*-
+  This class is set on the `<html>` element after Unpoly has [booted](/api/up.boot).
+
+  All [compilers](/api/up.script) will already have run on the initial page content.
+
+  You can use this class to hide elements until Unpoly has processed them,
+  e.g. to [hide switched elements before booting](/learn/switching-form-state#before-booting):
+
+  ```css
+  html:not(.up-booted) :is([up-show-for], [up-hide-for]) {
+    display: none;
+  }
+  ```
+
+  The class is not set when Unpoly [cannot boot](/api/up.framework.isSupported) or fails to load.
+  Elements hidden by such a rule would then stay hidden.
+
+  @selector .up-booted
   @experimental
   */
 
