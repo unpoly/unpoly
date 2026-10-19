@@ -14,7 +14,8 @@ up.Selector = class Selector {
     options.layer ??= u.presence(elementOrDocument, u.isElement)
 
     // With a single layer in the DOM, every element belongs to it and we can skip the layer lookup.
-    let noLayers = externalDocument || options.layer === 'any' || up.layer.count === 1
+    // We count layers in the DOM, not open layers: a closed overlay may still be playing its exit animation.
+    let noLayers = externalDocument || options.layer === 'any' || up.layer.attachedCount === 1
 
     // Also normalizes options: a missing { layer } with an { origin } becomes 'origin'.
     let layers = options.layer !== 'new' && !noLayers && up.layer.getAll(options)

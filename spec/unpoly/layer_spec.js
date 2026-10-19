@@ -229,6 +229,31 @@ describe('up.layer', function() {
       })
     })
 
+    describe('up.layer.attachedCount', function() {
+
+      it('counts the open layers', function() {
+        makeLayers(3)
+
+        expect(up.layer.attachedCount).toBe(3)
+      })
+
+      it('counts a closed overlay until its element is removed after its exit animation', async function() {
+        const overlay = await openOverlayWithCloseAnimation()
+        expect(up.layer.attachedCount).toBe(2)
+
+        overlay.dismiss()
+
+        expect(overlay.element).toHaveClass('up-destroying')
+        expect(up.layer.count).toBe(1)
+        expect(up.layer.attachedCount).toBe(2)
+
+        await wait(200)
+
+        expect(overlay.element).toBeDetached()
+        expect(up.layer.attachedCount).toBe(1)
+      })
+    })
+
     describe('up.layer.getAll()', function() {
 
       describe('for "any"', function() {

@@ -1523,6 +1523,7 @@ up.layer = (function() {
     'front',
     'sync',
     'count',
+    'attachedCount',
     'dismissOverlays'
   ], () => stack)
 

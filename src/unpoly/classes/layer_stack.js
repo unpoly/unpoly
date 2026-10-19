@@ -5,6 +5,7 @@ up.LayerStack = class LayerStack {
   constructor() {
     this._currentOverrides = []
     this.layers = [this._buildRoot()]
+    this._closingLayers = []
   }
 
   _buildRoot() {
@@ -13,6 +14,8 @@ up.LayerStack = class LayerStack {
 
   remove(layer) {
     u.remove(this.layers, layer)
+    // A closed overlay may keep its element for its exit animation. See attachedCount.
+    this._closingLayers.push(layer)
   }
 
   peel(layer, options = {}) {
@@ -125,6 +128,15 @@ up.LayerStack = class LayerStack {
 
   get count() {
     return this.layers.length
+  }
+
+  // Layers whose elements are in the DOM: the open layers, plus closed overlays
+  // that are still playing their exit animation.
+  get attachedCount() {
+    if (this._closingLayers.length) {
+      this._closingLayers = this._closingLayers.filter((layer) => layer.element.isConnected)
+    }
+    return this.layers.length + this._closingLayers.length
   }
 
   get root() {

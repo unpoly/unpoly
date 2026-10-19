@@ -831,6 +831,29 @@ extendDescribe('up.form', function() {
             await expectSubmitFromClosingOverlay({ overlays: 1, form })
           })
 
+          it('does not switch a region with the same [up-switch-region] selector in the root layer when the only overlay closes', async function() {
+            const listener = jasmine.createSpy('up:form:switch listener')
+            up.on('up:form:switch', (event) => listener(event.target.id))
+
+            const [rootRegion] = htmlFixtureList(`
+              <div class="region">
+                <div class="target" id="root-target" up-show-for="active">root target</div>
+              </div>
+            `)
+            up.hello(rootRegion)
+
+            const form = `
+              <form action="/path" method="get" up-layer="parent" up-target="main">
+                <input name="foo" up-switch=".target" up-switch-region=".region">
+              </form>
+            `
+
+            await expectSubmitFromClosingOverlay({ overlays: 1, form })
+
+            expect(listener).not.toHaveBeenCalled()
+            expect('#root-target').toBeVisible()
+          })
+
         })
 
       })
