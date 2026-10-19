@@ -633,11 +633,7 @@ up.form = (function() {
       // Disabled by a preview to block input while a request is loading.
       // Still counts as enabled when we read params or watch values.
       control.upPreviewDisabled = true
-      let undoPreviewDisable = undoDisable
-      undoDisable = () => {
-        delete control.upPreviewDisabled
-        undoPreviewDisable()
-      }
+      undoDisable = u.sequence(undoDisable, () => delete control.upPreviewDisabled)
     }
 
     // (1) This function is only returned if we didn't early-return above
