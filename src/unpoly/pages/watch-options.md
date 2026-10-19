@@ -96,6 +96,7 @@ From JavaScript you can pass a `{ delay }` option instead.
 
 For watchers of `input` the default delay is `up.form.config.watchInputDelay` (which defaults to `0`).
 For watchers of other events there is no default delay.
+`[up-switch]` is never debounced, because its effects are applied on the client.
 
 If the field's form is [aborted](/learn/aborting-requests) or destroyed while waiting for a delay,
 the callback is unscheduled.

@@ -488,10 +488,11 @@ extendDescribe('up.form', function() {
           expect(target).toBeHidden()
         })
 
-        it('delays the switching with [up-watch-delay]', async function() {
+        it('does not debounce switching, ignoring [up-watch-delay] and up.form.config.watchInputDelay', async function() {
+          up.form.config.watchInputDelay = 100
           let [form, textField, target] = htmlFixtureList(`
             <form>
-              <input name="field" up-switch=".target" up-watch-delay="50">
+              <input name="field" up-switch=".target" up-watch-delay="100">
               <div class="target" up-show-for="foo">target text</div>
             </form>
           `)
@@ -504,10 +505,35 @@ extendDescribe('up.form', function() {
           Trigger.change(textField)
           await wait()
 
-          expect(target).toBeHidden()
+          expect(target).toBeVisible()
+        })
+
+        it('switches before a debounced autosubmit reads the form', async function() {
+          let form = htmlFixture(`
+            <form action="/path" method="post" up-autosubmit up-watch-delay="50">
+              <select name="kind" up-switch=".company">
+                <option value="company">Company</option>
+                <option value="private">Private</option>
+              </select>
+              <input class="company" name="company" value="Acme" up-disable-for="private">
+            </form>
+          `)
+          let select = form.querySelector('select')
+          let companyField = form.querySelector('.company')
+          up.hello(form)
+          await wait()
+
+          select.value = 'private'
+          Trigger.change(select)
+          await wait()
+
+          expect(companyField).toBeDisabled()
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+
           await wait(100)
 
-          expect(target).toBeVisible()
+          expect(jasmine.Ajax.requests.count()).toBe(1)
+          expect(jasmine.lastRequest().data()).toMatchParams({ kind: 'private' })
         })
 
       })

@@ -206,7 +206,8 @@ To match all elements within the current [layer](/api/up.layer), set the region 
 ## Reacting to different events {#reacting-to-different-events}
 
 By default switch effects are applied for every [`input`](https://developer.mozilla.org/en-US/docs/Web/API/Element/input_event) event.
-To react to other events like `change`, or to debounce the switching effect, see [[watch-options]].
+To react to other events like `change`, see [[watch-options]].
+Switching effects are applied immediately and are never debounced, even when you configure a delay for other watchers.
 
 
 ## Custom switching effects {#custom-effects}

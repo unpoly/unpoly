@@ -31,7 +31,10 @@ up.Switcher = class Switcher {
   _trackFieldChanges() {
     let callback = () => this._onFieldChanged()
     return up.migrate.watchForSwitch?.(this._root, callback)
-      || up.watch(this._root, { logPrefix: '[up-switch]', includeDisabled: true }, callback)
+      // Switching effects are client-side and cheap, so we never debounce them.
+      // A { delay } meant for requests (from config or [up-watch-delay]) would only make switching lag,
+      // and would let an autosubmitting form read its fields before they were switched.
+      || up.watch(this._root, { logPrefix: '[up-switch]', includeDisabled: true, delay: 0 }, callback)
   }
 
   _trackNewSwitchees() {

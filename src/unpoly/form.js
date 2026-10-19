@@ -1708,7 +1708,13 @@ up.form = (function() {
       You can expand or narrow the search scope by configuring a different selector.
 
   @section Observed events
-    @mix up-watch/observed-events
+    @param [up-watch-event='input']
+      The type of event to watch.
+
+      See [which events to watch](/learn/watch-options#events).
+
+      Switching is never [debounced](/learn/watch-options#debouncing). `[up-switch]` ignores
+      `[up-watch-delay]` and `up.form.config.watchInputDelay`, since its effects are applied on the client.
 
   @stable
   @signature
