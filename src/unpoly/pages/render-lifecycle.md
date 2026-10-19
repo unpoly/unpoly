@@ -385,7 +385,7 @@ and custom elements.
 #### Debugging and testing
 
 Exceptions in user code are also logged to the browser's [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error).
-This way you can still access the stack trace or [detect JavaScript errors in E2E tests](https://makandracards.com/makandra/55056-raising-javascript-errors-in-ruby-e2e-tests-rspec-cucumber).
+This way you can still access the stack trace, and your E2E tests can fail when the browser console shows an error. Most test runners can do this, e.g. with Playwright's `page.on('console')` or the browser logs in Selenium.
 
 Some test runners like [Jasmine](https://jasmine.github.io/) already listen to the `error` event and fail your test if any uncaught exception is observed.
 In Jasmine you may use [`jasmine.spyOnGlobalErrorsAsync()`](https://makandracards.com/makandra/559289-jasmine-prevent-unhandled-promise-rejection-from-failing-your-test) to make assertions on the unhandled error.
