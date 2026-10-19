@@ -322,8 +322,8 @@ extendDescribe('up.form', function() {
         describe('when [up-switch] is set on an input[type=radio] instead of a group container', function() {
 
           if (up.migrate.loaded) {
-            it('logs a warning and keeps working', async function() {
-              spyOn(console, 'warn')
+            it('logs a deprecation and keeps working', async function() {
+              spyOn(console, 'error')
 
               const [form, radio1, radio2, switchee] = htmlFixtureList(`
               <form>
@@ -339,8 +339,8 @@ extendDescribe('up.form', function() {
               up.hello(form)
               await wait()
 
-              expect(console.warn).toHaveBeenCalled()
-              expect(console.warn.calls.mostRecent().args[0]).toMatch(/Use \[up-switch\] on the container of a radio group/i)
+              expect(console.error).toHaveBeenCalled()
+              expect(console.error.calls.mostRecent().args[0]).toMatch(/Use \[up-switch\] on the container of a radio group/i)
 
               // This still works for backwards compatibility
               expect(switchee).not.toBeVisible()
