@@ -1790,9 +1790,12 @@ describe('up.form', function() {
 
       it('ignores a nested [up-autosubmit] and warns, so a change submits the form only once', async function() {
         const warnSpy = spyOn(up, 'warn')
-        const form = fixture('form[up-autosubmit][up-target="#target"]')
-        fixture('#target')
-        const field = e.affix(form, 'input[up-autosubmit][name="input-name"][value="old-value"]')
+        const [form, field] = htmlFixtureList(`
+          <form up-autosubmit up-target="#target">
+            <input up-autosubmit name="input-name" value="old-value">
+          </form>
+        `)
+        htmlFixture('<div id="target"></div>')
         const submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
         up.hello(form)
 
@@ -1806,9 +1809,12 @@ describe('up.form', function() {
       })
 
       it('does not ignore an [up-autosubmit] field in a form with [up-autosubmit=false]', async function() {
-        const form = fixture('form[up-autosubmit=false][up-target="#target"]')
-        fixture('#target')
-        const field = e.affix(form, 'input[up-autosubmit][name="input-name"][value="old-value"]')
+        const [form, field] = htmlFixtureList(`
+          <form up-autosubmit="false" up-target="#target">
+            <input up-autosubmit name="input-name" value="old-value">
+          </form>
+        `)
+        htmlFixture('<div id="target"></div>')
         const submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
         up.hello(form)
 
@@ -1818,6 +1824,29 @@ describe('up.form', function() {
         await wait()
 
         expect(submitSpy.calls.count()).toBe(1)
+      })
+
+      it('does not ignore an [up-autosubmit] form in an overlay when an [up-autosubmit] element in the root layer encloses the overlay', async function() {
+        // Overlays are attached to the <body>, so the <body> encloses them in the DOM.
+        document.body.setAttribute('up-autosubmit', '')
+
+        try {
+          makeLayers([
+            {},
+            { fragment: '<form up-autosubmit id="overlay-form"><input name="input-name" value="old-value"></form>' },
+          ])
+          const submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
+
+          const field = up.fragment.get('#overlay-form input', { layer: 'overlay' })
+          field.value = 'new-value'
+          Trigger.change(field)
+
+          await wait()
+
+          expect(submitSpy).toHaveBeenCalled()
+        } finally {
+          document.body.removeAttribute('up-autosubmit')
+        }
       })
 
       it('submits the form when a change is observed in any of its fields', async function() {
