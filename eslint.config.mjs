@@ -74,6 +74,8 @@ export default tseslint.config(
         registerFixture: 'readonly',
         fileList: 'readonly',
         makeLayers: 'readonly',
+        openOverlayWithCloseAnimation: 'readonly',
+        expectSubmitFromClosingOverlay: 'readonly',
         Trigger: 'readonly',
         promiseState: 'readonly',
         countQueryResults: 'readonly',

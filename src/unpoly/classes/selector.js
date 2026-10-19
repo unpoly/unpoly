@@ -4,47 +4,50 @@ const e = up.element
 up.Selector = class Selector {
 
   constructor(selector, elementOrDocument, options = {}) {
-    this._filters = []
-
     // If we're given an element that is detached *or* from another document
-    // (think up.ResponseDoc) we are not filtering by element layer.
-    let matchingInExternalDocument = elementOrDocument && !document.contains(elementOrDocument)
+    // (think up.ResponseDoc), it has no layer and no destroying ancestors.
+    let externalDocument = elementOrDocument && !document.contains(elementOrDocument)
+    this._filters = (externalDocument || options.destroying) ? [] : [up.fragment.isNotDestroying]
 
-    if (!matchingInExternalDocument && !options.destroying) {
-      this._filters.push(up.fragment.isNotDestroying)
-    }
+    // Some up.fragment functions center around an element, like up.fragment.closest(element, selector).
+    // In this case up.fragment passes us that element, and we search the element's layer unless told otherwise.
+    options.layer ??= u.presence(elementOrDocument, u.isElement)
 
-    // A layer that is about to open does not exist yet, so we cannot filter by it.
-    let newLayer = options.layer === 'new'
+    // With a single layer in the DOM, every element belongs to it and we can skip the layer lookup.
+    let noLayers = externalDocument || options.layer === 'any' || up.layer.count === 1
 
-    this._ignoreLayers = newLayer || matchingInExternalDocument || options.layer === 'any' || up.layer.count === 1
-
+    // Also normalizes options: a missing { layer } with an { origin } becomes 'origin'.
+    let layers = options.layer !== 'new' && !noLayers && up.layer.getAll(options)
     let expandTargetLayer
 
-    if (newLayer) {
-      // Expand layer-specific selectors like `:main` for the new layer's { mode }
+    if (options.layer === 'new') {
+      // (1) A layer that is about to open does not exist yet, so we cannot filter by it.
+      //     Expand layer-specific selectors like `:main` for the new layer's { mode }.
       expandTargetLayer = 'new'
-    } else if (this._ignoreLayers) {
-      // Use the root layer to expand layer-specific selectors like `:main` or `:layer`
+    } else if (noLayers) {
+      // (2) There is no layer to tell matches apart by.
+      //     Use the root layer to expand layer-specific selectors like `:main` or `:layer`.
       expandTargetLayer = up.layer.root
+    } else if (layers.length) {
+      // (3) Only match within the given layers. Earlier layers are preferred.
+      //     Use the first layer to expand layer-specific selectors like `:main` or `:layer`.
+      this._layers = layers
+      this._filters.push((match) => u.some(layers, (layer) => layer.contains(match)))
+      expandTargetLayer = layers[0]
+    } else if (u.isElementLike(options.layer) || (options.layer === 'origin' && options.origin)) {
+      // (4) The layer of the given element-like value (root, { layer } or { origin }) has closed.
+      //     Its elements may still be in the DOM, playing their exit animation,
+      //     but nothing in a closed layer can match.
+      this._selectors = []
     } else {
-      // Some up.fragment function center around an element, like up.fragment.closest(element, selector).
-      // In this case up.fragment passes us that element and we can auto-pick the layer based on that.
-      options.layer ??= u.presence(elementOrDocument, u.isElement)
-
-      this._layers = up.layer.getAll(options)
-      if (!this._layers.length) throw new up.CannotMatch(["Unknown layer: %o", options.layer])
-
-      this._filters.push((match) => u.some(this._layers, (layer) => layer.contains(match)))
-
-      // Use the first layer to expand layer-specific selectors like `:main` or `:layer`
-      expandTargetLayer = this._layers[0]
+      // (5) A named layer that doesn't exist, e.g. { layer: 'child' } without a child.
+      throw new up.CannotMatch(["Unknown layer: %o", options.layer])
     }
 
-    this._selectors = up.fragment.expandTargets(selector, { ...options, layer: expandTargetLayer })
+    this._selectors ??= up.fragment.expandTargets(selector, { ...options, layer: expandTargetLayer })
 
-    // If the user has set config.mainTargets = [] then a selector :main
-    // will resolve to an empty array.
+    // No selectors match nothing: in case (4), or when the user has set config.mainTargets = []
+    // and we got a :main selector.
     this._unionSelector = this._selectors.join() || 'match-none'
   }
 
@@ -74,7 +77,7 @@ up.Selector = class Selector {
     // match in *any* requested layer) pick, losing the layer preference below.
     if (u.isElement(root)) {
       return this._firstSelectorMatch((selector) => root.querySelectorAll(selector))
-    } else if (this._ignoreLayers) {
+    } else if (!this._layers) {
       // With layers out of the picture the container is a whole document: the one we were
       // given (up.ResponseDoc passes its own), or ours.
       return this._firstSelectorMatch((selector) => (root || document).querySelectorAll(selector))

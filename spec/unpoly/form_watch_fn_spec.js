@@ -1215,6 +1215,45 @@ extendDescribe('up.form', function() {
         })
       })
 
+      describe('when the form is in an overlay that is closing', function() {
+
+        const form = `
+          <form action="/path" method="get" up-layer="parent" up-target="main">
+            <input name="foo">
+          </form>
+        `
+
+        it('updates the parent layer when the form is submitted into it while two overlays are open', async function() {
+          const callback = jasmine.createSpy('watch callback')
+          await expectSubmitFromClosingOverlay({ overlays: 2, form, prepare: (form) => up.watch(form, callback) })
+        })
+
+        it('updates the root layer when the form is submitted into it from the only overlay', async function() {
+          const callback = jasmine.createSpy('watch callback')
+          await expectSubmitFromClosingOverlay({ overlays: 1, form, prepare: (form) => up.watch(form, callback) })
+        })
+
+        it('does not run a delayed callback after the overlay has closed', async function() {
+          const callback = jasmine.createSpy('watch callback')
+
+          const prepare = function(form) {
+            up.watch(form, { delay: 20 }, callback)
+            const field = form.querySelector('input')
+            field.value = 'new value'
+            Trigger.input(field)
+          }
+
+          const { closingOverlay } = await expectSubmitFromClosingOverlay({ overlays: 2, form, prepare })
+
+          // Wait for the delay to pass while the overlay is still playing its close animation.
+          await wait(40)
+
+          expect(closingOverlay.element).toHaveClass('up-destroying')
+          expect(callback).not.toHaveBeenCalled()
+        })
+
+      })
+
       describe('logging', function() {
 
         function spyOnLog() {

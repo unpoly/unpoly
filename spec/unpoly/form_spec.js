@@ -1961,6 +1961,24 @@ describe('up.form', function() {
           expect('#target').toHaveSelector('.placeholder')
         })
       })
+
+      describe('when the form is in an overlay that is closing', function() {
+
+        const form = `
+          <form action="/path" method="get" up-layer="parent" up-target="main" up-autosubmit>
+            <input name="foo">
+          </form>
+        `
+
+        it('updates the parent layer when the form is submitted into it while two overlays are open', async function() {
+          await expectSubmitFromClosingOverlay({ overlays: 2, form })
+        })
+
+        it('updates the root layer when the form is submitted into it from the only overlay', async function() {
+          await expectSubmitFromClosingOverlay({ overlays: 1, form })
+        })
+
+      })
     })
 
     describe('input[up-watch]', function() {
