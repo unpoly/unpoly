@@ -146,6 +146,8 @@ up.framework = (function() {
   /*-
   This class is set on the `<html>` element after Unpoly has [booted](/api/up.boot).
 
+  @learn-ref switching-form-state#before-booting
+
   All [compilers](/api/up.script) will already have run on the initial page content.
 
   You can use this class to hide elements until Unpoly has processed them,

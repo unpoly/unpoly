@@ -57,11 +57,14 @@ const resetAttributes = function() {
   document.body.removeAttribute('style')
   document.documentElement.removeAttribute('class')
   document.documentElement.removeAttribute('style')
+  // Unpoly only sets this class once, when it boots before the first spec.
+  if (jasmine.bootedBeforeSuite) document.documentElement.classList.add('up-booted')
 }
 
 var findMetaTags = () => document.head.querySelectorAll('meta, link:not([rel=stylesheet])')
 
 beforeAll(function() {
+  jasmine.bootedBeforeSuite = document.documentElement.classList.contains('up-booted')
   jasmine.titleBeforeSuite = document.title
   jasmine.locationBeforeSuite = location.href
   jasmine.langBeforeSuite = document.documentElement.lang
