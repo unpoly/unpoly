@@ -17,6 +17,8 @@ up.migrate = (function() {
 
     Object.defineProperty(object, oldKey, {
       configurable: true,
+      // Scripts that enumerate the object must not trigger the warning. See removedProperty().
+      enumerable: false,
       get() {
         doWarn()
         return this[newKey]
@@ -37,6 +39,10 @@ up.migrate = (function() {
 
     Object.defineProperty(object, key, {
       configurable: true,
+      // The key usually exists as an enumerable data property, and redefining it would keep it enumerable.
+      // Then any script that enumerates the object would trigger the warning, e.g. JSON.stringify()
+      // when we format another warning with %o, or an analytics script walking window.up.
+      enumerable: false,
       get() {
         doWarn()
         return valueRef[0]

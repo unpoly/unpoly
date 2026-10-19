@@ -99,6 +99,64 @@ if (up.migrate.loaded) {
 
     })
 
+    describe('up.migrate.renamedProperty()', function() {
+
+      it('warns when the old property is accessed', function() {
+        const warnSpy = up.migrate.warn.mock()
+        const object = { newKey: 'value' }
+        up.migrate.renamedProperty(object, 'oldKey', 'newKey')
+
+        expect(object.oldKey).toBe('value')
+        expect(warnSpy).toHaveBeenCalled()
+      })
+
+      it('does not warn when the object is enumerated', function() {
+        const warnSpy = up.migrate.warn.mock()
+        const object = { newKey: 'value' }
+        up.migrate.renamedProperty(object, 'oldKey', 'newKey')
+
+        expect(Object.keys(object)).toEqual(['newKey'])
+        JSON.stringify(object)
+        expect(warnSpy).not.toHaveBeenCalled()
+      })
+
+    })
+
+    describe('up.migrate.removedProperty()', function() {
+
+      it('warns when the property is accessed', function() {
+        const warnSpy = up.migrate.warn.mock()
+        const object = { removedKey: 'value' }
+        up.migrate.removedProperty(object, 'removedKey')
+
+        expect(object.removedKey).toBe('value')
+        expect(warnSpy).toHaveBeenCalled()
+      })
+
+      it('does not warn when the object is enumerated, e.g. when another warning prints it', function() {
+        const warnSpy = up.migrate.warn.mock()
+        const object = { keptKey: 'kept', removedKey: 'value' }
+        up.migrate.removedProperty(object, 'removedKey')
+
+        expect(Object.keys(object)).toEqual(['keptKey'])
+        JSON.stringify(object)
+        expect(warnSpy).not.toHaveBeenCalled()
+      })
+
+    })
+
+    describe('up.modal and up.popup', function() {
+
+      it('do not warn about their deprecated config when enumerated', function() {
+        const warnSpy = up.migrate.warn.mock()
+
+        expect(Object.keys(up.modal)).not.toContain('config')
+        expect(Object.keys(up.popup)).not.toContain('config')
+        expect(warnSpy).not.toHaveBeenCalled()
+      })
+
+    })
+
     describe('up.migrate.renamedPackage()', function() {
 
       it('prints a warning and forwards the call to the new module', function() {

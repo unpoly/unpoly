@@ -152,6 +152,9 @@ up.modal = {
   }
 }
 
+// Don't warn when a script enumerates up.modal. Getters in an object literal are enumerable.
+Object.defineProperty(up.modal, 'config', { enumerable: false })
+
 up.migrate.renamedEvent('up:modal:open', 'up:layer:open')
 up.migrate.renamedEvent('up:modal:opened', 'up:layer:opened')
 up.migrate.renamedEvent('up:modal:close', 'up:layer:dismiss')

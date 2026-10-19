@@ -109,6 +109,9 @@ up.popup = {
   }
 }
 
+// Don't warn when a script enumerates up.popup. Getters in an object literal are enumerable.
+Object.defineProperty(up.popup, 'config', { enumerable: false })
+
 up.migrate.renamedEvent('up:popup:open', 'up:layer:open')
 up.migrate.renamedEvent('up:popup:opened', 'up:layer:opened')
 up.migrate.renamedEvent('up:popup:close', 'up:layer:dismiss')
