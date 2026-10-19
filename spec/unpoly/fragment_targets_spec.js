@@ -466,6 +466,13 @@ extendDescribe('up.fragment', function() {
           expect(resolved).toEqual('.before #foo .after')
         })
 
+        it("names the target and the origin when warning about the ampersand character '&'", function() {
+          const warnSpy = up.migrate.warn.mock()
+          const origin = fixture('#foo')
+          up.fragment.resolveOrigin('.before & .after', { origin })
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Found in %s (origin %o)'), '.before & .after', origin)
+        })
+
         it("ignores the ampersand character '&' in the value of an attribute selector and does not require an { origin } option (bugfix)", function() {
           const resolved = up.fragment.resolveOrigin('a[href="/foo?a=1&b=2"]')
           expect(resolved).toEqual('a[href="/foo?a=1&b=2"]')
