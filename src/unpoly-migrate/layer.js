@@ -68,7 +68,7 @@ function warnOfPreventedPeel(event) {
   let preventDefault = event.preventDefault
   event.preventDefault = function() {
     if (!up.layer.config.forcePeelSet) {
-      up.migrate.warn('A listener prevented peeling an overlay. Set up.layer.config.forcePeel to true to keep closing overlays, or to false to let listeners prevent peeling.')
+      up.migrate.warn('A listener tried to keep an overlay open while peeling. Choose with up.layer.config.forcePeel: false keeps it open (new default), true closes it (old behavior).')
     }
     return preventDefault.call(this)
   }
