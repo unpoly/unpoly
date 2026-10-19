@@ -535,9 +535,7 @@ up.Params = class Params {
 
     // Fields and buttons that a preview disabled still count, e.g. for a second submission
     // while the first one is loading.
-    let disableAgain = up.form.enablePreviewDisabledTemp(form)
-
-    try {
+    return up.form.withPreviewFieldsEnabled(form, () => {
       // We let the browser serialize the form, instead of iterating over up.form.fields():
       //
       // - Only the browser can read the value of a form-associated custom element. The element
@@ -563,9 +561,7 @@ up.Params = class Params {
         if (!browserControls.has(field) && !field.closest('fieldset:disabled')) params.addField(field)
       }
       return params
-    } finally {
-      disableAgain()
-    }
+    })
   }
 
   static fromContainer(container, options) {

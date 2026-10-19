@@ -670,11 +670,17 @@ up.form = (function() {
     }
   }
 
-  // Re-enables the controls that a preview has disabled, e.g. to read their params.
-  // Returns a function that disables them again.
-  function enablePreviewDisabledTemp(form) {
+  // Runs the given function while the controls that a preview has disabled are enabled,
+  // e.g. to read their params. Disables them again afterwards.
+  function withPreviewFieldsEnabled(form, fn) {
     let controls = findFieldsAndButtons(form).filter((control) => control.upPreviewDisabled && readFieldDisabled(control))
-    return u.sequence(u.map(controls, (control) => writeFieldDisabled(control, false)))
+    let disableAgain = u.sequence(u.map(controls, (control) => writeFieldDisabled(control, false)))
+
+    try {
+      return fn()
+    } finally {
+      disableAgain()
+    }
   }
 
   function setContainerDisabled(container, disabled) {
@@ -2455,7 +2461,7 @@ up.form = (function() {
     focusedField,
     // disableWhile,
     disableTemp: disableContainerTemp,
-    enablePreviewDisabledTemp,
+    withPreviewFieldsEnabled,
     setDisabled: setContainerDisabled,
     getDisablePreviewFn,
     // handleDisableOption,
