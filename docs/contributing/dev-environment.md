@@ -26,6 +26,10 @@ starts one in the background if none is running (the first build takes ~15s), re
 it on later runs, and waits for the watcher to pick up your latest edit — so you
 never test stale code.
 
+The watcher writes to the same files in `dist/` as a production build. So `bin/build`
+stops a running dev environment before it builds (except with `--watch` or
+`--config=development`).
+
 However you start it, everything the environment prints is also written to
 [`tmp/dev.log`](#logs). To follow it live, run the dev environment in its own terminal
 instead:

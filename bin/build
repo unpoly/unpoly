@@ -6,5 +6,29 @@
 //   bin/build --config=minified        only the minified bundles
 //   bin/build --watch                  rebuild on change (never gzips)
 //   bin/build --gzip / --no-gzip       force gzip on/off (default: on for production)
-import { runBuild } from '../tooling/build/build.mjs'
-process.exit(await runBuild(process.argv.slice(2)))
+//
+// A running dev environment writes to the same files in dist/, and would overwrite this
+// build on the next source change. So a one-off build stops it first.
+import { runBuild, parseBuildArgs } from '../tooling/build/build.mjs'
+import { stopDevEnv } from '../tooling/dev_env.mjs'
+import pc from 'picocolors'
+
+const argv = process.argv.slice(2)
+let options
+try {
+  options = parseBuildArgs(argv)
+} catch {
+  // runBuild() reports the invalid arguments below.
+}
+
+if (options && !options.watch && options.config !== 'development') {
+  const { result, pid } = await stopDevEnv()
+  if (result === 'stopped') {
+    console.log(pc.yellow('Stopped the dev environment, since it writes to dist/ too. Restart it with bin/dev.'))
+  } else if (result === 'wedged') {
+    console.error(pc.red(`The dev environment (PID ${pid}) would not stop. Stop it by hand, then build again.`))
+    process.exit(1)
+  }
+}
+
+process.exit(await runBuild(argv))
