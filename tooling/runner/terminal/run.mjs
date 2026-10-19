@@ -190,7 +190,7 @@ export async function runDev(argv, env) {
   let missing = missingDistFiles(config)
   if (missing.length) {
     console.error(pc.red(missing.every(isMinified)
-      ? `Missing from dist/: ${missing.join(', ')}. The dev watcher never builds the minified bundles — run \`bin/build --config=ci\` once.`
+      ? `Missing from dist/: ${missing.join(', ')}. The dev watcher never builds the minified bundles — run \`bin/build --config=minified\` once.`
       : `Missing from dist/: ${missing.join(', ')}, although the build reported success. Check tooling/build/webpack/development.js.`))
     return 4
   }

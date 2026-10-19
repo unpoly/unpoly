@@ -21,7 +21,8 @@ try {
   // runBuild() reports the invalid arguments below.
 }
 
-if (options && !options.watch && options.config !== 'development') {
+// The minified bundles are not built by the watcher, so building only them is safe.
+if (options && !options.watch && !['development', 'minified'].includes(options.config)) {
   const { result, pid } = await stopDevEnv()
   if (result === 'stopped') {
     console.log(pc.yellow('Stopped the dev environment, since it writes to dist/ too. Restart it with bin/dev.'))
