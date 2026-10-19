@@ -22,6 +22,10 @@ up.LinkFollowIntent = class LinkFollowIntent {
     // Don't preload when the user is holding down CTRL or SHIFT.
     if (!up.link.shouldFollowEvent(event, this._link)) return
 
+    // A preload request is already known, e.g. from hovering before a mousedown.
+    // We must not abort and repeat it, but let the click reuse it.
+    if (this._lastRequest) return
+
     this._unscheduleCallback()
 
     // On pointerdown we preload immediately.

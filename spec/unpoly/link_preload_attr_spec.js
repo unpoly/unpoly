@@ -402,6 +402,26 @@ extendDescribe('up.link', function() {
         expect(link.addEventListener).toHaveBeenCalledWith('touchstart', jasmine.any(Function), { passive: true })
       })
 
+      it('does not abort and repeat a loading preload request on mousedown after hovering', async function() {
+        up.link.config.preloadDelay = 50
+
+        fixture('.target')
+        const link = fixture('a[href="/foo"][up-target=".target"][up-preload]')
+        up.hello(link)
+
+        Trigger.hoverSequence(link)
+        await wait(100)
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        const preloadRequest = jasmine.lastRequest()
+
+        Trigger.mousedown(link)
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toEqual(1)
+        expect(preloadRequest.status).not.toEqual(0)
+      })
+
       it('preloads the link destination on mousedown (without delay)', async function() {
         up.link.config.preloadDelay = 100
 
