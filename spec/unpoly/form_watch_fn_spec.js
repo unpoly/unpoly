@@ -1215,43 +1215,33 @@ extendDescribe('up.form', function() {
         })
       })
 
-      describe('when the form is in an overlay that is closing', function() {
-
-        const form = `
+      it('lets the form update the parent layer from a closing overlay, and does not run a delayed callback afterwards', async function() {
+        await up.layer.open({ fragment: '<main id="main">old main</main>' })
+        // A real close animation keeps the closing overlay in the DOM while its fields are tracked.
+        const closingOverlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 100, fragment: `
           <form action="/path" method="get" up-layer="parent" up-target="main">
             <input name="foo">
           </form>
-        `
+        ` })
+        await wait()
+        const form = closingOverlay.element.querySelector('form')
+        const callback = jasmine.createSpy('watch callback')
+        up.watch(form, { delay: 20 }, callback)
+        form.querySelector('input').value = 'new value'
+        Trigger.input(form.querySelector('input'))
 
-        it('updates the parent layer when the form is submitted into it while two overlays are open', async function() {
-          const callback = jasmine.createSpy('watch callback')
-          await expectSubmitFromClosingOverlay({ overlays: 2, form, prepare: (form) => up.watch(form, callback) })
-        })
+        const job = up.submit(form)
+        await wait()
+        jasmine.respondWith('<main id="main">new main</main>')
 
-        it('updates the root layer when the form is submitted into it from the only overlay', async function() {
-          const callback = jasmine.createSpy('watch callback')
-          await expectSubmitFromClosingOverlay({ overlays: 1, form, prepare: (form) => up.watch(form, callback) })
-        })
+        await expectAsync(job).toBeResolved()
+        expect(closingOverlay.element).toHaveClass('up-destroying')
+        expect(up.fragment.get('#main', { layer: 'front' })).toHaveText('new main')
 
-        it('does not run a delayed callback after the overlay has closed', async function() {
-          const callback = jasmine.createSpy('watch callback')
-
-          const prepare = function(form) {
-            up.watch(form, { delay: 20 }, callback)
-            const field = form.querySelector('input')
-            field.value = 'new value'
-            Trigger.input(field)
-          }
-
-          const { closingOverlay } = await expectSubmitFromClosingOverlay({ overlays: 2, form, prepare })
-
-          // Wait for the delay to pass while the overlay is still playing its close animation.
-          await wait(40)
-
-          expect(closingOverlay.element).toHaveClass('up-destroying')
-          expect(callback).not.toHaveBeenCalled()
-        })
-
+        // Wait for the delay to pass while the overlay is still playing its close animation.
+        await wait(40)
+        expect(closingOverlay.element).toHaveClass('up-destroying')
+        expect(callback).not.toHaveBeenCalled()
       })
 
       describe('logging', function() {

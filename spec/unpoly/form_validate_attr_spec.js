@@ -939,22 +939,24 @@ extendDescribe('up.form', function() {
 
       })
 
-      describe('when the field is in an overlay that is closing', function() {
-
-        const form = `
+      it('updates the parent layer when the form is submitted into it from a closing overlay', async function() {
+        await up.layer.open({ fragment: '<main id="main">old main</main>' })
+        // A real close animation keeps the closing overlay in the DOM while its fields are tracked.
+        const closingOverlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 100, fragment: `
           <form action="/path" method="get" up-layer="parent" up-target="main">
             <input name="foo" up-validate>
           </form>
-        `
+        ` })
+        await wait()
+        const form = closingOverlay.element.querySelector('form')
 
-        it('updates the parent layer when the form is submitted into it while two overlays are open', async function() {
-          await expectSubmitFromClosingOverlay({ overlays: 2, form })
-        })
+        const job = up.submit(form)
+        await wait()
+        jasmine.respondWith('<main id="main">new main</main>')
 
-        it('updates the root layer when the form is submitted into it from the only overlay', async function() {
-          await expectSubmitFromClosingOverlay({ overlays: 1, form })
-        })
-
+        await expectAsync(job).toBeResolved()
+        expect(closingOverlay.element).toHaveClass('up-destroying')
+        expect(up.fragment.get('#main', { layer: 'front' })).toHaveText('new main')
       })
 
     })

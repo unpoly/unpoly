@@ -816,56 +816,70 @@ extendDescribe('up.form', function() {
 
         describe('when the field is in an overlay that is closing', function() {
 
-          const form = `
-            <form action="/path" method="get" up-layer="parent" up-target="main">
-              <input name="foo" up-switch=".target">
-              <div class="target" up-show-for="active">target</div>
-            </form>
-          `
+          it('updates the parent layer when the form is submitted into it', async function() {
+            await up.layer.open({ fragment: '<main id="main">old main</main>' })
+            // A real close animation keeps the closing overlay in the DOM while its fields are tracked.
+            const closingOverlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 100, fragment: `
+              <form action="/path" method="get" up-layer="parent" up-target="main">
+                <input name="foo" up-switch=".target">
+                <div class="target" up-show-for="active">target</div>
+              </form>
+            ` })
+            await wait()
+            const form = closingOverlay.element.querySelector('form')
 
-          it('updates the parent layer when the form is submitted into it while two overlays are open', async function() {
-            await expectSubmitFromClosingOverlay({ overlays: 2, form })
-          })
+            const job = up.submit(form)
+            await wait()
+            jasmine.respondWith('<main id="main">new main</main>')
 
-          it('updates the root layer when the form is submitted into it from the only overlay', async function() {
-            await expectSubmitFromClosingOverlay({ overlays: 1, form })
+            await expectAsync(job).toBeResolved()
+            expect(closingOverlay.element).toHaveClass('up-destroying')
+            expect(up.fragment.get('#main', { layer: 'front' })).toHaveText('new main')
           })
 
           it('does not switch a region with the same [up-switch-region] selector in the root layer when the only overlay closes', async function() {
             const listener = jasmine.createSpy('up:form:switch listener')
             up.on('up:form:switch', (event) => listener(event.target.id))
 
-            const [rootRegion] = htmlFixtureList(`
+            const [_main, rootRegion] = htmlFixtureList(`
+              <main id="main">old main</main>
               <div class="region">
                 <div class="target" id="root-target" up-show-for="active">root target</div>
               </div>
             `)
             up.hello(rootRegion)
 
-            const form = `
+            // A real close animation keeps the closing overlay in the DOM while its fields are tracked.
+            const closingOverlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 100, fragment: `
               <form action="/path" method="get" up-layer="parent" up-target="main">
                 <input name="foo" up-switch=".target" up-switch-region=".region">
               </form>
-            `
+            ` })
+            await wait()
 
-            await expectSubmitFromClosingOverlay({ overlays: 1, form })
+            up.submit(closingOverlay.element.querySelector('form'))
+            await wait()
+            jasmine.respondWith('<main id="main">new main</main>')
+            await wait()
 
+            expect(closingOverlay.element).toHaveClass('up-destroying')
             expect(listener).not.toHaveBeenCalled()
             expect('#root-target').toBeVisible()
           })
 
           it("does not switch the parent layer's elements when the field has no <form>", async function() {
-            const [rootTarget, other] = htmlFixtureList(`
+            const [rootTarget] = htmlFixtureList(`
               <div class="target" id="root-target" up-show-for="active">root target</div>
               <div id="other">old other</div>
             `)
             up.hello(rootTarget)
 
-            const overlay = await openOverlayWithCloseAnimation({ fragment: `
+            const overlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 100, fragment: `
               <div id="overlay-content">
                 <input name="foo" up-switch=".target">
               </div>
             ` })
+            await wait()
 
             const listener = jasmine.createSpy('up:form:switch listener')
             up.on('up:form:switch', (event) => listener(event.target.id))

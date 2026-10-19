@@ -76,11 +76,13 @@ describe('up.Selector', function() {
           </div>
         ` })
 
-        const closingOverlay = await openOverlayWithCloseAnimation({ fragment: `
+        // A real close animation keeps the closed overlay's elements in the DOM.
+        const closingOverlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 100, fragment: `
           <form class="region" id="closing-region">
             <input name="closing-input">
           </form>
         ` })
+        await wait()
         form = closingOverlay.element.querySelector('form')
 
         closingOverlay.dismiss()
