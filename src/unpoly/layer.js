@@ -828,8 +828,18 @@ up.layer = (function() {
     })
   }
 
+  // The layer classes' selectors never change, so we only build this once.
+  const ANY_SELECTOR = u.map(LAYER_CLASSES, (Class) => Class.selector()).join()
+
   function anySelector() {
-    return u.map(LAYER_CLASSES, (Class) => Class.selector()).join()
+    return ANY_SELECTOR
+  }
+
+  // Returns the closest ancestor (or self) that is a layer element. This looks at the DOM, not the
+  // layer stack: for an element in a closing overlay it returns that overlay's element, while
+  // up.layer.get(element) returns nothing.
+  function closestLayerElement(element) {
+    return element.closest(anySelector())
   }
 
   function optionToString(option) {
@@ -1328,6 +1338,7 @@ up.layer = (function() {
     ask,
     normalizeOptions,
     anySelector,
+    closestLayerElement,
     optionToString,
     get stack() { return stack.layers },
     isWithinForeignOverlay,

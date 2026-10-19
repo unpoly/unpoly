@@ -1469,7 +1469,7 @@ up.form = (function() {
 
   function getOriginRegion(origin) {
     if (origin) {
-      return getForm(origin) || up.layer.get(origin)?.element
+      return getForm(origin) || up.layer.closestLayerElement(origin)
     }
   }
 

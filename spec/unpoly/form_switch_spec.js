@@ -854,6 +854,32 @@ extendDescribe('up.form', function() {
             expect('#root-target').toBeVisible()
           })
 
+          it("does not switch the parent layer's elements when the field has no <form>", async function() {
+            const [rootTarget, other] = htmlFixtureList(`
+              <div class="target" id="root-target" up-show-for="active">root target</div>
+              <div id="other">old other</div>
+            `)
+            up.hello(rootTarget)
+
+            const overlay = await openOverlayWithCloseAnimation({ fragment: `
+              <div id="overlay-content">
+                <input name="foo" up-switch=".target">
+              </div>
+            ` })
+
+            const listener = jasmine.createSpy('up:form:switch listener')
+            up.on('up:form:switch', (event) => listener(event.target.id))
+
+            overlay.dismiss()
+
+            // Render something to make the switcher look for switchees again.
+            await up.render({ fragment: '<div id="other">new other</div>' })
+
+            expect(overlay.element).toHaveClass('up-destroying')
+            expect(listener).not.toHaveBeenCalled()
+            expect('#root-target').toBeVisible()
+          })
+
         })
 
       })

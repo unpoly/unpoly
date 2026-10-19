@@ -533,7 +533,7 @@ up.Layer = class Layer extends up.Record {
   contains(element) {
     // Test that the closest parent is the element and not another layer with elements nested
     // into this layer's element.
-    return element.closest(up.layer.anySelector()) === this.element
+    return up.layer.closestLayerElement(element) === this.element
   }
 
   /*-

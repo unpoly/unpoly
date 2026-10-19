@@ -152,6 +152,35 @@ describe('up.Layer', function() {
     })
   })
 
+  describe('#contains()', function() {
+
+    it('returns whether the given element is in this layer', async function() {
+      const [rootElement] = htmlFixtureList('<div id="root-element"></div>')
+      const overlay = await up.layer.open({ fragment: '<div id="overlay-element"></div>' })
+      const overlayElement = overlay.element.querySelector('#overlay-element')
+
+      expect(up.layer.root.contains(rootElement)).toBe(true)
+      expect(up.layer.root.contains(overlayElement)).toBe(false)
+      expect(overlay.contains(overlayElement)).toBe(true)
+      expect(overlay.contains(rootElement)).toBe(false)
+    })
+
+    it("returns false for an element in a descendant overlay that is nested into this layer's element", async function() {
+      const [container, opener] = htmlFixtureList(`
+        <div up-viewport style="height: 100px; overflow-y: scroll">
+          <a href="#" id="opener">open popup</a>
+        </div>
+      `)
+      const popup = await up.layer.open({ mode: 'popup', origin: opener, fragment: '<div id="popup-element"></div>' })
+      const popupElement = popup.element.querySelector('#popup-element')
+
+      expect(container).toContain(popup.element)
+      expect(up.layer.root.contains(popupElement)).toBe(false)
+      expect(popup.contains(popupElement)).toBe(true)
+    })
+
+  })
+
   describe('#peel()', function() {
 
     // Additional specs can be found for up.render({ peel })
