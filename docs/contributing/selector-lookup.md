@@ -24,7 +24,7 @@ depend on layers, liveness or Unpoly's custom selectors, go through `up.fragment
 - [What `up.Selector` does when you construct it](#what-upselector-does-when-you-construct-it)
   - [Failing to resolve a layer: two different errors](#failing-to-resolve-a-layer-two-different-errors)
   - [Order is a guarantee, not an accident](#order-is-a-guarantee-not-an-accident)
-  - [Root handling is inconsistent — know it before you trust it](#root-handling-is-inconsistent--know-it-before-you-trust-it)
+  - [Root handling](#root-handling)
 - [Layer scoping defaults to one layer](#layer-scoping-defaults-to-one-layer)
 - [The custom selectors, and where each is resolved](#the-custom-selectors-and-where-each-is-resolved)
   - [Not every pseudo is a matcher](#not-every-pseudo-is-a-matcher)
@@ -83,18 +83,31 @@ The constructor does the work up front; `matches()`, `closest()`, `descendants()
 1. **Install the liveness filter.** `up.fragment.isNotDestroying`, unless `{ destroying: true }`
    was passed or we are matching in an external/detached document — an `up.ResponseDoc` has no
    dying elements to speak of.
-2. **Decide whether layers matter at all.** They are ignored in three cases: the root element
-   is detached or from another document, `{ layer: 'any' }` was passed, or only one layer
-   exists.
-3. **Resolve the layers to search.** If a root *element* was given (as in
-   `up.fragment.closest(element, …)`), its layer is the default. Otherwise
-   `up.layer.getAll(options)` applies the cascade below. Note this resolves a layer **set** —
-   `{ layer: 'overlays' }` or `{ layer: '1 3' }` legitimately yield several — and adds a
-   containment filter for them.
+2. **Default the layer to the root element's.** If a root *element* was given (as in
+   `up.fragment.closest(element, …)`) and no `{ layer }`, the element is the layer reference.
+3. **Pick one of five cases**, each a single branch in the constructor:
+
+   | Case | When | Layer filter | Custom selectors expanded for |
+   |---|---|---|---|
+   | 1 | `{ layer: 'new' }` | none | the new layer |
+   | 2 | detached or external document, `{ layer: 'any' }`, or only one layer in the DOM (`up.layer.attachedCount === 1`) | none | the root layer |
+   | 3 | `up.layer.getAll(options)` found layers | only those layers | the first layer found |
+   | 4 | the layer comes from an element (the root, `{ layer: element }`, or the `{ origin }`), and no layer contains it | nothing matches | (no selectors) |
+   | 5 | a named layer that doesn't exist, or `{ layer: 'origin' }` without an `origin` | throws `up.CannotMatch` | |
+
+   Case 3 resolves a layer **set** — `{ layer: 'overlays' }` or `{ layer: '1 3' }` legitimately
+   yield several — and adds a containment filter for them.
+
+   Case 4 is an overlay that has closed but is still in the DOM, playing its exit animation:
+   its layer has left the stack, but its elements are still there, marked `.up-destroying`.
+   Nothing in a closed layer can match, so a lookup from inside it finds nothing instead of
+   throwing, and never falls through to another layer.
+
+   Case 2 counts the layers **in the DOM** (`attachedCount`: open layers plus closed overlays
+   still animating out), not the open layers. Otherwise an overlay closing into the root layer
+   would skip case 4.
 4. **Expand custom selectors** via `up.fragment.expandTargets()`, producing a list of plain
-   CSS selectors that is also joined into one union selector for the cheap operations. The
-   layer used for expansion is the first resolved layer — or the **root layer** when layers
-   are being ignored, since then there are no resolved layers to pick from.
+   CSS selectors that is also joined into one union selector for the cheap operations.
 
 If `up.fragment.config.mainTargets` is configured empty, `:main` expands to nothing and the
 union selector becomes the literal `'match-none'`, so the lookup reliably finds nothing
@@ -105,7 +118,9 @@ instead of accidentally matching everything.
 This distinction decides whether a render pass falls through to the next plan or dies:
 
 - A layer reference that resolves to **no layer** (`{ layer: 3 }` on a two-layer stack)
-  throws `up.CannotMatch` — which `up.Change.FromContent` swallows to try the next plan.
+  throws `up.CannotMatch` — which `up.Change.FromContent` swallows to try the next plan, as
+  long as the plan hasn't started to change the page yet. After that it aborts the pass.
+  A layer that comes from an element whose layer has closed is not an error (case 4).
 - An **unknown layer keyword** fails earlier, in `up.LayerLookup`, via `up.fail()`. That is a
   plain `up.Error`, *not* caught by the plan loop, so it aborts the whole pass.
 
@@ -123,17 +138,13 @@ Both are pinned by specs in `spec/unpoly/fragment_lookup_spec.js` ("prioritizes 
 targets", and the `{ layer: '1 3' }` / `{ layer: '3 1' }` pair). Don't collapse the loop into
 a single union query without changing those.
 
-### Root handling is inconsistent — know it before you trust it
+### Root handling
 
 - `descendants()` uses `querySelectorAll`, so the root is **excluded**; `subtree()` uses
   `up.element.subtree()`, so the root is **included**.
-- `firstDescendant()` **ignores its `root` argument entirely** whenever layers are considered:
-  that branch searches `layer.element`'s subtree, not yours. On a single-layer page (where
-  layers are ignored) the root *is* honoured, so `up.fragment.get(root, sel)` appears to be
-  root-scoped until someone opens an overlay. The existing root-scoping specs run
-  single-layer, and the two-layer ones nearby use a detached root, which also takes the
-  ignore-layers branch — so this is under-covered, and looks like a live bug rather than a
-  decision.
+- `firstDescendant()` searches an element root directly, and relies on the layer filter to keep
+  matches in the requested layers (a root like `<body>` contains every overlay). A `Document`
+  root narrows nothing, so then it searches layer by layer, to keep the layer preference.
 
 
 ## Layer scoping defaults to one layer
@@ -245,10 +256,12 @@ ultimately `<body>`, without anyone asking for a fallback. See
 
 - **A lookup bug is usually a scoping bug.** When an element is found that shouldn't be, check
   which layer the lookup resolved to before suspecting the selector.
-- **`up.layer.count === 1` hides layer bugs**, and changes behavior beyond filtering — it
-  switches `firstDescendant()` to the branch that honours the `root` argument. Anything
-  layer-sensitive needs a spec with a real overlay; see `makeLayers()` in
-  [Testing](testing.md).
+- **A single layer in the DOM hides layer bugs.** With `up.layer.attachedCount === 1` the
+  layer lookup is skipped entirely (case 2). Anything layer-sensitive needs a spec with a real
+  overlay, and usually with two or more layers; see `makeLayers()` in [Testing](testing.md).
+- **Closing overlays are a state of their own.** Their elements stay in the DOM during the
+  exit animation, after the layer has left the stack. The spec helpers disable close
+  animations, so this state never occurs in a spec unless you open the overlay with one.
 - **Two more lookup modes exist** that this guide doesn't cover: `up.fragment.trackSelector()`
   / `up.SelectorTracker` for "match now and as elements appear", and the special cases where
   an Element is passed *as the selector* (`up.fragment.matches()` derives a target for it;
