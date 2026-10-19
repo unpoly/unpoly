@@ -141,7 +141,7 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - A [validation](/learn/validation) request no longer sends the params of the form's first submit button, and no longer uses that button's `[formaction]`, `[formmethod]`, `[up-params]` or `[up-headers]`. Nobody pressed the button, so only the `<form>` decides where a validation goes.
 - Unpoly now throws an error when a field uses a `[form]` attribute to join a form in another [layer](/api/up.layer). The browser would submit that field with the wrong layer's form. If you render the same page in an overlay, give each form a unique `[id]`, or move the field into the form. The error message suggests these fixes.
 - `up.Params.fromForm()` now requires a `<form>` element, as documented. To read params from any other container, use `up.Params.fromContainer()`.
-- `up.Params.fromForm()` takes a new `{ submitButton }` option. It defaults to the form's first submit button. Pass `false` to send no button. The `{ includeDisabled }` option is ignored here, because the browser never sends a disabled field.
+- `up.Params.fromForm()` now includes the `[name]` and `[value]` of the form's first submit button, like a submission would. Pass `{ submitButton: false }` to only include fields, as before, or pass a different button element.
 - When a form with [`[up-accept]` or `[up-dismiss]`](/learn/closing-overlays#result-values) closes an overlay, the result value now also contains the `[name]` and `[value]` of the submit button the user pressed.
 
 
@@ -158,13 +158,16 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - Pages with many watched forms are much faster. Before, every `[up-autosubmit]`, `[up-validate]`, `[up-switch]` or `up.watch()` looked at every field on the page after each fragment update. A page with hundreds of small forms could freeze for a second after each update.
 - `up.form.fields()` and `up.form.submitButtons()` now ignore elements in another [layer](/api/up.layer) and elements that are being [destroyed](/api/up.destroy), like other `up.fragment` lookups. A field in a popup that is attached inside a form is no longer watched by that form.
 - Fix: While an overlay was closing, an [`[up-switch]`](/learn/switching-form-state) field in it could show or hide elements in the layer behind it. This happened for a field outside a `<form>`, and for an [`[up-switch-region]`](/api/up-switch#up-switch-region) that also matched in that layer.
+- [`[up-switch]`](/learn/switching-form-state) now switches immediately, ignoring `up.form.config.watchInputDelay` and `[up-watch-delay]`. Switching effects are client-side and don't benefit from debouncing. In a form that also [autosubmits](/api/up-autosubmit) with a delay, switching now settles before the submission reads the form.
+- A nested [`[up-autosubmit]`](/api/up-autosubmit), e.g. on a field inside a form that already has `[up-autosubmit]`, is now ignored with a warning. It used to submit the form a second time for the same change.
+- New experimental class [`.up-booted`](/api/up-booted) on the `<html>` element after Unpoly has booted. It lets CSS [hide switched elements until Unpoly has processed them](/learn/switching-form-state#before-booting).
 - ⚠️ `up.form.config.genericButtonSelectors` was renamed to `up.form.config.anyButtonSelectors`. It now matches every kind of button, including submit and reset buttons. The old name is polyfilled by `unpoly-migrate.js`.
 
 
 ### Overlays
 
 - ⚠️ An `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open when a link or form in a parent layer would close it ([peeling](/learn/closing-overlays#peeling)). The render pass then fails with `up.Aborted` and nothing is updated.
-  This affects listeners that prevent closing, e.g. to confirm unsaved changes. To let links in a parent layer close the overlay as before, return early when `event.value` is `':peel'`:
+  This affects listeners that prevent closing, e.g. to confirm unsaved changes. If your listener asks the user to confirm, you probably want the new behavior: "Cancel" now keeps the overlay open. Otherwise, to let links in a parent layer close the overlay as before, return early when `event.value` is `':peel'`:
 
   ```js
   up.on('up:layer:dismiss', function(event) {
@@ -210,6 +213,7 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - Pressing the Space key now activates a [faux button](/learn/faux-interactive-elements), e.g. an element with [`[up-emit]`](/api/up-emit) or [`[up-clickable]`](/api/up-clickable). Before, only the Enter key worked.
 - An [`[up-on-offline]`](/api/up-follow#up-on-offline) callback now receives the `up:fragment:offline` event as `event`, so it can call `event.retry()`. It used to receive the event as `error`.
 - [URL patterns](/api/url-patterns) now match full URLs on the page's own origin, like `https://example.com/users/*`. Such patterns never matched before.
+- Fix: When the user pressed the mouse button on a [preloading](/learn/preloading) link while its preload request was still loading after hovering, Unpoly aborted the request and sent the same request again. This happened since Unpoly 3.8.
 
 
 ### Smaller fixes and changes
@@ -223,6 +227,9 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - Fix: `up.fragment.matches()` with `{ layer: 'new', mode }` options expanded a selector like `:main` for the root layer, or threw an error while an overlay was open.
 - Fix: The `unpoly-migrate.js` polyfills for `up.popup.attach()`, `up.modal.follow()` and `up.modal.extract()` now open a new overlay again.
 - Fix: The `unpoly-migrate.js` polyfill for `up.network.shouldReduceRequests()` now logs a warning instead of throwing an error.
+- [`unpoly-migrate.js`](/changes/upgrading) now logs deprecations as errors, so test suites that fail on console errors find them without extra configuration. To log warnings as before, set `up.migrate.config.logLevel = 'warn'`.
+- Fix: `unpoly-migrate.js` logged deprecations that the app never caused when a script enumerated an object with deprecated properties, e.g. an analytics script walking `window.up`, or another deprecation message printing a config object.
+- The `unpoly-migrate.js` warning for the deprecated origin shorthand `&` now names the target and the origin element.
 
 
 > [note]
@@ -1104,7 +1111,7 @@ The `[up-switch]` attribute itself has been reworked with new modifiying attribu
 - `[up-switch]` now works on a [container of multiple checkboxes](/learn/switching-form-state#checkboxes) for a single array param, like `category[]`.
 - ⚠️ Setting `[up-switch]` on an individual radio button will now throw an error. Watch a container for the entire radio group instead.
 - ⚠️ Fields with `[up-switch]` now require a `[name]` attribute.
-- ⚠️ Unpoly will no longer un-hide elements targeted by `[up-switch]` when that element has neither `[up-show-for]` nor `[up-hide-for]` attributes. This was an undocumented side effect of the old implementation.
+- ❌ Unpoly no longer shows or hides elements targeted by `[up-switch]` when that element has neither `[up-show-for]` nor `[up-hide-for]` attributes. Before, such an element was shown while the field had a value or was checked, and hidden otherwise. This was an undocumented side effect of the old implementation. To keep the old behavior, set `[up-show-for=":present, :checked"]` on the element.
 
 
 ### Form validation
