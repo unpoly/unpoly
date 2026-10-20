@@ -142,6 +142,7 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - ⚠️ `up.Params.fromForm()` now requires a `<form>` element, as documented. To read params from any other container, use `up.Params.fromContainer()`.
 - ⚠️ `up.Params.fromForm()` now includes the `[name]` and `[value]` of the form's first submit button, like a submission would. Pass `{ submitButton: false }` to only include fields, as before, or pass a different button element.
 - ⚠️ When a form with [`[up-accept]` or `[up-dismiss]`](/learn/closing-overlays#result-values) closes an overlay, the result value now also contains the `[name]` and `[value]` of the submit button the user pressed.
+- One exception: a form only reads controls from its own [layer](/api/up.layer). The browser would also include controls from other layers that point to the form with a `[form]` attribute, e.g. when an overlay shows the same page as the layer below.
 
 
 ### Forms
@@ -156,9 +157,8 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - A custom control with a `[name]` but no readable value no longer reports an `undefined` value to watchers.
 - Pages with many watched forms are much faster. Before, every `[up-autosubmit]`, `[up-validate]`, `[up-switch]` or `up.watch()` looked at every field on the page after each fragment update. A page with hundreds of small forms could freeze for a second after each update.
 - ⚠️ `up.form.fields()` and `up.form.submitButtons()` now ignore elements in another [layer](/api/up.layer) and elements that are being [destroyed](/api/up.destroy), like other `up.fragment` lookups. A field in a popup that is attached inside a form is no longer watched by that form.
-- A form's params only contain controls from the form's own [layer](/api/up.layer). Controls in other layers are ignored, even when the browser would associate them with the form through a `[form]` attribute. When the same page is open in an overlay and in the layer below, each form reads its own `[form]` fields, although both forms have the same ID. This also applies to the fields of a popup that is attached within a form.
-- ⚠️ When a submit button or a focused field has a `[form]` attribute that points to a form ID in another layer, submitting now throws an error: "Prevented … from submitting a form in another layer". The browser would submit the other layer's form, e.g. the form below an overlay that shows the same page. To fix this, give your forms IDs that are unique across layers.
 - ⚠️ A `[form]` attribute now takes precedence over a surrounding `<form>`, like in the browser. A field or button within one form that is associated with another form no longer belongs to the surrounding form. It is no longer watched, validated or [disabled](/api/up-submit#up-disable) with that form, and it is no longer that form's default submit button.
+- ⚠️ When a submit button or a focused field has a `[form]` attribute that points to a form ID in another layer, submitting now throws an error: "Prevented … from submitting a form in another layer". The browser would submit the other layer's form, e.g. the form below an overlay that shows the same page. To fix this, give your forms IDs that are unique across layers.
 - ⚠️ `up.submit()` and `up.Params.fromForm()` now throw an error when the `{ submitButton }` option is a button that doesn't belong to the form, as the browser's `FormData` does. Pass `{ submitButton: false }` to read a form without a button.
 - Fix: While an overlay was closing, an [`[up-switch]`](/learn/switching-form-state) field in it could show or hide elements in the layer behind it. This happened for a field outside a `<form>`, and for an [`[up-switch-region]`](/api/up-switch#up-switch-region) that also matched in that layer.
 - ⚠️ [`[up-switch]`](/learn/switching-form-state) now switches immediately, ignoring `up.form.config.watchInputDelay` and `[up-watch-delay]`. Switching effects are client-side and don't benefit from debouncing. In a form that also [autosubmits](/api/up-autosubmit) with a delay, switching now settles before the submission reads the form.
@@ -3668,6 +3668,7 @@ However, Misconfigured server endpoints may send HTTP 200 (OK) for everything. T
   If neither of these options are given, the request will send no headers like `X-Up-Target` or `X-Up-Mode`.
   Also, since the request is no longer associated with the layer, it will not be aborted if the layer closes.
 - 🧩 The `up.network.isIdle()` function has been deprecated. Use `!up.network.isBusy()` instead.
+- 🧩 The event `up:request:fatal` was renamed to `up:request:offline`.
 - 🧩 The events `up:request:late` and `up:request:recover` were renamed to `up:network:late` and `up:network:recover` respectively. We may eventually re-introduce `up:request:late` and `up:request:recover` to support tracking individual requests (but not now).
 - New method `up.Request#header()` to access a given header.
 - 🧩 The method `up.Response#getHeader()` was renamed to `up.Response#header()`. It is now stable.
