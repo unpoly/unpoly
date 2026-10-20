@@ -33,10 +33,10 @@ up.network.config.patch(function(config) {
 })
 
 up.network.config.patch(function(config) {
-  up.migrate.renamedProperty(config, 'maxRequests', 'concurrency')
-  up.migrate.renamedProperty(config, 'slowDelay', 'lateDelay')
-  up.migrate.renamedProperty(config, 'cacheExpiry', 'cacheExpireAge', 'The configuration up.network.config.cacheExpiry has been renamed to up.network.config.cacheExpireAge. Note that Unpoly 3+ automatically reloads cached content after rendering to ensure users always see fresh data ("cache revalidation"). Setting a custom expiry may no longer be necessary.')
-  up.migrate.renamedProperty(config, 'clearCache', 'expireCache')
+  up.migrate.renamedProperty(config, 'maxRequests', 'concurrency', { label: 'up.network.config' })
+  up.migrate.renamedProperty(config, 'slowDelay', 'lateDelay', { label: 'up.network.config' })
+  up.migrate.renamedProperty(config, 'cacheExpiry', 'cacheExpireAge', { warning: 'The configuration up.network.config.cacheExpiry has been renamed to up.network.config.cacheExpireAge. Note that Unpoly 3+ automatically reloads cached content after rendering to ensure users always see fresh data ("cache revalidation"). Setting a custom expiry may no longer be necessary.' })
+  up.migrate.renamedProperty(config, 'clearCache', 'expireCache', { label: 'up.network.config' })
 
   let cacheSize = config.cacheSize
   Object.defineProperty(config, 'cacheSize', {
@@ -55,7 +55,7 @@ up.network.config.patch(function(config) {
 
   // Provide a default for the removed property, in case someone pushes into that.
   up.network.config.requestMetaKeys = []
-  up.migrate.removedProperty(config, 'requestMetaKeys', 'The configuration up.network.config.requestMetaKeys has been removed. Servers that optimize responses based on request headers should instead set a Vary response header.')
+  up.migrate.removedProperty(config, 'requestMetaKeys', { warning: 'The configuration up.network.config.requestMetaKeys has been removed. Servers that optimize responses based on request headers should instead set a Vary response header.' })
 })
 
 up.migrate.handleRequestOptions = function(options) {
@@ -291,7 +291,7 @@ up.network.shouldReduceRequests = function() {
 }
 
 up.network.config.patch(function(config) {
-  up.migrate.removedProperty(config, 'badRTT')
-  up.migrate.removedProperty(config, 'badDownlink')
-  up.migrate.renamedProperty(config, 'badResponseTime', 'lateDelay')
+  up.migrate.removedProperty(config, 'badRTT', { label: 'up.network.config' })
+  up.migrate.removedProperty(config, 'badDownlink', { label: 'up.network.config' })
+  up.migrate.renamedProperty(config, 'badResponseTime', 'lateDelay', { label: 'up.network.config' })
 })

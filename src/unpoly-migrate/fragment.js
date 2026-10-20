@@ -8,7 +8,7 @@ up.migrate.renamedPackage('flow', 'fragment')
 up.migrate.renamedPackage('dom', 'fragment')
 
 up.fragment.config.patch(function(config) {
-  up.migrate.renamedProperty(config, 'fallbacks', 'mainTargets')
+  up.migrate.renamedProperty(config, 'fallbacks', 'mainTargets', { label: 'up.fragment.config' })
 })
 
 up.migrate.handleResponseDocOptions = (docOptions) => up.migrate.fixKey(docOptions, 'html', 'document')

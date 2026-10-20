@@ -122,7 +122,7 @@ up.migrate.renamedAttribute('up-delay', 'up-preload-delay', { scope: preloadSele
 let preloadEnabledRef
 up.link.config.patch(function(config) {
   config.preloadEnabled = true
-  preloadEnabledRef = up.migrate.removedProperty(config, 'preloadEnabled', 'The configuration up.link.config.preloadEnabled has been removed. To disable preloading, prevent up:link:preload instead.')
+  preloadEnabledRef = up.migrate.removedProperty(config, 'preloadEnabled', { warning: 'The configuration up.link.config.preloadEnabled has been removed. To disable preloading, prevent up:link:preload instead.' })
 })
 
 up.on('up:link:preload', function(event) {

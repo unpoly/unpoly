@@ -10,10 +10,20 @@ up.migrate = (function() {
     logLevel: 'error'
   }))
 
-  function renamedProperty(object, oldKey, newKey, customWarning) {
+  // Pass a { label } like 'up.form.config' to name the object in the warning.
+  // Without a label we print the object itself.
+  function renamedProperty(object, oldKey, newKey, { label, warning } = {}) {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
-    const doWarn = u.memoize(() => customWarning ? warn(customWarning) : warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object))
+    const doWarn = u.memoize(function() {
+      if (warning) {
+        warn(warning)
+      } else if (label) {
+        warn('Property %s.%s has been renamed to %s.%s', label, oldKey, label, newKey)
+      } else {
+        warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+      }
+    })
 
     Object.defineProperty(object, oldKey, {
       configurable: true,
@@ -28,10 +38,20 @@ up.migrate = (function() {
     })
   }
 
-  function removedProperty(object, key, customWarning) {
+  // Pass a { label } like 'up.form.config' to name the object in the warning.
+  // Without a label we print the object itself.
+  function removedProperty(object, key, { label, warning } = {}) {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
-    const doWarn = u.memoize(() => customWarning ? warn(customWarning) : warn('Property { %s } has been removed without replacement (found in %o)', key, object))
+    const doWarn = u.memoize(function() {
+      if (warning) {
+        warn(warning)
+      } else if (label) {
+        warn('Property %s.%s has been removed without replacement', label, key)
+      } else {
+        warn('Property { %s } has been removed without replacement (found in %o)', key, object)
+      }
+    })
 
     let valueRef = [object[key]]
 

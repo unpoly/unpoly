@@ -107,7 +107,25 @@ if (up.migrate.loaded) {
         up.migrate.renamedProperty(object, 'oldKey', 'newKey')
 
         expect(object.oldKey).toBe('value')
-        expect(warnSpy).toHaveBeenCalled()
+        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('(found in %o)'), 'oldKey', 'newKey', object)
+      })
+
+      it('names the object by the given { label }', function() {
+        const warnSpy = up.migrate.warn.mock()
+        const object = { newKey: 'value' }
+        up.migrate.renamedProperty(object, 'oldKey', 'newKey', { label: 'up.foo.config' })
+
+        expect(object.oldKey).toBe('value')
+        expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property up.foo.config.oldKey has been renamed to up.foo.config.newKey')
+      })
+
+      it('logs the given { warning } instead of the default warning', function() {
+        const warnSpy = up.migrate.warn.mock()
+        const object = { newKey: 'value' }
+        up.migrate.renamedProperty(object, 'oldKey', 'newKey', { warning: 'Custom warning' })
+
+        expect(object.oldKey).toBe('value')
+        expect(warnSpy).toHaveBeenCalledWith('Custom warning')
       })
 
     })
@@ -120,7 +138,16 @@ if (up.migrate.loaded) {
         up.migrate.removedProperty(object, 'removedKey')
 
         expect(object.removedKey).toBe('value')
-        expect(warnSpy).toHaveBeenCalled()
+        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('(found in %o)'), 'removedKey', object)
+      })
+
+      it('names the object by the given { label }', function() {
+        const warnSpy = up.migrate.warn.mock()
+        const object = { removedKey: 'value' }
+        up.migrate.removedProperty(object, 'removedKey', { label: 'up.foo.config' })
+
+        expect(object.removedKey).toBe('value')
+        expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property up.foo.config.removedKey has been removed without replacement')
       })
 
       it('does not warn when the object is enumerated, e.g. when another warning prints it', function() {

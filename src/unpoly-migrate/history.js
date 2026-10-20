@@ -3,7 +3,7 @@
 */
 
 up.history.config.patch(function(config) {
-  up.migrate.renamedProperty(config, 'popTargets', 'restoreTargets')
+  up.migrate.renamedProperty(config, 'popTargets', 'restoreTargets', { label: 'up.history.config' })
 })
 
 /*-

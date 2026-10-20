@@ -5,12 +5,12 @@
 up.migrate.renamedPackage('layout', 'viewport')
 
 up.viewport.config.patch(function(config) {
-  up.migrate.renamedProperty(config, 'viewports', 'viewportSelectors')
-  up.migrate.renamedProperty(config, 'fixedTop', 'fixedTopSelectors')
-  up.migrate.renamedProperty(config, 'fixedBottom', 'fixedBottomSelectors')
-  up.migrate.renamedProperty(config, 'anchoredRight', 'anchoredRightSelectors')
-  up.migrate.renamedProperty(config, 'snap', 'revealSnap')
-  up.migrate.removedProperty(config, 'scrollSpeed')
+  up.migrate.renamedProperty(config, 'viewports', 'viewportSelectors', { label: 'up.viewport.config' })
+  up.migrate.renamedProperty(config, 'fixedTop', 'fixedTopSelectors', { label: 'up.viewport.config' })
+  up.migrate.renamedProperty(config, 'fixedBottom', 'fixedBottomSelectors', { label: 'up.viewport.config' })
+  up.migrate.renamedProperty(config, 'anchoredRight', 'anchoredRightSelectors', { label: 'up.viewport.config' })
+  up.migrate.renamedProperty(config, 'snap', 'revealSnap', { label: 'up.viewport.config' })
+  up.migrate.removedProperty(config, 'scrollSpeed', { label: 'up.viewport.config' })
 })
 
 /*-
