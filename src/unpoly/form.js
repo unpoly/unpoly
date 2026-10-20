@@ -1698,7 +1698,16 @@ up.form = (function() {
     if (event.defaultPrevented) return
 
     up.event.halt(event, { log: true })
-    up.error.muteUncriticalRejection(submit(form, { submitButton }))
+
+    // The browser resolves a button's [form] attribute across the whole page, and may have
+    // fired this event on a form in another layer. We submit the form that the button
+    // belongs to within its own layer.
+    let buttonForm = submitButton ? getForm(submitButton) : form
+    if (buttonForm && isSubmittable(buttonForm)) {
+      up.error.muteUncriticalRejection(submit(buttonForm, { submitButton }))
+    } else {
+      up.fail('Prevented button %o from submitting a form in another layer', submitButton)
+    }
   })
 
   /*-

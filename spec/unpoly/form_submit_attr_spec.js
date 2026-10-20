@@ -484,6 +484,70 @@ extendDescribe('up.form', function() {
           expect(request.method).toBe('POST')
         })
 
+        describe('with a [form] attribute when the same page is open in multiple layers', function() {
+
+          it("submits the form of the button's own layer, although the browser submits an earlier form with the same id", async function() {
+            const html = (prefix) => `
+              <div id="container">
+                <form id="my-form" action="/${prefix}-action" method="post" up-submit>
+                  <input name="own-field" value="${prefix}-own-value">
+                </form>
+                <button type="submit" name="button" value="${prefix}-button-value" form="my-form">Submit</button>
+              </div>
+            `
+            htmlFixtureList(html('root'))
+            await up.layer.open({ fragment: html('overlay') })
+
+            Trigger.clickSequence(up.fragment.get('button', { layer: 'overlay' }))
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/overlay-action')
+            expect(jasmine.lastRequest().data()).toMatchParams({ 'own-field': 'overlay-own-value', 'button': 'overlay-button-value' })
+          })
+
+          it('throws an error and submits nothing for a button whose [form] attribute points to a form in another layer', async function() {
+            const [rootForm] = htmlFixtureList(`
+              <form id="root-form" action="/action" method="post" up-submit>
+                <input name="own-field" value="own-value">
+              </form>
+            `)
+            await up.layer.open({ fragment: `
+              <div id="overlay-content">
+                <button type="submit" form="root-form">Submit</button>
+              </div>
+            ` })
+
+            await jasmine.expectGlobalError(/Prevented button .* from submitting a form in another layer/, async function() {
+              Trigger.clickSequence(up.fragment.get('button', { layer: 'overlay' }))
+              await wait()
+            })
+
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+            expect(rootForm).not.toHaveBeenDefaultSubmitted()
+          })
+
+          it('lets the browser submit natively for a button with [up-submit=false]', async function() {
+            const [rootForm] = htmlFixtureList(`
+              <form id="root-form" action="/action" method="post" up-submit>
+                <input name="own-field" value="own-value">
+              </form>
+            `)
+            await up.layer.open({ fragment: `
+              <div id="overlay-content">
+                <button type="submit" form="root-form" up-submit="false">Submit</button>
+              </div>
+            ` })
+
+            Trigger.clickSequence(up.fragment.get('button', { layer: 'overlay' }))
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+            expect(rootForm).toHaveBeenDefaultSubmitted()
+          })
+
+        })
+
         describe('when the form is submitted by pressing enter', function() {
 
           it('assumes the first submit button if the form was submitted with enter', async function() {
