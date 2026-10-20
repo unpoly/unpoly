@@ -1254,6 +1254,28 @@ describe('up.util', () => {
           expect(target).toEqual({ a: 1, b: 2, c: 3, d: 4, e: 5 })
         })
       })
+
+      describe('up.util.microtask()', function() {
+
+        it('runs the given function in a microtask and returns a promise for its return value', async function() {
+          const task = jasmine.createSpy('task').and.returnValue('result')
+
+          const promise = up.util.microtask(task)
+          expect(task).not.toHaveBeenCalled()
+
+          await expectAsync(promise).toBeResolvedTo('result')
+          expect(task).toHaveBeenCalled()
+        })
+
+        it('logs a deprecation warning', function() {
+          const warnSpy = up.migrate.warn.mock()
+
+          up.util.microtask(() => {})
+
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.util.microtask()'))
+        })
+
+      })
     }
 
 

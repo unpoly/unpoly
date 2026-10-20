@@ -133,7 +133,10 @@ Pushes the given function to the [JavaScript microtask queue](https://jakearchib
 @deprecated
   Use [`queueMicrotask()`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask) instead.
 */
-up.util.microtask = window.queueMicrotask
+up.util.microtask = function(task) {
+  up.migrate.deprecated('up.util.microtask()', 'queueMicrotask()')
+  return Promise.resolve().then(task)
+}
 
 up.migrate.splitAtOr = function(value) {
   let parts = value.split(/\s+or\s+/)
