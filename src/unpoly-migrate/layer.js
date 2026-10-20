@@ -2,12 +2,19 @@
 @module up.layer
 */
 
+// Renamed keys that may be passed as layer options or set in a layer config object.
+function fixRenamedLayerKeys(object) {
+  up.migrate.fixKey(object, 'closable', 'dismissible')
+  up.migrate.fixKey(object, 'dismissable', 'dismissible')
+  up.migrate.fixKey(object, 'closeLabel', 'dismissLabel')
+  up.migrate.fixKey(object, 'dismissAriaLabel', 'dismissARIALabel')
+  up.migrate.fixKey(object, 'historyVisible', 'history')
+}
+
 up.migrate.handleLayerOptions = function(options) {
+  // A config object is specific to a mode, so it never has a { mode }.
   up.migrate.fixKey(options, 'flavor', 'mode')
-  up.migrate.fixKey(options, 'closable', 'dismissible')
-  up.migrate.fixKey(options, 'dismissable', 'dismissible')
-  up.migrate.fixKey(options, 'closeLabel', 'dismissLabel')
-  up.migrate.fixKey(options, 'dismissAriaLabel', 'dismissARIALabel')
+  fixRenamedLayerKeys(options)
 
   for (let dimensionKey of ['width', 'maxWidth', 'height']) {
     if (options[dimensionKey]) {
@@ -108,7 +115,7 @@ layer.registerAttrCloser('up-close', (value, closeOptions) => {
   layer.dismiss(value, closeOptions)
 })
 
-up.migrate.handleLayerConfig = (config) => up.migrate.fixKey(config, 'historyVisible', 'history')
+up.migrate.handleLayerConfig = fixRenamedLayerKeys
 
 Object.defineProperty(up.Layer.prototype, 'historyVisible', { get: function() {
   up.migrate.deprecated('up.Layer#historyVisible', 'up.Layer#history')

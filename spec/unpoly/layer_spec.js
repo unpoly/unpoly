@@ -44,6 +44,19 @@ describe('up.layer', function() {
           up.layer.build({ mode: 'drawer' })
           expect(warnSpy).toHaveBeenCalled()
         })
+
+        it('renames a deprecated key that the user configured, like { closeLabel } (which is now { dismissLabel })', function() {
+          up.layer.config.overlay.closeLabel = 'Close'
+          up.layer.config.modal.dismissable = 'button key'
+          const warnSpy = up.migrate.warn.mock()
+
+          const layer = up.layer.build({ mode: 'modal' })
+
+          expect(layer.dismissLabel).toBe('Close')
+          expect(layer.dismissible).toMatchList(['button', 'key'])
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'closeLabel', 'dismissLabel', jasmine.anything())
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'dismissable', 'dismissible', jasmine.anything())
+        })
       }
     })
 
