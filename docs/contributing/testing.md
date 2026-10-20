@@ -80,16 +80,13 @@ Stack traces are mapped back to the original source, so the frames point at
 
 ### Debugging a failure
 
-**How to debug depends on where you are running.** In the terminal runner there is
-nothing to attach a debugger to, so inspecting state means logging it: anything you
+In the terminal there is no debugger, so you inspect state by logging it: anything you
 `console.log` in a spec or in `src/unpoly` shows up in the browser log that `--verbose`
-prints (below). But the terminal is not the only option — every failure comes with a
-`Debug in browser:` link that opens exactly that spec, and stepping through it in DevTools
-is usually the fastest way to understand a failure you can't explain.
+prints. A failure you can't explain is often fastest to understand by opening its
+`Debug in browser:` link and stepping through it in DevTools.
 
-**`--verbose` adds the state you would otherwise have to guess at.** Re-running a
-failure with the flag keeps everything above and adds the browser log plus an outline of
-the DOM as it stood when the spec failed:
+`--verbose` adds the browser log, every stack frame, and an outline of the DOM (rooted at
+`body`) as it stood when the spec failed:
 
 ```
   Browser log:
@@ -104,16 +101,8 @@ the DOM as it stood when the spec failed:
             Sign up
 ```
 
-The HTML state is a tree of CSS selectors rather than raw markup, which keeps a large
-fixture readable: `div` is implied for an element anchored by id or class, attributes
-appear in brackets, and text nodes are shown as indented text. That outline is usually
-enough to identify the problem without opening a browser — a fixture that was never
-compiled, an overlay still on the stack, a fragment inserted in the wrong place, or an
-attribute you expected Unpoly to have set.
-
-It is rooted at `body`, so it includes elements attached outside `#fixtures`, and a very
-large tree is clipped with a line saying so. `--verbose` also keeps every stack frame,
-where the default shows only the topmost frame in a spec file and in `src/`.
+That outline usually shows the problem without opening a browser: a fixture that was
+never compiled, an overlay still on the stack, a fragment inserted in the wrong place.
 
 ### Options and filters
 
@@ -128,103 +117,63 @@ where the default shows only the topmost frame in a spec file and in `src/`.
 | `--stop-on-failure=false` | Keep running a spec after its first failed expectation (default: stop) |
 | `--csp=none\|nonce-only\|strict-dynamic` · `--es6` · `--migrate` | Serve the specs under a CSP / ES6 / unpoly-migrate variant |
 
-`--spec` and `--file` are **repeatable**, and a run is the union of everything they select:
+`--spec` and `--file` are **repeatable**, and a run is the union of everything they select
+(overlaps run once):
 
 ```
-bin/test --spec="up.form" --spec="up.radio"
+bin/test --spec="up.form HTML [up-switch]" --spec="up.Params"
 bin/test --file=spec/unpoly/form_switch_spec.js --file=spec/unpoly/radio_spec.js:88
 ```
 
-Filters may overlap freely — naming a group and one of its specs is not a contradiction,
-and nothing can run twice.
+`--minify` runs the specs against the bundle we actually ship, where every `_`-prefixed
+member is renamed (see [private members](code-style.md#private-members-and-the-minified-build)).
+`bin/test` builds the minified bundles itself when they are missing or stale.
 
-`--minify` runs the specs against the bundle we actually ship. That matters because the
-minifier renames every `_`-prefixed member, so a spec that reaches one by name passes
-unminified and fails in production — see
-[private members](code-style.md#private-members-and-the-minified-build). The dev watcher
-does not build the minified bundles, so `bin/test` builds them itself when they are missing
-or older than your sources. CI runs this variant on every pull request.
-
-A failed spec exits with a non-zero exit code, so `bin/test` composes with other
-tooling. The spec runner itself — its exit codes, architecture and self-tests — is
-documented in [`tooling/README.md`](../../tooling/README.md).
+A failed spec exits non-zero. The spec runner itself is documented in
+[`tooling/README.md`](../../tooling/README.md).
 
 
 ## The full test suite is slow
 
-`bin/test --all` takes about **nine minutes**. That is why it needs the flag: an unfiltered
-run without one is refused, with a reminder of how to narrow it. Treat the whole suite as a
-cost to avoid, not a routine step after every edit.
+`bin/test --all` takes about **nine minutes**, which is why an unfiltered run needs the flag.
+Don't run it after every edit.
 
 **Find the specs that cover your change and run only those.** `bin/find-spec` searches
-`describe()` and `it()` titles and prints the full group path of every match:
-
-```
-bin/find-spec "up-disable"
-bin/find-spec "reset button"
-```
-
-Search more than once. A feature is known by several names, and the one in a spec title is
-rarely the one you were editing — so try the attribute, the function, the option, and the
-plain-English term somebody might have written:
+`describe()` and `it()` titles and prints the full name of every match. Search more than once:
+the name in a spec title is rarely the one you were editing, so try the attribute, the
+function, the option and the plain-English term:
 
 ```
 bin/find-spec "fieldSelectors"
 bin/find-spec "custom form field"
-bin/find-spec "disabled"
 ```
 
-Then run the groups you found. `--spec` and `--file` are repeatable and union, so several
-filters make a single run:
+**A whole module is not a narrow filter.** `--spec="up.fragment"` alone takes about five
+minutes. Name the groups that cover your change, like `up.form HTML [up-switch]` rather than
+`up.form`.
 
-```
-bin/test --spec="up.form HTML [up-switch]" --spec="up.Params"
-```
+**Run the full suite only when the blast radius is wide:** a change to `up.fragment`,
+`up.network`, `up.script`, `up.layer`, `up.util` or `up.element`, a change across many
+modules, or a refactoring whose reach you can't enumerate. Otherwise the filtered run *is*
+the verification.
 
-**A whole module is not a narrow filter.** `--spec="up.fragment"` passes the filter check,
-but runs a large part of the suite: `up.fragment` alone takes about five minutes. Name the
-groups that cover your change instead, like `up.form HTML [up-switch]` rather than `up.form`.
-Run a whole module only when you changed logic that most of that module re-uses.
-
-**Run the full suite only when the blast radius is genuinely wide:** a change to logic that
-most of the framework re-uses (`up.fragment`, `up.network`, `up.script`, `up.layer`,
-`up.util`, `up.element`), a change that touches many modules at once, or a refactoring whose
-reach you cannot enumerate. For an ordinary feature or fix inside one module, the filtered run
-*is* the verification.
-
-**Leave the build variants to CI.** The suite also runs minified, as an ES6 build, under two
-CSP modes, and with `unpoly-migrate.js` loaded — and each of those is another full suite.
-Open a pull request, let [CI](commit-conventions.md#continuous-integration) run the matrix in
-parallel, and read the result.
-
-Do not run variants locally "just to be sure": it multiplies the runtime of an already slow
-suite to look for a failure you have no reason to expect. Run one locally when
-
-- CI reported a failure in that variant, or
-- your change is specifically about what that variant exercises — CSP work earns
-  `--csp=nonce-only` and `--csp=strict-dynamic`, a new `unpoly-migrate.js` polyfill earns
-  `--migrate`.
-
-Even then, filter. `bin/test --migrate --spec="up.form HTML [up-switch]"` answers the question in seconds.
+**Leave the build variants to CI.** Minified, ES6, two CSP modes and `unpoly-migrate.js` are
+each another full suite, and [CI](commit-conventions.md#continuous-integration) runs them on
+every pull request. Run one locally (filtered) only when CI reported a failure in it, or when
+your change is about what it exercises, like `--csp=…` for CSP work or `--migrate` for a new
+polyfill.
 
 
 ## If you are an agent
 
-**Filter before you run.** [The full suite is slow](#the-full-test-suite-is-slow): find the groups that cover your
-change with `bin/find-spec` and run only those. A whole module like `up.fragment` is not a
-narrow filter: it runs for minutes. Save module runs and the unfiltered run for a wide blast
-radius, and leave the build variants to CI.
+**Filter before you run** (see [above](#the-full-test-suite-is-slow)).
 
-**Give the command a generous timeout.** The full suite takes minutes, and nothing caps
-its total runtime. A tool timeout shorter than that kills the run part-way and tells you
-nothing about your change.
+**Give the command a generous timeout**, set from how long the run actually takes. A
+shorter tool timeout kills the run and tells you nothing. You don't need to guard against
+a hang: a run that stops making progress exits non-zero by itself.
 
-You don't need to guard against a hang yourself: a run that stops making progress detects
-itself and exits non-zero. Set your timeout from how long the suite actually takes.
-
-**The full output is always in `tmp/test.log`.** Every run writes it, with the colours
-stripped, so truncating what you see in the terminal costs you nothing — read the log
-instead of running the suite again. A red run prints the path to remind you.
+**The full output is always in `tmp/test.log`**, without colours. Read it instead of
+running the suite again.
 
 
 ## Why a real browser
@@ -232,13 +181,8 @@ instead of running the suite again. A red run prints the path to remind you.
 Specs always run in a real browser: headless Chrome by default, Firefox with
 `--browser=firefox`. There is no jsdom variant, and we don't want one. Unpoly's
 behavior depends on details that a DOM emulation doesn't reproduce faithfully — focus
-handling, scroll positions, form serialization, event ordering, CSS resolution. A spec
-that passes against an emulated DOM would tell us very little.
-
-Chrome is the default because it's the easiest to debug by hand: a failing run prints a
-`Debug in browser:` URL that opens the single spec in a real browser window with
-DevTools available. See [Compatibility](compatibility.md#browser-support) for which
-browsers we support and which ones CI actually exercises.
+handling, scroll positions, form serialization, event ordering, CSS resolution.
+See [Compatibility](compatibility.md#browser-support) for which browsers CI exercises.
 
 
 ## How specs are organized
@@ -283,11 +227,9 @@ go under JavaScript, and the rare feature without any API under HTML. Modules wi
 kind may skip that level, as do classes, which go straight from `describe('up.Params')` to a
 group per method.
 
-**Below the feature**, ungrouped specs describe its general behavior. Small features need
-nothing else. Larger features group the rest by one main axis, usually per option or
-modifier. Occasionally a cohesive cluster cuts across that axis and gets its own group: the
-specs `when the server responds with an error` read better together than spread over the
-modifiers they involve. Nest deeper only in the largest features, like `up.render()`.
+**Below the feature**, ungrouped specs describe its general behavior. Larger features group
+the rest by one main axis, usually per option or modifier, plus the occasional cross-cutting
+group like `when the server responds with an error`.
 
 Nested group names concatenate with spaces to form a spec's *full name*, which is what
 `--spec` matches against. So the example above can be narrowed at any depth:
@@ -298,35 +240,16 @@ bin/test --spec="up.link HTML"                  # only the attribute specs
 bin/test --spec="up.follow()"                   # one function
 ```
 
-Full names never change when specs move between files, so a filter is always safe to
-copy from a failure and re-run.
+Full names never change when specs move between files.
 
 
 ### Finding the spec for a feature
 
-**By file name.** Start from the module: `up.form` is tested in `spec/unpoly/form_spec.js`.
-If a feature grew large enough to be extracted, it sits in `<module>_<feature>_spec.js`
-alongside it — `form_switch_spec.js` for `[up-switch]`, `layer_open_spec.js` for
-`up.layer.open()`. Every file for a module shares its prefix, so a listing groups them:
+**By file name.** `up.form` is tested in `spec/unpoly/form_spec.js`. A feature large enough
+to be extracted sits beside it in `<module>_<feature>_spec.js`, like `form_switch_spec.js`
+for `[up-switch]`. `ls spec/unpoly | grep ^form_` lists them all.
 
-```
-$ ls spec/unpoly | grep ^form_
-form_spec.js
-form_submit_attr_spec.js
-form_submit_fn_spec.js
-form_switch_spec.js
-…
-```
-
-Opening the module file also tells you what it gave away, and where that used to sit:
-
-```
-grep -n "require('./" spec/unpoly/fragment_spec.js
-```
-
-**By title.** When you know what a spec says but not where it lives, `bin/find-spec`
-searches every `describe()` and `it()` title — and only titles, so it won't drown you in
-spec code that happens to call the feature:
+**By title.** `bin/find-spec` searches only `describe()` and `it()` titles:
 
 ```
 $ bin/find-spec "kept element"
@@ -336,48 +259,32 @@ spec/unpoly/fragment_keep_spec.js:143 "up.fragment HTML [up-keep] omits a kept e
 …
 ```
 
-The quoted string *is* the spec's full name, so you can paste it straight into `--spec` —
-or any part of it, to widen the filter. A spec that only runs under a condition, like
-`(if up.migrate.loaded)`, says so after the quotes; run it with the matching option (`--migrate`). Passing a feature name also shows every file it is
-spread across, which for a big feature like `up.render()` is more than a dozen.
+The quoted string is the spec's full name, so you can paste it (or any part of it) into
+`--spec`. A spec that only runs under a condition, like `(if up.migrate.loaded)`, says so
+after the quotes; run it with the matching option (`--migrate`).
 
-Or skip the copying: `--file` takes a location and works out the filter itself.
+Or let `--file` work out the filter from a location:
 
 ```
 bin/test --file=spec/unpoly/classes/params_spec.js        # what that file declares
 bin/test --file=spec/unpoly/classes/params_spec.js:29     # just the group on line 29
 ```
 
-What a file "declares" depends on which kind it is, and the difference is worth knowing
-because it is the difference between 13 seconds and three minutes:
-
-- An **extracted file** starts with `extendDescribe()`, which names a group that other
-  files contribute to as well. Its own name would run the whole module, so `--file` runs
-  the blocks *this* file declares instead.
-- A **module's own spec file** starts with a real `describe()`, and naming it runs that
-  module — extracted files included, since skipping them would report a green run over a
-  fraction of the module's coverage. That is a [whole module](#the-full-test-suite-is-slow),
-  so for an ordinary change, point at the line of the group you need instead.
-
-So `--file` on a part means "this chunk", and on a module's file means "this module". The
-runner echoes the filters it derived, so you can always see which you got. Pointing at a
-line that declares nothing is an error rather than a silent wider run.
+On an [extracted file](#extracted-spec-files), `--file` runs just the blocks that file
+declares. On a module's own spec file, it runs the **whole module**, extracted files
+included, so point at the line of the group you need instead. The runner echoes the
+filters it derived.
 
 
 ### Where a new spec goes
 
-Put it in the `describe()` group it belongs to. The file follows from the group — you
-don't pick a file, and you very rarely create one. If that group happens to live in an
-extracted file, add it there; nothing else changes, because the group's full name is the
-same either way.
+Put it in the `describe()` group it belongs to. The file follows from the group, even when
+that is an extracted file. When a feature groups by option, a new option gets its own
+`with …` group. Otherwise, if no group fits, leave the spec ungrouped. Open a new group only
+for a cluster that a reader would look for together, like `when the server responds with an
+error`. The specs you wrote for one change are not a cluster by themselves.
 
-When a feature groups by option, specs for a new option get their own `with …` group too.
-Otherwise, if no group fits, leave the spec ungrouped. Don't open a new aspect group for a
-single requirement: regrouping a feature is a deliberate act, best agreed with a human.
-
-Only extract a group into a new file when it has grown to a size that makes its module
-file hard to read — a few dozen KB. That is a rare, deliberate act, not something to do
-while adding a spec.
+Extract a group into a new file only when its module file grows hard to read (a few dozen KB).
 
 
 ### Extracted spec files
@@ -410,9 +317,8 @@ extendDescribe('up.fragment', function() {
 So the split is invisible from the outside: one suite per module, unchanged full names,
 and `beforeEach` hooks from the module file still apply.
 
-If you ever add such a file, the tooling keeps you honest: `bin/self-test` fails if nothing
-loads it, or if its `extendDescribe()` chain doesn't name the group it is required into, and
-`bin/lint` names any alias you need to redeclare, since an extracted file is its own module.
+`bin/self-test` fails if nothing loads an extracted file, or if its `extendDescribe()` chain
+doesn't match where it is required. `bin/lint` names any alias you need to redeclare.
 
 
 ## Anatomy of a spec
@@ -447,10 +353,7 @@ it('submits the form and updates the target', async function() {
 })
 ```
 
-Specs for JavaScript functions are usually shorter — often just build, call, assert —
-because there's no user interaction to simulate and frequently no request.
-
-Each beat has a section below.
+Specs for JavaScript functions are usually shorter: build, call, assert.
 
 
 ## Building test HTML
@@ -467,9 +370,8 @@ const [form, field] = htmlFixtureList(`
 `)
 ```
 
-Writing the literal HTML is the point. Unpoly's features are HTML features, and a spec
-that spells out its markup lets you see at a glance what is being tested. Everything
-inserted this way is removed after the spec, so there's no cleanup to write.
+Writing the literal HTML is the point: a spec that spells out its markup shows at a glance
+what is being tested.
 
 ### The parameterized HTML function
 
@@ -504,10 +406,8 @@ Keeping this explicit is deliberate: some specs care about exactly when compiler
 
 ### State resets between specs
 
-You never have to undo what a spec did. Fixtures are removed, and Unpoly itself is reset
-after every spec — compilers you registered, `up.*.config` you changed, open overlays, the
-cache. So a spec can call `up.compiler()` or set config freely, and the next one starts
-clean.
+You never have to undo what a spec did. Fixtures are removed, and Unpoly is reset after
+every spec: registered compilers, changed `up.*.config`, open overlays, the cache.
 
 
 ### Overlays and styles
@@ -530,23 +430,17 @@ $form.append('<input name="field1" value="value1">')
 const $submitButton = $form.affix('input[type="submit"]')
 ```
 
-There are thousands of these, and they work fine — they just produce a wall of
-selectors that's hard to read as HTML. We're migrating them to `htmlFixtureList()` over
-time. Write new specs in the current style; if you find yourself editing an old one, you
-may as well convert it, but a working spec in the old style is much better than no spec.
-
-`up.element.affix()` remains useful for spawning a one-off element from a selector
-elsewhere in a spec. Just don't build the spec's initial HTML with it.
+They work, but read as a wall of selectors. Write new specs with `htmlFixtureList()`, and
+convert an old one when you edit it anyway. `up.element.affix()` is still fine for a one-off
+element later in a spec.
 
 
 ## Simulating user interaction
 
-`Trigger` dispatches the full event sequence a real interaction produces, not just the
-single event you might reach for. `Trigger.clickSequence(button)` fires
+`Trigger` dispatches the full event sequence a real interaction produces, which matters
+because Unpoly listens across that sequence. `Trigger.clickSequence(button)` fires
 `pointerover`, `mouseover`, `pointerdown`, `mousedown`, focus, `pointerup`, `mouseup`
-and `click` — which matters, because Unpoly listens across that sequence.
-
-Frequently used:
+and `click`.
 
 | Call | Simulates |
 |---|---|
@@ -559,8 +453,7 @@ Frequently used:
 | `Trigger.tabSequence(element)` | Tabbing to the next focusable element |
 | `Trigger.clickLinkWithKeyboard(link)` | Activating a link from the keyboard |
 
-`spec/helpers/trigger.js` has the rest, including the individual events
-(`Trigger.mousedown()`, `Trigger.focus()`, …) when you need one in isolation.
+`spec/helpers/trigger.js` has the rest, including single events like `Trigger.mousedown()`.
 
 
 ## The network is always mocked
@@ -584,17 +477,11 @@ index, or a request object) to answer an earlier one when several are in flight.
 
 ## Waiting for async code
 
-There is **no single rule** here, because the right thing to await depends on what you
-want to observe.
-
-In particular, you often can't just await the promise the API returns. `up.render({ url })`
-settles only after the server has responded *and* the fragment has been updated — so if
-you await it, you've already sailed past the point where the request was inspectable and
-answerable. That's why the shape in [Anatomy of a spec](#anatomy-of-a-spec) waits twice:
-once to let the request go out, once to let the response render.
-
-When you *do* only care about the end state, awaiting the promise is the clearest thing
-to write — as the compiler example above does with `await up.render(...)`.
+What to await depends on what you want to observe. `up.render({ url })` settles only after
+the server has responded *and* the fragment has been updated, so awaiting it skips past the
+point where you could inspect and answer the request. That's why the
+[spec anatomy](#anatomy-of-a-spec) waits twice. When you only care about the end state,
+await the promise.
 
 ### How to wait
 
@@ -606,36 +493,24 @@ await wait()        // one macrotask
 await wait(50)      // 50ms of real time — only for animations, see below
 ```
 
-`spec/helpers/wait.js` holds finer-grained variants — microtask ticks, a fixed number of
-macrotasks, an idle callback — for the rare spec that has to land between two specific
-ticks. Reach for one only when `wait()` genuinely can't express the timing.
+`spec/helpers/wait.js` holds finer-grained variants (microtasks, a number of macrotasks, an
+idle callback) for the rare spec that has to land between two specific ticks.
 
 ### Real time and clocks
 
-Wait for actual time **only when the thing you're testing is time-based** — an
-animation, or a configured delay like `up.form.config.watchInputDelay`. Everywhere else
-a real-time wait just makes the suite slower and flakier.
+Wait for actual time **only when the thing you're testing is time-based**, like an
+animation or `up.form.config.watchInputDelay`. Every millisecond is paid on every run, so
+keep it short:
 
-Every millisecond you wait is paid on every run of a suite with thousands of specs, so
-keep real-time waits as short as the browser allows:
+- Code that defers by a task (`u.task()`) needs tasks, not time: `await jasmine.waitTasks(2)`,
+  not `await wait(100)`.
+- Set configured delays (`lateDelay`, `watchInputDelay`, animation durations) to a few
+  milliseconds, then wait that plus 50–100 ms for timer inaccuracy.
+- Assert an earlier sign instead of the end state, like a progress bar's full width
+  instead of its removal after the animation.
 
-- **Stubbed work needs tasks, not time.** With the network mocked, a response is handled
-  within a task or two. When code defers by a task on purpose (`u.task()`), wait exactly
-  that many: `await jasmine.waitTasks(2)`, not `await wait(100)`.
-- **Shrink configured delays.** Set `up.network.config.lateDelay`, `watchInputDelay`,
-  animation durations and the like to a few milliseconds instead of waiting out their
-  defaults.
-- **Allow for timer inaccuracy, but no more.** Browser timers fire late, especially on a
-  busy CI machine. Wait the configured time plus 50–100 ms: with `lateDelay = 10`, a
-  `wait(60)` is enough to see the progress bar.
-- **Assert an earlier sign instead of the end state.** A progress bar that is concluding
-  moves to full width before it is removed after an animation. Asserting the width saves
-  waiting for the removal.
-
-`jasmine.clock()` is not the tool for this either. Don't install it, with one exception:
-making a mocked request time out. `jasmine.lastRequest().responseTimeout()` comes from
-jasmine-ajax and only works with the clock installed. The handful of specs that do this
-say so in a comment.
+Don't install `jasmine.clock()`, except to make a mocked request time out:
+`jasmine.lastRequest().responseTimeout()` only works with the clock installed.
 
 Older specs use `up.util.timer(ms, callback)`. Use `await wait(ms)` instead.
 
@@ -649,41 +524,30 @@ await expectAsync(promise).toBeRejected()
 await expectAsync(promise).toBePending()
 ```
 
-This also works for an `up.Request` or `up.RenderJob`, which are thenables rather than
-native promises. Jasmine's own `toBePending()` always passed for those, so a spec helper
-replaces it. `promiseState(promise)` resolves to `{ state, value }` with `state` being
-`'pending'`, `'fulfilled'` or `'rejected'`, for when you need the state or value itself.
+These also work for thenables like `up.Request` and `up.RenderJob`. `promiseState(promise)`
+resolves to `{ state, value }` when you need the state or value itself.
 
 ### When async/await isn't enough
 
-A few callback-timing observations can't be expressed with `async`/`await` — cases where
-you must assert from *inside* a callback rather than after awaiting it. For those,
-Jasmine's `done` callback is still available: declare the spec as
-`it('…', function(done) { … })` and call `done()` once the observation is complete.
-
-It isn't the default. Most of the remaining `done()` specs predate `async`/`await` and
-would read better converted, so reach for it only when the observation genuinely needs
-it.
+When you must assert from *inside* a callback, Jasmine's `done` callback is still
+available: `it('…', function(done) { … })`. Most existing `done()` specs just predate
+`async`/`await`, so don't copy them otherwise.
 
 
 ## Matchers
 
-Custom matchers live one per file in `spec/helpers/`, named after the matcher
-(`to_have_text.js` → `toHaveText()`). There are around seventy. Check for an existing one
-before asserting by hand — most things you'd want to say about an element, a request or
-a cache entry already have a matcher, and using it gives a far better failure message
-than a hand-rolled boolean.
+Around seventy custom matchers live one per file in `spec/helpers/` (`to_have_text.js` →
+`toHaveText()`). Check for one before asserting by hand: it gives a far better failure
+message than a boolean.
 
-Most element matchers accept a **CSS selector string** in place of the element, which is
-why specs can assert without keeping a reference around:
+Most element matchers accept a **CSS selector string** in place of the element:
 
 ```js
 expect('#target').toHaveText('new target')
 expect('#target').toBeVisible()
 ```
 
-To assert that an element is *gone*, negate a containment check rather than looking for
-a "missing" matcher:
+To assert that an element is *gone*, negate a containment check:
 
 ```js
 expect(document).not.toHaveSelector('up-progress-bar')
@@ -707,8 +571,7 @@ The ones you'll use constantly:
 | `toBeCached()` · `toBeExpired()` | The state of a cache entry |
 | `toBeOverlay()` · `toBeRootLayer()` | What kind of layer this is |
 
-Alongside these, Jasmine's own `jasmine.createSpy()` and `spyOn()` carry a lot of the
-weight in function specs — the compiler example above asserts entirely through a spy.
+Jasmine's `jasmine.createSpy()` and `spyOn()` carry a lot of the weight in function specs.
 
 
 ## Specs with special conditions
@@ -719,8 +582,6 @@ capability stubbed out, so you can cover the degraded path:
 ```js
 describeFallback('canPushState', function() { ... })
 ```
-
-`up.browser` exposes only two capabilities today — `canPushState()` and `canJQuery()`.
 
 **Expected errors.** Jasmine fails a spec when an error reaches `window.onerror`, which
 is wrong when the error is the thing you're testing. Call `allowGlobalErrors()` in the
@@ -733,13 +594,6 @@ group, or assert on it with `jasmine.expectGlobalError()`.
 
 ## Trying something by hand
 
-Some things are impractical to assert in a unit test — the visual look of an overlay, a form
-across several validation roundtrips, edge cases while Unpoly boots. Since
-[the network here is always mocked](#the-network-is-always-mocked), the suite cannot show you
-any of it.
-
-For those, `bin/dev` serves a **scratch server** on port 4001: a few real pages against a
-real server, in this repository, where you add a page and throw it away afterwards. See
-[Trying out changes](trying-out-changes.md).
-
-It proves nothing on its own. What you learn there belongs in a spec.
+Some things the mocked suite cannot show you, like the look of an overlay or a form across
+several validation roundtrips. For those, `bin/dev` serves a **scratch server** on port 4001
+(see [Trying out changes](trying-out-changes.md)). What you learn there still belongs in a spec.

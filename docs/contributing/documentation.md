@@ -44,7 +44,6 @@ Documentation lives in this repository, beside the code it describes. A sister p
   - [Keywords](#keywords)
 - [Markdown for agents](#markdown-for-agents)
   - [What a page needs](#what-a-page-needs)
-  - [Markers in the templates](#markers-in-the-templates)
 - [The contributing guides](#the-contributing-guides)
 - [Modules and classes](#modules-and-classes)
 - [Previewing your changes](#previewing-your-changes)
@@ -63,25 +62,11 @@ Unpoly has two kinds of documentation, and they do different jobs:
 | Reader intent | *"What arguments are accepted?"* | *"How do I implement this requirement?"* |
 | Example | [`/api/up.submit`](https://unpoly.com/api/up.submit) | [`/learn/submitting-forms`](https://unpoly.com/learn/submitting-forms) |
 
-Both kinds deliberately overlap, but they are written for different readers:
-
-- A **guide** shows a common use case end to end: how many features work together,
-  with lots of prose and examples, assuming little prior knowledge. It does *not*
-  explain every option or every edge case.
-- A **reference** explains every option, gives a basic example, and dives deep into
-  behavior and edge cases. It assumes prior knowledge: the reader already knows they
-  want this feature, but now they need the details.
-
-When unsure where content belongs, ask **who it serves**:
-
-- Text for a reader who *doesn't yet know this feature is the answer* — a use case,
-  a motivation, several features working together — belongs in a guide.
-- Text for a reader who *has already chosen the feature* — options, precise behavior,
-  edge cases — belongs in the reference.
-
-The same topic often needs both, written once for each audience. Some duplication
-is inevitable and intended; see [Reusing text](#reusing-text) for keeping repeated
-sentences consistent.
+A guide is for a reader who doesn't yet know which feature solves their problem: it shows
+a use case end to end, with many features working together, and skips most options and
+edge cases. A reference is for a reader who has already chosen the feature: it covers every
+option, the precise behavior and the edge cases. The same topic often needs both, and some
+duplication is intended (see [Reusing text](#reusing-text)).
 
 Both are parsed from files in this repository. The difference is the container:
 
@@ -189,9 +174,8 @@ guide pages under `/learn` (or under `/api` when `toc.yml` lists them in the API
 | `@header X-Up-Target` | `/api/X-Up-Target` |
 | `@page submitting-forms` | `/learn/submitting-forms` |
 
-Links in the docs spell out the prefix: `[label](/learn/caching#expiration)`. Before
-the docs moved under these prefixes, documents lived at the root (`/up.render`); those
-paths still redirect, but don't link to them.
+Links in the docs spell out the prefix (`/learn/caching#expiration`). The old root
+paths (`/up.render`) only redirect, so don't link to them.
 
 
 ## The feature types
@@ -477,22 +461,11 @@ function keeps an argument that only Unpoly itself passes.
 ### Markdown flavor
 
 `unpoly-site` renders doc comments and guide pages with
-[commonmarker](https://github.com/gjtorikian/commonmarker), so the Markdown is
-[CommonMark](https://commonmark.org/) with the GitHub extensions for tables, strikethrough and
-autolinks. Raw HTML passes through. On top of that come the extras described in this guide:
-heading attributes, wikilinks, admonitions, partials and code marks.
-
-A few CommonMark rules catch authors who know other flavors:
-
-- A list is *loose* when a blank line separates any two of its items, or two blocks inside
-  one item (like a paragraph and a code block). Then every item becomes a paragraph, with
-  more space between items. Leave out blank lines between short items.
-- An HTML block ends at the first blank line. Markdown after that blank line is parsed as
-  Markdown again, which is how a `<figcaption>` holds Markdown (see [What a page needs](#what-a-page-needs)).
-- Indent the code of a fenced block like its opening fence. CommonMark strips the fence's
-  indentation from every line inside.
-- A table needs a header row.
-- Quotes, dashes and `...` stay as typed. Type `…` or `–` when you want them.
+[commonmarker](https://github.com/gjtorikian/commonmarker): [CommonMark](https://commonmark.org/)
+with GitHub's tables, strikethrough and autolinks, plus the extras in this guide. Raw HTML
+passes through, and an HTML block ends at the first blank line. Quotes, dashes and `...`
+stay as typed, so type `…` or `–` when you want them. A blank line between list items makes
+the whole list loose (spaced paragraphs), so leave it out between short items.
 
 ### Referring to features
 
@@ -527,57 +500,40 @@ containing ` = `, and code inside headings or fenced blocks. A mention of the pa
 you're currently on isn't linked either, so you can write `` `up.render()` `` freely in
 its own doc comment.
 
-Guide pages have no backtick form, so they get their own autolink: a **wikilink** is
-the page's slug in double brackets, optionally with an anchor:
+Guide pages are autolinked with a **wikilink**: the page's slug in double brackets,
+optionally with an anchor:
 
 ```markdown
 For error handling, see [[error-responses]].
 Expired content is refreshed after rendering. See [[caching#revalidation]].
 ```
 
-A wikilink expands to a link labeled with the target's title — `Handling error responses`
-above, or `Caching: Revalidation` for the anchored form — so the label follows a retitle
-instead of rotting. A slug or anchor that doesn't resolve fails the site build. Wikilinks
-work for feature pages too (`[[up.render#concurrency]]`), which adds the anchor support
-that backtick autolinks lack. They are not expanded inside code blocks or code spans.
+A wikilink is labeled with the target's title (`Caching: Revalidation` for the anchored
+form), so the label follows a retitle. It also works for features (`[[up.render#concurrency]]`),
+which gives you the anchor that backtick autolinks lack. A slug or anchor that doesn't
+resolve fails the site build. Wikilinks are not expanded inside code.
+
+For your own label, write a plain Markdown link with the label woven into the sentence:
+`Unpoly can revalidate [expired](/learn/caching#expiration) cache entries.`
 
 A section of a chapter overview closes with a button to the page that tells the whole
-story. Write it as a paragraph that holds nothing but a wikilink with a `more:` prefix:
+story. Write it as a paragraph holding nothing but a wikilink with a `more:` prefix:
 
 ```markdown
 [[more: following-links]]
 ```
 
-It renders as a button labeled with the target's title, `More: Following links`, the
-same way an `@learn-ref` renders on an API page. It takes an anchor like any wikilink.
-The search index skips it. Never write its HTML by hand. A `[[more: …]]` within a
-sentence fails the site build.
-
-When you want your own label, don't use a wikilink — write a plain Markdown link
-with the label woven into the sentence:
-
-```markdown
-Unpoly can revalidate [expired](/learn/caching#expiration) cache entries.
-```
+It renders as a `More: Following links` button, like an `@learn-ref`. Don't write its HTML
+by hand. A `[[more: …]]` within a sentence fails the site build.
 
 Give a heading a stable anchor when you intend to link to it, so the URL survives a
-rewording:
+rewording. The braces take [Pandoc's heading attributes](https://pandoc.org/MANUAL.html#heading-identifiers)
+(`#id`, `.class`, `key=value`, bare `key`), on `#` and underlined headings alike:
 
 ```markdown
 ## Callback arguments {#callbacks}
-```
-
-The braces at the end of a heading line hold its attributes, in
-[Pandoc's syntax](https://pandoc.org/MANUAL.html#heading-identifiers): `#name` sets the `id`,
-`.name` adds a class, `key=value` (or `key="value"`) sets an attribute, and a bare `key` sets
-a boolean attribute. This works for `#` headings and for underlined (setext) headings:
-
-```markdown
 ### Closing when a location is reached {#location-condition data-toc-include}
 ```
-
-Without an `#id`, a heading still gets an id generated from its text. Only headings take
-attributes. Other elements that need attributes are written in HTML.
 
 ### Line breaks
 
@@ -647,33 +603,23 @@ A `[[=token]]` inserts a value that is computed when the site builds:
 | `[[=size unpoly.min.js]]` | The gzipped size of a file in `dist/`, e.g. `12.9 KB` |
 | `[[=base_url]]` | The site's origin, e.g. `https://unpoly.com` (the preview's own origin while previewing) |
 
-Unlike wikilinks, tokens are substituted *everywhere*, including code blocks — that's
-their main job, keeping version numbers in install snippets current
-(`unpoly@[[=version]]/unpoly.min.js`). To show the syntax literally, escape the opener
-as `\[[=`. An unknown or malformed token fails the site build with a list of the
-known tokens.
+Unlike wikilinks, tokens are substituted inside code blocks too, which keeps install
+snippets current (`unpoly@[[=version]]/unpoly.min.js`). Escape a literal opener as `\[[=`.
 
 ### Writing style
 
-Pages differ in voice, and the existing pages are no style canon: keep what works,
-improve what doesn't. A few conventions hold everywhere:
+The existing pages are no style canon: keep what works, improve what doesn't. A few
+conventions hold everywhere:
 
-- Open with one or two sentences saying what the topic *is*. Never "in this guide you will learn".
+- Open with one or two sentences saying what the topic *is*, never "in this guide you will learn".
+  That first paragraph doubles as the description on hubs and in search, so it must stand alone.
 - Headings name tasks or things ("Declaring dependencies"), not meta ("Overview of X").
-- Prefer short declarative sentences, usually subject-verb-object. "You" for instructions, "we" in walkthroughs.
-- Lead with value: say what the reader gets before explaining mechanics. Never build up
-  a problem for more than a clause.
-- Concrete beats abstract. Name outcomes and things ("your scroll position survives"),
-  not categories ("application behavior").
-- The first prose paragraph of every documentable — guide page, module or feature —
-  doubles as its short description on hubs, previews and indexes: one value-first
-  sentence that stands alone.
-- Don't enumerate features in prose — any pick of three reads as arbitrary.
-  Let code and lists carry enumerations.
-- Don't join two statements with an em-dash connective ("takes any JSON — and
-  compilers..."). Write two sentences.
-- In guides, show code early and often. A reader should rarely scroll a full screen
-  without passing an example.
+- Prefer short declarative sentences. "You" for instructions, "we" in walkthroughs.
+- Lead with value: say what the reader gets before explaining mechanics.
+- Concrete beats abstract ("your scroll position survives", not "application behavior").
+- Don't enumerate features in prose; any pick of three reads as arbitrary. Let code and lists do it.
+- Don't join two statements with an em-dash connective. Write two sentences.
+- In guides, show code early and often.
 - End on the last technical section. No closing summary.
 - Before review, run the `humanizer` skill to remove AI writing patterns.
   The skill is vendored unmodified (update with `npx skills update`), so tell it:
@@ -692,14 +638,10 @@ improve what doesn't. A few conventions hold everywhere:
 
 ## Reusing text
 
-Unpoly's documentation repeats itself a lot, and that's intentional. The same option is
-explained in a technical reference, in a holistic guide, sometimes in a getting-started page,
-because a reader learning the topic needs it in each place. What's good for the reader
-is punishing for us: the same sentence lives in many spots and has to stay consistent.
-
-That's what the directives below are for. **Extract when you notice a repetition, not
-on principle** — chasing consistency for its own sake produces more indirection than it
-saves.
+Unpoly's documentation repeats itself on purpose: the same option is explained in a
+reference, in a guide, sometimes on a getting-started page, because a reader needs it in
+each place. The directives below keep those copies consistent. **Extract when you notice
+a repetition, not on principle.**
 
 ### Markdown partials
 
@@ -742,15 +684,11 @@ indenting them below it — an override inherits whatever it doesn't restate:
 
 Naming a param the partial doesn't define is an error, so overrides can't silently rot.
 
-Most of this machinery exists for a handful of features. `up.render()`, `up.follow()`,
-`up.submit()`, `[up-follow]` and `[up-submit]` are the funnel that nearly everything
-else delegates to, so they pool the options of many features at once. `pages/params/`
-has directories for exactly those, plus a few small shared pairs.
-
-One consequence worth knowing: a **new render option belongs in
-`pages/params/up.render/<section>.md`**, because that partial is already the canonical
-copy feeding around ten pages. Writing it into a doc comment instead would silently
-desync `up.follow`, `[up-follow]`, `up.submit` and the rest.
+Most of this machinery serves `up.render()`, `up.follow()`, `up.submit()`, `[up-follow]`
+and `[up-submit]`, the funnel nearly everything else delegates to. So a **new render
+option belongs in `pages/params/up.render/<section>.md`**, the canonical copy feeding
+around ten pages. Writing it into a doc comment instead would silently desync
+`up.follow`, `[up-follow]`, `up.submit` and the rest.
 
 ### Inheriting a single param
 
@@ -777,12 +715,8 @@ It works on `@return` too.
 
 ## Guide pages
 
-Guide pages are the holistic half of the documentation: one article per topic, written
-from the developer's point of view, tying many API symbols together into something you
-can actually build. These deserve our best writing and our best examples. References
-are for looking things up; guides are for learning.
-
-Each page is one Markdown file in `src/unpoly/pages/`. The title is a Markdown h1
+A guide page is one article per topic, written from the developer's point of view.
+Each is one Markdown file in `src/unpoly/pages/`. The title is a Markdown h1
 underline, and the directives go at the bottom:
 
 ```markdown
@@ -806,42 +740,32 @@ the navigation a shorter label than the title.
 
 ### Listing the page in `toc.yml`
 
-`src/unpoly/pages/toc.yml` is the site's table of contents: it groups pages into topics
-for the Learn and API sections, in reading order. **A new page needs its entry in the
-same commit that creates it** — the site refuses to build when a page is missing from
-the manifest, listed twice, or when the manifest names a slug that doesn't exist.
+`src/unpoly/pages/toc.yml` groups pages into topics for the Learn and API sections, in
+reading order. **A new page needs its entry in the same commit** — the site refuses to
+build when a page is missing from it, listed twice, or when it names a slug that doesn't
+exist. The order within a Learn topic drives the previous/next navigation, so where you
+insert a page is an editorial decision.
 
-The order within a Learn topic drives the previous/next navigation on every Learn page,
-so where you insert a page is an editorial decision, not just a technical one.
-
-A Learn page that belongs to no chapter goes in the area's `loose:` list instead. It
-still counts as a Learn page (Learn menu, Learn search badge), but nothing lists it: not
-the sidebar, not the `/learn` hub, not the previous/next path. Readers reach it only
-through links from other pages.
+A Learn page that belongs to no chapter goes in the area's `loose:` list. Nothing lists
+it (sidebar, `/learn` hub, previous/next); readers reach it only through links.
 
 ### Linking the reference to a guide
 
-Readers reach a guide from the features it explains. The `@learn-ref` directive on a
-feature or module points at a guide page, and renders as a prominent "Learn:" link
-below the document's lead paragraphs:
+The `@learn-ref` directive on a feature or module renders a prominent "Learn:" link to a
+guide page below the lead paragraphs:
 
 ```js
 @selector [up-poll]
 @learn-ref polling
 ```
 
-The directive is repeatable, and the slug can carry an anchor
-(`@learn-ref caching#expiration`). The link label is derived from the target — the page
-title, or "Title › Heading" for anchored refs — so it survives retitles; to override it,
-indent your own label below the directive. A slug or anchor that doesn't resolve fails
-the site build.
+It is repeatable and takes an anchor (`@learn-ref caching#expiration`). The label is the
+target's title, or "Title › Heading" for an anchor; indent your own label below to override
+it. A slug or anchor that doesn't resolve fails the site build.
 
-A `@learn-ref` points to the Learn page that covers the symbol's wider topic.
-Readers often land on a very specific API page from a search result. The ref helps them
-find the overview of the topic the symbol belongs to. So the page doesn't need to explain
-or even mention the symbol: `up:request:loaded` belongs to `/network`, `[up-anchored=right]`
-to `/overlays`. Link one page, two only when the symbol belongs to two topics equally.
-Leave the ref out only when no Learn page covers the topic.
+Point it at the Learn page that covers the symbol's wider topic, even if that page never
+mentions the symbol: `up:request:loaded` belongs to `/network`, `[up-anchored=right]` to
+`/overlays`. Link a second page only when the symbol belongs to two topics equally.
 
 When you add a guide page, give the features of its topic a `@learn-ref`, or nothing will
 link to it. `rake docs:learn_refs` in `unpoly-site` lists the public selectors and events
@@ -849,63 +773,52 @@ that still lack one.
 
 > [!IMPORTANT]
 > Renaming a page changes its URL, and unlike a renamed API, we don't keep the old page
-> around as deprecated. Add a redirect to `src/unpoly-migrate/.htaccess`, which
-> unpoly.com includes:
+> around as deprecated. Add redirects to `src/unpoly-migrate/.htaccess`, which unpoly.com
+> includes, for both the full and the short path (unpoly.com only resolves `/foo` while
+> that page exists):
 >
 > ```apache
 > RedirectPermanent /learn/old-page-name /learn/new-page-name
 > RedirectPermanent /old-page-name /learn/new-page-name
 > ```
 >
-> The second line keeps the short path working: unpoly.com sends `/foo` to `/learn/foo`
-> (else to `/api/foo`) only while that page exists. Also point every redirect that led
-> to the old page at the new one: `rake docs:check_urls` in unpoly-site fails on a chain
-> of redirects.
+> Also point every redirect that led to the old page at the new one: `rake docs:check_urls`
+> in `unpoly-site` fails on a chain of redirects. The `.md` twin needs no redirect.
 >
-> The page's [Markdown twin](#markdown-for-agents) needs no redirect of its own: a `.md`
-> URL without a file redirects to its page.
->
-> Anchors (`#section`) need no such care. When you rename or move a section, update the
-> links in this repository and don't leave an `<a id="…">` shim behind. An external link
-> to the old anchor still opens the page, just at the top.
+> A renamed or moved section needs no redirect either. Update the links in this repository
+> and don't leave an `<a id="…">` shim behind.
 
 
 ### Overview pages
 
-Every topic in the Learn section opens with an overview page. An overview is not a
-table of contents — the sidebar already is one. Its jobs, roughly in reading order:
+Every topic in the Learn section opens with an overview page. It is not a table of
+contents (the sidebar is one). Its jobs, roughly in reading order:
 
-- Open with a standalone paragraph saying what Unpoly offers for this topic,
-  answering "do I want to read this?". It doubles as the topic's blurb elsewhere.
+- Open with a standalone paragraph saying what Unpoly offers for this topic.
 - Establish the mental model and terms the topic's other pages assume.
-- Show a minimal working example of the most common case. A reader who reads only
-  the overview can already do the basic thing.
-- Map the two to four most common needs — each a situation sentence with a taste
-  of code, linking its detail page. A feature that will excite readers can take a
-  map section even when it is not a common need. The remaining pages get a one-line
-  mention under a closing "See also" section. Pages in other topics that readers
-  will look for here go in the same section, never in a read-more box.
-- Name a boundary ("infinite scrolling is not here") only where readers will
-  plausibly take a wrong turn. Most overviews need none.
+- Show a minimal working example of the most common case.
+- Map the two to four most common needs (or exciting features), each a situation
+  sentence with a taste of code and a `[[more: …]]` to its detail page. The remaining
+  pages, and pages in other topics readers will look for here, get a one-line mention
+  under a closing "See also" section.
+- Name a boundary ("infinite scrolling is not here") only where readers will plausibly
+  take a wrong turn.
 
-Order sections for comprehension, and stay between 400-800 words. Good exemplars are `src/unpoly/pages/loading-state.md` and the Overlays pilot
-(`docs/rework-2026/pilots/overlays.md`, which becomes the real page during the rework).
+Stay between 400 and 800 words. Good exemplars are `src/unpoly/pages/loading-state.md`
+and `src/unpoly/pages/overlays.md`.
 
 Pages in a tutorial register, like the Getting started chapter, may bold one phrase per
 section: always the behavioral outcome ("updates **the `<form>` itself**"), never a feature
-name or code. Bold marks importance in prose; [`mark:` annotations](#marking-up-code-blocks)
-stay the device for drawing attention to code.
+name or code.
 
 
 ## Search ranking
 
-The search on unpoly.com ranks a few documents higher than the rest. Mark a document
-with `@signature` when it is a core feature that many Unpoly apps will use (like
-`[up-follow]` or `up.render()`), a key concept of the framework, or a guide page for
-beginner and intermediate users. Edge cases, escape hatches and dry reference pages
-stay unmarked — they still surface, below the common answers.
-
-The directive goes on a line of its own, next to the other directives:
+The search on unpoly.com ranks documents marked `@signature` above the rest. Mark core
+features many apps will use (like `[up-follow]` or `up.render()`), key concepts, and guide
+pages for beginner and intermediate users. Edge cases, escape hatches and dry reference
+pages stay unmarked. The directive goes on its own line, next to the other directives
+(below `@page` on a guide page):
 
 ```js
 @selector [up-follow]
@@ -913,73 +826,45 @@ The directive goes on a line of its own, next to the other directives:
 @signature
 ```
 
-A guide page takes it below `@page`:
-
-```markdown
-@page submitting-forms
-@signature
-```
-
-There are only two tiers, marked and unmarked. A query only surfaces the documents it
-matches, so the tier can be generous. When a page ranks wrong, fix it here rather than
-in the search code. A change shows in the search only after the index is rebuilt: run
-`SKIP_CHECK_LINKS=1 bundle exec rake search:index` in `unpoly-site`.
+When a page ranks wrong, fix it here rather than in the search code. A change shows only
+after the index is rebuilt: run `SKIP_CHECK_LINKS=1 bundle exec rake search:index` in
+`unpoly-site`.
 
 ### Keywords
 
-Our prose uses one term per concept ("overlay", "keeping elements", "error response").
-Readers don't know these terms and search for their own words ("modal", "preserve").
-`@keywords` lists such words for one page, so the search finds the page anyway:
+Our prose uses one term per concept ("overlay"), but readers search with their own words
+("modal"). `@keywords` lists such words so the search finds the page anyway:
 
 ```markdown
 @page closing-overlays
 @keywords dialog, modal
 ```
 
-Keywords only help the search find a page. They are never shown, neither on the page,
-nor in search results, nor in the page's Markdown. A keyword counts less than a word in the
-page's title. It fills a gap and gives the page a slight push, but doesn't overrule pages
-whose prose discusses the word. Don't tune keywords to win a particular search: readers and
-agents pick the right result once it is among the first few.
-
-Keywords cover clear gaps in the prose. They are not a list of the page's important words.
-Add a keyword only when all of these are true:
-
-- A reader would plausibly type the word when they need this page.
-- The page's prose doesn't use the word, in any form.
-- The search doesn't already show the page among the first results, without scrolling (about the top 5).
-
-A page has two budgets:
-
-- **0–2 synonyms**: other names for the term the page is about ("dialog" for overlay, "preserve" for keep).
-  Each page that the reader may mean gets its own: "closing dialog" should find `/closing-overlays`,
-  not only `/overlays`.
-- **0–4 page-specific keywords**: concepts, actions or names from other frameworks that this one
-  page answers ("toast" for flashes).
-
-Most pages need no keywords. Never change the prose to use a reader's word instead of our term.
+Keywords are never shown, and count less than a word in the title. Add one only when a
+reader would plausibly type it, the page's prose doesn't use it in any form, and the page
+isn't already among the top five results. Per page, allow up to two synonyms for the term
+the page is about and up to four page-specific words (like "toast" for flashes). Most pages
+need none. Never change the prose to use a reader's word instead of our term.
 
 
 ## Markdown for agents
 
 Every documentation page on unpoly.com also exists as Markdown, for coding agents and
-LLMs: its URL plus `.md` (`/api/up.render.md`). An agent that asks for `text/markdown` gets the
-same text at the page's own URL. `/index.md` (also served as `/llms.txt`) lists the
-guide chapters and API modules, and the `unpoly-docs` agent skill bundles all pages as
-files with a search script.
+LLMs: its URL plus `.md` (`/api/up.render.md`), or the page's own URL requested as
+`text/markdown`. `/index.md` (also `/llms.txt`) lists the guide chapters and API modules,
+and the `unpoly-docs` agent skill bundles all pages.
 
-You write nothing extra for this. `unpoly-site` renders each page as usual, then converts
-the HTML to Markdown, so whatever the page says, its Markdown says too. Headings keep
-their ids as `{#id}`, so links to `/api/up.render#options.target` still find their target.
+You write nothing extra for this: `unpoly-site` converts each rendered page's HTML to
+Markdown. Headings keep their ids as `{#id}`.
+To see what a change does to the Markdown, open the page's `.md` URL in the preview.
+`unpoly-site` pins the output of its test pages in golden files (see its README).
 
 ### What a page needs
 
-The converter can't look at pictures, so a page must describe its media. A build fails
-otherwise.
-
-Every image and video is a `<figure>`. Its `alt` (an `aria-label` for a video) names
-the medium in a few words. Its `<figcaption>` describes what the reader should learn
-from it, so a screen reader or an agent misses nothing:
+The converter can't look at pictures, so the build fails unless a page describes its media.
+Every image and video is a `<figure>`. Its `alt` (an `aria-label` for a video) names the
+kind of medium in a few words. Its `<figcaption>` describes what the reader should learn
+from it, without repeating the surrounding text:
 
 ```html
 <figure>
@@ -995,88 +880,33 @@ A render pass moves through these stages:
 </figure>
 ```
 
-- The `alt` or `aria-label` says what kind of medium it is: "Flowchart of …",
-  "Screenshot of …", "Video: …". It does not repeat the caption.
-- The caption describes content, not looks. Two to eight sentences are usual, a list
-  works for stages or steps, and one sentence is enough for a simple screenshot. Don't
-  repeat the text around the figure; say what the medium adds.
-- A width goes in the `width` attribute. A video keeps its `controls`, `loop` and `width`.
-- Write `images/…` paths relative to the sources, as for any image.
-- Leave a blank line after `<figcaption>` and before `</figcaption>`. The blank line ends
-  the HTML block, so the caption in between is read as Markdown.
+Leave a blank line after `<figcaption>` and before `</figcaption>`, so the caption is
+parsed as Markdown. On the site the caption is visually hidden, but screen readers and
+search read it.
 
-On the site the caption is visually hidden, but screen readers read it and search
-indexes it. The Markdown twin keeps the `<figure>` with the caption as Markdown, so it
-stays next to its medium.
+An embedded diagram (`<div embed="…">`) is an `<svg role="img">` with a `<title>` and a
+`<desc>`, and an `id` on the svg or its `<figure>`.
 
-- An embedded diagram (`<div embed="…">`) is an `<svg role="img">` with a `<title>` and a
-  `<desc>`, and an `id` on the svg or its `<figure>`. The Markdown links to the diagram on
-  the HTML page and repeats its description.
-
-A page's table of contents normally lists only its top-level headings. To list a lower
-heading too, give it a `data-toc-include` attribute:
-
-```markdown
-### Closing when a location is reached {#location-condition data-toc-include}
-```
-
-### Markers in the templates
-
-The templates in `unpoly-site` say what an element means with standard semantics
-(headings, `<nav>`, ARIA), which screen readers and the converter both understand. Where
-that is not enough, a `data-*` attribute takes over. Each `data-*` attribute serves one
-consumer:
-
-| Marker | Screen readers | Search (Pagefind) | Contents list | Markdown |
-|---|---|---|---|---|
-| `data-pagefind-body` | – | indexes these pages | – | – |
-| `data-pagefind-ignore` | – | skips the element | – | keeps it (agents want those blocks) |
-| `data-toc-ignore` | – | – | skips the heading | – |
-| `data-toc-include` | – | – | lists a lower heading | – |
-| `h2`–`h4` with `id` | headings | sub-results | lists them | a heading of that level with `{#id}` |
-| `role="heading" aria-level` | headings | – | – | heading of that level |
-| `aria-label` on a link | the link's name | – | – | the link's text |
-| `aria-hidden="true"` | hidden | indexed | – | dropped |
-| `data-markdown="ignore"` | read | indexed | – | dropped |
-| `data-markdown="chip"` | read | indexed | – | `(title or text)` |
-| `<svg role="img">` with `<title>`/`<desc>` | reads them | – | – | `[Diagram: title](…)` and the description |
-| `<nav aria-label="…">` | a landmark | – | – | a literal `<nav>` block of links |
-
-`data-markdown` has two values. `ignore` drops chrome that only humans use (the
-corner with the Markdown and copy buttons, a breadcrumb), with everything inside it. `chip` writes a badge or
-tag as a word in parentheses, preferring its `title`: the kind badge "JS" with
-`title="JavaScript function"` becomes `(JavaScript function)`. Add a value only for a
-case these two can't express.
-
-To see what a change does to the Markdown, open the page's `.md` URL in the preview.
-`unpoly-site` pins the output of its test pages in golden files (see its README).
-
+A page's table of contents lists only top-level headings. Add `data-toc-include` to a
+lower heading to list it too (see the `{…}` example under
+[Rely on autolinking](#rely-on-autolinking)).
 
 ## The contributing guides
 
-Everything above describes the documentation Unpoly *publishes*: doc comments and guide pages
-under `src/`, parsed by `unpoly-site` and served from unpoly.com. The guides you are reading now
-are a separate set with separate rules. They live in `docs/contributing/`, they are written for
-people and agents working *on* Unpoly rather than with it, and they are never published.
+The guides in `docs/contributing/` are for people and agents working *on* Unpoly, and are
+never published. GitHub renders them, so none of the conventions above apply: no
+directives, no autolinking, no partials, no custom `{#anchor}`. Link to a section by
+GitHub's generated slug (`testing.md#how-specs-are-organized`), and write admonitions as
+`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]` or `> [!CAUTION]`.
 
-They are rendered by **GitHub**, not by our own parser, so none of the conventions above apply:
-no `@` directives, no autolinking of `up.*` symbols, no partials, and no custom `{#anchor}` on a
-heading — GitHub generates its own slug and prints the braces verbatim. Link to a section with
-that generated slug (`testing.md#how-specs-are-organized`), and to code with an ordinary relative
-path. Admonitions use GitHub's spelling — `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`,
-`> [!WARNING]`, `> [!CAUTION]` — rather than the `> [important]` form used above.
-
-Long guides carry a table of contents below their intro, between `<!-- toc -->` markers. It is
-generated: run `bin/update-contributing-tocs` after adding, renaming or reordering a heading.
-`bin/self-test` fails if a TOC is stale, if a guide long enough to need one lacks it, or if a
-link between these files points at a heading that no longer exists — and names the command.
+Long guides carry a generated table of contents between `<!-- toc -->` markers. Run
+`bin/update-contributing-tocs` after changing a heading. `bin/self-test` fails on a stale
+TOC, a long guide without one, or a link to a heading that no longer exists.
 
 > [!IMPORTANT]
-> These guides describe the tooling and the layout of this repository, so they go stale in a way
-> published documentation cannot. Renaming a `bin/` script, moving a directory, changing what a
-> command prints or adding a spec convention all mean editing a guide in the same commit. The
-> [overview in `CONTRIBUTING.md`](../../CONTRIBUTING.md) summarizes each guide, so a summary may
-> need the same edit.
+> These guides describe this repository's tooling and layout, so update them in the same
+> commit that renames a `bin/` script, moves a directory or adds a spec convention. Also
+> check the summary of that guide in [`CONTRIBUTING.md`](../../CONTRIBUTING.md).
 
 
 ## Modules and classes
@@ -1109,7 +939,6 @@ Two things to know:
   repeated declarations of the same module are merged.
 - **There is no `@see` directive.** Point at related features in the prose, e.g.
   "See also `up.network.isBusy()`.", and at guide pages with `@learn-ref`.
-  The parser rejects a leftover `@see`.
 
 `@class` blocks also use `@parent` to nest under a module in the menu, e.g.
 `src/unpoly/classes/params.js` declares `@parent up.form`.
@@ -1135,3 +964,7 @@ guide page — only appears after restarting the dev environment.
 The sister repository [`unpoly-site`](https://github.com/unpoly/unpoly-site) has
 the HTML templates, CSS and JavaScripts for [unpoly.com](https://unpoly.com).
 It also contains a parser that reads the API documentation content from the `unpoly/unpoly` sources.
+
+What you need to know to write documentation *content* lives in this guide. How `unpoly-site`
+is implemented (its parser, templates and Markdown conversion) is explained in its README,
+starting with [What lives where](https://github.com/unpoly/unpoly-site#what-lives-where).

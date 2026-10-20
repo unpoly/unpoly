@@ -12,12 +12,10 @@ Only Chrome and Firefox have automated specs (`bin/test --browser=firefox`), and
 
 Modern *syntax* is safe: the build transpiles it down (to ES2024 for `unpoly.js`, to ES6
 for the optional `unpoly.es6.js`). Modern *APIs* are not, since transpiling doesn't
-polyfill them. Before you use a browser API, check on [caniuse.com](https://caniuse.com)
-that all three browsers have supported it for two years. If so, use it without a runtime check.
-
-An API newer than that needs a graceful degradation path. Add a feature check to
-`up.browser`, e.g. `up.browser.canPushState()`, and let the feature degrade rather than
-throw. Skipping an animation is fine.
+polyfill them. An API that all three browsers have supported for two years
+([caniuse.com](https://caniuse.com)) needs no runtime check. A newer one needs a feature check
+in `up.browser`, e.g. `up.browser.canPushState()`, and a path that degrades rather than throws.
+Skipping an animation is fine.
 
 
 ## Breaking changes

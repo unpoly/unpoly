@@ -1,9 +1,7 @@
 # Setting up a dev environment
 
-Specs never run against `src/` directly — they run against a transpiled build in `dist/`,
-which is why this repository has a dev environment at all. This page covers the dependencies
-you need and the one command that boots the build watcher, the spec server and the
-documentation site.
+Specs never run against `src/` directly, but against a transpiled build in `dist/`. One
+command boots the build watcher, the spec server and the documentation site.
 
 ## Installing development dependencies
 

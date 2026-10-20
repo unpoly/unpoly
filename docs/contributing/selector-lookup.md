@@ -92,16 +92,22 @@ The constructor does the work up front; `matches()`, `closest()`, `descendants()
    | 1 | `{ layer: 'new' }` | none | the new layer |
    | 2 | detached or external document, `{ layer: 'any' }`, or only one layer in the DOM (`up.layer.attachedCount === 1`) | none | the root layer |
    | 3 | `up.layer.getAll(options)` found layers | only those layers | the first layer found |
-   | 4 | the layer comes from an element (the root, `{ layer: element }`, or the `{ origin }`), and no layer contains it | nothing matches | (no selectors) |
+   | 4 | the layer comes from an element (the root, `{ layer: element }`, or an `{ origin }` without an `{ originLayer }`), and no open layer contains it | nothing matches | (no selectors) |
    | 5 | a named layer that doesn't exist, or `{ layer: 'origin' }` without an `origin` | throws `up.CannotMatch` | |
 
    Case 3 resolves a layer **set** — `{ layer: 'overlays' }` or `{ layer: '1 3' }` legitimately
    yield several — and adds a containment filter for them.
 
-   Case 4 is an overlay that has closed but is still in the DOM, playing its exit animation:
-   its layer has left the stack, but its elements are still there, marked `.up-destroying`.
-   Nothing in a closed layer can match, so a lookup from inside it finds nothing instead of
-   throwing, and never falls through to another layer.
+   Case 4 is a lookup *from an element* in an overlay that has closed but is still in the DOM,
+   playing its exit animation: its layer has left the stack, but its elements are still there,
+   marked `.up-destroying`. No open layer contains the element, so the lookup finds nothing
+   instead of throwing, never falls through to another layer, and finds nothing even with
+   `{ destroying: true }`.
+
+   A lookup that names the closed layer itself is case 3, not case 4. A closed `up.Layer`
+   object passed as `{ layer }`, or an `{ originLayer }` remembered from before the overlay
+   closed, still resolves to that layer. Its elements pass the layer filter while they animate
+   out. Only the liveness filter skips them, so `{ destroying: true }` finds them.
 
    Case 2 counts the layers **in the DOM** (`attachedCount`: open layers plus closed overlays
    still animating out), not the open layers. Otherwise an overlay closing into the root layer

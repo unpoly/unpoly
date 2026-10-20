@@ -1,8 +1,8 @@
 # Code organization
 
-Where code lives in this repository and why: the directory layout, the `window.up` global,
-which module owns which topic, how a module is structured internally, and where to find the
-specs for a given file.
+Where code lives, why Unpoly is a `window.up` global, which module owns which topic,
+and how a module is structured internally.
+
 <!-- toc -->
 - [Directory structure](#directory-structure)
   - [Where to find a module's specs](#where-to-find-a-modules-specs)
@@ -89,32 +89,16 @@ dist/                     # Output directory for the Webpack bundler (gitignored
 
 ### Where to find a module's specs
 
-A module's specs are not always in a single file: a group that grew too large lives in a
-sibling file sharing the module's prefix, like `form_switch_spec.js` above. See
-[How specs are organized](testing.md#how-specs-are-organized) for the naming, how to
-[find the spec for a feature](testing.md#finding-the-spec-for-a-feature), and
-[where a new spec goes](testing.md#where-a-new-spec-goes).
+A group that grew too large lives in a sibling file sharing the module's prefix, like
+`form_switch_spec.js` above. See [Finding the spec for a feature](testing.md#finding-the-spec-for-a-feature).
 
 
 ### Implementation plans
 
 A change worth more than one commit is worth a written plan first: what was decided,
-what was ruled out and why, and the sequence of commits it will take. Plans go in
-`docs/plans/`, which is gitignored except for its `.gitkeep`.
-
-A plan is a working note, not a deliverable. Keeping it out of the history means it
-never reaches a reviewer, while still surviving the branch switches and rebases that a
-long-lived branch goes through.
-
-Name the file after the change it plans — the request, the feature or the pull request —
-so that a directory listing reads as an index:
-
-```
-docs/plans/
-  pr-807-form-associated-custom-elements.md
-  up-switch-array-fields.md
-  optimistic-rendering.md
-```
+what was ruled out and why, and the sequence of commits. Plans are working notes in
+`docs/plans/`, which is gitignored. Name the file after the change, like
+`docs/plans/up-switch-array-fields.md`.
 
 
 ## Architecture

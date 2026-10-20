@@ -1,8 +1,7 @@
 # Philosophy
 
 The values behind Unpoly's design: what we choose to build, how we shape an API, and what we
-ask of a feature before it ships. Worth reading before you design a new feature — or before
-you review someone else's.
+ask of a feature before it ships.
 
 ## Values
 

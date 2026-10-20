@@ -1,19 +1,15 @@
 # Making a new release
 
 A guided CLI walks you through the process. Before starting, set the new version in
-`package.json` and write its changelog entry in `docs/changes/CHANGELOG_<major>.x.md` — the tool reads the version from
-`package.json` and tags with it.
+`package.json` and write its changelog entry in `docs/changes/CHANGELOG_<major>.x.md` — the
+tool reads the version from `package.json` and tags with it. Before a regular release, publish
+a pre-release (like `3.13.0-rc1`) and upgrade at least one real app to it.
 
-Before a regular release, publish a pre-release (like `3.13.0-rc1`) and upgrade at least one
-real app to it. The tool reminds you of this unless the version you release is itself a pre-release.
-
-In the changelog entry, start an item with ⚠️ when it may require changes to user code but `unpoly-migrate.js`
-polyfills the old usage, or with ❌ when it breaks code without a polyfill. Scripts find these markers only at the
-start of an item or paragraph.
-
-Only intentional changes to *documented* API or behavior are breaking changes. Bug fixes, changes that align Unpoly
-with native browser behavior, and changes to undocumented behavior get no marker. List them in their topic group,
-so users who relied on the old behavior can still find them.
+In the changelog, start an item that may need the reader's attention with a marker:
+🧩 when `unpoly-migrate.js` polyfills it and logs where the old API is used, ⚠️ when it is
+not polyfilled but rare or minor, and ❌ when readers should check their code in any case.
+Only intentional changes to *documented* API or behavior are breaking; bug fixes and changes
+to undocumented behavior get no marker.
 
 ```
 bin/release
@@ -32,4 +28,5 @@ CHANGELOG and CDN links, and announcing the release.
 
 ## If you are an agent
 
-Never make a release.
+Never run `bin/release` or publish to npm. When asked, you may prepare a release: the
+changelog entry and the version in `package.json`.
