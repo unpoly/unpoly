@@ -506,10 +506,13 @@ up.Params = class Params {
   Without the option the first submit button is assumed, which is also what a browser
   does when the user submits from a field by pressing `Enter`.
 
+  The button must belong to the form. Like the browser's `FormData`, `up.Params.fromForm()` throws
+  an error for a button of another form.
+
   ### Disabled fields {#disabled-fields}
 
   Like in a browser submission, a disabled field contributes no params.
-  The exception are fields and buttons that a [preview](/api/up.Preview.prototype.disable) disabled while a request is loading,
+  The exceptions are fields and buttons that a [preview](/api/up.Preview.prototype.disable) disabled while a request is loading,
   e.g. with [`[up-disable]`](/api/up-submit#up-disable). These still count as part of the form,
   so a second submission sends the same params as the first one.
 
@@ -518,6 +521,9 @@ up.Params = class Params {
     A `<form>` element.
   @param {Element|false} [options.submitButton]
     The submit button that submitted the form.
+
+    The button must belong to the form, or an error is thrown.
+    Pass `false` to include no submit button.
   @return {up.Params}
     A new `up.Params` instance with values from the given form.
   @stable
@@ -528,11 +534,8 @@ up.Params = class Params {
 
     try {
       // The FormData constructor accepts undefined for no submitter, but throws for false.
+      // It also throws for a button that doesn't belong to the form.
       let submitButton = e.get(options.submitButton ?? up.form.defaultSubmitButton(form)) || undefined
-
-      if (submitButton && submitButton.form !== form) {
-        up.fail('Submit button %o does not belong to form %o', submitButton, form)
-      }
 
       // We let the browser serialize the form, instead of iterating over up.form.fields():
       //
@@ -560,6 +563,21 @@ up.Params = class Params {
     }
   }
 
+  /*-
+  Constructs a new `up.Params` instance from the fields within the given container.
+
+  Unlike `up.Params.fromForm()`, the container may be any element.
+  The params contain the values of all [fields](/api/up.form.fields) within the container,
+  and no submit button.
+
+  @function up.Params.fromContainer
+  @param {Element|jQuery} container
+    The element to scan for fields.
+  @param {boolean} [options.includeDisabled=false]
+    Whether to add fields that are disabled.
+  @return {up.Params}
+  @experimental
+  */
   static fromContainer(container, options) {
     return this.fromFields(up.form.fields(container), options)
   }

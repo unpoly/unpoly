@@ -486,24 +486,58 @@ extendDescribe('up.form', function() {
 
         describe('with a [form] attribute when the same page is open in multiple layers', function() {
 
-          it("submits the form of the button's own layer, although the browser submits an earlier form with the same id", async function() {
-            const html = (prefix) => `
-              <div id="container">
-                <form id="my-form" action="/${prefix}-action" method="post" up-submit>
-                  <input name="own-field" value="${prefix}-own-value">
-                </form>
-                <button type="submit" name="button" value="${prefix}-button-value" form="my-form">Submit</button>
-              </div>
-            `
-            htmlFixtureList(html('root'))
+          const html = (prefix) => `
+            <div id="container">
+              <form id="my-form" action="/${prefix}-action" method="post" up-submit>
+                <input name="own-field" value="${prefix}-own-value">
+                <button type="submit">Submit</button>
+              </form>
+              <input name="external-field" value="${prefix}-external-value" form="my-form">
+              <button type="submit" id="external-button" form="my-form">Submit</button>
+            </div>
+          `
+
+          it('throws an error and submits nothing for a button whose form ID also exists in the layer below', async function() {
+            const [, rootForm] = htmlFixtureList(html('root'))
             await up.layer.open({ fragment: html('overlay') })
 
-            Trigger.clickSequence(up.fragment.get('button', { layer: 'overlay' }))
+            // The browser submits the first form#my-form in the document, which is in the root layer.
+            await jasmine.expectGlobalError(/Prevented .* from submitting a form in another layer \(ambiguous form ID "my-form"\)/, async function() {
+              Trigger.clickSequence(up.fragment.get('#external-button', { layer: 'overlay' }))
+              await wait()
+            })
+
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+            expect(rootForm).not.toHaveBeenDefaultSubmitted()
+          })
+
+          it('throws an error and submits nothing when the user presses Enter in a field whose form ID also exists in the layer below', async function() {
+            const [, rootForm] = htmlFixtureList(html('root'))
+            await up.layer.open({ fragment: html('overlay') })
+            let overlayField = up.fragment.get('[name=external-field]', { layer: 'overlay' })
+
+            await jasmine.expectGlobalError(/Prevented .* from submitting a form in another layer/, async function() {
+              Trigger.focus(overlayField)
+              // Pressing Enter submits the field's form, which the browser resolves to the form in the root layer.
+              overlayField.form.requestSubmit()
+              await wait()
+            })
+
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+            expect(rootForm).not.toHaveBeenDefaultSubmitted()
+          })
+
+          it('submits normally when the focused field belongs to the submitted form', async function() {
+            const [, rootForm] = htmlFixtureList(html('root'))
+            let rootField = up.fragment.get('[name=external-field]')
+
+            Trigger.focus(rootField)
+            rootForm.requestSubmit()
             await wait()
 
             expect(jasmine.Ajax.requests.count()).toBe(1)
-            expect(jasmine.lastRequest().url).toMatchURL('/overlay-action')
-            expect(jasmine.lastRequest().data()).toMatchParams({ 'own-field': 'overlay-own-value', 'button': 'overlay-button-value' })
+            expect(jasmine.lastRequest().url).toMatchURL('/root-action')
+            expect(jasmine.lastRequest().data()).toMatchParams({ 'own-field': 'root-own-value', 'external-field': 'root-external-value' })
           })
 
           it('throws an error and submits nothing for a button whose [form] attribute points to a form in another layer', async function() {
@@ -518,7 +552,7 @@ extendDescribe('up.form', function() {
               </div>
             ` })
 
-            await jasmine.expectGlobalError(/Prevented button .* from submitting a form in another layer/, async function() {
+            await jasmine.expectGlobalError(/Prevented .* from submitting a form in another layer/, async function() {
               Trigger.clickSequence(up.fragment.get('button', { layer: 'overlay' }))
               await wait()
             })

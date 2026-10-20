@@ -191,7 +191,7 @@ up.form = (function() {
 
     // Like the browser, a [form] attribute takes precedence over the surrounding form.
     if (root.matches('form')) {
-      elements = elements.filter((element) => getForm(element) === root)
+      elements = elements.filter((element) => !element.hasAttribute('form') || getForm(element) === root)
     }
 
     // If findFormElements() is called with an entire form, gather fields outside the form
@@ -232,8 +232,6 @@ up.form = (function() {
 
   If the given element is a `<form>` with an `[id]`, the list also includes fields outside the form
   that are associated with it through a [`[form]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#form) attribute.
-  Like in the browser, a `[form]` attribute takes precedence over the surrounding form, so a field within the form
-  that is associated with another form is not included.
 
   Fields in another [layer](/api/up.layer) and fields that are being [destroyed](/api/up.destroy) are ignored.
 
@@ -666,11 +664,9 @@ up.form = (function() {
   // The browser decides the form owner of a control across the whole page: A [form="X"] control
   // belongs to the first form#X in document order, and a control within a <form> belongs to it
   // even when it is in another layer (a popup attached within the form). Unpoly isolates layers.
-  //
-  // A formdata listener that reads *another* form meanwhile sees that form isolated away.
   function prepareParamsReadTemp(form) {
     let undo = u.cleaner()
-    let ownControls = findFieldsAndButtons(form)
+    let ownControls = new Set(findFieldsAndButtons(form))
 
     // Fields and buttons that a preview disabled still count, e.g. for a second submission
     // while the first one is loading.
@@ -680,6 +676,7 @@ up.form = (function() {
 
     // Our [form="X"] controls must belong to our form, not to an earlier form#X in another layer,
     // e.g. when the same page is open in an overlay and in the layer below.
+    // We don't use form.id, which an <input name="id"> shadows.
     let id = form.getAttribute('id')
     if (id) {
       for (let otherForm of document.querySelectorAll('form' + e.idSelector(id))) {
@@ -689,7 +686,7 @@ up.form = (function() {
 
     // Controls of other layers must not belong to our form.
     // We collect them before we change any, since form.elements is a live collection.
-    let foreignControls = u.filter(form.elements, (control) => (isField(control) || isAnyButton(control)) && !ownControls.includes(control))
+    let foreignControls = u.filter(form.elements, (control) => (isField(control) || isAnyButton(control)) && !ownControls.has(control))
     for (let control of foreignControls) {
       undo(e.setAttrsTemp(control, { form: 'up-isolated-' + u.uid() }))
     }
@@ -1699,15 +1696,16 @@ up.form = (function() {
 
     up.event.halt(event, { log: true })
 
-    // The browser resolves a button's [form] attribute across the whole page, and may have
-    // fired this event on a form in another layer. We submit the form that the button
-    // belongs to within its own layer.
-    let buttonForm = submitButton ? getForm(submitButton) : form
-    if (buttonForm && isSubmittable(buttonForm)) {
-      up.error.muteUncriticalRejection(submit(buttonForm, { submitButton }))
-    } else {
-      up.fail('Prevented button %o from submitting a form in another layer', submitButton)
+    // The browser resolves a [form] attribute across the whole page. When two layers have a form
+    // with the same ID, a button or a field (pressing Enter) in the upper layer submits the form
+    // in the lower layer. We cannot tell which form the user meant.
+    for (let control of [submitButton, document.activeElement]) {
+      if (control && control.form === form && getForm(control) !== form) {
+        up.fail('Prevented %o from submitting a form in another layer (ambiguous form ID "%s")', control, form.getAttribute('id'))
+      }
     }
+
+    up.error.muteUncriticalRejection(submit(form, { submitButton }))
   })
 
   /*-
@@ -2451,7 +2449,9 @@ up.form = (function() {
     // An outer [up-autosubmit] already submits when our fields change, honoring our [up-watch-*] attributes.
     // A second watcher would submit the form twice for the same change.
     // We don't warn, since a partial with [up-autosubmit] may be rendered with or without an outer one.
-    if (up.fragment.closest(formOrField.parentElement, '[up-autosubmit]:not([up-autosubmit=false])')) return
+    // An outer [up-autosubmit] of another form doesn't see our fields, e.g. for <input form="other-form">.
+    let outer = up.fragment.closest(formOrField.parentElement, '[up-autosubmit]:not([up-autosubmit=false])')
+    if (outer && getForm(outer) === getForm(formOrField)) return
 
     return autosubmit(formOrField, { logPrefix: '[up-autosubmit]' })
   })

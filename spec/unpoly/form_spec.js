@@ -1858,6 +1858,27 @@ describe('up.form', function() {
         expect(submitSpy.calls.count()).toBe(1)
       })
 
+      it('does not ignore a nested [up-autosubmit] field that belongs to another form through a [form] attribute', async function() {
+        const [formA, field, formB] = htmlFixtureList(`
+          <form id="form-a" action="/form-a" method="post" up-autosubmit up-target="#target">
+            <input up-autosubmit form="form-b" name="input-name" value="old-value">
+          </form>
+          <form id="form-b" action="/form-b" method="post" up-target="#target"></form>
+        `)
+        htmlFixture('<div id="target"></div>')
+        up.hello(formA)
+        up.hello(formB)
+
+        field.value = 'new-value'
+        Trigger.change(field)
+
+        await wait()
+
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+        expect(jasmine.lastRequest().url).toMatchURL('/form-b')
+        expect(jasmine.lastRequest().data()).toMatchParams({ 'input-name': 'new-value' })
+      })
+
       it('does not ignore an [up-autosubmit] form in an overlay when an [up-autosubmit] element in the root layer encloses the overlay', async function() {
         // Overlays are attached to the <body>, so the <body> encloses them in the DOM.
         document.body.setAttribute('up-autosubmit', '')
