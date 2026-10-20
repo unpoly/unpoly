@@ -1938,6 +1938,30 @@ describe('up.form', function() {
         expect(jasmine.lastRequest().data()).toMatchParams({ email: 'new@example.com' })
       })
 
+      it('submits the form when a form-associated custom element changes that a compiler inserted and that was defined later', async function() {
+        const { tagName, define } = lateFormAssociatedElement()
+        up.compiler('#field-container', function(container) {
+          container.innerHTML = `<${tagName} name="email" value="old@example.com"></${tagName}>`
+        })
+        const [form] = htmlFixtureList(`
+          <form up-autosubmit action="/action" method="post" up-target="#target">
+            <div id="field-container"></div>
+          </form>
+        `)
+        htmlFixtureList('<div id="target">old target</div>')
+        up.hello(form)
+
+        define()
+        await wait()
+
+        const field = form.querySelector(tagName)
+        field.value = 'new@example.com'
+        Trigger.change(field)
+        await wait()
+
+        expect(jasmine.lastRequest().data()).toMatchParams({ email: 'new@example.com' })
+      })
+
       it('detects a change in a field that was added dynamically later', async function() {
         up.form.config.watchInputDelay = 0
         const form = fixture('form[up-autosubmit][up-target="#target"]')

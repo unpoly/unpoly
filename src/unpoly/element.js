@@ -1571,7 +1571,7 @@ up.element = (function() {
   const awaitedTagNames = new Set()
 
   /*-
-  Emits `up:element:defined` when a custom element on the page gets defined.
+  Emits `up:element:defined` when a custom element in the given root gets defined.
 
   Looks for elements in the given root and its descendants that are not yet [defined](https://developer.mozilla.org/en-US/docs/Web/CSS/:defined),
   and waits for their definitions. Each tag name is only awaited once.
@@ -1595,7 +1595,7 @@ up.element = (function() {
   /*-
   This event is emitted when a custom element on the page gets defined.
 
-  Only tag names that were on the page before their definition are observed.
+  Only tag names that were in a fragment Unpoly compiled before their definition are observed.
   See `up.element.trackDefinitions()`.
 
   @event up:element:defined

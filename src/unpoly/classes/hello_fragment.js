@@ -33,14 +33,17 @@ up.HelloFragment = class HelloFragment {
     up.puts('up.hello()', "Compiling fragment %o", this._root)
     this._assignDataToElements()
 
-    // Some selectors only match a custom element after its definition, which may arrive
-    // after the element was inserted. Emit up:element:defined when that happens, so
-    // e.g. an up.SelectorTracker can sync again.
-    e.trackDefinitions(this._root)
-
     this._runCompilers(this._macros)
     this._emitCompileEvent()
     this._runCompilers(this._compilers)
+
+    // Some selectors only match a custom element after its definition, which may arrive
+    // after the element was inserted. Emit up:element:defined when that happens, so
+    // e.g. an up.SelectorTracker can sync again.
+    //
+    // We scan after running compilers, which may insert undefined custom elements themselves.
+    e.trackDefinitions(this._root)
+
     this._emitInsertedEvent()
     await Promise.all(this._compilePromises)
     return this._root
