@@ -524,18 +524,16 @@ up.Params = class Params {
   */
   static fromForm(form, options = {}) {
     form = e.get(form)
+    let restore = up.form.prepareParamsReadTemp(form)
 
-    up.form.assertFieldsInSameLayer(form)
+    try {
+      // The FormData constructor accepts undefined for no submitter, but throws for false.
+      let submitButton = e.get(options.submitButton ?? up.form.defaultSubmitButton(form)) || undefined
 
-    let submitButton = e.get(options.submitButton ?? up.form.defaultSubmitButton(form))
+      if (submitButton && submitButton.form !== form) {
+        up.fail('Submit button %o does not belong to form %o', submitButton, form)
+      }
 
-    // The FormData constructor throws unless the submitter is owned by this form, and
-    // up.form.submitButtons() can return a button that carries [form] for another form.
-    if (submitButton?.form !== form) submitButton = undefined
-
-    // Fields and buttons that a preview disabled still count, e.g. for a second submission
-    // while the first one is loading.
-    return up.form.withPreviewFieldsEnabled(form, () => {
       // We let the browser serialize the form, instead of iterating over up.form.fields():
       //
       // - Only the browser can read the value of a form-associated custom element. The element
@@ -545,12 +543,8 @@ up.Params = class Params {
       //   <fieldset disabled>, newline normalization, and whatever comes next.
       let params = new this(new FormData(form, submitButton))
 
-      // up.form.fields() can still find fields that the browser did not serialize:
-      //
-      // - Elements registered through up.form.config.fieldSelectors. The browser doesn't know
-      //   they are fields.
-      // - Fields in the form's layer with a [form] attribute that the browser resolved to a form
-      //   with the same ID in another layer. Unpoly resolves [form] within the field's own layer.
+      // up.form.fields() also finds elements registered through up.form.config.fieldSelectors.
+      // The browser doesn't know they are fields.
       //
       // We recognize the fields the browser already handled by their membership in form.elements,
       // since a FormData entry cannot be mapped back to the element that contributed it.
@@ -561,7 +555,9 @@ up.Params = class Params {
         if (!browserControls.has(field) && !field.closest('fieldset:disabled')) params.addField(field)
       }
       return params
-    })
+    } finally {
+      restore()
+    }
   }
 
   static fromContainer(container, options) {

@@ -785,51 +785,113 @@ describe('up.Params', function() {
       ])
     })
 
-    describe('cross-layer [form] associations', function() {
+    describe('fields and buttons in other layers', function() {
 
-      // A page rendered into an overlay usually repeats the ids of the page below it. The
-      // browser resolves a [form] attribute by document order and ignores layers, so it can
-      // hand one layer's field to another layer's form.
-      const html = `
+      // A page rendered into an overlay usually repeats the ids of the page below it. The browser
+      // resolves a [form] attribute by document order and ignores layers, so it can hand one
+      // layer's field to another layer's form.
+      //
+      // The external field comes first, so we can tell from the param order whether the browser
+      // serialized it as part of the form, or whether Unpoly added it afterwards.
+      const html = (prefix) => `
         <div id="container">
+          <test-form-associated-element name="external-field" value="${prefix}-external-value" form="my-form"></test-form-associated-element>
           <form id="my-form">
-            <input name="own-field" value="own-value">
+            <input name="own-field" value="${prefix}-own-value">
           </form>
-          <input name="external-field" value="external-value" form="my-form">
         </div>
       `
 
-      it('fails when a field from another layer is associated with the given form', async function() {
-        makeLayers([{ fragment: html }, { fragment: html }])
-        await wait()
+      it("serializes the form's own and external fields when an overlay repeats its ids", async function() {
+        htmlFixtureList(html('root'))
+        await up.layer.open({ fragment: html('overlay') })
 
         const rootForm = up.fragment.get('#my-form', { layer: 'root' })
-        const serialize = () => up.Params.fromForm(rootForm)
 
-        expect(serialize).toThrowError(/associated with a form in another layer\. Give the forms unique IDs, or avoid \[form\] attributes in pages that open in overlays/i)
+        expect(up.Params.fromForm(rootForm).toArray()).toEqual([
+          { name: 'external-field', value: 'root-external-value' },
+          { name: 'own-field', value: 'root-own-value' },
+        ])
       })
 
-      it('does not fail when both layers repeat the id but no field uses a [form] attribute', async function() {
-        const withoutExternalField = `
-          <div id="container">
-            <form id="my-form">
-              <input name="own-field" value="own-value">
-            </form>
-          </div>
-        `
-        makeLayers([{ fragment: withoutExternalField }, { fragment: withoutExternalField }])
-        await wait()
+      it("serializes an overlay form's own and external fields when the layer below repeats its ids", async function() {
+        htmlFixtureList(html('root'))
+        await up.layer.open({ fragment: html('overlay') })
 
-        const rootForm = up.fragment.get('#my-form', { layer: 'root' })
+        const overlayForm = up.fragment.get('#my-form', { layer: 'overlay' })
+
+        expect(up.Params.fromForm(overlayForm).toArray()).toEqual([
+          { name: 'external-field', value: 'overlay-external-value' },
+          { name: 'own-field', value: 'overlay-own-value' },
+        ])
+      })
+
+      it('does not serialize fields and buttons of a popup that is attached within the form', async function() {
+        // A popup is attached to the closest viewport of its origin, which here is within the form.
+        const [form, ownField, viewport, opener] = htmlFixtureList(`
+          <form>
+            <input name="own-field" value="own-value">
+            <div up-viewport style="height: 100px; overflow-y: scroll">
+              <a href="#" id="opener">open popup</a>
+            </div>
+          </form>
+        `)
+
+        await up.layer.open({ mode: 'popup', origin: opener, fragment: `
+          <div id="popup-content">
+            <input name="popup-field" value="popup-value">
+            <button type="button" name="popup-button" value="popup-button-value">Popup button</button>
+          </div>
+        ` })
+
+        expect(form).toContain(up.layer.current.element)
+        expect(up.Params.fromForm(form).toArray()).toEqual([
+          { name: 'own-field', value: 'own-value' },
+        ])
+      })
+
+      it('does not fail for a button in an overlay whose [form] attribute points to a form below', async function() {
+        const [rootForm] = htmlFixtureList(`
+          <form id="root-form">
+            <input name="own-field" value="own-value">
+          </form>
+        `)
+        await up.layer.open({ fragment: `
+          <div id="overlay-content">
+            <button type="button" name="overlay-button" value="overlay-button-value" form="root-form">Overlay button</button>
+          </div>
+        ` })
 
         expect(up.Params.fromForm(rootForm).toArray()).toEqual([
           { name: 'own-field', value: 'own-value' },
         ])
       })
 
-      it('does not fail when a duplicate form id and its [form] reference are in the same layer', function() {
+      it('does not fail for a button in a closing overlay whose [form] attribute points to a form below', async function() {
+        const [rootForm] = htmlFixtureList(`
+          <form id="root-form">
+            <input name="own-field" value="own-value">
+          </form>
+        `)
+        await up.layer.open({ fragment: `
+          <div id="overlay-content">
+            <button type="button" name="overlay-button" value="overlay-button-value" form="root-form">Overlay button</button>
+          </div>
+        `, animation: false })
+        let overlayElement = up.layer.current.element
+
+        up.layer.dismiss(null, { animation: 'fade-out', duration: 1000 })
+
+        // The overlay element is still attached while it animates out.
+        expect(overlayElement).toBeAttached()
+        expect(up.Params.fromForm(rootForm).toArray()).toEqual([
+          { name: 'own-field', value: 'own-value' },
+        ])
+      })
+
+      it('serializes an external field when a duplicate form id is in the same layer', function() {
         // Two forms sharing an id is invalid HTML, but the browser and Unpoly resolve it the
-        // same way within one layer, so there is nothing to protect against.
+        // same way within one layer.
         const [form] = htmlFixtureList(`
           <form id="my-form">
             <input name="own-field" value="own-value">
@@ -843,6 +905,64 @@ describe('up.Params', function() {
           { name: 'external-field', value: 'external-value' },
         ])
       })
+
+      describe('changes to the DOM', function() {
+
+        // The root layer and an overlay repeat their ids. A popup is attached within the overlay's form.
+        const html = (prefix) => `
+          <div id="container">
+            <input name="external-field" value="${prefix}-external-value" form="my-form">
+            <form id="my-form">
+              <input name="own-field" value="${prefix}-own-value">
+              <div up-viewport style="height: 100px; overflow-y: scroll">
+                <a href="#" class="opener">open popup</a>
+              </div>
+              <button type="submit" name="button" value="${prefix}-button-value">Submit</button>
+            </form>
+          </div>
+        `
+
+        async function buildLayers() {
+          htmlFixtureList(html('root'))
+          await up.layer.open({ fragment: html('overlay') })
+          let overlayForm = up.fragment.get('#my-form', { layer: 'overlay' })
+          await up.layer.open({ mode: 'popup', origin: overlayForm.querySelector('.opener'), fragment: `
+            <div id="popup-content">
+              <input name="popup-field" value="popup-value">
+            </div>
+          ` })
+          expect(overlayForm).toContain(up.layer.current.element)
+          return overlayForm
+        }
+
+        it('restores the DOM after reading params', async function() {
+          let overlayForm = await buildLayers()
+          let htmlBefore = document.body.innerHTML
+
+          let params = up.Params.fromForm(overlayForm).toArray()
+
+          expect(params).toEqual([
+            { name: 'external-field', value: 'overlay-external-value' },
+            { name: 'own-field', value: 'overlay-own-value' },
+            { name: 'button', value: 'overlay-button-value' },
+          ])
+          expect(document.body.innerHTML).toBe(htmlBefore)
+
+          // We can read the same params a second time.
+          expect(up.Params.fromForm(overlayForm).toArray()).toEqual(params)
+        })
+
+        it('restores the DOM when it fails for a submit button of another form', async function() {
+          let overlayForm = await buildLayers()
+          let rootButton = up.fragment.get('#my-form button', { layer: 'root' })
+          let htmlBefore = document.body.innerHTML
+
+          expect(() => up.Params.fromForm(overlayForm, { submitButton: rootButton })).toThrowError(/does not belong to form/)
+          expect(document.body.innerHTML).toBe(htmlBefore)
+        })
+
+      })
+
     })
 
     describe('submit buttons', function() {
@@ -931,6 +1051,19 @@ describe('up.Params', function() {
         expect(up.Params.fromForm(form).toArray()).toEqual([
           { name: 'email', value: 'foo@example.com' },
         ])
+      })
+
+      it('fails when given a { submitButton } of another form', function() {
+        const [form, , otherForm, otherButton] = htmlFixtureList(`
+          <form>
+            <input name="email" value="foo@example.com">
+          </form>
+          <form>
+            <button type="submit" name="action" value="save">Save</button>
+          </form>
+        `)
+
+        expect(() => up.Params.fromForm(form, { submitButton: otherButton })).toThrowError(/Submit button .* does not belong to form/)
       })
     })
 

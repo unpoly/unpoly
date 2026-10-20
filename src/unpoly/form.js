@@ -297,23 +297,6 @@ up.form = (function() {
     return findSubmitButtons(form)[0]
   }
 
-  // The browser resolves a field's [form] attribute by document order across the whole page,
-  // while Unpoly resolves it within the field's own layer (see getAssociatedForm()). When the
-  // two disagree, serializing the form would send a field from a layer that the user believes
-  // to be isolated.
-  function assertFieldsInSameLayer(form) {
-    let formLayer = up.layer.get(form)
-
-    for (let field of form.elements) {
-      // We only check fields that a [form] attribute pulls in from another layer.
-      // A descendant of the form may also be in another layer, when a popup is attached
-      // within the form's DOM. We don't detect that case yet.
-      if (field.hasAttribute('form') && up.layer.get(field) !== formLayer) {
-        up.fail('Cannot serialize %o: %o is associated with a form in another layer. Give the forms unique IDs, or avoid [form] attributes in pages that open in overlays.', form, field)
-      }
-    }
-  }
-
   function findFieldsAndButtons(container) {
     return [
       ...findFields(container),
@@ -342,7 +325,7 @@ up.form = (function() {
     return findFormElements(root, submitButtonSelector)
   }
 
-  const anyButtonSelector = config.selectorFn('anyButtonSelectors')
+  const [anyButtonSelector, isAnyButton] = config.selectorFns('anyButtonSelectors')
 
   function findAnyButtons(root) {
     return findFormElements(root, anyButtonSelector)
@@ -677,17 +660,41 @@ up.form = (function() {
     }
   }
 
-  // Runs the given function while the controls that a preview has disabled are enabled,
-  // e.g. to read their params. Disables them again afterwards.
-  function withPreviewFieldsEnabled(form, fn) {
-    let controls = findFieldsAndButtons(form).filter((control) => control.upPreviewDisabled && readFieldDisabled(control))
-    let disableAgain = u.sequence(u.map(controls, (control) => writeFieldDisabled(control, false)))
+  // Changes the DOM so the browser's form-data algorithm sees the same controls as Unpoly.
+  // Returns a function that restores the DOM.
+  //
+  // The browser decides the form owner of a control across the whole page: A [form="X"] control
+  // belongs to the first form#X in document order, and a control within a <form> belongs to it
+  // even when it is in another layer (a popup attached within the form). Unpoly isolates layers.
+  //
+  // A formdata listener that reads *another* form meanwhile sees that form isolated away.
+  function prepareParamsReadTemp(form) {
+    let undo = u.cleaner()
+    let ownControls = findFieldsAndButtons(form)
 
-    try {
-      return fn()
-    } finally {
-      disableAgain()
+    // Fields and buttons that a preview disabled still count, e.g. for a second submission
+    // while the first one is loading.
+    for (let control of ownControls) {
+      if (control.upPreviewDisabled && readFieldDisabled(control)) undo(writeFieldDisabled(control, false))
     }
+
+    // Our [form="X"] controls must belong to our form, not to an earlier form#X in another layer,
+    // e.g. when the same page is open in an overlay and in the layer below.
+    let id = form.getAttribute('id')
+    if (id) {
+      for (let otherForm of document.querySelectorAll('form' + e.idSelector(id))) {
+        if (otherForm !== form) undo(e.setAttrsTemp(otherForm, { id: 'up-isolated-' + u.uid() }))
+      }
+    }
+
+    // Controls of other layers must not belong to our form.
+    // We collect them before we change any, since form.elements is a live collection.
+    let foreignControls = u.filter(form.elements, (control) => (isField(control) || isAnyButton(control)) && !ownControls.includes(control))
+    for (let control of foreignControls) {
+      undo(e.setAttrsTemp(control, { form: 'up-isolated-' + u.uid() }))
+    }
+
+    return undo.clean
   }
 
   function setContainerDisabled(container, disabled) {
@@ -2458,7 +2465,6 @@ up.form = (function() {
     isField,
     submitButtons: findSubmitButtons,
     defaultSubmitButton,
-    assertFieldsInSameLayer,
     readFieldName,
     readFieldValue,
     readFieldDisabled,
@@ -2466,7 +2472,7 @@ up.form = (function() {
     focusedField,
     // disableWhile,
     disableTemp: disableContainerTemp,
-    withPreviewFieldsEnabled,
+    prepareParamsReadTemp,
     setDisabled: setContainerDisabled,
     getDisablePreviewFn,
     // handleDisableOption,

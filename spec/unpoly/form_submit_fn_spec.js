@@ -153,29 +153,28 @@ extendDescribe('up.form', function() {
         })
       })
 
-      describe('cross-layer [form] associations', function() {
+      describe('fields and buttons in other layers', function() {
 
-        it('aborts the submission when a field from another layer is associated with the form', async function() {
-          const html = `
+        it('only sends the params of the form when an overlay repeats its ids', async function() {
+          const html = (prefix) => `
             <div id="container">
-              <form id="my-form" action="/action" method="post">
-                <input name="own-field" value="own-value">
+              <form id="my-form" action="/${prefix}-action" method="post">
+                <input name="own-field" value="${prefix}-own-value">
               </form>
-              <input name="external-field" value="external-value" form="my-form">
+              <input name="external-field" value="${prefix}-external-value" form="my-form">
             </div>
           `
-          makeLayers([{ fragment: html }, { fragment: html }])
-          await wait()
+          htmlFixtureList(html('root'))
+          await up.layer.open({ fragment: html('overlay') })
 
           const rootForm = up.fragment.get('#my-form', { layer: 'root' })
+          up.submit(rootForm)
+          await wait()
 
-          // up.form.submitOptions() builds the params before up.render() is called, so the
-          // error escapes synchronously instead of rejecting a promise.
-          const submit = () => up.submit(rootForm)
-
-          expect(submit).toThrowError(/associated with a form in another layer\. Give the forms unique IDs, or avoid \[form\] attributes in pages that open in overlays/i)
-          expect(jasmine.Ajax.requests.count()).toBe(0)
+          expect(jasmine.lastRequest().url).toMatchURL('/root-action')
+          expect(jasmine.lastRequest().data()).toMatchParams({ 'own-field': 'root-own-value', 'external-field': 'root-external-value' })
         })
+
       })
 
       describe('custom form fields', function() {
