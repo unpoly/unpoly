@@ -12,7 +12,7 @@ function fixRenamedLayerKeys(object) {
 }
 
 up.migrate.handleLayerOptions = function(options) {
-  // A config object is specific to a mode, so it never has a { mode }.
+  // Only options can have a { flavor }, since a config object belongs to a mode.
   up.migrate.fixKey(options, 'flavor', 'mode')
   fixRenamedLayerKeys(options)
 

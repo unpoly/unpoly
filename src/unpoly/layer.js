@@ -1586,7 +1586,8 @@ up.layer = (function() {
     This is `true` when the overlay is [closed by force](/api/up.Layer.prototype.accept#options.force),
     e.g. when the user navigates back in history.
     It is also `true` when the overlay is [peeled](/learn/closing-overlays#peeling) by force,
-    with [`[up-peel="force"]`](/api/up-follow#up-peel), with a `{ force: true }` option
+    with [`[up-peel="force"]`](/api/up-follow#up-peel),
+    with [`up.Layer#peel({ force: true })`](/api/up.Layer.prototype.peel#options.force)
     or with `up.layer.config.forcePeel`.
 
     @experimental
@@ -1680,7 +1681,8 @@ up.layer = (function() {
     This is `true` when the overlay is [closed by force](/api/up.Layer.prototype.accept#options.force),
     e.g. when the user navigates back in history.
     It is also `true` when the overlay is [peeled](/learn/closing-overlays#peeling) by force,
-    with [`[up-peel="force"]`](/api/up-follow#up-peel), with a `{ force: true }` option
+    with [`[up-peel="force"]`](/api/up-follow#up-peel),
+    with [`up.Layer#peel({ force: true })`](/api/up.Layer.prototype.peel#options.force)
     or with `up.layer.config.forcePeel`.
 
     @experimental

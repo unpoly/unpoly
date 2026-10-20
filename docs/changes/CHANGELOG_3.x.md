@@ -164,7 +164,7 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - ⚠️ [`[up-switch]`](/learn/switching-form-state) now switches immediately, ignoring `up.form.config.watchInputDelay` and `[up-watch-delay]`. Switching effects are client-side and don't benefit from debouncing. In a form that also [autosubmits](/api/up-autosubmit) with a delay, switching now settles before the submission reads the form.
 - Fix: When a form was submitted or validated again while a request had disabled its fields, e.g. with [`[up-disable]`](/api/up-submit#up-disable), the second request sent no params for the disabled fields. Fields and buttons that a [preview](/api/up.Preview.prototype.disable) disabled now still count as part of the form when Unpoly reads params or watches values. This happened since Unpoly 3.10.
 - ⚠️ Since Unpoly 3.12, submit buttons honor a `[data-confirm]` attribute, like links and forms do. It is an alias of [`[up-confirm]`](/api/up-submit#up-confirm), so Rails helpers like `link_to` or `button_to` work without changes. If your app handles `[data-confirm]` itself, use your own attribute instead.
-- A nested [`[up-autosubmit]`](/api/up-autosubmit), e.g. on a field inside a form that already has `[up-autosubmit]`, is now ignored. It used to submit the form a second time for the same change.
+- A nested [`[up-autosubmit]`](/api/up-autosubmit), e.g. on a field inside a form that already has `[up-autosubmit]`, is now ignored when it belongs to the same form. It used to submit the form a second time for the same change.
 - New experimental class [`.up-booted`](/api/up-booted) on the `<html>` element after Unpoly has booted. It lets CSS [hide switched elements until Unpoly has processed them](/learn/switching-form-state#before-booting).
 - 🧩 `up.form.config.genericButtonSelectors` was renamed to `up.form.config.anyButtonSelectors`. It now matches every kind of button, including submit and reset buttons. The old name is polyfilled by `unpoly-migrate.js`.
 
@@ -186,6 +186,7 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - When a listener keeps an overlay open, the overlays below it now also stay open.
 - To close overlays even when a listener prevents it, use [`[up-peel="force"]`](/api/up-follow#up-peel), or pass `{ force: true }` to `up.Layer#accept()`, `up.Layer#dismiss()` or `up.Layer#peel()`. You can combine `force` with an intent, e.g. `[up-peel="accept force"]`.
 - Pressing the back button still closes overlays, even when a listener prevents it.
+- New experimental property `event.force` on [`up:layer:accept`](/api/up:layer:accept#event.force) and [`up:layer:dismiss`](/api/up:layer:dismiss#event.force) tells a listener whether the overlay closes even when it prevents the event.
 - New [`[up-on-accept]`](/api/up-layer-new#up-on-accept) and [`[up-on-dismiss]`](/api/up-layer-new#up-on-dismiss) attributes run code before an overlay closes, and can keep it open with `event.preventDefault()`. The matching [`{ onAccept }`](/api/up.layer.open#options.onAccept) and [`{ onDismiss }`](/api/up.layer.open#options.onDismiss) options are now documented.
 - When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent overlay, as described in [focus in overlays](/learn/focus#overlays). It used to fall back to the `<body>`.
 - Fix: [`[up-focus-visible]`](/api/up-follow#up-focus-visible) and the `{ focusVisible }` option were ignored when opening an overlay.
@@ -194,7 +195,7 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 
 ### Caching
 
-- 🧩 New config [`up.network.config.cacheEnabled`](/api/up.network.config#config.cacheEnabled) turns off the [cache](/learn/caching) entirely, e.g. for debugging. When it is `false`, no response is read from or written to the cache, and [preloading](/learn/preloading) is disabled. If you used `up.network.config.cacheSize = 0` to turn off caching, [`unpoly-migrate.js`](/changes/upgrading) now tells you to use this setting instead.
+- 🧩 New config [`up.network.config.cacheEnabled`](/api/up.network.config#config.cacheEnabled) turns off the [cache](/learn/caching) entirely, e.g. for debugging. When it is `false`, no response is read from or written to the cache, and [preloading](/learn/preloading) is disabled. If you used `up.network.config.cacheSize = 0` to turn off caching, [`unpoly-migrate.js`](/changes/upgrading) now disables the cache and tells you to use this setting instead. It used to throw an error.
 - An [`X-Up-Expire-Cache: false`](/api/X-Up-Expire-Cache) response header now expires no cache entries, like [`X-Up-Evict-Cache: false`](/api/X-Up-Evict-Cache). It used to be treated as a URL pattern matching `/false`.
 - Fix: When a compiler requested the URL of a request that had just been aborted or had just finished, it sometimes got the old request from the cache. It now makes a new request.
 
@@ -232,6 +233,8 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - Fix: `up.fragment.matches()` with `{ layer: 'new', mode }` options expanded a selector like `:main` for the root layer, or threw an error while an overlay was open.
 - Fix: The `unpoly-migrate.js` polyfills for `up.popup.attach()`, `up.modal.follow()` and `up.modal.extract()` now open a new overlay again.
 - Fix: The `unpoly-migrate.js` polyfill for `up.network.shouldReduceRequests()` now logs a warning instead of throwing an error.
+- Fix: The `unpoly-migrate.js` polyfill for `up.util.microtask()` threw an error. This happened since Unpoly 3.8.
+- Fix: `unpoly-migrate.js` ignored renamed layer keys like `closable`, `dismissable`, `closeLabel` or `dismissAriaLabel` when they were set in `up.layer.config`. They are now renamed, like when passed as options.
 - ⚠️ [`unpoly-migrate.js`](/changes/upgrading) now logs deprecations as errors, so test suites that fail on console errors find them without extra configuration. To log warnings as before, set `up.migrate.config.logLevel = 'warn'`.
 - Fix: `unpoly-migrate.js` logged deprecations that the app never caused when a script enumerated an object with deprecated properties, e.g. an analytics script walking `window.up`, or another deprecation message printing a config object.
 - The `unpoly-migrate.js` warning for the deprecated origin shorthand `&` now names the target and the origin element.
