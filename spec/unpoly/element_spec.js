@@ -2074,15 +2074,15 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.awaitDefinitions()', function() {
+  describe('up.element.trackDefinitions()', function() {
 
-    it('emits up:element:defined with the { localName } when a custom element on the page gets defined', async function() {
+    it('emits up:element:defined with the { localName } when a custom element in the given root gets defined', async function() {
       const { tagName, define } = lateFormAssociatedElement()
-      htmlFixtureList(`<${tagName}></${tagName}>`)
+      const [root] = htmlFixtureList(`<div><${tagName}></${tagName}></div>`)
       const listener = jasmine.createSpy('up:element:defined listener')
       up.on('up:element:defined', (event) => listener(event.localName))
 
-      up.element.awaitDefinitions()
+      up.element.trackDefinitions(root)
       await wait()
 
       expect(listener).not.toHaveBeenCalledWith(tagName)
@@ -2095,7 +2095,7 @@ describe('up.element', function() {
 
     it('only waits once for each tag name', async function() {
       const { tagName, define } = lateFormAssociatedElement()
-      htmlFixtureList(`
+      const [root] = htmlFixtureList(`
         <div>
           <${tagName}></${tagName}>
           <${tagName}></${tagName}>
@@ -2105,8 +2105,8 @@ describe('up.element', function() {
       const listener = jasmine.createSpy('up:element:defined listener')
       up.on('up:element:defined', (event) => listener(event.localName))
 
-      up.element.awaitDefinitions()
-      up.element.awaitDefinitions()
+      up.element.trackDefinitions(root)
+      up.element.trackDefinitions(root)
       define()
       await wait()
 
@@ -2121,6 +2121,34 @@ describe('up.element', function() {
       up.on('up:element:defined', (event) => listener(event.localName))
 
       await up.render({ fragment: `<div id="target"><${tagName}></${tagName}></div>` })
+      define()
+      await wait()
+
+      expect(listener).toHaveBeenCalledWith(tagName)
+    })
+
+    it('does not wait for custom elements outside a fragment compiled by up.hello()', async function() {
+      const { tagName } = lateFormAssociatedElement()
+      const [, fragment] = htmlFixtureList(`
+        <div>
+          <div id="fragment"></div>
+          <${tagName}></${tagName}>
+        </div>
+      `)
+      const whenDefinedSpy = spyOn(customElements, 'whenDefined').and.callThrough()
+
+      up.hello(fragment)
+
+      expect(whenDefinedSpy).not.toHaveBeenCalledWith(tagName)
+    })
+
+    it('waits for custom elements in a fragment compiled by up.hello()', async function() {
+      const { tagName, define } = lateFormAssociatedElement()
+      const [root] = htmlFixtureList(`<div><${tagName}></${tagName}></div>`)
+      const listener = jasmine.createSpy('up:element:defined listener')
+      up.on('up:element:defined', (event) => listener(event.localName))
+
+      up.hello(root)
       define()
       await wait()
 

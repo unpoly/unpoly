@@ -1,4 +1,5 @@
 const u = up.util
+const e = up.element
 
 up.HelloFragment = class HelloFragment {
 
@@ -31,6 +32,12 @@ up.HelloFragment = class HelloFragment {
   async run() {
     up.puts('up.hello()', "Compiling fragment %o", this._root)
     this._assignDataToElements()
+
+    // Some selectors only match a custom element after its definition, which may arrive
+    // after the element was inserted. Emit up:element:defined when that happens, so
+    // e.g. an up.SelectorTracker can sync again.
+    e.trackDefinitions(this._root)
+
     this._runCompilers(this._macros)
     this._emitCompileEvent()
     this._runCompilers(this._compilers)

@@ -3173,11 +3173,6 @@ up.fragment = (function() {
     } finally {
       if (--mutateLevel === 0) {
         afterMutateCleaner.clean()
-
-        // Some selectors only match a custom element after its definition, which may arrive
-        // after the element was inserted. Emit up:element:defined when that happens, so
-        // e.g. an up.SelectorTracker can sync again.
-        e.awaitDefinitions()
       }
     }
   }
