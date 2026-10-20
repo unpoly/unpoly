@@ -825,6 +825,37 @@ extendDescribe('up.history', function() {
           expect('main').toHaveText('restored content')
         })
 
+        if (up.migrate.loaded) {
+          it('does not print a migration warning when an up:layer:dismiss listener prevents closing the overlay', async function() {
+            const waitForBrowser = 100
+            const warnSpy = up.migrate.warn.mock()
+            fixture('main', { text: 'original content' })
+            up.history.config.restoreTargets = [':main']
+
+            up.history.push('/page1')
+            await wait()
+
+            up.history.push('/page2')
+            await wait()
+
+            up.layer.open({ content: 'overlay content' })
+            await wait()
+            expect(up.layer.count).toBe(2)
+
+            up.on('up:layer:dismiss', (event) => event.preventDefault())
+
+            history.back()
+            await wait(waitForBrowser)
+
+            jasmine.respondWithSelector('main', { text: 'restored content' })
+            await wait()
+
+            expect(up.layer.count).toBe(1)
+            expect('main').toHaveText('restored content')
+            expect(warnSpy).not.toHaveBeenCalled()
+          })
+        }
+
       })
 
       describe('up:location:restore event', function() {

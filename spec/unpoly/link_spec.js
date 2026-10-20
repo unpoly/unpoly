@@ -614,7 +614,7 @@ describe('up.link', function() {
         })
 
         it('keeps the overlay open without [up-peel="force"] when an up:layer:dismiss listener prevents it', async function() {
-          // unpoly-migrate.js defaults to true, which ignores prevented close events when peeling.
+          // Until the app sets this, unpoly-migrate.js ignores prevented close events when peeling.
           up.layer.config.forcePeel = false
           up.on('up:layer:dismiss', (event) => event.preventDefault())
           makeLayers([

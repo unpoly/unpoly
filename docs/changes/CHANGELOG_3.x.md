@@ -182,7 +182,7 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
   ```
 
   To force a single link, set [`[up-peel="force"]`](/api/up-follow#up-peel) instead.
-  To close overlays when peeling as in Unpoly 3.14, set the new config [`up.layer.config.forcePeel`](/api/up.layer.config#config.forcePeel) to `true`. `unpoly-migrate.js` sets it to `true`, and warns when a listener tries to keep an overlay open while you haven't set it yourself.
+  To close overlays when peeling as in Unpoly 3.14, set the new config [`up.layer.config.forcePeel`](/api/up.layer.config#config.forcePeel) to `true`. Until you set it yourself, `unpoly-migrate.js` keeps the 3.14 behavior: it closes the overlay anyway and warns when a listener tries to keep it open.
 - When a listener keeps an overlay open, the overlays below it now also stay open.
 - To close overlays even when a listener prevents it, use [`[up-peel="force"]`](/api/up-follow#up-peel), or pass `{ force: true }` to `up.Layer#accept()`, `up.Layer#dismiss()` or `up.Layer#peel()`. You can combine `force` with an intent, e.g. `[up-peel="accept force"]`.
 - Pressing the back button still closes overlays, even when a listener prevents it.

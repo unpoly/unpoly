@@ -56,7 +56,7 @@ describe('up.Layer.Overlay', function() {
     describe('when a descendant prevents its dismissal', function() {
 
       beforeEach(function() {
-        // unpoly-migrate.js defaults to true, which ignores prevented close events when peeling.
+        // Until the app sets this, unpoly-migrate.js ignores prevented close events when peeling.
         up.layer.config.forcePeel = false
       })
 

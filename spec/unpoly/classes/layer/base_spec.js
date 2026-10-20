@@ -286,7 +286,7 @@ describe('up.Layer', function() {
     describe('when a listener prevents a descendant from closing', function() {
 
       beforeEach(function() {
-        // unpoly-migrate.js defaults to true, which ignores prevented close events when peeling.
+        // Until the app sets this, unpoly-migrate.js ignores prevented close events when peeling.
         up.layer.config.forcePeel = false
       })
 
@@ -375,15 +375,9 @@ describe('up.Layer', function() {
 
     describe('with up.layer.config.forcePeel', function() {
 
-      if (up.migrate.loaded) {
-        it('defaults to true with unpoly-migrate.js', function() {
-          expect(up.layer.config.forcePeel).toBe(true)
-        })
-      } else {
-        it('defaults to false', function() {
-          expect(up.layer.config.forcePeel).toBe(false)
-        })
-      }
+      it('defaults to false', function() {
+        expect(up.layer.config.forcePeel).toBe(false)
+      })
 
       it('lets an up:layer:dismiss listener keep an overlay open when peeling with false', function() {
         up.layer.config.forcePeel = false
@@ -433,15 +427,34 @@ describe('up.Layer', function() {
       if (up.migrate.loaded) {
         describe('unpoly-migrate.js', function() {
 
-          it('warns when a listener prevents peeling while the setting has not been configured', function() {
+          it('warns once and closes the overlay when a listener prevents peeling while the setting has not been configured', async function() {
             const warnSpy = up.migrate.warn.mock()
             up.on('up:layer:dismiss', (event) => event.preventDefault())
-            const [root, overlay] = makeLayers(2)
+            makeLayers([
+              { target: '.element', content: 'old text in root' },
+              { target: '.element', content: 'old text in overlay' },
+            ])
 
-            root.peel()
+            await expectAsync(up.render('.element', { layer: 'root', peel: true, content: 'new text' })).toBeResolved()
 
-            expect(overlay).not.toBeAlive()
+            expect(up.layer.count).toBe(1)
+            expect(up.layer.root).toHaveText(/new text/)
+            expect(warnSpy.calls.count()).toBe(1)
             expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.layer.config.forcePeel'))
+          })
+
+          it('does not warn when a listener prevents a forced peel', async function() {
+            const warnSpy = up.migrate.warn.mock()
+            up.on('up:layer:dismiss', (event) => event.preventDefault())
+            makeLayers([
+              { target: '.element', content: 'old text in root' },
+              { target: '.element', content: 'old text in overlay' },
+            ])
+
+            await expectAsync(up.render('.element', { layer: 'root', peel: 'force', content: 'new text' })).toBeResolved()
+
+            expect(up.layer.count).toBe(1)
+            expect(warnSpy).not.toHaveBeenCalled()
           })
 
           it('does not warn when a listener prevents another kind of dismissal', function() {
@@ -454,27 +467,34 @@ describe('up.Layer', function() {
             expect(warnSpy).not.toHaveBeenCalled()
           })
 
-          it('does not warn after the setting was configured to true', function() {
+          it('does not warn and closes the overlay after the setting was configured to true', async function() {
             up.layer.config.forcePeel = true
             const warnSpy = up.migrate.warn.mock()
             up.on('up:layer:dismiss', (event) => event.preventDefault())
-            const [root, overlay] = makeLayers(2)
+            makeLayers([
+              { target: '.element', content: 'old text in root' },
+              { target: '.element', content: 'old text in overlay' },
+            ])
 
-            root.peel()
+            await expectAsync(up.render('.element', { layer: 'root', peel: true, content: 'new text' })).toBeResolved()
 
-            expect(overlay).not.toBeAlive()
+            expect(up.layer.count).toBe(1)
             expect(warnSpy).not.toHaveBeenCalled()
           })
 
-          it('does not warn after the setting was configured to false', function() {
+          it('does not warn and lets the listener keep the overlay open after the setting was configured to false', async function() {
             up.layer.config.forcePeel = false
             const warnSpy = up.migrate.warn.mock()
             up.on('up:layer:dismiss', (event) => event.preventDefault())
-            const [root, overlay] = makeLayers(2)
+            const [_root, overlay] = makeLayers([
+              { target: '.element', content: 'old text in root' },
+              { target: '.element', content: 'old text in overlay' },
+            ])
 
-            expect(() => root.peel()).toThrowError(up.Aborted)
+            await expectAsync(up.render('.element', { layer: 'root', peel: true, content: 'new text' })).toBeRejectedWith(jasmine.any(up.Aborted))
 
             expect(overlay).toBeAlive()
+            expect(up.layer.root).toHaveText(/old text in root/)
             expect(warnSpy).not.toHaveBeenCalled()
           })
 

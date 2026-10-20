@@ -166,7 +166,7 @@ extendDescribe('up.fragment', function() {
               describe('when an up:layer:dismiss listener prevents the peeling', function() {
 
                 beforeEach(function() {
-                  // unpoly-migrate.js defaults to true, which ignores prevented close events when peeling.
+                  // Until the app sets this, unpoly-migrate.js ignores prevented close events when peeling.
                   up.layer.config.forcePeel = false
                 })
 

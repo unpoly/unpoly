@@ -47,13 +47,15 @@ up.migrate.handleLayerOptions = function(options) {
 
 }
 
-// Until 3.14, listeners could not prevent peeling. Keep that behavior, and track whether the app
-// has chosen a value, so we can warn when a listener tries to prevent peeling.
+// Until 3.14, listeners could not prevent peeling. Since 3.15 they can, unless the app sets
+// up.layer.config.forcePeel = true. We keep the core default (false), but track whether the app
+// has chosen a value. Until it has, we keep the 3.14 behavior and warn when a listener tries
+// to prevent peeling.
 //
 // up.Config#reset() assigns the default after every up:framework:reset, which would go through our
 // setter and count as chosen. Because patch() runs again after each reset, we set the value here.
 up.layer.config.patch(function() {
-  this.forcePeelValue = true
+  this.forcePeelValue = false
   this.forcePeelSet = false
 
   Object.defineProperty(this, 'forcePeel', {
@@ -70,14 +72,16 @@ up.layer.config.patch(function() {
 
 // A capture listener on the document runs before any listener of the app.
 function warnOfPreventedPeel(event) {
-  if (event.value !== ':peel') return
+  // (1) Only peeling changed in 3.15. A listener could always prevent other kinds of closing.
+  // (2) Forced peels, like restoring history with the back button or [up-peel="force"], ignore
+  //     prevented events in 3.15 too. The overlay closes either way, so there is nothing to warn about.
+  // (3) Once the app has chosen a value for up.layer.config.forcePeel, it gets the 3.15 behavior.
+  if (event.value !== ':peel' || event.force || up.layer.config.forcePeelSet) return
 
-  let preventDefault = event.preventDefault
+  // We ignore the listener's preventDefault() call, so the overlay closes like it did in 3.14.
+  // Otherwise apps that upgrade with unpoly-migrate.js would see overlays stay open that used to close.
   event.preventDefault = function() {
-    if (!up.layer.config.forcePeelSet) {
-      up.migrate.warn('A listener tried to keep an overlay open while peeling. Choose with up.layer.config.forcePeel: false keeps it open (new default), true closes it (old behavior).')
-    }
-    return preventDefault.call(this)
+    up.migrate.warn('A listener tried to keep an overlay open while peeling. Choose with up.layer.config.forcePeel: false keeps it open (new default), true closes it (old behavior).')
   }
 }
 
