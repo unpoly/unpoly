@@ -491,17 +491,17 @@ describe('up.form', function() {
         expect(results).toMatchList([insideButton, outsideButton])
       })
 
-      it('includes elements matching a custom up.form.config.submitButtonSelectors', function() {
-        up.form.config.submitButtonSelectors.push('.custom-submit')
-        const [form, submitButton, customButton] = htmlFixtureList(`
+      it('only includes elements matching a custom up.form.config.submitButtonSelectors', function() {
+        up.form.config.submitButtonSelectors = ['button.custom-submit']
+        const [form, _submitButton, customButton] = htmlFixtureList(`
           <form>
             <button type="submit">Submit</button>
-            <button type="button" class="custom-submit">Custom submit</button>
+            <button type="submit" class="custom-submit">Custom submit</button>
             <button type="button">Other</button>
           </form>
         `)
 
-        expect(up.form.submitButtons(form)).toMatchList([submitButton, customButton])
+        expect(up.form.submitButtons(form)).toMatchList([customButton])
       })
     })
 
