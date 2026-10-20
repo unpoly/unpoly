@@ -9,7 +9,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
     this.layer = up.layer.get(options)
     this._origin = options.origin
     this._value = options.value
-    this._force = options.force
+    this._force = !!options.force
     this._response = options.response
     this._history = options.history ?? true
   }
@@ -120,6 +120,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
       value: this._value,
       origin: this._origin,
       response: this._response,
+      force: this._force,
     })
   }
 

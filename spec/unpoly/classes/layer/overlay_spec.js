@@ -949,6 +949,17 @@ describe('up.Layer.Overlay', function() {
         expect(up.layer.count).toBe(1)
       })
 
+      it('sets event.force on up:layer:accept when closing with { force: true }', function() {
+        makeLayers(3)
+        const acceptListener = jasmine.createSpy('up:layer:accept listener')
+        up.on('up:layer:accept', (event) => acceptListener(event.force))
+
+        up.layer.current.accept('value')
+        up.layer.current.accept('value', { force: true })
+
+        expect(acceptListener.calls.allArgs()).toEqual([[false], [true]])
+      })
+
       it('lets an up:layer:accept event handler cancel the acceptance and throws an AbortError', function() {
         makeLayers(2)
         expect(up.layer.count).toBe(2)
@@ -997,6 +1008,17 @@ describe('up.Layer.Overlay', function() {
       up.layer.dismiss(null, { force: true })
 
       expect(overlay).not.toBeAlive()
+    })
+
+    it('sets event.force on up:layer:dismiss when closing with { force: true }', function() {
+      makeLayers(3)
+      const dismissListener = jasmine.createSpy('up:layer:dismiss listener')
+      up.on('up:layer:dismiss', (event) => dismissListener(event.force))
+
+      up.layer.current.dismiss()
+      up.layer.current.dismiss(null, { force: true })
+
+      expect(dismissListener.calls.allArgs()).toEqual([[false], [true]])
     })
 
     it('uses an { animation } option instead of the configured close animation', async function() {

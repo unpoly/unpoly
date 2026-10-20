@@ -333,6 +333,7 @@ describe('up.Layer', function() {
         root.peel({ force: true })
 
         expect(dismissListener).toHaveBeenCalled()
+        expect(dismissListener.calls.argsFor(0)[0].force).toBe(true)
         expect(overlay).not.toBeAlive()
         expect(up.layer.count).toBe(1)
       })
@@ -403,6 +404,7 @@ describe('up.Layer', function() {
         root.peel()
 
         expect(dismissListener).toHaveBeenCalled()
+        expect(dismissListener.calls.argsFor(0)[0].force).toBe(true)
         expect(overlay).not.toBeAlive()
         expect(up.layer.count).toBe(1)
       })

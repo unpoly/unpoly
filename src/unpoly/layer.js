@@ -1580,6 +1580,16 @@ up.layer = (function() {
     Will be `undefined` if the overlay is not closing in reaction to a server response.
 
     See [Using the discarded response](/learn/closing-overlays#using-the-discarded-response).
+  @param {boolean} event.force
+    Whether the overlay closes even when a listener prevents it.
+
+    This is `true` when the overlay is [closed by force](/api/up.Layer.prototype.accept#options.force),
+    e.g. when the user navigates back in history.
+    It is also `true` when the overlay is [peeled](/learn/closing-overlays#peeling) by force,
+    with [`[up-peel="force"]`](/api/up-follow#up-peel), with a `{ force: true }` option
+    or with `up.layer.config.forcePeel`.
+
+    @experimental
   @param event.preventDefault()
     Prevents the overlay from closing.
 
@@ -1664,6 +1674,16 @@ up.layer = (function() {
     Will be `undefined` if the overlay is not closing in reaction to a server response.
 
     See [Using the discarded response](/learn/closing-overlays#using-the-discarded-response).
+  @param {boolean} event.force
+    Whether the overlay closes even when a listener prevents it.
+
+    This is `true` when the overlay is [closed by force](/api/up.Layer.prototype.accept#options.force),
+    e.g. when the user navigates back in history.
+    It is also `true` when the overlay is [peeled](/learn/closing-overlays#peeling) by force,
+    with [`[up-peel="force"]`](/api/up-follow#up-peel), with a `{ force: true }` option
+    or with `up.layer.config.forcePeel`.
+
+    @experimental
   @param event.preventDefault()
     Event listeners can call this method to prevent the overlay from closing.
 

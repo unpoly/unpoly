@@ -820,6 +820,7 @@ extendDescribe('up.history', function() {
           await wait()
 
           expect(dismissListener).toHaveBeenCalled()
+          expect(dismissListener.calls.argsFor(0)[0].force).toBe(true)
           expect(up.layer.count).toBe(1)
           expect('main').toHaveText('restored content')
         })
