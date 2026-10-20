@@ -28,7 +28,7 @@ This is a maintenance release to bridge the time until [Unpoly 3](https://github
 
 This is a maintenance release including two changes:
 
-- `[up-switch]` and `up.element.hide()` now hides elements using an `[hidden]` attribute instead of setting an inline style. Users can override the CSS for `[hidden]` to hide an element in a different way, e.g. by giving it a zero height.
+- ⚠️ `[up-switch]` and `up.element.hide()` now hides elements using an `[hidden]` attribute instead of setting an inline style. Users can override the CSS for `[hidden]` to hide an element in a different way, e.g. by giving it a zero height.
 - Fix a bug where, with a popup overlay already open, the user clicked on a preloaded, popup-opening link in the background layer, the second popup would not open.
 
 
@@ -111,7 +111,7 @@ This is a maintenance release while we're working on the next major feature upda
 - New option `up.log.config.format` lets you disable colors from log messages (thanks @stefanfisk!).
 - Elements with `[up-keep]` are now preserved when going back/forward in history (#293).
 - The function `up.element.createFromHTML()` now creates an element if the given HTML string begins with whitespace.
-- The function `up.element.createFromHTML()` now throws an error if the given HTML string contains more than one element on the root depth.
+- ⚠️ The function `up.element.createFromHTML()` now throws an error if the given HTML string contains more than one element on the root depth.
 - Elements matching `up.link.config.clickableSelectors` now get a `cursor: pointer` style through CSS.
 - Published new events to observe [closing overlay](/learn/closing-overlays) (`up:layer:dismiss`, `up:layer:dismissed`, `up:layer:accept`, `up:layer:accepted`). These events were implemented since Unpoly 2.0, but never documented.
 - Fix a bug where loading Unpoly would save a key called `"undefined"` to sessionStorage (#300).
@@ -142,8 +142,8 @@ This is a maintenance release while we're working on the next major feature upda
 - Unpoly can now be loaded with `<script defer>`. This can be used to load your scripts without blocking the DOM parser.
 - Unpoly can now be loaded with `<script type="module">`. This can be used deliver a modern JS build to modern browsers only.
 - Unpoly can now be [booted manually](/api/up.boot) at a time of your choice. By default Unpoly boots automatically once the initial DOM is parsed.
-- Event listeners registered with `up.on()` will no longer be called before Unpoly was [booted](/api/up.boot). Like with [compilers](/api/up.compiler), this lets you register behavior that is only active on [supported browsers](/api/up.framework.isSupported).
-- Unpoly no longer boots on Edge 18 or lower. Edge 18 was the last version of Edge to use Microsoft's custom rendering engine. Later versions use Chromium.
+- ⚠️ Event listeners registered with `up.on()` will no longer be called before Unpoly was [booted](/api/up.boot). Like with [compilers](/api/up.compiler), this lets you register behavior that is only active on [supported browsers](/api/up.framework.isSupported).
+- ⚠️ Unpoly no longer boots on Edge 18 or lower. Edge 18 was the last version of Edge to use Microsoft's custom rendering engine. Later versions use Chromium.
 
 
 ### Compatibility with strict Content Security Policies (CSP)
@@ -186,8 +186,8 @@ The layer associated with the request can now be accessed through `event.layer`.
 - When a target cannot be found and a fallback target is used, Unpoly now [logs](/api/up.log) a message.
 - When a [compiler](/api/up.compiler) is registered after [booting](/api/up.boot), Unpoly now explains in the log that the compiler will only run for fragments inserted in the future.
 - `up.observe()` and `input[up-observe]` now [log](/api/up.log) a warning when trying to observe a field without a `[name]` attribute.
-- `up.browser.loadPage()` has been renamed to `up.network.loadPage()`.
-- `up.browser.isSupported()` has been renamed to `up.framework.isSupported()`.
+- 🧩 `up.browser.loadPage()` has been renamed to `up.network.loadPage()`.
+- 🧩 `up.browser.isSupported()` has been renamed to `up.framework.isSupported()`.
 
 
 2.2.1
@@ -209,7 +209,7 @@ To achieve this `unpoly.js` is now compiled with modern JavaScript syntax that w
 
 ### ES5 build for legacy browsers
 
-If you need support for Internet Explorer 11 you can either use a transpiler like [Babel](https://babeljs.io/) **or** use Unpoly's ES5 build. To use the ES5 build, load `unpoly.es5.js` instead of `unpoly.js`. There is also a minified version `unpoly.es5.min.js`.
+⚠️ If you need support for Internet Explorer 11 you can either use a transpiler like [Babel](https://babeljs.io/) **or** use Unpoly's ES5 build. To use the ES5 build, load `unpoly.es5.js` instead of `unpoly.js`. There is also a minified version `unpoly.es5.min.js`.
 
 Like in earlier versions of Unpoly, supporting IE11 requires a polyfill for the `Promise` API. No additional polyfills are required by this version.
 
@@ -223,19 +223,19 @@ This step will allow Unpoly to use modern web APIs and reduce its bundle size ev
 
 ### Other changes
 
-- When going back in history, Unpoly reloads the `<body>` instead of the `:main` element. You can customize this behavior in `up.history.config.restoreTargets`.
-- The function `up.util.times()` has been deprecated. Use a classic [`for`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for) statement instead.
-- The function `up.Params.wrap()` has been removed without replacement.
-- Unpoly no longer loads when the browser is in quirks mode.
+- ⚠️ When going back in history, Unpoly reloads the `<body>` instead of the `:main` element. You can customize this behavior in `up.history.config.restoreTargets`.
+- 🧩 The function `up.util.times()` has been deprecated. Use a classic [`for`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for) statement instead.
+- ⚠️ The function `up.Params.wrap()` has been removed without replacement.
+- ⚠️ Unpoly no longer loads when the browser is in quirks mode.
 - When Unpoly cannot load, it prints a reason to the error log.
 
 
 2.1.0
 -----
 
-- Unpoly now shows a [progress bar](/api/up.network.config#config.progressBar) that appears for [late requests](/up:request:late).
+- 🧩 Unpoly now shows a [progress bar](/api/up.network.config#config.progressBar) that appears for [late requests](/up:request:late).
   The progress bar is enabled by default. If you're using [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading), the progress bar is disabled if you have an `up:request:late` listener, assuming that you have built a custom loading indicator.
-- For new layers, the `[up-history-visible]` and `[up-history]` options have been unified into a single `[up-history]` option. This reverts to the old behavior of Unpoly 1.0. The separation into two options was introduced in Unpoly 2.0, but turned out to be confusing to users.
+- 🧩 For new layers, the `[up-history-visible]` and `[up-history]` options have been unified into a single `[up-history]` option. This reverts to the old behavior of Unpoly 1.0. The separation into two options was introduced in Unpoly 2.0, but turned out to be confusing to users.
 - [Layer configuration](/api/up.layer.config) may now set mode-specific defaults for [`{ scroll }`](/learn/scrolling) and [`{ focus }`](/learn/focus). These take precendence to defaults in [`up.fragment.config.navigateOptions`](/api/up.fragment.config#config.navigateOptions).
 - Links with an `[up-instant]` attribute are now followed automatically, even if they don't also have an [`[up-follow]`](/api/up-follow) attribute.
 
@@ -269,9 +269,9 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 
 #### New Layer API
 
-- A new [layer API](/api/up.layer) replaces modals and popups.
+- 🧩 A new [layer API](/api/up.layer) replaces modals and popups.
 - Layers can be stacked infinitely.
-- Layers are fully isolated, meaning a screen in one layer will not accidentally see elements or events from another layer. For instance, [fragment links](/api/up.link) will only update elements from the [current layer](/api/up.layer.current) unless you [explicitly target another layer](/learn/targeting-other-layers).
+- ❌ Layers are fully isolated, meaning a screen in one layer will not accidentally see elements or events from another layer. For instance, [fragment links](/api/up.link) will only update elements from the [current layer](/api/up.layer.current) unless you [explicitly target another layer](/learn/targeting-other-layers).
 - A variety of [overlay modes](/learn/overlays#layer-modes) are supported, such as modal dialogs, popup overlays or drawers. You may [customize their appearance and behavior](/learn/customizing-overlays).
 
 #### Subinteractions
@@ -283,7 +283,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 #### Navigation intent
 
 - You can now define whether a framgent update constitutes a user navigation. Switching screens needs other defaults than updating a tiny box.
-- User navigation aborts earlier requests, fixing race conditions on slow connections.
+- ⚠️ User navigation aborts earlier requests, fixing race conditions on slow connections.
 
 #### Accessibility
 
@@ -295,7 +295,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 
 #### Reworked Bootstrap integration
 
-- The Bootstrap integration is now minimal and as unopinionated as possible. Little to no Bootstrap CSS is overridden.
+- ⚠️ The Bootstrap integration is now minimal and as unopinionated as possible. Little to no Bootstrap CSS is overridden.
 - Bootstrap versions 3, 4 and 5 are now supported.
 
 #### Quality of live improvements
@@ -303,12 +303,12 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 - Unpoly now ships with a bandwidth-friendly [polling implementation](/api/up-poll) that handles many edge cases.
 - The position of a clicked link is considered when deciding which element to replace. If possible, Unpoly will update an selector in the region of the link that triggered the fragment update. This helps with multiple self-contained components (with the same selector) on the same page.
 - The [log](/api/up.log) output is more much more compact and has a calmer formatting.
-- New fragments are no longer revealed by default. Instead Unpoly scrolls to the top when the [main target](/api/up-main) has changed, but does not scroll otherwise.
-- History is no longer changed by default. Instead Unpoly updates history only when a [main target](/api/up-main) has changed.
-- All scroll-related options have been unified in a single [`[up-scroll]` attribute](/learn/scrolling).
+- ⚠️ New fragments are no longer revealed by default. Instead Unpoly scrolls to the top when the [main target](/api/up-main) has changed, but does not scroll otherwise.
+- ❌ History is no longer changed by default. Instead Unpoly updates history only when a [main target](/api/up-main) has changed.
+- 🧩 All scroll-related options have been unified in a single [`[up-scroll]` attribute](/learn/scrolling).
 - Many optimizations have been made to preserve bandwidth on slow connections. For example, Unpoly stops [preloading](/api/up-preload) and [polling](/api/up-poll) whenthe connection has high latency or low throughput.
 - The client-side cache can be carefully managed by both the client and server.
-- Unpoly 1 had many functions for updating fragments (`up.replace()`, `up.extract()`, `up.modal.extract()`, etc.). Unpoly 2 has unified these into a single function `up.render()`.
+- 🧩 Unpoly 1 had many functions for updating fragments (`up.replace()`, `up.extract()`, `up.modal.extract()`, etc.). Unpoly 2 has unified these into a single function `up.render()`.
 - Event handlers to `up:link:follow`, `up:form:submit` etc. may change the render options for the coming fragment update.
 - Added more options to handle [unexpected server responses](/learn/error-responses), including the new `up:fragment:loaded` event.
 
@@ -337,11 +337,11 @@ There's a short list of changes that we cannot fix with aliases.
 
 #### Overlays (modals, popups) have different HTML
 
-⚠️ But it's similar. E.g. `<div class="modal">` becomes `<up-modal>`.
+❌ But it's similar. E.g. `<div class="modal">` becomes `<up-modal>`.
 
 #### Unpoly only sees the current layer
 
-⚠️ You can target other layers with `{ layer: 'any' }`.
+❌ You can target other layers with `{ layer: 'any' }`.
 
 #### Async functions no longer wait for animations
 
