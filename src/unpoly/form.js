@@ -1699,7 +1699,7 @@ up.form = (function() {
     // The browser resolves a [form] attribute across the whole page. When two layers have a form
     // with the same ID, a button or a field (pressing Enter) in the upper layer submits the form
     // in the lower layer. We cannot tell which form the user meant.
-    for (let control of [submitButton, document.activeElement]) {
+    for (let control of [event.submitter, document.activeElement]) {
       if (control && control.form === form && getForm(control) !== form) {
         up.fail('Prevented %o from submitting a form in another layer (ambiguous form ID "%s")', control, form.getAttribute('id'))
       }

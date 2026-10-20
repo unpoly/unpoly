@@ -516,12 +516,17 @@ extendDescribe('up.form', function() {
             await up.layer.open({ fragment: html('overlay') })
             let overlayField = up.fragment.get('[name=external-field]', { layer: 'overlay' })
 
+            // The browser resolves the field's [form] attribute to the form in the root layer.
+            // Pressing Enter in the field clicks that form's default button, without moving focus.
+            const rootDefaultButton = up.fragment.get('#my-form button', { layer: 'root' })
+
             await jasmine.expectGlobalError(/Prevented .* from submitting a form in another layer/, async function() {
               Trigger.focus(overlayField)
-              // Pressing Enter submits the field's form, which the browser resolves to the form in the root layer.
-              overlayField.form.requestSubmit()
+              rootDefaultButton.click()
               await wait()
             })
+
+            expect(overlayField).toBeFocused()
 
             expect(jasmine.Ajax.requests.count()).toBe(0)
             expect(rootForm).not.toHaveBeenDefaultSubmitted()
