@@ -142,6 +142,7 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - ⚠️ `up.Params.fromForm()` now requires a `<form>` element, as documented. To read params from any other container, use `up.Params.fromContainer()`.
 - ⚠️ `up.Params.fromForm()` now includes the `[name]` and `[value]` of the form's first submit button, like a submission would. Pass `{ submitButton: false }` to only include fields, as before, or pass a different button element.
 - ⚠️ When a form with [`[up-accept]` or `[up-dismiss]`](/learn/closing-overlays#result-values) closes an overlay, the result value now also contains the `[name]` and `[value]` of the submit button the user pressed.
+- ⚠️ `up.form.config.submitButtonSelectors` may only match native submit buttons. A custom element or a `<button type="button">` matched as a submit button now makes submitting throw an error.
 - One exception: a form only reads controls from its own [layer](/api/up.layer). The browser would also include controls from other layers that point to the form with a `[form]` attribute, e.g. when an overlay shows the same page as the layer below.
 
 

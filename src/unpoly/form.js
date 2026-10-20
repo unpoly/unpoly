@@ -96,6 +96,10 @@ up.form = (function() {
     @param {Array<string>} [config.submitButtonSelectors]
       An array of CSS selectors that represent submit buttons, such as `input[type=submit]` or `button[type=submit]`.
 
+      Selectors must only match native submit buttons: a `<button>` without a `[type]` or with `[type=submit]`,
+      an `<input type="submit">` or an `<input type="image">`. A browser cannot submit a form through other elements,
+      and [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData) rejects them.
+
     @param {Array<string>} [config.anyButtonSelectors]
       An array of CSS selectors that represent buttons of any kind, such as `button` or `input[type=button]`.
 
