@@ -37,7 +37,21 @@ up.network.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'slowDelay', 'lateDelay')
   up.migrate.renamedProperty(config, 'cacheExpiry', 'cacheExpireAge', 'The configuration up.network.config.cacheExpiry has been renamed to up.network.config.cacheExpireAge. Note that Unpoly 3+ automatically reloads cached content after rendering to ensure users always see fresh data ("cache revalidation"). Setting a custom expiry may no longer be necessary.')
   up.migrate.renamedProperty(config, 'clearCache', 'expireCache')
-  up.migrate.forbiddenPropertyValue(config, 'cacheSize', 0, 'Disabling the cache with up.network.config.cacheSize = 0 is no longer supported. To disable caching, set up.network.config.cacheEnabled = false instead.')
+
+  let cacheSize = config.cacheSize
+  Object.defineProperty(config, 'cacheSize', {
+    configurable: true,
+    get() {
+      return cacheSize
+    },
+    set(newValue) {
+      if (newValue === 0) {
+        up.migrate.deprecated('up.network.config.cacheSize = 0', 'up.network.config.cacheEnabled = false')
+        config.cacheEnabled = false
+      }
+      cacheSize = newValue
+    }
+  })
 
   // Provide a default for the removed property, in case someone pushes into that.
   up.network.config.requestMetaKeys = []

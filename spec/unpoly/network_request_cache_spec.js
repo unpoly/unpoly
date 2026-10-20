@@ -388,6 +388,37 @@ extendDescribe('up.network', function() {
 
         })
 
+        if (up.migrate.loaded) {
+          describe('with up.network.config.cacheSize = 0', function() {
+
+            it('disables the cache and logs a deprecation warning', async function() {
+              const warnSpy = up.migrate.warn.mock()
+
+              up.network.config.cacheSize = 0
+
+              expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.network.config.cacheEnabled = false'))
+              expect(up.network.config.cacheEnabled).toBe(false)
+
+              up.request({ url: '/foo', cache: true })
+              up.request({ url: '/foo', cache: true })
+              await wait()
+
+              expect(jasmine.Ajax.requests.count()).toBe(2)
+            })
+
+            it('does not warn for another cache size', function() {
+              const warnSpy = up.migrate.warn.mock()
+
+              up.network.config.cacheSize = 5
+
+              expect(up.network.config.cacheSize).toBe(5)
+              expect(up.network.config.cacheEnabled).toBe(true)
+              expect(warnSpy).not.toHaveBeenCalled()
+            })
+
+          })
+        }
+
         describe('matching requests', function() {
 
           it('reuses a request with the same URL but a different #hash', async function() {

@@ -56,23 +56,6 @@ up.migrate = (function() {
     return valueRef
   }
 
-  function forbiddenPropertyValue(object, key, forbiddenValue, errorMessage) {
-    let value = object[key]
-
-    Object.defineProperty(object, key, {
-      configurable: true,
-      get() {
-        return value
-      },
-      set(newValue) {
-        if (newValue === forbiddenValue) {
-          throw new Error(errorMessage)
-        }
-        value = newValue
-      }
-    })
-  }
-
   function transformAttribute(oldAttr, ...args) {
     let transformer = u.extractCallback(args)
     let { scope } = u.extractOptions(args)
@@ -278,7 +261,6 @@ up.migrate = (function() {
     renamedProperty,
     removedProperty,
     defineThrowingProps,
-    forbiddenPropertyValue,
     transformAttribute,
     renamedAttribute,
     removedAttribute,
