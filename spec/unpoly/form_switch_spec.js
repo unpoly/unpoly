@@ -845,7 +845,7 @@ extendDescribe('up.form', function() {
           it('updates the parent layer when the form is submitted into it', async function() {
             await up.layer.open({ fragment: '<main id="main">old main</main>' })
             // A real close animation keeps the closing overlay in the DOM while its fields are tracked.
-            const closingOverlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 100, fragment: `
+            const closingOverlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 300, fragment: `
               <form action="/path" method="get" up-layer="parent" up-target="main">
                 <input name="foo" up-switch=".target">
                 <div class="target" up-show-for="active">target</div>
@@ -876,7 +876,7 @@ extendDescribe('up.form', function() {
             up.hello(rootRegion)
 
             // A real close animation keeps the closing overlay in the DOM while its fields are tracked.
-            const closingOverlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 100, fragment: `
+            const closingOverlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 300, fragment: `
               <form action="/path" method="get" up-layer="parent" up-target="main">
                 <input name="foo" up-switch=".target" up-switch-region=".region">
               </form>
@@ -900,7 +900,7 @@ extendDescribe('up.form', function() {
             `)
             up.hello(rootTarget)
 
-            const overlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 100, fragment: `
+            const overlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 300, fragment: `
               <div id="overlay-content">
                 <input name="foo" up-switch=".target">
               </div>

@@ -252,7 +252,7 @@ describe('up.layer', function() {
 
       it('counts a closed overlay until its element is removed after its exit animation', async function() {
         // A real close animation keeps the closed overlay's element in the DOM.
-        const overlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 100 })
+        const overlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 300 })
         await wait()
         expect(up.layer.attachedCount).toBe(2)
 
@@ -262,7 +262,7 @@ describe('up.layer', function() {
         expect(up.layer.count).toBe(1)
         expect(up.layer.attachedCount).toBe(2)
 
-        await wait(200)
+        await wait(400)
 
         expect(overlay.element).toBeDetached()
         expect(up.layer.attachedCount).toBe(1)

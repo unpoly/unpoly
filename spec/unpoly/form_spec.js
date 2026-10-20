@@ -2079,7 +2079,7 @@ describe('up.form', function() {
       it('updates the parent layer when the form is submitted into it from a closing overlay', async function() {
         await up.layer.open({ fragment: '<main id="main">old main</main>' })
         // A real close animation keeps the closing overlay in the DOM while its fields are tracked.
-        const closingOverlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 100, fragment: `
+        const closingOverlay = await up.layer.open({ closeAnimation: 'fade-out', closeDuration: 300, fragment: `
           <form action="/path" method="get" up-layer="parent" up-target="main" up-autosubmit>
             <input name="foo">
           </form>
