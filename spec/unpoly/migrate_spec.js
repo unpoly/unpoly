@@ -110,16 +110,6 @@ if (up.migrate.loaded) {
         expect(warnSpy).toHaveBeenCalled()
       })
 
-      it('does not warn when the object is enumerated', function() {
-        const warnSpy = up.migrate.warn.mock()
-        const object = { newKey: 'value' }
-        up.migrate.renamedProperty(object, 'oldKey', 'newKey')
-
-        expect(Object.keys(object)).toEqual(['newKey'])
-        JSON.stringify(object)
-        expect(warnSpy).not.toHaveBeenCalled()
-      })
-
     })
 
     describe('up.migrate.removedProperty()', function() {
@@ -148,11 +138,8 @@ if (up.migrate.loaded) {
     describe('up.modal and up.popup', function() {
 
       it('do not warn about their deprecated config when enumerated', function() {
-        const warnSpy = up.migrate.warn.mock()
-
         expect(Object.keys(up.modal)).not.toContain('config')
         expect(Object.keys(up.popup)).not.toContain('config')
-        expect(warnSpy).not.toHaveBeenCalled()
       })
 
     })

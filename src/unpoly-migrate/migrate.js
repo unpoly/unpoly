@@ -17,8 +17,6 @@ up.migrate = (function() {
 
     Object.defineProperty(object, oldKey, {
       configurable: true,
-      // Scripts that enumerate the object must not trigger the warning. See removedProperty().
-      enumerable: false,
       get() {
         doWarn()
         return this[newKey]
