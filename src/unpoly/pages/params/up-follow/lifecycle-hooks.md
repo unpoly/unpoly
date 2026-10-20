@@ -7,6 +7,8 @@
 
   If the user does not confirm, no request is sent and no fragments are updated.
 
+  The message may also be passed as a `[data-confirm]` attribute, as rendered by Rails helpers like `link_to` or `button_to`.
+
 @param [up-on-loaded]
   A JavaScript snippet that is executed when the server responds with new HTML,
   but before the HTML is rendered.
