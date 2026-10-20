@@ -71,6 +71,27 @@ describe('up.form', function() {
           expect(up.form.get(overlayInput)).toBe(overlayForm)
         })
 
+        it('prefers the form from a [form] attribute over an ancestor form, like the browser', function() {
+          const [formA, input, formB] = htmlFixtureList(`
+            <form id="form-a">
+              <input name="email" form="form-b">
+            </form>
+            <form id="form-b"></form>
+          `)
+
+          expect(up.form.get(input)).toBe(formB)
+        })
+
+        it('returns a missing value for a field within a form when its [form] attribute matches no form, like the browser', function() {
+          const [form, input] = htmlFixtureList(`
+            <form>
+              <input name="email" form="unknown-form">
+            </form>
+          `)
+
+          expect(up.form.get(input)).toBeMissing()
+        })
+
       })
 
 
@@ -236,6 +257,19 @@ describe('up.form', function() {
         const field = e.affix(form, 'input[name=email][type=text][form=form-id]')
         const results = up.form.fields(form)
         expect(results).toMatchList([field])
+      })
+
+      it('does not include a field within the form whose [form] attribute points to another form', function() {
+        const [formA, ownField, foreignField, formB] = htmlFixtureList(`
+          <form id="form-a">
+            <input name="own">
+            <input name="foreign" form="form-b">
+          </form>
+          <form id="form-b"></form>
+        `)
+
+        expect(up.form.fields(formA)).toMatchList([ownField])
+        expect(up.form.fields(formB)).toMatchList([foreignField])
       })
     })
 

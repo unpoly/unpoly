@@ -189,6 +189,11 @@ up.form = (function() {
     root = e.get(root) // unwrap jQuery
     let elements = up.fragment.subtree(root, selectorFn())
 
+    // Like the browser, a [form] attribute takes precedence over the surrounding form.
+    if (root.matches('form')) {
+      elements = elements.filter((element) => getForm(element) === root)
+    }
+
     // If findFormElements() is called with an entire form, gather fields outside the form
     // element that are associated with the form (through <input form="id-of-form">, which
     // is an HTML feature.)
@@ -227,6 +232,8 @@ up.form = (function() {
 
   If the given element is a `<form>` with an `[id]`, the list also includes fields outside the form
   that are associated with it through a [`[form]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#form) attribute.
+  Like in the browser, a `[form]` attribute takes precedence over the surrounding form, so a field within the form
+  that is associated with another form is not included.
 
   Fields in another [layer](/api/up.layer) and fields that are being [destroyed](/api/up.destroy) are ignored.
 
@@ -1440,7 +1447,7 @@ up.form = (function() {
   */
 
   function getForm(element) {
-    return getLiteralForm(element) || getClosestForm(element) || getAssociatedForm(element)
+    return getLiteralForm(element) || getAssociatedForm(element) || getClosestForm(element)
   }
 
   function getLiteralForm(element) {
@@ -1451,7 +1458,8 @@ up.form = (function() {
 
   function getClosestForm(element) {
     // Return the closest form for vanilla fields, or any non-field element within a form (like a form group).
-    return element.closest('form')
+    // Like the browser, a [form] attribute decides alone, even when it matches no form in our layer.
+    if (!element.hasAttribute('form')) return element.closest('form')
   }
 
   function getAssociatedForm(element) {

@@ -1114,6 +1114,22 @@ extendDescribe('up.form', function() {
               expect(callback.calls.count()).toEqual(1)
             })
 
+            it('ignores a field within the form whose [form] attribute points to another form', async function() {
+              const [formA, input, formB] = htmlFixtureList(`
+                <form id="form-a">
+                  <input name="input-name" value="old-value" form="form-b">
+                </form>
+                <form id="form-b"></form>
+              `)
+              const callback = jasmine.createSpy('change callback')
+              up.watch(formA, callback)
+              input.value = 'new-value'
+              Trigger[eventType](input)
+              await wait()
+
+              expect(callback).not.toHaveBeenCalled()
+            })
+
           })
         })
       })

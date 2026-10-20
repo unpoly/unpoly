@@ -122,6 +122,24 @@ extendDescribe('up.form', function() {
           expect(jasmine.lastRequest().data()).toMatchParams({ foo: 'foo-value', submit1: 'submit1-value' })
         })
 
+        it('ignores a field and a submit button within the form whose [form] attribute points to another form', async function() {
+          // Like in the browser, the [form] attribute takes precedence over the surrounding form.
+          const [formA] = htmlFixtureList(`
+            <form id="form-a" action="/form-a" method="post">
+              <input name="own" value="own-value">
+              <input name="foreign" value="foreign-value" form="form-b">
+              <button type="submit" name="action" value="b" form="form-b" formaction="/button-b">Submit B</button>
+            </form>
+            <form id="form-b" action="/form-b" method="post"></form>
+          `)
+
+          up.submit(formA)
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/form-a')
+          expect(jasmine.lastRequest().data()).toMatchParams({ own: 'own-value' })
+        })
+
         it('does not include the submit button in the params with { submitButton: false }', async function() {
           const form = fixture('form[action="/action"][method="post"]')
           const fooInput = e.affix(form, 'input[type="text"][name="foo"][value="foo-value"]')

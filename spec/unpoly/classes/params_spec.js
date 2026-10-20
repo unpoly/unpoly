@@ -743,6 +743,24 @@ describe('up.Params', function() {
       ])
     })
 
+    it('serializes a field within the form whose [form] attribute points to another form only with that other form', function() {
+      // Like in the browser, the [form] attribute takes precedence over the surrounding form.
+      const [formA, , , formB] = htmlFixtureList(`
+        <form id="form-a">
+          <input name="own" value="own-value">
+          <input name="foreign" value="foreign-value" form="form-b">
+        </form>
+        <form id="form-b"></form>
+      `)
+
+      expect(up.Params.fromForm(formA).toArray()).toEqual([
+        { name: 'own', value: 'own-value' },
+      ])
+      expect(up.Params.fromForm(formB).toArray()).toEqual([
+        { name: 'foreign', value: 'foreign-value' },
+      ])
+    })
+
     it("serializes a configured custom element outside the form with a [form] attribute", function() {
       // The browser ignores [form] on an element that is not form-associated, so only
       // Unpoly's own field lookup finds this control.
@@ -900,9 +918,8 @@ describe('up.Params', function() {
         ])
       })
 
-      it('ignores a submit button that the browser associates with another form', function() {
-        // up.form.submitButtons() finds this button by subtree, but its [form] attribute makes
-        // the browser own it elsewhere. Passing it as a submitter would throw a NotFoundError.
+      it('ignores a submit button within the form whose [form] attribute points to another form', function() {
+        // Like in the browser, the [form] attribute takes precedence over the surrounding form.
         const [form] = htmlFixtureList(`
           <form>
             <input name="email" value="foo@example.com">
