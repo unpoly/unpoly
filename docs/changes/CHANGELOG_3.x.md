@@ -786,7 +786,7 @@ and `up.hello()`.
 ```js
 let textarea = up.element.createFromHTML('<textarea class="wysiwyg"></textarea>')
 await up.hello(textarea) // mark: await
-// chip: WYISWYG editor is now initialized
+// chip: WYSIWYG editor is now initialized
 ```
 
 The fulfillment value is the same element that was passed as an argument:
@@ -800,7 +800,7 @@ let textarea = await up.hello(up.element.createFromHTML(html))
 
 ### Performance fixes
 
-Unpoly 3.11 introduced a number of performance regressions that would be very noticable on pages with many elements, or many forms. To address this, this release includes a number of performance fixes:
+Unpoly 3.11 introduced a number of performance regressions that would be very noticeable on pages with many elements, or many forms. To address this, this release includes a number of performance fixes:
 
 - Fix a performance regression where Unpoly would track the DOM for dynamically inserted `[up-validate]` fields for every form. Now fields are only tracked for forms that use `[up-validate]`.
 - Features that need to track the insertion or removal of elements now only sync with the DOM once after a render pass.
@@ -814,7 +814,7 @@ Unpoly 3.11 introduced a number of performance regressions that would be very no
 
 Restricting content types is a security precaution. It protects in a hypothetical scenario where an attacker can both upload a file *and* can use an existing XSS vulnerability to cause Unpoly to render that file. It doesn't affect applications that reliably escape user input.
 
-You can configure which responses Unpoly will process by configuring a function in `up.fragment.config.renderableResponse`. To render *any* response regardless of content-type, configure a function that always returns true`:
+You can configure which responses Unpoly will process by configuring a function in `up.fragment.config.renderableResponse`. To render *any* response regardless of content-type, configure a function that always returns `true`:
     
 ```js
 up.fragment.config.renderableResponse = (response) => true
@@ -1101,7 +1101,7 @@ See [Custom switching effects](/learn/switching-form-state#custom-effects).
 
 #### New switching modifiers
 
-The `[up-switch]` attribute itself has been reworked with new modifiying attributes:
+The `[up-switch]` attribute itself has been reworked with new modifying attributes:
 
 - A new `[up-switch-region]` attribute allows to [expand or narrow the region](/learn/switching-form-state#region) where elements are switched.
 - `[up-switch]` can now [react to other events](/learn/switching-form-state#reacting-to-different-events), by setting an `[up-watch-event]` attribute.
@@ -1126,7 +1126,7 @@ The `[up-validate]` attribute has been reworked.
 
 By default Unpoly will submit validation requests to the form's `[action]` attribute, setting an additional `X-Up-Validate` header to allow the server distinguish a validation request from a regular form submission.
 
-Unpoly can now [validate forms against other URLs](/api/up-validate#urls). You can do so with the new [`[up-validate-url]`](/api/up-validate#up-validate-url) and [`[up-validate-method]`](/api/up-validate#up-validate-params) attributes on individudal fields or on entire forms:
+Unpoly can now [validate forms against other URLs](/api/up-validate#urls). You can do so with the new [`[up-validate-url]`](/api/up-validate#up-validate-url) and [`[up-validate-method]`](/api/up-validate#up-validate-method) attributes on individual fields or on entire forms:
 
 ```html
 <form method="post" action="/order" up-validate-url="/validate-order"> <!-- mark: up-validate-url -->
@@ -1371,7 +1371,7 @@ Client-side changes to the element (e.g. by a [compiler](/api/up.compiler)) are 
 
 To preserve an element as long as its [data](/learn/data) remains the same, set an `[up-keep="same-data"]` attribute. Only when the element's `[up-data]` attribute changes between versions, it is replaced by the new version. Changes in other attributes or its children are ignored.
 
-The example below uses a [compiler](/api/up.compiler) to render an interactive map into elements with a `.map` class. The initial map location is passed as an `[up-data]` attribute. Because we don't want to lose client-side state (like pan or zoom  ettings), we want to keep the map widget as long as possible. Only when the map's initial location changes, we want to re-render the map centered around the new location. We can achieve this by setting an `[up-keep="same-data"]` attribute on the map container:
+The example below uses a [compiler](/api/up.compiler) to render an interactive map into elements with a `.map` class. The initial map location is passed as an `[up-data]` attribute. Because we don't want to lose client-side state (like pan or zoom settings), we want to keep the map widget as long as possible. Only when the map's initial location changes, we want to re-render the map centered around the new location. We can achieve this by setting an `[up-keep="same-data"]` attribute on the map container:
 
 ```html
 <div class="map" up-data="{ location: 'Hofbräuhaus Munich' }" up-keep="same-data"></div> <!-- mark: same-data -->
@@ -1570,8 +1570,8 @@ Many experimental features have now been declared as stable:
 - `up.Response#lastModified` property
 - `up.Response#etag` property
 - `up.Response#age` property
-- `up.Response#expired` proprty
-- `{ response }` option for `up.Layer#accept()` method and `up.layer.accept()` funciton
+- `up.Response#expired` property
+- `{ response }` option for `up.Layer#accept()` method and `up.layer.accept()` function
 - `up.Layer#asCurrent()`
 - `up.layer.location` and `up.Layer#location` properties
 - `[up-abortable]` attribute for `[up-follow]` links
@@ -1604,7 +1604,7 @@ This release fixes an error in the minified Javascript (`unpoly.min.js`) (issue 
 3.10.0
 ------
 
-Unpoly 3.10 is a major feature relase, adding support for [client-side templates](/learn/templates), [arbitrary loading state](/learn/loading-state) and [optimistic rendering](/learn/optimistic-rendering). It also contains many bug fixes and quality-of-life improvements, like [Relaxed JSON](/api/relaxed-json).
+Unpoly 3.10 is a major feature release, adding support for [client-side templates](/learn/templates), [arbitrary loading state](/learn/loading-state) and [optimistic rendering](/learn/optimistic-rendering). It also contains many bug fixes and quality-of-life improvements, like [Relaxed JSON](/api/relaxed-json).
 
 This release contains some minor breaking changes. Changes that may need your attention are marked with 🧩 when [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) polyfills them and logs where you use the old API, with ⚠️ when they are not polyfilled but rare or minor, and with ❌ when you should check your code in any case.
 
@@ -1651,7 +1651,7 @@ For example, this is the [*Tasks* tab](https://demo.unpoly.com/tasks) in the off
 
 <video src="images/optimistic-rendering-demo.mp4" controls width="600" aria-label="The demo app reacting instantly under high latency"></video>
 
-Since optimistic rendering requires additional code, we recommend to use it for interactions where the duplication is low, or where the extra effort adds ignificant value for the user. Some suitable use cases include:
+Since optimistic rendering requires additional code, we recommend to use it for interactions where the duplication is low, or where the extra effort adds significant value for the user. Some suitable use cases include:
 
 - Forms with few or simple validations (e.g. adding a todo)
 - Forms where users would expect an immediate effect (e.g. submitting a chat message)
@@ -1724,7 +1724,7 @@ When Unpoly outputs HTML (e.g. for the `X-Up-Context` header) it always produces
 
 ### Progress bar
 
-Improvements have been made to the [global progress bar](/learn/progress-bar), which appears when requests are tooking long to load:
+Improvements have been made to the [global progress bar](/learn/progress-bar), which appears when requests are taking long to load:
 
 - The progress bar will no longer restart its animation when a request is immediately followed by another request.
  
@@ -1751,7 +1751,7 @@ Improvements have been made to the [global progress bar](/learn/progress-bar), w
 
 Unpoly 3.0 has added the `[up-disable]` attribute to [disable forms while working](/learn/disabling-forms). This release adds the following features:
 
-- When fields are [disabled](/learn/disabling-forms) during a render pass, and a field loses its focus, that field is now re-focused when the field is re-renabled afterwards.
+- When fields are [disabled](/learn/disabling-forms) during a render pass, and a field loses its focus, that field is now re-focused when the field is re-enabled afterwards.
 - You can now [disable form fields when the user activates a hyperlink](/learn/disabling-forms#from-link).
 - Disabling now also disable non-submit buttons, like an `button[type=button]` or `input[type=button]`.
 - New configuration `up.form.config.genericButtonSelectors`.
@@ -1766,7 +1766,7 @@ While this is still possible, the new canonical way is to separate tokens with a
 
 | Old form (still valid) | New form |
 |------------|-----------|
-| ✅ `[up-layer="parent root"]` | ✅ `[up-parent="parent, root"]` |
+| ✅ `[up-layer="parent root"]` | ✅ `[up-layer="parent, root"]` |
 | ✅ `[up-show-for="value1 value2"]` | ✅ `[up-show-for="value1, value2"]` |
 | ✅ `[up-alias="/foo /bar"]` | ✅ `[up-alias="/foo, /bar"]` |
 | ✅`up.on('event1 event2', fn)` | ✅ `up.on('event1, event2', fn)` |
@@ -1777,7 +1777,7 @@ Use a comma instead:
 | Old form (now invalid) | New form |
 |------------|-----------|
 | ❌ `[up-scroll="target or main"]` | ✅ `[up-scroll="target, main"]` |
-| ❌ `[up-focus="target or main"]` | ✅ `[up-scroll="target, main"]` |
+| ❌ `[up-focus="target or main"]` | ✅ `[up-focus="target, main"]` |
 
 
 
@@ -1828,8 +1828,8 @@ Unpoly has several methods to detect and process changes in form fields, most no
 This release includes the following changes:
 
 - `up.fragment.toTarget()` now supports a `{ strong: true }` option. This produces a more unique selector by only considering the element's `[id]` and `[up-id]` attributes. Weaker [derivation patterns](/learn/target-derivation#derivation-patterns), like the element's class, are not considered in strong mode. The element's tag name is only considered for singleton elements like `<html>` or `<body>`.
-- `up.fragment.toTarget()` can now skip [target verifcation](/learn/target-derivation#verification) by passing a `{ verify: false }` option.
-- When a [validated](/learn/validation#validating-after-changing-a-field) field wants to update its form group, that form group is no longer targeted by its `[class]`, which would often be ambigous. Instead the form group is only targeted by its `[id]` or `[up-id]` attribute. If the form group doesn't have an `[id]` or `[up-id]` attribute, it is targeted with a `.has()` selector referencing the changed field, e.g. `fieldset:has(#changed-field)`.
+- `up.fragment.toTarget()` can now skip [target verification](/learn/target-derivation#verification) by passing a `{ verify: false }` option.
+- When a [validated](/learn/validation#validating-after-changing-a-field) field wants to update its form group, that form group is no longer targeted by its `[class]`, which would often be ambiguous. Instead the form group is only targeted by its `[id]` or `[up-id]` attribute. If the form group doesn't have an `[id]` or `[up-id]` attribute, it is targeted with a `.has()` selector referencing the changed field, e.g. `fieldset:has(#changed-field)`.
 
 
 
@@ -1975,7 +1975,7 @@ This release improves the handling of faux-interactive elements:
 
 ### Polling
 
-- Listeners to the `up:fragment:poll` event can now inspect or mutate `event.renderOptions`. This allows more control over the polling request and sub-sequent render passes.
+- Listeners to the `up:fragment:poll` event can now inspect or mutate `event.renderOptions`. This allows more control over the polling request and subsequent render passes.
 - `[up-poll]` elements can now use the `[up-href]` attribute to poll from a different URL. By default Unpoly will poll the URL from which the element was originally loaded. The old method over overriding `[up-source]` is still supported, but `[up-href]` is the preferred way of doing this going forward.
 - `[up-poll]` elements can now use the `[up-method]` attribute to choose a different HTTP method for polling requests.
 - `[up-poll]` elements can now use the `[up-params]` attribute to add custom params to polling requests.
@@ -2204,7 +2204,7 @@ See [how cache entries are matched](/learn/optimizing-responses#cache-matching) 
 
 This release fixes some long-standing issues where the cache was evicted when a request failed due to [network issues](/learn/network-issues), or when the server responds with an empty response.
 
-This fix restores the indented behavior that, even without a connection, [cached content](/learn/caching) will remain navigatable for [90 minutes](/api/up.network.config#config.cacheEvictAge). This means that an offline user can instantly access pages that they already visited this session.
+This fix restores the intended behavior that, even without a connection, [cached content](/learn/caching) will remain navigatable for [90 minutes](/api/up.network.config#config.cacheEvictAge). This means that an offline user can instantly access pages that they already visited this session.
 
 
 ### Quick access to the form element in form events
@@ -2314,7 +2314,7 @@ CSS requires length values (like `width`, `top` or `margin`) to have a unit, e.g
 🧩 This approach required Unpoly to keep a list of CSS properties that denote lengths, which was unsustainable. You now always need to pass length values with a unit: 
 
 ```js
-// ❌ Length values without unit is uo longer supported
+// ❌ Length values without unit is no longer supported
 up.element.setStyle(div, { height: 50 })
 
 // ✔️ Length values now require a unit
@@ -2464,7 +2464,7 @@ This release addresses many edge cases with features that watch form fields for 
 
 ### Performance improvements
 
-- Unpoy now uses the native `:has()` selector [where available](https://developer.mozilla.org/en-US/docs/Web/CSS/:has). Unpoly's polyfill for `:has()` will remain included for the time being. It will be removed as Firefox' `:has()` support has reached the majority of users (available on Nightly now). 
+- Unpoly now uses the native `:has()` selector [where available](https://developer.mozilla.org/en-US/docs/Web/CSS/:has). Unpoly's polyfill for `:has()` will remain included for the time being. It will be removed as Firefox' `:has()` support has reached the majority of users (available on Nightly now). 
 - Improve performance of many element lookups, by finding elements via CSS selectors (vs. filtering lists with JavaScript).
 
 ### Support for [structured data markup](https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data)
@@ -2605,7 +2605,7 @@ up.render('.element', { url: '/path', history: true, metaTags: false }) // mark:
 ### Forgiving error handling
 
 In earlier versions, errors in user code would often crash Unpoly. This would sometimes leave the page in a corrupted state. For example,
-a render pass would only update some fragments, fail to scroll, or fail to run destuctors.
+a render pass would only update some fragments, fail to scroll, or fail to run destructors.
 
 This version changes how Unpoly handles exceptions thrown from user code, like compilers, transition functions or callbacks like `{ onAccepted }`.
 
@@ -3508,18 +3508,18 @@ That said, the following changes were made:
 
     By default Unpoly will expire the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method.
   - 🧩 The configuration `up.network.config.cacheExpiry` has been renamed to `up.network.config.cacheExpireAge`.
-  - The default for `up.network.config.expireCacheAge` is now 15 seconds (down from 5 minutes in Unpoly 2).
+  - The default for `up.network.config.cacheExpireAge` is now 15 seconds (down from 5 minutes in Unpoly 2).
     
     ⚠️ If you have previously configured a custom value for `up.network.config.clearCache` (now `.expireCache`) to
       prevent the display of stale content, check if that configuration is still needed with [revalidation](/learn/caching#revalidation).
   - 🧩 The response header `X-Up-Clear-Cache` has been renamed to `X-Up-Expire-Cache`.
-  - 🧩 The option to keep a cache entry through `X-Up-Clear-Clache: false` has been removed.
+  - 🧩 The option to keep a cache entry through `X-Up-Clear-Cache: false` has been removed.
   - 🧩 The function `up.cache.clear(pattern)` has been renamed to `up.cache.expire(pattern)`.
   - 🧩 The attribute `[up-clear-cache]` has been renamed to `[up-expire-cache]`.
   - 🧩 The option `up.render({ clearCache })` has been renamed to `{ expireCache }`.
   - 🧩 The option `up.request({ clearCache })` has been renamed to `{ expireCache }`.
 - Features have been added to evict cache entries:
-  - New configuration `up.network.config.expireCache` lets you define which requests evict existing cache entries. 
+  - New configuration `up.network.config.evictCache` lets you define which requests evict existing cache entries. 
   - ⚠️ By default Unpoly will expire, but not evict any cache entries when a request is made.
 
     To restore Unpoly 2's behavior of evicting the entire cache after a request with an [unsafe](https://developer.mozilla.org/en-US/docs/Glossary/Safe/HTTP) HTTP method, configure the following:
@@ -3530,14 +3530,13 @@ That said, the following changes were made:
   - New configuration `up.network.config.cacheEvictAge` (default is 90 minutes).
   - Added response header `X-Up-Evict-Cache`.
   - Added function `up.cache.evict(pattern)`.
-  - Added configuration `up.network`
 - Cache revalidation happens after `up.render()` settles.
 
   To run code once all render passes have finished, pass an `{ onFinished }` callback or `await up.render(..).finished`.
 - Cache revalidation can be controlled through a render option `{ revalidate }` or
   a link attribute `[up-revalidate]`.
   
-  The default option value is `{ revalidate: 'auto' }`, which revalidates if `up.fragment.config.autoRevalidate(response)` returns `true`. By default this configuration returns `true` if a response is older than `up.network.config.expireAge`.
+  The default option value is `{ revalidate: 'auto' }`, which revalidates if `up.fragment.config.autoRevalidate(response)` returns `true`. By default this configuration returns `true` if a response is older than `up.network.config.cacheExpireAge`.
 
 
 #### Conditional requests
@@ -3565,8 +3564,7 @@ Unpoly 3 lets you handle [connection loss](/learn/network-issues#disconnects) wi
 <a href="..." up-on-offline="if (confirm('You are offline. Retry?')) event.retry()">Post bid</a>
 ```
 
-You may also configure a global handler by listening to `up:request:offline` (renamed from `up:request:fatal`):
-:
+You may also configure a global handler by listening to `up:fragment:offline`:
 
 ```js
 up.on('up:fragment:offline', function(event) {
@@ -3708,9 +3706,9 @@ However, Misconfigured server endpoints may send HTTP 200 (OK) for everything. T
 
 #### Various changes
 
-- ⚠️ `up.element.booleanAttr()` now returns `true` for a attribute value that is present but non-boolean.
+- ⚠️ `up.element.booleanAttr()` now returns `true` for an attribute value that is present but non-boolean.
 
-  For example, the attribut value `[up-instant='up-instant']` is now considered `true`.
+  For example, the attribute value `[up-instant='up-instant']` is now considered `true`.
 
   Previously it returned `undefined`.
 

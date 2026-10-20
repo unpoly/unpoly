@@ -15,12 +15,12 @@ This is the last release with support for Internet Explorer 11. Future releases 
 
 This is a maintenance release to bridge the time until [Unpoly 3](https://github.com/unpoly/unpoly/discussions/407) is completed. This release includes the following changes:
 
-- When a fragment is [revealed](/#revealing-the-fragment), [fixed elements](https://unpoly.com/api/up-fixed-bottom) obstructing the viewport are now ignored while the fixed element is hidden.
+- When a fragment is [revealed](/learn/scrolling#target), [fixed elements](https://unpoly.com/api/up-fixed-bottom) obstructing the viewport are now ignored while the fixed element is hidden.
 - Listeners to `up:request:load` may now access the unopened `XMLHttpRequest` instance through `event.xhr`. This lets you track upload progress through [`event.xhr.upload`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/upload). (Thanks @iaddict!)
 - Listeners to `up:layer:accept` may change the layer's acceptance value by setting or mutating `event.value`. 
 - Listeners to `up:layer:dismiss` may change the layer's dismissal value by setting or mutating `event.value`. 
-- Fix a bug where right-aligned popups would have right-aligned text
-- Fix a bug where clicking links twice will not update location when the browser history API is used in between (#388)
+- Fix a bug where right-aligned popups would have right-aligned text.
+- Fix a bug where clicking links twice would not update the location when the browser history API is used in between (#388)
 
 
 2.6.1
@@ -28,8 +28,8 @@ This is a maintenance release to bridge the time until [Unpoly 3](https://github
 
 This is a maintenance release including two changes:
 
-- ⚠️ `[up-switch]` and `up.element.hide()` now hides elements using an `[hidden]` attribute instead of setting an inline style. Users can override the CSS for `[hidden]` to hide an element in a different way, e.g. by giving it a zero height.
-- Fix a bug where, with a popup overlay already open, the user clicked on a preloaded, popup-opening link in the background layer, the second popup would not open.
+- ⚠️ `[up-switch]` and `up.element.hide()` now hide elements using an `[hidden]` attribute instead of setting an inline style. Users can override the CSS for `[hidden]` to hide an element in a different way, e.g. by giving it a zero height.
+- Fix a bug where, when a popup overlay was already open and the user clicked on a preloaded, popup-opening link in the background layer, the second popup would not open.
 
 
 2.6.0
@@ -54,16 +54,16 @@ The [polling](/api/up-poll) implementation was rewritten to fix many issues and 
 
 - Events for [closing overlays](/learn/closing-overlays) (`up:layer:dismiss`, `up:layer:dismissed`, `up:layer:accept`, `up:layer:accepted`) have gained new useful properties:
   - The `{ value }` property is the [overlay result value](/learn/closing-overlays#result-values).
-  - The `{ origin }` property is the element that caused the element to close.
+  - The `{ origin }` property is the element that caused the overlay to close.
 - When an overlay is [closed](/learn/closing-overlays) its [result value](/learn/closing-overlays#result-values) is now [logged](/api/up.log) for easier debugging.
-- Fix many issues where clicking into foreign overlays constructed other libraries would close an underlying Unpoly modal. In many cases this is no longer necessary. There are some remaining cases where Unpoly would steal focus from a foreign overlay. These can be fixed by attaching the foreign overlay to the Unpoly overlay's element. The next Unpoly version will ship a more comprehensive solution for this.
+- Fix many issues where clicking into foreign overlays constructed by other libraries would close an underlying Unpoly modal. In many cases this is no longer necessary. There are some remaining cases where Unpoly would steal focus from a foreign overlay. These can be fixed by attaching the foreign overlay to the Unpoly overlay's element. The next Unpoly version will ship a more comprehensive solution for this.
 - Published a configuration option `up.layer.config.overlay.class`. It can be used to configure a default HTML class for an overlay's container element.
 
 ### Scrolling
 
 - Viewports within a `[up-keep]` fragment now retain their scroll positions during a fragment update.
 - The option for [revealing](/api/up.reveal) a fragment without animation is now `{ behavior: 'instant' }` instead of `{ behavior: 'auto' }`.
-- Fix an issue where Unpoly would prevent the browser's restoration of scroll positions when the the page was reloaded (closes #366 #65).
+- Fix an issue where Unpoly would prevent the browser's restoration of scroll positions when the page was reloaded (closes #366 #65).
 
 ### Various changes
 
@@ -79,7 +79,7 @@ The [polling](/api/up-poll) implementation was rewritten to fix many issues and 
 
 This maintenance release contains a single fix:
 
-- Fix a bug where modal overlays would not adjust its height to the height of its content.
+- Fix a bug where modal overlays would not adjust their height to the height of their content.
 
 
 2.5.2
@@ -130,8 +130,8 @@ This is a maintenance release while we're working on the next major feature upda
 - New experimental function `up.util.normalizeURL()`. It returns a normalized version of the given URL string. Two URLs that point to the same resource should normalize to the same string.
 - Fix a bug where an `[up-nav]` link to the root path (`/`) would never receive the `.up-current` class (#280).
 - Fix a bug where an `[up-nav]` link would never receive the `.up-current` class if the current URL contains a `#hash` fragment (#284).
-- Unpoly now prints a [log entry](/api/up.log) when a [request](/api/up.request) or [fragment update](/api/up.render) with `{ solo: true }` abort all other requests.
-- All API functions that work with URL now document how they handle `#hash` fragments.
+- Unpoly now prints a [log entry](/api/up.log) when a [request](/api/up.request) or [fragment update](/api/up.render) with `{ solo: true }` aborts all other requests.
+- All API functions that work with URLs now document how they handle `#hash` fragments.
 
 
 2.3.0
@@ -140,7 +140,7 @@ This is a maintenance release while we're working on the next major feature upda
 ### More control over loading Unpoly
 
 - Unpoly can now be loaded with `<script defer>`. This can be used to load your scripts without blocking the DOM parser.
-- Unpoly can now be loaded with `<script type="module">`. This can be used deliver a modern JS build to modern browsers only.
+- Unpoly can now be loaded with `<script type="module">`. This can be used to deliver a modern JS build to modern browsers only.
 - Unpoly can now be [booted manually](/api/up.boot) at a time of your choice. By default Unpoly boots automatically once the initial DOM is parsed.
 - ⚠️ Event listeners registered with `up.on()` will no longer be called before Unpoly was [booted](/api/up.boot). Like with [compilers](/api/up.compiler), this lets you register behavior that is only active on [supported browsers](/api/up.framework.isSupported).
 - ⚠️ Unpoly no longer boots on Edge 18 or lower. Edge 18 was the last version of Edge to use Microsoft's custom rendering engine. Later versions use Chromium.
@@ -150,7 +150,7 @@ This is a maintenance release while we're working on the next major feature upda
 
 When your [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) disallows `eval()`, Unpoly cannot directly run JavaScript code in HTML attributes. This affects `[up-on-...]` attributes like [`[up-on-loaded]`](/api/up-follow#up-on-loaded) or [`[up-on-accepted]`](/api/up-layer-new#up-on-accepted).
 
-Unpoly 2.3 lets your work around this by prefixing your callback with a [CSP nonce](https://content-security-policy.com/nonce/):
+Unpoly 2.3 lets you work around this by prefixing your callback with a [CSP nonce](https://content-security-policy.com/nonce/):
 
 ```html
 <a href="/path" up-follow up-on-loaded="nonce-kO52Iphm8B alert()">Click me</a>
@@ -174,7 +174,7 @@ Users of the [unpoly-rails](https://github.com/unpoly/unpoly-rails) gem can inse
 
 Request-related events now expose additional context about the event. This affects the events `up:fragment:loaded`, `up:request:load`, `up:request:loaded`, `up:request:aborted`, `up:request:fatal`.
 
-The link or form element that caused the request can now be access through `event.origin`.
+The link or form element that caused the request can now be accessed through `event.origin`.
 
 The layer associated with the request can now be accessed through `event.layer`. If the request is intended to update an existing fragment, this is that fragment's layer. If the request is intended to [open an overlay](/learn/opening-overlays), the associated layer is the future overlay's parent layer.
 
@@ -233,21 +233,21 @@ This step will allow Unpoly to use modern web APIs and reduce its bundle size ev
 2.1.0
 -----
 
-- 🧩 Unpoly now shows a [progress bar](/api/up.network.config#config.progressBar) that appears for [late requests](/up:request:late).
+- 🧩 Unpoly now shows a [progress bar](/api/up.network.config#config.progressBar) that appears for [late requests](/api/up:network:late).
   The progress bar is enabled by default. If you're using [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading), the progress bar is disabled if you have an `up:request:late` listener, assuming that you have built a custom loading indicator.
 - 🧩 For new layers, the `[up-history-visible]` and `[up-history]` options have been unified into a single `[up-history]` option. This reverts to the old behavior of Unpoly 1.0. The separation into two options was introduced in Unpoly 2.0, but turned out to be confusing to users.
-- [Layer configuration](/api/up.layer.config) may now set mode-specific defaults for [`{ scroll }`](/learn/scrolling) and [`{ focus }`](/learn/focus). These take precendence to defaults in [`up.fragment.config.navigateOptions`](/api/up.fragment.config#config.navigateOptions).
+- [Layer configuration](/api/up.layer.config) may now set mode-specific defaults for [`{ scroll }`](/learn/scrolling) and [`{ focus }`](/learn/focus). These take precedence over defaults in [`up.fragment.config.navigateOptions`](/api/up.fragment.config#config.navigateOptions).
 - Links with an `[up-instant]` attribute are now followed automatically, even if they don't also have an [`[up-follow]`](/api/up-follow) attribute.
 
 
 2.0.1
 -----
 
-This bugfix release addresses some issues user reported when upgrading to Unpoly 2:
+This bugfix release addresses some issues users reported when upgrading to Unpoly 2:
 
 - Fix a bug where [`unpoly-migrate.js`](https://unpoly.com/changes/upgrading) would crash when loaded.
-- Fix a bug where transitions would crash when some { scroll } options were also used (#187)
-- Users can now now change the spacing between a popup overlay and the opening link by giving `<up-popup>` a CSS margin.
+- Fix a bug where transitions would crash when some `{ scroll }` options were also used (#187).
+- Users can now change the spacing between a popup overlay and the opening link by giving `<up-popup>` a CSS margin.
 
 
 2.0.0
@@ -282,7 +282,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 
 #### Navigation intent
 
-- You can now define whether a framgent update constitutes a user navigation. Switching screens needs other defaults than updating a tiny box.
+- You can now define whether a fragment update constitutes a user navigation. Switching screens needs other defaults than updating a tiny box.
 - ⚠️ User navigation aborts earlier requests, fixing race conditions on slow connections.
 
 #### Accessibility
@@ -298,15 +298,15 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 - ⚠️ The Bootstrap integration is now minimal and as unopinionated as possible. Little to no Bootstrap CSS is overridden.
 - Bootstrap versions 3, 4 and 5 are now supported.
 
-#### Quality of live improvements
+#### Quality of life improvements
 
 - Unpoly now ships with a bandwidth-friendly [polling implementation](/api/up-poll) that handles many edge cases.
-- The position of a clicked link is considered when deciding which element to replace. If possible, Unpoly will update an selector in the region of the link that triggered the fragment update. This helps with multiple self-contained components (with the same selector) on the same page.
-- The [log](/api/up.log) output is more much more compact and has a calmer formatting.
+- The position of a clicked link is considered when deciding which element to replace. If possible, Unpoly will update a selector in the region of the link that triggered the fragment update. This helps with multiple self-contained components (with the same selector) on the same page.
+- The [log](/api/up.log) output is much more compact and has a calmer formatting.
 - ⚠️ New fragments are no longer revealed by default. Instead Unpoly scrolls to the top when the [main target](/api/up-main) has changed, but does not scroll otherwise.
 - ❌ History is no longer changed by default. Instead Unpoly updates history only when a [main target](/api/up-main) has changed.
 - 🧩 All scroll-related options have been unified in a single [`[up-scroll]` attribute](/learn/scrolling).
-- Many optimizations have been made to preserve bandwidth on slow connections. For example, Unpoly stops [preloading](/api/up-preload) and [polling](/api/up-poll) whenthe connection has high latency or low throughput.
+- Many optimizations have been made to preserve bandwidth on slow connections. For example, Unpoly stops [preloading](/api/up-preload) and [polling](/api/up-poll) when the connection has high latency or low throughput.
 - The client-side cache can be carefully managed by both the client and server.
 - 🧩 Unpoly 1 had many functions for updating fragments (`up.replace()`, `up.extract()`, `up.modal.extract()`, etc.). Unpoly 2 has unified these into a single function `up.render()`.
 - Event handlers to `up:link:follow`, `up:form:submit` etc. may change the render options for the coming fragment update.
@@ -317,7 +317,7 @@ If you're upgrading from an older Unpoly version you should load [`unpoly-migrat
 The optional server protocol has been extended with additional headers that the server may use to interact with the frontend. For example:
 
 - The server may [emit events on the frontend](/api/X-Up-Events).
-- The server may [close overlays](/X-Up-Accept).
+- The server may [close overlays](/api/X-Up-Accept-Layer).
 - The server may [change the render target](/api/X-Up-Target) for a fragment update.
 
 See `up.protocol` for a full list of features.
@@ -331,7 +331,7 @@ If you are using Elixir / Phoenix, the new protocol is already implemented by th
 
 Please use [`unpoly-migrate.js`](/changes/upgrading) for a very smooth upgrade process from Unpoly 0.x or 1.x to Unpoly 2.0.
 
-By loading `<code>unpoly-migrate.js</code>`, calls to most old APIs will be forwarded to the new version. A deprecation notice will be logged to your browser console. This way you can upgrade Unpoly, revive your application with a few changes, then replace deprecated API calls under green tests.
+By loading `unpoly-migrate.js`, calls to most old APIs will be forwarded to the new version. A deprecation notice will be logged to your browser console. This way you can upgrade Unpoly, revive your application with a few changes, then replace deprecated API calls under green tests.
 
 There's a short list of changes that we cannot fix with aliases.
 
@@ -354,7 +354,7 @@ There's a short list of changes that we cannot fix with aliases.
 
 ### Unpoly 1 maintenance
 
-- With the release of Unpoly we're ending maintenance of Unpoly 1. Expect little to no changes to Unpoly 1 in the future.
+- With the release of Unpoly 2 we're ending maintenance of Unpoly 1. Expect little to no changes to Unpoly 1 in the future.
 - GitHub issues that have been fixed in Unpoly 2 will be closed.
 - The documentation for Unpoly 1 has been archived to <https://v1.unpoly.com>.
 - The code for Unpoly 1 can be found in the [`1.x-stable`](https://github.com/unpoly/unpoly/tree/1.x-stable) branch.
