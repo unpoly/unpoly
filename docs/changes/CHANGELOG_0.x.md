@@ -143,9 +143,9 @@ All Unpoly functions that accept element arguments will accept both native eleme
 
 You will need to prefix some function calls with `$` to have your callbacks called with jQuery collections instead of native elements:
 
-- The `up.compiler()` callback now receives a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$compiler()`.
-- The `up.macro()` callback now received a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$macro()`.
-- The event handler passed to `up.on()` now receives an element instead of a jQuery collection. For the old behavior, use `up.$on()`.
+- ❌ The `up.compiler()` callback now receives a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$compiler()`.
+- ⚠️ The `up.macro()` callback now received a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection. For the old behavior, use `up.$macro()`.
+- ⚠️ The event handler passed to `up.on()` now receives an element instead of a jQuery collection. For the old behavior, use `up.$on()`.
 
 Finally, all Unpoly events (`up:*`) are now triggered as native events that can be received with [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). You may continue to use jQuery's [`jQuery#on()`](http://api.jquery.com/on/) to listen to Unpoly events, but you need to access custom properties through `event.originalEvent`.
 
@@ -191,9 +191,9 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 
 ### Events
 
-- The `up.bus` module has been renamed to `up.event`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
-- All Unpoly events (`up:*`) are now triggered as native events that can be received with [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). You may continue to use jQuery's [`jQuery#on()`](http://api.jquery.com/on/) to listen to Unpoly events, but you need to access custom properties from `event.originalEvent`.
-- Properties named `event.$target` and `event.$element` have been removed from *all* Unpoly events.
+- 🧩 The `up.bus` module has been renamed to `up.event`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
+- ⚠️ All Unpoly events (`up:*`) are now triggered as native events that can be received with [`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener). You may continue to use jQuery's [`jQuery#on()`](http://api.jquery.com/on/) to listen to Unpoly events, but you need to access custom properties from `event.originalEvent`.
+- ⚠️ Properties named `event.$target` and `event.$element` have been removed from *all* Unpoly events.
   Use the standard `event.target` to retrieve the element on which the element was [emitted](/api/up.emit).
 - `up.on()` may now bind to a given element by passing it as an (optional) first argument:
 
@@ -202,7 +202,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
   ```
 
   You may use this for [event delegation](https://davidwalsh.name/event-delegate).
-- The event handler passed to `up.on()` now receives an element instead of a jQuery collection:
+- ⚠️ The event handler passed to `up.on()` now receives an element instead of a jQuery collection:
 
   ```
   up.on('click', (event, element) => {
@@ -216,18 +216,18 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
   ```
   up.emit(element, 'app:user:login', { email: 'foo@example.com' })
   ```
-- `up.emit()` option `{ message }` is now `{ log }`.
+- 🧩 `up.emit()` option `{ message }` is now `{ log }`.
 - `up.emit()` no longer logs by default. You can enable the old efault message with `{ log: true }`.
-- `up.event.nobodyPrevents()` option `{ message }` is now `{ log }`.
-- The experimental function `up.reset()` was removed without replacement.
-- The experimental event `up:framework:reset` was removed without replacement.
+- 🧩 `up.event.nobodyPrevents()` option `{ message }` is now `{ log }`.
+- ⚠️ The experimental function `up.reset()` was removed without replacement.
+- ⚠️ The experimental event `up:framework:reset` was removed without replacement.
 
 
 
 ### Custom JavaScript
 
 - [Compilers](/api/up.compiler) may again return an array of destructor functions. The previous deprecation was removed.
-- The `up.compiler()` callback now receives a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection:
+- ❌ The `up.compiler()` callback now receives a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection:
 
   ```
   up.compiler('.button', function(button) {
@@ -236,7 +236,7 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
   ```
 
   For the old behavior, use `up.$compiler()`.
-- The `up.macro()` callback now received a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection:
+- ⚠️ The `up.macro()` callback now received a [native element](https://developer.mozilla.org/en-US/docs/Web/API/Element) instead of a jQuery collection:
 
   ```
   up.compiler('a.fast-link', function(element) {
@@ -251,12 +251,12 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
 
 ### Forms
 
-- `up:form:submit` no longer has a `{ $form }` property. The event is now [emitted](/api/up.emit)
+- ⚠️ `up:form:submit` no longer has a `{ $form }` property. The event is now [emitted](/api/up.emit)
   on the form that is being submitted.
 - `up.observe()` now accepts a single form field, multiple fields,
   a `<form>` or any container that contains form fields.
   The callback is called once for each change in any of the given elements.
-- The callback for `up.observe()` now receives the arguments `(value, name)`, where
+- ⚠️ The callback for `up.observe()` now receives the arguments `(value, name)`, where
   `value` is the changed field value and `name` is the `[name]` of the field element:
 
   ```
@@ -274,28 +274,28 @@ It complements [native `Element` methods](https://www.w3schools.com/jsref/dom_ob
     console.log('Observed one or more changes: %o', diff);
   });
   ```
-- The default `up.form.config.validateTargets` no longer includes the
+- ⚠️ The default `up.form.config.validateTargets` no longer includes the
   selector `'[up-fieldset]'`.
 
 
 ### Animation
 
-- CSS property names for custom [animations](/api/up.animation) and [transitions](/api/up.transition) must be given in `kebab-case`.
+- ⚠️ CSS property names for custom [animations](/api/up.animation) and [transitions](/api/up.transition) must be given in `kebab-case`.
   `camelCase` properties are no longer supported.
 
 
 ### Fragment update API
 
-- The module `up.dom` has been renamed to `up.fragment`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
-- The experimental function `up.all()` has been removed without replacement
-- The function `up.first()` has been renamed to `up.fragment.first()` to not be confused
+- 🧩 The module `up.dom` has been renamed to `up.fragment`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
+- ⚠️ The experimental function `up.all()` has been removed without replacement
+- 🧩 The function `up.first()` has been renamed to `up.fragment.first()` to not be confused
   with the low-level `up.element.first()`.
-- The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/api/up:fragment:destroyed) (emitted after a fragment was removed), remains in the API.
-- The `up:fragment:destroyed` event no longer has a `{ $element }` property. It now has a `{ fragment }` property that contains the detached element. Like before, it is emitted on the former parent of the destroyed element.
-- The properties for the `up:fragment:keep` event have been renamed.
-- The properties for the `up:fragment:kept` event have been renamed.
-- The properties for the `up:fragment:inserted` event have been renamed.
-- The properties for the `up:fragment:destroyed` event have been renamed.
+- ⚠️ The event `up:fragment:destroy` has been removed without replacement. This event was previously emitted before a fragment was removed. The event [`up:fragment:destroyed`](/api/up:fragment:destroyed) (emitted after a fragment was removed), remains in the API.
+- ⚠️ The `up:fragment:destroyed` event no longer has a `{ $element }` property. It now has a `{ fragment }` property that contains the detached element. Like before, it is emitted on the former parent of the destroyed element.
+- ⚠️ The properties for the `up:fragment:keep` event have been renamed.
+- ⚠️ The properties for the `up:fragment:kept` event have been renamed.
+- ⚠️ The properties for the `up:fragment:inserted` event have been renamed.
+- ⚠️ The properties for the `up:fragment:destroyed` event have been renamed.
 
 
 ### Utility functions
@@ -306,7 +306,7 @@ The `up.util` module now plug the worst emissions in JavaScript's standard libra
 - New experimental property `up.util.isEqual.key`.
   This property contains the name of a method that user-defined classes
   may implement to hook into the `up.util.isEqual()` protocol.
-- `up.util.isBlank()` now returns false for objects with a constructor.
+- ⚠️ `up.util.isBlank()` now returns false for objects with a constructor.
 - New experimental property `up.util.isBlank.key`. This property contains the name of a method that user-defined classes may implement to hook into the `up.util.isBlank()` protocol.
 - New experimental property `up.util.copy.key`. This property contains the name of a method that user-defined classes may implement to hook into the `up.util.copy()` protocol.
 
@@ -320,12 +320,12 @@ More utility functions to have been added to work with lists:
 
 Some list functions have been renamed to names used in the standard `Array` API:
 
-- `up.util.all()` was renamed to `up.util.every()` to match the standard [`Array#every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every), and to be less confusing with `up.element.all()`.
-- `up.util.any()` was renamed to `up.util.some()` to match the standard
+- 🧩 `up.util.all()` was renamed to `up.util.every()` to match the standard [`Array#every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every), and to be less confusing with `up.element.all()`.
+- 🧩 `up.util.any()` was renamed to `up.util.some()` to match the standard
   [`Array#some()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some).
-- `up.util.select()` was renamed to `up.util.filter()` to match the standard
+- 🧩 `up.util.select()` was renamed to `up.util.filter()` to match the standard
   [`Array#filter()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter).
-- `up.util.detect()` was renamed to `up.util.find()` to match the standard
+- 🧩 `up.util.detect()` was renamed to `up.util.find()` to match the standard
   [`Array#find()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find).
 
 All functions that worked for arrays now also work for array-like values:
@@ -340,35 +340,35 @@ All functions that worked for arrays now also work for array-like values:
 
 And some minor changes:
 
-- `up.util.nextFrame()` has been renamed to `up.util.task()`.
-- `up.util.setTimer()` has been renamed to `up.util.timer()`.
-- `up.util.toArray() now returns its unchanged argument if the argument is already an array.
+- 🧩 `up.util.nextFrame()` has been renamed to `up.util.task()`.
+- 🧩 `up.util.setTimer()` has been renamed to `up.util.timer()`.
+- ⚠️ `up.util.toArray() now returns its unchanged argument if the argument is already an array.
 - `up.util.copy()` now works with `Date` objects.
 - `up.util.isBoolean()` is now stable
 - `up.util.escapeHtml()` is now stable
 - `up.util.isJQuery()` now returns `false` if no jQuery is loaded into the `window.jQuery` global
-- `up.util.unresolvablePromise()` was removed without replacement.
-- `up.util.trim()` has been removed without replacement. Use the standard
+- ⚠️ `up.util.unresolvablePromise()` was removed without replacement.
+- ⚠️ `up.util.trim()` has been removed without replacement. Use the standard
   [`String#trim()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim) instead.
 - `up.util.parseUrl()` now returns the correct `{ hostname }`, `{ protocol }` and `{ pathname }` properties on IE11.
-- `up.util.selectorForElement()` is now `up.element.toSelector()`
+- 🧩 `up.util.selectorForElement()` is now `up.element.toSelector()`
 
 
 ### Scrolling Viewports
 
-- The `up.layout` module has been renamed to `up.viewport`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
+- 🧩 The `up.layout` module has been renamed to `up.viewport`. We want to normalize Unpoly's API to the pattern `up.thing.verb()` in the future.
 - Smooth [scrolling](/api/up.scroll) now mimics [native scroll behavior](https://hospodarets.com/native_smooth_scrolling):
-  - `up.scroll()` no longer takes a `{ duration }` or `{ easing }` option.
+  - ⚠️ `up.scroll()` no longer takes a `{ duration }` or `{ easing }` option.
   - `up.scroll()` now takes a `{ behavior }` option. Valid values are `auto` (no animation) and `smooth` (animates the scroll motion).
   - You may control the pace of `{ behavior: 'smooth' }` by also passing a `{ speed }` option`.
   - New config property `up.viewport.scrollSpeed`. This sets the default speed for smooth scrolling. The default value (`1`) roughly corresponds to the default speed of Chrome's native smooth scrolling.
 - Options for `up.reveal()` have been changed:
-  - Options `{ duration }` and `{ easing }` have been removed.
+  - ⚠️ Options `{ duration }` and `{ easing }` have been removed.
   - New option `{ padding }` to pass the desired padding between the revealed element and the closest [viewport](/api/up.viewport) edge (in pixels).
   - New option `{ snap }`. It can be `true`, `false` or a pixel number.
   - New option `{ behavior }`
   - New option `{ speed }`. Defaults to `up.viewport.scrollSpeed`.
-  - Config property `up.layout.config.snap` has been renamed to `up.viewport.config.revealSnap`.
+  - 🧩 Config property `up.layout.config.snap` has been renamed to `up.viewport.config.revealSnap`.
   - New config option `up.viewport.revealPadding`.
 - New experimental function `up.viewport.root()`. It return the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
   for the browser's main content area.
@@ -391,7 +391,7 @@ And some minor changes:
 
 ### Request parameters
 
-The experimental `up.params` module has been replaced with the `up.Params` class.
+⚠️ The experimental `up.params` module has been replaced with the `up.Params` class.
 Wrap any type of parameter representation into `up.Params` to get consistent API for reading
 and manipulation.
 
@@ -426,7 +426,7 @@ Supported methods are:
 
 ### Popups
 
-- The HTML markup for a popup has been changed to make it easier to style with CSS.
+- ⚠️ The HTML markup for a popup has been changed to make it easier to style with CSS.
   The new structure is:
 
   ```
@@ -436,11 +436,11 @@ Supported methods are:
     </div>
   </div>
   ```
-- The default CSS styles for `.up-popup` has been changed. If you have customized popup styles,
+- ⚠️ The default CSS styles for `.up-popup` has been changed. If you have customized popup styles,
   you should check if your modifications still work with the new defaults.
 - Popups now update their position when the screen is resized.
 - Popups now follow scrolling when placed within [viewports](/api/up.viewport) other than the main document.
-- The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`.
+- ⚠️ The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`.
   Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`:
   - `{ position }` defines on which side of the opening element the popup is attached. Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
   - `{ align }` defines the alignment of the popup along its side.
@@ -448,7 +448,7 @@ Supported methods are:
   - When the popup's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
 - New experimental function `up.popup.sync()`. It forces the popup to update its position when a
   layout change is not detected automatically.
-- popup elements are now appended to the respective viewport of the anchor element.
+- ⚠️ popup elements are now appended to the respective viewport of the anchor element.
   They were previously always appended to the end of the `<body>`.
 - The events `up:popup:open`,`up:popup:opened`, `up:popup:close` and `up:popup:closed` have an `{ anchor }` property.
   It references the element that the popup was [attached](/api/up.popup.attach()) to.
@@ -456,7 +456,7 @@ Supported methods are:
 
 ### Tooltips
 
-- The HTML markup for a popup has been changed to make it easier to style with CSS.
+- ⚠️ The HTML markup for a popup has been changed to make it easier to style with CSS.
   The new structure is:
 
   ```
@@ -466,18 +466,18 @@ Supported methods are:
     </div>
   </div>
   ```
-- The default CSS styles for `.up-tooltip` have been changed. If you have customized tooltip styles,
+- ⚠️ The default CSS styles for `.up-tooltip` have been changed. If you have customized tooltip styles,
   you should check if your modifications still work with the new defaults.
 - Tooltips now update their position when the screen is resized.
 - Tooltips now follow scrolling when placed within [viewports](/api/up.viewport) other than the main document.
-- The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`. Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`:
+- ⚠️ The `[up-position]` attribute has been split into two attributes `[up-position]` and `[up-align]`. Similarly the `{ position }` option has been split into two options `{ position }` and `{ align }`:
   - `{ position }` defines on which side of the opening element the popup is attached. Valid values are `'top'`, `'right'`, `'bottom'` and `'left'`.
   - `{ align }` defines the alignment of the popup along its side.
   - When the tooltip's `{ position }` is `'top'` or `'bottom'`, valid `{ align }` values are `'left'`, `center'` and `'right'`.
   - When the tooltip's `{ position }` is `'left'` or `'right'`, valid `{ align }` values are `top'`, `center'` and `bottom'`.
 - New experimental function `up.tooltip.sync()`. It forces the popup to update its position when a
   layout change is not detected automatically.
-- Tooltip elements are now appended to the respective viewport of the anchor element.
+- ⚠️ Tooltip elements are now appended to the respective viewport of the anchor element.
   They were previously always appended to the end of the `<body>`.
 
 
@@ -488,7 +488,7 @@ Supported methods are:
 
 ### AJAX acceleration
 
-- The properties for the `up:link:preload` event have been renamed.
+- ⚠️ The properties for the `up:link:preload` event have been renamed.
 
 
 ### Modal dialogs
@@ -512,8 +512,8 @@ Supported methods are:
 
 To prevent confusion with [`[up-data]`](/api/up-data), Unpoly now uses the word "params" when talking about form values or request parameters:
 
-- [`up.request()`](/api/up.request) option `{ data }` has been renamed to `{ params }`.
-- [`up.replace()`](/api/up.replace) option `{ data }` has been renamed to `{ params }`.
+- 🧩 [`up.request()`](/api/up.request) option `{ data }` has been renamed to `{ params }`.
+- 🧩 [`up.replace()`](/api/up.replace) option `{ data }` has been renamed to `{ params }`.
 
 Parameters may be passed in one of the following types:
 
@@ -543,7 +543,7 @@ To help working with form values and request parameters, an experimental module 
 - Fix a bug where linking back and forth between multiple `#anchor` hashes of the same URL would always reveal the first anchor.
 - Revealing elements below [fixed navigation bars](/api/up-fixed-top) now honors the navigation bar's `padding`, `border`, `margin`, `top` and `bottom` properties.
 - Fix a bug where revealing elements [fixed navigation bars](/api/up-fixed-top) would scroll 1 pixel too short.
-- [`up.layout.revealHash()`](/up.layout.revealHash) no longer retrieves the hash anchor from the current URL. You need to pass in a `#hash` value as a first argument.
+- ⚠️ [`up.layout.revealHash()`](/up.layout.revealHash) no longer retrieves the hash anchor from the current URL. You need to pass in a `#hash` value as a first argument.
 - Fix a bug where a `#hash` anchor would not be revealed if it included non-word characters like spaces or dots.
 
 
@@ -553,14 +553,14 @@ To help working with form values and request parameters, an experimental module 
 - Compilers that return [destructor functions](/api/up.compiler#destructor) now run slightly faster.
 - [Compilers](/api/up.compiler) with `{ batch: true }` now receive an array of [`[up-data]`](/api/up-data) objects as their second `data` argument.
 - [Compilers](/api/up.compiler) with `{ batch: true }` can no longer return destructor functions. Previously the behavior of batch destructors was undefined, now it throws an error.
-- Returning an array of [destructor functions](/api/up.compiler#destructor) from [`up.compiler()`](/api/up.compiler) is now deprecated. Please return a single destructor function instead.
-- [`up.syntax.data()`](/up.syntax.data) now returns `undefined` if the given object has no (or an empty) [`[up-data]`](/api/up-data) attribute. It previously returned an empty object.
+- 🧩 Returning an array of [destructor functions](/api/up.compiler#destructor) from [`up.compiler()`](/api/up.compiler) is now deprecated. Please return a single destructor function instead.
+- ⚠️ [`up.syntax.data()`](/up.syntax.data) now returns `undefined` if the given object has no (or an empty) [`[up-data]`](/api/up-data) attribute. It previously returned an empty object.
 
 
 ### Event listeners
 
 - To improve performance, Unpoly no longer parses [`[up-data]`](/api/up-data) attributes when an [`up.on()`](/api/up.on) listener does not require a third `data` argument.
-- [`up.on()`](/api/up.on) now throws an error when the same callback function is registered multiple times.
+- ⚠️ [`up.on()`](/api/up.on) now throws an error when the same callback function is registered multiple times.
 
 
 ### Fragment update API
@@ -633,7 +633,7 @@ Beware of the breaking change with `.up-current`!
 
 Maintaining the `.up-current` class on all links turned out to be a major performance bottleneck, so we had to make some breaking changes:
 
-- The [`.up-current`](/up-nav-a.up-current) class is now only assigned to links with an [`[up-nav]`](/api/up-nav) attribute, or to links within a container with an [`[up-nav]`](/api/up-nav) attribute. You should assign the [`[up-nav]`](/api/up-nav) attribute to all navigational elements that rely on `.up-current` for styling`.
+- ❌ The [`.up-current`](/up-nav-a.up-current) class is now only assigned to links with an [`[up-nav]`](/api/up-nav) attribute, or to links within a container with an [`[up-nav]`](/api/up-nav) attribute. You should assign the [`[up-nav]`](/api/up-nav) attribute to all navigational elements that rely on `.up-current` for styling`.
 - You can also globally configure selectors for your navigational elements in `up.status.config.navs`:
 
       up.status.config.navs.push('.my-nav-bar')
@@ -643,11 +643,11 @@ Maintaining the `.up-current` class on all links turned out to be a major perfor
 
 ### Animation
 
-- When performing an [animated page transition](/api/up.motion) Unpoly will no longer create copies of the old and new fragment versions. The animation will instead be performed on the fragment elements themselves.
+- ⚠️ When performing an [animated page transition](/api/up.motion) Unpoly will no longer create copies of the old and new fragment versions. The animation will instead be performed on the fragment elements themselves.
 - When animating an element with an existing [CSS transition](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions), Unpoly will now pause the CSS transition in its current state, perform the animation, then resume the CSS transition.
 - Unpoly now does less work when animation is disabled globally through `up.motion.config.enabled = false`.
-- [`up.morph()`](/api/up.morph) will now expect the new fragment version to be detached from the DOM before morphing.
-- [`up.morph()`](/api/up.morph) will now detach the old fragment version from the DOM after morphing.
+- ⚠️ [`up.morph()`](/api/up.morph) will now expect the new fragment version to be detached from the DOM before morphing.
+- ⚠️ [`up.morph()`](/api/up.morph) will now detach the old fragment version from the DOM after morphing.
 - The [`up.morph()`](/api/up.morph) function has been demoted from *stable* to *experimental*.
 - [`up.motion.finish()`](/api/up.motion.finish) now longer queries the DOM when there are no active animations.
 
@@ -659,7 +659,7 @@ Maintaining the `.up-current` class on all links turned out to be a major perfor
 
 ### Fragment updates
 
-- The [`up:fragment:destroyed`](/api/up:fragment:destroyed) event is now emitted after the fragment has been removed from the DOM. The event is emitted on the former parent of the removed fragment.
+- ⚠️ The [`up:fragment:destroyed`](/api/up:fragment:destroyed) event is now emitted after the fragment has been removed from the DOM. The event is emitted on the former parent of the removed fragment.
 
 
 ### Utility functions
@@ -776,7 +776,7 @@ This release contains no new features, but will help you when using tools like B
 
 - Updates for [`[up-hungry]`](/api/up-hungry) elements will no longer auto-close a [modal dialog](/up.modal).
 - Updates for [`[up-hungry]`](/api/up-hungry) elements will no longer auto-close a [popup overlay](/up.popup).
-- CSRF-related `<meta>` tags are no longer updated automatically with every request. This is to prevent unnecessary DOM jitter in applications that don't rotate CSRF tokens.
+- ⚠️ CSRF-related `<meta>` tags are no longer updated automatically with every request. This is to prevent unnecessary DOM jitter in applications that don't rotate CSRF tokens.
 
 ### Popup overlays
 
@@ -850,21 +850,21 @@ passively receive updates from the server. Currently the following functionality
     ...
   </form>
   ```
-- Forms with an `[up-reveal]` attribute will now only honor the attribute when the form submission was successful.
-- Forms with an `[up-restore-scroll]` attribute will now only honor the attribute when the form submission was successful.
+- ⚠️ Forms with an `[up-reveal]` attribute will now only honor the attribute when the form submission was successful.
+- ⚠️ Forms with an `[up-restore-scroll]` attribute will now only honor the attribute when the form submission was successful.
 - Forms with an `[up-reveal="css-selector"]` attribute will no longer crash when the selector could not be found.
 - Fix a bug where you couldn't submit a form if it's ID contains a slash character ([#46](https://github.com/unpoly/unpoly/issues/46)).
 
 ### Links
 
 - You can give links an `[up-fail-reveal]` attribute to indicate which element should be [revealed](/api/up.reveal) when the server responds with an error
-- Links with an `[up-reveal]` attribute will now only honor the attribute when the link could be followed successfully.
-- Links with an `[up-restore-scroll]` attribute will now only honor the attribute when the link could be followed successfully.
+- ⚠️ Links with an `[up-reveal]` attribute will now only honor the attribute when the link could be followed successfully.
+- ⚠️ Links with an `[up-restore-scroll]` attribute will now only honor the attribute when the link could be followed successfully.
 - Links with an `[up-reveal="css-selector"]` attribute will no longer crash when the selector could not be found.
 
 ### Animations
 
-- When [replacing](/api/up.replace) multiple elements, it is no longer possible to use different [transitions](/api/up.morph) for each element. The same transition is always applied to all elements.
+- ⚠️ When [replacing](/api/up.replace) multiple elements, it is no longer possible to use different [transitions](/api/up.morph) for each element. The same transition is always applied to all elements.
 
 
 
@@ -903,9 +903,9 @@ passively receive updates from the server. Currently the following functionality
 
 ### Fragment updates
 
-- `<script>` tags that were inserted by a fragment update are no longer executed. They are still executed during the initial page load. If you need a fragment update to call JavaScript code, call it from a compiler ([Google Analytics example](https://makandracards.com/makandra/41488-using-google-analytics-with-unpoly)).
-- The configuration option `up.dom.config.runInlineScripts` has been removed without replacement.
-- The configuration option `up.dom.config.runLinkedScripts` has been removed without replacement.
+- ❌ `<script>` tags that were inserted by a fragment update are no longer executed. They are still executed during the initial page load. If you need a fragment update to call JavaScript code, call it from a compiler ([Google Analytics example](https://makandracards.com/makandra/41488-using-google-analytics-with-unpoly)).
+- ⚠️ The configuration option `up.dom.config.runInlineScripts` has been removed without replacement.
+- ⚠️ The configuration option `up.dom.config.runLinkedScripts` has been removed without replacement.
 - Fix a bug where the contents of `<noscript>` tags were parsed into DOM elements (instead of a single verbatim text node). This was confusing libraries that work with `<noscript>` tags, such as [lazysizes](https://github.com/aFarkas/lazysizes).
 - Work around a [bug in IE11 and Edge](https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/12453464/) where `<noscript>` tags that were inserted by a fragment update could not be found with jQuery or `document.querySelectorAll()`.
 
@@ -951,33 +951,33 @@ This is a major update with some breaking changes. Expect a few more updates lik
 ### General
 
 - jQuery 3 is now supported in addition to jQuery 1.9+ and jQuery 2.
-- Unpoly now uses [native Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) instead of jQuery deferreds.
+- ⚠️ Unpoly now uses [native Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises) instead of jQuery deferreds.
 - You can now help improve Unpoly's documentation by clicking an *Edit this page* link on any [unpoly.com](https://unpoly.com/) subpage (like `[up-follow]`).
 
 ### Browser support
 
-- To enable support for Internet Explorer 11 you need to install a Polyfill for `Promise`. We recommend [ES6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB gzipped).
+- ⚠️ To enable support for Internet Explorer 11 you need to install a Polyfill for `Promise`. We recommend [ES6-promise](https://github.com/stefanpenner/es6-promise) (2.4 KB gzipped).
 - Fix a bug where Unpoly would not boot on Safari 9 and 10 if the initial page was loaded with a `POST` method.
 
 ### AJAX
 
-- Unpoly now uses [native XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) instead of `jQuery.ajax()`. If you have been hacking into Unpoly's networking through `jQuery.ajaxPrefilter()`, you must now use the [`up:proxy:load`](/up:proxy:load) event.
-- [`up.ajax()`](/api/up.ajax) has been deprecated since its signature is incompatible with native promises. Please use [`up.request()`](/api/up.request) instead, whose promise fulfills with an [`up.Response`](/api/up.Response) object.
-- The `up:proxy:received` event has been renamed to [`up:proxy:loaded`](/up:proxy:loaded).
-- The [`up:proxy:load`](/up:proxy:load) event properties have changed. You can now access request properties through a key `{ request }`, e.g. `event.request.url`.
+- ⚠️ Unpoly now uses [native XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) instead of `jQuery.ajax()`. If you have been hacking into Unpoly's networking through `jQuery.ajaxPrefilter()`, you must now use the [`up:proxy:load`](/up:proxy:load) event.
+- 🧩 [`up.ajax()`](/api/up.ajax) has been deprecated since its signature is incompatible with native promises. Please use [`up.request()`](/api/up.request) instead, whose promise fulfills with an [`up.Response`](/api/up.Response) object.
+- 🧩 The `up:proxy:received` event has been renamed to [`up:proxy:loaded`](/up:proxy:loaded).
+- ⚠️ The [`up:proxy:load`](/up:proxy:load) event properties have changed. You can now access request properties through a key `{ request }`, e.g. `event.request.url`.
 - The [`up:proxy:load`](/up:proxy:load) event can now be prevented to prevent a request from being sent to the network.
 -  The [`up:proxy:load`](/up:proxy:load) event now allows listeners to change request headers by manipulating the `event.request.headers` object.
 - A new event [`up:proxy:fatal`](/up:proxy:fatal) will be [emitted](/api/up.emit) when an [AJAX request](/api/up.request) encounters fatal error like a timeout or loss of network connectivity.
 
 ### Links
 
-- Links with unsafe HTTP methods like `POST` are no longer marked as `.up-current`, even if their `[href]` matches the current URL.
+- ⚠️ Links with unsafe HTTP methods like `POST` are no longer marked as `.up-current`, even if their `[href]` matches the current URL.
 - New experimental function [`up.link.isSafe()`](/api/up.link.isSafe). It returns whether the given link has a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1) HTTP method like `GET`.
 
 ### Fragment updates
 
 - When a selector was not found in the response, the error notification now offers a link to show the unexpected response.
-- The event [`up:fragment:destroy`](/up:fragment:destroy) can no longer be prevented.
+- ⚠️ The event [`up:fragment:destroy`](/up:fragment:destroy) can no longer be prevented.
 
 ### History
 
@@ -997,13 +997,13 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - When the server [signals a redirect with a `X-Up-Location` header](/api/up.protocol#redirect-detection), sending a `X-Up-Method` header is now optional. If it is missing, `GET` is assumed.
 - Unpoly will often update a different selector in case the request fails. This second selector is now sent to the server as a `X-Up-Fail-Target` header.
 - You can now [configure how CSRF tokens are sent your server-side framework](/api/up.protocol.config).
-- CSRF tokens are no longer sent for cross-domain requests.
+- ⚠️ CSRF tokens are no longer sent for cross-domain requests.
 
 ### Animation
 
-- `up.motion.none()` has been removed without replacement. Just pass `false` or the string `'none'` to indicate a animation or transition which has no visual effects and completes instantly.
-- [`up.motion.finish()`](/api/up.motion.finish) is now async. It returns a promise that fulfills when all animations are finished.
-- [`up.motion.finish()`](/api/up.motion.finish) now also finishes animations in ancestors of the given element.
+- ⚠️ `up.motion.none()` has been removed without replacement. Just pass `false` or the string `'none'` to indicate a animation or transition which has no visual effects and completes instantly.
+- ⚠️ [`up.motion.finish()`](/api/up.motion.finish) is now async. It returns a promise that fulfills when all animations are finished.
+- ⚠️ [`up.motion.finish()`](/api/up.motion.finish) now also finishes animations in ancestors of the given element.
 
 ### Modals
 
@@ -1016,22 +1016,22 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - `up.follow()` will now open a popup if the given link has `[up-popup]` attribute
 - up-popup links can now have an up-fail-target attribute to indicate which selector to replace for an non-200 response
 - Fix a bug where preloading an up-popup link would create an invisible .up-popup container in the DOM.
-- [`up.popup.attach()`](/api/up.popup.attach) now throws an error if neither `{ url }` nor `{ html }` options are given.
+- ⚠️ [`up.popup.attach()`](/api/up.popup.attach) now throws an error if neither `{ url }` nor `{ html }` options are given.
 
 ### Events
 
-- When async functions emit an event and that event is prevented, the async function now rejects with an [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error).
-- When async functions are called wth `{ confirm: true }` and the user denies confirmation, the async function now rejects with an [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error).
+- ⚠️ When async functions emit an event and that event is prevented, the async function now rejects with an [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error).
+- ⚠️ When async functions are called wth `{ confirm: true }` and the user denies confirmation, the async function now rejects with an [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error).
 
 ### Utility functions
 
-- [`up.util.setTimer()`](/up.util.setTimer) is now always async, even when called with a delay of `0` (zero). The function is now stable.
-- `up.util.isHash()` has been removed without replacement. In your code you can replace `up.util.isHash(x)` with `up.util.isObject(x) && !up.util.isFunction(x)`.
-- `up.util.resolvedDeferred()` has been removed without replacement. Use `Promise.resolve()` instead.
-- `up.util.resolvedPromise()` has been removed without replacement. Use `Promise.resolve(`) instead.
-- `up.util.rejectedPromise()` has been removed without replacement. Use `Promise.reject()` instead.
-- `up.util.unresolvableDeferred()` has been removed without replacement. Use `new Promise(function() {})` instead.
-- `up.motion.when()` has been removed without replacement. Use `Promise.all()` instead.
+- ⚠️ [`up.util.setTimer()`](/up.util.setTimer) is now always async, even when called with a delay of `0` (zero). The function is now stable.
+- ⚠️ `up.util.isHash()` has been removed without replacement. In your code you can replace `up.util.isHash(x)` with `up.util.isObject(x) && !up.util.isFunction(x)`.
+- ⚠️ `up.util.resolvedDeferred()` has been removed without replacement. Use `Promise.resolve()` instead.
+- ⚠️ `up.util.resolvedPromise()` has been removed without replacement. Use `Promise.resolve(`) instead.
+- ⚠️ `up.util.rejectedPromise()` has been removed without replacement. Use `Promise.reject()` instead.
+- ⚠️ `up.util.unresolvableDeferred()` has been removed without replacement. Use `new Promise(function() {})` instead.
+- ⚠️ `up.motion.when()` has been removed without replacement. Use `Promise.all()` instead.
 - [`up.util.isString()`](/api/up.util.isString) now also returns true for `String` instances (in addition to string literals)
 - [`up.util.isNumber()`](/api/up.util.isNumber()) now also returns true for `Number` instances (in addition to number literals)
 
@@ -1117,8 +1117,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Incompatible changes
 
-- ❌ Drop support for IE 9, which hasn't been supported on any platform since January 2016.
-- ❌ Drop support for IE 10, which hasn't been supported since January 2016 on any platform except
+- ⚠️ Drop support for IE 9, which hasn't been supported on any platform since January 2016.
+- ⚠️ Drop support for IE 10, which hasn't been supported since January 2016 on any platform except
   Windows Vista, and Vista is end-of-life in April 2017.
 
 
@@ -1162,8 +1162,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ `up.proxy.config.wrapMethodParam` is now [`up.protocol.config.methodParam`](/api/up.protocol.config#config.methodParam).
-- ❌ The event [`up:history:restored`](/up:history:restored) is no longer emitted when a history state
+- 🧩 `up.proxy.config.wrapMethodParam` is now [`up.protocol.config.methodParam`](/api/up.protocol.config#config.methodParam).
+- ⚠️ The event [`up:history:restored`](/up:history:restored) is no longer emitted when a history state
   was not created by Unpoly.
 
 
@@ -1198,11 +1198,11 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ [`up.replace()`](/api/up.replace) now returns a rejected promise if the server returns a non-200 status code.
-- ❌ `up.util.merge()` has been replaced with [`up.util.assign()`](/api/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
-- ❌ The `up.flow` module has been renamed to [`up.dom`](/up.dom).
-- ❌ The `up.navigation` module has been renamed to [`up.status`](/api/up.status).
-- ❌ Functions that measure position, dimensions or margin now return floats instead of rounded integers.
+- ⚠️ [`up.replace()`](/api/up.replace) now returns a rejected promise if the server returns a non-200 status code.
+- ⚠️ `up.util.merge()` has been replaced with [`up.util.assign()`](/api/up.util.assign), which no longer makes exceptions for `null` and `undefined` property values. This behaves like [`Object.assign`](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign).
+- 🧩 The `up.flow` module has been renamed to [`up.dom`](/up.dom).
+- 🧩 The `up.navigation` module has been renamed to [`up.status`](/api/up.status).
+- ⚠️ Functions that measure position, dimensions or margin now return floats instead of rounded integers.
 
 
 0.32.0
@@ -1226,8 +1226,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ [Modals](/up.modal) can no longer grow wider than the screen
-- ❌ The spacing around a modal dialog is longer implemented as a `margin` of `.up-modal-dialog`.
+- ⚠️ [Modals](/up.modal) can no longer grow wider than the screen
+- ⚠️ The spacing around a modal dialog is longer implemented as a `margin` of `.up-modal-dialog`.
   It is now a padding of `.up-modal-viewport`. This makes it easier to set the `width` or `max-width` of the dialog box.
 
   If your project has custom Unpoly styles, you should grep your CSS files for changes to the `margin`
@@ -1253,7 +1253,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ The [`up.modal.flavor()`](/up.modal.flavor) function was deprecated. Set values on the
+- 🧩 The [`up.modal.flavor()`](/up.modal.flavor) function was deprecated. Set values on the
   [`up.modal.flavors`](/up.modal.flavors) property instead.
 
 
@@ -1273,8 +1273,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ If you are using Unpoly's Boostrap integration, you now need to include `unpoly-bootstrap3.js` *after* you include the Bootstrap CSS.
-- ❌ Fix some issues when using Unpoly together with Bootstrap modals.
+- ⚠️ If you are using Unpoly's Boostrap integration, you now need to include `unpoly-bootstrap3.js` *after* you include the Bootstrap CSS.
+- ⚠️ Fix some issues when using Unpoly together with Bootstrap modals.
 
 
 
@@ -1291,7 +1291,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ Events handled by Unpoly selectors will no longer bubble up the DOM.
+- ⚠️ Events handled by Unpoly selectors will no longer bubble up the DOM.
 
 
 0.28.1
@@ -1322,7 +1322,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ `up.error()` has been renamed to [`up.fail()`](/up.fail) in order to prevent confusion with [`up.log.error()`](/up.log.error).
+- 🧩 `up.error()` has been renamed to [`up.fail()`](/up.fail) in order to prevent confusion with [`up.log.error()`](/up.log.error).
 
 
 0.27.3
@@ -1338,7 +1338,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ The `{ url }` option for [`up.destroy()`](/api/up.destroy) has been renamed to `{ history }` to be more
+- 🧩 The `{ url }` option for [`up.destroy()`](/api/up.destroy) has been renamed to `{ history }` to be more
   in line with [`up.replace()`](/api/up.replace).
 
 
@@ -1354,7 +1354,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ Links with [`up-target`](/up.target) now prefer to update elements within their own layer (page, modal, or popup).
+- ⚠️ Links with [`up-target`](/up.target) now prefer to update elements within their own layer (page, modal, or popup).
   Only when the target element doesn't exist within the link's layer, Unpoly will look through all layers
   from top to bottom.
 
@@ -1372,7 +1372,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ When [replacing](/api/up.replace) multiple page fragments at once, only the first fragment is revealed within its viewport
+- ⚠️ When [replacing](/api/up.replace) multiple page fragments at once, only the first fragment is revealed within its viewport
 
 
 0.27.0
@@ -1402,9 +1402,9 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ Tooltips now open and close much quicker.
-- ❌ Popups now open and close much quicker.
-- ❌ `.up-current` now considers two URLs different if they have different query strings.
+- ⚠️ Tooltips now open and close much quicker.
+- ⚠️ Popups now open and close much quicker.
+- ⚠️ `.up-current` now considers two URLs different if they have different query strings.
 
 
 
@@ -1424,7 +1424,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ When inserting a page fragment with a `<script src="...">` tag, the linked JavaScript is no longer loaded and executed. Inline scripts will still be executed. You can configure this behavior using the new [`up.flow.config`](/up.flow.config) property.
+- ⚠️ When inserting a page fragment with a `<script src="...">` tag, the linked JavaScript is no longer loaded and executed. Inline scripts will still be executed. You can configure this behavior using the new [`up.flow.config`](/up.flow.config) property.
 
 
 
@@ -1491,9 +1491,9 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ When opening a modal while another modal is open, the first modal will be closed (with animation) before the second modal opens (with animation)
-- ❌ When opening a popup while another popup is open, the first popup will be closed (with animation) before the second popup opens (with animation)
-- ❌ User-defined macros are now always run *before* built-in macros.
+- ⚠️ When opening a modal while another modal is open, the first modal will be closed (with animation) before the second modal opens (with animation)
+- ⚠️ When opening a popup while another popup is open, the first popup will be closed (with animation) before the second popup opens (with animation)
+- ⚠️ User-defined macros are now always run *before* built-in macros.
   This way you can set `[up-dash]` and `[up-expand]` from your own macros.
 
 
@@ -1531,10 +1531,10 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ Animations when opening or closing a [modal](/up.modal) now only affect the viewport around the dialog.
+- ⚠️ Animations when opening or closing a [modal](/up.modal) now only affect the viewport around the dialog.
   The backdrop is animated separately. This allows animations like "zoom in", which would look strange if
   the backdrop would zoom in together with the dialog.
-- ❌ The modal's HTML structure has been changed to include a `.up-modal-backdrop` element:
+- ⚠️ The modal's HTML structure has been changed to include a `.up-modal-backdrop` element:
 
   ```
   <div class="up-modal">
@@ -1550,11 +1550,11 @@ This is a major update with some breaking changes. Expect a few more updates lik
   </div>
   ```
 
-- ❌ The `z-index` properties for modal elements have been [changed](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/modal.css.sass).
+- ⚠️ The `z-index` properties for modal elements have been [changed](https://github.com/unpoly/unpoly/blob/master/lib/assets/stylesheets/unpoly/modal.css.sass).
   They might change again in the future.
-- ❌ The modal will now take over the document's scrollbars after the open animation has finished.
+- ⚠️ The modal will now take over the document's scrollbars after the open animation has finished.
   In earlier versions the modal took over as soon as the animation had started.
-- ❌ Calling [`up.motion.finish()`](/api/up.motion.finish) with an element will now also
+- ⚠️ Calling [`up.motion.finish()`](/api/up.motion.finish) with an element will now also
   complete animations/transitions on children of the given element.
 
 
@@ -1583,8 +1583,8 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ Tooltips have a darker background color.
-- ❌ The tooltip CSS has been changed to be easier to override.
+- ⚠️ Tooltips have a darker background color.
+- ⚠️ The tooltip CSS has been changed to be easier to override.
 
 
 0.22.1
@@ -1614,10 +1614,10 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ `up.proxy.idle()` is now [`up.proxy.isIdle()`](/up.proxy.isIdle)
-- ❌ `up.proxy.busy()` is now [`up.proxy.isBusy()`](/up.proxy.isBusy)
-- ❌ Event `up:proxy:busy` is now [`up:proxy:slow`](/up:proxy:slow)
-- ❌ Event `up:proxy:idle` is now [`up:proxy:idle`](/up:proxy:recover)
+- 🧩 `up.proxy.idle()` is now [`up.proxy.isIdle()`](/up.proxy.isIdle)
+- 🧩 `up.proxy.busy()` is now [`up.proxy.isBusy()`](/up.proxy.isBusy)
+- 🧩 Event `up:proxy:busy` is now [`up:proxy:slow`](/up:proxy:slow)
+- 🧩 Event `up:proxy:idle` is now [`up:proxy:idle`](/up:proxy:recover)
 
 
 0.21.0
@@ -1632,7 +1632,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ `up-toggle` has been renamed to `up-switch`
+- 🧩 `up-toggle` has been renamed to `up-switch`
 
 
 0.20.0
@@ -1641,14 +1641,14 @@ This is a major update with some breaking changes. Expect a few more updates lik
 - The project has been renamed to *Unpoly*.
 - All functions remain in the `up` namespace, so e.g. `up.replace()` is still called `up.replace()`.
 - All UJS functionality remains unchanged, so e.g. `up-target` is still called `up-target`.
-- The Bower package has been renamed to `unpoly`.
-- The Ruby gem for the Rails bindings has been renamed to `unpoly-rails`.
-- The new JavaScript and stylesheet assets are:
+- ⚠️ The Bower package has been renamed to `unpoly`.
+- ❌ The Ruby gem for the Rails bindings has been renamed to `unpoly-rails`.
+- ❌ The new JavaScript and stylesheet assets are:
   - [`unpoly.js`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly.js)
   - [`unpoly.min.js`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly.min.js)
   - [`unpoly.css`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly.css)
   - [`unpoly.min.css`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly.min.css)
-- If you're using the Bootstrap integration the new assets are:
+- ⚠️ If you're using the Bootstrap integration the new assets are:
   - [`unpoly-bootstrap3.js`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly-bootstrap3.js)
   - [`unpoly-bootstrap3.min.js`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly-bootstrap3.min.js)
   - [`unpoly-bootstrap3.css`](https://raw.githubusercontent.com/unpoly/unpoly/master/dist/unpoly-bootstrap3.css)
@@ -1666,7 +1666,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ `up.implant()` has been renamed to [`up.extract()`](/api/up.extract).
+- 🧩 `up.implant()` has been renamed to [`up.extract()`](/api/up.extract).
 
 
 0.18.1
@@ -1706,7 +1706,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ By default Unpoly now converts `PUT`, `PATCH` and `DELETE` requests to `POST` requests
+- ⚠️ By default Unpoly now converts `PUT`, `PATCH` and `DELETE` requests to `POST` requests
   that carry their original method in a form parameter named `_method`.
   This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
 
@@ -1715,7 +1715,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
   You can configure this behavior in [`up.proxy.config.wrapMethods`](/up.proxy.config)
   and [`up.proxy.config.wrapMethodParam`](/up.proxy.config).
-- ❌ The requested selector is now sent to the server as a request header `X-Up-Target`
+- ⚠️ The requested selector is now sent to the server as a request header `X-Up-Target`
   (this used to be `X-Up-Selector`). If you are using `unpoly-rails`, you can access it
   through `up.target` (this used to be `up.selector`).
 
@@ -1732,7 +1732,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ When [`up.observe()`](/api/up.observe) is used with a delay of zero, the callback is invoked instantly (instead of
+- ⚠️ When [`up.observe()`](/api/up.observe) is used with a delay of zero, the callback is invoked instantly (instead of
   being invoked in the next animation frame).
 
 
@@ -1757,12 +1757,12 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ Popups and modals used to close automatically whenever an element behind the overlay was replaced.
+- ⚠️ Popups and modals used to close automatically whenever an element behind the overlay was replaced.
   This behavior is still in effect, but only if the replacement was triggered by a link or element from
   within the popup or modal.
-- ❌ Popups and modals no longer raise an error if their (hidden) overlay was closed before the
+- ⚠️ Popups and modals no longer raise an error if their (hidden) overlay was closed before the
   response was received.
-- ❌ Popups and modals are now compiled before they are animated.
+- ⚠️ Popups and modals are now compiled before they are animated.
 
 
 0.15.1
@@ -1797,7 +1797,7 @@ This is a major update with some breaking changes. Expect a few more updates lik
 
 ### Breaking changes
 
-- ❌ [`up.observe()`](/api/up.observe) now takes the callback function as a last argument.
+- ⚠️ [`up.observe()`](/api/up.observe) now takes the callback function as a last argument.
   The callback can now longer be passed as a `.change` option.
 
 
@@ -1866,8 +1866,8 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- ❌ `up.bus.emit()` is now [`up.emit()`](/api/up.emit)
-- ❌ When `up.first()` finds no match, return `undefined` instead of `null`.
+- 🧩 `up.bus.emit()` is now [`up.emit()`](/api/up.emit)
+- ⚠️ When `up.first()` finds no match, return `undefined` instead of `null`.
 
 
 0.12.1
@@ -1891,9 +1891,9 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- ❌ Remove `up.slot`, which was poorly implemented, untested, and not much better than the `:empty` pseudo-selector
+- ⚠️ Remove `up.slot`, which was poorly implemented, untested, and not much better than the `:empty` pseudo-selector
   which has great browser support
-- ❌ Replaced the `up.bus.on(...)` event registry with vanilla DOM events bound to `document`. Also renamed
+- ⚠️ Replaced the `up.bus.on(...)` event registry with vanilla DOM events bound to `document`. Also renamed
   events in the process.
 
   Instead of the old ...
@@ -1914,13 +1914,13 @@ Refactored internals. No API changes.
       up.on('up:fragment:inserted', function(event, $fragment) {
          ...
       };
-- ❌ Renamed `up.ready()` to `up.hello()`. This will emit an `up:event:inserted` event for the given element,
+- 🧩 Renamed `up.ready()` to `up.hello()`. This will emit an `up:event:inserted` event for the given element,
   causing it to be compiled etc.
-- ❌ `up.popup.open()` has been renamed to `up.popup.attach()`.
-- ❌ `up.modal.open()` has been split into two methods `up.modal.visit(url)` and `up.modal.follow($link)`.
-- ❌ `up.tooltip.open()` has been renamed to `up.tooltip.attach()`.
-- ❌ Tooltips now escape HTML by default; To use HTML content, use an `[up-tooltip-html]` attribute instead.
-- ❌ Module configurations are now simple properties like `up.layout.config` instead of methods like `up.layout.defaults(...)`.
+- 🧩 `up.popup.open()` has been renamed to `up.popup.attach()`.
+- ⚠️ `up.modal.open()` has been split into two methods `up.modal.visit(url)` and `up.modal.follow($link)`.
+- 🧩 `up.tooltip.open()` has been renamed to `up.tooltip.attach()`.
+- ⚠️ Tooltips now escape HTML by default; To use HTML content, use an `[up-tooltip-html]` attribute instead.
+- ⚠️ Module configurations are now simple properties like `up.layout.config` instead of methods like `up.layout.defaults(...)`.
 
   Instead of the old ...
 
@@ -1964,7 +1964,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- ❌ Interactions that would result in an URL change ("pushState") now fall back to a full page load
+- ⚠️ Interactions that would result in an URL change ("pushState") now fall back to a full page load
   if Unpoly was booted from a non-GET request. [More information about the reasons for this](https://github.com/unpoly/unpoly/commit/d81d9007aa3bfae0fca8c55a71d180d1044acae5).
 
   This currently works out of the box if you're using Unpoly via the `unpoly-rails` Rubygem.
@@ -2002,7 +2002,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- ❌ While following links and submitting forms will still reveal elements by default,
+- ⚠️ While following links and submitting forms will still reveal elements by default,
   direct calls of [`up.replace()`](/api/up.replace) no longer do.
   This behavior can be activated using the `{ reveal: true }` option.
 
@@ -2021,7 +2021,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- ❌ [`up.reveal()`](/api/up.reveal) now only reveals the first 150 pixels of an element.
+- ⚠️ [`up.reveal()`](/api/up.reveal) now only reveals the first 150 pixels of an element.
 
 
 0.10.0
@@ -2037,10 +2037,10 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- ❌ The option `options.scroll` and attribute `up-scroll` have been removed. Instead you can use the
+- ⚠️ The option `options.scroll` and attribute `up-scroll` have been removed. Instead you can use the
   boolean option `options.reveal` or `up-reveal` to indicate whether an element should be revealed
   within the viewport before replacement.
-- ❌ The string `up.history.defaults('popTarget')` is now an array of selectors `up.history.defaults('popTargets')`
+- ⚠️ The string `up.history.defaults('popTarget')` is now an array of selectors `up.history.defaults('popTargets')`
 
 
 0.9.1
@@ -2082,7 +2082,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- ❌ Like Bootstrap, the Unpoly modal will now scroll the main document viewport instead of the modal dialog box.
+- ⚠️ Like Bootstrap, the Unpoly modal will now scroll the main document viewport instead of the modal dialog box.
 
 
 
@@ -2179,7 +2179,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- ❌ Rename option `.origin` to `.position` in `up.popup` and `up.tooltip`
+- 🧩 Rename option `.origin` to `.position` in `up.popup` and `up.tooltip`
 
 
 0.6.4
@@ -2199,7 +2199,7 @@ Refactored internals. No API changes.
 
 ### Breaking changes
 
-- ❌ Rename method `up.awaken()` to `up.compiler()`
+- 🧩 Rename method `up.awaken()` to `up.compiler()`
 
 
 0.6.2
@@ -2219,10 +2219,10 @@ Refactored internals. No API changes.
 0.6.0
 -----
 
-- Default options are now applied for `null` and `undefined` values, but no longer for empty strings.
+- ⚠️ Default options are now applied for `null` and `undefined` values, but no longer for empty strings.
 - Allow to disable cache use on a per-request basis.
-- `up.reload()` no longer reads from the cache by default.
-- Renamed `[up-marker]` to `[up-slot]`
+- ⚠️ `up.reload()` no longer reads from the cache by default.
+- 🧩 Renamed `[up-marker]` to `[up-slot]`
 - `up.destroy()` can now animate the element removal with a new `{ animate }` option.
 
 0.5.0
@@ -2256,7 +2256,7 @@ Refactored internals. No API changes.
 - Remove unintended logging.
 - Add configuration `up.viewport.config`.
 - Reveal elements before they are replaced.
-- `.up-active` now looks at `[up-href]` instead of `[up-source]` for alternate URLs.
+- ⚠️ `.up-active` now looks at `[up-href]` instead of `[up-source]` for alternate URLs.
 - `.up-active` classes are now set for `[up-instant]` links.
 
 0.4.1
@@ -2273,13 +2273,13 @@ Refactored internals. No API changes.
 - Remove nested log grouping, as group headers cannot be filtered away in Chrome DevTools.
 - `.up-current` is now also applied to links with an `[up-source]` attribute.
 - Errors are now shown within the page body (instead of opening an input-blocking alert).
-- Rename `up.cache` module to `up.proxy`.
+- 🧩 Rename `up.cache` module to `up.proxy`.
 - `up.proxy` defaults are now configurable.
 - Add `[up-instant]` attribute to follow a link on `mousedown` instead of `click`.
 - Add `[up-preload]` attribute to preload a link on hover.
-- Don't boot with jQuery versions older than 1.9.
+- ⚠️ Don't boot with jQuery versions older than 1.9.
 - `up.form.observe()` detects changes on browsers that do not fire `input` events.
-- Line breaks in tooltips are no longer allowed, as it breaks positioning.
+- ⚠️ Line breaks in tooltips are no longer allowed, as it breaks positioning.
 - `[up-tooltip]` can now read the tooltip text from an existing `[title]` attribute.
 - `up.util.debug()` no longer crashes when there are no placeholders in the message.
 - Format logging with nested groups.
@@ -2297,7 +2297,7 @@ This version adds compatibility (or graceful degredation) for IE9 and Safari:
 - Animations are now skipped in unsupporting browsers.
 - Modals and popups now force-disable history if the browser cannot currently call `pushState()`.
 
-Support for IE8 has been dropped. Unpoly will no longer boot in IE8.
+⚠️ Support for IE8 has been dropped. Unpoly will no longer boot in IE8.
 
 0.3.0
 -----
@@ -2318,7 +2318,7 @@ Support for IE8 has been dropped. Unpoly will no longer boot in IE8.
 - Tone down logging for `up.awaken()` invocations.
 - Tooltips now have "speech bubble" like arrows.
 - Trailing slashes are now ignored when marking links as `.up-current`
-- The server must now signal a redirected URL using `'X-Up-Current-Location'` instead of `X-Up-Previous-Redirect-Location`.
+- ⚠️ The server must now signal a redirected URL using `'X-Up-Current-Location'` instead of `X-Up-Previous-Redirect-Location`.
 
 0.2.1
 -----
@@ -2335,10 +2335,10 @@ Support for IE8 has been dropped. Unpoly will no longer boot in IE8.
 - Overlays now support `[ width }` and `{ height }` options.
 - Overlays now restore the previous url and title when closed.
 - Fix modal rendering issue in chrome.
-- Simplify modal template HTML structure.
+- ⚠️ Simplify modal template HTML structure.
 - New overlay option `{ closeLabel }`.
-- The transition `move-top` has been renamed to `move-up`.
-- The transition `move-bottom` has been renamed to `move-down`.
+- 🧩 The transition `move-top` has been renamed to `move-up`.
+- 🧩 The transition `move-bottom` has been renamed to `move-down`.
 - Support prepending fragments with `:before`.
 - Support appending fragments with `:after`.
 - New attribute `[up-marker]` to define a slot for later targeting. It is hidden visually while it is empty.
