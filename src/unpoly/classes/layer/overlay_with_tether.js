@@ -39,7 +39,7 @@ up.Layer.OverlayWithTether = class OverlayWithTether extends up.Layer.Overlay {
       this.dismiss(
         ':detached', {      // custom dismiss value so listeners can distinguish from other dismissals
         animation: false,   // no need to animate since we're already hidden
-        force: true         // since we're cleaning up a broken stack, don't allow user intervention
+        preventable: false  // since we're cleaning up a broken stack, don't allow user intervention
       })
     }
   }

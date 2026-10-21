@@ -877,7 +877,7 @@ up.Preview = class Preview {
     // wait a microtask for (the fulfilled) up.layer.open() promise.
     let overlay = up.layer.front
 
-    this.undo(() => overlay.dismiss(undoDismissValue, { force: true }))
+    this.undo(() => overlay.dismiss(undoDismissValue, { preventable: false }))
 
     return overlay
   }

@@ -160,13 +160,10 @@ up.Layer = class Layer extends up.Record {
     @param {string} [options.confirm]
       A message the user needs to confirm before the overlay is closed.
 
-    @param {boolean} [options.force=false]
-      Whether to close the overlay even if a listener [prevents](/learn/closing-overlays#keeping-open)
-      the close event.
+    @param {boolean} [options.preventable=true]
+      Whether the closing can be prevented by an event listener.
 
-      Overlays stacked on top of this overlay will also be closed by force.
-
-      @experimental
+      @internal
 
     @param {up.Response} [options.response]
       The server response that caused this overlay to close.
@@ -234,9 +231,7 @@ up.Layer = class Layer extends up.Record {
 
   Descendant overlays will be dismissed with value `':peel'`.
 
-  A listener may [keep a descendant overlay open](/learn/closing-overlays#keeping-open) by preventing its
-  `up:layer:dismiss` or `up:layer:accept` event. In that case this function throws an `up.Aborted` error.
-  Overlays in front of the blocking overlay stay closed. To ignore prevented events, pass `{ force: true }`.
+  Listeners to `up:layer:dismiss` or `up:layer:accept` cannot keep a descendant overlay open.
 
   @function up.Layer#peel
   @section Closing
@@ -249,12 +244,6 @@ up.Layer = class Layer extends up.Record {
       By default descendant overlays will be dismissed.\
       You can pass `{ intent: "accept" }` to
       accept them instead.
-
-    @param {boolean} [options.force=false]
-      Whether to close descendant overlays even if a listener [prevents](/learn/closing-overlays#keeping-open)
-      their close event.
-
-      @experimental
 
   @section Animation
     @param {string|Function(Element, Object)} [options.animation]

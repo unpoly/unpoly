@@ -96,78 +96,22 @@ extendDescribe('up.layer', function() {
           expect(overlay2).not.toBeAlive()
         })
 
-        it('does not open the overlay when an up:layer:dismiss listener prevents the peeling', async function() {
-          // Until the app sets this, unpoly-migrate.js ignores prevented close events when peeling.
-          up.layer.config.forcePeel = false
+        it('does not allow up:layer:dismiss listeners to prevent the peeling', async function() {
           const [root, overlay1, overlay2] = makeLayers(3)
           await wait()
 
           const dismissListener = jasmine.createSpy('up:layer:dismiss listener').and.callFake((event) => event.preventDefault())
           up.on('up:layer:dismiss', dismissListener)
-          const openedListener = jasmine.createSpy('up:layer:opened listener')
-          up.on('up:layer:opened', openedListener)
 
-          const openPromise = up.layer.open({ baseLayer: overlay1, content: 'new overlay' })
-          await expectAsync(openPromise).toBeRejectedWithError(up.Aborted, /prevented/i)
-
-          expect(dismissListener.calls.mostRecent().args[0]).toBeEvent('up:layer:dismiss', { value: ':peel', layer: overlay2 })
-          expect(openedListener).not.toHaveBeenCalled()
-          expect(up.layer.count).toBe(3)
-          expect(up.layer.get(2)).toBe(overlay2)
-          expect(overlay2).toBeAlive()
-          expect(document.querySelectorAll('up-modal').length).toBe(2)
-        })
-
-        it('does not open the overlay when an up:layer:dismiss listener prevents the peeling after a server response', async function() {
-          // Until the app sets this, unpoly-migrate.js ignores prevented close events when peeling.
-          up.layer.config.forcePeel = false
-          const [root, overlay1, overlay2] = makeLayers(3)
+          up.layer.open({ baseLayer: overlay1 })
           await wait()
 
-          up.on('up:layer:dismiss', (event) => event.preventDefault())
-
-          const openPromise = up.layer.open({ baseLayer: overlay1, url: '/path', target: '.target' })
-          await wait()
-
-          // Peeling happens after the response was received
-          expect(overlay2).toBeAlive()
-
-          jasmine.respondWithSelector('.target', { text: 'new overlay' })
-          await expectAsync(openPromise).toBeRejectedWithError(up.Aborted, /prevented/i)
-
           expect(up.layer.count).toBe(3)
-          expect(up.layer.get(2)).toBe(overlay2)
-          expect(overlay2).toBeAlive()
-          expect(document).not.toHaveSelector('.target')
-        })
 
-        it('opens the overlay with { peel: "force" }, even if an up:layer:dismiss listener prevents the peeling', async function() {
-          const [root, overlay1, overlay2] = makeLayers(3)
-          await wait()
-
-          up.on('up:layer:dismiss', (event) => event.preventDefault())
-
-          await up.layer.open({ baseLayer: overlay1, content: 'new overlay', peel: 'force' })
-
-          expect(up.layer.count).toBe(3)
+          expect(up.layer.get(0)).toBe(root)
+          expect(up.layer.get(1)).toBe(overlay1)
+          expect(up.layer.get(2)).not.toBe(overlay2)
           expect(overlay2).not.toBeAlive()
-          expect(up.layer.front).toHaveText('new overlay')
-        })
-
-        it('accepts overlaying layers with { peel: "accept force" }, even if an up:layer:accept listener prevents it', async function() {
-          const [root, overlay1, overlay2] = makeLayers(3)
-          await wait()
-
-          up.on('up:layer:accept', (event) => event.preventDefault())
-          const acceptedListener = jasmine.createSpy('up:layer:accepted listener')
-          up.on('up:layer:accepted', acceptedListener)
-
-          await up.layer.open({ baseLayer: overlay1, content: 'new overlay', peel: 'accept force' })
-
-          expect(acceptedListener).toHaveBeenCalled()
-          expect(acceptedListener.calls.mostRecent().args[0]).toBeEvent('up:layer:accepted', { layer: overlay2 })
-          expect(overlay2).not.toBeAlive()
-          expect(up.layer.front).toHaveText('new overlay')
         })
 
         it('still opens the layer if a destructor for an existing overlay crashes', async function() {

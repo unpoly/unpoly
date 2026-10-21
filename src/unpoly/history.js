@@ -474,8 +474,7 @@ up.history = (function() {
 
       // Don't replace elements in a modal that might still be open
       // We will close all overlays and update the root layer.
-      // Since the browser has already changed the URL, listeners cannot prevent this.
-      peel: 'force',
+      peel: true,
       layer: 'root',
 
       cache: 'auto',

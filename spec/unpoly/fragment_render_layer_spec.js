@@ -163,83 +163,29 @@ extendDescribe('up.fragment', function() {
                 expect(dismissedModes).toEqual(['drawer', 'modal'])
               })
 
-              describe('when an up:layer:dismiss listener prevents the peeling', function() {
+              it('does not allow up:layer:dismiss handlers to prevent the peeling', async function() {
+                let dismissListener = jasmine.createSpy('up:layer:dismiss listener').and.callFake((event) => event.preventDefault())
+                up.on('up:layer:dismiss', dismissListener)
+                let dismissedListener = jasmine.createSpy('up:layer:dismissed listener')
+                up.on('up:layer:dismissed', dismissedListener)
 
-                beforeEach(function() {
-                  // Until the app sets this, unpoly-migrate.js ignores prevented close events when peeling.
-                  up.layer.config.forcePeel = false
-                })
+                makeLayers([
+                  { target: '.element', content: 'old text in root' },
+                  { target: '.element', content: 'old text in overlay 1' },
+                  { target: '.element', content: 'old text in overlay 2' }
+                ])
+                await wait()
 
-                it('rejects with up.Aborted and keeps the overlay open', async function() {
-                  let dismissListener = jasmine.createSpy('up:layer:dismiss listener').and.callFake((event) => event.preventDefault())
-                  up.on('up:layer:dismiss', dismissListener)
-                  let dismissedListener = jasmine.createSpy('up:layer:dismissed listener')
-                  up.on('up:layer:dismissed', dismissedListener)
+                expect(dismissListener).not.toHaveBeenCalled()
 
-                  const [root, overlay] = makeLayers([
-                    { target: '.element', content: 'old text in root' },
-                    { target: '.element', content: 'old text in overlay' },
-                  ])
-                  await wait()
+                let renderPromise = up.render('.element', { content: 'new text', layer: 'root', peel: true })
+                await expectAsync(renderPromise).toBeResolved()
 
-                  let renderJob = up.render('.element', { content: 'new text', layer: 'root', peel: true })
-                  await expectAsync(renderJob).toBeRejectedWithError(up.Aborted, /prevented/i)
-
-                  expect(dismissListener.calls.mostRecent().args[0]).toBeEvent('up:layer:dismiss', { value: ':peel', layer: overlay })
-                  expect(dismissedListener).not.toHaveBeenCalled()
-                  expect(overlay).toBeAlive()
-                  expect(up.layer.current).toBe(overlay)
-                  expect(root).toHaveText(/old text in root/)
-                })
-
-                it('rejects with up.Aborted when the response is received, cleaning up loading state', async function() {
-                  up.on('up:layer:dismiss', (event) => event.preventDefault())
-
-                  const [root, overlay] = makeLayers([
-                    { target: '.element', content: 'old text in root' },
-                    { target: '.element', content: 'old text in overlay' },
-                  ])
-                  await wait()
-
-                  const [link] = htmlFixtureList('<a href="/path">link</a>')
-                  overlay.getContentElement().append(link)
-
-                  let renderJob = up.render('.element', { url: '/path', layer: 'root', peel: true, origin: link, feedback: true })
-                  await wait()
-
-                  expect(link).toHaveClass('up-active')
-                  expect(overlay).toBeAlive()
-
-                  jasmine.respondWithSelector('.element', { text: 'new text' })
-                  await expectAsync(renderJob).toBeRejectedWithError(up.Aborted, /prevented/i)
-                  await expectAsync(renderJob.finished).toBeRejectedWithError(up.Aborted, /prevented/i)
-
-                  expect(overlay).toBeAlive()
-                  expect(up.layer.current).toBe(overlay)
-                  expect(root).toHaveText(/old text in root/)
-                  expect(link).not.toHaveClass('up-active')
-                  expect(up.network.isBusy()).toBe(false)
-                })
-
-                it('keeps overlays closed that were closed before the blocking overlay', async function() {
-                  const [root, overlay1, overlay2] = makeLayers([
-                    { target: '.element', content: 'old text in root' },
-                    { target: '.element', content: 'old text in overlay 1' },
-                    { target: '.element', content: 'old text in overlay 2' }
-                  ])
-                  await wait()
-
-                  overlay1.on('up:layer:dismiss', (event) => event.preventDefault())
-
-                  let renderJob = up.render('.element', { content: 'new text', layer: 'root', peel: true })
-                  await expectAsync(renderJob).toBeRejectedWithError(up.Aborted)
-
-                  expect(overlay2).not.toBeAlive()
-                  expect(overlay1).toBeAlive()
-                  expect(up.layer.count).toBe(2)
-                  expect(root).toHaveText(/old text in root/)
-                })
-
+                expect(dismissListener).toHaveBeenCalled()
+                expect(dismissedListener).toHaveBeenCalled()
+                expect(up.layer.count).toBe(1)
+                expect(up.layer.current.mode).toBe('root')
+                expect(up.layer.current).toHaveText(/new text/)
               })
 
               it('does not create a history entry for the peeled layer', async function() {
@@ -409,53 +355,6 @@ extendDescribe('up.fragment', function() {
                 expect(acceptListener).toHaveBeenCalled()
                 expect(up.layer.count).toBe(1)
                 expect(up.layer.current.mode).toBe('root')
-                expect(up.layer.current).toHaveText(/new text/)
-              })
-
-            })
-
-            describe('with { peel: "force" }', function() {
-
-              it('dismisses all overlays over the target, even if an up:layer:dismiss listener prevents it', async function() {
-                let dismissListener = jasmine.createSpy('up:layer:dismiss listener').and.callFake((event) => event.preventDefault())
-                up.on('up:layer:dismiss', dismissListener)
-
-                makeLayers([
-                  { target: '.element', content: 'old text in root' },
-                  { target: '.element', content: 'old text in overlay 1' },
-                  { target: '.element', content: 'old text in overlay 2' }
-                ])
-                await wait()
-
-                await up.render('.element', { content: 'new text', layer: 'root', peel: 'force' })
-
-                expect(dismissListener.calls.count()).toBe(2)
-                expect(up.layer.count).toBe(1)
-                expect(up.layer.current).toHaveText(/new text/)
-              })
-
-            })
-
-            describe('with { peel: "accept force" }', function() {
-
-              it('accepts all overlays over the target, even if an up:layer:accept listener prevents it', async function() {
-                let dismissListener = jasmine.createSpy('up:layer:dismiss listener')
-                up.on('up:layer:dismiss', dismissListener)
-                let acceptListener = jasmine.createSpy('up:layer:accept listener').and.callFake((event) => event.preventDefault())
-                up.on('up:layer:accept', acceptListener)
-
-                makeLayers([
-                  { target: '.element', content: 'old text in root' },
-                  { target: '.element', content: 'old text in overlay 1' },
-                  { target: '.element', content: 'old text in overlay 2' }
-                ])
-                await wait()
-
-                await up.render('.element', { content: 'new text', layer: 'root', peel: 'accept force' })
-
-                expect(dismissListener).not.toHaveBeenCalled()
-                expect(acceptListener.calls.count()).toBe(2)
-                expect(up.layer.count).toBe(1)
                 expect(up.layer.current).toHaveText(/new text/)
               })
 
