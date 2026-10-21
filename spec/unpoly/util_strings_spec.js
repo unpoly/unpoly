@@ -160,6 +160,13 @@ extendDescribe('up.util', function() {
           expect(formatted).toEqual('before { foo: { bar: (circular) } } after')
         })
 
+        it('marks a circular reference through an array', function() {
+          const object = { foo: [] }
+          object.foo.push(object)
+          const formatted = up.util.sprintf('before %o after', object)
+          expect(formatted).toEqual('before { foo: [(circular)] } after')
+        })
+
         it('serializes an object in full every time it appears, as long as there is no cycle', function() {
           const shared = { baz: 'baz-value' }
           const object = { foo: shared, bar: [shared] }
@@ -225,6 +232,13 @@ extendDescribe('up.util', function() {
           }
           const formatted = up.util.sprintf('before %o after', new Foo())
           expect(formatted).toEqual('before my.Foo {…} after')
+        })
+
+        it('serializes a nested instance or error like a direct one', function() {
+          class Foo {}
+          const object = { request: new up.Request({ url: '/path' }), foo: new Foo(), error: new up.CannotMatch('message') }
+          const formatted = up.util.sprintf('before %o after', [object])
+          expect(formatted).toEqual('before [{ request: up.Request(GET /path), foo: Foo {…}, error: up.CannotMatch(message) }] after')
         })
       })
 
