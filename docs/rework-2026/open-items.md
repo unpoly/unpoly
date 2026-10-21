@@ -91,7 +91,6 @@ Sections that could become pages of their own, most valuable first. Word counts 
 Found in the unpoly-migrate review. None of these breaks an app today.
 - `up.hello()` returns a promise whose Element properties throw a TypeError. Code that only probes a property (e.g. a pretty-printer checking `nodeType`) also throws. Could warn and return `undefined` instead.
 - The progress bar is disabled with a warning when the app has any `up:network:late` listener, also when that listener only tracks analytics.
-- `prepareLocationChangedEvent()` in `src/unpoly-migrate/history.js` renames `event.url` without a label, so its warning prints the whole event with `%o`.
 - `{ flavor }` or `{ mode }` without `{ layer }` logs two warnings (the rename and the missing `{ layer: 'new' }`). Both are true, but one combined warning would be easier to act on.
 - Warnings for removed layer options (`{ width }`, `{ sticky }`, `{ template }`) and for `meta.response` in compilers don't say where they were found (origin element, compiler selector).
 - Core `up.layer.build()` could pass the mode to `up.migrate.handleLayerConfig()`, so unpoly-migrate doesn't search `up.layer.config` for the label.
