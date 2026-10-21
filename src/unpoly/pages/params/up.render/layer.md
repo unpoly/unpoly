@@ -20,8 +20,3 @@
   To [dismiss](/learn/closing-overlays#intents) obstructing overlays, pass `{ peel: true }` or `{ peel: 'dismiss' }`.\
   To [accept](/learn/closing-overlays#intents) obstructing overlays, pass `{ peel: 'accept' }`.\
   To not peel, pass `{ peel: false }`.
-
-  A listener can [prevent](/learn/closing-overlays#keeping-open) an obstructing overlay from closing.
-  The render pass then rejects with an `up.Aborted` error and the target layer is not updated.
-  To close obstructing overlays even when a listener prevents it, add the word `force`,
-  e.g. `{ peel: 'force' }` or `{ peel: 'accept force' }`.

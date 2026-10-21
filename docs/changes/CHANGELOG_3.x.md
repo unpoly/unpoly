@@ -172,22 +172,6 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 
 ### Overlays
 
-- 🧩 An `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open when a link or form in a parent layer would close it ([peeling](/learn/closing-overlays#peeling)). The render pass then fails with `up.Aborted` and nothing is updated.
-  This affects listeners that prevent closing, e.g. to confirm unsaved changes. If your listener asks the user to confirm, you probably want the new behavior: "Cancel" now keeps the overlay open. Otherwise, to let links in a parent layer close the overlay as before, return early when `event.value` is `':peel'`:
-
-  ```js
-  up.on('up:layer:dismiss', function(event) {
-    if (event.value === ':peel') return // mark-line
-    if (!confirm('Discard your changes?')) event.preventDefault()
-  })
-  ```
-
-  To force a single link, set [`[up-peel="force"]`](/api/up-follow#up-peel) instead.
-  To close overlays when peeling as in Unpoly 3.14, set the new config [`up.layer.config.forcePeel`](/api/up.layer.config#config.forcePeel) to `true`. Until you set it yourself, `unpoly-migrate.js` keeps the 3.14 behavior: it closes the overlay anyway and warns when a listener tries to keep it open.
-- When a listener keeps an overlay open, the overlays below it now also stay open.
-- To close overlays even when a listener prevents it, use [`[up-peel="force"]`](/api/up-follow#up-peel), or pass `{ force: true }` to `up.Layer#accept()`, `up.Layer#dismiss()` or `up.Layer#peel()`. You can combine `force` with an intent, e.g. `[up-peel="accept force"]`.
-- Pressing the back button still closes overlays, even when a listener prevents it.
-- New experimental property `event.force` on [`up:layer:accept`](/api/up:layer:accept#event.force) and [`up:layer:dismiss`](/api/up:layer:dismiss#event.force) tells a listener whether the overlay closes even when it prevents the event.
 - New [`[up-on-accept]`](/api/up-layer-new#up-on-accept) and [`[up-on-dismiss]`](/api/up-layer-new#up-on-dismiss) attributes run code before an overlay closes, and can keep it open with `event.preventDefault()`. The matching [`{ onAccept }`](/api/up.layer.open#options.onAccept) and [`{ onDismiss }`](/api/up.layer.open#options.onDismiss) options are now documented.
 - When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent overlay, as described in [focus in overlays](/learn/focus#overlays). It used to fall back to the `<body>`.
 - Fix: [`[up-focus-visible]`](/api/up-follow#up-focus-visible) and the `{ focusVisible }` option were ignored when opening an overlay.

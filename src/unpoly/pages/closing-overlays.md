@@ -255,18 +255,22 @@ When an overlay closes in reaction to a server response, you can [access the dis
 Keeping an overlay open {#keeping-open}
 -----------------------
 
-To keep an overlay open, for example when it has unsaved changes, prevent its
-[`up:layer:dismiss`](/api/up:layer:dismiss) event. This also blocks the Escape key, backdrop clicks
-and the close button:
+To keep an overlay open, prevent its [`up:layer:dismiss`](/api/up:layer:dismiss) event.
+Check the [dismissal value](#dismissal-values) to only ask when the user closes the overlay
+with the Escape key, a backdrop click or the `×` button:
 
 ```js
 up.on('up:layer:dismiss', function(event) {
-  let hasForm = event.layer.element.querySelector('form')
-  if (hasForm && !confirm('Discard your unsaved changes?')) {
+  let userClosed = [':key', ':outside', ':button'].includes(event.value) // mark: [':key', ':outside', ':button']
+  if (userClosed && !confirm('Close this overlay?')) {
     event.preventDefault() // mark-line
   }
 })
 ```
+
+Without that check, the listener would also ask when the overlay closes because a link or form
+[updated a parent layer](#peeling), e.g. after a successful save. The overlay closes anyway in that case,
+so the question would only confuse the user.
 
 To keep only one particular overlay open, set an [`[up-on-dismiss]`](/api/up-layer-new#up-on-dismiss) attribute
 on the opening link, or pass an [`{ onDismiss }`](/api/up.layer.open#options.onDismiss) callback, and call `event.preventDefault()` in it.
@@ -275,9 +279,6 @@ Mind the tense: `[up-on-dismiss]` runs *before* the overlay closes,
 
 No listener can keep an overlay open when the user presses the Back button, since
 [going back](/learn/history-in-overlays#restoration) closes all overlays.
-
-When an overlay closes because a layer below it is [updated](#peeling), `event.value` is `":peel"`,
-so a listener can treat that case differently.
 
 
 Closing by targeting a background layer {#peeling}
@@ -298,9 +299,8 @@ after a successful submission:
 
 A successful submission dismisses the form's own overlay with a [dismissal value](#dismissal-values) of `":peel"`.
 
-If a listener [keeps the overlay open](#keeping-open), the background layer is not updated.
-To close the overlay anyway, set an `[up-peel="force"]` attribute.
-To ignore such listeners whenever an overlay is peeled, set [`up.layer.config.forcePeel = true`](/api/up.layer.config#config.forcePeel).
+A listener cannot [keep a peeled overlay open](#keeping-open). By the time the overlay closes,
+the server has already processed the request.
 
 > [note]
 > The form still updates its own layer when the [server responds with an error code](/learn/error-responses)
