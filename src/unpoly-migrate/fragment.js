@@ -276,7 +276,7 @@ up.fragment.config.patch(function() {
 up.compiler('[up-keep]', function(element) {
   let selector = up.element.booleanOrStringAttr(element, 'up-keep')
   if (u.isString(selector) && /[.[#]/.test(selector)) {
-    up.migrate.warn('The [up-keep] attribute no longer supports a selector value. Elements will be matched by their derived target. You may prevent keeping with [up-on-keep="if(condition) event.preventDefault()"]. ')
+    up.migrate.warn('The [up-keep] attribute no longer supports a selector value (found in %o). Elements will be matched by their derived target. You may prevent keeping with [up-on-keep="if(condition) event.preventDefault()"].', element)
     // The best we can do here is prevent matching of the old and new element if the new element
     // does not match the selector.
     element.addEventListener('up:fragment:keep', function(event) {

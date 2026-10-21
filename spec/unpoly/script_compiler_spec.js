@@ -208,6 +208,13 @@ extendDescribe('up.script', function() {
             expect($baz.attr('up-keep')).toBeMissing()
             expect($bam.attr('up-keep')).toEqual('.partner')
           })
+
+          it('names the compiler in the warning', function() {
+            const warnSpy = up.migrate.warn.mock()
+            up.compiler('.foo', { keep: true }, function() {})
+            helloFixture('.foo')
+            expect(u.sprintf(...warnSpy.calls.argsFor(0))).toContain('found in compiler for ".foo"')
+          })
         })
       }
 

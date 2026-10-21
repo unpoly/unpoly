@@ -6,6 +6,6 @@ This feature is now deprecated.
 @internal
 */
 up.macro('[up-tooltip]', function(opener) {
-  up.migrate.warn('[up-tooltip] has been deprecated. Unpoly set a [title] attribute instead.')
+  up.migrate.warn('Attribute [up-tooltip] has been deprecated. Use a [title] attribute instead (found in %o).', opener)
   up.element.setMissingAttr(opener, 'title', opener.getAttribute('up-tooltip'))
 })

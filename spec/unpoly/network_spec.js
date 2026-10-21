@@ -332,6 +332,18 @@ describe('up.network', function() {
         })
       })
 
+      describe('up.Request#preload and up.Request#badResponseTime', function() {
+        it('are renamed to up.Request#background and up.Request#lateDelay (deprecated)', function() {
+          const warnSpy = up.migrate.warn.mock()
+          const request = new up.Request({ url: '/path', background: true, lateDelay: 123 })
+
+          expect(request.preload).toBe(true)
+          expect(request.badResponseTime).toBe(123)
+          expect(warnSpy).toHaveBeenCalledWith('Property up.Request#preload has been renamed to up.Request#background')
+          expect(warnSpy).toHaveBeenCalledWith('Property up.Request#badResponseTime has been renamed to up.Request#lateDelay')
+        })
+      })
+
       describe('up.network.config.requestMetaKeys', function() {
         it('is an array that the app may still push into, with a warning (deprecated)', function() {
           const warnSpy = up.migrate.warn.mock()

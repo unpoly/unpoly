@@ -49,6 +49,25 @@ if (up.migrate.loaded) {
           expect(link).toHaveAttribute('up-layer', 'new modal')
           expect(link).toHaveAttribute('up-target', '.target')
         })
+
+        it('prints a deprecation warning that names the link', function() {
+          const warnSpy = up.migrate.warn.mock()
+          const link = fixture('a[href="/path"][up-modal]')
+          up.hello(link)
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Attribute [%s] has been deprecated'), 'up-modal', '[up-layer="new modal"]', link)
+        })
+      })
+
+      describe('[up-drawer]', function() {
+        it('is converted to [up-layer="new drawer"][up-target=...]', function() {
+          const warnSpy = up.migrate.warn.mock()
+          const link = fixture('a[href="/path"][up-drawer=".target"]')
+          up.hello(link)
+          expect(link).not.toHaveAttribute('up-drawer')
+          expect(link).toHaveAttribute('up-layer', 'new drawer')
+          expect(link).toHaveAttribute('up-target', '.target')
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'up-drawer', '[up-layer="new drawer"]', link)
+        })
       })
     })
   })

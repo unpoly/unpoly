@@ -172,7 +172,7 @@ the given selector in a modal overlay.
 @deprecated
   Use `[up-layer="new modal"]` instead.
 */
-up.migrate.targetMacro('up-modal', { 'up-layer': 'new modal' }, () => up.migrate.deprecated('[up-modal]', '[up-layer="new modal"]'))
+up.migrate.targetMacro('up-modal', { 'up-layer': 'new modal' }, '[up-layer="new modal"]')
 
 /*-
 Clicking this link will load the destination and open
@@ -186,4 +186,4 @@ the given selector in a drawer overlay that slides in from the edge of the scree
 @deprecated
   Use `[up-layer="new drawer"]` instead.
 */
-up.migrate.targetMacro('up-drawer', { 'up-layer': 'new drawer' }, () => up.migrate.deprecated('[up-drawer]', '[up-layer="new drawer"]'))
+up.migrate.targetMacro('up-drawer', { 'up-layer': 'new drawer' }, '[up-layer="new drawer"]')

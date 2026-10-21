@@ -129,4 +129,4 @@ the given selector in a popup overlay.
 @deprecated
   Use `[up-layer="new popup"]` instead.
 */
-up.migrate.targetMacro('up-popup', { 'up-layer': 'new popup' }, () => up.migrate.deprecated('[up-popup]', '[up-layer="new popup"]'))
+up.migrate.targetMacro('up-popup', { 'up-layer': 'new popup' }, '[up-layer="new popup"]')

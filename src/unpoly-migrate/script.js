@@ -12,7 +12,7 @@ up.migrate.postCompile = function(elements, compiler) {
   // set [up-keep] on the elements it compiles
   let keepValue
   if (keepValue = compiler.keep) {
-    up.migrate.warn('The { keep: true } option for up.compiler() has been removed. Have the compiler set [up-keep] attribute instead.')
+    up.migrate.warn('The { keep } option for up.compiler() has been removed. Have the compiler set an [up-keep] attribute instead (found in compiler for "%s").', compiler.selector)
     const value = u.isString(keepValue) ? keepValue : ''
     for (let element of elements) {
       element.setAttribute('up-keep', value)
@@ -20,8 +20,9 @@ up.migrate.postCompile = function(elements, compiler) {
   }
 }
 
-up.migrate.targetMacro = function(queryAttr, fixedResultAttrs, callback) {
+up.migrate.targetMacro = function(queryAttr, fixedResultAttrs, replacement) {
   up.macro(`[${queryAttr}]`, function(link) {
+    up.migrate.warn('Attribute [%s] has been deprecated. Use %s instead (found in %o).', queryAttr, replacement, link)
     let optionalTarget
     const resultAttrs = u.copy(fixedResultAttrs)
     if ((optionalTarget = link.getAttribute(queryAttr))) {
@@ -31,7 +32,6 @@ up.migrate.targetMacro = function(queryAttr, fixedResultAttrs, callback) {
     }
     e.setMissingAttrs(link, resultAttrs)
     link.removeAttribute(queryAttr)
-    callback?.()
   })
 }
 

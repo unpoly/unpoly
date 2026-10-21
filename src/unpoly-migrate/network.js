@@ -203,7 +203,7 @@ Whether this request is [preloading](/learn/preloading) content.
 @deprecated
   Use `up.Request#background` instead.
 */
-up.migrate.renamedProperty(up.Request.prototype, 'preload', 'background')
+up.migrate.renamedProperty(up.Request.prototype, 'preload', 'background', { warning: 'Property up.Request#preload has been renamed to up.Request#background' })
 
 /*-
 The number of milliseconds after which this request can cause
@@ -216,7 +216,7 @@ Defaults to `up.network.config.lateDelay`.
 @deprecated
   Use `up.Request#lateDelay` instead.
 */
-up.migrate.renamedProperty(up.Request.prototype, 'badResponseTime', 'lateDelay')
+up.migrate.renamedProperty(up.Request.prototype, 'badResponseTime', 'lateDelay', { warning: 'Property up.Request#badResponseTime has been renamed to up.Request#lateDelay' })
 
 /*-
 @class up.Response

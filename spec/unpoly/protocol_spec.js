@@ -54,4 +54,44 @@ describe('up.protocol', function() {
     })
   })
 
+  if (up.migrate.loaded) {
+    describe('X-Up-Title response header', function() {
+      it('accepts a string that is not JSON-encoded, with a warning that names the value (deprecated)', async function() {
+        const warnSpy = up.migrate.warn.mock()
+        const request = up.request('/path')
+        await wait()
+
+        jasmine.respondWith({ responseText: 'text', responseHeaders: { 'X-Up-Title': 'Bare title' } })
+        const response = await request
+
+        expect(response.title).toBe('Bare title')
+        expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('X-Up-Title must now be a JSON-encoded string (got "Bare title")')
+      })
+    })
+
+    describe('X-Up-Clear-Cache response header', function() {
+      it('is used as X-Up-Expire-Cache (deprecated)', async function() {
+        const warnSpy = up.migrate.warn.mock()
+        const request = up.request('/path')
+        await wait()
+
+        jasmine.respondWith({ responseText: 'text', responseHeaders: { 'X-Up-Clear-Cache': '/foo/*' } })
+        const response = await request
+
+        expect(response.expireCache).toBe('/foo/*')
+        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('X-Up-Clear-Cache has been deprecated'))
+      })
+    })
+
+    describe('up.protocol.config.cspNonce', function() {
+      it('delegates to up.script.config.cspNonce (deprecated)', function() {
+        const warnSpy = up.migrate.warn.mock()
+        up.protocol.config.cspNonce = 'nonce-123'
+        expect(up.script.config.cspNonce).toBe('nonce-123')
+        expect(up.protocol.config.cspNonce).toBe('nonce-123')
+        expect(warnSpy).toHaveBeenCalled()
+      })
+    })
+  }
+
 })

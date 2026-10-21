@@ -17,20 +17,20 @@ up.migrate.renamedAttribute('up-bad-response-time', 'up-late-delay')
 up.migrate.transformAttribute('up-solo', function(link, solo) {
   switch (solo) {
     case '':
-      up.migrate.warn('Attribute [up-solo] has been replaced with [up-abort="all"]')
+      up.migrate.warn('Attribute [up-solo] has been replaced with [up-abort="all"] (found in %o)', link)
       link.setAttribute('up-abort', 'all')
       break
     case 'true':
-      up.migrate.warn('Attribute [up-solo="true"] has been replaced with [up-abort="all"]')
+      up.migrate.warn('Attribute [up-solo="true"] has been replaced with [up-abort="all"] (found in %o)', link)
       link.setAttribute('up-abort', 'all')
       break
     case 'false':
-      up.migrate.warn('Attribute [up-solo="false"] has been replaced with [up-abort="false"]')
+      up.migrate.warn('Attribute [up-solo="false"] has been replaced with [up-abort="false"] (found in %o)', link)
       up.migrate.warn('Unpoly 3+ only aborts requests targeting the same fragment. Setting [up-solo="false"] may no longer be necessary.')
       link.setAttribute('up-abort', 'false')
       break
     default:
-      up.migrate.warn('Attribute [up-solo] has been renamed to [up-abort] and [up-abort] no longer accepts a URL pattern. Check if you can use [up-abort="target"] instead.')
+      up.migrate.warn('Attribute [up-solo] has been renamed to [up-abort] and [up-abort] no longer accepts a URL pattern (found in %o). Check if you can use [up-abort="target"] instead.', link)
       link.setAttribute('up-abort', 'target')
   }
 })
@@ -38,19 +38,19 @@ up.migrate.transformAttribute('up-solo', function(link, solo) {
 up.migrate.transformAttribute('up-reveal', function(link, reveal) {
   switch (reveal) {
     case '':
-      up.migrate.warn('Attribute [up-reveal] has been replaced with [up-scroll="target"]')
+      up.migrate.warn('Attribute [up-reveal] has been replaced with [up-scroll="target"] (found in %o)', link)
       link.setAttribute('up-scroll', 'target')
       break
     case 'true':
-      up.migrate.warn('Attribute [up-reveal="true"] has been replaced with [up-scroll="target"]')
+      up.migrate.warn('Attribute [up-reveal="true"] has been replaced with [up-scroll="target"] (found in %o)', link)
       link.setAttribute('up-scroll', 'target')
       break
     case 'false':
-      up.migrate.warn('Attribute [up-reveal="false"] has been replaced with [up-scroll="false"]')
+      up.migrate.warn('Attribute [up-reveal="false"] has been replaced with [up-scroll="false"] (found in %o)', link)
       link.setAttribute('up-scroll', 'false')
       break
     default:
-      up.migrate.warn('Attribute [up-reveal="%s"] has been replaced with [up-scroll="%s"]', reveal, reveal)
+      up.migrate.warn('Attribute [up-reveal="%s"] has been replaced with [up-scroll="%s"] (found in %o)', reveal, reveal, link)
       link.setAttribute('up-scroll', reveal)
   }
 })
@@ -58,15 +58,15 @@ up.migrate.transformAttribute('up-reveal', function(link, reveal) {
 up.migrate.transformAttribute('up-reset-scroll', function(link, resetScroll) {
   switch (resetScroll) {
     case '':
-      up.migrate.warn('Attribute [up-reset-scroll] has been replaced with [up-scroll="top"]')
+      up.migrate.warn('Attribute [up-reset-scroll] has been replaced with [up-scroll="top"] (found in %o)', link)
       link.setAttribute('up-scroll', 'top')
       break
     case 'true':
-      up.migrate.warn('Attribute [up-reset-scroll="true"] has been replaced with [up-scroll="top"]')
+      up.migrate.warn('Attribute [up-reset-scroll="true"] has been replaced with [up-scroll="top"] (found in %o)', link)
       link.setAttribute('up-scroll', 'top')
       break
     case 'false':
-      up.migrate.warn('Attribute [up-reset-scroll="false"] has been replaced with [up-scroll="false"]')
+      up.migrate.warn('Attribute [up-reset-scroll="false"] has been replaced with [up-scroll="false"] (found in %o)', link)
       link.setAttribute('up-scroll', 'false')
       break
   }
@@ -75,15 +75,15 @@ up.migrate.transformAttribute('up-reset-scroll', function(link, resetScroll) {
 up.migrate.transformAttribute('up-restore-scroll', function(link, restoreScroll) {
   switch (restoreScroll) {
     case '':
-      up.migrate.warn('Attribute [up-restore-scroll] has been replaced with [up-scroll="restore"]')
+      up.migrate.warn('Attribute [up-restore-scroll] has been replaced with [up-scroll="restore"] (found in %o)', link)
       link.setAttribute('up-scroll', 'restore')
       break
     case 'true':
-      up.migrate.warn('Attribute [up-restore-scroll="true"] has been replaced with [up-scroll="restore"]')
+      up.migrate.warn('Attribute [up-restore-scroll="true"] has been replaced with [up-scroll="restore"] (found in %o)', link)
       link.setAttribute('up-scroll', 'restore')
       break
     case 'false':
-      up.migrate.warn('Attribute [up-restore-scroll="false"] has been replaced with [up-scroll="false"]')
+      up.migrate.warn('Attribute [up-restore-scroll="false"] has been replaced with [up-scroll="false"] (found in %o)', link)
       link.setAttribute('up-scroll', 'false')
       break
   }
@@ -116,7 +116,7 @@ This is shorthand for:
 @deprecated
   To accelerate all links use `up.link.config.instantSelectors` and `up.link.config.preloadSelectors`.
 */
-up.migrate.targetMacro('up-dash', { 'up-preload': '', 'up-instant': '' }, () => up.migrate.deprecated('[up-dash]', 'up.link.config.instantSelectors and up.link.config.preloadSelectors'))
+up.migrate.targetMacro('up-dash', { 'up-preload': '', 'up-instant': '' }, 'up.link.config.instantSelectors and up.link.config.preloadSelectors')
 
 up.migrate.renamedAttribute('up-delay', 'up-preload-delay', { scope: preloadSelectorFn })
 

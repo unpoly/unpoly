@@ -1496,6 +1496,32 @@ describe('up.link', function() {
         })
       })
 
+      describe('legacy [up-solo], [up-reset-scroll] and [up-restore-scroll] attributes', function() {
+        const cases = [
+          ['up-solo', '', 'up-abort', 'all'],
+          ['up-solo', 'true', 'up-abort', 'all'],
+          ['up-solo', 'false', 'up-abort', 'false'],
+          ['up-solo', '/pattern/*', 'up-abort', 'target'],
+          ['up-reset-scroll', '', 'up-scroll', 'top'],
+          ['up-reset-scroll', 'true', 'up-scroll', 'top'],
+          ['up-reset-scroll', 'false', 'up-scroll', 'false'],
+          ['up-restore-scroll', '', 'up-scroll', 'restore'],
+          ['up-restore-scroll', 'true', 'up-scroll', 'restore'],
+          ['up-restore-scroll', 'false', 'up-scroll', 'false'],
+        ]
+
+        for (let [oldAttr, oldValue, newAttr, newValue] of cases) {
+          it(`replaces [${oldAttr}="${oldValue}"] with [${newAttr}="${newValue}"] and names the link in the warning`, function() {
+            const warnSpy = up.migrate.warn.mock()
+            const link = fixture('a[href="/path"][up-follow]', { [oldAttr]: oldValue })
+            up.hello(link)
+
+            expect(link).toHaveAttribute(newAttr, newValue)
+            expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('(found in %o)'), link)
+          })
+        }
+      })
+
       describe('legacy [up-reveal] attribute', function() {
 
         it('is replaced with [up-scroll="target"] for an empty value', function() {

@@ -678,6 +678,13 @@ extendDescribe('up.fragment', function() {
       })
 
       if (up.migrate.loaded) {
+        it('prints a deprecation warning that names the element with a selector value in [up-keep]', function() {
+          const warnSpy = up.migrate.warn.mock()
+          const element = fixture('audio#player', { 'up-keep': '.player' })
+          up.hello(element)
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('no longer supports a selector value'), element)
+        })
+
         it('lets developers choose a selector to match against as the value of the [up-keep] attribute', function() {
           const container = fixture('.container')
 
