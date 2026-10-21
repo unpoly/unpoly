@@ -1978,7 +1978,7 @@ up.util = (function() {
   //   return undo
   // }
 
-  function stringifyArg(arg, placeholder = '%o') {
+  function stringifyArg(arg, placeholder = '%o', ancestors = new Set()) {
     let string
     const maxLength = 200
 
@@ -1993,6 +1993,9 @@ up.util = (function() {
       arg = arg.toString()
     }
 
+    // Values nested in an array or object print like a value passed directly with %o.
+    let stringifyNested = (value) => stringifyArg(value, '%o', ancestors)
+
     if (isString(arg)) {
       string = arg.trim().replace(/[\n\r\t ]+/g, ' ')
 
@@ -2006,24 +2009,39 @@ up.util = (function() {
       string = 'undefined'
     } else if (isNumber(arg) || isFunction(arg)) {
       string = arg.toString()
-    } else if (isArray(arg)) {
-      string = `[${map(arg, stringifyArg).join(', ')}]`
     } else if (isJQuery(arg)) {
-      string = `$(${map(arg, stringifyArg).join(', ')})`
+      string = `$(${map(arg, stringifyNested).join(', ')})`
     } else if (isElement(arg)) {
       string = tagOuterHTML(arg)
-    } else if (isRegExp(arg) || isError(arg)) {
-      string = arg.toString()
-    } else { // object, null
-      try {
-        string = JSON.stringify(arg)
-      } catch (error) {
-        if (error.name === 'TypeError') {
-          string = '(circular structure)'
+    } else if (isError(arg)) {
+      string = `${arg.name}(${arg.message})`
+    } else if (isObject(arg)) {
+      // Arrays and objects. Functions, elements and errors are objects, too, but are handled above.
+      // Our own classes declare a [Symbol.toStringTag] because minifiers may drop their class names.
+      let label = arg[Symbol.toStringTag] || arg.constructor?.name
+
+      if (ancestors.has(arg)) {
+        string = '(circular)'
+      } else if (isArray(arg) || isOptions(arg)) {
+        // Track the arrays and objects we're currently printing, so a cycle doesn't recurse infinitely.
+        // An object that appears twice without a cycle is printed in full both times.
+        ancestors.add(arg)
+        if (isArray(arg)) {
+          string = `[${map(arg, stringifyNested).join(', ')}]`
         } else {
-          throw error
+          let pairs = Object.entries(arg).map(([key, value]) => `${key}: ${stringifyNested(value)}`)
+          string = pairs.length ? `{ ${pairs.join(', ')} }` : '{}'
         }
+        ancestors.delete(arg)
+      } else if (arg.toString !== Object.prototype.toString) {
+        // A class instance with its own readable name, like an up.Request or a Date.
+        string = `${label}(${arg.toString()})`
+      } else {
+        string = `${label} {…}`
       }
+    } else {
+      // null, booleans
+      string = String(arg)
     }
 
     if (string.length > maxLength) {

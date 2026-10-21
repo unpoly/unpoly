@@ -72,6 +72,8 @@ up.Layer.Root = class Root extends up.Layer {
     up.fail('Cannot close the root layer')
   }
 
+  get [Symbol.toStringTag]() { return 'up.Layer.Root' }
+
   toString() {
     return "root layer"
   }

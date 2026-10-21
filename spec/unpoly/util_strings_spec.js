@@ -89,7 +89,20 @@ extendDescribe('up.util', function() {
       describe('with array argument', function() {
         it('recursively serializes the elements', function() {
           const formatted = up.util.sprintf('before %o after', [1, "foo"])
-          expect(formatted).toEqual('before [1, foo] after')
+          expect(formatted).toEqual('before [1, "foo"] after')
+        })
+
+        it('serializes nested elements like a direct element', function() {
+          const element = e.createFromHTML('<span class="foo">text</span>')
+          const formatted = up.util.sprintf('before %o after', [element])
+          expect(formatted).toEqual('before [<span class="foo">] after')
+        })
+
+        it('marks an array that contains itself', function() {
+          const array = [1]
+          array.push(array)
+          const formatted = up.util.sprintf('before %o after', array)
+          expect(formatted).toEqual('before [1, (circular)] after')
         })
       })
 
@@ -115,20 +128,46 @@ extendDescribe('up.util', function() {
 
       describe('with object argument', function() {
 
-        it('serializes to JSON', function() {
+        it('serializes keys and values', function() {
           const object = { foo: 'foo-value', bar: 'bar-value' }
           const formatted = up.util.sprintf('before %o after', object)
-          expect(formatted).toEqual('before {"foo":"foo-value","bar":"bar-value"} after')
+          expect(formatted).toEqual('before { foo: "foo-value", bar: "bar-value" } after')
         })
 
-        it('serializes to a fallback string if the given structure has circular references', function() {
+        it('serializes an empty object', function() {
+          const formatted = up.util.sprintf('before %o after', {})
+          expect(formatted).toEqual('before {} after')
+        })
+
+        it('serializes an object without prototype', function() {
+          const object = Object.create(null)
+          object.foo = 'foo-value'
+          const formatted = up.util.sprintf('before %o after', object)
+          expect(formatted).toEqual('before { foo: "foo-value" } after')
+        })
+
+        it('serializes nested values like direct values', function() {
+          const element = e.createFromHTML('<span class="foo">text</span>')
+          const object = { element, string: 'text', number: 5, null: null, array: [true] }
+          const formatted = up.util.sprintf('before %o after', object)
+          expect(formatted).toEqual('before { element: <span class="foo">, string: "text", number: 5, null: null, array: [true] } after')
+        })
+
+        it('marks a circular reference', function() {
           const object = { foo: {} }
           object.foo.bar = object
           const formatted = up.util.sprintf('before %o after', object)
-          expect(formatted).toEqual('before (circular structure) after')
+          expect(formatted).toEqual('before { foo: { bar: (circular) } } after')
         })
 
-        it("skips a key if a getter crashes", function() {
+        it('serializes an object in full every time it appears, as long as there is no cycle', function() {
+          const shared = { baz: 'baz-value' }
+          const object = { foo: shared, bar: [shared] }
+          const formatted = up.util.sprintf('before %o after', object)
+          expect(formatted).toEqual('before { foo: { baz: "baz-value" }, bar: [{ baz: "baz-value" }] } after')
+        })
+
+        it('skips a non-enumerable key with a getter that crashes', function() {
           const object = {}
           Object.defineProperty(object, 'foo', { get() { throw "error" } })
           let formatted = up.util.sprintf('before %o after', object)
@@ -136,15 +175,76 @@ extendDescribe('up.util', function() {
 
           object.bar = 'bar'
           formatted = up.util.sprintf('before %o after', object)
-          expect(formatted).toEqual('before {"bar":"bar"} after')
+          expect(formatted).toEqual('before { bar: "bar" } after')
+        })
+      })
+
+      describe('with class instance argument', function() {
+
+        it("serializes an up.Request with its class and readable name", function() {
+          const request = new up.Request({ url: '/users/5' })
+          const formatted = up.util.sprintf('before %o after', request)
+          expect(formatted).toEqual('before up.Request(GET /users/5) after')
+        })
+
+        it("serializes an up.Request with %s as its readable name", function() {
+          const request = new up.Request({ url: '/users/5' })
+          const formatted = up.util.sprintf('before %s after', request)
+          expect(formatted).toEqual('before GET /users/5 after')
+        })
+
+        it("serializes a layer with its class and readable name", async function() {
+          await up.layer.open({ mode: 'modal' })
+          const formatted = up.util.sprintf('before %o, %o after', up.layer.root, up.layer.current)
+          expect(formatted).toEqual('before up.Layer.Root(root layer), up.Layer.Modal(modal overlay) after')
+        })
+
+        it("serializes an up.Params with its query", function() {
+          const params = new up.Params({ foo: 'bar' })
+          const formatted = up.util.sprintf('before %o after', params)
+          expect(formatted).toEqual('before up.Params(foo=bar) after')
+        })
+
+        it("serializes a built-in class with its constructor name and string representation", function() {
+          const date = new Date(2026, 9, 21)
+          const formatted = up.util.sprintf('before %o, %o after', date, /^up-/i)
+          expect(formatted).toEqual(`before Date(${date.toString()}), RegExp(/^up-/i) after`)
+        })
+
+        it("serializes an instance without its own toString() with only its class name", function() {
+          class Foo {
+            constructor() { this.foo = 'foo' }
+          }
+          const formatted = up.util.sprintf('before %o after', new Foo())
+          expect(formatted).toEqual('before Foo {…} after')
+        })
+
+        it("prefers the instance's [Symbol.toStringTag] over its constructor name", function() {
+          class Foo {
+            get [Symbol.toStringTag]() { return 'my.Foo' }
+          }
+          const formatted = up.util.sprintf('before %o after', new Foo())
+          expect(formatted).toEqual('before my.Foo {…} after')
         })
       })
 
       describe('with Error argument', function() {
-        it("serializes the error's class and message", function() {
+        it("serializes the error's name and message", function() {
           const error = new up.CannotTarget("Error message")
           const formatted = up.util.sprintf('before %o after', error)
-          expect(formatted).toBe('before up.CannotTarget: Error message after')
+          expect(formatted).toBe('before up.CannotTarget(Error message) after')
+        })
+
+        it('serializes an up.Aborted error as an AbortError', function() {
+          const error = new up.Aborted("Error message")
+          const formatted = up.util.sprintf('before %o after', error)
+          expect(formatted).toBe('before AbortError(Error message) after')
+        })
+
+        it('serializes a native error', function() {
+          const error = new TypeError("Error message")
+          const formatted = up.util.sprintf('before %o after', error)
+          expect(formatted).toBe('before TypeError(Error message) after')
         })
       })
 
