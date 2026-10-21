@@ -1588,6 +1588,18 @@ describe('up.link', function() {
           expect(jasmine.lastRequest().url).toMatchURL('/path1')
         })
 
+        it('does not warn about an [up-back] link that is already followable through another attribute', function() {
+          up.history.config.enabled = true
+          up.history.push('/path1')
+          up.history.push('/path2')
+          const warnSpy = spyOn(up.migrate, 'warn')
+          const [link] = htmlFixtureList('<a href="/path3" up-back up-target="#target">back</a>')
+          up.hello(link)
+
+          expect(warnSpy).not.toHaveBeenCalled()
+          expect(link).toBeFollowable()
+        })
+
         it('does not warn about an element that the app passes to up.link.makeFollowable()', function() {
           const warnSpy = spyOn(up.migrate, 'warn')
           const element = fixture('span[up-href="/path"]')

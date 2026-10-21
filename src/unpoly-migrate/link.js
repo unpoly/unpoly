@@ -161,10 +161,10 @@ const LEGACY_UP_HREF_FOLLOW_SELECTOR = '[up-href]:not([up-follow], [up-poll], [u
 // We set [up-follow] instead of adding our selector to up.link.config, so core and unpoly-migrate
 // agree which elements are followable.
 //
-// The priority runs this macro after [up-back] (-100), which builds an [up-href] link and makes it followable,
-// so we don't warn about a link that the app never wrote. It also runs before [up-clickable] (-200),
-// which needs to see the [up-follow] attribute.
-up.macro(LEGACY_UP_HREF_FOLLOW_SELECTOR, { priority: -150 }, function(element) {
+// The priority runs this macro before [up-back] (-100). That macro sets an [up-href] that the app never wrote,
+// and only adds [up-follow] when the link isn't already followable, e.g. through [up-target].
+// We also run before [up-clickable] (-200), which needs to see the [up-follow] attribute.
+up.macro(LEGACY_UP_HREF_FOLLOW_SELECTOR, { priority: -50 }, function(element) {
   up.migrate.warn('Following links with only [up-href] has been deprecated. You must now also set an [up-follow] on the same link (found in %o).', element)
   element.setAttribute('up-follow', '')
 })
