@@ -225,7 +225,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - The npm package now also includes source maps for the unminified files, like `unpoly.js.map`.
 - `up.template.clone()` with an `{ origin }` now also finds a template in an ancestor layer, as described in [template lookup](/learn/templates#lookup). It used to only look in the origin's layer.
 - Fix: When an app's bundler minified `unpoly.js`, errors could lose their names. For example, an `up.CannotMatch` error was named `up.`. Errors now keep their names under any minifier.
-- Error and log messages now print objects more readably. A plain object prints as `{ foo: "bar" }`, a request as `up.Request(GET /users/5)` and an error as `up.CannotMatch(message)`. A circular reference prints `(circular)` where the cycle closes, instead of replacing the whole value.
+- Error messages, warnings and [unformatted log output](/api/up.log.config#config.format) now print objects more readably. A plain object prints as `{ foo: "bar" }`, a request as `up.Request(GET /users/5)` and an error as `up.CannotMatch(message)`. A circular reference prints `(circular)` where the cycle closes, instead of replacing the whole value.
 - Fix: `up.viewport.restoreFocus()` threw an error when called without a `{ layer }` option, or with a layer name like `{ layer: 'root' }`.
 - Fix: `up.viewport.restoreScroll()` ignored its `{ location }` option. It always restored the positions saved for the layer's current location.
 - Fix: `up.fragment.matches()` with `{ layer: 'new', mode }` options expanded a selector like `:main` for the root layer, or threw an error while an overlay was open.
