@@ -149,11 +149,12 @@ up.link = (function() {
   }))
 
   function isPreloadDisabled(link) {
-    // (1) Don't preload when we cannot change history. Following such a link will make a full page load ignoring our cache.
+    // (1) Don't preload when we cannot change the browser URL. Following such a link will make a full page load ignoring our cache.
+    //     When up.history.config.enabled excludes 'location', we never change the browser URL, so we can preload.
     // (2) Don't preload when the link isn't going to be handled by Unpoly.
     // (3) Don't preload when we're not going to cache the content according to up.network.config.autoCache.
     //     By default this only caches safe links.
-    return !up.browser.canPushState() || !isFollowable(link) || !willCache(link)
+    return (!up.browser.canPushState() && up.history.isEnabled('location')) || !isFollowable(link) || !willCache(link)
   }
 
   function willCache(link) {

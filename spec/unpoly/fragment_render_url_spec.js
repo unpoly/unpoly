@@ -2164,6 +2164,10 @@ extendDescribe('up.fragment', function() {
 
         describeFallback('canPushState', function() {
 
+          beforeEach(function() {
+            up.history.config.enabled = true
+          })
+
           describe('when options.history is truthy', function() {
 
             it('loads the content in a new page', async function() {

@@ -1421,6 +1421,58 @@ extendDescribe('up.fragment', function() {
 
         })
 
+        describe('when the initial page was loaded with a POST request', function() {
+
+          beforeEach(function() {
+            spyOn(up.protocol, 'initialRequestMethod').and.returnValue('POST')
+            htmlFixtureList('<div id="container">old container text</div>')
+          })
+
+          it('loads the content in a new page', async function() {
+            const loadPage = spyOn(up.network, 'loadPage')
+
+            up.render('#container', { url: '/path', history: true })
+            await wait()
+
+            expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining({ url: '/path' }))
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+          })
+
+          it("renders in the current page when up.history.config.enabled excludes the 'location' aspect", async function() {
+            up.history.config.enabled = ['lang']
+            const loadPage = spyOn(up.network, 'loadPage')
+
+            up.render('#container', { url: '/path', history: true })
+            await wait()
+
+            expect(loadPage).not.toHaveBeenCalled()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            jasmine.respondWith('<html lang="fr"><body><div id="container">new container text</div></body></html>')
+            await wait()
+
+            expect('#container').toHaveText('new container text')
+            expect(document.documentElement).toHaveAttribute('lang', 'fr')
+          })
+
+          it('renders in the current page with up.history.config.enabled = false', async function() {
+            up.history.config.enabled = false
+            const loadPage = spyOn(up.network, 'loadPage')
+
+            up.render('#container', { url: '/path', history: true })
+            await wait()
+
+            expect(loadPage).not.toHaveBeenCalled()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            jasmine.respondWithSelector('#container', { text: 'new container text' })
+            await wait()
+
+            expect('#container').toHaveText('new container text')
+          })
+
+        })
+
         describe('html[lang]', function() {
 
           it('updates the html[lang] attribute with the language from the response', async function() {

@@ -717,6 +717,7 @@ extendDescribe('up.link', function() {
 
         describeFallback('canPushState', function() {
           it('does not preload a link', async function() {
+            up.history.config.enabled = true
             fixture('.target')
             const link = helloFixture('a[href="/path"][up-target=".target"][up-preload]')
 
@@ -726,6 +727,48 @@ extendDescribe('up.link', function() {
 
             expect(jasmine.Ajax.requests.count()).toBe(0)
           })
+        })
+
+        describe('when the initial page was loaded with a POST request', function() {
+
+          beforeEach(function() {
+            spyOn(up.protocol, 'initialRequestMethod').and.returnValue('POST')
+            up.link.config.preloadDelay = 0
+          })
+
+          it('does not preload a link', async function() {
+            up.history.config.enabled = true
+            const [link] = htmlFixtureList('<a href="/path" up-target=".target" up-preload>label</a>')
+            up.hello(link)
+
+            Trigger.hoverSequence(link)
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+          })
+
+          it("preloads a link when up.history.config.enabled excludes the 'location' aspect", async function() {
+            up.history.config.enabled = ['lang']
+            const [link] = htmlFixtureList('<a href="/path" up-target=".target" up-preload>label</a>')
+            up.hello(link)
+
+            Trigger.hoverSequence(link)
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+          })
+
+          it('preloads a link with up.history.config.enabled = false', async function() {
+            up.history.config.enabled = false
+            const [link] = htmlFixtureList('<a href="/path" up-target=".target" up-preload>label</a>')
+            up.hello(link)
+
+            Trigger.hoverSequence(link)
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+          })
+
         })
       })
 

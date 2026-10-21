@@ -37,8 +37,8 @@ up.Change.FromURL = class FromURL extends up.Change {
     // Unpoly may have been booted without suppport for history.pushState.
     // E.g. when the initial page was loaded from a POST response.
     // In this case we make a full page load in hopes to reboot with
-    // pushState support.
-    if (this.options.history && !up.browser.canPushState()) {
+    // pushState support. We don't need to when we would not change the browser URL anyway.
+    if (this.options.history && !up.browser.canPushState() && up.history.isEnabled('location')) {
       return 'Loading content in new page to restore history support'
     }
   }

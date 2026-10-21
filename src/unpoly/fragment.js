@@ -3192,7 +3192,7 @@ up.fragment = (function() {
 
     documentElement.setAttribute('up-source', normalizeSource(location.href))
 
-    if (!up.browser.canPushState()) {
+    if (!up.browser.canPushState() && up.history.isEnabled('location')) {
       return up.warn('Cannot push history changes. Next render pass with history will load a full page.')
     }
   })
