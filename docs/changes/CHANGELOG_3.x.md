@@ -3,7 +3,7 @@
 
 A lot has changed for everyone who builds software since our last release. Many of us now write code together with AI agents.
 
-This release makes Unpoly work better for this new way of building software. A [completely rewritten documentation site](https://unpoly.com) helps humans and agents learn Unpoly best practices and look up API details. It is available as HTML, as Markdown and as an offline skill. A new contributor guide helps both contribute to the project. We believe that hypermedia-driven apps (HDAs) fit this new age well. They need less code and fewer dependencies, and have fewer moving parts.
+This release makes Unpoly work better for this new way of building software. A [completely rewritten documentation site](https://unpoly.com) helps humans and agents learn Unpoly best practices and look up API details. It is available as HTML, as Markdown and as an offline skill. A new contributor guide helps both humans and agents contribute to the project. We believe that hypermedia-driven apps (HDAs) fit this new age well. They need less code and fewer dependencies, and have fewer moving parts.
 That makes HDAs straightforward to understand and change, for humans and agents alike.
 
 We also made some changes to Unpoly itself. A major new feature is the ability to implement custom form fields as web components ("form-associated custom elements"). We fixed a ton of minor bugs and inconsistencies that had accumulated over Unpoly's 10+ years, and meaningfully improved our test coverage.
@@ -144,7 +144,8 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 - ⚠️ `up.Params.fromForm()` now includes the `[name]` and `[value]` of the form's first submit button, like a submission would. Pass `{ submitButton: false }` to only include fields, as before, or pass a different button element.
 - ⚠️ When a form with [`[up-accept]` or `[up-dismiss]`](/learn/closing-overlays#result-values) closes an overlay, the result value now also contains the `[name]` and `[value]` of the submit button the user pressed.
 - ⚠️ `up.form.config.submitButtonSelectors` may only match native submit buttons. A custom element or a `<button type="button">` matched as a submit button now makes submitting throw an error.
-- One exception: a form only reads controls from its own layer. See [Forms stay within their layer](#forms-stay-within-their-layer).
+
+There is one exception: unlike the browser, a form only reads controls from its own layer. See [Forms stay within their layer](#forms-stay-within-their-layer).
 
 
 ### Forms stay within their layer
@@ -160,7 +161,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 ### Forms
 
 - ⚠️ While a [validation](/learn/validation) request is loading, [feedback classes](/learn/feedback-classes) like `.up-loading` are now set by default, as for every other request. To turn them off, set `[up-watch-feedback="false"]` or pass `{ feedback: false }`.
-- A custom control only needs a `value` property to work as a [custom form field](/learn/custom-form-fields).
+- A custom control now only needs a `value` property to work as a [custom form field](/learn/custom-form-fields). It used to also need `name` and `disabled` properties. Unpoly now falls back to the `[name]` and `[disabled]` attributes.
 - A form-associated custom element is only submitted when it calls `setFormValue()`, even when it is listed in `up.form.config.fieldSelectors`.
 - A `formdata` listener changes what Unpoly sends, not what it watches. See [Adding values with a `formdata` listener](/learn/custom-form-fields#formdata).
 - New experimental config [`up.form.config.noFieldSelectors`](/api/up.form.config#config.noFieldSelectors) excludes elements from being treated as fields, e.g. a form-associated custom element that renders a button.
@@ -171,7 +172,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - ⚠️ A `[form]` attribute now takes precedence over a surrounding `<form>`, like in the browser. A field or button within one form that is associated with another form no longer belongs to the surrounding form. It is no longer watched, validated or [disabled](/api/up-submit#up-disable) with that form, and it is no longer that form's default submit button.
 - ⚠️ `up.submit()` and `up.Params.fromForm()` now throw an error when the `{ submitButton }` option is a button that doesn't belong to the form, as the browser's `FormData` does. Pass `{ submitButton: false }` to read a form without a button.
 - ⚠️ [`[up-switch]`](/learn/switching-form-state) now switches immediately, ignoring `up.form.config.watchInputDelay` and `[up-watch-delay]`. Switching effects are client-side and don't benefit from debouncing. In a form that also [autosubmits](/api/up-autosubmit) with a delay, switching now settles before the submission reads the form. If you set `[up-watch-delay]` on a switching field only to make it react faster, you can remove it. Keep it when the same field also validates or autosubmits.
-- Fix: When a form was submitted or validated again while a request had disabled its fields, e.g. with [`[up-disable]`](/api/up-submit#up-disable), the second request sent no params for the disabled fields. Fields and buttons that a [preview](/api/up.Preview.prototype.disable) disabled now still count as part of the form when Unpoly reads params or watches values. This happened since Unpoly 3.10.
+- Fix: When a form was submitted or validated again while a request had disabled its fields, e.g. with [`[up-disable]`](/api/up-submit#up-disable), the second request sent no params for the disabled fields. Fields and buttons that a [preview](/api/up.Preview.prototype.disable) disabled now still count as part of the form when Unpoly reads params or watches values.
 - ⚠️ Since Unpoly 3.12, submit buttons honor a `[data-confirm]` attribute, like links and forms do. It is an alias of [`[up-confirm]`](/api/up-submit#up-confirm), so Rails helpers like `link_to` or `button_to` work without changes. If your app handles `[data-confirm]` itself, users see two dialogs, and specs may fail with an `UnexpectedAlertOpenError`. Have your handler use another attribute instead. Unpoly only confirms for forms it submits, so buttons in an `[up-submit=false]` form or in a form that Unpoly doesn't handle still need your handler.
 - A nested [`[up-autosubmit]`](/api/up-autosubmit), e.g. on a field inside a form that already has `[up-autosubmit]`, is now ignored when it belongs to the same form. It used to submit the form a second time for the same change.
 - New experimental class [`.up-booted`](/api/up-booted) on the `<html>` element after Unpoly has booted. It lets CSS [hide switched elements until Unpoly has processed them](/learn/switching-form-state#before-booting).
@@ -181,7 +182,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 ### Overlays
 
 - New [`[up-on-accept]`](/api/up-layer-new#up-on-accept) and [`[up-on-dismiss]`](/api/up-layer-new#up-on-dismiss) attributes run code before an overlay closes, and can keep it open with `event.preventDefault()`. The matching [`{ onAccept }`](/api/up.layer.open#options.onAccept) and [`{ onDismiss }`](/api/up.layer.open#options.onDismiss) options are now documented.
-- When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent overlay, as described in [focus in overlays](/learn/focus#overlays). It used to fall back to the `<body>`.
+- When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent layer, as described in [focus in overlays](/learn/focus#overlays). It used to fall back to the `<body>`.
 - Fix: [`[up-focus-visible]`](/api/up-follow#up-focus-visible) and the `{ focusVisible }` option were ignored when opening an overlay.
 - Fix: The `{ duration }` and `{ easing }` options of `up.layer.open()` were ignored for the opening animation. This also affected `[up-duration]` and `[up-easing]` on a link that opens an overlay. Only `up.layer.config` was used.
 
@@ -202,11 +203,11 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - Fix: When an error was thrown after a render pass had started to change the page, Unpoly could render a [fallback target](/learn/targeting-fragments#providing-a-fallback-target) on top of the update. The render promise now rejects with that error.
 - ⚠️ When the server responds to [polling](/api/up-poll) or a [deferred](/api/up-defer) placeholder with an error code, Unpoly no longer throws an uncaught `up.CannotMatch` error. The response is not rendered: polling tries again after the next interval, and a deferred placeholder keeps its fallback content. A promise returned by `up.reload()` or `up.deferred.load()` still rejects, now with an `up.RenderResult`. To render error responses anyway, set [`[up-fail=false]`](/learn/error-responses) on the `[up-poll]` or `[up-defer]` element, or render them into another fragment with [`[up-fail-target]`](/api/up-defer#up-fail-target).
 - ⚠️ With [`up.history.config.enabled = false`](/api/up.history.config#config.enabled), a render pass no longer changes the window title, meta tags or `html[lang]`. Before, only the browser URL stayed unchanged, so the page could show the title of one page with the URL of another. To still update some aspects, set `up.history.config.enabled` to an array of the [history aspects](/learn/updating-history#disabling) Unpoly may update: `'location'`, `'title'`, `'metaTags'` or `'lang'`. For example, `up.history.config.enabled = ['lang']` never changes the browser URL, but still updates `html[lang]`. When an aspect is turned off, layers report their rendered value for it, so [`[up-nav]`](/learn/navigation-bars) follows the content. Closing an overlay no longer restores a turned-off aspect, and `up.history.push()` and `up.history.replace()` do nothing without `'location'`. When the initial page was loaded with a `POST` request and `'location'` is turned off, Unpoly no longer falls back to full page loads, no longer disables preloading, and no longer warns at boot.
-- 🧩 `up.history.config.updateMetaTags` is deprecated. To keep meta tags unchanged, omit `'metaTags'` from an array of aspects in [`up.history.config.enabled`](/api/up.history.config#config.enabled). `unpoly-migrate.js` polyfills the old setting. It also no longer warns when `up.history.config.updateMetaTags` is not set.
+- 🧩 `up.history.config.updateMetaTags` is deprecated. To keep meta tags unchanged, omit `'metaTags'` from an array of aspects in [`up.history.config.enabled`](/api/up.history.config#config.enabled). `unpoly-migrate.js` polyfills the old setting. It also no longer warns at boot when you haven't set `up.history.config.updateMetaTags`.
 - Fix: An explicit list of elements passed as [`{ metaTags }`](/api/up.render#options.metaTags) was replaced by the meta tags from the response.
 - Fix: [`[up-scroll-behavior]`](/api/up-follow#up-scroll-behavior) and the `{ scrollBehavior }` option were ignored when scrolling to the `top` or `bottom`, to a pixel position, to a `#hash` or when restoring a scroll position. Only revealing an element honored them.
 - Fix: A [combined transition](/learn/transitions#combining-animations) like `move-to-bottom/none` swapped the elements instantly. When one half is `none`, the other half is now animated.
-- Fix: With [animations disabled](/api/up.motion.config#config.enabled), animations and transitions no longer wait for the next animation frame before they finish. This happened since Unpoly 3.14.
+- Fix: With [animations disabled](/api/up.motion.config#config.enabled), animations and transitions no longer wait for the next animation frame before they finish. This bug was introduced in Unpoly 3.14.
 
 
 ### Links and URLs
@@ -214,12 +215,12 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - Pressing the Space key now activates a [faux button](/learn/faux-interactive-elements), e.g. an element with [`[up-emit]`](/api/up-emit) or [`[up-clickable]`](/api/up-clickable). Before, only the Enter key worked.
 - ⚠️ An [`[up-on-offline]`](/api/up-follow#up-on-offline) callback now receives the `up:fragment:offline` event as `event`, so it can call `event.retry()`. It used to receive the event as `error`.
 - [URL patterns](/api/url-patterns) now match full URLs on the page's own origin, like `https://example.com/users/*`. Such patterns never matched before.
-- Fix: When the user pressed the mouse button on a [preloading](/learn/preloading) link while its preload request was still loading after hovering, Unpoly aborted the request and sent the same request again. This happened since Unpoly 3.8.
+- Fix: When the user pressed the mouse button on a [preloading](/learn/preloading) link while its preload request was still loading after hovering, Unpoly aborted the request and sent the same request again. This bug was introduced in Unpoly 3.8.
 
 
 ### Smaller fixes and changes
 
-- ❌ The [3.14.0 release notes](/changes/3.14.0#callbacks) named the setting for callback nonces `up.script.config.callbackPolicy`. The correct name is [`up.script.config.evalCallbackPolicy`](/api/up.script.config#config.evalCallbackPolicy). If you copied the wrong name, Unpoly ignored your setting and used the default policy `'auto'`. Search your code for `callbackPolicy` and rename it. `unpoly-migrate.js` now forwards the wrong name and logs a warning.
+- ❌ The [3.14.0 release notes](/changes/3.14.0#callbacks) named the setting for callback nonces `up.script.config.callbackPolicy`. The correct name is [`up.script.config.evalCallbackPolicy`](/api/up.script.config#config.evalCallbackPolicy). If you copied the wrong name, Unpoly ignored your setting and used the default policy `'auto'`. Search your code for `callbackPolicy` and rename it. `unpoly-migrate.js` now forwards the wrong name and logs a deprecation message.
 - When Unpoly boots, it now logs an error for every setting that doesn't exist, like a misspelled key or one that was renamed in an earlier version. Unpoly checks the top-level keys of every `up.*.config` object, but not nested objects like `up.layer.config.modal`, and not settings you change after booting.
 - ⚠️ `unpoly.js` is now compiled using ES2024 (up from ES2021). It needs Chrome 119, Firefox 121 or Safari 17.4, all released by March 2024. The [ES6 build](/learn/legacy-browsers#es6-build) for legacy browsers remains available.
 - ⚠️ A `click` event dispatched by a script is no longer passed to [`up.on()`](/api/up.on) callbacks when the element has a `[disabled]` attribute, even for elements that browsers cannot disable. Before, only a `disabled` property had this effect.
@@ -231,8 +232,8 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - Fix: `up.viewport.restoreScroll()` ignored its `{ location }` option. It always restored the positions saved for the layer's current location.
 - Fix: `up.fragment.matches()` with `{ layer: 'new', mode }` options expanded a selector like `:main` for the root layer, or threw an error while an overlay was open.
 - Fix: The `unpoly-migrate.js` polyfills for `up.popup.attach()`, `up.modal.follow()` and `up.modal.extract()` now open a new overlay again.
-- Fix: The `unpoly-migrate.js` polyfill for `up.network.shouldReduceRequests()` now logs a warning instead of throwing an error.
-- Fix: The `unpoly-migrate.js` polyfill for `up.util.microtask()` threw an error. This happened since Unpoly 3.8.
+- Fix: The `unpoly-migrate.js` polyfill for `up.network.shouldReduceRequests()` now logs a deprecation message instead of throwing an error.
+- Fix: The `unpoly-migrate.js` polyfill for `up.util.microtask()` threw an error. This bug was introduced in Unpoly 3.8.
 - Fix: `unpoly-migrate.js` ignored renamed layer keys like `closable`, `dismissable`, `closeLabel` or `dismissAriaLabel` when they were set in `up.layer.config`. They are now renamed, like when passed as options.
 - ⚠️ [`unpoly-migrate.js`](/changes/upgrading) now logs deprecations as errors, so test suites that fail on console errors find them without extra configuration. To log warnings as before, set `up.migrate.config.logLevel = 'warn'`.
 - Fix: `unpoly-migrate.js` logged deprecations that the app never caused when a script enumerated an object with deprecated properties, e.g. an analytics script walking `window.up`, or another deprecation message printing a config object.
