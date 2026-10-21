@@ -67,8 +67,7 @@ up.on('up:link:follow', function(event, link) {
 })
 ```
 
-To stop Unpoly from ever changing history, set `up.history.config.enabled = false`.
-To only allow some parts of history to change, see [Updating only some of the state](#partial-updates).
+To stop Unpoly from ever changing history, or only some aspects of it, see [Turning off history aspects](#disabling).
 
 
 ### Treating other fragments as major {#auto-history-targets}
@@ -174,8 +173,8 @@ and `up.history.config.noMetaTagSelectors`. Only elements in the `<head>` are ev
 
 ### Updating only some of the state {#partial-updates}
 
-You can keep parts of the history state unchanged while the rest is updated.
-Each part has an attribute for links and forms, and a render option for JavaScript:
+You can keep aspects of the history state unchanged while the rest is updated.
+Each aspect has an attribute for links and forms, and a render option for JavaScript:
 
 | Keep unchanged | Attribute                                        | Render option                                  |
 |----------------|--------------------------------------------------|------------------------------------------------|
@@ -192,17 +191,7 @@ For example, this link updates the URL and title, but leaves the meta tags alone
 
 These options only take effect when a render pass [updates history](#when-history-is-changed) in the first place.
 
-To keep a part unchanged for all render passes, set `up.history.config.enabled` to an array of the parts
-that Unpoly may update. The parts are `'location'`, `'title'`, `'metaTags'` and `'lang'`.
-For example, this configuration never changes the URL, but still updates `html[lang]`:
-
-```js
-up.history.config.enabled = ['lang']
-```
-
-Without `'location'`, Unpoly adds no history entries, so there is nothing to [restore](/learn/restoring-history)
-when the user goes back. The attributes and render options above can keep more parts unchanged,
-but they can never update a part that the configuration excludes.
+To keep an aspect unchanged for all render passes, see [Turning off history aspects](#disabling).
 
 
 ### Setting a different URL or title {#explicit-values}
@@ -217,6 +206,36 @@ Give `[up-location]` or `[up-title]` a string instead of `false`:
 The server can do the same by responding with an `X-Up-Location` or `X-Up-Title` header.
 This is useful when you [optimize a response](/learn/optimizing-responses) to omit the layout,
 and the response no longer includes a `<title>`.
+
+An explicit value cannot update an aspect that is [turned off](#disabling) in the configuration.
+
+
+Turning off history aspects {#disabling}
+---------------------------
+
+To stop Unpoly from ever changing history, set `up.history.config.enabled = false`.
+Fragments are still updated, but the address bar, window title, meta tags and `html[lang]` stay as they are.
+
+To turn off only some aspects, set an array of the aspects that Unpoly may update.
+The aspects are `'location'`, `'title'`, `'metaTags'` and `'lang'`.
+For example, an app that keeps URLs out of the address bar and browser history for privacy
+can still let `html[lang]` follow the content:
+
+```js
+up.history.config.enabled = ['lang'] // mark: ['lang']
+```
+
+[Attributes and render options](#partial-updates) can keep more aspects unchanged for a single render pass,
+but they can never update an aspect that the configuration excludes.
+
+Turning off the `'location'` aspect has some consequences:
+
+- Unpoly adds no history entries, so there is nothing to [restore](/learn/restoring-history) when the user goes back.
+- `up.history.push()` and `up.history.replace()` do nothing.
+
+For every aspect that is turned off, a [layer](/api/up.layer) reports what it rendered, not what the browser shows.
+For example, `up.layer.location` is the URL of the rendered content,
+so an `[up-nav]` bar highlights links to the content instead of the unchanged address bar.
 
 
 Changing history from JavaScript {#history-api}

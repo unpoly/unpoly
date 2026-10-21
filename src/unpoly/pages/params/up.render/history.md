@@ -3,7 +3,8 @@
 @param {boolean|string} [options.history]
   Whether the browser URL, window title and meta tags will be [updated](/learn/updating-history).
 
-  If set to `true`, the history will always be updated.
+  If set to `true`, history will be updated, except for aspects that
+  `up.history.config.enabled` [turns off](/learn/updating-history#disabling).
 
   If set to `'auto'` history will be updated if the `{ target }` matches
   a selector in `up.fragment.config.autoHistoryTargets`. By default this contains all

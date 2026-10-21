@@ -26,18 +26,18 @@ up.history = (function() {
 
       If nothing is configured, the `<body>` element will be replaced.
     @param {boolean|Array<string>} [config.enabled=true]
-      Configures which parts of history [fragment updates](/api/up.render) can [update](/learn/updating-history).
+      Configures which aspects of history [fragment updates](/api/up.render) can [update](/learn/updating-history).
 
       If set to `true`, Unpoly may change the browser URL, the window title,
       [meta tags](/learn/updating-history#history-state) and the `<html>` element's `[lang]` attribute.
 
       If set to `false`, Unpoly will never change any of these.
 
-      To only update some parts, set an array of the parts Unpoly may update:
+      To only update some aspects, set an array of the aspects Unpoly may update:
 
-      | Part         | Updates |
+      | Aspect       | Updates |
       |--------------|---------|
-      | `'location'` | The browser URL. Without this part Unpoly adds no history entries, so there is nothing to [restore](/learn/restoring-history) when the user goes back. |
+      | `'location'` | The browser URL and history entries. |
       | `'title'`    | The window title. |
       | `'metaTags'` | [Meta tags](/api/up-meta) in the `<head>`. |
       | `'lang'`     | The `<html>` element's `[lang]` attribute. |
@@ -51,10 +51,10 @@ up.history = (function() {
 
       An empty array has the same effect as `false`.
 
-      Render options like [`{ title: false }`](/api/up.render#options.title) or [`{ history: false }`](/api/up.render#options.history)
-      can keep a part unchanged for a single render pass, but they can never update a part that this setting excludes.
-
+      Render options can only narrow this setting, never update an aspect that it excludes.
       An overlay without [visible history](/learn/history-in-overlays) never updates history, regardless of this setting.
+
+      See [Turning off history aspects](/learn/updating-history#disabling) for the consequences of excluding an aspect.
 
   @section Meta tags
     @param {boolean} [config.updateMetaTags=true]
@@ -63,7 +63,7 @@ up.history = (function() {
       to the document's title and URL.
 
       @deprecated
-        Omit `'metaTags'` from an array of parts in `up.history.config.enabled` instead.
+        Omit `'metaTags'` from an array of aspects in `up.history.config.enabled` instead.
 
     @param {Array<string>} [config.metaTagSelectors]
       An array of CSS selectors matching default [meta tags](/api/up-meta)
@@ -402,6 +402,11 @@ up.history = (function() {
   [`history.replaceState()`](https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState) function
   or handle the `up:location:changed` event.
 
+  ## When history is turned off
+
+  This function does nothing when `up.history.config.enabled` excludes the `'location'` aspect.
+  See [Turning off history aspects](/learn/updating-history#disabling).
+
   @function up.history.replace
   @param {string} url
   @experimental
@@ -429,6 +434,11 @@ up.history = (function() {
   To push a history entry that you want to restore yourself, use the browser's
   [`history.pushState()`](https://developer.mozilla.org/en-US/docs/Web/API/History/pushState) function
   or handle the `up:location:changed` event.
+
+  ## When history is turned off
+
+  This function does nothing when `up.history.config.enabled` excludes the `'location'` aspect.
+  See [Turning off history aspects](/learn/updating-history#disabling).
 
   @function up.history.push
   @param {string} url
