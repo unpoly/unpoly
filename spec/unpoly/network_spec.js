@@ -344,6 +344,68 @@ describe('up.network', function() {
         })
       })
 
+      describe('up.proxy.preload()', function() {
+        it('preloads the given link (deprecated)', async function() {
+          const warnSpy = up.migrate.warn.mock()
+          fixture('.target')
+          const link = fixture('a[href="/path"][up-target=".target"]')
+          up.network.preload(link)
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/path')
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.proxy.preload(link) has been deprecated'))
+        })
+      })
+
+      describe('up.browser.loadPage()', function() {
+        it('delegates to up.network.loadPage() (deprecated)', function() {
+          const loadPageSpy = spyOn(up.network, 'loadPage')
+          const warnSpy = up.migrate.warn.mock()
+          up.browser.loadPage({ url: '/path' })
+          expect(loadPageSpy).toHaveBeenCalledWith({ url: '/path' })
+          expect(warnSpy).toHaveBeenCalled()
+        })
+      })
+
+      describe('up.Request#navigate()', function() {
+        it('delegates to up.Request#loadPage() (deprecated)', function() {
+          const request = new up.Request({ url: '/path' })
+          const loadPageSpy = spyOn(request, 'loadPage')
+          const warnSpy = up.migrate.warn.mock()
+          request.navigate()
+          expect(loadPageSpy).toHaveBeenCalled()
+          expect(warnSpy).toHaveBeenCalled()
+        })
+      })
+
+      describe('up.network.abort() with a reason as the second argument', function() {
+        it('uses the string as { reason } (deprecated)', async function() {
+          const warnSpy = up.migrate.warn.mock()
+          const request = up.request('/path')
+          await wait()
+
+          up.network.abort(request, 'my reason')
+
+          await expectAsync(request).toBeRejectedWith(jasmine.objectContaining({ name: 'AbortError', message: jasmine.stringContaining('my reason') }))
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('no longer takes a reason as a second argument'))
+        })
+      })
+
+      describe('up.request() with legacy options', function() {
+        it('renames { clearCache } to { expireCache }', function() {
+          const warnSpy = up.migrate.warn.mock()
+          const request = up.request({ url: '/path', clearCache: true })
+          expect(request.expireCache).toBe(true)
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'clearCache', 'expireCache', 'request options')
+        })
+
+        it('warns about the removed { solo } option', function() {
+          const warnSpy = up.migrate.warn.mock()
+          up.request({ url: '/path', solo: true })
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.request({ solo }) has been removed'))
+        })
+      })
+
       describe('up.network.config.requestMetaKeys', function() {
         it('is an array that the app may still push into, with a warning (deprecated)', function() {
           const warnSpy = up.migrate.warn.mock()

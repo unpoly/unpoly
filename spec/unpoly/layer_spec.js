@@ -686,6 +686,28 @@ describe('up.layer', function() {
           })
         })
 
+        for (let removedLayer of ['modal', 'popup']) {
+          describe(`for the removed { layer: '${removedLayer}' } option`, function() {
+            it("sets { layer: 'overlay' }", function() {
+              const warnSpy = up.migrate.warn.mock()
+              const options = { layer: removedLayer }
+              up.layer.normalizeOptions(options)
+              expect(options).toEqual(jasmine.objectContaining({ layer: 'overlay' }))
+              expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining("Did you mean { layer: 'overlay' }?"))
+            })
+          })
+        }
+
+        for (let removedOption of ['width', 'maxWidth', 'height', 'sticky', 'template']) {
+          describe(`for the removed { ${removedOption} } option`, function() {
+            it('prints a warning', function() {
+              const warnSpy = up.migrate.warn.mock()
+              up.layer.normalizeOptions({ layer: 'new', [removedOption]: 'value' })
+              expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining(`{ ${removedOption} } has been removed`))
+            })
+          })
+        }
+
         describe('for the legacy { layer: "page" } option', function() {
           it('sets { layer: "root" }', function() {
             const options = { layer: 'page' }

@@ -878,6 +878,20 @@ extendDescribe('up.fragment', function() {
       require('./fragment_render_abort_spec')
 
       if (up.migrate.loaded) {
+        describe('up.RenderJob#options and up.RenderResult#options', function() {
+          it('are renamed to #renderOptions (deprecated)', async function() {
+            fixture('.target')
+            const warnSpy = up.migrate.warn.mock()
+            const job = up.render({ target: '.target', content: 'new content' })
+            const result = await job
+
+            expect(job.options).toBe(job.renderOptions)
+            expect(result.options).toBe(result.renderOptions)
+            expect(warnSpy).toHaveBeenCalledWith('up.RenderJob: Property { options } has been renamed to { renderOptions }')
+            expect(warnSpy).toHaveBeenCalledWith('up.RenderResult: Property { options } has been renamed to { renderOptions }')
+          })
+        })
+
         describe('with { solo } option', function() {
 
           it('aborts the request of an existing change', async function() {

@@ -107,4 +107,15 @@ describe('up.error', function() {
 
   })
 
+
+  if (up.migrate.loaded) {
+    describe('up.CannotCompile', function() {
+      it('is still an error class, with a warning that it is no longer thrown (deprecated)', function() {
+        const warnSpy = up.migrate.warn.mock()
+        expect(new up.CannotCompile()).toEqual(jasmine.any(up.Error))
+        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.CannotCompile is no longer thrown'))
+      })
+    })
+  }
+
 })
