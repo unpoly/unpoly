@@ -50,7 +50,8 @@ up.migrate.transformAttribute('up-reveal', function(link, reveal) {
       link.setAttribute('up-scroll', 'false')
       break
     default:
-      up.migrate.warn('Attribute [up-reveal="%s"] has been replaced with [up-scroll="%s"]', reveal)
+      up.migrate.warn('Attribute [up-reveal="%s"] has been replaced with [up-scroll="%s"]', reveal, reveal)
+      link.setAttribute('up-scroll', reveal)
   }
 })
 

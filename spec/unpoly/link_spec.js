@@ -1470,6 +1470,28 @@ describe('up.link', function() {
         })
       })
 
+      describe('legacy [up-reveal] attribute', function() {
+
+        it('is replaced with [up-scroll="target"] for an empty value', function() {
+          const warnSpy = up.migrate.warn.mock()
+          const link = fixture('a[href="/path"][up-follow][up-reveal]')
+          up.hello(link)
+
+          expect(link).toHaveAttribute('up-scroll', 'target')
+          expect(warnSpy).toHaveBeenCalled()
+        })
+
+        it('is replaced with [up-scroll] for a selector value', function() {
+          const warnSpy = up.migrate.warn.mock()
+          const link = fixture('a[href="/path"][up-follow][up-reveal=".element"]')
+          up.hello(link)
+
+          expect(link).toHaveAttribute('up-scroll', '.element')
+          expect(up.link.followOptions(link).scroll).toBe('.element')
+          expect(u.sprintf(...warnSpy.calls.argsFor(0))).toContain('Attribute [up-reveal=".element"] has been replaced with [up-scroll=".element"]')
+        })
+      })
+
       describe('legacy [up-href] elements without [up-follow]', function() {
 
         it('warns once', function() {
