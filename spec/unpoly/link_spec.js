@@ -1553,6 +1553,23 @@ describe('up.link', function() {
           expect(warnSpy).toHaveBeenCalledOnceWith(jasmine.stringContaining('Following links with only [up-href] has been deprecated'), element)
         })
 
+        it('sets [up-follow], making the link clickable and followable', async function() {
+          fixture('main', { text: 'old text' })
+          const warnSpy = spyOn(up.migrate, 'warn')
+          const [link] = htmlFixtureList('<a up-href="/foo">label</a>')
+          up.hello(link)
+
+          expect(warnSpy).toHaveBeenCalledOnceWith(jasmine.stringContaining('Following links with only [up-href] has been deprecated'), link)
+          expect(link).toHaveAttribute('up-follow', '')
+          expect(link).toHaveAttribute('up-clickable')
+          expect(link).toBeKeyboardFocusable()
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(jasmine.lastRequest().url).toMatchURL('/foo')
+        })
+
         it('does not warn about an [up-back] link, which Unpoly builds with an [up-href]', async function() {
           up.history.config.enabled = true
           up.history.push('/path1')
