@@ -4,7 +4,9 @@ up.Error = class Error extends window.Error {
       message = up.util.sprintf(...message)
     }
     super(message)
-    let name = 'up.' + this.constructor.name
-    Object.assign(this, { name }, props)
+    // Minifiers in app bundlers drop class names, but not a string from our tag.
+    Object.assign(this, { name: this[Symbol.toStringTag] }, props)
   }
+
+  get [Symbol.toStringTag]() { return 'up.Error' }
 }

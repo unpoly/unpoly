@@ -107,6 +107,35 @@ describe('up.error', function() {
 
   })
 
+  describe('up.Error', function() {
+
+    it("names each error class after its public name", function() {
+      for (let name of ['Error', 'Blocked', 'CannotMatch', 'CannotParse', 'CannotTarget', 'NotImplemented', 'Offline']) {
+        const error = new up[name]('message')
+        expect(error.name).toBe('up.' + name)
+        expect(error.toString()).toBe(`up.${name}: message`)
+      }
+    })
+
+    it("does not depend on the class name, which a minifier may drop", function() {
+      const MinifiedError = class extends up.Error {
+        get [Symbol.toStringTag]() { return 'up.Minified' }
+      }
+      Object.defineProperty(MinifiedError, 'name', { value: '' })
+
+      const error = new MinifiedError('message')
+      expect(error.name).toBe('up.Minified')
+      expect(error.toString()).toBe('up.Minified: message')
+    })
+
+    it("names an up.Aborted error 'AbortError', like a native abort error", function() {
+      const error = new up.Aborted('message')
+      expect(error.name).toBe('AbortError')
+      expect(error.toString()).toBe('AbortError: message')
+    })
+
+  })
+
 
   if (up.migrate.loaded) {
     describe('up.CannotCompile', function() {
