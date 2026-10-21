@@ -25,11 +25,36 @@ up.history = (function() {
       the current page and server response will be updated.
 
       If nothing is configured, the `<body>` element will be replaced.
-    @param {boolean} [config.enabled=true]
-      Configures whether [fragment updates](/api/up.render) can [update history](/learn/updating-history).
+    @param {boolean|Array<string>} [config.enabled=true]
+      Configures which parts of history [fragment updates](/api/up.render) can [update](/learn/updating-history).
 
-      If set to `false`, Unpoly will never change the browser URL, the window title,
-      [meta tags](/learn/updating-history#history-state) or the `<html>` element's `[lang]` attribute.
+      If set to `true`, Unpoly may change the browser URL, the window title,
+      [meta tags](/learn/updating-history#history-state) and the `<html>` element's `[lang]` attribute.
+
+      If set to `false`, Unpoly will never change any of these.
+
+      To only update some parts, set an array of the parts Unpoly may update:
+
+      | Part         | Updates |
+      |--------------|---------|
+      | `'location'` | The browser URL. Without this part Unpoly adds no history entries, so there is nothing to [restore](/learn/restoring-history) when the user goes back. |
+      | `'title'`    | The window title. |
+      | `'metaTags'` | [Meta tags](/api/up-meta) in the `<head>`. |
+      | `'lang'`     | The `<html>` element's `[lang]` attribute. |
+
+      For example, this configuration never changes the browser URL, but still updates the `[lang]` attribute
+      when the user switches to another language:
+
+      ```js
+      up.history.config.enabled = ['lang']
+      ```
+
+      An empty array has the same effect as `false`.
+
+      Render options like [`{ title: false }`](/api/up.render#options.title) or [`{ history: false }`](/api/up.render#options.history)
+      can keep a part unchanged for a single render pass, but they can never update a part that this setting excludes.
+
+      An overlay without [visible history](/learn/history-in-overlays) never updates history, regardless of this setting.
 
   @section Meta tags
     @param {boolean} [config.updateMetaTags=true]
@@ -37,10 +62,8 @@ up.history = (function() {
       [meta tags](/learn/updating-history#history-state) in addition
       to the document's title and URL.
 
-      Instead of disabling meta tag synchronization globally, you may also disable it
-      per render pass. To do so, pass a [`{ metaTags: false }`](/api/up.render#options.metaTags) option
-      or set an [`[up-meta-tags="false"]`](/api/up-follow#up-meta-tags) attribute
-      on a link.
+      @deprecated
+        Omit `'metaTags'` from an array of parts in `up.history.config.enabled` instead.
 
     @param {Array<string>} [config.metaTagSelectors]
       An array of CSS selectors matching default [meta tags](/api/up-meta)
@@ -70,7 +93,6 @@ up.history = (function() {
   */
   const config = new up.Config(() => ({
     enabled: true,
-    updateMetaTags: true,
     // Prefer restoring the body instead of :main, in case the last fragment update
     // changed the page layout. See https://github.com/unpoly/unpoly/issues/237.
     restoreTargets: ['body'],
@@ -126,6 +148,20 @@ up.history = (function() {
     } else {
       return newValue
     }
+  }
+
+  /*-
+  Returns whether `up.history.config.enabled` allows Unpoly to update the given part of history.
+
+  @function up.history.isEnabled
+  @param {string} part
+    One of `'location'`, `'title'`, `'metaTags'` or `'lang'`.
+  @return {boolean}
+  @internal
+  */
+  function isEnabled(part) {
+    let { enabled } = config
+    return u.isArray(enabled) ? enabled.includes(part) : !!enabled
   }
 
   function historyOptions(options) {
@@ -407,7 +443,7 @@ up.history = (function() {
   function placeAdoptedHistoryEntry(method, location, trackOptions) {
     adoptBase(location)
 
-    if (config.enabled) {
+    if (isEnabled('location')) {
       withTrackOptions(trackOptions, function() {
         // Call this instead of originalPushState in case someone else has patched history.pushState()
         // Our own tests do this to rate-limit the use of the history API.
@@ -769,6 +805,7 @@ up.history = (function() {
 
   return {
     config,
+    isEnabled,
     push,
     replace,
     get location() { return currentLocation() },

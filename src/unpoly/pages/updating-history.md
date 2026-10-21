@@ -67,7 +67,8 @@ up.on('up:link:follow', function(event, link) {
 })
 ```
 
-To stop Unpoly from ever changing the browser URL, set `up.history.config.enabled = false`.
+To stop Unpoly from ever changing history, set `up.history.config.enabled = false`.
+To only allow some parts of history to change, see [Updating only some of the state](#partial-updates).
 
 
 ### Treating other fragments as major {#auto-history-targets}
@@ -189,9 +190,19 @@ For example, this link updates the URL and title, but leaves the meta tags alone
 <a href="/posts/5" up-follow up-meta-tags="false">Read post</a> <!-- mark: up-meta-tags="false" -->
 ```
 
-To disable meta tag synchronization for all render passes, set `up.history.config.updateMetaTags = false`.
-
 These options only take effect when a render pass [updates history](#when-history-is-changed) in the first place.
+
+To keep a part unchanged for all render passes, set `up.history.config.enabled` to an array of the parts
+that Unpoly may update. The parts are `'location'`, `'title'`, `'metaTags'` and `'lang'`.
+For example, this configuration never changes the URL, but still updates `html[lang]`:
+
+```js
+up.history.config.enabled = ['lang']
+```
+
+Without `'location'`, Unpoly adds no history entries, so there is nothing to [restore](/learn/restoring-history)
+when the user goes back. The attributes and render options above can keep more parts unchanged,
+but they can never update a part that the configuration excludes.
 
 
 ### Setting a different URL or title {#explicit-values}

@@ -866,35 +866,6 @@ extendDescribe('up.fragment', function() {
             expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
           })
 
-          it('does not update meta tags with up.history.config.updateMetaTags = false', async function() {
-            up.history.config.updateMetaTags = false
-
-            fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
-            fixture(document.head, 'meta[name="description"][content="old description"]')
-
-            fixture('.container', { text: 'old container text' })
-            up.render('.container', { url: '/path', history: true })
-            await wait()
-
-            jasmine.respondWith(`
-              <html>
-                <head>
-                  <link rel='canonical' href='/new-canonical'>
-                  <meta name='description' content='old description'>
-                </head>
-                <body>
-                  <div class='container'>
-                    new container text
-                  </div>
-                </body>
-              </html>
-            `)
-            await wait()
-
-            expect(document.head).toHaveSelector('link[rel="canonical"][href="/old-canonical"]')
-            expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
-          })
-
           it('does not update meta tags with { metaTags: false } option', async function() {
             fixture(document.head, 'link[rel="canonical"][href="/old-canonical"]')
             fixture(document.head, 'meta[name="description"][content="old description"]')
@@ -1125,6 +1096,143 @@ extendDescribe('up.fragment', function() {
 
         })
 
+        describe('with up.history.config.enabled set to an array of parts', function() {
+
+          const response = `
+            <html lang="fr">
+              <head>
+                <title>new title</title>
+                <meta name="description" content="new description">
+              </head>
+              <body>
+                <div id="container">new container text</div>
+              </body>
+            </html>
+          `
+
+          let oldURL
+
+          beforeEach(function() {
+            oldURL = location.href
+            document.title = 'old title'
+            document.documentElement.setAttribute('lang', 'it')
+            fixture(document.head, 'meta[name="description"][content="old description"]')
+            htmlFixtureList('<div id="container">old container text</div>')
+          })
+
+          function render(options) {
+            return up.render('#container', { document: response, history: true, location: '/new-path', ...options })
+          }
+
+          it("only updates html[lang] with ['lang'], without adding a history entry", async function() {
+            up.history.config.enabled = ['lang']
+            const pushSpy = spyOn(history, 'pushState').and.callThrough()
+
+            await render()
+
+            expect('#container').toHaveText('new container text')
+            expect(document.documentElement).toHaveAttribute('lang', 'fr')
+            expect(location.href).toMatchURL(oldURL)
+            expect(pushSpy).not.toHaveBeenCalled()
+            expect(document.title).toBe('old title')
+            expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+          })
+
+          it("only changes the browser URL with ['location']", async function() {
+            up.history.config.enabled = ['location']
+
+            await render()
+
+            expect(location.href).toMatchURL('/new-path')
+            expect(document.title).toBe('old title')
+            expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+            expect(document.documentElement).toHaveAttribute('lang', 'it')
+          })
+
+          it("only changes the window title with ['title']", async function() {
+            up.history.config.enabled = ['title']
+
+            await render()
+
+            expect(document.title).toBe('new title')
+            expect(location.href).toMatchURL(oldURL)
+            expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+            expect(document.documentElement).toHaveAttribute('lang', 'it')
+          })
+
+          it("only updates meta tags with ['metaTags']", async function() {
+            up.history.config.enabled = ['metaTags']
+
+            await render()
+
+            expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
+            expect(document.head).not.toHaveSelector('meta[name="description"][content="old description"]')
+            expect(location.href).toMatchURL(oldURL)
+            expect(document.title).toBe('old title')
+            expect(document.documentElement).toHaveAttribute('lang', 'it')
+          })
+
+          it('changes nothing with an empty array, like with false', async function() {
+            up.history.config.enabled = []
+            const pushSpy = spyOn(history, 'pushState').and.callThrough()
+
+            await render()
+
+            expect('#container').toHaveText('new container text')
+            expect(location.href).toMatchURL(oldURL)
+            expect(pushSpy).not.toHaveBeenCalled()
+            expect(document.title).toBe('old title')
+            expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+            expect(document.documentElement).toHaveAttribute('lang', 'it')
+          })
+
+          it('does not set a title from a { title } option when the configuration excludes it', async function() {
+            up.history.config.enabled = ['lang']
+
+            await render({ title: 'title from option' })
+
+            expect(document.title).toBe('old title')
+            expect(document.documentElement).toHaveAttribute('lang', 'fr')
+          })
+
+          it('keeps html[lang] with { lang: false } when the configuration includes it', async function() {
+            up.history.config.enabled = ['title', 'lang']
+
+            await render({ lang: false })
+
+            expect(document.documentElement).toHaveAttribute('lang', 'it')
+            expect(document.title).toBe('new title')
+          })
+
+          it('does not update html[lang] when rendering into an overlay without visible history', async function() {
+            up.history.config.enabled = ['lang']
+            await up.layer.open({ target: '#container', content: 'old overlay text', history: false })
+
+            await render()
+
+            expect(up.layer.current).toHaveText('new container text')
+            expect(document.documentElement).toHaveAttribute('lang', 'it')
+          })
+
+          it("updates html[lang] for an overlay with visible history and restores it when the overlay closes", async function() {
+            up.history.config.enabled = ['lang']
+
+            await up.layer.open({ target: '#container', document: response, history: true, location: '/overlay' })
+
+            expect(up.layer.current).toHaveText('new container text')
+            expect(document.documentElement).toHaveAttribute('lang', 'fr')
+            expect(location.href).toMatchURL(oldURL)
+            expect(document.title).toBe('old title')
+
+            up.layer.dismiss()
+            await wait()
+
+            expect(document.documentElement).toHaveAttribute('lang', 'it')
+            expect(location.href).toMatchURL(oldURL)
+          })
+
+        })
+
         describe('html[lang]', function() {
 
           it('updates the html[lang] attribute with the language from the response', async function() {
@@ -1232,6 +1340,26 @@ extendDescribe('up.fragment', function() {
 
             expect('#container').toHaveText('new container text')
             expect(document.documentElement).toHaveAttribute('lang', 'de')
+          })
+
+          it('does not update the html[lang] attribute when rendering into an overlay without visible history', async function() {
+            document.documentElement.setAttribute('lang', 'it')
+            await up.layer.open({ target: '#container', content: 'old overlay text', history: false })
+
+            await up.render('#container', {
+              history: true,
+              location: '/path',
+              document: `
+                <html lang="fr">
+                  <body>
+                    <div id="container">new overlay text</div>
+                  </body>
+                </html>
+              `
+            })
+
+            expect(up.layer.current).toHaveText('new overlay text')
+            expect(document.documentElement).toHaveAttribute('lang', 'it')
           })
 
           it('does not update the html[lang] attribute when not updating history', async function() {

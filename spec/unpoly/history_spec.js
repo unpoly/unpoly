@@ -50,6 +50,17 @@ describe('up.history', function() {
         expect(pushSpy).not.toHaveBeenCalled()
         expect(location.href).toMatchURL(locationBefore)
       })
+
+      it("does not change the browser URL when up.history.config.enabled is an array without 'location'", function() {
+        up.history.config.enabled = ['title', 'metaTags', 'lang']
+        const locationBefore = location.href
+        const pushSpy = spyOn(history, 'pushState').and.callThrough()
+
+        up.history.push('/push-path')
+
+        expect(pushSpy).not.toHaveBeenCalled()
+        expect(location.href).toMatchURL(locationBefore)
+      })
     })
 
     describe('up.history.replace()', () => {

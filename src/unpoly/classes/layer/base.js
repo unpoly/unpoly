@@ -713,30 +713,29 @@ up.Layer = class Layer extends up.Record {
   }
 
   updateHistory(options) {
-    // Set unless { location: false }
+    // (1) Set unless { location: false }
+    // (2) When up.history.config.enabled excludes 'location', this still tracks the location internally,
+    //     but up.history.push() leaves the browser URL unchanged.
     if (u.isString(options.location)) {
-      // With up.history.config.enabled = false this still tracks the location internally,
-      // but up.history.push() leaves the browser URL unchanged.
       this.updateLocation(options.location, { push: true })
     }
 
-    // With up.history.config.enabled = false the page must not show a title, meta tags or language
-    // that don't match the unchanged browser URL.
-    if (!up.history.config.enabled) return
+    // The config is a ceiling: render options can only narrow it, never enable a part that it excludes.
+    let isEnabled = up.history.isEnabled
 
     // Set unless { metaTags: false }
-    if (up.history.config.updateMetaTags && u.isList(options.metaTags)) {
+    if (isEnabled('metaTags') && u.isList(options.metaTags)) {
       up.migrate?.warnOfHungryMetaTags?.(options.metaTags)
       this._updateMetaTags(options.metaTags)
     }
 
     // Set unless { title: false }
-    if (u.isString(options.title)) {
+    if (isEnabled('title') && u.isString(options.title)) {
       this.updateTitle(options.title)
     }
 
     // Set unless { lang: false }
-    if (u.isString(options.lang)) {
+    if (isEnabled('lang') && u.isString(options.lang)) {
       this._updateLang(options.lang)
     }
   }
@@ -831,9 +830,9 @@ up.Layer = class Layer extends up.Record {
   @experimental
   */
   get location() {
-    // With up.history.config.enabled = false, this returns the unchanged browser URL, while
+    // When up.history.config.enabled excludes 'location', this returns the unchanged browser URL, while
     // up:layer:location:changed reports the location from the render pass. This is intentional:
-    // what the page shows (address bar, title, .up-current) stays consistent with the browser URL.
+    // what the page shows (address bar, .up-current) stays consistent with the browser URL.
     if (this.showsLiveHistory()) {
       // Allow Unpoly-unaware code to use the pushState API directly.
       // This will implicitly change the front layer's location.
