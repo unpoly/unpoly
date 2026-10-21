@@ -280,6 +280,53 @@ describe('up.history', function() {
         expect(up.history.findMetaTags(head)).toEqual([script])
       })
     })
+
+    if (up.migrate.loaded) {
+      describe('up.history.config.updateMetaTags (deprecated)', function() {
+
+        it('accepts true without a warning and keeps all parts enabled', function() {
+          const warnSpy = up.migrate.warn.mock()
+
+          up.history.config.updateMetaTags = true
+
+          expect(warnSpy).not.toHaveBeenCalled()
+          expect(up.history.config.enabled).toBe(true)
+          expect(up.history.config.updateMetaTags).toBe(true)
+        })
+
+        it("removes 'metaTags' from up.history.config.enabled when set to false, with a deprecation warning", function() {
+          const warnSpy = up.migrate.warn.mock()
+
+          up.history.config.updateMetaTags = false
+
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.history.config.updateMetaTags = false has been deprecated'))
+          expect(up.history.config.enabled).toEqual(['location', 'title', 'lang'])
+          expect(up.history.config.updateMetaTags).toBe(false)
+        })
+
+        it("removes 'metaTags' from an existing array of parts when set to false", function() {
+          up.migrate.warn.mock()
+          up.history.config.enabled = ['metaTags', 'lang']
+
+          up.history.config.updateMetaTags = false
+
+          expect(up.history.config.enabled).toEqual(['lang'])
+        })
+
+        it('keeps working after a framework reset', async function() {
+          up.migrate.warn.mock()
+          up.framework.reset()
+          await wait()
+
+          expect(up.history.config.updateMetaTags).toBe(true)
+
+          up.history.config.updateMetaTags = false
+
+          expect(up.history.config.enabled).toEqual(['location', 'title', 'lang'])
+        })
+
+      })
+    }
   })
 
   describe('HTML', function() {

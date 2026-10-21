@@ -1055,6 +1055,52 @@ extendDescribe('up.fragment', function() {
               expect(document.head).toHaveSelector('link[rel="canonical"][href="/new-canonical"]')
               expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Remove the [up-hungry] attribute'), jasmine.anything())
             })
+
+            describe('with up.history.config.updateMetaTags (deprecated)', function() {
+
+              const response = `
+                <html lang="fr">
+                  <head>
+                    <title>new title</title>
+                    <meta name="description" content="new description">
+                  </head>
+                  <body>
+                    <div id="container">new container text</div>
+                  </body>
+                </html>
+              `
+
+              beforeEach(function() {
+                document.title = 'old title'
+                document.documentElement.setAttribute('lang', 'it')
+                fixture(document.head, 'meta[name="description"][content="old description"]')
+                htmlFixtureList('<div id="container">old container text</div>')
+              })
+
+              it('keeps updating meta tags without a warning when set to true', async function() {
+                const warnSpy = up.migrate.warn.mock()
+
+                up.history.config.updateMetaTags = true
+                await up.render('#container', { document: response, history: true, location: '/path' })
+
+                expect(warnSpy).not.toHaveBeenCalled()
+                expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
+              })
+
+              it('stops updating meta tags with a deprecation warning when set to false, but still updates the title and html[lang]', async function() {
+                const warnSpy = up.migrate.warn.mock()
+
+                up.history.config.updateMetaTags = false
+                await up.render('#container', { document: response, history: true, location: '/path' })
+
+                expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.history.config.updateMetaTags = false has been deprecated'))
+                expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+                expect(document.title).toBe('new title')
+                expect(document.documentElement).toHaveAttribute('lang', 'fr')
+                expect(location.href).toMatchURL('/path')
+              })
+
+            })
           }
         })
 

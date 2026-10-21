@@ -32,25 +32,22 @@ up.migrate.prepareLocationChangedEvent = function(event) {
 
 
 up.history.config.patch(function() {
-  this.updateMetaTagsValue = this.updateMetaTags
-  this.updateMetaTagsSet = false
-
   Object.defineProperty(this, 'updateMetaTags', {
     configurable: true,
     get() {
-      return this.updateMetaTagsValue
+      return up.history.isEnabled('metaTags')
     },
     set(value) {
-      this.updateMetaTagsValue = value
-      this.updateMetaTagsSet = true
+      // Apps used to set { updateMetaTags: true } to silence an old warning.
+      // Since that is the default, we accept it without a warning.
+      if (value) return
+
+      up.migrate.deprecated('up.history.config.updateMetaTags = false', "an array of parts without 'metaTags' in up.history.config.enabled")
+      let { enabled } = this
+      if (enabled === true) enabled = ['location', 'title', 'lang']
+      if (up.util.isArray(enabled)) this.enabled = enabled.filter((part) => part !== 'metaTags')
     }
   })
-})
-
-up.on('up:framework:boot', function() {
-  if (!up.history.config.updateMetaTagsSet) {
-    up.migrate.warn('Meta tags in the <head> are now updated automatically. Configure up.history.config.updateMetaTags to remove this warning.')
-  }
 })
 
 // up.compiler('[up-hungry]')
