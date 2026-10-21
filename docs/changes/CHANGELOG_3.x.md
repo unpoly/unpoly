@@ -233,6 +233,10 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - ⚠️ [`unpoly-migrate.js`](/changes/upgrading) now logs deprecations as errors, so test suites that fail on console errors find them without extra configuration. To log warnings as before, set `up.migrate.config.logLevel = 'warn'`.
 - Fix: `unpoly-migrate.js` logged deprecations that the app never caused when a script enumerated an object with deprecated properties, e.g. an analytics script walking `window.up`, or another deprecation message printing a config object.
 - The `unpoly-migrate.js` warning for the deprecated origin shorthand `&` now names the target and the origin element.
+- `unpoly-migrate.js` warnings about renamed render, request or layer options now name where the option was used, like the origin element or URL. They are printed once for each place, not once per page load.
+- Fix: With `unpoly-migrate.js`, a link with only an `[up-href]` attribute is now given `[up-follow]`. Before, `unpoly-migrate.js` and Unpoly could disagree about whether the link was followable.
+- Fix: With `unpoly-migrate.js`, old layer attributes like `[up-flavor]`, `[up-closable]` or `[up-history-visible]` are now also translated on forms that open an overlay.
+- Fix: With `unpoly-migrate.js`, a popup position like `'bottom-right'` is now split into `{ position: 'bottom', align: 'right' }` before the overlay opens. Before, [`up.Layer#position`](/api/up.Layer.prototype.position) and the `<up-popup>` attributes showed the combined value.
 
 
 > [note]
