@@ -122,7 +122,7 @@ You can use it in a form like a native field, including with [`[up-validate]`](/
 ```
 
 An element that is defined after the form was rendered, e.g. by a lazily loaded component, is picked up as soon as it is defined.
-Values appended by a [`formdata`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/formdata_event) listener are now sent as well.
+Values appended by a [`formdata`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/formdata_event) listener are now sent as well. See [Adding values with a `formdata` listener](/learn/custom-form-fields#formdata).
 
 The new guide [Custom form fields](/learn/custom-form-fields) compares four ways to build a custom control, from a hidden native field to a plain `<div>` that you register as a field.
 
