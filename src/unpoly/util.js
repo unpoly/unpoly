@@ -2004,10 +2004,7 @@ up.util = (function() {
         // This adds quotes and will log line breaks as verbatim `\n`.
         string = JSON.stringify(string)
       }
-    } else if (isUndefined(arg)) {
-      // JSON.stringify(undefined) is actually undefined
-      string = 'undefined'
-    } else if (isNumber(arg) || isFunction(arg)) {
+    } else if (isFunction(arg)) {
       string = arg.toString()
     } else if (isJQuery(arg)) {
       string = `$(${map(arg, stringifyNested).join(', ')})`
@@ -2040,7 +2037,7 @@ up.util = (function() {
         string = `${label} {…}`
       }
     } else {
-      // null, booleans
+      // undefined, null, booleans, numbers
       string = String(arg)
     }
 
