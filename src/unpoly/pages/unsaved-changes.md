@@ -59,8 +59,8 @@ The compiler returns them all, so Unpoly [cleans up](/learn/enhancing-elements#d
 Tracking changes {#tracking}
 ----------------
 
-`up.watch()` runs its callback when the user changes a field in the form. The first change sets
-the `dirty` flag. The compiler doesn't compare the current values with the original ones, so a user
+The [compiler](#compiler) uses `up.watch()` to run a callback when the user changes a field in the form.
+The first change sets the `dirty` flag. The compiler doesn't compare the current values with the original ones, so a user
 who types a character and deletes it again is still asked. That keeps the code short, and asking once
 too often is cheaper than losing work.
 
@@ -88,7 +88,7 @@ up.compiler('form[confirm-unsaved]', (form, data, meta) => { // mark: meta
 Asking before following a link {#links}
 ------------------------------
 
-Following a link emits a preventable `up:link:follow` event. The compiler listens with `up.Layer#on()`,
+Following a link emits a preventable `up:link:follow` event. The [compiler](#compiler) listens with `up.Layer#on()`,
 so it only hears links in the form's own layer.
 
 Links that open a new overlay are skipped, since the form stays where it is, beneath the new overlay.
@@ -116,7 +116,7 @@ layer.on('up:form:submit', (event) => {
 Asking before closing an overlay {#overlays}
 --------------------------------
 
-When the form is in an overlay, the user can close the overlay with its own controls.
+When the form is in an overlay, the [compiler](#compiler) asks before the user closes the overlay with its own controls.
 Each control dismisses the overlay with a [dismissal value](/learn/closing-overlays#dismissal-values):
 `":button"` for the `×` button, `":key"` for the Escape key and `":outside"` for a click on the backdrop.
 When the user closes the overlay this way, nothing has happened yet, so preventing the dismissal keeps
@@ -148,8 +148,13 @@ Asking before leaving the page {#leaving-the-page}
 ------------------------------
 
 Reloading the page, closing the browser tab or following a link that Unpoly doesn't handle all leave the page.
-For these, the browser emits a `beforeunload` event on the `window`. Preventing it makes the browser ask the user
-whether to leave. Browsers show their own generic text and ignore any message you provide.
+For these, the browser emits a `beforeunload` event on the `window`. The [compiler](#compiler) prevents it while
+the form is dirty, which makes the browser ask the user whether to leave. Browsers show their own generic text
+and ignore any message you provide.
+
+Browsers don't emit `beforeunload` reliably, especially on mobile devices, where a tab can be closed or
+discarded in the background without asking. If losing a draft would be costly, also save the form's values
+when the page is hidden, e.g. in a `pagehide` or `visibilitychange` listener.
 
 
 @page unsaved-changes
