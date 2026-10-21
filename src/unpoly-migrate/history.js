@@ -26,7 +26,7 @@ up.migrate.renamedEvent('up:history:restored', 'up:location:changed')
 up.migrate.renamedEvent('up:history:replaced', 'up:location:changed')
 
 up.migrate.prepareLocationChangedEvent = function(event) {
-  up.migrate.renamedProperty(event, 'url', 'location')
+  up.migrate.renamedProperty(event, 'url', 'location', { warning: 'Property event.url of up:location:changed has been renamed to event.location' })
   // up.migrate.removedProperty(event, 'reason')
 }
 

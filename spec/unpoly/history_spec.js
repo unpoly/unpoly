@@ -325,6 +325,23 @@ describe('up.history', function() {
     })
 
     if (up.migrate.loaded) {
+      describe('up:location:changed { url } (deprecated)', function() {
+
+        it('returns the event.location and names the renamed property in the warning', async function() {
+          up.history.config.enabled = true
+          const warnSpy = up.migrate.warn.mock()
+          let url = null
+          up.on('up:location:changed', (event) => url = event.url)
+
+          up.history.push('/foo')
+          await wait()
+
+          expect(url).toMatchURL('/foo')
+          expect(warnSpy).toHaveBeenCalledWith('Property event.url of up:location:changed has been renamed to event.location')
+        })
+
+      })
+
       describe('up.history.config.updateMetaTags (deprecated)', function() {
 
         it('accepts true without a warning and keeps all aspects enabled', function() {
