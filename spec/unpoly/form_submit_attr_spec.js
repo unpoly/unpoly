@@ -502,7 +502,7 @@ extendDescribe('up.form', function() {
             await up.layer.open({ fragment: html('overlay') })
 
             // The browser submits the first form#my-form in the document, which is in the root layer.
-            await jasmine.expectGlobalError(/Prevented .* from submitting a form in another layer \(ambiguous form ID "my-form"\)/, async function() {
+            await jasmine.expectGlobalError(/Prevented .* from submitting a form in another layer \(\[form="my-form"\]\)/, async function() {
               Trigger.clickSequence(up.fragment.get('#external-button', { layer: 'overlay' }))
               await wait()
             })
@@ -557,7 +557,7 @@ extendDescribe('up.form', function() {
               </div>
             ` })
 
-            await jasmine.expectGlobalError(/Prevented .* from submitting a form in another layer/, async function() {
+            await jasmine.expectGlobalError(/Prevented .* from submitting a form in another layer \(\[form="root-form"\]\)/, async function() {
               Trigger.clickSequence(up.fragment.get('button', { layer: 'overlay' }))
               await wait()
             })
