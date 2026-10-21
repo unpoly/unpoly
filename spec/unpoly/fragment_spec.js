@@ -35,6 +35,28 @@ describe('up.fragment', function() {
       })
     }
 
+    if (up.migrate.loaded) {
+      describe('up.fragment.config.matchAroundOrigin', function() {
+        it('is true while up.fragment.config.match is "region" (deprecated)', function() {
+          const warnSpy = up.migrate.warn.mock()
+          up.fragment.config.match = 'region'
+          expect(up.fragment.config.matchAroundOrigin).toBe(true)
+          up.fragment.config.match = 'first'
+          expect(up.fragment.config.matchAroundOrigin).toBe(false)
+          expect(warnSpy).toHaveBeenCalled()
+        })
+
+        it('sets up.fragment.config.match (deprecated)', function() {
+          const warnSpy = up.migrate.warn.mock()
+          up.fragment.config.matchAroundOrigin = false
+          expect(up.fragment.config.match).toBe('first')
+          up.fragment.config.matchAroundOrigin = true
+          expect(up.fragment.config.match).toBe('region')
+          expect(warnSpy).toHaveBeenCalled()
+        })
+      })
+    }
+
     describe('up.navigate()', function() {
       it('delegates to up.render({ ...options, navigate: true })', function() {
         const renderSpy = up.fragment.render.mock()

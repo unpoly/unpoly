@@ -19,7 +19,7 @@ up.fragment.config.patch(function(config) {
     configurable: true,
     get: function() {
       matchAroundOriginDeprecated()
-      return this.match === 'closest'
+      return this.match === 'region'
     },
     set: function(value) {
       matchAroundOriginDeprecated()
