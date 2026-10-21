@@ -272,6 +272,8 @@ Without that check, the listener would also ask when the overlay closes because 
 [updated a parent layer](#peeling), e.g. after a successful save. The overlay closes anyway in that case,
 so the question would only confuse the user.
 
+To ask only when a form in the overlay has unsaved changes, see [[unsaved-changes]].
+
 To keep only one particular overlay open, set an [`[up-on-dismiss]`](/api/up-layer-new#up-on-dismiss) attribute
 on the opening link, or pass an [`{ onDismiss }`](/api/up.layer.open#options.onDismiss) callback, and call `event.preventDefault()` in it.
 Mind the tense: `[up-on-dismiss]` runs *before* the overlay closes,

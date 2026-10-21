@@ -47,6 +47,7 @@ learn:
         - reactive-server-forms
         - switching-form-state
         - disabling-forms
+        - unsaved-changes
         - handling-all-forms
         - custom-form-fields
         - watch-options

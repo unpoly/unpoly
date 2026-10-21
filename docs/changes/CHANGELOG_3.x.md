@@ -20,6 +20,7 @@ You can now learn Unpoly on unpoly.com from start to finish, and look up details
 - The sidebar shows where you are in a chapter or module, longer pages show their contents, and a new menu makes the site usable on a phone. Diagrams and videos show what happens on the page.
 - The API reference at `/api` documents every attribute, function, event and option. Every API page links to the Learn page that explains its topic.
 - The new search shows whether a result is a Learn page or an API page, and where it sits in the docs.
+- A new guide shows how to [ask before discarding unsaved changes](/learn/unsaved-changes) in a form.
 
 Guides now live under `/learn`, like `/learn/caching`. API pages live under `/api`, like `/api/up.render`.
 Some pages also got a new name, e.g. *Handling failed responses* is now [Error responses](/learn/error-responses), and *Preserving elements* is now [Keeping elements](/learn/keeping-elements).

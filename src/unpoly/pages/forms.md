@@ -122,6 +122,8 @@ See also
 
 To disable fields and buttons while a form is submitting, see [[disabling-forms]].
 
+To ask before the user discards a form with unsaved changes, see [[unsaved-changes]].
+
 To show confirmations or errors after a submission, see [[flashes]].
 
 To submit all forms through Unpoly without annotating each one, see [[handling-all-forms]].
