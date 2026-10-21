@@ -152,6 +152,13 @@ describe('up.Request', function() {
     })
   })
 
+  describe('#toString()', function() {
+    it('returns the method and URL', function() {
+      const request = new up.Request({ url: '/path', method: 'post' })
+      expect(request.toString()).toBe('POST /path')
+    })
+  })
+
   describe('#hash', function() {
 
     it('returns the hash anchor from the constructed URL', function() {

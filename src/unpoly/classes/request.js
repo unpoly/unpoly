@@ -617,7 +617,7 @@ up.Request = class Request extends up.Record {
   }
 
   _emitLoad() {
-    let event = this.emit('up:request:load', { log: ['Loading %s', this.description] })
+    let event = this.emit('up:request:load', { log: ['Loading %s', this] })
     return !event.defaultPrevented
   }
 
@@ -656,7 +656,7 @@ up.Request = class Request extends up.Record {
   _onXHRLoad() {
     const response = this._extractResponseFromXHR()
 
-    const log = 'Loaded ' + response.description
+    const log = ['Loaded %s', response]
     this.emit('up:request:loaded', { request: response.request, response, log })
 
     this.respondWith(response)
@@ -721,7 +721,7 @@ up.Request = class Request extends up.Record {
   _setAbortedState(reason = 'Unknown reason') {
     if (this.ended) return
 
-    let log = ["Aborted request to %s: %s", this.description, reason]
+    let log = ["Aborted request to %s: %s", this, reason]
     this.state = 'aborted'
     this._reject(new up.Aborted(log))
     this.emit('up:request:aborted', { log })
@@ -733,7 +733,7 @@ up.Request = class Request extends up.Record {
   _setOfflineState(reason = 'Unknown reason') {
     if (this.ended) return
 
-    let log = ['Cannot load request from %s: %s', this.description, reason]
+    let log = ['Cannot load request from %s: %s', this, reason]
     this.state = 'offline'
     this.emit('up:request:offline', { log })
     this._reject(new up.Offline(log, { reason, request: this }))
@@ -877,7 +877,9 @@ up.Request = class Request extends up.Record {
     this._buildEventEmitter(args).assertEmitted()
   }
 
-  get description() {
+  get [Symbol.toStringTag]() { return 'up.Request' }
+
+  toString() {
     return this.method + ' ' + this.url
   }
 

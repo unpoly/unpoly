@@ -312,8 +312,10 @@ up.Response = class Response extends up.Record {
       this.request.expired
   }
 
-  get description() {
-    return `HTTP ${this.status} response to ${this.request.description}`
+  get [Symbol.toStringTag]() { return 'up.Response' }
+
+  toString() {
+    return `HTTP ${this.status} response to ${this.request}`
   }
 
   get redirect() {

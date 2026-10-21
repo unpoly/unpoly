@@ -20,7 +20,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
       this._request.assertEmitted('up:fragment:loaded', {
         ...this._loadedEventProps(),
         callback: this.options.onLoaded, // One callback is used for both success and failure. There is no { onFailLoaded }.
-        log: ['Loaded fragment from %s', this._response.description],
+        log: ['Loaded fragment from %s', this._response],
         skip: () => this._skip()
       })
 
@@ -45,7 +45,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   }
 
   _skip() {
-    up.puts('up.render()', 'Skipping ' + this._response.description)
+    up.puts('up.render()', 'Skipping %s', this._response)
     this.options.target = ':none'
     this.options.failTarget = ':none'
   }

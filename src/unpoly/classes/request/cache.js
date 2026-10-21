@@ -1,6 +1,6 @@
 const u = up.util
 
-// One route per method and URL (`request.description`).
+// One route per method and URL.
 class Route {
 
   // A list of `Vary` header names that we have seen in responses
@@ -207,7 +207,7 @@ up.Request.Cache = class Cache {
   }
 
   _getRoute(request) {
-    return request.cacheRoute || (this._routes[request.description] ||= new Route())
+    return request.cacheRoute || (this._routes[request.method + ' ' + request.url] ||= new Route())
   }
 
   _isUsable(request) {

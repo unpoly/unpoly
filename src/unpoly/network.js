@@ -493,7 +493,7 @@ up.network = (function() {
     // we use it unless `request.cache` is explicitly set to `false`.
     let cachedRequest
     if (newRequest.willCache() && (cachedRequest = cache.get(newRequest))) {
-      up.puts('up.request()', 'Re-using previous request to %s', newRequest.description)
+      up.puts('up.request()', 'Re-using previous request to %s', newRequest)
 
       // Check if we need to upgrade a cached background request to a foreground request.
       // This might affect whether we're going to emit an up:network:late event further

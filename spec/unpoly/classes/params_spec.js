@@ -91,6 +91,13 @@ describe('up.Params', function() {
     })
   })
 
+  describe('#toString()', function() {
+    it('returns the query', function() {
+      const params = new up.Params({ foo: 'foo value', bar: 'bar' })
+      expect(params.toString()).toBe(params.toQuery())
+    })
+  })
+
   describe('#toArray', function() {
 
     it('normalized null to an empty array', function() {

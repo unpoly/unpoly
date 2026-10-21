@@ -175,6 +175,12 @@ up.Params = class Params {
     return parts.join('&')
   }
 
+  get [Symbol.toStringTag]() { return 'up.Params' }
+
+  toString() {
+    return this.toQuery()
+  }
+
   _arrayEntryToQuery(entry) {
     const { value } = entry
 

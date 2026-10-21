@@ -20,6 +20,14 @@ describe('up.Response', function() {
     })
   })
 
+  describe('#toString()', function() {
+    it('returns the status and the request', function() {
+      const request = new up.Request({ url: '/path' })
+      const response = new up.Response({ request, status: 404 })
+      expect(response.toString()).toBe('HTTP 404 response to GET /path')
+    })
+  })
+
   describe('#fail', function() {
 
     it('defaults to undefined', function() {
