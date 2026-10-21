@@ -144,6 +144,11 @@ describe('up.error', function() {
         expect(new up.CannotCompile()).toEqual(jasmine.any(up.Error))
         expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.CannotCompile is no longer thrown'))
       })
+
+      it('is named up.CannotCompile', function() {
+        up.migrate.warn.mock()
+        expect(new up.CannotCompile().name).toBe('up.CannotCompile')
+      })
     })
   }
 

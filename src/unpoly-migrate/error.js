@@ -1,4 +1,5 @@
 class DeprecatedCannotCompile extends up.Error {
+  get [Symbol.toStringTag]() { return 'up.CannotCompile' }
 }
 
 Object.defineProperty(up, 'CannotCompile', { get: function() {
