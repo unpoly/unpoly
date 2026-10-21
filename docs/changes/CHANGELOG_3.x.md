@@ -154,7 +154,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 
 - ⚠️ `up.form.fields()` and `up.form.submitButtons()` now ignore elements in another [layer](/api/up.layer) and elements that are being [destroyed](/api/up.destroy), like other `up.fragment` lookups. A field in a popup that is attached inside a form is no longer watched by that form.
 - ⚠️ When a submit button or a focused field has a `[form]` attribute that points to a form in another layer, submitting now throws an error: "Prevented … from submitting a form in another layer". The browser would submit the other layer's form, e.g. when the same form ID exists in the layer below an overlay that shows the same page. To fix this, keep a form and its `[form]` controls in the same layer, and use form IDs that are unique across layers.
-- A form only reads params from controls in its own layer. Unlike the browser, it ignores controls from other layers that point to the form with a `[form]` attribute, e.g. when an overlay shows the same page as the layer below.
+- ⚠️ A form only reads params from controls in its own layer. Unlike the browser, it ignores controls from other layers that point to the form with a `[form]` attribute, e.g. when an overlay shows the same page as the layer below.
 - Fix: While an overlay was closing, an [`[up-switch]`](/learn/switching-form-state) field in it could show or hide elements in the layer behind it. This happened for a field outside a `<form>`, and for an [`[up-switch-region]`](/api/up-switch#up-switch-region) that also matched in that layer.
 
 
