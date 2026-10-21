@@ -133,6 +133,39 @@ describe('up.RenderOptions', function() {
         expect(options).toEqual(jasmine.objectContaining({ location: '/foo' }))
         expect(warnSpy).not.toHaveBeenCalled()
       })
+
+      describe('renamed and changed options', function() {
+        const onFailFinished = function() {}
+
+        const cases = [
+          [{ resetScroll: true }, { scroll: 'top' }],
+          [{ resetScroll: false }, { scroll: false }],
+          [{ restoreScroll: true }, { scroll: 'restore' }],
+          [{ restoreScroll: false }, { scroll: false }],
+          [{ reveal: true }, { scroll: 'target' }],
+          [{ reveal: false }, { scroll: false }],
+          [{ reveal: '.element' }, { scroll: '.element' }],
+          [{ scroll: 'reset' }, { scroll: 'top' }],
+          [{ solo: true }, { abort: 'all' }],
+          [{ failOnFinished: onFailFinished }, { onFailFinished }],
+          [{ badResponseTime: 123 }, { lateDelay: 123 }],
+          [{ layer: 'new', flavor: 'drawer' }, { layer: 'new', mode: 'drawer' }],
+          [{ layer: 'page' }, { layer: 'root' }],
+          [{ layer: 'new', closable: false }, { dismissible: false }],
+          [{ layer: 'new', closeLabel: 'Close' }, { dismissLabel: 'Close' }],
+        ]
+
+        for (let [legacyOptions, expectedOptions] of cases) {
+          it(`migrates ${JSON.stringify(legacyOptions)} with a single warning`, function() {
+            const warnSpy = up.migrate.warn.mock()
+
+            const options = up.RenderOptions.preprocess({ ...legacyOptions })
+
+            expect(options).toEqual(jasmine.objectContaining(expectedOptions))
+            expect(warnSpy.calls.count()).toBe(1)
+          })
+        }
+      })
     }
   })
 

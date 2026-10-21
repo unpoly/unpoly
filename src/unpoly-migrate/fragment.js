@@ -187,7 +187,7 @@ up.migrate.preprocessRenderOptions = function(options) {
   // Rewrite deprecated { resetScroll } option
   if (options.resetScroll === true) {
     up.migrate.deprecated('Option { resetScroll: true }', "{ scroll: 'top' }")
-    options.scroll = 'reset'
+    options.scroll = 'top'
   } if (options.resetScroll === false) {
     up.migrate.deprecated('Option { resetScroll: false }', "{ scroll: false }")
     options.scroll = false
@@ -204,7 +204,7 @@ up.migrate.preprocessRenderOptions = function(options) {
 
   // Rewrite deprecated { scroll } option values
   if (options.scroll === 'reset') {
-    up.migrate.deprecated("Option { scroll: 'reset'' }", "{ scroll: 'top' }")
+    up.migrate.deprecated("Option { scroll: 'reset' }", "{ scroll: 'top' }")
     options.scroll = 'top'
   }
 
