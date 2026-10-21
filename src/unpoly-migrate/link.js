@@ -163,6 +163,19 @@ up.compiler(LEGACY_UP_HREF_FOLLOW_SELECTOR, function(element) {
   up.migrate.warn('Following links with only [up-href] has been deprecated. You must now also set an [up-follow] on the same link (found in %o).', element)
 })
 
+// Unpoly itself builds [up-href] links and makes them followable, e.g. the [up-back] macro.
+// Our legacy selector already matches such a link, so the modern function would not set [up-follow],
+// and we would warn about a link that the app never wrote. We cannot exclude [up-back] in the selector,
+// since the macro removes that attribute.
+const modernMakeFollowable = up.link.makeFollowable
+up.link.makeFollowable = function(link) {
+  link = up.fragment.get(link)
+  if (link.matches(LEGACY_UP_HREF_FOLLOW_SELECTOR)) {
+    link.setAttribute('up-follow', '')
+  }
+  modernMakeFollowable(link)
+}
+
 
 // We used to follow links with just an [up-instant] attribute.
 // Now that [up-instant] is also a way to make generic clickable elements "act on press"
