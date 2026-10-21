@@ -232,10 +232,13 @@ Turning off the `'location'` aspect has some consequences:
 
 - Unpoly adds no history entries, so there is nothing to [restore](/learn/restoring-history) when the user goes back.
 - `up.history.push()` and `up.history.replace()` do nothing.
+- Links to a `#hash` still scroll to the matching fragment, but don't change the URL.
 
 For every aspect that is turned off, a [layer](/api/up.layer) reports what it rendered, not what the browser shows.
 For example, `up.layer.location` is the URL of the rendered content,
 so an `[up-nav]` bar highlights links to the content instead of the unchanged address bar.
+Closing an [overlay](/learn/history-in-overlays) leaves aspects that are turned off alone,
+so a title that your own code set while the overlay was open is kept.
 
 
 Changing history from JavaScript {#history-api}

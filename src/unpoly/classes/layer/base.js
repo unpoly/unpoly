@@ -652,12 +652,13 @@ up.Layer = class Layer extends up.Record {
     // (2) Getters like this.title would always return this._savedTitle unless we're the front layer
     u.assert(this.isFront())
 
-    // For an aspect that is not live, the getter returns the saved value,
-    // so this only saves the aspects that Unpoly keeps in sync with the browser.
-    this._savedTitle = this.title
-    this._savedMetaTags = this.metaTags
-    this._savedLocation = this.location // synced except on the root layer before the initial location change
-    this._savedLang = this.lang
+    // (1) Only save the aspects that Unpoly keeps in sync with the browser.
+    // (2) An aspect that is not live already holds what this layer rendered.
+    //     If the root layer has not rendered it yet, its getter keeps following the browser.
+    if (this.showsLiveHistory('title')) this._savedTitle = document.title
+    if (this.showsLiveHistory('metaTags')) this._savedMetaTags = up.history.findMetaTags()
+    if (this.showsLiveHistory('location')) this._savedLocation = up.history.location
+    if (this.showsLiveHistory('lang')) this._savedLang = up.history.getLang()
   }
 
   restoreHistory() {

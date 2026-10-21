@@ -182,6 +182,8 @@ up.history = (function() {
   > [NOTE]
   > If the current [layer](/api/up.layer) does not have [visible history](/api/up.Layer.prototype.history),
   > the browser's address bar will show the location of an ancestor layer.
+  > When `up.history.config.enabled` [turns off](/learn/updating-history#disabling) the `'location'` aspect,
+  > the address bar keeps its URL while layers render other locations.
   > To get the location of the current layer, use `up.layer.location`.
 
   @property up.history.location

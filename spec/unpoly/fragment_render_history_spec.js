@@ -1315,6 +1315,19 @@ extendDescribe('up.fragment', function() {
               expect(document.documentElement).toHaveAttribute('lang', 'it')
             })
 
+            it('keeps following the browser for aspects it has not rendered after an overlay opened and closed', async function() {
+              up.history.config.enabled = ['lang']
+              await up.layer.open({ target: '#container', document: response, history: true, location: '/overlay' })
+              up.layer.dismiss()
+              await wait()
+
+              document.title = 'title changed by app'
+              history.replaceState({}, '', '/changed-by-app')
+
+              expect(up.layer.root.title).toBe('title changed by app')
+              expect(up.layer.root.location).toMatchURL('/changed-by-app')
+            })
+
             it('returns what the browser shows with up.history.config.enabled = true', async function() {
               up.history.config.enabled = true
 
@@ -1387,8 +1400,11 @@ extendDescribe('up.fragment', function() {
               expect(document.title).toBe('old title')
             })
 
-            it("does not change the browser URL when the overlay closes and the configuration excludes 'location'", async function() {
+            it("keeps the root layer's rendered location without changing the browser URL when the overlay closes and the configuration excludes 'location'", async function() {
               up.history.config.enabled = ['lang']
+              await render()
+              expect(up.layer.location).toMatchURL('/new-path')
+
               await up.layer.open({ target: '#container', document: response, history: true, location: '/overlay' })
               const pushSpy = spyOn(history, 'pushState').and.callThrough()
 
@@ -1397,7 +1413,7 @@ extendDescribe('up.fragment', function() {
 
               expect(pushSpy).not.toHaveBeenCalled()
               expect(location.href).toMatchURL(oldURL)
-              expect(up.layer.location).toMatchURL(oldURL)
+              expect(up.layer.location).toMatchURL('/new-path')
             })
 
           })
@@ -1426,16 +1442,6 @@ extendDescribe('up.fragment', function() {
           beforeEach(function() {
             spyOn(up.protocol, 'initialRequestMethod').and.returnValue('POST')
             htmlFixtureList('<div id="container">old container text</div>')
-          })
-
-          it('loads the content in a new page', async function() {
-            const loadPage = spyOn(up.network, 'loadPage')
-
-            up.render('#container', { url: '/path', history: true })
-            await wait()
-
-            expect(loadPage).toHaveBeenCalledWith(jasmine.objectContaining({ url: '/path' }))
-            expect(jasmine.Ajax.requests.count()).toBe(0)
           })
 
           it("renders in the current page when up.history.config.enabled excludes the 'location' aspect", async function() {

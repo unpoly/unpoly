@@ -104,7 +104,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     // (1) The parent's saved history will be restored when this new overlay is closed.
     // (2) Save the parent's history as long as it is the topmost layer in the stack,
-    //     otherwise parent.showsLiveHistory() becomes false.
+    //     otherwise parent.showsLiveHistory(aspect) becomes false for every aspect.
     this._baseLayer.saveHistory()
 
     // Don't wait for peeling to finish. Change the stack sync so there is no state
