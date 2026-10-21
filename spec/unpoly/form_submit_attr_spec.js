@@ -750,6 +750,46 @@ extendDescribe('up.form', function() {
             expect(up.fragment.get('#failure', { layer: 'root' })).toHaveText('new failure')
           })
 
+          if (up.migrate.loaded) {
+            it('translates a renamed layer attribute like [up-flavor] (now [up-mode])', async function() {
+              const warnSpy = up.migrate.warn.mock()
+              let [form, submitButton] = htmlFixtureList(`
+                <form up-submit up-target="#target" up-layer="new" up-flavor="drawer" action="/action" method="post">
+                  <input type="submit" value="Submit">
+                </form>
+
+                <div id="target">old target</div>
+              `)
+
+              up.hello(form)
+
+              expect(form).toHaveAttribute('up-mode', 'drawer')
+              expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('has been renamed'), 'up-flavor', 'up-mode', form)
+
+              Trigger.clickSequence(submitButton)
+              await wait()
+
+              jasmine.respondWith(`<div id="target">new target</div>`)
+              await wait()
+
+              expect(up.layer.current.mode).toBe('drawer')
+              expect(up.layer.current).toHaveText('new target')
+            })
+
+            it('warns about a removed layer attribute like [up-width]', function() {
+              const warnSpy = up.migrate.warn.mock()
+              let [form] = htmlFixtureList(`
+                <form up-submit up-target="#target" up-layer="new" up-width="300" action="/action" method="post">
+                  <input type="submit" value="Submit">
+                </form>
+              `)
+
+              up.hello(form)
+
+              expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('has been removed'), 'up-width', form, '[up-size] or [up-class]')
+            })
+          }
+
         })
 
         describe('with [up-fail-layer="new"]', function() {

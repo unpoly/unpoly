@@ -3,15 +3,19 @@
 */
 
 const followSelectorFn = up.link.config.selectorFn('followSelectors')
+const submitSelectorFn = up.form.config.selectorFn('submitSelectors')
 const preloadSelectorFn = up.link.config.selectorFn('preloadSelectors')
 
-up.migrate.renamedAttribute('up-flavor', 'up-mode', { scope: followSelectorFn })
-up.migrate.renamedAttribute('up-closable', 'up-dismissible', { scope: followSelectorFn })
-up.migrate.renamedAttribute('up-dismissable', 'up-dismissible', { scope: followSelectorFn })
-up.migrate.removedAttribute('up-width', { scope: followSelectorFn, replacement: '[up-size] or [up-class]' })
-up.migrate.removedAttribute('up-height', { scope: followSelectorFn, replacement: '[up-size] or [up-class]' })
-up.migrate.renamedAttribute('up-history-visible', 'up-history', { scope: followSelectorFn })
-up.migrate.renamedAttribute('up-clear-cache', 'up-expire-cache', { scope: followSelectorFn })
+// Links and forms can open overlays, so old layer attributes are translated on both.
+const layerOpenerSelectorFn = () => [followSelectorFn(), submitSelectorFn()].join()
+
+up.migrate.renamedAttribute('up-flavor', 'up-mode', { scope: layerOpenerSelectorFn })
+up.migrate.renamedAttribute('up-closable', 'up-dismissible', { scope: layerOpenerSelectorFn })
+up.migrate.renamedAttribute('up-dismissable', 'up-dismissible', { scope: layerOpenerSelectorFn })
+up.migrate.removedAttribute('up-width', { scope: layerOpenerSelectorFn, replacement: '[up-size] or [up-class]' })
+up.migrate.removedAttribute('up-height', { scope: layerOpenerSelectorFn, replacement: '[up-size] or [up-class]' })
+up.migrate.renamedAttribute('up-history-visible', 'up-history', { scope: layerOpenerSelectorFn })
+up.migrate.renamedAttribute('up-clear-cache', 'up-expire-cache', { scope: layerOpenerSelectorFn })
 up.migrate.renamedAttribute('up-bad-response-time', 'up-late-delay')
 
 up.migrate.transformAttribute('up-solo', function(link, solo) {
