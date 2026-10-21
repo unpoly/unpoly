@@ -219,6 +219,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 
 ### Smaller fixes and changes
 
+- ❌ The [3.13.0 release notes](/changes/3.13.0) named the setting for callback nonces `up.script.config.callbackPolicy`. The correct name is [`up.script.config.evalCallbackPolicy`](/api/up.script.config#config.evalCallbackPolicy). If you copied the wrong name, Unpoly ignored your setting and used the default policy `'auto'`. Search your code for `callbackPolicy` and rename it. `unpoly-migrate.js` now forwards the wrong name and logs a warning.
 - ⚠️ `unpoly.js` is now compiled using ES2024 (up from ES2021). It needs Chrome 119, Firefox 121 or Safari 17.4, all released by March 2024. The [ES6 build](/learn/legacy-browsers#es6-build) for legacy browsers remains available.
 - ⚠️ A `click` event dispatched by a script is no longer passed to [`up.on()`](/api/up.on) callbacks when the element has a `[disabled]` attribute, even for elements that browsers cannot disable. Before, only a `disabled` property had this effect.
 - The npm package now also includes source maps for the unminified files, like `unpoly.js.map`.

@@ -7,6 +7,11 @@ const e = up.element
 
 up.migrate.renamedPackage('syntax', 'script')
 
+up.script.config.patch(function(config) {
+  // The 3.13.0 release notes named this setting wrongly, and apps copied the name.
+  up.migrate.renamedProperty(config, 'callbackPolicy', 'evalCallbackPolicy', { warning: 'There is no setting up.script.config.callbackPolicy. Use up.script.config.evalCallbackPolicy instead.' })
+})
+
 up.migrate.postCompile = function(elements, compiler) {
   // up.compiler() has a legacy { keep } option that will automatically
   // set [up-keep] on the elements it compiles

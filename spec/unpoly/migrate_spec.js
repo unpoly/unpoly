@@ -253,6 +253,7 @@ if (up.migrate.loaded) {
           ['up.network.config', 'cacheExpiry', 'cacheExpireAge'],
           ['up.network.config', 'clearCache', 'expireCache'],
           ['up.radio.config', 'hungry', 'hungrySelectors'],
+          ['up.script.config', 'callbackPolicy', 'evalCallbackPolicy'],
           ['up.status.config', 'navs', 'navSelectors'],
           ['up.viewport.config', 'viewports', 'viewportSelectors'],
           ['up.viewport.config', 'fixedTop', 'fixedTopSelectors'],
