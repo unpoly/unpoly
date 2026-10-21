@@ -172,7 +172,8 @@ up.macro(LEGACY_UP_HREF_FOLLOW_SELECTOR, { priority: -50 }, function(element) {
 // We used to follow links with just an [up-instant] attribute.
 // Now that [up-instant] is also a way to make generic clickable elements "act on press"
 // we require users to set an [up-follow] attribute.
-const LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR = `[up-instant]:is(a[href], ${LEGACY_UP_HREF_FOLLOW_SELECTOR})`
+// We don't need to match [up-href] elements, since the macro above gives them [up-follow].
+const LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR = 'a[href][up-instant]'
 
 up.link.config.patch(function(config) {
   config.followSelectors.push(LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR)
