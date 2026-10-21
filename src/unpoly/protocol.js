@@ -1101,7 +1101,7 @@ up.protocol = (function() {
 
   @stable
   */
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.protocol.config', () => ({
     methodParam: '_method',
     csrfParam() { return e.metaContent('csrf-param') },
     csrfToken() { return e.metaContent('csrf-token') },

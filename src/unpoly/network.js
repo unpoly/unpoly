@@ -141,7 +141,7 @@ up.network = (function() {
 
   @stable
   */
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.network.config', () => ({
     concurrency: 6,
     wrapMethod: true,
     cacheEnabled: true,

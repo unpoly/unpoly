@@ -91,7 +91,7 @@ up.history = (function() {
 
   @stable
   */
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.history.config', () => ({
     enabled: true,
     // Prefer restoring the body instead of :main, in case the last fragment update
     // changed the page layout. See https://github.com/unpoly/unpoly/issues/237.

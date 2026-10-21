@@ -6,7 +6,7 @@ const u = up.util
 */
 up.migrate = (function() {
 
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.migrate.config', () => ({
     logLevel: 'error'
   }))
 

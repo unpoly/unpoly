@@ -253,7 +253,6 @@ afterEach(function() {
 const appendDefaultFallback = (parent) => e.affix(parent, 'default-fallback')
 
 beforeEach(function() {
-  up.fragment.config.resetTargets = []
   u.remove(up.layer.config.any.mainTargets, ':layer')
   up.layer.config.any.mainTargets.push('default-fallback')
   up.layer.config.overlay.mainTargets.push(':layer') // this would usually be in config.any, but have removed it

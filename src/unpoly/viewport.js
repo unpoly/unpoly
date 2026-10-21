@@ -92,7 +92,7 @@ up.viewport = (function() {
       @experimental
   @stable
   */
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.viewport.config', () => ({
     viewportSelectors: ['[up-viewport]', '[up-fixed]'],
     fixedTopSelectors: ['[up-fixed~=top]'],
     fixedBottomSelectors: ['[up-fixed~=bottom]'],

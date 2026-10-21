@@ -37,7 +37,7 @@ up.motion = (function() {
     This can be useful in full-stack integration tests.
   @stable
   */
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.motion.config', () => ({
     duration: 175,
     easing: 'ease',
     enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches

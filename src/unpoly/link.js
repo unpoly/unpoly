@@ -114,7 +114,7 @@ up.link = (function() {
 
   @stable
   */
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.link.config', () => ({
     // (1) We want to follow all elements with an [up-follow] attribute.
     //     This can be an <a up-follow href="/path"> or an <span up-follow up-href="/path">
     // (2) Users expect a link to be followable if it uses a signature attribute

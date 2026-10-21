@@ -160,7 +160,7 @@ up.form = (function() {
 
   @stable
    */
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.form.config', () => ({
     groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
     fieldSelectors: [
       'select',

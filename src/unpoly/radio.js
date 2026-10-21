@@ -40,7 +40,7 @@ up.radio = (function() {
 
   @stable
   */
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.radio.config', () => ({
     hungrySelectors: ['[up-hungry]'],
     noHungrySelectors: ['[up-hungry=false]'],
     pollInterval: 30000,

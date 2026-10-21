@@ -177,7 +177,7 @@ up.layer = (function() {
 
   @stable
   */
-  const config = new up.Config(function() {
+  const config = new up.Config('up.layer.config', function() {
     const newConfig = {
       mode: 'modal',
       any: {

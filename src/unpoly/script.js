@@ -77,7 +77,7 @@ up.script = (function() {
   @property up.script.config
   @stable
   */
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.script.config', () => ({
     cspNonce() { return e.metaContent('csp-nonce') },
     cspWarnings: true,
     scriptElementPolicy: 'auto',

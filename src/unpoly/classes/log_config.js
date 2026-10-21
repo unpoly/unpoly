@@ -15,7 +15,7 @@ try {
 up.LogConfig = class LogConfig extends up.Config {
 
   constructor() {
-    super(() => ({
+    super('up.log.config', () => ({
       banner: true,
       format: true,
     }))

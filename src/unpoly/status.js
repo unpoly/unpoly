@@ -44,7 +44,7 @@ up.status = (function() {
 
   @stable
   */
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.status.config', () => ({
     currentClasses: ['up-current'],
     activeClasses: ['up-active'],
     loadingClasses: ['up-loading'],

@@ -219,7 +219,7 @@ up.fragment = (function() {
 
   @stable
   */
-  const config = new up.Config(() => ({
+  const config = new up.Config('up.fragment.config', () => ({
     badTargetClasses: [/^up-/],
 
     strongTargetDerivers: STRONG_TARGET_DERIVERS,
