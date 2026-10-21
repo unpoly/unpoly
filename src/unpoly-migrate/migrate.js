@@ -109,9 +109,16 @@ up.migrate = (function() {
     })
   }
 
-  function fixKey(object, oldKey, newKey) {
+  // Pass a { label } like 'up.layer.config.modal' or 'render options' to name the object in the warning.
+  // Without a label we print the object itself, which is hard to read for large or circular objects.
+  // A labeled warning also has the same text for every object, so we only print it once.
+  function fixKey(object, oldKey, newKey, { label } = {}) {
     if (u.isDefined(object[oldKey])) {
-      warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+      if (label) {
+        warn('Property { %s } has been renamed to { %s } (found in %s)', oldKey, newKey, label)
+      } else {
+        warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
+      }
       u.renameKey(object, oldKey, newKey)
     }
   }

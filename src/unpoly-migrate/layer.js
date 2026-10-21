@@ -3,18 +3,18 @@
 */
 
 // Renamed keys that may be passed as layer options or set in a layer config object.
-function fixRenamedLayerKeys(object) {
-  up.migrate.fixKey(object, 'closable', 'dismissible')
-  up.migrate.fixKey(object, 'dismissable', 'dismissible')
-  up.migrate.fixKey(object, 'closeLabel', 'dismissLabel')
-  up.migrate.fixKey(object, 'dismissAriaLabel', 'dismissARIALabel')
-  up.migrate.fixKey(object, 'historyVisible', 'history')
+function fixRenamedLayerKeys(object, label) {
+  up.migrate.fixKey(object, 'closable', 'dismissible', { label })
+  up.migrate.fixKey(object, 'dismissable', 'dismissible', { label })
+  up.migrate.fixKey(object, 'closeLabel', 'dismissLabel', { label })
+  up.migrate.fixKey(object, 'dismissAriaLabel', 'dismissARIALabel', { label })
+  up.migrate.fixKey(object, 'historyVisible', 'history', { label })
 }
 
 up.migrate.handleLayerOptions = function(options) {
   // Only options can have a { flavor }, since a config object belongs to a mode.
-  up.migrate.fixKey(options, 'flavor', 'mode')
-  fixRenamedLayerKeys(options)
+  up.migrate.fixKey(options, 'flavor', 'mode', { label: 'layer options' })
+  fixRenamedLayerKeys(options, 'layer options')
 
   for (let dimensionKey of ['width', 'maxWidth', 'height']) {
     if (options[dimensionKey]) {
@@ -77,7 +77,23 @@ layer.registerAttrCloser('up-close', (value, closeOptions) => {
   layer.dismiss(value, closeOptions)
 })
 
-up.migrate.handleLayerConfig = fixRenamedLayerKeys
+// Apps usually configure layers before Unpoly boots, so we check all mode configs once at boot.
+up.migrate.fixLayerConfigs = function() {
+  for (let [mode, modeConfig] of Object.entries(up.layer.config)) {
+    if (up.util.isOptions(modeConfig)) {
+      fixRenamedLayerKeys(modeConfig, `up.layer.config.${mode}`)
+    }
+  }
+}
+
+up.on('up:framework:boot', up.migrate.fixLayerConfigs)
+
+// The app may still set a renamed key after booting, so we also check the mode configs for every new layer.
+// Since the warning names the config object, it is only printed once per key and config object.
+up.migrate.handleLayerConfig = function(modeConfig) {
+  let [mode] = Object.entries(up.layer.config).find(([_mode, value]) => value === modeConfig)
+  fixRenamedLayerKeys(modeConfig, `up.layer.config.${mode}`)
+}
 
 Object.defineProperty(up.Layer.prototype, 'historyVisible', { get: function() {
   up.migrate.deprecated('up.Layer#historyVisible', 'up.Layer#history')

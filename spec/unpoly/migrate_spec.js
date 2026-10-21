@@ -97,6 +97,29 @@ if (up.migrate.loaded) {
 
       })
 
+      it('prints the object in the warning', function() {
+        const warnSpy = up.migrate.warn.mock()
+        let obj = { foo: 123 }
+        up.migrate.fixKey(obj, 'foo', 'bar')
+
+        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('(found in %o)'), 'foo', 'bar', obj)
+      })
+
+      it('names the object by the given { label }', function() {
+        const warnSpy = up.migrate.warn.mock()
+        up.migrate.fixKey({ foo: 123 }, 'foo', 'bar', { label: 'render options' })
+
+        expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property { foo } has been renamed to { bar } (found in render options)')
+      })
+
+      it('prints a labeled warning only once for multiple objects', function() {
+        const errorSpy = spyOn(up.log, 'error')
+        up.migrate.fixKey({ foo: 1 }, 'foo', 'bar', { label: 'render options' })
+        up.migrate.fixKey({ foo: 2 }, 'foo', 'bar', { label: 'render options' })
+
+        expect(errorSpy.calls.count()).toBe(1)
+      })
+
     })
 
     describe('up.migrate.renamedProperty()', function() {

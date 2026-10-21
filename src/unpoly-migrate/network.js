@@ -59,7 +59,7 @@ up.network.config.patch(function(config) {
 })
 
 up.migrate.handleRequestOptions = function(options) {
-  up.migrate.fixKey(options, 'clearCache', 'expireCache')
+  up.migrate.fixKey(options, 'clearCache', 'expireCache', { label: 'request options' })
 
   if (options.solo) {
     up.migrate.warn('The option up.request({ solo }) has been removed. Use up.network.abort() or up.fragment.abort() instead.')

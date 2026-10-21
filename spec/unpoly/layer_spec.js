@@ -54,8 +54,39 @@ describe('up.layer', function() {
 
           expect(layer.dismissLabel).toBe('Close')
           expect(layer.dismissible).toMatchList(['button', 'key'])
-          expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'closeLabel', 'dismissLabel', jasmine.anything())
-          expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'dismissable', 'dismissible', jasmine.anything())
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'closeLabel', 'dismissLabel', 'up.layer.config.overlay')
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'dismissable', 'dismissible', 'up.layer.config.modal')
+        })
+
+        it('only prints a warning once when the user configured a deprecated key again after opening a layer', function() {
+          const errorSpy = spyOn(up.log, 'error')
+
+          up.layer.config.modal.closable = false
+          up.layer.build({ mode: 'modal' })
+          up.layer.config.modal.closable = false
+          up.layer.build({ mode: 'modal' })
+
+          expect(up.layer.config.modal).not.toHaveKey('closable')
+          expect(up.layer.config.modal.dismissible).toBe(false)
+          expect(errorSpy.calls.count()).toBe(1)
+          expect(u.sprintf(...errorSpy.calls.argsFor(0).slice(1))).toBe('Property { closable } has been renamed to { dismissible } (found in up.layer.config.modal)')
+        })
+
+        describe('when Unpoly boots', function() {
+          it('renames deprecated keys in all mode configs, so the warning appears before the first overlay opens', function() {
+            up.layer.config.popup.closeLabel = 'Close'
+            up.layer.config.any.historyVisible = false
+            const warnSpy = up.migrate.warn.mock()
+
+            up.migrate.fixLayerConfigs()
+
+            expect(up.layer.config.popup).not.toHaveKey('closeLabel')
+            expect(up.layer.config.popup.dismissLabel).toBe('Close')
+            expect(up.layer.config.any).not.toHaveKey('historyVisible')
+            expect(up.layer.config.any.history).toBe(false)
+            expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'closeLabel', 'dismissLabel', 'up.layer.config.popup')
+            expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'historyVisible', 'history', 'up.layer.config.any')
+          })
         })
       }
     })
@@ -641,6 +672,17 @@ describe('up.layer', function() {
             const options = { flavor: 'cover' }
             up.layer.normalizeOptions(options)
             expect(options).toEqual(jasmine.objectContaining({ layer: 'new', mode: 'cover' }))
+          })
+        })
+
+        describe('for a renamed option like { closable } (which is now { dismissible })', function() {
+          it('renames the option and names the layer options in the warning', function() {
+            const warnSpy = up.migrate.warn.mock()
+            const options = { layer: 'new', closable: false }
+            up.layer.normalizeOptions(options)
+            expect(options).toEqual(jasmine.objectContaining({ dismissible: false }))
+            expect(options).not.toHaveKey('closable')
+            expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'closable', 'dismissible', 'layer options')
           })
         })
 
