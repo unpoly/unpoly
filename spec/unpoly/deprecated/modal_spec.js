@@ -20,11 +20,14 @@ if (up.migrate.loaded) {
 
     describe('up.modal.extract()', function() {
       it('opens the given HTML in a new modal overlay', async function() {
+        const warnSpy = up.migrate.warn.mock()
         await up.modal.extract('.target', '<div class="target">modal content</div>')
 
         expect(up.layer.count).toBe(2)
         expect(up.layer.mode).toBe('modal')
         expect(up.layer.current).toHaveText('modal content')
+        expect(warnSpy.calls.count()).toBe(1)
+        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.modal.extract(target, document) has been deprecated'))
       })
     })
 

@@ -58,7 +58,7 @@ up.modal = {
   */
   extract(target, html, options = {}) {
     up.migrate.deprecated('up.modal.extract(target, document)', 'up.layer.open({ document, mode: "modal" })')
-    return up.layer.open({ ...options, target, html, layer: 'new', mode: 'modal' })
+    return up.layer.open({ ...options, target, document: html, layer: 'new', mode: 'modal' })
   },
 
   /*-
