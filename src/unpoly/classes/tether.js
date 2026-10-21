@@ -4,7 +4,6 @@ const e = up.element
 up.Tether = class Tether {
 
   constructor(options) {
-    up.migrate.handleTetherOptions?.(options)
     this._anchor = options.anchor
     this._align = options.align
     this._position = options.position
