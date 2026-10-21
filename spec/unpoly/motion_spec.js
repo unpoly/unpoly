@@ -8,6 +8,20 @@ describe('up.motion', function() {
 
     describe('up.animate()', function() {
 
+      it('applies the last frame and settles without waiting for an animation frame when motion is disabled', async function() {
+        up.motion.config.enabled = false
+        const element = fixture('.element', { text: 'content', style: { opacity: '0.5' } })
+        const animateSpy = spyOn(element, 'animate').and.callThrough()
+
+        const promise = up.animate(element, { opacity: 0 }, { duration: 200 })
+
+        await jasmine.waitMicrotasks(10)
+
+        expect(element).toHaveOwnOpacity(0.0, 0.0)
+        await expectAsync(promise).already.toBeResolved()
+        expect(animateSpy).not.toHaveBeenCalled()
+      })
+
       it('animates the given element to a frame of kebab-case CSS properties', async function() {
         const element = fixture('.element', { text: 'content', style: { opacity: 0 } })
         up.animate(element, { opacity: 1 }, { duration: 200, easing: 'linear' })

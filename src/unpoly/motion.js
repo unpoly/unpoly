@@ -277,6 +277,15 @@ up.motion = (function() {
   @internal
   */
   async function animateNow(element, lastFrame, { duration, easing, finishedFrame }) {
+    // There is also Animation#commitStyles(), but that has two issues:
+    // (A) Throws on detached elements
+    // (B) Can't set an empty last frame property, e.g. when we're transforming towards { transform: '' }
+    let applyFinishedFrame = () => e.setStyle(element, finishedFrame ?? lastFrame)
+
+    // A Web Animation with a duration of 0 (e.g. with disabled motion) would only finish
+    // on the next animation frame. We don't want to depend on the rendering loop when nothing moves.
+    if (!duration) return applyFinishedFrame()
+
     // if (up.migrate.loaded) lastFrame = up.migrate.fixSetStyleProps(lastFrame)
     // TODO: We could accepting camelCase everywhere we now run fixSetStyleProps or fixStyleProps
     let camelizedLastFrame = u.withRenamedKeys(lastFrame, u.kebabToCamelCase)
@@ -284,11 +293,7 @@ up.motion = (function() {
     let offFinish
     let conclude = () => {
       animation.finish()
-      // There is also Animation#commitStyles(), but that has two issues:
-      // (A) Throws on detached elements
-      // (B) Can't set an empty last frame property, e.g. when we're transforming towards { transform: '' }
-      e.setStyle(element, finishedFrame ?? lastFrame)
-
+      applyFinishedFrame()
       animation.cancel()
       offFinish()
     }
