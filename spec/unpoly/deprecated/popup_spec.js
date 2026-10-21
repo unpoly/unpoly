@@ -46,17 +46,51 @@ if (up.migrate.loaded) {
     })
 
     describe('position with alignment, like { position: "bottom-right" }', function() {
-      it('is split into { position } and { align }', async function() {
+      it('is split into { position } and { align } for the layer and its element', async function() {
         const warnSpy = up.migrate.warn.mock()
         const origin = fixture('a#origin', { text: 'origin' })
-        const alignSpy = spyOn(up.Tether.prototype, 'start').and.callThrough()
         await up.layer.open({ mode: 'popup', origin, content: 'popup content', position: 'bottom-right' })
 
-        expect(alignSpy).toHaveBeenCalled()
-        const tether = alignSpy.calls.mostRecent().object
-        expect(tether._position).toBe('bottom')
-        expect(tether._align).toBe('right')
-        expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('The position value %o is deprecated'), 'bottom-right', { position: 'bottom', align: 'right' })
+        expect(up.layer.current.position).toBe('bottom')
+        expect(up.layer.current.align).toBe('right')
+        expect(up.layer.element).toHaveAttribute('position', 'bottom')
+        expect(up.layer.element).toHaveAttribute('align', 'right')
+        expect(warnSpy).toHaveBeenCalledOnceWith(jasmine.stringContaining('The position value %o is deprecated'), 'bottom-right', { position: 'bottom', align: 'right' })
+      })
+
+      it('places the popup below the origin, aligned to its right edge', async function() {
+        up.migrate.warn.mock()
+        const origin = fixture('a#origin', { text: 'origin', style: 'position: absolute; left: 300px; top: 50px; width: 100px; height: 20px' })
+        await up.layer.open({ mode: 'popup', origin, content: '<div style="width: 50px">popup content</div>', position: 'bottom-right' })
+
+        const originRect = origin.getBoundingClientRect()
+        const popupRect = up.layer.element.getBoundingClientRect()
+        expect(popupRect.top).toBeAround(originRect.bottom, 1)
+        expect(popupRect.right).toBeAround(originRect.right, 1)
+      })
+
+      it('is split when given as an [up-position] attribute', async function() {
+        up.migrate.warn.mock()
+        const [link] = htmlFixtureList('<a up-follow up-layer="new popup" up-position="bottom-right" up-content="popup content">label</a>')
+
+        Trigger.clickSequence(link)
+        await wait()
+
+        expect(up.layer.current.mode).toBe('popup')
+        expect(up.layer.element).toHaveAttribute('position', 'bottom')
+        expect(up.layer.element).toHaveAttribute('align', 'right')
+      })
+
+      it('is split when set in up.layer.config.popup', async function() {
+        up.migrate.warn.mock()
+        up.layer.config.popup.position = 'bottom-right'
+        const origin = fixture('a#origin', { text: 'origin' })
+        await up.layer.open({ mode: 'popup', origin, content: 'popup content' })
+
+        expect(up.layer.config.popup.position).toBe('bottom')
+        expect(up.layer.config.popup.align).toBe('right')
+        expect(up.layer.element).toHaveAttribute('position', 'bottom')
+        expect(up.layer.element).toHaveAttribute('align', 'right')
       })
     })
 

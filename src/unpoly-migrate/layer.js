@@ -2,13 +2,28 @@
 @module up.layer
 */
 
-// Renamed keys that may be passed as layer options or set in a layer config object.
+// Renamed keys and values that may be passed as layer options or set in a layer config object.
 function fixRenamedLayerKeys(object, label) {
   up.migrate.fixKey(object, 'closable', 'dismissible', { label })
   up.migrate.fixKey(object, 'dismissable', 'dismissible', { label })
   up.migrate.fixKey(object, 'closeLabel', 'dismissLabel', { label })
   up.migrate.fixKey(object, 'dismissAriaLabel', 'dismissARIALabel', { label })
   up.migrate.fixKey(object, 'historyVisible', 'history', { label })
+  splitPosition(object)
+}
+
+// Popups used to combine their position and alignment in a single value like 'bottom-right'.
+// We split it before the layer is built, so the layer and its element see the modern { position, align }.
+function splitPosition(object) {
+  if (!up.util.isString(object.position)) return
+
+  const [position, align] = object.position.split('-')
+
+  if (align) {
+    up.migrate.warn('The position value %o is deprecated. Use %o instead.', object.position, { position, align })
+    object.position = position
+    object.align = align
+  }
 }
 
 up.migrate.handleLayerOptions = function(options) {
@@ -45,16 +60,6 @@ up.migrate.handleLayerOptions = function(options) {
     options.layer = 'new'
   }
 
-}
-
-up.migrate.handleTetherOptions = function(options) {
-  const [position, align] = options.position.split('-')
-
-  if (align) {
-    up.migrate.warn('The position value %o is deprecated. Use %o instead.', options.position, { position, align })
-    options.position = position
-    options.align = align
-  }
 }
 
 /*-
