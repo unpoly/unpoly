@@ -433,6 +433,7 @@ if (up.migrate.loaded) {
           ['up.event.nobodyPrevents()', () => up.event.nobodyPrevents('custom:event'), true],
           ['up.motion.isEnabled()', () => up.motion.isEnabled() === up.motion.config.enabled, true],
           ['up.network.isIdle()', () => up.network.isIdle(), true],
+          ['up.history.url()', () => up.history.url() === up.history.location, true],
           ['up.Response#isSuccess()', () => new up.Response({ status: 200 }).isSuccess(), true],
           ['up.Response#isError()', () => new up.Response({ status: 500 }).isError(), true],
           ['up.Response#getHeader()', () => new up.Response({ headers: { 'X-Foo': 'bar' } }).getHeader('X-Foo'), 'bar'],
