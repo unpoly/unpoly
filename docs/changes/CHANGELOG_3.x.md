@@ -317,7 +317,7 @@ See [Security for script elements](/learn/script-security#script-elements).
 
 #### Callbacks
 
-Added a new setting `up.script.config.callbackPolicy`. This lets you control whether Unpoly will execute string callbacks in attributes or response headers:
+Added a new setting `up.script.config.evalCallbackPolicy`. This lets you control whether Unpoly will execute string callbacks in attributes or response headers:
 
 ```html
 <a
@@ -337,7 +337,7 @@ Added a new setting `up.script.config.callbackPolicy`. This lets you control whe
 
 ❌ By default Unpoly will parse and execute callbacks, but require a nonce once you set a `<meta name="csp-nonce">` in your `<head>`.
 
-You can configure `up.script.config.callbackPolicy` to block all callbacks, or to only allow [callbacks with a valid nonce](/learn/script-security#callback-nonces):
+You can configure `up.script.config.evalCallbackPolicy` to block all callbacks, or to only allow [callbacks with a valid nonce](/learn/script-security#callback-nonces):
 
 | `evalCallbackPolicy` | Runs without CSP?  | Runs with CSP?        | Runs with CSP and [`<meta name="csp-nonce">`](/learn/script-security#meta-csp-nonce)? |
 |----------------------|--------------------|-----------------------|----------------------------------------------------------------------------------|
@@ -356,7 +356,7 @@ Unpoly will now log warnings for configurations or CSP headers it considers over
 
 
 ```text
-An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks. Consider setting up.script.config.callbackPolicy = 'nonce'.
+An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks. Consider setting up.script.config.evalCallbackPolicy = 'nonce'.
 ```
 
 You can disable these warnings with `up.script.config.cspWarnings = false`.
