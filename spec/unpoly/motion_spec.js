@@ -1228,6 +1228,19 @@ describe('up.motion', function() {
       })
     })
 
+    if (up.migrate.loaded) {
+      describe('up.motion.isEnabled()', function() {
+        it('returns up.motion.config.enabled (deprecated)', function() {
+          const warnSpy = up.migrate.warn.mock()
+          up.motion.config.enabled = false
+          expect(up.motion.isEnabled()).toBe(false)
+          up.motion.config.enabled = true
+          expect(up.motion.isEnabled()).toBe(true)
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.motion.isEnabled() has been deprecated'))
+        })
+      })
+    }
+
     describe('up.motion.config', function() {
 
       function stubReducedMotion(reduce) {

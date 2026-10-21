@@ -1,9 +1,8 @@
-let modernFinish = up.motion.finish
+/*-
+@module up.motion
+*/
 
-up.motion.finish = function(...args) {
-  modernFinish(...args)
-  return up.migrate.formerlyAsync('up.motion.finish()')
-}
+// up.motion.finish() already returns up.migrate.formerlyAsync() from core.
 
 /*-
 Returns whether Unpoly will perform animations and transitions.
