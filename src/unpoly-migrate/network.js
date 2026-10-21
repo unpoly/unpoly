@@ -67,11 +67,11 @@ up.migrate.handleRequestOptions = function(options) {
 }
 
 up.on('up:request:loaded', function(event) {
-  if (event.response.headers['X-Up-Expire-Cache'] === 'false') {
+  if (event.response.header('X-Up-Expire-Cache') === 'false') {
     up.migrate.warn('The server can no longer override an { expireCache } option using an `X-Up-Expire-Cache: false` response header')
   }
 
-  if (event.response.headers['X-Up-Evict-Cache'] === 'false') {
+  if (event.response.header('X-Up-Evict-Cache') === 'false') {
     up.migrate.warn('The server can no longer override an { evictCache } option using an `X-Up-Evict-Cache: false` response header')
   }
 })

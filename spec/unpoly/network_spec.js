@@ -331,6 +331,20 @@ describe('up.network', function() {
           expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.network.shouldReduceRequests() has been removed'))
         })
       })
+
+      describe('X-Up-Expire-Cache: false and X-Up-Evict-Cache: false response headers', function() {
+        it('prints a warning, since the server can no longer override the client option', async function() {
+          const warnSpy = up.migrate.warn.mock()
+          up.request('/path')
+          await wait()
+
+          jasmine.respondWith({ responseText: 'text', responseHeaders: { 'X-Up-Expire-Cache': 'false', 'X-Up-Evict-Cache': 'false' } })
+          await wait()
+
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('X-Up-Expire-Cache: false'))
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('X-Up-Evict-Cache: false'))
+        })
+      })
     }
 
     describe('up.network.abort()', function() {
