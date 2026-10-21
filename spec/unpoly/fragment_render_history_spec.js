@@ -1142,7 +1142,7 @@ extendDescribe('up.fragment', function() {
 
         })
 
-        describe('with up.history.config.enabled set to an array of parts', function() {
+        describe('with up.history.config.enabled set to an array of aspects', function() {
 
           const response = `
             <html lang="fr">
@@ -1250,14 +1250,156 @@ extendDescribe('up.fragment', function() {
             expect(document.title).toBe('new title')
           })
 
-          it('does not update html[lang] when rendering into an overlay without visible history', async function() {
-            up.history.config.enabled = ['lang']
-            await up.layer.open({ target: '#container', content: 'old overlay text', history: false })
+          describe('history state of the root layer', function() {
 
-            await render()
+            it('returns what the browser shows before the layer has rendered history', function() {
+              up.history.config.enabled = ['lang']
 
-            expect(up.layer.current).toHaveText('new container text')
-            expect(document.documentElement).toHaveAttribute('lang', 'it')
+              expect(up.layer.root.location).toMatchURL(oldURL)
+              expect(up.layer.root.title).toBe('old title')
+              expect(Array.from(up.layer.root.metaTags)).toContain(document.head.querySelector('meta[name="description"]'))
+            })
+
+            it("returns the rendered location when the configuration excludes 'location'", async function() {
+              up.history.config.enabled = ['lang']
+
+              await render()
+
+              expect(up.layer.location).toMatchURL('/new-path')
+              expect(location.href).toMatchURL(oldURL)
+            })
+
+            it("marks [up-nav] links to the rendered location as .up-current when the configuration excludes 'location'", async function() {
+              up.history.config.enabled = ['lang']
+              const [nav, newLink, oldLink] = htmlFixtureList(`
+                <nav up-nav>
+                  <a href="/new-path">new</a>
+                  <a href="${up.history.location}">old</a>
+                </nav>
+              `)
+              up.hello(nav)
+              expect(oldLink).toHaveClass('up-current')
+
+              await render()
+
+              expect(newLink).toHaveClass('up-current')
+              expect(oldLink).not.toHaveClass('up-current')
+            })
+
+            it("returns the rendered title when the configuration excludes 'title'", async function() {
+              up.history.config.enabled = ['lang']
+
+              await render()
+
+              expect(up.layer.current.title).toBe('new title')
+              expect(document.title).toBe('old title')
+            })
+
+            it("returns the rendered meta tags when the configuration excludes 'metaTags'", async function() {
+              up.history.config.enabled = ['lang']
+
+              await render()
+
+              let contents = u.map(up.layer.current.metaTags, (metaTag) => metaTag.getAttribute('content'))
+              expect(contents).toContain('new description')
+              expect(contents).not.toContain('old description')
+              expect(document.head).toHaveSelector('meta[name="description"][content="old description"]')
+            })
+
+            it("returns the rendered lang when the configuration excludes 'lang'", async function() {
+              up.history.config.enabled = ['title']
+
+              await render()
+
+              expect(up.layer.current.lang).toBe('fr')
+              expect(document.documentElement).toHaveAttribute('lang', 'it')
+            })
+
+            it('returns what the browser shows with up.history.config.enabled = true', async function() {
+              up.history.config.enabled = true
+
+              await render()
+              history.replaceState({}, '', '/changed-by-script')
+              document.title = 'title changed by script'
+
+              expect(up.layer.location).toMatchURL('/changed-by-script')
+              expect(up.layer.current.title).toBe('title changed by script')
+            })
+
+          })
+
+          describe('history state of an overlay', function() {
+
+            it("returns the rendered location and marks [up-nav] links to it as .up-current when the configuration excludes 'location'", async function() {
+              up.history.config.enabled = ['lang']
+
+              await up.layer.open({
+                history: true,
+                location: '/overlay',
+                fragment: `
+                  <div id="overlay-content">
+                    <nav up-nav>
+                      <a href="/overlay">overlay</a>
+                    </nav>
+                  </div>
+                `
+              })
+
+              expect(up.layer.isOverlay()).toBe(true)
+              expect(up.layer.location).toMatchURL('/overlay')
+              expect(location.href).toMatchURL(oldURL)
+              expect(up.fragment.get('a[href="/overlay"]')).toHaveClass('up-current')
+            })
+
+            it("does not restore the title when the overlay closes and the configuration excludes 'title'", async function() {
+              up.history.config.enabled = ['lang']
+              await up.layer.open({ target: '#container', document: response, history: true, location: '/overlay' })
+              expect(up.layer.current.title).toBe('new title')
+
+              document.title = 'title changed by app'
+              up.layer.dismiss()
+              await wait()
+
+              expect(document.title).toBe('title changed by app')
+            })
+
+            it("does not restore meta tags when the overlay closes and the configuration excludes 'metaTags'", async function() {
+              up.history.config.enabled = ['lang']
+              await up.layer.open({ target: '#container', document: response, history: true, location: '/overlay' })
+
+              fixture(document.head, 'meta[name="keywords"][content="added by app"]')
+              up.layer.dismiss()
+              await wait()
+
+              expect(document.head).toHaveSelector('meta[name="keywords"][content="added by app"]')
+            })
+
+            it("does not restore html[lang] when the overlay closes and the configuration excludes 'lang'", async function() {
+              up.history.config.enabled = ['title']
+              await up.layer.open({ target: '#container', document: response, history: true, location: '/overlay' })
+              expect(document.title).toBe('new title')
+
+              document.documentElement.setAttribute('lang', 'es')
+              up.layer.dismiss()
+              await wait()
+
+              expect(document.documentElement).toHaveAttribute('lang', 'es')
+              expect(document.title).toBe('old title')
+            })
+
+            it("does not change the browser URL when the overlay closes and the configuration excludes 'location'", async function() {
+              up.history.config.enabled = ['lang']
+              await up.layer.open({ target: '#container', document: response, history: true, location: '/overlay' })
+              const pushSpy = spyOn(history, 'pushState').and.callThrough()
+
+              up.layer.dismiss()
+              await wait()
+
+              expect(pushSpy).not.toHaveBeenCalled()
+              expect(location.href).toMatchURL(oldURL)
+              expect(up.layer.location).toMatchURL(oldURL)
+            })
+
           })
 
           it("updates html[lang] for an overlay with visible history and restores it when the overlay closes", async function() {

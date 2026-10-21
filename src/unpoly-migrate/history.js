@@ -42,10 +42,13 @@ up.history.config.patch(function() {
       // Since that is the default, we accept it without a warning.
       if (value) return
 
-      up.migrate.deprecated('up.history.config.updateMetaTags = false', "an array of parts without 'metaTags' in up.history.config.enabled")
+      // (1) This changes up.history.config.enabled once.
+      // (2) When the app sets up.history.config.enabled afterwards, meta tags are updated again
+      //     if the new value includes them. We accept this, and point to the array in the deprecation.
+      up.migrate.deprecated('up.history.config.updateMetaTags = false', "an array of aspects without 'metaTags' in up.history.config.enabled")
       let { enabled } = this
       if (enabled === true) enabled = ['location', 'title', 'lang']
-      if (up.util.isArray(enabled)) this.enabled = enabled.filter((part) => part !== 'metaTags')
+      if (up.util.isArray(enabled)) this.enabled = enabled.filter((aspect) => aspect !== 'metaTags')
     }
   })
 })
@@ -53,6 +56,9 @@ up.history.config.patch(function() {
 // up.compiler('[up-hungry]')
 
 up.migrate.warnOfHungryMetaTags = function(metaTags) {
+  // Meta tags are not updated automatically when up.history.config.enabled excludes them.
+  if (!up.history.isEnabled('metaTags')) return
+
   let fullHungrySelector = up.radio.config.selector('hungrySelectors')
   let hungryMetaTags = up.util.filter(metaTags, (meta) => meta.matches(fullHungrySelector))
   if (hungryMetaTags.length) {

@@ -61,6 +61,30 @@ describe('up.history', function() {
         expect(pushSpy).not.toHaveBeenCalled()
         expect(location.href).toMatchURL(locationBefore)
       })
+
+      it('does not change the browser URL when up.history.config.enabled is an empty array', function() {
+        up.history.config.enabled = []
+        const locationBefore = location.href
+        const pushSpy = spyOn(history, 'pushState').and.callThrough()
+
+        up.history.push('/push-path')
+
+        expect(pushSpy).not.toHaveBeenCalled()
+        expect(location.href).toMatchURL(locationBefore)
+      })
+
+      it("does not adopt the URL when up.history.config.enabled excludes 'location'", function() {
+        up.history.config.enabled = ['lang']
+        up.history.push('/push-path')
+
+        // A foreign script now pushes the URL we were asked to push.
+        // If we had adopted it, we would mark its history entry as ours.
+        up.history.config.enabled = true
+        history.pushState({ foreign: true }, '', '/push-path')
+
+        expect(history.state.foreign).toBe(true)
+        expect(history.state.up).toBeUndefined()
+      })
     })
 
     describe('up.history.replace()', () => {
@@ -85,6 +109,25 @@ describe('up.history', function() {
         expect(pushSpy).not.toHaveBeenCalled()
         expect(up.history.location).toMatchURL('/replace-path')
         expect(location.href).toMatchURL('/replace-path')
+      })
+
+      it("changes the browser URL when up.history.config.enabled is an array with 'location'", function() {
+        up.history.config.enabled = ['location', 'lang']
+
+        up.history.replace('/replace-path')
+
+        expect(location.href).toMatchURL('/replace-path')
+      })
+
+      it("does not change the browser URL when up.history.config.enabled is an array without 'location'", function() {
+        up.history.config.enabled = ['title', 'metaTags', 'lang']
+        const locationBefore = location.href
+        const replaceSpy = spyOn(history, 'replaceState').and.callThrough()
+
+        up.history.replace('/replace-path')
+
+        expect(replaceSpy).not.toHaveBeenCalled()
+        expect(location.href).toMatchURL(locationBefore)
       })
     })
 
@@ -284,7 +327,7 @@ describe('up.history', function() {
     if (up.migrate.loaded) {
       describe('up.history.config.updateMetaTags (deprecated)', function() {
 
-        it('accepts true without a warning and keeps all parts enabled', function() {
+        it('accepts true without a warning and keeps all aspects enabled', function() {
           const warnSpy = up.migrate.warn.mock()
 
           up.history.config.updateMetaTags = true
@@ -304,13 +347,32 @@ describe('up.history', function() {
           expect(up.history.config.updateMetaTags).toBe(false)
         })
 
-        it("removes 'metaTags' from an existing array of parts when set to false", function() {
+        it("removes 'metaTags' from an existing array of aspects when set to false", function() {
           up.migrate.warn.mock()
           up.history.config.enabled = ['metaTags', 'lang']
 
           up.history.config.updateMetaTags = false
 
           expect(up.history.config.enabled).toEqual(['lang'])
+        })
+
+        it('points to the array of aspects in the deprecation warning', function() {
+          const warnSpy = up.migrate.warn.mock()
+
+          up.history.config.updateMetaTags = false
+
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining("an array of aspects without 'metaTags' in up.history.config.enabled"))
+        })
+
+        it('updates meta tags again when up.history.config.enabled is set afterwards', function() {
+          // This is accepted behavior: the polyfill changes up.history.config.enabled once.
+          up.migrate.warn.mock()
+          up.history.config.updateMetaTags = false
+
+          up.history.config.enabled = true
+
+          expect(up.history.config.updateMetaTags).toBe(true)
+          expect(up.history.isEnabled('metaTags')).toBe(true)
         })
 
         it('keeps working after a framework reset', async function() {

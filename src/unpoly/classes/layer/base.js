@@ -101,7 +101,12 @@ up.Layer = class Layer extends up.Record {
     return {
       context: {}, // To reset root
       lastScrollTops: up.viewport.newStateCache(),
-      lastFocusCapsules: up.viewport.newStateCache()
+      lastFocusCapsules: up.viewport.newStateCache(),
+      // Reset the root layer's history, so it falls back to what the browser shows.
+      _savedTitle: undefined,
+      _savedMetaTags: undefined,
+      _savedLocation: undefined,
+      _savedLang: undefined,
     }
   }
 
@@ -647,9 +652,8 @@ up.Layer = class Layer extends up.Record {
     // (2) Getters like this.title would always return this._savedTitle unless we're the front layer
     u.assert(this.isFront())
 
-    // If we're not rendering history, don't save history state of a background layer.
-    if (!this.showsLiveHistory()) return
-
+    // For an aspect that is not live, the getter returns the saved value,
+    // so this only saves the aspects that Unpoly keeps in sync with the browser.
     this._savedTitle = this.title
     this._savedMetaTags = this.metaTags
     this._savedLocation = this.location // synced except on the root layer before the initial location change
@@ -657,24 +661,25 @@ up.Layer = class Layer extends up.Record {
   }
 
   restoreHistory() {
-    if (!this.showsLiveHistory()) return
+    // Only restore the aspects that Unpoly keeps in sync with the browser.
+    // The app may have changed an excluded aspect while an overlay was open.
 
     // We may not have a #savedLocation when we were opened from an HTML string instead of a URL.
-    if (this._savedLocation) {
+    if (this._savedLocation && this.showsLiveHistory('location')) {
       // We cannot use the `this.title` setter as that does not
       // push a state if `newLocation === this._savedLocation`.
       up.history.push(this._savedLocation)
     }
 
-    if (this._savedTitle) {
+    if (this._savedTitle && this.showsLiveHistory('title')) {
       document.title = this._savedTitle
     }
 
-    if (this._savedMetaTags) {
+    if (this._savedMetaTags && this.showsLiveHistory('metaTags')) {
       up.history.updateMetaTags(this._savedMetaTags)
     }
 
-    if (u.isString(this._savedLang)) {
+    if (u.isString(this._savedLang) && this.showsLiveHistory('lang')) {
       up.history.updateLang(this._savedLang)
     }
   }
@@ -713,39 +718,54 @@ up.Layer = class Layer extends up.Record {
   }
 
   updateHistory(options) {
-    // (1) Set unless { location: false }
-    // (2) When up.history.config.enabled excludes 'location', this still tracks the location internally,
-    //     but up.history.push() leaves the browser URL unchanged.
+    // (1) The layer always stores the values it rendered.
+    // (2) The updaters only change the browser for an aspect that Unpoly keeps in sync (see showsLiveHistory()).
+    //     Since up.history.config.enabled can exclude aspects, render options can only narrow the config,
+    //     never update an aspect that it excludes.
+
+    // Set unless { location: false }
     if (u.isString(options.location)) {
       this.updateLocation(options.location, { push: true })
     }
 
-    // The config is a ceiling: render options can only narrow it, never enable a part that it excludes.
-    let isEnabled = up.history.isEnabled
-
     // Set unless { metaTags: false }
-    if (isEnabled('metaTags') && u.isList(options.metaTags)) {
+    if (u.isList(options.metaTags)) {
       up.migrate?.warnOfHungryMetaTags?.(options.metaTags)
       this._updateMetaTags(options.metaTags)
     }
 
     // Set unless { title: false }
-    if (isEnabled('title') && u.isString(options.title)) {
+    if (u.isString(options.title)) {
       this.updateTitle(options.title)
     }
 
     // Set unless { lang: false }
-    if (isEnabled('lang') && u.isString(options.lang)) {
+    if (u.isString(options.lang)) {
       this._updateLang(options.lang)
     }
   }
 
-  showsLiveHistory() {
-    return this.history && this.isFront() // && (up.history.config.enabled || this.isRoot())
+  // Returns whether Unpoly keeps the given history aspect of the browser in sync with this layer.
+  // The aspect is one of 'location', 'title', 'metaTags' or 'lang'.
+  showsLiveHistory(aspect) {
+    return this.history && this.isFront() && up.history.isEnabled(aspect)
+  }
+
+  // A layer's title, meta tags, lang or location is what it rendered,
+  // unless Unpoly keeps that aspect of the browser in sync with the layer.
+  _getHistory(aspect, savedValue, getLiveValue) {
+    // (1) Read a live aspect from the browser, so Unpoly-unaware code can change it directly,
+    //     e.g. by setting document.title or calling history.pushState().
+    // (2) Until the root layer has rendered a value, it shows what the initial page shows.
+    if (this.showsLiveHistory(aspect) || (this.isRoot() && savedValue === undefined)) {
+      return getLiveValue()
+    } else {
+      return savedValue
+    }
   }
 
   _onBrowserLocationChanged({ location }) {
-    if (this.showsLiveHistory()) {
+    if (this.showsLiveHistory('location')) {
       this.updateLocation(location, { push: false })
     }
   }
@@ -756,6 +776,8 @@ up.Layer = class Layer extends up.Record {
   If this layer does not have [visible history](/api/up.Layer.prototype.history),
   the browser window shows the title of an ancestor layer.
   This property still returns the title the layer would use if it had visible history.
+  The same applies when `up.history.config.enabled` [turns off](/learn/updating-history#disabling)
+  the `'title'` aspect.
 
   @learn-ref history-in-overlays
 
@@ -765,52 +787,38 @@ up.Layer = class Layer extends up.Record {
   @experimental
   */
   get title() {
-    if (this.showsLiveHistory()) {
-      // Allow Unpoly-unaware code to set the document title directly.
-      // This will implicitey change the front layer's title.
-      return document.title
-    } else {
-      return this._savedTitle
-    }
+    return this._getHistory('title', this._savedTitle, () => document.title)
   }
 
   // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
   updateTitle(title) {
     this._savedTitle = title
 
-    if (this.showsLiveHistory()) {
+    if (this.showsLiveHistory('title')) {
       document.title = title
     }
   }
 
   get metaTags() {
-    if (this.showsLiveHistory()) {
-      return up.history.findMetaTags()
-    } else {
-      return this._savedMetaTags
-    }
+    return this._getHistory('metaTags', this._savedMetaTags, up.history.findMetaTags)
   }
 
   _updateMetaTags(metaTags) {
     this._savedMetaTags = metaTags
 
-    if (this.showsLiveHistory()) {
+    if (this.showsLiveHistory('metaTags')) {
       up.history.updateMetaTags(metaTags)
     }
   }
 
   get lang() {
-    if (this.showsLiveHistory()) {
-      return up.history.getLang()
-    } else {
-      return this._savedLang
-    }
+    return this._getHistory('lang', this._savedLang, up.history.getLang)
   }
 
   _updateLang(lang) {
     this._savedLang = lang
 
-    if (this.showsLiveHistory()) {
+    if (this.showsLiveHistory('lang')) {
       up.history.updateLang(lang)
     }
   }
@@ -822,6 +830,9 @@ up.Layer = class Layer extends up.Record {
   still returns the URL of the content in the overlay. In this case
   the browser's address bar will show the location of an ancestor layer.
 
+  When `up.history.config.enabled` [turns off](/learn/updating-history#disabling) the `'location'` aspect,
+  this property returns the URL of the rendered content, while the address bar keeps its URL.
+
   @learn-ref history-in-overlays
 
   @property up.Layer#location
@@ -830,16 +841,11 @@ up.Layer = class Layer extends up.Record {
   @experimental
   */
   get location() {
-    // When up.history.config.enabled excludes 'location', this returns the unchanged browser URL, while
-    // up:layer:location:changed reports the location from the render pass. This is intentional:
-    // what the page shows (address bar, .up-current) stays consistent with the browser URL.
-    if (this.showsLiveHistory()) {
-      // Allow Unpoly-unaware code to use the pushState API directly.
-      // This will implicitly change the front layer's location.
-      return up.history.location
-    } else {
-      return this._savedLocation
-    }
+    // (1) When up.history.config.enabled excludes 'location', this returns the location of the
+    //     rendered content, not the unchanged browser URL. Hence [up-nav] follows the content.
+    // (2) When the location is live, Unpoly-unaware code may use the pushState API directly.
+    //     This will implicitly change the front layer's location.
+    return this._getHistory('location', this._savedLocation, () => up.history.location)
   }
 
   // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
@@ -862,7 +868,7 @@ up.Layer = class Layer extends up.Record {
     // - Because newLocation is also rootLayer._savedLocation, we don't push a new state.
     // - We end up not changing the URL from /overlay to /root, because neither peeling nor the fragment update
     //   has pushed a state.
-    if (newLocation !== liveLocation && this.showsLiveHistory() && push) {
+    if (newLocation !== liveLocation && this.showsLiveHistory('location') && push) {
       up.history.push(newLocation)
     }
 

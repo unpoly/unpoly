@@ -151,17 +151,17 @@ up.history = (function() {
   }
 
   /*-
-  Returns whether `up.history.config.enabled` allows Unpoly to update the given part of history.
+  Returns whether `up.history.config.enabled` allows Unpoly to update the given aspect of history.
 
   @function up.history.isEnabled
-  @param {string} part
+  @param {string} aspect
     One of `'location'`, `'title'`, `'metaTags'` or `'lang'`.
   @return {boolean}
   @internal
   */
-  function isEnabled(part) {
+  function isEnabled(aspect) {
     let { enabled } = config
-    return u.isArray(enabled) ? enabled.includes(part) : !!enabled
+    return u.isArray(enabled) ? enabled.includes(aspect) : !!enabled
   }
 
   function historyOptions(options) {
@@ -441,9 +441,11 @@ up.history = (function() {
   }
 
   function placeAdoptedHistoryEntry(method, location, trackOptions) {
-    adoptBase(location)
-
+    // When up.history.config.enabled excludes 'location', we do nothing.
+    // We don't adopt a URL that we never pushed.
     if (isEnabled('location')) {
+      adoptBase(location)
+
       withTrackOptions(trackOptions, function() {
         // Call this instead of originalPushState in case someone else has patched history.pushState()
         // Our own tests do this to rate-limit the use of the history API.
@@ -738,8 +740,8 @@ up.history = (function() {
       up.log.putsEvent(event)
 
       // (1) Because we prevented the event, it is up to us to change the hash.
-      // (2) We should not set the location if the layer shows no live history.
-      if (linkHash !== currentHash && layer.showsLiveHistory()) {
+      // (2) We should not set the location if the layer shows no live location.
+      if (linkHash !== currentHash && layer.showsLiveHistory('location')) {
         // We use pushState() instead of setting location.hash so we don't trigger
         // a hashchange event or cause browser scrolling.
         let newHREF = currentBase + linkHash
