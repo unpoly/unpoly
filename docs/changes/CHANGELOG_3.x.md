@@ -223,6 +223,8 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - ⚠️ A `click` event dispatched by a script is no longer passed to [`up.on()`](/api/up.on) callbacks when the element has a `[disabled]` attribute, even for elements that browsers cannot disable. Before, only a `disabled` property had this effect.
 - The npm package now also includes source maps for the unminified files, like `unpoly.js.map`.
 - `up.template.clone()` with an `{ origin }` now also finds a template in an ancestor layer, as described in [template lookup](/learn/templates#lookup). It used to only look in the origin's layer.
+- Fix: When an app's bundler minified `unpoly.js`, errors could lose their names. For example, an `up.CannotMatch` error was named `up.`. Errors now keep their names under any minifier.
+- Error and log messages now print objects more readably. A plain object prints as `{ foo: "bar" }`, a request as `up.Request(GET /users/5)` and an error as `up.CannotMatch(message)`. A circular reference prints `(circular)` where the cycle closes, instead of replacing the whole value.
 - Fix: `up.viewport.restoreFocus()` threw an error when called without a `{ layer }` option, or with a layer name like `{ layer: 'root' }`.
 - Fix: `up.viewport.restoreScroll()` ignored its `{ location }` option. It always restored the positions saved for the layer's current location.
 - Fix: `up.fragment.matches()` with `{ layer: 'new', mode }` options expanded a selector like `:main` for the root layer, or threw an error while an overlay was open.
@@ -234,7 +236,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - Fix: `unpoly-migrate.js` logged deprecations that the app never caused when a script enumerated an object with deprecated properties, e.g. an analytics script walking `window.up`, or another deprecation message printing a config object.
 - The `unpoly-migrate.js` warning for the deprecated origin shorthand `&` now names the target and the origin element.
 - `unpoly-migrate.js` warnings about renamed render, request or layer options now name where the option was used, like the origin element or URL. They are printed once for each place, not once per page load.
-- Fix: With `unpoly-migrate.js`, a link with only an `[up-href]` attribute is now given `[up-follow]`. Before, `unpoly-migrate.js` and Unpoly could disagree about whether the link was followable.
+- Fix: With `unpoly-migrate.js`, a link with only an `[up-href]` attribute is now given `[up-follow]`. Before, `unpoly-migrate.js` and Unpoly could disagree about whether the link was followable. It also no longer warns about a link that another attribute already makes followable, like `<a up-href="/path" up-target=".target">`.
 - Fix: With `unpoly-migrate.js`, old layer attributes like `[up-flavor]`, `[up-closable]` or `[up-history-visible]` are now also translated on forms that open an overlay.
 - Fix: With `unpoly-migrate.js`, a popup position like `'bottom-right'` is now split into `{ position: 'bottom', align: 'right' }` before the overlay opens. Before, [`up.Layer#position`](/api/up.Layer.prototype.position) and the `<up-popup>` attributes showed the combined value.
 
