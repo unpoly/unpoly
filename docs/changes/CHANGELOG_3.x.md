@@ -723,7 +723,7 @@ This migration is now also applied to forms and submit buttons, not just links.
 3.12.1
 ------
 
-- Fix a bug where Unpoly did not [rewrite CSP nonces within new fragments](https://unpoly.com/csp#nonce-rewriting).
+- Fix a bug where Unpoly did not [rewrite CSP nonces within new fragments](https://unpoly.com/learn/script-security#nonce-rewriting).
 
 
 3.12.0
@@ -2482,7 +2482,7 @@ This release addresses many edge cases with features that watch form fields for 
 
 ### Bugfixes and minor improvements
 
-- CSP nonces [embedded into attribute callbacks](https://unpoly.com/csp#nonceable-attributes) now work with [`Content-Security-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only).
+- CSP nonces [embedded into attribute callbacks](https://unpoly.com/learn/script-security#callback-nonces) now work with [`Content-Security-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy-Report-Only).
 - When the `X-Up-Validate` header value exceeds 2048 characters, it is now set to `:unknown`.
   This is to prevent web infrastructure from rejecting an overly long request line with an `413 Entity Too Large` error.
 - Fix a bug where `up:assets:changed` would be emitted for every response when configuring `up.fragment.config.runScripts = false`.
@@ -3026,7 +3026,7 @@ This release contains more changes to [`unpoly-migrate.js`](https://unpoly.com/c
 - Using the deprecated `up.$off()` now logs a deprecation warning.
 - Using the deprecated `up.scroll()` now logs a deprecation warning.
 - `up.form.config.groupSelectors` now also removes the suffix `:has(&)` in addition to `:has(:origin)`.
-- When disabling log formatting with `up.log.config.format = false` Unpoly no longer prints structured objects to the console. This makes it easier to [detected use of undeprecated APIs with automated tests](https://unpoly.com/changes/upgrading#detecting-deprecated-apis-with-tests).
+- When disabling log formatting with `up.log.config.format = false` Unpoly no longer prints structured objects to the console. This makes it easier to [detect use of deprecated APIs with automated tests](https://unpoly.com/changes/upgrading#with-tests).
 
 There's also a small change to a utility function:
 
