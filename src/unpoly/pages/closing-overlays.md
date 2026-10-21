@@ -255,7 +255,7 @@ When an overlay closes in reaction to a server response, you can [access the dis
 Keeping an overlay open {#keeping-open}
 -----------------------
 
-To keep an overlay open, prevent its [`up:layer:dismiss`](/api/up:layer:dismiss) event.
+To keep an overlay open, prevent its `up:layer:dismiss` event.
 Check the [dismissal value](#dismissal-values) to only ask when the user closes the overlay
 with the Escape key, a backdrop click or the `×` button:
 

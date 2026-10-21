@@ -3,14 +3,14 @@
 Decisions go in triage.md "Henning's answers" once settled. Item numbers continue the 2026-10-11 slow-down list.
 
 ## Decided in the slow-down list (applied after the list closes)
-- 1 Preventable peeling → done (dfad2c0fd). 1.1A Back force-peels. 1.2C `[up-peel]` words + `up.layer.parsePeelOption()`. 1.3B removed `up.reveal({ peel })`.
+- 1 Preventable peeling → done (dfad2c0fd), REVERTED 2026-10-21 (d9beac159: peels unpreventable again, see /learn/unsaved-changes). 1.1A Back force-peels. 1.2C `[up-peel]` words + `up.layer.parsePeelOption()`. 1.3B removed `up.reveal({ peel })`.
 - 2 Close-event pointer to onAccept/onDismiss → 🤖, done with 1.
 - 3, 4, 6, 7, 8, 10-14, 24 → duplication items, deferred to chapter sittings.
 - 5 → 5A: drop the first `autoCache` example on /caching, link "configure this default" to #disabling-route.
 - 9 → 9D: /optimizing-responses #version becomes "Detecting a full page load" (draft in session; `up.target?` example from unpoly-rails, pointer to X-Up-Target); #title gets "A response without a `<head>` has two more limits: Unpoly keeps the current meta tags, and it cannot detect a new deployment."
 - 15 → 15A: delete the commented-out "General advice" block on /script-security.
 - 16-20 → done: /custom-form-fields restructured (16A table splits Submitted | Watched, validated, switched | Disabled; 17A/18A rationale and re-enabling paragraph cut; 19A lazy-loading tip in #registering; 20 the #contract section dissolved into the patterns).
-- 25 → 25A done: ⚠️ kept, upgrade hint (`event.value === ":peel"`, `[up-peel="force"]`) in CHANGELOG_3.x.md.
+- 25 → 25A done (obsolete since the peel revert, 2026-10-21): ⚠️ kept, upgrade hint (`event.value === ":peel"`, `[up-peel="force"]`) in CHANGELOG_3.x.md.
 - 26 → 26A done (1d30c72be): `revealPadding` honored when rendering, with spec.
 - 27 → 27X done: /install and /skill move to /learn like every page, and keep permanent short redirects (fragments like /install#npm carry over). The script lists both rules first in the generated block, marked "never remove", aborts if either is missing, and rewrites the README label to unpoly.com/learn/skill. Runbook updated.
 - 28 → 28X (script behavior, verified 2026-10-13): .js files are rewritten only inside comments, so the two error-message URLs in src/unpoly/classes/change/ stay `https://unpoly.com/failed-responses` (redirects after the deploy). This was missing from the script and is now in it.

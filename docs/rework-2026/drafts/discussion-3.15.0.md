@@ -159,20 +159,6 @@ These changes cannot be polyfilled. If your server or your tests depend on the e
 
 ### Overlays
 
-- ❌ An `up:layer:dismiss` or `up:layer:accept` listener can now keep an overlay open when a link or form in a parent layer would close it ([peeling](https://unpoly.com/learn/closing-overlays#peeling)). The render pass then fails with `up.Aborted` and nothing is updated.
-  This affects listeners that prevent closing, e.g. to confirm unsaved changes. To let links in a parent layer close the overlay as before, return early when `event.value` is `':peel'`:
-
-  ```js
-  up.on('up:layer:dismiss', function(event) {
-    if (event.value === ':peel') return
-    if (!confirm('Discard your changes?')) event.preventDefault()
-  })
-  ```
-
-  To force a single link, set [`[up-peel="force"]`](https://unpoly.com/api/up-follow#up-peel) instead.
-- When a listener keeps an overlay open, the overlays below it now also stay open.
-- To close overlays even when a listener prevents it, use [`[up-peel="force"]`](https://unpoly.com/api/up-follow#up-peel), or pass `{ force: true }` to `up.Layer#accept()`, `up.Layer#dismiss()` or `up.Layer#peel()`. You can combine `force` with an intent, e.g. `[up-peel="accept force"]`.
-- Pressing the back button still closes overlays, even when a listener prevents it.
 - New [`[up-on-accept]`](https://unpoly.com/api/up-layer-new#up-on-accept) and [`[up-on-dismiss]`](https://unpoly.com/api/up-layer-new#up-on-dismiss) attributes run code before an overlay closes, and can keep it open with `event.preventDefault()`. The matching [`{ onAccept }`](https://unpoly.com/api/up.layer.open#options.onAccept) and [`{ onDismiss }`](https://unpoly.com/api/up.layer.open#options.onDismiss) options are now documented.
 - When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent overlay, as described in [focus in overlays](https://unpoly.com/learn/focus#overlays). It used to fall back to the `<body>`.
 - Fix: [`[up-focus-visible]`](https://unpoly.com/api/up-follow#up-focus-visible) and the `{ focusVisible }` option were ignored when opening an overlay.

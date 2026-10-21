@@ -61,11 +61,11 @@ Post the announcement first, then the others as replies or over the following da
 >
 > https://unpoly.com/learn/custom-form-fields
 
-**Overlays that refuse to close**
+**Unsaved changes**
 
-> An overlay can now stay open when a link in the page behind it would close it, e.g. to confirm unsaved changes. Use [up-peel="force"] to close it anyway.
+> A new guide shows a small compiler that asks before the user loses changes in a form, on the page and in overlays.
 >
-> https://unpoly.com/learn/closing-overlays#peeling
+> https://unpoly.com/learn/unsaved-changes
 
 **Contributing**
 
