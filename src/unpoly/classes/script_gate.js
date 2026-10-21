@@ -280,11 +280,11 @@ class StringCallbackItem {
   writeNonce(nonce) {
     let callback = this._getCallback()
     callback.nonce = nonce
-    this.writeCallbackString(callback.toString())
+    this.writeCallbackString(callback.toCallbackString())
   }
 
   _getCallback() {
-    return this._cacheCallback ||= up.NonceableCallback.fromString(this.readCallbackString())
+    return this._cacheCallback ||= up.NonceableCallback.fromCallbackString(this.readCallbackString())
   }
 
   logBlockedDescriptor() {

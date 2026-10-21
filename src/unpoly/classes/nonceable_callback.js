@@ -7,7 +7,7 @@ up.NonceableCallback = class NonceableCallback {
     this.nonce = nonce
   }
 
-  static fromString(string) {
+  static fromCallbackString(string) {
     let match = string.match(/^(nonce-(\S+)\s)?(.*)$/)
     return new this(match[3], match[2])
   }
@@ -20,7 +20,7 @@ up.NonceableCallback = class NonceableCallback {
     }
   }
 
-  toString() {
+  toCallbackString() {
     return `nonce-${this.nonce} ${this.script}`
   }
 

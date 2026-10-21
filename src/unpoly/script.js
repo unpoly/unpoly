@@ -1102,7 +1102,7 @@ up.script = (function() {
         argValues = [object, ...Object.values(u.pick(object, expandObject))]
       }
 
-      const nonceableCallback = up.NonceableCallback.fromString(code)
+      const nonceableCallback = up.NonceableCallback.fromCallbackString(code)
       const evalEnv = { thisContext: this, argNames: callArgNames, argValues }
       return new up.ScriptGate().evalCallback(nonceableCallback, evalEnv)
     }
