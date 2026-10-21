@@ -11,7 +11,10 @@ up.fragment.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'fallbacks', 'mainTargets', { label: 'up.fragment.config' })
 })
 
-up.migrate.handleResponseDocOptions = (docOptions) => up.migrate.fixKey(docOptions, 'html', 'document', { label: 'render options' })
+// Names the call site of a render pass in a warning about its options.
+const renderOptionsSource = (options) => ({ label: 'render options', detail: options.origin || options.url || options.target })
+
+up.migrate.handleResponseDocOptions = (docOptions) => up.migrate.fixKey(docOptions, 'html', 'document', renderOptionsSource(docOptions))
 
 up.fragment.config.patch(function(config) {
   let matchAroundOriginDeprecated = () => up.migrate.deprecated('up.fragment.config.matchAroundOrigin', 'up.fragment.config.match')
@@ -169,8 +172,8 @@ up.migrate.preprocessRenderOptions = function(options) {
     options.abort = false
   }
 
-  up.migrate.fixKey(options, 'failOnFinished', 'onFailFinished', { label: 'render options' })
-  up.migrate.fixKey(options, 'badResponseTime', 'lateDelay', { label: 'render options' })
+  up.migrate.fixKey(options, 'failOnFinished', 'onFailFinished', renderOptionsSource(options))
+  up.migrate.fixKey(options, 'badResponseTime', 'lateDelay', renderOptionsSource(options))
 
   // Rewrite deprecated { reveal } option (it had multiple variants)
   if (u.isString(options.reveal)) {

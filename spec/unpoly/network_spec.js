@@ -396,7 +396,7 @@ describe('up.network', function() {
           const warnSpy = up.migrate.warn.mock()
           const request = up.request({ url: '/path', clearCache: true })
           expect(request.expireCache).toBe(true)
-          expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'clearCache', 'expireCache', 'request options')
+          expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property { clearCache } has been renamed to { expireCache } (found in request options for "/path")')
         })
 
         it('warns about the removed { solo } option', function() {

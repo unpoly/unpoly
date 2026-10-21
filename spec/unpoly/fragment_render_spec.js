@@ -892,6 +892,43 @@ extendDescribe('up.fragment', function() {
           })
         })
 
+        describe('with a renamed option like { badResponseTime } (now { lateDelay })', function() {
+
+          function renamedOptionWarnings(errorSpy) {
+            return errorSpy.calls.all().map((call) => u.sprintf(...call.args.slice(1))).filter((message) => message.includes('{ badResponseTime }'))
+          }
+
+          it('names the origin in the warning, printing it once per origin', async function() {
+            fixture('.target')
+            const [origin1, origin2] = htmlFixtureList(`
+              <a id="origin1" href="/path">origin1</a>
+              <a id="origin2" href="/path">origin2</a>
+            `)
+            const errorSpy = spyOn(up.log, 'error')
+
+            await up.render({ target: '.target', content: 'content1', origin: origin1, badResponseTime: 100 })
+            await up.render({ target: '.target', content: 'content2', origin: origin2, badResponseTime: 100 })
+            await up.render({ target: '.target', content: 'content3', origin: origin1, badResponseTime: 100 })
+
+            expect(renamedOptionWarnings(errorSpy)).toEqual([
+              'Property { badResponseTime } has been renamed to { lateDelay } (found in render options for <a id="origin1" href="/path">)',
+              'Property { badResponseTime } has been renamed to { lateDelay } (found in render options for <a id="origin2" href="/path">)',
+            ])
+          })
+
+          it('names the URL in the warning when there is no origin', async function() {
+            fixture('.target')
+            const errorSpy = spyOn(up.log, 'error')
+
+            up.render({ target: '.target', url: '/path', badResponseTime: 100 })
+            await wait()
+
+            expect(renamedOptionWarnings(errorSpy)).toEqual([
+              'Property { badResponseTime } has been renamed to { lateDelay } (found in render options for "/path")',
+            ])
+          })
+        })
+
         describe('with { solo } option', function() {
 
           it('aborts the request of an existing change', async function() {

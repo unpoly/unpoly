@@ -3,12 +3,12 @@
 */
 
 // Renamed keys and values that may be passed as layer options or set in a layer config object.
-function fixRenamedLayerKeys(object, label) {
-  up.migrate.fixKey(object, 'closable', 'dismissible', { label })
-  up.migrate.fixKey(object, 'dismissable', 'dismissible', { label })
-  up.migrate.fixKey(object, 'closeLabel', 'dismissLabel', { label })
-  up.migrate.fixKey(object, 'dismissAriaLabel', 'dismissARIALabel', { label })
-  up.migrate.fixKey(object, 'historyVisible', 'history', { label })
+function fixRenamedLayerKeys(object, source) {
+  up.migrate.fixKey(object, 'closable', 'dismissible', source)
+  up.migrate.fixKey(object, 'dismissable', 'dismissible', source)
+  up.migrate.fixKey(object, 'closeLabel', 'dismissLabel', source)
+  up.migrate.fixKey(object, 'dismissAriaLabel', 'dismissARIALabel', source)
+  up.migrate.fixKey(object, 'historyVisible', 'history', source)
   splitPosition(object)
 }
 
@@ -28,8 +28,10 @@ function splitPosition(object) {
 
 up.migrate.handleLayerOptions = function(options) {
   // Only options can have a { flavor }, since a config object belongs to a mode.
-  up.migrate.fixKey(options, 'flavor', 'mode', { label: 'layer options' })
-  fixRenamedLayerKeys(options, 'layer options')
+  // We name the opening call site in warnings.
+  const source = { label: 'layer options', detail: options.origin || options.url }
+  up.migrate.fixKey(options, 'flavor', 'mode', source)
+  fixRenamedLayerKeys(options, source)
 
   for (let dimensionKey of ['width', 'maxWidth', 'height']) {
     if (options[dimensionKey]) {
@@ -86,7 +88,7 @@ layer.registerAttrCloser('up-close', (value, closeOptions) => {
 up.migrate.fixLayerConfigs = function() {
   for (let [mode, modeConfig] of Object.entries(up.layer.config)) {
     if (up.util.isOptions(modeConfig)) {
-      fixRenamedLayerKeys(modeConfig, `up.layer.config.${mode}`)
+      fixRenamedLayerKeys(modeConfig, { label: `up.layer.config.${mode}` })
     }
   }
 }
@@ -97,7 +99,7 @@ up.on('up:framework:boot', up.migrate.fixLayerConfigs)
 // Since the warning names the config object, it is only printed once per key and config object.
 up.migrate.handleLayerConfig = function(modeConfig) {
   let [mode] = Object.entries(up.layer.config).find(([_mode, value]) => value === modeConfig)
-  fixRenamedLayerKeys(modeConfig, `up.layer.config.${mode}`)
+  fixRenamedLayerKeys(modeConfig, { label: `up.layer.config.${mode}` })
 }
 
 Object.defineProperty(up.Layer.prototype, 'historyVisible', { get: function() {

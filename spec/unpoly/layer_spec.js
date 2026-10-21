@@ -684,6 +684,14 @@ describe('up.layer', function() {
             expect(options).not.toHaveKey('closable')
             expect(warnSpy).toHaveBeenCalledWith(jasmine.anything(), 'closable', 'dismissible', 'layer options')
           })
+
+          it('names the origin in the warning', function() {
+            const warnSpy = up.migrate.warn.mock()
+            const origin = fixture('a#origin[href="/path"]')
+            const options = { layer: 'new', origin, closable: false }
+            up.layer.normalizeOptions(options)
+            expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property { closable } has been renamed to { dismissible } (found in layer options for <a id="origin" href="/path">)')
+          })
         })
 
         for (let removedLayer of ['modal', 'popup']) {

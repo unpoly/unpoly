@@ -112,6 +112,18 @@ if (up.migrate.loaded) {
         expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property { foo } has been renamed to { bar } (found in render options)')
       })
 
+      it('names the call site by the given { detail }, printing the warning once per call site', function() {
+        const errorSpy = spyOn(up.log, 'error')
+        up.migrate.fixKey({ foo: 1 }, 'foo', 'bar', { label: 'request options', detail: '/path1' })
+        up.migrate.fixKey({ foo: 2 }, 'foo', 'bar', { label: 'request options', detail: '/path2' })
+        up.migrate.fixKey({ foo: 3 }, 'foo', 'bar', { label: 'request options', detail: '/path1' })
+
+        expect(errorSpy.calls.allArgs().map((args) => u.sprintf(...args.slice(1)))).toEqual([
+          'Property { foo } has been renamed to { bar } (found in request options for "/path1")',
+          'Property { foo } has been renamed to { bar } (found in request options for "/path2")',
+        ])
+      })
+
       it('prints a labeled warning only once for multiple objects', function() {
         const errorSpy = spyOn(up.log, 'error')
         up.migrate.fixKey({ foo: 1 }, 'foo', 'bar', { label: 'render options' })
