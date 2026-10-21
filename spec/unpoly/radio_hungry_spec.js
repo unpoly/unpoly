@@ -1445,6 +1445,13 @@ extendDescribe('up.radio', function() {
       if (up.migrate.loaded) {
 
         describe('with [up-if-history]', function() {
+          it('prints a deprecation warning that names the element', function() {
+            const warnSpy = up.migrate.warn.mock()
+            const element = fixture('.hungry[up-hungry][up-if-history]')
+            up.hello(element)
+            expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('[up-if-history] has been deprecated'), element)
+          })
+
           it("only updates a hungry fragment when updating history", async function() {
             up.hello(
               $fixture(".hungry[up-hungry]")
