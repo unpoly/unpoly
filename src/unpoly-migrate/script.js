@@ -8,7 +8,7 @@ const e = up.element
 up.migrate.renamedPackage('syntax', 'script')
 
 up.script.config.patch(function(config) {
-  // The 3.13.0 release notes named this setting wrongly, and apps copied the name.
+  // The 3.14.0 release notes named this setting wrongly, and apps copied the name.
   up.migrate.renamedProperty(config, 'callbackPolicy', 'evalCallbackPolicy', { warning: 'There is no setting up.script.config.callbackPolicy. Use up.script.config.evalCallbackPolicy instead.' })
 })
 
