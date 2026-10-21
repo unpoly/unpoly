@@ -332,6 +332,24 @@ describe('up.network', function() {
         })
       })
 
+      describe('up.network.config.requestMetaKeys', function() {
+        it('is an array that the app may still push into, with a warning (deprecated)', function() {
+          const warnSpy = up.migrate.warn.mock()
+          up.network.config.requestMetaKeys.push('target')
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.network.config.requestMetaKeys has been removed'))
+        })
+
+        it('is reset to an empty array by up.framework.reset() without a warning', function() {
+          up.network.config.requestMetaKeys = ['target']
+          const warnSpy = up.migrate.warn.mock()
+
+          up.framework.reset()
+
+          expect(warnSpy).not.toHaveBeenCalled()
+          expect(up.network.config.requestMetaKeys).toEqual([])
+        })
+      })
+
       describe('X-Up-Expire-Cache: false and X-Up-Evict-Cache: false response headers', function() {
         it('prints a warning, since the server can no longer override the client option', async function() {
           const warnSpy = up.migrate.warn.mock()

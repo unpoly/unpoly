@@ -1056,6 +1056,34 @@ extendDescribe('up.radio', function() {
       })
     })
 
+    if (up.migrate.loaded) {
+      describe('up.radio.config.pollEnabled', function() {
+
+        it('prevents polling when set to false (deprecated)', function() {
+          const warnSpy = up.migrate.warn.mock()
+          const element = fixture('.element[up-poll][up-href="/path"]')
+          up.radio.config.pollEnabled = false
+
+          const event = up.emit(element, 'up:fragment:poll')
+
+          expect(event.defaultPrevented).toBe(true)
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.radio.config.pollEnabled has been removed'))
+        })
+
+        it('is restored to true by up.framework.reset() without a warning', function() {
+          up.radio.config.pollEnabled = false
+          const warnSpy = up.migrate.warn.mock()
+
+          up.framework.reset()
+
+          expect(warnSpy).not.toHaveBeenCalled()
+          const element = fixture('.element[up-poll][up-href="/path"]')
+          const event = up.emit(element, 'up:fragment:poll')
+          expect(event.defaultPrevented).toBe(false)
+        })
+      })
+    }
+
   })
 
 })

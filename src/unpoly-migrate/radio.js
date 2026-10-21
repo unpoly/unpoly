@@ -8,11 +8,10 @@ up.radio.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'hungry', 'hungrySelectors', { label: 'up.radio.config' })
 })
 
-up.radio.config.pollEnabled = true
 let pollEnabledRef
 
 up.radio.config.patch(function(config) {
-  pollEnabledRef = up.migrate.removedProperty(config, 'pollEnabled', { warning: 'The configuration up.radio.config.pollEnabled has been removed. To disable polling, prevent up:fragment:poll instead.' })
+  pollEnabledRef = up.migrate.removedProperty(config, 'pollEnabled', { value: true, warning: 'The configuration up.radio.config.pollEnabled has been removed. To disable polling, prevent up:fragment:poll instead.' })
 })
 
 up.on('up:fragment:poll', function(event) {

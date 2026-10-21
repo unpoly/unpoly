@@ -183,6 +183,19 @@ if (up.migrate.loaded) {
         expect(warnSpy).not.toHaveBeenCalled()
       })
 
+      it('starts with the given { value } without a warning when defined again, like when up.framework.reset() runs a config patch', function() {
+        const warnSpy = up.migrate.warn.mock()
+        const object = {}
+        up.migrate.removedProperty(object, 'removedKey', { value: 'default' })
+        object.removedKey = 'changed'
+        warnSpy.calls.reset()
+
+        const valueRef = up.migrate.removedProperty(object, 'removedKey', { value: 'default' })
+
+        expect(valueRef[0]).toBe('default')
+        expect(warnSpy).not.toHaveBeenCalled()
+      })
+
     })
 
     describe('up.modal and up.popup', function() {

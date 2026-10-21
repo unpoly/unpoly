@@ -40,7 +40,10 @@ up.migrate = (function() {
 
   // Pass a { label } like 'up.form.config' to name the object in the warning.
   // Without a label we print the object itself.
-  function removedProperty(object, key, { label, warning } = {}) {
+  //
+  // Pass a { value } to set an initial value without a warning.
+  // It is restored when up.framework.reset() runs the config patch again.
+  function removedProperty(object, key, { label, warning, value } = {}) {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
     const doWarn = u.memoize(function() {
@@ -53,7 +56,10 @@ up.migrate = (function() {
       }
     })
 
-    let valueRef = [object[key]]
+    // We only keep an existing data value. When up.framework.reset() runs a config patch again,
+    // reading object[key] would call the getter from the previous definition, which warns and keeps the old value.
+    // We return the reference so a polyfill can honor a value that the app sets.
+    let valueRef = [value ?? Object.getOwnPropertyDescriptor(object, key)?.value]
 
     Object.defineProperty(object, key, {
       configurable: true,

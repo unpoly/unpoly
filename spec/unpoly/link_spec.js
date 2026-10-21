@@ -1470,6 +1470,32 @@ describe('up.link', function() {
         })
       })
 
+      describe('up.link.config.preloadEnabled', function() {
+
+        it('prevents preloading when set to false (deprecated)', function() {
+          const warnSpy = up.migrate.warn.mock()
+          const link = fixture('a[href="/path"][up-preload]')
+          up.link.config.preloadEnabled = false
+
+          const event = up.emit(link, 'up:link:preload')
+
+          expect(event.defaultPrevented).toBe(true)
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('up.link.config.preloadEnabled has been removed'))
+        })
+
+        it('is restored to true by up.framework.reset() without a warning', function() {
+          up.link.config.preloadEnabled = false
+          const warnSpy = up.migrate.warn.mock()
+
+          up.framework.reset()
+
+          expect(warnSpy).not.toHaveBeenCalled()
+          const link = fixture('a[href="/path"][up-preload]')
+          const event = up.emit(link, 'up:link:preload')
+          expect(event.defaultPrevented).toBe(false)
+        })
+      })
+
       describe('legacy [up-reveal] attribute', function() {
 
         it('is replaced with [up-scroll="target"] for an empty value', function() {
