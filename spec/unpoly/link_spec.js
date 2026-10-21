@@ -1600,6 +1600,15 @@ describe('up.link', function() {
           expect(link).toBeFollowable()
         })
 
+        it('does not warn about a link that is already followable through another attribute', function() {
+          const warnSpy = spyOn(up.migrate, 'warn')
+          const [link] = htmlFixtureList('<a up-href="/path" up-target="#target">label</a>')
+          up.hello(link)
+
+          expect(warnSpy).not.toHaveBeenCalled()
+          expect(link).toBeFollowable()
+        })
+
         it('does not warn about an element that the app passes to up.link.makeFollowable()', function() {
           const warnSpy = spyOn(up.migrate, 'warn')
           const element = fixture('span[up-href="/path"]')
