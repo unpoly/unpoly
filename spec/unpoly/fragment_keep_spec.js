@@ -524,6 +524,16 @@ extendDescribe('up.fragment', function() {
           expect(keptSpy).not.toHaveBeenCalled()
         })
 
+        it('rejects the up.render().finished promise, but not up.render(), when processing the { focus } option throws', async function() {
+          fixture('.keeper[up-keep]', { text: 'old-inside' })
+
+          const job = up.render({ fragment: `<div class='keeper' up-keep>new-inside</div>`, focus: '.keeper[' })
+
+          await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
+          await expectAsync(job.finished).toBeRejected()
+          expect('.keeper').toHaveText('old-inside')
+        })
+
       })
 
       it("removes an [up-keep] element if no matching element is found in the response", async function() {
