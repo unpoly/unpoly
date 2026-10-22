@@ -22,7 +22,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this._steps = responseDoc.commitSteps(this._steps)
 
     return [
-      ...this._executeSteps(),
+      this._executeSteps(),
       this._assertLayersAlive(),
     ]
   }
@@ -32,10 +32,10 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       // (1) Insert all new fragments, in target order (hungry steps last).
       let insertions = this._steps.map((step) => this._insertStep(step))
 
-      return [{
+      return {
         fragments: u.flatMap(insertions, 'fragments'),
         finished: this._completeSteps(insertions),
-      }]
+      }
     } else {
       return this._executeNoSteps()
     }
@@ -79,7 +79,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         let keepPlan = up.fragment.keepPlan(step)
         if (keepPlan) {
           return this._insertKeepEverythingStep(step, keepPlan)
-        }  else {
+        } else {
           return this._insertSwapStep(step)
         }
       }
@@ -100,7 +100,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     this._handleFocus(null, this._noneOptions)
     this._handleScroll(null, this._noneOptions)
 
-    return [{}]
+    return {}
   }
 
   _insertKeepEverythingStep(step, keepPlan) {
