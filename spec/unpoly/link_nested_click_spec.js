@@ -28,9 +28,9 @@ extendDescribe('up.link', function() {
         area                        | F    F    0     I        I          I      I      I        0    0      I           I  I         F
         area with link not followed | N    N    0     I        I          I      I      I        0    0      I           I  I         N
         div[up-href]                | F    F    0     I        I          I      I      I        0    0      I           I  I         F
-        instant link                | F    F    F     F        F          F      F      0        0    0      I           -  I         F
-        instant area                | F    F    0     0        0          0      0      0        0    0      I           I  I         F
-        instant div[up-href]        | F    F    0     0        0          0      0      0        0    0      I           I  I         F
+        instant link                | F    F    F     F        F          F      F      I        N    N      I           -  I         F
+        instant area                | F    F    0     I        I          I      I      I        0    0      I           I  I         F
+        instant div[up-href]        | F    F    0     I        I          I      I      I        0    0      I           I  I         F
       `
 
       const rows = {

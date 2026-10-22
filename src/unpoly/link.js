@@ -756,19 +756,27 @@ up.link = (function() {
       return false
     }
 
+    return isClickTarget(event.target, link)
+  }
+
+  // Returns whether a click on the given target is meant for the given link,
+  // and not for another interactive element within the link.
+  function isClickTarget(target, link) {
     // If user clicked on a child link of $link, or on a field, we want those other elements handle the click.
     // A link's buttons and labels belong to the link, but a clickable container like [up-expand]
     // leaves buttons and labels to handle their own clicks.
     const betterTargetSelector = `a, [up-follow], ${link.matches('a') ? up.form.fieldSelector() : up.form.interactiveSelector()}`
-    const betterTarget = event.target.closest(betterTargetSelector)
+    const betterTarget = target.closest(betterTargetSelector)
     return !betterTarget || (betterTarget === link)
   }
 
   function isInstant(linkOrDescendant) {
     const element = linkOrDescendant.closest(config.selector('instantSelectors'))
-    // Allow users to configure up.link.config.instantSelectors.push('a')
-    // but opt out individual links with [up-follow=false].
-    return element && !isInstantDisabled(element)
+    // (1) Allow users to configure up.link.config.instantSelectors.push('a')
+    //     but opt out individual links with [up-follow=false].
+    // (2) A press on an element that handles its own click is not instant. Otherwise we would
+    //     emit up:click on mousedown, ignore it, and then halt the click that the element needs.
+    return element && !isInstantDisabled(element) && isClickTarget(linkOrDescendant, element)
   }
 
   function isInstantDisabled(link) {
