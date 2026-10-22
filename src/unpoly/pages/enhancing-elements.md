@@ -35,6 +35,31 @@ the page first loads and when a matching fragment is rendered later.
 Compilers run in the order they were registered, each for all its matches in the new fragment.
 To change the order, pass a [`{ priority }`](/api/up.compiler#order).
 
+### Updating multiple fragments {#multiple-fragments}
+
+When a render pass [updates multiple fragments](/learn/targeting-fragments#multiple),
+Unpoly inserts all new fragments before it runs the first compiler.
+A compiler can therefore see the new version of other fragments from the same render pass:
+
+```html
+<a href="/folders/5" up-target="#files, #sidebar">Open folder</a>
+```
+
+```js
+up.compiler('#sidebar', function(sidebar) {
+  let count = document.querySelectorAll('#files .file').length // chip: counts the new files
+  sidebar.querySelector('.file-count').textContent = count
+})
+```
+
+Within one layer, fragments are inserted and compiled in the order of the target selector,
+followed by that layer's [hungry elements](/learn/hungry-elements).
+Focus and scroll position are updated after all compilers have run, and animations start last.
+
+Hungry elements on [other layers](/learn/hungry-elements#layers) are rendered as a separate group,
+after the current layer (or before it closes, when the render pass closes an overlay).
+Don't rely on fragments in other layers being updated when your compiler runs.
+
 ### Avoid `DOMContentLoaded` {#no-load-event}
 
 Without Unpoly, the `.current-time` enhancement might have been implemented

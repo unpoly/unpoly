@@ -145,8 +145,25 @@ Preflight has a concrete mechanism worth knowing: `up.Change.FromURL` builds a *
 context and the fragments to bind the request to. So the plan machinery runs once before the
 request exists, with its results discarded.
 
-`up.Change.UpdateSteps` then performs the swaps, **in reverse order**, and only the first
-step handles focus and scrolling — worth remembering before you add per-step behavior.
+`up.Change.UpdateSteps` then performs the swaps in **four phases**, each running over all
+steps before the next one starts:
+
+1. **Insert** every new fragment, in target order (hungry steps last). Destructors of
+   directly swapped fragments run here; transitioning old elements are absolutized and stay.
+2. **Welcome** every new fragment: finalize it, set reload attributes, run compilers. So a
+   compiler sees the new versions of all other fragments in the pass.
+3. **Focus and scroll**. Only the first step carries `{ focus }` and `{ scroll }` options
+   (except `{ scroll: 'keep' }`), but since all fragments are in place, focus lost in any
+   of them counts as lost, and scrolling sees the final layout.
+4. **Start motions**: transitions and animations, then removing old elements,
+   `up:fragment:destroyed` and unwrapping `<up-wrapper>` elements.
+
+Phases 2 to 4 run in one async method that is called synchronously, so they happen in the same
+task, but an exception after inserting rejects `up.RenderResult#finished` instead of
+`up.render()`. The per-step object that carries a step from phase 1 to the others never leaves
+`UpdateSteps`. To make the cut between inserting and transitioning, `up.Change.UpdateSteps`
+calls the internal `up.motion.swap()`, which inserts now and returns a function that starts the
+transition later; `up.morph()` is just both calls in a row.
 `up.Change.Addition` is the base class for everything that inserts content, and carries the
 concerns that outlive the swap: honouring a server's request to accept or dismiss a layer,
 and stamping each new fragment with the `[up-source]`, `[up-time]` and `[up-etag]` attributes
@@ -200,9 +217,8 @@ the pass closes the very layer it renders into: a listener on
 updated *before* the teardown. That is what lets a server response accept an overlay and
 still deliver a flash message to the layer underneath, and lets `onAccepted` / `onDismissed`
 handlers observe it. The call is memoized so it happens exactly once either way.
-
-> Note: the comment above `_renderOtherLayers()` in the source claims we execute other
-> layers first. That is misleading — read the array literal in `execute()` instead.
+Either way, the other-layer steps go through a separate `UpdateSteps` with its own four
+phases. They are not compiled together with the current layer's fragments.
 
 
 ## Rendering can open and close layers

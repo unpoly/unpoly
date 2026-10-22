@@ -50,15 +50,23 @@ and error states on the right. A render pass moves through these stages:
 13. DOM elements are updated. For `[up-keep]` elements, `up:fragment:keep` is emitted.
     Preventing that event updates the element after all.
     When every targeted element is kept, no compilers run and `onRendered()` is not called.
-14. Compilers run on new elements (`up:fragment:inserted`). Destructors run on old elements (`up:fragment:destroyed`),
-    after the transition if there is one.
+    Destructors run on old elements, unless they play a transition.
+14. Compilers run on new elements (`up:fragment:inserted`).
     When a compiler or destructor throws, an `error` event is emitted on `window` and the render pass continues.
 15. Focus and scroll position are updated. A new layer then emits `up:layer:opened`.
+    Transitions and animations start. Old elements without a transition emit `up:fragment:destroyed`.
 16. After a successful response, `up.render()` fulfills and `onRendered()` is called with an `up.RenderResult`.
     After an error response, `up.render()` rejects with an `up.RenderResult` and `onFailRendered()` is called.
 17. The browser renders the changes while the transition (or `failTransition`) plays and async compilers settle.
+    When the transition ends, destructors run on the old element and it emits `up:fragment:destroyed`.
 18. `up.render().finished` fulfills and `onFinished()` is called with the latest `up.RenderResult`.
     After an error response, `up.render().finished` rejects with an `up.RenderResult`.
+
+When a render pass [updates multiple fragments](/learn/targeting-fragments#multiple), stages 13 to 15 each
+complete for all fragments before the next stage begins. Within one layer, fragments are updated in the order of
+the target selector, followed by that layer's [hungry elements](/learn/hungry-elements). Compilers run in the same order,
+and see the new versions of all fragments in that layer. Hungry elements on [other layers](/learn/hungry-elements#layers)
+are rendered as a separate group: after the current layer, or before it closes when the render pass closes an overlay.
 
 `onError()` is called for every error that rejects `up.render()`, like `up.Offline`, `up.CannotMatch`
 or an aborted render pass, but not for an error response.
