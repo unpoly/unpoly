@@ -747,7 +747,7 @@ up.link = (function() {
   //   let verbatimHREF = link.getAttribute('href')
   // }
 
-  function shouldFollowEvent(event, link) {
+  function shouldHandleClick(event, link) {
     // Users may configure up.link.config.followSelectors.push('a')
     // and then opt out individual links with [up-follow=false].
     if (event.defaultPrevented) {
@@ -1273,7 +1273,7 @@ up.link = (function() {
   @signature
   */
   up.on('up:click', config.selectorFn('followSelectors'), function(event, link) {
-    if (shouldFollowEvent(event, link)) {
+    if (shouldHandleClick(event, link)) {
       up.event.halt(event, { log: true })
 
       // When the user clicks an hyperlink, the browser will focus the link element on `click`.
@@ -1532,7 +1532,7 @@ up.link = (function() {
     makeFollowable,
     isSafe,
     isFollowable,
-    shouldFollowEvent,
+    shouldHandleClick,
     convertClicks,
     config,
     loadDeferred,

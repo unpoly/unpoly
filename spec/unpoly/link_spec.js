@@ -776,7 +776,7 @@ describe('up.link', function() {
       }
     })
 
-    describe('up.link.shouldFollowEvent', function() {
+    describe('up.link.shouldHandleClick', function() {
 
       const buildEvent = function(target, attrs) {
         const event = Trigger.createMouseEvent('mousedown', attrs)
@@ -788,28 +788,28 @@ describe('up.link', function() {
       it("returns true when the given event's target is the given link itself", function() {
         const $link = $fixture('a[href="/foo"]')
         const event = buildEvent($link[0])
-        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(true)
+        expect(up.link.shouldHandleClick(event, $link[0])).toBe(true)
       })
 
       it("returns true when the given event's target is a non-link child of the given link", function() {
         const $link = $fixture('a[href="/foo"]')
         const $span = $link.affix('span')
         const event = buildEvent($span[0])
-        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(true)
+        expect(up.link.shouldHandleClick(event, $link[0])).toBe(true)
       })
 
       it("returns false when the given event's target is a child link of the given link (think [up-expand])", function() {
         const $link = $fixture('div[up-href="/foo"]')
         const $childLink = $link.affix('a[href="/bar"]')
         const event = buildEvent($childLink[0])
-        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
+        expect(up.link.shouldHandleClick(event, $link[0])).toBe(false)
       })
 
       it("returns false when the given event's target is a child input of the given link (think [up-expand])", function() {
         const $link = $fixture('div[up-href="/foo"]')
         const $childInput = $link.affix('input[type="text"]')
         const event = buildEvent($childInput[0])
-        expect(up.link.shouldFollowEvent(event, $link[0])).toBe(false)
+        expect(up.link.shouldHandleClick(event, $link[0])).toBe(false)
       })
     })
 
