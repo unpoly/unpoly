@@ -1,6 +1,9 @@
 const e = up.element
 const u = up.util
 
+// Options in an X-Up-Open-Layer header that start with "on", but take a selector instead of a callback.
+const NON_CALLBACK_KEYS = ['onAcceptedReload', 'onDismissedReload']
+
 up.ScriptGate = class ScriptGate {
 
   constructor(cspInfo = up.CSPInfo.none()) {
@@ -72,8 +75,8 @@ up.ScriptGate = class ScriptGate {
     for (let key of Object.keys(object)) {
       let script = object[key]
 
-      // The { onAcceptedReload } and { onDismissedReload } options take a selector, not a callback.
-      if (/^on[A-Z]/.test(key) && !key.endsWith('Reload') && u.isString(script)) {
+      // Any other on* key is a callback, so a mistyped key fails with "Unknown callback".
+      if (/^on[A-Z]/.test(key) && !NON_CALLBACK_KEYS.includes(key) && u.isString(script)) {
         let item = new ObjectPropertyItem(object, key)
         policy.processItem(item)
         object[key] = up.RenderOptions.parseCallback(key, object[key])
