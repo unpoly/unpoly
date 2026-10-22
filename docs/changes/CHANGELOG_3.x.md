@@ -3481,11 +3481,12 @@ Various changes make it easier to watch fields for changes:
 - 🧩 Replaced `up.form.config.validateTargets` with `up.form.config.groupSelectors`. Configured selectors must no longer contain a `:has(:origin)` suffix, as this is now added automatically when required.
 - All functions with a `{ params }` option now also accept a `FormData` value.
 - The `[up-show-for]` and `[up-hide-for]` attributes now accept values with spaces. Such values must be encoded as a JSON array, e.g. `<element up-show-for='["John Doe", "Jane Doe"]'>`. Fixes [#78](https://github.com/unpoly/unpoly/issues/78).
-- ⚠️ When submitting a form, `{ origin }` is now the element that triggered the submission:
+- ❌ When submitting a form, `{ origin }` is now the element that triggered the submission:
   - When a form is submitted, the `:origin` is now the submit button (instead of the `<form>` element)
   - When a form is submitted by pressing `Enter` within a focused field sets that field as the `{ origin }`, the `:origin` is now the focused field (instead of the `<form>` element)
   - When a form is watched or validated, the `:origin` is now the field that was changed (instead of the `<form>` element)
   - To select an active form with CSS, select `form.up-active, form:has(.up-active) { ... }`.
+  - A form attribute that refers to the origin, like `[up-fail-target=":origin"]` (or the old `&`), now matches the button or field, not the form. Use `form:has(:origin)`, or remove the attribute when the form itself is the default target.
 - Fix `up.watch()` (formerly `up.observe()`) crashing when passed an input outside a form.
 
 
