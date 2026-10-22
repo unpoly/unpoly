@@ -991,10 +991,14 @@ up.element = (function() {
 
   function preservingFocus(fn) {
     const oldFocusElement = document.activeElement
+    // Moving an element resets its scroll position and selection range.
+    const cursorProps = up.viewport.copyCursorProps(oldFocusElement)
     try {
       return fn()
     } finally {
       if (oldFocusElement && oldFocusElement !== document.activeElement) {
+        // Firefox needs focus-related props to be set *before* we focus the element
+        up.viewport.copyCursorProps(cursorProps, oldFocusElement)
         oldFocusElement.focus({ preventScroll: true })
       }
     }
