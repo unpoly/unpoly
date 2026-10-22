@@ -120,7 +120,7 @@ try {
 }
 ```
 
-To run code when an element *or one of its ancestors* was aborted, use `up.fragment.onAborted()`.
+To run code when an element *or one of its ancestors in the same layer* was aborted, use `up.fragment.onAborted()`.
 For example, a timer that reloads an element after 10 seconds should not fire once the element's requests were aborted:
 
 ```js
@@ -140,6 +140,7 @@ The following rules apply when opening or closing [overlays](/api/up.layer):
 - When two requests attempt to [open a new overlay](/api/up-layer-new) over the same base layer, the first request will be aborted by the second request.
 - A request to open a new overlay is aborted when the base layer's [main fragment](/api/main) is targeted by a second request.
 - When a layer is closed, all pending requests targeting that layer are aborted. This is regardless of the `{ abort }` option used.
+- Aborting a layer doesn't affect other layers. For example, `up.fragment.abort({ layer: 'root' })` keeps the requests, [polling](/api/up-poll) and pending [validations](/learn/validation) in an overlay.
 
 
 Destroyed fragments are aborted {#destroyed}

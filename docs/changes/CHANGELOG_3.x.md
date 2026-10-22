@@ -187,6 +187,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent layer, as described in [focus in overlays](/learn/focus#overlays). It used to fall back to the `<body>`.
 - Fix: [`[up-focus-visible]`](/api/up-follow#up-focus-visible) and the `{ focusVisible }` option were ignored when opening an overlay.
 - Fix: Pressing Escape dismissed an overlay even when an element in it had already handled the key with `event.preventDefault()`, e.g. a dropdown closing its list. A prevented Escape keydown now keeps the overlay open.
+- ⚠️ [Aborting](/learn/aborting-requests) the root layer, e.g. with `up.fragment.abort({ layer: 'root' })` or a render pass with `{ abort: 'layer' }`, no longer stops [polling](/api/up-poll), pending [validations](/learn/validation) or a scheduled [preload](/learn/preloading) in an open overlay. Requests in overlays were already kept. [`up.fragment.onAborted()`](/api/up.fragment.onAborted) and [`up.fragment.onKept()`](/api/up.fragment.onKept) now only react to ancestors in the same layer.
 - Fix: The `{ duration }` and `{ easing }` options of `up.layer.open()` were ignored for the opening animation. This also affected `[up-duration]` and `[up-easing]` on a link that opens an overlay. Only `up.layer.config` was used.
 
 

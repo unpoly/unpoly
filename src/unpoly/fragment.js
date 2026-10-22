@@ -2828,8 +2828,8 @@ up.fragment = (function() {
   ```js
   // Listen to all up:fragment:aborted events in case an ancestor
   let off = up.on('up:fragment:aborted', function(event) {
-     if (event.target.contains(element)) {
-        // element or an ancestor was aborted
+     if (up.fragment.contains(event.target, element)) {
+        // element or an ancestor in the same layer was aborted
      }
   })
   // Because we're registering a global event listener, we should
@@ -2844,7 +2844,7 @@ up.fragment = (function() {
   ```js
   // Listen to all up:fragment:aborted events in case an ancestor
   up.fragment.onAborted(element, function(event) {
-    // element or an ancestor was aborted
+    // element or an ancestor in the same layer was aborted
   })
   ```
 
@@ -2863,7 +2863,10 @@ up.fragment = (function() {
   */
 
   /*-
-  Runs a callback when the given element *or its ancestors* were [aborted](/learn/aborting-requests).
+  Runs a callback when the given element *or its ancestors in the same layer* were [aborted](/learn/aborting-requests).
+
+  Aborting another layer doesn't run the callback. For example, aborting the root layer
+  doesn't affect elements in an overlay, like it doesn't abort the overlay's requests.
 
   This utility function simplifies consumption of the `up:fragment:aborted` event.
 
@@ -2880,7 +2883,7 @@ up.fragment = (function() {
 
   @function up.fragment.onAborted
   @param {Element} element
-    The element to observe with its ancestors.
+    The element to observe with its ancestors in the same layer.
   @param {Function(event)} callback
     The callback to run.
 
@@ -2892,15 +2895,15 @@ up.fragment = (function() {
   @experimental
   */
   function onAborted(fragment, callback) {
-    return up.event.onClosest(fragment, 'up:fragment:aborted', callback)
+    return onClosestInLayer(fragment, 'up:fragment:aborted', callback)
   }
 
   /*-
-  Runs a callback when the given element *or its ancestors* were [kept](/learn/keeping-elements).
+  Runs a callback when the given element *or its ancestors in the same layer* were [kept](/learn/keeping-elements).
 
   @function up.fragment.onKept
   @param {Element} element
-    The element to observe with its ancestors.
+    The element to observe with its ancestors in the same layer.
   @param {Function(event)} callback
     The callback to run.
 
@@ -2912,7 +2915,18 @@ up.fragment = (function() {
   @experimental
   */
   function onKept(fragment, callback) {
-    return up.event.onClosest(fragment, 'up:fragment:kept', callback)
+    return onClosestInLayer(fragment, 'up:fragment:kept', callback)
+  }
+
+  // Like up.event.onClosest(), but ignores ancestors in another layer.
+  // E.g. aborting the root layer should not abort a poller in an overlay,
+  // like it doesn't abort the overlay's requests.
+  function onClosestInLayer(fragment, eventType, callback) {
+    let guard = (event) => contains(event.target, fragment)
+    let unsubscribe = up.on(eventType, { guard }, callback)
+    // We're listening globally, so we unsubscribe when the fragment is destroyed.
+    up.destructor(fragment, unsubscribe)
+    return unsubscribe
   }
 
   // This function lives in up.fragment (not up.element)

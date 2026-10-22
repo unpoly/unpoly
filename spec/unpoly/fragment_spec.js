@@ -1403,6 +1403,39 @@ describe('up.fragment', function() {
         expect(callback).not.toHaveBeenCalled()
       })
 
+      it("runs the callback when the fragment's layer is aborted", async function() {
+        await up.layer.open({ content: '<div class="fragment">fragment</div>' })
+        const fragment = up.fragment.get('.fragment', { layer: 'overlay' })
+        const callback = jasmine.createSpy('aborted callback')
+        up.fragment.onAborted(fragment, callback)
+
+        up.fragment.abort({ layer: 'overlay' })
+
+        expect(callback).toHaveBeenCalled()
+      })
+
+      it('does not run the callback for a fragment in an overlay when the root layer is aborted', async function() {
+        await up.layer.open({ content: '<div class="fragment">fragment</div>' })
+        const fragment = up.fragment.get('.fragment', { layer: 'overlay' })
+        const callback = jasmine.createSpy('aborted callback')
+        up.fragment.onAborted(fragment, callback)
+
+        up.fragment.abort({ layer: 'root' })
+
+        expect(callback).not.toHaveBeenCalled()
+      })
+
+      it('runs the callback for a fragment in an overlay when all layers are aborted', async function() {
+        await up.layer.open({ content: '<div class="fragment">fragment</div>' })
+        const fragment = up.fragment.get('.fragment', { layer: 'overlay' })
+        const callback = jasmine.createSpy('aborted callback')
+        up.fragment.onAborted(fragment, callback)
+
+        up.fragment.abort({ layer: 'any' })
+
+        expect(callback).toHaveBeenCalled()
+      })
+
       it('returns a callback that stops the event listener', function() {
         const fragment = fixture('.fragment')
         const callback = jasmine.createSpy('aborted callback')
@@ -1475,6 +1508,18 @@ describe('up.fragment', function() {
         expect(keeperCallback.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ type: 'up:fragment:kept', target: keeper }))
         expect(childCallback.calls.count()).toBe(1)
         expect(childCallback.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ type: 'up:fragment:kept', target: keeper }))
+      })
+
+      it("does not run the callback for a fragment in an overlay when an element in the root layer emits up:fragment:kept", async function() {
+        await up.layer.open({ content: '<div class="fragment">fragment</div>' })
+        const fragment = up.fragment.get('.fragment', { layer: 'overlay' })
+        const callback = jasmine.createSpy('kept callback')
+        up.fragment.onKept(fragment, callback)
+
+        // The root layer's element is an ancestor of the overlay in the DOM.
+        up.emit(up.layer.root.element, 'up:fragment:kept')
+
+        expect(callback).not.toHaveBeenCalled()
       })
 
       it('returns a function that unsubscribes the callback', async function() {

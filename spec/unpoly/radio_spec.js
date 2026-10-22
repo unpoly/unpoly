@@ -155,6 +155,44 @@ describe('up.radio', function() {
         expect(reloadSpy).not.toHaveBeenCalled()
       })
 
+      it('keeps polling in an overlay when the root layer is aborted', async function() {
+        const interval = 150
+        up.radio.config.pollInterval = interval
+        const timingTolerance = interval / 3
+
+        await up.layer.open({ content: '<div class="element">element</div>' })
+        const element = up.fragment.get('.element', { layer: 'overlay' })
+        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        up.radio.startPolling(element)
+
+        await wait(timingTolerance)
+        expect(reloadSpy).not.toHaveBeenCalled()
+
+        up.fragment.abort({ layer: 'root' })
+
+        await wait(interval)
+        expect(reloadSpy).toHaveBeenCalled()
+      })
+
+      it('stops polling in an overlay when all layers are aborted', async function() {
+        const interval = 150
+        up.radio.config.pollInterval = interval
+        const timingTolerance = interval / 3
+
+        await up.layer.open({ content: '<div class="element">element</div>' })
+        const element = up.fragment.get('.element', { layer: 'overlay' })
+        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        up.radio.startPolling(element)
+
+        await wait(timingTolerance)
+        expect(reloadSpy).not.toHaveBeenCalled()
+
+        up.fragment.abort({ layer: 'any' })
+
+        await wait(interval)
+        expect(reloadSpy).not.toHaveBeenCalled()
+      })
+
       it('keeps polling when the polling fragment is aborted through its own reloading', async function() {
         up.radio.config.pollAbortable = false
         const interval = 150
