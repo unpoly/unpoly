@@ -1367,6 +1367,12 @@ up.link = (function() {
   </div>
   ```
 
+  ## Links that Unpoly doesn't follow
+
+  When Unpoly wouldn't follow the expanded link, e.g. because it has a `[download]`, `[target]`
+  or `[up-follow=false]` attribute, clicking the area clicks the link. The browser then does what the link does,
+  like downloading a file or opening a new tab. Such links are configured in `up.link.config.noFollowSelectors`.
+
   ## Feedback classes
 
   Unpoly assigns the `.up-active` class to clicked links while they are loading.
@@ -1423,22 +1429,40 @@ up.link = (function() {
   up.attribute('up-expand', { defaultValue: 'a, [up-href]', macro: true }, function(area, childLinkSelector) {
     let childLink = e.get(area, childLinkSelector)
     if (childLink) {
-      e.setMissingAttrs(area, {
-        'up-href': e.attr(childLink, 'href'),
-        ...e.upAttrs(childLink)
-      })
-
-      // Remember the expander and expandee so we can set .up-active classes efficiently.
+      // Remember the expander and expandee so we can set .up-active classes efficiently,
+      // and so we can hand a click on a non-followable area to the link.
       childLink.upExpandedPair = area.upExpandedPair = [area, childLink]
 
       // This is our current workaround for expanded areas gaining an .up-current class from the contained link.
       e.addClasses(area, e.upClasses(childLink))
 
-      makeFollowable(area)
+      // When we wouldn't follow the link, e.g. a[download] or a[target], we don't make the area followable.
+      // Instead a click on the area clicks the link (see below), so the browser does whatever the link does.
+      if (!config.matches(childLink, 'noFollowSelectors')) {
+        e.setMissingAttrs(area, {
+          'up-href': e.attr(childLink, 'href'),
+          ...e.upAttrs(childLink)
+        })
+
+        makeFollowable(area)
+      }
       // A11y: We could also consider making the area clickable, via makeClickable().
       // However, since the original link is already present within the area,
       // we would not add accessibility benefits. We might also confuse screen readers
       // with a nested link.
+    }
+  })
+
+  up.on('up:click', '[up-expand]', function(event, area) {
+    let childLink = area.upExpandedPair?.[1]
+    // (1) A followable area is followed by the [up-follow] handler.
+    // (2) We ignore clicks on nested links or fields, including the expanded link itself.
+    //     This also prevents a loop if childLink.click() emits up:click on the link.
+    if (childLink && !isFollowable(area) && shouldHandleClick(event, area)) {
+      up.event.halt(event)
+      // The browser runs the link's default action within the user's click,
+      // so popup blockers allow a link with [target=_blank].
+      childLink.click()
     }
   })
 

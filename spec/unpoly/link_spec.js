@@ -1840,6 +1840,133 @@ describe('up.link', function() {
         expect(up.render.calls.count()).toEqual(1)
       })
 
+      describe('when Unpoly would not follow the expanded link', function() {
+
+        const linkCases = {
+          'a[download]': '<a href="/file.pdf" download>label</a>',
+          'a[target=_blank]': '<a href="/path" target="_blank">label</a>',
+          'a[up-follow=false]': '<a href="/path" up-follow="false" up-target="#target">label</a>',
+          'a cross-origin link': '<a href="https://other-domain.tld/path">label</a>',
+        }
+
+        for (let [description, linkHTML] of Object.entries(linkCases)) {
+          describe(`for ${description}`, function() {
+
+            it('does not make the area followable', function() {
+              const [area, link] = htmlFixtureList(`<div up-expand>${linkHTML}</div>`)
+              up.hello(area)
+
+              expect(area).not.toBeFollowable()
+              expect(area).not.toHaveAttribute('up-follow')
+              expect(area).not.toHaveAttribute('up-href')
+            })
+
+            it('clicks the link when the area is clicked, so the browser does what the link does', async function() {
+              const [area, link] = htmlFixtureList(`<div up-expand>${linkHTML}</div>`)
+              up.hello(area)
+              spyOn(link, 'click').and.callThrough()
+              const followListener = jasmine.createSpy('up:link:follow listener')
+              up.on('up:link:follow', followListener)
+
+              Trigger.clickSequence(area)
+
+              // The link is clicked synchronously within the user's click, so popup blockers allow it.
+              expect(link.click).toHaveBeenCalled()
+              expect(link).toHaveBeenDefaultFollowed()
+
+              await wait()
+
+              expect(followListener).not.toHaveBeenCalled()
+              expect(jasmine.Ajax.requests.count()).toBe(0)
+            })
+
+          })
+        }
+
+        it('does not click the link again when the link itself is clicked', async function() {
+          const [area, link] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/file.pdf" download>label</a>
+            </div>
+          `)
+          up.hello(area)
+          spyOn(link, 'click').and.callThrough()
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(link.click).not.toHaveBeenCalled()
+          expect(link).toHaveBeenDefaultFollowed()
+        })
+
+        it('does not click the link when the user clicks a field in the area', async function() {
+          const [area, link, input] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/file.pdf" download>label</a>
+              <input type="text" name="email">
+            </div>
+          `)
+          up.hello(area)
+          spyOn(link, 'click')
+
+          Trigger.clickSequence(input)
+          await wait()
+
+          expect(link.click).not.toHaveBeenCalled()
+        })
+
+        it('does not click the link when the user clicks another link in the area', async function() {
+          const [area, link, otherLink] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/file.pdf" download>label</a>
+              <a href="/other-path" up-follow>other label</a>
+            </div>
+          `)
+          up.hello(area)
+          spyOn(link, 'click')
+          const followSpy = up.link.follow.mock().and.returnValue(Promise.resolve())
+
+          Trigger.clickSequence(otherLink)
+          await wait()
+
+          expect(link.click).not.toHaveBeenCalled()
+          expect(followSpy.calls.count()).toBe(1)
+          expect(followSpy.calls.argsFor(0)[0]).toBe(otherLink)
+        })
+
+        it('does not click the link when the user holds a modifier key while clicking the area', async function() {
+          const [area, link] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/file.pdf" download>label</a>
+            </div>
+          `)
+          up.hello(area)
+          spyOn(link, 'click')
+
+          Trigger.clickSequence(area, { ctrlKey: true })
+          await wait()
+
+          expect(link.click).not.toHaveBeenCalled()
+        })
+
+        it('does not preload when the user hovers over the area', async function() {
+          up.link.config.preloadDelay = 0
+          const [area, link] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/file.pdf" download up-preload>label</a>
+            </div>
+          `)
+          up.hello(area)
+
+          Trigger.hoverSequence(area)
+          await wait(50)
+
+          expect(area).not.toHaveAttribute('up-preload')
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+        })
+
+      })
+
       if (up.migrate.loaded) {
         it('makes the expanded area followable if the expanded link is [up-dash] with a selector (bugfix)', function() {
           const $area = $fixture('div[up-expand] a[href="/path"][up-dash=".element"]')
