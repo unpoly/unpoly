@@ -47,7 +47,7 @@ A compiler can therefore see the new version of other fragments from the same re
 
 ```js
 up.compiler('#sidebar', function(sidebar) {
-  let count = document.querySelectorAll('#files .file').length // chip: counts the new files
+  let count = up.fragment.all('#files .file').length // chip: counts the new files
   sidebar.querySelector('.file-count').textContent = count
 })
 ```
