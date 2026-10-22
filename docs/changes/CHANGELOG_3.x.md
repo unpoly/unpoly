@@ -199,7 +199,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 
 A render pass now inserts all new content first, then runs compilers, then updates focus and scroll position, and starts animations last. This order now holds for every placement, and when a render pass updates [multiple fragments](/learn/targeting-fragments#multiple). A compiler can now see the new version of every other fragment updated in the same layer, including [hungry elements](/learn/hungry-elements). See [Compilers see the DOM after the change](/learn/enhancing-elements#dom-after-change).
 
-- ⚠️ Fragments are now inserted and compiled in the order of the target selector, followed by hungry elements. Since Unpoly 3.0 they were compiled in reverse order, which was never documented. `up:fragment:inserted` and `up:fragment:destroyed` are now also emitted in target order. When fragments are swapped without a transition, all their destructors now run before the first compiler, and `up:fragment:destroyed` is emitted after the last compiler.
+- ⚠️ Fragments are now inserted and compiled in the order of the target selector, followed by hungry elements. Since [Unpoly 3.0](/changes/3.0.0) they were compiled in reverse order, which was never documented. `up:fragment:inserted` and `up:fragment:destroyed` are now also emitted in target order. When fragments are swapped without a transition, all their destructors now run before the first compiler, and `up:fragment:destroyed` is emitted after the last compiler.
 - ⚠️ When `:content`, `:before` or `:after` is updated with a transition or animation, focus now moves right away, like when swapping a fragment. It used to move when the animation ended. With `:after` and `{ focus: 'target' }`, Unpoly now focuses the first appended element. It used to focus the container's first child, which could be an existing element.
 - ⚠️ When an error is thrown after new fragments were inserted, e.g. for an invalid `{ focus }` or `{ scroll }` selector, `up.render()` now fulfills and `up.render().finished` rejects. This was already the case when swapping a fragment, but `:before`, `:after` and fully [kept](/learn/keeping-elements) fragments rejected `up.render()`.
 - Fix: When multiple fragments played a transition and the render pass scrolled, only the first old element kept its position on the screen.
@@ -1262,7 +1262,7 @@ This version revises mechanisms to prevent cross-site scripting and handle stric
 
 #### Scripts in fragments are no longer executed
 
-⚠️ Unpoly no longer executes `<script>` elements in new fragments.\
+⚠️ Unpoly no longer executes `<script>` elements in new fragments. (Changed again in [3.14](/changes/3.14.0).)\
 This default can by changed by configuring `up.fragment.config.runScripts`.
 
 Unfortunately our the default for this setting has changed a few times now. It took us a while to find the right balance between secure defaults and compatibility with legacy apps.
@@ -3306,10 +3306,11 @@ Unpoly 3 makes it easier to work with [element data](/learn/data):
     console.log(meta.revalidating)                // result: true
   })
   ```
+- ⚠️ When a render pass updates multiple fragments, Unpoly now swaps and compiles them in reverse order of the target. A compiler in a later target runs before earlier targets are updated, so it sees their old content. *(Documented in 3.15.)* (Changed again in [3.15](/changes/3.15.0).)
 
 #### Various changes
 
-- ⚠️ Unpoly now executes `<script>` tags in new fragments.
+- ⚠️ Unpoly now executes `<script>` tags in new fragments. (Changed again in [3.11](/changes/3.11.0) and [3.14](/changes/3.14.0).)
   
   You may disable this behavior with `up.fragment.config.runScripts = false` (this was the default in Unpoly 2).
   
