@@ -334,6 +334,16 @@ up.form = (function() {
   }
 
   /*-
+  Returns a selector for elements that handle a click themselves, like fields, buttons and labels.
+
+  @function up.form.interactiveSelector
+  @internal
+  */
+  function interactiveSelector() {
+    return [fieldSelector(), anyButtonSelector(), 'label'].join()
+  }
+
+  /*-
   Submits a form via JavaScript and updates a fragment with the server response.
 
   The server must render an element matching the [target selector](/learn/targeting-fragments) from the `{ target }` option
@@ -2479,6 +2489,7 @@ up.form = (function() {
     validate,
     autosubmit,
     fieldSelector,
+    interactiveSelector,
     fields: findFields,
     trackFields,
     isField,

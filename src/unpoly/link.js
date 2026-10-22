@@ -754,9 +754,9 @@ up.link = (function() {
       return false
     }
 
-    // If user clicked on a child link of $link, or in an <input> within an [up-expand][up-href]
+    // If user clicked on a child link of $link, or on a field, button or label within an [up-expand][up-href],
     // we want those other elements handle the click.
-    const betterTargetSelector = `a, [up-follow], ${up.form.fieldSelector()}`
+    const betterTargetSelector = `a, [up-follow], ${up.form.interactiveSelector()}`
     const betterTarget = event.target.closest(betterTargetSelector)
     return !betterTarget || (betterTarget === link)
   }
@@ -1354,6 +1354,8 @@ up.link = (function() {
   In the example above, clicking anywhere within the `.notification` element
   would [follow](/api/up.follow) the *Close* link.
 
+  A click on another link, a form field, a button or a label within the area is left to that element.
+
   ## Multiple contained links
 
   If a container contains more than one link, you can set the value of the
@@ -1456,7 +1458,7 @@ up.link = (function() {
   up.on('up:click', '[up-expand]', function(event, area) {
     let childLink = area.upExpandedPair?.[1]
     // (1) A followable area is followed by the [up-follow] handler.
-    // (2) We ignore clicks on nested links or fields, including the expanded link itself.
+    // (2) We ignore clicks on nested links, fields, buttons or labels, including the expanded link itself.
     //     This also prevents a loop if childLink.click() emits up:click on the link.
     if (childLink && !isFollowable(area) && shouldHandleClick(event, area)) {
       up.event.halt(event)

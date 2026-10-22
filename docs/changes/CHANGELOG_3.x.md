@@ -231,6 +231,7 @@ A render pass now inserts all new content first, then runs compilers, then updat
 - [URL patterns](/api/url-patterns) now match full URLs on the page's own origin, like `https://example.com/users/*`. Such patterns never matched before.
 - Fix: When the user pressed the mouse button on a [preloading](/learn/preloading) link while its preload request was still loading after hovering, Unpoly aborted the request and sent the same request again. This bug was introduced in Unpoly 3.8.
 - Fix: When [`[up-expand]`](/api/up-expand) enlarged a link that Unpoly doesn't follow, like a link with `[download]`, `[target]` or `[up-follow=false]`, Unpoly followed it anyway when the area was clicked. A download was fetched in the background instead of saved, and `[target=_blank]` didn't open a new tab. Clicking the area now clicks the link, so the browser does what the link does.
+- Fix: Clicking a button or a `<label>` inside an [`[up-expand]`](/api/up-expand) area followed the expanded link. A submit button didn't submit its form, and a label didn't toggle its checkbox. Buttons and labels now handle their own clicks, like links and fields already did.
 
 
 ### Smaller fixes and changes
