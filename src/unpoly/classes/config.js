@@ -12,13 +12,15 @@ up.Config = class Config {
     this._knownKeys.push(...Object.keys(this))
 
     document.addEventListener('up:framework:reset', () => this.reset())
-    document.addEventListener('up:framework:boot', () => this.logUnknownKeys())
+    // We check one task after booting, to also see settings made by up:framework:boot or
+    // up:framework:booted listeners, or by compilers on the initial page.
+    document.addEventListener('up:framework:boot', () => u.task(() => this.logUnknownKeys()))
   }
 
   // Logs an error for a setting that doesn't exist, e.g. a misspelled or renamed key.
   // This is an error rather than a warning, because an ignored setting may be a security setting.
   // We only check top-level keys: a nested object like up.layer.config.modal may hold any layer option.
-  // Settings made after booting are not checked.
+  // We only check once, right after booting. Settings made later are not checked.
   //
   // This method is not private because a spec calls it.
   logUnknownKeys() {

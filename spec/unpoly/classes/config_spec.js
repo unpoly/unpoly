@@ -68,6 +68,25 @@ describe('up.Config', function() {
       expect(errorSpy).not.toHaveBeenCalled()
     })
 
+    it('runs one task after booting, so it sees settings made by an up:framework:booted listener', async function() {
+      // The spec suite boots only once. Instead of booting again, we capture the listener
+      // that a new up.Config registers for up:framework:boot, and call it ourselves.
+      const addListenerSpy = spyOn(document, 'addEventListener')
+      const object = new up.Config('up.test.config', () => ({ a: 1 }))
+      const [_type, bootListener] = addListenerSpy.calls.allArgs().find(([type]) => type === 'up:framework:boot')
+      const errorSpy = spyOn(up.log, 'error')
+
+      bootListener()
+      // Like a setting made by an up:framework:booted listener
+      object.b = 2
+
+      expect(errorSpy).not.toHaveBeenCalled()
+
+      await wait()
+
+      expect(errorSpy).toHaveBeenCalledOnceWith('up.test.config', 'Ignoring unknown setting %s', 'b')
+    })
+
     if (up.migrate.loaded) {
       it('does not log an error for an old key that unpoly-migrate.js renames', function() {
         const errorSpy = spyOn(up.log, 'error')
