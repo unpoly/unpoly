@@ -522,6 +522,10 @@ up.network = (function() {
       // `newRequest`. In this case we re-process `newRequest` as if it was just made.
       cache.track(cachedRequest, newRequest, { onIncompatible: processRequest })
 
+      // Make newRequest abortable on its own, e.g. by up.fragment.abort().
+      // Aborting it only rejects newRequest, while cachedRequest keeps loading for others.
+      if (!newRequest.ended) queue.track(newRequest)
+
       return true
     }
   }

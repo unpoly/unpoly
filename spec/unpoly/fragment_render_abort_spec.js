@@ -358,6 +358,57 @@ extendDescribe('up.fragment', function() {
             expect(up.network.queue.allRequests.length).toBe(1)
           })
 
+          it('aborts an earlier pass that reuses a preload request, but keeps loading the preload request', async function() {
+            let html = (text) => `<div id="element">${text}</div>`
+            htmlFixtureList(html('old'))
+            const [link] = htmlFixtureList('<a href="/path" up-target="#element">link</a>')
+
+            up.link.preload(link)
+            await wait()
+
+            const clickJob = up.follow(link)
+            clickJob.catch(() => {})
+            await wait()
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            const newJob = up.render('#element', { url: '/other', abort: 'target' })
+            await wait()
+            expect(jasmine.Ajax.requests.count()).toBe(2)
+
+            jasmine.respondWith(html('stale'), { request: 0 })
+            await wait()
+            jasmine.respondWith(html('new'), { request: 1 })
+            await wait()
+
+            expect('#element').toHaveText('new')
+            await expectAsync(clickJob).toBeRejectedWith(jasmine.any(up.Aborted))
+            await expectAsync(newJob).toBeResolvedTo(jasmine.any(up.RenderResult))
+            expect({ url: '/path', target: '#element' }).toBeCached()
+          })
+
+          it('aborts an earlier pass that reuses a preload request when local content is rendered', async function() {
+            let html = (text) => `<div id="element">${text}</div>`
+            htmlFixtureList(html('old'))
+            const [link] = htmlFixtureList('<a href="/path" up-target="#element">link</a>')
+
+            up.link.preload(link)
+            await wait()
+
+            const clickJob = up.follow(link)
+            clickJob.catch(() => {})
+            await wait()
+
+            up.render('#element', { content: 'local' })
+            await wait()
+            expect('#element').toHaveText('local')
+
+            jasmine.respondWith(html('stale'))
+            await wait()
+
+            expect('#element').toHaveText('local')
+            await expectAsync(clickJob).toBeRejectedWith(jasmine.any(up.Aborted))
+          })
+
           it('calls an { onError } callback of the aborted render pass with an up.Aborted error', async function() {
             htmlFixtureList('<div id="element">old text</div>')
             const onError = jasmine.createSpy('onError callback')

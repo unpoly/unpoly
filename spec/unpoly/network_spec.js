@@ -500,6 +500,44 @@ describe('up.network', function() {
         expect(listener.calls.argsFor(0)[0]).toBeEvent('up:request:aborted')
       })
 
+      it('aborts a request that is tracking a cached request, but not the cached request', async function() {
+        const listener = jasmine.createSpy('up:request:aborted listener')
+        up.on('up:request:aborted', listener)
+
+        const request1 = up.request({ url: '/url', cache: true })
+        await wait()
+
+        const request2 = up.request({ url: '/url', cache: true })
+        await wait()
+        expect(jasmine.Ajax.requests.count()).toBe(1)
+
+        up.network.abort(request2)
+
+        await expectAsync(request2).toBeRejectedWith(jasmine.any(up.Aborted))
+        expect((await promiseState(request1)).state).toBe('pending')
+        expect(listener.calls.count()).toBe(1)
+        expect(listener.calls.argsFor(0)[0].request).toBe(request2)
+      })
+
+      it('emits up:request:aborted for a tracking request when aborting all requests', async function() {
+        const listener = jasmine.createSpy('up:request:aborted listener')
+        up.on('up:request:aborted', listener)
+
+        const request1 = up.request({ url: '/url', cache: true })
+        await wait()
+
+        const request2 = up.request({ url: '/url', cache: true })
+        await wait()
+
+        up.network.abort()
+
+        await expectAsync(request1).toBeRejectedWith(jasmine.any(up.Aborted))
+        await expectAsync(request2).toBeRejectedWith(jasmine.any(up.Aborted))
+        let abortedRequests = listener.calls.allArgs().map(([event]) => event.request)
+        expect(abortedRequests).toContain(request1)
+        expect(abortedRequests).toContain(request2)
+      })
+
       it('does not send multiple up:request:aborted events if the request is aborted multiple times', async function() {
         const listener = jasmine.createSpy('event listener')
         up.on('up:request:aborted', listener)

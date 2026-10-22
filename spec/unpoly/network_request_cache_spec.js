@@ -230,6 +230,41 @@ extendDescribe('up.network', function() {
             await expectAsync(request2).toBeRejectedWith(jasmine.any(up.Aborted))
           })
 
+          it('does not abort the tracked request when a tracking request is aborted', async function() {
+            let request1 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            let request2 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+
+            request2.abort()
+            await expectAsync(request2).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            jasmine.respondWith('response text')
+
+            await expectAsync(request1).toBeResolvedTo(jasmine.any(up.Response))
+            expect({ url: '/path' }).toBeCached()
+          })
+
+          it('keeps the aborted state of a tracking request when the tracked request loads', async function() {
+            let request1 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            let request2 = up.request({ url: '/path', cache: true })
+            await wait()
+
+            request2.abort()
+            await expectAsync(request2).toBeRejectedWith(jasmine.any(up.Aborted))
+
+            jasmine.respondWith('response text')
+            await expectAsync(request1).toBeResolvedTo(jasmine.any(up.Response))
+
+            expect(request1.state).toBe('loaded')
+            expect(request2.state).toBe('aborted')
+          })
+
         })
 
         describe('when the server responds without content', function() {
@@ -539,6 +574,29 @@ extendDescribe('up.network', function() {
 
               // No 3rd request is sent
               expect(jasmine.Ajax.requests.count()).toEqual(2)
+              expect(up.network.isBusy()).toBe(false)
+            })
+
+            it('does not load an aborted tracking request that retroactively becomes a cache miss', async function() {
+              up.request({ url: '/path', target: '.a', cache: true })
+              await wait()
+
+              let request2 = up.request({ url: '/path', target: '.b', cache: true })
+              await wait()
+
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
+
+              request2.abort()
+              await expectAsync(request2).toBeRejectedWith(jasmine.any(up.Aborted))
+
+              jasmine.respondWithSelector('.a', {
+                text: 'content',
+                responseHeaders: { 'Vary': 'X-Up-Target' }
+              })
+              await wait()
+
+              expect(jasmine.Ajax.requests.count()).toEqual(1)
+              expect(request2.state).toBe('aborted')
               expect(up.network.isBusy()).toBe(false)
             })
 

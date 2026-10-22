@@ -126,6 +126,10 @@ up.Request.Cache = class Cache {
       // Wait until existingRequest responds or errors.
       // Note that while we're waiting, existingRequest could be evicted, e.g. after a failed response.
       value = await u.always(existingRequest)
+
+      // If newRequest was aborted while waiting, it must stay aborted.
+      // In particular we must not re-send it on a Vary mismatch, or delegate its state to existingRequest.
+      if (newRequest.ended) return
     }
 
     if (value instanceof up.Response) {

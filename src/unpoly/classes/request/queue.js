@@ -9,7 +9,17 @@ up.Request.Queue = class Queue {
   reset() {
     this._queuedRequests = []
     this._currentRequests = []
+    // Requests that reuse a cached request in flight (see up.Request.Cache#track()).
+    // They never load, so they don't count for concurrency or late/recover, but they can be aborted.
+    this._trackingRequests = []
     this._emittedLate = false
+  }
+
+  track(request) {
+    this._trackingRequests.push(request)
+    // The braces matter: u.remove() returns the removed request, a thenable that would make
+    // the derived promise adopt the request's rejection.
+    u.always(request, () => { u.remove(this._trackingRequests, request) })
   }
 
   get allRequests() {
@@ -119,7 +129,7 @@ up.Request.Queue = class Queue {
 
     let tester = up.Request.tester(conditions, { except })
 
-    for (let list of [this._currentRequests, this._queuedRequests]) {
+    for (let list of [this._currentRequests, this._queuedRequests, this._trackingRequests]) {
       const abortableRequests = u.filter(list, tester)
       for (let abortableRequest of abortableRequests) {
         if (logOnce) {
