@@ -39,6 +39,27 @@ describe('up.log', () => {
       })
     })
 
+    describe('up.log.config.format', function() {
+
+      // The spec browser is itself controlled by automation software, so we stub navigator.webdriver
+      // in both directions instead of relying on its actual value.
+
+      it('defaults to false in a browser controlled by automation software', function() {
+        spyOnProperty(navigator, 'webdriver').and.returnValue(true)
+        up.log.config.reset()
+
+        expect(up.log.config.format).toBe(false)
+      })
+
+      it('defaults to true in a browser not controlled by automation software', function() {
+        spyOnProperty(navigator, 'webdriver').and.returnValue(false)
+        up.log.config.reset()
+
+        expect(up.log.config.format).toBe(true)
+      })
+
+    })
+
     describe('up.log.error()', () => {
       it('sends an error message to the developer console regardless whether the log is enabled or not', function() {
         spyOn(console, 'error')

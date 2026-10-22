@@ -35,8 +35,13 @@ up.log = (function() {
     Note that errors will always be printed, regardless of this setting.
   @param {boolean} [config.banner=true]
     Print the Unpoly banner to the developer console.
-  @param {boolean} [config.format=true]
+  @param {boolean} [config.format]
     Format output using CSS.
+
+    Defaults to `true` in normal browsers.
+    Defaults to `false` in browsers controlled by automation software like Selenium, Playwright or Puppeteer
+    (when [`navigator.webdriver`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/webdriver) is `true`).
+    This keeps the log readable for test runners and coding agents that read the console as plain text.
   @stable
   */
   const config = new up.LogConfig()

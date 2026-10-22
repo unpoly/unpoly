@@ -17,7 +17,9 @@ up.LogConfig = class LogConfig extends up.Config {
   constructor() {
     super('up.log.config', () => ({
       banner: true,
-      format: true,
+      // Console styles are only useful for humans. A browser controlled by automation software
+      // (Selenium, Playwright, Puppeteer) usually feeds the log into a test runner or agent.
+      format: !navigator.webdriver,
     }))
   }
 

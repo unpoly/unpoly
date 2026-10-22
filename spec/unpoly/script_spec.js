@@ -594,6 +594,8 @@ describe('up.script', function() {
       let warnSpy
 
       beforeEach(function() {
+        // Expect a single line of text, regardless whether the spec browser formats the log.
+        up.log.config.format = false
         warnSpy = spyOn(console, 'warn').and.callThrough()
       })
 
@@ -618,7 +620,7 @@ describe('up.script', function() {
 
       describe('unexpectedly liberal script execution', function() {
 
-        const warnArgs = [jasmine.stringContaining("A 'strict-dynamic' CSP allows arbitrary <script> elements in new fragments"), jasmine.anything(), jasmine.anything()]
+        const warnArgs = [jasmine.stringContaining("A 'strict-dynamic' CSP allows arbitrary <script> elements in new fragments")]
 
         function itWarnsFor(cspName) {
           const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
@@ -696,7 +698,7 @@ describe('up.script', function() {
 
       describe('unexpectedly liberal callback execution', function() {
 
-        const warnArgs = [jasmine.stringContaining("An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks"), jasmine.anything(), jasmine.anything()]
+        const warnArgs = [jasmine.stringContaining("An 'unsafe-eval' CSP allows arbitrary [up-on...] callbacks")]
 
         function itWarnsFor(cspName) {
           const cspString = CSP_PRESETS[cspName] ?? up.fail('Unknown CSP preset' + cspName)
