@@ -449,7 +449,6 @@ up.motion = (function() {
           // we must shift the old copy so it looks like it is still sitting in the same position.
           oldRemote.moveBounds(0, viewport.scrollTop - scrollTopBeforeScroll)
 
-          // TODO: Instead of plucking callbacks above, we could only pass actual options here. We can do that now we no longer have { trackMotion }.
           await transitionFn(oldElement, newElement, timingOptions)
 
           beforeRemove?.()
