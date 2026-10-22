@@ -253,6 +253,25 @@ up-drawer[position=right] up-drawer-box {
 }
 ```
 
+### Styling the page while an overlay is open {#styling-the-page}
+
+To change the page behind an open overlay, like blurring it, use a `:has()` selector on the `<body>`:
+
+```css
+body:has(> :is(up-modal, up-drawer, up-cover)) main {
+  filter: blur(2px);
+}
+```
+
+Unlike a class that you set from JavaScript, the selector stops matching when the overlay element is removed,
+no matter how the overlay was closed.
+
+Modals, drawers and covers are appended to the `<body>`. This lets the selector use the child combinator (`>`),
+which is cheap for the browser to check, since it only looks at the body's children.
+
+Popups are attached to the [viewport](/api/up-viewport) around the element that opened them,
+so they aren't always direct children of the `<body>`. To also match open popups, use `body:has(up-popup)`.
+
 
 Customizing overlay elements {#customizing-overlay-elements}
 ----------------------------
