@@ -1204,6 +1204,8 @@ up.layer = (function() {
     @param [up-confirm]
       A message the user needs to confirm before the layer is closed.
 
+      See [[confirmation-dialogs#overlays]].
+
   @section Animation
     @param [up-animation]
       @like [up-accept]
@@ -1277,6 +1279,8 @@ up.layer = (function() {
       If the attribute value is omitted, a value `null` will be used.
     @param [up-confirm]
       A message the user needs to confirm before the layer is closed.
+
+      See [[confirmation-dialogs#overlays]].
 
   @section Animation
     @param [up-animation]

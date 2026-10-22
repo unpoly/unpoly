@@ -8,6 +8,8 @@
   If the user does not confirm, no request is sent and no fragments are updated.
   In that case the render promise rejects with an `up.Aborted` error.
 
+  See [[confirmation-dialogs]], also for showing a styled dialog instead of the browser's.
+
 @param {Function(Event)} [options.onLoaded]
   A callback that will be run when the server responds with new HTML,
   but before the HTML is rendered.

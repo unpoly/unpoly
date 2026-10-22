@@ -165,6 +165,8 @@ up.Layer = class Layer extends up.Record {
     @param {string} [options.confirm]
       A message the user needs to confirm before the overlay is closed.
 
+      See [[confirmation-dialogs#overlays]].
+
     @param {boolean} [options.preventable=true]
       Whether the closing can be prevented by an event listener.
 

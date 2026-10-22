@@ -141,6 +141,8 @@ To keep state for the lifetime of an overlay, like the record a reused screen is
 
 To control whether an overlay's location shows in the address bar, see [[history-in-overlays]].
 
+To ask for confirmation in an overlay instead of the browser's native dialog, see [styled confirmation dialogs](/learn/confirmation-dialogs#styled).
+
 @page overlays
 @keywords popover, lightbox
 @menu-title Overview

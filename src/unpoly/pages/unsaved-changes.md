@@ -8,6 +8,8 @@ The compiler on this page is deliberately simple. It covers the most common ways
 with minimal code, and is easy to extend. Each section below explains one part of it, names the cases
 that part leaves out, and shows how to cover them if your app needs it.
 
+To ask before a single action instead, like deleting a record, see [[confirmation-dialogs]].
+
 
 The compiler {#compiler}
 ------------
