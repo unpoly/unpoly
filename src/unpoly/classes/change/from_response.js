@@ -152,13 +152,13 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     // Also see preprocessing of server response in up.Request#extractResponseFromXHR().
 
     const responseURL = this._response.url
-    let serverLocation = responseURL
 
-    let hash = this._request.hash
-    if (hash) {
-      renderOptions.hash = hash
-      serverLocation += hash
-    }
+    // The server may send a #hash with X-Up-Location. Otherwise we keep the #hash of the requested URL,
+    // like a browser does when it follows a redirect.
+    let responseHash = u.parseURL(responseURL).hash
+    let hash = responseHash || this._request.hash
+    let serverLocation = responseHash ? responseURL : responseURL + (hash || '')
+    if (hash) renderOptions.hash = hash
 
     const isReloadable = (this._response.method === 'GET')
 

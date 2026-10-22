@@ -218,6 +218,7 @@ A render pass now inserts all new content first, then runs compilers, then updat
 - 🧩 `up.history.config.updateMetaTags` is deprecated. If you set it to `true`, remove the line. To keep meta tags unchanged, omit `'metaTags'` from an array of aspects in [`up.history.config.enabled`](/api/up.history.config#config.enabled). `unpoly-migrate.js` polyfills the old setting. It also no longer warns at boot when you haven't set `up.history.config.updateMetaTags`.
 - Fix: An explicit list of elements passed as [`{ metaTags }`](/api/up.render#options.metaTags) was replaced by the meta tags from the response.
 - Fix: [`[up-scroll-behavior]`](/api/up-follow#up-scroll-behavior) and the `{ scrollBehavior }` option were ignored when scrolling to the `top` or `bottom`, to a pixel position, to a `#hash` or when restoring a scroll position. Only revealing an element honored them.
+- Fix: When the server sent an [`X-Up-Location`](/api/X-Up-Location) header with a `#hash`, Unpoly updated the browser URL but did not reveal the matching element. When the requested URL also had a `#hash`, the browser URL ended up with both.
 - Fix: A [combined transition](/learn/transitions#combining-animations) like `move-to-bottom/none` swapped the elements instantly. When one half is `none`, the other half is now animated.
 - Fix: With [animations disabled](/api/up.motion.config#config.enabled), animations and transitions no longer wait for the next animation frame before they finish. This bug was introduced in Unpoly 3.14.
 

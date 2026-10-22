@@ -92,6 +92,17 @@ extendDescribe('up.fragment', function() {
             expect(location.href).toMatchURL('/other-path#hash')
           })
 
+          it('prefers a #hash from the X-Up-Location header over the #hash of the requested URL', async function() {
+            fixture('.target')
+            up.render('.target', { url: '/path#request-hash', history: true })
+            await wait()
+
+            jasmine.respondWithSelector('.target', { responseHeaders: { 'X-Up-Location': '/other-path#response-hash' } })
+            await wait()
+
+            expect(location.href).toMatchURL('/other-path#response-hash')
+          })
+
           it('adds a history entry after non-GET requests if the response includes a `X-Up-Method: GET` header (will happen after a redirect)', async function() {
             fixture('.target')
             up.render('.target', { url: '/requested-path', method: 'post', history: true })

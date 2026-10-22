@@ -107,6 +107,20 @@ extendDescribe('up.fragment', function() {
             expect(document.querySelector('#hash').getBoundingClientRect().top).toBeAround(0, 1)
           })
 
+          it('reveals the element matching a #hash from an X-Up-Location response header', async function() {
+            htmlFixtureList(tallMainHTML('old main'))
+            up.viewport.root.scrollTop = 1000
+
+            up.render('main', { url: '/path', scroll: 'auto' })
+            await wait()
+
+            jasmine.respondWith({ responseText: tallMainHTML('new main'), responseHeaders: { 'X-Up-Location': '/path#hash' } })
+            await wait()
+
+            expect('main').toHaveText(/new main/)
+            expect(document.querySelector('#hash').getBoundingClientRect().top).toBeAround(0, 1)
+          })
+
           it('uses the strategies configured in up.fragment.config.autoScroll', async function() {
             up.fragment.config.autoScroll = ['top']
             htmlFixtureList(`
