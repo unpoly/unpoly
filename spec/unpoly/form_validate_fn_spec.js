@@ -517,6 +517,23 @@ extendDescribe('up.form', function() {
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
         })
 
+        it('validates the closest form group that can be targeted', async function() {
+          const [_form, _fieldset, _field1, field2] = htmlFixtureList(`
+            <form id="signup" method="post" action="/action">
+              <fieldset>
+                <input type="text" name="tags[]">
+                <input type="text" name="tags[]">
+              </fieldset>
+            </form>
+          `)
+
+          up.validate(field2)
+
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('#signup')
+        })
+
         it('does not seek a form group with { formGroup: false }', async function() {
           const form = fixture('form[action=/form]')
           const group = e.affix(form, '[up-form-group]')

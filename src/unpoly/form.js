@@ -616,7 +616,7 @@ up.form = (function() {
 
     // Look the fallback up before disabling, while the control is still focusable.
     let focusFallback
-    if (document.activeElement === control) focusFallback = findGroup(control)
+    if (document.activeElement === control) focusFallback = findGroup(control, { targetable: false })
 
     let undoDisable = writeFieldDisabled(control, true)
     if (focusFallback) up.focus(focusFallback, { force: true, preventScroll: true })
@@ -1104,6 +1104,8 @@ up.form = (function() {
   @function up.form.group
   @param {Element} element
     The element for which to find a form group.
+  @param {boolean} [options.targetable=false]
+    Only return a group that Unpoly can target with a selector.
   @return {Element|undefined}
     The closest form group around the given element.
 
@@ -1112,8 +1114,8 @@ up.form = (function() {
     If the element is not within a `<form>`, returns `undefined`.
   @experimental
   */
-  function findGroup(field) {
-    return findGroupSolution(field).element
+  function findGroup(field, { targetable = false } = {}) {
+    return findGroupSolution(field, { targetable })?.element
   }
 
   /*-
@@ -1158,7 +1160,9 @@ up.form = (function() {
   @stable
   */
 
-  function findGroupSolution(field) {
+  // Returns the closest group around the given field, with a target selector whenever we can derive one.
+  // With { targetable: true } we skip groups for which we cannot derive a target.
+  function findGroupSolution(field, { targetable }) {
     return u.findResult(getGroupSelectors(), function(groupSelector) {
       let group = field.closest(groupSelector)
       if (group) {
@@ -1169,7 +1173,7 @@ up.form = (function() {
         // of the contained field, which usually has an identifying [name] or [id] attribute.
         let groupHasFieldTarget = goodDerivedFieldTarget && (group !== field) && `${groupSelector}:has(${goodDerivedFieldTarget})`
         let target = strongDerivedGroupTarget || groupHasFieldTarget
-        if (target) {
+        if (target || !targetable) {
           return {
             target,
             element: group,

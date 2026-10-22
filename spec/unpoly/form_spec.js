@@ -1302,6 +1302,64 @@ describe('up.form', function() {
 
         expect(up.form.group(input)).toBe(group)
       })
+
+      it('returns the form when no group around the element can be targeted (bugfix)', function() {
+        const [form, _button1, button2] = htmlFixtureList(`
+          <form method="post" action="/action">
+            <button type="submit" name="commit" value="save">Save</button>
+            <button type="submit" name="commit" value="publish">Publish</button>
+          </form>
+        `)
+
+        expect(up.form.group(button2)).toBe(form)
+      })
+
+      it('returns the closest group, even if it cannot be targeted', function() {
+        const [_form, fieldset, _field1, field2] = htmlFixtureList(`
+          <form id="signup" method="post" action="/action">
+            <fieldset>
+              <input type="text" name="tags[]">
+              <input type="text" name="tags[]">
+            </fieldset>
+          </form>
+        `)
+
+        expect(up.form.group(field2)).toBe(fieldset)
+      })
+
+      it('returns undefined for an element outside a form', function() {
+        const [field] = htmlFixtureList('<input type="text" name="email">')
+
+        expect(up.form.group(field)).toBeMissing()
+      })
+
+      describe('with { targetable: true }', function() {
+
+        it('skips a group that cannot be targeted', function() {
+          const [form, _fieldset, _field1, field2] = htmlFixtureList(`
+            <form id="signup" method="post" action="/action">
+              <fieldset>
+                <input type="text" name="tags[]">
+                <input type="text" name="tags[]">
+              </fieldset>
+            </form>
+          `)
+
+          expect(up.form.group(field2, { targetable: true })).toBe(form)
+        })
+
+        it('returns undefined when no group around the element can be targeted', function() {
+          const [_form, _button1, button2] = htmlFixtureList(`
+            <form method="post" action="/action">
+              <button type="submit" name="commit" value="save">Save</button>
+              <button type="submit" name="commit" value="publish">Publish</button>
+            </form>
+          `)
+
+          expect(up.form.group(button2, { targetable: true })).toBeMissing()
+        })
+
+      })
     })
 
     require('./form_validate_fn_spec')

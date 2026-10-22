@@ -749,6 +749,23 @@ extendDescribe('up.form', function() {
             expect(group).toBeFocused()
           })
 
+          it('focuses the form when no group around the input can be targeted (bugfix)', async function() {
+            const [form, _button1, button2] = htmlFixtureList(`
+              <form method="post" action="/action">
+                <button type="submit" name="commit" value="save">Save</button>
+                <button type="submit" name="commit" value="publish">Publish</button>
+              </form>
+            `)
+            button2.focus()
+            expect(button2).toBeFocused()
+
+            up.submit(form, { disable: true })
+            await wait(10)
+
+            expect(button2).toBeDisabled()
+            expect(form).toBeFocused()
+          })
+
           it('restores an element that lost focus, and its scroll positions and selection range when reverting', async function() {
             const target = fixture('#target')
             const parent = fixture('form#parent')

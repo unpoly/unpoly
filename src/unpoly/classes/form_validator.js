@@ -87,7 +87,7 @@ up.FormValidator = class FormValidator {
   _getFormGroupSolutions(field, { formGroup = true }) {
     if (!formGroup) return
 
-    let solution = up.form.groupSolution(field)
+    let solution = up.form.groupSolution(field, { targetable: true })
     if (solution) {
       up.puts('up.validate()', 'Validating form group of field %o', field)
       return [solution]
