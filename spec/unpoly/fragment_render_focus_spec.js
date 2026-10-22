@@ -423,6 +423,29 @@ extendDescribe('up.fragment', function() {
             expect('.focused').toBeFocused()
           })
 
+          it('preserves scroll position and selection range when only updating children (using :content)', async function() {
+            const longText = 'foooooooooooo\nbaaaaaaaaaaar\nbaaaaaaaaaaaz\nbaaaaaaaaaaam\nquuuuuuuuuuux\n'.repeat(2)
+            const container = fixture('.container')
+            const oldFocused = e.affix(container, 'textarea[name=prose][wrap=off][rows=3][cols=6]', { text: longText })
+            oldFocused.selectionStart = 10
+            oldFocused.selectionEnd = 11
+            oldFocused.scrollTop = 12
+            oldFocused.focus()
+
+            up.render('.container:content', {
+              focus: 'keep',
+              document: `<div class="container"><textarea name="prose" wrap="off" rows="3" cols="6">${longText}</textarea></div>`
+            })
+            await wait()
+
+            const textarea = document.querySelector('.container textarea')
+            expect(textarea).not.toBe(oldFocused)
+            expect(textarea).toBeFocused()
+            expect(textarea.selectionStart).toBeAround(10, 2)
+            expect(textarea.selectionEnd).toBeAround(11, 2)
+            expect(textarea.scrollTop).toBeAround(12, 2)
+          })
+
           it('preserves focus when only updating children (using :content) with a transition', async function() {
             up.motion.config.enabled = true
 
