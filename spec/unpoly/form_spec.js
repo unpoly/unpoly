@@ -375,7 +375,7 @@ describe('up.form', function() {
         const group = e.affix(form, '[up-form-group]')
         const input = e.affix(group, 'input[name=foo]')
 
-        const groupSolution = up.form.groupSolution(input)
+        const groupSolution = up.form.groupSolution(input, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: group,
@@ -388,7 +388,7 @@ describe('up.form', function() {
         const container = e.affix(form, 'div')
         const input = e.affix(container, 'input[name=foo]')
 
-        const groupSolution = up.form.groupSolution(input)
+        const groupSolution = up.form.groupSolution(input, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: form,
@@ -396,17 +396,28 @@ describe('up.form', function() {
         }))
       })
 
-      it('returns the form if a strong selector can be derived from neither group nor input', function() {
+      it('returns the form if a strong selector can be derived from neither group nor input, and { targetable: true } is passed', function() {
         const form = fixture('form#foo-form')
         const container = e.affix(form, '[up-form-group]')
         const input = e.affix(container, 'input')
 
-        const groupSolution = up.form.groupSolution(input)
+        const groupSolution = up.form.groupSolution(input, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: form,
           target: '#foo-form'
         }))
+      })
+
+      it('returns the closest group without a target if a selector can be derived from neither group nor input, and { targetable: false } is passed', function() {
+        const form = fixture('form#foo-form')
+        const container = e.affix(form, '[up-form-group]')
+        const input = e.affix(container, 'input')
+
+        const groupSolution = up.form.groupSolution(input, { targetable: false })
+
+        expect(groupSolution.element).toBe(container)
+        expect(groupSolution.target).toBeFalsy()
       })
 
       it("does not consider a form group's [class] to be a strong selector and prefers to :has()", function() {
@@ -414,7 +425,7 @@ describe('up.form', function() {
         const container = e.affix(form, '[up-form-group].form-group')
         const input = e.affix(container, 'input[name=foo]')
 
-        const groupSolution = up.form.groupSolution(input)
+        const groupSolution = up.form.groupSolution(input, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: container,
@@ -426,7 +437,7 @@ describe('up.form', function() {
         const form = fixture('form')
         const group = e.affix(form, '#group[up-form-group]')
 
-        const groupSolution = up.form.groupSolution(group)
+        const groupSolution = up.form.groupSolution(group, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: group,
@@ -439,7 +450,7 @@ describe('up.form', function() {
         const group = e.affix(form, '#group[up-form-group]')
         const input = e.affix(group, 'input[name=foo]')
 
-        const groupSolution = up.form.groupSolution(input)
+        const groupSolution = up.form.groupSolution(input, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: group,
