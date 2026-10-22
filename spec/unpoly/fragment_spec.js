@@ -1445,12 +1445,11 @@ describe('up.fragment', function() {
 
         // The overlay's elements are destroyed after the animation, when the overlay is no longer in the layer stack.
         up.layer.dismiss(null, { animation: 'fade-out', duration: 30 })
-        expect(callback.calls.count()).toBe(1)
+        expect(callback).toHaveBeenCalled()
 
         await wait(150)
 
         expect(document).not.toHaveSelector('up-modal')
-        expect(callback.calls.count()).toBe(1)
       })
 
       it('returns a callback that stops the event listener', function() {

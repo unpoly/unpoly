@@ -2896,7 +2896,8 @@ up.fragment = (function() {
   @experimental
   */
   function onAborted(fragment, callback) {
-    return onClosestInLayer(fragment, 'up:fragment:aborted', callback)
+    // Aborting the root layer should not abort a poller in an overlay, like it doesn't abort the overlay's requests.
+    return up.event.onClosest(fragment, 'up:fragment:aborted', { layer: 'origin' }, callback)
   }
 
   /*-
@@ -2916,18 +2917,7 @@ up.fragment = (function() {
   @experimental
   */
   function onKept(fragment, callback) {
-    return onClosestInLayer(fragment, 'up:fragment:kept', callback)
-  }
-
-  // Like up.event.onClosest(), but ignores ancestors in another layer.
-  // E.g. aborting the root layer should not abort a poller in an overlay,
-  // like it doesn't abort the overlay's requests.
-  function onClosestInLayer(fragment, eventType, callback) {
-    let guard = (event) => contains(event.target, fragment)
-    let unsubscribe = up.on(eventType, { guard }, callback)
-    // We're listening globally, so we unsubscribe when the fragment is destroyed.
-    up.destructor(fragment, unsubscribe)
-    return unsubscribe
+    return up.event.onClosest(fragment, 'up:fragment:kept', { layer: 'origin' }, callback)
   }
 
   // This function lives in up.fragment (not up.element)

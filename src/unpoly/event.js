@@ -170,6 +170,15 @@ up.event = (function() {
   @function up.event.onClosest
   @param {Element} element
     The element to observe with its ancestors.
+  @param {string} eventType
+    The event type to observe.
+  @param {string|up.Layer} [options.layer]
+    Only observe ancestors in the given [layer](/api/up.layer).
+
+    The layer is looked up with the observed element as `{ origin }`.
+    Pass `'origin'` to observe ancestors in the element's own layer.
+
+    By default the callback runs for any ancestor in the DOM, including the element of a parent layer.
   @param {Function(event)} callback
     The callback to run.
 
@@ -180,8 +189,10 @@ up.event = (function() {
     When the element is destroyed, the callback will be unsubscribed automatically.
   @experimental
   */
-  function onClosest(fragment, eventType, callback) {
-    let guard = (event) => event.target.contains(fragment)
+  function onClosest(...args) {
+    let [fragment, eventType, { layer }, callback] = u.args(args, 'val', 'val', 'options', 'callback')
+    layer &&= up.layer.get(layer, { origin: fragment })
+    let guard = (event) => event.target.contains(fragment) && (!layer || layer.contains(event.target))
     let unsubscribe = up.on(eventType, { guard }, callback)
 
     // Since we're binding to an element that is an ancestor of the fragment,

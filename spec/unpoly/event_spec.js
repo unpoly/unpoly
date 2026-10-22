@@ -877,6 +877,70 @@ describe('up.event', function() {
         up.emit(ancestor, 'my:event')
         expect(callback.calls.count()).toBe(2)
       })
+
+      it('runs the callback for an ancestor in a parent layer', async function() {
+        await up.layer.open({ content: '<div id="element">element</div>' })
+        const element = up.fragment.get('#element', { layer: 'overlay' })
+        const callback = jasmine.createSpy('callback')
+
+        up.event.onClosest(element, 'my:event', callback)
+
+        up.emit(up.layer.root.element, 'my:event')
+        expect(callback).toHaveBeenCalled()
+      })
+
+      describe('with { layer } option', function() {
+
+        it('only runs the callback for the element or an ancestor in the given layer', async function() {
+          await up.layer.open({ content: '<div id="ancestor"><div id="element">element</div></div>' })
+          const [ancestor, element] = up.fragment.all('#ancestor, #element', { layer: 'overlay' })
+          const callback = jasmine.createSpy('callback')
+
+          up.event.onClosest(element, 'my:event', { layer: 'origin' }, callback)
+
+          // The root layer's element is an ancestor in the DOM, but in another layer.
+          up.emit(up.layer.root.element, 'my:event')
+          expect(callback).not.toHaveBeenCalled()
+
+          up.emit(element, 'my:event')
+          expect(callback.calls.count()).toBe(1)
+
+          up.emit(ancestor, 'my:event')
+          expect(callback.calls.count()).toBe(2)
+
+          up.emit(up.layer.current.element, 'my:event')
+          expect(callback.calls.count()).toBe(3)
+        })
+
+        it('accepts an up.Layer', async function() {
+          const overlay = await up.layer.open({ content: '<div id="element">element</div>' })
+          const element = up.fragment.get('#element', { layer: 'overlay' })
+          const callback = jasmine.createSpy('callback')
+
+          up.event.onClosest(element, 'my:event', { layer: up.layer.root }, callback)
+
+          up.emit(overlay.element, 'my:event')
+          expect(callback).not.toHaveBeenCalled()
+
+          up.emit(up.layer.root.element, 'my:event')
+          expect(callback).toHaveBeenCalled()
+        })
+
+        it('still runs the callback for its layer after the layer was closed, e.g. during the closing animation', async function() {
+          const overlay = await up.layer.open({ content: '<div id="element">element</div>' })
+          const element = up.fragment.get('#element', { layer: 'overlay' })
+          const callback = jasmine.createSpy('callback')
+
+          up.event.onClosest(element, 'my:event', { layer: 'origin' }, callback)
+          up.motion.config.enabled = true
+          overlay.dismiss(null, { animation: 'fade-out', duration: 300 })
+          expect(overlay).not.toBeAlive()
+
+          up.emit(overlay.element, 'my:event')
+          expect(callback).toHaveBeenCalled()
+        })
+
+      })
     })
 
     describe('up.event.isModified()', function() {
