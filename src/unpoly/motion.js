@@ -427,7 +427,7 @@ up.motion = (function() {
 
     const cluster = [newElement, oldElement]
     const { nested } = motionController
-    let motion
+    let play
 
     // Finish previous transitions before we measure or replace elements.
     if (!nested) cluster.forEach((element) => motionController.finish(element))
@@ -435,7 +435,7 @@ up.motion = (function() {
     if (transitionFn && canAnimateElement(oldElement)) {
       if (nested) {
         // If morph() is called inside a transition function  we don't want to create additional absolutized bounds.
-        motion = () => transitionFn(oldElement, newElement, timingOptions)
+        play = () => transitionFn(oldElement, newElement, timingOptions)
       } else {
         // All changes to the DOM must be sync.
         const viewport = up.viewport.get(oldElement)
@@ -445,7 +445,7 @@ up.motion = (function() {
           afterMeasure: () => e.insertBefore(oldElement, newElement)
         })
 
-        motion = async () => {
+        play = async () => {
           // Since our caller may have scrolled the viewport (containing both oldElement and newElement),
           // we must shift the old copy so it looks like it is still sitting in the same position.
           oldRemote.moveBounds(0, viewport.scrollTop - scrollTopBeforeScroll)
@@ -462,10 +462,11 @@ up.motion = (function() {
     } else {
       beforeRemove?.()
       swapElementsDirectly(oldElement, newElement)
-      motion = afterRemove
+      // Nothing to animate. We only report the removal when the motion would start.
+      play = afterRemove
     }
 
-    return () => motionController.startFunction(cluster, async () => motion?.())
+    return () => motionController.startFunction(cluster, async () => play?.())
   }
 
   function findTransitionFn(value) {
