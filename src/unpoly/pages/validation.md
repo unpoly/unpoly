@@ -133,6 +133,32 @@ To render an error response somewhere else, set an [`[up-fail-target]`](/api/up-
 Most render options have such a `fail`-prefixed variant.
 See [rendering error responses differently](/learn/error-responses#fail-options) for details.
 
+### Focusing the first invalid field {#focusing-invalid-fields}
+
+In a long form, the fields with errors may be outside the visible screen area after a failed submission.
+To focus the first invalid field and scroll it into view, set [`{ failFocus }`](/api/up.render#options.failFocus)
+and [`{ failScroll }`](/api/up.render#options.failScroll) options for every form submission:
+
+```js
+up.on('up:form:submit', function(event) {
+  event.renderOptions.failFocus ??= '[aria-invalid="true"], auto'
+  event.renderOptions.failScroll ??= '[aria-invalid="true"], auto'
+})
+```
+
+This expects your server to render invalid fields with an `[aria-invalid="true"]` attribute,
+which also tells assistive technology about the error:
+
+```html
+<input type="text" id="email" name="email" value="foo@bar.com" aria-invalid="true"> <!-- mark: aria-invalid="true" -->
+```
+
+If your app marks invalid fields differently, like with an `.is-invalid` class, use that selector instead.
+
+When no field matches, Unpoly falls back to its default [focus](/learn/focus#auto) and [scroll](/learn/scrolling#auto)
+behavior, because of the `auto` at the end. The `??=` operator keeps an `[up-fail-focus]` or `[up-fail-scroll]`
+attribute that a form sets itself.
+
 ### HTML5 validations {#html5-validations}
 
 HTML5 added a number of validations through attributes like
