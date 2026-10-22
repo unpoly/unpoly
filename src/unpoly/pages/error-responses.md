@@ -132,6 +132,43 @@ sends an error response, or when there is another error.
 See [Render error handling example](/learn/render-lifecycle#error-handling-example).
 
 
+Showing your framework's error page in development {#development-error-pages}
+--------------------------------------------------
+
+In development, many server frameworks show a detailed error page when your code crashes, with a stack trace
+and sometimes an interactive console. When Unpoly renders that page into a fragment, it loses its own styles
+and scripts, and parts of it may not be shown at all.
+
+To see the full error page, prevent the `up:fragment:loaded` event and repeat the request as a full page load:
+
+```js
+// Returns true when your development server shows an error page.
+function isDevelopmentError(response) {
+  return document.body.dataset.environment === 'development'
+    && !response.ok
+    && /backtrace|stack ?trace|traceback/i.test(response.text)
+}
+
+up.on('up:fragment:loaded', function(event) {
+  if (isDevelopmentError(event.response)) {
+    event.preventDefault()        // don't render the error page into a fragment
+    event.request.loadPage()      // repeat the request as a full page load
+  }
+})
+```
+
+The code reads the environment from a `[data-environment]` attribute on the `<body>`.
+Render that attribute in your layout. In Rails:
+
+```erb
+<body data-environment="<%= Rails.env %>">
+```
+
+Other frameworks have a similar way to print the current environment into your layout.
+
+`up.Request#loadPage()` cannot repeat file uploads, so a form with a file field is sent again without its files.
+
+
 See also
 --------
 
