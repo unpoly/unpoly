@@ -1436,6 +1436,23 @@ describe('up.fragment', function() {
         expect(callback).toHaveBeenCalled()
       })
 
+      it('does not throw when an overlay with an observed fragment is removed after its closing animation (bugfix)', async function() {
+        up.motion.config.enabled = true
+        await up.layer.open({ content: '<div class="fragment">fragment</div>', animation: false })
+        const fragment = up.fragment.get('.fragment', { layer: 'overlay' })
+        const callback = jasmine.createSpy('aborted callback')
+        up.fragment.onAborted(fragment, callback)
+
+        // The overlay's elements are destroyed after the animation, when the overlay is no longer in the layer stack.
+        up.layer.dismiss(null, { animation: 'fade-out', duration: 30 })
+        expect(callback.calls.count()).toBe(1)
+
+        await wait(150)
+
+        expect(document).not.toHaveSelector('up-modal')
+        expect(callback.calls.count()).toBe(1)
+      })
+
       it('returns a callback that stops the event listener', function() {
         const fragment = fixture('.fragment')
         const callback = jasmine.createSpy('aborted callback')

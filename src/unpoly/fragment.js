@@ -1580,7 +1580,8 @@ up.fragment = (function() {
   */
   function contains(root, selectorOrElement) {
     if (u.isElement(selectorOrElement)) {
-      return e.contains(root, selectorOrElement) && up.layer.get(root).contains(selectorOrElement)
+      // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
+      return e.contains(root, selectorOrElement) && up.layer.get(root)?.contains(selectorOrElement)
     } else {
       return getSubtree(root, selectorOrElement).length > 0
     }
