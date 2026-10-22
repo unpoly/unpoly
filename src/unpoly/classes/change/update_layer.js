@@ -153,11 +153,12 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   _renderOtherLayers(responseDoc) {
-    // We execute steps on other layers first. If the render pass ends up closing this
-    // layer (e.g. by reaching a close condition or X-Up-Accept-Layer) we want:
+    // We execute steps on other layers after this layer. However, if the render pass ends up
+    // closing this layer (e.g. by reaching a close condition or X-Up-Accept-Layer), we execute them
+    // before the layer closes (see execute()). This way we can:
     //
-    // (1) ... to use the discarded content for hungry elements on other layers that have [up-if-layer=any].
-    // (2) ... to see updated hungry elements on other layers in onDismissed/onAccepted handlers.
+    // (1) ... use the discarded content for hungry elements on other layers that have [up-if-layer=any].
+    // (2) ... see updated hungry elements on other layers in onDismissed/onAccepted handlers.
     let otherLayerSteps = this._getHungrySteps().other
 
     return this.executeSteps({
@@ -226,8 +227,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       // A { scrollMap } option always overrides a { scroll } option.
       if (step.scrollMap) step.scroll = false
 
-      // Since up.motion will call @handleScrollAndFocus() after each fragment,
-      // and we only have a single scroll position and focus, only scroll/focus for the first step.
+      // We only have a single scroll position and focus, so only scroll/focus for the first step.
       if (i > 0) {
         step.focus = false
         step.scrollMap = undefined

@@ -173,11 +173,12 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
   }
 
   _renderOtherLayers(responseDoc) {
-    // We execute steps on other layers first. If the render pass ends up closing this
-    // layer (e.g. by reaching a close condition or X-Up-Accept-Layer) we want:
+    // We execute steps on other layers after this layer. However, if the render pass ends up
+    // closing this layer (e.g. by reaching a close condition or X-Up-Accept-Layer), we execute them
+    // before the layer closes (see execute()). This way we can:
     //
-    // (1) ... to use the discarded content for hungry elements on other layers that have [up-if-layer=any].
-    // (2) ... to see updated hungry elements on other layers in onDismissed/onAccepted handlers.
+    // (1) ... use the discarded content for hungry elements on other layers that have [up-if-layer=any].
+    // (2) ... see updated hungry elements on other layers in onDismissed/onAccepted handlers.
     let steps = this._getHungrySteps().other
     return this.executeSteps({ steps, responseDoc })
   }
