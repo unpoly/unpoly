@@ -372,6 +372,8 @@ up.link = (function() {
     parser.renderCallback('onAccepted')
     parser.renderCallback('onDismiss')
     parser.renderCallback('onDismissed')
+    parser.string('onAcceptedReload')
+    parser.string('onDismissedReload')
     parser.string('acceptEvent')
     parser.string('dismissEvent')
     parser.string('acceptFragment')

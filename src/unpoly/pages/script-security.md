@@ -150,7 +150,14 @@ With a strict CSP, [prefix them with your CSP nonce](#callback-nonces):
 X-Up-Open-Layer: { onAccepted: 'nonce-secret123 up.reload("#users-list")' }
 ```
 
-To keep JavaScript out of your response headers, send a custom header with the data your callback needs,
+To only reload an element after the overlay closes, pass its selector as `{ onAcceptedReload }` or `{ onDismissedReload }`.
+This runs no JavaScript, so it needs no nonce:
+
+```http
+X-Up-Open-Layer: { onAcceptedReload: '#users-list' }
+```
+
+For other callbacks, you can keep JavaScript out of your response headers. Send a custom header with the data your callback needs,
 like `X-Reload-On-Accept` below. A listener in a script file reads it and sets the callback:
 
 ```http

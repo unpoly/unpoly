@@ -560,6 +560,99 @@ extendDescribe('up.layer', function() {
 
         })
 
+        describe('{ onAcceptedReload }', function() {
+
+          it('reloads the given selector in the parent layer when the overlay is accepted', async function() {
+            htmlFixtureList('<div class="list" up-source="/list">old list</div>')
+            const overlay = await up.layer.open({ onAcceptedReload: '.list' })
+
+            overlay.accept()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/list')
+
+            jasmine.respondWithSelector('.list', { text: 'new list' })
+            await wait()
+
+            expect('.list').toHaveText('new list')
+          })
+
+          it('does not reload when the overlay is dismissed', async function() {
+            htmlFixtureList('<div class="list" up-source="/list">old list</div>')
+            const overlay = await up.layer.open({ onAcceptedReload: '.list' })
+
+            overlay.dismiss()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+          })
+
+          it('looks up the selector in the layer that opened the overlay', async function() {
+            const [rootList] = htmlFixtureList('<div class="list" up-source="/root-list">root list</div>')
+            await up.layer.open({ content: '<div class="list" up-source="/list1">list 1</div>' })
+            const overlay2 = await up.layer.open({ onAcceptedReload: '.list' })
+
+            overlay2.accept()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/list1')
+          })
+
+          it('does not reload when the parent layer is closing, too', async function() {
+            htmlFixtureList('<div class="list" up-source="/root-list">root list</div>')
+            const overlay1 = await up.layer.open({ content: '<div class="list" up-source="/list1">list 1</div>' })
+            await up.layer.open({ onDismissedReload: '.list' })
+
+            // Closing overlay1 dismisses overlay2, whose parent is now closing.
+            overlay1.dismiss()
+            await wait()
+
+            expect(up.layer.isRoot()).toBe(true)
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+          })
+
+          it('closes the overlay and reports an error when the selector matches nothing', async function() {
+            const overlay = await up.layer.open({ onAcceptedReload: '.missing' })
+
+            // We don't pin the message, which comes from up.reload().
+            await jasmine.expectGlobalError(/.*/, async function() {
+              overlay.accept()
+              await wait()
+            })
+
+            expect(overlay).not.toBeAlive()
+            expect(up.layer.isRoot()).toBe(true)
+          })
+
+        })
+
+        describe('{ onDismissedReload }', function() {
+
+          it('reloads the given selector in the parent layer when the overlay is dismissed', async function() {
+            htmlFixtureList('<div class="list" up-source="/list">old list</div>')
+            const overlay = await up.layer.open({ onDismissedReload: '.list' })
+
+            overlay.dismiss()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/list')
+          })
+
+          it('does not reload when the overlay is accepted', async function() {
+            htmlFixtureList('<div class="list" up-source="/list">old list</div>')
+            const overlay = await up.layer.open({ onDismissedReload: '.list' })
+
+            overlay.accept()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+          })
+
+        })
+
         describe('{ onAccepted }', function() {
 
           it('runs the given callback when they layer is accepted', async function() {

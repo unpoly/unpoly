@@ -72,7 +72,8 @@ up.ScriptGate = class ScriptGate {
     for (let key of Object.keys(object)) {
       let script = object[key]
 
-      if (/^on[A-Z]/.test(key) && u.isString(script)) {
+      // The { onAcceptedReload } and { onDismissedReload } options take a selector, not a callback.
+      if (/^on[A-Z]/.test(key) && !key.endsWith('Reload') && u.isString(script)) {
         let item = new ObjectPropertyItem(object, key)
         policy.processItem(item)
         object[key] = up.RenderOptions.parseCallback(key, object[key])

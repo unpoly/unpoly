@@ -83,6 +83,8 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       'onAccepted',
       'onDismiss',
       'onDismissed',
+      'onAcceptedReload',
+      'onDismissedReload',
       'acceptEvent',
       'dismissEvent',
       'acceptLocation',

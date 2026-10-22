@@ -812,6 +812,14 @@ up.protocol = (function() {
   X-Up-Open-Layer: { onAccepted: 'nonce-secret123 up.reload("#users-list")' }
   ```
 
+  To only reload an element after the overlay closes, pass a selector as `{ onAcceptedReload }` or `{ onDismissedReload }`.
+  This runs no JavaScript, so it needs no nonce:
+
+  ```http
+  Content-Type: text/html
+  X-Up-Open-Layer: { onAcceptedReload: '#users-list' }
+  ```
+
 
   @header X-Up-Open-Layer
   @experimental

@@ -631,6 +631,16 @@ up.layer = (function() {
 
       The function argument is an `up:layer:accepted` event.
 
+    @param {string} [options.onAcceptedReload]
+      A selector to [reload](/api/up.reload) after the overlay was [accepted](/learn/closing-overlays).
+
+      The element is looked up in the layer that opened the overlay.
+      An element near the `{ origin }` is preferred, and the selector may use `:origin`.
+
+      When an `{ onAccepted }` callback is also set, it runs first.
+
+      See [[subinteractions#reloading-on-acceptance]].
+
     @param {Function(Event)} [options.onDismiss]
       A function that is called when the overlay is about to be [dismissed](/learn/closing-overlays).
 
@@ -647,6 +657,14 @@ up.layer = (function() {
       A function that is called when the overlay was [dismissed](/learn/closing-overlays).
 
       The function argument is an `up:layer:dismissed` event.
+
+    @param {string} [options.onDismissedReload]
+      A selector to [reload](/api/up.reload) after the overlay was [dismissed](/learn/closing-overlays).
+
+      The element is looked up in the layer that opened the overlay.
+      An element near the `{ origin }` is preferred, and the selector may use `:origin`.
+
+      When an `{ onDismissed }` callback is also set, it runs first.
 
     @include up.render/lifecycle-hooks
 
@@ -1100,6 +1118,19 @@ up.layer = (function() {
       | `response` | The server response that caused the overlay to close |
       | `event`    | An `up:layer:accepted` event                  |
 
+      To only reload an element, use `[up-on-accepted-reload]` instead.
+
+    @param [up-on-accepted-reload]
+      A selector to [reload](/api/up.reload) after the overlay was [accepted](/learn/closing-overlays).
+
+      The element is looked up in the layer that opened the overlay.
+      An element near the link is preferred, and the selector may use `:origin` to refer to the link.
+
+      Unlike `[up-on-accepted]`, this attribute runs no JavaScript, so it needs no [CSP nonce](/learn/script-security#callback-nonces).
+      When both attributes are set, the `[up-on-accepted]` callback runs first.
+
+      See [[subinteractions#reloading-on-acceptance]].
+
     @param [up-on-dismiss]
       A JavaScript snippet that is called when the overlay is about to be [dismissed](/learn/closing-overlays).
 
@@ -1131,6 +1162,17 @@ up.layer = (function() {
       | `value`    | The overlay's [dismissal value](/learn/closing-overlays#dismissal-values) |
       | `response` | The server response that caused the overlay to close |
       | `event`    | An `up:layer:dismissed` event                  |
+
+      To only reload an element, use `[up-on-dismissed-reload]` instead.
+
+    @param [up-on-dismissed-reload]
+      A selector to [reload](/api/up.reload) after the overlay was [dismissed](/learn/closing-overlays).
+
+      The element is looked up in the layer that opened the overlay.
+      An element near the link is preferred, and the selector may use `:origin` to refer to the link.
+
+      Unlike `[up-on-dismissed]`, this attribute runs no JavaScript, so it needs no [CSP nonce](/learn/script-security#callback-nonces).
+      When both attributes are set, the `[up-on-dismissed]` callback runs first.
 
     @mix up-follow/lifecycle-hooks
 

@@ -1735,6 +1735,28 @@ extendDescribe('up.fragment', function() {
               expect('#overlay').toHaveText('overlay')
             })
 
+            for (let [option, closeMethod] of [['onAcceptedReload', 'accept'], ['onDismissedReload', 'dismiss']]) {
+              it(`reloads a fragment in the parent layer with { ${option} } from the header value, without a nonce`, async function() {
+                htmlFixtureList(`
+                  <div id="target">old target</div>
+                  <div class="list" up-source="/list">old list</div>
+                `)
+                up.render('#target', { url: '/path' })
+                await wait()
+
+                jasmine.respondWith({ responseText: '<div id="overlay">overlay</div>', responseHeaders: { 'X-Up-Open-Layer': JSON.stringify({ target: '#overlay', [option]: '.list' }) } })
+                await wait()
+
+                expect(up.layer.current).toBeOverlay()
+                expect(up.layer.current[option]).toBe('.list')
+
+                up.layer.current[closeMethod]()
+                await wait()
+
+                expect(jasmine.lastRequest().url).toMatchURL('/list')
+              })
+            }
+
             it('applies navigation defaults to the new overlay, even if the original render pass was not a navigation', async function() {
               up.layer.config.modal.mainTargets = ['#overlay-target']
 

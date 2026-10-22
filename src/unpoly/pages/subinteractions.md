@@ -271,10 +271,26 @@ A subinteraction is usually interested in acceptance only.
 Common acceptance callbacks
 ---------------------------
 
-### Reloading on acceptance
+### Reloading on acceptance {#reloading-on-acceptance}
 
 The most common callback reloads an element in the parent layer with `up.reload()`,
 as in the [example above](#starting-a-subinteraction).
+
+To only reload an element, you can also set `[up-on-accepted-reload]` to its selector.
+It runs no JavaScript, so it also works under a strict [Content Security Policy](/learn/script-security) without a nonce:
+
+```html
+<a href="/companies/new"
+  up-layer="new"
+  up-accept-location="/companies/$id"
+  up-on-accepted-reload=".company-list"> <!-- mark: up-on-accepted-reload -->
+  New company
+</a>
+```
+
+Unpoly looks for the element in the layer that opened the overlay, and prefers an element near the link.
+When the link also has an `[up-on-accepted]` callback, the callback runs first.
+To reload after the overlay was dismissed, use `[up-on-dismissed-reload]`.
 
 Sometimes the response that accepted the overlay already contains the HTML to update
 the element. In that case, render `event.response` instead of making another request:

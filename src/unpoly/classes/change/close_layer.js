@@ -68,6 +68,21 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
     // We don't wait for the closing animation to finish.
     this.layer.state = 'closed'
     this._emitClosedEvent(parent)
+
+    // After an { onAccepted } or { onDismissed } callback, reload a fragment from { onAcceptedReload } or { onDismissedReload }.
+    this._reloadParent(parent)
+  }
+
+  _reloadParent(parent) {
+    let selector = this.layer[`on${u.upperCaseFirst(this._verb)}edReload`]
+    // When the parent layer is closing too, e.g. when it peels this overlay, there is nothing to reload.
+    if (selector && parent.isAlive()) {
+      // (1) We prefer a match near the link that opened the overlay, and allow :origin in the selector.
+      // (2) The overlay is already closed. Like for a throwing { onAccepted } callback, we report an error
+      //     instead of throwing it, e.g. for a selector that matches nothing.
+      // (3) Like other reloads, we ignore an aborted request or an error response.
+      up.error.guard(() => up.error.muteUncriticalRejection(up.reload(selector, { layer: parent, origin: this.layer.origin })))
+    }
   }
 
   _emitCloseEvent() {

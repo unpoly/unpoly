@@ -1294,6 +1294,156 @@ describe('up.layer', function() {
 
         })
 
+        describe('[up-on-accepted-reload]', function() {
+
+          it('reloads the given selector in the parent layer after the overlay was accepted', async function() {
+            htmlFixtureList('<div class="list" up-source="/list">old list</div>')
+            const [_link, overlay] = await openOverlay(`up-on-accepted-reload=".list"`)
+
+            overlay.accept()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/list')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('.list')
+
+            jasmine.respondWithSelector('.list', { text: 'new list' })
+            await wait()
+
+            expect('.list').toHaveText('new list')
+          })
+
+          it('does not reload when the overlay was dismissed', async function() {
+            htmlFixtureList('<div class="list" up-source="/list">old list</div>')
+            const [_link, overlay] = await openOverlay(`up-on-accepted-reload=".list"`)
+
+            overlay.dismiss()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+          })
+
+          it('runs an [up-on-accepted] callback first, then reloads', async function() {
+            htmlFixtureList('<div class="list" up-source="/list">old list</div>')
+            const [_link, overlay] = await openOverlay(`up-on-accepted="nonce-specs-nonce closeCallbackSpy()" up-on-accepted-reload=".list"`)
+            const reloadSpy = spyOn(up, 'reload').and.returnValue(Promise.resolve(new up.RenderResult()))
+
+            overlay.accept()
+            await wait()
+
+            expect(window.closeCallbackSpy).toHaveBeenCalled()
+            expect(reloadSpy).toHaveBeenCalledWith('.list', jasmine.anything())
+            expect(window.closeCallbackSpy).toHaveBeenCalledBefore(reloadSpy)
+          })
+
+          it('prefers a match in the region of the link that opened the overlay', async function() {
+            const [_container1, _list1, _container2, link, _list2] = htmlFixtureList(`
+              <div class="container">
+                <div class="list" up-source="/list1">list 1</div>
+              </div>
+              <div class="container">
+                <a up-layer="new" up-target=".target" up-content="overlay text" up-on-accepted-reload=".container .list">open</a>
+                <div class="list" up-source="/list2">list 2</div>
+              </div>
+            `)
+            Trigger.clickSequence(link)
+            await wait()
+            expect(up.layer.isOverlay()).toBe(true)
+
+            up.layer.accept()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/list2')
+          })
+
+          it('resolves :origin to the link that opened the overlay', async function() {
+            const [_container1, _list1, container2, link, _list2] = htmlFixtureList(`
+              <div class="container">
+                <div class="list" up-source="/list1">list 1</div>
+              </div>
+              <div class="container" id="container2">
+                <a id="opener" up-layer="new" up-target=".target" up-content="overlay text" up-on-accepted-reload=".container:has(:origin) .list">open</a>
+                <div class="list" up-source="/list2">list 2</div>
+              </div>
+            `)
+            Trigger.clickSequence(link)
+            await wait()
+            expect(up.layer.isOverlay()).toBe(true)
+
+            up.layer.accept()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/list2')
+          })
+
+          it('parses [up-on-accepted-reload] on a form that opens an overlay', async function() {
+            htmlFixtureList('<div class="list" up-source="/list">old list</div>')
+            const [_form, button] = htmlFixtureList(`
+              <form action="/path" up-submit up-layer="new" up-target=".target" up-on-accepted-reload=".list">
+                <button type="submit">submit</button>
+              </form>
+            `)
+
+            Trigger.clickSequence(button)
+            await wait()
+
+            jasmine.respondWithSelector('.target', { text: 'overlay text' })
+            await wait()
+
+            expect(up.layer.isOverlay()).toBe(true)
+            up.layer.accept()
+            await wait()
+
+            expect(jasmine.lastRequest().url).toMatchURL('/list')
+          })
+
+        })
+
+        describe('[up-on-dismissed-reload]', function() {
+
+          it('reloads the given selector in the parent layer after the overlay was dismissed', async function() {
+            htmlFixtureList('<div class="list" up-source="/list">old list</div>')
+            await openOverlay(`up-on-dismissed-reload=".list"`)
+
+            Trigger.escapeSequence(document.body)
+            await wait()
+
+            expect(up.layer.isRoot()).toBe(true)
+            expect(jasmine.Ajax.requests.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/list')
+
+            jasmine.respondWithSelector('.list', { text: 'new list' })
+            await wait()
+
+            expect('.list').toHaveText('new list')
+          })
+
+          it('does not reload when the overlay was accepted', async function() {
+            htmlFixtureList('<div class="list" up-source="/list">old list</div>')
+            const [_link, overlay] = await openOverlay(`up-on-dismissed-reload=".list"`)
+
+            overlay.accept()
+            await wait()
+
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+          })
+
+          it('runs an [up-on-dismissed] callback first, then reloads', async function() {
+            htmlFixtureList('<div class="list" up-source="/list">old list</div>')
+            const [_link, overlay] = await openOverlay(`up-on-dismissed="nonce-specs-nonce closeCallbackSpy()" up-on-dismissed-reload=".list"`)
+            const reloadSpy = spyOn(up, 'reload').and.returnValue(Promise.resolve(new up.RenderResult()))
+
+            overlay.dismiss()
+            await wait()
+
+            expect(reloadSpy).toHaveBeenCalledWith('.list', jasmine.anything())
+            expect(window.closeCallbackSpy).toHaveBeenCalledBefore(reloadSpy)
+          })
+
+        })
+
         it('parses [up-on-dismiss] on a form that opens an overlay', async function() {
           const [_form, button] = htmlFixtureList(`
             <form action="/path" up-submit up-layer="new" up-target=".target" up-on-dismiss="nonce-specs-nonce closeCallbackSpy(value)">
