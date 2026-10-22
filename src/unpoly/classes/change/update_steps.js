@@ -122,6 +122,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // Otherwise we would run destructors for elements we want to keep.
     this._preserveDescendantKeepables(step)
 
+    // up.motion decides when the old element leaves the DOM: now, or after the transition.
+    // We tell it what to do at that moment. Everything else happens in our phases (see the returned object).
     let startMotion = up.motion.swap(step.oldElement, step.newElement, step.transition, {
       ...step,
       beforeRemove: () => {
