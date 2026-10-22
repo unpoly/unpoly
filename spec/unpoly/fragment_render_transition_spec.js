@@ -406,6 +406,22 @@ extendDescribe('up.fragment', function() {
           expect(spy).toHaveBeenCalledWith('new text', $parent.get(0))
         })
 
+        it('does not finish an animation that a compiler started within the new element', async function() {
+          up.compiler('.child', (child) => { up.animate(child, 'fade-in', { duration: 400, easing: 'linear' }) })
+          fixture('.element', { text: 'old text' })
+
+          up.render({
+            target: '.element',
+            document: '<div class="element"><div class="child">new text</div></div>',
+            transition: 'cross-fade',
+            duration: 400,
+            easing: 'linear',
+          })
+          await wait(100)
+
+          expect('.child').toHaveOwnOpacity(0.25, 0.15)
+        })
+
         it('reveals the new element while making the old element within the same viewport appear as if it would keep its scroll position', async function() {
           const $container = $fixture('.container[up-viewport]').css({
             'width': '200px',
@@ -446,6 +462,39 @@ extendDescribe('up.fragment', function() {
           // The absolutized $old is shifted upwards to make it looks like it
           // was at the scroll position before we revealed $new.
           expect($old.offset().top).toBeAround(-300, 5)
+        })
+
+        it('makes all old elements within the same viewport appear as if they would keep their scroll position when transitioning multiple fragments', async function() {
+          const [viewport, oldElement1, oldElement2] = htmlFixtureList(`
+            <div id="viewport" up-viewport style="width: 200px; height: 200px; overflow-y: scroll; position: fixed; left: 0; top: 0">
+              <div id="element1" style="height: 600px">old element1</div>
+              <div id="element2" style="height: 600px">old element2</div>
+            </div>
+          `)
+
+          viewport.scrollTop = 300
+          expect(oldElement1.getBoundingClientRect().top).toBeAround(-300, 5)
+          expect(oldElement2.getBoundingClientRect().top).toBeAround(300, 5)
+
+          up.render({
+            target: '#element1, #element2',
+            transition: 'cross-fade',
+            duration: 60000,
+            scroll: 'target',
+            document: `
+              <div id="element1" style="height: 600px">new element1</div>
+              <div id="element2" style="height: 600px">new element2</div>
+            `
+          })
+          await wait()
+
+          // The viewport is scrolled up due to the { scroll: 'target' } option.
+          expect(viewport.scrollTop).toBeAround(0, 5)
+
+          // Both absolutized old elements are shifted upwards to make it look like they
+          // were at the scroll position before we revealed the new elements.
+          expect(oldElement1.getBoundingClientRect().top).toBeAround(-300, 5)
+          expect(oldElement2.getBoundingClientRect().top).toBeAround(300, 5)
         })
 
         describe('when up.morph() is called from a transition function', function() {

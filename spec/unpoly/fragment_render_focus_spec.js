@@ -141,6 +141,55 @@ extendDescribe('up.fragment', function() {
               expect('#form').toBeFocused()
             })
 
+            it('focuses the first appended child when the container already has children', async function() {
+              htmlFixture(`
+                <form id="form">
+                  <input id="old-input">
+                </form>
+              `)
+
+              up.render({
+                focus: 'target',
+                target: '#form:after',
+                fragment: `
+                <form id="form">
+                  <input id="new-input">
+                </form>
+              `
+              })
+
+              await wait()
+
+              expect('#new-input').toBeFocused()
+            })
+
+            it('focuses the first appended child before the animation ends', async function() {
+              up.motion.config.enabled = true
+
+              htmlFixture(`
+                <form id="form">
+                </form>
+              `)
+
+              up.render({
+                focus: 'target',
+                target: '#form:after',
+                animation: 'fade-in',
+                duration: 300,
+                fragment: `
+                <form id="form">
+                  <input id="input">
+                </form>
+              `
+              })
+
+              await wait()
+
+              expect('#input').toBeFocused()
+              // The animation is still running
+              expect('#form').toHaveSelector('up-wrapper')
+            })
+
           })
 
           describe('when swapping children', function() {
@@ -165,6 +214,34 @@ extendDescribe('up.fragment', function() {
               await wait()
 
               expect('#form').toBeFocused()
+            })
+
+            it('focuses the container before the transition ends', async function() {
+              up.motion.config.enabled = true
+
+              htmlFixture(`
+                <form id="form">
+                  <input id="input" value="old">
+                </form>
+              `)
+
+              up.render({
+                focus: 'target',
+                target: '#form:content',
+                transition: 'cross-fade',
+                duration: 300,
+                fragment: `
+                <form id="form">
+                  <input id="input" value="new">
+                </form>
+              `
+              })
+
+              await wait()
+
+              expect('#form').toBeFocused()
+              // The transition is still running
+              expect('#form').toHaveSelector('.up-destroying')
             })
 
           })
@@ -278,6 +355,29 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect('.root-element').not.toBeFocused()
+          })
+
+          it('rejects the up.render().finished promise, but not up.render(), when the selector is invalid', async function() {
+            htmlFixtureList(`
+              <div id="fragment1">old fragment1</div>
+              <div id="fragment2">old fragment2</div>
+            `)
+
+            const job = up.render({
+              target: '#fragment1, #fragment2',
+              focus: '#fragment1[',
+              document: `
+                <div id="fragment1">new fragment1</div>
+                <div id="fragment2">new fragment2</div>
+              `
+            })
+
+            await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
+            await expectAsync(job.finished).toBeRejected()
+
+            expect('#fragment1').toHaveText('new fragment1')
+            expect('#fragment2').toHaveText('new fragment2')
+            expect(document).not.toHaveSelector('.up-destroying')
           })
         })
 

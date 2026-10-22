@@ -50,6 +50,21 @@ extendDescribe('up.fragment', function() {
           expect(up.viewport.root.scrollTop).toBe(1000)
         })
 
+        it('rejects the up.render().finished promise, but not up.render(), when processing the { scroll } option throws while appending', async function() {
+          htmlFixture('<div id="container"><p>old child</p></div>')
+
+          const job = up.render({
+            target: '#container:after',
+            scroll: '#container[',
+            document: '<div id="container"><p>new child</p></div>',
+          })
+
+          await expectAsync(job).toBeResolvedTo(jasmine.any(up.RenderResult))
+          await expectAsync(job.finished).toBeRejected()
+
+          expect(u.map(document.querySelectorAll('#container p'), 'textContent')).toEqual(['old child', 'new child'])
+        })
+
         describe('with { scroll: "auto" }', function() {
 
           it('scrolls the layer to the top when updating a main target', async function() {

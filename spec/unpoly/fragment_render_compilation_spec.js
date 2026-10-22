@@ -28,6 +28,18 @@ extendDescribe('up.fragment', function() {
           expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
         })
 
+        it('emits up:fragment:inserted on a wrapper around the new children when swapping children, and unwraps them afterwards', async function() {
+          const insertedSpy = jasmine.createSpy('up:fragment:inserted listener')
+          up.on('up:fragment:inserted', (event) => insertedSpy(event.target.tagName, event.target.textContent.trim()))
+
+          up.hello(fixture('.fragment', { text: 'old text' }))
+          await up.render({ target: '.fragment:content', document: '<div class="fragment"><span class="child">new text</span></div>' })
+
+          expect(insertedSpy).toHaveBeenCalledWith('UP-WRAPPER', 'new text')
+          expect(document).not.toHaveSelector('up-wrapper')
+          expect('.fragment > .child').toHaveText('new text')
+        })
+
         it('runs compilers when appending children', async function() {
           const childCompiler = jasmine.createSpy('compiler')
           up.compiler('.child', (element) => childCompiler(element.tagName, element.className))
@@ -38,8 +50,7 @@ extendDescribe('up.fragment', function() {
           expect(childCompiler).toHaveBeenCalledWith('SPAN', 'child')
         })
 
-        it('runs compilers after all fragments have been swapped', async function() {
-          let compileSpy = jasmine.createSpy('compile spy')
+        describe('when updating multiple fragments', function() {
 
           let html = (prefix) => `
             <div id="fragment1">
@@ -50,50 +61,105 @@ extendDescribe('up.fragment', function() {
             </div>
           `
 
-          up.compiler('#fragment1', (element) => {
-            compileSpy(
-              document.querySelector('#fragment1').textContent.trim(),
-              document.querySelector('#fragment2').textContent.trim(),
-            )
+          let texts = () => [
+            up.fragment.get('#fragment1').textContent.trim(),
+            up.fragment.get('#fragment2').textContent.trim(),
+          ]
+
+          it('lets a compiler in the first fragment see the new second fragment', async function() {
+            let compileSpy = jasmine.createSpy('compile spy')
+            up.compiler('#fragment1', () => compileSpy(...texts()))
+            htmlFixtureList(html('old'))
+
+            await up.render({ target: '#fragment1, #fragment2', document: html('new') })
+
+            expect(compileSpy).toHaveBeenCalledWith('new fragment1', 'new fragment2')
           })
 
-          htmlFixtureList(html('old'))
+          it('lets a compiler in the second fragment see the new first fragment', async function() {
+            let compileSpy = jasmine.createSpy('compile spy')
+            up.compiler('#fragment2', () => compileSpy(...texts()))
+            htmlFixtureList(html('old'))
 
-          await up.render({ target: '#fragment1, #fragment2', document: html('new') })
+            await up.render({ target: '#fragment1, #fragment2', document: html('new') })
 
-          expect(compileSpy).toHaveBeenCalledWith(
-            'new fragment1',
-            'new fragment2',
-          )
-        })
-
-        it('runs compilers after hungry fragments have been swapped', async function() {
-          let compileSpy = jasmine.createSpy('compile spy')
-
-          let html = (prefix) => `
-            <div id="fragment1">
-              ${prefix} fragment1
-            </div>
-            <div id="fragment2" up-hungry>
-              ${prefix} fragment2
-            </div>
-          `
-
-          up.compiler('#fragment1', (element) => {
-            compileSpy(
-              document.querySelector('#fragment1').textContent.trim(),
-              document.querySelector('#fragment2').textContent.trim(),
-            )
+            expect(compileSpy).toHaveBeenCalledWith('new fragment1', 'new fragment2')
           })
 
-          htmlFixtureList(html('old'))
+          it('lets a compiler in the second fragment see the new first fragment when both fragments are transitioning', async function() {
+            up.motion.config.enabled = true
+            let compileSpy = jasmine.createSpy('compile spy')
+            up.compiler('#fragment2', () => compileSpy(...texts()))
+            htmlFixtureList(html('old'))
 
-          await up.render({ target: '#fragment1', document: html('new') })
+            up.render({ target: '#fragment1, #fragment2', document: html('new'), transition: 'cross-fade', duration: 200 })
+            await wait()
 
-          expect(compileSpy).toHaveBeenCalledWith(
-            'new fragment1',
-            'new fragment2',
-          )
+            expect(compileSpy).toHaveBeenCalledWith('new fragment1', 'new fragment2')
+            // Old elements are still transitioning out
+            expect(document).toHaveSelector('#fragment1.up-destroying')
+            expect(document).toHaveSelector('#fragment2.up-destroying')
+          })
+
+          it('lets a compiler in the targeted fragment see a new hungry fragment', async function() {
+            let compileSpy = jasmine.createSpy('compile spy')
+            up.compiler('#fragment1', () => compileSpy(...texts()))
+            htmlFixtureList(html('old'))
+            up.element.get('#fragment2').setAttribute('up-hungry', '')
+
+            await up.render({ target: '#fragment1', document: html('new') })
+
+            expect(compileSpy).toHaveBeenCalledWith('new fragment1', 'new fragment2')
+          })
+
+          it('lets a compiler in a hungry fragment see the new targeted fragment', async function() {
+            let compileSpy = jasmine.createSpy('compile spy')
+            up.compiler('#fragment2', () => compileSpy(...texts()))
+            htmlFixtureList(html('old'))
+            up.element.get('#fragment2').setAttribute('up-hungry', '')
+
+            await up.render({ target: '#fragment1', document: html('new') })
+
+            expect(compileSpy).toHaveBeenCalledWith('new fragment1', 'new fragment2')
+          })
+
+          it('runs compilers in target order, then for hungry fragments', async function() {
+            let html = (prefix) => `
+              <div id="hungry" up-hungry>${prefix} hungry</div>
+              <div id="fragment1">${prefix} fragment1</div>
+              <div id="fragment2">${prefix} fragment2</div>
+            `
+            let compiledIDs = []
+            up.compiler('#hungry, #fragment1, #fragment2', (element) => { compiledIDs.push(element.id) })
+            htmlFixtureList(html('old'))
+
+            await up.render({ target: '#fragment2, #fragment1', document: html('new') })
+
+            expect(compiledIDs).toEqual(['fragment2', 'fragment1', 'hungry'])
+          })
+
+          it('runs all destructors before the first compiler, and emits up:fragment:destroyed after the last compiler', async function() {
+            let log = []
+            up.compiler('#fragment1, #fragment2', (element) => {
+              log.push(`compile ${element.textContent.trim()}`)
+              return () => log.push(`destroy ${element.textContent.trim()}`)
+            })
+            up.on('up:fragment:destroyed', ({ fragment }) => log.push(`destroyed ${fragment.textContent.trim()}`))
+            htmlFixtureList(html('old')).forEach((element) => up.hello(element))
+            log = []
+
+            await up.render({ target: '#fragment1, #fragment2', document: html('new') })
+
+            expect(log).toEqual([
+              'destroy old fragment1',
+              'destroy old fragment2',
+              'compile new fragment1',
+              'compile new fragment2',
+              'destroyed old fragment1',
+              'destroyed old fragment2',
+            ])
+          })
+
         })
 
         it('calls compilers with a third "meta" argument containing information about the render pass', async function() {

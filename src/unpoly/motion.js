@@ -208,6 +208,9 @@ up.motion = (function() {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
     element = up.fragment.get(element)
 
+    // Finish a previous animation, unless we're called from an animation or transition function.
+    if (!motionController.nested) motionController.finish(element)
+
     // Convert the given animation value to a function we can call.
     // This returns undefined for values like `undefined`, `false`, `[null, null]` etc.
     const animationFn = up.error.guardFn(findAnimationFn(animationValue))
@@ -395,12 +398,24 @@ up.motion = (function() {
     A promise that fulfills when the transition ends.
   @stable
   */
-  async function morph(oldElement, newElement, transitionValue, { duration, easing, afterInsert, beforeRemove, afterRemove } = {}) {
+  async function morph(oldElement, newElement, transitionValue, options) {
     // (A) If passed a selector, up.fragment.get() will prefer a match on the current layer.
     // (B) This also unwraps jQuery collections.
     oldElement = up.fragment.get(oldElement)
     newElement = up.fragment.get(newElement)
 
+    await swap(oldElement, newElement, transitionValue, options)()
+  }
+
+  // Inserts newElement now: before the absolutized oldElement when transitioning, in place of it otherwise.
+  // Returns a function that starts the transition and removes oldElement.
+  //
+  // Between the two calls a render pass compiles, focuses and scrolls:
+  //
+  // (A) Compilers may change newElement's size or position.
+  // (B) Compilers capture an [up-keep] identity before a transition adds inline styles.
+  // (C) We scroll newElement into position before we start the enter animation.
+  function swap(oldElement, newElement, transitionValue, { duration, easing, beforeRemove, afterRemove } = {}) {
     // Convert the given transition value to a function we can call.
     // This returns undefined for values like `undefined`, `false`, `[null, null]` etc.
     const transitionFn = up.error.guardFn(findTransitionFn(transitionValue))
@@ -410,29 +425,30 @@ up.motion = (function() {
     // (C) Nested calls should not re-call callbacks.
     const timingOptions = effectiveTimingOptions({ duration, easing })
 
-    const trackable = async function({ nested }) {
-      if (transitionFn && canAnimateElement(oldElement)) {
-        if (nested) {
-          // If morph() is called inside a transition function  we don't want to create additional absolutized bounds.
-          await transitionFn(oldElement, newElement, timingOptions)
-        } else {
-          // All changes to the DOM must be sync.
-          const viewport = up.viewport.get(oldElement)
-          const scrollTopBeforeScroll = viewport.scrollTop
+    const cluster = [newElement, oldElement]
+    const { nested } = motionController
+    let motion
 
-          const oldRemote = up.viewport.absolutize(oldElement, {
-            afterMeasure: () => e.insertBefore(oldElement, newElement)
-          })
+    // Finish previous transitions before we measure or replace elements.
+    if (!nested) cluster.forEach((element) => motionController.finish(element))
 
-          // (A) Compile the element in case of DOM changes that affect its size or position
-          // (B) Compile the element to capture its [up-keep] identity before we add a tracking class
-          // (B) Scroll newElement into position before we start the enter animation.
-          afterInsert?.()
+    if (transitionFn && canAnimateElement(oldElement)) {
+      if (nested) {
+        // If morph() is called inside a transition function  we don't want to create additional absolutized bounds.
+        motion = () => transitionFn(oldElement, newElement, timingOptions)
+      } else {
+        // All changes to the DOM must be sync.
+        const viewport = up.viewport.get(oldElement)
+        const scrollTopBeforeScroll = viewport.scrollTop
 
-          // Since we have scrolled the viewport (containing both oldElement and newElement),
+        const oldRemote = up.viewport.absolutize(oldElement, {
+          afterMeasure: () => e.insertBefore(oldElement, newElement)
+        })
+
+        motion = async () => {
+          // Since our caller may have scrolled the viewport (containing both oldElement and newElement),
           // we must shift the old copy so it looks like it is still sitting in the same position.
-          const scrollTopAfterScroll = viewport.scrollTop
-          oldRemote.moveBounds(0, scrollTopAfterScroll - scrollTopBeforeScroll)
+          oldRemote.moveBounds(0, viewport.scrollTop - scrollTopBeforeScroll)
 
           // TODO: Instead of plucking callbacks above, we could only pass actual options here. We can do that now we no longer have { trackMotion }.
           await transitionFn(oldElement, newElement, timingOptions)
@@ -442,16 +458,14 @@ up.motion = (function() {
           oldRemote.bounds.remove()
           afterRemove?.()
         }
-      } else {
-        // We still wrap in startFunction() so we will auto-finish previous transitions.
-        beforeRemove?.()
-        swapElementsDirectly(oldElement, newElement)
-        afterInsert?.()
-        afterRemove?.()
       }
+    } else {
+      beforeRemove?.()
+      swapElementsDirectly(oldElement, newElement)
+      motion = afterRemove
     }
 
-    await motionController.startFunction([newElement, oldElement], trackable)
+    return () => motionController.startFunction(cluster, async () => motion?.())
   }
 
   function findTransitionFn(value) {
@@ -662,6 +676,7 @@ up.motion = (function() {
 
   return {
     morph,
+    swap,
     animate,
     finish,
     transition: namedTransitions.put,

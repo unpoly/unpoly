@@ -8,17 +8,23 @@ up.MotionController = class MotionController {
     this._resetProps()
   }
 
+  // Whether we're currently starting a motion function.
+  // This helps us detect nested calls to up.morph() or up.animate(), e.g. from a transition function.
+  get nested() {
+    return this._startingCount > 0
+  }
+
   /*-
-  Finishes all animations in the given elements' ancestors and
-  descendants, then calls the given function.
+  Calls the given function and tracks the animation it starts, so it can be
+  [`finished`](/up.MotionController.finish) later.
+
+  Does not finish existing animations. Callers are expected to finish previous
+  animations on their elements before they first change the DOM, unless they are nested.
 
   The function is expected to return a promise that is fulfilled when
   the animation ends. The function is also expected to listen to
   `this.finishEvent` and instantly skip to the last frame
   when the event is observed.
-
-  The animation is tracked so it can be
-  [`finished`](/up.MotionController.finish) later.
 
   @function startFunction
   @param {List<Element>} cluster
@@ -28,21 +34,12 @@ up.MotionController = class MotionController {
     A promise that fulfills when the animation ends.
   */
   startFunction(newCluster, startMotionFn) {
-    const nested = (this._startingCount > 0)
-
-    if (!nested) {
-      for (let newClusterElement of newCluster) {
-        this.finish(newClusterElement)
-      }
-    }
-
     // Remember that we're currently starting a motion function.
-    // This helps us detect nested calls to up.morph() or up.animate() later.
     this._startingCount++
 
     try {
       this._playingClusters.push(newCluster)
-      let promise = up.error.muteUncriticalRejection(startMotionFn({ nested }))
+      let promise = up.error.muteUncriticalRejection(startMotionFn())
       return promise.finally(() => u.remove(this._playingClusters, newCluster))
     } finally {
       // This must happen sync. We cannot await the promise above, or we will be too late.
