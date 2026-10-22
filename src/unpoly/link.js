@@ -756,9 +756,10 @@ up.link = (function() {
       return false
     }
 
-    // If user clicked on a child link of $link, or on a field, button or label within an [up-expand][up-href],
-    // we want those other elements handle the click.
-    const betterTargetSelector = `a, [up-follow], ${up.form.interactiveSelector()}`
+    // If user clicked on a child link of $link, or on a field, we want those other elements handle the click.
+    // A link's buttons and labels belong to the link, but a clickable container like [up-expand]
+    // leaves buttons and labels to handle their own clicks.
+    const betterTargetSelector = `a, [up-follow], ${link.matches('a') ? up.form.fieldSelector() : up.form.interactiveSelector()}`
     const betterTarget = event.target.closest(betterTargetSelector)
     return !betterTarget || (betterTarget === link)
   }

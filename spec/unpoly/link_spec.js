@@ -1830,58 +1830,6 @@ describe('up.link', function() {
         expect(followSpy).not.toHaveBeenCalled()
       })
 
-      it('does nothing when the user clicks a button in the expanded area', async function() {
-        const [area, link, button] = htmlFixtureList(`
-          <div up-expand>
-            <a href="/path">label</a>
-            <button type="button">Button</button>
-          </div>
-        `)
-        up.hello(area)
-        const buttonListener = jasmine.createSpy('button click listener')
-        button.addEventListener('click', buttonListener)
-
-        Trigger.clickSequence(button)
-        await wait()
-
-        expect(buttonListener).toHaveBeenCalled()
-        expect(jasmine.Ajax.requests.count()).toBe(0)
-      })
-
-      it('submits a nested form when the user clicks its submit button in the expanded area', async function() {
-        const [area, link, form, submitButton] = htmlFixtureList(`
-          <div up-expand>
-            <a href="/path">label</a>
-            <form method="post" action="/form" up-submit>
-              <button type="submit">Save</button>
-            </form>
-          </div>
-        `)
-        up.hello(area)
-
-        Trigger.clickSequence(submitButton)
-        await wait()
-
-        expect(jasmine.Ajax.requests.count()).toBe(1)
-        expect(jasmine.lastRequest().url).toMatchURL('/form')
-      })
-
-      it('lets a label toggle its checkbox when the user clicks the label in the expanded area', async function() {
-        const [area, link, label, checkbox] = htmlFixtureList(`
-          <div up-expand>
-            <a href="/path">label</a>
-            <label><input type="checkbox" name="accept"> Accept</label>
-          </div>
-        `)
-        up.hello(area)
-
-        Trigger.clickSequence(label)
-        await wait()
-
-        expect(checkbox.checked).toBe(true)
-        expect(jasmine.Ajax.requests.count()).toBe(0)
-      })
-
       it('does not trigger multiple replaces when the user clicks on the expanded area of an [up-instant] link (bugfix)', async function() {
         const $area = $fixture('div[up-expand] a[href="/path"][up-follow][up-instant]')
         up.hello($area)
@@ -1965,62 +1913,6 @@ describe('up.link', function() {
           await wait()
 
           expect(link.click).not.toHaveBeenCalled()
-        })
-
-        it('does not click the link when the user clicks a button in the area', async function() {
-          const [area, link, button] = htmlFixtureList(`
-            <div up-expand>
-              <a href="/file.pdf" download>label</a>
-              <button type="button">Button</button>
-            </div>
-          `)
-          up.hello(area)
-          spyOn(link, 'click')
-          const buttonListener = jasmine.createSpy('button click listener')
-          button.addEventListener('click', buttonListener)
-
-          Trigger.clickSequence(button)
-          await wait()
-
-          expect(buttonListener).toHaveBeenCalled()
-          expect(link.click).not.toHaveBeenCalled()
-        })
-
-        it('submits a nested form when the user clicks its submit button in the area', async function() {
-          const [area, link, form, submitButton] = htmlFixtureList(`
-            <div up-expand>
-              <a href="/file.pdf" download>label</a>
-              <form method="post" action="/form" up-submit>
-                <button type="submit">Save</button>
-              </form>
-            </div>
-          `)
-          up.hello(area)
-          spyOn(link, 'click')
-
-          Trigger.clickSequence(submitButton)
-          await wait()
-
-          expect(link.click).not.toHaveBeenCalled()
-          expect(jasmine.Ajax.requests.count()).toBe(1)
-          expect(jasmine.lastRequest().url).toMatchURL('/form')
-        })
-
-        it('lets a label toggle its checkbox when the user clicks the label in the area', async function() {
-          const [area, link, label, checkbox] = htmlFixtureList(`
-            <div up-expand>
-              <a href="/file.pdf" download>label</a>
-              <label><input type="checkbox" name="accept"> Accept</label>
-            </div>
-          `)
-          up.hello(area)
-          spyOn(link, 'click')
-
-          Trigger.clickSequence(label)
-          await wait()
-
-          expect(link.click).not.toHaveBeenCalled()
-          expect(checkbox.checked).toBe(true)
         })
 
         it('does not click the link when the user clicks another link in the area', async function() {
@@ -2156,6 +2048,8 @@ describe('up.link', function() {
         })
       })
     })
+
+    require('./link_nested_click_spec')
 
     require('./link_preload_attr_spec')
 

@@ -172,15 +172,32 @@ const willScrollWithinPage = function(link) {
   return linkURL === currentURL
 }
 
+// A click within a link does not navigate when an element between the click target and the link
+// takes the click, like a checkbox or a submit button. A <button type="button"> or a text field
+// does not take the click. We only list elements that take the click in both Chrome and Firefox.
+const takesClickWithinLink = function(element) {
+  return element.matches('summary, input:is([type=checkbox], [type=radio])') ||
+    (element.form && element.matches('button:not([type=button]), input:is([type=submit], [type=image], [type=reset])')) ||
+    element.control?.matches('input:is([type=checkbox], [type=radio])')
+}
+
+const isActivatedLink = function(event, link) {
+  for (let element = event.target; element !== link; element = element.parentElement) {
+    if (takesClickWithinLink(element)) {
+      return false
+    }
+  }
+  return true
+}
+
 // Make specs fail if a link was followed without Unpoly.
 // This would otherwise navigate away from the spec runner.
 beforeEach(function() {
   window.defaultFollowedLinks = []
 
-  up.on('click', 'a[href]', function(event) {
-    const link = event.target
-
+  up.on('click', 'a[href]', function(event, link) {
     const browserWouldNavigate = !event.defaultPrevented &&
+      isActivatedLink(event, link) &&
       !link.getAttribute('href').match(/^javascript:/) &&
       !willScrollWithinPage(link)
 
