@@ -35,11 +35,17 @@ the page first loads and when a matching fragment is rendered later.
 Compilers run in the order they were registered, each for all its matches in the new fragment.
 To change the order, pass a [`{ priority }`](/api/up.compiler#order).
 
-### Updating multiple fragments {#multiple-fragments}
+### Compilers see the DOM after the change {#dom-after-change}
 
-When a render pass [updates multiple fragments](/learn/targeting-fragments#multiple),
-Unpoly inserts all new fragments before it runs the first compiler.
-A compiler can therefore see the new version of other fragments from the same render pass:
+When a compiler runs, the render pass has already changed the DOM:
+
+- All new elements are inserted. When a render pass [updates multiple fragments](/learn/targeting-fragments#multiple),
+  Unpoly inserts all of them before it runs the first compiler, including the layer's [hungry elements](/learn/hungry-elements).
+- Old elements are removed. When the render pass plays a [transition](/api/up.morph#named-transitions),
+  an old element stays on the screen until its exit animation ends. Unpoly marks it as being destroyed,
+  and lookups like `up.fragment.get()` and `up.fragment.all()` skip it.
+
+So a compiler can look at other parts of the page and see their new versions:
 
 ```html
 <a href="/folders/5" up-target="#files, #sidebar">Open folder</a>
@@ -52,8 +58,7 @@ up.compiler('#sidebar', function(sidebar) {
 })
 ```
 
-Within one layer, fragments are inserted and compiled in the order of the target selector,
-followed by that layer's [hungry elements](/learn/hungry-elements).
+Compilers run in the order of the target selector, followed by the layer's hungry elements.
 Focus and scroll position are updated after all compilers have run, and animations start last.
 
 Hungry elements on [other layers](/learn/hungry-elements#layers) are rendered as a separate group,
