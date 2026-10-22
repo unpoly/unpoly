@@ -3306,7 +3306,7 @@ Unpoly 3 makes it easier to work with [element data](/learn/data):
     console.log(meta.revalidating)                // result: true
   })
   ```
-- ⚠️ When a render pass updates multiple fragments, Unpoly now swaps and compiles them in reverse order of the target. A compiler in a later target runs before earlier targets are updated, so it sees their old content. *(Documented in 3.15.)* (Changed again in [3.15](/changes/3.15.0).)
+- ⚠️ When a render pass updates multiple fragments, Unpoly now swaps and compiles them in reverse order of the target. A compiler in a later target runs before earlier targets are updated, so it sees their old content. *(Documented and changed again in 3.15.)*
 
 #### Various changes
 
