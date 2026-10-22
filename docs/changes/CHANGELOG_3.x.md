@@ -314,7 +314,7 @@ This version introduces settings to globally control whether Unpoly will execute
 </div>
 ```
 
-⚠️ By default Unpoly will now run any `<script>` that passes your CSP checks, but requires a nonce for viral CSPs with `strict-dynamic`.
+⚠️ By default Unpoly will now run any `<script>` that passes your CSP checks, but requires a nonce for viral CSPs with `strict-dynamic`. Unpoly 2 and Unpoly 3.11–3.13 did not run scripts in new fragments. If your application script sits at the end of your `<body>`, it now runs again whenever the `<body>` is updated. [Move it into the `<head>` with a `[defer]` attribute](/learn/legacy-scripts#avoid-loading-your-application-scripts-in-the-body). To not run any scripts in new fragments, set `up.script.config.scriptElementPolicy = 'block'`.
 
 You can configure `up.script.config.scriptElementPolicy` to block all script elements, or to only allow [scripts with a valid `[nonce]` attribute](/learn/script-security#script-element-nonces):
 
