@@ -29,7 +29,7 @@ up.MotionController = class MotionController {
   @function startFunction
   @param {List<Element>} cluster
     A list of elements that will be affected by the motion.
-  @param {Function(): Promise} startMotion
+  @param {Function(): Promise} startMotionFn
   @return {Promise}
     A promise that fulfills when the animation ends.
   */

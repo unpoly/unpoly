@@ -217,7 +217,7 @@ up.motion = (function() {
 
     // (A) Apply defaults.
     // (B) Set zero duration if motion is disabled.
-    // (C) Nested calls should not re-call callbacks.
+    // (C) Leave out our callbacks, so a nested call from the motion function won't call them again.
     const timingOptions = effectiveTimingOptions({ duration, easing })
 
     let trackable = async function() {
@@ -422,7 +422,7 @@ up.motion = (function() {
 
     // (A) Apply defaults.
     // (B) Set zero duration if motion is disabled.
-    // (C) Nested calls should not re-call callbacks.
+    // (C) Leave out our callbacks, so a nested call from the motion function won't call them again.
     const timingOptions = effectiveTimingOptions({ duration, easing })
 
     const cluster = [newElement, oldElement]
@@ -434,10 +434,9 @@ up.motion = (function() {
 
     if (transitionFn && canAnimateElement(oldElement)) {
       if (nested) {
-        // If morph() is called inside a transition function  we don't want to create additional absolutized bounds.
+        // If morph() is called inside a transition function, we don't want to create additional absolutized bounds.
         play = () => transitionFn(oldElement, newElement, timingOptions)
       } else {
-        // All changes to the DOM must be sync.
         const viewport = up.viewport.get(oldElement)
         const scrollTopBeforeScroll = viewport.scrollTop
 
