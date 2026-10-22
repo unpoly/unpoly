@@ -1907,8 +1907,7 @@ up.layer = (function() {
   */
 
   /*-
-  Creates an element with the given `selector` and appends it to the [current layer's](/api/up.layer.current)
-  [outmost element](/api/up.Layer.prototype.element).
+  Creates an element with the given `selector` and appends it to the [current layer's](/api/up.layer.current) content.
 
   This is a shortcut for `up.layer.current.affix(selector)`.
   See `up.Layer#affix` for more documentation.

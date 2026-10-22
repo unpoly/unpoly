@@ -746,7 +746,7 @@ up.network = (function() {
   }
 
   /*-
-  This event is [emitted](/api/up.emit) when an [request](/api/up.request)
+  This event is [emitted](/api/up.emit) when a [request](/api/up.request)
   was [aborted](/learn/aborting-requests).
 
   @learn-ref aborting-requests#reacting
@@ -817,7 +817,7 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/api/up.emit) before an [request](/api/up.request)
+  This event is [emitted](/api/up.emit) before a [request](/api/up.request)
   is sent over the network.
 
   @learn-ref network
@@ -866,7 +866,7 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/api/up.emit) when the response to an [request](/api/up.request)
+  This event is [emitted](/api/up.emit) when the response to a [request](/api/up.request)
   has been received.
 
   @learn-ref network
@@ -905,7 +905,7 @@ up.network = (function() {
   */
 
   /*-
-  This event is [emitted](/api/up.emit) when an [request](/api/up.request)
+  This event is [emitted](/api/up.emit) when a [request](/api/up.request)
   encounters a fatal error, like a [timeout](/api/up.network.config#config.timeout) or loss of network connectivity.
 
   @learn-ref network-issues#disconnects

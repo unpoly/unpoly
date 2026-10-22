@@ -128,7 +128,7 @@ up.RenderJob = class RenderJob {
   /*-
   A promise that fulfills when fragments were updated and all [postprocessing steps](/learn/render-lifecycle#postprocessing) have concluded.
 
-  The promise will reject when the server responds with a [HTTP error status](/learn/error-responses),
+  The promise will reject when the server responds with an [HTTP error status](/learn/error-responses),
   when any request is [aborted](/learn/aborting-requests) or when there is a [network issue](/learn/network-issues).
 
   See [render hooks](/learn/render-lifecycle) for examples for awaiting rendering completion.
@@ -238,7 +238,7 @@ up.RenderJob = class RenderJob {
   The promise is *fulfilled* with an `up.RenderResult` when a fragment
   was updated from a successful server response.
 
-  The promise will *reject* for responses with a [HTTP error status](/learn/error-responses),
+  The promise will *reject* for responses with an [HTTP error status](/learn/error-responses),
   when the request is [aborted](/learn/aborting-requests), or when there is a
   [network issue](/learn/network-issues).
 
