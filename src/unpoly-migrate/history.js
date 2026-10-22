@@ -39,8 +39,11 @@ up.history.config.patch(function() {
     },
     set(value) {
       // Apps used to set { updateMetaTags: true } to silence an old warning.
-      // Since that is the default, we accept it without a warning.
-      if (value) return
+      // Since that is the default, we only ask to remove the line.
+      if (value) {
+        up.migrate.warn('up.history.config.updateMetaTags has been removed. Meta tags are updated by default.')
+        return
+      }
 
       // (1) This changes up.history.config.enabled once.
       // (2) When the app sets up.history.config.enabled afterwards, meta tags are updated again

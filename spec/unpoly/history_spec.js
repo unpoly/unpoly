@@ -344,12 +344,12 @@ describe('up.history', function() {
 
       describe('up.history.config.updateMetaTags (deprecated)', function() {
 
-        it('accepts true without a warning and keeps all aspects enabled', function() {
+        it('keeps all aspects enabled when set to true, with a warning to remove the setting', function() {
           const warnSpy = up.migrate.warn.mock()
 
           up.history.config.updateMetaTags = true
 
-          expect(warnSpy).not.toHaveBeenCalled()
+          expect(warnSpy).toHaveBeenCalledWith('up.history.config.updateMetaTags has been removed. Meta tags are updated by default.')
           expect(up.history.config.enabled).toBe(true)
           expect(up.history.config.updateMetaTags).toBe(true)
         })

@@ -1077,13 +1077,13 @@ extendDescribe('up.fragment', function() {
                 htmlFixtureList('<div id="container">old container text</div>')
               })
 
-              it('keeps updating meta tags without a warning when set to true', async function() {
+              it('keeps updating meta tags when set to true, with a warning to remove the setting', async function() {
                 const warnSpy = up.migrate.warn.mock()
 
                 up.history.config.updateMetaTags = true
                 await up.render('#container', { document: response, history: true, location: '/path' })
 
-                expect(warnSpy).not.toHaveBeenCalled()
+                expect(warnSpy).toHaveBeenCalledWith('up.history.config.updateMetaTags has been removed. Meta tags are updated by default.')
                 expect(document.head).toHaveSelector('meta[name="description"][content="new description"]')
               })
 
