@@ -129,6 +129,18 @@ The new guide [Custom form fields](/learn/custom-form-fields) compares four ways
 Thanks to @kmmbvnr for contributing form-associated custom elements and `formdata` support.
 
 
+### Quality-of-life improvements
+
+Some smaller changes in this release remove friction you may have worked around:
+
+- To reload an element after an overlay closes, set [`[up-on-accepted-reload]`](/api/up-layer-new#up-on-accepted-reload) to its selector. You no longer need a JavaScript callback or a CSP nonce. See [Overlays](#overlays).
+- [`[up-expand]`](/api/up-expand) now works for links that Unpoly doesn't follow, like a download or a link that opens a new tab. Buttons and labels inside the area now handle their own clicks. See [Links and URLs](#links-and-urls).
+- When Unpoly boots, it logs an error for a misspelled or renamed `up.*.config` setting, instead of ignoring it. See [Smaller fixes and changes](#smaller-fixes-and-changes).
+- Pages with many watched forms no longer freeze for a moment after each fragment update. See [Forms](#forms).
+- The Space key now activates a [faux button](/learn/faux-interactive-elements), like the Enter key. See [Links and URLs](#links-and-urls).
+- Test runners, CI and coding agents now read Unpoly's log as plain text. See [Smaller fixes and changes](#smaller-fixes-and-changes).
+
+
 ### Form submissions now match the browser
 
 Unpoly now uses the browser's form-data algorithm, so edge cases behave like a native form submission.
