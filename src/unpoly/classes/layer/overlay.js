@@ -289,6 +289,9 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   onEscapePressed(event) {
+    // A widget within the overlay may handle Escape itself, e.g. to close a dropdown.
+    if (event.defaultPrevented) return
+
     // All overlays listen to the Escape key being pressed, but only the front layer
     // should react. Note that we're using the *front* layer, not the *current* layer.
     // The current layer might be in the visual background, e.g. if a fragment is being

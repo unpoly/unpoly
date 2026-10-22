@@ -185,6 +185,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - New [`[up-on-accept]`](/api/up-layer-new#up-on-accept) and [`[up-on-dismiss]`](/api/up-layer-new#up-on-dismiss) attributes run code before an overlay closes, and can keep it open with `event.preventDefault()`. The matching [`{ onAccept }`](/api/up.layer.open#options.onAccept) and [`{ onDismiss }`](/api/up.layer.open#options.onDismiss) options are now documented.
 - When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent layer, as described in [focus in overlays](/learn/focus#overlays). It used to fall back to the `<body>`.
 - Fix: [`[up-focus-visible]`](/api/up-follow#up-focus-visible) and the `{ focusVisible }` option were ignored when opening an overlay.
+- Fix: Pressing Escape dismissed an overlay even when an element in it had already handled the key with `event.preventDefault()`, e.g. a dropdown closing its list. A prevented Escape keydown now keeps the overlay open.
 - Fix: The `{ duration }` and `{ easing }` options of `up.layer.open()` were ignored for the opening animation. This also affected `[up-duration]` and `[up-easing]` on a link that opens an overlay. Only `up.layer.config` was used.
 
 

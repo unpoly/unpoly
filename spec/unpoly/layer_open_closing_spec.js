@@ -178,6 +178,20 @@ extendDescribe('up.layer', function() {
               expect(up.layer.isOverlay()).toBe(false)
             })
 
+            it('keeps the layer open when an element in the layer prevents the Escape keydown', async function() {
+              up.layer.open({ dismissible: "key", content: '<div class="widget" tabindex="0">widget</div>' })
+
+              await wait()
+
+              const widget = up.fragment.get('.widget')
+              widget.addEventListener('keydown', (event) => { if (event.key === 'Escape') event.preventDefault() })
+              Trigger.escapeSequence(widget)
+
+              await wait()
+
+              expect(up.layer.isOverlay()).toBe(true)
+            })
+
             it('does not emit a global error when Escape is pressed and up:layer:dismiss is prevented', async function() {
               up.layer.open({ dismissible: "key" })
               up.on('up:layer:dismiss', (event) => event.preventDefault())
