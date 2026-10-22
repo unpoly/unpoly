@@ -194,6 +194,16 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - Fix: When a compiler requested the URL of a request that had just been aborted or had just finished, it sometimes got the old request from the cache. It now makes a new request.
 
 
+### Updating multiple fragments
+
+When a render pass updates [multiple fragments](/learn/targeting-fragments#multiple), Unpoly now inserts all new fragments before it runs the first compiler. A compiler can now see the new version of every other fragment updated in the same layer, including [hungry elements](/learn/hungry-elements). See [Updating multiple fragments](/learn/enhancing-elements#multiple-fragments) for the exact order.
+
+- ⚠️ Fragments are now inserted and compiled in the order of the target selector, followed by hungry elements. Since Unpoly 3.0 they were compiled in reverse order, which was never documented. `up:fragment:inserted` and `up:fragment:destroyed` are now also emitted in target order. When fragments are swapped without a transition, all their destructors now run before the first compiler, and `up:fragment:destroyed` is emitted after the last compiler.
+- ⚠️ When `:content`, `:before` or `:after` is updated with a transition or animation, focus now moves right away, like when swapping a fragment. It used to move when the animation ended. With `:after` and `{ focus: 'target' }`, Unpoly now focuses the first appended element. It used to focus the container's first child, which could be an existing element.
+- ⚠️ When an error is thrown after new fragments were inserted, e.g. for an invalid `{ focus }` or `{ scroll }` selector, `up.render()` now fulfills and `up.render().finished` rejects. This was already the case when swapping a fragment, but `:before`, `:after` and fully [kept](/learn/keeping-elements) fragments rejected `up.render()`.
+- Fix: When multiple fragments played a transition and the render pass scrolled, only the first old element kept its position on the screen.
+
+
 ### Rendering
 
 - Fix: The `{ onFailFinished }` callback and `[up-on-fail-finished]` attribute are now called after an [error response](/learn/error-responses) has finished rendering. They used to never be called.
