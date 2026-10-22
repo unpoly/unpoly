@@ -164,6 +164,7 @@ task, but an exception after inserting rejects `up.RenderResult#finished` instea
 `UpdateSteps`. To make the cut between inserting and transitioning, `up.Change.UpdateSteps`
 calls the internal `up.motion.swap()`, which inserts now and returns a function that starts the
 transition later; `up.morph()` is just both calls in a row.
+
 `up.Change.Addition` is the base class for everything that inserts content, and carries the
 concerns that outlive the swap: honouring a server's request to accept or dismiss a layer,
 and stamping each new fragment with the `[up-source]`, `[up-time]` and `[up-etag]` attributes
