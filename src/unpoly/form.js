@@ -1112,6 +1112,8 @@ up.form = (function() {
     If no better group can be found, the `<form>` element is returned.
 
     If the element is not within a `<form>`, returns `undefined`.
+
+    With `{ targetable: true }`, returns `undefined` when no group around the element can be targeted.
   @experimental
   */
   function findGroup(field, { targetable = false } = {}) {
