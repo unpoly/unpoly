@@ -473,6 +473,17 @@ extendDescribe('up.fragment', function() {
           expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Found in %s (origin %o)'), '.before & .after', origin)
         })
 
+        it("warns that a submission's :origin is no longer the form when replacing the ampersand character '&'", function() {
+          const warnSpy = up.migrate.warn.mock()
+          const origin = fixture('#foo')
+          up.fragment.resolveOrigin('& .child', { origin })
+          expect(warnSpy).toHaveBeenCalledWith(
+            "Origin shorthand '&' has been deprecated. Use :origin instead, but mind that a submission's :origin is now the button or changed field, not the form. Found in %s (origin %o).",
+            '& .child',
+            origin
+          )
+        })
+
         it("ignores the ampersand character '&' in the value of an attribute selector and does not require an { origin } option (bugfix)", function() {
           const resolved = up.fragment.resolveOrigin('a[href="/foo?a=1&b=2"]')
           expect(resolved).toEqual('a[href="/foo?a=1&b=2"]')

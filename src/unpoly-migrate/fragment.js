@@ -234,7 +234,7 @@ up.migrate.resolveOrigin = function(target, { origin } = {}) {
   return target.replace(pattern, function(variant) {
     if (variant === ':origin' || variant === '&') {
       if (variant === '&') {
-        up.migrate.warn("Origin shorthand '&' has been deprecated. Use :origin instead. Found in %s (origin %o).", target, origin)
+        up.migrate.warn("Origin shorthand '&' has been deprecated. Use :origin instead, but mind that a submission's :origin is now the button or changed field, not the form. Found in %s (origin %o).", target, origin)
       }
       if (origin) {
         return up.fragment.toTarget(origin)
