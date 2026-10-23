@@ -38,7 +38,8 @@ up.FocusCapsule = class FocusCapsule {
       return false
     }
 
-    let rediscoveredElement = up.fragment.get(this._target, { layer })
+    // Without a target we cannot rediscover the element in a new fragment.
+    let rediscoveredElement = this._target && up.fragment.get(this._target, { layer })
     if (rediscoveredElement) {
       // Firefox needs focus-related props to be set *before* we focus the element
       up.viewport.copyCursorProps(this._cursorProps, rediscoveredElement)
@@ -55,9 +56,9 @@ up.FocusCapsule = class FocusCapsule {
     let focusedElement = up.viewport.focusedElementWithin(layer.element)
     if (!focusedElement) return
 
+    // We also preserve an element that we cannot target. We won't be able to restore its focus,
+    // but we can still tell whether it was lost, e.g. for { focus: 'target-if-lost' }.
     let target = up.fragment.tryToTarget(focusedElement)
-    if (!target) return
-
     return new this(focusedElement, target)
   }
 

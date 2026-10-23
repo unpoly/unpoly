@@ -815,6 +815,27 @@ extendDescribe('up.fragment', function() {
 
             expect('.outside').toBeFocused()
           })
+
+          it('focuses the target if the focus was lost from an element without a derivable target', async function() {
+            const [_container, child] = htmlFixtureList(`
+              <div class="container">
+                <div tabindex="0">old child</div>
+              </div>
+            `)
+            child.focus()
+            expect(child).toBeFocused()
+
+            await up.render({
+              focus: 'target-if-lost',
+              fragment: `
+                <div class="container">
+                  <div tabindex="0">new child</div>
+                </div>
+              `
+            })
+
+            expect('.container').toBeFocused()
+          })
         })
 
         describe('with an array of { focus } options', function() {

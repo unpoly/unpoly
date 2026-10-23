@@ -1029,6 +1029,16 @@ describe('up.viewport', function() {
         expect(input).toBeFocused()
       })
 
+      it('returns false when the focused element had no derivable target', function() {
+        const [element] = htmlFixtureList('<div tabindex="0">focusable</div>')
+        element.focus()
+        up.viewport.saveFocus()
+        element.blur()
+
+        expect(up.viewport.restoreFocus()).toBe(false)
+        expect(element).not.toBeFocused()
+      })
+
     })
 
     describe('up.viewport.restoreScroll()', function() {

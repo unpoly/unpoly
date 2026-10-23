@@ -833,6 +833,30 @@ extendDescribe('up.form', function() {
             expect(input).not.toBeFocused()
             expect(unrelatedInput).toBeFocused()
           })
+
+          it('keeps the focus on the form when reverting, if the disabled element had no derivable target', async function() {
+            const [form, button] = htmlFixtureList(`
+              <form method="post" action="/action">
+                <button type="submit">Save</button>
+              </form>
+            `)
+            htmlFixtureList('<div id="target">old target</div>')
+            button.focus()
+            expect(button).toBeFocused()
+
+            up.submit(form, { disable: true, target: '#target' })
+            await wait(10)
+
+            expect(button).toBeDisabled()
+            expect(form).toBeFocused()
+
+            jasmine.respondWithSelector('#target', { text: 'new target' })
+            await wait()
+
+            expect('#target').toHaveText('new target')
+            expect(button).not.toBeDisabled()
+            expect(form).toBeFocused()
+          })
         })
       })
 

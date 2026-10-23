@@ -191,6 +191,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - Fix: When a focused field or button had no [form group](/api/up-form-group) that Unpoly could target, disabling it with [`[up-disable]`](/api/up-submit#up-disable) threw a `TypeError`. This happened e.g. for a submit button that shares its `[name]` with another button, in a form without an `[id]`.
 - ⚠️ [`up.form.group()`](/api/up.form.group) now returns the closest group, even when Unpoly cannot derive a target selector for it. To only get a group that Unpoly can target, pass the new `{ targetable: true }` option.
 - 🧩 `up.form.config.genericButtonSelectors` was renamed to `up.form.config.anyButtonSelectors`. It now matches every kind of button, including submit and reset buttons. The old name is polyfilled by `unpoly-migrate.js`.
+- Fix: After clicking a submit button that Unpoly cannot [target](/learn/target-derivation), e.g. a button without `[id]` or `[name]`, an [error response](/learn/error-responses) moved the focus to the `<body>`. The re-rendered form now receives the focus, like when other focused elements are replaced. The same happened in other render passes that replaced a focused element without a derivable target.
 
 
 ### Overlays

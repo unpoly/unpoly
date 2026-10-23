@@ -391,6 +391,49 @@ extendDescribe('up.form', function() {
           expect('.my-form').toHaveText('new form text')
         })
 
+        it('focuses the form when the focused submit button has no derivable target', async function() {
+          let html = (prefix) => `
+            <form id="form" method="post" action="/action" up-submit>
+              <input type="text" name="email" value="${prefix} email">
+              <button type="submit">Save</button>
+            </form>
+          `
+          const [form, _field, button] = htmlFixtureList(html('old'))
+          up.hello(form)
+
+          // Safari doesn't focus a button on click.
+          button.focus()
+          Trigger.clickSequence(button)
+          await wait()
+
+          jasmine.respondWith({ status: 422, responseText: html('new') })
+          await wait()
+
+          expect('#form').toHaveSelector('input[name=email][value="new email"]')
+          expect('#form').toBeFocused()
+        })
+
+        it('keeps the focus in a field when the form was submitted by pressing Enter in that field', async function() {
+          let html = (prefix) => `
+            <form id="form" method="post" action="/action" up-submit>
+              <input type="text" name="email" value="${prefix} email">
+              <button type="submit">Save</button>
+            </form>
+          `
+          const [form, field] = htmlFixtureList(html('old'))
+          up.hello(form)
+
+          field.focus()
+          Trigger.submitFormWithEnter(field)
+          await wait()
+
+          jasmine.respondWith({ status: 422, responseText: html('new') })
+          await wait()
+
+          expect('#form').toHaveSelector('input[name=email][value="new email"]')
+          expect('#form input[name=email]').toBeFocused()
+        })
+
         it('replaces the form if it was submitted by a submit button that was immediately removed (as Shoelace does when pressing Enter within an <sl-input>) (discussion #643)', async function() {
           const formSelector = 'form#form[action="/form-action"][method="put"][up-submit]'
           const form = fixture(formSelector)
