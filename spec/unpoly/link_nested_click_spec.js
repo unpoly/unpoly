@@ -26,6 +26,7 @@ extendDescribe('up.link', function() {
         link with method+confirm    | F    F    F     F        F          F      F      I        N    N      I           -  I         F
         link not followed           | N    N    N     I        I          IN     I      I        N    N      I           -  I         I
         area                        | F    F    0     I        I          I      I      I        0    0      I           I  I         I
+        area with method+confirm    | F    F    0     I        I          I      I      I        0    0      I           I  I         I
         area with link not followed | N    N    0     I        I          I      I      I        0    0      I           I  I         I
         div[up-href]                | F    F    0     I        I          I      I      I        0    0      I           I  I         I
         instant link                | F    F    F     F        F          F      F      I        N    N      I           -  I         F
@@ -55,6 +56,12 @@ extendDescribe('up.link', function() {
         'area': {
           description: 'an [up-expand] area',
           html: (inner) => `<div id="outer" up-expand><a href="/outer">Outer</a> ${inner}</div>`,
+        },
+        'area with method+confirm': {
+          // The area copies [data-method] and [data-confirm] from its link.
+          description: 'an [up-expand] area whose link has [data-method] and [data-confirm]',
+          html: (inner) => `<div id="outer" up-expand><a href="/outer" data-method="delete" data-confirm="Really delete?">Outer</a> ${inner}</div>`,
+          verifyFollow: (request) => rows['link with method+confirm'].verifyFollow(request),
         },
         'area with link not followed': {
           // Unpoly hands a click on the area to the link, so the browser does what the link does.

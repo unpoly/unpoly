@@ -251,6 +251,7 @@ A render pass now inserts all new content first, then runs compilers, then updat
 - Fix: Clicking a button, a `<label>` or a `<summary>` inside an [`[up-expand]`](/api/up-expand) area, or inside another followable element that isn't a link, followed the link. A submit button didn't submit its form, a label didn't toggle its checkbox, and a `<details>` element didn't open. These elements now handle their own clicks, like links and fields already did. Inside an `<a>` element, buttons and labels still belong to the link.
 - Fix: Clicking a form field inside an [`[up-instant]`](/api/up-instant) link did nothing. Unpoly didn't follow the link, but also prevented the click, so a checkbox didn't toggle. The same happened for fields, buttons and labels inside an `[up-instant]` area, e.g. an [`[up-expand]`](/api/up-expand) area that copied `[up-instant]` from its link. These elements now handle their own clicks.
 - Fix: An [`[up-instant]`](/api/up-instant) link did nothing when another script prevented its `mousedown` event, e.g. to keep the focus in a search field. Unpoly now follows such a link on `click`, and emits [`up:click`](/api/up:click) on `click` instead of `mousedown`.
+- Fix: Clicking an [`[up-expand]`](/api/up-expand) area around a link with `[data-method]` and `[data-confirm]`, e.g. a Rails delete link in a table row, sent a `GET` request without asking for confirmation. The area now also takes over these attributes from its link, with or without Rails UJS.
 
 
 ### Smaller fixes and changes

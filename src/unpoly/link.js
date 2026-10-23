@@ -1465,6 +1465,13 @@ up.link = (function() {
           ...e.upAttrs(childLink)
         })
 
+        // Unpoly also understands the Rails UJS attributes [data-method] and [data-confirm].
+        // With Rails UJS loaded, a later macro converts them to [up-method] and [up-confirm] on the area.
+        for (let attr of ['data-method', 'data-confirm']) {
+          let value = childLink.getAttribute(attr)
+          if (value) e.setMissingAttr(area, attr, value)
+        }
+
         makeFollowable(area)
       }
       // A11y: We could also consider making the area clickable, via makeClickable().

@@ -1840,6 +1840,64 @@ describe('up.link', function() {
         expect(up.render.calls.count()).toEqual(1)
       })
 
+      describe('when the expanded link has Rails attributes [data-method] and [data-confirm]', function() {
+
+        let html = `
+          <table>
+            <tr up-expand>
+              <td><a href="/posts/1" data-method="delete" data-confirm="Really delete?">Delete</a></td>
+              <td id="cell">Post 1</td>
+            </tr>
+          </table>
+        `
+
+        async function clickCellAndExpectConfirmedDelete() {
+          spyOn(window, 'confirm').and.returnValue(true)
+
+          Trigger.clickSequence('#cell')
+          await wait()
+
+          expect(window.confirm).toHaveBeenCalledWith('Really delete?')
+          // Unpoly wraps a DELETE request in a POST request with a { _method } param.
+          expect(jasmine.lastRequest().url).toMatchURL('/posts/1')
+          expect(jasmine.lastRequest().data()['_method']).toEqual(['DELETE'])
+        }
+
+        it('confirms and sends a DELETE request when the user clicks the area', async function() {
+          const [table] = htmlFixtureList(html)
+          up.hello(table)
+
+          await clickCellAndExpectConfirmedDelete()
+        })
+
+        describe('when Rails UJS is loaded', function() {
+
+          beforeEach(function() {
+            this.oldRails = $.rails
+            $.rails = {}
+          })
+
+          afterEach(function() {
+            $.rails = this.oldRails
+          })
+
+          it('converts the attributes on the area, so Rails UJS does not handle the area, and confirms and sends a DELETE request when the user clicks the area', async function() {
+            const [table] = htmlFixtureList(html)
+            const row = table.querySelector('tr')
+            up.hello(table)
+
+            expect(row).not.toHaveAttribute('data-method')
+            expect(row).not.toHaveAttribute('data-confirm')
+            expect(row).toHaveAttribute('up-method', 'delete')
+            expect(row).toHaveAttribute('up-confirm', 'Really delete?')
+
+            await clickCellAndExpectConfirmedDelete()
+          })
+
+        })
+
+      })
+
       describe('when Unpoly would not follow the expanded link', function() {
 
         const linkCases = {
