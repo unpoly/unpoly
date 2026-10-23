@@ -1,4 +1,4 @@
-3.15.0-rc6
+3.15.0-rc7
 ----------
 
 A lot has changed for everyone who builds software since our last release. Many of us now write code together with AI agents.
