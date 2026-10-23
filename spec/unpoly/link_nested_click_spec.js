@@ -200,12 +200,16 @@ extendDescribe('up.link', function() {
         return outcome || '0'
       }
 
-      const [header, ...rowLines] = matrix.trim().split('\n').map((line) => line.split('|').map((part) => part.trim()))
-      const columnKeys = header[1].split(/\s+/)
+      // Returns the column keys and a [rowKey, cells] pair per row.
+      function parseTable(table) {
+        const [header, ...rowLines] = table.trim().split('\n').map((line) => line.split('|').map((part) => part.trim()))
+        return [header[1].split(/\s+/), rowLines.map(([rowKey, cells]) => [rowKey, cells.split(/\s+/)])]
+      }
 
-      for (let [rowKey, rowCells] of rowLines) {
+      const [columnKeys, matrixRows] = parseTable(matrix)
+
+      for (let [rowKey, cells] of matrixRows) {
         let row = rows[rowKey]
-        let cells = rowCells.split(/\s+/)
 
         describe(`within ${row.description}`, function() {
 
@@ -233,6 +237,76 @@ extendDescribe('up.link', function() {
 
         })
       }
+
+      describe('when an [up-instant] element emits up:click', function() {
+
+        // An [up-instant] element emits up:click on mousedown. When the press is meant for a nested element
+        // that handles its own click, or when another script prevented the mousedown, it emits up:click on click.
+        // Either way it emits up:click exactly once.
+        const timings = `
+                               | self      span      button    checkbox prevented prevented-above
+          instant link         | mousedown mousedown mousedown click    click     click
+          instant area         | mousedown mousedown click     click    click     click
+          instant div[up-href] | mousedown mousedown click     click    click     click
+        `
+
+        const timingColumns = {
+          ...columns,
+          'prevented': {
+            // E.g. an autocomplete suggestion that keeps the focus in its search field
+            description: 'the element, whose mousedown is prevented by another script',
+            html: 'Text',
+            target: '#outer',
+            setup(target) {
+              target.addEventListener('mousedown', (event) => event.preventDefault())
+            },
+            verify: () => expect(isRequested('/outer')).toBe(true),
+          },
+          'prevented-above': {
+            description: 'the element, whose mousedown is prevented by another script on a container',
+            html: 'Text',
+            target: '#outer',
+            setup(target, container) {
+              container.addEventListener('mousedown', (event) => event.preventDefault())
+            },
+            verify: () => expect(isRequested('/outer')).toBe(true),
+          },
+        }
+
+        const [timingColumnKeys, timingRows] = parseTable(timings)
+
+        for (let [rowKey, cells] of timingRows) {
+          let row = rows[rowKey]
+
+          describe(`within ${row.description}`, function() {
+
+            timingColumnKeys.forEach(function(columnKey, index) {
+              let column = timingColumns[columnKey]
+              let expected = cells[index]
+
+              it(`emits up:click on ${expected} when the user clicks ${column.description}`, async function() {
+                let [container] = htmlFixtureList(`<div>${row.html(column.html)}</div>`)
+                up.hello(container)
+
+                let target = document.querySelector(column.target || '#inner')
+                column.setup?.(target, container)
+
+                // Listen on the container, since following halts up:click before it reaches the document.
+                let upClickTypes = []
+                container.addEventListener('up:click', (event) => upClickTypes.push(event.originalEvent.type))
+
+                Trigger.clickSequence(target)
+                await wait()
+
+                expect(upClickTypes).toEqual([expected])
+                column.verify?.()
+              })
+            })
+
+          })
+        }
+
+      })
 
     })
 

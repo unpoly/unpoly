@@ -861,7 +861,10 @@ up.link = (function() {
 
       // (1) Instant links emit up:click on mousedown
       // (2) On touch devices we never act on mousedown as the user may be long-pressing to open the context menu
-      if (isInstant(element) && !isLongPressPossible(event)) {
+      // (3) When another script prevented the mousedown, e.g. to keep the focus in a search field,
+      //     the press is not instant. A forked up:click would be prevented as well, and we would halt the click.
+      //     Like the browser, we still act on the click.
+      if (!event.defaultPrevented && isInstant(element) && !isLongPressPossible(event)) {
         // Remember that we already emitted an event so we don't do it again on click
         lastInstantTarget = element
 
