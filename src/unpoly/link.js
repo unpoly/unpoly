@@ -900,6 +900,8 @@ up.link = (function() {
 
   This event is generally emitted when an element is clicked. However, for elements
   with an `[up-instant]` attribute, this event is emitted on `mousedown` instead.
+  If the press lands on an element within that handles its own click, like a checkbox, or another script
+  prevented the `mousedown` event, `up:click` is emitted on `click` as usual.
 
   This is useful for listening to links being activated without needing to know whether
   a link is `[up-instant]`.
@@ -1328,6 +1330,7 @@ up.link = (function() {
 
   For [faux-interactive elements](/learn/faux-interactive-elements), setting `[up-instant]` will cause
   the `up:click` event to be emitted on `mousedown` instead of `click`.
+  A press on a control within the element, or a press whose `mousedown` was prevented, still emits `up:click` on `click`.
 
   To apply the instant effect without changing your HTML, configure `up.link.config.instantSelectors`.
 
@@ -1373,7 +1376,8 @@ up.link = (function() {
   In the example above, clicking anywhere within the `.notification` element
   would [follow](/api/up.follow) the *Close* link.
 
-  A click on another link, a form field, a button or a label within the area is left to that element.
+  A click on another link, a form field, a button, a label or a `<summary>` within the area is left to that element.
+  To keep the area from following a click on another element, prevent its [`up:click`](/api/up:click) event.
 
   ## Multiple contained links
 
@@ -1390,9 +1394,11 @@ up.link = (function() {
 
   ## Links that Unpoly doesn't follow
 
-  When Unpoly wouldn't follow the expanded link, e.g. because it has a `[download]`, `[target]`
-  or `[up-follow=false]` attribute, clicking the area clicks the link. The browser then does what the link does,
-  like downloading a file or opening a new tab. Such links are configured in `up.link.config.noFollowSelectors`.
+  When the expanded link [opts out of Unpoly](/api/up.link.config#config.noFollowSelectors), e.g. because it has
+  a `[download]`, `[target]` or `[up-follow=false]` attribute, clicking the area clicks the link.
+  The browser then does what the link does, like downloading a file or opening a new tab.
+
+  Any other link is followed by Unpoly, even a plain link without `[up-follow]`.
 
   ## Feedback classes
 
