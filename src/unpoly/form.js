@@ -327,20 +327,16 @@ up.form = (function() {
     return findFormElements(root, submitButtonSelector)
   }
 
+  /*-
+  Returns a selector for any button, including buttons that don't submit their form.
+
+  @function up.form.anyButtonSelector
+  @internal
+  */
   const [anyButtonSelector, isAnyButton] = config.selectorFns('anyButtonSelectors')
 
   function findAnyButtons(root) {
     return findFormElements(root, anyButtonSelector)
-  }
-
-  /*-
-  Returns a selector for elements that handle a click themselves, like fields, buttons and labels.
-
-  @function up.form.interactiveSelector
-  @internal
-  */
-  function interactiveSelector() {
-    return [fieldSelector(), anyButtonSelector(), 'label'].join()
   }
 
   /*-
@@ -2489,7 +2485,7 @@ up.form = (function() {
     validate,
     autosubmit,
     fieldSelector,
-    interactiveSelector,
+    anyButtonSelector,
     fields: findFields,
     trackFields,
     isField,

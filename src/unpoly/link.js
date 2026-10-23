@@ -763,11 +763,16 @@ up.link = (function() {
   // and not for another interactive element within the link.
   function isClickTarget(target, link) {
     // If user clicked on a child link of $link, or on a field, we want those other elements handle the click.
-    // A link's buttons and labels belong to the link, but a clickable container like [up-expand]
-    // leaves buttons and labels to handle their own clicks.
-    const betterTargetSelector = `a, [up-follow], ${link.matches('a') ? up.form.fieldSelector() : up.form.interactiveSelector()}`
+    // A link's buttons, labels and summaries belong to the link, but a clickable container like [up-expand]
+    // leaves them to handle their own clicks.
+    const betterTargetSelector = `a, [up-follow], ${link.matches('a') ? up.form.fieldSelector() : interactiveSelector()}`
     const betterTarget = target.closest(betterTargetSelector)
     return !betterTarget || (betterTarget === link)
+  }
+
+  // Elements within a clickable container that handle their own clicks.
+  function interactiveSelector() {
+    return [up.form.fieldSelector(), up.form.anyButtonSelector(), 'label', 'summary'].join()
   }
 
   function isInstant(linkOrDescendant) {

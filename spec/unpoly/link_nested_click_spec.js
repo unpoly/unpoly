@@ -25,12 +25,12 @@ extendDescribe('up.link', function() {
         link                        | F    F    F     F        F          F      F      I        N    N      I           -  I         F
         link with method+confirm    | F    F    F     F        F          F      F      I        N    N      I           -  I         F
         link not followed           | N    N    N     I        I          IN     I      I        N    N      I           -  I         I
-        area                        | F    F    0     I        I          I      I      I        0    0      I           I  I         F
-        area with link not followed | N    N    0     I        I          I      I      I        0    0      I           I  I         N
-        div[up-href]                | F    F    0     I        I          I      I      I        0    0      I           I  I         F
+        area                        | F    F    0     I        I          I      I      I        0    0      I           I  I         I
+        area with link not followed | N    N    0     I        I          I      I      I        0    0      I           I  I         I
+        div[up-href]                | F    F    0     I        I          I      I      I        0    0      I           I  I         I
         instant link                | F    F    F     F        F          F      F      I        N    N      I           -  I         F
-        instant area                | F    F    0     I        I          I      I      I        0    0      I           I  I         F
-        instant div[up-href]        | F    F    0     I        I          I      I      I        0    0      I           I  I         F
+        instant area                | F    F    0     I        I          I      I      I        0    0      I           I  I         I
+        instant div[up-href]        | F    F    0     I        I          I      I      I        0    0      I           I  I         I
       `
 
       const rows = {
@@ -159,7 +159,7 @@ extendDescribe('up.link', function() {
           },
         },
         'summary': {
-          // A <summary> is not a better target than its container, not even in an [up-expand] area.
+          // Like a button, a <summary> belongs to a link, but handles its own click in a clickable container.
           description: 'a <summary>',
           html: '<details><summary id="inner">Summary</summary>Details</details>',
           handled: () => document.querySelector('details').open,
