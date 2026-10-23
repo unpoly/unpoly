@@ -92,43 +92,48 @@ Styled confirmation dialogs {#styled}
 ---------------------------
 
 The browser's dialog cannot be styled. To ask in an [overlay](/learn/overlays) instead, give your links
-a `[custom-confirm]` attribute:
+and forms a `[custom-confirm]` attribute:
 
 ```html
 <a href="/projects/5" up-method="delete" up-follow custom-confirm="Really delete this project?">Delete project</a> <!-- mark: custom-confirm="Really delete this project?" -->
+
+<form method="post" action="/projects/5/archive" up-submit custom-confirm="Archive this project?"> <!-- mark: custom-confirm="Archive this project?" -->
+  ...
+</form>
 ```
 
 The attribute is not part of Unpoly. It is a hook for this listener:
 
 ```js
-up.on('up:link:follow', '[custom-confirm]', (event, link) => {
-  const message = link.getAttribute('custom-confirm')
+up.on('up:link:follow up:form:submit', '[custom-confirm]', (event, element) => {
+  const message = element.getAttribute('custom-confirm')
   const content = `
     <p>${up.util.escapeHTML(message)}</p>
     <button up-accept>OK</button>
     <button up-dismiss>Cancel</button>
   `
-  event.preventDefault()                    // don't follow the link yet
+  event.preventDefault()                    // don't follow the link or submit the form yet
   up.layer.ask({ content }).then(
-    () => up.render(event.renderOptions),   // on accept: follow the link with the same options
+    () => up.render(event.renderOptions),   // on accept: render with the same options
     () => {}                                // on dismiss: do nothing
   )
 })
 ```
 
-Before Unpoly follows a link, it emits `up:link:follow`. The listener prevents the event, so the link is not
-followed. Instead it opens an overlay with `up.layer.ask()`, which returns a promise for the user's answer.
+Before Unpoly follows a link, it emits `up:link:follow`. Before it submits a form, it emits `up:form:submit`.
+The listener prevents the event, so nothing is rendered yet. Instead it opens an overlay with `up.layer.ask()`,
+which returns a promise for the user's answer.
 The overlay's buttons [accept or dismiss it](/learn/closing-overlays). When the user accepts, the listener
-renders with the link's original options from `event.renderOptions`.
+renders with the original options from `event.renderOptions`, which follows the link or submits the form.
+
+For a form, `event.renderOptions` also remembers which button was pressed, so the form is submitted with its name and value.
+To only ask for one of several submit buttons, put the attribute on the button and read it from `event.submitButton`.
 
 The message is passed through `up.util.escapeHTML()`, so a message with characters like `<` cannot inject HTML.
 To keep the dialog's HTML out of your JavaScript, you can also pass a [template](/learn/templates) selector as `{ content }`.
 
 The recipe uses its own attribute instead of `[up-confirm]`. With `[up-confirm]`, `event.renderOptions` would contain
 a `{ confirm }` option, and the browser's dialog would appear after your own.
-
-For forms, listen to `up:form:submit` instead. Its `event.renderOptions` holds the form's options, and
-`up.render(event.renderOptions)` submits the form.
 
 The browser's dialog blocks the page until the user answers. A styled dialog doesn't, so the page can
 change while it is open, e.g. when a [polling](/learn/polling) response arrives. The link is then followed
