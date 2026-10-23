@@ -1029,6 +1029,18 @@ describe('up.viewport', function() {
         expect(input).toBeFocused()
       })
 
+      it("logs the restored element's target", function() {
+        const [input] = htmlFixtureList('<input type="text" name="email">')
+        input.focus()
+        up.viewport.saveFocus()
+        input.blur()
+        const putsSpy = spyOn(up, 'puts')
+
+        up.viewport.restoreFocus()
+
+        expect(putsSpy).toHaveBeenCalledWith('up.viewport.restoreFocus()', 'Restored focus to "%s"', 'input[name="email"]')
+      })
+
       it('returns false when the focused element had no derivable target', function() {
         const [element] = htmlFixtureList('<div tabindex="0">focusable</div>')
         element.focus()

@@ -668,7 +668,7 @@ up.viewport = (function() {
     const locationCapsule = layer.lastFocusCapsules.get(location)
     // The capsule returns `true` if we could rediscover and focus the previous element.
     if (locationCapsule && locationCapsule.restore(layer)) {
-      up.puts('up.viewport.restoreFocus()', 'Restored focus to "%s"', locationCapsule.target)
+      up.puts('up.viewport.restoreFocus()', 'Restored focus to "%s"', locationCapsule._target)
       return true
     } else {
       return false
