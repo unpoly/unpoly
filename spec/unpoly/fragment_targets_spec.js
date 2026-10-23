@@ -473,14 +473,29 @@ extendDescribe('up.fragment', function() {
           expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Found in %s (origin %o)'), '.before & .after', origin)
         })
 
-        it("warns that a submission's :origin is no longer the form when replacing the ampersand character '&'", function() {
+        it("warns about the ampersand character '&' without mentioning forms when the origin is not a form element", function() {
           const warnSpy = up.migrate.warn.mock()
           const origin = fixture('#foo')
           up.fragment.resolveOrigin('& .child', { origin })
           expect(warnSpy).toHaveBeenCalledWith(
-            "Origin shorthand '&' has been deprecated. Use :origin instead, but mind that a submission's :origin is now the button or changed field, not the form. Found in %s (origin %o).",
+            "Origin shorthand '&' has been deprecated. Use :origin instead. Found in %s (origin %o).",
             '& .child',
             origin
+          )
+        })
+
+        it("warns that a form submission's :origin is no longer the form when the origin of the ampersand character '&' is a form element", function() {
+          const warnSpy = up.migrate.warn.mock()
+          const [form, button] = htmlFixtureList(`
+            <form id="form">
+              <button type="submit" id="button">Submit</button>
+            </form>
+          `)
+          up.fragment.resolveOrigin('& .child', { origin: button })
+          expect(warnSpy).toHaveBeenCalledWith(
+            "Origin shorthand '&' has been deprecated. Use :origin instead. A form submission's :origin is now the button or changed field, not the form. To target the form, use form:has(:origin). Found in %s (origin %o).",
+            '& .child',
+            button
           )
         })
 

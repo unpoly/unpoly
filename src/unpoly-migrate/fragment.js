@@ -234,7 +234,10 @@ up.migrate.resolveOrigin = function(target, { origin } = {}) {
   return target.replace(pattern, function(variant) {
     if (variant === ':origin' || variant === '&') {
       if (variant === '&') {
-        up.migrate.warn("Origin shorthand '&' has been deprecated. Use :origin instead, but mind that a submission's :origin is now the button or changed field, not the form. Found in %s (origin %o).", target, origin)
+        // We only explain the changed :origin of form submissions when the origin is a form element.
+        // Validation origins also get the hint, which we accept as noise.
+        let formHint = origin?.form ? "A form submission's :origin is now the button or changed field, not the form. To target the form, use form:has(:origin). " : ''
+        up.migrate.warn("Origin shorthand '&' has been deprecated. Use :origin instead. " + formHint + "Found in %s (origin %o).", target, origin)
       }
       if (origin) {
         return up.fragment.toTarget(origin)
