@@ -100,7 +100,8 @@ window.Trigger = (function() {
     const key = "Return"
     keydown(link, key, options)
     keypress(link, key, options)
-    click(link, u.merge(options, { pointerType: '', clientX: 0, clientY: 0 }))
+    // A keyboard click has no click count, so its { detail } is 0.
+    click(link, u.merge(options, { pointerType: '', clientX: 0, clientY: 0, detail: 0 }))
     keyup(link, key, options)
   }
 

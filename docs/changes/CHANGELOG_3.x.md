@@ -202,6 +202,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - Fix: Pressing Escape dismissed an overlay even when an element in it had already handled the key with `event.preventDefault()`, e.g. a dropdown closing its list. A prevented Escape keydown now keeps the overlay open.
 - ⚠️ [Aborting](/learn/aborting-requests) the root layer, e.g. with `up.fragment.abort({ layer: 'root' })` or a render pass with `{ abort: 'layer' }`, no longer stops [polling](/api/up-poll), pending [validations](/learn/validation) or a scheduled [preload](/learn/preloading) in an open overlay. Requests in overlays were already kept. [`up.fragment.onAborted()`](/api/up.fragment.onAborted) and [`up.fragment.onKept()`](/api/up.fragment.onKept) now only react to ancestors in the same layer. To do the same in your own code, pass the new `{ layer }` option to [`up.event.onClosest()`](/api/up.event.onClosest).
 - Fix: The `{ duration }` and `{ easing }` options of `up.layer.open()` were ignored for the opening animation. This also affected `[up-duration]` and `[up-easing]` on a link that opens an overlay. Only `up.layer.config` was used.
+- Fix: Double-clicking a link that opens an overlay right away, e.g. a [styled confirmation dialog](/learn/confirmation-dialogs) or an overlay with [preloaded](/learn/preloading) content, dismissed the new overlay at once. The second click landed outside the overlay. Double-clicking a link that opens a popup opened and closed the popup. The overlay now stays open.
 
 
 ### Caching

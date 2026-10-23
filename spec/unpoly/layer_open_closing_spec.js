@@ -327,6 +327,34 @@ extendDescribe('up.layer', function() {
                 })
               })
 
+              it('does not dismiss the overlay when the second click of a double click on its opener lands on the viewport', async function() {
+                const [opener] = htmlFixtureList(`
+                  <a href="#" up-layer="new modal" up-content="overlay content" up-dismissible="outside">open</a>
+                `)
+                Trigger.clickSequence(opener)
+                await wait()
+
+                expect(up.layer.isOverlay()).toBe(true)
+
+                // The overlay opened on the first click, so the second click lands on its viewport.
+                Trigger.clickSequence(up.layer.current.viewportElement, { clientX: 0, clientY: 0, detail: 2 })
+                await wait()
+
+                expect(up.layer.isOverlay()).toBe(true)
+              })
+
+              it('dismisses the overlay when the viewport is clicked without a click count, like when activated from the keyboard', async function() {
+                up.layer.open({ dismissible: 'outside', mode: 'modal' })
+                await wait()
+
+                expect(up.layer.isOverlay()).toBe(true)
+
+                Trigger.clickSequence(up.layer.current.viewportElement, { clientX: 0, clientY: 0, detail: 0 })
+                await wait()
+
+                expect(up.layer.isOverlay()).toBe(false)
+              })
+
               it('does not dismiss the overlay when the user clicks on the parent layer, but within a foreign overlay', async function() {
                 up.layer.config.foreignOverlaySelectors = ['.foreign-overlay']
                 const foreignOverlay = fixture('.foreign-overlay', { text: 'foreign overlay content' })
@@ -388,6 +416,40 @@ extendDescribe('up.layer', function() {
 
                 Trigger.clickSequence(opener)
 
+                await wait()
+
+                expect(up.layer.isOverlay()).toBe(false)
+              })
+
+              it('does not dismiss the overlay or follow its opener again when the user double-clicks the opener', async function() {
+                const [opener] = htmlFixtureList(`
+                  <a href="#" up-layer="new popup" up-content="overlay content" up-dismissible="outside">open</a>
+                `)
+                Trigger.clickSequence(opener)
+                await wait()
+
+                expect(up.layer.count).toBe(2)
+
+                const followListener = jasmine.createSpy('up:link:follow listener')
+                up.on('up:link:follow', followListener)
+
+                Trigger.clickSequence(opener, { detail: 2 })
+                await wait()
+
+                expect(up.layer.count).toBe(2)
+                expect(followListener).not.toHaveBeenCalled()
+              })
+
+              it('lets the user close an overlay with tether by activating its opener with the keyboard', async function() {
+                const [opener] = htmlFixtureList(`
+                  <a href="#" up-layer="new popup" up-content="overlay content" up-dismissible="outside">open</a>
+                `)
+                Trigger.clickSequence(opener)
+                await wait()
+
+                expect(up.layer.isOverlay()).toBe(true)
+
+                Trigger.clickLinkWithKeyboard(opener)
                 await wait()
 
                 expect(up.layer.isOverlay()).toBe(false)

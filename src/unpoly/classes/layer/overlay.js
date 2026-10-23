@@ -284,7 +284,15 @@ up.Layer.Overlay = class Overlay extends up.Layer {
 
   _onOutsideClicked(event, halt) {
     up.log.putsEvent(event)
+    // We still halt a click we ignore below, or a popup's origin would be followed again.
     if (halt) up.event.halt(event)
+
+    // When the user double-clicks a link that opens an overlay right away, the second click
+    // lands outside the new overlay. We don't want to dismiss the overlay the user just opened.
+    // The up:click event has no { detail }, so we read the click count from the native event.
+    // Keyboard activations and element.click() have a { detail } of 0.
+    if (event.originalEvent?.detail > 1) return
+
     up.error.muteUncriticalSync(() =>
       this.dismiss(':outside', { origin: event.target })
     )
