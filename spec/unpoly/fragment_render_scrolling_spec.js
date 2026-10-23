@@ -121,6 +121,21 @@ extendDescribe('up.fragment', function() {
             expect(document.querySelector('#hash').getBoundingClientRect().top).toBeAround(0, 1)
           })
 
+          it('reveals the element matching the requested #hash when the server echoes an X-Up-Location header without a #hash', async function() {
+            htmlFixtureList(tallMainHTML('old main'))
+            up.viewport.root.scrollTop = 1000
+
+            up.render('main', { url: '/path#hash', scroll: 'auto' })
+            await wait()
+
+            // Server integrations like unpoly-rails echo the request URL, which never has a #hash.
+            jasmine.respondWith({ responseText: tallMainHTML('new main'), responseHeaders: { 'X-Up-Location': '/path' } })
+            await wait()
+
+            expect('main').toHaveText(/new main/)
+            expect(document.querySelector('#hash').getBoundingClientRect().top).toBeAround(0, 1)
+          })
+
           it('uses the strategies configured in up.fragment.config.autoScroll', async function() {
             up.fragment.config.autoScroll = ['top']
             htmlFixtureList(`
