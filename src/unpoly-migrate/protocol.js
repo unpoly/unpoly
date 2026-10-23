@@ -27,16 +27,6 @@ For example, to expire all responses to URLs starting with `/notes/`:
 X-Up-Clear-Cache: /notes/*
 ```
 
-### Overriding the client-side default
-
-If the server does not send an `X-Up-Clear-Cache` header, Unpoly will [expire the entire cache](/api/up.network.config#config.expireCache) after a non-GET request.
-
-You may force Unpoly to keep the cache fresh after a non-GET request:
-
-```http
-X-Up-Clear-Cache: false
-```
-
 @header X-Up-Clear-Cache
 @deprecated
   Use `X-Up-Expire-Cache` instead.

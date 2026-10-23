@@ -157,18 +157,18 @@ This runs no JavaScript, so it needs no nonce:
 X-Up-Open-Layer: { onAcceptedReload: '#users-list' }
 ```
 
-For other callbacks, you can keep JavaScript out of your response headers. Send a custom header with the data your callback needs,
-like `X-Reload-On-Accept` below. A listener in a script file reads it and sets the callback:
+For callbacks that do more than reload, you can keep JavaScript out of your response headers. Send a custom header with the data your callback needs,
+like `X-On-Accepted-Navigate` below. A listener in a script file reads it and sets the callback:
 
 ```http
 X-Up-Open-Layer: {}
-X-Reload-On-Accept: #users-list
+X-On-Accepted-Navigate: /companies
 ```
 
 ```js
 up.on('up:fragment:loaded', function(event) {
-  let selector = event.response.header('X-Reload-On-Accept')
-  if (selector) event.renderOptions.onAccepted = () => up.reload(selector) // mark: event.renderOptions.onAccepted
+  let url = event.response.header('X-On-Accepted-Navigate')
+  if (url) event.renderOptions.onAccepted = () => up.navigate({ url }) // mark: event.renderOptions.onAccepted
 })
 ```
 

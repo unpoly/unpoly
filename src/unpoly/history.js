@@ -57,7 +57,7 @@ up.history = (function() {
       See [Turning off history aspects](/learn/updating-history#disabling) for the consequences of excluding an aspect.
 
   @section Meta tags
-    @param {boolean} [config.updateMetaTags=true]
+    @param {boolean} [config.updateMetaTags]
       Configures whether [history changes](/learn/updating-history) update
       [meta tags](/learn/updating-history#history-state) in addition
       to the document's title and URL.

@@ -26,6 +26,7 @@
 
 @param {Element|false} [options.submitButton]
   The submit button used to submit the form.
+  The button must belong to the form, or an error is thrown.
 
   If the submit button has a `[name]` and `[value]` attribute, it will
   be included in the request params.

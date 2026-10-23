@@ -1006,6 +1006,12 @@ up.protocol = (function() {
   X-Up-Method: GET
   ```
 
+  ### Revealing an element
+
+  The URL may contain a `#hash`, e.g. `X-Up-Location: /users#alice`. Unpoly then
+  [reveals](/learn/scrolling) the element with that ID, like after following a link to `/users#alice`.
+  A `#hash` in this header replaces any `#hash` of the requested URL.
+
   @header X-Up-Location
   @stable
   */
