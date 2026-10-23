@@ -20,7 +20,6 @@ You can now learn Unpoly on unpoly.com from start to finish, and look up details
 - The sidebar shows where you are in a chapter or module, longer pages show their contents, and a new menu makes the site usable on a phone. Diagrams and videos show what happens on the page.
 - The API reference at `/api` documents every attribute, function, event and option. Every API page links to the Learn page that explains its topic.
 - The new search shows whether a result is a Learn page or an API page, and where it sits in the docs.
-- A new guide shows how to [ask before discarding unsaved changes](/learn/unsaved-changes) in a form.
 
 Guides now live under `/learn`, like `/learn/caching`. API pages live under `/api`, like `/api/up.render`.
 Some pages also got a new name, e.g. *Handling failed responses* is now [Error responses](/learn/error-responses), and *Preserving elements* is now [Keeping elements](/learn/keeping-elements).
@@ -137,7 +136,6 @@ Some smaller changes in this release remove friction you may have worked around:
 - [`[up-expand]`](/api/up-expand) now works for links that Unpoly doesn't follow, like a download or a link that opens a new tab. Buttons and labels inside the area now handle their own clicks. See [Links and URLs](#links-and-urls).
 - When Unpoly boots, it logs an error for a misspelled or renamed `up.*.config` setting, instead of ignoring it. See [Smaller fixes and changes](#smaller-fixes-and-changes).
 - Pages with many watched forms no longer freeze for a moment after each fragment update. See [Forms](#forms).
-- The Space key now activates a [faux button](/learn/faux-interactive-elements), like the Enter key. See [Links and URLs](#links-and-urls).
 - Test runners, CI and coding agents now read Unpoly's log as plain text. See [Smaller fixes and changes](#smaller-fixes-and-changes).
 
 
@@ -242,9 +240,9 @@ A render pass now inserts all new content first, then runs compilers, then updat
 
 ### Links and URLs
 
-- Pressing the Space key now activates a [faux button](/learn/faux-interactive-elements), e.g. an element with [`[up-emit]`](/api/up-emit) or [`[up-clickable]`](/api/up-clickable). Before, only the Enter key worked.
 - ⚠️ An [`[up-on-offline]`](/api/up-follow#up-on-offline) callback now receives the `up:fragment:offline` event as `event`, so it can call `event.retry()`. It used to receive the event as `error`.
 - [URL patterns](/api/url-patterns) now match full URLs on the page's own origin, like `https://example.com/users/*`. Such patterns never matched before.
+- Fix: Pressing the Space key didn't activate a [faux button](/learn/faux-interactive-elements), e.g. an element with [`[up-emit]`](/api/up-emit) or [`[up-clickable]`](/api/up-clickable). Only the Enter key worked, although Space was meant to work for buttons too.
 - Fix: When the user pressed the mouse button on a [preloading](/learn/preloading) link while its preload request was still loading after hovering, Unpoly aborted the request and sent the same request again. This bug was introduced in Unpoly 3.8.
 - Fix: When the user clicked a [preloading](/learn/preloading) link while its preload request was still loading, a newer render pass for the same fragment could not [abort](/learn/aborting-requests) the click. Once the preload responded, the click rendered the old response over the newer content, and aborted the newer render pass. The click can now be aborted like any other request, while the preload keeps loading for the cache.
 - Fix: When [`[up-expand]`](/api/up-expand) enlarged a link that Unpoly doesn't follow, like a link with `[download]`, `[target]` or `[up-follow=false]`, Unpoly followed it anyway when the area was clicked. A download was fetched in the background instead of saved, and `[target=_blank]` didn't open a new tab. Clicking the area now clicks the link, so the browser does what the link does.
