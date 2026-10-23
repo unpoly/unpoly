@@ -134,9 +134,20 @@ Some smaller changes in this release remove friction you may have worked around:
 
 - To reload an element after an overlay closes, set the new experimental [`[up-on-accepted-reload]`](/api/up-layer-new#up-on-accepted-reload) attribute to its selector. You no longer need a JavaScript callback or a CSP nonce. See [Overlays](#overlays).
 - [`[up-expand]`](/api/up-expand) now works for links that Unpoly doesn't follow, like a download or a link that opens a new tab. Buttons and labels inside the area now handle their own clicks. See [Links and URLs](#links-and-urls).
-- When Unpoly boots, it logs an error for a misspelled or renamed `up.*.config` setting, instead of ignoring it. See [Smaller fixes and changes](#smaller-fixes-and-changes).
+- When Unpoly boots, it logs an error for a misspelled or renamed `up.*.config` setting, instead of ignoring it. See [Mistakes are easier to find](#mistakes-are-easier-to-find).
 - Pages with many watched forms no longer freeze for a moment after each fragment update. See [Forms](#forms).
-- Test runners, CI and coding agents now read Unpoly's log as plain text. See [Smaller fixes and changes](#smaller-fixes-and-changes).
+- Test runners, CI and coding agents now read Unpoly's log as plain text. See [Mistakes are easier to find](#mistakes-are-easier-to-find).
+
+
+### Mistakes are easier to find
+
+When something is wrong, Unpoly now says so earlier and more clearly.
+This also helps coding agents: clear errors and plain-text logs in automated browsers let an agent notice a mistake and fix it on its own.
+
+- ⚠️ When Unpoly boots, it now logs an error for every setting that doesn't exist, like a misspelled key or one that was renamed in an earlier version. Unpoly checks the top-level keys of every `up.*.config` object, but not nested objects like `up.layer.config.modal`. Unpoly checks once, right after booting. If your tests fail on console errors, fix or remove these settings.
+- ⚠️ In a browser controlled by automation software, like Selenium, Playwright or Puppeteer, Unpoly now logs plain text without CSS formatting. Test runners, CI and coding agents that read the browser console get readable lines instead of `%c` placeholders and style strings. Normal browsers still format the log. To always format, set [`up.log.config.format = true`](/api/up.log.config#config.format).
+- Error messages, warnings and [unformatted log output](/api/up.log.config#config.format) now print objects more readably. A plain object prints as `{ foo: "bar" }`, a request as `up.Request(GET /users/5)` and an error as `up.CannotMatch(message)`. A circular reference prints `(circular)` where the cycle closes, instead of replacing the whole value.
+- Fix: When an app's bundler minified `unpoly.js`, errors could lose their names. For example, an `up.CannotMatch` error was named `up.`. Errors now keep their names under any minifier.
 
 
 ### Form submissions now match the browser
@@ -169,6 +180,16 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - ⚠️ When a submit button or a focused field has a `[form]` attribute that points to a form in another layer, submitting now throws an error: "Prevented … from submitting a form in another layer". The browser would submit the other layer's form, e.g. when the same form ID exists in the layer below an overlay that shows the same page. To fix this, keep a form and its `[form]` controls in the same layer, and use form IDs that are unique across layers.
 - ⚠️ A form only reads params from controls in its own layer. Unlike the browser, it ignores controls from other layers that point to the form with a `[form]` attribute, e.g. when an overlay shows the same page as the layer below.
 - Fix: While an overlay was closing, an [`[up-switch]`](/learn/switching-form-state) field in it could show or hide elements in the layer behind it. This happened for a field outside a `<form>`, and for an [`[up-switch-region]`](/api/up-switch#up-switch-region) that also matched in that layer.
+
+
+### A clear order of render steps
+
+A render pass now inserts all new content first, then runs compilers, then updates focus and scroll position, and starts animations last. This order now holds for every placement, and when a render pass updates [multiple fragments](/learn/targeting-fragments#multiple). A compiler can now see the new version of every other fragment updated in the same layer, including [hungry elements](/learn/hungry-elements). See [Compilers see the DOM after the change](/learn/enhancing-elements#dom-after-change).
+
+- ⚠️ Fragments are now inserted and compiled in the order of the target selector, followed by hungry elements. Since [Unpoly 3.0](/changes/3.0.0) they were compiled in reverse order, which the 3.0 notes did not mention until now. `up:fragment:inserted` and `up:fragment:destroyed` are now also emitted in target order. When fragments are swapped without a transition, all their destructors now run before the first compiler, and `up:fragment:destroyed` is emitted after the last compiler.
+- ⚠️ When `:content`, `:before` or `:after` is updated with a transition or animation, focus now moves right away, like when swapping a fragment. It used to move when the animation ended. With `:after` and `{ focus: 'target' }`, Unpoly now focuses the first appended element. It used to focus the container's first child, which could be an existing element.
+- ⚠️ When an error is thrown after new fragments were inserted, e.g. for an invalid `{ focus }` or `{ scroll }` selector, `up.render()` now fulfills and `up.render().finished` rejects. This was already the case when swapping a fragment, but `:before`, `:after` and fully [kept](/learn/keeping-elements) fragments rejected `up.render()`.
+- Fix: When multiple fragments played a transition and the render pass scrolled, only the first old element kept its position on the screen.
 
 
 ### Forms
@@ -211,16 +232,6 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 - Fix: When a compiler requested the URL of a request that had just been aborted or had just finished, it sometimes got the old request from the cache. It now makes a new request.
 
 
-### A clear order of render steps
-
-A render pass now inserts all new content first, then runs compilers, then updates focus and scroll position, and starts animations last. This order now holds for every placement, and when a render pass updates [multiple fragments](/learn/targeting-fragments#multiple). A compiler can now see the new version of every other fragment updated in the same layer, including [hungry elements](/learn/hungry-elements). See [Compilers see the DOM after the change](/learn/enhancing-elements#dom-after-change).
-
-- ⚠️ Fragments are now inserted and compiled in the order of the target selector, followed by hungry elements. Since [Unpoly 3.0](/changes/3.0.0) they were compiled in reverse order, which the 3.0 notes did not mention until now. `up:fragment:inserted` and `up:fragment:destroyed` are now also emitted in target order. When fragments are swapped without a transition, all their destructors now run before the first compiler, and `up:fragment:destroyed` is emitted after the last compiler.
-- ⚠️ When `:content`, `:before` or `:after` is updated with a transition or animation, focus now moves right away, like when swapping a fragment. It used to move when the animation ended. With `:after` and `{ focus: 'target' }`, Unpoly now focuses the first appended element. It used to focus the container's first child, which could be an existing element.
-- ⚠️ When an error is thrown after new fragments were inserted, e.g. for an invalid `{ focus }` or `{ scroll }` selector, `up.render()` now fulfills and `up.render().finished` rejects. This was already the case when swapping a fragment, but `:before`, `:after` and fully [kept](/learn/keeping-elements) fragments rejected `up.render()`.
-- Fix: When multiple fragments played a transition and the render pass scrolled, only the first old element kept its position on the screen.
-
-
 ### Rendering
 
 - Fix: The `{ onFailFinished }` callback and `[up-on-fail-finished]` attribute are now called after an [error response](/learn/error-responses) has finished rendering. They used to never be called.
@@ -252,31 +263,31 @@ A render pass now inserts all new content first, then runs compilers, then updat
 - Fix: Clicking an [`[up-expand]`](/api/up-expand) area around a link with `[data-method]` and `[data-confirm]`, e.g. a Rails delete link in a table row, sent a `GET` request without asking for confirmation. The area now also takes over these attributes from its link, with or without Rails UJS.
 
 
-### Smaller fixes and changes
+### unpoly-migrate.js
 
-- ❌ The [3.14.0 release notes](/changes/3.14.0#callbacks) named the setting for callback nonces `up.script.config.callbackPolicy`. The correct name is [`up.script.config.evalCallbackPolicy`](/api/up.script.config#config.evalCallbackPolicy). If you copied the wrong name, Unpoly ignored your setting and used the default policy `'auto'`. Search your code for `callbackPolicy` and rename it. Renaming makes [your policy](/learn/script-security#callback-policy) take effect. Check that your callbacks still run. `unpoly-migrate.js` now forwards the wrong name and logs a deprecation message. Without `unpoly-migrate.js`, Unpoly now logs an error for the wrong name when it boots, like for any other setting that doesn't exist.
-- ⚠️ When Unpoly boots, it now logs an error for every setting that doesn't exist, like a misspelled key or one that was renamed in an earlier version. Unpoly checks the top-level keys of every `up.*.config` object, but not nested objects like `up.layer.config.modal`. Unpoly checks once, right after booting. If your tests fail on console errors, fix or remove these settings.
-- ⚠️ `unpoly.js` is now compiled using ES2024 (up from ES2021). It needs Chrome 119, Firefox 121 or Safari 17.4, all released by March 2024. The [ES6 build](/learn/legacy-browsers#es6-build) for legacy browsers remains available.
-- ⚠️ A `click` event dispatched by a script is no longer passed to [`up.on()`](/api/up.on) callbacks when the element has a `[disabled]` attribute, even for elements that browsers cannot disable. Before, only a `disabled` property had this effect.
-- The npm package now also includes source maps for the unminified files, like `unpoly.js.map`.
-- `up.template.clone()` with an `{ origin }` now also finds a template in an ancestor layer, as described in [template lookup](/learn/templates#lookup). It used to only look in the origin's layer.
-- Fix: When an app's bundler minified `unpoly.js`, errors could lose their names. For example, an `up.CannotMatch` error was named `up.`. Errors now keep their names under any minifier.
-- Error messages, warnings and [unformatted log output](/api/up.log.config#config.format) now print objects more readably. A plain object prints as `{ foo: "bar" }`, a request as `up.Request(GET /users/5)` and an error as `up.CannotMatch(message)`. A circular reference prints `(circular)` where the cycle closes, instead of replacing the whole value.
-- ⚠️ In a browser controlled by automation software, like Selenium, Playwright or Puppeteer, Unpoly now logs plain text without CSS formatting. Test runners, CI and coding agents that read the browser console get readable lines instead of `%c` placeholders and style strings. Normal browsers still format the log. To always format, set [`up.log.config.format = true`](/api/up.log.config#config.format).
-- Fix: `up.viewport.restoreFocus()` threw an error when called without a `{ layer }` option, or with a layer name like `{ layer: 'root' }`.
-- Fix: `up.viewport.restoreScroll()` ignored its `{ location }` option. It always restored the positions saved for the layer's current location.
-- Fix: `up.fragment.matches()` with `{ layer: 'new', mode }` options expanded a selector like `:main` for the root layer, or threw an error while an overlay was open.
+- ⚠️ [`unpoly-migrate.js`](/changes/upgrading) now logs deprecations as errors, so test suites that fail on console errors find them without extra configuration. To log warnings as before, set `up.migrate.config.logLevel = 'warn'`.
+- `unpoly-migrate.js` warnings about renamed render, request or layer options now name where the option was used, like the origin element or URL. They are printed once for each place, not once per page load.
+- The `unpoly-migrate.js` warning for the deprecated origin shorthand `&` now names the target and the origin element. When the origin is a button or field in a form, it also reminds you that a form submission's `:origin` is now the button or changed field, not the form, and that `form:has(:origin)` targets the form.
+- Fix: `unpoly-migrate.js` logged deprecations that the app never caused when a script enumerated an object with deprecated properties, e.g. an analytics script walking `window.up`, or another deprecation message printing a config object.
 - Fix: The `unpoly-migrate.js` polyfills for `up.popup.attach()`, `up.modal.follow()` and `up.modal.extract()` now open a new overlay again.
 - Fix: The `unpoly-migrate.js` polyfill for `up.network.shouldReduceRequests()` now logs a deprecation message instead of throwing an error.
 - Fix: The `unpoly-migrate.js` polyfill for `up.util.microtask()` threw an error. This bug was introduced in Unpoly 3.8.
 - Fix: `unpoly-migrate.js` ignored renamed layer keys like `closable`, `dismissable`, `closeLabel` or `dismissAriaLabel` when they were set in `up.layer.config`. They are now renamed, like when passed as options.
-- ⚠️ [`unpoly-migrate.js`](/changes/upgrading) now logs deprecations as errors, so test suites that fail on console errors find them without extra configuration. To log warnings as before, set `up.migrate.config.logLevel = 'warn'`.
-- Fix: `unpoly-migrate.js` logged deprecations that the app never caused when a script enumerated an object with deprecated properties, e.g. an analytics script walking `window.up`, or another deprecation message printing a config object.
-- The `unpoly-migrate.js` warning for the deprecated origin shorthand `&` now names the target and the origin element. When the origin is a button or field in a form, it also reminds you that a form submission's `:origin` is now the button or changed field, not the form, and that `form:has(:origin)` targets the form.
-- `unpoly-migrate.js` warnings about renamed render, request or layer options now name where the option was used, like the origin element or URL. They are printed once for each place, not once per page load.
-- Fix: With `unpoly-migrate.js`, a link with only an `[up-href]` attribute is now given `[up-follow]`. Before, `unpoly-migrate.js` and Unpoly could disagree about whether the link was followable. It also no longer warns about a link that another attribute already makes followable, like `<a up-href="/path" up-target=".target">`.
 - Fix: With `unpoly-migrate.js`, old layer attributes like `[up-flavor]`, `[up-closable]` or `[up-history-visible]` are now also translated on forms that open an overlay.
 - Fix: With `unpoly-migrate.js`, a popup position like `'bottom-right'` is now split into `{ position: 'bottom', align: 'right' }` before the overlay opens. Before, [`up.Layer#position`](/api/up.Layer.prototype.position) and the `<up-popup>` attributes showed the combined value.
+- Fix: With `unpoly-migrate.js`, a link with only an `[up-href]` attribute is now given `[up-follow]`. Before, `unpoly-migrate.js` and Unpoly could disagree about whether the link was followable. It also no longer warns about a link that another attribute already makes followable, like `<a up-href="/path" up-target=".target">`.
+
+
+### Smaller fixes and changes
+
+- ❌ The [3.14.0 release notes](/changes/3.14.0#callbacks) named the setting for callback nonces `up.script.config.callbackPolicy`. The correct name is [`up.script.config.evalCallbackPolicy`](/api/up.script.config#config.evalCallbackPolicy). If you copied the wrong name, Unpoly ignored your setting and used the default policy `'auto'`. Search your code for `callbackPolicy` and rename it. Renaming makes [your policy](/learn/script-security#callback-policy) take effect. Check that your callbacks still run. `unpoly-migrate.js` now forwards the wrong name and logs a deprecation message. Without `unpoly-migrate.js`, Unpoly now logs an error for the wrong name when it boots, like for any other setting that doesn't exist.
+- ⚠️ `unpoly.js` is now compiled using ES2024 (up from ES2021). It needs Chrome 119, Firefox 121 or Safari 17.4, all released by March 2024. The [ES6 build](/learn/legacy-browsers#es6-build) for legacy browsers remains available.
+- ⚠️ A `click` event dispatched by a script is no longer passed to [`up.on()`](/api/up.on) callbacks when the element has a `[disabled]` attribute, even for elements that browsers cannot disable. Before, only a `disabled` property had this effect.
+- The npm package now also includes source maps for the unminified files, like `unpoly.js.map`.
+- `up.template.clone()` with an `{ origin }` now also finds a template in an ancestor layer, as described in [template lookup](/learn/templates#lookup). It used to only look in the origin's layer.
+- Fix: `up.viewport.restoreFocus()` threw an error when called without a `{ layer }` option, or with a layer name like `{ layer: 'root' }`.
+- Fix: `up.viewport.restoreScroll()` ignored its `{ location }` option. It always restored the positions saved for the layer's current location.
+- Fix: `up.fragment.matches()` with `{ layer: 'new', mode }` options expanded a selector like `:main` for the root layer, or threw an error while an overlay was open.
 
 
 > [note]
