@@ -100,7 +100,7 @@ up.link = (function() {
     @param {Array<string>} [config.clickableSelectors]
       A list of CSS selectors matching elements that should behave like links or buttons.
 
-      See [Clicking on non-interactive elements](/learn/faux-interactive-elements).
+      See [[faux-interactive-elements]].
 
       @experimental
 
@@ -1228,7 +1228,7 @@ up.link = (function() {
   <span up-follow up-href="/details">Read more</span>
   ```
 
-  See [Acting like a hyperlink](/learn/faux-interactive-elements) for details.
+  See [Acting like a hyperlink](/learn/faux-interactive-elements#acting-like-a-hyperlink) for details.
 
   ## Advanced fragment changes
 
@@ -1359,7 +1359,7 @@ up.link = (function() {
   /*-
   Enlarges the click area of a descendant link.
 
-  @learn-ref links
+  @learn-ref faux-interactive-elements
 
   `[up-expand]` honors all the Unpoly attributes in expanded links, like
   [`[up-target]`](/api/up-follow#up-target), `[up-instant]`, or `[up-preload]`.
@@ -1445,8 +1445,8 @@ up.link = (function() {
 
   @selector [up-expand]
   @params-note
-    All attributes of the descendant link will also be applied to the enlarged
-    click area.
+    The enlarged click area takes over the descendant link's Unpoly attributes,
+    as well as its `[data-method]` and `[data-confirm]` attributes.
   @param [up-expand]
     A CSS selector that defines which containing link should be expanded.
 
