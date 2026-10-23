@@ -291,6 +291,8 @@ It runs no JavaScript, so it also works under a strict [Content Security Policy]
 Unpoly looks for the element in the layer that opened the overlay, and prefers an element near the link.
 When the link also has an `[up-on-accepted]` callback, the callback runs first.
 To reload after the overlay was dismissed, use `[up-on-dismissed-reload]`.
+An overlay with nothing to confirm, like a list where the user adds and removes items, is only ever dismissed.
+See [[closing-overlays#intents]].
 
 Sometimes the response that accepted the overlay already contains the HTML to update
 the element. In that case, render `event.response` instead of making another request:

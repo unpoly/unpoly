@@ -13,10 +13,10 @@ Accepting and dismissing {#intents}
 
 Unpoly distinguishes two intents when an overlay closes:
 
-1. **Accepting** an overlay: the user picked a value, confirmed with *OK*, or completed their task.
-   An overlay can be accepted with a value.
-2. **Dismissing** an overlay: the user clicked *Cancel* or the `×` button, pressed `Escape`,
-   or clicked the backdrop.
+1. **Accepting** an overlay: the overlay closes with a positive outcome. The user confirmed with *OK*,
+   picked a value, or created a record. An overlay can be accepted with a value, but doesn't need one.
+2. **Dismissing** an overlay: the overlay closes with a negative outcome, or none at all. The user cancelled,
+   or simply closed it with the `×` button, the `Escape` key or a click on the backdrop.
 
 <figure>
   <img src="images/close-intent.png" alt="Annotated screenshot of a modal overlay and the ways to close it" width="600">
@@ -32,8 +32,15 @@ all dismiss the overlay, labeled `dismiss()`.
 
 Acceptance usually continues a larger interaction in the parent layer, like
 [selecting a record that was just created](/learn/subinteractions).
-Dismissal usually means cancellation. When you wait for a subtask to finish,
-you are interested in acceptance, but not in dismissal.
+When you wait for a subtask to finish, you are interested in acceptance, but not in dismissal.
+
+Some overlays never have a positive outcome to report. When the user only looks at an overlay,
+or makes changes in it that are saved right away, like adding and removing items in a list,
+there is nothing to confirm. Such an overlay is only ever dismissed.
+To update the parent layer after it closes, react to its dismissal, e.g. with
+[`[up-on-dismissed-reload]`](/api/up-layer-new#up-on-dismissed-reload).
+
+There is no callback for an overlay that closed either way. To react to both intents, handle both.
 
 When an overlay closes, overlays it has opened are closed with it, its pending requests are
 [aborted](/learn/aborting-requests#layers), and [focus returns](/learn/focus#overlays) to the link that opened it.
