@@ -77,8 +77,6 @@ up.network = (function() {
 
       See [Disabling the cache globally](/learn/caching#disabling-globally).
 
-      @experimental
-
     @param {number} [config.cacheSize=70]
       The maximum number of responses to cache.
 

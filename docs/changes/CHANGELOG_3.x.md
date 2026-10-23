@@ -133,7 +133,7 @@ Thanks to @kmmbvnr for contributing form-associated custom elements and `formdat
 
 Some smaller changes in this release remove friction you may have worked around:
 
-- To reload an element after an overlay closes, set [`[up-on-accepted-reload]`](/api/up-layer-new#up-on-accepted-reload) to its selector. You no longer need a JavaScript callback or a CSP nonce. See [Overlays](#overlays).
+- To reload an element after an overlay closes, set the new experimental [`[up-on-accepted-reload]`](/api/up-layer-new#up-on-accepted-reload) attribute to its selector. You no longer need a JavaScript callback or a CSP nonce. See [Overlays](#overlays).
 - [`[up-expand]`](/api/up-expand) now works for links that Unpoly doesn't follow, like a download or a link that opens a new tab. Buttons and labels inside the area now handle their own clicks. See [Links and URLs](#links-and-urls).
 - When Unpoly boots, it logs an error for a misspelled or renamed `up.*.config` setting, instead of ignoring it. See [Smaller fixes and changes](#smaller-fixes-and-changes).
 - Pages with many watched forms no longer freeze for a moment after each fragment update. See [Forms](#forms).
@@ -196,7 +196,7 @@ A form and its fields and buttons now always belong to one [layer](/api/up.layer
 
 ### Overlays
 
-- New [`[up-on-accepted-reload]`](/api/up-layer-new#up-on-accepted-reload) and [`[up-on-dismissed-reload]`](/api/up-layer-new#up-on-dismissed-reload) attributes reload an element in the parent layer after an overlay closes, e.g. `up-on-accepted-reload=".company-list"`. Unlike `up-on-accepted="up.reload('.company-list')"`, they run no JavaScript, so they need no CSP nonce. The matching options [`{ onAcceptedReload }`](/api/up.layer.open#options.onAcceptedReload) and [`{ onDismissedReload }`](/api/up.layer.open#options.onDismissedReload) also work in an [`X-Up-Open-Layer`](/api/X-Up-Open-Layer#callbacks) header. See [Reloading on acceptance](/learn/subinteractions#reloading-on-acceptance).
+- New experimental [`[up-on-accepted-reload]`](/api/up-layer-new#up-on-accepted-reload) and [`[up-on-dismissed-reload]`](/api/up-layer-new#up-on-dismissed-reload) attributes reload an element in the parent layer after an overlay closes, e.g. `up-on-accepted-reload=".company-list"`. Unlike `up-on-accepted="up.reload('.company-list')"`, they run no JavaScript, so they need no CSP nonce. The matching options [`{ onAcceptedReload }`](/api/up.layer.open#options.onAcceptedReload) and [`{ onDismissedReload }`](/api/up.layer.open#options.onDismissedReload) also work in an [`X-Up-Open-Layer`](/api/X-Up-Open-Layer#callbacks) header. See [Reloading on acceptance](/learn/subinteractions#reloading-on-acceptance).
 - New [`[up-on-accept]`](/api/up-layer-new#up-on-accept) and [`[up-on-dismiss]`](/api/up-layer-new#up-on-dismiss) attributes run code before an overlay closes, and can keep it open with `event.preventDefault()`. The matching [`{ onAccept }`](/api/up.layer.open#options.onAccept) and [`{ onDismiss }`](/api/up.layer.open#options.onDismiss) options are now documented.
 - When an overlay that was opened without an `{ origin }` closes, focus now moves to the parent layer, as described in [focus in overlays](/learn/focus#overlays). It used to fall back to the `<body>`.
 - Fix: [`[up-focus-visible]`](/api/up-follow#up-focus-visible) and the `{ focusVisible }` option were ignored when opening an overlay.

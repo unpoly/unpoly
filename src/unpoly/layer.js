@@ -641,6 +641,8 @@ up.layer = (function() {
 
       See [[subinteractions#reloading-on-acceptance]].
 
+      @experimental
+
     @param {Function(Event)} [options.onDismiss]
       A function that is called when the overlay is about to be [dismissed](/learn/closing-overlays).
 
@@ -665,6 +667,8 @@ up.layer = (function() {
       An element near the `{ origin }` is preferred, and the selector may use `:origin`.
 
       When an `{ onDismissed }` callback is also set, it runs first.
+
+      @experimental
 
     @include up.render/lifecycle-hooks
 
@@ -1131,6 +1135,8 @@ up.layer = (function() {
 
       See [[subinteractions#reloading-on-acceptance]].
 
+      @experimental
+
     @param [up-on-dismiss]
       A JavaScript snippet that is called when the overlay is about to be [dismissed](/learn/closing-overlays).
 
@@ -1173,6 +1179,8 @@ up.layer = (function() {
 
       Unlike `[up-on-dismissed]`, this attribute runs no JavaScript, so it needs no [CSP nonce](/learn/script-security#callback-nonces).
       When both attributes are set, the `[up-on-dismissed]` callback runs first.
+
+      @experimental
 
     @mix up-follow/lifecycle-hooks
 
