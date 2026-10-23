@@ -41,7 +41,7 @@ describe('up.Config', function() {
       const errorSpy = spyOn(up.log, 'error')
       object.b = 2
       object.logUnknownKeys()
-      expect(errorSpy).toHaveBeenCalledOnceWith('up.test.config', 'Ignoring unknown setting %s', 'b')
+      expect(errorSpy).toHaveBeenCalledOnceWith('up.test.config', 'Ignoring unknown setting %s. Fix its name or remove it.', 'b')
     })
 
     it('does not log an error for changed default settings', function() {
@@ -84,7 +84,7 @@ describe('up.Config', function() {
 
       await wait()
 
-      expect(errorSpy).toHaveBeenCalledOnceWith('up.test.config', 'Ignoring unknown setting %s', 'b')
+      expect(errorSpy).toHaveBeenCalledOnceWith('up.test.config', 'Ignoring unknown setting %s. Fix its name or remove it.', 'b')
     })
 
     if (up.migrate.loaded) {

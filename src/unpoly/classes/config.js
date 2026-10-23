@@ -26,7 +26,7 @@ up.Config = class Config {
   logUnknownKeys() {
     for (let key of Object.keys(this)) {
       if (!this._knownKeys.includes(key)) {
-        up.log.error(this._label, 'Ignoring unknown setting %s', key)
+        up.log.error(this._label, 'Ignoring unknown setting %s. Fix its name or remove it.', key)
       }
     }
   }
