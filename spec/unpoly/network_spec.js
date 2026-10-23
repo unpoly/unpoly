@@ -425,7 +425,7 @@ describe('up.network', function() {
       })
 
       describe('X-Up-Expire-Cache: false and X-Up-Evict-Cache: false response headers', function() {
-        it('prints a warning, since the server can no longer override the client option', async function() {
+        it('prints a warning, since the server can no longer prevent expiration or eviction', async function() {
           const warnSpy = up.migrate.warn.mock()
           up.request('/path')
           await wait()
@@ -433,8 +433,8 @@ describe('up.network', function() {
           jasmine.respondWith({ responseText: 'text', responseHeaders: { 'X-Up-Expire-Cache': 'false', 'X-Up-Evict-Cache': 'false' } })
           await wait()
 
-          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('X-Up-Expire-Cache: false'))
-          expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('X-Up-Evict-Cache: false'))
+          expect(warnSpy).toHaveBeenCalledWith('The server can no longer prevent cache expiration with an `X-Up-Expire-Cache: false` response header. The header has no effect and can be removed.')
+          expect(warnSpy).toHaveBeenCalledWith('The server can no longer prevent cache eviction with an `X-Up-Evict-Cache: false` response header. The header has no effect and can be removed.')
         })
       })
     }
