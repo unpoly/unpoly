@@ -127,7 +127,6 @@ The overlay's buttons [accept or dismiss it](/learn/closing-overlays). When the 
 renders with the original options from `event.renderOptions`, which follows the link or submits the form.
 
 For a form, `event.renderOptions` also remembers which button was pressed, so the form is submitted with its name and value.
-To only ask for one of several submit buttons, put the attribute on the button and read it from `event.submitButton`.
 
 The message is passed through `up.util.escapeHTML()`, so a message with characters like `<` cannot inject HTML.
 To keep the dialog's HTML out of your JavaScript, you can also pass a [template](/learn/templates) selector as `{ content }`.
