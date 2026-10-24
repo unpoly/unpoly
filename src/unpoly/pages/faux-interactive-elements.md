@@ -20,7 +20,7 @@ to make a click anywhere in the row follow that link:
 </tr>
 ```
 
-A click on the email address now follows the link to `/users/5`, as if the user had clicked *Alice*.
+A click on the email address does what a click on *Alice* does. It follows the link to `/users/5`.
 
 HTML doesn't let you wrap a `<tr>` in an `<a>` element, so `[up-expand]` is the way to make a whole row clickable.
 For a card, you can also wrap the whole card in an `<a>` element.
@@ -45,11 +45,10 @@ set `[up-expand]` to a selector for the one to follow:
 A click on *Acme Inc.* follows that link. A click anywhere else in the row follows *Alice*.
 
 
-### Downloads and new tabs
+### Links that Unpoly doesn't follow
 
-When the link [opts out of Unpoly](/api/up.link.config#config.noFollowSelectors), e.g. because it has a `[download]`,
-`[target]` or `[up-follow=false]` attribute, a click on the area clicks the link.
-The browser then does what the link does, like downloading a file or opening a new tab:
+When Unpoly doesn't follow the link, a click on the area clicks the link.
+A plain link makes a full page load, a `[download]` link downloads its file, and a `[target=_blank]` link opens a new tab:
 
 ```html
 <tr up-expand>
@@ -60,14 +59,12 @@ The browser then does what the link does, like downloading a file or opening a n
 
 A click on the amount downloads the PDF.
 
-Any other link is followed by Unpoly, even a plain link without `[up-follow]`.
-Give the link an `[up-follow]` attribute anyway, so that a click on the link itself also updates a fragment,
-unless you [follow all links](/learn/handling-all-links).
+To update a fragment instead, give the link an `[up-follow]` attribute, or [follow all links](/learn/handling-all-links).
 
 
 ### The area takes over the link's attributes
 
-The area copies the link's Unpoly attributes, so a click on the area does exactly what a click on the link does:
+When Unpoly follows the link, the area takes over the link's Unpoly attributes:
 
 ```html
 <tr up-expand>
@@ -77,9 +74,11 @@ The area copies the link's Unpoly attributes, so a click on the area does exactl
 ```
 
 A click anywhere in this row opens Alice in an [overlay](/learn/overlays), and hovering over the row [preloads](/learn/preloading) her page.
+Attributes that your own [macros](/api/up.macro) set on the link are taken over as well.
 
-The area also takes over the `[data-method]` and `[data-confirm]` attributes that Rails uses, e.g. for a delete link
-that asks for confirmation. Attributes that your own [macros](/api/up.macro) set on the link are copied as well.
+A click on the area follows the link itself. Events like `up:link:follow` are emitted on the link,
+and the link is the [origin](/learn/targeting-fragments#referring-to-the-origin-element) of the fragment update.
+The link's `[data-method]` and `[data-confirm]` attributes from Rails also apply, e.g. for a delete link that asks for confirmation.
 
 
 Acting like a hyperlink
@@ -251,3 +250,4 @@ would announce the same destination twice.
 
 
 @page faux-interactive-elements
+@menu-title Custom links and buttons
