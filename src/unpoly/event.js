@@ -419,11 +419,19 @@ up.event = (function() {
   }
 
   /*-
+  Returns whether the given click was made by JavaScript, e.g. with `element.click()` or `dispatchEvent()`.
+
+  Clicks from a real mouse, touch or keyboard are trusted by the browser.
+  A click made by code has no meaningful coordinates and no preceding `mousedown`,
+  so `up.link.convertClicks()` skips its checks against mouse effects for such clicks.
+
   @function up.event.isSyntheticClick
+  @param {Event} event
+  @return {boolean}
   @internal
   */
   function isSyntheticClick(event) {
-    return u.isMissing(event.clientX)
+    return !event.isTrusted
   }
 
   function fork(originalEvent, newType, copyKeys = []) {

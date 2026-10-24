@@ -16,6 +16,7 @@ extendDescribe('up.link', function() {
       //   N    The browser follows the outer link natively (or the expanded link, for an [up-expand] area)
       //   I    The nested element handles the click, e.g. a checkbox toggles or a nested link is followed
       //   IN   The nested element handles the click, and the browser also follows the outer link
+      //   E    The expanded link emits its [up-emit] event
       //   0    Nothing happens
       //   -    Does not apply
       //
@@ -29,6 +30,7 @@ extendDescribe('up.link', function() {
         area with method+confirm    | F    F    0     I        I          I      I      I        0    0      I           I  I         I
         area with link not followed | N    N    0     I        I          I      I      I        0    0      I           I  I         I
         area with plain link        | N    N    0     I        I          I      I      I        0    0      I           I  I         I
+        area with emitting link     | E    E    0     I        I          I      I      I        0    0      I           I  I         I
         div[up-href]                | F    F    0     I        I          I      I      I        0    0      I           I  I         I
         instant link                | F    F    F     F        F          F      F      I        N    N      I           -  I         F
         instant area                | F    F    0     I        I          I      I      I        0    0      I           I  I         I
@@ -73,6 +75,16 @@ extendDescribe('up.link', function() {
           // Unpoly doesn't follow a plain link without [up-follow], so a click on the area clicks the link.
           description: 'an [up-expand] area whose link has no [up-follow]',
           html: (inner) => `<div id="outer" up-expand><a href="/outer">Outer</a> ${inner}</div>`,
+        },
+        'area with emitting link': {
+          // Unpoly handles the link's click without following it. A click on the area clicks the link.
+          description: 'an [up-expand] area whose link has [up-emit]',
+          html: (inner) => `<div id="outer" up-expand><a href="#" up-emit="outer:clicked">Outer</a> ${inner}</div>`,
+          listenForEmit() {
+            const listener = jasmine.createSpy('outer:clicked listener')
+            up.on('outer:clicked', listener)
+            return () => listener.calls.count()
+          },
         },
         'div[up-href]': {
           description: 'a <div up-follow up-href>',
@@ -184,11 +196,12 @@ extendDescribe('up.link', function() {
         'N': 'lets the browser follow the link',
         'I': 'lets the nested element handle the click',
         'IN': 'lets the nested element handle the click, and the browser follow the link',
+        'E': 'emits the event of the expanded link',
         '0': 'does nothing',
       }
 
       // Tells what happened after the click, as a cell value.
-      function observe(row, handled) {
+      function observe(row, handled, emitCount) {
         let outcome = ''
 
         let followRequest = jasmine.Ajax.requests.filter((request) => new URL(request.url, location.href).pathname === '/outer')[0]
@@ -199,6 +212,12 @@ extendDescribe('up.link', function() {
 
         if (handled()) {
           outcome += 'I'
+        }
+
+        if (emitCount?.()) {
+          // The link must not emit its event twice.
+          expect(emitCount()).toBe(1)
+          outcome += 'E'
         }
 
         let nativelyFollowed = window.defaultFollowedLinks.filter((link) => link.getAttribute('href') === '/outer')
@@ -240,11 +259,12 @@ extendDescribe('up.link', function() {
 
               let target = document.querySelector(column.target || '#inner')
               let handled = column.setup ? column.setup(target) : (column.handled || (() => false))
+              let emitCount = row.listenForEmit?.()
 
               Trigger.clickSequence(target)
               await wait()
 
-              expect(observe(row, handled)).toBe(expected)
+              expect(observe(row, handled, emitCount)).toBe(expected)
             })
           })
 

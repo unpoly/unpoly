@@ -2083,7 +2083,7 @@ describe('up.link', function() {
               Trigger.clickSequence(area)
 
               // The link is clicked synchronously within the user's click, so popup blockers allow it.
-              expect(link.click).toHaveBeenCalled()
+              expect(link.click).toHaveBeenCalledTimes(1)
               expect(link).toHaveBeenDefaultFollowed()
 
               await wait()
@@ -2175,6 +2175,111 @@ describe('up.link', function() {
 
           expect(area).not.toHaveAttribute('up-preload')
           expect(jasmine.Ajax.requests.count()).toBe(0)
+        })
+
+      })
+
+      describe('when Unpoly handles the expanded link without following it', function() {
+
+        it('emits the [up-emit] event once when the user clicks the area outside the link', async function() {
+          const [area, link, cell] = htmlFixtureList(`
+            <div up-expand>
+              <a href="#" up-emit="provider:selected">Provider</a>
+              <span>Address</span>
+            </div>
+          `)
+          up.hello(area)
+          const listener = jasmine.createSpy('provider:selected listener')
+          up.on('provider:selected', listener)
+
+          Trigger.clickSequence(cell)
+          await wait()
+
+          expect(listener.calls.count()).toBe(1)
+        })
+
+        it('emits the [up-emit] event once when the area is within a popup overlay', async function() {
+          const [anchor] = htmlFixtureList('<span>anchor</span>')
+          await up.layer.open({ mode: 'popup', origin: anchor, fragment: `
+            <div id="popup-content" up-expand>
+              <a href="#" up-emit="provider:selected">Provider</a>
+              <span id="cell">Address</span>
+            </div>
+          ` })
+          const listener = jasmine.createSpy('provider:selected listener')
+          up.on('provider:selected', listener)
+
+          Trigger.clickSequence('#cell')
+          await wait()
+
+          expect(listener.calls.count()).toBe(1)
+        })
+
+        it('emits up:click once on an [up-clickable] element', async function() {
+          const [area, button, cell] = htmlFixtureList(`
+            <div up-expand="[up-clickable]">
+              <span up-clickable>Choose</span>
+              <span>Text</span>
+            </div>
+          `)
+          up.hello(area)
+          const listener = jasmine.createSpy('up:click listener')
+          button.addEventListener('up:click', listener)
+
+          Trigger.clickSequence(cell)
+          await wait()
+
+          expect(listener.calls.count()).toBe(1)
+        })
+
+        it('accepts the overlay when the link has [up-accept]', async function() {
+          const acceptedListener = jasmine.createSpy('onAccepted listener')
+          await up.layer.open({ mode: 'modal', onAccepted: acceptedListener, fragment: `
+            <div id="modal-content" up-expand>
+              <a href="#" up-accept='{ "id": 5 }'>Choose</a>
+              <span id="cell">Text</span>
+            </div>
+          ` })
+
+          Trigger.clickSequence('#cell')
+          await wait()
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(acceptedListener.calls.count()).toBe(1)
+          expect(acceptedListener.calls.argsFor(0)[0].value).toEqual({ id: 5 })
+        })
+
+        it('dismisses the overlay when the link has [up-dismiss]', async function() {
+          const dismissedListener = jasmine.createSpy('onDismissed listener')
+          await up.layer.open({ mode: 'modal', onDismissed: dismissedListener, fragment: `
+            <div id="modal-content" up-expand>
+              <a href="#" up-dismiss>Cancel</a>
+              <span id="cell">Text</span>
+            </div>
+          ` })
+
+          Trigger.clickSequence('#cell')
+          await wait()
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(dismissedListener.calls.count()).toBe(1)
+        })
+
+        it('dismisses a popup overlay when the link has [up-dismiss]', async function() {
+          const [anchor] = htmlFixtureList('<span>anchor</span>')
+          const dismissedListener = jasmine.createSpy('onDismissed listener')
+          await up.layer.open({ mode: 'popup', origin: anchor, onDismissed: dismissedListener, fragment: `
+            <div id="popup-content" up-expand>
+              <a href="#" up-dismiss>Cancel</a>
+              <span id="cell">Text</span>
+            </div>
+          ` })
+
+          Trigger.clickSequence('#cell')
+          await wait()
+
+          expect(up.layer.isRoot()).toBe(true)
+          expect(dismissedListener.calls.count()).toBe(1)
         })
 
       })
@@ -2404,6 +2509,44 @@ describe('up.link', function() {
           Trigger.click(link)
           expect(listener).toHaveBeenCalled()
           expect(listener.calls.argsFor(0)[0].defaultPrevented).toBe(true)
+        })
+
+        describe('when the click is made by JavaScript', function() {
+
+          it('emits an up:click event and follows the link within a popup overlay', async function() {
+            const [anchor] = htmlFixtureList('<span>anchor</span>')
+            await up.layer.open({ mode: 'popup', origin: anchor, fragment: `
+              <div id="popup-content">
+                <a href="/path" up-follow>label</a>
+              </div>
+            ` })
+            const link = up.fragment.get('#popup-content a')
+            const listener = jasmine.createSpy('up:click listener')
+            link.addEventListener('up:click', listener)
+
+            link.click()
+            await wait()
+
+            expect(listener.calls.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/path')
+          })
+
+          it("emits an up:click event when the link is clicked by another element's click handler", async function() {
+            const [button, link] = htmlFixtureList(`
+              <span id="button">button</span>
+              <a href="/path" up-follow>label</a>
+            `)
+            button.addEventListener('click', () => link.click())
+            const listener = jasmine.createSpy('up:click listener')
+            link.addEventListener('up:click', listener)
+
+            Trigger.clickSequence(button)
+            await wait()
+
+            expect(listener.calls.count()).toBe(1)
+            expect(jasmine.lastRequest().url).toMatchURL('/path')
+          })
+
         })
       })
 

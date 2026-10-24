@@ -836,10 +836,12 @@ up.link = (function() {
       if (isInstant(element) && lastInstantTarget === element) {
         up.event.halt(event)
 
-      // In case mousedown has created a layer over the click coordinates,
-      // Chrome will emit an event with { target: document.body } on click.
-      // Ignore that event and only process if we would still hit the
-      // expect layers at the click coordinates.
+      // (1) In case mousedown has created a layer over the click coordinates,
+      //     Chrome will emit an event with { target: document.body } on click.
+      //     Ignore that event and only process if we would still hit the
+      //     expect layers at the click coordinates.
+      // (2) A click made by JavaScript, e.g. element.click(), has no meaningful coordinates and
+      //     may run while another click is being handled. We skip the mouse checks for such clicks.
       } else if (up.event.inputDevice === 'key' || up.event.isSyntheticClick(event) || (layer.wasHitByMouseEvent(event) && !didUserDragAway(event))) {
         // Event is a `PointerEvent` with an { pointerType } property.
         // Its values are 'mouse', 'pen', 'touch' or '' (unknown, meaning synthetic or keyboard).

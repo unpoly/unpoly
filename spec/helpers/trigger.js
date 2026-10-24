@@ -2,6 +2,13 @@ const u = up.util
 const e = up.element
 const $ = jQuery
 
+// Specs cannot dispatch trusted events. We keep the original check for clicks made by
+// element.click(), but treat events from Trigger like clicks from a real mouse.
+beforeEach(function() {
+  const isSyntheticClick = up.event.isSyntheticClick
+  spyOn(up.event, 'isSyntheticClick').and.callFake((event) => isSyntheticClick(event) && !event.simulatesUser)
+})
+
 window.Trigger = (function() {
 
   function mouseover(element, options) {
@@ -344,13 +351,19 @@ window.Trigger = (function() {
 
   function createMouseEvent(type, options = {}) {
     options = buildMouseEventOptions(type, options)
-    return new MouseEvent(type, options)
+    return simulateUser(new MouseEvent(type, options))
   }
 
   function createPointerEvent(type, options = {}) {
     const pointerEventDefault = { pointerType: "mouse", isPrimary: true }
     options = buildMouseEventOptions(type, { ...pointerEventDefault, ...options })
-    return new PointerEvent(type, options)
+    return simulateUser(new PointerEvent(type, options))
+  }
+
+  // Marks an event so Unpoly processes it like an event from a real mouse (see the beforeEach() above).
+  function simulateUser(event) {
+    event.simulatesUser = true
+    return event
   }
 
   function createKeyboardEvent(type, options) {
