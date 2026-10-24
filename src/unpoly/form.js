@@ -1633,7 +1633,7 @@ up.form = (function() {
       @param up-target
         The [target selector](/learn/targeting-fragments) to update for a successful form submission.
 
-      @param up-fail-target
+      @param [up-fail-target=form]
         The [target selector](/learn/targeting-fragments) to update when the server responds with an error code.
 
         By default, error responses will update the `<form>` element itself.
