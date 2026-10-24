@@ -1,5 +1,5 @@
-3.15.0-rc7
-----------
+3.15.0
+------
 
 A lot has changed for everyone who builds software since our last release. Many of us now write code together with AI agents.
 
@@ -45,6 +45,13 @@ Agents can also read the docs without the skill:
 - Every page is also available as Markdown. Append `.md` to its URL, e.g. [`https://unpoly.com/api/up.render.md`](https://unpoly.com/api/up.render.md). Agents that ask for `text/markdown` first in their `Accept` header get Markdown at the page's own URL.
 - [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules, with links an agent can follow.
 - To give a chat a single page, use the copy button next to a page's title. It copies the page as Markdown.
+
+
+### Upgrades without human help
+
+Coding agents can now upgrade Unpoly without human help. Give your agent the [Unpoly skill](/learn/skill) and ask it to upgrade your app. The skill contains the [upgrade guide](/changes/upgrading) and the release notes of every version.
+
+To make sure this runs smoothly, we improved the release notes and `unpoly-migrate.js`, so your agent finds the changes your app needs. See [unpoly-migrate.js](#unpoly-migratejs) for the details.
 
 
 ### A guide for contributors
@@ -133,7 +140,7 @@ Thanks to @kmmbvnr for contributing form-associated custom elements and `formdat
 Some smaller changes in this release remove friction you may have worked around:
 
 - To reload an element after an overlay closes, set the new experimental [`[up-on-accepted-reload]`](/api/up-layer-new#up-on-accepted-reload) attribute to its selector. You no longer need a JavaScript callback or a CSP nonce. See [Overlays](#overlays).
-- [`[up-expand]`](/api/up-expand) now works for links that Unpoly doesn't follow, like a download or a link that opens a new tab. Buttons and labels inside the area now handle their own clicks. See [Links and URLs](#links-and-urls).
+- A click on an [`[up-expand]`](/api/up-expand) area now does what a click on its link does, also for downloads and links that open a new tab. Buttons and labels inside the area now handle their own clicks. See [Links and URLs](#links-and-urls).
 - When Unpoly boots, it logs an error for a misspelled or renamed `up.*.config` setting, instead of ignoring it. See [Mistakes are easier to find](#mistakes-are-easier-to-find).
 - Pages with many watched forms no longer freeze for a moment after each fragment update. See [Forms](#forms).
 - Test runners, CI and coding agents now read Unpoly's log as plain text. See [Mistakes are easier to find](#mistakes-are-easier-to-find).
@@ -190,6 +197,17 @@ A render pass now inserts all new content first, then runs compilers, then updat
 - ⚠️ When `:content`, `:before` or `:after` is updated with a transition or animation, focus now moves right away, like when swapping a fragment. It used to move when the animation ended. With `:after` and `{ focus: 'target' }`, Unpoly now focuses the first appended element. It used to focus the container's first child, which could be an existing element.
 - ⚠️ When an error is thrown after new fragments were inserted, e.g. for an invalid `{ focus }` or `{ scroll }` selector, `up.render()` now fulfills and `up.render().finished` rejects. This was already the case when swapping a fragment, but `:before`, `:after` and fully [kept](/learn/keeping-elements) fragments rejected `up.render()`.
 - Fix: When multiple fragments played a transition and the render pass scrolled, only the first old element kept its position on the screen.
+
+
+### Security note for apps on Unpoly 3.14
+
+The 3.14.0 release notes named the setting for callback nonces `up.script.config.callbackPolicy`. The correct name is [`up.script.config.evalCallbackPolicy`](/api/up.script.config#config.evalCallbackPolicy). The error was only in the release notes. The API reference and the guides always used the correct name.
+
+If you copied the wrong name, Unpoly ignored your setting and used its default policy. Without a `<meta name="csp-nonce">` tag, the default policy runs callbacks without checking their nonces. Your Content Security Policy then decides what runs. Injected HTML can run code through Unpoly callbacks if your CSP allows `'unsafe-eval'`, if it uses `'strict-dynamic'` (which trusts every script that Unpoly inserts), or if you have no CSP.
+
+To fix this, rename the setting to `evalCallbackPolicy`, then check that your callbacks still run. You don't need to upgrade to 3.15 for this.
+
+Starting with 3.15, Unpoly logs an error when it boots for every setting that doesn't exist, so a misspelled or renamed setting no longer goes unnoticed. See [Mistakes are easier to find](#mistakes-are-easier-to-find).
 
 
 ### Forms
@@ -256,11 +274,10 @@ A render pass now inserts all new content first, then runs compilers, then updat
 - Fix: Pressing the Space key didn't activate a [faux button](/learn/faux-interactive-elements), e.g. an element with [`[up-emit]`](/api/up-emit) or [`[up-clickable]`](/api/up-clickable). Only the Enter key worked, although Space was meant to work for buttons too.
 - Fix: When the user pressed the mouse button on a [preloading](/learn/preloading) link while its preload request was still loading after hovering, Unpoly aborted the request and sent the same request again. This bug was introduced in Unpoly 3.8.
 - Fix: When the user clicked a [preloading](/learn/preloading) link while its preload request was still loading, a newer render pass for the same fragment could not [abort](/learn/aborting-requests) the click. Once the preload responded, the click rendered the old response over the newer content, and aborted the newer render pass. The click can now be aborted like any other request, while the preload keeps loading for the cache.
-- Fix: When [`[up-expand]`](/api/up-expand) enlarged a link that Unpoly doesn't follow, like a link with `[download]`, `[target]` or `[up-follow=false]`, Unpoly followed it anyway when the area was clicked. A download was fetched in the background instead of saved, and `[target=_blank]` didn't open a new tab. Clicking the area now clicks the link, so the browser does what the link does.
+- ⚠️ A click on an [`[up-expand]`](/api/up-expand) area now does what a click on its link does. When Unpoly follows the link, it now follows the link itself, not the area: events like `up:link:follow` are emitted on the link, the link is the [origin](/api/origin), and its `[data-method]` and `[data-confirm]` attributes apply. When Unpoly doesn't follow the link, the area clicks it, and the browser does what the link does: a `[download]` link downloads its file, a `[target=_blank]` link opens a new tab, and a link without `[up-follow]` makes a full page load. To keep updating a fragment, give the link an `[up-follow]` attribute or [follow all links](/learn/handling-all-links).
 - Fix: Clicking a button, a `<label>` or a `<summary>` inside an [`[up-expand]`](/api/up-expand) area, or inside another followable element that isn't a link, followed the link. A submit button didn't submit its form, a label didn't toggle its checkbox, and a `<details>` element didn't open. These elements now handle their own clicks, like links and fields already did. Inside an `<a>` element, buttons and labels still belong to the link.
 - Fix: Clicking a form field inside an [`[up-instant]`](/api/up-instant) link did nothing. Unpoly didn't follow the link, but also prevented the click, so a checkbox didn't toggle. The same happened for fields, buttons and labels inside an `[up-instant]` area, e.g. an [`[up-expand]`](/api/up-expand) area that copied `[up-instant]` from its link. These elements now handle their own clicks.
 - Fix: An [`[up-instant]`](/api/up-instant) link did nothing when another script prevented its `mousedown` event, e.g. to keep the focus in a search field. Unpoly now follows such a link on `click`, and emits [`up:click`](/api/up:click) on `click` instead of `mousedown`.
-- Fix: Clicking an [`[up-expand]`](/api/up-expand) area around a link with `[data-method]` and `[data-confirm]`, e.g. a Rails delete link in a table row, sent a `GET` request without asking for confirmation. The area now also takes over these attributes from its link, with or without Rails UJS.
 
 
 ### unpoly-migrate.js
@@ -280,7 +297,7 @@ A render pass now inserts all new content first, then runs compilers, then updat
 
 ### Smaller fixes and changes
 
-- ❌ The [3.14.0 release notes](/changes/3.14.0#callbacks) named the setting for callback nonces `up.script.config.callbackPolicy`. The correct name is [`up.script.config.evalCallbackPolicy`](/api/up.script.config#config.evalCallbackPolicy). If you copied the wrong name, Unpoly ignored your setting and used the default policy `'auto'`. Search your code for `callbackPolicy` and rename it. Renaming makes [your policy](/learn/script-security#callback-policy) take effect. Check that your callbacks still run. `unpoly-migrate.js` now forwards the wrong name and logs a deprecation message. Without `unpoly-migrate.js`, Unpoly now logs an error for the wrong name when it boots, like for any other setting that doesn't exist.
+- ❌ The [3.14.0 release notes](/changes/3.14.0#callbacks) named the setting for callback nonces `up.script.config.callbackPolicy`. The correct name is [`up.script.config.evalCallbackPolicy`](/api/up.script.config#config.evalCallbackPolicy). If you copied the wrong name, Unpoly ignored your setting and used the default policy `'auto'`. Search your code for `callbackPolicy` and rename it. Renaming makes [your policy](/learn/script-security#callback-policy) take effect. Check that your callbacks still run. `unpoly-migrate.js` now forwards the wrong name and logs a deprecation message. Without `unpoly-migrate.js`, Unpoly now logs an error for the wrong name when it boots, like for any other setting that doesn't exist. See the [security note](#security-note-for-apps-on-unpoly-314).
 - ⚠️ `unpoly.js` is now compiled using ES2024 (up from ES2021). It needs Chrome 119, Firefox 121 or Safari 17.4, all released by March 2024. The [ES6 build](/learn/legacy-browsers#es6-build) for legacy browsers remains available.
 - ⚠️ A `click` event dispatched by a script is no longer passed to [`up.on()`](/api/up.on) callbacks when the element has a `[disabled]` attribute, even for elements that browsers cannot disable. Before, only a `disabled` property had this effect.
 - The npm package now also includes source maps for the unminified files, like `unpoly.js.map`.
@@ -3341,7 +3358,7 @@ Unpoly 3 makes it easier to work with [element data](/learn/data):
     console.log(meta.revalidating)                // result: true
   })
   ```
-- ⚠️ When a render pass updates multiple fragments, Unpoly now swaps and compiles them in reverse order of the target. A compiler in a later target runs before earlier targets are updated, so it sees their old content. *(Documented and changed again in 3.15.)*
+- ⚠️ When a render pass updates multiple fragments, Unpoly now swaps and compiles them in reverse order of the target. A compiler in a later target runs before earlier targets are updated, so it sees their old content. *(Documented and changed again in [3.15](/changes/3.15.0).)*
 
 #### Various changes
 
