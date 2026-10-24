@@ -43,3 +43,9 @@ up-drawer-backdrop
   .jasmine-banner
     margin: 0
     padding: 8px 4px
+
+  // The summary grows by a row of symbols for every ~80 specs. Since #fixtures is appended below the reporter,
+  // an unbounded summary would eventually push fixtures below the fold, failing specs that click or reveal them.
+  .jasmine-symbol-summary
+    max-height: 100px
+    overflow-y: auto
