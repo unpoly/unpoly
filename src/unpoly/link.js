@@ -1496,9 +1496,10 @@ up.link = (function() {
   up.on('up:click', '[up-expand]', function(event, area) {
     let childLink = area.upExpandedPair?.[1]
     // (1) A followable area is followed by the [up-follow] handler.
-    // (2) We ignore clicks on nested links, fields, buttons or labels, including the expanded link itself.
-    //     This also prevents a loop if childLink.click() emits up:click on the link.
-    if (childLink && !isFollowable(area) && shouldHandleClick(event, area)) {
+    // (2) A click within the expanded element belongs to that element. This includes the up:click that
+    //     childLink.click() emits below, so the area never handles its own forwarded click.
+    // (3) We ignore clicks on other links, fields, buttons or labels in the area.
+    if (childLink && !isFollowable(area) && !childLink.contains(event.target) && shouldHandleClick(event, area)) {
       up.event.halt(event)
       // The browser runs the link's default action within the user's click,
       // so popup blockers allow a link with [target=_blank].

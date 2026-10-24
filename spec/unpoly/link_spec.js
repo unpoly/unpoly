@@ -2232,6 +2232,84 @@ describe('up.link', function() {
           expect(listener.calls.count()).toBe(1)
         })
 
+        it('lets a delegated up:click listener handle an expanded [up-clickable] element when the user clicks the area outside the element', async function() {
+          const [area, button, cell] = htmlFixtureList(`
+            <div up-expand="[up-clickable]">
+              <span up-clickable>Choose</span>
+              <span>Text</span>
+            </div>
+          `)
+          up.hello(area)
+          spyOn(button, 'click').and.callThrough()
+          const elementListener = jasmine.createSpy('up:click listener on element')
+          button.addEventListener('up:click', elementListener)
+          const delegatedListener = jasmine.createSpy('delegated up:click listener')
+          up.on('up:click', '[up-clickable]', delegatedListener)
+
+          Trigger.clickSequence(cell)
+          await wait()
+
+          expect(button.click).toHaveBeenCalledTimes(1)
+          expect(elementListener.calls.count()).toBe(1)
+          expect(delegatedListener.calls.count()).toBe(1)
+        })
+
+        it('lets a delegated up:click listener handle an expanded [up-clickable] element when the user clicks the element', async function() {
+          const [area, button] = htmlFixtureList(`
+            <div up-expand="[up-clickable]">
+              <span up-clickable>Choose</span>
+              <span>Text</span>
+            </div>
+          `)
+          up.hello(area)
+          spyOn(button, 'click').and.callThrough()
+          const elementListener = jasmine.createSpy('up:click listener on element')
+          button.addEventListener('up:click', elementListener)
+          const delegatedListener = jasmine.createSpy('delegated up:click listener')
+          up.on('up:click', '[up-clickable]', delegatedListener)
+
+          Trigger.clickSequence(button)
+          await wait()
+
+          expect(button.click).not.toHaveBeenCalled()
+          expect(elementListener.calls.count()).toBe(1)
+          expect(delegatedListener.calls.count()).toBe(1)
+        })
+
+        it('emits the [up-emit] event of an expanded non-link element once when the user clicks the area outside the element', async function() {
+          const [area, element, cell] = htmlFixtureList(`
+            <div up-expand="[up-emit]">
+              <span up-emit="provider:selected">Provider</span>
+              <span>Address</span>
+            </div>
+          `)
+          up.hello(area)
+          const listener = jasmine.createSpy('provider:selected listener')
+          up.on('provider:selected', listener)
+
+          Trigger.clickSequence(cell)
+          await wait()
+
+          expect(listener.calls.count()).toBe(1)
+        })
+
+        it('emits the [up-emit] event of an expanded non-link element once when the user clicks the element', async function() {
+          const [area, element] = htmlFixtureList(`
+            <div up-expand="[up-emit]">
+              <span up-emit="provider:selected">Provider</span>
+              <span>Address</span>
+            </div>
+          `)
+          up.hello(area)
+          const listener = jasmine.createSpy('provider:selected listener')
+          up.on('provider:selected', listener)
+
+          Trigger.clickSequence(element)
+          await wait()
+
+          expect(listener.calls.count()).toBe(1)
+        })
+
         it('accepts the overlay when the link has [up-accept]', async function() {
           const acceptedListener = jasmine.createSpy('onAccepted listener')
           await up.layer.open({ mode: 'modal', onAccepted: acceptedListener, fragment: `
