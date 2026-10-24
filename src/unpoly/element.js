@@ -941,7 +941,9 @@ up.element = (function() {
   }
 
   function setMissingAttr(element, key, value) {
-    if (u.isMissing(element.getAttribute(key))) {
+    // (1) We skip a null or undefined value, e.g. from the attribute of another element that doesn't have it.
+    // (2) We set false as "false". Some callers set [up-etag=false] on purpose.
+    if (u.isGiven(value) && u.isMissing(element.getAttribute(key))) {
       element.setAttribute(key, value)
     }
   }

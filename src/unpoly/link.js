@@ -327,7 +327,7 @@ up.link = (function() {
   */
   function followOptions(link, options, parserOptions) {
     // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-    link = up.fragment.get(link)
+    link = effectiveLink(up.fragment.get(link))
     options = u.options(options)
 
     const parser = new up.OptionsParser(link, options, { fail: true, ...parserOptions })
@@ -518,7 +518,7 @@ up.link = (function() {
   */
   function preload(link, options) {
     // If passed a selector, up.fragment.get() will match in the current layer.
-    link = up.fragment.get(link)
+    link = effectiveLink(up.fragment.get(link))
 
     let issue = preloadIssue(link)
     if (issue) {
@@ -544,6 +544,13 @@ up.link = (function() {
       guardEvent,
       preload: true, // hint to up.Change.FromURL to stop execution after sending the request
     })
+  }
+
+  // A click on an [up-expand] area follows its link.
+  // Returns that link for an area, and the given element otherwise.
+  function effectiveLink(element) {
+    let link = element.upExpandedPair?.[1]
+    return element.contains(link) ? link : element
   }
 
   function preloadIssue(link) {
@@ -1358,18 +1365,21 @@ up.link = (function() {
 
   /*-
   Enlarges the click area of a descendant link.
+  A click anywhere in the area does what a click on its link does.
 
   @learn-ref faux-interactive-elements
 
-  `[up-expand]` honors all the Unpoly attributes in expanded links, like
+  When Unpoly follows the link, the area takes over the link's Unpoly attributes, like
   [`[up-target]`](/api/up-follow#up-target), `[up-instant]`, or `[up-preload]`.
+  A click on the area then follows the link itself. Events like `up:link:follow` are emitted on the link,
+  and the link is the [origin](/learn/targeting-fragments#referring-to-the-origin-element) of the fragment update.
 
   ## Example
 
   ```html
   <div class="notification" up-expand>
     Record was saved!
-    <a href="/records">Close</a>
+    <a href="/records" up-follow>Close</a>
   </div>
   ```
 
@@ -1387,18 +1397,18 @@ up.link = (function() {
   ```html
   <div class="notification" up-expand="#close"> <!-- mark: #close -->
     Record was saved!
-    <a id="details" href="/records/5">Details</a>
-    <a id="close" href="/records">Close</a> <!-- mark: id="close" -->
+    <a id="details" href="/records/5" up-follow>Details</a>
+    <a id="close" href="/records" up-follow>Close</a> <!-- mark: id="close" -->
   </div>
   ```
 
   ## Links that Unpoly doesn't follow
 
-  When the expanded link [opts out of Unpoly](/api/up.link.config#config.noFollowSelectors), e.g. because it has
-  a `[download]`, `[target]` or `[up-follow=false]` attribute, clicking the area clicks the link.
-  The browser then does what the link does, like downloading a file or opening a new tab.
+  When Unpoly doesn't [follow](/api/up.link.isFollowable) the expanded link, a click on the area clicks the link.
+  The browser then does what the link does. A plain link makes a full page load, a `[download]` link downloads its file,
+  and a `[target=_blank]` link opens a new tab.
 
-  Any other link is followed by Unpoly, even a plain link without `[up-follow]`.
+  To update a fragment instead, give the link an `[up-follow]` attribute or [follow all links](/learn/handling-all-links).
 
   ## Feedback classes
 
@@ -1409,8 +1419,8 @@ up.link = (function() {
 
   ```html
   <div up-expand>
-    <a href="/foo">Foo</a>
-    <a href="/bar">Bar</a>
+    <a href="/foo" up-follow>Foo</a>
+    <a href="/bar" up-follow>Bar</a>
   </div>
   ```
 
@@ -1419,8 +1429,8 @@ up.link = (function() {
 
   ```html
   <div up-expand class="up-active"> <!-- mark: class="up-active" -->
-    <a href="/foo" class="up-active">Foo</a> <!-- mark: class="up-active" -->
-    <a href="/bar">Bar</a>
+    <a href="/foo" up-follow class="up-active">Foo</a> <!-- mark: class="up-active" -->
+    <a href="/bar" up-follow>Bar</a>
   </div>
   ```
 
@@ -1428,8 +1438,8 @@ up.link = (function() {
 
   ```html
   <div up-expand>
-    <a href="/foo">Foo</a> <!-- chip: not active -->
-    <a href="/bar" class="up-active">Bar</a> <!-- mark: class="up-active" -->
+    <a href="/foo" up-follow>Foo</a> <!-- chip: not active -->
+    <a href="/bar" up-follow class="up-active">Bar</a> <!-- mark: class="up-active" -->
   </div>
   ```
 
@@ -1445,8 +1455,7 @@ up.link = (function() {
 
   @selector [up-expand]
   @params-note
-    The enlarged click area takes over the descendant link's Unpoly attributes,
-    as well as its `[data-method]` and `[data-confirm]` attributes.
+    When Unpoly follows the expanded link, the enlarged click area takes over the link's Unpoly attributes.
   @param [up-expand]
     A CSS selector that defines which containing link should be expanded.
 
@@ -1463,21 +1472,16 @@ up.link = (function() {
       // This is our current workaround for expanded areas gaining an .up-current class from the contained link.
       e.addClasses(area, e.upClasses(childLink))
 
-      // When we wouldn't follow the link, e.g. a[download] or a[target], we don't make the area followable.
-      // Instead a click on the area clicks the link (see below), so the browser does whatever the link does.
-      if (!config.matches(childLink, 'noFollowSelectors')) {
-        e.setMissingAttrs(area, {
-          'up-href': e.attr(childLink, 'href'),
-          ...e.upAttrs(childLink)
-        })
+      // [up-nav] only marks elements with a URL as .up-current.
+      // We give the area its link's URL, whether or not Unpoly follows the link.
+      e.setMissingAttr(area, 'up-href', e.attr(childLink, 'up-href') || e.attr(childLink, 'href'))
 
-        // Unpoly also understands the Rails UJS attributes [data-method] and [data-confirm].
-        // With Rails UJS loaded, a later macro converts them to [up-method] and [up-confirm] on the area.
-        for (let attr of ['data-method', 'data-confirm']) {
-          let value = childLink.getAttribute(attr)
-          if (value) e.setMissingAttr(area, attr, value)
-        }
-
+      // A click on the area does what a click on the link does.
+      // When Unpoly follows the link, the area takes over the link's attributes, so it is followable, instant or
+      // preloadable like the link. Following the area then follows the link (see effectiveLink()).
+      // Otherwise a click on the area clicks the link (see below), so the browser does whatever the link does.
+      if (isFollowable(childLink)) {
+        e.setMissingAttrs(area, e.upAttrs(childLink))
         makeFollowable(area)
       }
       // A11y: We could also consider making the area clickable, via makeClickable().
@@ -1563,7 +1567,8 @@ up.link = (function() {
   @signature
   */
   up.compiler(config.selectorFn('preloadSelectors'), function(link) {
-    if (!isPreloadDisabled(link)) {
+    // An [up-expand] area preloads its link, so we check whether we can preload that link.
+    if (!isPreloadDisabled(effectiveLink(link))) {
       let doPreload = (options) => up.error.muteUncriticalRejection(preload(link, options))
       // We need to map several cases here:
       //

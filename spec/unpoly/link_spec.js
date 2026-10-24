@@ -1625,8 +1625,12 @@ describe('up.link', function() {
 
       it('makes the element followable to the same destination as the first contained link', async function() {
         up.fragment.config.mainTargets = ['main']
-        fixture('main', { text: 'old text' })
-        const area = fixture('div[up-expand] a[href="/path"]')
+        htmlFixtureList('<main>old text</main>')
+        const [area] = htmlFixtureList(`
+          <div up-expand>
+            <a href="/path" up-follow>label</a>
+          </div>
+        `)
         up.hello(area)
 
         expect(area).toBeFollowable()
@@ -1635,6 +1639,7 @@ describe('up.link', function() {
 
         await wait()
 
+        expect(jasmine.lastRequest().url).toMatchURL('/path')
         expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('main')
 
         jasmine.respondWithSelector('main', { text: 'new text' })
@@ -1796,10 +1801,14 @@ describe('up.link', function() {
       })
 
       it('can be used to enlarge the click area of a link', async function() {
-        const $area = $fixture('div[up-expand] a[href="/path"]')
-        up.hello($area)
+        const [area] = htmlFixtureList(`
+          <div up-expand>
+            <a href="/path" up-follow>label</a>
+          </div>
+        `)
+        up.hello(area)
         spyOn(up, 'render').and.returnValue(Promise.resolve())
-        Trigger.clickSequence($area)
+        Trigger.clickSequence(area)
         await wait()
 
         expect(up.render).toHaveBeenCalled()
@@ -1840,12 +1849,141 @@ describe('up.link', function() {
         expect(up.render.calls.count()).toEqual(1)
       })
 
+      describe('when Unpoly follows the expanded link', function() {
+
+        it('follows the link itself, emitting up:link:follow on the link with the link as origin', async function() {
+          const [area, link, cell] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/path" up-follow>label</a>
+              <span>text</span>
+            </div>
+          `)
+          up.hello(area)
+          const followListener = jasmine.createSpy('up:link:follow listener')
+          up.on('up:link:follow', followListener)
+
+          Trigger.clickSequence(cell)
+          await wait()
+
+          expect(followListener.calls.count()).toBe(1)
+          const event = followListener.calls.argsFor(0)[0]
+          expect(event.target).toBe(link)
+          expect(event.renderOptions.origin).toBe(link)
+          expect(jasmine.lastRequest().url).toMatchURL('/path')
+        })
+
+        it("resolves :origin in the link's target to the link", async function() {
+          const [area] = htmlFixtureList(`
+            <div id="area" up-expand>
+              <a id="link" href="/path" up-target=":origin">label</a>
+            </div>
+          `)
+          up.hello(area)
+
+          Trigger.clickSequence(area)
+          await wait()
+
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toBe('#link')
+        })
+
+        it('lets a listener for an attribute of the link handle a click on the area', async function() {
+          // E.g. an app that shows its own confirmation dialog for links with a [data-confirm-dialog] attribute
+          const [area] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/path" up-follow data-confirm-dialog>label</a>
+            </div>
+          `)
+          up.hello(area)
+          const followListener = jasmine.createSpy('up:link:follow listener').and.callFake((event) => event.preventDefault())
+          up.on('up:link:follow', '[data-confirm-dialog]', followListener)
+
+          Trigger.clickSequence(area)
+          await wait()
+
+          expect(followListener).toHaveBeenCalled()
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+        })
+
+        it('returns focus to the link after an overlay opened from the area closes', async function() {
+          const [area, link] = htmlFixtureList(`
+            <div up-expand>
+              <a href="#" up-layer="new" up-content="overlay content">label</a>
+            </div>
+          `)
+          up.hello(area)
+
+          Trigger.clickSequence(area)
+          await wait()
+
+          expect(up.layer.isOverlay()).toBe(true)
+
+          up.layer.dismiss()
+          await wait()
+
+          expect(up.layer.isOverlay()).toBe(false)
+          expect(link).toBeFocused()
+        })
+
+        it('preloads the link when the user hovers over the area, emitting up:link:preload on the link', async function() {
+          up.link.config.preloadDelay = 0
+          const [area, link] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/path" up-follow up-preload>label</a>
+            </div>
+          `)
+          up.hello(area)
+          const preloadListener = jasmine.createSpy('up:link:preload listener')
+          up.on('up:link:preload', preloadListener)
+
+          Trigger.hoverSequence(area)
+          await wait(50)
+
+          expect(preloadListener.calls.count()).toBe(1)
+          expect(preloadListener.calls.argsFor(0)[0].target).toBe(link)
+          expect(jasmine.lastRequest().url).toMatchURL('/path')
+        })
+
+        it('does not preload an unsafe link when the user hovers over the area', async function() {
+          up.link.config.preloadDelay = 0
+          const [area] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/path" up-follow up-preload data-method="delete">label</a>
+            </div>
+          `)
+          up.hello(area)
+
+          Trigger.hoverSequence(area)
+          await wait(50)
+
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+        })
+
+        it('follows the area itself when its link is no longer in the area', async function() {
+          const [area, link] = htmlFixtureList(`
+            <div up-expand>
+              <a href="/path" up-follow>label</a>
+            </div>
+          `)
+          up.hello(area)
+          link.remove()
+          const followListener = jasmine.createSpy('up:link:follow listener')
+          up.on('up:link:follow', followListener)
+
+          Trigger.clickSequence(area)
+          await wait()
+
+          expect(followListener.calls.argsFor(0)[0].target).toBe(area)
+          expect(jasmine.lastRequest().url).toMatchURL('/path')
+        })
+
+      })
+
       describe('when the expanded link has Rails attributes [data-method] and [data-confirm]', function() {
 
         let html = `
           <table>
             <tr up-expand>
-              <td><a href="/posts/1" data-method="delete" data-confirm="Really delete?">Delete</a></td>
+              <td><a href="/posts/1" up-follow data-method="delete" data-confirm="Really delete?">Delete</a></td>
               <td id="cell">Post 1</td>
             </tr>
           </table>
@@ -1863,10 +2001,19 @@ describe('up.link', function() {
           expect(jasmine.lastRequest().data()['_method']).toEqual(['DELETE'])
         }
 
-        it('confirms and sends a DELETE request when the user clicks the area', async function() {
+        function expectRowWithoutMethodOrConfirm(row) {
+          expect(row).not.toHaveAttribute('data-method')
+          expect(row).not.toHaveAttribute('data-confirm')
+          expect(row).not.toHaveAttribute('up-method')
+          expect(row).not.toHaveAttribute('up-confirm')
+        }
+
+        it("confirms and sends a DELETE request through the link's attributes when the user clicks the area", async function() {
           const [table] = htmlFixtureList(html)
+          const row = table.querySelector('tr')
           up.hello(table)
 
+          expectRowWithoutMethodOrConfirm(row)
           await clickCellAndExpectConfirmedDelete()
         })
 
@@ -1881,15 +2028,15 @@ describe('up.link', function() {
             $.rails = this.oldRails
           })
 
-          it('converts the attributes on the area, so Rails UJS does not handle the area, and confirms and sends a DELETE request when the user clicks the area', async function() {
+          it("converts the link's attributes, and confirms and sends a DELETE request when the user clicks the area", async function() {
             const [table] = htmlFixtureList(html)
             const row = table.querySelector('tr')
+            const link = table.querySelector('a')
             up.hello(table)
 
-            expect(row).not.toHaveAttribute('data-method')
-            expect(row).not.toHaveAttribute('data-confirm')
-            expect(row).toHaveAttribute('up-method', 'delete')
-            expect(row).toHaveAttribute('up-confirm', 'Really delete?')
+            expect(link).toHaveAttribute('up-method', 'delete')
+            expect(link).toHaveAttribute('up-confirm', 'Really delete?')
+            expectRowWithoutMethodOrConfirm(row)
 
             await clickCellAndExpectConfirmedDelete()
           })
@@ -1905,6 +2052,7 @@ describe('up.link', function() {
           'a[target=_blank]': '<a href="/path" target="_blank">label</a>',
           'a[up-follow=false]': '<a href="/path" up-follow="false" up-target="#target">label</a>',
           'a cross-origin link': '<a href="https://other-domain.tld/path">label</a>',
+          'a plain link': '<a href="/path">label</a>',
         }
 
         for (let [description, linkHTML] of Object.entries(linkCases)) {
@@ -1916,7 +2064,13 @@ describe('up.link', function() {
 
               expect(area).not.toBeFollowable()
               expect(area).not.toHaveAttribute('up-follow')
-              expect(area).not.toHaveAttribute('up-href')
+            })
+
+            it("gives the area the link's URL, so [up-nav] can mark it as .up-current", function() {
+              const [area, link] = htmlFixtureList(`<div up-expand>${linkHTML}</div>`)
+              up.hello(area)
+
+              expect(area).toHaveAttribute('up-href', link.getAttribute('href'))
             })
 
             it('clicks the link when the area is clicked, so the browser does what the link does', async function() {

@@ -28,6 +28,7 @@ extendDescribe('up.link', function() {
         area                        | F    F    0     I        I          I      I      I        0    0      I           I  I         I
         area with method+confirm    | F    F    0     I        I          I      I      I        0    0      I           I  I         I
         area with link not followed | N    N    0     I        I          I      I      I        0    0      I           I  I         I
+        area with plain link        | N    N    0     I        I          I      I      I        0    0      I           I  I         I
         div[up-href]                | F    F    0     I        I          I      I      I        0    0      I           I  I         I
         instant link                | F    F    F     F        F          F      F      I        N    N      I           -  I         F
         instant area                | F    F    0     I        I          I      I      I        0    0      I           I  I         I
@@ -55,18 +56,23 @@ extendDescribe('up.link', function() {
         },
         'area': {
           description: 'an [up-expand] area',
-          html: (inner) => `<div id="outer" up-expand><a href="/outer">Outer</a> ${inner}</div>`,
+          html: (inner) => `<div id="outer" up-expand><a href="/outer" up-follow>Outer</a> ${inner}</div>`,
         },
         'area with method+confirm': {
-          // The area copies [data-method] and [data-confirm] from its link.
+          // The area follows its link, so the link's [data-method] and [data-confirm] apply.
           description: 'an [up-expand] area whose link has [data-method] and [data-confirm]',
-          html: (inner) => `<div id="outer" up-expand><a href="/outer" data-method="delete" data-confirm="Really delete?">Outer</a> ${inner}</div>`,
+          html: (inner) => `<div id="outer" up-expand><a href="/outer" up-follow data-method="delete" data-confirm="Really delete?">Outer</a> ${inner}</div>`,
           verifyFollow: (request) => rows['link with method+confirm'].verifyFollow(request),
         },
         'area with link not followed': {
           // Unpoly hands a click on the area to the link, so the browser does what the link does.
           description: 'an [up-expand] area whose link Unpoly does not follow',
           html: (inner) => `<div id="outer" up-expand><a href="/outer" up-follow="false">Outer</a> ${inner}</div>`,
+        },
+        'area with plain link': {
+          // Unpoly doesn't follow a plain link without [up-follow], so a click on the area clicks the link.
+          description: 'an [up-expand] area whose link has no [up-follow]',
+          html: (inner) => `<div id="outer" up-expand><a href="/outer">Outer</a> ${inner}</div>`,
         },
         'div[up-href]': {
           description: 'a <div up-follow up-href>',

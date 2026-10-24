@@ -1312,6 +1312,40 @@ describe('up.element', function() {
     })
   })
 
+  describe('up.element.setMissingAttr()', function() {
+
+    it('sets a missing attribute', function() {
+      let element = document.createElement('div')
+      up.element.setMissingAttr(element, 'foo', 'value')
+
+      expect(element).toHaveAttribute('foo', 'value')
+    })
+
+    it('keeps an existing attribute', function() {
+      let element = up.element.createFromSelector('div[foo=original]')
+      up.element.setMissingAttr(element, 'foo', 'changed')
+
+      expect(element).toHaveAttribute('foo', 'original')
+    })
+
+    it('leaves the attribute missing when passed null or undefined', function() {
+      let element = document.createElement('div')
+      up.element.setMissingAttr(element, 'foo', null)
+      up.element.setMissingAttr(element, 'bar', undefined)
+
+      expect(element).not.toHaveAttribute('foo')
+      expect(element).not.toHaveAttribute('bar')
+    })
+
+    it('sets false as "false"', function() {
+      let element = document.createElement('div')
+      up.element.setMissingAttr(element, 'foo', false)
+
+      expect(element).toHaveAttribute('foo', 'false')
+    })
+
+  })
+
   describe('up.element.setAttrsTemp()', function() {
 
     it('returns a function that restores the original attribute values', function() {

@@ -43,16 +43,6 @@ describe('up.rails', function() {
               expect($element.attr('up-method')).toEqual('patch')
             })
 
-            it('transforms an element that becomes followable through [up-expand]', function() {
-              const $element = $fixture('a[href="/path"][up-expand][data-method="put"]')
-              const $child = $element.affix('span[up-href="/foo"][up-follow]')
-              up.hello($element)
-              expect($element.attr('up-href')).toEqual('/foo')
-              expect($element.attr('up-follow')).toEqual('')
-              expect($element.attr('data-method')).toBeUndefined()
-              expect($element.attr('up-method')).toEqual('put')
-            })
-
             it('transforms an element that becomes followable through a user macro like [content-link]', function() {
               up.macro('[user-make-followable]', (element) => element.setAttribute('up-follow', ''))
               const $element = $fixture('a[href=/foo][user-make-followable][data-method="put"]')

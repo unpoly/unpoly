@@ -1173,7 +1173,7 @@ extendDescribe('up.fragment', function() {
         it('ignores HTML changes made by a system macro', async function() {
           let html = `
             <div id="keepable" up-expand up-keep="same-html">
-              <a href="/path">text</a>
+              <a href="/path" up-follow>text</a>
             </div>
           `
           let keepable = keepableFixture(html)
