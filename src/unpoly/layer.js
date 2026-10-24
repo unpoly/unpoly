@@ -417,9 +417,9 @@ up.layer = (function() {
     @param {Element} [options.origin]
       The link or button element that caused this overlay to open.
 
-      The origin [will be re-focused](/learn/focus#overlays) when the overlay closes.
+      When the overlay closes, the origin [receives the focus](/learn/focus#overlays) again. When you open an overlay from JavaScript, pass the element the user interacted with, e.g. `{ origin: event.target }` in an event handler. Without an origin, focus moves to the parent layer, and keyboard users lose their place on the page.
 
-      When opening a popup, the overlay will be anchored relative to the origin element.
+      When opening a popup, the overlay is anchored relative to the origin element.
 
     @param {string} [options.position]
       For **popups**, the position of the popup relative to the link or button that opened
@@ -824,8 +824,7 @@ up.layer = (function() {
 
   @function up.layer.ask
 
-  @param {Object} options
-    See options for `up.layer.open()`.
+  @mix up.layer.open
 
   @return {Promise}
     A promise that settles when the overlay closes.
@@ -1571,10 +1570,7 @@ up.layer = (function() {
   @learn-ref closing-overlays
 
   @function up.layer.accept
-  @param {any} [value]
-    @like up.Layer#accept
-  @param {Object} [options]
-    See [options for `up.Layer#accept()`](/api/up.Layer.prototype.accept#parameters).
+  @mix up.Layer#accept
   @stable
   */
 

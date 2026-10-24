@@ -407,8 +407,11 @@ up.script = (function() {
   @param selector
     @like up.compiler
 
-  @param {Object} options
-    See options for [`up.compiler()`](/api/up.compiler).
+  @param [options.priority]
+    @like up.compiler
+
+  @param [options.batch]
+    @like up.compiler
 
   @param macro
     @like up.compiler/compiler

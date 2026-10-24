@@ -140,7 +140,6 @@ Thanks to @kmmbvnr for contributing form-associated custom elements and `formdat
 Some smaller changes in this release remove friction you may have worked around:
 
 - To reload an element after an overlay closes, set the new experimental [`[up-on-accepted-reload]`](/api/up-layer-new#up-on-accepted-reload) attribute to its selector. You no longer need a JavaScript callback or a CSP nonce. See [Overlays](#overlays).
-- A click on an [`[up-expand]`](/api/up-expand) area now does what a click on its link does, also for downloads and links that open a new tab. Buttons and labels inside the area now handle their own clicks. See [Links and URLs](#links-and-urls).
 - When Unpoly boots, it logs an error for a misspelled or renamed `up.*.config` setting, instead of ignoring it. See [Mistakes are easier to find](#mistakes-are-easier-to-find).
 - Pages with many watched forms no longer freeze for a moment after each fragment update. See [Forms](#forms).
 - Test runners, CI and coding agents now read Unpoly's log as plain text. See [Mistakes are easier to find](#mistakes-are-easier-to-find).
@@ -155,6 +154,20 @@ This also helps coding agents: clear errors and plain-text logs in automated bro
 - ⚠️ In a browser controlled by automation software, like Selenium, Playwright or Puppeteer, Unpoly now logs plain text without CSS formatting. Test runners, CI and coding agents that read the browser console get readable lines instead of `%c` placeholders and style strings. Normal browsers still format the log. To always format, set [`up.log.config.format = true`](/api/up.log.config#config.format).
 - Error messages, warnings and [unformatted log output](/api/up.log.config#config.format) now print objects more readably. A plain object prints as `{ foo: "bar" }`, a request as `up.Request(GET /users/5)` and an error as `up.CannotMatch(message)`. A circular reference prints `(circular)` where the cycle closes, instead of replacing the whole value.
 - Fix: When an app's bundler minified `unpoly.js`, errors could lose their names. For example, an `up.CannotMatch` error was named `up.`. Errors now keep their names under any minifier.
+
+
+### Enlarged click areas
+
+A click on an [`[up-expand]`](/api/up-expand) area now does exactly what a click on its link does:
+
+- When Unpoly follows the link, it follows the link itself. The link's attributes, events and [origin](/api/origin) all apply, including your own event listeners on the link and Rails' `[data-method]` and `[data-confirm]`.
+- A link with `[download]` downloads its file, and a link with `[target=_blank]` opens a new tab.
+- A link that Unpoly doesn't follow makes a full page load, as it would when clicked directly.
+- After an overlay opened from the area closes, focus goes back to the link.
+
+Controls in the area, like checkboxes, buttons, labels or `<summary>` elements, keep handling their own clicks.
+
+Many apps we looked at had worked around the old limitations. You can now remove these workarounds. See [Custom links and buttons](/learn/faux-interactive-elements) for examples.
 
 
 ### Form submissions now match the browser

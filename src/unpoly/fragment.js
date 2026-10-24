@@ -636,21 +636,57 @@ up.fragment = (function() {
   Instead of calling `up.navigate()` you may also call `up.render({ navigate: true })`.
 
   @function up.navigate
-  @param {string|Element|jQuery} [target]
-    The [target selector](/learn/targeting-fragments) to update.
 
-    If omitted a [main target](/api/main) will be rendered.
+  @section Targeting
+    @param {string|Element|jQuery} [target]
+      The [target selector](/learn/targeting-fragments) to update.
 
-    You can also pass a DOM element or jQuery element here, in which case a selector
-    will be [derived from the element attributes](/learn/target-derivation). The given element
-    will also be set as the `{ origin }` option.
+      If omitted a [main target](/api/main) will be rendered.
 
-    Instead of passing the target as the first argument, you may also pass it as
-    [`{ target }` option](/api/up.render#options.target).
-  @param {string} [options.url]
-    The URL to navigate to.
-  @param {Object} [options]
-    See options for `up.render()`.
+      You can also pass a DOM element or jQuery element here, in which case a selector
+      will be [derived from the element attributes](/learn/target-derivation). The given element
+      will also be set as the `{ origin }` option.
+
+      Instead of passing the target as the first argument, you may also pass it as
+      [`{ target }` option](/api/up.render#options.target).
+
+    @mix up.render/targeting
+
+  @section Request
+    @mix up.render/request
+      @param options.url
+        The URL to navigate to.
+
+  @section Caching
+    @mix up.render/caching
+
+  @section Local content
+    @mix up.render/local-content
+
+  @section Layer
+    @mix up.render/layer
+
+  @section History
+    @mix up.render/history
+
+  @section Animation
+    @mix up.render/motion
+
+  @section Scrolling
+    @mix up.render/scrolling
+
+  @section Focus
+    @mix up.render/focus
+
+  @section Loading state
+    @mix up.render/loading-state
+
+  @section Client state
+    @mix up.render/client-state
+
+  @section Lifecycle hooks
+    @mix up.render/lifecycle-hooks
+
   @return
     @like up.render
   @stable
@@ -2028,12 +2064,16 @@ up.fragment = (function() {
   Returns whether Unpoly can [derive a target selector](/learn/target-derivation) for the given element.
 
   @function up.fragment.isTargetable
-  @param {Element} element
-    The element to test.
-  @param {Object} options
-    Options for target derivation and [verification](/learn/target-derivation#verification).
-
-    See [options for `up.fragment.toTarget()`](/api/up.fragment.toTarget).
+  @section Element
+    @param {Element} element
+      The element to test.
+    @param [options.strong]
+      @like up.fragment.toTarget
+  @section Verification
+    @param [options.verify]
+      @like up.fragment.toTarget
+    @param [options.origin]
+      @like up.fragment.toTarget
   @return {boolean}
     Whether a selector can be derived for the given element.
   @stable
