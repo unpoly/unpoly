@@ -646,8 +646,6 @@ describe('up.history', function() {
       describe('history navigation', function() {
 
         it('emits an event for every navigation step', async function() {
-          const waitForBrowser = 100
-
           up.network.config.autoCache = false
           up.history.config.restoreTargets = ['main']
           up.viewport.config.revealSnap = 0
@@ -753,7 +751,7 @@ describe('up.history', function() {
           ])
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
           expect(jasmine.Ajax.requests.count()).toBe(4)
           expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
           jasmine.respondWith(path2Text)
@@ -770,7 +768,7 @@ describe('up.history', function() {
           ])
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
           expect(jasmine.Ajax.requests.count()).toBe(4)
           expect(up.network.isBusy()).toBe(false)
           expect(location.href).toMatchURL('/path2#a')
@@ -785,7 +783,7 @@ describe('up.history', function() {
           ])
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
           expect(jasmine.Ajax.requests.count()).toBe(5)
           expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
           jasmine.respondWith(path1Text)
@@ -804,7 +802,7 @@ describe('up.history', function() {
           ])
 
           history.forward()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
           expect(jasmine.Ajax.requests.count()).toBe(6)
           expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
           jasmine.respondWith(path2Text)
@@ -824,7 +822,7 @@ describe('up.history', function() {
           ])
 
           history.forward()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
           expect(jasmine.Ajax.requests.count()).toBe(6)
           expect(up.network.isBusy()).toBe(false)
           expect(location.href).toMatchURL('/path2#b')
@@ -843,7 +841,7 @@ describe('up.history', function() {
           ])
 
           history.forward()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
           expect(jasmine.Ajax.requests.count()).toBe(7)
           expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
           jasmine.respondWith(path3Text)
@@ -870,7 +868,6 @@ describe('up.history', function() {
       })
 
       it('restores a location pushed by foreign JavaScript when a listener sets event.willHandle = true', async function() {
-        const waitForBrowser = 100
         up.network.config.autoCache = false
         up.history.config.restoreTargets = ['main']
         htmlFixtureList('<main>initial text</main>')
@@ -890,7 +887,7 @@ describe('up.history', function() {
         expect(jasmine.Ajax.requests.count()).toBe(0)
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
 
         expect(location.href).toMatchURL('/gallery/1')
         expect(jasmine.Ajax.requests.count()).toBe(1)
@@ -903,7 +900,6 @@ describe('up.history', function() {
       })
 
       it('does not restore an owned location when a listener sets event.willHandle = false', async function() {
-        const waitForBrowser = 100
         up.network.config.autoCache = false
         up.history.config.restoreTargets = ['main']
         htmlFixtureList('<main>initial text</main>')
@@ -922,7 +918,7 @@ describe('up.history', function() {
         await wait()
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
 
         expect(location.href).toMatchURL('/path1')
         expect(restoreListener).not.toHaveBeenCalled()

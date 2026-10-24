@@ -8,8 +8,6 @@ extendDescribe('up.history', function() {
     describe('navigating history with back and forward buttons', function() {
 
       it('loads locations when the navigation changes the path', async function() {
-        const waitForBrowser = 100
-
         up.network.config.autoCache = false
         up.history.config.restoreTargets = ['main']
 
@@ -54,7 +52,7 @@ extendDescribe('up.history', function() {
         expect('main').toHaveText('path3 text')
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(4)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
         jasmine.respondWith('<main>path2 text</main>')
@@ -63,7 +61,7 @@ extendDescribe('up.history', function() {
         expect('main').toHaveText('path2 text')
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(5)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
         jasmine.respondWith('<main>path1 text</main>')
@@ -72,7 +70,7 @@ extendDescribe('up.history', function() {
         expect('main').toHaveText('path1 text')
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(6)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
         jasmine.respondWith('<main>path2 text</main>')
@@ -81,7 +79,7 @@ extendDescribe('up.history', function() {
         expect('main').toHaveText('path2 text')
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(7)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
         jasmine.respondWith('<main>path3 text</main>')
@@ -93,8 +91,6 @@ extendDescribe('up.history', function() {
       })
 
       it('loads locations when the navigation changes the query string', async function() {
-        const waitForBrowser = 100
-
         up.network.config.autoCache = false
         up.history.config.restoreTargets = ['main']
 
@@ -140,7 +136,7 @@ extendDescribe('up.history', function() {
         expect(up.network.isBusy()).toBe(false)
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(4)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=2')
         jasmine.respondWith('<main>path2 text</main>')
@@ -149,7 +145,7 @@ extendDescribe('up.history', function() {
         expect('main').toHaveText('path2 text')
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(5)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=1')
         jasmine.respondWith('<main>path1 text</main>')
@@ -158,7 +154,7 @@ extendDescribe('up.history', function() {
         expect('main').toHaveText('path1 text')
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(6)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=2')
         jasmine.respondWith('<main>path2 text</main>')
@@ -167,7 +163,7 @@ extendDescribe('up.history', function() {
         expect('main').toHaveText('path2 text')
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(7)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=3')
         jasmine.respondWith('<main>path3 text</main>')
@@ -179,8 +175,6 @@ extendDescribe('up.history', function() {
       })
 
       it('loads locations when the navigation changes both path and hash', async function() {
-        const waitForBrowser = 100
-
         up.network.config.autoCache = false
         up.history.config.restoreTargets = ['main']
         up.viewport.config.revealSnap = 0
@@ -266,7 +260,7 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(0)
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(4)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
         jasmine.respondWith(path2Text)
@@ -276,14 +270,14 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(300 + 50 + 300)
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(4)
         expect(up.network.isBusy()).toBe(false)
         expect(location.href).toMatchURL('/path2#a')
         expect(viewport.scrollTop).toBe(300)
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(5)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
         jasmine.respondWith(path1Text)
@@ -293,7 +287,7 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(0)
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(6)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
         jasmine.respondWith(path2Text)
@@ -303,7 +297,7 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(300)
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(6)
         expect(up.network.isBusy()).toBe(false)
         expect(location.href).toMatchURL('/path2#b')
@@ -311,7 +305,7 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(300 + 50 + 300)
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(7)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
         jasmine.respondWith(path3Text)
@@ -324,8 +318,6 @@ extendDescribe('up.history', function() {
       })
 
       it('loads locations when the navigation changes both path and hash and the user reloads in between (issue #773)', async function() {
-        const waitForBrowser = 100
-
         const configure = () => {
           up.network.config.autoCache = false
           up.history.config.restoreTargets = ['main']
@@ -426,7 +418,7 @@ extendDescribe('up.history', function() {
         await fakeReload()
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
 
         expect(jasmine.Ajax.requests.count()).toBe(4)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
@@ -438,14 +430,14 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(300 + 50 + 300)
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(4)
         expect(up.network.isBusy()).toBe(false)
         expect(location.href).toMatchURL('/path2#a')
         expect(viewport.scrollTop).toBe(300)
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(5)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
         jasmine.respondWith(path1Text)
@@ -457,7 +449,7 @@ extendDescribe('up.history', function() {
         await fakeReload()
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(6)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
         jasmine.respondWith(path2Text)
@@ -467,7 +459,7 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(300)
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(6)
         expect(up.network.isBusy()).toBe(false)
         expect(location.href).toMatchURL('/path2#b')
@@ -475,7 +467,7 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(300 + 50 + 300)
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(7)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path3')
         jasmine.respondWith(path3Text)
@@ -488,8 +480,6 @@ extendDescribe('up.history', function() {
       })
 
       it('loads locations when the navigation changes both query string and hash', async function() {
-        const waitForBrowser = 100
-
         up.network.config.autoCache = false
         up.history.config.restoreTargets = ['main']
         up.viewport.config.revealSnap = 0
@@ -575,7 +565,7 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(0)
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(4)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=2')
         jasmine.respondWith(path2Text)
@@ -585,14 +575,14 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(300 + 50 + 300)
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(4)
         expect(up.network.isBusy()).toBe(false)
         expect(location.href).toMatchURL('/path?query=2#a')
         expect(viewport.scrollTop).toBe(300)
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(5)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path')
         jasmine.respondWith(path1Text)
@@ -602,7 +592,7 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(0)
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(6)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=2')
         jasmine.respondWith(path2Text)
@@ -612,7 +602,7 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(300)
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(6)
         expect(up.network.isBusy()).toBe(false)
         expect(location.href).toMatchURL('/path?query=2#b')
@@ -620,7 +610,7 @@ extendDescribe('up.history', function() {
         expect(viewport.scrollTop).toBe(300 + 50 + 300)
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(7)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path?query=3')
         jasmine.respondWith(path3Text)
@@ -634,8 +624,6 @@ extendDescribe('up.history', function() {
       })
 
       it('does not load locations when navigating over entries pushed by foreign JS with custom state', async function() {
-        const waitForBrowser = 150
-
         up.network.config.autoCache = false
         up.history.config.restoreTargets = ['main']
 
@@ -676,14 +664,14 @@ extendDescribe('up.history', function() {
         expect('main').toHaveText('path2 text')
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(2)
         expect(up.network.isBusy()).toBe(false)
         expect(location.href).toMatchURL('/foreign-path')
         expect('main').toHaveText('path2 text')
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(3)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path1')
         jasmine.respondWith('<main>path1 text</main>')
@@ -692,14 +680,14 @@ extendDescribe('up.history', function() {
         expect('main').toHaveText('path1 text')
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(3)
         expect(up.network.isBusy()).toBe(false)
         expect(location.href).toMatchURL('/foreign-path')
         expect('main').toHaveText('path1 text')
 
         history.forward()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
         expect(jasmine.Ajax.requests.count()).toBe(4)
         expect(jasmine.Ajax.requests.mostRecent().url).toMatchURL('/path2')
         jasmine.respondWith('<main>path2 text</main>')
@@ -711,8 +699,6 @@ extendDescribe('up.history', function() {
       })
 
       it('calls destructor functions when destroying compiled elements (bugfix)', async function() {
-        const waitForBrowser = 100
-
         // By default, up.history will replace the <body> tag when
         // the user presses the back-button. We reconfigure this
         // so we don't lose the Jasmine runner interface.
@@ -736,7 +722,7 @@ extendDescribe('up.history', function() {
         expect(constructorSpy).toHaveBeenCalled()
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
 
         expect(location.pathname).toEqual('/one')
         jasmine.respondWith("<div class='container'>restored container text</div>")
@@ -747,7 +733,6 @@ extendDescribe('up.history', function() {
       })
 
       it('renders an error response when restoring a location', async function() {
-        const waitForBrowser = 100
         up.network.config.autoCache = false
         up.history.config.restoreTargets = ['main']
         htmlFixtureList('<main>initial text</main>')
@@ -757,7 +742,7 @@ extendDescribe('up.history', function() {
         await wait()
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
 
         expect(jasmine.Ajax.requests.count()).toBe(1)
         expect(jasmine.lastRequest().url).toMatchURL('/path1')
@@ -770,7 +755,6 @@ extendDescribe('up.history', function() {
       })
 
       it('does not play a transition configured in up.fragment.config.navigateOptions when restoring a location', async function() {
-        const waitForBrowser = 100
         const transitionFn = jasmine.createSpy('transition').and.returnValue(Promise.resolve())
         up.transition('spy-transition', transitionFn)
         up.fragment.config.navigateOptions.transition = 'spy-transition'
@@ -784,7 +768,7 @@ extendDescribe('up.history', function() {
         await wait()
 
         history.back()
-        await wait(waitForBrowser)
+        await jasmine.waitPopstate()
 
         jasmine.respondWithSelector('main', { text: 'restored content' })
         await wait()
@@ -796,7 +780,6 @@ extendDescribe('up.history', function() {
       describe('overlays', function() {
 
         it('closes overlays when restoring the root layer, even if an up:layer:dismiss listener prevents it', async function() {
-          const waitForBrowser = 100
           fixture('main', { text: 'original content' })
           up.history.config.restoreTargets = [':main']
 
@@ -814,7 +797,7 @@ extendDescribe('up.history', function() {
           up.on('up:layer:dismiss', dismissListener)
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           jasmine.respondWithSelector('main', { text: 'restored content' })
           await wait()
@@ -829,7 +812,6 @@ extendDescribe('up.history', function() {
       describe('up:location:restore event', function() {
 
         it('emits an up:location:restore event that users can prevent and substitute their own restoration logic', async function() {
-          const waitForBrowser = 100
           const main = fixture('main#main', { text: 'original content' })
           up.history.config.restoreTargets = [':main']
           const restoreListener = jasmine.createSpy('up:location:restore listener').and.callFake((event) => {
@@ -848,7 +830,7 @@ extendDescribe('up.history', function() {
           expect(restoreListener).not.toHaveBeenCalled()
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           expect(up.history.location).toMatchURL('/page1')
           expect(restoreListener).toHaveBeenCalled()
@@ -857,7 +839,6 @@ extendDescribe('up.history', function() {
         })
 
         it('lets users mutate event.renderOptions to customize the restoration pass', async function() {
-          const waitForBrowser = 100
           fixture('#main', { text: 'original main' })
           fixture('#other', { text: 'original other' })
           up.history.config.restoreTargets = ['#main']
@@ -878,7 +859,7 @@ extendDescribe('up.history', function() {
 
           history.back()
 
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           expect(up.history.location).toMatchURL('/page1')
           expect(restoreListener).toHaveBeenCalled()
@@ -901,7 +882,6 @@ extendDescribe('up.history', function() {
       describe('caching', function() {
 
         it('restores a page from cache', async function() {
-          const waitForBrowser = 100
           fixture('main', { text: 'original content' })
           up.history.config.restoreTargets = [':main']
 
@@ -922,7 +902,7 @@ extendDescribe('up.history', function() {
           expect('main').toHaveText('path2 content')
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           // History was restored
           expect(up.history.location).toMatchURL('/path1')
@@ -932,7 +912,6 @@ extendDescribe('up.history', function() {
         })
 
         it('revalidates expired cache entries after restoration', async function() {
-          const waitForBrowser = 100
           up.network.config.cacheExpireAge = 1
           fixture('main', { text: 'original content' })
           up.history.config.restoreTargets = [':main']
@@ -959,7 +938,7 @@ extendDescribe('up.history', function() {
           expect('main').toHaveText('path2 content')
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           // History was restored
           expect(up.history.location).toMatchURL('/path1')
@@ -979,7 +958,6 @@ extendDescribe('up.history', function() {
 
       describe('focus restoration', () => {
         it('restores element focus when the user hits the back button', async function() {
-          const waitForBrowser = 100
           up.fragment.config.mainTargets = ['main']
           up.history.config.restoreTargets = [':main']
           const main = fixture('main')
@@ -1001,7 +979,7 @@ extendDescribe('up.history', function() {
           expect('main').toBeFocused()
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           expect(jasmine.Ajax.requests.count()).toBe(2)
           await wait()
@@ -1014,7 +992,6 @@ extendDescribe('up.history', function() {
         })
 
         it('focuses the restored fragment when no earlier focus is known for the location', async function() {
-          const waitForBrowser = 100
           up.fragment.config.mainTargets = ['main']
           up.history.config.restoreTargets = [':main']
           htmlFixtureList('<main>initial text</main>')
@@ -1024,7 +1001,7 @@ extendDescribe('up.history', function() {
           await wait()
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           expect(jasmine.Ajax.requests.count()).toBe(1)
           jasmine.respondWithSelector('main', { text: 'restored text' })
@@ -1084,22 +1061,22 @@ extendDescribe('up.history', function() {
           expect(location.href).toMatchURL('/test-three')
           $('.viewport').scrollTop(250)
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           expect(location.href).toMatchURL('/test-two')
           expect($('.viewport').scrollTop()).toBe(150)
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           expect(location.href).toMatchURL('/test-one')
           expect($('.viewport').scrollTop()).toBe(50)
           history.forward()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           expect(location.href).toMatchURL('/test-two')
           expect($('.viewport').scrollTop()).toBe(150)
           history.forward()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           expect(location.href).toMatchURL('/test-three')
           expect($('.viewport').scrollTop()).toBe(250)
@@ -1115,8 +1092,6 @@ extendDescribe('up.history', function() {
           const respond = () => jasmine.respondWith(longContentHTML)
 
           const $viewport = $(longContentHTML).appendTo(document.body)
-
-          const waitForBrowser = 100
 
           up.viewport.config.viewportSelectors = ['.viewport']
           up.history.config.restoreTargets = ['.viewport']
@@ -1136,7 +1111,7 @@ extendDescribe('up.history', function() {
           up.layer.root.lastScrollTops.clear()
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           respond()
           await wait()
@@ -1183,7 +1158,7 @@ extendDescribe('up.history', function() {
 
           expect(location.href).toMatchURL('/two')
           history.back()
-          await wait(50)
+          await jasmine.waitPopstate()
 
           expect('.viewport1').toBeScrolledTo(3000)
           expect('.viewport2').toBeScrolledTo(3050)

@@ -260,8 +260,6 @@ extendDescribe('up.link', function() {
         it('adds history entries and allows the user to use the back and forward buttons', async function() {
           up.history.config.enabled = true
 
-          const waitForBrowser = 300
-
           // By default, up.history will replace the <body> tag when
           // the user presses the back-button. We reconfigure this
           // so we don't lose the Jasmine runner interface.
@@ -319,21 +317,21 @@ extendDescribe('up.link', function() {
           expect(document.title).toEqual('title from three')
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           expect('.target').toHaveText('text from two')
           expect(location.pathname).toEqual('/two')
           expect(document.title).toEqual('title from two')
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           expect('.target').toHaveText('text from one')
           expect(location.pathname).toEqual('/one')
           expect(document.title).toEqual('title from one')
 
           history.forward()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           expect('.target').toHaveText('text from two')
           expect(location.pathname).toEqual('/two')
@@ -343,7 +341,6 @@ extendDescribe('up.link', function() {
         it('renders history when the user clicks on a link, goes back and then clicks on the same link (bugfix)', async function() {
           up.history.config.enabled = true
           up.history.config.restoreTargets = ['.target']
-          const waitForBrowser = 300
 
           const linkHTML = `
             <a href="/next" up-target=".target" up-history="false">label</a>
@@ -366,7 +363,7 @@ extendDescribe('up.link', function() {
           expect('.target').toHaveText('new text')
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           jasmine.respondWithSelector('.target', { text: 'old text' })
           await wait()
@@ -393,8 +390,6 @@ extendDescribe('up.link', function() {
           up.fragment.config.navigateOptions.history = true
 
           up.network.config.cacheEvictAge = 0
-
-          const waitForBrowser = 150
 
           const respondWith = (text) => {
             jasmine.respondWith(`
@@ -437,7 +432,7 @@ extendDescribe('up.link', function() {
           expect(location.pathname).toEqual('/two')
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           respondWith('restored text from one')
           await wait()
@@ -446,7 +441,7 @@ extendDescribe('up.link', function() {
           expect(location.pathname).toEqual('/one')
 
           history.forward()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           respondWith('restored text from two')
           await wait()

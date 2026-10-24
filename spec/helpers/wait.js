@@ -38,4 +38,16 @@ async function waitIdle(timeout) {
 
 jasmine.waitIdle = waitIdle
 
+// Waits until the browser has traversed history after history.back() or history.forward(),
+// then waits one more task for Unpoly to react to the change.
+//
+// The browser traverses asynchronously, and on a busy machine the popstate event
+// can arrive later than any fixed delay we would choose.
+async function waitPopstate() {
+  await new Promise((resolve) => window.addEventListener('popstate', resolve, { once: true }))
+  await waitTasks(1)
+}
+
+jasmine.waitPopstate = waitPopstate
+
 window.wait = waitTime

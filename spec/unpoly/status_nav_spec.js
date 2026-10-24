@@ -274,7 +274,6 @@ extendDescribe('up.status', function() {
           up.history.config.enabled = true
           up.fragment.config.mainTargets = ['#content']
           up.history.config.restoreTargets = [':main']
-          const waitForBrowser = 100
           // Unlike replaceURL(), this makes an entry that Unpoly restores on back
           up.history.replace('/page1')
           htmlFixtureList('<div id="content">content1</div>')
@@ -291,7 +290,7 @@ extendDescribe('up.status', function() {
           expect(link2).toHaveClass('up-current')
 
           history.back()
-          await wait(waitForBrowser)
+          await jasmine.waitPopstate()
 
           jasmine.respondWithSelector('#content', { text: 'restored content1' })
           await wait()
