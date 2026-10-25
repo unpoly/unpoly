@@ -1,0 +1,9 @@
+second-h1.md: Main part (24 lines)
+  The first H1 is the title. A later H1 is listed like any heading.
+
+  1-4    (intro)
+  5-12   ## Section
+  9-12   ### Subsection
+  13-20  # Appendix
+  17-20  ## Appendix section
+  21-24  # Second setext H1

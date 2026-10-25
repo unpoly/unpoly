@@ -1,0 +1,6 @@
+changelog.md (20 lines)
+  1-14   ## 3.1.0
+  6-9    ### Features
+  10-14  ### Fixes
+  15-20  ## 3.0.0
+  18-20  ### Breaking changes

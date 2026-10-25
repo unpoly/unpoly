@@ -1,0 +1,9 @@
+fenced-code.md: Fenced code (51 lines)
+  The summary comes after the code block.
+
+  1-8    (intro)
+  9-15   ## Backtick fences
+  16-25  ## Tilde fences
+  26-37  ## Nested fences
+  38-45  ## Indented fence
+  46-51  ## Unclosed fence

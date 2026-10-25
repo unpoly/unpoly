@@ -1,0 +1,11 @@
+depth.md: Depth (25 lines)
+  Intro text.
+
+  1-4    (intro)
+  5-8    ### A subsection before any section
+  9-22   ## Section
+  11-20  ### Subsection
+  13-18  #### Sub-subsection
+  19-20  #### Another sub-subsection
+  21-22  ### Another subsection
+  23-25  ## Last section

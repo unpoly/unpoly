@@ -12,6 +12,7 @@ tooling/
   build/        bin/build, the Webpack configs, and the build-freshness protocol
   dev_env.mjs   the dev environment behind bin/dev
   find_spec.mjs spec-title search behind bin/find-spec and bin/test --file
+  outline.mjs   Markdown sections with line ranges, behind bin/outline
   test/         self-tests for all of the above, mirroring this layout
 ```
 
@@ -74,7 +75,7 @@ function, so its tests live in Node with the rest.
   Its own process, deliberately not a route on the spec server, which `bin/ci` boots. See
   [its README](scratch/README.md) and [Trying out changes](../docs/contributing/trying-out-changes.md).
 - `test/` — the self-tests: `bin/self-test`.
-- `bin/test`, `bin/ci`, `bin/dev`, `bin/find-spec`, `bin/update-contributing-tocs` — thin **extensionless** executables (shebang +
+- `bin/test`, `bin/ci`, `bin/dev`, `bin/find-spec`, `bin/outline`, `bin/update-contributing-tocs` — thin **extensionless** executables (shebang +
   `chmod +x`), relying on Node 22's extensionless-ESM detection. The package is
   deliberately *not* `type: module` (that would break the CommonJS webpack configs),
   so everything under `tooling/**` is `.mjs` — except the three browser files and the

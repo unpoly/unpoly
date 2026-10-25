@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+// Prints the sections of Markdown files with the lines they span, so you can read one
+// section instead of the whole file:
+//
+//     bin/outline docs/contributing/testing.md
+//     bin/outline --depth=2 docs/contributing/*.md
+//
+// --depth=N lists headings down to that level (default 3: `##` and `###`, as H1 is the title).
+// The format is described in tooling/test/fixtures/outline/README.md.
+import { readFileSync, statSync } from 'node:fs'
+import { formatOutlines } from '../tooling/outline.mjs'
+
+const USAGE = 'Usage: bin/outline [--depth=N] <file.md>...'
+
+function fail(message) {
+  console.error(message)
+  process.exit(64)
+}
+
+let depth = 3
+let paths = []
+for (let arg of process.argv.slice(2)) {
+  let option = /^--depth=(\d+)$/.exec(arg)
+  if (option && Number(option[1]) >= 1) {
+    depth = Number(option[1])
+  } else if (arg.startsWith('-')) {
+    fail(USAGE)
+  } else {
+    paths.push(arg)
+  }
+}
+if (!paths.length) fail(USAGE)
+
+let files = paths.map((path) => {
+  let stat = statSync(path, { throwIfNoEntry: false })
+  if (!stat) fail(`No such file: ${path}`)
+  if (stat.isDirectory()) fail(`${path} is a directory. Pass the Markdown files in it, e.g. ${path}/*.md`)
+  return { path, markdown: readFileSync(path, 'utf8') }
+})
+
+console.log(formatOutlines(files, { depth }))

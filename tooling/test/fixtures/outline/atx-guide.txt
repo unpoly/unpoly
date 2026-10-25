@@ -1,0 +1,10 @@
+atx-guide.md: Writing guides (33 lines)
+  A guide in the contributing style: ATX headings, an intro paragraph
+  over two lines, and a generated TOC block below it.
+
+  1-12   (intro)
+  13-26  ## Basics
+  19-26  ### Inline `code` in headings
+  27-33  ## Closing hashes
+  29-30  ### C# keeps its hash
+  31-33  ### Anchors are dropped

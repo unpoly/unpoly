@@ -1,0 +1,8 @@
+no-title.md (16 lines)
+  A document without an H1. Its first paragraph is still the summary,
+  and the intro covers everything above the first heading.
+
+  1-5    (intro)
+  6-13   ## First section
+  10-13  ### A subsection
+  14-16  ## Second section

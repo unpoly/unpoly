@@ -1,0 +1,7 @@
+skill-page.md: Skill page (44 lines)
+  A page from the agent skill. Breadcrumbs above the title and navigation blocks below it are skipped.
+
+  1-26   (intro)
+  27-34  ## First section
+  31-34  ### A subsection
+  35-44  ## Second section

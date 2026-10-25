@@ -1,0 +1,8 @@
+setext-page.md: Setext page (37 lines)
+  A site page with underlined headings. The underlines
+  under the title and sections are not content.
+
+  1-7    (intro)
+  8-33   ## First section
+  29-33  ### An ATX subsection
+  34-37  ## Second section

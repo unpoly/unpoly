@@ -6,6 +6,8 @@ Each section below summarizes a guide and says when to read it in full.\
 The summaries are deliberately not sufficient: they exist so you can tell which guide
 you need, not so you can skip it.
 
+Run `bin/outline <guide>` to see a guide's sections with line ranges.
+
 
 ### [🍭 First change walkthrough](docs/contributing/first-change.md)
 
