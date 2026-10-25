@@ -165,7 +165,7 @@ A click on an [`[up-expand]`](/api/up-expand) area now does exactly what a click
 - A link that Unpoly doesn't follow makes a full page load, as it would when clicked directly.
 - After an overlay opened from the area closes, focus goes back to the link.
 
-Controls in the area, like checkboxes, buttons, labels or `<summary>` elements, keep handling their own clicks.
+Fields in an expanded area keep handling their own clicks, and buttons, labels and `<summary>` elements now do too, instead of following the link.
 
 Many apps we looked at had worked around the old limitations. You can now remove these workarounds. See [Custom links and buttons](/learn/faux-interactive-elements) for examples.
 
@@ -194,11 +194,10 @@ There is one exception: unlike the browser, a form only reads controls from its 
 
 ### Forms stay within their layer
 
-A form and its fields and buttons now always belong to one [layer](/api/up.layer). Before, some features looked across layers: a form could read a field from an overlay that pointed to it with a `[form]` attribute, and a button in an overlay could submit a form below it. To let an overlay affect a form in another layer, have the overlay [return a value](/learn/subinteractions#result-values) when it closes, and let the layer below submit or update its form in an [`{ onAccepted }`](/learn/subinteractions#callbacks) callback.
+A form and its fields and buttons now always belong to one [layer](/api/up.layer). Before, some features looked across layers: a form read the fields of a popup that was attached inside it, and a button in an overlay could submit a form below it. To let an overlay affect a form in another layer, have the overlay [return a value](/learn/subinteractions#result-values) when it closes, and let the layer below submit or update its form in an [`{ onAccepted }`](/learn/subinteractions#callbacks) callback.
 
-- ⚠️ `up.form.fields()` and `up.form.submitButtons()` now ignore elements in another [layer](/api/up.layer) and elements that are being [destroyed](/api/up.destroy), like other `up.fragment` lookups. A field in a popup that is attached inside a form is no longer watched by that form.
+- ⚠️ `up.form.fields()` and `up.form.submitButtons()` now ignore elements in another [layer](/api/up.layer) and elements that are being [destroyed](/api/up.destroy), like other `up.fragment` lookups. A field in a popup that is attached inside a form is no longer watched by that form or submitted with it.
 - ⚠️ When a submit button or a focused field has a `[form]` attribute that points to a form in another layer, submitting now throws an error: "Prevented … from submitting a form in another layer". The browser would submit the other layer's form, e.g. when the same form ID exists in the layer below an overlay that shows the same page. To fix this, keep a form and its `[form]` controls in the same layer, and use form IDs that are unique across layers.
-- ⚠️ A form only reads params from controls in its own layer. Unlike the browser, it ignores controls from other layers that point to the form with a `[form]` attribute, e.g. when an overlay shows the same page as the layer below.
 - Fix: While an overlay was closing, an [`[up-switch]`](/learn/switching-form-state) field in it could show or hide elements in the layer behind it. This happened for a field outside a `<form>`, and for an [`[up-switch-region]`](/api/up-switch#up-switch-region) that also matched in that layer.
 
 
@@ -290,15 +289,15 @@ Starting with 3.15, Unpoly logs an error when it boots for every setting that do
 - Fix: When the user clicked a [preloading](/learn/preloading) link while its preload request was still loading, a newer render pass for the same fragment could not [abort](/learn/aborting-requests) the click. Once the preload responded, the click rendered the old response over the newer content, and aborted the newer render pass. The click can now be aborted like any other request, while the preload keeps loading for the cache.
 - ⚠️ A click on an [`[up-expand]`](/api/up-expand) area now does what a click on its link does. When Unpoly follows the link, it now follows the link itself, not the area: events like `up:link:follow` are emitted on the link, the link is the [origin](/api/origin), and its `[data-method]` and `[data-confirm]` attributes apply. When Unpoly doesn't follow the link, the area clicks it, and the browser does what the link does: a `[download]` link downloads its file, a `[target=_blank]` link opens a new tab, and a link without `[up-follow]` makes a full page load. To keep updating a fragment, give the link an `[up-follow]` attribute or [follow all links](/learn/handling-all-links).
 - Fix: Clicking a button, a `<label>` or a `<summary>` inside an [`[up-expand]`](/api/up-expand) area, or inside another followable element that isn't a link, followed the link. A submit button didn't submit its form, a label didn't toggle its checkbox, and a `<details>` element didn't open. These elements now handle their own clicks, like links and fields already did. Inside an `<a>` element, buttons and labels still belong to the link.
-- ⚠️ Clicks made by JavaScript, like `element.click()`, now always emit [`up:click`](/api/up:click).
-- Fix: Clicking a form field inside an [`[up-instant]`](/api/up-instant) link did nothing. Unpoly didn't follow the link, but also prevented the click, so a checkbox didn't toggle. The same happened for fields, buttons and labels inside an `[up-instant]` area, e.g. an [`[up-expand]`](/api/up-expand) area that copied `[up-instant]` from its link. These elements now handle their own clicks.
+- ⚠️ Clicks made by JavaScript, like `element.click()`, now always emit [`up:click`](/api/up:click). When a script clicks a link, Unpoly now follows it, also while handling another click or within a popup. To have the browser follow the link instead, set `[up-follow=false]` on it.
+- Fix: Clicking a form field inside an [`[up-instant]`](/api/up-instant) link or area, e.g. an [`[up-expand]`](/api/up-expand) area around an `[up-instant]` link, did nothing. Unpoly didn't follow the link, but also prevented the click, so a checkbox didn't toggle. Fields now handle their own clicks.
 - Fix: An [`[up-instant]`](/api/up-instant) link did nothing when another script prevented its `mousedown` event, e.g. to keep the focus in a search field. Unpoly now follows such a link on `click`, and emits [`up:click`](/api/up:click) on `click` instead of `mousedown`.
 
 
 ### unpoly-migrate.js
 
 - ⚠️ [`unpoly-migrate.js`](/changes/upgrading) now logs deprecations as errors, so test suites that fail on console errors find them without extra configuration. To log warnings as before, set `up.migrate.config.logLevel = 'warn'`.
-- `unpoly-migrate.js` warnings about renamed render, request or layer options now name where the option was used, like the origin element or URL. They are printed once for each place, not once per page load.
+- `unpoly-migrate.js` warnings about renamed render, request or layer options now name where the option was used, like the origin element or URL, instead of printing the options object. Each place is reported once.
 - The `unpoly-migrate.js` warning for the deprecated origin shorthand `&` now names the target and the origin element. When the origin is a button or field in a form, it also reminds you that a form submission's `:origin` is now the button or changed field, not the form, and that `form:has(:origin)` targets the form.
 - Fix: `unpoly-migrate.js` logged deprecations that the app never caused when a script enumerated an object with deprecated properties, e.g. an analytics script walking `window.up`, or another deprecation message printing a config object.
 - Fix: The `unpoly-migrate.js` polyfills for `up.popup.attach()`, `up.modal.follow()` and `up.modal.extract()` now open a new overlay again.
