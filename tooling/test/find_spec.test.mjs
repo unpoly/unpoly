@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { findSpecs, formatMatches, parseSuite, specFiltersFor, staleChains } from '../find_spec.mjs'
+import { findSpecs, formatMatches, parseLocation, parseSuite, specFiltersFor, staleChains } from '../find_spec.mjs'
 
 // A suite of one module file, loaded by spec/specs.js like the real ones. Further files
 // are only reached through require().
@@ -269,7 +269,7 @@ describe('up.form', function() {
 
   // Space-joined and quoted, because that string *is* what --spec matches.
   assert.deepEqual(formatMatches(matches, { phrase: 'submits' }),
-    ['spec/unpoly/form_spec.js:4 "up.form [up-submit] submits the form"'])
+    ['spec/unpoly/form_spec.js:4-4 "up.form [up-submit] submits the form"'])
 })
 
 test('a condition is printed after the quoted full name, so the name stays pasteable', () => {
@@ -282,7 +282,24 @@ describe('up.form', function() {
 `), 'submits')
 
   assert.deepEqual(formatMatches(matches, { phrase: 'submits' }),
-    ['spec/unpoly/form_spec.js:4 "up.form submits the form"  (if up.migrate.loaded)'])
+    ['spec/unpoly/form_spec.js:4-4 "up.form submits the form"  (if up.migrate.loaded)'])
+})
+
+test('a location spans the whole describe() or it() call', () => {
+  let matches = findSpecs(suite(`
+describe('up.form', function() {
+  describe('[up-submit]', function() {
+    it('submits the form', function() {
+      expect(true).toBe(true)
+    })
+  })
+})
+`), 'up')
+
+  assert.deepEqual(formatMatches(matches, { phrase: 'up' }), [
+    'spec/unpoly/form_spec.js:2-8 "up.form"',
+    'spec/unpoly/form_spec.js:3-7 "up.form [up-submit]"',
+  ])
 })
 
 test('color highlights the phrase and leaves plain output untouched', () => {
@@ -301,21 +318,21 @@ test('locations are padded so every describe path starts in the same column', ()
   // Alignment is what makes a long result list scannable. It needs the whole match set
   // up front, which is why formatMatches() takes the array rather than a single match.
   const matches = [
-    { file: 'spec/unpoly/form_spec.js', line: 7, titles: ['up.form', 'submits'] },
-    { file: 'spec/unpoly/fragment_render_history_spec.js', line: 1234, titles: ['up.fragment', 'submits'] },
+    { file: 'spec/unpoly/form_spec.js', line: 7, endLine: 9, titles: ['up.form', 'submits'] },
+    { file: 'spec/unpoly/fragment_render_history_spec.js', line: 1234, endLine: 1240, titles: ['up.fragment', 'submits'] },
   ]
 
   const lines = formatMatches(matches, { phrase: 'submits' })
   const columns = lines.map((line) => line.indexOf('"'))
 
   assert.equal(columns[0], columns[1], `paths start in different columns: ${columns}`)
-  assert.match(lines[0], /form_spec\.js:7 {2,}"/, 'the shorter location is padded')
+  assert.match(lines[0], /form_spec\.js:7-9 {2,}"/, 'the shorter location is padded')
 })
 
 test('padding is measured without the colour codes', () => {
   const matches = [
-    { file: 'a.js', line: 1, titles: ['x', 'submits'] },
-    { file: 'bbbbbbbb.js', line: 22, titles: ['x', 'submits'] },
+    { file: 'a.js', line: 1, endLine: 2, titles: ['x', 'submits'] },
+    { file: 'bbbbbbbb.js', line: 22, endLine: 30, titles: ['x', 'submits'] },
   ]
 
   const plain = formatMatches(matches, { phrase: 'submits' })
@@ -423,4 +440,15 @@ describe('up.form', function() {
 `)
   assert.deepEqual(specFiltersFor(parsed, 'spec/unpoly/form_spec.js', 4),
     [{ name: 'up.form submits', condition: 'up.migrate.loaded' }])
+})
+
+// --- parseLocation: reading a --file value ---------------------------------------------
+
+test('a --file value is a path, optionally with a line', () => {
+  assert.deepEqual(parseLocation('spec/unpoly/form_spec.js'), { file: 'spec/unpoly/form_spec.js', line: null })
+  assert.deepEqual(parseLocation('spec/unpoly/form_spec.js:12'), { file: 'spec/unpoly/form_spec.js', line: 12 })
+})
+
+test('a --file value takes the range bin/find-spec prints, and uses its start line', () => {
+  assert.deepEqual(parseLocation('spec/unpoly/form_spec.js:12-40'), { file: 'spec/unpoly/form_spec.js', line: 12 })
 })

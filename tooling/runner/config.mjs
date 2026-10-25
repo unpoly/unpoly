@@ -39,8 +39,9 @@ const PARSERS = {
   // --spec more than once and the run is the union of all of them. Matched verbatim,
   // never as a regular expression — see spec/helpers/spec_filter.js.
   'spec': (value) => parseList(value),
-  // (terminal only) Spec files, each optionally `:line`, turned into `spec` filters — so
-  // you can run what you are looking at without retyping its title. Repeatable too.
+  // (terminal only) Spec files, each optionally `:line` or `:line-end`, turned into `spec`
+  // filters — so you can run what you are looking at without retyping its title.
+  // Repeatable too.
   'file': (value) => parseList(value),
   // Whether to deliver the test runner with a strict script-src CSP.
   'csp': (value) => parseEnumString(value, ['none', 'nonce-only', 'strict-dynamic'], 'none'),

@@ -20,7 +20,8 @@ const GROUP = /^([fx]?describe|describeFallback)$/
 const SPEC = /^[fx]?it$/
 
 // Every block in the suite, in the order Jasmine registers it:
-//   { file, line, kind, title, titles, isGroup, condition, chain, topInFile }
+//   { file, line, endLine, kind, title, titles, isGroup, condition, chain, topInFile }
+// `line` and `endLine` are where its describe()/it() call starts and ends.
 // `titles` is the real path from the root of the suite, ending in the block's own title.
 // `condition` is the source of the `if` tests around it, or null. `chain` is the
 // extendDescribe() titles around it in its own file, and `topInFile` says that no group of
@@ -60,7 +61,8 @@ export function parseSuite(sources) {
           const extend = name === 'extendDescribe'
           const titles = extend ? ctx.titles : [...ctx.titles, title]
           entries.push({
-            file, line: node.loc.start.line, kind: name, title, titles, isGroup: GROUP.test(name),
+            file, line: node.loc.start.line, endLine: node.loc.end.line,
+            kind: name, title, titles, isGroup: GROUP.test(name),
             condition: ctx.condition, chain: ctx.chain, topInFile: !ctx.inFileGroup,
           })
           const body = node.arguments.find((arg) => /Function/.test(arg.type))
@@ -195,6 +197,14 @@ export function specFiltersFor(suite, file, line = null) {
   return [...filters.values()]
 }
 
+// Splits a --file value into the path and the line it points at (or null). Takes
+// `path`, `path:line` and the `path:line-endLine` that bin/find-spec prints; the end of
+// a range is ignored, since the start line already names the block.
+export function parseLocation(location) {
+  const [, file, line] = /^(.*?)(?::(\d+)(?:-\d+)?)?$/.exec(location)
+  return { file, line: line ? Number(line) : null }
+}
+
 // A title with ${…} can't be matched verbatim, so a filter stops at the last fixed title
 // above it. The runner echoes what it derived.
 function staticPrefix(titles) {
@@ -214,7 +224,8 @@ export function staleChains(suite) {
   })
 }
 
-// One line per match: `file:line "full describe path"`. The path is space-joined, which
+// One line per match: `file:line-endLine "full describe path"`. The range lets a reader
+// open just that block, and --file takes it as it is. The path is space-joined, which
 // makes it exactly the full name Jasmine matches, so it can be pasted straight into
 // --spec; the quotes mark where it starts and ends. A block that only runs under a
 // condition says so after the quotes. Ancestry stays dim and the matched phrase bold, which
@@ -225,12 +236,14 @@ export function formatMatches(matches, { phrase, color = false } = {}) {
   // Locations are padded to the widest one so every path starts in the same column, which
   // is what makes a long result list scannable. Measured before painting, since the ANSI
   // codes would otherwise count towards the width.
-  const width = Math.max(0, ...matches.map(({ file, line }) => `${file}:${line}`.length))
+  const locationOf = ({ file, line, endLine }) => `${file}:${line}-${endLine}`
+  const width = Math.max(0, ...matches.map((match) => locationOf(match).length))
 
-  return matches.map(({ file, line, titles, condition }) => {
+  return matches.map((match) => {
+    const { titles, condition } = match
     const own = titles[titles.length - 1]
     const ancestry = titles.slice(0, -1)
-    const location = `${file}:${line}`
+    const location = locationOf(match)
     const at = paint.path(location) + ' '.repeat(width - location.length)
     const above = ancestry.length ? paint.ancestry(ancestry.join(' ') + ' ') : ''
     const only = condition ? paint.ancestry(`  (if ${condition})`) : ''
@@ -239,7 +252,7 @@ export function formatMatches(matches, { phrase, color = false } = {}) {
 }
 
 const ANSI = {
-  path: (s) => `\x1b[36m${s}\x1b[0m`,      // cyan: file:line
+  path: (s) => `\x1b[36m${s}\x1b[0m`,      // cyan: file:line-endLine
   ancestry: (s) => `\x1b[2m${s}\x1b[0m`,   // dim: the groups above the match
   match: (s) => `\x1b[1;33m${s}\x1b[0m`,   // bold yellow: the phrase itself
 }

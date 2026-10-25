@@ -109,7 +109,7 @@ never compiled, an overlay still on the stack, a fragment inserted in the wrong 
 | Option | Effect |
 |--------|--------|
 | `--spec="…"` | Only run specs whose full name contains this string. Matched verbatim, never as a pattern |
-| `--file=path[:line]` | Run what a file declares — or, with `:line`, just the group or spec declared on that line |
+| `--file=path[:line[-end]]` | Run what a file declares — or, with `:line`, just the group or spec declared on that line |
 | `--all` | Run every spec. Required for an unfiltered run, so the nine minutes are deliberate |
 | `--verbose` | Add the browser log + HTML state (fixtures, overlays) to each failure |
 | `--browser=firefox` | Run in Firefox instead of Chrome |
@@ -139,9 +139,10 @@ A failed spec exits non-zero. The spec runner itself is documented in
 Don't run it after every edit.
 
 **Find the specs that cover your change and run only those.** `bin/find-spec` searches
-`describe()` and `it()` titles and prints the full name of every match. Search more than once:
-the name in a spec title is rarely the one you were editing, so try the attribute, the
-function, the option and the plain-English term:
+`describe()` and `it()` titles and prints the line range (`path:start-end`) and full name of
+every match. The range tells you which lines to read, and works with `--file`. Search more
+than once: the name in a spec title is rarely the one you were editing, so try the attribute,
+the function, the option and the plain-English term:
 
 ```
 bin/find-spec "fieldSelectors"
@@ -257,9 +258,9 @@ for `[up-switch]`. `ls spec/unpoly | grep ^form_` lists them all.
 
 ```
 $ bin/find-spec "kept element"
-spec/unpoly/fragment_keep_spec.js:47  "up.fragment HTML [up-keep] does not run destructors within kept elements"
-spec/unpoly/fragment_keep_spec.js:73  "up.fragment HTML [up-keep] does not run destructors within kept elements when the <body> is targeted (bugfix)"
-spec/unpoly/fragment_keep_spec.js:143 "up.fragment HTML [up-keep] omits a kept element from the returned up.RenderResult"
+spec/unpoly/fragment_keep_spec.js:47-71   "up.fragment HTML [up-keep] does not run destructors within kept elements"
+spec/unpoly/fragment_keep_spec.js:73-92   "up.fragment HTML [up-keep] does not run destructors within kept elements when the <body> is targeted (bugfix)"
+spec/unpoly/fragment_keep_spec.js:143-163 "up.fragment HTML [up-keep] omits a kept element from the returned up.RenderResult"
 …
 ```
 

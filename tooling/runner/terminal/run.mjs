@@ -20,7 +20,7 @@ import { createRemapper } from './source_map.mjs'
 import { createReceiver } from './receiver.mjs'
 import { buildFailure } from './formatter.mjs'
 import { specsURL } from './urls.mjs'
-import { parseSuite, readSources, specFiltersFor } from '../../find_spec.mjs'
+import { parseLocation, parseSuite, readSources, specFiltersFor } from '../../find_spec.mjs'
 import { isDevEnvRunning, startDevEnv } from '../../dev_env.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -39,7 +39,7 @@ function parseConfig(argv, env) {
   }
 }
 
-// Turns every `--file=path[:line]` into ordinary `spec` filters, so the rest of the
+// Turns every `--file=path[:line[-end]]` into ordinary `spec` filters, so the rest of the
 // runner (and the page URL) only ever deals with full names. Reuses the parser behind
 // bin/find-spec rather than growing a second way to read a spec file.
 //
@@ -51,8 +51,7 @@ function resolveFileOption(config) {
   const suite = parseSuite(readSources(projectRoot))
   const filters = []
   for (let location of config.file) {
-    const [, name, lineText] = /^(.*?)(?::(\d+))?$/.exec(location)
-    const line = lineText ? Number(lineText) : null
+    const { file: name, line } = parseLocation(location)
     const absolute = path.resolve(projectRoot, name)
     const file = path.relative(projectRoot, absolute).split(path.sep).join('/')
 
