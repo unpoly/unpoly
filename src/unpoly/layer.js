@@ -838,12 +838,10 @@ up.layer = (function() {
   */
   function ask(options) {
     return new Promise(function(resolve, reject) {
-      options = {
-        ...options,
+      open(up.RenderOptions.chainCallbacks(options, {
         onAccepted: (event) => resolve(event.value),
-        onDismissed: (event) => reject(event.value)
-      }
-      open(options)
+        onDismissed: (event) => reject(event.value),
+      }))
     })
   }
 

@@ -584,6 +584,32 @@ describe('up.layer', function() {
 
         await expectAsync(promise).toBeRejectedWith('dismissal value')
       })
+
+      it("calls an { onAccepted } callback when the overlay is accepted", async function() {
+        up.motion.config.enabled = false
+        const onAccepted = jasmine.createSpy('onAccepted callback')
+
+        const promise = up.layer.ask({ content: 'Would you like to accept?', onAccepted })
+        await wait()
+
+        up.layer.accept('acceptance value')
+
+        await expectAsync(promise).toBeResolvedTo('acceptance value')
+        expect(onAccepted).toHaveBeenCalledWith(jasmine.objectContaining({ type: 'up:layer:accepted', value: 'acceptance value' }))
+      })
+
+      it("calls an { onDismissed } callback when the overlay is dismissed", async function() {
+        up.motion.config.enabled = false
+        const onDismissed = jasmine.createSpy('onDismissed callback')
+
+        const promise = up.layer.ask({ content: 'Would you like to accept?', onDismissed })
+        await wait()
+
+        up.layer.dismiss('dismissal value')
+
+        await expectAsync(promise).toBeRejectedWith('dismissal value')
+        expect(onDismissed).toHaveBeenCalledWith(jasmine.objectContaining({ type: 'up:layer:dismissed', value: 'dismissal value' }))
+      })
     })
 
     describe('up.layer.current', function() {

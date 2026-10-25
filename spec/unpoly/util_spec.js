@@ -804,10 +804,19 @@ describe('up.util', () => {
         const one = () => values.push('one')
         const two = () => values.push('two')
         const three = () => values.push('three')
-        const sequence = up.util.sequence(one, false, two, undefined, three)
+        const sequence = up.util.sequence(one, false, two, undefined, null, three)
         expect(values).toEqual([])
         sequence()
         expect(values).toEqual(['one', 'two', 'three'])
+      })
+
+      it('passes its arguments to each function', function() {
+        const one = jasmine.createSpy('one')
+        const two = jasmine.createSpy('two')
+        const sequence = up.util.sequence(one, two)
+        sequence('foo', 'bar')
+        expect(one).toHaveBeenCalledWith('foo', 'bar')
+        expect(two).toHaveBeenCalledWith('foo', 'bar')
       })
 
       it('returns an array of all return values', function() {

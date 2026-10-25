@@ -25,14 +25,12 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change {
     // removal animation.
     up.fragment.markAsDestroying(this._element)
 
-    up.animate(this._element, this._animation, {
-      ...this.options,
+    up.animate(this._element, this._animation, up.RenderOptions.chainCallbacks(this.options, {
       onFinished: () => {
         this._erase()
         this._emitDestroyed()
-        this.options.onFinished?.()
       }
-    })
+    }))
   }
 
   _erase() {

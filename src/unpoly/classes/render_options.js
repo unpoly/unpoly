@@ -271,6 +271,16 @@ up.RenderOptions = (function() {
     }
   }
 
+  // Returns a copy of the given options where each callback in ownCallbacks runs before
+  // the caller's callback of the same name.
+  function chainCallbacks(options, ownCallbacks) {
+    let chained = { ...options }
+    for (let key in ownCallbacks) {
+      chained[key] = u.sequence(ownCallbacks[key], options[key])
+    }
+    return chained
+  }
+
   return {
     preprocess,
     finalize,
@@ -278,6 +288,7 @@ up.RenderOptions = (function() {
     deriveFailOptions,
     parseCallback,
     callbackAttr,
+    chainCallbacks,
     NO_PREVIEWS,
     NO_MOTION,
     NO_INPUT_INTERFERENCE,

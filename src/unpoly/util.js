@@ -1583,10 +1583,12 @@ up.util = (function() {
   @param {Array<Function()>} functions
   @return {Function()}
     A function that will call all `functions` if called.
+
+    Its arguments are passed on to each function.
   @internal
   */
   function sequence(...fns) {
-    return (...callArgs) => callAll(fns, callArgs)
+    return (...callArgs) => callAll(fns, ...callArgs)
   }
 
   function callAll(fns, ...args) {

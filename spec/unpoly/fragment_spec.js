@@ -213,21 +213,24 @@ describe('up.fragment', function() {
       })
 
       it('runs an { onFinished } callback after the element has been removed from the DOM', async function() {
-        const $parent = $fixture('.parent')
-        const $element = $parent.affix('.element')
-        expect($element).toBeAttached()
+        const [parent, element] = htmlFixtureList(`
+          <div class="parent">
+            <div class="element"></div>
+          </div>
+        `)
+        let attachedDuringCallback
+        const onFinished = jasmine.createSpy('onFinished callback').and.callFake(() => attachedDuringCallback = element.isConnected)
 
-        const onFinished = jasmine.createSpy('onFinished callback')
-
-        up.destroy($element, { animation: 'fade-out', duration: 30, onFinished })
+        up.destroy(element, { animation: 'fade-out', duration: 30, onFinished })
         await wait()
 
-        expect($element).toBeAttached()
+        expect(element).toBeAttached()
         expect(onFinished).not.toHaveBeenCalled()
         await wait(200)
 
-        expect($element).toBeDetached()
-        expect(onFinished).toHaveBeenCalled()
+        expect(element).toBeDetached()
+        expect(onFinished).toHaveBeenCalledTimes(1)
+        expect(attachedDuringCallback).toBe(false)
       })
 
       it('calls #sync() on all layers in the stack', async function() {
