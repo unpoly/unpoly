@@ -1,7 +1,7 @@
 # Commit conventions
 
-How we write commits and what happens to them: the module prefix every subject carries, what
-CI runs when you open a pull request, and what an agent must ask before committing.
+How we write commits and what happens to them: the module prefix every subject carries, and
+what CI runs when you open a pull request.
 
 ## Message prefix
 
@@ -34,8 +34,3 @@ CSP, under a strict-dynamic CSP, against the `unpoly-migrate` build, against the
 build and against the minified build.
 
 It runs on every pull request against `master`, and on every push to `master`.
-
-
-## If you are an agent
-
-Ask your human before committing, pushing or opening a pull request.

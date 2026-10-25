@@ -98,8 +98,6 @@ changing documentation. The directive set is large and you won't guess it.
 
 > Commit messages are prefixed with the main module in square brackets, e.g.
 > `[link] Ignore CTRL clicks`. CI runs all tests on every pull request.
-> Agents should ask their human before committing, pushing or opening a
-> pull request.
 
 [Read the commit conventions](docs/contributing/commit-conventions.md) before making a
 commit.

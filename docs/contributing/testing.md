@@ -5,7 +5,7 @@ every change are what let you alter code you don't fully understand and find out
 Treat a green suite as permission to be bold, and a red one as the cheapest possible bug report.
 
 "Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each module `foo.js` has a
-spec `spec/unpoly/foo_spec.js`.
+spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
 
 <!-- toc -->
 - [Running tests](#running-tests)
@@ -159,9 +159,9 @@ the verification.
 
 **Leave the build variants to CI.** Minified, ES6, two CSP modes and `unpoly-migrate.js` are
 each another full suite, and [CI](commit-conventions.md#continuous-integration) runs them on
-every pull request. Run one locally (filtered) only when CI reported a failure in it, or when
-your change is about what it exercises, like `--csp=…` for CSP work or `--migrate` for a new
-polyfill.
+every pull request. Check its result before you call a change done. Run one locally
+(filtered) only when CI reported a failure in it, or when your change is about what it
+exercises, like `--csp=…` for CSP work or `--migrate` for a new polyfill.
 
 
 ## If you are an agent
@@ -174,6 +174,10 @@ a hang: a run that stops making progress exits non-zero by itself.
 
 **The full output is always in `tmp/test.log`**, without colours. Read it instead of
 running the suite again.
+
+**Run Firefox only for a Firefox issue.** Firefox runs (`--browser=firefox`) are too
+unreliable for a general check, so CI doesn't run them either. Leave them out unless your
+task is about a bug in Firefox.
 
 
 ## Why a real browser
