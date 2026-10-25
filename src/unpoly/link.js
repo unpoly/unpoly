@@ -769,19 +769,29 @@ up.link = (function() {
   // Returns whether a click on the given target is meant for the given link,
   // and not for another interactive element within the link.
   function isClickTarget(target, link) {
-    // A click within a nested [up-expand] area belongs to that area.
-    // Only a working area has an { upExpandedPair }, so an inert area or [up-expand=false] does not block the click.
+    // A click within a nested [up-expand] area belongs to that area, but only if:
+    // (1) The area works. Only the [up-expand] macro sets an { upExpandedPair },
+    //     so an inert area or [up-expand=false] does not take the click.
+    // (2) The area is not the element we're testing, e.g. when the area asks about a click on itself.
+    // (3) The area is inside the element. closest() may also find an area around it,
+    //     but that outer area does not take the click from its content.
     const innerArea = target.closest('[up-expand]')
     if (innerArea?.upExpandedPair && innerArea !== link && link.contains(innerArea)) {
       return false
     }
 
-    // If user clicked on a child link of $link, or on a field, we want those other elements handle the click.
-    // A link's buttons, labels and summaries belong to the link, but a clickable container like [up-expand]
-    // leaves them to handle their own clicks.
+    // An element within the link may be a better target that handles the click itself:
+    // (1) A nested link or [up-follow] element is always followed on its own.
+    // (2) A field always handles its own click.
+    // (3) A link's buttons, labels and summaries are part of its content, so clicking them follows the link.
+    //     A clickable container like an [up-expand] area leaves them to handle their own clicks.
     const betterTargetSelector = `a, [up-follow], ${link.matches('a') ? up.form.fieldSelector() : interactiveSelector()}`
-    // An element around the link, like an outer [up-expand] area, is not a better target.
     const betterTarget = target.closest(betterTargetSelector)
+    // The click is meant for the link if:
+    // (1) Nothing more specific than the link was clicked.
+    // (2) The closest better target is the link itself.
+    // (3) closest() walked past the link to an element around it, like an outer [up-expand] area
+    //     or a <label> around the link. A better target must lie between the click target and the link.
     return !betterTarget || (betterTarget === link) || !link.contains(betterTarget)
   }
 
