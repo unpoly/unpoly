@@ -1,14 +1,13 @@
 Agent skill
 ===========
 
-Unpoly's documentation is available as an agent skill for AI coding tools. Once
-installed, your coding agent can look up how Unpoly works, its best practices and
-exact API details, instead of guessing from what it remembers.
+Unpoly's documentation is available as an agent skill for AI coding tools. With the
+skill, your coding agent follows Unpoly's best practices, knows every API detail and
+upgrades your app to new Unpoly versions on its own.
 
-The skill holds every guide, the full API reference and the release notes of all
-versions as Markdown files, with a search script your agent runs locally. That is
-faster than fetching pages from the web, and works offline. The release notes also help
-when your agent upgrades an app from an older Unpoly version.
+The skill contains every guide, the full API reference, the [upgrade guide](/changes/upgrading)
+and the release notes of all versions as Markdown files, with a search script your agent
+runs locally. That is faster than fetching pages from the web, and works offline.
 
 
 ## Install with `npx skills` {#npx-skills}
