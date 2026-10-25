@@ -2362,6 +2362,88 @@ describe('up.link', function() {
 
       })
 
+      describe('when nested in another [up-expand] area', function() {
+
+        let html = (innerCell) => `
+          <table>
+            <tbody>
+              <tr up-expand>
+                <td><a href="/edit" up-follow up-layer="new">Edit</a></td>
+                <td>Name</td>
+                ${innerCell}
+              </tr>
+            </tbody>
+          </table>
+        `
+
+        it('follows the inner link once when the user clicks the inner area, and the outer link when the user clicks elsewhere', async function() {
+          const [table, tbody, row, editCell, editLink, nameCell, qrCell, qrLink] = htmlFixtureList(html(`
+            <td up-expand><a href="/qr" up-follow up-layer="new">QR</a></td>
+          `))
+          up.hello(row)
+          const followListener = jasmine.createSpy('up:link:follow listener').and.callFake((event) => event.preventDefault())
+          up.on('up:link:follow', followListener)
+
+          Trigger.clickSequence(qrCell)
+          await wait()
+
+          expect(followListener.calls.count()).toBe(1)
+          expect(followListener.calls.argsFor(0)[0].target).toBe(qrLink)
+
+          Trigger.clickSequence(nameCell)
+          await wait()
+
+          expect(followListener.calls.count()).toBe(2)
+          expect(followListener.calls.argsFor(1)[0].target).toBe(editLink)
+        })
+
+        const nonFollowedCases = {
+          'a[download]': '<a href="/file.pdf" download>Download</a>',
+          'a[up-follow=false]': '<a href="/path" up-follow="false">Download</a>',
+        }
+
+        for (let [description, linkHTML] of Object.entries(nonFollowedCases)) {
+          it(`clicks the inner link when the user clicks the inner area around ${description}, and does not follow the outer link`, async function() {
+            const [table, tbody, row, editCell, editLink, nameCell, innerCell, innerLink] = htmlFixtureList(html(`
+              <td up-expand>${linkHTML}</td>
+            `))
+            up.hello(row)
+            spyOn(innerLink, 'click').and.callThrough()
+            const followListener = jasmine.createSpy('up:link:follow listener')
+            up.on('up:link:follow', followListener)
+
+            Trigger.clickSequence(innerCell)
+            await wait()
+
+            expect(innerLink.click).toHaveBeenCalledTimes(1)
+            expect(innerLink).toHaveBeenDefaultFollowed()
+            expect(followListener).not.toHaveBeenCalled()
+            expect(jasmine.Ajax.requests.count()).toBe(0)
+          })
+        }
+
+        const outerCases = {
+          'an [up-expand] element without a link': '<td up-expand>No link</td>',
+          'an [up-expand=false] element': '<td up-expand="false"><a href="/file.pdf" download>Download</a></td>',
+        }
+
+        for (let [description, cellHTML] of Object.entries(outerCases)) {
+          it(`follows the outer link when the user clicks ${description}`, async function() {
+            const [table, tbody, row, editCell, editLink, nameCell, innerCell] = htmlFixtureList(html(cellHTML))
+            up.hello(row)
+            const followListener = jasmine.createSpy('up:link:follow listener').and.callFake((event) => event.preventDefault())
+            up.on('up:link:follow', followListener)
+
+            Trigger.clickSequence(innerCell)
+            await wait()
+
+            expect(followListener.calls.count()).toBe(1)
+            expect(followListener.calls.argsFor(0)[0].target).toBe(editLink)
+          })
+        }
+
+      })
+
       if (up.migrate.loaded) {
         it('makes the expanded area followable if the expanded link is [up-dash] with a selector (bugfix)', function() {
           const $area = $fixture('div[up-expand] a[href="/path"][up-dash=".element"]')

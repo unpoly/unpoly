@@ -769,12 +769,20 @@ up.link = (function() {
   // Returns whether a click on the given target is meant for the given link,
   // and not for another interactive element within the link.
   function isClickTarget(target, link) {
+    // A click within a nested [up-expand] area belongs to that area.
+    // Only a working area has an { upExpandedPair }, so an inert area or [up-expand=false] does not block the click.
+    const innerArea = target.closest('[up-expand]')
+    if (innerArea?.upExpandedPair && innerArea !== link && link.contains(innerArea)) {
+      return false
+    }
+
     // If user clicked on a child link of $link, or on a field, we want those other elements handle the click.
     // A link's buttons, labels and summaries belong to the link, but a clickable container like [up-expand]
     // leaves them to handle their own clicks.
     const betterTargetSelector = `a, [up-follow], ${link.matches('a') ? up.form.fieldSelector() : interactiveSelector()}`
+    // An element around the link, like an outer [up-expand] area, is not a better target.
     const betterTarget = target.closest(betterTargetSelector)
-    return !betterTarget || (betterTarget === link)
+    return !betterTarget || (betterTarget === link) || !link.contains(betterTarget)
   }
 
   // Elements within a clickable container that handle their own clicks.
