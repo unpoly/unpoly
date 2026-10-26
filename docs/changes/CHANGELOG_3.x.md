@@ -3,8 +3,7 @@
 
 A lot has changed for everyone who builds software since our last release. Many of us now write code together with AI agents.
 
-This release makes Unpoly work better for this new way of building software. A [completely rewritten documentation site](https://unpoly.com) helps humans and agents learn Unpoly best practices and look up API details. It is available as HTML, as Markdown and as an offline skill. A new contributor guide helps both humans and agents contribute to the project. We believe that hypermedia-driven apps (HDAs) fit this new age well. They need less code and fewer dependencies, and have fewer moving parts.
-That makes HDAs straightforward to understand and change, for humans and agents alike.
+This release makes Unpoly work better for this new way of building software. A [completely rewritten documentation site](https://unpoly.com) helps humans and agents learn Unpoly best practices and look up API details. It is available as HTML, as Markdown and as an offline skill. A new contributor guide helps both humans and agents contribute to the project. We believe that hypermedia-driven apps (HDAs) fit this way of working well. They need less code, fewer dependencies and fewer moving parts, which makes them straightforward to understand and change for humans and agents alike.
 
 We also made some changes to Unpoly itself. A major new feature is the ability to implement custom form fields as web components ("form-associated custom elements"). We fixed a ton of minor bugs and inconsistencies that had accumulated over Unpoly's 10+ years, and meaningfully improved our test coverage.
 
@@ -15,14 +14,12 @@ Changes that may need your attention are marked with 🧩 when [`unpoly-migrate.
 
 You can now learn Unpoly on unpoly.com from start to finish, and look up details when you need them.
 
-- The new Learn area is a course: [Getting started](/learn/start/overview) takes you from how Unpoly works to your first links, forms, overlays and compilers. After it, 13 chapters cover everything from [Links](/learn/links) and [Forms](/learn/forms) to [Backend integration](/learn/backend-integration) and [Advanced rendering](/learn/advanced-rendering). Each chapter opens with an overview, and every page links to the next one, so you can read the docs like a book.
-- We rewrote the existing guides, split long pages into focused ones, merged pages that overlapped, and added pages for topics that had no home before. We checked the code examples against the source code and fixed the ones that did not work.
-- The sidebar shows where you are in a chapter or module, longer pages show their contents, and a new menu makes the site usable on a phone. Diagrams and videos show what happens on the page.
-- The API reference at `/api` documents every attribute, function, event and option. Every API page links to the Learn page that explains its topic.
-- The new search shows whether a result is a Learn page or an API page, and where it sits in the docs.
+- The new [Learn](/learn) area covers all of Unpoly with best practices and examples, for beginners and pros alike.
+- [Getting started](/learn/start/overview) is a new guide that takes you from how Unpoly works to your first links, forms, overlays and compilers.
+- We checked the code examples against the source code and fixed the ones that did not work. We split long guides into focused pages, merged guides that overlapped, and added pages for missing topics.
+- The new search looks through the full text of every page. It ranks the feature you most likely mean first and favors matches in titles. Each result shows whether it is a guide, an attribute, a function or an event, and which chapter or module it belongs to. It also lists the sections that matched, so you can jump to the right heading. Press `/` to search from any page. Search also works on phones.
+- The [API reference](/api) is now separate from the Learn guides. Every API page links to the guide that explains its topic.
 
-Guides now live under `/learn`, like `/learn/caching`. API pages live under `/api`, like `/api/up.render`.
-Some pages also got a new name, e.g. *Handling failed responses* is now [Error responses](/learn/error-responses), and *Preserving elements* is now [Keeping elements](/learn/keeping-elements).
 Old URLs redirect to the new pages, so your links and bookmarks keep working.
 
 
@@ -42,7 +39,7 @@ If you use Claude Code, you can also [install the skill as a plugin](/learn/skil
 
 Agents can also read the docs without the skill:
 
-- Every page is also available as Markdown. Append `.md` to its URL, e.g. [`https://unpoly.com/api/up.render.md`](https://unpoly.com/api/up.render.md). Agents that ask for `text/markdown` first in their `Accept` header get Markdown at the page's own URL.
+- Every page is available as Markdown. Append `.md` to its URL, e.g. [`https://unpoly.com/api/up.render.md`](https://unpoly.com/api/up.render.md). Agents that ask for `text/markdown` first in their `Accept` header get Markdown at the page's own URL.
 - [`/llms.txt`](https://unpoly.com/llms.txt) lists all guides and API modules, with links an agent can follow.
 - To give a chat a single page, use the copy button next to a page's title. It copies the page as Markdown.
 
@@ -150,7 +147,7 @@ Some smaller changes in this release remove friction you may have worked around:
 When something is wrong, Unpoly now says so earlier and more clearly.
 This also helps coding agents: clear errors and plain-text logs in automated browsers let an agent notice a mistake and fix it on its own.
 
-- ⚠️ When Unpoly boots, it now logs an error for every setting that doesn't exist, like a misspelled key or one that was renamed in an earlier version. Unpoly checks the top-level keys of every `up.*.config` object, but not nested objects like `up.layer.config.modal`. Unpoly checks once, right after booting. If your tests fail on console errors, fix or remove these settings.
+- ⚠️ When Unpoly boots, it now logs an error for every setting that doesn't exist, like a misspelled key or one that was renamed in an earlier version. It checks the top-level keys of every `up.*.config` object, but not nested objects like `up.layer.config.modal`, and only once, right after booting. If your tests fail on console errors, fix or remove these settings.
 - ⚠️ In a browser controlled by automation software, like Selenium, Playwright or Puppeteer, Unpoly now logs plain text without CSS formatting. Test runners, CI and coding agents that read the browser console get readable lines instead of `%c` placeholders and style strings. Normal browsers still format the log. To always format, set [`up.log.config.format = true`](/api/up.log.config#config.format).
 - Error messages, warnings and [unformatted log output](/api/up.log.config#config.format) now print objects more readably. A plain object prints as `{ foo: "bar" }`, a request as `up.Request(GET /users/5)` and an error as `up.CannotMatch(message)`. A circular reference prints `(circular)` where the cycle closes, instead of replacing the whole value.
 - Fix: When an app's bundler minified `unpoly.js`, errors could lose their names. For example, an `up.CannotMatch` error was named `up.`. Errors now keep their names under any minifier.
