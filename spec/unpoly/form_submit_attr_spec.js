@@ -1069,6 +1069,39 @@ extendDescribe('up.form', function() {
         })
       })
 
+      describe('with [up-confirm] modifier', function() {
+
+        it('submits the form without a confirmation dialog when the attribute value is "false"', async function() {
+          spyOn(window, 'confirm')
+          const [form, submitButton] = htmlFixtureList(`
+            <form method="post" action="/action" up-submit up-target="#target" up-confirm="false">
+              <button type="submit">Submit</button>
+            </form>
+          `)
+
+          Trigger.clickSequence(submitButton)
+          await wait()
+
+          expect(window.confirm).not.toHaveBeenCalled()
+          expect(jasmine.lastRequest().url).toMatchURL('/action')
+        })
+
+        it('submits the form without a confirmation dialog when the submit button has [up-confirm="false"]', async function() {
+          spyOn(window, 'confirm')
+          const [form, submitButton] = htmlFixtureList(`
+            <form method="post" action="/action" up-submit up-target="#target" up-confirm="Really?">
+              <button type="submit" up-confirm="false">Submit</button>
+            </form>
+          `)
+
+          Trigger.clickSequence(submitButton)
+          await wait()
+
+          expect(window.confirm).not.toHaveBeenCalled()
+          expect(jasmine.lastRequest().url).toMatchURL('/action')
+        })
+      })
+
       describe('with [up-preview] modifier', function() {
         it('shows a preview effect while the form is loading', async function() {
           const target = fixture('#target', { text: 'old target' })

@@ -5,6 +5,9 @@ We tunnel some browser APIs through this module for easier mocking in tests.
 @internal
 */
 up.browser = (function() {
+
+  const u = up.util
+
   /*-
   Submits the given form with a full page load.
 
@@ -72,7 +75,7 @@ up.browser = (function() {
   @internal
   */
   function assertConfirmed(options) {
-    const confirmed = !options.confirm || window.confirm(options.confirm)
+    const confirmed = !u.isString(options.confirm) || !options.confirm || window.confirm(options.confirm)
     if (!confirmed) {
       throw new up.Aborted('User canceled action')
     }

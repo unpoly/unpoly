@@ -644,6 +644,42 @@ extendDescribe('up.link', function() {
       })
 
 
+      describe('with [up-confirm] modifier', function() {
+
+        it('shows a confirmation dialog with the given message before following the link', async function() {
+          spyOn(window, 'confirm').and.returnValue(true)
+          const [link] = htmlFixtureList('<a href="/foo" up-follow up-target="#target" up-confirm="Really?">label</a>')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(window.confirm).toHaveBeenCalledWith('Really?')
+          expect(jasmine.lastRequest().url).toMatchURL('/foo')
+        })
+
+        it('follows the link without a confirmation dialog when the attribute value is "false"', async function() {
+          spyOn(window, 'confirm')
+          const [link] = htmlFixtureList('<a href="/foo" up-follow up-target="#target" up-confirm="false">label</a>')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(window.confirm).not.toHaveBeenCalled()
+          expect(jasmine.lastRequest().url).toMatchURL('/foo')
+        })
+
+        it('follows the link without a confirmation dialog when the attribute value is empty', async function() {
+          spyOn(window, 'confirm')
+          const [link] = htmlFixtureList('<a href="/foo" up-follow up-target="#target" up-confirm="">label</a>')
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(window.confirm).not.toHaveBeenCalled()
+          expect(jasmine.lastRequest().url).toMatchURL('/foo')
+        })
+      })
+
       describe('with [up-preview] modifier', function() {
         it('shows a preview effect while the link is loading', async function() {
           const target = fixture('#target', { text: 'old target' })

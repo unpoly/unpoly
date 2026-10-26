@@ -196,6 +196,18 @@ describe('up.rails', function() {
           })
         }
 
+        it('follows a link with [data-confirm="false"] without a confirmation dialog', async function() {
+          spyOn(window, 'confirm')
+          const [link] = htmlFixtureList('<a href="/foo" up-follow up-target="#target" data-confirm="false">label</a>')
+          up.hello(link)
+
+          Trigger.clickSequence(link)
+          await wait()
+
+          expect(window.confirm).not.toHaveBeenCalled()
+          expect(jasmine.lastRequest().url).toMatchURL('/foo')
+        })
+
         describe('on link that is not followable', () => {
           it("is not changed", function() {
             const $element = $fixture(`a[href="/foo"][data-confirm="Really?"]`)

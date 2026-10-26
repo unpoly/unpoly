@@ -1744,6 +1744,17 @@ describe('up.layer', function() {
             expect(followListener).not.toHaveBeenCalled()
             expect(link).not.toHaveBeenDefaultFollowed()
           })
+
+          it('accepts the overlay without a confirmation dialog when the attribute value is "false"', function() {
+            const [root, overlay] = makeLayers(2)
+            const link = overlay.affix('a[up-accept][up-confirm="false"]')
+            spyOn(window, 'confirm')
+
+            Trigger.clickSequence(link)
+
+            expect(window.confirm).not.toHaveBeenCalled()
+            expect(overlay).not.toBeAlive()
+          })
         })
       })
 

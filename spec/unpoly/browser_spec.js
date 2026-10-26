@@ -24,6 +24,18 @@ describe('up.browser', function() {
         up.browser.assertConfirmed({})
         expect(window.confirm).not.toHaveBeenCalled()
       })
+
+      it('does not show a confirmation dialog for { confirm: true }, as there is no message to show', function() {
+        spyOn(window, 'confirm')
+        up.browser.assertConfirmed({ confirm: true })
+        expect(window.confirm).not.toHaveBeenCalled()
+      })
+
+      it('does not show a confirmation dialog for { confirm: false }', function() {
+        spyOn(window, 'confirm')
+        up.browser.assertConfirmed({ confirm: false })
+        expect(window.confirm).not.toHaveBeenCalled()
+      })
     })
 
     describe('up.browser.popCookie', function() {
