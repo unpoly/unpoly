@@ -503,7 +503,7 @@ extendDescribe('up.fragment', function() {
           it('does not use options like { confirm } or { feedback } when verifying', async function() {
             const confirmSpy = spyOn(window, 'confirm').and.returnValue(true)
 
-            up.render('.target', { url: '/cached-path', cache: true, revalidate: true, confirm: true, feedback: true })
+            up.render('.target', { url: '/cached-path', cache: true, revalidate: true, confirm: 'Are you sure?', feedback: true })
             expect(confirmSpy.calls.count()).toBe(1)
             await wait()
 
