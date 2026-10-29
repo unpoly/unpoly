@@ -25,6 +25,13 @@ function changelogPath() {
   return `docs/changes/CHANGELOG_${major}.x.md`
 }
 
+function checkChangelog() {
+  const changelog = fs.readFileSync(changelogPath(), 'utf-8')
+  if (/^Unreleased\n-+$/m.test(changelog)) {
+    throw new Error(`Rename the "Unreleased" heading in ${changelogPath()} to ${getVersion()}`)
+  }
+}
+
 function run(command, optional = false) {
   console.log(colors.cyan('$ ' + command))
   try {
@@ -159,6 +166,7 @@ function paths() {
 }
 
 async function processRelease() {
+  checkChangelog()
   await clean()
   await build()
   await confirmRelease()
