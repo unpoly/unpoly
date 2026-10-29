@@ -1,5 +1,5 @@
-3.15.1
-------
+Unreleased
+----------
 
 - Fix a bug where [`[up-confirm="false"]`](/api/up-follow#up-confirm) and `[data-confirm="false"]` showed a confirmation dialog with the text "false". Rails renders `data: { confirm: false }` this way. These values now mean that no confirmation is needed.
 

@@ -1,9 +1,13 @@
 # Making a new release
 
 A guided CLI walks you through the process. Before starting, set the new version in
-`package.json` and write its changelog entry in `docs/changes/CHANGELOG_<major>.x.md` — the
+`package.json` and finish its changelog entry in `docs/changes/CHANGELOG_<major>.x.md` — the
 tool reads the version from `package.json` and tags with it. Before a regular release, publish
 a pre-release (like `3.13.0-rc1`) and upgrade at least one real app to it.
+
+Changes that are not yet released go under an `Unreleased` heading at the top of the changelog.
+On release, rename that heading to the version number. The tool stops while an `Unreleased`
+heading is left.
 
 In the changelog, start an item that may need the reader's attention with a marker:
 🧩 when `unpoly-migrate.js` polyfills it and logs where the old API is used, ⚠️ when it is
