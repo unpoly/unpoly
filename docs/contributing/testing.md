@@ -4,7 +4,7 @@
 every change are what let you alter code you don't fully understand and find out immediately whether you broke it.
 Treat a green suite as permission to be bold, and a red one as the cheapest possible bug report.
 
-"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each file `foo.js` has a
+"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each namespace file `foo.js` has a
 spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
 
 <!-- toc -->
@@ -192,7 +192,7 @@ See [Compatibility](compatibility.md#browser-support) for which browsers CI exer
 
 ## How specs are organized
 
-Every source file has a spec file at the mirrored path. `src/unpoly/form.js` is tested by
+A source file's specs live at the mirrored path. `src/unpoly/form.js` is tested by
 `spec/unpoly/form_spec.js`, and `src/unpoly/classes/params.js` by
 `spec/unpoly/classes/params_spec.js`. Where a group of specs grew too large to live
 there, it moved into a sibling file that shares the namespace's prefix — see

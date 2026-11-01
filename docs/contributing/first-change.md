@@ -55,7 +55,7 @@ Forms are the topic of `up.form`, so we work in two files:
 - `spec/unpoly/form_spec.js` for the specs — except the `[up-submit]` specs, which grew
   large enough to live in a sibling file, `spec/unpoly/form_submit_attr_spec.js`
 
-Every source file `foo.js` has a spec `foo_spec.js`, and a feature with a lot of specs may have
+Every namespace file `foo.js` has a spec `foo_spec.js`, and a feature with a lot of specs may have
 one of its own. `bin/find-spec "[up-submit]"` tells you which file to open; see
 [testing](testing.md#finding-the-spec-for-a-feature) and
 [code organization](code-organization.md#directory-structure).
