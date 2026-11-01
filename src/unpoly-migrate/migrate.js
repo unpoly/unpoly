@@ -172,7 +172,7 @@ up.migrate = (function() {
     return u.uniq(u.map(eventTypes, fixEventType))
   }
 
-  function renamedPackage(oldName, newName) {
+  function renamedNamespace(oldName, newName) {
     Object.defineProperty(up, oldName, {
       configurable: true,
       get() {
@@ -293,7 +293,7 @@ up.migrate = (function() {
 
   return {
     deprecated,
-    renamedPackage,
+    renamedNamespace,
     renamedProperty,
     removedProperty,
     defineThrowingProps,

@@ -2,7 +2,7 @@
 @namespace up.event
 */
 
-up.migrate.renamedPackage('bus', 'event')
+up.migrate.renamedNamespace('bus', 'event')
 
 /*-
 [Emits an event](/api/up.emit) and returns whether no listener

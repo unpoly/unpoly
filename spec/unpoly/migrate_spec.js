@@ -219,7 +219,7 @@ if (up.migrate.loaded) {
 
     })
 
-    describe('up.migrate.renamedPackage()', function() {
+    describe('up.migrate.renamedNamespace()', function() {
 
       it('prints a warning and forwards the call to the new namespace', function() {
         const warnSpy = up.migrate.warn.mock()

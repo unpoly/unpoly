@@ -2,7 +2,7 @@
 @namespace up.viewport
 */
 
-up.migrate.renamedPackage('layout', 'viewport')
+up.migrate.renamedNamespace('layout', 'viewport')
 
 up.viewport.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'viewports', 'viewportSelectors', { label: 'up.viewport.config' })

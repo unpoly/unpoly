@@ -4,7 +4,7 @@ const u = up.util
 @namespace up.network
 */
 
-up.migrate.renamedPackage('proxy', 'network')
+up.migrate.renamedNamespace('proxy', 'network')
 up.migrate.renamedEvent('up:proxy:load',     'up:request:load')    // renamed in 1.0.0
 up.migrate.renamedEvent('up:proxy:received', 'up:request:loaded')  // renamed in 0.50.0
 up.migrate.renamedEvent('up:proxy:loaded',   'up:request:loaded')  // renamed in 1.0.0

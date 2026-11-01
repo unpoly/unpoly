@@ -4,8 +4,8 @@ const u = up.util
 @namespace up.fragment
 */
 
-up.migrate.renamedPackage('flow', 'fragment')
-up.migrate.renamedPackage('dom', 'fragment')
+up.migrate.renamedNamespace('flow', 'fragment')
+up.migrate.renamedNamespace('dom', 'fragment')
 
 up.fragment.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'fallbacks', 'mainTargets', { label: 'up.fragment.config' })
