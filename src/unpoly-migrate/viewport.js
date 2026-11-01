@@ -1,5 +1,5 @@
 /*-
-@module up.viewport
+@namespace up.viewport
 */
 
 up.migrate.renamedPackage('layout', 'viewport')

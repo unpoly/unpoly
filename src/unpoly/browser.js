@@ -1,7 +1,7 @@
 /*-
-We tunnel some browser APIs through this module for easier mocking in tests.
+We tunnel some browser APIs through this namespace for easier mocking in tests.
 
-@module up.browser
+@namespace up.browser
 @internal
 */
 up.browser = (function() {

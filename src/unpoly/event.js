@@ -3,7 +3,7 @@ Features to emit and observe DOM events.
 
 `up.on()` listens on `document` or a given element, and can delegate to a selector so it also catches events from elements inserted later. It returns a function that unbinds the listener, and unbinds automatically when the element is destroyed. `up.emit()` emits a custom event with the given properties and returns it, so you can check whether a listener prevented it. An `[up-emit]` attribute emits a custom event when the element is clicked.
 
-@module up.event
+@namespace up.event
 */
 up.event = (function() {
 

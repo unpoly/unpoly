@@ -1,5 +1,5 @@
 /*-
-@module up.layer
+@namespace up.layer
 */
 
 up.popup = {

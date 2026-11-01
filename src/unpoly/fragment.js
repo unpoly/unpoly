@@ -12,7 +12,7 @@ Lookup functions like `up.fragment.get()` differ from `document.querySelector()`
 
 @learn-ref advanced-rendering
 
-@module up.fragment
+@namespace up.fragment
 */
 up.fragment = (function() {
 

@@ -1,7 +1,7 @@
 const u = up.util
 
 /*-
-@module up.network
+@namespace up.network
 */
 
 up.migrate.renamedPackage('proxy', 'network')

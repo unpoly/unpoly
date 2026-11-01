@@ -4,7 +4,7 @@
 every change are what let you alter code you don't fully understand and find out immediately whether you broke it.
 Treat a green suite as permission to be bold, and a red one as the cheapest possible bug report.
 
-"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each module `foo.js` has a
+"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each file `foo.js` has a
 spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
 
 <!-- toc -->
@@ -149,13 +149,13 @@ bin/find-spec "fieldSelectors"
 bin/find-spec "custom form field"
 ```
 
-**A whole module is not a narrow filter.** `--spec="up.fragment"` alone takes about five
+**A whole namespace is not a narrow filter.** `--spec="up.fragment"` alone takes about five
 minutes. Name the groups that cover your change, like `up.form HTML [up-switch]` rather than
 `up.form`.
 
 **Run the full suite only when the blast radius is wide:** a change to `up.fragment`,
 `up.network`, `up.script`, `up.layer`, `up.util` or `up.element`, a change across many
-modules, or a refactoring whose reach you can't enumerate. Otherwise the filtered run *is*
+namespaces, or a refactoring whose reach you can't enumerate. Otherwise the filtered run *is*
 the verification.
 
 **Leave the build variants to CI.** Minified, ES6, two CSP modes and `unpoly-migrate.js` are
@@ -192,17 +192,17 @@ See [Compatibility](compatibility.md#browser-support) for which browsers CI exer
 
 ## How specs are organized
 
-Every module has a spec file at the mirrored path. `src/unpoly/form.js` is tested by
+Every source file has a spec file at the mirrored path. `src/unpoly/form.js` is tested by
 `spec/unpoly/form_spec.js`, and `src/unpoly/classes/params.js` by
 `spec/unpoly/classes/params_spec.js`. Where a group of specs grew too large to live
-there, it moved into a sibling file that shares the module's prefix — see
+there, it moved into a sibling file that shares the namespace's prefix — see
 [extracted spec files](#extracted-spec-files) below.
 
-Inside a [main module](code-organization.md#responsibilities) spec, groups nest by
-module, kind and feature:
+Inside a [namespace](code-organization.md#responsibilities) spec, groups nest by
+namespace, kind and feature:
 
 ```js
-describe('up.link', function() {                                     // module
+describe('up.link', function() {                                     // namespace
 
   describe('JavaScript', function() {                                // kind
 
@@ -228,7 +228,7 @@ describe('up.link', function() {                                     // module
 
 Features are named as in the API docs: functions with parentheses (`up.follow()`), selectors
 in brackets (`[up-follow]`). JavaScript and HTML are the only kinds; events and config objects
-go under JavaScript, and the rare feature without any API under HTML. Modules with a single
+go under JavaScript, and the rare feature without any API under HTML. Namespaces with a single
 kind may skip that level, as do classes, which go straight from `describe('up.Params')` to a
 group per method.
 
@@ -240,7 +240,7 @@ Nested group names concatenate with spaces to form a spec's *full name*, which i
 `--spec` matches against. So the example above can be narrowed at any depth:
 
 ```
-bin/test --spec="up.link"                       # the whole module
+bin/test --spec="up.link"                       # the whole namespace
 bin/test --spec="up.link HTML"                  # only the attribute specs
 bin/test --spec="up.follow()"                   # one function
 ```
@@ -251,7 +251,7 @@ Full names never change when specs move between files.
 ### Finding the spec for a feature
 
 **By file name.** `up.form` is tested in `spec/unpoly/form_spec.js`. A feature large enough
-to be extracted sits beside it in `<module>_<feature>_spec.js`, like `form_switch_spec.js`
+to be extracted sits beside it in `<namespace>_<feature>_spec.js`, like `form_switch_spec.js`
 for `[up-switch]`. `ls spec/unpoly | grep ^form_` lists them all.
 
 **By title.** `bin/find-spec` searches only `describe()` and `it()` titles:
@@ -276,7 +276,7 @@ bin/test --file=spec/unpoly/classes/params_spec.js:29     # just the group on li
 ```
 
 On an [extracted file](#extracted-spec-files), `--file` runs just the blocks that file
-declares. On a module's own spec file, it runs the **whole module**, extracted files
+declares. On a namespace's own spec file, it runs the **whole namespace**, extracted files
 included, so point at the line of the group you need instead. The runner echoes the
 filters it derived.
 
@@ -289,12 +289,12 @@ that is an extracted file. When a feature groups by option, a new option gets it
 for a cluster that a reader would look for together, like `when the server responds with an
 error`. The specs you wrote for one change are not a cluster by themselves.
 
-Extract a group into a new file only when its module file grows hard to read (a few dozen KB).
+Extract a group into a new file only when its namespace file grows hard to read (a few dozen KB).
 
 
 ### Extracted spec files
 
-The module file keeps a `require()` at the exact position the group used to occupy, so
+The namespace file keeps a `require()` at the exact position the group used to occupy, so
 reading order survives:
 
 ```js
@@ -319,8 +319,8 @@ extendDescribe('up.fragment', function() {
       describe('with { url } option', function() { ... })
 ```
 
-So the split is invisible from the outside: one suite per module, unchanged full names,
-and `beforeEach` hooks from the module file still apply.
+So the split is invisible from the outside: one suite per namespace, unchanged full names,
+and `beforeEach` hooks from the namespace file still apply.
 
 `bin/self-test` fails if nothing loads an extracted file, or if its `extendDescribe()` chain
 doesn't match where it is required. `bin/lint` names any alias you need to redeclare.

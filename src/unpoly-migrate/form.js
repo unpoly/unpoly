@@ -1,5 +1,5 @@
 /*-
-@module up.form
+@namespace up.form
 */
 
 up.form.config.patch(function(config) {

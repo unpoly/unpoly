@@ -27,11 +27,11 @@ bump the major. Apps that load `unpoly-migrate.js` keep working and get a deprec
 warning in the console; apps that don't, break — which is why the polyfill is the price
 of the rename.
 
-`src/unpoly-migrate/` mirrors the [main modules](code-organization.md#responsibilities),
+`src/unpoly-migrate/` mirrors the [namespaces](code-organization.md#responsibilities),
 so a renamed `up.form` API gets its polyfill in `src/unpoly-migrate/form.js`.
 
 `up.migrate` has helpers for the usual cases — renamed or removed attributes, events and
-properties, renamed packages, functions that used to be async. A renamed *function* is
+properties, renamed namespaces, functions that used to be async. A renamed *function* is
 delegated by hand with `up.migrate.deprecated()`. Read `src/unpoly-migrate/migrate.js`
 before hand-rolling one. Two examples follow.
 
@@ -79,7 +79,7 @@ up.migrate.renamedAttribute('up-observe', 'up-watch')
 
 ### Specs for deprecated features
 
-Keep a spec for every polyfill, in the module's own spec file. It should assert only
+Keep a spec for every polyfill, in the namespace's own spec file. It should assert only
 that the old way delegates to the new way — the behavior itself is already covered by
 the new API's specs.
 

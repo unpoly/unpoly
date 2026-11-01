@@ -60,10 +60,10 @@ describe('up.Config', function() {
       expect(errorSpy).not.toHaveBeenCalled()
     })
 
-    it('does not log an error for the settings of Unpoly modules, which have no unknown keys', function() {
+    it('does not log an error for the settings of Unpoly namespaces, which have no unknown keys', function() {
       const errorSpy = spyOn(up.log, 'error')
-      for (let module of [up.fragment, up.link, up.form, up.layer, up.network, up.history, up.viewport, up.motion, up.radio, up.status, up.script, up.protocol, up.log]) {
-        module.config.logUnknownKeys()
+      for (let namespace of [up.fragment, up.link, up.form, up.layer, up.network, up.history, up.viewport, up.motion, up.radio, up.status, up.script, up.protocol, up.log]) {
+        namespace.config.logUnknownKeys()
       }
       expect(errorSpy).not.toHaveBeenCalled()
     })

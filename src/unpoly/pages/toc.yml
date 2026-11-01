@@ -4,7 +4,7 @@
 # which interfaces the API reference lists. Every fact about a single document
 # (its title, slug, menu title, visibility) lives in that document's directives.
 #
-# The site fails to build when a page or module is missing here, listed twice, or
+# The site fails to build when a page or namespace is missing here, listed twice, or
 # names a slug that does not exist. See docs/contributing/documentation.md.
 #
 # During the docs rework, pages that will dissolve stay listed in the chapter that
@@ -173,56 +173,56 @@ api:
   reading: lookup
 
   topics:
-    - type: module
-      module: up.link
+    - type: namespace
+      namespace: up.link
 
-    - type: module
-      module: up.form
+    - type: namespace
+      namespace: up.form
 
-    - type: module
-      module: up.script
+    - type: namespace
+      namespace: up.script
 
-    - type: module
-      module: up.layer
+    - type: namespace
+      namespace: up.layer
 
-    - type: module
-      module: up.fragment
+    - type: namespace
+      namespace: up.fragment
 
-    - type: module
-      module: up.radio
+    - type: namespace
+      namespace: up.radio
 
-    - type: module
-      module: up.motion
+    - type: namespace
+      namespace: up.motion
 
-    - type: module
-      module: up.status
+    - type: namespace
+      namespace: up.status
 
-    - type: module
-      module: up.network
+    - type: namespace
+      namespace: up.network
 
-    - type: module
-      module: up.event
+    - type: namespace
+      namespace: up.event
 
-    - type: module
-      module: up.protocol
+    - type: namespace
+      namespace: up.protocol
 
-    - type: module
-      module: up.element
+    - type: namespace
+      namespace: up.element
 
-    - type: module
-      module: up.viewport
+    - type: namespace
+      namespace: up.viewport
 
-    - type: module
-      module: up.history
+    - type: namespace
+      namespace: up.history
 
-    - type: module
-      module: up.util
+    - type: namespace
+      namespace: up.util
 
-    - type: module
-      module: up.framework
+    - type: namespace
+      namespace: up.framework
 
-    - type: module
-      module: up.log
+    - type: namespace
+      namespace: up.log
 
     - type: page-group
       title: Formats

@@ -221,7 +221,7 @@ if (up.migrate.loaded) {
 
     describe('up.migrate.renamedPackage()', function() {
 
-      it('prints a warning and forwards the call to the new module', function() {
+      it('prints a warning and forwards the call to the new namespace', function() {
         const warnSpy = up.migrate.warn.mock()
         const value = up.dom
         expect(warnSpy).toHaveBeenCalled()

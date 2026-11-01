@@ -6,7 +6,7 @@ An element with `[up-hungry]` is updated whenever a server response contains a m
 @learn-ref live-fragments
 @learn-ref flashes
 
-@module up.radio
+@namespace up.radio
 */
 up.radio = (function() {
 

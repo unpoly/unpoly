@@ -9,7 +9,7 @@ From JavaScript, `up.reveal()` scrolls an element into view, and `up.viewport.sa
 
 @learn-ref scrolling-and-focus
 
-@module up.viewport
+@namespace up.viewport
 */
 up.viewport = (function() {
 

@@ -1,5 +1,5 @@
 /*-
-@module up.event
+@namespace up.event
 */
 
 up.migrate.renamedPackage('bus', 'event')

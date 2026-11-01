@@ -2,7 +2,7 @@
 Unpoly used to come with a basic tooltip implementation.
 This feature is now deprecated.
 
-@module up.tooltip
+@namespace up.tooltip
 @internal
 */
 up.macro('[up-tooltip]', function(opener) {

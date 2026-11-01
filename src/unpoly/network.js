@@ -11,7 +11,7 @@ Events are emitted throughout the request lifecycle. `up:network:late` fires whe
 
 @learn-ref network
 
-@module up.network
+@namespace up.network
 */
 up.network = (function() {
 

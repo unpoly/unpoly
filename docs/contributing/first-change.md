@@ -48,14 +48,14 @@ git checkout -b up-trim
 
 ## Where the code goes
 
-Every feature belongs to exactly one [main module](code-organization.md#responsibilities).
+Every feature belongs to exactly one [namespace](code-organization.md#responsibilities).
 Forms are the topic of `up.form`, so we work in two files:
 
 - `src/unpoly/form.js` for the implementation
 - `spec/unpoly/form_spec.js` for the specs — except the `[up-submit]` specs, which grew
   large enough to live in a sibling file, `spec/unpoly/form_submit_attr_spec.js`
 
-Every module `foo.js` has a spec `foo_spec.js`, and a feature with a lot of specs may have
+Every source file `foo.js` has a spec `foo_spec.js`, and a feature with a lot of specs may have
 one of its own. `bin/find-spec "[up-submit]"` tells you which file to open; see
 [testing](testing.md#finding-the-spec-for-a-feature) and
 [code organization](code-organization.md#directory-structure).
@@ -105,7 +105,7 @@ bin/test --spec="up.form.trim()"
 Watch it fail. A failure proves that our test actually covers something.
 
 Now the implementation. `up.form` follows the
-[main module pattern](code-organization.md#main-module-pattern): an IIFE that returns
+[namespace pattern](code-organization.md#namespace-pattern): an IIFE that returns
 its public symbols. Add the function inside it, and list it in the returned object:
 
 ```diff
@@ -135,7 +135,7 @@ what publishes `up.form.trim()`.
 
 Run the spec again and watch it pass.
 
-Commit, [prefixing your message with the module](commit-conventions.md) in square brackets:
+Commit, [prefixing your message with the namespace](commit-conventions.md) in square brackets:
 
 ```
 git commit -m "[form] Add up.form.trim()"
@@ -280,7 +280,7 @@ into the section it belongs to, at the section's indentation:
 ```
 
 The comment says `@function up.submit`, not `up.form.submit`, because the function is
-[aliased](code-organization.md#main-module-pattern) onto the `up` global — which is
+[aliased](code-organization.md#namespace-pattern) onto the `up` global — which is
 also why its doc page is `/api/up.submit`.
 
 Same for the `[up-submit]` selector, which gains a new attribute. Note how prose

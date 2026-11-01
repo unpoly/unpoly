@@ -1,5 +1,5 @@
 /*-
-@module up.element
+@namespace up.element
 */
 
 /*-

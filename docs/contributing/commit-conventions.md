@@ -1,11 +1,11 @@
 # Commit conventions
 
-How we write commits and what happens to them: the module prefix every subject carries, and
+How we write commits and what happens to them: the namespace prefix every subject carries, and
 what CI runs when you open a pull request.
 
 ## Message prefix
 
-Every commit subject begins with the [main module](code-organization.md#responsibilities)
+Every commit subject begins with the [namespace](code-organization.md#responsibilities)
 it affects, in square brackets:
 
 ```
@@ -14,10 +14,10 @@ it affects, in square brackets:
 [form] Support form attribute to associate outside elements with a form ID
 ```
 
-If a change touches several modules, name the one it is mainly about. You don't need
+If a change touches several namespaces, name the one it is mainly about. You don't need
 to list them all.
 
-Some commits don't belong to a module. Make up a term that reads like one:
+Some commits don't belong to a namespace. Make up a term that reads like one:
 
 ```
 [build] Upgrade Webpack

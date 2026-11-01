@@ -7,7 +7,7 @@ Unpoly ships with [predefined transitions](/api/up.morph#named-transitions) and 
 
 @learn-ref motion
 
-@module up.motion
+@namespace up.motion
 */
 up.motion = (function() {
 

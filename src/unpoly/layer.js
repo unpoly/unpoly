@@ -7,11 +7,11 @@ Features to open, close and look up overlays.
 
 Add `[up-layer=new]` to a link or form to show its response in a new overlay, or open one from JavaScript with `up.layer.open()`. An overlay closes when the user dismisses it, or when an `[up-accept]` link or form closes it with a result value. `up.layer.ask()` opens an overlay and returns a promise for that value, so a subinteraction reads like a function call.
 
-`up.layer.current` is the layer your code is working with, and most functions in this module operate on it: `up.layer.on()` listens to events from the current layer only, and `up.layer.dismiss()` closes it. The layers themselves are `up.Layer` objects, listed in `up.layer.stack`.
+`up.layer.current` is the layer your code is working with, and most functions in this namespace operate on it: `up.layer.on()` listens to events from the current layer only, and `up.layer.dismiss()` closes it. The layers themselves are `up.Layer` objects, listed in `up.layer.stack`.
 
 @learn-ref overlays
 
-@module up.layer
+@namespace up.layer
 */
 up.layer = (function() {
 
@@ -1346,7 +1346,7 @@ up.layer = (function() {
 
   up.on('up:framework:evaled', function() {
     // Due to circular dependencies we must delay initialization of the stack until all of
-    // Unpoly's submodules have been evaled. We cannot delay initialization until up:framework:boot,
+    // Unpoly's namespaces have been evaled. We cannot delay initialization until up:framework:boot,
     // since by then user scripts have run and event listeners will no longer register as "default".
     stack = new up.LayerStack()
   })
@@ -1380,7 +1380,7 @@ up.layer = (function() {
 
   ### Remembering the current layer
 
-  Most functions in the `up.layer` package affect the current layer. For example, `up.layer.dismiss()`
+  Most functions in the `up.layer` namespace affect the current layer. For example, `up.layer.dismiss()`
   is shorthand for `up.layer.current.dismiss()`.
 
   As described above, `up.layer.current` is set to the correct layer in compilers and most events,

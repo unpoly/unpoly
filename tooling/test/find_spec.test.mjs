@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { findSpecs, formatMatches, parseLocation, parseSuite, specFiltersFor, staleChains } from '../find_spec.mjs'
 
-// A suite of one module file, loaded by spec/specs.js like the real ones. Further files
+// A suite of one namespace file, loaded by spec/specs.js like the real ones. Further files
 // are only reached through require().
 function suite(text, others = {}, file = 'spec/unpoly/form_spec.js') {
   return parseSuite({
@@ -187,7 +187,7 @@ describe('up.script', function() {
 
 // --- Extracted files ---------------------------------------------------------------
 
-const MODULE = `
+const NAMESPACE = `
 describe('up.fragment', function() {
   describe('JavaScript', function() {
     describe('up.render()', function() {
@@ -224,7 +224,7 @@ extendDescribe('up.fragment', function() {
 `
 
 const extracted = (text = EXTRACTED) =>
-  suite(MODULE, { 'spec/unpoly/fragment_render_url_spec.js': text }, 'spec/unpoly/fragment_spec.js')
+  suite(NAMESPACE, { 'spec/unpoly/fragment_render_url_spec.js': text }, 'spec/unpoly/fragment_spec.js')
 
 test('an extracted file gets the path of the position it is required from', () => {
   let matches = findSpecs(extracted(), 'fetches')
@@ -251,7 +251,7 @@ test('an extracted file loaded at the root of the suite is reported as stale', (
 })
 
 test('loaded files and requires of missing files are reported', () => {
-  let parsed = suite(MODULE, {}, 'spec/unpoly/fragment_spec.js')
+  let parsed = suite(NAMESPACE, {}, 'spec/unpoly/fragment_spec.js')
   assert.deepEqual([...parsed.loaded], ['spec/unpoly/fragment_spec.js'])
   assert.deepEqual(parsed.missing.map((each) => each.required), ['spec/unpoly/fragment_render_url_spec.js'])
 })
@@ -379,15 +379,15 @@ test('a file that declares nothing resolves to nothing', () => {
 })
 
 // An extracted file names a group that other files contribute to, so its own name would
-// run the whole module. We target what this file declares instead.
+// run the whole namespace. We target what this file declares instead.
 
 const URL_FILE = 'spec/unpoly/fragment_render_url_spec.js'
 
-test('a module file resolves to the module, which includes its extracted files', () => {
+test('a namespace file resolves to the namespace, which includes its extracted files', () => {
   assert.deepEqual(names(specFiltersFor(extracted(), 'spec/unpoly/fragment_spec.js')), ['up.fragment'])
 })
 
-test('an extracted file resolves to the blocks it declares, not to the module', () => {
+test('an extracted file resolves to the blocks it declares, not to the namespace', () => {
   assert.deepEqual(names(specFiltersFor(extracted(), URL_FILE)), [
     'up.fragment JavaScript up.render() with { url } option',
     'up.fragment JavaScript up.render() with { method } option',

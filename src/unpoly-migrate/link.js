@@ -1,5 +1,5 @@
 /*-
-@module up.link
+@namespace up.link
 */
 
 const followSelectorFn = up.link.config.selectorFn('followSelectors')

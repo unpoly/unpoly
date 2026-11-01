@@ -1,5 +1,5 @@
 /*-
-@module up.script
+@namespace up.script
 */
 
 const u = up.util

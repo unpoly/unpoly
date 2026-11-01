@@ -7,7 +7,7 @@ To render a new form state while the user is still typing, mark fields with `[up
 
 @learn-ref forms
 
-@module up.form
+@namespace up.form
 */
 up.form = (function() {
 

@@ -1,7 +1,7 @@
 const u = up.util
 
 /*-
-@module up.fragment
+@namespace up.fragment
 */
 
 up.migrate.renamedPackage('flow', 'fragment')

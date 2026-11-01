@@ -24,7 +24,7 @@ test('every required spec file exists', () => {
 
 test("every extracted file's extendDescribe() chain names the group it is required into", () => {
   // Also fails for an extracted file required by spec/specs.js (it would load at the root
-  // of the suite) and for a module file required from inside a group.
+  // of the suite) and for a namespace file required from inside a group.
   let stale = staleChains(suite).map(({ file, line, chain, titles }) =>
     `${file}:${line} names [${chain.join(' › ')}] but is required into [${titles.slice(0, -1).join(' › ')}]`)
   assert.deepEqual(stale, [], stale.join('\n'))

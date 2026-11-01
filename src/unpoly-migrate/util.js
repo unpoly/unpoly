@@ -1,5 +1,5 @@
 /*-
-@module up.util
+@namespace up.util
 */
 
 /*-

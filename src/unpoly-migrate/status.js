@@ -1,5 +1,5 @@
 /*-
-@module up.status
+@namespace up.status
 */
 
 up.migrate.renamedPackage('navigation', 'status')

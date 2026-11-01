@@ -1,16 +1,16 @@
 # Code organization
 
-Where code lives, why Unpoly is a `window.up` global, which module owns which topic,
-and how a module is structured internally.
+Where code lives, why Unpoly is a `window.up` global, which namespace owns which topic,
+and how a namespace is structured internally.
 
 <!-- toc -->
 - [Directory structure](#directory-structure)
-  - [Where to find a module's specs](#where-to-find-a-modules-specs)
+  - [Where to find a namespace's specs](#where-to-find-a-namespaces-specs)
   - [Implementation plans](#implementation-plans)
 - [Architecture](#architecture)
   - [Not an ESM module](#not-an-esm-module)
   - [Responsibilities](#responsibilities)
-  - [Main module pattern](#main-module-pattern)
+  - [Namespace pattern](#namespace-pattern)
 - [Entry points and optional bundles](#entry-points-and-optional-bundles)
 <!-- /toc -->
 
@@ -28,14 +28,14 @@ src/                      # Webpack entry points for Unpoly's main and optional 
   unpoly-migrate.js       # ... Entry point for optional bundle that polyfills deprecated features
   ...                     # ... Other entry points for optional bundles
 
-  unpoly/                 # Source code (JS, CSS) for main Unpoly modules
-    form.js               # ... Code for up.form module
-    link.js               # ... Code for up.link module
-    link.sass             # ... CSS for up.link module
-    layer.js              # ... Code for up.layer module
-    ...                   # ... Code for other modules
+  unpoly/                 # Source code (JS, CSS) for Unpoly's namespaces
+    form.js               # ... Code for up.form namespace
+    link.js               # ... Code for up.link namespace
+    link.sass             # ... CSS for up.link namespace
+    layer.js              # ... Code for up.layer namespace
+    ...                   # ... Code for other namespaces
 
-    classes/              # Class definitions used by main modules
+    classes/              # Class definitions used by namespaces
       params.js           # ... Code for up.Params class
       request.js          # ... Code for up.Request class
       response.js         # ... Code for up.Response class
@@ -43,11 +43,11 @@ src/                      # Webpack entry points for Unpoly's main and optional 
 
 spec/
   unpoly/                 # Tests (Jasmine specs)
-    form_spec.js          # ... Tests for up.form module
+    form_spec.js          # ... Tests for up.form namespace
     form_switch_spec.js   # ... Tests for [up-switch], too large to keep in form_spec.js
-    link_spec.js          # ... Tests for up.link module
-    layer_spec.js         # ... Tests for up.layer module
-    ...                   # ... Tests for other modules
+    link_spec.js          # ... Tests for up.link namespace
+    layer_spec.js         # ... Tests for up.layer namespace
+    ...                   # ... Tests for other namespaces
 
     classes/              # Tests for classes in src/unpoly/classes
       params_spec.js      # ... Tests for up.Params class
@@ -87,9 +87,9 @@ dist/                     # Output directory for the Webpack bundler (gitignored
   ...
 ```
 
-### Where to find a module's specs
+### Where to find a namespace's specs
 
-A group that grew too large lives in a sibling file sharing the module's prefix, like
+A group that grew too large lives in a sibling file sharing the namespace's prefix, like
 `form_switch_spec.js` above. See [Finding the spec for a feature](testing.md#finding-the-spec-for-a-feature).
 
 
@@ -115,9 +115,9 @@ Unpoly isn't an ESM module that can be imported. Instead it defines a global `wi
 
 ### Responsibilities
 
-Unpoly's functionality is handled by a number of "main modules" below. Each module handles a topic (e.g. "forms") and defines any HTML extensions and JS API to support that topic.
+Unpoly's functionality is split into the namespaces below. Each namespace handles a topic (e.g. "forms") and defines any HTML extensions and JS API to support that topic.
 
-| Module | Topics | Example selectors | Example functions | Example events |
+| Namespace | Topics | Example selectors | Example functions | Example events |
 |---|---|---|---|---|
 | `up.link` | Hyperlinks, preloading, lazy-loading | `[up-follow]`, `[up-preload]`, `[up-defer]` | `up.follow()` | `up:link:follow` |
 | `up.form` | Forms, validation, dependent fields | `[up-submit]`, `[up-validate]`, `[up-switch]` | `up.submit()`, `up.watch()` | `up:form:submit`, `up:form:validate` |
@@ -137,27 +137,27 @@ Unpoly's functionality is handled by a number of "main modules" below. Each modu
 | `up.framework` | Booting, feature detection | `[up-boot=manual]` | `up.boot()` | `up:framework:booted` |
 | `up.log` | Console logging | — | `up.log.enable()` | — |
 
-We rarely add a new main module. We sometimes rename an existing module when its responsibilities change, and the name no longer fits.
+We rarely add a new namespace. We sometimes rename an existing namespace when its responsibilities change, and the name no longer fits.
 
 
-### Main module pattern
+### Namespace pattern
 
-Main modules live in `src/unpoly`. E.g. `src/unpoly/link.js` defines the `up.link` module that deals with hyperlinks.
+Namespaces live in `src/unpoly`. E.g. `src/unpoly/link.js` defines the `up.link` namespace that deals with hyperlinks.
 
-A module definition has the following jobs:
+A namespace definition has the following jobs:
 
 - Implement any HTML extensions, mostly new attributes like `[up-follow]`. These are either handled by event listeners, or by activating behavior on new DOM elements with a compiler.
 - Define a companion JavaScript API (like `up.link.follow()`). Public JS API is exposed on the `window.up` global, internal API is hidden within closures.
-- Often expose a configuration property (like `up.link.config`) that lets the developer configure the module's behavior.
+- Often expose a configuration property (like `up.link.config`) that lets the developer configure the namespace's behavior.
 
 To illustrate, here is a *very* simplified version of `up.link`:
 
 ```js
-// An Unpoly "module" is simply an object property of the `window.up` global.
+// An Unpoly namespace is simply an object property of the `window.up` global.
 // Here we assign `up.link` to an IIFE that returns the public symbols (classic "module pattern")
 up.link = (function() {
   
-  // Short aliases for our two utility modules.
+  // Short aliases for our two utility namespaces.
   const u = up.util
   const e = up.element
   
@@ -205,7 +205,7 @@ up.link = (function() {
   }
 })()
 
-// We usually expose functions as `up.module.verb()`.
+// We usually expose functions as `up.namespace.verb()`.
 // Frequently used functions are aliased directly on `window.up` to shorten call sites.
 up.follow = up.link.follow
 ```
@@ -235,7 +235,7 @@ up.viewport.config.fixedTopSelectors.push('.navbar.fixed-top')
 
 That is the intended shape of an optional bundle: `up.*.config` defaults for one
 ecosystem, plus a sibling `.sass` file. If a bundle seems to need behavior of its own,
-that behavior belongs in a main module, reachable through config from outside.
+that behavior belongs in a namespace, reachable through config from outside.
 `unpoly-migrate` is the exception, and it earns it by shipping polyfills.
 
 A new bundle needs an entry in `tooling/build/webpack/entries.js` *and* its output files listed in

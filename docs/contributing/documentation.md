@@ -45,7 +45,7 @@ Documentation lives in this repository, beside the code it describes. A sister p
 - [Markdown for agents](#markdown-for-agents)
   - [What a page needs](#what-a-page-needs)
 - [The contributing guides](#the-contributing-guides)
-- [Modules and classes](#modules-and-classes)
+- [Namespaces and classes](#namespaces-and-classes)
 - [Previewing your changes](#previewing-your-changes)
 - [Changing the visual presentation on unpoly.com](#changing-the-visual-presentation-on-unpolycom)
 <!-- /toc -->
@@ -80,7 +80,7 @@ are available:
 | Container | Can declare |
 |---|---|
 | `.md` file | `@page`, `@partial` |
-| `/*- … */` comment | `@module`, `@class`, `@function`, `@selector`, `@event`, `@property`, `@constructor`, `@header`, `@cookie` |
+| `/*- … */` comment | `@namespace`, `@class`, `@function`, `@selector`, `@event`, `@property`, `@constructor`, `@header`, `@cookie` |
 
 A block that declares none of these is an error, so every doc comment has exactly one.
 
@@ -122,7 +122,7 @@ function isNumber(value) {
 Four parts, always in this order:
 
 1. **Prose**, as Markdown. Lead with a summary of one or two sentences: the first
-   paragraph is reused on its own in module listings and search results, so it must stand alone.
+   paragraph is reused on its own in namespace listings and search results, so it must stand alone.
 2. **The declaration** — what this is (`@function`) and its plain name (`up.util.isNumber`).
 3. **Parameters and return value.**
 4. **A mandatory visibility tag.** See [Visibility](#visibility).
@@ -751,7 +751,7 @@ it (sidebar, `/learn` hub, previous/next); readers reach it only through links.
 
 ### Linking the reference to a guide
 
-The `@learn-ref` directive on a feature or module renders a prominent "Learn:" link to a
+The `@learn-ref` directive on a feature or namespace renders a prominent "Learn:" link to a
 guide page below the lead paragraphs:
 
 ```js
@@ -851,7 +851,7 @@ need none. Never change the prose to use a reader's word instead of our term.
 
 Every documentation page on unpoly.com also exists as Markdown, for coding agents and
 LLMs: its URL plus `.md` (`/api/up.render.md`), or the page's own URL requested as
-`text/markdown`. `/index.md` (also `/llms.txt`) lists the guide chapters and API modules,
+`text/markdown`. `/index.md` (also `/llms.txt`) lists the guide chapters and API namespaces,
 and the `unpoly-docs` agent skill bundles all pages.
 
 You write nothing extra for this: `unpoly-site` converts each rendered page's HTML to
@@ -909,38 +909,34 @@ TOC, a long guide without one, or a link to a heading that no longer exists.
 > check the summary of that guide in [`CONTRIBUTING.md`](../../CONTRIBUTING.md).
 
 
-## Modules and classes
+## Namespaces and classes
 
 You'll rarely add one of these, but every file with doc comments depends on one.
 
-A module or class block gives a [main module](code-organization.md#responsibilities) its
-own page and title:
+A namespace or class block gives a [namespace](code-organization.md#responsibilities) or
+class its own page, titled by its name:
 
 ```js
 /*-
-Forms
-=====
+Features to submit and validate forms without a full page load.
 
-The `up.form` module helps you work with non-trivial forms.
+@learn-ref forms
 
-@learn-ref submitting-forms
-@learn-ref validation
-
-@module up.form
+@namespace up.form
 */
 ```
 
 Two things to know:
 
-- **Every file that documents features must declare its own `@module` (or `@class`)
+- **Every file that documents features must declare its own `@namespace` (or `@class`)
   first.** Features attach to the most recently parsed interface, so a file without one
-  would file its features under whichever module happened to be parsed before it.
-  `src/unpoly-migrate/form.js` opens with `@module up.form` for exactly this reason;
-  repeated declarations of the same module are merged.
+  would file its features under whichever namespace happened to be parsed before it.
+  `src/unpoly-migrate/form.js` opens with `@namespace up.form` for exactly this reason;
+  repeated declarations of the same namespace are merged.
 - **There is no `@see` directive.** Point at related features in the prose, e.g.
   "See also `up.network.isBusy()`.", and at guide pages with `@learn-ref`.
 
-`@class` blocks also use `@parent` to nest under a module in the menu, e.g.
+`@class` blocks also use `@parent` to nest under a namespace in the menu, e.g.
 `src/unpoly/classes/params.js` declares `@parent up.form`.
 
 

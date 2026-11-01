@@ -150,7 +150,7 @@ up.follow(link, { metaTags: true })
 Changing defaults globally {#config}
 --------------------------
 
-Most modules have an `up.*.config` property that adjusts their behavior
+Most namespaces have an `up.*.config` property that adjusts their behavior
 for your entire application. For example, this makes every new overlay
 open as a drawer instead of a modal:
 

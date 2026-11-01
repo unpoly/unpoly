@@ -68,7 +68,7 @@ function, so its tests live in Node with the rest.
   (`Config.fromArgv`, `--key=value`, CLI > env > default, strict on unknown flags).
 - `find_spec.mjs` — PURE (except `readSources()`): parses the suite from `spec/specs.js` with acorn → every spec's real full name (`bin/find-spec`, `--file=path:line`, the spec manifest self-test).
   For an `extendDescribe()` it returns the blocks *below* it, so `--file` on an extracted
-  file runs that file rather than its whole module.
+  file runs that file rather than its whole namespace.
 - `dev_env.mjs` — the dev environment: one process table, one supervisor, one pid
   file (`tmp/dev.pid`). See [its own contract](#the-dev-environment) below.
 - `scratch/` — the scratch server behind port 4001: real pages for trying a change by hand.

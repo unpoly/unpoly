@@ -1,5 +1,5 @@
 /*-
-@module up.protocol
+@namespace up.protocol
 */
 
 up.migrate.clearCacheFromXHR = function(xhr) {

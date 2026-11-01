@@ -1,5 +1,5 @@
 /*-
-@module up.history
+@namespace up.history
 */
 
 up.history.config.patch(function(config) {

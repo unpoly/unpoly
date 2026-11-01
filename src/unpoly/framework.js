@@ -1,9 +1,9 @@
 /*-
 Features to control when Unpoly boots.
 
-By default Unpoly boots on `DOMContentLoaded`, after your own scripts have had a chance to configure it and register compilers. You rarely need this module. Boot manually with `up.boot()` only when you load Unpoly with `<script async>`, or when you set `[up-boot=manual]` on the `<html>` element and boot later yourself. `up.framework.isSupported()` returns whether Unpoly can boot in the current browser. On an unsupported browser Unpoly stays inactive, leaving a server-side web application without JavaScript enhancements.
+By default Unpoly boots on `DOMContentLoaded`, after your own scripts have had a chance to configure it and register compilers. You rarely need this namespace. Boot manually with `up.boot()` only when you load Unpoly with `<script async>`, or when you set `[up-boot=manual]` on the `<html>` element and boot later yourself. `up.framework.isSupported()` returns whether Unpoly can boot in the current browser. On an unsupported browser Unpoly stays inactive, leaving a server-side web application without JavaScript enhancements.
 
-@module up.framework
+@namespace up.framework
 */
 
 up.framework = (function() {
@@ -12,7 +12,7 @@ up.framework = (function() {
   // ------------------------------------------------------------------------------------------------------
   // Browser starts parsing HTML    -                         loading
   // Unpoly script is running       evaling                   loading (if sync) or interactive (if defered)
-  // ... submodules are running     evaling                   loading (if sync) or interactive (if defered)
+  // ... namespaces are running     evaling                   loading (if sync) or interactive (if defered)
   // User scripts are running       configuring               loading (if sync) or interactive (if defered)
   // DOMContentLoaded               configuring => booting    interactive
   // Initial page is compiling      booting                   interactive
@@ -78,7 +78,7 @@ up.framework = (function() {
       return
     }
 
-    // This is called synchronously after all Unpoly modules have been parsed
+    // This is called synchronously after all Unpoly namespaces have been parsed
     // and executed. We cannot delay booting until the DOM is ready, since by then
     // all user-defined event listeners and compilers will have registered.
     // Note that any non-async scripts after us will delay DOMContentLoaded.

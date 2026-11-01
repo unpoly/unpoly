@@ -114,7 +114,7 @@ To give an AI chat a single page, use the copy button next to the page title. It
 the page as Markdown, ready to paste.
 
 To give an AI chat broad context about Unpoly, paste <https://unpoly.com/llms.txt>. It
-lists all guides and API modules, with links the chat can follow.
+lists all guides and API namespaces, with links the chat can follow.
 
 
 @page skill

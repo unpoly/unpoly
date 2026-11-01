@@ -53,8 +53,8 @@ feature, or before reviewing someone else's.
 
 ### [🗂️ Code organization](docs/contributing/code-organization.md)
 
-> Where files live, why Unpoly is a `window.up` global, which module owns which topic,
-> how we structure modules internally, and how to find tests for a given file.
+> Where files live, why Unpoly is a `window.up` global, which namespace owns which topic,
+> how we structure namespaces internally, and how to find tests for a given file.
 > Implementation plans for larger changes go in `docs/plans/`, named after their subject.
 
 [Read the code organization guide](docs/contributing/code-organization.md) before
@@ -67,7 +67,7 @@ adding or moving code.
 > They always run in a real browser, but can be driven from the terminal
 > using `bin/test`. The network is always mocked. We have patterns to wait for
 > async code. The full suite takes ~9 minutes, so find the relevant groups with `bin/find-spec`,
-> run only those (not whole modules, which take minutes too), and leave the minified, ES6, CSP
+> run only those (not whole namespaces, which take minutes too), and leave the minified, ES6, CSP
 > and migrate variants to CI.
 
 [Read the full testing guide](docs/contributing/testing.md) before writing or changing a spec.
@@ -98,7 +98,7 @@ changing documentation. The directive set is large and you won't guess it.
 
 ### [✉️ Commit conventions](docs/contributing/commit-conventions.md)
 
-> Commit messages are prefixed with the main module in square brackets, e.g.
+> Commit messages are prefixed with the namespace in square brackets, e.g.
 > `[link] Ignore CTRL clicks`. CI runs all tests on every pull request.
 
 [Read the commit conventions](docs/contributing/commit-conventions.md) before making a

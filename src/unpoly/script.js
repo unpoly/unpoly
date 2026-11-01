@@ -7,7 +7,7 @@ When your own code inserts HTML into the page, call `up.hello()` on the new elem
 
 @learn-ref scripting
 
-@module up.script
+@namespace up.script
 */
 up.script = (function() {
 

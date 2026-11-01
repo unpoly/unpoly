@@ -8,7 +8,7 @@ Within an `[up-nav]` container, links pointing to the current location are marke
 @learn-ref loading-state
 @learn-ref navigation-bars
 
-@module up.status
+@namespace up.status
 */
 up.status = (function() {
 

@@ -175,9 +175,9 @@ export function findSpecs(suite, phrase) {
 // [{ name, condition }]. Returns null when the file declares nothing there — the caller has
 // the path and can say so usefully.
 //
-// A file runs as its outermost blocks. For a module's own file that is the module, which
+// A file runs as its outermost blocks. For a namespace's own file that is the namespace, which
 // includes its extracted files; for an extracted file it is just what the file declares,
-// since naming the group it extends would run the whole module. Pointing at an
+// since naming the group it extends would run the whole namespace. Pointing at an
 // extendDescribe() line runs what the file declares, too. A block that is expanded at
 // several calls yields one filter per call.
 export function specFiltersFor(suite, file, line = null) {
@@ -214,7 +214,7 @@ function staticPrefix(titles) {
 
 // The first real blocks of a file whose extendDescribe() chain does not name the path they
 // are actually required into. extendDescribe() titles are documentation only, so nothing
-// else would notice a stale one. This also catches a module file required from inside a
+// else would notice a stale one. This also catches a namespace file required from inside a
 // group (empty chain, non-empty path) and an extracted file loaded at the root.
 export function staleChains(suite) {
   return suite.entries.filter((entry) => {

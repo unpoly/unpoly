@@ -1,7 +1,7 @@
 const u = up.util
 
 /*-
-@module up.migrate
+@namespace up.migrate
 @internal
 */
 up.migrate = (function() {

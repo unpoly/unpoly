@@ -1,5 +1,5 @@
 /*-
-@module up.layer
+@namespace up.layer
 */
 
 // Renamed keys and values that may be passed as layer options or set in a layer config object.

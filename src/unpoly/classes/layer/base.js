@@ -4,7 +4,7 @@ const u = up.util
 /*-
 Each layer has an `up.Layer` instance.
 
-Most functions in the `up.layer` package interact with the [current layer](/api/up.layer.current).
+Most functions in the `up.layer` namespace interact with the [current layer](/api/up.layer.current).
 For example, `up.layer.dismiss()` is a shortcut for `up.layer.current.dismiss()`.
 
 `up.layer.current` is set to the right layer in compilers and most events,

@@ -17,7 +17,7 @@ compilers running on the new fragment and, last, `up:layer:opened`.
   </figcaption>
 </figure>
 
-@module up.log
+@namespace up.log
 */
 up.log = (function() {
 

@@ -7,7 +7,7 @@ Low-level functions to access and change the DOM.
 
 These functions know nothing about layers or animation. For a fragment-aware API, prefer `up.fragment`.
 
-@module up.element
+@namespace up.element
 */
 up.element = (function() {
 
@@ -1569,7 +1569,7 @@ up.element = (function() {
 
   // Tag names for which trackDefinitions() is already waiting.
   //
-  // Unlike all other module state, this is never reset on up:framework:reset.
+  // Unlike all other namespace state, this is never reset on up:framework:reset.
   // A custom element definition cannot be undone, so forgetting a tag name would only
   // start a second promise for the same definition. A tag name that is never defined
   // (e.g. a custom element that only exists for CSS) leaves one pending promise that

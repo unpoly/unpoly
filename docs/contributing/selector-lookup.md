@@ -36,7 +36,7 @@ depend on layers, liveness or Unpoly's custom selectors, go through `up.fragment
 
 ## Why we have our own lookup engine
 
-`up.fragment`'s module documentation lists three differences from the DOM API, and the
+`up.fragment`'s namespace documentation lists three differences from the DOM API, and the
 `up.fragment.get()` documentation adds a fourth. Each is a bug waiting to happen if you
 bypass it:
 

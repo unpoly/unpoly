@@ -5,7 +5,7 @@ Features to update the browser history and handle the Back button.
 
 @learn-ref history
 
-@module up.history
+@namespace up.history
 */
 up.history = (function() {
 

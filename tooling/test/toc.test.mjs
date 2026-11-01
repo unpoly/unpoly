@@ -17,7 +17,7 @@ test('slugs lowercase and hyphenate', () => {
 
 test('slugs drop backticks, parentheses, slashes and apostrophes', () => {
   assert.equal(githubSlug('Running `bin/dev`'), 'running-bindev')
-  assert.equal(githubSlug("Where to find a module's specs"), 'where-to-find-a-modules-specs')
+  assert.equal(githubSlug("Where to find a namespace's specs"), 'where-to-find-a-namespaces-specs')
   assert.equal(githubSlug("When async/await isn't enough"), 'when-asyncawait-isnt-enough')
   assert.equal(githubSlug('Callback arguments (advanced)'), 'callback-arguments-advanced')
 })

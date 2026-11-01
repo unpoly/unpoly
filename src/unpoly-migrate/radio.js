@@ -1,7 +1,7 @@
 const e = up.element
 
 /*-
-@module up.radio
+@namespace up.radio
 */
 
 up.radio.config.patch(function(config) {

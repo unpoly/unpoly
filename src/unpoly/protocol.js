@@ -5,7 +5,7 @@ Request headers tell your server what Unpoly is about to render, and response he
 
 @learn-ref backend-integration
 
-@module up.protocol
+@namespace up.protocol
 */
 up.protocol = (function() {
 

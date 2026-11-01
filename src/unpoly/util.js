@@ -1,11 +1,11 @@
 /*-
 Helper functions for basic JavaScript values.
 
-Most functions are predicates like `up.util.isPresent()` or `up.util.isBlank()`, or list helpers like `up.util.uniq()`, `up.util.reject()` and `up.util.pick()`. They are similar to [Lodash](https://lodash.com/), but feature parity is not a goal. The module also parses the formats used in Unpoly's attributes: `up.util.parseRelaxedJSON()` reads [[relaxed-json]], and `up.util.normalizeURL()` and `up.util.parseURL()` work with URLs.
+Most functions are predicates like `up.util.isPresent()` or `up.util.isBlank()`, or list helpers like `up.util.uniq()`, `up.util.reject()` and `up.util.pick()`. They are similar to [Lodash](https://lodash.com/), but feature parity is not a goal. The namespace also parses the formats used in Unpoly's attributes: `up.util.parseRelaxedJSON()` reads [[relaxed-json]], and `up.util.normalizeURL()` and `up.util.parseURL()` work with URLs.
 
 @learn-ref relaxed-json
 
-@module up.util
+@namespace up.util
 */
 up.util = (function() {
 
@@ -2064,7 +2064,7 @@ up.util = (function() {
   const SERIALIZED_TAG_PATTERN = /<("[^"]*"|[^">])*>/
 
   // This could go in up.element, but we want up.util to not have any dependencies
-  // so every other module can depend on up.util.
+  // so every other namespace can depend on up.util.
   function tagOuterHTML(element) {
     return element.cloneNode().outerHTML.match(SERIALIZED_TAG_PATTERN)[0]
   }

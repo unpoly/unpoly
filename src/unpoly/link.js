@@ -9,7 +9,7 @@ Links feel faster with `[up-instant]`, which follows on `mousedown` instead of `
 
 @learn-ref links
 
-@module up.link
+@namespace up.link
 */
 
 up.link = (function() {

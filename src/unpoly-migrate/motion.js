@@ -1,5 +1,5 @@
 /*-
-@module up.motion
+@namespace up.motion
 */
 
 // up.motion.finish() already returns up.migrate.formerlyAsync() from core.
