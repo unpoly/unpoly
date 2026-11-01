@@ -28,9 +28,10 @@ const PROCESSES = [
   { name: 'server',      command: 'bin/test-server' },
   // Neither local server is given a PORT: each reads the shared table, so PORT_OFFSET moves
   // them and the port isServerRunning() probes without anything being threaded through here.
-  // middleman cannot do that, so docs gets an explicit one.
+  // middleman cannot do that, so docs gets an explicit one. It must be --port: middleman
+  // ignores a PORT env. If the port is taken, middleman picks a random free one instead.
   { name: 'scratch',     command: 'bin/scratch-server' },
-  { name: 'docs',        command: 'bundle exec middleman server', cwd: '../unpoly-site',  env: { PORT: String(PORTS.docs) } },
+  { name: 'docs',        command: `bundle exec middleman server --port ${PORTS.docs}`, cwd: '../unpoly-site' },
 ]
 
 const SUPERVISOR = import.meta.filename
