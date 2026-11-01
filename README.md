@@ -23,8 +23,8 @@
 </p>
 
 
-The missing application layer for HTML
---------------------------------------
+Build a complete frontend in HTML
+---------------------------------
 
 [Unpoly](https://unpoly.com) expands what links, forms and server-rendered pages can do, while your application stays on the server:
 
