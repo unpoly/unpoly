@@ -194,7 +194,6 @@ describe('up.radio', function() {
       })
 
       it('keeps polling when the polling fragment is aborted through its own reloading', async function() {
-        up.radio.config.pollAbortable = false
         const interval = 150
         up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
