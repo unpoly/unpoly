@@ -22,7 +22,11 @@
     "skipLibCheck": true,
     // The build strips types from each file on its own (esbuild). Flag code that needs
     // whole-program information to emit, like re-exported types without `export type`.
-    "isolatedModules": true
+    "isolatedModules": true,
+    // Forbid TypeScript syntax that has runtime semantics (enum, namespace, parameter
+    // properties), so stripping the types is all it takes to get JavaScript. That keeps us
+    // independent of the tool that strips them.
+    "erasableSyntaxOnly": true
   },
   "include": ["src/**/*.ts"]
 }
