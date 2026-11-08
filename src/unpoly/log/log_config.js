@@ -1,3 +1,5 @@
+import { Config } from '../util/config.js'
+
 let enabledKey = 'up.log.enabled'
 let enabled = false
 
@@ -12,7 +14,7 @@ try {
   // as an <iframe>. See https://bugs.chromium.org/p/chromium/issues/detail?id=357625
 }
 
-up.LogConfig = class LogConfig extends up.Config {
+export class LogConfig extends Config {
 
   constructor() {
     super('up.log.config', () => ({
@@ -37,4 +39,9 @@ up.LogConfig = class LogConfig extends up.Config {
     }
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  LogConfig,
 }

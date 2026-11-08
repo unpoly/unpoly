@@ -1,7 +1,8 @@
-const u = up.util
+import { identity, pickBy } from '../util.js'
+import { fail } from '../error.js'
 
-up.Registry = class Registry {
-  constructor(valueDescription, normalize = u.identity) {
+export class Registry {
+  constructor(valueDescription, normalize = identity) {
     this._data = {}
     this._normalize = normalize
     this._valueDescription = valueDescription
@@ -16,11 +17,16 @@ up.Registry = class Registry {
   }
 
   get(name) {
-    return this._data[name] || up.fail("Unknown %s %o", this._valueDescription, name)
+    return this._data[name] || fail("Unknown %s %o", this._valueDescription, name)
   }
 
   reset() {
-    this._data = u.pickBy(this._data, 'isDefault')
+    this._data = pickBy(this._data, 'isDefault')
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  Registry,
 }

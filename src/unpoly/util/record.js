@@ -1,6 +1,6 @@
-const u = up.util
+import { copy, isEqual, mergeDefined, pick, variant } from '../util.js'
 
-up.Record = class Record {
+export class Record {
 
   keys() {
     throw 'Return an array of keys'
@@ -13,23 +13,28 @@ up.Record = class Record {
   }
 
   constructor(options) {
-    Object.assign(this, u.mergeDefined(this.defaults(options), this.attributes(options)))
+    Object.assign(this, mergeDefined(this.defaults(options), this.attributes(options)))
   }
 
   attributes(source = this) {
-    return u.pick(source, this.keys())
+    return pick(source, this.keys())
   }
 
-  [u.copy.key]() {
-    return u.variant(this)
+  [copy.key]() {
+    return variant(this)
   }
 
-  [u.isEqual.key](other) {
-    return (this.constructor === other.constructor) && u.isEqual(this.attributes(), other.attributes())
+  [isEqual.key](other) {
+    return (this.constructor === other.constructor) && isEqual(this.attributes(), other.attributes())
   }
 
   // static is(value) {
   //   return value instanceof this
   // }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  Record,
 }

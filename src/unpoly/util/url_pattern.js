@@ -1,6 +1,8 @@
-const u = up.util
+import { escapeRegExp, flatMap, getSimpleTokens, matchableURL, matchableURLPatternAtom } from '../util.js'
 
-up.URLPattern = class URLPattern {
+// A class expression, so the class is still named `URLPattern` at runtime, while the binding
+// doesn't shadow the browser's `URLPattern` here or in importers.
+export const UpURLPattern = class URLPattern {
 
   constructor(fullPattern) {
     this._groups = []
@@ -8,7 +10,7 @@ up.URLPattern = class URLPattern {
     const positiveList = []
     const negativeList = []
 
-    for (let pattern of u.getSimpleTokens(fullPattern)) {
+    for (let pattern of getSimpleTokens(fullPattern)) {
       if (pattern[0] === '-') {
         negativeList.push(pattern.substring(1))
       } else {
@@ -23,8 +25,8 @@ up.URLPattern = class URLPattern {
   _buildRegexp(list, capture) {
     if (!list.length) { return }
 
-    list = u.flatMap(list, u.matchableURLPatternAtom)
-    list = list.map(u.escapeRegExp)
+    list = flatMap(list, matchableURLPatternAtom)
+    list = list.map(escapeRegExp)
 
     let reCode = list.join('|')
 
@@ -49,14 +51,14 @@ up.URLPattern = class URLPattern {
   // This method is performance-sensitive. It's called for every link in an [up-nav]
   // after every fragment update.
   test(url, doNormalize = true) {
-    if (doNormalize) { url = u.matchableURL(url) }
+    if (doNormalize) { url = matchableURL(url) }
     // Use RegExp#test() instead of RegExp#recognize() as building match groups is expensive,
     // and we only need to know whether the URL matches (true / false).
     return this._positiveRegexp.test(url) && !this._isExcluded(url)
   }
 
   recognize(url, doNormalize = true) {
-    if (doNormalize) { url = u.matchableURL(url) }
+    if (doNormalize) { url = matchableURL(url) }
     let match = this._positiveRegexp.exec(url)
     if (match && !this._isExcluded(url)) {
       const resolution = {}
@@ -73,4 +75,9 @@ up.URLPattern = class URLPattern {
   _isExcluded(url) {
     return this._negativeRegexp?.test(url)
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  URLPattern: UpURLPattern,
 }

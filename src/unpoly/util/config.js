@@ -1,7 +1,7 @@
-const u = up.util
-const e = up.element
+import { queueTask, upperCaseFirst } from '../util.js'
+import { unionSelector } from '../element.js'
 
-up.Config = class Config {
+export class Config {
 
   constructor(label, blueprintFn = (() => ({}))) {
     this._label = label
@@ -14,7 +14,7 @@ up.Config = class Config {
     document.addEventListener('up:framework:reset', () => this.reset())
     // We check one task after booting, to also see settings made by up:framework:boot or
     // up:framework:booted listeners, or by compilers on the initial page.
-    document.addEventListener('up:framework:boot', () => u.task(() => this.logUnknownKeys()))
+    document.addEventListener('up:framework:boot', () => queueTask(() => this.logUnknownKeys()))
   }
 
   // Logs an error for a setting that doesn't exist, e.g. a misspelled or renamed key.
@@ -45,8 +45,8 @@ up.Config = class Config {
 
   selector(prop, condition = '') {
     let includes = this[prop]
-    let excludes = this['no' + u.upperCaseFirst(prop)]
-    return e.unionSelector(includes, excludes, condition)
+    let excludes = this['no' + upperCaseFirst(prop)]
+    return unionSelector(includes, excludes, condition)
   }
 
   selectorFn(prop) {
@@ -56,4 +56,9 @@ up.Config = class Config {
   selectorFns(prop) {
     return [this.selectorFn(prop), this.matchesFn(prop)]
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  Config,
 }

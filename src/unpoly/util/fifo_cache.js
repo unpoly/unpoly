@@ -1,8 +1,8 @@
-const u = up.util
+import { identity } from '../util.js'
 
-up.FIFOCache = class FIFOCache {
+export class FIFOCache {
 
-  constructor({ capacity = 10, normalizeKey = u.identity } = {}) {
+  constructor({ capacity = 10, normalizeKey = identity } = {}) {
     this._map = new Map()
     this._capacity = capacity
     this._normalizeKey = normalizeKey
@@ -27,4 +27,9 @@ up.FIFOCache = class FIFOCache {
     this._map.clear()
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  FIFOCache,
 }

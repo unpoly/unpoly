@@ -34,6 +34,14 @@ import * as cannotMatchError from './unpoly/error/cannot_match.js'
 import * as cannotParseError from './unpoly/error/cannot_parse.js'
 import * as cannotTargetError from './unpoly/error/cannot_target.js'
 import * as offlineError from './unpoly/error/offline.js'
+import * as recordClass from './unpoly/util/record.js'
+import * as configClass from './unpoly/util/config.js'
+import * as logConfigClass from './unpoly/log/log_config.js'
+import * as registryClass from './unpoly/util/registry.js'
+import * as optionsParserClass from './unpoly/element/options_parser.js'
+import * as fifoCacheClass from './unpoly/util/fifo_cache.js'
+import * as rectClass from './unpoly/util/rect.js'
+import * as urlPatternClass from './unpoly/util/url_pattern.js'
 
 window.up = {}
 
@@ -53,6 +61,14 @@ const apis = [
   cannotParseError.api,
   cannotTargetError.api,
   offlineError.api,
+  recordClass.api,
+  configClass.api,
+  logConfigClass.api,
+  registryClass.api,
+  optionsParserClass.api,
+  fifoCacheClass.api,
+  rectClass.api,
+  urlPatternClass.api,
 ]
 
 // Copy property descriptors, so getters (like `up.context`) stay live.
@@ -74,13 +90,6 @@ for (let api of apis) {
 const installs = [
   util.install,
 
-  () => require('./unpoly/util/record'),
-  () => require('./unpoly/util/config'),
-  () => require('./unpoly/log/log_config'),
-  () => require('./unpoly/util/registry'),
-  () => require('./unpoly/element/options_parser'),
-  () => require('./unpoly/util/fifo_cache'),
-  () => require('./unpoly/util/rect'),
   () => require('./unpoly/viewport/body_shifter'),
   () => require('./unpoly/fragment/render/change/change'),
   () => require('./unpoly/fragment/render/change/addition'),
@@ -141,7 +150,6 @@ const installs = [
   () => require('./unpoly/script/csp/script_gate'),
   () => require('./unpoly/fragment/selector'),
   () => require('./unpoly/layer/tether'),
-  () => require('./unpoly/util/url_pattern'),
 
   () => require('./unpoly/framework'),
   () => require('./unpoly/event'),

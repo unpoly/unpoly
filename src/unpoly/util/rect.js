@@ -1,4 +1,6 @@
-up.Rect = class Rect extends up.Record {
+import { Record } from './record.js'
+
+export class Rect extends Record {
 
   keys() {
     return [
@@ -40,4 +42,9 @@ up.Rect = class Rect extends up.Record {
     return rect
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  Rect,
 }

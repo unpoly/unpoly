@@ -5,6 +5,7 @@ import {
 } from './util.js'
 import { fail } from './error.js'
 import { mockable } from './mockable.js'
+import { Rect } from './util/rect.js'
 import './element.sass'
 
 /*-
@@ -1501,7 +1502,7 @@ export function crossOriginSelector(attr) {
 }
 
 export function isIntersectingWindow(element, { margin = 0 } = {}) {
-  const rect = up.Rect.fromElement(element)
+  const rect = Rect.fromElement(element)
   rect.grow(margin)
 
   return (rect.bottom > 0) && (rect.top  < window.innerHeight) &&
