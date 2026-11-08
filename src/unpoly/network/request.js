@@ -11,6 +11,12 @@ import { Params } from '../form/params.js'
 import { FormRenderer } from './form_renderer.js'
 import { UpResponse } from './response.js'
 import { XHRRenderer } from './xhr_renderer.js'
+import {
+  acceptLayerFromXHR, contextFromXHR, csrfHeader as protocolCsrfHeader, csrfParam,
+  csrfToken as protocolCsrfToken, dismissLayerFromXHR, eventPlansFromXHR, evictCacheFromXHR,
+  expireCacheFromXHR, headerize, locationFromXHR, methodFromXHR, openLayerFromXHR, targetFromXHR,
+  titleFromXHR,
+} from '../protocol.js'
 import { Record } from '../util/record.js'
 import { UpURLPattern } from '../util/url_pattern.js'
 
@@ -810,17 +816,17 @@ export const UpRequest = class Request extends Record {
   }
 
   csrfHeader() {
-    return up.protocol.csrfHeader()
+    return protocolCsrfHeader()
   }
 
   csrfParam() {
-    return up.protocol.csrfParam()
+    return csrfParam()
   }
 
   // Returns a CSRF token if this request requires it
   csrfToken() {
     if (!this.isSafe() && !this.isCrossOrigin()) {
-      return up.protocol.csrfToken()
+      return protocolCsrfToken()
     }
   }
 
@@ -836,21 +842,21 @@ export const UpRequest = class Request extends Record {
       xhr: this.xhr,
       text: this.xhr.responseText,
       status: this.xhr.status,
-      title: up.protocol.titleFromXHR(this.xhr),
-      target: up.protocol.targetFromXHR(this.xhr),
-      openLayer: up.protocol.openLayerFromXHR(this.xhr),
-      acceptLayer: up.protocol.acceptLayerFromXHR(this.xhr),
-      dismissLayer: up.protocol.dismissLayerFromXHR(this.xhr),
-      eventPlans: up.protocol.eventPlansFromXHR(this.xhr),
-      context: up.protocol.contextFromXHR(this.xhr),
-      expireCache: up.protocol.expireCacheFromXHR(this.xhr),
-      evictCache: up.protocol.evictCacheFromXHR(this.xhr),
+      title: titleFromXHR(this.xhr),
+      target: targetFromXHR(this.xhr),
+      openLayer: openLayerFromXHR(this.xhr),
+      acceptLayer: acceptLayerFromXHR(this.xhr),
+      dismissLayer: dismissLayerFromXHR(this.xhr),
+      eventPlans: eventPlansFromXHR(this.xhr),
+      context: contextFromXHR(this.xhr),
+      expireCache: expireCacheFromXHR(this.xhr),
+      evictCache: evictCacheFromXHR(this.xhr),
       fail: this.fail,
     }
 
-    let methodFromResponse = up.protocol.methodFromXHR(this.xhr)
+    let methodFromResponse = methodFromXHR(this.xhr)
 
-    let urlFromResponse = up.protocol.locationFromXHR(this.xhr)
+    let urlFromResponse = locationFromXHR(this.xhr)
     if (urlFromResponse) {
       // On browsers other than IE11 we can ask the XHR object for its { responseURL },
       // which contains the final URL after redirects. The server may also use the
@@ -931,12 +937,12 @@ export const UpRequest = class Request extends Record {
       this._setAutoHeader(csrfHeader, csrfToken)
     }
 
-    this._setAutoHeader(up.protocol.headerize('version'), up.version)
+    this._setAutoHeader(headerize('version'), up.version)
   }
 
   _setPropertyHeader(key) {
     this._setAutoHeader(
-      up.protocol.headerize(key),
+      headerize(key),
       this[key]
     )
   }

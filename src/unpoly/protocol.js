@@ -1,3 +1,8 @@
+import { evalOption, identity, memoize, normalizeMethod, normalizeURL, parseRelaxedJSON } from './util.js'
+import { metaContent } from './element.js'
+import { popCookie } from './browser.js'
+import { Config } from './util/config.js'
+
 /*-
 HTTP headers that let your server inspect and steer Unpoly's rendering.
 
@@ -7,1141 +12,1139 @@ Request headers tell your server what Unpoly is about to render, and response he
 
 @namespace up.protocol
 */
-up.protocol = (function() {
 
-  const u = up.util
-  const e = up.element
 
-  const headerize = function(camel) {
-    const header = camel.replace(/(^.|[A-Z])/g, (char) => '-' + char.toUpperCase())
-    return 'X-Up' + header
+export const headerize = function(camel) {
+  const header = camel.replace(/(^.|[A-Z])/g, (char) => '-' + char.toUpperCase())
+  return 'X-Up' + header
+}
+
+const extractHeader = function(xhr, shortHeader, parseFn = identity) {
+  let value = xhr.getResponseHeader(headerize(shortHeader))
+  if (value) {
+    return parseFn(value)
   }
+}
 
-  const extractHeader = function(xhr, shortHeader, parseFn = u.identity) {
-    let value = xhr.getResponseHeader(headerize(shortHeader))
-    if (value) {
-      return parseFn(value)
-    }
-  }
+/*-
+@function up.protocol.targetFromXHR
+@internal
+*/
+export function targetFromXHR(xhr) {
+  return extractHeader(xhr, 'target')
+}
 
-  /*-
-  @function up.protocol.targetFromXHR
-  @internal
-  */
-  function targetFromXHR(xhr) {
-    return extractHeader(xhr, 'target')
-  }
+/*-
+This request header contains the current Unpoly version to mark this request as a fragment update.
 
-  /*-
-  This request header contains the current Unpoly version to mark this request as a fragment update.
+Server-side code may check for the presence of an `X-Up-Version` header to
+distinguish [fragment updates](/api/up.link) from full page loads.
 
-  Server-side code may check for the presence of an `X-Up-Version` header to
-  distinguish [fragment updates](/api/up.link) from full page loads.
+The `X-Up-Version` header is guaranteed to be set for all [requests made through Unpoly](/api/up.request).
 
-  The `X-Up-Version` header is guaranteed to be set for all [requests made through Unpoly](/api/up.request).
+### Example
 
-  ### Example
+The user updates a fragment. Unpoly automatically includes the following request header:
 
-  The user updates a fragment. Unpoly automatically includes the following request header:
+```http
+X-Up-Version: 1.0.0
+```
 
-  ```http
-  X-Up-Version: 1.0.0
-  ```
+The server chooses to render different HTML for Unpoly requests, e.g. by excluding the document `<head>`
+and only rendering the `<body>`. The server responds with the following HTTP:
 
-  The server chooses to render different HTML for Unpoly requests, e.g. by excluding the document `<head>`
-  and only rendering the `<body>`. The server responds with the following HTTP:
+```http
+Vary: X-Up-Version
 
-  ```http
-  Vary: X-Up-Version
+<body>
+  ...
+</body>
+```
 
-  <body>
-    ...
-  </body>
-  ```
+@include vary-header-note
 
-  @include vary-header-note
+@header X-Up-Version
+@stable
+*/
 
-  @header X-Up-Version
-  @stable
-  */
+/*-
+The `X-Up-Target` request and response headers allow the server to [read](#request) or [change](#response)
+the [target selector](/learn/targeting-fragments) for a fragment update.
 
-  /*-
-  The `X-Up-Target` request and response headers allow the server to [read](#request) or [change](#response)
-  the [target selector](/learn/targeting-fragments) for a fragment update.
+Server-side code is free to [optimize its response](/learn/optimizing-responses) by only rendering HTML
+that matches the selector. For example, you might prefer to not render an
+expensive sidebar if the sidebar is not targeted.
 
-  Server-side code is free to [optimize its response](/learn/optimizing-responses) by only rendering HTML
-  that matches the selector. For example, you might prefer to not render an
-  expensive sidebar if the sidebar is not targeted.
-
-  > [note]
-  > Unpoly will often [update a different selector for an error response](/learn/error-responses#fail-options).
-  > The target selector for error responses is sent as a separate request header (`X-Up-Fail-Target`).
+> [note]
+> Unpoly will often [update a different selector for an error response](/learn/error-responses#fail-options).
+> The target selector for error responses is sent as a separate request header (`X-Up-Fail-Target`).
 
 
-  ## Detecting the targeted fragment on the server {#request}
+## Detecting the targeted fragment on the server {#request}
 
-  When the user updates a fragment `.menu`,  Unpoly automatically includes the following request header:
+When the user updates a fragment `.menu`,  Unpoly automatically includes the following request header:
 
-  ```http
-  X-Up-Target: .menu
-  ```
+```http
+X-Up-Target: .menu
+```
 
-  The server chooses to render only the HTML for the updating fragment.
-  It responds with the following HTTP:
+The server chooses to render only the HTML for the updating fragment.
+It responds with the following HTTP:
 
-  ```http
-  Vary: X-Up-Target
+```http
+Vary: X-Up-Target
 
-  <div class="menu">...</div>
-  ```
+<div class="menu">...</div>
+```
 
-  ### Merging of request targets {#merging}
+### Merging of request targets {#merging}
 
-  When two [caching](/learn/caching) requests are sent to the same URL within the same [microtask](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide),
-  only a single request is sent. The request will contain both targets in its `X-Up-Target` header.
+When two [caching](/learn/caching) requests are sent to the same URL within the same [microtask](https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide),
+only a single request is sent. The request will contain both targets in its `X-Up-Target` header.
 
-  For example, these two render passes render different selectors from `/path`:
+For example, these two render passes render different selectors from `/path`:
 
-  ```js
-  up.render('.foo', { url: '/path', cache: true })
-  up.render('.bar', { url: '/path', cache: true })
-  ```
+```js
+up.render('.foo', { url: '/path', cache: true })
+up.render('.bar', { url: '/path', cache: true })
+```
 
-  Unpoly will send a single request with both targets:
+Unpoly will send a single request with both targets:
 
-  ```http
-  GET /path HTTP/1.1
-  X-Up-Target: .foo, .bar
-  ```
+```http
+GET /path HTTP/1.1
+X-Up-Target: .foo, .bar
+```
 
-  ### Optional targets are omitted {#optional-targets}
+### Optional targets are omitted {#optional-targets}
 
-  An optional selector part (`:maybe` suffix) will be omitted from the `X-Up-Target` header unless it
-  matches in the current page.
+An optional selector part (`:maybe` suffix) will be omitted from the `X-Up-Target` header unless it
+matches in the current page.
 
-  Required selector parts are always included in the `X-Up-Target` header.
+Required selector parts are always included in the `X-Up-Target` header.
 
-  @include vary-header-note
-
-
-  ## Changing the render target from the server {#response}
-
-  The server may change the render target context by including a CSS selector as an `X-Up-Target` header
-  in its response.
-
-  ```http
-  Content-Type: text/html
-  X-Up-Target: .selector-from-server
-
-  <div class="selector-from-server">
-    ...
-  </div>
-  ```
-
-  The frontend will use the `X-Up-Target` selector for both successful (HTTP status `200 OK`)
-  and error (status `4xx` or `5xx`) responses. There is no <code autolink="false">X-Up-Fail-Target</code>
-  header in the response.
+@include vary-header-note
 
 
-  ### Rendering nothing
+## Changing the render target from the server {#response}
 
-  The server may send an `X-Up-Target: :none` response header with an empty body to skip the current render pass.
+The server may change the render target context by including a CSS selector as an `X-Up-Target` header
+in its response.
 
-  Also see [rendering nothing](/learn/conditional-requests#rendering-nothing).
+```http
+Content-Type: text/html
+X-Up-Target: .selector-from-server
 
-  @header X-Up-Target
-  @stable
-  @signature
-  */
+<div class="selector-from-server">
+  ...
+</div>
+```
 
-  /*-
-  This request header contains the [target selector](/learn/targeting-fragments) that Unpoly updates when the server sends an [error response](/learn/error-responses).
+The frontend will use the `X-Up-Target` selector for both successful (HTTP status `200 OK`)
+and error (status `4xx` or `5xx`) responses. There is no <code autolink="false">X-Up-Fail-Target</code>
+header in the response.
 
-  An error response has a status code other than 2xx, but still contains HTML.
 
-  Server-side code is free to [optimize its response](/learn/optimizing-responses) to an error response by only rendering HTML
-  that matches the provided selector. For example, you might prefer to not render an
-  expensive sidebar if the sidebar is not targeted.
+### Rendering nothing
 
-  ### Example
+The server may send an `X-Up-Target: :none` response header with an empty body to skip the current render pass.
 
-  ```http
-  X-Up-Target: .menu
-  X-Up-Fail-Target: body
-  ```
+Also see [rendering nothing](/learn/conditional-requests#rendering-nothing).
 
-  ### Signaling failed form submissions
+@header X-Up-Target
+@stable
+@signature
+*/
 
-  When [submitting a form](/learn/submitting-forms),
-  Unpoly needs to know whether the form submission has failed (to update the form with
-  validation errors) or succeeded (to update the `[up-target]` selector).
+/*-
+This request header contains the [target selector](/learn/targeting-fragments) that Unpoly updates when the server sends an [error response](/learn/error-responses).
 
-  For Unpoly to be able to detect a failed form submission, the response must
-  return a non-2xx HTTP status code. We recommend using
-  [HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Entity).
+An error response has a status code other than 2xx, but still contains HTML.
 
-  To do so in [Ruby on Rails](http://rubyonrails.org/), pass a [`:status` option to `render`](http://guides.rubyonrails.org/layouts_and_rendering.html#the-status-option):
+Server-side code is free to [optimize its response](/learn/optimizing-responses) to an error response by only rendering HTML
+that matches the provided selector. For example, you might prefer to not render an
+expensive sidebar if the sidebar is not targeted.
 
-  ```ruby
-  class UsersController < ApplicationController
+### Example
 
-    def create
-      user_params = params[:user].permit(:email, :password)
-      @user = User.new(user_params)
-      if @user.save
-        sign_in @user
-      else
-        render 'form', status: :unprocessable_entity
-      end
+```http
+X-Up-Target: .menu
+X-Up-Fail-Target: body
+```
+
+### Signaling failed form submissions
+
+When [submitting a form](/learn/submitting-forms),
+Unpoly needs to know whether the form submission has failed (to update the form with
+validation errors) or succeeded (to update the `[up-target]` selector).
+
+For Unpoly to be able to detect a failed form submission, the response must
+return a non-2xx HTTP status code. We recommend using
+[HTTP 422](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422) (Unprocessable Entity).
+
+To do so in [Ruby on Rails](http://rubyonrails.org/), pass a [`:status` option to `render`](http://guides.rubyonrails.org/layouts_and_rendering.html#the-status-option):
+
+```ruby
+class UsersController < ApplicationController
+
+  def create
+    user_params = params[:user].permit(:email, :password)
+    @user = User.new(user_params)
+    if @user.save
+      sign_in @user
+    else
+      render 'form', status: :unprocessable_entity
     end
-
   end
-  ```
 
-  The example uses Ruby on Rails, but works similarly with any other backend.
+end
+```
 
-  @header X-Up-Fail-Target
-  @stable
-  */
+The example uses Ruby on Rails, but works similarly with any other backend.
 
-  /*-
-  This request header contains the targeted layer's [mode](/api/up.layer.mode).
+@header X-Up-Fail-Target
+@stable
+*/
 
-  Server-side code is free to render different HTML for different modes.
-  For example, you might prefer to not render a site navigation for overlays.
+/*-
+This request header contains the targeted layer's [mode](/api/up.layer.mode).
 
-  ### Example
+Server-side code is free to render different HTML for different modes.
+For example, you might prefer to not render a site navigation for overlays.
 
-  The user updates a fragment `main` within a [drawer overlay](/learn/overlays#layer-modes).
-  Unpoly automatically includes the following request headers:
+### Example
 
-  ```http
-  X-Up-Mode: drawer
-  X-Up-Target: main
-  ```
+The user updates a fragment `main` within a [drawer overlay](/learn/overlays#layer-modes).
+Unpoly automatically includes the following request headers:
 
-  The server chooses to render only the HTML required for the overlay.
-  It responds with the following HTTP:
+```http
+X-Up-Mode: drawer
+X-Up-Target: main
+```
 
-  ```http
-  Vary: X-Up-Mode
+The server chooses to render only the HTML required for the overlay.
+It responds with the following HTTP:
 
-  <main>...</main>
-  ```
+```http
+Vary: X-Up-Mode
 
-  @include vary-header-note
+<main>...</main>
+```
 
-  @header X-Up-Mode
-  @stable
-  */
+@include vary-header-note
 
-  /*-
-  This request header contains the [mode](/api/up.layer.mode) of the layer
-  that Unpoly updates when the server sends an [error response](/learn/error-responses).
+@header X-Up-Mode
+@stable
+*/
 
-  An error response has a status code other than 2xx, but still contains HTML.
+/*-
+This request header contains the [mode](/api/up.layer.mode) of the layer
+that Unpoly updates when the server sends an [error response](/learn/error-responses).
 
-  Server-side code is free to render different HTML for different modes.
-  For example, you might prefer to not render a site navigation for overlays.
+An error response has a status code other than 2xx, but still contains HTML.
 
-  ### Example
+Server-side code is free to render different HTML for different modes.
+For example, you might prefer to not render a site navigation for overlays.
 
-  Assume we have the following form in a drawer overlay. The form targets
-  the root layer:
+### Example
 
-  ```html
-  <!-- label: Form within an overlay -->
-  <form action="/submit" up-submit up-layer="root"> <!-- mark: up-layer="root" -->
-    ...
-  </form>
-  ```
+Assume we have the following form in a drawer overlay. The form targets
+the root layer:
 
-  Because [failed form submissions update the `<form>` element](/learn/validation#changing-how-validation-errors-are-rendered),
-  submitting this form will send the following headers:
+```html
+<!-- label: Form within an overlay -->
+<form action="/submit" up-submit up-layer="root"> <!-- mark: up-layer="root" -->
+  ...
+</form>
+```
 
-  ```http
-  X-Up-Mode: root
-  X-Up-Fail-Mode: drawer
-  ```
+Because [failed form submissions update the `<form>` element](/learn/validation#changing-how-validation-errors-are-rendered),
+submitting this form will send the following headers:
 
-  @header X-Up-Fail-Mode
-  @stable
-  */
+```http
+X-Up-Mode: root
+X-Up-Fail-Mode: drawer
+```
 
-  /*-
-  This request header contains the [mode](/api/up.layer.mode) of the layer
-  from which the interaction [originated](/api/origin).
+@header X-Up-Fail-Mode
+@stable
+*/
 
-  Links or forms may target another layer than their own.
-  The targeted layer is sent as an `X-Up-Mode` header.
+/*-
+This request header contains the [mode](/api/up.layer.mode) of the layer
+from which the interaction [originated](/api/origin).
 
-  ## Example
+Links or forms may target another layer than their own.
+The targeted layer is sent as an `X-Up-Mode` header.
 
-  Assume we have the following link in a modal overlay. The link targets
-  the root layer:
+## Example
 
-  ```html
-  <!-- label: Link within an overlay -->
-  <a href="/" up-follow up-layer="root">Click me</a> <!-- mark: up-layer="root" -->
-  ```
+Assume we have the following link in a modal overlay. The link targets
+the root layer:
 
-  When the link is clicked, the following request headers are sent:
+```html
+<!-- label: Link within an overlay -->
+<a href="/" up-follow up-layer="root">Click me</a> <!-- mark: up-layer="root" -->
+```
 
-  ```http
-  X-Up-Mode: root
-  X-Up-Origin-Mode: modal
-  ```
+When the link is clicked, the following request headers are sent:
 
-  ## Interaction origins
+```http
+X-Up-Mode: root
+X-Up-Origin-Mode: modal
+```
 
-  The origin element is automatically set for many actions, for example:
+## Interaction origins
 
-  @include default-origins
+The origin element is automatically set for many actions, for example:
 
-  When the origin element is unknown, this header is not sent.
+@include default-origins
 
-  @header X-Up-Origin-Mode
-  @experimental
-  */
+When the origin element is unknown, this header is not sent.
 
-  /*-
-  This response header contains a hash identifying the content in the response body.
+@header X-Up-Origin-Mode
+@experimental
+*/
 
-  Typically, the ETag value is a hash of the underlying data that was rendered,
-  or a hash of the data's last modification time.
+/*-
+This response header contains a hash identifying the content in the response body.
 
-  ETags can be used to prevent unnecessary re-rendering of unchanged content.
-  See [Conditional requests](/learn/conditional-requests) for details and examples.
+Typically, the ETag value is a hash of the underlying data that was rendered,
+or a hash of the data's last modification time.
 
-  ### Format
+ETags can be used to prevent unnecessary re-rendering of unchanged content.
+See [Conditional requests](/learn/conditional-requests) for details and examples.
 
-  A (weak) ETag typically looks like this:
+### Format
 
-  ```http
-  ETag: W/"55e4d42a148795d9f25f89d4"
-  ```
+A (weak) ETag typically looks like this:
 
-  For more information about an ETag's format, see
-  [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) and [RFC 7232](https://www.rfc-editor.org/rfc/rfc7232#section-2.3).
+```http
+ETag: W/"55e4d42a148795d9f25f89d4"
+```
 
-  ### Alternatives
+For more information about an ETag's format, see
+[MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) and [RFC 7232](https://www.rfc-editor.org/rfc/rfc7232#section-2.3).
 
-  Instead of sending this header, the server may also render fragments with `[up-etag]` attributes.
+### Alternatives
 
-  @header ETag
-  @stable
-  */
+Instead of sending this header, the server may also render fragments with `[up-etag]` attributes.
 
-  /*-
-  This request header contains the ETag of a fragment that is being reloaded.
+@header ETag
+@stable
+*/
 
-  The server can use the header value to prevent unnecessary re-rendering of unchanged content.
-  See [Conditional requests](/learn/conditional-requests) for details and examples.
+/*-
+This request header contains the ETag of a fragment that is being reloaded.
 
-  The header is only set when Unpoly knows the ETag of the loading fragment.
-  For this the fragment must have been rendered with an `ETag` response header or `[up-etag]` attribute.
+The server can use the header value to prevent unnecessary re-rendering of unchanged content.
+See [Conditional requests](/learn/conditional-requests) for details and examples.
 
-  ### Format
+The header is only set when Unpoly knows the ETag of the loading fragment.
+For this the fragment must have been rendered with an `ETag` response header or `[up-etag]` attribute.
 
-  The `If-None-Match` header uses the same format as the `ETag` header:
+### Format
 
-  ```http
-  If-None-Match: W/"55e4d42a148795d9f25f89d4"
-  ```
+The `If-None-Match` header uses the same format as the `ETag` header:
 
-  @header If-None-Match
-  @stable
-  */
+```http
+If-None-Match: W/"55e4d42a148795d9f25f89d4"
+```
 
-  /*-
-  This response header contains the time when the content in the response body was last modified.
+@header If-None-Match
+@stable
+*/
 
-  Last modification times can be used to prevent unnecessary re-rendering of unchanged content.
-  See [Conditional requests](/learn/conditional-requests) for details and examples.
+/*-
+This response header contains the time when the content in the response body was last modified.
 
-  ### Format
+Last modification times can be used to prevent unnecessary re-rendering of unchanged content.
+See [Conditional requests](/learn/conditional-requests) for details and examples.
 
-  The header value is a date/time in [RFC 1123](https://www.rfc-editor.org/rfc/rfc1123) format:
+### Format
 
-  ```http
-  Last-Modified: Wed, 15 Nov 2000 13:11:22 GMT
-  ```
+The header value is a date/time in [RFC 1123](https://www.rfc-editor.org/rfc/rfc1123) format:
 
-  For a readable description of the time format, see [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified).
+```http
+Last-Modified: Wed, 15 Nov 2000 13:11:22 GMT
+```
 
-  ### Alternatives
+For a readable description of the time format, see [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified).
 
-  Instead of sending this header, the server may also render fragments with `[up-time]` attributes.
+### Alternatives
 
-  @header Last-Modified
-  @stable
-  */
+Instead of sending this header, the server may also render fragments with `[up-time]` attributes.
 
-  /*-
-  This request header contains the last modification time of a fragment that is being reloaded.
+@header Last-Modified
+@stable
+*/
 
-  The server can use the header value to prevent unnecessary re-rendering of unchanged content.
-  See [Conditional requests](/learn/conditional-requests) for details and examples.
+/*-
+This request header contains the last modification time of a fragment that is being reloaded.
 
-  The header is only set when Unpoly knows the last modification time of the loading fragment.
-  For this the fragment must have been rendered with an `Last-Modified` response header or `[up-time]` attribute.
+The server can use the header value to prevent unnecessary re-rendering of unchanged content.
+See [Conditional requests](/learn/conditional-requests) for details and examples.
 
-  ### Format
+The header is only set when Unpoly knows the last modification time of the loading fragment.
+For this the fragment must have been rendered with an `Last-Modified` response header or `[up-time]` attribute.
 
-  The header value is a date/time in [RFC 1123](https://www.rfc-editor.org/rfc/rfc1123) format:
+### Format
 
-  ```http
-  If-Modified-Since: Wed, 15 Nov 2000 13:11:22 GMT
-  ```
+The header value is a date/time in [RFC 1123](https://www.rfc-editor.org/rfc/rfc1123) format:
 
-  @header If-Modified-Since
-  @stable
-  */
+```http
+If-Modified-Since: Wed, 15 Nov 2000 13:11:22 GMT
+```
 
-  function parseModifyCacheValue(value) {
-    if (value === 'false') {
-      return false
-    } else {
-      return value
-    }
+@header If-Modified-Since
+@stable
+*/
+
+function parseModifyCacheValue(value) {
+  if (value === 'false') {
+    return false
+  } else {
+    return value
   }
+}
 
-  function evictCacheFromXHR(xhr) {
-    return extractHeader(xhr, 'evictCache', parseModifyCacheValue)
-  }
+export function evictCacheFromXHR(xhr) {
+  return extractHeader(xhr, 'evictCache', parseModifyCacheValue)
+}
 
-  /*-
-  The server may send this optional response header to control which previously [cached](/learn/caching)
-  responses should be [evicted](/learn/caching#eviction) when this response is received.
+/*-
+The server may send this optional response header to control which previously [cached](/learn/caching)
+responses should be [evicted](/learn/caching#eviction) when this response is received.
 
-  The value of this header is a [URL pattern](/api/url-patterns) matching responses that should be evicted.
+The value of this header is a [URL pattern](/api/url-patterns) matching responses that should be evicted.
 
-  For example, to evict all responses to URLs starting with `/notes/`:
+For example, to evict all responses to URLs starting with `/notes/`:
 
-  ```http
-  X-Up-Evict-Cache: /notes/*
-  ```
+```http
+X-Up-Evict-Cache: /notes/*
+```
 
-  To evict all cache entries:
+To evict all cache entries:
 
-  ```http
-  X-Up-Evict-Cache: *
-  ```
+```http
+X-Up-Evict-Cache: *
+```
 
-  To evict nothing, send `false`:
+To evict nothing, send `false`:
 
-  ```http
-  X-Up-Evict-Cache: false
-  ```
+```http
+X-Up-Evict-Cache: false
+```
 
-  @header X-Up-Evict-Cache
-  @stable
-  */
+@header X-Up-Evict-Cache
+@stable
+*/
 
 
-  function expireCacheFromXHR(xhr) {
-    return extractHeader(xhr, 'expireCache', parseModifyCacheValue) ?? up.migrate.clearCacheFromXHR?.(xhr)
-  }
+export function expireCacheFromXHR(xhr) {
+  return extractHeader(xhr, 'expireCache', parseModifyCacheValue) ?? up.migrate.clearCacheFromXHR?.(xhr)
+}
 
-  /*-
-  The server may send this optional response header to control which previously [cached](/learn/caching)
-  responses should be [expired](/learn/caching#expiration) when this response is received.
+/*-
+The server may send this optional response header to control which previously [cached](/learn/caching)
+responses should be [expired](/learn/caching#expiration) when this response is received.
 
-  The value of this header is a [URL pattern](/api/url-patterns) matching responses that should be expired.
+The value of this header is a [URL pattern](/api/url-patterns) matching responses that should be expired.
 
-  For example, to expire all responses to URLs starting with `/notes/`:
+For example, to expire all responses to URLs starting with `/notes/`:
 
-  ```http
-  X-Up-Expire-Cache: /notes/*
-  ```
+```http
+X-Up-Expire-Cache: /notes/*
+```
 
-  To expire all cache entries:
+To expire all cache entries:
 
-  ```http
-  X-Up-Expire-Cache: *
-  ```
+```http
+X-Up-Expire-Cache: *
+```
 
-  To expire nothing beyond what the client has already expired, send `false`:
+To expire nothing beyond what the client has already expired, send `false`:
 
-  ```http
-  X-Up-Expire-Cache: false
-  ```
+```http
+X-Up-Expire-Cache: false
+```
 
-  ### Relation to the client-side default
+### Relation to the client-side default
 
-  When Unpoly sends a non-GET request, it [expires the entire cache](/api/up.network.config#config.expireCache)
-  before the server responds. This header can only expire *additional* entries.
-  It cannot undo an expiration that has already happened.
+When Unpoly sends a non-GET request, it [expires the entire cache](/api/up.network.config#config.expireCache)
+before the server responds. This header can only expire *additional* entries.
+It cannot undo an expiration that has already happened.
 
-  To keep the cache fresh after a non-GET request, configure the client instead.
-  For example, set an [`[up-expire-cache="false"]`](/api/up-follow#up-expire-cache) attribute
-  on the link or form, or customize `up.network.config.expireCache`.
+To keep the cache fresh after a non-GET request, configure the client instead.
+For example, set an [`[up-expire-cache="false"]`](/api/up-follow#up-expire-cache) attribute
+on the link or form, or customize `up.network.config.expireCache`.
 
-  @header X-Up-Expire-Cache
-  @stable
-  */
+@header X-Up-Expire-Cache
+@stable
+*/
 
-  function contextFromXHR(xhr) {
-    return extractHeader(xhr, 'context', u.parseRelaxedJSON)
-  }
+export function contextFromXHR(xhr) {
+  return extractHeader(xhr, 'context', parseRelaxedJSON)
+}
 
-  /*-
-  This request header contains the targeted layer's [context](/learn/layer-context), serialized as JSON.
+/*-
+This request header contains the targeted layer's [context](/learn/layer-context), serialized as JSON.
 
-  ### Example
+### Example
 
-  The current layer has a context `{ lives: 3 }`.
-  When the user updates a fragment, Unpoly automatically includes the following request headers:
+The current layer has a context `{ lives: 3 }`.
+When the user updates a fragment, Unpoly automatically includes the following request headers:
 
-  ```http
-  X-Up-Context: { "lives": 3 }
-  X-Up-Target: main
-  ```
+```http
+X-Up-Context: { "lives": 3 }
+X-Up-Target: main
+```
 
-  The server may choose to render HTML based on that context, e.g. by including
-  a live counter in the response. It responds with the following HTTP:
+The server may choose to render HTML based on that context, e.g. by including
+a live counter in the response. It responds with the following HTTP:
 
-  ```http
-  Vary: X-Up-Context
+```http
+Vary: X-Up-Context
 
+<main>
+  3 lives left
+  ...
+</main>
+```
+
+@include vary-header-note
+
+### Updating context from the server
+
+The server may update the layer context by sending a `X-Up-Context` response header with
+changed key/value pairs:
+
+```http
+Content-Type: text/html
+X-Up-Context: { "lives": 2 }
+
+<html>
+  ...
+</html>
+```
+
+@include unicode-header-values
+
+Upon seeing the response header, Unpoly will merge the server-provided context object into
+the layer's context object, adding or replacing keys as needed.
+Client-side context keys not mentioned in the response will remain unchanged.
+
+There is no explicit protocol to *remove* keys from the context, but the server may send a key
+with a `null` value to effectively remove a key.
+
+The frontend will use the server-provided context updates for both successful (HTTP status `200 OK`)
+and error (status `4xx` or `5xx`) responses.  If no `X-Up-Context` response header is set,
+the updating layer's context will not be changed.
+
+It is recommended that the server only places changed key/value pairs into the `X-Up-Context`
+response header, and not echo the entire context object. Otherwise any client-side changes made while
+the request was in flight will get overridden by the server-provided context.
+
+@header X-Up-Context
+@experimental
+*/
+
+/*-
+This request header contains the [context](/learn/layer-context) of the layer
+that Unpoly updates when the server sends an [error response](/learn/error-responses), serialized as JSON.
+
+An error response has a status code other than 2xx, but still contains HTML.
+
+Server-side code is free to render different HTML for different contexts.
+
+### Example
+
+```http
+X-Up-Fail-Context: { "lives": 3 }
+```
+
+@header X-Up-Fail-Context
+@experimental
+*/
+
+/*-
+@function up.protocol.methodFromXHR
+@internal
+*/
+export function methodFromXHR(xhr) {
+  return extractHeader(xhr, 'method', normalizeMethod)
+}
+
+/*-
+The server may set this optional response header to change the HTTP method after a fragment update.
+
+Without this header Unpoly will use the [requested method](/api/up.Request.prototype.method).
+
+### Signaling the HTTP method after a redirect
+
+Without an `X-Up-Method` header, Unpoly will assume a `GET` method after a redirect.
+
+This assumption is correct for redirects with status codes 301, 302 and 303,
+and incorrect for the [less common codes 307 and 308](https://makandracards.com/makandra/501468-modern-http-status-codes-for-redirecting).
+
+Also for technical reasons Unpoly cannot detect redirects to the same URL, but using a different method. For example, when a request
+to `POST /users` redirects to `GET /users`.
+
+You can address both edge cases by including an `X-Up-Method` header in your responses.
+
+### Example
+
+```http
+X-Up-Location: /users
+X-Up-Method: GET
+```
+
+@header X-Up-Method
+@stable
+*/
+
+/*-
+@function up.protocol.titleFromXHR
+@internal
+*/
+export function titleFromXHR(xhr) {
+  return up.migrate.titleFromXHR?.(xhr) ?? extractHeader(xhr, 'title', parseRelaxedJSON)
+}
+
+/*-
+The server may set this optional response header to change the document title after a fragment update.
+
+The title must be encoded as a [relaxed JSON](/api/relaxed-json) string.
+
+Without this header Unpoly will extract the `<title>` from the server response.
+
+This header is useful when you [optimize your response](/learn/optimizing-responses) to not render
+the application layout unless targeted. When your shortened response
+no longer includes a `<title>`, you can instead use this HTTP header to pass the document title.
+
+@include unicode-header-values
+
+### Example
+
+```http
+X-Up-Title: "Playlist browser"
+```
+
+Note that the quotes must be included in the JSON-encoded header value.
+
+@header X-Up-Title
+@stable
+*/
+
+/*-
+This request header contains the names of the [form fields being validated](/api/up-validate).
+
+When seeing this header, the server is [expected](/api/up-validate#backend-protocol)
+to validate (but not save) the form submission and render a new form state with validation errors.
+See the documentation for `[up-validate]` for more information
+on how server-side validation works in Unpoly.
+
+### Example
+
+Let's look at a registration form that uses `[up-validate]` to validate form groups
+as the user completes fields:
+
+```html
+<form action="/users">
+
+  <fieldset>
+    <label for="email">E-mail</label>
+    <input type="text" id="email" name="email" up-validate> <!-- mark: up-validate -->
+  </fieldset>
+
+  <fieldset>
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" up-validate> <!-- mark: up-validate -->
+  </fieldset>
+
+  <button type="submit">Register</button>
+
+</form>
+```
+
+When the `email` input is changed, Unpoly will submit the form with an
+additional `X-Up-Validate` header:
+
+```http
+X-Up-Validate: email
+X-Up-Target: fieldset:has(#email)
+```
+
+### Batched validations
+
+If multiple validations are [batched](/api/up.validate#batching) into a single request,
+`X-Up-Validate` contains a space-separated list of all validating field names:
+
+```http
+X-Up-Validate: email password
+X-Up-Target: fieldset:has(#password), fieldset:has(#email)
+```
+
+### When no origin field is known
+
+When `up.validate()` is called with a non-field element, Unpoly might not know
+which element triggered the validation. In that case the header value will be `:unknown`:
+
+```http
+X-Up-Validate: :unknown
+X-Up-Target: .preview
+```
+
+### When too many fields are validated
+
+Validating a long form may cause the `X-Up-Validate` header to become excessively long.
+This may cause web infrastructure to reject the request with a `413 Entity Too Large` error.
+
+To prevent this, the header value is set to `:unknown` if its length exceeds `up.protocol.config.maxHeaderSize`.
+
+@header X-Up-Validate
+@stable
+@signature
+*/
+
+export function eventPlansFromXHR(xhr) {
+  return extractHeader(xhr, 'events', parseRelaxedJSON)
+}
+
+/*-
+The server may set this response header to [emit events](/api/up.emit) with the
+requested [fragment update](/api/up-follow).
+
+The header value is a [relaxed JSON](/api/relaxed-json) array.
+Each element in the array is an object representing an event to be emitted
+on the `document`.
+
+The object property `{ "type" }` defines the event's [type](https://developer.mozilla.org/en-US/docs/Web/API/Event/type). Other properties become properties of the emitted event object.
+
+@include unicode-header-values
+
+### Example
+
+```http
+Content-Type: text/html
+X-Up-Events: [{ type: 'user:created', id: 5012 }, { type: 'signup:completed' }]
+...
+
+<html>
+  ...
+</html>
+```
+
+### Emitting an event on a layer
+
+Instead of emitting an event on the `document`, the server may also choose to
+[emit the event on the layer being updated](/api/up.layer.emit). To do so, add a property
+`{ layer: 'current' }` to the JSON object of an event:
+
+```http
+Content-Type: text/html
+X-Up-Events: [{ type: 'user:created', name: 'foobar', layer: 'current' }]
+...
+
+<html>
+  ...
+</html>
+```
+
+@header X-Up-Events
+@stable
+*/
+
+export function openLayerFromXHR(xhr) {
+  // When no specific options are given, the server will send X-Up-Open-Layer: {}
+  return extractHeader(xhr, 'openLayer', parseRelaxedJSON)
+}
+
+/*-
+The server can send this response header to force its response to [open a new overlay](/learn/opening-overlays).
+
+## Basic example
+
+The following will select the [main](/api/main) element from the HTML payload
+and open it with a basic `modal` overlay:
+
+```http
+Content-Type: text/html
+X-Up-Open-Layer: {}
+
+<html>
   <main>
-    3 lives left
-    ...
-  </main>
-  ```
-
-  @include vary-header-note
-
-  ### Updating context from the server
-
-  The server may update the layer context by sending a `X-Up-Context` response header with
-  changed key/value pairs:
-
-  ```http
-  Content-Type: text/html
-  X-Up-Context: { "lives": 2 }
-
-  <html>
-    ...
-  </html>
-  ```
-
-  @include unicode-header-values
-
-  Upon seeing the response header, Unpoly will merge the server-provided context object into
-  the layer's context object, adding or replacing keys as needed.
-  Client-side context keys not mentioned in the response will remain unchanged.
-
-  There is no explicit protocol to *remove* keys from the context, but the server may send a key
-  with a `null` value to effectively remove a key.
-
-  The frontend will use the server-provided context updates for both successful (HTTP status `200 OK`)
-  and error (status `4xx` or `5xx`) responses.  If no `X-Up-Context` response header is set,
-  the updating layer's context will not be changed.
-
-  It is recommended that the server only places changed key/value pairs into the `X-Up-Context`
-  response header, and not echo the entire context object. Otherwise any client-side changes made while
-  the request was in flight will get overridden by the server-provided context.
-
-  @header X-Up-Context
-  @experimental
-  */
-
-  /*-
-  This request header contains the [context](/learn/layer-context) of the layer
-  that Unpoly updates when the server sends an [error response](/learn/error-responses), serialized as JSON.
-
-  An error response has a status code other than 2xx, but still contains HTML.
-
-  Server-side code is free to render different HTML for different contexts.
-
-  ### Example
-
-  ```http
-  X-Up-Fail-Context: { "lives": 3 }
-  ```
-
-  @header X-Up-Fail-Context
-  @experimental
-  */
-
-  /*-
-  @function up.protocol.methodFromXHR
-  @internal
-  */
-  function methodFromXHR(xhr) {
-    return extractHeader(xhr, 'method', u.normalizeMethod)
-  }
-
-  /*-
-  The server may set this optional response header to change the HTTP method after a fragment update.
-
-  Without this header Unpoly will use the [requested method](/api/up.Request.prototype.method).
-
-  ### Signaling the HTTP method after a redirect
-
-  Without an `X-Up-Method` header, Unpoly will assume a `GET` method after a redirect.
-
-  This assumption is correct for redirects with status codes 301, 302 and 303,
-  and incorrect for the [less common codes 307 and 308](https://makandracards.com/makandra/501468-modern-http-status-codes-for-redirecting).
-
-  Also for technical reasons Unpoly cannot detect redirects to the same URL, but using a different method. For example, when a request
-  to `POST /users` redirects to `GET /users`.
-
-  You can address both edge cases by including an `X-Up-Method` header in your responses.
-
-  ### Example
-
-  ```http
-  X-Up-Location: /users
-  X-Up-Method: GET
-  ```
-
-  @header X-Up-Method
-  @stable
-  */
-
-  /*-
-  @function up.protocol.titleFromXHR
-  @internal
-  */
-  function titleFromXHR(xhr) {
-    return up.migrate.titleFromXHR?.(xhr) ?? extractHeader(xhr, 'title', u.parseRelaxedJSON)
-  }
-
-  /*-
-  The server may set this optional response header to change the document title after a fragment update.
-
-  The title must be encoded as a [relaxed JSON](/api/relaxed-json) string.
-
-  Without this header Unpoly will extract the `<title>` from the server response.
-
-  This header is useful when you [optimize your response](/learn/optimizing-responses) to not render
-  the application layout unless targeted. When your shortened response
-  no longer includes a `<title>`, you can instead use this HTTP header to pass the document title.
-
-  @include unicode-header-values
-
-  ### Example
-
-  ```http
-  X-Up-Title: "Playlist browser"
-  ```
-
-  Note that the quotes must be included in the JSON-encoded header value.
-
-  @header X-Up-Title
-  @stable
-  */
-
-  /*-
-  This request header contains the names of the [form fields being validated](/api/up-validate).
-
-  When seeing this header, the server is [expected](/api/up-validate#backend-protocol)
-  to validate (but not save) the form submission and render a new form state with validation errors.
-  See the documentation for `[up-validate]` for more information
-  on how server-side validation works in Unpoly.
-
-  ### Example
-
-  Let's look at a registration form that uses `[up-validate]` to validate form groups
-  as the user completes fields:
-
-  ```html
-  <form action="/users">
-
-    <fieldset>
-      <label for="email">E-mail</label>
-      <input type="text" id="email" name="email" up-validate> <!-- mark: up-validate -->
-    </fieldset>
-
-    <fieldset>
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" up-validate> <!-- mark: up-validate -->
-    </fieldset>
-
-    <button type="submit">Register</button>
-
-  </form>
-  ```
-
-  When the `email` input is changed, Unpoly will submit the form with an
-  additional `X-Up-Validate` header:
-
-  ```http
-  X-Up-Validate: email
-  X-Up-Target: fieldset:has(#email)
-  ```
-
-  ### Batched validations
-
-  If multiple validations are [batched](/api/up.validate#batching) into a single request,
-  `X-Up-Validate` contains a space-separated list of all validating field names:
-
-  ```http
-  X-Up-Validate: email password
-  X-Up-Target: fieldset:has(#password), fieldset:has(#email)
-  ```
-
-  ### When no origin field is known
-
-  When `up.validate()` is called with a non-field element, Unpoly might not know
-  which element triggered the validation. In that case the header value will be `:unknown`:
-
-  ```http
-  X-Up-Validate: :unknown
-  X-Up-Target: .preview
-  ```
-
-  ### When too many fields are validated
-
-  Validating a long form may cause the `X-Up-Validate` header to become excessively long.
-  This may cause web infrastructure to reject the request with a `413 Entity Too Large` error.
-
-  To prevent this, the header value is set to `:unknown` if its length exceeds `up.protocol.config.maxHeaderSize`.
-
-  @header X-Up-Validate
-  @stable
-  @signature
-  */
-
-  function eventPlansFromXHR(xhr) {
-    return extractHeader(xhr, 'events', u.parseRelaxedJSON)
-  }
-
-  /*-
-  The server may set this response header to [emit events](/api/up.emit) with the
-  requested [fragment update](/api/up-follow).
-
-  The header value is a [relaxed JSON](/api/relaxed-json) array.
-  Each element in the array is an object representing an event to be emitted
-  on the `document`.
-
-  The object property `{ "type" }` defines the event's [type](https://developer.mozilla.org/en-US/docs/Web/API/Event/type). Other properties become properties of the emitted event object.
-
-  @include unicode-header-values
-
-  ### Example
-
-  ```http
-  Content-Type: text/html
-  X-Up-Events: [{ type: 'user:created', id: 5012 }, { type: 'signup:completed' }]
-  ...
-
-  <html>
-    ...
-  </html>
-  ```
-
-  ### Emitting an event on a layer
-
-  Instead of emitting an event on the `document`, the server may also choose to
-  [emit the event on the layer being updated](/api/up.layer.emit). To do so, add a property
-  `{ layer: 'current' }` to the JSON object of an event:
-
-  ```http
-  Content-Type: text/html
-  X-Up-Events: [{ type: 'user:created', name: 'foobar', layer: 'current' }]
-  ...
-
-  <html>
-    ...
-  </html>
-  ```
-
-  @header X-Up-Events
-  @stable
-  */
-
-  function openLayerFromXHR(xhr) {
-    // When no specific options are given, the server will send X-Up-Open-Layer: {}
-    return extractHeader(xhr, 'openLayer', u.parseRelaxedJSON)
-  }
-
-  /*-
-  The server can send this response header to force its response to [open a new overlay](/learn/opening-overlays).
-
-  ## Basic example
-
-  The following will select the [main](/api/main) element from the HTML payload
-  and open it with a basic `modal` overlay:
-
-  ```http
-  Content-Type: text/html
-  X-Up-Open-Layer: {}
-
-  <html>
-    <main>
-      Overlay content
-    </main>
-  </html>
-  ```
-
-  ## Custom layer options {#options}
-
-  When `X-Up-Open-Layer` is used without options, the new overlay will have the [default mode](/api/up.layer.config#config.mode) (`modal`), select a [main target](/api/main)
-  and use [default navigation options](/api/up.fragment.config#config.navigateOptions).
-
-  You can customize the target and appearance of the new overlay, by setting the header value to a [relaxed JSON](/api/relaxed-json) string
-  with render options:
-
-  ```http
-  Content-Type: text/html
-  X-Up-Open-Layer: { target: '#menu', mode: 'drawer', animation: 'fade-in' }
-
-  <div id="menu">
     Overlay content
-  </div>
-  ```
+  </main>
+</html>
+```
 
-  Many options from `up.layer.open()` are supported.
+## Custom layer options {#options}
 
-  ### Callback options {#callbacks}
+When `X-Up-Open-Layer` is used without options, the new overlay will have the [default mode](/api/up.layer.config#config.mode) (`modal`), select a [main target](/api/main)
+and use [default navigation options](/api/up.fragment.config#config.navigateOptions).
 
-  Callbacks like `{ onAccepted }` or `{ onDismissed }` can be passed as a string of JavaScript:
+You can customize the target and appearance of the new overlay, by setting the header value to a [relaxed JSON](/api/relaxed-json) string
+with render options:
 
-  ```http
-  Content-Type: text/html
-  X-Up-Open-Layer: { onAccepted: 'up.reload("#users-list")' }
-  ```
+```http
+Content-Type: text/html
+X-Up-Open-Layer: { target: '#menu', mode: 'drawer', animation: 'fade-in' }
 
-  With a strict CSP you can [prefix your callback with a nonce](/learn/script-security#callback-nonces):
+<div id="menu">
+  Overlay content
+</div>
+```
 
-  ```http
-  Content-Type: text/html
-  X-Up-Open-Layer: { onAccepted: 'nonce-secret123 up.reload("#users-list")' }
-  ```
+Many options from `up.layer.open()` are supported.
 
-  To only reload an element after the overlay closes, pass a selector as `{ onAcceptedReload }` or `{ onDismissedReload }`.
-  This runs no JavaScript, so it needs no nonce:
+### Callback options {#callbacks}
 
-  ```http
-  Content-Type: text/html
-  X-Up-Open-Layer: { onAcceptedReload: '#users-list' }
-  ```
+Callbacks like `{ onAccepted }` or `{ onDismissed }` can be passed as a string of JavaScript:
+
+```http
+Content-Type: text/html
+X-Up-Open-Layer: { onAccepted: 'up.reload("#users-list")' }
+```
+
+With a strict CSP you can [prefix your callback with a nonce](/learn/script-security#callback-nonces):
+
+```http
+Content-Type: text/html
+X-Up-Open-Layer: { onAccepted: 'nonce-secret123 up.reload("#users-list")' }
+```
+
+To only reload an element after the overlay closes, pass a selector as `{ onAcceptedReload }` or `{ onDismissedReload }`.
+This runs no JavaScript, so it needs no nonce:
+
+```http
+Content-Type: text/html
+X-Up-Open-Layer: { onAcceptedReload: '#users-list' }
+```
 
 
-  @header X-Up-Open-Layer
-  @experimental
-  */
+@header X-Up-Open-Layer
+@experimental
+*/
 
-  function acceptLayerFromXHR(xhr) {
-    // Even if acceptance has no value, the server will send
-    // X-Up-Accept-Layer: null
-    return extractHeader(xhr, 'acceptLayer', u.parseRelaxedJSON)
+export function acceptLayerFromXHR(xhr) {
+  // Even if acceptance has no value, the server will send
+  // X-Up-Accept-Layer: null
+  return extractHeader(xhr, 'acceptLayer', parseRelaxedJSON)
+}
+
+/*-
+The server may set this response header to [accept](/api/up.layer.accept) the targeted overlay
+in response to a fragment update.
+
+Upon seeing the header, Unpoly will cancel the fragment update and accept the layer instead.
+
+The header value is the acceptance value serialized as a [relaxed JSON](/api/relaxed-json) value.
+To accept an overlay without value, set the header value to the string `null`.
+
+@include unicode-header-values
+
+### Example
+
+The response below will accept the targeted overlay with the value `{ user_id: 1012 }`:
+
+```http
+Content-Type: text/html
+X-Up-Accept-Layer: { user_id: 1012 }
+
+<html>
+  ...
+</html>
+```
+
+### Rendering content
+
+The response may contain `text/html` content. If the root layer is targeted,
+the `X-Up-Accept-Layer` header is ignored and the fragment is updated with
+the response's HTML content.
+
+If you know that an overlay will be closed and don't want to render HTML,
+have the server change the render target to `:none`:
+
+```http
+Content-Type: text/html
+X-Up-Accept-Layer: { user_id: 1012 }
+X-Up-Target: :none
+```
+
+@header X-Up-Accept-Layer
+@stable
+@signature
+*/
+
+export function dismissLayerFromXHR(xhr) {
+  // Even if dismissal has no value, the server will send
+  // X-Up-Dismiss-Layer: null
+  return extractHeader(xhr, 'dismissLayer', parseRelaxedJSON)
+}
+
+/*-
+The server may set this response header to [dismiss](/api/up.layer.dismiss) the targeted overlay
+in response to a fragment update.
+
+Upon seeing the header, Unpoly will cancel the fragment update and dismiss the layer instead.
+
+The header value is the dismissal value serialized as a [relaxed JSON](/api/relaxed-json) value.
+To dismiss an overlay without value, set the header value to the string `null`.
+
+@include unicode-header-values
+
+### Example
+
+The response below will dismiss the targeted overlay without a dismissal value:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: text/html
+X-Up-Dismiss-Layer: null
+
+<html>
+  ...
+</html>
+```
+
+### Rendering content
+
+The response may contain `text/html` content. If the root layer is targeted,
+the `X-Up-Dismiss-Layer` header is ignored and the fragment is updated with
+the response's HTML content.
+
+If you know that an overlay will be closed and don't want to render HTML,
+have the server change the render target to `:none`:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: text/html
+X-Up-Dismiss-Layer: { user_id: 1012 }
+X-Up-Target: :none
+```
+
+@header X-Up-Dismiss-Layer
+@stable
+*/
+
+/*-
+Server-side companion libraries like unpoly-rails set this cookie so we
+have a way to detect the request method of the initial page load.
+There is no JavaScript API for this.
+
+@function up.protocol.initialRequestMethod
+@internal
+*/
+export const initialRequestMethod = memoize(function() {
+  return normalizeMethod(popCookie('_up_method'))
+})
+
+/*-
+The server may set this optional cookie to echo the HTTP method of the initial request.
+
+When the initial page was loaded with a method other than `GET`, set a cookie with that method:
+
+```http
+Set-Cookie: _up_method=POST
+```
+
+The **simplest implementation** is to set this cookie for every request that is neither
+`GET` nor an [Unpoly request](/api/X-Up-Version). For all other requests
+an existing `_up_method` cookie should be deleted.
+
+When Unpoly boots it will look for this cookie and configure itself accordingly.
+The cookie is then deleted in order to not affect following requests.
+
+If the initial page was loaded with a non-`GET` HTTP method, Unpoly prefers to make a full
+page load when you try to update a fragment. Once the next page was loaded with a `GET` method,
+Unpoly will again update fragments. This fixes two edge cases:
+
+1. Unpoly replaces the initial page state so it can later restore it when the user
+   goes back to that initial URL. However, if the initial request was a POST,
+   Unpoly will wrongly assume that it can restore the state by reloading with GET.
+2. Some browsers have a bug where the initial request method is used for all
+   subsequently pushed states. That means if the user reloads the page on a later
+   GET state, the browser will wrongly attempt a POST request.
+   This issue affected Safari 9-12.
+
+@cookie _up_method
+@stable
+*/
+
+/*-
+@function up.protocol.locationFromXHR
+@internal
+*/
+export function locationFromXHR(xhr) {
+  // We prefer the X-Up-Location header to xhr.responseURL.
+  // If the server redirected to a new location, Unpoly-related headers
+  // will be encoded in the request's query params like this:
+  //
+  //     /redirect-target?_up[target]=.foo
+  //
+  // To prevent these these `_up` params from showing up in the browser URL,
+  // the X-Up-Location header will omit these params while `xhr.responseURL`
+  // will still contain them.
+  let location = extractHeader(xhr, 'location') || xhr.responseURL
+  if (location) {
+    return normalizeURL(location)
   }
+}
 
-  /*-
-  The server may set this response header to [accept](/api/up.layer.accept) the targeted overlay
-  in response to a fragment update.
+/*-
+The server may set this response header to set a custom browser location after a fragment update.
 
-  Upon seeing the header, Unpoly will cancel the fragment update and accept the layer instead.
+Without an `X-Up-Location` header Unpoly will set the browser location to the
+[requested URL](/api/up.Request.prototype.url). After a redirect the URL of the last request is used.
+You only need to set `X-Up-Location` when you want to explicitly set a different URL.
 
-  The header value is the acceptance value serialized as a [relaxed JSON](/api/relaxed-json) value.
-  To accept an overlay without value, set the header value to the string `null`.
+When setting `X-Up-Location` it is recommended to also set `X-Up-Method`.
 
-  @include unicode-header-values
+### Example
 
-  ### Example
+```http
+X-Up-Location: /current-url
+X-Up-Method: GET
+```
 
-  The response below will accept the targeted overlay with the value `{ user_id: 1012 }`:
+### Revealing an element
 
-  ```http
-  Content-Type: text/html
-  X-Up-Accept-Layer: { user_id: 1012 }
+The URL may contain a `#hash`, e.g. `X-Up-Location: /users#alice`. Unpoly then
+[reveals](/learn/scrolling) the element with that ID, like after following a link to `/users#alice`.
+A `#hash` in this header replaces any `#hash` of the requested URL.
 
-  <html>
-    ...
-  </html>
-  ```
+@header X-Up-Location
+@stable
+*/
 
-  ### Rendering content
+/*-
+Request headers that influenced a response should be listed in a `Vary` response header.
 
-  The response may contain `text/html` content. If the root layer is targeted,
-  the `X-Up-Accept-Layer` header is ignored and the fragment is updated with
-  the response's HTML content.
+This tells Unpoly to [partition its cache](/learn/optimizing-responses#vary) for that URL so that each
+request header value gets a separate cache entry.
 
-  If you know that an overlay will be closed and don't want to render HTML,
-  have the server change the render target to `:none`:
+You can set a `Vary` header manually from your server-side code. You may also be using
+a library like [unpoly-rails](https://github.com/unpoly/unpoly-rails) that sets the `Vary` header automatically.
 
-  ```http
-  Content-Type: text/html
-  X-Up-Accept-Layer: { user_id: 1012 }
-  X-Up-Target: :none
-  ```
 
-  @header X-Up-Accept-Layer
-  @stable
-  @signature
-  */
+> [tip]
+> Server-side Unpoly apps may inspect [request headers](/api/up.protocol) to [customize or shorten responses](/learn/optimizing-responses),
+> e.g. by omitting content that isn't [targeted](/learn/targeting-fragments).
+> When a response is optimized in that fashion, a `Vary` header should be sent.
 
-  function dismissLayerFromXHR(xhr) {
-    // Even if dismissal has no value, the server will send
-    // X-Up-Dismiss-Layer: null
-    return extractHeader(xhr, 'dismissLayer', u.parseRelaxedJSON)
-  }
+### Example
 
-  /*-
-  The server may set this response header to [dismiss](/api/up.layer.dismiss) the targeted overlay
-  in response to a fragment update.
-
-  Upon seeing the header, Unpoly will cancel the fragment update and dismiss the layer instead.
-
-  The header value is the dismissal value serialized as a [relaxed JSON](/api/relaxed-json) value.
-  To dismiss an overlay without value, set the header value to the string `null`.
-
-  @include unicode-header-values
-
-  ### Example
-
-  The response below will dismiss the targeted overlay without a dismissal value:
-
-  ```http
-  HTTP/1.1 200 OK
-  Content-Type: text/html
-  X-Up-Dismiss-Layer: null
-
-  <html>
-    ...
-  </html>
-  ```
-
-  ### Rendering content
-
-  The response may contain `text/html` content. If the root layer is targeted,
-  the `X-Up-Dismiss-Layer` header is ignored and the fragment is updated with
-  the response's HTML content.
-
-  If you know that an overlay will be closed and don't want to render HTML,
-  have the server change the render target to `:none`:
+@include vary-header-example
 
-  ```http
-  HTTP/1.1 200 OK
-  Content-Type: text/html
-  X-Up-Dismiss-Layer: { user_id: 1012 }
-  X-Up-Target: :none
-  ```
+See [How cache entries are matched](/learn/optimizing-responses#cache-matching) for more examples.
 
-  @header X-Up-Dismiss-Layer
-  @stable
-  */
+### Resources
 
-  /*-
-  Server-side companion libraries like unpoly-rails set this cookie so we
-  have a way to detect the request method of the initial page load.
-  There is no JavaScript API for this.
+- [RFC 9110: Vary](https://httpwg.org/specs/rfc9110.html#field.vary)
+- [MDN: Vary](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Vary)
+- [Key CDN: Vary](https://www.keycdn.com/support/vary-header)
 
-  @function up.protocol.initialRequestMethod
-  @internal
-  */
-  const initialRequestMethod = u.memoize(function() {
-    return u.normalizeMethod(up.browser.popCookie('_up_method'))
-  })
+@header Vary
+@stable
+*/
 
-  /*-
-  The server may set this optional cookie to echo the HTTP method of the initial request.
+/*-
+Configures strings used in the optional [server protocol](/api/up.protocol).
 
-  When the initial page was loaded with a method other than `GET`, set a cookie with that method:
+@property up.protocol.config
 
-  ```http
-  Set-Cookie: _up_method=POST
-  ```
+@section CSRF
+  @param {string} [config.csrfHeader='X-CSRF-Token']
+    The name of the HTTP header that will include the
+    [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
+    for requests made by Unpoly.
 
-  The **simplest implementation** is to set this cookie for every request that is neither
-  `GET` nor an [Unpoly request](/api/X-Up-Version). For all other requests
-  an existing `_up_method` cookie should be deleted.
+  @param {string|Function(): string} [config.csrfParam]
+    The `name` of the hidden `<input>` used for sending a
+    [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) when
+    the browser submits a form without Unpoly. For requests made by Unpoly the token is sent as an
+    [HTTP header](/api/up.protocol.config#config.csrfHeader) instead.
 
-  When Unpoly boots it will look for this cookie and configure itself accordingly.
-  The cookie is then deleted in order to not affect following requests.
+    The parameter name can be configured as a string or as function that returns the parameter name.
+    If no name is set, no token will be sent.
 
-  If the initial page was loaded with a non-`GET` HTTP method, Unpoly prefers to make a full
-  page load when you try to update a fragment. Once the next page was loaded with a `GET` method,
-  Unpoly will again update fragments. This fixes two edge cases:
+    Defaults to the `content` attribute of a `<meta>` tag named `csrf-param`:
 
-  1. Unpoly replaces the initial page state so it can later restore it when the user
-     goes back to that initial URL. However, if the initial request was a POST,
-     Unpoly will wrongly assume that it can restore the state by reloading with GET.
-  2. Some browsers have a bug where the initial request method is used for all
-     subsequently pushed states. That means if the user reloads the page on a later
-     GET state, the browser will wrongly attempt a POST request.
-     This issue affected Safari 9-12.
+    ```html
+    <meta name="csrf-param" content="authenticity_token">
+    ```
 
-  @cookie _up_method
-  @stable
-  */
+  @param {string|Function(): string} [config.csrfToken]
+    The [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
+    to send for unsafe requests. The token will be sent as either an HTTP header (for requests made by Unpoly)
+    or a hidden form `<input>` (for form submissions without Unpoly).
 
-  /*-
-  @function up.protocol.locationFromXHR
-  @internal
-  */
-  function locationFromXHR(xhr) {
-    // We prefer the X-Up-Location header to xhr.responseURL.
-    // If the server redirected to a new location, Unpoly-related headers
-    // will be encoded in the request's query params like this:
-    //
-    //     /redirect-target?_up[target]=.foo
-    //
-    // To prevent these these `_up` params from showing up in the browser URL,
-    // the X-Up-Location header will omit these params while `xhr.responseURL`
-    // will still contain them.
-    let location = extractHeader(xhr, 'location') || xhr.responseURL
-    if (location) {
-      return u.normalizeURL(location)
-    }
-  }
+    The token can either be configured as a string or as function that returns the token.
+    If no token is set, no token will be sent.
 
-  /*-
-  The server may set this response header to set a custom browser location after a fragment update.
+    Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
 
-  Without an `X-Up-Location` header Unpoly will set the browser location to the
-  [requested URL](/api/up.Request.prototype.url). After a redirect the URL of the last request is used.
-  You only need to set `X-Up-Location` when you want to explicitly set a different URL.
+    ```
+    <meta name='csrf-token' content='secret12345'>
+    ```
 
-  When setting `X-Up-Location` it is recommended to also set `X-Up-Method`.
-
-  ### Example
-
-  ```http
-  X-Up-Location: /current-url
-  X-Up-Method: GET
-  ```
-
-  ### Revealing an element
-
-  The URL may contain a `#hash`, e.g. `X-Up-Location: /users#alice`. Unpoly then
-  [reveals](/learn/scrolling) the element with that ID, like after following a link to `/users#alice`.
-  A `#hash` in this header replaces any `#hash` of the requested URL.
-
-  @header X-Up-Location
-  @stable
-  */
-
-  /*-
-  Request headers that influenced a response should be listed in a `Vary` response header.
-
-  This tells Unpoly to [partition its cache](/learn/optimizing-responses#vary) for that URL so that each
-  request header value gets a separate cache entry.
-
-  You can set a `Vary` header manually from your server-side code. You may also be using
-  a library like [unpoly-rails](https://github.com/unpoly/unpoly-rails) that sets the `Vary` header automatically.
-
-
-  > [tip]
-  > Server-side Unpoly apps may inspect [request headers](/api/up.protocol) to [customize or shorten responses](/learn/optimizing-responses),
-  > e.g. by omitting content that isn't [targeted](/learn/targeting-fragments).
-  > When a response is optimized in that fashion, a `Vary` header should be sent.
-
-  ### Example
-
-  @include vary-header-example
-
-  See [How cache entries are matched](/learn/optimizing-responses#cache-matching) for more examples.
-
-  ### Resources
-
-  - [RFC 9110: Vary](https://httpwg.org/specs/rfc9110.html#field.vary)
-  - [MDN: Vary](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Vary)
-  - [Key CDN: Vary](https://www.keycdn.com/support/vary-header)
-
-  @header Vary
-  @stable
-  */
-
-  /*-
-  Configures strings used in the optional [server protocol](/api/up.protocol).
-
-  @property up.protocol.config
-
-  @section CSRF
-    @param {string} [config.csrfHeader='X-CSRF-Token']
-      The name of the HTTP header that will include the
-      [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
-      for requests made by Unpoly.
-
-    @param {string|Function(): string} [config.csrfParam]
-      The `name` of the hidden `<input>` used for sending a
-      [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern) when
-      the browser submits a form without Unpoly. For requests made by Unpoly the token is sent as an
-      [HTTP header](/api/up.protocol.config#config.csrfHeader) instead.
-
-      The parameter name can be configured as a string or as function that returns the parameter name.
-      If no name is set, no token will be sent.
-
-      Defaults to the `content` attribute of a `<meta>` tag named `csrf-param`:
-
-      ```html
-      <meta name="csrf-param" content="authenticity_token">
-      ```
-
-    @param {string|Function(): string} [config.csrfToken]
-      The [CSRF token](https://en.wikipedia.org/wiki/Cross-site_request_forgery#Synchronizer_token_pattern)
-      to send for unsafe requests. The token will be sent as either an HTTP header (for requests made by Unpoly)
-      or a hidden form `<input>` (for form submissions without Unpoly).
-
-      The token can either be configured as a string or as function that returns the token.
-      If no token is set, no token will be sent.
-
-      Defaults to the `content` attribute of a `<meta>` tag named `csrf-token`:
-
-      ```
-      <meta name='csrf-token' content='secret12345'>
-      ```
-
-  @section Method wrapping
-    @param {string} [config.methodParam='_method']
-      The name of request parameter containing the original request method when Unpoly needs to
-      [wrap](/api/up.network.config#config.wrapMethod) the method.
-
-      Methods must be wrapped when making a [full page request](/api/up.network.loadPage) with a methods other
-      than GET or POST. In this case Unpoly will make a POST request with the original request method
-      in a form parameter named `_method`:
-
-      ```http
-      POST /test HTTP/1.1
-      Host: example.com
-      Content-Type: application/x-www-form-urlencoded
-      Content-Length: 11
-
-      _method=PUT
-      ```
-
-  @section Header size
-    @param {number} [config.maxHeaderSize]
-      The preferred maximum length of an `X-Up`-prefixed header's value.
-
-      This is currently only honored for `X-Up-Validate`.
-
-      @experimental
-
-  @stable
-  */
-  const config = new up.Config('up.protocol.config', () => ({
-    methodParam: '_method',
-    csrfParam() { return e.metaContent('csrf-param') },
-    csrfToken() { return e.metaContent('csrf-token') },
-    // TODO: Let's move config.cspNonce() to up.script.config after all
-    csrfHeader: 'X-CSRF-Token', // Used by Rails. Other frameworks use different headers.
-    maxHeaderSize: 2048,
-  }))
-
-  function csrfHeader() {
-    return u.evalOption(config.csrfHeader)
-  }
-
-  function csrfParam() {
-    return u.evalOption(config.csrfParam)
-  }
-
-  function csrfToken() {
-    return u.evalOption(config.csrfToken)
-  }
-
-  function wrapMethod(method, params) {
-    params.add(config.methodParam, method)
-    return 'POST'
-  }
-
-  return {
+@section Method wrapping
+  @param {string} [config.methodParam='_method']
+    The name of request parameter containing the original request method when Unpoly needs to
+    [wrap](/api/up.network.config#config.wrapMethod) the method.
+
+    Methods must be wrapped when making a [full page request](/api/up.network.loadPage) with a methods other
+    than GET or POST. In this case Unpoly will make a POST request with the original request method
+    in a form parameter named `_method`:
+
+    ```http
+    POST /test HTTP/1.1
+    Host: example.com
+    Content-Type: application/x-www-form-urlencoded
+    Content-Length: 11
+
+    _method=PUT
+    ```
+
+@section Header size
+  @param {number} [config.maxHeaderSize]
+    The preferred maximum length of an `X-Up`-prefixed header's value.
+
+    This is currently only honored for `X-Up-Validate`.
+
+    @experimental
+
+@stable
+*/
+export const config = new Config('up.protocol.config', () => ({
+  methodParam: '_method',
+  csrfParam() { return metaContent('csrf-param') },
+  csrfToken() { return metaContent('csrf-token') },
+  // TODO: Let's move config.cspNonce() to up.script.config after all
+  csrfHeader: 'X-CSRF-Token', // Used by Rails. Other frameworks use different headers.
+  maxHeaderSize: 2048,
+}))
+
+export function csrfHeader() {
+  return evalOption(config.csrfHeader)
+}
+
+export function csrfParam() {
+  return evalOption(config.csrfParam)
+}
+
+export function csrfToken() {
+  return evalOption(config.csrfToken)
+}
+
+export function wrapMethod(method, params) {
+  params.add(config.methodParam, method)
+  return 'POST'
+}
+
+export const api = {
+  protocol: {
     config,
     locationFromXHR,
     titleFromXHR,
@@ -1160,5 +1163,5 @@ up.protocol = (function() {
     initialRequestMethod,
     headerize,
     wrapMethod,
-  }
-})()
+  },
+}

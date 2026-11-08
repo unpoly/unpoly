@@ -7,6 +7,7 @@ import { fail, muteUncriticalRejection } from '../error.js'
 import { Aborted } from '../error/aborted.js'
 import { build, on } from '../event.js'
 import { Params } from './params.js'
+import { config, headerize } from '../protocol.js'
 
 export class FormValidator {
 
@@ -329,9 +330,9 @@ export class FormValidator {
   }
 
   _addValidateHeader(headers, names) {
-    let key = up.protocol.headerize('validate')
+    let key = headerize('validate')
     let value = names.join(' ')
-    if (!value || value.length > up.protocol.config.maxHeaderSize) value = ':unknown'
+    if (!value || value.length > config.maxHeaderSize) value = ':unknown'
     headers[key] = value
   }
 

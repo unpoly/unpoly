@@ -1,4 +1,5 @@
 import { copy, memoizeMethod } from '../util.js'
+import { wrapMethod } from '../protocol.js'
 
 const CONTENT_TYPE_URL_ENCODED = 'application/x-www-form-urlencoded'
 const CONTENT_TYPE_FORM_DATA = 'multipart/form-data'
@@ -50,7 +51,7 @@ export class XHRRenderer {
     // if the server redirects with 302 (Rails default) instead of 303.
     let method = this._request.method
     if (this._request.wrapMethod && !this._request.will302RedirectWithGET()) {
-      method = up.protocol.wrapMethod(method, this._params)
+      method = wrapMethod(method, this._params)
     }
     return method
   }

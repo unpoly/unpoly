@@ -2,6 +2,7 @@ import { contains, each } from '../util.js'
 import { affix } from '../element.js'
 import { submitForm } from '../browser.js'
 import { Params } from '../form/params.js'
+import { wrapMethod } from '../protocol.js'
 
 // In HTML5, forms may only have a GET or POST method.
 // There were several proposals to extend this to PUT, DELETE, etc.
@@ -30,7 +31,7 @@ export class FormRenderer {
     if (!contains(HTML_FORM_METHODS, method)) {
       // HTML forms can only have a GET or POST method. Other HTTP methods will be converted
       // to a `POST` request and carry their original method as a `_method` parameter.
-      method = up.protocol.wrapMethod(method, this.params)
+      method = wrapMethod(method, this.params)
     }
 
     this._form = affix(document.body, 'form.up-request-loader', { method, action })
