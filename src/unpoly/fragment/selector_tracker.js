@@ -1,6 +1,6 @@
-const u = up.util
+import { noop, sequence } from '../util.js'
 
-up.SelectorTracker = class SelectorTracker {
+export class SelectorTracker {
 
   constructor(selectFn, addCallback) {
     this._selectFn = selectFn
@@ -21,7 +21,7 @@ up.SelectorTracker = class SelectorTracker {
     //     only syncs the current mutation (after up:fragment:insert) for performance reasons.
     this.sync()
 
-    return u.sequence(
+    return sequence(
       this._trackFragments(),
       () => this._removeAllMatches(),
     )
@@ -54,7 +54,7 @@ up.SelectorTracker = class SelectorTracker {
     for (let newMatch of this._selectFn()) {
       let knownRemoveCallback = removeMap.get(newMatch)
       removeMap.delete(newMatch)
-      let removeCallback = knownRemoveCallback || this._addCallback(newMatch) || u.noop
+      let removeCallback = knownRemoveCallback || this._addCallback(newMatch) || noop
       this._knownMatches.set(newMatch, removeCallback)
     }
 
@@ -71,4 +71,9 @@ up.SelectorTracker = class SelectorTracker {
     }
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  SelectorTracker,
 }

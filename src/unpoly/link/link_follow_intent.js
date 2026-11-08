@@ -1,7 +1,7 @@
-const u = up.util
-const e = up.element
+import { scheduleTimer } from '../util.js'
+import { numberAttr } from '../element.js'
 
-up.LinkFollowIntent = class LinkFollowIntent {
+export class LinkFollowIntent {
 
   constructor(link, callback) {
     this._link = link
@@ -33,7 +33,7 @@ up.LinkFollowIntent = class LinkFollowIntent {
     const applyDelay = (event.type === 'mouseenter')
     if (applyDelay) {
       let delay = this._parseDelay()
-      this._timer = u.timer(delay, () => this._runCallback(event))
+      this._timer = scheduleTimer(delay, () => this._runCallback(event))
     } else {
       this._runCallback(event)
     }
@@ -50,7 +50,7 @@ up.LinkFollowIntent = class LinkFollowIntent {
   }
 
   _parseDelay() {
-    return e.numberAttr(this._link, 'up-preload-delay') ?? up.link.config.preloadDelay
+    return numberAttr(this._link, 'up-preload-delay') ?? up.link.config.preloadDelay
   }
 
   _runCallback(event) {
@@ -75,4 +75,9 @@ up.LinkFollowIntent = class LinkFollowIntent {
     //     like to onFirstIntersect().
     this._callback({ onRequestKnown: (request) => this._lastRequest = request })
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  LinkFollowIntent,
 }

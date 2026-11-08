@@ -1,6 +1,7 @@
-const u = up.util
+import { remove, some } from '../util.js'
+import { muteUncriticalRejection } from '../error.js'
 
-up.MotionController = class MotionController {
+export class MotionController {
 
   constructor(name) {
     // TODO: Make finishEvent concrete string everywhere. We only have a singgle MotionController.
@@ -40,8 +41,8 @@ up.MotionController = class MotionController {
 
     try {
       this._playingClusters.push(newCluster)
-      let promise = up.error.muteUncriticalRejection(startMotionFn())
-      return promise.finally(() => u.remove(this._playingClusters, newCluster))
+      let promise = muteUncriticalRejection(startMotionFn())
+      return promise.finally(() => remove(this._playingClusters, newCluster))
     } finally {
       // This must happen sync. We cannot await the promise above, or we will be too late.
       this._startingCount--
@@ -50,7 +51,7 @@ up.MotionController = class MotionController {
 
   finish(element = document.body) {
     for (let playingCluster of this._findPlayingClusters(element)) {
-      u.remove(this._playingClusters, playingCluster)
+      remove(this._playingClusters, playingCluster)
 
       for (let playingElement of playingCluster) {
         this._emitFinishEvent(playingElement)
@@ -60,7 +61,7 @@ up.MotionController = class MotionController {
 
   _findPlayingClusters(queryElement) {
     return this._playingClusters.filter((cluster) => {
-      return u.some(cluster, (clusterElement) => queryElement.contains(clusterElement))
+      return some(cluster, (clusterElement) => queryElement.contains(clusterElement))
     })
   }
 
@@ -77,4 +78,9 @@ up.MotionController = class MotionController {
     this.finish()
     this._resetProps()
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  MotionController,
 }

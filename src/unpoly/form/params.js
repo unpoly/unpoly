@@ -1,5 +1,10 @@
-const u = up.util
-const e = up.element
+import {
+  contains, copy, evalOption, filterList, findInList, isArray, isBasicObjectProperty, isBlank,
+  isDefined, isEqual, isFormData, isGiven, isMissing, isObject, isPresent, isString, map,
+  normalizeURL, parseURL, reject, some, wrapList, wrapValue,
+} from '../util.js'
+import { getOne } from '../element.js'
+import { fail } from '../error.js'
 
 /*-
 The `up.Params` class offers a consistent API to read and manipulate request parameters
@@ -21,7 +26,7 @@ The following types of parameter representation are supported:
 @class up.Params
 @parent up.form
 */
-up.Params = class Params {
+export class Params {
 
   /*-
   Constructs a new `up.Params` instance.
@@ -49,8 +54,8 @@ up.Params = class Params {
     this.entries = []
   }
 
-  [u.copy.key]() {
-    return new up.Params(this)
+  [copy.key]() {
+    return new Params(this)
   }
 
   /*-
@@ -79,7 +84,7 @@ up.Params = class Params {
     const obj = {}
     for (let entry of this.entries) {
       const { name, value } = entry
-      if (!u.isBasicObjectProperty(name)) {
+      if (!isBasicObjectProperty(name)) {
         if (this._isArrayKey(name)) {
           obj[name] ||= []
           obj[name].push(value)
@@ -188,7 +193,7 @@ up.Params = class Params {
     // There is a subtle difference when encoding blank values:
     // 1. An undefined or null value is encoded to `key` with no equals sign
     // 2. An empty string value is encoded to `key=` with an equals sign but no value
-    if (u.isGiven(value)) {
+    if (isGiven(value)) {
       query += "="
       query += encodeURIComponent(value)
     }
@@ -209,11 +214,11 @@ up.Params = class Params {
   }
 
   hasBinaryEntries() {
-    return u.some(this.entries, this._isBinaryEntry)
+    return some(this.entries, this._isBinaryEntry)
   }
 
   withoutBinaryEntries() {
-    let simpleEntries = u.reject(this.entries, this._isBinaryEntry)
+    let simpleEntries = reject(this.entries, this._isBinaryEntry)
     return new this.constructor(simpleEntries)
   }
 
@@ -233,8 +238,8 @@ up.Params = class Params {
   */
   toURL(base) {
     let parts = [base, this.toQuery()]
-    parts = u.filter(parts, u.isPresent)
-    const separator = u.contains(base, '?') ? '&' : '?'
+    parts = filterList(parts, isPresent)
+    const separator = contains(base, '?') ? '&' : '?'
     return parts.join(separator)
   }
 
@@ -275,21 +280,21 @@ up.Params = class Params {
   @stable
   */
   addAll(raw) {
-    if (u.isMissing(raw)) {
+    if (isMissing(raw)) {
       // nothing to do
     } else if (raw instanceof this.constructor) {
       this.entries.push(...raw.entries)
-    } else if (u.isArray(raw)) {
+    } else if (isArray(raw)) {
       // internal use for copying
       this.entries.push(...raw)
-    } else if (u.isString(raw)) {
+    } else if (isString(raw)) {
       this._addAllFromQuery(raw)
-    } else if (u.isFormData(raw)) {
+    } else if (isFormData(raw)) {
       this._addAllFromFormData(raw)
-    } else if (u.isObject(raw)) {
+    } else if (isObject(raw)) {
       this._addAllFromObject(raw)
     } else {
-      up.fail("Unsupported params type: %o", raw)
+      fail("Unsupported params type: %o", raw)
     }
   }
 
@@ -298,7 +303,7 @@ up.Params = class Params {
   @internal
   */
   keys() {
-    return u.map(this.entries, 'name')
+    return map(this.entries, 'name')
   }
 
   /*-
@@ -306,14 +311,14 @@ up.Params = class Params {
   @internal
   */
   values() {
-    return u.map(this.entries, 'value')
+    return map(this.entries, 'value')
   }
 
   _addAllFromObject(object) {
     for (let key in object) {
       const value = object[key]
       // We cannot use up.util.wrapList() because we want to keep null as [null], not []
-      const valueElements = u.isArray(value) ? value : [value]
+      const valueElements = isArray(value) ? value : [value]
       for (let valueElement of valueElements) {
         this.add(key, valueElement)
       }
@@ -329,7 +334,7 @@ up.Params = class Params {
         // (1) foo=bar should become { name: 'foo', bar: 'bar' }
         // (2) foo=    should become { name: 'foo', bar: '' }
         // (3) foo     should become { name: 'foo', bar: null }
-        if (u.isGiven(value)) {
+        if (isGiven(value)) {
           value = decodeURIComponent(value)
         } else {
           value = null
@@ -372,7 +377,7 @@ up.Params = class Params {
   @stable
   */
   delete(name) {
-    this.entries = u.reject(this.entries, this._matchEntryFn(name))
+    this.entries = reject(this.entries, this._matchEntryFn(name))
   }
 
   _matchEntryFn(name) {
@@ -431,7 +436,7 @@ up.Params = class Params {
   @experimental
   */
   getFirst(name) {
-    const entry = u.find(this.entries, this._matchEntryFn(name))
+    const entry = findInList(this.entries, this._matchEntryFn(name))
     return entry?.value
   }
 
@@ -447,15 +452,15 @@ up.Params = class Params {
   @experimental
   */
   getAll(name) {
-    const entries = u.filter(this.entries, this._matchEntryFn(name))
-    return u.map(entries, 'value')
+    const entries = filterList(this.entries, this._matchEntryFn(name))
+    return map(entries, 'value')
   }
 
   _isArrayKey(key) {
-    return u.evalOption(up.form.config.arrayParam, key)
+    return evalOption(up.form.config.arrayParam, key)
   }
 
-  [u.isBlank.key]() {
+  [isBlank.key]() {
     return this.entries.length === 0
   }
 
@@ -535,13 +540,13 @@ up.Params = class Params {
   @stable
   */
   static fromForm(form, options = {}) {
-    form = e.get(form)
+    form = getOne(form)
     let restore = up.form.prepareParamsReadTemp(form)
 
     try {
       // The FormData constructor accepts undefined for no submitter, but throws for false.
       // It also throws for a button that doesn't belong to the form.
-      let submitButton = e.get(options.submitButton ?? up.form.defaultSubmitButton(form)) || undefined
+      let submitButton = getOne(options.submitButton ?? up.form.defaultSubmitButton(form)) || undefined
 
       // We let the browser serialize the form, instead of iterating over up.form.fields():
       //
@@ -605,7 +610,7 @@ up.Params = class Params {
   */
   static fromFields(fields, { includeDisabled } = {}) {
     const params = new this()
-    for (let field of u.wrapList(fields)) {
+    for (let field of wrapList(fields)) {
       params.addField(field, { includeDisabled })
     }
     return params
@@ -629,7 +634,7 @@ up.Params = class Params {
   @experimental
   */
   addField(field, { includeDisabled } = {}) {
-    field = e.get(field) // unwrap jQuery
+    field = getOne(field) // unwrap jQuery
 
     // A field is excluded from a form submission if it has no name, or if it is disabled.
     let name = up.form.readFieldName(field)
@@ -640,7 +645,7 @@ up.Params = class Params {
 
     if (tagName === 'SELECT') {
       // A <select> can have multiple selected options.
-      values = u.map(field.selectedOptions, 'value')
+      values = map(field.selectedOptions, 'value')
     } else if ((type === 'checkbox') || (type === 'radio')) {
       if (field.checked) values = [up.form.readFieldValue(field)]
     } else if (type === 'file') {
@@ -651,7 +656,7 @@ up.Params = class Params {
       // A custom control may expose a { name } without a readable { value },
       // in which case it has nothing to contribute.
       let value = up.form.readFieldValue(field)
-      if (u.isDefined(value)) values = [value]
+      if (isDefined(value)) values = [value]
     }
 
     for (let value of values) {
@@ -659,8 +664,8 @@ up.Params = class Params {
     }
   }
 
-  [u.isEqual.key](other) {
-    return (this.constructor === other.constructor) && u.isEqual(this.entries, other.entries)
+  [isEqual.key](other) {
+    return (this.constructor === other.constructor) && isEqual(this.entries, other.entries)
   }
 
   /*-
@@ -686,7 +691,7 @@ up.Params = class Params {
   */
   static fromURL(url) {
     const params = new (this)()
-    const urlParts = u.parseURL(url)
+    const urlParts = parseURL(url)
     let query = urlParts.search
     if (query) {
       query = query.replace(/^\?/, '')
@@ -713,14 +718,14 @@ up.Params = class Params {
   @experimental
   */
   static stripURL(url) {
-    return u.normalizeURL(url, { search: false })
+    return normalizeURL(url, { search: false })
   }
 
   static merge(start, ...objects) {
-    let merged = u.copy(start)
+    let merged = copy(start)
 
     for (let object of objects) {
-      let other = u.wrapValue(this, object)
+      let other = wrapValue(this, object)
       // We cannot use iterate over other.entries and call set(), since other.entries
       // might have multiple values for the same array key.
       for (let key of other.keys()) merged.delete(key)
@@ -730,4 +735,8 @@ up.Params = class Params {
     return merged
   }
 
+}
+
+export const api = {
+  Params,
 }

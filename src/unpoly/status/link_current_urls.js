@@ -1,6 +1,7 @@
-const u = up.util
+import { matchableURL } from '../util.js'
+import { UpURLPattern } from '../util/url_pattern.js'
 
-up.LinkCurrentURLs = class LinkCurrentURLs {
+export class LinkCurrentURLs {
 
   constructor(link) {
     // A link with an unsafe method will never be highlighted with .up-current.
@@ -9,17 +10,17 @@ up.LinkCurrentURLs = class LinkCurrentURLs {
     if (this._isSafe) {
       const href = link.getAttribute('href')
       if (href && (href !== '#')) {
-        this._href = u.matchableURL(href)
+        this._href = matchableURL(href)
       }
 
       const upHREF = link.getAttribute('up-href')
       if (upHREF) {
-        this._upHREF = u.matchableURL(upHREF)
+        this._upHREF = matchableURL(upHREF)
       }
 
       const alias = link.getAttribute('up-alias')
       if (alias) {
-        this._aliasPattern = new up.URLPattern(alias)
+        this._aliasPattern = new UpURLPattern(alias)
       }
     }
   }
@@ -50,4 +51,9 @@ up.LinkCurrentURLs = class LinkCurrentURLs {
       this._aliasPattern?.test?.(normalizedLocation, false)
     ))
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  LinkCurrentURLs,
 }

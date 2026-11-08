@@ -1,11 +1,13 @@
-const e = up.element
-const u = up.util
+import { evalOption, filterList, isNumber, map } from '../util.js'
+import { computedStyle, getOne, isVisible } from '../element.js'
+import { fail } from '../error.js'
+import { Rect } from '../util/rect.js'
 
-up.RevealMotion = class RevealMotion {
+export class RevealMotion {
 
   constructor(element, options = {}) {
     this._element = element
-    this._viewport = e.get(options.viewport) || up.viewport.get(this._element)
+    this._viewport = getOne(options.viewport) || up.viewport.get(this._element)
     this._obstructionsLayer = up.layer.get(this._viewport)
     this._behavior = options.behavior ?? 'instant'
 
@@ -21,9 +23,9 @@ up.RevealMotion = class RevealMotion {
 
   start() {
     const viewportRect = this._getViewportRect(this._viewport)
-    const elementRect = up.Rect.fromElement(this._element)
+    const elementRect = Rect.fromElement(this._element)
     if (this._max) {
-      const maxPixels =  u.evalOption(this._max, this._element)
+      const maxPixels =  evalOption(this._max, this._element)
       elementRect.height = Math.min(elementRect.height, maxPixels)
     }
 
@@ -32,7 +34,7 @@ up.RevealMotion = class RevealMotion {
 
     // Cards test (topics dropdown) throw an error when we also fail at zero
     if (viewportRect.height < 0) {
-      up.fail('Viewport has no visible area')
+      fail('Viewport has no visible area')
     }
 
     const originalScrollTop = this._viewport.scrollTop
@@ -58,7 +60,7 @@ up.RevealMotion = class RevealMotion {
       // Do nothing.
     }
 
-    if (u.isNumber(this._snap) && (newScrollTop < this._snap) && (elementRect.top < (0.5 * viewportRect.height))) {
+    if (isNumber(this._snap) && (newScrollTop < this._snap) && (elementRect.top < (0.5 * viewportRect.height))) {
       newScrollTop = 0
     }
 
@@ -72,27 +74,27 @@ up.RevealMotion = class RevealMotion {
       // Other than an element with overflow-y, the document viewport
       // stretches to the full height of its contents. So we create a viewport
       // sized to the usuable screen area.
-      return new up.Rect({
+      return new Rect({
         left: 0,
         top: 0,
         width: up.viewport.rootWidth(),
         height: up.viewport.rootHeight()
       })
     } else {
-      return up.Rect.fromElement(this._viewport)
+      return Rect.fromElement(this._viewport)
     }
   }
 
   _computeObstructionRects(selector) {
     let elements = up.fragment.all(selector, { layer: this._obstructionsLayer })
-    elements = u.filter(elements, e.isVisible)
-    return u.map(elements, (element) => {
-      if (e.style(element, 'position') === 'sticky') {
+    elements = filterList(elements, isVisible)
+    return map(elements, (element) => {
+      if (computedStyle(element, 'position') === 'sticky') {
         // There is no simple way to detect if a sticky element is in static or fixed positioning.
         // We pretend it is always fixed for the purpose of measuring obstruction.
-        return up.Rect.fromElementAsFixed(element)
+        return Rect.fromElementAsFixed(element)
       } else {
-        return up.Rect.fromElement(element)
+        return Rect.fromElement(element)
       }
     })
   }
@@ -113,4 +115,9 @@ up.RevealMotion = class RevealMotion {
       }
     }
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  RevealMotion,
 }

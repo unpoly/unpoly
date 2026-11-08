@@ -1,7 +1,13 @@
-const u = up.util
-const e = up.element
+import {
+  compact, filterList, flatMap, isPresent, isString, map, mapObject, merge, mergeDefined,
+  newDeferred, pluckKey, scheduleTimer, uniq,
+} from '../util.js'
+import { booleanOrStringAttr } from '../element.js'
+import { fail, muteUncriticalRejection } from '../error.js'
+import { Aborted } from '../error/aborted.js'
+import { Params } from './params.js'
 
-up.FormValidator = class FormValidator {
+export class FormValidator {
 
   constructor(form) {
     this._form = form
@@ -26,7 +32,7 @@ up.FormValidator = class FormValidator {
     return up.on(field, eventType, (event) => {
       if (!field.closest('.up-keeping')) {
         up.log.putsEvent(event)
-        up.error.muteUncriticalRejection(this.validate({ origin: field }))
+        muteUncriticalRejection(this.validate({ origin: field }))
       }
     })
   }
@@ -36,7 +42,7 @@ up.FormValidator = class FormValidator {
   }
 
   _onAborted(event) {
-    let abortedError = new up.Aborted(event.reason)
+    let abortedError = new Aborted(event.reason)
     let solution
     while (solution = this._dirtySolutions.shift()) {
       solution.deferred.reject(abortedError)
@@ -57,7 +63,7 @@ up.FormValidator = class FormValidator {
 
     // Although a single validate() call may update multiple fragments,
     // they will all share the same render pass.
-    let deferred = u.newDeferred()
+    let deferred = newDeferred()
 
     for (let solution of solutions) {
       // Remember solution-specific render options from
@@ -65,7 +71,7 @@ up.FormValidator = class FormValidator {
       // (2) any [up-watch-] prefixed attributes parsed from the origin
       // (3) any [up-validate-] prefixed attributes parsed from the origin
       let renderOptions = up.form.validateOptions(solution.origin, options)
-      solution.batch = u.pluckKey(renderOptions, 'batch')
+      solution.batch = pluckKey(renderOptions, 'batch')
       solution.renderOptions = renderOptions
 
       solution.destination = `${renderOptions.method} ${renderOptions.url}`
@@ -95,10 +101,10 @@ up.FormValidator = class FormValidator {
   }
 
   _getTargetSelectorSolutions({ target, origin }) {
-    if (u.isString(target)) {
+    if (isString(target)) {
       up.puts('up.validate()', 'Validating target "%s"', target)
       let simpleSelectors = up.fragment.splitTarget(target)
-      return u.compact(simpleSelectors.map(function(simpleSelector) {
+      return compact(simpleSelectors.map(function(simpleSelector) {
         let element = up.fragment.get(simpleSelector, { origin })
         if (element) {
           return {
@@ -107,7 +113,7 @@ up.FormValidator = class FormValidator {
             origin
           }
         } else {
-          up.fail('Validation target "%s" does not match an element', simpleSelector)
+          fail('Validation target "%s" does not match an element', simpleSelector)
         }
       }))
     }
@@ -128,7 +134,7 @@ up.FormValidator = class FormValidator {
     let containerWithAttr = field.closest('[up-validate]')
 
     if (containerWithAttr) {
-      let target = e.booleanOrStringAttr(containerWithAttr, 'up-validate')
+      let target = booleanOrStringAttr(containerWithAttr, 'up-validate')
       return this._getTargetSelectorSolutions({ target, origin: field })
     }
   }
@@ -138,14 +144,14 @@ up.FormValidator = class FormValidator {
     let shortestDelay = Math.min(...solutionDelays) || 0
     // Render requests always reset the timer, using their then-current delay.
     clearTimeout(this._nextRenderTimer)
-    this._nextRenderTimer = u.timer(shortestDelay, () => {
+    this._nextRenderTimer = scheduleTimer(shortestDelay, () => {
       this._nextRenderTimer = null
       this._renderDirtySolutions()
     })
   }
 
   _renderDirtySolutions() {
-    up.error.muteUncriticalRejection(this._doRenderDirtySolutions())
+    muteUncriticalRejection(this._doRenderDirtySolutions())
   }
 
   async _doRenderDirtySolutions() {
@@ -216,13 +222,13 @@ up.FormValidator = class FormValidator {
     //     </form>
 
     // Remove duplicate names as a radio button group has multiple inputs with the same name.
-    let dirtyOrigins = u.map(dirtySolutions, 'origin')
-    let dirtyFields = u.flatMap(dirtyOrigins, up.form.fields)
+    let dirtyOrigins = map(dirtySolutions, 'origin')
+    let dirtyFields = flatMap(dirtyOrigins, up.form.fields)
     // Without this filter an unnamed field pads the header with an empty token ("email "). Two of
     // them can even join into a truthy " " — u.uniq() keeps both when one reports '' and the other
     // null — which would skip the ':unknown' fallback in _addValidateHeader() below.
-    let dirtyNames = u.uniq(u.filter(u.map(dirtyFields, up.form.readFieldName), u.isPresent))
-    let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
+    let dirtyNames = uniq(filterList(map(dirtyFields, up.form.readFieldName), isPresent))
+    let dirtyRenderOptionsList = map(dirtySolutions, 'renderOptions')
 
     // A validation is not a real submission: no button was pressed, so only the <form> element
     // decides where the request goes and what it sends.
@@ -233,10 +239,10 @@ up.FormValidator = class FormValidator {
     //     like { contentType }.
     // (3) u.mergeDefined() does not skip undefined objects, it skips entries in objects
     //     that have an undefined value.
-    let options = u.mergeDefined(formDestinationOptions, ...dirtyRenderOptionsList)
+    let options = mergeDefined(formDestinationOptions, ...dirtyRenderOptionsList)
 
     // Update the collected targets of all solutions.
-    options.target = u.map(dirtySolutions, 'target').join(', ')
+    options.target = map(dirtySolutions, 'target').join(', ')
 
     // Since we may render multiple dirty elements we cannot have individual origins
     // for each. We already resolved an :origin selector in getSolution(), so we don't
@@ -263,17 +269,17 @@ up.FormValidator = class FormValidator {
     // We can receive params from
     // (1) A <form up-params="..."> JSON attribute, obtained by up.form.destinationOptions() above
     // (2) one or more up.validate({ params }) calls
-    options.params = up.Params.merge(
+    options.params = Params.merge(
       formDestinationOptions.params,
-      ...u.map(dirtyRenderOptionsList, 'params')
+      ...map(dirtyRenderOptionsList, 'params')
     )
 
     // We can receive headers from
     // (1) A <form up-headers="..."> JSON attribute, obtained by up.form.destinationOptions() above
     // (2) one or more up.validate({ headers }) calls
-    options.headers = u.merge(
+    options.headers = merge(
       formDestinationOptions.headers,
-      ...u.map(dirtyRenderOptionsList, 'headers')
+      ...map(dirtyRenderOptionsList, 'headers')
     )
 
     // Make sure the X-Up-Validate header is present, so the server-side
@@ -282,23 +288,23 @@ up.FormValidator = class FormValidator {
 
     // If any solution wants feedback, they all get it.
     // When no solution has an opinion we leave { feedback } unset, so the render default applies.
-    let feedbacks = u.compact(u.map(dirtyRenderOptionsList, 'feedback'))
+    let feedbacks = compact(map(dirtyRenderOptionsList, 'feedback'))
     if (feedbacks.length) options.feedback = feedbacks.includes(true)
 
     // Each up.validate({ data }) call should only apply to the targeted element,
     options.data = undefined
-    options.dataMap = u.mapObject(dirtySolutions, ({ target, element, renderOptions: { data, keepData } }) => [
+    options.dataMap = mapObject(dirtySolutions, ({ target, element, renderOptions: { data, keepData } }) => [
       target,
       keepData ? up.data(element) : data
     ])
 
     // Each up.validate({ preview }) call should only apply to the targeted element,
     options.preview = undefined
-    options.previewMap = u.mapObject(dirtySolutions, ({ target, renderOptions: { preview } }) => [target, preview])
+    options.previewMap = mapObject(dirtySolutions, ({ target, renderOptions: { preview } }) => [target, preview])
 
     // Each up.validate({ placeholder }) call should only apply to the targeted element,
     options.placeholder = undefined
-    options.placeholderMap = u.mapObject(dirtySolutions, ({ target, renderOptions: { placeholder } }) => [target, placeholder])
+    options.placeholderMap = mapObject(dirtySolutions, ({ target, renderOptions: { placeholder } }) => [target, placeholder])
 
     // We may render multiple solutions with { disable } options, and most disable options
     // are specific to an { origin }, e.g. `{ disable: '.form-group:has(:origin)'}
@@ -328,4 +334,9 @@ up.FormValidator = class FormValidator {
     headers[key] = value
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  FormValidator,
 }

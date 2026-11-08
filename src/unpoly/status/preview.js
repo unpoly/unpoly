@@ -1,5 +1,10 @@
-const u = up.util
-const e = up.element
+import { isAdjacentPosition, parseArgs, pick } from '../util.js'
+import {
+  addClassTemp, hide, hideTemp, removeClassTemp, setAttrsTemp, setStyleTemp, showTemp, unwrap,
+  wrapChildren,
+} from '../element.js'
+import { guard } from '../error.js'
+import { UpError } from '../error/error.js'
 
 /*-
 Instances of `up.Preview` can describe temporary changes to a page.
@@ -13,7 +18,7 @@ See [Previews](/learn/previews) for an overview.
 @class up.Preview
 @parent up.status
 */
-up.Preview = class Preview {
+export class Preview {
 
   /*-
   @constructor up.Preview
@@ -118,7 +123,7 @@ up.Preview = class Preview {
       //      preview.show('#element')
       //      return () => preview.hide('#element')
       //    })
-      reportError(new up.Error('Preview used after end of request'))
+      reportError(new UpError('Preview used after end of request'))
     } else {
       this._cleaner.guard(...args)
     }
@@ -315,7 +320,7 @@ up.Preview = class Preview {
   */
   run(value, options = {}) {
     for (let fn of up.status.resolvePreviewFns(value)) {
-      this.undo(up.error.guard(fn, this, options))
+      this.undo(guard(fn, this, options))
     }
   }
 
@@ -362,7 +367,7 @@ up.Preview = class Preview {
   */
   setAttrs(...args) {
     let [element, attrs] = this._parseMutatorArgs(args, 'val', 'val')
-    this.undo(e.setAttrsTemp(element, attrs))
+    this.undo(setAttrsTemp(element, attrs))
   }
 
   /*-
@@ -391,7 +396,7 @@ up.Preview = class Preview {
   */
   addClass(...args) {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
-    this.undo(e.addClassTemp(element, klass))
+    this.undo(addClassTemp(element, klass))
   }
 
   /*-
@@ -424,7 +429,7 @@ up.Preview = class Preview {
   */
   removeClass(...args) {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
-    this.undo(e.removeClassTemp(element, klass))
+    this.undo(removeClassTemp(element, klass))
   }
 
   /*-
@@ -455,7 +460,7 @@ up.Preview = class Preview {
   */
   setStyle(...args) {
     let [element, styles] = this._parseMutatorArgs(args, 'val', 'val')
-    this.undo(e.setStyleTemp(element, styles))
+    this.undo(setStyleTemp(element, styles))
   }
 
   /*-
@@ -616,7 +621,7 @@ up.Preview = class Preview {
     //     - A NodeList with mixed Element and Text nodes
     // (2) When tempValue resolves to multiple nodes, it will be wrapped
     //     in an <up-wrapper> container.
-    let [reference, position = 'beforeend', tempValue] = this._parseMutatorArgs(args, 'val', u.isAdjacentPosition, 'val')
+    let [reference, position = 'beforeend', tempValue] = this._parseMutatorArgs(args, 'val', isAdjacentPosition, 'val')
     this.undo(up.fragment.insertTemp(reference, position, tempValue))
   }
 
@@ -644,7 +649,7 @@ up.Preview = class Preview {
   */
   show(...args) {
     let [element] = this._parseMutatorArgs(args, 'val')
-    this.undo(e.showTemp(element))
+    this.undo(showTemp(element))
   }
 
   /*-
@@ -674,7 +679,7 @@ up.Preview = class Preview {
   */
   hide(...args) {
     let [element] = this._parseMutatorArgs(args, 'val')
-    this.undo(e.hideTemp(element))
+    this.undo(hideTemp(element))
   }
 
   /*-
@@ -710,9 +715,9 @@ up.Preview = class Preview {
   hideContent(...args) {
     let [parent] = this._parseMutatorArgs(args, 'val')
     // Place all children in a wrapper so we can hide text nodes.
-    let wrapper = e.wrapChildren(parent)
-    e.hide(wrapper)
-    this.undo(() => e.unwrap(wrapper))
+    let wrapper = wrapChildren(parent)
+    hide(wrapper)
+    this.undo(() => unwrap(wrapper))
   }
 
   /*-
@@ -866,7 +871,7 @@ up.Preview = class Preview {
     }
 
     up.layer.open({
-      ...u.pick(this.renderOptions, [...up.Layer.Overlay.VISUAL_KEYS, 'target']),
+      ...pick(this.renderOptions, [...up.Layer.Overlay.VISUAL_KEYS, 'target']),
       ...options,
       content,
       abort: false,
@@ -883,7 +888,7 @@ up.Preview = class Preview {
   }
 
   _parseMutatorArgs(args, ...specs) {
-    let [element, ...rest] = u.args(args, ...specs)
+    let [element, ...rest] = parseArgs(args, ...specs)
     // (1) up.fragment.get(undefined) returns undefined
     // (2) up.fragment.get(Element) returns the element
     // (3) this.fragment is undefined when opening a new layer
@@ -891,4 +896,8 @@ up.Preview = class Preview {
     return [element, ...rest]
   }
 
+}
+
+export const api = {
+  Preview,
 }

@@ -1,6 +1,8 @@
-const u = up.util
+import { copy, isEqual, isPromise, omit, queueTask, scheduleTimer, sequence, some, uniq } from '../util.js'
+import { fail as errorFail, guard } from '../error.js'
+import { Params } from './params.js'
 
-up.FieldWatcher = class FieldWatcher {
+export class FieldWatcher {
 
   constructor(root, options, callback) {
     this._options = options
@@ -19,7 +21,7 @@ up.FieldWatcher = class FieldWatcher {
     this._currentTimer = null
     this._callbackRunning = false
 
-    return u.sequence(
+    return sequence(
       this._trackFields(),
       this._trackAbort(),
       this._trackReset(),
@@ -28,7 +30,7 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _ensureWatchable() {
-    const fail = (message) => up.fail(message, this._logPrefix, this._root)
+    const fail = (message) => errorFail(message, this._logPrefix, this._root)
 
     if (!this._callback) {
       fail('No callback provided for %s (%o)')
@@ -66,7 +68,7 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _fieldOptions(field) {
-    let rootOptions = u.copy(this._options)
+    let rootOptions = copy(this._options)
     return up.form.watchOptions(field, rootOptions, { defaults: { event: 'input' } })
   }
 
@@ -90,14 +92,14 @@ up.FieldWatcher = class FieldWatcher {
     let delay = fieldOptions.delay || 0
     clearTimeout(this._currentTimer) // debounce a previously set timer
 
-    this._currentTimer = u.timer(delay, () => {
+    this._currentTimer = scheduleTimer(delay, () => {
       this._currentTimer = null
       this._requestCallback()
     })
   }
 
   _isNewValues(values) {
-    return !u.isEqual(values, this._processedValues) && !u.isEqual(this._scheduledValues, values)
+    return !isEqual(values, this._processedValues) && !isEqual(this._scheduledValues, values)
   }
 
   async _requestCallback() {
@@ -120,7 +122,7 @@ up.FieldWatcher = class FieldWatcher {
     // Don't forward { event, delay } because
     // (1) we have already processed them here and
     // (2) those aren't render options.
-    let callbackOptions = u.omit(this._scheduledFieldOptions, ['event', 'delay'])
+    let callbackOptions = omit(this._scheduledFieldOptions, ['event', 'delay'])
     const diff = this._changedValues(this._processedValues, this._scheduledValues)
     this._processedValues = this._scheduledValues
     this._scheduledValues = null
@@ -137,7 +139,7 @@ up.FieldWatcher = class FieldWatcher {
       }
     }
 
-    if (u.some(callbackReturnValues, u.isPromise)) {
+    if (some(callbackReturnValues, isPromise)) {
       let callbackDone = Promise.allSettled(callbackReturnValues)
       await callbackDone
     }
@@ -149,18 +151,18 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _runCallback(...args) {
-    return up.error.guard(this._callback, ...args)
+    return guard(this._callback, ...args)
   }
 
   _changedValues(previous, next) {
     const changes = {}
     let keys = Object.keys(previous)
     keys = keys.concat(Object.keys(next))
-    keys = u.uniq(keys)
+    keys = uniq(keys)
     for (let key of keys) {
       const previousValue = previous[key]
       const nextValue = next[key]
-      if (!u.isEqual(previousValue, nextValue)) {
+      if (!isEqual(previousValue, nextValue)) {
         changes[key] = nextValue
       }
     }
@@ -168,7 +170,7 @@ up.FieldWatcher = class FieldWatcher {
   }
 
   _readFieldValues() {
-    return up.Params.fromContainer(this._root, { includeDisabled: this._includeDisabled }).toObject()
+    return Params.fromContainer(this._root, { includeDisabled: this._includeDisabled }).toObject()
   }
 
   _check(event, fieldOptions = {}) {
@@ -182,6 +184,11 @@ up.FieldWatcher = class FieldWatcher {
 
   _onFormReset(event) {
     // We need to wait 1 task for the reset button to affect field values
-    u.task(() => this._check(event))
+    queueTask(() => this._check(event))
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  FieldWatcher,
 }

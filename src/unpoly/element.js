@@ -899,7 +899,7 @@ export function createNodesFromHTML(html) {
 @function up.element.root
 @internal
 */
-function getRoot() {
+export function getRoot() {
   return document.documentElement
 }
 

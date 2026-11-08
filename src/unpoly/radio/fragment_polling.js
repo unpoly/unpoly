@@ -1,7 +1,8 @@
-const e = up.element
-const u = up.util
+import { uid } from '../util.js'
+import { numberAttr } from '../element.js'
+import { throwCritical } from '../error.js'
 
-up.FragmentPolling = class FragmentPolling {
+export class FragmentPolling {
 
   static forFragment(fragment) {
     return fragment.upPolling ||= new this(fragment)
@@ -16,7 +17,7 @@ up.FragmentPolling = class FragmentPolling {
     this._state = 'stopped' // stopped | started
     this._forceIntent = null // stop | start
 
-    this._reloadJID = u.uid()
+    this._reloadJID = uid()
 
     // this._abortable = true
     this._loading = false
@@ -144,7 +145,7 @@ up.FragmentPolling = class FragmentPolling {
   }
 
   _getFullDelay() {
-    return this._options.interval ?? e.numberAttr(this._fragment, 'up-interval') ?? up.radio.config.pollInterval
+    return this._options.interval ?? numberAttr(this._fragment, 'up-interval') ?? up.radio.config.pollInterval
   }
 
   _getRemainingDelay() {
@@ -207,7 +208,7 @@ up.FragmentPolling = class FragmentPolling {
     this._loading = false
     this._satisfyInterval()
     this._scheduleRemainingTime()
-    up.error.throwCritical(reason)
+    throwCritical(reason)
   }
 
   _satisfyInterval() {
@@ -215,4 +216,9 @@ up.FragmentPolling = class FragmentPolling {
     this._lastAttempt = new Date()
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  FragmentPolling,
 }

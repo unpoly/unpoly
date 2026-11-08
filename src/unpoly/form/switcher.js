@@ -1,19 +1,21 @@
-const u = up.util
-const e = up.element
+import { getSimpleTokens, intersect, isEqual, isPresent, sequence, some } from '../util.js'
+import { toggle } from '../element.js'
+import { fail } from '../error.js'
+import { Params } from './params.js'
 
 const BUILTIN_SWITCH_EFFECTS = [
-  { attr: 'up-hide-for', toggle(target, active) { e.toggle(target, !active) } },
-  { attr: 'up-show-for', toggle(target, active) { e.toggle(target, active) } },
+  { attr: 'up-hide-for', toggle(target, active) { toggle(target, !active) } },
+  { attr: 'up-show-for', toggle(target, active) { toggle(target, active) } },
   { attr: 'up-disable-for', toggle(target, active) { up.form.setDisabled(target, active) } },
   { attr: 'up-enable-for', toggle(target, active) { up.form.setDisabled(target, !active) } },
 ]
 
-up.Switcher = class Switcher {
+export class Switcher {
 
   constructor(root) {
     // The root should either be an individual input, or a container of radio buttons.
     this._root = root
-    this._switcheeSelector = root.getAttribute('up-switch') || up.fail("No switch target given for %o", root)
+    this._switcheeSelector = root.getAttribute('up-switch') || fail("No switch target given for %o", root)
     this._regionSelector = root.getAttribute('up-switch-region')
   }
 
@@ -22,7 +24,7 @@ up.Switcher = class Switcher {
     // Don't risk unswitched state showing up in the browser.
     this._switchRegion()
 
-    return u.sequence(
+    return sequence(
       this._trackFieldChanges(),
       this._trackNewSwitchees(),
     )
@@ -55,7 +57,7 @@ up.Switcher = class Switcher {
 
   _switchSwitchee(switchee, fieldTokens = this._buildFieldTokens()) {
     let previousValues = switchee.upSwitchValues
-    if (!u.isEqual(previousValues, fieldTokens)) {
+    if (!isEqual(previousValues, fieldTokens)) {
       switchee.upSwitchValues = fieldTokens
       this.switchSwitcheeNow(switchee, fieldTokens)
     }
@@ -67,7 +69,7 @@ up.Switcher = class Switcher {
       let attrValue = switchee.getAttribute(attr)
       if (attrValue) {
         let activeTokens = this._parseSwitcheeTokens(attrValue)
-        let isActive = u.intersect(fieldTokens, activeTokens).length > 0
+        let isActive = intersect(fieldTokens, activeTokens).length > 0
         toggle(switchee, isActive)
       }
     }
@@ -89,23 +91,28 @@ up.Switcher = class Switcher {
   }
 
   _parseSwitcheeTokens(str) {
-    return u.getSimpleTokens(str, { json: true })
+    return getSimpleTokens(str, { json: true })
   }
 
   _buildFieldTokens() {
-    let values = up.Params.fromContainer(this._root, { includeDisabled: true }).values()
+    let values = Params.fromContainer(this._root, { includeDisabled: true }).values()
     let tokens = [...values]
 
-    let anyPresent = u.some(values, u.isPresent)
+    let anyPresent = some(values, isPresent)
     tokens.push(anyPresent ? ':present' : ':blank')
 
     let fields = up.form.fields(this._root)
     if (fields[0]?.matches('[type=radio], [type=checkbox]')) {
-      let anyChecked = u.some(fields, 'checked')
+      let anyChecked = some(fields, 'checked')
       tokens.push(anyChecked ? ':checked' : ':unchecked')
     }
 
     return tokens
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  Switcher,
 }

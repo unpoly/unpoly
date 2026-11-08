@@ -1,5 +1,6 @@
-const e = up.element
-const u = up.util
+import { cleaner } from '../util.js'
+import { addClassTemp, computedStyle, getRoot, setStyleTemp } from '../element.js'
+
 const SHIFT_CLASS = 'up-scrollbar-away'
 
 // Gives `<body>` a right padding in the width of a scrollbar.
@@ -9,12 +10,12 @@ const SHIFT_CLASS = 'up-scrollbar-away'
 // This is to prevent the body and elements from jumping when we add the
 // modal overlay, which has its own scroll bar.
 // This is screwed up, but Bootstrap does the same.
-up.BodyShifter = class BodyShifter {
+export class BodyShifter {
 
   constructor() {
     this._anchoredElements = new Set()
     this._stack = 0
-    this._cleaner = u.cleaner()
+    this._cleaner = cleaner()
   }
 
   lowerStack() {
@@ -48,7 +49,7 @@ up.BodyShifter = class BodyShifter {
 
     // Always publish on the <html> element for consistency, even if the scrolling element
     // is sometimes <body>. The property will be inherited
-    this._cleaner(e.setStyleTemp(e.root, {
+    this._cleaner(setStyleTemp(getRoot(), {
       '--up-scrollbar-width': this._rootScrollbarWidth + 'px'
     }))
 
@@ -67,12 +68,17 @@ up.BodyShifter = class BodyShifter {
     if (!this._isShifted()) return
 
     // viewport.sass wants to add the scrollbar with to the value, so we store it in a separate property.
-    let originalValue = e.style(element, styleProp)
+    let originalValue = computedStyle(element, styleProp)
 
     this._cleaner(
-      e.setStyleTemp(element, { ['--up-original-' + styleProp]: originalValue }),
-      e.addClassTemp(element, SHIFT_CLASS),
+      setStyleTemp(element, { ['--up-original-' + styleProp]: originalValue }),
+      addClassTemp(element, SHIFT_CLASS),
     )
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  BodyShifter,
 }

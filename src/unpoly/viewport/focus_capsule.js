@@ -1,4 +1,4 @@
-up.FocusCapsule = class FocusCapsule {
+export class FocusCapsule {
 
   constructor(element, target) {
     this._element = element
@@ -62,4 +62,9 @@ up.FocusCapsule = class FocusCapsule {
     return new this(focusedElement, target)
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  FocusCapsule,
 }

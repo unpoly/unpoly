@@ -1,7 +1,8 @@
-const u = up.util
+import { findResult } from '../util.js'
+
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
-up.FragmentFinder = class FragmentFinder {
+export class FragmentFinder {
 
   constructor(options) {
     this._options = options
@@ -37,7 +38,7 @@ up.FragmentFinder = class FragmentFinder {
   _findDescendantInRegion() {
     let simpleSelectors = up.fragment.splitTarget(this._selector)
 
-    return u.findResult(simpleSelectors, (simpleSelector) => {
+    return findResult(simpleSelectors, (simpleSelector) => {
       let parts = simpleSelector.match(DESCENDANT_SELECTOR)
       if (parts) {
         let parent = up.fragment.closest(this._origin, parts[1], this._options)
@@ -51,4 +52,9 @@ up.FragmentFinder = class FragmentFinder {
   _findFirst() {
     return up.fragment.getFirstDescendant(this._document, this._selector, this._options)
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  FragmentFinder,
 }

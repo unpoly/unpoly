@@ -50,6 +50,21 @@ import * as helloFragmentClass from './unpoly/script/hello_fragment.js'
 import * as destructorPassClass from './unpoly/script/destructor_pass.js'
 import * as nonceableCallbackClass from './unpoly/script/csp/nonceable_callback.js'
 import * as scriptGateClass from './unpoly/script/csp/script_gate.js'
+import * as bodyShifterClass from './unpoly/viewport/body_shifter.js'
+import * as focusCapsuleClass from './unpoly/viewport/focus_capsule.js'
+import * as revealMotionClass from './unpoly/viewport/reveal_motion.js'
+import * as fieldWatcherClass from './unpoly/form/field_watcher.js'
+import * as switcherClass from './unpoly/form/switcher.js'
+import * as formValidatorClass from './unpoly/form/form_validator.js'
+import * as paramsClass from './unpoly/form/params.js'
+import * as fragmentPollingClass from './unpoly/radio/fragment_polling.js'
+import * as linkCurrentUrlsClass from './unpoly/status/link_current_urls.js'
+import * as previewClass from './unpoly/status/preview.js'
+import * as linkFollowIntentClass from './unpoly/link/link_follow_intent.js'
+import * as motionControllerClass from './unpoly/motion/motion_controller.js'
+import * as selectorTrackerClass from './unpoly/fragment/selector_tracker.js'
+import * as fragmentFinderClass from './unpoly/fragment/fragment_finder.js'
+import * as selectorClass from './unpoly/fragment/selector.js'
 
 window.up = {}
 
@@ -85,6 +100,21 @@ const apis = [
   destructorPassClass.api,
   nonceableCallbackClass.api,
   scriptGateClass.api,
+  bodyShifterClass.api,
+  focusCapsuleClass.api,
+  revealMotionClass.api,
+  fieldWatcherClass.api,
+  switcherClass.api,
+  formValidatorClass.api,
+  paramsClass.api,
+  fragmentPollingClass.api,
+  linkCurrentUrlsClass.api,
+  previewClass.api,
+  linkFollowIntentClass.api,
+  motionControllerClass.api,
+  selectorTrackerClass.api,
+  fragmentFinderClass.api,
+  selectorClass.api,
 ]
 
 // Copy property descriptors, so getters (like `up.context`) stay live.
@@ -106,7 +136,6 @@ for (let api of apis) {
 const installs = [
   util.install,
 
-  () => require('./unpoly/viewport/body_shifter'),
   () => require('./unpoly/fragment/render/change/change'),
   () => require('./unpoly/fragment/render/change/addition'),
   () => require('./unpoly/fragment/render/render_job'),
@@ -118,15 +147,8 @@ const installs = [
   () => require('./unpoly/fragment/render/change/change_from_url'),
   () => require('./unpoly/fragment/render/change/change_from_response'),
   () => require('./unpoly/fragment/render/change/change_from_content'),
-  () => require('./unpoly/fragment/selector_tracker'),
-  () => require('./unpoly/form/field_watcher'),
-  () => require('./unpoly/form/switcher'),
-  () => require('./unpoly/form/form_validator'),
-  () => require('./unpoly/viewport/focus_capsule'),
   () => require('./unpoly/fragment/render/fragment_processor'),
-  () => require('./unpoly/fragment/fragment_finder'),
   () => require('./unpoly/fragment/render/fragment_focus'),
-  () => require('./unpoly/radio/fragment_polling'),
   () => require('./unpoly/fragment/render/fragment_scrolling'),
   () => require('./unpoly/layer/base'),
   () => require('./unpoly/layer/modes/overlay'),
@@ -139,12 +161,7 @@ const installs = [
   () => require('./unpoly/layer/modes/cover_layer'),
   () => require('./unpoly/layer/layer_lookup'),
   () => require('./unpoly/layer/layer_stack'),
-  () => require('./unpoly/status/link_current_urls'),
-  () => require('./unpoly/link/link_follow_intent'),
-  () => require('./unpoly/motion/motion_controller'),
   () => require('./unpoly/layer/overlay_focus'),
-  () => require('./unpoly/form/params'),
-  () => require('./unpoly/status/preview'),
   () => require('./unpoly/network/progress_bar'),
   () => require('./unpoly/fragment/render/render_options'),
   () => require('./unpoly/fragment/render/render_result'),
@@ -155,8 +172,6 @@ const installs = [
   () => require('./unpoly/network/xhr_renderer'),
   () => require('./unpoly/network/response'),
   () => require('./unpoly/fragment/render/response_doc'),
-  () => require('./unpoly/viewport/reveal_motion'),
-  () => require('./unpoly/fragment/selector'),
   () => require('./unpoly/layer/tether'),
 
   () => require('./unpoly/framework'),
