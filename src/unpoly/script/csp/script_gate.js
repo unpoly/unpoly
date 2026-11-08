@@ -1,12 +1,17 @@
-const e = up.element
-const u = up.util
+import { isString } from '../../util.js'
+import { attrSelector, subtree } from '../../element.js'
+import { fail } from '../../error.js'
+import { Blocked } from '../../error/blocked.js'
+import { NotImplemented } from '../../error/not_implemented.js'
+import { CSPInfo } from './csp_info.js'
+import { NonceableCallback } from './nonceable_callback.js'
 
 // Options in an X-Up-Open-Layer header that start with "on", but take a selector instead of a callback.
 const NON_CALLBACK_KEYS = ['onAcceptedReload', 'onDismissedReload']
 
-up.ScriptGate = class ScriptGate {
+export class ScriptGate {
 
-  constructor(cspInfo = up.CSPInfo.none()) {
+  constructor(cspInfo = CSPInfo.none()) {
     // Only parse the page nonce once for adopting multiple items.
     // TODO: Consider moving page none parsing to CSPInfo
     let pageNonce = up.script.cspNonce()
@@ -43,14 +48,14 @@ up.ScriptGate = class ScriptGate {
         return nonceableCallback.unsafeEval(evalEnv)
       } catch (error) {
         if (error instanceof EvalError) {
-          throw new up.Blocked(error.message)
+          throw new Blocked(error.message)
         } else {
           throw error
         }
       }
     } else {
       // We don't rewrite the callback string in the DOM.
-      throw new up.Blocked('Blocked callback: ' + nonceableCallback.script)
+      throw new Blocked('Blocked callback: ' + nonceableCallback.script)
     }
   }
 
@@ -76,7 +81,7 @@ up.ScriptGate = class ScriptGate {
       let script = object[key]
 
       // Any other on* key is a callback, so a mistyped key fails with "Unknown callback".
-      if (/^on[A-Z]/.test(key) && !NON_CALLBACK_KEYS.includes(key) && u.isString(script)) {
+      if (/^on[A-Z]/.test(key) && !NON_CALLBACK_KEYS.includes(key) && isString(script)) {
         let item = new ObjectPropertyItem(object, key)
         policy.processItem(item)
         object[key] = up.RenderOptions.parseCallback(key, object[key])
@@ -98,7 +103,7 @@ up.ScriptGate = class ScriptGate {
 
     // TODO: It is weird that we keep a list of callback options in RenderOptions, but the list of nonceable attrs is in up.script? Maybe at least move them together?
     for (let attribute of up.script.config.nonceableAttributes) {
-      let matches = e.subtree(root, e.attrSelector(attribute))
+      let matches = subtree(root, attrSelector(attribute))
       for (let element of matches) {
         let item = new AttributeItem(element, attribute, policy)
         policy.processItem(item)
@@ -136,7 +141,7 @@ class Policy {
   }
 
   warnOfUnsafeCSP() {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
   processItem(item) {
@@ -155,7 +160,7 @@ class Policy {
   }
 
   passesItem(_itemNonce) {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
 }
@@ -190,7 +195,7 @@ class ConfigurablePolicy extends Policy {
   }
 
   resolveAuto() {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
   passesItem(itemNonce) {
@@ -206,7 +211,7 @@ class ConfigurablePolicy extends Policy {
       // Nonces will be checked in processItem().
       case 'nonce': return this.isValidNonce(itemNonce)
 
-      default: up.fail('Unknown policy: %s = %o', this.configExpression(), this.policyString)
+      default: fail('Unknown policy: %s = %o', this.configExpression(), this.policyString)
     }
   }
 
@@ -288,11 +293,11 @@ class StringCallbackItem {
   }
 
   _getCallback() {
-    return this._cacheCallback ||= up.NonceableCallback.fromCallbackString(this.readCallbackString())
+    return this._cacheCallback ||= NonceableCallback.fromCallbackString(this.readCallbackString())
   }
 
   logBlockedDescriptor() {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
   block() {
@@ -300,11 +305,11 @@ class StringCallbackItem {
   }
 
   readCallbackString() {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
   writeCallbackString(_newString) {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
 }
@@ -318,7 +323,7 @@ class AttributeItem extends StringCallbackItem {
   }
 
   logBlockedDescriptor() {
-    return ['Blocked callback attribute: %s', e.attrSelector(this._attribute, this.readCallbackString())]
+    return ['Blocked callback attribute: %s', attrSelector(this._attribute, this.readCallbackString())]
   }
 
   readCallbackString() {
@@ -376,4 +381,9 @@ class ScriptElementItem {
     up.script.block(this._element)
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  ScriptGate,
 }

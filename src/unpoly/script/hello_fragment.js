@@ -1,7 +1,9 @@
-const u = up.util
-const e = up.element
+import { evalOption, filterList, isPromise, map } from '../util.js'
+import { trackDefinitions } from '../element.js'
+import { guard, guardPromise } from '../error.js'
+import { UpError } from '../error/error.js'
 
-up.HelloFragment = class HelloFragment {
+export class HelloFragment {
 
   constructor(root, macros, compilers, { layer, data, dataRoot, dataMap, meta, insertedEvent }) {
     // (1) If a caller has already looked up the layer we don't want to look it up again.
@@ -42,7 +44,7 @@ up.HelloFragment = class HelloFragment {
     // e.g. an up.SelectorTracker can sync again.
     //
     // We scan after running compilers, which may insert undefined custom elements themselves.
-    e.trackDefinitions(this._root)
+    trackDefinitions(this._root)
 
     this._emitInsertedEvent()
     await Promise.all(this._compilePromises)
@@ -121,7 +123,7 @@ up.HelloFragment = class HelloFragment {
     // expects a second argument. Note that we must pass data for an argument
     // count of 0, since then the function might take varargs.
     if (compiler.length !== 1) {
-      const dataList = u.map(elements, up.script.data)
+      const dataList = map(elements, up.script.data)
       compileArgs.push(dataList, this._meta)
     }
 
@@ -130,11 +132,11 @@ up.HelloFragment = class HelloFragment {
   }
 
   async _applyCompilerFunction(compiler, elementOrElements, compileArgs, onDestructor) {
-    let maybeDestructor = up.error.guard(() => compiler.apply(elementOrElements, compileArgs))
+    let maybeDestructor = guard(() => compiler.apply(elementOrElements, compileArgs))
 
-    if (u.isPromise(maybeDestructor)) {
+    if (isPromise(maybeDestructor)) {
       // If the async compiler rejects, emit an `error` event but don't reject.
-      let guardedPromise = up.error.guardPromise(maybeDestructor)
+      let guardedPromise = guardPromise(maybeDestructor)
 
       // Remember this promise for the return value of #run()
       this._compilePromises.push(guardedPromise)
@@ -150,19 +152,19 @@ up.HelloFragment = class HelloFragment {
   }
 
   _reportBatchCompilerWithDestructor(compiler) {
-    let error = new up.Error(['Batch compiler (%s) cannot return a destructor', compiler.selector])
+    let error = new UpError(['Batch compiler (%s) cannot return a destructor', compiler.selector])
     reportError(error)
   }
 
   _select(selector) {
-    return up.fragment.subtree(this._root, u.evalOption(selector), { layer: this._layer } )
+    return up.fragment.subtree(this._root, evalOption(selector), { layer: this._layer } )
   }
 
   _selectOnce(compiler) {
     let matches = this._select(compiler.selector)
 
     if (!compiler.rerun) {
-      matches = u.filter(matches, (element) => {
+      matches = filterList(matches, (element) => {
         let appliedCompilers = (element.upAppliedCompilers ||= new Set())
         if (!appliedCompilers.has(compiler)) {
           appliedCompilers.add(compiler)
@@ -174,4 +176,9 @@ up.HelloFragment = class HelloFragment {
     return matches
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  HelloFragment,
 }

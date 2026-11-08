@@ -45,6 +45,11 @@ import * as urlPatternClass from './unpoly/util/url_pattern.js'
 import * as eventEmitterClass from './unpoly/event/event_emitter.js'
 import * as eventListenerClass from './unpoly/event/event_listener.js'
 import * as eventListenerGroupClass from './unpoly/event/event_listener_group.js'
+import * as cspInfoClass from './unpoly/script/csp/csp_info.js'
+import * as helloFragmentClass from './unpoly/script/hello_fragment.js'
+import * as destructorPassClass from './unpoly/script/destructor_pass.js'
+import * as nonceableCallbackClass from './unpoly/script/csp/nonceable_callback.js'
+import * as scriptGateClass from './unpoly/script/csp/script_gate.js'
 
 window.up = {}
 
@@ -75,6 +80,11 @@ const apis = [
   eventEmitterClass.api,
   eventListenerClass.api,
   eventListenerGroupClass.api,
+  cspInfoClass.api,
+  helloFragmentClass.api,
+  destructorPassClass.api,
+  nonceableCallbackClass.api,
+  scriptGateClass.api,
 ]
 
 // Copy property descriptors, so getters (like `up.context`) stay live.
@@ -108,9 +118,6 @@ const installs = [
   () => require('./unpoly/fragment/render/change/change_from_url'),
   () => require('./unpoly/fragment/render/change/change_from_response'),
   () => require('./unpoly/fragment/render/change/change_from_content'),
-  () => require('./unpoly/script/csp/csp_info'),
-  () => require('./unpoly/script/hello_fragment'),
-  () => require('./unpoly/script/destructor_pass'),
   () => require('./unpoly/fragment/selector_tracker'),
   () => require('./unpoly/form/field_watcher'),
   () => require('./unpoly/form/switcher'),
@@ -135,7 +142,6 @@ const installs = [
   () => require('./unpoly/status/link_current_urls'),
   () => require('./unpoly/link/link_follow_intent'),
   () => require('./unpoly/motion/motion_controller'),
-  () => require('./unpoly/script/csp/nonceable_callback'),
   () => require('./unpoly/layer/overlay_focus'),
   () => require('./unpoly/form/params'),
   () => require('./unpoly/status/preview'),
@@ -150,7 +156,6 @@ const installs = [
   () => require('./unpoly/network/response'),
   () => require('./unpoly/fragment/render/response_doc'),
   () => require('./unpoly/viewport/reveal_motion'),
-  () => require('./unpoly/script/csp/script_gate'),
   () => require('./unpoly/fragment/selector'),
   () => require('./unpoly/layer/tether'),
 

@@ -1,13 +1,13 @@
-const u = up.util
+import { map } from '../../util.js'
 
 const NONCE_PATTERN = /'nonce-([^']+)'/g
 
 function findNonces(cspPart) {
   let matches = cspPart.matchAll(NONCE_PATTERN)
-  return u.map(matches, '1')
+  return map(matches, '1')
 }
 
-up.CSPInfo = class CSPInfo {
+export class CSPInfo {
 
   constructor(declaration = '', nonces = []) {
     this.declaration = declaration
@@ -47,4 +47,9 @@ up.CSPInfo = class CSPInfo {
     return new this()
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  CSPInfo,
 }

@@ -1,6 +1,6 @@
-const e = up.element
+import { affix } from '../../element.js'
 
-up.NonceableCallback = class NonceableCallback {
+export class NonceableCallback {
 
   constructor(script, nonce) {
     this.script = script
@@ -45,7 +45,7 @@ up.NonceableCallback = class NonceableCallback {
     let scriptElement
     try {
       up.noncedEval = { ...evalEnv }
-      scriptElement = e.affix(document.body, 'script', { nonce: this.nonce, text: wrappedScript })
+      scriptElement = affix(document.body, 'script', { nonce: this.nonce, text: wrappedScript })
       if (up.noncedEval.error) {
         throw up.noncedEval.error
       } else {
@@ -57,4 +57,9 @@ up.NonceableCallback = class NonceableCallback {
     }
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  NonceableCallback,
 }

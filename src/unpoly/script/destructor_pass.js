@@ -1,6 +1,6 @@
-const u = up.util
+import { pluckKey } from '../util.js'
 
-up.DestructorPass = class DestructorPass {
+export class DestructorPass {
 
   constructor(fragment, options) {
     this._fragment = fragment
@@ -11,7 +11,7 @@ up.DestructorPass = class DestructorPass {
     for (let cleanable of this._selectCleanables()) {
       // In the case of [up-keep] elements we may run on a clone that matches .up-can-clean
       // but has no { upDestructors } property.
-      let registry = u.pluckKey(cleanable, 'upDestructors')
+      let registry = pluckKey(cleanable, 'upDestructors')
       registry?.clean(cleanable)
     }
   }
@@ -22,4 +22,9 @@ up.DestructorPass = class DestructorPass {
     return up.fragment.subtree(this._fragment, '.up-can-clean', selectOptions)
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  DestructorPass,
 }
