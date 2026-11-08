@@ -47,10 +47,10 @@ export class OpenLayerPlan extends Addition {
 
   execute(responseDoc, onApplicable) {
     // Find our target in the responseDoc.
-    // If it cannot be matched, up.CannotMatch is thrown and up.Change.FromContent will try the next plan.
+    // If it cannot be matched, up.CannotMatch is thrown and ChangeFromContent will try the next plan.
     this._matchPostflight(responseDoc)
 
-    // If our steps can be matched, up.Change.FromContent wants a chance to some final
+    // If our steps can be matched, ChangeFromContent wants a chance to some final
     // preparations before we start rendering.
     onApplicable()
 
@@ -88,7 +88,7 @@ export class OpenLayerPlan extends Addition {
     }
 
     if (!this._content || !this._baseLayer.isAlive()) {
-      // An error message will be chosen by up.Change.FromContent
+      // An error message will be chosen by ChangeFromContent
       throw new CannotMatch()
     }
   }

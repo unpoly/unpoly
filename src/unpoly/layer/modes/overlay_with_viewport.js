@@ -10,7 +10,7 @@ export class OverlayWithViewport extends Overlay {
   }
 
   /*-
-  @function up.Layer.OverlayWithViewport#openNow
+  @function OverlayWithViewport#openNow
   @internal
   */
   createElements() {

@@ -382,7 +382,7 @@ export class Layer extends Record {
   ```js
   up.layer.open()
 
-  up.layer.parent // returns up.Layer.Root
+  up.layer.parent // returns the root layer
   ```
 
   @property up.Layer#parent
@@ -427,7 +427,7 @@ export class Layer extends Record {
   up.layer.open({ mode: 'drawer' })
   up.layer.open({ mode: 'modal' })
 
-  up.layer.current.ancestors // returns [up.Layer.Drawer, up.Layer.Root]
+  up.layer.current.ancestors // returns [drawer overlay, root layer]
   ```
 
   @property up.Layer#ancestors
@@ -452,9 +452,9 @@ export class Layer extends Record {
 
   ```js
   up.layer.open()
-  up.layer.current              // returns up.Layer.Modal
+  up.layer.current              // returns the modal overlay
   up.layer.current.descendants  // returns []
-  up.layer.root.descendants     // returns [up.Layer.Modal]
+  up.layer.root.descendants     // returns [modal overlay]
   ```
 
 
@@ -702,16 +702,16 @@ export class Layer extends Record {
   ## Example
 
   ```js
-  up.layer.current // returns up.Layer.Root
+  up.layer.current // returns the root layer
 
   up.layer.open() // open an overlay
-  up.layer.current // returns up.Layer.Modal
+  up.layer.current // returns the modal overlay
 
   up.layer.parent.asCurrent(function() {
-    up.layer.current // returns up.Layer.Root
+    up.layer.current // returns the root layer
   })
 
-  up.layer.current // returns up.Layer.Modal
+  up.layer.current // returns the modal overlay
   ```
 
   @param {Function()} fn

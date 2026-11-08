@@ -14,7 +14,7 @@ export class DestroyFragment extends Change {
   execute() {
     // Destroying a fragment is a sync function.
     //
-    // A variant of the logic below can also be found in up.Change.UpdateLayer.
+    // A variant of the logic below can also be found in UpdateLayerPlan.
     // Updating (swapping) a fragment also involves destroying the old version,
     // but the logic needs to be interwoven with the insertion logic for the new
     // version.

@@ -65,7 +65,7 @@ export class ChangeFromResponse extends Change {
     // like a server-set location, or server-sent events.
     this._augmentOptionsFromResponse(finalRenderOptions)
 
-    // When up.Change.FromContent eventually compiles fragments, the { meta } object
+    // When ChangeFromContent eventually compiles fragments, the { meta } object
     // will be passed as a third argument to compilers.
     finalRenderOptions.meta = this._helloMeta()
 

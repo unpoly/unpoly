@@ -92,7 +92,7 @@ const CONTENT_KEYS = [
 ]
 
 // preprocess() will leave out properties for which there may be a better default
-// later, in particular from the layer config in up.Change.OpenLayer.
+// later, in particular from the layer config in OpenLayerPlan.
 const LATE_KEYS = [
   'history',
   'focus',
@@ -181,7 +181,7 @@ function preprocess(options) {
 
   return merge(
     // Leave out properties for which there may be a better default later, in particular
-    // from the layer config in up.Change.OpenLayer. If we merged it now we could
+    // from the layer config in OpenLayerPlan. If we merged it now we could
     // not distinguish a user option (which always has highest priority) with a
     // default that may be overridden by the layer config. If there is no better default
     // later, the original defaults will be applied in finalize().
@@ -198,7 +198,7 @@ function preprocess(options) {
 
 // Look up the origin layers*before* we make the request.
 // In case of { layer: 'origin' } the { origin } element may get removed while the request was in flight,
-// making up.Change.FromContent#execute() fail with a message like "layer { origin } does not exist" or
+// making ChangeFromContent#execute() fail with a message like "layer { origin } does not exist" or
 // "Could not find a layer to render in. You may have passed an unmatchable layer reference, or a detached element.".
 function rememberOriginLayer({ origin, originLayer }) {
   if (origin && !originLayer) {

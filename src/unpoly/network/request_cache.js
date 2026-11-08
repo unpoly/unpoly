@@ -172,7 +172,7 @@ export class RequestCache {
     }
   }
 
-  // Used by up.Request.Tester
+  // Used by UpRequest.tester()
   willHaveSameResponse(existingRequest, newRequest) {
     return existingRequest === newRequest || existingRequest === newRequest.trackedRequest
   }

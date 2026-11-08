@@ -12,7 +12,7 @@ export class Addition extends Change {
     this._response = options.response
   }
 
-  // TODO: Consider moving this to up.Layer.Base
+  // TODO: Consider moving this to up.Layer
   handleLayerChangeRequests(newElements, newLocation) {
     if (this.layer.isOverlay()) {
       // TODO: Can we do this with "close"? Please recheck

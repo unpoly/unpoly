@@ -108,7 +108,7 @@ up.radio = (function() {
     }
 
     // Remove nested steps on other layers.
-    // Note that `steps.current` is already compressed by up.Change.UpdateLayer once it's been mixed with
+    // Note that `steps.current` is already compressed by UpdateLayerPlan once it's been mixed with
     // the explicit target steps. So we're not doing it again here.
     steps.other = up.fragment.compressNestedSteps(steps.other)
 

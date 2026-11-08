@@ -15,7 +15,7 @@ export class UpdateLayerPlan extends Addition {
     this.layer = options.layer
     this.target = options.target
     this._context = options.context
-    // up.fragment.expandTargets() was already called by up.Change.FromContent
+    // up.fragment.expandTargets() was already called by ChangeFromContent
     this._steps = up.fragment.parseTargetSteps(this.target, this.options)
     // this.uid = Math.random()
   }
@@ -56,13 +56,13 @@ export class UpdateLayerPlan extends Addition {
   execute(responseDoc, onApplicable) {
     // (1) For each step, find a `step.newElement` that matches both in this.layer
     //     and in the response document.
-    // (2) Match newElements here instead of relying on up.Change.UpdateSteps to
+    // (2) Match newElements here instead of relying on UpdateSteps to
     //     do it later. This way we will throw up.CannotMatch early, and our caller
-    //     up.Change.FromContent knows that this plan is not applicable. It can then
+    //     ChangeFromContent knows that this plan is not applicable. It can then
     //     try a fallback plan.
     this._matchPostflight(responseDoc)
 
-    // If our steps can be matched, up.Change.FromContent wants a chance to some final
+    // If our steps can be matched, ChangeFromContent wants a chance to some final
     // preparations before we start rendering.
     onApplicable()
 
@@ -195,7 +195,7 @@ export class UpdateLayerPlan extends Addition {
       if (step.oldElement) {
         return true
       } else if (!step.maybe) {
-        // An error message will be chosen by up.Change.FromContent
+        // An error message will be chosen by ChangeFromContent
         throw new CannotMatch()
       }
     })

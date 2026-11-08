@@ -2366,7 +2366,7 @@ up.fragment = (function() {
 
   function hasAutoHistory(newFragments, layer) {
     // We cannot use up.fragment.contains(fragment, config.autoHistoryTargets)
-    // because fragment is not yet attached when we are called from up.Change.OpenLayer.
+    // because fragment is not yet attached when we are called from OpenLayerPlan.
 
     let vanillaSelector = expandTargets(config.autoHistoryTargets, { layer }).join()
 

@@ -390,7 +390,7 @@ export const UpRequest = class Request extends Record {
       //
       // up.layer.get('new') will return 'new' unchanged, but I'm not sure
       // if any code actually calls up.request({ ..., layer: 'new' }).
-      // In up.Change.OpenLayer we connect requests to the base layer we're stacking upon.
+      // In OpenLayerPlan we connect requests to the base layer we're stacking upon.
       this.layer = up.layer.get(this.layer, layerLookupOptions)
       this.context ||= this.layer.context || {} // @layer might be "new", so we default to {}
       this.mode ||= this.layer.mode
@@ -461,7 +461,7 @@ export const UpRequest = class Request extends Record {
     // the subtree that we're canceling.
     //
     // We allow users to pass in pre-matched `{ fragments }` in the constructor.
-    // We use this in `up.Change.FromURL` since we already know the element's we're trying
+    // We use this in `ChangeFromURL` since we already know the element's we're trying
     // to replace.
     //
     // If we haven't received a `{ fragments }` property (or if it has been deleted by

@@ -542,7 +542,7 @@ up.link = (function() {
       ...up.RenderOptions.NO_INPUT_INTERFERENCE,
       ...up.RenderOptions.NO_PREVIEWS,
       guardEvent,
-      preload: true, // hint to up.Change.FromURL to stop execution after sending the request
+      preload: true, // hint to ChangeFromURL to stop execution after sending the request
     })
   }
 

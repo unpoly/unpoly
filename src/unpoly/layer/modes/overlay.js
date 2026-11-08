@@ -117,7 +117,7 @@ export class Overlay extends Layer {
     // no effect.
     //
     // The up.layer.current value within a callback is controlled by the event
-    // emission in up.Change.OpenLayer and up.Change.CloseLayer
+    // emission in OpenLayerPlan and CloseLayer
     let fn = this[name]
     if (fn) {
       return fn.bind(this)
@@ -499,12 +499,12 @@ export class Overlay extends Layer {
     return ['opening', 'opened'].includes(this.state)
   }
 
-  // Documented in up.Layer.Base
+  // Documented in up.Layer
   accept(value = null, options = {}) {
     return this._executeCloseChange('accept', value, options)
   }
 
-  // Documented in up.Layer.Base
+  // Documented in up.Layer
   dismiss(value = null, options = {}) {
     return this._executeCloseChange('dismiss', value, options)
   }
