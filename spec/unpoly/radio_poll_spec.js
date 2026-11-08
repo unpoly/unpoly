@@ -523,7 +523,7 @@ extendDescribe('up.radio', function() {
       })
 
       it('does not poll a fragment with a weak selector', async function() {
-        const warnSpy = spyOn(up, 'warn')
+        const warnSpy = up.warn.mock()
 
         helloFixture('div[up-poll][up-interval=30]', { text: 'old text' })
 

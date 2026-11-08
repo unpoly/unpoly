@@ -904,7 +904,7 @@ extendDescribe('up.fragment', function() {
               <a id="origin1" href="/path">origin1</a>
               <a id="origin2" href="/path">origin2</a>
             `)
-            const errorSpy = spyOn(up.log, 'error')
+            const errorSpy = up.log.error.mock()
 
             await up.render({ target: '.target', content: 'content1', origin: origin1, badResponseTime: 100 })
             await up.render({ target: '.target', content: 'content2', origin: origin2, badResponseTime: 100 })
@@ -918,7 +918,7 @@ extendDescribe('up.fragment', function() {
 
           it('names the URL in the warning when there is no origin', async function() {
             fixture('.target')
-            const errorSpy = spyOn(up.log, 'error')
+            const errorSpy = up.log.error.mock()
 
             up.render({ target: '.target', url: '/path', badResponseTime: 100 })
             await wait()

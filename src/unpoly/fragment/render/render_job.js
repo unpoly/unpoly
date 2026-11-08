@@ -8,6 +8,7 @@ import { ChangeFromResponse } from './change/change_from_response.js'
 import { ChangeFromURL } from './change/change_from_url.js'
 import { RenderOptions } from './render_options.js'
 import { RenderResult } from './render_result.js'
+import { printToStandard } from '../../log.js'
 
 /*-
 A queued render task.
@@ -130,7 +131,7 @@ export class RenderJob {
 
   _handleError(error) {
     let prefix = error instanceof Aborted ? 'Rendering was aborted' : 'Error while rendering'
-    up.puts('up.render()', `${prefix}: ${error.name}: ${error.message}`)
+    printToStandard('up.render()', `${prefix}: ${error.name}: ${error.message}`)
     guard(() => this.renderOptions.onError?.(error))
   }
 

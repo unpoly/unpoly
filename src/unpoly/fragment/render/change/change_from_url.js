@@ -4,6 +4,7 @@ import { Offline } from '../../../error/offline.js'
 import { ChangeFromContent } from './change_from_content.js'
 import { ChangeFromResponse } from './change_from_response.js'
 import { Change } from './change.js'
+import { printToStandard } from '../../../log.js'
 import { UpResponse } from '../../../network/response.js'
 
 export class ChangeFromURL extends Change {
@@ -11,7 +12,7 @@ export class ChangeFromURL extends Change {
   async execute() {
     let newPageReason = this._newPageReason()
     if (newPageReason) {
-      up.puts('up.render()', newPageReason)
+      printToStandard('up.render()', newPageReason)
       up.network.loadPage(this.options)
       // Prevent our caller from executing any further code, since we're already
       // navigating away from this JavaScript environment.

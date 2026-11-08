@@ -2,6 +2,7 @@ import {
   findInList, getComplexTokens, isArray, isElement, isFunction, isOptions, isString,
 } from '../../util.js'
 import { guard } from '../../error.js'
+import { printToWarn } from '../../log.js'
 import { Record } from '../../util/record.js'
 
 export class FragmentProcessor extends Record {
@@ -88,7 +89,7 @@ export class FragmentProcessor extends Record {
     if (match) {
       return match
     } else {
-      up.warn('up.render()', 'Could not find an element matching "%s"', selector)
+      printToWarn('up.render()', 'Could not find an element matching "%s"', selector)
       // Return undefined so { focus: 'auto' } will try the next option from { autoMeans }
     }
   }

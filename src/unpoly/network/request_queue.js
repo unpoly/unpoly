@@ -2,6 +2,7 @@ import {
   always, evalOption, filterList, findInList, parseArgs, queueTask, remove, scheduleTimer, some,
 } from '../util.js'
 import { emit } from '../event.js'
+import { printToStandard } from '../log.js'
 import { UpRequest } from './request.js'
 
 export class RequestQueue {
@@ -137,7 +138,7 @@ export class RequestQueue {
       const abortableRequests = filterList(list, tester)
       for (let abortableRequest of abortableRequests) {
         if (logOnce) {
-          up.puts(...logOnce)
+          printToStandard(...logOnce)
           logOnce = null
         }
         abortableRequest.abort({ reason })

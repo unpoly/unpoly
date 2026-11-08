@@ -1,10 +1,10 @@
-import { UNSET_OVERLAY_VISUALS } from '../../../layer/overlay_visuals.js'
 import { evalOption, memoizeMethod, merge, parseURL } from '../../../util.js'
 import { CannotParse } from '../../../error/cannot_parse.js'
 import { ChangeFromContent } from './change_from_content.js'
 import { Change } from './change.js'
 import { RenderOptions } from '../render_options.js'
-
+import { UNSET_OVERLAY_VISUALS } from '../../../layer/overlay_visuals.js'
+import { printToStandard, printToWarn } from '../../../log.js'
 
 export class ChangeFromResponse extends Change {
 
@@ -51,14 +51,14 @@ export class ChangeFromResponse extends Change {
   }
 
   _skip() {
-    up.puts('up.render()', 'Skipping %s', this._response)
+    printToStandard('up.render()', 'Skipping %s', this._response)
     this.options.target = ':none'
     this.options.failTarget = ':none'
   }
 
   _updateContentFromResponse(finalRenderOptions) {
     if (finalRenderOptions.didForceFailOptions) {
-      up.puts('up.render()', 'Rendering error response using fail-prefixed options (https://unpoly.com/learn/error-responses)')
+      printToStandard('up.render()', 'Rendering error response using fail-prefixed options (https://unpoly.com/learn/error-responses)')
     }
 
     // The response might carry some updates for our change options,
@@ -88,9 +88,9 @@ export class ChangeFromResponse extends Change {
     let effectiveTarget = renderResult.target
 
     if (/:(before|after)/.test(inputTarget)) {
-      up.warn('up.render()', 'Cannot revalidate cache when prepending/appending (target %s)', inputTarget)
+      printToWarn('up.render()', 'Cannot revalidate cache when prepending/appending (target %s)', inputTarget)
     } else {
-      up.puts('up.render()', 'Revalidating cached response for target "%s"', effectiveTarget)
+      printToStandard('up.render()', 'Revalidating cached response for target "%s"', effectiveTarget)
       let revalidateResult = await up.reload(effectiveTarget, {
         ...originalRenderOptions,
         ...RenderOptions.NO_MOTION, // offering something like { verifyTransition } would mean we need to delay { onFinished } even further

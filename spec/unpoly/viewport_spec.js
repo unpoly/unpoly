@@ -1034,7 +1034,7 @@ describe('up.viewport', function() {
         input.focus()
         up.viewport.saveFocus()
         input.blur()
-        const putsSpy = spyOn(up, 'puts')
+        const putsSpy = up.puts.mock()
 
         up.viewport.restoreFocus()
 

@@ -1068,7 +1068,7 @@ extendDescribe('up.fragment', function() {
       })
 
       it('prints a warning when the [up-keep] element is not targetable, but does not crash the render pass', async function() {
-        spyOn(up, 'warn').and.callThrough()
+        const warnSpy = up.warn.mock().and.callThrough()
 
         let html = (prefix) => `
           <div id="target">
@@ -1086,7 +1086,7 @@ extendDescribe('up.fragment', function() {
         expect('#target [up-keep]').toHaveText('new keepable')
         expect('#target #content').toHaveText('new content')
 
-        expect(up.warn).toHaveBeenCalledWith('[up-keep]', jasmine.stringMatching(/Cannot keep untargetable/i), jasmine.anything())
+        expect(warnSpy).toHaveBeenCalledWith('[up-keep]', jasmine.stringMatching(/Cannot keep untargetable/i), jasmine.anything())
       })
 
       function keepableFixture(html, renderOptions = {}) {

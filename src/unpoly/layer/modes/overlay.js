@@ -8,6 +8,7 @@ import { CloseLayer } from '../../fragment/render/change/close_layer.js'
 import { Layer } from '../base.js'
 import { OverlayFocus } from '../overlay_focus.js'
 import { OVERLAY_VISUAL_KEYS } from '../overlay_visuals.js'
+import { printUserEvent } from '../../log.js'
 import { UpURLPattern } from '../../util/url_pattern.js'
 
 /*-
@@ -270,7 +271,7 @@ export class Overlay extends Layer {
   }
 
   _onOutsideClicked(event, halt) {
-    up.log.putsEvent(event)
+    printUserEvent(event)
     // We still halt a click we ignore below, or a popup's origin would be followed again.
     if (halt) eventHalt(event)
 

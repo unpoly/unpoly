@@ -7,6 +7,7 @@ import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
 import { RenderOptions } from '../render_options.js'
 import { RenderResult } from '../render_result.js'
+import { printToStandard } from '../../../log.js'
 
 export class OpenLayerPlan extends Addition {
 
@@ -95,7 +96,7 @@ export class OpenLayerPlan extends Addition {
   }
 
   _createOverlay() {
-    up.puts('up.render()', `Opening element "${this.target}" in new overlay`)
+    printToStandard('up.render()', `Opening element "${this.target}" in new overlay`)
 
     this._assertOpenEventEmitted()
 

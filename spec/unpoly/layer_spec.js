@@ -59,7 +59,7 @@ describe('up.layer', function() {
         })
 
         it('only prints a warning once when the user configured a deprecated key again after opening a layer', function() {
-          const errorSpy = spyOn(up.log, 'error')
+          const errorSpy = up.log.error.mock()
 
           up.layer.config.modal.closable = false
           up.layer.build({ mode: 'modal' })

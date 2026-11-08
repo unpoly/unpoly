@@ -4,6 +4,7 @@ import { Change } from './change.js'
 import { OpenLayerPlan } from './open_layer.js'
 import { UpdateLayerPlan } from './update_layer.js'
 import { ResponseDoc } from '../response_doc.js'
+import { printToStandard } from '../../../log.js'
 
 export class ChangeFromContent extends Change {
 
@@ -88,7 +89,7 @@ export class ChangeFromContent extends Change {
   _onPlanApplicable(plan) {
     let primaryPlan = this._getPlans()[0]
     if (plan !== primaryPlan) {
-      up.puts('up.render()', 'Could not match primary target "%s". Updating a fallback target "%s".', primaryPlan.target, plan.target)
+      printToStandard('up.render()', 'Could not match primary target "%s". Updating a fallback target "%s".', primaryPlan.target, plan.target)
     }
 
     let { assets } = this._getResponseDoc()

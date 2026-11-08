@@ -5,6 +5,7 @@ import { Addition } from './addition.js'
 import { UpdateSteps } from './update_steps.js'
 import { RenderOptions } from '../render_options.js'
 import { RenderResult } from '../render_result.js'
+import { printToStandard } from '../../../log.js'
 import { FocusCapsule } from '../../../viewport/focus_capsule.js'
 
 export class UpdateLayerPlan extends Addition {
@@ -92,7 +93,7 @@ export class UpdateLayerPlan extends Addition {
   _renderCurrentLayer(responseDoc) {
     if (this._steps.length) {
       // Don't log this.target since that does not include hungry elements
-      up.puts('up.render()', `Updating "${this._bestPreflightSelector()}" in ${this.layer}`)
+      printToStandard('up.render()', `Updating "${this._bestPreflightSelector()}" in ${this.layer}`)
     }
 
     // Make sure only the first step will have scroll-related options.

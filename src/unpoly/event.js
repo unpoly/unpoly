@@ -4,6 +4,7 @@ import { fail } from './error.js'
 import { EventEmitter } from './event/event_emitter.js'
 import { EventListenerGroup } from './event/event_listener_group.js'
 import { EventListener } from './event/event_listener.js'
+import { printUserEvent } from './log.js'
 
 /*-
 Features to emit and observe DOM events.
@@ -406,7 +407,7 @@ up.on('click', 'a.disabled', function(event) {
 @stable
 */
 export function halt(event, options = {}) {
-  if (options.log) up.log.putsEvent(event)
+  if (options.log) printUserEvent(event)
   event.stopImmediatePropagation()
   event.preventDefault()
 }

@@ -2,6 +2,7 @@ import { copy, isEqual, isPromise, omit, queueTask, scheduleTimer, sequence, som
 import { fail as errorFail, guard } from '../error.js'
 import { on } from '../event.js'
 import { Params } from './params.js'
+import { printUserEvent } from '../log.js'
 
 export class FieldWatcher {
 
@@ -178,7 +179,7 @@ export class FieldWatcher {
     const values = this._readFieldValues()
 
     if (this._isNewValues(values)) {
-      up.log.putsEvent(event)
+      printUserEvent(event)
       this._scheduleValues(values, fieldOptions)
     }
   }

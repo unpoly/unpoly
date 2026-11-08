@@ -1,18 +1,7 @@
 import { Config } from '../util/config.js'
 
-let enabledKey = 'up.log.enabled'
+const enabledKey = 'up.log.enabled'
 let enabled = false
-
-try {
-  // All supported browsers have sessionStorage, but the property is `null`
-  // in private browsing mode in Safari and the default Android webkit browser.
-  // See https://makandracards.com/makandra/32865-sessionstorage-per-window-browser-storage
-  enabled = !!sessionStorage?.getItem(enabledKey)
-} catch {
-  // Chrome explodes upon access of window.sessionStorage when
-  // user blocks third-party cookies and site data and this page is embedded
-  // as an <iframe>. See https://bugs.chromium.org/p/chromium/issues/detail?id=357625
-}
 
 export class LogConfig extends Config {
 
@@ -23,6 +12,17 @@ export class LogConfig extends Config {
       // (Selenium, Playwright, Puppeteer) usually feeds the log into a test runner or agent.
       format: !navigator.webdriver,
     }))
+
+    try {
+      // All supported browsers have sessionStorage, but the property is `null`
+      // in private browsing mode in Safari and the default Android webkit browser.
+      // See https://makandracards.com/makandra/32865-sessionstorage-per-window-browser-storage
+      enabled = !!sessionStorage?.getItem(enabledKey)
+    } catch {
+      // Chrome explodes upon access of window.sessionStorage when
+      // user blocks third-party cookies and site data and this page is embedded
+      // as an <iframe>. See https://bugs.chromium.org/p/chromium/issues/detail?id=357625
+    }
   }
 
   get enabled() {

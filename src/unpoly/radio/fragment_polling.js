@@ -2,6 +2,7 @@ import { uid } from '../util.js'
 import { numberAttr } from '../element.js'
 import { throwCritical } from '../error.js'
 import { build, on } from '../event.js'
+import { printToStandard, printToWarn } from '../log.js'
 
 export class FragmentPolling {
 
@@ -52,7 +53,7 @@ export class FragmentPolling {
 
     if (this._state === 'stopped') {
       if (!up.fragment.isTargetable(this._fragment)) {
-        up.warn('[up-poll]', 'Cannot poll untargetable fragment %o', this._fragment)
+        printToWarn('[up-poll]', 'Cannot poll untargetable fragment %o', this._fragment)
         return
       }
 
@@ -131,12 +132,12 @@ export class FragmentPolling {
 
     if (!up.fragment.isAlive(this._fragment)) {
       this._stop()
-      up.puts('[up-poll]', 'Stopped polling a detached fragment')
+      printToStandard('[up-poll]', 'Stopped polling a detached fragment')
       return
     }
 
     if (!this._isFragmentVisible()) {
-      up.puts('[up-poll]', 'Will not poll hidden fragment')
+      printToStandard('[up-poll]', 'Will not poll hidden fragment')
       // (1) We don't need to re-schedule a timer here. _onVisibilityChange() will do that for us.
       // (2) Also we prefer to not have pending timers in inactive tabs to save resources.
       return

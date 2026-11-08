@@ -7,6 +7,7 @@ import { fail, muteUncriticalRejection } from '../error.js'
 import { Aborted } from '../error/aborted.js'
 import { build, on } from '../event.js'
 import { Params } from './params.js'
+import { printToStandard, printUserEvent } from '../log.js'
 import { config, headerize } from '../protocol.js'
 
 export class FormValidator {
@@ -33,7 +34,7 @@ export class FormValidator {
     let eventType = up.form.validateOptions(field).event
     return on(field, eventType, (event) => {
       if (!field.closest('.up-keeping')) {
-        up.log.putsEvent(event)
+        printUserEvent(event)
         muteUncriticalRejection(this.validate({ origin: field }))
       }
     })
@@ -97,14 +98,14 @@ export class FormValidator {
 
     let solution = up.form.groupSolution(field, { targetable: true })
     if (solution) {
-      up.puts('up.validate()', 'Validating form group of field %o', field)
+      printToStandard('up.validate()', 'Validating form group of field %o', field)
       return [solution]
     }
   }
 
   _getTargetSelectorSolutions({ target, origin }) {
     if (isString(target)) {
-      up.puts('up.validate()', 'Validating target "%s"', target)
+      printToStandard('up.validate()', 'Validating target "%s"', target)
       let simpleSelectors = up.fragment.splitTarget(target)
       return compact(simpleSelectors.map(function(simpleSelector) {
         let element = up.fragment.get(simpleSelector, { origin })
@@ -122,7 +123,7 @@ export class FormValidator {
   }
 
   _getElementSolutions(element) {
-    up.puts('up.validate()', 'Validating element %o', element)
+    printToStandard('up.validate()', 'Validating element %o', element)
     return [{
       element,
       target: up.fragment.toTarget(element),

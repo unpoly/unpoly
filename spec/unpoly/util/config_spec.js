@@ -38,7 +38,7 @@ describe('up.Config', function() {
 
     it('logs an error for a key that the default settings do not have', function() {
       const object = new up.Config('up.test.config', () => ({ a: 1 }))
-      const errorSpy = spyOn(up.log, 'error')
+      const errorSpy = up.log.error.mock()
       object.b = 2
       object.logUnknownKeys()
       expect(errorSpy).toHaveBeenCalledOnceWith('up.test.config', 'Ignoring unknown setting %s. Fix its name or remove it.', 'b')
@@ -46,7 +46,7 @@ describe('up.Config', function() {
 
     it('does not log an error for changed default settings', function() {
       const object = new up.Config('up.test.config', () => ({ a: 1 }))
-      const errorSpy = spyOn(up.log, 'error')
+      const errorSpy = up.log.error.mock()
       object.a = 2
       object.logUnknownKeys()
       expect(errorSpy).not.toHaveBeenCalled()
@@ -54,14 +54,14 @@ describe('up.Config', function() {
 
     it('does not check keys of nested objects', function() {
       const object = new up.Config('up.test.config', () => ({ nested: { a: 1 } }))
-      const errorSpy = spyOn(up.log, 'error')
+      const errorSpy = up.log.error.mock()
       object.nested.b = 2
       object.logUnknownKeys()
       expect(errorSpy).not.toHaveBeenCalled()
     })
 
     it('does not log an error for the settings of Unpoly namespaces, which have no unknown keys', function() {
-      const errorSpy = spyOn(up.log, 'error')
+      const errorSpy = up.log.error.mock()
       for (let namespace of [up.fragment, up.link, up.form, up.layer, up.network, up.history, up.viewport, up.motion, up.radio, up.status, up.script, up.protocol, up.log]) {
         namespace.config.logUnknownKeys()
       }
@@ -74,7 +74,7 @@ describe('up.Config', function() {
       const addListenerSpy = spyOn(document, 'addEventListener')
       const object = new up.Config('up.test.config', () => ({ a: 1 }))
       const [_type, bootListener] = addListenerSpy.calls.allArgs().find(([type]) => type === 'up:framework:boot')
-      const errorSpy = spyOn(up.log, 'error')
+      const errorSpy = up.log.error.mock()
 
       bootListener()
       // Like a setting made by an up:framework:booted listener
@@ -89,7 +89,7 @@ describe('up.Config', function() {
 
     if (up.migrate.loaded) {
       it('does not log an error for an old key that unpoly-migrate.js renames', function() {
-        const errorSpy = spyOn(up.log, 'error')
+        const errorSpy = up.log.error.mock()
         up.migrate.warn.mock()
         up.script.config.callbackPolicy = 'nonce'
         up.script.config.logUnknownKeys()

@@ -6,6 +6,7 @@ import {
 import { guard } from '../error.js'
 import { UpError } from '../error/error.js'
 import { OVERLAY_VISUAL_KEYS } from '../layer/overlay_visuals.js'
+import { printToStandard } from '../log.js'
 
 /*-
 Instances of `up.Preview` can describe temporary changes to a page.
@@ -775,7 +776,7 @@ export class Preview {
     // Both swapContent() and openLayer() can deal with that.
     let placeholderNodes = up.fragment.provideNodes(placeholderReference, { origin: this.origin })
 
-    up.puts('[up-placeholder]', 'Showing placeholder %o', placeholderReference)
+    printToStandard('[up-placeholder]', 'Showing placeholder %o', placeholderReference)
 
     if (parent) {
       this.swapContent(parent, placeholderNodes)

@@ -3,9 +3,10 @@ import { attrSelector, subtree } from '../../element.js'
 import { fail } from '../../error.js'
 import { Blocked } from '../../error/blocked.js'
 import { NotImplemented } from '../../error/not_implemented.js'
+import { RenderOptions } from '../../fragment/render/render_options.js'
+import { printToStandard, printToWarn } from '../../log.js'
 import { CSPInfo } from './csp_info.js'
 import { NonceableCallback } from './nonceable_callback.js'
-import { RenderOptions } from '../../fragment/render/render_options.js'
 
 // Options in an X-Up-Open-Layer header that start with "on", but take a selector instead of a callback.
 const NON_CALLBACK_KEYS = ['onAcceptedReload', 'onDismissedReload']
@@ -217,11 +218,11 @@ class ConfigurablePolicy extends Policy {
   }
 
   log(...descriptorArgs) {
-    up.puts(this.configExpression(), ...descriptorArgs)
+    printToStandard(this.configExpression(), ...descriptorArgs)
   }
 
   warn(...descriptorArgs) {
-    up.warn(this.configExpression(), ...descriptorArgs)
+    printToWarn(this.configExpression(), ...descriptorArgs)
   }
 
   configExpression() {

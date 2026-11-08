@@ -3,6 +3,7 @@ import { trackDefinitions } from '../element.js'
 import { guard, guardPromise } from '../error.js'
 import { UpError } from '../error/error.js'
 import { emit } from '../event.js'
+import { printToStandard } from '../log.js'
 
 export class HelloFragment {
 
@@ -33,7 +34,7 @@ export class HelloFragment {
   }
 
   async run() {
-    up.puts('up.hello()', "Compiling fragment %o", this._root)
+    printToStandard('up.hello()', "Compiling fragment %o", this._root)
     this._assignDataToElements()
 
     this._runCompilers(this._macros)
@@ -91,7 +92,7 @@ export class HelloFragment {
     if (!matches.length) { return }
 
     if (!compiler.isDefault) {
-      up.puts('up.hello()', 'Compiling %d× "%s" on %s', matches.length, compiler.selector, this._layer)
+      printToStandard('up.hello()', 'Compiling %d× "%s" on %s', matches.length, compiler.selector, this._layer)
     }
 
     if (compiler.batch) {

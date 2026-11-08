@@ -1,6 +1,7 @@
 import { scheduleTimer } from '../util.js'
 import { numberAttr } from '../element.js'
 import { on } from '../event.js'
+import { printUserEvent } from '../log.js'
 
 export class LinkFollowIntent {
 
@@ -55,7 +56,7 @@ export class LinkFollowIntent {
   }
 
   _runCallback(event) {
-    up.log.putsEvent(event)
+    printUserEvent(event)
 
     // We unschedule the delayed callback then the link is aborted.
     // However, there are edge cases when the link can still be detached while

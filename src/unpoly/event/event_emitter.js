@@ -3,6 +3,7 @@ import { getOne } from '../element.js'
 import { guard } from '../error.js'
 import { Aborted } from '../error/aborted.js'
 import { build } from '../event.js'
+import { config, printToStandard } from '../log.js'
 import { Record } from '../util/record.js'
 
 export class EventEmitter extends Record {
@@ -47,7 +48,7 @@ export class EventEmitter extends Record {
   }
 
   _logEmission() {
-    if (!up.log.config.enabled) { return }
+    if (!config.enabled) { return }
 
     let message = this.log
     let messageArgs
@@ -61,9 +62,9 @@ export class EventEmitter extends Record {
     const { type } = this.event
 
     if (isString(message)) {
-      up.puts(type, message, ...messageArgs)
+      printToStandard(type, message, ...messageArgs)
     } else if (message !== false) {
-      up.puts(type, `Event ${type}`)
+      printToStandard(type, `Event ${type}`)
     }
   }
 
