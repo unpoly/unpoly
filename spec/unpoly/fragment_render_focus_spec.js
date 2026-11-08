@@ -510,7 +510,7 @@ extendDescribe('up.fragment', function() {
             outside.focus()
             expect(outside).toBeFocused()
 
-            const focusSpy = spyOn(up, 'focus').and.callThrough()
+            const focusSpy = up.focus.mock().and.callThrough()
 
             up.render({
               focus: 'keep',

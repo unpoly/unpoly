@@ -10,6 +10,7 @@ import {
   updateMetaTags,
 } from '../history.js'
 import { Record } from '../util/record.js'
+import { newStateCache } from '../viewport.js'
 
 /*-
 Each layer has an `up.Layer` instance.
@@ -110,8 +111,8 @@ export class Layer extends Record {
   defaults() {
     return {
       context: {}, // To reset root
-      lastScrollTops: up.viewport.newStateCache(),
-      lastFocusCapsules: up.viewport.newStateCache(),
+      lastScrollTops: newStateCache(),
+      lastFocusCapsules: newStateCache(),
       // Reset the root layer's history, so it falls back to what the browser shows.
       _savedTitle: undefined,
       _savedMetaTags: undefined,

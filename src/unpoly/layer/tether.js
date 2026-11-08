@@ -2,6 +2,7 @@ import { isDefined, queueTask } from '../util.js'
 import { computedStyleNumber, getRoot, setInlineStyle } from '../element.js'
 import { fail } from '../error.js'
 import { isAlive } from '../fragment.js'
+import { closest } from '../viewport.js'
 
 export class Tether {
 
@@ -12,7 +13,7 @@ export class Tether {
 
     this._alignAxis = (this._position === 'top') || (this._position === 'bottom') ? 'horizontal' : 'vertical'
 
-    this._viewport = up.viewport.get(this._anchor)
+    this._viewport = closest(this._anchor)
     // The document viewport is <html> on some browsers, and we cannot attach children to that.
     this.parent = this._viewport === getRoot() ? document.body : this._viewport
 

@@ -1,5 +1,6 @@
 import { affix, setAttrsTemp } from '../element.js'
 import { on } from '../event.js'
+import { doFocus, tryFocus } from '../viewport.js'
 
 export class OverlayFocus {
 
@@ -81,7 +82,7 @@ export class OverlayFocus {
   _focusStart(focusOptions) {
     // Focusing the overlay element with its [role=dialog] will read out
     // "dialog field" in many screen readers.
-    up.focus(this._focusElement, focusOptions)
+    doFocus(this._focusElement, focusOptions)
   }
 
   _focusEnd() {
@@ -95,7 +96,7 @@ export class OverlayFocus {
   _focusLastDescendant(element) {
     // Don't use forEach since we need to break out of the loop with `return`
     for (let child of [...element.children].toReversed()) {
-      if (up.viewport.tryFocus(child) || this._focusLastDescendant(child)) {
+      if (tryFocus(child) || this._focusLastDescendant(child)) {
         return true
       }
     }

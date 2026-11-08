@@ -8,6 +8,7 @@ import { Addition } from './addition.js'
 import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
 import { block, clean, hello } from '../../../script.js'
+import { copyCursorProps, getSubtree } from '../../../viewport.js'
 
 export class UpdateSteps extends Addition {
 
@@ -254,10 +255,10 @@ export class UpdateSteps extends Addition {
 
           // Attaching a viewport to another element will cause it to lose
           // its scroll position, even if both parents are in the same document.
-          let viewports = up.viewport.subtree(keepPlan.oldElement)
+          let viewports = getSubtree(keepPlan.oldElement)
           keepPlan.revivers = map(viewports, function(viewport) {
-            let cursorProps = up.viewport.copyCursorProps(viewport)
-            return () => up.viewport.copyCursorProps(cursorProps, viewport)
+            let cursorProps = copyCursorProps(viewport)
+            return () => copyCursorProps(cursorProps, viewport)
           })
 
           if (this._willChangeBody()) {

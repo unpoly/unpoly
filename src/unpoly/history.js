@@ -8,6 +8,7 @@ import { initialRequestMethod } from './protocol.js'
 import { registerMacro } from './script.js'
 import { Config } from './util/config.js'
 import { FIFOCache } from './util/fifo_cache.js'
+import { revealHash, revealHashFn, saveFocus, saveScroll } from './viewport.js'
 
 /*-
 Features to update the browser history and handle the Back button.
@@ -557,12 +558,12 @@ function reactToChange(event) {
   }
 
   if (event.reason === 'pop') {
-    up.viewport.saveFocus({ location: event.previousLocation })
-    up.viewport.saveScroll({ location: event.previousLocation })
+    saveFocus({ location: event.previousLocation })
+    saveScroll({ location: event.previousLocation })
     restoreLocation(event.location)
   } else if (event.reason === 'hash') {
     // We handle every hashchange, since only we know reveal obstructions.
-    up.viewport.revealHash(location.hash, { strong: true })
+    revealHash(location.hash, { strong: true })
   }
 }
 
@@ -725,7 +726,7 @@ function onJumpLinkClicked(event, link) {
   // (2) Scroll with { behavior: 'auto' } (instead of thew default { behavior: 'instant' }
   //     so it picks up any scroll-behavior CSS rule on the viewport element.
   let layer = up.layer.get(link)
-  let revealFn = up.viewport.revealHashFn(linkHash, { layer, behavior, focus: true })
+  let revealFn = revealHashFn(linkHash, { layer, behavior, focus: true })
 
   if (revealFn) {
     // (1) Prevent the browser, Unpoly or other JavaScript from following the link.
@@ -804,7 +805,7 @@ export function install() {
       // (2) When following a link to another URL with a #hash URL, Chrome's default
       //     scrolling behavior happens *after* DOMContentLoaded. We wait one more task to
       //     fix the scroll position after the browser did its thing.
-      up.viewport.revealHash(location.hash, { strong: true, focus: true })
+      revealHash(location.hash, { strong: true, focus: true })
     }
   })
 

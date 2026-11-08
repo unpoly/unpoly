@@ -41,6 +41,7 @@ import * as log from './unpoly/log.js'
 import * as script from './unpoly/script.js'
 import * as history from './unpoly/history.js'
 import * as fragment from './unpoly/fragment.js'
+import * as viewport from './unpoly/viewport.js'
 import * as baseError from './unpoly/error/error.js'
 import * as notImplementedError from './unpoly/error/not_implemented.js'
 import * as abortedError from './unpoly/error/aborted.js'
@@ -120,6 +121,7 @@ const apis = [
   script.api,
   history.api,
   fragment.api,
+  viewport.api,
   baseError.api,
   notImplementedError.api,
   abortedError.api,
@@ -210,7 +212,7 @@ const installs = [
   script.install,
   history.install,
   fragment.install,
-  () => require('./unpoly/viewport'),
+  viewport.install,
   () => require('./unpoly/motion'),
   () => require('./unpoly/network'),
   () => require('./unpoly/layer'),

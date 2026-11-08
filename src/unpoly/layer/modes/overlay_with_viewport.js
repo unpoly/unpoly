@@ -1,4 +1,5 @@
 import { Overlay } from './overlay.js'
+import { bodyShifter } from '../../viewport.js'
 
 export class OverlayWithViewport extends Overlay {
 
@@ -14,7 +15,7 @@ export class OverlayWithViewport extends Overlay {
   @internal
   */
   createElements() {
-    up.viewport.bodyShifter.raiseStack()
+    bodyShifter.raiseStack()
     this.createElement(this.constructor.getParentElement())
     if (this.backdrop) { this.createBackdropElement(this.element) }
     this.createViewportElement(this.element)
@@ -23,7 +24,7 @@ export class OverlayWithViewport extends Overlay {
   }
 
   onElementsRemoved() {
-    up.viewport.bodyShifter.lowerStack()
+    bodyShifter.lowerStack()
   }
 
   sync() {

@@ -1,6 +1,7 @@
 import { isString } from '../../util.js'
 import { subtreeFirst } from '../../element.js'
 import { FragmentProcessor } from './fragment_processor.js'
+import { doFocus, firstHashTarget, restoreFocus } from '../../viewport.js'
 
 const PREVENT_SCROLL_OPTIONS = { preventScroll: true }
 
@@ -63,7 +64,7 @@ export class FragmentFocus extends FragmentProcessor {
   }
 
   _restorePreviousFocusForLocation() {
-    return up.viewport.restoreFocus({ layer: this.layer })
+    return restoreFocus({ layer: this.layer })
   }
 
   _autofocus() {
@@ -75,7 +76,7 @@ export class FragmentFocus extends FragmentProcessor {
 
   _focusElement(element) {
     if (element) {
-      up.focus(element, {
+      doFocus(element, {
         force: true, // force focus on otherwise non-focusable elements
         ...PREVENT_SCROLL_OPTIONS,
         inputDevice: this.inputDevice,
@@ -86,7 +87,7 @@ export class FragmentFocus extends FragmentProcessor {
   }
 
   _focusHash() {
-    let hashTarget = up.viewport.firstHashTarget(this.hash, { layer: this.layer })
+    let hashTarget = firstHashTarget(this.hash, { layer: this.layer })
     if (hashTarget) {
       return this._focusElement(hashTarget)
     }

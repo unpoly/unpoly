@@ -5,6 +5,7 @@ import { Aborted } from '../../../error/aborted.js'
 import { build } from '../../../event.js'
 import { abort, reload } from '../../../fragment.js'
 import { Change } from './change.js'
+import { doFocus } from '../../../viewport.js'
 
 export class CloseLayer extends Change {
 
@@ -155,7 +156,7 @@ export class CloseLayer extends Change {
       // Otherwise focus the parent layer. Its focus element was made focusable by moveToFront() above.
       let newFocusElement = this.layer.origin || formerParent.getFocusElement()
 
-      up.focus(newFocusElement, { preventScroll: true })
+      doFocus(newFocusElement, { preventScroll: true })
     }
   }
 }

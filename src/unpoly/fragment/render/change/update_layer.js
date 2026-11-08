@@ -8,6 +8,7 @@ import { RenderOptions } from '../render_options.js'
 import { RenderResult } from '../render_result.js'
 import { historyOptions } from '../../../history.js'
 import { printToStandard } from '../../../log.js'
+import { getScrollTops, saveFocus, saveScroll } from '../../../viewport.js'
 import { FocusCapsule } from '../../../viewport/focus_capsule.js'
 
 export class UpdateLayerPlan extends Addition {
@@ -102,12 +103,12 @@ export class UpdateLayerPlan extends Addition {
     this._coordinateSteps()
 
     if (this.options.saveScroll) {
-      up.viewport.saveScroll({ layer: this.layer })
+      saveScroll({ layer: this.layer })
     }
 
     if (this.options.saveFocus) {
       // TODO: This creates the same up.FocusCapsule that we already built in _setScrollAndFocusOption()
-      up.viewport.saveFocus({ layer: this.layer })
+      saveFocus({ layer: this.layer })
     }
 
     let { peel } = this.options
@@ -221,7 +222,7 @@ export class UpdateLayerPlan extends Addition {
     // Store the focused element's selector, scroll position and selection range
     // in an up.FocusCapsule for later restoration.
     let focusCapsule = FocusCapsule.preserve(this.layer)
-    let oldScrollTops = up.viewport.getScrollTops({ layer: this.layer })
+    let oldScrollTops = getScrollTops({ layer: this.layer })
 
     this._steps.forEach((step, i) => {
       step.focusCapsule = focusCapsule

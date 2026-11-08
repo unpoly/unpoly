@@ -1,12 +1,13 @@
 import { on } from '../event.js'
 import { getSmart, tryToTarget } from '../fragment.js'
+import { copyCursorProps, doFocus, focusedElementWithin } from '../viewport.js'
 
 export class FocusCapsule {
 
   constructor(element, target) {
     this._element = element
     this._target = target
-    this._cursorProps = up.viewport.copyCursorProps(this._element)
+    this._cursorProps = copyCursorProps(this._element)
   }
 
   wasLost() {
@@ -45,8 +46,8 @@ export class FocusCapsule {
     let rediscoveredElement = this._target && getSmart(this._target, { layer })
     if (rediscoveredElement) {
       // Firefox needs focus-related props to be set *before* we focus the element
-      up.viewport.copyCursorProps(this._cursorProps, rediscoveredElement)
-      up.focus(rediscoveredElement, focusOptions)
+      copyCursorProps(this._cursorProps, rediscoveredElement)
+      doFocus(rediscoveredElement, focusOptions)
 
       // Signals callers that we could restore.
       // This matters to up.FragmentFocus to know that a { focus: ['restore', '.other'] }
@@ -56,7 +57,7 @@ export class FocusCapsule {
   }
 
   static preserve(layer) {
-    let focusedElement = up.viewport.focusedElementWithin(layer.element)
+    let focusedElement = focusedElementWithin(layer.element)
     if (!focusedElement) return
 
     // We also preserve an element that we cannot target. We won't be able to restore its focus,

@@ -3,16 +3,17 @@ import { computedStyle, getOne, isVisible } from '../element.js'
 import { fail } from '../error.js'
 import { getAll } from '../fragment.js'
 import { Rect } from '../util/rect.js'
+import { closest, config, isRoot, rootHeight, rootWidth } from '../viewport.js'
 
 export class RevealMotion {
 
   constructor(element, options = {}) {
     this._element = element
-    this._viewport = getOne(options.viewport) || up.viewport.get(this._element)
+    this._viewport = getOne(options.viewport) || closest(this._element)
     this._obstructionsLayer = up.layer.get(this._viewport)
     this._behavior = options.behavior ?? 'instant'
 
-    const viewportConfig = up.viewport.config
+    const viewportConfig = config
     this._snap    = options.snap    ?? options.revealSnap    ?? viewportConfig.revealSnap
     this._padding = options.padding ?? options.revealPadding ?? viewportConfig.revealPadding
     this._top     = options.top     ?? options.revealTop     ?? viewportConfig.revealTop
@@ -71,15 +72,15 @@ export class RevealMotion {
   }
 
   _getViewportRect() {
-    if (up.viewport.isRoot(this._viewport)) {
+    if (isRoot(this._viewport)) {
       // Other than an element with overflow-y, the document viewport
       // stretches to the full height of its contents. So we create a viewport
       // sized to the usuable screen area.
       return new Rect({
         left: 0,
         top: 0,
-        width: up.viewport.rootWidth(),
-        height: up.viewport.rootHeight()
+        width: rootWidth(),
+        height: rootHeight()
       })
     } else {
       return Rect.fromElement(this._viewport)

@@ -1,5 +1,6 @@
 import { cleaner } from '../util.js'
 import { addClassTemp, computedStyle, getRoot, setStyleTemp } from '../element.js'
+import { rootScrollbarWidth } from '../viewport.js'
 
 const SHIFT_CLASS = 'up-scrollbar-away'
 
@@ -45,7 +46,7 @@ export class BodyShifter {
   _shiftNow() {
     // Remember whether the root viewport has a visible scrollbar at rest.
     // It will disappear when we set overflow-y: hidden below.
-    this._rootScrollbarWidth = up.viewport.rootScrollbarWidth()
+    this._rootScrollbarWidth = rootScrollbarWidth()
 
     // Always publish on the <html> element for consistency, even if the scrolling element
     // is sometimes <body>. The property will be inherited
