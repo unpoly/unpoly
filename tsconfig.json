@@ -1,1 +1,27 @@
-{}
+{
+  // Type checking only (bin/typecheck). The build transpiles with its own tsconfig,
+  // see tooling/build/webpack/shared.js.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+
+    // Loose while we convert. A later pass tightens these.
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+
+    "target": "es2024",
+    "lib": ["es2024", "dom", "dom.iterable"],
+    "module": "preserve",
+    // Source files are scripts that share one global scope. Checking them as modules
+    // gives each file its own scope, so `const u = up.util` doesn't clash between files.
+    "moduleDetection": "force",
+    // Don't load @types packages of our dev dependencies (node, express, ...).
+    "types": [],
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.js", "src/**/*.ts"],
+  // Only requires the other files, including an ERB template that TypeScript can't resolve.
+  "exclude": ["src/unpoly.js"]
+}

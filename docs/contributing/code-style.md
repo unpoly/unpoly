@@ -6,8 +6,12 @@ most are not.
 
 ## No types
 
-Unpoly is plain JavaScript, and nothing type-checks it. The build runs the source
-through TypeScript, but only to transpile it.
+Unpoly is plain JavaScript. The build runs the source through TypeScript, but only to
+transpile it.
+
+We are starting to migrate to TypeScript. `bin/typecheck` runs TypeScript 7's checker over
+`src/` with loose settings and takes well under a second. It still reports errors, so
+the build ignores it, and CI runs it as a separate job that may fail.
 
 Types appear in [doc comments](documentation.md) only, in a notation loosely inspired by
 TypeScript. They document intent for the reader; no tool verifies them.

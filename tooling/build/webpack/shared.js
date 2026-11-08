@@ -70,6 +70,9 @@ function scriptPipeline({ es, lint = true }) {
     options: {
       appendTsSuffixTo: [/.*/],
       transpileOnly: true,
+      // The tsconfig.json in the project root is for type checking. Its options
+      // (e.g. moduleDetection) must not change what we emit.
+      configFile: path.join(__dirname, 'tsconfig.transpile.json'),
       compilerOptions: {
         allowJs: true,
         checkJs: true,

@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+// Type-check src/ with TypeScript 7, using the tsconfig.json in the project root.
+// Extra arguments are forwarded to tsc, so `bin/typecheck --extendedDiagnostics` works.
+//
+// TypeScript 7 is installed as `typescript7`. The `typescript` package stays at 5.9,
+// because the build (ts-loader) and ESLint (typescript-eslint) need its compiler API,
+// which TypeScript 7 doesn't ship.
+import { spawn } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const tscBin = path.join(projectRoot, 'node_modules', 'typescript7', 'bin', 'tsc')
+
+let child = spawn(tscBin, ['--project', 'tsconfig.json', ...process.argv.slice(2)], { stdio: 'inherit', cwd: projectRoot })
+child.on('exit', (code) => process.exit(code ?? 1))
