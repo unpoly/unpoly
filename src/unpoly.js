@@ -1,23 +1,38 @@
 // Unpoly's namespaces are ES modules. Each exports `api`, its contribution to `window.up`,
 // and optionally `install()`, which performs all its side effects (registering compilers,
 // listeners, macros). A module's top level only declares things.
+//
+// We only access `api` and `install` as static properties of the imported modules, never
+// pass a module namespace object around: webpack would then have to build that object,
+// listing every export of the module (2.4 KB for up.util alone).
 import * as namespace from './unpoly/namespace.js.erb'
 import * as mockable from './unpoly/mockable.js'
 import * as migrateStub from './unpoly/migrate_stub.js'
 
-// The explicit install order.
+window.up = {}
+
+const apis = [
+  namespace.api,
+  mockable.api,
+  migrateStub.api,
+]
+
+// Copy property descriptors, so getters (like `up.context`) stay live.
+for (let api of apis) {
+  Object.defineProperties(up, Object.getOwnPropertyDescriptors(api))
+}
+
+// The explicit install order. It runs while `up.framework.evaling` is true, so listeners and
+// compilers are registered as defaults, which survive a reset between specs.
 //
 // TEMPORARY (TypeScript migration, Phase 1): Namespaces we haven't converted to ES modules yet
 // are scripts that assign to `window.up` and register their side effects while they evaluate.
 // They're listed as `() => require(…)`, so they run at their position in the install order,
-// after the APIs of all converted modules are on `window.up`. Replace each with an import
-// when its file is converted.
-const modules = [
-  namespace,
-  mockable,
+// after the APIs of all converted modules are on `window.up`. When converting a file, remove
+// its line, and add its `install` here if it has one.
+const installs = [
   () => require('./unpoly/util'),
   () => require('./unpoly/error'),
-  migrateStub,
   () => require('./unpoly/browser'),
   () => require('./unpoly/element'),
 
@@ -117,22 +132,8 @@ const modules = [
   () => require('./unpoly/rails'),
 ]
 
-window.up = {}
-
-// Copy property descriptors, so getters (like `up.context`) stay live.
-for (let module of modules) {
-  Object.defineProperties(up, Object.getOwnPropertyDescriptors(module.api || {}))
-}
-
-// Unpoly marks listeners and compilers registered while `up.framework.evaling` as defaults,
-// which survive a reset between specs.
-for (let module of modules) {
-  // TEMPORARY (TypeScript migration, Phase 1): A function is an unconverted script, see above.
-  if (typeof module === 'function') {
-    module()
-  } else {
-    module.install?.()
-  }
+for (let install of installs) {
+  install()
 }
 
 up.framework.onEvaled()
