@@ -1,3 +1,5 @@
+import { on } from '../event.js'
+
 export class FocusCapsule {
 
   constructor(element, target) {
@@ -27,7 +29,7 @@ export class FocusCapsule {
   @internal
   */
   autoVoid() {
-    up.on('focusin', { once: true }, () => this._voided = true)
+    on('focusin', { once: true }, () => this._voided = true)
   }
 
   restore(layer, focusOptions) {

@@ -5,6 +5,7 @@ import {
 } from '../../element.js'
 import { fail } from '../../error.js'
 import { CannotMatch } from '../../error/cannot_match.js'
+import { emit } from '../../event.js'
 import { FragmentFinder } from '../fragment_finder.js'
 
 export class ResponseDoc {
@@ -207,7 +208,7 @@ export class ResponseDoc {
     if (selectEvent) {
       selectEvent.newFragment = newElement
       selectEvent.renderOptions = step.originalRenderOptions
-      up.emit(step.oldElement, selectEvent, { callback: step.selectCallback })
+      emit(step.oldElement, selectEvent, { callback: step.selectCallback })
       if (selectEvent.defaultPrevented) {
         return
       }

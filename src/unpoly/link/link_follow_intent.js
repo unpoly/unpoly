@@ -1,5 +1,6 @@
 import { scheduleTimer } from '../util.js'
 import { numberAttr } from '../element.js'
+import { on } from '../event.js'
 
 export class LinkFollowIntent {
 
@@ -15,7 +16,7 @@ export class LinkFollowIntent {
   }
 
   _on(eventType, fn) {
-    up.on(this._link, eventType, { passive: true }, fn)
+    on(this._link, eventType, { passive: true }, fn)
   }
 
   _scheduleCallback(event) {

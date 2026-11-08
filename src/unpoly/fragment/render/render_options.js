@@ -2,6 +2,7 @@ import {
   isGiven, merge, normalizeURL as utilNormalizeURL, omit, pick, renameKey, sequence, some,
 } from '../../util.js'
 import { fail } from '../../error.js'
+import { getInputDevice } from '../../event.js'
 
 // Sometimes we need to use given render options, but disable preview effects.
 const NO_PREVIEWS = {
@@ -189,7 +190,7 @@ function preprocess(options) {
     // Remember the defaults in a { default } prop so we can re-use it
     // later in deriveFailOptions() and finalize().
     { defaults },
-    { inputDevice: up.event.inputDevice },
+    { inputDevice: getInputDevice() },
     options,
     normalizeURL(options),
     rememberOriginLayer(options),

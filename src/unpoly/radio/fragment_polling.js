@@ -1,6 +1,7 @@
 import { uid } from '../util.js'
 import { numberAttr } from '../element.js'
 import { throwCritical } from '../error.js'
+import { build, on } from '../event.js'
 
 export class FragmentPolling {
 
@@ -83,7 +84,7 @@ export class FragmentPolling {
     if (this._eventsBound) return
     this._eventsBound = true
 
-    up.destructor(this._fragment, up.on('visibilitychange up:layer:opened up:layer:dismissed up:layer:accepted', this._onVisibilityChange.bind(this)))
+    up.destructor(this._fragment, on('visibilitychange up:layer:opened up:layer:dismissed up:layer:accepted', this._onVisibilityChange.bind(this)))
     up.fragment.onAborted(this._fragment, this._onFragmentAborted.bind(this))
     up.fragment.onKept(this._fragment, this._onFragmentKept.bind(this))
   }
@@ -169,7 +170,7 @@ export class FragmentPolling {
     // Don't schedule timers while we're loading. _onReloadSuccess() and _onReloadFailure() will do that for us.
     this._loading = true
 
-    let guardEvent = up.event.build('up:fragment:poll', { log: ['Polling fragment', this._fragment] })
+    let guardEvent = build('up:fragment:poll', { log: ['Polling fragment', this._fragment] })
     let reloadOptions = { ...this._options, guardEvent, jid: this._reloadJID }
 
     up.reload(this._fragment, reloadOptions).then(

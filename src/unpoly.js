@@ -35,6 +35,7 @@ import * as migrateStub from './unpoly/migrate_stub.js'
 import * as browser from './unpoly/browser.js'
 import * as element from './unpoly/element.js'
 import * as framework from './unpoly/framework.js'
+import * as event from './unpoly/event.js'
 import * as baseError from './unpoly/error/error.js'
 import * as notImplementedError from './unpoly/error/not_implemented.js'
 import * as abortedError from './unpoly/error/aborted.js'
@@ -109,6 +110,7 @@ const apis = [
   browser.api,
   element.api,
   framework.api,
+  event.api,
   baseError.api,
   notImplementedError.api,
   abortedError.api,
@@ -195,7 +197,7 @@ up._classes = {
 const installs = [
   util.install,
 
-  () => require('./unpoly/event'),
+  event.install,
   () => require('./unpoly/protocol'),
   () => require('./unpoly/log'),
   () => require('./unpoly/script'),

@@ -1,5 +1,6 @@
 import { remove, some } from '../util.js'
 import { muteUncriticalRejection } from '../error.js'
+import { emit } from '../event.js'
 
 export class MotionController {
 
@@ -66,7 +67,7 @@ export class MotionController {
   }
 
   _emitFinishEvent(element) {
-    return up.emit(element, this.finishEvent, { log: false })
+    return emit(element, this.finishEvent, { log: false })
   }
 
   _resetProps() {

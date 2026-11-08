@@ -1,4 +1,5 @@
 import { mockable } from './mockable.js'
+import { emit } from './event.js'
 
 /*-
 Features to control when Unpoly boots.
@@ -7,7 +8,6 @@ By default Unpoly boots on `DOMContentLoaded`, after your own scripts have had a
 
 @namespace up.framework
 */
-
 
 // Event                          up.framework.readyState   document.readyState
 // ------------------------------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ Emits event [`up:framework:reset`](/up:framework:reset).
 @internal
 */
 export function emitReset() {
-  up.emit('up:framework:reset', { log: false })
+  emit('up:framework:reset', { log: false })
 }
 
 /*-
@@ -88,11 +88,11 @@ export function boot({ mode = 'manual' } = {}) {
     // Change the state in case any user-provided compiler calls up.boot().
     // up.boot() is a no-op unless readyState === 'configuring'.
     readyState = 'booting'
-    up.emit('up:framework:boot', { mode, log: false })
+    emit('up:framework:boot', { mode, log: false })
     readyState = 'booted'
     // The initial page has been compiled, so CSS can stop hiding unprocessed elements.
     document.documentElement.classList.add('up-booted')
-    up.emit('up:framework:booted', { mode, log: false })
+    emit('up:framework:booted', { mode, log: false })
   } else {
     console.error("Unpoly cannot boot: %s", issue)
   }
@@ -189,7 +189,7 @@ You may then call `up.boot()` to manually boot Unpoly at a later time.
 */
 
 export function onEvaled() {
-  up.emit('up:framework:evaled', { log: false })
+  emit('up:framework:evaled', { log: false })
 
   if (mustManualBoot()) {
     console.debug('Call up.boot() after you have configured Unpoly')

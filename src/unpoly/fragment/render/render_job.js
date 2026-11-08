@@ -2,6 +2,7 @@ import { delegatePromise, isFunction, memoize, memoizeMethod, pluckKey } from '.
 import { assertConfirmed } from '../../browser.js'
 import { guard } from '../../error.js'
 import { Aborted } from '../../error/aborted.js'
+import { emit } from '../../event.js'
 import { ChangeFromContent } from './change/change_from_content.js'
 import { ChangeFromResponse } from './change/change_from_response.js'
 import { ChangeFromURL } from './change/change_from_url.js'
@@ -196,7 +197,7 @@ export class RenderJob {
       // guardEvent.renderOptions.guardEvent. This would cause an infinite loop for event
       // listeners that prevent the default and re-render.
       guardEvent.renderOptions = this.renderOptions
-      if (up.emit(guardEvent, { target: this.renderOptions.origin }).defaultPrevented) {
+      if (emit(guardEvent, { target: this.renderOptions.origin }).defaultPrevented) {
         throw new Aborted(`Rendering was prevented by ${guardEvent.type} listener`)
       }
     }

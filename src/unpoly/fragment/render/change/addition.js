@@ -1,5 +1,6 @@
 import { isDefined } from '../../../util.js'
 import { setMissingAttr } from '../../../element.js'
+import { emit } from '../../../event.js'
 import { Change } from './change.js'
 
 export class Addition extends Change {
@@ -52,7 +53,7 @@ export class Addition extends Change {
     // A listener to such a server-sent event might also close the layer.
     this.layer.asCurrent(() => {
       for (let eventPlan of this._eventPlans) {
-        up.emit({ ...eventPlan, response: this._response })
+        emit({ ...eventPlan, response: this._response })
         this.layer.assertAlive()
       }
     })

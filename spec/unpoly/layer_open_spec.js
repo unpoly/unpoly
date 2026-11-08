@@ -274,7 +274,8 @@ extendDescribe('up.layer', function() {
             const event1Plan = { type: 'foo', prop: 'bar ' }
             const event2Plan = { type: 'baz', prop: 'bam ' }
 
-            spyOn(up, 'emit').and.callThrough()
+            const emittedEvents = []
+            up.on('foo baz', (event) => emittedEvents.push(event))
 
             await wait()
 
@@ -285,8 +286,7 @@ extendDescribe('up.layer', function() {
 
             await wait()
 
-            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event1Plan))
-            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event2Plan))
+            expect(emittedEvents.map(({ type, prop }) => ({ type, prop }))).toEqual([event1Plan, event2Plan])
           })
         })
       })

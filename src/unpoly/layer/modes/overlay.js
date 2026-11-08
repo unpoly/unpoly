@@ -1,15 +1,14 @@
-import {
-  compact, compactObject, contains, findResult, getSimpleTokens, pick,
-} from '../../util.js'
+import { compact, compactObject, contains, findResult, getSimpleTokens, pick } from '../../util.js'
 import { affix, idSelector, jsonAttr, subtreeFirst } from '../../element.js'
 import { muteUncriticalSync } from '../../error.js'
 import { OptionsParser } from '../../element/options_parser.js'
+import { halt as eventHalt, on, onEscape } from '../../event.js'
 import { Params } from '../../form/params.js'
-import { Layer } from '../base.js'
-import { OVERLAY_VISUAL_KEYS } from '../overlay_visuals.js'
-import { OverlayFocus } from '../overlay_focus.js'
-import { UpURLPattern } from '../../util/url_pattern.js'
 import { CloseLayer } from '../../fragment/render/change/close_layer.js'
+import { Layer } from '../base.js'
+import { OverlayFocus } from '../overlay_focus.js'
+import { OVERLAY_VISUAL_KEYS } from '../overlay_visuals.js'
+import { UpURLPattern } from '../../util/url_pattern.js'
 
 /*-
 @class up.Layer
@@ -197,7 +196,7 @@ export class Overlay extends Layer {
       // If this overlay has its own viewport, a click outside the frame will hit
       // the viewport and not the parent element.
       if (this.viewportElement) {
-        up.on(this.viewportElement, 'up:click', (event) => {
+        on(this.viewportElement, 'up:click', (event) => {
           // Don't react when a click into the overlay frame bubbles to the viewportElement
           if (event.target === this.viewportElement) {
             this._onOutsideClicked(event, true)
@@ -220,7 +219,7 @@ export class Overlay extends Layer {
     }
 
     if (this._supportsDismissMethod('key')) {
-      this._unbindEscapePressed = up.event.onEscape((event) => this.onEscapePressed(event))
+      this._unbindEscapePressed = onEscape((event) => this.onEscapePressed(event))
     }
 
     // <a up-accept="value">OK</a>
@@ -273,7 +272,7 @@ export class Overlay extends Layer {
   _onOutsideClicked(event, halt) {
     up.log.putsEvent(event)
     // We still halt a click we ignore below, or a popup's origin would be followed again.
-    if (halt) up.event.halt(event)
+    if (halt) eventHalt(event)
 
     // When the user double-clicks a link that opens an overlay right away, the second click
     // lands outside the new overlay. We don't want to dismiss the overlay the user just opened.
@@ -301,7 +300,7 @@ export class Overlay extends Layer {
         // modal with escape.
         field.blur()
       } else if (this._supportsDismissMethod('key')) {
-        up.event.halt(event, { log: true })
+        eventHalt(event, { log: true })
         muteUncriticalSync(() =>
           this.dismiss(':key')
         )
@@ -319,7 +318,7 @@ export class Overlay extends Layer {
     this.on('up:click', `[${attribute}]:not(form)`, (event, link) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
       // a link from being followed on the root layer.
-      up.event.halt(event, { log: true })
+      eventHalt(event, { log: true })
 
       const value = jsonAttr(link, attribute)
       this._onAttrCloserActivated(link, value, closeFn)
@@ -331,7 +330,7 @@ export class Overlay extends Layer {
     this.on('submit', `[${attribute}]`, (event, element) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
       // a form from being submitted on the root layer.
-      up.event.halt(event, { log: true })
+      eventHalt(event, { log: true })
 
       // (1) `element` is whichever element carries the attribute, which for the documented
       //     markup is the form itself. Read the form from the event instead, so we cannot

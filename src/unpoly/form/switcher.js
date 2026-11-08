@@ -1,6 +1,7 @@
 import { getSimpleTokens, intersect, isEqual, isPresent, sequence, some } from '../util.js'
 import { toggle } from '../element.js'
 import { fail } from '../error.js'
+import { emit } from '../event.js'
 import { Params } from './params.js'
 
 const BUILTIN_SWITCH_EFFECTS = [
@@ -74,7 +75,7 @@ export class Switcher {
       }
     }
     let log = ['Switching %o', switchee]
-    up.emit(switchee, 'up:form:switch', { field: this._root, fieldTokens, log })
+    emit(switchee, 'up:form:switch', { field: this._root, fieldTokens, log })
   }
 
   _findSwitchees() {

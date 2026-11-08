@@ -1,5 +1,6 @@
 import { copy, isEqual, isPromise, omit, queueTask, scheduleTimer, sequence, some, uniq } from '../util.js'
 import { fail as errorFail, guard } from '../error.js'
+import { on } from '../event.js'
 import { Params } from './params.js'
 
 export class FieldWatcher {
@@ -55,12 +56,12 @@ export class FieldWatcher {
 
   _trackAbort() {
     let guard = ({ target }) => target.contains(this._region)
-    return up.on('up:fragment:aborted', { guard }, () => this._abort())
+    return on('up:fragment:aborted', { guard }, () => this._abort())
   }
 
   _trackReset() {
     let guard = ({ target }) => target === this._region
-    return up.on('reset', { guard }, (event) => this._onFormReset(event))
+    return on('reset', { guard }, (event) => this._onFormReset(event))
   }
 
   get _region() {
@@ -78,7 +79,7 @@ export class FieldWatcher {
 
     // Return a function that unbinds all events when the field is removed from _root.
     // Note that an [up-keep] field may be moved to another root.
-    return up.on(field, eventType, (event) => this._check(event, fieldOptions))
+    return on(field, eventType, (event) => this._check(event, fieldOptions))
   }
 
   _abort() {

@@ -1,5 +1,6 @@
 import { compact, memoize } from '../../../util.js'
 import { CannotMatch } from '../../../error/cannot_match.js'
+import { assertEmitted } from '../../../event.js'
 import { Addition } from './addition.js'
 import { UpdateSteps } from './update_steps.js'
 import { FragmentFocus } from '../fragment_focus.js'
@@ -258,7 +259,7 @@ export class OpenLayerPlan extends Addition {
     // might confuse this with the event for @layer.parent itself opening.
     //
     // There is no { onOpen } or [up-on-open] handler to accompany the DOM event.
-    up.event.assertEmitted('up:layer:open', {
+    assertEmitted('up:layer:open', {
       origin: this._origin,
       baseLayer: this._baseLayer, // sets up.layer.current
       layerOptions: this.options,

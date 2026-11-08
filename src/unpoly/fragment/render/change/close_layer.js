@@ -2,6 +2,7 @@ import { upperCaseFirst } from '../../../util.js'
 import { assertConfirmed } from '../../../browser.js'
 import { guard, muteUncriticalRejection } from '../../../error.js'
 import { Aborted } from '../../../error/aborted.js'
+import { build } from '../../../event.js'
 import { Change } from './change.js'
 
 export class CloseLayer extends Change {
@@ -131,7 +132,7 @@ export class CloseLayer extends Change {
   }
 
   _buildEvent(name) {
-    return up.event.build(name, {
+    return build(name, {
       layer: this.layer,
       value: this._value,
       origin: this._origin,

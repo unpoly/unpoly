@@ -1,6 +1,7 @@
 import {
   always, evalOption, filterList, findInList, parseArgs, queueTask, remove, scheduleTimer, some,
 } from '../util.js'
+import { emit } from '../event.js'
 import { UpRequest } from './request.js'
 
 export class RequestQueue {
@@ -149,7 +150,7 @@ export class RequestQueue {
   _checkForLate() {
     if (!this._emittedLate && this._hasLateTimedRequests()) {
       this._emittedLate = true
-      up.emit('up:network:late', { log: 'Server is slow to respond' })
+      emit('up:network:late', { log: 'Server is slow to respond' })
     }
   }
 
@@ -160,7 +161,7 @@ export class RequestQueue {
     // when a pending watch callback waits for a previous callback to finish.
     if (this._emittedLate && !this._timedRequests.length) {
       this._emittedLate = false
-      up.emit('up:network:recover', { log: 'Slow requests were loaded' })
+      emit('up:network:recover', { log: 'Slow requests were loaded' })
     }
   }
 

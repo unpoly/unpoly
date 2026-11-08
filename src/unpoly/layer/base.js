@@ -2,6 +2,7 @@ import { assert, evalOption, isEqual, isList, isString } from '../util.js'
 import { affix } from '../element.js'
 import { Aborted } from '../error/aborted.js'
 import { NotImplemented } from '../error/not_implemented.js'
+import { on } from '../event.js'
 import { EventEmitter } from '../event/event_emitter.js'
 import { EventListenerGroup } from '../event/event_listener_group.js'
 import { Record } from '../util/record.js'
@@ -122,7 +123,7 @@ export class Layer extends Record {
 
   setupHandlers() {
     up.link.convertClicks(this)
-    this._unbindLocationChanged = up.on('up:location:changed', (event) => this._onBrowserLocationChanged(event))
+    this._unbindLocationChanged = on('up:location:changed', (event) => this._onBrowserLocationChanged(event))
   }
 
   teardownHandlers() {

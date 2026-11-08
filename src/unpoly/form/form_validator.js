@@ -5,6 +5,7 @@ import {
 import { booleanOrStringAttr } from '../element.js'
 import { fail, muteUncriticalRejection } from '../error.js'
 import { Aborted } from '../error/aborted.js'
+import { build, on } from '../event.js'
 import { Params } from './params.js'
 
 export class FormValidator {
@@ -29,7 +30,7 @@ export class FormValidator {
 
   _onFieldAdded(field) {
     let eventType = up.form.validateOptions(field).event
-    return up.on(field, eventType, (event) => {
+    return on(field, eventType, (event) => {
       if (!field.closest('.up-keeping')) {
         up.log.putsEvent(event)
         muteUncriticalRejection(this.validate({ origin: field }))
@@ -317,7 +318,7 @@ export class FormValidator {
 
     // The guardEvent will be emitted on the render pass' { origin }, so the form in this case.
     // The guardEvent will also be assigned a { renderOptions } attribute in up.render()
-    options.guardEvent = up.event.build('up:form:validate', {
+    options.guardEvent = build('up:form:validate', {
       fields: dirtyFields,
       log: 'Validating form',
       params: options.params,

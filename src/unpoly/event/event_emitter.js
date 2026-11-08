@@ -2,6 +2,7 @@ import { extractOptions, isArray, isElementLike, isGiven, isString, merge } from
 import { getOne } from '../element.js'
 import { guard } from '../error.js'
 import { Aborted } from '../error/aborted.js'
+import { build } from '../event.js'
 import { Record } from '../util/record.js'
 
 export class EventEmitter extends Record {
@@ -129,11 +130,11 @@ export class EventEmitter extends Record {
       // The props object may also include options for the emission, such as
       // { layer }, { target }, { baseLayer } or { log }.
       // up.emit([target], eventType, [eventPropsAndEmitOptions])
-      options.event = up.event.build(args[0], options)
+      options.event = build(args[0], options)
     } else {
       // In this branch we receive an object that contains the event type as a { type } property:
       // up.emit([target, { type: 'foo', prop: 'value' }
-      options.event = up.event.build(options)
+      options.event = build(options)
     }
 
     return new (this)(options)

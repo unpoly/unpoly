@@ -2,6 +2,7 @@ import { evalOption, filterList, isPromise, map } from '../util.js'
 import { trackDefinitions } from '../element.js'
 import { guard, guardPromise } from '../error.js'
 import { UpError } from '../error/error.js'
+import { emit } from '../event.js'
 
 export class HelloFragment {
 
@@ -52,7 +53,7 @@ export class HelloFragment {
   }
 
   _emitCompileEvent() {
-    up.emit(this._root, 'up:compilers:before', { log: false })
+    emit(this._root, 'up:compilers:before', { log: false })
   }
 
   _emitInsertedEvent() {
