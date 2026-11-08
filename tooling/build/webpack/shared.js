@@ -8,6 +8,11 @@ function minify(doMinify) {
     mode: doMinify ? 'production' : 'none',
     devtool: doMinify ? 'source-map' : false,
     optimization: {
+      // `mode: 'none'` would turn these off for unminified builds. Without them every ES module
+      // gets its own wrapper, and imports are reached through module objects. Apps that bundle
+      // the unminified unpoly.js from npm would minify that (+3 KB gzip).
+      concatenateModules: true,
+      providedExports: true,
       minimize: doMinify,
       minimizer: [
         new TerserPlugin({
