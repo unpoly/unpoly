@@ -73,6 +73,9 @@ export async function finish(bundle, result, { terser, strip }) {
   if (bundle.strict) {
     ({ js, map } = insertStrictDirective(js, map))
   }
+  if (bundle.min || strip) {
+    js = shortenModuleKeys(js)
+  }
 
   let ecma = Number(bundle.target.slice(2))
   if (bundle.min) {
@@ -117,6 +120,19 @@ async function minifyStyles(files, target) {
     }
     files.set(cssPath, code)
   }
+}
+
+// esbuild wraps every file that is still a script, not an ES module, in a function keyed by its path:
+// `__commonJS({ "src/unpoly/foo.js"() { … } })`. The key is only a label (esbuild's helper calls
+// whatever the object holds), but Terser can't know that, and the paths cost ~270 bytes of gzip in
+// unpoly.min.js. So the bundles we publish get a one-letter key instead. That includes the
+// unminified unpoly.js, which apps minify with their own Terser, and would carry the paths along
+// (~550 bytes of gzip). The dev bundles keep the paths, which help a reader find their way around.
+//
+// We overwrite the path with spaces instead of cutting it out, so every line and column of the
+// bundle, and so its source map, stays as it was.
+export function shortenModuleKeys(js) {
+  return js.replace(/(__commonJS\(\{\n\s*)("[^"\n]+")(?=\()/g, (_match, prefix, key) => `${prefix}m${' '.repeat(key.length - 1)}`)
 }
 
 // esbuild hoists our ES modules into a single function and, since modules are implicitly

@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { SourceMapConsumer } from 'source-map'
-import { insertStrictDirective } from '../../build/esbuild.mjs'
+import { insertStrictDirective, shortenModuleKeys } from '../../build/esbuild.mjs'
 
 // A bundle as esbuild prints it: one IIFE. The map points line 2 (`up.x = 1`) at line 5 of foo.js.
 const JS = '(() => {\n  up.x = 1;\n})();\n'
@@ -22,4 +22,11 @@ test('moves the source map down by the line it inserts', async () => {
 
 test('refuses a bundle that is not an IIFE, rather than inserting the directive somewhere else', () => {
   assert.throws(() => insertStrictDirective('"use strict";\nfoo()', null), /Expected the bundle to start with/)
+})
+
+test('shortens the path keys of CommonJS wrappers, keeping every column in place', () => {
+  let js = 'var require_foo = __commonJS({\n  "src/unpoly/foo.js"() {\n    up.foo = 1;\n  }\n});\n'
+  let shortened = shortenModuleKeys(js)
+  assert.equal(shortened, 'var require_foo = __commonJS({\n  m                  () {\n    up.foo = 1;\n  }\n});\n')
+  assert.equal(shortened.length, js.length)
 })
