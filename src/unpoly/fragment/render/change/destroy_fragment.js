@@ -1,6 +1,7 @@
 import { abort, emitFragmentDestroyed, markFragmentAsDestroying } from '../../../fragment.js'
 import { Change } from './change.js'
 import { RenderOptions } from '../render_options.js'
+import { animate } from '../../../motion.js'
 import { clean } from '../../../script.js'
 
 export class DestroyFragment extends Change {
@@ -30,7 +31,7 @@ export class DestroyFragment extends Change {
     // removal animation.
     markFragmentAsDestroying(this._element)
 
-    up.animate(this._element, this._animation, RenderOptions.chainCallbacks(this.options, {
+    animate(this._element, this._animation, RenderOptions.chainCallbacks(this.options, {
       onFinished: () => {
         this._erase()
         this._emitDestroyed()

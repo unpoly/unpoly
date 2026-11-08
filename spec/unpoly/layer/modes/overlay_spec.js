@@ -533,33 +533,33 @@ describe('Overlay', function() {
     it('uses an { animation } option instead of the configured close animation', async function() {
       up.motion.config.enabled = true
       await up.layer.open({ mode: 'modal', openAnimation: false, closeAnimation: 'move-to-bottom', closeDuration: 5 })
-      spyOn(up, 'animate').and.callThrough()
+      const animateSpy = up.animate.mock().and.callThrough()
 
       up.layer.current.accept(null, { animation: 'move-to-top' })
 
-      expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-top', jasmine.anything())
-      expect(up.animate).not.toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
+      expect(animateSpy).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-top', jasmine.anything())
+      expect(animateSpy).not.toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
     })
 
     it('uses { duration } and { easing } options instead of the configured close duration and easing', async function() {
       up.motion.config.enabled = true
       await up.layer.open({ mode: 'modal', openAnimation: false, closeAnimation: 'fade-out', closeDuration: 5, closeEasing: 'linear' })
-      spyOn(up, 'animate').and.callThrough()
+      const animateSpy = up.animate.mock().and.callThrough()
 
       up.layer.current.accept(null, { duration: 7, easing: 'ease-in' })
 
-      expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'fade-out', jasmine.objectContaining({ duration: 7, easing: 'ease-in' }))
+      expect(animateSpy).toHaveBeenCalledWith(jasmine.any(Element), 'fade-out', jasmine.objectContaining({ duration: 7, easing: 'ease-in' }))
     })
 
     it('uses the configured close easing', async function() {
       up.motion.config.enabled = true
       up.layer.config.overlay.closeEasing = 'linear'
       await up.layer.open({ mode: 'modal', openAnimation: false, closeAnimation: 'fade-out', closeDuration: 5 })
-      spyOn(up, 'animate').and.callThrough()
+      const animateSpy = up.animate.mock().and.callThrough()
 
       up.layer.current.accept()
 
-      expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'fade-out', jasmine.objectContaining({ easing: 'linear' }))
+      expect(animateSpy).toHaveBeenCalledWith(jasmine.any(Element), 'fade-out', jasmine.objectContaining({ easing: 'linear' }))
     })
 
     it("uses the overlay instance's close duration when the global animation duration has been set to zero (bugfix)", async function() {
@@ -925,12 +925,12 @@ describe('Overlay', function() {
     it('uses an { animation } option instead of the configured close animation', async function() {
       up.motion.config.enabled = true
       await up.layer.open({ mode: 'modal', openAnimation: false, closeAnimation: 'move-to-bottom', closeDuration: 5 })
-      spyOn(up, 'animate').and.callThrough()
+      const animateSpy = up.animate.mock().and.callThrough()
 
       up.layer.current.dismiss(null, { animation: 'move-to-top' })
 
-      expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-top', jasmine.anything())
-      expect(up.animate).not.toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
+      expect(animateSpy).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-top', jasmine.anything())
+      expect(animateSpy).not.toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
     })
 
     it('takes a dismissal value that is passed to onDismissed handlers', function() {

@@ -207,13 +207,13 @@ describe('up.Layer', function() {
       up.motion.config.enabled = true
       await up.layer.open({ openAnimation: false, closeAnimation: 'fade-out', closeDuration: 5 })
       await up.layer.open({ openAnimation: false, closeAnimation: 'fade-out', closeDuration: 5 })
-      spyOn(up, 'animate').and.callThrough()
+      const animateSpy = up.animate.mock().and.callThrough()
 
       up.layer.root.peel({ animation: 'move-to-top' })
 
       expect(up.layer.count).toBe(1)
       // Each overlay box animates with the given animation. Backdrops always fade out.
-      expect(up.animate.calls.allArgs().filter((args) => args[1] === 'move-to-top').length).toBe(2)
+      expect(animateSpy.calls.allArgs().filter((args) => args[1] === 'move-to-top').length).toBe(2)
     })
 
     describe('close intent', function() {

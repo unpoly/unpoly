@@ -1478,7 +1478,7 @@ describe('up.Preview', function() {
           options.onFinished?.()
         }
 
-        let animateSpy = spyOn(up, 'animate').and.callFake(fakeAnimate)
+        let animateSpy = up.animate.mock().and.callFake(fakeAnimate)
 
         let previewFn = (preview) => preview.showPlaceholder('<div>preview content</div>')
 

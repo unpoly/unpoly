@@ -7,6 +7,7 @@ import {
 import { Addition } from './addition.js'
 import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
+import { animate, swap } from '../../../motion.js'
 import { block, clean, hello } from '../../../script.js'
 import { copyCursorProps, getSubtree } from '../../../viewport.js'
 
@@ -133,7 +134,7 @@ export class UpdateSteps extends Addition {
 
     // up.motion decides when the old element leaves the DOM: now, or after the transition.
     // We tell it what to do at that moment. Everything else happens in our phases (see the returned object).
-    let startMotion = up.motion.swap(step.oldElement, step.newElement, step.transition, {
+    let startMotion = swap(step.oldElement, step.newElement, step.transition, {
       ...step,
       beforeRemove: () => {
         clean(step.oldElement, { layer: step.layer })
@@ -215,7 +216,7 @@ export class UpdateSteps extends Addition {
       // Reveal the element that was being prepended/appended.
       scrollElement: wrapper,
       welcome: () => this._welcomeElement(wrapper, step),
-      startMotion: () => up.animate(wrapper, step.animation, { ...step, onFinished: () => unwrap(wrapper) }),
+      startMotion: () => animate(wrapper, step.animation, { ...step, onFinished: () => unwrap(wrapper) }),
     }
   }
 

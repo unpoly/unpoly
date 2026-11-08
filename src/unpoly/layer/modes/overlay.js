@@ -10,6 +10,7 @@ import { Layer } from '../base.js'
 import { OverlayFocus } from '../overlay_focus.js'
 import { OVERLAY_VISUAL_KEYS } from '../overlay_visuals.js'
 import { printUserEvent } from '../../log.js'
+import { animate, isNone } from '../../motion.js'
 import { readData } from '../../script.js'
 import { UpURLPattern } from '../../util/url_pattern.js'
 
@@ -449,14 +450,14 @@ export class Overlay extends Layer {
 
   _animationFn(boxAnimation, backdropAnimation) {
     // If we don't animate the box, we don't animate the backdrop either.
-    if (up.motion.isNone(boxAnimation)) return false
+    if (isNone(boxAnimation)) return false
 
     // Only animate the backdrop element if this layer has a backdrop.
     backdropAnimation = this.backdrop && backdropAnimation
 
     return (_element, animateOptions) => {
-      const boxDone = up.animate(this.getBoxElement(), boxAnimation, animateOptions)
-      const backdropDone = up.animate(this.backdropElement, backdropAnimation, animateOptions)
+      const boxDone = animate(this.getBoxElement(), boxAnimation, animateOptions)
+      const backdropDone = animate(this.backdropElement, backdropAnimation, animateOptions)
 
       // Promise.all() ignores non-Thenables in the given array
       return Promise.all([boxDone, backdropDone])
@@ -470,7 +471,7 @@ export class Overlay extends Layer {
       options.onFinished?.()
     }
 
-    return up.animate(this.element, animationProps.animation, { ...animationProps, onFinished })
+    return animate(this.element, animationProps.animation, { ...animationProps, onFinished })
   }
 
   openAnimationProps(options = {}) {
