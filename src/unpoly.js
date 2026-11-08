@@ -5,6 +5,20 @@
 // We only access `api` and `install` as static properties of the imported modules, never
 // pass a module namespace object around: webpack would then have to build that object,
 // listing every export of the module (2.4 KB for up.util alone).
+//
+// Import cycles between modules are fine, as long as no top level needs a binding from the
+// cycle before it is initialized. ES modules evaluate depth-first, so within a cycle the
+// module we import first from here is evaluated last. Hence two rules:
+//
+// - Outside of functions, a module uses imported bindings only for `extends` and
+//   `new Config()`. Other top-level uses (like element.js calling `mockable()`) are only
+//   safe while the two modules aren't part of the same cycle.
+// - This file enters every cycle through a namespace, never through a base class. Importing
+//   `Layer` first, with Layer → layer.js → RootLayer → Layer, would evaluate
+//   `class RootLayer extends Layer` before `Layer` exists.
+//
+// After changing imports, load dist/unpoly.js once. A ReferenceError at load time
+// ("Cannot access … before initialization") means a cycle is entered from the wrong side.
 import * as namespace from './unpoly/namespace.js.erb'
 import * as mockable from './unpoly/mockable.js'
 import * as util from './unpoly/util.js'
@@ -46,8 +60,11 @@ for (let api of apis) {
   Object.defineProperties(up, Object.getOwnPropertyDescriptors(api))
 }
 
-// The explicit install order. It runs while `up.framework.evaling` is true, so listeners and
-// compilers are registered as defaults, which survive a reset between specs.
+// The explicit install order. All installs run before `up.framework.onEvaled()` below, while
+// `up.framework.evaling` is still true. Event listeners, compilers, macros and registry entries
+// created now are marked as defaults (`isDefault`), which a reset between specs keeps
+// (see event_listener.js, registry.js, script.js). Installs listed before `framework` run
+// before `up.framework` exists, so they cannot create any of these.
 //
 // TEMPORARY (TypeScript migration, Phase 1): Namespaces we haven't converted to ES modules yet
 // are scripts that assign to `window.up` and register their side effects while they evaluate.
