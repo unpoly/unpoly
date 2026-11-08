@@ -167,7 +167,7 @@ import { LinkFollower } from './link/link_follower.js'
 
 // Settings to globally configure link handling.
 // Published as up.link.config.
-export const config = new Config(() => ({
+export const config = new Config('up.link.config', () => ({
   followSelector: '[up-follow]',
 }))
 
@@ -242,7 +242,10 @@ in `mockable()`.
 
 During the TypeScript migration, namespaces that haven't been converted yet are still
 scripts that assign to `window.up` from an IIFE, and are listed in `installs` as
-`() => require(…)`.
+`() => require(…)`. Such a script must never `import` anything: webpack would stop
+concatenating the modules it reaches, which costs ~6 KB in `unpoly.min.js`. It reaches
+functions and classes through `window.up` instead. Classes that are no longer on `window.up`
+are handed to it through a temporary, private `up._classes` object, which the entry fills.
 
 
 ## Entry points and optional bundles

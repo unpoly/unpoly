@@ -56,8 +56,7 @@ Each line of the dev log is `HH:MM:SS.mmm service | output`:
 
 ```
 09:48:38.636 server      | Unpoly specs serving on http://localhost:4000. Press CTRL+C to quit.
-09:48:50.554 watch       | asset unpoly.js 399 KiB [compared for emit] (name: unpoly)
-09:48:50.554 watch       |   modules by path ./src/unpoly/ 421 KiB 105 modules
+09:48:50.554 watch       | asset unpoly.js 396 KiB [emitted] (name: unpoly) 1 related asset
 09:48:50.554 watch       | webpack 5.105.4 compiled successfully in 11393 ms
 09:48:53.217 docs        | == The Middleman is loading
 ```
