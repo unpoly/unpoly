@@ -8,6 +8,7 @@ import {
 import { fail, guard } from './error.js'
 import { mockable } from './mockable.js'
 import { assertEmitted, on } from './event.js'
+import { getSmart } from './fragment.js'
 import { isBooted, isEvaling } from './framework.js'
 import { printToStandard } from './log.js'
 import { NonceableCallback } from './script/csp/nonceable_callback.js'
@@ -742,7 +743,7 @@ let compiled = await up.hello(textarea) // compiled === textarea
 */
 export function hello(element, options = {}) {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-  element = up.fragment.get(element, options)
+  element = getSmart(element, options)
 
   // We default to running all registered processor fns, but callers
   // can opt to only run given processor arguments.
@@ -884,7 +885,7 @@ data.pins[0].title // result: 'Friedberg'
 */
 export const readData = mockable(function readData(element) {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-  element = up.fragment.get(element)
+  element = getSmart(element)
 
   return element.upData ||= buildData(element)
 })

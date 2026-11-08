@@ -157,7 +157,7 @@ extendDescribe('up.fragment', function() {
             fixture('.element')
             const previousRequest = up.request('/baz')
 
-            const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = up.fragment.abort.mock()
 
             up.render('.element', { url: '/path1', abort: 'all' })
 
@@ -175,7 +175,7 @@ extendDescribe('up.fragment', function() {
 
             const previousRequest = up.request('/baz')
 
-            const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = up.fragment.abort.mock()
 
             up.render('.element', { url: '/path1', abort: 'layer', layer: 1 })
 
@@ -193,7 +193,7 @@ extendDescribe('up.fragment', function() {
 
             const previousRequest = up.request('/baz')
 
-            const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = up.fragment.abort.mock()
 
             up.render('.element', { url: '/path1', abort: '.element', layer: 1 })
 
@@ -209,7 +209,7 @@ extendDescribe('up.fragment', function() {
 
             const previousRequest = up.request('/baz')
 
-            const abortSpy = spyOn(up.fragment, 'abort')
+            const abortSpy = up.fragment.abort.mock()
 
             up.render('.element', { url: '/path1', abort: element })
 

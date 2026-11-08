@@ -971,9 +971,12 @@ extendDescribe('up.form', function() {
 
       describe('origin of submission', function() {
 
-        beforeEach(function() { spyOn(up, 'RenderJob').and.callThrough() })
+        let lastOrigin
 
-        const lastOrigin = () => up.RenderJob.calls.mostRecent().args[0].origin
+        beforeEach(function() {
+          lastOrigin = () => undefined
+          up.on('up:form:submit', ({ renderOptions }) => lastOrigin = () => renderOptions.origin)
+        })
 
         it('sets the origin to the clicked submit button', function() {
           const form = fixture('form[action="/path"][up-submit]')

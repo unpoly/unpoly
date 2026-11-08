@@ -1,6 +1,7 @@
 import { every, filterList, findResult, isElement, isElementLike, presence, some } from '../util.js'
 import { elementLikeMatches, subtree } from '../element.js'
 import { CannotMatch } from '../error/cannot_match.js'
+import { expandTargets, isNotDestroying } from '../fragment.js'
 
 export class Selector {
 
@@ -8,7 +9,7 @@ export class Selector {
     // If we're given an element that is detached *or* from another document
     // (think up.ResponseDoc), it has no layer and no destroying ancestors.
     let externalDocument = elementOrDocument && !document.contains(elementOrDocument)
-    this._filters = (externalDocument || options.destroying) ? [] : [up.fragment.isNotDestroying]
+    this._filters = (externalDocument || options.destroying) ? [] : [isNotDestroying]
 
     // Some up.fragment functions center around an element, like up.fragment.closest(element, selector).
     // In this case up.fragment passes us that element, and we search the element's layer unless told otherwise.
@@ -46,7 +47,7 @@ export class Selector {
       throw new CannotMatch(["Unknown layer: %o", options.layer])
     }
 
-    this._selectors ??= up.fragment.expandTargets(selector, { ...options, layer: expandTargetLayer })
+    this._selectors ??= expandTargets(selector, { ...options, layer: expandTargetLayer })
 
     // No selectors match nothing: in case (4), or when the user has set config.mainTargets = []
     // and we got a :main selector.

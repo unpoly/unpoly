@@ -3,6 +3,7 @@ import {
   booleanAttr, booleanOrNumberAttr, booleanOrNumberOrStringAttr, booleanOrStringAttr, closestAttr,
   jsonAttr, numberAttr, stringAttr,
 } from '../element.js'
+import { failKey as fragmentFailKey } from '../fragment.js'
 import { RenderOptions } from '../fragment/render/render_options.js'
 
 export class OptionsParser {
@@ -96,7 +97,7 @@ export class OptionsParser {
     }
 
     let failKey
-    if (this._fail && (failKey = up.fragment.failKey(key))) {
+    if (this._fail && (failKey = fragmentFailKey(key))) {
       const failAttrNames = compact(map(attrNames, (attrName) => this._deriveFailAttrName(attrName)))
       this.parse(attrReader, failKey, { ... keyOptions, attr: failAttrNames })
     }

@@ -69,7 +69,7 @@ extendDescribe('up.radio', function() {
         const deferreds = []
         up.radio.config.pollInterval = 100
 
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => {
+        const reloadSpy = up.reload.mock().and.callFake(() => {
           const deferred = u.newDeferred()
           deferreds.push(deferred)
           return deferred
@@ -127,7 +127,7 @@ extendDescribe('up.radio', function() {
       it('keeps polling if a request failed with a network issue', async function() {
         await jasmine.spyOnGlobalErrorsAsync(async function(globalErrorSpy) {
           up.radio.config.pollInterval = 100
-          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.reject(new up.Error('mocked network error')))
+          const reloadSpy = up.reload.mock().and.callFake(() => Promise.reject(new up.Error('mocked network error')))
 
           helloFixture('.element[up-poll]')
 
@@ -211,7 +211,7 @@ extendDescribe('up.radio', function() {
           up.radio.config.pollInterval = 50
           spyOnProperty(document, 'hidden', 'get').and.returnValue(true)
           spyOnProperty(document, 'visibilityState', 'get').and.returnValue('hidden')
-          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+          const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
           helloFixture('.element[up-poll]')
 
@@ -220,7 +220,7 @@ extendDescribe('up.radio', function() {
         })
 
         it("pauses polling while the browser tab is hidden", async function() {
-          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+          const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
           let currentHidden = false
           let currentVisibilityState = 'visible'
@@ -282,7 +282,7 @@ extendDescribe('up.radio', function() {
         })
 
         it("pauses polling while the element's layer is in the background", async function() {
-          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+          const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
           const element = fixture('.unread[up-poll][up-interval=100]')
           up.hello(element) // start polling
@@ -307,7 +307,7 @@ extendDescribe('up.radio', function() {
         })
 
         it("keeps polling on background layers with [up-if-layer='any']", async function() {
-          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+          const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
           const element = fixture('.unread[up-poll][up-interval=100][up-if-layer=any]')
           up.hello(element) // start polling
@@ -324,7 +324,7 @@ extendDescribe('up.radio', function() {
         })
 
         it('does not poll when it was paused for a full interval on a background layer, but an { onAccepted } or { onDismissed } callback renders the polling layer', async function() {
-          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+          const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
           const container = fixture('.container')
           const element = e.affix(container, '.unread[up-poll][up-interval=100]')
@@ -357,7 +357,7 @@ extendDescribe('up.radio', function() {
 
         it('stops polling when the element is destroyed', async function() {
           up.radio.config.pollInterval = 75
-          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+          const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
           const element = helloFixture('.element[up-poll]')
 
@@ -371,7 +371,7 @@ extendDescribe('up.radio', function() {
 
         it('stops polling when the element is detached by an external script', async function() {
           up.radio.config.pollInterval = 75
-          const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+          const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
           const element = helloFixture('.element[up-poll]')
 
@@ -494,7 +494,7 @@ extendDescribe('up.radio', function() {
       })
 
       it('allows to pass a polling interval per [up-interval] attribute', async function() {
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
         up.radio.config.pollInterval = 30
 

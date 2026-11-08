@@ -3,6 +3,7 @@ import { trackDefinitions } from '../element.js'
 import { guard, guardPromise } from '../error.js'
 import { UpError } from '../error/error.js'
 import { emit } from '../event.js'
+import { emitFragmentInserted, getSubtree } from '../fragment.js'
 import { printToStandard } from '../log.js'
 import { readData, registerDestructor } from '../script.js'
 
@@ -60,7 +61,7 @@ export class HelloFragment {
 
   _emitInsertedEvent() {
     if (this._insertedEvent) {
-      up.fragment.emitInserted(this._root, this._meta)
+      emitFragmentInserted(this._root, this._meta)
     }
   }
 
@@ -160,7 +161,7 @@ export class HelloFragment {
   }
 
   _select(selector) {
-    return up.fragment.subtree(this._root, evalOption(selector), { layer: this._layer } )
+    return getSubtree(this._root, evalOption(selector), { layer: this._layer } )
   }
 
   _selectOnce(compiler) {

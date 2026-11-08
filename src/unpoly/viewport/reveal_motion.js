@@ -1,6 +1,7 @@
 import { evalOption, filterList, isNumber, map } from '../util.js'
 import { computedStyle, getOne, isVisible } from '../element.js'
 import { fail } from '../error.js'
+import { getAll } from '../fragment.js'
 import { Rect } from '../util/rect.js'
 
 export class RevealMotion {
@@ -86,7 +87,7 @@ export class RevealMotion {
   }
 
   _computeObstructionRects(selector) {
-    let elements = up.fragment.all(selector, { layer: this._obstructionsLayer })
+    let elements = getAll(selector, { layer: this._obstructionsLayer })
     elements = filterList(elements, isVisible)
     return map(elements, (element) => {
       if (computedStyle(element, 'position') === 'sticky') {

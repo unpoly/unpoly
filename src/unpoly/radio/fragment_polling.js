@@ -2,6 +2,7 @@ import { uid } from '../util.js'
 import { numberAttr } from '../element.js'
 import { throwCritical } from '../error.js'
 import { build, on } from '../event.js'
+import { isAlive, isTargetable, matches, onAborted, onKept, reload } from '../fragment.js'
 import { printToStandard, printToWarn } from '../log.js'
 import { registerDestructor } from '../script.js'
 
@@ -53,7 +54,7 @@ export class FragmentPolling {
     Object.assign(this._options, options)
 
     if (this._state === 'stopped') {
-      if (!up.fragment.isTargetable(this._fragment)) {
+      if (!isTargetable(this._fragment)) {
         printToWarn('[up-poll]', 'Cannot poll untargetable fragment %o', this._fragment)
         return
       }
@@ -87,8 +88,8 @@ export class FragmentPolling {
     this._eventsBound = true
 
     registerDestructor(this._fragment, on('visibilitychange up:layer:opened up:layer:dismissed up:layer:accepted', this._onVisibilityChange.bind(this)))
-    up.fragment.onAborted(this._fragment, this._onFragmentAborted.bind(this))
-    up.fragment.onKept(this._fragment, this._onFragmentKept.bind(this))
+    onAborted(this._fragment, this._onFragmentAborted.bind(this))
+    onKept(this._fragment, this._onFragmentKept.bind(this))
   }
 
   _onVisibilityChange() {
@@ -131,7 +132,7 @@ export class FragmentPolling {
       return
     }
 
-    if (!up.fragment.isAlive(this._fragment)) {
+    if (!isAlive(this._fragment)) {
       this._stop()
       printToStandard('[up-poll]', 'Stopped polling a detached fragment')
       return
@@ -175,7 +176,7 @@ export class FragmentPolling {
     let guardEvent = build('up:fragment:poll', { log: ['Polling fragment', this._fragment] })
     let reloadOptions = { ...this._options, guardEvent, jid: this._reloadJID }
 
-    up.reload(this._fragment, reloadOptions).then(
+    reload(this._fragment, reloadOptions).then(
       this._onReloadSuccess.bind(this),
       this._onReloadFailure.bind(this)
     )
@@ -199,7 +200,7 @@ export class FragmentPolling {
   }
 
   _onFragmentSwapped(newFragment) {
-    if (this._forceIntent === 'start' && up.fragment.matches(this._fragment, newFragment)) {
+    if (this._forceIntent === 'start' && matches(this._fragment, newFragment)) {
       // Force start the new up.Polling instance for the new fragment.
       this.constructor.forFragment(newFragment).forceStart(this._options)
     }

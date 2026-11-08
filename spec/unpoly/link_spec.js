@@ -21,10 +21,10 @@ describe('up.link', function() {
       })
 
       it('does not render', function() {
-        spyOn(up, 'render').and.returnValue(Promise.resolve())
+        const renderSpy = up.render.mock().and.returnValue(Promise.resolve())
         const link = fixture('a[href="/path"][up-method="PUT"][up-layer="new"]')
         const options = up.link.followOptions(link)
-        expect(up.render).not.toHaveBeenCalled()
+        expect(renderSpy).not.toHaveBeenCalled()
       })
 
       it('parses the link method from a [data-method] attribute so we can replace the Rails UJS adapter with Unpoly', function() {
@@ -1807,11 +1807,11 @@ describe('up.link', function() {
           </div>
         `)
         up.hello(area)
-        spyOn(up, 'render').and.returnValue(Promise.resolve())
+        const renderSpy = up.render.mock().and.returnValue(Promise.resolve())
         Trigger.clickSequence(area)
         await wait()
 
-        expect(up.render).toHaveBeenCalled()
+        expect(renderSpy).toHaveBeenCalled()
       })
 
       it('does nothing when the user clicks another link in the expanded area', async function() {
@@ -1842,11 +1842,11 @@ describe('up.link', function() {
       it('does not trigger multiple replaces when the user clicks on the expanded area of an [up-instant] link (bugfix)', async function() {
         const $area = $fixture('div[up-expand] a[href="/path"][up-follow][up-instant]')
         up.hello($area)
-        spyOn(up, 'render').and.returnValue(Promise.resolve())
+        const renderSpy = up.render.mock().and.returnValue(Promise.resolve())
         Trigger.clickSequence($area)
         await wait()
 
-        expect(up.render.calls.count()).toEqual(1)
+        expect(renderSpy.calls.count()).toEqual(1)
       })
 
       describe('when Unpoly follows the expanded link', function() {

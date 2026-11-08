@@ -2,6 +2,7 @@ import {
   findInList, getComplexTokens, isArray, isElement, isFunction, isOptions, isString,
 } from '../../util.js'
 import { guard } from '../../error.js'
+import { contains, getSmart } from '../../fragment.js'
 import { printToWarn } from '../../log.js'
 import { Record } from '../../util/record.js'
 
@@ -75,16 +76,16 @@ export class FragmentProcessor extends Record {
 
   resolveCondition(condition) {
     if (condition === 'main') {
-      return this.fragment && up.fragment.contains(this.fragment, ':main')
+      return this.fragment && contains(this.fragment, ':main')
     }
   }
 
   findSelector(selector) {
     const lookupOpts = { layer: this.layer, origin: this.origin }
 
-    let matchWithinFragment = this.fragment && up.fragment.get(this.fragment, selector, lookupOpts)
+    let matchWithinFragment = this.fragment && getSmart(this.fragment, selector, lookupOpts)
     // Prefer selecting a descendant of @fragment, but if not possible search through @fragment's entire layer
-    let match = matchWithinFragment || up.fragment.get(selector, lookupOpts)
+    let match = matchWithinFragment || getSmart(selector, lookupOpts)
 
     if (match) {
       return match

@@ -3,6 +3,7 @@ import { toggle } from '../element.js'
 import { fail } from '../error.js'
 import { emit } from '../event.js'
 import { Params } from './params.js'
+import { getSmart, getSubtree, trackSelector } from '../fragment.js'
 
 const BUILTIN_SWITCH_EFFECTS = [
   { attr: 'up-hide-for', toggle(target, active) { toggle(target, !active) } },
@@ -42,7 +43,7 @@ export class Switcher {
 
   _trackNewSwitchees() {
     let onSwitcheeAdded = (switchee) => this._switchSwitchee(switchee)
-    return up.fragment.trackSelector(() => this._findSwitchees(), onSwitcheeAdded)
+    return trackSelector(() => this._findSwitchees(), onSwitcheeAdded)
   }
 
   _onFieldChanged() {
@@ -80,12 +81,12 @@ export class Switcher {
 
   _findSwitchees() {
     let scope = this._scope
-    return scope ? up.fragment.subtree(scope, this._switcheeSelector) : []
+    return scope ? getSubtree(scope, this._switcheeSelector) : []
   }
 
   get _scope() {
     if (this._regionSelector) {
-      return up.fragment.get(this._regionSelector, { origin: this._root })
+      return getSmart(this._regionSelector, { origin: this._root })
     } else {
       return up.form.getRegion(this._root)
     }

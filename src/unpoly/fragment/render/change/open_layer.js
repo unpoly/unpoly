@@ -1,6 +1,7 @@
 import { compact, memoize } from '../../../util.js'
 import { CannotMatch } from '../../../error/cannot_match.js'
 import { assertEmitted } from '../../../event.js'
+import { getSmart, hasAutoHistory } from '../../../fragment.js'
 import { Addition } from './addition.js'
 import { UpdateSteps } from './update_steps.js'
 import { FragmentFocus } from '../fragment_focus.js'
@@ -44,7 +45,7 @@ export class OpenLayerPlan extends Addition {
       // We associate this request with the base layer's main element. This way the request
       // will be aborted if the base layer receives a major navigation, but not when a
       // minor fragment is updated.
-      bindFragments: compact([up.fragment.get(':main', { layer: this._baseLayer })]),
+      bindFragments: compact([getSmart(':main', { layer: this._baseLayer })]),
       fragments: [],
     }
   }
@@ -216,7 +217,7 @@ export class OpenLayerPlan extends Addition {
     // If the layer is opened with { history } auto, the new overlay will from now
     // on have visible history *if* its initial fragment has auto-history.
     if (this.layer.history === 'auto') {
-      this.layer.history = up.fragment.hasAutoHistory([this._content], this.layer)
+      this.layer.history = hasAutoHistory([this._content], this.layer)
     }
 
     // If an ancestor layer was opened with the wish to not affect history, this

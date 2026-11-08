@@ -3,6 +3,7 @@ import { assertConfirmed } from '../../../browser.js'
 import { guard, muteUncriticalRejection } from '../../../error.js'
 import { Aborted } from '../../../error/aborted.js'
 import { build } from '../../../event.js'
+import { abort, reload } from '../../../fragment.js'
 import { Change } from './change.js'
 
 export class CloseLayer extends Change {
@@ -34,7 +35,7 @@ export class CloseLayer extends Change {
     this._emitClosingEvent()
 
     // Abort all pending requests targeting the layer we're now closing.
-    up.fragment.abort({ reason: 'Layer is closing', layer: this.layer })
+    abort({ reason: 'Layer is closing', layer: this.layer })
 
     // Mark the element as closing. This will prevent some actions that we don't want
     // during closing time, such as the overlay re-attaching itself after every
@@ -86,7 +87,7 @@ export class CloseLayer extends Change {
       // (2) The overlay is already closed. Like for a throwing { onAccepted } callback, we report an error
       //     instead of throwing it, e.g. for a selector that matches nothing.
       // (3) Like other reloads, we ignore an aborted request or an error response.
-      guard(() => muteUncriticalRejection(up.reload(selector, { layer: parent, origin: this.layer.origin })))
+      guard(() => muteUncriticalRejection(reload(selector, { layer: parent, origin: this.layer.origin })))
     }
   }
 

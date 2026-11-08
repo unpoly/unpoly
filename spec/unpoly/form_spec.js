@@ -783,10 +783,10 @@ describe('up.form', function() {
       })
 
       it('does not render', function() {
-        spyOn(up, 'render')
+        const renderSpy = up.render.mock()
         const form = fixture('form[action="/path"][up-method="PUT"][up-layer="new"]')
         const options = up.form.submitOptions(form)
-        expect(up.render).not.toHaveBeenCalled()
+        expect(renderSpy).not.toHaveBeenCalled()
       })
 
       it('parses the form method from a [data-method] attribute so we can replace the Rails UJS adapter with Unpoly', function() {

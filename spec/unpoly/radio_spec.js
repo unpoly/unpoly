@@ -100,7 +100,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
 
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
         const element = fixture('.element')
         up.radio.startPolling(element)
@@ -119,7 +119,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
 
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
         const element = fixture('.element')
         up.radio.startPolling(element)
@@ -140,7 +140,7 @@ describe('up.radio', function() {
         up.radio.config.pollInterval = interval
         const timingTolerance = interval / 3
 
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
         const container = fixture('.container')
         const element = e.affix(container, '.element')
@@ -162,7 +162,7 @@ describe('up.radio', function() {
 
         await up.layer.open({ content: '<div class="element">element</div>' })
         const element = up.fragment.get('.element', { layer: 'overlay' })
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
         up.radio.startPolling(element)
 
         await wait(timingTolerance)
@@ -181,7 +181,7 @@ describe('up.radio', function() {
 
         await up.layer.open({ content: '<div class="element">element</div>' })
         const element = up.fragment.get('.element', { layer: 'overlay' })
-        const reloadSpy = spyOn(up, 'reload').and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
         up.radio.startPolling(element)
 
         await wait(timingTolerance)
@@ -354,7 +354,7 @@ describe('up.radio', function() {
         const interval = 150
         const timingTolerance = interval / 3
 
-        const reloadSpy = spyOn(up, "reload").and.callFake(() => Promise.resolve(new up.RenderResult()))
+        const reloadSpy = up.reload.mock().and.callFake(() => Promise.resolve(new up.RenderResult()))
 
         const element = fixture(".element")
         up.radio.startPolling(element, { interval })

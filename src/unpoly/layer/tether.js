@@ -1,6 +1,7 @@
 import { isDefined, queueTask } from '../util.js'
 import { computedStyleNumber, getRoot, setInlineStyle } from '../element.js'
 import { fail } from '../error.js'
+import { isAlive } from '../fragment.js'
 
 export class Tether {
 
@@ -46,7 +47,7 @@ export class Tether {
 
   isAlive() {
     // return !this.parent.isConnected || !this._anchor.isConnected
-    return up.fragment.isAlive(this.parent) && up.fragment.isAlive(this._anchor)
+    return isAlive(this.parent) && isAlive(this._anchor)
   }
 
   sync() {

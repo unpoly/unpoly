@@ -1,6 +1,9 @@
 import { assert, copy, flatMap, map, some } from '../../../util.js'
 import { leadingElement, unwrap, wrapChildren } from '../../../element.js'
 import { fail } from '../../../error.js'
+import {
+  config, emitFragmentDestroyed, emitFragmentKept, findKeepPlan, markFragmentAsDestroying,
+} from '../../../fragment.js'
 import { Addition } from './addition.js'
 import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
@@ -81,7 +84,7 @@ export class UpdateSteps extends Addition {
   _insertStep(step) {
     switch (step.placement) {
       case 'swap': {
-        let keepPlan = up.fragment.keepPlan(step)
+        let keepPlan = findKeepPlan(step)
         if (keepPlan) {
           return this._insertKeepEverythingStep(step, keepPlan)
         } else {
@@ -114,14 +117,14 @@ export class UpdateSteps extends Addition {
       fragments: [],
       focusElement: step.oldElement,
       scrollElement: step.oldElement,
-      welcome: () => up.fragment.emitKept(keepPlan),
+      welcome: () => emitFragmentKept(keepPlan),
     }
   }
 
   _insertSwapStep(step) {
     const parent = step.parentElement ?? step.oldElement.parentNode
 
-    up.fragment.markAsDestroying(step.oldElement)
+    markFragmentAsDestroying(step.oldElement)
 
     // This needs to happen before up.script.clean() below.
     // Otherwise we would run destructors for elements we want to keep.
@@ -135,7 +138,7 @@ export class UpdateSteps extends Addition {
         clean(step.oldElement, { layer: step.layer })
       },
       afterRemove: () => {
-        up.fragment.emitDestroyed(step.oldElement, { parent, log: false })
+        emitFragmentDestroyed(step.oldElement, { parent, log: false })
         step.afterRemove?.()
       }
     })
@@ -234,7 +237,7 @@ export class UpdateSteps extends Addition {
 
     if (step.keep) {
       for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
-        let keepPlan = up.fragment.keepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
+        let keepPlan = findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
         if (keepPlan) {
           // Replace keepable with its clone so it looks good in a transition
           // between oldElement and newElement.
@@ -294,7 +297,7 @@ export class UpdateSteps extends Addition {
   _finalizeDescendantKeepables(step) {
     for (let keepPlan of step.descendantKeepPlans) {
       keepPlan.oldElement.classList.remove('up-keeping')
-      up.fragment.emitKept(keepPlan)
+      emitFragmentKept(keepPlan)
     }
   }
 
@@ -309,7 +312,7 @@ export class UpdateSteps extends Addition {
     const fragmentFocus = new FragmentFocus({
       ...options,
       fragment,
-      autoMeans: up.fragment.config.autoFocus,
+      autoMeans: config.autoFocus,
     })
     fragmentFocus.process(options.focus)
   }
@@ -318,7 +321,7 @@ export class UpdateSteps extends Addition {
     const scrolling = new FragmentScrolling({
       ...options,
       fragment,
-      autoMeans: up.fragment.config.autoScroll
+      autoMeans: config.autoScroll
     })
     scrolling.process(options.scrollMap ?? options.scroll)
   }

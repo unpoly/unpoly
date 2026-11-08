@@ -1,4 +1,5 @@
 import { fail } from '../../error.js'
+import { isAlive } from '../../fragment.js'
 import { Overlay } from './overlay.js'
 import { Tether } from '../tether.js'
 
@@ -33,7 +34,7 @@ export class OverlayWithTether extends Overlay {
     // don't run the code below that might re-attach the overlay.
     if (!this.isAlive()) return
 
-    if (up.fragment.isAlive(this.element) && this._tether.isAlive()) {
+    if (isAlive(this.element) && this._tether.isAlive()) {
       // The fragment update might have moved elements around.
       // This is a good moment to sync our position relative to the anchor.
       this._tether.sync()

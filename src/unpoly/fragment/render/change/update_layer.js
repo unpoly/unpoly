@@ -1,5 +1,6 @@
 import { evalAutoOption, map, memoize, memoizeMethod, merge, pick } from '../../../util.js'
 import { CannotMatch } from '../../../error/cannot_match.js'
+import { abort, compressNestedSteps, hasAutoHistory, parseTargetSteps } from '../../../fragment.js'
 import { FragmentFinder } from '../../fragment_finder.js'
 import { Addition } from './addition.js'
 import { UpdateSteps } from './update_steps.js'
@@ -18,7 +19,7 @@ export class UpdateLayerPlan extends Addition {
     this.target = options.target
     this._context = options.context
     // up.fragment.expandTargets() was already called by ChangeFromContent
-    this._steps = up.fragment.parseTargetSteps(this.target, this.options)
+    this._steps = parseTargetSteps(this.target, this.options)
     // this.uid = Math.random()
   }
 
@@ -125,7 +126,7 @@ export class UpdateLayerPlan extends Addition {
     // by passing { abort: false }, we abort pending requests targeting
     // the elements that we're about to remove.
     if (this.options.abort !== false) {
-      up.fragment.abort(this._getFragments(), {
+      abort(this._getFragments(), {
         reason: 'Fragment is being replaced',
         jid: this.options.jid,
       })
@@ -208,7 +209,7 @@ export class UpdateLayerPlan extends Addition {
   }
 
   _compressNestedSteps() {
-    this._steps = up.fragment.compressNestedSteps(this._steps)
+    this._steps = compressNestedSteps(this._steps)
   }
 
   _getHungrySteps() {
@@ -251,7 +252,7 @@ export class UpdateLayerPlan extends Addition {
     // We update the history with { history: 'auto' } when at least
     // one targeted fragment has auto-history.
     const oldFragments = map(this._steps, 'oldElement')
-    return up.fragment.hasAutoHistory(oldFragments, this.layer)
+    return hasAutoHistory(oldFragments, this.layer)
   }
 
   _getNewLocation() {

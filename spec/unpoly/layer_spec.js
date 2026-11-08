@@ -1352,7 +1352,7 @@ describe('up.layer', function() {
           it('runs an [up-on-accepted] callback first, then reloads', async function() {
             htmlFixtureList('<div class="list" up-source="/list">old list</div>')
             const [_link, overlay] = await openOverlay(`up-on-accepted="nonce-specs-nonce closeCallbackSpy()" up-on-accepted-reload=".list"`)
-            const reloadSpy = spyOn(up, 'reload').and.returnValue(Promise.resolve(new up.RenderResult()))
+            const reloadSpy = up.reload.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
 
             overlay.accept()
             await wait()
@@ -1459,7 +1459,7 @@ describe('up.layer', function() {
           it('runs an [up-on-dismissed] callback first, then reloads', async function() {
             htmlFixtureList('<div class="list" up-source="/list">old list</div>')
             const [_link, overlay] = await openOverlay(`up-on-dismissed="nonce-specs-nonce closeCallbackSpy()" up-on-dismissed-reload=".list"`)
-            const reloadSpy = spyOn(up, 'reload').and.returnValue(Promise.resolve(new up.RenderResult()))
+            const reloadSpy = up.reload.mock().and.returnValue(Promise.resolve(new up.RenderResult()))
 
             overlay.dismiss()
             await wait()

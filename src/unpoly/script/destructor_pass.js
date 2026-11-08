@@ -1,4 +1,5 @@
 import { pluckKey } from '../util.js'
+import { getSubtree } from '../fragment.js'
 
 export class DestructorPass {
 
@@ -19,7 +20,7 @@ export class DestructorPass {
   _selectCleanables() {
     // fragment functions usually ignore elements that are being destroyed
     const selectOptions = { ...this._options, destroying: true }
-    return up.fragment.subtree(this._fragment, '.up-can-clean', selectOptions)
+    return getSubtree(this._fragment, '.up-can-clean', selectOptions)
   }
 
 }

@@ -3,6 +3,7 @@ import { getOne } from '../element.js'
 import { guard } from '../error.js'
 import { Aborted } from '../error/aborted.js'
 import { build } from '../event.js'
+import { getSmart } from '../fragment.js'
 import { config, printToStandard } from '../log.js'
 import { Record } from '../util/record.js'
 
@@ -115,7 +116,7 @@ export class EventEmitter extends Record {
     }
 
     if (isString(options.target)) {
-      options.target = up.fragment.get(options.target, { layer: options.layer })
+      options.target = getSmart(options.target, { layer: options.layer })
     } else if (!options.target) {
       // If no element is given, we emit the event on the document.
       options.target = document

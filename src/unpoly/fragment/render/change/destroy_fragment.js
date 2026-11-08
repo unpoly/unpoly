@@ -1,3 +1,4 @@
+import { abort, emitFragmentDestroyed, markFragmentAsDestroying } from '../../../fragment.js'
 import { Change } from './change.js'
 import { RenderOptions } from '../render_options.js'
 import { clean } from '../../../script.js'
@@ -27,7 +28,7 @@ export class DestroyFragment extends Change {
     // The destroying fragment gets an .up-destroying class so we can
     // recognize elements that are being destroyed but are still playing out their
     // removal animation.
-    up.fragment.markAsDestroying(this._element)
+    markFragmentAsDestroying(this._element)
 
     up.animate(this._element, this._animation, RenderOptions.chainCallbacks(this.options, {
       onFinished: () => {
@@ -39,14 +40,14 @@ export class DestroyFragment extends Change {
 
   _erase() {
     this._layer.asCurrent(() => {
-      up.fragment.abort(this._element)
+      abort(this._element)
       clean(this._element, { layer: this._layer })
       this._element.remove()
     })
   }
 
   _emitDestroyed() {
-    up.fragment.emitDestroyed(this._element, { parent: this._parent, log: this._log })
+    emitFragmentDestroyed(this._element, { parent: this._parent, log: this._log })
   }
 
 }

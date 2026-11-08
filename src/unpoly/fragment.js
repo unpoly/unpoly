@@ -1,7 +1,34 @@
-require('./fragment.sass')
-
-const u = up.util
-const e = up.element
+import './fragment.sass'
+import {
+  cleaner, copy, defineDelegates, evalAutoOption, filterList, findResult, getComplexTokens,
+  isAdjacentPosition, isDefined, isElement, isElementLike, isEqual, isFunction, isList, isRegExp,
+  isString, lowerCaseFirst, map, merge, normalizeURL, parseArgIntoOptions, parseArgs,
+  parseScalarJSONPairs, pick, presence, reject, some, uniq, uniqBy, upperCaseFirst, wrapList,
+} from './util.js'
+import {
+  attrSelector, booleanAttr, booleanOrStringAttr, classSelector, closestAttr,
+  contains as elementContains, createNodesFromHTML, documentPosition, getOne, idSelector,
+  isIntersectingWindow, parseSelector, removeAttrsFromHTML, subtree, subtreeFirst, wrapIfRequired,
+} from './element.js'
+import { canPushState } from './browser.js'
+import { fail } from './error.js'
+import { mockable } from './mockable.js'
+import { CannotParse } from './error/cannot_parse.js'
+import { CannotTarget } from './error/cannot_target.js'
+import { emit, on, onClosest } from './event.js'
+import { FragmentFinder } from './fragment/fragment_finder.js'
+import { DestroyFragment } from './fragment/render/change/destroy_fragment.js'
+import { RenderJob } from './fragment/render/render_job.js'
+import { SelectorTracker } from './fragment/selector_tracker.js'
+import { Selector } from './fragment/selector.js'
+import { isEnabled } from './history.js'
+import { Layer } from './layer/base.js'
+import { printToStandard, printToWarn } from './log.js'
+import {
+  callbackAttr, config as scriptConfig, hello, isScript, readData, registerDestructor,
+  registerMacro,
+} from './script.js'
+import { Config } from './util/config.js'
 
 /*-
 The JavaScript API to render, look up and destroy page fragments. Every link, form, overlay or poll that Unpoly handles ends in `up.render()`, and your own code can call it with the same options.
@@ -14,3235 +41,3255 @@ Lookup functions like `up.fragment.get()` differ from `document.querySelector()`
 
 @namespace up.fragment
 */
-up.fragment = (function() {
 
-  function upTagName(element) {
-    let tagName = element.localName
-    if (tagName.startsWith('up-')) {
-      return tagName
-    }
+function upTagName(element) {
+  let tagName = element.localName
+  if (tagName.startsWith('up-')) {
+    return tagName
   }
+}
 
-  const STRONG_TARGET_DERIVERS = [
-    '[up-id]',
-    '[id]',
-    'html',
-    'head',
-    'body',
-  ]
+const STRONG_TARGET_DERIVERS = [
+  '[up-id]',
+  '[id]',
+  'html',
+  'head',
+  'body',
+]
 
-  /*-
-  Configures defaults for fragment updates.
+/*-
+Configures defaults for fragment updates.
 
-  @property up.fragment.config
+@property up.fragment.config
 
-  @section Targeting
-    @param {Array<string>} [config.mainTargets=['[up-main]', 'main', ':layer']]
-      An array of CSS selectors matching default [render targets](/learn/targeting-fragments).
+@section Targeting
+  @param {Array<string>} [config.mainTargets=['[up-main]', 'main', ':layer']]
+    An array of CSS selectors matching default [render targets](/learn/targeting-fragments).
 
-      When no explicit target is given, Unpoly will update the first selector matching both
-      the current page and the server response.
+    When no explicit target is given, Unpoly will update the first selector matching both
+    the current page and the server response.
 
-      When [navigating](/learn/navigation-defaults) to a main target, Unpoly will automatically
-      [reset scroll positions](/learn/scrolling#auto) and
-      [update the browser history](/learn/updating-history).
+    When [navigating](/learn/navigation-defaults) to a main target, Unpoly will automatically
+    [reset scroll positions](/learn/scrolling#auto) and
+    [update the browser history](/learn/updating-history).
 
-      This property is aliased as [`up.layer.config.any.mainTargets`](/api/up.layer.config#config.any.mainTargets).
+    This property is aliased as [`up.layer.config.any.mainTargets`](/api/up.layer.config#config.any.mainTargets).
 
-      Also see [targeting the main fragment](/learn/targeting-fragments#targeting-the-main-element).
+    Also see [targeting the main fragment](/learn/targeting-fragments#targeting-the-main-element).
 
-    @param {Array<string|Function<Element>: string|undefined>} [config.targetDerivers]
-      An array of [target derivation patterns](/learn/target-derivation#derivation-patterns)
-      used to [guess a target selector](/learn/target-derivation) for an element.
+  @param {Array<string|Function<Element>: string|undefined>} [config.targetDerivers]
+    An array of [target derivation patterns](/learn/target-derivation#derivation-patterns)
+    used to [guess a target selector](/learn/target-derivation) for an element.
 
-      For instance, a pattern `'a[href]'` is applicable to all `<a href="...">` elements.
-      It produces a target like `a[href="/users"]`.
+    For instance, a pattern `'a[href]'` is applicable to all `<a href="...">` elements.
+    It produces a target like `a[href="/users"]`.
 
-      If your deriver can't be expressed in a pattern string, you may also add a function that
-      accepts an `Element` and returns a target selector, if applicable. If the function
-      is not applicable it may return `undefined`. In that case the next pattern will be tried.
+    If your deriver can't be expressed in a pattern string, you may also add a function that
+    accepts an `Element` and returns a target selector, if applicable. If the function
+    is not applicable it may return `undefined`. In that case the next pattern will be tried.
 
-    @param {Array<string|RegExp>} [config.badTargetClasses]
-      An array of class names that should be ignored when
-      [deriving a target selector from a fragment](/learn/target-derivation).
+  @param {Array<string|RegExp>} [config.badTargetClasses]
+    An array of class names that should be ignored when
+    [deriving a target selector from a fragment](/learn/target-derivation).
 
-      The class names may also be passed as a regular expression.
+    The class names may also be passed as a regular expression.
 
-    @param {boolean} [config.verifyDerivedTarget=true]
-      Whether [derived targets](/learn/target-derivation) must match the element to be applicable.
+  @param {boolean} [config.verifyDerivedTarget=true]
+    Whether [derived targets](/learn/target-derivation) must match the element to be applicable.
 
-      When verification is disabled, the first applicable [derivation pattern](/learn/target-derivation#derivation-patterns)
-      will be used, even if the produced target would match another element on the page.
+    When verification is disabled, the first applicable [derivation pattern](/learn/target-derivation#derivation-patterns)
+    will be used, even if the produced target would match another element on the page.
 
-      Also see [Derived target verification](/learn/target-derivation#verification).
+    Also see [Derived target verification](/learn/target-derivation#verification).
 
-    @param {string} [config.match='region']
-      How to match fragments when a [target selector](/learn/targeting-fragments) yields multiple results.
+  @param {string} [config.match='region']
+    How to match fragments when a [target selector](/learn/targeting-fragments) yields multiple results.
 
-      When set to `'region'` Unpoly will prefer to match fragments in the
-      [region](/learn/targeting-fragments#ambiguous-selectors) of the [origin element](/api/up.render#options.origin).
+    When set to `'region'` Unpoly will prefer to match fragments in the
+    [region](/learn/targeting-fragments#ambiguous-selectors) of the [origin element](/api/up.render#options.origin).
 
-      If set to `'first'` Unpoly will always use the first matching fragment.
+    If set to `'first'` Unpoly will always use the first matching fragment.
 
-  @section Render options
+@section Render options
 
-    @param {Object} [config.navigateOptions]
-      An object of default render options to apply when [navigating](/learn/navigation-defaults).
+  @param {Object} [config.navigateOptions]
+    An object of default render options to apply when [navigating](/learn/navigation-defaults).
 
-      To set defaults for *all* render passes (when navigating or not), use `up.fragment.config.renderOptions`.
+    To set defaults for *all* render passes (when navigating or not), use `up.fragment.config.renderOptions`.
 
-    @param {Object} [config.renderOptions]
-      An object of low-level render options to apply to *any* render pass.
+  @param {Object} [config.renderOptions]
+    An object of low-level render options to apply to *any* render pass.
 
-      When [navigating](/learn/navigation-defaults), the defaults from `up.fragment.config.navigateOptions` will also be applied.
+    When [navigating](/learn/navigation-defaults), the defaults from `up.fragment.config.navigateOptions` will also be applied.
 
-      > [!important]
-      > By design only a minimal set of options is configured. This is to spare callers from excessive unsetting
-      > of defaults when rendering a fragment without navigation.
-      > Any opinionated settings (in particular `{ cache, history, scroll }`)
-      > should be configured in `up.fragment.config.navigateOptions`.
-
-      @experimental
-
-    @param {Object} [config.reloadOptions]
-      An object of default render options to apply when [reloading fragments](/api/up.reload).
-
-      To set defaults for *all* render passes (when reloading or not), use `up.fragment.config.renderOptions`.
-
-      @experimental
-
-    @param {Array<string>} [config.autoHistoryTargets]
-      When an updated fragment contains an element matching one of the given [target selectors](/learn/targeting-fragments),
-      history will be updated with `{ history: 'auto' }`.
-
-      By default Unpoly will auto-update history when updating a [main target](#config.mainTargets).
-
-    @param {Array<boolean|string|Function(Element)>} [config.autoScroll]
-      An array of scroll strategies to try after updating a fragment with `{ scroll: 'auto' }`.
-
-      See [Scrolling](/learn/scrolling) for available strategies.
-
-      The default configuration tries, in this order:
-
-      - If the URL has a `#hash`, scroll to the hash.
-      - If updating a [main target](/api/up-main), reset scroll positions.
-
-    @param {Array<boolean|string|Function(Element)>} [config.autoFocus]
-      An array of focus strategies when updating a fragment with `{ focus: 'auto' }`.
-
-      See [Controlling focus](/learn/focus) for available strategies.
-
-      The default configuration tries the following strategies, in this order:
-
-      - Focus a `#hash` in the URL.
-      - Focus an `[autofocus]` element in the new fragment.
-      - If updating a [main target](/api/up-main), focus the new fragment.
-      - If focus was lost with the old fragment, re-focus a [similar](/learn/target-derivation) element.
-      - If focus was lost with the old fragment, focus the new fragment.
-
-  @section Preprocessing
-
-    @param {Function(string): string} [config.normalizeKeepHTML]
-      A function that normalizes a HTML string before comparison with [`[up-keep="same-html"]`](/learn/keeping-elements#same-html).
-
-      By default only light normalization is applied:
-
-      - Line indentation is ignored.
-      - Some fluctuating attributes are ignored, such as CSP nonces.
-
-      You can configure your own normalization instead of the default. For example, the following
-      would only strip leading and trailing whitespace:
-
-      ```js
-      up.fragment.config.normalizeKeepHTML = (str) => str.trim()
-      ```
-
-      See [Keeping an element until its HTML changes](/learn/keeping-elements#same-html) for context.
-
-  @section Responses
-
-    @param {boolean|Function(up.Response): boolean} [config.autoRevalidate]
-      Whether to reload a fragment after it was rendered from a cached response with `{ revalidate: 'auto' }`.
-
-      By default Unpoly verifies cached responses that are older than `up.network.config.cacheExpireAge`:
-
-      ```js
-      up.fragment.config.autoRevalidate = (response) => response.expired
-      ```
-
-      You can exempt server paths from being auto-revalidated like this:
-
-      ```js
-      up.fragment.config.autoRevalidate = (response) => response.expired && response.url != '/dashboard'
-      ```
-
-    @param {Function(Object): boolean} [config.skipResponse]
-      When to finish a render pass without changes,
-      usually to [not re-insert identical content](/learn/render-lifecycle#skipping-responses).
-
-      By default Unpoly skips the following responses:
-
-      - Responses without text in their body.
-        Such responses occur when the server answers a [conditional request](/learn/conditional-requests)
-        with `304 Not Modified`, or responds with `204 No Content`.
-      - When [revalidating](/learn/caching#revalidation), if the expired response and fresh response
-        have the exact same text.
-
-      The configured function accepts an object with the same properties
-      as an `up:fragment:loaded` event. You can provide a different function to use your own logic.
-      For example, the following would never skip a response by default:
-
-      ```js
-      up.fragment.config.skipResponse = ({ response, expiredResponse }) => false
-      ```
-
-      You may also skip responses by calling `event.skip()` on an `up:fragment:loaded` event.
-
-  @param {Function(up.Response): boolean} [config.renderableResponse]
-    Whether the given response has a [content-type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type)
-    that is considered renderable.
-
-    By default Unpoly renders responses with an [HTML content-type](/api/up.Response.prototype.isHTML).
-    Trying to render responses with a different type will throw an error, even if the response body contains HTML markup.
-
-    Restricting content types is a security precaution. It protects in a hypothetical scenario where an attacker can both
-    upload a file *and* can use an existing XSS vulnerability to cause Unpoly to render that file. It doesn't
-    affect applications that reliably escape user input.
-
-    To render *any* response regardless of content-type, configure a function that always returns `true`:
-
-    ```js
-    up.fragment.config.renderableResponse = (response) => true
-    ```
+    > [!important]
+    > By design only a minimal set of options is configured. This is to spare callers from excessive unsetting
+    > of defaults when rendering a fragment without navigation.
+    > Any opinionated settings (in particular `{ cache, history, scroll }`)
+    > should be configured in `up.fragment.config.navigateOptions`.
 
     @experimental
 
-  @stable
-  */
-  const config = new up.Config('up.fragment.config', () => ({
-    badTargetClasses: [/^up-/],
+  @param {Object} [config.reloadOptions]
+    An object of default render options to apply when [reloading fragments](/api/up.reload).
 
-    strongTargetDerivers: STRONG_TARGET_DERIVERS,
+    To set defaults for *all* render passes (when reloading or not), use `up.fragment.config.renderOptions`.
 
-    targetDerivers: [
-      ...STRONG_TARGET_DERIVERS,
-      'main',
-      '[up-main]',
-      upTagName,
-      'link[rel][type]',
-      'link[rel=preload][href]',
-      'link[rel=preconnect][href]',
-      'link[rel=prefetch][href]',
-      'link[rel]',
-      'meta[property]',
-      '*[name]',
-      'form[action]',
-      'a[href]',
-      '[class]',
-      '[up-flashes]',
-      'form',
-    ],
+    @experimental
 
-    verifyDerivedTarget: true,
+  @param {Array<string>} [config.autoHistoryTargets]
+    When an updated fragment contains an element matching one of the given [target selectors](/learn/targeting-fragments),
+    history will be updated with `{ history: 'auto' }`.
 
-    renderOptions: {
-      hungry: true,
-      keep: true,
-      saveScroll: true,
-      saveFocus: true,
-      focusVisible: 'auto',
-      abort: 'target',
-      failOptions: true,
-      feedback: true,
-    },
+    By default Unpoly will auto-update history when updating a [main target](#config.mainTargets).
 
-    // These defaults will be set to both success and fail options
-    // if { navigate: true } is given.
-    navigateOptions: {
-      cache: 'auto',
-      revalidate: 'auto',
-      fallback: true,
-      focus: 'auto',
-      scroll: 'auto',
-      history: 'auto',
-      peel: 'dismiss',
-    },
+  @param {Array<boolean|string|Function(Element)>} [config.autoScroll]
+    An array of scroll strategies to try after updating a fragment with `{ scroll: 'auto' }`.
 
-    reloadOptions: {
-      target: ':main',
-      scroll: 'keep',
-      focus: 'keep',
-    },
+    See [Scrolling](/learn/scrolling) for available strategies.
 
-    match: 'region',
-    autoHistoryTargets: [':main'],
-    autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
-    autoScroll: ['hash', 'layer-if-main'],
-    autoRevalidate: (response) => response.expired,
-    skipResponse: defaultSkipResponse,
-    renderableResponse: (response) => response.isHTML(),
-    normalizeKeepHTML: defaultNormalizeKeepHTML
-  }))
+    The default configuration tries, in this order:
 
-  // Users who are not using layers will prefer settings default targets
-  // as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
-  u.delegate(config, ['mainTargets'], () => up.layer.config.any)
+    - If the URL has a `#hash`, scroll to the hash.
+    - If updating a [main target](/api/up-main), reset scroll positions.
 
-  function defaultSkipResponse({ response, expiredResponse }) {
-    return !response.text || response.text === expiredResponse?.text
-  }
+  @param {Array<boolean|string|Function(Element)>} [config.autoFocus]
+    An array of focus strategies when updating a fragment with `{ focus: 'auto' }`.
 
-  /*-
-  Returns the URL from which the given element was loaded.
+    See [Controlling focus](/learn/focus) for available strategies.
 
-  If the given element was never directly updated, but part of a larger fragment update,
-  the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) known source of an ancestor element is returned.
+    The default configuration tries the following strategies, in this order:
 
-  ## Example
+    - Focus a `#hash` in the URL.
+    - Focus an `[autofocus]` element in the new fragment.
+    - If updating a [main target](/api/up-main), focus the new fragment.
+    - If focus was lost with the old fragment, re-focus a [similar](/learn/target-derivation) element.
+    - If focus was lost with the old fragment, focus the new fragment.
 
-  In the HTML below, the element `#one` was loaded from the URL `/foo`:
+@section Preprocessing
 
-  ```html
-  <div id="one" up-source="/foo">
-  <div id="two">...</div>
-  </div>
-  ```
+  @param {Function(string): string} [config.normalizeKeepHTML]
+    A function that normalizes a HTML string before comparison with [`[up-keep="same-html"]`](/learn/keeping-elements#same-html).
 
-  We can now ask for the source of an element:
+    By default only light normalization is applied:
 
-  ```javascript
-  up.fragment.source('#two') // returns '/foo'
-  ```
+    - Line indentation is ignored.
+    - Some fluctuating attributes are ignored, such as CSP nonces.
 
-  @function up.fragment.source
-  @param {Element|string} element
-    The element or CSS selector for which to look up the source URL.
-  @return {string|undefined}
-    The URL from which the element was loaded.
-  @stable
-  */
-  function sourceOf(element, options = {}) {
-    element = getSmart(element, options)
-    return e.closestAttr(element, 'up-source')
-  }
+    You can configure your own normalization instead of the default. For example, the following
+    would only strip leading and trailing whitespace:
 
-  function normalizeSource(source) {
-    // Don't use u.matchableURL() here. We need to keep the trailing slash here,
-    // to support backends that care about trailing slashes.
-    return u.normalizeURL(source, { hash: false })
-  }
+    ```js
+    up.fragment.config.normalizeKeepHTML = (str) => str.trim()
+    ```
 
-  /*-
-  Returns the last modification time of the content in the given element.
+    See [Keeping an element until its HTML changes](/learn/keeping-elements#same-html) for context.
 
-  The last modification time corresponds to the `Last-Modified` header in the response that
-  rendered the fragment. Alternatively the `[up-time]` attribute of the element or an ancestor is used.
+@section Responses
 
-  If no ancestor fragment with an `[up-time]` attribute exists, `undefined` is returned.
+  @param {boolean|Function(up.Response): boolean} [config.autoRevalidate]
+    Whether to reload a fragment after it was rendered from a cached response with `{ revalidate: 'auto' }`.
 
-  When the fragment is reloaded,
-  its modification time is sent as an `If-Modified-Since` request header. The server may check the header and decide to [skip rendering](/learn/conditional-requests).
+    By default Unpoly verifies cached responses that are older than `up.network.config.cacheExpireAge`:
 
-  @learn-ref conditional-requests
+    ```js
+    up.fragment.config.autoRevalidate = (response) => response.expired
+    ```
 
-  @function up.fragment.time
-  @param {Element} element
-  @return {Date|undefined}
-    The fragment's last modification time.
+    You can exempt server paths from being auto-revalidated like this:
 
-    Returns `undefined` if the fragment was rendered without a modification time.
-  @stable
-  */
-  function timeOf(element) {
-    let value = e.closestAttr(element, 'up-time')
-    if (value && value !== 'false') {
-      // We support both Unix timestamps (e.g. "1445412480")
-      // and RFC 1123 times (e.g. "Wed, 21 Oct 2015 07:28:00 GMT").
-      if (/^\d+$/.test(value)) {
-       value = Number(value) * 1000
-      }
-      return new Date(value)
-    }
-  }
+    ```js
+    up.fragment.config.autoRevalidate = (response) => response.expired && response.url != '/dashboard'
+    ```
 
-  /*-
-  Sets the time when the fragment's underlying data was last changed.
-
-  When the fragment is reloaded,
-  its known modification time is sent as an `If-Modified-Since` request header.
-  The server may check the header and decide to [skip rendering](/learn/conditional-requests).
-
-  @learn-ref conditional-requests
-
-  ### How `[up-time]` attributes are set
-
-  Unpoly will automatically set an `[up-time]` attribute when a fragment was rendered
-  from a response with a `Last-Modified` header. When a fragment was rendered without such a header,
-  Unpoly will set `[up-time=false]` to indicate that its modification time is unknown.
-
-  A large response may contain multiple fragments that are later reloaded individually
-  and should each have their own modification time. In this case the server may also render multiple
-  fragments with each their own `[up-time]` attribute.
-  See [Individual versions per fragment](/learn/conditional-requests#fragment-versions) for an example.
-
-  @selector [up-time]
-  @param {string} up-time
-    The time when the element's underlying data was last changed.
-
-    The value can either be a Unix timestamp (e.g. `"1445412480"`)
-    or an [RFC 1123](https://www.rfc-editor.org/rfc/rfc1123) time (e.g. `Wed, 21 Oct 2015 07:28:00 GMT`).
-
-    You can also set the value to `"false"` to prevent a `If-Modified-Since` request header
-    when reloading this fragment.
-  @stable
-  */
-
-  /*-
-  Returns the [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) of the content in the given element.
-
-  The returned ETag corresponds to the [`ETag` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag)
-  in the response that rendered the fragment. Alternatively the `[up-etag]` attribute of the element
-  or an ancestor is used.
-
-  If no ancestor fragment with an `[up-etag]` attribute exists, `undefined` is returned.
-
-  When the fragment is reloaded,
-  its ETag is sent as an `If-None-Match` request header. The server may check the header and decide to [skip rendering](/learn/conditional-requests).
-
-  @learn-ref conditional-requests
-
-  @function up.fragment.etag
-  @param {Element} element
-  @return {string|undefined}
-    The fragment's ETag.
-
-    Returns `undefined` if the fragment was rendered without an ETag.
-  @stable
-  */
-  function etagOf(element) {
-    let value = e.closestAttr(element, 'up-etag')
-    if (value && value !== 'false') {
-      return value
-    }
-  }
-
-  /*-
-  Sets an [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) for the fragment's underlying data.
-
-  ETags can be used to skip unnecessary rendering of unchanged content.
-  This is useful for [reloading](/api/up.reload), [cache revalidation](/learn/caching#revalidation) and [polling](/api/up-poll).
-
-  @learn-ref conditional-requests
-
-  ### How `[up-etag]` attributes are set
-
-  Unpoly will automatically set an `[up-etag]` attribute when a fragment was rendered
-  from a response with a `ETag` header. When a fragment was rendered without such a header,
-  Unpoly will set `[up-etag=false]` to indicate that its ETag is unknown.
-
-  A large response may contain multiple fragments that are later reloaded individually
-  and should each have their own ETag. In this case the server may also render multiple
-  fragments with each their own `[up-etag]` attribute.
-  See [Individual versions per fragment](/learn/conditional-requests#fragment-versions) for an example.
-
-  @selector [up-etag]
-  @param {string} up-etag
-    An ETag for the element's underlying data.
-
-    You can also set the value to `"false"` to prevent a `If-None-Match` request header
-    when reloading this fragment.
-  @stable
-  */
-
-  /*-
-  When Unpoly inserts a fragment, the `[up-source]` attribute is automatically set
-  to the URL from which the fragment's HTML was loaded.
-
-  When an element is [reloaded](/api/up.reload) or [polled](/api/up-poll),
-  Unpoly will request the URL from the closest `[up-source]` attribute.
-
-  The `[up-source]` attribute is only set for `GET` requests.
-
-  @learn-ref polling#source
-
-  ## Using an explicit source URL
-
-  To indicate a different source URL for a fragment (and its descendants),
-  manually set `[up-source]` attribute:
-
-  ```html
-  <div class="unread-count" up-poll up-source="/unread-count"> <!-- mark: up-source="/unread-count" -->
-    2 new messages
-  </div>
-  ```
-
-  When such an `[up-source]` attribute is explicitly set in the HTML, Unpoly will not overwrite
-  it on insertion.
-
-  ## Accessing the source URL from JavaScript
-
-  To retrieve the source URL from JavaScript, use `up.fragment.source()`.
-
-  @selector [up-source]
-  @param {string} up-source
-    The URL from which this element and its descendants were initially requested.
-  @stable
-  */
-
-  /*-
-  Replaces elements on the current page with matching elements from a server response or HTML string.
-
-  ## Choosing which fragment to update
-
-  The current and new elements must both match the same [target selector](/learn/targeting-fragments).
-  The selector is either given as `{ target }` option,
-  or a [main target](/api/up-main) is used as default.
-
-  Let's say your current HTML looks like this:
-
-  ```html
-  <div class="one">old one</div>
-  <div class="two">old two</div>
-  ```
-
-  We now replace the second `<div>` by [targeting](/learn/targeting-fragments) its CSS class:
-
-  ```js
-  up.render({ target: '.two', url: '/new' })
-  ```
-
-  The server renders a response for `/new`:
-
-  ```html
-  <div class="one">new one</div>
-  <div class="two">new two</div>
-  ```
-
-  Unpoly looks for the selector `.two` in the response and places it
-  in the current page. The current page now looks like this:
-
-  ```html
-  <div class="one">old one</div>
-  <div class="two">new two</div>
-  ```
-
-  Note how only `.two` has changed. The update for `.one` was
-  discarded, since it didn't match the selector.
-
-  See [targeting fragments](/learn/targeting-fragments) for many examples for how you can target content.
-
-  ## Passing the new fragment
-
-  The new fragment content can be passed as one of the following options:
-
-  @include providing-html-table
-
-  See [providing HTML to render](/learn/providing-html) for more details and examples.
-
-  ## Enabling side effects
-
-  This function has many options to enable scrolling, focus, request cancellation and other side
-  effects. These options are all disabled by default and must be opted into one-by-one.
-
-  To enable defaults that a user would expect for navigation (like clicking a link),
-  pass [`{ navigate: true }`](#options.navigate) or use `up.navigate()` instead.
-
-  ## Hooking into the render process
-
-  Your code may hook into specific stages of the rendering process. This allows you to modify the rendered result or handle error cases.
-
-  See [render hooks](/learn/render-lifecycle) for details.
-
-  ## Concurrency
-
-  Unfinished requests [targeting](/learn/targeting-fragments) the updated fragment or its descendants are [aborted](/learn/aborting-requests).
-  You may control this behavior using the [`{ abort }`](#options.abort) option.
-
-  @function up.render
-
-  @section Targeting
-    @param {string|Element|jQuery|Array<string>} [target]
-      The [target selector](/learn/targeting-fragments) to update.
-
-      Instead of passing the target as the first argument, you may also pass it as
-      a `{ target }` option. See [`{ target }`](#options.target) for details.
-
-    @mix up.render/targeting
-
-  @section Navigation
-    @mix up.render/navigation
-
-  @section Request
-    @mix up.render/request
-
-  @section Caching
-    @mix up.render/caching
-
-  @section Local content
-    @mix up.render/local-content
-
-  @section Layer
-    @mix up.render/layer
-
-  @section History
-    @mix up.render/history
-
-  @section Animation
-    @mix up.render/motion
-
-  @section Scrolling
-    @mix up.render/scrolling
-
-  @section Focus
-    @mix up.render/focus
-
-  @section Loading state
-    @mix up.render/loading-state
-
-  @section Client state
-    @mix up.render/client-state
-
-  @section Lifecycle hooks
-    @mix up.render/lifecycle-hooks
-
-  @return {up.RenderJob}
-    A promise that fulfills with an `up.RenderResult` once the page has been updated.
-
-    The promise rejects when one of the following conditions occur:
-
-    - the render pass was [aborted](/learn/aborting-requests)
-    - the server sends an [error status](/learn/error-responses)
-    - there is a [network issue](/learn/network-issues)
-    - [targets](/learn/targeting-fragments) could not be matched
-
-    See [Render lifecycle hooks](/learn/render-lifecycle) for more information about handling
-    errors, or running code after rendering.
-
-  @stable
-  @signature
-  */
-  const render = up.mockable((...args) => {
-    let options = parseTargetAndOptions(args)
-    return new up.RenderJob(options).execute()
-  })
-
-  /*-
-  [Navigates](/learn/navigation-defaults) to the given URL by updating a major fragment in the current page.
-
-  `up.navigate()` will mimic a click on a vanilla `<a href>` link to satisfy user expectations
-  regarding scrolling, focus, request cancellation and [many other side effects](/learn/navigation-defaults).
-  To update a fragment without side effects, use `up.render()`.
-
-  Instead of calling `up.navigate()` you may also call `up.render({ navigate: true })`.
-
-  @function up.navigate
-
-  @section Targeting
-    @param {string|Element|jQuery} [target]
-      The [target selector](/learn/targeting-fragments) to update.
-
-      If omitted a [main target](/api/main) will be rendered.
-
-      You can also pass a DOM element or jQuery element here, in which case a selector
-      will be [derived from the element attributes](/learn/target-derivation). The given element
-      will also be set as the `{ origin }` option.
-
-      Instead of passing the target as the first argument, you may also pass it as
-      [`{ target }` option](/api/up.render#options.target).
-
-    @mix up.render/targeting
-
-  @section Request
-    @mix up.render/request
-      @param options.url
-        The URL to navigate to.
-
-  @section Caching
-    @mix up.render/caching
-
-  @section Local content
-    @mix up.render/local-content
-
-  @section Layer
-    @mix up.render/layer
-
-  @section History
-    @mix up.render/history
-
-  @section Animation
-    @mix up.render/motion
-
-  @section Scrolling
-    @mix up.render/scrolling
-
-  @section Focus
-    @mix up.render/focus
-
-  @section Loading state
-    @mix up.render/loading-state
-
-  @section Client state
-    @mix up.render/client-state
-
-  @section Lifecycle hooks
-    @mix up.render/lifecycle-hooks
-
-  @return
-    @like up.render
-  @stable
-  */
-  const navigate = up.mockable((...args) => {
-    const options = parseTargetAndOptions(args)
-    return render({ ...options, navigate: true })
-  })
-
-  /*-
-  This event is [emitted](/api/up.emit) after the server response was loaded, but before
-  the HTML is used to [change a fragment](/api/up.render).
-
-  This gives you a chance to inspect the response or DOM state right before a fragment would be inserted.
-  You may then choose to [change render options](#event.renderOptions) or [abort](#event.preventDefault)
-  the render pass to do something else instead.
-
-  The event is emitted on the targeted layer.
-  When [opening an overlay](/learn/opening-overlays), the event is emitted on the parent layer
-  of the new overlay.
-
-  @learn-ref render-lifecycle
-
-  ### Example: Making a full page load instead
-
-  Event listeners may call `event.preventDefault()` on an `up:fragment:loaded` event
-  to prevent any changes to the DOM and browser history.
-
-  This is useful to detect an entirely different page layout
-  (like a maintenance page or fatal server error)
-  which should be opened with a full page load:
-
-  ```js
-  up.on('up:fragment:loaded', (event) => {
-    let isMaintenancePage = event.response.header('X-Maintenance')
-
-    if (isMaintenancePage) {
-      // Prevent the fragment update and don't update browser history
-      event.preventDefault() // mark-line
-
-      // Make a full page load for the same request.
-      event.request.loadPage() // mark-line
-    }
-  })
-  ```
-
-  ### Example: Changing render options {#changing-render-options}
-
-  Instead of preventing the update, listeners may also access the `event.renderOptions` object
-  to mutate options to the `up.render()` call that will process the server response:
-
-  ```js
-  up.on('up:fragment:loaded', async function(event) {
-    // If we see an X-Course-Completed header, render the main target
-    if (event.response.header('X-Course-Completed')) {
-      event.renderOptions.target = ':main' // mark-line
-    }
-  })
-  ```
-
-  ### Example: Do something else, then retry
-
-  You may retry a prevented fragment update later, by calling `up.render(event.renderOptions)`:
-
-  ```js
-  up.on('up:fragment:loaded', async function(event) {
-    // When we couldn't access a page since we're signed out, the server sends a header
-    if (event.response.header('X-Session-Missing')) {
-      // Don't render the error message
-      event.preventDefault() // mark-line
-
-      // Sign in using a modal overlay
-      await up.layer.ask({ url: '/sign_in', acceptEvent: 'app:session:created' })
-
-      // Now that we're signed in, retry the original request
-      up.render(event.renderOptions) // mark-line
-    }
-  })
-  ```
-
-  ### Example: Discarding a revalidation response
-
-  When rendering [cached](/learn/caching) content that is too old, Unpoly automatically reloads the fragment
-  to ensure that the user never sees expired content. This process is called [cache revalidation](/learn/caching#revalidation).
-
-  To prevent the insertion of [revalidated](/learn/caching#revalidation) content *after* the
-  server responded you may prevent the `up:fragment:loaded` event with an `{ revalidating: true }` property.
-
-  The following would skip rendering a revalidation response if it has the same `X-Version` header as
-  the original, stale response:
-
-  ```js
-  up.on('up:fragment:loaded', function(event) {
-    if (event.revalidating) {
-      let newVersion = event.response.header('X-Version')
-      let oldVersion = event.expiredResponse.header('X-Version')
-      if (newVersion === oldVersion) {
-        event.skip()
-      }
-    }
-  })
-  ```
-
-  Also see [skipping a loaded response](/learn/render-lifecycle#skipping-responses).
-
-  ### Cases that trigger the event {#cases}
-
-  The `up:fragment:loaded` event is emitted when we have an HTML response from the server
-  *and* we are about to render elements:
-
-  | Case                                                            | `up:fragment:loaded` emitted? |
-  |-----------------------------------------------------------------|-------------------------------|
-  | Server responds with 200 OK                                     | ✔️ yes                           |
-  | Server responds with an [error code](/learn/error-responses)         | ✔️ yes                           |
-  | Rendering from [cache](/learn/caching)                                | ✔️ yes                           |
-  | Rendering a [string of HTML](/learn/providing-html#string)            | ❌ no                            |
-  | Server [renders nothing](/learn/conditional-requests#rendering-nothing) | ❌ no                            |
-  | [Fatal network error](/learn/network-issues#disconnects)              | ❌ no                            |
-  | [Preloading](/learn/preloading)                                       | ❌ no                            |
-
-  @event up:fragment:loaded
-
-  @param event.preventDefault()
-    Aborts this render pass without changes.
-
-    Programmatic callers will reject with an `up.Aborted` error.
-
-  @param event.skip()
-    Finishes this render pass without changes,
+  @param {Function(Object): boolean} [config.skipResponse]
+    When to finish a render pass without changes,
     usually to [not re-insert identical content](/learn/render-lifecycle#skipping-responses).
 
-    Programmatic callers will fulfill with an [empty](/api/up.RenderResult.prototype.none) `up.RenderResult`.
+    By default Unpoly skips the following responses:
 
-    To configure global rules for responses that should be skipped, you may
-    also use `up.fragment.config.skipResponse` instead of registering an `up:fragment:loaded` listener.
+    - Responses without text in their body.
+      Such responses occur when the server answers a [conditional request](/learn/conditional-requests)
+      with `304 Not Modified`, or responds with `204 No Content`.
+    - When [revalidating](/learn/caching#revalidation), if the expired response and fresh response
+      have the exact same text.
 
-  @param {up.Request} event.request
-    The original request to the server.
+    The configured function accepts an object with the same properties
+    as an `up:fragment:loaded` event. You can provide a different function to use your own logic.
+    For example, the following would never skip a response by default:
 
-  @param {up.Response} event.response
-    The response received from the server.
+    ```js
+    up.fragment.config.skipResponse = ({ response, expiredResponse }) => false
+    ```
 
-  @param {boolean} event.revalidating
-     Whether responding to a [cache revalidation](/learn/caching#revalidation) request.
-     @experimental
+    You may also skip responses by calling `event.skip()` on an `up:fragment:loaded` event.
 
-  @param {up.Response|undefined} event.expiredResponse
-     When [revalidating](/learn/caching#revalidation), this property is set to the expired content
-     that is being reloaded.
+@param {Function(up.Response): boolean} [config.renderableResponse]
+  Whether the given response has a [content-type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type)
+  that is considered renderable.
 
-     You may compare the `{ response }` and `{ expiredResponse }` properties to prevent
-     [re-insertion of identical content](/learn/render-lifecycle#skipping-responses).
+  By default Unpoly renders responses with an [HTML content-type](/api/up.Response.prototype.isHTML).
+  Trying to render responses with a different type will throw an error, even if the response body contains HTML markup.
 
-     Also see `up.fragment.config.skipResponse`.
+  Restricting content types is a security precaution. It protects in a hypothetical scenario where an attacker can both
+  upload a file *and* can use an existing XSS vulnerability to cause Unpoly to render that file. It doesn't
+  affect applications that reliably escape user input.
 
-     @experimental
-
-  @param {Element|undefined} event.origin
-    The link, input or form element that caused the fragment update.
-
-    If no origin element is known, this property is left `undefined`.
-
-  @param {Object} event.renderOptions
-    Options for the `up.render()` call that will process the server response.
-
-    Listeners may inspect or [modify](#changing-render-options) these options.
-  @stable
-  */
-
-  /*-
-  This event is emitted when the device loses its network connection while [rendering](/api/up.render) content.
-
-  Listeners may decide how to handle the connection loss. E.g. you may choose to display an error, or to offer a button that retries the failed request.
-  See [handling connection loss](/learn/network-issues#disconnects) for more details and examples.
-
-  The event is emitted on the targeted layer.
-
-  @learn-ref network-issues#disconnects
-
-  ## Example
-
-  This handler will ask the user if they want to retry a failed fragment update:
+  To render *any* response regardless of content-type, configure a function that always returns `true`:
 
   ```js
-  up.on('up:fragment:offline', function(event) {
-    if (confirm('You are offline. Retry?')) event.retry()
-  })
+  up.fragment.config.renderableResponse = (response) => true
   ```
 
-  ### Cases that trigger the event {#cases}
-
-  The `up:fragment:offline` event is emitted when we have a fatal connectivity issue
-  *and* we were about to render elements:
-
-  | Case                                                            | `up:fragment:offline` emitted? |
-  |-----------------------------------------------------------------|--------------------------------|
-  | [Fatal network error](/learn/network-issues#disconnects)              | ✔️ yes                        |
-  | Server responds with an [error code](/learn/error-responses)         | ❌ no                         |
-  | Server [renders nothing](/learn/conditional-requests#rendering-nothing) | ❌ no                         |
-  | [Preloading](/learn/preloading) fails                                 | ❌ no                         |
-
-
-  @event up:fragment:offline
-
-  @param {up.Request} event.request
-    The original request to the server.
-
-  @param {Object} event.renderOptions
-    Options for the `up.render()` call that has caused the failed request.
-
-  @param {Function(Object): Promise<up.RenderResult>} event.retry()
-    Retry the render pass with the same options.
-
-    You may pass an object to override individual properties from the original render options.
-
-    Retrying causes a second render pass with its own async `up.RenderResult`.
-    The promise from the original render pass has already been rejected when `up:fragment:offline` is emitted.
-
-  @param {Element} [event.origin]
-    The link or form element that caused the fragment update.
-
-  @stable
-  */
-
-  /*-
-  Elements with an `[up-keep]` attribute will be kept when rendering.
-
-  @learn-ref keeping-elements
-
-  ## Basic example
-
-  A common use case is to keep the playback state of media elements:
-
-  ```html
-  <article>
-    <p>Content</p>
-    <audio id="player" up-keep src="song.mp3"></audio>
-  </article>
-  ```
-
-  When [targeting](/learn/targeting-fragments) the `<article>` fragment, the `<audio>` element and
-  its playback state will be the same before and after the update. All other elements (like the `<p>`)
-  will be updated with new content.
-
-  See [Keeping elements](/learn/keeping-elements) for elaborate examples.
-
-  ## Limitations
-
-  - The `[up-keep]` attribute is only supported for elements within the `<body>`.
-  - If an `<audio up-keep>` or `<video up-keep>` element is a *direct* child of the `<body>`,
-    it will lose its playback state during a fragment update.
-    To keep its playback state in all browsers,
-    insert a container element between the `<body>` and the media element.
-
-
-  @selector [up-keep]
-  @param [up-keep='true']
-    How long to keep the element.
-
-    When set to `'true'` (the default), the element is kept as long as its
-    [derived target](/learn/target-derivation) can be correlated in both the old and new content.
-
-    When set to `'same-html'`, the element is kept as long as its outer HTML
-    does not change between versions. See [Keeping an element until its HTML changes](/learn/keeping-elements#same-html).
-
-    When set to `'same-data'`, the element is kept as long as its [data](/learn/data)
-    does not change between versions. See [Keeping an element until its data changes](/learn/keeping-elements#same-data).
-
-    When set to `'false'` the element is never kept. A new element with `[up-keep="false"]`
-    will always replace an existing element, even if that existing element has `[up-keep="true"]`.
-    See [Forcing an update](/learn/keeping-elements#forcing-updates).
-  @param [up-on-keep]
-    Code to run before an existing element is kept during a page update.
-
-    Calling `event.preventDefault()` will prevent the element from being kept.
-    It will then be swapped with `newFragment`.
-
-    The code may use the variables `event` (of type `up:fragment:keep`),
-    `this` (the old fragment), `newFragment` and `newData`.
-  @stable
-  @signature
-  */
-
-  function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }) {
-    const log = ['Keeping fragment %o', oldElement]
-    const callback = up.script.callbackAttr(oldElement, 'up-on-keep', { expandObject: ['newFragment', 'newData'] })
-    return up.emit(oldElement, 'up:fragment:keep', { log, callback, newFragment, newData, renderOptions })
-  }
-
-  /*-
-  This event is emitted before an existing element is [kept](/learn/keeping-elements)
-  during a render pass.
-
-  Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
-  to prevent the element from being kept. If the event is prevented, the element
-  will be replaced with a fragment from the response.
-
-  @learn-ref keeping-elements
-
-  ### Example
-
-  The following would only keep an `<audio up-keep>` element as long as it plays
-  the same song (as identified by the tag's `src` attribute):
-
-  ```js
-  up.on('up:fragment:keep', 'audio', function(event, element) {
-    if (element.getAttribute('src') !== event.newFragment.getAttribute('src')) {
-      // Preventing the event forces an update
-      event.preventDefault()
-    }
-  })
-  ```
-
-  You may also define an `up:fragment:keep` listener in HTML using an [`[up-on-keep]`](/api/up-keep#up-on-keep) attribute.
-
-  @event up:fragment:keep
-  @param event.preventDefault()
-    Prevents the fragment from being kept.
-
-    The fragment will be replaced with `event.newFragment`.
-  @param {Element} event.target
-    The fragment that will be kept.
-  @param {Element} event.newFragment
-    The new element from the response.
-  @param {Object} event.newData
-    The [data](/learn/data) attached to the new element.
-  @param {Object} event.renderOptions
-    An object with [render options](/api/up.render#parameters) for the current render pass.
-  @stable
-  */
-
-  /*-
-  The `up:fragment:kept` event is emitted *after* an existing element has been [kept](/learn/keeping-elements) during a render pass.
-
-  All [keep conditions](/learn/keeping-elements#conditions) have already been evaluated.
-  The keeping can no longer be prevented. For this, use `up:fragment:keep` instead.
-
-  @learn-ref keeping-elements
-
-  @event up:fragment:kept
-  @param {Element} event.target
-    The fragment that has been kept.
-  @param {Element} event.newFragment
-    The response fragment that has been discarded.
-  @param {Object} event.newData
-    The [data](/learn/data) attached to the discarded element.
   @experimental
-  */
 
-  function emitFragmentKept({ oldElement, newElement: newFragment, newData }) {
-    return up.emit(oldElement, 'up:fragment:kept', { log: false, newFragment, newData })
+@stable
+*/
+export const config = new Config('up.fragment.config', () => ({
+  badTargetClasses: [/^up-/],
+
+  strongTargetDerivers: STRONG_TARGET_DERIVERS,
+
+  targetDerivers: [
+    ...STRONG_TARGET_DERIVERS,
+    'main',
+    '[up-main]',
+    upTagName,
+    'link[rel][type]',
+    'link[rel=preload][href]',
+    'link[rel=preconnect][href]',
+    'link[rel=prefetch][href]',
+    'link[rel]',
+    'meta[property]',
+    '*[name]',
+    'form[action]',
+    'a[href]',
+    '[class]',
+    '[up-flashes]',
+    'form',
+  ],
+
+  verifyDerivedTarget: true,
+
+  renderOptions: {
+    hungry: true,
+    keep: true,
+    saveScroll: true,
+    saveFocus: true,
+    focusVisible: 'auto',
+    abort: 'target',
+    failOptions: true,
+    feedback: true,
+  },
+
+  // These defaults will be set to both success and fail options
+  // if { navigate: true } is given.
+  navigateOptions: {
+    cache: 'auto',
+    revalidate: 'auto',
+    fallback: true,
+    focus: 'auto',
+    scroll: 'auto',
+    history: 'auto',
+    peel: 'dismiss',
+  },
+
+  reloadOptions: {
+    target: ':main',
+    scroll: 'keep',
+    focus: 'keep',
+  },
+
+  match: 'region',
+  autoHistoryTargets: [':main'],
+  autoFocus: ['hash', 'autofocus', 'main-if-main', 'keep', 'target-if-lost'],
+  autoScroll: ['hash', 'layer-if-main'],
+  autoRevalidate: (response) => response.expired,
+  skipResponse: defaultSkipResponse,
+  renderableResponse: (response) => response.isHTML(),
+  normalizeKeepHTML: defaultNormalizeKeepHTML
+}))
+
+// Users who are not using layers will prefer settings default targets
+// as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
+defineDelegates(config, ['mainTargets'], () => up.layer.config.any)
+
+
+function defaultSkipResponse({ response, expiredResponse }) {
+  return !response.text || response.text === expiredResponse?.text
+}
+
+/*-
+Returns the URL from which the given element was loaded.
+
+If the given element was never directly updated, but part of a larger fragment update,
+the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) known source of an ancestor element is returned.
+
+## Example
+
+In the HTML below, the element `#one` was loaded from the URL `/foo`:
+
+```html
+<div id="one" up-source="/foo">
+<div id="two">...</div>
+</div>
+```
+
+We can now ask for the source of an element:
+
+```javascript
+up.fragment.source('#two') // returns '/foo'
+```
+
+@function up.fragment.source
+@param {Element|string} element
+  The element or CSS selector for which to look up the source URL.
+@return {string|undefined}
+  The URL from which the element was loaded.
+@stable
+*/
+export function sourceOf(element, options = {}) {
+  element = getSmart(element, options)
+  return closestAttr(element, 'up-source')
+}
+
+export function normalizeSource(source) {
+  // Don't use u.matchableURL() here. We need to keep the trailing slash here,
+  // to support backends that care about trailing slashes.
+  return normalizeURL(source, { hash: false })
+}
+
+/*-
+Returns the last modification time of the content in the given element.
+
+The last modification time corresponds to the `Last-Modified` header in the response that
+rendered the fragment. Alternatively the `[up-time]` attribute of the element or an ancestor is used.
+
+If no ancestor fragment with an `[up-time]` attribute exists, `undefined` is returned.
+
+When the fragment is reloaded,
+its modification time is sent as an `If-Modified-Since` request header. The server may check the header and decide to [skip rendering](/learn/conditional-requests).
+
+@learn-ref conditional-requests
+
+@function up.fragment.time
+@param {Element} element
+@return {Date|undefined}
+  The fragment's last modification time.
+
+  Returns `undefined` if the fragment was rendered without a modification time.
+@stable
+*/
+export function timeOf(element) {
+  let value = closestAttr(element, 'up-time')
+  if (value && value !== 'false') {
+    // We support both Unix timestamps (e.g. "1445412480")
+    // and RFC 1123 times (e.g. "Wed, 21 Oct 2015 07:28:00 GMT").
+    if (/^\d+$/.test(value)) {
+     value = Number(value) * 1000
+    }
+    return new Date(value)
+  }
+}
+
+/*-
+Sets the time when the fragment's underlying data was last changed.
+
+When the fragment is reloaded,
+its known modification time is sent as an `If-Modified-Since` request header.
+The server may check the header and decide to [skip rendering](/learn/conditional-requests).
+
+@learn-ref conditional-requests
+
+### How `[up-time]` attributes are set
+
+Unpoly will automatically set an `[up-time]` attribute when a fragment was rendered
+from a response with a `Last-Modified` header. When a fragment was rendered without such a header,
+Unpoly will set `[up-time=false]` to indicate that its modification time is unknown.
+
+A large response may contain multiple fragments that are later reloaded individually
+and should each have their own modification time. In this case the server may also render multiple
+fragments with each their own `[up-time]` attribute.
+See [Individual versions per fragment](/learn/conditional-requests#fragment-versions) for an example.
+
+@selector [up-time]
+@param {string} up-time
+  The time when the element's underlying data was last changed.
+
+  The value can either be a Unix timestamp (e.g. `"1445412480"`)
+  or an [RFC 1123](https://www.rfc-editor.org/rfc/rfc1123) time (e.g. `Wed, 21 Oct 2015 07:28:00 GMT`).
+
+  You can also set the value to `"false"` to prevent a `If-Modified-Since` request header
+  when reloading this fragment.
+@stable
+*/
+
+/*-
+Returns the [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) of the content in the given element.
+
+The returned ETag corresponds to the [`ETag` header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag)
+in the response that rendered the fragment. Alternatively the `[up-etag]` attribute of the element
+or an ancestor is used.
+
+If no ancestor fragment with an `[up-etag]` attribute exists, `undefined` is returned.
+
+When the fragment is reloaded,
+its ETag is sent as an `If-None-Match` request header. The server may check the header and decide to [skip rendering](/learn/conditional-requests).
+
+@learn-ref conditional-requests
+
+@function up.fragment.etag
+@param {Element} element
+@return {string|undefined}
+  The fragment's ETag.
+
+  Returns `undefined` if the fragment was rendered without an ETag.
+@stable
+*/
+export function etagOf(element) {
+  let value = closestAttr(element, 'up-etag')
+  if (value && value !== 'false') {
+    return value
+  }
+}
+
+/*-
+Sets an [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) for the fragment's underlying data.
+
+ETags can be used to skip unnecessary rendering of unchanged content.
+This is useful for [reloading](/api/up.reload), [cache revalidation](/learn/caching#revalidation) and [polling](/api/up-poll).
+
+@learn-ref conditional-requests
+
+### How `[up-etag]` attributes are set
+
+Unpoly will automatically set an `[up-etag]` attribute when a fragment was rendered
+from a response with a `ETag` header. When a fragment was rendered without such a header,
+Unpoly will set `[up-etag=false]` to indicate that its ETag is unknown.
+
+A large response may contain multiple fragments that are later reloaded individually
+and should each have their own ETag. In this case the server may also render multiple
+fragments with each their own `[up-etag]` attribute.
+See [Individual versions per fragment](/learn/conditional-requests#fragment-versions) for an example.
+
+@selector [up-etag]
+@param {string} up-etag
+  An ETag for the element's underlying data.
+
+  You can also set the value to `"false"` to prevent a `If-None-Match` request header
+  when reloading this fragment.
+@stable
+*/
+
+/*-
+When Unpoly inserts a fragment, the `[up-source]` attribute is automatically set
+to the URL from which the fragment's HTML was loaded.
+
+When an element is [reloaded](/api/up.reload) or [polled](/api/up-poll),
+Unpoly will request the URL from the closest `[up-source]` attribute.
+
+The `[up-source]` attribute is only set for `GET` requests.
+
+@learn-ref polling#source
+
+## Using an explicit source URL
+
+To indicate a different source URL for a fragment (and its descendants),
+manually set `[up-source]` attribute:
+
+```html
+<div class="unread-count" up-poll up-source="/unread-count"> <!-- mark: up-source="/unread-count" -->
+  2 new messages
+</div>
+```
+
+When such an `[up-source]` attribute is explicitly set in the HTML, Unpoly will not overwrite
+it on insertion.
+
+## Accessing the source URL from JavaScript
+
+To retrieve the source URL from JavaScript, use `up.fragment.source()`.
+
+@selector [up-source]
+@param {string} up-source
+  The URL from which this element and its descendants were initially requested.
+@stable
+*/
+
+/*-
+Replaces elements on the current page with matching elements from a server response or HTML string.
+
+## Choosing which fragment to update
+
+The current and new elements must both match the same [target selector](/learn/targeting-fragments).
+The selector is either given as `{ target }` option,
+or a [main target](/api/up-main) is used as default.
+
+Let's say your current HTML looks like this:
+
+```html
+<div class="one">old one</div>
+<div class="two">old two</div>
+```
+
+We now replace the second `<div>` by [targeting](/learn/targeting-fragments) its CSS class:
+
+```js
+up.render({ target: '.two', url: '/new' })
+```
+
+The server renders a response for `/new`:
+
+```html
+<div class="one">new one</div>
+<div class="two">new two</div>
+```
+
+Unpoly looks for the selector `.two` in the response and places it
+in the current page. The current page now looks like this:
+
+```html
+<div class="one">old one</div>
+<div class="two">new two</div>
+```
+
+Note how only `.two` has changed. The update for `.one` was
+discarded, since it didn't match the selector.
+
+See [targeting fragments](/learn/targeting-fragments) for many examples for how you can target content.
+
+## Passing the new fragment
+
+The new fragment content can be passed as one of the following options:
+
+@include providing-html-table
+
+See [providing HTML to render](/learn/providing-html) for more details and examples.
+
+## Enabling side effects
+
+This function has many options to enable scrolling, focus, request cancellation and other side
+effects. These options are all disabled by default and must be opted into one-by-one.
+
+To enable defaults that a user would expect for navigation (like clicking a link),
+pass [`{ navigate: true }`](#options.navigate) or use `up.navigate()` instead.
+
+## Hooking into the render process
+
+Your code may hook into specific stages of the rendering process. This allows you to modify the rendered result or handle error cases.
+
+See [render hooks](/learn/render-lifecycle) for details.
+
+## Concurrency
+
+Unfinished requests [targeting](/learn/targeting-fragments) the updated fragment or its descendants are [aborted](/learn/aborting-requests).
+You may control this behavior using the [`{ abort }`](#options.abort) option.
+
+@function up.render
+
+@section Targeting
+  @param {string|Element|jQuery|Array<string>} [target]
+    The [target selector](/learn/targeting-fragments) to update.
+
+    Instead of passing the target as the first argument, you may also pass it as
+    a `{ target }` option. See [`{ target }`](#options.target) for details.
+
+  @mix up.render/targeting
+
+@section Navigation
+  @mix up.render/navigation
+
+@section Request
+  @mix up.render/request
+
+@section Caching
+  @mix up.render/caching
+
+@section Local content
+  @mix up.render/local-content
+
+@section Layer
+  @mix up.render/layer
+
+@section History
+  @mix up.render/history
+
+@section Animation
+  @mix up.render/motion
+
+@section Scrolling
+  @mix up.render/scrolling
+
+@section Focus
+  @mix up.render/focus
+
+@section Loading state
+  @mix up.render/loading-state
+
+@section Client state
+  @mix up.render/client-state
+
+@section Lifecycle hooks
+  @mix up.render/lifecycle-hooks
+
+@return {up.RenderJob}
+  A promise that fulfills with an `up.RenderResult` once the page has been updated.
+
+  The promise rejects when one of the following conditions occur:
+
+  - the render pass was [aborted](/learn/aborting-requests)
+  - the server sends an [error status](/learn/error-responses)
+  - there is a [network issue](/learn/network-issues)
+  - [targets](/learn/targeting-fragments) could not be matched
+
+  See [Render lifecycle hooks](/learn/render-lifecycle) for more information about handling
+  errors, or running code after rendering.
+
+@stable
+@signature
+*/
+export const render = mockable((...args) => {
+  let options = parseTargetAndOptions(args)
+  return new RenderJob(options).execute()
+})
+
+/*-
+[Navigates](/learn/navigation-defaults) to the given URL by updating a major fragment in the current page.
+
+`up.navigate()` will mimic a click on a vanilla `<a href>` link to satisfy user expectations
+regarding scrolling, focus, request cancellation and [many other side effects](/learn/navigation-defaults).
+To update a fragment without side effects, use `up.render()`.
+
+Instead of calling `up.navigate()` you may also call `up.render({ navigate: true })`.
+
+@function up.navigate
+
+@section Targeting
+  @param {string|Element|jQuery} [target]
+    The [target selector](/learn/targeting-fragments) to update.
+
+    If omitted a [main target](/api/main) will be rendered.
+
+    You can also pass a DOM element or jQuery element here, in which case a selector
+    will be [derived from the element attributes](/learn/target-derivation). The given element
+    will also be set as the `{ origin }` option.
+
+    Instead of passing the target as the first argument, you may also pass it as
+    [`{ target }` option](/api/up.render#options.target).
+
+  @mix up.render/targeting
+
+@section Request
+  @mix up.render/request
+    @param options.url
+      The URL to navigate to.
+
+@section Caching
+  @mix up.render/caching
+
+@section Local content
+  @mix up.render/local-content
+
+@section Layer
+  @mix up.render/layer
+
+@section History
+  @mix up.render/history
+
+@section Animation
+  @mix up.render/motion
+
+@section Scrolling
+  @mix up.render/scrolling
+
+@section Focus
+  @mix up.render/focus
+
+@section Loading state
+  @mix up.render/loading-state
+
+@section Client state
+  @mix up.render/client-state
+
+@section Lifecycle hooks
+  @mix up.render/lifecycle-hooks
+
+@return
+  @like up.render
+@stable
+*/
+export const navigate = mockable((...args) => {
+  const options = parseTargetAndOptions(args)
+  return render({ ...options, navigate: true })
+})
+
+/*-
+This event is [emitted](/api/up.emit) after the server response was loaded, but before
+the HTML is used to [change a fragment](/api/up.render).
+
+This gives you a chance to inspect the response or DOM state right before a fragment would be inserted.
+You may then choose to [change render options](#event.renderOptions) or [abort](#event.preventDefault)
+the render pass to do something else instead.
+
+The event is emitted on the targeted layer.
+When [opening an overlay](/learn/opening-overlays), the event is emitted on the parent layer
+of the new overlay.
+
+@learn-ref render-lifecycle
+
+### Example: Making a full page load instead
+
+Event listeners may call `event.preventDefault()` on an `up:fragment:loaded` event
+to prevent any changes to the DOM and browser history.
+
+This is useful to detect an entirely different page layout
+(like a maintenance page or fatal server error)
+which should be opened with a full page load:
+
+```js
+up.on('up:fragment:loaded', (event) => {
+  let isMaintenancePage = event.response.header('X-Maintenance')
+
+  if (isMaintenancePage) {
+    // Prevent the fragment update and don't update browser history
+    event.preventDefault() // mark-line
+
+    // Make a full page load for the same request.
+    event.request.loadPage() // mark-line
+  }
+})
+```
+
+### Example: Changing render options {#changing-render-options}
+
+Instead of preventing the update, listeners may also access the `event.renderOptions` object
+to mutate options to the `up.render()` call that will process the server response:
+
+```js
+up.on('up:fragment:loaded', async function(event) {
+  // If we see an X-Course-Completed header, render the main target
+  if (event.response.header('X-Course-Completed')) {
+    event.renderOptions.target = ':main' // mark-line
+  }
+})
+```
+
+### Example: Do something else, then retry
+
+You may retry a prevented fragment update later, by calling `up.render(event.renderOptions)`:
+
+```js
+up.on('up:fragment:loaded', async function(event) {
+  // When we couldn't access a page since we're signed out, the server sends a header
+  if (event.response.header('X-Session-Missing')) {
+    // Don't render the error message
+    event.preventDefault() // mark-line
+
+    // Sign in using a modal overlay
+    await up.layer.ask({ url: '/sign_in', acceptEvent: 'app:session:created' })
+
+    // Now that we're signed in, retry the original request
+    up.render(event.renderOptions) // mark-line
+  }
+})
+```
+
+### Example: Discarding a revalidation response
+
+When rendering [cached](/learn/caching) content that is too old, Unpoly automatically reloads the fragment
+to ensure that the user never sees expired content. This process is called [cache revalidation](/learn/caching#revalidation).
+
+To prevent the insertion of [revalidated](/learn/caching#revalidation) content *after* the
+server responded you may prevent the `up:fragment:loaded` event with an `{ revalidating: true }` property.
+
+The following would skip rendering a revalidation response if it has the same `X-Version` header as
+the original, stale response:
+
+```js
+up.on('up:fragment:loaded', function(event) {
+  if (event.revalidating) {
+    let newVersion = event.response.header('X-Version')
+    let oldVersion = event.expiredResponse.header('X-Version')
+    if (newVersion === oldVersion) {
+      event.skip()
+    }
+  }
+})
+```
+
+Also see [skipping a loaded response](/learn/render-lifecycle#skipping-responses).
+
+### Cases that trigger the event {#cases}
+
+The `up:fragment:loaded` event is emitted when we have an HTML response from the server
+*and* we are about to render elements:
+
+| Case                                                            | `up:fragment:loaded` emitted? |
+|-----------------------------------------------------------------|-------------------------------|
+| Server responds with 200 OK                                     | ✔️ yes                           |
+| Server responds with an [error code](/learn/error-responses)         | ✔️ yes                           |
+| Rendering from [cache](/learn/caching)                                | ✔️ yes                           |
+| Rendering a [string of HTML](/learn/providing-html#string)            | ❌ no                            |
+| Server [renders nothing](/learn/conditional-requests#rendering-nothing) | ❌ no                            |
+| [Fatal network error](/learn/network-issues#disconnects)              | ❌ no                            |
+| [Preloading](/learn/preloading)                                       | ❌ no                            |
+
+@event up:fragment:loaded
+
+@param event.preventDefault()
+  Aborts this render pass without changes.
+
+  Programmatic callers will reject with an `up.Aborted` error.
+
+@param event.skip()
+  Finishes this render pass without changes,
+  usually to [not re-insert identical content](/learn/render-lifecycle#skipping-responses).
+
+  Programmatic callers will fulfill with an [empty](/api/up.RenderResult.prototype.none) `up.RenderResult`.
+
+  To configure global rules for responses that should be skipped, you may
+  also use `up.fragment.config.skipResponse` instead of registering an `up:fragment:loaded` listener.
+
+@param {up.Request} event.request
+  The original request to the server.
+
+@param {up.Response} event.response
+  The response received from the server.
+
+@param {boolean} event.revalidating
+   Whether responding to a [cache revalidation](/learn/caching#revalidation) request.
+   @experimental
+
+@param {up.Response|undefined} event.expiredResponse
+   When [revalidating](/learn/caching#revalidation), this property is set to the expired content
+   that is being reloaded.
+
+   You may compare the `{ response }` and `{ expiredResponse }` properties to prevent
+   [re-insertion of identical content](/learn/render-lifecycle#skipping-responses).
+
+   Also see `up.fragment.config.skipResponse`.
+
+   @experimental
+
+@param {Element|undefined} event.origin
+  The link, input or form element that caused the fragment update.
+
+  If no origin element is known, this property is left `undefined`.
+
+@param {Object} event.renderOptions
+  Options for the `up.render()` call that will process the server response.
+
+  Listeners may inspect or [modify](#changing-render-options) these options.
+@stable
+*/
+
+/*-
+This event is emitted when the device loses its network connection while [rendering](/api/up.render) content.
+
+Listeners may decide how to handle the connection loss. E.g. you may choose to display an error, or to offer a button that retries the failed request.
+See [handling connection loss](/learn/network-issues#disconnects) for more details and examples.
+
+The event is emitted on the targeted layer.
+
+@learn-ref network-issues#disconnects
+
+## Example
+
+This handler will ask the user if they want to retry a failed fragment update:
+
+```js
+up.on('up:fragment:offline', function(event) {
+  if (confirm('You are offline. Retry?')) event.retry()
+})
+```
+
+### Cases that trigger the event {#cases}
+
+The `up:fragment:offline` event is emitted when we have a fatal connectivity issue
+*and* we were about to render elements:
+
+| Case                                                            | `up:fragment:offline` emitted? |
+|-----------------------------------------------------------------|--------------------------------|
+| [Fatal network error](/learn/network-issues#disconnects)              | ✔️ yes                        |
+| Server responds with an [error code](/learn/error-responses)         | ❌ no                         |
+| Server [renders nothing](/learn/conditional-requests#rendering-nothing) | ❌ no                         |
+| [Preloading](/learn/preloading) fails                                 | ❌ no                         |
+
+
+@event up:fragment:offline
+
+@param {up.Request} event.request
+  The original request to the server.
+
+@param {Object} event.renderOptions
+  Options for the `up.render()` call that has caused the failed request.
+
+@param {Function(Object): Promise<up.RenderResult>} event.retry()
+  Retry the render pass with the same options.
+
+  You may pass an object to override individual properties from the original render options.
+
+  Retrying causes a second render pass with its own async `up.RenderResult`.
+  The promise from the original render pass has already been rejected when `up:fragment:offline` is emitted.
+
+@param {Element} [event.origin]
+  The link or form element that caused the fragment update.
+
+@stable
+*/
+
+/*-
+Elements with an `[up-keep]` attribute will be kept when rendering.
+
+@learn-ref keeping-elements
+
+## Basic example
+
+A common use case is to keep the playback state of media elements:
+
+```html
+<article>
+  <p>Content</p>
+  <audio id="player" up-keep src="song.mp3"></audio>
+</article>
+```
+
+When [targeting](/learn/targeting-fragments) the `<article>` fragment, the `<audio>` element and
+its playback state will be the same before and after the update. All other elements (like the `<p>`)
+will be updated with new content.
+
+See [Keeping elements](/learn/keeping-elements) for elaborate examples.
+
+## Limitations
+
+- The `[up-keep]` attribute is only supported for elements within the `<body>`.
+- If an `<audio up-keep>` or `<video up-keep>` element is a *direct* child of the `<body>`,
+  it will lose its playback state during a fragment update.
+  To keep its playback state in all browsers,
+  insert a container element between the `<body>` and the media element.
+
+
+@selector [up-keep]
+@param [up-keep='true']
+  How long to keep the element.
+
+  When set to `'true'` (the default), the element is kept as long as its
+  [derived target](/learn/target-derivation) can be correlated in both the old and new content.
+
+  When set to `'same-html'`, the element is kept as long as its outer HTML
+  does not change between versions. See [Keeping an element until its HTML changes](/learn/keeping-elements#same-html).
+
+  When set to `'same-data'`, the element is kept as long as its [data](/learn/data)
+  does not change between versions. See [Keeping an element until its data changes](/learn/keeping-elements#same-data).
+
+  When set to `'false'` the element is never kept. A new element with `[up-keep="false"]`
+  will always replace an existing element, even if that existing element has `[up-keep="true"]`.
+  See [Forcing an update](/learn/keeping-elements#forcing-updates).
+@param [up-on-keep]
+  Code to run before an existing element is kept during a page update.
+
+  Calling `event.preventDefault()` will prevent the element from being kept.
+  It will then be swapped with `newFragment`.
+
+  The code may use the variables `event` (of type `up:fragment:keep`),
+  `this` (the old fragment), `newFragment` and `newData`.
+@stable
+@signature
+*/
+
+export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }) {
+  const log = ['Keeping fragment %o', oldElement]
+  const callback = callbackAttr(oldElement, 'up-on-keep', { expandObject: ['newFragment', 'newData'] })
+  return emit(oldElement, 'up:fragment:keep', { log, callback, newFragment, newData, renderOptions })
+}
+
+/*-
+This event is emitted before an existing element is [kept](/learn/keeping-elements)
+during a render pass.
+
+Event listeners can call `event.preventDefault()` on an `up:fragment:keep` event
+to prevent the element from being kept. If the event is prevented, the element
+will be replaced with a fragment from the response.
+
+@learn-ref keeping-elements
+
+### Example
+
+The following would only keep an `<audio up-keep>` element as long as it plays
+the same song (as identified by the tag's `src` attribute):
+
+```js
+up.on('up:fragment:keep', 'audio', function(event, element) {
+  if (element.getAttribute('src') !== event.newFragment.getAttribute('src')) {
+    // Preventing the event forces an update
+    event.preventDefault()
+  }
+})
+```
+
+You may also define an `up:fragment:keep` listener in HTML using an [`[up-on-keep]`](/api/up-keep#up-on-keep) attribute.
+
+@event up:fragment:keep
+@param event.preventDefault()
+  Prevents the fragment from being kept.
+
+  The fragment will be replaced with `event.newFragment`.
+@param {Element} event.target
+  The fragment that will be kept.
+@param {Element} event.newFragment
+  The new element from the response.
+@param {Object} event.newData
+  The [data](/learn/data) attached to the new element.
+@param {Object} event.renderOptions
+  An object with [render options](/api/up.render#parameters) for the current render pass.
+@stable
+*/
+
+/*-
+The `up:fragment:kept` event is emitted *after* an existing element has been [kept](/learn/keeping-elements) during a render pass.
+
+All [keep conditions](/learn/keeping-elements#conditions) have already been evaluated.
+The keeping can no longer be prevented. For this, use `up:fragment:keep` instead.
+
+@learn-ref keeping-elements
+
+@event up:fragment:kept
+@param {Element} event.target
+  The fragment that has been kept.
+@param {Element} event.newFragment
+  The response fragment that has been discarded.
+@param {Object} event.newData
+  The [data](/learn/data) attached to the discarded element.
+@experimental
+*/
+
+export function emitFragmentKept({ oldElement, newElement: newFragment, newData }) {
+  return emit(oldElement, 'up:fragment:kept', { log: false, newFragment, newData })
+}
+
+/*-
+Returns a object detailing a keep operation iff the given { oldElement } is [up-keep] and
+we can find a matching partner in { newElement }.
+
+Otherwise returns undefined.
+
+@function up.fragment.keepPlan
+@param {Element} options.oldElement
+@param {Element} options.newElement
+@param {boolean} options.descendantsOnly
+@param {boolean} options.keep
+@internal
+*/
+export function findKeepPlan(options) {
+  if (options.keep === false) return
+
+  const { oldElement, newElement } = options
+
+  let oldElementMode = keepMode(oldElement)
+  // Early return if no [up-keep] attr or if [up-keep=false]
+  if (!oldElementMode) { return }
+
+  let partner
+  let partnerSelector = tryToTarget(oldElement)
+  if (!partnerSelector) {
+    printToWarn('[up-keep]', 'Cannot keep untargetable %o', oldElement)
   }
 
-  /*-
-  Returns a object detailing a keep operation iff the given { oldElement } is [up-keep] and
-  we can find a matching partner in { newElement }.
+  const lookupOpts = { layer: options.layer }
 
-  Otherwise returns undefined.
+  if (options.descendantsOnly) {
+    // Since newElement is from a freshly parsed HTML document, we could use
+    // up.element functions to match the selector. However, since we also want
+    // to use custom selectors like ":main" or "&" we use up.fragment.get().
+    partner = getSmart(newElement, partnerSelector, lookupOpts)
+  } else {
+    partner = subtreeFirst(newElement, partnerSelector, lookupOpts)
+  }
 
-  @function up.fragment.keepPlan
-  @param {Element} options.oldElement
-  @param {Element} options.newElement
-  @param {boolean} options.descendantsOnly
-  @param {boolean} options.keep
-  @internal
-  */
-  function findKeepPlan(options) {
-    if (options.keep === false) return
+  // (1) The partner must be matched
+  // (2) The partner does not need to be [up-keep]
+  if (!partner) return
 
-    const { oldElement, newElement } = options
+  let partnerMode = keepMode(partner)
 
-    let oldElementMode = keepMode(oldElement)
-    // Early return if no [up-keep] attr or if [up-keep=false]
-    if (!oldElementMode) { return }
+  // (1) The partner must not be [up-keep=false], regardless of oldElement's state.
+  // (2) We already tested old element for [up-keep=false] at the beginning of findKeepPlan().
+  if (partnerMode === false) return
 
-    let partner
-    let partnerSelector = up.fragment.tryToTarget(oldElement)
-    if (!partnerSelector) {
-      up.warn('[up-keep]', 'Cannot keep untargetable %o', oldElement)
+  let oldIdentity = keepIdentity(oldElement, oldElementMode)
+  let partnerIdentity = keepIdentity(partner, oldElementMode)
+
+  if (!isEqual(oldIdentity, partnerIdentity)) return
+
+  const plan = {
+    oldElement, // the element that should be kept
+    newElement: partner, // the element that would have replaced it but now does not
+    newData: readData(partner), // the parsed up-data attribute of the element we will discard
+    renderOptions: options,
+  }
+
+  // Preventing up:fragment:keep will force a replacement
+  if (emitFragmentKeep(plan).defaultPrevented) return
+
+  // If we came this far, we can keep oldElement.
+  return plan
+}
+
+function keepIdentity(element, mode = keepMode(element)) {
+  return element.upKeepIdentity ??= copy(buildKeepIdentity(element, mode))
+}
+
+export function defaultNormalizeKeepHTML(html) {
+  // Remove attributes that might fluctuate beteen responses, but don't normally contribute to element identity.
+  html = removeAttrsFromHTML(html, ['up-etag', 'up-source', 'up-time', 'nonce', ...scriptConfig.nonceableAttributes])
+  // Remove leading spaces.
+  html = html.replace(/^[ \t]+/mg, '')
+  return html
+}
+
+function buildKeepIdentity(element, mode) {
+  if (mode === 'same-html') {
+    return config.normalizeKeepHTML(element.outerHTML)
+  } else if (mode === 'same-data') {
+    return readData(element)
+  } else {
+    return true
+  }
+}
+
+
+function keepMode(element) {
+  return booleanOrStringAttr(element, 'up-keep')
+}
+
+
+export function emitFragmentInserted(element, meta) {
+  if (element.upInserted) return
+  element.upInserted = true
+
+  const log = ['Inserted fragment %o', element]
+
+  // TODO: Is it important to wrap the entire compilation in mutate()? In case a programmatic cal to up.hello calls a compiler runs up.hello()?
+
+  return mutate(() => emit(element, 'up:fragment:inserted', { ...meta, log }))
+}
+
+/*-
+When a page fragment has been [inserted or updated](/api/up.render),
+this event is [emitted](/api/up.emit) on the new element.
+
+When an element with children is inserted, `up:fragment:inserted` is only
+emitted once for the entire new subtree.
+
+If you're looking to run code when a new fragment matches
+a selector, use `up.compiler()`.\
+This event is emitted after compilation.
+
+@learn-ref render-lifecycle
+
+### Example
+
+```js
+up.on('up:fragment:inserted', function(event, fragment) {
+  console.log("Looks like we have a new %o!", fragment)
+})
+```
+
+@event up:fragment:inserted
+@param {Element} event.target
+  The fragment that has been inserted or updated.
+@param {up.Layer} event.layer
+  The [layer](/api/up.layer) of the new fragment.
+@param {boolean} event.ok
+  Whether the element was loaded from a [successful response](/learn/error-responses#fail-options).
+@param {boolean} event.revalidating
+  Whether the element was reloaded for the purpose of [cache revalidation](/learn/caching#revalidation).
+
+@stable
+*/
+
+
+export function emitFragmentDestroyed(fragment, options) {
+  const log = options.log ?? ['Destroyed fragment %o', fragment]
+  const parent = options.parent || document
+  return mutate(() => emit(parent, 'up:fragment:destroyed', { fragment, parent, log }))
+}
+
+/*-
+This event is [emitted](/api/up.emit) after a page fragment was [destroyed](/api/up.destroy) and removed from the DOM.
+
+If the destruction is [animated](/api/up.motion), this event is emitted *after* the animation has ended.
+
+The event is emitted on the parent element of the fragment that was removed.
+If an element with children is destroyed, `up:fragment:destroyed`
+is only emitted once for the entire subtree
+that was removed.
+
+@learn-ref render-lifecycle
+
+@event up:fragment:destroyed
+@param {Element} event.fragment
+  The detached element that has been removed from the DOM.
+@param {Element} event.parent
+  The former parent element of the fragment that has now been detached from the DOM.
+@param {Element} event.target
+  The former parent element of the fragment that has now been detached from the DOM.
+@stable
+*/
+
+export function isNotDestroying(element) {
+  return !element.closest('.up-destroying')
+}
+
+/*-
+Returns whether the given fragment is both [attached to the DOM](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected)
+and not currently in a destroy animation.
+
+## Understanding aliveness
+
+A fragment that is alive can be [targeted](/learn/targeting-fragments), and can be discovered by `up.fragment` functions.
+
+A fragment becomes "unalive" immediately when it is destroyed, or when an ancestor is destroyed.
+If the destruction is [animated](/api/up.motion), the fragment is "unalive" while the animation is still playing.
+
+| Element state            | `up.fragment.isAlive(element)` |
+|---------------------------|----------------------|
+| Entered DOM               | `true`               |
+| Enter animation playing   | `true`               |
+| Still element in the DOM  | `true`               |
+| Exit animation playing    | `false`              |
+| Removed from DOM          | `false`              |
+
+## See also
+
+- The `.up-destroying` class is automatically assigned to elements in their exit animation.
+- All `up.fragment` functions (like `up.fragment.get()`) ignore elements in their exit animation.
+- The `up.Layer#isAlive()` method checks if an overlay is attached to the DOM and also not in a closing animation.
+
+@function up.fragment.isAlive
+@param {Element} fragment
+  The fragment to check.
+@return {boolean}
+  Whether the fragment (and its ancestors) are considered alive.
+@experimental
+*/
+export function isAlive(fragment) {
+  return fragment.isConnected && isNotDestroying(fragment)
+}
+
+/*-
+Returns the first fragment matching the given CSS selector.
+
+This function differs from `document.querySelector()` and `up.element.get()`:
+
+- This function only selects elements in the [current layer](/api/up.layer.current).
+  Pass a `{ layer }`option to match elements in other layers.
+- This function ignores elements that are being [destroyed](/api/up.destroy) or that are being
+  removed by a [transition](/api/up.morph).
+- This function prefers to match elements in the [region](/learn/targeting-fragments#ambiguous-selectors)
+  of a given `{ origin }` element (optional).
+- This function supports non-standard CSS extensions like `:main` or `:layer`.
+
+If no element matches these conditions, `undefined` is returned.
+
+### Matching a selector in a layer
+
+To select the first element with the selector `.foo` on the [current layer](/api/up.layer.current):
+
+```js
+let foo = up.fragment.get('.foo')
+```
+
+You may also pass a `{ layer }` option to match elements within another layer:
+
+```js
+let foo = up.fragment.get('.foo', { layer: 'any' })
+```
+
+### Matching the descendant of an element
+
+To only select in the descendants of an element, pass a root element as the first argument:
+
+```js
+let container = up.fragment.get('.container')
+let fooInContainer = up.fragment.get(container, '.foo')
+```
+
+### Matching in the origin's region
+
+When processing a user interaction, it is often helpful to match elements in the region of the link
+that's being clicked or of the form field that's being changed. In this case you may pass
+the triggering element as `{ origin }` element.
+
+Assume the following HTML:
+
+```html
+<div class="element">
+</div>
+<div class="element">
+  <a href="..."></a>
+</div>
+```
+
+When processing an event for the `<a href="...">` you can pass the link element
+as `{ origin }` to match the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
+element in the link's ancestry:
+
+```js
+let link = event.target
+up.fragment.get('.element') // returns the first .element
+up.fragment.get('.element', { origin: link }) // returns the second .element
+```
+
+When the link does not have an ancestor matching `.element`,
+Unpoly will search the entire layer for `.element`.
+
+To [disable region-aware fragment matching](/learn/targeting-fragments#disabling-region-aware-fragment-matching), pass a `{ match: 'first' }` option:
+
+```js
+up.fragment.get('.element', { origin: link, match: 'first' })
+```
+
+### Matching an origin sibling
+
+When processing a user interaction, it is often helpful to match elements
+within the same container as the the link that's being clicked or the form field that's
+being changed.
+
+Assume the following HTML:
+
+```html
+<div class="element" id="one">
+  <div class="inner"></div>
+</div>
+<div class="element" id="two">
+  <a href="..."></a>
+  <div class="inner"></div>
+</div>
+```
+
+When processing an event for the `<a href="...">` you can pass the link element
+as `{ origin }` to match within the link's container:
+
+```js
+let link = event.target
+up.fragment.get('.element .inner') // returns the first .inner
+up.fragment.get('.element .inner', { origin: link }) // returns the second .inner
+```
+
+Only when the link's `.element` container does not have a child `.inner`,
+Unpoly will search the entire layer for `.element .inner`.
+
+### Elements are returned unchanged
+
+Passing an existing element will return it unchanged:
+
+```js
+let element = document.querySelector(...)
+up.fragment.get(element) // returns the given element
+```
+
+### Similar features
+
+- The [`.up-destroying`](/api/up-destroying) class is assigned to elements during their removal animation.
+- The [`up.element.get()`](/api/up.element.get) function simply returns the first element matching a selector
+without filtering by layer or destruction state.
+
+@function up.fragment.get
+@section Search scope
+  @param {Element|jQuery|Document} [root=document]
+    The root element for the search. Only the root's descendants will be matched.
+
+    May be omitted to search through all elements in the current `document`.
+  @param {string|Element} selector
+    The selector to match.
+
+    If passed an `Element` instead of a string, that element is returned without further lookups.
+  @param {string} [options.layer='current']
+    The layer in which to select elements.
+
+    See `up.layer.get()` for a list of supported layer values.
+
+    If a root element was passed as first argument, this option is ignored and the
+    root element's layer is searched.
+
+  @param {boolean} [options.destroying=false]
+    Whether to include destroyed elements still playing out their exit animation.
+
+    @experimental
+
+@section Region awareness
+  @param {string} [options.match='region']
+    Controls which fragment to return when the [`selector`](#selector) yields multiple results.
+
+    When set to `'region'` Unpoly will prefer to match fragments in the
+    [region](/learn/targeting-fragments#ambiguous-selectors) of the [origin element](#options.origin).
+
+    If set to `'first'` Unpoly will always return the first matching fragment.
+
+    Defaults to `up.fragment.config.match`, which defaults to `'region'`.
+
+  @param {Element|jQuery} [options.origin]
+    The origin element that triggered this fragment lookup, e.g. a button that was clicked.
+
+    Unpoly will prefer to match fragments in the [region](/learn/targeting-fragments#ambiguous-selectors)
+    of the origin element.
+
+    The `selector` argument may refer to the origin as `:origin`.
+@return {Element|undefined}
+  The first matching element, or `undefined` if no such element matched.
+@stable
+@signature
+*/
+export function getSmart(...args) {
+  let [root, selector, options] = parseGetArgs(args)
+
+  if (isElementLike(selector)) {
+    // (1) up.fragment.get(root: Element, element: Element, [options]) should just return element.
+    //     The given root and options are ignored. We also don't check if it's destroying.
+    // (2) We do use e.get() to unwrap a jQuery collection.
+    return getOne(selector)
+  }
+
+  if (root) {
+    // We don't match around { origin } if we're given a root for the search.
+    return getFirstDescendant(root, selector, options)
+  }
+
+  // (1) If we don't have a root element we will use a context-sensitive lookup strategy
+  //     that tries to match elements in the region of { origin } before going through
+  //     the entire layer.
+  // (2) We must not pass a { document } option to up.FragmentFinder.
+  return new FragmentFinder({
+    selector,
+    ...pick(options, ['layer', 'match', 'origin', 'destroying']),
+  }).find()
+}
+
+export function getFirstDescendant(...args) {
+  let [root, selectorString, options] = parseGetArgs(args)
+
+  let selector = new Selector(selectorString, root, options)
+  return selector.firstDescendant(root)
+}
+
+function parseGetArgs(args) {
+  return parseArgs(args, 'val', 'val', 'options')
+}
+
+/*-
+Returns all elements matching the given CSS selector, but
+ignores elements that are being [destroyed](/api/up.destroy) or that are being
+removed by a [transition](/api/up.morph).
+
+By default this function only selects elements in the [current layer](/api/up.layer.current).
+Pass a `{ layer }`option to match elements in other layers. See `up.layer.get()` for a list
+of supported layer values.
+
+Returns an empty list if no element matches these conditions.
+
+### Example
+
+To select all elements with the selector `.foo` on the [current layer](/api/up.layer.current):
+
+```js
+let foos = up.fragment.all('.foo')
+```
+
+You may also pass a `{ layer }` option to match elements within another layer:
+
+```js
+let foos = up.fragment.all('.foo', { layer: 'any' })
+```
+
+To select in the descendants of an element, pass a root element as the first argument:
+
+```js
+let container = up.fragment.get('.container')
+let foosInContainer = up.fragment.all(container, '.foo')
+```
+
+### Similar features
+
+- The [`.up-destroying`](/api/up-destroying) class is assigned to elements during their removal animation.
+- The [`up.element.all()`](/api/up.element.all) function simply returns all elements matching a selector
+  without further filtering.
+
+@function up.fragment.all
+
+@section Search scope
+  @param {Element|jQuery|Document} [root=document]
+    The root element for the search. Only the root's descendants will be matched.
+
+    May be omitted to search through all elements in the given [layer](#options.layer).
+
+  @param {string} selector
+    The selector to match.
+
+  @param {string} [options.layer='current']
+    The layer in which to select elements.
+
+    See `up.layer.get()` for a list of supported layer values.
+
+    If a `root` element was passed as first argument, this option is ignored and the
+    root element's layer is searched.
+
+@section Origin
+  @param {string|Element|jQuery} [options.origin]
+    The origin element that triggered this fragment lookup, e.g. a button that was clicked.
+
+    The `selector` argument may refer to the origin as `:origin`.
+
+@return {List<Element>}
+  A list of all elements matching the selector.
+
+  Returns an empty list if there are no matches.
+@stable
+*/
+export function getAll(...args) {
+  let [root, selectorString, options] = parseGetArgs(args)
+
+  // (0) up.fragment.all(element) or up.fragment.all(element, element) should return an array of that element.
+  if (isElement(selectorString)) {
+    return [selectorString]
+  }
+
+  // (1) up.fragment.all(list) or up.fragment.all(element, list) should return the list unchanged
+  if (isList(selectorString)) {
+    return selectorString
+  }
+
+  // (2) up.fragment.all(rootElement, selector) should find selector within
+  //     the descendants of rootElement.
+  // (3) up.fragment.all(selector) should find selector within the current layer.
+  // (4) up.fragment.all(selector, { layer }) should find selector within the given layer(s).
+  let selector = new Selector(selectorString, root, options)
+  return selector.descendants(root)
+}
+
+/*-
+Marks a target selector as optional.
+
+If a `:maybe` selector is not found in the current page or the server response,
+Unpoly will skip rendering the fragment instead of throwing an error.
+
+An optional selector will be omitted from an `X-Up-Target` header unless it
+matches in the current page.
+
+@learn-ref targeting-fragments#missing-targets
+
+### Example
+
+When [updating multiple fragments](/learn/targeting-fragments#multiple)
+you may combine required and optional selectors in a single target string.
+
+The link below will update the fragments `.content` (required) and `.details` (optional):
+
+```html
+<a href="/card/5" up-target=".content, .details:maybe">...</a>
+```
+
+Only the fragment `.content` is required to match. If `.details` is missing
+in the current page or the server response, Unpoly will only update `.content`
+without an error.
+
+@selector :maybe
+@stable
+*/
+
+/*-
+Returns a list of a `root` element's descendants matching the given selector.
+
+If the `root` element itself matches the selector, it is also included in the returned list.
+
+## Ignored elements
+
+The following elements are ignored, even if they match the selector:
+
+- Elements in a different [layer](/api/up.layer) than `root`.
+- Elements that are being [destroyed](/api/up.destroy) with an animation.
+- Elements that are being removed by a [transition](/api/up-transition).
+
+To include all elements matching the selector, use `up.element.subtree()`.
+
+@function up.fragment.subtree
+@param {Element} root
+  The root element for the search.
+@param {string} selector
+  The CSS selector to match.
+@return {NodeList<Element>|Array<Element>}
+  A list of all matching elements.
+@stable
+*/
+export function getSubtree(element, selector, options = {}) {
+  return new Selector(selector, element, options).subtree(element)
+}
+
+/*-
+Returns whether the given `root` matches or contains the given selector or element.
+
+Will always return `false` if the two elements are on different [layers](/api/up.layer).
+
+@param {Element|Document} root
+@param {string|Element} query
+  The selector or element to look for.
+@return {boolean}
+@function up.fragment.contains
+  Whether the root contains the given element or selector.
+@experimental
+*/
+export function contains(root, selectorOrElement) {
+  if (isElement(selectorOrElement)) {
+    // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
+    return elementContains(root, selectorOrElement) && up.layer.get(root)?.contains(selectorOrElement)
+  } else {
+    return getSubtree(root, selectorOrElement).length > 0
+  }
+}
+
+/*-
+Returns the first element that matches the selector by testing the element itself
+and traversing up through ancestors in element's layers.
+
+`up.fragment.closest()` will only match elements in the same [layer](/api/up.layer) as
+the given element. To match ancestors regardless of layers, use `up.element.closest()`.
+
+@function up.fragment.closest
+@param {Element} element
+  The element on which to start the search.
+@param {string} selector
+  The CSS selector to match.
+@return {Element|null|undefined} element
+  The matching element.
+
+  Returns `null` or `undefined` if no element matches in the same layer.
+@stable
+*/
+export function closest(element, selector, options) {
+  return new Selector(selector, element, options).closest(element)
+}
+
+/*-
+Destroys the given element or selector.
+
+All registered [destructors](/learn/enhancing-elements#destructor) are called.
+The element is then removed from the DOM.
+
+Unfinished requests targeting the destroyed fragment or its descendants are [aborted](/learn/aborting-requests).
+
+Emits the event [`up:fragment:destroyed`](/api/up:fragment:destroyed).
+
+## Animating the removal
+
+You may animate the element's removal by passing an option like `{ animation: 'fade-out' }`.
+Unpoly ships with a number of [predefined animations](/api/up.animate#named-animations) and
+you may also define [custom animations](/api/up.animation).
+
+If the element's removal is animated, the element will remain in the DOM until after the animation
+has completed. While the animation is running the element will be given the `.up-destroying` class.
+The element will also be given the [`[inert]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert)
+attribute to prevent interaction and to hide its content from assistive technologies.
+
+To prevent accidental selection of destroying elements, they are ignored by
+Unpoly features like [`[up-target]`](/learn/targeting-fragments) or `up.fragment.get()`.
+
+## Running code after removal
+
+Destroying an element without animation works synchronously:
+
+```js
+console.log(element.isConnected) // logs "true"
+
+up.destroy(element) // no need to await
+
+console.log(element.isConnected) // logs "false"
+```
+
+When the removal is animated, it remains attached while the exit animation
+plays. To run code after the element was detached from the DOM, pass an `{ onFinished }` callback:
+
+```js
+console.log(element.isConnected) // logs "true"
+
+up.destroy(element, {
+  animation: 'fade-out',
+  duration: 500,
+  onFinished() { console.log(element.isConnected) }
+})
+
+console.log(element.isConnected) // logs "true"
+
+// After 500 ms the { onFinished } callback logs "false"
+```
+
+## Detecting destructor errors
+
+If a [destructor](/learn/enhancing-elements#destructor) throws an error, `up.destroy()` will still remove the element and *not* throw an error.
+
+Instead destructor errors will print to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error)
+and emit an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event).
+
+See [errors in user code](/learn/render-lifecycle#errors-in-user-code) for details.
+
+@function up.destroy
+@section Scope
+  @param {string|Element|jQuery} element
+    The element to remove.
+@section Animation
+  @param {string|Function(element, options): Promise} [options.animation='none']
+    An animation to play before the element is removed from the DOM.
+  @param options.duration
+    @like up.animate
+  @param options.easing
+    @like up.animate
+  @param {Function} [options.onFinished]
+    A callback that is run when any animations are finished and the element was removed from the DOM.
+@stable
+@signature
+*/
+export function destroy(...args) {
+  const options = parseTargetAndOptions(args)
+  const element = getSmart(options.target, options)
+
+  if (element) {
+    new DestroyFragment({ ...options, element }).execute()
+  }
+
+  return up.migrate.formerlyAsync?.('up.destroy()')
+}
+
+function parseTargetAndOptions(args) {
+  const options = parseArgIntoOptions(args, 'target')
+  if (isElement(options.target)) {
+    options.origin ||= options.target
+  }
+  return options
+}
+
+/*-
+Elements are assigned the `.up-destroying` class before they are [destroyed](/api/up.destroy)
+or while they are being removed by a [transition](/api/up.morph).
+
+@learn-ref transitions#how-a-transition-plays
+
+If the removal is [animated](/api/up.destroy#animating-the-removal),
+the class is assigned before the animation starts.
+
+### Destroying elements are ignored
+
+Destroyed elements remain attached to the DOM while they are playing out their exit animation.
+To prevent accidental selection of destroying elements, they are ignored by
+Unpoly features like [`[up-target]`](/learn/targeting-fragments) or `up.fragment.get()`.
+
+Only the low-level DOM helpers in `up.element` will *not* ignore elements that are being destroyed.
+
+### Accessibility
+
+While an element's destruction is animating, the element is also assigned an
+[`[inert]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert) attribute.
+
+This prevents interaction with the element and hides it from assistive technologies.
+
+@selector .up-destroying
+@stable
+*/
+
+export function markFragmentAsDestroying(element) {
+  element.classList.add('up-destroying')
+  element.setAttribute('inert', '')
+}
+
+/*-
+Replaces the given element with a fresh copy fetched from the server.
+
+@learn-ref live-fragments
+
+By default, reloading is **not** considered a [user navigation](/learn/navigation-defaults) and will not scroll, focus
+or update the browser location. You may change this with `{ navigate: true }`.
+
+## Example
+
+```js
+let { fragment } = await up.reload('.inbox')
+console.log("New .inbox element: ", fragment)
+```
+
+## Controlling the URL that is reloaded
+
+Unpoly remembers [the URL from which a fragment was loaded](/api/up-source),
+so you don't usually need to pass a URL when reloading.
+
+To reload from another URL, pass a `{ url }` option or set an `[up-source]` attribute
+on the element being reloaded or its ancestors.
+
+## Skipping updates when nothing changed
+
+The server can answer `304 Not Modified` when the fragment hasn't changed. See [conditional requests](/learn/conditional-requests).
+
+## Restoring content from cache
+
+To instantly restore a fragment to the last [cached](/learn/caching) version, pass a `{ cache: true }` option:
+
+```js
+up.reload('.inbox', { cache: true }) // mark: cache: true
+```
+
+If the fragment source isn't cached, a network request is made.
+
+To restore a fragment from cache, but [revalidate](/learn/caching#revalidation) cached content that
+has [expired](/learn/caching#expiration), also pass a `{ revalidate: 'auto' }` option:
+
+```js
+up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate: 'auto'
+```
+
+@function up.reload
+
+@section Targeting
+  @param {string|Element|Array<Element>|jQuery} [element]
+    The element or selector that should be reloaded.
+
+    If omitted, an element matching a selector in `up.fragment.config.mainTargets` will be reloaded.
+
+    When an `Element` object is passed, a target selector will be [derived](/learn/target-derivation).
+
+@section Render options
+  @param {Object} [options]
+    Additional [render options](/api/up.render#parameters) to use when reloading the fragment.
+
+    Common options are documented below, but most [options for `up.render()`](/api/up.render#parameters) may be used.
+
+    Defaults can be configured in `up.fragment.config.reloadOptions` and `up.fragment.config.renderOptions`.
+
+  @param {boolean} [options.navigate=false]
+    Whether the reloading constitutes a [user navigation](/learn/navigation-defaults).
+
+@section Request
+  @mix up.render/request
+    @param options.url
+      The URL from which to reload the fragment.
+
+      Defaults to the [URL from which the fragment was originally loaded](/api/up.fragment.source).
+
+@section Caching
+  @param {boolean} [options.cache=false]
+    Whether to restore the fragment from the [cache](/learn/caching).
+
+    By default the cache is ignored and a new HTTP request is sent.
+    Pass `{ cache: true }` to restore the fragment from the cache.
+
+  @param {boolean|string} [options.revalidate=false]
+    @like up.render
+
+@section Scrolling
+  @param [options.scroll='keep']
+    Whether to scroll after the fragment was reloaded.
+
+    By default Unpoly will [keep scroll positions](/learn/scrolling#keep) of all viewports
+    around the updated fragment.
+
+    See [scrolling](/learn/scrolling) for a list of allowed values.
+
+    @like up.render
+
+@section Focus
+  @param [options.focus='keep']
+    What to focus after the fragment was reloaded.
+
+    By default Unpoly will [keep the current focus](/learn/focus#keep)
+    within the updated fragment.
+
+    See [focus](/learn/focus) for a list of allowed values.
+
+    @like up.render
+
+@section Loading state
+  @mix up.render/loading-state
+
+@section Client state
+  @mix up.reload/client-state
+
+@section Lifecycle hooks
+  @mix up.render/lifecycle-hooks
+
+@return
+  @like up.render
+
+@stable
+@signature
+*/
+export const reload = mockable(function reload(...args) {
+  const options = { ...config.reloadOptions, ...parseTargetAndOptions(args) }
+  options.target ||= ':main'
+  const element = getSmart(options.target, options)
+  options.url ||= sourceOf(element)
+  options.headers = merge(options.headers, conditionalHeaders(element))
+  if (options.keepData || booleanAttr(element, 'up-keep-data')) {
+    options.data = readData(element)
+  }
+  up.migrate.postprocessReloadOptions?.(options)
+  return render(options)
+})
+
+function conditionalHeaders(element) {
+  let headers = {}
+  let time = timeOf(element)
+  if (time) {
+    headers['If-Modified-Since'] = time.toUTCString()
+  }
+  let etag = etagOf(element)
+  if (etag) {
+    headers['If-None-Match'] = etag
+  }
+  return headers
+}
+
+/*-
+Fetches the given URL with JavaScript and [replaces](/api/up.render) the
+[current layer](/api/up.layer.current)'s [main fragment](/api/up.fragment.config#config.mainTargets)
+with a matching fragment from the server response.
+
+### Example
+
+This would replace the current page with the response for `/users`:
+
+```js
+up.visit('/users')
+```
+
+@function up.visit
+
+@section Destination
+  @param {string} url
+    The URL to visit.
+
+@section Render options
+  @param {Object} [options]
+    Additional [render options](/api/up.render#parameters) to use for rendering the destination URL.
+
+    Most [options for `up.render()`](/api/up.render#parameters) may be used.
+
+@return
+  @like up.render
+
+@stable
+*/
+export function visit(url, options) {
+  return navigate({ ...options, url })
+}
+
+const KEY_PATTERN = /^(onFail|on|fail)?(.+)$/
+
+/*-
+Removes a "fail" prefix or infix from an options key.
+
+Returns `undefined` if the given key has no "fail" prefix or infix.
+
+## Examples
+
+```js
+successKey('target')         // result: undefined
+successKey('onFinished')     // result: undefined
+successKey('failTarget')     // result: 'target'
+successKey('onFailFinished') // result: 'onFinished'
+```
+
+@function up.fragment.successKey
+@internal
+*/
+export function successKey(key) {
+  let match = KEY_PATTERN.exec(key)
+  if (match) {
+    let [_, prefix, suffix] = match
+
+    switch (prefix) {
+      case 'onFail':
+        return 'on' + upperCaseFirst(suffix)
+      case 'fail':
+        return lowerCaseFirst(suffix)
     }
+  }
+}
 
-    const lookupOpts = { layer: options.layer }
+/*-
+Adds a "fail" prefix or infix from an options key.
 
-    if (options.descendantsOnly) {
-      // Since newElement is from a freshly parsed HTML document, we could use
-      // up.element functions to match the selector. However, since we also want
-      // to use custom selectors like ":main" or "&" we use up.fragment.get().
-      partner = up.fragment.get(newElement, partnerSelector, lookupOpts)
+Returns `undefined` if the key already has a "fail" prefix or infix.
+
+## Examples
+
+```js
+failKey('target')         // result: 'failTarget'
+failKey('onFinished')     // result: 'onFailFinished'
+failKey('failTarget')     // result: undefined
+failKey('onFailFinished') // result: undefined
+```
+
+@function up.fragment.failKey
+@internal
+*/
+export function failKey(key) {
+  let match = KEY_PATTERN.exec(key)
+  if (match) {
+    let [_, prefix, suffix] = match
+
+    switch (prefix) {
+      case 'on':
+        return 'onFail' + upperCaseFirst(suffix)
+      case undefined:
+        return 'fail' + upperCaseFirst(suffix)
+    }
+  }
+}
+
+/*-
+[Derives a CSS selector](/learn/target-derivation) that matches the given element as good as possible.
+
+If no target can be derived and [verified](/learn/target-derivation#verification), an error `up.CannotTarget` is thrown.
+
+### Example
+
+```js
+element = up.element.createFromHTML('<span class="klass">...</span>')
+selector = up.fragment.toTarget(element) // returns '.klass'
+```
+
+@function up.fragment.toTarget
+@section Element
+  @param {Element|string} element
+    The element for which to create a selector.
+
+    When a string is given, it is returned unchanged.
+  @param {boolean} [options.strong=false]
+    Whether to provide a more unique selector by only considering the element's `[id]` and `[up-id]` attributes.
+
+    Weaker target derivers, like the element's class, are not considered in strong mode.
+    The element's tag name is only considered for singleton elements like `<html>` or `<body>`.
+
+    @experimental
+@section Verification
+  @param {boolean} [options.verify]
+    Whether to verify that the derived selector matches the given element.
+
+    Defaults to `up.fragment.config.verifyDerivedTarget`.
+
+  @param {Element} [options.origin]
+    The origin used to [resolve an ambiguous selector](/learn/targeting-fragments#ambiguous-selectors)
+    during [target verification](/learn/target-derivation#verification).
+@return {string}
+  The derived selector string.
+@stable
+*/
+export function toTarget(element, options) {
+  return presence(element, isString) || tryToTarget(element, options) || cannotTarget(element)
+}
+
+/*-
+Returns whether Unpoly can [derive a target selector](/learn/target-derivation) for the given element.
+
+@function up.fragment.isTargetable
+@section Element
+  @param {Element} element
+    The element to test.
+  @param [options.strong]
+    @like up.fragment.toTarget
+@section Verification
+  @param [options.verify]
+    @like up.fragment.toTarget
+  @param [options.origin]
+    @like up.fragment.toTarget
+@return {boolean}
+  Whether a selector can be derived for the given element.
+@stable
+*/
+export function isTargetable(element, options) {
+  return !!tryToTarget(element, options)
+}
+
+function untargetableMessage(element) {
+  return `Cannot derive good target selector from a <${element.localName}> element without identifying attributes. Try setting an [id] or configure up.fragment.config.targetDerivers.`
+}
+
+function cannotTarget(element) {
+  throw new CannotTarget(untargetableMessage(element))
+}
+
+export function tryToTarget(element, options = {}) {
+  let derivers = options.strong ? config.strongTargetDerivers : config.targetDerivers
+
+  return findResult(derivers, function(deriver) {
+    let target = deriveTarget(element, deriver)
+
+    if (target && isGoodTarget(target, element, options)) {
+      return target
+    }
+  })
+}
+
+function deriveTarget(element, deriver) {
+  if (isFunction(deriver)) {
+    return deriver(element)
+  } else if (element.matches(deriver)) {
+    try {
+      // Now that we know that a deriver is applicable to our element, we're using
+      // the element's tag name and attribute to form a more specific target.
+      // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
+      return deriveTargetFromPattern(element, deriver)
+    } catch (e) {
+      if (e instanceof CannotParse) {
+        // This error can be thrown for two reasons:
+        // (1) up.element.parseSelector() cannot parse the given string
+        // (2) up.element.parseSelector() parses a selector with a depth > 1.
+        return deriver
+      } else {
+        throw e
+      }
+    }
+  }
+}
+
+function deriveTargetFromPattern(element, deriver) {
+  // Now that we know that a deriver is applicable to our element, we're using
+  // the element's tag name and attribute to form a more specific target.
+  // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
+
+  let { includePath, excludeRaw } = parseSelector(deriver)
+
+  if (includePath.length !== 1) {
+    // It's not straightforward to improve a descendant selector like '.foo .bar' or '.foo > .bar'.
+    // It's also not common to see such selectors configured in config.targetDerivers.
+    // Hence we just return the matching deriver.
+    throw new CannotParse(deriver)
+  }
+
+  let { tagName, id, classNames, attributes } = includePath[0]
+  let result = ''
+
+  if (tagName === '*') {
+    // In a deriver '*' means to include the actual tag name in the target-
+    // Use the local name, which keeps the case of camelCase SVG elements like <clipPath>.
+    // Type selectors match those case-sensitively, so tagName.toLowerCase() would not match.
+    result += element.localName
+  } else if (tagName) {
+    // If a deriver contains an actual tag name like 'main' it becomes
+    // part of the target selector.
+    result += tagName
+  }
+
+  for (let className of classNames) {
+    result += classSelector(className)
+  }
+
+  if (id) {
+    result += idSelector(id)
+  }
+
+  for (let attributeName in attributes) {
+    // If a deriver contains an attribute value (e.g. '[rel=canonical]') we use that for the target.
+    // If the deriver has a value-less attribute (e.g. '[rel]') we use the actual attribute value from the element.
+    let attributeValue = attributes[attributeName] || element.getAttribute(attributeName)
+
+    if (attributeName === 'id') {
+      // We allow a deriver '[id]' to apply to all elements with an ID.
+      // However, we want to use an ID selector ('#foo') instead of an attribute selector ('[id=foo]').
+      result += idSelector(attributeValue)
+    } else if (attributeName === 'class') {
+      // We allow a deriver '[class]' to apply to all elements with a class.
+      // However, we want to (1) filter class against config.badTargetClasses and
+      // (2) use an class selector ('.foo') instead of an attribute selector ('[class=foo]').
+      for (let goodClass of goodClassesForTarget(element)) {
+        result += classSelector(goodClass)
+      }
     } else {
-      partner = e.subtreeFirst(newElement, partnerSelector, lookupOpts)
+      result += attrSelector(attributeName, attributeValue)
     }
+  }
 
-    // (1) The partner must be matched
-    // (2) The partner does not need to be [up-keep]
-    if (!partner) return
+  if (excludeRaw) {
+    result += excludeRaw
+  }
 
-    let partnerMode = keepMode(partner)
+  return result
+}
 
-    // (1) The partner must not be [up-keep=false], regardless of oldElement's state.
-    // (2) We already tested old element for [up-keep=false] at the beginning of findKeepPlan().
-    if (partnerMode === false) return
+function isGoodTarget(target, element, options = {}) {
+  let verify = options.verify ?? config.verifyDerivedTarget
+  return !isAlive(element) || !verify || getSmart(target, { layer: element, ...options }) === element
+}
 
-    let oldIdentity = keepIdentity(oldElement, oldElementMode)
-    let partnerIdentity = keepIdentity(partner, oldElementMode)
+/*-
+Sets a unique identifier for this element.
 
-    if (!u.isEqual(oldIdentity, partnerIdentity)) return
+This identifier is used in [target derivation](/learn/target-derivation)
+to create a CSS selector that matches this element precisely.
+If the element already has [other attributes that make a good identifier](/learn/target-derivation#derivation-patterns),
+like a good `[id]` or `[class]` attribute, it is not necessary to also set `[up-id]`.
 
-    const plan = {
-      oldElement, // the element that should be kept
-      newElement: partner, // the element that would have replaced it but now does not
-      newData: up.script.data(partner), // the parsed up-data attribute of the element we will discard
-      renderOptions: options,
+@learn-ref target-derivation
+
+### Example
+
+Take this element:
+
+```html
+<section>
+  <h2>Latest news</h2>
+</section>
+```
+
+Unpoly cannot generate a good CSS selector for this element:
+
+```js
+up.fragment.toTarget(element)
+// throws error: up.CannotTarget
+```
+
+We can improve this by assigning an `[up-id]`:
+
+```html
+<section up-id="latest-news">
+  <h2>Latest news</h2>
+</section>
+```
+
+The attribute value is used to create a better selector:
+
+```js
+up.fragment.toTarget(element)
+// returns '[up-id="latest-news"]'
+```
+
+@selector [up-id]
+@param up-id
+  A string that uniquely identifies this element.
+@stable
+*/
+
+function matchesPattern(pattern, str) {
+  if (isRegExp(pattern)) {
+    return pattern.test(str)
+  } else {
+    return pattern === str
+  }
+}
+
+function goodClassesForTarget(element) {
+  let isGood = (klass) => !some(config.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
+  return filterList(element.classList, isGood)
+}
+
+const MAIN_PSEUDO = /:main\b/
+const LAYER_PSEUDO = /:layer\b/
+const ORIGIN_PSEUDO = /:origin\b/
+
+export function containsMainPseudo(target) {
+  return MAIN_PSEUDO.test(target)
+}
+
+export function expandTargets(targets, options = {}) {
+  const { layer } = options
+  if (layer !== 'new' && !(layer instanceof Layer)) {
+    fail('Must pass an up.Layer as { layer } option, but got %o', layer)
+  }
+
+  // Copy the list since targets might be a jQuery collection, and this does not support shift or push.
+  targets = copy(wrapList(targets))
+
+  const expanded = []
+
+  while (targets.length) {
+    let target = targets.shift()
+    if (target === true) target = ':main'
+
+    if (containsMainPseudo(target)) {
+      let mode = resolveMode(options)
+      let replaced = up.layer.mainTargets(mode).map((mainTarget) => target.replace(MAIN_PSEUDO, mainTarget))
+      targets.unshift(...replaced)
+    } else if (LAYER_PSEUDO.test(target)) {
+      // Discard this target for new layers, which don't have a first-swappable-element.
+      // Also don't && the layer check into the `else if` condition above, or it will
+      // be returned as a verbatim string below.
+      if (layer === 'new' || layer.state === 'opening') continue
+      let firstSwappableTarget = toTarget(layer.getFirstSwappableElement(), options)
+      targets.unshift(target.replace(LAYER_PSEUDO, firstSwappableTarget))
+    } else if (isElementLike(target)) {
+      expanded.push(toTarget(target, options))
+    } else if (isString(target)) {
+      expanded.push(resolveOrigin(target, options))
     }
-
-    // Preventing up:fragment:keep will force a replacement
-    if (emitFragmentKeep(plan).defaultPrevented) return
-
-    // If we came this far, we can keep oldElement.
-    return plan
   }
 
-  function keepIdentity(element, mode = keepMode(element)) {
-    return element.upKeepIdentity ??= u.copy(buildKeepIdentity(element, mode))
-  }
+  return uniq(expanded)
+}
 
-  function defaultNormalizeKeepHTML(html) {
-    // Remove attributes that might fluctuate beteen responses, but don't normally contribute to element identity.
-    html = e.removeAttrsFromHTML(html, ['up-etag', 'up-source', 'up-time', 'nonce', ...up.script.config.nonceableAttributes])
-    // Remove leading spaces.
-    html = html.replace(/^[ \t]+/mg, '')
-    return html
+function resolveMode({ layer, mode }) {
+  if (layer === 'new') {
+    return mode || fail('Must pass a { mode } option together with { layer: "new" }')
+  } else {
+    return layer.mode
   }
+}
 
-  function buildKeepIdentity(element, mode) {
-    if (mode === 'same-html') {
-      return config.normalizeKeepHTML(element.outerHTML)
-    } else if (mode === 'same-data') {
-      return up.data(element)
+function modernResolveOrigin(target, { origin } = {}) {
+  return target.replace(ORIGIN_PSEUDO, function(match) {
+    if (origin) {
+      return toTarget(origin)
     } else {
+      fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
+    }
+  })
+}
+
+export function resolveOrigin(target, options) {
+  // up.FormValidator sometimes calls resolveOrigin(undefined)
+  if (!isString(target)) return target
+  return (up.migrate.resolveOrigin || modernResolveOrigin)(target, options)
+}
+
+export function splitTarget(target) {
+  return getComplexTokens(target)
+}
+
+export function parseTargetSteps(target, options = {}) {
+  let defaultPlacement = options.defaultPlacement || 'swap'
+  let defaultMaybe = options.defaultMaybe ?? false
+
+  let steps = []
+  let simpleSelectors = splitTarget(target)
+
+  for (let selector of simpleSelectors) {
+    if (selector === ':none') continue
+
+    let placement = defaultPlacement
+    let maybe = defaultMaybe
+
+    selector = selector.replace(/::?(before|after|content)\b/, (_match, customPlacement) => {
+      placement = customPlacement
+      return ''
+    })
+
+    selector = selector.replace(/:maybe\b/, () => {
+      maybe = true
+      return ''
+    })
+
+    // Each step inherits all options of this change.
+    const step = {
+      ...options,
+      selector,
+      placement,
+      maybe,
+      originalRenderOptions: options,
+    }
+
+    steps.push(step)
+  }
+
+  return steps
+}
+
+export function hasAutoHistory(newFragments, layer) {
+  // We cannot use up.fragment.contains(fragment, config.autoHistoryTargets)
+  // because fragment is not yet attached when we are called from OpenLayerPlan.
+
+  let vanillaSelector = expandTargets(config.autoHistoryTargets, { layer }).join()
+
+  for (let newFragment of newFragments) {
+    if (subtree(newFragment, vanillaSelector).length) {
       return true
     }
   }
 
-  // Snapshot the keep identity before macros make changes.
-  // TODO: Doesn't this need to happen before other macros?
-  up.macro('[up-keep]', (element) => keepIdentity(element))
+  printToStandard('up.render()', "Will not auto-update history because fragment doesn't contain a selector from up.fragment.config.autoHistoryTargets")
+  return false
+}
 
-  function keepMode(element) {
-    return e.booleanOrStringAttr(element, 'up-keep')
-  }
+/*-
+A pseudo-selector that matches the layer's [main fragment](/api/up-main).
+
+Use `:main` to only update the main fragment, while keeping static layout elements around it.
+To replace all visible elements of a layer, see `:layer`.
+
+@learn-ref targeting-fragments
+
+## Targeting the main fragment
+
+You can target the main fragment using the `:main` selector:
+
+```html
+<a href="/cards/5" up-target=":main">Load post</a>
+
+<main>
+  Post will appear here
+</main>
+```
+
+Unpoly will also update `:main` if no other target is given:
+
+```html
+<a href="/cards/5" up-follow>Load post</a>
+
+<main>
+  Post will appear here
+</main>
+```
+
+Also see [targeting the main fragment](/learn/targeting-fragments#targeting-the-main-element).
+
+## Default main targets
+
+The default main targets are:
+
+- any element with an `[up-main]` attribute
+- the HTML5 [`<main>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main) element
+- the current layer's [topmost swappable element](/api/layer)
+
+You may configure main target selectors in `up.fragment.config.mainTargets`.
+
+@selector :main
+@stable
+*/
+
+/*-
+Marks this element as the [main fragment](/learn/targeting-fragments#targeting-the-main-element) of your application layout.
+
+Unpoly will update the main fragment when no more specific render target is given.
+
+@learn-ref targeting-fragments
+
+## Example
+
+Many links simply replace the main fragment in your application layout.
+
+Unpoly lets you mark this element as a default target using the `[up-main]` attribute:
+
+```html
+<body>
+  <div class="layout">
+    <div class="layout--side">
+      ...
+    </div>
+    <div class="layout--content" up-main>
+     ...
+    </div>
+  </div>
+</body>
+```
+
+Once the main fragment is marked, you no longer need `[up-target]` in a link.\
+Use `[up-follow]` and the `[up-main]` element will be replaced:
+
+```html
+<a href="/foo" up-follow>...</a>
+```
+
+If you want to update something more specific, you can still use `[up-target]`:
+
+```html
+<a href="/foo" up-target=".profile">...</a>
+```
+
+## Overlays can use a different main fragment {#overlays}
+
+Overlays often use a different default selector, e.g. to exclude a navigation bar.
+
+To mark a different main fragment for an overlay, set the [layer mode](/learn/overlays#layer-modes) as the
+value of the `[up-main]` attribute:
+
+```html
+<body>
+  <div class="layout" up-main="root">
+    <div class="layout--side">
+      ...
+    </div>
+    <div class="layout--content" up-main="modal">
+      ...
+    </div>
+  </div>
+</body>
+```
+
+## Using existing elements as main targets
+
+Instead of the `[up-main]` attribute you may also use the standard [`<main>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main) element.
+
+You may also configure an existing selector in `up.fragment.config.mainTargets`:
+
+```js
+up.fragment.config.mainTargets.push('.layout--content')
+```
+
+You may configure layer-specific targets in `up.layer.config`:
+
+```js
+up.layer.config.popup.mainTargets.push('.menu')              // for popup overlays
+up.layer.config.drawer.mainTargets.push('.menu')             // for drawer overlays
+up.layer.config.overlay.mainTargets.push('.layout--content') // for all overlay modes
+```
+
+@selector [up-main]
+@param [up-main]
+  A space-separated list of [layer modes](/learn/overlays#layer-modes) for which this element is the main fragment.
+
+  Omit the attribute value to make this the main fragment for *all* layer modes.
+
+  To use a different main fragment for all overlays (but not the root layer), set `[up-main=overlay]`.
+@stable
+*/
+
+/*-
+To make a server request without changing a fragment, use the `:none` [target](/learn/targeting-fragments).
+
+@learn-ref targeting-fragments
+
+### Example
+
+Clicking this link will make a request to `/ping`, but not update any element:
+
+```html
+<a href="/ping" up-target=":none">Ping server</a>
+```
+
+@selector :none
+@stable
+*/
+
+/*-
+Your [target selectors](/learn/targeting-fragments) may use this pseudo-selector
+to reference the origin element that triggered the change.
+
+The `:origin` placeholder will be replaced with a target [derived](/learn/target-derivation)
+from the origin element.
+
+@learn-ref targeting-fragments#ambiguous-selectors
 
 
-  function emitFragmentInserted(element, meta) {
-    if (element.upInserted) return
-    element.upInserted = true
+## Example
 
-    const log = ['Inserted fragment %o', element]
+@include origin-selector-example
 
-    // TODO: Is it important to wrap the entire compilation in mutate()? In case a programmatic cal to up.hello calls a compiler runs up.hello()?
+## Default origins
 
-    return mutate(() => up.emit(element, 'up:fragment:inserted', { ...meta, log }))
-  }
+The origin element is automatically set for many actions, for example:
 
-  /*-
-  When a page fragment has been [inserted or updated](/api/up.render),
-  this event is [emitted](/api/up.emit) on the new element.
+@include default-origins
 
-  When an element with children is inserted, `up:fragment:inserted` is only
-  emitted once for the entire new subtree.
+## Setting the origin programmatically
 
-  If you're looking to run code when a new fragment matches
-  a selector, use `up.compiler()`.\
-  This event is emitted after compilation.
+When updating fragments programmatically through functions like `up.render()`
+you may pass an origin element as an `{ origin }` option:
 
-  @learn-ref render-lifecycle
+```js
+element.addEventListener('click', function(event) {
+  up.render('.preview', { url: '/preview', origin: element })
+})
+```
 
-  ### Example
+You do not need to pass an `{ origin }` for functions that already have a
+natural origin:
 
-  ```js
-  up.on('up:fragment:inserted', function(event, fragment) {
-    console.log("Looks like we have a new %o!", fragment)
-  })
-  ```
+```js
+up.follow(link) // link will be set as { origin }
+```
 
-  @event up:fragment:inserted
-  @param {Element} event.target
-    The fragment that has been inserted or updated.
-  @param {up.Layer} event.layer
-    The [layer](/api/up.layer) of the new fragment.
-  @param {boolean} event.ok
-    Whether the element was loaded from a [successful response](/learn/error-responses#fail-options).
-  @param {boolean} event.revalidating
-    Whether the element was reloaded for the purpose of [cache revalidation](/learn/caching#revalidation).
+> [TIP]
+> Ensuring an origin is set may improve the precision of fragment lookup, even if
+> a [target selector](/learn/targeting-fragments) doesn't contain an `:origin` reference.
+> In the example above, Unpoly would prefer to match `.preview` in the
+> [region](/learn/targeting-fragments#ambiguous-selectors) of the origin.
+> If no origin is known, Unpoly will always match the first `.preview` in the
+> current [layer](/api/up.layer).
 
-  @stable
-  */
+@selector :origin
+@stable
+*/
 
+/*-
+Your [target selectors](/learn/targeting-fragments) may use this pseudo-selector
+to replace the layer's topmost swappable element.
 
-  function emitFragmentDestroyed(fragment, options) {
-    const log = options.log ?? ['Destroyed fragment %o', fragment]
-    const parent = options.parent || document
-    return mutate(() => up.emit(parent, 'up:fragment:destroyed', { fragment, parent, log }))
-  }
+@learn-ref targeting-fragments
 
-  /*-
-  This event is [emitted](/api/up.emit) after a page fragment was [destroyed](/api/up.destroy) and removed from the DOM.
+## What is targeted
 
-  If the destruction is [animated](/api/up.motion), this event is emitted *after* the animation has ended.
+@include topmost-swappable-layer-element
 
-  The event is emitted on the parent element of the fragment that was removed.
-  If an element with children is destroyed, `up:fragment:destroyed`
-  is only emitted once for the entire subtree
-  that was removed.
+Use `:layer` to replace all visible elements of a layer. To only update a layer's main fragment
+while keeping static layout elements around it, see `:main`.
 
-  @learn-ref render-lifecycle
+## Example
 
-  @event up:fragment:destroyed
-  @param {Element} event.fragment
-    The detached element that has been removed from the DOM.
-  @param {Element} event.parent
-    The former parent element of the fragment that has now been detached from the DOM.
-  @param {Element} event.target
-    The former parent element of the fragment that has now been detached from the DOM.
-  @stable
-  */
+We open an overlay with a target selector `#foo`:
 
-  function isNotDestroying(element) {
-    return !element.closest('.up-destroying')
-  }
+```
+up.layer.open({ target: '#foo', content: 'Hello from overlay' })
+```
 
-  /*-
-  Returns whether the given fragment is both [attached to the DOM](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected)
-  and not currently in a destroy animation.
+The topmost swappable element is now `#foo`, which we can select with `:layer`:
 
-  ## Understanding aliveness
+```js
+// targets '#foo'
+up.render({ target: ':layer', url: '/page2' })
+```
 
-  A fragment that is alive can be [targeted](/learn/targeting-fragments), and can be discovered by `up.fragment` functions.
+The resolution of `:layer` depends on the targeted layer. For example, when rendering in
+the root layer, `:layer` will resolve to the `<body>`:
 
-  A fragment becomes "unalive" immediately when it is destroyed, or when an ancestor is destroyed.
-  If the destruction is [animated](/api/up.motion), the fragment is "unalive" while the animation is still playing.
+```js
+// targets the body
+up.render({ target: ':layer', layer: 'root', url: '/page2' })
+```
 
-  | Element state            | `up.fragment.isAlive(element)` |
-  |---------------------------|----------------------|
-  | Entered DOM               | `true`               |
-  | Enter animation playing   | `true`               |
-  | Still element in the DOM  | `true`               |
-  | Exit animation playing    | `false`              |
-  | Removed from DOM          | `false`              |
+@selector :layer
+@stable
+*/
 
-  ## See also
+/*-
+Returns whether the given element matches the given CSS selector or other element.
 
-  - The `.up-destroying` class is automatically assigned to elements in their exit animation.
-  - All `up.fragment` functions (like `up.fragment.get()`) ignore elements in their exit animation.
-  - The `up.Layer#isAlive()` method checks if an overlay is attached to the DOM and also not in a closing animation.
+Other than [`Element#matches()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/matches)
+this function supports non-standard selectors like `:main` or `:layer`.
 
-  @function up.fragment.isAlive
+Instead of a selector you may also pass a second element. In that case
+the function returns whether both elements match the same [derived target](/learn/target-derivation).
+
+### Examples
+
+```js
+let element = document.querySelector('div[up-main]')
+up.fragment.matches(element, 'div') // result: true
+up.fragment.matches(element, 'span') // result: false
+up.fragment.matches(element, ':main') // result: true
+up.fragment.matches(element, element) // result: true
+```
+
+@function up.fragment.matches
+
+@section Comparison
   @param {Element} fragment
-    The fragment to check.
-  @return {boolean}
-    Whether the fragment (and its ancestors) are considered alive.
-  @experimental
-  */
-  function isAlive(fragment) {
-    return fragment.isConnected && isNotDestroying(fragment)
+    The element to test.
+  @param {string|Element} selector
+    The selector that the `fragment` should match.
+
+    When an `Element` is passed as this `selector` argument, this functions tests whether `fragment` matches
+    a [target derived](/learn/target-derivation) from `selector`.
+
+@section Layer
+  @param {string|up.Layer} [options.layer]
+    The layer for which to match.
+
+    Pseudo-selectors like `:main` may expand to different selectors in different layers.
+
+    Defaults to the layer of `fragment`.
+  @param {string|up.Layer} [options.mode]
+    Required if `{ layer: 'new' }` is passed.
+
+@return {boolean}
+  Whether `fragment` matches the given `selector`.
+
+@stable
+*/
+export function matches(element, selector, options = {}) {
+  element = getOne(element)
+  if (isElement(selector)) {
+    let target = tryToTarget(selector)
+    return target && element.matches(target)
+  } else {
+    return new Selector(selector, element, options).matches(element)
   }
-
-  /*-
-  Returns the first fragment matching the given CSS selector.
-
-  This function differs from `document.querySelector()` and `up.element.get()`:
-
-  - This function only selects elements in the [current layer](/api/up.layer.current).
-    Pass a `{ layer }`option to match elements in other layers.
-  - This function ignores elements that are being [destroyed](/api/up.destroy) or that are being
-    removed by a [transition](/api/up.morph).
-  - This function prefers to match elements in the [region](/learn/targeting-fragments#ambiguous-selectors)
-    of a given `{ origin }` element (optional).
-  - This function supports non-standard CSS extensions like `:main` or `:layer`.
-
-  If no element matches these conditions, `undefined` is returned.
-
-  ### Matching a selector in a layer
-
-  To select the first element with the selector `.foo` on the [current layer](/api/up.layer.current):
-
-  ```js
-  let foo = up.fragment.get('.foo')
-  ```
-
-  You may also pass a `{ layer }` option to match elements within another layer:
-
-  ```js
-  let foo = up.fragment.get('.foo', { layer: 'any' })
-  ```
-
-  ### Matching the descendant of an element
-
-  To only select in the descendants of an element, pass a root element as the first argument:
-
-  ```js
-  let container = up.fragment.get('.container')
-  let fooInContainer = up.fragment.get(container, '.foo')
-  ```
-
-  ### Matching in the origin's region
-
-  When processing a user interaction, it is often helpful to match elements in the region of the link
-  that's being clicked or of the form field that's being changed. In this case you may pass
-  the triggering element as `{ origin }` element.
-
-  Assume the following HTML:
-
-  ```html
-  <div class="element">
-  </div>
-  <div class="element">
-    <a href="..."></a>
-  </div>
-  ```
-
-  When processing an event for the `<a href="...">` you can pass the link element
-  as `{ origin }` to match the [closest](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest)
-  element in the link's ancestry:
-
-  ```js
-  let link = event.target
-  up.fragment.get('.element') // returns the first .element
-  up.fragment.get('.element', { origin: link }) // returns the second .element
-  ```
-
-  When the link does not have an ancestor matching `.element`,
-  Unpoly will search the entire layer for `.element`.
-
-  To [disable region-aware fragment matching](/learn/targeting-fragments#disabling-region-aware-fragment-matching), pass a `{ match: 'first' }` option:
-
-  ```js
-  up.fragment.get('.element', { origin: link, match: 'first' })
-  ```
-
-  ### Matching an origin sibling
-
-  When processing a user interaction, it is often helpful to match elements
-  within the same container as the the link that's being clicked or the form field that's
-  being changed.
-
-  Assume the following HTML:
-
-  ```html
-  <div class="element" id="one">
-    <div class="inner"></div>
-  </div>
-  <div class="element" id="two">
-    <a href="..."></a>
-    <div class="inner"></div>
-  </div>
-  ```
-
-  When processing an event for the `<a href="...">` you can pass the link element
-  as `{ origin }` to match within the link's container:
-
-  ```js
-  let link = event.target
-  up.fragment.get('.element .inner') // returns the first .inner
-  up.fragment.get('.element .inner', { origin: link }) // returns the second .inner
-  ```
-
-  Only when the link's `.element` container does not have a child `.inner`,
-  Unpoly will search the entire layer for `.element .inner`.
-
-  ### Elements are returned unchanged
-
-  Passing an existing element will return it unchanged:
-
-  ```js
-  let element = document.querySelector(...)
-  up.fragment.get(element) // returns the given element
-  ```
-
-  ### Similar features
-
-  - The [`.up-destroying`](/api/up-destroying) class is assigned to elements during their removal animation.
-  - The [`up.element.get()`](/api/up.element.get) function simply returns the first element matching a selector
-  without filtering by layer or destruction state.
-
-  @function up.fragment.get
-  @section Search scope
-    @param {Element|jQuery|Document} [root=document]
-      The root element for the search. Only the root's descendants will be matched.
-
-      May be omitted to search through all elements in the current `document`.
-    @param {string|Element} selector
-      The selector to match.
-
-      If passed an `Element` instead of a string, that element is returned without further lookups.
-    @param {string} [options.layer='current']
-      The layer in which to select elements.
-
-      See `up.layer.get()` for a list of supported layer values.
-
-      If a root element was passed as first argument, this option is ignored and the
-      root element's layer is searched.
-
-    @param {boolean} [options.destroying=false]
-      Whether to include destroyed elements still playing out their exit animation.
-
-      @experimental
-
-  @section Region awareness
-    @param {string} [options.match='region']
-      Controls which fragment to return when the [`selector`](#selector) yields multiple results.
-
-      When set to `'region'` Unpoly will prefer to match fragments in the
-      [region](/learn/targeting-fragments#ambiguous-selectors) of the [origin element](#options.origin).
-
-      If set to `'first'` Unpoly will always return the first matching fragment.
-
-      Defaults to `up.fragment.config.match`, which defaults to `'region'`.
-
-    @param {Element|jQuery} [options.origin]
-      The origin element that triggered this fragment lookup, e.g. a button that was clicked.
-
-      Unpoly will prefer to match fragments in the [region](/learn/targeting-fragments#ambiguous-selectors)
-      of the origin element.
-
-      The `selector` argument may refer to the origin as `:origin`.
-  @return {Element|undefined}
-    The first matching element, or `undefined` if no such element matched.
-  @stable
-  @signature
-  */
-  function getSmart(...args) {
-    let [root, selector, options] = parseGetArgs(args)
-
-    if (u.isElementLike(selector)) {
-      // (1) up.fragment.get(root: Element, element: Element, [options]) should just return element.
-      //     The given root and options are ignored. We also don't check if it's destroying.
-      // (2) We do use e.get() to unwrap a jQuery collection.
-      return e.get(selector)
-    }
-
-    if (root) {
-      // We don't match around { origin } if we're given a root for the search.
-      return getFirstDescendant(root, selector, options)
-    }
-
-    // (1) If we don't have a root element we will use a context-sensitive lookup strategy
-    //     that tries to match elements in the region of { origin } before going through
-    //     the entire layer.
-    // (2) We must not pass a { document } option to up.FragmentFinder.
-    return new up.FragmentFinder({
-      selector,
-      ...u.pick(options, ['layer', 'match', 'origin', 'destroying']),
-    }).find()
-  }
-
-  function getFirstDescendant(...args) {
-    let [root, selectorString, options] = parseGetArgs(args)
-
-    let selector = new up.Selector(selectorString, root, options)
-    return selector.firstDescendant(root)
-  }
-
-  function parseGetArgs(args) {
-    return u.args(args, 'val', 'val', 'options')
-  }
-
-  /*-
-  Returns all elements matching the given CSS selector, but
-  ignores elements that are being [destroyed](/api/up.destroy) or that are being
-  removed by a [transition](/api/up.morph).
-
-  By default this function only selects elements in the [current layer](/api/up.layer.current).
-  Pass a `{ layer }`option to match elements in other layers. See `up.layer.get()` for a list
-  of supported layer values.
-
-  Returns an empty list if no element matches these conditions.
-
-  ### Example
-
-  To select all elements with the selector `.foo` on the [current layer](/api/up.layer.current):
-
-  ```js
-  let foos = up.fragment.all('.foo')
-  ```
-
-  You may also pass a `{ layer }` option to match elements within another layer:
-
-  ```js
-  let foos = up.fragment.all('.foo', { layer: 'any' })
-  ```
-
-  To select in the descendants of an element, pass a root element as the first argument:
-
-  ```js
-  let container = up.fragment.get('.container')
-  let foosInContainer = up.fragment.all(container, '.foo')
-  ```
-
-  ### Similar features
-
-  - The [`.up-destroying`](/api/up-destroying) class is assigned to elements during their removal animation.
-  - The [`up.element.all()`](/api/up.element.all) function simply returns all elements matching a selector
-    without further filtering.
-
-  @function up.fragment.all
-
-  @section Search scope
-    @param {Element|jQuery|Document} [root=document]
-      The root element for the search. Only the root's descendants will be matched.
-
-      May be omitted to search through all elements in the given [layer](#options.layer).
-
-    @param {string} selector
-      The selector to match.
-
-    @param {string} [options.layer='current']
-      The layer in which to select elements.
-
-      See `up.layer.get()` for a list of supported layer values.
-
-      If a `root` element was passed as first argument, this option is ignored and the
-      root element's layer is searched.
-
-  @section Origin
-    @param {string|Element|jQuery} [options.origin]
-      The origin element that triggered this fragment lookup, e.g. a button that was clicked.
-
-      The `selector` argument may refer to the origin as `:origin`.
-
-  @return {List<Element>}
-    A list of all elements matching the selector.
-
-    Returns an empty list if there are no matches.
-  @stable
-  */
-  function getAll(...args) {
-    let [root, selectorString, options] = parseGetArgs(args)
-
-    // (0) up.fragment.all(element) or up.fragment.all(element, element) should return an array of that element.
-    if (u.isElement(selectorString)) {
-      return [selectorString]
-    }
-
-    // (1) up.fragment.all(list) or up.fragment.all(element, list) should return the list unchanged
-    if (u.isList(selectorString)) {
-      return selectorString
-    }
-
-    // (2) up.fragment.all(rootElement, selector) should find selector within
-    //     the descendants of rootElement.
-    // (3) up.fragment.all(selector) should find selector within the current layer.
-    // (4) up.fragment.all(selector, { layer }) should find selector within the given layer(s).
-    let selector = new up.Selector(selectorString, root, options)
-    return selector.descendants(root)
-  }
-
-  /*-
-  Marks a target selector as optional.
-
-  If a `:maybe` selector is not found in the current page or the server response,
-  Unpoly will skip rendering the fragment instead of throwing an error.
-
-  An optional selector will be omitted from an `X-Up-Target` header unless it
-  matches in the current page.
-
-  @learn-ref targeting-fragments#missing-targets
-
-  ### Example
-
-  When [updating multiple fragments](/learn/targeting-fragments#multiple)
-  you may combine required and optional selectors in a single target string.
-
-  The link below will update the fragments `.content` (required) and `.details` (optional):
-
-  ```html
-  <a href="/card/5" up-target=".content, .details:maybe">...</a>
-  ```
-
-  Only the fragment `.content` is required to match. If `.details` is missing
-  in the current page or the server response, Unpoly will only update `.content`
-  without an error.
-
-  @selector :maybe
-  @stable
-  */
-
-  /*-
-  Returns a list of a `root` element's descendants matching the given selector.
-
-  If the `root` element itself matches the selector, it is also included in the returned list.
-
-  ## Ignored elements
-
-  The following elements are ignored, even if they match the selector:
-
-  - Elements in a different [layer](/api/up.layer) than `root`.
-  - Elements that are being [destroyed](/api/up.destroy) with an animation.
-  - Elements that are being removed by a [transition](/api/up-transition).
-
-  To include all elements matching the selector, use `up.element.subtree()`.
-
-  @function up.fragment.subtree
-  @param {Element} root
-    The root element for the search.
-  @param {string} selector
-    The CSS selector to match.
-  @return {NodeList<Element>|Array<Element>}
-    A list of all matching elements.
-  @stable
-  */
-  function getSubtree(element, selector, options = {}) {
-    return new up.Selector(selector, element, options).subtree(element)
-  }
-
-  /*-
-  Returns whether the given `root` matches or contains the given selector or element.
-
-  Will always return `false` if the two elements are on different [layers](/api/up.layer).
-
-  @param {Element|Document} root
-  @param {string|Element} query
-    The selector or element to look for.
-  @return {boolean}
-  @function up.fragment.contains
-    Whether the root contains the given element or selector.
-  @experimental
-  */
-  function contains(root, selectorOrElement) {
-    if (u.isElement(selectorOrElement)) {
-      // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
-      return e.contains(root, selectorOrElement) && up.layer.get(root)?.contains(selectorOrElement)
-    } else {
-      return getSubtree(root, selectorOrElement).length > 0
+}
+
+export function matchSelectorMap(element, selectorMap, { layer = element } = {}) {
+  let hits = []
+
+  if (selectorMap && element) {
+    for (let [selector, value] of Object.entries(selectorMap)) {
+      if (isDefined(value) && matches(element, selector, { layer })) {
+        hits.push(value)
+      }
     }
   }
 
-  /*-
-  Returns the first element that matches the selector by testing the element itself
-  and traversing up through ancestors in element's layers.
+  return hits
+}
 
-  `up.fragment.closest()` will only match elements in the same [layer](/api/up.layer) as
-  the given element. To match ancestors regardless of layers, use `up.element.closest()`.
+export function shouldRevalidate(request, response, options = {}) {
+  return request.fromCache && evalAutoOption(options.revalidate, config.autoRevalidate, response)
+}
 
-  @function up.fragment.closest
-  @param {Element} element
-    The element on which to start the search.
-  @param {string} selector
-    The CSS selector to match.
-  @return {Element|null|undefined} element
-    The matching element.
-
-    Returns `null` or `undefined` if no element matches in the same layer.
-  @stable
-  */
-  function closest(element, selector, options) {
-    return new up.Selector(selector, element, options).closest(element)
-  }
-
-  /*-
-  Destroys the given element or selector.
-
-  All registered [destructors](/learn/enhancing-elements#destructor) are called.
-  The element is then removed from the DOM.
-
-  Unfinished requests targeting the destroyed fragment or its descendants are [aborted](/learn/aborting-requests).
-
-  Emits the event [`up:fragment:destroyed`](/api/up:fragment:destroyed).
-
-  ## Animating the removal
-
-  You may animate the element's removal by passing an option like `{ animation: 'fade-out' }`.
-  Unpoly ships with a number of [predefined animations](/api/up.animate#named-animations) and
-  you may also define [custom animations](/api/up.animation).
-
-  If the element's removal is animated, the element will remain in the DOM until after the animation
-  has completed. While the animation is running the element will be given the `.up-destroying` class.
-  The element will also be given the [`[inert]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert)
-  attribute to prevent interaction and to hide its content from assistive technologies.
-
-  To prevent accidental selection of destroying elements, they are ignored by
-  Unpoly features like [`[up-target]`](/learn/targeting-fragments) or `up.fragment.get()`.
-
-  ## Running code after removal
-
-  Destroying an element without animation works synchronously:
-
-  ```js
-  console.log(element.isConnected) // logs "true"
-
-  up.destroy(element) // no need to await
-
-  console.log(element.isConnected) // logs "false"
-  ```
-
-  When the removal is animated, it remains attached while the exit animation
-  plays. To run code after the element was detached from the DOM, pass an `{ onFinished }` callback:
-
-  ```js
-  console.log(element.isConnected) // logs "true"
-
-  up.destroy(element, {
-    animation: 'fade-out',
-    duration: 500,
-    onFinished() { console.log(element.isConnected) }
+function isContainedByRivalStep(steps, candidateStep) {
+  return some(steps, function(rivalStep) {
+    return (rivalStep !== candidateStep) &&
+      ((rivalStep.placement === 'swap') || (rivalStep.placement === 'content')) &&
+      rivalStep.oldElement.contains(candidateStep.oldElement)
   })
+}
 
-  console.log(element.isConnected) // logs "true"
+export function compressNestedSteps(steps) {
+  if (steps.length < 2) return steps
+  let compressed = uniqBy(steps, 'oldElement')
+  compressed = reject(compressed, (step) => isContainedByRivalStep(compressed, step))
+  return compressed
+}
 
-  // After 500 ms the { onFinished } callback logs "false"
-  ```
+/*-
+[Aborts requests](/learn/aborting-requests) targeting a fragment or layer.
 
-  ## Detecting destructor errors
+Always emits the event `up:fragment:aborted`, regardless of whether there were requests to abort.
+If a request was aborted, the event `up:request:aborted` will also be emitted.
 
-  If a [destructor](/learn/enhancing-elements#destructor) throws an error, `up.destroy()` will still remove the element and *not* throw an error.
+@learn-ref aborting-requests
 
-  Instead destructor errors will print to the [error console](https://developer.mozilla.org/en-US/docs/Web/API/console/error)
-  and emit an [`error` event on `window`](https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event).
+### Aborting requests targeting a fragment
 
-  See [errors in user code](/learn/render-lifecycle#errors-in-user-code) for details.
+To abort pending requests [targeting](/learn/targeting-fragments) an element or its descendants,
+pass a reference or CSS selector for that element:
 
-  @function up.destroy
-  @section Scope
-    @param {string|Element|jQuery} element
-      The element to remove.
-  @section Animation
-    @param {string|Function(element, options): Promise} [options.animation='none']
-      An animation to play before the element is removed from the DOM.
-    @param options.duration
-      @like up.animate
-    @param options.easing
-      @like up.animate
-    @param {Function} [options.onFinished]
-      A callback that is run when any animations are finished and the element was removed from the DOM.
-  @stable
-  @signature
-  */
-  function destroy(...args) {
-    const options = parseTargetAndOptions(args)
-    const element = getSmart(options.target, options)
+```js
+up.fragment.abort(element)
+up.fragment.abort('.foo')
+```
 
-    if (element) {
-      new up._classes.DestroyFragment({ ...options, element }).execute()
-    }
+You may also pass an `{ origin }` or `{ layer }` option to help look up the selector.
 
-    return up.migrate.formerlyAsync?.('up.destroy()')
-  }
+### Aborting requests targeting a layer
 
-  function parseTargetAndOptions(args) {
-    const options = u.parseArgIntoOptions(args, 'target')
-    if (u.isElement(options.target)) {
-      options.origin ||= options.target
-    }
-    return options
-  }
+To abort all requests targeting elements on a given layer,
+pass a [`{ layer }` option](/learn/targeting-other-layers):
 
-  /*-
-  Elements are assigned the `.up-destroying` class before they are [destroyed](/api/up.destroy)
-  or while they are being removed by a [transition](/api/up.morph).
+```js
+up.fragment.abort({ layer: 'root' })
+```
 
-  @learn-ref transitions#how-a-transition-plays
+### Aborting all requests
 
-  If the removal is [animated](/api/up.destroy#animating-the-removal),
-  the class is assigned before the animation starts.
+This would abort requests targeting any elements on any layer:
 
-  ### Destroying elements are ignored
+```js
+up.fragment.abort({ layer: 'any' })
+```
 
-  Destroyed elements remain attached to the DOM while they are playing out their exit animation.
-  To prevent accidental selection of destroying elements, they are ignored by
-  Unpoly features like [`[up-target]`](/learn/targeting-fragments) or `up.fragment.get()`.
+### Low-level API
 
-  Only the low-level DOM helpers in `up.element` will *not* ignore elements that are being destroyed.
+There is also a low-level `up.network.abort()` function, which aborts requests
+matching arbitrary conditions.
 
-  ### Accessibility
+If possible, prefer `up.fragment.abort()`, which matches requests by screen region.
+Only when requests are aborted by screen region, components
+can [react to being aborted](/api/up:fragment:aborted).
 
-  While an element's destruction is animating, the element is also assigned an
-  [`[inert]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/inert) attribute.
 
-  This prevents interaction with the element and hides it from assistive technologies.
+@function up.fragment.abort
+@section Matching requests
+  @param {string|Element|List<Element>} [element]
+    The element (or selector) for which requests should be aborted.
 
-  @selector .up-destroying
-  @stable
-  */
+    May be omitted with `{ layer }` option.
+  @param {string|up.Layer} [options.layer]
+    The [layer](/learn/targeting-other-layers) for which requests should be aborted.
 
-  function markFragmentAsDestroying(element) {
-    element.classList.add('up-destroying')
-    element.setAttribute('inert', '')
-  }
-
-  /*-
-  Replaces the given element with a fresh copy fetched from the server.
-
-  @learn-ref live-fragments
-
-  By default, reloading is **not** considered a [user navigation](/learn/navigation-defaults) and will not scroll, focus
-  or update the browser location. You may change this with `{ navigate: true }`.
-
-  ## Example
-
-  ```js
-  let { fragment } = await up.reload('.inbox')
-  console.log("New .inbox element: ", fragment)
-  ```
-
-  ## Controlling the URL that is reloaded
-
-  Unpoly remembers [the URL from which a fragment was loaded](/api/up-source),
-  so you don't usually need to pass a URL when reloading.
-
-  To reload from another URL, pass a `{ url }` option or set an `[up-source]` attribute
-  on the element being reloaded or its ancestors.
-
-  ## Skipping updates when nothing changed
-
-  The server can answer `304 Not Modified` when the fragment hasn't changed. See [conditional requests](/learn/conditional-requests).
-
-  ## Restoring content from cache
-
-  To instantly restore a fragment to the last [cached](/learn/caching) version, pass a `{ cache: true }` option:
-
-  ```js
-  up.reload('.inbox', { cache: true }) // mark: cache: true
-  ```
-
-  If the fragment source isn't cached, a network request is made.
-
-  To restore a fragment from cache, but [revalidate](/learn/caching#revalidation) cached content that
-  has [expired](/learn/caching#expiration), also pass a `{ revalidate: 'auto' }` option:
-
-  ```js
-  up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate: 'auto'
-  ```
-
-  @function up.reload
-
-  @section Targeting
-    @param {string|Element|Array<Element>|jQuery} [element]
-      The element or selector that should be reloaded.
-
-      If omitted, an element matching a selector in `up.fragment.config.mainTargets` will be reloaded.
-
-      When an `Element` object is passed, a target selector will be [derived](/learn/target-derivation).
-
-  @section Render options
-    @param {Object} [options]
-      Additional [render options](/api/up.render#parameters) to use when reloading the fragment.
-
-      Common options are documented below, but most [options for `up.render()`](/api/up.render#parameters) may be used.
-
-      Defaults can be configured in `up.fragment.config.reloadOptions` and `up.fragment.config.renderOptions`.
-
-    @param {boolean} [options.navigate=false]
-      Whether the reloading constitutes a [user navigation](/learn/navigation-defaults).
-
-  @section Request
-    @mix up.render/request
-      @param options.url
-        The URL from which to reload the fragment.
-
-        Defaults to the [URL from which the fragment was originally loaded](/api/up.fragment.source).
-
-  @section Caching
-    @param {boolean} [options.cache=false]
-      Whether to restore the fragment from the [cache](/learn/caching).
-
-      By default the cache is ignored and a new HTTP request is sent.
-      Pass `{ cache: true }` to restore the fragment from the cache.
-
-    @param {boolean|string} [options.revalidate=false]
-      @like up.render
-
-  @section Scrolling
-    @param [options.scroll='keep']
-      Whether to scroll after the fragment was reloaded.
-
-      By default Unpoly will [keep scroll positions](/learn/scrolling#keep) of all viewports
-      around the updated fragment.
-
-      See [scrolling](/learn/scrolling) for a list of allowed values.
-
-      @like up.render
-
-  @section Focus
-    @param [options.focus='keep']
-      What to focus after the fragment was reloaded.
-
-      By default Unpoly will [keep the current focus](/learn/focus#keep)
-      within the updated fragment.
-
-      See [focus](/learn/focus) for a list of allowed values.
-
-      @like up.render
-
-  @section Loading state
-    @mix up.render/loading-state
-
-  @section Client state
-    @mix up.reload/client-state
-
-  @section Lifecycle hooks
-    @mix up.render/lifecycle-hooks
-
-  @return
-    @like up.render
-
-  @stable
-  @signature
-  */
-  function reload(...args) {
-    const options = { ...config.reloadOptions, ...parseTargetAndOptions(args) }
-    options.target ||= ':main'
-    const element = getSmart(options.target, options)
-    options.url ||= sourceOf(element)
-    options.headers = u.merge(options.headers, conditionalHeaders(element))
-    if (options.keepData || e.booleanAttr(element, 'up-keep-data')) {
-      options.data = up.data(element)
-    }
-    up.migrate.postprocessReloadOptions?.(options)
-    return render(options)
-  }
-
-  function conditionalHeaders(element) {
-    let headers = {}
-    let time = timeOf(element)
-    if (time) {
-      headers['If-Modified-Since'] = time.toUTCString()
-    }
-    let etag = etagOf(element)
-    if (etag) {
-      headers['If-None-Match'] = etag
-    }
-    return headers
-  }
-
-  /*-
-  Fetches the given URL with JavaScript and [replaces](/api/up.render) the
-  [current layer](/api/up.layer.current)'s [main fragment](/api/up.fragment.config#config.mainTargets)
-  with a matching fragment from the server response.
-
-  ### Example
-
-  This would replace the current page with the response for `/users`:
-
-  ```js
-  up.visit('/users')
-  ```
-
-  @function up.visit
-
-  @section Destination
-    @param {string} url
-      The URL to visit.
-
-  @section Render options
-    @param {Object} [options]
-      Additional [render options](/api/up.render#parameters) to use for rendering the destination URL.
-
-      Most [options for `up.render()`](/api/up.render#parameters) may be used.
-
-  @return
-    @like up.render
-
-  @stable
-  */
-  function visit(url, options) {
-    return navigate({ ...options, url })
-  }
-
-  const KEY_PATTERN = /^(onFail|on|fail)?(.+)$/
-
-  /*-
-  Removes a "fail" prefix or infix from an options key.
-
-  Returns `undefined` if the given key has no "fail" prefix or infix.
-
-  ## Examples
-
-  ```js
-  successKey('target')         // result: undefined
-  successKey('onFinished')     // result: undefined
-  successKey('failTarget')     // result: 'target'
-  successKey('onFailFinished') // result: 'onFinished'
-  ```
-
-  @function up.fragment.successKey
-  @internal
-  */
-  function successKey(key) {
-    let match = KEY_PATTERN.exec(key)
-    if (match) {
-      let [_, prefix, suffix] = match
-
-      switch (prefix) {
-        case 'onFail':
-          return 'on' + u.upperCaseFirst(suffix)
-        case 'fail':
-          return u.lowerCaseFirst(suffix)
-      }
-    }
-  }
-
-  /*-
-  Adds a "fail" prefix or infix from an options key.
-
-  Returns `undefined` if the key already has a "fail" prefix or infix.
-
-  ## Examples
-
-  ```js
-  failKey('target')         // result: 'failTarget'
-  failKey('onFinished')     // result: 'onFailFinished'
-  failKey('failTarget')     // result: undefined
-  failKey('onFailFinished') // result: undefined
-  ```
-
-  @function up.fragment.failKey
-  @internal
-  */
-  function failKey(key) {
-    let match = KEY_PATTERN.exec(key)
-    if (match) {
-      let [_, prefix, suffix] = match
-
-      switch (prefix) {
-        case 'on':
-          return 'onFail' + u.upperCaseFirst(suffix)
-        case undefined:
-          return 'fail' + u.upperCaseFirst(suffix)
-      }
-    }
-  }
-
-  /*-
-  [Derives a CSS selector](/learn/target-derivation) that matches the given element as good as possible.
-
-  If no target can be derived and [verified](/learn/target-derivation#verification), an error `up.CannotTarget` is thrown.
-
-  ### Example
-
-  ```js
-  element = up.element.createFromHTML('<span class="klass">...</span>')
-  selector = up.fragment.toTarget(element) // returns '.klass'
-  ```
-
-  @function up.fragment.toTarget
-  @section Element
-    @param {Element|string} element
-      The element for which to create a selector.
-
-      When a string is given, it is returned unchanged.
-    @param {boolean} [options.strong=false]
-      Whether to provide a more unique selector by only considering the element's `[id]` and `[up-id]` attributes.
-
-      Weaker target derivers, like the element's class, are not considered in strong mode.
-      The element's tag name is only considered for singleton elements like `<html>` or `<body>`.
-
-      @experimental
-  @section Verification
-    @param {boolean} [options.verify]
-      Whether to verify that the derived selector matches the given element.
-
-      Defaults to `up.fragment.config.verifyDerivedTarget`.
-
-    @param {Element} [options.origin]
-      The origin used to [resolve an ambiguous selector](/learn/targeting-fragments#ambiguous-selectors)
-      during [target verification](/learn/target-derivation#verification).
-  @return {string}
-    The derived selector string.
-  @stable
-  */
-  function toTarget(element, options) {
-    return u.presence(element, u.isString) || tryToTarget(element, options) || cannotTarget(element)
-  }
-
-  /*-
-  Returns whether Unpoly can [derive a target selector](/learn/target-derivation) for the given element.
-
-  @function up.fragment.isTargetable
-  @section Element
-    @param {Element} element
-      The element to test.
-    @param [options.strong]
-      @like up.fragment.toTarget
-  @section Verification
-    @param [options.verify]
-      @like up.fragment.toTarget
-    @param [options.origin]
-      @like up.fragment.toTarget
-  @return {boolean}
-    Whether a selector can be derived for the given element.
-  @stable
-  */
-  function isTargetable(element, options) {
-    return !!tryToTarget(element, options)
-  }
-
-  function untargetableMessage(element) {
-    return `Cannot derive good target selector from a <${element.localName}> element without identifying attributes. Try setting an [id] or configure up.fragment.config.targetDerivers.`
-  }
-
-  function cannotTarget(element) {
-    throw new up.CannotTarget(untargetableMessage(element))
-  }
-
-  function tryToTarget(element, options = {}) {
-    let derivers = options.strong ? config.strongTargetDerivers : config.targetDerivers
-
-    return u.findResult(derivers, function(deriver) {
-      let target = deriveTarget(element, deriver)
-
-      if (target && isGoodTarget(target, element, options)) {
-        return target
-      }
-    })
-  }
-
-  function deriveTarget(element, deriver) {
-    if (u.isFunction(deriver)) {
-      return deriver(element)
-    } else if (element.matches(deriver)) {
-      try {
-        // Now that we know that a deriver is applicable to our element, we're using
-        // the element's tag name and attribute to form a more specific target.
-        // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
-        return deriveTargetFromPattern(element, deriver)
-      } catch (e) {
-        if (e instanceof up.CannotParse) {
-          // This error can be thrown for two reasons:
-          // (1) up.element.parseSelector() cannot parse the given string
-          // (2) up.element.parseSelector() parses a selector with a depth > 1.
-          return deriver
-        } else {
-          throw e
-        }
-      }
-    }
-  }
-
-  function deriveTargetFromPattern(element, deriver) {
-    // Now that we know that a deriver is applicable to our element, we're using
-    // the element's tag name and attribute to form a more specific target.
-    // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
-
-    let { includePath, excludeRaw } = e.parseSelector(deriver)
-
-    if (includePath.length !== 1) {
-      // It's not straightforward to improve a descendant selector like '.foo .bar' or '.foo > .bar'.
-      // It's also not common to see such selectors configured in config.targetDerivers.
-      // Hence we just return the matching deriver.
-      throw new up.CannotParse(deriver)
-    }
-
-    let { tagName, id, classNames, attributes } = includePath[0]
-    let result = ''
-
-    if (tagName === '*') {
-      // In a deriver '*' means to include the actual tag name in the target-
-      // Use the local name, which keeps the case of camelCase SVG elements like <clipPath>.
-      // Type selectors match those case-sensitively, so tagName.toLowerCase() would not match.
-      result += element.localName
-    } else if (tagName) {
-      // If a deriver contains an actual tag name like 'main' it becomes
-      // part of the target selector.
-      result += tagName
-    }
-
-    for (let className of classNames) {
-      result += e.classSelector(className)
-    }
-
-    if (id) {
-      result += e.idSelector(id)
-    }
-
-    for (let attributeName in attributes) {
-      // If a deriver contains an attribute value (e.g. '[rel=canonical]') we use that for the target.
-      // If the deriver has a value-less attribute (e.g. '[rel]') we use the actual attribute value from the element.
-      let attributeValue = attributes[attributeName] || element.getAttribute(attributeName)
-
-      if (attributeName === 'id') {
-        // We allow a deriver '[id]' to apply to all elements with an ID.
-        // However, we want to use an ID selector ('#foo') instead of an attribute selector ('[id=foo]').
-        result += e.idSelector(attributeValue)
-      } else if (attributeName === 'class') {
-        // We allow a deriver '[class]' to apply to all elements with a class.
-        // However, we want to (1) filter class against config.badTargetClasses and
-        // (2) use an class selector ('.foo') instead of an attribute selector ('[class=foo]').
-        for (let goodClass of goodClassesForTarget(element)) {
-          result += e.classSelector(goodClass)
-        }
-      } else {
-        result += e.attrSelector(attributeName, attributeValue)
-      }
-    }
-
-    if (excludeRaw) {
-      result += excludeRaw
-    }
-
-    return result
-  }
-
-  function isGoodTarget(target, element, options = {}) {
-    let verify = options.verify ?? config.verifyDerivedTarget
-    return !isAlive(element) || !verify || up.fragment.get(target, { layer: element, ...options }) === element
-  }
-
-  /*-
-  Sets a unique identifier for this element.
-
-  This identifier is used in [target derivation](/learn/target-derivation)
-  to create a CSS selector that matches this element precisely.
-  If the element already has [other attributes that make a good identifier](/learn/target-derivation#derivation-patterns),
-  like a good `[id]` or `[class]` attribute, it is not necessary to also set `[up-id]`.
-
-  @learn-ref target-derivation
-
-  ### Example
-
-  Take this element:
-
-  ```html
-  <section>
-    <h2>Latest news</h2>
-  </section>
-  ```
-
-  Unpoly cannot generate a good CSS selector for this element:
-
-  ```js
-  up.fragment.toTarget(element)
-  // throws error: up.CannotTarget
-  ```
-
-  We can improve this by assigning an `[up-id]`:
-
-  ```html
-  <section up-id="latest-news">
-    <h2>Latest news</h2>
-  </section>
-  ```
-
-  The attribute value is used to create a better selector:
-
-  ```js
-  up.fragment.toTarget(element)
-  // returns '[up-id="latest-news"]'
-  ```
-
-  @selector [up-id]
-  @param up-id
-    A string that uniquely identifies this element.
-  @stable
-  */
-
-  function matchesPattern(pattern, str) {
-    if (u.isRegExp(pattern)) {
-      return pattern.test(str)
-    } else {
-      return pattern === str
-    }
-  }
-
-  function goodClassesForTarget(element) {
-    let isGood = (klass) => !u.some(config.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
-    return u.filter(element.classList, isGood)
-  }
-
-  const MAIN_PSEUDO = /:main\b/
-  const LAYER_PSEUDO = /:layer\b/
-  const ORIGIN_PSEUDO = /:origin\b/
-
-  function containsMainPseudo(target) {
-    return MAIN_PSEUDO.test(target)
-  }
-
-  function expandTargets(targets, options = {}) {
-    const { layer } = options
-    if (layer !== 'new' && !(layer instanceof up.Layer)) {
-      up.fail('Must pass an up.Layer as { layer } option, but got %o', layer)
-    }
-
-    // Copy the list since targets might be a jQuery collection, and this does not support shift or push.
-    targets = u.copy(u.wrapList(targets))
-
-    const expanded = []
-
-    while (targets.length) {
-      let target = targets.shift()
-      if (target === true) target = ':main'
-
-      if (containsMainPseudo(target)) {
-        let mode = resolveMode(options)
-        let replaced = up.layer.mainTargets(mode).map((mainTarget) => target.replace(MAIN_PSEUDO, mainTarget))
-        targets.unshift(...replaced)
-      } else if (LAYER_PSEUDO.test(target)) {
-        // Discard this target for new layers, which don't have a first-swappable-element.
-        // Also don't && the layer check into the `else if` condition above, or it will
-        // be returned as a verbatim string below.
-        if (layer === 'new' || layer.state === 'opening') continue
-        let firstSwappableTarget = toTarget(layer.getFirstSwappableElement(), options)
-        targets.unshift(target.replace(LAYER_PSEUDO, firstSwappableTarget))
-      } else if (u.isElementLike(target)) {
-        expanded.push(toTarget(target, options))
-      } else if (u.isString(target)) {
-        expanded.push(resolveOrigin(target, options))
-      }
-    }
-
-    return u.uniq(expanded)
-  }
-
-  function resolveMode({ layer, mode }) {
-    if (layer === 'new') {
-      return mode || up.fail('Must pass a { mode } option together with { layer: "new" }')
-    } else {
-      return layer.mode
-    }
-  }
-
-  function modernResolveOrigin(target, { origin } = {}) {
-    return target.replace(ORIGIN_PSEUDO, function(match) {
-      if (origin) {
-        return toTarget(origin)
-      } else {
-        up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', match, target)
-      }
-    })
-  }
-
-  function resolveOrigin(target, options) {
-    // up.FormValidator sometimes calls resolveOrigin(undefined)
-    if (!u.isString(target)) return target
-    return (up.migrate.resolveOrigin || modernResolveOrigin)(target, options)
-  }
-
-  function splitTarget(target) {
-    return u.getComplexTokens(target)
-  }
-
-  function parseTargetSteps(target, options = {}) {
-    let defaultPlacement = options.defaultPlacement || 'swap'
-    let defaultMaybe = options.defaultMaybe ?? false
-
-    let steps = []
-    let simpleSelectors = splitTarget(target)
-
-    for (let selector of simpleSelectors) {
-      if (selector === ':none') continue
-
-      let placement = defaultPlacement
-      let maybe = defaultMaybe
-
-      selector = selector.replace(/::?(before|after|content)\b/, (_match, customPlacement) => {
-        placement = customPlacement
-        return ''
-      })
-
-      selector = selector.replace(/:maybe\b/, () => {
-        maybe = true
-        return ''
-      })
-
-      // Each step inherits all options of this change.
-      const step = {
-        ...options,
-        selector,
-        placement,
-        maybe,
-        originalRenderOptions: options,
-      }
-
-      steps.push(step)
-    }
-
-    return steps
-  }
-
-  function hasAutoHistory(newFragments, layer) {
-    // We cannot use up.fragment.contains(fragment, config.autoHistoryTargets)
-    // because fragment is not yet attached when we are called from OpenLayerPlan.
-
-    let vanillaSelector = expandTargets(config.autoHistoryTargets, { layer }).join()
-
-    for (let newFragment of newFragments) {
-      if (e.subtree(newFragment, vanillaSelector).length) {
-        return true
-      }
-    }
-
-    up.puts('up.render()', "Will not auto-update history because fragment doesn't contain a selector from up.fragment.config.autoHistoryTargets")
-    return false
-  }
-
-  /*-
-  A pseudo-selector that matches the layer's [main fragment](/api/up-main).
-
-  Use `:main` to only update the main fragment, while keeping static layout elements around it.
-  To replace all visible elements of a layer, see `:layer`.
-
-  @learn-ref targeting-fragments
-
-  ## Targeting the main fragment
-
-  You can target the main fragment using the `:main` selector:
-
-  ```html
-  <a href="/cards/5" up-target=":main">Load post</a>
-
-  <main>
-    Post will appear here
-  </main>
-  ```
-
-  Unpoly will also update `:main` if no other target is given:
-
-  ```html
-  <a href="/cards/5" up-follow>Load post</a>
-
-  <main>
-    Post will appear here
-  </main>
-  ```
-
-  Also see [targeting the main fragment](/learn/targeting-fragments#targeting-the-main-element).
-
-  ## Default main targets
-
-  The default main targets are:
-
-  - any element with an `[up-main]` attribute
-  - the HTML5 [`<main>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main) element
-  - the current layer's [topmost swappable element](/api/layer)
-
-  You may configure main target selectors in `up.fragment.config.mainTargets`.
-
-  @selector :main
-  @stable
-  */
-
-  /*-
-  Marks this element as the [main fragment](/learn/targeting-fragments#targeting-the-main-element) of your application layout.
-
-  Unpoly will update the main fragment when no more specific render target is given.
-
-  @learn-ref targeting-fragments
-
-  ## Example
-
-  Many links simply replace the main fragment in your application layout.
-
-  Unpoly lets you mark this element as a default target using the `[up-main]` attribute:
-
-  ```html
-  <body>
-    <div class="layout">
-      <div class="layout--side">
-        ...
-      </div>
-      <div class="layout--content" up-main>
-       ...
-      </div>
-    </div>
-  </body>
-  ```
-
-  Once the main fragment is marked, you no longer need `[up-target]` in a link.\
-  Use `[up-follow]` and the `[up-main]` element will be replaced:
-
-  ```html
-  <a href="/foo" up-follow>...</a>
-  ```
-
-  If you want to update something more specific, you can still use `[up-target]`:
-
-  ```html
-  <a href="/foo" up-target=".profile">...</a>
-  ```
-
-  ## Overlays can use a different main fragment {#overlays}
-
-  Overlays often use a different default selector, e.g. to exclude a navigation bar.
-
-  To mark a different main fragment for an overlay, set the [layer mode](/learn/overlays#layer-modes) as the
-  value of the `[up-main]` attribute:
-
-  ```html
-  <body>
-    <div class="layout" up-main="root">
-      <div class="layout--side">
-        ...
-      </div>
-      <div class="layout--content" up-main="modal">
-        ...
-      </div>
-    </div>
-  </body>
-  ```
-
-  ## Using existing elements as main targets
-
-  Instead of the `[up-main]` attribute you may also use the standard [`<main>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/main) element.
-
-  You may also configure an existing selector in `up.fragment.config.mainTargets`:
-
-  ```js
-  up.fragment.config.mainTargets.push('.layout--content')
-  ```
-
-  You may configure layer-specific targets in `up.layer.config`:
-
-  ```js
-  up.layer.config.popup.mainTargets.push('.menu')              // for popup overlays
-  up.layer.config.drawer.mainTargets.push('.menu')             // for drawer overlays
-  up.layer.config.overlay.mainTargets.push('.layout--content') // for all overlay modes
-  ```
-
-  @selector [up-main]
-  @param [up-main]
-    A space-separated list of [layer modes](/learn/overlays#layer-modes) for which this element is the main fragment.
-
-    Omit the attribute value to make this the main fragment for *all* layer modes.
-
-    To use a different main fragment for all overlays (but not the root layer), set `[up-main=overlay]`.
-  @stable
-  */
-
-  /*-
-  To make a server request without changing a fragment, use the `:none` [target](/learn/targeting-fragments).
-
-  @learn-ref targeting-fragments
-
-  ### Example
-
-  Clicking this link will make a request to `/ping`, but not update any element:
-
-  ```html
-  <a href="/ping" up-target=":none">Ping server</a>
-  ```
-
-  @selector :none
-  @stable
-  */
-
-  /*-
-  Your [target selectors](/learn/targeting-fragments) may use this pseudo-selector
-  to reference the origin element that triggered the change.
-
-  The `:origin` placeholder will be replaced with a target [derived](/learn/target-derivation)
-  from the origin element.
-
-  @learn-ref targeting-fragments#ambiguous-selectors
-
-
-  ## Example
-
-  @include origin-selector-example
-
-  ## Default origins
-
-  The origin element is automatically set for many actions, for example:
-
-  @include default-origins
-
-  ## Setting the origin programmatically
-
-  When updating fragments programmatically through functions like `up.render()`
-  you may pass an origin element as an `{ origin }` option:
-
-  ```js
-  element.addEventListener('click', function(event) {
-    up.render('.preview', { url: '/preview', origin: element })
-  })
-  ```
-
-  You do not need to pass an `{ origin }` for functions that already have a
-  natural origin:
-
-  ```js
-  up.follow(link) // link will be set as { origin }
-  ```
-
-  > [TIP]
-  > Ensuring an origin is set may improve the precision of fragment lookup, even if
-  > a [target selector](/learn/targeting-fragments) doesn't contain an `:origin` reference.
-  > In the example above, Unpoly would prefer to match `.preview` in the
-  > [region](/learn/targeting-fragments#ambiguous-selectors) of the origin.
-  > If no origin is known, Unpoly will always match the first `.preview` in the
-  > current [layer](/api/up.layer).
-
-  @selector :origin
-  @stable
-  */
-
-  /*-
-  Your [target selectors](/learn/targeting-fragments) may use this pseudo-selector
-  to replace the layer's topmost swappable element.
-
-  @learn-ref targeting-fragments
-
-  ## What is targeted
-
-  @include topmost-swappable-layer-element
-
-  Use `:layer` to replace all visible elements of a layer. To only update a layer's main fragment
-  while keeping static layout elements around it, see `:main`.
-
-  ## Example
-
-  We open an overlay with a target selector `#foo`:
-
-  ```
-  up.layer.open({ target: '#foo', content: 'Hello from overlay' })
-  ```
-
-  The topmost swappable element is now `#foo`, which we can select with `:layer`:
-
-  ```js
-  // targets '#foo'
-  up.render({ target: ':layer', url: '/page2' })
-  ```
-
-  The resolution of `:layer` depends on the targeted layer. For example, when rendering in
-  the root layer, `:layer` will resolve to the `<body>`:
-
-  ```js
-  // targets the body
-  up.render({ target: ':layer', layer: 'root', url: '/page2' })
-  ```
-
-  @selector :layer
-  @stable
-  */
-
-  /*-
-  Returns whether the given element matches the given CSS selector or other element.
-
-  Other than [`Element#matches()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/matches)
-  this function supports non-standard selectors like `:main` or `:layer`.
-
-  Instead of a selector you may also pass a second element. In that case
-  the function returns whether both elements match the same [derived target](/learn/target-derivation).
-
-  ### Examples
-
-  ```js
-  let element = document.querySelector('div[up-main]')
-  up.fragment.matches(element, 'div') // result: true
-  up.fragment.matches(element, 'span') // result: false
-  up.fragment.matches(element, ':main') // result: true
-  up.fragment.matches(element, element) // result: true
-  ```
-
-  @function up.fragment.matches
-
-  @section Comparison
-    @param {Element} fragment
-      The element to test.
-    @param {string|Element} selector
-      The selector that the `fragment` should match.
-
-      When an `Element` is passed as this `selector` argument, this functions tests whether `fragment` matches
-      a [target derived](/learn/target-derivation) from `selector`.
-
-  @section Layer
-    @param {string|up.Layer} [options.layer]
-      The layer for which to match.
-
-      Pseudo-selectors like `:main` may expand to different selectors in different layers.
-
-      Defaults to the layer of `fragment`.
-    @param {string|up.Layer} [options.mode]
-      Required if `{ layer: 'new' }` is passed.
-
-  @return {boolean}
-    Whether `fragment` matches the given `selector`.
-
-  @stable
-  */
-  function matches(element, selector, options = {}) {
-    element = e.get(element)
-    if (u.isElement(selector)) {
-      let target = tryToTarget(selector)
-      return target && element.matches(target)
-    } else {
-      return new up.Selector(selector, element, options).matches(element)
-    }
-  }
-
-  function matchSelectorMap(element, selectorMap, { layer = element } = {}) {
-    let hits = []
-
-    if (selectorMap && element) {
-      for (let [selector, value] of Object.entries(selectorMap)) {
-        if (u.isDefined(value) && matches(element, selector, { layer })) {
-          hits.push(value)
-        }
-      }
-    }
-
-    return hits
-  }
-
-  function shouldRevalidate(request, response, options = {}) {
-    return request.fromCache && u.evalAutoOption(options.revalidate, config.autoRevalidate, response)
-  }
-
-  function isContainedByRivalStep(steps, candidateStep) {
-    return u.some(steps, function(rivalStep) {
-      return (rivalStep !== candidateStep) &&
-        ((rivalStep.placement === 'swap') || (rivalStep.placement === 'content')) &&
-        rivalStep.oldElement.contains(candidateStep.oldElement)
-    })
-  }
-
-  function compressNestedSteps(steps) {
-    if (steps.length < 2) return steps
-    let compressed = u.uniqBy(steps, 'oldElement')
-    compressed = u.reject(compressed, (step) => isContainedByRivalStep(compressed, step))
-    return compressed
-  }
-
-  /*-
-  [Aborts requests](/learn/aborting-requests) targeting a fragment or layer.
-
-  Always emits the event `up:fragment:aborted`, regardless of whether there were requests to abort.
-  If a request was aborted, the event `up:request:aborted` will also be emitted.
-
-  @learn-ref aborting-requests
-
-  ### Aborting requests targeting a fragment
-
-  To abort pending requests [targeting](/learn/targeting-fragments) an element or its descendants,
-  pass a reference or CSS selector for that element:
-
-  ```js
-  up.fragment.abort(element)
-  up.fragment.abort('.foo')
-  ```
-
-  You may also pass an `{ origin }` or `{ layer }` option to help look up the selector.
-
-  ### Aborting requests targeting a layer
-
-  To abort all requests targeting elements on a given layer,
-  pass a [`{ layer }` option](/learn/targeting-other-layers):
-
-  ```js
-  up.fragment.abort({ layer: 'root' })
-  ```
-
-  ### Aborting all requests
-
-  This would abort requests targeting any elements on any layer:
-
-  ```js
-  up.fragment.abort({ layer: 'any' })
-  ```
-
-  ### Low-level API
-
-  There is also a low-level `up.network.abort()` function, which aborts requests
-  matching arbitrary conditions.
-
-  If possible, prefer `up.fragment.abort()`, which matches requests by screen region.
-  Only when requests are aborted by screen region, components
-  can [react to being aborted](/api/up:fragment:aborted).
-
-
-  @function up.fragment.abort
-  @section Matching requests
-    @param {string|Element|List<Element>} [element]
-      The element (or selector) for which requests should be aborted.
-
-      May be omitted with `{ layer }` option.
-    @param {string|up.Layer} [options.layer]
-      The [layer](/learn/targeting-other-layers) for which requests should be aborted.
-
-      May be omitted with `element` argument.
-    @param {Element} [options.origin]
-      The element causing requests to be aborted.
-
-      This is used to look up an `element` selector or `{ layer }` name.
-    @param {up.Request} [options.except]
-      A request that should not be aborted, even if it matches
-      the conditions above.
-
-      @experimental
-  @section Debugging
-    @param {string} [options.reason]
-      The reason for aborting requests.
-
-      The promise by an aborted `up.request()` will reject with this reason
-      to help debugging an unexpected aborting.
-
-      If omitted, a default message will describe the abort conditions.
-  @stable
-  */
-  function abort(...args) {
-    let options = parseTargetAndOptions(args)
-
-    // The function that checks whether a given function will be aborted.
-    let testFn
-
-    // The reason will be logged with the up:request:abort event when we actually abort an event.
-    // It should be a string, not an array that goes through sprintf().
-    let { reason, newLayer, jid } = options
-
-    // At the end we're going to emit up:fragment:aborted on these elements.
-    // Other async code observing these elements can then chose to abort itself.
-    let elements
-
-    // An element can be passed as first argument (public API) or as { target } option.
-    // There's also an internal API that { target } can be an array of elements.
-    // This is used by up.RenderJob.
-    if (options.target) {
-      // If we're given an element or selector, we abort all requests
-      // targeting that subtree.
-      elements = getAll(options.target, options)
-      testFn = (request) => request.isBoundToSubtrees(elements)
-      reason ||= 'Aborting requests within fragment'
-    } else {
-      // If we're not given an element or selector, we abort all layers
-      // matching the { layer } option. If no { layer } option is given,
-      // all requests in the current layer are aborted.
-      //
-      // This behavior is slightly inconsistent with that of other up.fragment
-      // functions, which operate on the main element if no other target is given.
-      // However, when we navigate on a layer, we want to abort *all* requests on
-      // that layer, even requests with a target outside of main, e.g. a nav bar.
-      let layers = up.layer.getAll(options)
-      elements = u.map(layers, 'element')
-      testFn = (request) => request.isBoundToLayers(layers)
-      reason ||= 'Aborting requests within ' + layers.join(', ')
-    }
-
-    let testFnWithAbortable = (request) => request.abortable && testFn(request)
-    up.network.abort(testFnWithAbortable, { ...options, reason })
-
-    // We *always* emit an `up:fragment:aborted` event, even when there is no
-    // request being aborted. This event serves for *any* async code that may want
-    // to abort itself, e.g. timers waiting for a delay.
-    for (let element of elements) {
-      // Some effort has invested to log about aborting only when necessary:
-      //
-      // (1) We don't log on up:fragment:aborted. This event is emitted with *every*
-      //     fragment update, whether or not we're actually aborting requests. Logging
-      //     with every update would make the log noisy and confusing.
-      // (2) When we *do* abort a request, up:request:aborted is emitted and logged.
-      //     This is done in up.Request#setAbortedState().
-      // (3) When up.fragment.abort() is called via up.render({ abort }) we also log
-      //     a message "Change with { abort } option will abort other requests' before
-      //     we abort the first request. This is done via an { logOnce } option that
-      //     this function passes on to up.network.abort().
-      up.emit(element, 'up:fragment:aborted', { reason, newLayer, jid, log: reason })
-    }
-  }
-
-  /*-
-  This event is emitted when requests for an element were [aborted](/learn/aborting-requests).
-
-  This event is emitted on the element for which requests were aborted.
-  If requests for an entire layer were aborted, this event is emitted on the
-  [layer's outmost element](/api/up.Layer.prototype.element).
-
-  @learn-ref aborting-requests
-
-  ### Example
-
-  This would run code when an element or its descendants were aborted:
-
-  ```js
-  up.on(element, 'up:fragment:aborted', function(event) {
-    // element or its descendants were aborted
-  })
-  ```
-
-  A more common use case is to run code when an element *or one of its ancestors*
-  were aborted:
-
-  ```js
-  // Listen to all up:fragment:aborted events in case an ancestor
-  let off = up.on('up:fragment:aborted', function(event) {
-     if (up.fragment.contains(event.target, element)) {
-        // element or an ancestor in the same layer was aborted
-     }
-  })
-  // Because we're registering a global event listener, we should
-  // clean up when `element` is destroyed.
-  up.destructor(element, off)
-  ```
-
-  To simplify observing an element and its ancestors for aborted requests,
-  the function `up.fragment.onAborted()` is provided. This allows us to shorten
-  the above code:
-
-  ```js
-  // Listen to all up:fragment:aborted events in case an ancestor
-  up.fragment.onAborted(element, function(event) {
-    // element or an ancestor in the same layer was aborted
-  })
-  ```
-
-  @event up:fragment:aborted
-  @param {Element} event.target
-    The element for which requests were aborted.
-  @param {string} event.reason
-    A string describing the reason for aborting this fragment.
-
-    @experimental
-  @param {boolean} event.newLayer
-    Whether the fragment was aborted by a [new overlay opening](/learn/opening-overlays).
-
-    @experimental
-  @stable
-  */
-
-  /*-
-  Runs a callback when the given element *or its ancestors in the same layer* were [aborted](/learn/aborting-requests).
-
-  Aborting another layer doesn't run the callback. For example, aborting the root layer
-  doesn't affect elements in an overlay, like it doesn't abort the overlay's requests.
-
-  This utility function simplifies consumption of the `up:fragment:aborted` event.
-
-  ### Example
-
-  Let's say we want to [reload](/api/up.reload) an element after 10 seconds.
-  If requests for that element were [aborted](/learn/aborting-requests) before the
-  10 seconds are over, we no longer want to reload:
-
-  ```js
-  let timeout = setTimeout(() => up.reload(element), 10000)
-  up.fragment.onAborted(element, () => clearTimeout(timeout))
-  ```
-
-  @function up.fragment.onAborted
-  @param {Element} element
-    The element to observe with its ancestors in the same layer.
-  @param {Function(event)} callback
-    The callback to run.
-
-    It will be called with an `up:fragment:aborted` argument.
-  @return {Function}
-    A function that unsubscribes the callback.
-
-    When the element is destroyed, the callback will be unsubscribed automatically.
-  @experimental
-  */
-  function onAborted(fragment, callback) {
-    // Aborting the root layer should not abort a poller in an overlay, like it doesn't abort the overlay's requests.
-    return up.event.onClosest(fragment, 'up:fragment:aborted', { layer: 'origin' }, callback)
-  }
-
-  /*-
-  Runs a callback when the given element *or its ancestors in the same layer* were [kept](/learn/keeping-elements).
-
-  @function up.fragment.onKept
-  @param {Element} element
-    The element to observe with its ancestors in the same layer.
-  @param {Function(event)} callback
-    The callback to run.
-
-    It will be called with an `up:fragment:kept` argument.
-  @return {Function}
-    A function that unsubscribes the callback.
-
-    When the element is destroyed, the callback will be unsubscribed automatically.
-  @experimental
-  */
-  function onKept(fragment, callback) {
-    return up.event.onClosest(fragment, 'up:fragment:kept', { layer: 'origin' }, callback)
-  }
-
-  // This function lives in up.fragment (not up.element)
-  // because we stop the observe via up.fragment.onAborted().
-  function onFirstIntersect(element, callback, { margin = 0 } = {}) {
-    // IntersectionObserver has some ms lag until it reports intersection entries.
-    // This lag also exists for the initial intersection check.
-    //
-    // This is too slow for us when rendering an [up-defer="reveal"]
-    // that both (1) already cached and (2) scrolled into viewport when inserted.
-    // In that case we want to immediately render the cached content and not show
-    // a flash of unloaded partial. The same is true when revalidating such a partial.
-    if (e.isIntersectingWindow(element, { margin })) {
-      callback()
-      return
-    }
-
-    // This function will be called (1) for the initial intersection check
-    // and (2) whenever the intersection state changes.
-    function processIntersectEntries(entries) {
-      for (let entry of entries) {
-        if (entry.isIntersecting) {
-          disconnect()
-          callback()
-          return // just in case we have multiple entries queued
-        }
-      }
-    }
-
-    let observer = new IntersectionObserver(processIntersectEntries, { rootMargin: `${margin}px` })
-    let disconnect = () => observer.disconnect()
-    observer.observe(element)
-    up.destructor(element, disconnect)
-  }
-
-  const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
-
-  function provideNodes(value, { origin, originLayer, data, htmlParser = e.createNodesFromHTML } = {}) {
-    if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
-      let [parsedValue, parsedData] = u.parseScalarJSONPairs(value)[0]
-      data = { ...data, ...parsedData }
-      value = up.fragment.get(parsedValue, { layer: 'closest', origin, originLayer }) || up.fail(`Cannot find template "%s"`, value)
-    }
-
-    if (u.isString(value)) {
-      value = htmlParser(value)
-    }
-
-    if (isTemplate(value)) {
-      value = cloneTemplate(value, data, { htmlParser })
-    }
-
-    return u.wrapList(value)
-  }
-
-  function isTemplate(value) {
-    return u.isElement(value) && value.matches('template, script[type]') && !up.script.isScript(value)
-  }
-
-  /*-
-  Clones a [template](/learn/templates) element.
-
-  Emits the `up:template:clone` event. You can use that event to integrate [template engines](/learn/templates)
-  like Mustache, EJS or Handlebars.
-
-  @learn-ref templates
-
-  ### Example
-
-  ```js
-  let nodes = up.template.clone('#table-placeholder')
-  up.render({ fragment: nodes[0] })
-  ```
-
-  ### Passing variables
-
-  Any [template variables](/learn/templates#dynamic) can be passed as a second argument:
-
-  ```js
-  let nodes = up.template.clone('#table-placeholder', { rows: 10 })
-  ```
-
-  @function up.template.clone
-  @param {string|Element} template
-    The element to clone.
-
-    This is usually a `<template>` element or a `<script>` with a custom type.
-
-    You may also pass a selector for the element to clone.
-  @param {Object} [data = {}]
-    An object with [template variables](/learn/templates#dynamic).
+    May be omitted with `element` argument.
   @param {Element} [options.origin]
-    An optional [origin](/api/origin) element used for [template lookup](/learn/templates#lookup).
-  @return {List<Node>}
-    A [list](/api/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects that represent
-    the cloned templates.
+    The element causing requests to be aborted.
 
-    You can pass this list to any rendering function, like `up.render()` or `up.Preview#insert()`.
-  @stable
-  */
-  function cloneTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
-    // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
-    let template = getSmart(templateOrSelector, { origin, layer: 'closest' }) || up.fail('Template not found: %o', templateOrSelector)
-    let event = up.emit(template, 'up:template:clone', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
-    let nodes = event.nodes ?? defaultTemplateNodes(template, htmlParser)
-    for (let node of nodes) {
-      node.upTemplateData = data
+    This is used to look up an `element` selector or `{ layer }` name.
+  @param {up.Request} [options.except]
+    A request that should not be aborted, even if it matches
+    the conditions above.
+
+    @experimental
+@section Debugging
+  @param {string} [options.reason]
+    The reason for aborting requests.
+
+    The promise by an aborted `up.request()` will reject with this reason
+    to help debugging an unexpected aborting.
+
+    If omitted, a default message will describe the abort conditions.
+@stable
+*/
+export const abort = mockable(function abort(...args) {
+  let options = parseTargetAndOptions(args)
+
+  // The function that checks whether a given function will be aborted.
+  let testFn
+
+  // The reason will be logged with the up:request:abort event when we actually abort an event.
+  // It should be a string, not an array that goes through sprintf().
+  let { reason, newLayer, jid } = options
+
+  // At the end we're going to emit up:fragment:aborted on these elements.
+  // Other async code observing these elements can then chose to abort itself.
+  let elements
+
+  // An element can be passed as first argument (public API) or as { target } option.
+  // There's also an internal API that { target } can be an array of elements.
+  // This is used by up.RenderJob.
+  if (options.target) {
+    // If we're given an element or selector, we abort all requests
+    // targeting that subtree.
+    elements = getAll(options.target, options)
+    testFn = (request) => request.isBoundToSubtrees(elements)
+    reason ||= 'Aborting requests within fragment'
+  } else {
+    // If we're not given an element or selector, we abort all layers
+    // matching the { layer } option. If no { layer } option is given,
+    // all requests in the current layer are aborted.
+    //
+    // This behavior is slightly inconsistent with that of other up.fragment
+    // functions, which operate on the main element if no other target is given.
+    // However, when we navigate on a layer, we want to abort *all* requests on
+    // that layer, even requests with a target outside of main, e.g. a nav bar.
+    let layers = up.layer.getAll(options)
+    elements = map(layers, 'element')
+    testFn = (request) => request.isBoundToLayers(layers)
+    reason ||= 'Aborting requests within ' + layers.join(', ')
+  }
+
+  let testFnWithAbortable = (request) => request.abortable && testFn(request)
+  up.network.abort(testFnWithAbortable, { ...options, reason })
+
+  // We *always* emit an `up:fragment:aborted` event, even when there is no
+  // request being aborted. This event serves for *any* async code that may want
+  // to abort itself, e.g. timers waiting for a delay.
+  for (let element of elements) {
+    // Some effort has invested to log about aborting only when necessary:
+    //
+    // (1) We don't log on up:fragment:aborted. This event is emitted with *every*
+    //     fragment update, whether or not we're actually aborting requests. Logging
+    //     with every update would make the log noisy and confusing.
+    // (2) When we *do* abort a request, up:request:aborted is emitted and logged.
+    //     This is done in up.Request#setAbortedState().
+    // (3) When up.fragment.abort() is called via up.render({ abort }) we also log
+    //     a message "Change with { abort } option will abort other requests' before
+    //     we abort the first request. This is done via an { logOnce } option that
+    //     this function passes on to up.network.abort().
+    emit(element, 'up:fragment:aborted', { reason, newLayer, jid, log: reason })
+  }
+})
+
+/*-
+This event is emitted when requests for an element were [aborted](/learn/aborting-requests).
+
+This event is emitted on the element for which requests were aborted.
+If requests for an entire layer were aborted, this event is emitted on the
+[layer's outmost element](/api/up.Layer.prototype.element).
+
+@learn-ref aborting-requests
+
+### Example
+
+This would run code when an element or its descendants were aborted:
+
+```js
+up.on(element, 'up:fragment:aborted', function(event) {
+  // element or its descendants were aborted
+})
+```
+
+A more common use case is to run code when an element *or one of its ancestors*
+were aborted:
+
+```js
+// Listen to all up:fragment:aborted events in case an ancestor
+let off = up.on('up:fragment:aborted', function(event) {
+   if (up.fragment.contains(event.target, element)) {
+      // element or an ancestor in the same layer was aborted
+   }
+})
+// Because we're registering a global event listener, we should
+// clean up when `element` is destroyed.
+up.destructor(element, off)
+```
+
+To simplify observing an element and its ancestors for aborted requests,
+the function `up.fragment.onAborted()` is provided. This allows us to shorten
+the above code:
+
+```js
+// Listen to all up:fragment:aborted events in case an ancestor
+up.fragment.onAborted(element, function(event) {
+  // element or an ancestor in the same layer was aborted
+})
+```
+
+@event up:fragment:aborted
+@param {Element} event.target
+  The element for which requests were aborted.
+@param {string} event.reason
+  A string describing the reason for aborting this fragment.
+
+  @experimental
+@param {boolean} event.newLayer
+  Whether the fragment was aborted by a [new overlay opening](/learn/opening-overlays).
+
+  @experimental
+@stable
+*/
+
+/*-
+Runs a callback when the given element *or its ancestors in the same layer* were [aborted](/learn/aborting-requests).
+
+Aborting another layer doesn't run the callback. For example, aborting the root layer
+doesn't affect elements in an overlay, like it doesn't abort the overlay's requests.
+
+This utility function simplifies consumption of the `up:fragment:aborted` event.
+
+### Example
+
+Let's say we want to [reload](/api/up.reload) an element after 10 seconds.
+If requests for that element were [aborted](/learn/aborting-requests) before the
+10 seconds are over, we no longer want to reload:
+
+```js
+let timeout = setTimeout(() => up.reload(element), 10000)
+up.fragment.onAborted(element, () => clearTimeout(timeout))
+```
+
+@function up.fragment.onAborted
+@param {Element} element
+  The element to observe with its ancestors in the same layer.
+@param {Function(event)} callback
+  The callback to run.
+
+  It will be called with an `up:fragment:aborted` argument.
+@return {Function}
+  A function that unsubscribes the callback.
+
+  When the element is destroyed, the callback will be unsubscribed automatically.
+@experimental
+*/
+export function onAborted(fragment, callback) {
+  // Aborting the root layer should not abort a poller in an overlay, like it doesn't abort the overlay's requests.
+  return onClosest(fragment, 'up:fragment:aborted', { layer: 'origin' }, callback)
+}
+
+/*-
+Runs a callback when the given element *or its ancestors in the same layer* were [kept](/learn/keeping-elements).
+
+@function up.fragment.onKept
+@param {Element} element
+  The element to observe with its ancestors in the same layer.
+@param {Function(event)} callback
+  The callback to run.
+
+  It will be called with an `up:fragment:kept` argument.
+@return {Function}
+  A function that unsubscribes the callback.
+
+  When the element is destroyed, the callback will be unsubscribed automatically.
+@experimental
+*/
+export function onKept(fragment, callback) {
+  return onClosest(fragment, 'up:fragment:kept', { layer: 'origin' }, callback)
+}
+
+// This function lives in up.fragment (not up.element)
+// because we stop the observe via up.fragment.onAborted().
+export function onFirstIntersect(element, callback, { margin = 0 } = {}) {
+  // IntersectionObserver has some ms lag until it reports intersection entries.
+  // This lag also exists for the initial intersection check.
+  //
+  // This is too slow for us when rendering an [up-defer="reveal"]
+  // that both (1) already cached and (2) scrolled into viewport when inserted.
+  // In that case we want to immediately render the cached content and not show
+  // a flash of unloaded partial. The same is true when revalidating such a partial.
+  if (isIntersectingWindow(element, { margin })) {
+    callback()
+    return
+  }
+
+  // This function will be called (1) for the initial intersection check
+  // and (2) whenever the intersection state changes.
+  function processIntersectEntries(entries) {
+    for (let entry of entries) {
+      if (entry.isIntersecting) {
+        disconnect()
+        callback()
+        return // just in case we have multiple entries queued
+      }
     }
-    return nodes
   }
 
-  /*-
-  This event is emitted before a [template is cloned](/learn/templates).
+  let observer = new IntersectionObserver(processIntersectEntries, { rootMargin: `${margin}px` })
+  let disconnect = () => observer.disconnect()
+  observer.observe(element)
+  registerDestructor(element, disconnect)
+}
 
-  @learn-ref templates
+const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
-  ### Integrating template engines
-
-  Listeners can use this event to [integrate template engines](/learn/templates#dynamic) by following these steps:
-
-  - Listen to the `up:template:clone` event on selected `<template>` or `<script>` elements.
-  - Process the given template (`event.target`) and data (`event.data`).
-  - Set `event.nodes` to a [list](/api/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
-  the template results.
-
-  When no listener sets `event.nodes`, Unpoly will simply parse the template's inner HTML. Any variables in `event.data`
-  will be made available for [post-processing in a compiler](/learn/templates#compiler-postprocessing).
-
-  ### Example: Integrating Mustache.js
-
-  We want to integrate [Mustache](https://github.com/janl/mustache.js) to enable templates like this:
-
-  ```html
-  <script id="greeter-template" type="text/mustache"> <!-- mark: type="text/mustache" -->
-    <div id="greeter">
-      Hello, {{name}}!
-    </div>
-  </script>
-  ```
-
-  An event handler for a Mustache integration would look like this:
-
-  ```js
-  up.on('up:template:clone', '[type="text/mustache"]', function(event) { // mark: [type="text/mustache"]
-    const template = event.target.innerHTML
-    const result = Mustache.render(template, event.data)
-    event.nodes = up.element.createNodesFromHTML(result)
-  })
-  ```
-
-  Also see documentation for `up.element.createNodesFromHTML()`.
-
-  @event up:template:clone
-  @param {Element} event.target
-    The template element being cloned.
-  @param {Object} event.data
-    Any [template variables](/learn/templates#dynamic) that should be used when cloning.
-  @param {null|List<Element>} event.nodes
-    A list of element and text nodes representing the cloned template result.
-
-    The value is `null` initially and must be set by a listener.
-    When no listener sets `event.nodes`, Unpoly will parse the template's inner HTML.
-  @stable
-  */
-
-  function defaultTemplateNodes(template, htmlParser = e.createNodesFromHTML) {
-    let templateText = template.innerHTML
-    return htmlParser(templateText)
+export function provideNodes(value, { origin, originLayer, data, htmlParser = createNodesFromHTML } = {}) {
+  if (isString(value) && STARTS_WITH_SELECTOR.test(value)) {
+    let [parsedValue, parsedData] = parseScalarJSONPairs(value)[0]
+    data = { ...data, ...parsedData }
+    value = getSmart(parsedValue, { layer: 'closest', origin, originLayer }) || fail(`Cannot find template "%s"`, value)
   }
 
-  /*-
-  Inserts the given `element` at a given `position` relative to the `reference` element.
+  if (isString(value)) {
+    value = htmlParser(value)
+  }
+
+  if (isTemplate(value)) {
+    value = cloneTemplate(value, data, { htmlParser })
+  }
+
+  return wrapList(value)
+}
+
+function isTemplate(value) {
+  return isElement(value) && value.matches('template, script[type]') && !isScript(value)
+}
+
+/*-
+Clones a [template](/learn/templates) element.
+
+Emits the `up:template:clone` event. You can use that event to integrate [template engines](/learn/templates)
+like Mustache, EJS or Handlebars.
+
+@learn-ref templates
+
+### Example
+
+```js
+let nodes = up.template.clone('#table-placeholder')
+up.render({ fragment: nodes[0] })
+```
+
+### Passing variables
+
+Any [template variables](/learn/templates#dynamic) can be passed as a second argument:
+
+```js
+let nodes = up.template.clone('#table-placeholder', { rows: 10 })
+```
+
+@function up.template.clone
+@param {string|Element} template
+  The element to clone.
+
+  This is usually a `<template>` element or a `<script>` with a custom type.
+
+  You may also pass a selector for the element to clone.
+@param {Object} [data = {}]
+  An object with [template variables](/learn/templates#dynamic).
+@param {Element} [options.origin]
+  An optional [origin](/api/origin) element used for [template lookup](/learn/templates#lookup).
+@return {List<Node>}
+  A [list](/api/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects that represent
+  the cloned templates.
+
+  You can pass this list to any rendering function, like `up.render()` or `up.Preview#insert()`.
+@stable
+*/
+export function cloneTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
+  // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
+  let template = getSmart(templateOrSelector, { origin, layer: 'closest' }) || fail('Template not found: %o', templateOrSelector)
+  let event = emit(template, 'up:template:clone', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
+  let nodes = event.nodes ?? defaultTemplateNodes(template, htmlParser)
+  for (let node of nodes) {
+    node.upTemplateData = data
+  }
+  return nodes
+}
+
+/*-
+This event is emitted before a [template is cloned](/learn/templates).
+
+@learn-ref templates
+
+### Integrating template engines
+
+Listeners can use this event to [integrate template engines](/learn/templates#dynamic) by following these steps:
+
+- Listen to the `up:template:clone` event on selected `<template>` or `<script>` elements.
+- Process the given template (`event.target`) and data (`event.data`).
+- Set `event.nodes` to a [list](/api/List) of [`Node`](https://developer.mozilla.org/en-US/docs/Web/API/Node) objects representing
+the template results.
+
+When no listener sets `event.nodes`, Unpoly will simply parse the template's inner HTML. Any variables in `event.data`
+will be made available for [post-processing in a compiler](/learn/templates#compiler-postprocessing).
+
+### Example: Integrating Mustache.js
+
+We want to integrate [Mustache](https://github.com/janl/mustache.js) to enable templates like this:
+
+```html
+<script id="greeter-template" type="text/mustache"> <!-- mark: type="text/mustache" -->
+  <div id="greeter">
+    Hello, {{name}}!
+  </div>
+</script>
+```
+
+An event handler for a Mustache integration would look like this:
+
+```js
+up.on('up:template:clone', '[type="text/mustache"]', function(event) { // mark: [type="text/mustache"]
+  const template = event.target.innerHTML
+  const result = Mustache.render(template, event.data)
+  event.nodes = up.element.createNodesFromHTML(result)
+})
+```
+
+Also see documentation for `up.element.createNodesFromHTML()`.
+
+@event up:template:clone
+@param {Element} event.target
+  The template element being cloned.
+@param {Object} event.data
+  Any [template variables](/learn/templates#dynamic) that should be used when cloning.
+@param {null|List<Element>} event.nodes
+  A list of element and text nodes representing the cloned template result.
+
+  The value is `null` initially and must be set by a listener.
+  When no listener sets `event.nodes`, Unpoly will parse the template's inner HTML.
+@stable
+*/
+
+function defaultTemplateNodes(template, htmlParser = createNodesFromHTML) {
+  let templateText = template.innerHTML
+  return htmlParser(templateText)
+}
+
+/*-
+Inserts the given `element` at a given `position` relative to the `reference` element.
+
+The new element will be [compiled](/api/up.hello), unless it is already compiled.
+
+Returns a function that [destroys](/api/up.destroy) the inserted element and removes it from the DOM.
+
+@function up.fragment.insertTemp
+
+@param {Element} reference
+  The reference element relative to which the new element will be inserted.
+
+@param {string} [position='beforeend']
+  The insert position relative to the `reference` element.
+
+  @include adjacent-positions
+
+@param {Element|string} newElement
+  The element to insert.
+
+  You may also pass a string of HTML, which will be [parsed into an element](/api/up.element.createFromHTML).
+
+  You may also pass a CSS selector matching the new element.
+
+  If the element is a `<template>`, it will be cloned before insertion.
 
   The new element will be [compiled](/api/up.hello), unless it is already compiled.
 
-  Returns a function that [destroys](/api/up.destroy) the inserted element and removes it from the DOM.
+  If the element is attached to the document before assertion, it will be moved back to its original place
+  when reverting the temporary insertion. Moved elements are not re-compiled or destroyed.
 
-  @function up.fragment.insertTemp
+@return {Function}
+  A function that [destroys](/api/up.destroy) the inserted element and removes it from the DOM.
 
-  @param {Element} reference
-    The reference element relative to which the new element will be inserted.
+@internal
+*/
+export function insertTemp(...args) {
+  let [reference, position = 'beforeend', tempValue] = parseArgs(args, 'val', isAdjacentPosition, 'val')
 
-  @param {string} [position='beforeend']
-    The insert position relative to the `reference` element.
+  let tempNodes = provideNodes(tempValue, { origin: reference })
+  // We may be given a NodeList, or an HTML string without a single root Element.
+  // In these cases we wrap it in an <up-wrapper> so we have a single root Element we
+  // can pass into Element#insertAdjacentElement(), up.hello() or up.destroy().
+  // This simplifies our code significantly.
+  let tempElement = wrapIfRequired(tempNodes)
 
-    @include adjacent-positions
+  // In case the element was already attached to this document, we need to remember
+  // its position so we can return it when reverting.
+  let oldPosition = document.contains(tempElement) && documentPosition(tempElement)
 
-  @param {Element|string} newElement
-    The element to insert.
+  reference.insertAdjacentElement(position, tempElement)
 
-    You may also pass a string of HTML, which will be [parsed into an element](/api/up.element.createFromHTML).
+  if (oldPosition) {
+    // Don't compile or destroy an element if it was connected to the document before the move.
+    return () => {
+      oldPosition[0].insertAdjacentElement(oldPosition[1], tempElement)
+    }
+  } else {
+    hello(tempElement)
+    return () => destroy(tempElement)
+  }
+}
 
-    You may also pass a CSS selector matching the new element.
+/*-
+@function up.fragment.trackSelector
+@param {Function(): List<Element>} selectFn
+  A function that returns the elements that currently match.
 
-    If the element is a `<template>`, it will be cloned before insertion.
+  It is called again after every render pass. To keep this cheap, look up elements
+  within a small root instead of the entire document.
+@param {Function(Element): Function(Element)} callback
+  A callback that is called when we discover a new match.
+  The callback can return another function that is called when that element no longer matches.
+@internal
+*/
+export function trackSelector(selectFn, callback) {
+  let tracker = new SelectorTracker(selectFn, callback)
+  return tracker.start()
+}
 
-    The new element will be [compiled](/api/up.hello), unless it is already compiled.
+let mutateLevel = 0
+let afterMutateCleaner = cleaner('fifo')
 
-    If the element is attached to the document before assertion, it will be moved back to its original place
-    when reverting the temporary insertion. Moved elements are not re-compiled or destroyed.
-
-  @return {Function}
-    A function that [destroys](/api/up.destroy) the inserted element and removes it from the DOM.
-
-  @internal
-  */
-  function insertTemp(...args) {
-    let [reference, position = 'beforeend', tempValue] = u.args(args, 'val', u.isAdjacentPosition, 'val')
-
-    let tempNodes = provideNodes(tempValue, { origin: reference })
-    // We may be given a NodeList, or an HTML string without a single root Element.
-    // In these cases we wrap it in an <up-wrapper> so we have a single root Element we
-    // can pass into Element#insertAdjacentElement(), up.hello() or up.destroy().
-    // This simplifies our code significantly.
-    let tempElement = e.wrapIfRequired(tempNodes)
-
-    // In case the element was already attached to this document, we need to remember
-    // its position so we can return it when reverting.
-    let oldPosition = document.contains(tempElement) && e.documentPosition(tempElement)
-
-    reference.insertAdjacentElement(position, tempElement)
-
-    if (oldPosition) {
-      // Don't compile or destroy an element if it was connected to the document before the move.
-      return () => {
-        oldPosition[0].insertAdjacentElement(oldPosition[1], tempElement)
-      }
-    } else {
-      up.hello(tempElement)
-      return () => up.destroy(tempElement)
+export function mutate(callback) {
+  try {
+    mutateLevel++
+    return callback()
+  } finally {
+    if (--mutateLevel === 0) {
+      afterMutateCleaner.clean()
     }
   }
+}
 
-  /*-
-  @function up.fragment.trackSelector
-  @param {Function(): List<Element>} selectFn
-    A function that returns the elements that currently match.
-
-    It is called again after every render pass. To keep this cheap, look up elements
-    within a small root instead of the entire document.
-  @param {Function(Element): Function(Element)} callback
-    A callback that is called when we discover a new match.
-    The callback can return another function that is called when that element no longer matches.
-  @internal
-  */
-  function trackSelector(selectFn, callback) {
-    let tracker = new up.SelectorTracker(selectFn, callback)
-    return tracker.start()
+export function afterMutate(callback) {
+  if (mutateLevel === 0) {
+    callback()
+  } else {
+    afterMutateCleaner(callback)
   }
+}
 
-  let mutateLevel = 0
-  let afterMutateCleaner = u.cleaner('fifo')
 
-  function mutate(callback) {
-    try {
-      mutateLevel++
-      return callback()
-    } finally {
-      if (--mutateLevel === 0) {
-        afterMutateCleaner.clean()
-      }
-    }
-  }
+/*-
+Returns the current [context](/learn/layer-context).
 
-  function afterMutate(callback) {
-    if (mutateLevel === 0) {
-      callback()
-    } else {
-      afterMutateCleaner(callback)
-    }
-  }
+This is aliased as `up.layer.context`.
 
-  up.on('up:framework:boot', function() {
+@learn-ref layer-context
+
+@property up.context
+@param {Object} context
+  The context object.
+
+  If no context has been set an empty object is returned.
+@experimental
+*/
+
+export function install() {
+  // Snapshot the keep identity before macros make changes.
+  // TODO: Doesn't this need to happen before other macros?
+  registerMacro('[up-keep]', (element) => keepIdentity(element))
+
+  on('up:framework:boot', function() {
     const { documentElement } = document
 
-    up.hello(documentElement)
+    hello(documentElement)
 
     documentElement.setAttribute('up-source', normalizeSource(location.href))
 
-    if (!up.browser.canPushState() && up.history.isEnabled('location')) {
-      return up.warn('Cannot push history changes. Next render pass with history will load a full page.')
+    if (!canPushState() && isEnabled('location')) {
+      return printToWarn('Cannot push history changes. Next render pass with history will load a full page.')
     }
   })
+}
 
-  return {
+export const api = {
+  fragment: {
     config,
     reload,
     destroy,
@@ -3293,30 +3340,16 @@ up.fragment = (function() {
     trackSelector,
     mutate,
     afterMutate,
+    // export for testing
     // swapTemp,
     // timer: scheduleTimer
-  }
-})()
-
-up.reload = up.fragment.reload
-up.destroy = up.fragment.destroy
-up.render = up.fragment.render
-up.navigate = up.fragment.navigate
-up.visit = up.fragment.visit
-up.template = { clone: up.fragment.cloneTemplate }
-
-/*-
-Returns the current [context](/learn/layer-context).
-
-This is aliased as `up.layer.context`.
-
-@learn-ref layer-context
-
-@property up.context
-@param {Object} context
-  The context object.
-
-  If no context has been set an empty object is returned.
-@experimental
-*/
-u.delegate(up, ['context'], () => up.layer.current)
+  },
+  reload,
+  destroy,
+  render,
+  navigate,
+  visit,
+  template: { clone: cloneTemplate },
+  get context() { return up.layer.current.context },
+  set context(context) { up.layer.current.context = context },
+}

@@ -3,6 +3,7 @@ import {
 } from '../../util.js'
 import { fail } from '../../error.js'
 import { getInputDevice } from '../../event.js'
+import { config, successKey } from '../../fragment.js'
 import { callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback } from '../../script.js'
 
 // Sometimes we need to use given render options, but disable preview effects.
@@ -135,7 +136,7 @@ function callbackAttr(element, attrName, key) {
 
 function navigateDefaults(options) {
   if (options.navigate) {
-    return up.fragment.config.navigateOptions
+    return config.navigateOptions
   }
 }
 
@@ -177,7 +178,7 @@ function preprocess(options) {
   removeUsePrefix(options)
 
   const defaults = merge(
-    up.fragment.config.renderOptions,
+    config.renderOptions,
     navigateDefaults(options)
   )
 
@@ -235,7 +236,7 @@ function failOverrides(options) {
     // Note that up.fragment.successKey(key) only returns a value
     // if the given key is prefixed with "fail".
     const value = options[key]
-    let unprefixed = up.fragment.successKey(key)
+    let unprefixed = successKey(key)
     if (unprefixed) {
       overrides[unprefixed] = value
     }

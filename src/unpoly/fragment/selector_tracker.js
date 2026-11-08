@@ -1,5 +1,6 @@
 import { noop, sequence } from '../util.js'
 import { on } from '../event.js'
+import { afterMutate } from '../fragment.js'
 
 export class SelectorTracker {
 
@@ -41,7 +42,7 @@ export class SelectorTracker {
       // When we're in the middle of a render pass, we don't want to react to every
       // up:fragment:inserted/destroyed event, for performance reasons.
       // We want to only sync once at the end of the render pass.
-      up.fragment.afterMutate(() => this.sync())
+      afterMutate(() => this.sync())
     }
   }
 

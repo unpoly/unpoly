@@ -6,6 +6,7 @@ import {
 import { fail } from '../../error.js'
 import { CannotMatch } from '../../error/cannot_match.js'
 import { emit } from '../../event.js'
+import { parseTargetSteps, provideNodes, toTarget, tryToTarget } from '../../fragment.js'
 import { FragmentFinder } from '../fragment_finder.js'
 import { findMetaTags, getLang } from '../../history.js'
 import { adoptDetachedHeadAsset, adoptNewFragment, findAssets, warnOfUnsafeCSP } from '../../script.js'
@@ -28,7 +29,7 @@ export class ResponseDoc {
     warnOfUnsafeCSP(cspInfo)
 
     if (origin) {
-      let originSelector = up.fragment.tryToTarget(origin)
+      let originSelector = tryToTarget(origin)
       if (originSelector) {
         this._rediscoveredOrigin = this.select(originSelector)
       }
@@ -48,7 +49,7 @@ export class ResponseDoc {
       this._isFullDocument = isFullDocumentHTML(value)
 
       let htmlParser = (html) => [createBrokenDocumentFromHTML(html)]
-      let nodes = up.fragment.provideNodes(value, { origin, data, htmlParser })
+      let nodes = provideNodes(value, { origin, data, htmlParser })
 
       // If value is HTML, e.createBrokenDocumentFromHTML() will parse it into a Document.
       // Even if value is only a fragment, or multiple sibling nodes, it will always be
@@ -66,7 +67,7 @@ export class ResponseDoc {
   }
 
   _parseFragment(value, origin, data) {
-    let element = extractSingular(up.fragment.provideNodes(value, { origin, data }))
+    let element = extractSingular(provideNodes(value, { origin, data }))
     this._document = this._buildFauxDocument(element)
   }
 
@@ -75,8 +76,8 @@ export class ResponseDoc {
 
     // We are only provided with inner child content.
     // To simplify other code we wrap it in an element matching { target }.
-    let simplifiedTarget = map(up.fragment.parseTargetSteps(target), 'selector').join()
-    let nodes = up.fragment.provideNodes(value, { origin, data })
+    let simplifiedTarget = map(parseTargetSteps(target), 'selector').join()
+    let nodes = provideNodes(value, { origin, data })
     let matchingElement = createFromSelector(simplifiedTarget, { content: nodes })
 
     this._document = this._buildFauxDocument(matchingElement)
@@ -99,7 +100,7 @@ export class ResponseDoc {
   rootSelector() {
     // We want to say this._document.documentElement, but we sometimes have
     // a faux document with multiple children.
-    return up.fragment.toTarget(this._document.children[0])
+    return toTarget(this._document.children[0])
   }
 
   get title() {

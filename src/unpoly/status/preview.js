@@ -5,6 +5,7 @@ import {
 } from '../element.js'
 import { guard } from '../error.js'
 import { UpError } from '../error/error.js'
+import { getSmart, insertTemp, provideNodes } from '../fragment.js'
 import { OVERLAY_VISUAL_KEYS } from '../layer/overlay_visuals.js'
 import { printToStandard } from '../log.js'
 
@@ -624,7 +625,7 @@ export class Preview {
     // (2) When tempValue resolves to multiple nodes, it will be wrapped
     //     in an <up-wrapper> container.
     let [reference, position = 'beforeend', tempValue] = this._parseMutatorArgs(args, 'val', isAdjacentPosition, 'val')
-    this.undo(up.fragment.insertTemp(reference, position, tempValue))
+    this.undo(insertTemp(reference, position, tempValue))
   }
 
   /*-
@@ -774,7 +775,7 @@ export class Preview {
 
     // We do not need to wrap a NodeList of mixed Text and Element nodes.
     // Both swapContent() and openLayer() can deal with that.
-    let placeholderNodes = up.fragment.provideNodes(placeholderReference, { origin: this.origin })
+    let placeholderNodes = provideNodes(placeholderReference, { origin: this.origin })
 
     printToStandard('[up-placeholder]', 'Showing placeholder %o', placeholderReference)
 
@@ -894,7 +895,7 @@ export class Preview {
     // (1) up.fragment.get(undefined) returns undefined
     // (2) up.fragment.get(Element) returns the element
     // (3) this.fragment is undefined when opening a new layer
-    element = up.fragment.get(element, { layer: this.layer, origin: this.origin }) || this.fragment
+    element = getSmart(element, { layer: this.layer, origin: this.origin }) || this.fragment
     return [element, ...rest]
   }
 

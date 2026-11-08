@@ -1,6 +1,7 @@
 import { isDefined } from '../../../util.js'
 import { setMissingAttr } from '../../../element.js'
 import { emit } from '../../../event.js'
+import { normalizeSource, sourceOf } from '../../../fragment.js'
 import { Change } from './change.js'
 
 export class Addition extends Change {
@@ -78,7 +79,7 @@ export class Addition extends Change {
     //     reloadable (not GET), we keep the same source as before.
     // (2) Don't set a source if someone tries to 'keep' when opening a new layer
     if (source === 'keep') {
-      source = (oldElement && up.fragment.source(oldElement))
+      source = (oldElement && sourceOf(oldElement))
     }
 
     // (1) Don't set a source if { false } is passed.
@@ -86,7 +87,7 @@ export class Addition extends Change {
     // (3) Don't use u.matchableURL() here. We need to keep a trailing slash
     //     to support backends that care about trailing slashes.
     if (source) {
-      setMissingAttr(newElement, 'up-source', up.fragment.normalizeSource(source))
+      setMissingAttr(newElement, 'up-source', normalizeSource(source))
     }
   }
 

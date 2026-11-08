@@ -2,6 +2,7 @@ import { isArray, isBlank, isList, isObject, isString, matchURLs, normalizeURL, 
 import { getRoot, setAttrPresence, setMissingAttrs } from './element.js'
 import { muteUncriticalRejection } from './error.js'
 import { build, emit, halt, isModified, on } from './event.js'
+import { render } from './fragment.js'
 import { printToStandard, printUserEvent } from './log.js'
 import { initialRequestMethod } from './protocol.js'
 import { registerMacro } from './script.js'
@@ -509,7 +510,7 @@ function restoreLocation(location) {
   // An up.Offline error (the server could not be reached) is critical and surfaces as an
   // unhandled rejection, while the page keeps its content. This is intentional: losing the
   // connection while restoring is worth reporting, unlike an error status, which we render.
-  muteUncriticalRejection(up.render({
+  muteUncriticalRejection(render({
     guardEvent: build('up:location:restore', { location, log: `Restoring location ${location}` }),
 
     // The browser has already restored the URL, but hasn't changed content

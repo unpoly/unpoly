@@ -2,6 +2,7 @@ import { copy, isEqual, isPromise, omit, queueTask, scheduleTimer, sequence, som
 import { fail as errorFail, guard } from '../error.js'
 import { on } from '../event.js'
 import { Params } from './params.js'
+import { isAlive } from '../fragment.js'
 import { printUserEvent } from '../log.js'
 
 export class FieldWatcher {
@@ -119,7 +120,7 @@ export class FieldWatcher {
 
     // If the form was manually detached (not destroyed) while a callback was scheduled,
     // we don't run the callback.
-    if (!up.fragment.isAlive(this._region)) return
+    if (!isAlive(this._region)) return
 
     // Don't forward { event, delay } because
     // (1) we have already processed them here and

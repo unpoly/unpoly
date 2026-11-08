@@ -1,6 +1,7 @@
 import { scheduleTimer } from '../util.js'
 import { numberAttr } from '../element.js'
 import { on } from '../event.js'
+import { isAlive, onAborted } from '../fragment.js'
 import { printUserEvent } from '../log.js'
 
 export class LinkFollowIntent {
@@ -13,7 +14,7 @@ export class LinkFollowIntent {
     this._on('mouseleave', () => this._unscheduleCallback())
     // Don't preload if the link was removed from the DOM while we were waiting for the timer.
     // This also happens in specs, when the timer terminates after a spec has ended.
-    up.fragment.onAborted(this._link, () => this._unscheduleCallback())
+    onAborted(this._link, () => this._unscheduleCallback())
   }
 
   _on(eventType, fn) {
@@ -69,7 +70,7 @@ export class LinkFollowIntent {
     // - The expired content is revalidated (which does not abort eagerly).
     // - The link is replaced with the revalidated content.
     // - The callback delay finishes and tries to follow a detached link.
-    if (!up.fragment.isAlive(this._link)) return
+    if (!isAlive(this._link)) return
 
     // (1) Remember the request when sent
     // (2) All callbacks from up.link already mute uncritical rejections.

@@ -1,5 +1,6 @@
 import { filterList, map, memoizeMethod, pick, uniq } from '../../../util.js'
 import { CannotMatch } from '../../../error/cannot_match.js'
+import { expandTargets, mutate } from '../../../fragment.js'
 import { Change } from './change.js'
 import { OpenLayerPlan } from './open_layer.js'
 import { UpdateLayerPlan } from './update_layer.js'
@@ -56,7 +57,7 @@ export class ChangeFromContent extends Change {
   }
 
   _expandTargets(targets, layer) {
-    return up.fragment.expandTargets(targets, { layer, mode: this.options.mode, origin: this._origin })
+    return expandTargets(targets, { layer, mode: this.options.mode, origin: this._origin })
   }
 
   execute() {
@@ -73,7 +74,7 @@ export class ChangeFromContent extends Change {
     // Group compilation and emission of up:fragment:inserted into a mutation block.
     // This allows up.SelectorTracker to only sync once after the mutation, and
     // ignore any events in between.
-    return up.fragment.mutate(() =>
+    return mutate(() =>
       matchedPlan.execute(
         this._getResponseDoc(),
         this._onPlanApplicable.bind(this, matchedPlan)

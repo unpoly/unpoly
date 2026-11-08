@@ -4,6 +4,7 @@ import { muteUncriticalSync } from '../../error.js'
 import { OptionsParser } from '../../element/options_parser.js'
 import { halt as eventHalt, on, onEscape } from '../../event.js'
 import { Params } from '../../form/params.js'
+import { destroy, getAll } from '../../fragment.js'
 import { CloseLayer } from '../../fragment/render/change/close_layer.js'
 import { Layer } from '../base.js'
 import { OverlayFocus } from '../overlay_focus.js'
@@ -252,8 +253,8 @@ export class Overlay extends Layer {
     let id = label.getAttribute('for')
     let fieldSelector = up.form.fieldSelector(idSelector(id))
 
-    let fieldsAnywhere = up.fragment.all(fieldSelector, { layer: 'any' })
-    let fieldsInLayer = up.fragment.all(fieldSelector, { layer: this })
+    let fieldsAnywhere = getAll(fieldSelector, { layer: 'any' })
+    let fieldsInLayer = getAll(fieldSelector, { layer: this })
 
     // We would much rather not interfere with label clicking logic,
     // and let the browser do its thing. Hence we only interfere if there
@@ -434,7 +435,7 @@ export class Overlay extends Layer {
     }
 
     // Do not re-use `options`, or we would call startCloseAnimation(animation: startCloseAnimation)!
-    up.destroy(this.element, {
+    destroy(this.element, {
       ...options,
       ...animationProps,
       onFinished,

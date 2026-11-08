@@ -1,4 +1,5 @@
 import { findResult } from '../util.js'
+import { closest, config, containsMainPseudo, getFirstDescendant, matches, splitTarget } from '../fragment.js'
 
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
@@ -11,7 +12,7 @@ export class FragmentFinder {
     this._selector = options.selector
     // This option is for matching fragments in detached content, as needed by up.ResponseDoc.
     this._document = options.document || window.document
-    this._match = options.match ?? up.fragment.config.match
+    this._match = options.match ?? config.match
     this._preferOldElements = options.preferOldElements
   }
 
@@ -21,36 +22,36 @@ export class FragmentFinder {
 
   _findInPreferredElements() {
     if (this._preferOldElements) {
-      return this._preferOldElements.find((preferOldElement) => this._document.contains(preferOldElement) && up.fragment.matches(preferOldElement, this._selector))
+      return this._preferOldElements.find((preferOldElement) => this._document.contains(preferOldElement) && matches(preferOldElement, this._selector))
     }
   }
 
   _findInRegion() {
-    if (this._match === 'region' && !up.fragment.containsMainPseudo(this._selector) && this._origin?.isConnected) {
+    if (this._match === 'region' && !containsMainPseudo(this._selector) && this._origin?.isConnected) {
       return this._findClosest() || this._findDescendantInRegion()
     }
   }
 
   _findClosest() {
-    return up.fragment.closest(this._origin, this._selector, this._options)
+    return closest(this._origin, this._selector, this._options)
   }
 
   _findDescendantInRegion() {
-    let simpleSelectors = up.fragment.splitTarget(this._selector)
+    let simpleSelectors = splitTarget(this._selector)
 
     return findResult(simpleSelectors, (simpleSelector) => {
       let parts = simpleSelector.match(DESCENDANT_SELECTOR)
       if (parts) {
-        let parent = up.fragment.closest(this._origin, parts[1], this._options)
+        let parent = closest(this._origin, parts[1], this._options)
         if (parent) {
-          return up.fragment.getFirstDescendant(parent, parts[2], this._options)
+          return getFirstDescendant(parent, parts[2], this._options)
         }
       }
     })
   }
 
   _findFirst() {
-    return up.fragment.getFirstDescendant(this._document, this._selector, this._options)
+    return getFirstDescendant(this._document, this._selector, this._options)
   }
 }
 

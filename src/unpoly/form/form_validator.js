@@ -7,6 +7,7 @@ import { fail, muteUncriticalRejection } from '../error.js'
 import { Aborted } from '../error/aborted.js'
 import { build, on } from '../event.js'
 import { Params } from './params.js'
+import { getSmart, onAborted, render, resolveOrigin, splitTarget, toTarget } from '../fragment.js'
 import { printToStandard, printUserEvent } from '../log.js'
 import { config, headerize } from '../protocol.js'
 import { readData } from '../script.js'
@@ -42,7 +43,7 @@ export class FormValidator {
   }
 
   _honorAbort() {
-    up.fragment.onAborted(this._form, (event) => this._onAborted(event))
+    onAborted(this._form, (event) => this._onAborted(event))
   }
 
   _onAborted(event) {
@@ -81,7 +82,7 @@ export class FormValidator {
       solution.destination = `${renderOptions.method} ${renderOptions.url}`
       // Resolve :origin pseudo here, as a batched validation will only
       // have a single { origin } (set to the form).
-      solution.target = up.fragment.resolveOrigin(solution.target, solution)
+      solution.target = resolveOrigin(solution.target, solution)
       solution.deferred = deferred
     }
 
@@ -107,9 +108,9 @@ export class FormValidator {
   _getTargetSelectorSolutions({ target, origin }) {
     if (isString(target)) {
       printToStandard('up.validate()', 'Validating target "%s"', target)
-      let simpleSelectors = up.fragment.splitTarget(target)
+      let simpleSelectors = splitTarget(target)
       return compact(simpleSelectors.map(function(simpleSelector) {
-        let element = up.fragment.get(simpleSelector, { origin })
+        let element = getSmart(simpleSelector, { origin })
         if (element) {
           return {
             element,
@@ -127,7 +128,7 @@ export class FormValidator {
     printToStandard('up.validate()', 'Validating element %o', element)
     return [{
       element,
-      target: up.fragment.toTarget(element),
+      target: toTarget(element),
       origin: element
     }]
   }
@@ -184,7 +185,7 @@ export class FormValidator {
 
     try {
       // Resolve all promises we have handed out for the now-rendered solutions.
-      let renderPromise = up.render(renderOptions)
+      let renderPromise = render(renderOptions)
       for (let solution of solutionsBatch) {
         solution.deferred.resolve(renderPromise)
       }
@@ -317,7 +318,7 @@ export class FormValidator {
     //
     // Disabling the same elements multiple time is not an issue since up.form.disableTemp()
     // only sees enabled elements.
-    options.disable = dirtySolutions.map((solution) => up.fragment.resolveOrigin(solution.renderOptions.disable, solution))
+    options.disable = dirtySolutions.map((solution) => resolveOrigin(solution.renderOptions.disable, solution))
 
     // The guardEvent will be emitted on the render pass' { origin }, so the form in this case.
     // The guardEvent will also be assigned a { renderOptions } attribute in up.render()

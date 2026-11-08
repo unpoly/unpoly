@@ -8,6 +8,7 @@ import { Aborted } from '../error/aborted.js'
 import { Offline } from '../error/offline.js'
 import { EventEmitter } from '../event/event_emitter.js'
 import { Params } from '../form/params.js'
+import { getSmart, parseTargetSteps, splitTarget } from '../fragment.js'
 import { FormRenderer } from './form_renderer.js'
 import { UpResponse } from './response.js'
 import { XHRRenderer } from './xhr_renderer.js'
@@ -476,10 +477,10 @@ export const UpRequest = class Request extends Record {
   }
 
   _findFragments() {
-    let steps = up.fragment.parseTargetSteps(this.target)
+    let steps = parseTargetSteps(this.target)
     let lookupOpts = { origin: this.origin, layer: this.layer }
     // Look for one match per step.
-    let matches = map(steps, (step) => up.fragment.get(step.selector, lookupOpts))
+    let matches = map(steps, (step) => getSmart(step.selector, lookupOpts))
     return compact(matches)
   }
 
@@ -968,7 +969,7 @@ export const UpRequest = class Request extends Record {
     // a fragment response).
     if (!this.target || !trackingRequest.target) return
 
-    let targetAtoms = up.fragment.splitTarget(this.target + ',' + trackingRequest.target)
+    let targetAtoms = splitTarget(this.target + ',' + trackingRequest.target)
     this.target = uniq(targetAtoms).join(', ')
     this._setPropertyHeader('target') // X-Up-Target header was set in the response
 

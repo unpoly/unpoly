@@ -40,6 +40,7 @@ import * as protocol from './unpoly/protocol.js'
 import * as log from './unpoly/log.js'
 import * as script from './unpoly/script.js'
 import * as history from './unpoly/history.js'
+import * as fragment from './unpoly/fragment.js'
 import * as baseError from './unpoly/error/error.js'
 import * as notImplementedError from './unpoly/error/not_implemented.js'
 import * as abortedError from './unpoly/error/aborted.js'
@@ -101,7 +102,6 @@ import { DrawerLayer } from './unpoly/layer/modes/drawer_layer.js'
 import { CoverLayer } from './unpoly/layer/modes/cover_layer.js'
 import { RequestQueue } from './unpoly/network/request_queue.js'
 import { RequestCache } from './unpoly/network/request_cache.js'
-import { DestroyFragment } from './unpoly/fragment/render/change/destroy_fragment.js'
 
 window.up = {}
 
@@ -119,6 +119,7 @@ const apis = [
   log.api,
   script.api,
   history.api,
+  fragment.api,
   baseError.api,
   notImplementedError.api,
   abortedError.api,
@@ -188,7 +189,6 @@ for (let api of apis) {
 up._classes = {
   RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer, // used by up.layer
   RequestQueue, RequestCache,                                 // used by up.network
-  DestroyFragment,                                            // used by up.fragment
 }
 
 // The explicit install order. All installs run before `up.framework.onEvaled()` below, while
@@ -209,7 +209,7 @@ const installs = [
   log.install,
   script.install,
   history.install,
-  () => require('./unpoly/fragment'),
+  fragment.install,
   () => require('./unpoly/viewport'),
   () => require('./unpoly/motion'),
   () => require('./unpoly/network'),

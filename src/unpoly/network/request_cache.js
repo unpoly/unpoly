@@ -1,6 +1,7 @@
 import {
   always, containsAll, defineDelegates, each, every, filterList, last, remove, variant, wrapValue,
 } from '../util.js'
+import { splitTarget } from '../fragment.js'
 import { UpRequest } from './request.js'
 import { UpResponse } from './response.js'
 
@@ -48,8 +49,8 @@ class Route {
         // A response tailored to a target is never a match for a response without a target
         if (!newValue) return false
 
-        let cachedTokens = up.fragment.splitTarget(cachedValue)
-        let newTokens = up.fragment.splitTarget(newValue)
+        let cachedTokens = splitTarget(cachedValue)
+        let newTokens = splitTarget(newValue)
 
         return containsAll(cachedTokens, newTokens)
       } else {

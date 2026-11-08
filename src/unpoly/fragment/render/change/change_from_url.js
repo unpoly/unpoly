@@ -1,6 +1,7 @@
 import { always, isCrossOrigin, memoizeMethod, unresolvablePromise, withRenamedKeys } from '../../../util.js'
 import { canPushState } from '../../../browser.js'
 import { Offline } from '../../../error/offline.js'
+import { failKey, render } from '../../../fragment.js'
 import { ChangeFromContent } from './change_from_content.js'
 import { ChangeFromResponse } from './change_from_response.js'
 import { Change } from './change.js'
@@ -61,7 +62,7 @@ export class ChangeFromURL extends Change {
     return {
       ...this.options, // contains preflight keys relevant for the request, e.g. { url, method }
       ...successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
-      ...withRenamedKeys(failAttrs, up.fragment.failKey), // contains meta information for a failed update, e.g. { failTarget },
+      ...withRenamedKeys(failAttrs, failKey), // contains meta information for a failed update, e.g. { failTarget },
     }
   }
 
@@ -101,7 +102,7 @@ export class ChangeFromURL extends Change {
       this.request.emit('up:fragment:offline', {
         callback: this.options.onOffline,
         renderOptions: this.options,
-        retry: (retryOptions) => up.render({ ...this.options, ...retryOptions }),
+        retry: (retryOptions) => render({ ...this.options, ...retryOptions }),
         log,
       })
     }
