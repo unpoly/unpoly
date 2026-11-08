@@ -45,6 +45,8 @@ export function esbuildOptions(bundle, { sourcemap }) {
       },
     },
     inject: bundle.inject,
+    // Class names are API (up.Request.name). esbuild would lose some of them, see names.mjs.
+    keepNames: true,
     // jasmine-core reads `global`, which webpack 5 used to rewrite to the global object.
     define: { global: 'globalThis' },
     // We write ourselves in finish(), after Terser.

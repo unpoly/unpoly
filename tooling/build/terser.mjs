@@ -1,6 +1,7 @@
 // Terser runs after esbuild, on its finished bundle: to minify the .min.js bundles, and to strip
 // comments from the unminified bundles we publish. It is the slowest step of the build by far
-// (~4 s for unpoly.min.js), so it runs in worker threads, one bundle per worker.
+// (~4 s for unpoly.min.js), so it runs in worker threads, one bundle per worker. The workers also
+// drop the __name() calls that Terser doesn't need (see names.mjs).
 //
 // Why not esbuild's own minifier: it makes classes anonymous (`up.Record.name === ''`), and
 // restoring the names with its `keepNames` costs +12 % gzip. It also compresses less than Terser
