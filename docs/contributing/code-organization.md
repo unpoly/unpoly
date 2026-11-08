@@ -38,7 +38,7 @@ src/                      # Webpack entry points for Unpoly's main and optional 
     layer.js              # ... Code for up.layer namespace
     layer/                # ... Classes owned by up.layer
       base.js             # ...... Code for up.Layer class
-      modes/              # ...... One class per layer mode (modal, popup, ...)
+      modes/              # ...... One class per layer mode (ModalLayer, PopupLayer, ...)
     fragment/             # ... Classes owned by up.fragment
       render/             # ...... The classes behind up.render()
     util/                 # ... Generic helper classes (up.Config, up.Rect, ...)
@@ -222,6 +222,14 @@ file: `form.js` beside `form/`, `layer.js` beside `layer/`. A published class go
 docs are (`up.Params` is documented under `up.form`). Closely related classes share a
 sub-folder, like `fragment/render/` or `layer/modes/`. Generic helper classes live in
 `util/`. A class file exports the class, and an `api` if the class is published.
+
+Only top-level classes appear on `window.up`. Internal ones (like `up.ResponseDoc`) stay there
+under their flat name, marked `@internal`, because the specs are a separate bundle and can't
+import them. Subclasses and helpers that used to be nested (`up.Layer.Modal`) are not on
+`window.up` at all, and are named so they stand on their own (`ModalLayer`). A class named
+like a browser global is a named class expression bound to an `Up` name
+(`export const UpRequest = class Request …`), so it keeps its runtime name without
+shadowing the global.
 
 The entry file `src/unpoly.js` ties the modules together. It imports every module, copies
 each `api` onto `window.up` (the `apis` list), then calls each `install()` (the `installs`
