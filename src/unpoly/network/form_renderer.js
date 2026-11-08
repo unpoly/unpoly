@@ -1,12 +1,14 @@
-const u = up.util
-const e = up.element
+import { contains, each } from '../util.js'
+import { affix } from '../element.js'
+import { submitForm } from '../browser.js'
+import { Params } from '../form/params.js'
 
 // In HTML5, forms may only have a GET or POST method.
 // There were several proposals to extend this to PUT, DELETE, etc.
 // but they have all been abandoned.
 const HTML_FORM_METHODS = ['GET', 'POST']
 
-up.Request.FormRenderer = class FormRenderer {
+export class FormRenderer {
 
   constructor(request) {
     this._request = request
@@ -21,17 +23,17 @@ up.Request.FormRenderer = class FormRenderer {
 
     // GET forms cannot have an URL with a query section in their [action] attribute.
     // The query section would be overridden by the serialized input values on submission.
-    const paramsFromQuery = up.Params.fromURL(action)
+    const paramsFromQuery = Params.fromURL(action)
     this.params.addAll(paramsFromQuery)
-    action = up.Params.stripURL(action)
+    action = Params.stripURL(action)
 
-    if (!u.contains(HTML_FORM_METHODS, method)) {
+    if (!contains(HTML_FORM_METHODS, method)) {
       // HTML forms can only have a GET or POST method. Other HTTP methods will be converted
       // to a `POST` request and carry their original method as a `_method` parameter.
       method = up.protocol.wrapMethod(method, this.params)
     }
 
-    this._form = e.affix(document.body, 'form.up-request-loader', { method, action })
+    this._form = affix(document.body, 'form.up-request-loader', { method, action })
 
     // We only need an [enctype] attribute if the user has explicitly
     // requested one. If none is given, we can use the browser's default
@@ -49,12 +51,12 @@ up.Request.FormRenderer = class FormRenderer {
 
     // @params will be undefined for GET requests, since we have already
     // transfered all params to the URL during normalize().
-    u.each(this.params.toArray(), this._addField.bind(this))
+    each(this.params.toArray(), this._addField.bind(this))
 
-    up.browser.submitForm(this._form)
+    submitForm(this._form)
   }
 
   _addField(attrs) {
-    e.affix(this._form, 'input[type=hidden]', attrs)
+    affix(this._form, 'input[type=hidden]', attrs)
   }
 }

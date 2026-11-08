@@ -127,8 +127,10 @@ Expires cache entries.
 @deprecated
   Use `up.cache.expire()` instead.
 */
-up.Request.Cache.prototype.clear = function(...args) {
-  // up.cache is an up.Request.Cache instance
+// The cache's class isn't on window.up, and importing it here would patch a second copy
+// of the class, since unpoly-migrate.js is a separate bundle. So we patch the prototype
+// of the up.cache instance.
+Object.getPrototypeOf(up.cache).clear = function(...args) {
   up.migrate.deprecated('up.cache.clear()', 'up.cache.expire()')
   this.expire(...args)
 }

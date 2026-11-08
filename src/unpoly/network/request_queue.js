@@ -1,6 +1,9 @@
-const u = up.util
+import {
+  always, evalOption, filterList, findInList, parseArgs, queueTask, remove, scheduleTimer, some,
+} from '../util.js'
+import { UpRequest } from './request.js'
 
-up.Request.Queue = class Queue {
+export class RequestQueue {
 
   constructor() {
     this.reset()
@@ -19,7 +22,7 @@ up.Request.Queue = class Queue {
     this._trackingRequests.push(request)
     // The braces matter: u.remove() returns the removed request, a thenable that would make
     // the derived promise adopt the request's rejection.
-    u.always(request, () => { u.remove(this._trackingRequests, request) })
+    always(request, () => { remove(this._trackingRequests, request) })
   }
 
   get allRequests() {
@@ -28,7 +31,7 @@ up.Request.Queue = class Queue {
 
   asap(request) {
     request.runQueuedCallbacks()
-    u.always(request, () => this._onRequestSettled(request))
+    always(request, () => this._onRequestSettled(request))
 
     // When considering whether a request is "slow", we're measuring the duration between request.queuedAt
     // and the moment when the request gets settled. Note that when setSlowTimer() occurs, it will
@@ -63,11 +66,11 @@ up.Request.Queue = class Queue {
 
     // We may have multiple timers running concurrently.
     // Nonethess we don't emit duplicate events due to the check in @_checkLate().
-    u.timer(timeUntilLate, () => this._checkForLate())
+    scheduleTimer(timeUntilLate, () => this._checkForLate())
   }
 
   _getMaxConcurrency() {
-    return u.evalOption(up.network.config.concurrency)
+    return evalOption(up.network.config.concurrency)
   }
 
   _hasConcurrencyLeft() {
@@ -93,9 +96,9 @@ up.Request.Queue = class Queue {
     // Only when there is no foreground request left in the queue we will send a background request.
     // Note that if a queued preload request is requested without { preload: true } we will
     // promote it to the foreground (see @promoteToForeground()).
-    let request = u.find(this._queuedRequests, (request) => !request.background)
+    let request = findInList(this._queuedRequests, (request) => !request.background)
     request ||= this._queuedRequests[0]
-    return u.remove(this._queuedRequests, request)
+    return remove(this._queuedRequests, request)
   }
 
   _sendRequestNow(request) {
@@ -106,14 +109,14 @@ up.Request.Queue = class Queue {
 
   _onRequestSettled(request) {
     // If the request was aborted before it was sent, it still sits in @queuedRequests.
-    u.remove(this._currentRequests, request) || u.remove(this._queuedRequests, request)
+    remove(this._currentRequests, request) || remove(this._queuedRequests, request)
 
     queueMicrotask(() => this._poke())
 
     // Check if we can emit up:network:recover after a previous up:network:late event.
     // We do give other code one more task to queue another requests, e.g. a queued watcher diff.
     // This way a long-running chain of requests only shows a single, un-interrupted progress bar.
-    u.task(() => this._checkForRecover())
+    queueTask(() => this._checkForRecover())
   }
 
   _poke() {
@@ -125,12 +128,12 @@ up.Request.Queue = class Queue {
 
   // Aborting a request will cause its promise to reject, which will also uncache it
   abort(...args) {
-    let [conditions = true, { except, reason, logOnce }] = u.args(args, 'val', 'options')
+    let [conditions = true, { except, reason, logOnce }] = parseArgs(args, 'val', 'options')
 
-    let tester = up.Request.tester(conditions, { except })
+    let tester = UpRequest.tester(conditions, { except })
 
     for (let list of [this._currentRequests, this._queuedRequests, this._trackingRequests]) {
-      const abortableRequests = u.filter(list, tester)
+      const abortableRequests = filterList(list, tester)
       for (let abortableRequest of abortableRequests) {
         if (logOnce) {
           up.puts(...logOnce)
@@ -138,7 +141,7 @@ up.Request.Queue = class Queue {
         }
         abortableRequest.abort({ reason })
         // Avoid changing the list we're iterating over.
-        u.remove(list, abortableRequest)
+        remove(list, abortableRequest)
       }
     }
   }
@@ -176,7 +179,7 @@ up.Request.Queue = class Queue {
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1
     const isLate = (request) => request.age >= (request.effectiveLateTime - timerTolerance)
-    return u.some(this._timedRequests, isLate)
+    return some(this._timedRequests, isLate)
   }
 
 }

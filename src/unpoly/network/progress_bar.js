@@ -1,18 +1,18 @@
-const e = up.element
+import { affix, paint } from '../element.js'
 
 const TRANSITION_DELAY = 300
 
-up.ProgressBar = class ProgressBar {
+export class ProgressBar {
 
   constructor() {
     this._step = 0
-    this._element = e.affix(document.body, 'up-progress-bar')
+    this._element = affix(document.body, 'up-progress-bar')
     this._element.style.transition = `width ${TRANSITION_DELAY}ms ease-out`
 
     this._moveTo(0)
     // The element must be painted at width: 0 before we apply the target width.
     // If the first paint sees the bar at the target width, we don't get an animated transition.
-    e.paint(this._element)
+    paint(this._element)
 
     this._width = 31
     this._nextStep()
@@ -57,4 +57,9 @@ up.ProgressBar = class ProgressBar {
     this._moveTo(100)
     setTimeout(this.destroy.bind(this), TRANSITION_DELAY)
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  ProgressBar,
 }

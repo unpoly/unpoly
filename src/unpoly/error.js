@@ -26,6 +26,9 @@ export function fail(...args) {
   throw new UpError(args)
 }
 
+// We reach up.RenderResult and up.Response through window.up instead of importing them:
+// util imports this module, and the classes import util (through up.Record), so the import
+// would throw at load time.
 function isCritical(error) {
   return (typeof error !== 'object') || ((error.name !== 'AbortError') && !(error instanceof up.RenderResult) && !(error instanceof up.Response))
 }

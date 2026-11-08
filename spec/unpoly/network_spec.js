@@ -747,7 +747,7 @@ describe('up.network', function() {
       describe("for GET requests", function() {
 
         it("creates a GET form, adds all { params } as hidden fields and submits the form", function() {
-          const submitForm = spyOn(up.browser, 'submitForm')
+          const submitForm = up.browser.submitForm.mock()
           up.network.loadPage({
             url: '/foo',
             method: 'GET',
@@ -767,7 +767,7 @@ describe('up.network', function() {
         })
 
         it('merges params from the given URL and the { params } option', function() {
-          const submitForm = spyOn(up.browser, 'submitForm')
+          const submitForm = up.browser.submitForm.mock()
           up.network.loadPage({ url: '/foo?param1=param1%20value', method: 'GET', params: { param2: 'param2 value' } })
           expect(submitForm).toHaveBeenCalled()
           const $form = $('form.up-request-loader')
@@ -783,7 +783,7 @@ describe('up.network', function() {
       describe("for POST requests", function() {
 
         it("creates a POST form, adds all { params } params as hidden fields and submits the form", function() {
-          const submitForm = spyOn(up.browser, 'submitForm')
+          const submitForm = up.browser.submitForm.mock()
           up.network.loadPage({
             url: '/foo',
             method: 'POST',
@@ -799,7 +799,7 @@ describe('up.network', function() {
         })
 
         it('merges params from the given URL and the { params } option', function() {
-          const submitForm = spyOn(up.browser, 'submitForm')
+          const submitForm = up.browser.submitForm.mock()
           up.network.loadPage({ url: '/foo?param1=param1%20value', method: 'POST', params: { param2: 'param2 value' } })
           expect(submitForm).toHaveBeenCalled()
           const $form = $('form.up-request-loader')
@@ -811,7 +811,7 @@ describe('up.network', function() {
         })
 
         it('uses the given { contentType }', function() {
-          const submitForm = spyOn(up.browser, 'submitForm')
+          const submitForm = up.browser.submitForm.mock()
           up.network.loadPage({
             url: '/foo',
             method: 'POST',
@@ -825,7 +825,7 @@ describe('up.network', function() {
         })
 
         it('ignores binary entries, as we cannot encode them in form inputs', function() {
-          const submitForm = spyOn(up.browser, 'submitForm')
+          const submitForm = up.browser.submitForm.mock()
           const params = [
             { name: 'scalar', value: 'scalar-value' },
             { name: 'blob', value: new Blob(['blob-value'], { type: "text/plain" }) },
@@ -844,7 +844,7 @@ describe('up.network', function() {
       u.each(['PUT', 'PATCH', 'DELETE'], function(method) {
         describe(`for ${method} requests`, function() {
           it("uses a POST form and sends the actual method as a { _method } param", function() {
-            const submitForm = spyOn(up.browser, 'submitForm')
+            const submitForm = up.browser.submitForm.mock()
             up.network.loadPage({ url: '/foo', method })
             expect(submitForm).toHaveBeenCalled()
             const $form = $('form.up-request-loader')
@@ -860,7 +860,7 @@ describe('up.network', function() {
         beforeEach(function() {
           up.protocol.config.csrfToken = () => 'csrf-token'
           up.protocol.config.csrfParam = () => 'csrf-param'
-          this.submitForm = spyOn(up.browser, 'submitForm')
+          this.submitForm = up.browser.submitForm.mock()
         })
 
         it('submits an CSRF token as another hidden field', function() {

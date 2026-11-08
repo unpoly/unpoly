@@ -1,4 +1,4 @@
-describe('up.Request.Cache', function() {
+describe('RequestCache', function() {
   describe('#track', function() {
     it('resolves the given new request when the given cached request is resolved', async function() {
       let sourceRequest = new up.Request({ url: '/foo' })

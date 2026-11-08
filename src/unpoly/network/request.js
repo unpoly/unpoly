@@ -1,4 +1,18 @@
-const u = up.util
+import {
+  always, compact, contains, delegatePromise, evalAutoOption, evalOption, isArray, isBlank,
+  isCrossOrigin, isFunction, isMissing, isNumber, isOptions, isString, map, matchURLs,
+  methodAllowsPayload, newDeferred, normalizeMethod, normalizeURL, queueTask, safeStringifyJSON,
+  some, uniq, wrapList,
+} from '../util.js'
+import { Aborted } from '../error/aborted.js'
+import { Offline } from '../error/offline.js'
+import { EventEmitter } from '../event/event_emitter.js'
+import { Params } from '../form/params.js'
+import { FormRenderer } from './form_renderer.js'
+import { UpResponse } from './response.js'
+import { XHRRenderer } from './xhr_renderer.js'
+import { Record } from '../util/record.js'
+import { UpURLPattern } from '../util/url_pattern.js'
 
 /*-
 A normalized description of an [HTTP request](/api/up.request).
@@ -17,7 +31,9 @@ console.log(response.text)
 @class up.Request
 @parent up.network
 */
-up.Request = class Request extends up.Record {
+// A class expression, so the class is still named `Request` at runtime, while the binding
+// doesn't shadow the browser's `Request` here or in importers.
+export const UpRequest = class Request extends Record {
 
   /*-
   The HTTP method for the request.
@@ -359,7 +375,7 @@ up.Request = class Request extends up.Record {
   constructor(options) {
     super(options)
 
-    this.params = new up.Params(this.params) // copies, which we want
+    this.params = new Params(this.params) // copies, which we want
 
     // Normalize a first time to get a normalized cache key.
     this._normalize()
@@ -398,7 +414,7 @@ up.Request = class Request extends up.Record {
     // This up.Request object is also promise for its up.Response.
     // We delegate all promise-related methods (then, catch, finally) to an internal
     // _deferred object.
-    this._deferred = u.newDeferred()
+    this._deferred = newDeferred()
 
     this._setAutoHeaders()
   }
@@ -407,12 +423,12 @@ up.Request = class Request extends up.Record {
     if (this.background) {
       return false
     } else {
-      return this.lateDelay ?? u.evalOption(up.network.config.lateDelay, this)
+      return this.lateDelay ?? evalOption(up.network.config.lateDelay, this)
     }
   }
 
   isTimed() {
-    return u.isNumber(this.effectiveLateTime)
+    return isNumber(this.effectiveLateTime)
   }
 
   /*-
@@ -457,8 +473,8 @@ up.Request = class Request extends up.Record {
     let steps = up.fragment.parseTargetSteps(this.target)
     let lookupOpts = { origin: this.origin, layer: this.layer }
     // Look for one match per step.
-    let matches = u.map(steps, (step) => up.fragment.get(step.selector, lookupOpts))
-    return u.compact(matches)
+    let matches = map(steps, (step) => up.fragment.get(step.selector, lookupOpts))
+    return compact(matches)
   }
 
   get bindFragments() {
@@ -485,18 +501,18 @@ up.Request = class Request extends up.Record {
   }
 
   _normalize() {
-    this.method = u.normalizeMethod(this.method)
+    this.method = normalizeMethod(this.method)
     this._extractHashFromURL()
     this._transferParamsToURL()
 
     // This consistently strips the hostname from same-origin requests.
-    this.url = u.normalizeURL(this.url)
+    this.url = normalizeURL(this.url)
   }
 
   _evictExpensiveAttrs() {
     // We want to allow up:request:loaded events etc. to still access the properties that
     // we are about to evict, so we wait for one more frame. It shouldn't matter for GC.
-    u.task(() => {
+    queueTask(() => {
       // (1) While the request is still in flight, we require the target layer
       // to be able to cancel it when the layers gets closed. We now
       // evict this property, since response.request.layer.element will
@@ -531,7 +547,7 @@ up.Request = class Request extends up.Record {
   }
 
   _transferParamsToURL() {
-    if (!this.url || this.allowsPayload() || u.isBlank(this.params)) {
+    if (!this.url || this.allowsPayload() || isBlank(this.params)) {
       return
     }
 
@@ -555,7 +571,7 @@ up.Request = class Request extends up.Record {
   }
 
   allowsPayload() {
-    return u.methodAllowsPayload(this.method)
+    return methodAllowsPayload(this.method)
   }
 
   will302RedirectWithGET() {
@@ -563,11 +579,11 @@ up.Request = class Request extends up.Record {
   }
 
   willCache() {
-    return up.network.config.cacheEnabled && u.evalAutoOption(this.cache, up.network.config.autoCache, this)
+    return up.network.config.cacheEnabled && evalAutoOption(this.cache, up.network.config.autoCache, this)
   }
 
   runQueuedCallbacks() {
-    u.always(this, () => this._evictExpensiveAttrs())
+    always(this, () => this._evictExpensiveAttrs())
   }
 
   load() {
@@ -596,7 +612,7 @@ up.Request = class Request extends up.Record {
       this.expired = false
 
       // Convert from XHR's callback-based API to up.Request's promise-based API
-      new up.Request.XHRRenderer(this).buildAndSend({
+      new XHRRenderer(this).buildAndSend({
         onload: () => this._onXHRLoad(),
         onerror: () => this._onXHRError(),
         ontimeout: () => this._onXHRTimeout(),
@@ -650,7 +666,7 @@ up.Request = class Request extends up.Record {
     // Abort all pending requests so their callbacks won't run
     // while we're already navigating away.
     up.network.abort()
-    new up.Request.FormRenderer(this).buildAndSubmit()
+    new FormRenderer(this).buildAndSubmit()
   }
 
   _onXHRLoad() {
@@ -723,7 +739,7 @@ up.Request = class Request extends up.Record {
 
     let log = ["Aborted request to %s: %s", this, reason]
     this.state = 'aborted'
-    this._reject(new up.Aborted(log))
+    this._reject(new Aborted(log))
     this.emit('up:request:aborted', { log })
 
     // Return true so callers know we didn't return early without actually aborting anything.
@@ -736,7 +752,7 @@ up.Request = class Request extends up.Record {
     let log = ['Cannot load request from %s: %s', this, reason]
     this.state = 'offline'
     this.emit('up:request:offline', { log })
-    this._reject(new up.Offline(log, { reason, request: this }))
+    this._reject(new Offline(log, { reason, request: this }))
   }
 
   respondWith(response) {
@@ -809,7 +825,7 @@ up.Request = class Request extends up.Record {
   }
 
   isCrossOrigin() {
-    return u.isCrossOrigin(this.url)
+    return isCrossOrigin(this.url)
   }
 
   _extractResponseFromXHR() {
@@ -843,7 +859,7 @@ up.Request = class Request extends up.Record {
       // Unfortunately we cannot ask the XHR object for its response method.
       // The server may use the custom X-Up-Method for that. If that header is missing
       // AND the URLs changed between request and response, we assume GET.
-      if (!u.matchURLs(this.url, urlFromResponse)) {
+      if (!matchURLs(this.url, urlFromResponse)) {
         methodFromResponse ||= 'GET'
       }
 
@@ -854,7 +870,7 @@ up.Request = class Request extends up.Record {
       responseAttrs.method = methodFromResponse
     }
 
-    return new up.Response(responseAttrs)
+    return new UpResponse(responseAttrs)
   }
 
   _buildEventEmitter(args) {
@@ -862,7 +878,7 @@ up.Request = class Request extends up.Record {
     // This way listeners can observe event-related events on a given layer.
     // This request has an optional { layer } attribute, which is used by
     // EventEmitter.
-    return up.EventEmitter.fromEmitArgs(args, {
+    return EventEmitter.fromEmitArgs(args, {
       layer: this.bindLayer,
       request: this,
       origin: this.origin
@@ -884,15 +900,15 @@ up.Request = class Request extends up.Record {
   }
 
   isBoundToSubtrees(subtreeRoots) {
-    subtreeRoots = u.wrapList(subtreeRoots)
+    subtreeRoots = wrapList(subtreeRoots)
 
-    return u.some(this.bindFragments, function(fragment) {
-      return u.some(subtreeRoots, (subtreeElement) => subtreeElement.contains(fragment))
+    return some(this.bindFragments, function(fragment) {
+      return some(subtreeRoots, (subtreeElement) => subtreeElement.contains(fragment))
     })
   }
 
   isBoundToLayers(layers) {
-    return u.contains(layers, this.bindLayer)
+    return contains(layers, this.bindLayer)
   }
 
   get age() {
@@ -926,12 +942,12 @@ up.Request = class Request extends up.Record {
   }
 
   _setAutoHeader(name, value) {
-    if (u.isMissing(value)) {
+    if (isMissing(value)) {
       return
     }
 
-    if (u.isOptions(value) || u.isArray(value)) {
-      value = u.safeStringifyJSON(value)
+    if (isOptions(value) || isArray(value)) {
+      value = safeStringifyJSON(value)
     }
     this.headers[name] = value
   }
@@ -947,20 +963,20 @@ up.Request = class Request extends up.Record {
     if (!this.target || !trackingRequest.target) return
 
     let targetAtoms = up.fragment.splitTarget(this.target + ',' + trackingRequest.target)
-    this.target = u.uniq(targetAtoms).join(', ')
+    this.target = uniq(targetAtoms).join(', ')
     this._setPropertyHeader('target') // X-Up-Target header was set in the response
 
-    this._fragments = u.uniq([...this.fragments, ...trackingRequest.fragments])
+    this._fragments = uniq([...this.fragments, ...trackingRequest.fragments])
   }
 
   static tester(condition, { except } = {}) {
     let testFn
-    if (u.isFunction(condition)) {
+    if (isFunction(condition)) {
       testFn = condition
     } else if (condition instanceof this) {
       testFn = (request) => condition === request
-    } else if (u.isString(condition)) {
-      let pattern = new up.URLPattern(condition)
+    } else if (isString(condition)) {
+      let pattern = new UpURLPattern(condition)
       testFn = (request) => pattern.test(request.url)
     } else { // boolean, truthy/falsy values
       testFn = (_request) => condition
@@ -1007,6 +1023,10 @@ up.Request = class Request extends up.Record {
   */
   static {
     // A request is also a promise ("thenable") for its response.
-    u.delegatePromise(this.prototype, function() { return this._deferred })
+    delegatePromise(this.prototype, function() { return this._deferred })
   }
+}
+
+export const api = {
+  Request: UpRequest,
 }

@@ -70,6 +70,9 @@ import * as layerLookupClass from './unpoly/layer/layer_lookup.js'
 import * as layerStackClass from './unpoly/layer/layer_stack.js'
 import * as overlayFocusClass from './unpoly/layer/overlay_focus.js'
 import * as tetherClass from './unpoly/layer/tether.js'
+import * as progressBarClass from './unpoly/network/progress_bar.js'
+import * as requestClass from './unpoly/network/request.js'
+import * as responseClass from './unpoly/network/response.js'
 
 window.up = {}
 
@@ -125,6 +128,9 @@ const apis = [
   layerStackClass.api,
   overlayFocusClass.api,
   tetherClass.api,
+  progressBarClass.api,
+  requestClass.api,
+  responseClass.api,
 ]
 
 // Copy property descriptors, so getters (like `up.context`) stay live.
@@ -160,15 +166,8 @@ const installs = [
   () => require('./unpoly/fragment/render/fragment_processor'),
   () => require('./unpoly/fragment/render/fragment_focus'),
   () => require('./unpoly/fragment/render/fragment_scrolling'),
-  () => require('./unpoly/network/progress_bar'),
   () => require('./unpoly/fragment/render/render_options'),
   () => require('./unpoly/fragment/render/render_result'),
-  () => require('./unpoly/network/request'),
-  () => require('./unpoly/network/request_cache'),
-  () => require('./unpoly/network/request_queue'),
-  () => require('./unpoly/network/form_renderer'),
-  () => require('./unpoly/network/xhr_renderer'),
-  () => require('./unpoly/network/response'),
   () => require('./unpoly/fragment/render/response_doc'),
 
   () => require('./unpoly/framework'),

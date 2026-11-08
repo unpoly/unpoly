@@ -1,5 +1,6 @@
 import { isString } from './util.js'
 import { Aborted } from './error/aborted.js'
+import { mockable } from './mockable.js'
 
 /*-
 We tunnel some browser APIs through this namespace for easier mocking in tests.
@@ -16,9 +17,9 @@ For mocking in specs.
 @function up.browser.submitForm
 @internal
 */
-export function submitForm(form) {
+export const submitForm = mockable(function submitForm(form) {
   form.submit()
-}
+})
 
 /*-
 Returns whether this browser supports manipulation of the current URL
@@ -34,7 +35,7 @@ fall back to a full page load.
 @return {boolean}
 @internal
 */
-export function canPushState() {
+export const canPushState = mockable(function canPushState() {
   // We cannot use pushState if the initial request method is a POST for two reasons:
   //
   // 1. Unpoly replaces the initial state so it can handle the pop event when the
@@ -52,7 +53,7 @@ export function canPushState() {
   // Unpoly framework to work). This way Unpoly will fall back to full page loads until
   // the framework was booted from a GET request.
   return up.protocol.initialRequestMethod() === 'GET'
-}
+})
 
 // Don't memoize so a build may publish window.jQuery after Unpoly was loaded
 export function canJQuery() {
@@ -74,13 +75,13 @@ export function popCookie(name) {
 @param {boolean} options.preload
 @internal
 */
-export function assertConfirmed(options) {
+export const assertConfirmed = mockable(function assertConfirmed(options) {
   const confirmed = !isString(options.confirm) || !options.confirm || window.confirm(options.confirm)
   if (!confirmed) {
     throw new Aborted('User canceled action')
   }
   return true
-}
+})
 
 export const api = {
   browser: {

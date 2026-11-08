@@ -1,4 +1,8 @@
-const u = up.util
+import {
+  always, containsAll, defineDelegates, each, every, filterList, last, remove, variant, wrapValue,
+} from '../util.js'
+import { UpRequest } from './request.js'
+import { UpResponse } from './response.js'
 
 // One route per method and URL.
 class Route {
@@ -13,11 +17,11 @@ class Route {
   matchBest(newRequest) {
     let matches = this.requests.filter((cachedRequest) => this.satisfies(cachedRequest, newRequest))
     // Newer requests are always appended
-    return u.last(matches)
+    return last(matches)
   }
 
   delete(request) {
-    u.remove(this.requests, request)
+    remove(this.requests, request)
   }
 
   put(request) {
@@ -33,7 +37,7 @@ class Route {
   satisfies(cachedRequest, newRequest) {
     if (cachedRequest === newRequest) return true
 
-    return u.every(this.varyHeaders, (varyHeader) => {
+    return every(this.varyHeaders, (varyHeader) => {
       let cachedValue = cachedRequest.header(varyHeader)
       let newValue = newRequest.header(varyHeader)
 
@@ -47,7 +51,7 @@ class Route {
         let cachedTokens = up.fragment.splitTarget(cachedValue)
         let newTokens = up.fragment.splitTarget(newValue)
 
-        return u.containsAll(cachedTokens, newTokens)
+        return containsAll(cachedTokens, newTokens)
       } else {
         return cachedValue === newValue
       }
@@ -55,7 +59,7 @@ class Route {
   }
 }
 
-up.Request.Cache = class Cache {
+export class RequestCache {
 
   constructor() {
     this.reset()
@@ -125,14 +129,14 @@ up.Request.Cache = class Cache {
     } else {
       // Wait until existingRequest responds or errors.
       // Note that while we're waiting, existingRequest could be evicted, e.g. after a failed response.
-      value = await u.always(existingRequest)
+      value = await always(existingRequest)
 
       // If newRequest was aborted while waiting, it must stay aborted.
       // In particular we must not re-send it on a Vary mismatch, or delegate its state to existingRequest.
       if (newRequest.ended) return
     }
 
-    if (value instanceof up.Response) {
+    if (value instanceof UpResponse) {
       if (options.force || existingRequest.cacheRoute.satisfies(existingRequest, newRequest)) {
         // Remember that newRequest was settled from cache.
         // This makes it a candidate for cache revalidation.
@@ -141,14 +145,14 @@ up.Request.Cache = class Cache {
         // Create a variant where response.request === newRequest.
         // This is needed so up.render({ response }) can see the correct value for response.request.fromCache,
         // which is true for the cache-missing request but false for the cache-hitting request.
-        value = u.variant(value, { request: newRequest })
+        value = variant(value, { request: newRequest })
 
         // respondWith() will check response.ok and either fulfill or reject newRequest's promise.
         newRequest.respondWith(value)
 
         // Since this request object is never in the cache, we need
         // to expire ourselves when otherRequest is expired.
-        u.delegate(newRequest, ['expired', 'state'], () => existingRequest)
+        defineDelegates(newRequest, ['expired', 'state'], () => existingRequest)
       } else {
         // A supposed cache hit turns out to be a cache *miss* due to the response carrying
         // an incompatible Vary header.
@@ -206,7 +210,7 @@ up.Request.Cache = class Cache {
   }
 
   _delete(request) {
-    u.remove(this._requests, request)
+    remove(this._requests, request)
     request.cacheRoute?.delete(request)
   }
 
@@ -236,16 +240,16 @@ up.Request.Cache = class Cache {
   }
 
   _eachMatch(condition = true, testerOptions, fn) {
-    let tester = up.Request.tester(condition, testerOptions)
+    let tester = UpRequest.tester(condition, testerOptions)
 
     // Copy results so evict() can delete from the list we're iterating over
-    let results = u.filter(this._requests, tester)
+    let results = filterList(this._requests, tester)
 
-    u.each(results, fn)
+    each(results, fn)
   }
 
   _wrap(requestOrOptions) {
-    return u.wrapValue(up.Request, requestOrOptions)
+    return wrapValue(UpRequest, requestOrOptions)
   }
 
 }

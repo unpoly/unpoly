@@ -1,4 +1,7 @@
-const u = up.util
+import { evalOption, getSimpleTokens, variant } from '../util.js'
+import { CSPInfo } from '../script/csp/csp_info.js'
+import { Record } from '../util/record.js'
+
 const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
 
 /*-
@@ -15,7 +18,9 @@ console.log(response.text)   // "<html><body>..."
 @class up.Response
 @parent up.network
 */
-up.Response = class Response extends up.Record {
+// A class expression, so the class is still named `Response` at runtime, while the binding
+// doesn't shadow the browser's `Response` here or in importers.
+export const UpResponse = class Response extends Record {
 
   /*-
   The HTTP method used for the request that produced this response.
@@ -149,7 +154,7 @@ up.Response = class Response extends up.Record {
   @stable
   */
   get ok() {
-    return !u.evalOption(this.fail ?? up.network.config.fail, this)
+    return !evalOption(this.fail ?? up.network.config.fail, this)
   }
 
   /*-
@@ -190,7 +195,7 @@ up.Response = class Response extends up.Record {
 
   get varyHeaderNames() {
     let varyHeaderValue = this.header('Vary')
-    return u.getSimpleTokens(varyHeaderValue, { separator: ',' })
+    return getSimpleTokens(varyHeaderValue, { separator: ',' })
   }
 
   /*-
@@ -228,7 +233,7 @@ up.Response = class Response extends up.Record {
   */
   get cspInfo() {
     let policy = this.header('Content-Security-Policy') || this.header('Content-Security-Policy-Report-Only')
-    return up.CSPInfo.fromHeader(policy)
+    return CSPInfo.fromHeader(policy)
   }
 
   /*-
@@ -325,7 +330,7 @@ up.Response = class Response extends up.Record {
   get redirectRequest() {
     if (!this.redirect) return
 
-    let finalRequest = u.variant(this.request, {
+    let finalRequest = variant(this.request, {
       method: this.method,
       url: this.url,
       // The { cacheRoute } prop may no longer be correctly cached
@@ -340,4 +345,8 @@ up.Response = class Response extends up.Record {
     return finalRequest
   }
 
+}
+
+export const api = {
+  Response: UpResponse,
 }

@@ -1,9 +1,10 @@
+import { copy, memoizeMethod } from '../util.js'
+
 const CONTENT_TYPE_URL_ENCODED = 'application/x-www-form-urlencoded'
 const CONTENT_TYPE_FORM_DATA = 'multipart/form-data'
 
-const u = up.util
 
-up.Request.XHRRenderer = class XHRRenderer {
+export class XHRRenderer {
 
   constructor(request) {
     this._request = request
@@ -14,7 +15,7 @@ up.Request.XHRRenderer = class XHRRenderer {
 
     // We copy params since we will modify them below.
     // This would confuse API clients and cache key logic in up.network.
-    this._params = u.copy(this._request.params)
+    this._params = copy(this._request.params)
 
     // IE11 explodes it we're setting an undefined timeout property
     if (this._request.timeout) {
@@ -94,7 +95,7 @@ up.Request.XHRRenderer = class XHRRenderer {
   }
 
   static {
-    u.memoizeMethod(this.prototype, {
+    memoizeMethod(this.prototype, {
       _finalizePayload: true,
       _getMethod: true,
     })

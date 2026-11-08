@@ -1716,7 +1716,7 @@ describe('up.layer', function() {
           it('shows a confirm message before accepting the overlay', function() {
             const [root, overlay] = makeLayers(2)
             const link = overlay.affix('a[up-accept][up-confirm="Are you sure?"]')
-            const confirmSpy = spyOn(up.browser, 'assertConfirmed')
+            const confirmSpy = up.browser.assertConfirmed.mock()
 
             Trigger.clickSequence(link)
 
@@ -1726,7 +1726,7 @@ describe('up.layer', function() {
 
           it('does not accept the overlay or follow the link if the message is not confirmed', function() {
             const [root, overlay] = makeLayers(2)
-            const confirmSpy = spyOn(up.browser, 'assertConfirmed').and.callFake(function(options) {
+            const confirmSpy = up.browser.assertConfirmed.mock().and.callFake(function(options) {
               if (options.confirm) {
                 throw new up.Aborted('User aborted')
               }
@@ -1917,7 +1917,7 @@ describe('up.layer', function() {
             const [root, overlay] = makeLayers(2)
             const form = overlay.affix('form[up-accept][up-confirm="Are you sure?"]')
             const submitButton = e.affix(form, 'input[type=submit]')
-            const confirmSpy = spyOn(up.browser, 'assertConfirmed')
+            const confirmSpy = up.browser.assertConfirmed.mock()
 
             Trigger.clickSequence(submitButton)
 
@@ -1927,7 +1927,7 @@ describe('up.layer', function() {
 
           it('does not accept the overlay or submit the form if the message is not confirmed', function() {
             const [root, overlay] = makeLayers(2)
-            const confirmSpy = spyOn(up.browser, 'assertConfirmed').and.callFake(function(options) {
+            const confirmSpy = up.browser.assertConfirmed.mock().and.callFake(function(options) {
               if (options.confirm) {
                 throw new up.Aborted('User aborted')
               }
