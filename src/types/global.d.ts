@@ -12,3 +12,6 @@ declare var spyOn: any
 
 // Entry points require their stylesheets, which webpack handles.
 declare module '*.sass'
+
+// ERB templates (like the one that inserts the version number) are rendered by webpack's erb loader.
+declare module '*.erb'

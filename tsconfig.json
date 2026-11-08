@@ -19,9 +19,10 @@
     "moduleDetection": "force",
     // Don't load @types packages of our dev dependencies (node, express, ...).
     "types": [],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // The build transpiles each file on its own (ts-loader with transpileOnly). Flag code that
+    // needs whole-program information to emit, like re-exported types without `export type`.
+    "isolatedModules": true
   },
-  "include": ["src/**/*.js", "src/**/*.ts"],
-  // Only requires the other files, including an ERB template that TypeScript can't resolve.
-  "exclude": ["src/unpoly.js"]
+  "include": ["src/**/*.js", "src/**/*.ts"]
 }
