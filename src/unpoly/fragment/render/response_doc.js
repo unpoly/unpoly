@@ -1,7 +1,13 @@
-const u = up.util
-const e = up.element
+import { isString, map, memoizeMethod, wrapList } from '../../util.js'
+import {
+  createBrokenDocumentFromHTML, createFromSelector, extractSingular, isFullDocumentHTML,
+  revivedClone, subtree,
+} from '../../element.js'
+import { fail } from '../../error.js'
+import { CannotMatch } from '../../error/cannot_match.js'
+import { FragmentFinder } from '../fragment_finder.js'
 
-up.ResponseDoc = class ResponseDoc {
+export class ResponseDoc {
 
   constructor({ document, fragment, content, target, origin, data, cspInfo, match }) {
     if (document) {
@@ -32,13 +38,13 @@ up.ResponseDoc = class ResponseDoc {
     if (value instanceof Document) {  // Document
       this._document = value
       this._isFullDocument = true
-    } else if (u.isString(value)) { // String of HTML or maybe a <template> selector
+    } else if (isString(value)) { // String of HTML or maybe a <template> selector
       // Remember whether the HTML originally contained a full document.
       // Asset comparison needs to know whether the document has a <head> because
       // e.createBrokenDocumentFromHTML() always creates an (empty) <head> if missing in the HTML.
-      this._isFullDocument = e.isFullDocumentHTML(value)
+      this._isFullDocument = isFullDocumentHTML(value)
 
-      let htmlParser = (html) => [e.createBrokenDocumentFromHTML(html)]
+      let htmlParser = (html) => [createBrokenDocumentFromHTML(html)]
       let nodes = up.fragment.provideNodes(value, { origin, data, htmlParser })
 
       // If value is HTML, e.createBrokenDocumentFromHTML() will parse it into a Document.
@@ -57,24 +63,24 @@ up.ResponseDoc = class ResponseDoc {
   }
 
   _parseFragment(value, origin, data) {
-    let element = e.extractSingular(up.fragment.provideNodes(value, { origin, data }))
+    let element = extractSingular(up.fragment.provideNodes(value, { origin, data }))
     this._document = this._buildFauxDocument(element)
   }
 
   _parseContent(value, origin, target, data) {
-    if (!target) up.fail("must pass a { target } when passing { content }")
+    if (!target) fail("must pass a { target } when passing { content }")
 
     // We are only provided with inner child content.
     // To simplify other code we wrap it in an element matching { target }.
-    let simplifiedTarget = u.map(up.fragment.parseTargetSteps(target), 'selector').join()
+    let simplifiedTarget = map(up.fragment.parseTargetSteps(target), 'selector').join()
     let nodes = up.fragment.provideNodes(value, { origin, data })
-    let matchingElement = e.createFromSelector(simplifiedTarget, { content: nodes })
+    let matchingElement = createFromSelector(simplifiedTarget, { content: nodes })
 
     this._document = this._buildFauxDocument(matchingElement)
   }
 
   _buildFauxDocument(nodes) {
-    nodes = u.wrapList(nodes)
+    nodes = wrapList(nodes)
 
     // We're creating a faux document to wrap around a fragment root that is not already a `Document`.
     // This has two motivations:
@@ -129,10 +135,10 @@ up.ResponseDoc = class ResponseDoc {
       let assets = up.script.findAssets(head)
 
       // Need to use up.util.map() for a NodeList, which does not support #map()
-      return u.map(assets, (asset) => {
+      return map(assets, (asset) => {
         // (A) Assets might contain elements that need to be re-created in the current document context.
         // (B) Returns copies so multiple calls to #assets return the same array, even if some assets where inserted.
-        asset = e.revivedClone(asset)
+        asset = revivedClone(asset)
 
         // Rewrite [nonce] attributes so we don't see up:assets:changed with every request.
         up.script.adoptDetachedHeadAsset(asset, this._cspInfo)
@@ -162,7 +168,7 @@ up.ResponseDoc = class ResponseDoc {
   // (3) Supports origin-aware lookup priorities.
   // (4) Returns undefined if there is no match.
   select(selector) {
-    let finder = new up.FragmentFinder({
+    let finder = new FragmentFinder({
       selector: selector,
       origin: this._rediscoveredOrigin,
       document: this._document,
@@ -214,7 +220,7 @@ up.ResponseDoc = class ResponseDoc {
   _cannotMatchStep(step) {
     if (!step.maybe) {
       // An error message will be chosen by up.Change.FromContent
-      throw new up.CannotMatch()
+      throw new CannotMatch()
     }
   }
 
@@ -244,9 +250,9 @@ up.ResponseDoc = class ResponseDoc {
     // (2) <script> elements are inert and will not run code when inserted into the main `document`.
     // (3) Safari cannot parse (or move?) auto-playing media elements.
     if (this._document instanceof Document) {
-      for (let brokenElement of e.subtree(element, ':is(noscript, script, audio, video):not(.up-keeping, .up-keeping *)')) {
+      for (let brokenElement of subtree(element, ':is(noscript, script, audio, video):not(.up-keeping, .up-keeping *)')) {
         // throw "why does this not re-execute a <script> tag? wouldn't it be safer to disable all scripts, then revive some of them?"
-        let clone = e.revivedClone(brokenElement)
+        let clone = revivedClone(brokenElement)
         brokenElement.replaceWith(clone)
       }
     }
@@ -254,9 +260,14 @@ up.ResponseDoc = class ResponseDoc {
 
   static {
     // Cache since multiple plans will query this.
-    u.memoizeMethod(this.prototype, {
+    memoizeMethod(this.prototype, {
       getHead: true,
     })
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  ResponseDoc,
 }

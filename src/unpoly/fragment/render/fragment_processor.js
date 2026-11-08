@@ -1,6 +1,10 @@
-const u = up.util
+import {
+  findInList, getComplexTokens, isArray, isElement, isFunction, isOptions, isString,
+} from '../../util.js'
+import { guard } from '../../error.js'
+import { Record } from '../../util/record.js'
 
-up.FragmentProcessor = class FragmentProcessor extends up.Record {
+export class FragmentProcessor extends Record {
 
   keys() {
     return [
@@ -17,29 +21,29 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
   }
 
   preprocessOnce(opt) {
-    return u.getComplexTokens(opt)
+    return getComplexTokens(opt)
   }
 
   tryProcess(opt) {
-    if (u.isArray(opt)) {
+    if (isArray(opt)) {
       return this.processArray(opt)
     }
 
-    if (u.isOptions(opt)) {
+    if (isOptions(opt)) {
       return this.processSelectorMap(opt)
     }
 
-    if (u.isFunction(opt)) {
-      let result = up.error.guard(opt, this.fragment, this.attributes())
+    if (isFunction(opt)) {
+      let result = guard(opt, this.fragment, this.attributes())
       // The function result can be another processable value.
       return this.tryProcess(result)
     }
 
-    if (u.isElement(opt)) {
+    if (isElement(opt)) {
       return this.processElement(opt) // TODO: Test that { focus: Element } works
     }
 
-    if (u.isString(opt)) {
+    if (isString(opt)) {
       if (opt === 'auto') {
         return this.tryProcess(this.autoMeans)
       }
@@ -65,7 +69,7 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
   }
 
   processArray(array) {
-    return u.find(array, (opt) => this.tryProcess(opt))
+    return findInList(array, (opt) => this.tryProcess(opt))
   }
 
   resolveCondition(condition) {
@@ -88,4 +92,9 @@ up.FragmentProcessor = class FragmentProcessor extends up.Record {
       // Return undefined so { focus: 'auto' } will try the next option from { autoMeans }
     }
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  FragmentProcessor,
 }

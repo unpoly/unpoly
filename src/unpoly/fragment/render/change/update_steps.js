@@ -1,12 +1,16 @@
-const u = up.util
-const e = up.element
+import { assert, copy, flatMap, map, some } from '../../../util.js'
+import { leadingElement, unwrap, wrapChildren } from '../../../element.js'
+import { fail } from '../../../error.js'
+import { Addition } from './addition.js'
+import { FragmentFocus } from '../fragment_focus.js'
+import { FragmentScrolling } from '../fragment_scrolling.js'
 
-up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
+export class UpdateSteps extends Addition {
 
   constructor(options) {
     super(options)
 
-    this._steps = u.copy(u.assert(options.steps)) // we mutate it below
+    this._steps = copy(assert(options.steps)) // we mutate it below
     this._noneOptions = options.noneOptions || {}
   }
 
@@ -33,7 +37,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       let insertions = this._steps.map((step) => this._insertStep(step))
 
       return {
-        fragments: u.flatMap(insertions, 'fragments'),
+        fragments: flatMap(insertions, 'fragments'),
         finished: this._completeSteps(insertions),
       }
     } else {
@@ -91,7 +95,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
         return this._insertChildrenStep(step)
       }
       default: {
-        up.fail('Unknown placement: %o', step.placement)
+        fail('Unknown placement: %o', step.placement)
       }
     }
   }
@@ -160,8 +164,8 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // Make a copy since it's a live HTMLCollection, and we're going to move these elements.
     let newChildren = [...step.newElement.children]
 
-    let oldWrapper = e.wrapChildren(step.oldElement)
-    let newWrapper = e.wrapChildren(step.newElement)
+    let oldWrapper = wrapChildren(step.oldElement)
+    let newWrapper = wrapChildren(step.newElement)
 
     let wrapperInsertion = this._insertSwapStep({
       ...step,
@@ -170,7 +174,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       oldElement: oldWrapper,
       newElement: newWrapper,
       // Unwrapping preserves focus.
-      afterRemove: () => e.unwrap(newWrapper),
+      afterRemove: () => unwrap(newWrapper),
     })
 
     return {
@@ -190,7 +194,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
     // Text nodes are wrapped in an <up-wrapper> container so we can
     // animate them and measure their position/size for scrolling.
     // This is not possible for container-less text nodes.
-    let wrapper = e.wrapChildren(step.newElement)
+    let wrapper = wrapChildren(step.newElement)
 
     // Note that since we're prepending/appending instead of replacing,
     // newElement will not actually be inserted into the DOM, only its children.
@@ -202,11 +206,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
       // (A) We never inserted step.newElement, only its children.
       // (B) We focus the first new element child. If it's all text nodes, we focus step.oldElement.
       // (C) Unwrapping preserves focus.
-      focusElement: e.leadingElement(wrapper.childNodes) || step.oldElement,
+      focusElement: leadingElement(wrapper.childNodes) || step.oldElement,
       // Reveal the element that was being prepended/appended.
       scrollElement: wrapper,
       welcome: () => this._welcomeElement(wrapper, step),
-      startMotion: () => up.animate(wrapper, step.animation, { ...step, onFinished: () => e.unwrap(wrapper) }),
+      startMotion: () => up.animate(wrapper, step.animation, { ...step, onFinished: () => unwrap(wrapper) }),
     }
   }
 
@@ -247,7 +251,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
           // Attaching a viewport to another element will cause it to lose
           // its scroll position, even if both parents are in the same document.
           let viewports = up.viewport.subtree(keepPlan.oldElement)
-          keepPlan.revivers = u.map(viewports, function(viewport) {
+          keepPlan.revivers = map(viewports, function(viewport) {
             let cursorProps = up.viewport.copyCursorProps(viewport)
             return () => up.viewport.copyCursorProps(cursorProps, viewport)
           })
@@ -297,11 +301,11 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   // In that case we cannot use the body as "safe harbor" to remporarily move
   // [up-keep] elements.
   _willChangeBody() {
-    return u.some(this._steps, (step) => step.oldElement.matches('body'))
+    return some(this._steps, (step) => step.oldElement.matches('body'))
   }
 
   _handleFocus(fragment, options) {
-    const fragmentFocus = new up.FragmentFocus({
+    const fragmentFocus = new FragmentFocus({
       ...options,
       fragment,
       autoMeans: up.fragment.config.autoFocus,
@@ -310,7 +314,7 @@ up.Change.UpdateSteps = class UpdateSteps extends up.Change.Addition {
   }
 
   _handleScroll(fragment, options) {
-    const scrolling = new up.FragmentScrolling({
+    const scrolling = new FragmentScrolling({
       ...options,
       fragment,
       autoMeans: up.fragment.config.autoScroll

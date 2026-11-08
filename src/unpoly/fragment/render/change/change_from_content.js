@@ -1,6 +1,11 @@
-const u = up.util
+import { filterList, map, memoizeMethod, pick, uniq } from '../../../util.js'
+import { CannotMatch } from '../../../error/cannot_match.js'
+import { Change } from './change.js'
+import { OpenLayerPlan } from './open_layer.js'
+import { UpdateLayerPlan } from './update_layer.js'
+import { ResponseDoc } from '../response_doc.js'
 
-up.Change.FromContent = class FromContent extends up.Change {
+export class ChangeFromContent extends Change {
 
   constructor(options) {
     super(options)
@@ -31,7 +36,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   _filterLayers() {
-    this._layers = u.filter(this._layers, this._isRenderableLayer)
+    this._layers = filterList(this._layers, this._isRenderableLayer)
   }
 
   _expandIntoPlans(plans, layers, targets) {
@@ -41,7 +46,7 @@ up.Change.FromContent = class FromContent extends up.Change {
       for (let target of this._expandTargets(targets, layer)) {
         // Any plans we add will inherit all properties from @options
         const props = { ...this.options, target, layer, defaultPlacement: this._defaultPlacement() }
-        const change = layer === 'new' ? new up.Change.OpenLayer(props) : new up.Change.UpdateLayer(props)
+        const change = layer === 'new' ? new OpenLayerPlan(props) : new UpdateLayerPlan(props)
         plans.push(change)
       }
     }
@@ -76,7 +81,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   _isApplicablePlanError(error) {
     // (1) Only an up.CannotMatch means "this plan doesn't fit, try the next one".
     // (2) Once a plan has started to change the page, we cannot try another plan on top of it.
-    return !(error instanceof up.CannotMatch) || this._planApplied
+    return !(error instanceof CannotMatch) || this._planApplied
   }
 
   // Final preparations before elements are being changed.
@@ -102,7 +107,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   _getResponseDoc() {
     if (this._preflight) return
 
-    const docOptions = u.pick(this.options, [
+    const docOptions = pick(this.options, [
       'target',
       'content',
       'fragment',
@@ -121,7 +126,7 @@ up.Change.FromContent = class FromContent extends up.Change {
       docOptions.target = this._firstExpandedTarget(docOptions.target)
     }
 
-    return new up.ResponseDoc(docOptions)
+    return new ResponseDoc(docOptions)
   }
 
   _improveOptionsFromResponseDoc() {
@@ -172,20 +177,20 @@ up.Change.FromContent = class FromContent extends up.Change {
 
   _cannotMatchTarget(reason) {
     if (this._getPlans().length) {
-      const planTargets = u.uniq(u.map(this._getPlans(), 'target'))
+      const planTargets = uniq(map(this._getPlans(), 'target'))
       const humanizedLayerOption = up.layer.optionToString(this.options.layer)
-      throw new up.CannotMatch([reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption])
+      throw new CannotMatch([reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption])
     } else if (this._layers.length === 0) {
       this._cannotMatchLayer()
     } else if (this.options.didForceFailOptions) {
-      throw new up.CannotMatch('No target selector given for error responses (https://unpoly.com/learn/error-responses)')
+      throw new CannotMatch('No target selector given for error responses (https://unpoly.com/learn/error-responses)')
     } else {
-      throw new up.CannotMatch('No target selector given')
+      throw new CannotMatch('No target selector given')
     }
   }
 
   _cannotMatchLayer() {
-    throw new up.CannotMatch('Could not find a layer to render in. You may have passed an unmatchable layer reference, or a detached element.')
+    throw new CannotMatch('Could not find a layer to render in. You may have passed an unmatchable layer reference, or a detached element.')
   }
 
   _seekPlan(fn) {
@@ -204,7 +209,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   }
 
   static {
-    u.memoizeMethod(this.prototype, {
+    memoizeMethod(this.prototype, {
       _getPlans: true,
       _getResponseDoc: true,
       getPreflightProps: true,

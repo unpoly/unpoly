@@ -1,7 +1,8 @@
-const u = up.util
-const e = up.element
+import { isDefined } from '../../../util.js'
+import { setMissingAttr } from '../../../element.js'
+import { Change } from './change.js'
 
-up.Change.Addition = class Addition extends up.Change {
+export class Addition extends Change {
 
   constructor(options) {
     super(options)
@@ -59,14 +60,14 @@ up.Change.Addition = class Addition extends up.Change {
 
   _tryAcceptLayerFromServer() {
     // When accepting without a value, the server will send X-Up-Accept-Layer: null
-    if (u.isDefined(this._acceptLayer)) {
+    if (isDefined(this._acceptLayer)) {
       this.layer.accept(this._acceptLayer, { response: this._response })
     }
   }
 
   _tryDismissLayerFromServer() {
     // When dismissing without a value, the server will send X-Up-Dismiss-Layer: null
-    if (u.isDefined(this._dismissLayer)) {
+    if (isDefined(this._dismissLayer)) {
       this.layer.dismiss(this._dismissLayer, { response: this._response })
     }
   }
@@ -84,20 +85,20 @@ up.Change.Addition = class Addition extends up.Change {
     // (3) Don't use u.matchableURL() here. We need to keep a trailing slash
     //     to support backends that care about trailing slashes.
     if (source) {
-      e.setMissingAttr(newElement, 'up-source', up.fragment.normalizeSource(source))
+      setMissingAttr(newElement, 'up-source', up.fragment.normalizeSource(source))
     }
   }
 
   _setTime({ newElement, time }) {
     // If the server didn't send a Last-Modified header, tag the element
     // with [up-time=false] to indicate that we cannot use an ancestor's [up-time].
-    e.setMissingAttr(newElement, 'up-time', time ? time.toUTCString() : false)
+    setMissingAttr(newElement, 'up-time', time ? time.toUTCString() : false)
   }
 
   _setETag({ newElement, etag }) {
     // If the server didn't send an Etag header, tag the element
     // with [up-etag=false] to indicate that we cannot use an ancestor's [up-etag].
-    e.setMissingAttr(newElement, 'up-etag', etag || false)
+    setMissingAttr(newElement, 'up-etag', etag || false)
   }
 
   setReloadAttrs(options) {

@@ -1,6 +1,13 @@
-let u = up.util
+import { compact, memoize } from '../../../util.js'
+import { CannotMatch } from '../../../error/cannot_match.js'
+import { Addition } from './addition.js'
+import { UpdateSteps } from './update_steps.js'
+import { FragmentFocus } from '../fragment_focus.js'
+import { FragmentScrolling } from '../fragment_scrolling.js'
+import { RenderOptions } from '../render_options.js'
+import { RenderResult } from '../render_result.js'
 
-up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
+export class OpenLayerPlan extends Addition {
 
   constructor(options) {
     super(options)
@@ -33,7 +40,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       // We associate this request with the base layer's main element. This way the request
       // will be aborted if the base layer receives a major navigation, but not when a
       // minor fragment is updated.
-      bindFragments: u.compact([up.fragment.get(':main', { layer: this._baseLayer })]),
+      bindFragments: compact([up.fragment.get(':main', { layer: this._baseLayer })]),
       fragments: [],
     }
   }
@@ -53,7 +60,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
-    let renderOtherLayersOnce = u.memoize(() => this._renderOtherLayers(responseDoc))
+    let renderOtherLayersOnce = memoize(() => this._renderOtherLayers(responseDoc))
     let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
 
     try {
@@ -62,7 +69,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
         ...renderOtherLayersOnce(),
       ]
 
-      return new up.RenderResult({
+      return new RenderResult({
         layer: this.layer,
         target: this.target,
         renderOptions: this.options,
@@ -82,7 +89,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
     if (!this._content || !this._baseLayer.isAlive()) {
       // An error message will be chosen by up.Change.FromContent
-      throw new up.CannotMatch()
+      throw new CannotMatch()
     }
   }
 
@@ -180,7 +187,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // (1) ... use the discarded content for hungry elements on other layers that have [up-if-layer=any].
     // (2) ... see updated hungry elements on other layers in onDismissed/onAccepted handlers.
     let steps = this._getHungrySteps().other
-    return new up.Change.UpdateSteps({ steps }).execute(responseDoc)
+    return new UpdateSteps({ steps }).execute(responseDoc)
   }
 
   async _compileLayer() {
@@ -195,7 +202,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
 
   _buildLayer() {
     const beforeNew = (optionsWithLayerDefaults) => {
-      return this.options = up.RenderOptions.finalize(optionsWithLayerDefaults)
+      return this.options = RenderOptions.finalize(optionsWithLayerDefaults)
     }
 
     return up.layer.build(this.options, beforeNew)
@@ -222,7 +229,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     this._baseLayer.overlayFocus?.moveToBack()
     this.layer.overlayFocus.moveToFront()
 
-    const fragmentFocus = new up.FragmentFocus({
+    const fragmentFocus = new FragmentFocus({
       fragment: this._content,
       layer: this.layer,
       autoMeans: ['autofocus', 'layer'],
@@ -240,7 +247,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
       layer: this.layer,
       autoMeans: ['hash', 'layer']
     }
-    const scrolling = new up.FragmentScrolling(scrollingOptions)
+    const scrolling = new FragmentScrolling(scrollingOptions)
     scrolling.process(this.options.scrollMap ?? this.options.scroll)
   }
 

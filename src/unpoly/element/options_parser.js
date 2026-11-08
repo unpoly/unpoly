@@ -3,6 +3,7 @@ import {
   booleanAttr, booleanOrNumberAttr, booleanOrNumberOrStringAttr, booleanOrStringAttr, closestAttr,
   jsonAttr, numberAttr, stringAttr,
 } from '../element.js'
+import { RenderOptions } from '../fragment/render/render_options.js'
 
 export class OptionsParser {
 
@@ -67,7 +68,7 @@ export class OptionsParser {
   // }
 
   renderCallback(key, keyOptions = {}) {
-    let attrReader = (link, attr) => up.RenderOptions.callbackAttr(link, attr, key)
+    let attrReader = (link, attr) => RenderOptions.callbackAttr(link, attr, key)
     this.parse(attrReader, key, keyOptions)
   }
 

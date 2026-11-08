@@ -73,6 +73,13 @@ import * as tetherClass from './unpoly/layer/tether.js'
 import * as progressBarClass from './unpoly/network/progress_bar.js'
 import * as requestClass from './unpoly/network/request.js'
 import * as responseClass from './unpoly/network/response.js'
+import * as renderJobClass from './unpoly/fragment/render/render_job.js'
+import * as fragmentProcessorClass from './unpoly/fragment/render/fragment_processor.js'
+import * as fragmentFocusClass from './unpoly/fragment/render/fragment_focus.js'
+import * as fragmentScrollingClass from './unpoly/fragment/render/fragment_scrolling.js'
+import * as renderOptionsClass from './unpoly/fragment/render/render_options.js'
+import * as renderResultClass from './unpoly/fragment/render/render_result.js'
+import * as responseDocClass from './unpoly/fragment/render/response_doc.js'
 
 window.up = {}
 
@@ -131,6 +138,13 @@ const apis = [
   progressBarClass.api,
   requestClass.api,
   responseClass.api,
+  renderJobClass.api,
+  fragmentProcessorClass.api,
+  fragmentFocusClass.api,
+  fragmentScrollingClass.api,
+  renderOptionsClass.api,
+  renderResultClass.api,
+  responseDocClass.api,
 ]
 
 // Copy property descriptors, so getters (like `up.context`) stay live.
@@ -152,23 +166,6 @@ for (let api of apis) {
 const installs = [
   util.install,
 
-  () => require('./unpoly/fragment/render/change/change'),
-  () => require('./unpoly/fragment/render/change/addition'),
-  () => require('./unpoly/fragment/render/render_job'),
-  () => require('./unpoly/fragment/render/change/destroy_fragment'),
-  () => require('./unpoly/fragment/render/change/open_layer'),
-  () => require('./unpoly/fragment/render/change/update_layer'),
-  () => require('./unpoly/fragment/render/change/update_steps'),
-  () => require('./unpoly/fragment/render/change/close_layer'),
-  () => require('./unpoly/fragment/render/change/change_from_url'),
-  () => require('./unpoly/fragment/render/change/change_from_response'),
-  () => require('./unpoly/fragment/render/change/change_from_content'),
-  () => require('./unpoly/fragment/render/fragment_processor'),
-  () => require('./unpoly/fragment/render/fragment_focus'),
-  () => require('./unpoly/fragment/render/fragment_scrolling'),
-  () => require('./unpoly/fragment/render/render_options'),
-  () => require('./unpoly/fragment/render/render_result'),
-  () => require('./unpoly/fragment/render/response_doc'),
 
   () => require('./unpoly/framework'),
   () => require('./unpoly/event'),

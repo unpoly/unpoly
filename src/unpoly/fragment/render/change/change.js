@@ -1,16 +1,19 @@
-up.Change = class Change {
+import { NotImplemented } from '../../../error/not_implemented.js'
+import { RenderOptions } from '../render_options.js'
+
+export class Change {
 
   constructor(options) {
     this.options = options
   }
 
   execute() {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
   deriveFailOptions() {
     // This will merge shared keys and unprefix failKeys.
-    return up.RenderOptions.deriveFailOptions(this.options)
+    return RenderOptions.deriveFailOptions(this.options)
   }
 
 }

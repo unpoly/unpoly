@@ -8,6 +8,7 @@ import { Params } from '../../form/params.js'
 import { Layer } from '../base.js'
 import { OverlayFocus } from '../overlay_focus.js'
 import { UpURLPattern } from '../../util/url_pattern.js'
+import { CloseLayer } from '../../fragment/render/change/close_layer.js'
 
 /*-
 @class up.Layer
@@ -535,7 +536,7 @@ export class Overlay extends Layer {
 
   _executeCloseChange(verb, value, options) {
     options = { ...options, verb, value, layer: this }
-    return new up.Change.CloseLayer(options).execute()
+    return new CloseLayer(options).execute()
   }
 
   getFirstSwappableElement() {

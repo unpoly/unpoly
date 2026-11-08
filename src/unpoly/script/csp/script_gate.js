@@ -5,6 +5,7 @@ import { Blocked } from '../../error/blocked.js'
 import { NotImplemented } from '../../error/not_implemented.js'
 import { CSPInfo } from './csp_info.js'
 import { NonceableCallback } from './nonceable_callback.js'
+import { RenderOptions } from '../../fragment/render/render_options.js'
 
 // Options in an X-Up-Open-Layer header that start with "on", but take a selector instead of a callback.
 const NON_CALLBACK_KEYS = ['onAcceptedReload', 'onDismissedReload']
@@ -84,7 +85,7 @@ export class ScriptGate {
       if (/^on[A-Z]/.test(key) && !NON_CALLBACK_KEYS.includes(key) && isString(script)) {
         let item = new ObjectPropertyItem(object, key)
         policy.processItem(item)
-        object[key] = up.RenderOptions.parseCallback(key, object[key])
+        object[key] = RenderOptions.parseCallback(key, object[key])
       }
     }
   }

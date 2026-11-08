@@ -1,9 +1,16 @@
-const u = up.util
+import { evalAutoOption, map, memoize, memoizeMethod, merge, pick } from '../../../util.js'
+import { CannotMatch } from '../../../error/cannot_match.js'
+import { FragmentFinder } from '../../fragment_finder.js'
+import { Addition } from './addition.js'
+import { UpdateSteps } from './update_steps.js'
+import { RenderOptions } from '../render_options.js'
+import { RenderResult } from '../render_result.js'
+import { FocusCapsule } from '../../../viewport/focus_capsule.js'
 
-up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
+export class UpdateLayerPlan extends Addition {
 
   constructor(options) {
-    options = up.RenderOptions.finalize(options)
+    options = RenderOptions.finalize(options)
     super(options)
     this.layer = options.layer
     this.target = options.target
@@ -23,7 +30,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       layer: this.layer,
       bindLayer: this.layer,
       mode: this.layer.mode,
-      context: u.merge(this.layer.context, this._context),
+      context: merge(this.layer.context, this._context),
       origin: this.options.origin,
       target: this._bestPreflightSelector(),
       fragments,
@@ -36,14 +43,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     const isProbable = (step) => !step.maybe || step.oldElement?.isConnected
     let bestSteps = this._steps.filter(isProbable)
-    let selectors = u.map(bestSteps, 'selector')
+    let selectors = map(bestSteps, 'selector')
     return selectors.join(', ') || ':none'
   }
 
   _getFragments() {
     this._matchPreflight()
 
-    return u.map(this._steps, 'oldElement')
+    return map(this._steps, 'oldElement')
   }
 
   execute(responseDoc, onApplicable) {
@@ -61,7 +68,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
-    let renderOtherLayersOnce = u.memoize(() => this._renderOtherLayers(responseDoc))
+    let renderOtherLayersOnce = memoize(() => this._renderOtherLayers(responseDoc))
 
     // TODO: Can this be a try ... catch ?
     let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
@@ -71,7 +78,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         ...renderOtherLayersOnce(),
       ]
 
-      return new up.RenderResult({
+      return new RenderResult({
         target: this.target,
         layer: this.layer,
         renderOptions: this.options,
@@ -138,14 +145,14 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // Note that @handleLayerChangeRequests() also throws an `up.Aborted` error
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests(
-      u.map(this._steps, 'newElement'),
+      map(this._steps, 'newElement'),
       this._getNewLocation(),
     )
 
     // Change history before compilation, so new fragments see the new location.
     this.layer.updateHistory(this._getEffectiveHistoryOptions())
 
-    return new up.Change.UpdateSteps({ steps: this._steps, noneOptions: this.options }).execute(responseDoc)
+    return new UpdateSteps({ steps: this._steps, noneOptions: this.options }).execute(responseDoc)
   }
 
   _renderOtherLayers(responseDoc) {
@@ -157,7 +164,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // (2) ... see updated hungry elements on other layers in onDismissed/onAccepted handlers.
     let otherLayerSteps = this._getHungrySteps().other
 
-    return new up.Change.UpdateSteps({ steps: otherLayerSteps }).execute(responseDoc)
+    return new UpdateSteps({ steps: otherLayerSteps }).execute(responseDoc)
   }
 
   _matchPreflight() {
@@ -179,7 +186,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   _matchOldElements() {
     this._steps = this._steps.filter((step) => {
 
-      const finder = new up.FragmentFinder(u.pick(step, ['selector', 'origin', 'layer', 'match', 'preferOldElements']))
+      const finder = new FragmentFinder(pick(step, ['selector', 'origin', 'layer', 'match', 'preferOldElements']))
 
       // Try to find fragments matching step.selector within step.layer.
       // Note that step.oldElement might already have been set by up.radio.hungrySteps().
@@ -189,7 +196,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
         return true
       } else if (!step.maybe) {
         // An error message will be chosen by up.Change.FromContent
-        throw new up.CannotMatch()
+        throw new CannotMatch()
       }
     })
   }
@@ -210,7 +217,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   _coordinateSteps() {
     // Store the focused element's selector, scroll position and selection range
     // in an up.FocusCapsule for later restoration.
-    let focusCapsule = up.FocusCapsule.preserve(this.layer)
+    let focusCapsule = FocusCapsule.preserve(this.layer)
     let oldScrollTops = up.viewport.getScrollTops({ layer: this.layer })
 
     this._steps.forEach((step, i) => {
@@ -235,13 +242,13 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   _hasHistory() {
-    return u.evalAutoOption(this.options.history, this._hasAutoHistory.bind(this))
+    return evalAutoOption(this.options.history, this._hasAutoHistory.bind(this))
   }
 
   _hasAutoHistory() {
     // We update the history with { history: 'auto' } when at least
     // one targeted fragment has auto-history.
-    const oldFragments = u.map(this._steps, 'oldElement')
+    const oldFragments = map(this._steps, 'oldElement')
     return up.fragment.hasAutoHistory(oldFragments, this.layer)
   }
 
@@ -266,7 +273,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
   }
 
   static {
-    u.memoizeMethod(this.prototype, {
+    memoizeMethod(this.prototype, {
       _matchPreflight: true,
       _matchOldElements: true,
       _hasHistory: true,

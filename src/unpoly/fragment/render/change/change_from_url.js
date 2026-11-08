@@ -1,6 +1,12 @@
-const u = up.util
+import { always, isCrossOrigin, memoizeMethod, unresolvablePromise, withRenamedKeys } from '../../../util.js'
+import { canPushState } from '../../../browser.js'
+import { Offline } from '../../../error/offline.js'
+import { ChangeFromContent } from './change_from_content.js'
+import { ChangeFromResponse } from './change_from_response.js'
+import { Change } from './change.js'
+import { UpResponse } from '../../../network/response.js'
 
-up.Change.FromURL = class FromURL extends up.Change {
+export class ChangeFromURL extends Change {
 
   async execute() {
     let newPageReason = this._newPageReason()
@@ -9,7 +15,7 @@ up.Change.FromURL = class FromURL extends up.Change {
       up.network.loadPage(this.options)
       // Prevent our caller from executing any further code, since we're already
       // navigating away from this JavaScript environment.
-      return u.unresolvablePromise()
+      return unresolvablePromise()
     }
 
     let requestAttrs = this._getRequestAttrs()
@@ -23,14 +29,14 @@ up.Change.FromURL = class FromURL extends up.Change {
 
     // Use always() since _onRequestSettled() will decide whether the promise
     // will be fulfilled or rejected.
-    return await u.always(request, (responseOrError) => this._onRequestSettled(responseOrError))
+    return await always(request, (responseOrError) => this._onRequestSettled(responseOrError))
   }
 
   _newPageReason() {
     // Rendering content from cross-origin URLs is out of scope for Unpoly.
     // We still allow users to call up.render() with a cross-origin URL, but
     // we will then make a full-page request.
-    if (u.isCrossOrigin(this.options.url)) {
+    if (isCrossOrigin(this.options.url)) {
       return 'Loading cross-origin content in new page'
     }
 
@@ -38,7 +44,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     // E.g. when the initial page was loaded from a POST response.
     // In this case we make a full page load in hopes to reboot with
     // pushState support. We don't need to when we would not change the browser URL anyway.
-    if (this.options.history && !up.browser.canPushState() && up.history.isEnabled('location')) {
+    if (this.options.history && !canPushState() && up.history.isEnabled('location')) {
       return 'Loading content in new page to restore history support'
     }
   }
@@ -53,7 +59,7 @@ up.Change.FromURL = class FromURL extends up.Change {
     return {
       ...this.options, // contains preflight keys relevant for the request, e.g. { url, method }
       ...successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
-      ...u.withRenamedKeys(failAttrs, up.fragment.failKey), // contains meta information for a failed update, e.g. { failTarget },
+      ...withRenamedKeys(failAttrs, up.fragment.failKey), // contains meta information for a failed update, e.g. { failTarget },
     }
   }
 
@@ -65,7 +71,7 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   _preflightPropsForRenderOptions(renderOptions, getPreflightPropsOptions) {
-    const preflightChange = new up.Change.FromContent({ ...renderOptions, preflight: true })
+    const preflightChange = new ChangeFromContent({ ...renderOptions, preflight: true })
     // #getPreflightProps() will return meta information about the change that is most
     // likely before the request was dispatched.
     // This might change postflight if the response does not contain the desired target.
@@ -73,7 +79,7 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   _onRequestSettled(response) {
-    if (response instanceof up.Response) {
+    if (response instanceof UpResponse) {
       return this._onRequestSettledWithResponse(response)
     } else {
       // Value is up.Aborted, up.Offline or another fatal error that can never
@@ -84,11 +90,11 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   _onRequestSettledWithResponse(response) {
-    return new up.Change.FromResponse({ ...this.options, response }).execute()
+    return new ChangeFromResponse({ ...this.options, response }).execute()
   }
 
   _onRequestSettledWithError(error) {
-    if (error instanceof up.Offline) {
+    if (error instanceof Offline) {
       let log = ['Cannot load fragment from %s: %s', error.request, error.reason]
       this.request.emit('up:fragment:offline', {
         callback: this.options.onOffline,
@@ -110,7 +116,7 @@ up.Change.FromURL = class FromURL extends up.Change {
   }
 
   static {
-    u.memoizeMethod(this.prototype, {
+    memoizeMethod(this.prototype, {
       _getRequestAttrs: true,
     })
   }

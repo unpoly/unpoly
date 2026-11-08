@@ -1,6 +1,7 @@
-const u = up.util
+import { isNumber, isString } from '../../util.js'
+import { FragmentProcessor } from './fragment_processor.js'
 
-up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
+export class FragmentScrolling extends FragmentProcessor {
 
   keys() {
     return super.keys().concat([
@@ -42,9 +43,9 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
       case true:
         return this._revealElement(this.fragment)
       default:
-        if (u.isNumber(opt)) {
+        if (isNumber(opt)) {
           return this._scrollTo(opt)
-        } else if (u.isString(opt)) {
+        } else if (isString(opt)) {
           return this._revealSelector(opt)
         }
     }
@@ -90,4 +91,9 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
     return up.viewport.restoreScroll({ ...this.attributes(), around: this.fragment, ...extraOptions })
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  FragmentScrolling,
 }

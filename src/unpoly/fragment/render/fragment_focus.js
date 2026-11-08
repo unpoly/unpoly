@@ -1,9 +1,10 @@
-const u = up.util
-const e = up.element
+import { isString } from '../../util.js'
+import { subtreeFirst } from '../../element.js'
+import { FragmentProcessor } from './fragment_processor.js'
 
 const PREVENT_SCROLL_OPTIONS = { preventScroll: true }
 
-up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
+export class FragmentFocus extends FragmentProcessor {
 
   keys() {
     return super.keys().concat([
@@ -34,7 +35,7 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
       case 'autofocus':
         return this._autofocus()
       default:
-        if (u.isString(opt)) {
+        if (isString(opt)) {
           return this._focusSelector(opt)
         }
     }
@@ -66,7 +67,7 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
   }
 
   _autofocus() {
-    let autofocusElement = this.fragment && e.subtreeFirst(this.fragment, '[autofocus]')
+    let autofocusElement = this.fragment && subtreeFirst(this.fragment, '[autofocus]')
     if (autofocusElement) {
       return this._focusElement(autofocusElement)
     }
@@ -95,4 +96,9 @@ up.FragmentFocus = class FragmentFocus extends up.FragmentProcessor {
     return this.focusCapsule?.wasLost()
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  FragmentFocus,
 }

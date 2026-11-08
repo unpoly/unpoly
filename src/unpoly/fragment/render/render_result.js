@@ -1,4 +1,4 @@
-const u = up.util
+import { compact, map } from '../../util.js'
 
 /*-
 Instances of `up.RenderResult` describe the effects of [rendering](/api/up.render).
@@ -16,7 +16,7 @@ console.log(result.renderOptions) // result: { target: '.target', content: 'foo'
 @class up.RenderResult
 @parent up.fragment
 */
-up.RenderResult = class RenderResult {
+export class RenderResult {
 
   /*-
   The effective fragments that ended up being inserted.
@@ -107,7 +107,7 @@ up.RenderResult = class RenderResult {
   }
 
   _partialPhase(partialResults, phase, extraValue) {
-    return u.compact([...u.map(partialResults, phase), extraValue])
+    return compact([...map(partialResults, phase), extraValue])
   }
 
   async _finish(partialResults) {
@@ -175,4 +175,8 @@ up.RenderResult = class RenderResult {
     return !this.renderOptions.didFail
   }
 
+}
+
+export const api = {
+  RenderResult,
 }

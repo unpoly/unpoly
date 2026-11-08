@@ -1,4 +1,7 @@
-up.Change.DestroyFragment = class DestroyFragment extends up.Change {
+import { Change } from './change.js'
+import { RenderOptions } from '../render_options.js'
+
+export class DestroyFragment extends Change {
 
   constructor(options) {
     super(options)
@@ -25,7 +28,7 @@ up.Change.DestroyFragment = class DestroyFragment extends up.Change {
     // removal animation.
     up.fragment.markAsDestroying(this._element)
 
-    up.animate(this._element, this._animation, up.RenderOptions.chainCallbacks(this.options, {
+    up.animate(this._element, this._animation, RenderOptions.chainCallbacks(this.options, {
       onFinished: () => {
         this._erase()
         this._emitDestroyed()

@@ -1,6 +1,10 @@
-const u = up.util
+import { upperCaseFirst } from '../../../util.js'
+import { assertConfirmed } from '../../../browser.js'
+import { guard, muteUncriticalRejection } from '../../../error.js'
+import { Aborted } from '../../../error/aborted.js'
+import { Change } from './change.js'
 
-up.Change.CloseLayer = class CloseLayer extends up.Change {
+export class CloseLayer extends Change {
 
   constructor(options) {
     super(options)
@@ -20,10 +24,10 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
     // Abort when this layer is already closing, or when it has finished closing.
     this.layer.assertAlive()
 
-    up.browser.assertConfirmed(this.options)
+    assertConfirmed(this.options)
 
     if (this._emitCloseEvent().defaultPrevented && this._preventable) {
-      throw new up.Aborted('Close event was prevented')
+      throw new Aborted('Close event was prevented')
     }
 
     this._emitClosingEvent()
@@ -74,14 +78,14 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
   }
 
   _reloadParent(parent) {
-    let selector = this.layer[`on${u.upperCaseFirst(this._verb)}edReload`]
+    let selector = this.layer[`on${upperCaseFirst(this._verb)}edReload`]
     // When the parent layer is closing too, e.g. when it peels this overlay, there is nothing to reload.
     if (selector && parent.isAlive()) {
       // (1) We prefer a match near the link that opened the overlay, and allow :origin in the selector.
       // (2) The overlay is already closed. Like for a throwing { onAccepted } callback, we report an error
       //     instead of throwing it, e.g. for a selector that matches nothing.
       // (3) Like other reloads, we ignore an aborted request or an error response.
-      up.error.guard(() => up.error.muteUncriticalRejection(up.reload(selector, { layer: parent, origin: this.layer.origin })))
+      guard(() => muteUncriticalRejection(up.reload(selector, { layer: parent, origin: this.layer.origin })))
     }
   }
 
@@ -89,7 +93,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
     // The close event is emitted on the layer that is about to close.
     let event = this.layer.emit(
       this._buildEvent(`up:layer:${this._verb}`), {
-      callback: this.layer.callback(`on${u.upperCaseFirst(this._verb)}`),
+      callback: this.layer.callback(`on${upperCaseFirst(this._verb)}`),
       log: [`Will ${this._verb} ${this.layer} with value %o`, this._value]
     })
 
@@ -106,7 +110,7 @@ up.Change.CloseLayer = class CloseLayer extends up.Change {
 
   _emitClosedEvent(formerParent) {
     const verbPast = `${this._verb}ed`
-    const verbPastUpperCaseFirst = u.upperCaseFirst(verbPast)
+    const verbPastUpperCaseFirst = upperCaseFirst(verbPast)
 
     // layer.emit({ ensureBubbles: true }) will automatically emit a second event on document
     // because the layer is detached. We do not want to emit it on the parent layer where users

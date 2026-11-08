@@ -1,4 +1,12 @@
-const u = up.util
+import { delegatePromise, isFunction, memoize, memoizeMethod, pluckKey } from '../../util.js'
+import { assertConfirmed } from '../../browser.js'
+import { guard } from '../../error.js'
+import { Aborted } from '../../error/aborted.js'
+import { ChangeFromContent } from './change/change_from_content.js'
+import { ChangeFromResponse } from './change/change_from_response.js'
+import { ChangeFromURL } from './change/change_from_url.js'
+import { RenderOptions } from './render_options.js'
+import { RenderResult } from './render_result.js'
 
 /*-
 A queued render task.
@@ -24,7 +32,7 @@ console.log(finalResult.fragment) // logs the revalidated fragment
 @class up.RenderJob
 @parent up.fragment
 */
-up.RenderJob = class RenderJob {
+export class RenderJob {
 
   constructor(renderOptions) {
     this.renderOptions = renderOptions
@@ -49,15 +57,15 @@ up.RenderJob = class RenderJob {
 
       // Do this after emitting { guardEvent }, in case listeners want to augment render options
       // that are shortcuts (e.g. { layer: 'new modal' }) or that affect other options.
-      this.renderOptions = up.RenderOptions.preprocess(this.renderOptions)
+      this.renderOptions = RenderOptions.preprocess(this.renderOptions)
 
       // Throw if { confirm } is given and the user rejects the dialog.
       // Do this after emitting { guardEvent }, in case listeners want to augment render options.
-      up.browser.assertConfirmed(this.renderOptions)
+      assertConfirmed(this.renderOptions)
 
       // Ensure we have either { url, content, fragment, document } option.
       // Do this after emitting { guardEvent }, in case listeners want to augment render options.
-      up.RenderOptions.assertContentGiven(this.renderOptions)
+      RenderOptions.assertContentGiven(this.renderOptions)
 
       // TODO: Should the change always return a successful result for easier handling here, and we then throw on !result.ok?
 
@@ -76,13 +84,13 @@ up.RenderJob = class RenderJob {
     // (1) There was an error during the request (return value is up.Offline, up.Aborted, etc.)
     // (2) No fragment could be matched (return value is up.CannotMatch)
     // (3) We're preloading (early return value is up.Request)
-    if (result instanceof up.RenderResult) {
+    if (result instanceof RenderResult) {
       let { onRendered, onFinished } = result.renderOptions
 
       // We call result.renderOptions.onRendered() instead of this.renderOptions.onRendered()
       // as this will call the correct options.onRendered() or onFailRendered()
       // depending on options.failOptions.
-      if (!result.none) up.error.guard(() => onRendered?.(result))
+      if (!result.none) guard(() => onRendered?.(result))
 
       // Run an { onFinished } callback if revalidation succeeds.
       // There is no callback for a failed revalidation.
@@ -96,7 +104,7 @@ up.RenderJob = class RenderJob {
       // (2) The then() will create a new chain, and we don't want to fail that
 
       let guardedOnFinished = function(result) {
-        up.error.guard(() => onFinished?.(result))
+        guard(() => onFinished?.(result))
       }
 
       // Ignoring other rejections prevents Chrome from logging an `unhandledrejection` event
@@ -113,16 +121,16 @@ up.RenderJob = class RenderJob {
       //
       // Although Chrome will fail to log error traces that way, we still log the error name and message
       // in _handleError().
-      this.finished.then(guardedOnFinished, (reason) => !result.ok && reason instanceof up.RenderResult && guardedOnFinished(reason))
+      this.finished.then(guardedOnFinished, (reason) => !result.ok && reason instanceof RenderResult && guardedOnFinished(reason))
 
       return true
     }
   }
 
   _handleError(error) {
-    let prefix = error instanceof up.Aborted ? 'Rendering was aborted' : 'Error while rendering'
+    let prefix = error instanceof Aborted ? 'Rendering was aborted' : 'Error while rendering'
     up.puts('up.render()', `${prefix}: ${error.name}: ${error.message}`)
-    up.error.guard(() => this.renderOptions.onError?.(error))
+    guard(() => this.renderOptions.onError?.(error))
   }
 
   /*-
@@ -148,7 +156,7 @@ up.RenderJob = class RenderJob {
       let result = await this._rendered
       return await result.finished
     } catch (error) {
-      if (error instanceof up.RenderResult) {
+      if (error instanceof RenderResult) {
         throw await error.finished
       } else {
         // Fatal error, not a failure result.
@@ -167,20 +175,20 @@ up.RenderJob = class RenderJob {
     //     The { handleAbort } callback is called in up.Change.FromContent#_onPlanApplicable()
     // (3) FromURL is eventually going to call FromContent.
     //     We memoize the callback so we only run it once.
-    let handleAbort = u.memoize((request) => this._handleAbortOption(request))
+    let handleAbort = memoize((request) => this._handleAbortOption(request))
     let renderOptions = { ...this.renderOptions, handleAbort }
 
     if (renderOptions.url) {
-      return new up.Change.FromURL(renderOptions)
+      return new ChangeFromURL(renderOptions)
     } else if (renderOptions.response) {
-      return new up.Change.FromResponse(renderOptions)
+      return new ChangeFromResponse(renderOptions)
     } else {
-      return new up.Change.FromContent(renderOptions)
+      return new ChangeFromContent(renderOptions)
     }
   }
 
   _emitGuardEvent() {
-    let guardEvent = u.pluckKey(this.renderOptions, 'guardEvent')
+    let guardEvent = pluckKey(this.renderOptions, 'guardEvent')
     if (guardEvent) {
       // Allow guard event handlers to manipulate render options for the default behavior.
       //
@@ -189,7 +197,7 @@ up.RenderJob = class RenderJob {
       // listeners that prevent the default and re-render.
       guardEvent.renderOptions = this.renderOptions
       if (up.emit(guardEvent, { target: this.renderOptions.origin }).defaultPrevented) {
-        throw new up.Aborted(`Rendering was prevented by ${guardEvent.type} listener`)
+        throw new Aborted(`Rendering was prevented by ${guardEvent.type} listener`)
       }
     }
   }
@@ -220,7 +228,7 @@ up.RenderJob = class RenderJob {
     } else if (abort === 'all' || abort === true) {
       // Abort requests targeting any fragment in any layer
       up.fragment.abort({ ...abortOptions, layer: 'any' })
-    } else if (u.isFunction(abort)) {
+    } else if (isFunction(abort)) {
       // Required by unpoly-migrate to convert { solo: URLPatternString } and { solo: Function(up.Request): boolean }.
       // We don't advertise this variant as aborting arbitrary requests cannot support
       // up:fragment:aborted events or the up.fragment.onAborted() function.
@@ -254,12 +262,16 @@ up.RenderJob = class RenderJob {
   */
   static {
     // A request is also a promise ("thenable") for its initial render pass.
-    u.delegatePromise(this.prototype, function() { return this._rendered })
+    delegatePromise(this.prototype, function() { return this._rendered })
 
-    u.memoizeMethod(this.prototype, {
+    memoizeMethod(this.prototype, {
       _awaitFinished: true,
       _getChange: true,
     })
   }
 
+}
+
+export const api = {
+  RenderJob,
 }

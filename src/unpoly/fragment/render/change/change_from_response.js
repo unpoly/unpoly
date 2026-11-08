@@ -1,8 +1,12 @@
 import { Overlay } from '../../../layer/modes/overlay.js'
+import { evalOption, memoizeMethod, merge, parseURL } from '../../../util.js'
+import { CannotParse } from '../../../error/cannot_parse.js'
+import { ChangeFromContent } from './change_from_content.js'
+import { Change } from './change.js'
+import { RenderOptions } from '../render_options.js'
 
-const u = up.util
 
-up.Change.FromResponse = class FromResponse extends up.Change {
+export class ChangeFromResponse extends Change {
 
   constructor(options) {
     super(options)
@@ -31,7 +35,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
 
     // Listeners to up:fragment:loaded may have changed renderOptions.fail
     // to force success or failure options.
-    let fail = u.evalOption(this.options.fail, this._response) ?? !this._response.ok
+    let fail = evalOption(this.options.fail, this._response) ?? !this._response.ok
 
     if (fail) {
       throw this._updateContentFromResponse(this.deriveFailOptions())
@@ -42,7 +46,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
 
   _assetRenderableResponse() {
     if (!up.fragment.config.renderableResponse(this._response)) {
-      throw new up.CannotParse(['Cannot render response with content-type "%s" (configure with up.fragment.config.renderableResponse)', this._response.contentType])
+      throw new CannotParse(['Cannot render response with content-type "%s" (configure with up.fragment.config.renderableResponse)', this._response.contentType])
     }
   }
 
@@ -68,7 +72,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     // After the initial render pass has finished, consider reloading stale content.
     finalRenderOptions.verifyFinished = (result) => this._revalidate(result, finalRenderOptions)
 
-    return new up.Change.FromContent(finalRenderOptions).execute()
+    return new ChangeFromContent(finalRenderOptions).execute()
   }
 
   async _revalidate(renderResult, originalRenderOptions) {
@@ -89,9 +93,9 @@ up.Change.FromResponse = class FromResponse extends up.Change {
       up.puts('up.render()', 'Revalidating cached response for target "%s"', effectiveTarget)
       let revalidateResult = await up.reload(effectiveTarget, {
         ...originalRenderOptions,
-        ...up.RenderOptions.NO_MOTION, // offering something like { verifyTransition } would mean we need to delay { onFinished } even further
-        ...up.RenderOptions.NO_INPUT_INTERFERENCE,
-        ...up.RenderOptions.NO_PREVIEWS,
+        ...RenderOptions.NO_MOTION, // offering something like { verifyTransition } would mean we need to delay { onFinished } even further
+        ...RenderOptions.NO_INPUT_INTERFERENCE,
+        ...RenderOptions.NO_PREVIEWS,
         feedback: originalRenderOptions.feedback, // we do want to keep { feedback } for .up-revalidating
         preferOldElements: renderResult.fragments, // ensure we match the same fragments when initial render pass matched around { origin } and { origin } has been detached
         layer: renderResult.layer, // if the original render opened a layer, we now update it
@@ -157,7 +161,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
 
     // The server may send a #hash with X-Up-Location. Otherwise we keep the #hash of the requested URL,
     // like a browser does when it follows a redirect.
-    let responseHash = u.parseURL(responseURL).hash
+    let responseHash = parseURL(responseURL).hash
     let hash = responseHash || this._request.hash
     let serverLocation = responseHash ? responseURL : responseURL + (hash || '')
     if (hash) renderOptions.hash = hash
@@ -211,7 +215,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
 
     // If the server has provided an update to our context via the X-Up-Context
     // response header, merge it into our existing { context } option.
-    renderOptions.context = u.merge(renderOptions.context, this._response.context)
+    renderOptions.context = merge(renderOptions.context, this._response.context)
 
     renderOptions.cspInfo = this._response.cspInfo
     renderOptions.time ??= this._response.lastModified
@@ -219,7 +223,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   }
 
   static {
-    u.memoizeMethod(this.prototype, {
+    memoizeMethod(this.prototype, {
       _loadedEventProps: true,
     })
   }
