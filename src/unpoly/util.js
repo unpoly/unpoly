@@ -1,3 +1,5 @@
+import { guardFn } from './error.js'
+
 /*-
 Helper functions for basic JavaScript values.
 
@@ -2187,7 +2189,7 @@ export function cleaner(order = 'lifo') {
   }
 
   api.guard = function(...values) {
-    track(values, up.error.guardFn)
+    track(values, guardFn)
   }
 
   api.clean = function(...args) {

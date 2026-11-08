@@ -1,8 +1,14 @@
+import { Error as UpError } from './error.js'
+
 // AbortController already throws an abort error, which is really a DOMException(message, 'AbortError')
-up.Aborted = class Aborted extends up.Error {
+export class Aborted extends UpError {
   constructor(message) {
     super(message, { name: 'AbortError' })
   }
 
   get [Symbol.toStringTag]() { return 'up.Aborted' }
+}
+
+export const api = {
+  Aborted,
 }

@@ -8,7 +8,16 @@
 import * as namespace from './unpoly/namespace.js.erb'
 import * as mockable from './unpoly/mockable.js'
 import * as util from './unpoly/util.js'
+import * as error from './unpoly/error.js'
 import * as migrateStub from './unpoly/migrate_stub.js'
+import * as baseError from './unpoly/errors/error.js'
+import * as notImplementedError from './unpoly/errors/not_implemented.js'
+import * as abortedError from './unpoly/errors/aborted.js'
+import * as blockedError from './unpoly/errors/blocked.js'
+import * as cannotMatchError from './unpoly/errors/cannot_match.js'
+import * as cannotParseError from './unpoly/errors/cannot_parse.js'
+import * as cannotTargetError from './unpoly/errors/cannot_target.js'
+import * as offlineError from './unpoly/errors/offline.js'
 
 window.up = {}
 
@@ -16,7 +25,16 @@ const apis = [
   namespace.api,
   mockable.api,
   util.api,
+  error.api,
   migrateStub.api,
+  baseError.api,
+  notImplementedError.api,
+  abortedError.api,
+  blockedError.api,
+  cannotMatchError.api,
+  cannotParseError.api,
+  cannotTargetError.api,
+  offlineError.api,
 ]
 
 // Copy property descriptors, so getters (like `up.context`) stay live.
@@ -34,18 +52,8 @@ for (let api of apis) {
 // its line, and add its `install` here if it has one.
 const installs = [
   util.install,
-  () => require('./unpoly/error'),
   () => require('./unpoly/browser'),
   () => require('./unpoly/element'),
-
-  () => require('./unpoly/errors/error'),
-  () => require('./unpoly/errors/not_implemented'),
-  () => require('./unpoly/errors/aborted'),
-  () => require('./unpoly/errors/blocked'),
-  () => require('./unpoly/errors/cannot_match'),
-  () => require('./unpoly/errors/cannot_parse'),
-  () => require('./unpoly/errors/cannot_target'),
-  () => require('./unpoly/errors/offline'),
 
   () => require('./unpoly/classes/record'),
   () => require('./unpoly/classes/config'),
