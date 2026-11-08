@@ -7,6 +7,7 @@
 // listing every export of the module (2.4 KB for up.util alone).
 import * as namespace from './unpoly/namespace.js.erb'
 import * as mockable from './unpoly/mockable.js'
+import * as util from './unpoly/util.js'
 import * as migrateStub from './unpoly/migrate_stub.js'
 
 window.up = {}
@@ -14,6 +15,7 @@ window.up = {}
 const apis = [
   namespace.api,
   mockable.api,
+  util.api,
   migrateStub.api,
 ]
 
@@ -31,7 +33,7 @@ for (let api of apis) {
 // after the APIs of all converted modules are on `window.up`. When converting a file, remove
 // its line, and add its `install` here if it has one.
 const installs = [
-  () => require('./unpoly/util'),
+  util.install,
   () => require('./unpoly/error'),
   () => require('./unpoly/browser'),
   () => require('./unpoly/element'),
