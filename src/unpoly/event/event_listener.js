@@ -1,5 +1,6 @@
 import { compactObject, evalOption, pick, reject, uid } from '../util.js'
 import { fail } from '../error.js'
+import { isBeforeBoot, isEvaling } from '../framework.js'
 import { Record } from '../util/record.js'
 
 export class EventListener extends Record {
@@ -23,7 +24,7 @@ export class EventListener extends Record {
   constructor(attributes) {
     super(attributes)
     this._key = this.constructor._buildKey(attributes)
-    this.isDefault = up.framework.evaling
+    this.isDefault = isEvaling()
 
     // We don't usually run up.on() listeners before Unpoly has booted.
     // This is done so incompatible code is not called on browsers that don't support Unpoly.
@@ -64,7 +65,7 @@ export class EventListener extends Record {
   }
 
   nativeCallback(event) {
-    if (up.framework.beforeBoot && !this.beforeBoot) {
+    if (isBeforeBoot() && !this.beforeBoot) {
       return
     }
 

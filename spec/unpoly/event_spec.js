@@ -353,7 +353,7 @@ describe('up.event', function() {
 
         it('does not call the listener before Unpoly has booted', function() {
           let isBeforeBoot = true
-          spyOnProperty(up.framework, 'beforeBoot', 'get').and.callFake(() => isBeforeBoot)
+          up.framework.isBeforeBoot.mock().and.callFake(() => isBeforeBoot)
 
           const element = fixture('.element')
           const listener = jasmine.createSpy('listener')
@@ -370,7 +370,7 @@ describe('up.event', function() {
 
         it('does call the listener before Unpoly has booted if it was registered with { beforeBoot: true }', function() {
           let isBeforeBoot = true
-          spyOnProperty(up.framework, 'beforeBoot', 'get').and.callFake(() => isBeforeBoot)
+          up.framework.isBeforeBoot.mock().and.callFake(() => isBeforeBoot)
 
           const element = fixture('.element')
           const listener = jasmine.createSpy('listener')
