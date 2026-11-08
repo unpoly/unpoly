@@ -1,1 +1,3 @@
+// ts-loader's config, see shared.js. Separate from the root tsconfig.json (type checking only),
+// so type-check options can't change what the build emits.
 {}

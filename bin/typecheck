@@ -5,6 +5,7 @@
 // TypeScript 7 is installed as `typescript7`. The `typescript` package stays at 5.9,
 // because the build (ts-loader) and ESLint (typescript-eslint) need its compiler API,
 // which TypeScript 7 doesn't ship.
+// So `npx tsc` (node_modules/.bin/tsc) runs TypeScript 5.9, a different and slower checker.
 import { spawn } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
