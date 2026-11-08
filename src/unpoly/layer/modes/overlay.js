@@ -1,11 +1,12 @@
 import {
-  compact, compactObject, contains, findResult, getSimpleTokens, pick, spanObject,
+  compact, compactObject, contains, findResult, getSimpleTokens, pick,
 } from '../../util.js'
 import { affix, idSelector, jsonAttr, subtreeFirst } from '../../element.js'
 import { muteUncriticalSync } from '../../error.js'
 import { OptionsParser } from '../../element/options_parser.js'
 import { Params } from '../../form/params.js'
 import { Layer } from '../base.js'
+import { OVERLAY_VISUAL_KEYS } from '../overlay_visuals.js'
 import { OverlayFocus } from '../overlay_focus.js'
 import { UpURLPattern } from '../../util/url_pattern.js'
 import { CloseLayer } from '../../fragment/render/change/close_layer.js'
@@ -59,32 +60,10 @@ export class Overlay extends Layer {
   @stable
   */
 
-  static VISUAL_KEYS = [
-    'mode',
-    'position',
-    'align',
-    'size',
-    'origin', // for tethered anchor element
-    'class',
-    'backdrop',
-    'dismissible',
-    'dismissLabel',
-    'dismissARIALabel',
-    'openAnimation',
-    'closeAnimation',
-    'openDuration',
-    'closeDuration',
-    'openEasing',
-    'closeEasing',
-    'trapFocus',
-  ]
-
-  static UNSET_VISUALS = spanObject(this.VISUAL_KEYS, undefined)
-
   keys() {
     return [
       ...super.keys(),
-      ...this.constructor.VISUAL_KEYS,
+      ...OVERLAY_VISUAL_KEYS,
 
       // Events and close conditions
       'onOpened',

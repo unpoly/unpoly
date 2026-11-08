@@ -1,4 +1,4 @@
-import { Overlay } from '../../../layer/modes/overlay.js'
+import { UNSET_OVERLAY_VISUALS } from '../../../layer/overlay_visuals.js'
 import { evalOption, memoizeMethod, merge, parseURL } from '../../../util.js'
 import { CannotParse } from '../../../error/cannot_parse.js'
 import { ChangeFromContent } from './change_from_content.js'
@@ -188,7 +188,7 @@ export class ChangeFromResponse extends Change {
       up.script.adoptRenderOptionsFromHeader(openLayerOptions, this._response.cspInfo)
 
       Object.assign(renderOptions, {
-        ...Overlay.UNSET_VISUALS,              // When we're already opening an overlay, don't adopt its visuals.
+        ...UNSET_OVERLAY_VISUALS,              // When we're already opening an overlay, don't adopt its visuals.
         target: undefined,                     // The original target may no longer be appropriate, even if it exists in the response.
         ...up.fragment.config.navigateOptions, // Options like `{ history, focus, scroll }` might no longer work. Also enable a fallback target.
         ...openLayerOptions,                   // Anything explicitly passed as the value of `X-Up-Open-Layer`.

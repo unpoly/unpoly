@@ -5,7 +5,7 @@ import {
 } from '../element.js'
 import { guard } from '../error.js'
 import { UpError } from '../error/error.js'
-import { Overlay } from '../layer/modes/overlay.js'
+import { OVERLAY_VISUAL_KEYS } from '../layer/overlay_visuals.js'
 
 /*-
 Instances of `up.Preview` can describe temporary changes to a page.
@@ -872,7 +872,7 @@ export class Preview {
     }
 
     up.layer.open({
-      ...pick(this.renderOptions, [...Overlay.VISUAL_KEYS, 'target']),
+      ...pick(this.renderOptions, [...OVERLAY_VISUAL_KEYS, 'target']),
       ...options,
       content,
       abort: false,
