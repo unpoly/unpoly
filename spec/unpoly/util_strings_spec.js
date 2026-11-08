@@ -82,7 +82,8 @@ extendDescribe('up.util', function() {
       describe('with function argument', function() {
         it('serializes the function code', function() {
           const formatted = up.util.sprintf('before %o after', function foo() {})
-          expect(formatted).toEqual('before function foo() { } after')
+          // The build reprints the function, so we don't know its whitespace.
+          expect(formatted).toMatch(/^before function foo\(\) \{\s*\} after$/)
         })
       })
 
