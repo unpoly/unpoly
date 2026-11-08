@@ -14,6 +14,32 @@ describe('up.framework', function() {
 
     })
 
+    describe('class names', function() {
+
+      // Developers see class names in the console and in `up.Request.name`. Bundlers and minifiers
+      // like to drop or rename them (see tooling/build/names.mjs), so this also runs against the
+      // minified and ES6 builds.
+      it('keeps the name of every class on window.up', function() {
+        let misnamed = []
+        let checked = 0
+        let check = (owner, path) => {
+          for (let key of Object.keys(owner)) {
+            let value = owner[key]
+            if (typeof value !== 'function' || !/^[A-Z]/.test(key)) continue
+            checked++
+            if (value.name !== key) misnamed.push(`${path}.${key} is named "${value.name}"`)
+            // Nested classes, like up.Change.UpdateLayer
+            if (path === 'up') check(value, `${path}.${key}`)
+          }
+        }
+        check(up, 'up')
+
+        expect(misnamed).toEqual([])
+        expect(checked).toBeGreaterThan(10)
+      })
+
+    })
+
     describe('up.framework.isSupported', function() {
 
       it('returns true on a supported browser', function() {
