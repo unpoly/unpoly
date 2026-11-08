@@ -1,7 +1,8 @@
-const u = up.util
-const e = up.element
+import { isDefined, queueTask } from '../util.js'
+import { computedStyleNumber, getRoot, setInlineStyle } from '../element.js'
+import { fail } from '../error.js'
 
-up.Tether = class Tether {
+export class Tether {
 
   constructor(options) {
     this._anchor = options.anchor
@@ -12,7 +13,7 @@ up.Tether = class Tether {
 
     this._viewport = up.viewport.get(this._anchor)
     // The document viewport is <html> on some browsers, and we cannot attach children to that.
-    this.parent = this._viewport === e.root ? document.body : this._viewport
+    this.parent = this._viewport === getRoot() ? document.body : this._viewport
 
     // If the offsetParent is within the viewport (or is the viewport) we can simply
     // `position: absolute` and it will move as the viewport scrolls, without JavaScript.
@@ -40,7 +41,7 @@ up.Tether = class Tether {
 
   _scheduleSync() {
     clearTimeout(this.syncTimer)
-    return this.syncTimer = u.task(this.sync.bind(this))
+    return this.syncTimer = queueTask(this.sync.bind(this))
   }
 
   isAlive() {
@@ -52,10 +53,10 @@ up.Tether = class Tether {
     const elementBox = this._element.getBoundingClientRect()
 
     const elementMargin = {
-      top:    e.styleNumber(this._element, 'margin-top'),
-      right:  e.styleNumber(this._element, 'margin-right'),
-      bottom: e.styleNumber(this._element, 'margin-bottom'),
-      left:   e.styleNumber(this._element, 'margin-left')
+      top:    computedStyleNumber(this._element, 'margin-top'),
+      right:  computedStyleNumber(this._element, 'margin-right'),
+      bottom: computedStyleNumber(this._element, 'margin-bottom'),
+      left:   computedStyleNumber(this._element, 'margin-left')
     }
 
     const anchorBox = this._anchor.getBoundingClientRect()
@@ -146,10 +147,10 @@ up.Tether = class Tether {
       }
     }
 
-    if (u.isDefined(left) || u.isDefined(top)) {
+    if (isDefined(left) || isDefined(top)) {
       this._moveTo(left, top)
     } else {
-      up.fail('Invalid tether constraints: %o', this._describeConstraints())
+      fail('Invalid tether constraints: %o', this._describeConstraints())
     }
   }
 
@@ -168,6 +169,11 @@ up.Tether = class Tether {
   _setOffset(left, top) {
     this.offsetLeft = left
     this.offsetTop = top
-    e.setStyle(this._element, { left, top }, 'px')
+    setInlineStyle(this._element, { left, top }, 'px')
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  Tether,
 }

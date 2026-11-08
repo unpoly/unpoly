@@ -1,5 +1,10 @@
-const e = up.element
-const u = up.util
+import { assert, evalOption, isEqual, isList, isString } from '../util.js'
+import { affix } from '../element.js'
+import { Aborted } from '../error/aborted.js'
+import { NotImplemented } from '../error/not_implemented.js'
+import { EventEmitter } from '../event/event_emitter.js'
+import { EventListenerGroup } from '../event/event_listener_group.js'
+import { Record } from '../util/record.js'
 
 /*-
 Each layer has an `up.Layer` instance.
@@ -14,7 +19,7 @@ the background layer during compilation.
 @class up.Layer
 @parent up.layer
 */
-up.Layer = class Layer extends up.Record {
+export class Layer extends Record {
 
   /*-
   This layer's outmost container element.
@@ -112,7 +117,7 @@ up.Layer = class Layer extends up.Record {
 
   constructor(options = {}) {
     super(options)
-    u.assert(this.mode)
+    assert(this.mode)
   }
 
   setupHandlers() {
@@ -203,7 +208,7 @@ up.Layer = class Layer extends up.Record {
   @stable
   */
   accept() {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
   /*-
@@ -229,7 +234,7 @@ up.Layer = class Layer extends up.Record {
   @stable
   */
   dismiss() {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
   /*-
@@ -271,7 +276,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   evalOption(option) {
-    return u.evalOption(option, this)
+    return evalOption(option, this)
   }
 
   /*-
@@ -354,14 +359,14 @@ up.Layer = class Layer extends up.Record {
   @stable
   */
   isAlive() {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
   assertAlive() {
     if (!this.isAlive()) {
       // Wind up the call stack. Whoever has closed the layer will also clean up
       // elements, handlers, etc.
-      throw new up.Aborted("Layer is no longer alive")
+      throw new Aborted("Layer is no longer alive")
     }
   }
 
@@ -510,7 +515,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   getFirstSwappableElement() {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
   /*-
@@ -593,7 +598,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   _buildEventListenerGroup(args) {
-    return up.EventListenerGroup.fromBindArgs(args, {
+    return EventListenerGroup.fromBindArgs(args, {
       guard: (event) => this._containsEventTarget(event),
       elements: [this.element],
       baseLayer: this
@@ -613,7 +618,7 @@ up.Layer = class Layer extends up.Record {
   }
 
   _buildEventEmitter(args) {
-    return up.EventEmitter.fromEmitArgs(args, { layer: this })
+    return EventEmitter.fromEmitArgs(args, { layer: this })
   }
 
   /*-
@@ -652,7 +657,7 @@ up.Layer = class Layer extends up.Record {
   saveHistory() {
     // (1) showsLiveHistory() would always return false unless we're the front layer
     // (2) Getters like this.title would always return this._savedTitle unless we're the front layer
-    u.assert(this.isFront())
+    assert(this.isFront())
 
     // (1) Only save the aspects that Unpoly keeps in sync with the browser.
     // (2) An aspect that is not live already holds what this layer rendered.
@@ -682,7 +687,7 @@ up.Layer = class Layer extends up.Record {
       up.history.updateMetaTags(this._savedMetaTags)
     }
 
-    if (u.isString(this._savedLang) && this.showsLiveHistory('lang')) {
+    if (isString(this._savedLang) && this.showsLiveHistory('lang')) {
       up.history.updateLang(this._savedLang)
     }
   }
@@ -727,23 +732,23 @@ up.Layer = class Layer extends up.Record {
     //     never update an aspect that it excludes.
 
     // Set unless { location: false }
-    if (u.isString(options.location)) {
+    if (isString(options.location)) {
       this.updateLocation(options.location, { push: true })
     }
 
     // Set unless { metaTags: false }
-    if (u.isList(options.metaTags)) {
+    if (isList(options.metaTags)) {
       up.migrate?.warnOfHungryMetaTags?.(options.metaTags)
       this._updateMetaTags(options.metaTags)
     }
 
     // Set unless { title: false }
-    if (u.isString(options.title)) {
+    if (isString(options.title)) {
       this.updateTitle(options.title)
     }
 
     // Set unless { lang: false }
-    if (u.isString(options.lang)) {
+    if (isString(options.lang)) {
       this._updateLang(options.lang)
     }
   }
@@ -887,11 +892,14 @@ up.Layer = class Layer extends up.Record {
   }
 
   static selector(_part) {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
+  // Subclasses for each mode (RootLayer, ModalLayer, …) aren't public, so they all say up.Layer.
+  get [Symbol.toStringTag]() { return 'up.Layer' }
+
   toString() {
-    throw new up.NotImplemented()
+    throw new NotImplemented()
   }
 
   /*-
@@ -916,10 +924,10 @@ up.Layer = class Layer extends up.Record {
   @experimental
   */
   affix(...args) {
-    return e.affix(this.getFirstSwappableElement(), ...args)
+    return affix(this.getFirstSwappableElement(), ...args)
   }
 
-  [u.isEqual.key](other) {
+  [isEqual.key](other) {
     return (this.constructor === other.constructor) && (this.element === other.element)
   }
 
@@ -934,4 +942,8 @@ up.Layer = class Layer extends up.Record {
     Object.assign(this, this.defaults())
   }
 
+}
+
+export const api = {
+  Layer,
 }

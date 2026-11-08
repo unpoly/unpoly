@@ -1,7 +1,7 @@
 const u = up.util
 const e = up.element
 
-describe('up.Layer.Popup', function() {
+describe('PopupLayer', function() {
 
   it('has no dismiss button by default', async function() {
     const [opener] = htmlFixtureList('<a href="#">opener</a>')

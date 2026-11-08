@@ -1,5 +1,5 @@
-up.Layer.Popup = class Popup extends up.Layer.OverlayWithTether {
-  static mode = 'popup'
+import { OverlayWithTether } from './overlay_with_tether.js'
 
-  get [Symbol.toStringTag]() { return 'up.Layer.Popup' }
+export class PopupLayer extends OverlayWithTether {
+  static mode = 'popup'
 }

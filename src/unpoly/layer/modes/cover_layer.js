@@ -1,5 +1,5 @@
-up.Layer.Cover = class Cover extends up.Layer.OverlayWithViewport {
-  static mode = 'cover'
+import { OverlayWithViewport } from './overlay_with_viewport.js'
 
-  get [Symbol.toStringTag]() { return 'up.Layer.Cover' }
+export class CoverLayer extends OverlayWithViewport {
+  static mode = 'cover'
 }

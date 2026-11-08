@@ -1,6 +1,6 @@
-const e = up.element
+import { affix, setAttrsTemp } from '../element.js'
 
-up.OverlayFocus = class OverlayFocus {
+export class OverlayFocus {
 
   constructor(layer) {
     this._layer = layer
@@ -12,7 +12,7 @@ up.OverlayFocus = class OverlayFocus {
     if (this._active) { return }
     this._active = true
 
-    this._unsetAttrs = e.setAttrsTemp(this._focusElement, {
+    this._unsetAttrs = setAttrsTemp(this._focusElement, {
       // Make layer.element focusable.
       // It would be slightly nicer to give it [tabindex=-1] to make it focusable through JS,
       // but remove it from the keyboard tab sequence. However, then we would need additional
@@ -27,8 +27,8 @@ up.OverlayFocus = class OverlayFocus {
 
     if (this._trapFocus) {
       this._untrapFocus = up.on('focusin', (event) => this._onFocus(event))
-      this._focusTrapBefore = e.affix(this._focusElement, 'beforebegin', 'up-focus-trap[tabindex=0]')
-      this._focusTrapAfter = e.affix(this._focusElement, 'afterend', 'up-focus-trap[tabindex=0]')
+      this._focusTrapBefore = affix(this._focusElement, 'beforebegin', 'up-focus-trap[tabindex=0]')
+      this._focusTrapAfter = affix(this._focusElement, 'afterend', 'up-focus-trap[tabindex=0]')
     }
   }
 
@@ -99,4 +99,9 @@ up.OverlayFocus = class OverlayFocus {
       }
     }
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  OverlayFocus,
 }

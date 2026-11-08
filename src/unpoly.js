@@ -65,6 +65,11 @@ import * as motionControllerClass from './unpoly/motion/motion_controller.js'
 import * as selectorTrackerClass from './unpoly/fragment/selector_tracker.js'
 import * as fragmentFinderClass from './unpoly/fragment/fragment_finder.js'
 import * as selectorClass from './unpoly/fragment/selector.js'
+import * as layerClass from './unpoly/layer/base.js'
+import * as layerLookupClass from './unpoly/layer/layer_lookup.js'
+import * as layerStackClass from './unpoly/layer/layer_stack.js'
+import * as overlayFocusClass from './unpoly/layer/overlay_focus.js'
+import * as tetherClass from './unpoly/layer/tether.js'
 
 window.up = {}
 
@@ -115,6 +120,11 @@ const apis = [
   selectorTrackerClass.api,
   fragmentFinderClass.api,
   selectorClass.api,
+  layerClass.api,
+  layerLookupClass.api,
+  layerStackClass.api,
+  overlayFocusClass.api,
+  tetherClass.api,
 ]
 
 // Copy property descriptors, so getters (like `up.context`) stay live.
@@ -150,18 +160,6 @@ const installs = [
   () => require('./unpoly/fragment/render/fragment_processor'),
   () => require('./unpoly/fragment/render/fragment_focus'),
   () => require('./unpoly/fragment/render/fragment_scrolling'),
-  () => require('./unpoly/layer/base'),
-  () => require('./unpoly/layer/modes/overlay'),
-  () => require('./unpoly/layer/modes/overlay_with_tether'),
-  () => require('./unpoly/layer/modes/overlay_with_viewport'),
-  () => require('./unpoly/layer/modes/root_layer'),
-  () => require('./unpoly/layer/modes/modal_layer'),
-  () => require('./unpoly/layer/modes/popup_layer'),
-  () => require('./unpoly/layer/modes/drawer_layer'),
-  () => require('./unpoly/layer/modes/cover_layer'),
-  () => require('./unpoly/layer/layer_lookup'),
-  () => require('./unpoly/layer/layer_stack'),
-  () => require('./unpoly/layer/overlay_focus'),
   () => require('./unpoly/network/progress_bar'),
   () => require('./unpoly/fragment/render/render_options'),
   () => require('./unpoly/fragment/render/render_result'),
@@ -172,7 +170,6 @@ const installs = [
   () => require('./unpoly/network/xhr_renderer'),
   () => require('./unpoly/network/response'),
   () => require('./unpoly/fragment/render/response_doc'),
-  () => require('./unpoly/layer/tether'),
 
   () => require('./unpoly/framework'),
   () => require('./unpoly/event'),

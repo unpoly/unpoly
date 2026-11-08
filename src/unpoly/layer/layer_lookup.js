@@ -1,7 +1,12 @@
-const u = up.util
-const e = up.element
+import {
+  compact, flatMap, getSimpleTokens, isElementLike, isNumber, isString, memoizeMethod,
+  parseArgIntoOptions, uniq,
+} from '../util.js'
+import { getOne } from '../element.js'
+import { fail } from '../error.js'
+import { Layer } from './base.js'
 
-up.LayerLookup = class LayerLookup {
+export class LayerLookup {
 
   constructor(stack, options) {
     this._stack = stack
@@ -15,25 +20,25 @@ up.LayerLookup = class LayerLookup {
     }
 
     this._options = options
-    this._values = u.getSimpleTokens(options.layer)
+    this._values = getSimpleTokens(options.layer)
   }
 
   all() {
-    let results = u.flatMap(this._values, (value) => this._resolveValue(value))
-    results = u.compact(results)
-    results = u.uniq(results)
+    let results = flatMap(this._values, (value) => this._resolveValue(value))
+    results = compact(results)
+    results = uniq(results)
     return results
   }
 
   static all(stack, ...args) {
-    const options = u.parseArgIntoOptions(args, 'layer')
+    const options = parseArgIntoOptions(args, 'layer')
 
     // We can process some very frequent calls like all(up.Layer)
     // without going through a full lookup, which would require layer options normalization etc.
 
     const { layer } = options
 
-    if (layer instanceof up.Layer) {
+    if (layer instanceof Layer) {
       return [layer]
     }
 
@@ -42,7 +47,7 @@ up.LayerLookup = class LayerLookup {
   }
 
   _forElement(element) {
-    element = e.get(element) // unwrap jQuery
+    element = getOne(element) // unwrap jQuery
     return this._stack.layers.findLast((layer) => layer.contains(element))
   }
 
@@ -51,11 +56,11 @@ up.LayerLookup = class LayerLookup {
   }
 
   _resolveValue(value) {
-    if (value instanceof up.Layer) {
+    if (value instanceof Layer) {
       return value
     }
 
-    if (u.isNumber(value)) {
+    if (isNumber(value)) {
       return this._forIndex(value)
     }
 
@@ -63,7 +68,7 @@ up.LayerLookup = class LayerLookup {
       return this._forIndex(Number(value))
     }
 
-    if (u.isElementLike(value)) {
+    if (isElementLike(value)) {
       return this._forElement(value)
     }
 
@@ -100,7 +105,7 @@ up.LayerLookup = class LayerLookup {
       case 'origin':
         return this._getOriginLayer()
       default:
-        return up.fail("Unknown { layer } option: %o", value)
+        return fail("Unknown { layer } option: %o", value)
     }
   }
 
@@ -119,7 +124,7 @@ up.LayerLookup = class LayerLookup {
   _getBaseLayer() {
     let { baseLayer } = this._options
 
-    if (u.isString(baseLayer)) {
+    if (isString(baseLayer)) {
       // The { baseLayer } option may itself be a string like "parent".
       // In this case we look it up using a new up.LayerLookup instance, using
       // up.layer.current as the { baseLayer } for that second lookup.
@@ -131,10 +136,15 @@ up.LayerLookup = class LayerLookup {
   }
 
   static {
-    u.memoizeMethod(this.prototype, {
+    memoizeMethod(this.prototype, {
       _getBaseLayer: true,
       _getOriginLayer: true,
     })
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  LayerLookup,
 }

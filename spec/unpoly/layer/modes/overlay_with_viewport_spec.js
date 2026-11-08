@@ -1,4 +1,4 @@
-describe('up.Layer.OverlayWithViewport', function() {
+describe('OverlayWithViewport', function() {
   describe('preservation of overlays during fragment changes', function() {
 
     it('keeps the overlay in the DOM', async function() {

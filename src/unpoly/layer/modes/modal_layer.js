@@ -1,5 +1,5 @@
-up.Layer.Modal = class Modal extends up.Layer.OverlayWithViewport {
-  static mode = 'modal'
+import { OverlayWithViewport } from './overlay_with_viewport.js'
 
-  get [Symbol.toStringTag]() { return 'up.Layer.Modal' }
+export class ModalLayer extends OverlayWithViewport {
+  static mode = 'modal'
 }

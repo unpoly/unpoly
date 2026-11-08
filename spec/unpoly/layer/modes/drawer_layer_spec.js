@@ -1,4 +1,4 @@
-describe('up.Layer.Drawer', function() {
+describe('DrawerLayer', function() {
   describe('styles', function() {
 
     it('is as high as the root viewport, regardless of content', function() {

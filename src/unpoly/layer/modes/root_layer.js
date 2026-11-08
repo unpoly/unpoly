@@ -1,6 +1,8 @@
-const e = up.element
+import { getRoot } from '../../element.js'
+import { fail } from '../../error.js'
+import { Layer } from '../base.js'
 
-up.Layer.Root = class Root extends up.Layer {
+export class RootLayer extends Layer {
 
   static mode = 'root'
 
@@ -24,7 +26,7 @@ up.Layer.Root = class Root extends up.Layer {
     //
     // We always return the current <html> instead of caching it,
     // since the developer might replace it with a new version.
-    return e.root
+    return getRoot()
   }
 
   constructor(options) {
@@ -69,10 +71,8 @@ up.Layer.Root = class Root extends up.Layer {
   }
 
   _cannotCloseRoot() {
-    up.fail('Cannot close the root layer')
+    fail('Cannot close the root layer')
   }
-
-  get [Symbol.toStringTag]() { return 'up.Layer.Root' }
 
   toString() {
     return "root layer"

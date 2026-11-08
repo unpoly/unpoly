@@ -99,7 +99,7 @@ describe('up.layer', function() {
       })
     })
 
-    // There are more specs for up.Layer.Overlay#accept()
+    // There are more specs for Overlay#accept()
 
     describe('up.layer.dismiss()', function() {
       it('closes the current layer', function() {
@@ -109,7 +109,7 @@ describe('up.layer', function() {
       })
     })
 
-    // There are more specs for up.Layer.Overlay#dismiss()
+    // There are more specs for Overlay#dismiss()
 
     describe('up.layer.dismissOverlays()', function() {
 

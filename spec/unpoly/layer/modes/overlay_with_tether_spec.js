@@ -1,7 +1,7 @@
 const u = up.util
 const e = up.element
 
-describe('up.Layer.OverlayWithTether', function() {
+describe('OverlayWithTether', function() {
   describe('preservation of overlays during fragment changes', function() {
 
     it('dismisses the overlay when its viewport has been removed', async function() {

@@ -1,4 +1,4 @@
-describe('up.Layer.Modal', function() {
+describe('ModalLayer', function() {
 
   const e = up.element
   const u = up.util

@@ -1,5 +1,5 @@
-up.Layer.Drawer = class Drawer extends up.Layer.OverlayWithViewport {
-  static mode = 'drawer'
+import { OverlayWithViewport } from './overlay_with_viewport.js'
 
-  get [Symbol.toStringTag]() { return 'up.Layer.Drawer' }
+export class DrawerLayer extends OverlayWithViewport {
+  static mode = 'drawer'
 }

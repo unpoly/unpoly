@@ -3,6 +3,7 @@ import { getOne } from '../element.js'
 import { guard } from '../error.js'
 import { Aborted } from '../error/aborted.js'
 import { Record } from '../util/record.js'
+import { Layer } from '../layer/base.js'
 
 export class EventEmitter extends Record {
 
@@ -90,7 +91,7 @@ export class EventEmitter extends Record {
     // target. We remove it from the argument list and store it in options.
     if (isElementLike(args[0])) {
       options.target = getOne(args.shift())
-    } else if (args[0] instanceof up.Layer) {
+    } else if (args[0] instanceof Layer) {
       options.layer = args.shift()
     }
 

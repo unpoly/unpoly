@@ -1,7 +1,7 @@
 const u = up.util
 const e = up.element
 
-describe('up.Layer.Overlay', function() {
+describe('Overlay', function() {
 
   beforeEach(function() {
     up.motion.config.enabled = false

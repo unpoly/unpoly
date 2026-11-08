@@ -1,13 +1,17 @@
-up.Layer.OverlayWithTether = class OverlayWithTether extends up.Layer.Overlay {
+import { fail } from '../../error.js'
+import { Overlay } from './overlay.js'
+import { Tether } from '../tether.js'
+
+export class OverlayWithTether extends Overlay {
 
   createElements() {
     if (!this.origin) {
-      up.fail('Missing { origin } option')
+      fail('Missing { origin } option')
     }
 
     // We first construct an un-started Tether object so we can
     // ask for its parent element.
-    this._tether = new up.Tether({
+    this._tether = new Tether({
       anchor: this.origin,
       align: this.align,
       position: this.position

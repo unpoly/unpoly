@@ -1,4 +1,4 @@
-describe('up.Layer.Root', function() {
+describe('RootLayer', function() {
 
   describe('#dismiss()', function() {
     it('throws an error', function() {

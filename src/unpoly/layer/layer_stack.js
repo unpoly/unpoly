@@ -1,6 +1,7 @@
-const u = up.util
+import { last, remove } from '../util.js'
+import { LayerLookup } from './layer_lookup.js'
 
-up.LayerStack = class LayerStack {
+export class LayerStack {
 
   constructor() {
     this._currentOverrides = []
@@ -13,7 +14,7 @@ up.LayerStack = class LayerStack {
   }
 
   remove(layer) {
-    u.remove(this.layers, layer)
+    remove(this.layers, layer)
     // A closed overlay may keep its element for its exit animation. See attachedCount.
     this._closingLayers.push(layer)
   }
@@ -89,7 +90,7 @@ up.LayerStack = class LayerStack {
   }
 
   getAll(...args) {
-    return up.LayerLookup.all(this, ...args)
+    return LayerLookup.all(this, ...args)
   }
 
   sync() {
@@ -150,11 +151,16 @@ up.LayerStack = class LayerStack {
   get current() {
     // Event listeners and compilers will push into @currentOverrides
     // to temporarily set up.layer.current to the layer they operate in.
-    return u.last(this._currentOverrides) || this.front
+    return last(this._currentOverrides) || this.front
   }
 
   get front() {
-    return u.last(this.layers)
+    return last(this.layers)
   }
 
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  LayerStack,
 }

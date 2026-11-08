@@ -1,4 +1,6 @@
-up.Layer.OverlayWithViewport = class OverlayWithViewport extends up.Layer.Overlay {
+import { Overlay } from './overlay.js'
+
+export class OverlayWithViewport extends Overlay {
 
   // For stubbing in tests
   static getParentElement() {

@@ -1,3 +1,5 @@
+import { Overlay } from '../../../layer/modes/overlay.js'
+
 const u = up.util
 
 up.Change.FromResponse = class FromResponse extends up.Change {
@@ -182,7 +184,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
       up.script.adoptRenderOptionsFromHeader(openLayerOptions, this._response.cspInfo)
 
       Object.assign(renderOptions, {
-        ...up.Layer.Overlay.UNSET_VISUALS,     // When we're already opening an overlay, don't adopt its visuals.
+        ...Overlay.UNSET_VISUALS,              // When we're already opening an overlay, don't adopt its visuals.
         target: undefined,                     // The original target may no longer be appropriate, even if it exists in the response.
         ...up.fragment.config.navigateOptions, // Options like `{ history, focus, scroll }` might no longer work. Also enable a fallback target.
         ...openLayerOptions,                   // Anything explicitly passed as the value of `X-Up-Open-Layer`.

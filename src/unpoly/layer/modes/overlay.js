@@ -1,10 +1,18 @@
-const e = up.element
-const u = up.util
+import {
+  compact, compactObject, contains, findResult, getSimpleTokens, pick, spanObject,
+} from '../../util.js'
+import { affix, idSelector, jsonAttr, subtreeFirst } from '../../element.js'
+import { muteUncriticalSync } from '../../error.js'
+import { OptionsParser } from '../../element/options_parser.js'
+import { Params } from '../../form/params.js'
+import { Layer } from '../base.js'
+import { OverlayFocus } from '../overlay_focus.js'
+import { UpURLPattern } from '../../util/url_pattern.js'
 
 /*-
 @class up.Layer
 */
-up.Layer.Overlay = class Overlay extends up.Layer {
+export class Overlay extends Layer {
 
   /*-
   The button or link that opened this overlay.
@@ -70,7 +78,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     'trapFocus',
   ]
 
-  static UNSET_VISUALS = u.spanObject(this.VISUAL_KEYS, undefined)
+  static UNSET_VISUALS = spanObject(this.VISUAL_KEYS, undefined)
 
   keys() {
     return [
@@ -109,15 +117,15 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     } else if (this.dismissible === false) {
       this.dismissible = []
     } else {
-      this.dismissible = u.getSimpleTokens(this.dismissible)
+      this.dismissible = getSimpleTokens(this.dismissible)
     }
 
     if (this.acceptLocation) {
-      this.acceptLocation = new up.URLPattern(this.acceptLocation)
+      this.acceptLocation = new UpURLPattern(this.acceptLocation)
     }
 
     if (this.dismissLocation) {
-      this.dismissLocation = new up.URLPattern(this.dismissLocation)
+      this.dismissLocation = new UpURLPattern(this.dismissLocation)
     }
   }
 
@@ -138,7 +146,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
 
   createElement(parentElement) {
     this.nesting ||= this._suggestVisualNesting()
-    const elementAttrs = u.compactObject(u.pick(this, ['align', 'position', 'size', 'class', 'nesting']))
+    const elementAttrs = compactObject(pick(this, ['align', 'position', 'size', 'class', 'nesting']))
     this.element = this.affixPart(parentElement, null, elementAttrs)
   }
 
@@ -176,15 +184,15 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     })
     // Since the dismiss button already has an accessible [aria-label]
     // we hide the "X" label from screen readers.
-    return e.affix(this.dismissElement, 'span[aria-hidden="true"]', { text: this.dismissLabel })
+    return affix(this.dismissElement, 'span[aria-hidden="true"]', { text: this.dismissLabel })
   }
 
   affixPart(parentElement, part, options = {}) {
-    return e.affix(parentElement, this.selector(part), options)
+    return affix(parentElement, this.selector(part), options)
   }
 
   static selector(part) {
-    return u.compact(['up', this.mode, part]).join('-')
+    return compact(['up', this.mode, part]).join('-')
   }
 
   _suggestVisualNesting() {
@@ -199,7 +207,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   setupHandlers() {
     super.setupHandlers()
 
-    this.overlayFocus = new up.OverlayFocus(this)
+    this.overlayFocus = new OverlayFocus(this)
 
     if (this._supportsDismissMethod('button')) {
       this.createDismissElement(this.getBoxElement())
@@ -261,7 +269,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     // focus that (even though label and input are in different forms).
     // The browser always focuses the first input matching the ID from [for].
     let id = label.getAttribute('for')
-    let fieldSelector = up.form.fieldSelector(e.idSelector(id))
+    let fieldSelector = up.form.fieldSelector(idSelector(id))
 
     let fieldsAnywhere = up.fragment.all(fieldSelector, { layer: 'any' })
     let fieldsInLayer = up.fragment.all(fieldSelector, { layer: this })
@@ -293,7 +301,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
     // Keyboard activations and element.click() have a { detail } of 0.
     if (event.originalEvent?.detail > 1) return
 
-    up.error.muteUncriticalSync(() =>
+    muteUncriticalSync(() =>
       this.dismiss(':outside', { origin: event.target })
     )
   }
@@ -314,7 +322,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
         field.blur()
       } else if (this._supportsDismissMethod('key')) {
         up.event.halt(event, { log: true })
-        up.error.muteUncriticalSync(() =>
+        muteUncriticalSync(() =>
           this.dismiss(':key')
         )
       }
@@ -333,7 +341,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       // a link from being followed on the root layer.
       up.event.halt(event, { log: true })
 
-      const value = e.jsonAttr(link, attribute)
+      const value = jsonAttr(link, attribute)
       this._onAttrCloserActivated(link, value, closeFn)
     })
   }
@@ -351,27 +359,27 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       // (2) The opener is interested in the form's full params, including the button the user
       //     pressed. When nothing submitted the form (a script dispatched the event) there is
       //     no button to attribute, and we must not guess the form's first one.
-      const value = up.Params.fromForm(event.target, { submitButton: event.submitter ?? false })
+      const value = Params.fromForm(event.target, { submitButton: event.submitter ?? false })
       this._onAttrCloserActivated(element, value, closeFn)
     })
   }
 
   _onAttrCloserActivated(origin, value, closeFn) {
     const closeOptions = { origin }
-    const parser = new up.OptionsParser(origin, closeOptions)
+    const parser = new OptionsParser(origin, closeOptions)
     parser.booleanOrString('animation')
     parser.string('easing')
     parser.number('duration')
     parser.booleanOrString('confirm')
 
-    up.error.muteUncriticalSync(() => closeFn(value, closeOptions))
+    muteUncriticalSync(() => closeFn(value, closeOptions))
   }
 
   _registerExternalEventCloser(eventTypes, closeFn) {
     if (!eventTypes) { return }
     return this.on(eventTypes, (event) => {
       event.preventDefault()
-      up.error.muteUncriticalSync(() =>
+      muteUncriticalSync(() =>
         closeFn.call(this, event, { response: event.response })
       )
     })
@@ -386,10 +394,10 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   _tryCloseForElements(selector, closeFn, newElements, response) {
-    let match = u.findResult(newElements, (element) => e.subtreeFirst(element, selector))
+    let match = findResult(newElements, (element) => subtreeFirst(element, selector))
     if (match) {
       const closeValue = up.data(match)
-      up.error.muteUncriticalSync(() =>
+      muteUncriticalSync(() =>
         closeFn.call(this, closeValue, { response })
       )
     }
@@ -410,7 +418,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
       // '/decks/:deckId/cards/:cardId' is matched against
       // '/decks/123/cards/456' resolution is { deckId: 123, cardId: 456 }.
       const closeValue = { ...resolution, location: newLocation }
-      up.error.muteUncriticalSync(() =>
+      muteUncriticalSync(() =>
         closeFn.call(this, closeValue, { response })
       )
     }
@@ -522,7 +530,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   }
 
   _supportsDismissMethod(method) {
-    return u.contains(this.dismissible, method)
+    return contains(this.dismissible, method)
   }
 
   _executeCloseChange(verb, value, options) {

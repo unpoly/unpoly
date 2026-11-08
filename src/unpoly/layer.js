@@ -1,3 +1,9 @@
+import { CoverLayer } from './layer/modes/cover_layer.js'
+import { DrawerLayer } from './layer/modes/drawer_layer.js'
+import { ModalLayer } from './layer/modes/modal_layer.js'
+import { PopupLayer } from './layer/modes/popup_layer.js'
+import { RootLayer } from './layer/modes/root_layer.js'
+
 require('./layer.sass')
 
 const u = up.util
@@ -16,11 +22,11 @@ Add `[up-layer=new]` to a link or form to show its response in a new overlay, or
 up.layer = (function() {
 
   const LAYER_CLASSES = [
-    up.Layer.Root,
-    up.Layer.Modal,
-    up.Layer.Popup,
-    up.Layer.Drawer,
-    up.Layer.Cover
+    RootLayer,
+    ModalLayer,
+    PopupLayer,
+    DrawerLayer,
+    CoverLayer
   ]
 
   /*-

@@ -130,7 +130,7 @@ extendDescribe('up.layer', function() {
             up.layer.open({ fragment: '<div class="new-overlay-element"></div>', baseLayer: 'root' })
 
             // Peel destructors run in the next microtask because of implementation details in
-            // up.Layer.Overlay#destroyElements().
+            // Overlay#destroyElements().
             await wait(300)
 
             expect(destructor).toHaveBeenCalled()

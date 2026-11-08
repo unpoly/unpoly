@@ -203,7 +203,7 @@ extendDescribe('up.util', function() {
         it("serializes a layer with its class and readable name", async function() {
           await up.layer.open({ mode: 'modal' })
           const formatted = up.util.sprintf('before %o, %o after', up.layer.root, up.layer.current)
-          expect(formatted).toEqual('before up.Layer.Root(root layer), up.Layer.Modal(modal overlay) after')
+          expect(formatted).toEqual('before up.Layer(root layer), up.Layer(modal overlay) after')
         })
 
         it("serializes an up.Params with its query", function() {
