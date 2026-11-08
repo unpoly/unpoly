@@ -20,7 +20,7 @@ to list them all.
 Some commits don't belong to a namespace. Make up a term that reads like one:
 
 ```
-[build] Upgrade Webpack
+[build] Upgrade esbuild
 [version] Version 3.5.0
 [specs] Replace old fixtures helper
 [docs] Document optimistic rendering

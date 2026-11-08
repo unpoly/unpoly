@@ -23,7 +23,7 @@ themselves are structured is covered in [Testing](testing.md#how-specs-are-organ
 This repository is organized like this:
 
 ```
-src/                      # Webpack entry points for Unpoly's main and optional bundles
+src/                      # Entry points for Unpoly's main and optional bundles
   unpoly.ts               # ... Entry point for main Unpoly bundle (JS, CSS)
   unpoly-migrate.ts       # ... Entry point for optional bundle that polyfills deprecated features
   ...                     # ... Other entry points for optional bundles
@@ -61,7 +61,7 @@ spec/
     ...                   # ... Other helpers
 
 bin/                      # Scripts for development
-  dev                     # ... Start or stop dev environment (Webpack bundler, Jasmine runner)
+  dev                     # ... Start or stop dev environment (build watcher, Jasmine runner)
   test                    # ... Run tests from terminal (will execute in headless Chrome internally)
   find-spec               # ... Find specs by a phrase in their describe()/it() titles
   ...                     # ... other dev scripts
@@ -69,7 +69,7 @@ bin/                      # Scripts for development
 tooling/                  # Our own dev machinery, never shipped (rarely need to edit here)
   runner/                 # ... Runs the specs: server, terminal driver, in-page reporter
   scratch/                # ... Pages for trying a change by hand (see Trying out changes)
-  build/                  # ... bin/build and the Webpack configuration
+  build/                  # ... bin/build: esbuild, Terser and the build watcher
   dev_env.mjs             # ... The dev environment behind bin/dev
   find_spec.mjs           # ... Spec-title search behind bin/find-spec
   test/                   # ... Unit tests for all of the above (bin/self-test)
@@ -78,7 +78,7 @@ docs/                     # Documentation for contributors, never shipped
   contributing/           # ... The guides linked from CONTRIBUTING.md
   plans/                  # ... Implementation plans (gitignored)
 
-dist/                     # Output directory for the Webpack bundler (gitignored, never edit directly)
+dist/                     # Output directory for the build (gitignored, never edit directly)
   unpoly.js               # ... Main Unpoly bundle (JS)
   unpoly.css              # ... Main Unpoly bundle (CSS)
   unpoly.min.js           # ... Minified Unpoly bundle (JS)
@@ -110,7 +110,7 @@ Unpoly isn't an ESM module that can be imported. Instead it defines a global `wi
 - The server-rendered HTML document can directly use Unpoly's HTML extensions (e.g. `[up-follow]`, `[up-submit]`).
 - Callback attributes (like `[onclick]`, `[up-on-accepted]`) can directly call functions on the `up` global (no way to `import` here).
 
-*Internally* Unpoly's files are ES modules that `import` from each other. Webpack bundles them into one script that sets `window.up`. See the [namespace pattern](#namespace-pattern) below.
+*Internally* Unpoly's files are ES modules that `import` from each other. esbuild bundles them into one script that sets `window.up`. See the [namespace pattern](#namespace-pattern) below.
 
 ### Responsibilities
 
@@ -249,7 +249,7 @@ Where they need one, they call it through `window.up` at call time.
 
 ## Entry points and optional bundles
 
-Files directly in `src/` are Webpack entry points, one per bundle we publish. Everything
+Files directly in `src/` are entry points, one per bundle we publish. Everything
 in `src/unpoly/` is only ever reached through one of them.
 
 - `src/unpoly.ts` is the main bundle. It is built twice: `unpoly.js` for current
@@ -274,5 +274,5 @@ ecosystem, plus a sibling `.sass` file. If a bundle seems to need behavior of it
 that behavior belongs in a namespace, reachable through config from outside.
 `unpoly-migrate` is the exception, and it earns it by shipping polyfills.
 
-A new bundle needs an entry in `tooling/build/webpack/entries.js` *and* its output files listed in
+A new bundle needs an entry in `tooling/build/bundles.mjs` *and* its output files listed in
 `bin/release`, or it won't be published.

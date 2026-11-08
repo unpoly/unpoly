@@ -5,7 +5,9 @@ command boots the build watcher, the spec server and the documentation site.
 
 ## Installing development dependencies
 
-To build Unpoly you require Node.js, Webpack and other npm packages.
+To build Unpoly you require Node.js and the npm packages from `package.json` (esbuild,
+Terser, Sass and ESLint, among others). The build also calls Ruby, to render the one ERB
+template that inserts the version number.
 
 Install the Node version from `.nvmrc`.
 
@@ -20,7 +22,7 @@ npm install
 Specs don't consume the sources directly, but a transpiled build in `dist/`. Hence
 `bin/test` needs a **dev environment**: a build watcher, the spec server and the
 [scratch server](trying-out-changes.md). It
-starts one in the background if none is running (the first build takes ~15s), reuses
+starts one in the background if none is running (the first build takes a few seconds), reuses
 it on later runs, and waits for the watcher to pick up your latest edit — so you
 never test stale code.
 
@@ -42,6 +44,16 @@ If a build has errors — a syntax slip, or an ESLint violation — `bin/test` p
 them instead of running the specs and exits non-zero, and `bin/dev status` reports
 them too. The watcher itself keeps running, so your next edit can fix things.
 
+## The build
+
+`bin/build` bundles every entry point in `src/` with [esbuild](https://esbuild.github.io/), which
+also strips TypeScript's types, and minifies with [Terser](https://terser.org/).
+`tooling/build/bundles.mjs` lists every bundle, and which `--config` builds it.
+
+The watcher rebuilds only the bundles that read the file you edited, usually within 200 ms, and
+lints the file with ESLint if it is in `src/`. The build itself never lints: `bin/lint` does,
+and CI runs it as its own job.
+
 ## Logs
 
 Everything the dev environment prints goes to **`tmp/dev.log`**, whether you started it with
@@ -56,15 +68,16 @@ Each line of the dev log is `HH:MM:SS.mmm service | output`:
 
 ```
 09:48:38.636 server      | Unpoly specs serving on http://localhost:4000. Press CTRL+C to quit.
-09:48:50.554 watch       | asset unpoly.js 396 KiB [emitted] (name: unpoly) 1 related asset
-09:48:50.554 watch       | webpack 5.105.4 compiled successfully in 11393 ms
-09:48:53.217 docs        | == The Middleman is loading
+09:48:38.902 watch       | Watching src, spec, tooling/runner/browser for changes…
+09:48:40.233 watch       | Built 9 of 9 bundles in 1326 ms
+09:48:41.217 docs        | == The Middleman is loading
+09:49:12.480 watch       | Built 2 of 9 bundles in 118 ms
 ```
 
 What you can find in there:
 
-- `watch` — the build watcher. What it rebuilt and how long it took, and the verbatim
-  compile or ESLint errors when a build breaks.
+- `watch` — the build watcher. How many bundles it rebuilt and how long it took, and the
+  verbatim compile or ESLint errors when a build breaks.
 - `server` — the spec server, including the port it came up on.
 - `docs` — the documentation site, if you have that sibling repository checked out.
 - `dev` — the supervisor itself: a service exiting, a sibling repository being skipped
@@ -88,7 +101,7 @@ practice means a syntax error or bad import in `tooling/dev_env.mjs`. It is empt
 ## What it runs
 
 ```
-watch      # the Webpack build watcher, keeping dist/ current
+watch      # the build watcher, keeping dist/ current
 server     # the spec runner            — serves on port 4000
 scratch    # pages for trying a change by hand — serves on port 4001
 docs       # unpoly.com, if checked out — serves on port 4567

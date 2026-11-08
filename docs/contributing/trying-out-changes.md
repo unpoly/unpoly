@@ -37,7 +37,7 @@ this repository under `tooling/scratch`.
 `http://localhost:4001` lists every page that exists, and says which files back each one.
 
 **Page requests wait for the build.** If you edit `src/unpoly/link.ts` and reload a scratch
-page, the request blocks until webpack has finished, so you never look at the previous build
+page, the request blocks until the build watcher has finished, so you never look at the previous build
 and conclude your change did nothing. If the build is *broken*, the page shows you the
 compile errors instead — file, line and all.
 

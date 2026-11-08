@@ -10,10 +10,10 @@ We migrated Unpoly to TypeScript one module at a time, leaf modules first. All o
 TypeScript now, except the ERB template `namespace.js.erb`. The types are still loose, and many
 are provisional.
 
-The build runs every source file through TypeScript only to transpile it (ts-loader with
-`transpileOnly`), and never checks types. The only type check is `bin/typecheck`, which runs
-TypeScript 7's checker over `src/` with loose settings and takes well under a second. It
-still reports errors, so CI runs it as a separate job that may fail.
+The build doesn't use TypeScript at all: esbuild strips the types from each file, and never
+checks them. The only type check is `bin/typecheck`, which runs TypeScript 7's checker over
+`src/` with loose settings and takes well under a second. It still reports errors, so CI runs
+it as a separate job that may fail.
 
 In a `.ts` module:
 
