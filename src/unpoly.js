@@ -80,6 +80,14 @@ import * as fragmentScrollingClass from './unpoly/fragment/render/fragment_scrol
 import * as renderOptionsClass from './unpoly/fragment/render/render_options.js'
 import * as renderResultClass from './unpoly/fragment/render/render_result.js'
 import * as responseDocClass from './unpoly/fragment/render/response_doc.js'
+import { RootLayer } from './unpoly/layer/modes/root_layer.js'
+import { ModalLayer } from './unpoly/layer/modes/modal_layer.js'
+import { PopupLayer } from './unpoly/layer/modes/popup_layer.js'
+import { DrawerLayer } from './unpoly/layer/modes/drawer_layer.js'
+import { CoverLayer } from './unpoly/layer/modes/cover_layer.js'
+import { RequestQueue } from './unpoly/network/request_queue.js'
+import { RequestCache } from './unpoly/network/request_cache.js'
+import { DestroyFragment } from './unpoly/fragment/render/change/destroy_fragment.js'
 
 window.up = {}
 
@@ -152,6 +160,17 @@ for (let api of apis) {
   Object.defineProperties(up, Object.getOwnPropertyDescriptors(api))
 }
 
+// TEMPORARY (TypeScript migration, Phase 1): Namespaces we haven't converted yet can't import
+// the classes that are no longer on `window.up`. An `import` in a file that we `require()`
+// below makes webpack stop concatenating every module it reaches, which costs ~6 KB in
+// unpoly.min.js. So they read these classes from here. When converting a namespace, have it
+// import its classes and remove them here.
+up._classes = {
+  RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer, // used by up.layer
+  RequestQueue, RequestCache,                                 // used by up.network
+  DestroyFragment,                                            // used by up.fragment
+}
+
 // The explicit install order. All installs run before `up.framework.onEvaled()` below, while
 // `up.framework.evaling` is still true. Event listeners, compilers, macros and registry entries
 // created now are marked as defaults (`isDefault`), which a reset between specs keeps
@@ -165,7 +184,6 @@ for (let api of apis) {
 // its line, and add its `install` here if it has one.
 const installs = [
   util.install,
-
 
   () => require('./unpoly/framework'),
   () => require('./unpoly/event'),

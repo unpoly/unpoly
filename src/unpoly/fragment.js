@@ -1,5 +1,3 @@
-import { DestroyFragment } from './fragment/render/change/destroy_fragment.js'
-
 require('./fragment.sass')
 
 const u = up.util
@@ -1730,7 +1728,7 @@ up.fragment = (function() {
     const element = getSmart(options.target, options)
 
     if (element) {
-      new DestroyFragment({ ...options, element }).execute()
+      new up._classes.DestroyFragment({ ...options, element }).execute()
     }
 
     return up.migrate.formerlyAsync?.('up.destroy()')

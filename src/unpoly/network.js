@@ -1,6 +1,3 @@
-import { RequestCache } from './network/request_cache.js'
-import { RequestQueue } from './network/request_queue.js'
-
 require('./network.sass')
 
 const u = up.util
@@ -158,9 +155,9 @@ up.network = (function() {
     timeout: 90_000,
   }))
 
-  const queue = new RequestQueue()
+  const queue = new up._classes.RequestQueue()
 
-  const cache = new RequestCache()
+  const cache = new up._classes.RequestCache()
 
   let progressBar = null
 
