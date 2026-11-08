@@ -7,6 +7,7 @@ import { fail } from '../../error.js'
 import { CannotMatch } from '../../error/cannot_match.js'
 import { emit } from '../../event.js'
 import { FragmentFinder } from '../fragment_finder.js'
+import { adoptDetachedHeadAsset, adoptNewFragment, findAssets, warnOfUnsafeCSP } from '../../script.js'
 
 export class ResponseDoc {
 
@@ -23,7 +24,7 @@ export class ResponseDoc {
 
     // This is the parsed script-src declaration from the response
     this._cspInfo = cspInfo
-    up.script.warnOfUnsafeCSP(cspInfo)
+    warnOfUnsafeCSP(cspInfo)
 
     if (origin) {
       let originSelector = up.fragment.tryToTarget(origin)
@@ -133,7 +134,7 @@ export class ResponseDoc {
 
   get assets() {
     return this._fromHead((head) => {
-      let assets = up.script.findAssets(head)
+      let assets = findAssets(head)
 
       // Need to use up.util.map() for a NodeList, which does not support #map()
       return map(assets, (asset) => {
@@ -142,7 +143,7 @@ export class ResponseDoc {
         asset = revivedClone(asset)
 
         // Rewrite [nonce] attributes so we don't see up:assets:changed with every request.
-        up.script.adoptDetachedHeadAsset(asset, this._cspInfo)
+        adoptDetachedHeadAsset(asset, this._cspInfo)
 
         return asset
       })
@@ -232,7 +233,7 @@ export class ResponseDoc {
       // (A) If the user doesn't want to run scripts in the new fragment, we block all <script> elements.
       //     We cannot wait until finalizeElement(), because then the script has already been inserted and has executed.
       // (B) For the remaining scripts we verify and adopt CSP nonces so they can be executed in the current page.
-      up.script.adoptNewFragment(element, this._cspInfo)
+      adoptNewFragment(element, this._cspInfo)
 
       // Ensure that the element cannot be matched for subsequent selects().
       element.remove()

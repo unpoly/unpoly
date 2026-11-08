@@ -5,6 +5,7 @@ import { Blocked } from '../../error/blocked.js'
 import { NotImplemented } from '../../error/not_implemented.js'
 import { RenderOptions } from '../../fragment/render/render_options.js'
 import { printToStandard, printToWarn } from '../../log.js'
+import { block, config, cspNonce, findScripts, isScript } from '../../script.js'
 import { CSPInfo } from './csp_info.js'
 import { NonceableCallback } from './nonceable_callback.js'
 
@@ -16,7 +17,7 @@ export class ScriptGate {
   constructor(cspInfo = CSPInfo.none()) {
     // Only parse the page nonce once for adopting multiple items.
     // TODO: Consider moving page none parsing to CSPInfo
-    let pageNonce = up.script.cspNonce()
+    let pageNonce = cspNonce()
 
     this._evalCallbackPolicy = new EvalCallbackPolicy(pageNonce, cspInfo)
     this._scriptElementPolicy = new BodyScriptElementPolicy(pageNonce, cspInfo)
@@ -24,7 +25,7 @@ export class ScriptGate {
   }
 
   warnOfUnsafeCSP() {
-    if (up.script.config.cspWarnings) {
+    if (config.cspWarnings) {
       this._evalCallbackPolicy.warnOfUnsafeCSP()
       this._scriptElementPolicy.warnOfUnsafeCSP()
     }
@@ -67,7 +68,7 @@ export class ScriptGate {
   }
 
   adoptDetachedHeadAsset(asset) {
-    if (!up.script.isScript(asset)) return
+    if (!isScript(asset)) return
 
     // (A) These assets are not normally going to be inserted into the page, but may emit up:assets:changed.
     // (B) We need to adopt script[nonce] attributes for the comparison, and in case the user wants to insert manually.
@@ -94,7 +95,7 @@ export class ScriptGate {
   _adoptScriptElements(root) {
     const policy = this._scriptElementPolicy
 
-    for (let script of up.script.findScripts(root)) {
+    for (let script of findScripts(root)) {
       let item = new ScriptElementItem(script)
       policy.processItem(item)
     }
@@ -104,7 +105,7 @@ export class ScriptGate {
     const policy = this._evalCallbackPolicy
 
     // TODO: It is weird that we keep a list of callback options in RenderOptions, but the list of nonceable attrs is in up.script? Maybe at least move them together?
-    for (let attribute of up.script.config.nonceableAttributes) {
+    for (let attribute of config.nonceableAttributes) {
       let matches = subtree(root, attrSelector(attribute))
       for (let element of matches) {
         let item = new AttributeItem(element, attribute, policy)
@@ -187,7 +188,7 @@ class ConfigurablePolicy extends Policy {
 
     this._configProp = configProp
 
-    let policyString = up.script.config[configProp]
+    let policyString = config[configProp]
     if (policyString === 'auto') policyString = this.resolveAuto()
     if (policyString === 'nonce' && !this.pageNonce) {
       this.warn('Enforcing nonces requires a <meta name="csp-nonce">.')
@@ -380,7 +381,7 @@ class ScriptElementItem {
   }
 
   block() {
-    up.script.block(this._element)
+    block(this._element)
   }
 
 }

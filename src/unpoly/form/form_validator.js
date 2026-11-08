@@ -9,6 +9,7 @@ import { build, on } from '../event.js'
 import { Params } from './params.js'
 import { printToStandard, printUserEvent } from '../log.js'
 import { config, headerize } from '../protocol.js'
+import { readData } from '../script.js'
 
 export class FormValidator {
 
@@ -298,7 +299,7 @@ export class FormValidator {
     options.data = undefined
     options.dataMap = mapObject(dirtySolutions, ({ target, element, renderOptions: { data, keepData } }) => [
       target,
-      keepData ? up.data(element) : data
+      keepData ? readData(element) : data
     ])
 
     // Each up.validate({ preview }) call should only apply to the targeted element,

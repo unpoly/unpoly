@@ -204,7 +204,7 @@ extendDescribe('up.script', function() {
         })
 
         it('does not parse an [up-data] attribute if the compiler function only takes a single argument', function() {
-          const parseDataSpy = spyOn(up.script, 'data').and.returnValue({})
+          const parseDataSpy = up.script.data.mock().and.returnValue({})
 
           const $child = $fixture(".child")
 

@@ -1343,7 +1343,7 @@ extendDescribe('up.fragment', function() {
         it('ignores a <script nonce> for the comparison', async function() {
           up.script.config.scriptElementPolicy = 'pass'
 
-          spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+          up.script.cspNonce.mock().and.returnValue('page-secret')
 
           let keepable = keepableFixture(`<div id="keepable" up-keep="same-html"><script nonce="page-secret"></script></div>`)
 
@@ -1362,7 +1362,7 @@ extendDescribe('up.fragment', function() {
         it('ignores a callback nonce for the comparison', async function() {
           up.script.config.scriptElementPolicy = 'pass'
 
-          spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+          up.script.cspNonce.mock().and.returnValue('page-secret')
 
           let keepable = keepableFixture(`<input id="keepable" name="foo" up-keep="same-html" up-watch="nonce-page-secret foo()"></input>`)
 
@@ -1381,7 +1381,7 @@ extendDescribe('up.fragment', function() {
         it('ignores multiple callback nonces within the same tag', async function() {
           up.script.config.scriptElementPolicy = 'pass'
 
-          spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+          up.script.cspNonce.mock().and.returnValue('page-secret')
 
           let keepable = keepableFixture(`<a id="keepable" href="/path" up-keep="same-html" up-on-rendered="nonce-page-secret foo()" data-x="x" up-on-finished="nonce-page-secret bar()" data-y="y">text</a>`)
 

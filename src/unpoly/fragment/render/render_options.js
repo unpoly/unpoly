@@ -3,6 +3,7 @@ import {
 } from '../../util.js'
 import { fail } from '../../error.js'
 import { getInputDevice } from '../../event.js'
+import { callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback } from '../../script.js'
 
 // Sometimes we need to use given render options, but disable preview effects.
 const NO_PREVIEWS = {
@@ -120,7 +121,7 @@ const CALLBACKS = {
 }
 
 function parseCallback(key, code) {
-  return up.script.parseCallback(code, parseCallbackOptions(key))
+  return scriptParseCallback(code, parseCallbackOptions(key))
 }
 
 function parseCallbackOptions(key) {
@@ -129,7 +130,7 @@ function parseCallbackOptions(key) {
 
 function callbackAttr(element, attrName, key) {
   // return e.parseAttr(element, attrName, (value) => parseCallback(key, value))
-  return up.script.callbackAttr(element, attrName, parseCallbackOptions(key))
+  return scriptCallbackAttr(element, attrName, parseCallbackOptions(key))
 }
 
 function navigateDefaults(options) {

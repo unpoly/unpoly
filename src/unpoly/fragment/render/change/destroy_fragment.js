@@ -1,5 +1,6 @@
 import { Change } from './change.js'
 import { RenderOptions } from '../render_options.js'
+import { clean } from '../../../script.js'
 
 export class DestroyFragment extends Change {
 
@@ -39,7 +40,7 @@ export class DestroyFragment extends Change {
   _erase() {
     this._layer.asCurrent(() => {
       up.fragment.abort(this._element)
-      up.script.clean(this._element, { layer: this._layer })
+      clean(this._element, { layer: this._layer })
       this._element.remove()
     })
   }

@@ -600,7 +600,7 @@ extendDescribe('up.fragment', function() {
 
           describe('if the page nonce is not known', function() {
             beforeEach(function() {
-              spyOn(up.script, 'cspNonce').and.returnValue(null)
+              up.script.cspNonce.mock().and.returnValue(null)
             })
 
             itBehavesLikeBlock()

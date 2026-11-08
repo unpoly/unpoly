@@ -38,6 +38,7 @@ import * as framework from './unpoly/framework.js'
 import * as event from './unpoly/event.js'
 import * as protocol from './unpoly/protocol.js'
 import * as log from './unpoly/log.js'
+import * as script from './unpoly/script.js'
 import * as baseError from './unpoly/error/error.js'
 import * as notImplementedError from './unpoly/error/not_implemented.js'
 import * as abortedError from './unpoly/error/aborted.js'
@@ -115,6 +116,7 @@ const apis = [
   event.api,
   protocol.api,
   log.api,
+  script.api,
   baseError.api,
   notImplementedError.api,
   abortedError.api,
@@ -203,7 +205,7 @@ const installs = [
 
   event.install,
   log.install,
-  () => require('./unpoly/script'),
+  script.install,
   () => require('./unpoly/history'),
   () => require('./unpoly/fragment'),
   () => require('./unpoly/viewport'),

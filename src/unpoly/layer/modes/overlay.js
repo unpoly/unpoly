@@ -9,6 +9,7 @@ import { Layer } from '../base.js'
 import { OverlayFocus } from '../overlay_focus.js'
 import { OVERLAY_VISUAL_KEYS } from '../overlay_visuals.js'
 import { printUserEvent } from '../../log.js'
+import { readData } from '../../script.js'
 import { UpURLPattern } from '../../util/url_pattern.js'
 
 /*-
@@ -376,7 +377,7 @@ export class Overlay extends Layer {
   _tryCloseForElements(selector, closeFn, newElements, response) {
     let match = findResult(newElements, (element) => subtreeFirst(element, selector))
     if (match) {
-      const closeValue = up.data(match)
+      const closeValue = readData(match)
       muteUncriticalSync(() =>
         closeFn.call(this, closeValue, { response })
       )

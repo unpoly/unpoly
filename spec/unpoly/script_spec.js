@@ -770,7 +770,7 @@ describe('up.script', function() {
 
           describe('when the page nonce is known', function() {
             beforeEach(function() {
-              spyOn(up.script, 'cspNonce').and.returnValue('secret000')
+              up.script.cspNonce.mock().and.returnValue('secret000')
             })
 
             itDoesNotWarnFor('host-based')
@@ -783,7 +783,7 @@ describe('up.script', function() {
 
           describe('when the page nonce is not known', function() {
             beforeEach(function() {
-              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+              up.script.cspNonce.mock().and.returnValue(undefined)
             })
 
             itDoesNotWarnFor('host-based')
@@ -809,7 +809,7 @@ describe('up.script', function() {
         describe('scripts', function() {
 
           it('rewrites a matching [nonce]', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+            up.script.cspNonce.mock().and.returnValue('page000')
 
             const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
             const script = up.element.createFromSelector('script[nonce="response111"][src="external.js"]')
@@ -819,7 +819,7 @@ describe('up.script', function() {
           })
 
           it('does not rewrite a non-matching [nonce]', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+            up.script.cspNonce.mock().and.returnValue('page000')
 
             const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
             const script = up.element.createFromSelector('script[nonce="wrong222"][src="external.js"]')
@@ -829,7 +829,7 @@ describe('up.script', function() {
           })
 
           it('does not rewrite a matching [nonce] when the page nonce is not known', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            up.script.cspNonce.mock().and.returnValue(undefined)
 
             const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
             const script = up.element.createFromSelector('script[nonce="response111"][src="external.js"]')
@@ -839,7 +839,7 @@ describe('up.script', function() {
           })
 
           it('does not change an element without a [nonce] attribute', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+            up.script.cspNonce.mock().and.returnValue('page000')
 
             const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
             const script = up.element.createFromSelector('script[src="external.js"]')
@@ -855,7 +855,7 @@ describe('up.script', function() {
         describe('inline styles (not supported)', function() {
 
           it('does not rewrite the [nonce] of inline <style> elements using the script-src nonce', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue('page000')
+            up.script.cspNonce.mock().and.returnValue('page000')
 
             const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response111'")
             const style = up.element.createFromSelector('style[nonce="response111"]')
@@ -867,7 +867,7 @@ describe('up.script', function() {
         })
 
         it('does not trigger up:assets:changed if a script elements is identical after the [nonce] was rewritten', async function() {
-          spyOn(up.script, 'cspNonce').and.returnValue('specs-nonce')
+          up.script.cspNonce.mock().and.returnValue('specs-nonce')
           const listener = jasmine.createSpy('up:assets:changed listener')
           up.on('up:assets:changed', listener)
 
@@ -1049,7 +1049,7 @@ describe('up.script', function() {
             })
 
             it('returns a throwing function a callback with the correct nonce, but the page nonce is not known to Unpoly', function() {
-              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+              up.script.cspNonce.mock().and.returnValue(undefined)
               let code = 'nonce-specs-nonce window.callbackSpy()'
               let renderOptions = { onLoaded: code }
               up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
@@ -1059,7 +1059,7 @@ describe('up.script', function() {
             })
 
             it('returns a throwing function for a callback with an incorrect nonce', function() {
-              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+              up.script.cspNonce.mock().and.returnValue(undefined)
               let code = 'nonce-wrong222 window.callbackSpy()'
               let renderOptions = { onLoaded: code }
               up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
@@ -1124,7 +1124,7 @@ describe('up.script', function() {
 
               if (!pageNonce) {
                 it('returns an executable function for a callback with a correct nonce, but the page nonce is not known to Unpoly', function() {
-                  spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+                  up.script.cspNonce.mock().and.returnValue(undefined)
                   let code = 'nonce-specs-nonce window.callbackSpy()'
                   let renderOptions = { onLoaded: code }
                   up.script.adoptRenderOptionsFromHeader(renderOptions, this.cspInfo)
@@ -1307,7 +1307,7 @@ describe('up.script', function() {
           })
 
           it('returns a throwing function a callback with the correct nonce, but the page nonce is not known to Unpoly', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            up.script.cspNonce.mock().and.returnValue(undefined)
             let code = 'nonce-specs-nonce window.callbackSpy()'
             let fn = up.script.parseCallback(code)
             expect(fn).toThrowError(up.Blocked)
@@ -1315,7 +1315,7 @@ describe('up.script', function() {
           })
 
           it('returns a throwing function for a callback with an incorrect nonce', function() {
-            spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+            up.script.cspNonce.mock().and.returnValue(undefined)
             let code = 'nonce-wrong222 window.callbackSpy()'
             let fn = up.script.parseCallback(code)
             expect(fn).toThrowError(up.Blocked)
@@ -1370,7 +1370,7 @@ describe('up.script', function() {
 
             if (!pageNonce) {
               it('returns an executable function for a callback with a correct nonce, but the page nonce is not known to Unpoly', function() {
-                spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+                up.script.cspNonce.mock().and.returnValue(undefined)
                 let code = 'nonce-specs-nonce window.callbackSpy()'
                 let fn = up.script.parseCallback(code)
                 expect(fn).not.toThrowError(up.Blocked)

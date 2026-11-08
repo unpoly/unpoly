@@ -5,6 +5,7 @@ import { OpenLayerPlan } from './open_layer.js'
 import { UpdateLayerPlan } from './update_layer.js'
 import { ResponseDoc } from '../response_doc.js'
 import { printToStandard } from '../../../log.js'
+import { assertAssetsOK } from '../../../script.js'
 
 export class ChangeFromContent extends Change {
 
@@ -94,7 +95,7 @@ export class ChangeFromContent extends Change {
 
     let { assets } = this._getResponseDoc()
     if (assets) {
-      up.script.assertAssetsOK(assets, plan.options)
+      assertAssetsOK(assets, plan.options)
     }
 
     // Used by up.RenderJob

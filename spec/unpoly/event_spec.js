@@ -500,7 +500,7 @@ describe('up.event', function() {
         })
 
         it('does not parse an [up-data] attribute if the listener function only takes one argument', async function() {
-          const parseDataSpy = spyOn(up.script, 'data').and.returnValue({})
+          const parseDataSpy = up.script.data.mock().and.returnValue({})
 
           const $child = $fixture('.child')
           up.on('click', '.child', function(event) {}) // no-op
@@ -512,7 +512,7 @@ describe('up.event', function() {
         })
 
         it('does not parse an [up-data] attribute if the listener function only takes two arguments', async function() {
-          const parseDataSpy = spyOn(up.script, 'data').and.returnValue({})
+          const parseDataSpy = up.script.data.mock().and.returnValue({})
 
           const $child = $fixture('.child')
           up.on('click', '.child', function(event, $element) {}) // no-op

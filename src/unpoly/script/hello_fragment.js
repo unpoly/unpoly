@@ -4,6 +4,7 @@ import { guard, guardPromise } from '../error.js'
 import { UpError } from '../error/error.js'
 import { emit } from '../event.js'
 import { printToStandard } from '../log.js'
+import { readData, registerDestructor } from '../script.js'
 
 export class HelloFragment {
 
@@ -111,11 +112,11 @@ export class HelloFragment {
     // (A) For performance reason, do not parse [up-data] unless the compiler function expects a second argument.
     // (B) We must pass data for an argument count of 0, since then the function might take varargs.
     if (compiler.length !== 1) {
-      const data = up.script.data(element)
+      const data = readData(element)
       compileArgs.push(data, this._meta)
     }
 
-    let onDestructor = (destructor) => up.destructor(element, destructor)
+    let onDestructor = (destructor) => registerDestructor(element, destructor)
     this._applyCompilerFunction(compiler, element, compileArgs, onDestructor)
   }
 
@@ -125,7 +126,7 @@ export class HelloFragment {
     // expects a second argument. Note that we must pass data for an argument
     // count of 0, since then the function might take varargs.
     if (compiler.length !== 1) {
-      const dataList = map(elements, up.script.data)
+      const dataList = map(elements, readData)
       compileArgs.push(dataList, this._meta)
     }
 

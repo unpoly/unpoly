@@ -1,6 +1,7 @@
 import { compactObject, evalOption, pick, reject, uid } from '../util.js'
 import { fail } from '../error.js'
 import { isBeforeBoot, isEvaling } from '../framework.js'
+import { readData } from '../script.js'
 import { Record } from '../util/record.js'
 
 export class EventListener extends Record {
@@ -92,7 +93,7 @@ export class EventListener extends Record {
       const expectedArgCount = this.callback.length
 
       if (expectedArgCount !== 1 && expectedArgCount !== 2) {
-        const data = up.script.data(element)
+        const data = readData(element)
         args.push(data)
       }
 

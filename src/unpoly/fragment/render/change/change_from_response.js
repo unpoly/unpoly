@@ -5,6 +5,7 @@ import { Change } from './change.js'
 import { RenderOptions } from '../render_options.js'
 import { UNSET_OVERLAY_VISUALS } from '../../../layer/overlay_visuals.js'
 import { printToStandard, printToWarn } from '../../../log.js'
+import { adoptRenderOptionsFromHeader } from '../../../script.js'
 
 export class ChangeFromResponse extends Change {
 
@@ -185,7 +186,7 @@ export class ChangeFromResponse extends Change {
       // (1) check up.script.config.allow and possibly block
       // (2) adopt any prefixed nonces
       // (3) parse the string into a function
-      up.script.adoptRenderOptionsFromHeader(openLayerOptions, this._response.cspInfo)
+      adoptRenderOptionsFromHeader(openLayerOptions, this._response.cspInfo)
 
       Object.assign(renderOptions, {
         ...UNSET_OVERLAY_VISUALS,              // When we're already opening an overlay, don't adopt its visuals.

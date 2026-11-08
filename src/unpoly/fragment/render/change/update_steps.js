@@ -4,6 +4,7 @@ import { fail } from '../../../error.js'
 import { Addition } from './addition.js'
 import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
+import { block, clean, hello } from '../../../script.js'
 
 export class UpdateSteps extends Addition {
 
@@ -131,7 +132,7 @@ export class UpdateSteps extends Addition {
     let startMotion = up.motion.swap(step.oldElement, step.newElement, step.transition, {
       ...step,
       beforeRemove: () => {
-        up.script.clean(step.oldElement, { layer: step.layer })
+        clean(step.oldElement, { layer: step.layer })
       },
       afterRemove: () => {
         up.fragment.emitDestroyed(step.oldElement, { parent, log: false })
@@ -222,7 +223,7 @@ export class UpdateSteps extends Addition {
     this.setReloadAttrs(step)
 
     // Run macros and compilers. This also snapshots for [up-keep="same-html"].
-    return up.hello(element, step)
+    return hello(element, step)
   }
 
   // This will find all [up-keep] descendants in oldElement, overwrite their partner
@@ -246,7 +247,7 @@ export class UpdateSteps extends Addition {
           // When the newElement from the response has a response, it will be inserted
           // into the DOM during the transition. Only at the end it will be replaced by the keepable.
           // To prevent the execution of these placeholder-scripts, we change their { type }.
-          up.script.block(keepPlan.newElement)
+          block(keepPlan.newElement)
 
           // Attaching a viewport to another element will cause it to lose
           // its scroll position, even if both parents are in the same document.

@@ -3,6 +3,7 @@ import { numberAttr } from '../element.js'
 import { throwCritical } from '../error.js'
 import { build, on } from '../event.js'
 import { printToStandard, printToWarn } from '../log.js'
+import { registerDestructor } from '../script.js'
 
 export class FragmentPolling {
 
@@ -14,7 +15,7 @@ export class FragmentPolling {
     this._options = up.radio.pollOptions(fragment)
 
     this._fragment = fragment
-    up.destructor(fragment, this._onFragmentDestroyed.bind(this))
+    registerDestructor(fragment, this._onFragmentDestroyed.bind(this))
 
     this._state = 'stopped' // stopped | started
     this._forceIntent = null // stop | start
@@ -85,7 +86,7 @@ export class FragmentPolling {
     if (this._eventsBound) return
     this._eventsBound = true
 
-    up.destructor(this._fragment, on('visibilitychange up:layer:opened up:layer:dismissed up:layer:accepted', this._onVisibilityChange.bind(this)))
+    registerDestructor(this._fragment, on('visibilitychange up:layer:opened up:layer:dismissed up:layer:accepted', this._onVisibilityChange.bind(this)))
     up.fragment.onAborted(this._fragment, this._onFragmentAborted.bind(this))
     up.fragment.onKept(this._fragment, this._onFragmentKept.bind(this))
   }

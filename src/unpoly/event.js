@@ -5,6 +5,7 @@ import { EventEmitter } from './event/event_emitter.js'
 import { EventListenerGroup } from './event/event_listener_group.js'
 import { EventListener } from './event/event_listener.js'
 import { printUserEvent } from './log.js'
+import { registerDestructor } from './script.js'
 
 /*-
 Features to emit and observe DOM events.
@@ -201,7 +202,7 @@ export function onClosest(...args) {
 
   // Since we're binding to an element that is an ancestor of the fragment,
   // we should unregister the event listener when the fragment is removed.
-  up.destructor(fragment, unsubscribe)
+  registerDestructor(fragment, unsubscribe)
   return unsubscribe
 }
 

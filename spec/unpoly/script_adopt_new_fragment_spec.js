@@ -70,7 +70,7 @@ extendDescribe('up.script', function() {
             })
 
             it('does not change a script element without a [nonce]', function() {
-              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              up.script.cspNonce.mock().and.returnValue('page000')
 
               const script = up.element.createFromSelector('script', { text: 'console.log("hello")' })
               const scriptHTMLBefore = script.outerHTML
@@ -82,7 +82,7 @@ extendDescribe('up.script', function() {
             })
 
             it("does not change am inline script element when its [nonce] doesn't match the response nonce", function() {
-              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              up.script.cspNonce.mock().and.returnValue('page000')
 
               const script = up.element.createFromSelector('script', { nonce: 'incorrect456', text: 'console.log("hello")' })
               const scriptHTMLBefore = script.outerHTML
@@ -94,7 +94,7 @@ extendDescribe('up.script', function() {
             })
 
             it('does not add a [nonce] to linked, un-nonced script, as that might bypass a host-based CSP (bugfix)', async function() {
-              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              up.script.cspNonce.mock().and.returnValue('page000')
 
               const script = up.element.createFromSelector('script', { src: up.specUtil.staticFile('linked_noop_script.js') })
               const scriptHTMLBefore = script.outerHTML
@@ -106,7 +106,7 @@ extendDescribe('up.script', function() {
             })
 
             it("rewrites the [nonce] of a body script when it matches the response nonce", async function() {
-              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              up.script.cspNonce.mock().and.returnValue('page000')
 
               const script = up.element.createFromSelector('script', { nonce: 'response111', text: 'console.log("hello")' })
 
@@ -117,7 +117,7 @@ extendDescribe('up.script', function() {
             })
 
             it('does not change a script element with an correct nonce, but the page nonce is unknown', function() {
-              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+              up.script.cspNonce.mock().and.returnValue(undefined)
 
               const script = up.element.createFromSelector('script', { nonce: 'response111', text: 'console.log("hello")' })
               const scriptHTMLBefore = script.outerHTML
@@ -150,7 +150,7 @@ extendDescribe('up.script', function() {
             })
 
             it('blocks a script element without nonce', function() {
-              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              up.script.cspNonce.mock().and.returnValue('page000')
               const script = up.element.createFromSelector('script')
               expect(script).toBeActiveScript()
 
@@ -160,7 +160,7 @@ extendDescribe('up.script', function() {
             })
 
             it('rewrites a script element nonce that matches its response', function() {
-              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              up.script.cspNonce.mock().and.returnValue('page000')
               const script = up.element.createFromSelector('script[nonce="response111"]')
               expect(script).toBeActiveScript()
 
@@ -171,7 +171,7 @@ extendDescribe('up.script', function() {
             })
 
             it('blocks a script element whose nonce that matches its response, but the page nonce is unknown', function() {
-              spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+              up.script.cspNonce.mock().and.returnValue(undefined)
               const script = up.element.createFromSelector('script[nonce="response111"]')
               expect(script).toBeActiveScript()
 
@@ -181,7 +181,7 @@ extendDescribe('up.script', function() {
             })
 
             it('blocks a script element with an incorrect nonce', function() {
-              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              up.script.cspNonce.mock().and.returnValue('page000')
               const script = up.element.createFromSelector('script[nonce="wrong222"]')
               expect(script).toBeActiveScript()
 
@@ -191,7 +191,7 @@ extendDescribe('up.script', function() {
             })
 
             it('does not change a script element with a non-JavaScript type', function() {
-              spyOn(up.script, 'cspNonce').and.returnValue('page000')
+              up.script.cspNonce.mock().and.returnValue('page000')
               const script = up.element.createFromSelector('script[type="text/ramenscript"]', { text: 'console.log("hello")' })
               const scriptHTMLBefore = script.outerHTML
 
@@ -256,7 +256,7 @@ extendDescribe('up.script', function() {
           })
 
           // it('rewrites the [nonce] of a body script with Content-Security-Policy-Report-Only response header', async function() {
-          //   spyOn(up.script, 'cspNonce').and.returnValue('page-secret')
+          //   up.script.cspNonce.mock().and.returnValue('page-secret')
           //
           //   let [target] = htmlFixtureList(`
           //     <div id="target">
@@ -482,7 +482,7 @@ extendDescribe('up.script', function() {
               })
             } else {
               it('blocks a callback whose nonce matches its response', function() {
-                spyOn(up.script, 'cspNonce').and.returnValue(undefined)
+                up.script.cspNonce.mock().and.returnValue(undefined)
                 const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
                 const link = up.element.createFromHTML(`
               <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
@@ -564,7 +564,7 @@ extendDescribe('up.script', function() {
             itBehavesLikeNonce({ pageNonce: 'page000' })
 
             // it("rewrites nonceable callbacks to use the current page's nonce with Content-Security-Policy-Report-Only response header", async function() {
-            //   spyOn(up.script, 'cspNonce').and.returnValue('secret1')
+            //   up.script.cspNonce.mock().and.returnValue('secret1')
             //   fixture('.target')
             //   up.render('.target', { url: '/path' })
             //
@@ -584,7 +584,7 @@ extendDescribe('up.script', function() {
             // })
   
             // it("rewrites nonceable callbacks to use the current page's nonce when opening a new overlay (bugfix)", async function() {
-            //   spyOn(up.script, 'cspNonce').and.returnValue('secret1')
+            //   up.script.cspNonce.mock().and.returnValue('secret1')
             //   up.render('.target', { url: '/path', layer: 'new' })
             //
             //   await wait()

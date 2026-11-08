@@ -8,6 +8,7 @@ import { FragmentScrolling } from '../fragment_scrolling.js'
 import { RenderOptions } from '../render_options.js'
 import { RenderResult } from '../render_result.js'
 import { printToStandard } from '../../../log.js'
+import { hello } from '../../../script.js'
 
 export class OpenLayerPlan extends Addition {
 
@@ -195,7 +196,7 @@ export class OpenLayerPlan extends Addition {
   async _compileLayer() {
     // Compile the entire layer, not just the user content.
     // E.g. [up-dismiss] in the layer elements needs to go through a macro.
-    await up.hello(this.layer.element, {
+    await hello(this.layer.element, {
       ...this.options,
       layer: this.layer,
       dataRoot: this._content
