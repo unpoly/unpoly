@@ -6,19 +6,27 @@
 // pass a module namespace object around: webpack would then have to build that object,
 // listing every export of the module (2.4 KB for up.util alone).
 //
-// Import cycles between modules are fine, as long as no top level needs a binding from the
-// cycle before it is initialized. ES modules evaluate depth-first, so within a cycle the
-// module we import first from here is evaluated last. Hence two rules:
+// Import cycles between modules are fine, as long as nothing evaluated while a module or class
+// is defined needs a binding from the cycle before it is initialized. ES modules evaluate
+// depth-first, so within a cycle the module we import first from here is evaluated last.
+// Hence these rules:
 //
-// - Outside of functions, a module uses imported bindings only for `extends` and
-//   `new Config()`. Other top-level uses (like element.js calling `mockable()`) are only
-//   safe while the two modules aren't part of the same cycle.
-// - This file enters every cycle through a namespace, never through a base class. Importing
-//   `Layer` first, with Layer → layer.js → RootLayer → Layer, would evaluate
-//   `class RootLayer extends Layer` before `Layer` exists.
+// - Anything that runs when a module or class is defined must only use bindings that are
+//   already evaluated. That means `extends`, computed keys (`[isEqual.key]`), static fields and
+//   blocks (`static { memoizeMethod(…) }`) and top-level calls (`new Config()`, `mockable()`).
+//   These are safe for bindings from util and element, because those are evaluated before
+//   anything else. This is also why util and element must never import a class.
+// - A base class must be evaluated before its subclasses. When a base class reaches one of
+//   its subclasses through its own imports, `class Sub extends Base` runs before `Base` exists.
+//   So code outside a class hierarchy imports the base class, not a subclass, wherever it can
+//   (the layer modes are only imported by each other and by this file). Where it can't
+//   (`RenderJob` creates a `ChangeFromURL`), that code must be evaluated before the base class.
+// - This file imports the namespaces before the classes, and so enters every cycle through a
+//   namespace.
 //
-// After changing imports, load dist/unpoly.js once. A ReferenceError at load time
-// ("Cannot access … before initialization") means a cycle is entered from the wrong side.
+// After changing imports, run tmp/a2/tdz.cjs (if you have it) and load dist/unpoly.js once.
+// A ReferenceError at load time ("Cannot access … before initialization") means a cycle is
+// entered from the wrong side.
 import * as namespace from './unpoly/namespace.js.erb'
 import * as mockable from './unpoly/mockable.js'
 import * as util from './unpoly/util.js'
