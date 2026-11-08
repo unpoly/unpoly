@@ -1,6 +1,7 @@
 import { evalOption, identity, memoize, normalizeMethod, normalizeURL, parseRelaxedJSON } from './util.js'
 import { metaContent } from './element.js'
 import { popCookie } from './browser.js'
+import { mockable } from './mockable.js'
 import { Config } from './util/config.js'
 
 /*-
@@ -936,7 +937,12 @@ There is no JavaScript API for this.
 @function up.protocol.initialRequestMethod
 @internal
 */
-export const initialRequestMethod = memoize(function() {
+export const initialRequestMethod = mockable(function initialRequestMethod() {
+  return readInitialRequestMethod()
+})
+
+// The cookie is deleted after reading, so we must only read it once.
+const readInitialRequestMethod = memoize(function() {
   return normalizeMethod(popCookie('_up_method'))
 })
 

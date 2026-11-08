@@ -5,6 +5,10 @@ import { NotImplemented } from '../error/not_implemented.js'
 import { on } from '../event.js'
 import { EventEmitter } from '../event/event_emitter.js'
 import { EventListenerGroup } from '../event/event_listener_group.js'
+import {
+  currentLocation, findMetaTags, getLang, isEnabled, push as historyPush, updateLang,
+  updateMetaTags,
+} from '../history.js'
 import { Record } from '../util/record.js'
 
 /*-
@@ -664,9 +668,9 @@ export class Layer extends Record {
     // (2) An aspect that is not live already holds what this layer rendered.
     //     If the root layer has not rendered it yet, its getter keeps following the browser.
     if (this.showsLiveHistory('title')) this._savedTitle = document.title
-    if (this.showsLiveHistory('metaTags')) this._savedMetaTags = up.history.findMetaTags()
-    if (this.showsLiveHistory('location')) this._savedLocation = up.history.location
-    if (this.showsLiveHistory('lang')) this._savedLang = up.history.getLang()
+    if (this.showsLiveHistory('metaTags')) this._savedMetaTags = findMetaTags()
+    if (this.showsLiveHistory('location')) this._savedLocation = currentLocation()
+    if (this.showsLiveHistory('lang')) this._savedLang = getLang()
   }
 
   restoreHistory() {
@@ -677,7 +681,7 @@ export class Layer extends Record {
     if (this._savedLocation && this.showsLiveHistory('location')) {
       // We cannot use the `this.title` setter as that does not
       // push a state if `newLocation === this._savedLocation`.
-      up.history.push(this._savedLocation)
+      historyPush(this._savedLocation)
     }
 
     if (this._savedTitle && this.showsLiveHistory('title')) {
@@ -685,11 +689,11 @@ export class Layer extends Record {
     }
 
     if (this._savedMetaTags && this.showsLiveHistory('metaTags')) {
-      up.history.updateMetaTags(this._savedMetaTags)
+      updateMetaTags(this._savedMetaTags)
     }
 
     if (isString(this._savedLang) && this.showsLiveHistory('lang')) {
-      up.history.updateLang(this._savedLang)
+      updateLang(this._savedLang)
     }
   }
 
@@ -757,7 +761,7 @@ export class Layer extends Record {
   // Returns whether Unpoly keeps the given history aspect of the browser in sync with this layer.
   // The aspect is one of 'location', 'title', 'metaTags' or 'lang'.
   showsLiveHistory(aspect) {
-    return this.history && this.isFront() && up.history.isEnabled(aspect)
+    return this.history && this.isFront() && isEnabled(aspect)
   }
 
   // A layer's title, meta tags, lang or location is what it rendered,
@@ -809,26 +813,26 @@ export class Layer extends Record {
   }
 
   get metaTags() {
-    return this._getHistory('metaTags', this._savedMetaTags, up.history.findMetaTags)
+    return this._getHistory('metaTags', this._savedMetaTags, findMetaTags)
   }
 
   _updateMetaTags(metaTags) {
     this._savedMetaTags = metaTags
 
     if (this.showsLiveHistory('metaTags')) {
-      up.history.updateMetaTags(metaTags)
+      updateMetaTags(metaTags)
     }
   }
 
   get lang() {
-    return this._getHistory('lang', this._savedLang, up.history.getLang)
+    return this._getHistory('lang', this._savedLang, getLang)
   }
 
   _updateLang(lang) {
     this._savedLang = lang
 
     if (this.showsLiveHistory('lang')) {
-      up.history.updateLang(lang)
+      updateLang(lang)
     }
   }
 
@@ -854,13 +858,13 @@ export class Layer extends Record {
     //     rendered content, not the unchanged browser URL. Hence [up-nav] follows the content.
     // (2) When the location is live, Unpoly-unaware code may use the pushState API directly.
     //     This will implicitly change the front layer's location.
-    return this._getHistory('location', this._savedLocation, () => up.history.location)
+    return this._getHistory('location', this._savedLocation, () => currentLocation())
   }
 
   // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
   updateLocation(newLocation, { push }) {
     let prevSavedLocation = this._savedLocation
-    let liveLocation = up.history.location
+    let liveLocation = currentLocation()
 
     // (A) Update _savedLocation before we push a new state below.
     //     Pushing a new state will emit up:location:changed, which will re-call updateLocation()
@@ -878,7 +882,7 @@ export class Layer extends Record {
     // - We end up not changing the URL from /overlay to /root, because neither peeling nor the fragment update
     //   has pushed a state.
     if (newLocation !== liveLocation && this.showsLiveHistory('location') && push) {
-      up.history.push(newLocation)
+      historyPush(newLocation)
     }
 
     // (A) Only emit up:layer:location:changed after we pushed a new history entry.

@@ -7,6 +7,7 @@ import { fail } from '../../error.js'
 import { CannotMatch } from '../../error/cannot_match.js'
 import { emit } from '../../event.js'
 import { FragmentFinder } from '../fragment_finder.js'
+import { findMetaTags, getLang } from '../../history.js'
 import { adoptDetachedHeadAsset, adoptNewFragment, findAssets, warnOfUnsafeCSP } from '../../script.js'
 
 export class ResponseDoc {
@@ -129,7 +130,7 @@ export class ResponseDoc {
   }
 
   get metaTags() {
-    return this._fromHead(up.history.findMetaTags)
+    return this._fromHead(findMetaTags)
   }
 
   get assets() {
@@ -155,7 +156,7 @@ export class ResponseDoc {
     // only use the [lang] attribute if the initial document contained a <html> element.
     // Otherwise Unpoly would delete the attribute from the current page.
     if (this._isFullDocument) {
-      return up.history.getLang(this._document)
+      return getLang(this._document)
     }
   }
 

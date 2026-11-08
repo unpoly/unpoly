@@ -1451,7 +1451,7 @@ extendDescribe('up.fragment', function() {
         describe('when the initial page was loaded with a POST request', function() {
 
           beforeEach(function() {
-            spyOn(up.protocol, 'initialRequestMethod').and.returnValue('POST')
+            up.protocol.initialRequestMethod.mock().and.returnValue('POST')
             htmlFixtureList('<div id="container">old container text</div>')
           })
 

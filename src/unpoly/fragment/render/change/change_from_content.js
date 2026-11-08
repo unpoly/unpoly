@@ -4,6 +4,7 @@ import { Change } from './change.js'
 import { OpenLayerPlan } from './open_layer.js'
 import { UpdateLayerPlan } from './update_layer.js'
 import { ResponseDoc } from '../response_doc.js'
+import { refineOption } from '../../../history.js'
 import { printToStandard } from '../../../log.js'
 import { assertAssetsOK } from '../../../script.js'
 
@@ -142,9 +143,9 @@ export class ChangeFromContent extends Change {
       this.options.target ||= responseDoc.rootSelector()
     }
 
-    this.options.title = up.history.refineOption(this.options.title, responseDoc.title)
-    this.options.metaTags = up.history.refineOption(this.options.metaTags, responseDoc.metaTags)
-    this.options.lang = up.history.refineOption(this.options.lang, responseDoc.lang)
+    this.options.title = refineOption(this.options.title, responseDoc.title)
+    this.options.metaTags = refineOption(this.options.metaTags, responseDoc.metaTags)
+    this.options.lang = refineOption(this.options.lang, responseDoc.lang)
   }
 
   _defaultPlacement() {

@@ -7,6 +7,7 @@ import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
 import { RenderOptions } from '../render_options.js'
 import { RenderResult } from '../render_result.js'
+import { historyOptions } from '../../../history.js'
 import { printToStandard } from '../../../log.js'
 import { hello } from '../../../script.js'
 
@@ -294,7 +295,7 @@ export class OpenLayerPlan extends Addition {
     // For the initial fragment insertion we always update its location, even if the layer
     // does not have visible history ({ history } attribute). This ensures that a
     // layer always has a #location.
-    return up.history.options(this.options)
+    return historyOptions(this.options)
   }
 
   _getNewLocation() {
