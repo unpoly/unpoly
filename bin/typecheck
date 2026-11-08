@@ -3,8 +3,8 @@
 // Extra arguments are forwarded to tsc, so `bin/typecheck --extendedDiagnostics` works.
 //
 // TypeScript 7 is installed as `typescript7`. The `typescript` package stays at 5.9,
-// because the build (ts-loader) and ESLint (typescript-eslint) need its compiler API,
-// which TypeScript 7 doesn't ship.
+// because ESLint (typescript-eslint) needs its compiler API, which TypeScript 7 doesn't ship.
+// The build doesn't use TypeScript at all: esbuild strips the types.
 // So `npx tsc` (node_modules/.bin/tsc) runs TypeScript 5.9, a different and slower checker.
 import { spawn } from 'node:child_process'
 import path from 'node:path'

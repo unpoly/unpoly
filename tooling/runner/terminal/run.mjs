@@ -86,7 +86,7 @@ const isMinified = (name) => name.includes('.min.')
 // which is why the caller only asks once a build is green — see runDev().
 // The minified bundles this config asks for that dist/ cannot serve: absent, or older than the
 // newest source. They are the only artifacts that can be *silently* stale — the dev watcher
-// never builds them (see tooling/build/webpack/development.js), while waitForFreshBuild() has
+// never builds them (see the development config in tooling/build/bundles.mjs), while waitForFreshBuild() has
 // already established that everything it does build is current. Testing a stale one fails
 // whichever specs cover the newest work, which reads exactly like a regression in that work.
 //
@@ -136,7 +136,7 @@ export async function runDev(argv, env) {
   // Start one in the background if none is up, so `bin/test` needs no manual setup.
   if (!(await isDevEnvRunning())) {
     try {
-      console.error(pc.blue('Starting the dev environment in the background — the first build may take ~15s…'))
+      console.error(pc.blue('Starting the dev environment in the background — the first build may take a few seconds…'))
       await startDevEnv()
       console.error(pc.blue('Dev environment kept running in the background (logs in tmp/dev.log) — stop with `bin/dev stop`.'))
       console.error('')
@@ -173,7 +173,7 @@ export async function runDev(argv, env) {
   if (outdated.length) {
     console.error(pc.blue(`The dev watcher does not build ${outdated.join(', ')} — building it once…`))
     let code = await runBuild(['--config=minified'])
-    // webpack has printed its own errors; 6 is this runner's "the build is not usable" code.
+    // The build has printed its own errors; 6 is this runner's "the build is not usable" code.
     if (code !== 0) return 6
     console.error('')
   }
@@ -190,7 +190,7 @@ export async function runDev(argv, env) {
   if (missing.length) {
     console.error(pc.red(missing.every(isMinified)
       ? `Missing from dist/: ${missing.join(', ')}. The dev watcher never builds the minified bundles — run \`bin/build --config=minified\` once.`
-      : `Missing from dist/: ${missing.join(', ')}, although the build reported success. Check tooling/build/webpack/development.js.`))
+      : `Missing from dist/: ${missing.join(', ')}, although the build reported success. Check the development config in tooling/build/bundles.mjs.`))
     return 4
   }
 

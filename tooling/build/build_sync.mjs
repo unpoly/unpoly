@@ -9,7 +9,7 @@ import { readStatus, PROJECT_ROOT } from './build_status.mjs'
 
 const SKIP_DIRS = new Set(['node_modules', 'dist', 'tmp', '.git'])
 
-// Where a webpack input can live. `src` and `spec` are obvious; `tooling/runner/browser` is here
+// Where a bundle input can live. `src` and `spec` are obvious; `tooling/runner/browser` is here
 // because spec/helpers/terminal_reporter.js imports poster.js from it, which pulls in
 // log_value.mjs and dom_snapshot.js — so those are compiled into dist/specs.js like any other
 // source. It is that directory rather than all of `tooling` because everything else under
@@ -18,39 +18,38 @@ const SKIP_DIRS = new Set(['node_modules', 'dist', 'tmp', '.git'])
 // not a guess: the directory exists to hold the browser-side runner, and a self-test walks the
 // imports from poster.js and fails if any of them lands outside a scanned directory.
 //
+// The dev watcher (watch.mjs) watches the same directories.
+//
 // We deliberately do **not** try to tell inputs from non-inputs. Every scheme for it is a
-// hand-maintained approximation of webpack's dependency graph, and it drifts the moment anyone
+// hand-maintained approximation of the bundler's dependency graph, and it drifts the moment anyone
 // adds a file: `src` alone holds 117 guide pages, an images tree of diagrams and recordings and
-// an `.htaccess`; `spec` holds two fixture videos; `tooling` holds Node-only `.mjs` modules and
-// the webpack configs themselves. A path list or an extension allowlist would have to be
-// extended for the next README somebody writes.
+// an `.htaccess`; `spec` holds two fixture videos. A path list or an extension allowlist would
+// have to be extended for the next README somebody writes.
 //
 // A residue remains that no extension list can catch: a file with a watchable extension that
-// webpack nevertheless does not import — a `.js` under src/ that nothing requires, say. That is
+// no bundle imports — a `.js` under src/ that nothing requires, say. That is
 // what IDLE_GRACE_MS is for. It costs three seconds and needs no maintenance. Missing a real input is the failure that actually matters — it runs the suite
 // against a stale bundle without saying so — and over-scanning cannot cause it.
 export const SOURCE_DIRS = ['src', 'spec', 'tooling/runner/browser']
 
-// The extensions webpack has a loader for, from the rules in tooling/build/webpack/shared.js:
-// `/\.js$/` and `/\.js\.erb$/` (both via ts-loader) and `/\.(css|sass|scss)$/`. `.ts` is listed
-// because ts-loader is already configured for it.
+// The extensions a bundle can import, from LOADED_EXTENSIONS in tooling/build/esbuild.mjs. Also
+// what makes the dev watcher start a rebuild.
 //
 // An allowlist, not a list of things to skip. A skip list only skips what someone remembered to
 // name, so every guide page, diagram, fixture video and `.htaccess` had to be enumerated, and the
 // next one silently rots it. This way anything that is not a build input is ignored by default,
 // including file types nobody has invented yet, and only a *new loader* needs attention — a
-// deliberate edit to the webpack config, guarded by a self-test that fails if an extension gains
-// a loader without being listed here.
+// deliberate edit to the build, guarded by a self-test that fails if esbuild.mjs loads an
+// extension that isn't listed here. (The list is not imported from there, because that would
+// load esbuild and Sass into every `bin/test` run.)
 //
-// Known gap: tooling/runner/browser/log_value.mjs is bundled into dist/specs.js but `.mjs` is not
-// listed, since it otherwise means Node-only throughout tooling/. Editing that one file is not
-// detected, so a run started within about a second of saving it can use the previous build. It is
-// a pure formatting helper that changes rarely, and a second run is correct.
-export const WATCHABLE_SUFFIXES = ['.js', '.ts', '.js.erb', '.css', '.sass', '.scss']
+// `.mjs` is listed for tooling/runner/browser/log_value.mjs, which is bundled into dist/specs.js.
+// Elsewhere under the scanned directories there are no `.mjs` files.
+export const WATCHABLE_SUFFIXES = ['.js', '.ts', '.mjs', '.js.erb', '.css', '.sass', '.scss']
 
 const isWatchable = (name) => WATCHABLE_SUFFIXES.some((suffix) => name.endsWith(suffix))
 
-// The newest file webpack might rebuild for, as `{ mtime, file }`. The path is carried so the
+// The newest file the watcher might rebuild for, as `{ mtime, file }`. The path is carried so the
 // caller can name it — either when reporting that nothing rebuilt, or on a timeout.
 export function newestSource(root = PROJECT_ROOT, dirs = SOURCE_DIRS) {
   let newest = 0
@@ -96,7 +95,7 @@ function defaultSleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-// How long to wait for the watcher to react before concluding it is not going to. Webpack
+// How long to wait for the watcher to react before concluding it is not going to. The watcher
 // starts a build well within a second of a change it cares about; three seconds is generous
 // enough to survive polling on a network or WSL filesystem, and the cost of being generous is
 // only that a docs-only edit delays a run by that much.
@@ -147,8 +146,8 @@ export async function waitForFreshBuild({
     }
     // Nothing is going to happen. The watcher reacts to a change it cares about in well under a
     // second, so an idle status whose build has not moved after the grace period means our
-    // newest file is not one webpack consumes — a guide page, an image, a Node-only module.
-    // dist/ is already current for everything webpack does read, so run. `unbuiltEdit` lets the
+    // newest file is not one a bundle consumes — a guide page, an image, a Node-only module.
+    // dist/ is already current for everything the bundles do read, so run. `unbuiltEdit` lets the
     // caller say which file it was; reading that name is what tells you whether to be relaxed
     // (`pages/foo.md`) or suspicious (`unpoly/link.js`), with no list to maintain.
     if (status && status.state === 'idle' && status.startedAt === startedAtOnEntry && now() - enteredAt >= idleGraceMs) {

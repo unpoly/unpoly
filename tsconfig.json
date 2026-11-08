@@ -1,6 +1,6 @@
 {
-  // Type checking only (bin/typecheck). The build transpiles with its own tsconfig,
-  // see tooling/build/webpack/shared.js.
+  // Type checking only (bin/typecheck). The build (esbuild) doesn't read this file, see
+  // tsconfigRaw in tooling/build/esbuild.mjs.
   "compilerOptions": {
     "noEmit": true,
 
@@ -20,8 +20,8 @@
     // Don't load @types packages of our dev dependencies (node, express, ...).
     "types": [],
     "skipLibCheck": true,
-    // The build transpiles each file on its own (ts-loader with transpileOnly). Flag code that
-    // needs whole-program information to emit, like re-exported types without `export type`.
+    // The build strips types from each file on its own (esbuild). Flag code that needs
+    // whole-program information to emit, like re-exported types without `export type`.
     "isolatedModules": true
   },
   "include": ["src/**/*.ts"]

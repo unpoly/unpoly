@@ -29,7 +29,7 @@ test('--minify asks for the minified bundle the dev watcher never builds', () =>
 })
 
 test('nothing is missing once the watcher has built', () => {
-  // What tooling/build/webpack/development.js produces, which is every bundle a default
+  // What the development config in tooling/build/bundles.mjs produces, which is every bundle a default
   // run loads — so the fresh-clone path must reach the specs, not a hard error.
   let built = dist(['unpoly.js', 'unpoly.es6.js', 'unpoly-migrate.js', 'specs.js', 'specs.es6.js', 'jasmine.js'])
   assert.deepEqual(missingDistFiles(Config.fromArgv([]), built), [])

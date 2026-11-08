@@ -11,7 +11,7 @@ on:
     branches:
       - master
 jobs:
-  # bin/build only lints src/, so specs and the tooling need their own step. It is a
+  # The build doesn't lint, so this is what checks src/, the specs and the tooling. It is a
   # separate job rather than a step in `test`, which would repeat it once per matrix entry.
   lint:
     runs-on: ubuntu-22.04

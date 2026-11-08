@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Lint src/, spec/ and tooling/ with ESLint. For src/ these are the same rules the webpack
-// build enforces, run standalone. The build lints nothing else -- the specs bundle sets
-// lint: false and the tooling is never bundled -- so this is the only thing that checks
-// them, in particular no-undef, which catches a spec file using something from another
-// file's scope. CI runs this as its own step.
+// Lint src/, spec/ and tooling/ with ESLint. The build doesn't lint. The dev watcher lints
+// src/ after every change (tooling/build/lint.mjs), so `bin/test` reports an ESLint error in
+// src/ like a syntax error. Nothing else checks spec/ and tooling/, in particular no-undef,
+// which catches a spec file using something from another file's scope. CI runs this as its
+// own step.
 //
 // bin/ is not linted: its executables are extensionless, which ESLint will not match.
 import { spawn } from 'node:child_process'

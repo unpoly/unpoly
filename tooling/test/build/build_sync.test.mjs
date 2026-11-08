@@ -4,6 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { waitForFreshBuild, newestSource, newestSourceMtime, WATCHABLE_SUFFIXES, SOURCE_DIRS, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
+import { LOADED_EXTENSIONS } from '../../build/esbuild.mjs'
 
 const noop = async () => {}
 
@@ -63,7 +64,7 @@ test('times out when the build stays older than the edit', async () => {
   )
 })
 
-test('the browser-side runner files webpack compiles into the specs bundle are all scanned', () => {
+test('the browser-side runner files the build compiles into the specs bundle are all scanned', () => {
   // tooling/ is scanned precisely because these reach dist/specs.js. Derive the set from the
   // imports rather than trusting a comment, and fail if any of it moves outside SOURCE_DIRS.
   const root = new URL('../../../', import.meta.url).pathname
@@ -109,7 +110,7 @@ function checkout(files) {
 
 const idle = (startedAt, ok = true) => ({ pid: 1, state: 'idle', startedAt, ok })
 
-test('only extensions webpack has a loader for count', () => {
+test('only extensions a bundle can import count', () => {
   // The bug this replaced: every one of these used to make the freshness predicate
   // unsatisfiable, so bin/test waited 30s and refused to run. An allowlist ignores them, and
   // ignores the next file type nobody has thought of yet.
@@ -126,32 +127,26 @@ test('only extensions webpack has a loader for count', () => {
 })
 
 test('every extension that is an input does count', () => {
-  const root = checkout({ 'src/a.js': 1000, 'src/b.sass': 2000, 'src/c.scss': 3000, 'src/d.css': 4000, 'src/e.js.erb': 5000, 'src/f.ts': 6000 })
+  const root = checkout({ 'src/a.js': 1000, 'src/b.sass': 2000, 'src/c.scss': 3000, 'src/d.css': 4000, 'src/e.js.erb': 5000, 'src/f.ts': 6000, 'src/g.mjs': 7000 })
   try {
-    assert.equal(newestSource(root, ['src']).file, path.join('src', 'f.ts'))
+    assert.equal(newestSource(root, ['src']).file, path.join('src', 'g.mjs'))
   } finally { rmSync(root, { recursive: true, force: true }) }
 })
 
-test('a bare .erb is not an input, because the loader tests /\\.js\\.erb$/', () => {
+test('a bare .erb is not an input, because the erb plugin only loads /\\.js\\.erb$/', () => {
   const root = checkout({ 'src/a.js': 1000, 'src/template.erb': 2000 })
   try {
     assert.equal(newestSourceMtime(root, ['src']), 1000 * 1000)
   } finally { rmSync(root, { recursive: true, force: true }) }
 })
 
-test('WATCHABLE_SUFFIXES covers every extension the webpack configs load', () => {
-  // The guard on the one direction that bites silently: add a loader for a new extension without
+test('WATCHABLE_SUFFIXES covers every extension the build loads', () => {
+  // The guard on the one direction that bites silently: let the build load a new extension without
   // listing it here and those edits stop counting, so bin/test runs against a stale bundle
-  // without saying so. This fails instead.
-  // Every extension a rule can match, not just one of them: `/\.(sass|scss)$/` has to have both
-  // listed, or dropping one goes unnoticed because the other still matches the rule.
-  const listed = new Set(WATCHABLE_SUFFIXES.flatMap((suffix) => suffix.slice(1).split('.')))
-  const shared = readFileSync(new URL('../../build/webpack/shared.js', import.meta.url), 'utf8')
-  for (const [, source] of shared.matchAll(/test:\s*\/(.+?)\/[gimsuy]*,/g)) {
-    for (const [, extension] of source.matchAll(/([a-z][a-z0-9]*)/g)) {
-      assert.ok(listed.has(extension),
-        `tooling/build/webpack/shared.js loads .${extension} (/${source}/), which is missing from WATCHABLE_SUFFIXES`)
-    }
+  // without saying so, and the dev watcher doesn't even rebuild. This fails instead.
+  for (const extension of LOADED_EXTENSIONS) {
+    assert.ok(WATCHABLE_SUFFIXES.includes(extension),
+      `tooling/build/esbuild.mjs loads ${extension}, which is missing from WATCHABLE_SUFFIXES`)
   }
 })
 
@@ -183,7 +178,7 @@ test('an idle watcher that never reacts means nothing needed building', async ()
 })
 
 test('it does not give up before the grace period', async () => {
-  // Webpack needs a moment to notice a change; concluding "nothing is happening" too early
+  // The watcher needs a moment to notice a change; concluding "nothing is happening" too early
   // would run against the previous build for a file it really does consume.
   let clock = 0
   let reads = 0

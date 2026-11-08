@@ -3,9 +3,9 @@
 // this is set before the helpers below read specs.drivenByTerminal.
 window.specs.drivenByTerminal = !!window.__postToTerminal
 
-// Helpers are order-independent, so we let webpack pick them all up.
-var helpers = require.context('./helpers', true, /\.js$/)
-helpers.keys().forEach(helpers)
+// Helpers are order-independent, so we let the build pick them all up
+// (see globPlugin() in tooling/build/esbuild.mjs).
+require('./helpers/**/*.js')
 
 // Spec files are required one by one, because not every spec file may be loaded on its
 // own: a file extracted from an oversized group (see spec/helpers/extend_describe.js)

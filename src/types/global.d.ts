@@ -15,8 +15,8 @@ interface Window {
   Rails?: any
 }
 
-// Entry points require their stylesheets, which webpack handles.
+// Entry points require their stylesheets, which the build compiles with Sass.
 declare module '*.sass'
 
-// ERB templates (like the one that inserts the version number) are rendered by webpack's erb loader.
+// ERB templates (like the one that inserts the version number) are rendered by the build's erb plugin.
 declare module '*.erb'

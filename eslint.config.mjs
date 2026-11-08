@@ -144,12 +144,4 @@ export default tseslint.config(
       },
     },
   },
-  {
-    files: ['tooling/build/webpack/**/*.js'],
-    languageOptions: {
-      globals: {
-        __dirname: 'readonly',
-      },
-    },
-  },
 )

@@ -105,7 +105,7 @@ export function startServer(port = serverPort, { waitForBuild = waitForFreshBuil
   })
 }
 
-// Blocks the request while webpack is working, so a page never shows you the previous
+// Blocks the request while the watcher is building, so a page never shows you the previous
 // build. Reuses the runner's build protocol rather than watching dist/ a second way.
 const gateOnBuild = (waitForBuild) => async (req, res, next) => {
   try {

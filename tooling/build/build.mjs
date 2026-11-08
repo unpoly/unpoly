@@ -1,21 +1,17 @@
-// The build task behind `bin/build`. Wraps the `webpack` CLI (rather than the Node
-// API) so we inherit its output and exit codes verbatim — that's what makes build
-// errors surface and one-shot builds exit non-zero. Optionally gzips the minified
-// production bundles afterwards, the way the old `npm run build` did.
+// The build task behind `bin/build`. esbuild bundles each entry (and strips TypeScript), Terser
+// minifies, both in this process. Optionally gzips the minified production bundles afterwards.
+//
+// The watcher (`--watch`) lives in watch.mjs.
 
 import { spawn } from 'node:child_process'
+import { statSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
-const webpackBin = path.join(projectRoot, 'node_modules', '.bin', 'webpack')
-
-const CONFIGS = {
-  development: 'tooling/build/webpack/development.js',
-  production: 'tooling/build/webpack/production.js',
-  ci: 'tooling/build/webpack/ci.js',
-  minified: 'tooling/build/webpack/minified.js',
-}
+import esbuild from 'esbuild'
+import pc from 'picocolors'
+import { CONFIGS } from './bundles.mjs'
+import { esbuildOptions, finish } from './esbuild.mjs'
+import { TerserPool } from './terser.mjs'
+import { PROJECT_ROOT } from './build_status.mjs'
 
 // The minified bundles `npm run build` used to gzip.
 const GZIP_TARGETS = ['dist/unpoly.es6.min.js', 'dist/unpoly.min.js']
@@ -51,7 +47,7 @@ export function parseBuildArgs(argv) {
 
 function spawnStep(command, args) {
   return new Promise((resolve) => {
-    let child = spawn(command, args, { stdio: 'inherit', cwd: projectRoot })
+    let child = spawn(command, args, { stdio: 'inherit', cwd: PROJECT_ROOT })
     child.on('exit', (code) => resolve(code ?? 1))
   })
 }
@@ -65,17 +61,64 @@ export async function runBuild(argv) {
     return 2
   }
 
-  let webpackArgs = ['--config', CONFIGS[options.config]]
-  if (options.watch) webpackArgs.push('--watch')
+  if (options.watch) {
+    // Only returns on Ctrl-C, and gzipping makes no sense for a watcher.
+    let { runWatch } = await import('./watch.mjs')
+    return runWatch(CONFIGS[options.config])
+  }
 
-  let code = await spawnStep(webpackBin, webpackArgs)
-
-  // In watch mode webpack only returns on Ctrl-C, and gzipping a possibly-broken
-  // build makes no sense — so we're done either way.
-  if (options.watch || code !== 0) return code
+  let errors = await buildOnce(CONFIGS[options.config], {
+    // Comments only matter in the unminified bundles we publish. Elsewhere the source maps make
+    // them harmless, and stripping would cost the dev build more than everything else together.
+    strip: options.config === 'production',
+  })
+  if (errors.length) {
+    console.error(errors.join('\n'))
+    return 1
+  }
 
   if (options.gzip) {
-    code = await spawnStep('gzip', ['--keep', '--force', ...GZIP_TARGETS])
+    return await spawnStep('gzip', ['--keep', '--force', ...GZIP_TARGETS])
   }
-  return code
+  return 0
+}
+
+// Builds every bundle of a config once. Resolves with a list of formatted error messages, empty
+// when everything was written.
+export async function buildOnce({ bundles, sourcemap }, { strip = false, log = console.log } = {}) {
+  let terser = new TerserPool()
+  let startedAt = Date.now()
+  try {
+    let outcomes = await Promise.all(bundles.map(async (bundle) => {
+      let bundleStartedAt = Date.now()
+      try {
+        let result = await esbuild.build(esbuildOptions(bundle, { sourcemap: sourcemap(bundle) }))
+        await finish(bundle, result, { terser, strip })
+        log(builtLine(bundle, Date.now() - bundleStartedAt))
+        return []
+      } catch (error) {
+        return await formatError(error)
+      }
+    }))
+    let errors = outcomes.flat()
+    if (!errors.length) log(pc.green(`Built ${bundles.length} bundles in ${Date.now() - startedAt} ms`))
+    return errors
+  } finally {
+    await terser.close()
+  }
+}
+
+export function builtLine(bundle, ms) {
+  let file = path.join('dist', bundle.out)
+  let size = statSync(path.join(PROJECT_ROOT, file)).size
+  return `${file.padEnd(32)} ${(size / 1024).toFixed(1).padStart(7)} KiB  ${pc.dim(`${ms} ms`)}`
+}
+
+// esbuild's own rendering of a failure (with a code frame), or the stack of anything else that
+// went wrong (Sass, ERB, Terser).
+export async function formatError(error) {
+  if (error?.errors?.length) {
+    return await esbuild.formatMessages(error.errors, { kind: 'error', color: false })
+  }
+  return [String(error?.stack || error)]
 }
