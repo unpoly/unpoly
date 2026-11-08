@@ -4,14 +4,14 @@ How Unpoly's own source is written. Some of these rules are enforced by ESLint (
 most are not.
 
 
-## No types
+## Plain JavaScript, for now
 
-Unpoly is plain JavaScript. The build runs the source through TypeScript, but only to
-transpile it.
+Unpoly is plain JavaScript, and we are starting to migrate it to TypeScript.
 
-We are starting to migrate to TypeScript. `bin/typecheck` runs TypeScript 7's checker over
-`src/` with loose settings and takes well under a second. It still reports errors, so
-the build ignores it, and CI runs it as a separate job that may fail.
+The build runs the source through TypeScript only to transpile it (ts-loader with
+`transpileOnly`), and never checks types. The only type check is `bin/typecheck`, which runs
+TypeScript 7's checker over `src/` with loose settings and takes well under a second. It
+still reports errors, so CI runs it as a separate job that may fail.
 
 Types appear in [doc comments](documentation.md) only, in a notation loosely inspired by
 TypeScript. They document intent for the reader; no tool verifies them.
