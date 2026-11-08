@@ -1457,7 +1457,7 @@ extendDescribe('up.fragment', function() {
 
           it("renders in the current page when up.history.config.enabled excludes the 'location' aspect", async function() {
             up.history.config.enabled = ['lang']
-            const loadPage = spyOn(up.network, 'loadPage')
+            const loadPage = up.network.loadPage.mock()
 
             up.render('#container', { url: '/path', history: true })
             await wait()
@@ -1474,7 +1474,7 @@ extendDescribe('up.fragment', function() {
 
           it('renders in the current page with up.history.config.enabled = false', async function() {
             up.history.config.enabled = false
-            const loadPage = spyOn(up.network, 'loadPage')
+            const loadPage = up.network.loadPage.mock()
 
             up.render('#container', { url: '/path', history: true })
             await wait()

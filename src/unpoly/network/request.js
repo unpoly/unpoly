@@ -9,6 +9,7 @@ import { Offline } from '../error/offline.js'
 import { EventEmitter } from '../event/event_emitter.js'
 import { Params } from '../form/params.js'
 import { getSmart, parseTargetSteps, splitTarget } from '../fragment.js'
+import { abortRequests, cache, config as networkConfig, isSafeMethod } from '../network.js'
 import { FormRenderer } from './form_renderer.js'
 import { UpResponse } from './response.js'
 import { XHRRenderer } from './xhr_renderer.js'
@@ -351,7 +352,7 @@ export const UpRequest = class Request extends Record {
   }
 
   defaults() {
-    let config = up.network.config
+    let config = networkConfig
     return {
       state: 'new',
       abortable: true,
@@ -430,7 +431,7 @@ export const UpRequest = class Request extends Record {
     if (this.background) {
       return false
     } else {
-      return this.lateDelay ?? evalOption(up.network.config.lateDelay, this)
+      return this.lateDelay ?? evalOption(networkConfig.lateDelay, this)
     }
   }
 
@@ -574,7 +575,7 @@ export const UpRequest = class Request extends Record {
   @experimental
   */
   isSafe() {
-    return up.network.isSafeMethod(this.method)
+    return isSafeMethod(this.method)
   }
 
   allowsPayload() {
@@ -586,7 +587,7 @@ export const UpRequest = class Request extends Record {
   }
 
   willCache() {
-    return up.network.config.cacheEnabled && evalAutoOption(this.cache, up.network.config.autoCache, this)
+    return networkConfig.cacheEnabled && evalAutoOption(this.cache, networkConfig.autoCache, this)
   }
 
   runQueuedCallbacks() {
@@ -672,7 +673,7 @@ export const UpRequest = class Request extends Record {
 
     // Abort all pending requests so their callbacks won't run
     // while we're already navigating away.
-    up.network.abort()
+    abortRequests()
     new FormRenderer(this).buildAndSubmit()
   }
 
@@ -990,7 +991,7 @@ export const UpRequest = class Request extends Record {
     }
 
     if (except) {
-      return (request) => !up.cache.willHaveSameResponse(request, except) && testFn(request)
+      return (request) => !cache.willHaveSameResponse(request, except) && testFn(request)
     } else {
       return testFn
     }

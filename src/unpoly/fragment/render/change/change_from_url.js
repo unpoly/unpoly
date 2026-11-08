@@ -7,6 +7,7 @@ import { ChangeFromResponse } from './change_from_response.js'
 import { Change } from './change.js'
 import { isEnabled } from '../../../history.js'
 import { printToStandard } from '../../../log.js'
+import { loadPage, makeRequest } from '../../../network.js'
 import { UpResponse } from '../../../network/response.js'
 
 export class ChangeFromURL extends Change {
@@ -15,14 +16,14 @@ export class ChangeFromURL extends Change {
     let newPageReason = this._newPageReason()
     if (newPageReason) {
       printToStandard('up.render()', newPageReason)
-      up.network.loadPage(this.options)
+      loadPage(this.options)
       // Prevent our caller from executing any further code, since we're already
       // navigating away from this JavaScript environment.
       return unresolvablePromise()
     }
 
     let requestAttrs = this._getRequestAttrs()
-    let request = this.request = up.request(requestAttrs)
+    let request = this.request = makeRequest(requestAttrs)
     this.options.onRequestKnown?.(request)
 
     if (this.options.preload) return request

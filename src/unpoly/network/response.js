@@ -1,4 +1,5 @@
 import { evalOption, getSimpleTokens, variant } from '../util.js'
+import { cache, config } from '../network.js'
 import { CSPInfo } from '../script/csp/csp_info.js'
 import { Record } from '../util/record.js'
 
@@ -154,7 +155,7 @@ export const UpResponse = class Response extends Record {
   @stable
   */
   get ok() {
-    return !evalOption(this.fail ?? up.network.config.fail, this)
+    return !evalOption(this.fail ?? config.fail, this)
   }
 
   /*-
@@ -311,7 +312,7 @@ export const UpResponse = class Response extends Record {
   @stable
   */
   get expired() {
-    return this.age > up.network.config.cacheExpireAge ||
+    return this.age > config.cacheExpireAge ||
       // When the user calls up.cache.expire() it will expire requests, not responses.
       // Hence we need to delegate to our request.
       this.request.expired
@@ -340,7 +341,7 @@ export const UpResponse = class Response extends Record {
       onSettle: null,
     })
 
-    up.cache.track(this.request, finalRequest, { force: true })
+    cache.track(this.request, finalRequest, { force: true })
 
     return finalRequest
   }

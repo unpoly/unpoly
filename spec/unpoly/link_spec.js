@@ -1131,7 +1131,7 @@ describe('up.link', function() {
       })
 
       it('sends a { background: true } request', async function() {
-        const requestSpy = spyOn(up, 'request').and.callThrough()
+        const requestSpy = up.request.mock().and.callThrough()
         const [link] = htmlFixtureList('<a href="/path" up-target=".target">label</a>')
 
         up.link.preload(link)
@@ -1267,7 +1267,7 @@ describe('up.link', function() {
         })
 
         it('calls up.request() with a { background: true } option', async function() {
-          const requestSpy = spyOn(up, 'request').and.callThrough()
+          const requestSpy = up.request.mock().and.callThrough()
 
           const $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
           up.hello($link)

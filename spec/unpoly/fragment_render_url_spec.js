@@ -2162,7 +2162,7 @@ extendDescribe('up.fragment', function() {
         describe('for a cross-origin URL', function() {
 
           it('loads the content in a new page', async function() {
-            const loadPage = spyOn(up.network, 'loadPage')
+            const loadPage = up.network.loadPage.mock()
 
             fixture('.one')
             up.render({ target: '.one', url: 'http://other-domain.com/path/to' })
@@ -2174,7 +2174,7 @@ extendDescribe('up.fragment', function() {
           })
 
           it("returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", function(done) {
-            const loadPage = spyOn(up.network, 'loadPage')
+            const loadPage = up.network.loadPage.mock()
 
             fixture('.one')
             const promise = up.render({ target: '.one', url: 'http://other-domain.com/path/to' })
@@ -2195,7 +2195,7 @@ extendDescribe('up.fragment', function() {
           describe('when options.history is truthy', function() {
 
             it('loads the content in a new page', async function() {
-              const loadPage = spyOn(up.network, 'loadPage')
+              const loadPage = up.network.loadPage.mock()
 
               fixture('.one')
               up.render({ target: '.one', url: '/path', history: true })
@@ -2207,7 +2207,7 @@ extendDescribe('up.fragment', function() {
             })
 
             it("returns an pending promise (since we do not want any callbacks to run as we're tearing down this page context)", async function() {
-              const loadPage = spyOn(up.network, 'loadPage')
+              const loadPage = up.network.loadPage.mock()
 
               fixture('.one')
               const promise = up.render({ target: '.one', url: '/path', history: true })
@@ -2219,7 +2219,7 @@ extendDescribe('up.fragment', function() {
 
           describe('when options.history is falsy', function() {
             it("does not load the content in a new page", async function() {
-              const loadPage = spyOn(up.network, 'loadPage')
+              const loadPage = up.network.loadPage.mock()
 
               fixture('.one')
               up.render({ target: '.one', url: '/path' })

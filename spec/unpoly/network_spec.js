@@ -359,7 +359,7 @@ describe('up.network', function() {
 
       describe('up.browser.loadPage()', function() {
         it('delegates to up.network.loadPage() (deprecated)', function() {
-          const loadPageSpy = spyOn(up.network, 'loadPage')
+          const loadPageSpy = up.network.loadPage.mock()
           const warnSpy = up.migrate.warn.mock()
           up.browser.loadPage({ url: '/path' })
           expect(loadPageSpy).toHaveBeenCalledWith({ url: '/path' })

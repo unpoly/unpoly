@@ -24,6 +24,7 @@ import { Selector } from './fragment/selector.js'
 import { isEnabled } from './history.js'
 import { Layer } from './layer/base.js'
 import { printToStandard, printToWarn } from './log.js'
+import { abortRequests } from './network.js'
 import {
   callbackAttr, config as scriptConfig, hello, isScript, readData, registerDestructor,
   registerMacro,
@@ -2847,7 +2848,7 @@ export const abort = mockable(function abort(...args) {
   }
 
   let testFnWithAbortable = (request) => request.abortable && testFn(request)
-  up.network.abort(testFnWithAbortable, { ...options, reason })
+  abortRequests(testFnWithAbortable, { ...options, reason })
 
   // We *always* emit an `up:fragment:aborted` event, even when there is no
   // request being aborted. This event serves for *any* async code that may want
