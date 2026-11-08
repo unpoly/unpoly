@@ -24,7 +24,7 @@
 // - This file imports the namespaces before the classes, and so enters every cycle through a
 //   namespace.
 //
-// After changing imports, run tmp/a2/tdz.cjs (if you have it) and load dist/unpoly.js once.
+// After changing imports, load dist/unpoly.js once.
 // A ReferenceError at load time ("Cannot access … before initialization") means a cycle is
 // entered from the wrong side.
 import * as namespace from './unpoly/namespace.js.erb'
@@ -47,6 +47,9 @@ import * as network from './unpoly/network.js'
 import * as layer from './unpoly/layer.js'
 import * as link from './unpoly/link.js'
 import * as form from './unpoly/form.js'
+import * as status from './unpoly/status.js'
+import * as radio from './unpoly/radio.js'
+import * as rails from './unpoly/rails.js'
 import * as baseError from './unpoly/error/error.js'
 import * as notImplementedError from './unpoly/error/not_implemented.js'
 import * as abortedError from './unpoly/error/aborted.js'
@@ -130,6 +133,8 @@ const apis = [
   layer.api,
   link.api,
   form.api,
+  status.api,
+  radio.api,
   baseError.api,
   notImplementedError.api,
   abortedError.api,
@@ -191,20 +196,17 @@ for (let api of apis) {
   Object.defineProperties(up, Object.getOwnPropertyDescriptors(api))
 }
 
-// The explicit install order. All installs run before `up.framework.onEvaled()` below, while
-// `up.framework.evaling` is still true. Event listeners, compilers, macros and registry entries
-// created now are marked as defaults (`isDefault`), which a reset between specs keeps
-// (see event_listener.js, registry.js, script.js). Installs listed before `framework` run
-// before `up.framework` exists, so they cannot create any of these.
+// The explicit install order. It is the order in which the namespaces registered their side
+// effects before they were ES modules. All installs run before `up.framework.onEvaled()` below,
+// while `up.framework.evaling` is still true. Event listeners, compilers, macros and registry
+// entries created now are marked as defaults (`isDefault`), which a reset between specs keeps
+// (see event_listener.js, registry.js, script.js).
 //
-// TEMPORARY (TypeScript migration, Phase 1): Namespaces we haven't converted to ES modules yet
-// are scripts that assign to `window.up` and register their side effects while they evaluate.
-// They're listed as `() => require(…)`, so they run at their position in the install order,
-// after the APIs of all converted modules are on `window.up`. When converting a file, remove
-// its line, and add its `install` here if it has one.
+// Some things already happen when a module is evaluated, before any install: a `new Config()`
+// builds its defaults and listens for `up:framework:reset`, and a few namespaces create helper
+// objects (like up.network's request queue and cache).
 const installs = [
   util.install,
-
   event.install,
   log.install,
   script.install,
@@ -218,13 +220,13 @@ const installs = [
   () => layer.install([RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]),
   link.install,
   form.install,
-  () => require('./unpoly/status'),
-  () => require('./unpoly/radio'),
-  () => require('./unpoly/rails'),
+  status.install,
+  radio.install,
+  rails.install,
 ]
 
 for (let install of installs) {
   install()
 }
 
-up.framework.onEvaled()
+framework.onEvaled()

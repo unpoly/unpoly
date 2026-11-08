@@ -5,6 +5,7 @@ import { build, on } from '../event.js'
 import { isAlive, isTargetable, matches, onAborted, onKept, reload } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { printToStandard, printToWarn } from '../log.js'
+import { config, pollOptions } from '../radio.js'
 import { registerDestructor } from '../script.js'
 
 export class FragmentPolling {
@@ -14,7 +15,7 @@ export class FragmentPolling {
   }
 
   constructor(fragment) {
-    this._options = up.radio.pollOptions(fragment)
+    this._options = pollOptions(fragment)
 
     this._fragment = fragment
     registerDestructor(fragment, this._onFragmentDestroyed.bind(this))
@@ -150,7 +151,7 @@ export class FragmentPolling {
   }
 
   _getFullDelay() {
-    return this._options.interval ?? numberAttr(this._fragment, 'up-interval') ?? up.radio.config.pollInterval
+    return this._options.interval ?? numberAttr(this._fragment, 'up-interval') ?? config.pollInterval
   }
 
   _getRemainingDelay() {

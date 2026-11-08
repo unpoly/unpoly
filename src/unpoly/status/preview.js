@@ -10,6 +10,7 @@ import { getSmart, insertTemp, provideNodes } from '../fragment.js'
 import { layerStack, open } from '../layer.js'
 import { OVERLAY_VISUAL_KEYS } from '../layer/overlay_visuals.js'
 import { printToStandard } from '../log.js'
+import { resolvePreviewFns } from '../status.js'
 
 /*-
 Instances of `up.Preview` can describe temporary changes to a page.
@@ -324,7 +325,7 @@ export class Preview {
   @experimental
   */
   run(value, options = {}) {
-    for (let fn of up.status.resolvePreviewFns(value)) {
+    for (let fn of resolvePreviewFns(value)) {
       this.undo(guard(fn, this, options))
     }
   }

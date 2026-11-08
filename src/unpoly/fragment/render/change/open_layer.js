@@ -11,6 +11,7 @@ import { RenderResult } from '../render_result.js'
 import { historyOptions } from '../../../history.js'
 import { build, layerStack } from '../../../layer.js'
 import { printToStandard } from '../../../log.js'
+import { hungrySteps } from '../../../radio.js'
 import { hello } from '../../../script.js'
 
 export class OpenLayerPlan extends Addition {
@@ -282,7 +283,7 @@ export class OpenLayerPlan extends Addition {
   }
 
   _getHungrySteps() {
-    return up.radio.hungrySteps(this._getEffectiveRenderOptions())
+    return hungrySteps(this._getEffectiveRenderOptions())
   }
 
   _getEffectiveRenderOptions() {

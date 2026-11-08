@@ -17,6 +17,7 @@ import {
 import { closestLayerElement, layerStack } from './layer.js'
 import { followOptions as linkFollowOptions } from './link.js'
 import { callbackAttr, registerAttrCompiler, registerCompiler, registerDestructor } from './script.js'
+import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
 import { doFocus, focusedElementWithin } from './viewport.js'
 
@@ -572,7 +573,7 @@ export function watchOptions(field, options, parserOptions = {}) {
 
   let parser = new OptionsParser(field, options, parserOptions)
 
-  parser.include(up.status.statusOptions, parserOptions)
+  parser.include(statusOptions, parserOptions)
   parser.string('event')
   parser.number('delay')
 

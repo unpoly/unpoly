@@ -20,6 +20,7 @@ import {
   expireCacheFromXHR, headerize, locationFromXHR, methodFromXHR, openLayerFromXHR, targetFromXHR,
   titleFromXHR,
 } from '../protocol.js'
+import { runPreviews } from '../status.js'
 import { Record } from '../util/record.js'
 import { UpURLPattern } from '../util/url_pattern.js'
 
@@ -637,7 +638,7 @@ export const UpRequest = class Request extends Record {
 
   runPreviews(renderOptions) {
     if (!this.ended && !this.fromCache) {
-      this._revertPreviews = up.status.runPreviews(this, renderOptions)
+      this._revertPreviews = runPreviews(this, renderOptions)
     }
   }
 

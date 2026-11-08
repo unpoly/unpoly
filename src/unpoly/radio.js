@@ -1,3 +1,16 @@
+import { isEmpty, setMissingAttrs, stringAttr } from './element.js'
+import { OptionsParser } from './element/options_parser.js'
+import { build } from './event.js'
+import { compressNestedSteps, getAll, tryToTarget } from './fragment.js'
+import { layerStack } from './layer.js'
+import { parseRequestOptions } from './link.js'
+import { printToWarn } from './log.js'
+import { motionOptions as motionMotionOptions } from './motion.js'
+import { FragmentPolling } from './radio/fragment_polling.js'
+import { callbackAttr, registerAttrCompiler, registerMacro } from './script.js'
+import { statusOptions } from './status.js'
+import { Config } from './util/config.js'
+
 /*-
 Features to update fragments without a user click.
 
@@ -8,534 +21,535 @@ An element with `[up-hungry]` is updated whenever a server response contains a m
 
 @namespace up.radio
 */
-up.radio = (function() {
 
-  const e = up.element
 
-  /*-
-  Configures defaults for passive updates.
+/*-
+Configures defaults for passive updates.
 
-  @property up.radio.config
+@property up.radio.config
 
-  @section Hungry elements
-    @param {Array<string>} [config.hungrySelectors]
-      An array of CSS selectors that are replaced whenever matching elements are found in a response.
-      These elements are replaced even when they are not targeted directly.
+@section Hungry elements
+  @param {Array<string>} [config.hungrySelectors]
+    An array of CSS selectors that are replaced whenever matching elements are found in a response.
+    These elements are replaced even when they are not targeted directly.
 
-      By default this contains the `[up-hungry]` attribute.
+    By default this contains the `[up-hungry]` attribute.
 
-      The configured selectors will be used to find hungry elements in the current page.
-      For each matching element a target will be [derived](/learn/target-derivation) from that
-      specific element. E.g. when you configure `up.radio.config.hungrySelectors.push('input')`,
-      a given input will be targeted with its derived selector (like `input[name=email]`).
+    The configured selectors will be used to find hungry elements in the current page.
+    For each matching element a target will be [derived](/learn/target-derivation) from that
+    specific element. E.g. when you configure `up.radio.config.hungrySelectors.push('input')`,
+    a given input will be targeted with its derived selector (like `input[name=email]`).
 
-      For this to work hungry elements [must have a derivable target selector](/api/up-hungry#derivable-target-required).
+    For this to work hungry elements [must have a derivable target selector](/api/up-hungry#derivable-target-required).
 
-    @param {Array<string>} [config.noHungrySelectors=['[up-hungry=false]']]
-      Exceptions to `up.radio.config.hungrySelectors`.
+  @param {Array<string>} [config.noHungrySelectors=['[up-hungry=false]']]
+    Exceptions to `up.radio.config.hungrySelectors`.
 
-  @section Polling
-    @param {number} [config.pollInterval=30000]
-      The default [polling](/api/up-poll) interval in milliseconds.
+@section Polling
+  @param {number} [config.pollInterval=30000]
+    The default [polling](/api/up-poll) interval in milliseconds.
 
-  @stable
-  */
-  const config = new up.Config('up.radio.config', () => ({
-    hungrySelectors: ['[up-hungry]'],
-    noHungrySelectors: ['[up-hungry=false]'],
-    pollInterval: 30000,
-  }))
+@stable
+*/
+export const config = new Config('up.radio.config', () => ({
+  hungrySelectors: ['[up-hungry]'],
+  noHungrySelectors: ['[up-hungry=false]'],
+  pollInterval: 30000,
+}))
 
-  function hungrySteps(renderOptions) {
-    let { hungry, origin, layer: renderLayer, meta } = renderOptions
-    let steps = { current: [], other: [] }
+export function hungrySteps(renderOptions) {
+  let { hungry, origin, layer: renderLayer, meta } = renderOptions
+  let steps = { current: [], other: [] }
 
-    if (!hungry) return steps
+  if (!hungry) return steps
 
-    let hungrySelector = config.selector('hungrySelectors')
+  let hungrySelector = config.selector('hungrySelectors')
 
-    // When multiple steps target the same new selector, we're updating the layer
-    // that's closer to the layer of the render pass.
-    //
-    // In this case two steps will match the same { newElement }. Hence this case is
-    // not covered by step compression (which looks at { oldElement }).
-    const layerPreference = [renderLayer, ...renderLayer.ancestors, ...renderLayer.descendants]
+  // When multiple steps target the same new selector, we're updating the layer
+  // that's closer to the layer of the render pass.
+  //
+  // In this case two steps will match the same { newElement }. Hence this case is
+  // not covered by step compression (which looks at { oldElement }).
+  const layerPreference = [renderLayer, ...renderLayer.ancestors, ...renderLayer.descendants]
 
-    for (let elementLayer of layerPreference) {
-      let hungries = up.fragment.all(elementLayer.element, hungrySelector, { layer: elementLayer })
+  for (let elementLayer of layerPreference) {
+    let hungries = getAll(elementLayer.element, hungrySelector, { layer: elementLayer })
 
-      for (let element of hungries) {
-        let selector = up.fragment.tryToTarget(element, { origin })
-        if (!selector) {
-          up.warn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
-          continue
-        }
-
-        let ifLayer = e.attr(element, 'up-if-layer')
-        let applicableLayers = ifLayer ? up.layer.getAll(ifLayer, { baseLayer: elementLayer }) : [elementLayer]
-
-        let motionOptions = up.motion.motionOptions(element)
-
-        // We cannot emit up:fragment:hungry here as we don't know { newElement } yet.
-        let selectEvent = up.event.build('up:fragment:hungry', { log: false })
-        let selectCallback = up.script.callbackAttr(element, 'up-on-hungry', { expandObject: ['newFragment', 'renderOptions'] })
-
-        let step = {
-          selector,            // The selector for a single step is { selector }
-          oldElement: element, // The match on the current page
-          layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
-          origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
-          ...motionOptions,    // The hungry element defines its own transition, duration, easing.
-          placement: 'swap',   // Hungry elements are always swapped, never appended
-          keep: true,          // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
-          maybe: true,         // Don't fail if we cannot match { newElement } later.
-          meta,
-          selectEvent,         // Used by up.ResponseDoc#selectStep()
-          selectCallback,      // Used by up.ResponseDoc#selectStep()
-          // The step also gets a reference to the original render options.
-          // Although these render options are not used to render the hungry step, it will be
-          // passed to up:fragment:hungry listener to e.g. only update hungry elements if the
-          // original render pass would update history.
-          originalRenderOptions: renderOptions,
-        }
-
-        if (applicableLayers.includes(renderLayer)) {
-          let list = renderLayer === elementLayer ? steps.current : steps.other
-          list.push(step)
-        }
+    for (let element of hungries) {
+      let selector = tryToTarget(element, { origin })
+      if (!selector) {
+        printToWarn('[up-hungry]', 'Ignoring untargetable fragment %o', element)
+        continue
       }
 
+      let ifLayer = stringAttr(element, 'up-if-layer')
+      let applicableLayers = ifLayer ? layerStack.getAll(ifLayer, { baseLayer: elementLayer }) : [elementLayer]
+
+      let motionOptions = motionMotionOptions(element)
+
+      // We cannot emit up:fragment:hungry here as we don't know { newElement } yet.
+      let selectEvent = build('up:fragment:hungry', { log: false })
+      let selectCallback = callbackAttr(element, 'up-on-hungry', { expandObject: ['newFragment', 'renderOptions'] })
+
+      let step = {
+        selector,            // The selector for a single step is { selector }
+        oldElement: element, // The match on the current page
+        layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
+        origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
+        ...motionOptions,    // The hungry element defines its own transition, duration, easing.
+        placement: 'swap',   // Hungry elements are always swapped, never appended
+        keep: true,          // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
+        maybe: true,         // Don't fail if we cannot match { newElement } later.
+        meta,
+        selectEvent,         // Used by up.ResponseDoc#selectStep()
+        selectCallback,      // Used by up.ResponseDoc#selectStep()
+        // The step also gets a reference to the original render options.
+        // Although these render options are not used to render the hungry step, it will be
+        // passed to up:fragment:hungry listener to e.g. only update hungry elements if the
+        // original render pass would update history.
+        originalRenderOptions: renderOptions,
+      }
+
+      if (applicableLayers.includes(renderLayer)) {
+        let list = renderLayer === elementLayer ? steps.current : steps.other
+        list.push(step)
+      }
     }
 
-    // Remove nested steps on other layers.
-    // Note that `steps.current` is already compressed by UpdateLayerPlan once it's been mixed with
-    // the explicit target steps. So we're not doing it again here.
-    steps.other = up.fragment.compressNestedSteps(steps.other)
-
-    return steps
   }
 
-  /*-
-  Before an `[up-hungry]` element is added to a render pass, an event `up:fragment:hungry` is emitted on that element.
+  // Remove nested steps on other layers.
+  // Note that `steps.current` is already compressed by UpdateLayerPlan once it's been mixed with
+  // the explicit target steps. So we're not doing it again here.
+  steps.other = compressNestedSteps(steps.other)
 
-  @learn-ref hungry-elements#conditions
+  return steps
+}
 
-  ## Preventing hungry elements from being updated
+/*-
+Before an `[up-hungry]` element is added to a render pass, an event `up:fragment:hungry` is emitted on that element.
 
-  You may prevent the `up:fragment:hungry` event to exclude a hungry element from the render pass.
-  Use this to define arbitrary conditions for when a hungry element should be updated.
+@learn-ref hungry-elements#conditions
 
-  For example, the following would update a hungry element only for render passes that [update history](/learn/updating-history):
+## Preventing hungry elements from being updated
 
-  ```js
-  element.addEventListener('up:fragment:hungry', function(event) {
-    if (!event.renderOptions.history) event.preventDefault()
-  })
-  ```
+You may prevent the `up:fragment:hungry` event to exclude a hungry element from the render pass.
+Use this to define arbitrary conditions for when a hungry element should be updated.
 
-  You may also define conditions based on the *new* element that a hungry element would be swapped with.
-  The following would skip an update if the new element has the class `.is-empty`:
+For example, the following would update a hungry element only for render passes that [update history](/learn/updating-history):
 
-  ```js
-  element.addEventListener('up:fragment:hungry', function(event) {
-    if (event.newFragment.classList.contains('is-empty')) {
-      event.preventDefault()
-    }
-  })
-  ```
+```js
+element.addEventListener('up:fragment:hungry', function(event) {
+  if (!event.renderOptions.history) event.preventDefault()
+})
+```
 
-  @event up:fragment:hungry
-  @param {Element} event.target
-    The hungry element that is about to be swapped.
-  @param {Element} event.newFragment
-    The fragment in the new content that this hungry element would be swapped with.
-  @param {Object} event.renderOptions
-    The [render options](/api/up.render#parameters) for the current render pass.
-  @param event.preventDefault()
-    Prevents the hungry element from being targeted in the current render pass.
-  @stable
-  */
+You may also define conditions based on the *new* element that a hungry element would be swapped with.
+The following would skip an update if the new element has the class `.is-empty`:
 
-  /*-
-  Elements with an `[up-hungry]` attribute are updated whenever the server
-  sends a matching element, even if the element is not [targeted](/learn/targeting-fragments).
-
-  Hungry elements are optional in the same way as `:maybe` targets.
-  When an `[up-hungry]` element does not match in the server response, the element will not be updated,
-  but no error is thrown.
-
-  @learn-ref hungry-elements
-
-  ## Use cases
-
-  Common use cases for `[up-hungry]` are elements that live in the application layout,
-  outside of the fragment that is typically being targeted. Examples include:
-
-  - Unread message counters
-  - Page-specific subnavigation
-  - Account-wide notifications (e.g. about an expired credit card)
-
-  Instead of explicitly including such elements in every [target selector](/learn/targeting-fragments)
-  (e.g. `.content, .unread-messages:maybe`) we can mark the element as `[up-hungry]`:
-
-  ```html
-  <div class="unread-messages" up-hungry>
-    You have no unread messages
-  </div>
-  ```
-
-  A selector for the hungry element (`.unread-messages`) will be added to target selectors automatically.
-
-  ## Derivable target required {#derivable-target-required}
-
-  When an `[up-hungry]` element piggy-backs on another fragment update, Unpoly
-  will [derive a target selector](/learn/target-derivation) for the hungry element.
-
-  For this to work the hungry element must have an [identifying attribute](/learn/target-derivation#derivation-patterns),
-  such as an `[id]` or a unique `[class]` attribute.
-  When no good target can be derived, the hungry element is excluded from the update and a
-  message like this will be [logged](/api/up.log):
-
-  ```text
-  [up-hungry] Ignoring untargetable fragment <div>
-  ```
-
-  ## Behavior with multiple layers
-
-  By default only hungry elements on the targeted [layer](/api/up.layer) are updated.
-
-  To match a hungry element when updating other layers, set an [`[up-if-layer]`](#up-if-layer) attribute.
-  For example, a hungry element with `[up-if-layer="subtree"]` will piggy-back on render passes for both
-  its own layer and any overlay covering it.
-
-  ## Conflict resolution
-
-  When Unpoly renders new content, each element in that content can only be inserted once.
-  When hungry elements conflict with each other or with the [target selector](/learn/targeting-fragments),
-  the conflict is resolved using the following rules:
-
-  1. When the target selector and a hungry element match the same element in the response, the element is updated once, as part of the target selector.
-  2. When hungry elements are nested within each other, only the outermost hungry element is updated. We recommend using hungry elements sparingly, and adding elements to the target selector instead.
-  3. When hungry elements on different layers match the same element in the response,
-     only the hungry element on the layer closest to the rendering layer is updated.
-
-  ## Disabling
-
-  By default hungry elements are processed for all updates of the current layer.
-  You can disable the processing of hungry elements using one of the following methods:
-
-  - Rendering with an [`{ hungry: false }`](/api/up.render#options.hungry) option will not process any hungry elements.
-  - Setting an [`[up-use-hungry="false"]`](/api/up-follow#up-use-hungry) attribute on a link or form will not update hungry elements when the element is activated.
-  - Preventing an `up:fragment:hungry` event will prevent the hungry element
-    from being updated.
-  - Calling `event.preventDefault()` in an `[up-on-hungry]` attribute handler will prevent the hungry element
-    from being updated.
-
-  @selector [up-hungry]
-
-  @section Layer
-    @param [up-if-layer='current']
-      Only piggy-back on updates on [layers](/api/up.layer) that match the given [layer reference](/learn/targeting-other-layers).
-
-      Relative references like `'parent'` or `'child'` will be resolved in relation to the hungry element's layer.
-
-      To match a hungry element when updating one of multiple layers, separate the references with a comma.
-      For example, `'current, child'` will match for updates on either the hungry element's layer or
-      its direct child.
-
-      To match a hungry element when updating *any* layer, set this attribute to `'any'`.
-
-  @section Animation
-    @param [up-transition]
-      @like [up-transition]
-
-    @param [up-duration]
-      @like [up-transition]
-
-    @param [up-easing]
-      @like [up-transition]
-
-  @section Callbacks
-    @param [up-on-hungry]
-      Code to run before this element is included in a fragment update.
-
-      Calling `event.preventDefault()` will prevent the hungry fragment
-      from being updated.
-
-      For instance, if you want to auto-update a hungry navigation bar
-      only when changing history entries:
-
-      ```html
-      <nav id="side-nav" up-hungry up-on-hungry="if (!renderOptions.history) event.preventDefault()">
-       ...
-      </nav>
-      ```
-
-      The code may use the variables `event` (of type `up:fragment:hungry`),
-      `this` (the hungry element), `newFragment` and `renderOptions`.
-
-  @stable
-  @signature
-  */
-
-  /*-
-  Starts [polling](/api/up-poll) the given element.
-
-  The given element does not need an `[up-poll]` attribute.
-
-  @function up.radio.startPolling
-  @section General
-    @param {Element} fragment
-      The fragment to reload periodically.
-    @param {Object} [options]
-      Options for reloading the fragment.
-
-      By default Unpoly will parse options from the fragment's attributes (see `[up-poll]`).
-      You may pass this additional `options` object to [supplement or override](/learn/attributes-and-options#options) options parsed from the fragment's attributes.
-  @section Trigger
-    @param {number} [options.interval]
-      The reload interval in milliseconds.
-
-      Defaults to `up.radio.config.pollInterval`.
-
-    @param {string} [options.ifLayer='front']
-      Controls polling while the fragment's [layer](/api/up.layer) is covered by an overlay.
-
-      When set to `'front'`, polling will pause while the fragment's layer is covered by an overlay.
-      When the fragment's layer is uncovered, polling will resume.
-
-      When set to `'any'`, polling will continue on background layers.
-
-  @section Request
-    @param {string} [options.url]
-      The URL from which to reload the fragment.
-
-      Defaults to the URL this fragment was [originally loaded from](/api/up-source).
-
-    @param {string} [options.method='get']
-      The HTTP method used to reload the fragment.
-
-      @experimental
-
-    @param {string} [options.headers={}]
-      A JSON object with additional request headers.
-
-    @param {string} [options.params={}]
-      A JSON object with additional [parameters](/api/up.Params) that should be sent as the request's
-      [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
-
-      When making a `GET` request to a URL with a query string, the given `{ params }` will be added
-      to the query parameters.
-
-  @section Client state
-    @param {boolean} [options.keepData=false]
-      Whether to [preserve](/learn/data#preserving) the polling fragment's
-      [data object](/learn/data) through reloads.
-
-      @experimental
-
-  @section Loading state
-    @mix up.render/loading-state
-  @stable
-  */
-  function startPolling(fragment, options = {}) {
-    up.FragmentPolling.forFragment(fragment).forceStart(options)
+```js
+element.addEventListener('up:fragment:hungry', function(event) {
+  if (event.newFragment.classList.contains('is-empty')) {
+    event.preventDefault()
   }
+})
+```
 
-  /*-
-  Stops [polling](/api/up-poll) the given element.
+@event up:fragment:hungry
+@param {Element} event.target
+  The hungry element that is about to be swapped.
+@param {Element} event.newFragment
+  The fragment in the new content that this hungry element would be swapped with.
+@param {Object} event.renderOptions
+  The [render options](/api/up.render#parameters) for the current render pass.
+@param event.preventDefault()
+  Prevents the hungry element from being targeted in the current render pass.
+@stable
+*/
 
-  @function up.radio.stopPolling
+/*-
+Elements with an `[up-hungry]` attribute are updated whenever the server
+sends a matching element, even if the element is not [targeted](/learn/targeting-fragments).
+
+Hungry elements are optional in the same way as `:maybe` targets.
+When an `[up-hungry]` element does not match in the server response, the element will not be updated,
+but no error is thrown.
+
+@learn-ref hungry-elements
+
+## Use cases
+
+Common use cases for `[up-hungry]` are elements that live in the application layout,
+outside of the fragment that is typically being targeted. Examples include:
+
+- Unread message counters
+- Page-specific subnavigation
+- Account-wide notifications (e.g. about an expired credit card)
+
+Instead of explicitly including such elements in every [target selector](/learn/targeting-fragments)
+(e.g. `.content, .unread-messages:maybe`) we can mark the element as `[up-hungry]`:
+
+```html
+<div class="unread-messages" up-hungry>
+  You have no unread messages
+</div>
+```
+
+A selector for the hungry element (`.unread-messages`) will be added to target selectors automatically.
+
+## Derivable target required {#derivable-target-required}
+
+When an `[up-hungry]` element piggy-backs on another fragment update, Unpoly
+will [derive a target selector](/learn/target-derivation) for the hungry element.
+
+For this to work the hungry element must have an [identifying attribute](/learn/target-derivation#derivation-patterns),
+such as an `[id]` or a unique `[class]` attribute.
+When no good target can be derived, the hungry element is excluded from the update and a
+message like this will be [logged](/api/up.log):
+
+```text
+[up-hungry] Ignoring untargetable fragment <div>
+```
+
+## Behavior with multiple layers
+
+By default only hungry elements on the targeted [layer](/api/up.layer) are updated.
+
+To match a hungry element when updating other layers, set an [`[up-if-layer]`](#up-if-layer) attribute.
+For example, a hungry element with `[up-if-layer="subtree"]` will piggy-back on render passes for both
+its own layer and any overlay covering it.
+
+## Conflict resolution
+
+When Unpoly renders new content, each element in that content can only be inserted once.
+When hungry elements conflict with each other or with the [target selector](/learn/targeting-fragments),
+the conflict is resolved using the following rules:
+
+1. When the target selector and a hungry element match the same element in the response, the element is updated once, as part of the target selector.
+2. When hungry elements are nested within each other, only the outermost hungry element is updated. We recommend using hungry elements sparingly, and adding elements to the target selector instead.
+3. When hungry elements on different layers match the same element in the response,
+   only the hungry element on the layer closest to the rendering layer is updated.
+
+## Disabling
+
+By default hungry elements are processed for all updates of the current layer.
+You can disable the processing of hungry elements using one of the following methods:
+
+- Rendering with an [`{ hungry: false }`](/api/up.render#options.hungry) option will not process any hungry elements.
+- Setting an [`[up-use-hungry="false"]`](/api/up-follow#up-use-hungry) attribute on a link or form will not update hungry elements when the element is activated.
+- Preventing an `up:fragment:hungry` event will prevent the hungry element
+  from being updated.
+- Calling `event.preventDefault()` in an `[up-on-hungry]` attribute handler will prevent the hungry element
+  from being updated.
+
+@selector [up-hungry]
+
+@section Layer
+  @param [up-if-layer='current']
+    Only piggy-back on updates on [layers](/api/up.layer) that match the given [layer reference](/learn/targeting-other-layers).
+
+    Relative references like `'parent'` or `'child'` will be resolved in relation to the hungry element's layer.
+
+    To match a hungry element when updating one of multiple layers, separate the references with a comma.
+    For example, `'current, child'` will match for updates on either the hungry element's layer or
+    its direct child.
+
+    To match a hungry element when updating *any* layer, set this attribute to `'any'`.
+
+@section Animation
+  @param [up-transition]
+    @like [up-transition]
+
+  @param [up-duration]
+    @like [up-transition]
+
+  @param [up-easing]
+    @like [up-transition]
+
+@section Callbacks
+  @param [up-on-hungry]
+    Code to run before this element is included in a fragment update.
+
+    Calling `event.preventDefault()` will prevent the hungry fragment
+    from being updated.
+
+    For instance, if you want to auto-update a hungry navigation bar
+    only when changing history entries:
+
+    ```html
+    <nav id="side-nav" up-hungry up-on-hungry="if (!renderOptions.history) event.preventDefault()">
+     ...
+    </nav>
+    ```
+
+    The code may use the variables `event` (of type `up:fragment:hungry`),
+    `this` (the hungry element), `newFragment` and `renderOptions`.
+
+@stable
+@signature
+*/
+
+/*-
+Starts [polling](/api/up-poll) the given element.
+
+The given element does not need an `[up-poll]` attribute.
+
+@function up.radio.startPolling
+@section General
   @param {Element} fragment
-    The fragment to stop reloading.
-  @stable
-  */
-  function stopPolling(element) {
-    up.FragmentPolling.forFragment(element).forceStop()
+    The fragment to reload periodically.
+  @param {Object} [options]
+    Options for reloading the fragment.
+
+    By default Unpoly will parse options from the fragment's attributes (see `[up-poll]`).
+    You may pass this additional `options` object to [supplement or override](/learn/attributes-and-options#options) options parsed from the fragment's attributes.
+@section Trigger
+  @param {number} [options.interval]
+    The reload interval in milliseconds.
+
+    Defaults to `up.radio.config.pollInterval`.
+
+  @param {string} [options.ifLayer='front']
+    Controls polling while the fragment's [layer](/api/up.layer) is covered by an overlay.
+
+    When set to `'front'`, polling will pause while the fragment's layer is covered by an overlay.
+    When the fragment's layer is uncovered, polling will resume.
+
+    When set to `'any'`, polling will continue on background layers.
+
+@section Request
+  @param {string} [options.url]
+    The URL from which to reload the fragment.
+
+    Defaults to the URL this fragment was [originally loaded from](/api/up-source).
+
+  @param {string} [options.method='get']
+    The HTTP method used to reload the fragment.
+
+    @experimental
+
+  @param {string} [options.headers={}]
+    A JSON object with additional request headers.
+
+  @param {string} [options.params={}]
+    A JSON object with additional [parameters](/api/up.Params) that should be sent as the request's
+    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
+    to the query parameters.
+
+@section Client state
+  @param {boolean} [options.keepData=false]
+    Whether to [preserve](/learn/data#preserving) the polling fragment's
+    [data object](/learn/data) through reloads.
+
+    @experimental
+
+@section Loading state
+  @mix up.render/loading-state
+@stable
+*/
+export function startPolling(fragment, options = {}) {
+  FragmentPolling.forFragment(fragment).forceStart(options)
+}
+
+/*-
+Stops [polling](/api/up-poll) the given element.
+
+@function up.radio.stopPolling
+@param {Element} fragment
+  The fragment to stop reloading.
+@stable
+*/
+export function stopPolling(element) {
+  FragmentPolling.forFragment(element).forceStop()
+}
+
+export function pollOptions(fragment, options = {}) {
+  const defaults = { background: true }
+  const parser = new OptionsParser(fragment, options, { defaults })
+  parser.number('interval', { default: config.pollInterval })
+  parser.string('ifLayer', { default: 'front' })
+  parser.include(parseRequestOptions)
+  parser.include(statusOptions)
+  // An error response renders nothing, unless the fragment has [up-fail=false].
+  // Polling then tries again after the next interval.
+  options.failTarget ??= ':none'
+  return options
+}
+
+/*-
+Elements with an `[up-poll]` attribute are [reloaded](/api/up.reload) from the server periodically.
+
+@learn-ref polling
+
+## Example
+
+This fragment `#score` will be reloaded every 30 seconds:
+
+```html
+<div id="score" up-poll> <!-- mark: id="score" -->
+  Score: 1400
+</div>
+```
+
+@selector [up-poll]
+
+@section Trigger
+  @param [up-interval]
+    The reload interval in milliseconds.
+
+    Defaults to `up.radio.config.pollInterval`, which defaults to 30 seconds.
+
+  @param [up-if-layer='front']
+    Controls polling while the fragment's [layer](/api/up.layer) is covered by an overlay.
+
+    When set to `'front'`, polling will pause while the fragment's layer is covered by an overlay.
+    When the fragment's layer is uncovered, polling will resume.
+
+    When set to `'any'`, polling will continue on background layers.
+
+    @experimental
+
+@section Request
+  @param [up-href]
+    The URL from which to reload the fragment.
+
+    Defaults to the URL this fragment was [originally loaded from](/api/up-source).
+
+  @param [up-method='get']
+    The HTTP method used to reload the fragment.
+
+    @experimental
+
+  @param [up-headers]
+    A [relaxed JSON](/api/relaxed-json) object with additional request headers.
+
+  @param [up-params]
+    A [relaxed JSON](/api/relaxed-json) object with additional [parameters](/api/up.Params) that should be sent as the request's
+    [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
+
+    When making a `GET` request to a URL with a query string, the given `{ params }` will be added
+    to the query parameters.
+
+  @param [up-fail]
+    How to handle [error responses](/learn/error-responses).
+
+    By default, polling will skip server responses with an error code,
+    even when the response contains a matching fragment. After the configured
+    interval, the server will be polled again.
+
+    Set `[up-fail=false]` to render *any* response that contains a matching fragment,
+    even with a 4xx or 5xx status code.
+
+@section Client state
+  @param [up-keep-data]
+    Whether to [preserve](/learn/data#preserving) the polling fragment's
+    [data object](/learn/data) through reloads.
+
+    @experimental
+
+@section Loading state
+  @mix up-follow/loading-state
+
+@stable
+@signature
+*/
+
+/*-
+This event is emitted before a [polling](/api/up-poll) fragment is reloaded from the server.
+
+@learn-ref polling#preventing-request
+
+Listeners may prevent the `up:fragment:poll` event to prevent the fragment from being reloaded.
+Preventing the event will only skip a single update:
+
+```js
+up.on('up:fragment:poll', function(event) {
+  // Don't reload a fragment that contains a playing video
+  let video = event.target.querySelector('video')
+  if (video && !video.paused) {
+    event.preventDefault()
   }
+})
+```
 
-  function pollOptions(fragment, options = {}) {
-    const defaults = { background: true }
-    const parser = new up.OptionsParser(fragment, options, { defaults })
-    parser.number('interval', { default: config.pollInterval })
-    parser.string('ifLayer', { default: 'front' })
-    parser.include(up.link.requestOptions)
-    parser.include(up.status.statusOptions)
-    // An error response renders nothing, unless the fragment has [up-fail=false].
-    // Polling then tries again after the next interval.
-    options.failTarget ??= ':none'
-    return options
-  }
+The server will be polled again after the configured interval, emitting another `up:fragment:poll` event.
 
-  /*-
-  Elements with an `[up-poll]` attribute are [reloaded](/api/up.reload) from the server periodically.
+@event up:fragment:poll
+@param {Element} event.target
+  The polling fragment.
+@param {Object} event.renderOptions
+  An object with [render options](/api/up.render#parameters) for the render pass that reloads the polling fragment.
 
-  @learn-ref polling
+  Listeners may inspect and modify these options.
+@param event.preventDefault()
+  Prevents the fragment from being reloaded.
+@stable
+*/
 
-  ## Example
+/*-
+Use an `[up-flashes]` element to show confirmations, alerts or warnings.
 
-  This fragment `#score` will be reloaded every 30 seconds:
+@learn-ref flashes
 
-  ```html
-  <div id="score" up-poll> <!-- mark: id="score" -->
-    Score: 1400
-  </div>
-  ```
+<figure>
+  <img src="images/flashes.png" alt="Screenshot of three flash messages" width="480">
+  <figcaption>
 
-  @selector [up-poll]
+Three flash messages stacked on top of each other: a confirmation ("User created successfully!"),
+an error ("Could not save your changes!") and a warning ("Your credit card is expiring in 3 days.").
+Each kind has its own color, so the user can tell them apart at a glance.
 
-  @section Trigger
-    @param [up-interval]
-      The reload interval in milliseconds.
+  </figcaption>
+</figure>
 
-      Defaults to `up.radio.config.pollInterval`, which defaults to 30 seconds.
+Your application layout should have an empty `[up-flashes]` element to indicate where flash messages should be inserted:
 
-    @param [up-if-layer='front']
-      Controls polling while the fragment's [layer](/api/up.layer) is covered by an overlay.
+```html
+<nav>
+  Navigation items ...
+</nav>
+<div up-flashes></div> <!-- mark-line -->
+<main>
+  Main page content ...
+</main>
+```
 
-      When set to `'front'`, polling will pause while the fragment's layer is covered by an overlay.
-      When the fragment's layer is uncovered, polling will resume.
+To render a flash message, include an `[up-flashes]` element in your response.
+The element's content should be the messages you want to render:
 
-      When set to `'any'`, polling will continue on background layers.
+```html
+<div up-flashes>
+  <strong>User was updated!</strong>
+</div>
 
-      @experimental
+<main>
+  Main response content ...
+</main>
+```
 
-  @section Request
-    @param [up-href]
-      The URL from which to reload the fragment.
+See [notification flashes](/learn/flashes) for more details and examples.
 
-      Defaults to the URL this fragment was [originally loaded from](/api/up-source).
+@selector [up-flashes]
+@section Animation
+  @param [up-transition]
+    The name of a [transition](/api/up.motion) to morph between the old and new notification flashes.
+  @param [up-duration]
+    @like [up-transition]
 
-    @param [up-method='get']
-      The HTTP method used to reload the fragment.
+  @param [up-easing]
+    @like [up-transition]
+@stable
+*/
 
-      @experimental
-
-    @param [up-headers]
-      A [relaxed JSON](/api/relaxed-json) object with additional request headers.
-
-    @param [up-params]
-      A [relaxed JSON](/api/relaxed-json) object with additional [parameters](/api/up.Params) that should be sent as the request's
-      [query string](https://en.wikipedia.org/wiki/Query_string) or payload.
-
-      When making a `GET` request to a URL with a query string, the given `{ params }` will be added
-      to the query parameters.
-
-    @param [up-fail]
-      How to handle [error responses](/learn/error-responses).
-
-      By default, polling will skip server responses with an error code,
-      even when the response contains a matching fragment. After the configured
-      interval, the server will be polled again.
-
-      Set `[up-fail=false]` to render *any* response that contains a matching fragment,
-      even with a 4xx or 5xx status code.
-
-  @section Client state
-    @param [up-keep-data]
-      Whether to [preserve](/learn/data#preserving) the polling fragment's
-      [data object](/learn/data) through reloads.
-
-      @experimental
-
-  @section Loading state
-    @mix up-follow/loading-state
-
-  @stable
-  @signature
-  */
-  up.attribute('up-poll', function(fragment) {
-    up.FragmentPolling.forFragment(fragment).onPollAttributeObserved()
+export function install() {
+  registerAttrCompiler('up-poll', function(fragment) {
+    FragmentPolling.forFragment(fragment).onPollAttributeObserved()
   })
 
-  /*-
-  This event is emitted before a [polling](/api/up-poll) fragment is reloaded from the server.
-
-  @learn-ref polling#preventing-request
-
-  Listeners may prevent the `up:fragment:poll` event to prevent the fragment from being reloaded.
-  Preventing the event will only skip a single update:
-
-  ```js
-  up.on('up:fragment:poll', function(event) {
-    // Don't reload a fragment that contains a playing video
-    let video = event.target.querySelector('video')
-    if (video && !video.paused) {
-      event.preventDefault()
-    }
-  })
-  ```
-
-  The server will be polled again after the configured interval, emitting another `up:fragment:poll` event.
-
-  @event up:fragment:poll
-  @param {Element} event.target
-    The polling fragment.
-  @param {Object} event.renderOptions
-    An object with [render options](/api/up.render#parameters) for the render pass that reloads the polling fragment.
-
-    Listeners may inspect and modify these options.
-  @param event.preventDefault()
-    Prevents the fragment from being reloaded.
-  @stable
-  */
-
-  /*-
-  Use an `[up-flashes]` element to show confirmations, alerts or warnings.
-
-  @learn-ref flashes
-
-  <figure>
-    <img src="images/flashes.png" alt="Screenshot of three flash messages" width="480">
-    <figcaption>
-
-  Three flash messages stacked on top of each other: a confirmation ("User created successfully!"),
-  an error ("Could not save your changes!") and a warning ("Your credit card is expiring in 3 days.").
-  Each kind has its own color, so the user can tell them apart at a glance.
-
-    </figcaption>
-  </figure>
-
-  Your application layout should have an empty `[up-flashes]` element to indicate where flash messages should be inserted:
-
-  ```html
-  <nav>
-    Navigation items ...
-  </nav>
-  <div up-flashes></div> <!-- mark-line -->
-  <main>
-    Main page content ...
-  </main>
-  ```
-
-  To render a flash message, include an `[up-flashes]` element in your response.
-  The element's content should be the messages you want to render:
-
-  ```html
-  <div up-flashes>
-    <strong>User was updated!</strong>
-  </div>
-
-  <main>
-    Main response content ...
-  </main>
-  ```
-
-  See [notification flashes](/learn/flashes) for more details and examples.
-
-  @selector [up-flashes]
-  @section Animation
-    @param [up-transition]
-      The name of a [transition](/api/up.motion) to morph between the old and new notification flashes.
-    @param [up-duration]
-      @like [up-transition]
-
-    @param [up-easing]
-      @like [up-transition]
-  @stable
-  */
-  up.macro('[up-flashes]', function(fragment) {
-    e.setMissingAttrs(fragment, {
+  registerMacro('[up-flashes]', function(fragment) {
+    setMissingAttrs(fragment, {
       'up-hungry': '',
       'up-if-layer': 'subtree',
       'up-keep': '',
@@ -543,15 +557,17 @@ up.radio = (function() {
     })
 
     fragment.addEventListener('up:fragment:keep', function(event) {
-      if (!e.isEmpty(event.newFragment)) event.preventDefault()
+      if (!isEmpty(event.newFragment)) event.preventDefault()
     })
   })
+}
 
-  return {
+export const api = {
+  radio: {
     config,
     hungrySteps,
     startPolling,
     stopPolling,
     pollOptions,
-  }
-})()
+  },
+}

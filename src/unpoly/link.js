@@ -21,6 +21,7 @@ import { motionOptions } from './motion.js'
 import { config as networkConfig, isSafeMethod } from './network.js'
 import { UpRequest } from './network/request.js'
 import { registerAttrCompiler, registerCompiler, registerMacro } from './script.js'
+import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
 import { doFocus } from './viewport.js'
 
@@ -405,7 +406,7 @@ export function followOptions(link, options, parserOptions) {
   parser.number('closeDuration')
 
   // Status effects
-  parser.include(up.status.statusOptions)
+  parser.include(statusOptions)
 
   // Viewport options
   parser.booleanOrString('focus')

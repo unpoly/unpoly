@@ -8,6 +8,7 @@ import { RenderOptions } from '../render_options.js'
 import { RenderResult } from '../render_result.js'
 import { historyOptions } from '../../../history.js'
 import { printToStandard } from '../../../log.js'
+import { hungrySteps } from '../../../radio.js'
 import { getScrollTops, saveFocus, saveScroll } from '../../../viewport.js'
 import { FocusCapsule } from '../../../viewport/focus_capsule.js'
 
@@ -215,7 +216,7 @@ export class UpdateLayerPlan extends Addition {
 
   _getHungrySteps() {
     // Find all [up-hungry] elements matching our layer and fragments.
-    return up.radio.hungrySteps(this._getEffectiveRenderOptions())
+    return hungrySteps(this._getEffectiveRenderOptions())
   }
 
   _coordinateSteps() {
