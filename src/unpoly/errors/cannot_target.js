@@ -1,4 +1,4 @@
-import { Error as UpError } from './error.js'
+import { UpError } from './error.js'
 
 export class CannotTarget extends UpError {
   get [Symbol.toStringTag]() { return 'up.CannotTarget' }

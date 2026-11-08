@@ -1,8 +1,8 @@
 import { sprintf } from '../util.js'
 
-// A class expression, so the class keeps its name when webpack's module concatenation
-// renames the binding, which collides with the global `Error`.
-export const Error = class Error extends window.Error {
+// A class expression, so the class is still named `Error` at runtime (`up.Error.name`),
+// while the binding is `UpError` and doesn't shadow the global `Error` here or in importers.
+export const UpError = class Error extends window.Error {
   constructor(message, props = {}) {
     if (Array.isArray(message)) {
       message = sprintf(...message)
@@ -16,5 +16,5 @@ export const Error = class Error extends window.Error {
 }
 
 export const api = {
-  Error,
+  Error: UpError,
 }

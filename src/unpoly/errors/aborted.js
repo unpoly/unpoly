@@ -1,4 +1,4 @@
-import { Error as UpError } from './error.js'
+import { UpError } from './error.js'
 
 // AbortController already throws an abort error, which is really a DOMException(message, 'AbortError')
 export class Aborted extends UpError {

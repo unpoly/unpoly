@@ -1,4 +1,4 @@
-import { Error as UpError } from './errors/error.js'
+import { UpError } from './errors/error.js'
 
 /*-
 Throws a [JavaScript error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error)
