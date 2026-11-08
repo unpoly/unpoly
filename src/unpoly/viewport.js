@@ -7,6 +7,7 @@ import {
 import { fail } from './error.js'
 import { mockable } from './mockable.js'
 import { getInputDevice, on } from './event.js'
+import { isField } from './form.js'
 import { contains, getAll as fragmentGetAll, getSmart, tryToTarget } from './fragment.js'
 import { layerStack } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
@@ -115,7 +116,7 @@ export const config = new Config('up.viewport.config', () => ({
   revealPadding: 0,
   revealTop: false,
   revealMax() { return 0.5 * window.innerHeight },
-  autoFocusVisible({ element, inputDevice }) { return inputDevice === 'key' || up.form.isField(element) }
+  autoFocusVisible({ element, inputDevice }) { return inputDevice === 'key' || isField(element) }
 }))
 
 export const bodyShifter = new BodyShifter()

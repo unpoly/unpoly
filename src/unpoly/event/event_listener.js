@@ -1,5 +1,6 @@
 import { compactObject, evalOption, pick, reject, uid } from '../util.js'
 import { fail } from '../error.js'
+import { readFieldDisabled } from '../form.js'
 import { isBeforeBoot, isEvaling } from '../framework.js'
 import { readData } from '../script.js'
 import { Record } from '../util/record.js'
@@ -101,7 +102,7 @@ export class EventListener extends Record {
       // The platform only suppresses *trusted* clicks, so a click dispatched by a script is
       // delivered even to a disabled <button>. We use the field accessor outside fields, since
       // "does this element consider itself disabled" is the same question.
-      if (this.eventType === 'click' && up.form.readFieldDisabled(element)) {
+      if (this.eventType === 'click' && readFieldDisabled(element)) {
         return
       }
 

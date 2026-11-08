@@ -1,6 +1,7 @@
 import { copy, isEqual, isPromise, omit, queueTask, scheduleTimer, sequence, some, uniq } from '../util.js'
 import { fail as errorFail, guard } from '../error.js'
 import { on } from '../event.js'
+import { getRegion, isField, readFieldName, trackFields, watchOptions } from '../form.js'
 import { Params } from './params.js'
 import { isAlive } from '../fragment.js'
 import { printUserEvent } from '../log.js'
@@ -43,16 +44,16 @@ export class FieldWatcher {
       fail('Use %s with the container of a radio group, not with an individual radio button (%o)')
     }
 
-    if (up.form.isField(this._root) && !up.form.readFieldName(this._root)) {
+    if (isField(this._root) && !readFieldName(this._root)) {
       fail('%s can only watch fields with a name (%o)')
     }
   }
 
   _trackFields() {
-    if (up.form.isField(this._root)) {
+    if (isField(this._root)) {
       return this._watchField(this._root)
     } else {
-      return up.form.trackFields(this._root, (field) => this._watchField(field))
+      return trackFields(this._root, (field) => this._watchField(field))
     }
   }
 
@@ -67,12 +68,12 @@ export class FieldWatcher {
   }
 
   get _region() {
-    return up.form.getRegion(this._root)
+    return getRegion(this._root)
   }
 
   _fieldOptions(field) {
     let rootOptions = copy(this._options)
-    return up.form.watchOptions(field, rootOptions, { defaults: { event: 'input' } })
+    return watchOptions(field, rootOptions, { defaults: { event: 'input' } })
   }
 
   _watchField(field) {

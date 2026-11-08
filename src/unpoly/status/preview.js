@@ -5,6 +5,7 @@ import {
 } from '../element.js'
 import { guard } from '../error.js'
 import { UpError } from '../error/error.js'
+import { disableContainerTemp } from '../form.js'
 import { getSmart, insertTemp, provideNodes } from '../fragment.js'
 import { layerStack, open } from '../layer.js'
 import { OVERLAY_VISUAL_KEYS } from '../layer/overlay_visuals.js'
@@ -494,7 +495,7 @@ export class Preview {
   */
   disable(...args) {
     let [element] = this._parseMutatorArgs(args, 'val')
-    this.undo(up.form.disableTemp(element, { preview: true }))
+    this.undo(disableContainerTemp(element, { preview: true }))
   }
 
   /*-

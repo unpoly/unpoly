@@ -5,6 +5,10 @@ import {
 } from '../util.js'
 import { getOne } from '../element.js'
 import { fail } from '../error.js'
+import {
+  config, defaultSubmitButton, findFields, prepareParamsReadTemp, readFieldDisabled, readFieldName,
+  readFieldValue,
+} from '../form.js'
 
 /*-
 The `up.Params` class offers a consistent API to read and manipulate request parameters
@@ -457,7 +461,7 @@ export class Params {
   }
 
   _isArrayKey(key) {
-    return evalOption(up.form.config.arrayParam, key)
+    return evalOption(config.arrayParam, key)
   }
 
   [isBlank.key]() {
@@ -541,12 +545,12 @@ export class Params {
   */
   static fromForm(form, options = {}) {
     form = getOne(form)
-    let restore = up.form.prepareParamsReadTemp(form)
+    let restore = prepareParamsReadTemp(form)
 
     try {
       // The FormData constructor accepts undefined for no submitter, but throws for false.
       // It also throws for a button that doesn't belong to the form.
-      let submitButton = getOne(options.submitButton ?? up.form.defaultSubmitButton(form)) || undefined
+      let submitButton = getOne(options.submitButton ?? defaultSubmitButton(form)) || undefined
 
       // We let the browser serialize the form, instead of iterating over up.form.fields():
       //
@@ -565,7 +569,7 @@ export class Params {
       // A control that *is* in form.elements but that the browser refuses to serialize (a reset
       // button, an <output>) is therefore not re-added.
       let browserControls = new Set(form.elements)
-      for (let field of up.form.fields(form)) {
+      for (let field of findFields(form)) {
         if (!browserControls.has(field) && !field.closest('fieldset:disabled')) params.addField(field)
       }
       return params
@@ -590,7 +594,7 @@ export class Params {
   @experimental
   */
   static fromContainer(container, options) {
-    return this.fromFields(up.form.fields(container), options)
+    return this.fromFields(findFields(container), options)
   }
 
   /*-
@@ -637,8 +641,8 @@ export class Params {
     field = getOne(field) // unwrap jQuery
 
     // A field is excluded from a form submission if it has no name, or if it is disabled.
-    let name = up.form.readFieldName(field)
-    if (!name || (up.form.readFieldDisabled(field) && !includeDisabled && !field.upPreviewDisabled)) return
+    let name = readFieldName(field)
+    if (!name || (readFieldDisabled(field) && !includeDisabled && !field.upPreviewDisabled)) return
 
     let { tagName, type } = field
     let values = []
@@ -647,7 +651,7 @@ export class Params {
       // A <select> can have multiple selected options.
       values = map(field.selectedOptions, 'value')
     } else if ((type === 'checkbox') || (type === 'radio')) {
-      if (field.checked) values = [up.form.readFieldValue(field)]
+      if (field.checked) values = [readFieldValue(field)]
     } else if (type === 'file') {
       // The value of an input[type=file] is the local path displayed in the form.
       // The actual File objects are in the #files property.
@@ -655,7 +659,7 @@ export class Params {
     } else {
       // A custom control may expose a { name } without a readable { value },
       // in which case it has nothing to contribute.
-      let value = up.form.readFieldValue(field)
+      let value = readFieldValue(field)
       if (isDefined(value)) values = [value]
     }
 

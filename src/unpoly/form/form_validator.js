@@ -6,6 +6,10 @@ import { booleanOrStringAttr } from '../element.js'
 import { fail, muteUncriticalRejection } from '../error.js'
 import { Aborted } from '../error/aborted.js'
 import { build, on } from '../event.js'
+import {
+  destinationOptions, findFields, findGroupSolution, isField, readFieldName, trackFields,
+  validateOptions,
+} from '../form.js'
 import { Params } from './params.js'
 import { getSmart, onAborted, render, resolveOrigin, splitTarget, toTarget } from '../fragment.js'
 import { printToStandard, printUserEvent } from '../log.js'
@@ -25,7 +29,7 @@ export class FormValidator {
   start() {
     let guard = (field) => this._isValidatingField(field)
     let callback = (field) => this._onFieldAdded(field)
-    return up.form.trackFields(this._form, { guard }, callback)
+    return trackFields(this._form, { guard }, callback)
   }
 
   _isValidatingField(field) {
@@ -33,7 +37,7 @@ export class FormValidator {
   }
 
   _onFieldAdded(field) {
-    let eventType = up.form.validateOptions(field).event
+    let eventType = validateOptions(field).event
     return on(field, eventType, (event) => {
       if (!field.closest('.up-keeping')) {
         printUserEvent(event)
@@ -75,7 +79,7 @@ export class FormValidator {
       // (1) the given options object
       // (2) any [up-watch-] prefixed attributes parsed from the origin
       // (3) any [up-validate-] prefixed attributes parsed from the origin
-      let renderOptions = up.form.validateOptions(solution.origin, options)
+      let renderOptions = validateOptions(solution.origin, options)
       solution.batch = pluckKey(renderOptions, 'batch')
       solution.renderOptions = renderOptions
 
@@ -90,7 +94,7 @@ export class FormValidator {
   }
 
   _getFieldSolutions({ origin, ...options }) {
-    if (up.form.isField(origin)) {
+    if (isField(origin)) {
       return this._getValidateAttrSolutions(origin) || this._getFormGroupSolutions(origin, options)
     }
   }
@@ -98,7 +102,7 @@ export class FormValidator {
   _getFormGroupSolutions(field, { formGroup = true }) {
     if (!formGroup) return
 
-    let solution = up.form.groupSolution(field, { targetable: true })
+    let solution = findGroupSolution(field, { targetable: true })
     if (solution) {
       printToStandard('up.validate()', 'Validating form group of field %o', field)
       return [solution]
@@ -228,16 +232,16 @@ export class FormValidator {
 
     // Remove duplicate names as a radio button group has multiple inputs with the same name.
     let dirtyOrigins = map(dirtySolutions, 'origin')
-    let dirtyFields = flatMap(dirtyOrigins, up.form.fields)
+    let dirtyFields = flatMap(dirtyOrigins, findFields)
     // Without this filter an unnamed field pads the header with an empty token ("email "). Two of
     // them can even join into a truthy " " — u.uniq() keeps both when one reports '' and the other
     // null — which would skip the ':unknown' fallback in _addValidateHeader() below.
-    let dirtyNames = uniq(filterList(map(dirtyFields, up.form.readFieldName), isPresent))
+    let dirtyNames = uniq(filterList(map(dirtyFields, readFieldName), isPresent))
     let dirtyRenderOptionsList = map(dirtySolutions, 'renderOptions')
 
     // A validation is not a real submission: no button was pressed, so only the <form> element
     // decides where the request goes and what it sends.
-    let formDestinationOptions = up.form.destinationOptions(this._form, { submitButton: false })
+    let formDestinationOptions = destinationOptions(this._form, { submitButton: false })
 
     // (1) Merge together all render options for all origins.
     // (2) Adopt some formDestinationOptions that cannot be overridden by solutions,

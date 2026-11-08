@@ -3,6 +3,7 @@ import { affix, idSelector, jsonAttr, subtreeFirst } from '../../element.js'
 import { muteUncriticalSync } from '../../error.js'
 import { OptionsParser } from '../../element/options_parser.js'
 import { halt as eventHalt, on, onEscape } from '../../event.js'
+import { fieldSelector as formFieldSelector, focusedField } from '../../form.js'
 import { Params } from '../../form/params.js'
 import { destroy, getAll } from '../../fragment.js'
 import { CloseLayer } from '../../fragment/render/change/close_layer.js'
@@ -253,7 +254,7 @@ export class Overlay extends Layer {
     // focus that (even though label and input are in different forms).
     // The browser always focuses the first input matching the ID from [for].
     let id = label.getAttribute('for')
-    let fieldSelector = up.form.fieldSelector(idSelector(id))
+    let fieldSelector = formFieldSelector(idSelector(id))
 
     let fieldsAnywhere = getAll(fieldSelector, { layer: 'any' })
     let fieldsInLayer = getAll(fieldSelector, { layer: this })
@@ -299,7 +300,7 @@ export class Overlay extends Layer {
     // The current layer might be in the visual background, e.g. if a fragment is being
     // compiled in a background layer.
     if (this.isFront()) {
-      let field = up.form.focusedField()
+      let field = focusedField()
       if (field) {
         // Allow screen reader users to get back to a state where they can dismiss the
         // modal with escape.

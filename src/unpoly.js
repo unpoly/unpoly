@@ -46,6 +46,7 @@ import * as motion from './unpoly/motion.js'
 import * as network from './unpoly/network.js'
 import * as layer from './unpoly/layer.js'
 import * as link from './unpoly/link.js'
+import * as form from './unpoly/form.js'
 import * as baseError from './unpoly/error/error.js'
 import * as notImplementedError from './unpoly/error/not_implemented.js'
 import * as abortedError from './unpoly/error/aborted.js'
@@ -128,6 +129,7 @@ const apis = [
   network.api,
   layer.api,
   link.api,
+  form.api,
   baseError.api,
   notImplementedError.api,
   abortedError.api,
@@ -215,7 +217,7 @@ const installs = [
   // reach a mode class before its superclass is evaluated (see the cycle rules above).
   () => layer.install([RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]),
   link.install,
-  () => require('./unpoly/form'),
+  form.install,
   () => require('./unpoly/status'),
   () => require('./unpoly/radio'),
   () => require('./unpoly/rails'),

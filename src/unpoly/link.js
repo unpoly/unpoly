@@ -12,6 +12,7 @@ import { UpError } from './error/error.js'
 import {
   build, emit, fork, getInputDevice, halt, isModified, isSyntheticClick, keyModifiers, on,
 } from './event.js'
+import { anyButtonSelector, fieldSelector } from './form.js'
 import { getSmart, onFirstIntersect, render } from './fragment.js'
 import { RenderOptions } from './fragment/render/render_options.js'
 import { isEnabled } from './history.js'
@@ -803,7 +804,7 @@ function isClickTarget(target, link) {
   // (2) A field always handles its own click.
   // (3) A link's buttons, labels and summaries are part of its content, so clicking them follows the link.
   //     A clickable container like an [up-expand] area leaves them to handle their own clicks.
-  const betterTargetSelector = `a, [up-follow], ${link.matches('a') ? up.form.fieldSelector() : interactiveSelector()}`
+  const betterTargetSelector = `a, [up-follow], ${link.matches('a') ? fieldSelector() : interactiveSelector()}`
   const betterTarget = target.closest(betterTargetSelector)
   // The click is meant for the link if:
   // (1) Nothing more specific than the link was clicked.
@@ -815,7 +816,7 @@ function isClickTarget(target, link) {
 
 // Elements within a clickable container that handle their own clicks.
 function interactiveSelector() {
-  return [up.form.fieldSelector(), up.form.anyButtonSelector(), 'label', 'summary'].join()
+  return [fieldSelector(), anyButtonSelector(), 'label', 'summary'].join()
 }
 
 function isInstant(linkOrDescendant) {

@@ -2,14 +2,15 @@ import { getSimpleTokens, intersect, isEqual, isPresent, sequence, some } from '
 import { toggle } from '../element.js'
 import { fail } from '../error.js'
 import { emit } from '../event.js'
+import { findFields, getRegion, setContainerDisabled, watch } from '../form.js'
 import { Params } from './params.js'
 import { getSmart, getSubtree, trackSelector } from '../fragment.js'
 
 const BUILTIN_SWITCH_EFFECTS = [
   { attr: 'up-hide-for', toggle(target, active) { toggle(target, !active) } },
   { attr: 'up-show-for', toggle(target, active) { toggle(target, active) } },
-  { attr: 'up-disable-for', toggle(target, active) { up.form.setDisabled(target, active) } },
-  { attr: 'up-enable-for', toggle(target, active) { up.form.setDisabled(target, !active) } },
+  { attr: 'up-disable-for', toggle(target, active) { setContainerDisabled(target, active) } },
+  { attr: 'up-enable-for', toggle(target, active) { setContainerDisabled(target, !active) } },
 ]
 
 export class Switcher {
@@ -38,7 +39,7 @@ export class Switcher {
       // Switching effects are client-side and cheap, so we never debounce them.
       // A { delay } meant for requests (from config or [up-watch-delay]) would only make switching lag,
       // and would let an autosubmitting form read its fields before they were switched.
-      || up.watch(this._root, { logPrefix: '[up-switch]', includeDisabled: true, delay: 0 }, callback)
+      || watch(this._root, { logPrefix: '[up-switch]', includeDisabled: true, delay: 0 }, callback)
   }
 
   _trackNewSwitchees() {
@@ -88,7 +89,7 @@ export class Switcher {
     if (this._regionSelector) {
       return getSmart(this._regionSelector, { origin: this._root })
     } else {
-      return up.form.getRegion(this._root)
+      return getRegion(this._root)
     }
   }
 
@@ -103,7 +104,7 @@ export class Switcher {
     let anyPresent = some(values, isPresent)
     tokens.push(anyPresent ? ':present' : ':blank')
 
-    let fields = up.form.fields(this._root)
+    let fields = findFields(this._root)
     if (fields[0]?.matches('[type=radio], [type=checkbox]')) {
       let anyChecked = some(fields, 'checked')
       tokens.push(anyChecked ? ':checked' : ':unchecked')
