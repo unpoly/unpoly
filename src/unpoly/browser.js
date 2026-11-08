@@ -1,5 +1,5 @@
 import { isString } from './util.js'
-import { Aborted } from './errors/aborted.js'
+import { Aborted } from './error/aborted.js'
 
 /*-
 We tunnel some browser APIs through this namespace for easier mocking in tests.
