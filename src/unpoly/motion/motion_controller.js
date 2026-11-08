@@ -32,6 +32,7 @@ up.MotionController = class MotionController {
   @param {Function(): Promise} startMotionFn
   @return {Promise}
     A promise that fulfills when the animation ends.
+  @internal
   */
   startFunction(newCluster, startMotionFn) {
     // Remember that we're currently starting a motion function.
