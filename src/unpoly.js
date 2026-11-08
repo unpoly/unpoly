@@ -2,19 +2,22 @@
 // and optionally `install()`, which performs all its side effects (registering compilers,
 // listeners, macros). A module's top level only declares things.
 import * as namespace from './unpoly/namespace.js.erb'
+import * as mockable from './unpoly/mockable.js'
+import * as migrateStub from './unpoly/migrate_stub.js'
 
 // The explicit install order.
+//
+// TEMPORARY (TypeScript migration, Phase 1): Namespaces we haven't converted to ES modules yet
+// are scripts that assign to `window.up` and register their side effects while they evaluate.
+// They're listed as `() => require(…)`, so they run at their position in the install order,
+// after the APIs of all converted modules are on `window.up`. Replace each with an import
+// when its file is converted.
 const modules = [
   namespace,
-
-  // TEMPORARY (TypeScript migration, Phase 1): Namespaces we haven't converted to ES modules yet
-  // are scripts that assign to `window.up` and register their side effects while they evaluate.
-  // We require() each one at its position in the install order, after the APIs of all converted
-  // modules are on `window.up`. Remove these lines as their files are converted.
-  () => require('./unpoly/mockable'),
+  mockable,
   () => require('./unpoly/util'),
   () => require('./unpoly/error'),
-  () => require('./unpoly/migrate_stub'),
+  migrateStub,
   () => require('./unpoly/browser'),
   () => require('./unpoly/element'),
 

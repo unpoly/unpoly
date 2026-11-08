@@ -1,4 +1,4 @@
-up.mockable = function(originalFn) {
+export function mockable(originalFn) {
   if (window.jasmine) {
     let name = originalFn.name
     let obj = { [name]: originalFn }
@@ -10,4 +10,8 @@ up.mockable = function(originalFn) {
   } else {
     return originalFn
   }
+}
+
+export const api = {
+  mockable,
 }
