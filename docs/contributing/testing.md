@@ -579,6 +579,27 @@ The ones you'll use constantly:
 Jasmine's `jasmine.createSpy()` and `spyOn()` carry a lot of the weight in function specs.
 
 
+## Spying on Unpoly functions
+
+`spyOn(up.form, 'trackFields')` replaces the function on `window.up`. It only catches calls
+that go through `window.up`: your spec's own calls, and calls from user code. Unpoly's own
+modules [import](code-organization.md#namespace-pattern) the function instead, so their calls
+pass the spy without a sound, and a `toHaveBeenCalled()` expectation fails for no visible
+reason.
+
+To intercept Unpoly's internal callers, the function must be wrapped in `mockable()` where it is
+defined. Then call `.mock()` on it, which returns a regular Jasmine spy:
+
+```js
+const trackFieldsSpy = up.form.trackFields.mock().and.callThrough()
+up.element.isSingleton.mock().and.callFake((element) => element.matches('fake-body'))
+```
+
+If the function isn't mockable yet, wrap it in `mockable()` rather than reaching for a
+workaround. `mockable()` costs nothing outside the test suite: it returns the function
+unchanged when Jasmine isn't loaded.
+
+
 ## Specs with special conditions
 
 **Browser capabilities.** `describeFallback()` runs a group with an `up.browser`

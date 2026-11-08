@@ -75,7 +75,7 @@ extendDescribe('up.fragment', function() {
 
         it('ignores a { transition } option when replacing a singleton element like <body>', async function() {
           // shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          spyOn(up.element, 'isSingleton').and.callFake((element) => element.matches('fake-body'))
+          up.element.isSingleton.mock().and.callFake((element) => element.matches('fake-body'))
 
           up.fragment.config.targetDerivers.unshift('fake-body')
           $fixture('fake-body').text('old text')
