@@ -30,30 +30,29 @@ src/                      # Webpack entry points for Unpoly's main and optional 
 
   unpoly/                 # Source code (JS, CSS) for Unpoly's namespaces
     form.js               # ... Code for up.form namespace
+    form/                 # ... Classes owned by up.form
+      params.js           # ...... Code for up.Params class
+      ...
     link.js               # ... Code for up.link namespace
     link.sass             # ... CSS for up.link namespace
     layer.js              # ... Code for up.layer namespace
-    ...                   # ... Code for other namespaces
-
-    classes/              # Class definitions used by namespaces
-      params.js           # ... Code for up.Params class
-      request.js          # ... Code for up.Request class
-      response.js         # ... Code for up.Response class
-      ...                 # ... Other class definitions
+    layer/                # ... Classes owned by up.layer
+      base.js             # ...... Code for up.Layer class
+      modes/              # ...... One class per layer mode (modal, popup, ...)
+    fragment/             # ... Classes owned by up.fragment
+      render/             # ...... The classes behind up.render()
+    util/                 # ... Generic helper classes (up.Config, up.Rect, ...)
+    ...                   # ... Other namespaces and their classes
 
 spec/
-  unpoly/                 # Tests (Jasmine specs)
+  unpoly/                 # Tests (Jasmine specs), mirroring src/unpoly
     form_spec.js          # ... Tests for up.form namespace
     form_switch_spec.js   # ... Tests for [up-switch], too large to keep in form_spec.js
+    form/                 # ... Tests for classes owned by up.form
+      params_spec.js      # ...... Tests for up.Params class
     link_spec.js          # ... Tests for up.link namespace
     layer_spec.js         # ... Tests for up.layer namespace
-    ...                   # ... Tests for other namespaces
-
-    classes/              # Tests for classes in src/unpoly/classes
-      params_spec.js      # ... Tests for up.Params class
-      request_spec.js     # ... Tests for up.Request class
-      response_spec.js    # ... Tests for up.Response class
-      ...                 # ... Tests for other classes
+    ...                   # ... Tests for other namespaces and classes
 
   helpers/                # Utility helpers and custom matchers for Jasmine specs
     reset_up.js           # ... Cleans up global state after each test
@@ -218,7 +217,11 @@ export const api = {
 }
 ```
 
-A class file exports the class, and an `api` if the class is published (like `up.Params`).
+Classes live in a folder named after the namespace that owns them, next to the namespace
+file: `form.js` beside `form/`, `layer.js` beside `layer/`. A published class goes where its
+docs are (`up.Params` is documented under `up.form`). Closely related classes share a
+sub-folder, like `fragment/render/` or `layer/modes/`. Generic helper classes live in
+`util/`. A class file exports the class, and an `api` if the class is published.
 
 The entry file `src/unpoly.js` ties the modules together. It imports every module, copies
 each `api` onto `window.up` (the `apis` list), then calls each `install()` (the `installs`

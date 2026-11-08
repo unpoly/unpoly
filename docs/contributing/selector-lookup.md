@@ -1,8 +1,8 @@
 # Selector lookup deep-dive
 
 Read this before you write internal code that looks up an element, and before you change
-[`up.Selector`](../../src/unpoly/classes/selector.js),
-[`up.FragmentFinder`](../../src/unpoly/classes/fragment_finder.js) or the lookup functions in
+[`up.Selector`](../../src/unpoly/fragment/selector.js),
+[`up.FragmentFinder`](../../src/unpoly/fragment/fragment_finder.js) or the lookup functions in
 [`src/unpoly/fragment.js`](../../src/unpoly/fragment.js).
 
 The short version: **prefer `up.fragment.*` over native `querySelector()` when you are

@@ -937,7 +937,7 @@ Two things to know:
   "See also `up.network.isBusy()`.", and at guide pages with `@learn-ref`.
 
 `@class` blocks also use `@parent` to nest under a namespace in the menu, e.g.
-`src/unpoly/classes/params.js` declares `@parent up.form`.
+`src/unpoly/form/params.js` declares `@parent up.form`.
 
 
 ## Previewing your changes

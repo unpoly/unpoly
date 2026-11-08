@@ -65,7 +65,7 @@ F1) up.Params → #toQuery → returns the query section for the given object
     Expected 'foo-key=foo%20value&bar-key=bar%20value' to equal 'foo-key=foo+value&bar-key=bar+value'.
 
   Stacktrace:
-    spec/unpoly/classes/params_spec.js:35 in anonymous function
+    spec/unpoly/form/params_spec.js:35 in anonymous function
 
   Debug in browser:
     http://localhost:4000/specs?spec=up.Params%20%23toQuery%20returns%20the%20query%20section
@@ -193,8 +193,8 @@ See [Compatibility](compatibility.md#browser-support) for which browsers CI exer
 ## How specs are organized
 
 A source file's specs live at the mirrored path. `src/unpoly/form.js` is tested by
-`spec/unpoly/form_spec.js`, and `src/unpoly/classes/params.js` by
-`spec/unpoly/classes/params_spec.js`. Where a group of specs grew too large to live
+`spec/unpoly/form_spec.js`, and `src/unpoly/form/params.js` by
+`spec/unpoly/form/params_spec.js`. Where a group of specs grew too large to live
 there, it moved into a sibling file that shares the namespace's prefix — see
 [extracted spec files](#extracted-spec-files) below.
 
@@ -271,8 +271,8 @@ after the quotes; run it with the matching option (`--migrate`).
 Or let `--file` work out the filter from a location:
 
 ```
-bin/test --file=spec/unpoly/classes/params_spec.js        # what that file declares
-bin/test --file=spec/unpoly/classes/params_spec.js:29     # just the group on line 29
+bin/test --file=spec/unpoly/form/params_spec.js        # what that file declares
+bin/test --file=spec/unpoly/form/params_spec.js:29     # just the group on line 29
 ```
 
 On an [extracted file](#extracted-spec-files), `--file` runs just the blocks that file

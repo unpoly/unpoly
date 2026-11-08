@@ -1,6 +1,6 @@
 # Rendering core deep-dive
 
-Read this before you touch `up.render()` or anything in `src/unpoly/classes/change/`.
+Read this before you touch `up.render()` or anything in `src/unpoly/fragment/render/`.
 If you are working on any other part of Unpoly, you don't need it: the rendering core is
 reached through a small public surface, and the rest of the library treats it as a black
 box.
@@ -66,7 +66,7 @@ up.render()
                       └─ up.Change.UpdateSteps  the actual swaps
 ```
 
-`up.render()` returns an [`up.RenderJob`](../../src/unpoly/classes/render_job.js) — the
+`up.render()` returns an [`up.RenderJob`](../../src/unpoly/fragment/render/render_job.js) — the
 promise-like object callers await. It resolves with an `up.RenderResult` describing what was
 actually updated, and exposes a second promise, `.finished`, that waits for animations and
 revalidation to settle too.
@@ -82,7 +82,7 @@ Which *change* the job starts with depends on where the content comes from
 
 These are entry points, not alternatives — a `{ url }` pass passes through every row below
 it. The classes live in
-[`src/unpoly/classes/change/`](../../src/unpoly/classes/change/) and extend `up.Change`.
+[`src/unpoly/fragment/render/change/`](../../src/unpoly/fragment/render/change/) and extend `up.Change`.
 Note that there are two different contracts among them: the top-level changes implement
 `execute()` with no arguments, while a *plan* (`UpdateLayer`, `OpenLayer`) implements
 `execute(responseDoc, onApplicable)` **and** `getPreflightProps()`. If you add a change
@@ -134,7 +134,7 @@ Matching happens **twice**, and this is the distinction worth internalising:
 - **Postflight** (`_matchPostflight()`), against the response document: which new elements
   did the server actually send? Steps whose new element is missing are dropped or fail here.
 
-"The response document" is an [`up.ResponseDoc`](../../src/unpoly/classes/response_doc.js),
+"The response document" is an [`up.ResponseDoc`](../../src/unpoly/fragment/render/response_doc.js),
 and it does more than parse HTML. It matches steps against itself (`selectSteps()`), adopts
 CSP nonces, and *detaches* each new element as it is committed, so a later hungry step
 cannot steal an element that is already spoken for.
