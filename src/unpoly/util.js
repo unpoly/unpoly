@@ -1,4 +1,5 @@
 import { guardFn } from './error.js'
+import { canJQuery } from './browser.js'
 
 /*-
 Helper functions for basic JavaScript values.
@@ -660,7 +661,7 @@ Returns whether the given argument is a [jQuery collection](https://learn.jquery
 @stable
 */
 export function isJQuery(value) {
-  return up.browser.canJQuery() && value instanceof jQuery
+  return canJQuery() && value instanceof jQuery
 }
 
 /*-
