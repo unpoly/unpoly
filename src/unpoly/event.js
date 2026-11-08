@@ -1,6 +1,7 @@
 import { extractOptions, last, omit, parseArgs, pick, some } from './util.js'
 import { getRoot, jsonAttr, stringAttr } from './element.js'
 import { fail } from './error.js'
+import { mockable } from './mockable.js'
 import { EventEmitter } from './event/event_emitter.js'
 import { EventListenerGroup } from './event/event_listener_group.js'
 import { EventListener } from './event/event_listener.js'
@@ -436,9 +437,9 @@ so `up.link.convertClicks()` skips its checks against mouse effects for such cli
 @return {boolean}
 @internal
 */
-export function isSyntheticClick(event) {
+export const isSyntheticClick = mockable(function isSyntheticClick(event) {
   return !event.isTrusted
-}
+})
 
 export function fork(originalEvent, newType, copyKeys = []) {
   const newEvent = build(newType, pick(originalEvent, copyKeys))

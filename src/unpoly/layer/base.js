@@ -10,6 +10,7 @@ import {
   updateMetaTags,
 } from '../history.js'
 import { closestLayerElement, mainTargets } from '../layer.js'
+import { convertClicks } from '../link.js'
 import { Record } from '../util/record.js'
 import { newStateCache } from '../viewport.js'
 
@@ -128,7 +129,7 @@ export class Layer extends Record {
   }
 
   setupHandlers() {
-    up.link.convertClicks(this)
+    convertClicks(this)
     this._unbindLocationChanged = on('up:location:changed', (event) => this._onBrowserLocationChanged(event))
   }
 

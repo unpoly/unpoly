@@ -2,6 +2,7 @@ import { scheduleTimer } from '../util.js'
 import { numberAttr } from '../element.js'
 import { on } from '../event.js'
 import { isAlive, onAborted } from '../fragment.js'
+import { config, shouldHandleClick } from '../link.js'
 import { printUserEvent } from '../log.js'
 
 export class LinkFollowIntent {
@@ -23,7 +24,7 @@ export class LinkFollowIntent {
 
   _scheduleCallback(event) {
     // Don't preload when the user is holding down CTRL or SHIFT.
-    if (!up.link.shouldHandleClick(event, this._link)) return
+    if (!shouldHandleClick(event, this._link)) return
 
     // A preload request is already known, e.g. from hovering before a mousedown.
     // We must not abort and repeat it, but let the click reuse it.
@@ -53,7 +54,7 @@ export class LinkFollowIntent {
   }
 
   _parseDelay() {
-    return numberAttr(this._link, 'up-preload-delay') ?? up.link.config.preloadDelay
+    return numberAttr(this._link, 'up-preload-delay') ?? config.preloadDelay
   }
 
   _runCallback(event) {

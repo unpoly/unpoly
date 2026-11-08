@@ -4,6 +4,7 @@ import { muteUncriticalRejection } from './error.js'
 import { build, emit, halt, isModified, on } from './event.js'
 import { render } from './fragment.js'
 import { layerStack } from './layer.js'
+import { makeFollowable } from './link.js'
 import { printToStandard, printUserEvent } from './log.js'
 import { initialRequestMethod } from './protocol.js'
 import { registerMacro } from './script.js'
@@ -825,7 +826,7 @@ export function install() {
         'up-scroll': 'restore'
       })
       link.removeAttribute('up-back')
-      up.link.makeFollowable(link)
+      makeFollowable(link)
     }
   })
 

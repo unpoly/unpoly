@@ -45,6 +45,7 @@ import * as viewport from './unpoly/viewport.js'
 import * as motion from './unpoly/motion.js'
 import * as network from './unpoly/network.js'
 import * as layer from './unpoly/layer.js'
+import * as link from './unpoly/link.js'
 import * as baseError from './unpoly/error/error.js'
 import * as notImplementedError from './unpoly/error/not_implemented.js'
 import * as abortedError from './unpoly/error/aborted.js'
@@ -126,6 +127,7 @@ const apis = [
   motion.api,
   network.api,
   layer.api,
+  link.api,
   baseError.api,
   notImplementedError.api,
   abortedError.api,
@@ -212,7 +214,7 @@ const installs = [
   // up.layer gets its mode classes from here. Nothing else imports them, so no other module can
   // reach a mode class before its superclass is evaluated (see the cycle rules above).
   () => layer.install([RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]),
-  () => require('./unpoly/link'),
+  link.install,
   () => require('./unpoly/form'),
   () => require('./unpoly/status'),
   () => require('./unpoly/radio'),

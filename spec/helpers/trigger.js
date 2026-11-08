@@ -2,11 +2,10 @@ const u = up.util
 const e = up.element
 const $ = jQuery
 
-// Specs cannot dispatch trusted events. We keep the original check for clicks made by
+// Specs cannot dispatch trusted events. We repeat the original check (!event.isTrusted) for clicks made by
 // element.click(), but treat events from Trigger like clicks from a real mouse.
 beforeEach(function() {
-  const isSyntheticClick = up.event.isSyntheticClick
-  spyOn(up.event, 'isSyntheticClick').and.callFake((event) => isSyntheticClick(event) && !event.simulatesUser)
+  up.event.isSyntheticClick.mock().and.callFake((event) => !event.isTrusted && !event.simulatesUser)
 })
 
 window.Trigger = (function() {

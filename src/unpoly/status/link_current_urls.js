@@ -1,11 +1,12 @@
 import { matchableURL } from '../util.js'
+import { isSafe } from '../link.js'
 import { UpURLPattern } from '../util/url_pattern.js'
 
 export class LinkCurrentURLs {
 
   constructor(link) {
     // A link with an unsafe method will never be highlighted with .up-current.
-    this._isSafe = up.link.isSafe(link)
+    this._isSafe = isSafe(link)
 
     if (this._isSafe) {
       const href = link.getAttribute('href')
