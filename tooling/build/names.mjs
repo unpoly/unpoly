@@ -17,10 +17,10 @@
 // - A call that names a function goes.
 // - A call that names a class whose own name is already the right one goes. Terser keeps the
 //   class's name (`keep_classnames`).
-// - A call that names an anonymous class goes, and the class gets the name in its source:
-//   `class {` becomes `class Foo {`. Unless the class mentions `Foo` itself, which might mean an
-//   outer `Foo` that the new name would shadow.
-// - Every other call stays, like the one for `class Error3`.
+// - A call that names a class expression goes, and the class gets the name in its source:
+//   `class {` and `class _Foo {` become `class Foo {`. Unless the class mentions either name, which
+//   might mean an outer binding that the new name would shadow.
+// - Every other call stays.
 //
 // We overwrite removed code with spaces instead of cutting it out, so every line and column of
 // the bundle stays where it was. Only the inserted names move code, within their line, and we move
@@ -32,9 +32,15 @@ import * as acorn from 'acorn'
 export function dropNeedlessNames(js, map = null) {
   let ast = acorn.parse(js, { ecmaVersion: 'latest', sourceType: 'script' })
   let calls = []
+  // Class expression → the name of the variable it is assigned to.
+  let holders = new Map()
   walk(ast, [], (node, ancestors) => {
     if (node.type === 'CallExpression' && node.callee.type === 'Identifier' && node.callee.name === '__name') {
       calls.push({ node, ancestors: [...ancestors] })
+    } else if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier' && node.init?.type === 'ClassExpression') {
+      holders.set(node.init, node.id.name)
+    } else if (node.type === 'AssignmentExpression' && node.left.type === 'Identifier' && node.right.type === 'ClassExpression') {
+      holders.set(node.right, node.left.name)
     }
   })
 
@@ -46,11 +52,26 @@ export function dropNeedlessNames(js, map = null) {
     }
   }
   let insertions = []
-  // Whether we can give `klass` the `name` it should have, by keeping or inserting its own.
+  // Whether we can give `klass` the `name` it should have in its source: it has it already, or
+  // we insert it into an anonymous class expression, or replace the name esbuild gave a class
+  // expression. Only expressions, because there the name is a binding inside the class alone.
+  // Never when the class mentions either name, which could mean an outer binding we'd shadow.
   let nameClass = (klass, name) => {
-    if (klass?.id) return klass.id.name === name
-    if (klass?.type !== 'ClassExpression' || !isPlainName(name) || mentions(klass, name)) return false
-    insertions.push({ offset: klass.start + 'class'.length, text: ` ${name}` })
+    if (!klass) return false
+    if (klass.id?.name === name) return true
+    if (klass.type !== 'ClassExpression' || !isPlainName(name) || mentions(klass, name, klass.id)) return false
+    if (klass.id) {
+      // class _Foo extends … → class Foo extends …. If the class mentions `_Foo`, that has to mean
+      // the variable the class is assigned to (`var _Foo = class _Foo …`) from then on, which only
+      // works for code that runs after the class is defined.
+      let oldName = klass.id.name
+      if (mentions(klass, oldName, klass.id) && (holders.get(klass) !== oldName || usedDuringDefinition(klass, oldName))) return false
+      blank(klass.id.start, klass.id.end)
+      insertions.push({ offset: klass.id.start, text: name })
+    } else {
+      // class extends … → class Foo extends …
+      insertions.push({ offset: klass.start + 'class'.length, text: ` ${name}` })
+    }
     return true
   }
 
@@ -66,6 +87,9 @@ export function dropNeedlessNames(js, map = null) {
       blank(target.end, node.end)
     } else if (target.type === 'Identifier' && parent.type === 'ExpressionStatement' && declaresFunction(grandparent, target.name)) {
       // function foo() { … } __name(foo, "foo");
+      blank(parent.start, parent.end)
+    } else if (target.type === 'Identifier' && parent.type === 'ExpressionStatement' && nameClass(declaredClass(grandparent, target.name), name)) {
+      // var _Foo = class _Foo { … }; __name(_Foo, "Foo"), from lowering for ES2015.
       blank(parent.start, parent.end)
     } else if (target.type === 'ThisExpression') {
       // class Foo { static { __name(this, "Foo"); } … }
@@ -93,6 +117,15 @@ export function dropNeedlessNames(js, map = null) {
   return { js: chars.join(''), map }
 }
 
+// The class expression that a block (or the program) assigns to `var name` right in its body.
+function declaredClass(block, name) {
+  for (let statement of block?.body ?? []) {
+    if (statement.type !== 'VariableDeclaration') continue
+    let declarator = statement.declarations.find((candidate) => candidate.id.type === 'Identifier' && candidate.id.name === name)
+    if (declarator?.init?.type === 'ClassExpression') return declarator.init
+  }
+}
+
 // Whether a block (or the program) declares `name` as a function right in its body.
 function declaresFunction(block, name) {
   return block?.body?.some?.((statement) => statement.type === 'FunctionDeclaration' && statement.id?.name === name)
@@ -110,11 +143,23 @@ function isPlainName(name) {
   }
 }
 
-// Whether any identifier in `node` is `name`. Property names and strings don't count.
-function mentions(node, name) {
+// Whether code that runs while `klass` is being defined mentions `name`: its superclass, computed
+// member names, static blocks and static field initializers.
+function usedDuringDefinition(klass, name) {
+  let early = [klass.superClass]
+  for (let member of klass.body.body) {
+    if (member.computed) early.push(member.key)
+    if (member.type === 'StaticBlock') early.push(member)
+    if (member.type === 'PropertyDefinition' && member.static) early.push(member.value)
+  }
+  return early.some((node) => node && mentions(node, name))
+}
+
+// Whether any identifier in `node` is `name`. Property names, strings and `except` don't count.
+function mentions(node, name, except = null) {
   let found = false
   walk(node, [], (child, ancestors) => {
-    if (child.type !== 'Identifier' || child.name !== name) return
+    if (child.type !== 'Identifier' || child.name !== name || child === except) return
     let parent = ancestors.at(-1)
     let isPropertyName = !parent.computed && (
       (parent.type === 'MemberExpression' && parent.property === child) ||

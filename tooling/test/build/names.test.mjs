@@ -22,8 +22,7 @@ async function build(source, { target = 'es2024', sourcemap = false } = {}) {
 }
 
 // Runs a bundle and returns what it put on `window.result`.
-function run(js) {
-  let window = {}
+function run(js, window = {}) {
   new Function('window', js)(window)
   return window.result
 }
@@ -64,7 +63,41 @@ test('a class keeps its name, without a call, when lowered for ES2015', async ()
   assert.equal(run(js).bar, 1)
 })
 
-test('a class that esbuild renamed keeps its call', async () => {
+test('an ES2015 class with static members gets its name back, without a call', async () => {
+  // esbuild prints var _Foo = class _Foo { … }; __name(_Foo, "Foo"); _Foo.bar = 1; var Foo = _Foo;
+  let { esbuilt, js } = await build(`
+    class Foo { static bar = 1; me() { return Foo.bar } }
+    window.result = Foo
+  `, { target: 'es2015' })
+  assert.match(esbuilt, /class _Foo /)
+  assert.equal(calls(js), 0)
+  assert.equal(run(js).name, 'Foo')
+  assert.equal(new (run(js))().me(), 1)
+})
+
+test('a class that esbuild renamed gets its name back when it does not mention it', async () => {
+  // esbuild renames the class because `Error` would shadow the global the bundle uses elsewhere.
+  let { esbuilt, js } = await build(`
+    const MyError = class Error extends window.Error {}
+    window.result = [MyError, new Error('global')]
+  `)
+  assert.match(esbuilt, /class Error2 /)
+  assert.equal(calls(js), 0)
+  let [MyError, globalError] = run(js, { Error })
+  assert.equal(MyError.name, 'Error')
+  assert.ok(!(globalError instanceof MyError))
+})
+
+test('an ES2015 class that uses its old name while being defined keeps its call', async () => {
+  let { js } = await build(`
+    class Foo { static bar = 1; static baz = Foo.bar + 1 }
+    window.result = Foo
+  `, { target: 'es2015' })
+  assert.equal(run(js).name, 'Foo')
+  assert.equal(run(js).baz, 2)
+})
+
+test('a class that esbuild renamed, and that refers to itself, keeps its call', async () => {
   // The name `Error` would shadow the global the bundle uses elsewhere, so esbuild renames the
   // class. Renaming it back would break `new Error()` inside it.
   let { js } = await build(`
