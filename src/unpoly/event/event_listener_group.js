@@ -1,6 +1,8 @@
-const u = up.util
+import { cleaner as utilCleaner, copy, extractOptions, getSimpleTokens, isJQuery, isList } from '../util.js'
+import { EventListener } from './event_listener.js'
+import { Record } from '../util/record.js'
 
-up.EventListenerGroup = class EventListenerGroup extends up.Record {
+export class EventListenerGroup extends Record {
 
   keys() {
     return [
@@ -19,10 +21,10 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
   }
 
   bind() {
-    const cleaner = u.cleaner()
+    const cleaner = utilCleaner()
 
     this._eachListenerAttributes(function(attrs) {
-      const listener = new up.EventListener(attrs)
+      const listener = new EventListener(attrs)
       listener.bind()
       return cleaner(listener.unbind.bind(listener))
     })
@@ -44,7 +46,7 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
 
   unbind() {
     this._eachListenerAttributes(function(attrs) {
-      let listener = up.EventListener.fromElement(attrs)
+      let listener = EventListener.fromElement(attrs)
       if (listener) {
         listener.unbind()
       }
@@ -60,7 +62,7 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
   @internal
   */
   static fromBindArgs(args, overrides) {
-    args = u.copy(args)
+    args = copy(args)
 
     // A callback function is given in all arg variants.
     const callback = args.pop()
@@ -70,20 +72,20 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
     let elements
     if (args[0].addEventListener) {
       elements = [args.shift()]
-    } else if (u.isJQuery(args[0]) || (u.isList(args[0]) && args[0][0].addEventListener)) {
+    } else if (isJQuery(args[0]) || (isList(args[0]) && args[0][0].addEventListener)) {
       elements = args.shift()
     } else {
       elements = [document]
     }
 
     // Event names are given in all arg variants
-    let eventTypes = u.getSimpleTokens(args.shift())
+    let eventTypes = getSimpleTokens(args.shift())
     let fixTypes = up.migrate.fixEventTypes
     if (fixTypes) {
       eventTypes = fixTypes(eventTypes)
     }
 
-    const options = u.extractOptions(args)
+    const options = extractOptions(args)
 
     // A selector is given if the user wants to delegate events.
     // It might be undefined.
@@ -92,4 +94,9 @@ up.EventListenerGroup = class EventListenerGroup extends up.Record {
     const attributes = { elements, eventTypes, selector, callback, ...options, ...overrides }
     return new (this)(attributes)
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  EventListenerGroup,
 }

@@ -42,6 +42,9 @@ import * as optionsParserClass from './unpoly/element/options_parser.js'
 import * as fifoCacheClass from './unpoly/util/fifo_cache.js'
 import * as rectClass from './unpoly/util/rect.js'
 import * as urlPatternClass from './unpoly/util/url_pattern.js'
+import * as eventEmitterClass from './unpoly/event/event_emitter.js'
+import * as eventListenerClass from './unpoly/event/event_listener.js'
+import * as eventListenerGroupClass from './unpoly/event/event_listener_group.js'
 
 window.up = {}
 
@@ -69,6 +72,9 @@ const apis = [
   fifoCacheClass.api,
   rectClass.api,
   urlPatternClass.api,
+  eventEmitterClass.api,
+  eventListenerClass.api,
+  eventListenerGroupClass.api,
 ]
 
 // Copy property descriptors, so getters (like `up.context`) stay live.
@@ -105,9 +111,6 @@ const installs = [
   () => require('./unpoly/script/csp/csp_info'),
   () => require('./unpoly/script/hello_fragment'),
   () => require('./unpoly/script/destructor_pass'),
-  () => require('./unpoly/event/event_emitter'),
-  () => require('./unpoly/event/event_listener'),
-  () => require('./unpoly/event/event_listener_group'),
   () => require('./unpoly/fragment/selector_tracker'),
   () => require('./unpoly/form/field_watcher'),
   () => require('./unpoly/form/switcher'),

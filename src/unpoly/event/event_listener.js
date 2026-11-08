@@ -1,6 +1,8 @@
-const u = up.util
+import { compactObject, evalOption, pick, reject, uid } from '../util.js'
+import { fail } from '../error.js'
+import { Record } from '../util/record.js'
 
-up.EventListener = class EventListener extends up.Record {
+export class EventListener extends Record {
 
   keys() {
     return [
@@ -38,7 +40,7 @@ up.EventListener = class EventListener extends up.Record {
   bind() {
     const map = (this.element.upEventListeners ||= {})
     if (map[this._key]) {
-      up.fail('up.on(): The %o callback %o cannot be registered more than once', this.eventType, this.callback)
+      fail('up.on(): The %o callback %o cannot be registered more than once', this.eventType, this.callback)
     }
     map[this._key] = this
 
@@ -49,7 +51,7 @@ up.EventListener = class EventListener extends up.Record {
     // Avoid setting a default { passive: false } since some browsers have non-false
     // defaults for some event types like `touchstart`.
     // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#parameters
-    let options = u.compactObject(u.pick(this, ['once', 'passive', 'capture']))
+    let options = compactObject(pick(this, ['once', 'passive', 'capture']))
     return [this.eventType, this.nativeCallback, options]
   }
 
@@ -72,7 +74,7 @@ up.EventListener = class EventListener extends up.Record {
     // 3. There is only a single event bubbling up the DOM, so we are only called once.
     let element = event.target
     if (this.selector) {
-      let selector = u.evalOption(this.selector)
+      let selector = evalOption(this.selector)
       element = element.closest(selector)
     }
 
@@ -126,7 +128,7 @@ up.EventListener = class EventListener extends up.Record {
   static _buildKey(attributes) {
     // Give the callback function a numeric identifier so it
     // can become part of the upEventListeners key.
-    attributes.callback.upUid ||= u.uid()
+    attributes.callback.upUid ||= uid()
 
     return [
       attributes.eventType,
@@ -139,9 +141,14 @@ up.EventListener = class EventListener extends up.Record {
     let map = element.upEventListeners
     if (map) {
       const listeners = Object.values(map)
-      return u.reject(listeners, 'isDefault')
+      return reject(listeners, 'isDefault')
     } else {
       return []
     }
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  EventListener,
 }

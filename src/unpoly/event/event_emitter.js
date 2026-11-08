@@ -1,7 +1,10 @@
-const u = up.util
-const e = up.element
+import { extractOptions, isArray, isElementLike, isGiven, isString, merge } from '../util.js'
+import { getOne } from '../element.js'
+import { guard } from '../error.js'
+import { Aborted } from '../error/aborted.js'
+import { Record } from '../util/record.js'
 
-up.EventEmitter = class EventEmitter extends up.Record {
+export class EventEmitter extends Record {
 
   keys() {
     return [
@@ -32,13 +35,13 @@ up.EventEmitter = class EventEmitter extends up.Record {
       document.dispatchEvent(this.event)
     }
 
-    up.error.guard(() => this.callback?.(this.event))
+    guard(() => this.callback?.(this.event))
   }
 
   assertEmitted() {
     const event = this.emit()
     if (event.defaultPrevented) {
-      throw new up.Aborted(`Event ${event.type} was prevented`)
+      throw new Aborted(`Event ${event.type} was prevented`)
     }
   }
 
@@ -48,7 +51,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
     let message = this.log
     let messageArgs
 
-    if (u.isArray(message)) {
+    if (isArray(message)) {
       [message, ...messageArgs] = message
     } else {
       messageArgs = []
@@ -56,7 +59,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
 
     const { type } = this.event
 
-    if (u.isString(message)) {
+    if (isString(message)) {
       up.puts(type, message, ...messageArgs)
     } else if (message !== false) {
       up.puts(type, `Event ${type}`)
@@ -77,16 +80,16 @@ up.EventEmitter = class EventEmitter extends up.Record {
     // { type } property for the event type. In case we are passed a pre-built
     // Event object, the hash will contain emission that options that cannot be
     // carried by the event object, such as { layer } or { callback }.
-    let options = u.extractOptions(args)
+    let options = extractOptions(args)
 
     // Event-emitting functions may instantiate their up.EventEmitter with preconfigured
     // defaults. E.g. up.Layer#emit() will set the default { layer: this }.
-    options = u.merge(defaults, options)
+    options = merge(defaults, options)
 
     // If we are passed an element or layer as a first argument, this is the event
     // target. We remove it from the argument list and store it in options.
-    if (u.isElementLike(args[0])) {
-      options.target = e.get(args.shift())
+    if (isElementLike(args[0])) {
+      options.target = getOne(args.shift())
     } else if (args[0] instanceof up.Layer) {
       options.layer = args.shift()
     }
@@ -94,7 +97,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
     // Setting a { layer } is a shorthand to (1) emit the event on the layer's
     // element and (2) to set up.layer.current to that layer during emission.
     let layer
-    if (u.isGiven(options.layer)) {
+    if (isGiven(options.layer)) {
       layer = up.layer.get(options.layer)
       options.target ||= layer.element
       options.baseLayer ||= layer
@@ -107,7 +110,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
       options.baseLayer = up.layer.get(options.baseLayer)
     }
 
-    if (u.isString(options.target)) {
+    if (isString(options.target)) {
       options.target = up.fragment.get(options.target, { layer: options.layer })
     } else if (!options.target) {
       // If no element is given, we emit the event on the document.
@@ -119,7 +122,7 @@ up.EventEmitter = class EventEmitter extends up.Record {
       // up.emit([target], event, [emitOptions])
       options.event = args[0]
       options.log ??= args[0].log
-    } else if (u.isString(args[0])) {
+    } else if (isString(args[0])) {
       // In this branch we receive an Event type and props object.
       // The props object may also include options for the emission, such as
       // { layer }, { target }, { baseLayer } or { log }.
@@ -133,4 +136,9 @@ up.EventEmitter = class EventEmitter extends up.Record {
 
     return new (this)(options)
   }
+}
+
+export const api = {
+  /** @internal On window.up for the specs. */
+  EventEmitter,
 }
