@@ -145,11 +145,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // Change history before compilation, so new fragments see the new location.
     this.layer.updateHistory(this._getEffectiveHistoryOptions())
 
-    return this.executeSteps({
-      steps: this._steps,
-      noneOptions: this.options,
-      responseDoc,
-    })
+    return new up.Change.UpdateSteps({ steps: this._steps, noneOptions: this.options }).execute(responseDoc)
   }
 
   _renderOtherLayers(responseDoc) {
@@ -161,10 +157,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
     // (2) ... see updated hungry elements on other layers in onDismissed/onAccepted handlers.
     let otherLayerSteps = this._getHungrySteps().other
 
-    return this.executeSteps({
-      steps: otherLayerSteps,
-      responseDoc,
-    })
+    return new up.Change.UpdateSteps({ steps: otherLayerSteps }).execute(responseDoc)
   }
 
   _matchPreflight() {

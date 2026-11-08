@@ -180,7 +180,7 @@ up.Change.OpenLayer = class OpenLayer extends up.Change.Addition {
     // (1) ... use the discarded content for hungry elements on other layers that have [up-if-layer=any].
     // (2) ... see updated hungry elements on other layers in onDismissed/onAccepted handlers.
     let steps = this._getHungrySteps().other
-    return this.executeSteps({ steps, responseDoc })
+    return new up.Change.UpdateSteps({ steps }).execute(responseDoc)
   }
 
   async _compileLayer() {

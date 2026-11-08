@@ -106,8 +106,4 @@ up.Change.Addition = class Addition extends up.Change {
     this._setETag(options)
   }
 
-  executeSteps({ steps, responseDoc, noneOptions }) {
-    return new up.Change.UpdateSteps({ steps, noneOptions }).execute(responseDoc)
-  }
-
 }
