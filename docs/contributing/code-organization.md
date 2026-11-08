@@ -238,14 +238,12 @@ cycles between modules.
 
 Because internal callers import functions directly, a spec that spies on `up.link.follow`
 doesn't intercept calls from other modules. A function that specs need to replace is wrapped
-in `mockable()`.
+in `mockable()`, and specs call `up.link.follow.mock()` (see
+[Testing](testing.md#spying-on-unpoly-functions)).
 
-During the TypeScript migration, namespaces that haven't been converted yet are still
-scripts that assign to `window.up` from an IIFE, and are listed in `installs` as
-`() => require(…)`. Such a script must never `import` anything: webpack would stop
-concatenating the modules it reaches, which costs ~6 KB in `unpoly.min.js`. It reaches
-functions and classes through `window.up` instead. Classes that are no longer on `window.up`
-are handed to it through a temporary, private `up._classes` object, which the entry fills.
+`util.js`, `element.js`, `browser.js`, `error.js` and the classes in `util/` and `error/` are
+evaluated before everything else, so they never import a feature namespace like `up.fragment`.
+Where they need one, they call it through `window.up` at call time.
 
 
 ## Entry points and optional bundles
