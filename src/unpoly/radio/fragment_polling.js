@@ -3,6 +3,7 @@ import { numberAttr } from '../element.js'
 import { throwCritical } from '../error.js'
 import { build, on } from '../event.js'
 import { isAlive, isTargetable, matches, onAborted, onKept, reload } from '../fragment.js'
+import { layerStack } from '../layer.js'
 import { printToStandard, printToWarn } from '../log.js'
 import { registerDestructor } from '../script.js'
 
@@ -161,7 +162,7 @@ export class FragmentPolling {
   }
 
   _isOnFrontLayer() {
-    this.layer ||= up.layer.get(this._fragment)
+    this.layer ||= layerStack.get(this._fragment)
     return this.layer?.isFront?.()
   }
 

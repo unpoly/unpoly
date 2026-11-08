@@ -4,6 +4,7 @@ import { fail } from './error.js'
 import { EventEmitter } from './event/event_emitter.js'
 import { EventListenerGroup } from './event/event_listener_group.js'
 import { EventListener } from './event/event_listener.js'
+import { layerStack } from './layer.js'
 import { printUserEvent } from './log.js'
 import { registerDestructor } from './script.js'
 
@@ -196,7 +197,7 @@ up.event.onClosest(element, 'click', function() {
 */
 export function onClosest(...args) {
   let [fragment, eventType, { layer }, callback] = parseArgs(args, 'val', 'val', 'options', 'callback')
-  layer &&= up.layer.get(layer, { origin: fragment })
+  layer &&= layerStack.get(layer, { origin: fragment })
   let guard = (event) => event.target.contains(fragment) && (!layer || layer.contains(event.target))
   let unsubscribe = on(eventType, { guard }, callback)
 

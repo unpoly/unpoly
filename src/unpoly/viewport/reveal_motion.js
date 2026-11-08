@@ -2,6 +2,7 @@ import { evalOption, filterList, isNumber, map } from '../util.js'
 import { computedStyle, getOne, isVisible } from '../element.js'
 import { fail } from '../error.js'
 import { getAll } from '../fragment.js'
+import { layerStack } from '../layer.js'
 import { Rect } from '../util/rect.js'
 import { closest, config, isRoot, rootHeight, rootWidth } from '../viewport.js'
 
@@ -10,7 +11,7 @@ export class RevealMotion {
   constructor(element, options = {}) {
     this._element = element
     this._viewport = getOne(options.viewport) || closest(this._element)
-    this._obstructionsLayer = up.layer.get(this._viewport)
+    this._obstructionsLayer = layerStack.get(this._viewport)
     this._behavior = options.behavior ?? 'instant'
 
     const viewportConfig = config

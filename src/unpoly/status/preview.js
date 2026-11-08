@@ -6,6 +6,7 @@ import {
 import { guard } from '../error.js'
 import { UpError } from '../error/error.js'
 import { getSmart, insertTemp, provideNodes } from '../fragment.js'
+import { layerStack, open } from '../layer.js'
 import { OVERLAY_VISUAL_KEYS } from '../layer/overlay_visuals.js'
 import { printToStandard } from '../log.js'
 
@@ -873,7 +874,7 @@ export class Preview {
       if (value !== undoDismissValue) this.request.abort({ reason: 'Preview overlay dismissed' })
     }
 
-    up.layer.open({
+    open({
       ...pick(this.renderOptions, [...OVERLAY_VISUAL_KEYS, 'target']),
       ...options,
       content,
@@ -883,7 +884,7 @@ export class Preview {
 
     // The new overlay is already in the stack. However, this function must be be sync and cannot
     // wait a microtask for (the fulfilled) up.layer.open() promise.
-    let overlay = up.layer.front
+    let overlay = layerStack.front
 
     this.undo(() => overlay.dismiss(undoDismissValue, { preventable: false }))
 

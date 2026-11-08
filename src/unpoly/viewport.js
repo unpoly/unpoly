@@ -8,6 +8,7 @@ import { fail } from './error.js'
 import { mockable } from './mockable.js'
 import { getInputDevice, on } from './event.js'
 import { contains, getAll as fragmentGetAll, getSmart, tryToTarget } from './fragment.js'
+import { layerStack } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
 import { registerCompiler } from './script.js'
 import { Config } from './util/config.js'
@@ -187,7 +188,7 @@ export const reveal = mockable(function(element, options) {
 
   // Now that we have looked up the element with an option like { layer: 'any' },
   // the only layer relevant from here on is the element's layer.
-  if (!(options.layer = up.layer.get(element))) {
+  if (!(options.layer = layerStack.get(element))) {
     fail('Cannot reveal a detached element')
   }
 
@@ -639,7 +640,7 @@ Unpoly automatically saves focus-related state before [navigating](/learn/naviga
 @stable
 */
 export function saveFocus(options = {}) {
-  const layer = up.layer.get(options)
+  const layer = layerStack.get(options)
   const location = options.location || layer.location
   if (location) {
     const focusCapsule = FocusCapsule.preserve(layer)
@@ -666,7 +667,7 @@ Unpoly automatically restores focus-related state when the user [presses the bac
 @stable
 */
 export function restoreFocus(options = {}) {
-  const layer = up.layer.get(options)
+  const layer = layerStack.get(options)
   const location = options.location || layer.location
   const locationCapsule = layer.lastFocusCapsules.get(location)
   // The capsule returns `true` if we could rediscover and focus the previous element.
@@ -685,7 +686,7 @@ export function newStateCache() {
 function parseOptions(args) {
   const [reference, options] = parseArgs(args, 'val', 'options')
 
-  options.layer = up.layer.get(options)
+  options.layer = layerStack.get(options)
 
   let viewports
   if (reference) {

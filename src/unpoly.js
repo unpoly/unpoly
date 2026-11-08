@@ -44,6 +44,7 @@ import * as fragment from './unpoly/fragment.js'
 import * as viewport from './unpoly/viewport.js'
 import * as motion from './unpoly/motion.js'
 import * as network from './unpoly/network.js'
+import * as layer from './unpoly/layer.js'
 import * as baseError from './unpoly/error/error.js'
 import * as notImplementedError from './unpoly/error/not_implemented.js'
 import * as abortedError from './unpoly/error/aborted.js'
@@ -124,6 +125,7 @@ const apis = [
   viewport.api,
   motion.api,
   network.api,
+  layer.api,
   baseError.api,
   notImplementedError.api,
   abortedError.api,
@@ -185,15 +187,6 @@ for (let api of apis) {
   Object.defineProperties(up, Object.getOwnPropertyDescriptors(api))
 }
 
-// TEMPORARY (TypeScript migration, Phase 1): Namespaces we haven't converted yet can't import
-// the classes that are no longer on `window.up`. An `import` in a file that we `require()`
-// below makes webpack stop concatenating every module it reaches, which costs ~6 KB in
-// unpoly.min.js. So they read these classes from here. When converting a namespace, have it
-// import its classes and remove them here.
-up._classes = {
-  RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer, // used by up.layer
-}
-
 // The explicit install order. All installs run before `up.framework.onEvaled()` below, while
 // `up.framework.evaling` is still true. Event listeners, compilers, macros and registry entries
 // created now are marked as defaults (`isDefault`), which a reset between specs keeps
@@ -216,7 +209,9 @@ const installs = [
   viewport.install,
   motion.install,
   network.install,
-  () => require('./unpoly/layer'),
+  // up.layer gets its mode classes from here. Nothing else imports them, so no other module can
+  // reach a mode class before its superclass is evaluated (see the cycle rules above).
+  () => layer.install([RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]),
   () => require('./unpoly/link'),
   () => require('./unpoly/form'),
   () => require('./unpoly/status'),

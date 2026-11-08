@@ -3,6 +3,7 @@ import { getRoot, setAttrPresence, setMissingAttrs } from './element.js'
 import { muteUncriticalRejection } from './error.js'
 import { build, emit, halt, isModified, on } from './event.js'
 import { render } from './fragment.js'
+import { layerStack } from './layer.js'
 import { printToStandard, printUserEvent } from './log.js'
 import { initialRequestMethod } from './protocol.js'
 import { registerMacro } from './script.js'
@@ -707,7 +708,7 @@ function onJumpLinkClicked(event, link) {
   // Don't handle clicks that would open a new tab.
   if (isModified(event)) return
 
-  let [currentBase, currentHash] = splitLocation(up.layer.current.location)
+  let [currentBase, currentHash] = splitLocation(layerStack.current.location)
   let [linkBase, linkHash] = splitLocation(normalizeURL(link))
   let verbatimHREF = link.getAttribute('href')
 
@@ -725,7 +726,7 @@ function onJumpLinkClicked(event, link) {
   //     a well-known anchor like "#top".
   // (2) Scroll with { behavior: 'auto' } (instead of thew default { behavior: 'instant' }
   //     so it picks up any scroll-behavior CSS rule on the viewport element.
-  let layer = up.layer.get(link)
+  let layer = layerStack.get(link)
   let revealFn = revealHashFn(linkHash, { layer, behavior, focus: true })
 
   if (revealFn) {

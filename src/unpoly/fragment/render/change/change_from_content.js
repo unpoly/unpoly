@@ -6,6 +6,7 @@ import { OpenLayerPlan } from './open_layer.js'
 import { UpdateLayerPlan } from './update_layer.js'
 import { ResponseDoc } from '../response_doc.js'
 import { refineOption } from '../../../history.js'
+import { layerStack, optionToString } from '../../../layer.js'
 import { printToStandard } from '../../../log.js'
 import { assertAssetsOK } from '../../../script.js'
 
@@ -19,7 +20,7 @@ export class ChangeFromContent extends Change {
     // options.
     this._origin = options.origin
     this._preflight = options.preflight
-    this._layers = up.layer.getAll(options)
+    this._layers = layerStack.getAll(options)
   }
 
   _getPlans() {
@@ -160,7 +161,7 @@ export class ChangeFromContent extends Change {
   _firstExpandedTarget(target) {
     // When the user passes a closed layer as { layer } option, we expand the target with the root
     // layer instead of having up.fragment.expandTargets() throw. In many cases we get the same result.
-    let layer = this._layers[0] || up.layer.root
+    let layer = this._layers[0] || layerStack.root
     return this._expandTargets(target || ':main', layer)[0]
   }
 
@@ -182,7 +183,7 @@ export class ChangeFromContent extends Change {
   _cannotMatchTarget(reason) {
     if (this._getPlans().length) {
       const planTargets = uniq(map(this._getPlans(), 'target'))
-      const humanizedLayerOption = up.layer.optionToString(this.options.layer)
+      const humanizedLayerOption = optionToString(this.options.layer)
       throw new CannotMatch([reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption])
     } else if (this._layers.length === 0) {
       this._cannotMatchLayer()

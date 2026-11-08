@@ -9,6 +9,7 @@ import { FragmentScrolling } from '../fragment_scrolling.js'
 import { RenderOptions } from '../render_options.js'
 import { RenderResult } from '../render_result.js'
 import { historyOptions } from '../../../history.js'
+import { build, layerStack } from '../../../layer.js'
 import { printToStandard } from '../../../log.js'
 import { hello } from '../../../script.js'
 
@@ -121,7 +122,7 @@ export class OpenLayerPlan extends Addition {
 
     // Don't wait for peeling to finish. Change the stack sync so there is no state
     // when the new overlay is scheduled to be pushed, but not yet in the stack.
-    up.layer.stack.push(this.layer)
+    layerStack.layers.push(this.layer)
 
     this.layer.createElements()
     this.layer.setupHandlers()
@@ -210,7 +211,7 @@ export class OpenLayerPlan extends Addition {
       return this.options = RenderOptions.finalize(optionsWithLayerDefaults)
     }
 
-    return up.layer.build(this.options, beforeNew)
+    return build(this.options, beforeNew)
   }
 
   _handleHistory() {

@@ -9,6 +9,7 @@ import {
   currentLocation, findMetaTags, getLang, isEnabled, push as historyPush, updateLang,
   updateMetaTags,
 } from '../history.js'
+import { closestLayerElement, mainTargets } from '../layer.js'
 import { Record } from '../util/record.js'
 import { newStateCache } from '../viewport.js'
 
@@ -136,7 +137,7 @@ export class Layer extends Record {
   }
 
   mainTargets() {
-    return up.layer.mainTargets(this.mode)
+    return mainTargets(this.mode)
   }
 
   /*-
@@ -540,7 +541,7 @@ export class Layer extends Record {
   contains(element) {
     // Test that the closest parent is the element and not another layer with elements nested
     // into this layer's element.
-    return up.layer.closestLayerElement(element) === this.element
+    return closestLayerElement(element) === this.element
   }
 
   /*-

@@ -2,6 +2,7 @@ import { every, filterList, findResult, isElement, isElementLike, presence, some
 import { elementLikeMatches, subtree } from '../element.js'
 import { CannotMatch } from '../error/cannot_match.js'
 import { expandTargets, isNotDestroying } from '../fragment.js'
+import { layerStack } from '../layer.js'
 
 export class Selector {
 
@@ -17,10 +18,10 @@ export class Selector {
 
     // With a single layer in the DOM, every element belongs to it and we can skip the layer lookup.
     // We count layers in the DOM, not open layers: a closed overlay may still be playing its exit animation.
-    let noLayers = externalDocument || options.layer === 'any' || up.layer.attachedCount === 1
+    let noLayers = externalDocument || options.layer === 'any' || layerStack.attachedCount === 1
 
     // Also normalizes options: a missing { layer } with an { origin } becomes 'origin'.
-    let layers = options.layer !== 'new' && !noLayers && up.layer.getAll(options)
+    let layers = options.layer !== 'new' && !noLayers && layerStack.getAll(options)
     let expandTargetLayer
 
     if (options.layer === 'new') {
@@ -30,7 +31,7 @@ export class Selector {
     } else if (noLayers) {
       // (2) There is no layer to tell matches apart by.
       //     Use the root layer to expand layer-specific selectors like `:main` or `:layer`.
-      expandTargetLayer = up.layer.root
+      expandTargetLayer = layerStack.root
     } else if (layers.length) {
       // (3) Only match within the given layers. Earlier layers are preferred.
       //     Use the first layer to expand layer-specific selectors like `:main` or `:layer`.

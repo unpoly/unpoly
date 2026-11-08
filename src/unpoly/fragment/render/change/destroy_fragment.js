@@ -1,6 +1,7 @@
 import { abort, emitFragmentDestroyed, markFragmentAsDestroying } from '../../../fragment.js'
 import { Change } from './change.js'
 import { RenderOptions } from '../render_options.js'
+import { layerStack } from '../../../layer.js'
 import { animate } from '../../../motion.js'
 import { clean } from '../../../script.js'
 
@@ -8,7 +9,7 @@ export class DestroyFragment extends Change {
 
   constructor(options) {
     super(options)
-    this._layer = up.layer.get(options) || up.layer.current
+    this._layer = layerStack.get(options) || layerStack.current
     this._element = this.options.element
     this._animation = this.options.animation
     this._log = this.options.log

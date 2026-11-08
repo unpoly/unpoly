@@ -1,4 +1,5 @@
 import { last, remove } from '../util.js'
+import { build } from '../layer.js'
 import { LayerLookup } from './layer_lookup.js'
 
 export class LayerStack {
@@ -10,7 +11,7 @@ export class LayerStack {
   }
 
   _buildRoot() {
-    return up.layer.build({ mode: 'root', stack: this })
+    return build({ mode: 'root', stack: this })
   }
 
   remove(layer) {

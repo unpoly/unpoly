@@ -6,6 +6,7 @@ import { halt as eventHalt, on, onEscape } from '../../event.js'
 import { Params } from '../../form/params.js'
 import { destroy, getAll } from '../../fragment.js'
 import { CloseLayer } from '../../fragment/render/change/close_layer.js'
+import { isWithinForeignOverlay } from '../../layer.js'
 import { Layer } from '../base.js'
 import { OverlayFocus } from '../overlay_focus.js'
 import { OVERLAY_VISUAL_KEYS } from '../overlay_visuals.js'
@@ -212,7 +213,7 @@ export class Overlay extends Layer {
         // but overlaying this overlay with a huge z-index. Clicking such a foreign overlay
         // would close this layer, as Unpoly considers it to be on the root layer (our parent).2
         this._unbindParentClicked = this.parent.on('up:click', (event, element) => {
-          if (!up.layer.isWithinForeignOverlay(element)) {
+          if (!isWithinForeignOverlay(element)) {
             // When our origin is clicked again, halt the click event
             // We achieve this by halting the click event.
             const originClicked = this.origin && this.origin.contains(element)

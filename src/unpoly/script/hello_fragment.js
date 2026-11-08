@@ -4,6 +4,7 @@ import { guard, guardPromise } from '../error.js'
 import { UpError } from '../error/error.js'
 import { emit } from '../event.js'
 import { emitFragmentInserted, getSubtree } from '../fragment.js'
+import { layerStack } from '../layer.js'
 import { printToStandard } from '../log.js'
 import { readData, registerDestructor } from '../script.js'
 
@@ -12,7 +13,7 @@ export class HelloFragment {
   constructor(root, macros, compilers, { layer, data, dataRoot, dataMap, meta, insertedEvent }) {
     // (1) If a caller has already looked up the layer we don't want to look it up again.
     // (2) Default to the current layer in case the user manually compiles a detached element.
-    layer ||= up.layer.get(root) || up.layer.current
+    layer ||= layerStack.get(root) || layerStack.current
 
     this._root = root
     this._macros = macros

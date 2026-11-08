@@ -4,6 +4,7 @@ import { guard } from '../error.js'
 import { Aborted } from '../error/aborted.js'
 import { build } from '../event.js'
 import { getSmart } from '../fragment.js'
+import { layerStack } from '../layer.js'
 import { config, printToStandard } from '../log.js'
 import { Record } from '../util/record.js'
 
@@ -103,7 +104,7 @@ export class EventEmitter extends Record {
     // element and (2) to set up.layer.current to that layer during emission.
     let layer
     if (isGiven(options.layer)) {
-      layer = up.layer.get(options.layer)
+      layer = layerStack.get(options.layer)
       options.target ||= layer.element
       options.baseLayer ||= layer
     }
@@ -112,7 +113,7 @@ export class EventEmitter extends Record {
     // In case we get a layer name like 'root' (instead of an up.Layer object) we look
     // up the actual up.Layer object.
     if (options.baseLayer) {
-      options.baseLayer = up.layer.get(options.baseLayer)
+      options.baseLayer = layerStack.get(options.baseLayer)
     }
 
     if (isString(options.target)) {

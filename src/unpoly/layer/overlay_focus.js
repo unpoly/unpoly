@@ -1,5 +1,6 @@
 import { affix, setAttrsTemp } from '../element.js'
 import { on } from '../event.js'
+import { isWithinForeignOverlay } from '../layer.js'
 import { doFocus, tryFocus } from '../viewport.js'
 
 export class OverlayFocus {
@@ -58,7 +59,7 @@ export class OverlayFocus {
 
     // (1) Ignore focus events triggered by this method.
     // (2) Ignore focus events within overlays by other libraries.
-    if (this._processingFocusEvent || up.layer.isWithinForeignOverlay(target)) {
+    if (this._processingFocusEvent || isWithinForeignOverlay(target)) {
       return
     }
 

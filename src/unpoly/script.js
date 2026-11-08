@@ -10,6 +10,7 @@ import { mockable } from './mockable.js'
 import { assertEmitted, on } from './event.js'
 import { getSmart } from './fragment.js'
 import { isBooted, isEvaling } from './framework.js'
+import { layerStack } from './layer.js'
 import { printToStandard } from './log.js'
 import { NonceableCallback } from './script/csp/nonceable_callback.js'
 import { ScriptGate } from './script/csp/script_gate.js'
@@ -512,7 +513,7 @@ function insertProcessor(queue, newCompiler) {
 
   if (isBooted()) {
     if (newCompiler.priority === 0) {
-      for (let layer of up.layer.stack) {
+      for (let layer of layerStack.layers) {
         hello(layer.element, { layer, compilers: [newCompiler], macros: [], insertedEvent: false })
       }
     } else {

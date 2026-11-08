@@ -4,6 +4,7 @@ import {
 import { fail } from '../../error.js'
 import { getInputDevice } from '../../event.js'
 import { config, successKey } from '../../fragment.js'
+import { layerStack, normalizeOptions } from '../../layer.js'
 import { callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback } from '../../script.js'
 
 // Sometimes we need to use given render options, but disable preview effects.
@@ -174,7 +175,7 @@ function removeUsePrefix(options) {
 
 function preprocess(options) {
   up.migrate.preprocessRenderOptions?.(options)
-  up.layer.normalizeOptions(options)
+  normalizeOptions(options)
   removeUsePrefix(options)
 
   const defaults = merge(
@@ -206,7 +207,7 @@ function preprocess(options) {
 function rememberOriginLayer({ origin, originLayer }) {
   if (origin && !originLayer) {
     return {
-      originLayer: up.layer.get(origin),
+      originLayer: layerStack.get(origin),
     }
   }
 }

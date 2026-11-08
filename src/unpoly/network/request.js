@@ -9,6 +9,7 @@ import { Offline } from '../error/offline.js'
 import { EventEmitter } from '../event/event_emitter.js'
 import { Params } from '../form/params.js'
 import { getSmart, parseTargetSteps, splitTarget } from '../fragment.js'
+import { layerStack } from '../layer.js'
 import { abortRequests, cache, config as networkConfig, isSafeMethod } from '../network.js'
 import { FormRenderer } from './form_renderer.js'
 import { UpResponse } from './response.js'
@@ -399,15 +400,15 @@ export const UpRequest = class Request extends Record {
       // up.layer.get('new') will return 'new' unchanged, but I'm not sure
       // if any code actually calls up.request({ ..., layer: 'new' }).
       // In OpenLayerPlan we connect requests to the base layer we're stacking upon.
-      this.layer = up.layer.get(this.layer, layerLookupOptions)
+      this.layer = layerStack.get(this.layer, layerLookupOptions)
       this.context ||= this.layer.context || {} // @layer might be "new", so we default to {}
       this.mode ||= this.layer.mode
 
-      this.failLayer = up.layer.get(this.failLayer, layerLookupOptions)
+      this.failLayer = layerStack.get(this.failLayer, layerLookupOptions)
       this.failContext ||= this.failLayer?.context || {} // @failLayer might be "new", so we default to {}
       this.failMode ||= this.failLayer?.mode
 
-      this.originLayer ||= up.layer.get(this.origin) || up.layer.current
+      this.originLayer ||= layerStack.get(this.origin) || layerStack.current
       this.originMode ||= this.originLayer?.mode
     }
 

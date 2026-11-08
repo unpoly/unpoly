@@ -5,6 +5,7 @@ import { Aborted } from '../../../error/aborted.js'
 import { build } from '../../../event.js'
 import { abort, reload } from '../../../fragment.js'
 import { Change } from './change.js'
+import { layerStack } from '../../../layer.js'
 import { doFocus } from '../../../viewport.js'
 
 export class CloseLayer extends Change {
@@ -13,7 +14,7 @@ export class CloseLayer extends Change {
     super(options)
 
     this._verb = options.verb
-    this.layer = up.layer.get(options)
+    this.layer = layerStack.get(options)
     this._origin = options.origin
     this._value = options.value
     this._preventable = options.preventable ?? true

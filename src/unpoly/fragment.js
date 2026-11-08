@@ -22,6 +22,7 @@ import { RenderJob } from './fragment/render/render_job.js'
 import { SelectorTracker } from './fragment/selector_tracker.js'
 import { Selector } from './fragment/selector.js'
 import { isEnabled } from './history.js'
+import { config as layerConfig, layerStack, mainTargets } from './layer.js'
 import { Layer } from './layer/base.js'
 import { printToStandard, printToWarn } from './log.js'
 import { abortRequests } from './network.js'
@@ -313,7 +314,7 @@ export const config = new Config('up.fragment.config', () => ({
 
 // Users who are not using layers will prefer settings default targets
 // as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
-defineDelegates(config, ['mainTargets'], () => up.layer.config.any)
+defineDelegates(config, ['mainTargets'], () => layerConfig.any)
 
 
 function defaultSkipResponse({ response, expiredResponse }) {
@@ -1642,7 +1643,7 @@ Will always return `false` if the two elements are on different [layers](/api/up
 export function contains(root, selectorOrElement) {
   if (isElement(selectorOrElement)) {
     // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
-    return elementContains(root, selectorOrElement) && up.layer.get(root)?.contains(selectorOrElement)
+    return elementContains(root, selectorOrElement) && layerStack.get(root)?.contains(selectorOrElement)
   } else {
     return getSubtree(root, selectorOrElement).length > 0
   }
@@ -2304,7 +2305,7 @@ export function expandTargets(targets, options = {}) {
 
     if (containsMainPseudo(target)) {
       let mode = resolveMode(options)
-      let replaced = up.layer.mainTargets(mode).map((mainTarget) => target.replace(MAIN_PSEUDO, mainTarget))
+      let replaced = mainTargets(mode).map((mainTarget) => target.replace(MAIN_PSEUDO, mainTarget))
       targets.unshift(...replaced)
     } else if (LAYER_PSEUDO.test(target)) {
       // Discard this target for new layers, which don't have a first-swappable-element.
@@ -2841,7 +2842,7 @@ export const abort = mockable(function abort(...args) {
     // functions, which operate on the main element if no other target is given.
     // However, when we navigate on a layer, we want to abort *all* requests on
     // that layer, even requests with a target outside of main, e.g. a nav bar.
-    let layers = up.layer.getAll(options)
+    let layers = layerStack.getAll(options)
     elements = map(layers, 'element')
     testFn = (request) => request.isBoundToLayers(layers)
     reason ||= 'Aborting requests within ' + layers.join(', ')
@@ -3351,6 +3352,6 @@ export const api = {
   navigate,
   visit,
   template: { clone: cloneTemplate },
-  get context() { return up.layer.current.context },
-  set context(context) { up.layer.current.context = context },
+  get context() { return layerStack.current.context },
+  set context(context) { layerStack.current.context = context },
 }
