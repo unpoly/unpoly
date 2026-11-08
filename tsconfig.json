@@ -14,8 +14,9 @@
     "target": "es2024",
     "lib": ["es2024", "dom", "dom.iterable"],
     "module": "preserve",
-    // Source files are scripts that share one global scope. Checking them as modules
-    // gives each file its own scope, so `const u = up.util` doesn't clash between files.
+    // Source files are ES modules that export `api` and `install()` (see src/unpoly.js).
+    // Files not yet converted are scripts that assign to `window.up`. Checking them as modules
+    // too gives each its own scope, so `const u = up.util` doesn't clash between files.
     "moduleDetection": "force",
     // Don't load @types packages of our dev dependencies (node, express, ...).
     "types": [],

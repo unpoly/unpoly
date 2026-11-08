@@ -111,7 +111,7 @@ Unpoly isn't an ESM module that can be imported. Instead it defines a global `wi
 - The server-rendered HTML document can directly use Unpoly's HTML extensions (e.g. `[up-follow]`, `[up-submit]`).
 - Callback attributes (like `[onclick]`, `[up-on-accepted]`) can directly call functions on the `up` global (no way to `import` here).
 
-*Internally* Unpoly is free to use ESM modules and `import`/`export`, which Webpack will compile away.
+*Internally* Unpoly's files are ES modules that `import` from each other. Webpack bundles them into one script that sets `window.up`. See the [namespace pattern](#namespace-pattern) below.
 
 ### Responsibilities
 
@@ -147,68 +147,91 @@ Namespaces live in `src/unpoly`. E.g. `src/unpoly/link.js` defines the `up.link`
 A namespace definition has the following jobs:
 
 - Implement any HTML extensions, mostly new attributes like `[up-follow]`. These are either handled by event listeners, or by activating behavior on new DOM elements with a compiler.
-- Define a companion JavaScript API (like `up.link.follow()`). Public JS API is exposed on the `window.up` global, internal API is hidden within closures.
+- Define a companion JavaScript API (like `up.link.follow()`), published on the `window.up` global.
 - Often expose a configuration property (like `up.link.config`) that lets the developer configure the namespace's behavior.
+
+Each namespace is an ES module that exports:
+
+- **Named functions**, which other files `import`. Internal code never calls through the global (`up.link.follow()`), it imports `follow` from `./link.js`.
+- **`api`**, the module's contribution to `window.up`: the namespace object, plus any shortcuts like `up.follow`. Public names may differ from the internal ones (`get: getOne`).
+- Optionally **`install()`**, which performs all the module's side effects: registering compilers, macros and event listeners.
+
+A module's top level only declares things. Nothing happens when it is imported.
 
 To illustrate, here is a *very* simplified version of `up.link`:
 
 ```js
-// An Unpoly namespace is simply an object property of the `window.up` global.
-// Here we assign `up.link` to an IIFE that returns the public symbols (classic "module pattern")
-up.link = (function() {
-  
-  // Short aliases for our two utility namespaces.
-  const u = up.util
-  const e = up.element
-  
-  // Settings to globally configure link handling.
-  // Published as up.link.config.
-  const config = new up.Config(() => ({
-    followSelector: '[up-follow]',
-  }))
+// Import the functions and classes we need from other modules.
+import { Config } from './util/config.js'
+import { emit } from './event.js'
+import { LinkFollower } from './link/link_follower.js'
 
-  // Programmatically follow a link.
-  // Published as up.link.follow()
-  function follow(link) {
-    // Allow listeners to prevent the follow
-    if (emitFollowEvent(link).defaultPrevented) return
-    
-    // Instantiate a helper class to handle the following
-    return new up.LinkFollower(link).execute()
-  }
+// Settings to globally configure link handling.
+// Published as up.link.config.
+export const config = new Config(() => ({
+  followSelector: '[up-follow]',
+}))
 
-  // Return whether a link will be followed by Unpoly.
-  // Published as up.link.isFollowable()
-  function isFollowable(link) {
-    return !!link.closest(config.followSelector)
-  }
+// Programmatically follow a link.
+// Published as up.link.follow() and up.follow()
+export function follow(link) {
+  // Allow listeners to prevent the follow
+  if (emitFollowEvent(link).defaultPrevented) return
 
-  // Internal helper to emit an up:link:follow event.
-  // Not published.
-  function emitFollowEvent(link) {
-    return up.emit(link, 'up:link:follow')
-  }
-  
+  // Instantiate a helper class to handle the following
+  return new LinkFollower(link).execute()
+}
+
+// Return whether a link will be followed by Unpoly.
+// Published as up.link.isFollowable()
+export function isFollowable(link) {
+  return !!link.closest(config.followSelector)
+}
+
+// Internal helper to emit an up:link:follow event.
+// Not exported, not published.
+function emitFollowEvent(link) {
+  return emit(link, 'up:link:follow')
+}
+
+// Side effects only run when the entry file calls install().
+export function install() {
   // Handle clicks on links with an [up-follow] attribute
   document.addEventListener('click', function(event) {
     if (isFollowable(event.target)) {
       follow(event.target)
     }
   })
-  
-  // Return the public functions and values that will be set as up.link properties.
-  // Do not return internal helpers.
-  return {
+}
+
+// The public functions and values that will be set as up.link properties.
+// Do not add internal helpers.
+export const api = {
+  link: {
     config,       // becomes up.link.config
     follow,       // becomes up.link.follow()
     isFollowable, // becomes up.link.isFollowable()
-  }
-})()
-
-// We usually expose functions as `up.namespace.verb()`.
-// Frequently used functions are aliased directly on `window.up` to shorten call sites.
-up.follow = up.link.follow
+  },
+  // We usually expose functions as `up.namespace.verb()`.
+  // Frequently used functions also get a shortcut directly on `window.up`.
+  follow,         // becomes up.follow()
+}
 ```
+
+A class file exports the class, and an `api` if the class is published (like `up.Params`).
+
+The entry file `src/unpoly.js` ties the modules together. It imports every module, copies
+each `api` onto `window.up` (the `apis` list), then calls each `install()` (the `installs`
+list, which is the explicit install order). Its comments also explain the rules for import
+cycles between modules.
+
+Because internal callers import functions directly, a spec that spies on `up.link.follow`
+doesn't intercept calls from other modules. A function that specs need to replace is wrapped
+in `mockable()`.
+
+During the TypeScript migration, namespaces that haven't been converted yet are still
+scripts that assign to `window.up` from an IIFE, and are listed in `installs` as
+`() => require(…)`.
 
 
 ## Entry points and optional bundles
