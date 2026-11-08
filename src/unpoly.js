@@ -11,6 +11,7 @@ import * as util from './unpoly/util.js'
 import * as error from './unpoly/error.js'
 import * as migrateStub from './unpoly/migrate_stub.js'
 import * as browser from './unpoly/browser.js'
+import * as element from './unpoly/element.js'
 import * as baseError from './unpoly/errors/error.js'
 import * as notImplementedError from './unpoly/errors/not_implemented.js'
 import * as abortedError from './unpoly/errors/aborted.js'
@@ -29,6 +30,7 @@ const apis = [
   error.api,
   migrateStub.api,
   browser.api,
+  element.api,
   baseError.api,
   notImplementedError.api,
   abortedError.api,
@@ -54,7 +56,6 @@ for (let api of apis) {
 // its line, and add its `install` here if it has one.
 const installs = [
   util.install,
-  () => require('./unpoly/element'),
 
   () => require('./unpoly/classes/record'),
   () => require('./unpoly/classes/config'),
