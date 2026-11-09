@@ -96,15 +96,18 @@ test('a scan that finds nothing fails closed rather than reporting "fresh"', () 
 // --- Over-scanning, and the grace that pays for it -------------------------
 
 // A fake checkout. `files` maps a relative path to an mtime in seconds, so a test can say which
-// file is newest without sleeping.
+// file is newest without sleeping. Its directories are older than every file.
 function checkout(files) {
   const root = mkdtempSync(path.join(tmpdir(), 'unpoly-src-'))
+  const dirs = new Set()
   for (const [relative, seconds] of Object.entries(files)) {
     const full = path.join(root, relative)
     mkdirSync(path.dirname(full), { recursive: true })
     writeFileSync(full, '')
     utimesSync(full, seconds, seconds)
+    for (let dir = path.dirname(full); dir !== root; dir = path.dirname(dir)) dirs.add(dir)
   }
+  for (const dir of dirs) utimesSync(dir, 1, 1)
   return root
 }
 
@@ -137,6 +140,17 @@ test('a bare .erb is not an input, because the erb plugin only loads /\\.js\\.er
   const root = checkout({ 'src/a.js': 1000, 'src/template.erb': 2000 })
   try {
     assert.equal(newestSourceMtime(root, ['src']), 1000 * 1000)
+  } finally { rmSync(root, { recursive: true, force: true }) }
+})
+
+test('a deleted or moved file counts, through its directory', () => {
+  // Deleting spec/helpers/b.js changes no file's mtime. Only the directory's tells that a build
+  // may be stale.
+  const root = checkout({ 'spec/helpers/a.js': 1000, 'spec/helpers/b.js': 1000 })
+  try {
+    rmSync(path.join(root, 'spec/helpers/b.js'))
+    utimesSync(path.join(root, 'spec/helpers'), 2000, 2000)
+    assert.deepEqual(newestSource(root, ['spec']), { mtime: 2000 * 1000, file: path.join('spec', 'helpers') })
   } finally { rmSync(root, { recursive: true, force: true }) }
 })
 

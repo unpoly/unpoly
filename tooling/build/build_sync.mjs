@@ -51,16 +51,26 @@ const isWatchable = (name) => WATCHABLE_SUFFIXES.some((suffix) => name.endsWith(
 
 // The newest file the watcher might rebuild for, as `{ mtime, file }`. The path is carried so the
 // caller can name it — either when reporting that nothing rebuilt, or on a timeout.
+//
+// Directories count too. Deleting or moving a file changes no file's mtime, only its directory's,
+// and moved files keep theirs. Without the directory, a run started right after `rm` would find
+// everything fresh before the watcher had even seen the deletion. The price: a new non-source
+// file (a guide page, an image) next to sources costs the next run the grace period once.
 export function newestSource(root = PROJECT_ROOT, dirs = SOURCE_DIRS) {
   let newest = 0
   let newestFile = null
   let seen = 0
+  let consider = (mtime, full) => {
+    if (mtime > newest) { newest = mtime; newestFile = full }
+  }
 
   for (let dir of dirs) {
-    walk(path.join(root, dir), (mtime, full) => {
+    let full = path.join(root, dir)
+    try { consider(statSync(full).mtimeMs, full) } catch { continue }
+    walk(full, (mtime, file) => {
       seen++
-      if (mtime > newest) { newest = mtime; newestFile = full }
-    })
+      consider(mtime, file)
+    }, consider)
   }
 
   // No sources at all means the wrong cwd (or a broken checkout). Reporting 0 would say
@@ -73,14 +83,15 @@ export function newestSourceMtime(...args) {
   return newestSource(...args).mtime
 }
 
-function walk(dir, onFile) {
+function walk(dir, onFile, onDir) {
   let entries
   try { entries = readdirSync(dir, { withFileTypes: true }) } catch { return }
   for (let entry of entries) {
     if (SKIP_DIRS.has(entry.name)) continue
     let full = path.join(dir, entry.name)
     if (entry.isDirectory()) {
-      walk(full, onFile)
+      try { onDir(statSync(full).mtimeMs, full) } catch { /* ignore */ }
+      walk(full, onFile, onDir)
     } else if (isWatchable(entry.name)) {
       try { onFile(statSync(full).mtimeMs, full) } catch { /* ignore */ }
     }

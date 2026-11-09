@@ -74,8 +74,10 @@ export async function runWatch({ bundles, sourcemap }) {
 
   for (let dir of SOURCE_DIRS) {
     watch(path.join(PROJECT_ROOT, dir), { recursive: true }, (_event, filename) => {
-      // Node may not know the name. Then rebuild anyway, but there is nothing to lint.
-      if (!filename) return rounds.change(null)
+      // Node may not know the name. And a directory that is renamed, moved or deleted is
+      // reported under its own name only, not for the files in it. Then rebuild anyway, but there
+      // is nothing to lint.
+      if (!filename || !path.extname(filename)) return rounds.change(null)
       if (isWatchable(filename)) rounds.change(path.join(PROJECT_ROOT, dir, filename))
     })
   }

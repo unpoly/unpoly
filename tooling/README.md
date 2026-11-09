@@ -137,7 +137,9 @@ until `idle && startedAt >= newestSourceMtime`, then throws if `ok` is false;
 
 `newestSourceMtime` walks `src`, `spec` and `tooling/runner/browser`, counting only the
 extensions a bundle can import (`WATCHABLE_SUFFIXES`, which also decides what makes the watcher
-rebuild). That last directory is in because
+rebuild), plus every directory: a deleted or moved file changes no file's mtime, only its
+directory's. The watcher in turn rebuilds for any event without a file extension, which is how
+inotify reports a moved or deleted directory. `tooling/runner/browser` is in because
 `spec/helpers/terminal_reporter.js` imports `poster.js` from it, which pulls two more modules into
 `dist/specs.js`; the rest of `tooling` runs in Node and can never be bundled. One self-test derives
 the bundled set from the imports and fails if any of it moves outside a scanned directory; another
