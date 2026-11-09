@@ -288,7 +288,7 @@ the new animation begins.
 @stable
 */
 // The element may also be a selector.
-export const animate = mockable(async function animate(element: any, animationValue: AnimationValue, { duration, easing, onFinished }: AnimateOptions = {}): Promise<void> {
+export const animate = mockable(async function animate(element: any, animationValue: AnimationValue | undefined, { duration, easing, onFinished }: AnimateOptions = {}): Promise<void> {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   element = getSmart(element)
 
@@ -411,7 +411,8 @@ Does nothing if there are no animations to complete.
 @stable
 */
 export function finish(element?: ElementOrSelector): Promise<void> | undefined {
-  element = getSmart(element)
+  // Without an element, getSmart() returns undefined, and we finish all animations.
+  element = getSmart(element as ElementOrSelector)
   motionController.finish(element)
   // Finishing is synchronous. With unpoly-migrate, we return a promise that warns when awaited.
   return up.migrate.formerlyAsync?.('up.motion.finish()')
@@ -582,7 +583,7 @@ function composeTransitionFn(oldAnimation: AnimationValue, newAnimation: Animati
   }
 }
 
-function findAnimationFn(value: AnimationValue): AnimationFn | undefined {
+function findAnimationFn(value: AnimationValue | undefined): AnimationFn | undefined {
   if (isNone(value)) {
     return undefined
   } else if (isFunction(value)) {
