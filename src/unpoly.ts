@@ -3,7 +3,7 @@
 // listeners, macros). A module's top level only declares things.
 //
 // We only access `api` and `install` as static properties of the imported modules, never
-// pass a module namespace object around: webpack would then have to build that object,
+// pass a module namespace object around: the bundler would then have to build that object,
 // listing every export of the module (2.4 KB for up.util alone).
 //
 // Import cycles between modules are fine, as long as nothing evaluated while a module or class

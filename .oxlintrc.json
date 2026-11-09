@@ -101,7 +101,7 @@
     "use-isnan": ["error", { "enforceForIndexOf": false, "enforceForSwitchCase": true }],
     "valid-typeof": ["error", { "requireStringLiterals": false }],
     // Unlike typescript-eslint's, Oxlint's TypeScript rules only run on TypeScript files. So this
-    // doesn't check a `@ts-ignore` in a .js file, although bin/typecheck checks those too.
+    // doesn't check a `@ts-ignore` in a .js file (specs, tooling). bin/typecheck doesn't read those either.
     "typescript/ban-ts-comment": "error",
     "typescript/no-duplicate-enum-values": "error",
     "typescript/no-empty-object-type": "error",
