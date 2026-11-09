@@ -89,7 +89,7 @@ layer.registerAttrCloser('up-close', (value, closeOptions) => {
 // Apps usually configure layers before Unpoly boots, so we check all mode configs once at boot.
 up.migrate.fixLayerConfigs = function() {
   for (let [mode, modeConfig] of Object.entries(up.layer.config)) {
-    if (up.util.isOptions(modeConfig)) {
+    if (up.internal.isOptions(modeConfig)) {
       fixRenamedLayerKeys(modeConfig, { label: `up.layer.config.${mode}` })
     }
   }

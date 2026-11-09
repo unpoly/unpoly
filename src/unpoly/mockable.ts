@@ -20,7 +20,3 @@ export function mockable<F extends AnyFunction>(originalFn: F): MockableFunction
     return originalFn as MockableFunction<F>
   }
 }
-
-export const api = {
-  mockable,
-}

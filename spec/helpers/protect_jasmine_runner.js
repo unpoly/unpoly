@@ -4,7 +4,7 @@ const $ = jQuery
 
 function fail(...args) {
   if (!jasmine.resetting) {
-    up.fail(...args)
+    up.internal.fail(...args)
   }
 }
 
@@ -318,7 +318,7 @@ beforeAll(function() {
 
 // Remove all assets that might have been inserted by a test
 afterEach(function() {
-  let assets = [...up.script.findAssets()]
+  let assets = [...up.internal.findAssets()]
   for (let asset of assets) {
     asset.remove()
   }

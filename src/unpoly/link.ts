@@ -4,7 +4,6 @@ import {
   addClasses, booleanOrStringAttr, crossOriginSelector, getOne, numberAttr, setMissingAttr,
   setMissingAttrs, stringAttr, upAttrs, upClasses,
 } from './element.js'
-import { canPushState } from './browser.js'
 import { muteUncriticalRejection } from './error.js'
 import { mockable } from './mockable.js'
 import { OptionsParser } from './element/options_parser.js'
@@ -15,7 +14,7 @@ import {
 import { anyButtonSelector, fieldSelector } from './form.js'
 import { getSmart, onFirstIntersect, render } from './fragment.js'
 import { RenderOptions } from './fragment/render/render_options.js'
-import { isHistoryEnabled } from './history.js'
+import { canPushState, isHistoryEnabled } from './history.js'
 import { LinkFollowIntent } from './link/link_follow_intent.js'
 import { motionOptions } from './motion.js'
 import { config as networkConfig, isSafeMethod } from './network.js'
@@ -1675,7 +1674,6 @@ export const api = {
     makeFollowable,
     isSafe,
     isFollowable,
-    shouldHandleClick,
     config,
     loadDeferred,
   },

@@ -70,8 +70,3 @@ export class NonceableCallback {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  NonceableCallback,
-}

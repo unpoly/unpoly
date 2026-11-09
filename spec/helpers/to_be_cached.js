@@ -6,7 +6,7 @@ beforeEach(function() {
     toBeCached(util, customEqualityTesters) {
       return {
         compare(optionsOrRequest) {
-          const request = u.wrapValue(up.Request, optionsOrRequest)
+          const request = up.internal.wrapValue(up.Request, optionsOrRequest)
           const cached = up.cache.get(request)
 
           return { pass: !!cached }
@@ -17,7 +17,7 @@ beforeEach(function() {
     toBeCachedWithoutResponse(util, customEqualityTesters) {
       return {
         compare(optionsOrRequest) {
-          const request = u.wrapValue(up.Request, optionsOrRequest)
+          const request = up.internal.wrapValue(up.Request, optionsOrRequest)
           const cached = up.cache.get(request)
 
           const pass = cached && !cached.response
@@ -31,16 +31,16 @@ beforeEach(function() {
       return {
         compare(optionsOrRequest, expectedResponseProps = {}) {
           let message
-          const request = u.wrapValue(up.Request, optionsOrRequest)
+          const request = up.internal.wrapValue(up.Request, optionsOrRequest)
           const cached = up.cache.get(request)
 
-          const pass = cached && cached.response && u.objectContains(cached.response, expectedResponseProps)
+          const pass = cached && cached.response && up.internal.objectContains(cached.response, expectedResponseProps)
           let actualResponseProps = cached.response ? u.pick(cached.response, Object.keys(expectedResponseProps)) : null
 
           if (pass) {
-            message = u.sprintf("Expected %o not to be cached with response %o, but the cached response was %o", request, expectedResponseProps, actualResponseProps)
+            message = up.internal.sprintf("Expected %o not to be cached with response %o, but the cached response was %o", request, expectedResponseProps, actualResponseProps)
           } else {
-            message = u.sprintf("Expected %o to be cached with response %o, but the cached response was %o", request, expectedResponseProps, actualResponseProps)
+            message = up.internal.sprintf("Expected %o to be cached with response %o, but the cached response was %o", request, expectedResponseProps, actualResponseProps)
           }
 
           return { pass, message }

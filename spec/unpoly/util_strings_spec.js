@@ -10,12 +10,12 @@ extendDescribe('up.util', function() {
       describe('with string argument', function() {
 
         it('serializes the string verbatim with %s', function() {
-          const formatted = up.util.sprintf('before %s after', 'argument')
+          const formatted = up.internal.sprintf('before %s after', 'argument')
           expect(formatted).toEqual('before argument after')
         })
 
         it('includes quotes with %o', function() {
-          const formatted = up.util.sprintf('before %o after', 'argument')
+          const formatted = up.internal.sprintf('before %o after', 'argument')
           expect(formatted).toEqual('before "argument" after')
         })
       })
@@ -23,12 +23,12 @@ extendDescribe('up.util', function() {
       describe('with undefined argument', function() {
 
         it('serializes to the word "undefined"', function() {
-          const formatted = up.util.sprintf('before %o after', undefined)
+          const formatted = up.internal.sprintf('before %o after', undefined)
           expect(formatted).toEqual('before undefined after')
         })
 
         it('does not crash with %s', function() {
-          const formatted = up.util.sprintf('before %s after', undefined)
+          const formatted = up.internal.sprintf('before %s after', undefined)
           expect(formatted).toEqual('before undefined after')
         })
       })
@@ -36,12 +36,12 @@ extendDescribe('up.util', function() {
       describe('with null argument', function() {
 
         it('serializes to the word "null"', function() {
-          const formatted = up.util.sprintf('before %o after', null)
+          const formatted = up.internal.sprintf('before %o after', null)
           expect(formatted).toEqual('before null after')
         })
 
         it('does not crash with %s', function() {
-          const formatted = up.util.sprintf('before %s after', null)
+          const formatted = up.internal.sprintf('before %s after', null)
           expect(formatted).toEqual('before null after')
         })
       })
@@ -49,12 +49,12 @@ extendDescribe('up.util', function() {
       describe('with true argument', function() {
 
         it('serializes to the word "true"', function() {
-          const formatted = up.util.sprintf('before %o after', true)
+          const formatted = up.internal.sprintf('before %o after', true)
           expect(formatted).toEqual('before true after')
         })
 
         it('does not crash with %s', function() {
-          const formatted = up.util.sprintf('before %s after', true)
+          const formatted = up.internal.sprintf('before %s after', true)
           expect(formatted).toEqual('before true after')
         })
       })
@@ -62,26 +62,26 @@ extendDescribe('up.util', function() {
       describe('with false argument', function() {
 
         it('serializes to the word "false"', function() {
-          const formatted = up.util.sprintf('before %o after', false)
+          const formatted = up.internal.sprintf('before %o after', false)
           expect(formatted).toEqual('before false after')
         })
 
         it('does not crash with %s', function() {
-          const formatted = up.util.sprintf('before %s after', false)
+          const formatted = up.internal.sprintf('before %s after', false)
           expect(formatted).toEqual('before false after')
         })
       })
 
       describe('with number argument', function() {
         it('serializes the number as string', function() {
-          const formatted = up.util.sprintf('before %o after', 5)
+          const formatted = up.internal.sprintf('before %o after', 5)
           expect(formatted).toEqual('before 5 after')
         })
       })
 
       describe('with function argument', function() {
         it('serializes the function code', function() {
-          const formatted = up.util.sprintf('before %o after', function foo() {})
+          const formatted = up.internal.sprintf('before %o after', function foo() {})
           // The build reprints the function, so we don't know its whitespace.
           expect(formatted).toMatch(/^before function foo\(\) \{\s*\} after$/)
         })
@@ -89,20 +89,20 @@ extendDescribe('up.util', function() {
 
       describe('with array argument', function() {
         it('recursively serializes the elements', function() {
-          const formatted = up.util.sprintf('before %o after', [1, "foo"])
+          const formatted = up.internal.sprintf('before %o after', [1, "foo"])
           expect(formatted).toEqual('before [1, "foo"] after')
         })
 
         it('serializes nested elements like a direct element', function() {
           const element = e.createFromHTML('<span class="foo">text</span>')
-          const formatted = up.util.sprintf('before %o after', [element])
+          const formatted = up.internal.sprintf('before %o after', [element])
           expect(formatted).toEqual('before [<span class="foo">] after')
         })
 
         it('marks an array that contains itself', function() {
           const array = [1]
           array.push(array)
-          const formatted = up.util.sprintf('before %o after', array)
+          const formatted = up.internal.sprintf('before %o after', array)
           expect(formatted).toEqual('before [1, (circular)] after')
         })
       })
@@ -113,7 +113,7 @@ extendDescribe('up.util', function() {
           const content = '<tr><td>cell</td></tr>'
           const closeTag = '</table>'
           const element = e.createFromHTML(openTag + content + closeTag)
-          const formatted = up.util.sprintf('before %o after', element)
+          const formatted = up.internal.sprintf('before %o after', element)
           expect(formatted).toEqual('before ' + openTag + ' after')
         })
       })
@@ -122,7 +122,7 @@ extendDescribe('up.util', function() {
         it('serializes the tag name with id, name and class attributes, but ignores other attributes', function() {
           const $element1 = $('<table id="table-id">')
           const $element2 = $('<ul id="ul-id">')
-          const formatted = up.util.sprintf('before %o after', $element1.add($element2))
+          const formatted = up.internal.sprintf('before %o after', $element1.add($element2))
           expect(formatted).toEqual('before $(<table id="table-id">, <ul id="ul-id">) after')
         })
       })
@@ -131,58 +131,58 @@ extendDescribe('up.util', function() {
 
         it('serializes keys and values', function() {
           const object = { foo: 'foo-value', bar: 'bar-value' }
-          const formatted = up.util.sprintf('before %o after', object)
+          const formatted = up.internal.sprintf('before %o after', object)
           expect(formatted).toEqual('before { foo: "foo-value", bar: "bar-value" } after')
         })
 
         it('serializes an empty object', function() {
-          const formatted = up.util.sprintf('before %o after', {})
+          const formatted = up.internal.sprintf('before %o after', {})
           expect(formatted).toEqual('before {} after')
         })
 
         it('serializes an object without prototype', function() {
           const object = Object.create(null)
           object.foo = 'foo-value'
-          const formatted = up.util.sprintf('before %o after', object)
+          const formatted = up.internal.sprintf('before %o after', object)
           expect(formatted).toEqual('before { foo: "foo-value" } after')
         })
 
         it('serializes nested values like direct values', function() {
           const element = e.createFromHTML('<span class="foo">text</span>')
           const object = { element, string: 'text', number: 5, null: null, array: [true] }
-          const formatted = up.util.sprintf('before %o after', object)
+          const formatted = up.internal.sprintf('before %o after', object)
           expect(formatted).toEqual('before { element: <span class="foo">, string: "text", number: 5, null: null, array: [true] } after')
         })
 
         it('marks a circular reference', function() {
           const object = { foo: {} }
           object.foo.bar = object
-          const formatted = up.util.sprintf('before %o after', object)
+          const formatted = up.internal.sprintf('before %o after', object)
           expect(formatted).toEqual('before { foo: { bar: (circular) } } after')
         })
 
         it('marks a circular reference through an array', function() {
           const object = { foo: [] }
           object.foo.push(object)
-          const formatted = up.util.sprintf('before %o after', object)
+          const formatted = up.internal.sprintf('before %o after', object)
           expect(formatted).toEqual('before { foo: [(circular)] } after')
         })
 
         it('serializes an object in full every time it appears, as long as there is no cycle', function() {
           const shared = { baz: 'baz-value' }
           const object = { foo: shared, bar: [shared] }
-          const formatted = up.util.sprintf('before %o after', object)
+          const formatted = up.internal.sprintf('before %o after', object)
           expect(formatted).toEqual('before { foo: { baz: "baz-value" }, bar: [{ baz: "baz-value" }] } after')
         })
 
         it('skips a non-enumerable key with a getter that crashes', function() {
           const object = {}
           Object.defineProperty(object, 'foo', { get() { throw "error" } })
-          let formatted = up.util.sprintf('before %o after', object)
+          let formatted = up.internal.sprintf('before %o after', object)
           expect(formatted).toEqual('before {} after')
 
           object.bar = 'bar'
-          formatted = up.util.sprintf('before %o after', object)
+          formatted = up.internal.sprintf('before %o after', object)
           expect(formatted).toEqual('before { bar: "bar" } after')
         })
       })
@@ -191,49 +191,49 @@ extendDescribe('up.util', function() {
 
         it("serializes an up.Request with its class and readable name", function() {
           const request = new up.Request({ url: '/users/5' })
-          const formatted = up.util.sprintf('before %o after', request)
+          const formatted = up.internal.sprintf('before %o after', request)
           expect(formatted).toEqual('before up.Request(GET /users/5) after')
         })
 
         it("serializes an up.Request with %s as its readable name", function() {
           const request = new up.Request({ url: '/users/5' })
-          const formatted = up.util.sprintf('before %s after', request)
+          const formatted = up.internal.sprintf('before %s after', request)
           expect(formatted).toEqual('before GET /users/5 after')
         })
 
         it("serializes a layer with its class and readable name", async function() {
           await up.layer.open({ mode: 'modal' })
-          const formatted = up.util.sprintf('before %o, %o after', up.layer.root, up.layer.current)
+          const formatted = up.internal.sprintf('before %o, %o after', up.layer.root, up.layer.current)
           expect(formatted).toEqual('before up.Layer(root layer), up.Layer(modal overlay) after')
         })
 
         it("serializes an up.Params with its query", function() {
           const params = new up.Params({ foo: 'bar' })
-          const formatted = up.util.sprintf('before %o after', params)
+          const formatted = up.internal.sprintf('before %o after', params)
           expect(formatted).toEqual('before up.Params(foo=bar) after')
         })
 
         it("serializes an up.RenderJob with its class name", function() {
           const job = new up.RenderJob({ target: '#target' })
-          const formatted = up.util.sprintf('before %o after', job)
+          const formatted = up.internal.sprintf('before %o after', job)
           expect(formatted).toEqual('before up.RenderJob {…} after')
         })
 
         it("serializes an up.RenderResult with its class name", function() {
           const result = new up.RenderResult()
-          const formatted = up.util.sprintf('before %o after', result)
+          const formatted = up.internal.sprintf('before %o after', result)
           expect(formatted).toEqual('before up.RenderResult {…} after')
         })
 
         it("serializes an up.Preview with its class name", function() {
           const preview = new up.Preview({})
-          const formatted = up.util.sprintf('before %o after', preview)
+          const formatted = up.internal.sprintf('before %o after', preview)
           expect(formatted).toEqual('before up.Preview {…} after')
         })
 
         it("serializes a built-in class with its constructor name and string representation", function() {
           const date = new Date(2026, 9, 21)
-          const formatted = up.util.sprintf('before %o, %o after', date, /^up-/i)
+          const formatted = up.internal.sprintf('before %o, %o after', date, /^up-/i)
           expect(formatted).toEqual(`before Date(${date.toString()}), RegExp(/^up-/i) after`)
         })
 
@@ -241,7 +241,7 @@ extendDescribe('up.util', function() {
           class Foo {
             constructor() { this.foo = 'foo' }
           }
-          const formatted = up.util.sprintf('before %o after', new Foo())
+          const formatted = up.internal.sprintf('before %o after', new Foo())
           expect(formatted).toEqual('before Foo {…} after')
         })
 
@@ -249,14 +249,14 @@ extendDescribe('up.util', function() {
           class Foo {
             get [Symbol.toStringTag]() { return 'my.Foo' }
           }
-          const formatted = up.util.sprintf('before %o after', new Foo())
+          const formatted = up.internal.sprintf('before %o after', new Foo())
           expect(formatted).toEqual('before my.Foo {…} after')
         })
 
         it('serializes a nested instance or error like a direct one', function() {
           class Foo {}
           const object = { request: new up.Request({ url: '/path' }), foo: new Foo(), error: new up.CannotMatch('message') }
-          const formatted = up.util.sprintf('before %o after', [object])
+          const formatted = up.internal.sprintf('before %o after', [object])
           expect(formatted).toEqual('before [{ request: up.Request(GET /path), foo: Foo {…}, error: up.CannotMatch(message) }] after')
         })
       })
@@ -264,26 +264,26 @@ extendDescribe('up.util', function() {
       describe('with Error argument', function() {
         it("serializes the error's name and message", function() {
           const error = new up.CannotTarget("Error message")
-          const formatted = up.util.sprintf('before %o after', error)
+          const formatted = up.internal.sprintf('before %o after', error)
           expect(formatted).toBe('before up.CannotTarget(Error message) after')
         })
 
         it('serializes an up.Aborted error as an AbortError', function() {
           const error = new up.Aborted("Error message")
-          const formatted = up.util.sprintf('before %o after', error)
+          const formatted = up.internal.sprintf('before %o after', error)
           expect(formatted).toBe('before AbortError(Error message) after')
         })
 
         it('serializes a native error', function() {
           const error = new TypeError("Error message")
-          const formatted = up.util.sprintf('before %o after', error)
+          const formatted = up.internal.sprintf('before %o after', error)
           expect(formatted).toBe('before TypeError(Error message) after')
         })
       })
 
       describe('with color style (%c)', function() {
         it('discards the style directives', function() {
-          const formatted = up.util.sprintf('foo %cbar', 'color: red')
+          const formatted = up.internal.sprintf('foo %cbar', 'color: red')
           expect(formatted).toBe('foo bar')
         })
       })
@@ -292,15 +292,15 @@ extendDescribe('up.util', function() {
     describe('up.util.camelToKebabCase()', function() {
 
       it('converts camelCase to kebab-case', function() {
-        expect(up.util.camelToKebabCase('fooBar')).toEqual('foo-bar')
+        expect(up.internal.camelToKebabCase('fooBar')).toEqual('foo-bar')
       })
 
       it("doesn't change a string that is already in kebab-case", function() {
-        expect(up.util.camelToKebabCase('foo-bar')).toEqual('foo-bar')
+        expect(up.internal.camelToKebabCase('foo-bar')).toEqual('foo-bar')
       })
 
       it("doesn't change CSS custom property name", function() {
-        expect(up.util.camelToKebabCase('--foo-bar')).toEqual('--foo-bar')
+        expect(up.internal.camelToKebabCase('--foo-bar')).toEqual('--foo-bar')
       })
 
     })
@@ -308,11 +308,11 @@ extendDescribe('up.util', function() {
     describe('up.util.kebabToCamelCase()', function() {
 
       it('converts camelCase to kebab-case', function() {
-        expect(up.util.kebabToCamelCase('foo-bar')).toEqual('fooBar')
+        expect(up.internal.kebabToCamelCase('foo-bar')).toEqual('fooBar')
       })
 
       it("doesn't change a string that is already in camel-case", function() {
-        expect(up.util.kebabToCamelCase('fooBar')).toEqual('fooBar')
+        expect(up.internal.kebabToCamelCase('fooBar')).toEqual('fooBar')
       })
 
     })
@@ -352,40 +352,40 @@ extendDescribe('up.util', function() {
 
         it('parses tokens separated by a space', function() {
           const str = 'foo bar baz'
-          const tokens = up.util.getSimpleTokens(str)
+          const tokens = up.internal.getSimpleTokens(str)
           expect(tokens).toEqual(['foo', 'bar', 'baz'])
         })
 
         it('trims whitespace', function() {
           const str = " foo \t  bar \r  baz   \n"
-          const tokens = up.util.getSimpleTokens(str)
+          const tokens = up.internal.getSimpleTokens(str)
           expect(tokens).toEqual(['foo', 'bar', 'baz'])
         })
 
         it('does not parse a JSON array', function() {
           const str = '["foo", "bar"]'
-          const tokens = up.util.getSimpleTokens(str)
+          const tokens = up.internal.getSimpleTokens(str)
           expect(tokens).toEqual(['["foo"', '"bar"]'])
         })
 
         it('returns an array unchanged', function() {
           const array = ['foo', 'bar']
-          const tokens = up.util.getSimpleTokens(array)
+          const tokens = up.internal.getSimpleTokens(array)
           expect(tokens).toEqual(['foo', 'bar'])
         })
 
         it('returns an empty array for undefined', function() {
-          const tokens = up.util.getSimpleTokens(undefined)
+          const tokens = up.internal.getSimpleTokens(undefined)
           expect(tokens).toEqual([])
         })
 
         it('returns an empty array for null', function() {
-          const tokens = up.util.getSimpleTokens(null)
+          const tokens = up.internal.getSimpleTokens(null)
           expect(tokens).toEqual([])
         })
 
         it('returns an empty array for an empty string', function() {
-          const tokens = up.util.getSimpleTokens('')
+          const tokens = up.internal.getSimpleTokens('')
           expect(tokens).toEqual([])
         })
 
@@ -395,13 +395,13 @@ extendDescribe('up.util', function() {
 
         it('parses tokens separated by a comma', function() {
           const str = 'foo, bar, baz'
-          const tokens = up.util.getSimpleTokens(str)
+          const tokens = up.internal.getSimpleTokens(str)
           expect(tokens).toEqual(['foo', 'bar', 'baz'])
         })
 
         it('trims whitespace', function() {
           const str = '\n foo   , \t bar  , \n baz  '
-          const tokens = up.util.getSimpleTokens(str)
+          const tokens = up.internal.getSimpleTokens(str)
           expect(tokens).toEqual(['foo', 'bar', 'baz'])
         })
 
@@ -411,13 +411,13 @@ extendDescribe('up.util', function() {
 
         it('parses the string as JSON if it is enclosed in square brackets', function() {
           const str = '["foo", "bar"]'
-          const tokens = up.util.getSimpleTokens(str, { json: true })
+          const tokens = up.internal.getSimpleTokens(str, { json: true })
           expect(tokens).toEqual(['foo', 'bar'])
         })
 
         it("parses the string as space-separated tokens if it isn't enclosed in square brackets on both sides", function() {
           const str = '[foo bar baz'
-          const tokens = up.util.getSimpleTokens(str, { json: true })
+          const tokens = up.internal.getSimpleTokens(str, { json: true })
           expect(tokens).toEqual(['[foo', 'bar', 'baz'])
         })
       })
@@ -427,19 +427,19 @@ extendDescribe('up.util', function() {
 
           it('parses tokens separated by " or "', function() {
             const str = 'foo or bar or baz'
-            const tokens = up.util.getSimpleTokens(str)
+            const tokens = up.internal.getSimpleTokens(str)
             expect(tokens).toEqual(['foo', 'bar', 'baz'])
           })
 
           it('trims whitespace', function() {
             const str = '\n foo   or \t bar  or \n baz  '
-            const tokens = up.util.getSimpleTokens(str)
+            const tokens = up.internal.getSimpleTokens(str)
             expect(tokens).toEqual(['foo', 'bar', 'baz'])
           })
 
           it('does not consider plain whitespace to be a separator if `or` is used anywhere', function() {
             const str = 'foo bar or baz bam'
-            const tokens = up.util.getSimpleTokens(str)
+            const tokens = up.internal.getSimpleTokens(str)
             expect(tokens).toEqual(['foo bar', 'baz bam'])
           })
 
@@ -448,7 +448,7 @@ extendDescribe('up.util', function() {
             it('prints a deprecation warning', function() {
               const warnSpy = up.migrate.warn.mock()
               const str = 'foo or bar or baz'
-              const tokens = up.util.getSimpleTokens(str)
+              const tokens = up.internal.getSimpleTokens(str)
               expect(tokens).toEqual(['foo', 'bar', 'baz'])
               expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Separating tokens by `or` has been deprecated'))
             })
@@ -456,7 +456,7 @@ extendDescribe('up.util', function() {
             it('does not print a deprecation warning if the string did not contain an ` or `', function() {
               const warnSpy = up.migrate.warn.mock()
               const str = 'foo bar baz'
-              const tokens = up.util.getSimpleTokens(str)
+              const tokens = up.internal.getSimpleTokens(str)
               expect(tokens).toEqual(['foo', 'bar', 'baz'])
               expect(warnSpy).not.toHaveBeenCalled()
             })
@@ -468,7 +468,7 @@ extendDescribe('up.util', function() {
 
         it('does not parse tokens separated by " or "', function() {
           const str = 'foo or bar or baz'
-          const tokens = up.util.getSimpleTokens(str)
+          const tokens = up.internal.getSimpleTokens(str)
           expect(tokens).toEqual(['foo', 'or', 'bar', 'or', 'baz'])
         })
 
@@ -482,7 +482,7 @@ extendDescribe('up.util', function() {
 
         it('does not separate tokens at whitespace', function() {
           const str = 'foo bar baz'
-          const tokens = up.util.getComplexTokens(str)
+          const tokens = up.internal.getComplexTokens(str)
           expect(tokens).toEqual(['foo bar baz'])
         })
 
@@ -492,44 +492,44 @@ extendDescribe('up.util', function() {
 
         it('parses tokens separated by a comma', function() {
           const str = 'foo, bar, baz'
-          const tokens = up.util.getComplexTokens(str)
+          const tokens = up.internal.getComplexTokens(str)
           expect(tokens).toEqual(['foo', 'bar', 'baz'])
         })
 
         it('trims whitespace', function() {
           const str = '\n foo   , \t bar  , \n baz  '
-          const tokens = up.util.getComplexTokens(str)
+          const tokens = up.internal.getComplexTokens(str)
           expect(tokens).toEqual(['foo', 'bar', 'baz'])
         })
 
         it('ignores commas in single-quoted strings', function() {
           const str = `.foo, .bar[attr='baz, bam'], .qux`
-          const tokens = up.util.getComplexTokens(str)
+          const tokens = up.internal.getComplexTokens(str)
           expect(tokens).toEqual([`.foo`, `.bar[attr='baz, bam']`, `.qux`])
         })
 
         it('ignores commas in double-quoted strings', function() {
           const str = `.foo, .bar[attr="baz, bam"], .qux`
-          const tokens = up.util.getComplexTokens(str)
+          const tokens = up.internal.getComplexTokens(str)
           expect(tokens).toEqual([`.foo`, `.bar[attr="baz, bam"]`, `.qux`])
         })
 
         it('ignores commas in square brackets', function() {
           const str = `foo, [bar, baz], bam`
-          const tokens = up.util.getComplexTokens(str)
+          const tokens = up.internal.getComplexTokens(str)
           // throw new Error("xxx")
           expect(tokens).toEqual([`foo`, `[bar, baz]`, `bam`])
         })
 
         it('ignores commas in round parentheses', function() {
           const str = `.foo, .bar:is(input, select), .qux`
-          const tokens = up.util.getComplexTokens(str)
+          const tokens = up.internal.getComplexTokens(str)
           expect(tokens).toEqual(['.foo', '.bar:is(input, select)', '.qux'])
         })
 
         it('ignores commas in curly braces', function() {
           const str = `foo, { bar: 'baz', bam: 'qux' }, fred`
-          const tokens = up.util.getComplexTokens(str)
+          const tokens = up.internal.getComplexTokens(str)
           expect(tokens).toEqual([`foo`, `{ bar: 'baz', bam: 'qux' }`, `fred`])
         })
 
@@ -540,19 +540,19 @@ extendDescribe('up.util', function() {
 
           it('parses tokens separated by " or "', function() {
             const str = 'foo or bar or baz'
-            const tokens = up.util.getComplexTokens(str)
+            const tokens = up.internal.getComplexTokens(str)
             expect(tokens).toEqual(['foo', 'bar', 'baz'])
           })
 
           it('trims whitespace', function() {
             const str = '\n foo   or \t bar  or \n baz  '
-            const tokens = up.util.getComplexTokens(str)
+            const tokens = up.internal.getComplexTokens(str)
             expect(tokens).toEqual(['foo', 'bar', 'baz'])
           })
 
           it('does not consider commas to be a separator if `or` is used anywhere', function() {
             const str = 'foo bar or baz, bam'
-            const tokens = up.util.getComplexTokens(str)
+            const tokens = up.internal.getComplexTokens(str)
             expect(tokens).toEqual(['foo bar', 'baz, bam'])
           })
 
@@ -561,7 +561,7 @@ extendDescribe('up.util', function() {
             it('prints a deprecation warning', function() {
               const warnSpy = up.migrate.warn.mock()
               const str = 'foo or bar or baz'
-              const tokens = up.util.getComplexTokens(str)
+              const tokens = up.internal.getComplexTokens(str)
               expect(tokens).toEqual(['foo', 'bar', 'baz'])
               expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Separating tokens by `or` has been deprecated'))
             })
@@ -569,7 +569,7 @@ extendDescribe('up.util', function() {
             it('does not print a deprecation warning if the string did not contain an ` or `', function() {
               const warnSpy = up.migrate.warn.mock()
               const str = 'foo, bar, baz'
-              const tokens = up.util.getComplexTokens(str)
+              const tokens = up.internal.getComplexTokens(str)
               expect(tokens).toEqual(['foo', 'bar', 'baz'])
               expect(warnSpy).not.toHaveBeenCalled()
             })
@@ -581,7 +581,7 @@ extendDescribe('up.util', function() {
 
         it('does not parse tokens separated by " or "', function() {
           const str = 'foo bar or baz, bam'
-          const tokens = up.util.getComplexTokens(str)
+          const tokens = up.internal.getComplexTokens(str)
           expect(tokens).toEqual(['foo bar or baz', 'bam'])
         })
 
@@ -592,7 +592,7 @@ extendDescribe('up.util', function() {
     describe('up.util.maskPattern()', function() {
 
       it('replaces the given RegExp with a placeholder, then restores it with { restore } fn', function() {
-        let { masked, restore } = up.util.maskPattern('foo <bar> baz <bam> qux', [/<[^>]+>/g])
+        let { masked, restore } = up.internal.maskPattern('foo <bar> baz <bam> qux', [/<[^>]+>/g])
         expect(masked).toBe('foo §0 baz §1 qux')
 
         let restored = restore(masked)
@@ -600,14 +600,14 @@ extendDescribe('up.util', function() {
       })
 
       it('allows to restore placeholders within a partial or transformed string', function() {
-        let { masked, restore } = up.util.maskPattern('foo <bar> baz <bam> qux', [/<[^>]+>/g])
+        let { masked, restore } = up.internal.maskPattern('foo <bar> baz <bam> qux', [/<[^>]+>/g])
 
         let restored = restore('one §1 two')
         expect(restored).toBe('one <bam> two')
       })
 
       it('correctly processes a placeholder control character within a masked string', function() {
-        let { masked, restore } = up.util.maskPattern('foo <bar§0baz> qux', [/<[^>]+>/g])
+        let { masked, restore } = up.internal.maskPattern('foo <bar§0baz> qux', [/<[^>]+>/g])
         expect(masked).toBe('foo §1 qux')
 
         let restored = restore(masked)
@@ -615,7 +615,7 @@ extendDescribe('up.util', function() {
       })
 
       it('replaces multiple patterns', function() {
-        let { masked, restore } = up.util.maskPattern('foo <bar> baz [bam] qux', [/<[^>]+>/g, /\[[^]+]/g])
+        let { masked, restore } = up.internal.maskPattern('foo <bar> baz [bam] qux', [/<[^>]+>/g, /\[[^]+]/g])
         expect(masked).toBe('foo §0 baz §1 qux')
 
         let restored = restore(masked)
@@ -625,7 +625,7 @@ extendDescribe('up.util', function() {
       describe('with { keepDelimiters: true }', function() {
 
         it('does not mask the outer delimiters', function() {
-          let { masked, restore } = up.util.maskPattern('foo <bar> baz <bam> qux', [/<[^>]+>/g], { keepDelimiters: true })
+          let { masked, restore } = up.internal.maskPattern('foo <bar> baz <bam> qux', [/<[^>]+>/g], { keepDelimiters: true })
           expect(masked).toBe('foo <§0> baz <§1> qux')
 
           let restored = restore(masked)
@@ -640,7 +640,7 @@ extendDescribe('up.util', function() {
 
       it('simplifies a complex CSS selector', function() {
         let input = `input[foo="bar, ]baz"]:is(.control[qux]:not(.active)), .other:not(.mine)`
-        let { masked, restore } = up.util.expressionOutline(input)
+        let { masked, restore } = up.internal.expressionOutline(input)
         expect(masked).toBe(`input[§1]:is(§2), .other:not(§3)`)
 
         let restored = restore(masked)
@@ -649,7 +649,7 @@ extendDescribe('up.util', function() {
 
       it('simplifies a string containing complex JavaScript object literals', function() {
         let input = `foo { key: [1, 'two', { three: 4 }] }, bar { "a}b": 5 }`
-        let { masked, restore } = up.util.expressionOutline(input)
+        let { masked, restore } = up.internal.expressionOutline(input)
         expect(masked).toBe(`foo {§2}, bar {§3}`)
 
         let restored = restore(masked)
@@ -660,7 +660,7 @@ extendDescribe('up.util', function() {
 
         it('masks and restores content in quoted strings', function() {
           let input = `foo "bar" baz 'qux' fred`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe(`foo "§0" baz '§1' fred`)
 
           let restored = restore(masked)
@@ -669,7 +669,7 @@ extendDescribe('up.util', function() {
 
         it('honors an escaped quote', function() {
           let input = `foo "bar\\"baz" qux`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe(`foo "§0" qux`)
 
           let restored = restore(masked)
@@ -678,7 +678,7 @@ extendDescribe('up.util', function() {
 
         it('ignores a single quote within a double-quoted string', function() {
           let input = `foo "bar's" baz`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe(`foo "§0" baz`)
 
           let restored = restore(masked)
@@ -691,7 +691,7 @@ extendDescribe('up.util', function() {
 
         it('masks and restores content in parentheses', function() {
           let input = `foo (bar) baz (qux) fred`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe('foo (§0) baz (§1) fred')
 
           let restored = restore(masked)
@@ -700,7 +700,7 @@ extendDescribe('up.util', function() {
 
         it('masks and restores nested parentheses', function() {
           let input = `foo (bar (baz) (qux)) fred`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe('foo (§0) fred')
 
           let restored = restore(masked)
@@ -709,7 +709,7 @@ extendDescribe('up.util', function() {
 
         it('ignores a closing parentheses in a string', function() {
           let input = `foo (bar "baz)qux") fred`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe('foo (§1) fred')
 
           let restored = restore(masked)
@@ -722,7 +722,7 @@ extendDescribe('up.util', function() {
 
         it('masks and restores content in brackets', function() {
           let input = `foo [bar] baz [qux] fred`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe('foo [§0] baz [§1] fred')
 
           let restored = restore(masked)
@@ -731,7 +731,7 @@ extendDescribe('up.util', function() {
 
         it('masks and restores nested brackets', function() {
           let input = `foo [bar [baz] [qux]] fred`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe('foo [§0] fred')
 
           let restored = restore(masked)
@@ -740,7 +740,7 @@ extendDescribe('up.util', function() {
 
         it('ignores a closing bracket in a string', function() {
           let input = `foo [bar "baz]qux"] fred`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe('foo [§1] fred')
 
           let restored = restore(masked)
@@ -753,7 +753,7 @@ extendDescribe('up.util', function() {
 
         it('masks and restores content in braces', function() {
           let input = `foo {bar} baz {qux} fred`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe('foo {§0} baz {§1} fred')
 
           let restored = restore(masked)
@@ -762,7 +762,7 @@ extendDescribe('up.util', function() {
 
         it('masks and restores nested braces', function() {
           let input = `foo {bar {baz} {qux}} fred`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe('foo {§0} fred')
 
           let restored = restore(masked)
@@ -771,7 +771,7 @@ extendDescribe('up.util', function() {
 
         it('ignores a closing brace in a string', function() {
           let input = `foo {bar "baz}qux"} fred`
-          let { masked, restore } = up.util.expressionOutline(input)
+          let { masked, restore } = up.internal.expressionOutline(input)
           expect(masked).toBe('foo {§1} fred')
 
           let restored = restore(masked)
@@ -785,19 +785,19 @@ extendDescribe('up.util', function() {
     describe('up.util.parseString()', function() {
 
       it('parses a double-quoted string', function() {
-        expect(up.util.parseString(`"foo"`)).toBe(`foo`)
+        expect(up.internal.parseString(`"foo"`)).toBe(`foo`)
       })
 
       it('parses a double-quoted string with escape sequences', function() {
-        expect(up.util.parseString(`"foo\\\\bar\\"baz"`)).toBe(`foo\\bar"baz`)
+        expect(up.internal.parseString(`"foo\\\\bar\\"baz"`)).toBe(`foo\\bar"baz`)
       })
 
       it('parses a single-quoted string', function() {
-        expect(up.util.parseString(`'foo'`)).toBe(`foo`)
+        expect(up.internal.parseString(`'foo'`)).toBe(`foo`)
       })
 
       it('parses a single-quoted string with escape sequences', function() {
-        expect(up.util.parseString(`'foo\\\\bar\\'baz'`)).toBe(`foo\\bar'baz`)
+        expect(up.internal.parseString(`'foo\\\\bar\\'baz'`)).toBe(`foo\\bar'baz`)
       })
 
     })
@@ -919,31 +919,31 @@ extendDescribe('up.util', function() {
 
         it('returns a tuple of the initial string and the parsed JSON object', function() {
           let str = 'foo bar { "baz": 3 }'
-          let result = up.util.parseScalarJSONPairs(str)
+          let result = up.internal.parseScalarJSONPairs(str)
           expect(result).toEqual([['foo bar', { baz: 3 }]])
         })
 
         it('accepts unquoted property names and single quote strings', function() {
           let str = 'foo bar { baz: 3 }'
-          let result = up.util.parseScalarJSONPairs(str)
+          let result = up.internal.parseScalarJSONPairs(str)
           expect(result).toEqual([['foo bar', { baz: 3 }]])
         })
 
         it('ignores braces in strings', function() {
           let str = `foo "{ bar }" baz { "key": 'foo { bar } baz' }`
-          let result = up.util.parseScalarJSONPairs(str)
+          let result = up.internal.parseScalarJSONPairs(str)
           expect(result).toEqual([[`foo "{ bar }" baz`, { key: 'foo { bar } baz' }]])
         })
 
         it('parses nested objects', function() {
           let str = 'foo bar { baz: { qux: 3 } }'
-          let result = up.util.parseScalarJSONPairs(str)
+          let result = up.internal.parseScalarJSONPairs(str)
           expect(result).toEqual([['foo bar', { baz: { qux: 3 } }]])
         })
 
         it('parses multiple pairs separated by comma', function() {
           let str = 'foo { bar: 1 }, baz { qux: 2 }'
-          let result = up.util.parseScalarJSONPairs(str)
+          let result = up.internal.parseScalarJSONPairs(str)
           expect(result).toEqual([
             ['foo', { bar: 1 }],
             ['baz', { qux: 2 }]
@@ -952,7 +952,7 @@ extendDescribe('up.util', function() {
 
         it('does not consider a comma within an object to be a pair separator', function() {
           let str = 'foo { bar: 1, baz: 2 }, qux { fred: 3 }'
-          let result = up.util.parseScalarJSONPairs(str)
+          let result = up.internal.parseScalarJSONPairs(str)
           expect(result).toEqual([
             ['foo', { bar: 1, baz: 2 }],
             ['qux', { fred: 3 }]
@@ -965,13 +965,13 @@ extendDescribe('up.util', function() {
 
         it('returns an array of the given string and undefined', function() {
           let str = 'foo bar baz'
-          let result = up.util.parseScalarJSONPairs(str)
+          let result = up.internal.parseScalarJSONPairs(str)
           expect(result).toEqual([['foo bar baz', undefined]])
         })
 
         it('returns an array of multiple comma-separated tokens', function() {
           let str = 'foo bar, baz qux'
-          let result = up.util.parseScalarJSONPairs(str)
+          let result = up.internal.parseScalarJSONPairs(str)
           expect(result).toEqual([['foo bar', undefined], ['baz qux', undefined]])
         })
 

@@ -14,11 +14,11 @@ beforeEach(function() {
 
           if (u.isString(expectedStyles)) {
             return {
-              pass: u.isPresent(e.inlineStyle(element, expectedStyles))
+              pass: u.isPresent(up.internal.inlineStyle(element, expectedStyles))
             }
           } else {
             return {
-              pass: util.equals(expectedStyles, e.inlineStyle(element, Object.keys(expectedStyles)))
+              pass: util.equals(expectedStyles, up.internal.inlineStyle(element, Object.keys(expectedStyles)))
             }
           }
         }

@@ -239,7 +239,7 @@ describe('up.Request', function() {
     })
 
     it('aborts pending requests and loads the request URL with its method and params in a full page load', async function() {
-      const submitForm = up.browser.submitForm.mock()
+      const submitForm = up.internal.submitForm.mock()
       const pendingRequest = up.request('/pending')
       await wait()
 

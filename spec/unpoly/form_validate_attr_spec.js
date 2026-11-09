@@ -552,7 +552,7 @@ extendDescribe('up.form', function() {
       })
 
       it("does not use form attributes intended for submission results, like [up-scroll] or [up-confirm] (bugfix)", async function() {
-        const renderSpy = up.render.mock().and.returnValue(u.unresolvablePromise())
+        const renderSpy = up.render.mock().and.returnValue(up.internal.unresolvablePromise())
         const form = fixture('form[up-submit][action="/path"]')
         form.setAttribute('up-scroll', 'main')
         form.setAttribute('up-confirm', 'really submit?')

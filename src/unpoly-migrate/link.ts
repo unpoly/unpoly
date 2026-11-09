@@ -186,7 +186,7 @@ up.link.config.patch(function(config) {
 function isFollowableWithoutLegacyInstant(element: Element): boolean {
   let { followSelectors, noFollowSelectors } = up.link.config
   let modernFollowSelectors = followSelectors.filter((selector: string) => selector !== LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR)
-  return element.matches(up.element.unionSelector(modernFollowSelectors, noFollowSelectors))
+  return element.matches(up.internal.unionSelector(modernFollowSelectors, noFollowSelectors))
 }
 
 up.compiler(LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR, function(element: Element) {

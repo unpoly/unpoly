@@ -3,7 +3,6 @@
 */
 
 const u = up.util
-const e = up.element
 
 up.migrate.renamedNamespace('syntax', 'script')
 
@@ -37,7 +36,7 @@ up.migrate.targetMacro = function(queryAttr: string, fixedResultAttrs: Record<st
     } else {
       resultAttrs['up-follow'] = ''
     }
-    e.setMissingAttrs(link, resultAttrs)
+    up.internal.setMissingAttrs(link, resultAttrs)
     link.removeAttribute(queryAttr)
   })
 }

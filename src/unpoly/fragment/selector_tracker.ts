@@ -85,8 +85,3 @@ export class SelectorTracker {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  SelectorTracker,
-}

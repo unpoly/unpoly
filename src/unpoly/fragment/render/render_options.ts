@@ -519,8 +519,3 @@ export const RenderOptions = {
   NO_MOTION,
   NO_INPUT_INTERFERENCE,
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  RenderOptions,
-}

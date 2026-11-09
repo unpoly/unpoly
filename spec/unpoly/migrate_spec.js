@@ -109,23 +109,23 @@ if (up.migrate.loaded) {
         const warnSpy = up.migrate.warn.mock()
         up.migrate.fixKey({ foo: 123 }, 'foo', 'bar', { label: 'render options' })
 
-        expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property { foo } has been renamed to { bar } (found in render options)')
+        expect(up.internal.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property { foo } has been renamed to { bar } (found in render options)')
       })
 
       it('names the call site by the given { detail }, printing the warning once per call site', function() {
-        const errorSpy = up.log.error.mock()
+        const errorSpy = up.internal.printToError.mock()
         up.migrate.fixKey({ foo: 1 }, 'foo', 'bar', { label: 'request options', detail: '/path1' })
         up.migrate.fixKey({ foo: 2 }, 'foo', 'bar', { label: 'request options', detail: '/path2' })
         up.migrate.fixKey({ foo: 3 }, 'foo', 'bar', { label: 'request options', detail: '/path1' })
 
-        expect(errorSpy.calls.allArgs().map((args) => u.sprintf(...args.slice(1)))).toEqual([
+        expect(errorSpy.calls.allArgs().map((args) => up.internal.sprintf(...args.slice(1)))).toEqual([
           'Property { foo } has been renamed to { bar } (found in request options for "/path1")',
           'Property { foo } has been renamed to { bar } (found in request options for "/path2")',
         ])
       })
 
       it('prints a labeled warning only once for multiple objects', function() {
-        const errorSpy = up.log.error.mock()
+        const errorSpy = up.internal.printToError.mock()
         up.migrate.fixKey({ foo: 1 }, 'foo', 'bar', { label: 'render options' })
         up.migrate.fixKey({ foo: 2 }, 'foo', 'bar', { label: 'render options' })
 
@@ -151,7 +151,7 @@ if (up.migrate.loaded) {
         up.migrate.renamedProperty(object, 'oldKey', 'newKey', { label: 'up.foo.config' })
 
         expect(object.oldKey).toBe('value')
-        expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property up.foo.config.oldKey has been renamed to up.foo.config.newKey')
+        expect(up.internal.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property up.foo.config.oldKey has been renamed to up.foo.config.newKey')
       })
 
       it('logs the given { warning } instead of the default warning', function() {
@@ -182,7 +182,7 @@ if (up.migrate.loaded) {
         up.migrate.removedProperty(object, 'removedKey', { label: 'up.foo.config' })
 
         expect(object.removedKey).toBe('value')
-        expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property up.foo.config.removedKey has been removed without replacement')
+        expect(up.internal.sprintf(...warnSpy.calls.argsFor(0))).toBe('Property up.foo.config.removedKey has been removed without replacement')
       })
 
       it('does not warn when the object is enumerated, e.g. when another warning prints it', function() {
@@ -297,7 +297,7 @@ if (up.migrate.loaded) {
             const config = lookup(label)
             const warnSpy = up.migrate.warn.mock()
             config[key] = 123
-            expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe(`Property ${label}.${key} has been removed without replacement`)
+            expect(up.internal.sprintf(...warnSpy.calls.argsFor(0))).toBe(`Property ${label}.${key} has been removed without replacement`)
           })
         }
       })
@@ -490,20 +490,20 @@ if (up.migrate.loaded) {
     describe('up.migrate.warn()', function() {
 
       it('prepends a deprecation prefix to the given message and prints it to the error log', function() {
-        const spy = up.log.error.mock()
+        const spy = up.internal.printToError.mock()
         up.migrate.warn("a legacy warning")
         expect(spy).toHaveBeenCalledWith('unpoly-migrate', 'a legacy warning')
       })
 
       it('only prints a given message once', function() {
-        const spy = up.log.error.mock()
+        const spy = up.internal.printToError.mock()
         up.migrate.warn("a very unique legacy warning")
         up.migrate.warn("a very unique legacy warning")
         expect(spy.calls.count()).toBe(1)
       })
 
       it('allows substitution', function() {
-        const spy = up.log.error.mock()
+        const spy = up.internal.printToError.mock()
         up.migrate.warn('%s is a substituted warning', 'foo')
         up.migrate.warn('%s is a substituted warning', 'bar')
 
@@ -516,8 +516,8 @@ if (up.migrate.loaded) {
 
       describe('log level', function() {
         it('logs errors by default, so test suites that fail on console errors find deprecations', function() {
-          const warnSpy = up.log.warn.mock()
-          const errorSpy = up.log.error.mock()
+          const warnSpy = up.internal.printToWarn.mock()
+          const errorSpy = up.internal.printToError.mock()
           up.migrate.warn("a legacy warning")
           expect(errorSpy).toHaveBeenCalledWith('unpoly-migrate', 'a legacy warning')
           expect(warnSpy).not.toHaveBeenCalled()
@@ -525,8 +525,8 @@ if (up.migrate.loaded) {
 
         it('logs warnings with up.migrate.config.logLevel = "warn"', function() {
           up.migrate.config.logLevel = 'warn'
-          const warnSpy = up.log.warn.mock()
-          const errorSpy = up.log.error.mock()
+          const warnSpy = up.internal.printToWarn.mock()
+          const errorSpy = up.internal.printToError.mock()
           up.migrate.warn("a legacy warning")
           expect(warnSpy).toHaveBeenCalledWith('unpoly-migrate', 'a legacy warning')
           expect(errorSpy).not.toHaveBeenCalled()
@@ -534,8 +534,8 @@ if (up.migrate.loaded) {
 
         it('does not log anything with up.migrate.config.logLevel = "none"', function() {
           up.migrate.config.logLevel = 'none'
-          const warnSpy = up.log.warn.mock()
-          const errorSpy = up.log.error.mock()
+          const warnSpy = up.internal.printToWarn.mock()
+          const errorSpy = up.internal.printToError.mock()
           up.migrate.warn("a legacy warning")
           expect(errorSpy).not.toHaveBeenCalled()
           expect(warnSpy).not.toHaveBeenCalled()

@@ -144,7 +144,7 @@ up.observe = function(...args) {
     let list = args.shift()
     up.migrate.warn('Calling up.observe() with a list of multiple elements is no longer supported by up.watch()')
     let unwatchFns = up.util.map(list, (firstArg) => up.watch(firstArg, ...args))
-    return up.util.sequence(unwatchFns)
+    return up.internal.sequence(unwatchFns)
   }
 
   return up.watch(...args)

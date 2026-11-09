@@ -710,23 +710,23 @@ extendDescribe('up.util', function() {
     describe('up.util.containsAll()', function() {
 
       it('returns true if the first array has all elements of the second array, and then some more', () => {
-        expect(up.util.containsAll(['a', 'b'], ['b'])).toBe(true)
+        expect(up.internal.containsAll(['a', 'b'], ['b'])).toBe(true)
       })
 
       it('returns true if the second array is empty', () => {
-        expect(up.util.containsAll(['a', 'b'], [])).toBe(true)
+        expect(up.internal.containsAll(['a', 'b'], [])).toBe(true)
       })
 
       it('returns true if both arrays have the same elements', () => {
-        expect(up.util.containsAll(['a', 'b'], ['a', 'b'])).toBe(true)
+        expect(up.internal.containsAll(['a', 'b'], ['a', 'b'])).toBe(true)
       })
 
       it('ignores element order', () => {
-        expect(up.util.containsAll(['a', 'b'], ['b', 'a'])).toBe(true)
+        expect(up.internal.containsAll(['a', 'b'], ['b', 'a'])).toBe(true)
       })
 
       it('returns false if the second array has additional elements', () => {
-        expect(up.util.containsAll(['a', 'b'], ['a', 'b', 'c'])).toBe(false)
+        expect(up.internal.containsAll(['a', 'b'], ['a', 'b', 'c'])).toBe(false)
       })
     })
 

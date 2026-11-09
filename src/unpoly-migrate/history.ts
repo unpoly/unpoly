@@ -36,7 +36,7 @@ up.history.config.patch(function() {
   Object.defineProperty(this, 'updateMetaTags', {
     configurable: true,
     get() {
-      return up.history.isEnabled('metaTags')
+      return up.internal.isHistoryEnabled('metaTags')
     },
     set(value) {
       // Apps used to set { updateMetaTags: true } to silence an old warning.
@@ -62,7 +62,7 @@ up.history.config.patch(function() {
 // Core calls this hook (up.Layer).
 up.migrate.warnOfHungryMetaTags = function(metaTags: Element[]) {
   // Meta tags are not updated automatically when up.history.config.enabled excludes them.
-  if (!up.history.isEnabled('metaTags')) return
+  if (!up.internal.isHistoryEnabled('metaTags')) return
 
   let fullHungrySelector = up.radio.config.selector('hungrySelectors')
   let hungryMetaTags = up.util.filter(metaTags, (meta: Element) => meta.matches(fullHungrySelector))

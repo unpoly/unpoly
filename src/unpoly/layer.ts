@@ -1978,9 +1978,7 @@ export const api = {
   layer: {
     config,
     open,
-    build: buildLayer,
     ask,
-    normalizeOptions: normalizeLayerOptions,
     get stack() { return layerStack.layers },
     get(...args: LayerLookupArgs): Layer | undefined { return layerStack.get(...args) },
     getAll(...args: LayerLookupArgs): Layer[] { return layerStack.getAll(...args) },
@@ -1988,9 +1986,7 @@ export const api = {
     get overlays() { return layerStack.overlays },
     get current() { return layerStack.current },
     get front() { return layerStack.front },
-    sync() { return layerStack.sync() },
     get count() { return layerStack.count },
-    get attachedCount() { return layerStack.attachedCount },
     dismissOverlays(...args: Parameters<LayerStack['dismissOverlays']>): void { return layerStack.dismissOverlays(...args) },
   },
 }

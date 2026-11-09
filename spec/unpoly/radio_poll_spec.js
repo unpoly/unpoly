@@ -70,7 +70,7 @@ extendDescribe('up.radio', function() {
         up.radio.config.pollInterval = 100
 
         const reloadSpy = up.reload.mock().and.callFake(() => {
-          const deferred = u.newDeferred()
+          const deferred = up.internal.newDeferred()
           deferreds.push(deferred)
           return deferred
         })
@@ -523,7 +523,7 @@ extendDescribe('up.radio', function() {
       })
 
       it('does not poll a fragment with a weak selector', async function() {
-        const warnSpy = up.warn.mock()
+        const warnSpy = up.internal.printToWarn.mock()
 
         helloFixture('div[up-poll][up-interval=30]', { text: 'old text' })
 
@@ -1074,7 +1074,7 @@ extendDescribe('up.radio', function() {
           up.radio.config.pollEnabled = false
           const warnSpy = up.migrate.warn.mock()
 
-          up.framework.reset()
+          up.internal.emitReset()
 
           expect(warnSpy).not.toHaveBeenCalled()
           const element = fixture('.element[up-poll][up-href="/path"]')

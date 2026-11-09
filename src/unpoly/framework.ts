@@ -292,12 +292,7 @@ function supportIssue(): string | undefined {
 export const api = {
   framework: {
     boot,
-    startExtension,
-    stopExtension,
-    reset: emitReset,
     get booted() { return isBooted() },
-    /** @internal On window.up so specs can call isBeforeBoot.mock(). */
-    isBeforeBoot,
     isSupported,
   },
   boot,

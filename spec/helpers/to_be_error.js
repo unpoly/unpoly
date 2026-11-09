@@ -37,6 +37,6 @@ jasmine.anyError = (...args) => ({
   },
 
   jasmineToString() {
-    return u.sprintf("An error matching %o", args)
+    return up.internal.sprintf("An error matching %o", args)
   }
 })

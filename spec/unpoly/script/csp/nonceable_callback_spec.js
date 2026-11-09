@@ -5,13 +5,13 @@ describe('up.NonceableCallback', function() {
   describe('.fromCallbackString()', function() {
 
     it('parses a string of JavaScript', function() {
-      let callback = up.NonceableCallback.fromCallbackString('a + b')
+      let callback = up.internal.NonceableCallback.fromCallbackString('a + b')
       expect(callback.nonce).toBeMissing()
       expect(callback.script).toEqual('a + b')
     })
 
     it('parses a string of JavaScript with a prefixed nonce', function() {
-      let callback = up.NonceableCallback.fromCallbackString('nonce-secret a + b')
+      let callback = up.internal.NonceableCallback.fromCallbackString('nonce-secret a + b')
       expect(callback.nonce).toEqual('secret')
       expect(callback.script).toEqual('a + b')
     })
@@ -21,11 +21,11 @@ describe('up.NonceableCallback', function() {
   describe('#toCallbackString()', function() {
 
     it('serializes the nonce and script into a string that .fromCallbackString() parses back', function() {
-      let callback = new up.NonceableCallback('a + b', 'secret')
+      let callback = new up.internal.NonceableCallback('a + b', 'secret')
       let string = callback.toCallbackString()
       expect(string).toEqual('nonce-secret a + b')
 
-      let parsed = up.NonceableCallback.fromCallbackString(string)
+      let parsed = up.internal.NonceableCallback.fromCallbackString(string)
       expect(parsed.nonce).toEqual('secret')
       expect(parsed.script).toEqual('a + b')
     })
@@ -35,7 +35,7 @@ describe('up.NonceableCallback', function() {
   describe('#unsafeEval()', function() {
 
     it('runs the callback with the given argNames and argValues', function() {
-      let callback = up.NonceableCallback.fromCallbackString('return a + b')
+      let callback = up.internal.NonceableCallback.fromCallbackString('return a + b')
 
       let callFnWithArgs = () => {
         let evalEnv = {
@@ -53,7 +53,7 @@ describe('up.NonceableCallback', function() {
     })
 
     it('runs the callback with the given thisContext', function() {
-      let callback = up.NonceableCallback.fromCallbackString('return this.length + a')
+      let callback = up.internal.NonceableCallback.fromCallbackString('return this.length + a')
 
       let callFnWithArgs = () => {
         let evalEnv = {
@@ -72,7 +72,7 @@ describe('up.NonceableCallback', function() {
     })
 
     it('runs a function with an embedded nonce', function() {
-      let callback = up.NonceableCallback.fromCallbackString('nonce-specs-nonce return a + b')
+      let callback = up.internal.NonceableCallback.fromCallbackString('nonce-specs-nonce return a + b')
       let result = callback.unsafeEval({
         argNames: ['a', 'b'],
         argValues: [2, 3],
@@ -81,7 +81,7 @@ describe('up.NonceableCallback', function() {
     })
 
     it('re-throws errors thrown by the callback script', function() {
-      let callback = up.NonceableCallback.fromCallbackString('nonce-specs-nonce throw "error message"')
+      let callback = up.internal.NonceableCallback.fromCallbackString('nonce-specs-nonce throw "error message"')
       let doEval = () => callback.unsafeEval({ argNames: [], argValues: [] })
       expect(doEval).toThrow('error message')
     })

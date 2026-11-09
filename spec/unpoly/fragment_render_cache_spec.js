@@ -991,7 +991,7 @@ extendDescribe('up.fragment', function() {
             it('logs to the error console and there also is an { onFinished } callback (bugfix)', async function() {
               const onFinished = jasmine.createSpy('onFinished callback')
               const job = up.render('.target', { url: '/cached-path', cache: true, revalidate: true, onFinished })
-              const logErrorSpy = up.puts.mock().and.callThrough()
+              const logErrorSpy = up.internal.printToStandard.mock().and.callThrough()
               await wait()
 
               expect('.target').toHaveText('cached text')

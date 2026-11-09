@@ -40,8 +40,3 @@ export class FIFOCache<K = any, V = any> {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  FIFOCache,
-}

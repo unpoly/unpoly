@@ -353,7 +353,7 @@ describe('up.event', function() {
 
         it('does not call the listener before Unpoly has booted', function() {
           let isBeforeBoot = true
-          up.framework.isBeforeBoot.mock().and.callFake(() => isBeforeBoot)
+          up.internal.isBeforeBoot.mock().and.callFake(() => isBeforeBoot)
 
           const element = fixture('.element')
           const listener = jasmine.createSpy('listener')
@@ -370,7 +370,7 @@ describe('up.event', function() {
 
         it('does call the listener before Unpoly has booted if it was registered with { beforeBoot: true }', function() {
           let isBeforeBoot = true
-          up.framework.isBeforeBoot.mock().and.callFake(() => isBeforeBoot)
+          up.internal.isBeforeBoot.mock().and.callFake(() => isBeforeBoot)
 
           const element = fixture('.element')
           const listener = jasmine.createSpy('listener')
@@ -793,14 +793,14 @@ describe('up.event', function() {
       it('emits the event', function() {
         const eventListener = jasmine.createSpy('event listener')
         up.on('my:event', eventListener)
-        up.event.assertEmitted('my:event', { key: 'value' })
+        up.internal.assertEmitted('my:event', { key: 'value' })
         expect(eventListener).toHaveBeenCalledWith(jasmine.objectContaining({ key: 'value' }), jasmine.anything(), jasmine.anything())
       })
 
       it('throws an AbortError if any listener calls event.preventDefault()', function() {
         const eventListener = (event) => event.preventDefault()
         up.on('my:event', eventListener)
-        const fn = () => up.event.assertEmitted('my:event', { key: 'value' })
+        const fn = () => up.internal.assertEmitted('my:event', { key: 'value' })
         expect(fn).toAbort()
       })
     })
@@ -960,27 +960,27 @@ describe('up.event', function() {
 
       it('returns false for a click event with the left mouse button', function() {
         const event = Trigger.createMouseEvent('mousedown', { button: 0 })
-        expect(up.event.isModified(event)).toBe(false)
+        expect(up.internal.isModified(event)).toBe(false)
       })
 
       it('returns true if the right mouse button is used', function() {
         const event = Trigger.createMouseEvent('mousedown', { button: 2 })
-        expect(up.event.isModified(event)).toBe(true)
+        expect(up.internal.isModified(event)).toBe(true)
       })
 
       it('returns true if shift is pressed during the click', function() {
         const event = Trigger.createMouseEvent('mousedown', { shiftKey: 2 })
-        expect(up.event.isModified(event)).toBe(true)
+        expect(up.internal.isModified(event)).toBe(true)
       })
 
       it('returns true if ctrl is pressed during the click', function() {
         const event = Trigger.createMouseEvent('mousedown', { ctrlKey: 2 })
-        expect(up.event.isModified(event)).toBe(true)
+        expect(up.internal.isModified(event)).toBe(true)
       })
 
       it('returns true if meta is pressed during the click', function() {
         const event = Trigger.createMouseEvent('mousedown', { metaKey: 2 })
-        expect(up.event.isModified(event)).toBe(true)
+        expect(up.internal.isModified(event)).toBe(true)
       })
     })
 

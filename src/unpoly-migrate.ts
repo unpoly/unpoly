@@ -4,7 +4,7 @@
 declare const require: (path: string) => void
 
 // We are going to add compilers and event handlers that should not be reset during specs.
-up.framework.startExtension()
+up.internal.startExtension()
 require('./unpoly-migrate/migrate')
 require('./unpoly-migrate/util/config')
 require('./unpoly-migrate/fragment/render/render_job')
@@ -31,4 +31,4 @@ require('./unpoly-migrate/protocol')
 require('./unpoly-migrate/network')
 require('./unpoly-migrate/radio')
 require('./unpoly-migrate/viewport')
-up.framework.stopExtension()
+up.internal.stopExtension()

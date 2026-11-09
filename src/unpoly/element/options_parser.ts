@@ -170,8 +170,3 @@ export class OptionsParser {
     return `${this._attrPrefix}${camelToKebabCase(option)}`
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  OptionsParser,
-}

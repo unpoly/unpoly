@@ -174,7 +174,7 @@ extendDescribe('up.fragment', function() {
         const element = fixture('div.foo[custom-attr=value]')
         expect(up.fragment.toTarget(element)).toBe('.foo')
 
-        up.fragment.config.targetDerivers.unshift((element) => e.attrSelector('custom-attr', element.getAttribute('custom-attr')))
+        up.fragment.config.targetDerivers.unshift((element) => up.internal.attrSelector('custom-attr', element.getAttribute('custom-attr')))
 
         expect(up.fragment.toTarget(element)).toBe('[custom-attr="value"]')
       })
@@ -366,54 +366,54 @@ extendDescribe('up.fragment', function() {
 
       it('returns a list of simple selectors without changes', function() {
         const targets = ['.foo', '.bar']
-        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
+        const expanded = up.internal.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.foo', '.bar'])
       })
 
       it("expands ':main' to the given layer mode's main targets", function() {
         const targets = ['.before', ':main', '.after']
         up.layer.config.root.mainTargets = ['.main1', '.main2']
-        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
+        const expanded = up.internal.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before', '.main1', '.main2', '.after'])
       })
 
       it("expands a descendant selector rooted at ':main'", function() {
         const targets = ['.before .child', ':main .child', '.after .child']
         up.layer.config.root.mainTargets = ['.main1', '.main2']
-        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
+        const expanded = up.internal.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before .child', '.main1 .child', '.main2 .child', '.after .child'])
       })
 
       it("expands true to the given layer mode's main targets (useful because { fallback } is often passed as a target)", function() {
         const targets = ['.before', true, '.after']
         up.layer.config.root.mainTargets = ['.main1', '.main2']
-        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
+        const expanded = up.internal.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before', '.main1', '.main2', '.after'])
       })
 
       it("expands ':layer' to a selector for the given layer's first swappable element", function() {
         const targets = ['.before', ':layer', '.after']
-        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
+        const expanded = up.internal.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before', 'body', '.after'])
       })
 
       it("expands a descendant selector rooted at ':layer'", function() {
         const targets = ['.before .child', ':layer .child', '.after .child']
-        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
+        const expanded = up.internal.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before .child', 'body .child', '.after .child'])
       })
 
       it("expands ':main' to the given layer mode's main targets if a main target is itself ':layer'", function() {
         const targets = ['.before', ':main', '.after']
         up.layer.config.root.mainTargets = [':layer']
-        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
+        const expanded = up.internal.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before', 'body', '.after'])
       })
 
       it('expands an element to a matching selector', function() {
         const element = fixture('#foo')
         const targets = ['.before', element, '.after']
-        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
+        const expanded = up.internal.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.before', '#foo', '.after'])
       })
 
@@ -421,7 +421,7 @@ extendDescribe('up.fragment', function() {
         const targets = ['.before', ':origin .child', '.after']
         const origin = fixture('#foo')
         up.layer.config.root.mainTargets = [':layer']
-        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root, origin })
+        const expanded = up.internal.expandTargets(targets, { layer: up.layer.root, origin })
         expect(expanded).toEqual(['.before', '#foo .child', '.after'])
       })
 
@@ -429,7 +429,7 @@ extendDescribe('up.fragment', function() {
         const targets = ['#before', ':layer :main :origin .child', '#after']
         const origin = fixture('#origin')
         up.layer.config.root.mainTargets = ['#main']
-        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root, origin })
+        const expanded = up.internal.expandTargets(targets, { layer: up.layer.root, origin })
         expect(expanded).toEqual(['#before', 'body #main #origin .child', '#after'])
       })
 
@@ -438,7 +438,7 @@ extendDescribe('up.fragment', function() {
           const targets = ['.before', '& .child', '.after']
           const origin = fixture('#foo')
           up.layer.config.root.mainTargets = [':layer']
-          const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root, origin })
+          const expanded = up.internal.expandTargets(targets, { layer: up.layer.root, origin })
           expect(expanded).toEqual(['.before', '#foo .child', '.after'])
         })
       }
@@ -446,7 +446,7 @@ extendDescribe('up.fragment', function() {
       it('removes duplicate selectors', function() {
         const targets = ['.foo', ':main']
         up.layer.config.root.mainTargets = ['.foo']
-        const expanded = up.fragment.expandTargets(targets, { layer: up.layer.root })
+        const expanded = up.internal.expandTargets(targets, { layer: up.layer.root })
         expect(expanded).toEqual(['.foo'])
       })
     })
@@ -455,28 +455,28 @@ extendDescribe('up.fragment', function() {
 
       it("it expands ':origin' to a selector for { origin }", function() {
         const origin = fixture('#foo')
-        const resolved = up.fragment.resolveOrigin('.before :origin .after', { origin })
+        const resolved = up.internal.resolveOrigin('.before :origin .after', { origin })
         expect(resolved).toEqual('.before #foo .after')
       })
 
       if (up.migrate.loaded) {
         it("expands the ampersand character '&' to a selector for { origin }", function() {
           const origin = fixture('#foo')
-          const resolved = up.fragment.resolveOrigin('.before & .after', { origin })
+          const resolved = up.internal.resolveOrigin('.before & .after', { origin })
           expect(resolved).toEqual('.before #foo .after')
         })
 
         it("names the target and the origin when warning about the ampersand character '&'", function() {
           const warnSpy = up.migrate.warn.mock()
           const origin = fixture('#foo')
-          up.fragment.resolveOrigin('.before & .after', { origin })
+          up.internal.resolveOrigin('.before & .after', { origin })
           expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Found in %s (origin %o)'), '.before & .after', origin)
         })
 
         it("warns about the ampersand character '&' without mentioning forms when the origin is not a form element", function() {
           const warnSpy = up.migrate.warn.mock()
           const origin = fixture('#foo')
-          up.fragment.resolveOrigin('& .child', { origin })
+          up.internal.resolveOrigin('& .child', { origin })
           expect(warnSpy).toHaveBeenCalledWith(
             "Origin shorthand '&' has been deprecated. Use :origin instead. Found in %s (origin %o).",
             '& .child',
@@ -491,7 +491,7 @@ extendDescribe('up.fragment', function() {
               <button type="submit" id="button">Submit</button>
             </form>
           `)
-          up.fragment.resolveOrigin('& .child', { origin: button })
+          up.internal.resolveOrigin('& .child', { origin: button })
           expect(warnSpy).toHaveBeenCalledWith(
             "Origin shorthand '&' has been deprecated. Use :origin instead. A form submission's :origin is now the button or changed field, not the form. To target the form, use form:has(:origin). Found in %s (origin %o).",
             '& .child',
@@ -500,19 +500,19 @@ extendDescribe('up.fragment', function() {
         })
 
         it("ignores the ampersand character '&' in the value of an attribute selector and does not require an { origin } option (bugfix)", function() {
-          const resolved = up.fragment.resolveOrigin('a[href="/foo?a=1&b=2"]')
+          const resolved = up.internal.resolveOrigin('a[href="/foo?a=1&b=2"]')
           expect(resolved).toEqual('a[href="/foo?a=1&b=2"]')
         })
 
         it("ignores the ampersand character '&' in the value of an attribute selector that also contains square brackets in the attribute value (bugfix)", function() {
-          const resolved = up.fragment.resolveOrigin('form[action="/example?param[]=a&param[]=b"]')
+          const resolved = up.internal.resolveOrigin('form[action="/example?param[]=a&param[]=b"]')
           expect(resolved).toEqual('form[action="/example?param[]=a&param[]=b"]')
         })
       }
 
       it("it expands ':origin' to a selector for { origin } if the origin's target is an attribute selector (bugfix)'", function() {
         const origin = fixture('a[href="/foo"]')
-        const resolved = up.fragment.resolveOrigin('.before :origin .after', { origin })
+        const resolved = up.internal.resolveOrigin('.before :origin .after', { origin })
         expect(resolved).toEqual('.before a[href="/foo"] .after')
       })
     })
@@ -520,17 +520,17 @@ extendDescribe('up.fragment', function() {
     describe('up.fragment.splitTarget()', function() {
 
       it('returns an array containing a single target', function() {
-        const selectors = up.fragment.splitTarget('.one')
+        const selectors = up.internal.splitTarget('.one')
         expect(selectors).toEqual(['.one'])
       })
 
       it('splits multiple targets at commas', function() {
-        const selectors = up.fragment.splitTarget('.one, .two')
+        const selectors = up.internal.splitTarget('.one, .two')
         expect(selectors).toEqual(['.one', '.two'])
       })
 
       it('does not split at commas within parentheses', function() {
-        const selectors = up.fragment.splitTarget('.one:has(.three, .four), .two')
+        const selectors = up.internal.splitTarget('.one:has(.three, .four), .two')
         expect(selectors).toEqual(['.one:has(.three, .four)', '.two'])
       })
     })
@@ -538,14 +538,14 @@ extendDescribe('up.fragment', function() {
     describe('up.fragment.parseTargetSteps()', function() {
 
       it('parses a single target', function() {
-        const steps = up.fragment.parseTargetSteps('.one')
+        const steps = up.internal.parseTargetSteps('.one')
         expect(steps).toEqual([
           jasmine.objectContaining({ selector: '.one' })
         ])
       })
 
       it('parses multiple targets', function() {
-        const steps = up.fragment.parseTargetSteps('.one, .two')
+        const steps = up.internal.parseTargetSteps('.one, .two')
         expect(steps).toEqual([
           jasmine.objectContaining({ selector: '.one' }),
           jasmine.objectContaining({ selector: '.two' }),
@@ -553,7 +553,7 @@ extendDescribe('up.fragment', function() {
       })
 
       it('parses multiple targets with commas within parentheses', function() {
-        const steps = up.fragment.parseTargetSteps('.one:has(.three, .four), .two')
+        const steps = up.internal.parseTargetSteps('.one:has(.three, .four), .two')
         expect(steps).toEqual([
           jasmine.objectContaining({ selector: '.one:has(.three, .four)' }),
           jasmine.objectContaining({ selector: '.two' }),
@@ -561,12 +561,12 @@ extendDescribe('up.fragment', function() {
       })
 
       it('does not parse any steps from a :none target', function() {
-        const steps = up.fragment.parseTargetSteps(':none')
+        const steps = up.internal.parseTargetSteps(':none')
         expect(steps).toEqual([])
       })
 
       it('ignores a :none target in a union of other targets', function() {
-        const steps = up.fragment.parseTargetSteps('.one, :none, .two')
+        const steps = up.internal.parseTargetSteps('.one, :none, .two')
         expect(steps).toEqual([
           jasmine.objectContaining({ selector: '.one' }),
           jasmine.objectContaining({ selector: '.two' }),
@@ -574,14 +574,14 @@ extendDescribe('up.fragment', function() {
       })
 
       it('sets a default placement of "swap"', function() {
-        const steps = up.fragment.parseTargetSteps('.one')
+        const steps = up.internal.parseTargetSteps('.one')
         expect(steps).toEqual([
           jasmine.objectContaining({ selector: '.one', placement: 'swap' })
         ])
       })
 
       it('parses a prepending placement from :before (single colon)', function() {
-        const steps = up.fragment.parseTargetSteps('.one:before, .two')
+        const steps = up.internal.parseTargetSteps('.one:before, .two')
         expect(steps).toEqual([
           jasmine.objectContaining({ selector: '.one', placement: 'before' }),
           jasmine.objectContaining({ selector: '.two', placement: 'swap' }),
@@ -589,7 +589,7 @@ extendDescribe('up.fragment', function() {
       })
 
       it('parses a prepending placement from ::before (double colon)', function() {
-        const steps = up.fragment.parseTargetSteps('.one::before, .two')
+        const steps = up.internal.parseTargetSteps('.one::before, .two')
         expect(steps).toEqual([
           jasmine.objectContaining({ selector: '.one', placement: 'before' }),
           jasmine.objectContaining({ selector: '.two', placement: 'swap' }),
@@ -597,7 +597,7 @@ extendDescribe('up.fragment', function() {
       })
 
       it('parses an append placement from :after (single colon)', function() {
-        const steps = up.fragment.parseTargetSteps('.one, .two:after')
+        const steps = up.internal.parseTargetSteps('.one, .two:after')
         expect(steps).toEqual([
           jasmine.objectContaining({ selector: '.one', placement: 'swap' }),
           jasmine.objectContaining({ selector: '.two', placement: 'after' }),
@@ -605,7 +605,7 @@ extendDescribe('up.fragment', function() {
       })
 
       it('parses an append placement from ::after (double colon)', function() {
-        const steps = up.fragment.parseTargetSteps('.one, .two::after')
+        const steps = up.internal.parseTargetSteps('.one, .two::after')
         expect(steps).toEqual([
           jasmine.objectContaining({ selector: '.one', placement: 'swap' }),
           jasmine.objectContaining({ selector: '.two', placement: 'after' }),
@@ -613,7 +613,7 @@ extendDescribe('up.fragment', function() {
       })
 
       it('parses an optional target from :maybe', function() {
-        const steps = up.fragment.parseTargetSteps('.one, .two:maybe')
+        const steps = up.internal.parseTargetSteps('.one, .two:maybe')
         expect(steps).toEqual([
           jasmine.objectContaining({ selector: '.one', maybe: false }),
           jasmine.objectContaining({ selector: '.two', maybe: true }),
@@ -621,7 +621,7 @@ extendDescribe('up.fragment', function() {
       })
 
       it('parses multiple pseudo elements in the same target', function() {
-        const steps = up.fragment.parseTargetSteps('.one:maybe:before')
+        const steps = up.internal.parseTargetSteps('.one:maybe:before')
         expect(steps).toEqual([
           jasmine.objectContaining({ selector: '.one', maybe: true, placement: 'before' }),
         ])
@@ -637,7 +637,7 @@ extendDescribe('up.fragment', function() {
         const containerStep = { placement: 'swap', oldElement: container, selector: '.container' }
         const childStep = { placement: 'swap', oldElement: child, selector: '.child' }
 
-        expect(up.fragment.compressNestedSteps([childStep, containerStep])).toEqual([containerStep])
+        expect(up.internal.compressNestedSteps([childStep, containerStep])).toEqual([containerStep])
       })
 
       it("removes a step whose { oldElement } is contained by an earlier step's { oldElement }", function() {
@@ -647,7 +647,7 @@ extendDescribe('up.fragment', function() {
         const containerStep = { placement: 'swap', oldElement: container, selector: '.container' }
         const childStep = { placement: 'swap', oldElement: child, selector: '.child' }
 
-        expect(up.fragment.compressNestedSteps([containerStep, childStep])).toEqual([containerStep])
+        expect(up.internal.compressNestedSteps([containerStep, childStep])).toEqual([containerStep])
       })
 
       it("keeps a step whose { oldElement } is not contained by another step's { oldElement }", function() {
@@ -657,7 +657,7 @@ extendDescribe('up.fragment', function() {
         const sibling1Step = { placement: 'swap', oldElement: sibling1, selector: '.sibling1' }
         const sibling2Step = { placement: 'swap', oldElement: sibling2, selector: '.sibling2' }
 
-        expect(up.fragment.compressNestedSteps([sibling1Step, sibling2Step])).toEqual([sibling1Step, sibling2Step])
+        expect(up.internal.compressNestedSteps([sibling1Step, sibling2Step])).toEqual([sibling1Step, sibling2Step])
       })
 
       it('keeps the earlier step if two steps have the same { oldElement }', function() {
@@ -666,7 +666,7 @@ extendDescribe('up.fragment', function() {
         const step1 = { placement: 'swap', oldElement: element, selector: '.element', scroll: 'auto' }
         const step2 = { placement: 'swap', oldElement: element, selector: '.element', scroll: false }
 
-        expect(up.fragment.compressNestedSteps([step1, step2])).toEqual([step1])
+        expect(up.internal.compressNestedSteps([step1, step2])).toEqual([step1])
       })
 
       it('keeps the earlier step if two steps have the same { oldElement } but a different { selector }', function() {
@@ -675,7 +675,7 @@ extendDescribe('up.fragment', function() {
         const step1 = { placement: 'swap', oldElement: element, selector: 'div', scroll: 'auto' }
         const step2 = { placement: 'swap', oldElement: element, selector: '.element', scroll: false }
 
-        expect(up.fragment.compressNestedSteps([step1, step2])).toEqual([step1])
+        expect(up.internal.compressNestedSteps([step1, step2])).toEqual([step1])
       })
     })
 

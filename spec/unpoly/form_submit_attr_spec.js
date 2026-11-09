@@ -272,7 +272,7 @@ extendDescribe('up.form', function() {
       })
 
       it('does not submit the form while a HTML5 validation is violated', async function() {
-        const submitSpy = up.submit.mock().and.returnValue(u.unresolvablePromise())
+        const submitSpy = up.submit.mock().and.returnValue(up.internal.unresolvablePromise())
 
         const form = fixture('form[action="/form-target"][up-submit]')
         const input = e.affix(form, 'input[type=text][name=title][required]')

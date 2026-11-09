@@ -10,7 +10,6 @@ import {
   containsElement, createNodesFromHTML, documentPosition, getOne, idSelector,
   isIntersectingWindow, parseSelector, removeAttrsFromHTML, subtree, subtreeFirst, wrapIfRequired,
 } from './element.js'
-import { canPushState } from './browser.js'
 import { fail } from './error.js'
 import { mockable } from './mockable.js'
 import { CannotParse } from './error/cannot_parse.js'
@@ -21,7 +20,7 @@ import { DestroyFragment } from './fragment/render/change/destroy_fragment.js'
 import { RenderJob } from './fragment/render/render_job.js'
 import { SelectorTracker } from './fragment/selector_tracker.js'
 import { Selector } from './fragment/selector.js'
-import { isHistoryEnabled } from './history.js'
+import { canPushState, isHistoryEnabled } from './history.js'
 import { config as layerConfig, layerStack, mainTargets } from './layer.js'
 import { Layer } from './layer/base.js'
 import { printToStandard, printToWarn } from './log.js'
@@ -3429,13 +3428,7 @@ export const api = {
     closest,
     source: sourceOf,
     visit,
-    defaultNormalizeKeepHTML, // export for testing
-    successKey,
-    failKey,
-    expandTargets,
-    resolveOrigin,
     toTarget,
-    tryToTarget,
     isTargetable,
     matches,
     time: timeOf,
@@ -3443,12 +3436,7 @@ export const api = {
     abort,
     onAborted,
     onKept,
-    splitTarget,
-    parseTargetSteps,
     isAlive,
-    compressNestedSteps,
-    insertTemp,
-    provideNodes,
     cloneTemplate,
     // export for testing
     // swapTemp,

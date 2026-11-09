@@ -7,7 +7,7 @@ describe('up.error', function() {
     it('does not mute a fulfilled promise', async function() {
       const value = 'fulfillment value'
       const promise = Promise.resolve(value)
-      const mutedPromise = up.error.muteUncriticalRejection(promise)
+      const mutedPromise = up.internal.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeResolvedTo(value)
     })
@@ -15,7 +15,7 @@ describe('up.error', function() {
     it('mutes a rejected promise if the rejection value is an up.Response', async function() {
       const response = new up.Response()
       const promise = Promise.reject(response)
-      const mutedPromise = up.error.muteUncriticalRejection(promise)
+      const mutedPromise = up.internal.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeResolved()
     })
@@ -23,7 +23,7 @@ describe('up.error', function() {
     it('mutes a rejected promise if the rejection value is an up.RenderResult', async function() {
       const renderResult = new up.RenderResult()
       const promise = Promise.reject(renderResult)
-      const mutedPromise = up.error.muteUncriticalRejection(promise)
+      const mutedPromise = up.internal.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeResolved()
     })
@@ -31,7 +31,7 @@ describe('up.error', function() {
     it('mutes a rejected promise if the rejection value is an AbortError', async function() {
       const abortError = new up.Aborted('User aborted')
       const promise = Promise.reject(abortError)
-      const mutedPromise = up.error.muteUncriticalRejection(promise)
+      const mutedPromise = up.internal.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeResolved()
     })
@@ -39,7 +39,7 @@ describe('up.error', function() {
     it('does not mute a rejected promise with another rejection value', async function() {
       const error = new Error('other error')
       const promise = Promise.reject(error)
-      const mutedPromise = up.error.muteUncriticalRejection(promise)
+      const mutedPromise = up.internal.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeRejectedWith(error)
     })
@@ -49,7 +49,7 @@ describe('up.error', function() {
 
     it('calls the given function and returns its return value', function() {
       let fn = () => 123
-      expect(up.error.guard(fn)).toBe(123)
+      expect(up.internal.guard(fn)).toBe(123)
     })
 
     describe('when the function throws an error', function() {
@@ -57,7 +57,7 @@ describe('up.error', function() {
       it('does not crash', async function() {
         await jasmine.spyOnGlobalErrorsAsync(async function() {
           let fn = () => { throw new Error('error message') }
-          let runGuarded = () => up.error.guard(fn)
+          let runGuarded = () => up.internal.guard(fn)
           expect(runGuarded).not.toThrowError()
         })
       })
@@ -65,7 +65,7 @@ describe('up.error', function() {
       it('returns undefined', async function() {
         await jasmine.spyOnGlobalErrorsAsync(async function() {
           let fn = () => { throw new Error('error message') }
-          expect(up.error.guard(fn)).toBe(undefined)
+          expect(up.internal.guard(fn)).toBe(undefined)
         })
       })
 
@@ -74,7 +74,7 @@ describe('up.error', function() {
         let fn = () => { throw error }
 
         await jasmine.expectGlobalError(error, async function() {
-          up.error.guard(fn)
+          up.internal.guard(fn)
         })
       })
 
@@ -86,7 +86,7 @@ describe('up.error', function() {
 
     it('returns a function that calls the given functions', function() {
       let fn = jasmine.createSpy('wrapped function').and.returnValue(123)
-      let guarded = up.error.guardFn(fn)
+      let guarded = up.internal.guardFn(fn)
 
       expect(guarded).toEqual(jasmine.any(Function))
       expect(fn).not.toHaveBeenCalled()
@@ -98,7 +98,7 @@ describe('up.error', function() {
     it('calls the wrapped function with a guard', async function() {
       let error = new Error('error message')
       let fn = jasmine.createSpy('wrapped function').and.throwError(error)
-      let guarded = up.error.guardFn(fn)
+      let guarded = up.internal.guardFn(fn)
 
       await jasmine.expectGlobalError(error, async function() {
         expect(guarded).not.toThrowError()

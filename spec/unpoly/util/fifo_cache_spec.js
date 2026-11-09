@@ -3,7 +3,7 @@ describe('up.FIFOCache', function() {
   describe('#get()', function() {
 
     it('returns an item that was previously set', function() {
-      const cache = new up.FIFOCache()
+      const cache = new up.internal.FIFOCache()
       cache.set('foo', 'value of foo')
       cache.set('bar', 'value of bar')
 
@@ -12,7 +12,7 @@ describe('up.FIFOCache', function() {
     })
 
     it('returns undefined if no item with that key was set', function() {
-      const cache = new up.FIFOCache()
+      const cache = new up.internal.FIFOCache()
       cache.set('foo', 'value of foo')
 
       expect(cache.get('bar')).toBeUndefined()
@@ -20,7 +20,7 @@ describe('up.FIFOCache', function() {
 
     describe('with { normalizeKey } option', function() {
       it('normalizes the cache key before setting and retrieval', function() {
-        const cache = new up.FIFOCache({
+        const cache = new up.internal.FIFOCache({
           normalizeKey(key) {
             return key.length
           }
@@ -36,7 +36,7 @@ describe('up.FIFOCache', function() {
 
   describe('#set()', function() {
     it('removes the oldest item if setting a new item would exceed the cache size', function() {
-      const cache = new up.FIFOCache({ capacity: 2 })
+      const cache = new up.internal.FIFOCache({ capacity: 2 })
 
       cache.set('foo', 'value of foo')
       cache.set('bar', 'value of bar')

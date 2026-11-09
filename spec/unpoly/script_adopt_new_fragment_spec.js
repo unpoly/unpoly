@@ -13,45 +13,45 @@ extendDescribe('up.script', function() {
           describe(`when the page nonce is ${pageNonce ? 'known' : 'not known'}`, function() {
 
             beforeEach(function() {
-              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+              up.script.config.cspNonce = up.internal.assert(pageNonce, u.isDefined)
             })
 
             it('blocks a script element without nonce', function() {
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const script = up.element.createFromSelector('script')
               expect(script).toBeActiveScript()
 
-              up.script.adoptNewFragment(script, cspInfo)
+              up.internal.adoptNewFragment(script, cspInfo)
 
               expect(script).toBeInertScript()
             })
 
             it('blocks a script element with the correct page nonce', function() {
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const script = up.element.createFromSelector('script[nonce="response123"]')
               expect(script).toBeActiveScript()
 
-              up.script.adoptNewFragment(script, cspInfo)
+              up.internal.adoptNewFragment(script, cspInfo)
 
               expect(script).toBeInertScript()
             })
 
             it('blocks a script element with an incorrect nonce', function() {
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const script = up.element.createFromSelector('script[nonce="wrong456"]')
               expect(script).toBeActiveScript()
 
-              up.script.adoptNewFragment(script, cspInfo)
+              up.internal.adoptNewFragment(script, cspInfo)
 
               expect(script).toBeInertScript()
             })
 
             it('does not change a script element with a non-JavaScript type', function() {
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const script = up.element.createFromSelector('script[type="text/ramenscript"]', { text: 'console.log("hello")' })
               const scriptHTMLBefore = script.outerHTML
 
-              up.script.adoptNewFragment(script, cspInfo)
+              up.internal.adoptNewFragment(script, cspInfo)
 
               expect(script.outerHTML).toEqual(scriptHTMLBefore)
             })
@@ -65,64 +65,64 @@ extendDescribe('up.script', function() {
           describe(`when the CSP is ${strictDynamic ? 'strict-dynamic' : 'not strict-dynamic'}`, function() {
 
             beforeEach(function() {
-              let strictDynamicPart = up.util.assert(strictDynamic, up.util.isBoolean) ? "'strict-dynamic'" : ""
-              this.cspInfo ??= up.CSPInfo.fromHeader(`script-src 'self' 'nonce-response111' ${strictDynamicPart}`)
+              let strictDynamicPart = up.internal.assert(strictDynamic, up.util.isBoolean) ? "'strict-dynamic'" : ""
+              this.cspInfo ??= up.internal.CSPInfo.fromHeader(`script-src 'self' 'nonce-response111' ${strictDynamicPart}`)
             })
 
             it('does not change a script element without a [nonce]', function() {
-              up.script.cspNonce.mock().and.returnValue('page000')
+              up.internal.cspNonce.mock().and.returnValue('page000')
 
               const script = up.element.createFromSelector('script', { text: 'console.log("hello")' })
               const scriptHTMLBefore = script.outerHTML
 
-              up.script.adoptNewFragment(script, this.cspInfo)
+              up.internal.adoptNewFragment(script, this.cspInfo)
 
               expect(script).toBeActiveScript()
               expect(script.outerHTML).toEqual(scriptHTMLBefore)
             })
 
             it("does not change am inline script element when its [nonce] doesn't match the response nonce", function() {
-              up.script.cspNonce.mock().and.returnValue('page000')
+              up.internal.cspNonce.mock().and.returnValue('page000')
 
               const script = up.element.createFromSelector('script', { nonce: 'incorrect456', text: 'console.log("hello")' })
               const scriptHTMLBefore = script.outerHTML
 
-              up.script.adoptNewFragment(script, this.cspInfo)
+              up.internal.adoptNewFragment(script, this.cspInfo)
 
               expect(script).toBeActiveScript()
               expect(script.outerHTML).toEqual(scriptHTMLBefore)
             })
 
             it('does not add a [nonce] to linked, un-nonced script, as that might bypass a host-based CSP (bugfix)', async function() {
-              up.script.cspNonce.mock().and.returnValue('page000')
+              up.internal.cspNonce.mock().and.returnValue('page000')
 
               const script = up.element.createFromSelector('script', { src: up.specUtil.staticFile('linked_noop_script.js') })
               const scriptHTMLBefore = script.outerHTML
 
-              up.script.adoptNewFragment(script, this.cspInfo)
+              up.internal.adoptNewFragment(script, this.cspInfo)
 
               expect(script).toBeActiveScript()
               expect(script.outerHTML).toEqual(scriptHTMLBefore)
             })
 
             it("rewrites the [nonce] of a body script when it matches the response nonce", async function() {
-              up.script.cspNonce.mock().and.returnValue('page000')
+              up.internal.cspNonce.mock().and.returnValue('page000')
 
               const script = up.element.createFromSelector('script', { nonce: 'response111', text: 'console.log("hello")' })
 
-              up.script.adoptNewFragment(script, this.cspInfo)
+              up.internal.adoptNewFragment(script, this.cspInfo)
 
               expect(script).toBeActiveScript()
               expect(script).toHaveProperty('nonce', 'page000')
             })
 
             it('does not change a script element with an correct nonce, but the page nonce is unknown', function() {
-              up.script.cspNonce.mock().and.returnValue(undefined)
+              up.internal.cspNonce.mock().and.returnValue(undefined)
 
               const script = up.element.createFromSelector('script', { nonce: 'response111', text: 'console.log("hello")' })
               const scriptHTMLBefore = script.outerHTML
 
-              up.script.adoptNewFragment(script, this.cspInfo)
+              up.internal.adoptNewFragment(script, this.cspInfo)
 
               expect(script).toBeActiveScript()
               expect(script.outerHTML).toEqual(scriptHTMLBefore)
@@ -132,7 +132,7 @@ extendDescribe('up.script', function() {
               const script = up.element.createFromSelector('script[type="text/ramenscript"]', { text: 'console.log("hello")' })
               const scriptHTMLBefore = script.outerHTML
 
-              up.script.adoptNewFragment(script, this.cspInfo)
+              up.internal.adoptNewFragment(script, this.cspInfo)
 
               expect(script.outerHTML).toEqual(scriptHTMLBefore)
             })
@@ -145,57 +145,57 @@ extendDescribe('up.script', function() {
           describe(`when the CSP is ${strictDynamic ? 'strict-dynamic' : 'not strict-dynamic'}`, function() {
 
             beforeEach(function() {
-              let strictDynamicPart = up.util.assert(strictDynamic, up.util.isGiven) ? "'strict-dynamic'" : ""
-              this.cspInfo ??= up.CSPInfo.fromHeader(`script-src 'self' 'nonce-response111' ${strictDynamicPart}`)
+              let strictDynamicPart = up.internal.assert(strictDynamic, up.util.isGiven) ? "'strict-dynamic'" : ""
+              this.cspInfo ??= up.internal.CSPInfo.fromHeader(`script-src 'self' 'nonce-response111' ${strictDynamicPart}`)
             })
 
             it('blocks a script element without nonce', function() {
-              up.script.cspNonce.mock().and.returnValue('page000')
+              up.internal.cspNonce.mock().and.returnValue('page000')
               const script = up.element.createFromSelector('script')
               expect(script).toBeActiveScript()
 
-              up.script.adoptNewFragment(script, this.cspInfo)
+              up.internal.adoptNewFragment(script, this.cspInfo)
 
               expect(script).toBeInertScript()
             })
 
             it('rewrites a script element nonce that matches its response', function() {
-              up.script.cspNonce.mock().and.returnValue('page000')
+              up.internal.cspNonce.mock().and.returnValue('page000')
               const script = up.element.createFromSelector('script[nonce="response111"]')
               expect(script).toBeActiveScript()
 
-              up.script.adoptNewFragment(script, this.cspInfo)
+              up.internal.adoptNewFragment(script, this.cspInfo)
 
               expect(script).toBeActiveScript()
               expect(script).toHaveProperty('nonce', 'page000')
             })
 
             it('blocks a script element whose nonce that matches its response, but the page nonce is unknown', function() {
-              up.script.cspNonce.mock().and.returnValue(undefined)
+              up.internal.cspNonce.mock().and.returnValue(undefined)
               const script = up.element.createFromSelector('script[nonce="response111"]')
               expect(script).toBeActiveScript()
 
-              up.script.adoptNewFragment(script, this.cspInfo)
+              up.internal.adoptNewFragment(script, this.cspInfo)
 
               expect(script).toBeInertScript()
             })
 
             it('blocks a script element with an incorrect nonce', function() {
-              up.script.cspNonce.mock().and.returnValue('page000')
+              up.internal.cspNonce.mock().and.returnValue('page000')
               const script = up.element.createFromSelector('script[nonce="wrong222"]')
               expect(script).toBeActiveScript()
 
-              up.script.adoptNewFragment(script, this.cspInfo)
+              up.internal.adoptNewFragment(script, this.cspInfo)
 
               expect(script).toBeInertScript()
             })
 
             it('does not change a script element with a non-JavaScript type', function() {
-              up.script.cspNonce.mock().and.returnValue('page000')
+              up.internal.cspNonce.mock().and.returnValue('page000')
               const script = up.element.createFromSelector('script[type="text/ramenscript"]', { text: 'console.log("hello")' })
               const scriptHTMLBefore = script.outerHTML
 
-              up.script.adoptNewFragment(script, this.cspInfo)
+              up.internal.adoptNewFragment(script, this.cspInfo)
 
               expect(script.outerHTML).toEqual(scriptHTMLBefore)
             })
@@ -324,44 +324,44 @@ extendDescribe('up.script', function() {
           describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
 
             beforeEach(function() {
-              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+              up.script.config.cspNonce = up.internal.assert(pageNonce, u.isDefined)
             })
 
             it('blocks a callback without nonce', function() {
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const link = up.element.createFromHTML(`
                 <a href="/foo" up-follow up-on-loaded="console.log('hi')"></a>              
               `)
 
               expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
 
-              up.script.adoptNewFragment(link, cspInfo)
+              up.internal.adoptNewFragment(link, cspInfo)
 
               expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
             })
 
             it('blocks a callback with the correct nonce', function() {
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const link = up.element.createFromHTML(`
                 <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
               `)
 
               expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
 
-              up.script.adoptNewFragment(link, cspInfo)
+              up.internal.adoptNewFragment(link, cspInfo)
 
               expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
             })
 
             it('blocks a callback with an incorrect nonce', function() {
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const link = up.element.createFromHTML(`
                 <a href="/foo" up-follow up-on-loaded="nonce-wrong456 console.log('hi')"></a>              
               `)
 
               expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
 
-              up.script.adoptNewFragment(link, cspInfo)
+              up.internal.adoptNewFragment(link, cspInfo)
 
               expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
             })
@@ -373,28 +373,28 @@ extendDescribe('up.script', function() {
 
           describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
             beforeEach(function() {
-              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+              up.script.config.cspNonce = up.internal.assert(pageNonce, u.isDefined)
             })
 
             it('does not change a callback without a nonce', function() {
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const link = up.element.createFromHTML(`
               <a href="/foo" up-follow up-on-loaded="console.log('hi')"></a>              
             `)
 
-              up.script.adoptNewFragment(link, cspInfo)
+              up.internal.adoptNewFragment(link, cspInfo)
 
               expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
               expect(link.getAttribute('up-on-loaded')).toBe("console.log('hi')")
             })
 
             it('does not change a callback with an incorrect nonce', function() {
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const link = up.element.createFromHTML(`
               <a href="/foo" up-follow up-on-loaded="nonce-wrong456 console.log('hi')"></a>              
             `)
 
-              up.script.adoptNewFragment(link, cspInfo)
+              up.internal.adoptNewFragment(link, cspInfo)
 
               expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
               expect(link.getAttribute('up-on-loaded')).toBe("nonce-wrong456 console.log('hi')")
@@ -403,12 +403,12 @@ extendDescribe('up.script', function() {
             if (pageNonce) {
 
               it('rewrites a correct callback nonce', function() {
-                const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+                const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
                 const link = up.element.createFromHTML(`
                 <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
               `)
 
-                up.script.adoptNewFragment(link, cspInfo)
+                up.internal.adoptNewFragment(link, cspInfo)
 
                 expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
                 expect(link.getAttribute('up-on-loaded')).toBe("nonce-page000 console.log('hi')")
@@ -417,12 +417,12 @@ extendDescribe('up.script', function() {
             } else {
 
               it('does not rewrite a correct callback nonce', function() {
-                const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+                const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
                 const link = up.element.createFromHTML(`
                 <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
               `)
 
-                up.script.adoptNewFragment(link, cspInfo)
+                up.internal.adoptNewFragment(link, cspInfo)
 
                 expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
                 expect(link.getAttribute('up-on-loaded')).toBe("nonce-response123 console.log('hi')")
@@ -437,60 +437,60 @@ extendDescribe('up.script', function() {
           describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
 
             beforeEach(function() {
-              up.script.config.cspNonce = up.util.assert(pageNonce, u.isDefined)
+              up.script.config.cspNonce = up.internal.assert(pageNonce, u.isDefined)
             })
 
             it('blocks a callback without nonce', function() {
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const link = up.element.createFromHTML(`
               <a href="/foo" up-follow up-on-loaded="console.log('hi')"></a>              
             `)
 
               expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
 
-              up.script.adoptNewFragment(link, cspInfo)
+              up.internal.adoptNewFragment(link, cspInfo)
 
               expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
             })
 
             it('blocks a callback with an incorrect nonce', function() {
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const link = up.element.createFromHTML(`
               <a href="/foo" up-follow up-on-loaded="nonce-wrong456 console.log('hi')"></a>              
             `)
 
               expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
 
-              up.script.adoptNewFragment(link, cspInfo)
+              up.internal.adoptNewFragment(link, cspInfo)
 
               expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
             })
 
             if (pageNonce) {
               it('rewrites a callback nonce that matches its response', function() {
-                const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+                const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
                 const link = up.element.createFromHTML(`
               <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
             `)
 
                 expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
 
-                up.script.adoptNewFragment(link, cspInfo)
+                up.internal.adoptNewFragment(link, cspInfo)
 
                 expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
                 expect(link.getAttribute('up-on-loaded')).toBe("nonce-page000 console.log('hi')")
               })
             } else {
               it('blocks a callback whose nonce matches its response', function() {
-                up.script.cspNonce.mock().and.returnValue(undefined)
-                const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+                up.internal.cspNonce.mock().and.returnValue(undefined)
+                const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
                 const link = up.element.createFromHTML(`
               <a href="/foo" up-follow up-on-loaded="nonce-response123 console.log('hi')"></a>              
             `)
 
                 expect(link.getAttribute('up-on-loaded')).toBeActiveCallbackString()
 
-                up.script.adoptNewFragment(link, cspInfo)
+                up.internal.adoptNewFragment(link, cspInfo)
 
                 expect(link.getAttribute('up-on-loaded')).toBeInertCallbackString()
               })
@@ -539,12 +539,12 @@ extendDescribe('up.script', function() {
           for (let attr of ['up-on-accept', 'up-on-dismiss']) {
             it(`rewrites a callback nonce in an [${attr}] attribute`, function() {
               up.script.config.cspNonce = 'page000'
-              const cspInfo = up.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
+              const cspInfo = up.internal.CSPInfo.fromHeader("script-src 'self' 'nonce-response123'")
               const link = up.element.createFromHTML(`
                 <a href="/foo" up-layer="new" ${attr}="nonce-response123 console.log('hi')"></a>
               `)
 
-              up.script.adoptNewFragment(link, cspInfo)
+              up.internal.adoptNewFragment(link, cspInfo)
 
               expect(link.getAttribute(attr)).toBe("nonce-page000 console.log('hi')")
             })

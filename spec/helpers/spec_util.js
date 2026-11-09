@@ -41,7 +41,7 @@ up.specUtil = (function() {
   }
 
   function rootHasReducedWidthFromScrollbar() {
-    return up.viewport.rootScrollbarWidth() > 0
+    return up.internal.rootScrollbarWidth() > 0
   }
 
   /*-

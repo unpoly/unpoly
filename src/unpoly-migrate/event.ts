@@ -90,7 +90,7 @@ up.$off = function(...definitionArgs) {
   let nativeCallback = $callback.upNativeCallback
 
   if (!nativeCallback) {
-    up.fail('The callback passed to up.$off() was never registered with up.$on()')
+    up.internal.fail('The callback passed to up.$off() was never registered with up.$on()')
   }
 
   return up.off(...definitionArgs, nativeCallback)

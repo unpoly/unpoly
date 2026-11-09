@@ -222,7 +222,7 @@ describe('up.viewport', function() {
         const button = e.affix(root, 'button')
         button.focus()
 
-        expect(up.viewport.focusedElementWithin(root)).toBe(button)
+        expect(up.internal.focusedElementWithin(root)).toBe(button)
       })
 
       it('returns undefined if the focused element is not contained by the given root', function() {
@@ -230,12 +230,12 @@ describe('up.viewport', function() {
         const button = fixture('button')
         button.focus()
 
-        expect(up.viewport.focusedElementWithin(root)).toBeMissing()
+        expect(up.internal.focusedElementWithin(root)).toBeMissing()
       })
 
       it('returns undefined if no element is focused', function() {
         const root = fixture('.root')
-        expect(up.viewport.focusedElementWithin(root)).toBeMissing()
+        expect(up.internal.focusedElementWithin(root)).toBeMissing()
       })
 
       it('returns undefined if the given root is the <body>, but the focused element is an overlay', async function() {
@@ -243,7 +243,7 @@ describe('up.viewport', function() {
         const button = overlay.affix('button')
         button.focus()
 
-        expect(up.viewport.focusedElementWithin(document.body)).toBeMissing()
+        expect(up.internal.focusedElementWithin(document.body)).toBeMissing()
       })
     })
 
@@ -263,7 +263,7 @@ describe('up.viewport', function() {
           this.$container = $('<div class="container">').prependTo($body)
           this.$container.css({ opacity: 0.2 }) // reduce flashing during test runs
 
-          this.clientHeight = up.viewport.rootHeight()
+          this.clientHeight = up.internal.rootHeight()
 
           const elementPlans = [
             { height: this.clientHeight, backgroundColor: 'yellow' }, // [0]
@@ -874,7 +874,7 @@ describe('up.viewport', function() {
         const revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
         const $match = $fixture('div#hash')
 
-        up.viewport.revealHash('#hash')
+        up.internal.revealHash('#hash')
         await wait()
 
         expect(revealSpy).toHaveBeenCalledWith($match[0], jasmine.anything())
@@ -884,7 +884,7 @@ describe('up.viewport', function() {
         const revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
         const $match = $fixture('a[name="hash"]')
 
-        up.viewport.revealHash('#hash')
+        up.internal.revealHash('#hash')
         await wait()
 
         expect(revealSpy).toHaveBeenCalledWith($match[0], jasmine.anything())
@@ -892,7 +892,7 @@ describe('up.viewport', function() {
 
       it('returns a truthy value so up.FragmentScrolling knows that scrolling succeeded', function() {
         fixture('#hash')
-        const result = up.viewport.revealHash('#hash')
+        const result = up.internal.revealHash('#hash')
         expect(result).toBeTruthy()
       })
 
@@ -903,7 +903,7 @@ describe('up.viewport', function() {
           const revealSpy = up.reveal.mock()
 
           up.viewport.root.scrollTop = 50
-          up.viewport.revealHash('#hash')
+          up.internal.revealHash('#hash')
           await wait()
 
           expect(revealSpy).not.toHaveBeenCalled()
@@ -913,7 +913,7 @@ describe('up.viewport', function() {
 
         it('returns a falsy value so up.FragmentScrolling knows it needs to try the next option', function() {
           fixture('.high', { style: { height: '10000px' } }) // Ensure we have a vertical scroll bar
-          const result = up.viewport.revealHash('#hash')
+          const result = up.internal.revealHash('#hash')
           expect(result).toBeFalsy()
         })
       })
@@ -926,7 +926,7 @@ describe('up.viewport', function() {
         const $element = $motherViewport.affix('.element')
         const $childViewport = $element.affix('.child[up-viewport]')
         const $grandChildViewport = $childViewport.affix('.grand-child[up-viewport]')
-        const actual = up.viewport.subtree($element[0])
+        const actual = up.internal.getViewportSubtree($element[0])
         const expected = $childViewport.add($grandChildViewport)
 
         expect(actual).toMatchList(expected)
@@ -934,7 +934,7 @@ describe('up.viewport', function() {
 
       it('returns the given element if it is a viewport', function() {
         const viewportElement = $fixture('.viewport[up-viewport]')[0]
-        const results = up.viewport.subtree(viewportElement)
+        const results = up.internal.getViewportSubtree(viewportElement)
         expect(results).toMatchList([viewportElement])
       })
     })
@@ -945,7 +945,7 @@ describe('up.viewport', function() {
         const $element = $motherViewport.affix('.element')
         const $childViewport = $element.affix('.child[up-viewport]')
         const $grandChildViewport = $childViewport.affix('.grand-child[up-viewport]')
-        const actual = up.viewport.around($element[0])
+        const actual = up.internal.getViewportAround($element[0])
         const expected = $motherViewport.add($childViewport).add($grandChildViewport)
 
         expect(actual).toMatchList(expected)
@@ -983,16 +983,16 @@ describe('up.viewport', function() {
 
         it('falls back to the scrolling element if <body> is configured to scroll (fix for Edge)', function() {
           const element = fixture('.element', { style: { height: '3000px' } })
-          this.resetHTMLCSS = e.setStyleTemp(document.documentElement, { 'overflow-y': 'hidden' })
-          this.resetBodyCSS = e.setStyleTemp(document.body, { 'overflow-y': 'scroll' })
+          this.resetHTMLCSS = up.internal.setStyleTemp(document.documentElement, { 'overflow-y': 'hidden' })
+          this.resetBodyCSS = up.internal.setStyleTemp(document.body, { 'overflow-y': 'scroll' })
           const result = up.viewport.get(element)
           expect(result).toBe(document.scrollingElement)
         })
 
         it('falls back to the scrolling element if <html> is configured to scroll (fix for Edge)', function() {
           const element = fixture('.element', { style: { height: '3000px' } })
-          this.resetHTMLCSS = e.setStyleTemp(document.documentElement, { 'overflow-y': 'scroll' })
-          this.resetBodyCSS = e.setStyleTemp(document.body, { 'overflow-y': 'hidden' })
+          this.resetHTMLCSS = up.internal.setStyleTemp(document.documentElement, { 'overflow-y': 'scroll' })
+          this.resetBodyCSS = up.internal.setStyleTemp(document.body, { 'overflow-y': 'hidden' })
           const result = up.viewport.get(element)
           expect(result).toBe(document.scrollingElement)
         })
@@ -1038,7 +1038,7 @@ describe('up.viewport', function() {
         input.focus()
         up.viewport.saveFocus()
         input.blur()
-        const putsSpy = up.puts.mock()
+        const putsSpy = up.internal.printToStandard.mock()
 
         up.viewport.restoreFocus()
 
@@ -1150,7 +1150,7 @@ describe('up.viewport', function() {
         expect($element.css('position')).toEqual('static')
         const previousDims = $element[0].getBoundingClientRect()
 
-        up.viewport.absolutize($element[0])
+        up.internal.absolutize($element[0])
 
         expect($element.closest('up-bounds').css('position')).toEqual('absolute')
 
@@ -1162,7 +1162,7 @@ describe('up.viewport', function() {
         const $element = $fixture('.element').css({ margin: '40px' })
         const previousDims = $element[0].getBoundingClientRect()
 
-        up.viewport.absolutize($element[0])
+        up.internal.absolutize($element[0])
 
         const newDims = $element[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
@@ -1173,7 +1173,7 @@ describe('up.viewport', function() {
         const $child = $('<div class="child">child text</div>').css({ margin: '40px' }).appendTo($element)
         const previousChildDims = $child[0].getBoundingClientRect()
 
-        up.viewport.absolutize($element[0])
+        up.internal.absolutize($element[0])
 
         const newChildDims = $child[0].getBoundingClientRect()
         expect(newChildDims).toEqual(previousChildDims)
@@ -1187,7 +1187,7 @@ describe('up.viewport', function() {
 
         const previousDims = $element2[0].getBoundingClientRect()
 
-        up.viewport.absolutize($element2[0])
+        up.internal.absolutize($element2[0])
 
         const newDims = $element2[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
@@ -1205,7 +1205,7 @@ describe('up.viewport', function() {
 
         const previousDims = $element2[0].getBoundingClientRect()
 
-        up.viewport.absolutize($element2[0])
+        up.internal.absolutize($element2[0])
 
         const newDims = $element2[0].getBoundingClientRect()
         expect(newDims).toEqual(previousDims)
@@ -1223,7 +1223,7 @@ describe('up.viewport', function() {
           top: '77px'
         })
         $fixedChild.appendTo($element)
-        up.viewport.absolutize($element[0])
+        up.internal.absolutize($element[0])
 
         expect($fixedChild.css(['position', 'left', 'top'])).toEqual({
           position: 'absolute',
@@ -1238,7 +1238,7 @@ describe('up.viewport', function() {
         $fixedChild.appendTo($element)
         const $fixedSibling = $fixture('[up-fixed]').css({ position: 'fixed' })
 
-        up.viewport.absolutize($element[0])
+        up.internal.absolutize($element[0])
 
         expect($fixedChild.css('position')).toEqual('absolute')
         expect($fixedSibling.css('position')).toEqual('fixed')

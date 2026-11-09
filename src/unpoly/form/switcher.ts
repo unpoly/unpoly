@@ -120,8 +120,3 @@ export class Switcher {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  Switcher,
-}

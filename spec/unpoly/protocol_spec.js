@@ -11,17 +11,17 @@ describe('up.protocol', function() {
 
     it('returns the [content] of a <meta name="csrf-token"> by default', function() {
       this.$meta = $('<meta name="csrf-token" content="token-from-meta">').appendTo('head')
-      expect(up.protocol.csrfToken()).toEqual('token-from-meta')
+      expect(up.internal.csrfToken()).toEqual('token-from-meta')
     })
 
     it('returns a configured token', function() {
       up.protocol.config.csrfToken = 'configured-token'
-      expect(up.protocol.csrfToken()).toEqual('configured-token')
+      expect(up.internal.csrfToken()).toEqual('configured-token')
     })
 
     it('allows to configure a function that returns the token', function() {
       up.protocol.config.csrfToken = () => 'configured-token'
-      expect(up.protocol.csrfToken()).toEqual('configured-token')
+      expect(up.internal.csrfToken()).toEqual('configured-token')
     })
   })
 
@@ -33,23 +33,23 @@ describe('up.protocol', function() {
 
     it('returns the [content] of a <meta name="csrf-param"> by default', function() {
       this.$meta = $('<meta name="csrf-param" content="param-from-meta">').appendTo('head')
-      expect(up.protocol.csrfParam()).toEqual('param-from-meta')
+      expect(up.internal.csrfParam()).toEqual('param-from-meta')
     })
 
     it('returns a configured parameter name', function() {
       up.protocol.config.csrfParam = 'configured-param'
-      expect(up.protocol.csrfParam()).toEqual('configured-param')
+      expect(up.internal.csrfParam()).toEqual('configured-param')
     })
 
     it('allows to configure a function that returns the parameter name', function() {
       up.protocol.config.csrfParam = () => 'configured-param'
-      expect(up.protocol.csrfParam()).toEqual('configured-param')
+      expect(up.internal.csrfParam()).toEqual('configured-param')
     })
   })
 
   describe('up.protocol.headerize()', function() {
     it('turns a camelized identifier into an X-Up-Foo-Bar style header name', function() {
-      const header = up.protocol.headerize('fooBar')
+      const header = up.internal.headerize('fooBar')
       expect(header).toEqual('X-Up-Foo-Bar')
     })
   })
@@ -65,7 +65,7 @@ describe('up.protocol', function() {
         const response = await request
 
         expect(response.title).toBe('Bare title')
-        expect(u.sprintf(...warnSpy.calls.argsFor(0))).toBe('X-Up-Title must now be a JSON-encoded string (got "Bare title")')
+        expect(up.internal.sprintf(...warnSpy.calls.argsFor(0))).toBe('X-Up-Title must now be a JSON-encoded string (got "Bare title")')
       })
     })
 

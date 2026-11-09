@@ -148,7 +148,7 @@ extendDescribe('up.radio', function() {
       it("does not reload a hungry element if it has a weak selector", async function() {
         $fixture("div[up-hungry]").text("old hungry")
         $fixture(".target").text("old target")
-        const warnSpy = up.warn.mock()
+        const warnSpy = up.internal.printToWarn.mock()
 
         const renderJob = up.render(".target", { url: "/path" })
 

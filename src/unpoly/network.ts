@@ -1003,7 +1003,6 @@ export const api = {
     isBusy,
     config,
     abort: abortRequests,
-    queue, // for testing
     loadPage,
   },
   request: makeRequest,

@@ -32,11 +32,8 @@
 // A ReferenceError at load time ("Cannot access … before initialization") means a cycle is
 // entered from the wrong side.
 import * as namespace from './unpoly/namespace.js.erb'
-import * as mockable from './unpoly/mockable.js'
 import * as util from './unpoly/util.js'
-import * as error from './unpoly/error.js'
 import * as migrateStub from './unpoly/migrate_stub.js'
-import * as browser from './unpoly/browser.js'
 import * as element from './unpoly/element.js'
 import * as framework from './unpoly/framework.js'
 import * as event from './unpoly/event.js'
@@ -62,43 +59,28 @@ import * as cannotMatchError from './unpoly/error/cannot_match.js'
 import * as cannotParseError from './unpoly/error/cannot_parse.js'
 import * as cannotTargetError from './unpoly/error/cannot_target.js'
 import * as offlineError from './unpoly/error/offline.js'
-import * as configClass from './unpoly/util/config.js'
-import * as optionsParserClass from './unpoly/element/options_parser.js'
-import * as fifoCacheClass from './unpoly/util/fifo_cache.js'
-import * as rectClass from './unpoly/util/rect.js'
-import * as urlPatternClass from './unpoly/util/url_pattern.js'
-import * as eventEmitterClass from './unpoly/event/event_emitter.js'
-import * as eventListenerClass from './unpoly/event/event_listener.js'
-import * as cspInfoClass from './unpoly/script/csp/csp_info.js'
-import * as nonceableCallbackClass from './unpoly/script/csp/nonceable_callback.js'
-import * as switcherClass from './unpoly/form/switcher.js'
 import * as paramsClass from './unpoly/form/params.js'
 import * as previewClass from './unpoly/status/preview.js'
-import * as motionControllerClass from './unpoly/motion/motion_controller.js'
-import * as selectorTrackerClass from './unpoly/fragment/selector_tracker.js'
 import * as layerClass from './unpoly/layer/base.js'
-import * as tetherClass from './unpoly/layer/tether.js'
 import * as requestClass from './unpoly/network/request.js'
 import * as responseClass from './unpoly/network/response.js'
 import * as renderJobClass from './unpoly/fragment/render/render_job.js'
-import * as renderOptionsClass from './unpoly/fragment/render/render_options.js'
 import * as renderResultClass from './unpoly/fragment/render/render_result.js'
-import * as responseDocClass from './unpoly/fragment/render/response_doc.js'
 import { RootLayer } from './unpoly/layer/modes/root_layer.js'
 import { ModalLayer } from './unpoly/layer/modes/modal_layer.js'
 import { PopupLayer } from './unpoly/layer/modes/popup_layer.js'
 import { DrawerLayer } from './unpoly/layer/modes/drawer_layer.js'
 import { CoverLayer } from './unpoly/layer/modes/cover_layer.js'
+// up.internal, for the specs and unpoly-migrate. Imported last, so it doesn't change the order
+// in which modules are evaluated.
+import * as internal from './unpoly/internal.js'
 
 window.up = {}
 
 const apis = [
   namespace.api,
-  mockable.api,
   util.api,
-  error.api,
   migrateStub.api,
-  browser.api,
   element.api,
   framework.api,
   event.api,
@@ -123,28 +105,14 @@ const apis = [
   cannotParseError.api,
   cannotTargetError.api,
   offlineError.api,
-  configClass.api,
-  optionsParserClass.api,
-  fifoCacheClass.api,
-  rectClass.api,
-  urlPatternClass.api,
-  eventEmitterClass.api,
-  eventListenerClass.api,
-  cspInfoClass.api,
-  nonceableCallbackClass.api,
-  switcherClass.api,
   paramsClass.api,
   previewClass.api,
-  motionControllerClass.api,
-  selectorTrackerClass.api,
   layerClass.api,
-  tetherClass.api,
   requestClass.api,
   responseClass.api,
   renderJobClass.api,
-  renderOptionsClass.api,
   renderResultClass.api,
-  responseDocClass.api,
+  internal.api,
 ]
 
 // Copy property descriptors, so getters (like `up.context`) stay live.

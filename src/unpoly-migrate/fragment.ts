@@ -226,7 +226,7 @@ up.migrate.postprocessReloadOptions = function(options: any) {
     legacyHeader = '0'
   }
 
-  options.headers[up.protocol.headerize('reloadFromTime')] = legacyHeader
+  options.headers[up.internal.headerize('reloadFromTime')] = legacyHeader
 }
 
 // Modern versions only support ":origin". This legacy implementation
@@ -247,7 +247,7 @@ up.migrate.resolveOrigin = function(target: string, { origin }: { origin?: Eleme
       if (origin) {
         return up.fragment.toTarget(origin)
       } else {
-        up.fail('Missing { origin } element to resolve "%s" reference (found in %s)', variant, target)
+        up.internal.fail('Missing { origin } element to resolve "%s" reference (found in %s)', variant, target)
       }
     } else {
       // Skip over quoted attribute selector values, which may contain an ampersand
@@ -285,7 +285,7 @@ up.fragment.config.patch(function() {
 
 // up.compiler('[up-keep]:not([up-keep=true]):not([up-keep=""])', function(element) {
 up.compiler('[up-keep]', function(element: Element) {
-  let selector = up.element.booleanOrStringAttr(element, 'up-keep')
+  let selector = up.internal.booleanOrStringAttr(element, 'up-keep')
   if (u.isString(selector) && /[.[#]/.test(selector)) {
     up.migrate.warn('The [up-keep] attribute no longer supports a selector value (found in %o). Elements will be matched by their derived target. You may prevent keeping with [up-on-keep="if(condition) event.preventDefault()"].', element)
     // The best we can do here is prevent matching of the old and new element if the new element

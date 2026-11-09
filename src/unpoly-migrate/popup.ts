@@ -104,8 +104,10 @@ up.popup = {
   },
 
   sync() {
-    up.migrate.deprecated('up.popup.sync()', 'up.layer.sync()')
-    return up.layer.sync()
+    up.migrate.deprecated('up.popup.sync()', 'up.Layer#sync()')
+    for (let layer of up.layer.stack) {
+      layer.sync()
+    }
   }
 }
 

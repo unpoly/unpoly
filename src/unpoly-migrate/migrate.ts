@@ -21,7 +21,7 @@ type AttributeScope = string | (() => string)
 */
 up.migrate = (function() {
 
-  const config = new up.Config('up.migrate.config', () => ({
+  const config = new up.internal.Config('up.migrate.config', () => ({
     logLevel: 'error'
   }))
 
@@ -30,7 +30,7 @@ up.migrate = (function() {
   function renamedProperty(object: object, oldKey: string, newKey: string, { label, warning }: PropertyWarningOptions = {}): void {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
-    const doWarn = u.memoize(function() {
+    const doWarn = up.internal.memoize(function() {
       if (warning) {
         warn(warning)
       } else if (label) {
@@ -61,7 +61,7 @@ up.migrate = (function() {
   function removedProperty(object: object, key: string, { label, warning, value }: PropertyWarningOptions & { value?: any } = {}): [any] {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
-    const doWarn = u.memoize(function() {
+    const doWarn = up.internal.memoize(function() {
       if (warning) {
         warn(warning)
       } else if (label) {
@@ -97,8 +97,8 @@ up.migrate = (function() {
 
   // Called as transformAttribute(oldAttr, { scope }?, transformer).
   function transformAttribute(oldAttr: string, ...args: any[]): void {
-    let transformer: (element: Element, value: string) => void = u.extractCallback(args)
-    let { scope }: { scope?: AttributeScope } = u.extractOptions(args)
+    let transformer: (element: Element, value: string) => void = up.internal.extractCallback(args)
+    let { scope }: { scope?: AttributeScope } = up.internal.extractOptions(args)
 
     // Scope may be a selector string OR a function
     let selector = scope || `[${oldAttr}]`
@@ -146,7 +146,7 @@ up.migrate = (function() {
       } else {
         warn('Property { %s } has been renamed to { %s } (found in %o)', oldKey, newKey, object)
       }
-      u.renameKey(object, oldKey, newKey)
+      up.internal.renameKey(object, oldKey, newKey)
     }
   }
 
@@ -204,12 +204,13 @@ up.migrate = (function() {
     warnedMessages = {}
   }
 
-  const warn: (message: string, ...args: any[]) => void = up.mockable((message: string, ...args: any[]) => {
-    const formattedMessage = u.sprintf(message, ...args)
+  const warn: (message: string, ...args: any[]) => void = up.internal.mockable((message: string, ...args: any[]) => {
+    const formattedMessage = up.internal.sprintf(message, ...args)
     const logLevel = config.logLevel
     if (logLevel !== 'none' && !warnedMessages[formattedMessage]) {
       warnedMessages[formattedMessage] = true
-      up.log[logLevel]('unpoly-migrate', message, ...args)
+      const log = (logLevel === 'warn') ? up.internal.printToWarn : up.internal.printToError
+      log('unpoly-migrate', message, ...args)
     }
   })
 
@@ -241,7 +242,7 @@ up.migrate = (function() {
   function fixStylePropName(prop: string): string {
     if (/[A-Z]/.test(prop)) {
       warn(`CSS property names must be in kebab-case, but got camelCase "${prop}"`)
-      return u.camelToKebabCase(prop)
+      return up.internal.camelToKebabCase(prop)
     } else {
       return prop
     }

@@ -89,8 +89,3 @@ export class MotionController {
     this._resetProps()
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  MotionController,
-}

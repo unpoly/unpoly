@@ -96,8 +96,3 @@ An instance of `up.URLPattern`.
 @internal
 */
 export type UpURLPattern = InstanceType<typeof UpURLPattern>
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  URLPattern: UpURLPattern,
-}

@@ -50,8 +50,3 @@ export class CSPInfo {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  CSPInfo,
-}

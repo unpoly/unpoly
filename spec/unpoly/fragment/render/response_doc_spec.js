@@ -8,7 +8,7 @@ describe('up.ResponseDoc', function() {
     describe('#select()', function() {
 
       it('selects a matching element from the given, full HTML document', function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
           <html>
             <body>
               <div class="foo">foo text</div>
@@ -24,7 +24,7 @@ describe('up.ResponseDoc', function() {
       it('rediscovers the given { origin } element in the new document and prefers to match in its region', function() {
         let origin = fixture('.origin')
 
-        let doc = new up.ResponseDoc({ origin, document: `
+        let doc = new up.internal.ResponseDoc({ origin, document: `
           <html>
             <body>
               <div class="foo" id="foo1"></div>
@@ -45,7 +45,7 @@ describe('up.ResponseDoc', function() {
         // the revalidation pass needs to handle a detached origin.
         origin.remove()
 
-        let doc = new up.ResponseDoc({ origin, document: `
+        let doc = new up.internal.ResponseDoc({ origin, document: `
           <html>
             <body>
               <div class="foo" id="foo1"></div>
@@ -59,7 +59,7 @@ describe('up.ResponseDoc', function() {
       })
 
       it('returns a missing value if no element matches', function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
           <html>
             <body>
               <div class="foo">foo text</div>
@@ -71,7 +71,7 @@ describe('up.ResponseDoc', function() {
       })
 
       it('no longer selects the root fragment once it has been attached to window.document (bugfix)', function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
           <html>
             <body>
               <div class="foo">foo text</div>
@@ -98,7 +98,7 @@ describe('up.ResponseDoc', function() {
     describe('#getHead()', function() {
 
       it('returns the head element', function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
           <html>
             <head>
             </head>
@@ -111,7 +111,7 @@ describe('up.ResponseDoc', function() {
       })
 
       it('returns a missing value if the document is only a fragment', function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
           <div id="target">target</div>  
         ` })
 
@@ -141,7 +141,7 @@ describe('up.ResponseDoc', function() {
     describe('#title', function() {
 
       it("returns the <title> text of a document that starts with <html>", function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
           <html>
             <head>
               <title>Document title</title>
@@ -155,7 +155,7 @@ describe('up.ResponseDoc', function() {
       })
 
       it("returns the <title> text of a document that starts with a <!DOCTYPE>", function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
           <!DOCTYPE>
           <html>
             <head>
@@ -170,7 +170,7 @@ describe('up.ResponseDoc', function() {
       })
 
       it("returns the <title> text of a document that starts with a comment before <!DOCTYPE>", function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
           <!-- Comment -->
           <!DOCTYPE>
           <html>
@@ -186,7 +186,7 @@ describe('up.ResponseDoc', function() {
       })
 
       it("returns the <title> text of a document that starts with multiple comments before <!DOCTYPE>", function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
           <!-- Comment1 -->
           <!-- Comment2 -->
           <!DOCTYPE>
@@ -203,7 +203,7 @@ describe('up.ResponseDoc', function() {
       })
 
       it("returns the <title> text of a document that starts whitespace before <!DOCTYPE>", function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
 
 
           <!DOCTYPE>
@@ -220,7 +220,7 @@ describe('up.ResponseDoc', function() {
       })
 
       it("returns the <title> text of a document that starts with a mix of comments and whitespace before <!DOCTYPE>", function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
 
           <!-- Comment1 -->
 
@@ -240,7 +240,7 @@ describe('up.ResponseDoc', function() {
       })
 
       it('returns a missing value if the document has no <title> element', function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
           <html>
             <body>
             </body>
@@ -251,7 +251,7 @@ describe('up.ResponseDoc', function() {
       })
 
       it('returns a missing value if the document is only a fragment', function() {
-        let doc = new up.ResponseDoc({ document: `
+        let doc = new up.internal.ResponseDoc({ document: `
           <div id="target">target</div>  
         ` })
 
@@ -267,7 +267,7 @@ describe('up.ResponseDoc', function() {
     describe('#select()', function() {
 
       it('selects a matching element from the given string fragment', function() {
-        let doc = new up.ResponseDoc({ fragment: `
+        let doc = new up.internal.ResponseDoc({ fragment: `
           <div class="foo">foo text</div>
         ` })
 
@@ -276,13 +276,13 @@ describe('up.ResponseDoc', function() {
 
       it('selects a matching element from the given element fragment', function() {
         let fragment = up.element.createFromHTML('<div class="foo">foo text</div>')
-        let doc = new up.ResponseDoc({ fragment })
+        let doc = new up.internal.ResponseDoc({ fragment })
 
         expect(doc.select('.foo')).toHaveText('foo text')
       })
 
       it('no longer selects the root fragment once it has been attached to window.document (bugfix)', function() {
-        let doc = new up.ResponseDoc({ fragment: `
+        let doc = new up.internal.ResponseDoc({ fragment: `
           <div class="foo">foo text</div>
         ` })
 
@@ -304,7 +304,7 @@ describe('up.ResponseDoc', function() {
     describe('#rootSelector()', function() {
 
       it('returns a selector for the fragment', function() {
-        let doc = new up.ResponseDoc({ fragment: `
+        let doc = new up.internal.ResponseDoc({ fragment: `
           <div class="foo">foo text</div>
         ` })
 
@@ -316,7 +316,7 @@ describe('up.ResponseDoc', function() {
     describe('#getHead()', function() {
 
       it('returns a missing value', function() {
-        let doc = new up.ResponseDoc({ fragment: `
+        let doc = new up.internal.ResponseDoc({ fragment: `
           <div class="foo">foo text</div>
         ` })
 
@@ -328,7 +328,7 @@ describe('up.ResponseDoc', function() {
     describe('#title', function() {
 
       it('returns a missing value', function() {
-        let doc = new up.ResponseDoc({ fragment: `
+        let doc = new up.internal.ResponseDoc({ fragment: `
           <div class="foo">foo text</div>
         ` })
 
@@ -344,20 +344,20 @@ describe('up.ResponseDoc', function() {
     describe('#select()', function() {
 
       it('selects a matching element from the given target selector and inner HTML', function() {
-        let doc = new up.ResponseDoc({ target: '.foo', content: 'foo text' })
+        let doc = new up.internal.ResponseDoc({ target: '.foo', content: 'foo text' })
 
         expect(doc.select('.foo')).toHaveText('foo text')
       })
 
       it('selects a matching element from the given target selector and child element', function() {
         let inner = e.createFromSelector('#inner', { text: 'inner text' })
-        let doc = new up.ResponseDoc({ target: '.foo', content: inner })
+        let doc = new up.internal.ResponseDoc({ target: '.foo', content: inner })
 
         expect(doc.select('.foo')).toHaveText('inner text')
       })
 
       it('no longer selects the root fragment once it has been attached to window.document (bugfix)', function() {
-        let doc = new up.ResponseDoc({ target: '.foo', content: 'foo text' })
+        let doc = new up.internal.ResponseDoc({ target: '.foo', content: 'foo text' })
 
         let foo = doc.select('.foo')
         expect(foo).toEqual(jasmine.any(Element))
@@ -377,7 +377,7 @@ describe('up.ResponseDoc', function() {
     describe('#rootSelector()', function() {
 
       it('returns a selector for the fragment', function() {
-        let doc = new up.ResponseDoc({ target: '.foo', content: 'foo text' })
+        let doc = new up.internal.ResponseDoc({ target: '.foo', content: 'foo text' })
 
         expect(doc.rootSelector()).toBe('.foo')
       })
@@ -387,7 +387,7 @@ describe('up.ResponseDoc', function() {
     describe('#getHead()', function() {
 
       it('returns a missing value', function() {
-        let doc = new up.ResponseDoc({ target: '.foo', content: 'foo text' })
+        let doc = new up.internal.ResponseDoc({ target: '.foo', content: 'foo text' })
 
         expect(doc.getHead()).toBeMissing()
       })
@@ -397,7 +397,7 @@ describe('up.ResponseDoc', function() {
     describe('#title', function() {
 
       it('returns a missing value', function() {
-        let doc = new up.ResponseDoc({ target: '.foo', content: 'foo text' })
+        let doc = new up.internal.ResponseDoc({ target: '.foo', content: 'foo text' })
 
         expect(doc.title).toBeMissing()
       })

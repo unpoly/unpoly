@@ -723,7 +723,7 @@ extendDescribe('up.fragment', function() {
 
         it('calls destructors when the replaced element is a singleton element like <body> (bugfix)', async function() {
           // shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          up.element.isSingleton.mock().and.callFake((element) => element.matches('.container'))
+          up.internal.isSingleton.mock().and.callFake((element) => element.matches('.container'))
           const destructor = jasmine.createSpy('destructor')
           up.compiler('.container', () => destructor)
           const $container = $fixture('.container')
@@ -740,7 +740,7 @@ extendDescribe('up.fragment', function() {
         })
 
         it('marks the old element as .up-destroying before destructors', function(done) {
-          const testElementState = u.memoize(function(element) {
+          const testElementState = up.internal.memoize(function(element) {
             expect(element).toHaveText('old text')
             expect(element).toMatchSelector('.up-destroying')
             done()
@@ -895,7 +895,7 @@ extendDescribe('up.fragment', function() {
         describe('with a renamed option like { badResponseTime } (now { lateDelay })', function() {
 
           function renamedOptionWarnings(errorSpy) {
-            return errorSpy.calls.all().map((call) => u.sprintf(...call.args.slice(1))).filter((message) => message.includes('{ badResponseTime }'))
+            return errorSpy.calls.all().map((call) => up.internal.sprintf(...call.args.slice(1))).filter((message) => message.includes('{ badResponseTime }'))
           }
 
           it('names the origin in the warning, printing it once per origin', async function() {
@@ -904,7 +904,7 @@ extendDescribe('up.fragment', function() {
               <a id="origin1" href="/path">origin1</a>
               <a id="origin2" href="/path">origin2</a>
             `)
-            const errorSpy = up.log.error.mock()
+            const errorSpy = up.internal.printToError.mock()
 
             await up.render({ target: '.target', content: 'content1', origin: origin1, badResponseTime: 100 })
             await up.render({ target: '.target', content: 'content2', origin: origin2, badResponseTime: 100 })
@@ -918,7 +918,7 @@ extendDescribe('up.fragment', function() {
 
           it('names the URL in the warning when there is no origin', async function() {
             fixture('.target')
-            const errorSpy = up.log.error.mock()
+            const errorSpy = up.internal.printToError.mock()
 
             up.render({ target: '.target', url: '/path', badResponseTime: 100 })
             await wait()
@@ -942,7 +942,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.render('.element', { url: '/path2', solo: true })
@@ -950,7 +950,7 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(change1Error).toBeAbortError()
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
           })
 
           it('aborts the request of an existing change if the new change is made from local content', async function() {
@@ -964,7 +964,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.render('.element', { content: 'local content', solo: true })
@@ -972,7 +972,7 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(change1Error).toBeAbortError()
-            expect(up.network.queue.allRequests.length).toEqual(0)
+            expect(up.internal.queue.allRequests.length).toEqual(0)
           })
 
           it('does not cancel its own pending preload request (bugfix)', async function() {
@@ -988,7 +988,7 @@ extendDescribe('up.fragment', function() {
             change1Promise.catch((e) => change1Error = e)
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.follow(changeLink, { solo: true })
@@ -997,7 +997,7 @@ extendDescribe('up.fragment', function() {
 
             expect(change1Error).toBeUndefined()
             expect(change2Error).toBeUndefined()
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
           })
 
           it("aborts an existing change's request that was queued with { solo: false }", async function() {
@@ -1011,7 +1011,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.render('.element', { url: '/path2', solo: true })
@@ -1019,7 +1019,7 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(change1Error).toBeAbortError()
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
           })
 
           it("does not abort an existing change's request when called with { solo: false }", async function() {
@@ -1034,7 +1034,7 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
             expect(change1Error).toBeUndefined()
 
             change2Promise = up.render('.element', { url: '/path2', solo: false })
@@ -1042,7 +1042,7 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(change1Error).toBeUndefined()
-            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(up.internal.queue.allRequests.length).toEqual(2)
           })
 
           it('may be passed as a function that decides which existing requests are aborted', async function() {
@@ -1064,11 +1064,11 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(up.internal.queue.allRequests.length).toEqual(2)
             expect(change1Error).toBeUndefined()
             expect(change2Error).toBeUndefined()
 
-            const soloFn = (request) => u.matchURLs(request.url, '/path1')
+            const soloFn = (request) => up.internal.matchURLs(request.url, '/path1')
 
             change3Promise = up.render('.element3', { url: '/path3', solo: soloFn }).catch((e) => change3Error = e)
 
@@ -1078,7 +1078,7 @@ extendDescribe('up.fragment', function() {
             expect(change2Error).toBeUndefined()
             expect(change3Error).toBeUndefined()
 
-            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(up.internal.queue.allRequests.length).toEqual(2)
           })
 
           it('may be passed as a function that decides which existing requests are aborted when updating from local content', async function() {
@@ -1100,11 +1100,11 @@ extendDescribe('up.fragment', function() {
 
             await wait()
 
-            expect(up.network.queue.allRequests.length).toEqual(2)
+            expect(up.internal.queue.allRequests.length).toEqual(2)
             expect(change1Error).toBeUndefined()
             expect(change2Error).toBeUndefined()
 
-            const soloFn = (request) => u.matchURLs(request.url, '/path1')
+            const soloFn = (request) => up.internal.matchURLs(request.url, '/path1')
 
             change3Promise = up.render('.element3', { content: 'new content', solo: soloFn }).catch((e) => change3Error = e)
 
@@ -1114,7 +1114,7 @@ extendDescribe('up.fragment', function() {
             expect(change2Error).toBeUndefined()
             expect(change3Error).toBeUndefined()
 
-            expect(up.network.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests.length).toEqual(1)
           })
         })
       }

@@ -75,7 +75,7 @@ describe('PopupLayer', function() {
         }
       })
 
-      popupOptions = u.options(popupOptions, { mode: 'popup', origin, content: 'popup content' })
+      popupOptions = up.internal.newOptions(popupOptions, { mode: 'popup', origin, content: 'popup content' })
       up.layer.open(popupOptions)
 
       const popup = up.layer.current
@@ -101,7 +101,7 @@ describe('PopupLayer', function() {
 
     it('repositions only once when the window is resized multiple times within a task', async function() {
       openPopup()
-      const syncSpy = spyOn(up.Tether.prototype, 'sync').and.callThrough()
+      const syncSpy = spyOn(up.internal.Tether.prototype, 'sync').and.callThrough()
 
       up.emit(window, 'resize')
       up.emit(window, 'resize')

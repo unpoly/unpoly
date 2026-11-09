@@ -10,7 +10,7 @@ describe('up.OptionsParser', function() {
     it('keeps the given key from the observed options', function() {
       const element = fixture('.element')
       const options = { foo: 1, bar: 2 }
-      const parser = new up.OptionsParser(element, options)
+      const parser = new up.internal.OptionsParser(element, options)
       parser.parse(stringAttr, 'bar')
       expect(options.foo).toBe(1)
     })
@@ -19,7 +19,7 @@ describe('up.OptionsParser', function() {
       const element = fixture('.element')
       element.setAttribute('up-foo-bar-baz', 'value')
       const options = {}
-      const parser = new up.OptionsParser(element, options)
+      const parser = new up.internal.OptionsParser(element, options)
       parser.parse(stringAttr, 'fooBarBaz')
       expect(options.fooBarBaz).toBe('value')
     })
@@ -28,7 +28,7 @@ describe('up.OptionsParser', function() {
       const element = fixture('.element')
       element.setAttribute('foo-bar', 'value')
       const options = {}
-      const parser = new up.OptionsParser(element, options)
+      const parser = new up.internal.OptionsParser(element, options)
       parser.parse(stringAttr, 'baz', { attr: 'foo-bar' })
       expect(options.baz).toBe('value')
     })
@@ -37,7 +37,7 @@ describe('up.OptionsParser', function() {
       const element = fixture('.element')
       element.setAttribute('baz-bam', 'value')
       const options = {}
-      const parser = new up.OptionsParser(element, options)
+      const parser = new up.internal.OptionsParser(element, options)
       parser.parse(stringAttr, 'baz', { attr: ['foo-bar', 'baz-bam'] })
       expect(options.baz).toBe('value')
     })
@@ -46,7 +46,7 @@ describe('up.OptionsParser', function() {
       const element = fixture('.element')
       element.setAttribute('up-foo', 'element value')
       const options = { foo: 'options value' }
-      const parser = new up.OptionsParser(element, options)
+      const parser = new up.internal.OptionsParser(element, options)
       parser.parse(stringAttr, 'foo')
       expect(options.foo).toBe('options value')
     })
@@ -54,7 +54,7 @@ describe('up.OptionsParser', function() {
     it('writes undefined if neither observed options nor observed element produces a value', function() {
       const element = fixture('.element')
       const options = {}
-      const parser = new up.OptionsParser(element, options)
+      const parser = new up.internal.OptionsParser(element, options)
       parser.parse(stringAttr, 'foo')
       expect(options.foo).toBeUndefined()
     })
@@ -63,7 +63,7 @@ describe('up.OptionsParser', function() {
       const element = fixture('.element')
       element.setAttribute('up-foo', '123')
       const options = {}
-      const parser = new up.OptionsParser(element, options)
+      const parser = new up.internal.OptionsParser(element, options)
       parser.parse(e.numberAttr, 'foo')
       expect(options.foo).toBe(123)
     })
@@ -72,7 +72,7 @@ describe('up.OptionsParser', function() {
       const element = fixture('.element')
       element.setAttribute('up-foo', '123')
       const options = { foo: '456' }
-      const parser = new up.OptionsParser(element, options)
+      const parser = new up.internal.OptionsParser(element, options)
       parser.parse(e.numberAttr, 'foo')
       expect(options.foo).toBe('456')
     })
@@ -82,7 +82,7 @@ describe('up.OptionsParser', function() {
       it('does not write the given default value if the options produced a value', function() {
         const element = fixture('.element')
         const options = { foo: 'options value' }
-        const parser = new up.OptionsParser(element, options)
+        const parser = new up.internal.OptionsParser(element, options)
         parser.parse(stringAttr, 'foo', { default: 'default value' })
         expect(options.foo).toBe('options value')
       })
@@ -90,7 +90,7 @@ describe('up.OptionsParser', function() {
       it("does not write the given default value if the element's attribute produced a value", function() {
         const element = fixture('.element', { 'up-foo': 'attribute value' })
         const options = {}
-        const parser = new up.OptionsParser(element, options)
+        const parser = new up.internal.OptionsParser(element, options)
         parser.parse(stringAttr, 'foo', { default: 'default value' })
         expect(options.foo).toBe('attribute value')
       })
@@ -98,7 +98,7 @@ describe('up.OptionsParser', function() {
       it("writes the given default value if neither options nor observed element's attribute produce a value", function() {
         const element = fixture('.element')
         const options = {}
-        const parser = new up.OptionsParser(element, options)
+        const parser = new up.internal.OptionsParser(element, options)
         parser.parse(stringAttr, 'foo', { default: 'default value' })
         expect(options.foo).toBe('default value')
       })
@@ -108,7 +108,7 @@ describe('up.OptionsParser', function() {
       it("writes the given default value if neither options nor observed element's attribute produce a value", function() {
         const element = fixture('.element')
         const options = {}
-        const parser = new up.OptionsParser(element, options, { defaults: { foo: 'default value' } })
+        const parser = new up.internal.OptionsParser(element, options, { defaults: { foo: 'default value' } })
         parser.parse(stringAttr, 'foo')
         expect(options.foo).toBe('default value')
       })
@@ -119,7 +119,7 @@ describe('up.OptionsParser', function() {
       it('uses a fail-prefixed option from the observed options', function() {
         const element = fixture('.element')
         const options = { foo: 1, failFoo: 2 }
-        const parser = new up.OptionsParser(element, options, { fail: true })
+        const parser = new up.internal.OptionsParser(element, options, { fail: true })
         parser.parse(stringAttr, 'foo')
         expect(options.foo).toBe(1)
         expect(options.failFoo).toBe(2)
@@ -130,7 +130,7 @@ describe('up.OptionsParser', function() {
         element.setAttribute('up-foo', 'success value')
         element.setAttribute('up-fail-foo', 'failure value')
         const options = {}
-        const parser = new up.OptionsParser(element, options, { fail: true })
+        const parser = new up.internal.OptionsParser(element, options, { fail: true })
         parser.parse(stringAttr, 'foo')
         expect(options.foo).toBe('success value')
         expect(options.failFoo).toBe('failure value')
@@ -139,7 +139,7 @@ describe('up.OptionsParser', function() {
       it('writes undefined if neither observed options nor observed element produces a fail-prefixed value', function() {
         const element = fixture('.element')
         const options = {}
-        const parser = new up.OptionsParser(element, options, { fail: true })
+        const parser = new up.internal.OptionsParser(element, options, { fail: true })
         parser.parse(stringAttr, 'foo')
         expect(options.foo).toBeUndefined()
         expect(options.failFoo).toBeUndefined()
@@ -148,7 +148,7 @@ describe('up.OptionsParser', function() {
       it('also uses the default value for the fail-prefixed option', function() {
         const element = fixture('.element')
         const options = {}
-        const parser = new up.OptionsParser(element, options, { fail: true })
+        const parser = new up.internal.OptionsParser(element, options, { fail: true })
         parser.parse(stringAttr, 'foo', { default: 'default value' })
         expect(options.foo).toBe('default value')
         expect(options.failFoo).toBe('default value')
@@ -159,7 +159,7 @@ describe('up.OptionsParser', function() {
         it('uses an onFail-prefixed option from the observed options', function() {
           const element = fixture('.element')
           const options = { onFoo: 1, onFailFoo: 2 }
-          const parser = new up.OptionsParser(element, options, { fail: true })
+          const parser = new up.internal.OptionsParser(element, options, { fail: true })
           parser.parse(stringAttr, 'foo')
           expect(options.onFoo).toBe(1)
           expect(options.onFailFoo).toBe(2)
@@ -170,7 +170,7 @@ describe('up.OptionsParser', function() {
           element.setAttribute('up-on-foo', 'success value')
           element.setAttribute('up-on-fail-foo', 'failure value')
           const options = {}
-          const parser = new up.OptionsParser(element, options, { fail: true })
+          const parser = new up.internal.OptionsParser(element, options, { fail: true })
           parser.parse(stringAttr, 'onFoo')
           expect(options.onFoo).toBe('success value')
           expect(options.onFailFoo).toBe('failure value')
@@ -183,7 +183,7 @@ describe('up.OptionsParser', function() {
         const container = fixture('.container[up-foo="value"]')
         const element = e.affix(container, '.element')
         const options = {}
-        const parser = new up.OptionsParser(element, options, { closest: true })
+        const parser = new up.internal.OptionsParser(element, options, { closest: true })
         parser.parse(stringAttr, 'foo')
         expect(options.foo).toBe('value')
       })
@@ -199,7 +199,7 @@ describe('up.OptionsParser', function() {
       const element = fixture('.element', { 'up-attr': 'up-attr-value' })
 
       const options = {}
-      const parser = new up.OptionsParser(element, options)
+      const parser = new up.internal.OptionsParser(element, options)
 
       parser.string('attr')
       parser.include(parsingFn)
@@ -217,7 +217,7 @@ describe('up.OptionsParser', function() {
 
       const options = {}
       const parserOptions = { fail: true, attrPrefix: 'my-prefix-', defaults: { fromDefault: 'defaultValue' } }
-      const parser = new up.OptionsParser(element, options, parserOptions)
+      const parser = new up.internal.OptionsParser(element, options, parserOptions)
 
       parser.string('attr')
       parser.include(parsingFn)

@@ -295,8 +295,3 @@ export class ResponseDoc {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  ResponseDoc,
-}

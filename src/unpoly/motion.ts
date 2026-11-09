@@ -770,8 +770,6 @@ export const api = {
     transition: namedTransitions.put,
     animation: namedAnimations.put,
     config,
-    isNone,
-    swapElementsDirectly,
   },
   transition: namedTransitions.put,
   animation: namedAnimations.put,

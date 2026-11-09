@@ -442,7 +442,7 @@ describe('up.status', function() {
 
         it('removes .up-active when a link with [up-confirm] was not confirmed', async function() {
           const $link = $fixture('a[href="/foo"][up-target=".main"][up-confirm="Really follow?"]')
-          up.browser.assertConfirmed.mock().and.throwError(new up.Aborted('User aborted'))
+          up.internal.assertConfirmed.mock().and.throwError(new up.Aborted('User aborted'))
 
           Trigger.clickSequence($link)
 

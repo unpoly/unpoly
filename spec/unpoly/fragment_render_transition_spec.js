@@ -75,7 +75,7 @@ extendDescribe('up.fragment', function() {
 
         it('ignores a { transition } option when replacing a singleton element like <body>', async function() {
           // shouldSwapElementsDirectly() is true for body, but can't have the example replace the Jasmine test runner UI
-          up.element.isSingleton.mock().and.callFake((element) => element.matches('fake-body'))
+          up.internal.isSingleton.mock().and.callFake((element) => element.matches('fake-body'))
 
           up.fragment.config.targetDerivers.unshift('fake-body')
           $fixture('fake-body').text('old text')
@@ -585,7 +585,7 @@ extendDescribe('up.fragment', function() {
           })
 
           it("replaces the elements directly, since first inserting and then removing would shift scroll positions", async function() {
-            const swapDirectlySpy = up.motion.swapElementsDirectly.mock()
+            const swapDirectlySpy = up.internal.swapElementsDirectly.mock()
             $fixture('.element').text('version 1')
             up.render({
               fragment: '<div class="element">version 2</div>',

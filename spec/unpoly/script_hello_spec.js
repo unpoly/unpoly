@@ -400,7 +400,7 @@ extendDescribe('up.script', function() {
         })
 
         it('returns a promise that delays fulfillment until all async compilers have terminated', async function() {
-          let compilerDeferred = u.newDeferred()
+          let compilerDeferred = up.internal.newDeferred()
           up.compiler('.element', async function(_element) {
             await compilerDeferred
           })
@@ -417,7 +417,7 @@ extendDescribe('up.script', function() {
         })
 
         it('delays the promise until async batch compilers have terminated', async function() {
-          let compilerDeferred = u.newDeferred()
+          let compilerDeferred = up.internal.newDeferred()
           up.compiler('.element', { batch: true }, async function(_elements) {
             await compilerDeferred
           })
@@ -435,7 +435,7 @@ extendDescribe('up.script', function() {
 
         it('fulfills the promise when an async compiler rejects (and emits an error event)', async function() {
           let asyncError = new Error('error from async compiler')
-          let compilerDeferred = u.newDeferred()
+          let compilerDeferred = up.internal.newDeferred()
           up.compiler('.element', async function(_element) {
             await compilerDeferred
           })
@@ -454,7 +454,7 @@ extendDescribe('up.script', function() {
 
         it('fulfills the promise when an async batch compiler rejects (and emits an error event)', async function() {
           let asyncError = new Error('error from async compiler')
-          let compilerDeferred = u.newDeferred()
+          let compilerDeferred = up.internal.newDeferred()
           up.compiler('.element', { batch: true }, async function(_elements) {
             await compilerDeferred
           })

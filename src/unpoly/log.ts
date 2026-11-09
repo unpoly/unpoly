@@ -189,13 +189,8 @@ export function install(): void {
 
 export const api = {
   log: {
-    puts: printToStandard,
-    error: printToError,
-    warn: printToWarn,
     config,
     enable,
     disable,
   },
-  puts: printToStandard,
-  warn: printToWarn,
 }

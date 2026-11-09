@@ -16,7 +16,7 @@ function resetLocation() {
 
   // Webkit throttles replaceState() calls (see protect_jasmine_runner.js).
   // Hence we only call it when the history was actually changed.
-  if (!up.util.matchURLs(location.href, jasmine.locationBeforeSuite)) {
+  if (!up.internal.matchURLs(location.href, jasmine.locationBeforeSuite)) {
     up.history.replace(jasmine.locationBeforeSuite)
     didChange = true
   }
@@ -115,14 +115,14 @@ afterEach(async function() {
     // Most pending promises will wait for an animation to finish.
     up.motion.finish()
 
-    up.browser.popCookie(up.protocol.config.methodCookie)
+    up.internal.popCookie(up.protocol.config.methodCookie)
 
     // Wait one more frame so pending callbacks have a chance to run.
     // Pending callbacks might change the URL or cause errors that bleed into
     // the next example.
     if (resetLocation() || waitMore) { await wait() }
 
-    up.framework.reset()
+    up.internal.emitReset()
 
     // Resetting the framework may change the location, title, etc. again.
     if (resetLocation() || waitMore) { await wait() }
@@ -151,9 +151,9 @@ afterEach(async function() {
   // Then scroll to the top.
   if (document.scrollingElement.scrollTop !== 0) {
     document.scrollingElement.style.setProperty('overflow-y', 'hidden')
-    up.element.paint(document.scrollingElement)
+    up.internal.paint(document.scrollingElement)
     document.scrollingElement.style.removeProperty('overflow-y')
-    up.element.paint(document.scrollingElement)
+    up.internal.paint(document.scrollingElement)
     document.scrollingElement.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   }
 
@@ -163,12 +163,12 @@ afterEach(async function() {
   let now = new Date()
   if (now - lastIdleCallback > 10_000) {
     lastIdleCallback = now
-    up.puts('specs', 'Awaiting an idle callback to let the browser catch up')
+    up.internal.printToStandard('specs', 'Awaiting an idle callback to let the browser catch up')
     await jasmine.waitIdle(1000)
   }
 
   jasmine.resetting = false
 
-  up.puts('specs', 'Framework was reset')
+  up.internal.printToStandard('specs', 'Framework was reset')
 })
 

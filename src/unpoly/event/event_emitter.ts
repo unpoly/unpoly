@@ -167,8 +167,3 @@ export class EventEmitter {
     return new (this)(options as EventEmitterOptions)
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  EventEmitter,
-}

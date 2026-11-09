@@ -196,8 +196,3 @@ export class Tether {
     setInlineStyle(this._element, { left, top }, 'px')
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  Tether,
-}

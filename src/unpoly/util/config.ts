@@ -57,7 +57,9 @@ export class Config<S extends object> {
   logUnknownKeys(): void {
     for (let key of Object.keys(this)) {
       if (!this._knownKeys.includes(key)) {
-        up.log.error(this._label, 'Ignoring unknown setting %s. Fix its name or remove it.', key)
+        // Config is evaluated before up.log, whose LogConfig extends it. So we can't import
+        // printToError() and reach it through window.up when called.
+        up.internal.printToError(this._label, 'Ignoring unknown setting %s. Fix its name or remove it.', key)
       }
     }
   }
@@ -88,9 +90,4 @@ export class Config<S extends object> {
   selectorFns(prop: SelectorKey<S>): [SelectorFn, MatchesFn] {
     return [this.selectorFn(prop), this.matchesFn(prop)]
   }
-}
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  Config,
 }

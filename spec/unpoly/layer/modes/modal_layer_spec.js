@@ -189,8 +189,8 @@ describe('ModalLayer', function() {
       })
 
       it("gives the body additional padding on the right so the hidden scrollbar won't enlarge the client area, causing a layout shift", async function() {
-        const rootScrollbarWidthSpy = up.viewport.rootScrollbarWidth.mock().and.returnValue(25)
-        const unsetBodyStyle = e.setStyleTemp(document.body, { 'padding-right': '40px' })
+        const rootScrollbarWidthSpy = up.internal.rootScrollbarWidth.mock().and.returnValue(25)
+        const unsetBodyStyle = up.internal.setStyleTemp(document.body, { 'padding-right': '40px' })
 
         up.layer.open({ mode: 'modal', content: 'modal content' })
         expect(document).not.toHaveVerticalScrollbar()
@@ -204,8 +204,8 @@ describe('ModalLayer', function() {
       })
 
       it('does not change the body if the viewport root never had a scrollbar', async function() {
-        const unsetScrollingElementStyle = e.setStyleTemp(document.scrollingElement, { 'overflow-y': 'hidden' })
-        const unsetBodyStyle = e.setStyleTemp(document.body, { 'padding-right': '30px' })
+        const unsetScrollingElementStyle = up.internal.setStyleTemp(document.scrollingElement, { 'overflow-y': 'hidden' })
+        const unsetBodyStyle = up.internal.setStyleTemp(document.body, { 'padding-right': '30px' })
         expect(document).not.toHaveVerticalScrollbar()
 
         up.layer.open({ modal: 'modal', content: '<div style="height: 10000px"></div>' })
@@ -224,7 +224,7 @@ describe('ModalLayer', function() {
       })
 
       it('shifts right-anchored elements to the left', async function() {
-        const rootScrollbarWidthSpy = up.viewport.rootScrollbarWidth.mock().and.returnValue(25)
+        const rootScrollbarWidthSpy = up.internal.rootScrollbarWidth.mock().and.returnValue(25)
         const anchored = fixture('div[up-anchored=right]', { style: { position: 'fixed', top: '0px', right: '70px' } })
         up.hello(anchored)
 
@@ -239,7 +239,7 @@ describe('ModalLayer', function() {
       })
 
       it('adjusts the { right } property of multiple right-anchored elements with varying { right } values', async function() {
-        const rootScrollbarWidthSpy = up.viewport.rootScrollbarWidth.mock().and.returnValue(20)
+        const rootScrollbarWidthSpy = up.internal.rootScrollbarWidth.mock().and.returnValue(20)
         const anchored1 = fixture('#one[up-anchored=right]', {
           style: {
             position: 'fixed',
@@ -270,7 +270,7 @@ describe('ModalLayer', function() {
       })
 
       it('considers [up-fixed=top] elements as right-anchored', async function() {
-        const rootScrollbarWidthSpy = up.viewport.rootScrollbarWidth.mock().and.returnValue(25)
+        const rootScrollbarWidthSpy = up.internal.rootScrollbarWidth.mock().and.returnValue(25)
         const anchored = fixture('div[up-fixed=top]', { style: { position: 'fixed', top: '0px', right: '70px' } })
         up.hello(anchored)
 
@@ -285,7 +285,7 @@ describe('ModalLayer', function() {
       })
 
       it('consistently shifts and unshifts if multiple overlays are opened and closed concurrently', async function() {
-        const rootScrollbarWidthSpy = up.viewport.rootScrollbarWidth.mock().and.returnValue(25)
+        const rootScrollbarWidthSpy = up.internal.rootScrollbarWidth.mock().and.returnValue(25)
         up.motion.config.enabled = true
 
         fixture('div', { style: { height: '10000px' } })
@@ -349,7 +349,7 @@ describe('ModalLayer', function() {
       })
 
       it("shifts right-anchored elements only once if multiple nested overlays are opened", async function() {
-        const rootScrollbarWidthSpy = up.viewport.rootScrollbarWidth.mock().and.returnValue(25)
+        const rootScrollbarWidthSpy = up.internal.rootScrollbarWidth.mock().and.returnValue(25)
         const anchored = fixture('div[up-fixed=top]', { style: { position: 'fixed', top: '0px', right: '70px' } })
         up.hello(anchored)
 
@@ -377,7 +377,7 @@ describe('ModalLayer', function() {
       })
 
       it('shifts dynamically inserted right-anchored elements to the left', async function() {
-        const rootScrollbarWidthSpy = up.viewport.rootScrollbarWidth.mock().and.returnValue(25)
+        const rootScrollbarWidthSpy = up.internal.rootScrollbarWidth.mock().and.returnValue(25)
         up.layer.open({ mode: 'modal', content: 'modal content' })
 
         const anchored = fixture('div[up-anchored=right]', { style: { position: 'fixed', top: '0px', right: '70px' } })
@@ -450,7 +450,7 @@ describe('ModalLayer', function() {
       })
 
       it('does not leave inline custom properties after the overlay was closed', async function() {
-        const rootScrollbarWidthSpy = up.viewport.rootScrollbarWidth.mock().and.returnValue(25)
+        const rootScrollbarWidthSpy = up.internal.rootScrollbarWidth.mock().and.returnValue(25)
         const anchored = fixture('div[up-anchored=right]', { style: { position: 'fixed', top: '0px', right: '70px' } })
         up.hello(anchored)
 

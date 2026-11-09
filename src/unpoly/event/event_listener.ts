@@ -185,8 +185,3 @@ export class EventListener {
     }
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  EventListener,
-}

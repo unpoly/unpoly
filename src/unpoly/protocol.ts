@@ -1165,9 +1165,5 @@ export function wrapMethod(method: string, params: Params): string {
 export const api = {
   protocol: {
     config,
-    csrfParam,
-    csrfToken,
-    initialRequestMethod,
-    headerize,
   },
 }
