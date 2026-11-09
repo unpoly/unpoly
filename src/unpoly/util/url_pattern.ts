@@ -32,7 +32,9 @@ export const UpURLPattern = class URLPattern {
       }
     }
 
-    this._positiveRegexp = this._buildRegexp(positiveList, true)
+    // TODO: A pattern without positive atoms (like "-/admin") has no positive regexp, and
+    // test() and recognize() throw.
+    this._positiveRegexp = this._buildRegexp(positiveList, true)!
     this._negativeRegexp = this._buildRegexp(negativeList, false)
   }
 
@@ -65,14 +67,15 @@ export const UpURLPattern = class URLPattern {
   // This method is performance-sensitive. It's called for every link in an [up-nav]
   // after every fragment update.
   test(url: string, doNormalize = true): boolean {
-    if (doNormalize) { url = matchableURL(url) }
+    // matchableURL() only returns undefined for an empty URL.
+    if (doNormalize) { url = matchableURL(url)! }
     // Use RegExp#test() instead of RegExp#recognize() as building match groups is expensive,
     // and we only need to know whether the URL matches (true / false).
     return this._positiveRegexp.test(url) && !this._isExcluded(url)
   }
 
   recognize(url: string, doNormalize = true): Record<string, string | number> | undefined {
-    if (doNormalize) { url = matchableURL(url) }
+    if (doNormalize) { url = matchableURL(url)! }
     let match = this._positiveRegexp.exec(url)
     if (match && !this._isExcluded(url)) {
       const resolution: Record<string, string | number> = {}
@@ -86,7 +89,7 @@ export const UpURLPattern = class URLPattern {
     }
   }
 
-  _isExcluded(url: string): boolean {
+  _isExcluded(url: string): boolean | undefined {
     return this._negativeRegexp?.test(url)
   }
 }

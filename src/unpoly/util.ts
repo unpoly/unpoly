@@ -232,7 +232,7 @@ export function matchURLs(leftURL: string, rightURL: string, options?: Normalize
 
 // Normalize the URL so it is better suited for path comparison.
 // In particular it strips the hash and trailing slash.
-export function matchableURL(url: string | ParsedURL, options?: NormalizeURLOptions): string | undefined {
+export function matchableURL(url: string | ParsedURL | undefined, options?: NormalizeURLOptions): string | undefined {
   if (!url) return
   return normalizeURL(url, { hash: false, trailingSlash: false, ...options })
 }
@@ -458,7 +458,7 @@ Returns whether the given argument is not `undefined`.
 @return {boolean}
 @stable
 */
-export const isDefined = negate(isUndefined)
+export const isDefined = negate(isUndefined) as <T>(value: T) => value is Exclude<T, undefined>
 
 /*-
 Returns whether the given argument is either `undefined` or `null`.
@@ -490,7 +490,7 @@ For the opposite of `up.util.isGiven()` see [`up.util.isMissing()`](/api/up.util
 @return {boolean}
 @stable
 */
-export const isGiven = negate(isMissing)
+export const isGiven = negate(isMissing) as <T>(value: T) => value is NonNullable<T>
 
 // isNan = (object) ->
 //   isNumber(value) && value != +value
@@ -587,9 +587,10 @@ otherwise returns `undefined`.
 @return {any|undefined}
 @stable
 */
-export function presence<T>(value: T, tester: (value: T) => boolean = isPresent): T | undefined {
+export function presence<T>(value: T, tester: (value: T) => boolean = isPresent): NonNullable<T> | undefined {
   if (tester(value)) {
-    return value
+    // We assume that the tester rejects null and undefined, like every tester we pass.
+    return value as NonNullable<T>
   }
 }
 
@@ -996,7 +997,7 @@ up.util.merge(a, b) // result: { a: '1', b: '3', c: '4' }
   A new object with all merged properties.
 @stable
 */
-export function merge(...sources: PlainObject[]): PlainObject {
+export function merge(...sources: (PlainObject | null | undefined)[]): PlainObject {
   return Object.assign({}, ...sources)
 }
 
@@ -1151,8 +1152,8 @@ neither `null` nor `undefined`.
 @return {Array<T>}
 @stable
 */
-export function compact<T>(array: List<T>): T[] {
-  return filterList(array, isGiven)
+export function compact<T>(array: List<T>): NonNullable<T>[] {
+  return filterList(array, isGiven) as NonNullable<T>[]
 }
 
 export function compactObject<T extends object>(object: T): Partial<T> {
@@ -2155,7 +2156,7 @@ const SERIALIZED_TAG_PATTERN = /<("[^"]*"|[^">])*>/
 // This could go in up.element, but we want up.util to not have any dependencies
 // so every other namespace can depend on up.util.
 function tagOuterHTML(element: Element): string {
-  return (element.cloneNode() as Element).outerHTML.match(SERIALIZED_TAG_PATTERN)[0]
+  return (element.cloneNode() as Element).outerHTML.match(SERIALIZED_TAG_PATTERN)![0]
 }
 
 function negate<A extends any[]>(fn: (...args: A) => any): (...args: A) => boolean {
@@ -2169,7 +2170,8 @@ export function memoizeMethod(object: PlainObject, propLiteral: PlainObject): vo
   // We do this so that object's keys go through the same property mangling as the rest of the code.
   for (let prop in propLiteral) {
     // TODO: Why can't we just get the old prop using object[prop] ?
-    let originalDescriptor = Object.getOwnPropertyDescriptor(object, prop)
+    // Callers pass a class prototype that defines the methods.
+    let originalDescriptor = Object.getOwnPropertyDescriptor(object, prop)!
     let oldImpl = originalDescriptor.value
     let memoizedImpl = memoize(oldImpl, `__${prop}MemoizeCache`)
     object[prop] = memoizedImpl
@@ -2420,7 +2422,8 @@ export function parseScalarJSONPairs(str: string) {
   let { maskedTokens, restore } = complexTokenOutlines(str)
 
   return maskedTokens.map((maskedToken) => {
-    let [_match, string, json] = maskedToken.match(/([^{]+)({[^}]*})?/)
+    // The tokenizer drops empty tokens, so the pattern always matches.
+    let [_match, string, json] = maskedToken.match(/([^{]+)({[^}]*})?/)!
     return [
       restore(string.trim()),
       json && parseRelaxedJSON(restore(json))

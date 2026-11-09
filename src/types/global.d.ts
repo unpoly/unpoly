@@ -15,6 +15,9 @@ interface Window {
   Rails?: any
 }
 
+// The browser ignores a null timer ID, and we store a cleared timer as null.
+declare function clearTimeout(id: number | null | undefined): void
+
 // Entry points require their stylesheets, which the build compiles with Sass.
 declare module '*.sass'
 
