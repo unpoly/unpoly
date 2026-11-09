@@ -508,6 +508,11 @@ describe('up.element', function() {
       expect(element.getAttribute('foo')).toEqual('bar"baz')
     })
 
+    it('allows a closing square bracket in a quoted attribute value', function() {
+      const element = up.element.createFromSelector('input[name="user[email]"]')
+      expect(element.getAttribute('name')).toEqual('user[email]')
+    })
+
     it('creates an element with an attribute set to a space-separated value', function() {
       const element = up.element.createFromSelector('ul[foo~=bar]')
       expect(element).toBeElement()
