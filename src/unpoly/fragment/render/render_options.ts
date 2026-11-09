@@ -10,6 +10,8 @@ import type { List, PlainObject, ValueOrFunction } from '../../util.js'
 import type { EventPlan, InputDevice } from '../../event.js'
 import type { ParseCallbackOptions } from '../../script.js'
 import type { Layer } from '../../layer/base.js'
+import type { LayerCloseEvent, LayerOpenedEvent } from '../../layer.js'
+import type { FragmentLoadedEvent, FragmentOfflineEvent } from '../../fragment.js'
 import type { ParamsLike } from '../../form/params.js'
 import type { AnimationValue, TransitionValue } from '../../motion.js'
 import type { PreviewFn } from '../../status.js'
@@ -154,16 +156,16 @@ export interface RenderOptions {
 
   // Lifecycle hooks
   confirm?: string | false
-  onLoaded?: (event: Event) => any
-  onOffline?: (event: Event) => any
+  onLoaded?: (event: FragmentLoadedEvent) => any
+  onOffline?: (event: FragmentOfflineEvent) => any
   onRendered?: (result: RenderResult) => any
   onFinished?: (result: RenderResult) => any
   onError?: (error: any) => any
-  onOpened?: (event: Event) => any
-  onAccept?: (event: Event) => any
-  onAccepted?: (event: Event) => any
-  onDismiss?: (event: Event) => any
-  onDismissed?: (event: Event) => any
+  onOpened?: (event: LayerOpenedEvent) => any
+  onAccept?: (event: LayerCloseEvent) => any
+  onAccepted?: (event: LayerCloseEvent) => any
+  onDismiss?: (event: LayerCloseEvent) => any
+  onDismissed?: (event: LayerCloseEvent) => any
   // A selector to reload after the overlay was accepted or dismissed.
   onAcceptedReload?: string
   onDismissedReload?: string
@@ -309,7 +311,7 @@ const SHARED_KEYS = PREFLIGHT_KEYS.concat([
 ])
 
 // At least one of these properties must be given for Unpoly to render content.
-const CONTENT_KEYS: string[] = [
+const CONTENT_KEYS: (keyof RenderOptions)[] = [
   'url',
   'response',
   'content',
@@ -435,7 +437,7 @@ function rememberOriginLayer({ origin, originLayer }: RenderOptions): RenderOpti
 }
 
 function finalize<T extends RenderOptions>(preprocessedOptions: T, lateDefaults?: RenderOptions): T
-function finalize(preprocessedOptions, lateDefaults) {
+function finalize(preprocessedOptions: RenderOptions, lateDefaults?: RenderOptions) {
   return merge(
     preprocessedOptions.defaults,
     lateDefaults,
@@ -455,11 +457,11 @@ function assertContentGiven(options: RenderOptions): void {
 }
 
 function failOverrides(options: RenderOptions): RenderOptions {
-  const overrides: RenderOptions = {}
+  const overrides: PlainObject = {}
   for (let key in options) {
     // Note that up.fragment.successKey(key) only returns a value
     // if the given key is prefixed with "fail".
-    const value = options[key]
+    const value = (options as PlainObject)[key]
     let unprefixed = successKey(key)
     if (unprefixed) {
       overrides[unprefixed] = value
@@ -501,12 +503,12 @@ function deriveFailOptions(preprocessedOptions: RenderOptions): RenderOptions {
 
 // Returns a copy of the given options where each callback in ownCallbacks runs before
 // the caller's callback of the same name.
-function chainCallbacks<T extends object>(options: T, ownCallbacks: PlainObject): T {
-  let chained = { ...options }
+function chainCallbacks<T extends PlainObject>(options: T, ownCallbacks: PlainObject): T {
+  let chained: PlainObject = { ...options }
   for (let key in ownCallbacks) {
     chained[key] = sequence(ownCallbacks[key], options[key])
   }
-  return chained
+  return chained as T
 }
 
 export const RenderOptions = {
