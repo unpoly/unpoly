@@ -1,3 +1,8 @@
+// TypeScript only knows require() from @types/node, which we don't load. We keep require() because
+// the files below are scripts that patch window.up and must run between startExtension() and
+// stopExtension(). Imports would be hoisted above startExtension().
+declare const require: (path: string) => void
+
 // We are going to add compilers and event handlers that should not be reset during specs.
 up.framework.startExtension()
 require('./unpoly-migrate/migrate')

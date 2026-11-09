@@ -12,7 +12,7 @@ function unpoly({ es, min }) {
 
 function unpolyMigrate({ min }) {
   return merge(
-    file('./src/unpoly-migrate.js', `unpoly-migrate${min ? '.min' : ''}.js`),
+    file('./src/unpoly-migrate.ts', `unpoly-migrate${min ? '.min' : ''}.js`),
     // Always transpile to ES5. I don't want multiple versions of this trivial file.
     scriptPipeline({ es: 'es6' }),
     minify(min),
