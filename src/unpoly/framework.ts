@@ -1,6 +1,13 @@
 import { mockable } from './mockable.js'
 import { emit } from './event.js'
 
+/**
+The `up:framework:booted` event.
+*/
+export type FrameworkBootedEvent = Event & {
+  mode: 'auto' | 'manual'
+}
+
 /*-
 Features to control when Unpoly boots.
 

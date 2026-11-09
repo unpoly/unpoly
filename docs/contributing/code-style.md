@@ -43,6 +43,10 @@ In a `.ts` module:
 - Where the honest code would emit differently, a cast with a comment is fine, e.g.
   `(now as any) - (this.loadedAt as any)` instead of `now.getTime() - …`.
 - `any` is fine where a precise type would be complex.
+- Unpoly's events are typed by name, like DOM events in `HTMLElementEventMap`. `UpEventMap` in
+  `event.ts` maps each event type to its event object, and `up.on()` and `up.emit()` look it up. A
+  new event gets a type in the module that documents it (like `LinkFollowEvent` in `link.ts`),
+  with the properties from its doc comment, and an entry in the map.
 - Typing must not change what the build emits. Compare `unpoly.min.js` before and after.
 - `unpoly-migrate` is loosely typed for now. Its files are scripts, not modules: they patch
   `window.up` (which TypeScript sees as `any`) and import nothing, since `unpoly-migrate.js` is a

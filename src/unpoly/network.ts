@@ -11,6 +11,23 @@ import { UpResponse } from './network/response.js'
 import { Config } from './util/config.js'
 import type { ConfigWith } from './util/config.js'
 import type { RequestOptions } from './network/request.js'
+import type { Layer } from './layer/base.js'
+
+/**
+The `up:request:load`, `up:request:aborted` and `up:request:offline` events.
+*/
+export type RequestEvent = Event & {
+  request: UpRequest
+  layer: Layer
+  origin: Element
+}
+
+/**
+The `up:request:loaded` event.
+*/
+export type RequestLoadedEvent = RequestEvent & {
+  response: UpResponse
+}
 
 /*-
 Features to make HTTP requests and cache their responses.

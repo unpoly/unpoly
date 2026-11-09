@@ -21,7 +21,7 @@ import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
 import type { ConfigWith } from './util/config.js'
 import { doFocus, focusedElementWithin } from './viewport.js'
-import type { PlainObject } from './util.js'
+import type { List, PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
 import type { OptionsParserOptions } from './element/options_parser.js'
 import type { RenderOptions } from './fragment/render/render_options.js'
@@ -37,8 +37,40 @@ export type Field = Element & {
   name?: string
   value?: any
   disabled?: boolean
+  form?: HTMLFormElement | null
   // Set while a preview disables the field, see disableControlTemp().
   upPreviewDisabled?: boolean
+}
+
+/**
+The `up:form:submit` event.
+*/
+export type FormSubmitEvent = Event & {
+  target: Element
+  form: Element
+  params: Params
+  submitButton: Element | undefined
+  renderOptions: RenderOptions
+}
+
+/**
+The `up:form:validate` event.
+*/
+export type FormValidateEvent = Event & {
+  target: Element
+  form: Element
+  params: Params
+  fields: List<Element>
+  renderOptions: RenderOptions
+}
+
+/**
+The `up:form:switch` event.
+*/
+export type FormSwitchEvent = Event & {
+  target: Element
+  field: Element
+  fieldTokens: string[]
 }
 
 /*-
@@ -2513,7 +2545,8 @@ export function install(): void {
     // The browser resolves a [form] attribute across the whole page. A button or a field (pressing Enter)
     // can then submit a form in another layer: when two layers have a form with the same ID, or when
     // [form] refers to a form that only exists in another layer. Layers don't share forms.
-    for (let control of [event.submitter, document.activeElement]) {
+    // Either may be a control that isn't a field (or null), whose { form } is then undefined.
+    for (let control of [event.submitter, document.activeElement] as Field[]) {
       if (control && control.form === form && getForm(control) !== form) {
         fail('Prevented %o from submitting a form in another layer ([form="%s"])', control, control.getAttribute('form'))
       }

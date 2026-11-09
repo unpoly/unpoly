@@ -16,7 +16,7 @@ export type ListenerTarget = EventTarget & { upEventListeners?: Record<string, E
 A function registered with `up.on()`. It is called with the event, the element matching
 the selector (or the element it listens on) and, if it takes three arguments, the element's data.
 */
-export type ListenerCallback = ((event: Event, element: Element, data?: any) => any) & { upUid?: number }
+export type ListenerCallback<E = Event> = ((event: E, element: HTMLElement, data?: any) => any) & { upUid?: number }
 
 /**
 Everything an `up.EventListener` needs to know.

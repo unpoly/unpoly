@@ -13,7 +13,7 @@ import { closestLayerElement, mainTargets } from '../layer.js'
 import { convertClicks } from '../link.js'
 import { newStateCache } from '../viewport.js'
 import type { List, PlainObject, ValueOrFunction } from '../util.js'
-import type { UnbindFn } from '../event.js'
+import type { EmitProps, EmittedEvent, EventTypes, ListenerArgs, ObservedEvent, UnbindFn } from '../event.js'
 import type { EventListenerAttributes } from '../event/event_listener.js'
 import type { HistoryAspect } from '../history.js'
 import type { LayerStack } from './layer_stack.js'
@@ -76,13 +76,6 @@ export interface PeelOptions extends LayerCloseOptions {
   value?: any
   intent?: 'accept' | 'dismiss'
 }
-
-/**
-A function that `up.Layer#on()` calls with the event, the element the listener was registered on
-(or that matched its selector), and that element's [data](/data).
-*/
-// TODO(types): Look up the event type by its name, like `GlobalEventHandlersEventMap['click']`.
-export type LayerEventListener = (event: any, element: HTMLElement, data?: any) => any
 
 /**
 Options for listening to events with `up.Layer#on()`.
@@ -685,10 +678,7 @@ export abstract class Layer {
   @include up.on/after-element
   @stable
   */
-  on(types: string | string[], listener: LayerEventListener): UnbindFn
-  on(types: string | string[], selector: string, listener: LayerEventListener): UnbindFn
-  on(types: string | string[], options: LayerListenerOptions, listener: LayerEventListener): UnbindFn
-  on(types: string | string[], selector: string, options: LayerListenerOptions, listener: LayerEventListener): UnbindFn
+  on<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>, LayerListenerOptions>): UnbindFn
   on(...args) {
     return this._buildEventListenerGroup(args).bind()
   }
@@ -700,8 +690,7 @@ export abstract class Layer {
   @include up.off/after-element
   @stable
   */
-  off(types: string | string[], listener: LayerEventListener): void
-  off(types: string | string[], selector: string, listener: LayerEventListener): void
+  off<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>, LayerListenerOptions>): void
   off(...args) {
     return this._buildEventListenerGroup(args).unbind()
   }
@@ -759,10 +748,11 @@ export abstract class Layer {
     @like up.emit
   @stable
   */
-  emit(eventType: string, props?: PlainObject): Event
-  emit(event: Event, options?: PlainObject): Event
-  emit(eventPlan: PlainObject & { type: string }): Event
-  emit(target: EventTarget, eventType: string | Event, props?: PlainObject): Event
+  emit<T extends string>(eventType: T, props?: EmitProps): EmittedEvent<T>
+  emit<T extends string>(eventPlan: EmitProps & { type: T }): EmittedEvent<T>
+  emit<E extends Event>(event: E, options?: EmitProps): E
+  emit<T extends string>(target: EventTarget, eventType: T, props?: EmitProps): EmittedEvent<T>
+  emit<E extends Event>(target: EventTarget, event: E, options?: EmitProps): E
   emit(...args) {
     return this._buildEventEmitter(args).emit()
   }

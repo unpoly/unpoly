@@ -23,6 +23,8 @@ import type { ElementOrSelector } from './element.js'
 import type { CSPInfo } from './script/csp/csp_info.js'
 import type { PolicyString } from './script/csp/script_gate.js'
 import type { Compiler, HelloFragmentOptions } from './script/hello_fragment.js'
+import type { RenderOptions } from './fragment/render/render_options.js'
+import type { UpResponse } from './network/response.js'
 
 /**
 Options for `up.hello()`.
@@ -50,6 +52,16 @@ type ScriptedElement = Element & {
   upTemplateData?: PlainObject
   upCompileData?: PlainObject
   upDestructors?: Cleaner
+}
+
+/**
+The `up:assets:changed` event.
+*/
+export type AssetsChangedEvent = Event & {
+  newAssets: List<Element>
+  oldAssets: List<Element>
+  renderOptions: RenderOptions
+  response: UpResponse | undefined
 }
 
 /*-

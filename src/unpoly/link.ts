@@ -29,9 +29,44 @@ import type { ElementOrSelector } from './element.js'
 import type { OptionsParserOptions } from './element/options_parser.js'
 import type { RenderJob } from './fragment/render/render_job.js'
 import type { Layer } from './layer/base.js'
+import type { ModifierKey } from './event.js'
 
 // A link expanded with [up-expand] remembers the area it expanded to, and the area remembers the link.
-type ExpandedElement = Element & { upExpandedPair?: Element[] }
+type ExpandedElement = Element & { upExpandedPair?: HTMLElement[] }
+
+/**
+The `up:link:follow` event.
+*/
+export type LinkFollowEvent = Event & {
+  target: Element
+  renderOptions: RenderOptions
+}
+
+/**
+The `up:link:preload` event.
+*/
+export type LinkPreloadEvent = Event & {
+  target: Element
+  renderOptions: RenderOptions
+}
+
+/**
+The `up:click` event.
+*/
+// It also has the properties that forkEventAsUpClick() copies from the original event.
+// They are undefined when the original event has no such property, like the { button } of a keyboard event.
+export type ClickEvent = Event & Pick<MouseEvent, 'clientX' | 'clientY' | 'button' | ModifierKey> & {
+  target: Element
+  originalEvent: MouseEvent | KeyboardEvent
+}
+
+/**
+The `up:deferred:load` event.
+*/
+export type DeferredLoadEvent = Event & {
+  target: Element
+  renderOptions: RenderOptions
+}
 
 /*-
 Features to follow links without a full page load.
@@ -1630,7 +1665,7 @@ export function install(): void {
     }
   })
 
-  on('up:click', '[up-expand]', function(event, area) {
+  on('up:click', '[up-expand]', function(event, area: ExpandedElement) {
     let childLink = area.upExpandedPair?.[1]
     // (1) A followable area is followed by the [up-follow] handler.
     // (2) A click within the expanded element belongs to that element. This includes the up:click that

@@ -1100,7 +1100,7 @@ export function install(): void {
   // Wait until another element is focused. Otherwise we would lose .up-focus-hidden
   // when the user switches to another window, then returns to the app window (where
   // a content element might still be :focus-visible).
-  on('focusin', function({ relatedTarget }) {
+  on('focusin', function({ relatedTarget }: FocusEvent & { relatedTarget: Element | null }) {
     removeFocusClasses(relatedTarget)
   })
 }

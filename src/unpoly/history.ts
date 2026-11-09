@@ -14,6 +14,8 @@ import type { ConfigWith } from './util/config.js'
 import { FIFOCache } from './util/fifo_cache.js'
 import { revealHash, revealHashFn, saveFocus, saveScroll } from './viewport.js'
 import type { NormalizeURLOptions, PlainObject } from './util.js'
+import type { RenderOptions } from './fragment/render/render_options.js'
+import type { ClickEvent } from './link.js'
 
 /**
 Why the location changed. `'detect'` is only used internally: we tell `'hash'` from `'pop'` later.
@@ -46,6 +48,14 @@ export type LocationChangedEvent = Event & {
   previousLocation: string | undefined
   alreadyHandled: boolean
   willHandle: boolean
+}
+
+/**
+The `up:location:restore` event.
+*/
+export type LocationRestoreEvent = Event & {
+  location: string
+  renderOptions: RenderOptions
 }
 
 /*-
@@ -782,7 +792,7 @@ function adoptInitialHistoryEntry(): void {
 }
 
 
-function onJumpLinkClicked(event: MouseEvent, link: HTMLAnchorElement): void {
+function onJumpLinkClicked(event: ClickEvent, link: HTMLAnchorElement): void {
   // If other JavaScript already handled this click, do nothing.
   if (event.defaultPrevented) return
 

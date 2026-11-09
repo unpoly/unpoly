@@ -7,7 +7,7 @@ import { config, successKey } from '../../fragment.js'
 import { layerStack, normalizeLayerOptions } from '../../layer.js'
 import { callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback } from '../../script.js'
 import type { List, PlainObject, ValueOrFunction } from '../../util.js'
-import type { InputDevice } from '../../event.js'
+import type { EventPlan, InputDevice } from '../../event.js'
 import type { ParseCallbackOptions } from '../../script.js'
 import type { Layer } from '../../layer/base.js'
 import type { ParamsLike } from '../../form/params.js'
@@ -201,7 +201,7 @@ export interface RenderOptions {
 
   // Internal options that ChangeFromResponse takes from the response.
   hash?: string
-  eventPlans?: PlainObject[]
+  eventPlans?: EventPlan[]
   acceptLayer?: any
   dismissLayer?: any
   cspInfo?: CSPInfo

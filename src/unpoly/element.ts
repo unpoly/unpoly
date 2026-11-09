@@ -54,6 +54,13 @@ export interface ParsedSelector {
   excludeRaw: string | undefined
 }
 
+/**
+The `up:element:defined` event.
+*/
+export type ElementDefinedEvent = Event & {
+  localName: string
+}
+
 /*-
 Low-level functions to access and change the DOM.
 

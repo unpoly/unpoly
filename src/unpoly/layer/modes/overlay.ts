@@ -397,7 +397,7 @@ export class Overlay extends Layer {
 
   _registerSubmitCloser(attribute: string, closeFn: CloseFn): void {
     // Allow the fallbacks to be both vanilla forms and Unpoly [up-submit] forms
-    this.on('submit', `[${attribute}]`, (event, element) => {
+    this.on('submit', `[${attribute}]`, (event: SubmitEvent & { target: HTMLFormElement }, element) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
       // a form from being submitted on the root layer.
       eventHalt(event, { log: true })

@@ -7,6 +7,7 @@ import type { RenderOptions } from '../render_options.js'
 import type { Layer } from '../../../layer/base.js'
 import type { UpResponse } from '../../../network/response.js'
 import type { PlainObject } from '../../../util.js'
+import type { EventPlan } from '../../../event.js'
 
 /**
 What a change will update, known before its request is sent. ChangeFromURL makes them request options,
@@ -44,7 +45,7 @@ export class Addition extends Change {
   declare layer: Layer
   declare _acceptLayer: any
   declare _dismissLayer: any
-  declare _eventPlans: PlainObject[]
+  declare _eventPlans: EventPlan[]
   declare _response: UpResponse | undefined
 
   constructor(options: RenderOptions) {

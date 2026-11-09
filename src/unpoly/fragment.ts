@@ -40,6 +40,7 @@ import type {
 } from './fragment/render/render_options.js'
 import type { FocusCapsule } from './viewport/focus_capsule.js'
 import type { LayerMode } from './layer/base.js'
+import type { RenderResult } from './fragment/render/render_result.js'
 
 /**
 A step of a render pass: which old element to update with which new element, and how.
@@ -109,6 +110,84 @@ export interface ProvideNodesOptions {
   originLayer?: Layer
   data?: any
   htmlParser?: HTMLParser
+}
+
+/**
+The `up:fragment:loaded` event.
+*/
+export type FragmentLoadedEvent = Event & {
+  request: UpRequest
+  response: UpResponse
+  revalidating: boolean
+  expiredResponse: UpResponse | undefined
+  origin: Element | undefined
+  renderOptions: RenderOptions
+}
+
+/**
+The `up:fragment:offline` event.
+*/
+export type FragmentOfflineEvent = Event & {
+  request: UpRequest
+  renderOptions: RenderOptions
+  retry: (retryOptions?: RenderOptions) => Promise<RenderResult>
+  origin: Element
+}
+
+/**
+The `up:fragment:keep` event.
+*/
+export type FragmentKeepEvent = Event & {
+  target: Element
+  newFragment: Element
+  newData: PlainObject
+  renderOptions: RenderOptions
+}
+
+/**
+The `up:fragment:kept` event.
+*/
+export type FragmentKeptEvent = Event & {
+  target: Element
+  newFragment: Element
+  newData: PlainObject
+}
+
+/**
+The `up:fragment:inserted` event.
+*/
+export type FragmentInsertedEvent = Event & {
+  target: Element
+  layer: Layer
+  ok: boolean
+  revalidating: boolean
+}
+
+/**
+The `up:fragment:destroyed` event.
+*/
+export type FragmentDestroyedEvent = Event & {
+  fragment: Element
+  parent: Element
+  target: Element
+}
+
+/**
+The `up:fragment:aborted` event.
+*/
+export type FragmentAbortedEvent = Event & {
+  target: Element
+  reason: string
+  newLayer: boolean
+}
+
+/**
+The `up:template:clone` event.
+*/
+export type TemplateCloneEvent = Event & {
+  target: Element
+  data: PlainObject
+  nodes: List<Node> | null
 }
 
 /*-
@@ -3212,7 +3291,8 @@ export function cloneTemplate(templateOrSelector: ElementOrSelector, data: any =
   // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
   let template = getSmart(templateOrSelector, { origin, layer: 'closest' }) || fail('Template not found: %o', templateOrSelector)
   let event = emit(template, 'up:template:clone', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
-  let nodes = event.nodes ?? defaultTemplateNodes(template, htmlParser)
+  // Each node remembers the template variables for readData(), even a text node.
+  let nodes: List<Node & { upTemplateData?: any }> = event.nodes ?? defaultTemplateNodes(template, htmlParser)
   for (let node of nodes) {
     node.upTemplateData = data
   }

@@ -7,6 +7,9 @@ import type { UnbindFn } from '../event.js'
 import type { Overlay } from './modes/overlay.js'
 import type { DoFocusOptions } from '../viewport.js'
 
+// A focusin event on the document, whose target is the focused element.
+type FocusInEvent = FocusEvent & { target: HTMLElement }
+
 export class OverlayFocus {
   declare _layer: Overlay
   declare _focusElement: HTMLElement
@@ -42,7 +45,7 @@ export class OverlayFocus {
     })
 
     if (this._trapFocus) {
-      this._untrapFocus = on('focusin', (event) => this._onFocus(event))
+      this._untrapFocus = on('focusin', (event: FocusInEvent) => this._onFocus(event))
       this._focusTrapBefore = affix(this._focusElement, 'beforebegin', 'up-focus-trap[tabindex=0]')
       this._focusTrapAfter = affix(this._focusElement, 'afterend', 'up-focus-trap[tabindex=0]')
     }
@@ -68,7 +71,7 @@ export class OverlayFocus {
   }
 
   // A focusin event always targets an element.
-  _onFocus(event: FocusEvent & { target: HTMLElement }): void {
+  _onFocus(event: FocusInEvent): void {
     const { target } = event
 
     // (1) Ignore focus events triggered by this method.

@@ -13,6 +13,7 @@ import { Config } from './util/config.js'
 import type { ConfigWith } from './util/config.js'
 import type { PlainObject } from './util.js'
 import type { RenderStep } from './fragment.js'
+import type { RenderOptions } from './fragment/render/render_options.js'
 
 /**
 The render steps for hungry elements, on the targeted layer and on other layers.
@@ -21,6 +22,23 @@ The render steps for hungry elements, on the targeted layer and on other layers.
 export interface HungrySteps {
   current: RenderStep[]
   other: RenderStep[]
+}
+
+/**
+The `up:fragment:hungry` event.
+*/
+export type FragmentHungryEvent = Event & {
+  target: Element
+  newFragment: Element
+  renderOptions: RenderOptions
+}
+
+/**
+The `up:fragment:poll` event.
+*/
+export type FragmentPollEvent = Event & {
+  target: Element
+  renderOptions: RenderOptions
 }
 
 /*-

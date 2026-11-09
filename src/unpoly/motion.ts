@@ -67,6 +67,13 @@ export interface SwapOptions {
   afterRemove?: () => void
 }
 
+/**
+The `up:motion:finish` event.
+*/
+export type MotionFinishEvent = Event & {
+  target: Element
+}
+
 /*-
 Features to animate fragment updates.
 

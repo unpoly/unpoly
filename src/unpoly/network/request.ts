@@ -26,6 +26,7 @@ import type { Deferred, PlainObject, ValueOrFunction } from '../util.js'
 import type { ParamsLike } from '../form/params.js'
 import type { Layer } from '../layer/base.js'
 import type { Route } from './request_cache.js'
+import type { EmitProps, EmittedEvent } from '../event.js'
 
 /**
 The state of an `up.Request` in its lifecycle.
@@ -997,6 +998,8 @@ export const UpRequest = class Request {
     })
   }
 
+  emit<T extends string>(eventType: T, props?: EmitProps): EmittedEvent<T>
+  emit<E extends Event>(event: E, options?: EmitProps): E
   emit(...args: any[]): Event {
     return this._buildEventEmitter(args).emit()
   }

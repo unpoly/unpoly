@@ -14,12 +14,48 @@ import { Config } from './util/config.js'
 import type { ConfigWith } from './util/config.js'
 import type { PlainObject } from './util.js'
 import type { AnimationValue } from './motion.js'
+import type { UpResponse } from './network/response.js'
 
 /**
 A layer subclass for a mode, like `ModalLayer`. Each has a static `{ mode }`.
 @internal
 */
 export type LayerClass = (new (options: LayerOptions) => Layer) & Pick<typeof Layer, 'mode' | 'selector'>
+
+/**
+The `up:layer:open` event.
+*/
+export type LayerOpenEvent = Event & {
+  layerOptions: RenderOptions
+  origin: Element
+}
+
+/**
+The `up:layer:opened` event.
+*/
+export type LayerOpenedEvent = Event & {
+  origin: Element
+  layer: Layer
+}
+
+/**
+The `up:layer:location:changed` event.
+*/
+export type LayerLocationChangedEvent = Event & {
+  location: string
+  previousLocation: string | undefined
+  layer: Layer
+}
+
+/**
+The `up:layer:accept`, `up:layer:accepted`, `up:layer:dismiss` and `up:layer:dismissed` events.
+*/
+export type LayerCloseEvent = Event & {
+  layer: Layer
+  value: any
+  origin: Element
+  response: UpResponse
+}
 
 /*-
 Features to open, close and look up overlays.

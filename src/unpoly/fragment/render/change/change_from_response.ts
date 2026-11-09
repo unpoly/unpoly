@@ -9,6 +9,7 @@ import { UNSET_OVERLAY_VISUALS } from '../../../layer/overlay_visuals.js'
 import { printToStandard, printToWarn } from '../../../log.js'
 import { adoptRenderOptionsFromHeader } from '../../../script.js'
 import type { PlainObject } from '../../../util.js'
+import type { EventPlan } from '../../../event.js'
 import type { RenderResult } from '../render_result.js'
 import type { UpRequest } from '../../../network/request.js'
 import type { UpResponse } from '../../../network/response.js'
@@ -209,7 +210,8 @@ export class ChangeFromResponse extends Change {
 
     renderOptions.location = refineOption(renderOptions.location, serverLocation)
     renderOptions.title = refineOption(renderOptions.title, this._response.title)
-    renderOptions.eventPlans = this._response.eventPlans
+    // TODO(types): Type up.Response#eventPlans as EventPlan[], then drop this cast.
+    renderOptions.eventPlans = this._response.eventPlans as EventPlan[]
 
     let serverTarget = this._response.target
     if (serverTarget) {
