@@ -1,17 +1,24 @@
 import { copy, memoizeMethod } from '../util.js'
 import { wrapMethod } from '../protocol.js'
+import type { Params } from '../form/params.js'
+import type { UpRequest } from './request.js'
 
 const CONTENT_TYPE_URL_ENCODED = 'application/x-www-form-urlencoded'
 const CONTENT_TYPE_FORM_DATA = 'multipart/form-data'
 
 
 export class XHRRenderer {
+  declare _request: UpRequest
+  declare _params: Params
+  declare _payload: any
+  declare _contentType: string | null | undefined
 
-  constructor(request) {
+  constructor(request: UpRequest) {
     this._request = request
   }
 
-  buildAndSend(handlers) {
+  // Assigns the handlers (onload, onerror, ...) to the XMLHttpRequest.
+  buildAndSend(handlers: Partial<XMLHttpRequest>): void {
     const xhr = this._request.xhr
 
     // We copy params since we will modify them below.
@@ -44,7 +51,7 @@ export class XHRRenderer {
     xhr.send(this._getPayload())
   }
 
-  _getMethod() {
+  _getMethod(): string {
     // By default HTTP methods other than `GET` or `POST` will be converted into a `POST`
     // request and carry their original method as a `_method` parameter. This is to
     // [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347)
@@ -56,17 +63,17 @@ export class XHRRenderer {
     return method
   }
 
-  _getContentType() {
+  _getContentType(): string | null | undefined {
     this._finalizePayload()
     return this._contentType
   }
 
-  _getPayload() {
+  _getPayload(): any {
     this._finalizePayload()
     return this._payload
   }
 
-  _finalizePayload() {
+  _finalizePayload(): void {
     this._payload = this._request.payload
     this._contentType = this._request.contentType
 
