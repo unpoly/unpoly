@@ -250,6 +250,24 @@ test('a file from the future does not hold up the run once the requested build i
   assert.ok(clock < 3000, `returned before the grace period (at ${clock})`)
 })
 
+test('a file from the future does not hold up the run when the watcher was still debouncing it', async () => {
+  // The unlucky order: we are called within the watcher's debounce, so its round for the file
+  // starts after we read the status. That round moves `startedAt`, but not past the mtime. We
+  // used to take that as the watcher having reacted, never asked for a build, and timed out
+  // after 30 s.
+  let clock = 0
+  let reads = 0
+  let status = idle(100)
+  const build = await waitForFreshBuild({
+    read: () => { if (++reads === 2) status = idle(150); return status },
+    request: () => { status = idle(clock + 20) },
+    newestMtime: 1e12, newestFile: 'src/unpoly/link.ts',
+    isAlive: () => true, now: () => (clock += 100), sleep: noop,
+  })
+  assert.equal(build.unbuiltEdit, 'src/unpoly/link.ts')
+  assert.ok(clock < 3000, `returned before the grace period (at ${clock})`)
+})
+
 test('a build that starts but never settles still times out', async () => {
   let clock = 0
   await assert.rejects(

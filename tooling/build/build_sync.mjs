@@ -154,10 +154,14 @@ export async function waitForFreshBuild({
     throw new BuildSyncError('Build watcher not running (its process is gone). Start it with `bin/dev`.')
   }
 
-  const enteredAt = now()
-  const startedAtOnEntry = status.startedAt
-  let deadline = enteredAt + timeoutMs
   let requestedAt = null
+  // The watcher's last `startedAt`, and since when it has stood. We judge whether the watcher has
+  // reacted by how long it has been quiet, not by its `startedAt` on entry: a round that started
+  // just after we were called (the change was still in the watcher's debounce) is the watcher
+  // reacting, and if it still didn't get past `newestMtime`, the request below must still come.
+  let lastStartedAt = status.startedAt
+  let quietSince = now()
+  let deadline = quietSince + timeoutMs
   while (true) {
     status = read()
     let idle = status?.state === 'idle'
@@ -168,8 +172,12 @@ export async function waitForFreshBuild({
       return requestedAt === null ? status : { ...status, missedEdit: newestFile }
     }
     let time = now()
-    let untouched = idle && status.startedAt === startedAtOnEntry
-    if (untouched && requestedAt === null && time - enteredAt >= requestAfterMs) {
+    if (status && status.startedAt !== lastStartedAt) {
+      lastStartedAt = status.startedAt
+      quietSince = time
+    }
+    let quietFor = idle ? time - quietSince : 0
+    if (requestedAt === null && quietFor >= requestAfterMs) {
       requestedAt = time
       request(newestFile)
     }
@@ -183,7 +191,7 @@ export async function waitForFreshBuild({
     // dist/ may well be current anyway (an old watcher does not answer guide-page saves), so
     // run. `unbuiltEdit` lets the caller say which file it was; reading that name is what tells
     // you whether to be relaxed (`pages/foo.md`) or suspicious (`unpoly/link.js`).
-    if (untouched && time - enteredAt >= idleGraceMs) {
+    if (quietFor >= idleGraceMs) {
       if (status.ok === false) throw new BuildFailedError(status.errors || '(no error output captured)')
       return { ...status, unbuiltEdit: newestFile }
     }
