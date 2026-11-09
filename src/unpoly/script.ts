@@ -17,6 +17,38 @@ import { ScriptGate } from './script/csp/script_gate.js'
 import { DestructorPass } from './script/destructor_pass.js'
 import { HelloFragment } from './script/hello_fragment.js'
 import { Config } from './util/config.js'
+import type { Cleaner, List, PlainObject } from './util.js'
+import type { ElementOrSelector } from './element.js'
+import type { CSPInfo } from './script/csp/csp_info.js'
+import type { Compiler, HelloFragmentOptions } from './script/hello_fragment.js'
+
+/**
+Options for `up.hello()`.
+*/
+export interface HelloOptions extends HelloFragmentOptions {
+  // Only run these macros and compilers (default: all registered ones).
+  macros?: Compiler[]
+  compilers?: Compiler[]
+  [key: string]: any
+}
+
+/**
+Options for `up.script.parseCallback()`.
+@internal
+*/
+export interface ParseCallbackOptions {
+  argNames?: string[]
+  // Also pass these properties of the first argument as arguments.
+  expandObject?: string[] | false
+}
+
+// The properties Unpoly sets on elements to remember their data and destructors.
+type ScriptedElement = Element & {
+  upData?: any
+  upTemplateData?: PlainObject
+  upCompileData?: PlainObject
+  upDestructors?: Cleaner
+}
 
 /*-
 Features to attach JavaScript behavior to HTML elements whenever they enter the page.
@@ -149,8 +181,8 @@ const SYSTEM_MACRO_PRIORITIES = {
   '[up-keep]': 9999999999,  // cache the identity of e.g. [up-keep="same-html"] before any client-side changes
 }
 
-let registeredCompilers = []
-let registeredMacros = []
+let registeredCompilers: Compiler[] = []
+let registeredMacros: Compiler[] = []
 
 /*-
 Registers a function to be called when Unpoly inserts a matching element.
@@ -376,7 +408,7 @@ or manually call `up.hello()` on an element that should be
 @stable
 @signature
 */
-export function registerCompiler(...args) {
+export function registerCompiler(...args: any[]): void {
   registerProcessor(args)
 }
 
@@ -435,11 +467,11 @@ up.macro('[shake-modal]', function(link) {
 @stable
 @signature
 */
-export function registerMacro(...args) {
+export function registerMacro(...args: any[]): void {
   registerProcessor(args, { macro: true })
 }
 
-export function registerAttrCompiler(...args) {
+export function registerAttrCompiler(...args: any[]): void {
   let [attr, options, valueCallback] = parseProcessorArgs(args)
 
   let selector = `[${attr}]`
@@ -460,7 +492,7 @@ export function registerAttrCompiler(...args) {
   registerProcessor([selector, options, callback])
 }
 
-function detectSystemMacroPriority(macroSelector) {
+function detectSystemMacroPriority(macroSelector: string | (() => string)): number {
   macroSelector = evalOption(macroSelector)
   for (let substr in SYSTEM_MACRO_PRIORITIES) {
     if (macroSelector.indexOf(substr) >= 0) {
@@ -470,7 +502,7 @@ function detectSystemMacroPriority(macroSelector) {
   fail('Unregistered priority for system macro %o', macroSelector)
 }
 
-function registerProcessor(args, overrides = {}) {
+function registerProcessor(args: any[], overrides: PlainObject = {}): void {
   let processor = buildProcessor(args, overrides)
 
   if (processor.macro) {
@@ -486,11 +518,11 @@ function registerProcessor(args, overrides = {}) {
 
 }
 
-const parseProcessorArgs = function(args) {
+const parseProcessorArgs = function(args: any[]): any[] {
   return parseArgs(args, 'val', 'options', 'callback')
 }
 
-function buildProcessor(args, overrides) {
+function buildProcessor(args: any[], overrides: PlainObject): Compiler & PlainObject {
   let [selector, options, callback] = parseProcessorArgs(args)
 
   options = newOptions(options, {
@@ -503,7 +535,7 @@ function buildProcessor(args, overrides) {
   return Object.assign(callback, options, overrides)
 }
 
-function insertProcessor(queue, newCompiler) {
+function insertProcessor(queue: Compiler[], newCompiler: Compiler & PlainObject): Compiler {
   let existingCompiler
   let index = 0
   while ((existingCompiler = queue[index]) && (existingCompiler.priority >= newCompiler.priority)) {
@@ -574,7 +606,7 @@ for (let element of document.querySelectorAll('div')) {
   One or more destructor functions.
 @stable
 */
-export function registerDestructor(element, value) {
+export function registerDestructor(element: ScriptedElement, value: any): void {
   let fns = scanFunctions(value)
   if (!fns.length) return
 
@@ -593,7 +625,7 @@ export function registerDestructor(element, value) {
   }
 }
 
-function buildDestructorRegistry(element) {
+function buildDestructorRegistry(element: Element): Cleaner {
   let registry = cleaner()
   registry(addClassTemp(element, 'up-can-clean'))
   return registry
@@ -742,7 +774,8 @@ let compiled = await up.hello(textarea) // compiled === textarea
 @stable
 @signature
 */
-export function hello(element, options = {}) {
+export function hello(element: ElementOrSelector, options?: HelloOptions): Promise<Element>
+export function hello(element, options: HelloOptions = {}) {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   element = getSmart(element, options)
 
@@ -766,7 +799,7 @@ and does not remove the element from the DOM.
 @param {up.Layer} options.layer
 @internal
 */
-export function clean(fragment, options = {}) {
+export function clean(fragment: Element, options: PlainObject = {}): void {
   new DestructorPass(fragment, options).run()
 }
 
@@ -884,14 +917,15 @@ data.pins[0].title // result: 'Friedberg'
 @stable
 @signature
 */
-export const readData = mockable(function readData(element) {
+// The element may also be a selector.
+export const readData = mockable(function readData(element: any): any {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   element = getSmart(element)
 
   return element.upData ||= buildData(element)
 })
 
-function buildData(element) {
+function buildData(element: ScriptedElement & HTMLElement): any {
   let parsedJSON = jsonAttr(element, 'up-data') ?? {}
 
   // If the [up-data] JSON isn't an object then we cannot offer live merging
@@ -917,7 +951,7 @@ function buildData(element) {
 @return {NodeList}
 @internal
 */
-export function findAssets(head = document.head) {
+export function findAssets(head: ParentNode = document.head): NodeListOf<Element> {
   return head.querySelectorAll(config.selector('assetSelectors'))
 }
 
@@ -995,7 +1029,7 @@ By marking the `<meta>` tag with `[up-asset]`, it will also emit an `up:assets:c
 @stable
 */
 
-export function assertAssetsOK(newAssets, renderOptions) {
+export function assertAssetsOK(newAssets: Iterable<Element> & { length?: number }, renderOptions: PlainObject): void {
   let { response } = renderOptions
   let oldAssets = findAssets()
 
@@ -1004,11 +1038,11 @@ export function assertAssetsOK(newAssets, renderOptions) {
   }
 }
 
-function assetsIdentity(assets) {
+function assetsIdentity(assets: Iterable<Element> & { length?: number }): string {
   return map(assets, assetIdentity).join()
 }
 
-function assetIdentity(assetElement) {
+function assetIdentity(assetElement: Element): string {
   // Remove the [nonce] attribute which the browser usually masks from the outerHTML of <script> elements.
   // However it isn't masked for inert scripts (e.g. when they fail a CSP check).
   return removeAttrsFromHTML(assetElement.outerHTML, ['nonce'])
@@ -1076,34 +1110,34 @@ If you cannot allow the rendering to proceed with changed assets, listeners may 
 @stable
 */
 
-export function block(root) {
+export function block(root: ParentNode): void {
   for (let script of findScripts(root)) {
     script.type = 'up-blocked-script'
   }
 }
 
-export function findScripts(root, condition = '') {
+export function findScripts(root: ParentNode, condition = ''): List<HTMLScriptElement> {
   let selector = config.selector('scriptSelectors', condition)
-  return subtree(root, selector)
+  return subtree(root, selector) as List<HTMLScriptElement>
 }
 
-export function isScript(value) {
+export function isScript(value: Element): boolean {
   return config.matches(value, 'scriptSelectors')
 }
 
-export function adoptNewFragment(fragment, cspInfo) {
+export function adoptNewFragment(fragment: Element, cspInfo: CSPInfo): void {
   new ScriptGate(cspInfo).adoptNewFragment(fragment)
 }
 
-export function adoptDetachedHeadAsset(script, cspInfo) {
+export function adoptDetachedHeadAsset(script: Element, cspInfo: CSPInfo): void {
   new ScriptGate(cspInfo).adoptDetachedHeadAsset(script)
 }
 
-export function adoptRenderOptionsFromHeader(renderOptions, cspInfo) {
+export function adoptRenderOptionsFromHeader(renderOptions: PlainObject, cspInfo: CSPInfo): void {
   new ScriptGate(cspInfo).adoptRenderOptionsFromHeader(renderOptions)
 }
 
-export function callbackAttr(element, attrName, parseOpts) {
+export function callbackAttr(element: Element, attrName: string, parseOpts?: ParseCallbackOptions): ((...args: any[]) => any) | undefined {
   return parseAttr(element, attrName, (code) => {
     let fn = parseCallback(code, parseOpts)
     // Emulate the behavior of the `onclick` attribute, where `this` refers to the clicked element.
@@ -1111,7 +1145,7 @@ export function callbackAttr(element, attrName, parseOpts) {
   })
 }
 
-export function parseCallback(code, { argNames = ['event'], expandObject = false } = {}) {
+export function parseCallback(code: string, { argNames = ['event'], expandObject = false }: ParseCallbackOptions = {}): (...argValues: any[]) => any {
   // Return an unbound function so callers can bind to an object of their choice.
   return function(...argValues) {
     let callArgNames = argNames
@@ -1128,11 +1162,11 @@ export function parseCallback(code, { argNames = ['event'], expandObject = false
   }
 }
 
-export const cspNonce = mockable(function cspNonce() {
+export const cspNonce = mockable(function cspNonce(): string | undefined {
   return evalOption(config.cspNonce)
 })
 
-export function warnOfUnsafeCSP(cspInfo) {
+export function warnOfUnsafeCSP(cspInfo: CSPInfo): void {
   new ScriptGate(cspInfo).warnOfUnsafeCSP()
 }
 
@@ -1140,12 +1174,12 @@ export function warnOfUnsafeCSP(cspInfo) {
 Resets the list of registered compiler directives to the
 moment when the framework was booted.
 */
-function reset() {
+function reset(): void {
   registeredCompilers = filterList(registeredCompilers, 'isDefault')
   registeredMacros = filterList(registeredMacros, 'isDefault')
 }
 
-export function install() {
+export function install(): void {
   on('up:framework:reset', reset)
 }
 
