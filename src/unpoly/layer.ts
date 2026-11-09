@@ -365,7 +365,8 @@ The last element is the [frontmost layer](/api/up.layer.front).
 @param {List<up.Layer>} stack
 @stable
 */
-export let layerStack: LayerStack = null
+// Set by install().
+export let layerStack: LayerStack = null!
 
 let handlers: unknown[] = []
 
@@ -472,7 +473,8 @@ export function buildLayer(options: PlainObject, beforeNew?: (options: PlainObje
     options = beforeNew(options)
   }
 
-  return new Class(options)
+  // An unknown { mode } has no class, and throws a TypeError here.
+  return new Class!(options)
 }
 
 function reset(): void {

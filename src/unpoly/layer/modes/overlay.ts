@@ -223,7 +223,8 @@ export abstract class Overlay extends Layer {
   }
 
   setContent(content: Node): void {
-    this.contentElement.append(content)
+    // Set by createElements().
+    this.contentElement!.append(content)
     this.onContentSet()
   }
 
@@ -245,12 +246,13 @@ export abstract class Overlay extends Layer {
     return affix(parentElement, this.selector(part), options)
   }
 
-  static selector(part?: string): string {
+  static selector(part?: string | null): string {
     return compact(['up', this.mode, part]).join('-')
   }
 
   _suggestVisualNesting(): number {
-    const { parent } = this
+    // An overlay always has a parent.
+    const { parent } = this as { parent: Layer }
     if (this.mode === parent.mode) {
       return 1 + (parent as Overlay)._suggestVisualNesting()
     } else {
@@ -282,7 +284,7 @@ export abstract class Overlay extends Layer {
         // This prevents issues with other overlay libs appending elements to document.body,
         // but overlaying this overlay with a huge z-index. Clicking such a foreign overlay
         // would close this layer, as Unpoly considers it to be on the root layer (our parent).2
-        this._unbindParentClicked = this.parent.on('up:click', (event, element) => {
+        this._unbindParentClicked = this.parent!.on('up:click', (event, element) => {
           if (!isWithinForeignOverlay(element)) {
             // When our origin is clicked again, halt the click event
             // We achieve this by halting the click event.
@@ -322,7 +324,8 @@ export abstract class Overlay extends Layer {
     // If an input with the same [id] is on an ancestor layer the browser would
     // focus that (even though label and input are in different forms).
     // The browser always focuses the first input matching the ID from [for].
-    let id = label.getAttribute('for')
+    // The listener only matches label[for].
+    let id = label.getAttribute('for')!
     let fieldSelector = formFieldSelector(idSelector(id))
 
     let fieldsAnywhere = getAll(fieldSelector, { layer: 'any' })
@@ -344,7 +347,7 @@ export abstract class Overlay extends Layer {
     }
   }
 
-  _onOutsideClicked(event: Event & { originalEvent?: UIEvent, target: Element }, halt: boolean): void {
+  _onOutsideClicked(event: Event & { originalEvent?: UIEvent, target: Element }, halt: boolean | undefined): void {
     printUserEvent(event)
     // We still halt a click we ignore below, or a popup's origin would be followed again.
     if (halt) eventHalt(event)
@@ -353,7 +356,8 @@ export abstract class Overlay extends Layer {
     // lands outside the new overlay. We don't want to dismiss the overlay the user just opened.
     // The up:click event has no { detail }, so we read the click count from the native event.
     // Keyboard activations and element.click() have a { detail } of 0.
-    if (event.originalEvent?.detail > 1) return
+    // Without an original event we compare undefined, which is never > 1.
+    if ((event.originalEvent?.detail as number) > 1) return
 
     muteUncriticalSync(() =>
       this.dismiss(':outside', { origin: event.target })
@@ -448,7 +452,8 @@ export abstract class Overlay extends Layer {
   }
 
   _tryCloseForElements(selector: string | undefined, closeFn: CloseFn, newElements: Element[], response: UpResponse | undefined): void {
-    let match = findResult(newElements, (element) => subtreeFirst(element, selector))
+    // Without a selector we look for "undefined", which matches nothing.
+    let match = findResult(newElements, (element) => subtreeFirst(element, selector!))
     if (match) {
       const closeValue = readData(match)
       muteUncriticalSync(() =>
@@ -519,7 +524,7 @@ export abstract class Overlay extends Layer {
   onElementsRemoved(): void {
   }
 
-  _animationFn(boxAnimation: AnimationValue, backdropAnimation: AnimationValue): AnimationFn | false {
+  _animationFn(boxAnimation: AnimationValue | undefined, backdropAnimation: AnimationValue): AnimationFn | false {
     // If we don't animate the box, we don't animate the backdrop either.
     if (isNone(boxAnimation)) return false
 
@@ -570,7 +575,8 @@ export abstract class Overlay extends Layer {
   }
 
   isAlive(): boolean {
-    return ['opening', 'opened'].includes(this.state)
+    // includes() takes an undefined state and returns false.
+    return ['opening', 'opened'].includes(this.state!)
   }
 
   // Documented in up.Layer

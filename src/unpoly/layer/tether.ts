@@ -78,11 +78,12 @@ export class Tether {
   sync(): void {
     const elementBox = this._element.getBoundingClientRect()
 
+    // A computed margin is never blank.
     const elementMargin = {
-      top:    computedStyleNumber(this._element, 'margin-top'),
-      right:  computedStyleNumber(this._element, 'margin-right'),
-      bottom: computedStyleNumber(this._element, 'margin-bottom'),
-      left:   computedStyleNumber(this._element, 'margin-left')
+      top:    computedStyleNumber(this._element, 'margin-top')!,
+      right:  computedStyleNumber(this._element, 'margin-right')!,
+      bottom: computedStyleNumber(this._element, 'margin-bottom')!,
+      left:   computedStyleNumber(this._element, 'margin-left')!
     }
 
     const anchorBox = this._anchor.getBoundingClientRect()
@@ -173,8 +174,10 @@ export class Tether {
       }
     }
 
+    // TODO: A valid position with an invalid align (or the other way around) sets only one
+    // coordinate. We then move to NaN instead of failing below. This should be &&.
     if (isDefined(left) || isDefined(top)) {
-      this._moveTo(left, top)
+      this._moveTo(left!, top!)
     } else {
       fail('Invalid tether constraints: %o', this._describeConstraints())
     }

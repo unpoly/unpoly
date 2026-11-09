@@ -15,8 +15,9 @@ export class OverlayWithTether extends Overlay {
     // ask for its parent element.
     this._tether = new Tether({
       anchor: this.origin as HTMLElement,
-      align: this.align,
-      position: this.position
+      // The popup's mode config defaults both.
+      align: this.align!,
+      position: this.position!
     })
     this.createElement(this._tether.parent)
     this.createContentElement(this.element)

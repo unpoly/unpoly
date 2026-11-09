@@ -19,8 +19,9 @@ export class OverlayWithViewport extends Overlay {
     this.createElement((this.constructor as typeof OverlayWithViewport).getParentElement())
     if (this.backdrop) { this.createBackdropElement(this.element) }
     this.createViewportElement(this.element)
-    this.createBoxElement(this.viewportElement)
-    this.createContentElement(this.boxElement)
+    // The calls above set each parent element.
+    this.createBoxElement(this.viewportElement!)
+    this.createContentElement(this.boxElement!)
   }
 
   onElementsRemoved(): void {

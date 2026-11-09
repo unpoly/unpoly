@@ -208,9 +208,10 @@ export abstract class Layer {
 
     // A layer has no { element } option. The root layer has an element getter, and an overlay
     // creates its element when it opens.
-    this.stack = options.stack
-    this.history = options.history
-    this.mode = options.mode
+    // buildLayer() always passes these. The mode configs default { history }.
+    this.stack = options.stack!
+    this.history = options.history!
+    this.mode = options.mode!
     this.context = context
     this.lastScrollTops = lastScrollTops
     this.lastFocusCapsules = lastFocusCapsules
@@ -900,7 +901,7 @@ export abstract class Layer {
     This layer's title.
   @experimental
   */
-  get title(): string {
+  get title(): string | undefined {
     return this._getHistory('title', this._savedTitle, () => document.title)
   }
 
@@ -913,7 +914,7 @@ export abstract class Layer {
     }
   }
 
-  get metaTags(): List<Element> {
+  get metaTags(): List<Element> | undefined {
     return this._getHistory('metaTags', this._savedMetaTags, findMetaTags)
   }
 
@@ -954,7 +955,7 @@ export abstract class Layer {
     The layer's current location.
   @experimental
   */
-  get location(): string {
+  get location(): string | undefined {
     // (1) When up.history.config.enabled excludes 'location', this returns the location of the
     //     rendered content, not the unchanged browser URL. Hence [up-nav] follows the content.
     // (2) When the location is live, Unpoly-unaware code may use the pushState API directly.
@@ -993,11 +994,11 @@ export abstract class Layer {
     }
   }
 
-  selector(part?: string): string {
+  selector(part?: string | null): string {
     return (this.constructor as typeof Layer).selector(part)
   }
 
-  static selector(_part?: string): string {
+  static selector(_part?: string | null): string {
     throw new NotImplemented()
   }
 
