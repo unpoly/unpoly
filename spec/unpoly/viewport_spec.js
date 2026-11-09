@@ -767,6 +767,7 @@ describe('up.viewport', function() {
 
           const scrollStarted = new Promise((resolve) => document.addEventListener('scroll', resolve, { once: true }))
           const scrollEnded = new Promise((resolve) => document.addEventListener('scrollend', resolve, { once: true }))
+          const finalScrollTop = 20000 - document.scrollingElement.clientHeight + 100
 
           up.reveal(destination, { behavior: 'smooth' })
 
@@ -776,10 +777,11 @@ describe('up.viewport', function() {
           // A smooth scroll starts on a later frame, which can take a while on a busy machine.
           await Promise.race([scrollStarted, wait(3000)])
           expect(document.scrollingElement.scrollTop).toBeGreaterThan(0)
+          // The first frame of an animation is still on its way. An instant scroll on a later frame would be there.
+          expect(document.scrollingElement.scrollTop).toBeLessThan(finalScrollTop)
 
           // Browsers without a scrollend event wait for the timeout.
           await Promise.race([scrollEnded, wait(3000)])
-          const finalScrollTop = 20000 - document.scrollingElement.clientHeight + 100
           expect(document.scrollingElement.scrollTop).toBe(finalScrollTop)
         })
       })
@@ -811,6 +813,8 @@ describe('up.viewport', function() {
           await Promise.race([scrollStarted, wait(3000)])
 
           expect(viewport.scrollTop).toBeGreaterThan(0)
+          // The first frame of an animation is still on its way to #target. An instant scroll on a later frame would be there.
+          expect(viewport.scrollTop).toBeLessThan(target.offsetTop)
         })
 
         it('does not use smooth scrolling if the viewport has no `{ scroll-behavior }` style', async function() {
