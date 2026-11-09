@@ -7,14 +7,34 @@ import { layerStack } from '../layer.js'
 import { printToStandard, printToWarn } from '../log.js'
 import { config, pollOptions } from '../radio.js'
 import { registerDestructor } from '../script.js'
+import type { PlainObject } from '../util.js'
+import type { Layer } from '../layer/base.js'
+import type { RenderResult } from '../fragment/render/render_result.js'
+
+/**
+An element with an `[up-poll]` attribute. It remembers its `up.FragmentPolling`.
+@internal
+*/
+export type PollingElement = Element & { upPolling?: FragmentPolling }
 
 export class FragmentPolling {
 
-  static forFragment(fragment) {
+  declare _options: PlainObject
+  declare _fragment: Element
+  declare _state: 'stopped' | 'started'
+  declare _forceIntent: 'stop' | 'start' | null
+  declare _reloadJID: number
+  declare _loading: boolean
+  declare _eventsBound: boolean | undefined
+  declare _reloadTimer: ReturnType<typeof setTimeout> | null | undefined
+  declare _lastAttempt: Date
+  declare layer: Layer | undefined
+
+  static forFragment(fragment: PollingElement): FragmentPolling {
     return fragment.upPolling ||= new this(fragment)
   }
 
-  constructor(fragment) {
+  constructor(fragment: Element) {
     this._options = pollOptions(fragment)
 
     this._fragment = fragment
@@ -30,29 +50,29 @@ export class FragmentPolling {
     this._satisfyInterval()
   }
 
-  onPollAttributeObserved() {
+  onPollAttributeObserved(): void {
     this._start()
   }
 
-  _onFragmentAborted({ newLayer, jid }) {
+  _onFragmentAborted({ newLayer, jid }: Event & { newLayer?: boolean, jid?: number }): void {
     const isOurAbort = (jid === this._reloadJID)
     if (isOurAbort || newLayer) return
     this._stop()
   }
 
-  _onFragmentKept() {
+  _onFragmentKept(): void {
     if (this._forceIntent !== 'stop') {
       this._start()
     }
   }
 
-  _onFragmentDestroyed() {
+  _onFragmentDestroyed(): void {
     // The element may come back (when it is swapped) or or may not come back (when it is destroyed).
     // If it does come back, `onPollAttributeObserved()` will restart the polling.
     this._stop()
   }
 
-  _start(options) {
+  _start(options?: PlainObject): void {
     Object.assign(this._options, options)
 
     if (this._state === 'stopped') {
@@ -67,25 +87,25 @@ export class FragmentPolling {
     }
   }
 
-  _stop() {
+  _stop(): void {
     if (this._state === 'started') {
       this._clearReloadTimer()  // don't keep inactive tabs awake
       this._state = 'stopped'
     }
   }
 
-  forceStart(options) {
+  forceStart(options?: PlainObject): void {
     Object.assign(this._options, options)
     this._forceIntent = 'start'
     this._start()
   }
 
-  forceStop() {
+  forceStop(): void {
     this._forceIntent = 'stop'
     this._stop()
   }
 
-  _bindEvents() {
+  _bindEvents(): void {
     if (this._eventsBound) return
     this._eventsBound = true
 
@@ -94,7 +114,7 @@ export class FragmentPolling {
     onKept(this._fragment, this._onFragmentKept.bind(this))
   }
 
-  _onVisibilityChange() {
+  _onVisibilityChange(): void {
     if (this._isFragmentVisible()) {
       this._scheduleRemainingTime() // will check started
     } else {
@@ -102,17 +122,17 @@ export class FragmentPolling {
     }
   }
 
-  _isFragmentVisible() {
+  _isFragmentVisible(): boolean {
     return (!document.hidden) &&
       (this._options.ifLayer === 'any' || this._isOnFrontLayer())
   }
 
-  _clearReloadTimer() {
+  _clearReloadTimer(): void {
     clearTimeout(this._reloadTimer)
     this._reloadTimer = null
   }
 
-  _scheduleRemainingTime() {
+  _scheduleRemainingTime(): void {
     if (this._reloadTimer || this._loading || this._state === 'stopped') return
 
     this._clearReloadTimer()
@@ -122,12 +142,12 @@ export class FragmentPolling {
     )
   }
 
-  _onTimerReached() {
+  _onTimerReached(): void {
     this._reloadTimer = null
     this._tryReload()
   }
 
-  _tryReload() {
+  _tryReload(): void {
     // The setTimeout(doReload) callback might already be scheduled
     // before the polling stopped.
     if (this._state === 'stopped') {
@@ -150,24 +170,25 @@ export class FragmentPolling {
     this._reloadNow()
   }
 
-  _getFullDelay() {
+  _getFullDelay(): number {
     return this._options.interval ?? numberAttr(this._fragment, 'up-interval') ?? config.pollInterval
   }
 
-  _getRemainingDelay() {
+  _getRemainingDelay(): number {
     return Math.max(this._getFullDelay() - this._getFragmentAge(), 0)
   }
 
-  _getFragmentAge() {
-    return new Date() - this._lastAttempt
+  _getFragmentAge(): number {
+    // Subtracting dates gives milliseconds. TypeScript only allows it with getTime(), which would add bytes.
+    return (new Date() as any) - (this._lastAttempt as any)
   }
 
-  _isOnFrontLayer() {
+  _isOnFrontLayer(): boolean {
     this.layer ||= layerStack.get(this._fragment)
     return this.layer?.isFront?.()
   }
 
-  _reloadNow() {
+  _reloadNow(): void {
     // If we were called manually (not by a timeout), clear a scheduled timeout to prevent concurrency.
     // The timeout will be re-scheduled by this._onReloadSuccess() or this._onReloadFailure().
     this._clearReloadTimer()
@@ -184,7 +205,7 @@ export class FragmentPolling {
     )
   }
 
-  _onReloadSuccess({ fragment }) {
+  _onReloadSuccess({ fragment }: RenderResult): void {
     this._loading = false
     this._satisfyInterval()
 
@@ -201,14 +222,14 @@ export class FragmentPolling {
     }
   }
 
-  _onFragmentSwapped(newFragment) {
+  _onFragmentSwapped(newFragment: Element): void {
     if (this._forceIntent === 'start' && matches(this._fragment, newFragment)) {
       // Force start the new up.Polling instance for the new fragment.
-      this.constructor.forFragment(newFragment).forceStart(this._options)
+      (this.constructor as typeof FragmentPolling).forFragment(newFragment).forceStart(this._options)
     }
   }
 
-  _onReloadFailure(reason) {
+  _onReloadFailure(reason: any): void {
     // An error response rejects with an up.RenderResult (rendered into { failTarget: ':none' }),
     // which is not critical. Only a fatal render error will be thrown below.
     this._loading = false
@@ -217,7 +238,7 @@ export class FragmentPolling {
     throwCritical(reason)
   }
 
-  _satisfyInterval() {
+  _satisfyInterval(): void {
     // This will delay the next timer scheduling for a full interval.
     this._lastAttempt = new Date()
   }
