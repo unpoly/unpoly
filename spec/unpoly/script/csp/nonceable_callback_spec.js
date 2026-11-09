@@ -16,6 +16,18 @@ describe('up.NonceableCallback', function() {
       expect(callback.script).toEqual('a + b')
     })
 
+    it('parses a string of JavaScript that spans multiple lines', function() {
+      let callback = up.internal.NonceableCallback.fromCallbackString('\n  a()\n  b()\n')
+      expect(callback.nonce).toBeMissing()
+      expect(callback.script).toEqual('\n  a()\n  b()\n')
+    })
+
+    it('parses a string of JavaScript that spans multiple lines with a prefixed nonce', function() {
+      let callback = up.internal.NonceableCallback.fromCallbackString('nonce-secret a()\nb()')
+      expect(callback.nonce).toEqual('secret')
+      expect(callback.script).toEqual('a()\nb()')
+    })
+
   })
 
   describe('#toCallbackString()', function() {

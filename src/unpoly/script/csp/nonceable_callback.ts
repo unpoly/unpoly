@@ -28,8 +28,8 @@ export class NonceableCallback {
   }
 
   static fromCallbackString(string: string): NonceableCallback {
-    // TODO: Without the s flag, a callback with a line break doesn't match, and we throw a TypeError.
-    let match = string.match(/^(nonce-(\S+)\s)?(.*)$/)!
+    // With the s flag, the pattern matches any string, including one with line breaks.
+    let match = string.match(/^(nonce-(\S+)\s)?(.*)$/s)!
     return new this(match[3], match[2])
   }
 
