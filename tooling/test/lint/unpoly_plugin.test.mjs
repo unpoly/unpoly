@@ -41,3 +41,18 @@ test('no-octal reports a legacy octal literal, also in a file that Oxlint parses
   })
   assert.deepEqual(lines, { 'script.js': [1, 2] })
 })
+
+test('no-octal reports a legacy octal escape in a string, also in a file that Oxlint parses as a script', (t) => {
+  let lines = lint(t, 'no-octal', {
+    'script.js': [
+      String.raw`let a = '\07'`,
+      String.raw`let b = "x\1"`,
+      String.raw`let c = '\08'`,
+      String.raw`let d = '\\\7'`,
+      // The null character, an escaped backslash, and other escapes are fine.
+      String.raw`let e = '\0' + '\\07' + '\x07\u0007\n' + '07'`,
+      '',
+    ].join('\n'),
+  })
+  assert.deepEqual(lines, { 'script.js': [1, 2, 3, 4] })
+})

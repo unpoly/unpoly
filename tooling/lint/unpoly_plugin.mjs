@@ -20,13 +20,14 @@ const declareClassFields = {
   },
 }
 
-// ESLint parsed every file as a module, where a legacy octal literal (`010`) is a syntax error.
-// Oxlint parses a .js file without import or export (like most specs) as a script, which allows
-// it, and has no no-octal rule. Our build bundles these files as modules, though.
+// ESLint parsed every file as a module, where a legacy octal literal (`010`) or escape (`'\07'`)
+// is a syntax error. Oxlint parses a .js file without import or export (like most specs) as a
+// script, which allows both, and has no rule for them. Our build bundles these files as modules,
+// though.
 const noOctal = {
   meta: {
     type: 'problem',
-    docs: { description: 'Disallow legacy octal literals, like in a module' },
+    docs: { description: 'Disallow legacy octal literals and escapes, like in a module' },
     schema: [],
   },
   create(context) {
@@ -34,11 +35,17 @@ const noOctal = {
       Literal(node) {
         if (typeof node.value === 'number' && /^0[0-9]/.test(node.raw)) {
           context.report({ node, message: 'Octal literals are not allowed in modules. Use the syntax `0o10`.' })
+        } else if (typeof node.value === 'string' && LEGACY_OCTAL_ESCAPE.test(node.raw)) {
+          context.report({ node, message: 'Octal escape sequences are not allowed in modules. Use `\\x07` or `\\u0007`.' })
         }
       },
     }
   },
 }
+
+// A backslash that is not itself escaped, followed by 1-7, or by 0 and another digit. `\0`
+// alone is the null character, and `\8` and `\9` are no-nonoctal-decimal-escape's.
+const LEGACY_OCTAL_ESCAPE = /(?<!\\)(?:\\\\)*\\(?:[1-7]|0[0-9])/
 
 export default {
   meta: { name: 'unpoly' },
