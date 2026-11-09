@@ -5,10 +5,39 @@ import { getAll } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { Rect } from '../util/rect.js'
 import { closest, config, isRoot, rootHeight, rootWidth } from '../viewport.js'
+import type { Layer } from '../layer/base.js'
+import type { ValueOrFunction } from '../util.js'
+
+/**
+Options for `up.reveal()`. Each `reveal*` option is an alias used by render options.
+@internal
+*/
+export interface RevealOptions {
+  viewport?: Element | string
+  behavior?: ScrollBehavior
+  snap?: number
+  revealSnap?: number
+  padding?: number
+  revealPadding?: number
+  top?: boolean
+  revealTop?: boolean
+  max?: ValueOrFunction<number>
+  revealMax?: ValueOrFunction<number>
+}
 
 export class RevealMotion {
+  declare _element: HTMLElement
+  declare _viewport: HTMLElement
+  declare _obstructionsLayer: Layer
+  declare _behavior: ScrollBehavior
+  declare _snap: number
+  declare _padding: number
+  declare _top: boolean
+  declare _max: ValueOrFunction<number>
+  declare _topObstructionSelector: string
+  declare _bottomObstructionSelector: string
 
-  constructor(element, options = {}) {
+  constructor(element: HTMLElement, options: RevealOptions = {}) {
     this._element = element
     this._viewport = getOne(options.viewport) || closest(this._element)
     this._obstructionsLayer = layerStack.get(this._viewport)
@@ -24,7 +53,7 @@ export class RevealMotion {
     this._bottomObstructionSelector = viewportConfig.selector('fixedBottomSelectors')
   }
 
-  start() {
+  start(): void {
     const viewportRect = this._getViewportRect(this._viewport)
     const elementRect = Rect.fromElement(this._element)
     if (this._max) {
@@ -72,7 +101,7 @@ export class RevealMotion {
     }
   }
 
-  _getViewportRect() {
+  _getViewportRect(): Rect {
     if (isRoot(this._viewport)) {
       // Other than an element with overflow-y, the document viewport
       // stretches to the full height of its contents. So we create a viewport
@@ -88,7 +117,7 @@ export class RevealMotion {
     }
   }
 
-  _computeObstructionRects(selector) {
+  _computeObstructionRects(selector: string): Rect[] {
     let elements = getAll(selector, { layer: this._obstructionsLayer })
     elements = filterList(elements, isVisible)
     return map(elements, (element) => {
@@ -102,7 +131,7 @@ export class RevealMotion {
     })
   }
 
-  _substractObstructions(viewportRect) {
+  _substractObstructions(viewportRect: Rect): void {
     for (let obstructionRect of this._computeObstructionRects(this._topObstructionSelector)) {
       let diff = obstructionRect.bottom - viewportRect.top
       if (diff > 0) {
