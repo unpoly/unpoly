@@ -5,8 +5,46 @@ import {
 } from '../element.js'
 import { failKey as fragmentFailKey } from '../fragment.js'
 import { RenderOptions } from '../fragment/render/render_options.js'
+import type { PlainObject } from '../util.js'
+
+/**
+Reads an attribute value from an element, like `up.element.booleanAttr()`.
+@internal
+*/
+export type AttrReader = (element: Element, attribute: string) => any
+
+/**
+Options for an `up.OptionsParser`.
+@internal
+*/
+export interface OptionsParserOptions {
+  // Also parse an [up-fail-…] attribute for each option that has a fail variant.
+  fail?: boolean
+  // Look for attributes on the element's ancestors, too.
+  closest?: boolean
+  attrPrefix?: string
+  // Defaults for options without an attribute, or `false` to set no defaults.
+  defaults?: PlainObject | false
+}
+
+/**
+Options for parsing a single option with an `up.OptionsParser`.
+@internal
+*/
+export interface ParseKeyOptions {
+  // The attribute(s) to read. Defaults to the kebab-cased key with the parser's prefix.
+  attr?: string | string[]
+  default?: any
+  normalize?: (value: any) => any
+}
 
 export class OptionsParser {
+  declare _options: PlainObject
+  declare _element: Element
+  declare _fail: boolean | undefined
+  declare _closest: boolean | undefined
+  declare _attrPrefix: string
+  declare _defaults: PlainObject | false
 
   /*-
   @constructor up.OptionsParser
@@ -25,7 +63,7 @@ export class OptionsParser {
     nor can be parsed from `element`.
   @internal
   */
-  constructor(element, options, parserOptions = {}) {
+  constructor(element: Element, options: PlainObject, parserOptions: OptionsParserOptions = {}) {
     this._options = options
     this._element = element
     this._fail = parserOptions.fail
@@ -34,31 +72,31 @@ export class OptionsParser {
     this._defaults = parserOptions.defaults ?? {}
   }
 
-  string(key, keyOptions) {
+  string(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(stringAttr, key, keyOptions)
   }
 
-  boolean(key, keyOptions) {
+  boolean(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(booleanAttr, key, keyOptions)
   }
 
-  number(key, keyOptions) {
+  number(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(numberAttr, key, keyOptions)
   }
 
-  booleanOrString(key, keyOptions) {
+  booleanOrString(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(booleanOrStringAttr, key, keyOptions)
   }
 
-  booleanOrNumber(key, keyOptions) {
+  booleanOrNumber(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(booleanOrNumberAttr, key, keyOptions)
   }
 
-  booleanOrNumberOrString(key, keyOptions) {
+  booleanOrNumberOrString(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(booleanOrNumberOrStringAttr, key, keyOptions)
   }
 
-  json(key, keyOptions) {
+  json(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(jsonAttr, key, keyOptions)
   }
 
@@ -68,12 +106,12 @@ export class OptionsParser {
   //   this.parse(attrReader, key, keyOptions)
   // }
 
-  renderCallback(key, keyOptions = {}) {
+  renderCallback(key: string, keyOptions: ParseKeyOptions = {}): void {
     let attrReader = (link, attr) => RenderOptions.callbackAttr(link, attr, key)
     this.parse(attrReader, key, keyOptions)
   }
 
-  parse(attrReader, key, keyOptions = {}) {
+  parse(attrReader: AttrReader, key: string, keyOptions: ParseKeyOptions = {}): void {
     const attrNames = wrapList(keyOptions.attr ?? this._attrNameForKey(key))
 
     // Below we will only set @options[key] = value if value is defined.
@@ -103,13 +141,13 @@ export class OptionsParser {
     }
   }
 
-  include(optionsFn, parserOptions) {
+  include(optionsFn: (element: Element, options: PlainObject, parserOptions: OptionsParserOptions) => PlainObject, parserOptions?: OptionsParserOptions): void {
     // let fnResult = optionsFn(this._element, this._options, this._parserOptions)
     let fnResult = optionsFn(this._element, this._options, { defaults: this._defaults, ...parserOptions })
     Object.assign(this._options, fnResult)
   }
 
-  _parseFromAttr(attrValueFn, element, attrName) {
+  _parseFromAttr(attrValueFn: AttrReader, element: Element, attrName: string): any {
     if (this._closest) {
       return closestAttr(element, attrName, attrValueFn)
     } else {
@@ -117,18 +155,18 @@ export class OptionsParser {
     }
   }
 
-  _deriveFailAttrName(attr) {
+  _deriveFailAttrName(attr: string): string | undefined {
     return this._deriveFailAttrNameForPrefix(attr, this._attrPrefix + 'on-') ||
       this._deriveFailAttrNameForPrefix(attr, this._attrPrefix)
   }
 
-  _deriveFailAttrNameForPrefix(attr, prefix) {
+  _deriveFailAttrNameForPrefix(attr: string, prefix: string): string | undefined {
     if (attr.startsWith(prefix)) {
       return `${prefix}fail-${attr.substring(prefix.length)}`
     }
   }
 
-  _attrNameForKey(option) {
+  _attrNameForKey(option: string): string {
     return `${this._attrPrefix}${camelToKebabCase(option)}`
   }
 }
