@@ -487,8 +487,7 @@ in the returned list.
 @return {List<Element>}
 @internal
 */
-export function getViewportSubtree(element: ElementOrSelector, options?: PlainObject): List<HTMLElement>
-export function getViewportSubtree(element, options = {}) {
+export function getViewportSubtree(element: ElementOrSelector, options: PlainObject = {}): List<HTMLElement> {
   element = getSmart(element, options)
   return subtree(element, allSelector())
 }
@@ -506,8 +505,7 @@ In that case we restore / reset the scroll tops of all viewports around the frag
 @return {List<Element>}
 @internal
 */
-export function getViewportAround(element: ElementOrSelector, options?: PlainObject): HTMLElement[]
-export function getViewportAround(element, options = {}) {
+export function getViewportAround(element: ElementOrSelector, options: PlainObject = {}): HTMLElement[] {
   element = getSmart(element, options)
   return around(element, allSelector())
 }
@@ -617,7 +615,7 @@ value is the viewport's vertical scroll position:
 @internal
 */
 function getScrollTopsForViewportElements(viewports: Iterable<Element>): Record<string, number> {
-  let tops = {}
+  let tops: Record<string, number> = {}
   for (let viewport of viewports) {
     let key = scrollTopKey(viewport)
     if (key) {
@@ -815,7 +813,7 @@ export function absolutize(element: HTMLElement, options: { afterMeasure?: () =>
   insertBefore(element, bounds)
   bounds.appendChild(element)
 
-  const moveBounds = function(diffX, diffY) {
+  const moveBounds = function(diffX: number, diffY: number) {
     boundsRect.left += diffX
     boundsRect.top += diffY
     return setInlineStyle(bounds, boundsRect, 'px')
