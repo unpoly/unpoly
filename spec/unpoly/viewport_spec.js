@@ -794,13 +794,17 @@ describe('up.viewport', function() {
           const target = e.affix(viewport, '#target', { style: { 'height': '10px', 'background-color': 'red' } })
           const after = e.affix(viewport, '#after', { style: { 'height': '20000px', 'background-color': 'yellow' } })
 
-          // spyOn(viewport, 'scrollTo').and.callThrough()
+          const scrollStarted = new Promise((resolve) => viewport.addEventListener('scroll', resolve, { once: true }))
 
           up.reveal(target, { behavior: 'auto', top: true })
-          await wait(80)
 
-          expect(viewport.scrollTop).toBeGreaterThan(10)
-          expect(viewport.scrollTop).toBeLessThan(19000)
+          // An instant scroll would have changed the position synchronously.
+          expect(viewport.scrollTop).toBe(0)
+
+          // A smooth scroll starts on a later frame, which can take a while on a busy machine.
+          await Promise.race([scrollStarted, wait(3000)])
+
+          expect(viewport.scrollTop).toBeGreaterThan(0)
         })
 
         it('does not use smooth scrolling if the viewport has no `{ scroll-behavior }` style', async function() {
