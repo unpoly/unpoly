@@ -1,5 +1,7 @@
 import { identity, pickBy } from '../util.js'
 import { fail } from '../error.js'
+// Unlike other classes in util/, Registry may import a feature namespace: only up.motion and
+// up.status use it, and both are evaluated after up.framework.
 import { isEvaling } from '../framework.js'
 
 export class Registry<T = any> {
