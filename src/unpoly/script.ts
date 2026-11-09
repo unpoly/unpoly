@@ -145,7 +145,7 @@ export interface ScriptConfig {
   noScriptSelectors: string[]
   evalCallbackPolicy: PolicyString
   scriptElementPolicy: PolicyString
-  cspNonce: string | (() => string)
+  cspNonce: string | (() => string | undefined)
   cspWarnings: boolean
   /**
   Callback attributes like `[up-on-loaded]`, which may carry a CSP nonce.
@@ -876,7 +876,7 @@ let compiled = await up.hello(textarea) // compiled === textarea
 */
 export function hello(element: ElementOrSelector, options: HelloOptions = {}): Promise<Element> {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-  element = getSmart(element, options)
+  element = getSmart(element, options)!
 
   // We default to running all registered processor fns, but callers
   // can opt to only run given processor arguments.
@@ -1224,15 +1224,15 @@ export function isScript(value: Element): boolean {
   return config.matches(value, 'scriptSelectors')
 }
 
-export function adoptNewFragment(fragment: Element, cspInfo: CSPInfo): void {
+export function adoptNewFragment(fragment: Element, cspInfo: CSPInfo | undefined): void {
   new ScriptGate(cspInfo).adoptNewFragment(fragment)
 }
 
-export function adoptDetachedHeadAsset(script: Element, cspInfo: CSPInfo): void {
+export function adoptDetachedHeadAsset(script: Element, cspInfo: CSPInfo | undefined): void {
   new ScriptGate(cspInfo).adoptDetachedHeadAsset(script)
 }
 
-export function adoptRenderOptionsFromHeader(renderOptions: PlainObject, cspInfo: CSPInfo): void {
+export function adoptRenderOptionsFromHeader(renderOptions: PlainObject, cspInfo: CSPInfo | undefined): void {
   new ScriptGate(cspInfo).adoptRenderOptionsFromHeader(renderOptions)
 }
 
@@ -1265,7 +1265,7 @@ export const cspNonce = mockable(function cspNonce(): string | undefined {
   return evalOption(config.cspNonce)
 })
 
-export function warnOfUnsafeCSP(cspInfo: CSPInfo): void {
+export function warnOfUnsafeCSP(cspInfo: CSPInfo | undefined): void {
   new ScriptGate(cspInfo).warnOfUnsafeCSP()
 }
 

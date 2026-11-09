@@ -156,7 +156,8 @@ class Policy {
   }
 
   isValidNonce(nonce: string | undefined): boolean {
-    return this._validNonces.has(nonce)
+    // has(undefined) is false.
+    return this._validNonces.has(nonce!)
   }
 
   tryRewriteNonce(allowedItem: PolicyItem, nonce = allowedItem.readNonce()): void {
@@ -363,8 +364,9 @@ class AttributeItem extends StringCallbackItem {
     return ['Blocked callback attribute: %s', attrSelector(this._attribute, this.readCallbackString())]
   }
 
+  // We only build an item for an element with the attribute.
   readCallbackString(): string {
-    return this._element.getAttribute(this._attribute)
+    return this._element.getAttribute(this._attribute)!
   }
 
   writeCallbackString(newString: string): void {
