@@ -12,7 +12,9 @@ up.script.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'callbackPolicy', 'evalCallbackPolicy', { warning: 'There is no setting up.script.config.callbackPolicy. Use up.script.config.evalCallbackPolicy instead.' })
 })
 
-up.migrate.postCompile = function(elements, compiler) {
+// Core calls this hook (HelloFragment in script/hello_fragment.ts).
+// The compiler is any because its legacy { keep } option no longer exists in core's types.
+up.migrate.postCompile = function(elements: Element[], compiler: any) {
   // up.compiler() has a legacy { keep } option that will automatically
   // set [up-keep] on the elements it compiles
   let keepValue
@@ -25,8 +27,8 @@ up.migrate.postCompile = function(elements, compiler) {
   }
 }
 
-up.migrate.targetMacro = function(queryAttr, fixedResultAttrs, replacement) {
-  up.macro(`[${queryAttr}]`, function(link) {
+up.migrate.targetMacro = function(queryAttr: string, fixedResultAttrs: Record<string, string>, replacement: string) {
+  up.macro(`[${queryAttr}]`, function(link: Element) {
     up.migrate.warn('Attribute [%s] has been deprecated. Use %s instead (found in %o).', queryAttr, replacement, link)
     let optionalTarget
     const resultAttrs = u.copy(fixedResultAttrs)
@@ -76,7 +78,7 @@ up.$compiler = function(...definitionArgs) {
 
   let $fn = definitionArgs.pop()
 
-  return up.compiler(...definitionArgs, function(element, ...fnArgs) {
+  return up.compiler(...definitionArgs, function(element: Element, ...fnArgs) {
     let $element = jQuery(element)
     return $fn($element, ...fnArgs)
   })
@@ -118,13 +120,14 @@ up.$macro = function(...definitionArgs) {
 
   let $fn = definitionArgs.pop()
 
-  return up.macro(...definitionArgs, function(element, ...fnArgs) {
+  return up.macro(...definitionArgs, function(element: Element, ...fnArgs) {
     let $element = jQuery(element)
     return $fn($element, ...fnArgs)
   })
 }
 
-up.migrate.processHelloMeta = function(meta, response) {
+// Core calls this hook (ChangeFromResponse in fragment/render/change/change_from_response.js).
+up.migrate.processHelloMeta = function(meta: object, response: any) {
   Object.defineProperty(meta, 'response', { get() {
     up.migrate.warn('Accessing meta.response from a compiler has been deprecated without replacement. Avoid fragments that compile differently for the initial page load vs. subsequent fragment updates.')
       return response
@@ -134,7 +137,7 @@ up.migrate.processHelloMeta = function(meta, response) {
 let modernHello = up.hello
 let errorMessage = 'up.hello() is now async and returns a promise'
 
-class WasElementIsPromise extends Promise {}
+class WasElementIsPromise extends Promise<any> {}
 up.migrate.defineThrowingProps(WasElementIsPromise.prototype, Element.prototype, errorMessage)
 up.migrate.defineThrowingProps(WasElementIsPromise.prototype, Node.prototype, errorMessage)
 up.migrate.defineThrowingProps(WasElementIsPromise.prototype, EventTarget.prototype, errorMessage)
