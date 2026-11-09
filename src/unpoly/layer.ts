@@ -2027,6 +2027,17 @@ export const api = {
   },
 }
 
+// TypeScript can't see the shortcuts that defineDelegates() adds below, so we declare them on `up`.
+// Keep the keys in sync with the list below.
+declare module '../unpoly.js' {
+  interface Up {
+    layer: CoreApi['layer'] & Pick<Layer,
+      'accept' | 'dismiss' | 'isRoot' | 'isOverlay' | 'isFront' | 'on' | 'off' | 'emit' | 'parent' | 'history' |
+      'location' | 'mode' | 'context' | 'element' | 'contains' | 'size' | 'affix'
+    >
+  }
+}
+
 // Shortcuts for the current layer, like `up.layer.accept()` for `up.layer.current.accept()`.
 // A function is bound to the layer that is current when it is accessed, not when it is called.
 defineDelegates(api.layer, [
