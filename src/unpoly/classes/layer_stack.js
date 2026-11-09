@@ -112,7 +112,6 @@ up.LayerStack = class LayerStack {
   }
 
   dismissOverlays(value = null, options = {}) {
-    options.dismissible = false
     for (let overlay of this.overlays.toReversed()) {
       overlay.dismiss(value, options)
     }
