@@ -18,7 +18,9 @@ By default Unpoly boots on `DOMContentLoaded`, after your own scripts have had a
 // DOMContentLoaded               configuring => booting    interactive
 // Initial page is compiling      booting                   interactive
 // Document resources loaded      booted                    complete
-let readyState = 'evaling' // evaling => configuring => booting => booted
+type ReadyState = 'evaling' | 'configuring' | 'booting' | 'booted'
+
+let readyState: ReadyState = 'evaling' // evaling => configuring => booting => booted
 
 /*-
 Whether Unpoly has finished booting.
@@ -41,7 +43,7 @@ Emits event [`up:framework:reset`](/up:framework:reset).
 @function up.framework.reset
 @internal
 */
-export function emitReset() {
+export function emitReset(): void {
   emit('up:framework:reset', { log: false })
 }
 
@@ -72,7 +74,7 @@ This leaves you with a classic server-side application on legacy browsers.
 @experimental
 @signature
 */
-export function boot({ mode = 'manual' } = {}) {
+export function boot({ mode = 'manual' }: { mode?: 'manual' | 'auto' } = {}): void {
   if (readyState !== 'configuring') {
     // In an app with a lot of async script the user may attempt to boot us twice.
     console.error('Unpoly has already booted')
@@ -104,7 +106,7 @@ function mustManualBoot() {
   // (B) We cannot rely on document.currentScript being present.
   //     This function runs before the support check, we may be dealing with a browser that doesn't support `document.currentScript` (e.g. IE11).
   //     Also `document.currentScript` is `undefined` for a `<script type="module">`.
-  if (document.currentScript?.async) {
+  if ((document.currentScript as HTMLScriptElement)?.async) {
     return true
   }
 
@@ -188,7 +190,7 @@ You may then call `up.boot()` to manually boot Unpoly at a later time.
 @signature
 */
 
-export function onEvaled() {
+export function onEvaled(): void {
   emit('up:framework:evaled', { log: false })
 
   if (mustManualBoot()) {
@@ -207,14 +209,14 @@ export function onEvaled() {
   readyState = 'configuring'
 }
 
-export function startExtension() {
+export function startExtension(): void {
   if (readyState !== 'configuring') {
     throw new Error('Unpoly extensions must be loaded before booting')
   }
   readyState = 'evaling'
 }
 
-export function stopExtension() {
+export function stopExtension(): void {
   readyState = 'configuring'
 }
 
@@ -252,24 +254,24 @@ If you need to support Internet Explorer 11, use Unpoly 2.
 @stable
 @signature
 */
-export function isSupported() {
+export function isSupported(): boolean {
   return !supportIssue()
 }
 
-export function isEvaling() {
+export function isEvaling(): boolean {
   return readyState === 'evaling'
 }
 
-export function isBooted() {
+export function isBooted(): boolean {
   return readyState === 'booted'
 }
 
 // Mockable, so specs can pretend that Unpoly hasn't booted.
-export const isBeforeBoot = mockable(function isBeforeBoot() {
+export const isBeforeBoot = mockable(function isBeforeBoot(): boolean {
   return readyState !== 'booting' && readyState !== 'booted'
 })
 
-function supportIssue() {
+function supportIssue(): string | undefined {
   for (let feature of ['Promise', 'DOMParser', 'FormData', 'reportError']) {
     if (!window[feature]) {
       return `Browser doesn't support the ${feature} API`
