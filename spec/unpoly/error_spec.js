@@ -163,6 +163,9 @@ describe('up.error', function() {
       it('is named up.CannotCompile', function() {
         up.migrate.warn.mock()
         expect(new up.CannotCompile().name).toBe('up.CannotCompile')
+        expect(up.CannotCompile.name).toBe('up.CannotCompile')
+        // A data property on the class's own prototype, since Chrome ignores a getter (see src/unpoly.ts).
+        expect(Object.getOwnPropertyDescriptor(up.CannotCompile.prototype, Symbol.toStringTag)?.value).toBe('up.CannotCompile')
       })
     })
   }

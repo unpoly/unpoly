@@ -26,7 +26,7 @@ import {
   isSingleton, leadingElement, paint, parseSelector, removeAttrsFromHTML, removeClassTemp, setAttrsTemp,
   setMissingAttr, setMissingAttrs, setStyleTemp, trackDefinitions, unionSelector, unwrap,
 } from './element.js'
-import { emitReset, isBeforeBoot, startExtension, stopExtension } from './framework.js'
+import { emitReset, isBeforeBoot, setClassName, startExtension, stopExtension } from './framework.js'
 import { assertEmitted, isModified, isSyntheticClick } from './event.js'
 import { csrfParam, csrfToken, headerize, initialRequestMethod } from './protocol.js'
 import { printToError, printToStandard, printToWarn } from './log.js'
@@ -145,6 +145,7 @@ export const api = {
 
     emitReset,
     isBeforeBoot,
+    setClassName,
     startExtension,
     stopExtension,
 
