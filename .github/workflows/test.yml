@@ -39,12 +39,10 @@ jobs:
         run: bin/lint
 
   # Gives quick feedback on broken types without waiting for the spec suite.
-  # While the migration leaves type errors in src/, a failure here doesn't fail the workflow.
   typecheck:
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     name: Type check
-    continue-on-error: true
     # The type check needs no browser, so `npm ci` can skip Puppeteer's Chrome download.
     env:
       PUPPETEER_SKIP_DOWNLOAD: true

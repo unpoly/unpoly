@@ -12,8 +12,8 @@ are provisional.
 
 The build doesn't use TypeScript at all: esbuild strips the types from each file, and never
 checks them. The only type check is `bin/typecheck`, which runs TypeScript 7's checker over
-`src/` with loose settings and takes well under a second. It still reports errors, so CI runs
-it as a separate job that may fail.
+`src/` with loose settings and takes well under a second. CI runs it as a separate job, and a
+type error fails the workflow.
 
 In a `.ts` module:
 
