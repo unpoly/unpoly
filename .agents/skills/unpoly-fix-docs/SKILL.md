@@ -1,6 +1,6 @@
 ---
 name: unpoly-fix-docs
-description: Copy-edit the Unpoly documentation embedded in this repository — the `/*-` doc comments in `src/unpoly/**/*.js` and the guide pages under `src/unpoly/pages/` — fixing typos, grammar, awkward English and obvious factual errors without touching structure, JSDoc directives, links or code. Use when asked to proofread, revise or fix the wording of Unpoly's API reference or guides. This is not a general-purpose documentation writing skill.
+description: Copy-edit the Unpoly documentation embedded in this repository — the `/*-` doc comments in `src/unpoly/**/*.{js,ts}` and the guide pages under `src/unpoly/pages/` — fixing typos, grammar, awkward English and obvious factual errors without touching structure, JSDoc directives, links or code. Use when asked to proofread, revise or fix the wording of Unpoly's API reference or guides. This is not a general-purpose documentation writing skill.
 ---
 
 # Revising Unpoly's embedded documentation
