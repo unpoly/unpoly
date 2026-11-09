@@ -100,7 +100,7 @@ up.ScriptGate = class ScriptGate {
     for (let attribute of up.script.config.nonceableAttributes) {
       let matches = e.subtree(root, e.attrSelector(attribute))
       for (let element of matches) {
-        let item = new AttributeItem(element, attribute, policy)
+        let item = new AttributeItem(element, attribute)
         policy.processItem(item)
       }
     }
