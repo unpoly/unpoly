@@ -700,8 +700,10 @@ export function parseSelector(rawSelector: string): ParsedSelector {
 
     depthSelector = depthSelector.replace(/\[[^\]]*]/g, function(attr) {
       attr = restoreSelectorLiterals(attr)
-      // TODO: Throws for a valid selector with whitespace around the operator, like [foo = "bar"].
-      let [_raw, name, _operator, quote, value] = attr.match(/\[([\w-]+)(?:([~|^$*]?=)(["'])?(.*?)\3)?]/s)!
+      // We allow whitespace around the name, operator and value, and ignore a case-sensitivity flag ([foo="bar" i]).
+      // TODO: A namespaced attribute ([ns|foo]) or an invalid attribute selector doesn't match, and we throw a TypeError
+      //       instead of failing with "Cannot parse selector".
+      let [_raw, name, _operator, quote, value] = attr.match(/\[\s*([\w-]+)\s*(?:([~|^$*]?=)\s*(["'])?(.*?)\3)?(?:\s+[is])?\s*]/is)!
       quote ||= '"'
       parsed.attributes[name] = value ? parseString(quote + value + quote) : ''
       return ''
