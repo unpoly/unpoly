@@ -1,6 +1,11 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { Rounds, affectedBundles } from '../../build/watch.mjs'
+import { existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import { Rounds, affectedBundles, watchSources } from '../../build/watch.mjs'
+import { REQUEST_PATH, requestBuild } from '../../build/build_status.mjs'
+import { SOURCE_DIRS } from '../../build/build_sync.mjs'
 
 // --- Rounds -------------------------------------------------------------------
 
@@ -157,4 +162,94 @@ test('a change without a file name rebuilds everything', () => {
 
 test('a bundle that has not built yet always rebuilds everything', () => {
   assert.deepEqual(affectedBundles([unpoly, null], new Set(['/src/unpoly/util.js'])), [0, 1])
+})
+
+// --- watchSources() ----------------------------------------------------------
+
+// A project in a temp directory, watched for real, with a Rounds stand-in that records what it
+// is told. `expect(calls, action)` runs `action` and waits up to a second for those calls.
+function project(t) {
+  let root = mkdtempSync(path.join(tmpdir(), 'watch-sources-'))
+  for (let dir of SOURCE_DIRS) mkdirSync(path.join(root, dir, 'sub'), { recursive: true })
+  writeFileSync(path.join(root, 'package.json'), '{}')
+  let calls = []
+  let logs = []
+  let rounds = {
+    change: (file) => calls.push(['change', file && path.relative(root, file)]),
+    touch: (file) => calls.push(['touch', file && path.relative(root, file)]),
+  }
+  let watcher = watchSources(rounds, { root, log: (message) => logs.push(message) })
+  t.after(() => {
+    watcher.close()
+    rmSync(root, { recursive: true, force: true })
+  })
+  let at = (file) => path.join(root, file)
+  let has = (call) => calls.some((other) => JSON.stringify(other) === JSON.stringify(call))
+  let expect = async (expected, action) => {
+    calls.length = 0
+    await action()
+    let deadline = Date.now() + 1000
+    while (!expected.every(has)) {
+      if (Date.now() > deadline) assert.fail(`expected ${JSON.stringify(expected)}, got ${JSON.stringify(calls)}`)
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    }
+  }
+  let settle = () => new Promise((resolve) => setTimeout(resolve, 50))
+  return { root, at, calls, logs, expect, settle }
+}
+
+test('a source rebuilds, and its directory counts as seen', async (t) => {
+  let { at, calls, expect } = project(t)
+  for (let dir of SOURCE_DIRS) {
+    await expect([['touch', `${dir}/sub`], ['change', `${dir}/sub/a.js`]], () => writeFileSync(at(`${dir}/sub/a.js`), '1'))
+  }
+  await expect([['touch', 'src/sub']], () => writeFileSync(at('src/sub/guide.md'), '1'))
+  assert.ok(!calls.some(([kind, file]) => kind === 'change' && file?.endsWith('guide.md')), 'a guide page builds nothing')
+})
+
+test('a new or moved directory rebuilds everything', async (t) => {
+  let { at, expect, settle } = project(t)
+  await expect([['change', null]], () => mkdirSync(at('spec/new')))
+  await settle()
+  await expect([['change', null]], () => renameSync(at('spec/new'), at('spec/moved')))
+  await settle()
+  await expect([['change', 'spec/moved/a.js']], () => writeFileSync(at('spec/moved/a.js'), '1'))
+})
+
+test('package.json rebuilds everything, also when saved by rename again', async (t) => {
+  // The version number in the bundle comes from there.
+  let { at, expect } = project(t)
+  for (let i = 0; i < 2; i++) {
+    await expect([['change', null]], () => {
+      writeFileSync(at('package.json.tmp'), `{"version": "${i}"}`)
+      renameSync(at('package.json.tmp'), at('package.json'))
+    })
+  }
+})
+
+test('a rebuild request rebuilds the files it names, once', async (t) => {
+  let { root, at, calls, logs, expect, settle } = project(t)
+  await expect([['change', 'src/sub/a.js'], ['change', null]], () => requestBuild(['src/sub/a.js', 'spec/sub'], root))
+  assert.match(logs.join('\n'), /requested for src\/sub\/a\.js, spec\/sub/)
+  assert.ok(!existsSync(at(REQUEST_PATH)), 'the request is taken')
+  await settle()
+  assert.equal(calls.filter(([kind]) => kind === 'change').length, 2, 'and served once')
+})
+
+test('rebuild requests still arrive after tmp/ was deleted', async (t) => {
+  let { root, at, expect, settle } = project(t)
+  rmSync(at('tmp'), { recursive: true })
+  await settle()
+  await expect([['change', 'src/sub/a.js']], () => requestBuild('src/sub/a.js', root))
+  await settle()
+  await expect([['change', 'src/sub/b.js']], () => requestBuild('src/sub/b.js', root))
+})
+
+test('a source directory deleted and created again is watched again', async (t) => {
+  // A checkout that replaces spec/, say.
+  let { at, expect, settle } = project(t)
+  await expect([['change', null]], () => rmSync(at('spec'), { recursive: true }))
+  await expect([['change', null]], () => mkdirSync(at('spec')))
+  await settle()
+  await expect([['change', 'spec/a.js']], () => writeFileSync(at('spec/a.js'), '1'))
 })

@@ -1,12 +1,16 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs'
+import { EventEmitter } from 'node:events'
+import { mkdirSync, mkdtempSync, renameSync, rmSync, unlinkSync, watch, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { watchTree } from '../../build/watch_tree.mjs'
 
 // A real tree in a temp directory, watched for real: the bugs this guards against live in
 // Node and inotify, not in our code.
+//
+// The test fails when watchTree() leaves a watch open after close(). A watch it loses track of
+// would otherwise keep the test runner waiting for ever instead of failing.
 function tree(t, files = {}) {
   let root = mkdtempSync(path.join(tmpdir(), 'watch-tree-'))
   for (let [file, content] of Object.entries(files)) {
@@ -14,12 +18,23 @@ function tree(t, files = {}) {
     writeFileSync(path.join(root, file), content)
   }
   let events = []
+  let open = new Set()
+  let countingWatch = (dir, listener) => {
+    let watcher = watch(dir, listener)
+    open.add(watcher)
+    let close = watcher.close.bind(watcher)
+    watcher.close = () => { open.delete(watcher); close() }
+    return watcher
+  }
   let watcher = watchTree(root, (file, { directory }) => {
     events.push({ file: file && path.relative(root, file), directory })
-  }, { skip: (name) => name === 'node_modules' })
+  }, { skip: (name) => name === 'node_modules', watch: countingWatch })
   t.after(() => {
     watcher.close()
+    let leaked = [...open]
+    for (let fsWatcher of leaked) fsWatcher.close()
     rmSync(root, { recursive: true, force: true })
+    assert.equal(leaked.length, 0, 'every watch is closed')
   })
   let at = (file) => path.join(root, file)
   // Resolves once an event for `file` arrives after this call, or fails after a second.
@@ -33,6 +48,43 @@ function tree(t, files = {}) {
     }
   }
   return { root, at, events, watcher, expectEvent }
+}
+
+// A stand-in for fs.watch() whose watchers the test fires by hand, even after they were closed.
+// `fail(dir)` may return an error to throw instead of watching.
+function fakeWatch({ fail = () => null } = {}) {
+  let watchers = []
+  function watch(dir, listener) {
+    let error = fail(dir)
+    if (error) throw error
+    let watcher = Object.assign(new EventEmitter(), {
+      dir,
+      closed: false,
+      close() { this.closed = true },
+      fire: (event, name) => listener(event, name),
+    })
+    watchers.push(watcher)
+    return watcher
+  }
+  // The latest watcher for `dir`.
+  let of = (dir) => watchers.findLast((watcher) => watcher.dir === dir)
+  return { watch, of }
+}
+
+// A temp directory with these subdirectories, watched with a fakeWatch().
+function fakeTree(t, dirs, options) {
+  let root = mkdtempSync(path.join(tmpdir(), 'watch-tree-'))
+  t.after(() => rmSync(root, { recursive: true, force: true }))
+  for (let dir of dirs) mkdirSync(path.join(root, dir), { recursive: true })
+  let fake = fakeWatch(options)
+  let events = []
+  let errors = []
+  let watcher = watchTree(root, (file, { directory }) => events.push({ file: file && path.relative(root, file), directory }), {
+    watch: fake.watch,
+    onError: (error, dir) => errors.push([error.code, path.relative(root, dir)]),
+  })
+  let at = (dir) => path.join(root, dir)
+  return { root, at, events, errors, watcher, of: (dir) => fake.of(at(dir)) }
 }
 
 // What an atomic save does, and Claude Code's Edit tool: write a temp file, rename it over.
@@ -97,4 +149,42 @@ test('a root deleted and created again is watched again', async (t) => {
 test('skipped directories are not watched', (t) => {
   let { at, watcher } = tree(t, { 'node_modules/x/a.js': '0', 'sub/a.js': '0' })
   assert.deepEqual(watcher.directories.sort(), [at(''), at('sub')].map((dir) => dir.replace(/\/$/, '')).sort())
+})
+
+test('events from a watch that was dropped are ignored', (t) => {
+  // A watch can still report after its directory was renamed away, under the old path, even when
+  // a new directory of that name is watched by then.
+  let { at, root, events, watcher, of } = fakeTree(t, ['sub'])
+  let old = of('sub')
+  renameSync(at('sub'), at('sub2'))
+  of('').fire('rename', 'sub')
+  of('').fire('rename', 'sub2')
+  mkdirSync(at('sub'))
+  of('').fire('rename', 'sub')
+  assert.ok(old.closed)
+  assert.deepEqual(watcher.directories.sort(), [root, at('sub'), at('sub2')].sort())
+
+  events.length = 0
+  old.fire('change', 'a.js')
+  assert.deepEqual(events, [], 'the old watch says nothing')
+  of('sub').fire('change', 'a.js')
+  assert.deepEqual(events, [{ file: 'sub/a.js', directory: false }])
+})
+
+test('a directory that cannot be watched is reported, the others are watched', (t) => {
+  // Out of inotify watches. Without the report, edits in it would silently not rebuild.
+  let enospc = Object.assign(new Error('ENOSPC: System limit for number of file watchers reached'), { code: 'ENOSPC' })
+  let { at, root, errors, watcher } = fakeTree(t, ['full', 'fine'], { fail: (dir) => dir.endsWith('full') ? enospc : null })
+  assert.deepEqual(errors, [['ENOSPC', 'full']])
+  assert.deepEqual(watcher.directories.sort(), [root, at('fine')].sort())
+})
+
+test('a watch that fails later is reported and dropped, unless its directory is gone', (t) => {
+  let { at, root, errors, watcher, of } = fakeTree(t, ['a', 'b'])
+  of('a').emit('error', Object.assign(new Error('EIO'), { code: 'EIO' }))
+  assert.deepEqual(errors, [['EIO', 'a']])
+  rmSync(at('b'), { recursive: true })
+  of('b').emit('error', Object.assign(new Error('EPERM'), { code: 'EPERM' }))
+  assert.deepEqual(errors, [['EIO', 'a']], 'the parent reports a directory that is gone')
+  assert.deepEqual(watcher.directories, [root])
 })
