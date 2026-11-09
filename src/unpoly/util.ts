@@ -2103,7 +2103,7 @@ function stringifyArg(arg: any, placeholder = '%o', ancestors = new Set()): stri
     string = `${arg.name}(${arg.message})`
   } else if (isObject(arg)) {
     // Arrays and objects. Functions, elements and errors are objects, too, but are handled above.
-    // Our own classes declare a [Symbol.toStringTag] because minifiers may drop their class names.
+    // Our own classes declare a [Symbol.toStringTag] because minifiers drop their class names.
     let label = arg[Symbol.toStringTag] || arg.constructor?.name
 
     if (ancestors.has(arg)) {

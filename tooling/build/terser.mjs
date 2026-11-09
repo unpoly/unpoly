@@ -1,11 +1,8 @@
 // Terser runs after esbuild, on its finished bundle: to minify the .min.js bundles, and to strip
 // comments from the unminified bundles we publish. It is the slowest step of the build by far
-// (~4 s for unpoly.min.js), so it runs in worker threads, one bundle per worker. The workers also
-// drop the __name() calls that Terser doesn't need (see names.mjs).
+// (~4 s for unpoly.min.js), so it runs in worker threads, one bundle per worker.
 //
-// Why not esbuild's own minifier: it makes classes anonymous (`up.Record.name === ''`), and
-// restoring the names with its `keepNames` costs +12 % gzip. It also compresses less than Terser
-// (+3.6 % gzip without keepNames).
+// Why not esbuild's own minifier: it compresses less than Terser (+3.6 % gzip).
 
 import { Worker } from 'node:worker_threads'
 import os from 'node:os'
@@ -79,7 +76,7 @@ export class TerserPool {
   }
 
   // `kind` is 'minify' or 'strip'. `map` is esbuild's source map, or null for no source map.
-  // Resolves with { code, map, keptNames }.
+  // Resolves with { code, map }.
   run({ kind, ecma, code, map, url }) {
     return new Promise((resolve, reject) => {
       this.#queue.push({ job: { kind, ecma, code, map, url }, resolve, reject })

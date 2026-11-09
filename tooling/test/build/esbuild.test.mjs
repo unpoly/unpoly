@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { SourceMapConsumer } from 'source-map'
-import { checkKeptNames, insertStrictDirective, shortenModuleKeys } from '../../build/esbuild.mjs'
+import { insertStrictDirective, shortenModuleKeys } from '../../build/esbuild.mjs'
 
 // A bundle as esbuild prints it: one IIFE. The map points line 2 (`up.x = 1`) at line 5 of foo.js.
 const JS = '(() => {\n  up.x = 1;\n})();\n'
@@ -34,9 +34,4 @@ test('shortens the path keys of CommonJS wrappers, keeping every column in place
 test('refuses a CommonJS wrapper it cannot shorten, rather than publishing its path', () => {
   let js = 'var require_foo = __commonJS({ "src/unpoly/foo.js"() {} });\n'
   assert.throws(() => shortenModuleKeys(js), /does not recognize/)
-})
-
-test('fails a bundle that keeps a __name() call', () => {
-  assert.doesNotThrow(() => checkKeptNames({ out: 'unpoly.min.js' }, 0))
-  assert.throws(() => checkKeptNames({ out: 'unpoly.min.js' }, 1), /unpoly\.min\.js keeps 1 __name\(\) calls/)
 })

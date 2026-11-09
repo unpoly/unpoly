@@ -45,8 +45,6 @@ export function esbuildOptions(bundle, { sourcemap }) {
       },
     },
     inject: bundle.inject,
-    // Class names are API (up.Request.name). esbuild would lose some of them, see names.mjs.
-    keepNames: true,
     // jasmine-core reads `global`, which webpack 5 used to rewrite to the global object.
     define: { global: 'globalThis' },
     // We write ourselves in finish(), after Terser.
@@ -79,9 +77,7 @@ export async function finish(bundle, result, { terser, strip }) {
 
   let ecma = Number(bundle.target.slice(2))
   if (bundle.min || strip) {
-    let keptNames
-    ({ code: js, map, keptNames } = await terser.run({ kind: bundle.min ? 'minify' : 'strip', ecma, code: js, map, url: path.basename(mapPath) }))
-    checkKeptNames(bundle, keptNames)
+    ({ code: js, map } = await terser.run({ kind: bundle.min ? 'minify' : 'strip', ecma, code: js, map, url: path.basename(mapPath) }))
   }
 
   files.set(jsPath, js)
@@ -139,19 +135,6 @@ export function shortenModuleKeys(js) {
     throw new Error('esbuild printed a __commonJS() wrapper that shortenModuleKeys() in tooling/build/esbuild.mjs does not recognize.')
   }
   return shortened
-}
-
-// names.mjs drops every __name() call esbuild emits for our bundles today. A call it keeps
-// costs bytes and nobody would notice, so we fail the build instead. When this happens after an
-// esbuild upgrade, esbuild changed how it prints these calls and names.mjs needs to learn the new
-// shape. When it happens after a change to src/, look at the class that kept its call: it may
-// mention its own name in a way names.mjs doesn't rewrite (see nameClass() there).
-const MAX_KEPT_NAMES = 0
-
-export function checkKeptNames(bundle, keptNames) {
-  if (keptNames > MAX_KEPT_NAMES) {
-    throw new Error(`${bundle.out} keeps ${keptNames} __name() calls, but we expect at most ${MAX_KEPT_NAMES}. See checkKeptNames() in tooling/build/esbuild.mjs.`)
-  }
 }
 
 // esbuild hoists our ES modules into a single function and, since modules are implicitly
