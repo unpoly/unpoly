@@ -37,6 +37,46 @@ export interface HelloOptions extends HelloFragmentOptions {
 }
 
 /**
+Options for `up.compiler()` and `up.macro()`.
+*/
+export interface CompilerOptions {
+  priority?: number
+  batch?: boolean
+  /** @internal Also run on elements that the compiler already compiled. */
+  rerun?: boolean
+}
+
+/**
+The function passed to `up.compiler()` or `up.macro()`. It is called with a matching element, its
+[data](/learn/data) and [meta information](/learn/enhancing-elements#meta) about the render pass.
+It may return a destructor function, an array of destructors, or a promise.
+*/
+export type CompilerCallback = (element: HTMLElement, data: any, meta: PlainObject) => unknown
+
+/**
+The function passed to `up.compiler()` or `up.macro()` with `{ batch: true }`. It is called once
+with all matching elements and their data.
+*/
+export type BatchCompilerCallback = (elements: HTMLElement[], data: any[], meta: PlainObject) => unknown
+
+/**
+Options for `registerAttrCompiler()`.
+@internal
+*/
+export interface AttrCompilerOptions extends CompilerOptions {
+  // The value for an attribute set without a value, or to "true".
+  defaultValue?: string
+  macro?: boolean
+}
+
+/**
+A compiler for `registerAttrCompiler()`. It is called with the element and its attribute value.
+Without a `{ defaultValue }`, the value of an attribute set without a value (or to "true") is `true`.
+@internal
+*/
+export type AttrCompilerCallback<V = string | true> = (element: HTMLElement, value: V) => unknown
+
+/**
 Options for `up.script.parseCallback()`.
 @internal
 */
@@ -198,7 +238,7 @@ export const config = new Config('up.script.config', (): ScriptConfig => ({
   ]
 })) as ConfigWith<ScriptConfig>
 
-const SYSTEM_MACRO_PRIORITIES = {
+const SYSTEM_MACRO_PRIORITIES: Record<string, number> = {
   '[up-back]': -100,        // sets [up-href] to previous URL
   '[up-clickable]': -200,   // A11y for link-like elements
   '[up-drawer]': -200,      //
@@ -441,6 +481,9 @@ or manually call `up.hello()` on an element that should be
 @stable
 @signature
 */
+export function registerCompiler(selector: Compiler['selector'], callback: CompilerCallback): void
+export function registerCompiler(selector: Compiler['selector'], options: CompilerOptions & { batch: true }, callback: BatchCompilerCallback): void
+export function registerCompiler(selector: Compiler['selector'], options: CompilerOptions, callback: CompilerCallback): void
 export function registerCompiler(...args: any[]): void {
   registerProcessor(args)
 }
@@ -500,17 +543,23 @@ up.macro('[shake-modal]', function(link) {
 @stable
 @signature
 */
+export function registerMacro(selector: Compiler['selector'], callback: CompilerCallback): void
+export function registerMacro(selector: Compiler['selector'], options: CompilerOptions & { batch: true }, callback: BatchCompilerCallback): void
+export function registerMacro(selector: Compiler['selector'], options: CompilerOptions, callback: CompilerCallback): void
 export function registerMacro(...args: any[]): void {
   registerProcessor(args, { macro: true })
 }
 
+export function registerAttrCompiler(attr: string, callback: AttrCompilerCallback): void
+export function registerAttrCompiler(attr: string, options: AttrCompilerOptions & { defaultValue: string }, callback: AttrCompilerCallback<string>): void
+export function registerAttrCompiler(attr: string, options: AttrCompilerOptions, callback: AttrCompilerCallback): void
 export function registerAttrCompiler(...args: any[]): void {
   let [attr, options, valueCallback] = parseProcessorArgs(args)
 
   let selector = `[${attr}]`
   let { defaultValue } = options
 
-  let callback = (element) => {
+  let callback = (element: HTMLElement) => {
     let value = booleanOrStringAttr(element, attr)
 
     // Do nothing in a case like [up-defer=false]
@@ -807,8 +856,7 @@ let compiled = await up.hello(textarea) // compiled === textarea
 @stable
 @signature
 */
-export function hello(element: ElementOrSelector, options?: HelloOptions): Promise<Element>
-export function hello(element, options: HelloOptions = {}) {
+export function hello(element: ElementOrSelector, options: HelloOptions = {}): Promise<Element> {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   element = getSmart(element, options)
 

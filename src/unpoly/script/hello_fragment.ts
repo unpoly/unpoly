@@ -18,6 +18,7 @@ with its registration options.
 export type Compiler = AnyFunction & {
   selector: string | (() => string)
   isDefault?: boolean
+  priority: number
   batch?: boolean
   rerun?: boolean
 }
@@ -158,7 +159,7 @@ export class HelloFragment {
       compileArgs.push(data, this._meta)
     }
 
-    let onDestructor = (destructor) => registerDestructor(element, destructor)
+    let onDestructor = (destructor: unknown) => registerDestructor(element, destructor)
     this._applyCompilerFunction(compiler, element, compileArgs, onDestructor)
   }
 

@@ -12,7 +12,7 @@ import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
 import type { ConfigWith } from './util/config.js'
 import type { PlainObject } from './util.js'
-import type { RenderStep } from './fragment.js'
+import type { FragmentKeepEvent, RenderStep } from './fragment.js'
 import type { RenderOptions } from './fragment/render/render_options.js'
 
 /**
@@ -596,7 +596,8 @@ export function install(): void {
     })
 
     fragment.addEventListener('up:fragment:keep', function(event) {
-      if (!isEmpty(event.newFragment)) event.preventDefault()
+      // A flash is an HTML element, so its new version is one too.
+      if (!isEmpty((event as FragmentKeepEvent).newFragment as HTMLElement)) event.preventDefault()
     })
   })
 }

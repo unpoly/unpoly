@@ -206,11 +206,14 @@ class DetachedAssetPolicy extends Policy {
 
 }
 
+// The keys of up.script.config that hold a policy.
+type PolicyConfigProp = 'evalCallbackPolicy' | 'scriptElementPolicy'
+
 class ConfigurablePolicy extends Policy {
-  declare _configProp: string
+  declare _configProp: PolicyConfigProp
   declare policyString: PolicyString
 
-  constructor(configProp: string, pageNonce: string | undefined, cspInfo: CSPInfo) {
+  constructor(configProp: PolicyConfigProp, pageNonce: string | undefined, cspInfo: CSPInfo) {
     // Page nonce and CSP info must be known for #resolveAuto()
     super(pageNonce, cspInfo)
 

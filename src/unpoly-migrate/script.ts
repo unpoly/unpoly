@@ -84,7 +84,7 @@ up.$compiler = function(...definitionArgs) {
 
   let $fn = definitionArgs.pop()
 
-  return up.compiler(...definitionArgs, function(element: Element, ...fnArgs) {
+  return (up.compiler as any)(...definitionArgs, function(element: Element, ...fnArgs) {
     let $element = jQuery(element)
     return $fn($element, ...fnArgs)
   })
@@ -126,7 +126,7 @@ up.$macro = function(...definitionArgs) {
 
   let $fn = definitionArgs.pop()
 
-  return up.macro(...definitionArgs, function(element: Element, ...fnArgs) {
+  return (up.macro as any)(...definitionArgs, function(element: Element, ...fnArgs) {
     let $element = jQuery(element)
     return $fn($element, ...fnArgs)
   })
