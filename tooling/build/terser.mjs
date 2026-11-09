@@ -67,16 +67,19 @@ export function stripOptions({ ecma }) {
 // is busy. Call close() when done, or the workers keep the process alive.
 export class TerserPool {
   #size
+  #url
   #idle = []
   #all = []
   #queue = []
 
-  constructor({ size = Math.max(1, os.availableParallelism() - 1) } = {}) {
+  // `url` is a seam for the self-tests.
+  constructor({ size = Math.max(1, os.availableParallelism() - 1), url = new URL('./terser_worker.mjs', import.meta.url) } = {}) {
     this.#size = size
+    this.#url = url
   }
 
   // `kind` is 'minify' or 'strip'. `map` is esbuild's source map, or null for no source map.
-  // Resolves with { code, map }.
+  // Resolves with { code, map, keptNames }.
   run({ kind, ecma, code, map, url }) {
     return new Promise((resolve, reject) => {
       this.#queue.push({ job: { kind, ecma, code, map, url }, resolve, reject })
@@ -89,20 +92,43 @@ export class TerserPool {
       let worker = this.#idle.pop() || this.#spawn()
       if (!worker) return
       let task = this.#queue.shift()
-      worker.once('message', ({ result, error }) => {
+      let settle = (outcome) => {
+        worker.off('message', onMessage)
+        worker.off('error', onError)
+        worker.off('exit', onExit)
+        outcome()
+        this.#drain()
+      }
+      let onMessage = ({ result, error }) => settle(() => {
         this.#idle.push(worker)
         if (error) task.reject(new Error(error))
         else task.resolve(result)
-        this.#drain()
       })
+      // A worker that dies without posting (out of memory, a throw outside its handler) must
+      // fail the job, or bin/build and bin/release would wait for it for ever.
+      let onError = (error) => settle(() => task.reject(error))
+      let onExit = (code) => settle(() => task.reject(new Error(`A Terser worker exited with code ${code}`)))
+      worker.on('message', onMessage)
+      worker.on('error', onError)
+      worker.on('exit', onExit)
       worker.postMessage(task.job)
     }
   }
 
   #spawn() {
     if (this.#all.length >= this.#size) return null
-    let worker = new Worker(new URL('./terser_worker.mjs', import.meta.url))
+    let worker = new Worker(this.#url)
     this.#all.push(worker)
+    // A worker that died is gone for good, and makes room for a new one. ('error' comes before
+    // 'exit', so a job may already be waiting for that room.)
+    worker.on('exit', () => {
+      this.#all = this.#all.filter((other) => other !== worker)
+      this.#idle = this.#idle.filter((other) => other !== worker)
+      this.#drain()
+    })
+    // An idle worker has no job to fail. Its exit (above) is all that matters, and an 'error'
+    // event without a listener would crash the build.
+    worker.on('error', () => {})
     return worker
   }
 
