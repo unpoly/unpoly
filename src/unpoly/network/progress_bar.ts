@@ -3,6 +3,10 @@ import { affix, paint } from '../element.js'
 const TRANSITION_DELAY = 300
 
 export class ProgressBar {
+  declare _step: number
+  declare _element: HTMLElement
+  declare _width: number
+  declare timeout: number
 
   constructor() {
     this._step = 0
@@ -18,7 +22,7 @@ export class ProgressBar {
     this._nextStep()
   }
 
-  _nextStep() {
+  _nextStep(): void {
     let diff
     if (this._width < 80) {
       if (Math.random() < 0.15) {
@@ -42,17 +46,17 @@ export class ProgressBar {
     this.timeout = setTimeout(this._nextStep.bind(this), nextStepDelay)
   }
 
-  _moveTo(width) {
+  _moveTo(width: number): void {
     this._width = width
     this._element.style.width = `${width}vw`
   }
 
-  destroy() {
+  destroy(): void {
     clearTimeout(this.timeout)
     this._element.remove()
   }
 
-  conclude() {
+  conclude(): void {
     clearTimeout(this.timeout)
     this._moveTo(100)
     setTimeout(this.destroy.bind(this), TRANSITION_DELAY)
