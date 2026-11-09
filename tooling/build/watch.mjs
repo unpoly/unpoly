@@ -14,7 +14,7 @@ import pc from 'picocolors'
 import { BuildStatus, PROJECT_ROOT } from './build_status.mjs'
 import { SOURCE_DIRS, WATCHABLE_SUFFIXES } from './build_sync.mjs'
 import { esbuildOptions, finish } from './esbuild.mjs'
-import { formatError } from './build.mjs'
+import { formatError, formatWarnings } from './build.mjs'
 import { SourceLinter } from './lint.mjs'
 import { TerserPool } from './terser.mjs'
 
@@ -37,9 +37,11 @@ export async function runWatch({ bundles, sourcemap }) {
 
   async function build(changedFiles) {
     let affected = affectedBundles(inputs, changedFiles)
+    let warnings = new Set()
     await Promise.all(affected.map(async (index) => {
       try {
         let result = await contexts[index].rebuild()
+        for (let warning of await formatWarnings(result)) warnings.add(warning)
         await finish(bundles[index], result, { terser, strip: false })
         inputs[index] = new Set(Object.keys(result.metafile.inputs).map((input) => path.resolve(PROJECT_ROOT, input)))
         errors[index] = []
@@ -47,6 +49,8 @@ export async function runWatch({ bundles, sourcemap }) {
         errors[index] = await formatError(error)
       }
     }))
+    // Printed, but not reported to bin/test: a warning doesn't fail a build.
+    if (warnings.size) console.log(pc.yellow([...warnings].join('\n')))
     return { built: affected.length, errors: errors.flat() }
   }
 

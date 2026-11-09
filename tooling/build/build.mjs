@@ -89,10 +89,12 @@ export async function buildOnce({ bundles, sourcemap }, { strip = false, log = c
   let terser = new TerserPool()
   let startedAt = Date.now()
   try {
+    let warnings = new Set()
     let outcomes = await Promise.all(bundles.map(async (bundle) => {
       let bundleStartedAt = Date.now()
       try {
         let result = await esbuild.build(esbuildOptions(bundle, { sourcemap: sourcemap(bundle) }))
+        for (let warning of await formatWarnings(result)) warnings.add(warning)
         await finish(bundle, result, { terser, strip })
         log(builtLine(bundle, Date.now() - bundleStartedAt))
         return []
@@ -100,6 +102,8 @@ export async function buildOnce({ bundles, sourcemap }, { strip = false, log = c
         return await formatError(error)
       }
     }))
+    // Several bundles share most of their sources, and so their warnings.
+    if (warnings.size) log(pc.yellow([...warnings].join('\n')))
     let errors = outcomes.flat()
     if (!errors.length) log(pc.green(`Built ${bundles.length} bundles in ${Date.now() - startedAt} ms`))
     return errors
@@ -112,6 +116,14 @@ export function builtLine(bundle, ms) {
   let file = path.join('dist', bundle.out)
   let size = statSync(path.join(PROJECT_ROOT, file)).size
   return `${file.padEnd(32)} ${(size / 1024).toFixed(1).padStart(7)} KiB  ${pc.dim(`${ms} ms`)}`
+}
+
+// esbuild's warnings point at likely bugs: a duplicate key, `x === -0`, a misspelled `typeof`
+// result, an import that a CommonJS module doesn't export. They don't fail a build, but we print
+// them, as webpack did. (Our esbuild options silence its own logging.)
+export async function formatWarnings(result) {
+  if (!result.warnings?.length) return []
+  return await esbuild.formatMessages(result.warnings, { kind: 'warning', color: false })
 }
 
 // esbuild's own rendering of a failure (with a code frame), or the stack of anything else that
