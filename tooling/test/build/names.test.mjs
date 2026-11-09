@@ -128,7 +128,8 @@ test('a class that refers to itself in a shorthand property keeps its call', () 
   // Renaming `_Foo` in `{ _Foo }` would change the property's key. esbuild expands the shorthand
   // today (`{ Foo: _Foo }`), so this input is written by hand.
   let source = '(() => { var Foo = class _Foo { static { __name(this, "Foo") } both() { return { _Foo } } } })()'
-  let { js } = dropNeedlessNames(source)
+  let { js, kept } = dropNeedlessNames(source)
+  assert.equal(kept, 1)
   assert.equal(js, source)
 })
 
@@ -150,7 +151,8 @@ test('an ES2015 class that runs code while being defined gets its uses renamed, 
 
 test('a class is never named arguments or eval', () => {
   let source = '(() => { var a = class { static { __name(this, "arguments") } }; var b = class { static { __name(this, "eval") } } })()'
-  let { js } = dropNeedlessNames(source)
+  let { js, kept } = dropNeedlessNames(source)
+  assert.equal(kept, 2)
   assert.equal(js, source)
 })
 

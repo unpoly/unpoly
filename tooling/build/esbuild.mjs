@@ -78,10 +78,10 @@ export async function finish(bundle, result, { terser, strip }) {
   }
 
   let ecma = Number(bundle.target.slice(2))
-  if (bundle.min) {
-    ({ code: js, map } = await terser.run({ kind: 'minify', ecma, code: js, map, url: path.basename(mapPath) }))
-  } else if (strip) {
-    ({ code: js, map } = await terser.run({ kind: 'strip', ecma, code: js, map, url: path.basename(mapPath) }))
+  if (bundle.min || strip) {
+    let keptNames
+    ({ code: js, map, keptNames } = await terser.run({ kind: bundle.min ? 'minify' : 'strip', ecma, code: js, map, url: path.basename(mapPath) }))
+    checkKeptNames(bundle, keptNames)
   }
 
   files.set(jsPath, js)
@@ -131,8 +131,27 @@ async function minifyStyles(files, target) {
 //
 // We overwrite the path with spaces instead of cutting it out, so every line and column of the
 // bundle, and so its source map, stays as it was.
+//
+// If esbuild ever prints the wrappers differently, we fail instead of quietly publishing the paths.
 export function shortenModuleKeys(js) {
-  return js.replace(/(__commonJS\(\{\n\s*)("[^"\n]+")(?=\()/g, (_match, prefix, key) => `${prefix}m${' '.repeat(key.length - 1)}`)
+  let shortened = js.replace(/(__commonJS\(\{\n\s*)("[^"\n]+")(?=\()/g, (_match, prefix, key) => `${prefix}m${' '.repeat(key.length - 1)}`)
+  if (/__commonJS\(\{\s*"/.test(shortened)) {
+    throw new Error('esbuild printed a __commonJS() wrapper that shortenModuleKeys() in tooling/build/esbuild.mjs does not recognize.')
+  }
+  return shortened
+}
+
+// names.mjs drops every __name() call esbuild emits for our bundles today. A call it keeps
+// costs bytes and nobody would notice, so we fail the build instead. When this happens after an
+// esbuild upgrade, esbuild changed how it prints these calls and names.mjs needs to learn the new
+// shape. When it happens after a change to src/, look at the class that kept its call: it may
+// mention its own name in a way names.mjs doesn't rewrite (see nameClass() there).
+const MAX_KEPT_NAMES = 0
+
+export function checkKeptNames(bundle, keptNames) {
+  if (keptNames > MAX_KEPT_NAMES) {
+    throw new Error(`${bundle.out} keeps ${keptNames} __name() calls, but we expect at most ${MAX_KEPT_NAMES}. See checkKeptNames() in tooling/build/esbuild.mjs.`)
+  }
 }
 
 // esbuild hoists our ES modules into a single function and, since modules are implicitly

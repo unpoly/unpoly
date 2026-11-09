@@ -23,13 +23,18 @@
 //   itself as `_Foo`, those references are renamed with it (see nameClass()).
 // - Every other call stays.
 //
+// The pass depends on how esbuild prints these calls, so we pin esbuild to an exact version.
+// After upgrading it, run the names self-test, `bin/test --minify` and `bin/test --es6 --minify`.
+// A published bundle that keeps a call fails the build (see checkKeptNames() in esbuild.mjs).
+//
 // We overwrite removed code with spaces instead of cutting it out, so every line and column of
 // the bundle stays where it was. Only the inserted names move code, within their line, and we move
 // the source map's mappings on that line with them.
 
 import * as acorn from 'acorn'
 
-// Returns the trimmed `js`, and `map` updated to match (or null without a map).
+// Returns the trimmed `js`, `map` updated to match (or null without a map), and `kept`, the
+// number of __name() calls left in `js`.
 export function dropNeedlessNames(js, map = null) {
   let ast = acorn.parse(js, { ecmaVersion: 'latest', sourceType: 'script' })
   let calls = []
@@ -89,6 +94,7 @@ export function dropNeedlessNames(js, map = null) {
     return true
   }
 
+  let kept = 0
   for (let { node, ancestors } of calls) {
     let [target, nameLiteral] = node.arguments
     let name = nameLiteral?.value
@@ -113,6 +119,8 @@ export function dropNeedlessNames(js, map = null) {
       // (_a = class { … }, __name(_a, "Foo"), _a), from lowering for ES2015. Also blank the
       // comma after the call, which is never last: the sequence ends with `_a`.
       blank(node.start, parent.expressions[parent.expressions.indexOf(node) + 1].start)
+    } else {
+      kept++
     }
   }
 
@@ -127,7 +135,7 @@ export function dropNeedlessNames(js, map = null) {
   for (let { offset, text } of insertions.sort((a, b) => b.offset - a.offset)) {
     chars.splice(offset, 0, text)
   }
-  return { js: chars.join(''), map }
+  return { js: chars.join(''), map, kept }
 }
 
 // The class expression that a block (or the program) assigns to `var name` right in its body.

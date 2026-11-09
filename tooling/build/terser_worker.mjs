@@ -11,7 +11,7 @@ parentPort.on('message', async ({ kind, ecma, code, map, url }) => {
     // Chain esbuild's map, so the result still points into src/.
     let sourceMap = trimmed.map ? { content: trimmed.map, url } : false
     let result = await minify(trimmed.js, { ...options, sourceMap })
-    parentPort.postMessage({ result: { code: result.code, map: result.map || null } })
+    parentPort.postMessage({ result: { code: result.code, map: result.map || null, keptNames: trimmed.kept } })
   } catch (error) {
     parentPort.postMessage({ error: String(error?.stack || error) })
   }
