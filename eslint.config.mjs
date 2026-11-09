@@ -56,6 +56,13 @@ export default tseslint.config(
       'no-var': 'off',
       // We allow `any` while converting (strictness is loose for now).
       '@typescript-eslint/no-explicit-any': 'off',
+      // A class field that only states a type must be `declare`d. Without `declare` the compiled
+      // class would define the property (as undefined), and only in builds whose target uses
+      // define semantics for class fields. See docs/contributing/code-style.md.
+      'no-restricted-syntax': ['error', {
+        selector: 'PropertyDefinition[declare!=true][value=null]',
+        message: 'Declare a class field without initializer with `declare`, e.g. `declare left: number`.',
+      }],
     },
   },
   {

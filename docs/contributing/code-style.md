@@ -24,7 +24,24 @@ In a `.ts` module:
 - Give a reusable shape a name (`export type`, `export interface`), like `List<T>` or
   `NormalizeURLOptions`. Mark a type that isn't public API with `@internal` in a `/** */` comment.
 - Declare class fields with `declare` (`declare left: number`). A field without `declare` makes
-  the compiled class define the property, which costs bytes and changes behavior.
+  the compiled class define the property, which costs bytes and changes behavior (differently in
+  `unpoly.js` and `unpoly.es6.js`, whose targets treat class fields differently). ESLint reports a
+  field without `declare` or an initializer.
+- When a function resolves its argument by reassigning it (`element = getSmart(element)`),
+  TypeScript keeps the parameter's declared type and reports the uses below. Write the typed
+  signature as an overload and leave the implementation untyped:
+
+  ```ts
+  export function morph(oldElement: ElementOrSelector, newElement: ElementOrSelector, ...): Promise<void>
+  export async function morph(oldElement, newElement, ...) {
+    oldElement = getSmart(oldElement)
+  ```
+
+  Callers get the typed signature, the body stays as it was. A new local variable or a cast would be
+  checked, but changes the emitted code. Use a plain `any` parameter (with a comment) only where an
+  overload isn't possible, like a function expression passed to `mockable()`.
+- Where the honest code would emit differently, a cast with a comment is fine, e.g.
+  `(now as any) - (this.loadedAt as any)` instead of `now.getTime() - …`.
 - `any` is fine where a precise type would be complex.
 - Typing must not change what the build emits. Compare `unpoly.min.js` before and after.
 
