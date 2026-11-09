@@ -4,7 +4,6 @@ import { popCookie } from './browser.js'
 import { mockable } from './mockable.js'
 import { Config } from './util/config.js'
 import type { ConfigWith } from './util/config.js'
-import type { PlainObject } from './util.js'
 import type { Params } from './form/params.js'
 
 /*-
@@ -1058,6 +1057,17 @@ See [How cache entries are matched](/learn/optimizing-responses#cache-matching) 
 @stable
 */
 
+/**
+The settings in `up.protocol.config`, described in its doc comment.
+*/
+export interface ProtocolConfig {
+  methodParam: string
+  csrfParam: string | (() => string)
+  csrfToken: string | (() => string)
+  csrfHeader: string
+  maxHeaderSize: number
+}
+
 /*-
 Configures strings used in the optional [server protocol](/api/up.protocol).
 
@@ -1126,14 +1136,14 @@ Configures strings used in the optional [server protocol](/api/up.protocol).
 
 @stable
 */
-export const config = new Config<PlainObject>('up.protocol.config', () => ({
+export const config = new Config('up.protocol.config', (): ProtocolConfig => ({
   methodParam: '_method',
   csrfParam() { return metaContent('csrf-param') },
   csrfToken() { return metaContent('csrf-token') },
   // TODO: Let's move config.cspNonce() to up.script.config after all
   csrfHeader: 'X-CSRF-Token', // Used by Rails. Other frameworks use different headers.
   maxHeaderSize: 2048,
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<ProtocolConfig>
 
 export function csrfHeader(): string {
   return evalOption(config.csrfHeader)
