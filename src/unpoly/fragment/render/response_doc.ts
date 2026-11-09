@@ -108,7 +108,8 @@ export class ResponseDoc {
   }
 
   _buildFauxDocument(nodes: Node | List<Node>): HTMLElement
-  _buildFauxDocument(nodes) {
+  // The nodes are wrapped in a list in place.
+  _buildFauxDocument(nodes: any) {
     nodes = wrapList(nodes)
 
     // We're creating a faux document to wrap around a fragment root that is not already a `Document`.

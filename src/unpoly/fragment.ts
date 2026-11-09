@@ -538,8 +538,7 @@ up.fragment.source('#two') // returns '/foo'
   The URL from which the element was loaded.
 @stable
 */
-export function sourceOf(element: ElementOrSelector, options?: PlainObject): string | undefined
-export function sourceOf(element, options = {}) {
+export function sourceOf(element: ElementOrSelector, options: PlainObject = {}): string | undefined {
   element = getSmart(element, options)
   return closestAttr(element, 'up-source')
 }
@@ -2135,7 +2134,7 @@ export const reload = mockable(function reload(...args: RenderArgs | []): Render
 })
 
 function conditionalHeaders(element: Element): Record<string, string> {
-  let headers = {}
+  let headers: Record<string, string> = {}
   let time = timeOf(element)
   if (time) {
     headers['If-Modified-Since'] = time.toUTCString()
@@ -2479,7 +2478,7 @@ function matchesPattern(pattern: any, str: string): boolean {
 }
 
 function goodClassesForTarget(element: Element): string[] {
-  let isGood = (klass) => !some(config.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
+  let isGood = (klass: string) => !some(config.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
   return filterList(element.classList, isGood)
 }
 
@@ -2894,8 +2893,7 @@ up.fragment.matches(element, element) // result: true
 
 @stable
 */
-export function matches(element: ElementOrSelector, selector: string | Element, options?: PlainObject): boolean
-export function matches(element, selector, options = {}) {
+export function matches(element: ElementOrSelector, selector: string | Element, options: PlainObject = {}): boolean {
   element = getOne(element)
   if (isElement(selector)) {
     let target = tryToTarget(selector)
@@ -3018,7 +3016,7 @@ export const abort = mockable(function abort(...args: any[]): void {
   let options = parseTargetAndOptions(args)
 
   // The function that checks whether a given function will be aborted.
-  let testFn
+  let testFn: (request: UpRequest) => boolean
 
   // The reason will be logged with the up:request:abort event when we actually abort an event.
   // It should be a string, not an array that goes through sprintf().
@@ -3026,7 +3024,7 @@ export const abort = mockable(function abort(...args: any[]): void {
 
   // At the end we're going to emit up:fragment:aborted on these elements.
   // Other async code observing these elements can then chose to abort itself.
-  let elements
+  let elements: Element[]
 
   // An element can be passed as first argument (public API) or as { target } option.
   // There's also an internal API that { target } can be an array of elements.
@@ -3052,7 +3050,7 @@ export const abort = mockable(function abort(...args: any[]): void {
     reason ||= 'Aborting requests within ' + layers.join(', ')
   }
 
-  let testFnWithAbortable = (request) => request.abortable && testFn(request)
+  let testFnWithAbortable = (request: UpRequest) => request.abortable && testFn(request)
   abortRequests(testFnWithAbortable, { ...options, reason })
 
   // We *always* emit an `up:fragment:aborted` event, even when there is no
@@ -3207,7 +3205,7 @@ export function onFirstIntersect(element: Element, callback: () => void, { margi
 
   // This function will be called (1) for the initial intersection check
   // and (2) whenever the intersection state changes.
-  function processIntersectEntries(entries) {
+  function processIntersectEntries(entries: IntersectionObserverEntry[]) {
     for (let entry of entries) {
       if (entry.isIntersecting) {
         disconnect()
