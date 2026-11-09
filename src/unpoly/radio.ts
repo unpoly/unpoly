@@ -10,6 +10,16 @@ import { FragmentPolling } from './radio/fragment_polling.js'
 import { callbackAttr, registerAttrCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
+import type { PlainObject } from './util.js'
+
+/**
+The render steps for hungry elements, on the targeted layer and on other layers.
+@internal
+*/
+export interface HungrySteps {
+  current: PlainObject[]
+  other: PlainObject[]
+}
 
 /*-
 Features to update fragments without a user click.
@@ -57,9 +67,9 @@ export const config = new Config('up.radio.config', () => ({
   pollInterval: 30000,
 }))
 
-export function hungrySteps(renderOptions) {
+export function hungrySteps(renderOptions: PlainObject): HungrySteps {
   let { hungry, origin, layer: renderLayer, meta } = renderOptions
-  let steps = { current: [], other: [] }
+  let steps: HungrySteps = { current: [], other: [] }
 
   if (!hungry) return steps
 
@@ -349,7 +359,7 @@ The given element does not need an `[up-poll]` attribute.
   @mix up.render/loading-state
 @stable
 */
-export function startPolling(fragment, options = {}) {
+export function startPolling(fragment: Element, options: PlainObject = {}): void {
   FragmentPolling.forFragment(fragment).forceStart(options)
 }
 
@@ -361,11 +371,11 @@ Stops [polling](/api/up-poll) the given element.
   The fragment to stop reloading.
 @stable
 */
-export function stopPolling(element) {
+export function stopPolling(element: Element): void {
   FragmentPolling.forFragment(element).forceStop()
 }
 
-export function pollOptions(fragment, options = {}) {
+export function pollOptions(fragment: Element, options: PlainObject = {}): PlainObject {
   const defaults = { background: true }
   const parser = new OptionsParser(fragment, options, { defaults })
   parser.number('interval', { default: config.pollInterval })
@@ -543,7 +553,7 @@ See [notification flashes](/learn/flashes) for more details and examples.
 @stable
 */
 
-export function install() {
+export function install(): void {
   registerAttrCompiler('up-poll', function(fragment) {
     FragmentPolling.forFragment(fragment).onPollAttributeObserved()
   })
