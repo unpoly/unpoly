@@ -28,11 +28,11 @@ warning in the console; apps that don't, break — which is why the polyfill is 
 of the rename.
 
 `src/unpoly-migrate/` mirrors the [namespaces](code-organization.md#responsibilities),
-so a renamed `up.form` API gets its polyfill in `src/unpoly-migrate/form.js`.
+so a renamed `up.form` API gets its polyfill in `src/unpoly-migrate/form.ts`.
 
 `up.migrate` has helpers for the usual cases — renamed or removed attributes, events and
 properties, renamed namespaces, functions that used to be async. A renamed *function* is
-delegated by hand with `up.migrate.deprecated()`. Read `src/unpoly-migrate/migrate.js`
+delegated by hand with `up.migrate.deprecated()`. Read `src/unpoly-migrate/migrate.ts`
 before hand-rolling one. Two examples follow.
 
 

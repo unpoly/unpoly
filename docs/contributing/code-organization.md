@@ -25,7 +25,7 @@ This repository is organized like this:
 ```
 src/                      # Webpack entry points for Unpoly's main and optional bundles
   unpoly.js               # ... Entry point for main Unpoly bundle (JS, CSS)
-  unpoly-migrate.js       # ... Entry point for optional bundle that polyfills deprecated features
+  unpoly-migrate.ts       # ... Entry point for optional bundle that polyfills deprecated features
   ...                     # ... Other entry points for optional bundles
 
   unpoly/                 # Source code (TS, JS, CSS) for Unpoly's namespaces
@@ -255,7 +255,7 @@ in `src/unpoly/` is only ever reached through one of them.
 - `src/unpoly.js` is the main bundle. It is built twice: `unpoly.js` for current
   browsers, and `unpoly.es6.js` for
   [older ones](https://unpoly.com/install/legacy-browsers).
-- `src/unpoly-migrate.js` polyfills renamed and removed APIs, so an app can
+- `src/unpoly-migrate.ts` polyfills renamed and removed APIs, so an app can
   [upgrade](https://unpoly.com/changes/upgrading) without changing all its call sites at
   once. See [Compatibility](compatibility.md#breaking-changes) for how to write one.
 - `src/unpoly-bootstrap{3,4,5}.js` adapt Unpoly to

@@ -931,7 +931,7 @@ Two things to know:
 - **Every file that documents features must declare its own `@namespace` (or `@class`)
   first.** Features attach to the most recently parsed interface, so a file without one
   would file its features under whichever namespace happened to be parsed before it.
-  `src/unpoly-migrate/form.js` opens with `@namespace up.form` for exactly this reason;
+  `src/unpoly-migrate/form.ts` opens with `@namespace up.form` for exactly this reason;
   repeated declarations of the same namespace are merged.
 - **There is no `@see` directive.** Point at related features in the prose, e.g.
   "See also `up.network.isBusy()`.", and at guide pages with `@learn-ref`.

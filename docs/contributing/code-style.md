@@ -7,8 +7,9 @@ most are not.
 ## Moving to TypeScript
 
 We are migrating Unpoly to TypeScript, one module at a time, leaf modules first. All namespaces
-are TypeScript, and so are the layer classes; the render pipeline (`fragment/render/`), the entry
-files and `unpoly-migrate` are still plain JavaScript.
+are TypeScript, and so are the render pipeline (`fragment/render/`), the layer classes and
+`unpoly-migrate`. Only the entry files `unpoly.js` and `unpoly-bootstrap{3,4,5}.js` are still plain
+JavaScript.
 
 The build runs every source file through TypeScript only to transpile it (ts-loader with
 `transpileOnly`), and never checks types. The only type check is `bin/typecheck`, which runs
@@ -44,6 +45,11 @@ In a `.ts` module:
   `(now as any) - (this.loadedAt as any)` instead of `now.getTime() - …`.
 - `any` is fine where a precise type would be complex.
 - Typing must not change what the build emits. Compare `unpoly.min.js` before and after.
+- `unpoly-migrate` is loosely typed for now. Its files are scripts, not modules: they patch
+  `window.up` (which TypeScript sees as `any`) and import nothing, since `unpoly-migrate.js` is a
+  separate bundle and a class imported from `src/unpoly/` would be a second copy. Type parameters
+  where it's easy, and mark each function that core calls on `up.migrate` with a "Core calls this
+  hook" comment.
 
 Public types also appear in [doc comments](documentation.md), in a notation loosely inspired
 by TypeScript. Those document intent for the reader; no tool verifies them.
