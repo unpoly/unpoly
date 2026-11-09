@@ -182,14 +182,15 @@ export class RenderJob {
   _getChange(): ChangeFromURL | ChangeFromResponse | ChangeFromContent {
     // (1) With a given { url } we want to handle { abort } when the new request is known.
     //     This way we can exclude the new request from aborting.
-    //     The { handleAbort } callback is called in ChangeFromURL#_onRequestProcessed()
+    //     The { handleAbort } callback is called in ChangeFromURL#execute()
     // (2) When rendering local content, we want to handle { abort } when we render.
     //     This way we don't abort when the pass was aborted by { guardEvent }, { confirm }
     //     or any other error on the way.
     //     The { handleAbort } callback is called in ChangeFromContent#_onPlanApplicable()
     // (3) FromURL is eventually going to call FromContent.
     //     We memoize the callback so we only run it once.
-    let handleAbort = memoize((request: AbortOptionProps) => this._handleAbortOption(request))
+    // (4) Both callers pass the preflight props of the change. FromURL adds the new { request }.
+    let handleAbort = memoize((preflightProps: AbortOptionProps) => this._handleAbortOption(preflightProps))
     let renderOptions = { ...this.renderOptions, handleAbort }
 
     if (renderOptions.url) {
