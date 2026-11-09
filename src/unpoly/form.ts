@@ -1531,7 +1531,8 @@ function getAssociatedForm(element: Element): HTMLFormElement | undefined {
   let formID = element.getAttribute('form')
   if (formID) {
     let selector = 'form' + idSelector(formID)
-    return getSmart(selector, { layer: element })
+    // The selector only matches a <form>.
+    return getSmart(selector, { layer: element }) as HTMLFormElement
   }
 }
 

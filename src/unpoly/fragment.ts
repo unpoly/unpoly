@@ -1521,7 +1521,8 @@ without filtering by layer or destruction state.
 @signature
 */
 // Takes a selector or element, optionally preceded by a root element, and followed by options.
-// TODO(types): HTMLElement | undefined, once callers handle it.
+export function getSmart(selector: ElementOrSelector, options?: PlainObject): HTMLElement | undefined
+export function getSmart(root: ParentNode, selector: ElementOrSelector, options?: PlainObject): HTMLElement | undefined
 export function getSmart(...args: any[]): any {
   let [root, selector, options] = parseGetArgs(args)
 
@@ -1547,6 +1548,8 @@ export function getSmart(...args: any[]): any {
   }).find()
 }
 
+export function getFirstDescendant(selector: string, options?: PlainObject): HTMLElement | undefined
+export function getFirstDescendant(root: ParentNode, selector: string, options?: PlainObject): HTMLElement | undefined
 export function getFirstDescendant(...args: any[]): any {
   let [root, selectorString, options] = parseGetArgs(args)
 
@@ -1628,6 +1631,11 @@ let foosInContainer = up.fragment.all(container, '.foo')
 @stable
 */
 // Takes a selector, optionally preceded by a root element, and followed by options.
+// A selector string gives an array. An element or list is returned as a list.
+export function getAll(selector: string, options?: PlainObject): HTMLElement[]
+export function getAll(root: ParentNode, selector: string, options?: PlainObject): HTMLElement[]
+export function getAll(selector: ElementOrSelector, options?: PlainObject): List<HTMLElement>
+export function getAll(root: ParentNode, selector: ElementOrSelector, options?: PlainObject): List<HTMLElement>
 export function getAll(...args: any[]): any {
   let [root, selectorString, options] = parseGetArgs(args)
 
