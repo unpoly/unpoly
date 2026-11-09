@@ -8,6 +8,22 @@ import { EventListener } from './event/event_listener.js'
 import { layerStack } from './layer.js'
 import { printUserEvent } from './log.js'
 import { registerDestructor } from './script.js'
+import type { PlainObject } from './util.js'
+
+/**
+A function that removes the event listeners registered by `up.on()`.
+*/
+export type UnbindFn = () => void
+
+/**
+An event built by `up.event.fork()`, with the event it was forked from.
+*/
+export type ForkedEvent = Event & { originalEvent: Event }
+
+/**
+The device that the user last interacted with. See `up.event.inputDevice`.
+*/
+export type InputDevice = 'unknown' | 'key' | 'pointer'
 
 /*-
 Features to emit and observe DOM events.
@@ -17,7 +33,7 @@ Features to emit and observe DOM events.
 @namespace up.event
 */
 
-function reset() {
+function reset(): void {
   // Resets the list of registered event listeners to the
   // moment when the framework was booted.
   for (let globalElement of [window, document, getRoot(), document.body]) {
@@ -159,7 +175,8 @@ up.on(element, 'mouseenter mouseleave', function(event) {
 @stable
 @signature
 */
-export function on(...args) {
+// TODO(types): Overloads for the argument variants of up.on(), see its doc comment.
+export function on(...args: any[]): UnbindFn {
   return buildListenerGroup(args).bind()
 }
 
@@ -196,7 +213,7 @@ up.event.onClosest(element, 'click', function() {
   When the element is destroyed, the callback will be unsubscribed automatically.
 @experimental
 */
-export function onClosest(...args) {
+export function onClosest(...args: any[]): UnbindFn {
   let [fragment, eventType, { layer }, callback] = parseArgs(args, 'val', 'val', 'options', 'callback')
   layer &&= layerStack.get(layer, { origin: fragment })
   let guard = (event) => event.target.contains(fragment) && (!layer || layer.contains(event.target))
@@ -234,15 +251,15 @@ up.off('click', '.button', listener)
 @include up.off/after-element
 @stable
 */
-export function off(...args) {
+export function off(...args: any[]): void {
   return buildListenerGroup(args).unbind()
 }
 
-function buildListenerGroup(args, options) {
+function buildListenerGroup(args: any[], options?: PlainObject): EventListenerGroup {
   return EventListenerGroup.fromBindArgs(args, options)
 }
 
-function buildEmitter(args) {
+function buildEmitter(args: any[]): EventEmitter {
   return EventEmitter.fromEmitArgs(args)
 }
 
@@ -305,7 +322,7 @@ up.emit('my:event', { foo: 'bar' })
 @stable
 @signature
 */
-export function emit(...args) {
+export function emit(...args: any[]): Event {
   return buildEmitter(args).emit()
 }
 
@@ -339,7 +356,7 @@ up.emit(event)                       // emits the event
   The unemitted event object.
 @stable
 */
-export function build(...args) {
+export function build(...args: any[]): Event {
   const props = extractOptions(args)
   const type = args[0] || props.type || fail('Missing event type')
 
@@ -359,7 +376,7 @@ export function build(...args) {
 @return {Event}
 @internal
 */
-export function assertEmitted(...args) {
+export function assertEmitted(...args: any[]): void {
   return buildEmitter(args).assertEmitted()
 }
 
@@ -379,7 +396,7 @@ up.event.onEscape(function(event) {
   The listener function that will be called when `Escape` is pressed.
 @experimental
 */
-export function onEscape(listener) {
+export function onEscape(listener: (event: KeyboardEvent) => any): UnbindFn {
   return on('keydown', function(event) {
     if (event.key === 'Escape') {
       return listener(event)
@@ -409,7 +426,7 @@ up.on('click', 'a.disabled', function(event) {
   The event to stop processing for.
 @stable
 */
-export function halt(event, options = {}) {
+export function halt(event: Event, options: { log?: boolean } = {}): void {
   if (options.log) printUserEvent(event)
   event.stopImmediatePropagation()
   event.preventDefault()
@@ -421,7 +438,7 @@ export const keyModifiers = ['metaKey', 'shiftKey', 'ctrlKey', 'altKey']
 @function up.event.isModified
 @internal
 */
-export function isModified(event) {
+export function isModified(event: MouseEvent): boolean {
   return (event.button > 0) || some(keyModifiers, (modifier) => event[modifier])
 }
 
@@ -437,12 +454,12 @@ so `up.link.convertClicks()` skips its checks against mouse effects for such cli
 @return {boolean}
 @internal
 */
-export const isSyntheticClick = mockable(function isSyntheticClick(event) {
+export const isSyntheticClick = mockable(function isSyntheticClick(event: Event): boolean {
   return !event.isTrusted
 })
 
-export function fork(originalEvent, newType, copyKeys = []) {
-  const newEvent = build(newType, pick(originalEvent, copyKeys))
+export function fork<E extends Event>(originalEvent: E, newType: string, copyKeys: (keyof E)[] = []): ForkedEvent {
+  const newEvent = build(newType, pick(originalEvent, copyKeys)) as ForkedEvent
   newEvent.originalEvent = originalEvent; // allow users to access other props through event.originalEvent.prop
 
   ['stopPropagation', 'stopImmediatePropagation', 'preventDefault'].forEach(function(key) {
@@ -543,7 +560,7 @@ to the `/menu` path.
   The event properties, serialized as [relaxed JSON](/api/relaxed-json).
 @stable
 */
-function executeEmitAttr(event, element) {
+function executeEmitAttr(event: MouseEvent, element: Element): void {
   if (isModified(event)) { return }
   const eventType = stringAttr(element, 'up-emit')
   const eventProps = jsonAttr(element, 'up-emit-props')
@@ -553,7 +570,7 @@ function executeEmitAttr(event, element) {
 }
 
 
-let inputDevices = ['unknown']
+let inputDevices: InputDevice[] = ['unknown']
 
 /*-
 The class of input device used to cause the current event.
@@ -603,16 +620,16 @@ window.addEventListener('scroll', function() {
   A string describing the current input device class.
 @experimental
 */
-export function getInputDevice() {
+export function getInputDevice(): InputDevice {
   return last(inputDevices)
 }
 
-function observeInputDevice(newModality) {
+function observeInputDevice(newModality: InputDevice): void {
   inputDevices.push(newModality)
   setTimeout(() => inputDevices.pop())
 }
 
-export function install() {
+export function install(): void {
   on('up:click', '[up-emit]', executeEmitAttr)
 
   on('keydown keyup', { capture: true }, () => observeInputDevice('key'))
