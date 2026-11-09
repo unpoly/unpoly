@@ -10,6 +10,14 @@ export interface EvalEnv {
   thisContext?: any
 }
 
+// The inline script that _runAsScriptElement() inserts can only reach us through the global `up`.
+declare module '../../../unpoly.js' {
+  interface Up {
+    /** @internal */
+    noncedEval?: EvalEnv & { value?: any, error?: any }
+  }
+}
+
 export class NonceableCallback {
   declare script: string
   declare nonce: string | undefined
