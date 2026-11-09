@@ -13,6 +13,58 @@ import { MotionController } from './motion/motion_controller.js'
 import { Config } from './util/config.js'
 import { Registry } from './util/registry.js'
 import { absolutize, closest, rootHeight, rootWidth } from './viewport.js'
+import type { PlainObject } from './util.js'
+import type { ElementOrSelector, StyleProps } from './element.js'
+import type { OptionsParserOptions } from './element/options_parser.js'
+
+/**
+The duration and easing of an animation, after applying the defaults from `up.motion.config`.
+*/
+export interface TimingOptions {
+  duration: number
+  easing: string
+}
+
+/**
+A function that animates an element. See `up.animation()`.
+*/
+export type AnimationFn = (element: HTMLElement, options: TimingOptions) => Promise<any>
+
+/**
+A function that animates the transition from an old to a new element. See `up.transition()`.
+*/
+export type TransitionFn = (oldElement: HTMLElement, newElement: HTMLElement, options: TimingOptions) => Promise<any>
+
+/**
+An animation: the name of a registered animation, the CSS properties of the last frame,
+a function, or `false` or `'none'` for no animation.
+*/
+export type AnimationValue = string | StyleProps | AnimationFn | false
+
+/**
+A transition: the name of a registered transition, a pair of animations (also as `'old/new'`),
+a function, or `false` or `'none'` for no transition.
+*/
+export type TransitionValue = string | [AnimationValue, AnimationValue] | TransitionFn | false
+
+/**
+Options for `up.animate()`.
+*/
+export interface AnimateOptions {
+  duration?: number
+  easing?: string
+  onFinished?: () => void
+}
+
+/**
+Options for `up.morph()` and `up.motion.swap()`.
+*/
+export interface SwapOptions {
+  duration?: number
+  easing?: string
+  beforeRemove?: () => void
+  afterRemove?: () => void
+}
 
 /*-
 Features to animate fragment updates.
@@ -56,7 +108,7 @@ export const config = new Config('up.motion.config', () => ({
   enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches
 }))
 
-export let namedAnimations = new Registry('animation', findAnimationFn)
+export let namedAnimations = new Registry<AnimationFn>('animation', findAnimationFn)
 
 /*-
 Defines a named animation.
@@ -100,7 +152,7 @@ will take care of all these points.
 @signature
 */
 
-export let namedTransitions = new Registry('transition', findTransitionFn)
+export let namedTransitions = new Registry<TransitionFn>('transition', findTransitionFn)
 
 /*-
 Defines a named transition that [morphs](/api/up.morph) from one element to another.
@@ -146,7 +198,7 @@ will take care of all these points.
 @signature
 */
 
-function reset() {
+function reset(): void {
   motionController.reset()
 }
 
@@ -217,7 +269,8 @@ the new animation begins.
   A promise for the animation's end.
 @stable
 */
-export const animate = mockable(async function animate(element, animationValue, { duration, easing, onFinished } = {}) {
+// The element may also be a selector.
+export const animate = mockable(async function animate(element: any, animationValue: AnimationValue, { duration, easing, onFinished }: AnimateOptions = {}): Promise<void> {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   element = getSmart(element)
 
@@ -249,7 +302,7 @@ export const animate = mockable(async function animate(element, animationValue, 
   await motionController.startFunction([element], trackable)
 })
 
-function canAnimateElement(element) {
+function canAnimateElement(element: Element): boolean {
   return !isSingleton(element)
 }
 
@@ -263,7 +316,7 @@ This function will:
 @function effectiveTimingOptions
 @internal
 */
-function effectiveTimingOptions({ duration, easing }) {
+function effectiveTimingOptions({ duration, easing }: { duration?: number, easing?: string }): TimingOptions {
   return {
     duration: config.enabled ? (duration ?? config.duration) : 0,
     easing: easing ?? config.easing,
@@ -292,7 +345,7 @@ finish event.
   A promise that fulfills when the animation ends.
 @internal
 */
-async function animateNow(element, lastFrame, { duration, easing, finishedFrame }) {
+async function animateNow(element: HTMLElement, lastFrame: StyleProps, { duration, easing, finishedFrame }: TimingOptions & { finishedFrame?: StyleProps }): Promise<void> {
   // There is also Animation#commitStyles(), but that has two issues:
   // (A) Throws on detached elements
   // (B) Can't set an empty last frame property, e.g. when we're transforming towards { transform: '' }
@@ -339,6 +392,7 @@ Does nothing if there are no animations to complete.
   A promise that fulfills when animations and transitions have finished.
 @stable
 */
+export function finish(element?: ElementOrSelector): any
 export function finish(element) {
   element = getSmart(element)
   motionController.finish(element)
@@ -411,6 +465,7 @@ You can define additional named transitions using [`up.transition()`](/api/up.tr
   A promise that fulfills when the transition ends.
 @stable
 */
+export function morph(oldElement: ElementOrSelector, newElement: ElementOrSelector, transitionValue: TransitionValue, options?: SwapOptions): Promise<void>
 export async function morph(oldElement, newElement, transitionValue, options) {
   // (A) If passed a selector, up.fragment.get() will prefer a match on the current layer.
   // (B) This also unwraps jQuery collections.
@@ -428,7 +483,7 @@ export async function morph(oldElement, newElement, transitionValue, options) {
 // (A) Compilers may change newElement's size or position.
 // (B) Compilers capture an [up-keep] identity before a transition adds inline styles.
 // (C) We scroll newElement into position before we start the enter animation.
-export function swap(oldElement, newElement, transitionValue, { duration, easing, beforeRemove, afterRemove } = {}) {
+export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitionValue: TransitionValue, { duration, easing, beforeRemove, afterRemove }: SwapOptions = {}): () => Promise<any> {
   // Convert the given transition value to a function we can call.
   // This returns undefined for values like `undefined`, `false`, `[null, null]` etc.
   const transitionFn = guardFn(findTransitionFn(transitionValue))
@@ -480,7 +535,7 @@ export function swap(oldElement, newElement, transitionValue, { duration, easing
   return () => motionController.startFunction(cluster, async () => play?.())
 }
 
-function findTransitionFn(value) {
+function findTransitionFn(value: TransitionValue): TransitionFn | undefined {
   if (isNone(value)) {
     return undefined
   } else if (isFunction(value)) {
@@ -488,13 +543,13 @@ function findTransitionFn(value) {
   } else if (isArray(value)) {
     return composeTransitionFn(...value)
   } else if (isString(value) && value.includes('/')) {
-    return composeTransitionFn(...value.split('/'))
+    return composeTransitionFn(...value.split('/') as [string, string])
   } else {
-    return namedTransitions.get(value)
+    return namedTransitions.get(value as string)
   }
 }
 
-function composeTransitionFn(oldAnimation, newAnimation) {
+function composeTransitionFn(oldAnimation: AnimationValue, newAnimation: AnimationValue): TransitionFn | undefined {
   // A composition of two null-animations is a null-transform
   // and should be skipped. If only one half is a null-animation, we animate the other half.
   if (!isNone(oldAnimation) || !isNone(newAnimation)) {
@@ -507,7 +562,7 @@ function composeTransitionFn(oldAnimation, newAnimation) {
   }
 }
 
-function findAnimationFn(value) {
+function findAnimationFn(value: AnimationValue): AnimationFn | undefined {
   if (isNone(value)) {
     return undefined
   } else if (isFunction(value)) {
@@ -515,16 +570,16 @@ function findAnimationFn(value) {
   } else if (isOptions(value)) {
     return (element, options) => animateNow(element, value, options)
   } else {
-    return namedAnimations.get(value)
+    return namedAnimations.get(value as string)
   }
 }
 
 // Have a separate function so we can mock it in specs.
-export const swapElementsDirectly = mockable(function(oldElement, newElement) {
+export const swapElementsDirectly = mockable(function(oldElement: Element, newElement: Element): void {
   oldElement.replaceWith(newElement)
 })
 
-export function motionOptions(element, options, parserOptions) {
+export function motionOptions(element: Element, options?: PlainObject, parserOptions?: OptionsParserOptions): PlainObject {
   options = newOptions(options)
   let parser = new OptionsParser(element, options, parserOptions)
 
@@ -544,37 +599,38 @@ to be skipped.
 @function up.motion.isNone
 @internal
 */
-export function isNone(motionValue) {
+export function isNone(motionValue: any): boolean {
   // false, undefined, '', null, the string "none" and an empty object of CSS properties are all ways to skip animations
   return !motionValue || motionValue === 'none' || (isOptions(motionValue) && isBlank(motionValue))
 }
 
-function registerOpacityAnimation(name, from, to) {
+// From is an opacity or a function that reads it from the element.
+function registerOpacityAnimation(name: string, from: any, to: number): void {
   namedAnimations.put(name, function(element, options) {
     element.style.opacity = evalOption(from, element)
     return animateNow(element, { opacity: to }, options)
   })
 }
 
-function currentOpacity(element) {
+function currentOpacity(element: Element): string {
   return computedStyle(element, 'opacity')
 }
 
 
-function translateCSS(dx, dy) {
+function translateCSS(dx: number, dy: number): StyleProps {
   return { transform: `translate(${dx}px, ${dy}px)` }
 }
 
-function zeroTranslateCSS() {
+function zeroTranslateCSS(): StyleProps {
   return { transform: 'translate(0, 0)' }
 }
 
-function untranslatedBox(element) {
+function untranslatedBox(element: HTMLElement): DOMRect {
   setInlineStyle(element, zeroTranslateCSS())
   return element.getBoundingClientRect()
 }
 
-function registerMoveAnimations(direction, boxToTransform) {
+function registerMoveAnimations(direction: string, boxToTransform: (box: DOMRect) => StyleProps): void {
   const animationToName = `move-to-${direction}`
   const animationFromName = `move-from-${direction}`
 
@@ -650,7 +706,7 @@ version will fade in.
 @signature
 */
 
-export function install() {
+export function install(): void {
   on('up:framework:boot', function() {
     // Explain to the user why animations aren't working.
     // E.g. the user might have disabled animations in her OS.
