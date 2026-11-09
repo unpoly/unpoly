@@ -1,26 +1,39 @@
-import { isNumber, isString } from '../../util.js'
+import { isDefined, isNumber, isString, pickBy } from '../../util.js'
 import { FragmentProcessor } from './fragment_processor.js'
 import { restoreScroll, reveal, revealHash, scrollTo } from '../../viewport.js'
 
 export class FragmentScrolling extends FragmentProcessor {
 
-  keys() {
-    return super.keys().concat([
-      'hash',
-      'mode',
-      'revealTop',
-      'revealMax',
-      'revealSnap',
-      'revealPadding',
-      'behavior',
-      'oldScrollTops',
-    ])
-  }
-
   constructor(options) {
+    super(options)
+    this.hash = options.hash
+    this.mode = options.mode
+    this.revealTop = options.revealTop
+    this.revealMax = options.revealMax
+    this.revealSnap = options.revealSnap
+    this.revealPadding = options.revealPadding
     // Render options call it { scrollBehavior } to stand out among many other options.
     // The viewport functions we call only take scrolling options, and call it { behavior }.
-    super({ ...options, behavior: options.scrollBehavior })
+    //
+    // The processor for a match in a selector map is built from our attributes, which have
+    // { behavior } but no { scrollBehavior }, so it scrolls instantly. This is how it has
+    // always worked, but it may be a bug.
+    this.behavior = options.scrollBehavior
+    this.oldScrollTops = options.oldScrollTops
+  }
+
+  attributes() {
+    return pickBy({
+      ...super.attributes(),
+      hash: this.hash,
+      mode: this.mode,
+      revealTop: this.revealTop,
+      revealMax: this.revealMax,
+      revealSnap: this.revealSnap,
+      revealPadding: this.revealPadding,
+      behavior: this.behavior,
+      oldScrollTops: this.oldScrollTops,
+    }, isDefined)
   }
 
   processPrimitive(opt) {

@@ -7,19 +7,16 @@ import { getSmart } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { Layer } from '../layer/base.js'
 import { config, printToStandard } from '../log.js'
-import { Record } from '../util/record.js'
 
-export class EventEmitter extends Record {
+export class EventEmitter {
 
-  keys() {
-    return [
-      'target',
-      'event',
-      'baseLayer',
-      'callback',
-      'log',
-      'ensureBubbles',
-    ]
+  constructor(options) {
+    this.target = options.target
+    this.event = options.event
+    this.baseLayer = options.baseLayer
+    this.callback = options.callback
+    this.log = options.log
+    this.ensureBubbles = options.ensureBubbles
   }
 
   emit() {

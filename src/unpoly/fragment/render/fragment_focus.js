@@ -1,4 +1,4 @@
-import { isString } from '../../util.js'
+import { isDefined, isString, pickBy } from '../../util.js'
 import { subtreeFirst } from '../../element.js'
 import { FragmentProcessor } from './fragment_processor.js'
 import { doFocus, firstHashTarget, restoreFocus } from '../../viewport.js'
@@ -7,13 +7,22 @@ const PREVENT_SCROLL_OPTIONS = { preventScroll: true }
 
 export class FragmentFocus extends FragmentProcessor {
 
-  keys() {
-    return super.keys().concat([
-      'hash',
-      'focusVisible',
-      'focusCapsule',
-      'inputDevice',
-    ])
+  constructor(options) {
+    super(options)
+    this.hash = options.hash
+    this.focusVisible = options.focusVisible
+    this.focusCapsule = options.focusCapsule
+    this.inputDevice = options.inputDevice
+  }
+
+  attributes() {
+    return pickBy({
+      ...super.attributes(),
+      hash: this.hash,
+      focusVisible: this.focusVisible,
+      focusCapsule: this.focusCapsule,
+      inputDevice: this.inputDevice,
+    }, isDefined)
   }
 
   processPrimitive(opt) {

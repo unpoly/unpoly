@@ -1,20 +1,28 @@
 import {
-  findInList, getComplexTokens, isArray, isElement, isFunction, isOptions, isString,
+  findInList, getComplexTokens, isArray, isDefined, isElement, isFunction, isOptions, isString, pickBy,
 } from '../../util.js'
 import { guard } from '../../error.js'
 import { contains, getSmart } from '../../fragment.js'
 import { printToWarn } from '../../log.js'
-import { Record } from '../../util/record.js'
 
-export class FragmentProcessor extends Record {
+export class FragmentProcessor {
 
-  keys() {
-    return [
-      'fragment',
-      'autoMeans',
-      'origin',
-      'layer'
-    ]
+  constructor(options) {
+    this.fragment = options.fragment
+    this.autoMeans = options.autoMeans
+    this.origin = options.origin
+    this.layer = options.layer
+  }
+
+  // The options that we pass to a function value, and to the processor for a match in a
+  // selector map. Subclasses add their own.
+  attributes() {
+    return pickBy({
+      fragment: this.fragment,
+      autoMeans: this.autoMeans,
+      origin: this.origin,
+      layer: this.layer,
+    }, isDefined)
   }
 
   process(opt) {

@@ -1,7 +1,6 @@
 import { evalOption, getSimpleTokens, variant } from '../util.js'
 import { cache, config } from '../network.js'
 import { CSPInfo } from '../script/csp/csp_info.js'
-import { Record } from '../util/record.js'
 
 const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
 
@@ -21,7 +20,7 @@ console.log(response.text)   // "<html><body>..."
 */
 // A class expression, so the class is still named `Response` at runtime, while the binding
 // doesn't shadow the browser's `Response` here or in importers.
-export const UpResponse = class Response extends Record {
+export const UpResponse = class Response {
 
   /*-
   The HTTP method used for the request that produced this response.
@@ -117,34 +116,25 @@ export const UpResponse = class Response extends Record {
   @experimental
   */
 
-  keys() {
-    return [
-      'method',
-      'url',
-      'text',
-      'status',
-      'request',
-      'xhr', // optional
-      'target',
-      'title',
-      'openLayer',
-      'acceptLayer',
-      'dismissLayer',
-      'eventPlans',
-      'context',
-      'expireCache',
-      'evictCache',
-      'headers', // custom headers to for synthetic reponses without { xhr } property
-      'loadedAt',
-      'fail',
-    ]
-  }
-
-  defaults() {
-    return {
-      headers: {},
-      loadedAt: new Date(),
-    }
+  constructor(options = {}) {
+    this.method = options.method
+    this.url = options.url
+    this.text = options.text
+    this.status = options.status
+    this.request = options.request
+    this.xhr = options.xhr // optional
+    this.target = options.target
+    this.title = options.title
+    this.openLayer = options.openLayer
+    this.acceptLayer = options.acceptLayer
+    this.dismissLayer = options.dismissLayer
+    this.eventPlans = options.eventPlans
+    this.context = options.context
+    this.expireCache = options.expireCache
+    this.evictCache = options.evictCache
+    this.headers = options.headers ?? {} // custom headers for synthetic responses without { xhr }
+    this.loadedAt = options.loadedAt ?? new Date()
+    this.fail = options.fail
   }
 
   /*-

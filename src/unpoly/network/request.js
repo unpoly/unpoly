@@ -21,7 +21,6 @@ import {
   titleFromXHR,
 } from '../protocol.js'
 import { runPreviews } from '../status.js'
-import { Record } from '../util/record.js'
 import { UpURLPattern } from '../util/url_pattern.js'
 
 /*-
@@ -43,7 +42,7 @@ console.log(response.text)
 */
 // A class expression, so the class is still named `Request` at runtime, while the binding
 // doesn't shadow the browser's `Request` here or in importers.
-export const UpRequest = class Request extends Record {
+export const UpRequest = class Request {
 
   /*-
   The HTTP method for the request.
@@ -310,63 +309,6 @@ export const UpRequest = class Request extends Record {
   @stable
   */
 
-  keys() {
-    return [
-      // 'signal',
-      'method',
-      'url',
-      'hash',
-      'params',
-      'target',
-      'failTarget',
-      'headers',
-      'timeout',
-      'background',
-      'cache',  // since up.network.request() options are sometimes wrapped in this class
-      'expireCache',  // since up.network.request() options are sometimes wrapped in this class
-      'evictCache',  // since up.network.request() options are sometimes wrapped in this class
-
-      // While requests are queued or in flight we keep the layer they're targeting.
-      // If that layer is closed we will cancel all pending requests targeting that layer.
-      // Note that when opening a new layer, this { layer } attribute will be the set to
-      // the current layer. The { mode } and { failMode } attributes will belong to the
-      // new layer being opened.
-      'layer',
-      'mode',        // we would love to delegate @mode to @layer.mode, but @layer might be the string "new"
-      'context',     // we would love to delegate @context to @layer.context, but @layer might be string "new"
-      'failLayer',
-      'failMode',    // we would love to delegate @failMode to @failLayer.mode, but @failLayer might be the string "new"
-      'failContext', // we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
-      'origin',
-      'originLayer',
-      'originMode',
-      'builtAt',
-      'wrapMethod',
-      'contentType',
-      'payload',
-      'onLoading',
-      'onSettle',
-      'fail',
-      'abortable',
-      'lateDelay',
-      'previews',
-    ]
-  }
-
-  defaults() {
-    let config = networkConfig
-    return {
-      state: 'new',
-      abortable: true,
-      expired: false,
-      headers: {},
-      timeout: config.timeout,
-      builtAt: new Date(),
-      previews: [],
-      wrapMethod: config.wrapMethod,
-    }
-  }
-
   /*-
   Creates a new `up.Request` object.
 
@@ -383,9 +325,46 @@ export const UpRequest = class Request extends Record {
   @internal
   */
   constructor(options) {
-    super(options)
+    this.state = 'new'
+    this.expired = false
 
-    this.params = new Params(this.params) // copies, which we want
+    this.method = options.method
+    this.url = options.url
+    this.hash = options.hash
+    this.params = new Params(options.params) // copies, which we want
+    this.target = options.target
+    this.failTarget = options.failTarget
+    this.headers = options.headers ?? {}
+    this.timeout = options.timeout ?? networkConfig.timeout
+    this.background = options.background
+    this.cache = options.cache  // since up.network.request() options are sometimes wrapped in this class
+    this.expireCache = options.expireCache  // since up.network.request() options are sometimes wrapped in this class
+    this.evictCache = options.evictCache  // since up.network.request() options are sometimes wrapped in this class
+
+    // While requests are queued or in flight we keep the layer they're targeting.
+    // If that layer is closed we will cancel all pending requests targeting that layer.
+    // Note that when opening a new layer, this { layer } attribute will be the set to
+    // the current layer. The { mode } and { failMode } attributes will belong to the
+    // new layer being opened.
+    this.layer = options.layer
+    this.mode = options.mode // we would love to delegate @mode to @layer.mode, but @layer might be the string "new"
+    this.context = options.context // we would love to delegate @context to @layer.context, but @layer might be string "new"
+    this.failLayer = options.failLayer
+    this.failMode = options.failMode // we would love to delegate @failMode to @failLayer.mode, but @failLayer might be the string "new"
+    this.failContext = options.failContext // we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
+    this.origin = options.origin
+    this.originLayer = options.originLayer
+    this.originMode = options.originMode
+    this.builtAt = options.builtAt ?? new Date()
+    this.wrapMethod = options.wrapMethod ?? networkConfig.wrapMethod
+    this.contentType = options.contentType
+    this.payload = options.payload
+    this.onLoading = options.onLoading
+    this.onSettle = options.onSettle
+    this.fail = options.fail
+    this.abortable = options.abortable ?? true
+    this.lateDelay = options.lateDelay
+    this.previews = options.previews ?? []
 
     // Normalize a first time to get a normalized cache key.
     this._normalize()

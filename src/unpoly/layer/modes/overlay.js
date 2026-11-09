@@ -10,7 +10,6 @@ import { CloseLayer } from '../../fragment/render/change/close_layer.js'
 import { isWithinForeignOverlay } from '../../layer.js'
 import { Layer } from '../base.js'
 import { OverlayFocus } from '../overlay_focus.js'
-import { OVERLAY_VISUAL_KEYS } from '../overlay_visuals.js'
 import { printUserEvent } from '../../log.js'
 import { animate, isNone } from '../../motion.js'
 import { readData } from '../../script.js'
@@ -65,31 +64,41 @@ export class Overlay extends Layer {
   @stable
   */
 
-  keys() {
-    return [
-      ...super.keys(),
-      ...OVERLAY_VISUAL_KEYS,
-
-      // Events and close conditions
-      'onOpened',
-      'onAccept',
-      'onAccepted',
-      'onDismiss',
-      'onDismissed',
-      'onAcceptedReload',
-      'onDismissedReload',
-      'acceptEvent',
-      'dismissEvent',
-      'acceptLocation',
-      'dismissLocation',
-      'acceptFragment',
-      'dismissFragment',
-    ]
-  }
-
-
   constructor(options) {
     super(options)
+
+    // How the overlay looks and animates (see OVERLAY_VISUAL_KEYS)
+    this.position = options.position
+    this.align = options.align
+    this.size = options.size
+    this.origin = options.origin // for tethered anchor element
+    this.class = options.class
+    this.backdrop = options.backdrop
+    this.dismissible = options.dismissible
+    this.dismissLabel = options.dismissLabel
+    this.dismissARIALabel = options.dismissARIALabel
+    this.openAnimation = options.openAnimation
+    this.closeAnimation = options.closeAnimation
+    this.openDuration = options.openDuration
+    this.closeDuration = options.closeDuration
+    this.openEasing = options.openEasing
+    this.closeEasing = options.closeEasing
+    this.trapFocus = options.trapFocus
+
+    // Events and close conditions
+    this.onOpened = options.onOpened
+    this.onAccept = options.onAccept
+    this.onAccepted = options.onAccepted
+    this.onDismiss = options.onDismiss
+    this.onDismissed = options.onDismissed
+    this.onAcceptedReload = options.onAcceptedReload
+    this.onDismissedReload = options.onDismissedReload
+    this.acceptEvent = options.acceptEvent
+    this.dismissEvent = options.dismissEvent
+    this.acceptLocation = options.acceptLocation
+    this.dismissLocation = options.dismissLocation
+    this.acceptFragment = options.acceptFragment
+    this.dismissFragment = options.dismissFragment
 
     // We need to mark the layer as "opening" so its topmost swappable element
     // does not resolve from the :layer pseudo-selector. Since :layer is a part of

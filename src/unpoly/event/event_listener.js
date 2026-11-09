@@ -3,28 +3,20 @@ import { fail } from '../error.js'
 import { readFieldDisabled } from '../form.js'
 import { isBeforeBoot, isEvaling } from '../framework.js'
 import { readData } from '../script.js'
-import { Record } from '../util/record.js'
 
-export class EventListener extends Record {
-
-  keys() {
-    return [
-      'element',
-      'eventType',
-
-      'selector',
-      'callback',
-      'guard',
-      'baseLayer',
-      'passive',
-      'once',
-      'capture',
-      'beforeBoot',
-    ]
-  }
+export class EventListener {
 
   constructor(attributes) {
-    super(attributes)
+    this.element = attributes.element
+    this.eventType = attributes.eventType
+    this.selector = attributes.selector
+    this.callback = attributes.callback
+    this.guard = attributes.guard
+    this.baseLayer = attributes.baseLayer
+    this.passive = attributes.passive
+    this.once = attributes.once
+    this.capture = attributes.capture
+
     this._key = this.constructor._buildKey(attributes)
     this.isDefault = isEvaling()
 
@@ -33,7 +25,7 @@ export class EventListener extends Record {
     // Listeners that do need to run before Unpoly boots can pass { beforeBoot: true } to override.
     // We also default to { beforeBoot: true } for framework events that are emitted
     // before booting.
-    this.beforeBoot ??= (this.eventType.indexOf('up:framework:') === 0)
+    this.beforeBoot = attributes.beforeBoot ?? (this.eventType.indexOf('up:framework:') === 0)
 
     // Need to store the bound nativeCallback function because addEventListener()
     // and removeEventListener() need to see the exact same reference.

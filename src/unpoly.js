@@ -62,7 +62,6 @@ import * as cannotMatchError from './unpoly/error/cannot_match.js'
 import * as cannotParseError from './unpoly/error/cannot_parse.js'
 import * as cannotTargetError from './unpoly/error/cannot_target.js'
 import * as offlineError from './unpoly/error/offline.js'
-import * as recordClass from './unpoly/util/record.js'
 import * as configClass from './unpoly/util/config.js'
 import * as logConfigClass from './unpoly/log/log_config.js'
 import * as registryClass from './unpoly/util/registry.js'
@@ -147,7 +146,6 @@ const apis = [
   cannotParseError.api,
   cannotTargetError.api,
   offlineError.api,
-  recordClass.api,
   configClass.api,
   logConfigClass.api,
   registryClass.api,

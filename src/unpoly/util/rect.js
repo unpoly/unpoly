@@ -1,14 +1,11 @@
-import { Record } from './record.js'
+export class Rect {
 
-export class Rect extends Record {
-
-  keys() {
-    return [
-      'left',
-      'top',
-      'width',
-      'height'
-    ]
+  // Also takes a DOMRect, whose properties are getters on its prototype.
+  constructor({ left, top, width, height }) {
+    this.left = left
+    this.top = top
+    this.width = width
+    this.height = height
   }
 
   get bottom() {

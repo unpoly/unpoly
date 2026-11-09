@@ -1,23 +1,14 @@
 import { cleaner as utilCleaner, copy, extractOptions, getSimpleTokens, isJQuery, isList } from '../util.js'
 import { EventListener } from './event_listener.js'
-import { Record } from '../util/record.js'
 
-export class EventListenerGroup extends Record {
+export class EventListenerGroup {
 
-  keys() {
-    return [
-      'elements',
-      'eventTypes',
-
-      'selector',
-      'callback',
-      'guard',
-      'baseLayer',
-      'passive',
-      'once',
-      'capture',
-      'beforeBoot',
-    ]
+  constructor({ elements, eventTypes, ...listenerAttributes }) {
+    this.elements = elements
+    this.eventTypes = eventTypes
+    // The other attributes (selector, callback, options) are for the EventListener we build
+    // for each element and event type. It picks the ones it knows.
+    this._listenerAttributes = listenerAttributes
   }
 
   bind() {
@@ -35,13 +26,9 @@ export class EventListenerGroup extends Record {
   _eachListenerAttributes(fn) {
     for (let element of this.elements) {
       for (let eventType of this.eventTypes) {
-        fn(this._listenerAttributes(element, eventType))
+        fn({ ...this._listenerAttributes, element, eventType })
       }
     }
-  }
-
-  _listenerAttributes(element, eventType) {
-    return { ...this.attributes(), element, eventType }
   }
 
   unbind() {

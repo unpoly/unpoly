@@ -11,7 +11,6 @@ import {
 } from '../history.js'
 import { closestLayerElement, mainTargets } from '../layer.js'
 import { convertClicks } from '../link.js'
-import { Record } from '../util/record.js'
 import { newStateCache } from '../viewport.js'
 
 /*-
@@ -27,7 +26,7 @@ the background layer during compilation.
 @class up.Layer
 @parent up.layer
 */
-export class Layer extends Record {
+export class Layer {
 
   /*-
   This layer's outmost container element.
@@ -98,33 +97,15 @@ export class Layer extends Record {
   @experimental
   */
 
-  keys() {
-    return [
-      'element',
-      'stack',
-      'history',
-      'mode',
-      'context',
-      'lastScrollTops',
-      'lastFocusCapsules',
-    ]
-  }
-
-  defaults() {
-    return {
-      context: {}, // To reset root
-      lastScrollTops: newStateCache(),
-      lastFocusCapsules: newStateCache(),
-      // Reset the root layer's history, so it falls back to what the browser shows.
-      _savedTitle: undefined,
-      _savedMetaTags: undefined,
-      _savedLocation: undefined,
-      _savedLang: undefined,
-    }
-  }
-
   constructor(options = {}) {
-    super(options)
+    // A layer has no { element } option. The root layer has an element getter, and an overlay
+    // creates its element when it opens.
+    this.stack = options.stack
+    this.history = options.history
+    this.mode = options.mode
+    this.context = options.context ?? {}
+    this.lastScrollTops = options.lastScrollTops ?? newStateCache()
+    this.lastFocusCapsules = options.lastFocusCapsules ?? newStateCache()
     assert(this.mode)
   }
 
@@ -945,9 +926,14 @@ export class Layer extends Record {
   }
 
   reset() {
-    // Re-assigning defaults will also reset context as well as
-    // caches for scroll positions and focus.
-    Object.assign(this, this.defaults())
+    this.context = {}
+    this.lastScrollTops = newStateCache()
+    this.lastFocusCapsules = newStateCache()
+    // Reset the root layer's history, so it falls back to what the browser shows.
+    this._savedTitle = undefined
+    this._savedMetaTags = undefined
+    this._savedLocation = undefined
+    this._savedLang = undefined
   }
 
 }
