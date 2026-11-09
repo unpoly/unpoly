@@ -287,8 +287,8 @@ up.migrate = (function() {
     }
   }
 
-  // Takes a key or an array of keys. Typed any because `u` is the untyped up.util, so u.isString() doesn't narrow.
-  function fixGetStyleProps(keyOrKeys: any): any {
+  // Takes a key or an array of keys.
+  function fixGetStyleProps(keyOrKeys: string | string[]): string | string[] {
     let transformed
 
     if (u.isString(keyOrKeys)) {
@@ -303,7 +303,7 @@ up.migrate = (function() {
     return transformed
   }
 
-  // Takes an object of props or a string. Typed any for the same reason as fixGetStyleProps().
+  // Takes an object of props or a string. Typed any because u.isObject() isn't a type predicate, so it doesn't narrow.
   function fixSetStyleProps(props: any, unit?: string): any {
     let transformed
 

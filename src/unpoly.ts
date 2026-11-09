@@ -121,6 +121,7 @@ const apis = [
 // The type of `window.up` (see src/types/global.d.ts). It's an interface, so unpoly-migrate (and
 // apps) can add keys by declaration merging. To add keys to an existing namespace, redeclare it
 // with an intersection, like `util: CoreApi['util'] & { … }`: the redeclared type must be a subtype.
+// Only one place may redeclare a namespace. A second, different redeclaration fails with TS2717.
 export interface Up extends CoreApi {} // oxlint-disable-line typescript/no-empty-object-type
 
 /**

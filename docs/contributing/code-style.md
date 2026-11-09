@@ -80,14 +80,23 @@ In a `.ts` module:
   with the properties from its doc comment, and an entry in the map.
 - Typing must not change what the build emits. Compare `unpoly.min.js` before and after.
 - The global `up` has the type `Up`, which `src/unpoly.ts` builds from every module's `api`. A
-  key that no `api` contributes is declared by merging it into `Up` (or into a namespace's type)
-  with a `declare module` block, next to the code that adds it.
+  key that no `api` contributes is declared by merging it into `Up` with a `declare module`
+  block, next to the code that adds it. A namespace's type can't be merged into. To add keys to
+  a namespace, redeclare the namespace with an intersection, like
+  `util: CoreApi['util'] & { … }`. Only one place may redeclare a namespace: a second,
+  different redeclaration fails with TS2717 ("Subsequent property declarations must have the
+  same type").
 - `unpoly-migrate` is loosely typed for now. Its files are scripts, not modules: they patch
-  `window.up` and import nothing, since `unpoly-migrate.js` is a separate bundle and a class
-  imported from `src/unpoly/` would be a second copy. Each file declares the keys it adds to `up`,
-  as `any` where a precise type isn't easy; a deprecated alias gets the type of its replacement.
-  A wrapper that forwards its `...args` to an overloaded function casts the callee:
-  `(up.element.get as any)(...args)`. Type parameters where it's easy. Core declares the hooks it
+  `window.up` and import nothing at runtime, since `unpoly-migrate.js` is a separate bundle and a
+  class imported from `src/unpoly/` would be a second copy. Type-only imports like
+  `import('../unpoly/util.js').List<Element>` are fine, since they're erased. Each file declares
+  the keys it adds to `up`, as `any` where a precise type isn't easy; a deprecated alias gets
+  the type of its replacement. A method added to a class declaration like `up.Layer` is merged
+  into the class's interface. `up.Request` and `up.Response` are class expressions, which can't
+  be merged into, so their methods are added through a cast and stay undeclared.
+  A wrapper that forwards its `...args` casts the callee unless the callee has a rest
+  parameter: `(up.element.get as any)(...args)`. TypeScript only spreads an `any[]` into a rest
+  parameter (TS2556). Type parameters where it's easy. Core declares the hooks it
   calls on `up.migrate` in `migrate_stub.ts`, and migrate marks each implementation with a "Core
   calls this hook" comment.
 
