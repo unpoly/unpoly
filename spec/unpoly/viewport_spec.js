@@ -1242,6 +1242,18 @@ describe('up.viewport', function() {
         })
       })
 
+      it('does not convert hidden fixed elements within the element (bugfix)', function() {
+        const [element, hiddenFixedChild] = htmlFixtureList(`
+          <div class="element" style="position: absolute">
+            <div class="hidden-fixed-child" up-fixed style="position: fixed; top: 10px; display: none"></div>
+          </div>
+        `)
+
+        up.viewport.absolutize(element)
+
+        expect(hiddenFixedChild.style.top).toBe('10px')
+      })
+
       it("does not convert fixed elements outside the element's subtree (bugfix)", function() {
         const $element = $fixture('.element').css({ position: 'absolute' })
         const $fixedChild = $('<div class="fixed-child" up-fixed></div>').css({ position: 'fixed' })

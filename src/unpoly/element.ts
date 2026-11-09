@@ -987,7 +987,12 @@ export function fixedToAbsolute(element: HTMLElement): void {
   // Set the position to 'absolute' so it gains an offsetParent
   element.style.position = 'absolute'
 
-  const offsetParentRect = element.offsetParent!.getBoundingClientRect()
+  // A hidden element (e.g. with `display: none`) has no offsetParent.
+  // It is invisible, so it has no position to preserve.
+  const { offsetParent } = element
+  if (!offsetParent) return
+
+  const offsetParentRect = offsetParent.getBoundingClientRect()
 
   // A computed margin is never blank.
   setInlineStyle(element, {
