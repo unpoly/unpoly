@@ -121,7 +121,6 @@ export class LayerStack {
   dismissOverlays(value: any = null, options: LayerCloseOptions = {}): void {
     // TODO(types): Closing an overlay reads no { dismissible } option, so this has no effect.
     // Maybe { preventable: false } was meant, like in peel(). (Needs Henning)
-    options.dismissible = false
     for (let overlay of this.overlays.toReversed()) {
       overlay.dismiss(value, options)
     }
