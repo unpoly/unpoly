@@ -55,6 +55,21 @@ const ATTRS_WITH_LOCAL_HTML = '[up-content], [up-fragment], [up-document]'
 const ATTRS_SUGGESTING_FOLLOW = `${ATTRS_WITH_LOCAL_HTML}, [up-target], [up-layer], [up-transition], [up-preload]`
 const DEFAULT_INTERACTIVE_ELEMENT = 'a[href], button'
 
+/**
+The settings in `up.link.config`, described in its doc comment.
+*/
+export interface LinkConfig {
+  followSelectors: string[]
+  noFollowSelectors: string[]
+  instantSelectors: string[]
+  noInstantSelectors: string[]
+  preloadSelectors: string[]
+  noPreloadSelectors: string[]
+  clickableSelectors: string[]
+  noClickableSelectors: string[]
+  preloadDelay: number
+}
+
 /*-
 Configures defaults for link handling.
 
@@ -144,7 +159,7 @@ without requiring developers to set `[up-...]` attributes.
 
 @stable
 */
-export const config = new Config<PlainObject>('up.link.config', () => ({
+export const config = new Config('up.link.config', (): LinkConfig => ({
   // (1) We want to follow all elements with an [up-follow] attribute.
   //     This can be an <a up-follow href="/path"> or an <span up-follow up-href="/path">
   // (2) Users expect a link to be followable if it uses a signature attribute
@@ -176,7 +191,7 @@ export const config = new Config<PlainObject>('up.link.config', () => ({
   noClickableSelectors: ['[up-clickable=false]', DEFAULT_INTERACTIVE_ELEMENT],
 
   preloadDelay: 90,
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<LinkConfig>
 
 function isPreloadDisabled(link: Element): boolean {
   // (1) Don't preload when we cannot change the browser URL. Following such a link will make a full page load ignoring our cache.
