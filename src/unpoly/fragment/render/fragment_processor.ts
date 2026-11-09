@@ -4,10 +4,31 @@ import {
 import { guard } from '../../error.js'
 import { contains, getSmart } from '../../fragment.js'
 import { printToWarn } from '../../log.js'
+import type { PlainObject } from '../../util.js'
+import type { Layer } from '../../layer/base.js'
 
-export class FragmentProcessor {
+/**
+Options for an `up.FragmentProcessor`. Subclasses take more.
+@internal
+*/
+export interface FragmentProcessorOptions {
+  fragment?: HTMLElement
+  // What { focus: 'auto' } or { scroll: 'auto' } means, as another processable value.
+  autoMeans?: any
+  origin?: Element
+  layer?: Layer
+  [key: string]: any
+}
 
-  constructor(options) {
+// Processes a { focus } or { scroll } render option. The option can be a string, an element, a function,
+// an array of alternatives or a selector map, so its type stays `any`.
+export abstract class FragmentProcessor {
+  declare fragment: HTMLElement | undefined
+  declare autoMeans: any
+  declare origin: Element | undefined
+  declare layer: Layer | undefined
+
+  constructor(options: FragmentProcessorOptions) {
     this.fragment = options.fragment
     this.autoMeans = options.autoMeans
     this.origin = options.origin
@@ -16,7 +37,7 @@ export class FragmentProcessor {
 
   // The options that we pass to a function value, and to the processor for a match in a
   // selector map. Subclasses add their own.
-  attributes() {
+  attributes(): PlainObject {
     return pickBy({
       fragment: this.fragment,
       autoMeans: this.autoMeans,
@@ -25,16 +46,17 @@ export class FragmentProcessor {
     }, isDefined)
   }
 
-  process(opt) {
+  // Returns a truthy value if the option was processed.
+  process(opt: any): any {
     let preprocessed = this.preprocessOnce(opt)
     return this.tryProcess(preprocessed)
   }
 
-  preprocessOnce(opt) {
+  preprocessOnce(opt: any): any {
     return getComplexTokens(opt)
   }
 
-  tryProcess(opt) {
+  tryProcess(opt: any): any {
     if (isArray(opt)) {
       return this.processArray(opt)
     }
@@ -50,7 +72,7 @@ export class FragmentProcessor {
     }
 
     if (isElement(opt)) {
-      return this.processElement(opt) // TODO: Test that { focus: Element } works
+      return this.processElement(opt as HTMLElement) // TODO: Test that { focus: Element } works
     }
 
     if (isString(opt)) {
@@ -67,28 +89,32 @@ export class FragmentProcessor {
     return this.processPrimitive(opt)
   }
 
-  processSelectorMap(map) {
+  abstract processPrimitive(opt: any): any
+
+  abstract processElement(element: HTMLElement): any
+
+  processSelectorMap(map: PlainObject): string[] {
     return Object.keys(map).filter((selector) => {
       let match = this.findSelector(selector)
       if (match) {
-        let matchProcessor = new this.constructor({ ...this.attributes(), fragment: match })
+        let matchProcessor = new (this.constructor as any)({ ...this.attributes(), fragment: match })
         let opt = map[selector]
         return matchProcessor.process(opt)
       }
     })
   }
 
-  processArray(array) {
+  processArray(array: any[]): any {
     return findInList(array, (opt) => this.tryProcess(opt))
   }
 
-  resolveCondition(condition) {
+  resolveCondition(condition: string): boolean | undefined {
     if (condition === 'main') {
       return this.fragment && contains(this.fragment, ':main')
     }
   }
 
-  findSelector(selector) {
+  findSelector(selector: string): HTMLElement | undefined {
     const lookupOpts = { layer: this.layer, origin: this.origin }
 
     let matchWithinFragment = this.fragment && getSmart(this.fragment, selector, lookupOpts)
