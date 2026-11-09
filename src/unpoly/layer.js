@@ -180,70 +180,65 @@ up.layer.config.overlay.mainTargets.unshift('.content')
 
 @stable
 */
-export const config = new Config('up.layer.config', function() {
-  const newConfig = {
-    mode: 'modal',
-    any: {
-      mainTargets: [
-        "[up-main='']",
-        'main',
-        ':layer' // this is <body> for the root layer
-      ]
-    },
-    root: {
-      mainTargets: ['[up-main~=root]'],
-      history: true
-    },
-    overlay: {
-      mainTargets: ['[up-main~=overlay]'],
-      openAnimation: 'fade-in',
-      closeAnimation: 'fade-out',
-      dismissLabel: '×',
-      dismissARIALabel: 'Dismiss dialog',
-      dismissible: true,
-      history: 'auto',
-      trapFocus: true,
-    },
-    cover: {
-      mainTargets: ['[up-main~=cover]']
-    },
-    drawer: {
-      mainTargets: ['[up-main~=drawer]'],
-      backdrop: true,
-      position: 'left',
-      size: 'medium',
-      openAnimation(layer) {
-        switch (layer.position) {
-          case 'left': return 'move-from-left'
-          case 'right': return 'move-from-right'
-        }
-      },
-      closeAnimation(layer) {
-        switch (layer.position) {
-          case 'left': return 'move-to-left'
-          case 'right': return 'move-to-right'
-        }
+export const config = new Config('up.layer.config', () => ({
+  mode: 'modal',
+  any: {
+    mainTargets: [
+      "[up-main='']",
+      'main',
+      ':layer' // this is <body> for the root layer
+    ]
+  },
+  root: {
+    mainTargets: ['[up-main~=root]'],
+    history: true
+  },
+  overlay: {
+    mainTargets: ['[up-main~=overlay]'],
+    openAnimation: 'fade-in',
+    closeAnimation: 'fade-out',
+    dismissLabel: '×',
+    dismissARIALabel: 'Dismiss dialog',
+    dismissible: true,
+    history: 'auto',
+    trapFocus: true,
+  },
+  cover: {
+    mainTargets: ['[up-main~=cover]']
+  },
+  drawer: {
+    mainTargets: ['[up-main~=drawer]'],
+    backdrop: true,
+    position: 'left',
+    size: 'medium',
+    openAnimation(layer) {
+      switch (layer.position) {
+        case 'left': return 'move-from-left'
+        case 'right': return 'move-from-right'
       }
     },
-    modal: {
-      mainTargets: ['[up-main~=modal]'],
-      backdrop: true,
-      size: 'medium'
-    },
-    popup: {
-      mainTargets: ['[up-main~=popup]'],
-      position: 'bottom',
-      size: 'medium',
-      align: 'left',
-      dismissible: 'outside key',
-      trapFocus: false,
-    },
-    foreignOverlaySelectors: ['dialog'],
-  }
-
-
-  return newConfig
-})
+    closeAnimation(layer) {
+      switch (layer.position) {
+        case 'left': return 'move-to-left'
+        case 'right': return 'move-to-right'
+      }
+    }
+  },
+  modal: {
+    mainTargets: ['[up-main~=modal]'],
+    backdrop: true,
+    size: 'medium'
+  },
+  popup: {
+    mainTargets: ['[up-main~=popup]'],
+    position: 'bottom',
+    size: 'medium',
+    align: 'left',
+    dismissible: 'outside key',
+    trapFocus: false,
+  },
+  foreignOverlaySelectors: ['dialog'],
+}))
 
 /*-
 A list of layers that are currently open.
