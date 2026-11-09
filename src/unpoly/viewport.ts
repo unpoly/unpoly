@@ -467,11 +467,12 @@ if no closer viewport exists.
 @stable
 */
 export function closest(target: ElementOrSelector, options: PlainObject = {}): HTMLElement {
-  const element = getSmart(target, options)
+  const element = getSmart(target, options)!
   // Use up.element.closest() which searches across layer boundaries.
   // It is OK to find a viewport in a parent layer. Layers without its
   // own viewport (like popups) are scrolled by the parent layer's viewport.
-  return element.closest(allSelector())
+  // Every element is within the root viewport, so closest() always finds one.
+  return element.closest<HTMLElement>(allSelector())!
 }
 
 /*-
@@ -488,7 +489,7 @@ in the returned list.
 @internal
 */
 export function getViewportSubtree(element: ElementOrSelector, options: PlainObject = {}): List<HTMLElement> {
-  element = getSmart(element, options)
+  element = getSmart(element, options)!
   return subtree(element, allSelector())
 }
 
@@ -506,7 +507,7 @@ In that case we restore / reset the scroll tops of all viewports around the frag
 @internal
 */
 export function getViewportAround(element: ElementOrSelector, options: PlainObject = {}): HTMLElement[] {
-  element = getSmart(element, options)
+  element = getSmart(element, options)!
   return around(element, allSelector())
 }
 
@@ -533,7 +534,8 @@ for the browser's main content area.
 @stable
 */
 export function getRoot(): Element {
-  return document.scrollingElement
+  // Only a quirks-mode document has no scrolling element.
+  return document.scrollingElement!
 }
 
 export function rootWidth(): number {
@@ -696,7 +698,7 @@ Unpoly automatically saves focus-related state before [navigating](/learn/naviga
 @stable
 */
 export function saveFocus(options: PlainObject = {}): void {
-  const layer = layerStack.get(options)
+  const layer = layerStack.get(options)!
   const location = options.location || layer.location
   if (location) {
     const focusCapsule = FocusCapsule.preserve(layer)
@@ -723,7 +725,7 @@ Unpoly automatically restores focus-related state when the user [presses the bac
 @stable
 */
 export function restoreFocus(options: PlainObject = {}): boolean {
-  const layer = layerStack.get(options)
+  const layer = layerStack.get(options)!
   const location = options.location || layer.location
   const locationCapsule = layer.lastFocusCapsules.get(location)
   // The capsule returns `true` if we could rediscover and focus the previous element.
@@ -766,7 +768,8 @@ export function scrollTo(position: number, ...args: any[]): boolean {
 function setScrollPositions(viewports: Iterable<HTMLElement>, tops: Record<string, number>, defaultTop: number, behavior: ScrollBehavior = 'instant'): void {
   for (let viewport of viewports) {
     const key = scrollTopKey(viewport)
-    let top = tops[key] || defaultTop
+    // An untargetable viewport has no key, and has no saved position under tops['undefined'].
+    let top = tops[key!] || defaultTop
 
     // Negative numbers scroll to the bottom, leaving an unscrolled buffer.
     if (top < 0 || Object.is(top, -0)) {
@@ -1060,7 +1063,7 @@ that is now hidden, e.g. `15px`.
 @function up.viewport.firstHashTarget
 @internal
 */
-export function firstHashTarget(hash: string, options: PlainObject = {}): HTMLElement | undefined {
+export function firstHashTarget(hash: string | undefined, options: PlainObject = {}): HTMLElement | undefined {
   hash = pureHash(hash)
   if (hash) {
     const selector = [
@@ -1086,7 +1089,7 @@ function pureHash(value: string | undefined): string | undefined {
 export function focusedElementWithin(scopeElement: Element): Element | undefined {
   const focusedElement = document.activeElement
   if (contains(scopeElement, focusedElement)) {
-    return focusedElement
+    return focusedElement!
   }
 }
 

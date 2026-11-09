@@ -40,7 +40,7 @@ export class RevealMotion {
   constructor(element: HTMLElement, options: RevealOptions = {}) {
     this._element = element
     this._viewport = getOne(options.viewport) || closest(this._element)
-    this._obstructionsLayer = layerStack.get(this._viewport)
+    this._obstructionsLayer = layerStack.get(this._viewport)!
     this._behavior = options.behavior ?? 'instant'
 
     const viewportConfig = config
