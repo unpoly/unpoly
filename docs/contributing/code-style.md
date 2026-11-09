@@ -58,19 +58,22 @@ In a `.ts` module:
   TypeScript narrows the parameter to a member of its declared type: an `ElementOrSelector`
   becomes an `Element`, never the `HTMLElement` that `getSmart()` returns. When that's enough,
   type the parameter as usual. Otherwise write the typed signature as an overload, and give the
-  implementation an `any` parameter with a comment:
+  implementation the resolved type:
 
   ```ts
-  export function morph(oldElement: ElementOrSelector, newElement: ElementOrSelector, ...): Promise<void>
-  // The elements are resolved in place. TypeScript would narrow them to Element, not HTMLElement.
-  export async function morph(oldElement: any, newElement: any, ...) {
-    oldElement = getSmart(oldElement)
+  get(request: UpRequest | RequestOptions): UpRequest | undefined
+  // The request is wrapped in place, so the implementation takes the wrapped type.
+  get(request: UpRequest) {
+    request = this._wrap(request)
   ```
 
-  Callers get the typed signature, the body stays as it was. A new local variable or a cast would be
-  checked, but changes the emitted code. A function expression passed to `mockable()` can't have
-  overloads. Type its rest parameter as a union of tuples (like `trackFields()` does), or as `any`
-  with a comment.
+  Callers get the typed signature, and the body stays as it was. This works for methods, whose
+  parameters TypeScript compares bivariantly. A function declaration's overload must be
+  assignable to its implementation once `strictFunctionTypes` is on (TS2394), so a function
+  takes `any` instead, with a comment (like `morph()`). A cast at each use would work too, and
+  emits nothing, but it takes one cast per use. A new local variable would change the emitted
+  code. A function expression passed to `mockable()` can't have overloads. Type its rest
+  parameter as a union of tuples (like `trackFields()` does), or as `any` with a comment.
 - Where the honest code would emit differently, a cast with a comment is fine, e.g.
   `(now as any) - (this.loadedAt as any)` instead of `now.getTime() - …`.
 - `any` is fine where a precise type would be complex.

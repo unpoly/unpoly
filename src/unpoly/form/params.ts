@@ -560,10 +560,10 @@ export class Params {
   @stable
   */
   static fromForm(form: ElementOrSelector, options?: { submitButton?: ElementOrSelector | false }): Params
-  // The form is resolved in place. TypeScript can't narrow it to the form element, since a
-  // <form> is also a list of its fields.
-  static fromForm(form: any, options: { submitButton?: ElementOrSelector | false } = {}) {
-    form = getOne(form)
+  // The form is resolved in place, so the implementation takes the resolved type. The cast is
+  // needed since getOne() returns an HTMLElement.
+  static fromForm(form: HTMLFormElement, options: { submitButton?: ElementOrSelector | false } = {}) {
+    form = getOne(form) as HTMLFormElement
     let restore = prepareParamsReadTemp(form)
 
     try {

@@ -569,8 +569,8 @@ let options = up.form.submitOptions(form)
 @stable
 */
 export function submitOptions(form: ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions
-// The form is resolved in place. TypeScript can't narrow it to the form element, since a
-// <form> is also a list of its fields.
+// The form is resolved in place. The implementation can't take the resolved type: with
+// strictFunctionTypes, a function's overload must be assignable to it (TS2394).
 export function submitOptions(form: any, options?: RenderOptions, parserOptions?: OptionsParserOptions) {
   form = getSmart(form)
   form = getForm(form)

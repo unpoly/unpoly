@@ -483,7 +483,8 @@ You can define additional named transitions using [`up.transition()`](/api/up.tr
 @stable
 */
 export function morph(oldElement: ElementOrSelector, newElement: ElementOrSelector, transitionValue: TransitionValue, options?: SwapOptions): Promise<void>
-// The elements are resolved in place. TypeScript would narrow them to Element, not HTMLElement.
+// The elements are resolved in place. The implementation can't take the resolved type: with
+// strictFunctionTypes, a function's overload must be assignable to it (TS2394).
 export async function morph(oldElement: any, newElement: any, transitionValue: TransitionValue, options?: SwapOptions) {
   // (A) If passed a selector, up.fragment.get() will prefer a match on the current layer.
   // (B) This also unwraps jQuery collections.

@@ -86,8 +86,8 @@ export class RequestCache {
   }
 
   get(request: UpRequest | RequestOptions): UpRequest | undefined
-  // The request is wrapped in place. TypeScript wouldn't narrow it to an up.Request.
-  get(request: any) {
+  // The request is wrapped in place, so the implementation takes the wrapped type.
+  get(request: UpRequest) {
     request = this._wrap(request)
     let route = this._getRoute(request)
 
@@ -103,8 +103,8 @@ export class RequestCache {
   }
 
   put(request: UpRequest | RequestOptions): Promise<void>
-  // The request is wrapped in place. TypeScript wouldn't narrow it to an up.Request.
-  async put(request: any) {
+  // The request is wrapped in place, so the implementation takes the wrapped type.
+  async put(request: UpRequest) {
     request = this._wrap(request)
     let route = this._getRoute(request)
 
