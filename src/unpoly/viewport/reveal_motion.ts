@@ -33,7 +33,7 @@ export class RevealMotion {
   declare _snap: number
   declare _padding: number
   declare _top: boolean
-  declare _max: ValueOrFunction<number>
+  declare _max: ValueOrFunction<number> | false
   declare _topObstructionSelector: string
   declare _bottomObstructionSelector: string
 

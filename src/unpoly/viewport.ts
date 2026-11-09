@@ -71,6 +71,21 @@ From JavaScript, `up.reveal()` scrolls an element into view, and `up.viewport.sa
 */
 
 
+/**
+The settings in `up.viewport.config`, described in its doc comment.
+*/
+export interface ViewportConfig {
+  viewportSelectors: string[]
+  fixedTopSelectors: string[]
+  fixedBottomSelectors: string[]
+  anchoredRightSelectors: string[]
+  revealSnap: number
+  revealPadding: number
+  revealMax: number | false | ((element: Element) => number)
+  revealTop: boolean
+  autoFocusVisible: (props: { element: Element, inputDevice: InputDevice }) => boolean
+}
+
 /*-
 Configures defaults for scrolling.
 
@@ -146,7 +161,7 @@ Configures defaults for scrolling.
     @experimental
 @stable
 */
-export const config = new Config<PlainObject>('up.viewport.config', () => ({
+export const config = new Config('up.viewport.config', (): ViewportConfig => ({
   viewportSelectors: ['[up-viewport]', '[up-fixed]'],
   fixedTopSelectors: ['[up-fixed~=top]'],
   fixedBottomSelectors: ['[up-fixed~=bottom]'],
@@ -156,7 +171,7 @@ export const config = new Config<PlainObject>('up.viewport.config', () => ({
   revealTop: false,
   revealMax() { return 0.5 * window.innerHeight },
   autoFocusVisible({ element, inputDevice }) { return inputDevice === 'key' || isField(element) }
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<ViewportConfig>
 
 export const bodyShifter = new BodyShifter()
 
