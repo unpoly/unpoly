@@ -801,7 +801,8 @@ function onJumpLinkClicked(event: MouseEvent, link: HTMLAnchorElement): void {
 
   // By default we will honor a { scroll-behavior } style from CSS.
   // This can be overridden by an [up-scroll-behavior] attribute.
-  let behavior = link.getAttribute('up-scroll-behavior') ?? 'auto'
+  // Like the attribute for render options, its value is passed on unchecked.
+  let behavior = (link.getAttribute('up-scroll-behavior') ?? 'auto') as ScrollBehavior
 
   // (1) Check if we recognize the link hash, because it matches a fragment or
   //     a well-known anchor like "#top".
