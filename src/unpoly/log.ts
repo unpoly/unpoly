@@ -111,7 +111,7 @@ function printToStreamStyled(stream: LogStream, prefix: string, customStyles: st
 }
 
 // With multiple watchers on the same field we only want to print once.
-let lastPrintedUserEvent
+let lastPrintedUserEvent: Event | undefined
 
 export function printUserEvent(event: Event & { originalEvent?: Event }): void {
   if (config.enabled && lastPrintedUserEvent !== event) {

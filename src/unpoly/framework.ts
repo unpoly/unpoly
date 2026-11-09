@@ -287,7 +287,7 @@ export function setClassName(klass: abstract new (...args: any[]) => any, name: 
 }
 
 function supportIssue(): string | undefined {
-  for (let feature of ['Promise', 'DOMParser', 'FormData', 'reportError']) {
+  for (let feature of ['Promise', 'DOMParser', 'FormData', 'reportError'] as const) {
     if (!window[feature]) {
       return `Browser doesn't support the ${feature} API`
     }
