@@ -18,8 +18,9 @@
 // - A call that names a class whose own name is already the right one goes. Terser keeps the
 //   class's name (`keep_classnames`).
 // - A call that names a class expression goes, and the class gets the name in its source:
-//   `class {` and `class _Foo {` become `class Foo {`. Unless the class mentions either name, which
-//   might mean an outer binding that the new name would shadow.
+//   `class {` and `class _Foo {` become `class Foo {`. Unless the class mentions the new name,
+//   which might mean an outer binding that the new name would shadow. Where the class refers to
+//   itself as `_Foo`, those references are renamed with it (see nameClass()).
 // - Every other call stays.
 //
 // We overwrite removed code with spaces instead of cutting it out, so every line and column of
@@ -28,7 +29,7 @@
 
 import * as acorn from 'acorn'
 
-// Resolves with the trimmed `js`, and `map` updated to match (or null without a map).
+// Returns the trimmed `js`, and `map` updated to match (or null without a map).
 export function dropNeedlessNames(js, map = null) {
   let ast = acorn.parse(js, { ecmaVersion: 'latest', sourceType: 'script' })
   let calls = []
@@ -52,26 +53,39 @@ export function dropNeedlessNames(js, map = null) {
     }
   }
   let insertions = []
+  let rename = (identifier, name) => {
+    blank(identifier.start, identifier.end)
+    insertions.push({ offset: identifier.start, text: name })
+  }
   // Whether we can give `klass` the `name` it should have in its source: it has it already, or
   // we insert it into an anonymous class expression, or replace the name esbuild gave a class
   // expression. Only expressions, because there the name is a binding inside the class alone.
-  // Never when the class mentions either name, which could mean an outer binding we'd shadow.
+  // Never when the class mentions the new name, which could mean an outer binding we'd shadow.
   let nameClass = (klass, name) => {
     if (!klass) return false
     if (klass.id?.name === name) return true
     if (klass.type !== 'ClassExpression' || !isPlainName(name) || mentions(klass, name, klass.id)) return false
-    if (klass.id) {
-      // class _Foo extends … → class Foo extends …. If the class mentions `_Foo`, that has to mean
-      // the variable the class is assigned to (`var _Foo = class _Foo …`) from then on, which only
-      // works for code that runs after the class is defined.
-      let oldName = klass.id.name
-      if (mentions(klass, oldName, klass.id) && (holders.get(klass) !== oldName || usedDuringDefinition(klass, oldName))) return false
-      blank(klass.id.start, klass.id.end)
-      insertions.push({ offset: klass.id.start, text: name })
-    } else {
+    if (!klass.id) {
       // class extends … → class Foo extends …
       insertions.push({ offset: klass.start + 'class'.length, text: ` ${name}` })
+      return true
     }
+    // class _Foo extends … → class Foo extends …
+    let oldName = klass.id.name
+    let uses = references(klass, oldName, klass.id)
+    if (uses.length && holders.get(klass) === oldName && !runsCodeWhileDefined(klass)) {
+      // `var _Foo = class _Foo { … }`, from lowering for ES2015. The uses of `_Foo` inside the
+      // class now mean the variable, which holds the same class once it is defined. They stay
+      // `_Foo`, so Terser can mangle them. That's only safe when no code runs before then.
+    } else if (uses.length) {
+      // `var Foo = class _Foo { … new _Foo() … }`. The uses get the new name too, and keep
+      // meaning the class. Renaming a binding with every use keeps its meaning, unless the new
+      // name was taken (we checked) or a use is also a property name: `{ _Foo }` would become
+      // `{ Foo }`, and `eval()` might use names we don't see.
+      if (uses.some((use) => use.shorthand) || mentions(klass, 'eval')) return false
+      for (let use of uses) rename(use, name)
+    }
+    rename(klass.id, name)
     return true
   }
 
@@ -91,23 +105,22 @@ export function dropNeedlessNames(js, map = null) {
     } else if (target.type === 'Identifier' && parent.type === 'ExpressionStatement' && nameClass(declaredClass(grandparent, target.name), name)) {
       // var _Foo = class _Foo { … }; __name(_Foo, "Foo"), from lowering for ES2015.
       blank(parent.start, parent.end)
-    } else if (target.type === 'ThisExpression') {
+    } else if (target.type === 'ThisExpression' && parent.type === 'ExpressionStatement' && grandparent?.type === 'StaticBlock' &&
+        grandparent.body.length === 1 && nameClass(ancestors.findLast((ancestor) => ancestor.type === 'ClassExpression' || ancestor.type === 'ClassDeclaration'), name)) {
       // class Foo { static { __name(this, "Foo"); } … }
-      let klass = ancestors.findLast((ancestor) => ancestor.type === 'ClassExpression' || ancestor.type === 'ClassDeclaration')
-      if (parent.type === 'ExpressionStatement' && grandparent?.type === 'StaticBlock' && grandparent.body.length === 1 && nameClass(klass, name)) {
-        blank(grandparent.start, grandparent.end)
-      }
-    } else if (target.type === 'Identifier' && parent.type === 'SequenceExpression') {
+      blank(grandparent.start, grandparent.end)
+    } else if (target.type === 'Identifier' && parent.type === 'SequenceExpression' && sequenceCanDrop(parent, node, target, name)) {
       // (_a = class { … }, __name(_a, "Foo"), _a), from lowering for ES2015. Also blank the
       // comma after the call, which is never last: the sequence ends with `_a`.
-      let index = parent.expressions.indexOf(node)
-      let klass = parent.expressions.slice(0, index).findLast((expression) =>
-        expression.type === 'AssignmentExpression' && expression.left.type === 'Identifier' && expression.left.name === target.name)?.right
-      let next = parent.expressions[index + 1]
-      if (next && nameClass(klass, name)) {
-        blank(node.start, next.start)
-      }
+      blank(node.start, parent.expressions[parent.expressions.indexOf(node) + 1].start)
     }
+  }
+
+  function sequenceCanDrop(sequence, call, target, name) {
+    let index = sequence.expressions.indexOf(call)
+    let klass = sequence.expressions.slice(0, index).findLast((expression) =>
+      expression.type === 'AssignmentExpression' && expression.left.type === 'Identifier' && expression.left.name === target.name)?.right
+    return !!sequence.expressions[index + 1] && nameClass(klass, name)
   }
 
   if (map) map = shiftMappings(map, js, insertions)
@@ -133,8 +146,9 @@ function declaresFunction(block, name) {
 
 // Whether `name` can be a class's name. Class bodies are strict, so this also rules out `let`,
 // `static` and the other names that are only reserved in strict mode.
+// acorn doesn't check a class expression's name for the two names strict code can't bind.
 function isPlainName(name) {
-  if (typeof name !== 'string' || !/^[A-Za-z_$][\w$]*$/.test(name)) return false
+  if (typeof name !== 'string' || !/^[A-Za-z_$][\w$]*$/.test(name) || name === 'arguments' || name === 'eval') return false
   try {
     acorn.parse(`(class ${name} {})`, { ecmaVersion: 'latest' })
     return true
@@ -143,21 +157,32 @@ function isPlainName(name) {
   }
 }
 
-// Whether code that runs while `klass` is being defined mentions `name`: its superclass, computed
-// member names, static blocks and static field initializers.
-function usedDuringDefinition(klass, name) {
-  let early = [klass.superClass]
-  for (let member of klass.body.body) {
-    if (member.computed) early.push(member.key)
-    if (member.type === 'StaticBlock') early.push(member)
-    if (member.type === 'PropertyDefinition' && member.static) early.push(member.value)
-  }
-  return early.some((node) => node && mentions(node, name))
+// Whether `klass` may run code of its own while it is being defined: a static block, a static field
+// with a value, or a superclass or computed member name other than a literal or a plain reference
+// (`extends up.Base`, `[util.copy.key]()`). Such code could call a method that uses `_Foo` before
+// the variable holds the class. Methods and instance fields only run later.
+function runsCodeWhileDefined(klass) {
+  return !isPlainReference(klass.superClass) || klass.body.body.some((member) =>
+    member.type === 'StaticBlock' ||
+    (member.type === 'PropertyDefinition' && member.static && member.value) ||
+    (member.computed && !isPlainReference(member.key)))
+}
+
+function isPlainReference(node) {
+  if (!node || node.type === 'Identifier' || node.type === 'Literal') return true
+  return node.type === 'MemberExpression' && !node.computed && isPlainReference(node.object)
 }
 
 // Whether any identifier in `node` is `name`. Property names, strings and `except` don't count.
 function mentions(node, name, except = null) {
-  let found = false
+  return references(node, name, except).length > 0
+}
+
+// The identifiers in `node` that are `name`, except property names, strings and `except`. A
+// shorthand property (`{ _Foo }`) is both a property name and a reference; its reference comes
+// with `shorthand: true`.
+function references(node, name, except = null) {
+  let found = []
   walk(node, [], (child, ancestors) => {
     if (child.type !== 'Identifier' || child.name !== name || child === except) return
     let parent = ancestors.at(-1)
@@ -165,7 +190,12 @@ function mentions(node, name, except = null) {
       (parent.type === 'MemberExpression' && parent.property === child) ||
       (['Property', 'MethodDefinition', 'PropertyDefinition'].includes(parent.type) && parent.key === child)
     )
-    if (!isPropertyName) found = true
+    if (isPropertyName) return
+    // acorn gives a shorthand property's value a node of its own, at the key's position. In a
+    // pattern with a default (`{ _Foo = 1 }`) the value is an AssignmentPattern around it.
+    let property = ancestors.findLast((ancestor) => ancestor.type === 'Property')
+    let shorthand = property?.shorthand && property.key.start === child.start
+    found.push(shorthand ? { ...child, shorthand } : child)
   })
   return found
 }

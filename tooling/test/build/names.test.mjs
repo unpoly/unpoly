@@ -88,7 +88,7 @@ test('a class that esbuild renamed gets its name back when it does not mention i
   assert.ok(!(globalError instanceof MyError))
 })
 
-test('an ES2015 class that uses its old name while being defined keeps its call', async () => {
+test('an ES2015 class that uses its name in a static initializer keeps working', async () => {
   let { js } = await build(`
     class Foo { static bar = 1; static baz = Foo.bar + 1 }
     window.result = Foo
@@ -97,14 +97,61 @@ test('an ES2015 class that uses its old name while being defined keeps its call'
   assert.equal(run(js).baz, 2)
 })
 
-test('a class that esbuild renamed, and that refers to itself, keeps its call', async () => {
+test('a class that esbuild renamed, and that refers to itself, gets its name back everywhere', async () => {
   // The name `Error` would shadow the global the bundle uses elsewhere, so esbuild renames the
-  // class. Renaming it back would break `new Error()` inside it.
-  let { js } = await build(`
+  // class and its uses inside it. Renaming all of them back keeps `new Error()` meaning the class.
+  let { esbuilt, js } = await build(`
     const MyError = class Error extends window.Error { make() { return new Error('x') } }
     window.result = MyError
   `)
-  assert.equal(calls(js), 1)
+  assert.match(esbuilt, /new Error2\(/)
+  assert.equal(calls(js), 0)
+  let MyError = run(js, { Error })
+  assert.equal(MyError.name, 'Error')
+  assert.ok(new MyError().make() instanceof MyError)
+})
+
+test('a class that refers to itself gets its name back without a call', async () => {
+  // esbuild prints `var Foo = class _Foo { static { __name(this, "Foo") } … new _Foo() … }`.
+  let { esbuilt, js } = await build(`
+    class Foo { static bar = 1; copy() { return new Foo() } }
+    window.result = Foo
+  `)
+  assert.match(esbuilt, /class _Foo /)
+  assert.equal(calls(js), 0)
+  let Foo = run(js)
+  assert.equal(Foo.name, 'Foo')
+  assert.ok(new Foo().copy() instanceof Foo)
+})
+
+test('a class that refers to itself in a shorthand property keeps its call', () => {
+  // Renaming `_Foo` in `{ _Foo }` would change the property's key. esbuild expands the shorthand
+  // today (`{ Foo: _Foo }`), so this input is written by hand.
+  let source = '(() => { var Foo = class _Foo { static { __name(this, "Foo") } both() { return { _Foo } } } })()'
+  let { js } = dropNeedlessNames(source)
+  assert.equal(js, source)
+})
+
+test('an ES2015 class that runs code while being defined gets its uses renamed, not pointed at the variable', async () => {
+  // Pointing `_Foo` at the variable would leave it undefined while the static block runs.
+  let { js } = dropNeedlessNames([
+    '(() => {',
+    '  var _Foo = class _Foo { static helper() { return _Foo.x } static { this.y = this.helper() } };',
+    '  __name(_Foo, "Foo");',
+    '  window.result = _Foo;',
+    '})();',
+  ].join('\n'))
+  assert.equal(calls(js), 0)
+  assert.match(js, /class Foo /)
+  assert.match(js, /return Foo\s*\.x/)
+  let Foo = run(js)
+  assert.equal(Foo.name, 'Foo')
+})
+
+test('a class is never named arguments or eval', () => {
+  let source = '(() => { var a = class { static { __name(this, "arguments") } }; var b = class { static { __name(this, "eval") } } })()'
+  let { js } = dropNeedlessNames(source)
+  assert.equal(js, source)
 })
 
 test('an anonymous class that mentions its future name keeps its call', async () => {
