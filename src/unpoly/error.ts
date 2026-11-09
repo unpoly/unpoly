@@ -21,7 +21,7 @@ The message may contain [substitution marks](https://developer.mozilla.org/en-US
   A list of variables to replace any substitution marks in the error message.
 @internal
 */
-export function fail(...args) {
+export function fail(...args: [message: string, ...vars: any[]]): never {
   // Yes, we pass the message plus all substitution vars as an array in the first arg slot.
   throw new UpError(args)
 }
@@ -29,7 +29,7 @@ export function fail(...args) {
 // We reach up.RenderResult and up.Response through window.up instead of importing them:
 // util imports this module, and the classes import util, so the import
 // would throw at load time.
-function isCritical(error) {
+function isCritical(error: any): boolean {
   return (typeof error !== 'object') || ((error.name !== 'AbortError') && !(error instanceof up.RenderResult) && !(error instanceof up.Response))
 }
 
@@ -63,11 +63,12 @@ Other types of errors will not be muted.
 @return {Promise}
 @internal
 */
-export function muteUncriticalRejection(promise) {
+// TODO(types): Promise<T>, once up.RenderJob declares the promise methods it delegates.
+export function muteUncriticalRejection(promise: any): Promise<any> {
   return promise.catch(throwCritical)
 }
 
-export function muteUncriticalSync(block) {
+export function muteUncriticalSync<T>(block: () => T): T | undefined {
   try {
     return block()
   } catch (e) {
@@ -75,13 +76,13 @@ export function muteUncriticalSync(block) {
   }
 }
 
-export function throwCritical(value) {
+export function throwCritical(value: any): void {
   if (isCritical(value)) {
     throw value
   }
 }
 
-export function guard(fn, ...args) {
+export function guard<A extends any[], R>(fn: (...args: A) => R, ...args: A): R | undefined {
   try {
     return fn(...args)
   } catch (error) {
@@ -89,11 +90,11 @@ export function guard(fn, ...args) {
   }
 }
 
-export function guardPromise(promise) {
+export function guardPromise<T>(promise: Promise<T>): Promise<T | void> {
   return promise.catch(reportError)
 }
 
-export function guardFn(fn) {
+export function guardFn<A extends any[], R>(fn: ((...args: A) => R) | undefined): ((...args: A) => R | undefined) | undefined {
   if (fn) {
     return (...args) => guard(() => fn(...args))
   }
