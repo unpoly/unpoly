@@ -3,6 +3,17 @@
 How Unpoly's own source is written. Some of these rules are enforced by Oxlint (`bin/lint`),
 most are not.
 
+<!-- toc -->
+- [Moving to TypeScript](#moving-to-typescript)
+- [Every byte counts](#every-byte-counts)
+- [Leave it to the minifier](#leave-it-to-the-minifier)
+- [No dependencies](#no-dependencies)
+- [No jQuery](#no-jquery)
+- [Naming](#naming)
+- [Private members and the minified build](#private-members-and-the-minified-build)
+- [Linting](#linting)
+<!-- /toc -->
+
 
 ## Moving to TypeScript
 
@@ -11,9 +22,19 @@ TypeScript now, except the ERB template `namespace.js.erb`. The types are still 
 are provisional.
 
 The build doesn't use TypeScript at all: esbuild strips the types from each file, and never
-checks them. The only type check is `bin/typecheck`, which runs TypeScript 7's checker over
-`src/` with loose settings and takes well under a second. CI runs it as a separate job, and a
-type error fails the workflow.
+checks them. The only type check is `bin/typecheck`, which takes about two seconds and runs
+TypeScript 7's checker twice:
+
+- `tsconfig.json` checks all of `src/` with loose settings.
+- `tsconfig.core.json` checks Unpoly's core (`src/unpoly.ts` and `src/unpoly/`) with stricter
+  settings, so far `noImplicitAny`. `unpoly-migrate` isn't part of this check. Neither are the
+  change classes in `src/unpoly/fragment/render/change/`, which wait for a restructure.
+  TypeScript can't leave out a folder that other core files import, so `bin/typecheck` drops
+  that folder's errors instead (see `NOT_YET_STRICT` there).
+
+When a folder passes the stricter settings, remove it from `NOT_YET_STRICT`. When all of `src/`
+passes a setting, move it to `tsconfig.json`. CI runs `bin/typecheck` as a separate job, and a
+type error in either check fails the workflow.
 
 In a `.ts` module:
 
@@ -27,19 +48,27 @@ In a `.ts` module:
   the compiled class define the property, which costs bytes and changes behavior (differently in
   `unpoly.js` and `unpoly.es6.js`, whose targets treat class fields differently). `bin/lint`
   reports a field without `declare` or an initializer.
+- Core code has no implicit `any`: type every parameter, a `let` without an initializer, and an
+  empty `{}` or `[]` that collects values. Callbacks get their parameter types from the function
+  they're passed to (`up.compiler()`, `up.on()`), so prefer typing that function over annotating
+  each callback.
 - When a function resolves its argument by reassigning it (`element = getSmart(element)`),
-  TypeScript keeps the parameter's declared type and reports the uses below. Write the typed
-  signature as an overload and leave the implementation untyped:
+  TypeScript narrows the parameter to a member of its declared type: an `ElementOrSelector`
+  becomes an `Element`, never the `HTMLElement` that `getSmart()` returns. When that's enough,
+  type the parameter as usual. Otherwise write the typed signature as an overload, and give the
+  implementation an `any` parameter with a comment:
 
   ```ts
   export function morph(oldElement: ElementOrSelector, newElement: ElementOrSelector, ...): Promise<void>
-  export async function morph(oldElement, newElement, ...) {
+  // The elements are resolved in place. TypeScript would narrow them to Element, not HTMLElement.
+  export async function morph(oldElement: any, newElement: any, ...) {
     oldElement = getSmart(oldElement)
   ```
 
   Callers get the typed signature, the body stays as it was. A new local variable or a cast would be
-  checked, but changes the emitted code. Use a plain `any` parameter (with a comment) only where an
-  overload isn't possible, like a function expression passed to `mockable()`.
+  checked, but changes the emitted code. A function expression passed to `mockable()` can't have
+  overloads. Type its rest parameter as a union of tuples (like `trackFields()` does), or as `any`
+  with a comment.
 - Where the honest code would emit differently, a cast with a comment is fine, e.g.
   `(now as any) - (this.loadedAt as any)` instead of `now.getTime() - …`.
 - `any` is fine where a precise type would be complex.

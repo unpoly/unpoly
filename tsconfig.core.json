@@ -1,0 +1,11 @@
+{
+  // Type checking only (bin/typecheck). Checks Unpoly's core (src/unpoly/) with stricter
+  // settings than tsconfig.json. Each setting moves to tsconfig.json once unpoly-migrate
+  // passes it too.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noImplicitAny": true
+  },
+  // unpoly-migrate and the Bootstrap entries are left out. Core never imports them.
+  "include": ["src/types/**/*.ts", "src/unpoly.ts", "src/unpoly/**/*.ts"]
+}

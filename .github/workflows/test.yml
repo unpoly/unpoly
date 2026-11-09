@@ -61,6 +61,7 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      # Runs both tsconfig.json and the stricter tsconfig.core.json.
       - name: Type-check src
         run: bin/typecheck
 

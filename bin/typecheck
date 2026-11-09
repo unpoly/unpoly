@@ -1,5 +1,10 @@
 #!/usr/bin/env node
-// Type-check src/ with TypeScript 7, using the tsconfig.json in the project root.
+// Type-check src/ with TypeScript 7. Runs two checks:
+//
+//   1. tsconfig.json: all of src/, with loose settings.
+//   2. tsconfig.core.json: Unpoly's core (src/unpoly/), with stricter settings.
+//      Errors in the folders listed in NOT_YET_STRICT are dropped.
+//
 // Extra arguments are forwarded to tsc, so `bin/typecheck --extendedDiagnostics` works.
 // The build doesn't use TypeScript at all: esbuild strips the types.
 import { spawn } from 'node:child_process'
@@ -8,6 +13,49 @@ import { fileURLToPath } from 'node:url'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const tscBin = path.join(projectRoot, 'node_modules', 'typescript', 'bin', 'tsc')
+const extraArgs = process.argv.slice(2)
 
-let child = spawn(tscBin, ['--project', 'tsconfig.json', ...process.argv.slice(2)], { stdio: 'inherit', cwd: projectRoot })
-child.on('exit', (code) => process.exit(code ?? 1))
+// Core folders that don't pass tsconfig.core.json yet. tsc has no per-file settings, and
+// leaving a folder out of the config's `include` doesn't help: other core files import it,
+// so tsc checks it anyway. We drop its errors from the output instead.
+const NOT_YET_STRICT = [
+  // The change classes wait for a restructure.
+  'src/unpoly/fragment/render/change/',
+]
+
+function tsc(args, stdio) {
+  return new Promise((resolve) => {
+    let child = spawn(tscBin, args, { stdio, cwd: projectRoot })
+    let stdout = ''
+    child.stdout?.on('data', (chunk) => stdout += chunk)
+    child.on('exit', (code) => resolve({ code: code ?? 1, stdout }))
+  })
+}
+
+// Splits tsc's plain output (`--pretty false`) into blocks. An error starts with
+// `path(line,col): error`, followed by indented lines that elaborate it.
+// Any other line is a block of its own.
+function outputBlocks(output) {
+  let blocks = []
+  for (let line of output.split('\n')) {
+    if (/^\s/.test(line) && blocks.length) {
+      blocks.at(-1).lines.push(line)
+    } else if (line) {
+      blocks.push({ lines: [line], error: /^\S+\(\d+,\d+\): error /.test(line) })
+    }
+  }
+  return blocks
+}
+
+let loose = await tsc(['--project', 'tsconfig.json', ...extraArgs], 'inherit')
+let core = await tsc(['--project', 'tsconfig.core.json', '--pretty', 'false', ...extraArgs], ['inherit', 'pipe', 'inherit'])
+let blocks = outputBlocks(core.stdout).filter(({ lines, error }) => !(error && NOT_YET_STRICT.some((folder) => lines[0].startsWith(folder))))
+for (let { lines } of blocks) console.log(lines.join('\n'))
+let coreErrorCount = blocks.filter(({ error }) => error).length
+if (coreErrorCount) {
+  console.log(`\nFound ${coreErrorCount} error${coreErrorCount === 1 ? '' : 's'} with the stricter settings of tsconfig.core.json.`)
+}
+// tsc fails for reasons other than errors in a file, like a broken config.
+let coreFailed = coreErrorCount > 0 || (core.code !== 0 && !outputBlocks(core.stdout).some(({ error }) => error))
+
+process.exit(loose.code || (coreFailed ? 1 : 0))
