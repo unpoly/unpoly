@@ -773,6 +773,19 @@ describe('up.event', function() {
 
         expect(emittedEvent.target).toEqual(element)
       })
+
+      it('triggers an event on the element of a layer passed as the first argument, with that layer as the current layer', async function() {
+        const overlay = await up.layer.open({ mode: 'modal' })
+        const listener = jasmine.createSpy('event listener').and.callFake((event) => [event.type, event.target, up.layer.current])
+        overlay.element.addEventListener('my:event', listener)
+        up.layer.root.element.addEventListener('my:event', listener)
+
+        up.emit(overlay, 'my:event')
+        expect(listener.calls.mostRecent().returnValue).toEqual(['my:event', overlay.element, overlay])
+
+        up.emit(up.layer.root, 'my:event')
+        expect(listener.calls.mostRecent().returnValue).toEqual(['my:event', up.layer.root.element, up.layer.root])
+      })
     })
 
     describe('up.event.assertEmitted()', function() {

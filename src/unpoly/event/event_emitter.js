@@ -5,6 +5,7 @@ import { Aborted } from '../error/aborted.js'
 import { build } from '../event.js'
 import { getSmart } from '../fragment.js'
 import { layerStack } from '../layer.js'
+import { Layer } from '../layer/base.js'
 import { config, printToStandard } from '../log.js'
 import { Record } from '../util/record.js'
 
@@ -94,9 +95,7 @@ export class EventEmitter extends Record {
     // target. We remove it from the argument list and store it in options.
     if (isElementLike(args[0])) {
       options.target = getOne(args.shift())
-    } else if (args[0]?.[Symbol.toStringTag] === 'up.Layer') {
-      // We don't import Layer for an instanceof check: up.Layer imports us (for up.Layer#emit()),
-      // and we're imported by many modules that load before it.
+    } else if (args[0] instanceof Layer) {
       options.layer = args.shift()
     }
 
