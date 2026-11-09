@@ -13,10 +13,23 @@ import { build, layerStack } from '../../../layer.js'
 import { printToStandard } from '../../../log.js'
 import { hungrySteps } from '../../../radio.js'
 import { hello } from '../../../script.js'
+import type { PartialRenderResult } from '../render_result.js'
+import type { ResponseDoc } from '../response_doc.js'
+import type { PreflightProps } from './addition.js'
+import type { HungrySteps } from '../../../radio.js'
+import type { PlainObject } from '../../../util.js'
+import type { Layer } from '../../../layer/base.js'
+import type { Overlay } from '../../../layer/modes/overlay.js'
 
 export class OpenLayerPlan extends Addition {
+  declare layer: Overlay
+  declare target: string
+  declare _origin: Element | undefined
+  declare _baseLayer: Layer
+  declare _content: HTMLElement | undefined
 
-  constructor(options) {
+  // ChangeFromContent has turned { target } into a selector string.
+  constructor(options: RenderOptions & { target?: string }) {
     super(options)
     this.target = options.target
     this._origin = options.origin
@@ -25,7 +38,7 @@ export class OpenLayerPlan extends Addition {
     // to up:layer:open may modify layer options.
   }
 
-  getPreflightProps() {
+  getPreflightProps(): PreflightProps {
     // We assume that the server will respond with our target.
     // Hence this change will always be applicable.
 
@@ -52,7 +65,7 @@ export class OpenLayerPlan extends Addition {
     }
   }
 
-  execute(responseDoc, onApplicable) {
+  execute(responseDoc: ResponseDoc, onApplicable: () => void): RenderResult {
     // Find our target in the responseDoc.
     // If it cannot be matched, up.CannotMatch is thrown and ChangeFromContent will try the next plan.
     this._matchPostflight(responseDoc)
@@ -87,7 +100,7 @@ export class OpenLayerPlan extends Addition {
     }
   }
 
-  _matchPostflight(responseDoc) {
+  _matchPostflight(responseDoc: ResponseDoc): void {
     if (this.target === ':none') {
       this._content = document.createElement('up-none')
     } else {
@@ -100,7 +113,7 @@ export class OpenLayerPlan extends Addition {
     }
   }
 
-  _createOverlay() {
+  _createOverlay(): void {
     printToStandard('up.render()', `Opening element "${this.target}" in new overlay`)
 
     this._assertOpenEventEmitted()
@@ -129,7 +142,7 @@ export class OpenLayerPlan extends Addition {
     this.layer.setupHandlers()
   }
 
-  _renderOverlayContent(responseDoc) {
+  _renderOverlayContent(responseDoc: ResponseDoc): PartialRenderResult {
     // The server may trigger multiple signals that may cause the overlay to close immediately:
     //
     // - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
@@ -186,7 +199,7 @@ export class OpenLayerPlan extends Addition {
     }
   }
 
-  _renderOtherLayers(responseDoc) {
+  _renderOtherLayers(responseDoc: ResponseDoc): PartialRenderResult[] {
     // We execute steps on other layers after this layer. However, if the render pass ends up
     // closing this layer (e.g. by reaching a close condition or X-Up-Accept-Layer), we execute them
     // before the layer closes (see execute()). This way we can:
@@ -197,7 +210,7 @@ export class OpenLayerPlan extends Addition {
     return new UpdateSteps({ steps }).execute(responseDoc)
   }
 
-  async _compileLayer() {
+  async _compileLayer(): Promise<void> {
     // Compile the entire layer, not just the user content.
     // E.g. [up-dismiss] in the layer elements needs to go through a macro.
     await hello(this.layer.element, {
@@ -207,15 +220,15 @@ export class OpenLayerPlan extends Addition {
     })
   }
 
-  _buildLayer() {
-    const beforeNew = (optionsWithLayerDefaults) => {
+  _buildLayer(): Overlay {
+    const beforeNew = (optionsWithLayerDefaults: RenderOptions) => {
       return this.options = RenderOptions.finalize(optionsWithLayerDefaults)
     }
 
-    return build(this.options, beforeNew)
+    return build(this.options, beforeNew) as Overlay
   }
 
-  _handleHistory() {
+  _handleHistory(): void {
     // If the layer is opened with { history } auto, the new overlay will from now
     // on have visible history *if* its initial fragment has auto-history.
     if (this.layer.history === 'auto') {
@@ -232,7 +245,7 @@ export class OpenLayerPlan extends Addition {
     this.layer.updateHistory(this._getEffectiveHistoryOptions())
   }
 
-  _handleFocus() {
+  _handleFocus(): void {
     this._baseLayer.overlayFocus?.moveToBack()
     this.layer.overlayFocus.moveToFront()
 
@@ -247,7 +260,7 @@ export class OpenLayerPlan extends Addition {
     fragmentFocus.process(this.options.focus)
   }
 
-  _handleScroll() {
+  _handleScroll(): void {
     const scrollingOptions = {
       ...this.options,
       fragment: this._content,
@@ -258,7 +271,7 @@ export class OpenLayerPlan extends Addition {
     scrolling.process(this.options.scrollMap ?? this.options.scroll)
   }
 
-  _assertOpenEventEmitted() {
+  _assertOpenEventEmitted(): void {
     // The initial up:layer:open event is emitted on the document, since the layer
     // element has not been attached yet and there is no obvious element it should
     // be emitted on. We don't want to emit it on @layer.parent.element since users
@@ -273,7 +286,7 @@ export class OpenLayerPlan extends Addition {
     })
   }
 
-  _emitOpenedEvent() {
+  _emitOpenedEvent(): void {
     this.layer.emit('up:layer:opened', {
       origin: this._origin,
       callback: this.layer.callback('onOpened'),
@@ -282,11 +295,11 @@ export class OpenLayerPlan extends Addition {
     )
   }
 
-  _getHungrySteps() {
+  _getHungrySteps(): HungrySteps {
     return hungrySteps(this._getEffectiveRenderOptions())
   }
 
-  _getEffectiveRenderOptions() {
+  _getEffectiveRenderOptions(): RenderOptions {
     return {
       ...this.options,
       layer: this.layer,
@@ -294,14 +307,14 @@ export class OpenLayerPlan extends Addition {
     }
   }
 
-  _getEffectiveHistoryOptions() {
+  _getEffectiveHistoryOptions(): PlainObject {
     // For the initial fragment insertion we always update its location, even if the layer
     // does not have visible history ({ history } attribute). This ensures that a
     // layer always has a #location.
     return historyOptions(this.options)
   }
 
-  _getNewLocation() {
+  _getNewLocation(): string | boolean | undefined {
     return this._getEffectiveRenderOptions().location
   }
 
