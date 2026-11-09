@@ -11,6 +11,8 @@ declare var spyOn: any
 interface Window {
   jQuery?: any
   jasmine?: any
+  // The rails-ujs gem
+  Rails?: any
 }
 
 // Entry points require their stylesheets, which webpack handles.

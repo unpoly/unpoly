@@ -15,7 +15,7 @@ function isRailsUJSLoaded() {
     window.jQuery?.rails // jquery-ujs gem
 }
 
-function swapAttr(element, dataAttr, upAttr) {
+function swapAttr(element: Element, dataAttr: string, upAttr: string): void {
   if (element.hasAttribute(dataAttr)) {
     let dataValue = element.getAttribute(dataAttr)
     setMissingAttr(element, upAttr, dataValue)
@@ -23,7 +23,7 @@ function swapAttr(element, dataAttr, upAttr) {
   }
 }
 
-function defineMacro(elementSelector, relevantFn) {
+function defineMacro(elementSelector: string, relevantFn: (element: Element) => boolean): void {
   registerMacro(`:is([data-confirm], [data-method]):is(${elementSelector})`, function(element) {
     // It would be nicer to test isRailsUJSLoaded() once at up:framework:boot,
     // but this would make it harder to test.
@@ -34,7 +34,7 @@ function defineMacro(elementSelector, relevantFn) {
   })
 }
 
-export function install() {
+export function install(): void {
   defineMacro('a[href], [up-href]', (el) => isFollowable(el))
   defineMacro('form, input[type=submit], button[type=submit], button:not([type])', (el) => isSubmittable(getForm(el)))
 }
