@@ -3,10 +3,19 @@ import { elementLikeMatches, subtree } from '../element.js'
 import { CannotMatch } from '../error/cannot_match.js'
 import { expandTargets, isNotDestroying } from '../fragment.js'
 import { layerStack } from '../layer.js'
+import type { List, PlainObject } from '../util.js'
+import type { Layer } from '../layer/base.js'
+
+type ElementFilter = (element: Element) => boolean
 
 export class Selector {
+  declare _filters: ElementFilter[]
+  declare _layers: Layer[] | undefined
+  declare _selectors: string[]
+  declare _unionSelector: string
 
-  constructor(selector, elementOrDocument, options = {}) {
+  // The options are lookup options like { layer, origin, destroying }, see up.fragment.get().
+  constructor(selector: any, elementOrDocument: Element | Document | undefined, options: PlainObject = {}) {
     // If we're given an element that is detached *or* from another document
     // (think up.ResponseDoc), it has no layer and no destroying ancestors.
     let externalDocument = elementOrDocument && !document.contains(elementOrDocument)
@@ -21,7 +30,7 @@ export class Selector {
     let noLayers = externalDocument || options.layer === 'any' || layerStack.attachedCount === 1
 
     // Also normalizes options: a missing { layer } with an { origin } becomes 'origin'.
-    let layers = options.layer !== 'new' && !noLayers && layerStack.getAll(options)
+    let layers: Layer[] | false = options.layer !== 'new' && !noLayers && layerStack.getAll(options)
     let expandTargetLayer
 
     if (options.layer === 'new') {
@@ -55,19 +64,19 @@ export class Selector {
     this._unionSelector = this._selectors.join() || 'match-none'
   }
 
-  matches(element) {
+  matches(element: Element): boolean {
     return elementLikeMatches(element, this._unionSelector) && this._passesFilter(element)
   }
 
-  closest(element) {
-    return this._filterOne(element.closest(this._unionSelector))
+  closest(element: Element): HTMLElement | undefined {
+    return this._filterOne(element.closest<HTMLElement>(this._unionSelector))
   }
 
-  descendants(root = document) {
-    return this._filterMany(root.querySelectorAll(this._unionSelector))
+  descendants(root: Element | Document = document): HTMLElement[] {
+    return this._filterMany(root.querySelectorAll<HTMLElement>(this._unionSelector))
   }
 
-  firstDescendant(root) {
+  firstDescendant(root?: Element | Document): HTMLElement | undefined {
     // Note that we query per expanded selector, not once for their union: when
     // `up.fragment.config.mainTargets` matches both .container and body, up.fragment.get(':main')
     // must prefer .container even though body comes first in the document.
@@ -80,11 +89,11 @@ export class Selector {
     // as one would search the whole document and let the layer filter (which accepts a
     // match in *any* requested layer) pick, losing the layer preference below.
     if (isElement(root)) {
-      return this._firstSelectorMatch((selector) => root.querySelectorAll(selector))
+      return this._firstSelectorMatch((selector) => root.querySelectorAll<HTMLElement>(selector))
     } else if (!this._layers) {
       // With layers out of the picture the container is a whole document: the one we were
       // given (up.ResponseDoc passes its own), or ours.
-      return this._firstSelectorMatch((selector) => (root || document).querySelectorAll(selector))
+      return this._firstSelectorMatch((selector) => (root || document).querySelectorAll<HTMLElement>(selector))
     } else {
       // Earlier layers win, so u.findResult() tries one layer at a time. E.g.
       // up.fragment.get('main', { layer: 'current root' }) may match in both layers, but
@@ -96,25 +105,25 @@ export class Selector {
     }
   }
 
-  subtree(root) {
+  subtree(root: Element): HTMLElement[] {
     return this._filterMany(subtree(root, this._unionSelector))
   }
 
-  _firstSelectorMatch(fn) {
+  _firstSelectorMatch(fn: (selector: string) => List<HTMLElement>): HTMLElement | undefined {
     return findResult(this._selectors, (selector) => {
       return this._filterMany(fn(selector))[0]
     })
   }
 
-  _passesFilter(element) {
+  _passesFilter(element: Element): boolean {
     return element && every(this._filters, (filter) => filter(element))
   }
 
-  _filterOne(element) {
+  _filterOne(element: HTMLElement): HTMLElement | undefined {
     return presence(element, this._passesFilter.bind(this))
   }
 
-  _filterMany(elements) {
+  _filterMany(elements: List<HTMLElement>): HTMLElement[] {
     return filterList(elements, this._passesFilter.bind(this))
   }
 
