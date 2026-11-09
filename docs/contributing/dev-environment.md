@@ -51,8 +51,9 @@ also strips TypeScript's types, and minifies with [Terser](https://terser.org/).
 `tooling/build/bundles.mjs` lists every bundle, and which `--config` builds it.
 
 The watcher rebuilds only the bundles that read the file you edited, usually within 200 ms, and
-lints the file with ESLint if it is in `src/`. The build itself never lints: `bin/lint` does,
-and CI runs it as its own job.
+lints the file with ESLint if it is in `src/`. Of the one-shot builds, only the production build
+(`bin/build` without `--config`, which `bin/release` runs) lints `src/`, and fails on an error.
+`bin/lint` lints `src/`, `spec/` and `tooling/`, and CI runs it as its own job.
 
 ## Logs
 

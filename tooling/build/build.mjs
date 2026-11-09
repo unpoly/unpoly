@@ -41,8 +41,13 @@ export function parseBuildArgs(argv) {
   }
   // Gzip is only meaningful for the production bundle, so that's its default.
   if (gzip === null) gzip = config === 'production'
+  // The production build is what bin/release publishes, so it refuses code that fails ESLint, as
+  // the webpack build did. Linting src/ takes ~10 s, though, longer than the build, so the other
+  // configs leave it to bin/lint, CI's Lint job and the dev watcher. bin/test --minify builds the
+  // minified bundles often and must stay fast.
+  let lint = config === 'production'
 
-  return { config, watch, gzip }
+  return { config, watch, gzip, lint }
 }
 
 function spawnStep(command, args) {
@@ -67,11 +72,16 @@ export async function runBuild(argv) {
     return runWatch(CONFIGS[options.config])
   }
 
-  let errors = await buildOnce(CONFIGS[options.config], {
-    // Comments only matter in the unminified bundles we publish. Elsewhere the source maps make
-    // them harmless, and stripping would cost the dev build more than everything else together.
-    strip: options.config === 'production',
-  })
+  let [buildErrors, lintErrors] = await Promise.all([
+    buildOnce(CONFIGS[options.config], {
+      // Comments only matter in the unminified bundles we publish. Elsewhere the source maps make
+      // them harmless, and stripping would cost the dev build more than everything else together.
+      strip: options.config === 'production',
+    }),
+    // ESLint runs in this thread while esbuild and Terser work in their own processes and threads.
+    options.lint ? lintSources() : [],
+  ])
+  let errors = [...buildErrors, ...lintErrors]
   if (errors.length) {
     console.error(errors.join('\n'))
     return 1
@@ -81,6 +91,13 @@ export async function runBuild(argv) {
     return await spawnStep('gzip', ['--keep', '--force', ...GZIP_TARGETS])
   }
   return 0
+}
+
+// The errors ESLint finds in src/, formatted. Imported on demand, because loading ESLint costs
+// every other build time.
+async function lintSources() {
+  let { SourceLinter } = await import('./lint.mjs')
+  return new SourceLinter().lint([])
 }
 
 // Builds every bundle of a config once. Resolves with a list of formatted error messages, empty

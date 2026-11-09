@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Lint src/, spec/ and tooling/ with ESLint. The build doesn't lint. The dev watcher lints
-// src/ after every change (tooling/build/lint.mjs), so `bin/test` reports an ESLint error in
+// Lint src/, spec/ and tooling/ with ESLint. Only the production build lints (src/ only, so
+// bin/release refuses lint errors). The dev watcher lints src/ after every change (tooling/build/lint.mjs), so `bin/test` reports an ESLint error in
 // src/ like a syntax error. Nothing else checks spec/ and tooling/, in particular no-undef,
 // which catches a spec file using something from another file's scope. CI runs this as its
 // own step.

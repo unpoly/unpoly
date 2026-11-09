@@ -1,8 +1,9 @@
 // ESLint for the dev watcher: keeps the lint errors of every file in src/ and re-lints only what
 // changed, so an ESLint violation reaches `bin/test` and `bin/dev status` like a syntax error does.
+// The production build (what bin/release publishes) uses it once, to refuse code with errors.
 //
-// The build itself never lints. CI and `bin/lint` run ESLint as a step of their own, over src/,
-// spec/ and tooling/. Like the webpack build before, the watcher covers src/ only, and only
+// The other one-shot builds don't lint. CI and `bin/lint` run ESLint as a step of their own, over
+// src/, spec/ and tooling/. Like the webpack build before, the watcher covers src/ only, and only
 // errors fail a build. Warnings don't.
 
 import { existsSync } from 'node:fs'
