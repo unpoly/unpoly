@@ -17,6 +17,7 @@ import { ScriptGate } from './script/csp/script_gate.js'
 import { DestructorPass } from './script/destructor_pass.js'
 import { HelloFragment } from './script/hello_fragment.js'
 import { Config } from './util/config.js'
+import type { ConfigWith } from './util/config.js'
 import type { Cleaner, List, PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
 import type { CSPInfo } from './script/csp/csp_info.js'
@@ -126,7 +127,7 @@ Configures defaults for script handling and asset tracking.
 @property up.script.config
 @stable
 */
-export const config = new Config('up.script.config', () => ({
+export const config = new Config<PlainObject>('up.script.config', () => ({
   cspNonce() { return metaContent('csp-nonce') },
   cspWarnings: true,
   scriptElementPolicy: 'auto',
@@ -163,7 +164,7 @@ export const config = new Config('up.script.config', () => ({
   noScriptSelectors: [
     'script[type="application/ld+json"]'
   ]
-}))
+})) as ConfigWith<PlainObject>
 
 const SYSTEM_MACRO_PRIORITIES = {
   '[up-back]': -100,        // sets [up-href] to previous URL

@@ -23,6 +23,7 @@ import { UpRequest } from './network/request.js'
 import { registerAttrCompiler, registerCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
+import type { ConfigWith } from './util/config.js'
 import { doFocus } from './viewport.js'
 import type { PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
@@ -143,7 +144,7 @@ without requiring developers to set `[up-...]` attributes.
 
 @stable
 */
-export const config = new Config('up.link.config', () => ({
+export const config = new Config<PlainObject>('up.link.config', () => ({
   // (1) We want to follow all elements with an [up-follow] attribute.
   //     This can be an <a up-follow href="/path"> or an <span up-follow up-href="/path">
   // (2) Users expect a link to be followable if it uses a signature attribute
@@ -175,7 +176,7 @@ export const config = new Config('up.link.config', () => ({
   noClickableSelectors: ['[up-clickable=false]', DEFAULT_INTERACTIVE_ELEMENT],
 
   preloadDelay: 90,
-}))
+})) as ConfigWith<PlainObject>
 
 function isPreloadDisabled(link: Element): boolean {
   // (1) Don't preload when we cannot change the browser URL. Following such a link will make a full page load ignoring our cache.

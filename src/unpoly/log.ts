@@ -2,6 +2,7 @@ import { sprintf } from './util.js'
 import { mockable } from './mockable.js'
 import { on } from './event.js'
 import { LogConfig } from './log/log_config.js'
+import type { PlainObject } from './util.js'
 
 /*-
 Features to log Unpoly's activity to the browser console.
@@ -47,7 +48,7 @@ Configures the logging output to the developer console.
   This keeps the log readable for test runners and coding agents that read the console as plain text.
 @stable
 */
-export const config = new LogConfig()
+export const config = new LogConfig() as LogConfig & PlainObject
 
 /**
 The arguments for a log message: a prefix (usually the event type or function name), a message

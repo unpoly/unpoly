@@ -19,6 +19,7 @@ import { followOptions as linkFollowOptions } from './link.js'
 import { callbackAttr, registerAttrCompiler, registerCompiler, registerDestructor } from './script.js'
 import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
+import type { ConfigWith } from './util/config.js'
 import { doFocus, focusedElementWithin } from './viewport.js'
 import type { PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
@@ -199,7 +200,7 @@ Sets default options for form submission and validation.
 
 @stable
  */
-export const config = new Config('up.form.config', () => ({
+export const config = new Config<PlainObject>('up.form.config', () => ({
   groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
   fieldSelectors: [
     'select',
@@ -226,7 +227,7 @@ export const config = new Config('up.form.config', () => ({
   watchChangeEvents: ['change'],
   watchableEvents: ['input', 'change'],
   arrayParam: (name) => name.endsWith('[]'),
-}))
+})) as ConfigWith<PlainObject>
 
 function findFormElements(root: ElementOrSelector, selectorFn: SelectorFn): Field[]
 function findFormElements(root, selectorFn) {

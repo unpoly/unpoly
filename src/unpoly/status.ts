@@ -12,6 +12,7 @@ import { printToStandard } from './log.js'
 import { LinkCurrentURLs } from './status/link_current_urls.js'
 import { Preview } from './status/preview.js'
 import { Config } from './util/config.js'
+import type { ConfigWith } from './util/config.js'
 import { Registry } from './util/registry.js'
 import { FocusCapsule } from './viewport/focus_capsule.js'
 import type { List, PlainObject } from './util.js'
@@ -81,14 +82,14 @@ Sets default options for status effects.
 
 @stable
 */
-export const config = new Config('up.status.config', () => ({
+export const config = new Config<PlainObject>('up.status.config', () => ({
   currentClasses: ['up-current'],
   activeClasses: ['up-active'],
   loadingClasses: ['up-loading'],
   revalidatingClasses: ['up-revalidating'],
   navSelectors: ['[up-nav]', 'nav'],
   noNavSelectors: ['[up-nav=false]'],
-}))
+})) as ConfigWith<PlainObject>
 
 export let namedPreviewFns = new Registry<PreviewFn>('preview')
 

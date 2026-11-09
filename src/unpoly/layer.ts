@@ -11,6 +11,7 @@ import type { LayerOptions } from './layer/base.js'
 import type { LayerLookupArgs } from './layer/layer_lookup.js'
 import { LayerStack } from './layer/layer_stack.js'
 import { Config } from './util/config.js'
+import type { ConfigWith } from './util/config.js'
 import type { PlainObject } from './util.js'
 
 /**
@@ -189,7 +190,7 @@ up.layer.config.overlay.mainTargets.unshift('.content')
 
 @stable
 */
-export const config = new Config('up.layer.config', () => ({
+export const config = new Config<PlainObject>('up.layer.config', () => ({
   mode: 'modal',
   any: {
     mainTargets: [
@@ -247,7 +248,7 @@ export const config = new Config('up.layer.config', () => ({
     trapFocus: false,
   },
   foreignOverlaySelectors: ['dialog'],
-}))
+})) as ConfigWith<PlainObject>
 
 /*-
 A list of layers that are currently open.

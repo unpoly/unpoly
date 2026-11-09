@@ -31,6 +31,7 @@ import {
   registerMacro,
 } from './script.js'
 import { Config } from './util/config.js'
+import type { ConfigWith } from './util/config.js'
 import type { List, PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
 import type { UpRequest } from './network/request.js'
@@ -323,7 +324,7 @@ Configures defaults for fragment updates.
 
 @stable
 */
-export const config = new Config('up.fragment.config', () => ({
+export const config = new Config<PlainObject>('up.fragment.config', () => ({
   badTargetClasses: [/^up-/],
 
   strongTargetDerivers: STRONG_TARGET_DERIVERS,
@@ -386,7 +387,7 @@ export const config = new Config('up.fragment.config', () => ({
   skipResponse: defaultSkipResponse,
   renderableResponse: (response) => response.isHTML(),
   normalizeKeepHTML: defaultNormalizeKeepHTML
-}))
+})) as ConfigWith<PlainObject>
 
 // Users who are not using layers will prefer settings default targets
 // as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.

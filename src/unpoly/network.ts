@@ -9,6 +9,8 @@ import { RequestQueue } from './network/request_queue.js'
 import { UpRequest } from './network/request.js'
 import { UpResponse } from './network/response.js'
 import { Config } from './util/config.js'
+import type { ConfigWith } from './util/config.js'
+import type { PlainObject } from './util.js'
 import type { RequestOptions } from './network/request.js'
 
 /*-
@@ -147,7 +149,7 @@ Sets default options for network requests.
 
 @stable
 */
-export const config = new Config('up.network.config', () => ({
+export const config = new Config<PlainObject>('up.network.config', () => ({
   concurrency: 6,
   wrapMethod: true,
   cacheEnabled: true,
@@ -161,7 +163,7 @@ export const config = new Config('up.network.config', () => ({
   evictCache: false,
   progressBar: true,
   timeout: 90_000,
-}))
+})) as ConfigWith<PlainObject>
 
 export const queue = new RequestQueue()
 

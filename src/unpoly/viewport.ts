@@ -13,6 +13,7 @@ import { layerStack } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
 import { registerCompiler } from './script.js'
 import { Config } from './util/config.js'
+import type { ConfigWith } from './util/config.js'
 import { FIFOCache } from './util/fifo_cache.js'
 import { Rect } from './util/rect.js'
 import { BodyShifter } from './viewport/body_shifter.js'
@@ -145,7 +146,7 @@ Configures defaults for scrolling.
     @experimental
 @stable
 */
-export const config = new Config('up.viewport.config', () => ({
+export const config = new Config<PlainObject>('up.viewport.config', () => ({
   viewportSelectors: ['[up-viewport]', '[up-fixed]'],
   fixedTopSelectors: ['[up-fixed~=top]'],
   fixedBottomSelectors: ['[up-fixed~=bottom]'],
@@ -155,7 +156,7 @@ export const config = new Config('up.viewport.config', () => ({
   revealTop: false,
   revealMax() { return 0.5 * window.innerHeight },
   autoFocusVisible({ element, inputDevice }) { return inputDevice === 'key' || isField(element) }
-}))
+})) as ConfigWith<PlainObject>
 
 export const bodyShifter = new BodyShifter()
 

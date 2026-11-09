@@ -10,6 +10,7 @@ import { FragmentPolling } from './radio/fragment_polling.js'
 import { callbackAttr, registerAttrCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
+import type { ConfigWith } from './util/config.js'
 import type { PlainObject } from './util.js'
 import type { RenderStep } from './fragment.js'
 
@@ -62,11 +63,11 @@ Configures defaults for passive updates.
 
 @stable
 */
-export const config = new Config('up.radio.config', () => ({
+export const config = new Config<PlainObject>('up.radio.config', () => ({
   hungrySelectors: ['[up-hungry]'],
   noHungrySelectors: ['[up-hungry=false]'],
   pollInterval: 30000,
-}))
+})) as ConfigWith<PlainObject>
 
 export function hungrySteps(renderOptions: PlainObject): HungrySteps {
   let { hungry, origin, layer: renderLayer, meta } = renderOptions

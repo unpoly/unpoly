@@ -14,17 +14,28 @@ Returns whether an element matches the selector of a config property. See `up.ut
 */
 export type MatchesFn = (element: Element, condition?: string) => boolean
 
-export class Config {
-  // The settings are the keys of the object returned by the blueprint function.
-  // TODO(types): A namespace could declare its settings, e.g. `Config & NetworkSettings`.
-  [key: string]: any
+/**
+The keys of settings `S` that hold a list of CSS selectors, like `'followSelectors'`.
+@internal
+*/
+export type SelectorKey<S> = { [K in keyof S]-?: S[K] extends string[] ? K : never }[keyof S] & string
 
+/**
+A config object with the settings `S`, like `up.network.config`.
+
+The `Config` class only has the methods. Its constructor copies the settings onto the instance,
+which a TypeScript class can't express. So a namespace casts its `new Config(...)` to this type.
+@internal
+*/
+export type ConfigWith<S extends object> = Config<S> & S
+
+export class Config<S extends object = PlainObject> {
   declare _label: string
-  declare _blueprintFn: () => PlainObject
+  declare _blueprintFn: () => S
   declare _knownKeys: string[]
 
 
-  constructor(label: string, blueprintFn: () => PlainObject = (() => ({}))) {
+  constructor(label: string, blueprintFn: () => S = (() => ({}) as S)) {
     this._label = label
     this._blueprintFn = blueprintFn
     this._knownKeys = []
@@ -56,25 +67,26 @@ export class Config {
     Object.assign(this, this._blueprintFn())
   }
 
-  matches(element: Element, prop: string, condition?: string): boolean {
+  matches(element: Element, prop: SelectorKey<S>, condition?: string): boolean {
     return element?.matches(this.selector(prop, condition))
   }
 
-  matchesFn(prop: string): MatchesFn {
+  matchesFn(prop: SelectorKey<S>): MatchesFn {
     return (element, condition) => this.matches(element, prop, condition)
   }
 
-  selector(prop: string, condition = ''): string {
-    let includes = this[prop]
-    let excludes = this['no' + upperCaseFirst(prop)]
+  selector(prop: SelectorKey<S>, condition = ''): string {
+    // The settings aren't members of the class, see ConfigWith.
+    let includes = (this as any)[prop]
+    let excludes = (this as any)['no' + upperCaseFirst(prop)]
     return unionSelector(includes, excludes, condition)
   }
 
-  selectorFn(prop: string): SelectorFn {
+  selectorFn(prop: SelectorKey<S>): SelectorFn {
     return (condition) => this.selector(prop, condition)
   }
 
-  selectorFns(prop: string): [SelectorFn, MatchesFn] {
+  selectorFns(prop: SelectorKey<S>): [SelectorFn, MatchesFn] {
     return [this.selectorFn(prop), this.matchesFn(prop)]
   }
 }
