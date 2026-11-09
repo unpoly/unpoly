@@ -41,6 +41,7 @@ src/                      # Entry points for Unpoly's main and optional bundles
       modes/              # ...... One class per layer mode (ModalLayer, PopupLayer, ...)
     fragment/             # ... Classes owned by up.fragment
       render/             # ...... The classes behind up.render()
+    framework/            # ... Classes owned by up.framework (Registry)
     util/                 # ... Generic helper classes (up.Config, up.Rect, ...)
     internal.ts           # ... Internals the specs and unpoly-migrate need, published as up.internal
     ...                   # ... Other namespaces and their classes
@@ -257,9 +258,6 @@ from a feature namespace, define a protocol key that the class implements, like
 `up.util.copy.key`: `error.ts` defines `isCritical.key`, and `up.Response` implements it. Only
 when neither is possible, call the function through the global at call time, as `Config` logs
 with `up.internal.printToError()`.
-
-One class in `util/` breaks this rule: `registry.ts` imports `isEvaling()` from `framework.ts`. That
-is safe only because a registry calls it when an entry is put, after every module was evaluated.
 
 
 ## Entry points and optional bundles
