@@ -36,7 +36,7 @@
   "homepage": "https://unpoly.com",
   "devDependencies": {
     "@eslint/js": "^9",
-    "@stylistic/eslint-plugin": "^4",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "acorn": "^8.19.0",
     "ejs": "^3.1.10",
     "esbuild": "0.28.2",
@@ -48,6 +48,7 @@
     "jasmine-ajax": "*",
     "jquery": "*",
     "opn": "*",
+    "oxlint": "1.92.0",
     "picocolors": "^1.1.1",
     "puppeteer": "^24.6.0",
     "sass": "*",

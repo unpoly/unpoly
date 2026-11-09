@@ -1,0 +1,24 @@
+// The lint config for `bin/lint`, CI and editors: Oxlint's native rules from
+// `.oxlintrc.native.json`, plus the rules that run in JavaScript. Loading those costs about a
+// second per Oxlint process, so the dev watcher skips them (see tooling/build/lint.mjs).
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["./.oxlintrc.native.json"],
+  "jsPlugins": [
+    "@stylistic/eslint-plugin",
+    "./tooling/lint/unpoly_plugin.mjs"
+  ],
+  "rules": {
+    // Oxlint has no stylistic rules of its own. Its formatter (oxfmt) would reformat everything.
+    "@stylistic/semi": ["error", "never"],
+    "@stylistic/arrow-parens": ["error", "always"],
+    "@stylistic/object-curly-spacing": ["error", "always"],
+    "@stylistic/space-before-function-paren": ["error", {
+      "anonymous": "never",
+      "named": "never",
+      "asyncArrow": "always"
+    }],
+    "unpoly/declare-class-fields": "error",
+    "unpoly/no-octal": "error"
+  }
+}

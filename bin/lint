@@ -1,17 +1,40 @@
 #!/usr/bin/env node
-// Lint src/, spec/ and tooling/ with ESLint. Only the production build lints (src/ only, so
-// bin/release refuses lint errors). The dev watcher lints src/ after every change (tooling/build/lint.mjs), so `bin/test` reports an ESLint error in
-// src/ like a syntax error. Nothing else checks spec/ and tooling/, in particular no-undef,
-// which catches a spec file using something from another file's scope. CI runs this as its
-// own step.
+// Lint src/, spec/ and tooling/ with Oxlint (`.oxlintrc.json`), and check src/unpoly.js for api
+// collisions (tooling/lint/api_collisions.mjs). Extra arguments are forwarded to Oxlint, so
+// `bin/lint --fix` works.
 //
-// bin/ is not linted: its executables are extensionless, which ESLint will not match.
+// Only the production build lints (src/ only, so bin/release refuses lint errors). The dev
+// watcher lints src/ after every change, still with ESLint (tooling/build/lint.mjs), so `bin/test`
+// reports a lint error in src/ like a syntax error. Nothing else checks the code
+// style, spec/ and tooling/, in particular no-undef, which catches a spec file using something
+// from another file's scope. CI runs this as its own step.
+//
+// bin/ is not linted: its executables are extensionless, which Oxlint will not match.
 import { spawn } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { ApiCollisionCheck, formatProblems } from '../tooling/lint/api_collisions.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const eslintBin = path.join(projectRoot, 'node_modules', '.bin', 'eslint')
+const oxlintBin = path.join(projectRoot, 'node_modules', '.bin', 'oxlint')
 
-let child = spawn(eslintBin, ['src', 'spec', 'tooling', ...process.argv.slice(2)], { stdio: 'inherit', cwd: projectRoot })
-child.on('exit', (code) => process.exit(code ?? 1))
+let args = ['src', 'spec', 'tooling', ...process.argv.slice(2)]
+
+function oxlint(stdio) {
+  return new Promise((resolve) => {
+    let child = spawn(oxlintBin, args, { stdio, cwd: projectRoot })
+    child.on('exit', (code) => resolve(code ?? 1))
+  })
+}
+
+// Oxlint fixes in one pass and skips a fix that touches another one (like `{a: 1};` needing
+// both a space and no semicolon), where ESLint passes again. A silent pass first gets those.
+if (args.some((arg) => arg.startsWith('--fix'))) await oxlint('ignore')
+let linted = oxlint('inherit')
+let collisions = new ApiCollisionCheck().check()
+let code = await linted
+if (collisions.length) {
+  console.log(formatProblems(collisions))
+  code ||= 1
+}
+process.exit(code)
