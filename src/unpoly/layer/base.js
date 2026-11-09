@@ -98,14 +98,21 @@ export class Layer {
   */
 
   constructor(options = {}) {
+    // Like a default parameter, a default only replaces an undefined option.
+    const {
+      context = {},
+      lastScrollTops = newStateCache(),
+      lastFocusCapsules = newStateCache(),
+    } = options
+
     // A layer has no { element } option. The root layer has an element getter, and an overlay
     // creates its element when it opens.
     this.stack = options.stack
     this.history = options.history
     this.mode = options.mode
-    this.context = options.context ?? {}
-    this.lastScrollTops = options.lastScrollTops ?? newStateCache()
-    this.lastFocusCapsules = options.lastFocusCapsules ?? newStateCache()
+    this.context = context
+    this.lastScrollTops = lastScrollTops
+    this.lastFocusCapsules = lastFocusCapsules
     assert(this.mode)
   }
 

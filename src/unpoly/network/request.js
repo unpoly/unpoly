@@ -325,6 +325,17 @@ export const UpRequest = class Request {
   @internal
   */
   constructor(options) {
+    // Like a default parameter, a default only replaces an undefined option.
+    // A null option stays null, e.g. { timeout: null } sends the request without a timeout.
+    const {
+      headers = {},
+      timeout = networkConfig.timeout,
+      builtAt = new Date(),
+      wrapMethod = networkConfig.wrapMethod,
+      abortable = true,
+      previews = [],
+    } = options
+
     this.state = 'new'
     this.expired = false
 
@@ -334,8 +345,8 @@ export const UpRequest = class Request {
     this.params = new Params(options.params) // copies, which we want
     this.target = options.target
     this.failTarget = options.failTarget
-    this.headers = options.headers ?? {}
-    this.timeout = options.timeout ?? networkConfig.timeout
+    this.headers = headers
+    this.timeout = timeout
     this.background = options.background
     this.cache = options.cache  // since up.network.request() options are sometimes wrapped in this class
     this.expireCache = options.expireCache  // since up.network.request() options are sometimes wrapped in this class
@@ -355,16 +366,16 @@ export const UpRequest = class Request {
     this.origin = options.origin
     this.originLayer = options.originLayer
     this.originMode = options.originMode
-    this.builtAt = options.builtAt ?? new Date()
-    this.wrapMethod = options.wrapMethod ?? networkConfig.wrapMethod
+    this.builtAt = builtAt
+    this.wrapMethod = wrapMethod
     this.contentType = options.contentType
     this.payload = options.payload
     this.onLoading = options.onLoading
     this.onSettle = options.onSettle
     this.fail = options.fail
-    this.abortable = options.abortable ?? true
+    this.abortable = abortable
     this.lateDelay = options.lateDelay
-    this.previews = options.previews ?? []
+    this.previews = previews
 
     // Normalize a first time to get a normalized cache key.
     this._normalize()

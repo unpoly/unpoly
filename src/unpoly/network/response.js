@@ -117,6 +117,9 @@ export const UpResponse = class Response {
   */
 
   constructor(options = {}) {
+    // Like a default parameter, a default only replaces an undefined option.
+    const { headers = {}, loadedAt = new Date() } = options
+
     this.method = options.method
     this.url = options.url
     this.text = options.text
@@ -132,8 +135,8 @@ export const UpResponse = class Response {
     this.context = options.context
     this.expireCache = options.expireCache
     this.evictCache = options.evictCache
-    this.headers = options.headers ?? {} // custom headers for synthetic responses without { xhr }
-    this.loadedAt = options.loadedAt ?? new Date()
+    this.headers = headers // custom headers for synthetic responses without { xhr }
+    this.loadedAt = loadedAt
     this.fail = options.fail
   }
 
