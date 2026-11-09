@@ -69,6 +69,8 @@ export async function runWatch({ bundles, sourcemap }) {
       let startedAt = Date.now()
       // ESLint runs in this thread while esbuild and Terser work in their own processes and threads.
       let [{ built, errors: buildErrors }, lintErrors] = await Promise.all([build(changedFiles), linter.lint(changedFiles)])
+      // Printed, but not reported to bin/test: a warning doesn't fail a build.
+      if (linter.warnings.length) console.log(pc.yellow(linter.warnings.join('\n')))
       // The modern and es6 bundles report the same syntax error.
       let roundErrors = [...new Set([...buildErrors, ...lintErrors])]
       if (roundErrors.length) {

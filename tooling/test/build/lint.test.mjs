@@ -9,7 +9,7 @@ import { SourceLinter } from '../../build/lint.mjs'
 function project(t, files) {
   let root = mkdtempSync(path.join(tmpdir(), 'source-linter-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))
-  writeFileSync(path.join(root, 'eslint.config.mjs'), `export default [{ rules: { semi: ['error', 'never'] } }]\n`)
+  writeFileSync(path.join(root, 'eslint.config.mjs'), `export default [{ rules: { semi: ['error', 'never'], 'no-var': 'warn' } }]\n`)
   for (let [file, content] of Object.entries(files)) {
     mkdirSync(path.dirname(path.join(root, file)), { recursive: true })
     writeFileSync(path.join(root, file), content)
@@ -37,4 +37,15 @@ test('later calls lint the changed files, and errors stand until their file is f
 
   writeFileSync(at('src/unpoly/bad.js'), 'let b = 1\n')
   assert.deepEqual(await linter.lint([at('src/unpoly/bad.js')]), [])
+})
+
+test('warnings are kept apart from errors, for the last call only', async (t) => {
+  let { root, at } = project(t, { 'src/unpoly.ts': 'let a = 1\n', 'src/unpoly/old.js': 'var b = 1\n' })
+  let linter = new SourceLinter({ root })
+  assert.deepEqual(await linter.lint([null]), [], 'a warning is no error')
+  assert.match(linter.warnings[0], /src\/unpoly\/old\.js[\s\S]*no-var/)
+
+  writeFileSync(at('src/unpoly/other.js'), 'let c = 1\n')
+  await linter.lint([at('src/unpoly/other.js')])
+  assert.deepEqual(linter.warnings, [])
 })

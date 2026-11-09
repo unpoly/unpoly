@@ -26,6 +26,9 @@ export class SourceLinter {
   // Absolute path → ESLint result with its errors, for every file that has errors.
   #failing = new Map()
   #linted = false
+  // The formatted warnings of the files the last call linted, empty when there are none. They
+  // don't fail a build, so they only go to the watcher's log.
+  warnings = []
 
   // `root` is a seam for the self-tests.
   constructor({ root = PROJECT_ROOT } = {}) {
@@ -57,23 +60,33 @@ export class SourceLinter {
   }
 
   async #lintTargets(targets) {
+    let warned = []
     if (targets.length) {
       for (let result of await this.#eslint.lintFiles(targets)) {
         let errors = result.messages.filter((message) => message.severity === 2)
         if (errors.length) {
           this.#failing.set(result.filePath, { ...result, messages: errors, warningCount: 0, fixableWarningCount: 0 })
         }
+        let warnings = result.messages.filter((message) => message.severity === 1)
+        if (warnings.length) {
+          warned.push({ ...result, messages: warnings, errorCount: 0, fatalErrorCount: 0, fixableErrorCount: 0 })
+        }
       }
     }
+    this.warnings = await this.#format(warned)
     return this.format()
   }
 
-  async format() {
-    if (!this.#failing.size) return []
+  // The formatted errors of every file in src/, empty when there are none.
+  format() {
+    return this.#format([...this.#failing.values()])
+  }
+
+  async #format(results) {
+    if (!results.length) return []
     this.#formatter ??= await this.#eslint.loadFormatter('stylish')
     // Paths from the project root, like esbuild's own errors.
-    let results = [...this.#failing.values()].map((result) => ({ ...result, filePath: path.relative(this.#root, result.filePath) }))
-    let text = await this.#formatter.format(results)
+    let text = await this.#formatter.format(results.map((result) => ({ ...result, filePath: path.relative(this.#root, result.filePath) })))
     // The status file is plain text. bin/test colors it itself.
     return [stripVTControlCharacters(text).trim()]
   }
