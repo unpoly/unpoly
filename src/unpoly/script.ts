@@ -24,6 +24,7 @@ import type { CSPInfo } from './script/csp/csp_info.js'
 import type { PolicyString } from './script/csp/script_gate.js'
 import type { Compiler, HelloFragmentOptions } from './script/hello_fragment.js'
 import type { RenderOptions } from './fragment/render/render_options.js'
+import type { Layer } from './layer/base.js'
 import type { UpResponse } from './network/response.js'
 
 /**
@@ -47,6 +48,17 @@ export interface CompilerOptions {
 }
 
 /**
+[Information about the render pass](/learn/enhancing-elements#meta) that a compiler gets as its
+third argument. The `{ meta }` option of `up.hello()` may add more keys.
+*/
+export interface CompilerMeta {
+  layer: Layer
+  ok: boolean
+  revalidating: boolean
+  [key: string]: any
+}
+
+/**
 The function passed to `up.compiler()` or `up.macro()`. It is called with a matching element, its
 [data](/learn/data) and [meta information](/learn/enhancing-elements#meta) about the render pass.
 It may return a destructor function, an array of destructors, or a promise.
@@ -54,7 +66,7 @@ It may return a destructor function, an array of destructors, or a promise.
 A compiler gets any element that matches its selector, so the element type is a parameter. It
 defaults to `HTMLElement`. A compiler for SVG elements can annotate its argument as `SVGElement`.
 */
-export type CompilerCallback<E extends Element = HTMLElement> = (element: E, data: any, meta: PlainObject) => unknown
+export type CompilerCallback<E extends Element = HTMLElement> = (element: E, data: any, meta: CompilerMeta) => unknown
 
 /**
 The function passed to `up.compiler()` or `up.macro()` with `{ batch: true }`. It is called once
@@ -63,7 +75,7 @@ with all matching elements and their data.
 TypeScript only picks this callback type when `batch` is the literal `true`. Options from a
 variable need `as const`, or `batch` is widened to `boolean` and the callback gets one element.
 */
-export type BatchCompilerCallback<E extends Element = HTMLElement> = (elements: E[], data: any[], meta: PlainObject) => unknown
+export type BatchCompilerCallback<E extends Element = HTMLElement> = (elements: E[], data: any[], meta: CompilerMeta) => unknown
 
 /**
 Options for `registerAttrCompiler()`.
