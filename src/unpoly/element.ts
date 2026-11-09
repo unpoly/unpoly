@@ -3,10 +3,56 @@ import {
   isElementLike, isGiven, isList, isMissing, isPresent, isString, isTextNode, mapObject, noop,
   parseArgs, parseNumber, parseRelaxedJSON, parseString, wrapList,
 } from './util.js'
+import type { List, PlainObject } from './util.js'
 import { fail } from './error.js'
 import { mockable } from './mockable.js'
 import { Rect } from './util/rect.js'
 import './element.sass'
+
+/**
+A CSS selector, an element, or a list of elements. See `up.element.get()`.
+*/
+export type ElementOrSelector = string | Element | List<Element>
+
+/**
+A function that undoes a temporary change, like the one returned by `up.element.setAttrsTemp()`.
+*/
+export type UndoFunction = () => void
+
+/**
+Inline styles as an object, with property names in kebab-case (`'font-size'`).
+Values are strings, or numbers that get the unit passed to `up.element.setStyle()`.
+Any object with such properties works, e.g. an `up.Rect`.
+*/
+export type StyleProps = Record<string, any>
+
+/**
+Parses the value of an attribute. Returns `undefined` if it cannot parse the value,
+so `up.element.parseAttr()` tries the next parser.
+@internal
+*/
+export type AttrParser = (value: string, attribute: string, element: Element) => any
+
+/**
+One element in a parsed selector's descendant path (`div.foo#bar[baz]` in `main > div.foo#bar[baz]`).
+@internal
+*/
+export interface SelectorSegment {
+  tagName: string | null
+  classNames: string[]
+  id: string | null
+  attributes: Record<string, string>
+}
+
+/**
+What `up.element.parseSelector()` returns.
+@internal
+*/
+export interface ParsedSelector {
+  includePath: SelectorSegment[]
+  includeRaw: string
+  excludeRaw: string | undefined
+}
 
 /*-
 Low-level functions to access and change the DOM.
@@ -34,7 +80,7 @@ Returns the first descendant element matching the given selector.
   Returns `null` or `undefined` if no element matches.
 @internal
 */
-function first(...args) {
+function first(...args: any[]): HTMLElement {
   let [root = document, selector] = parseArgs(args, 'val', 'val')
   return root.querySelector(selector)
 }
@@ -53,18 +99,18 @@ If the `root` element itself matches the selector, it is also included in the re
   A list of all matching elements.
 @stable
 */
-export function subtree(root, selector) {
-  const descendantMatches = root.querySelectorAll(selector)
+export function subtree(root: ParentNode, selector: string): List<HTMLElement> {
+  const descendantMatches = root.querySelectorAll<HTMLElement>(selector)
 
   if (elementLikeMatches(root, selector)) {
-    return [root, ...descendantMatches]
+    return [root as HTMLElement, ...descendantMatches]
   } else {
     return descendantMatches
   }
 }
 
-export function subtreeFirst(root, selector) {
-  return elementLikeMatches(root, selector) ? root : root.querySelector(selector)
+export function subtreeFirst(root: ParentNode, selector: string): HTMLElement | null {
+  return elementLikeMatches(root, selector) ? root as HTMLElement : root.querySelector<HTMLElement>(selector)
 }
 
 /*-
@@ -73,7 +119,7 @@ Like `Element#matches()`, but returns `false` for a `Document` or `Window` argum
 @function elementLikeMatches
 @internal
 */
-export function elementLikeMatches(elementLike, selector) {
+export function elementLikeMatches(elementLike: any, selector: string): boolean {
   return isElement(elementLike) && elementLike.matches(selector)
 }
 
@@ -84,7 +130,7 @@ or its descendants.
 @function contains
 @internal
 */
-export function contains(root, selectorOrElement) {
+export function contains(root: Node, selectorOrElement: ElementOrSelector): boolean {
   const element = getOne(selectorOrElement)
   // We cannot use `root.contains(element)` as <form> elements with an input named "contains"
   // would define `root.contains` to return that input (GH#507).
@@ -95,11 +141,11 @@ export function contains(root, selectorOrElement) {
 @function up.element.ancestor
 @internal
 */
-export function ancestor(element, selector) {
-  return element.parentNode?.closest(selector)
+export function ancestor(element: Element, selector: string): HTMLElement | null {
+  return (element.parentNode as Element)?.closest<HTMLElement>(selector)
 }
 
-export function around(element, selector) {
+export function around(element: Element, selector: string): HTMLElement[] {
   // Only the closest match around the element, not all ancestors. This is intentional for viewports:
   // outer viewports show other content (a page around a scrolling sidebar, the page behind an overlay),
   // and scrolling them when a fragment updates would be an unexpected side effect.
@@ -139,6 +185,9 @@ up.element.get('.foo') // returns the first matching element
   The obtained `Element`.
 @stable
 */
+export function getOne(selectorOrElement: ElementOrSelector): HTMLElement
+export function getOne(root: ParentNode, selector: string): HTMLElement
+export function getOne<T>(value: T): T // undefined, null, Window, Document, DocumentFragment, ...
 export function getOne(...args) {
   const value = args.pop()
 
@@ -182,11 +231,11 @@ elements = up.element.list($jquery, nodeList, undefined, element, selector)
 @return {Array<Element>}
 @internal
 */
-export function getList(...args) {
+export function getList(...args: any[]): HTMLElement[] {
   return flatMap(args, valueToList)
 }
 
-function valueToList(value) {
+function valueToList(value: any): List<HTMLElement> {
   if (isString(value)) {
     return document.querySelectorAll(value)
   } else {
@@ -210,7 +259,7 @@ To customize the CSS rule for hiding, see `[hidden]`.
 @param {Element} element
 @stable
 */
-export function hide(element) {
+export function hide(element: HTMLElement): void {
   setVisible(element, false)
 }
 
@@ -276,25 +325,25 @@ manually set `element.style.display = 'block'`.
   The element to show.
 @stable
 */
-export function show(element) {
+export function show(element: HTMLElement): void {
   setVisible(element, true)
 }
 
-export function showTemp(element) {
+export function showTemp(element: HTMLElement): UndoFunction {
   return setVisibleTemp(element, true)
 }
 
-export function hideTemp(element) {
+export function hideTemp(element: HTMLElement): UndoFunction {
   return setVisibleTemp(element, false)
 }
 
-function setVisibleTemp(element, newVisible) {
+function setVisibleTemp(element: HTMLElement, newVisible: boolean): UndoFunction {
   if (newVisible === isVisible(element)) return noop
   setVisible(element, newVisible)
   return () => setVisible(element, !newVisible)
 }
 
-function setVisible(element, newVisible) {
+function setVisible(element: HTMLElement, newVisible: boolean): void {
   if (newVisible) {
     // Remove the attribute set by `up.element.hide()`.
     element.removeAttribute('hidden')
@@ -325,11 +374,11 @@ Changes whether the given element is [shown](/api/up.element.show) or [hidden](/
 @stable
 @signature
 */
-export function toggle(element, newVisible = !isVisible(element)) {
+export function toggle(element: HTMLElement, newVisible: boolean = !isVisible(element)): void {
   setVisible(element, newVisible)
 }
 
-export function setAttrPresence(element, attr, value, newPresent) {
+export function setAttrPresence(element: Element, attr: string, value: string, newPresent: boolean): void {
   if (newPresent) {
     return element.setAttribute(attr, value)
   } else {
@@ -360,7 +409,7 @@ element.getAttribute('tabindex') // result: "1"
   To remove an attribute, use a value of `null` or `undefined`.
 @stable
 */
-export function setAttrs(element, attrs) {
+export function setAttrs(element: Element, attrs: PlainObject): void {
   for (let key in attrs) {
     const value = attrs[key]
     if (isGiven(value)) {
@@ -398,7 +447,7 @@ element.getAttribute('title') // result: "Original"
   A function that restores the attributes to their value before the change.
 @internal
 */
-export function setAttrsTemp(element, attrs) {
+export function setAttrsTemp(element: Element, attrs: PlainObject): UndoFunction {
   let keys = Object.keys(attrs)
   let oldAttrs = pickAttrs(element, keys)
   setAttrs(element, attrs)
@@ -409,16 +458,16 @@ export function setAttrsTemp(element, attrs) {
 @function up.element.metaContent
 @internal
 */
-export function metaContent(name) {
+export function metaContent(name: string): string | undefined {
   const selector = "meta" + attrSelector('name', name)
-  return document.head.querySelector(selector)?.content
+  return document.head.querySelector<HTMLMetaElement>(selector)?.content
 }
 
 /*-
 @function up.element.insertBefore
 @internal
 */
-export function insertBefore(existingNode, newNode) {
+export function insertBefore(existingNode: Node, newNode: Node): void {
   // We're not using insertAdjacentElement() because that does not work with Text nodes
   existingNode.parentNode.insertBefore(newNode, existingNode)
 }
@@ -508,7 +557,7 @@ element = up.element.createFromSelector('div', { style: { color: 'red' }})
 @include up.element.createFromSelector/all
 @stable
 */
-export function createFromSelector(selector, attrs = {}) {
+export function createFromSelector(selector: string, attrs: PlainObject = {}): HTMLElement {
   let { includePath } = parseSelector(selector)
 
   let rootElement
@@ -556,7 +605,7 @@ export function createFromSelector(selector, attrs = {}) {
   return rootElement
 }
 
-function makeVariation(element, { id, classNames, attributes }) {
+function makeVariation(element: Element, { id, classNames, attributes }: SelectorSegment): void {
   if (id) {
     element.id = id
   }
@@ -596,7 +645,7 @@ up.element.parseSelector('.content > form[action="/"]:not(.bar)')
 @function up.element.parseSelector
 @internal
 */
-export function parseSelector(rawSelector) {
+export function parseSelector(rawSelector: string): ParsedSelector {
   let excludeRaw
 
   const {
@@ -614,7 +663,7 @@ export function parseSelector(rawSelector) {
   const includeSegments = includeWithoutAttrs.split(/[ >]+/)
 
   let includePath = includeSegments.map(function(depthSelector) {
-    let parsed = {
+    let parsed: SelectorSegment = {
       tagName: null,
       classNames: [],
       id: null,
@@ -687,7 +736,7 @@ See `up.element.createFromSelector()` for many more examples.
 @stable
 @signature
 */
-export function affix(...args) {
+export function affix(...args: any[]): HTMLElement {
   let [parent, position = 'beforeend', selector, attributes] = parseArgs(args, 'val', isAdjacentPosition, 'val', 'options')
   const element = createFromSelector(selector, attributes)
   parent.insertAdjacentElement(position, element)
@@ -701,13 +750,13 @@ const SINGLETON_TAG_NAMES = ['HTML', 'BODY', 'HEAD', 'TITLE']
 @function up.element.isSingleton
 @internal
 */
-export const isSingleton = mockable((element) => element.matches(SINGLETON_TAG_NAMES.join()))
+export const isSingleton = mockable((element: Element): boolean => element.matches(SINGLETON_TAG_NAMES.join()))
 
 /*-
 @function up.element.attrSelector
 @internal
 */
-export function attrSelector(attribute, value) {
+export function attrSelector(attribute: string, value?: string): string {
   if (isGiven(value)) {
     value = value.replace(/"/g, '\\"')
     // We could get away with omitting the quotes for simple alphanumeric strings,
@@ -719,7 +768,7 @@ export function attrSelector(attribute, value) {
   }
 }
 
-export function idSelector(id) {
+export function idSelector(id: string): string {
   if (id.match(/^[a-z][a-z0-9\-_]*$/i)) {
     return `#${id}`
   } else {
@@ -731,7 +780,7 @@ export function idSelector(id) {
 @function up.element.classSelector
 @internal
 */
-export function classSelector(klass) {
+export function classSelector(klass: string): string {
   klass = klass.replace(/[^\w-]/g, '\\$&')
   return `.${klass}`
 }
@@ -752,7 +801,7 @@ into the destination document using `up.element.revivedClone()`.
 @return {Document}
 @internal
 */
-export function createBrokenDocumentFromHTML(html) {
+export function createBrokenDocumentFromHTML(html: string): Document {
   // DOMParser is usually smart enough to parse an incomplete HTML fragment into a full <html> document.
   // However, any table components without an enclosing <table> will be parsed into a simple text node.
   const firstTag = firstTagNameInHTML(html)
@@ -784,11 +833,11 @@ export function createBrokenDocumentFromHTML(html) {
 //   element.replaceWith(clone)
 // }
 
-export function revivedClone(element) {
+export function revivedClone(element: Element): HTMLElement {
   // We cannot use `scriptish.cloneNode(true)` as this does not fix broken <noscript> elements
   let clone = createFromHTML(element.outerHTML)
   // When a CSP is set, the browser masks the nonce from .getAttribute() and .outerHTML
-  if ('nonce' in element) clone.nonce = element.nonce
+  if ('nonce' in element) clone.nonce = (element as HTMLElement).nonce
   return clone
 }
 
@@ -816,7 +865,7 @@ element.children[0].textContent // returns 'text'
 @stable
 @signature
 */
-export function createFromHTML(html) {
+export function createFromHTML(html: string): HTMLElement {
   return extractSingular(createNodesFromHTML(html))
 }
 
@@ -831,13 +880,13 @@ or if the given list only contains a `Text` node.
 @return {Element}
 @internal
 */
-export function extractSingular(nodes) {
+export function extractSingular(nodes: List<Node>): HTMLElement {
   return tryExtractSingular(nodes) || fail('Expected a single element, but got %d nodes', nodes.length)
 }
 
-function tryExtractSingular(nodes) {
+function tryExtractSingular(nodes: List<Node>): HTMLElement | undefined {
   if (nodes.length === 1 && isElementLike(nodes[0])) {
-    return nodes[0]
+    return nodes[0] as HTMLElement
   }
 }
 
@@ -876,7 +925,7 @@ No changes will be made to whitespace in the middle of the given string.
 
 @experimental
 */
-export function createNodesFromHTML(html) {
+export function createNodesFromHTML(html: string): NodeListOf<ChildNode> {
   // Prevent all-whitespace text nodes at the beginning or end
   html = html.trim()
 
@@ -899,7 +948,7 @@ export function createNodesFromHTML(html) {
 @function up.element.root
 @internal
 */
-export function getRoot() {
+export function getRoot(): HTMLElement {
   return document.documentElement
 }
 
@@ -909,7 +958,7 @@ Forces the browser to paint the given element now.
 @function up.element.paint
 @internal
 */
-export function paint(element) {
+export function paint(element: HTMLElement): void {
   element.offsetHeight
 }
 
@@ -917,7 +966,7 @@ export function paint(element) {
 @function up.element.fixedToAbsolute
 @internal
 */
-export function fixedToAbsolute(element) {
+export function fixedToAbsolute(element: HTMLElement): void {
   const elementRectAsFixed = element.getBoundingClientRect()
 
   // Set the position to 'absolute' so it gains an offsetParent
@@ -939,13 +988,13 @@ On the given element, sets attributes that are still missing.
 @function up.element.setMissingAttrs
 @internal
 */
-export function setMissingAttrs(element, attrs) {
+export function setMissingAttrs(element: Element, attrs: PlainObject): void {
   for (let key in attrs) {
     setMissingAttr(element, key, attrs[key])
   }
 }
 
-export function setMissingAttr(element, key, value) {
+export function setMissingAttr(element: Element, key: string, value: any): void {
   // (1) We skip a null or undefined value, e.g. from the attribute of another element that doesn't have it.
   // (2) We set false as "false". Some callers set [up-etag=false] on purpose.
   if (isGiven(value) && isMissing(element.getAttribute(key))) {
@@ -957,7 +1006,7 @@ export function setMissingAttr(element, key, value) {
 @function up.element.unwrap
 @internal
 */
-export function unwrap(wrapper) {
+export function unwrap(wrapper: Element): void {
   preservingFocus(function() {
     // Make a copy as it is a live list and we to iterate over it while also mutating it.
     let childNodes = [...wrapper.childNodes]
@@ -966,15 +1015,15 @@ export function unwrap(wrapper) {
   })
 }
 
-function wrapNodes(nodeOrNodes) {
+function wrapNodes(nodeOrNodes: List<Node>): HTMLElement {
   const wrapper = document.createElement('up-wrapper')
   wrapper.append(...wrapList(nodeOrNodes))
   return wrapper
 }
 
-export function wrapIfRequired(nodes) {
+export function wrapIfRequired(nodes: List<Node>): Element {
   if (nodes.length === 1 && isElement(nodes[0])) {
-    return nodes[0]
+    return nodes[0] as Element
   } else {
     // There are multiple cases when we want to create a wrapper:
     // (1) We have multiple nodes, possibly a mix of Element and Text nodes
@@ -984,7 +1033,7 @@ export function wrapIfRequired(nodes) {
   }
 }
 
-export function wrapChildren(element) {
+export function wrapChildren(element: Element): HTMLElement {
   const wrapper = wrapNodes(element.childNodes)
   element.append(wrapper)
   // <element>
@@ -996,8 +1045,8 @@ export function wrapChildren(element) {
   return wrapper
 }
 
-function preservingFocus(fn) {
-  const oldFocusElement = document.activeElement
+function preservingFocus<T>(fn: () => T): T {
+  const oldFocusElement = document.activeElement as HTMLElement
   // Moving an element resets its scroll position and selection range.
   const cursorProps = up.viewport.copyCursorProps(oldFocusElement)
   try {
@@ -1011,7 +1060,7 @@ function preservingFocus(fn) {
   }
 }
 
-export function parseAttr(element, attribute, ...parsers) {
+export function parseAttr(element: Element, attribute: string, ...parsers: AttrParser[]): any {
   // The document does not respond to #hasAttribute()
   if (!element.hasAttribute?.(attribute)) return undefined
   let rawValue = element.getAttribute(attribute)
@@ -1041,11 +1090,11 @@ If the element has the attribute but without a value (e.g. `<input readonly>`), 
   Returns `undefined` if the attribute is not set on the given element.
 @stable
 */
-export function stringAttr(element, attribute) {
+export function stringAttr(element: Element, attribute: string): string | undefined {
   return parseAttr(element, attribute, tryParseString)
 }
 
-let tryParseString = identity
+let tryParseString: AttrParser = identity
 
 /*-
 Returns the value of the given attribute on the given element, cast as a boolean value.
@@ -1082,11 +1131,11 @@ The table below shows return values for `up.element.booleanAttr(element, 'foo')`
   The cast attribute value.
 @stable
 */
-export function booleanAttr(element, attribute) {
+export function booleanAttr(element: Element, attribute: string): boolean | undefined {
   return parseAttr(element, attribute, tryParseBoolean)
 }
 
-function tryParseBoolean(value, attribute) {
+function tryParseBoolean(value: string, attribute: string): boolean | undefined {
   switch (value) {
     case 'false': {
       return false
@@ -1114,7 +1163,7 @@ If the attribute value cannot be cast, returns the attribute value unchanged.
   The cast attribute value.
 @internal
 */
-export function booleanOrStringAttr(element, attribute) {
+export function booleanOrStringAttr(element: Element, attribute: string): boolean | string | undefined {
   return parseAttr(element, attribute, tryParseBoolean, tryParseString)
 }
 
@@ -1134,7 +1183,7 @@ If the attribute value cannot be cast to either boolean or number, returns `unde
   The cast attribute value.
 @internal
 */
-export function booleanOrNumberAttr(element, attribute) {
+export function booleanOrNumberAttr(element: Element, attribute: string): boolean | number | undefined {
   return parseAttr(element, attribute, tryParseBoolean, tryParseNumber)
 }
 
@@ -1152,7 +1201,7 @@ If the attribute value cannot be cast, returns the attribute value unchanged.
   The cast attribute value.
 @internal
 */
-export function booleanOrNumberOrStringAttr(element, attribute) {
+export function booleanOrNumberOrStringAttr(element: Element, attribute: string): boolean | number | string | undefined {
   return parseAttr(element, attribute, tryParseBoolean, tryParseNumber, tryParseString)
 }
 
@@ -1170,11 +1219,11 @@ If the attribute value cannot be cast to a number, `undefined` is returned.
   The cast attribute value.
 @stable
 */
-export function numberAttr(element, attribute) {
+export function numberAttr(element: Element, attribute: string): number | undefined {
   return parseAttr(element, attribute, tryParseNumber)
 }
 
-function tryParseNumber(value) {
+function tryParseNumber(value: string): number | undefined {
   // Call without second argument
   return parseNumber(value)
 }
@@ -1195,24 +1244,24 @@ Throws a `SyntaxError` if the attribute value is an invalid JSON string.
   The cast attribute value.
 @stable
 */
-export function jsonAttr(element, attribute) {
+export function jsonAttr(element: Element, attribute: string): any {
   return parseAttr(element, attribute, tryParseJSON)
 }
 
-function tryParseJSON(value) {
+function tryParseJSON(value: string): any {
   if (value?.trim()) {
     return parseRelaxedJSON(value)
   }
 }
 
-export function closestAttr(element, attr, readAttrFn = stringAttr) {
+export function closestAttr(element: Element, attr: string, readAttrFn: (element: Element, attribute: string) => any = stringAttr): any {
   let match = element.closest('[' + attr + ']')
   if (match) {
     return readAttrFn(match, attr)
   }
 }
 
-export function addClasses(element, classes) {
+export function addClasses(element: Element, classes: Iterable<string>): void {
   // Don't use element.classList.add(...classes) because that sets an empty [class]
   // attribute if classes is an empty array.
   for (let klass of classes) element.classList.add(klass)
@@ -1243,15 +1292,15 @@ element.className // result: 'foo'
   A function that restores the original class list when called.
 @internal
 */
-export function addClassTemp(element, klass) {
+export function addClassTemp(element: Element, klass: string): UndoFunction {
   return setClassStateTemp(element, klass, true)
 }
 
-export function removeClassTemp(element, klass) {
+export function removeClassTemp(element: Element, klass: string): UndoFunction {
   return setClassStateTemp(element, klass, false)
 }
 
-function setClassStateTemp(element, klass, targetState) {
+function setClassStateTemp(element: Element, klass: string, targetState: boolean): UndoFunction {
   if (element.classList.contains(klass) === targetState) return noop
   element.classList.toggle(klass, targetState)
   return () => element.classList.toggle(klass, !targetState)
@@ -1287,6 +1336,8 @@ let value = up.element.style(element, ['font-size', 'margin-top'])
   The requested style value or values.
 @stable
 */
+export function computedStyle(element: Element, prop: string): string
+export function computedStyle(element: Element, props: string[]): Record<string, string>
 export function computedStyle(element, props) {
   const style = window.getComputedStyle(element)
   return extractFromStyleObject(style, props)
@@ -1319,7 +1370,7 @@ value = up.element.styleNumber(element, 'font-size')
   The cast property value.
 @stable
 */
-export function computedStyleNumber(element, prop) {
+export function computedStyleNumber(element: Element, prop: string): number | undefined {
   const rawValue = computedStyle(element, prop)
   if (isPresent(rawValue)) {
     return parseFloat(rawValue)
@@ -1338,12 +1389,14 @@ If a property is not set, it will be returned as an empty string.
 @return {string|Object}
 @internal
 */
+export function inlineStyle(element: HTMLElement, prop: string): string
+export function inlineStyle(element: HTMLElement, props: string[]): Record<string, string>
 export function inlineStyle(element, props) {
   const { style } = element
   return extractFromStyleObject(style, props)
 }
 
-function extractFromStyleObject(style, keyOrKeys) {
+function extractFromStyleObject(style: CSSStyleDeclaration, keyOrKeys: string | string[]): string | Record<string, string> {
   if (up.migrate.loaded) keyOrKeys = up.migrate.fixGetStyleProps(keyOrKeys)
 
   if (isString(keyOrKeys)) {
@@ -1369,7 +1422,7 @@ up.element.setStyle(element, { color: 'red', 'font-size': '2em' })
   One or more CSS properties with kebab-case keys.
 @stable
 */
-export function setInlineStyle(element, props, unit = '') {
+export function setInlineStyle(element: HTMLElement, props: string | StyleProps, unit = ''): void {
   if (up.migrate.loaded) props = up.migrate.fixSetStyleProps(props, unit)
 
   if (isString(props)) {
@@ -1411,7 +1464,7 @@ getComputedStyle(element).fontSize // result: '12px'
   A function that restores the original inline styles when called.
 @internal
 */
-export function setStyleTemp(element, newStyles) {
+export function setStyleTemp(element: HTMLElement, newStyles: StyleProps): UndoFunction {
   const oldStyles = inlineStyle(element, Object.keys(newStyles))
   setInlineStyle(element, newStyles)
   return () => setInlineStyle(element, oldStyles)
@@ -1432,25 +1485,25 @@ Elements not attached to the DOM are considered hidden.
   Whether the given element is visible.
 @stable
 */
-export function isVisible(element) {
+export function isVisible(element: HTMLElement): boolean {
   // From https://github.com/jquery/jquery/blame/9cb162f6b62b6d4403060a0f0d2065d3ae96bbcc/src/css/hiddenVisibleSelectors.js#L12
   return !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length)
 }
 
-function isUpPrefixed(string) {
+function isUpPrefixed(string: string): boolean {
   return /^up-/.test(string)
 }
 
-function pickAttrs(element, attrNames) {
+function pickAttrs(element: Element, attrNames: string[]): Record<string, string> {
   return mapObject(attrNames, (name) => [name, element.getAttribute(name)])
 }
 
-export function upAttrs(element) {
+export function upAttrs(element: Element): Record<string, string> {
   let attrNames = element.getAttributeNames().filter(isUpPrefixed)
   return pickAttrs(element, attrNames)
 }
 
-export function upClasses(element) {
+export function upClasses(element: Element): string[] {
   return filterList(element.classList.values(), isUpPrefixed)
 }
 
@@ -1493,15 +1546,15 @@ These `<div>` elements are *not* considered empty:
   Whether the given element is empty.
 @experimental
 */
-export function isEmpty(element) {
+export function isEmpty(element: HTMLElement): boolean {
   return !element.children.length > 0 && !element.innerText.trim()
 }
 
-export function crossOriginSelector(attr) {
+export function crossOriginSelector(attr: string): string {
   return `[${attr}*="//"]:not([${attr}*="//${location.host}/"])`
 }
 
-export function isIntersectingWindow(element, { margin = 0 } = {}) {
+export function isIntersectingWindow(element: Element, { margin = 0 }: { margin?: number } = {}): boolean {
   const rect = Rect.fromElement(element)
   rect.grow(margin)
 
@@ -1523,14 +1576,14 @@ up.element.unionSelector(['input', 'textarea'], ['.disabled', '[disabled]'], '.a
 @param {string} [condition]
 @internal
 */
-export function unionSelector(includes, excludes, condition) {
+export function unionSelector(includes: string[], excludes?: string[], condition?: string): string {
   let selector = `:is(${includes.join()})`
   if (isPresent(excludes)) selector += `:not(${excludes.join()})`
   if (condition) selector += `:is(${condition})`
   return selector
 }
 
-export function documentPosition(element) {
+export function documentPosition(element: Element): [Element, InsertPosition] {
   let nextSibling = element.nextElementSibling
   if (nextSibling) {
     return [nextSibling, 'beforebegin']
@@ -1543,16 +1596,16 @@ export function documentPosition(element) {
 // HTML allows comments before a <!DOCTYPE> or <html> tag (issue #726)
 const FIRST_TAG_NAME_PATTERN = /^\s*(<!--[^-]*.*?-->\s*)*<([a-z-!]+)\b/i
 
-function firstTagNameInHTML(html) {
+function firstTagNameInHTML(html: string): string | undefined {
   return FIRST_TAG_NAME_PATTERN.exec(html)?.[2].toUpperCase()
 }
 
-export function isFullDocumentHTML(html) {
+export function isFullDocumentHTML(html: string): boolean {
   let firstTag = firstTagNameInHTML(html)
   return firstTag === 'HTML' || firstTag === '!DOCTYPE'
 }
 
-export function leadingElement(nodes) {
+export function leadingElement(nodes: Iterable<Node>): Element | undefined {
   for (let node of nodes) {
     if (isElement(node)) {
       return node
@@ -1564,7 +1617,7 @@ export function leadingElement(nodes) {
   }
 }
 
-export function removeAttrsFromHTML(html, attrs) {
+export function removeAttrsFromHTML(html: string, attrs: string[]): string {
   let tagPattern = /<[^<]+>/g
   let attrPattern = new RegExp(`\\s+(${attrs.join('|')})="[^"]*"`, 'g')
   let cleanTag = (match) => match.replace(attrPattern, '')
@@ -1594,7 +1647,7 @@ only matches `:enabled` after `customElements.define()`.
 @param {Element} root
 @internal
 */
-export function trackDefinitions(root) {
+export function trackDefinitions(root: ParentNode): void {
   for (let { localName } of subtree(root, ':not(:defined)')) {
     if (!awaitedTagNames.has(localName)) {
       awaitedTagNames.add(localName)
