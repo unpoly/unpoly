@@ -219,7 +219,7 @@ Returns `undefined` if no param value with that name is set.
 ```
 
 At the other end, `up.render()` — the function most of Unpoly delegates to. The real
-comment in `src/unpoly/fragment.js` runs 131 lines; this is trimmed hard, with `...`
+comment in `src/unpoly/fragment.ts` runs 131 lines; this is trimmed hard, with `...`
 marking what's left out:
 
 ```js
@@ -937,7 +937,7 @@ Two things to know:
   "See also `up.network.isBusy()`.", and at guide pages with `@learn-ref`.
 
 `@class` blocks also use `@parent` to nest under a namespace in the menu, e.g.
-`src/unpoly/form/params.js` declares `@parent up.form`.
+`src/unpoly/form/params.ts` declares `@parent up.form`.
 
 
 ## Previewing your changes

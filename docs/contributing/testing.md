@@ -193,8 +193,8 @@ See [Compatibility](compatibility.md#browser-support) for which browsers CI exer
 
 ## How specs are organized
 
-A source file's specs live at the mirrored path. `src/unpoly/form.js` is tested by
-`spec/unpoly/form_spec.js`, and `src/unpoly/form/params.js` by
+A source file's specs live at the mirrored path. `src/unpoly/form.ts` is tested by
+`spec/unpoly/form_spec.js`, and `src/unpoly/form/params.ts` by
 `spec/unpoly/form/params_spec.js`. Where a group of specs grew too large to live
 there, it moved into a sibling file that shares the namespace's prefix — see
 [extracted spec files](#extracted-spec-files) below.

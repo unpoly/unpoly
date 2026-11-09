@@ -1,8 +1,8 @@
 // Ambient declarations for type checking (bin/typecheck). The build never reads this file.
 
-// Each namespace file assigns its namespace to the global `up` (`up.util = ...`).
-// TypeScript 7 doesn't infer members of a global from assignments in other files,
-// so we declare `up` as `any` until namespaces become ES modules.
+// Unpoly's own modules import each other and don't need the global `up`. A few places still reach
+// it at call time (e.g. `up.migrate.*`, which only exists when unpoly-migrate.js is loaded), so we
+// declare it as `any`.
 declare var up: any
 
 // Globals we use only when the page has them: jQuery for interop, Jasmine in up.mockable().

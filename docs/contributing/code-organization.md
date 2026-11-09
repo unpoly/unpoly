@@ -28,14 +28,14 @@ src/                      # Webpack entry points for Unpoly's main and optional 
   unpoly-migrate.js       # ... Entry point for optional bundle that polyfills deprecated features
   ...                     # ... Other entry points for optional bundles
 
-  unpoly/                 # Source code (JS, CSS) for Unpoly's namespaces
-    form.js               # ... Code for up.form namespace
+  unpoly/                 # Source code (TS, JS, CSS) for Unpoly's namespaces
+    form.ts               # ... Code for up.form namespace
     form/                 # ... Classes owned by up.form
-      params.js           # ...... Code for up.Params class
+      params.ts           # ...... Code for up.Params class
       ...
-    link.js               # ... Code for up.link namespace
+    link.ts               # ... Code for up.link namespace
     link.sass             # ... CSS for up.link namespace
-    layer.js              # ... Code for up.layer namespace
+    layer.ts              # ... Code for up.layer namespace
     layer/                # ... Classes owned by up.layer
       base.js             # ...... Code for up.Layer class
       modes/              # ...... One class per layer mode (ModalLayer, PopupLayer, ...)
@@ -141,7 +141,7 @@ We rarely add a new namespace. We sometimes rename an existing namespace when it
 
 ### Namespace pattern
 
-Namespaces live in `src/unpoly`. E.g. `src/unpoly/link.js` defines the `up.link` namespace that deals with hyperlinks.
+Namespaces live in `src/unpoly`. E.g. `src/unpoly/link.ts` defines the `up.link` namespace that deals with hyperlinks.
 
 A namespace definition has the following jobs:
 
@@ -218,7 +218,7 @@ export const api = {
 ```
 
 Classes live in a folder named after the namespace that owns them, next to the namespace
-file: `form.js` beside `form/`, `layer.js` beside `layer/`. A published class goes where its
+file: `form.ts` beside `form/`, `layer.ts` beside `layer/`. A published class goes where its
 docs are (`up.Params` is documented under `up.form`). Closely related classes share a
 sub-folder, like `fragment/render/` or `layer/modes/`. Generic helper classes live in
 `util/`. A class file exports the class, and an `api` if the class is published.

@@ -6,8 +6,9 @@ most are not.
 
 ## Moving to TypeScript
 
-We are migrating Unpoly to TypeScript, one module at a time, starting with the modules that
-import nothing else (`util.ts`, `element.ts`, ...). The rest is still plain JavaScript.
+We are migrating Unpoly to TypeScript, one module at a time, leaf modules first. All namespaces
+are TypeScript; the render pipeline (`fragment/render/`), the layer classes, the entry files and
+`unpoly-migrate` are still plain JavaScript.
 
 The build runs every source file through TypeScript only to transpile it (ts-loader with
 `transpileOnly`), and never checks types. The only type check is `bin/typecheck`, which runs

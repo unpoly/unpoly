@@ -2,8 +2,8 @@
 
 Read this before you write internal code that looks up an element, and before you change
 [`up.Selector`](../../src/unpoly/fragment/selector.js),
-[`up.FragmentFinder`](../../src/unpoly/fragment/fragment_finder.js) or the lookup functions in
-[`src/unpoly/fragment.js`](../../src/unpoly/fragment.js).
+[`up.FragmentFinder`](../../src/unpoly/fragment/fragment_finder.ts) or the lookup functions in
+[`src/unpoly/fragment.ts`](../../src/unpoly/fragment.ts).
 
 The short version: **prefer `up.fragment.*` over native `querySelector()` when you are
 looking for a fragment.** A native query silently ignores everything Unpoly adds — most
