@@ -761,7 +761,8 @@ export function getLang(doc: Document = document): string | undefined {
 }
 
 export function updateLang(newLang: string | undefined): void {
-  setAttrPresence(getRoot(), 'lang', newLang, !!newLang)
+  // setAttrPresence() only reads the value when it's present.
+  setAttrPresence(getRoot(), 'lang', newLang!, !!newLang)
 }
 
 function patchHistoryAPI(): void {
@@ -801,7 +802,8 @@ function onJumpLinkClicked(event: ClickEvent, link: HTMLAnchorElement): void {
 
   let [currentBase, currentHash] = splitLocation(layerStack.current.location)
   let [linkBase, linkHash] = splitLocation(normalizeURL(link))
-  let verbatimHREF = link.getAttribute('href')
+  // The listener only matches links with an [href].
+  let verbatimHREF = link.getAttribute('href')!
 
   // (1) If we're not scrolling the page, we must leave the event unprevented
   //     and allow the link to be followed, or handled by other JavaScript.
@@ -818,7 +820,8 @@ function onJumpLinkClicked(event: ClickEvent, link: HTMLAnchorElement): void {
   //     a well-known anchor like "#top".
   // (2) Scroll with { behavior: 'auto' } (instead of thew default { behavior: 'instant' }
   //     so it picks up any scroll-behavior CSS rule on the viewport element.
-  let layer = layerStack.get(link)
+  // The link is attached, so it's in a layer.
+  let layer = layerStack.get(link)!
   let revealFn = revealHashFn(linkHash, { layer, behavior, focus: true })
 
   if (revealFn) {
