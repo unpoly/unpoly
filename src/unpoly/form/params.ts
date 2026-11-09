@@ -163,7 +163,7 @@ export class Params {
   @stable
   */
   toFormData(): FormData {
-    const formData = new FormData()
+    const formData: FormData & { originalArray?: ParamEntry[] } = new FormData()
     for (let entry of this.entries) {
       formData.append(entry.name, entry.value)
     }
