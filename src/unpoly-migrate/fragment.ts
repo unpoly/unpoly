@@ -12,9 +12,10 @@ up.fragment.config.patch(function(config) {
 })
 
 // Names the call site of a render pass in a warning about its options.
-const renderOptionsSource = (options) => ({ label: 'render options', detail: options.origin || options.url || options.target })
+const renderOptionsSource = (options: any) => ({ label: 'render options', detail: options.origin || options.url || options.target })
 
-up.migrate.handleResponseDocOptions = (docOptions) => up.migrate.fixKey(docOptions, 'html', 'document', renderOptionsSource(docOptions))
+// Core calls this hook (ChangeFromContent).
+up.migrate.handleResponseDocOptions = (docOptions: any) => up.migrate.fixKey(docOptions, 'html', 'document', renderOptionsSource(docOptions))
 
 up.fragment.config.patch(function(config) {
   let matchAroundOriginDeprecated = () => up.migrate.deprecated('up.fragment.config.matchAroundOrigin', 'up.fragment.config.match')
@@ -48,7 +49,7 @@ from a new page fetched from the server.
 @deprecated
   Use `up.render()` or `up.navigate()` instead.
 */
-up.replace = function(target, url, options) {
+up.replace = function(target: any, url: string, options?: object) {
   up.migrate.deprecated('up.replace(target, url)', 'up.navigate(target, { url })')
   return up.navigate({ ...options, target, url })
 }
@@ -91,7 +92,7 @@ discarded, since it didn't match the selector.
 @deprecated
   Use `up.render()` or `up.navigate()` instead.
 */
-up.extract = function(target, document, options) {
+up.extract = function(target: any, document: string, options?: object) {
   up.migrate.deprecated('up.extract(target, document)', 'up.navigate(target, { document })')
   return up.navigate({ ...options, target, document })
 }
@@ -129,7 +130,8 @@ up.fragment.first = function(...args) {
 
 up.first = up.fragment.first
 
-up.migrate.preprocessRenderOptions = function(options) {
+// Core calls this hook (RenderOptions). Render options have no type yet.
+up.migrate.preprocessRenderOptions = function(options: any) {
   // Rewrite deprecated { history: URLString } option
   if (u.isString(options.history) && (options.history !== 'auto')) {
     up.migrate.warn("Passing a URL as { history } option is deprecated. Pass it as { location } instead.")
@@ -213,11 +215,13 @@ up.migrate.preprocessRenderOptions = function(options) {
 
 }
 
-up.migrate.postprocessReloadOptions = function(options) {
+// Core calls this hook (up.reload()).
+up.migrate.postprocessReloadOptions = function(options: any) {
   let lastModified = options.headers?.['If-Modified-Since']
   let legacyHeader
   if (lastModified) {
-    legacyHeader = Math.floor(new Date(lastModified) * 0.001).toString()
+    // A date converts to its timestamp in arithmetic. TypeScript wants getTime(), which would change the emitted code.
+    legacyHeader = Math.floor((new Date(lastModified) as any) * 0.001).toString()
   } else {
     legacyHeader = '0'
   }
@@ -227,7 +231,8 @@ up.migrate.postprocessReloadOptions = function(options) {
 
 // Modern versions only support ":origin". This legacy implementation
 // also supports the old shorthand "&".
-up.migrate.resolveOrigin = function(target, { origin } = {}) {
+// Core uses this instead of its own implementation when unpoly-migrate is loaded (up.fragment).
+up.migrate.resolveOrigin = function(target: string, { origin }: { origin?: Element & { form?: HTMLFormElement } } = {}): string {
   // We skip over attribute selector values, which may contain an ampersand, e.g. 'a[href="/notes?page=2&order=created"]'
   let pattern = /"[^"]*"|'[^']*'|&|:origin\b/g
 
@@ -260,7 +265,7 @@ up.fragment.config.patch(function() {
         case 'auto': return true
         case 'pass': return true
         case 'block': return false
-        case 'nonce': return (script) => !!script.nonce
+        case 'nonce': return (script: HTMLScriptElement) => !!script.nonce
       }
     },
     set(value) {
@@ -279,13 +284,13 @@ up.fragment.config.patch(function() {
 })
 
 // up.compiler('[up-keep]:not([up-keep=true]):not([up-keep=""])', function(element) {
-up.compiler('[up-keep]', function(element) {
+up.compiler('[up-keep]', function(element: Element) {
   let selector = up.element.booleanOrStringAttr(element, 'up-keep')
   if (u.isString(selector) && /[.[#]/.test(selector)) {
     up.migrate.warn('The [up-keep] attribute no longer supports a selector value (found in %o). Elements will be matched by their derived target. You may prevent keeping with [up-on-keep="if(condition) event.preventDefault()"].', element)
     // The best we can do here is prevent matching of the old and new element if the new element
     // does not match the selector.
-    element.addEventListener('up:fragment:keep', function(event) {
+    element.addEventListener('up:fragment:keep', function(event: any) {
       if (event.target === element && !event.newFragment.matches(selector)) {
         event.preventDefault()
       }
