@@ -9,10 +9,24 @@ import { refineOption } from '../../../history.js'
 import { layerStack, optionToString } from '../../../layer.js'
 import { printToStandard } from '../../../log.js'
 import { assertAssetsOK } from '../../../script.js'
+import type { RenderOptions, RenderTarget, ResolvedRenderOptions } from '../render_options.js'
+import type { ResponseDocOptions } from '../response_doc.js'
+import type { PreflightProps } from './addition.js'
+import type { Layer } from '../../../layer/base.js'
+import type { RenderResult } from '../render_result.js'
 
+// A way to render: updating a target in an existing layer, or opening a new overlay.
+type LayerPlan = OpenLayerPlan | UpdateLayerPlan
+
+// Renders content that is already known (a string, an element or a response text). Also computes
+// the preflight props for ChangeFromURL, before the request is sent.
 export class ChangeFromContent extends Change {
+  declare _origin: Element | undefined
+  declare _preflight: boolean | undefined
+  declare _layers: (Layer | 'new')[]
+  declare _planApplied: boolean
 
-  constructor(options) {
+  constructor(options: RenderOptions) {
     super(options)
 
     // Only extract options required for step building, since #execute() will be called with an
@@ -23,8 +37,8 @@ export class ChangeFromContent extends Change {
     this._layers = layerStack.getAll(options)
   }
 
-  _getPlans() {
-    let plans = []
+  _getPlans(): LayerPlan[] {
+    let plans: LayerPlan[] = []
 
     this._filterLayers()
     this._improveOptionsFromResponseDoc()
@@ -36,32 +50,33 @@ export class ChangeFromContent extends Change {
     return plans
   }
 
-  _isRenderableLayer(layer) {
+  _isRenderableLayer(layer: Layer | 'new') {
     return (layer === 'new') || layer.isAlive()
   }
 
-  _filterLayers() {
+  _filterLayers(): void {
     this._layers = filterList(this._layers, this._isRenderableLayer)
   }
 
-  _expandIntoPlans(plans, layers, targets) {
+  _expandIntoPlans(plans: LayerPlan[], layers: (Layer | 'new')[], targets: any): void {
     for (let layer of layers) {
       // An abstract selector like :main may expand into multiple
       // concrete selectors, like ['main', '.content'].
       for (let target of this._expandTargets(targets, layer)) {
         // Any plans we add will inherit all properties from @options
         const props = { ...this.options, target, layer, defaultPlacement: this._defaultPlacement() }
-        const change = layer === 'new' ? new OpenLayerPlan(props) : new UpdateLayerPlan(props)
+        // TypeScript doesn't narrow props.layer through the layer variable.
+        const change = layer === 'new' ? new OpenLayerPlan(props) : new UpdateLayerPlan(props as ResolvedRenderOptions)
         plans.push(change)
       }
     }
   }
 
-  _expandTargets(targets, layer) {
+  _expandTargets(targets: any, layer: Layer | 'new'): string[] {
     return expandTargets(targets, { layer, mode: this.options.mode, origin: this._origin })
   }
 
-  execute() {
+  execute(): any {
     // Preloading from local content is a no-op.
     if (this.options.preload) {
       // TODO: This is not an async method? So just return undefined?
@@ -71,7 +86,7 @@ export class ChangeFromContent extends Change {
     return this._seekPlan(this._executePlan.bind(this)) || this._cannotMatchPostflightTarget()
   }
 
-  _executePlan(matchedPlan) {
+  _executePlan(matchedPlan: LayerPlan): RenderResult {
     // Group compilation and emission of up:fragment:inserted into a mutation block.
     // This allows up.SelectorTracker to only sync once after the mutation, and
     // ignore any events in between.
@@ -83,14 +98,14 @@ export class ChangeFromContent extends Change {
     )
   }
 
-  _isApplicablePlanError(error) {
+  _isApplicablePlanError(error: any): boolean {
     // (1) Only an up.CannotMatch means "this plan doesn't fit, try the next one".
     // (2) Once a plan has started to change the page, we cannot try another plan on top of it.
     return !(error instanceof CannotMatch) || this._planApplied
   }
 
   // Final preparations before elements are being changed.
-  _onPlanApplicable(plan) {
+  _onPlanApplicable(plan: LayerPlan): void {
     let primaryPlan = this._getPlans()[0]
     if (plan !== primaryPlan) {
       printToStandard('up.render()', 'Could not match primary target "%s". Updating a fallback target "%s".', primaryPlan.target, plan.target)
@@ -109,7 +124,7 @@ export class ChangeFromContent extends Change {
     this._planApplied = true
   }
 
-  _getResponseDoc() {
+  _getResponseDoc(): ResponseDoc | undefined {
     if (this._preflight) return
 
     const docOptions = pick(this.options, [
@@ -131,10 +146,11 @@ export class ChangeFromContent extends Change {
       docOptions.target = this._firstExpandedTarget(docOptions.target)
     }
 
-    return new ResponseDoc(docOptions)
+    // With content, { target } is a selector string by now (see above).
+    return new ResponseDoc(docOptions as ResponseDocOptions)
   }
 
-  _improveOptionsFromResponseDoc() {
+  _improveOptionsFromResponseDoc(): void {
     if (this._preflight) return
 
     let responseDoc = this._getResponseDoc()
@@ -150,7 +166,7 @@ export class ChangeFromContent extends Change {
     this.options.lang = refineOption(this.options.lang, responseDoc.lang)
   }
 
-  _defaultPlacement() {
+  _defaultPlacement(): string | undefined {
     if (!this.options.document && !this.options.fragment) {
       return 'content'
     }
@@ -158,7 +174,7 @@ export class ChangeFromContent extends Change {
 
   // When the user provided a { content } we need an actual CSS selector for
   // which up.ResponseDoc can create a matching element.
-  _firstExpandedTarget(target) {
+  _firstExpandedTarget(target: RenderTarget | undefined): string {
     // When the user passes a closed layer as { layer } option, we expand the target with the root
     // layer instead of having up.fragment.expandTargets() throw. In many cases we get the same result.
     let layer = this._layers[0] || layerStack.root
@@ -167,20 +183,23 @@ export class ChangeFromContent extends Change {
 
   // Returns information about the change that is most likely before the request was dispatched.
   // This might change postflight if the response does not contain the desired target.
-  getPreflightProps(opts = {}) {
-    const getPlanProps = (plan) => plan.getPreflightProps()
+  // With { optional: true }, returns true instead of throwing when no target matches.
+  getPreflightProps(opts?: { optional?: false }): PreflightProps
+  getPreflightProps(opts: { optional: boolean }): PreflightProps | true
+  getPreflightProps(opts: { optional?: boolean } = {}) {
+    const getPlanProps = (plan: LayerPlan) => plan.getPreflightProps()
     return this._seekPlan(getPlanProps) || opts.optional || this._cannotMatchPreflightTarget()
   }
 
-  _cannotMatchPreflightTarget() {
+  _cannotMatchPreflightTarget(): never {
     this._cannotMatchTarget('Could not find target in current page')
   }
 
-  _cannotMatchPostflightTarget() {
+  _cannotMatchPostflightTarget(): never {
     this._cannotMatchTarget('Could not find common target in current page and response')
   }
 
-  _cannotMatchTarget(reason) {
+  _cannotMatchTarget(reason: string): never {
     if (this._getPlans().length) {
       const planTargets = uniq(map(this._getPlans(), 'target'))
       const humanizedLayerOption = optionToString(this.options.layer)
@@ -194,11 +213,11 @@ export class ChangeFromContent extends Change {
     }
   }
 
-  _cannotMatchLayer() {
+  _cannotMatchLayer(): never {
     throw new CannotMatch('Could not find a layer to render in. You may have passed an unmatchable layer reference, or a detached element.')
   }
 
-  _seekPlan(fn) {
+  _seekPlan<T>(fn: (plan: LayerPlan) => T): T | undefined {
     for (let plan of this._getPlans()) {
       try {
         // A return statement stops iteration of a vanilla for loop,

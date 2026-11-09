@@ -17,6 +17,7 @@ import type { UpRequest } from '../../network/request.js'
 import type { UpResponse } from '../../network/response.js'
 import type { RenderResult } from './render_result.js'
 import type { CSPInfo } from '../../script/csp/csp_info.js'
+import type { PreflightProps } from './change/addition.js'
 
 /**
 What to render: a target selector, an element to derive a selector from, or several alternatives.
@@ -176,7 +177,8 @@ export interface RenderOptions {
   defaultToEmptyContent?: boolean
   // An event to emit before rendering, e.g. up:link:follow. Rendering is aborted when it is prevented.
   guardEvent?: Event & { renderOptions?: RenderOptions }
-  handleAbort?: (request: UpRequest) => void
+  // Set by RenderJob, called with the change's preflight props once a plan applies.
+  handleAbort?: (props: PreflightProps & { request?: UpRequest }) => void
   // An identifier for a render pass. See up.fragment.abort().
   jid?: any
   // Only use the response if it was cached (up.link.preload()).
@@ -184,6 +186,10 @@ export interface RenderOptions {
   expiredResponse?: UpResponse
   verifyFinished?: (result: RenderResult) => any
   onRequestKnown?: (request: UpRequest) => void
+  // Only compute the preflight props, there is no content yet (ChangeFromURL).
+  preflight?: boolean
+  // How a step updates its target when the target has no ::before/::after/::content suffix.
+  defaultPlacement?: string
   // Prefer these elements when matching the target, e.g. when revalidating.
   preferOldElements?: Element[]
 
