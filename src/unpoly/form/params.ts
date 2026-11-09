@@ -561,7 +561,8 @@ export class Params {
     A new `up.Params` instance with values from the given form.
   @stable
   */
-  static fromForm(form: ElementOrSelector, options: { submitButton?: ElementOrSelector | false } = {}): Params {
+  static fromForm(form: ElementOrSelector, options?: { submitButton?: ElementOrSelector | false }): Params
+  static fromForm(form, options: { submitButton?: ElementOrSelector | false } = {}) {
     form = getOne(form)
     let restore = prepareParamsReadTemp(form)
 
@@ -577,7 +578,7 @@ export class Params {
       // - The browser knows the full serialization rules: files, <select multiple>, the submitter
       //   (including an image button's click coordinates), [dirname], fields in a
       //   <fieldset disabled>, newline normalization, and whatever comes next.
-      let params = new this(new FormData(form as HTMLFormElement, submitButton))
+      let params = new this(new FormData(form, submitButton))
 
       // up.form.fields() also finds elements registered through up.form.config.fieldSelectors.
       // The browser doesn't know they are fields.
@@ -586,7 +587,7 @@ export class Params {
       // since a FormData entry cannot be mapped back to the element that contributed it.
       // A control that *is* in form.elements but that the browser refuses to serialize (a reset
       // button, an <output>) is therefore not re-added.
-      let browserControls = new Set((form as HTMLFormElement).elements)
+      let browserControls = new Set(form.elements)
       for (let field of findFields(form)) {
         if (!browserControls.has(field) && !field.closest('fieldset:disabled')) params.addField(field)
       }
