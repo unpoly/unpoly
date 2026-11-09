@@ -1,4 +1,34 @@
 import { compact, map } from '../../util.js'
+import type { PlainObject } from '../../util.js'
+import type { Layer } from '../../layer/base.js'
+
+/**
+Checks a finished render pass, e.g. that its layer is still open. May return a new `up.RenderResult`
+that replaces the finished result.
+@internal
+*/
+export type VerifyFinishedFn = (result: RenderResult) => RenderResult | void | Promise<RenderResult | void>
+
+/**
+What a step of a render pass contributes to its `up.RenderResult`.
+@internal
+*/
+export interface PartialRenderResult {
+  fragments?: Element[]
+  finished?: Promise<any>
+  verifyFinished?: VerifyFinishedFn
+}
+
+/**
+Options for constructing an `up.RenderResult`.
+@internal
+*/
+export interface RenderResultOptions {
+  layer?: Layer
+  target?: string
+  renderOptions?: PlainObject
+  partialResults?: PartialRenderResult[]
+}
 
 /*-
 Instances of `up.RenderResult` describe the effects of [rendering](/api/up.render).
@@ -17,6 +47,11 @@ console.log(result.renderOptions) // result: { target: '.target', content: 'foo'
 @parent up.fragment
 */
 export class RenderResult {
+  declare layer: Layer
+  declare target: string
+  declare renderOptions: PlainObject
+  declare fragments: Element[]
+  declare finished: Promise<RenderResult>
 
   /*-
   The effective fragments that ended up being inserted.
@@ -97,7 +132,7 @@ export class RenderResult {
   @stable
   */
 
-  constructor({ layer, target, renderOptions = {}, partialResults = [] } = {}) {
+  constructor({ layer, target, renderOptions = {}, partialResults = [] }: RenderResultOptions = {}) {
     this.layer = layer
     this.target = target
     this.renderOptions = renderOptions
@@ -106,16 +141,16 @@ export class RenderResult {
     this.finished = this._finish(partialResults)
   }
 
-  _partialPhase(partialResults, phase, extraValue) {
+  _partialPhase(partialResults: PartialRenderResult[], phase: keyof PartialRenderResult, extraValue?: any): any[] {
     return compact([...map(partialResults, phase), extraValue])
   }
 
-  async _finish(partialResults) {
+  async _finish(partialResults: PartialRenderResult[]): Promise<RenderResult> {
     let finishedPromises = this._partialPhase(partialResults, 'finished')
     let verifyFns = this._partialPhase(partialResults, 'verifyFinished', this.renderOptions.verifyFinished)
     await Promise.all(finishedPromises)
 
-    let finishedResult = this
+    let finishedResult: RenderResult = this
     for (let verifyFn of verifyFns) {
       let verifyerResult = await verifyFn(finishedResult)
       finishedResult = verifyerResult || finishedResult
@@ -139,7 +174,7 @@ export class RenderResult {
   @param {boolean} none
   @stable
   */
-  get none() {
+  get none(): boolean {
     return !this.fragments.length
   }
 
@@ -155,7 +190,7 @@ export class RenderResult {
   @param {Element} fragment
   @stable
   */
-  get fragment() {
+  get fragment(): Element | undefined {
     return this.fragments[0]
   }
 
@@ -171,7 +206,7 @@ export class RenderResult {
   @param {boolean} up.RenderResult#ok
   @experimental
   */
-  get ok() {
+  get ok(): boolean {
     return !this.renderOptions.didFail
   }
 
