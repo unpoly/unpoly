@@ -3,28 +3,58 @@
 // earlier one (a second `fragment: { … }` would replace the whole up.fragment namespace).
 // This rule reads the `api` object literal of each module in the entry's `apis` array and
 // reports keys that more than one module contributes. It costs no bytes in the bundle.
+// `bin/lint` runs it reliably. The webpack ESLint plugin caches and only lints changed files,
+// so it misses a collision added in a module while the entry stays unchanged.
 import fs from 'node:fs'
 import path from 'node:path'
-import * as acorn from 'acorn'
+import { parse } from '@typescript-eslint/typescript-estree'
 
+// Imports name a module with a `.js` extension, also when the module is written in TypeScript
+// (TypeScript maps `./x.js` to `./x.ts`).
+function resolveModuleFile(file) {
+  if (!fs.existsSync(file) && file.endsWith('.js')) {
+    let tsFile = file.replace(/\.js$/, '.ts')
+    if (fs.existsSync(tsFile)) return tsFile
+  }
+  return file
+}
+
+// Returns a Set of keys, or a string that says why the keys can't be read.
 function readApiKeys(file) {
+  let code
+  try {
+    code = fs.readFileSync(resolveModuleFile(file), 'utf8')
+  } catch (error) {
+    return `Cannot read ${path.basename(file)}: ${error.message}`
+  }
   // namespace.js.erb embeds Ruby, but only inside string literals.
-  let code = fs.readFileSync(file, 'utf8').replace(/<%[\s\S]*?%>/g, '')
-  let ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'module' })
+  code = code.replace(/<%[\s\S]*?%>/g, '')
+
+  let ast
+  try {
+    ast = parse(code)
+  } catch (error) {
+    return `Cannot parse ${path.basename(file)}: ${error.message}`
+  }
+
+  let invalid = 'Cannot read the keys of this api. Expected a module whose `export const api` is an object literal without spreads or computed keys.'
   for (let statement of ast.body) {
     let declarations = statement.type === 'ExportNamedDeclaration' && statement.declaration?.declarations
     let api = declarations && declarations.find((declaration) => declaration.id.name === 'api')
     if (!api) continue
-    if (api.init?.type !== 'ObjectExpression') return null
+    let init = api.init
+    // `{ … } as Type` or `{ … } satisfies Type`
+    while (init?.type === 'TSAsExpression' || init?.type === 'TSSatisfiesExpression') init = init.expression
+    if (init?.type !== 'ObjectExpression') return invalid
     // A Set, because a getter and a setter (`up.context`) are two properties with one key.
     let keys = new Set()
-    for (let property of api.init.properties) {
-      if (property.type !== 'Property' || property.computed) return null
+    for (let property of init.properties) {
+      if (property.type !== 'Property' || property.computed) return invalid
       keys.add(property.key.name ?? String(property.key.value))
     }
     return keys
   }
-  return null
+  return invalid
 }
 
 export const noApiCollisions = {
@@ -49,9 +79,9 @@ export const noApiCollisions = {
         let ownerOfKey = new Map()
         for (let element of node.elements) {
           let file = element.type === 'MemberExpression' && moduleFiles.get(element.object.name)
-          let keys = file && readApiKeys(file)
-          if (!keys) {
-            context.report({ node: element, message: 'Cannot read the keys of this api. Expected a module whose `export const api` is an object literal without spreads or computed keys.' })
+          let keys = file ? readApiKeys(file) : 'Cannot find the module of this api. Expected `<namespace import>.api`.'
+          if (typeof keys === 'string') {
+            context.report({ node: element, message: keys })
             continue
           }
           for (let key of keys) {
