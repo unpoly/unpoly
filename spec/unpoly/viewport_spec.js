@@ -765,15 +765,21 @@ describe('up.viewport', function() {
 
           expect(document.scrollingElement.scrollTop).toBe(0)
 
+          const scrollStarted = new Promise((resolve) => document.addEventListener('scroll', resolve, { once: true }))
+          const scrollEnded = new Promise((resolve) => document.addEventListener('scrollend', resolve, { once: true }))
+
           up.reveal(destination, { behavior: 'smooth' })
 
-          await wait(160)
+          // An instant scroll would have changed the position synchronously.
+          expect(document.scrollingElement.scrollTop).toBe(0)
 
+          // A smooth scroll starts on a later frame, which can take a while on a busy machine.
+          await Promise.race([scrollStarted, wait(3000)])
+          expect(document.scrollingElement.scrollTop).toBeGreaterThan(0)
+
+          // Browsers without a scrollend event wait for the timeout.
+          await Promise.race([scrollEnded, wait(3000)])
           const finalScrollTop = 20000 - document.scrollingElement.clientHeight + 100
-          expect(document.scrollingElement.scrollTop).toBeGreaterThan(10)
-          expect(document.scrollingElement.scrollTop).toBeLessThan(finalScrollTop - 10)
-
-          await wait(1500)
           expect(document.scrollingElement.scrollTop).toBe(finalScrollTop)
         })
       })
