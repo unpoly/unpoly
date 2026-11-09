@@ -1,17 +1,28 @@
 import { noop, sequence } from '../util.js'
 import { on } from '../event.js'
 import { afterMutate } from '../fragment.js'
+import type { UnbindFn } from '../event.js'
+
+/**
+Called when an element starts matching. May return a function that is called when it stops matching.
+@internal
+*/
+export type SelectorTrackerAddCallback = (element: Element) => ((element: Element) => void) | void
 
 export class SelectorTracker {
+  declare _selectFn: () => Iterable<Element>
+  declare _addCallback: SelectorTrackerAddCallback
+  declare _knownMatches: Map<Element, (element: Element) => void>
+  declare _syncScheduled: boolean
 
-  constructor(selectFn, addCallback) {
+  constructor(selectFn: () => Iterable<Element>, addCallback: SelectorTrackerAddCallback) {
     this._selectFn = selectFn
     this._addCallback = addCallback
     this._knownMatches = new Map()
     this._syncScheduled = false
   }
 
-  start() {
+  start(): UnbindFn {
     // Get initial matches immediately. If we waited for scheduleSync(), the following race condition
     // could occur:
     //
@@ -29,14 +40,14 @@ export class SelectorTracker {
     )
   }
 
-  _trackFragments() {
+  _trackFragments(): UnbindFn {
     // A custom element may only match our selector after its definition, which can arrive
     // after the element was inserted (e.g. a form-associated custom element only matches
     // :enabled once defined).
     return on('up:fragment:inserted up:fragment:destroyed up:element:defined', () => this._scheduleSync())
   }
 
-  _scheduleSync() {
+  _scheduleSync(): void {
     if (!this._syncScheduled) {
       this._syncScheduled = true
       // When we're in the middle of a render pass, we don't want to react to every
@@ -47,7 +58,7 @@ export class SelectorTracker {
   }
 
   // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
-  sync() {
+  sync(): void {
     this._syncScheduled = false
 
     let removeMap = new Map(this._knownMatches)
@@ -63,11 +74,11 @@ export class SelectorTracker {
     this._runRemoveCallbacks(removeMap)
   }
 
-  _removeAllMatches() {
+  _removeAllMatches(): void {
     this._runRemoveCallbacks(this._knownMatches)
   }
 
-  _runRemoveCallbacks(map) {
+  _runRemoveCallbacks(map: Map<Element, (element: Element) => void>): void {
     for (let [element, removeCallback] of map) {
       removeCallback(element)
     }
