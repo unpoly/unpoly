@@ -12,7 +12,7 @@ the given keys.
 @deprecated
   Use `up.util.pick()` instead.
 */
-up.util.only = function(object, ...keys) {
+up.util.only = function(object: object, ...keys: string[]) {
   up.migrate.deprecated('up.util.only(object, ...keys)', 'up.util.pick(object, keys)')
   return up.util.pick(object, keys)
 }
@@ -27,7 +27,7 @@ the given keys.
 @deprecated
   Use `up.util.omit(object, keys)` (with an array argument) instead of `up.util.except(object, ...keys)` (with rest arguments).
 */
-up.util.except = function(object, ...keys) {
+up.util.except = function(object: object, ...keys: string[]) {
   up.migrate.deprecated('up.util.except(object, ...keys)', 'up.util.omit(object, keys)')
   return up.util.omit(object, keys)
 }
@@ -86,7 +86,7 @@ Calls the given function for the given number of times.
 @deprecated
   Use a `for` loop instead.
 */
-up.util.times = function(count, block) {
+up.util.times = function(count: number, block: () => void) {
   up.migrate.deprecated('up.util.times()', 'a `for` loop')
   for (let i = 0; i < count; i++) {
     block()
@@ -102,7 +102,7 @@ Merge the own properties of one or more `sources` into the `target` object.
 @deprecated
   Use [`Object.assign()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) instead.
 */
-up.util.assign = function(...args) {
+up.util.assign = function(...args: [object, ...any[]]) {
   up.migrate.deprecated('up.util.assign()', 'Object.assign()')
   return Object.assign(...args)
 }
@@ -116,7 +116,7 @@ Returns an array of values of the given object.
 @deprecated
   Use [`Object.values()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values) instead.
 */
-up.util.values = function(...args) {
+up.util.values = function(...args: [object]) {
   up.migrate.deprecated('up.util.values()', 'Object.values()')
   return Object.values(...args)
 }
@@ -133,12 +133,13 @@ Pushes the given function to the [JavaScript microtask queue](https://jakearchib
 @deprecated
   Use [`queueMicrotask()`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask) instead.
 */
-up.util.microtask = function(task) {
+up.util.microtask = function(task: () => any) {
   up.migrate.deprecated('up.util.microtask()', 'queueMicrotask()')
   return Promise.resolve().then(task)
 }
 
-up.migrate.splitAtOr = function(value) {
+// Core calls this hook (splitSimpleTokenString() in util.ts).
+up.migrate.splitAtOr = function(value: string): string[] | undefined {
   let parts = value.split(/\s+or\s+/)
   if (parts.length >= 2) {
     up.migrate.warn(`Separating tokens by \`or\` has been deprecated. Use a comma (\`,\`) instead. Found in "${value}".`)
