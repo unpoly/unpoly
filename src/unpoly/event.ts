@@ -458,8 +458,9 @@ export const isSyntheticClick = mockable(function isSyntheticClick(event: Event)
   return !event.isTrusted
 })
 
-export function fork<E extends Event>(originalEvent: E, newType: string, copyKeys: (keyof E)[] = []): ForkedEvent {
-  const newEvent = build(newType, pick(originalEvent, copyKeys)) as ForkedEvent
+export function fork(originalEvent: Event, newType: string, copyKeys: string[] = []): ForkedEvent {
+  // The keys may belong to a subclass, like MouseEvent#clientX.
+  const newEvent = build(newType, pick(originalEvent as PlainObject, copyKeys)) as ForkedEvent
   newEvent.originalEvent = originalEvent; // allow users to access other props through event.originalEvent.prop
 
   ['stopPropagation', 'stopImmediatePropagation', 'preventDefault'].forEach(function(key) {
