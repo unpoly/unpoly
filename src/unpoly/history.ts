@@ -58,6 +58,16 @@ Features to update the browser history and handle the Back button.
 */
 
 
+/**
+The settings in `up.history.config`, described in its doc comment.
+*/
+export interface HistoryConfig {
+  enabled: boolean | HistoryAspect[]
+  restoreTargets: string[]
+  metaTagSelectors: string[]
+  noMetaTagSelectors: string[]
+}
+
 /*-
 Configures behavior when the user goes back or forward in browser history.
 
@@ -137,7 +147,7 @@ Configures behavior when the user goes back or forward in browser history.
 
 @stable
 */
-export const config = new Config<PlainObject>('up.history.config', () => ({
+export const config = new Config('up.history.config', (): HistoryConfig => ({
   enabled: true,
   // Prefer restoring the body instead of :main, in case the last fragment update
   // changed the page layout. See https://github.com/unpoly/unpoly/issues/237.
@@ -157,7 +167,7 @@ export const config = new Config<PlainObject>('up.history.config', () => ({
     // New nonced callbacks from the response will validates and then rewritten to match the existing nonce.
     'meta[name=csp-nonce]',
   ],
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<HistoryConfig>
 
 /*-
 Returns a normalized URL for the previous history entry.
