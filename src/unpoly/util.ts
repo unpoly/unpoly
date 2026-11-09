@@ -910,11 +910,14 @@ Returns a shallow copy of the given value.
 @return {any}
 @stable
 */
-export function copy<T>(value: T): T {
+// A list (like a NodeList or an array) is copied into a new array.
+export function copy<T>(value: List<T> & object): T[]
+export function copy<T>(value: T): T
+export function copy(value) {
   if (isObject(value) && value[copy.key]) {
     value = value[copy.key]()
   } else if (isList(value)) {
-    value = copyArrayLike(value) as T
+    value = copyArrayLike(value)
   } else if (isOptions(value)) {
     value = Object.assign({}, value)
   }

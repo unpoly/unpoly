@@ -7,7 +7,7 @@ import { emitFragmentInserted, getSubtree } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { printToStandard } from '../log.js'
 import { readData, registerDestructor } from '../script.js'
-import type { PlainObject } from '../util.js'
+import type { AnyFunction, PlainObject } from '../util.js'
 import type { Layer } from '../layer/base.js'
 
 /**
@@ -15,7 +15,7 @@ A compiler or macro registered with `up.compiler()` or `up.macro()`: the compile
 with its registration options.
 @internal
 */
-export type Compiler = ((...args: any[]) => any) & {
+export type Compiler = AnyFunction & {
   selector: string | (() => string)
   isDefault?: boolean
   batch?: boolean

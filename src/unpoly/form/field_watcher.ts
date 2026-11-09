@@ -5,14 +5,14 @@ import { getRegion, isField, readFieldName, trackFields, watchOptions } from '..
 import { Params } from './params.js'
 import { isAlive } from '../fragment.js'
 import { printUserEvent } from '../log.js'
-import type { PlainObject } from '../util.js'
+import type { AnyFunction, PlainObject } from '../util.js'
 
 /**
 The callback for `up.watch()`. It is called with the new value, the field name and the
 options for the change. With `{ batch: true }` it is called once with an object of all
 changed values and the options.
 */
-export type WatchCallback = (...args: any[]) => any
+export type WatchCallback = AnyFunction
 
 /**
 Options for an `up.FieldWatcher`. Other options are passed on to the callback.
