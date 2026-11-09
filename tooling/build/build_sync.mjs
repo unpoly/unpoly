@@ -7,7 +7,8 @@ import { readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { readStatus, PROJECT_ROOT } from './build_status.mjs'
 
-const SKIP_DIRS = new Set(['node_modules', 'dist', 'tmp', '.git'])
+// Never scanned or watched.
+export const SKIP_DIRS = new Set(['node_modules', 'dist', 'tmp', '.git'])
 
 // Where a bundle input can live. `src` and `spec` are obvious; `tooling/runner/browser` is here
 // because spec/helpers/terminal_reporter.js imports poster.js from it, which pulls in

@@ -12,11 +12,12 @@ import path from 'node:path'
 import esbuild from 'esbuild'
 import pc from 'picocolors'
 import { BuildStatus, PROJECT_ROOT } from './build_status.mjs'
-import { SOURCE_DIRS, WATCHABLE_SUFFIXES } from './build_sync.mjs'
+import { SKIP_DIRS, SOURCE_DIRS, WATCHABLE_SUFFIXES } from './build_sync.mjs'
 import { esbuildOptions, finish } from './esbuild.mjs'
 import { formatError, formatWarnings } from './build.mjs'
 import { SourceLinter } from './lint.mjs'
 import { TerserPool } from './terser.mjs'
+import { watchTree } from './watch_tree.mjs'
 
 // Editors write a file in several steps (truncate, write, rename). Waiting this long after the
 // last event turns them into one round.
@@ -73,16 +74,21 @@ export async function runWatch({ bundles, sourcemap }) {
   })
 
   for (let dir of SOURCE_DIRS) {
-    watch(path.join(PROJECT_ROOT, dir), { recursive: true }, (_event, filename) => {
-      // Node may not know the name. And a directory that is renamed, moved or deleted is
-      // reported under its own name only, not for the files in it. Then rebuild anyway, but there
-      // is nothing to lint.
-      if (!filename || !path.extname(filename)) return rounds.change(null)
-      if (isWatchable(filename)) rounds.change(path.join(PROJECT_ROOT, dir, filename))
+    watchTree(path.join(PROJECT_ROOT, dir), (file, { directory }) => {
+      // A directory that appears, moves or vanishes brings or takes files without an event of
+      // their own. Rebuild everything, but there is nothing to lint.
+      if (directory || !file) rounds.change(null)
+      else if (isWatchable(file)) rounds.change(file)
+    }, {
+      skip: (name) => SKIP_DIRS.has(name),
+      onError: (error, dir) => console.log(pc.red(`Cannot watch ${path.relative(PROJECT_ROOT, dir)} (${error.code}). Edits in it will not rebuild.`)),
     })
   }
-  // The version number in namespace.js.erb comes from here.
-  watch(path.join(PROJECT_ROOT, 'package.json'), () => rounds.change(null))
+  // The version number in namespace.js.erb comes from here. We watch the directory, because
+  // saving the file by rename would end a watch on the file itself.
+  watch(PROJECT_ROOT, (_event, name) => {
+    if (name === 'package.json') rounds.change(null)
+  })
 
   console.log(`Watching ${SOURCE_DIRS.join(', ')} for changes…`)
   rounds.change(null) // the initial build
