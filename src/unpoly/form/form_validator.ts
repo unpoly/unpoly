@@ -15,10 +15,32 @@ import { getSmart, onAborted, render, resolveOrigin, splitTarget, toTarget } fro
 import { printToStandard, printUserEvent } from '../log.js'
 import { config, headerize } from '../protocol.js'
 import { readData } from '../script.js'
+import type { Deferred, PlainObject } from '../util.js'
+
+/**
+What to re-render to validate a field: an element, its target selector and the field that
+triggered the validation. Before rendering we add the render options and a deferred that settles
+when the validation has rendered.
+@internal
+*/
+export interface ValidationSolution {
+  element: Element
+  target: string
+  origin: Element
+  renderOptions?: PlainObject
+  batch?: boolean
+  // The method and URL. Solutions with the same destination can be validated in one request.
+  destination?: string
+  deferred?: Deferred<any>
+}
 
 export class FormValidator {
+  declare _form: HTMLFormElement
+  declare _dirtySolutions: ValidationSolution[]
+  declare _nextRenderTimer: number | null
+  declare _rendering: boolean
 
-  constructor(form) {
+  constructor(form: HTMLFormElement) {
     this._form = form
     this._dirtySolutions = []
     this._nextRenderTimer = null
@@ -26,17 +48,17 @@ export class FormValidator {
     this._honorAbort()
   }
 
-  start() {
+  start(): () => void {
     let guard = (field) => this._isValidatingField(field)
     let callback = (field) => this._onFieldAdded(field)
     return trackFields(this._form, { guard }, callback)
   }
 
-  _isValidatingField(field) {
+  _isValidatingField(field: Element): Element | null {
     return field.closest('[up-validate]:not([up-validate=false])')
   }
 
-  _onFieldAdded(field) {
+  _onFieldAdded(field: Element): () => void {
     let eventType = validateOptions(field).event
     return on(field, eventType, (event) => {
       if (!field.closest('.up-keeping')) {
@@ -46,11 +68,11 @@ export class FormValidator {
     })
   }
 
-  _honorAbort() {
+  _honorAbort(): void {
     onAborted(this._form, (event) => this._onAborted(event))
   }
 
-  _onAborted(event) {
+  _onAborted(event: Event & { reason?: any }): void {
     let abortedError = new Aborted(event.reason)
     let solution
     while (solution = this._dirtySolutions.shift()) {
@@ -58,14 +80,14 @@ export class FormValidator {
     }
   }
 
-  validate(options = {}) {
+  validate(options: PlainObject = {}): Deferred<any> | undefined {
     let newSolutions = this._getSolutions(options)
     this._dirtySolutions.push(...newSolutions)
     this._scheduleNextRender()
     return newSolutions[0]?.deferred
   }
 
-  _getSolutions(options) {
+  _getSolutions(options: PlainObject): ValidationSolution[] {
     let solutions = this._getTargetSelectorSolutions(options)
       || this._getFieldSolutions(options)
       || this._getElementSolutions(options.origin)
@@ -93,13 +115,13 @@ export class FormValidator {
     return solutions
   }
 
-  _getFieldSolutions({ origin, ...options }) {
+  _getFieldSolutions({ origin, ...options }: PlainObject): ValidationSolution[] | undefined {
     if (isField(origin)) {
       return this._getValidateAttrSolutions(origin) || this._getFormGroupSolutions(origin, options)
     }
   }
 
-  _getFormGroupSolutions(field, { formGroup = true }) {
+  _getFormGroupSolutions(field: Element, { formGroup = true }: PlainObject): ValidationSolution[] | undefined {
     if (!formGroup) return
 
     let solution = findGroupSolution(field, { targetable: true })
@@ -109,7 +131,7 @@ export class FormValidator {
     }
   }
 
-  _getTargetSelectorSolutions({ target, origin }) {
+  _getTargetSelectorSolutions({ target, origin }: PlainObject): ValidationSolution[] | undefined {
     if (isString(target)) {
       printToStandard('up.validate()', 'Validating target "%s"', target)
       let simpleSelectors = splitTarget(target)
@@ -128,7 +150,7 @@ export class FormValidator {
     }
   }
 
-  _getElementSolutions(element) {
+  _getElementSolutions(element: Element): ValidationSolution[] {
     printToStandard('up.validate()', 'Validating element %o', element)
     return [{
       element,
@@ -137,7 +159,7 @@ export class FormValidator {
     }]
   }
 
-  _getValidateAttrSolutions(field) {
+  _getValidateAttrSolutions(field: Element): ValidationSolution[] | undefined {
     // In case of radio buttons the [up-validate] attribute will
     // be set on a container containing the entire radio button group.
     let containerWithAttr = field.closest('[up-validate]')
@@ -148,7 +170,7 @@ export class FormValidator {
     }
   }
 
-  _scheduleNextRender() {
+  _scheduleNextRender(): void {
     let solutionDelays = this._dirtySolutions.map((solution) => solution.renderOptions.delay)
     let shortestDelay = Math.min(...solutionDelays) || 0
     // Render requests always reset the timer, using their then-current delay.
@@ -159,11 +181,11 @@ export class FormValidator {
     })
   }
 
-  _renderDirtySolutions() {
+  _renderDirtySolutions(): void {
     muteUncriticalRejection(this._doRenderDirtySolutions())
   }
 
-  async _doRenderDirtySolutions() {
+  async _doRenderDirtySolutions(): Promise<void> {
     // We do *not* remove solutions for which the origin no longer exists,
     // as a delayed solution's { target } may still require an update.
 
@@ -202,7 +224,7 @@ export class FormValidator {
     }
   }
 
-  _selectDirtySolutionsBatch() {
+  _selectDirtySolutionsBatch(): ValidationSolution[] {
     let batch = []
     let i = 0
     while (i < this._dirtySolutions.length) {
@@ -217,11 +239,11 @@ export class FormValidator {
     return batch
   }
 
-  _canBatchSolutions(s1, s2) {
+  _canBatchSolutions(s1: ValidationSolution, s2: ValidationSolution): boolean {
     return s1.destination === s2.destination && s1.batch && s2.batch
   }
 
-  _mergeRenderOptions(dirtySolutions) {
+  _mergeRenderOptions(dirtySolutions: ValidationSolution[]): PlainObject {
     // Dirty fields are the fields that triggered the validation, not the fields contained
     // by the solution elements. This is not the same thing in a scenario like this:
     //
@@ -336,7 +358,7 @@ export class FormValidator {
     return options
   }
 
-  _addValidateHeader(headers, names) {
+  _addValidateHeader(headers: Record<string, string>, names: string[]): void {
     let key = headerize('validate')
     let value = names.join(' ')
     if (!value || value.length > config.maxHeaderSize) value = ':unknown'
