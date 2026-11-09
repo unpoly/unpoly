@@ -7,12 +7,16 @@ import { config } from '../network.js'
 import { UpRequest } from './request.js'
 
 export class RequestQueue {
+  declare _queuedRequests: UpRequest[]
+  declare _currentRequests: UpRequest[]
+  declare _trackingRequests: UpRequest[]
+  declare _emittedLate: boolean
 
   constructor() {
     this.reset()
   }
 
-  reset() {
+  reset(): void {
     this._queuedRequests = []
     this._currentRequests = []
     // Requests that reuse a cached request in flight (see RequestCache#track()).
@@ -21,18 +25,18 @@ export class RequestQueue {
     this._emittedLate = false
   }
 
-  track(request) {
+  track(request: UpRequest): void {
     this._trackingRequests.push(request)
     // The braces matter: u.remove() returns the removed request, a thenable that would make
     // the derived promise adopt the request's rejection.
     always(request, () => { remove(this._trackingRequests, request) })
   }
 
-  get allRequests() {
+  get allRequests(): UpRequest[] {
     return this._currentRequests.concat(this._queuedRequests)
   }
 
-  asap(request) {
+  asap(request: UpRequest): void {
     request.runQueuedCallbacks()
     always(request, () => this._onRequestSettled(request))
 
@@ -50,7 +54,7 @@ export class RequestQueue {
   // are prioritized when picking the next request under concurrency constraints.
   //
   // Does nothing if the given request is not a background request.
-  promoteToForeground(request) {
+  promoteToForeground(request: UpRequest): void {
     if (request.background) {
       request.background = false
 
@@ -60,41 +64,41 @@ export class RequestQueue {
     }
   }
 
-  _scheduleSlowTimer(request) {
+  _scheduleSlowTimer(request: UpRequest): void {
     if (!request.isTimed()) return
 
     // In case the request was loading in the background before it was promoted to
     // the foreground, the request may have less time left than request.lateDelay.
-    let timeUntilLate = Math.max(request.effectiveLateTime - request.age)
+    let timeUntilLate = Math.max(request.effectiveLateTime as number - request.age)
 
     // We may have multiple timers running concurrently.
     // Nonethess we don't emit duplicate events due to the check in @_checkLate().
     scheduleTimer(timeUntilLate, () => this._checkForLate())
   }
 
-  _getMaxConcurrency() {
+  _getMaxConcurrency(): number {
     return evalOption(config.concurrency)
   }
 
-  _hasConcurrencyLeft() {
+  _hasConcurrencyLeft(): boolean {
     const maxConcurrency = this._getMaxConcurrency()
     return (maxConcurrency === -1) || (this._currentRequests.length < maxConcurrency)
   }
 
-  get size() {
+  get size(): number {
     return this.allRequests.length
   }
 
-  isBusy() {
+  isBusy(): boolean {
     return this.size > 0
   }
 
-  _queueRequest(request) {
+  _queueRequest(request: UpRequest): void {
     // Queue the request at the end of our FIFO queue.
     this._queuedRequests.push(request)
   }
 
-  _pluckNextRequest() {
+  _pluckNextRequest(): UpRequest | undefined {
     // We always prioritize foreground requests over background requests.
     // Only when there is no foreground request left in the queue we will send a background request.
     // Note that if a queued preload request is requested without { preload: true } we will
@@ -104,13 +108,13 @@ export class RequestQueue {
     return remove(this._queuedRequests, request)
   }
 
-  _sendRequestNow(request) {
+  _sendRequestNow(request: UpRequest): void {
     if (request.load()) {
       this._currentRequests.push(request)
     }
   }
 
-  _onRequestSettled(request) {
+  _onRequestSettled(request: UpRequest): void {
     // If the request was aborted before it was sent, it still sits in @queuedRequests.
     remove(this._currentRequests, request) || remove(this._queuedRequests, request)
 
@@ -122,7 +126,7 @@ export class RequestQueue {
     queueTask(() => this._checkForRecover())
   }
 
-  _poke() {
+  _poke(): void {
     let request
     if (this._hasConcurrencyLeft() && (request = this._pluckNextRequest())) {
       return this._sendRequestNow(request)
@@ -130,7 +134,7 @@ export class RequestQueue {
   }
 
   // Aborting a request will cause its promise to reject, which will also uncache it
-  abort(...args) {
+  abort(...args: any[]): void {
     let [conditions = true, { except, reason, logOnce }] = parseArgs(args, 'val', 'options')
 
     let tester = UpRequest.tester(conditions, { except })
@@ -149,14 +153,14 @@ export class RequestQueue {
     }
   }
 
-  _checkForLate() {
+  _checkForLate(): void {
     if (!this._emittedLate && this._hasLateTimedRequests()) {
       this._emittedLate = true
       emit('up:network:late', { log: 'Server is slow to respond' })
     }
   }
 
-  _checkForRecover() {
+  _checkForRecover(): void {
     // We we ever emitted "late" (and probably are showing a progress bar), we wait for the
     // entire queue to clear before we emit "recover". This includes waiting for non-late requests.
     // This is to show a continuous progress bar for a chain of queued requests, e.g.
@@ -167,7 +171,7 @@ export class RequestQueue {
     }
   }
 
-  get _timedRequests() {
+  get _timedRequests(): UpRequest[] {
     // Exclude requests that return false.
     // These are requests that were initialized with { lateDelay: false } or { background: true }.
     return this.allRequests.filter((request) => request.isTimed())
@@ -175,7 +179,7 @@ export class RequestQueue {
 
   // Returns queued requests that are (1) timed (effectiveLateTime not false)
   // and (2) have been longer queued than their effectiveLateTime.
-  _hasLateTimedRequests() {
+  _hasLateTimedRequests(): boolean {
     // If lateDelay is 200, we're scheduling the _checkLate() timer after 200 ms.
     // The request must be slow when _checkLate() is called, or we will never look
     // at it again. Since the JavaScript setTimeout() is inaccurate, we allow a request
