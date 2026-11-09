@@ -115,7 +115,7 @@ export type EmittedEvent<T> = T extends keyof UpEventMap ? UpEventMap[T] : AnyEv
 /**
 One or more event types for `up.on()`, separated by spaces or commas, or as an array.
 */
-export type EventTypes = string | string[]
+export type EventTypes = string | readonly string[]
 
 /**
 What `up.on()` listens on: an element, the document, the window, or a list of elements.
