@@ -35,15 +35,12 @@
   },
   "homepage": "https://unpoly.com",
   "devDependencies": {
-    "@eslint/js": "^9",
     "@stylistic/eslint-plugin": "^5.10.0",
     "acorn": "^8.19.0",
     "ejs": "^3.1.10",
     "esbuild": "0.28.2",
-    "eslint": "^9",
     "express": "*",
     "glob": "*",
-    "globals": "^16",
     "jasmine": "^5.13.0",
     "jasmine-ajax": "*",
     "jquery": "*",
@@ -54,9 +51,7 @@
     "sass": "*",
     "source-map": "^0.6.1",
     "terser": "5.51.2",
-    "typescript": "~5.9.3",
-    "typescript-eslint": "^8",
-    "typescript7": "npm:typescript@^7.0.2",
+    "typescript": "^7.0.2",
     "yoctocolors-cjs": "*"
   }
 }
