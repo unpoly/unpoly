@@ -4,8 +4,9 @@ import { Overlay } from './overlay.js'
 import { Tether } from '../tether.js'
 
 export class OverlayWithTether extends Overlay {
+  declare _tether: Tether
 
-  createElements() {
+  createElements(): void {
     if (!this.origin) {
       fail('Missing { origin } option')
     }
@@ -13,7 +14,7 @@ export class OverlayWithTether extends Overlay {
     // We first construct an un-started Tether object so we can
     // ask for its parent element.
     this._tether = new Tether({
-      anchor: this.origin,
+      anchor: this.origin as HTMLElement,
       align: this.align,
       position: this.position
     })
@@ -21,15 +22,15 @@ export class OverlayWithTether extends Overlay {
     this.createContentElement(this.element)
   }
 
-  onContentSet() {
+  onContentSet(): void {
     this._tether.start(this.element)
   }
 
-  onElementsRemoved() {
+  onElementsRemoved(): void {
     this._tether.stop()
   }
 
-  sync() {
+  sync(): void {
     // In case some async code calls #sync() on a layer that was already closed,
     // don't run the code below that might re-attach the overlay.
     if (!this.isAlive()) return
