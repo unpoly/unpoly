@@ -35,7 +35,7 @@ import type { List, PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
 import type { UpRequest } from './network/request.js'
 import type { UpResponse } from './network/response.js'
-import type { RenderOptions, ResolvedRenderOptions } from './fragment/render/render_options.js'
+import type { RenderOptions, RenderTarget, ResolvedRenderOptions } from './fragment/render/render_options.js'
 import type { FocusCapsule } from './viewport/focus_capsule.js'
 
 /**
@@ -63,6 +63,11 @@ export interface RenderStep extends ResolvedRenderOptions {
   oldScrollTops?: Record<string, number>
   descendantsOnly?: boolean
 }
+
+/**
+The arguments of `up.render()` and the functions built on it: a target and render options, or only render options.
+*/
+export type RenderArgs = [target: RenderTarget, options?: RenderOptions] | [options: RenderOptions]
 
 /**
 An element with [up-keep] that is kept in an update, and the element it would have been replaced with.
@@ -722,8 +727,7 @@ You may control this behavior using the [`{ abort }`](#options.abort) option.
 @stable
 @signature
 */
-// TODO(types): RenderOptions and RenderJob types. Takes a target and options, or options.
-export const render = mockable((...args: any[]): any => {
+export const render = mockable((...args: RenderArgs): RenderJob => {
   let options = parseTargetAndOptions(args)
   return new RenderJob(options).execute()
 })
@@ -793,7 +797,7 @@ Instead of calling `up.navigate()` you may also call `up.render({ navigate: true
   @like up.render
 @stable
 */
-export const navigate = mockable((...args: any[]): any => {
+export const navigate = mockable((...args: RenderArgs): RenderJob => {
   const options = parseTargetAndOptions(args)
   return render({ ...options, navigate: true })
 })
@@ -1996,7 +2000,7 @@ up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate: 'a
 @stable
 @signature
 */
-export const reload = mockable(function reload(...args: any[]): any {
+export const reload = mockable(function reload(...args: RenderArgs | []): RenderJob {
   const options = { ...config.reloadOptions, ...parseTargetAndOptions(args) }
   options.target ||= ':main'
   const element = getSmart(options.target, options)
@@ -2052,7 +2056,7 @@ up.visit('/users')
 
 @stable
 */
-export function visit(url: string, options?: PlainObject): any {
+export function visit(url: string, options?: RenderOptions): RenderJob {
   return navigate({ ...options, url })
 }
 

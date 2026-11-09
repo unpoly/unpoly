@@ -63,8 +63,8 @@ Other types of errors will not be muted.
 @return {Promise}
 @internal
 */
-// TODO(types): Promise<T>, once up.RenderJob declares the promise methods it delegates.
-export function muteUncriticalRejection(promise: any): Promise<any> {
+// Takes a promise, or a promise-like object like an up.RenderJob.
+export function muteUncriticalRejection<T>(promise: Pick<Promise<T>, 'catch'>): Promise<T | void> {
   return promise.catch(throwCritical)
 }
 
