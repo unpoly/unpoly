@@ -1,8 +1,13 @@
 import { last, remove } from '../util.js'
 import { build } from '../layer.js'
 import { LayerLookup } from './layer_lookup.js'
+import type { LayerLookupArgs } from './layer_lookup.js'
+import type { Layer, LayerCloseOptions, PeelOptions } from './base.js'
 
 export class LayerStack {
+  declare _currentOverrides: Layer[]
+  declare layers: Layer[]
+  declare _closingLayers: Layer[]
 
   constructor() {
     this._currentOverrides = []
@@ -10,17 +15,17 @@ export class LayerStack {
     this._closingLayers = []
   }
 
-  _buildRoot() {
+  _buildRoot(): Layer {
     return build({ mode: 'root', stack: this })
   }
 
-  remove(layer) {
+  remove(layer: Layer): void {
     remove(this.layers, layer)
     // A closed overlay may keep its element for its exit animation. See attachedCount.
     this._closingLayers.push(layer)
   }
 
-  peel(layer, options = {}) {
+  peel(layer: Layer, options: PeelOptions = {}): void {
     // We will dismiss descendants closer to the front first to prevent
     // recursive calls of peel().
     const descendants = layer.descendants.toReversed()
@@ -42,65 +47,65 @@ export class LayerStack {
     }
   }
 
-  reset() {
+  reset(): void {
     this.peel(this.root, { animation: false })
     this._currentOverrides = []
     this.root.reset()
   }
 
-  parentOf(layer) {
+  parentOf(layer: Layer): Layer | undefined {
     return this.layers[layer.index - 1]
   }
 
-  childOf(layer) {
+  childOf(layer: Layer): Layer | undefined {
     return this.layers[layer.index + 1]
   }
 
-  ancestorsOf(layer) {
+  ancestorsOf(layer: Layer): Layer[] {
     // Return closest ancestors first
     return this.layers.slice(0, layer.index).toReversed()
   }
 
-  selfAndAncestorsOf(layer) {
+  selfAndAncestorsOf(layer: Layer): Layer[] {
     // Order for layer.closest()
     return [layer, ...layer.ancestors]
   }
 
-  descendantsOf(layer) {
+  descendantsOf(layer: Layer): Layer[] {
     return this.layers.slice(layer.index + 1)
   }
 
-  isRoot(layer) {
+  isRoot(layer: Layer): boolean {
     return this.root === layer
   }
 
-  isOverlay(layer) {
+  isOverlay(layer: Layer): boolean {
     return this.root !== layer
   }
 
-  isCurrent(layer) {
+  isCurrent(layer: Layer): boolean {
     return this.current === layer
   }
 
-  isFront(layer) {
+  isFront(layer: Layer): boolean {
     return this.front === layer
   }
 
-  get(...args) {
+  get(...args: LayerLookupArgs): Layer | undefined {
     return this.getAll(...args)[0]
   }
 
-  getAll(...args) {
+  getAll(...args: LayerLookupArgs): Layer[] {
     return LayerLookup.all(this, ...args)
   }
 
-  sync() {
+  sync(): void {
     for (let layer of this.layers) {
       layer.sync()
     }
   }
 
-  asCurrent(layer, fn) {
+  asCurrent<T>(layer: Layer, fn: () => T): T {
     try {
       this._currentOverrides.push(layer)
       return fn()
@@ -109,53 +114,55 @@ export class LayerStack {
     }
   }
 
-  reversed() {
+  reversed(): Layer[] {
     return this.layers.toReversed()
   }
 
-  dismissOverlays(value = null, options = {}) {
+  dismissOverlays(value: any = null, options: LayerCloseOptions = {}): void {
+    // TODO(types): Closing an overlay reads no { dismissible } option, so this has no effect.
+    // Maybe { preventable: false } was meant, like in peel(). (Needs Henning)
     options.dismissible = false
     for (let overlay of this.overlays.toReversed()) {
       overlay.dismiss(value, options)
     }
   }
 
-  at(index) {
+  at(index: number): Layer | undefined {
     return this.layers[index]
   }
 
-  indexOf(layer) {
+  indexOf(layer: Layer): number {
     return this.layers.indexOf(layer)
   }
 
-  get count() {
+  get count(): number {
     return this.layers.length
   }
 
   // Layers whose elements are in the DOM: the open layers, plus closed overlays
   // that are still playing their exit animation.
-  get attachedCount() {
+  get attachedCount(): number {
     if (this._closingLayers.length) {
       this._closingLayers = this._closingLayers.filter((layer) => layer.element.isConnected)
     }
     return this.layers.length + this._closingLayers.length
   }
 
-  get root() {
+  get root(): Layer {
     return this.layers[0]
   }
 
-  get overlays() {
+  get overlays(): Layer[] {
     return this.root.descendants
   }
 
-  get current() {
+  get current(): Layer {
     // Event listeners and compilers will push into @currentOverrides
     // to temporarily set up.layer.current to the layer they operate in.
     return last(this._currentOverrides) || this.front
   }
 
-  get front() {
+  get front(): Layer {
     return last(this.layers)
   }
 

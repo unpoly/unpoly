@@ -37,6 +37,11 @@ export interface LayerLookupOptions {
 }
 
 /**
+The arguments of `up.layer.get()` and `up.layer.getAll()`: a layer value, lookup options, or both.
+*/
+export type LayerLookupArgs = [value?: LayerOption | LayerLookupOptions, options?: LayerLookupOptions]
+
+/**
 What a single layer name resolves to. The name `'new'` passes through as a string, for the
 render options that open a new overlay.
 @internal
@@ -72,7 +77,7 @@ export class LayerLookup {
     return results
   }
 
-  static all(stack: LayerStack, ...args: any[]): Layer[] {
+  static all(stack: LayerStack, ...args: LayerLookupArgs): Layer[] {
     const options = parseArgIntoOptions(args, 'layer')
 
     // We can process some very frequent calls like all(up.Layer)
