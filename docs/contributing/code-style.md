@@ -27,10 +27,12 @@ TypeScript 7's checker twice:
 
 - `tsconfig.json` checks all of `src/` with loose settings.
 - `tsconfig.core.json` checks Unpoly's core (`src/unpoly.ts` and `src/unpoly/`) with stricter
-  settings, so far `noImplicitAny`. `unpoly-migrate` isn't part of this check. Neither are the
-  change classes in `src/unpoly/fragment/render/change/`, which wait for a restructure.
-  TypeScript can't leave out a folder that other core files import, so `bin/typecheck` drops
-  that folder's errors instead (see `NOT_YET_STRICT` there).
+  settings, so far `noImplicitAny`. `unpoly-migrate` isn't part of this check, so core can't
+  use the API that only migrate adds, like `up.migrate.deprecated()` or `config.patch()`. The
+  change classes in `src/unpoly/fragment/render/change/` wait for a restructure before they
+  get the stricter settings. TypeScript can't leave out a folder that other core files import,
+  so `bin/typecheck` drops that folder's errors of the stricter settings instead (see
+  `NOT_YET_STRICT` there).
 
 When a folder passes the stricter settings, remove it from `NOT_YET_STRICT`. When all of `src/`
 passes a setting, move it to `tsconfig.json`. CI runs `bin/typecheck` as a separate job, and a

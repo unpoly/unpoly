@@ -2,8 +2,9 @@
 // Type-check src/ with TypeScript 7. Runs two checks:
 //
 //   1. tsconfig.json: all of src/, with loose settings.
-//   2. tsconfig.core.json: Unpoly's core (src/unpoly/), with stricter settings.
-//      Errors in the folders listed in NOT_YET_STRICT are dropped.
+//   2. tsconfig.core.json: Unpoly's core (src/unpoly/), with stricter settings and without
+//      unpoly-migrate's declarations. In the folders listed in NOT_YET_STRICT, we drop the
+//      errors of the stricter settings.
 //
 // Extra arguments are forwarded to tsc, so `bin/typecheck --extendedDiagnostics` works.
 // The build doesn't use TypeScript at all: esbuild strips the types.
@@ -15,13 +16,18 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const tscBin = path.join(projectRoot, 'node_modules', 'typescript', 'bin', 'tsc')
 const extraArgs = process.argv.slice(2)
 
-// Core folders that don't pass tsconfig.core.json yet. tsc has no per-file settings, and
-// leaving a folder out of the config's `include` doesn't help: other core files import it,
-// so tsc checks it anyway. We drop its errors from the output instead.
+// Core folders that don't pass the stricter settings of tsconfig.core.json yet. tsc has no
+// per-file settings, and leaving a folder out of the config's `include` doesn't help: other
+// core files import it, so tsc checks it anyway. We drop its errors from the output instead.
 const NOT_YET_STRICT = [
   // The change classes wait for a restructure.
   'src/unpoly/fragment/render/change/',
 ]
+
+// The errors that the stricter settings report. We only drop these in NOT_YET_STRICT, so its
+// files are still checked without unpoly-migrate's declarations. When tsconfig.core.json gets
+// another setting, add its error codes.
+const STRICT_ERROR = /: error TS7\d{3}:/ // noImplicitAny
 
 function tsc(args, stdio) {
   return new Promise((resolve) => {
@@ -49,11 +55,13 @@ function outputBlocks(output) {
 
 let loose = await tsc(['--project', 'tsconfig.json', ...extraArgs], 'inherit')
 let core = await tsc(['--project', 'tsconfig.core.json', '--pretty', 'false', ...extraArgs], ['inherit', 'pipe', 'inherit'])
-let blocks = outputBlocks(core.stdout).filter(({ lines, error }) => !(error && NOT_YET_STRICT.some((folder) => lines[0].startsWith(folder))))
+let blocks = outputBlocks(core.stdout).filter(({ lines, error }) =>
+  !(error && STRICT_ERROR.test(lines[0]) && NOT_YET_STRICT.some((folder) => lines[0].startsWith(folder)))
+)
 for (let { lines } of blocks) console.log(lines.join('\n'))
 let coreErrorCount = blocks.filter(({ error }) => error).length
 if (coreErrorCount) {
-  console.log(`\nFound ${coreErrorCount} error${coreErrorCount === 1 ? '' : 's'} with the stricter settings of tsconfig.core.json.`)
+  console.log(`\nFound ${coreErrorCount} error${coreErrorCount === 1 ? '' : 's'} in the core check (tsconfig.core.json).`)
 }
 // tsc fails for reasons other than errors in a file, like a broken config.
 let coreFailed = coreErrorCount > 0 || (core.code !== 0 && !outputBlocks(core.stdout).some(({ error }) => error))

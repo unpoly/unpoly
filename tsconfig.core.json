@@ -6,6 +6,7 @@
   "compilerOptions": {
     "noImplicitAny": true
   },
-  // unpoly-migrate and the Bootstrap entries are left out. Core never imports them.
+  // unpoly-migrate and the Bootstrap entries are left out. Core never imports them, and
+  // must not use the API that unpoly-migrate adds (like `up.migrate.deprecated()`).
   "include": ["src/types/**/*.ts", "src/unpoly.ts", "src/unpoly/**/*.ts"]
 }
