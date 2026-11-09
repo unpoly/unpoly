@@ -77,7 +77,7 @@ up.$on = function(...definitionArgs) {
   up.migrate.warn('up.$on() has been deprecated. Instead use up.on() with a callback that wraps the given native element in a jQuery collection.')
   let callback = definitionArgs.pop()
 
-  callback.upNativeCallback = function(event, element, data) {
+  callback.upNativeCallback = function(event: Event, element: Element, data: any) {
     let $element = jQuery(element)
     callback.call($element, event, $element, data)
   }
