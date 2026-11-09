@@ -913,6 +913,10 @@ up.element = (function() {
   @internal
   */
   function fixedToAbsolute(element) {
+    // A hidden element (e.g. with `display: none`) has no position to preserve.
+    // It would also not gain an offsetParent below.
+    if (!isVisible(element)) return
+
     const elementRectAsFixed = element.getBoundingClientRect()
 
     // Set the position to 'absolute' so it gains an offsetParent
