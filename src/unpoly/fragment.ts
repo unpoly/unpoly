@@ -122,6 +122,7 @@ export type FragmentLoadedEvent = Event & {
   expiredResponse: UpResponse | undefined
   origin: Element | undefined
   renderOptions: RenderOptions
+  skip: () => void
 }
 
 /**
