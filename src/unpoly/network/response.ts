@@ -1,6 +1,7 @@
 import { evalOption, getSimpleTokens, variant } from '../util.js'
 import { cache, config } from '../network.js'
 import { CSPInfo } from '../script/csp/csp_info.js'
+import { isCritical } from '../error.js'
 import type { PlainObject, ValueOrFunction } from '../util.js'
 import type { UpRequest } from './request.js'
 
@@ -383,6 +384,11 @@ export const UpResponse = class Response {
     cache.track(this.request, finalRequest, { force: true })
 
     return finalRequest
+  }
+
+  // A failed request rejects with its response, which is not a critical error.
+  [isCritical.key](): boolean {
+    return false
   }
 
 }

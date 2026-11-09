@@ -26,13 +26,14 @@ export function fail(...args: [message: string, ...vars: any[]]): never {
   throw new UpError(args)
 }
 
-// We reach up.RenderResult and up.Response through window.up instead of importing them:
-// util imports this module, so an import would evaluate up.Response, and every namespace
-// it imports, before util. (The bundle doesn't throw then, since esbuild turns top-level
-// `const` into `var`, but those modules would see util's constants as undefined.)
-function isCritical(error: any): boolean {
-  return (typeof error !== 'object') || ((error.name !== 'AbortError') && !(error instanceof up.RenderResult) && !(error instanceof up.Response))
+// up.Response and up.RenderResult implement this protocol to mark their instances as uncritical.
+// An `instanceof` check would have to import them, but util imports this module. Their modules,
+// and every namespace they import, would then be evaluated before util.
+export function isCritical(error: any): boolean {
+  return (typeof error !== 'object') || (error[isCritical.key] ? error[isCritical.key]() : (error.name !== 'AbortError'))
 }
+
+isCritical.key = 'up.error.isCritical'
 
 /*-
 Registers an empty rejection handler in case the given promise

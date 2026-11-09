@@ -1,4 +1,5 @@
 import { compact, map } from '../../util.js'
+import { isCritical } from '../../error.js'
 import type { RenderOptions } from './render_options.js'
 import type { Layer } from '../../layer/base.js'
 
@@ -208,6 +209,11 @@ export class RenderResult {
   */
   get ok(): boolean {
     return !this.renderOptions.didFail
+  }
+
+  // A failed render pass rejects with its result, which is not a critical error.
+  [isCritical.key](): boolean {
+    return false
   }
 
 }

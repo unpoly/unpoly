@@ -252,9 +252,11 @@ in `mockable()`, and specs call `up.link.follow.mock()` or `up.internal.trackFie
 `util.ts`, `element.ts`, `browser.ts`, `error.ts` and the classes in `util/` and `error/` are
 evaluated before any feature namespace, so they never import one like `up.fragment`.
 Where they need one, move the function down into a module they may import, as we did with
-`copyCursorProps()` in `element.ts`. Only when that's not possible, call it through the
-global at call time: `error.ts` checks `instanceof up.Response`, and `Config` logs with
-`up.internal.printToError()`.
+`copyCursorProps()` in `element.ts`. Instead of checking `instanceof` against a class
+from a feature namespace, define a protocol key that the class implements, like
+`up.util.copy.key`: `error.ts` defines `isCritical.key`, and `up.Response` implements it. Only
+when neither is possible, call the function through the global at call time, as `Config` logs
+with `up.internal.printToError()`.
 
 One class in `util/` breaks this rule: `registry.ts` imports `isEvaling()` from `framework.ts`. That
 is safe only because a registry calls it when an entry is put, after every module was evaluated.

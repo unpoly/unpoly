@@ -28,6 +28,14 @@ describe('up.error', function() {
       await expectAsync(mutedPromise).toBeResolved()
     })
 
+    it('mutes a rejected promise if the rejection value is an instance of a subclass of up.Response', async function() {
+      const ResponseSubclass = class extends up.Response {}
+      const promise = Promise.reject(new ResponseSubclass())
+      const mutedPromise = up.internal.muteUncriticalRejection(promise)
+
+      await expectAsync(mutedPromise).toBeResolved()
+    })
+
     it('mutes a rejected promise if the rejection value is an AbortError', async function() {
       const abortError = new up.Aborted('User aborted')
       const promise = Promise.reject(abortError)
@@ -42,6 +50,13 @@ describe('up.error', function() {
       const mutedPromise = up.internal.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeRejectedWith(error)
+    })
+
+    it('does not mute a rejected promise if the rejection value is not an object', async function() {
+      const promise = Promise.reject('reason')
+      const mutedPromise = up.internal.muteUncriticalRejection(promise)
+
+      await expectAsync(mutedPromise).toBeRejectedWith('reason')
     })
   })
 
