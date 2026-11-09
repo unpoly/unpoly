@@ -1489,7 +1489,7 @@ up.element = (function() {
   @experimental
   */
   function isEmpty(element) {
-    return !element.children.length > 0 && !element.innerText.trim()
+    return !element.children.length && !element.innerText.trim()
   }
 
   function crossOriginSelector(attr) {
