@@ -78,7 +78,7 @@ import { CoverLayer } from './unpoly/layer/modes/cover_layer.js'
 // in which modules are evaluated.
 import * as internal from './unpoly/internal.js'
 
-window.up = {}
+window.up = {} as Up
 
 const apis = [
   namespace.api,
@@ -116,7 +116,23 @@ const apis = [
   renderJobClass.api,
   renderResultClass.api,
   internal.api,
-]
+] as const
+
+// The type of `window.up` (see src/types/global.d.ts). It's an interface, so unpoly-migrate (and
+// apps) can add keys by declaration merging. To add keys to an existing namespace, redeclare it
+// with an intersection, like `util: CoreApi['util'] & { … }`: the redeclared type must be a subtype.
+export interface Up extends CoreApi {} // oxlint-disable-line typescript/no-empty-object-type
+
+/**
+Every api above, merged.
+
+@internal
+*/
+export type CoreApi = MergeApis<typeof apis>
+
+type MergeApis<T extends readonly object[]> = T extends readonly [infer First, ...infer Rest extends readonly object[]]
+  ? First & MergeApis<Rest>
+  : unknown
 
 // Copy property descriptors, so getters (like `up.context`) stay live.
 // A later api would replace an earlier api's key without notice. The lint check in
@@ -140,8 +156,9 @@ for (let api of apis) {
 const layerModes = [RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]
 for (let key in up) {
   // Test the key first, so we don't call a getter like `up.context`.
-  if (/^[A-Z]/.test(key) && up[key].prototype) {
-    framework.setClassName(up[key], 'up.' + key)
+  // `Up` has no index signature, so we read the key from an untyped `up`.
+  if (/^[A-Z]/.test(key) && (up as any)[key].prototype) {
+    framework.setClassName((up as any)[key], 'up.' + key)
   }
 }
 for (let mode of layerModes) {

@@ -18,5 +18,8 @@ interface Window {
 // Entry points require their stylesheets, which the build compiles with Sass.
 declare module '*.sass'
 
-// ERB templates (like the one that inserts the version number) are rendered by the build's erb plugin.
-declare module '*.erb'
+// ERB templates are rendered by the build's erb plugin. The only one inserts the version number.
+// We spell out its type: an untyped module would make the whole `Up` type `any`.
+declare module '*/namespace.js.erb' {
+  export const api: { version: string }
+}
