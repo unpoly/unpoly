@@ -105,6 +105,8 @@ the background layer during compilation.
 export abstract class Layer {
   // Each subclass has its mode, like ModalLayer.mode = 'modal'.
   declare static mode: LayerMode
+  // 'up.Layer' for every mode, set in unpoly.ts.
+  declare [Symbol.toStringTag]: string
   declare stack: LayerStack
   declare lastScrollTops: FIFOCache<string, any>
   declare lastFocusCapsules: FIFOCache<string, any>
@@ -1005,9 +1007,6 @@ export abstract class Layer {
   static selector(_part?: string): string {
     throw new NotImplemented()
   }
-
-  // Subclasses for each mode (RootLayer, ModalLayer, …) aren't public, so they all say up.Layer.
-  get [Symbol.toStringTag]() { return 'up.Layer' }
 
   toString(): string {
     throw new NotImplemented()

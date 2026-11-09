@@ -1,8 +1,6 @@
 import { UpError } from './error.js'
 
-export class CannotParse extends UpError {
-  get [Symbol.toStringTag]() { return 'up.CannotParse' }
-}
+export class CannotParse extends UpError {}
 
 export const api = {
   CannotParse,

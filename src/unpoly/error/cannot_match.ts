@@ -1,8 +1,6 @@
 import { UpError } from './error.js'
 
-export class CannotMatch extends UpError {
-  get [Symbol.toStringTag]() { return 'up.CannotMatch' }
-}
+export class CannotMatch extends UpError {}
 
 export const api = {
   CannotMatch,

@@ -9,8 +9,8 @@ export interface URLPatternGroup {
   cast: (value: string) => string | number
 }
 
-// A class expression, so the class is still named `URLPattern` at runtime, while the binding
-// doesn't shadow the browser's `URLPattern` here or in importers.
+// A class expression, so the binding doesn't shadow the browser's `URLPattern` here or in importers.
+// At runtime the class is named `up.URLPattern` (see unpoly.ts).
 export const UpURLPattern = class URLPattern {
   declare _groups: URLPatternGroup[]
   declare _positiveRegexp: RegExp

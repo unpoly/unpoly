@@ -277,8 +277,6 @@ export class RenderJob {
   @stable
   */
 
-  get [Symbol.toStringTag]() { return 'up.RenderJob' }
-
   static {
     // A request is also a promise ("thenable") for its initial render pass.
     delegatePromise(this.prototype, function() { return this._rendered })

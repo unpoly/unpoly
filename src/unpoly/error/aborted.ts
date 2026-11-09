@@ -5,8 +5,6 @@ export class Aborted extends UpError {
   constructor(message) {
     super(message, { name: 'AbortError' })
   }
-
-  get [Symbol.toStringTag]() { return 'up.Aborted' }
 }
 
 export const api = {

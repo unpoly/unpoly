@@ -200,6 +200,28 @@ for (let api of apis) {
   Object.defineProperties(up, Object.getOwnPropertyDescriptors(api))
 }
 
+// The browser console labels an object after its class, like `Uncaught up.Aborted: …` or
+// `up.Request {…}`. Minifiers rename our classes, in our .min.js bundles and in apps that minify
+// unpoly.js themselves, so that would say `Uncaught m: …`. Apps filter console errors in their tests
+// by our names, so we give every class on window.up its public name:
+// - Chrome labels an instance of a base class with its class's `name` property.
+// - For an instance of a subclass, Chrome walks up the prototype chain and takes the first own
+//   [Symbol.toStringTag] *data* property (it skips a getter) or the original name of an own
+//   `constructor`, whichever comes first. So each class needs a tag on its own prototype.
+// The tag also names our objects in Object.prototype.toString() and u.inspect(), and our errors (see
+// error.ts). The layer modes aren't public, so they all say up.Layer.
+const layerModes = [RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]
+for (let key in up) {
+  // Test the key first, so we don't call a getter like `up.context`. up.RenderOptions is no class.
+  if (/^[A-Z]/.test(key) && up[key].prototype) {
+    Object.defineProperty(up[key], 'name', { value: 'up.' + key })
+    up[key].prototype[Symbol.toStringTag] = 'up.' + key
+  }
+}
+for (let mode of layerModes) {
+  mode.prototype[Symbol.toStringTag] = 'up.Layer'
+}
+
 // The explicit install order. It is the order in which the namespaces registered their side
 // effects before they were ES modules. All installs run before `up.framework.onEvaled()` below,
 // while `up.framework.evaling` is still true. Event listeners, compilers, macros and registry
@@ -221,7 +243,7 @@ const installs = [
   network.install,
   // up.layer gets its mode classes from here. Nothing else imports them, so no other module can
   // reach a mode class before its superclass is evaluated (see the cycle rules above).
-  () => layer.install([RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]),
+  () => layer.install(layerModes),
   link.install,
   form.install,
   status.install,

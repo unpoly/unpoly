@@ -14,6 +14,37 @@ describe('up.framework', function() {
 
     })
 
+    describe('classes on window.up', function() {
+
+      // Minifiers rename our classes. Chrome's console would then say `Uncaught m: …` instead of
+      // `Uncaught up.Aborted: …`, unless we set these properties (see src/unpoly.ts).
+      // tooling/test/build/class_names.test.mjs checks what Chrome shows.
+
+      it("sets each class's name and [Symbol.toStringTag] to its public name", function() {
+        let keys = Object.keys(up).filter((key) => /^[A-Z]/.test(key) && up[key].prototype)
+        expect(keys).toContain('Aborted')
+        expect(keys).toContain('Request')
+
+        for (let key of keys) {
+          expect(up[key].name).toBe(`up.${key}`)
+          // A data property on the class's own prototype, since Chrome ignores a getter.
+          expect(Object.getOwnPropertyDescriptor(up[key].prototype, Symbol.toStringTag)?.value).toBe(`up.${key}`)
+        }
+      })
+
+      it('tags the class of a layer in any mode as up.Layer', async function() {
+        let layers = [up.layer.root]
+        for (let mode of ['modal', 'popup', 'drawer', 'cover']) {
+          layers.push(await up.layer.open({ mode, content: 'content', origin: document.body }))
+        }
+
+        for (let layer of layers) {
+          expect(Object.getOwnPropertyDescriptor(Object.getPrototypeOf(layer), Symbol.toStringTag)?.value).toBe('up.Layer')
+        }
+      })
+
+    })
+
     describe('up.framework.isSupported', function() {
 
       it('returns true on a supported browser', function() {

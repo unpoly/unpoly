@@ -46,8 +46,8 @@ console.log(response.text)   // "<html><body>..."
 @class up.Response
 @parent up.network
 */
-// A class expression, so the class is still named `Response` at runtime, while the binding
-// doesn't shadow the browser's `Response` here or in importers.
+// A class expression, so the binding doesn't shadow the browser's `Response` here or in importers.
+// At runtime the class is named `up.Response` (see unpoly.ts).
 export const UpResponse = class Response {
   declare method: string
   declare url: string
@@ -358,8 +358,6 @@ export const UpResponse = class Response {
       // Hence we need to delegate to our request.
       this.request.expired
   }
-
-  get [Symbol.toStringTag]() { return 'up.Response' }
 
   toString(): string {
     return `HTTP ${this.status} response to ${this.request}`

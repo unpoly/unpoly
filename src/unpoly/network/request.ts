@@ -100,9 +100,11 @@ console.log(response.text)
 @class up.Request
 @parent up.network
 */
-// A class expression, so the class is still named `Request` at runtime, while the binding
-// doesn't shadow the browser's `Request` here or in importers.
+// A class expression, so the binding doesn't shadow the browser's `Request` here or in importers.
+// At runtime the class is named `up.Request` (see unpoly.ts).
 export const UpRequest = class Request {
+  // 'up.Request', set in unpoly.ts. TypeScript needs it to accept a request as a promise.
+  declare [Symbol.toStringTag]: string
   declare state: RequestState
   declare expired: boolean
   declare method: string
@@ -1002,8 +1004,6 @@ export const UpRequest = class Request {
   assertEmitted(...args: any[]): void {
     this._buildEventEmitter(args).assertEmitted()
   }
-
-  get [Symbol.toStringTag]() { return 'up.Request' }
 
   toString(): string {
     return this.method + ' ' + this.url

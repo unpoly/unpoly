@@ -202,8 +202,6 @@ export class Params {
     return parts.join('&')
   }
 
-  get [Symbol.toStringTag]() { return 'up.Params' }
-
   toString(): string {
     return this.toQuery()
   }

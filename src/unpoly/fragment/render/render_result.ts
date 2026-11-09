@@ -210,8 +210,6 @@ export class RenderResult {
     return !this.renderOptions.didFail
   }
 
-  get [Symbol.toStringTag]() { return 'up.RenderResult' }
-
 }
 
 export const api = {
