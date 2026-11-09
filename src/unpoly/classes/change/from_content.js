@@ -159,7 +159,7 @@ up.Change.FromContent = class FromContent extends up.Change {
   // This might change postflight if the response does not contain the desired target.
   getPreflightProps(opts = {}) {
     const getPlanProps = (plan) => plan.getPreflightProps()
-    return this._seekPlan(getPlanProps) || opts.optional || this._cannotMatchPreflightTarget()
+    return this._seekPlan(getPlanProps) || (opts.optional ? {} : this._cannotMatchPreflightTarget())
   }
 
   _cannotMatchPreflightTarget() {

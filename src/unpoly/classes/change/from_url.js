@@ -57,13 +57,6 @@ up.Change.FromURL = class FromURL extends up.Change {
     }
   }
 
-  // This is required by up.RenderJob to handle { abort: 'target' }.
-  // TODO: I think this is no longer required. Instead _handleAbortOption() is called with { bindFragments }...
-
-  getPreflightProps() {
-    return this._getRequestAttrs()
-  }
-
   _preflightPropsForRenderOptions(renderOptions, getPreflightPropsOptions) {
     const preflightChange = new up.Change.FromContent({ ...renderOptions, preflight: true })
     // #getPreflightProps() will return meta information about the change that is most
