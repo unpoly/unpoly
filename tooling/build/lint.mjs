@@ -13,6 +13,10 @@ import { PROJECT_ROOT } from './build_status.mjs'
 
 const LINTED_DIR = 'src'
 const LINTED_EXTENSIONS = ['.js', '.ts']
+// The entry's no-api-collisions rule (tooling/eslint/no_api_collisions.mjs) reads the `api` of
+// every module, so a change to any of them can make the entry fail. ESLint can't know that, so
+// we lint the entry again with every change to src/.
+const ENTRY = path.join(PROJECT_ROOT, 'src/unpoly.js')
 
 export class SourceLinter {
   #eslint = new ESLint({ cwd: PROJECT_ROOT })
@@ -26,6 +30,7 @@ export class SourceLinter {
   // every file in src/, empty when there are none.
   async lint(files) {
     let targets = this.#linted ? [...files].filter((file) => file && isLinted(file)) : [path.join(PROJECT_ROOT, LINTED_DIR)]
+    if (this.#linted && targets.length && !targets.includes(ENTRY)) targets.push(ENTRY)
     this.#linted = true
 
     let present = []

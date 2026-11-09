@@ -3,8 +3,8 @@
 // earlier one (a second `fragment: { … }` would replace the whole up.fragment namespace).
 // This rule reads the `api` object literal of each module in the entry's `apis` array and
 // reports keys that more than one module contributes. It costs no bytes in the bundle.
-// `bin/lint` runs it reliably. The webpack ESLint plugin caches and only lints changed files,
-// so it misses a collision added in a module while the entry stays unchanged.
+// `bin/lint` runs it. The dev watcher only lints changed files, so it lints the entry again
+// whenever a module changes (see tooling/build/lint.mjs).
 import fs from 'node:fs'
 import path from 'node:path'
 import { parse } from '@typescript-eslint/typescript-estree'
