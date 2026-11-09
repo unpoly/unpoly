@@ -1,7 +1,7 @@
 # Selector lookup deep-dive
 
 Read this before you write internal code that looks up an element, and before you change
-[`up.Selector`](../../src/unpoly/fragment/selector.js),
+[`up.Selector`](../../src/unpoly/fragment/selector.ts),
 [`up.FragmentFinder`](../../src/unpoly/fragment/fragment_finder.ts) or the lookup functions in
 [`src/unpoly/fragment.ts`](../../src/unpoly/fragment.ts).
 
