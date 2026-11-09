@@ -9,6 +9,23 @@ import {
   config, defaultSubmitButton, findFields, prepareParamsReadTemp, readFieldDisabled, readFieldName,
   readFieldValue,
 } from '../form.js'
+import type { PlainObject } from '../util.js'
+import type { ElementOrSelector } from '../element.js'
+
+/**
+A single param. Its value is usually a string or a `File`. Other values are stringified
+when the params are encoded.
+*/
+export interface ParamEntry {
+  name: string
+  value: any
+}
+
+/**
+Anything that `new up.Params()` accepts: another `up.Params`, an array of entries, a query string,
+a `FormData` object or a plain object like `{ name: 'value' }`.
+*/
+export type ParamsLike = Params | ParamEntry[] | string | FormData | PlainObject | null | undefined
 
 /*-
 The `up.Params` class offers a consistent API to read and manipulate request parameters
@@ -31,6 +48,7 @@ The following types of parameter representation are supported:
 @parent up.form
 */
 export class Params {
+  declare entries: ParamEntry[]
 
   /*-
   Constructs a new `up.Params` instance.
@@ -43,7 +61,7 @@ export class Params {
   @return {up.Params}
   @stable
   */
-  constructor(raw) {
+  constructor(raw?: ParamsLike) {
     this.clear()
     this.addAll(raw)
   }
@@ -54,11 +72,11 @@ export class Params {
   @function up.Params#clear
   @stable
   */
-  clear() {
+  clear(): void {
     this.entries = []
   }
 
-  [copy.key]() {
+  [copy.key](): Params {
     return new Params(this)
   }
 
@@ -84,7 +102,7 @@ export class Params {
   @return {Object}
   @experimental
   */
-  toObject() {
+  toObject(): PlainObject {
     const obj = {}
     for (let entry of this.entries) {
       const { name, value } = entry
@@ -122,7 +140,7 @@ export class Params {
   @return {Array}
   @experimental
   */
-  toArray() {
+  toArray(): ParamEntry[] {
     return this.entries
   }
 
@@ -144,7 +162,7 @@ export class Params {
   @return {FormData}
   @stable
   */
-  toFormData() {
+  toFormData(): FormData {
     const formData = new FormData()
     for (let entry of this.entries) {
       formData.append(entry.name, entry.value)
@@ -178,7 +196,7 @@ export class Params {
     A query string built from this `up.Params` instance.
   @stable
   */
-  toQuery() {
+  toQuery(): string {
     let simpleEntries = this.withoutBinaryEntries().entries
     let parts = simpleEntries.map(this._arrayEntryToQuery)
     return parts.join('&')
@@ -186,11 +204,11 @@ export class Params {
 
   get [Symbol.toStringTag]() { return 'up.Params' }
 
-  toString() {
+  toString(): string {
     return this.toQuery()
   }
 
-  _arrayEntryToQuery(entry) {
+  _arrayEntryToQuery(entry: ParamEntry): string {
     const { value } = entry
 
     let query = encodeURIComponent(entry.name)
@@ -213,17 +231,17 @@ export class Params {
   @function up.Params#_isBinaryEntry
   @internal
   */
-  _isBinaryEntry({ value }) {
+  _isBinaryEntry({ value }: ParamEntry): boolean {
     return value instanceof Blob
   }
 
-  hasBinaryEntries() {
+  hasBinaryEntries(): boolean {
     return some(this.entries, this._isBinaryEntry)
   }
 
-  withoutBinaryEntries() {
+  withoutBinaryEntries(): Params {
     let simpleEntries = reject(this.entries, this._isBinaryEntry)
-    return new this.constructor(simpleEntries)
+    return new (this.constructor as typeof Params)(simpleEntries)
   }
 
   /*-
@@ -240,7 +258,7 @@ export class Params {
     The built URL.
   @experimental
   */
-  toURL(base) {
+  toURL(base: string): string {
     let parts = [base, this.toQuery()]
     parts = filterList(parts, isPresent)
     const separator = contains(base, '?') ? '&' : '?'
@@ -270,7 +288,7 @@ export class Params {
     The value of the new entry.
   @stable
   */
-  add(name, value) {
+  add(name: string, value: any): void {
     this.entries.push({ name, value })
   }
 
@@ -283,7 +301,7 @@ export class Params {
   @param {Object|Array|string|FormData|up.Params|undefined} params
   @stable
   */
-  addAll(raw) {
+  addAll(raw: ParamsLike): void {
     if (isMissing(raw)) {
       // nothing to do
     } else if (raw instanceof this.constructor) {
@@ -306,7 +324,7 @@ export class Params {
   @function up.Params#keys
   @internal
   */
-  keys() {
+  keys(): string[] {
     return map(this.entries, 'name')
   }
 
@@ -314,11 +332,11 @@ export class Params {
   @function up.Params#values
   @internal
   */
-  values() {
+  values(): any[] {
     return map(this.entries, 'value')
   }
 
-  _addAllFromObject(object) {
+  _addAllFromObject(object: PlainObject): void {
     for (let key in object) {
       const value = object[key]
       // We cannot use up.util.wrapList() because we want to keep null as [null], not []
@@ -329,7 +347,7 @@ export class Params {
     }
   }
 
-  _addAllFromQuery(query) {
+  _addAllFromQuery(query: string): void {
     for (let part of query.split('&')) {
       if (part) {
         let [name, value] = part.split('=')
@@ -348,7 +366,7 @@ export class Params {
     }
   }
 
-  _addAllFromFormData(formData) {
+  _addAllFromFormData(formData: FormData): void {
     for (let value of formData.entries()) {
       this.add(...value)
     }
@@ -368,7 +386,7 @@ export class Params {
     The new value of the entry.
   @stable
   */
-  set(name, value) {
+  set(name: string, value: any): void {
     this.delete(name)
     this.add(name, value)
   }
@@ -380,11 +398,11 @@ export class Params {
   @param {string} name
   @stable
   */
-  delete(name) {
+  delete(name: string): void {
     this.entries = reject(this.entries, this._matchEntryFn(name))
   }
 
-  _matchEntryFn(name) {
+  _matchEntryFn(name: string): (entry: ParamEntry) => boolean {
     return (entry) => entry.name === name
   }
 
@@ -420,7 +438,7 @@ export class Params {
   @param {string} name
   @stable
   */
-  get(name) {
+  get(name: string): any {
     if (this._isArrayKey(name)) {
       return this.getAll(name)
     } else {
@@ -439,7 +457,7 @@ export class Params {
     The value of the param with the given name.
   @experimental
   */
-  getFirst(name) {
+  getFirst(name: string): any {
     const entry = findInList(this.entries, this._matchEntryFn(name))
     return entry?.value
   }
@@ -455,16 +473,16 @@ export class Params {
     An array of all values with the given name.
   @experimental
   */
-  getAll(name) {
+  getAll(name: string): any[] {
     const entries = filterList(this.entries, this._matchEntryFn(name))
     return map(entries, 'value')
   }
 
-  _isArrayKey(key) {
+  _isArrayKey(key: string): boolean {
     return evalOption(config.arrayParam, key)
   }
 
-  [isBlank.key]() {
+  [isBlank.key](): boolean {
     return this.entries.length === 0
   }
 
@@ -543,7 +561,7 @@ export class Params {
     A new `up.Params` instance with values from the given form.
   @stable
   */
-  static fromForm(form, options = {}) {
+  static fromForm(form: ElementOrSelector, options: { submitButton?: ElementOrSelector | false } = {}): Params {
     form = getOne(form)
     let restore = prepareParamsReadTemp(form)
 
@@ -559,7 +577,7 @@ export class Params {
       // - The browser knows the full serialization rules: files, <select multiple>, the submitter
       //   (including an image button's click coordinates), [dirname], fields in a
       //   <fieldset disabled>, newline normalization, and whatever comes next.
-      let params = new this(new FormData(form, submitButton))
+      let params = new this(new FormData(form as HTMLFormElement, submitButton))
 
       // up.form.fields() also finds elements registered through up.form.config.fieldSelectors.
       // The browser doesn't know they are fields.
@@ -568,7 +586,7 @@ export class Params {
       // since a FormData entry cannot be mapped back to the element that contributed it.
       // A control that *is* in form.elements but that the browser refuses to serialize (a reset
       // button, an <output>) is therefore not re-added.
-      let browserControls = new Set(form.elements)
+      let browserControls = new Set((form as HTMLFormElement).elements)
       for (let field of findFields(form)) {
         if (!browserControls.has(field) && !field.closest('fieldset:disabled')) params.addField(field)
       }
@@ -593,7 +611,7 @@ export class Params {
   @return {up.Params}
   @experimental
   */
-  static fromContainer(container, options) {
+  static fromContainer(container: Element, options?: { includeDisabled?: boolean }): Params {
     return this.fromFields(findFields(container), options)
   }
 
@@ -612,7 +630,7 @@ export class Params {
   @return {up.Params}
   @experimental
   */
-  static fromFields(fields, { includeDisabled } = {}) {
+  static fromFields(fields: ElementOrSelector, { includeDisabled }: { includeDisabled?: boolean } = {}): Params {
     const params = new this()
     for (let field of wrapList(fields)) {
       params.addField(field, { includeDisabled })
@@ -637,7 +655,8 @@ export class Params {
     A field that a [preview](/api/up.Preview.prototype.disable) disabled is always added.
   @experimental
   */
-  addField(field, { includeDisabled } = {}) {
+  // TODO(types): A type for fields (input, select, textarea or a form-associated custom element).
+  addField(field: any, { includeDisabled }: { includeDisabled?: boolean } = {}): void {
     field = getOne(field) // unwrap jQuery
 
     // A field is excluded from a form submission if it has no name, or if it is disabled.
@@ -668,7 +687,7 @@ export class Params {
     }
   }
 
-  [isEqual.key](other) {
+  [isEqual.key](other: Params): boolean {
     return (this.constructor === other.constructor) && isEqual(this.entries, other.entries)
   }
 
@@ -693,7 +712,7 @@ export class Params {
     The params from the given URL's query string.
   @stable
   */
-  static fromURL(url) {
+  static fromURL(url: string): Params {
     const params = new (this)()
     const urlParts = parseURL(url)
     let query = urlParts.search
@@ -721,11 +740,11 @@ export class Params {
     The given URL without its query string.
   @experimental
   */
-  static stripURL(url) {
+  static stripURL(url: string): string {
     return normalizeURL(url, { search: false })
   }
 
-  static merge(start, ...objects) {
+  static merge(start: Params, ...objects: ParamsLike[]): Params {
     let merged = copy(start)
 
     for (let object of objects) {
