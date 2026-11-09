@@ -4,10 +4,22 @@ import { on } from '../event.js'
 import { isAlive, onAborted } from '../fragment.js'
 import { config, shouldHandleClick } from '../link.js'
 import { printUserEvent } from '../log.js'
+import type { UpRequest } from '../network/request.js'
+
+/**
+Called when the user shows an intent to follow a link, e.g. by hovering over it.
+It reports the request it makes, so the intent can abort it when the user moves away.
+@internal
+*/
+export type FollowIntentCallback = (options: { onRequestKnown: (request: UpRequest) => void }) => void
 
 export class LinkFollowIntent {
+  declare _link: Element
+  declare _callback: FollowIntentCallback
+  declare _lastRequest: UpRequest | null
+  declare _timer: number | undefined
 
-  constructor(link, callback) {
+  constructor(link: Element, callback: FollowIntentCallback) {
     this._link = link
     this._callback = callback
     this._lastRequest = null
@@ -18,11 +30,11 @@ export class LinkFollowIntent {
     onAborted(this._link, () => this._unscheduleCallback())
   }
 
-  _on(eventType, fn) {
+  _on(eventType: string, fn: (event: Event) => void): void {
     on(this._link, eventType, { passive: true }, fn)
   }
 
-  _scheduleCallback(event) {
+  _scheduleCallback(event: Event): void {
     // Don't preload when the user is holding down CTRL or SHIFT.
     if (!shouldHandleClick(event, this._link)) return
 
@@ -43,7 +55,7 @@ export class LinkFollowIntent {
     }
   }
 
-  _unscheduleCallback() {
+  _unscheduleCallback(): void {
     clearTimeout(this._timer)
 
     // Only abort if the request is still preloading.
@@ -53,11 +65,11 @@ export class LinkFollowIntent {
     this._lastRequest = null
   }
 
-  _parseDelay() {
+  _parseDelay(): number {
     return numberAttr(this._link, 'up-preload-delay') ?? config.preloadDelay
   }
 
-  _runCallback(event) {
+  _runCallback(event: Event): void {
     printUserEvent(event)
 
     // We unschedule the delayed callback then the link is aborted.
