@@ -24,4 +24,7 @@ up.layer.config.foreignOverlaySelectors.push(
   '.dropdown-menu:not(up-popup)'
 )
 
+// TypeScript only knows require() from @types/node, which we don't load. We keep require() for
+// the stylesheet, since an import would change the emitted code.
+declare const require: (path: string) => void
 require('./unpoly-bootstrap4.sass')

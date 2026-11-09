@@ -21,7 +21,7 @@ function unpolyMigrate({ min }) {
 
 function unpolyBootstrap({ version, min }) {
   return merge(
-    file(`./src/unpoly-bootstrap${version}.js`, `unpoly-bootstrap${version}${min ? '.min' : ''}.js`),
+    file(`./src/unpoly-bootstrap${version}.ts`, `unpoly-bootstrap${version}${min ? '.min' : ''}.js`),
     scriptPipeline({ es: 'es6' }),
     // Always transpile to ES5. I don't want multiple versions of this trivial file.
     stylePipeline(`unpoly-bootstrap${version}${min ? '.min' : ''}.css`),
