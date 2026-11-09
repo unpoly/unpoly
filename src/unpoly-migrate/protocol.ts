@@ -2,7 +2,8 @@
 @namespace up.protocol
 */
 
-up.migrate.clearCacheFromXHR = function(xhr) {
+// Core calls this hook (up.protocol).
+up.migrate.clearCacheFromXHR = function(xhr: XMLHttpRequest): string | false | undefined {
   let value = xhr.getResponseHeader('X-Up-Clear-Cache')
 
   if (value) {
@@ -35,7 +36,8 @@ X-Up-Clear-Cache: /notes/*
 // X-Up-Title used to carry a window title as a bare string.
 // We now require it to be a JSON-encoded string so we can escape high-ASCII characters:
 // https://makandracards.com/makandra/536174-http-headers-can-only-transport-us-ascii-characters-safely
-up.migrate.titleFromXHR = function(xhr) {
+// Core calls this hook (up.protocol).
+up.migrate.titleFromXHR = function(xhr: XMLHttpRequest): string | false | undefined {
   let value = xhr.getResponseHeader('X-Up-Title')
 
   if (value) {
