@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { SourceMapConsumer } from 'source-map'
-import { insertStrictDirective, shortenModuleKeys } from '../../build/esbuild.mjs'
+import { insertStrictDirective, shortenModuleKeys, stripStylePaths } from '../../build/esbuild.mjs'
 
 // A bundle as esbuild prints it: one IIFE. The map points line 2 (`up.x = 1`) at line 5 of foo.js.
 const JS = '(() => {\n  up.x = 1;\n})();\n'
@@ -34,4 +34,9 @@ test('shortens the path keys of CommonJS wrappers, keeping every column in place
 test('refuses a CommonJS wrapper it cannot shorten, rather than publishing its path', () => {
   let js = 'var require_foo = __commonJS({ "src/unpoly/foo.js"() {} });\n'
   assert.throws(() => shortenModuleKeys(js), /does not recognize/)
+})
+
+test('removes the path comments esbuild puts above each stylesheet, keeping other comments', () => {
+  let css = '/* src/unpoly/element.sass */\n[hidden] {\n  display: none;\n}\n\n/* src/unpoly/layer.sass */\n/* A comment of ours */\nup-modal {\n  z-index: 2;\n}\n'
+  assert.equal(stripStylePaths(css), '[hidden] {\n  display: none;\n}\n\n/* A comment of ours */\nup-modal {\n  z-index: 2;\n}\n')
 })

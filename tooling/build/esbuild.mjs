@@ -85,6 +85,10 @@ export async function finish(bundle, result, { terser, strip }) {
 
   if (bundle.min) {
     await minifyStyles(files, bundle.target)
+  } else if (strip) {
+    for (let [file, content] of files) {
+      if (file.endsWith('.css')) files.set(file, stripStylePaths(content))
+    }
   }
 
   mkdirSync(DIST, { recursive: true })
@@ -116,6 +120,15 @@ async function minifyStyles(files, target) {
     }
     files.set(cssPath, code)
   }
+}
+
+// esbuild starts each stylesheet it bundles with a comment line naming its path
+// (`/* src/unpoly/layer.sass */`). Like the module keys in the JS (see shortenModuleKeys()), the
+// unminified stylesheets we publish shouldn't carry our paths. (The minifier drops the comments
+// from the others.) Removing lines would shift a source map, but only the production build
+// strips, and it publishes no source map for an unminified bundle.
+export function stripStylePaths(css) {
+  return css.replace(/^\/\* src\/[^\n]*? \*\/\n/gm, '')
 }
 
 // esbuild wraps every file that is still a script, not an ES module, in a function keyed by its path:
