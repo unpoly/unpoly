@@ -72,9 +72,11 @@ up.Change.FromResponse = class FromResponse extends up.Change {
   async _revalidate(renderResult, originalRenderOptions) {
     if (!up.fragment.shouldRevalidate(this._request, this._response, originalRenderOptions)) return
 
-    // This is an explicit target passed as `{ render }` option.
+    // This is an explicit target passed as `{ target }` option.
     // It may be `undefined` if the user has not given an explicit selector and relies on a fallback.
     // If it is given, it may still contain ':before' or ':after'.
+    // It may also be an array or an element. RegExp#test() below coerces it to a string,
+    // which joins an array and never matches an element. That is what we want, so we don't check its type.
     let inputTarget = originalRenderOptions.target
 
     // This is the target that we ended up rendering.
