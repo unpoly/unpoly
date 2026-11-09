@@ -34,6 +34,7 @@ spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
   - [Asserting on promises](#asserting-on-promises)
   - [When async/await isn't enough](#when-asyncawait-isnt-enough)
 - [Matchers](#matchers)
+- [Spying on Unpoly functions](#spying-on-unpoly-functions)
 - [Specs with special conditions](#specs-with-special-conditions)
 - [Trying something by hand](#trying-something-by-hand)
 <!-- /toc -->
