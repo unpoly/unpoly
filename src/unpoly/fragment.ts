@@ -132,7 +132,7 @@ export type FragmentOfflineEvent = Event & {
   request: UpRequest
   renderOptions: RenderOptions
   retry: (retryOptions?: RenderOptions) => Promise<RenderResult>
-  origin: Element
+  origin: Element | undefined
 }
 
 /**

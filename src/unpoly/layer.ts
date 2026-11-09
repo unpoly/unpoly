@@ -52,9 +52,9 @@ The `up:layer:accept`, `up:layer:accepted`, `up:layer:dismiss` and `up:layer:dis
 */
 export type LayerCloseEvent = Event & {
   layer: Layer
-  value: any
-  origin: Element
-  response: UpResponse
+  value?: any
+  origin: Element | undefined
+  response: UpResponse | undefined
 }
 
 /*-

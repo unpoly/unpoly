@@ -18,8 +18,8 @@ The `up:request:load`, `up:request:aborted` and `up:request:offline` events.
 */
 export type RequestEvent = Event & {
   request: UpRequest
-  layer: Layer
-  origin: Element
+  layer: Layer | undefined
+  origin: Element | undefined
 }
 
 /**
