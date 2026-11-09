@@ -11,10 +11,21 @@ import { printToStandard } from '../../../log.js'
 import { hungrySteps } from '../../../radio.js'
 import { getScrollTops, saveFocus, saveScroll } from '../../../viewport.js'
 import { FocusCapsule } from '../../../viewport/focus_capsule.js'
+import type { PlainObject } from '../../../util.js'
+import type { RenderStep } from '../../../fragment.js'
+import type { ResolvedRenderOptions } from '../render_options.js'
+import type { PartialRenderResult } from '../render_result.js'
+import type { ResponseDoc } from '../response_doc.js'
+import type { PreflightProps } from './addition.js'
+import type { HungrySteps } from '../../../radio.js'
 
 export class UpdateLayerPlan extends Addition {
+  declare options: ResolvedRenderOptions
+  declare target: string
+  declare _context: PlainObject | undefined
+  declare _steps: RenderStep[]
 
-  constructor(options) {
+  constructor(options: ResolvedRenderOptions) {
     options = RenderOptions.finalize(options)
     super(options)
     this.layer = options.layer
@@ -25,7 +36,7 @@ export class UpdateLayerPlan extends Addition {
     // this.uid = Math.random()
   }
 
-  getPreflightProps() {
+  getPreflightProps(): PreflightProps {
     // This will throw up.CannotMatch if { target } cannot be found in { layer }.
     this._matchPreflight()
 
@@ -43,22 +54,22 @@ export class UpdateLayerPlan extends Addition {
     }
   }
 
-  _bestPreflightSelector() {
+  _bestPreflightSelector(): string {
     this._matchPreflight()
 
-    const isProbable = (step) => !step.maybe || step.oldElement?.isConnected
+    const isProbable = (step: RenderStep) => !step.maybe || step.oldElement?.isConnected
     let bestSteps = this._steps.filter(isProbable)
     let selectors = map(bestSteps, 'selector')
     return selectors.join(', ') || ':none'
   }
 
-  _getFragments() {
+  _getFragments(): Element[] {
     this._matchPreflight()
 
     return map(this._steps, 'oldElement')
   }
 
-  execute(responseDoc, onApplicable) {
+  execute(responseDoc: ResponseDoc, onApplicable: () => void): RenderResult {
     // (1) For each step, find a `step.newElement` that matches both in this.layer
     //     and in the response document.
     // (2) Match newElements here instead of relying on UpdateSteps to
@@ -94,7 +105,7 @@ export class UpdateLayerPlan extends Addition {
     }
   }
 
-  _renderCurrentLayer(responseDoc) {
+  _renderCurrentLayer(responseDoc: ResponseDoc): PartialRenderResult[] {
     if (this._steps.length) {
       // Don't log this.target since that does not include hungry elements
       printToStandard('up.render()', `Updating "${this._bestPreflightSelector()}" in ${this.layer}`)
@@ -160,7 +171,7 @@ export class UpdateLayerPlan extends Addition {
     return new UpdateSteps({ steps: this._steps, noneOptions: this.options }).execute(responseDoc)
   }
 
-  _renderOtherLayers(responseDoc) {
+  _renderOtherLayers(responseDoc: ResponseDoc): PartialRenderResult[] {
     // We execute steps on other layers after this layer. However, if the render pass ends up
     // closing this layer (e.g. by reaching a close condition or X-Up-Accept-Layer), we execute them
     // before the layer closes (see execute()). This way we can:
@@ -172,26 +183,26 @@ export class UpdateLayerPlan extends Addition {
     return new UpdateSteps({ steps: otherLayerSteps }).execute(responseDoc)
   }
 
-  _matchPreflight() {
+  _matchPreflight(): void {
     this._matchOldElements()
     this._compressNestedSteps()
   }
 
-  _matchPostflight(responseDoc) {
+  _matchPostflight(responseDoc: ResponseDoc): void {
     this._matchOldElements()
     this._addHungryStepsOnCurrentLayer()
     this._compressNestedSteps()
     this._matchNewElements(responseDoc)
   }
 
-  _addHungryStepsOnCurrentLayer() {
+  _addHungryStepsOnCurrentLayer(): void {
     this._steps.push(...this._getHungrySteps().current)
   }
 
-  _matchOldElements() {
+  _matchOldElements(): void {
     this._steps = this._steps.filter((step) => {
 
-      const finder = new FragmentFinder(pick(step, ['selector', 'origin', 'layer', 'match', 'preferOldElements']))
+      const finder = new FragmentFinder(pick(step, ['selector', 'origin', 'layer', 'match', 'preferOldElements'] as const))
 
       // Try to find fragments matching step.selector within step.layer.
       // Note that step.oldElement might already have been set by up.radio.hungrySteps().
@@ -206,20 +217,20 @@ export class UpdateLayerPlan extends Addition {
     })
   }
 
-  _matchNewElements(responseDoc) {
+  _matchNewElements(responseDoc: ResponseDoc): void {
     this._steps = responseDoc.selectSteps(this._steps)
   }
 
-  _compressNestedSteps() {
+  _compressNestedSteps(): void {
     this._steps = compressNestedSteps(this._steps)
   }
 
-  _getHungrySteps() {
+  _getHungrySteps(): HungrySteps {
     // Find all [up-hungry] elements matching our layer and fragments.
     return hungrySteps(this._getEffectiveRenderOptions())
   }
 
-  _coordinateSteps() {
+  _coordinateSteps(): void {
     // Store the focused element's selector, scroll position and selection range
     // in an up.FocusCapsule for later restoration.
     let focusCapsule = FocusCapsule.preserve(this.layer)
@@ -246,22 +257,22 @@ export class UpdateLayerPlan extends Addition {
     })
   }
 
-  _hasHistory() {
+  _hasHistory(): boolean {
     return evalAutoOption(this.options.history, this._hasAutoHistory.bind(this))
   }
 
-  _hasAutoHistory() {
+  _hasAutoHistory(): boolean {
     // We update the history with { history: 'auto' } when at least
     // one targeted fragment has auto-history.
     const oldFragments = map(this._steps, 'oldElement')
     return hasAutoHistory(oldFragments, this.layer)
   }
 
-  _getNewLocation() {
+  _getNewLocation(): string | boolean | undefined {
     return this._getEffectiveHistoryOptions().location
   }
 
-  _getEffectiveRenderOptions() {
+  _getEffectiveRenderOptions(): ResolvedRenderOptions {
     return {
       ...this.options,
       layer: this.layer,
@@ -269,7 +280,7 @@ export class UpdateLayerPlan extends Addition {
     }
   }
 
-  _getEffectiveHistoryOptions() {
+  _getEffectiveHistoryOptions(): PlainObject {
     if (this._hasHistory()) {
       return historyOptions(this.options)
     } else {

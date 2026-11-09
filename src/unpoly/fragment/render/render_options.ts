@@ -211,6 +211,8 @@ Render options once the render pass has found the layer to render in (in UpdateL
 */
 export interface ResolvedRenderOptions extends RenderOptions {
   layer?: Layer
+  // A selector string, see up.fragment.toTarget().
+  target?: string
 }
 
 // Sometimes we need to use given render options, but disable preview effects.
@@ -418,7 +420,8 @@ function rememberOriginLayer({ origin, originLayer }: RenderOptions): RenderOpti
   }
 }
 
-function finalize(preprocessedOptions: RenderOptions, lateDefaults?: RenderOptions): RenderOptions {
+function finalize<T extends RenderOptions>(preprocessedOptions: T, lateDefaults?: RenderOptions): T
+function finalize(preprocessedOptions, lateDefaults) {
   return merge(
     preprocessedOptions.defaults,
     lateDefaults,

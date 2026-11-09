@@ -36,6 +36,7 @@ import type { ElementOrSelector } from './element.js'
 import type { UpRequest } from './network/request.js'
 import type { UpResponse } from './network/response.js'
 import type { RenderOptions, ResolvedRenderOptions } from './fragment/render/render_options.js'
+import type { FocusCapsule } from './viewport/focus_capsule.js'
 
 /**
 A step of a render pass: which old element to update with which new element, and how.
@@ -57,6 +58,9 @@ export interface RenderStep extends ResolvedRenderOptions {
   parentElement?: ParentNode
   afterRemove?: () => void
   descendantKeepPlans?: KeepPlan[]
+  // Set by UpdateLayer, for { focus: 'keep' } and { scroll: 'keep' }.
+  focusCapsule?: FocusCapsule
+  oldScrollTops?: Record<string, number>
   descendantsOnly?: boolean
 }
 

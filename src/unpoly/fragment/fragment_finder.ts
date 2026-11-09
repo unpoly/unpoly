@@ -36,27 +36,28 @@ export class FragmentFinder {
     this._preferOldElements = options.preferOldElements
   }
 
-  find(): Element | undefined {
+  // Unpoly works with HTML elements, see up.fragment.get().
+  find(): HTMLElement | undefined {
     return this._findInPreferredElements() || this._findInRegion() || this._findFirst()
   }
 
-  _findInPreferredElements(): Element | undefined {
+  _findInPreferredElements(): HTMLElement | undefined {
     if (this._preferOldElements) {
-      return this._preferOldElements.find((preferOldElement) => this._document.contains(preferOldElement) && matches(preferOldElement, this._selector))
+      return this._preferOldElements.find((preferOldElement) => this._document.contains(preferOldElement) && matches(preferOldElement, this._selector)) as HTMLElement
     }
   }
 
-  _findInRegion(): Element | undefined {
+  _findInRegion(): HTMLElement | undefined {
     if (this._match === 'region' && !containsMainPseudo(this._selector) && this._origin?.isConnected) {
       return this._findClosest() || this._findDescendantInRegion()
     }
   }
 
-  _findClosest(): Element | undefined {
+  _findClosest(): HTMLElement | undefined {
     return closest(this._origin, this._selector, this._options)
   }
 
-  _findDescendantInRegion(): Element | undefined {
+  _findDescendantInRegion(): HTMLElement | undefined {
     let simpleSelectors = splitTarget(this._selector)
 
     return findResult(simpleSelectors, (simpleSelector) => {
@@ -70,7 +71,7 @@ export class FragmentFinder {
     })
   }
 
-  _findFirst(): Element | undefined {
+  _findFirst(): HTMLElement | undefined {
     return getFirstDescendant(this._document, this._selector, this._options)
   }
 }

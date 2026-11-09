@@ -9,6 +9,24 @@ import type { UpResponse } from '../../../network/response.js'
 import type { PlainObject } from '../../../util.js'
 
 /**
+What a change will update, known before its request is sent. ChangeFromURL makes them request options,
+RenderJob passes them to the `{ abort }` option.
+@internal
+*/
+export interface PreflightProps {
+  // The layer to update, or 'new' when opening an overlay.
+  layer: Layer | 'new'
+  // The layer whose fragments the request belongs to, for aborting.
+  bindLayer: Layer
+  mode: string
+  context: PlainObject
+  origin: Element | undefined
+  target: string
+  fragments: Element[]
+  bindFragments: Element[]
+}
+
+/**
 The values that `Addition#setReloadAttrs()` sets as `[up-source]`, `[up-time]` and `[up-etag]`.
 @internal
 */
