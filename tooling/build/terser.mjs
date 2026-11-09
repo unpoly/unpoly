@@ -18,6 +18,10 @@ import os from 'node:os'
 //   reads the property to force a layout.
 // - `booleans_as_integers` (−0.1 %) turns `true` into `1`, and user code may compare with `=== true`.
 // - `toplevel` and `mangle.toplevel` save nothing, since everything is inside esbuild's IIFE.
+//
+// Like the minifiers in apps, we let Terser drop class names. `keep_classnames` would cost 23 bytes
+// of gzip in unpoly.min.js and 88 in unpoly.es6.min.js, and it could only keep the names of classes
+// that esbuild hasn't made anonymous, often renamed (`class Error2`, `class _Params`).
 export function minifyOptions({ ecma }) {
   return {
     ecma,
@@ -25,11 +29,8 @@ export function minifyOptions({ ecma }) {
       ecma,
       // A third pass saves a byte. More passes save nothing.
       passes: 3,
-      // Class names show in `up.Request.name` and in the browser console.
-      keep_classnames: true,
     },
     mangle: {
-      keep_classnames: true,
       // Our convention for private members: `_foo` and `#foo`.
       properties: {
         regex: /^[_#]/,
