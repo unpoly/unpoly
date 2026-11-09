@@ -17,7 +17,7 @@ const LINTED_EXTENSIONS = ['.js', '.ts']
 // The entry's no-api-collisions rule (tooling/eslint/no_api_collisions.mjs) reads the `api` of
 // every module, so a change to any of them can make the entry fail. ESLint can't know that, so
 // we lint the entry again with every change to src/.
-const ENTRY = 'src/unpoly.js'
+const ENTRY = 'src/unpoly.ts'
 
 export class SourceLinter {
   #root
