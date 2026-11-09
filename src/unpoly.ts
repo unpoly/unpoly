@@ -125,10 +125,11 @@ for (let api of apis) {
   Object.defineProperties(up, Object.getOwnPropertyDescriptors(api))
 }
 
-// The browser console labels an object after its class, like `Uncaught up.Aborted: …` or
-// `up.Request {…}`. Minifiers rename our classes, in our .min.js bundles and in apps that minify
-// unpoly.js themselves, so that would say `Uncaught m: …`. Apps filter console errors in their tests
-// by our names, so we give every class on window.up its public name:
+// Chrome reports an uncaught error by its class, like `Uncaught up.Aborted: …` in chromedriver's
+// browser log, which apps filter in their tests. It also labels logged objects by their class, like
+// `up.Request {…}`. (The error's own text, which DevTools prints, uses its `name` instead.)
+// Minifiers rename our classes, in our .min.js bundles and in apps that minify unpoly.js
+// themselves, so the log would say `Uncaught m: …`. So we give every class on window.up its public name:
 // - Chrome labels an instance of a base class with its class's `name` property.
 // - For an instance of a subclass, Chrome walks up the prototype chain and takes the first own
 //   [Symbol.toStringTag] *data* property (it skips a getter) or the original name of an own

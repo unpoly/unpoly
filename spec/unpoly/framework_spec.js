@@ -16,8 +16,8 @@ describe('up.framework', function() {
 
     describe('classes on window.up', function() {
 
-      // Minifiers rename our classes. Chrome's console would then say `Uncaught m: …` instead of
-      // `Uncaught up.Aborted: …`, unless we set these properties (see src/unpoly.ts).
+      // Minifiers rename our classes. chromedriver's browser log would then say `Uncaught m: …`
+      // instead of `Uncaught up.Aborted: …`, unless we set these properties (see src/unpoly.ts).
       // tooling/test/build/class_names.test.mjs checks what Chrome shows.
 
       it("sets each class's name and [Symbol.toStringTag] to its public name", function() {
