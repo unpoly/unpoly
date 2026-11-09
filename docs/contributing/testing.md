@@ -4,7 +4,7 @@
 every change are what let you alter code you don't fully understand and find out immediately whether you broke it.
 Treat a green suite as permission to be bold, and a red one as the cheapest possible bug report.
 
-"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each namespace file `foo.js` has a
+"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each namespace file `foo.ts` has a
 spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
 
 <!-- toc -->

@@ -70,7 +70,7 @@ duplication is intended (see [Reusing text](#reusing-text)).
 
 Both are parsed from files in this repository. The difference is the container:
 
-- In a `.js` file, each `/*- … */` comment is one documentation block. A file can hold
+- In a `.ts` file, each `/*- … */` comment is one documentation block. A file can hold
   many blocks.
 - In a `.md` file, the **entire file** is one documentation block.
 

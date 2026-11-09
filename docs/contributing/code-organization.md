@@ -24,11 +24,11 @@ This repository is organized like this:
 
 ```
 src/                      # Webpack entry points for Unpoly's main and optional bundles
-  unpoly.js               # ... Entry point for main Unpoly bundle (JS, CSS)
+  unpoly.ts               # ... Entry point for main Unpoly bundle (JS, CSS)
   unpoly-migrate.ts       # ... Entry point for optional bundle that polyfills deprecated features
   ...                     # ... Other entry points for optional bundles
 
-  unpoly/                 # Source code (TS, JS, CSS) for Unpoly's namespaces
+  unpoly/                 # Source code (TS, CSS) for Unpoly's namespaces
     form.ts               # ... Code for up.form namespace
     form/                 # ... Classes owned by up.form
       params.ts           # ...... Code for up.Params class
@@ -231,7 +231,7 @@ like a browser global is a named class expression bound to an `Up` name
 (`export const UpRequest = class Request …`), so it keeps its runtime name without
 shadowing the global.
 
-The entry file `src/unpoly.js` ties the modules together. It imports every module, copies
+The entry file `src/unpoly.ts` ties the modules together. It imports every module, copies
 each `api` onto `window.up` (the `apis` list), then calls each `install()` (the `installs`
 list, which is the explicit install order). Its comments also explain the rules for import
 cycles between modules. Two modules must not contribute the same key to `window.up`, or the
@@ -252,19 +252,19 @@ Where they need one, they call it through `window.up` at call time.
 Files directly in `src/` are Webpack entry points, one per bundle we publish. Everything
 in `src/unpoly/` is only ever reached through one of them.
 
-- `src/unpoly.js` is the main bundle. It is built twice: `unpoly.js` for current
+- `src/unpoly.ts` is the main bundle. It is built twice: `unpoly.js` for current
   browsers, and `unpoly.es6.js` for
   [older ones](https://unpoly.com/install/legacy-browsers).
 - `src/unpoly-migrate.ts` polyfills renamed and removed APIs, so an app can
   [upgrade](https://unpoly.com/changes/upgrading) without changing all its call sites at
   once. See [Compatibility](compatibility.md#breaking-changes) for how to write one.
-- `src/unpoly-bootstrap{3,4,5}.js` adapt Unpoly to
+- `src/unpoly-bootstrap{3,4,5}.ts` adapt Unpoly to
   [Bootstrap](https://unpoly.com/install/bootstrap).
 
 Read one of the Bootstrap entries before you add anything to `src/`. They contain no
 behavior at all — only configuration:
 
-```js
+```ts
 up.status.config.currentClasses.push('active')
 up.viewport.config.fixedTopSelectors.push('.navbar.fixed-top')
 ```

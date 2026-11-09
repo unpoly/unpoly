@@ -6,10 +6,9 @@ most are not.
 
 ## Moving to TypeScript
 
-We are migrating Unpoly to TypeScript, one module at a time, leaf modules first. All namespaces
-are TypeScript, and so are the render pipeline (`fragment/render/`), the layer classes and
-`unpoly-migrate`. Only the entry files `unpoly.js` and `unpoly-bootstrap{3,4,5}.js` are still plain
-JavaScript.
+We migrated Unpoly to TypeScript one module at a time, leaf modules first. All of `src/` is
+TypeScript now, except the ERB template `namespace.js.erb`. The types are still loose, and many
+are provisional.
 
 The build runs every source file through TypeScript only to transpile it (ts-loader with
 `transpileOnly`), and never checks types. The only type check is `bin/typecheck`, which runs
