@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { SourceLinter } from '../../build/lint.mjs'
@@ -55,6 +55,34 @@ test('warnings are kept apart from errors, for the last call only', async (t) =>
   write('src/unpoly/other.js', 'let c = 1\n')
   await linter.lint([at('src/unpoly/other.js')])
   assert.deepEqual(linter.warnings, [])
+})
+
+test('a failed Oxlint run fails its round only, and the next round lints the files it missed', async (t) => {
+  // The bug this guards against: a broken config failed every later round, until the watcher
+  // restarted, and the changed files' errors were lost.
+  let { root, at, write } = project(t, {
+    'src/unpoly.ts': EMPTY_ENTRY,
+    'src/unpoly/a.js': 'debugger\n',
+    'src/unpoly/b.js': 'let b = 1\n',
+    'src/unpoly/c.js': 'let c = 1\n',
+  })
+  let files = (errors) => errors.map((error) => error.split('\n')[0])
+  let linter = new SourceLinter({ root })
+  assert.deepEqual(files(await linter.lint([null])), ['src/unpoly/a.js'])
+
+  let config = readFileSync(at('.oxlintrc.native.json'), 'utf8')
+  write('.oxlintrc.native.json', '{ broken')
+  write('src/unpoly/b.js', 'debugger\n')
+  let errors = await linter.lint([at('src/unpoly/b.js')])
+  assert.deepEqual(files(errors), ['src/unpoly/a.js', '.oxlintrc.native.json'], 'the errors from before stand')
+  assert.match(errors[1], /error {2}Oxlint failed: /)
+
+  write('.oxlintrc.native.json', config)
+  write('src/unpoly/c.js', 'let c = 2\n')
+  assert.deepEqual(files(await linter.lint([at('src/unpoly/c.js')])), ['src/unpoly/a.js', 'src/unpoly/b.js'])
+
+  write('src/unpoly/b.js', 'let b = 1\n')
+  assert.deepEqual(files(await linter.lint([at('src/unpoly/b.js')])), ['src/unpoly/a.js'])
 })
 
 test('a change to any module checks the entry for api collisions again', async (t) => {

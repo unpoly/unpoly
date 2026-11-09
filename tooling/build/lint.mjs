@@ -33,6 +33,10 @@ export class SourceLinter {
   // Absolute path → Oxlint's errors in that file, for every file that has errors.
   #failing = new Map()
   #collisions = []
+  // What Oxlint said when this round's run failed as a whole (a broken config, for example), and
+  // the files it couldn't lint, which the next round lints again.
+  #oxlintFailure = null
+  #unlinted = []
   #linted = false
   // The formatted warnings of the files the last call linted, empty when there are none. They
   // don't fail a build, so they only go to the watcher's log.
@@ -49,25 +53,31 @@ export class SourceLinter {
   // couldn't attribute), or all of src/ on the first call. Resolves with the formatted errors of
   // every file in src/, empty when there are none.
   async lint(files) {
-    let targets
-    if (this.#linted) {
-      targets = [...files].filter((file) => file && this.#isLinted(file))
-      for (let file of targets) this.#failing.delete(file)
-      // A deleted file has no errors left.
-      targets = targets.filter((file) => existsSync(file))
-    } else {
-      this.#linted = true
-      targets = [path.join(this.#root, LINTED_DIR)]
-    }
+    let targets = this.#linted ? [...files].filter((file) => file && this.#isLinted(file)) : [path.join(this.#root, LINTED_DIR)]
+    this.#linted = true
+    targets = [...new Set([...this.#unlinted, ...targets])]
+    // A deleted file has no errors left.
+    for (let file of targets) if (!existsSync(file)) this.#failing.delete(file)
+    targets = targets.filter((file) => existsSync(file))
 
     // The entry's collisions depend on every module's api, so we check them with every round.
     // That only parses the modules that changed.
     this.#checkApiCollisions()
+    let { diagnostics = [], failure = null } = targets.length ? await this.#oxlint(targets) : {}
+    // Until a later round lints the files again, their errors from before stand.
+    this.#oxlintFailure = failure
+    this.#unlinted = failure ? targets : []
     let warned = new Map()
-    for (let diagnostic of targets.length ? await this.#oxlint(targets) : []) {
-      let file = path.resolve(this.#root, diagnostic.filename)
-      let byFile = diagnostic.severity === 'error' ? this.#failing : warned
-      byFile.set(file, [...(byFile.get(file) ?? []), diagnostic])
+    if (!failure) {
+      // A target is a file, or src/ itself in the first round.
+      for (let file of this.#failing.keys()) {
+        if (targets.some((target) => file === target || file.startsWith(target + path.sep))) this.#failing.delete(file)
+      }
+      for (let diagnostic of diagnostics) {
+        let file = path.resolve(this.#root, diagnostic.filename)
+        let byFile = diagnostic.severity === 'error' ? this.#failing : warned
+        byFile.set(file, [...(byFile.get(file) ?? []), diagnostic])
+      }
     }
     this.warnings = this.#format(warned)
     return this.format()
@@ -76,6 +86,7 @@ export class SourceLinter {
   // The formatted errors of every file in src/, empty when there are none.
   format() {
     let blocks = this.#format(this.#failing)
+    if (this.#oxlintFailure) blocks.push(formatFile(this.#config, [{ severity: 'error', message: `Oxlint failed: ${this.#oxlintFailure}` }]))
     if (this.#collisions.length) blocks.push(formatFile(ENTRY, this.#collisions))
     return blocks
   }
@@ -90,8 +101,8 @@ export class SourceLinter {
     this.#collisions = this.#apiCollisions.check().map((problem) => ({ ...problem, severity: 'error', code: 'unpoly(api-collisions)' }))
   }
 
-  // Resolves with Oxlint's errors and warnings in `targets`, as { filename, line, column,
-  // message, code, severity }.
+  // Resolves with { diagnostics }, Oxlint's errors and warnings in `targets` as { filename, line,
+  // column, message, code, severity }, or with { failure } when Oxlint failed as a whole.
   #oxlint(targets) {
     let args = ['-c', this.#config, '-f', 'json', '--no-error-on-unmatched-pattern', ...targets]
     return new Promise((resolve) => {
@@ -106,17 +117,17 @@ export class SourceLinter {
           report = JSON.parse(stdout)
         } catch {
           // A broken config, for example. Fail the build with what Oxlint said.
-          resolve([{ filename: this.#config, severity: 'error', message: `Oxlint failed: ${(stderr || stdout).trim()}` }])
+          resolve({ failure: (stderr || stdout).trim() })
           return
         }
-        resolve(report.diagnostics.map((diagnostic) => ({
+        resolve({ diagnostics: report.diagnostics.map((diagnostic) => ({
           filename: diagnostic.filename,
           severity: diagnostic.severity === 'error' ? 'error' : 'warning',
           line: diagnostic.labels?.[0]?.span.line,
           column: diagnostic.labels?.[0]?.span.column,
           message: diagnostic.message,
           code: diagnostic.code,
-        })))
+        })) })
       })
     })
   }
