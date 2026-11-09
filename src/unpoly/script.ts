@@ -21,6 +21,7 @@ import type { ConfigWith } from './util/config.js'
 import type { Cleaner, List, PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
 import type { CSPInfo } from './script/csp/csp_info.js'
+import type { PolicyString } from './script/csp/script_gate.js'
 import type { Compiler, HelloFragmentOptions } from './script/hello_fragment.js'
 
 /**
@@ -63,6 +64,25 @@ When your own code inserts HTML into the page, call `up.hello()` on the new elem
 @namespace up.script
 */
 
+
+/**
+The settings in `up.script.config`, described in its doc comment.
+*/
+export interface ScriptConfig {
+  assetSelectors: string[]
+  noAssetSelectors: string[]
+  scriptSelectors: string[]
+  noScriptSelectors: string[]
+  evalCallbackPolicy: PolicyString
+  scriptElementPolicy: PolicyString
+  cspNonce: string | (() => string)
+  cspWarnings: boolean
+  /**
+  Callback attributes like `[up-on-loaded]`, which may carry a CSP nonce.
+  @internal
+  */
+  nonceableAttributes: string[]
+}
 
 /*-
 Configures defaults for script handling and asset tracking.
@@ -127,7 +147,7 @@ Configures defaults for script handling and asset tracking.
 @property up.script.config
 @stable
 */
-export const config = new Config<PlainObject>('up.script.config', () => ({
+export const config = new Config('up.script.config', (): ScriptConfig => ({
   cspNonce() { return metaContent('csp-nonce') },
   cspWarnings: true,
   scriptElementPolicy: 'auto',
@@ -164,7 +184,7 @@ export const config = new Config<PlainObject>('up.script.config', () => ({
   noScriptSelectors: [
     'script[type="application/ld+json"]'
   ]
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<ScriptConfig>
 
 const SYSTEM_MACRO_PRIORITIES = {
   '[up-back]': -100,        // sets [up-href] to previous URL
