@@ -7,14 +7,47 @@ import { abort, reload } from '../../../fragment.js'
 import { Change } from './change.js'
 import { layerStack } from '../../../layer.js'
 import { doFocus } from '../../../viewport.js'
+import type { LayerReference } from '../render_options.js'
+import type { Layer } from '../../../layer/base.js'
+import type { Overlay } from '../../../layer/modes/overlay.js'
+import type { UpResponse } from '../../../network/response.js'
 
-export class CloseLayer extends Change {
+/**
+Options for accepting or dismissing an overlay.
+@internal
+*/
+export interface CloseLayerOptions {
+  verb: 'accept' | 'dismiss'
+  layer: LayerReference
+  value?: any
+  origin?: Element
+  // Whether a listener may prevent the overlay from closing.
+  preventable?: boolean
+  response?: UpResponse
+  // Whether to restore the parent layer's history.
+  history?: boolean
+  confirm?: string | false
+  // Other options go to Overlay#destroyElements(), e.g. { animation }.
+  [key: string]: any
+}
 
-  constructor(options) {
+// An event for the closing overlay, e.g. up:layer:accepted.
+type CloseEvent = Event & { value?: any }
+
+export class CloseLayer extends Change<CloseLayerOptions> {
+  declare _verb: 'accept' | 'dismiss'
+  declare layer: Overlay
+  declare _origin: Element | undefined
+  declare _value: any
+  declare _preventable: boolean
+  declare _response: UpResponse | undefined
+  declare _history: boolean
+
+  constructor(options: CloseLayerOptions) {
     super(options)
 
     this._verb = options.verb
-    this.layer = layerStack.get(options)
+    this.layer = layerStack.get(options) as Overlay
     this._origin = options.origin
     this._value = options.value
     this._preventable = options.preventable ?? true
@@ -22,7 +55,7 @@ export class CloseLayer extends Change {
     this._history = options.history ?? true
   }
 
-  execute() {
+  execute(): void {
     // Closing a layer is a sync function.
 
     // Abort when this layer is already closing, or when it has finished closing.
@@ -81,7 +114,7 @@ export class CloseLayer extends Change {
     this._reloadParent(parent)
   }
 
-  _reloadParent(parent) {
+  _reloadParent(parent: Layer): void {
     let selector = this.layer[`on${upperCaseFirst(this._verb)}edReload`]
     // When the parent layer is closing too, e.g. when it peels this overlay, there is nothing to reload.
     if (selector && parent.isAlive()) {
@@ -93,9 +126,9 @@ export class CloseLayer extends Change {
     }
   }
 
-  _emitCloseEvent() {
+  _emitCloseEvent(): CloseEvent {
     // The close event is emitted on the layer that is about to close.
-    let event = this.layer.emit(
+    let event: CloseEvent = this.layer.emit(
       this._buildEvent(`up:layer:${this._verb}`), {
       callback: this.layer.callback(`on${upperCaseFirst(this._verb)}`),
       log: [`Will ${this._verb} ${this.layer} with value %o`, this._value]
@@ -107,12 +140,12 @@ export class CloseLayer extends Change {
     return event
   }
 
-  _emitClosingEvent() {
+  _emitClosingEvent(): void {
     let event = this._buildEvent(`up:layer:${this._verb}ing`)
     this.layer.emit(event, { log: false })
   }
 
-  _emitClosedEvent(formerParent) {
+  _emitClosedEvent(formerParent: Layer): CloseEvent {
     const verbPast = `${this._verb}ed`
     const verbPastUpperCaseFirst = upperCaseFirst(verbPast)
 
@@ -134,7 +167,7 @@ export class CloseLayer extends Change {
     )
   }
 
-  _buildEvent(name) {
+  _buildEvent(name: string): CloseEvent {
     return build(name, {
       layer: this.layer,
       value: this._value,
@@ -143,7 +176,7 @@ export class CloseLayer extends Change {
     })
   }
 
-  _handleFocus(formerParent) {
+  _handleFocus(formerParent: Layer): void {
     let hadFocus = this.layer.hasFocus()
 
     // A11Y: Stop trapping focus in the layer that's about to close
