@@ -22,6 +22,65 @@ import {
 } from '../protocol.js'
 import { runPreviews } from '../status.js'
 import { UpURLPattern } from '../util/url_pattern.js'
+import type { Deferred, PlainObject, ValueOrFunction } from '../util.js'
+import type { ParamsLike } from '../form/params.js'
+import type { Layer } from '../layer/base.js'
+
+/**
+The state of an `up.Request` in its lifecycle.
+*/
+// The request cache sets 'tracking' while a request waits for the response of an earlier, equivalent request.
+export type RequestState = 'new' | 'loading' | 'tracking' | 'loaded' | 'aborted' | 'offline'
+
+/**
+Options for constructing an `up.Request`. See `up.request()` for most of them.
+@internal
+*/
+export interface RequestOptions {
+  url: string
+  method?: string
+  hash?: string
+  params?: ParamsLike
+  target?: string
+  failTarget?: string
+  headers?: Record<string, string>
+  timeout?: number | null
+  background?: boolean
+  cache?: boolean | 'auto'
+  expireCache?: any
+  evictCache?: any
+  // A layer, or a name like 'root' or 'new'.
+  layer?: Layer | string
+  mode?: string
+  context?: PlainObject
+  failLayer?: Layer | string
+  failMode?: string
+  failContext?: PlainObject
+  origin?: Element
+  originLayer?: Layer
+  originMode?: string
+  builtAt?: Date
+  wrapMethod?: boolean | null
+  contentType?: string
+  payload?: any
+  onLoading?: () => any
+  onSettle?: (responseOrError: UpResponse | Error) => any
+  fail?: ValueOrFunction<boolean>
+  abortable?: boolean | null
+  lateDelay?: number | false
+  previews?: any[]
+  // Skip looking up layers, e.g. for a request that is only used as a cache key.
+  basic?: boolean
+  bindLayer?: Layer
+  fragments?: Element[]
+  bindFragments?: Element[]
+}
+
+/**
+What `up.Request.tester()` accepts: a request, a URL pattern, a function or a boolean.
+@internal
+*/
+export type RequestCondition = UpRequest | string | ((request: UpRequest) => boolean) | boolean
 
 /*-
 A normalized description of an [HTTP request](/api/up.request).
@@ -43,6 +102,53 @@ console.log(response.text)
 // A class expression, so the class is still named `Request` at runtime, while the binding
 // doesn't shadow the browser's `Request` here or in importers.
 export const UpRequest = class Request {
+  declare state: RequestState
+  declare expired: boolean
+  declare method: string
+  declare url: string
+  declare hash: string | undefined
+  declare params: Params
+  declare target: string | undefined
+  declare failTarget: string | undefined
+  declare headers: Record<string, string>
+  declare timeout: number | null
+  declare background: boolean | undefined
+  declare cache: boolean | 'auto' | undefined
+  declare expireCache: any
+  declare evictCache: any
+  // While the request is new, these may be a layer name like 'root' or 'new'.
+  declare layer: any
+  declare mode: string | undefined
+  declare context: PlainObject | undefined
+  declare failLayer: any
+  declare failMode: string | undefined
+  declare failContext: PlainObject | undefined
+  declare origin: Element | undefined
+  declare originLayer: Layer | undefined
+  declare originMode: string | undefined
+  declare builtAt: Date
+  declare wrapMethod: boolean | null
+  declare contentType: string | undefined
+  declare payload: any
+  declare onLoading: (() => any) | undefined
+  declare onSettle: ((responseOrError: UpResponse | Error) => any) | undefined
+  declare fail: ValueOrFunction<boolean> | undefined
+  declare abortable: boolean | null
+  declare lateDelay: number | false | undefined
+  declare previews: any[]
+  declare bindLayer: Layer | undefined
+  declare response: UpResponse | undefined
+  declare fromCache: boolean | undefined
+  declare _fragments: Element[] | undefined
+  declare _bindFragments: Element[] | undefined
+  declare _deferred: Deferred<UpResponse>
+  declare _xhr: XMLHttpRequest | undefined
+  declare _revertPreviews: (() => void) | undefined
+
+  // A request is also a promise for its response. The static block at the end delegates these.
+  declare then: Promise<UpResponse>['then']
+  declare catch: Promise<UpResponse>['catch']
+  declare finally: Promise<UpResponse>['finally']
 
   /*-
   The HTTP method for the request.
@@ -324,7 +430,7 @@ export const UpRequest = class Request {
   @param {number} [attrs.timeout]
   @internal
   */
-  constructor(options) {
+  constructor(options: RequestOptions) {
     // Like a default parameter, a default only replaces an undefined option.
     // A null option stays null, e.g. { timeout: null } sends the request without a timeout.
     const {
@@ -419,7 +525,7 @@ export const UpRequest = class Request {
     this._setAutoHeaders()
   }
 
-  get effectiveLateTime() {
+  get effectiveLateTime(): number | false {
     if (this.background) {
       return false
     } else {
@@ -427,7 +533,7 @@ export const UpRequest = class Request {
     }
   }
 
-  isTimed() {
+  isTimed(): boolean {
     return isNumber(this.effectiveLateTime)
   }
 
@@ -438,7 +544,7 @@ export const UpRequest = class Request {
   @param {XMLHttpRequest} xhr
   @stable
   */
-  get xhr() {
+  get xhr(): XMLHttpRequest {
     // Initialize the xhr request on first access,
     // so listeners on up:request:send events have a chance to access the xhr.
     return this._xhr ??= new XMLHttpRequest()
@@ -456,7 +562,7 @@ export const UpRequest = class Request {
     A list of targeted fragments.
   @stable
   */
-  get fragments() {
+  get fragments(): Element[] {
     // This property is required for `up.fragment.abort()` to select requests within
     // the subtree that we're canceling.
     //
@@ -477,7 +583,7 @@ export const UpRequest = class Request {
     return compact(matches)
   }
 
-  get bindFragments() {
+  get bindFragments(): Element[] {
     return this._bindFragments || this.fragments
   }
 
@@ -496,7 +602,7 @@ export const UpRequest = class Request {
     The first targeted fragment.
   @stable
   */
-  get fragment() {
+  get fragment(): Element | undefined {
     return this.fragments?.[0]
   }
 
@@ -566,19 +672,19 @@ export const UpRequest = class Request {
     Whether the request uses a safe HTTP method.
   @experimental
   */
-  isSafe() {
+  isSafe(): boolean {
     return isSafeMethod(this.method)
   }
 
-  allowsPayload() {
+  allowsPayload(): boolean {
     return methodAllowsPayload(this.method)
   }
 
-  will302RedirectWithGET() {
+  will302RedirectWithGET(): boolean {
     return this.isSafe() || (this.method === 'POST')
   }
 
-  willCache() {
+  willCache(): boolean {
     return networkConfig.cacheEnabled && evalAutoOption(this.cache, networkConfig.autoCache, this)
   }
 
@@ -626,7 +732,7 @@ export const UpRequest = class Request {
     }
   }
 
-  runPreviews(renderOptions) {
+  runPreviews(renderOptions: PlainObject): void {
     if (!this.ended && !this.fromCache) {
       this._revertPreviews = runPreviews(this, renderOptions)
     }
@@ -726,7 +832,7 @@ export const UpRequest = class Request {
     The reason will be set as the error's message.
   @stable
   */
-  abort({ reason } = {}) {
+  abort({ reason }: { reason?: string | Error } = {}): void {
     // _setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     // will call _setAbortedState() a second time, without a message.
     if (this._setAbortedState(reason) && this._xhr) {
@@ -734,7 +840,7 @@ export const UpRequest = class Request {
     }
   }
 
-  _setAbortedState(reason = 'Unknown reason') {
+  _setAbortedState(reason: string | Error = 'Unknown reason') {
     if (this.ended) return
 
     let log = ["Aborted request to %s: %s", this, reason]
@@ -746,7 +852,7 @@ export const UpRequest = class Request {
     return true
   }
 
-  _setOfflineState(reason = 'Unknown reason') {
+  _setOfflineState(reason: string = 'Unknown reason') {
     if (this.ended) return
 
     let log = ['Cannot load request from %s: %s', this, reason]
@@ -755,7 +861,7 @@ export const UpRequest = class Request {
     this._reject(new Offline(log, { reason, request: this }))
   }
 
-  respondWith(response) {
+  respondWith(response: UpResponse): void {
     this.response = response
 
     if (this.ended) return
@@ -770,17 +876,17 @@ export const UpRequest = class Request {
 
   // Settle our promise before running settle callbacks. A callback may settle a u.variant() of this
   // request (like up.Response#redirectRequest), which shares our deferred and would settle it first.
-  _resolve(response) {
+  _resolve(response: UpResponse): void {
     this._deferred.resolve(response)
     this._runSettleCallbacks(response)
   }
 
-  _reject(responseOrError) {
+  _reject(responseOrError: UpResponse | Error): void {
     this._deferred.reject(responseOrError)
     this._runSettleCallbacks(responseOrError)
   }
 
-  _runSettleCallbacks(responseOrError) {
+  _runSettleCallbacks(responseOrError: UpResponse | Error): void {
     // Do this sync so previews are reverted before another DOM mutation.
     // awaiting the response would delay this for too long.
     this._revertPreviews?.()
@@ -805,26 +911,26 @@ export const UpRequest = class Request {
     Whether this request has ended.
   @stable
   */
-  get ended() {
+  get ended(): boolean {
     return (this.state !== 'new') && (this.state !== 'loading') && (this.state !== 'tracking')
   }
 
-  csrfHeader() {
+  csrfHeader(): string {
     return protocolCsrfHeader()
   }
 
-  csrfParam() {
+  csrfParam(): string {
     return csrfParam()
   }
 
   // Returns a CSRF token if this request requires it
-  csrfToken() {
+  csrfToken(): string {
     if (!this.isSafe() && !this.isCrossOrigin()) {
       return protocolCsrfToken()
     }
   }
 
-  isCrossOrigin() {
+  isCrossOrigin(): boolean {
     return isCrossOrigin(this.url)
   }
 
@@ -873,7 +979,7 @@ export const UpRequest = class Request {
     return new UpResponse(responseAttrs)
   }
 
-  _buildEventEmitter(args) {
+  _buildEventEmitter(args: any[]): EventEmitter {
     // We prefer emitting request-related events on the targeted layer.
     // This way listeners can observe event-related events on a given layer.
     // This request has an optional { layer } attribute, which is used by
@@ -885,21 +991,21 @@ export const UpRequest = class Request {
     })
   }
 
-  emit(...args) {
+  emit(...args: any[]): Event {
     return this._buildEventEmitter(args).emit()
   }
 
-  assertEmitted(...args) {
+  assertEmitted(...args: any[]): void {
     this._buildEventEmitter(args).assertEmitted()
   }
 
   get [Symbol.toStringTag]() { return 'up.Request' }
 
-  toString() {
+  toString(): string {
     return this.method + ' ' + this.url
   }
 
-  isBoundToSubtrees(subtreeRoots) {
+  isBoundToSubtrees(subtreeRoots: Element[]): boolean {
     subtreeRoots = wrapList(subtreeRoots)
 
     return some(this.bindFragments, function(fragment) {
@@ -907,15 +1013,16 @@ export const UpRequest = class Request {
     })
   }
 
-  isBoundToLayers(layers) {
+  isBoundToLayers(layers: Layer[]): boolean {
     return contains(layers, this.bindLayer)
   }
 
-  get age() {
-    return new Date() - this.builtAt
+  get age(): number {
+    // Subtracting dates gives milliseconds. TypeScript only allows arithmetic on numbers.
+    return (new Date() as any) - (this.builtAt as any)
   }
 
-  header(name) {
+  header(name: string): string | undefined {
     return this.headers[name]
   }
 
@@ -934,14 +1041,14 @@ export const UpRequest = class Request {
     this._setAutoHeader(headerize('version'), up.version)
   }
 
-  _setPropertyHeader(key) {
+  _setPropertyHeader(key: string): void {
     this._setAutoHeader(
       headerize(key),
       this[key]
     )
   }
 
-  _setAutoHeader(name, value) {
+  _setAutoHeader(name: string, value: any): void {
     if (isMissing(value)) {
       return
     }
@@ -952,7 +1059,7 @@ export const UpRequest = class Request {
     this.headers[name] = value
   }
 
-  mergeIfUnsent(trackingRequest) {
+  mergeIfUnsent(trackingRequest: UpRequest): void {
     // We can only merge a tracking request if the original request has not been sent to the network.
     // This can happen if multiple [up-defer] requests are sent during the same render pass.
     if (this.state !== 'new') return
@@ -969,7 +1076,7 @@ export const UpRequest = class Request {
     this._fragments = uniq([...this.fragments, ...trackingRequest.fragments])
   }
 
-  static tester(condition, { except } = {}) {
+  static tester(condition: RequestCondition, { except }: { except?: UpRequest } = {}): (request: UpRequest) => boolean {
     let testFn
     if (isFunction(condition)) {
       testFn = condition
@@ -1026,6 +1133,11 @@ export const UpRequest = class Request {
     delegatePromise(this.prototype, function() { return this._deferred })
   }
 }
+
+/**
+An instance of `up.Request`.
+*/
+export type UpRequest = InstanceType<typeof UpRequest>
 
 export const api = {
   Request: UpRequest,
