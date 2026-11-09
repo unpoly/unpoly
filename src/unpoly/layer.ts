@@ -32,7 +32,7 @@ Add `[up-layer=new]` to a link or form to show its response in a new overlay, or
 */
 
 // The layer class for each mode, like ModalLayer. The entry passes them to install(), so only
-// the entry and the mode classes themselves import a mode class (see the cycle rules in src/unpoly.js).
+// the entry and the mode classes themselves import a mode class (see the cycle rules in src/unpoly.ts).
 let layerClasses: LayerClass[] = []
 
 /*-

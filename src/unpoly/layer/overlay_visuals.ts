@@ -4,7 +4,7 @@ import { spanObject } from '../util.js'
 // The Overlay constructor assigns each of them (Layer assigns { mode }). Keep both in sync.
 //
 // These live outside the Overlay class, so code outside the layer modes can use them without
-// importing a mode class (see the cycle rules in src/unpoly.js).
+// importing a mode class (see the cycle rules in src/unpoly.ts).
 export const OVERLAY_VISUAL_KEYS = [
   'mode',
   'position',

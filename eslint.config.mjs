@@ -66,7 +66,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/unpoly.js'],
+    files: ['src/unpoly.ts'],
     plugins: {
       unpoly: { rules: { 'no-api-collisions': noApiCollisions } },
     },

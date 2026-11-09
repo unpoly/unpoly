@@ -204,7 +204,7 @@ for (let api of apis) {
 // effects before they were ES modules. All installs run before `up.framework.onEvaled()` below,
 // while `up.framework.evaling` is still true. Event listeners, compilers, macros and registry
 // entries created now are marked as defaults (`isDefault`), which a reset between specs keeps
-// (see event_listener.js, registry.js, script.js).
+// (see event_listener.ts, registry.ts, script.ts).
 //
 // Some things already happen when a module is evaluated, before any install: a `new Config()`
 // builds its defaults and listens for `up:framework:reset`, and a few namespaces create helper

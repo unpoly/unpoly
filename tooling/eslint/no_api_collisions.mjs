@@ -1,4 +1,4 @@
-// An ESLint rule for src/unpoly.js. The entry copies every module's `api` onto `window.up`,
+// An ESLint rule for src/unpoly.ts. The entry copies every module's `api` onto `window.up`,
 // so when two modules contribute the same top-level key, the later one silently replaces the
 // earlier one (a second `fragment: { … }` would replace the whole up.fragment namespace).
 // This rule reads the `api` object literal of each module in the entry's `apis` array and

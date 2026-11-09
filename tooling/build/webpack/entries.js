@@ -3,7 +3,7 @@ const { merge, file, scriptPipeline, stylePipeline, minify, discardStyles } = re
 
 function unpoly({ es, min }) {
   return merge(
-    file('./src/unpoly.js', `unpoly${es == 'es6' ? '.es6' : ''}${min ? '.min' : ''}.js`),
+    file('./src/unpoly.ts', `unpoly${es == 'es6' ? '.es6' : ''}${min ? '.min' : ''}.js`),
     scriptPipeline({ es }),
     es === 'es6' ? discardStyles(): stylePipeline(`unpoly${min ? '.min' : ''}.css`),
     minify(min),
