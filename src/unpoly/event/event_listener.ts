@@ -117,7 +117,7 @@ export class EventListener {
     // 2. event.target is the element that received an event, which might be a
     //    child of `selector`.
     // 3. There is only a single event bubbling up the DOM, so we are only called once.
-    let element = event.target as Element
+    let element: Element | null = event.target as Element
     if (this.selector) {
       let selector = evalOption(this.selector)
       element = element.closest(selector)

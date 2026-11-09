@@ -128,7 +128,7 @@ export class EventEmitter {
     // element and (2) to set up.layer.current to that layer during emission.
     let layer
     if (isGiven(options.layer)) {
-      layer = layerStack.get(options.layer)
+      layer = layerStack.get(options.layer)!
       options.target ||= layer.element
       options.baseLayer ||= layer
     }

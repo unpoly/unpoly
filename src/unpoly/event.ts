@@ -718,7 +718,8 @@ to the `/menu` path.
 */
 function executeEmitAttr(event: ClickEvent, element: Element): void {
   if (isModified(event)) { return }
-  const eventType = stringAttr(element, 'up-emit')
+  // The listener only matches [up-emit].
+  const eventType = stringAttr(element, 'up-emit')!
   const eventProps = jsonAttr(element, 'up-emit-props')
   const forkedEvent = fork(event, eventType)
   Object.assign(forkedEvent, eventProps)
