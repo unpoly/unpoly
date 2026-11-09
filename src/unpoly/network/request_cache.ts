@@ -5,38 +5,49 @@ import { splitTarget } from '../fragment.js'
 import { config } from '../network.js'
 import { UpRequest } from './request.js'
 import { UpResponse } from './response.js'
+import type { RequestCondition, RequestOptions } from './request.js'
+
+/**
+Options for `up.cache.track()`.
+@internal
+*/
+export interface TrackOptions {
+  // Track even if the requests would not get the same response.
+  force?: boolean
+  onIncompatible?: (newRequest: UpRequest) => void
+}
 
 // One route per method and URL.
 class Route {
 
   // A list of `Vary` header names that we have seen in responses
   // to earlier requests with this route's method and URL.
-  varyHeaders = new Set()
+  varyHeaders: Set<string> = new Set()
 
   // Cached requests for this route's method and URL.
-  requests = []
+  requests: UpRequest[] = []
 
-  matchBest(newRequest) {
+  matchBest(newRequest: UpRequest): UpRequest | undefined {
     let matches = this.requests.filter((cachedRequest) => this.satisfies(cachedRequest, newRequest))
     // Newer requests are always appended
     return last(matches)
   }
 
-  delete(request) {
+  delete(request: UpRequest): void {
     remove(this.requests, request)
   }
 
-  put(request) {
+  put(request: UpRequest): void {
     this.requests.push(request)
   }
 
-  updateVary(response) {
+  updateVary(response: UpResponse): void {
     for (let headerName of response.varyHeaderNames) {
       this.varyHeaders.add(headerName)
     }
   }
 
-  satisfies(cachedRequest, newRequest) {
+  satisfies(cachedRequest: UpRequest, newRequest: UpRequest): boolean {
     if (cachedRequest === newRequest) return true
 
     return every(this.varyHeaders, (varyHeader) => {
@@ -62,16 +73,19 @@ class Route {
 }
 
 export class RequestCache {
+  declare _routes: Record<string, Route>
+  declare _requests: UpRequest[]
 
   constructor() {
     this.reset()
   }
 
-  reset() {
+  reset(): void {
     this._routes = {}
     this._requests = []
   }
 
+  get(request: UpRequest | RequestOptions): UpRequest | undefined
   get(request) {
     request = this._wrap(request)
     let route = this._getRoute(request)
@@ -87,6 +101,7 @@ export class RequestCache {
     }
   }
 
+  put(request: UpRequest | RequestOptions): Promise<void>
   async put(request) {
     request = this._wrap(request)
     let route = this._getRoute(request)
@@ -118,7 +133,7 @@ export class RequestCache {
   }
 
   // TODO: Move this to up.Request
-  async track(existingRequest, newRequest, options = {}) {
+  async track(existingRequest: UpRequest, newRequest: UpRequest, options: TrackOptions = {}): Promise<void> {
     newRequest.trackedRequest = existingRequest
     newRequest.state = 'tracking'
 
@@ -175,11 +190,11 @@ export class RequestCache {
   }
 
   // Used by UpRequest.tester()
-  willHaveSameResponse(existingRequest, newRequest) {
+  willHaveSameResponse(existingRequest: UpRequest, newRequest: UpRequest): boolean {
     return existingRequest === newRequest || existingRequest === newRequest.trackedRequest
   }
 
-  evict(condition = true, testerOptions) {
+  evict(condition: RequestCondition = true, testerOptions?: { except?: UpRequest }): void {
     this._eachMatch(condition, testerOptions,
       // It is generally not a great idea to manipulate the list we're iterating over,
       // but this._eachMatch() copies results before iterating.
@@ -187,7 +202,7 @@ export class RequestCache {
     )
   }
 
-  expire(condition = true, testerOptions) {
+  expire(condition: RequestCondition = true, testerOptions?: { except?: UpRequest }): void {
     this._eachMatch(condition, testerOptions,
       // We need to force cached responses to be expired, regardless of their age.
       // It may seem strange that we're setting an { expired } property on the *request*
@@ -201,7 +216,7 @@ export class RequestCache {
     )
   }
 
-  reindex(request) {
+  reindex(request: UpRequest): void {
     this._delete(request)
 
     // The cacheRoute is about to change because the request
@@ -211,37 +226,37 @@ export class RequestCache {
     this.put(request)
   }
 
-  _delete(request) {
+  _delete(request: UpRequest): void {
     remove(this._requests, request)
     request.cacheRoute?.delete(request)
   }
 
-  _getRoute(request) {
+  _getRoute(request: UpRequest): Route {
     return request.cacheRoute || (this._routes[request.method + ' ' + request.url] ||= new Route())
   }
 
-  _isUsable(request) {
+  _isUsable(request: UpRequest): boolean {
     return request.age < config.cacheEvictAge
   }
 
   // Read by specs
-  get currentSize() {
+  get currentSize(): number {
     return this._requests.length
   }
 
-  get _capacity() {
+  get _capacity(): number {
     return config.cacheSize
 
   }
 
-  _limitSize() {
+  _limitSize(): void {
     for (let i = 0; i < (this.currentSize - this._capacity); i++) {
       // The _requests array is in insertion order, so the oldest entry will be first
       this._delete(this._requests[0])
     }
   }
 
-  _eachMatch(condition = true, testerOptions, fn) {
+  _eachMatch(condition: RequestCondition = true, testerOptions: { except?: UpRequest } | undefined, fn: (request: UpRequest) => void): void {
     let tester = UpRequest.tester(condition, testerOptions)
 
     // Copy results so evict() can delete from the list we're iterating over
@@ -250,8 +265,10 @@ export class RequestCache {
     each(results, fn)
   }
 
-  _wrap(requestOrOptions) {
+  _wrap(requestOrOptions: UpRequest | RequestOptions): UpRequest {
     return wrapValue(UpRequest, requestOrOptions)
   }
 
 }
+
+export type { Route }

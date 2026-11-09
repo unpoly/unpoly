@@ -25,6 +25,7 @@ import { UpURLPattern } from '../util/url_pattern.js'
 import type { Deferred, PlainObject, ValueOrFunction } from '../util.js'
 import type { ParamsLike } from '../form/params.js'
 import type { Layer } from '../layer/base.js'
+import type { Route } from './request_cache.js'
 
 /**
 The state of an `up.Request` in its lifecycle.
@@ -144,6 +145,9 @@ export const UpRequest = class Request {
   declare _deferred: Deferred<UpResponse>
   declare _xhr: XMLHttpRequest | undefined
   declare _revertPreviews: (() => void) | undefined
+  // Set by the request cache.
+  declare cacheRoute: Route | undefined
+  declare trackedRequest: UpRequest | undefined
 
   // A request is also a promise for its response. The static block at the end delegates these.
   declare then: Promise<UpResponse>['then']
