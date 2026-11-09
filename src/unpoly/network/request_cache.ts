@@ -96,7 +96,7 @@ export class RequestCache {
         return cachedRequest
       } else {
         // Cache hit, but too old
-        this._delete(request, route)
+        this._delete(cachedRequest)
       }
     }
   }
