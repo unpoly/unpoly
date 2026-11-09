@@ -10,7 +10,6 @@ import { UpRequest } from './network/request.js'
 import { UpResponse } from './network/response.js'
 import { Config } from './util/config.js'
 import type { ConfigWith } from './util/config.js'
-import type { PlainObject } from './util.js'
 import type { RequestOptions } from './network/request.js'
 
 /*-
@@ -24,6 +23,32 @@ Events are emitted throughout the request lifecycle. `up:network:late` fires whe
 
 @namespace up.network
 */
+
+/**
+The settings in `up.network.config`, described in its doc comment.
+*/
+export interface NetworkConfig {
+  concurrency: number | (() => number)
+  wrapMethod: boolean
+  lateDelay: number | ((request: UpRequest) => number | false)
+  timeout: number | undefined
+  fail: boolean | ((response: UpResponse) => boolean)
+  cacheEnabled: boolean
+  cacheSize: number
+  cacheExpireAge: number
+  cacheEvictAge: number
+  autoCache: (request: UpRequest) => boolean
+  expireCache: CacheMatcher
+  evictCache: CacheMatcher
+  progressBar: boolean | (() => boolean)
+}
+
+/**
+Which cache entries to expire or evict: `true` for all, `false` for none.
+A function receives the request and may also return a URL pattern.
+@internal
+*/
+export type CacheMatcher = boolean | ((request: UpRequest) => boolean | string)
 
 /*-
 Sets default options for network requests.
@@ -149,7 +174,7 @@ Sets default options for network requests.
 
 @stable
 */
-export const config = new Config<PlainObject>('up.network.config', () => ({
+export const config = new Config('up.network.config', (): NetworkConfig => ({
   concurrency: 6,
   wrapMethod: true,
   cacheEnabled: true,
@@ -163,7 +188,7 @@ export const config = new Config<PlainObject>('up.network.config', () => ({
   evictCache: false,
   progressBar: true,
   timeout: 90_000,
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<NetworkConfig>
 
 export const queue = new RequestQueue()
 
