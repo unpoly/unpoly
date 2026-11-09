@@ -138,7 +138,7 @@ up.util.microtask = function(task: () => any) {
   return Promise.resolve().then(task)
 }
 
-// Core calls this hook (splitSimpleTokenString() in util.ts).
+// Core calls this hook (up.util).
 up.migrate.splitAtOr = function(value: string): string[] | undefined {
   let parts = value.split(/\s+or\s+/)
   if (parts.length >= 2) {

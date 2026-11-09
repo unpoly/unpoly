@@ -309,6 +309,8 @@ up.migrate = (function() {
 
   up.on('up:framework:reset', reset)
 
+  // Core reads loaded, formerlyAsync(), fixEventTypes(), fixGetStyleProps() and fixSetStyleProps().
+  // It calls more hooks that other files add to up.migrate (look for "Core calls this hook").
   return {
     deprecated,
     renamedNamespace,

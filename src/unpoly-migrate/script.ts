@@ -12,7 +12,7 @@ up.script.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'callbackPolicy', 'evalCallbackPolicy', { warning: 'There is no setting up.script.config.callbackPolicy. Use up.script.config.evalCallbackPolicy instead.' })
 })
 
-// Core calls this hook (HelloFragment in script/hello_fragment.ts).
+// Core calls this hook (HelloFragment).
 // The compiler is any because its legacy { keep } option no longer exists in core's types.
 up.migrate.postCompile = function(elements: Element[], compiler: any) {
   // up.compiler() has a legacy { keep } option that will automatically
@@ -126,7 +126,7 @@ up.$macro = function(...definitionArgs) {
   })
 }
 
-// Core calls this hook (ChangeFromResponse in fragment/render/change/change_from_response.js).
+// Core calls this hook (ChangeFromResponse).
 up.migrate.processHelloMeta = function(meta: object, response: any) {
   Object.defineProperty(meta, 'response', { get() {
     up.migrate.warn('Accessing meta.response from a compiler has been deprecated without replacement. Avoid fragments that compile differently for the initial page load vs. subsequent fragment updates.')
