@@ -26,7 +26,7 @@ export interface Migrate {
   clearCacheFromXHR?(xhr: XMLHttpRequest): string | false | undefined
   titleFromXHR?(xhr: XMLHttpRequest): string | false | undefined
   postCompile?(elements: Element[], compiler: Compiler): void
-  watchForSwitch?(root: Element, callback: (event?: Event) => void): () => void
+  watchForSwitch?(root: Element, callback: (event: Event) => void): (() => void) | undefined
   migratedFormGroupSelectors?(): string[]
   prepareLocationChangedEvent?(event: LocationChangedEvent): void
   warnOfHungryMetaTags?(metaTags: List<Element>): void
