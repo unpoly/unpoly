@@ -3,6 +3,7 @@ import { metaContent } from './element.js'
 import { popCookie } from './browser.js'
 import { mockable } from './mockable.js'
 import { Config } from './util/config.js'
+import type { Params } from './form/params.js'
 
 /*-
 HTTP headers that let your server inspect and steer Unpoly's rendering.
@@ -15,12 +16,12 @@ Request headers tell your server what Unpoly is about to render, and response he
 */
 
 
-export const headerize = function(camel) {
+export const headerize = function(camel: string): string {
   const header = camel.replace(/(^.|[A-Z])/g, (char) => '-' + char.toUpperCase())
   return 'X-Up' + header
 }
 
-const extractHeader = function(xhr, shortHeader, parseFn = identity) {
+const extractHeader = function(xhr: XMLHttpRequest, shortHeader: string, parseFn: (value: string) => any = identity): any {
   let value = xhr.getResponseHeader(headerize(shortHeader))
   if (value) {
     return parseFn(value)
@@ -31,7 +32,7 @@ const extractHeader = function(xhr, shortHeader, parseFn = identity) {
 @function up.protocol.targetFromXHR
 @internal
 */
-export function targetFromXHR(xhr) {
+export function targetFromXHR(xhr: XMLHttpRequest): string | undefined {
   return extractHeader(xhr, 'target')
 }
 
@@ -401,7 +402,7 @@ If-Modified-Since: Wed, 15 Nov 2000 13:11:22 GMT
 @stable
 */
 
-function parseModifyCacheValue(value) {
+function parseModifyCacheValue(value: string): string | false {
   if (value === 'false') {
     return false
   } else {
@@ -409,7 +410,7 @@ function parseModifyCacheValue(value) {
   }
 }
 
-export function evictCacheFromXHR(xhr) {
+export function evictCacheFromXHR(xhr: XMLHttpRequest): string | false | undefined {
   return extractHeader(xhr, 'evictCache', parseModifyCacheValue)
 }
 
@@ -442,7 +443,7 @@ X-Up-Evict-Cache: false
 */
 
 
-export function expireCacheFromXHR(xhr) {
+export function expireCacheFromXHR(xhr: XMLHttpRequest): string | false | undefined {
   return extractHeader(xhr, 'expireCache', parseModifyCacheValue) ?? up.migrate.clearCacheFromXHR?.(xhr)
 }
 
@@ -484,7 +485,7 @@ on the link or form, or customize `up.network.config.expireCache`.
 @stable
 */
 
-export function contextFromXHR(xhr) {
+export function contextFromXHR(xhr: XMLHttpRequest) {
   return extractHeader(xhr, 'context', parseRelaxedJSON)
 }
 
@@ -572,7 +573,7 @@ X-Up-Fail-Context: { "lives": 3 }
 @function up.protocol.methodFromXHR
 @internal
 */
-export function methodFromXHR(xhr) {
+export function methodFromXHR(xhr: XMLHttpRequest): string | undefined {
   return extractHeader(xhr, 'method', normalizeMethod)
 }
 
@@ -608,7 +609,7 @@ X-Up-Method: GET
 @function up.protocol.titleFromXHR
 @internal
 */
-export function titleFromXHR(xhr) {
+export function titleFromXHR(xhr: XMLHttpRequest) {
   return up.migrate.titleFromXHR?.(xhr) ?? extractHeader(xhr, 'title', parseRelaxedJSON)
 }
 
@@ -708,7 +709,7 @@ To prevent this, the header value is set to `:unknown` if its length exceeds `up
 @signature
 */
 
-export function eventPlansFromXHR(xhr) {
+export function eventPlansFromXHR(xhr: XMLHttpRequest) {
   return extractHeader(xhr, 'events', parseRelaxedJSON)
 }
 
@@ -756,7 +757,7 @@ X-Up-Events: [{ type: 'user:created', name: 'foobar', layer: 'current' }]
 @stable
 */
 
-export function openLayerFromXHR(xhr) {
+export function openLayerFromXHR(xhr: XMLHttpRequest) {
   // When no specific options are given, the server will send X-Up-Open-Layer: {}
   return extractHeader(xhr, 'openLayer', parseRelaxedJSON)
 }
@@ -828,7 +829,7 @@ X-Up-Open-Layer: { onAcceptedReload: '#users-list' }
 @experimental
 */
 
-export function acceptLayerFromXHR(xhr) {
+export function acceptLayerFromXHR(xhr: XMLHttpRequest) {
   // Even if acceptance has no value, the server will send
   // X-Up-Accept-Layer: null
   return extractHeader(xhr, 'acceptLayer', parseRelaxedJSON)
@@ -878,7 +879,7 @@ X-Up-Target: :none
 @signature
 */
 
-export function dismissLayerFromXHR(xhr) {
+export function dismissLayerFromXHR(xhr: XMLHttpRequest) {
   // Even if dismissal has no value, the server will send
   // X-Up-Dismiss-Layer: null
   return extractHeader(xhr, 'dismissLayer', parseRelaxedJSON)
@@ -937,12 +938,12 @@ There is no JavaScript API for this.
 @function up.protocol.initialRequestMethod
 @internal
 */
-export const initialRequestMethod = mockable(function initialRequestMethod() {
+export const initialRequestMethod = mockable(function initialRequestMethod(): string {
   return readInitialRequestMethod()
 })
 
 // The cookie is deleted after reading, so we must only read it once.
-const readInitialRequestMethod = memoize(function() {
+const readInitialRequestMethod = memoize(function(): string {
   return normalizeMethod(popCookie('_up_method'))
 })
 
@@ -982,7 +983,7 @@ Unpoly will again update fragments. This fixes two edge cases:
 @function up.protocol.locationFromXHR
 @internal
 */
-export function locationFromXHR(xhr) {
+export function locationFromXHR(xhr: XMLHttpRequest): string | undefined {
   // We prefer the X-Up-Location header to xhr.responseURL.
   // If the server redirected to a new location, Unpoly-related headers
   // will be encoded in the request's query params like this:
@@ -1132,19 +1133,19 @@ export const config = new Config('up.protocol.config', () => ({
   maxHeaderSize: 2048,
 }))
 
-export function csrfHeader() {
+export function csrfHeader(): string {
   return evalOption(config.csrfHeader)
 }
 
-export function csrfParam() {
+export function csrfParam(): string {
   return evalOption(config.csrfParam)
 }
 
-export function csrfToken() {
+export function csrfToken(): string {
   return evalOption(config.csrfToken)
 }
 
-export function wrapMethod(method, params) {
+export function wrapMethod(method: string, params: Params): string {
   params.add(config.methodParam, method)
   return 'POST'
 }
