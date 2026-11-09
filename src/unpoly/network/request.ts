@@ -1036,7 +1036,7 @@ export const UpRequest = class Request {
   _setAutoHeaders() {
     // Add information about the response's intended use, so the server may
     // customize or shorten its response.
-    for (let key of ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext', 'originMode']) {
+    for (let key of ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext', 'originMode'] as const) {
       this._setPropertyHeader(key)
     }
 
@@ -1048,7 +1048,7 @@ export const UpRequest = class Request {
     this._setAutoHeader(headerize('version'), up.version)
   }
 
-  _setPropertyHeader(key: string): void {
+  _setPropertyHeader(key: keyof UpRequest & string): void {
     this._setAutoHeader(
       headerize(key),
       this[key]
@@ -1084,7 +1084,7 @@ export const UpRequest = class Request {
   }
 
   static tester(condition: RequestCondition, { except }: { except?: UpRequest } = {}): (request: UpRequest) => boolean {
-    let testFn
+    let testFn: (request: UpRequest) => boolean
     if (isFunction(condition)) {
       testFn = condition
     } else if (condition instanceof this) {

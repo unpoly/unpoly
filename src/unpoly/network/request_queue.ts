@@ -198,7 +198,8 @@ export class RequestQueue {
     // at it again. Since the JavaScript setTimeout() is inaccurate, we allow a request
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1
-    const isLate = (request) => request.age >= (request.effectiveLateTime - timerTolerance)
+    // A timed request has a numeric late time.
+    const isLate = (request: UpRequest) => request.age >= ((request.effectiveLateTime as number) - timerTolerance)
     return some(this._timedRequests, isLate)
   }
 
