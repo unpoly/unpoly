@@ -54,6 +54,29 @@ To render a new form state while the user is still typing, mark fields with `[up
 */
 
 
+/**
+The settings in `up.form.config`, described in its doc comment.
+*/
+export interface FormConfig {
+  submitSelectors: string[]
+  noSubmitSelectors: string[]
+  groupSelectors: string[]
+  fieldSelectors: string[]
+  noFieldSelectors: string[]
+  submitButtonSelectors: string[]
+  anyButtonSelectors: string[]
+  arrayParam: boolean | ((name: string) => boolean)
+  watchInputDelay: number
+  watchInputEvents: string[] | ((field: Element) => string[])
+  watchChangeEvents: string[] | ((field: Element) => string[])
+  validateBatch: boolean
+  /**
+  Nothing reads this setting.
+  @internal
+  */
+  watchableEvents: string[]
+}
+
 /*-
 Sets default options for form submission and validation.
 
@@ -200,7 +223,7 @@ Sets default options for form submission and validation.
 
 @stable
  */
-export const config = new Config<PlainObject>('up.form.config', () => ({
+export const config = new Config('up.form.config', (): FormConfig => ({
   groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
   fieldSelectors: [
     'select',
@@ -227,7 +250,7 @@ export const config = new Config<PlainObject>('up.form.config', () => ({
   watchChangeEvents: ['change'],
   watchableEvents: ['input', 'change'],
   arrayParam: (name) => name.endsWith('[]'),
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<FormConfig>
 
 function findFormElements(root: ElementOrSelector, selectorFn: SelectorFn): Field[]
 function findFormElements(root, selectorFn) {
