@@ -118,7 +118,7 @@ export class RevealMotion {
   }
 
   _computeObstructionRects(selector: string): Rect[] {
-    let elements = getAll(selector, { layer: this._obstructionsLayer })
+    let elements: HTMLElement[] = getAll(selector, { layer: this._obstructionsLayer })
     elements = filterList(elements, isVisible)
     return map(elements, (element) => {
       if (computedStyle(element, 'position') === 'sticky') {

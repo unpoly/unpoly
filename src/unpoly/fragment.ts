@@ -31,6 +31,56 @@ import {
   registerMacro,
 } from './script.js'
 import { Config } from './util/config.js'
+import type { List, PlainObject } from './util.js'
+import type { ElementOrSelector } from './element.js'
+import type { UpRequest } from './network/request.js'
+import type { UpResponse } from './network/response.js'
+
+/**
+A step of a render pass: which old element to update with which new element, and how.
+@internal
+*/
+// TODO(types): A proper interface, once the render classes are typed.
+export type RenderStep = PlainObject
+
+/**
+An element with [up-keep] that is kept in an update, and the element it would have been replaced with.
+@internal
+*/
+export interface KeepPlan {
+  oldElement: Element
+  newElement: Element
+  newData?: any
+  renderOptions?: PlainObject
+  // Set when rendering, see UpdateSteps.
+  revivers?: any[]
+}
+
+/**
+Derives a target selector for an element: a selector pattern like `'[id]'`, or a function.
+See `up.fragment.config.targetDerivers`.
+*/
+export type TargetDeriver = string | ((element: Element) => string | undefined)
+
+/**
+Parses an HTML string into nodes.
+@internal
+*/
+export type HTMLParser = (html: string) => List<Node>
+
+// Properties Unpoly sets on fragments.
+type FragmentElement = Element & { upKeepIdentity?: any, upInserted?: boolean }
+
+/**
+Options for turning a value (HTML, a template or nodes) into nodes.
+@internal
+*/
+export interface ProvideNodesOptions {
+  origin?: Element
+  originLayer?: Layer
+  data?: any
+  htmlParser?: HTMLParser
+}
 
 /*-
 The JavaScript API to render, look up and destroy page fragments. Every link, form, overlay or poll that Unpoly handles ends in `up.render()`, and your own code can call it with the same options.
@@ -44,7 +94,7 @@ Lookup functions like `up.fragment.get()` differ from `document.querySelector()`
 @namespace up.fragment
 */
 
-function upTagName(element) {
+function upTagName(element: Element) {
   let tagName = element.localName
   if (tagName.startsWith('up-')) {
     return tagName
@@ -317,7 +367,7 @@ export const config = new Config('up.fragment.config', () => ({
 defineDelegates(config, ['mainTargets'], () => layerConfig.any)
 
 
-function defaultSkipResponse({ response, expiredResponse }) {
+function defaultSkipResponse({ response, expiredResponse }: PlainObject): boolean {
   return !response.text || response.text === expiredResponse?.text
 }
 
@@ -350,12 +400,13 @@ up.fragment.source('#two') // returns '/foo'
   The URL from which the element was loaded.
 @stable
 */
+export function sourceOf(element: ElementOrSelector, options?: PlainObject): string | undefined
 export function sourceOf(element, options = {}) {
   element = getSmart(element, options)
   return closestAttr(element, 'up-source')
 }
 
-export function normalizeSource(source) {
+export function normalizeSource(source: string | undefined): string | undefined {
   // Don't use u.matchableURL() here. We need to keep the trailing slash here,
   // to support backends that care about trailing slashes.
   return normalizeURL(source, { hash: false })
@@ -382,7 +433,7 @@ its modification time is sent as an `If-Modified-Since` request header. The serv
   Returns `undefined` if the fragment was rendered without a modification time.
 @stable
 */
-export function timeOf(element) {
+export function timeOf(element: Element) {
   let value = closestAttr(element, 'up-time')
   if (value && value !== 'false') {
     // We support both Unix timestamps (e.g. "1445412480")
@@ -448,7 +499,7 @@ its ETag is sent as an `If-None-Match` request header. The server may check the 
   Returns `undefined` if the fragment was rendered without an ETag.
 @stable
 */
-export function etagOf(element) {
+export function etagOf(element: Element) {
   let value = closestAttr(element, 'up-etag')
   if (value && value !== 'false') {
     return value
@@ -650,7 +701,8 @@ You may control this behavior using the [`{ abort }`](#options.abort) option.
 @stable
 @signature
 */
-export const render = mockable((...args) => {
+// TODO(types): RenderOptions and RenderJob types. Takes a target and options, or options.
+export const render = mockable((...args: any[]): any => {
   let options = parseTargetAndOptions(args)
   return new RenderJob(options).execute()
 })
@@ -720,7 +772,7 @@ Instead of calling `up.navigate()` you may also call `up.render({ navigate: true
   @like up.render
 @stable
 */
-export const navigate = mockable((...args) => {
+export const navigate = mockable((...args: any[]): any => {
   const options = parseTargetAndOptions(args)
   return render({ ...options, navigate: true })
 })
@@ -999,7 +1051,7 @@ See [Keeping elements](/learn/keeping-elements) for elaborate examples.
 @signature
 */
 
-export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }) {
+export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }: KeepPlan & { renderOptions: PlainObject }) {
   const log = ['Keeping fragment %o', oldElement]
   const callback = callbackAttr(oldElement, 'up-on-keep', { expandObject: ['newFragment', 'newData'] })
   return emit(oldElement, 'up:fragment:keep', { log, callback, newFragment, newData, renderOptions })
@@ -1065,7 +1117,7 @@ The keeping can no longer be prevented. For this, use `up:fragment:keep` instead
 @experimental
 */
 
-export function emitFragmentKept({ oldElement, newElement: newFragment, newData }) {
+export function emitFragmentKept({ oldElement, newElement: newFragment, newData }: KeepPlan) {
   return emit(oldElement, 'up:fragment:kept', { log: false, newFragment, newData })
 }
 
@@ -1082,7 +1134,7 @@ Otherwise returns undefined.
 @param {boolean} options.keep
 @internal
 */
-export function findKeepPlan(options) {
+export function findKeepPlan(options: PlainObject): KeepPlan | undefined {
   if (options.keep === false) return
 
   const { oldElement, newElement } = options
@@ -1137,11 +1189,11 @@ export function findKeepPlan(options) {
   return plan
 }
 
-function keepIdentity(element, mode = keepMode(element)) {
+function keepIdentity(element: FragmentElement, mode: string | boolean = keepMode(element)) {
   return element.upKeepIdentity ??= copy(buildKeepIdentity(element, mode))
 }
 
-export function defaultNormalizeKeepHTML(html) {
+export function defaultNormalizeKeepHTML(html: string): string {
   // Remove attributes that might fluctuate beteen responses, but don't normally contribute to element identity.
   html = removeAttrsFromHTML(html, ['up-etag', 'up-source', 'up-time', 'nonce', ...scriptConfig.nonceableAttributes])
   // Remove leading spaces.
@@ -1149,7 +1201,7 @@ export function defaultNormalizeKeepHTML(html) {
   return html
 }
 
-function buildKeepIdentity(element, mode) {
+function buildKeepIdentity(element: Element, mode: string | boolean) {
   if (mode === 'same-html') {
     return config.normalizeKeepHTML(element.outerHTML)
   } else if (mode === 'same-data') {
@@ -1160,12 +1212,12 @@ function buildKeepIdentity(element, mode) {
 }
 
 
-function keepMode(element) {
+function keepMode(element: Element): string | boolean {
   return booleanOrStringAttr(element, 'up-keep')
 }
 
 
-export function emitFragmentInserted(element, meta) {
+export function emitFragmentInserted(element: FragmentElement, meta: PlainObject): Event {
   if (element.upInserted) return
   element.upInserted = true
 
@@ -1211,7 +1263,7 @@ up.on('up:fragment:inserted', function(event, fragment) {
 */
 
 
-export function emitFragmentDestroyed(fragment, options) {
+export function emitFragmentDestroyed(fragment: Element, options: PlainObject) {
   const log = options.log ?? ['Destroyed fragment %o', fragment]
   const parent = options.parent || document
   return mutate(() => emit(parent, 'up:fragment:destroyed', { fragment, parent, log }))
@@ -1239,7 +1291,7 @@ that was removed.
 @stable
 */
 
-export function isNotDestroying(element) {
+export function isNotDestroying(element: Element): boolean {
   return !element.closest('.up-destroying')
 }
 
@@ -1275,7 +1327,7 @@ If the destruction is [animated](/api/up.motion), the fragment is "unalive" whil
   Whether the fragment (and its ancestors) are considered alive.
 @experimental
 */
-export function isAlive(fragment) {
+export function isAlive(fragment: Element | undefined): boolean {
   return fragment.isConnected && isNotDestroying(fragment)
 }
 
@@ -1443,7 +1495,9 @@ without filtering by layer or destruction state.
 @stable
 @signature
 */
-export function getSmart(...args) {
+// Takes a selector or element, optionally preceded by a root element, and followed by options.
+// TODO(types): HTMLElement | undefined, once callers handle it.
+export function getSmart(...args: any[]): any {
   let [root, selector, options] = parseGetArgs(args)
 
   if (isElementLike(selector)) {
@@ -1468,14 +1522,14 @@ export function getSmart(...args) {
   }).find()
 }
 
-export function getFirstDescendant(...args) {
+export function getFirstDescendant(...args: any[]): any {
   let [root, selectorString, options] = parseGetArgs(args)
 
   let selector = new Selector(selectorString, root, options)
   return selector.firstDescendant(root)
 }
 
-function parseGetArgs(args) {
+function parseGetArgs(args: any[]) {
   return parseArgs(args, 'val', 'val', 'options')
 }
 
@@ -1548,7 +1602,8 @@ let foosInContainer = up.fragment.all(container, '.foo')
   Returns an empty list if there are no matches.
 @stable
 */
-export function getAll(...args) {
+// Takes a selector, optionally preceded by a root element, and followed by options.
+export function getAll(...args: any[]): any {
   let [root, selectorString, options] = parseGetArgs(args)
 
   // (0) up.fragment.all(element) or up.fragment.all(element, element) should return an array of that element.
@@ -1623,7 +1678,7 @@ To include all elements matching the selector, use `up.element.subtree()`.
   A list of all matching elements.
 @stable
 */
-export function getSubtree(element, selector, options = {}) {
+export function getSubtree(element: Element, selector: string, options: PlainObject = {}): any {
   return new Selector(selector, element, options).subtree(element)
 }
 
@@ -1640,7 +1695,7 @@ Will always return `false` if the two elements are on different [layers](/api/up
   Whether the root contains the given element or selector.
 @experimental
 */
-export function contains(root, selectorOrElement) {
+export function contains(root: Element, selectorOrElement: any): boolean {
   if (isElement(selectorOrElement)) {
     // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
     return elementContains(root, selectorOrElement) && layerStack.get(root)?.contains(selectorOrElement)
@@ -1667,7 +1722,7 @@ the given element. To match ancestors regardless of layers, use `up.element.clos
   Returns `null` or `undefined` if no element matches in the same layer.
 @stable
 */
-export function closest(element, selector, options) {
+export function closest(element: Element, selector: string, options?: PlainObject): HTMLElement | undefined {
   return new Selector(selector, element, options).closest(element)
 }
 
@@ -1749,7 +1804,7 @@ See [errors in user code](/learn/render-lifecycle#errors-in-user-code) for detai
 @stable
 @signature
 */
-export function destroy(...args) {
+export function destroy(...args: any[]): any {
   const options = parseTargetAndOptions(args)
   const element = getSmart(options.target, options)
 
@@ -1760,7 +1815,7 @@ export function destroy(...args) {
   return up.migrate.formerlyAsync?.('up.destroy()')
 }
 
-function parseTargetAndOptions(args) {
+function parseTargetAndOptions(args: any[]): PlainObject {
   const options = parseArgIntoOptions(args, 'target')
   if (isElement(options.target)) {
     options.origin ||= options.target
@@ -1796,7 +1851,7 @@ This prevents interaction with the element and hides it from assistive technolog
 @stable
 */
 
-export function markFragmentAsDestroying(element) {
+export function markFragmentAsDestroying(element: Element): void {
   element.classList.add('up-destroying')
   element.setAttribute('inert', '')
 }
@@ -1920,7 +1975,7 @@ up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate: 'a
 @stable
 @signature
 */
-export const reload = mockable(function reload(...args) {
+export const reload = mockable(function reload(...args: any[]): any {
   const options = { ...config.reloadOptions, ...parseTargetAndOptions(args) }
   options.target ||= ':main'
   const element = getSmart(options.target, options)
@@ -1933,7 +1988,7 @@ export const reload = mockable(function reload(...args) {
   return render(options)
 })
 
-function conditionalHeaders(element) {
+function conditionalHeaders(element: Element): Record<string, string> {
   let headers = {}
   let time = timeOf(element)
   if (time) {
@@ -1976,7 +2031,7 @@ up.visit('/users')
 
 @stable
 */
-export function visit(url, options) {
+export function visit(url: string, options?: PlainObject): any {
   return navigate({ ...options, url })
 }
 
@@ -1999,7 +2054,7 @@ successKey('onFailFinished') // result: 'onFinished'
 @function up.fragment.successKey
 @internal
 */
-export function successKey(key) {
+export function successKey(key: string): string | undefined {
   let match = KEY_PATTERN.exec(key)
   if (match) {
     let [_, prefix, suffix] = match
@@ -2030,7 +2085,7 @@ failKey('onFailFinished') // result: undefined
 @function up.fragment.failKey
 @internal
 */
-export function failKey(key) {
+export function failKey(key: string): string | undefined {
   let match = KEY_PATTERN.exec(key)
   if (match) {
     let [_, prefix, suffix] = match
@@ -2082,7 +2137,7 @@ selector = up.fragment.toTarget(element) // returns '.klass'
   The derived selector string.
 @stable
 */
-export function toTarget(element, options) {
+export function toTarget(element: Element | string, options?: PlainObject): string {
   return presence(element, isString) || tryToTarget(element, options) || cannotTarget(element)
 }
 
@@ -2104,22 +2159,23 @@ Returns whether Unpoly can [derive a target selector](/learn/target-derivation) 
   Whether a selector can be derived for the given element.
 @stable
 */
-export function isTargetable(element, options) {
+export function isTargetable(element: Element, options?: PlainObject): boolean {
   return !!tryToTarget(element, options)
 }
 
-function untargetableMessage(element) {
+function untargetableMessage(element: any): string {
   return `Cannot derive good target selector from a <${element.localName}> element without identifying attributes. Try setting an [id] or configure up.fragment.config.targetDerivers.`
 }
 
-function cannotTarget(element) {
+function cannotTarget(element: any): never {
   throw new CannotTarget(untargetableMessage(element))
 }
 
-export function tryToTarget(element, options = {}) {
+// The element may also be a selector string, which is returned unchanged.
+export function tryToTarget(element: any, options: PlainObject = {}): string | undefined {
   let derivers = options.strong ? config.strongTargetDerivers : config.targetDerivers
 
-  return findResult(derivers, function(deriver) {
+  return findResult(derivers, function(deriver: TargetDeriver) {
     let target = deriveTarget(element, deriver)
 
     if (target && isGoodTarget(target, element, options)) {
@@ -2128,7 +2184,7 @@ export function tryToTarget(element, options = {}) {
   })
 }
 
-function deriveTarget(element, deriver) {
+function deriveTarget(element: Element, deriver: TargetDeriver): string | undefined {
   if (isFunction(deriver)) {
     return deriver(element)
   } else if (element.matches(deriver)) {
@@ -2150,7 +2206,7 @@ function deriveTarget(element, deriver) {
   }
 }
 
-function deriveTargetFromPattern(element, deriver) {
+function deriveTargetFromPattern(element: Element, deriver: string): string | undefined {
   // Now that we know that a deriver is applicable to our element, we're using
   // the element's tag name and attribute to form a more specific target.
   // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
@@ -2214,7 +2270,7 @@ function deriveTargetFromPattern(element, deriver) {
   return result
 }
 
-function isGoodTarget(target, element, options = {}) {
+function isGoodTarget(target: string, element: Element, options: PlainObject = {}): boolean {
   let verify = options.verify ?? config.verifyDerivedTarget
   return !isAlive(element) || !verify || getSmart(target, { layer: element, ...options }) === element
 }
@@ -2267,7 +2323,8 @@ up.fragment.toTarget(element)
 @stable
 */
 
-function matchesPattern(pattern, str) {
+// The pattern is a string with optional * wildcards, a RegExp or a function.
+function matchesPattern(pattern: any, str: string): boolean {
   if (isRegExp(pattern)) {
     return pattern.test(str)
   } else {
@@ -2275,7 +2332,7 @@ function matchesPattern(pattern, str) {
   }
 }
 
-function goodClassesForTarget(element) {
+function goodClassesForTarget(element: Element): string[] {
   let isGood = (klass) => !some(config.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
   return filterList(element.classList, isGood)
 }
@@ -2284,11 +2341,11 @@ const MAIN_PSEUDO = /:main\b/
 const LAYER_PSEUDO = /:layer\b/
 const ORIGIN_PSEUDO = /:origin\b/
 
-export function containsMainPseudo(target) {
+export function containsMainPseudo(target: string): boolean {
   return MAIN_PSEUDO.test(target)
 }
 
-export function expandTargets(targets, options = {}) {
+export function expandTargets(targets: any, options: PlainObject = {}): string[] {
   const { layer } = options
   if (layer !== 'new' && !(layer instanceof Layer)) {
     fail('Must pass an up.Layer as { layer } option, but got %o', layer)
@@ -2324,7 +2381,7 @@ export function expandTargets(targets, options = {}) {
   return uniq(expanded)
 }
 
-function resolveMode({ layer, mode }) {
+function resolveMode({ layer, mode }: PlainObject): string {
   if (layer === 'new') {
     return mode || fail('Must pass a { mode } option together with { layer: "new" }')
   } else {
@@ -2332,7 +2389,7 @@ function resolveMode({ layer, mode }) {
   }
 }
 
-function modernResolveOrigin(target, { origin } = {}) {
+function modernResolveOrigin(target: string, { origin }: { origin?: Element } = {}): string {
   return target.replace(ORIGIN_PSEUDO, function(match) {
     if (origin) {
       return toTarget(origin)
@@ -2342,17 +2399,17 @@ function modernResolveOrigin(target, { origin } = {}) {
   })
 }
 
-export function resolveOrigin(target, options) {
+export function resolveOrigin(target: any, options?: PlainObject): any {
   // up.FormValidator sometimes calls resolveOrigin(undefined)
   if (!isString(target)) return target
   return (up.migrate.resolveOrigin || modernResolveOrigin)(target, options)
 }
 
-export function splitTarget(target) {
+export function splitTarget(target: string): string[] {
   return getComplexTokens(target)
 }
 
-export function parseTargetSteps(target, options = {}) {
+export function parseTargetSteps(target: string, options: PlainObject = {}): RenderStep[] {
   let defaultPlacement = options.defaultPlacement || 'swap'
   let defaultMaybe = options.defaultMaybe ?? false
 
@@ -2390,7 +2447,7 @@ export function parseTargetSteps(target, options = {}) {
   return steps
 }
 
-export function hasAutoHistory(newFragments, layer) {
+export function hasAutoHistory(newFragments: Element[], layer: Layer): boolean {
   // We cannot use up.fragment.contains(fragment, config.autoHistoryTargets)
   // because fragment is not yet attached when we are called from OpenLayerPlan.
 
@@ -2691,6 +2748,7 @@ up.fragment.matches(element, element) // result: true
 
 @stable
 */
+export function matches(element: ElementOrSelector, selector: string, options?: PlainObject): boolean
 export function matches(element, selector, options = {}) {
   element = getOne(element)
   if (isElement(selector)) {
@@ -2701,7 +2759,7 @@ export function matches(element, selector, options = {}) {
   }
 }
 
-export function matchSelectorMap(element, selectorMap, { layer = element } = {}) {
+export function matchSelectorMap(element: Element, selectorMap: PlainObject | undefined, { layer = element }: { layer?: any } = {}): any[] {
   let hits = []
 
   if (selectorMap && element) {
@@ -2715,11 +2773,11 @@ export function matchSelectorMap(element, selectorMap, { layer = element } = {})
   return hits
 }
 
-export function shouldRevalidate(request, response, options = {}) {
+export function shouldRevalidate(request: UpRequest, response: UpResponse, options: PlainObject = {}): boolean {
   return request.fromCache && evalAutoOption(options.revalidate, config.autoRevalidate, response)
 }
 
-function isContainedByRivalStep(steps, candidateStep) {
+function isContainedByRivalStep(steps: RenderStep[], candidateStep: RenderStep): boolean {
   return some(steps, function(rivalStep) {
     return (rivalStep !== candidateStep) &&
       ((rivalStep.placement === 'swap') || (rivalStep.placement === 'content')) &&
@@ -2727,7 +2785,7 @@ function isContainedByRivalStep(steps, candidateStep) {
   })
 }
 
-export function compressNestedSteps(steps) {
+export function compressNestedSteps(steps: RenderStep[]): RenderStep[] {
   if (steps.length < 2) return steps
   let compressed = uniqBy(steps, 'oldElement')
   compressed = reject(compressed, (step) => isContainedByRivalStep(compressed, step))
@@ -2810,7 +2868,7 @@ can [react to being aborted](/api/up:fragment:aborted).
     If omitted, a default message will describe the abort conditions.
 @stable
 */
-export const abort = mockable(function abort(...args) {
+export const abort = mockable(function abort(...args: any[]): void {
   let options = parseTargetAndOptions(args)
 
   // The function that checks whether a given function will be aborted.
@@ -2961,7 +3019,7 @@ up.fragment.onAborted(element, () => clearTimeout(timeout))
   When the element is destroyed, the callback will be unsubscribed automatically.
 @experimental
 */
-export function onAborted(fragment, callback) {
+export function onAborted(fragment: Element, callback: (event: Event) => void): () => void {
   // Aborting the root layer should not abort a poller in an overlay, like it doesn't abort the overlay's requests.
   return onClosest(fragment, 'up:fragment:aborted', { layer: 'origin' }, callback)
 }
@@ -2982,13 +3040,13 @@ Runs a callback when the given element *or its ancestors in the same layer* were
   When the element is destroyed, the callback will be unsubscribed automatically.
 @experimental
 */
-export function onKept(fragment, callback) {
+export function onKept(fragment: Element, callback: (event: Event) => void): () => void {
   return onClosest(fragment, 'up:fragment:kept', { layer: 'origin' }, callback)
 }
 
 // This function lives in up.fragment (not up.element)
 // because we stop the observe via up.fragment.onAborted().
-export function onFirstIntersect(element, callback, { margin = 0 } = {}) {
+export function onFirstIntersect(element: Element, callback: () => void, { margin = 0 }: { margin?: number } = {}): void {
   // IntersectionObserver has some ms lag until it reports intersection entries.
   // This lag also exists for the initial intersection check.
   //
@@ -3021,7 +3079,7 @@ export function onFirstIntersect(element, callback, { margin = 0 } = {}) {
 
 const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
-export function provideNodes(value, { origin, originLayer, data, htmlParser = createNodesFromHTML } = {}) {
+export function provideNodes(value: any, { origin, originLayer, data, htmlParser = createNodesFromHTML }: ProvideNodesOptions = {}): List<Node> {
   if (isString(value) && STARTS_WITH_SELECTOR.test(value)) {
     let [parsedValue, parsedData] = parseScalarJSONPairs(value)[0]
     data = { ...data, ...parsedData }
@@ -3039,7 +3097,7 @@ export function provideNodes(value, { origin, originLayer, data, htmlParser = cr
   return wrapList(value)
 }
 
-function isTemplate(value) {
+function isTemplate(value: any): boolean {
   return isElement(value) && value.matches('template, script[type]') && !isScript(value)
 }
 
@@ -3084,7 +3142,7 @@ let nodes = up.template.clone('#table-placeholder', { rows: 10 })
   You can pass this list to any rendering function, like `up.render()` or `up.Preview#insert()`.
 @stable
 */
-export function cloneTemplate(templateOrSelector, data = {}, { origin, htmlParser } = {}) {
+export function cloneTemplate(templateOrSelector: ElementOrSelector, data: any = {}, { origin, htmlParser }: ProvideNodesOptions = {}): List<Node> {
   // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
   let template = getSmart(templateOrSelector, { origin, layer: 'closest' }) || fail('Template not found: %o', templateOrSelector)
   let event = emit(template, 'up:template:clone', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
@@ -3149,7 +3207,7 @@ Also see documentation for `up.element.createNodesFromHTML()`.
 @stable
 */
 
-function defaultTemplateNodes(template, htmlParser = createNodesFromHTML) {
+function defaultTemplateNodes(template: Element, htmlParser: HTMLParser = createNodesFromHTML): List<Node> {
   let templateText = template.innerHTML
   return htmlParser(templateText)
 }
@@ -3190,7 +3248,7 @@ Returns a function that [destroys](/api/up.destroy) the inserted element and rem
 
 @internal
 */
-export function insertTemp(...args) {
+export function insertTemp(...args: any[]): () => void {
   let [reference, position = 'beforeend', tempValue] = parseArgs(args, 'val', isAdjacentPosition, 'val')
 
   let tempNodes = provideNodes(tempValue, { origin: reference })
@@ -3229,7 +3287,7 @@ export function insertTemp(...args) {
   The callback can return another function that is called when that element no longer matches.
 @internal
 */
-export function trackSelector(selectFn, callback) {
+export function trackSelector(selectFn: () => List<Element>, callback: (element: Element) => any): () => void {
   let tracker = new SelectorTracker(selectFn, callback)
   return tracker.start()
 }
@@ -3237,7 +3295,7 @@ export function trackSelector(selectFn, callback) {
 let mutateLevel = 0
 let afterMutateCleaner = cleaner('fifo')
 
-export function mutate(callback) {
+export function mutate<T>(callback: () => T): T {
   try {
     mutateLevel++
     return callback()
@@ -3248,7 +3306,7 @@ export function mutate(callback) {
   }
 }
 
-export function afterMutate(callback) {
+export function afterMutate(callback: () => void): void {
   if (mutateLevel === 0) {
     callback()
   } else {
@@ -3272,7 +3330,7 @@ This is aliased as `up.layer.context`.
 @experimental
 */
 
-export function install() {
+export function install(): void {
   // Snapshot the keep identity before macros make changes.
   // TODO: Doesn't this need to happen before other macros?
   registerMacro('[up-keep]', (element) => keepIdentity(element))
