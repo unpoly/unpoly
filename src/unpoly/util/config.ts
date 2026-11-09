@@ -1,6 +1,5 @@
 import { queueTask, upperCaseFirst } from '../util.js'
 import { unionSelector } from '../element.js'
-import type { PlainObject } from '../util.js'
 
 /**
 Returns a selector for a config property. See `up.util.Config#selectorFn()`.
@@ -29,7 +28,7 @@ which a TypeScript class can't express. So a namespace casts its `new Config(...
 */
 export type ConfigWith<S extends object> = Config<S> & S
 
-export class Config<S extends object = PlainObject> {
+export class Config<S extends object> {
   declare _label: string
   declare _blueprintFn: () => S
   declare _knownKeys: string[]
