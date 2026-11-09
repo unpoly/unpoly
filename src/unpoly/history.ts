@@ -215,7 +215,7 @@ Returns whether `up.history.config.enabled` allows Unpoly to update the given as
 @return {boolean}
 @internal
 */
-export function isEnabled(aspect: HistoryAspect): boolean {
+export function isHistoryEnabled(aspect: HistoryAspect): boolean {
   let { enabled } = config
   return isArray(enabled) ? enabled.includes(aspect) : !!enabled
 }
@@ -511,7 +511,7 @@ export function push(location: string, trackOptions?: HistoryTrackOptions): void
 function placeAdoptedHistoryEntry(method: 'pushState' | 'replaceState', location: string, trackOptions?: HistoryTrackOptions): void {
   // When up.history.config.enabled excludes 'location', we do nothing.
   // We don't adopt a URL that we never pushed.
-  if (isEnabled('location')) {
+  if (isHistoryEnabled('location')) {
     adoptBase(location)
 
     withTrackOptions(trackOptions, function() {
@@ -881,7 +881,7 @@ export function install(): void {
 export const api = {
   history: {
     config,
-    isEnabled,
+    isEnabled: isHistoryEnabled,
     push,
     replace,
     get location() { return currentLocation() },

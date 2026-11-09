@@ -130,7 +130,7 @@ or its descendants.
 @function contains
 @internal
 */
-export function contains(root: Node, selectorOrElement: ElementOrSelector): boolean {
+export function containsElement(root: Node, selectorOrElement: ElementOrSelector): boolean {
   const element = getOne(selectorOrElement)
   // We cannot use `root.contains(element)` as <form> elements with an input named "contains"
   // would define `root.contains` to return that input (GH#507).
@@ -1671,7 +1671,7 @@ See `up.element.trackDefinitions()`.
 export const api = {
   element: {
     subtree,
-    contains,
+    contains: containsElement,
     closestAttr,
     ancestor,
     get: getOne,

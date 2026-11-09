@@ -9,7 +9,7 @@ import { FragmentScrolling } from '../fragment_scrolling.js'
 import { RenderOptions } from '../render_options.js'
 import { RenderResult } from '../render_result.js'
 import { historyOptions } from '../../../history.js'
-import { build, layerStack } from '../../../layer.js'
+import { buildLayer, layerStack } from '../../../layer.js'
 import { printToStandard } from '../../../log.js'
 import { hungrySteps } from '../../../radio.js'
 import { hello } from '../../../script.js'
@@ -227,7 +227,7 @@ export class OpenLayerPlan extends Addition {
       return this.options = RenderOptions.finalize(optionsWithLayerDefaults)
     }
 
-    return build(this.options, beforeNew) as Overlay
+    return buildLayer(this.options, beforeNew) as Overlay
   }
 
   _handleHistory(): void {

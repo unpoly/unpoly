@@ -7,7 +7,7 @@ import {
 } from './util.js'
 import {
   attrSelector, booleanAttr, booleanOrStringAttr, classSelector, closestAttr,
-  contains as elementContains, createNodesFromHTML, documentPosition, getOne, idSelector,
+  containsElement, createNodesFromHTML, documentPosition, getOne, idSelector,
   isIntersectingWindow, parseSelector, removeAttrsFromHTML, subtree, subtreeFirst, wrapIfRequired,
 } from './element.js'
 import { canPushState } from './browser.js'
@@ -21,7 +21,7 @@ import { DestroyFragment } from './fragment/render/change/destroy_fragment.js'
 import { RenderJob } from './fragment/render/render_job.js'
 import { SelectorTracker } from './fragment/selector_tracker.js'
 import { Selector } from './fragment/selector.js'
-import { isEnabled } from './history.js'
+import { isHistoryEnabled } from './history.js'
 import { config as layerConfig, layerStack, mainTargets } from './layer.js'
 import { Layer } from './layer/base.js'
 import { printToStandard, printToWarn } from './log.js'
@@ -1764,7 +1764,7 @@ Will always return `false` if the two elements are on different [layers](/api/up
 export function contains(root: Element, selectorOrElement: any): boolean {
   if (isElement(selectorOrElement)) {
     // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
-    return elementContains(root, selectorOrElement) && layerStack.get(root)?.contains(selectorOrElement)
+    return containsElement(root, selectorOrElement) && layerStack.get(root)?.contains(selectorOrElement)
   } else {
     return getSubtree(root, selectorOrElement).length > 0
   }
@@ -3409,7 +3409,7 @@ export function install(): void {
 
     documentElement.setAttribute('up-source', normalizeSource(location.href))
 
-    if (!canPushState() && isEnabled('location')) {
+    if (!canPushState() && isHistoryEnabled('location')) {
       return printToWarn('Cannot push history changes. Next render pass with history will load a full page.')
     }
   })

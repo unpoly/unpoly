@@ -487,8 +487,8 @@ in the returned list.
 @return {List<Element>}
 @internal
 */
-export function getSubtree(element: ElementOrSelector, options?: PlainObject): List<HTMLElement>
-export function getSubtree(element, options = {}) {
+export function getViewportSubtree(element: ElementOrSelector, options?: PlainObject): List<HTMLElement>
+export function getViewportSubtree(element, options = {}) {
   element = getSmart(element, options)
   return subtree(element, allSelector())
 }
@@ -506,8 +506,8 @@ In that case we restore / reset the scroll tops of all viewports around the frag
 @return {List<Element>}
 @internal
 */
-export function getAround(element: ElementOrSelector, options?: PlainObject): HTMLElement[]
-export function getAround(element, options = {}) {
+export function getViewportAround(element: ElementOrSelector, options?: PlainObject): HTMLElement[]
+export function getViewportAround(element, options = {}) {
   element = getSmart(element, options)
   return around(element, allSelector())
 }
@@ -752,7 +752,7 @@ function parseOptions(args: any[]): [List<HTMLElement>, PlainObject] {
   } else if (options.around) {
     // This is relevant when updating a fragment with { scroll: 'restore' | 'reset' }.
     // In tht case we restore / reset the scroll tops of all viewports around the fragment.
-    viewports = getAround(options.around, options)
+    viewports = getViewportAround(options.around, options)
   } else {
     viewports = getAll(options)
   }
@@ -1126,8 +1126,8 @@ export const api = {
     revealHash,
     config,
     get: closest,
-    subtree: getSubtree,
-    around: getAround,
+    subtree: getViewportSubtree,
+    around: getViewportAround,
     get root() { return getRoot() },
     rootHeight,
     rootScrollbarWidth,

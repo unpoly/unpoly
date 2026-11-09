@@ -6,7 +6,7 @@ import { on } from '../event.js'
 import { EventEmitter } from '../event/event_emitter.js'
 import { EventListenerGroup } from '../event/event_listener_group.js'
 import {
-  currentLocation, findMetaTags, getLang, isEnabled, push as historyPush, updateLang,
+  currentLocation, findMetaTags, getLang, isHistoryEnabled, push as historyPush, updateLang,
   updateMetaTags,
 } from '../history.js'
 import { closestLayerElement, mainTargets } from '../layer.js'
@@ -869,7 +869,7 @@ export abstract class Layer {
   // Returns whether Unpoly keeps the given history aspect of the browser in sync with this layer.
   // The aspect is one of 'location', 'title', 'metaTags' or 'lang'.
   showsLiveHistory(aspect: HistoryAspect): boolean {
-    return this.history && this.isFront() && isEnabled(aspect)
+    return this.history && this.isFront() && isHistoryEnabled(aspect)
   }
 
   // A layer's title, meta tags, lang or location is what it rendered,

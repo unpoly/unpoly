@@ -4,7 +4,7 @@ import {
 import { fail } from '../../error.js'
 import { getInputDevice } from '../../event.js'
 import { config, successKey } from '../../fragment.js'
-import { layerStack, normalizeOptions } from '../../layer.js'
+import { layerStack, normalizeLayerOptions } from '../../layer.js'
 import { callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback } from '../../script.js'
 import type { List, PlainObject, ValueOrFunction } from '../../util.js'
 import type { InputDevice } from '../../event.js'
@@ -395,7 +395,7 @@ function removeUsePrefix(options: RenderOptions): void {
 
 function preprocess(options: RenderOptions): RenderOptions {
   up.migrate.preprocessRenderOptions?.(options)
-  normalizeOptions(options)
+  normalizeLayerOptions(options)
   removeUsePrefix(options)
 
   const defaults = merge(

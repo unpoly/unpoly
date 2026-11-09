@@ -405,13 +405,13 @@ function setBaseLayerOption(options: PlainObject): void {
   options.baseLayer = layerStack.get('current', { ...options, normalizeLayerOptions: false })
 }
 
-export function normalizeOptions(options: PlainObject): void {
+export function normalizeLayerOptions(options: PlainObject): void {
   normalizeLayerOption(options)
   options.context ??= {}
   setBaseLayerOption(options)
 }
 
-export function build(options: PlainObject, beforeNew?: (options: PlainObject) => PlainObject): Layer {
+export function buildLayer(options: PlainObject, beforeNew?: (options: PlainObject) => PlainObject): Layer {
   const { mode } = options
   const Class = layerClasses.find((Class) => Class.mode === mode)
 
@@ -1978,9 +1978,9 @@ export const api = {
   layer: {
     config,
     open,
-    build,
+    build: buildLayer,
     ask,
-    normalizeOptions,
+    normalizeOptions: normalizeLayerOptions,
     get stack() { return layerStack.layers },
     get(...args: LayerLookupArgs): Layer | undefined { return layerStack.get(...args) },
     getAll(...args: LayerLookupArgs): Layer[] { return layerStack.getAll(...args) },

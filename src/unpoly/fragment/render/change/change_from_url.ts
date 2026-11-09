@@ -5,7 +5,7 @@ import { failKey, render } from '../../../fragment.js'
 import { ChangeFromContent } from './change_from_content.js'
 import { ChangeFromResponse } from './change_from_response.js'
 import { Change } from './change.js'
-import { isEnabled } from '../../../history.js'
+import { isHistoryEnabled } from '../../../history.js'
 import { printToStandard } from '../../../log.js'
 import { loadPage, makeRequest } from '../../../network.js'
 import { UpResponse } from '../../../network/response.js'
@@ -62,7 +62,7 @@ export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
     // E.g. when the initial page was loaded from a POST response.
     // In this case we make a full page load in hopes to reboot with
     // pushState support. We don't need to when we would not change the browser URL anyway.
-    if (this.options.history && !canPushState() && isEnabled('location')) {
+    if (this.options.history && !canPushState() && isHistoryEnabled('location')) {
       return 'Loading content in new page to restore history support'
     }
   }

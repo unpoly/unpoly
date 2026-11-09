@@ -4,7 +4,7 @@ import {
 } from '../util.js'
 import { getOne } from '../element.js'
 import { fail } from '../error.js'
-import { normalizeOptions } from '../layer.js'
+import { normalizeLayerOptions } from '../layer.js'
 import { Layer } from './base.js'
 import type { LayerStack } from './layer_stack.js'
 
@@ -61,7 +61,7 @@ export class LayerLookup {
     // (2) It will also lookup a string { baseLayer }.
     // (3) It will set the default layer to 'current' if nothing matches.
     if (options.normalizeLayerOptions !== false) {
-      normalizeOptions(options)
+      normalizeLayerOptions(options)
     }
 
     this._options = options

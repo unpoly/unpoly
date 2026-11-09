@@ -15,7 +15,7 @@ import {
 import { anyButtonSelector, fieldSelector } from './form.js'
 import { getSmart, onFirstIntersect, render } from './fragment.js'
 import { RenderOptions } from './fragment/render/render_options.js'
-import { isEnabled } from './history.js'
+import { isHistoryEnabled } from './history.js'
 import { LinkFollowIntent } from './link/link_follow_intent.js'
 import { motionOptions } from './motion.js'
 import { config as networkConfig, isSafeMethod } from './network.js'
@@ -199,7 +199,7 @@ function isPreloadDisabled(link: Element): boolean {
   // (2) Don't preload when the link isn't going to be handled by Unpoly.
   // (3) Don't preload when we're not going to cache the content according to up.network.config.autoCache.
   //     By default this only caches safe links.
-  return (!canPushState() && isEnabled('location')) || !isFollowable(link) || !willCache(link)
+  return (!canPushState() && isHistoryEnabled('location')) || !isFollowable(link) || !willCache(link)
 }
 
 function willCache(link: Element): boolean {
