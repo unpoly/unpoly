@@ -6,7 +6,7 @@ beforeEach(function() {
     toHaveOwnProperty(util, customEqualityTesters) {
       return {
         compare(object, expectedProperty) {
-          return { pass: object.hasOwnProperty(expectedProperty) } // eslint-disable-line no-prototype-builtins
+          return { pass: object.hasOwnProperty(expectedProperty) } // oxlint-disable-line no-prototype-builtins
         }
       }
     }

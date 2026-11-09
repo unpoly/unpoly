@@ -17,7 +17,7 @@ test('--gzip / --no-gzip override the per-config default', () => {
 })
 
 test('only the production build lints', () => {
-  // bin/release publishes the production build, so it must refuse code that fails ESLint. The
+  // bin/release publishes the production build, so it must refuse code that fails the linter. The
   // others stay fast: bin/test --minify builds the minified bundles on demand.
   assert.equal(parseBuildArgs([]).lint, true)
   for (let config of ['development', 'ci', 'minified']) {

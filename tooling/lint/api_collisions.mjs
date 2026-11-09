@@ -4,9 +4,9 @@
 // `api` object literal of each module in the entry's `apis` array and reports keys that more than
 // one module contributes. It costs no bytes in the bundle.
 //
-// The ESLint rule in tooling/eslint/no_api_collisions.mjs runs it for the entry. It is a module of
-// its own, because it reads other files than the one being linted, which a linter that only
-// re-lints changed files can't know. Checking again only parses the modules that changed.
+// It is not an Oxlint rule, because it reads other files than the one being linted, which a
+// linter that only re-lints changed files can't know. `bin/lint` runs it, and the dev watcher
+// runs it with every round (it only parses the modules that changed, in a few milliseconds).
 import fs from 'node:fs'
 import path from 'node:path'
 import { parse } from 'acorn'

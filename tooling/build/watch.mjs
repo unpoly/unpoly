@@ -67,7 +67,7 @@ export async function runWatch({ bundles, sourcemap }) {
       // `startedAt` passes the new directory mtime, which waitForFreshBuild() compares against.
       if (!changedFiles.size) return standingErrors()
       let startedAt = Date.now()
-      // ESLint runs in this thread while esbuild and Terser work in their own processes and threads.
+      // Oxlint runs in its own process, like esbuild. Terser works in its own threads.
       let [{ built, errors: buildErrors }, lintErrors] = await Promise.all([build(changedFiles), linter.lint(changedFiles)])
       // Printed, but not reported to bin/test: a warning doesn't fail a build.
       if (linter.warnings.length) console.log(pc.yellow(linter.warnings.join('\n')))

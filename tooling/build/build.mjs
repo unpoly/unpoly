@@ -41,9 +41,10 @@ export function parseBuildArgs(argv) {
   }
   // Gzip is only meaningful for the production bundle, so that's its default.
   if (gzip === null) gzip = config === 'production'
-  // The production build is what bin/release publishes, so it refuses code that fails ESLint, as
-  // the webpack build did. Linting src/ takes ~10 s, though, longer than the build, so the other
-  // configs leave it to bin/lint, CI's Lint job and the dev watcher. bin/test --minify builds the
+  // The production build is what bin/release publishes, so it refuses code that fails the linter,
+  // as the webpack build did. Linting src/ with all rules takes ~2 s, though, mostly for the rules
+  // that run in JavaScript, so the other configs leave it to bin/lint, CI's Lint job and the dev
+  // watcher. bin/test --minify builds the
   // minified bundles often and must stay fast.
   let lint = config === 'production'
 
@@ -78,7 +79,7 @@ export async function runBuild(argv) {
       // them harmless, and stripping would cost the dev build more than everything else together.
       strip: options.config === 'production',
     }),
-    // ESLint runs in this thread while esbuild and Terser work in their own processes and threads.
+    // Oxlint runs in its own process, like esbuild. Terser works in its own threads.
     options.lint ? lintSources() : [],
   ])
   let errors = [...buildErrors, ...lintErrors]
@@ -93,11 +94,10 @@ export async function runBuild(argv) {
   return 0
 }
 
-// The errors ESLint finds in src/, formatted. Imported on demand, because loading ESLint costs
-// every other build time.
+// The errors Oxlint finds in src/ with all rules (.oxlintrc.json), formatted.
 async function lintSources() {
-  let { SourceLinter } = await import('./lint.mjs')
-  return new SourceLinter().lint([])
+  let { SourceLinter, FULL_CONFIG } = await import('./lint.mjs')
+  return new SourceLinter({ config: FULL_CONFIG }).lint([])
 }
 
 // Builds every bundle of a config once. Resolves with a list of formatted error messages, empty
