@@ -3,10 +3,53 @@ import { fail } from '../error.js'
 import { readFieldDisabled } from '../form.js'
 import { isBeforeBoot, isEvaling } from '../framework.js'
 import { readData } from '../script.js'
+import type { Layer } from '../layer/base.js'
+
+/**
+An element, document or window that Unpoly listens on. It remembers its listeners,
+so `up.off()` can find them.
+@internal
+*/
+export type ListenerTarget = EventTarget & { upEventListeners?: Record<string, EventListener> }
+
+/**
+A function registered with `up.on()`. It is called with the event, the element matching
+the selector (or the element it listens on) and, if it takes three arguments, the element's data.
+*/
+export type ListenerCallback = ((event: Event, element: Element, data?: any) => any) & { upUid?: number }
+
+/**
+Everything an `up.EventListener` needs to know.
+@internal
+*/
+export interface EventListenerAttributes {
+  element: ListenerTarget
+  eventType: string
+  selector?: string | (() => string)
+  callback: ListenerCallback
+  guard?: (event: Event) => boolean
+  baseLayer?: Layer
+  passive?: boolean
+  once?: boolean
+  capture?: boolean
+  beforeBoot?: boolean
+}
 
 export class EventListener {
+  declare element: ListenerTarget
+  declare eventType: string
+  declare selector: string | (() => string) | undefined
+  declare callback: ListenerCallback
+  declare guard: ((event: Event) => boolean) | undefined
+  declare baseLayer: Layer | undefined
+  declare passive: boolean | undefined
+  declare once: boolean | undefined
+  declare capture: boolean | undefined
+  declare beforeBoot: boolean
+  declare isDefault: boolean
+  declare _key: string
 
-  constructor(attributes) {
+  constructor(attributes: EventListenerAttributes) {
     this.element = attributes.element
     this.eventType = attributes.eventType
     this.selector = attributes.selector
@@ -17,7 +60,7 @@ export class EventListener {
     this.once = attributes.once
     this.capture = attributes.capture
 
-    this._key = this.constructor._buildKey(attributes)
+    this._key = (this.constructor as typeof EventListener)._buildKey(attributes)
     this.isDefault = isEvaling()
 
     // We don't usually run up.on() listeners before Unpoly has booted.
@@ -32,7 +75,7 @@ export class EventListener {
     this.nativeCallback = this.nativeCallback.bind(this)
   }
 
-  bind() {
+  bind(): void {
     const map = (this.element.upEventListeners ||= {})
     if (map[this._key]) {
       fail('up.on(): The %o callback %o cannot be registered more than once', this.eventType, this.callback)
@@ -42,7 +85,7 @@ export class EventListener {
     this.element.addEventListener(...this._addListenerArg())
   }
 
-  _addListenerArg() {
+  _addListenerArg(): [string, (event: Event) => void, AddEventListenerOptions] {
     // Avoid setting a default { passive: false } since some browsers have non-false
     // defaults for some event types like `touchstart`.
     // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#parameters
@@ -50,7 +93,7 @@ export class EventListener {
     return [this.eventType, this.nativeCallback, options]
   }
 
-  unbind() {
+  unbind(): void {
     let map = this.element.upEventListeners
     if (map) {
       delete map[this._key]
@@ -58,7 +101,7 @@ export class EventListener {
     this.element.removeEventListener(...this._addListenerArg())
   }
 
-  nativeCallback(event) {
+  nativeCallback(event: Event): void {
     if (isBeforeBoot() && !this.beforeBoot) {
       return
     }
@@ -67,7 +110,7 @@ export class EventListener {
     // 2. event.target is the element that received an event, which might be a
     //    child of `selector`.
     // 3. There is only a single event bubbling up the DOM, so we are only called once.
-    let element = event.target
+    let element = event.target as Element
     if (this.selector) {
       let selector = evalOption(this.selector)
       element = element.closest(selector)
@@ -112,7 +155,7 @@ export class EventListener {
     }
   }
 
-  static fromElement(attributes) {
+  static fromElement(attributes: EventListenerAttributes): EventListener | undefined {
     let map = attributes.element.upEventListeners
     if (map) {
       const key = this._buildKey(attributes)
@@ -120,7 +163,7 @@ export class EventListener {
     }
   }
 
-  static _buildKey(attributes) {
+  static _buildKey(attributes: EventListenerAttributes): string {
     // Give the callback function a numeric identifier so it
     // can become part of the upEventListeners key.
     attributes.callback.upUid ||= uid()
@@ -132,7 +175,7 @@ export class EventListener {
     ].join('|')
   }
 
-  static allNonDefault(element) {
+  static allNonDefault(element: ListenerTarget): EventListener[] {
     let map = element.upEventListeners
     if (map) {
       const listeners = Object.values(map)
