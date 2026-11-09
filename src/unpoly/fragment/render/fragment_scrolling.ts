@@ -112,7 +112,8 @@ export class FragmentScrolling extends FragmentProcessor {
     // If the layer has its own viewport, like a modal, revealing the box will
     // scroll the layer viewport. Revealing the layer element would scroll
     // the main document viewport.
-    return this._revealElement(this.layer.getBoxElement())
+    // The render pass always passes a { layer }.
+    return this._revealElement(this.layer!.getBoxElement())
   }
 
   _scrollTo(position: number): boolean {

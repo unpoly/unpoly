@@ -539,11 +539,11 @@ up.fragment.source('#two') // returns '/foo'
 @stable
 */
 export function sourceOf(element: ElementOrSelector, options: PlainObject = {}): string | undefined {
-  element = getSmart(element, options)
+  element = getSmart(element, options)!
   return closestAttr(element, 'up-source')
 }
 
-export function normalizeSource(source: string | undefined): string | undefined {
+export function normalizeSource(source: string): string {
   // Don't use u.matchableURL() here. We need to keep the trailing slash here,
   // to support backends that care about trailing slashes.
   return normalizeURL(source, { hash: false })
@@ -1280,7 +1280,8 @@ export function findKeepPlan(options: PlainObject): KeepPlan | undefined {
   if (!oldElementMode) { return }
 
   let partner
-  let partnerSelector = tryToTarget(oldElement)
+  // Without a target we keep looking for "undefined", which matches nothing.
+  let partnerSelector = tryToTarget(oldElement)!
   if (!partnerSelector) {
     printToWarn('[up-keep]', 'Cannot keep untargetable %o', oldElement)
   }
@@ -1325,7 +1326,7 @@ export function findKeepPlan(options: PlainObject): KeepPlan | undefined {
   return plan
 }
 
-function keepIdentity(element: FragmentElement, mode: string | boolean = keepMode(element)) {
+function keepIdentity(element: FragmentElement, mode: string | boolean | undefined = keepMode(element)) {
   return element.upKeepIdentity ??= copy(buildKeepIdentity(element, mode))
 }
 
@@ -1337,7 +1338,7 @@ export function defaultNormalizeKeepHTML(html: string): string {
   return html
 }
 
-function buildKeepIdentity(element: Element, mode: string | boolean) {
+function buildKeepIdentity(element: Element, mode: string | boolean | undefined) {
   if (mode === 'same-html') {
     return config.normalizeKeepHTML(element.outerHTML)
   } else if (mode === 'same-data') {
@@ -1348,12 +1349,12 @@ function buildKeepIdentity(element: Element, mode: string | boolean) {
 }
 
 
-function keepMode(element: Element): string | boolean {
+function keepMode(element: Element): string | boolean | undefined {
   return booleanOrStringAttr(element, 'up-keep')
 }
 
 
-export function emitFragmentInserted(element: FragmentElement, meta: PlainObject): Event {
+export function emitFragmentInserted(element: FragmentElement, meta: PlainObject): Event | undefined {
   if (element.upInserted) return
   element.upInserted = true
 
@@ -1463,7 +1464,7 @@ If the destruction is [animated](/api/up.motion), the fragment is "unalive" whil
   Whether the fragment (and its ancestors) are considered alive.
 @experimental
 */
-export function isAlive(fragment: Element | undefined): boolean {
+export function isAlive(fragment: Element): boolean {
   return fragment.isConnected && isNotDestroying(fragment)
 }
 
@@ -1842,7 +1843,8 @@ Will always return `false` if the two elements are on different [layers](/api/up
 export function contains(root: Element, selectorOrElement: any): boolean {
   if (isElement(selectorOrElement)) {
     // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
-    return containsElement(root, selectorOrElement) && layerStack.get(root)?.contains(selectorOrElement)
+    // Returns undefined when the root is in no layer.
+    return (containsElement(root, selectorOrElement) && layerStack.get(root)?.contains(selectorOrElement)) as boolean
   } else {
     return getSubtree(root, selectorOrElement).length > 0
   }
@@ -2123,7 +2125,8 @@ export const reload = mockable(function reload(...args: RenderArgs | []): Render
   const options = { ...config.reloadOptions, ...parseTargetAndOptions(args) }
   options.target ||= ':main'
   // up.reload() takes one element or selector, not a list of target selectors.
-  const element = getSmart(options.target as ElementOrSelector, options)
+  // A target that matches nothing throws a TypeError below.
+  const element = getSmart(options.target as ElementOrSelector, options)!
   options.url ||= sourceOf(element)
   options.headers = merge(options.headers, conditionalHeaders(element))
   if (options.keepData || booleanAttr(element, 'up-keep-data')) {
@@ -2390,7 +2393,8 @@ function deriveTargetFromPattern(element: Element, deriver: string): string | un
   for (let attributeName in attributes) {
     // If a deriver contains an attribute value (e.g. '[rel=canonical]') we use that for the target.
     // If the deriver has a value-less attribute (e.g. '[rel]') we use the actual attribute value from the element.
-    let attributeValue = attributes[attributeName] || element.getAttribute(attributeName)
+    // The element matches the deriver, so it has the attribute.
+    let attributeValue = attributes[attributeName] || element.getAttribute(attributeName)!
 
     if (attributeName === 'id') {
       // We allow a deriver '[id]' to apply to all elements with an ID.
@@ -2550,11 +2554,11 @@ export function resolveOrigin(target: any, options?: PlainObject): any {
   return (up.migrate.resolveOrigin || modernResolveOrigin)(target, options)
 }
 
-export function splitTarget(target: string): string[] {
+export function splitTarget(target: string | undefined): string[] {
   return getComplexTokens(target)
 }
 
-export function parseTargetSteps(target: string, options: PlainObject = {}): RenderStep[] {
+export function parseTargetSteps(target: string | undefined, options: PlainObject = {}): RenderStep[] {
   let defaultPlacement = options.defaultPlacement || 'swap'
   let defaultMaybe = options.defaultMaybe ?? false
 
@@ -2897,7 +2901,8 @@ export function matches(element: ElementOrSelector, selector: string | Element, 
   element = getOne(element)
   if (isElement(selector)) {
     let target = tryToTarget(selector)
-    return target && element.matches(target)
+    // Returns undefined for an element without a target.
+    return (target && element.matches(target)) as boolean
   } else {
     return new Selector(selector, element, options).matches(element)
   }
@@ -2925,7 +2930,8 @@ function isContainedByRivalStep(steps: RenderStep[], candidateStep: RenderStep):
   return some(steps, function(rivalStep) {
     return (rivalStep !== candidateStep) &&
       ((rivalStep.placement === 'swap') || (rivalStep.placement === 'content')) &&
-      rivalStep.oldElement.contains(candidateStep.oldElement)
+      // Steps have an old element once their target is matched.
+      rivalStep.oldElement!.contains(candidateStep.oldElement!)
   })
 }
 

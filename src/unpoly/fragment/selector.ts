@@ -30,7 +30,8 @@ export class Selector {
     let noLayers = externalDocument || options.layer === 'any' || layerStack.attachedCount === 1
 
     // Also normalizes options: a missing { layer } with an { origin } becomes 'origin'.
-    let layers: Layer[] | false = options.layer !== 'new' && !noLayers && layerStack.getAll(options)
+    // False for a new layer or without layers. The branches below only read it as an array.
+    let layers = (options.layer !== 'new' && !noLayers && layerStack.getAll(options)) as Layer[]
     let expandTargetLayer
 
     if (options.layer === 'new') {
@@ -115,11 +116,12 @@ export class Selector {
     })
   }
 
-  _passesFilter(element: Element): boolean {
-    return element && every(this._filters, (filter) => filter(element))
+  _passesFilter(element: Element | null): boolean {
+    // Null for a missing element, which callers treat like false.
+    return (element && every(this._filters, (filter) => filter(element))) as boolean
   }
 
-  _filterOne(element: HTMLElement): HTMLElement | undefined {
+  _filterOne(element: HTMLElement | null): HTMLElement | undefined {
     return presence(element, this._passesFilter.bind(this))
   }
 

@@ -56,7 +56,8 @@ export class FragmentFocus extends FragmentProcessor {
       case true:
         return this._focusElement(this.fragment)
       case 'layer':
-        return this._focusElement(this.layer.getFocusElement())
+        // The render pass always passes a { layer }.
+        return this._focusElement(this.layer!.getFocusElement())
       case 'main':
         return this._focusSelector(':main')
       case 'hash':
@@ -88,7 +89,7 @@ export class FragmentFocus extends FragmentProcessor {
   }
 
   _restoreLostFocus(): boolean | undefined {
-    return this.focusCapsule?.restore(this.layer, PREVENT_SCROLL_OPTIONS)
+    return this.focusCapsule?.restore(this.layer!, PREVENT_SCROLL_OPTIONS)
   }
 
   _restorePreviousFocusForLocation(): boolean {

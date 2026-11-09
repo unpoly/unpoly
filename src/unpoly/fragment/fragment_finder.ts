@@ -53,8 +53,9 @@ export class FragmentFinder {
     }
   }
 
+  // _findInRegion() only calls this with an origin.
   _findClosest(): HTMLElement | undefined {
-    return closest(this._origin, this._selector, this._options)
+    return closest(this._origin!, this._selector, this._options)
   }
 
   _findDescendantInRegion(): HTMLElement | undefined {
@@ -63,7 +64,7 @@ export class FragmentFinder {
     return findResult(simpleSelectors, (simpleSelector) => {
       let parts = simpleSelector.match(DESCENDANT_SELECTOR)
       if (parts) {
-        let parent = closest(this._origin, parts[1], this._options)
+        let parent = closest(this._origin!, parts[1], this._options)
         if (parent) {
           return getFirstDescendant(parent, parts[2], this._options)
         }

@@ -216,7 +216,8 @@ export class ResponseDoc {
   commitSteps(steps: RenderStep[]): RenderStep[] {
     // If multiple steps want to match the same new element, the first step will remain in the left.
     // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
-    return steps.filter((step) => this.commitElement(step.newElement))
+    // Steps have a new element once they're matched.
+    return steps.filter((step) => this.commitElement(step.newElement!))
   }
 
   _trySelectStep(step: RenderStep): boolean | undefined {
@@ -237,7 +238,7 @@ export class ResponseDoc {
     if (selectEvent) {
       selectEvent.newFragment = newElement
       selectEvent.renderOptions = step.originalRenderOptions
-      emit(step.oldElement, selectEvent, { callback: step.selectCallback })
+      emit(step.oldElement!, selectEvent, { callback: step.selectCallback })
       if (selectEvent.defaultPrevented) {
         return
       }

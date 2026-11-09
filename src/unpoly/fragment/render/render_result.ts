@@ -134,8 +134,9 @@ export class RenderResult {
   */
 
   constructor({ layer, target, renderOptions = {}, partialResults = [] }: RenderResultOptions = {}) {
-    this.layer = layer
-    this.target = target
+    // Unpoly always passes both. Only specs build an empty result.
+    this.layer = layer!
+    this.target = target!
     this.renderOptions = renderOptions
 
     this.fragments = this._partialPhase(partialResults, 'fragments').flat()
