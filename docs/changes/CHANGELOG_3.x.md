@@ -2,6 +2,7 @@ Unreleased
 ----------
 
 - Fix a bug where [`[up-confirm="false"]`](/api/up-follow#up-confirm) and `[data-confirm="false"]` showed a confirmation dialog with the text "false". Rails renders `data: { confirm: false }` this way. These values now mean that no confirmation is needed.
+- Fix a bug where [`up.element.affix()`](/api/up.element.affix) and [`up.element.createFromSelector()`](/api/up.element.createFromSelector) threw an error when a quoted attribute value contained a `]` character, like in `input[name="user[email]"]`.
 
 
 3.15.0

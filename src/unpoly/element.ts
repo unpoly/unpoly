@@ -687,7 +687,7 @@ export function parseSelector(rawSelector: string): ParsedSelector {
 
     depthSelector = depthSelector.replace(/\[[^\]]*]/g, function(attr) {
       attr = restoreSelectorLiterals(attr)
-      let [_raw, name, _operator, quote, value] = attr.match(/\[([\w-]+)(?:([~|^$*]?=)(["'])?([^\3\]]*?)\3)?]/)
+      let [_raw, name, _operator, quote, value] = attr.match(/\[([\w-]+)(?:([~|^$*]?=)(["'])?(.*?)\3)?]/s)
       quote ||= '"'
       parsed.attributes[name] = value ? parseString(quote + value + quote) : ''
       return ''
