@@ -57,6 +57,15 @@ Your own code then accesses Unpoly's JavaScript API through the `window.up` glob
 without an explicit `import`.
 
 
+## Downloading a release {#download}
+
+To host Unpoly yourself without npm, download the complete release as a `.tgz` archive:
+
+[unpoly-[[=version]].tgz](https://registry.npmjs.org/unpoly/-/unpoly-[[=version]].tgz)
+
+The archive contains all JavaScript and CSS builds, minified and unminified.
+
+
 ## Optional extensions {#extensions}
 
 You now have everything you need to start using Unpoly.
