@@ -4,10 +4,33 @@ import { RenderOptions } from '../render_options.js'
 import { layerStack } from '../../../layer.js'
 import { animate } from '../../../motion.js'
 import { clean } from '../../../script.js'
+import type { AnimationValue } from '../../../motion.js'
+import type { LayerReference } from '../render_options.js'
+import type { Layer } from '../../../layer/base.js'
 
-export class DestroyFragment extends Change {
+/**
+Options for `up.destroy()`, plus the element to destroy.
+@internal
+*/
+export interface DestroyFragmentOptions {
+  element: Element
+  animation?: AnimationValue
+  duration?: number
+  easing?: string
+  onFinished?: () => void
+  log?: any
+  layer?: LayerReference
+  [key: string]: any
+}
 
-  constructor(options) {
+export class DestroyFragment extends Change<DestroyFragmentOptions> {
+  declare _layer: Layer
+  declare _element: Element
+  declare _animation: AnimationValue | undefined
+  declare _log: any
+  declare _parent: ParentNode | null
+
+  constructor(options: DestroyFragmentOptions) {
     super(options)
     this._layer = layerStack.get(options) || layerStack.current
     this._element = this.options.element
@@ -15,7 +38,7 @@ export class DestroyFragment extends Change {
     this._log = this.options.log
   }
 
-  execute() {
+  execute(): void {
     // Destroying a fragment is a sync function.
     //
     // A variant of the logic below can also be found in UpdateLayerPlan.
@@ -40,7 +63,7 @@ export class DestroyFragment extends Change {
     }))
   }
 
-  _erase() {
+  _erase(): void {
     this._layer.asCurrent(() => {
       abort(this._element)
       clean(this._element, { layer: this._layer })
@@ -48,7 +71,7 @@ export class DestroyFragment extends Change {
     })
   }
 
-  _emitDestroyed() {
+  _emitDestroyed(): void {
     emitFragmentDestroyed(this._element, { parent: this._parent, log: this._log })
   }
 
