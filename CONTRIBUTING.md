@@ -88,7 +88,7 @@ changing documentation. The directive set is large and you won't guess it.
 
 ### [👗 Code style](docs/contributing/code-style.md)
 
-> Plain JavaScript for now, no dependencies, no jQuery.
+> Moving to TypeScript module by module, no dependencies, no jQuery.
 > Byte count is a real constraint that sometimes
 > justifies unconventional code.
 > You can run ESLint with `bin/lint`, and the type check with `bin/typecheck`.

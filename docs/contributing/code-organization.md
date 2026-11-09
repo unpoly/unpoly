@@ -242,7 +242,7 @@ doesn't intercept calls from other modules. A function that specs need to replac
 in `mockable()`, and specs call `up.link.follow.mock()` (see
 [Testing](testing.md#spying-on-unpoly-functions)).
 
-`util.js`, `element.js`, `browser.js`, `error.js` and the classes in `util/` and `error/` are
+`util.ts`, `element.ts`, `browser.ts`, `error.ts` and the classes in `util/` and `error/` are
 evaluated before any feature namespace, so they never import one like `up.fragment`.
 Where they need one, they call it through `window.up` at call time.
 

@@ -100,7 +100,7 @@ would report JSDoc errors.
 
 ## Anatomy of a doc comment
 
-Here is a complete one, from `src/unpoly/util.js`:
+Here is a complete one, from `src/unpoly/util.ts`:
 
 ```js
 /*-

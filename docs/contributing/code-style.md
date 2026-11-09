@@ -4,17 +4,31 @@ How Unpoly's own source is written. Some of these rules are enforced by ESLint (
 most are not.
 
 
-## Plain JavaScript, for now
+## Moving to TypeScript
 
-Unpoly is plain JavaScript, and we are starting to migrate it to TypeScript.
+We are migrating Unpoly to TypeScript, one module at a time, starting with the modules that
+import nothing else (`util.ts`, `element.ts`, ...). The rest is still plain JavaScript.
 
-The build runs the source through TypeScript only to transpile it (ts-loader with
+The build runs every source file through TypeScript only to transpile it (ts-loader with
 `transpileOnly`), and never checks types. The only type check is `bin/typecheck`, which runs
 TypeScript 7's checker over `src/` with loose settings and takes well under a second. It
 still reports errors, so CI runs it as a separate job that may fail.
 
-Types appear in [doc comments](documentation.md) only, in a notation loosely inspired by
-TypeScript. They document intent for the reader; no tool verifies them.
+In a `.ts` module:
+
+- Import other modules by their `.js` name (`import { map } from './util.js'`), also when they
+  are `.ts` files. TypeScript and the build both resolve this to `util.ts`.
+- Annotate exported functions (parameters, and return types where they aren't obvious). Let
+  TypeScript infer the types of local variables, unless a type helps the reader.
+- Give a reusable shape a name (`export type`, `export interface`), like `List<T>` or
+  `NormalizeURLOptions`. Mark a type that isn't public API with `@internal` in a `/** */` comment.
+- Declare class fields with `declare` (`declare left: number`). A field without `declare` makes
+  the compiled class define the property, which costs bytes and changes behavior.
+- `any` is fine where a precise type would be complex.
+- Typing must not change what the build emits. Compare `unpoly.min.js` before and after.
+
+Public types also appear in [doc comments](documentation.md), in a notation loosely inspired
+by TypeScript. Those document intent for the reader; no tool verifies them.
 
 
 ## Every byte counts
