@@ -92,6 +92,32 @@ test('a change without a file name is passed on as null', async () => {
   assert.deepEqual(calls, [[null]])
 })
 
+test('a change that needs no rebuild still makes a round, with no files', async () => {
+  // A guide page saved by rename moves its directory's mtime, which bin/test waits for. Without a
+  // round, every run waited out the grace period until the next source edit.
+  let calls = []
+  let { subject, log, fireTimers } = rounds({ run: async (files) => { calls.push([...files]); return [] } })
+
+  subject.touch()
+  fireTimers()
+  await subject.idle
+
+  assert.deepEqual(calls, [[]])
+  assert.deepEqual(log, ['building', 'idle'])
+})
+
+test('a change that needs no rebuild joins a round with real changes', async () => {
+  let calls = []
+  let { subject, fireTimers } = rounds({ run: async (files) => { calls.push([...files]); return [] } })
+
+  subject.touch()
+  subject.change('/a.js')
+  fireTimers()
+  await subject.idle
+
+  assert.deepEqual(calls, [['/a.js']])
+})
+
 // --- affectedBundles() ------------------------------------------------------
 
 const unpoly = new Set(['/src/unpoly.js', '/src/unpoly/util.js'])

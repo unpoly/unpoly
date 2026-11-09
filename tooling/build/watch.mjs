@@ -55,21 +55,29 @@ export async function runWatch({ bundles, sourcemap }) {
     return { built: affected.length, errors: errors.flat() }
   }
 
+  // What the last builds and lints found, without building or linting anything.
+  async function standingErrors() {
+    return [...new Set([...errors.flat(), ...await linter.format()])]
+  }
+
   let rounds = new Rounds({
     status: new BuildStatus(),
     async run(changedFiles) {
+      // Only files that no bundle reads have changed. The round itself is the point: its
+      // `startedAt` passes the new directory mtime, which waitForFreshBuild() compares against.
+      if (!changedFiles.size) return standingErrors()
       let startedAt = Date.now()
       // ESLint runs in this thread while esbuild and Terser work in their own processes and threads.
       let [{ built, errors: buildErrors }, lintErrors] = await Promise.all([build(changedFiles), linter.lint(changedFiles)])
       // The modern and es6 bundles report the same syntax error.
-      let errors = [...new Set([...buildErrors, ...lintErrors])]
-      if (errors.length) {
+      let roundErrors = [...new Set([...buildErrors, ...lintErrors])]
+      if (roundErrors.length) {
         console.log(pc.red(`Build failed in ${Date.now() - startedAt} ms:`))
-        console.log(errors.join('\n\n'))
+        console.log(roundErrors.join('\n\n'))
       } else {
         console.log(pc.green(`Built ${built} of ${bundles.length} bundles in ${Date.now() - startedAt} ms`))
       }
-      return errors
+      return roundErrors
     },
   })
 
@@ -79,6 +87,9 @@ export async function runWatch({ bundles, sourcemap }) {
       // their own. Rebuild everything, but there is nothing to lint.
       if (directory || !file) rounds.change(null)
       else if (isWatchable(file)) rounds.change(file)
+      // A guide page, an image, an editor's swap file. Nothing to build, but bin/test sees the
+      // directory's mtime move (see newestSource()) and waits for a round that started after it.
+      else rounds.touch()
     }, {
       skip: (name) => SKIP_DIRS.has(name),
       onError: (error, dir) => console.log(pc.red(`Cannot watch ${path.relative(PROJECT_ROOT, dir)} (${error.code}). Edits in it will not rebuild.`)),
@@ -154,6 +165,12 @@ export class Rounds {
   // `file` is an absolute path, or null for a change we can't attribute to a file.
   change(file) {
     this.#changed.add(file)
+    this.touch()
+  }
+
+  // A change that needs no rebuild. It still gets a round, with an empty `changedFiles`, so
+  // the status reports a newer `startedAt`.
+  touch() {
     this.#pending = true
     this.#clearTimer(this.#timer)
     this.#timer = this.#setTimer(() => this.#start(), this.#debounceMs)

@@ -55,8 +55,9 @@ const isWatchable = (name) => WATCHABLE_SUFFIXES.some((suffix) => name.endsWith(
 //
 // Directories count too. Deleting or moving a file changes no file's mtime, only its directory's,
 // and moved files keep theirs. Without the directory, a run started right after `rm` would find
-// everything fresh before the watcher had even seen the deletion. The price: a new non-source
-// file (a guide page, an image) next to sources costs the next run the grace period once.
+// everything fresh before the watcher had even seen the deletion. A non-source file (a guide
+// page, an image, a swap file) moves its directory's mtime too, so the watcher answers every
+// change in these directories with a round, an empty one if nothing needs building.
 export function newestSource(root = PROJECT_ROOT, dirs = SOURCE_DIRS) {
   let newest = 0
   let newestFile = null
