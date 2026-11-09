@@ -2,28 +2,30 @@ import { map } from '../../util.js'
 
 const NONCE_PATTERN = /'nonce-([^']+)'/g
 
-function findNonces(cspPart) {
+function findNonces(cspPart: string): string[] {
   let matches = cspPart.matchAll(NONCE_PATTERN)
   return map(matches, '1')
 }
 
 export class CSPInfo {
+  declare declaration: string
+  declare nonces: string[]
 
-  constructor(declaration = '', nonces = []) {
+  constructor(declaration = '', nonces: string[] = []) {
     this.declaration = declaration
     this.nonces = nonces
   }
 
-  isStrictDynamic() {
+  isStrictDynamic(): boolean {
     return this.declaration.includes("'strict-dynamic'")
   }
 
-  isUnsafeEval() {
+  isUnsafeEval(): boolean {
     return this.declaration.includes("'unsafe-eval'")
   }
 
-  static fromHeader(cspHeader) {
-    let results = {}
+  static fromHeader(cspHeader: string | undefined): CSPInfo {
+    let results: Record<string, [declaration: string, nonces: string[]]> = {}
 
     if (cspHeader) {
       let declarations = cspHeader.split(/\s*;\s*/)
@@ -43,7 +45,7 @@ export class CSPInfo {
     }
   }
 
-  static none() {
+  static none(): CSPInfo {
     return new this()
   }
 
