@@ -10,30 +10,37 @@
 // under its old name. A directory watch has neither problem: it reports every name that is
 // written, created, renamed or deleted in it, whatever happens to the inodes.
 
-import { readdirSync, statSync, watch } from 'node:fs'
+import { readdirSync, statSync, watch as fsWatch } from 'node:fs'
 import path from 'node:path'
 
 // Calls `onChange(file, { directory })` for every event under `root`, with the absolute path
 // of the entry that changed. `directory` is true when that entry is (or was) a directory: its
 // contents appeared or went away as a whole, without an event of their own. `file` is null when
 // Node could not name the entry. Directories whose name `skip()` returns true for are not watched.
+// `onError(error, dir)` hears of a directory we could not watch, or stopped watching. `watch`
+// is a seam for the self-tests.
 //
 // Returns `{ close() }`.
-export function watchTree(root, onChange, { skip = () => false, onError = () => {} } = {}) {
+export function watchTree(root, onChange, { skip = () => false, onError = () => {}, watch = fsWatch } = {}) {
   // Directory path → its FSWatcher.
   let watched = new Map()
 
   function add(dir) {
     let watcher
     try {
-      watcher = watch(dir, (_event, name) => changed(dir, name))
+      watcher = watch(dir, (_event, name) => changed(dir, watcher, name))
     } catch (error) {
       // Gone before we got to it, or out of inotify watches (ENOSPC). Say so: a directory we
       // cannot watch is one whose edits no longer rebuild anything.
       if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') onError(error, dir)
       return
     }
-    watcher.on('error', () => drop(dir))
+    watcher.on('error', (error) => {
+      if (watched.get(dir) !== watcher) return
+      drop(dir)
+      // A directory that went away takes its watch with it, and its parent's event says so.
+      if (isDirectory(dir)) onError(error, dir)
+    })
     watched.set(dir, watcher)
     for (let child of subdirectories(dir)) add(child)
   }
@@ -48,10 +55,11 @@ export function watchTree(root, onChange, { skip = () => false, onError = () => 
     }
   }
 
-  function changed(dir, name) {
+  function changed(dir, watcher, name) {
     // A watch that outlived its directory (renamed or deleted, and its parent's event already
-    // handled) still reports, under the old path. Its events mean nothing.
-    if (!watched.has(dir)) return
+    // handled) can still report, under the old path, and so can one for a directory of the same
+    // name that has since replaced it. Its events mean nothing.
+    if (watched.get(dir) !== watcher) return
     if (!name) {
       // Node could not tell us what changed. Look at the whole directory again.
       for (let child of [...watched.keys()]) {
@@ -73,10 +81,32 @@ export function watchTree(root, onChange, { skip = () => false, onError = () => 
     onChange(file, { directory: wasDirectory || nowDirectory })
   }
 
+  // The root, too, only shows up in its parent's events. Watching those for its name keeps a
+  // root watched that is deleted and created again (`rm -rf tmp`, a checkout that replaces `spec`).
+  let parent
+  try {
+    parent = watch(path.dirname(root), (event, name) => {
+      if (event === 'rename' && (!name || name === path.basename(root))) rootChanged()
+    })
+    parent.on('error', (error) => onError(error, path.dirname(root)))
+  } catch (error) {
+    onError(error, path.dirname(root))
+  }
+
+  function rootChanged() {
+    let wasWatched = watched.has(root)
+    drop(root)
+    add(root)
+    if (wasWatched || watched.has(root)) onChange(root, { directory: true })
+  }
+
   add(root)
 
   return {
-    close() { drop(root) },
+    close() {
+      parent?.close()
+      drop(root)
+    },
     // For the self-tests.
     get directories() { return [...watched.keys()] },
   }

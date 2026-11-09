@@ -84,6 +84,16 @@ test('a directory deleted and recreated under the same name is watched again', a
   await expectEvent('sub/b.js', () => writeFileSync(at('sub/b.js'), '1'))
 })
 
+test('a root deleted and created again is watched again', async (t) => {
+  // `rm -rf tmp` used to end the watch on tmp/ for good, and with it bin/test's rebuild requests.
+  let { root, at, events, expectEvent } = tree(t, { 'sub/a.js': '0' })
+  await expectEvent('', () => rmSync(root, { recursive: true }))
+  assert.ok(events.find((event) => event.file === '').directory)
+  await expectEvent('', () => mkdirSync(at('sub'), { recursive: true }))
+  await new Promise((resolve) => setTimeout(resolve, 20))
+  await expectEvent('sub/b.js', () => writeFileSync(at('sub/b.js'), '1'))
+})
+
 test('skipped directories are not watched', (t) => {
   let { at, watcher } = tree(t, { 'node_modules/x/a.js': '0', 'sub/a.js': '0' })
   assert.deepEqual(watcher.directories.sort(), [at(''), at('sub')].map((dir) => dir.replace(/\/$/, '')).sort())

@@ -11,7 +11,7 @@ import { mkdirSync, watch } from 'node:fs'
 import path from 'node:path'
 import esbuild from 'esbuild'
 import pc from 'picocolors'
-import { BuildStatus, PROJECT_ROOT, REQUEST_PATH, readBuildRequest } from './build_status.mjs'
+import { BuildStatus, PROJECT_ROOT, REQUEST_PATH, takeBuildRequest } from './build_status.mjs'
 import { SKIP_DIRS, SOURCE_DIRS, WATCHABLE_SUFFIXES } from './build_sync.mjs'
 import { esbuildOptions, finish } from './esbuild.mjs'
 import { formatError, formatWarnings } from './build.mjs'
@@ -83,49 +83,14 @@ export async function runWatch({ bundles, sourcemap }) {
     },
   })
 
-  for (let dir of SOURCE_DIRS) {
-    watchTree(path.join(PROJECT_ROOT, dir), (file, { directory }) => {
-      // A directory that appears, moves or vanishes brings or takes files without an event of
-      // their own. Rebuild and lint everything.
-      if (directory || !file) return rounds.change(null)
-      // An event for a name in a directory may have moved the directory's mtime, which bin/test
-      // looks at (see newestSource()).
-      rounds.touch(path.dirname(file))
-      // A guide page, an image or an editor's swap file needs nothing else.
-      if (isWatchable(file)) rounds.change(file)
-    }, {
-      skip: (name) => SKIP_DIRS.has(name),
-      onError: (error, dir) => console.log(pc.red(`Cannot watch ${path.relative(PROJECT_ROOT, dir)} (${error.code}). Edits in it will not rebuild.`)),
-    })
-  }
-  // The version number in namespace.js.erb comes from here. We watch the directory, because
-  // saving the file by rename would end a watch on the file itself.
-  watch(PROJECT_ROOT, (_event, name) => {
-    if (name === 'package.json') rounds.change(null)
-  })
-
-  // bin/test asks for a rebuild when it finds a source newer than our last round. That means we
-  // missed a file event, so say so.
-  let requestDir = path.join(PROJECT_ROOT, path.dirname(REQUEST_PATH))
-  mkdirSync(requestDir, { recursive: true })
-  watch(requestDir, (_event, name) => {
-    if (name !== path.basename(REQUEST_PATH)) return
-    let files = readBuildRequest()
-    console.log(pc.yellow(`A rebuild was requested for ${files.join(', ') || 'an unknown file'}, which the watcher had not noticed.`))
-    if (!files.length) rounds.change(null)
-    for (let file of files) {
-      let absolute = path.join(PROJECT_ROOT, file)
-      // A directory: something in it came or went.
-      rounds.change(isWatchable(absolute) ? absolute : null)
-    }
-  })
-
+  let watcher = watchSources(rounds)
   console.log(`Watching ${SOURCE_DIRS.join(', ')} for changes…`)
   rounds.change(null) // the initial build
 
   // Only Ctrl-C (or bin/dev stopping us) ends the watcher.
   return new Promise((resolve) => {
     let stop = async () => {
+      watcher.close()
       await Promise.all(contexts.map((context) => context.dispose()))
       await terser.close()
       resolve(0)
@@ -133,6 +98,62 @@ export async function runWatch({ bundles, sourcemap }) {
     process.once('SIGINT', stop)
     process.once('SIGTERM', stop)
   })
+}
+
+// Tells `rounds` about every change in the source directories (see Rounds#change() and
+// #touch()), in package.json, and every rebuild request from bin/test. `root` and `log` are seams
+// for the self-tests. Returns `{ close() }`.
+export function watchSources(rounds, { root = PROJECT_ROOT, log = console.log } = {}) {
+  let cannotWatch = (error, dir) => log(pc.red(`Cannot watch ${path.relative(root, dir) || '.'} (${error.code}). Edits in it will not rebuild.`))
+  let watchers = SOURCE_DIRS.map((dir) => watchTree(path.join(root, dir), (file, { directory }) => {
+    // A directory that appears, moves or vanishes brings or takes files without an event of
+    // their own. Rebuild and lint everything.
+    if (directory || !file) return rounds.change(null)
+    // An event for a name in a directory may have moved the directory's mtime, which bin/test
+    // looks at (see newestSource()).
+    rounds.touch(path.dirname(file))
+    // A guide page, an image or an editor's swap file needs nothing else.
+    if (isWatchable(file)) rounds.change(file)
+  }, {
+    skip: (name) => SKIP_DIRS.has(name),
+    onError: cannotWatch,
+  }))
+
+  // The version number in namespace.js.erb comes from here. We watch the directory, because
+  // saving the file by rename would end a watch on the file itself.
+  let rootWatcher = watch(root, (_event, name) => {
+    if (name === 'package.json') rounds.change(null)
+  })
+  rootWatcher.on('error', (error) => cannotWatch(error, root))
+
+  // bin/test asks for a rebuild when it finds a source newer than our last round. That means we
+  // missed a file event, so say so. A tree of one directory, so that `rm -rf tmp` doesn't end
+  // the requests.
+  let requestFile = path.join(root, REQUEST_PATH)
+  mkdirSync(path.dirname(requestFile), { recursive: true })
+  let requests = watchTree(path.dirname(requestFile), (file, { directory }) => {
+    // When tmp/ itself comes back, a request may have landed in it before we watched it again.
+    if (file !== requestFile && !directory) return
+    // Null when there is none, or when this is the event for our taking it.
+    let files = takeBuildRequest(root)
+    if (!files) return
+    log(pc.yellow(`A rebuild was requested for ${files.join(', ') || 'an unknown file'}, which the watcher had not noticed.`))
+    if (!files.length) rounds.change(null)
+    for (let file of files) {
+      let absolute = path.join(root, file)
+      // A directory: something in it came or went.
+      rounds.change(isWatchable(absolute) ? absolute : null)
+    }
+  }, {
+    skip: () => true,
+    onError: cannotWatch,
+  })
+
+  return {
+    close() {
+      for (let tree of [...watchers, requests, rootWatcher]) tree.close()
+    },
+  }
 }
 
 // The indexes of the bundles that need a rebuild for `changedFiles`, given each bundle's `inputs`

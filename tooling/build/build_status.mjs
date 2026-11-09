@@ -3,7 +3,7 @@
 // server use. The watcher rebuilds every bundle together, in rounds, and reports a round as
 // "idle" only once all of its bundles are written, so a runner never reads a half-written dist/.
 
-import { writeFileSync, mkdirSync, readFileSync, renameSync } from 'node:fs'
+import { writeFileSync, mkdirSync, readFileSync, renameSync, unlinkSync } from 'node:fs'
 import path from 'node:path'
 
 // The repo root, derived from this file rather than the cwd: a `bin/test` run from a
@@ -112,12 +112,19 @@ export function requestBuild(files, root = PROJECT_ROOT) {
   }
 }
 
-// The requested paths, empty when the request names none.
-export function readBuildRequest(root = PROJECT_ROOT) {
+// Takes the request off the disk, and returns the paths it names (empty when it names none), or
+// null when there is no request. Moving it away first means a request written while we read
+// lands as a new file, for the next call.
+export function takeBuildRequest(root = PROJECT_ROOT) {
+  let file = path.join(root, REQUEST_PATH)
+  let taken = `${file}.${process.pid}.taken`
   try {
-    return readFileSync(path.join(root, REQUEST_PATH), 'utf8').split('\n').filter(Boolean)
+    renameSync(file, taken)
+    let files = readFileSync(taken, 'utf8').split('\n').filter(Boolean)
+    unlinkSync(taken)
+    return files
   } catch {
-    return []
+    return null
   }
 }
 

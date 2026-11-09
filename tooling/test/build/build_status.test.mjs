@@ -1,9 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { BuildStatus, requestBuild, readBuildRequest } from '../../build/build_status.mjs'
+import { BuildStatus, requestBuild, takeBuildRequest } from '../../build/build_status.mjs'
 
 // A status wired to a capture array and a hand-driven clock, plus `last()` for the latest write.
 function statusWithCapture() {
@@ -96,14 +96,16 @@ test('a full round vouches for everything, other rounds for the paths they saw',
   assert.deepEqual(last().seen, {}, 'a full round includes what the others saw')
 })
 
-test('a rebuild request carries the files to the watcher', (t) => {
+test('a rebuild request carries the files to the watcher, once', (t) => {
   let root = mkdtempSync(path.join(tmpdir(), 'build-request-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))
-  assert.deepEqual(readBuildRequest(root), [])
+  assert.equal(takeBuildRequest(root), null)
   requestBuild(['src/unpoly/link.ts', 'spec/helpers'], root)
-  assert.deepEqual(readBuildRequest(root), ['src/unpoly/link.ts', 'spec/helpers'])
+  assert.deepEqual(takeBuildRequest(root), ['src/unpoly/link.ts', 'spec/helpers'])
+  assert.equal(takeBuildRequest(root), null, 'a request is served once')
   requestBuild('src/unpoly/link.ts', root)
-  assert.deepEqual(readBuildRequest(root), ['src/unpoly/link.ts'])
+  assert.deepEqual(takeBuildRequest(root), ['src/unpoly/link.ts'])
   requestBuild(null, root)
-  assert.deepEqual(readBuildRequest(root), [])
+  assert.deepEqual(takeBuildRequest(root), [])
+  assert.deepEqual(readdirSync(path.join(root, 'tmp')), [], 'nothing is left behind')
 })
