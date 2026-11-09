@@ -2781,7 +2781,7 @@ up.fragment.matches(element, element) // result: true
 
 @stable
 */
-export function matches(element: ElementOrSelector, selector: string, options?: PlainObject): boolean
+export function matches(element: ElementOrSelector, selector: string | Element, options?: PlainObject): boolean
 export function matches(element, selector, options = {}) {
   element = getOne(element)
   if (isElement(selector)) {

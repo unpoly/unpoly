@@ -12,6 +12,7 @@ import { hungrySteps } from '../../../radio.js'
 import { getScrollTops, saveFocus, saveScroll } from '../../../viewport.js'
 import { FocusCapsule } from '../../../viewport/focus_capsule.js'
 import type { PlainObject } from '../../../util.js'
+import type { PeelOptions } from '../../../layer/base.js'
 import type { RenderStep } from '../../../fragment.js'
 import type { ResolvedRenderOptions } from '../render_options.js'
 import type { PartialRenderResult } from '../render_result.js'
@@ -132,7 +133,9 @@ export class UpdateLayerPlan extends Addition {
       //
       // (3) Only restore the base layer's history if the fragment update adds a
       //     history entry (issue #397).
-      this.layer.peel({ history: !this._hasHistory(), intent: peel })
+      //
+      // (4) Layer#peel() dismisses for any intent other than 'accept', including { peel: true }.
+      this.layer.peel({ history: !this._hasHistory(), intent: peel as PeelOptions['intent'] })
     }
 
     // Unless the user has explicitly opted out of the default { abort: 'target' }

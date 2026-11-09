@@ -19,6 +19,7 @@ import type { UnbindFn } from '../../event.js'
 import type { LayerCloseOptions, LayerOptions } from '../base.js'
 import type { AnimationFn, AnimationValue } from '../../motion.js'
 import type { UpResponse } from '../../network/response.js'
+import type { CloseLayerOptions } from '../../fragment/render/change/close_layer.js'
 
 /**
 A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
@@ -583,7 +584,7 @@ export class Overlay extends Layer {
 
   _executeCloseChange(verb: 'accept' | 'dismiss', value: any, options: PlainObject): void {
     options = { ...options, verb, value, layer: this }
-    return new CloseLayer(options).execute()
+    return new CloseLayer(options as CloseLayerOptions).execute()
   }
 
   getFirstSwappableElement(): HTMLElement {

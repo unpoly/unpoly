@@ -190,7 +190,8 @@ export class CloseLayer extends Change<CloseLayerOptions> {
       // Otherwise focus the parent layer. Its focus element was made focusable by moveToFront() above.
       let newFocusElement = this.layer.origin || formerParent.getFocusElement()
 
-      doFocus(newFocusElement, { preventScroll: true })
+      // The origin is an Element, but in practice always focusable like an HTMLElement.
+      doFocus(newFocusElement as HTMLElement, { preventScroll: true })
     }
   }
 }

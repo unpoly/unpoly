@@ -90,7 +90,7 @@ export interface RenderOptions {
 
   // Layer
   layer?: LayerReference
-  peel?: boolean | string
+  peel?: boolean | 'accept' | 'dismiss'
   mode?: string
   size?: string
   class?: string

@@ -18,7 +18,7 @@ import type { ResponseDoc } from '../response_doc.js'
 import type { PreflightProps } from './addition.js'
 import type { HungrySteps } from '../../../radio.js'
 import type { PlainObject } from '../../../util.js'
-import type { Layer } from '../../../layer/base.js'
+import type { Layer, PeelOptions } from '../../../layer/base.js'
 import type { Overlay } from '../../../layer/modes/overlay.js'
 
 export class OpenLayerPlan extends Addition {
@@ -127,7 +127,9 @@ export class OpenLayerPlan extends Addition {
     // (2) Only restore the base layer's history if the new overlay does not add one of its own.
     //     Otherwise we would add an intermediate history entries when swapping overlays
     //     with { layer: 'swap' } (issue #397).
-    this._baseLayer.peel({ history: !this.layer.history, intent: this.options.peel })
+    //
+    // (3) Layer#peel() dismisses for any intent other than 'accept', including { peel: true } and { peel: false }.
+    this._baseLayer.peel({ history: !this.layer.history, intent: this.options.peel as PeelOptions['intent'] })
 
     // (1) The parent's saved history will be restored when this new overlay is closed.
     // (2) Save the parent's history as long as it is the topmost layer in the stack,
