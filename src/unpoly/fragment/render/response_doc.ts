@@ -10,10 +10,34 @@ import { parseTargetSteps, provideNodes, toTarget, tryToTarget } from '../../fra
 import { FragmentFinder } from '../fragment_finder.js'
 import { findMetaTags, getLang } from '../../history.js'
 import { adoptDetachedHeadAsset, adoptNewFragment, findAssets, warnOfUnsafeCSP } from '../../script.js'
+import type { List } from '../../util.js'
+import type { RenderStep } from '../../fragment.js'
+import type { CSPInfo } from '../../script/csp/csp_info.js'
+
+/**
+Options for an `up.ResponseDoc`. One of `{ document }`, `{ fragment }` or `{ content }` holds the new HTML.
+@internal
+*/
+export interface ResponseDocOptions {
+  document?: string | Element | Document
+  fragment?: string | Element
+  content?: string | Element | List<Node>
+  target?: string
+  origin?: Element
+  data?: any
+  cspInfo?: CSPInfo
+  match?: 'region' | 'first'
+}
 
 export class ResponseDoc {
+  // A parsed Document for a full HTML document, or an <up-document> element wrapping a fragment.
+  declare _document: Document | HTMLElement
+  declare _isFullDocument: boolean | undefined
+  declare _cspInfo: CSPInfo | undefined
+  declare _rediscoveredOrigin: Element | undefined
+  declare _match: 'region' | 'first' | undefined
 
-  constructor({ document, fragment, content, target, origin, data, cspInfo, match }) {
+  constructor({ document, fragment, content, target, origin, data, cspInfo, match }: ResponseDocOptions) {
     if (document) {
       this._parseDocument(document, origin, data)
     } else if (fragment) {
@@ -38,7 +62,7 @@ export class ResponseDoc {
     this._match = match
   }
 
-  _parseDocument(value, origin, data) {
+  _parseDocument(value: string | Element | Document, origin: Element | undefined, data: any): void {
     if (value instanceof Document) {  // Document
       this._document = value
       this._isFullDocument = true
@@ -48,14 +72,14 @@ export class ResponseDoc {
       // e.createBrokenDocumentFromHTML() always creates an (empty) <head> if missing in the HTML.
       this._isFullDocument = isFullDocumentHTML(value)
 
-      let htmlParser = (html) => [createBrokenDocumentFromHTML(html)]
+      let htmlParser = (html: string) => [createBrokenDocumentFromHTML(html)]
       let nodes = provideNodes(value, { origin, data, htmlParser })
 
       // If value is HTML, e.createBrokenDocumentFromHTML() will parse it into a Document.
       // Even if value is only a fragment, or multiple sibling nodes, it will always be
       // wrapped into a Document.
       if (nodes[0] instanceof Document) {
-        this._document = nodes[0]
+        this._document = nodes[0] as Document
       } else {
         // If value is a template reference, a custom up:template:clone handler
         // may have passed us a non-document.
@@ -66,12 +90,12 @@ export class ResponseDoc {
     }
   }
 
-  _parseFragment(value, origin, data) {
+  _parseFragment(value: string | Element, origin: Element | undefined, data: any): void {
     let element = extractSingular(provideNodes(value, { origin, data }))
     this._document = this._buildFauxDocument(element)
   }
 
-  _parseContent(value, origin, target, data) {
+  _parseContent(value: string | Element | List<Node>, origin: Element | undefined, target: string | undefined, data: any): void {
     if (!target) fail("must pass a { target } when passing { content }")
 
     // We are only provided with inner child content.
@@ -83,6 +107,7 @@ export class ResponseDoc {
     this._document = this._buildFauxDocument(matchingElement)
   }
 
+  _buildFauxDocument(nodes: Node | List<Node>): HTMLElement
   _buildFauxDocument(nodes) {
     nodes = wrapList(nodes)
 
@@ -97,13 +122,13 @@ export class ResponseDoc {
     return fauxDocument
   }
 
-  rootSelector() {
+  rootSelector(): string {
     // We want to say this._document.documentElement, but we sometimes have
     // a faux document with multiple children.
     return toTarget(this._document.children[0])
   }
 
-  get title() {
+  get title(): string | undefined {
     // We get it from the <head> instead of this._document.title.
     // We want to distinguish between a parsed document that does not have a <head> or <title>
     // and a given, but empty title.
@@ -117,24 +142,24 @@ export class ResponseDoc {
   parsed from a fragment, or from a document without a `<head>` element.
   */
   // No _ prefix: specs call this directly, and _-prefixed members are mangled in the minified build.
-  getHead() {
+  getHead(): HTMLHeadElement | undefined {
     // The root may be a `Document` (which always has a `#head`, even if it wasn't present in the HTML)
     // or an `Element` (which never has a `#head`).
     if (this._isFullDocument) {
-      return this._document.head
+      return (this._document as Document).head
     }
   }
 
-  _fromHead(fn) {
+  _fromHead<T>(fn: (head: HTMLHeadElement) => T): T | undefined {
     let head = this.getHead()
     return head && fn(head)
   }
 
-  get metaTags() {
+  get metaTags(): NodeListOf<Element> | undefined {
     return this._fromHead(findMetaTags)
   }
 
-  get assets() {
+  get assets(): Element[] | undefined {
     return this._fromHead((head) => {
       let assets = findAssets(head)
 
@@ -152,16 +177,16 @@ export class ResponseDoc {
     })
   }
 
-  get lang() {
+  get lang(): string | undefined {
     // Although DOMParser always produces a document with <html> element, we must
     // only use the [lang] attribute if the initial document contained a <html> element.
     // Otherwise Unpoly would delete the attribute from the current page.
     if (this._isFullDocument) {
-      return getLang(this._document)
+      return getLang(this._document as Document)
     }
   }
 
-  _getTitleText(head) {
+  _getTitleText(head: HTMLHeadElement): string | undefined {
     // We must find inside the head ('head title') instead of 'title'
     // so we won't match the <title> of an inline SVG image.
     return head.querySelector('title')?.textContent
@@ -171,7 +196,7 @@ export class ResponseDoc {
   // (2) Supports custom Unpoly selectors like :has() or :main.
   // (3) Supports origin-aware lookup priorities.
   // (4) Returns undefined if there is no match.
-  select(selector) {
+  select(selector: string): Element | undefined {
     let finder = new FragmentFinder({
       selector: selector,
       origin: this._rediscoveredOrigin,
@@ -181,19 +206,19 @@ export class ResponseDoc {
     return finder.find()
   }
 
-  selectSteps(steps) {
+  selectSteps(steps: RenderStep[]): RenderStep[] {
     return steps.filter((step) => {
       return this._trySelectStep(step) || this._cannotMatchStep(step)
     })
   }
 
-  commitSteps(steps) {
+  commitSteps(steps: RenderStep[]): RenderStep[] {
     // If multiple steps want to match the same new element, the first step will remain in the left.
     // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
     return steps.filter((step) => this.commitElement(step.newElement))
   }
 
-  _trySelectStep(step) {
+  _trySelectStep(step: RenderStep): boolean | undefined {
     // TODO: Why do we need this check?
     if (step.newElement) {
       return true
@@ -221,14 +246,14 @@ export class ResponseDoc {
     return true
   }
 
-  _cannotMatchStep(step) {
+  _cannotMatchStep(step: RenderStep): void {
     if (!step.maybe) {
       // An error message will be chosen by ChangeFromContent
       throw new CannotMatch()
     }
   }
 
-  commitElement(element) {
+  commitElement(element: Element): boolean | undefined {
     // If multiple steps want to match the name new element, only he first will succeed.
     // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
     if (this._document.contains(element)) {
@@ -244,7 +269,7 @@ export class ResponseDoc {
     }
   }
 
-  finalizeElement(element) {
+  finalizeElement(element: Element): void {
     // If we plucked elements from a Document we assume that document was created by DOMParser,
     // which operates in a different context and creates inert elements:
     //
