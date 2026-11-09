@@ -7,7 +7,7 @@ const submitSelectorFn = up.form.config.selectorFn('submitSelectors')
 const preloadSelectorFn = up.link.config.selectorFn('preloadSelectors')
 
 // Links and forms can open overlays, so old layer attributes are translated on both.
-const layerOpenerSelectorFn = () => [followSelectorFn(), submitSelectorFn()].join()
+const layerOpenerSelectorFn = (): string => [followSelectorFn(), submitSelectorFn()].join()
 
 up.migrate.renamedAttribute('up-flavor', 'up-mode', { scope: layerOpenerSelectorFn })
 up.migrate.renamedAttribute('up-closable', 'up-dismissible', { scope: layerOpenerSelectorFn })
@@ -18,7 +18,7 @@ up.migrate.renamedAttribute('up-history-visible', 'up-history', { scope: layerOp
 up.migrate.renamedAttribute('up-clear-cache', 'up-expire-cache', { scope: layerOpenerSelectorFn })
 up.migrate.renamedAttribute('up-bad-response-time', 'up-late-delay')
 
-up.migrate.transformAttribute('up-solo', function(link, solo) {
+up.migrate.transformAttribute('up-solo', function(link: Element, solo: string) {
   switch (solo) {
     case '':
       up.migrate.warn('Attribute [up-solo] has been replaced with [up-abort="all"] (found in %o)', link)
@@ -39,7 +39,7 @@ up.migrate.transformAttribute('up-solo', function(link, solo) {
   }
 })
 
-up.migrate.transformAttribute('up-reveal', function(link, reveal) {
+up.migrate.transformAttribute('up-reveal', function(link: Element, reveal: string) {
   switch (reveal) {
     case '':
       up.migrate.warn('Attribute [up-reveal] has been replaced with [up-scroll="target"] (found in %o)', link)
@@ -59,7 +59,7 @@ up.migrate.transformAttribute('up-reveal', function(link, reveal) {
   }
 })
 
-up.migrate.transformAttribute('up-reset-scroll', function(link, resetScroll) {
+up.migrate.transformAttribute('up-reset-scroll', function(link: Element, resetScroll: string) {
   switch (resetScroll) {
     case '':
       up.migrate.warn('Attribute [up-reset-scroll] has been replaced with [up-scroll="top"] (found in %o)', link)
@@ -76,7 +76,7 @@ up.migrate.transformAttribute('up-reset-scroll', function(link, resetScroll) {
   }
 })
 
-up.migrate.transformAttribute('up-restore-scroll', function(link, restoreScroll) {
+up.migrate.transformAttribute('up-restore-scroll', function(link: Element, restoreScroll: string) {
   switch (restoreScroll) {
     case '':
       up.migrate.warn('Attribute [up-restore-scroll] has been replaced with [up-scroll="restore"] (found in %o)', link)
@@ -124,7 +124,7 @@ up.migrate.targetMacro('up-dash', { 'up-preload': '', 'up-instant': '' }, 'up.li
 
 up.migrate.renamedAttribute('up-delay', 'up-preload-delay', { scope: preloadSelectorFn })
 
-let preloadEnabledRef
+let preloadEnabledRef: [boolean]
 up.link.config.patch(function(config) {
   preloadEnabledRef = up.migrate.removedProperty(config, 'preloadEnabled', { value: true, warning: 'The configuration up.link.config.preloadEnabled has been removed. To disable preloading, prevent up:link:preload instead.' })
 })
@@ -164,7 +164,7 @@ const LEGACY_UP_HREF_FOLLOW_SELECTOR = '[up-href]:not([up-follow], [up-poll], [u
 // The priority runs this macro before [up-back] (-100). That macro sets an [up-href] that the app never wrote,
 // and only adds [up-follow] when the link isn't already followable, e.g. through [up-target].
 // We also run before [up-clickable] (-200), which needs to see the [up-follow] attribute.
-up.macro(LEGACY_UP_HREF_FOLLOW_SELECTOR, { priority: -50 }, function(element) {
+up.macro(LEGACY_UP_HREF_FOLLOW_SELECTOR, { priority: -50 }, function(element: Element) {
   // A link like <a up-href up-target> is already followable through another attribute.
   if (up.link.isFollowable(element)) return
 
@@ -183,13 +183,13 @@ up.link.config.patch(function(config) {
 })
 
 // Only warn about links that the legacy selector alone makes followable.
-function isFollowableWithoutLegacyInstant(element) {
+function isFollowableWithoutLegacyInstant(element: Element): boolean {
   let { followSelectors, noFollowSelectors } = up.link.config
-  let modernFollowSelectors = followSelectors.filter((selector) => selector !== LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR)
+  let modernFollowSelectors = followSelectors.filter((selector: string) => selector !== LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR)
   return element.matches(up.element.unionSelector(modernFollowSelectors, noFollowSelectors))
 }
 
-up.compiler(LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR, function(element) {
+up.compiler(LEGACY_UP_INSTANT_FOLLOW_INTENT_SELECTOR, function(element: Element) {
   if (up.link.isFollowable(element) && !isFollowableWithoutLegacyInstant(element)) {
     up.migrate.warn('Following links with only [up-instant] has been deprecated. You must now also set an [up-follow] on the same link (found in %o).', element)
   }
