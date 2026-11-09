@@ -1,6 +1,7 @@
+import { copyCursorProps } from '../element.js'
 import { on } from '../event.js'
 import { getSmart, tryToTarget } from '../fragment.js'
-import { copyCursorProps, doFocus, focusedElementWithin } from '../viewport.js'
+import { doFocus, focusedElementWithin } from '../viewport.js'
 import type { Layer } from '../layer/base.js'
 import type { PlainObject } from '../util.js'
 

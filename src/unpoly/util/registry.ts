@@ -1,5 +1,6 @@
 import { identity, pickBy } from '../util.js'
 import { fail } from '../error.js'
+import { isEvaling } from '../framework.js'
 
 export class Registry<T = any> {
   declare _data: Record<string, T>
@@ -16,7 +17,7 @@ export class Registry<T = any> {
 
   put(key: string, object: any): void {
     object = this._normalize(object)
-    object.isDefault = up.framework.evaling
+    object.isDefault = isEvaling()
     this._data[key] = object
   }
 

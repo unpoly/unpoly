@@ -177,8 +177,8 @@ for (let mode of layerModes) {
 }
 
 // The explicit install order. It is the order in which the namespaces registered their side
-// effects before they were ES modules. All installs run before `up.framework.onEvaled()` below,
-// while `up.framework.evaling` is still true. Event listeners, compilers, macros and registry
+// effects before they were ES modules. All installs run before `framework.onEvaled()` below,
+// while `isEvaling()` is still true. Event listeners, compilers, macros and registry
 // entries created now are marked as defaults (`isDefault`), which a reset between specs keeps
 // (see event_listener.ts, registry.ts, script.ts).
 //

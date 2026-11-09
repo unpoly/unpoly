@@ -295,7 +295,6 @@ export const api = {
     startExtension,
     stopExtension,
     reset: emitReset,
-    get evaling() { return isEvaling() },
     get booted() { return isBooted() },
     /** @internal On window.up so specs can call isBeforeBoot.mock(). */
     isBeforeBoot,

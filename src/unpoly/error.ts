@@ -27,8 +27,9 @@ export function fail(...args: [message: string, ...vars: any[]]): never {
 }
 
 // We reach up.RenderResult and up.Response through window.up instead of importing them:
-// util imports this module, and the classes import util, so the import
-// would throw at load time.
+// util imports this module, so an import would evaluate up.Response, and every namespace
+// it imports, before util. (The bundle doesn't throw then, since esbuild turns top-level
+// `const` into `var`, but those modules would see util's constants as undefined.)
 function isCritical(error: any): boolean {
   return (typeof error !== 'object') || ((error.name !== 'AbortError') && !(error instanceof up.RenderResult) && !(error instanceof up.Response))
 }

@@ -1092,21 +1092,6 @@ export function focusedElementWithin(scopeElement: Element): Element | undefined
   }
 }
 
-const CURSOR_PROPS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']
-
-// Copies the selection and scroll position of a field. Without a target, copies them into an object.
-export function copyCursorProps(from: any, to: any = {}): any {
-  for (let key of CURSOR_PROPS) {
-    try {
-      to[key] = from[key]
-    } catch (_error) {
-      // Safari throws a TypeError when accessing { selectionStart }
-      // from a focused <input type="submit">. We ignore it.
-    }
-  }
-  return to
-}
-
 export function install(): void {
   registerCompiler(config.selectorFn('anchoredRightSelectors'), function(element) {
     return bodyShifter.onAnchoredElementInserted(element)
@@ -1138,7 +1123,6 @@ export const api = {
     absolutize,
     focus: doFocus,
     focusedElementWithin,
-    copyCursorProps,
   },
   focus: doFocus,
   reveal,

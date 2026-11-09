@@ -1045,16 +1045,31 @@ export function wrapChildren(element: Element): HTMLElement {
   return wrapper
 }
 
+const CURSOR_PROPS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']
+
+// Copies the selection and scroll position of a field. Without a target, copies them into an object.
+export function copyCursorProps(from: any, to: any = {}): any {
+  for (let key of CURSOR_PROPS) {
+    try {
+      to[key] = from[key]
+    } catch (_error) {
+      // Safari throws a TypeError when accessing { selectionStart }
+      // from a focused <input type="submit">. We ignore it.
+    }
+  }
+  return to
+}
+
 function preservingFocus<T>(fn: () => T): T {
   const oldFocusElement = document.activeElement as HTMLElement
   // Moving an element resets its scroll position and selection range.
-  const cursorProps = up.viewport.copyCursorProps(oldFocusElement)
+  const cursorProps = copyCursorProps(oldFocusElement)
   try {
     return fn()
   } finally {
     if (oldFocusElement && oldFocusElement !== document.activeElement) {
       // Firefox needs focus-related props to be set *before* we focus the element
-      up.viewport.copyCursorProps(cursorProps, oldFocusElement)
+      copyCursorProps(cursorProps, oldFocusElement)
       oldFocusElement.focus({ preventScroll: true })
     }
   }

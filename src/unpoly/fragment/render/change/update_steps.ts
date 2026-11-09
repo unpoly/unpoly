@@ -1,5 +1,5 @@
 import { assert, copy, flatMap, map, some } from '../../../util.js'
-import { leadingElement, unwrap, wrapChildren } from '../../../element.js'
+import { copyCursorProps, leadingElement, unwrap, wrapChildren } from '../../../element.js'
 import { fail } from '../../../error.js'
 import {
   config, emitFragmentDestroyed, emitFragmentKept, findKeepPlan, markFragmentAsDestroying,
@@ -9,7 +9,7 @@ import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
 import { animate, swap } from '../../../motion.js'
 import { block, clean, hello } from '../../../script.js'
-import { copyCursorProps, getViewportSubtree } from '../../../viewport.js'
+import { getViewportSubtree } from '../../../viewport.js'
 import type { ResolvedRenderOptions } from '../render_options.js'
 import type { PartialRenderResult } from '../render_result.js'
 import type { ResponseDoc } from '../response_doc.js'
