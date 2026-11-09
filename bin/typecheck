@@ -39,15 +39,15 @@ function tsc(args, stdio) {
 }
 
 // Splits tsc's plain output (`--pretty false`) into blocks. An error starts with
-// `path(line,col): error`, followed by indented lines that elaborate it.
-// Any other line is a block of its own.
+// `path(line,col): error`, followed by indented lines that elaborate it. An error without a
+// location, like a missing type library, starts with `error`. Any other line is a block of its own.
 function outputBlocks(output) {
   let blocks = []
   for (let line of output.split('\n')) {
     if (/^\s/.test(line) && blocks.length) {
       blocks.at(-1).lines.push(line)
     } else if (line) {
-      blocks.push({ lines: [line], error: /^\S+\(\d+,\d+\): error /.test(line) })
+      blocks.push({ lines: [line], error: /^(\S+\(\d+,\d+\): )?error TS\d+/.test(line) })
     }
   }
   return blocks
@@ -63,7 +63,7 @@ let coreErrorCount = blocks.filter(({ error }) => error).length
 if (coreErrorCount) {
   console.log(`\nFound ${coreErrorCount} error${coreErrorCount === 1 ? '' : 's'} in the core check (tsconfig.core.json).`)
 }
-// tsc fails for reasons other than errors in a file, like a broken config.
+// tsc may also fail without printing an error, e.g. when it crashes.
 let coreFailed = coreErrorCount > 0 || (core.code !== 0 && !outputBlocks(core.stdout).some(({ error }) => error))
 
 process.exit(loose.code || (coreFailed ? 1 : 0))
