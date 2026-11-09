@@ -4,6 +4,7 @@ const $ = jQuery
 
 // Specs cannot dispatch trusted events. We repeat the original check (!event.isTrusted) for clicks made by
 // element.click(), but treat events from Trigger like clicks from a real mouse.
+// A .mock() fake cannot call the original, so keep this in sync with isSyntheticClick() in src/unpoly/event.js.
 beforeEach(function() {
   up.event.isSyntheticClick.mock().and.callFake((event) => !event.isTrusted && !event.simulatesUser)
 })
