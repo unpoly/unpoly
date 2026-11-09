@@ -1654,6 +1654,52 @@ the render pass that will load and show the validation results.
 @stable
 */
 
+/*-
+Returns the form for the given element.
+
+- For a `<form>` element, returns the element itself.
+- For an element with a `[form]` attribute, returns the form with that ID in the element's [layer](/api/up.layer).
+- For any other element, returns the closest `<form>` ancestor. This works for fields, submit buttons
+  and any other element within a form, like a [form group](/api/up-form-group).
+
+## Elements outside their form
+
+A field or submit button can belong to a form that doesn't contain it.
+Set its `[form]` attribute to the form's ID:
+
+```html
+<form id="search-form" action="/search">
+  <input name="query">
+</form>
+
+<button type="submit" form="search-form">Search</button> <!-- mark: form="search-form" -->
+```
+
+We can now retrieve the form for the button:
+
+```js
+let button = document.querySelector('button')
+up.form.get(button) // result: <form id="search-form">
+```
+
+Unlike the browser's [`element.form`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement/form)
+property, `up.form.get()` only looks for the form in the element's own layer.
+When an overlay shows a form with the same ID as a form in the root layer,
+`element.form` returns the first form with that ID in the document, which is the form in the root layer.
+`up.form.get()` returns the form in the overlay.
+
+Like in the browser, a `[form]` attribute takes precedence over a form ancestor.
+When the attribute matches no form in the element's layer, no form is returned, even if the element is within a form.
+
+@function up.form.get
+@param {Element} element
+  A `<form>`, a field, a submit button or any other element within a form.
+@return {Element|null|undefined}
+  The form for the given element.
+
+  Returns `null` or `undefined` if the element has no form.
+@experimental
+*/
 export function getForm(element: Element): HTMLFormElement | null | undefined {
   return getLiteralForm(element) || getAssociatedForm(element) || getClosestForm(element)
 }
@@ -2676,6 +2722,7 @@ export function install(): void {
 export const api = {
   form: {
     config,
+    get: getForm,
     submit,
     submitOptions,
     isSubmittable,

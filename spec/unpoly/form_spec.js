@@ -6,13 +6,13 @@ describe('up.form', function() {
 
   describe('JavaScript', function() {
 
-    describe('up.internal.getForm()', function() {
+    describe('up.form.get()', function() {
 
       describe('for a form element', function() {
 
         it('returns the form element', function() {
           const form = fixture('form')
-          expect(up.internal.getForm(form)).toBe(form)
+          expect(up.form.get(form)).toBe(form)
         })
 
       })
@@ -28,7 +28,7 @@ describe('up.form', function() {
             </form>
           `)
 
-          expect(up.internal.getForm(input)).toBe(form)
+          expect(up.form.get(input)).toBe(form)
         })
 
         it('returns the associated form for a form-external field', function() {
@@ -38,7 +38,7 @@ describe('up.form', function() {
             <input form="my-form">
           `)
 
-          expect(up.internal.getForm(externalInput)).toBe(form)
+          expect(up.form.get(externalInput)).toBe(form)
         })
 
         it('returns the associated form for a form-external field when multiple layers have the same form[id]', function() {
@@ -67,8 +67,35 @@ describe('up.form', function() {
           expect(overlayForm).toBeAttached()
           expect(overlayInput).toBeAttached()
 
-          expect(up.internal.getForm(rootInput)).toBe(rootForm)
-          expect(up.internal.getForm(overlayInput)).toBe(overlayForm)
+          expect(up.form.get(rootInput)).toBe(rootForm)
+          expect(up.form.get(overlayInput)).toBe(overlayForm)
+        })
+
+        it('does not return a form with the [form] ID from another layer', function() {
+          makeLayers([
+            { fragment: '<form id="my-form"></form>' },
+            { fragment: '<div id="container"><input id="my-field" form="my-form"></div>' },
+          ])
+
+          let rootForm = up.fragment.get('#my-form', { layer: 'root' })
+          let overlayInput = up.fragment.get('#my-field', { layer: 'overlay' })
+          expect(rootForm).toBeAttached()
+          expect(overlayInput).toBeAttached()
+          // The browser's own lookup finds the form in the root layer.
+          expect(overlayInput.form).toBe(rootForm)
+
+          expect(up.form.get(overlayInput)).toBeMissing()
+        })
+
+        it('returns the associated form for a submit button outside the form', function() {
+          const [form, input, button] = htmlFixtureList(`
+            <form id="search-form">
+              <input name="query">
+            </form>
+            <button type="submit" form="search-form">Search</button>
+          `)
+
+          expect(up.form.get(button)).toBe(form)
         })
 
         it('prefers the form from a [form] attribute over an ancestor form, like the browser', function() {
@@ -79,7 +106,7 @@ describe('up.form', function() {
             <form id="form-b"></form>
           `)
 
-          expect(up.internal.getForm(input)).toBe(formB)
+          expect(up.form.get(input)).toBe(formB)
         })
 
         it('returns a missing value for a field within a form when its [form] attribute matches no form, like the browser', function() {
@@ -89,7 +116,7 @@ describe('up.form', function() {
             </form>
           `)
 
-          expect(up.internal.getForm(input)).toBeMissing()
+          expect(up.form.get(input)).toBeMissing()
         })
 
       })
@@ -106,13 +133,13 @@ describe('up.form', function() {
             </form>
           `)
 
-          expect(up.internal.getForm(group)).toBe(form)
+          expect(up.form.get(group)).toBe(form)
         })
 
         it('returns a missing value if the div is not in a form', function() {
           const [div] = htmlFixtureList('<div></div>')
 
-          expect(up.internal.getForm(div)).toBeMissing()
+          expect(up.form.get(div)).toBeMissing()
         })
 
       })

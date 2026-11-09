@@ -48,7 +48,7 @@ import { queue } from './network.js'
 import { buildLayer, normalizeLayerOptions } from './layer.js'
 import { shouldHandleClick } from './link.js'
 import {
-  disableContainerTemp, findGroupSolution, getForm, getGroupSelectors, readFieldDisabled,
+  disableContainerTemp, findGroupSolution, getGroupSelectors, readFieldDisabled,
   submitButtonOverrides, trackFields,
 } from './form.js'
 import { Config } from './util/config.js'
@@ -205,7 +205,6 @@ export const api = {
 
     disableContainerTemp,
     findGroupSolution,
-    getForm,
     getGroupSelectors,
     readFieldDisabled,
     submitButtonOverrides,
