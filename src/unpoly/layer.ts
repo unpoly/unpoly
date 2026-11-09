@@ -8,6 +8,7 @@ import { render } from './fragment.js'
 import { RenderOptions } from './fragment/render/render_options.js'
 import { Layer } from './layer/base.js'
 import type { LayerOptions } from './layer/base.js'
+import type { LayerLookupArgs } from './layer/layer_lookup.js'
 import { LayerStack } from './layer/layer_stack.js'
 import { Config } from './util/config.js'
 import type { PlainObject } from './util.js'
@@ -1915,8 +1916,8 @@ export const api = {
     optionToString,
     isWithinForeignOverlay,
     get stack() { return layerStack.layers },
-    get(...args) { return layerStack.get(...args) },
-    getAll(...args) { return layerStack.getAll(...args) },
+    get(...args: LayerLookupArgs): Layer | undefined { return layerStack.get(...args) },
+    getAll(...args: LayerLookupArgs): Layer[] { return layerStack.getAll(...args) },
     get root() { return layerStack.root },
     get overlays() { return layerStack.overlays },
     get current() { return layerStack.current },
@@ -1924,7 +1925,7 @@ export const api = {
     sync() { return layerStack.sync() },
     get count() { return layerStack.count },
     get attachedCount() { return layerStack.attachedCount },
-    dismissOverlays(...args) { return layerStack.dismissOverlays(...args) },
+    dismissOverlays(...args: Parameters<LayerStack['dismissOverlays']>): void { return layerStack.dismissOverlays(...args) },
   },
 }
 
