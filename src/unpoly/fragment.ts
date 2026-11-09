@@ -36,7 +36,9 @@ import type { List, PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
 import type { UpRequest } from './network/request.js'
 import type { UpResponse } from './network/response.js'
-import type { RenderOptions, RenderTarget, ResolvedRenderOptions } from './fragment/render/render_options.js'
+import type {
+  FragmentProcessorValue, RenderOptions, RenderTarget, ResolvedRenderOptions,
+} from './fragment/render/render_options.js'
 import type { FocusCapsule } from './viewport/focus_capsule.js'
 
 /**
@@ -135,6 +137,35 @@ const STRONG_TARGET_DERIVERS = [
   'head',
   'body',
 ]
+
+/**
+The settings in `up.fragment.config`, described in its doc comment.
+*/
+export interface FragmentConfig {
+  /**
+  Not stored in `up.fragment.config`, but forwarded to `up.layer.config.any.mainTargets`.
+  */
+  mainTargets: string[]
+  targetDerivers: TargetDeriver[]
+  /**
+  The patterns for `up.fragment.toTarget(element, { strong: true })`.
+  @internal
+  */
+  strongTargetDerivers: string[]
+  badTargetClasses: (string | RegExp)[]
+  verifyDerivedTarget: boolean
+  match: 'region' | 'first'
+  navigateOptions: RenderOptions
+  renderOptions: RenderOptions
+  reloadOptions: RenderOptions
+  autoHistoryTargets: string[]
+  autoScroll: FragmentProcessorValue[]
+  autoFocus: FragmentProcessorValue[]
+  normalizeKeepHTML: (html: string) => string
+  autoRevalidate: boolean | ((response: UpResponse) => boolean)
+  skipResponse: (loadedEventProps: PlainObject) => boolean
+  renderableResponse: (response: UpResponse) => boolean
+}
 
 /*-
 Configures defaults for fragment updates.
@@ -324,7 +355,7 @@ Configures defaults for fragment updates.
 
 @stable
 */
-export const config = new Config<PlainObject>('up.fragment.config', () => ({
+export const config = new Config('up.fragment.config', (): Omit<FragmentConfig, 'mainTargets'> => ({
   badTargetClasses: [/^up-/],
 
   strongTargetDerivers: STRONG_TARGET_DERIVERS,
@@ -387,7 +418,7 @@ export const config = new Config<PlainObject>('up.fragment.config', () => ({
   skipResponse: defaultSkipResponse,
   renderableResponse: (response) => response.isHTML(),
   normalizeKeepHTML: defaultNormalizeKeepHTML
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<FragmentConfig>
 
 // Users who are not using layers will prefer settings default targets
 // as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
@@ -2012,7 +2043,8 @@ up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate: 'a
 export const reload = mockable(function reload(...args: RenderArgs | []): RenderJob {
   const options = { ...config.reloadOptions, ...parseTargetAndOptions(args) }
   options.target ||= ':main'
-  const element = getSmart(options.target, options)
+  // up.reload() takes one element or selector, not a list of target selectors.
+  const element = getSmart(options.target as ElementOrSelector, options)
   options.url ||= sourceOf(element)
   options.headers = merge(options.headers, conditionalHeaders(element))
   if (options.keepData || booleanAttr(element, 'up-keep-data')) {
