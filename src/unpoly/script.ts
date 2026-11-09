@@ -50,14 +50,20 @@ export interface CompilerOptions {
 The function passed to `up.compiler()` or `up.macro()`. It is called with a matching element, its
 [data](/learn/data) and [meta information](/learn/enhancing-elements#meta) about the render pass.
 It may return a destructor function, an array of destructors, or a promise.
+
+A compiler gets any element that matches its selector, so the element type is a parameter. It
+defaults to `HTMLElement`. A compiler for SVG elements can annotate its argument as `SVGElement`.
 */
-export type CompilerCallback = (element: HTMLElement, data: any, meta: PlainObject) => unknown
+export type CompilerCallback<E extends Element = HTMLElement> = (element: E, data: any, meta: PlainObject) => unknown
 
 /**
 The function passed to `up.compiler()` or `up.macro()` with `{ batch: true }`. It is called once
 with all matching elements and their data.
+
+TypeScript only picks this callback type when `batch` is the literal `true`. Options from a
+variable need `as const`, or `batch` is widened to `boolean` and the callback gets one element.
 */
-export type BatchCompilerCallback = (elements: HTMLElement[], data: any[], meta: PlainObject) => unknown
+export type BatchCompilerCallback<E extends Element = HTMLElement> = (elements: E[], data: any[], meta: PlainObject) => unknown
 
 /**
 Options for `registerAttrCompiler()`.
@@ -74,7 +80,7 @@ A compiler for `registerAttrCompiler()`. It is called with the element and its a
 Without a `{ defaultValue }`, the value of an attribute set without a value (or to "true") is `true`.
 @internal
 */
-export type AttrCompilerCallback<V = string | true> = (element: HTMLElement, value: V) => unknown
+export type AttrCompilerCallback<V = string | true, E extends Element = HTMLElement> = (element: E, value: V) => unknown
 
 /**
 Options for `up.script.parseCallback()`.
@@ -481,9 +487,9 @@ or manually call `up.hello()` on an element that should be
 @stable
 @signature
 */
-export function registerCompiler(selector: Compiler['selector'], callback: CompilerCallback): void
-export function registerCompiler(selector: Compiler['selector'], options: CompilerOptions & { batch: true }, callback: BatchCompilerCallback): void
-export function registerCompiler(selector: Compiler['selector'], options: CompilerOptions, callback: CompilerCallback): void
+export function registerCompiler<E extends Element = HTMLElement>(selector: Compiler['selector'], callback: CompilerCallback<E>): void
+export function registerCompiler<E extends Element = HTMLElement>(selector: Compiler['selector'], options: CompilerOptions & { batch: true }, callback: BatchCompilerCallback<E>): void
+export function registerCompiler<E extends Element = HTMLElement>(selector: Compiler['selector'], options: CompilerOptions, callback: CompilerCallback<E>): void
 export function registerCompiler(...args: any[]): void {
   registerProcessor(args)
 }
@@ -543,16 +549,16 @@ up.macro('[shake-modal]', function(link) {
 @stable
 @signature
 */
-export function registerMacro(selector: Compiler['selector'], callback: CompilerCallback): void
-export function registerMacro(selector: Compiler['selector'], options: CompilerOptions & { batch: true }, callback: BatchCompilerCallback): void
-export function registerMacro(selector: Compiler['selector'], options: CompilerOptions, callback: CompilerCallback): void
+export function registerMacro<E extends Element = HTMLElement>(selector: Compiler['selector'], callback: CompilerCallback<E>): void
+export function registerMacro<E extends Element = HTMLElement>(selector: Compiler['selector'], options: CompilerOptions & { batch: true }, callback: BatchCompilerCallback<E>): void
+export function registerMacro<E extends Element = HTMLElement>(selector: Compiler['selector'], options: CompilerOptions, callback: CompilerCallback<E>): void
 export function registerMacro(...args: any[]): void {
   registerProcessor(args, { macro: true })
 }
 
-export function registerAttrCompiler(attr: string, callback: AttrCompilerCallback): void
-export function registerAttrCompiler(attr: string, options: AttrCompilerOptions & { defaultValue: string }, callback: AttrCompilerCallback<string>): void
-export function registerAttrCompiler(attr: string, options: AttrCompilerOptions, callback: AttrCompilerCallback): void
+export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, callback: AttrCompilerCallback<string | true, E>): void
+export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, options: AttrCompilerOptions & { defaultValue: string }, callback: AttrCompilerCallback<string, E>): void
+export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, options: AttrCompilerOptions, callback: AttrCompilerCallback<string | true, E>): void
 export function registerAttrCompiler(...args: any[]): void {
   let [attr, options, valueCallback] = parseProcessorArgs(args)
 
