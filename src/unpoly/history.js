@@ -461,7 +461,7 @@ up.history = (function() {
       withTrackOptions(trackOptions, function() {
         // Call this instead of originalPushState in case someone else has patched history.pushState()
         // Our own tests do this to rate-limit the use of the history API.
-        history[method](null, { up: true }, location)
+        history[method]({ up: true }, '', location)
       })
     }
   }

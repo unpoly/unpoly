@@ -3,6 +3,7 @@ Unreleased
 
 - Fix a bug where [`[up-confirm="false"]`](/api/up-follow#up-confirm) and `[data-confirm="false"]` showed a confirmation dialog with the text "false". Rails renders `data: { confirm: false }` this way. These values now mean that no confirmation is needed.
 - Fix a bug where [`up.element.affix()`](/api/up.element.affix) and [`up.element.createFromSelector()`](/api/up.element.createFromSelector) threw an error when a quoted attribute value contained a `]` character, like in `input[name="user[email]"]`.
+- When Unpoly adds or changes a history entry, it now calls the browser's History API once instead of twice. Browsers limit how often a page may change its history, so apps that update history often are less likely to hit that limit.
 
 
 3.15.0

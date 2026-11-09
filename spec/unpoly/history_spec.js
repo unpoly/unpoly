@@ -40,6 +40,16 @@ describe('up.history', function() {
         expect(location.href).toMatchURL('/push-path')
       })
 
+      it('marks the new history entry as placed by Unpoly with a single call to the History API', function() {
+        // Browsers rate-limit history changes, so every call counts.
+        const replaceSpy = spyOn(history, 'replaceState').and.callThrough()
+
+        up.history.push('/push-path')
+
+        expect(history.state.up).toBe(true)
+        expect(replaceSpy).not.toHaveBeenCalled()
+      })
+
       it('does not change the browser URL with up.history.config.enabled = false', function() {
         up.history.config.enabled = false
         const locationBefore = location.href
@@ -109,6 +119,15 @@ describe('up.history', function() {
         expect(pushSpy).not.toHaveBeenCalled()
         expect(up.history.location).toMatchURL('/replace-path')
         expect(location.href).toMatchURL('/replace-path')
+      })
+
+      it('marks the history entry as placed by Unpoly with a single call to the History API', function() {
+        const replaceSpy = spyOn(history, 'replaceState').and.callThrough()
+
+        up.history.replace('/replace-path')
+
+        expect(history.state.up).toBe(true)
+        expect(replaceSpy.calls.count()).toBe(1)
       })
 
       it("changes the browser URL when up.history.config.enabled is an array with 'location'", function() {
