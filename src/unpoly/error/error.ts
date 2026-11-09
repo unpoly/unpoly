@@ -1,9 +1,7 @@
 import { sprintf } from '../util.js'
 import type { PlainObject } from '../util.js'
 
-// A class expression, so the class is still named `Error` at runtime (`up.Error.name`),
-// while the binding is `UpError` and doesn't shadow the global `Error` here or in importers.
-export const UpError = class Error extends window.Error {
+export class UpError extends Error {
   // The message may be an array of a message with substitution marks and its values,
   // like `['Unexpected result %o', result]`.
   constructor(message?: string | any[], props: PlainObject = {}) {
