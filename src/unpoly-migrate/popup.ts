@@ -15,7 +15,7 @@ up.popup = {
   @deprecated
     Use `up.layer.open({ origin, mode: 'popup' })` instead.
   */
-  attach(origin, options = {}) {
+  attach(origin, options: object = {}) {
     origin = up.fragment.get(origin)
     up.migrate.deprecated('up.popup.attach(origin)', "up.layer.open({ origin, mode: 'popup' })")
     return up.layer.open({ ...options, origin, layer: 'new', mode: 'popup' })
@@ -30,7 +30,7 @@ up.popup = {
   @deprecated
     Use `up.layer.dismiss()` instead.
   */
-  close(options = {}) {
+  close(options: object = {}) {
     up.migrate.deprecated('up.popup.close()', 'up.layer.dismiss()')
     up.layer.dismiss(null, options)
     return up.migrate.formerlyAsync('up.layer.dismiss()')
@@ -85,7 +85,7 @@ up.popup = {
   @deprecated
     Use `up.layer.contains()` instead.
   */
-  contains(element) {
+  contains(element: any) {
     up.migrate.deprecated('up.popup.contains()', 'up.layer.contains()')
     return up.layer.contains(element)
   },
