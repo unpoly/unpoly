@@ -98,7 +98,9 @@ up.FormValidator = class FormValidator {
     if (u.isString(target)) {
       up.puts('up.validate()', 'Validating target "%s"', target)
       let simpleSelectors = up.fragment.splitTarget(target)
-      return u.compact(simpleSelectors.map(function(simpleSelector) {
+      // A blank target (like " " or ",") has no selectors. We return undefined
+      // so the caller falls back to the validation target it would use without a target.
+      return u.presence(u.compact(simpleSelectors.map(function(simpleSelector) {
         let element = up.fragment.get(simpleSelector, { origin })
         if (element) {
           return {
@@ -109,7 +111,7 @@ up.FormValidator = class FormValidator {
         } else {
           up.fail('Validation target "%s" does not match an element', simpleSelector)
         }
-      }))
+      })))
     }
   }
 

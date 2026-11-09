@@ -537,6 +537,16 @@ extendDescribe('up.fragment', function() {
         const selectors = up.fragment.splitTarget('.one:has(.three, .four), .two')
         expect(selectors).toEqual(['.one:has(.three, .four)', '.two'])
       })
+
+      it('returns an empty array for an empty string', function() {
+        const selectors = up.fragment.splitTarget('')
+        expect(selectors).toEqual([])
+      })
+
+      it('returns an empty array for a blank string', function() {
+        const selectors = up.fragment.splitTarget(' ')
+        expect(selectors).toEqual([])
+      })
     })
 
     describe('up.fragment.parseTargetSteps()', function() {

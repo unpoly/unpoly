@@ -9,6 +9,7 @@ Unreleased
 - Fix a bug where [`up.fragment.toTarget()`](/api/up.fragment.toTarget) threw a `TypeError` when given an empty string. It now throws an `up.CannotTarget` error.
 - Fix a bug where rendering failed when a new fragment had a callback attribute like [`[up-on-loaded]`](/api/up-follow#up-on-loaded) whose code spanned multiple lines. Running such a callback failed as well.
 - Fix a bug where a [transition](/learn/transitions) failed when the old element contained a hidden [`[up-fixed=top]`](/api/up-fixed-top) or `[up-fixed=bottom]` element, like a collapsed navigation bar.
+- Fix a bug where a blank [`[up-validate]`](/api/up-validate) value, like `" "` or `","`, threw an error whenever the field changed. A blank value now behaves like an empty `[up-validate]` attribute and validates the field's [form group](/api/up-form-group). The same goes for a blank `{ target }` passed to [`up.validate()`](/api/up.validate).
 - When Unpoly adds or changes a history entry, it now calls the browser's History API once instead of twice. Browsers limit how often a page may change its history, so apps that update history often are less likely to hit that limit.
 - ⚠️ Rendering into the `<html>` element now throws an `up.CannotTarget` error. It would swap or duplicate `<head>` and `<body>`. Make a full page load instead.
 
