@@ -1,9 +1,30 @@
 import { cleaner as utilCleaner, copy, extractOptions, getSimpleTokens, isJQuery, isList } from '../util.js'
 import { EventListener } from './event_listener.js'
+import type { EventListenerAttributes, ListenerTarget } from './event_listener.js'
+import type { List, PlainObject } from '../util.js'
+
+/**
+The attributes for an `up.EventListener`, minus its single element and event type.
+@internal
+*/
+export type SharedListenerAttributes = Omit<EventListenerAttributes, 'element' | 'eventType'>
+
+/**
+Everything an `up.EventListenerGroup` needs to know: the elements and event types to listen to,
+and the attributes for each `up.EventListener`.
+@internal
+*/
+export interface EventListenerGroupAttributes extends SharedListenerAttributes {
+  elements: List<ListenerTarget>
+  eventTypes: string[]
+}
 
 export class EventListenerGroup {
+  declare elements: List<ListenerTarget>
+  declare eventTypes: string[]
+  declare _listenerAttributes: SharedListenerAttributes
 
-  constructor({ elements, eventTypes, ...listenerAttributes }) {
+  constructor({ elements, eventTypes, ...listenerAttributes }: EventListenerGroupAttributes) {
     this.elements = elements
     this.eventTypes = eventTypes
     // The other attributes (selector, callback, options) are for the EventListener we build
@@ -11,7 +32,7 @@ export class EventListenerGroup {
     this._listenerAttributes = listenerAttributes
   }
 
-  bind() {
+  bind(): () => void {
     const cleaner = utilCleaner()
 
     this._eachListenerAttributes(function(attrs) {
@@ -23,7 +44,7 @@ export class EventListenerGroup {
     return cleaner.clean
   }
 
-  _eachListenerAttributes(fn) {
+  _eachListenerAttributes(fn: (attributes: EventListenerAttributes) => void): void {
     for (let element of this.elements) {
       for (let eventType of this.eventTypes) {
         fn({ ...this._listenerAttributes, element, eventType })
@@ -31,7 +52,7 @@ export class EventListenerGroup {
     }
   }
 
-  unbind() {
+  unbind(): void {
     this._eachListenerAttributes(function(attrs) {
       let listener = EventListener.fromElement(attrs)
       if (listener) {
@@ -48,7 +69,7 @@ export class EventListenerGroup {
   @function up.EventListenerGroup.fromBindArgs
   @internal
   */
-  static fromBindArgs(args, overrides) {
+  static fromBindArgs(args: any[], overrides?: PlainObject): EventListenerGroup {
     args = copy(args)
 
     // A callback function is given in all arg variants.
