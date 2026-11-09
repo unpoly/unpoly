@@ -28,9 +28,12 @@
 // - This file imports the namespaces before the classes, and so enters every cycle through a
 //   namespace.
 //
-// After changing imports, load dist/unpoly.js once.
-// A ReferenceError at load time ("Cannot access … before initialization") means a cycle is
-// entered from the wrong side.
+// Loading dist/unpoly.js does not reliably reveal a cycle entered from the wrong side. The bundle
+// has no "Cannot access … before initialization" errors, since esbuild turns top-level `const`,
+// `let` and `class` into `var`. A binding read too early is just `undefined`: calling it throws a
+// TypeError (`… is not a function`, `Class extends value undefined`), but reading a value does not
+// fail at all. So after changing imports, check which modules a changed module reads while it is
+// evaluated, and that they come first.
 import * as namespace from './unpoly/namespace.js.erb'
 import * as util from './unpoly/util.js'
 import * as migrateStub from './unpoly/migrate_stub.js'
