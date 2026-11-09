@@ -478,7 +478,7 @@ export function metaContent(name: string): string | undefined {
 */
 export function insertBefore(existingNode: Node, newNode: Node): void {
   // We're not using insertAdjacentElement() because that does not work with Text nodes
-  existingNode.parentNode.insertBefore(newNode, existingNode)
+  existingNode.parentNode!.insertBefore(newNode, existingNode)
 }
 
 /*-
@@ -569,7 +569,8 @@ element = up.element.createFromSelector('div', { style: { color: 'red' }})
 export function createFromSelector(selector: string, attrs: PlainObject = {}): HTMLElement {
   let { includePath } = parseSelector(selector)
 
-  let rootElement
+  // A selector has at least one segment, so the loop below assigns this.
+  let rootElement!: HTMLElement
   let depthElement
   let previousElement
 
@@ -696,7 +697,8 @@ export function parseSelector(rawSelector: string): ParsedSelector {
 
     depthSelector = depthSelector.replace(/\[[^\]]*]/g, function(attr) {
       attr = restoreSelectorLiterals(attr)
-      let [_raw, name, _operator, quote, value] = attr.match(/\[([\w-]+)(?:([~|^$*]?=)(["'])?(.*?)\3)?]/s)
+      // TODO: Throws for a valid selector with whitespace around the operator, like [foo = "bar"].
+      let [_raw, name, _operator, quote, value] = attr.match(/\[([\w-]+)(?:([~|^$*]?=)(["'])?(.*?)\3)?]/s)!
       quote ||= '"'
       parsed.attributes[name] = value ? parseString(quote + value + quote) : ''
       return ''
@@ -814,7 +816,8 @@ export function createBrokenDocumentFromHTML(html: string): Document {
   // DOMParser is usually smart enough to parse an incomplete HTML fragment into a full <html> document.
   // However, any table components without an enclosing <table> will be parsed into a simple text node.
   const firstTag = firstTagNameInHTML(html)
-  if (['TR', 'TD', 'TH', 'THEAD', 'TBODY'].includes(firstTag)) {
+  // includes() takes an undefined tag name and returns false.
+  if (['TR', 'TD', 'TH', 'THEAD', 'TBODY'].includes(firstTag!)) {
     html = `<table>${html}</table>`
   }
   return new DOMParser().parseFromString(html, 'text/html')
@@ -981,11 +984,12 @@ export function fixedToAbsolute(element: HTMLElement): void {
   // Set the position to 'absolute' so it gains an offsetParent
   element.style.position = 'absolute'
 
-  const offsetParentRect = element.offsetParent.getBoundingClientRect()
+  const offsetParentRect = element.offsetParent!.getBoundingClientRect()
 
+  // A computed margin is never blank.
   setInlineStyle(element, {
-    left: (elementRectAsFixed.left - computedStyleNumber(element, 'margin-left') - offsetParentRect.left) + 'px',
-    top: (elementRectAsFixed.top - computedStyleNumber(element, 'margin-top') - offsetParentRect.top) + 'px',
+    left: (elementRectAsFixed.left - computedStyleNumber(element, 'margin-left')! - offsetParentRect.left) + 'px',
+    top: (elementRectAsFixed.top - computedStyleNumber(element, 'margin-top')! - offsetParentRect.top) + 'px',
     right: '',
     bottom: ''
   })
@@ -1087,7 +1091,7 @@ function preservingFocus<T>(fn: () => T): T {
 export function parseAttr(element: Element, attribute: string, ...parsers: AttrParser[]): any {
   // The document does not respond to #hasAttribute()
   if (!element.hasAttribute?.(attribute)) return undefined
-  let rawValue = element.getAttribute(attribute)
+  let rawValue = element.getAttribute(attribute)!
 
   for (let parser of parsers) {
     let parserResult = parser(rawValue, attribute, element)
@@ -1421,7 +1425,8 @@ export function inlineStyle(element: HTMLElement, props: string | string[]) {
 }
 
 function extractFromStyleObject(style: CSSStyleDeclaration, keyOrKeys: string | string[]): string | Record<string, string> {
-  if (up.migrate.loaded) keyOrKeys = up.migrate.fixGetStyleProps(keyOrKeys)
+  // unpoly-migrate defines all hooks.
+  if (up.migrate.loaded) keyOrKeys = up.migrate.fixGetStyleProps!(keyOrKeys)
 
   if (isString(keyOrKeys)) {
     return style.getPropertyValue(keyOrKeys)
@@ -1447,7 +1452,7 @@ up.element.setStyle(element, { color: 'red', 'font-size': '2em' })
 @stable
 */
 export function setInlineStyle(element: HTMLElement, props: string | StyleProps, unit = ''): void {
-  if (up.migrate.loaded) props = up.migrate.fixSetStyleProps(props, unit)
+  if (up.migrate.loaded) props = up.migrate.fixSetStyleProps!(props, unit)
 
   if (isString(props)) {
     element.setAttribute('style', props)
@@ -1602,7 +1607,7 @@ up.element.unionSelector(['input', 'textarea'], ['.disabled', '[disabled]'], '.a
 */
 export function unionSelector(includes: string[], excludes?: string[], condition?: string): string {
   let selector = `:is(${includes.join()})`
-  if (isPresent(excludes)) selector += `:not(${excludes.join()})`
+  if (isPresent(excludes)) selector += `:not(${excludes!.join()})`
   if (condition) selector += `:is(${condition})`
   return selector
 }
@@ -1613,7 +1618,8 @@ export function documentPosition(element: Element): [Element, InsertPosition] {
     return [nextSibling, 'beforebegin']
   } else {
     // We're the only or last child of our parent.
-    return [element.parentElement, 'beforeend']
+    // The caller passes an attached element below <html>.
+    return [element.parentElement!, 'beforeend']
   }
 }
 
