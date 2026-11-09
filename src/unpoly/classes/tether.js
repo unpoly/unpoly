@@ -39,8 +39,9 @@ up.Tether = class Tether {
   }
 
   _scheduleSync() {
-    clearTimeout(this.syncTimer)
-    return this.syncTimer = u.task(this.sync.bind(this))
+    // Not u.task(), which doesn't return a timer ID we could clear.
+    clearTimeout(this._syncTimer)
+    this._syncTimer = setTimeout(() => this.sync())
   }
 
   isAlive() {

@@ -99,6 +99,18 @@ describe('up.Layer.Popup', function() {
       expect(popup.element.style.left).toBe(origin.style.left)
     })
 
+    it('repositions only once when the window is resized multiple times within a task', async function() {
+      openPopup()
+      const syncSpy = spyOn(up.Tether.prototype, 'sync').and.callThrough()
+
+      up.emit(window, 'resize')
+      up.emit(window, 'resize')
+      up.emit(window, 'resize')
+      await wait()
+
+      expect(syncSpy.calls.count()).toBe(1)
+    })
+
     describe('with { position: "bottom", align: "left" }', function() {
 
       it('is positioned below the origin and grows from the left origin edge to the right', function() {
