@@ -42,7 +42,7 @@ Removes the given element from the DOM tree.
 @deprecated
   Use [`Element#remove()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/remove) instead.
 */
-up.element.remove = function(element) {
+up.element.remove = function(element: Element) {
   up.migrate.deprecated('up.element.remove()', 'Element#remove()')
   return element.remove()
 }
@@ -63,7 +63,7 @@ use `up.fragment.matches()` instead.
 @deprecated
   Use [`Element#matches()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/matches) instead.
 */
-up.element.matches = function(element, selector) {
+up.element.matches = function(element: Element, selector: string) {
   up.migrate.deprecated('up.element.matches()', 'Element#matches()')
   return element.matches(selector)
 }
@@ -84,7 +84,7 @@ and traversing up through its ancestors in the DOM tree.
 @deprecated
   Use [`Element#closest()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) instead.
 */
-up.element.closest = function(element, selector) {
+up.element.closest = function(element: Element, selector: string) {
   up.migrate.deprecated('up.element.closest()', 'Element#closest()')
   return element.closest(selector)
 }
@@ -100,7 +100,7 @@ The old element will be removed from the DOM tree.
 @deprecated
   Use [`Element#replaceWith()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/replaceWith) instead.
 */
-up.element.replace = function(oldElement, newElement) {
+up.element.replace = function(oldElement: Element, newElement: Node) {
   up.migrate.deprecated('up.element.replace()', 'Element#replaceWith()')
   return oldElement.replaceWith(newElement)
 }
@@ -145,7 +145,7 @@ Adds or removes the given class from the given element.
 @deprecated
   Use [`Element#classList.toggle(className)`](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList) instead.
 */
-up.element.toggleClass = function(element, klass, newPresent) {
+up.element.toggleClass = function(element: Element, klass: string, newPresent?: boolean) {
   up.migrate.deprecated('up.element.toggleClass()', 'element.classList.toggle()')
   const list = element.classList
   if (newPresent == null) { newPresent = !list.contains(klass) }
@@ -183,7 +183,7 @@ See also `up.element.isDetached()`.
 @deprecated
   Use `element.isConnected` instead.
 */
-up.element.isAttached = function(element) {
+up.element.isAttached = function(element: Node) {
   up.migrate.deprecated('up.element.isAttached()', 'element.isConnected')
   return document.contains(element)
 }
@@ -197,7 +197,7 @@ Returns whether the given element has been removed from the DOM tree.
 @deprecated
   Use `!element.isConnected` instead.
 */
-up.element.isDetached = function(element) {
+up.element.isDetached = function(element: Node) {
   up.migrate.deprecated('up.element.isDetached()', '!element.isConnected')
   return !up.element.isAttached(element)
 }
