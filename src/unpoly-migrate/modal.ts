@@ -2,6 +2,12 @@
 @namespace up.layer
 */
 
+declare module '../unpoly.js' {
+  interface Up {
+    modal: any
+  }
+}
+
 const FLAVORS_ERROR = new Error('up.modal.flavors has been removed without direct replacement. You may give new layers a { class } or modify layer elements on up:layer:open.')
 
 up.modal = {

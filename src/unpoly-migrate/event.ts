@@ -2,6 +2,16 @@
 @namespace up.event
 */
 
+declare module '../unpoly.js' {
+  interface Up {
+    event: CoreApi['event'] & {
+      nobodyPrevents: any
+    }
+    $on: any
+    $off: any
+  }
+}
+
 up.migrate.renamedNamespace('bus', 'event')
 
 /*-
@@ -26,7 +36,7 @@ if (up.event.nobodyPrevents('disk:erase')) {
 */
 up.event.nobodyPrevents = function(...args) {
   up.migrate.deprecated('up.event.nobodyPrevents(type)', '!up.emit(type).defaultPrevented')
-  const event = up.emit(...args)
+  const event = (up.emit as any)(...args)
   return !event.defaultPrevented
 }
 
@@ -81,7 +91,7 @@ up.$on = function(...definitionArgs) {
     let $element = jQuery(element)
     callback.call($element, event, $element, data)
   }
-  return up.on(...definitionArgs, callback.upNativeCallback)
+  return (up.on as any)(...definitionArgs, callback.upNativeCallback)
 }
 
 up.$off = function(...definitionArgs) {
@@ -93,5 +103,5 @@ up.$off = function(...definitionArgs) {
     up.internal.fail('The callback passed to up.$off() was never registered with up.$on()')
   }
 
-  return up.off(...definitionArgs, nativeCallback)
+  return (up.off as any)(...definitionArgs, nativeCallback)
 }

@@ -2,6 +2,12 @@
 @namespace up.layer
 */
 
+declare module '../unpoly.js' {
+  interface Up {
+    popup: any
+  }
+}
+
 up.popup = {
   /*-
   Attaches a popup overlay to the given element or selector.

@@ -4,6 +4,19 @@ const u = up.util
 @namespace up.network
 */
 
+// A deprecated alias has the type of the function that replaces it.
+declare module '../unpoly.js' {
+  interface Up {
+    network: CoreApi['network'] & {
+      clear(): void
+      preload: CoreApi['link']['preload']
+      isIdle(): boolean
+      shouldReduceRequests(): boolean
+    }
+    ajax: any
+  }
+}
+
 up.migrate.renamedNamespace('proxy', 'network')
 up.migrate.renamedEvent('up:proxy:load',     'up:request:load')    // renamed in 1.0.0
 up.migrate.renamedEvent('up:proxy:received', 'up:request:loaded')  // renamed in 0.50.0
@@ -106,7 +119,7 @@ up.ajax('/search', { params: { query: 'sunshine' } }).then(function(text) {
 up.ajax = function(...args) {
   up.migrate.deprecated('up.ajax()', 'up.request()')
   const pickResponseText = (response) => response.text
-  return up.request(...args).then(pickResponseText)
+  return (up.request as any)(...args).then(pickResponseText)
 }
 
 /*-
@@ -194,7 +207,8 @@ Aborts all pending requests.
 @deprecated
   Use `up.Request#loadPage()` instead.
 */
-up.Request.prototype.navigate = function() {
+// up.Request is a class expression, so we can't declare the method by declaration merging.
+;(up.Request.prototype as any).navigate = function() {
   up.migrate.deprecated('up.Request#navigate()', 'up.Request#loadPage()')
   this.loadPage()
 }
@@ -276,7 +290,8 @@ function mayHaveCustomIndicator() {
   return u.find(listeners, (listener) => listener.eventType === 'up:network:late')
 }
 
-const progressBarDefault = up.network.config.progressBar
+// Core's default is a boolean, not a function.
+const progressBarDefault = up.network.config.progressBar as boolean
 up.network.config.patch(function(config) {
   config.progressBar = function() {
     if (mayHaveCustomIndicator()) {

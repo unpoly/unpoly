@@ -2,6 +2,17 @@
 @namespace up.viewport
 */
 
+// A deprecated alias has the type of the function that replaces it.
+declare module '../unpoly.js' {
+  interface Up {
+    viewport: CoreApi['viewport'] & {
+      closest: CoreApi['viewport']['get']
+      scroll: any
+    }
+    scroll: any
+  }
+}
+
 up.migrate.renamedNamespace('layout', 'viewport')
 
 up.viewport.config.patch(function(config) {

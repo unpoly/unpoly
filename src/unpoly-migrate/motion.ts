@@ -2,6 +2,14 @@
 @namespace up.motion
 */
 
+declare module '../unpoly.js' {
+  interface Up {
+    motion: CoreApi['motion'] & {
+      isEnabled(): boolean
+    }
+  }
+}
+
 // up.motion.finish() already returns up.migrate.formerlyAsync() from core.
 
 /*-

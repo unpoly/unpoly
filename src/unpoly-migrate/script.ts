@@ -2,6 +2,13 @@
 @namespace up.script
 */
 
+declare module '../unpoly.js' {
+  interface Up {
+    $compiler: any
+    $macro: any
+  }
+}
+
 const u = up.util
 
 up.migrate.renamedNamespace('syntax', 'script')

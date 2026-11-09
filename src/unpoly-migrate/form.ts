@@ -2,6 +2,12 @@
 @namespace up.form
 */
 
+declare module '../unpoly.js' {
+  interface Up {
+    observe: any
+  }
+}
+
 up.form.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'fields', 'fieldSelectors', { label: 'up.form.config' })
   up.migrate.renamedProperty(config, 'submitButtons', 'submitButtonSelectors', { label: 'up.form.config' })

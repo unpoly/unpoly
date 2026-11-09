@@ -2,6 +2,14 @@
 @namespace up.history
 */
 
+declare module '../unpoly.js' {
+  interface Up {
+    history: CoreApi['history'] & {
+      url(): string
+    }
+  }
+}
+
 up.history.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'popTargets', 'restoreTargets', { label: 'up.history.config' })
 })

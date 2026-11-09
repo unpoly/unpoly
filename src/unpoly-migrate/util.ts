@@ -2,6 +2,29 @@
 @namespace up.util
 */
 
+// A deprecated alias has the type of the function that replaces it.
+declare module '../unpoly.js' {
+  interface Up {
+    util: CoreApi['util'] & {
+      only: any
+      except: any
+      parseUrl: CoreApi['util']['parseURL']
+      any: CoreApi['util']['some']
+      all: CoreApi['util']['every']
+      detect: CoreApi['util']['find']
+      select: CoreApi['util']['filter']
+      setTimer: CoreApi['util']['timer']
+      escapeHtml: CoreApi['util']['escapeHTML']
+      selectorForElement: CoreApi['fragment']['toTarget']
+      nextFrame: CoreApi['util']['task']
+      times: any
+      assign: any
+      values: any
+      microtask: any
+    }
+  }
+}
+
 /*-
 Returns a copy of the given object that only contains
 the given keys.
@@ -12,7 +35,7 @@ the given keys.
 @deprecated
   Use `up.util.pick()` instead.
 */
-up.util.only = function(object: object, ...keys: string[]) {
+up.util.only = function(object: Record<string, any>, ...keys: string[]) {
   up.migrate.deprecated('up.util.only(object, ...keys)', 'up.util.pick(object, keys)')
   return up.util.pick(object, keys)
 }
@@ -27,7 +50,7 @@ the given keys.
 @deprecated
   Use `up.util.omit(object, keys)` (with an array argument) instead of `up.util.except(object, ...keys)` (with rest arguments).
 */
-up.util.except = function(object: object, ...keys: string[]) {
+up.util.except = function(object: Record<string, any>, ...keys: string[]) {
   up.migrate.deprecated('up.util.except(object, ...keys)', 'up.util.omit(object, keys)')
   return up.util.omit(object, keys)
 }

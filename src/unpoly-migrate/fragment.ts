@@ -4,6 +4,18 @@ const u = up.util
 @namespace up.fragment
 */
 
+// A deprecated alias has the type of the function that replaces it.
+declare module '../unpoly.js' {
+  interface Up {
+    fragment: CoreApi['fragment'] & {
+      first: CoreApi['fragment']['get']
+    }
+    first: CoreApi['fragment']['get']
+    replace: any
+    extract: any
+  }
+}
+
 up.migrate.renamedNamespace('flow', 'fragment')
 up.migrate.renamedNamespace('dom', 'fragment')
 
@@ -125,7 +137,7 @@ Returns `undefined` if no element matches these conditions.
 */
 up.fragment.first = function(...args) {
   up.migrate.deprecated('up.fragment.first()', 'up.fragment.get()')
-  return up.fragment.get(...args)
+  return (up.fragment.get as any)(...args)
 }
 
 up.first = up.fragment.first

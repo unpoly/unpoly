@@ -2,6 +2,25 @@
 @namespace up.element
 */
 
+// A deprecated alias has the type of the function that replaces it.
+declare module '../unpoly.js' {
+  interface Up {
+    element: CoreApi['element'] & {
+      first: CoreApi['element']['get']
+      createFromHtml: CoreApi['element']['createFromHTML']
+      remove: any
+      matches: any
+      closest: any
+      replace: any
+      all: any
+      toggleClass: any
+      toSelector: CoreApi['fragment']['toTarget']
+      isAttached: any
+      isDetached: any
+    }
+  }
+}
+
 /*-
 Returns the first descendant element matching the given selector.
 
@@ -21,7 +40,7 @@ Returns the first descendant element matching the given selector.
 */
 up.element.first = function(...args) {
   up.migrate.deprecated('up.element.first()', 'up.element.get()')
-  return up.element.get(...args)
+  return (up.element.get as any)(...args)
 }
 
 up.element.createFromHtml = function(...args) {
