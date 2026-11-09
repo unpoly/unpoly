@@ -1,5 +1,6 @@
 import { OverlayWithViewport } from './overlay_with_viewport.js'
+import type { LayerMode } from '../base.js'
 
 export class CoverLayer extends OverlayWithViewport {
-  static mode = 'cover'
+  static mode: LayerMode = 'cover'
 }
