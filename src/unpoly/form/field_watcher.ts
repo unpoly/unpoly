@@ -5,10 +5,42 @@ import { getRegion, isField, readFieldName, trackFields, watchOptions } from '..
 import { Params } from './params.js'
 import { isAlive } from '../fragment.js'
 import { printUserEvent } from '../log.js'
+import type { PlainObject } from '../util.js'
+
+/**
+The callback for `up.watch()`. It is called with the new value, the field name and the
+options for the change. With `{ batch: true }` it is called once with an object of all
+changed values and the options.
+*/
+export type WatchCallback = (...args: any[]) => any
+
+/**
+Options for an `up.FieldWatcher`. Other options are passed on to the callback.
+@internal
+*/
+export interface FieldWatcherOptions {
+  batch?: boolean
+  logPrefix?: string
+  includeDisabled?: boolean
+  event?: string
+  delay?: number
+  [key: string]: any
+}
 
 export class FieldWatcher {
+  declare _options: FieldWatcherOptions
+  declare _root: Element
+  declare _callback: WatchCallback
+  declare _batch: boolean | undefined
+  declare _logPrefix: string
+  declare _includeDisabled: boolean | undefined
+  declare _scheduledValues: PlainObject | null
+  declare _scheduledFieldOptions: PlainObject | null
+  declare _processedValues: PlainObject
+  declare _currentTimer: number | null
+  declare _callbackRunning: boolean
 
-  constructor(root, options, callback) {
+  constructor(root: Element, options: FieldWatcherOptions, callback: WatchCallback) {
     this._options = options
     this._root = root
     this._callback = callback
@@ -19,7 +51,7 @@ export class FieldWatcher {
     this._ensureWatchable()
   }
 
-  start() {
+  start(): () => void {
     this._scheduledValues = null
     this._processedValues = this._readFieldValues()
     this._currentTimer = null
@@ -33,7 +65,7 @@ export class FieldWatcher {
     )
   }
 
-  _ensureWatchable() {
+  _ensureWatchable(): void {
     const fail = (message) => errorFail(message, this._logPrefix, this._root)
 
     if (!this._callback) {
@@ -49,7 +81,7 @@ export class FieldWatcher {
     }
   }
 
-  _trackFields() {
+  _trackFields(): () => void {
     if (isField(this._root)) {
       return this._watchField(this._root)
     } else {
@@ -57,26 +89,26 @@ export class FieldWatcher {
     }
   }
 
-  _trackAbort() {
+  _trackAbort(): () => void {
     let guard = ({ target }) => target.contains(this._region)
     return on('up:fragment:aborted', { guard }, () => this._abort())
   }
 
-  _trackReset() {
+  _trackReset(): () => void {
     let guard = ({ target }) => target === this._region
     return on('reset', { guard }, (event) => this._onFormReset(event))
   }
 
-  get _region() {
+  get _region(): Element {
     return getRegion(this._root)
   }
 
-  _fieldOptions(field) {
+  _fieldOptions(field: Element): PlainObject {
     let rootOptions = copy(this._options)
     return watchOptions(field, rootOptions, { defaults: { event: 'input' } })
   }
 
-  _watchField(field) {
+  _watchField(field: Element): () => void {
     let fieldOptions = this._fieldOptions(field)
     let eventType = fieldOptions.event
 
@@ -85,12 +117,12 @@ export class FieldWatcher {
     return on(field, eventType, (event) => this._check(event, fieldOptions))
   }
 
-  _abort() {
+  _abort(): void {
     // This causes the next call to _requestCallback() to return early.
     this._scheduledValues = null
   }
 
-  _scheduleValues(values, fieldOptions) {
+  _scheduleValues(values: PlainObject, fieldOptions: PlainObject): void {
     this._scheduledValues = values
     this._scheduledFieldOptions = fieldOptions
     let delay = fieldOptions.delay || 0
@@ -102,11 +134,11 @@ export class FieldWatcher {
     })
   }
 
-  _isNewValues(values) {
+  _isNewValues(values: PlainObject): boolean {
     return !isEqual(values, this._processedValues) && !isEqual(this._scheduledValues, values)
   }
 
-  async _requestCallback() {
+  async _requestCallback(): Promise<void> {
     // When aborted we nullify _scheduledValues to cancel a scheduled callback.
     if (!this._scheduledValues) return
 
@@ -154,11 +186,11 @@ export class FieldWatcher {
     this._requestCallback()
   }
 
-  _runCallback(...args) {
+  _runCallback(...args: any[]): any {
     return guard(this._callback, ...args)
   }
 
-  _changedValues(previous, next) {
+  _changedValues(previous: PlainObject, next: PlainObject): PlainObject {
     const changes = {}
     let keys = Object.keys(previous)
     keys = keys.concat(Object.keys(next))
@@ -173,11 +205,11 @@ export class FieldWatcher {
     return changes
   }
 
-  _readFieldValues() {
+  _readFieldValues(): PlainObject {
     return Params.fromContainer(this._root, { includeDisabled: this._includeDisabled }).toObject()
   }
 
-  _check(event, fieldOptions = {}) {
+  _check(event: Event, fieldOptions: PlainObject = {}): void {
     const values = this._readFieldValues()
 
     if (this._isNewValues(values)) {
@@ -186,7 +218,7 @@ export class FieldWatcher {
     }
   }
 
-  _onFormReset(event) {
+  _onFormReset(event: Event): void {
     // We need to wait 1 task for the reset button to affect field values
     queueTask(() => this._check(event))
   }
