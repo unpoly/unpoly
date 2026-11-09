@@ -14,8 +14,12 @@
 // - Anything that runs when a module or class is defined must only use bindings that are
 //   already evaluated. That means `extends`, computed keys (`[isEqual.key]`), static fields and
 //   blocks (`static { memoizeMethod(…) }`) and top-level calls (`new Config()`, `mockable()`).
-//   These are safe for bindings from util and element, because those are evaluated before
-//   anything else. This is also why util and element must never import a class.
+//   These are safe for bindings from util and element, because this file imports them before
+//   any namespace or class.
+//   Only the few low-level modules they import themselves are evaluated earlier: mockable,
+//   browser, error and the classes in error/ evaluate before util has finished, so they must
+//   not use a binding from util while they are defined. This is also why util and element
+//   must never import a feature namespace, or a class outside util/ and error/.
 // - A base class must be evaluated before its subclasses. When a base class reaches one of
 //   its subclasses through its own imports, `class Sub extends Base` runs before `Base` exists.
 //   So code outside a class hierarchy imports the base class, not a subclass, wherever it can
