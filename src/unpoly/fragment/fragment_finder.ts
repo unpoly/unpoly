@@ -3,9 +3,29 @@ import { closest, config, containsMainPseudo, getFirstDescendant, matches, split
 
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
-export class FragmentFinder {
+/**
+Options for an `up.FragmentFinder`. Other options (like `{ layer }`) are passed on to
+`up.fragment.closest()` and `up.fragment.get()`.
+@internal
+*/
+export interface FragmentFinderOptions {
+  selector: string
+  origin?: Element
+  document?: Document | Element
+  match?: 'region' | 'first'
+  preferOldElements?: Element[]
+  [key: string]: any
+}
 
-  constructor(options) {
+export class FragmentFinder {
+  declare _options: FragmentFinderOptions
+  declare _origin: Element | undefined
+  declare _selector: string
+  declare _document: Document | Element
+  declare _match: 'region' | 'first'
+  declare _preferOldElements: Element[] | undefined
+
+  constructor(options: FragmentFinderOptions) {
     this._options = options
     this._origin = options.origin
     // Selector is a string, not an up.Selector
@@ -16,27 +36,27 @@ export class FragmentFinder {
     this._preferOldElements = options.preferOldElements
   }
 
-  find() {
+  find(): Element | undefined {
     return this._findInPreferredElements() || this._findInRegion() || this._findFirst()
   }
 
-  _findInPreferredElements() {
+  _findInPreferredElements(): Element | undefined {
     if (this._preferOldElements) {
       return this._preferOldElements.find((preferOldElement) => this._document.contains(preferOldElement) && matches(preferOldElement, this._selector))
     }
   }
 
-  _findInRegion() {
+  _findInRegion(): Element | undefined {
     if (this._match === 'region' && !containsMainPseudo(this._selector) && this._origin?.isConnected) {
       return this._findClosest() || this._findDescendantInRegion()
     }
   }
 
-  _findClosest() {
+  _findClosest(): Element | undefined {
     return closest(this._origin, this._selector, this._options)
   }
 
-  _findDescendantInRegion() {
+  _findDescendantInRegion(): Element | undefined {
     let simpleSelectors = splitTarget(this._selector)
 
     return findResult(simpleSelectors, (simpleSelector) => {
@@ -50,7 +70,7 @@ export class FragmentFinder {
     })
   }
 
-  _findFirst() {
+  _findFirst(): Element | undefined {
     return getFirstDescendant(this._document, this._selector, this._options)
   }
 }
