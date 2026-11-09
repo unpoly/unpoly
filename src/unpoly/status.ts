@@ -14,6 +14,29 @@ import { Preview } from './status/preview.js'
 import { Config } from './util/config.js'
 import { Registry } from './util/registry.js'
 import { FocusCapsule } from './viewport/focus_capsule.js'
+import type { List, PlainObject } from './util.js'
+import type { OptionsParserOptions } from './element/options_parser.js'
+import type { Layer } from './layer/base.js'
+import type { UpRequest } from './network/request.js'
+
+/**
+A preview function, registered with `up.preview()` or passed as `{ preview }`.
+It changes the page while a request is loading, through the given `up.Preview`.
+*/
+export type PreviewFn = (preview: Preview, options?: PlainObject) => any
+
+// A nav remembers the locations its links were last compared with.
+type NavElement = Element & { upNavLocations?: string[] }
+
+// A link remembers its parsed URLs, and the area it expands to with [up-expand].
+type NavLink = Element & { upCurrentURLs?: LinkCurrentURLs, upExpandedPair?: Element[] }
+
+interface NavUpdateOptions {
+  // The links in the navs have changed.
+  newLinks: boolean
+  // A layer's location has changed.
+  anyLocationChanged: boolean
+}
 
 /*-
 Features to show which request is loading and which link leads to the current page.
@@ -67,7 +90,7 @@ export const config = new Config('up.status.config', () => ({
   noNavSelectors: ['[up-nav=false]'],
 }))
 
-export let namedPreviewFns = new Registry('preview')
+export let namedPreviewFns = new Registry<PreviewFn>('preview')
 
 /*-
 Registers a named [preview](/learn/previews) function.
@@ -126,20 +149,20 @@ From HTML you can append the options to the `[up-preview]` argument, after the p
 
 const SELECTOR_LINK = 'a, [up-href]'
 
-function linkCurrentURLs(link) {
+function linkCurrentURLs(link: NavLink): LinkCurrentURLs {
   // Check if we have computed the URLs before.
   // Computation is sort of expensive (multiplied by number of links),
   // so we cache the results in a link property
   return link.upCurrentURLs ||= new LinkCurrentURLs(link)
 }
 
-function getNavLocations(nav) {
+function getNavLocations(nav: Element): string[] {
   let layerRef = stringAttr(nav, 'up-layer') || 'origin'
   let layers = layerStack.getAll(layerRef, { origin: nav })
   return compact(layers.map(getMatchableLayerLocation))
 }
 
-function updateNav(nav, links, { newLinks, anyLocationChanged }) {
+function updateNav(nav: NavElement, links: List<Element>, { newLinks, anyLocationChanged }: NavUpdateOptions): void {
   // Only look up current layer locations when either:
   //
   // (1) the location changed (anyLocationChanged = true) or
@@ -173,7 +196,7 @@ Because we update full navs, we only need to lookup layer locations once.
 @function updateNavsAround
 @internal
 */
-function updateNavsAround(root, opts) {
+function updateNavsAround(root: Element, opts: NavUpdateOptions): void {
   const navSelector = config.selector('navSelectors')
   const fullNavs = around(root, navSelector)
 
@@ -183,7 +206,7 @@ function updateNavsAround(root, opts) {
   }
 }
 
-function getMatchableLayerLocation(layer) {
+function getMatchableLayerLocation(layer: Layer): string | undefined {
   return matchableURL(layer.location)
 }
 
@@ -193,7 +216,7 @@ function getMatchableLayerLocation(layer) {
 @param {string|Element|jQuery} element
 @internal
 */
-function findActivatableAreas(element) {
+function findActivatableAreas(element: NavLink): Element[] {
   return element.upExpandedPair || [element]
 }
 
@@ -263,7 +286,7 @@ You can style revalidating fragments to convey that content might be stale:
 @experimental
 */
 
-export function runPreviews(request, renderOptions) {
+export function runPreviews(request: UpRequest, renderOptions: PlainObject): () => void {
   let { bindLayer } = request
   let focusCapsule = FocusCapsule.preserve(bindLayer)
   let applyPreviews = () => doRunPreviews(request, renderOptions)
@@ -275,7 +298,7 @@ export function runPreviews(request, renderOptions) {
   }
 }
 
-function doRunPreviews(request, renderOptions) {
+function doRunPreviews(request: UpRequest, renderOptions: PlainObject): () => void {
   let { fragment, fragments, origin } = request
   let cleaner = utilCleaner()
   let previewForFragment = (fragment) => new Preview({ fragment, request, renderOptions, cleaner })
@@ -388,7 +411,7 @@ See [Placeholders](/learn/placeholders) for details and elaborate examples.
 @signature
 */
 
-function getPlaceholderPreviewFn(placeholder) {
+function getPlaceholderPreviewFn(placeholder: any): PreviewFn | undefined {
   if (!placeholder) return
 
   return function(preview) {
@@ -396,7 +419,7 @@ function getPlaceholderPreviewFn(placeholder) {
   }
 }
 
-export function resolvePreviewFns(value) {
+export function resolvePreviewFns(value: any): PreviewFn[] {
   if (isFunction(value)) {
     return [value]
   } else if (isString(value)) {
@@ -408,7 +431,7 @@ export function resolvePreviewFns(value) {
   }
 }
 
-function resolvePreviewString(str) {
+function resolvePreviewString(str: string): PreviewFn[] {
   return map(parseScalarJSONPairs(str), ([name, parsedOptions]) => {
     let previewFn = namedPreviewFns.get(name)
 
@@ -419,13 +442,13 @@ function resolvePreviewString(str) {
   })
 }
 
-function getActiveElements({ origin, activeElements }) {
+function getActiveElements({ origin, activeElements }: PlainObject): Element[] {
   activeElements ||= wrapList(origin)
   // If the link area was grown with [up-expand], we highlight the [up-expand] container.
   return flatMap(activeElements, findActivatableAreas)
 }
 
-function getFeedbackClassesPreviewFn(feedbackOption, fragments) {
+function getFeedbackClassesPreviewFn(feedbackOption: boolean | undefined, fragments: Element[]): PreviewFn | undefined {
   if (!feedbackOption) return
 
   return function(preview) {
@@ -440,7 +463,7 @@ function getFeedbackClassesPreviewFn(feedbackOption, fragments) {
   }
 }
 
-export function statusOptions(element, options, parserOptions) {
+export function statusOptions(element: Element, options?: PlainObject, parserOptions?: OptionsParserOptions): PlainObject {
   options = newOptions(options)
   const parser = new OptionsParser(element, options, parserOptions)
   parser.booleanOrString('disable')
@@ -586,7 +609,7 @@ When a link within a [navigational container](/learn/navigation-bars) points to 
 @signature
 */
 
-export function install() {
+export function install(): void {
   on('up:compilers:before', (_event, newFragment) => {
     updateNavsAround(newFragment, { newLinks: true, anyLocationChanged: false })
   })
