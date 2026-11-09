@@ -6,9 +6,188 @@ import { getInputDevice } from '../../event.js'
 import { config, successKey } from '../../fragment.js'
 import { layerStack, normalizeOptions } from '../../layer.js'
 import { callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback } from '../../script.js'
+import type { List, PlainObject, ValueOrFunction } from '../../util.js'
+import type { InputDevice } from '../../event.js'
+import type { ParseCallbackOptions } from '../../script.js'
+import type { Layer } from '../../layer/base.js'
+import type { ParamsLike } from '../../form/params.js'
+import type { AnimationValue, TransitionValue } from '../../motion.js'
+import type { PreviewFn } from '../../status.js'
+import type { UpRequest } from '../../network/request.js'
+import type { UpResponse } from '../../network/response.js'
+import type { RenderResult } from './render_result.js'
+
+/**
+What to render: a target selector, an element to derive a selector from, or several alternatives.
+*/
+export type RenderTarget = string | Element | List<Element> | string[]
+
+/**
+A layer reference: a layer object, an element in a layer, or a name like `'current'`, `'parent'` or `'new'`.
+*/
+export type LayerReference = string | Layer | Element
+
+/**
+A `{ focus }` or `{ scroll }` option: a keyword like `'auto'` or `'keep'`, a selector, an element, a function,
+an array of alternatives or a selector map. See `up.FragmentProcessor`.
+*/
+export type FragmentProcessorValue = any
+
+/**
+A `{ preview }` option: the name of a preview, a preview function, or a list of them.
+*/
+export type PreviewValue = string | PreviewFn | (string | PreviewFn)[] | false
+
+/**
+The options that `up.render()`, `up.navigate()` and the functions built on them (`up.follow()`,
+`up.submit()`, `up.layer.open()`, ...) pass through a render pass.
+
+The public options are documented in `up.render()` and `up.layer.open()`.
+Every option can also be given with a `fail` prefix (`{ failTarget }`, `{ failScroll }`, ...),
+which is used instead for an [error response](/learn/error-responses#fail-options).
+The render pass adds internal options while it runs, listed at the end.
+*/
+export interface RenderOptions {
+  // Targeting
+  target?: RenderTarget
+  fallback?: string | boolean
+  match?: 'region' | 'first'
+  origin?: Element
+  hungry?: boolean
+
+  // Navigation
+  navigate?: boolean
+
+  // Request
+  url?: string
+  method?: string
+  params?: ParamsLike
+  headers?: Record<string, string>
+  abort?: boolean | string | Element | List<Element> | ((options: PlainObject) => any)
+  abortable?: boolean
+  background?: boolean
+  lateDelay?: number | false
+  timeout?: number
+  fail?: ValueOrFunction<boolean> | 'auto'
+
+  // Caching
+  cache?: boolean | 'auto'
+  revalidate?: boolean | 'auto' | ((response: UpResponse) => boolean)
+  revalidatePreview?: PreviewValue
+  expireCache?: any
+  evictCache?: any
+
+  // Local content
+  content?: string | Element | List<Node>
+  fragment?: string | Element
+  document?: string | Element | Document
+  response?: UpResponse
+
+  // Layer
+  layer?: LayerReference
+  peel?: boolean | string
+  mode?: string
+  size?: string
+  class?: string
+  position?: string
+  align?: string
+  dismissable?: boolean | string | string[]
+  dismissLabel?: string
+  dismissARIALabel?: string
+  trapFocus?: boolean
+  acceptEvent?: string | string[]
+  dismissEvent?: string | string[]
+  acceptLocation?: string | string[]
+  dismissLocation?: string | string[]
+  acceptFragment?: string
+  dismissFragment?: string
+
+  // History
+  history?: boolean | 'auto'
+  title?: boolean | string
+  location?: boolean | string
+  metaTags?: boolean | Element[]
+  lang?: boolean | string
+
+  // Animation
+  transition?: TransitionValue
+  animation?: AnimationValue
+  openAnimation?: AnimationValue
+  closeAnimation?: AnimationValue
+  duration?: number
+  easing?: string
+  closeDuration?: number
+  closeEasing?: string
+
+  // Scrolling
+  scroll?: FragmentProcessorValue
+  scrollMap?: PlainObject
+  scrollBehavior?: ScrollBehavior
+  revealSnap?: number
+  revealTop?: boolean
+  revealPadding?: number
+  revealMax?: number | ((viewportHeight: number) => number)
+  saveScroll?: boolean
+
+  // Focus
+  focus?: FragmentProcessorValue
+  focusVisible?: boolean | 'auto'
+  saveFocus?: boolean
+
+  // Loading state
+  disable?: boolean | string | Element | any[]
+  placeholder?: string | Element | List<Node> | false
+  preview?: PreviewValue
+  feedback?: boolean
+
+  // Client state
+  data?: any
+  dataMap?: PlainObject
+  keep?: boolean
+  keepData?: boolean
+  context?: PlainObject
+
+  // Lifecycle hooks
+  confirm?: string | false
+  onLoaded?: (event: Event) => any
+  onOffline?: (event: Event) => any
+  onRendered?: (result: RenderResult) => any
+  onFinished?: (result: RenderResult) => any
+  onError?: (error: any) => any
+  onOpened?: (event: Event) => any
+  onAccept?: (event: Event) => any
+  onAccepted?: (event: Event) => any
+  onDismiss?: (event: Event) => any
+  onDismissed?: (event: Event) => any
+
+  // Internal options, set by Unpoly's own callers or by the render pass.
+  baseLayer?: Layer
+  originLayer?: Layer
+  source?: string | false
+  // Use the fail-prefixed options for an error response, instead of the success options.
+  failOptions?: boolean
+  didFail?: boolean
+  didForceFailOptions?: boolean
+  // The defaults from up.fragment.config, merged in by RenderOptions.finalize().
+  defaults?: RenderOptions
+  inputDevice?: InputDevice
+  // Opens an empty overlay when no content option is given (up.layer.open()).
+  defaultToEmptyContent?: boolean
+  // An event to emit before rendering, e.g. up:link:follow. Rendering is aborted when it is prevented.
+  guardEvent?: Event & { renderOptions?: RenderOptions }
+  handleAbort?: (request: UpRequest) => void
+  // An identifier for a render pass. See up.fragment.abort().
+  jid?: any
+  // Only use the response if it was cached (up.link.preload()).
+  preload?: boolean
+  expiredResponse?: UpResponse
+  verifyFinished?: (result: RenderResult) => any
+  [key: `fail${string}`]: any
+}
+
 
 // Sometimes we need to use given render options, but disable preview effects.
-const NO_PREVIEWS = {
+const NO_PREVIEWS: RenderOptions = {
   preview: false,
   disable: false,
   placeholder: false,
@@ -16,14 +195,14 @@ const NO_PREVIEWS = {
 }
 
 // Sometimes we need to use given render options, but disable meddling with user control.
-const NO_INPUT_INTERFERENCE = {
+const NO_INPUT_INTERFERENCE: RenderOptions = {
   scroll: 'keep',
   focus: 'keep',
   confirm: false,
 }
 
 // Sometimes we need to use given render options, but disable animation.
-const NO_MOTION = {
+const NO_MOTION: RenderOptions = {
   transition: false,
   animation: false,
   openAnimation: false,
@@ -32,7 +211,7 @@ const NO_MOTION = {
 
 // These properties are used before the request is sent.
 // Hence there cannot be a failVariant.
-const PREFLIGHT_KEYS = [
+const PREFLIGHT_KEYS: (keyof RenderOptions)[] = [
   'url',
   'method',
   'origin',
@@ -87,7 +266,7 @@ const SHARED_KEYS = PREFLIGHT_KEYS.concat([
 ])
 
 // At least one of these properties must be given for Unpoly to render content.
-const CONTENT_KEYS = [
+const CONTENT_KEYS: string[] = [
   'url',
   'response',
   'content',
@@ -97,19 +276,19 @@ const CONTENT_KEYS = [
 
 // preprocess() will leave out properties for which there may be a better default
 // later, in particular from the layer config in OpenLayerPlan.
-const LATE_KEYS = [
+const LATE_KEYS: string[] = [
   'history',
   'focus',
   'scroll',
 ]
 
-const EVENT_CALLBACK = {} // default in up.element.parseCallback() is { mainKey: 'event' }
-const RESULT_CALLBACK = { argNames: ['result'] }
-const ERROR_CALLBACK = { argNames: ['error'] }
-const OPEN_LAYER_CALLBACK = { expandObject: ['layer'] }
-const CLOSE_LAYER_CALLBACK = { expandObject: ['layer', 'value', 'response'] }
+const EVENT_CALLBACK: ParseCallbackOptions = {} // default in up.element.parseCallback() is { mainKey: 'event' }
+const RESULT_CALLBACK: ParseCallbackOptions = { argNames: ['result'] }
+const ERROR_CALLBACK: ParseCallbackOptions = { argNames: ['error'] }
+const OPEN_LAYER_CALLBACK: ParseCallbackOptions = { expandObject: ['layer'] }
+const CLOSE_LAYER_CALLBACK: ParseCallbackOptions = { expandObject: ['layer', 'value', 'response'] }
 
-const CALLBACKS = {
+const CALLBACKS: Record<string, ParseCallbackOptions> = {
   onLoaded: EVENT_CALLBACK,
   onRendered: RESULT_CALLBACK,
   onFinished: RESULT_CALLBACK,
@@ -122,26 +301,26 @@ const CALLBACKS = {
   onDismissed: CLOSE_LAYER_CALLBACK,
 }
 
-function parseCallback(key, code) {
+function parseCallback(key: string, code: string): (...args: any[]) => any {
   return scriptParseCallback(code, parseCallbackOptions(key))
 }
 
-function parseCallbackOptions(key) {
+function parseCallbackOptions(key: string): ParseCallbackOptions {
   return CALLBACKS[key] ?? fail(`Unknown callback { ${key} }`)
 }
 
-function callbackAttr(element, attrName, key) {
+function callbackAttr(element: Element, attrName: string, key: string): ((...args: any[]) => any) | undefined {
   // return e.parseAttr(element, attrName, (value) => parseCallback(key, value))
   return scriptCallbackAttr(element, attrName, parseCallbackOptions(key))
 }
 
-function navigateDefaults(options) {
+function navigateDefaults(options: RenderOptions): RenderOptions | undefined {
   if (options.navigate) {
     return config.navigateOptions
   }
 }
 
-function normalizeURL({ url }) {
+function normalizeURL({ url }: RenderOptions): RenderOptions | undefined {
   // Absolutize a relative URL in case render options are re-used later,
   // after the location base changed. For example:
   //
@@ -167,13 +346,13 @@ function normalizeURL({ url }) {
 // be { data, dataMap }, not { useData, useDataMap }. Because we otherwise have full symmetry
 // between attributes and options, *except* for this one distinction, we also accept
 // { useData } for { data }.
-function removeUsePrefix(options) {
+function removeUsePrefix(options: RenderOptions): void {
   renameKey(options, 'useData', 'data')
   renameKey(options, 'useHungry', 'hungry')
   renameKey(options, 'useKeep', 'keep')
 }
 
-function preprocess(options) {
+function preprocess(options: RenderOptions): RenderOptions {
   up.migrate.preprocessRenderOptions?.(options)
   normalizeOptions(options)
   removeUsePrefix(options)
@@ -204,7 +383,7 @@ function preprocess(options) {
 // In case of { layer: 'origin' } the { origin } element may get removed while the request was in flight,
 // making ChangeFromContent#execute() fail with a message like "layer { origin } does not exist" or
 // "Could not find a layer to render in. You may have passed an unmatchable layer reference, or a detached element.".
-function rememberOriginLayer({ origin, originLayer }) {
+function rememberOriginLayer({ origin, originLayer }: RenderOptions): RenderOptions | undefined {
   if (origin && !originLayer) {
     return {
       originLayer: layerStack.get(origin),
@@ -212,7 +391,7 @@ function rememberOriginLayer({ origin, originLayer }) {
   }
 }
 
-function finalize(preprocessedOptions, lateDefaults) {
+function finalize(preprocessedOptions: RenderOptions, lateDefaults?: RenderOptions): RenderOptions {
   return merge(
     preprocessedOptions.defaults,
     lateDefaults,
@@ -220,7 +399,7 @@ function finalize(preprocessedOptions, lateDefaults) {
   )
 }
 
-function assertContentGiven(options) {
+function assertContentGiven(options: RenderOptions): void {
   if (!some(CONTENT_KEYS, (contentKey) => isGiven(options[contentKey]))) {
     // up.layer.open() should open an empty layer without a content key.
     if (options.defaultToEmptyContent) {
@@ -231,8 +410,8 @@ function assertContentGiven(options) {
   }
 }
 
-function failOverrides(options) {
-  const overrides = {}
+function failOverrides(options: RenderOptions): RenderOptions {
+  const overrides: RenderOptions = {}
   for (let key in options) {
     // Note that up.fragment.successKey(key) only returns a value
     // if the given key is prefixed with "fail".
@@ -245,7 +424,7 @@ function failOverrides(options) {
   return overrides
 }
 
-function deriveFailOptions(preprocessedOptions) {
+function deriveFailOptions(preprocessedOptions: RenderOptions): RenderOptions {
   // Remember that this pass was a failure (for up.RenderResult#ok)
   let markFailure = { didFail: true }
 
@@ -278,7 +457,7 @@ function deriveFailOptions(preprocessedOptions) {
 
 // Returns a copy of the given options where each callback in ownCallbacks runs before
 // the caller's callback of the same name.
-function chainCallbacks(options, ownCallbacks) {
+function chainCallbacks<T extends object>(options: T, ownCallbacks: PlainObject): T {
   let chained = { ...options }
   for (let key in ownCallbacks) {
     chained[key] = sequence(ownCallbacks[key], options[key])
