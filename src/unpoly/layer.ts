@@ -326,13 +326,13 @@ export const config = new Config('up.layer.config', (): LayerConfig => ({
     backdrop: true,
     position: 'left',
     size: 'medium',
-    openAnimation(layer) {
+    openAnimation(layer: Layer) {
       switch (layer.position) {
         case 'left': return 'move-from-left'
         case 'right': return 'move-from-right'
       }
     },
-    closeAnimation(layer) {
+    closeAnimation(layer: Layer) {
       switch (layer.position) {
         case 'left': return 'move-to-left'
         case 'right': return 'move-to-right'
@@ -367,7 +367,7 @@ The last element is the [frontmost layer](/api/up.layer.front).
 */
 export let layerStack: LayerStack = null
 
-let handlers = []
+let handlers: unknown[] = []
 
 export function mainTargets(mode: LayerMode): string[] {
   return flatMap(modeConfigs(mode), 'mainTargets')
@@ -949,8 +949,8 @@ try {
 export function ask(options: PlainObject): Promise<any> {
   return new Promise(function(resolve, reject) {
     open(RenderOptions.chainCallbacks(options, {
-      onAccepted: (event) => resolve(event.value),
-      onDismissed: (event) => reject(event.value),
+      onAccepted: (event: LayerCloseEvent) => resolve(event.value),
+      onDismissed: (event: LayerCloseEvent) => reject(event.value),
     }))
   })
 }

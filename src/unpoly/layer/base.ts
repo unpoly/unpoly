@@ -679,7 +679,7 @@ export abstract class Layer {
   @stable
   */
   on<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>, LayerListenerOptions>): UnbindFn
-  on(...args) {
+  on(...args: unknown[]) {
     return this._buildEventListenerGroup(args).bind()
   }
 
@@ -691,13 +691,13 @@ export abstract class Layer {
   @stable
   */
   off<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>, LayerListenerOptions>): void
-  off(...args) {
+  off(...args: unknown[]) {
     return this._buildEventListenerGroup(args).unbind()
   }
 
   _buildEventListenerGroup(args: any[]): EventListenerGroup {
     return EventListenerGroup.fromBindArgs(args, {
-      guard: (event) => this._containsEventTarget(event),
+      guard: (event: Event) => this._containsEventTarget(event),
       elements: [this.element],
       baseLayer: this
     })
@@ -753,7 +753,7 @@ export abstract class Layer {
   emit<E extends Event>(event: E, options?: EmitProps): E
   emit<T extends string>(target: EventTarget, eventType: T, props?: EmitProps): EmittedEvent<T>
   emit<E extends Event>(target: EventTarget, event: E, options?: EmitProps): E
-  emit(...args) {
+  emit(...args: unknown[]) {
     return this._buildEventEmitter(args).emit()
   }
 
@@ -1024,7 +1024,7 @@ export abstract class Layer {
   @experimental
   */
   affix(selector: string, attrs?: PlainObject): HTMLElement
-  affix(...args) {
+  affix(...args: [selector: string, attrs?: PlainObject]) {
     return affix(this.getFirstSwappableElement(), ...args)
   }
 
