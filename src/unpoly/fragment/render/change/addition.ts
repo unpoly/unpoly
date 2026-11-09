@@ -3,10 +3,33 @@ import { setMissingAttr } from '../../../element.js'
 import { emit } from '../../../event.js'
 import { normalizeSource, sourceOf } from '../../../fragment.js'
 import { Change } from './change.js'
+import type { RenderOptions } from '../render_options.js'
+import type { Layer } from '../../../layer/base.js'
+import type { UpResponse } from '../../../network/response.js'
+import type { PlainObject } from '../../../util.js'
 
+/**
+The values that `Addition#setReloadAttrs()` sets as `[up-source]`, `[up-time]` and `[up-etag]`.
+@internal
+*/
+export interface ReloadAttrsOptions {
+  oldElement?: Element
+  newElement: Element
+  source?: string | false
+  time?: Date | false
+  etag?: string | false
+}
+
+// A change that adds new content to a layer: by updating it (UpdateLayer) or by opening it (OpenLayer).
 export class Addition extends Change {
+  // Set by subclasses.
+  declare layer: Layer
+  declare _acceptLayer: any
+  declare _dismissLayer: any
+  declare _eventPlans: PlainObject[]
+  declare _response: UpResponse | undefined
 
-  constructor(options) {
+  constructor(options: RenderOptions) {
     super(options)
     this._acceptLayer = options.acceptLayer
     this._dismissLayer = options.dismissLayer
@@ -15,7 +38,7 @@ export class Addition extends Change {
   }
 
   // TODO: Consider moving this to up.Layer
-  handleLayerChangeRequests(newElements, newLocation) {
+  handleLayerChangeRequests(newElements: Element[], newLocation: string | boolean | undefined): void {
     if (this.layer.isOverlay()) {
       // TODO: Can we do this with "close"? Please recheck
 
@@ -60,21 +83,21 @@ export class Addition extends Change {
     })
   }
 
-  _tryAcceptLayerFromServer() {
+  _tryAcceptLayerFromServer(): void {
     // When accepting without a value, the server will send X-Up-Accept-Layer: null
     if (isDefined(this._acceptLayer)) {
       this.layer.accept(this._acceptLayer, { response: this._response })
     }
   }
 
-  _tryDismissLayerFromServer() {
+  _tryDismissLayerFromServer(): void {
     // When dismissing without a value, the server will send X-Up-Dismiss-Layer: null
     if (isDefined(this._dismissLayer)) {
       this.layer.dismiss(this._dismissLayer, { response: this._response })
     }
   }
 
-  _setSource({ oldElement, newElement, source }) {
+  _setSource({ oldElement, newElement, source }: ReloadAttrsOptions): void {
     // (1) When the server responds with an error, or when the request method is not
     //     reloadable (not GET), we keep the same source as before.
     // (2) Don't set a source if someone tries to 'keep' when opening a new layer
@@ -91,19 +114,19 @@ export class Addition extends Change {
     }
   }
 
-  _setTime({ newElement, time }) {
+  _setTime({ newElement, time }: ReloadAttrsOptions): void {
     // If the server didn't send a Last-Modified header, tag the element
     // with [up-time=false] to indicate that we cannot use an ancestor's [up-time].
     setMissingAttr(newElement, 'up-time', time ? time.toUTCString() : false)
   }
 
-  _setETag({ newElement, etag }) {
+  _setETag({ newElement, etag }: ReloadAttrsOptions): void {
     // If the server didn't send an Etag header, tag the element
     // with [up-etag=false] to indicate that we cannot use an ancestor's [up-etag].
     setMissingAttr(newElement, 'up-etag', etag || false)
   }
 
-  setReloadAttrs(options) {
+  setReloadAttrs(options: ReloadAttrsOptions): void {
     this._setSource(options)
     this._setTime(options)
     this._setETag(options)

@@ -16,6 +16,7 @@ import type { PreviewFn } from '../../status.js'
 import type { UpRequest } from '../../network/request.js'
 import type { UpResponse } from '../../network/response.js'
 import type { RenderResult } from './render_result.js'
+import type { CSPInfo } from '../../script/csp/csp_info.js'
 
 /**
 What to render: a target selector, an element to derive a selector from, or several alternatives.
@@ -182,6 +183,24 @@ export interface RenderOptions {
   preload?: boolean
   expiredResponse?: UpResponse
   verifyFinished?: (result: RenderResult) => any
+  onRequestKnown?: (request: UpRequest) => void
+  // Prefer these elements when matching the target, e.g. when revalidating.
+  preferOldElements?: Element[]
+
+  // Internal options that ChangeFromResponse takes from the response.
+  hash?: string
+  eventPlans?: PlainObject[]
+  acceptLayer?: any
+  dismissLayer?: any
+  cspInfo?: CSPInfo
+  time?: Date | false
+  etag?: string | false
+  // Passed to compilers as their third argument.
+  meta?: PlainObject
+
+  // A renamed option that unpoly-migrate still accepts.
+  html?: string
+
   [key: `fail${string}`]: any
 }
 
