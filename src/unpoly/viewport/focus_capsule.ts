@@ -1,16 +1,22 @@
 import { on } from '../event.js'
 import { getSmart, tryToTarget } from '../fragment.js'
 import { copyCursorProps, doFocus, focusedElementWithin } from '../viewport.js'
+import type { Layer } from '../layer/base.js'
+import type { PlainObject } from '../util.js'
 
 export class FocusCapsule {
+  declare _element: Element
+  declare _target: string | undefined
+  declare _cursorProps: any
+  declare _voided: boolean | undefined
 
-  constructor(element, target) {
+  constructor(element: Element, target: string | undefined) {
     this._element = element
     this._target = target
     this._cursorProps = copyCursorProps(this._element)
   }
 
-  wasLost() {
+  wasLost(): boolean {
     return document.activeElement !== this._element && !this._voided
   }
 
@@ -30,11 +36,11 @@ export class FocusCapsule {
   @function up.FocusCapsule.prototype.autoVoid
   @internal
   */
-  autoVoid() {
+  autoVoid(): void {
     on('focusin', { once: true }, () => this._voided = true)
   }
 
-  restore(layer, focusOptions) {
+  restore(layer: Layer, focusOptions?: PlainObject): boolean | undefined {
     if (!this.wasLost()) {
       // Signal callers that we could not restore.
       // This matters to up.FragmentFocus to know that a { focus: ['restore', '.other'] }
@@ -56,7 +62,7 @@ export class FocusCapsule {
     }
   }
 
-  static preserve(layer) {
+  static preserve(layer: Layer): FocusCapsule | undefined {
     let focusedElement = focusedElementWithin(layer.element)
     if (!focusedElement) return
 
