@@ -61,7 +61,7 @@ particular is **not** automatic — it depends on which entry point you call.
 | `up.fragment.get(selector)` — no root | `up.FragmentFinder` | **Yes** |
 | `up.fragment.get(root, selector)` — with a root | `up.Selector` | No, deliberately |
 | `up.fragment.all()`, `.subtree()`, `.closest()`, `.matches()` | `up.Selector` | No |
-| `up.fragment.getFirstDescendant()` | `up.Selector` | No — this is the explicit "just the first match" entry point |
+| `getFirstDescendant()` (fragment.ts) | `up.Selector` | No — this is the explicit "just the first match" entry point |
 | Render steps (`UpdateLayerPlan#_matchOldElements()`) | `up.FragmentFinder` | Yes |
 | Response matching (`up.ResponseDoc#select()`) | `up.FragmentFinder` | Yes, against a *rediscovered* origin |
 
@@ -80,7 +80,7 @@ search"*.
 The constructor does the work up front; `matches()`, `closest()`, `descendants()`,
 `firstDescendant()` and `subtree()` then reuse it.
 
-1. **Install the liveness filter.** `up.fragment.isNotDestroying`, unless `{ destroying: true }`
+1. **Install the liveness filter.** `isNotDestroying()` (fragment.ts), unless `{ destroying: true }`
    was passed or we are matching in an external/detached document — an `up.ResponseDoc` has no
    dying elements to speak of.
 2. **Default the layer to the root element's.** If a root *element* was given (as in
@@ -175,7 +175,7 @@ by different mechanisms:
 
 | Selector | Expands to | Resolved by |
 |---|---|---|
-| `:main` | every entry of `up.layer.mainTargets(mode)`, as *separate* candidates | `expandTargets()`, looping until no `:main` remains |
+| `:main` | every entry of `mainTargets(mode)` (layer.ts), as *separate* candidates | `expandTargets()`, looping until no `:main` remains |
 | `:layer` | a derived target for the layer's first swappable element | `expandTargets()`, via `layer.getFirstSwappableElement()` |
 | `:origin` | a derived target for the `{ origin }` element | `resolveOrigin()`, called from `expandTargets()` |
 
@@ -202,7 +202,7 @@ Beyond the pseudos, much matching is **configured** rather than hard-coded.
 counterpart, as used for `hungrySelectors`, `assetSelectors`, `fieldSelectors`,
 `followSelectors` and others. When you need to match "the kind of element the user
 configured", use that so configuration and negation keep working. Note `:main` is *not* one of
-these: `up.layer.mainTargets()` deliberately returns an unmerged candidate list, because
+these: `mainTargets()` (layer.ts) deliberately returns an unmerged candidate list, because
 precedence and per-candidate plans depend on the order.
 
 ### Not every pseudo is a matcher
@@ -268,7 +268,7 @@ ultimately `<body>`, without anyone asking for a fallback. See
 - **Closing overlays are a state of their own.** Their elements stay in the DOM during the
   exit animation, after the layer has left the stack. The spec helpers disable close
   animations, so this state never occurs in a spec unless you open the overlay with one.
-- **Two more lookup modes exist** that this guide doesn't cover: `up.fragment.trackSelector()`
+- **Two more lookup modes exist** that this guide doesn't cover: `trackSelector()` (fragment.ts)
   / `up.SelectorTracker` for "match now and as elements appear", and the special cases where
   an Element is passed *as the selector* (`up.fragment.matches()` derives a target for it;
   `up.fragment.get(root, element)` returns it unfiltered, destroying or not).

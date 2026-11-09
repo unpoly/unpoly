@@ -162,7 +162,7 @@ Phases 2 to 4 run in one async method that is called synchronously, so they happ
 task, but an exception after inserting rejects `up.RenderResult#finished` instead of
 `up.render()`. The per-step object that carries a step from phase 1 to the others never leaves
 `UpdateSteps`. To make the cut between inserting and transitioning, `UpdateSteps`
-calls the internal `up.motion.swap()`, which inserts now and returns a function that starts the
+calls the internal `swap()` (motion.ts), which inserts now and returns a function that starts the
 transition later; `up.morph()` is just both calls in a row.
 
 `Addition` is the base class for everything that inserts content, and carries the
@@ -181,18 +181,18 @@ acquires its value is most of debugging "why did it render that?".
 
 | Stage | What happens to the options |
 |---|---|
-| `up.RenderJob#_executePromise()` | The guard event is emitted **first**, on raw options — so `up:link:follow` and `up:form:submit` listeners see shorthands like `{ layer: 'new modal' }` unexpanded. Only then `up.RenderOptions.preprocess()` normalizes layer references, renames `use`-prefixed keys (`useKeep` → `keep`), and merges `config.renderOptions` plus, with `{ navigate: true }`, `config.navigateOptions`. It keeps the merged defaults in a `{ defaults }` prop, and resolves `{ origin }` to an `originLayer` *before* the request, since the origin may be gone by the time the response arrives. |
+| `up.RenderJob#_executePromise()` | The guard event is emitted **first**, on raw options — so `up:link:follow` and `up:form:submit` listeners see shorthands like `{ layer: 'new modal' }` unexpanded. Only then `RenderOptions.preprocess()` (render_options.ts) normalizes layer references, renames `use`-prefixed keys (`useKeep` → `keep`), and merges `config.renderOptions` plus, with `{ navigate: true }`, `config.navigateOptions`. It keeps the merged defaults in a `{ defaults }` prop, and resolves `{ origin }` to an `originLayer` *before* the request, since the origin may be gone by the time the response arrives. |
 | `up:fragment:loaded` listeners | User code may mutate the options here, or force `{ fail }` either way. This is the documented escape hatch for responses that can't be rendered as a fragment. |
 | `ChangeFromResponse` | *Then* success or fail options are picked. With `{ failOptions }` (a `config.renderOptions` default), `deriveFailOptions()` re-derives the object from the defaults plus the `fail`-prefixed keys; without it — as in `up.validate()` — the success options are kept and only the `fail`-prefixed keys override individually. |
 | `_augmentOptionsFromResponse()` | The server's turn — see the layers section below. |
 | `ChangeFromContent` | Expands the object into one *plan* per layer per target. |
-| `UpdateLayerPlan` / `OpenLayerPlan` | `up.RenderOptions.finalize()` applies the defaults deliberately withheld until now (`LATE_KEYS`: `history`, `focus`, `scroll`), because an overlay's own config may have a better one. `OpenLayerPlan` merges the layer config first, then finalizes. |
+| `UpdateLayerPlan` / `OpenLayerPlan` | `RenderOptions.finalize()` applies the defaults deliberately withheld until now (`LATE_KEYS`: `history`, `focus`, `scroll`), because an overlay's own config may have a better one. `OpenLayerPlan` merges the layer config first, then finalizes. |
 
 
 ## Hungry elements join late, and may live on another layer
 
 `[up-hungry]` elements are not part of the target. They are collected by
-`up.radio.hungrySteps()` and pushed onto the step list **in postflight, not preflight** — so
+`hungrySteps()` (radio.ts) and pushed onto the step list **in postflight, not preflight** — so
 they never influence what we request, nor whether a plan is viable. A pass that fails to
 match its target fails whether or not a hungry element could have been updated. They *do*
 end up inside the `{ abort: 'target' }` set, though, because that is computed from the step
@@ -281,7 +281,7 @@ callback on the render options; `up.RenderResult#_finish()` awaits every `finish
 pass has settled, which is why it is observable through `.finished` but not through the
 promise `up.render()` itself resolves with.
 
-`up.fragment.shouldRevalidate()` gates it: the response must have come from the cache
+`shouldRevalidate()` (fragment.ts) gates it: the response must have come from the cache
 (`request.fromCache`) and `{ revalidate }` must say yes. `revalidate: 'auto'` is a navigate
 default and `config.autoRevalidate` is `(response) => response.expired`, so in practice
 navigation revalidates expired cache hits and nothing else.

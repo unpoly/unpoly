@@ -256,6 +256,9 @@ Where they need one, move the function down into a module they may import, as we
 global at call time: `error.ts` checks `instanceof up.Response`, and `Config` logs with
 `up.internal.printToError()`.
 
+One class in `util/` breaks this rule: `registry.ts` imports `isEvaling()` from `framework.ts`. That
+is safe only because a registry calls it when an entry is put, after every module was evaluated.
+
 
 ## Entry points and optional bundles
 

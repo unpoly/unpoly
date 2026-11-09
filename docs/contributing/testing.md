@@ -401,7 +401,7 @@ This keeps the two versions visibly identical apart from the one thing that diff
 ### Fixtures are not compiled
 
 `htmlFixtureList()` inserts elements without running [compilers](https://unpoly.com/api/up.compiler).
-When the feature under test is implemented as a compiler or with `up.attribute()`, call
+When the feature under test is implemented as a compiler (including `registerAttrCompiler()`), call
 `up.hello()` yourself:
 
 ```js
