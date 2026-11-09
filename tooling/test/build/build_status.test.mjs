@@ -1,6 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { BuildStatus } from '../../build/build_status.mjs'
+import { mkdtempSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import { BuildStatus, requestBuild, readBuildRequest } from '../../build/build_status.mjs'
 
 // A status wired to a capture array and a hand-driven clock, plus `last()` for the latest write.
 function statusWithCapture() {
@@ -65,4 +68,14 @@ test('startedAt is when the round started, not when it finished', () => {
   status.finish([])
 
   assert.equal(last().startedAt, 2000)
+})
+
+test('a rebuild request carries the file to the watcher', (t) => {
+  let root = mkdtempSync(path.join(tmpdir(), 'build-request-'))
+  t.after(() => rmSync(root, { recursive: true, force: true }))
+  assert.equal(readBuildRequest(root), null)
+  requestBuild('src/unpoly/link.ts', root)
+  assert.equal(readBuildRequest(root), 'src/unpoly/link.ts')
+  requestBuild(null, root)
+  assert.equal(readBuildRequest(root), null)
 })

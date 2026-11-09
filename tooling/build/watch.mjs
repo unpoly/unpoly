@@ -7,11 +7,11 @@
 // edit yet: a runner reading "idle" would then test a stale specs.js. A round has one start time,
 // taken before any bundle reads a source, and ends when every affected bundle is written.
 
-import { watch } from 'node:fs'
+import { mkdirSync, watch } from 'node:fs'
 import path from 'node:path'
 import esbuild from 'esbuild'
 import pc from 'picocolors'
-import { BuildStatus, PROJECT_ROOT } from './build_status.mjs'
+import { BuildStatus, PROJECT_ROOT, REQUEST_PATH, readBuildRequest } from './build_status.mjs'
 import { SKIP_DIRS, SOURCE_DIRS, WATCHABLE_SUFFIXES } from './build_sync.mjs'
 import { esbuildOptions, finish } from './esbuild.mjs'
 import { formatError, formatWarnings } from './build.mjs'
@@ -99,6 +99,18 @@ export async function runWatch({ bundles, sourcemap }) {
   // saving the file by rename would end a watch on the file itself.
   watch(PROJECT_ROOT, (_event, name) => {
     if (name === 'package.json') rounds.change(null)
+  })
+
+  // bin/test asks for a rebuild when it finds a source newer than our last round. That means we
+  // missed a file event, so say so.
+  let requestDir = path.join(PROJECT_ROOT, path.dirname(REQUEST_PATH))
+  mkdirSync(requestDir, { recursive: true })
+  watch(requestDir, (_event, name) => {
+    if (name !== path.basename(REQUEST_PATH)) return
+    let file = readBuildRequest()
+    console.log(pc.yellow(`A rebuild was requested for ${file ?? 'an unknown file'}, which the watcher had not noticed.`))
+    let absolute = file && path.join(PROJECT_ROOT, file)
+    rounds.change(absolute && isWatchable(absolute) ? absolute : null)
   })
 
   console.log(`Watching ${SOURCE_DIRS.join(', ')} for changes…`)

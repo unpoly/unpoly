@@ -10,20 +10,20 @@ const noop = async () => {}
 
 test('errors when there is no status file', async () => {
   await assert.rejects(
-    waitForFreshBuild({ read: () => null, newestMtime: 0, isAlive: () => true, sleep: noop }),
+    waitForFreshBuild({ request: noop, read: () => null, newestMtime: 0, isAlive: () => true, sleep: noop }),
     BuildSyncError
   )
 })
 
 test('errors when the watcher pid is dead', async () => {
   await assert.rejects(
-    waitForFreshBuild({ read: () => ({ pid: 1, state: 'idle', startedAt: 100 }), newestMtime: 0, isAlive: () => false, sleep: noop }),
+    waitForFreshBuild({ request: noop, read: () => ({ pid: 1, state: 'idle', startedAt: 100 }), newestMtime: 0, isAlive: () => false, sleep: noop }),
     /process is gone/
   )
 })
 
 test('resolves when idle and built after the latest edit', async () => {
-  let status = await waitForFreshBuild({
+  let status = await waitForFreshBuild({ request: noop,
     read: () => ({ pid: 1, state: 'idle', startedAt: 200 }),
     newestMtime: 100, isAlive: () => true, sleep: noop,
   })
@@ -31,7 +31,7 @@ test('resolves when idle and built after the latest edit', async () => {
 })
 
 test('resolves when a fresh build reports ok:true', async () => {
-  let status = await waitForFreshBuild({
+  let status = await waitForFreshBuild({ request: noop,
     read: () => ({ pid: 1, state: 'idle', startedAt: 200, ok: true, errors: '' }),
     newestMtime: 100, isAlive: () => true, sleep: noop,
   })
@@ -40,7 +40,7 @@ test('resolves when a fresh build reports ok:true', async () => {
 
 test('throws BuildFailedError carrying the errors when the fresh build failed', async () => {
   await assert.rejects(
-    waitForFreshBuild({
+    waitForFreshBuild({ request: noop,
       read: () => ({ pid: 1, state: 'idle', startedAt: 200, ok: false, errors: 'ERROR in ./src/unpoly/foo.js\nSyntaxError' }),
       newestMtime: 100, isAlive: () => true, sleep: noop,
     }),
@@ -55,10 +55,10 @@ test('throws BuildFailedError carrying the errors when the fresh build failed', 
 test('times out when the build stays older than the edit', async () => {
   let clock = 0
   await assert.rejects(
-    waitForFreshBuild({
+    waitForFreshBuild({ request: noop,
       read: () => ({ pid: 1, state: 'idle', startedAt: 50 }),
       newestMtime: 100, isAlive: () => true,
-      now: () => (clock += 1000), sleep: noop, timeoutMs: 2000,
+      now: () => (clock += 1000), sleep: noop, timeoutMs: 2000, idleGraceMs: Infinity,
     }),
     /didn't finish a build/
   )
@@ -181,7 +181,7 @@ test('an idle watcher that never reacts means nothing needed building', async ()
   // The bug this fixes: editing a guide page made the predicate unsatisfiable, so bin/test
   // waited out 30s and refused to run at all.
   let clock = 0
-  const build = await waitForFreshBuild({
+  const build = await waitForFreshBuild({ request: noop,
     read: () => idle(100),
     newestMtime: 200, newestFile: 'src/unpoly/pages/closing-overlays.md',
     isAlive: () => true, now: () => (clock += 1000), sleep: noop, idleGraceMs: 3000,
@@ -196,7 +196,7 @@ test('it does not give up before the grace period', async () => {
   // would run against the previous build for a file it really does consume.
   let clock = 0
   let reads = 0
-  const build = await waitForFreshBuild({
+  const build = await waitForFreshBuild({ request: noop,
     read: () => { reads++; return reads < 4 ? idle(100) : idle(300) },
     newestMtime: 200, isAlive: () => true,
     now: () => (clock += 400), sleep: noop, idleGraceMs: 3000,
@@ -205,10 +205,55 @@ test('it does not give up before the grace period', async () => {
   assert.equal(build.unbuiltEdit, undefined)
 })
 
+test('asks the watcher to rebuild when it does not react, and names the file it missed', async () => {
+  // The backstop for a file event the watcher never got. Without it, bin/test ran against a stale
+  // bundle after the grace period.
+  let clock = 0
+  let requests = []
+  let status = idle(100)
+  const build = await waitForFreshBuild({
+    read: () => status,
+    request: (file) => { requests.push([file, clock]); status = idle(clock + 20) },
+    newestMtime: 200, newestFile: 'src/unpoly/link.ts',
+    isAlive: () => true, now: () => (clock += 100), sleep: noop,
+  })
+  assert.deepEqual(requests.map(([file]) => file), ['src/unpoly/link.ts'])
+  assert.ok(requests[0][1] >= 1000, 'asks only after giving the watcher a second')
+  assert.equal(build.missedEdit, 'src/unpoly/link.ts')
+  assert.equal(build.unbuiltEdit, undefined)
+})
+
+test('does not ask for a rebuild when the watcher reacts', async () => {
+  let clock = 0
+  let requests = 0
+  let reads = 0
+  const build = await waitForFreshBuild({
+    read: () => (++reads < 5 ? idle(100) : idle(300)),
+    request: () => requests++,
+    newestMtime: 200, isAlive: () => true, now: () => (clock += 100), sleep: noop,
+  })
+  assert.equal(requests, 0)
+  assert.equal(build.missedEdit, undefined)
+})
+
+test('a file from the future does not hold up the run once the requested build is done', async () => {
+  // No build can ever start after its mtime. Waiting would end in the timeout.
+  let clock = 0
+  let status = idle(100)
+  const build = await waitForFreshBuild({
+    read: () => status,
+    request: () => { status = idle(clock + 20) },
+    newestMtime: 1e12, newestFile: 'src/unpoly/link.ts',
+    isAlive: () => true, now: () => (clock += 100), sleep: noop,
+  })
+  assert.equal(build.unbuiltEdit, 'src/unpoly/link.ts')
+  assert.ok(clock < 3000, `returned before the grace period (at ${clock})`)
+})
+
 test('a build that starts but never settles still times out', async () => {
   let clock = 0
   await assert.rejects(
-    waitForFreshBuild({
+    waitForFreshBuild({ request: noop,
       read: () => ({ pid: 1, state: 'building', startedAt: 300, ok: true }),
       newestMtime: 200, isAlive: () => true,
       now: () => (clock += 1000), sleep: noop, timeoutMs: 5000,
@@ -221,7 +266,7 @@ test('a failed build is reported even when nothing rebuilt', async () => {
   // Otherwise a docs edit after a broken build would quietly run the suite against it.
   let clock = 0
   await assert.rejects(
-    waitForFreshBuild({
+    waitForFreshBuild({ request: noop,
       read: () => ({ pid: 1, state: 'idle', startedAt: 100, ok: false, errors: "TS1005: ';' expected." }),
       newestMtime: 200, isAlive: () => true,
       now: () => (clock += 1000), sleep: noop, idleGraceMs: 3000,
@@ -233,7 +278,7 @@ test('a failed build is reported even when nothing rebuilt', async () => {
 test('the timeout names the newest edit', async () => {
   let clock = 0
   await assert.rejects(
-    waitForFreshBuild({
+    waitForFreshBuild({ request: noop,
       read: () => ({ pid: 1, state: 'building', startedAt: 300, ok: true }),
       newestMtime: 200, newestFile: 'src/unpoly/link.js',
       isAlive: () => true, now: () => (clock += 1000), sleep: noop, timeoutMs: 5000,

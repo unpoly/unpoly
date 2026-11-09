@@ -66,15 +66,40 @@ export class BuildStatus {
 
 function writeStatusFile(status) {
   try {
-    let file = path.join(PROJECT_ROOT, STATUS_PATH)
-    mkdirSync(path.dirname(file), { recursive: true })
-    // Write-then-rename, because a reader polling every 100ms can otherwise catch a
-    // half-written file: readStatus() returns null for it, and the runner reported a
-    // healthy watcher as missing.
-    let temp = `${file}.${process.pid}.tmp`
-    writeFileSync(temp, JSON.stringify(status))
-    renameSync(temp, file)
+    writeAtomically(path.join(PROJECT_ROOT, STATUS_PATH), JSON.stringify(status))
   } catch {
     // best effort — never fail a build over status bookkeeping
   }
+}
+
+// The other direction, runner → watcher: a request to rebuild for a file the watcher has not
+// reacted to. Should never be needed, since the watcher sees every change in the source
+// directories. It is the backstop for a missed file event (an inotify limit, a network
+// filesystem, a Node bug), which would otherwise run bin/test against a stale bundle. The file
+// holds the path of the file, relative to the project root, or nothing.
+export const REQUEST_PATH = 'tmp/build-request'
+
+export function requestBuild(file, root = PROJECT_ROOT) {
+  try {
+    writeAtomically(path.join(root, REQUEST_PATH), file ?? '')
+  } catch {
+    // best effort: without the request, waitForFreshBuild() falls back to its grace period
+  }
+}
+
+export function readBuildRequest(root = PROJECT_ROOT) {
+  try {
+    return readFileSync(path.join(root, REQUEST_PATH), 'utf8') || null
+  } catch {
+    return null
+  }
+}
+
+// Write-then-rename, because a reader polling every 100ms can otherwise catch a half-written
+// file: readStatus() returns null for it, and the runner reported a healthy watcher as missing.
+function writeAtomically(file, content) {
+  mkdirSync(path.dirname(file), { recursive: true })
+  let temp = `${file}.${process.pid}.tmp`
+  writeFileSync(temp, content)
+  renameSync(temp, file)
 }

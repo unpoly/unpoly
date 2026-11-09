@@ -154,18 +154,22 @@ name: `src` alone holds 117 guide pages, an images tree of diagrams and recordin
 `bin/test` waited 30s and refused to run. `.mjs` is listed for `runner/browser/log_value.mjs`,
 which is bundled; the Node-only `.mjs` files elsewhere in `tooling` are never scanned.
 
-What no extension list can catch is a file with a watchable extension that no bundle imports.
-That is what the 3s grace is for: if the watcher is still `idle` with an unchanged `startedAt`,
-nothing needed building, so the run proceeds and reports `unbuiltEdit` so `bin/test` can name the
-file. Under-scanning is the failure that matters, and over-scanning cannot cause it. The 30s timeout
-now means only that a build started and never finished.
+The watcher answers every change in these directories with a round, an empty one for a file no
+bundle reads (a guide page, a swap file), so `startedAt` passes every mtime the runner can see. If
+the watcher is still `idle` with an unchanged `startedAt` after 1s, it has missed a file event.
+`waitForFreshBuild` then writes the newest file's path to `tmp/build-request`, which the watcher
+watches, and the watcher rebuilds for it. `bin/test` names the file (`missedEdit`), since a watcher
+that misses events deserves a look. A watcher that ignores the request (one started before requests
+existed) gets a 3s grace, after which the run proceeds and reports `unbuiltEdit`. Under-scanning is
+the failure that matters, and over-scanning cannot cause it. The 30s timeout now means only that a
+build started and never finished.
 
 **Only the watcher writes it**, which is what keeps it single-writer: one-shot builds
 (`build/build.mjs`) never create a `BuildStatus`. Under webpack, `bin/build --config=ci` reused
 the watcher's plugin and overwrote a running watcher's status with its own pid, and every reader
 then concluded the environment was gone.
 
-Transient files (`build-status.json`, any `.pid`, any `.log`) belong in the gitignored `tmp/`.
+Transient files (`build-status.json`, `build-request`, any `.pid`, any `.log`) belong in the gitignored `tmp/`.
 
 ## Output
 

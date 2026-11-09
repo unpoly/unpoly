@@ -5,7 +5,7 @@
 
 import { readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
-import { readStatus, PROJECT_ROOT } from './build_status.mjs'
+import { readStatus, requestBuild, PROJECT_ROOT } from './build_status.mjs'
 
 // Never scanned or watched.
 export const SKIP_DIRS = new Set(['node_modules', 'dist', 'tmp', '.git'])
@@ -108,10 +108,14 @@ function defaultSleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-// How long to wait for the watcher to react before concluding it is not going to. The watcher
-// starts a build well within a second of a change it cares about; three seconds is generous
-// enough to survive polling on a network or WSL filesystem, and the cost of being generous is
-// only that a docs-only edit delays a run by that much.
+// How long to wait for the watcher to react before asking it to rebuild (see requestBuild()).
+// The watcher answers every change in the source directories with a round, 20 ms after the
+// event, so after a second it has missed the change, not just been slow about it.
+const REQUEST_AFTER_MS = 1_000
+
+// How long to wait for the watcher to react before concluding it is not going to. Only a watcher
+// that does not answer requests gets here: one started before requests existed, or one that has
+// lost its watch on tmp/.
 const IDLE_GRACE_MS = 3_000
 
 export class BuildSyncError extends Error {}
@@ -132,7 +136,9 @@ export async function waitForFreshBuild({
   now = Date.now,
   sleep = defaultSleep,
   timeoutMs = 30_000,
+  requestAfterMs = REQUEST_AFTER_MS,
   idleGraceMs = IDLE_GRACE_MS,
+  request = requestBuild,
 } = {}) {
   if (newestMtime === undefined) {
     const newest = newestSource()
@@ -151,23 +157,37 @@ export async function waitForFreshBuild({
   const enteredAt = now()
   const startedAtOnEntry = status.startedAt
   let deadline = enteredAt + timeoutMs
+  let requestedAt = null
   while (true) {
     status = read()
-    if (status && status.state === 'idle' && status.startedAt >= newestMtime) {
+    let idle = status?.state === 'idle'
+    if (idle && status.startedAt >= newestMtime) {
       if (status.ok === false) throw new BuildFailedError(status.errors || '(no error output captured)')
-      return status
+      // `missedEdit` names the file the watcher only built on request, so a watcher that misses
+      // changes doesn't go unnoticed.
+      return requestedAt === null ? status : { ...status, missedEdit: newestFile }
     }
-    // Nothing is going to happen. The watcher reacts to a change it cares about in well under a
-    // second, so an idle status whose build has not moved after the grace period means our
-    // newest file is not one a bundle consumes — a guide page, an image, a Node-only module.
-    // dist/ is already current for everything the bundles do read, so run. `unbuiltEdit` lets the
-    // caller say which file it was; reading that name is what tells you whether to be relaxed
-    // (`pages/foo.md`) or suspicious (`unpoly/link.js`), with no list to maintain.
-    if (status && status.state === 'idle' && status.startedAt === startedAtOnEntry && now() - enteredAt >= idleGraceMs) {
+    let time = now()
+    let untouched = idle && status.startedAt === startedAtOnEntry
+    if (untouched && requestedAt === null && time - enteredAt >= requestAfterMs) {
+      requestedAt = time
+      request(newestFile)
+    }
+    // The watcher built on our request, and still not past `newestMtime`: that lies in the
+    // future (a clock skew, `touch -d`). No build will ever get past it, so run.
+    if (idle && requestedAt !== null && status.startedAt >= requestedAt) {
       if (status.ok === false) throw new BuildFailedError(status.errors || '(no error output captured)')
       return { ...status, unbuiltEdit: newestFile }
     }
-    if (now() >= deadline) {
+    // Nothing is going to happen: the watcher did not react to the change or to our request.
+    // dist/ may well be current anyway (an old watcher does not answer guide-page saves), so
+    // run. `unbuiltEdit` lets the caller say which file it was; reading that name is what tells
+    // you whether to be relaxed (`pages/foo.md`) or suspicious (`unpoly/link.js`).
+    if (untouched && time - enteredAt >= idleGraceMs) {
+      if (status.ok === false) throw new BuildFailedError(status.errors || '(no error output captured)')
+      return { ...status, unbuiltEdit: newestFile }
+    }
+    if (time >= deadline) {
       // Reaching here means the watcher kept working without ever finishing a build that
       // includes the edit — a build that never settles, or one rebuild chasing another. "Nothing
       // rebuilt at all" no longer lands here; it is handled above.

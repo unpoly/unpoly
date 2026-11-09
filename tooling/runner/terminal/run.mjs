@@ -154,6 +154,11 @@ export async function runDev(argv, env) {
     if (build.unbuiltEdit) {
       console.error(pc.blue(`No rebuild for ${build.unbuiltEdit} — running against the current build.`))
     }
+    // The watcher missed a change, and only rebuilt because we asked. Worth knowing, since the
+    // next missed change may be one we can't see either.
+    if (build.missedEdit) {
+      console.error(pc.yellow(`The build watcher had not noticed ${build.missedEdit}. It rebuilt on request.`))
+    }
   } catch (error) {
     if (error instanceof BuildFailedError) {
       process.stdout.write(buildFailure(error.errors))
