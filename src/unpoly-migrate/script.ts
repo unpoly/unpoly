@@ -45,7 +45,7 @@ up.migrate.targetMacro = function(queryAttr: string, fixedResultAttrs: Record<st
     } else {
       resultAttrs['up-follow'] = ''
     }
-    up.internal.setMissingAttrs(link, resultAttrs)
+    up.element.setMissingAttrs(link, resultAttrs)
     link.removeAttribute(queryAttr)
   })
 }

@@ -1351,6 +1351,56 @@ describe('up.element', function() {
 
   })
 
+  describe('up.element.setMissingAttrs()', function() {
+
+    it('sets missing attributes from the given object', function() {
+      let element = document.createElement('div')
+      up.element.setMissingAttrs(element, { 'foo-name': 'foo-value', 'bar-name': 'bar-value' })
+
+      expect(element).toHaveAttribute('foo-name', 'foo-value')
+      expect(element).toHaveAttribute('bar-name', 'bar-value')
+    })
+
+    it('keeps existing attributes', function() {
+      let element = up.element.createFromSelector('div[foo=original]')
+      up.element.setMissingAttrs(element, { 'foo': 'changed', 'bar': 'new' })
+
+      expect(element).toHaveAttribute('foo', 'original')
+      expect(element).toHaveAttribute('bar', 'new')
+    })
+
+    it('keeps an existing attribute with an empty value', function() {
+      let element = up.element.createFromSelector('div[foo=""]')
+      up.element.setMissingAttrs(element, { 'foo': 'changed' })
+
+      expect(element).toHaveAttribute('foo', '')
+    })
+
+    it('sets an empty attribute with an empty string as a property value', function() {
+      let element = document.createElement('div')
+      up.element.setMissingAttrs(element, { 'foo': '' })
+
+      expect(element).toHaveAttribute('foo', '')
+    })
+
+    it('skips null and undefined property values', function() {
+      let element = up.element.createFromSelector('div[baz=original]')
+      up.element.setMissingAttrs(element, { 'foo': null, 'bar': undefined, 'baz': null })
+
+      expect(element).not.toHaveAttribute('foo')
+      expect(element).not.toHaveAttribute('bar')
+      expect(element).toHaveAttribute('baz', 'original')
+    })
+
+    it('sets false as "false"', function() {
+      let element = document.createElement('div')
+      up.element.setMissingAttrs(element, { 'foo': false })
+
+      expect(element).toHaveAttribute('foo', 'false')
+    })
+
+  })
+
   describe('up.internal.setAttrsTemp()', function() {
 
     it('returns a function that restores the original attribute values', function() {

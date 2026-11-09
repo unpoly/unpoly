@@ -9,6 +9,7 @@ Unreleased
 - [`up.event.isModified()`](/api/up.event.isModified) is now public API. It returns whether the user clicked with a modifier key or a mouse button other than the primary button, so your own click handlers can leave these clicks to the browser, e.g. to open a link in a new tab.
 - [`up.form.watchOptions()`](/api/up.form.watchOptions), [`up.form.validateOptions()`](/api/up.form.validateOptions) and [`up.radio.pollOptions()`](/api/up.radio.pollOptions) are now public API. They parse an element's attributes into the options that `up.watch()`, `up.validate()` or `[up-poll]` would use, like `up.link.followOptions()` and `up.form.submitOptions()` do for links and forms. Your code can use them to see, e.g., which events a field is watched for and how long its changes are debounced.
 - [`up.form.get()`](/api/up.form.get) is now public API. It returns the form for a given form, field, submit button or any other element within a form. Unlike the browser's `element.form` property, it looks up the form of a `[form]` attribute within the element's layer, so a form in an overlay is found even when the root layer has a form with the same ID.
+- [`up.element.setMissingAttrs()`](/api/up.element.setMissingAttrs) is now public API. Unlike [`up.element.setAttrs()`](/api/up.element.setAttrs), it only sets attributes that the element doesn't have yet, and skips `null` or `undefined` values instead of removing the attribute.
 
 
 3.15.0

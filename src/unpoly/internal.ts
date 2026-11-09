@@ -24,7 +24,7 @@ import {
   addClassTemp, ancestor, attrSelector, booleanOrNumberAttr, booleanOrStringAttr, classSelector, closestAttr,
   containsElement, createBrokenDocumentFromHTML, extractSingular, fixedToAbsolute, getList, inlineStyle,
   isSingleton, leadingElement, paint, parseSelector, removeAttrsFromHTML, removeClassTemp, setAttrsTemp,
-  setMissingAttr, setMissingAttrs, setStyleTemp, trackDefinitions, unionSelector, unwrap,
+  setMissingAttr, setStyleTemp, trackDefinitions, unionSelector, unwrap,
 } from './element.js'
 import { emitReset, isBeforeBoot, setClassName, startExtension, stopExtension } from './framework.js'
 import { assertEmitted, isSyntheticClick } from './event.js'
@@ -136,7 +136,6 @@ export const api = {
     removeClassTemp,
     setAttrsTemp,
     setMissingAttr,
-    setMissingAttrs,
     setStyleTemp,
     trackDefinitions,
     unionSelector,

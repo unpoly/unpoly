@@ -398,6 +398,9 @@ export function setAttrPresence(element: Element, attr: string, value: string, n
 /*-
 Sets properties from the given object as attributes on the given element.
 
+Attributes that the element already has are overridden.
+To only set attributes that the element doesn't have yet, use `up.element.setMissingAttrs()`.
+
 ### Example
 
 ```js
@@ -996,10 +999,41 @@ export function fixedToAbsolute(element: HTMLElement): void {
 }
 
 /*-
-On the given element, sets attributes that are still missing.
+Sets attributes from the given object that the given element doesn't have yet.
+
+Attributes that the element already has are kept, even when their value is an empty string.
+
+### Example
+
+```js
+let element = up.element.createFromSelector('div[title="Original"]')
+up.element.setMissingAttrs(element, { title: 'Changed', tabindex: 1 })
+
+element.getAttribute('title') // result: "Original"
+element.getAttribute('tabindex') // result: "1"
+```
+
+### Differences from `up.element.setAttrs()`
+
+`up.element.setAttrs()` sets every given attribute, overriding a value the element already has.
+For a `null` or `undefined` value it removes the attribute.
+
+`up.element.setMissingAttrs()` keeps the attributes the element already has.
+It skips a `null` or `undefined` value, so the attribute stays missing.
+
+Both functions set a value of `false` as the string `"false"`.
 
 @function up.element.setMissingAttrs
-@internal
+@param {Element} element
+  The element on which to set attributes.
+@param {Object} attributes
+  An object of attribute names and values to set.
+
+  An attribute is only set when the element doesn't have it.
+  An attribute with an empty value counts as present, and is kept.
+
+  A value of `null` or `undefined` is skipped.
+@experimental
 */
 export function setMissingAttrs(element: Element, attrs: PlainObject): void {
   for (let key in attrs) {
@@ -1707,6 +1741,7 @@ export const api = {
     show,
     createFromSelector,
     setAttrs,
+    setMissingAttrs,
     affix,
     createNodesFromHTML,
     createFromHTML,
