@@ -4,9 +4,31 @@ import { fail } from '../error.js'
 import { isAlive } from '../fragment.js'
 import { closest } from '../viewport.js'
 
-export class Tether {
+/**
+Where a popup sits relative to its anchor (`position`), and how it lines up with the anchor (`align`).
+@internal
+*/
+export interface TetherOptions {
+  anchor: HTMLElement
+  align: string
+  position: string
+}
 
-  constructor(options) {
+export class Tether {
+  declare _anchor: HTMLElement
+  declare _align: string
+  declare _position: string
+  declare _alignAxis: 'horizontal' | 'vertical'
+  declare _viewport: HTMLElement
+  declare parent: HTMLElement
+  declare _syncOnScroll: boolean
+  declare _element: HTMLElement
+  // TODO(types): queueTask() returns nothing, so this is always undefined and clearTimeout() has no effect.
+  declare syncTimer: any
+  declare offsetLeft: number
+  declare offsetTop: number
+
+  constructor(options: TetherOptions) {
     this._anchor = options.anchor
     this._align = options.align
     this._position = options.position
@@ -23,7 +45,7 @@ export class Tether {
     this._syncOnScroll = !this._viewport.contains(this._anchor.offsetParent)
   }
 
-  start(element) {
+  start(element: HTMLElement): void {
     this._element = element
     this._element.style.position = 'absolute'
     this._setOffset(0, 0)
@@ -31,27 +53,27 @@ export class Tether {
     this._changeEventSubscription('on')
   }
 
-  stop() {
+  stop(): void {
     this._changeEventSubscription('off')
   }
 
-  _changeEventSubscription(fn) {
+  _changeEventSubscription(fn: 'on' | 'off'): void {
     let doScheduleSync = this._scheduleSync.bind(this)
     up[fn](window, 'resize', doScheduleSync)
     if (this._syncOnScroll) { up[fn](this._viewport, 'scroll', doScheduleSync) }
   }
 
-  _scheduleSync() {
+  _scheduleSync(): void {
     clearTimeout(this.syncTimer)
     return this.syncTimer = queueTask(this.sync.bind(this))
   }
 
-  isAlive() {
+  isAlive(): boolean {
     // return !this.parent.isConnected || !this._anchor.isConnected
     return isAlive(this.parent) && isAlive(this._anchor)
   }
 
-  sync() {
+  sync(): void {
     const elementBox = this._element.getBoundingClientRect()
 
     const elementMargin = {
@@ -156,11 +178,11 @@ export class Tether {
     }
   }
 
-  _describeConstraints() {
+  _describeConstraints(): { position: string, align: string } {
     return { position: this._position, align: this._align }
   }
 
-  _moveTo(targetLeft, targetTop) {
+  _moveTo(targetLeft: number, targetTop: number): void {
     const elementBox = this._element.getBoundingClientRect()
     this._setOffset(
       (targetLeft - elementBox.left) + this.offsetLeft,
@@ -168,7 +190,7 @@ export class Tether {
     )
   }
 
-  _setOffset(left, top) {
+  _setOffset(left: number, top: number): void {
     this.offsetLeft = left
     this.offsetTop = top
     setInlineStyle(this._element, { left, top }, 'px')
