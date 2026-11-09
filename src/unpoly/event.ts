@@ -355,7 +355,7 @@ export function onClosest<T extends EventTypes>(element: Element, types: T, opti
 export function onClosest(...args: any[]): UnbindFn {
   let [fragment, eventType, { layer }, callback] = parseArgs(args, 'val', 'val', 'options', 'callback')
   layer &&= layerStack.get(layer, { origin: fragment })
-  let guard = (event) => event.target.contains(fragment) && (!layer || layer.contains(event.target))
+  let guard = (event: Event) => (event.target as Element).contains(fragment) && (!layer || layer.contains(event.target as Element))
   let unsubscribe = on(eventType, { guard }, callback)
 
   // Since we're binding to an element that is an ancestor of the fragment,
@@ -618,7 +618,7 @@ export function fork(originalEvent: Event, newType: string, copyKeys: string[] =
   const newEvent = build(newType, pick(originalEvent as PlainObject, copyKeys)) as ForkedEvent
   newEvent.originalEvent = originalEvent; // allow users to access other props through event.originalEvent.prop
 
-  ['stopPropagation', 'stopImmediatePropagation', 'preventDefault'].forEach(function(key) {
+  (['stopPropagation', 'stopImmediatePropagation', 'preventDefault'] as const).forEach(function(key) {
     const originalMethod = newEvent[key]
 
     return newEvent[key] = function() {
