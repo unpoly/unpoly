@@ -7,10 +7,38 @@ import { getSmart } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { Layer } from '../layer/base.js'
 import { config, printToStandard } from '../log.js'
+import type { PlainObject } from '../util.js'
+
+/**
+What to log when an event is emitted: a message, an array of a message and its substitution values,
+or `false` to log nothing. When missing, the event type is logged.
+@internal
+*/
+export type EmitLogOption = string | any[] | false
+
+/**
+Everything an `up.EventEmitter` needs to know. `up.EventEmitter.fromEmitArgs()` builds this
+from the many ways `up.emit()` can be called.
+@internal
+*/
+export interface EventEmitterOptions {
+  target: EventTarget
+  event: Event
+  baseLayer?: Layer
+  callback?: (event: Event) => void
+  log?: EmitLogOption
+  ensureBubbles?: boolean
+}
 
 export class EventEmitter {
+  declare target: EventTarget
+  declare event: Event
+  declare baseLayer: Layer | undefined
+  declare callback: ((event: Event) => void) | undefined
+  declare log: EmitLogOption | undefined
+  declare ensureBubbles: boolean | undefined
 
-  constructor(options) {
+  constructor(options: EventEmitterOptions) {
     this.target = options.target
     this.event = options.event
     this.baseLayer = options.baseLayer
@@ -19,7 +47,7 @@ export class EventEmitter {
     this.ensureBubbles = options.ensureBubbles
   }
 
-  emit() {
+  emit(): Event {
     this._logEmission()
 
     if (this.baseLayer) {
@@ -30,24 +58,24 @@ export class EventEmitter {
     return this.event
   }
 
-  _dispatchEvent() {
+  _dispatchEvent(): void {
     this.target.dispatchEvent(this.event)
 
-    if (this.ensureBubbles && !this.target.isConnected) {
+    if (this.ensureBubbles && !(this.target as Node).isConnected) {
       document.dispatchEvent(this.event)
     }
 
     guard(() => this.callback?.(this.event))
   }
 
-  assertEmitted() {
+  assertEmitted(): void {
     const event = this.emit()
     if (event.defaultPrevented) {
       throw new Aborted(`Event ${event.type} was prevented`)
     }
   }
 
-  _logEmission() {
+  _logEmission(): void {
     if (!config.enabled) { return }
 
     let message = this.log
@@ -68,7 +96,7 @@ export class EventEmitter {
     }
   }
 
-  static fromEmitArgs(args, defaults = {}) {
+  static fromEmitArgs(args: any[], defaults: PlainObject = {}): EventEmitter {
     // Event-emitting functions are crazy overloaded:
     //
     // - up.emit([target], eventType, [eventProps])
@@ -136,7 +164,7 @@ export class EventEmitter {
       options.event = build(options)
     }
 
-    return new (this)(options)
+    return new (this)(options as EventEmitterOptions)
   }
 }
 
