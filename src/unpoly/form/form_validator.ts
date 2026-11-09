@@ -1,6 +1,6 @@
 import {
   compact, filterList, flatMap, isPresent, isString, map, mapObject, merge, mergeDefined,
-  newDeferred, pluckKey, scheduleTimer, uniq,
+  newDeferred, pluckKey, presence, scheduleTimer, uniq,
 } from '../util.js'
 import { booleanOrStringAttr } from '../element.js'
 import { fail, muteUncriticalRejection } from '../error.js'
@@ -71,6 +71,7 @@ export class FormValidator {
       if (!field.closest('.up-keeping')) {
         printUserEvent(event)
         // Validating a field always finds a solution, at least the field itself.
+        // A blank [up-validate] value falls back like a missing one.
         muteUncriticalRejection(this.validate({ origin: field })!)
       }
     })
@@ -145,7 +146,9 @@ export class FormValidator {
     if (isString(target)) {
       printToStandard('up.validate()', 'Validating target "%s"', target)
       let simpleSelectors = splitTarget(target)
-      return compact(simpleSelectors.map(function(simpleSelector) {
+      // A blank target (like " " or ",") has no selectors. We return undefined
+      // so the caller falls back to the validation target it would use without a target.
+      return presence(compact(simpleSelectors.map(function(simpleSelector) {
         let element = getSmart(simpleSelector, { origin })
         if (element) {
           return {
@@ -156,7 +159,7 @@ export class FormValidator {
         } else {
           fail('Validation target "%s" does not match an element', simpleSelector)
         }
-      }))
+      })))
     }
   }
 
