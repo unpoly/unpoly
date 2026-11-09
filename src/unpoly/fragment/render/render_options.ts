@@ -96,7 +96,7 @@ export interface RenderOptions {
   class?: string
   position?: string
   align?: string
-  dismissable?: boolean | string | string[]
+  dismissible?: boolean | string | string[]
   dismissLabel?: string
   dismissARIALabel?: string
   trapFocus?: boolean
@@ -164,6 +164,9 @@ export interface RenderOptions {
   onAccepted?: (event: Event) => any
   onDismiss?: (event: Event) => any
   onDismissed?: (event: Event) => any
+  // A selector to reload after the overlay was accepted or dismissed.
+  onAcceptedReload?: string
+  onDismissedReload?: string
 
   // Internal options, set by Unpoly's own callers or by the render pass.
   baseLayer?: Layer
