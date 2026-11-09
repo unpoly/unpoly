@@ -3,7 +3,7 @@
 */
 
 // Renamed keys and values that may be passed as layer options or set in a layer config object.
-function fixRenamedLayerKeys(object, source) {
+function fixRenamedLayerKeys(object: any, source: { label: string, detail?: any }): void {
   up.migrate.fixKey(object, 'closable', 'dismissible', source)
   up.migrate.fixKey(object, 'dismissable', 'dismissible', source)
   up.migrate.fixKey(object, 'closeLabel', 'dismissLabel', source)
@@ -14,7 +14,7 @@ function fixRenamedLayerKeys(object, source) {
 
 // Popups used to combine their position and alignment in a single value like 'bottom-right'.
 // We split it before the layer is built, so the layer and its element see the modern { position, align }.
-function splitPosition(object) {
+function splitPosition(object: any): void {
   if (!up.util.isString(object.position)) return
 
   const [position, align] = object.position.split('-')
@@ -26,7 +26,8 @@ function splitPosition(object) {
   }
 }
 
-up.migrate.handleLayerOptions = function(options) {
+// Core calls this hook (up.layer).
+up.migrate.handleLayerOptions = function(options: any) {
   // Only options can have a { flavor }, since a config object belongs to a mode.
   // We name the opening call site in warnings.
   const source = { label: 'layer options', detail: options.origin || options.url }
@@ -78,7 +79,8 @@ a fallback destination on the root layer:
 @deprecated
   Use `[up-dismiss]` instead.
 */
-up.migrate.registerLayerCloser = (layer) => // <a up-close>Close</a> (legacy close attribute)
+// Core calls this hook (Overlay).
+up.migrate.registerLayerCloser = (layer: any) => // <a up-close>Close</a> (legacy close attribute)
 layer.registerAttrCloser('up-close', (value, closeOptions) => {
   up.migrate.deprecated('[up-close]', '[up-dismiss]')
   layer.dismiss(value, closeOptions)
@@ -97,7 +99,8 @@ up.on('up:framework:boot', up.migrate.fixLayerConfigs)
 
 // The app may still set a renamed key after booting, so we also check the mode configs for every new layer.
 // Since the warning names the config object, it is only printed once per key and config object.
-up.migrate.handleLayerConfig = function(modeConfig) {
+// Core calls this hook (up.layer).
+up.migrate.handleLayerConfig = function(modeConfig: object) {
   let [mode] = Object.entries(up.layer.config).find(([_mode, value]) => value === modeConfig)
   fixRenamedLayerKeys(modeConfig, { label: `up.layer.config.${mode}` })
 }
