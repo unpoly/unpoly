@@ -14,6 +14,23 @@ import { printUserEvent } from '../../log.js'
 import { animate, isNone } from '../../motion.js'
 import { readData } from '../../script.js'
 import { UpURLPattern } from '../../util/url_pattern.js'
+import type { AnyFunction, PlainObject, ValueOrFunction } from '../../util.js'
+import type { UnbindFn } from '../../event.js'
+import type { LayerCloseOptions, LayerOptions } from '../base.js'
+import type { AnimationFn, AnimationValue } from '../../motion.js'
+import type { UpResponse } from '../../network/response.js'
+
+/**
+A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
+@internal
+*/
+export type CloseFn = (value: any, options?: LayerCloseOptions) => void
+
+/**
+How to animate an overlay as it opens or closes.
+@internal
+*/
+export type OverlayAnimationOptions = Pick<LayerCloseOptions, 'animation' | 'duration' | 'easing' | 'onFinished'>
 
 /*-
 @class up.Layer
@@ -64,7 +81,44 @@ export class Overlay extends Layer {
   @stable
   */
 
-  constructor(options) {
+  declare element: HTMLElement
+  declare class: string | undefined
+  declare backdrop: boolean
+  // The constructor turns the option (true, false or a string) into an array of methods.
+  declare dismissible: string[] | boolean | string
+  declare dismissLabel: string
+  declare dismissARIALabel: string
+  declare openAnimation: ValueOrFunction<AnimationValue>
+  declare closeAnimation: ValueOrFunction<AnimationValue>
+  declare openDuration: number
+  declare closeDuration: number
+  declare openEasing: string
+  declare closeEasing: string
+  declare trapFocus: boolean
+  declare onOpened: AnyFunction | undefined
+  declare onAccept: AnyFunction | undefined
+  declare onAccepted: AnyFunction | undefined
+  declare onDismiss: AnyFunction | undefined
+  declare onDismissed: AnyFunction | undefined
+  declare onAcceptedReload: string | undefined
+  declare onDismissedReload: string | undefined
+  declare acceptEvent: string | undefined
+  declare dismissEvent: string | undefined
+  // The constructor turns the option (a URL pattern string) into an UpURLPattern.
+  declare acceptLocation: UpURLPattern | undefined
+  declare dismissLocation: UpURLPattern | undefined
+  declare acceptFragment: string | undefined
+  declare dismissFragment: string | undefined
+  declare nesting: number
+  declare backdropElement: HTMLElement | undefined
+  declare viewportElement: HTMLElement | undefined
+  declare dismissElement: HTMLElement | undefined
+  declare overlayFocus: OverlayFocus
+  declare _unbindParentClicked: UnbindFn | undefined
+  declare _unbindEscapePressed: UnbindFn | undefined
+  declare wasEverVisible: boolean | undefined
+
+  constructor(options: LayerOptions) {
     super(options)
 
     // How the overlay looks and animates (see OVERLAY_VISUAL_KEYS)
@@ -115,15 +169,15 @@ export class Overlay extends Layer {
     }
 
     if (this.acceptLocation) {
-      this.acceptLocation = new UpURLPattern(this.acceptLocation)
+      this.acceptLocation = new UpURLPattern(this.acceptLocation as any)
     }
 
     if (this.dismissLocation) {
-      this.dismissLocation = new UpURLPattern(this.dismissLocation)
+      this.dismissLocation = new UpURLPattern(this.dismissLocation as any)
     }
   }
 
-  callback(name) {
+  callback(name: string): AnyFunction | undefined {
     // Only binds the callback to the layer instance.
     // Note if the callback was created by an UJS attribute like [up-on-accepted], the
     // callback is already bound to the origin element to mimic the behavior of built-in
@@ -138,40 +192,40 @@ export class Overlay extends Layer {
     }
   }
 
-  createElement(parentElement) {
+  createElement(parentElement: Element): void {
     this.nesting ||= this._suggestVisualNesting()
     const elementAttrs = compactObject(pick(this, ['align', 'position', 'size', 'class', 'nesting']))
     this.element = this.affixPart(parentElement, null, elementAttrs)
   }
 
-  createBackdropElement(parentElement) {
+  createBackdropElement(parentElement: Element): void {
     this.backdropElement = this.affixPart(parentElement, 'backdrop')
   }
 
-  createViewportElement(parentElement) {
+  createViewportElement(parentElement: Element): void {
     // Give the viewport element an [up-viewport] attribute so it will be found
     // by up.viewport.get().
     this.viewportElement = this.affixPart(parentElement, 'viewport', { 'up-viewport': '' })
   }
 
-  createBoxElement(parentElement) {
+  createBoxElement(parentElement: Element): void {
     this.boxElement = this.affixPart(parentElement, 'box')
   }
 
-  createContentElement(parentElement) {
+  createContentElement(parentElement: Element): void {
     this.contentElement = this.affixPart(parentElement, 'content')
   }
 
-  setContent(content) {
+  setContent(content: Node): void {
     this.contentElement.append(content)
     this.onContentSet()
   }
 
   // Optional callback used by sub-classes
-  onContentSet() {
+  onContentSet(): void {
   }
 
-  createDismissElement(parentElement) {
+  createDismissElement(parentElement: Element): HTMLElement {
     this.dismissElement = this.affixPart(parentElement, 'dismiss', {
       'up-dismiss': '":button"', // value must be JSON
       'aria-label': this.dismissARIALabel
@@ -181,24 +235,24 @@ export class Overlay extends Layer {
     return affix(this.dismissElement, 'span[aria-hidden="true"]', { text: this.dismissLabel })
   }
 
-  affixPart(parentElement, part, options = {}) {
+  affixPart(parentElement: Element, part: string | null, options: PlainObject = {}): HTMLElement {
     return affix(parentElement, this.selector(part), options)
   }
 
-  static selector(part) {
+  static selector(part?: string): string {
     return compact(['up', this.mode, part]).join('-')
   }
 
-  _suggestVisualNesting() {
+  _suggestVisualNesting(): number {
     const { parent } = this
     if (this.mode === parent.mode) {
-      return 1 + parent._suggestVisualNesting()
+      return 1 + (parent as Overlay)._suggestVisualNesting()
     } else {
       return 0
     }
   }
 
-  setupHandlers() {
+  setupHandlers(): void {
     super.setupHandlers()
 
     this.overlayFocus = new OverlayFocus(this)
@@ -257,7 +311,7 @@ export class Overlay extends Layer {
     this.on('up:click', 'label[for]', (event, label) => this._onLabelForClicked(event, label))
   }
 
-  _onLabelForClicked(event, label) {
+  _onLabelForClicked(event: Event, label: Element): void {
     // We do our own focus logic when the user clicks an label[for].
     // If an input with the same [id] is on an ancestor layer the browser would
     // focus that (even though label and input are in different forms).
@@ -284,7 +338,7 @@ export class Overlay extends Layer {
     }
   }
 
-  _onOutsideClicked(event, halt) {
+  _onOutsideClicked(event: Event & { originalEvent?: UIEvent, target: Element }, halt: boolean): void {
     printUserEvent(event)
     // We still halt a click we ignore below, or a popup's origin would be followed again.
     if (halt) eventHalt(event)
@@ -300,7 +354,7 @@ export class Overlay extends Layer {
     )
   }
 
-  onEscapePressed(event) {
+  onEscapePressed(event: KeyboardEvent): void {
     // A widget within the overlay may handle Escape itself, e.g. to close a dropdown.
     if (event.defaultPrevented) return
 
@@ -313,7 +367,7 @@ export class Overlay extends Layer {
       if (field) {
         // Allow screen reader users to get back to a state where they can dismiss the
         // modal with escape.
-        field.blur()
+        (field as HTMLElement).blur()
       } else if (this._supportsDismissMethod('key')) {
         eventHalt(event, { log: true })
         muteUncriticalSync(() =>
@@ -323,12 +377,12 @@ export class Overlay extends Layer {
     }
   }
 
-  registerAttrCloser(attribute, closeFn) {
+  registerAttrCloser(attribute: string, closeFn: CloseFn): void {
     this._registerClickCloser(attribute, closeFn)
     this._registerSubmitCloser(attribute, closeFn)
   }
 
-  _registerClickCloser(attribute, closeFn) {
+  _registerClickCloser(attribute: string, closeFn: CloseFn): void {
     // Allow the fallbacks to be both vanilla links and Unpoly [up-follow] links
     this.on('up:click', `[${attribute}]:not(form)`, (event, link) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
@@ -340,7 +394,7 @@ export class Overlay extends Layer {
     })
   }
 
-  _registerSubmitCloser(attribute, closeFn) {
+  _registerSubmitCloser(attribute: string, closeFn: CloseFn): void {
     // Allow the fallbacks to be both vanilla forms and Unpoly [up-submit] forms
     this.on('submit', `[${attribute}]`, (event, element) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
@@ -358,7 +412,7 @@ export class Overlay extends Layer {
     })
   }
 
-  _onAttrCloserActivated(origin, value, closeFn) {
+  _onAttrCloserActivated(origin: Element, value: any, closeFn: CloseFn): void {
     const closeOptions = { origin }
     const parser = new OptionsParser(origin, closeOptions)
     parser.booleanOrString('animation')
@@ -369,7 +423,7 @@ export class Overlay extends Layer {
     muteUncriticalSync(() => closeFn(value, closeOptions))
   }
 
-  _registerExternalEventCloser(eventTypes, closeFn) {
+  _registerExternalEventCloser(eventTypes: string | undefined, closeFn: CloseFn): UnbindFn | undefined {
     if (!eventTypes) { return }
     return this.on(eventTypes, (event) => {
       event.preventDefault()
@@ -379,15 +433,15 @@ export class Overlay extends Layer {
     })
   }
 
-  tryAcceptForElements(newElements, response) {
+  tryAcceptForElements(newElements: Element[], response?: UpResponse): void {
     this._tryCloseForElements(this.acceptFragment, this.accept, newElements, response)
   }
 
-  tryDismissForElements(newElements, response) {
+  tryDismissForElements(newElements: Element[], response?: UpResponse): void {
     this._tryCloseForElements(this.dismissFragment, this.dismiss, newElements, response)
   }
 
-  _tryCloseForElements(selector, closeFn, newElements, response) {
+  _tryCloseForElements(selector: string | undefined, closeFn: CloseFn, newElements: Element[], response: UpResponse | undefined): void {
     let match = findResult(newElements, (element) => subtreeFirst(element, selector))
     if (match) {
       const closeValue = readData(match)
@@ -397,15 +451,15 @@ export class Overlay extends Layer {
     }
   }
 
-  tryAcceptForLocation(newLocation, response) {
+  tryAcceptForLocation(newLocation: string | undefined, response?: UpResponse): void {
     this._tryCloseForLocation(newLocation, this.acceptLocation, this.accept, response)
   }
 
-  tryDismissForLocation(newLocation, response) {
+  tryDismissForLocation(newLocation: string | undefined, response?: UpResponse): void {
     this._tryCloseForLocation(newLocation, this.dismissLocation, this.dismiss, response)
   }
 
-  _tryCloseForLocation(newLocation, urlPattern, closeFn, response) {
+  _tryCloseForLocation(newLocation: string | undefined, urlPattern: UpURLPattern | undefined, closeFn: CloseFn, response: UpResponse | undefined): void {
     let resolution = newLocation && urlPattern?.recognize(newLocation)
     if (resolution) {
       // resolution now contains named capture groups, e.g. when
@@ -418,7 +472,7 @@ export class Overlay extends Layer {
     }
   }
 
-  teardownHandlers() {
+  teardownHandlers(): void {
     super.teardownHandlers()
     this._unbindParentClicked?.()
     this._unbindEscapePressed?.()
@@ -438,7 +492,7 @@ export class Overlay extends Layer {
     A resolved promise.
   @internal
   */
-  destroyElements(options) {
+  destroyElements(options: LayerCloseOptions): void {
     const animationProps = this.closeAnimationProps(options)
 
     const onFinished = () => {
@@ -456,10 +510,10 @@ export class Overlay extends Layer {
   }
 
   // Optional callback used by sub-classes
-  onElementsRemoved() {
+  onElementsRemoved(): void {
   }
 
-  _animationFn(boxAnimation, backdropAnimation) {
+  _animationFn(boxAnimation: AnimationValue, backdropAnimation: AnimationValue): AnimationFn | false {
     // If we don't animate the box, we don't animate the backdrop either.
     if (isNone(boxAnimation)) return false
 
@@ -475,7 +529,7 @@ export class Overlay extends Layer {
     }
   }
 
-  startOpenAnimation(options = {}) {
+  startOpenAnimation(options: OverlayAnimationOptions = {}): Promise<void> {
     const animationProps = this.openAnimationProps(options)
     const onFinished = () => {
       this.wasEverVisible = true
@@ -485,7 +539,7 @@ export class Overlay extends Layer {
     return animate(this.element, animationProps.animation, { ...animationProps, onFinished })
   }
 
-  openAnimationProps(options = {}) {
+  openAnimationProps(options: OverlayAnimationOptions = {}): OverlayAnimationOptions {
     let boxAnimation = options.animation ?? this.evalOption(this.openAnimation)
     let backdropAnimation = 'fade-in' // _animationFn() will ignore this animation unless the box is also animating
     let animationFn = this._animationFn(boxAnimation, backdropAnimation)
@@ -497,7 +551,7 @@ export class Overlay extends Layer {
     }
   }
 
-  closeAnimationProps(options = {}) {
+  closeAnimationProps(options: OverlayAnimationOptions = {}): OverlayAnimationOptions {
     let boxAnimation =  this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation))
     let backdropAnimation = 'fade-out' // _animationFn() will ignore this animation unless the box is also animating
     let animationFn = this._animationFn(boxAnimation, backdropAnimation)
@@ -509,34 +563,34 @@ export class Overlay extends Layer {
     }
   }
 
-  isAlive() {
+  isAlive(): boolean {
     return ['opening', 'opened'].includes(this.state)
   }
 
   // Documented in up.Layer
-  accept(value = null, options = {}) {
+  accept(value: any = null, options: LayerCloseOptions = {}): void {
     return this._executeCloseChange('accept', value, options)
   }
 
   // Documented in up.Layer
-  dismiss(value = null, options = {}) {
+  dismiss(value: any = null, options: LayerCloseOptions = {}): void {
     return this._executeCloseChange('dismiss', value, options)
   }
 
-  _supportsDismissMethod(method) {
-    return contains(this.dismissible, method)
+  _supportsDismissMethod(method: string): boolean {
+    return contains(this.dismissible as string[], method)
   }
 
-  _executeCloseChange(verb, value, options) {
+  _executeCloseChange(verb: 'accept' | 'dismiss', value: any, options: PlainObject): void {
     options = { ...options, verb, value, layer: this }
     return new CloseLayer(options).execute()
   }
 
-  getFirstSwappableElement() {
-    return this.getContentElement().children[0]
+  getFirstSwappableElement(): HTMLElement {
+    return this.getContentElement().children[0] as HTMLElement
   }
 
-  toString() {
+  toString(): string {
     return `${this.mode} overlay`
   }
 }
