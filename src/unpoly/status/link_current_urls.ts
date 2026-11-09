@@ -3,8 +3,12 @@ import { isSafe } from '../link.js'
 import { UpURLPattern } from '../util/url_pattern.js'
 
 export class LinkCurrentURLs {
+  declare _isSafe: boolean
+  declare _href: string | undefined
+  declare _upHREF: string | undefined
+  declare _aliasPattern: UpURLPattern | undefined
 
-  constructor(link) {
+  constructor(link: Element) {
     // A link with an unsafe method will never be highlighted with .up-current.
     this._isSafe = isSafe(link)
 
@@ -26,7 +30,7 @@ export class LinkCurrentURLs {
     }
   }
 
-  isCurrent(normalizedLocation) {
+  isCurrent(normalizedLocation: string | undefined): boolean {
     // In overlays without history no link is considered current.
     if (!normalizedLocation) {
       return false
@@ -42,7 +46,7 @@ export class LinkCurrentURLs {
     )
   }
 
-  isAnyCurrent(normalizedLocations) {
+  isAnyCurrent(normalizedLocations: string[]): boolean {
     // It is important to return false instead of a falsey value.
     // up.status feeds the return value to element.classList.toggle(),
     // which would use a default for undefined.
