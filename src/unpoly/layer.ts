@@ -9,6 +9,13 @@ import { RenderOptions } from './fragment/render/render_options.js'
 import { Layer } from './layer/base.js'
 import { LayerStack } from './layer/layer_stack.js'
 import { Config } from './util/config.js'
+import type { PlainObject } from './util.js'
+
+/**
+A layer subclass for a mode, like `ModalLayer`. Each has a static `{ mode }`.
+@internal
+*/
+export type LayerClass = (typeof Layer) & { mode: string }
 
 /*-
 Features to open, close and look up overlays.
@@ -24,7 +31,7 @@ Add `[up-layer=new]` to a link or form to show its response in a new overlay, or
 
 // The layer class for each mode, like ModalLayer. The entry passes them to install(), so only
 // the entry and the mode classes themselves import a mode class (see the cycle rules in src/unpoly.js).
-let layerClasses = []
+let layerClasses: LayerClass[] = []
 
 /*-
 Configures default attributes for new overlays.
@@ -250,11 +257,11 @@ The last element is the [frontmost layer](/api/up.layer.front).
 @param {List<up.Layer>} stack
 @stable
 */
-export let layerStack = null
+export let layerStack: LayerStack = null
 
 let handlers = []
 
-export function mainTargets(mode) {
+export function mainTargets(mode: string): string[] {
   return flatMap(modeConfigs(mode), 'mainTargets')
 }
 
@@ -263,7 +270,7 @@ Returns an array of config objects that apply to the given mode name.
 
 The config objects are in descending order of specificity.
 */
-function modeConfigs(mode) {
+function modeConfigs(mode: string): PlainObject[] {
   if (mode === 'root') {
     return [config.root, config.any]
   } else {
@@ -271,7 +278,7 @@ function modeConfigs(mode) {
   }
 }
 
-function normalizeLayerOption(options) {
+function normalizeLayerOption(options: PlainObject): void {
   if (options.layer instanceof Layer) return
 
   up.migrate.handleLayerOptions?.(options)
@@ -316,7 +323,7 @@ function normalizeLayerOption(options) {
   }
 }
 
-function setBaseLayerOption(options) {
+function setBaseLayerOption(options: PlainObject): void {
   if (options.baseLayer instanceof Layer) return
 
   // Remember the layer that was current when the request was made,
@@ -326,13 +333,13 @@ function setBaseLayerOption(options) {
   options.baseLayer = layerStack.get('current', { ...options, normalizeLayerOptions: false })
 }
 
-export function normalizeOptions(options) {
+export function normalizeOptions(options: PlainObject): void {
   normalizeLayerOption(options)
   options.context ??= {}
   setBaseLayerOption(options)
 }
 
-export function build(options, beforeNew) {
+export function build(options: PlainObject, beforeNew?: (options: PlainObject) => PlainObject): Layer {
   const { mode } = options
   const Class = layerClasses.find((Class) => Class.mode === mode)
 
@@ -360,7 +367,7 @@ export function build(options, beforeNew) {
   return new Class(options)
 }
 
-function reset() {
+function reset(): void {
   layerStack.reset()
   handlers = filterList(handlers, 'isDefault')
 }
@@ -675,7 +682,7 @@ console.log(layer.mode) // logs "modal"
 
 @stable
 */
-export async function open(options) {
+export async function open(options: PlainObject): Promise<Layer> {
   options = newOptions(options, {
     layer: 'new',
     defaultToEmptyContent: true,
@@ -831,7 +838,7 @@ try {
 @stable
 @signature
 */
-export function ask(options) {
+export function ask(options: PlainObject): Promise<any> {
   return new Promise(function(resolve, reject) {
     open(RenderOptions.chainCallbacks(options, {
       onAccepted: (event) => resolve(event.value),
@@ -841,16 +848,16 @@ export function ask(options) {
 }
 
 // The layer classes' selectors never change, so we only build this once (in install()).
-let anySelector
+let anySelector: string
 
 // Returns the closest ancestor (or self) that is a layer element. This looks at the DOM, not the
 // layer stack: for an element in a closing overlay it returns that overlay's element, while
 // up.layer.get(element) returns nothing.
-export function closestLayerElement(element) {
+export function closestLayerElement(element: Element): Element | null {
   return element.closest(anySelector)
 }
 
-export function optionToString(option) {
+export function optionToString(option: any): string {
   if (isString(option)) {
     return `layer "${option}"`
   } else {
@@ -858,7 +865,7 @@ export function optionToString(option) {
   }
 }
 
-export function isWithinForeignOverlay(element) {
+export function isWithinForeignOverlay(element: Element): boolean {
   let selector = config.selector('foreignOverlaySelectors')
   return !!(selector && element.closest(selector))
 }
@@ -1877,7 +1884,7 @@ See `up.Layer#affix` for more documentation.
 @experimental
 */
 
-export function install(classes) {
+export function install(classes: LayerClass[]): void {
   layerClasses = classes
   anySelector = map(classes, (Class) => Class.selector()).join()
 
