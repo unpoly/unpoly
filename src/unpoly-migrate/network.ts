@@ -57,7 +57,8 @@ up.network.config.patch(function(config) {
   up.migrate.removedProperty(config, 'requestMetaKeys', { value: [], warning: 'The configuration up.network.config.requestMetaKeys has been removed. Servers that optimize responses based on request headers should instead set a Vary response header.' })
 })
 
-up.migrate.handleRequestOptions = function(options) {
+// Core calls this hook (up.request()). The options are any, since they may have keys that core no longer knows.
+up.migrate.handleRequestOptions = function(options: any) {
   up.migrate.fixKey(options, 'clearCache', 'expireCache', { label: 'request options', detail: options.url })
 
   if (options.solo) {
@@ -148,7 +149,8 @@ up.network.preload = function(...args) {
   return up.link.preload(...args)
 }
 
-up.migrate.preprocessAbortArgs = function(args) {
+// Core calls this hook (up.network.abort()).
+up.migrate.preprocessAbortArgs = function(args: any[]) {
   if (args.length === 2 && u.isString(args[1])) {
     up.migrate.warn('up.network.abort() no longer takes a reason as a second argument. Pass it as { reason } option instead.')
     args[1] = { reason: args[1] }
@@ -251,7 +253,7 @@ Returns `undefined` if the given header name was not included in the response.
 @deprecated
   Use `up.Response#header` instead.
 */
-up.Response.prototype.getHeader = function(name) {
+up.Response.prototype.getHeader = function(name: string) {
   up.migrate.deprecated('up.Response#getHeader()', 'up.Response#header()')
   return this.header(name)
 }
