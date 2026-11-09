@@ -2028,13 +2028,15 @@ export const api = {
 }
 
 // TypeScript can't see the shortcuts that defineDelegates() adds below, so we declare them on `up`.
-// Keep the keys in sync with the list below.
+// `satisfies` checks that the list below names only these keys, but not that it names all of them.
+type LayerShortcut =
+  'accept' | 'dismiss' | 'isRoot' | 'isOverlay' | 'isFront' | 'on' | 'off' | 'emit' | 'parent' | 'history' |
+  'location' | 'mode' | 'context' | 'element' | 'contains' | 'size' | 'affix'
+
 declare module '../unpoly.js' {
   interface Up {
-    layer: CoreApi['layer'] & Pick<Layer,
-      'accept' | 'dismiss' | 'isRoot' | 'isOverlay' | 'isFront' | 'on' | 'off' | 'emit' | 'parent' | 'history' |
-      'location' | 'mode' | 'context' | 'element' | 'contains' | 'size' | 'affix'
-    >
+    // Layer#isOverlay() narrows the layer to an Overlay, but up.layer is never one.
+    layer: CoreApi['layer'] & Pick<Layer, Exclude<LayerShortcut, 'isOverlay'>> & { isOverlay(): boolean }
   }
 }
 
@@ -2058,4 +2060,4 @@ defineDelegates(api.layer, [
   'contains',
   'size',
   'affix'
-], () => layerStack.current)
+] satisfies LayerShortcut[], () => layerStack.current)
