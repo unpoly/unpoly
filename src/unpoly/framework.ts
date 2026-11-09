@@ -271,6 +271,13 @@ export const isBeforeBoot = mockable(function isBeforeBoot(): boolean {
   return readyState !== 'booting' && readyState !== 'booted'
 })
 
+// Gives a class its public name, which survives minification (see unpoly.ts). We define the
+// tag instead of assigning it, which would throw when the class inherits a getter or read-only tag.
+export function setClassName(klass: abstract new (...args: any[]) => any, name: string): void {
+  Object.defineProperty(klass, 'name', { value: name })
+  Object.defineProperty(klass.prototype, Symbol.toStringTag, { value: name })
+}
+
 function supportIssue(): string | undefined {
   for (let feature of ['Promise', 'DOMParser', 'FormData', 'reportError']) {
     if (!window[feature]) {

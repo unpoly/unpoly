@@ -141,12 +141,11 @@ const layerModes = [RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]
 for (let key in up) {
   // Test the key first, so we don't call a getter like `up.context`.
   if (/^[A-Z]/.test(key) && up[key].prototype) {
-    Object.defineProperty(up[key], 'name', { value: 'up.' + key })
-    up[key].prototype[Symbol.toStringTag] = 'up.' + key
+    framework.setClassName(up[key], 'up.' + key)
   }
 }
 for (let mode of layerModes) {
-  mode.prototype[Symbol.toStringTag] = 'up.Layer'
+  framework.setClassName(mode, 'up.Layer')
 }
 
 // The explicit install order. It is the order in which the namespaces registered their side
