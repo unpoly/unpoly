@@ -130,7 +130,7 @@ export class ScriptGate {
     for (let attribute of config.nonceableAttributes) {
       let matches = subtree(root, attrSelector(attribute))
       for (let element of matches) {
-        let item = new AttributeItem(element, attribute, policy)
+        let item = new AttributeItem(element, attribute)
         policy.processItem(item)
       }
     }
