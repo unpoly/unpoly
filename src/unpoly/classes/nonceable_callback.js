@@ -8,7 +8,7 @@ up.NonceableCallback = class NonceableCallback {
   }
 
   static fromCallbackString(string) {
-    let match = string.match(/^(nonce-(\S+)\s)?(.*)$/)
+    let match = string.match(/^(nonce-(\S+)\s)?(.*)$/s)
     return new this(match[3], match[2])
   }
 

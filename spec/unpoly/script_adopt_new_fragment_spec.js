@@ -320,6 +320,21 @@ extendDescribe('up.script', function() {
 
       describe('CSP nonces in callback attributes', function() {
 
+        it('renders a fragment with a callback attribute that spans multiple lines (bugfix)', async function() {
+          htmlFixtureList('<div id="target">old text</div>')
+
+          await up.render({ fragment: `
+            <div id="target">
+              <a href="/foo" up-follow up-on-loaded="
+                console.log('first line')
+                console.log('second line')
+              ">new text</a>
+            </div>
+          ` })
+
+          expect('#target').toHaveText('new text')
+        })
+
         function itBehavesLikeBlock({ pageNonce } = {}) {
           describe(`when the page nonce is ${pageNonce ? 'known' : 'unknown'}`, function() {
 

@@ -7,6 +7,7 @@ Unreleased
 - Fix a bug where [`up.layer.ask()`](/api/up.layer.ask) rejected with a `TypeError` when called without options.
 - Fix a bug where [`up.modal.contains()`](/api/up.modal.contains) and [`up.popup.contains()`](/api/up.popup.contains) threw a `TypeError` when given a selector string.
 - Fix a bug where [`up.fragment.toTarget()`](/api/up.fragment.toTarget) threw a `TypeError` when given an empty string. It now throws an `up.CannotTarget` error.
+- Fix a bug where rendering failed when a new fragment had a callback attribute like [`[up-on-loaded]`](/api/up-follow#up-on-loaded) whose code spanned multiple lines. Running such a callback failed as well.
 - When Unpoly adds or changes a history entry, it now calls the browser's History API once instead of twice. Browsers limit how often a page may change its history, so apps that update history often are less likely to hit that limit.
 - ⚠️ Rendering into the `<html>` element now throws an `up.CannotTarget` error. It would swap or duplicate `<head>` and `<body>`. Make a full page load instead.
 

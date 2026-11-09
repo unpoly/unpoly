@@ -449,6 +449,22 @@ describe('up.link', function() {
         delete window.onLoadedCallback
       })
 
+      it('parses an [up-on-loaded] attribute that spans multiple lines', function() {
+        window.onLoadedCallback = jasmine.createSpy('onLoaded callback')
+        const [link] = htmlFixtureList(`
+          <a href="/foo" up-on-loaded="nonce-specs-nonce
+            window.onLoadedCallback('first line')
+            window.onLoadedCallback('second line')
+          ">label</a>
+        `)
+        const options = up.link.followOptions(link)
+
+        options.onLoaded(up.event.build('up:fragment:loaded'))
+
+        expect(window.onLoadedCallback.calls.allArgs()).toEqual([['first line'], ['second line']])
+        delete window.onLoadedCallback
+      })
+
       it('parses an [up-on-rendered] attribute into a function that receives the result', function() {
         window.onRenderedCallback = jasmine.createSpy('onRendered callback')
         const [link] = htmlFixtureList('<a href="/foo" up-on-rendered="nonce-specs-nonce window.onRenderedCallback(this, result)">label</a>')
