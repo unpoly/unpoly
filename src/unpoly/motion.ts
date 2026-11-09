@@ -16,6 +16,7 @@ import { Registry } from './util/registry.js'
 import { absolutize, closest, rootHeight, rootWidth } from './viewport.js'
 import type { PlainObject } from './util.js'
 import type { ElementOrSelector, StyleProps } from './element.js'
+import type { UnbindFn } from './event.js'
 import type { OptionsParserOptions } from './element/options_parser.js'
 
 /**
@@ -376,7 +377,7 @@ async function animateNow(element: HTMLElement, lastFrame: StyleProps, { duratio
   // TODO: We could accepting camelCase everywhere we now run fixSetStyleProps or fixStyleProps
   let camelizedLastFrame = withRenamedKeys(lastFrame, kebabToCamelCase)
   let animation = element.animate([ camelizedLastFrame ], { duration, easing, fill: 'forwards' })
-  let offFinish
+  let offFinish: UnbindFn
   let conclude = () => {
     animation.finish()
     applyFinishedFrame()
@@ -409,8 +410,7 @@ Does nothing if there are no animations to complete.
   A promise that fulfills when animations and transitions have finished.
 @stable
 */
-export function finish(element?: ElementOrSelector): any
-export function finish(element) {
+export function finish(element?: ElementOrSelector): any {
   element = getSmart(element)
   motionController.finish(element)
   return up.migrate.formerlyAsync?.('up.motion.finish()')
@@ -483,7 +483,8 @@ You can define additional named transitions using [`up.transition()`](/api/up.tr
 @stable
 */
 export function morph(oldElement: ElementOrSelector, newElement: ElementOrSelector, transitionValue: TransitionValue, options?: SwapOptions): Promise<void>
-export async function morph(oldElement, newElement, transitionValue, options) {
+// The elements are resolved in place. TypeScript would narrow them to Element, not HTMLElement.
+export async function morph(oldElement: any, newElement: any, transitionValue: TransitionValue, options?: SwapOptions) {
   // (A) If passed a selector, up.fragment.get() will prefer a match on the current layer.
   // (B) This also unwraps jQuery collections.
   oldElement = getSmart(oldElement)
@@ -623,7 +624,7 @@ export function isNone(motionValue: any): boolean {
 
 // From is an opacity or a function that reads it from the element.
 function registerOpacityAnimation(name: string, from: any, to: number): void {
-  namedAnimations.put(name, function(element, options) {
+  namedAnimations.put(name, function(element: HTMLElement, options: TimingOptions) {
     element.style.opacity = evalOption(from, element)
     return animateNow(element, { opacity: to }, options)
   })
@@ -651,13 +652,13 @@ function registerMoveAnimations(direction: string, boxToTransform: (box: DOMRect
   const animationToName = `move-to-${direction}`
   const animationFromName = `move-from-${direction}`
 
-  namedAnimations.put(animationToName, function(element, options) {
+  namedAnimations.put(animationToName, function(element: HTMLElement, options: TimingOptions) {
     const box = untranslatedBox(element)
     const transform = boxToTransform(box)
     return animateNow(element, transform, options)
   })
 
-  namedAnimations.put(animationFromName, function(element, options) {
+  namedAnimations.put(animationFromName, function(element: HTMLElement, options: TimingOptions) {
     const box = untranslatedBox(element)
     const transform = boxToTransform(box)
     setInlineStyle(element, transform)
