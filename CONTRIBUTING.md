@@ -91,7 +91,7 @@ changing documentation. The directive set is large and you won't guess it.
 > Moving to TypeScript module by module, no dependencies, no jQuery.
 > Byte count is a real constraint that sometimes
 > justifies unconventional code.
-> You can run ESLint with `bin/lint`, and the type check with `bin/typecheck`.
+> You can run Oxlint with `bin/lint`, and the type check with `bin/typecheck`.
 
 [Skim the code style guide](docs/contributing/code-style.md) before showing your code to someone else.
 

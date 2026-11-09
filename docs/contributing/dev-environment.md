@@ -6,7 +6,7 @@ command boots the build watcher, the spec server and the documentation site.
 ## Installing development dependencies
 
 To build Unpoly you require Node.js and the npm packages from `package.json` (esbuild,
-Terser, Sass and ESLint, among others). The build also calls Ruby, to render the one ERB
+Terser, Sass and Oxlint, among others). The build also calls Ruby, to render the one ERB
 template that inserts the version number.
 
 Install the Node version from `.nvmrc`.
@@ -40,7 +40,7 @@ bin/dev stop                         # stop a running environment
 bin/dev status                       # report whether one is running (and flag a broken build)
 ```
 
-If a build has errors — a syntax slip, or an ESLint violation — `bin/test` prints
+If a build has errors — a syntax slip, or a lint error — `bin/test` prints
 them instead of running the specs and exits non-zero, and `bin/dev status` reports
 them too. The watcher itself keeps running, so your next edit can fix things.
 
@@ -51,9 +51,10 @@ also strips TypeScript's types, and minifies with [Terser](https://terser.org/).
 `tooling/build/bundles.mjs` lists every bundle, and which `--config` builds it.
 
 The watcher rebuilds only the bundles that read the file you edited, usually within 200 ms, and
-lints the file with ESLint if it is in `src/`. Of the one-shot builds, only the production build
-(`bin/build` without `--config`, which `bin/release` runs) lints `src/`, and fails on an error.
-`bin/lint` lints `src/`, `spec/` and `tooling/`, and CI runs it as its own job.
+lints the file with Oxlint if it is in `src/` (Oxlint's native rules only, see
+[Linting](code-style.md#linting)). Of the one-shot builds, only the production build
+(`bin/build` without `--config`, which `bin/release` runs) lints `src/`, with all rules, and fails
+on an error. `bin/lint` lints `src/`, `spec/` and `tooling/`, and CI runs it as its own job.
 
 ## Logs
 
@@ -78,7 +79,7 @@ Each line of the dev log is `HH:MM:SS.mmm service | output`:
 What you can find in there:
 
 - `watch` — the build watcher. How many bundles it rebuilt and how long it took, and the
-  verbatim compile or ESLint errors when a build breaks.
+  verbatim compile or lint errors when a build breaks.
 - `server` — the spec server, including the port it came up on.
 - `docs` — the documentation site, if you have that sibling repository checked out.
 - `dev` — the supervisor itself: a service exiting, a sibling repository being skipped

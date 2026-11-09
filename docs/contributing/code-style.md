@@ -1,6 +1,6 @@
 # Code style
 
-How Unpoly's own source is written. Some of these rules are enforced by ESLint (`bin/lint`),
+How Unpoly's own source is written. Some of these rules are enforced by Oxlint (`bin/lint`),
 most are not.
 
 
@@ -25,8 +25,8 @@ In a `.ts` module:
   `NormalizeURLOptions`. Mark a type that isn't public API with `@internal` in a `/** */` comment.
 - Declare class fields with `declare` (`declare left: number`). A field without `declare` makes
   the compiled class define the property, which costs bytes and changes behavior (differently in
-  `unpoly.js` and `unpoly.es6.js`, whose targets treat class fields differently). ESLint reports a
-  field without `declare` or an initializer.
+  `unpoly.js` and `unpoly.es6.js`, whose targets treat class fields differently). `bin/lint`
+  reports a field without `declare` or an initializer.
 - When a function resolves its argument by reassigning it (`element = getSmart(element)`),
   TypeScript keeps the parameter's declared type and reports the uses below. Write the typed
   signature as an overload and leave the implementation untyped:
@@ -119,8 +119,19 @@ direct call — cannot be `_`-prefixed: the name it asks for does not exist in
 
 ## Linting
 
-`bin/lint` runs ESLint over `src/`, `spec/` and `tooling/`. Extra arguments are forwarded,
-so `bin/lint --fix` works.
+`bin/lint` runs [Oxlint](https://oxc.rs/docs/guide/usage/linter) over `src/`, `spec/` and
+`tooling/`, and checks that no two modules contribute the same key to `window.up`
+(`tooling/lint/api_collisions.mjs`). Extra arguments are forwarded to Oxlint, so
+`bin/lint --fix` works.
 
-Lint errors in `src/` fail the build, so `bin/test` surfaces them for you. Specs and the
-tooling are not part of that build, so only `bin/lint` (or CI's lint job) checks those.
+The rules are in two files in the project root. `.oxlintrc.native.json` has Oxlint's own rules,
+which are written in Rust. `.oxlintrc.json` extends it with the rules that run in JavaScript: the
+code style rules from `@stylistic/eslint-plugin`, and our own in `tooling/lint/unpoly_plugin.mjs`.
+Editors with the Oxc extension use `.oxlintrc.json`. To silence a rule for one line, write
+`// oxlint-disable-line rule-name`.
+
+Lint errors in `src/` fail the build, so `bin/test` surfaces them for you. The dev watcher only
+checks the native rules and the api collisions, though. The code style and `declare` on class
+fields wait for `bin/lint`, CI and the production build, because the JavaScript rules would add a
+second to every rebuild. Specs and the tooling are not part of the build, so only `bin/lint`
+(or CI's lint job) checks those.
