@@ -62,6 +62,8 @@ export interface RenderOptions {
 
   // Request
   url?: string
+  // The button that submitted a form (up.submit()), or false for none.
+  submitButton?: Element | false
   method?: string
   params?: ParamsLike
   headers?: Record<string, string>

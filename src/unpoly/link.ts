@@ -27,6 +27,7 @@ import { doFocus } from './viewport.js'
 import type { PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
 import type { OptionsParserOptions } from './element/options_parser.js'
+import type { RenderJob } from './fragment/render/render_job.js'
 import type { Layer } from './layer/base.js'
 
 // A link expanded with [up-expand] remembers the area it expanded to, and the area remembers the link.
@@ -294,7 +295,7 @@ up.follow(link)
 @stable
 @signature
 */
-export const follow = mockable(function(link: ElementOrSelector, options?: PlainObject, parserOptions?: OptionsParserOptions): any {
+export const follow = mockable(function(link: ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderJob {
   return render(followOptions(link, options, parserOptions))
 })
 
@@ -354,7 +355,7 @@ let options = up.link.followOptions(link)
   An object of [render options](/api/up.render#parameters).
 @stable
 */
-export function followOptions(link: ElementOrSelector, options?: PlainObject, parserOptions?: OptionsParserOptions): PlainObject
+export function followOptions(link: ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions
 export function followOptions(link, options, parserOptions) {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   link = effectiveLink(getSmart(link))

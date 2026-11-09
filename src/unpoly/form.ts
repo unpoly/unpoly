@@ -23,6 +23,8 @@ import { doFocus, focusedElementWithin } from './viewport.js'
 import type { PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
 import type { OptionsParserOptions } from './element/options_parser.js'
+import type { RenderOptions } from './fragment/render/render_options.js'
+import type { RenderJob } from './fragment/render/render_job.js'
 import type { SelectorFn } from './util/config.js'
 import type { PreviewFn } from './status.js'
 
@@ -472,7 +474,7 @@ up.submit('form.new-user', { target: '.main' })
 
 @stable
 */
-export const submit = mockable((form: ElementOrSelector, options?: PlainObject): any => {
+export const submit = mockable((form: ElementOrSelector, options?: RenderOptions): RenderJob => {
   return render(submitOptions(form, options))
 })
 
@@ -511,7 +513,7 @@ let options = up.form.submitOptions(form)
   The parsed submit options.
 @stable
 */
-export function submitOptions(form: ElementOrSelector, options?: PlainObject, parserOptions?: OptionsParserOptions): PlainObject
+export function submitOptions(form: ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions
 export function submitOptions(form, options, parserOptions) {
   form = getSmart(form)
   form = getForm(form)
