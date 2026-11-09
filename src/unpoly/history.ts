@@ -506,9 +506,6 @@ function placeAdoptedHistoryEntry(method: 'pushState' | 'replaceState', location
     withTrackOptions(trackOptions, function() {
       // Call this instead of originalPushState in case someone else has patched history.pushState()
       // Our own tests do this to rate-limit the use of the history API.
-      //
-      // TODO: { up: true } lands in the unused second argument (title), so the pushed state is null.
-      // TypeScript reports this. Probably meant history[method]({ up: true }, '', location). (Needs Henning)
       history[method]({ up: true }, '', location)
     })
   }

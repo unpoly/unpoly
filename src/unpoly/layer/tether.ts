@@ -23,7 +23,6 @@ export class Tether {
   declare parent: HTMLElement
   declare _syncOnScroll: boolean
   declare _element: HTMLElement
-  // TODO(types): queueTask() returns nothing, so this is always undefined and clearTimeout() has no effect.
   declare _syncTimer: ReturnType<typeof setTimeout>
   declare offsetLeft: number
   declare offsetTop: number

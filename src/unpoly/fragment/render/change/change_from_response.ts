@@ -92,7 +92,6 @@ export class ChangeFromResponse extends Change {
     // If it is given, it may still contain ':before' or ':after'.
     // It may also be an array or an element. RegExp#test() below coerces it to a string,
     // which joins an array and never matches an element. That is what we want, so we don't check its type.
-    // An array of selectors or an element is turned into a string by RegExp#test().
     let inputTarget = originalRenderOptions.target as string
 
     // This is the target that we ended up rendering.

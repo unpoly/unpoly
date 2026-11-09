@@ -72,8 +72,8 @@ export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
   // - Includes the preflight props for fail-prefixed options
   _getRequestAttrs(): RequestAttrs {
     const successAttrs = this._preflightPropsForRenderOptions(this.options)
-    // This is true when the fail options match no target. Spreading true adds nothing.
-    const failAttrs = this._preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true }) as PreflightProps
+    // This is empty when the fail options match no target.
+    const failAttrs = this._preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true })
 
     return {
       ...this.options, // contains preflight keys relevant for the request, e.g. { url, method }
@@ -83,7 +83,7 @@ export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
   }
 
   _preflightPropsForRenderOptions(renderOptions: RenderOptions): PreflightProps
-  _preflightPropsForRenderOptions(renderOptions: RenderOptions, getPreflightPropsOptions: { optional: boolean }): PreflightProps | true
+  _preflightPropsForRenderOptions(renderOptions: RenderOptions, getPreflightPropsOptions: { optional: boolean }): Partial<PreflightProps>
   _preflightPropsForRenderOptions(renderOptions, getPreflightPropsOptions?) {
     const preflightChange = new ChangeFromContent({ ...renderOptions, preflight: true })
     // #getPreflightProps() will return meta information about the change that is most

@@ -183,9 +183,9 @@ export class ChangeFromContent extends Change {
 
   // Returns information about the change that is most likely before the request was dispatched.
   // This might change postflight if the response does not contain the desired target.
-  // With { optional: true }, returns true instead of throwing when no target matches.
+  // With { optional: true }, returns an empty object instead of throwing when no target matches.
   getPreflightProps(opts?: { optional?: false }): PreflightProps
-  getPreflightProps(opts: { optional: boolean }): PreflightProps | true
+  getPreflightProps(opts: { optional: boolean }): Partial<PreflightProps>
   getPreflightProps(opts: { optional?: boolean } = {}) {
     const getPlanProps = (plan: LayerPlan) => plan.getPreflightProps()
     return this._seekPlan(getPlanProps) || (opts.optional ? {} : this._cannotMatchPreflightTarget())
