@@ -276,6 +276,9 @@ export class RenderJob {
     A promise that fulfills with an `up.RenderResult` once the page has been updated.
   @stable
   */
+
+  get [Symbol.toStringTag]() { return 'up.RenderJob' }
+
   static {
     // A request is also a promise ("thenable") for its initial render pass.
     delegatePromise(this.prototype, function() { return this._rendered })

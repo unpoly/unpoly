@@ -942,6 +942,8 @@ export class Preview {
     return [element, ...rest]
   }
 
+  get [Symbol.toStringTag]() { return 'up.Preview' }
+
 }
 
 export const api = {

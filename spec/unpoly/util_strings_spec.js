@@ -213,6 +213,24 @@ extendDescribe('up.util', function() {
           expect(formatted).toEqual('before up.Params(foo=bar) after')
         })
 
+        it("serializes an up.RenderJob with its class name", function() {
+          const job = new up.RenderJob({ target: '#target' })
+          const formatted = up.util.sprintf('before %o after', job)
+          expect(formatted).toEqual('before up.RenderJob {…} after')
+        })
+
+        it("serializes an up.RenderResult with its class name", function() {
+          const result = new up.RenderResult()
+          const formatted = up.util.sprintf('before %o after', result)
+          expect(formatted).toEqual('before up.RenderResult {…} after')
+        })
+
+        it("serializes an up.Preview with its class name", function() {
+          const preview = new up.Preview({})
+          const formatted = up.util.sprintf('before %o after', preview)
+          expect(formatted).toEqual('before up.Preview {…} after')
+        })
+
         it("serializes a built-in class with its constructor name and string representation", function() {
           const date = new Date(2026, 9, 21)
           const formatted = up.util.sprintf('before %o, %o after', date, /^up-/i)
