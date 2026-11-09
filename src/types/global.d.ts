@@ -8,6 +8,10 @@ declare var up: any
 // Globals we use only when the page has them: jQuery for interop, Jasmine in up.mockable().
 declare var jQuery: any
 declare var spyOn: any
+interface Window {
+  jQuery?: any
+  jasmine?: any
+}
 
 // Entry points require their stylesheets, which webpack handles.
 declare module '*.sass'
