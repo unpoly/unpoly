@@ -1,5 +1,20 @@
 const u = up.util
 
+/**
+Options for the warning that up.migrate.renamedProperty() and up.migrate.removedProperty() print.
+@internal
+*/
+type PropertyWarningOptions = {
+  label?: string
+  warning?: string
+}
+
+/**
+Where to look for an old attribute: a selector, or a function that returns one.
+@internal
+*/
+type AttributeScope = string | (() => string)
+
 /*-
 @namespace up.migrate
 @internal
@@ -12,7 +27,7 @@ up.migrate = (function() {
 
   // Pass a { label } like 'up.form.config' to name the object in the warning.
   // Without a label we print the object itself.
-  function renamedProperty(object, oldKey, newKey, { label, warning } = {}) {
+  function renamedProperty(object: object, oldKey: string, newKey: string, { label, warning }: PropertyWarningOptions = {}): void {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
     const doWarn = u.memoize(function() {
@@ -43,7 +58,7 @@ up.migrate = (function() {
   //
   // Pass a { value } to set an initial value without a warning.
   // It is restored when up.framework.reset() runs the config patch again.
-  function removedProperty(object, key, { label, warning, value } = {}) {
+  function removedProperty(object: object, key: string, { label, warning, value }: PropertyWarningOptions & { value?: any } = {}): [any] {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
     const doWarn = u.memoize(function() {
@@ -59,7 +74,7 @@ up.migrate = (function() {
     // We only keep an existing data value. When up.framework.reset() runs a config patch again,
     // reading object[key] would call the getter from the previous definition, which warns and keeps the old value.
     // We return the reference so a polyfill can honor a value that the app sets.
-    let valueRef = [value ?? Object.getOwnPropertyDescriptor(object, key)?.value]
+    let valueRef: [any] = [value ?? Object.getOwnPropertyDescriptor(object, key)?.value]
 
     Object.defineProperty(object, key, {
       configurable: true,
@@ -80,13 +95,14 @@ up.migrate = (function() {
     return valueRef
   }
 
-  function transformAttribute(oldAttr, ...args) {
-    let transformer = u.extractCallback(args)
-    let { scope } = u.extractOptions(args)
+  // Called as transformAttribute(oldAttr, { scope }?, transformer).
+  function transformAttribute(oldAttr: string, ...args: any[]): void {
+    let transformer: (element: Element, value: string) => void = u.extractCallback(args)
+    let { scope }: { scope?: AttributeScope } = u.extractOptions(args)
 
     // Scope may be a selector string OR a function
     let selector = scope || `[${oldAttr}]`
-    up.macro(selector, { priority: -1000 }, function(element) {
+    up.macro(selector, { priority: -1000 }, function(element: Element) {
       // If scope is given as a function it does not select for the attribute
       if (element.hasAttribute(oldAttr)) {
         let value = element.getAttribute(oldAttr)
@@ -95,7 +111,7 @@ up.migrate = (function() {
     })
   }
 
-  function renamedAttribute(oldAttr, newAttr, { scope, mapValue } = {}) {
+  function renamedAttribute(oldAttr: string, newAttr: string, { scope, mapValue }: { scope?: AttributeScope, mapValue?: string | ((value: string) => string) } = {}): void {
     transformAttribute(oldAttr, { scope }, function(element, value) {
       warn('Attribute [%s] has been renamed to [%s] (found in %o)', oldAttr, newAttr, element)
       if (mapValue) {
@@ -105,7 +121,7 @@ up.migrate = (function() {
     })
   }
 
-  function removedAttribute(oldAttr, { scope, replacement } = {}) {
+  function removedAttribute(oldAttr: string, { scope, replacement }: { scope?: AttributeScope, replacement?: string } = {}): void {
     transformAttribute(oldAttr, { scope }, function(element, _value) {
       if (replacement) {
         warn('Attribute [%s] has been removed (found in %o). Use %s instead.', oldAttr, element, replacement)
@@ -121,7 +137,7 @@ up.migrate = (function() {
   //
   // Pass a { detail } like an origin element or URL to name the call site, e.g. 'render options for <a href="/foo">'.
   // Since warnings are deduplicated by their text, this prints the warning once per call site.
-  function fixKey(object, oldKey, newKey, { label, detail } = {}) {
+  function fixKey(object: object, oldKey: string, newKey: string, { label, detail }: { label?: string, detail?: any } = {}): void {
     if (u.isDefined(object[oldKey])) {
       if (label && detail) {
         warn('Property { %s } has been renamed to { %s } (found in %s for %o)', oldKey, newKey, label, detail)
@@ -135,20 +151,20 @@ up.migrate = (function() {
   }
 
   // Maps old event type to new event type
-  const renamedEvents = {}
+  const renamedEvents: Record<string, string> = {}
 
-  function renamedEvent(oldType, newType) {
+  function renamedEvent(oldType: string, newType: string): void {
     renamedEvents[oldType] = newType
   }
 
   // Maps old event type to new event type
-  const removedEvents = {}
+  const removedEvents: Record<string, string | null> = {}
 
-  function removedEvent(type, replacementExpression = null) {
+  function removedEvent(type: string, replacementExpression: string | null = null): void {
     removedEvents[type] = replacementExpression
   }
 
-  function fixEventType(eventType) {
+  function fixEventType(eventType: string): string {
     let newEventType = renamedEvents[eventType]
     if (newEventType) {
       warn(`Event ${eventType} has been renamed to ${newEventType}`)
@@ -166,13 +182,13 @@ up.migrate = (function() {
     }
   }
 
-  function fixEventTypes(eventTypes) {
+  function fixEventTypes(eventTypes: string[]): string[] {
     // Remove duplicates as e.g. up:history:pushed and up:history:replaced
     // both map to up:location:changed.
     return u.uniq(u.map(eventTypes, fixEventType))
   }
 
-  function renamedNamespace(oldName, newName) {
+  function renamedNamespace(oldName: string, newName: string): void {
     Object.defineProperty(up, oldName, {
       configurable: true,
       get() {
@@ -182,13 +198,13 @@ up.migrate = (function() {
     })
   }
 
-  let warnedMessages = {}
+  let warnedMessages: Record<string, boolean> = {}
 
   function reset() {
     warnedMessages = {}
   }
 
-  const warn = up.mockable((message, ...args) => {
+  const warn: (message: string, ...args: any[]) => void = up.mockable((message: string, ...args: any[]) => {
     const formattedMessage = u.sprintf(message, ...args)
     const logLevel = config.logLevel
     if (logLevel !== 'none' && !warnedMessages[formattedMessage]) {
@@ -197,12 +213,12 @@ up.migrate = (function() {
     }
   })
 
-  function deprecated(deprecatedExpression, replacementExpression) {
+  function deprecated(deprecatedExpression: string, replacementExpression: string): void {
     warn(`${deprecatedExpression} has been deprecated. Use ${replacementExpression} instead.`)
   }
 
   // Returns a resolved promise that prints a warning when #then() is called.
-  function formerlyAsync(label) {
+  function formerlyAsync(label: string): Promise<void> {
     const promise = Promise.resolve()
     const oldThen = promise.then
     promise.then = function() {
@@ -222,7 +238,7 @@ up.migrate = (function() {
     'min-width', 'min-height',
   ]
 
-  function fixStylePropName(prop) {
+  function fixStylePropName(prop: string): string {
     if (/[A-Z]/.test(prop)) {
       warn(`CSS property names must be in kebab-case, but got camelCase "${prop}"`)
       return u.camelToKebabCase(prop)
@@ -231,7 +247,7 @@ up.migrate = (function() {
     }
   }
 
-  function fixStylePropValue(prop, value, unit) {
+  function fixStylePropValue(prop: string, value: any, unit: string | undefined): any {
     if (!unit && CSS_LENGTH_PROPS.includes(prop) && /^[\d.]+$/.test(value)) {
       warn(`CSS length values must have a unit, but got "${prop}: ${value}". Use "${prop}: ${value}px" instead.`)
       return value + "px"
@@ -240,7 +256,8 @@ up.migrate = (function() {
     }
   }
 
-  function fixGetStyleProps(keyOrKeys) {
+  // Takes a key or an array of keys. Typed any because `u` is the untyped up.util, so u.isString() doesn't narrow.
+  function fixGetStyleProps(keyOrKeys: any): any {
     let transformed
 
     if (u.isString(keyOrKeys)) {
@@ -255,7 +272,8 @@ up.migrate = (function() {
     return transformed
   }
 
-  function fixSetStyleProps(props, unit) {
+  // Takes an object of props or a string. Typed any for the same reason as fixGetStyleProps().
+  function fixSetStyleProps(props: any, unit?: string): any {
     let transformed
 
     if (u.isObject(props)) {
@@ -274,7 +292,7 @@ up.migrate = (function() {
     return transformed
   }
 
-  function defineThrowingProps(object, forbiddenPrototype, errorMessage) {
+  function defineThrowingProps(object: object, forbiddenPrototype: object, errorMessage: string): void {
     let complain = () => { throw new TypeError(errorMessage) }
 
     for (const propName of Object.getOwnPropertyNames(forbiddenPrototype)) {
