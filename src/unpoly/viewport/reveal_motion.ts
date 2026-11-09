@@ -54,7 +54,7 @@ export class RevealMotion {
   }
 
   start(): void {
-    const viewportRect = this._getViewportRect(this._viewport)
+    const viewportRect = this._getViewportRect()
     const elementRect = Rect.fromElement(this._element)
     if (this._max) {
       const maxPixels =  evalOption(this._max, this._element)

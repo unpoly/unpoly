@@ -1182,7 +1182,7 @@ export function findKeepPlan(options: PlainObject): KeepPlan | undefined {
     // to use custom selectors like ":main" or "&" we use up.fragment.get().
     partner = getSmart(newElement, partnerSelector, lookupOpts)
   } else {
-    partner = subtreeFirst(newElement, partnerSelector, lookupOpts)
+    partner = subtreeFirst(newElement, partnerSelector)
   }
 
   // (1) The partner must be matched
