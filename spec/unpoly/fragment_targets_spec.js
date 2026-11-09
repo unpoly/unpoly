@@ -499,6 +499,12 @@ extendDescribe('up.fragment', function() {
           )
         })
 
+        it("throws an error when the ampersand character '&' has no { origin } to resolve it", function() {
+          up.migrate.warn.mock()
+          const resolve = () => up.internal.resolveOrigin('.before & .after')
+          expect(resolve).toThrowError(/Missing \{ origin \} element to resolve "&" reference \(found in \.before & \.after\)/)
+        })
+
         it("ignores the ampersand character '&' in the value of an attribute selector and does not require an { origin } option (bugfix)", function() {
           const resolved = up.internal.resolveOrigin('a[href="/foo?a=1&b=2"]')
           expect(resolved).toEqual('a[href="/foo?a=1&b=2"]')

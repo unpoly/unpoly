@@ -1067,6 +1067,35 @@ extendDescribe('up.fragment', function() {
               expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Remove the [up-hungry] attribute'), jasmine.anything())
             })
 
+            it("does not warn about an [up-hungry] meta tag when up.history.config.enabled excludes meta tags", async function() {
+              up.history.config.enabled = ['location', 'title']
+              fixture(document.head, 'link[rel="canonical"][href="/old-canonical"][up-hungry]')
+              const warnSpy = up.migrate.warn.mock()
+
+              fixture('.container', { text: 'old container text' })
+              up.render('.container', { url: '/path', history: true })
+
+              await wait()
+
+              jasmine.respondWith(`
+                <html>
+                  <head>
+                    <link rel='canonical' href='/new-canonical' up-hungry>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              `)
+
+              await wait()
+
+              expect('.container').toHaveText('new container text')
+              expect(warnSpy).not.toHaveBeenCalledWith(jasmine.stringContaining('Remove the [up-hungry] attribute'), jasmine.anything())
+            })
+
             describe('with up.history.config.updateMetaTags (deprecated)', function() {
 
               const response = `

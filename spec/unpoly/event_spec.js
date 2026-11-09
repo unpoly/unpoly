@@ -658,6 +658,12 @@ describe('up.event', function() {
           expect(clickSpy.calls.count()).toEqual(1)
         })
 
+        it('throws an error when the callback was never registered through up.$on()', function() {
+          up.migrate.warn.mock()
+          const unbind = () => up.$off('click', '.child', function() {})
+          expect(unbind).toThrowError(/never registered with up\.\$on\(\)/)
+        })
+
       })
     }
 
