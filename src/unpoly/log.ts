@@ -49,6 +49,15 @@ Configures the logging output to the developer console.
 */
 export const config = new LogConfig()
 
+/**
+The arguments for a log message: a prefix (usually the event type or function name), a message
+with optional substitution marks, and the values for the marks.
+@internal
+*/
+export type LogArgs = [prefix: string, message?: string, ...vars: any[]]
+
+type LogStream = 'log' | 'warn' | 'error'
+
 
 /*-
 Prints a logging message to the browser console.
@@ -59,7 +68,7 @@ Prints a logging message to the browser console.
 @param {Array} ...args
 @internal
 */
-export const printToStandard = mockable(function printToStandard(...args) {
+export const printToStandard = mockable(function printToStandard(...args: LogArgs): void {
   if (config.enabled) {
     printToStream('log', ...args)
   }
@@ -69,7 +78,7 @@ export const printToStandard = mockable(function printToStandard(...args) {
 @function up.warn
 @internal
 */
-export const printToWarn = mockable(function printToWarn(...args) {
+export const printToWarn = mockable(function printToWarn(...args: LogArgs): void {
   printToStream('warn', ...args)
 })
 
@@ -77,15 +86,15 @@ export const printToWarn = mockable(function printToWarn(...args) {
 @function up.log.error
 @internal
 */
-export const printToError = mockable(function printToError(...args) {
+export const printToError = mockable(function printToError(...args: LogArgs): void {
   printToStream('error', ...args)
 })
 
-function printToStream(stream, prefix, message, ...args) {
+function printToStream(stream: LogStream, prefix: string, message?: string, ...args: any[]): void {
   printToStreamStyled(stream, prefix, '', message, ...args)
 }
 
-function printToStreamStyled(stream, prefix, customStyles, message, ...args) {
+function printToStreamStyled(stream: LogStream, prefix: string, customStyles: string, message?: string, ...args: any[]): void {
   if (message) {
     if (config.format) {
       console[stream](
@@ -103,7 +112,7 @@ function printToStreamStyled(stream, prefix, customStyles, message, ...args) {
 // With multiple watchers on the same field we only want to print once.
 let lastPrintedUserEvent
 
-export function printUserEvent(event) {
+export function printUserEvent(event: Event & { originalEvent?: Event }): void {
   if (config.enabled && lastPrintedUserEvent !== event) {
     lastPrintedUserEvent = event
     let originalEvent = event.originalEvent || event
@@ -112,7 +121,7 @@ export function printUserEvent(event) {
   }
 }
 
-function printBanner() {
+function printBanner(): void {
   if (!config.banner) { return }
 
   // The ASCII art looks broken in code since we need to escape backslashes
@@ -156,7 +165,7 @@ Errors will always be printed, regardless of this setting.
 @stable
 @signature
 */
-export function enable() {
+export function enable(): void {
   config.enabled = true
 }
 
@@ -169,11 +178,11 @@ Errors will still be printed, even with logging disabled.
 @stable
 @signature
 */
-export function disable() {
+export function disable(): void {
   config.enabled = false
 }
 
-export function install() {
+export function install(): void {
   on('up:framework:boot', printBanner)
 }
 
