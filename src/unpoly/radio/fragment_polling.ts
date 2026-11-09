@@ -122,7 +122,7 @@ export class FragmentPolling {
     }
   }
 
-  _isFragmentVisible(): boolean {
+  _isFragmentVisible(): boolean | undefined {
     return (!document.hidden) &&
       (this._options.ifLayer === 'any' || this._isOnFrontLayer())
   }
@@ -183,7 +183,7 @@ export class FragmentPolling {
     return (new Date() as any) - (this._lastAttempt as any)
   }
 
-  _isOnFrontLayer(): boolean {
+  _isOnFrontLayer(): boolean | undefined {
     this.layer ||= layerStack.get(this._fragment)
     return this.layer?.isFront?.()
   }
