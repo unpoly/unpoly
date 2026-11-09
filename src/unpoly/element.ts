@@ -187,7 +187,9 @@ up.element.get('.foo') // returns the first matching element
 */
 export function getOne(selectorOrElement: ElementOrSelector): HTMLElement
 export function getOne(root: ParentNode, selector: string): HTMLElement
-export function getOne<T>(value: T): T // undefined, null, Window, Document, DocumentFragment, ...
+// Other values (undefined, null, false, Window, Document, DocumentFragment, ...) are returned unchanged.
+// Distributes over a union, so `ElementOrSelector | false` becomes `HTMLElement | false`.
+export function getOne<T>(value: T): T extends ElementOrSelector ? HTMLElement : T
 export function getOne(...args) {
   const value = args.pop()
 
