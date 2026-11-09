@@ -24,7 +24,7 @@ export class Tether {
   declare _syncOnScroll: boolean
   declare _element: HTMLElement
   // TODO(types): queueTask() returns nothing, so this is always undefined and clearTimeout() has no effect.
-  declare syncTimer: any
+  declare _syncTimer: ReturnType<typeof setTimeout>
   declare offsetLeft: number
   declare offsetTop: number
 
@@ -64,8 +64,9 @@ export class Tether {
   }
 
   _scheduleSync(): void {
-    clearTimeout(this.syncTimer)
-    return this.syncTimer = queueTask(this.sync.bind(this))
+    // Not queueTask(), which doesn't return a timer ID we could clear.
+    clearTimeout(this._syncTimer)
+    this._syncTimer = setTimeout(() => this.sync())
   }
 
   isAlive(): boolean {
