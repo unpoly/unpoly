@@ -75,7 +75,8 @@ export interface RenderOptions {
   // Caching
   cache?: boolean | 'auto'
   revalidate?: boolean | 'auto' | ((response: UpResponse) => boolean)
-  revalidatePreview?: PreviewValue
+  // With true, the { preview } is used.
+  revalidatePreview?: PreviewValue | true
   expireCache?: any
   evictCache?: any
 

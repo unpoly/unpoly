@@ -8,17 +8,23 @@ import { refineOption } from '../../../history.js'
 import { UNSET_OVERLAY_VISUALS } from '../../../layer/overlay_visuals.js'
 import { printToStandard, printToWarn } from '../../../log.js'
 import { adoptRenderOptionsFromHeader } from '../../../script.js'
+import type { PlainObject } from '../../../util.js'
+import type { RenderResult } from '../render_result.js'
+import type { UpRequest } from '../../../network/request.js'
+import type { UpResponse } from '../../../network/response.js'
 
 export class ChangeFromResponse extends Change {
+  declare _response: UpResponse
+  declare _request: UpRequest
 
-  constructor(options) {
+  constructor(options: RenderOptions) {
     super(options)
 
     this._response = options.response
     this._request = this._response.request
   }
 
-  execute() {
+  execute(): RenderResult {
     if (config.skipResponse(this._loadedEventProps())) {
       this._skip()
     } else {
@@ -47,19 +53,19 @@ export class ChangeFromResponse extends Change {
     return this._updateContentFromResponse(this.options)
   }
 
-  _assetRenderableResponse() {
+  _assetRenderableResponse(): void {
     if (!config.renderableResponse(this._response)) {
       throw new CannotParse(['Cannot render response with content-type "%s" (configure with up.fragment.config.renderableResponse)', this._response.contentType])
     }
   }
 
-  _skip() {
+  _skip(): void {
     printToStandard('up.render()', 'Skipping %s', this._response)
     this.options.target = ':none'
     this.options.failTarget = ':none'
   }
 
-  _updateContentFromResponse(finalRenderOptions) {
+  _updateContentFromResponse(finalRenderOptions: RenderOptions): RenderResult {
     if (finalRenderOptions.didForceFailOptions) {
       printToStandard('up.render()', 'Rendering error response using fail-prefixed options (https://unpoly.com/learn/error-responses)')
     }
@@ -78,13 +84,14 @@ export class ChangeFromResponse extends Change {
     return new ChangeFromContent(finalRenderOptions).execute()
   }
 
-  async _revalidate(renderResult, originalRenderOptions) {
+  async _revalidate(renderResult: RenderResult, originalRenderOptions: RenderOptions): Promise<RenderResult | undefined> {
     if (!shouldRevalidate(this._request, this._response, originalRenderOptions)) return
 
     // This is an explicit target passed as `{ render }` option.
     // It may be `undefined` if the user has not given an explicit selector and relies on a fallback.
     // If it is given, it may still contain ':before' or ':after'.
-    let inputTarget = originalRenderOptions.target
+    // An array of selectors or an element is turned into a string by RegExp#test().
+    let inputTarget = originalRenderOptions.target as string
 
     // This is the target that we ended up rendering.
     // It may be a fallback target. It is always defined.
@@ -124,7 +131,7 @@ export class ChangeFromResponse extends Change {
     }
   }
 
-  _revalidatePreview({ preview, revalidatePreview }) {
+  _revalidatePreview({ preview, revalidatePreview }: RenderOptions): RenderOptions['preview'] {
     if (revalidatePreview === true) {
       return preview
     } else {
@@ -132,7 +139,7 @@ export class ChangeFromResponse extends Change {
     }
   }
 
-  _loadedEventProps() {
+  _loadedEventProps(): PlainObject {
     const { expiredResponse } = this.options
 
     return {
@@ -144,7 +151,7 @@ export class ChangeFromResponse extends Change {
     }
   }
 
-  _helloMeta() {
+  _helloMeta(): PlainObject {
     // (1) We avoid exposing values that would prevent garbage collection
     //    by compilers holding a reference to their meta arg in their closure.
     //
@@ -157,7 +164,7 @@ export class ChangeFromResponse extends Change {
     return meta
   }
 
-  _augmentOptionsFromResponse(renderOptions) {
+  _augmentOptionsFromResponse(renderOptions: RenderOptions): void {
     // Also see preprocessing of server response in up.Request#extractResponseFromXHR().
 
     const responseURL = this._response.url
