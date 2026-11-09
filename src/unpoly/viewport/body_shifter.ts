@@ -1,6 +1,7 @@
 import { cleaner } from '../util.js'
 import { addClassTemp, computedStyle, getRoot, setStyleTemp } from '../element.js'
 import { rootScrollbarWidth } from '../viewport.js'
+import type { Cleaner } from '../util.js'
 
 const SHIFT_CLASS = 'up-scrollbar-away'
 
@@ -12,6 +13,10 @@ const SHIFT_CLASS = 'up-scrollbar-away'
 // modal overlay, which has its own scroll bar.
 // This is screwed up, but Bootstrap does the same.
 export class BodyShifter {
+  declare _anchoredElements: Set<HTMLElement>
+  declare _stack: number
+  declare _cleaner: Cleaner
+  declare _rootScrollbarWidth: number
 
   constructor() {
     this._anchoredElements = new Set()
@@ -19,15 +24,15 @@ export class BodyShifter {
     this._cleaner = cleaner()
   }
 
-  lowerStack() {
+  lowerStack(): void {
     if (--this._stack === 0) this._unshiftNow()
   }
 
-  raiseStack() {
+  raiseStack(): void {
     if (++this._stack === 1) this._shiftNow()
   }
 
-  onAnchoredElementInserted(element) {
+  onAnchoredElementInserted(element: HTMLElement): () => void {
     this._anchoredElements.add(element)
 
     // If the new element was inserted after we shifted, we must now shift its { right }.
@@ -37,13 +42,13 @@ export class BodyShifter {
     return () => this._anchoredElements.delete(element)
   }
 
-  _isShifted() {
+  _isShifted(): boolean {
     // If the scrollbar never took space away from the main viewport's client width,
     // we do not need to change any styles.
     return this._stack > 0
   }
 
-  _shiftNow() {
+  _shiftNow(): void {
     // Remember whether the root viewport has a visible scrollbar at rest.
     // It will disappear when we set overflow-y: hidden below.
     this._rootScrollbarWidth = rootScrollbarWidth()
@@ -61,11 +66,11 @@ export class BodyShifter {
     }
   }
 
-  _unshiftNow() {
+  _unshiftNow(): void {
     this._cleaner.clean()
   }
 
-  _shiftElement(element, styleProp) {
+  _shiftElement(element: HTMLElement, styleProp: string): void {
     if (!this._isShifted()) return
 
     // viewport.sass wants to add the scrollbar with to the value, so we store it in a separate property.
