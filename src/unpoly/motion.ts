@@ -410,9 +410,10 @@ Does nothing if there are no animations to complete.
   A promise that fulfills when animations and transitions have finished.
 @stable
 */
-export function finish(element?: ElementOrSelector): any {
+export function finish(element?: ElementOrSelector): Promise<void> | undefined {
   element = getSmart(element)
   motionController.finish(element)
+  // Finishing is synchronous. With unpoly-migrate, we return a promise that warns when awaited.
   return up.migrate.formerlyAsync?.('up.motion.finish()')
 }
 
