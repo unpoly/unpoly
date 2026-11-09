@@ -63,47 +63,24 @@ import * as cannotParseError from './unpoly/error/cannot_parse.js'
 import * as cannotTargetError from './unpoly/error/cannot_target.js'
 import * as offlineError from './unpoly/error/offline.js'
 import * as configClass from './unpoly/util/config.js'
-import * as logConfigClass from './unpoly/log/log_config.js'
-import * as registryClass from './unpoly/util/registry.js'
 import * as optionsParserClass from './unpoly/element/options_parser.js'
 import * as fifoCacheClass from './unpoly/util/fifo_cache.js'
 import * as rectClass from './unpoly/util/rect.js'
 import * as urlPatternClass from './unpoly/util/url_pattern.js'
 import * as eventEmitterClass from './unpoly/event/event_emitter.js'
 import * as eventListenerClass from './unpoly/event/event_listener.js'
-import * as eventListenerGroupClass from './unpoly/event/event_listener_group.js'
 import * as cspInfoClass from './unpoly/script/csp/csp_info.js'
-import * as helloFragmentClass from './unpoly/script/hello_fragment.js'
-import * as destructorPassClass from './unpoly/script/destructor_pass.js'
 import * as nonceableCallbackClass from './unpoly/script/csp/nonceable_callback.js'
-import * as scriptGateClass from './unpoly/script/csp/script_gate.js'
-import * as bodyShifterClass from './unpoly/viewport/body_shifter.js'
-import * as focusCapsuleClass from './unpoly/viewport/focus_capsule.js'
-import * as revealMotionClass from './unpoly/viewport/reveal_motion.js'
-import * as fieldWatcherClass from './unpoly/form/field_watcher.js'
 import * as switcherClass from './unpoly/form/switcher.js'
-import * as formValidatorClass from './unpoly/form/form_validator.js'
 import * as paramsClass from './unpoly/form/params.js'
-import * as fragmentPollingClass from './unpoly/radio/fragment_polling.js'
-import * as linkCurrentUrlsClass from './unpoly/status/link_current_urls.js'
 import * as previewClass from './unpoly/status/preview.js'
-import * as linkFollowIntentClass from './unpoly/link/link_follow_intent.js'
 import * as motionControllerClass from './unpoly/motion/motion_controller.js'
 import * as selectorTrackerClass from './unpoly/fragment/selector_tracker.js'
-import * as fragmentFinderClass from './unpoly/fragment/fragment_finder.js'
-import * as selectorClass from './unpoly/fragment/selector.js'
 import * as layerClass from './unpoly/layer/base.js'
-import * as layerLookupClass from './unpoly/layer/layer_lookup.js'
-import * as layerStackClass from './unpoly/layer/layer_stack.js'
-import * as overlayFocusClass from './unpoly/layer/overlay_focus.js'
 import * as tetherClass from './unpoly/layer/tether.js'
-import * as progressBarClass from './unpoly/network/progress_bar.js'
 import * as requestClass from './unpoly/network/request.js'
 import * as responseClass from './unpoly/network/response.js'
 import * as renderJobClass from './unpoly/fragment/render/render_job.js'
-import * as fragmentProcessorClass from './unpoly/fragment/render/fragment_processor.js'
-import * as fragmentFocusClass from './unpoly/fragment/render/fragment_focus.js'
-import * as fragmentScrollingClass from './unpoly/fragment/render/fragment_scrolling.js'
 import * as renderOptionsClass from './unpoly/fragment/render/render_options.js'
 import * as renderResultClass from './unpoly/fragment/render/render_result.js'
 import * as responseDocClass from './unpoly/fragment/render/response_doc.js'
@@ -147,47 +124,24 @@ const apis = [
   cannotTargetError.api,
   offlineError.api,
   configClass.api,
-  logConfigClass.api,
-  registryClass.api,
   optionsParserClass.api,
   fifoCacheClass.api,
   rectClass.api,
   urlPatternClass.api,
   eventEmitterClass.api,
   eventListenerClass.api,
-  eventListenerGroupClass.api,
   cspInfoClass.api,
-  helloFragmentClass.api,
-  destructorPassClass.api,
   nonceableCallbackClass.api,
-  scriptGateClass.api,
-  bodyShifterClass.api,
-  focusCapsuleClass.api,
-  revealMotionClass.api,
-  fieldWatcherClass.api,
   switcherClass.api,
-  formValidatorClass.api,
   paramsClass.api,
-  fragmentPollingClass.api,
-  linkCurrentUrlsClass.api,
   previewClass.api,
-  linkFollowIntentClass.api,
   motionControllerClass.api,
   selectorTrackerClass.api,
-  fragmentFinderClass.api,
-  selectorClass.api,
   layerClass.api,
-  layerLookupClass.api,
-  layerStackClass.api,
-  overlayFocusClass.api,
   tetherClass.api,
-  progressBarClass.api,
   requestClass.api,
   responseClass.api,
   renderJobClass.api,
-  fragmentProcessorClass.api,
-  fragmentFocusClass.api,
-  fragmentScrollingClass.api,
   renderOptionsClass.api,
   renderResultClass.api,
   responseDocClass.api,

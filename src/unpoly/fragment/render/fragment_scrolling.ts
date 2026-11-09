@@ -132,8 +132,3 @@ export class FragmentScrolling extends FragmentProcessor {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  FragmentScrolling,
-}

@@ -888,10 +888,5 @@ export const api = {
     get previousLocation() { return previousLocation },
     isLocation,
     findMetaTags,
-    updateMetaTags,
-    getLang,
-    updateLang,
-    refineOption,
-    options: historyOptions,
   },
 }

@@ -83,8 +83,3 @@ export class BodyShifter {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  BodyShifter,
-}

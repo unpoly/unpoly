@@ -92,8 +92,3 @@ export class LinkFollowIntent {
     this._callback({ onRequestKnown: (request) => this._lastRequest = request })
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  LinkFollowIntent,
-}

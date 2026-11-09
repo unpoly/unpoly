@@ -117,8 +117,3 @@ export class OverlayFocus {
     }
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  OverlayFocus,
-}

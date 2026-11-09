@@ -291,14 +291,12 @@ function supportIssue(): string | undefined {
 
 export const api = {
   framework: {
-    onEvaled,
     boot,
     startExtension,
     stopExtension,
     reset: emitReset,
     get evaling() { return isEvaling() },
     get booted() { return isBooted() },
-    get beforeBoot() { return isBeforeBoot() },
     /** @internal On window.up so specs can call isBeforeBoot.mock(). */
     isBeforeBoot,
     isSupported,

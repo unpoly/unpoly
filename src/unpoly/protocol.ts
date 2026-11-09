@@ -1165,22 +1165,9 @@ export function wrapMethod(method: string, params: Params): string {
 export const api = {
   protocol: {
     config,
-    locationFromXHR,
-    titleFromXHR,
-    targetFromXHR,
-    methodFromXHR,
-    openLayerFromXHR,
-    acceptLayerFromXHR,
-    contextFromXHR,
-    dismissLayerFromXHR,
-    eventPlansFromXHR,
-    expireCacheFromXHR,
-    evictCacheFromXHR,
-    csrfHeader,
     csrfParam,
     csrfToken,
     initialRequestMethod,
     headerize,
-    wrapMethod,
   },
 }

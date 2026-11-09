@@ -586,9 +586,7 @@ export function install(): void {
 export const api = {
   radio: {
     config,
-    hungrySteps,
     startPolling,
     stopPolling,
-    pollOptions,
   },
 }

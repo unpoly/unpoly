@@ -49,8 +49,3 @@ export class LogConfig extends Config<LogSettings> {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  LogConfig,
-}

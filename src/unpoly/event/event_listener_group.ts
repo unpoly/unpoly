@@ -103,8 +103,3 @@ export class EventListenerGroup {
     return new (this)(attributes)
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  EventListenerGroup,
-}

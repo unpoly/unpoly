@@ -765,7 +765,6 @@ export function install(): void {
 export const api = {
   motion: {
     morph,
-    swap,
     animate,
     finish,
     transition: namedTransitions.put,
@@ -773,7 +772,6 @@ export const api = {
     config,
     isNone,
     swapElementsDirectly,
-    motionOptions,
   },
   transition: namedTransitions.put,
   animation: namedAnimations.put,

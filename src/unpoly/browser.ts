@@ -87,7 +87,6 @@ export const api = {
   browser: {
     submitForm,
     canPushState,
-    canJQuery,
     assertConfirmed,
     popCookie,
   },

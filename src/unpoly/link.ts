@@ -1671,13 +1671,11 @@ export const api = {
   link: {
     follow,
     followOptions,
-    requestOptions: parseRequestOptions,
     preload,
     makeFollowable,
     isSafe,
     isFollowable,
     shouldHandleClick,
-    convertClicks,
     config,
     loadDeferred,
   },

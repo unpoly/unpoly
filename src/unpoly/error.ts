@@ -102,12 +102,8 @@ export function guardFn<A extends any[], R>(fn: ((...args: A) => R) | undefined)
 
 export const api = {
   error: {
-    fail,
-    throwCritical,
     muteUncriticalRejection,
-    muteUncriticalSync,
     guard,
-    guardPromise,
     guardFn,
   },
   fail,

@@ -190,8 +190,3 @@ export class LayerLookup {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  LayerLookup,
-}

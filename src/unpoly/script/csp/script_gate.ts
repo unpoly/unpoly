@@ -419,8 +419,3 @@ class ScriptElementItem implements PolicyItem {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  ScriptGate,
-}

@@ -148,8 +148,3 @@ export class RevealMotion {
     }
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  RevealMotion,
-}

@@ -652,8 +652,6 @@ export const api = {
     halt,
     isModified,
     isSyntheticClick,
-    fork,
-    keyModifiers,
     get inputDevice() { return getInputDevice() },
   },
   on,

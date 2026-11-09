@@ -62,8 +62,3 @@ export class ProgressBar {
     setTimeout(this.destroy.bind(this), TRANSITION_DELAY)
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  ProgressBar,
-}

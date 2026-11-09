@@ -75,8 +75,3 @@ export class FragmentFinder {
     return getFirstDescendant(this._document, this._selector, this._options)
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  FragmentFinder,
-}

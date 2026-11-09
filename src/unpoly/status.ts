@@ -637,9 +637,6 @@ export const api = {
     config,
     // showAroundRequest,
     preview: namedPreviewFns.put,
-    resolvePreviewFns,
-    runPreviews,
-    statusOptions,
   },
   preview: namedPreviewFns.put,
 }

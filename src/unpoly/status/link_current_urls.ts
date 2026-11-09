@@ -57,8 +57,3 @@ export class LinkCurrentURLs {
     ))
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  LinkCurrentURLs,
-}

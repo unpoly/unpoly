@@ -223,8 +223,3 @@ export class FieldWatcher {
     queueTask(() => this._check(event))
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  FieldWatcher,
-}

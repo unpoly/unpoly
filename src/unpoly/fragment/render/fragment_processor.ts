@@ -129,8 +129,3 @@ export abstract class FragmentProcessor {
     }
   }
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  FragmentProcessor,
-}

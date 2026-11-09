@@ -1977,14 +1977,10 @@ export function install(classes: LayerClass[]): void {
 export const api = {
   layer: {
     config,
-    mainTargets,
     open,
     build,
     ask,
     normalizeOptions,
-    closestLayerElement,
-    optionToString,
-    isWithinForeignOverlay,
     get stack() { return layerStack.layers },
     get(...args: LayerLookupArgs): Layer | undefined { return layerStack.get(...args) },
     getAll(...args: LayerLookupArgs): Layer[] { return layerStack.getAll(...args) },

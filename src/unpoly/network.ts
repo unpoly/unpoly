@@ -1001,7 +1001,6 @@ export const api = {
     // processRequest,
     cache,
     isBusy,
-    isSafeMethod,
     config,
     abort: abortRequests,
     queue, // for testing

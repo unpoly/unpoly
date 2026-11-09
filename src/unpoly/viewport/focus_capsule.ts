@@ -73,8 +73,3 @@ export class FocusCapsule {
   }
 
 }
-
-export const api = {
-  /** @internal On window.up for the specs. */
-  FocusCapsule,
-}
