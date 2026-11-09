@@ -197,7 +197,7 @@ export function getOne(root: ParentNode, selector: string): HTMLElement
 // Other values (undefined, null, false, Window, Document, DocumentFragment, ...) are returned unchanged.
 // Distributes over a union, so `ElementOrSelector | false` becomes `HTMLElement | false`.
 export function getOne<T>(value: T): T extends ElementOrSelector ? HTMLElement : T
-export function getOne(...args) {
+export function getOne(...args: unknown[]) {
   const value = args.pop()
 
   if (isElement(value)) { // Return an element before we run any other expensive checks
@@ -1362,7 +1362,7 @@ let value = up.element.style(element, ['font-size', 'margin-top'])
 */
 export function computedStyle(element: Element, prop: string): string
 export function computedStyle(element: Element, props: string[]): Record<string, string>
-export function computedStyle(element, props) {
+export function computedStyle(element: Element, props: string | string[]) {
   const style = window.getComputedStyle(element)
   return extractFromStyleObject(style, props)
 }
@@ -1415,7 +1415,7 @@ If a property is not set, it will be returned as an empty string.
 */
 export function inlineStyle(element: HTMLElement, prop: string): string
 export function inlineStyle(element: HTMLElement, props: string[]): Record<string, string>
-export function inlineStyle(element, props) {
+export function inlineStyle(element: HTMLElement, props: string | string[]) {
   const { style } = element
   return extractFromStyleObject(style, props)
 }
@@ -1644,7 +1644,7 @@ export function leadingElement(nodes: Iterable<Node>): Element | undefined {
 export function removeAttrsFromHTML(html: string, attrs: string[]): string {
   let tagPattern = /<[^<]+>/g
   let attrPattern = new RegExp(`\\s+(${attrs.join('|')})="[^"]*"`, 'g')
-  let cleanTag = (match) => match.replace(attrPattern, '')
+  let cleanTag = (match: string) => match.replace(attrPattern, '')
   html = html.replace(tagPattern, cleanTag)
   return html
 }

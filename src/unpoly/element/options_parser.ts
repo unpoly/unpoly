@@ -107,7 +107,7 @@ export class OptionsParser {
   // }
 
   renderCallback(key: string, keyOptions: ParseKeyOptions = {}): void {
-    let attrReader = (link, attr) => RenderOptions.callbackAttr(link, attr, key)
+    let attrReader: AttrReader = (link, attr) => RenderOptions.callbackAttr(link, attr, key)
     this.parse(attrReader, key, keyOptions)
   }
 
