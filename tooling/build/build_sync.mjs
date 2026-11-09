@@ -51,7 +51,9 @@ export const WATCHABLE_SUFFIXES = ['.js', '.ts', '.mjs', '.js.erb', '.css', '.sa
 const isWatchable = (name) => WATCHABLE_SUFFIXES.some((suffix) => name.endsWith(suffix))
 
 // The newest file the watcher might rebuild for, as `{ mtime, file }`. The path is carried so the
-// caller can name it — either when reporting that nothing rebuilt, or on a timeout.
+// caller can name it — either when reporting that nothing rebuilt, or on a timeout. `sources`
+// lists every file and directory as `{ file, mtime }`, newest first, so the caller can check them
+// one by one against what the watcher has seen (see unbuiltSources()).
 //
 // Directories count too. Deleting or moving a file changes no file's mtime, only its directory's,
 // and moved files keep theirs. Without the directory, a run started right after `rm` would find
@@ -59,26 +61,35 @@ const isWatchable = (name) => WATCHABLE_SUFFIXES.some((suffix) => name.endsWith(
 // page, an image, a swap file) moves its directory's mtime too, so the watcher answers every
 // change in these directories with a round, an empty one if nothing needs building.
 export function newestSource(root = PROJECT_ROOT, dirs = SOURCE_DIRS) {
-  let newest = 0
-  let newestFile = null
-  let seen = 0
-  let consider = (mtime, full) => {
-    if (mtime > newest) { newest = mtime; newestFile = full }
-  }
+  let sources = []
+  let files = 0
+  let consider = (mtime, full) => sources.push({ file: path.relative(root, full), mtime })
 
   for (let dir of dirs) {
     let full = path.join(root, dir)
     try { consider(statSync(full).mtimeMs, full) } catch { continue }
     walk(full, (mtime, file) => {
-      seen++
+      files++
       consider(mtime, file)
     }, consider)
   }
 
   // No sources at all means the wrong cwd (or a broken checkout). Reporting 0 would say
   // "everything is fresh" and let the run proceed against whatever is in dist/.
-  if (seen === 0) throw new Error(`No source files found under ${root}. Run from the project root.`)
-  return { mtime: newest, file: newestFile && path.relative(root, newestFile) }
+  if (files === 0) throw new Error(`No source files found under ${root}. Run from the project root.`)
+  sources.sort((a, b) => b.mtime - a.mtime)
+  return { mtime: sources[0].mtime, file: sources[0].file, sources }
+}
+
+// The `sources` (see newestSource()) that the watcher's last round may not include, newest first.
+// A source is included when a round that built and linted everything started after its mtime, or
+// when the watcher had an event for it and started a round after its mtime. Time alone is not
+// enough: a later round for another file would vouch for an edit the watcher never saw.
+export function unbuiltSources(status, sources) {
+  // A watcher from before `seen` existed. All we can go by is its last round.
+  if (status.fullStartedAt === undefined) return sources.filter(({ mtime }) => mtime > status.startedAt)
+  let full = status.fullStartedAt ?? -Infinity
+  return sources.filter(({ file, mtime }) => mtime > full && !(status.seen?.[file] >= mtime))
 }
 
 export function newestSourceMtime(...args) {
@@ -128,10 +139,19 @@ export class BuildFailedError extends Error {
   }
 }
 
+// Names a few files for a message.
+function describe(files) {
+  let named = files.slice(0, 3).join(', ')
+  return files.length > 3 ? `${named} and ${files.length - 3} more` : named
+}
+
+// `sources` are the files and directories to wait for (see newestSource()). The self-tests may
+// pass just the newest one, as `newestMtime` and `newestFile`.
 export async function waitForFreshBuild({
   read = () => readStatus(),
   newestMtime,
   newestFile = null,
+  sources,
   isAlive = defaultIsAlive,
   now = Date.now,
   sleep = defaultSleep,
@@ -140,10 +160,8 @@ export async function waitForFreshBuild({
   idleGraceMs = IDLE_GRACE_MS,
   request = requestBuild,
 } = {}) {
-  if (newestMtime === undefined) {
-    const newest = newestSource()
-    newestMtime = newest.mtime
-    newestFile = newest.file
+  if (sources === undefined) {
+    sources = newestMtime === undefined ? newestSource().sources : [{ file: newestFile, mtime: newestMtime }]
   }
 
   let status = read()
@@ -155,21 +173,23 @@ export async function waitForFreshBuild({
   }
 
   let requestedAt = null
+  let requested = []
   // The watcher's last `startedAt`, and since when it has stood. We judge whether the watcher has
   // reacted by how long it has been quiet, not by its `startedAt` on entry: a round that started
   // just after we were called (the change was still in the watcher's debounce) is the watcher
-  // reacting, and if it still didn't get past `newestMtime`, the request below must still come.
+  // reacting, and if it still didn't include every source, the request below must still come.
   let lastStartedAt = status.startedAt
   let quietSince = now()
   let deadline = quietSince + timeoutMs
   while (true) {
     status = read()
     let idle = status?.state === 'idle'
-    if (idle && status.startedAt >= newestMtime) {
+    let unbuilt = idle ? unbuiltSources(status, sources).map(({ file }) => file) : null
+    if (idle && !unbuilt.length) {
       if (status.ok === false) throw new BuildFailedError(status.errors || '(no error output captured)')
-      // `missedEdit` names the file the watcher only built on request, so a watcher that misses
+      // `missedEdit` names the files the watcher only built on request, so a watcher that misses
       // changes doesn't go unnoticed.
-      return requestedAt === null ? status : { ...status, missedEdit: newestFile }
+      return requestedAt === null ? status : { ...status, missedEdit: describe(requested) }
     }
     let time = now()
     if (status && status.startedAt !== lastStartedAt) {
@@ -179,13 +199,14 @@ export async function waitForFreshBuild({
     let quietFor = idle ? time - quietSince : 0
     if (requestedAt === null && quietFor >= requestAfterMs) {
       requestedAt = time
-      request(newestFile)
+      requested = unbuilt
+      request(unbuilt)
     }
-    // The watcher built on our request, and still not past `newestMtime`: that lies in the
-    // future (a clock skew, `touch -d`). No build will ever get past it, so run.
+    // The watcher built on our request, and still doesn't include a source: its mtime lies in
+    // the future (a clock skew, `touch -d`). No build will ever get past it, so run.
     if (idle && requestedAt !== null && status.startedAt >= requestedAt) {
       if (status.ok === false) throw new BuildFailedError(status.errors || '(no error output captured)')
-      return { ...status, unbuiltEdit: newestFile }
+      return { ...status, unbuiltEdit: describe(unbuilt) }
     }
     // Nothing is going to happen: the watcher did not react to the change or to our request.
     // dist/ may well be current anyway (an old watcher does not answer guide-page saves), so
@@ -193,13 +214,14 @@ export async function waitForFreshBuild({
     // you whether to be relaxed (`pages/foo.md`) or suspicious (`unpoly/link.js`).
     if (quietFor >= idleGraceMs) {
       if (status.ok === false) throw new BuildFailedError(status.errors || '(no error output captured)')
-      return { ...status, unbuiltEdit: newestFile }
+      return { ...status, unbuiltEdit: describe(unbuilt) }
     }
     if (time >= deadline) {
       // Reaching here means the watcher kept working without ever finishing a build that
       // includes the edit — a build that never settles, or one rebuild chasing another. "Nothing
       // rebuilt at all" no longer lands here; it is handled above.
-      const edit = newestFile ? ` (newest edit: ${newestFile})` : ''
+      const newest = unbuilt?.[0] ?? sources[0]?.file
+      const edit = newest ? ` (newest edit: ${newest})` : ''
       throw new BuildSyncError(`Build watcher didn't finish a build including your latest edit within ${Math.round(timeoutMs / 1000)}s${edit}. Check its output in tmp/dev.log, or restart it with \`bin/dev stop && bin/dev\`.`)
     }
     await sleep(100)

@@ -23,24 +23,47 @@ export function readStatus(root = PROJECT_ROOT) {
 // Only the watcher creates one of these, so there is exactly one writer. (Under webpack, a
 // one-shot `bin/build --config=ci` reused the watcher's plugin and overwrote a running
 // watcher's status with its own pid; everything that read the file then saw a dead process.)
+//
+// Besides the state, the status says which edits the watcher's builds include, file by file, so
+// that waitForFreshBuild() can tell a missed edit from one that was built. A start time alone
+// couldn't: any later round, for another file or for a swap file, would certify every older
+// edit, including one the watcher never saw. `fullStartedAt` is the start of the last round
+// that built and linted everything, so it includes every edit older than that. `seen` maps the
+// files and directories the watcher had an event for since then (relative to the project root)
+// to the start of the last round after such an event.
 export class BuildStatus {
   #startedAt
+  #fullStartedAt = null
+  #seen = new Map()
   #sink
   #now
+  #root
 
-  // `write` and `now` are seams for the self-tests; production uses the file writer and
-  // the wall clock.
-  constructor({ write = writeStatusFile, now = Date.now } = {}) {
+  // `write`, `now` and `root` are seams for the self-tests; production uses the file writer, the
+  // wall clock and the project root.
+  constructor({ write = writeStatusFile, now = Date.now, root = PROJECT_ROOT } = {}) {
     this.#sink = write
     this.#now = now
+    this.#root = root
     this.#startedAt = now()
   }
 
   // A round of rebuilds begins. Called before any bundle reads a source, so `startedAt` is
   // older than every file the round sees: waitForFreshBuild() trusts a round to include an edit
   // only if the round started after the edit's mtime.
-  start() {
+  //
+  // `seen` are the absolute paths that had an event since the last round. `full` says that the
+  // round builds and lints everything.
+  start({ seen = [], full = false } = {}) {
     this.#startedAt = this.#now()
+    if (full) {
+      this.#fullStartedAt = this.#startedAt
+      this.#seen.clear()
+    } else {
+      for (let file of seen) {
+        if (file) this.#seen.set(path.relative(this.#root, file), this.#startedAt)
+      }
+    }
     this.#write('building', [])
   }
 
@@ -56,6 +79,8 @@ export class BuildStatus {
       pid: process.pid,
       state,
       startedAt: this.#startedAt,
+      fullStartedAt: this.#fullStartedAt,
+      seen: Object.fromEntries(this.#seen),
       ok: errors.length === 0,
       // Several bundles build the same source (modern/es6, unpoly/specs…), so the same file's
       // error shows up more than once. Collapse the duplicates.
@@ -72,26 +97,27 @@ function writeStatusFile(status) {
   }
 }
 
-// The other direction, runner → watcher: a request to rebuild for a file the watcher has not
+// The other direction, runner → watcher: a request to rebuild for files the watcher has not
 // reacted to. Should never be needed, since the watcher sees every change in the source
 // directories. It is the backstop for a missed file event (an inotify limit, a network
 // filesystem, a Node bug), which would otherwise run bin/test against a stale bundle. The file
-// holds the path of the file, relative to the project root, or nothing.
+// holds the paths of the files, relative to the project root, one per line, or nothing.
 export const REQUEST_PATH = 'tmp/build-request'
 
-export function requestBuild(file, root = PROJECT_ROOT) {
+export function requestBuild(files, root = PROJECT_ROOT) {
   try {
-    writeAtomically(path.join(root, REQUEST_PATH), file ?? '')
+    writeAtomically(path.join(root, REQUEST_PATH), [files ?? []].flat().join('\n'))
   } catch {
     // best effort: without the request, waitForFreshBuild() falls back to its grace period
   }
 }
 
+// The requested paths, empty when the request names none.
 export function readBuildRequest(root = PROJECT_ROOT) {
   try {
-    return readFileSync(path.join(root, REQUEST_PATH), 'utf8') || null
+    return readFileSync(path.join(root, REQUEST_PATH), 'utf8').split('\n').filter(Boolean)
   } catch {
-    return null
+    return []
   }
 }
 

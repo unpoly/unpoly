@@ -35,7 +35,6 @@ export class SourceLinter {
   // the files it couldn't lint, which the next round lints again.
   #oxlintFailure = null
   #unlinted = []
-  #linted = false
   // The formatted warnings of the files the last call linted, empty when there are none. They
   // don't fail a build, so they only go to the watcher's log.
   warnings = []
@@ -46,12 +45,13 @@ export class SourceLinter {
     this.#apiCollisions = new ApiCollisionCheck(path.join(root, ENTRY))
   }
 
-  // Lints `files` (absolute paths as the watcher saw them change, or null for a change it
-  // couldn't attribute), or all of src/ on the first call. Resolves with the formatted errors of
-  // every file in src/, empty when there are none.
+  // Lints `files`, absolute paths as the watcher saw them change. A null among them (a change
+  // the watcher couldn't attribute, like its first round or a new directory) lints all of src/
+  // (~0.4 s instead of ~0.2 s). Resolves with the formatted errors of every file in src/, empty
+  // when there are none.
   async lint(files) {
-    let targets = this.#linted ? [...files].filter((file) => file && this.#isLinted(file)) : [path.join(this.#root, LINTED_DIR)]
-    this.#linted = true
+    files = [...files]
+    let targets = files.includes(null) ? [path.join(this.#root, LINTED_DIR)] : files.filter((file) => this.#isLinted(file))
     targets = [...new Set([...this.#unlinted, ...targets])]
     // A deleted file has no errors left.
     for (let file of targets) if (!existsSync(file)) this.#failing.delete(file)

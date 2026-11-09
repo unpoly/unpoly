@@ -8,8 +8,9 @@ import { Rounds, affectedBundles } from '../../build/watch.mjs'
 function rounds({ run }) {
   let timers = []
   let log = []
+  let starts = []
   let status = {
-    start: () => log.push('building'),
+    start: (round) => { starts.push(round); log.push('building') },
     finish: (errors) => log.push(errors.length ? `idle: ${errors.join(', ')}` : 'idle'),
   }
   let subject = new Rounds({
@@ -19,7 +20,7 @@ function rounds({ run }) {
     clearTimer: (fn) => { timers = timers.filter((timer) => timer !== fn) },
   })
   let fireTimers = () => { let due = timers; timers = []; due.forEach((fn) => fn()) }
-  return { subject, log, fireTimers }
+  return { subject, log, starts, fireTimers }
 }
 
 test('changes within the debounce time make one round', async () => {
@@ -116,6 +117,21 @@ test('a change that needs no rebuild joins a round with real changes', async () 
   await subject.idle
 
   assert.deepEqual(calls, [['/a.js']])
+})
+
+test('the status learns which paths a round has seen', async () => {
+  // waitForFreshBuild() checks each source against them (see BuildStatus).
+  let { subject, starts, fireTimers } = rounds({ run: async () => [] })
+
+  subject.touch('/src/pages')
+  subject.change('/src/a.js')
+  fireTimers()
+  await subject.idle
+  subject.change(null)
+  fireTimers()
+  await subject.idle
+
+  assert.deepEqual(starts, [{ seen: ['/src/pages', '/src/a.js'], full: false }, { seen: [], full: true }])
 })
 
 // --- affectedBundles() ------------------------------------------------------

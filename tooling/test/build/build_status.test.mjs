@@ -70,12 +70,40 @@ test('startedAt is when the round started, not when it finished', () => {
   assert.equal(last().startedAt, 2000)
 })
 
-test('a rebuild request carries the file to the watcher', (t) => {
+test('a full round vouches for everything, other rounds for the paths they saw', () => {
+  // waitForFreshBuild() checks every source against these, so that a round for one file doesn't
+  // vouch for an edit to another one that the watcher never saw.
+  let statuses = []
+  let clock = { now: 1000 }
+  let status = new BuildStatus({ write: (written) => statuses.push(written), now: () => clock.now, root: '/project' })
+  let last = () => statuses.at(-1)
+
+  status.start({ full: true })
+  assert.equal(last().fullStartedAt, 1000)
+  assert.deepEqual(last().seen, {})
+
+  clock.now = 2000
+  status.start({ seen: ['/project/src/unpoly/link.ts', '/project/src/unpoly'] })
+  clock.now = 3000
+  status.start({ seen: ['/project/src/unpoly/link.ts'] })
+  status.finish([])
+  assert.equal(last().fullStartedAt, 1000)
+  assert.deepEqual(last().seen, { 'src/unpoly/link.ts': 3000, 'src/unpoly': 2000 })
+
+  clock.now = 4000
+  status.start({ seen: ['/project/src/unpoly/form.ts'], full: true })
+  assert.equal(last().fullStartedAt, 4000)
+  assert.deepEqual(last().seen, {}, 'a full round includes what the others saw')
+})
+
+test('a rebuild request carries the files to the watcher', (t) => {
   let root = mkdtempSync(path.join(tmpdir(), 'build-request-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))
-  assert.equal(readBuildRequest(root), null)
+  assert.deepEqual(readBuildRequest(root), [])
+  requestBuild(['src/unpoly/link.ts', 'spec/helpers'], root)
+  assert.deepEqual(readBuildRequest(root), ['src/unpoly/link.ts', 'spec/helpers'])
   requestBuild('src/unpoly/link.ts', root)
-  assert.equal(readBuildRequest(root), 'src/unpoly/link.ts')
+  assert.deepEqual(readBuildRequest(root), ['src/unpoly/link.ts'])
   requestBuild(null, root)
-  assert.equal(readBuildRequest(root), null)
+  assert.deepEqual(readBuildRequest(root), [])
 })

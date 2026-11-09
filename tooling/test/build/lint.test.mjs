@@ -25,12 +25,14 @@ function project(t, files) {
   return { root, at, write }
 }
 
-test('the first call lints all of src/', async (t) => {
-  // The bug this guards against: the watcher's first lint skipped src/, so an error that was
-  // there before it started never showed up.
-  let { root } = project(t, { 'src/unpoly.ts': EMPTY_ENTRY, 'src/unpoly/bad.js': 'debugger\n' })
-  let errors = await new SourceLinter({ root }).lint([null])
-  assert.deepEqual(errors, ['src/unpoly/bad.js\n  1:1      error  `debugger` statement is not allowed  eslint(no-debugger)'])
+test('a change without a file name lints all of src/', async (t) => {
+  // The watcher's first round is one, so an error that was there before it started shows up. So
+  // is a new or moved directory, whose files have no events of their own.
+  let { root, write } = project(t, { 'src/unpoly.ts': EMPTY_ENTRY, 'src/unpoly/bad.js': 'debugger\n' })
+  let linter = new SourceLinter({ root })
+  assert.deepEqual(await linter.lint([null]), ['src/unpoly/bad.js\n  1:1      error  `debugger` statement is not allowed  eslint(no-debugger)'])
+  write('src/moved/worse.js', 'debugger\n')
+  assert.equal((await linter.lint([null])).length, 2)
 })
 
 test('later calls lint the changed files, and errors stand until their file is fixed', async (t) => {

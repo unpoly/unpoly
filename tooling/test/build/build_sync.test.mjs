@@ -150,7 +150,8 @@ test('a deleted or moved file counts, through its directory', () => {
   try {
     rmSync(path.join(root, 'spec/helpers/b.js'))
     utimesSync(path.join(root, 'spec/helpers'), 2000, 2000)
-    assert.deepEqual(newestSource(root, ['spec']), { mtime: 2000 * 1000, file: path.join('spec', 'helpers') })
+    let { mtime, file } = newestSource(root, ['spec'])
+    assert.deepEqual({ mtime, file }, { mtime: 2000 * 1000, file: path.join('spec', 'helpers') })
   } finally { rmSync(root, { recursive: true, force: true }) }
 })
 
@@ -217,7 +218,7 @@ test('asks the watcher to rebuild when it does not react, and names the file it 
     newestMtime: 200, newestFile: 'src/unpoly/link.ts',
     isAlive: () => true, now: () => (clock += 100), sleep: noop,
   })
-  assert.deepEqual(requests.map(([file]) => file), ['src/unpoly/link.ts'])
+  assert.deepEqual(requests.map(([files]) => files), [['src/unpoly/link.ts']])
   assert.ok(requests[0][1] >= 1000, 'asks only after giving the watcher a second')
   assert.equal(build.missedEdit, 'src/unpoly/link.ts')
   assert.equal(build.unbuiltEdit, undefined)
@@ -266,6 +267,62 @@ test('a file from the future does not hold up the run when the watcher was still
   })
   assert.equal(build.unbuiltEdit, 'src/unpoly/link.ts')
   assert.ok(clock < 3000, `returned before the grace period (at ${clock})`)
+})
+
+test('lists every source, newest first', () => {
+  const root = checkout({ 'src/a.js': 3000, 'src/b.js': 2000, 'src/pages/x.md': 4000 })
+  try {
+    assert.deepEqual(newestSource(root, ['src']).sources.map(({ file }) => file), ['src/a.js', 'src/b.js', 'src', 'src/pages'])
+  } finally { rmSync(root, { recursive: true, force: true }) }
+})
+
+// A status from a watcher that tracks what it has seen (see BuildStatus).
+const seenIdle = (startedAt, fullStartedAt, seen) => ({ ...idle(startedAt), fullStartedAt, seen })
+
+test('a later round does not vouch for an edit the watcher never saw', async () => {
+  // The bug this fixes: freshness was judged by `startedAt` alone, so any later round (another
+  // file, an editor's swap file) hid a missed event, and the run went ahead against a stale bundle.
+  let clock = 0
+  let requests = []
+  let status = seenIdle(300, 100, { 'src/unpoly/form.ts': 300, 'src/unpoly': 300 })
+  const build = await waitForFreshBuild({
+    read: () => status,
+    request: (files) => {
+      requests.push(files)
+      status = seenIdle(clock, 100, { ...status.seen, 'src/unpoly/link.ts': clock })
+    },
+    sources: [{ file: 'src/unpoly/form.ts', mtime: 250 }, { file: 'src/unpoly', mtime: 250 }, { file: 'src/unpoly/link.ts', mtime: 200 }, { file: 'src/unpoly/util.ts', mtime: 50 }],
+    isAlive: () => true, now: () => (clock += 100), sleep: noop,
+  })
+  assert.deepEqual(requests, [['src/unpoly/link.ts']])
+  assert.equal(build.missedEdit, 'src/unpoly/link.ts')
+})
+
+test('a round that built everything vouches for every older edit', async () => {
+  let requests = 0
+  const build = await waitForFreshBuild({
+    read: () => seenIdle(300, 300, {}),
+    request: () => requests++,
+    sources: [{ file: 'src/unpoly/link.ts', mtime: 250 }, { file: 'spec/helpers', mtime: 200 }],
+    isAlive: () => true, sleep: noop,
+  })
+  assert.equal(requests, 0)
+  assert.equal(build.missedEdit, undefined)
+})
+
+test('a seen file counts only for the edits before its round', async () => {
+  // The watcher saw link.ts at 300, but it changed again at 400, and that event never came.
+  let clock = 0
+  let requests = []
+  let status = seenIdle(300, 100, { 'src/unpoly/link.ts': 300 })
+  const build = await waitForFreshBuild({
+    read: () => status,
+    request: (files) => { requests.push(files); status = seenIdle(clock, 100, { 'src/unpoly/link.ts': clock }) },
+    sources: [{ file: 'src/unpoly/link.ts', mtime: 400 }],
+    isAlive: () => true, now: () => (clock += 100), sleep: noop,
+  })
+  assert.deepEqual(requests, [['src/unpoly/link.ts']])
+  assert.equal(build.missedEdit, 'src/unpoly/link.ts')
 })
 
 test('a build that starts but never settles still times out', async () => {

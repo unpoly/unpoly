@@ -86,12 +86,13 @@ export async function runWatch({ bundles, sourcemap }) {
   for (let dir of SOURCE_DIRS) {
     watchTree(path.join(PROJECT_ROOT, dir), (file, { directory }) => {
       // A directory that appears, moves or vanishes brings or takes files without an event of
-      // their own. Rebuild everything, but there is nothing to lint.
-      if (directory || !file) rounds.change(null)
-      else if (isWatchable(file)) rounds.change(file)
-      // A guide page, an image, an editor's swap file. Nothing to build, but bin/test sees the
-      // directory's mtime move (see newestSource()) and waits for a round that started after it.
-      else rounds.touch()
+      // their own. Rebuild and lint everything.
+      if (directory || !file) return rounds.change(null)
+      // An event for a name in a directory may have moved the directory's mtime, which bin/test
+      // looks at (see newestSource()).
+      rounds.touch(path.dirname(file))
+      // A guide page, an image or an editor's swap file needs nothing else.
+      if (isWatchable(file)) rounds.change(file)
     }, {
       skip: (name) => SKIP_DIRS.has(name),
       onError: (error, dir) => console.log(pc.red(`Cannot watch ${path.relative(PROJECT_ROOT, dir)} (${error.code}). Edits in it will not rebuild.`)),
@@ -109,10 +110,14 @@ export async function runWatch({ bundles, sourcemap }) {
   mkdirSync(requestDir, { recursive: true })
   watch(requestDir, (_event, name) => {
     if (name !== path.basename(REQUEST_PATH)) return
-    let file = readBuildRequest()
-    console.log(pc.yellow(`A rebuild was requested for ${file ?? 'an unknown file'}, which the watcher had not noticed.`))
-    let absolute = file && path.join(PROJECT_ROOT, file)
-    rounds.change(absolute && isWatchable(absolute) ? absolute : null)
+    let files = readBuildRequest()
+    console.log(pc.yellow(`A rebuild was requested for ${files.join(', ') || 'an unknown file'}, which the watcher had not noticed.`))
+    if (!files.length) rounds.change(null)
+    for (let file of files) {
+      let absolute = path.join(PROJECT_ROOT, file)
+      // A directory: something in it came or went.
+      rounds.change(isWatchable(absolute) ? absolute : null)
+    }
   })
 
   console.log(`Watching ${SOURCE_DIRS.join(', ')} for changes…`)
@@ -158,6 +163,7 @@ export class Rounds {
   #status
   #run
   #changed = new Set()
+  #seen = new Set()
   #pending = false
   #running = false
   #timer = null
@@ -167,7 +173,9 @@ export class Rounds {
   #idle = null
 
   // `run(changedFiles)` builds and resolves with a list of errors. `changedFiles` is a Set of what
-  // change() got since the last round. The timer functions are seams for the self-tests.
+  // change() got since the last round. A null in it means that the round builds and lints
+  // everything. `status.start()` learns which paths the round has seen (see BuildStatus). The
+  // timer functions are seams for the self-tests.
   constructor({ status, run, debounceMs = DEBOUNCE_MS, setTimer = setTimeout, clearTimer = clearTimeout }) {
     this.#status = status
     this.#run = run
@@ -179,12 +187,14 @@ export class Rounds {
   // `file` is an absolute path, or null for a change we can't attribute to a file.
   change(file) {
     this.#changed.add(file)
-    this.touch()
+    this.touch(file)
   }
 
-  // A change that needs no rebuild. It still gets a round, with an empty `changedFiles`, so
-  // the status reports a newer `startedAt`.
-  touch() {
+  // A change that needs no rebuild, at the absolute path `seen` (a directory whose listing
+  // changed, say). It still gets a round, with an empty `changedFiles`, so the status reports
+  // a newer `startedAt` and the path as seen.
+  touch(seen = null) {
+    if (seen) this.#seen.add(seen)
     this.#pending = true
     this.#clearTimer(this.#timer)
     this.#timer = this.#setTimer(() => this.#start(), this.#debounceMs)
@@ -205,9 +215,11 @@ export class Rounds {
     try {
       while (this.#pending) {
         let files = this.#changed
+        let seen = this.#seen
         this.#changed = new Set()
+        this.#seen = new Set()
         this.#pending = false
-        this.#status.start()
+        this.#status.start({ seen: [...seen], full: files.has(null) })
         let errors
         try {
           errors = await this.#run(files)

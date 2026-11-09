@@ -96,7 +96,7 @@ export async function runBuild(argv) {
 // The errors Oxlint finds in src/, formatted.
 async function lintSources() {
   let { SourceLinter } = await import('./lint.mjs')
-  return new SourceLinter().lint([])
+  return new SourceLinter().lint([null])
 }
 
 // Builds every bundle of a config once. Resolves with a list of formatted error messages, empty
