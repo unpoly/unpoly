@@ -9,6 +9,7 @@ import { RequestQueue } from './network/request_queue.js'
 import { UpRequest } from './network/request.js'
 import { UpResponse } from './network/response.js'
 import { Config } from './util/config.js'
+import type { RequestOptions } from './network/request.js'
 
 /*-
 Features to make HTTP requests and cache their responses.
@@ -166,7 +167,7 @@ export const queue = new RequestQueue()
 
 export const cache = new RequestCache()
 
-let progressBar = null
+let progressBar: ProgressBar | null = null
 
 /*-
 Returns a [cached](/learn/caching) request matching the given request options.
@@ -274,7 +275,7 @@ making a new request.
 @internal
 */
 
-function reset() {
+function reset(): void {
   abortRequests()
   queue.reset()
   cache.reset()
@@ -474,26 +475,26 @@ See [Caching](/learn/caching) for more details and examples.
 @stable
 @signature
 */
-export const makeRequest = mockable(function makeRequest(...args) {
+export const makeRequest = mockable(function makeRequest(...args: [url: string, options?: Partial<RequestOptions>] | [options: RequestOptions]): UpRequest {
   const options = parseRequestOptions(args)
   const request = new UpRequest(options)
   processRequest(request)
   return request
 })
 
-function parseRequestOptions(args) {
-  let options = parseArgIntoOptions(args, 'url')
+function parseRequestOptions(args: any[]): RequestOptions {
+  let options = parseArgIntoOptions(args, 'url') as RequestOptions
   up.migrate.handleRequestOptions?.(options)
   return options
 }
 
-function processRequest(request) {
+function processRequest(request: UpRequest): void {
   cache.expire(request.expireCache ?? evalOption(config.expireCache, request) ?? false)
   cache.evict(request.evictCache ?? evalOption(config.evictCache, request) ?? false)
   useCachedRequest(request) || queueRequest(request)
 }
 
-function useCachedRequest(newRequest) {
+function useCachedRequest(newRequest: UpRequest) {
   // If we have an existing promise matching this new request,
   // we use it unless `request.cache` is explicitly set to `false`.
   let cachedRequest
@@ -536,7 +537,7 @@ function useCachedRequest(newRequest) {
 }
 
 // If no existing promise is available, we queue a network request.
-function queueRequest(request) {
+function queueRequest(request: UpRequest) {
   handleCaching(request)
 
   queue.asap(request)
@@ -544,7 +545,7 @@ function queueRequest(request) {
   return true
 }
 
-function handleCaching(request) {
+function handleCaching(request: UpRequest): void {
   // Several code paths lead here:
   //
   // (1) A request with { cache: true } when there was a cache miss.
@@ -573,7 +574,8 @@ function handleCaching(request) {
   // We do this synchronously, before the request's promise settles. Otherwise a request made
   // synchronously after an abort (e.g. by a compiler during the render that aborted it)
   // would hit the aborted request in the cache.
-  request.onSettle = function(responseOrError) {
+  // An up.Response, or an error (which has no { expireCache } or { evictCache }).
+  request.onSettle = function(responseOrError: any) {
     cache.expire(responseOrError.expireCache ?? false, { except: request })
     cache.evict(responseOrError.evictCache ?? false, { except: request })
 
@@ -623,7 +625,7 @@ The network is also considered busy while requests are [loading in the backgroun
   Whether a request is loading.
 @stable
 */
-export function isBusy() {
+export function isBusy(): boolean {
   return queue.isBusy()
 }
 
@@ -648,7 +650,7 @@ Also see `up.Request#loadPage()`.
   Binary values from file inputs will be removed from the given params.
 @stable
 */
-export const loadPage = mockable(function loadPage(requestsAttrs) {
+export const loadPage = mockable(function loadPage(requestsAttrs: RequestOptions): void {
   new UpRequest(requestsAttrs).loadPage()
 })
 
@@ -745,7 +747,7 @@ Use `up.fragment.abort()`.
   @experimental
 @stable
 */
-export function abortRequests(...args) {
+export function abortRequests(...args: any[]): void {
   up.migrate.preprocessAbortArgs?.(args)
   queue.abort(...args)
 }
@@ -943,21 +945,21 @@ To effectively [handle disconnects while rendering](/learn/network-issues#discon
 @stable
 */
 
-export function isSafeMethod(method) {
+export function isSafeMethod(method: string): boolean {
   return contains(['GET', 'OPTIONS', 'HEAD'], normalizeMethod(method))
 }
 
-function onLate() {
+function onLate(): void {
   if (evalOption(config.progressBar)) {
     progressBar = new ProgressBar()
   }
 }
 
-function onRecover() {
+function onRecover(): void {
   progressBar?.conclude()
 }
 
-export function install() {
+export function install(): void {
   on('up:network:late', onLate)
 
   on('up:network:recover', onRecover)
