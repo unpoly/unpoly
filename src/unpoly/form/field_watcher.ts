@@ -158,7 +158,8 @@ export class FieldWatcher {
     // Don't forward { event, delay } because
     // (1) we have already processed them here and
     // (2) those aren't render options.
-    let callbackOptions = omit(this._scheduledFieldOptions, ['event', 'delay'])
+    // Set and cleared together with _scheduledValues, which we checked above.
+    let callbackOptions = omit(this._scheduledFieldOptions!, ['event', 'delay'])
     const diff = this._changedValues(this._processedValues, this._scheduledValues)
     this._processedValues = this._scheduledValues
     this._scheduledValues = null

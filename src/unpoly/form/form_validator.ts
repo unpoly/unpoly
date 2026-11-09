@@ -19,19 +19,26 @@ import type { Deferred, PlainObject } from '../util.js'
 
 /**
 What to re-render to validate a field: an element, its target selector and the field that
-triggered the validation. Before rendering we add the render options and a deferred that settles
-when the validation has rendered.
+triggered the validation.
 @internal
 */
-export interface ValidationSolution {
+export interface FoundValidationSolution {
   element: Element
   target: string
   origin: Element
-  renderOptions?: PlainObject
-  batch?: boolean
+}
+
+/**
+A solution that is scheduled for rendering. `_getSolutions()` adds the render options and a
+deferred that settles when the validation has rendered.
+@internal
+*/
+export interface ValidationSolution extends FoundValidationSolution {
+  renderOptions: PlainObject
+  batch: boolean | undefined
   // The method and URL. Solutions with the same destination can be validated in one request.
-  destination?: string
-  deferred?: Deferred<any>
+  destination: string
+  deferred: Deferred<any>
 }
 
 export class FormValidator {
@@ -63,7 +70,8 @@ export class FormValidator {
     return on(field, eventType, (event) => {
       if (!field.closest('.up-keeping')) {
         printUserEvent(event)
-        muteUncriticalRejection(this.validate({ origin: field }))
+        // Validating a field always finds a solution, at least the field itself.
+        muteUncriticalRejection(this.validate({ origin: field })!)
       }
     })
   }
@@ -88,9 +96,10 @@ export class FormValidator {
   }
 
   _getSolutions(options: PlainObject): ValidationSolution[] {
-    let solutions = this._getTargetSelectorSolutions(options)
+    // The loop below adds the props of a scheduled solution.
+    let solutions = (this._getTargetSelectorSolutions(options)
       || this._getFieldSolutions(options)
-      || this._getElementSolutions(options.origin)
+      || this._getElementSolutions(options.origin)) as ValidationSolution[]
 
     // Although a single validate() call may update multiple fragments,
     // they will all share the same render pass.
@@ -115,23 +124,24 @@ export class FormValidator {
     return solutions
   }
 
-  _getFieldSolutions({ origin, ...options }: PlainObject): ValidationSolution[] | undefined {
+  _getFieldSolutions({ origin, ...options }: PlainObject): FoundValidationSolution[] | undefined {
     if (isField(origin)) {
       return this._getValidateAttrSolutions(origin) || this._getFormGroupSolutions(origin, options)
     }
   }
 
-  _getFormGroupSolutions(field: Element, { formGroup = true }: PlainObject): ValidationSolution[] | undefined {
+  _getFormGroupSolutions(field: Element, { formGroup = true }: PlainObject): FoundValidationSolution[] | undefined {
     if (!formGroup) return
 
     let solution = findGroupSolution(field, { targetable: true })
     if (solution) {
       printToStandard('up.validate()', 'Validating form group of field %o', field)
-      return [solution]
+      // A { targetable } solution has a target.
+      return [solution as FoundValidationSolution]
     }
   }
 
-  _getTargetSelectorSolutions({ target, origin }: PlainObject): ValidationSolution[] | undefined {
+  _getTargetSelectorSolutions({ target, origin }: PlainObject): FoundValidationSolution[] | undefined {
     if (isString(target)) {
       printToStandard('up.validate()', 'Validating target "%s"', target)
       let simpleSelectors = splitTarget(target)
@@ -150,7 +160,7 @@ export class FormValidator {
     }
   }
 
-  _getElementSolutions(element: Element): ValidationSolution[] {
+  _getElementSolutions(element: Element): FoundValidationSolution[] {
     printToStandard('up.validate()', 'Validating element %o', element)
     return [{
       element,
@@ -159,7 +169,7 @@ export class FormValidator {
     }]
   }
 
-  _getValidateAttrSolutions(field: Element): ValidationSolution[] | undefined {
+  _getValidateAttrSolutions(field: Element): FoundValidationSolution[] | undefined {
     // In case of radio buttons the [up-validate] attribute will
     // be set on a container containing the entire radio button group.
     let containerWithAttr = field.closest('[up-validate]')
@@ -239,7 +249,7 @@ export class FormValidator {
     return batch
   }
 
-  _canBatchSolutions(s1: ValidationSolution, s2: ValidationSolution): boolean {
+  _canBatchSolutions(s1: ValidationSolution, s2: ValidationSolution): boolean | undefined {
     return s1.destination === s2.destination && s1.batch && s2.batch
   }
 

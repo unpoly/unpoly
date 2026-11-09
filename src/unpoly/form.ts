@@ -297,7 +297,7 @@ function findFormElements(root: ElementOrSelector, selectorFn: SelectorFn): Fiel
   // element that are associated with the form (through <input form="id-of-form">, which
   // is an HTML feature.)
   if (root.matches('form[id]')) {
-    const formReference = attrSelector('form', root.getAttribute('id'))
+    const formReference = attrSelector('form', root.getAttribute('id')!)
     const externalElementsSelector = selectorFn(formReference)
     const externalElements = getAll(externalElementsSelector, { layer: root })
     elements = uniq([...elements, ...externalElements])
@@ -351,7 +351,7 @@ export function findFields(root: ElementOrSelector): Field[] {
 // attribute access is wrong for at least one kind of field.
 
 // Falls back on absence, not falseness: a native field reports '' and means it.
-export function readFieldName(field: Field): string | undefined {
+export function readFieldName(field: Field): string | null | undefined {
   return field.name ?? field.getAttribute('name')
 }
 
@@ -366,7 +366,7 @@ export function readFieldValue(field: Field): any {
 // Asks the same question as writeFieldDisabled(), so the two cannot disagree about which
 // spelling is authoritative.
 export function readFieldDisabled(field: Field): boolean {
-  return 'disabled' in field ? field.disabled : field.hasAttribute('disabled')
+  return 'disabled' in field ? field.disabled! : field.hasAttribute('disabled')
 }
 
 // Write only the spelling the control implements. Assigning a { disabled } property that a
@@ -742,7 +742,7 @@ function disableControlTemp(control: Field, preview: boolean | undefined): (() =
 }
 
 // Disable is true (the origin's form), an element, a selector or an array of these.
-function getDisableContainers(disable: any, origin: Element): Element[] {
+function getDisableContainers(disable: any, origin: Element | undefined): Element[] {
   let originScope = () => getRegion(origin)
 
   if (disable === true) {
@@ -758,7 +758,7 @@ function getDisableContainers(disable: any, origin: Element): Element[] {
   }
 }
 
-export function getDisablePreviewFn(disable: any, origin: Element): PreviewFn {
+export function getDisablePreviewFn(disable: any, origin: Element | undefined): PreviewFn {
   return function(preview) {
     let containers = getDisableContainers(disable, origin)
     for (let container of containers) {
@@ -816,7 +816,7 @@ export function setContainerDisabled(container: Element, disabled: boolean): voi
 // like [up-scroll], [up-confirm], etc.
 export function destinationOptions(form: Element, options?: PlainObject, parserOptions?: OptionsParserOptions): PlainObject {
   options = newOptions(options)
-  form = getForm(form)
+  form = getForm(form)!
   const parser = new OptionsParser(form, options, parserOptions)
 
   parser.string('contentType', { attr: 'enctype' })
@@ -1485,7 +1485,7 @@ See [preventing race conditions](/learn/reactive-server-forms#race-conditions) f
 */
 export function validate(...args: [originOrTarget: any, ...rest: any[]]): any {
   let options = parseValidateArgs(...args)
-  let form = getForm(options.origin)
+  let form = getForm(options.origin)!
   let validator = getFormValidator(form)
   return validator.validate(options)
 }
@@ -1565,7 +1565,7 @@ the render pass that will load and show the validation results.
 @stable
 */
 
-export function getForm(element: Element): HTMLFormElement | undefined {
+export function getForm(element: Element): HTMLFormElement | null | undefined {
   return getLiteralForm(element) || getAssociatedForm(element) || getClosestForm(element)
 }
 
@@ -1575,7 +1575,7 @@ function getLiteralForm(element: Element): HTMLFormElement | undefined {
   if (element instanceof HTMLFormElement) return element
 }
 
-function getClosestForm(element: Element): HTMLFormElement | undefined {
+function getClosestForm(element: Element): HTMLFormElement | null | undefined {
   // Return the closest form for vanilla fields, or any non-field element within a form (like a form group).
   // Like the browser, a [form] attribute decides alone, even when it matches no form in our layer.
   if (!element.hasAttribute('form')) return element.closest('form')
@@ -1615,7 +1615,7 @@ export function getRegion(origin: Element | undefined): Element {
   return getOriginRegion(origin) || layerStack.current.element
 }
 
-function getOriginRegion(origin: Element | undefined): Element | undefined {
+function getOriginRegion(origin: Element | undefined): Element | null | undefined {
   if (origin) {
     return getForm(origin) || closestLayerElement(origin)
   }
@@ -1683,7 +1683,7 @@ To consider other selectors to be submittable, see `up.form.config.submitSelecto
 @stable
 */
 export function isSubmittable(form: ElementOrSelector): boolean {
-  form = getSmart(form)
+  form = getSmart(form)!
   return config.matches(form, 'submitSelectors')
 }
 
@@ -2577,7 +2577,7 @@ export function install(): void {
     // A second watcher would submit the form twice for the same change.
     // We don't warn, since a partial with [up-autosubmit] may be rendered with or without an outer one.
     // An outer [up-autosubmit] of another form doesn't see our fields, e.g. for <input form="other-form">.
-    let outer = closest(formOrField.parentElement, '[up-autosubmit]:not([up-autosubmit=false])')
+    let outer = closest(formOrField.parentElement!, '[up-autosubmit]:not([up-autosubmit=false])')
     if (outer && getForm(outer) === getForm(formOrField)) return
 
     return autosubmit(formOrField, { logPrefix: '[up-autosubmit]' })

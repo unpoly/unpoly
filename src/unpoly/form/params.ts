@@ -348,7 +348,7 @@ export class Params {
   _addAllFromQuery(query: string): void {
     for (let part of query.split('&')) {
       if (part) {
-        let [name, value] = part.split('=')
+        let [name, value] = part.split('=') as [string, string | null | undefined]
         name = decodeURIComponent(name)
         // There are three forms we need to handle:
         // (1) foo=bar should become { name: 'foo', bar: 'bar' }
