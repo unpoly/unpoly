@@ -143,6 +143,18 @@ describe('up.error', function() {
       expect(error.toString()).toBe('up.Minified: message')
     })
 
+    it("lets a subclass assign its own [Symbol.toStringTag], which becomes the error's name", function() {
+      class AppError extends up.Error {}
+      AppError.prototype[Symbol.toStringTag] = 'AppError'
+
+      const error = new AppError('message')
+      expect(error.name).toBe('AppError')
+      expect(error.toString()).toBe('AppError: message')
+
+      error[Symbol.toStringTag] = 'AppError.Instance'
+      expect(Object.prototype.toString.call(error)).toBe('[object AppError.Instance]')
+    })
+
     it("names an up.Aborted error 'AbortError', like a native abort error", function() {
       const error = new up.Aborted('message')
       expect(error.name).toBe('AbortError')

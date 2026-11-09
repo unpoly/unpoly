@@ -280,9 +280,10 @@ export const isBeforeBoot = mockable(function isBeforeBoot(): boolean {
 
 // Gives a class its public name, which survives minification (see unpoly.ts). We define the
 // tag instead of assigning it, which would throw when the class inherits a getter or read-only tag.
+// The tag stays writable and configurable, so an app can still assign its own tag to a subclass or instance.
 export function setClassName(klass: abstract new (...args: any[]) => any, name: string): void {
   Object.defineProperty(klass, 'name', { value: name })
-  Object.defineProperty(klass.prototype, Symbol.toStringTag, { value: name })
+  Object.defineProperty(klass.prototype, Symbol.toStringTag, { value: name, writable: true, configurable: true })
 }
 
 function supportIssue(): string | undefined {
