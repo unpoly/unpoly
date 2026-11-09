@@ -7,12 +7,13 @@ import { on } from './event.js'
 import { render } from './fragment.js'
 import { RenderOptions } from './fragment/render/render_options.js'
 import { Layer } from './layer/base.js'
-import type { LayerOptions } from './layer/base.js'
+import type { LayerMode, LayerOptions } from './layer/base.js'
 import type { LayerLookupArgs } from './layer/layer_lookup.js'
 import { LayerStack } from './layer/layer_stack.js'
 import { Config } from './util/config.js'
 import type { ConfigWith } from './util/config.js'
 import type { PlainObject } from './util.js'
+import type { AnimationValue } from './motion.js'
 
 /**
 A layer subclass for a mode, like `ModalLayer`. Each has a static `{ mode }`.
@@ -35,6 +36,87 @@ Add `[up-layer=new]` to a link or form to show its response in a new overlay, or
 // The layer class for each mode, like ModalLayer. The entry passes them to install(), so only
 // the entry and the mode classes themselves import a mode class (see the cycle rules in src/unpoly.ts).
 let layerClasses: LayerClass[] = []
+
+/**
+The settings in `up.layer.config`, described in its doc comment.
+
+Besides a few settings of its own, the config has one object of defaults for each layer mode
+(inherited from `ModeDefaults`), one for all overlays (`overlay`) and one for all layers (`any`).
+*/
+export interface LayerConfig extends ModeDefaults {
+  mode: OverlayMode
+  any: LayerDefaults
+  overlay: OverlayDefaults
+  foreignOverlaySelectors: string[]
+}
+
+/**
+The defaults for each layer mode, like `up.layer.config.drawer`.
+
+The keys are exactly the layer modes, so `config[mode]` is typed for every `LayerMode`.
+*/
+export interface ModeDefaults {
+  root: LayerDefaults
+  modal: OverlayDefaults
+  drawer: DrawerDefaults
+  popup: OverlayDefaults
+  cover: OverlayDefaults
+}
+
+/**
+A layer mode that opens an overlay. All modes except `'root'`.
+*/
+export type OverlayMode = Exclude<LayerMode, 'root'>
+
+/**
+Defaults for new layers, like `up.layer.config.any` or `up.layer.config.root`.
+
+Each object only holds the defaults set at its own level. `up.layer.open()` merges the levels
+(`any`, then `overlay`, then the mode). E.g. `up.layer.config.modal.openAnimation` is `undefined`
+until an app sets it, but modals open with the animation from `up.layer.config.overlay`.
+*/
+export interface LayerDefaults {
+  mainTargets?: string[]
+  history?: boolean | 'auto'
+  // Any option for up.layer.open() can have a default, render options included.
+  // TODO(types): Extend the options of up.layer.open() instead, so a misspelled key is an error.
+  [option: string]: any
+}
+
+/**
+Defaults for new overlays, like `up.layer.config.overlay` or `up.layer.config.modal`.
+*/
+export interface OverlayDefaults extends LayerDefaults {
+  openAnimation?: LayerAnimation
+  openDuration?: number
+  openEasing?: string
+  closeAnimation?: LayerAnimation
+  closeDuration?: number
+  closeEasing?: string
+  dismissible?: boolean | string | string[]
+  dismissLabel?: string
+  dismissARIALabel?: string
+  trapFocus?: boolean
+  backdrop?: boolean
+  class?: string
+  size?: 'small' | 'medium' | 'large' | 'full' | 'grow'
+  // Popups take any position, drawers only 'left' or 'right' (see DrawerDefaults).
+  position?: 'top' | 'bottom' | 'left' | 'right'
+  // Only popups have an alignment.
+  align?: 'left' | 'right' | 'center' | 'top' | 'bottom'
+}
+
+/**
+Defaults for new drawers, like `up.layer.config.drawer`.
+*/
+export interface DrawerDefaults extends OverlayDefaults {
+  position?: 'left' | 'right'
+}
+
+/**
+The animation for opening or closing an overlay. A function receives the overlay and returns the animation.
+*/
+export type LayerAnimation = AnimationValue | ((layer: Layer) => AnimationValue)
 
 /*-
 Configures default attributes for new overlays.
@@ -190,7 +272,7 @@ up.layer.config.overlay.mainTargets.unshift('.content')
 
 @stable
 */
-export const config = new Config<PlainObject>('up.layer.config', () => ({
+export const config = new Config('up.layer.config', (): LayerConfig => ({
   mode: 'modal',
   any: {
     mainTargets: [
@@ -248,7 +330,7 @@ export const config = new Config<PlainObject>('up.layer.config', () => ({
     trapFocus: false,
   },
   foreignOverlaySelectors: ['dialog'],
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<LayerConfig>
 
 /*-
 A list of layers that are currently open.
@@ -264,7 +346,7 @@ export let layerStack: LayerStack = null
 
 let handlers = []
 
-export function mainTargets(mode: string): string[] {
+export function mainTargets(mode: LayerMode): string[] {
   return flatMap(modeConfigs(mode), 'mainTargets')
 }
 
@@ -273,7 +355,7 @@ Returns an array of config objects that apply to the given mode name.
 
 The config objects are in descending order of specificity.
 */
-function modeConfigs(mode: string): PlainObject[] {
+function modeConfigs(mode: LayerMode): LayerDefaults[] {
   if (mode === 'root') {
     return [config.root, config.any]
   } else {

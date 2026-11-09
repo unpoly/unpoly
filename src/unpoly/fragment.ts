@@ -40,6 +40,7 @@ import type {
   FragmentProcessorValue, RenderOptions, RenderTarget, ResolvedRenderOptions,
 } from './fragment/render/render_options.js'
 import type { FocusCapsule } from './viewport/focus_capsule.js'
+import type { LayerMode } from './layer/base.js'
 
 /**
 A step of a render pass: which old element to update with which new element, and how.
@@ -2447,7 +2448,7 @@ export function expandTargets(targets: any, options: PlainObject = {}): string[]
   return uniq(expanded)
 }
 
-function resolveMode({ layer, mode }: PlainObject): string {
+function resolveMode({ layer, mode }: PlainObject): LayerMode {
   if (layer === 'new') {
     return mode || fail('Must pass a { mode } option together with { layer: "new" }')
   } else {
