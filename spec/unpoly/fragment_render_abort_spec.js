@@ -299,6 +299,84 @@ extendDescribe('up.fragment', function() {
             expect('.element').toHaveText('new content')
           })
 
+          describe('when a { fallback } target is rendered', function() {
+
+            it('aborts requests in the fallback fragment, but not in the unmatched primary fragment, when rendering a { document } (bugfix)', async function() {
+              let [primary] = htmlFixtureList(`
+                <div class="primary">old primary</div>
+                <div class="fallback">old fallback</div>
+              `)
+
+              const primaryJob = up.render('.primary', { url: '/primary-path' })
+              const fallbackJob = up.render('.fallback', { url: '/fallback-path' })
+              await wait()
+              expect(jasmine.Ajax.requests.count()).toBe(2)
+
+              let abortedListener = jasmine.createSpy('up:fragment:aborted listener')
+              up.on('up:fragment:aborted', abortedListener)
+
+              // .primary exists in the page, but not in the new document, so { fallback } is used.
+              await up.render({
+                target: '.primary',
+                fallback: '.fallback',
+                document: '<div class="fallback">new fallback</div>',
+                abort: 'target',
+              })
+
+              expect('.primary').toHaveText('old primary')
+              expect('.fallback').toHaveText('new fallback')
+
+              await expectAsync(fallbackJob).toBeRejectedWith(jasmine.any(up.Aborted))
+              expect((await promiseState(primaryJob)).state).toBe('pending')
+              expect(abortedListener.calls.all().map((call) => call.args[0].target)).not.toContain(primary)
+            })
+
+            it('aborts requests in the fallback fragment, but not in the unmatched primary fragment, when rendering a { response } (bugfix)', async function() {
+              htmlFixtureList(`
+                <div class="primary">old primary</div>
+                <div class="fallback">old fallback</div>
+              `)
+
+              const request = up.request('/response-url')
+              await wait()
+              jasmine.respondWith('<div class="fallback">new fallback</div>')
+              const response = await request
+
+              const primaryJob = up.render('.primary', { url: '/primary-path' })
+              const fallbackJob = up.render('.fallback', { url: '/fallback-path' })
+              await wait()
+
+              await up.render({ target: '.primary', fallback: '.fallback', response, abort: 'target' })
+
+              expect('.primary').toHaveText('old primary')
+              expect('.fallback').toHaveText('new fallback')
+
+              await expectAsync(fallbackJob).toBeRejectedWith(jasmine.any(up.Aborted))
+              expect((await promiseState(primaryJob)).state).toBe('pending')
+            })
+
+            it('aborts requests in the fallback fragment when rendering a { url }', async function() {
+              htmlFixtureList(`
+                <div class="primary">old primary</div>
+                <div class="fallback">old fallback</div>
+              `)
+
+              const fallbackJob = up.render('.fallback', { url: '/fallback-path' })
+              await wait()
+
+              const job = up.render({ target: '.primary', fallback: '.fallback', url: '/new-path', abort: 'target' })
+              await wait()
+
+              jasmine.respondWith('<div class="fallback">new fallback</div>')
+              await job
+
+              expect('.primary').toHaveText('old primary')
+              expect('.fallback').toHaveText('new fallback')
+              await expectAsync(fallbackJob).toBeRejectedWith(jasmine.any(up.Aborted))
+            })
+
+          })
+
           it('lets a compiler in the new fragment request the URL of a request that was just aborted (bugfix)', async function() {
             let compilerRequest
             up.compiler('.element', function() {

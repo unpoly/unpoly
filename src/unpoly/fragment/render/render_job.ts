@@ -189,7 +189,8 @@ export class RenderJob {
     //     The { handleAbort } callback is called in ChangeFromContent#_onPlanApplicable()
     // (3) FromURL is eventually going to call FromContent.
     //     We memoize the callback so we only run it once.
-    // (4) Both callers pass the preflight props of the change. FromURL adds the new { request }.
+    // (4) FromURL passes the preflight props of the change, plus the new { request }.
+    //     FromContent passes the preflight props of the plan it renders, which may be a fallback.
     let handleAbort = memoize((preflightProps: AbortOptionProps) => this._handleAbortOption(preflightProps))
     let renderOptions = { ...this.renderOptions, handleAbort }
 

@@ -116,11 +116,12 @@ export class ChangeFromContent extends Change {
       assertAssetsOK(assets, plan.options)
     }
 
-    // Used by up.RenderJob
-    this.options.handleAbort(this.getPreflightProps())
+    // Used by up.RenderJob.
+    // Pass the props of the plan we are rendering. this.getPreflightProps() would use the first
+    // plan that matches the current page, which may not be in the response when we render a fallback.
+    this.options.handleAbort(plan.getPreflightProps())
 
-    // From here on the plan changes the page. Set this last: getPreflightProps() above
-    // also uses _seekPlan(), and must still be able to skip plans that don't fit.
+    // From here on the plan changes the page.
     this._planApplied = true
   }
 
