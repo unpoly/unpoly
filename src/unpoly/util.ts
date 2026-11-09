@@ -2190,6 +2190,8 @@ export function variant<T extends object>(source: T, changes: PlainObject = {}):
   return variant
 }
 
+// Returns one value per spec, so callers can type the destructured values as a tuple.
+export function parseArgs<S extends ArgSpec[]>(args: any[], ...specs: S): { [K in keyof S]: any }
 export function parseArgs(args: any[], ...specs: ArgSpec[]): any[] {
   let results = []
 
