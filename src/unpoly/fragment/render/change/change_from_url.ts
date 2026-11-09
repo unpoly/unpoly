@@ -9,14 +9,28 @@ import { isEnabled } from '../../../history.js'
 import { printToStandard } from '../../../log.js'
 import { loadPage, makeRequest } from '../../../network.js'
 import { UpResponse } from '../../../network/response.js'
+import type { RenderOptions } from '../render_options.js'
+import type { RenderResult } from '../render_result.js'
+import type { PreflightProps } from './addition.js'
+import type { RequestOptions, UpRequest } from '../../../network/request.js'
 
-export class ChangeFromURL extends Change {
+/**
+The options for the request of a `ChangeFromURL`: the render options plus the preflight props
+of the success and fail options.
+@internal
+*/
+export type RequestAttrs = RenderOptions & PreflightProps & { url: string }
 
-  async execute() {
+export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
+  declare request: UpRequest
+
+  // Fulfills with a request for { preload: true }.
+  async execute(): Promise<RenderResult | UpRequest> {
     let newPageReason = this._newPageReason()
     if (newPageReason) {
       printToStandard('up.render()', newPageReason)
-      loadPage(this.options)
+      // A full page load only uses the request options among the render options (and ignores { target }).
+      loadPage(this.options as RequestOptions)
       // Prevent our caller from executing any further code, since we're already
       // navigating away from this JavaScript environment.
       return unresolvablePromise()
@@ -36,7 +50,7 @@ export class ChangeFromURL extends Change {
     return await always(request, (responseOrError) => this._onRequestSettled(responseOrError))
   }
 
-  _newPageReason() {
+  _newPageReason(): string | undefined {
     // Rendering content from cross-origin URLs is out of scope for Unpoly.
     // We still allow users to call up.render() with a cross-origin URL, but
     // we will then make a full-page request.
@@ -56,9 +70,10 @@ export class ChangeFromURL extends Change {
   // - Includes the render options
   // - Includes the preflight props of the actual Change instance
   // - Includes the preflight props for fail-prefixed options
-  _getRequestAttrs() {
+  _getRequestAttrs(): RequestAttrs {
     const successAttrs = this._preflightPropsForRenderOptions(this.options)
-    const failAttrs = this._preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true })
+    // This is true when the fail options match no target. Spreading true adds nothing.
+    const failAttrs = this._preflightPropsForRenderOptions(this.deriveFailOptions(), { optional: true }) as PreflightProps
 
     return {
       ...this.options, // contains preflight keys relevant for the request, e.g. { url, method }
@@ -70,11 +85,13 @@ export class ChangeFromURL extends Change {
   // This is required by up.RenderJob to handle { abort: 'target' }.
   // TODO: I think this is no longer required. Instead _handleAbortOption() is called with { bindFragments }...
 
-  getPreflightProps() {
+  getPreflightProps(): RequestAttrs {
     return this._getRequestAttrs()
   }
 
-  _preflightPropsForRenderOptions(renderOptions, getPreflightPropsOptions) {
+  _preflightPropsForRenderOptions(renderOptions: RenderOptions): PreflightProps
+  _preflightPropsForRenderOptions(renderOptions: RenderOptions, getPreflightPropsOptions: { optional: boolean }): PreflightProps | true
+  _preflightPropsForRenderOptions(renderOptions, getPreflightPropsOptions?) {
     const preflightChange = new ChangeFromContent({ ...renderOptions, preflight: true })
     // #getPreflightProps() will return meta information about the change that is most
     // likely before the request was dispatched.
@@ -82,7 +99,7 @@ export class ChangeFromURL extends Change {
     return preflightChange.getPreflightProps(getPreflightPropsOptions)
   }
 
-  _onRequestSettled(response) {
+  _onRequestSettled(response: UpResponse | Error): RenderResult {
     if (response instanceof UpResponse) {
       return this._onRequestSettledWithResponse(response)
     } else {
@@ -93,17 +110,17 @@ export class ChangeFromURL extends Change {
     }
   }
 
-  _onRequestSettledWithResponse(response) {
+  _onRequestSettledWithResponse(response: UpResponse): RenderResult {
     return new ChangeFromResponse({ ...this.options, response }).execute()
   }
 
-  _onRequestSettledWithError(error) {
+  _onRequestSettledWithError(error: Error): never {
     if (error instanceof Offline) {
       let log = ['Cannot load fragment from %s: %s', error.request, error.reason]
       this.request.emit('up:fragment:offline', {
         callback: this.options.onOffline,
         renderOptions: this.options,
-        retry: (retryOptions) => render({ ...this.options, ...retryOptions }),
+        retry: (retryOptions: RenderOptions) => render({ ...this.options, ...retryOptions }),
         log,
       })
     }

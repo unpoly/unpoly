@@ -70,7 +70,7 @@ export interface RenderOptions {
   background?: boolean
   lateDelay?: number | false
   timeout?: number
-  fail?: ValueOrFunction<boolean> | 'auto'
+  fail?: ValueOrFunction<boolean>
 
   // Caching
   cache?: boolean | 'auto'
