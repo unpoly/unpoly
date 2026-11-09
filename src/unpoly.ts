@@ -134,10 +134,11 @@ for (let api of apis) {
 //   [Symbol.toStringTag] *data* property (it skips a getter) or the original name of an own
 //   `constructor`, whichever comes first. So each class needs a tag on its own prototype.
 // The tag also names our objects in Object.prototype.toString() and u.inspect(), and our errors (see
-// error.ts). The layer modes aren't public, so they all say up.Layer.
+// error.ts). The layer modes aren't public, so they all say up.Layer. Internal classes on up.internal
+// keep whatever name the minifier gives them. None of them is an error class.
 const layerModes = [RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]
 for (let key in up) {
-  // Test the key first, so we don't call a getter like `up.context`. up.RenderOptions is no class.
+  // Test the key first, so we don't call a getter like `up.context`.
   if (/^[A-Z]/.test(key) && up[key].prototype) {
     Object.defineProperty(up[key], 'name', { value: 'up.' + key })
     up[key].prototype[Symbol.toStringTag] = 'up.' + key

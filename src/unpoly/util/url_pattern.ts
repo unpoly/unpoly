@@ -10,7 +10,7 @@ export interface URLPatternGroup {
 }
 
 // A class expression, so the binding doesn't shadow the browser's `URLPattern` here or in importers.
-// At runtime the class is named `up.URLPattern` (see unpoly.ts).
+// The class is internal (`up.internal.UpURLPattern`), so unpoly.ts doesn't give it a public name.
 export const UpURLPattern = class URLPattern {
   declare _groups: URLPatternGroup[]
   declare _positiveRegexp: RegExp
@@ -92,7 +92,7 @@ export const UpURLPattern = class URLPattern {
 }
 
 /**
-An instance of `up.URLPattern`.
+An instance of `up.internal.UpURLPattern`.
 @internal
 */
 export type UpURLPattern = InstanceType<typeof UpURLPattern>
