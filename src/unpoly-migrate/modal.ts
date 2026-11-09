@@ -17,7 +17,7 @@ up.modal = {
   @deprecated
     Use `up.layer.open({ url, mode: "modal" })` instead.
   */
-  visit(url, options = {}) {
+  visit(url: string, options: object = {}) {
     up.migrate.deprecated('up.modal.visit(url)', 'up.layer.open({ url, mode: "modal" })')
     return up.layer.open({ ...options, url, mode: 'modal' })
   },
@@ -35,7 +35,7 @@ up.modal = {
   @deprecated
     Use `up.follow(link, { layer: "new modal" })` instead.
   */
-  follow(link, options = {}) {
+  follow(link: any, options: object = {}) {
     up.migrate.deprecated('up.modal.follow(link)', 'up.follow(link, { layer: "new modal" })')
     return up.follow(link, { ...options, layer: 'new', mode: 'modal' })
   },
@@ -56,7 +56,7 @@ up.modal = {
   @deprecated
     Use `up.layer.open({ document, mode: "modal" })` instead.
   */
-  extract(target, html, options = {}) {
+  extract(target: string, html: string, options: object = {}) {
     up.migrate.deprecated('up.modal.extract(target, document)', 'up.layer.open({ document, mode: "modal" })')
     return up.layer.open({ ...options, target, document: html, layer: 'new', mode: 'modal' })
   },
@@ -70,7 +70,7 @@ up.modal = {
   @deprecated
     Use `up.layer.dismiss()` instead.
   */
-  close(options = {}) {
+  close(options: object = {}) {
     up.migrate.deprecated('up.modal.close()', 'up.layer.dismiss()')
     up.layer.dismiss(null, options)
     return up.migrate.formerlyAsync('up.layer.dismiss()')
@@ -125,7 +125,7 @@ up.modal = {
   @deprecated
     Use `up.layer.contains()` instead.
   */
-  contains(element) {
+  contains(element: any) {
     up.migrate.deprecated('up.modal.contains()', 'up.layer.contains()')
     return up.layer.contains(element)
   },
