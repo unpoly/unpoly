@@ -118,7 +118,7 @@ function scriptPipeline({ es, lint = true }) {
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.[jt]s$/,
           exclude: /node_modules/,
           use: [tsLoader]
         },
@@ -130,7 +130,10 @@ function scriptPipeline({ es, lint = true }) {
       ]
     },
     resolve: {
-      extensions: ['.js', '.js.erb']
+      extensions: ['.js', '.ts', '.js.erb'],
+      // Imports name a TypeScript module with a `.js` extension, as TypeScript expects
+      // (`import { map } from './util.js'` finds util.ts). So try `.ts` first.
+      extensionAlias: { '.js': ['.ts', '.js'] },
     },
     target: ['web', es]
   }
@@ -142,7 +145,8 @@ function merge(...configs) {
       rules: []
     },
     resolve: {
-      extensions: []
+      extensions: [],
+      extensionAlias: {},
     },
     plugins: []
   }
@@ -166,6 +170,9 @@ function merge(...configs) {
     }
     if (config.resolve && config.resolve.extensions) {
       merged.resolve.extensions.push(...config.resolve.extensions)
+    }
+    if (config.resolve && config.resolve.extensionAlias) {
+      Object.assign(merged.resolve.extensionAlias, config.resolve.extensionAlias)
     }
     if (config.plugins) {
       merged.plugins.push(...config.plugins)

@@ -46,6 +46,19 @@ export default tseslint.config(
     },
   },
   {
+    // typescript-eslint's recommended config turns on rules for .ts files that it leaves off
+    // for .js. Unpoly's code style is the same in both, so we turn them off again.
+    files: ['**/*.ts'],
+    rules: {
+      'prefer-const': 'off',
+      'prefer-rest-params': 'off',
+      'prefer-spread': 'off',
+      'no-var': 'off',
+      // We allow `any` while converting (strictness is loose for now).
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
     files: ['src/unpoly.js'],
     plugins: {
       unpoly: { rules: { 'no-api-collisions': noApiCollisions } },
