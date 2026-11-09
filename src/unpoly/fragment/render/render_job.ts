@@ -10,6 +10,11 @@ import { ChangeFromURL } from './change/change_from_url.js'
 import { RenderOptions } from './render_options.js'
 import { RenderResult } from './render_result.js'
 import { printToStandard } from '../../log.js'
+import type { PreflightProps } from './change/addition.js'
+import type { UpRequest } from '../../network/request.js'
+
+// What the { abort } option needs to know about a change: its preflight props, and its request if it has one.
+type AbortOptionProps = PreflightProps & { request?: UpRequest }
 
 /*-
 A queued render task.
@@ -36,12 +41,18 @@ console.log(finalResult.fragment) // logs the revalidated fragment
 @parent up.fragment
 */
 export class RenderJob {
+  declare renderOptions: RenderOptions
+  declare _rendered: Promise<RenderResult>
+  // The promise methods are delegated to the render promise, see the static block below.
+  declare then: Promise<RenderResult>['then']
+  declare catch: Promise<RenderResult>['catch']
+  declare finally: Promise<RenderResult>['finally']
 
-  constructor(renderOptions) {
+  constructor(renderOptions: RenderOptions) {
     this.renderOptions = renderOptions
   }
 
-  execute() {
+  execute(): this {
     this._rendered = this._executePromise()
     return this
   }
@@ -54,7 +65,7 @@ export class RenderJob {
   @stable
   */
 
-  async _executePromise() {
+  async _executePromise(): Promise<RenderResult> {
     try {
       this._emitGuardEvent()
 
@@ -81,7 +92,7 @@ export class RenderJob {
     }
   }
 
-  _handleResult(result) {
+  _handleResult(result: any): true | undefined {
     // There may be multiple reasons why `result` is not an up.RenderResult:
     //
     // (1) There was an error during the request (return value is up.Offline, up.Aborted, etc.)
@@ -106,7 +117,7 @@ export class RenderJob {
       // (1) Only access result.finished through this.finished to avoid creating new promises
       // (2) The then() will create a new chain, and we don't want to fail that
 
-      let guardedOnFinished = function(result) {
+      let guardedOnFinished = function(result: RenderResult) {
         guard(() => onFinished?.(result))
       }
 
@@ -130,7 +141,7 @@ export class RenderJob {
     }
   }
 
-  _handleError(error) {
+  _handleError(error: any): void {
     let prefix = error instanceof Aborted ? 'Rendering was aborted' : 'Error while rendering'
     printToStandard('up.render()', `${prefix}: ${error.name}: ${error.message}`)
     guard(() => this.renderOptions.onError?.(error))
@@ -149,12 +160,12 @@ export class RenderJob {
     The [revalidated](/learn/caching#revalidation) render result.
   @stable
   */
-  get finished() {
+  get finished(): Promise<RenderResult> {
     return this._awaitFinished()
   }
 
   // Method is memoized below
-  async _awaitFinished() {
+  async _awaitFinished(): Promise<RenderResult> {
     try {
       let result = await this._rendered
       return await result.finished
@@ -168,7 +179,7 @@ export class RenderJob {
     }
   }
 
-  _getChange() {
+  _getChange(): ChangeFromURL | ChangeFromResponse | ChangeFromContent {
     // (1) With a given { url } we want to handle { abort } when the new request is known.
     //     This way we can exclude the new request from aborting.
     //     The { handleAbort } callback is called in ChangeFromURL#_onRequestProcessed()
@@ -178,11 +189,12 @@ export class RenderJob {
     //     The { handleAbort } callback is called in ChangeFromContent#_onPlanApplicable()
     // (3) FromURL is eventually going to call FromContent.
     //     We memoize the callback so we only run it once.
-    let handleAbort = memoize((request) => this._handleAbortOption(request))
+    let handleAbort = memoize((request: AbortOptionProps) => this._handleAbortOption(request))
     let renderOptions = { ...this.renderOptions, handleAbort }
 
     if (renderOptions.url) {
-      return new ChangeFromURL(renderOptions)
+      // TypeScript doesn't narrow the object through renderOptions.url.
+      return new ChangeFromURL(renderOptions as RenderOptions & { url: string })
     } else if (renderOptions.response) {
       return new ChangeFromResponse(renderOptions)
     } else {
@@ -190,7 +202,7 @@ export class RenderJob {
     }
   }
 
-  _emitGuardEvent() {
+  _emitGuardEvent(): void {
     let guardEvent = pluckKey(this.renderOptions, 'guardEvent')
     if (guardEvent) {
       // Allow guard event handlers to manipulate render options for the default behavior.
@@ -205,7 +217,7 @@ export class RenderJob {
     }
   }
 
-  _handleAbortOption({ bindFragments, bindLayer, origin, layer, request }) {
+  _handleAbortOption({ bindFragments, bindLayer, origin, layer, request }: AbortOptionProps): void {
     // When preloading up.RenderOptions forces { abort: false }.
     let { abort } = this.renderOptions
 

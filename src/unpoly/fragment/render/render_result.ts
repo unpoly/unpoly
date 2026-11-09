@@ -1,5 +1,5 @@
 import { compact, map } from '../../util.js'
-import type { PlainObject } from '../../util.js'
+import type { RenderOptions } from './render_options.js'
 import type { Layer } from '../../layer/base.js'
 
 /**
@@ -26,7 +26,7 @@ Options for constructing an `up.RenderResult`.
 export interface RenderResultOptions {
   layer?: Layer
   target?: string
-  renderOptions?: PlainObject
+  renderOptions?: RenderOptions
   partialResults?: PartialRenderResult[]
 }
 
@@ -49,7 +49,7 @@ console.log(result.renderOptions) // result: { target: '.target', content: 'foo'
 export class RenderResult {
   declare layer: Layer
   declare target: string
-  declare renderOptions: PlainObject
+  declare renderOptions: RenderOptions
   declare fragments: Element[]
   declare finished: Promise<RenderResult>
 
