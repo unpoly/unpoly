@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
-import { mkdirSync, mkdtempSync, renameSync, rmSync, unlinkSync, watch, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, renameSync, rmSync, symlinkSync, unlinkSync, watch, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { watchTree } from '../../build/watch_tree.mjs'
@@ -15,7 +15,8 @@ function tree(t, files = {}) {
   let root = mkdtempSync(path.join(tmpdir(), 'watch-tree-'))
   for (let [file, content] of Object.entries(files)) {
     mkdirSync(path.dirname(path.join(root, file)), { recursive: true })
-    writeFileSync(path.join(root, file), content)
+    if (content.symlink) symlinkSync(path.join(root, content.symlink), path.join(root, file))
+    else writeFileSync(path.join(root, file), content)
   }
   let events = []
   let open = new Set()
@@ -144,6 +145,13 @@ test('a root deleted and created again is watched again', async (t) => {
   await expectEvent('', () => mkdirSync(at('sub'), { recursive: true }))
   await new Promise((resolve) => setTimeout(resolve, 20))
   await expectEvent('sub/b.js', () => writeFileSync(at('sub/b.js'), '1'))
+})
+
+test('symlinked directories are not watched, whether they were there first or came later', async (t) => {
+  // Like newestSource(). A link could also form a cycle.
+  let { root, at, watcher, expectEvent } = tree(t, { 'real/a.js': '0', 'first': { symlink: 'real' } })
+  await expectEvent('later', () => symlinkSync(at('real'), at('later')))
+  assert.deepEqual(watcher.directories.sort(), [root, at('real')].sort())
 })
 
 test('skipped directories are not watched', (t) => {

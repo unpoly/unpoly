@@ -72,6 +72,7 @@ export async function runBuild(argv) {
     return runWatch(CONFIGS[options.config])
   }
 
+  let startedAt = Date.now()
   let [buildErrors, lintErrors] = await Promise.all([
     buildOnce(CONFIGS[options.config], {
       // Comments only matter in the unminified bundles we publish. Elsewhere the source maps make
@@ -86,6 +87,8 @@ export async function runBuild(argv) {
     console.error(errors.join('\n'))
     return 1
   }
+  // Only now, because a lint error fails a build whose bundles were all written.
+  console.log(pc.green(`Built ${CONFIGS[options.config].bundles.length} bundles in ${Date.now() - startedAt} ms`))
 
   if (options.gzip) {
     return await spawnStep('gzip', ['--keep', '--force', ...GZIP_TARGETS])
@@ -103,7 +106,6 @@ async function lintSources() {
 // when everything was written.
 export async function buildOnce({ bundles, sourcemap }, { strip = false, log = console.log } = {}) {
   let terser = new TerserPool()
-  let startedAt = Date.now()
   try {
     let warnings = new Set()
     let outcomes = await Promise.all(bundles.map(async (bundle) => {
@@ -120,9 +122,7 @@ export async function buildOnce({ bundles, sourcemap }, { strip = false, log = c
     }))
     // Several bundles share most of their sources, and so their warnings.
     if (warnings.size) log(pc.yellow([...warnings].join('\n')))
-    let errors = outcomes.flat()
-    if (!errors.length) log(pc.green(`Built ${bundles.length} bundles in ${Date.now() - startedAt} ms`))
-    return errors
+    return outcomes.flat()
   } finally {
     await terser.close()
   }

@@ -80,6 +80,18 @@ function clean() {
   })
 }
 
+// A running dev environment writes to dist/ too. bin/build stops it, but only after clean(), so a
+// dev rebuild in between could leave its source maps for us to publish. Stop it first.
+async function stopDevEnv() {
+  const { stopDevEnv } = await import('../tooling/dev_env.mjs')
+  const { result, pid } = await stopDevEnv()
+  if (result === 'stopped') {
+    console.log(colors.yellow('Stopped the dev environment, since it writes to dist/ too. Restart it with bin/dev.'))
+  } else if (result === 'wedged') {
+    throw new Error(`The dev environment (PID ${pid}) would not stop. Stop it by hand, then release again.`)
+  }
+}
+
 function build() {
   console.log("Compiling a fresh build...")
   console.log()
@@ -163,6 +175,7 @@ function paths() {
 
 async function processRelease() {
   checkChangelog()
+  await stopDevEnv()
   await clean()
   await build()
   await confirmRelease()

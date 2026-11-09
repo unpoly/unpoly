@@ -10,7 +10,7 @@
 // under its old name. A directory watch has neither problem: it reports every name that is
 // written, created, renamed or deleted in it, whatever happens to the inodes.
 
-import { readdirSync, statSync, watch as fsWatch } from 'node:fs'
+import { lstatSync, readdirSync, watch as fsWatch } from 'node:fs'
 import path from 'node:path'
 
 // Calls `onChange(file, { directory })` for every event under `root`, with the absolute path
@@ -122,9 +122,11 @@ export function watchTree(root, onChange, { skip = () => false, onError = () => 
   }
 }
 
+// Not a symlink to a directory. We don't follow those, like subdirectories() (and newestSource()
+// in build_sync.mjs): there are none in the source directories, and one could form a cycle.
 function isDirectory(file) {
   try {
-    return statSync(file).isDirectory()
+    return lstatSync(file).isDirectory()
   } catch {
     return false
   }
