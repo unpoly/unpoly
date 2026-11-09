@@ -24,6 +24,13 @@ import { registerAttrCompiler, registerCompiler, registerMacro } from './script.
 import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
 import { doFocus } from './viewport.js'
+import type { PlainObject } from './util.js'
+import type { ElementOrSelector } from './element.js'
+import type { OptionsParserOptions } from './element/options_parser.js'
+import type { Layer } from './layer/base.js'
+
+// A link expanded with [up-expand] remembers the area it expanded to, and the area remembers the link.
+type ExpandedElement = Element & { upExpandedPair?: Element[] }
 
 /*-
 Features to follow links without a full page load.
@@ -38,9 +45,9 @@ Links feel faster with `[up-instant]`, which follows on `mousedown` instead of `
 */
 
 
-let lastTouchstartTarget = null
-let lastMousedownTarget = null
-let lastInstantTarget = null
+let lastTouchstartTarget: EventTarget | null = null
+let lastMousedownTarget: EventTarget | null = null
+let lastInstantTarget: Element | null = null
 
 const ATTRS_WITH_LOCAL_HTML = '[up-content], [up-fragment], [up-document]'
 const ATTRS_SUGGESTING_FOLLOW = `${ATTRS_WITH_LOCAL_HTML}, [up-target], [up-layer], [up-transition], [up-preload]`
@@ -169,7 +176,7 @@ export const config = new Config('up.link.config', () => ({
   preloadDelay: 90,
 }))
 
-function isPreloadDisabled(link) {
+function isPreloadDisabled(link: Element): boolean {
   // (1) Don't preload when we cannot change the browser URL. Following such a link will make a full page load ignoring our cache.
   //     When up.history.config.enabled excludes 'location', we never change the browser URL, so we can preload.
   // (2) Don't preload when the link isn't going to be handled by Unpoly.
@@ -178,7 +185,7 @@ function isPreloadDisabled(link) {
   return (!canPushState() && isEnabled('location')) || !isFollowable(link) || !willCache(link)
 }
 
-function willCache(link) {
+function willCache(link: Element): boolean {
   // Instantiate a lightweight request with basic link attributes needed for the cache-check.
   const options = parseRequestOptions(link)
   if (options.url) {
@@ -189,7 +196,7 @@ function willCache(link) {
   }
 }
 
-function reset() {
+function reset(): void {
   lastTouchstartTarget = null
   lastMousedownTarget = null
   lastInstantTarget = null
@@ -287,11 +294,12 @@ up.follow(link)
 @stable
 @signature
 */
-export const follow = mockable(function(link, options, parserOptions) {
+export const follow = mockable(function(link: ElementOrSelector, options?: PlainObject, parserOptions?: OptionsParserOptions): any {
   return render(followOptions(link, options, parserOptions))
 })
 
-export function parseRequestOptions(link, options, parserOptions) {
+// TODO(types): Return RequestOptions once the render options have a type.
+export function parseRequestOptions(link: Element, options?: PlainObject, parserOptions?: OptionsParserOptions): any {
   options = newOptions(options)
   const parser = new OptionsParser(link, options, { ...parserOptions, fail: false })
 
@@ -346,6 +354,7 @@ let options = up.link.followOptions(link)
   An object of [render options](/api/up.render#parameters).
 @stable
 */
+export function followOptions(link: ElementOrSelector, options?: PlainObject, parserOptions?: OptionsParserOptions): PlainObject
 export function followOptions(link, options, parserOptions) {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   link = effectiveLink(getSmart(link))
@@ -537,6 +546,7 @@ with pages the user is likely to click or that should be
   When the link cannot be preloaded, the promise rejects with an error.
 @stable
 */
+export function preload(link: ElementOrSelector, options?: PlainObject): Promise<any>
 export function preload(link, options) {
   // If passed a selector, up.fragment.get() will match in the current layer.
   link = effectiveLink(getSmart(link))
@@ -569,12 +579,13 @@ export function preload(link, options) {
 
 // A click on an [up-expand] area follows its link.
 // Returns that link for an area, and the given element otherwise.
-function effectiveLink(element) {
+// A link that was expanded with [up-expand] stands for the link inside it.
+function effectiveLink(element: ExpandedElement): Element {
   let link = element.upExpandedPair?.[1]
   return element.contains(link) ? link : element
 }
 
-function preloadIssue(link) {
+function preloadIssue(link: Element): string | undefined {
   if (!isSafe(link)) {
     return 'Will not preload an unsafe link'
   }
@@ -631,11 +642,11 @@ Looks at the link's `[up-method]` or `[data-method]` attributes. Defaults to `"g
   The HTTP method.
 @internal
 */
-function followMethod(link, options = {}) {
+function followMethod(link: Element, options: PlainObject = {}): string {
   return normalizeMethod(options.method || link.getAttribute('up-method') || link.getAttribute('data-method'))
 }
 
-function followURL(link, options = {}) {
+function followURL(link: Element, options: PlainObject = {}): string | undefined {
   const url = options.url || link.getAttribute('up-href') || link.getAttribute('href')
 
   // Developers sometimes make a <a href="#"> to give a JavaScript interaction standard
@@ -672,6 +683,7 @@ To make additional elements followable, see `up.link.config.followSelectors`.
   Whether Unpoly will handle the given link.
 @stable
 */
+export function isFollowable(link: ElementOrSelector): boolean
 export function isFollowable(link) {
   link = getSmart(link)
   return config.matches(link, 'followSelectors')
@@ -689,13 +701,13 @@ will receive an `[up-follow]` attribute.
   The element or selector for the link to make followable.
 @experimental
 */
-export function makeFollowable(link) {
+export function makeFollowable(link: Element): void {
   if (!isFollowable(link)) {
     link.setAttribute('up-follow', '')
   }
 }
 
-function makeClickable(element) {
+function makeClickable(element: HTMLElement): void {
   // We default to a button role, except if the element looks link-ish
   let role = element.matches('a, [up-follow]') ? 'link' : 'button'
 
@@ -776,26 +788,26 @@ Any matching element will now gain [keyboard interaction and other accessibility
 //   let verbatimHREF = link.getAttribute('href')
 // }
 
-export function shouldHandleClick(event, link) {
+export function shouldHandleClick(event: Event, link: Element): boolean {
   // Users may configure up.link.config.followSelectors.push('a')
   // and then opt out individual links with [up-follow=false].
   if (event.defaultPrevented) {
     return false
   }
 
-  return isClickTarget(event.target, link)
+  return isClickTarget(event.target as Element, link)
 }
 
 // Returns whether a click on the given target is meant for the given link,
 // and not for another interactive element within the link.
-function isClickTarget(target, link) {
+function isClickTarget(target: Element, link: Element): boolean {
   // A click within a nested [up-expand] area belongs to that area, but only if:
   // (1) The area works. Only the [up-expand] macro sets an { upExpandedPair },
   //     so an inert area or [up-expand=false] does not take the click.
   // (2) The area is not the element we're testing, e.g. when the area asks about a click on itself.
   // (3) The area is inside the element. closest() may also find an area around it,
   //     but that outer area does not take the click from its content.
-  const innerArea = target.closest('[up-expand]')
+  const innerArea: ExpandedElement = target.closest('[up-expand]')
   if (innerArea?.upExpandedPair && innerArea !== link && link.contains(innerArea)) {
     return false
   }
@@ -816,11 +828,11 @@ function isClickTarget(target, link) {
 }
 
 // Elements within a clickable container that handle their own clicks.
-function interactiveSelector() {
+function interactiveSelector(): string {
   return [fieldSelector(), anyButtonSelector(), 'label', 'summary'].join()
 }
 
-function isInstant(linkOrDescendant) {
+function isInstant(linkOrDescendant: Element): boolean {
   const element = linkOrDescendant.closest(config.selector('instantSelectors'))
   // (1) Allow users to configure up.link.config.instantSelectors.push('a')
   //     but opt out individual links with [up-follow=false].
@@ -829,7 +841,7 @@ function isInstant(linkOrDescendant) {
   return element && !isInstantDisabled(element) && isClickTarget(linkOrDescendant, element)
 }
 
-function isInstantDisabled(link) {
+function isInstantDisabled(link: Element): boolean {
   // (1) We cannot resolve config.noInstantSelectors via a :not() selector because
   //     convertClicks() needs to check if a given link is instant.
   // (2) We cannot implement this as !isFollowable(link) because [up-clickable] can add
@@ -859,7 +871,7 @@ Also see docs for `up:click`.
 @param {up.Layer} layer
 @internal
 */
-export function convertClicks(layer) {
+export function convertClicks(layer: Layer): void {
   layer.on('click', function(event, element) {
     // We never handle events for the right mouse button,
     // or when Shift/CTRL/Meta/ALT is pressed
@@ -927,16 +939,16 @@ export function convertClicks(layer) {
   })
 }
 
-function isLongPressPossible(mousedownEvent) {
-  let mousedownTarget = mousedownEvent.target
+function isLongPressPossible(mousedownEvent: MouseEvent) {
+  let mousedownTarget = mousedownEvent.target as Element
   return (lastTouchstartTarget === mousedownTarget) && mousedownTarget.closest('[href]')
 }
 
-function didUserDragAway(clickEvent) {
+function didUserDragAway(clickEvent: MouseEvent): boolean {
   return lastMousedownTarget && (lastMousedownTarget !== clickEvent.target)
 }
 
-function forkEventAsUpClick(originalEvent) {
+function forkEventAsUpClick(originalEvent: MouseEvent | KeyboardEvent): void {
   let forwardedProps = ['clientX', 'clientY', 'button', ...keyModifiers]
   const newEvent = fork(originalEvent, 'up:click', forwardedProps)
   emit(originalEvent.target, newEvent, { log: false })
@@ -1015,12 +1027,13 @@ You can configure links to use unsafe methods like `POST` or `DELETE` by setting
   Whether the link will be followed using a safe HTTP method.
 @stable
 */
-export function isSafe(link) {
+export function isSafe(link: Element): boolean {
   const method = followMethod(link)
   return isSafeMethod(method)
 }
 
-function onLoadCondition(condition, link, callback) {
+// The condition is 'insert', 'reveal', 'hover' or 'manual'.
+function onLoadCondition(condition: string | false, link: Element, callback: (options?: any) => void): void {
   switch (condition) {
     case 'insert':
       callback()
@@ -1087,7 +1100,7 @@ Loads a [`[up-defer="manual"]`](/api/up-defer) placeholder.
 @stable
 @signature
 */
-export function loadDeferred(link, options) {
+export function loadDeferred(link: Element, options?: PlainObject): any {
   let guardEvent = build('up:deferred:load', { log: ['Loading deferred %o', link] })
 
   // These options override up.link.follow() behavior
@@ -1536,7 +1549,7 @@ Links with an `[up-preload]` attribute are always [followed by Unpoly](/api/up-f
 @signature
 */
 
-export function install() {
+export function install(): void {
   registerMacro(config.selectorFn('clickableSelectors'), makeClickable)
 
   registerAttrCompiler('up-defer', { defaultValue: 'insert' }, function(link, condition) {
