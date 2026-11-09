@@ -1,4 +1,4 @@
-import { isDefined, queueTask } from '../util.js'
+import { isDefined } from '../util.js'
 import { computedStyleNumber, getRoot, setInlineStyle } from '../element.js'
 import { fail } from '../error.js'
 import { isAlive } from '../fragment.js'
