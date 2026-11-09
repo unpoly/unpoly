@@ -405,8 +405,7 @@ let options = up.link.followOptions(link)
   An object of [render options](/api/up.render#parameters).
 @stable
 */
-export function followOptions(link: ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions
-export function followOptions(link, options, parserOptions) {
+export function followOptions(link: ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   link = effectiveLink(getSmart(link))
   options = newOptions(options)
@@ -597,8 +596,9 @@ with pages the user is likely to click or that should be
   When the link cannot be preloaded, the promise rejects with an error.
 @stable
 */
+// Returns a Promise or an up.RenderJob, which has the API of a Promise.
 export function preload(link: ElementOrSelector, options?: PlainObject): Promise<any>
-export function preload(link, options) {
+export function preload(link: ElementOrSelector, options?: PlainObject) {
   // If passed a selector, up.fragment.get() will match in the current layer.
   link = effectiveLink(getSmart(link))
 
@@ -734,8 +734,7 @@ To make additional elements followable, see `up.link.config.followSelectors`.
   Whether Unpoly will handle the given link.
 @stable
 */
-export function isFollowable(link: ElementOrSelector): boolean
-export function isFollowable(link) {
+export function isFollowable(link: ElementOrSelector): boolean {
   link = getSmart(link)
   return config.matches(link, 'followSelectors')
 }
@@ -1604,7 +1603,7 @@ export function install(): void {
   registerMacro(config.selectorFn('clickableSelectors'), makeClickable)
 
   registerAttrCompiler('up-defer', { defaultValue: 'insert' }, function(link, condition) {
-    let doLoad = (options) => muteUncriticalRejection(loadDeferred(link, options))
+    let doLoad = (options?: PlainObject) => muteUncriticalRejection(loadDeferred(link, options))
     onLoadCondition(condition, link, doLoad)
   })
 
@@ -1682,7 +1681,7 @@ export function install(): void {
   registerCompiler(config.selectorFn('preloadSelectors'), function(link) {
     // An [up-expand] area preloads its link, so we check whether we can preload that link.
     if (!isPreloadDisabled(effectiveLink(link))) {
-      let doPreload = (options) => muteUncriticalRejection(preload(link, options))
+      let doPreload = (options?: PlainObject) => muteUncriticalRejection(preload(link, options))
       // We need to map several cases here:
       //
       // (1) <a up-preload>              => 'hover'
