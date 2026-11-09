@@ -15,6 +15,7 @@ import type { ArgSpec, Cleaner, PlainObject } from '../util.js'
 import type { ElementOrSelector, StyleProps } from '../element.js'
 import type { Params } from '../form/params.js'
 import type { Layer } from '../layer/base.js'
+import type { LayerCloseEvent } from '../layer.js'
 import type { UpRequest } from '../network/request.js'
 
 /**
@@ -394,7 +395,7 @@ export class Preview {
   */
   setAttrs(attrs: PlainObject): void
   setAttrs(element: ElementOrSelector, attrs: PlainObject): void
-  setAttrs(...args) {
+  setAttrs(...args: unknown[]) {
     let [element, attrs] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(setAttrsTemp(element, attrs))
   }
@@ -425,7 +426,7 @@ export class Preview {
   */
   addClass(klass: string): void
   addClass(element: ElementOrSelector, klass: string): void
-  addClass(...args) {
+  addClass(...args: unknown[]) {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(addClassTemp(element, klass))
   }
@@ -460,7 +461,7 @@ export class Preview {
   */
   removeClass(klass: string): void
   removeClass(element: ElementOrSelector, klass: string): void
-  removeClass(...args) {
+  removeClass(...args: unknown[]) {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(removeClassTemp(element, klass))
   }
@@ -493,7 +494,7 @@ export class Preview {
   */
   setStyle(styles: StyleProps): void
   setStyle(element: ElementOrSelector, styles: StyleProps): void
-  setStyle(...args) {
+  setStyle(...args: unknown[]) {
     let [element, styles] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(setStyleTemp(element, styles))
   }
@@ -524,7 +525,7 @@ export class Preview {
   @stable
   */
   disable(element?: ElementOrSelector): void
-  disable(...args) {
+  disable(...args: unknown[]) {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(disableContainerTemp(element, { preview: true }))
   }
@@ -651,7 +652,7 @@ export class Preview {
   insert(tempValue: any): void
   insert(reference: ElementOrSelector, tempValue: any): void
   insert(reference: ElementOrSelector, position: InsertPosition, tempValue: any): void
-  insert(...args) {
+  insert(...args: unknown[]) {
     // (1) tempValue can have on of the following forms:
     //     - A string of HTML
     //     - A CSS selector string matching a template
@@ -687,7 +688,7 @@ export class Preview {
   @stable
   */
   show(element?: ElementOrSelector): void
-  show(...args) {
+  show(...args: unknown[]) {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(showTemp(element))
   }
@@ -718,7 +719,7 @@ export class Preview {
   @stable
   */
   hide(element?: ElementOrSelector): void
-  hide(...args) {
+  hide(...args: unknown[]) {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(hideTemp(element))
   }
@@ -754,7 +755,7 @@ export class Preview {
   @experimental
   */
   hideContent(parent?: ElementOrSelector): void
-  hideContent(...args) {
+  hideContent(...args: unknown[]) {
     let [parent] = this._parseMutatorArgs(args, 'val')
     // Place all children in a wrapper so we can hide text nodes.
     let wrapper = wrapChildren(parent)
@@ -811,7 +812,7 @@ export class Preview {
   */
   showPlaceholder(placeholder: any): void
   showPlaceholder(parent: ElementOrSelector, placeholder: any): void
-  showPlaceholder(...args) {
+  showPlaceholder(...args: unknown[]) {
     let [parent, placeholderReference] = this._parseMutatorArgs(args, 'val', 'val')
 
     // We do not need to wrap a NodeList of mixed Text and Element nodes.
@@ -876,7 +877,7 @@ export class Preview {
   */
   swapContent(newContent: any): void
   swapContent(parent: ElementOrSelector, newContent: any): void
-  swapContent(...args) {
+  swapContent(...args: unknown[]) {
     let [parent, newContent] = this._parseMutatorArgs(args, 'val', 'val')
     this.hideContent(parent)
     this.insert(parent, newContent)
@@ -910,7 +911,7 @@ export class Preview {
   openLayer(content: any, options: PlainObject = {}): Layer {
     let undoDismissValue = ':undo-preview'
 
-    let onDismiss = ({ value }) => {
+    let onDismiss = ({ value }: LayerCloseEvent) => {
       // Abort the request when the user dismisses the overlay,
       // but not when we ourselves dismiss it when reverting.
       if (value !== undoDismissValue) this.request.abort({ reason: 'Preview overlay dismissed' })
