@@ -25,11 +25,11 @@ export class LogConfig extends Config {
     }
   }
 
-  get enabled() {
+  get enabled(): boolean {
     return enabled
   }
 
-  set enabled(newEnabled) {
+  set enabled(newEnabled: boolean) {
     enabled = newEnabled
     try {
       sessionStorage?.setItem(enabledKey, newEnabled ? '1' : '')
