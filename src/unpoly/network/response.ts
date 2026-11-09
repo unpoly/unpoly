@@ -1,6 +1,36 @@
 import { evalOption, getSimpleTokens, variant } from '../util.js'
 import { cache, config } from '../network.js'
 import { CSPInfo } from '../script/csp/csp_info.js'
+import type { PlainObject, ValueOrFunction } from '../util.js'
+import type { UpRequest as UpRequestClass } from './request.js'
+
+type UpRequest = InstanceType<typeof UpRequestClass>
+
+/**
+Options for constructing an `up.Response`. Most are read from the response headers.
+@internal
+*/
+export interface ResponseOptions {
+  method?: string
+  url?: string
+  text?: string
+  status?: number
+  request?: UpRequest
+  xhr?: XMLHttpRequest
+  target?: string
+  title?: string
+  openLayer?: PlainObject
+  acceptLayer?: any
+  dismissLayer?: any
+  eventPlans?: PlainObject[]
+  context?: PlainObject
+  expireCache?: any
+  evictCache?: any
+  // Custom headers for synthetic responses without { xhr }.
+  headers?: Record<string, string>
+  loadedAt?: Date
+  fail?: ValueOrFunction<boolean>
+}
 
 const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
 
@@ -21,6 +51,25 @@ console.log(response.text)   // "<html><body>..."
 // A class expression, so the class is still named `Response` at runtime, while the binding
 // doesn't shadow the browser's `Response` here or in importers.
 export const UpResponse = class Response {
+  declare method: string
+  declare url: string
+  declare text: string
+  declare status: number
+  declare request: UpRequest
+  declare xhr: XMLHttpRequest | undefined
+  declare target: string | undefined
+  declare title: string | undefined
+  declare openLayer: PlainObject | undefined
+  declare acceptLayer: any
+  declare dismissLayer: any
+  declare eventPlans: PlainObject[] | undefined
+  declare context: PlainObject | undefined
+  declare expireCache: any
+  declare evictCache: any
+  declare headers: Record<string, string>
+  declare loadedAt: Date
+  declare fail: ValueOrFunction<boolean> | undefined
+  declare parsedJSON: any
 
   /*-
   The HTTP method used for the request that produced this response.
@@ -116,7 +165,7 @@ export const UpResponse = class Response {
   @experimental
   */
 
-  constructor(options = {}) {
+  constructor(options: ResponseOptions = {}) {
     // Like a default parameter, a default only replaces an undefined option.
     const { headers = {}, loadedAt = new Date() } = options
 
@@ -147,7 +196,7 @@ export const UpResponse = class Response {
   @param {boolean} ok
   @stable
   */
-  get ok() {
+  get ok(): boolean {
     return !evalOption(this.fail ?? config.fail, this)
   }
 
@@ -166,7 +215,7 @@ export const UpResponse = class Response {
   @param {boolean} none
   @internal
   */
-  get none() {
+  get none(): boolean {
     return !this.text
   }
 
@@ -183,11 +232,11 @@ export const UpResponse = class Response {
     The value of the header.
   @stable
   */
-  header(name) {
+  header(name: string): string | undefined {
     return this.headers[name] || this.xhr?.getResponseHeader(name)
   }
 
-  get varyHeaderNames() {
+  get varyHeaderNames(): string[] {
     let varyHeaderValue = this.header('Vary')
     return getSimpleTokens(varyHeaderValue, { separator: ',' })
   }
@@ -199,7 +248,7 @@ export const UpResponse = class Response {
   @param {string} contentType
   @stable
   */
-  get contentType() {
+  get contentType(): string | undefined {
     return this.header('Content-Type')
   }
 
@@ -216,7 +265,7 @@ export const UpResponse = class Response {
     Whether the response has an HTML mime type.
   @experimental
   */
-  isHTML() {
+  isHTML(): boolean {
     return HTML_CONTENT_TYPE.test(this.contentType)
   }
 
@@ -225,7 +274,7 @@ export const UpResponse = class Response {
   @param {Object} cspInfo
   @internal
   */
-  get cspInfo() {
+  get cspInfo(): CSPInfo {
     let policy = this.header('Content-Security-Policy') || this.header('Content-Security-Policy-Report-Only')
     return CSPInfo.fromHeader(policy)
   }
@@ -239,7 +288,7 @@ export const UpResponse = class Response {
   @param {Date|undefined} lastModified
   @stable
   */
-  get lastModified() {
+  get lastModified(): Date | undefined {
     let header = this.header('Last-Modified')
     if (header) {
       return new Date(header)
@@ -255,7 +304,7 @@ export const UpResponse = class Response {
   @param {string|undefined} etag
   @stable
   */
-  get etag() {
+  get etag(): string | undefined {
     return this.header('ETag')
   }
 
@@ -279,7 +328,7 @@ export const UpResponse = class Response {
   @param {Object} json
   @stable
   */
-  get json() {
+  get json(): any {
     return this.parsedJSON ||= JSON.parse(this.text)
   }
 
@@ -290,9 +339,10 @@ export const UpResponse = class Response {
   @param {number} age
   @stable
   */
-  get age() {
+  get age(): number {
     let now = new Date()
-    return now - this.loadedAt
+    // Subtracting dates gives milliseconds. TypeScript only allows arithmetic on numbers.
+    return (now as any) - (this.loadedAt as any)
   }
 
   /*-
@@ -304,7 +354,7 @@ export const UpResponse = class Response {
   @param {boolean} expired
   @stable
   */
-  get expired() {
+  get expired(): boolean {
     return this.age > config.cacheExpireAge ||
       // When the user calls up.cache.expire() it will expire requests, not responses.
       // Hence we need to delegate to our request.
@@ -313,15 +363,15 @@ export const UpResponse = class Response {
 
   get [Symbol.toStringTag]() { return 'up.Response' }
 
-  toString() {
+  toString(): string {
     return `HTTP ${this.status} response to ${this.request}`
   }
 
-  get redirect() {
+  get redirect(): boolean {
     return (this.url !== this.request.url) || (this.method !== this.request.method)
   }
 
-  get redirectRequest() {
+  get redirectRequest(): UpRequest | undefined {
     if (!this.redirect) return
 
     let finalRequest = variant(this.request, {
@@ -340,6 +390,11 @@ export const UpResponse = class Response {
   }
 
 }
+
+/**
+An instance of `up.Response`.
+*/
+export type UpResponse = InstanceType<typeof UpResponse>
 
 export const api = {
   Response: UpResponse,
