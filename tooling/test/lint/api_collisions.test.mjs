@@ -82,6 +82,9 @@ test('reports an up.internal key that is not its export name', (t) => {
   for (let beta of [
     "import { sprintf } from './alpha.js'\nexport const api = { internal: { format: sprintf } }\n",
     "import { sprintf as format } from './alpha.js'\nexport const api = { internal: { format } }\n",
+    "import { sprintf } from './alpha.js'\nconst format = sprintf\nexport const api = { internal: { format } }\n",
+    "import format from './alpha.js'\nexport const api = { internal: { format } }\n",
+    "import * as alpha from './alpha.js'\nexport const api = { internal: { alpha } }\n",
   ]) {
     let { check } = project(t, {
       'src/unpoly/alpha.js': 'export function sprintf() {}\nexport const api = { util: {} }\n',
