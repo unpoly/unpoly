@@ -36,6 +36,7 @@
 // evaluated, and that they come first.
 import * as namespace from './unpoly/namespace.js.erb'
 import * as util from './unpoly/util.js'
+import * as error from './unpoly/error.js'
 import * as migrateStub from './unpoly/migrate_stub.js'
 import * as element from './unpoly/element.js'
 import * as framework from './unpoly/framework.js'
@@ -83,6 +84,7 @@ window.up = {} as Up
 const apis = [
   namespace.api,
   util.api,
+  error.api,
   migrateStub.api,
   element.api,
   framework.api,

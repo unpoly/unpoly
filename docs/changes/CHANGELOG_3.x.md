@@ -5,6 +5,7 @@ Unreleased
 - Fix a bug where [`up.element.affix()`](/api/up.element.affix) and [`up.element.createFromSelector()`](/api/up.element.createFromSelector) threw an error when a quoted attribute value contained a `]` character, like in `input[name="user[email]"]`.
 - Fix a bug where rendering a [fallback target](/learn/targeting-fragments#providing-a-fallback-target) from a `{ document }`, `{ fragment }` or `{ response }` [aborted](/learn/aborting-requests) requests in the primary target, although the primary target was not updated. This happened with `{ abort: 'target' }`, which is the default.
 - When Unpoly adds or changes a history entry, it now calls the browser's History API once instead of twice. Browsers limit how often a page may change its history, so apps that update history often are less likely to hit that limit.
+- [`up.error.muteUncriticalRejection()`](/api/up.error.muteUncriticalRejection) is now public API. It ignores the expected rejections of a promise you don't handle, like an aborted request or an error response, so they don't show up as "Uncaught (in promise)" in the error console.
 
 
 3.15.0

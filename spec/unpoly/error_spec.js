@@ -2,12 +2,12 @@ const u = up.util
 
 describe('up.error', function() {
 
-  describe('up.internal.muteUncriticalRejection()', function() {
+  describe('up.error.muteUncriticalRejection()', function() {
 
     it('does not mute a fulfilled promise', async function() {
       const value = 'fulfillment value'
       const promise = Promise.resolve(value)
-      const mutedPromise = up.internal.muteUncriticalRejection(promise)
+      const mutedPromise = up.error.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeResolvedTo(value)
     })
@@ -15,7 +15,7 @@ describe('up.error', function() {
     it('mutes a rejected promise if the rejection value is an up.Response', async function() {
       const response = new up.Response()
       const promise = Promise.reject(response)
-      const mutedPromise = up.internal.muteUncriticalRejection(promise)
+      const mutedPromise = up.error.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeResolved()
     })
@@ -23,7 +23,7 @@ describe('up.error', function() {
     it('mutes a rejected promise if the rejection value is an up.RenderResult', async function() {
       const renderResult = new up.RenderResult()
       const promise = Promise.reject(renderResult)
-      const mutedPromise = up.internal.muteUncriticalRejection(promise)
+      const mutedPromise = up.error.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeResolved()
     })
@@ -31,7 +31,7 @@ describe('up.error', function() {
     it('mutes a rejected promise if the rejection value is an instance of a subclass of up.Response', async function() {
       const ResponseSubclass = class extends up.Response {}
       const promise = Promise.reject(new ResponseSubclass())
-      const mutedPromise = up.internal.muteUncriticalRejection(promise)
+      const mutedPromise = up.error.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeResolved()
     })
@@ -39,7 +39,15 @@ describe('up.error', function() {
     it('mutes a rejected promise if the rejection value is an AbortError', async function() {
       const abortError = new up.Aborted('User aborted')
       const promise = Promise.reject(abortError)
-      const mutedPromise = up.internal.muteUncriticalRejection(promise)
+      const mutedPromise = up.error.muteUncriticalRejection(promise)
+
+      await expectAsync(mutedPromise).toBeResolved()
+    })
+
+    it('mutes a rejected promise if the rejection value is a native AbortError', async function() {
+      const abortError = new DOMException('Aborted by the browser', 'AbortError')
+      const promise = Promise.reject(abortError)
+      const mutedPromise = up.error.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeResolved()
     })
@@ -47,14 +55,14 @@ describe('up.error', function() {
     it('does not mute a rejected promise with another rejection value', async function() {
       const error = new Error('other error')
       const promise = Promise.reject(error)
-      const mutedPromise = up.internal.muteUncriticalRejection(promise)
+      const mutedPromise = up.error.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeRejectedWith(error)
     })
 
     it('does not mute a rejected promise if the rejection value is not an object', async function() {
       const promise = Promise.reject('reason')
-      const mutedPromise = up.internal.muteUncriticalRejection(promise)
+      const mutedPromise = up.error.muteUncriticalRejection(promise)
 
       await expectAsync(mutedPromise).toBeRejectedWith('reason')
     })

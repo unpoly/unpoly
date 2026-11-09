@@ -17,7 +17,7 @@ import {
   normalizeMethod, objectContains, parseArgs, parseScalarJSONPairs, parseString, renameKey, sequence,
   spanObject, sprintf, unresolvablePromise, withRenamedKeys, wrapValue,
 } from './util.js'
-import { fail, guard, guardFn, muteUncriticalRejection } from './error.js'
+import { fail, guard, guardFn } from './error.js'
 import { mockable } from './mockable.js'
 import { assertConfirmed, popCookie, submitForm } from './browser.js'
 import {
@@ -108,7 +108,6 @@ export const api = {
     fail,
     guard,
     guardFn,
-    muteUncriticalRejection,
 
     mockable,
 

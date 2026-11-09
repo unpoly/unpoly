@@ -137,6 +137,7 @@ Unpoly's functionality is split into the namespaces below. Each namespace handle
 | `up.util` | JavaScript helpers, relaxed JSON | — | `up.util.isBlank()`, `up.util.copy()` | — |
 | `up.framework` | Booting, feature detection | `[up-boot=manual]` | `up.boot()` | `up:framework:booted` |
 | `up.log` | Console logging | — | `up.log.enable()` | — |
+| `up.error` | Error classes, expected rejections | — | `up.error.muteUncriticalRejection()` | — |
 
 We rarely add a new namespace. We sometimes rename an existing namespace when its responsibilities change, and the name no longer fits.
 
