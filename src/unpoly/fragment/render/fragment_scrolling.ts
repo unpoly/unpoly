@@ -1,10 +1,36 @@
 import { isDefined, isNumber, isString, pickBy } from '../../util.js'
 import { FragmentProcessor } from './fragment_processor.js'
 import { restoreScroll, reveal, revealHash, scrollTo } from '../../viewport.js'
+import type { FragmentProcessorOptions } from './fragment_processor.js'
+import type { PlainObject } from '../../util.js'
+
+/**
+Options for an `up.FragmentScrolling`.
+@internal
+*/
+export interface FragmentScrollingOptions extends FragmentProcessorOptions {
+  hash?: string
+  mode?: string
+  revealTop?: boolean
+  revealMax?: number | ((viewportHeight: number) => number)
+  revealSnap?: number
+  revealPadding?: number
+  scrollBehavior?: ScrollBehavior
+  // Scroll positions from before the update, for { scroll: 'keep' }.
+  oldScrollTops?: any
+}
 
 export class FragmentScrolling extends FragmentProcessor {
+  declare hash: string | undefined
+  declare mode: string | undefined
+  declare revealTop: boolean | undefined
+  declare revealMax: number | ((viewportHeight: number) => number) | undefined
+  declare revealSnap: number | undefined
+  declare revealPadding: number | undefined
+  declare behavior: ScrollBehavior | undefined
+  declare oldScrollTops: any
 
-  constructor(options) {
+  constructor(options: FragmentScrollingOptions) {
     super(options)
     this.hash = options.hash
     this.mode = options.mode
@@ -22,7 +48,7 @@ export class FragmentScrolling extends FragmentProcessor {
     this.oldScrollTops = options.oldScrollTops
   }
 
-  attributes() {
+  attributes(): PlainObject {
     return pickBy({
       ...super.attributes(),
       hash: this.hash,
@@ -36,7 +62,7 @@ export class FragmentScrolling extends FragmentProcessor {
     }, isDefined)
   }
 
-  processPrimitive(opt) {
+  processPrimitive(opt: any): any {
     switch (opt) {
       case 'top':
         return this._scrollTo(0)
@@ -65,23 +91,23 @@ export class FragmentScrolling extends FragmentProcessor {
     }
   }
 
-  processElement(element) {
+  processElement(element: HTMLElement): boolean | undefined {
     return this._revealElement(element)
   }
 
-  _revealElement(element) {
+  _revealElement(element: HTMLElement | undefined): boolean | undefined {
     if (element) {
       reveal(element, this.attributes())
       return true
     }
   }
 
-  _revealSelector(selector) {
+  _revealSelector(selector: string): boolean | undefined {
     let match = this.findSelector(selector)
     return this._revealElement(match)
   }
 
-  _revealLayer() {
+  _revealLayer(): boolean | undefined {
     // Reveal the layer's box instead of the layer's element.
     // If the layer has its own viewport, like a modal, revealing the box will
     // scroll the layer viewport. Revealing the layer element would scroll
@@ -89,18 +115,18 @@ export class FragmentScrolling extends FragmentProcessor {
     return this._revealElement(this.layer.getBoxElement())
   }
 
-  _scrollTo(position) {
+  _scrollTo(position: number): boolean {
     // With { around: undefined }, scrollToTop() resets all viewports in { layer }
     return scrollTo(position, { ...this.attributes(), around: this.fragment })
   }
 
-  _restoreOld() {
+  _restoreOld(): boolean | undefined {
     if (this.oldScrollTops) {
       return this._restoreSaved({ scrollTops: this.oldScrollTops })
     }
   }
 
-  _restoreSaved(extraOptions) {
+  _restoreSaved(extraOptions?: PlainObject): boolean {
     // With { around: undefined }, restoreScroll() restores all viewports in { layer }
     return restoreScroll({ ...this.attributes(), around: this.fragment, ...extraOptions })
   }
