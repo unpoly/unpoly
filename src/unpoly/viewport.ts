@@ -18,6 +18,44 @@ import { Rect } from './util/rect.js'
 import { BodyShifter } from './viewport/body_shifter.js'
 import { FocusCapsule } from './viewport/focus_capsule.js'
 import { RevealMotion } from './viewport/reveal_motion.js'
+import type { List, PlainObject } from './util.js'
+import type { ElementOrSelector } from './element.js'
+import type { InputDevice } from './event.js'
+
+/**
+Options for focusing an element.
+@internal
+*/
+export interface DoFocusOptions {
+  preventScroll?: boolean
+  // Focus an element that isn't focusable, by giving it [tabindex=-1].
+  force?: boolean
+  inputDevice?: InputDevice
+  focusVisible?: boolean | 'auto'
+}
+
+/**
+Options for revealing the element that a URL #hash points to.
+@internal
+*/
+export interface RevealHashOptions {
+  // Reveal the target again after the browser had a chance to scroll.
+  strong?: boolean
+  layer?: any
+  origin?: Element
+  behavior?: ScrollBehavior
+  focus?: boolean
+}
+
+/**
+What `up.viewport.absolutize()` returns: the `<up-bounds>` element that now wraps the element,
+and a function that moves it.
+@internal
+*/
+export interface Absolutization {
+  bounds: HTMLElement
+  moveBounds(diffX: number, diffY: number): void
+}
 
 /*-
 Features to control scrolling and focus when fragments are updated.
@@ -182,7 +220,8 @@ To make `up.reveal()` aware of fixed elements you can either:
 @stable
 @signature
 */
-export const reveal = mockable(function(element, options) {
+// The element may also be a selector.
+export const reveal = mockable(function(element: any, options?: PlainObject): any {
   // copy options, since we will mutate it below (options.layer = ...).
   options = newOptions(options)
   element = getSmart(element, options)
@@ -248,7 +287,7 @@ Focusing an element will also [reveal](/api/up.reveal) it, unless `{ preventScro
 
 @stable
 */
-export const doFocus = mockable(function doFocus(element, { preventScroll, force, inputDevice, focusVisible } = {}) {
+export const doFocus = mockable(function doFocus(element: HTMLElement, { preventScroll, force, inputDevice, focusVisible }: DoFocusOptions = {}): any {
   if (force) {
     // (1) Element#tabIndex is -1 for all non-interactive elements,
     //     whether or not the element has an [tabindex=-1] attribute.
@@ -281,7 +320,7 @@ export const doFocus = mockable(function doFocus(element, { preventScroll, force
   }
 })
 
-function removeFocusClasses(element) {
+function removeFocusClasses(element: Element | null): void {
   element?.classList.remove('up-focus-hidden', 'up-focus-visible')
 }
 
@@ -333,7 +372,7 @@ Because of this the `.up-focus-visible` class may be set on elements that the br
 @experimental
 */
 
-export function tryFocus(element, options) {
+export function tryFocus(element: HTMLElement, options?: DoFocusOptions): boolean {
   doFocus(element, options)
   return element === document.activeElement
 }
@@ -365,7 +404,7 @@ up.viewport.revealHash('#chapter2')
 @param {string} [options.behavior="instant"]
 @internal
 */
-export function revealHash(...args) {
+export function revealHash(...args: Parameters<typeof revealHashFn>): any {
   return revealHashFn(...args)?.()
 }
 
@@ -377,7 +416,7 @@ Returns `undefined` if we cannot scroll.
 @function up.viewport.revealHashFn
 @internal
 */
-export function revealHashFn(hash, { strong, layer, origin, behavior = 'instant', focus = false } = {}) {
+export function revealHashFn(hash: string, { strong, layer, origin, behavior = 'instant', focus = false }: RevealHashOptions = {}): (() => any) | undefined {
   if (!hash) return
 
   let match = firstHashTarget(hash, { layer, origin })
@@ -395,7 +434,7 @@ export function revealHashFn(hash, { strong, layer, origin, behavior = 'instant'
   }
 }
 
-function allSelector() {
+function allSelector(): string {
   // On Edge the document viewport can be changed from CSS
   return [rootSelector(), ...config.viewportSelectors].join()
 }
@@ -411,7 +450,7 @@ if no closer viewport exists.
 @return {Element}
 @stable
 */
-export function closest(target, options = {}) {
+export function closest(target: ElementOrSelector, options: PlainObject = {}): HTMLElement {
   const element = getSmart(target, options)
   // Use up.element.closest() which searches across layer boundaries.
   // It is OK to find a viewport in a parent layer. Layers without its
@@ -432,6 +471,7 @@ in the returned list.
 @return {List<Element>}
 @internal
 */
+export function getSubtree(element: ElementOrSelector, options?: PlainObject): List<HTMLElement>
 export function getSubtree(element, options = {}) {
   element = getSmart(element, options)
   return subtree(element, allSelector())
@@ -450,6 +490,7 @@ In that case we restore / reset the scroll tops of all viewports around the frag
 @return {List<Element>}
 @internal
 */
+export function getAround(element: ElementOrSelector, options?: PlainObject): HTMLElement[]
 export function getAround(element, options = {}) {
   element = getSmart(element, options)
   return around(element, allSelector())
@@ -461,11 +502,11 @@ Returns a list of all the viewports on the current layer.
 @function up.viewport.all
 @internal
 */
-function getAll(options = {}) {
+function getAll(options: PlainObject = {}): List<HTMLElement> {
   return fragmentGetAll(allSelector(), options)
 }
 
-function rootSelector() {
+function rootSelector(): string {
   return getRoot().tagName
 }
 
@@ -477,29 +518,29 @@ for the browser's main content area.
 @param {Element} root
 @stable
 */
-export function getRoot() {
+export function getRoot(): Element {
   return document.scrollingElement
 }
 
-export function rootWidth() {
+export function rootWidth(): number {
   // This should happen on the <html> element, regardless of document.scrollingElement
   return elementGetRoot().clientWidth
 }
 
-export function rootHeight() {
+export function rootHeight(): number {
   // This should happen on the <html> element, regardless of document.scrollingElement
   return elementGetRoot().clientHeight
 }
 
-export function isRoot(element) {
+export function isRoot(element: Element): boolean {
   return element === getRoot()
 }
 
-export const rootScrollbarWidth = mockable(function rootScrollbarWidth() {
+export const rootScrollbarWidth = mockable(function rootScrollbarWidth(): number {
   return window.innerWidth - rootWidth()
 })
 
-function scrollTopKey(viewport) {
+function scrollTopKey(viewport: Element): string | undefined {
   return tryToTarget(viewport)
 }
 
@@ -507,9 +548,9 @@ function scrollTopKey(viewport) {
 @function up.viewport.fixedElements
 @internal
 */
-function fixedElements(root = document) {
+function fixedElements(root: ParentNode = document): NodeListOf<HTMLElement> {
   const queryParts = ['[up-fixed]'].concat(config.fixedTopSelectors).concat(config.fixedBottomSelectors)
-  return root.querySelectorAll(queryParts.join())
+  return root.querySelectorAll<HTMLElement>(queryParts.join())
 }
 
 /*-
@@ -537,7 +578,7 @@ Unpoly automatically saves scroll positions before [navigating](/learn/navigatio
   If omitted, positions for the current layer will be saved.
 @stable
 */
-export function saveScroll(...args) {
+export function saveScroll(...args: any[]): void {
   const [viewports, options] = parseOptions(args)
   const location = options.location || options.layer.location
   if (location) {
@@ -559,7 +600,7 @@ value is the viewport's vertical scroll position:
 @return {Object<string, number>}
 @internal
 */
-function getScrollTopsForViewportElements(viewports) {
+function getScrollTopsForViewportElements(viewports: Iterable<Element>): Record<string, number> {
   let tops = {}
   for (let viewport of viewports) {
     let key = scrollTopKey(viewport)
@@ -572,7 +613,7 @@ function getScrollTopsForViewportElements(viewports) {
   return tops
 }
 
-export function getScrollTops(...args) {
+export function getScrollTops(...args: [options?: PlainObject]): Record<string, number> {
   let viewports = getAll(...args)
   return getScrollTopsForViewportElements(viewports)
 }
@@ -600,7 +641,7 @@ Unpoly automatically restores scroll positions when the user [presses the back b
   Returns whether scroll positions could be restored.
 @stable
 */
-export function restoreScroll(...args) {
+export function restoreScroll(...args: any[]): boolean {
   const [viewports, options] = parseOptions(args)
   const location = options.location || options.layer.location
   const scrollTops = options.scrollTops ?? options.layer.lastScrollTops.get(location)
@@ -640,7 +681,7 @@ Unpoly automatically saves focus-related state before [navigating](/learn/naviga
   If omitted, state for the current layer will be saved.
 @stable
 */
-export function saveFocus(options = {}) {
+export function saveFocus(options: PlainObject = {}): void {
   const layer = layerStack.get(options)
   const location = options.location || layer.location
   if (location) {
@@ -667,7 +708,7 @@ Unpoly automatically restores focus-related state when the user [presses the bac
   Returns whether focus state could be restored.
 @stable
 */
-export function restoreFocus(options = {}) {
+export function restoreFocus(options: PlainObject = {}): boolean {
   const layer = layerStack.get(options)
   const location = options.location || layer.location
   const locationCapsule = layer.lastFocusCapsules.get(location)
@@ -680,11 +721,11 @@ export function restoreFocus(options = {}) {
   }
 }
 
-export function newStateCache() {
+export function newStateCache(): FIFOCache<string, any> {
   return new FIFOCache({ capacity: 30, normalizeKey: matchableURL })
 }
 
-function parseOptions(args) {
+function parseOptions(args: any[]): [List<HTMLElement>, PlainObject] {
   const [reference, options] = parseArgs(args, 'val', 'options')
 
   options.layer = layerStack.get(options)
@@ -702,13 +743,13 @@ function parseOptions(args) {
   return [viewports, options]
 }
 
-export function scrollTo(position, ...args) {
+export function scrollTo(position: number, ...args: any[]): boolean {
   const [viewports, options] = parseOptions(args)
   setScrollPositions(viewports, {}, position, options.behavior)
   return true
 }
 
-function setScrollPositions(viewports, tops, defaultTop, behavior = 'instant') {
+function setScrollPositions(viewports: Iterable<HTMLElement>, tops: Record<string, number>, defaultTop: number, behavior: ScrollBehavior = 'instant'): void {
   for (let viewport of viewports) {
     const key = scrollTopKey(viewport)
     let top = tops[key] || defaultTop
@@ -722,7 +763,7 @@ function setScrollPositions(viewports, tops, defaultTop, behavior = 'instant') {
   }
 }
 
-export function absolutize(element, options = {}) {
+export function absolutize(element: HTMLElement, options: { afterMeasure?: () => void } = {}): Absolutization {
   const viewport = closest(element)
 
   const viewportRect = viewport.getBoundingClientRect()
@@ -1005,7 +1046,7 @@ that is now hidden, e.g. `15px`.
 @function up.viewport.firstHashTarget
 @internal
 */
-export function firstHashTarget(hash, options = {}) {
+export function firstHashTarget(hash: string, options: PlainObject = {}): HTMLElement | undefined {
   hash = pureHash(hash)
   if (hash) {
     const selector = [
@@ -1024,11 +1065,11 @@ Returns `'foo'` if the hash is `'#foo'`.
 @function pureHash
 @internal
 */
-function pureHash(value) {
+function pureHash(value: string | undefined): string | undefined {
   return value?.replace(/^#/, '')
 }
 
-export function focusedElementWithin(scopeElement) {
+export function focusedElementWithin(scopeElement: Element): Element | undefined {
   const focusedElement = document.activeElement
   if (contains(scopeElement, focusedElement)) {
     return focusedElement
@@ -1037,7 +1078,8 @@ export function focusedElementWithin(scopeElement) {
 
 const CURSOR_PROPS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']
 
-export function copyCursorProps(from, to = {}) {
+// Copies the selection and scroll position of a field. Without a target, copies them into an object.
+export function copyCursorProps(from: any, to: any = {}): any {
   for (let key of CURSOR_PROPS) {
     try {
       to[key] = from[key]
@@ -1049,7 +1091,7 @@ export function copyCursorProps(from, to = {}) {
   return to
 }
 
-export function install() {
+export function install(): void {
   registerCompiler(config.selectorFn('anchoredRightSelectors'), function(element) {
     return bodyShifter.onAnchoredElementInserted(element)
   })
