@@ -6,6 +6,9 @@ import { findFields, getRegion, setContainerDisabled, watch } from '../form.js'
 import { Params } from './params.js'
 import { getSmart, getSubtree, trackSelector } from '../fragment.js'
 
+// A switchee remembers the field tokens it was last switched with.
+type Switchee = Element & { upSwitchValues?: string[] }
+
 const BUILTIN_SWITCH_EFFECTS = [
   { attr: 'up-hide-for', toggle(target, active) { toggle(target, !active) } },
   { attr: 'up-show-for', toggle(target, active) { toggle(target, active) } },
@@ -14,15 +17,18 @@ const BUILTIN_SWITCH_EFFECTS = [
 ]
 
 export class Switcher {
+  declare _root: Element
+  declare _switcheeSelector: string
+  declare _regionSelector: string | null
 
-  constructor(root) {
+  constructor(root: Element) {
     // The root should either be an individual input, or a container of radio buttons.
     this._root = root
     this._switcheeSelector = root.getAttribute('up-switch') || fail("No switch target given for %o", root)
     this._regionSelector = root.getAttribute('up-switch-region')
   }
 
-  start() {
+  start(): () => void {
     // Switch our region once immediately.
     // Don't risk unswitched state showing up in the browser.
     this._switchRegion()
@@ -33,7 +39,7 @@ export class Switcher {
     )
   }
 
-  _trackFieldChanges() {
+  _trackFieldChanges(): () => void {
     let callback = () => this._onFieldChanged()
     return up.migrate.watchForSwitch?.(this._root, callback)
       // Switching effects are client-side and cheap, so we never debounce them.
@@ -42,23 +48,23 @@ export class Switcher {
       || watch(this._root, { logPrefix: '[up-switch]', includeDisabled: true, delay: 0 }, callback)
   }
 
-  _trackNewSwitchees() {
+  _trackNewSwitchees(): () => void {
     let onSwitcheeAdded = (switchee) => this._switchSwitchee(switchee)
     return trackSelector(() => this._findSwitchees(), onSwitcheeAdded)
   }
 
-  _onFieldChanged() {
+  _onFieldChanged(): void {
     this._switchRegion()
   }
 
-  _switchRegion() {
+  _switchRegion(): void {
     const fieldTokens = this._buildFieldTokens()
     for (let switchee of this._findSwitchees()) {
       this._switchSwitchee(switchee, fieldTokens)
     }
   }
 
-  _switchSwitchee(switchee, fieldTokens = this._buildFieldTokens()) {
+  _switchSwitchee(switchee: Switchee, fieldTokens: string[] = this._buildFieldTokens()): void {
     let previousValues = switchee.upSwitchValues
     if (!isEqual(previousValues, fieldTokens)) {
       switchee.upSwitchValues = fieldTokens
@@ -67,7 +73,7 @@ export class Switcher {
   }
 
   // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
-  switchSwitcheeNow(switchee, fieldTokens) {
+  switchSwitcheeNow(switchee: Element, fieldTokens: string[]): void {
     for (let { attr, toggle } of BUILTIN_SWITCH_EFFECTS) {
       let attrValue = switchee.getAttribute(attr)
       if (attrValue) {
@@ -80,12 +86,12 @@ export class Switcher {
     emit(switchee, 'up:form:switch', { field: this._root, fieldTokens, log })
   }
 
-  _findSwitchees() {
+  _findSwitchees(): Switchee[] {
     let scope = this._scope
     return scope ? getSubtree(scope, this._switcheeSelector) : []
   }
 
-  get _scope() {
+  get _scope(): Element | undefined {
     if (this._regionSelector) {
       return getSmart(this._regionSelector, { origin: this._root })
     } else {
@@ -93,11 +99,11 @@ export class Switcher {
     }
   }
 
-  _parseSwitcheeTokens(str) {
+  _parseSwitcheeTokens(str: string): string[] {
     return getSimpleTokens(str, { json: true })
   }
 
-  _buildFieldTokens() {
+  _buildFieldTokens(): string[] {
     let values = Params.fromContainer(this._root, { includeDisabled: true }).values()
     let tokens = [...values]
 
