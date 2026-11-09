@@ -53,6 +53,18 @@ Within an `[up-nav]` container, links pointing to the current location are marke
 */
 
 
+/**
+The settings in `up.status.config`, described in its doc comment.
+*/
+export interface StatusConfig {
+  currentClasses: string[]
+  activeClasses: string[]
+  loadingClasses: string[]
+  revalidatingClasses: string[]
+  navSelectors: string[]
+  noNavSelectors: string[]
+}
+
 /*-
 Sets default options for status effects.
 
@@ -82,14 +94,14 @@ Sets default options for status effects.
 
 @stable
 */
-export const config = new Config<PlainObject>('up.status.config', () => ({
+export const config = new Config('up.status.config', (): StatusConfig => ({
   currentClasses: ['up-current'],
   activeClasses: ['up-active'],
   loadingClasses: ['up-loading'],
   revalidatingClasses: ['up-revalidating'],
   navSelectors: ['[up-nav]', 'nav'],
   noNavSelectors: ['[up-nav=false]'],
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<StatusConfig>
 
 export let namedPreviewFns = new Registry<PreviewFn>('preview')
 
