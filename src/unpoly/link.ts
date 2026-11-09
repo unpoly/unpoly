@@ -236,7 +236,7 @@ function isPreloadDisabled(link: Element): boolean {
   return (!canPushState() && isHistoryEnabled('location')) || !isFollowable(link) || !willCache(link)
 }
 
-function willCache(link: Element): boolean {
+function willCache(link: Element): boolean | undefined {
   // Instantiate a lightweight request with basic link attributes needed for the cache-check.
   const options = parseRequestOptions(link)
   if (options.url) {
@@ -407,7 +407,7 @@ let options = up.link.followOptions(link)
 */
 export function followOptions(link: ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-  link = effectiveLink(getSmart(link))
+  link = effectiveLink(getSmart(link)!)
   options = newOptions(options)
 
   const parser = new OptionsParser(link, options, { fail: true, ...parserOptions })
@@ -600,7 +600,7 @@ with pages the user is likely to click or that should be
 export function preload(link: ElementOrSelector, options?: PlainObject): Promise<any>
 export function preload(link: ElementOrSelector, options?: PlainObject) {
   // If passed a selector, up.fragment.get() will match in the current layer.
-  link = effectiveLink(getSmart(link))
+  link = effectiveLink(getSmart(link)!)
 
   let issue = preloadIssue(link)
   if (issue) {
@@ -633,7 +633,8 @@ export function preload(link: ElementOrSelector, options?: PlainObject) {
 // A link that was expanded with [up-expand] stands for the link inside it.
 function effectiveLink(element: ExpandedElement): Element {
   let link = element.upExpandedPair?.[1]
-  return element.contains(link) ? link : element
+  // contains(undefined) is false.
+  return element.contains(link!) ? link! : element
 }
 
 function preloadIssue(link: Element): string | undefined {
@@ -735,7 +736,7 @@ To make additional elements followable, see `up.link.config.followSelectors`.
 @stable
 */
 export function isFollowable(link: ElementOrSelector): boolean {
-  link = getSmart(link)
+  link = getSmart(link)!
   return config.matches(link, 'followSelectors')
 }
 
@@ -857,7 +858,7 @@ function isClickTarget(target: Element, link: Element): boolean {
   // (2) The area is not the element we're testing, e.g. when the area asks about a click on itself.
   // (3) The area is inside the element. closest() may also find an area around it,
   //     but that outer area does not take the click from its content.
-  const innerArea: ExpandedElement = target.closest('[up-expand]')
+  const innerArea: ExpandedElement | null = target.closest('[up-expand]')
   if (innerArea?.upExpandedPair && innerArea !== link && link.contains(innerArea)) {
     return false
   }
@@ -882,7 +883,7 @@ function interactiveSelector(): string {
   return [fieldSelector(), anyButtonSelector(), 'label', 'summary'].join()
 }
 
-function isInstant(linkOrDescendant: Element): boolean {
+function isInstant(linkOrDescendant: Element): boolean | null {
   const element = linkOrDescendant.closest(config.selector('instantSelectors'))
   // (1) Allow users to configure up.link.config.instantSelectors.push('a')
   //     but opt out individual links with [up-follow=false].
@@ -994,14 +995,14 @@ function isLongPressPossible(mousedownEvent: MouseEvent) {
   return (lastTouchstartTarget === mousedownTarget) && mousedownTarget.closest('[href]')
 }
 
-function didUserDragAway(clickEvent: MouseEvent): boolean {
+function didUserDragAway(clickEvent: MouseEvent): boolean | null {
   return lastMousedownTarget && (lastMousedownTarget !== clickEvent.target)
 }
 
 function forkEventAsUpClick(originalEvent: MouseEvent | KeyboardEvent): void {
   let forwardedProps = ['clientX', 'clientY', 'button', ...keyModifiers]
   const newEvent = fork(originalEvent, 'up:click', forwardedProps)
-  emit(originalEvent.target, newEvent, { log: false })
+  emit(originalEvent.target!, newEvent, { log: false })
 }
 
 /*-
