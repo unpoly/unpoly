@@ -271,7 +271,7 @@ export class UpdateLayerPlan extends Addition {
     return hasAutoHistory(oldFragments, this.layer)
   }
 
-  _getNewLocation(): string | boolean | undefined {
+  _getNewLocation(): string | false | undefined {
     return this._getEffectiveHistoryOptions().location
   }
 

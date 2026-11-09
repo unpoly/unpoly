@@ -17,6 +17,8 @@ import type { EmitProps, EmittedEvent, EventTypes, ListenerArgs, ObservedEvent, 
 import type { EventListenerAttributes } from '../event/event_listener.js'
 import type { HistoryAspect } from '../history.js'
 import type { LayerStack } from './layer_stack.js'
+import type { Overlay } from './modes/overlay.js'
+import type { OverlayFocus } from './overlay_focus.js'
 import type { AnimationValue } from '../motion.js'
 import type { UpResponse } from '../network/response.js'
 import type { FIFOCache } from '../util/fifo_cache.js'
@@ -106,6 +108,7 @@ export abstract class Layer {
   // Overlays set the elements that they create. The root layer has none of them.
   declare contentElement: HTMLElement | undefined
   declare boxElement: HTMLElement | undefined
+  declare overlayFocus: OverlayFocus | undefined
   declare state: LayerState | undefined
   declare _index: number | undefined
   declare _unbindLocationChanged: UnbindFn | undefined
@@ -418,7 +421,7 @@ export abstract class Layer {
   @return {boolean}
   @stable
   */
-  isOverlay(): boolean {
+  isOverlay(): this is Overlay {
     return this.stack.isOverlay(this)
   }
 

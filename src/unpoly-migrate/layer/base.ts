@@ -2,6 +2,14 @@
 @class up.Layer
 */
 
+// Adds methods to up.Layer that core doesn't declare, so they exist only with unpoly-migrate.
+declare module '../../unpoly/layer/base.js' {
+  interface Layer {
+    isOpen(): boolean
+    isClosed(): boolean
+  }
+}
+
 /*-
 Returns whether this layer is still part of the [layer stack](/api/up.layer.stack).
 

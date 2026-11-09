@@ -33,7 +33,7 @@ export function isCritical(error: any): boolean {
   return (typeof error !== 'object') || (error[isCritical.key] ? error[isCritical.key]() : (error.name !== 'AbortError'))
 }
 
-isCritical.key = 'up.error.isCritical'
+isCritical.key = 'up.error.isCritical' as const
 
 /*-
 Registers an empty rejection handler in case the given promise

@@ -7,6 +7,7 @@ import { abort, reload } from '../../../fragment.js'
 import { Change } from './change.js'
 import { layerStack } from '../../../layer.js'
 import { doFocus } from '../../../viewport.js'
+import type { PlainObject } from '../../../util.js'
 import type { LayerReference } from '../render_options.js'
 import type { Layer } from '../../../layer/base.js'
 import type { Overlay } from '../../../layer/modes/overlay.js'
@@ -115,7 +116,8 @@ export class CloseLayer extends Change<CloseLayerOptions> {
   }
 
   _reloadParent(parent: Layer): void {
-    let selector = this.layer[`on${upperCaseFirst(this._verb)}edReload`]
+    // The name is { onAcceptedReload } or { onDismissedReload }, built from a string.
+    let selector = (this.layer as PlainObject)[`on${upperCaseFirst(this._verb)}edReload`]
     // When the parent layer is closing too, e.g. when it peels this overlay, there is nothing to reload.
     if (selector && parent.isAlive()) {
       // (1) We prefer a match near the link that opened the overlay, and allow :origin in the selector.

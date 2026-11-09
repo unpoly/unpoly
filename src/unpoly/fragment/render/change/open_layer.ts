@@ -316,8 +316,9 @@ export class OpenLayerPlan extends Addition {
     return historyOptions(this.options)
   }
 
-  _getNewLocation(): string | boolean | undefined {
-    return this._getEffectiveRenderOptions().location
+  _getNewLocation(): string | false | undefined {
+    // { location: true } only makes sense with a response, and refineOption() replaces it with the response URL.
+    return this._getEffectiveRenderOptions().location as string | false | undefined
   }
 
 }

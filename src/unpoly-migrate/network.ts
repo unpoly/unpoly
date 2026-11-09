@@ -248,7 +248,8 @@ Returns whether the server responded with a 2xx HTTP status.
 @deprecated
   Use `up.Response#ok` instead.
 */
-up.Response.prototype.isSuccess = function() {
+// up.Response is a class expression, so we can't declare its methods by declaration merging.
+;(up.Response.prototype as any).isSuccess = function() {
   up.migrate.deprecated('up.Response#isSuccess()', 'up.Response#ok')
   return this.ok
 }
@@ -267,7 +268,7 @@ Returns `undefined` if the given header name was not included in the response.
 @deprecated
   Use `up.Response#header` instead.
 */
-up.Response.prototype.getHeader = function(name: string) {
+;(up.Response.prototype as any).getHeader = function(name: string) {
   up.migrate.deprecated('up.Response#getHeader()', 'up.Response#header()')
   return this.header(name)
 }
@@ -280,7 +281,7 @@ Returns whether the response was not [successful](/api/up.Response.prototype.ok)
 @deprecated
   Use `!up.Response#ok` instead.
 */
-up.Response.prototype.isError = function() {
+;(up.Response.prototype as any).isError = function() {
   up.migrate.deprecated('up.Response#isError()', '!up.Response#ok')
   return !this.ok
 }

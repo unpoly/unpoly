@@ -36,7 +36,7 @@ export type OverlayAnimationOptions = Pick<LayerCloseOptions, 'animation' | 'dur
 /*-
 @class up.Layer
 */
-export class Overlay extends Layer {
+export abstract class Overlay extends Layer {
 
   /*-
   The button or link that opened this overlay.
@@ -187,11 +187,16 @@ export class Overlay extends Layer {
     //
     // The up.layer.current value within a callback is controlled by the event
     // emission in OpenLayerPlan and CloseLayer
-    let fn = this[name]
+    //
+    // The name is a callback property like 'onAccepted', built from a string by CloseLayer.
+    let fn = (this as PlainObject)[name]
     if (fn) {
       return fn.bind(this)
     }
   }
+
+  // Each subclass creates its elements in its own way, and calls createElement() to create the container.
+  abstract createElements(): void
 
   createElement(parentElement: Element): void {
     this.nesting ||= this._suggestVisualNesting()
@@ -452,15 +457,15 @@ export class Overlay extends Layer {
     }
   }
 
-  tryAcceptForLocation(newLocation: string | undefined, response?: UpResponse): void {
+  tryAcceptForLocation(newLocation: string | false | undefined, response?: UpResponse): void {
     this._tryCloseForLocation(newLocation, this.acceptLocation, this.accept, response)
   }
 
-  tryDismissForLocation(newLocation: string | undefined, response?: UpResponse): void {
+  tryDismissForLocation(newLocation: string | false | undefined, response?: UpResponse): void {
     this._tryCloseForLocation(newLocation, this.dismissLocation, this.dismiss, response)
   }
 
-  _tryCloseForLocation(newLocation: string | undefined, urlPattern: UpURLPattern | undefined, closeFn: CloseFn, response: UpResponse | undefined): void {
+  _tryCloseForLocation(newLocation: string | false | undefined, urlPattern: UpURLPattern | undefined, closeFn: CloseFn, response: UpResponse | undefined): void {
     let resolution = newLocation && urlPattern?.recognize(newLocation)
     if (resolution) {
       // resolution now contains named capture groups, e.g. when

@@ -57,7 +57,8 @@ export class Addition extends Change {
   }
 
   // TODO: Consider moving this to up.Layer
-  handleLayerChangeRequests(newElements: Element[], newLocation: string | boolean | undefined): void {
+  // { location: true } only makes sense with a response, and refineOption() replaces it with the response URL.
+  handleLayerChangeRequests(newElements: Element[], newLocation: string | false | undefined): void {
     if (this.layer.isOverlay()) {
       // TODO: Can we do this with "close"? Please recheck
 

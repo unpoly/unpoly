@@ -574,7 +574,7 @@ console.log(up.util.isBlank(bar)) // prints true
 @property up.util.isBlank.key
 @stable
 */
-isBlank.key = 'up.util.isBlank'
+isBlank.key = 'up.util.isBlank' as const
 
 /*-
 Returns the given argument if the argument is [present](/api/up.util.isPresent),
@@ -971,7 +971,7 @@ console.log(copy.email) // still prints 'foo@foo.com'
 @param {string} key
 @stable
 */
-copy.key = 'up.util.copy'
+copy.key = 'up.util.copy' as const
 
 /*-
 Creates a new object by merging together the properties from the given objects.
@@ -1925,7 +1925,7 @@ up.util.isEqual(one, three) // returns false
 @param {string} key
 @stable
 */
-isEqual.key = 'up.util.isEqual'
+isEqual.key = 'up.util.isEqual' as const
 
 function isEqualList(a: List<any>, b: List<any>): boolean {
   return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
