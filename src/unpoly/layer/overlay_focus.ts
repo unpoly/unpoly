@@ -2,16 +2,29 @@ import { affix, setAttrsTemp } from '../element.js'
 import { on } from '../event.js'
 import { isWithinForeignOverlay } from '../layer.js'
 import { doFocus, tryFocus } from '../viewport.js'
+import type { UndoFunction } from '../element.js'
+import type { UnbindFn } from '../event.js'
+import type { Overlay } from './modes/overlay.js'
+import type { DoFocusOptions } from '../viewport.js'
 
 export class OverlayFocus {
+  declare _layer: Overlay
+  declare _focusElement: HTMLElement
+  declare _trapFocus: boolean
+  declare _active: boolean | undefined
+  declare _unsetAttrs: UndoFunction
+  declare _untrapFocus: UnbindFn
+  declare _focusTrapBefore: HTMLElement
+  declare _focusTrapAfter: HTMLElement
+  declare _processingFocusEvent: boolean | undefined
 
-  constructor(layer) {
+  constructor(layer: Overlay) {
     this._layer = layer
     this._focusElement = this._layer.getFocusElement()
     this._trapFocus = this._layer.trapFocus
   }
 
-  moveToFront() {
+  moveToFront(): void {
     if (this._active) { return }
     this._active = true
 
@@ -35,11 +48,11 @@ export class OverlayFocus {
     }
   }
 
-  moveToBack() {
+  moveToBack(): void {
     this.teardown()
   }
 
-  teardown() {
+  teardown(): void {
     if (!this._active) { return }
     this._active = false
 
@@ -54,7 +67,8 @@ export class OverlayFocus {
     }
   }
 
-  _onFocus(event) {
+  // A focusin event always targets an element.
+  _onFocus(event: FocusEvent & { target: HTMLElement }): void {
     const { target } = event
 
     // (1) Ignore focus events triggered by this method.
@@ -80,13 +94,13 @@ export class OverlayFocus {
     this._processingFocusEvent = false
   }
 
-  _focusStart(focusOptions) {
+  _focusStart(focusOptions?: DoFocusOptions): void {
     // Focusing the overlay element with its [role=dialog] will read out
     // "dialog field" in many screen readers.
     doFocus(this._focusElement, focusOptions)
   }
 
-  _focusEnd() {
+  _focusEnd(): void {
     // The end will usually be the dismiss button, if there is one.
     // Otherwise it will be the last focusable element.
     // We focus on the box element since focusing on the layer container
@@ -94,10 +108,10 @@ export class OverlayFocus {
     this._focusLastDescendant(this._layer.getBoxElement()) || this._focusStart()
   }
 
-  _focusLastDescendant(element) {
+  _focusLastDescendant(element: Element): boolean | undefined {
     // Don't use forEach since we need to break out of the loop with `return`
     for (let child of [...element.children].toReversed()) {
-      if (tryFocus(child) || this._focusLastDescendant(child)) {
+      if (tryFocus(child as HTMLElement) || this._focusLastDescendant(child)) {
         return true
       }
     }
