@@ -360,7 +360,8 @@ up.util.map(['apple', 'cherry'], 'length') // result: [5, 6]
   A new array containing the result of each function call.
 @stable
 */
-export function map<T, R = any>(list: List<T>, block: Iteratee<T, R>): R[] {
+// Also takes an iterator, like the one returned by String#matchAll(). It has no length.
+export function map<T, R = any>(list: Iterable<T> & { length?: number }, block: Iteratee<T, R>): R[] {
   if (list.length === 0) { return [] }
   block = iteratee(block)
   let mapped = []
