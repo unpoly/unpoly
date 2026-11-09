@@ -14,7 +14,7 @@ The values that `Addition#setReloadAttrs()` sets as `[up-source]`, `[up-time]` a
 */
 export interface ReloadAttrsOptions {
   oldElement?: Element
-  newElement: Element
+  newElement?: Element
   source?: string | false
   time?: Date | false
   etag?: string | false

@@ -196,14 +196,15 @@ export class ResponseDoc {
   // (2) Supports custom Unpoly selectors like :has() or :main.
   // (3) Supports origin-aware lookup priorities.
   // (4) Returns undefined if there is no match.
-  select(selector: string): Element | undefined {
+  // Unpoly works with HTML elements, see up.fragment.get().
+  select(selector: string): HTMLElement | undefined {
     let finder = new FragmentFinder({
       selector: selector,
       origin: this._rediscoveredOrigin,
       document: this._document,
       match: this._match,
     })
-    return finder.find()
+    return finder.find() as HTMLElement
   }
 
   selectSteps(steps: RenderStep[]): RenderStep[] {

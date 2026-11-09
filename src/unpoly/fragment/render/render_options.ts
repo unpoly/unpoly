@@ -205,6 +205,14 @@ export interface RenderOptions {
 }
 
 
+/**
+Render options once the render pass has found the layer to render in (in UpdateLayer and OpenLayer).
+@internal
+*/
+export interface ResolvedRenderOptions extends RenderOptions {
+  layer?: Layer
+}
+
 // Sometimes we need to use given render options, but disable preview effects.
 const NO_PREVIEWS: RenderOptions = {
   preview: false,

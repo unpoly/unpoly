@@ -11,14 +11,15 @@ import { callbackAttr, registerAttrCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
 import type { PlainObject } from './util.js'
+import type { RenderStep } from './fragment.js'
 
 /**
 The render steps for hungry elements, on the targeted layer and on other layers.
 @internal
 */
 export interface HungrySteps {
-  current: PlainObject[]
-  other: PlainObject[]
+  current: RenderStep[]
+  other: RenderStep[]
 }
 
 /*-

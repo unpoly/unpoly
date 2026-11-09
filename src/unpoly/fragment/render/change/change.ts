@@ -10,7 +10,9 @@ export class Change<O extends object = RenderOptions> {
     this.options = options
   }
 
-  execute(): any {
+  // Subclasses may take arguments.
+  execute(...args: any[]): any
+  execute() {
     throw new NotImplemented()
   }
 

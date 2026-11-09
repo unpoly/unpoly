@@ -35,13 +35,30 @@ import type { List, PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
 import type { UpRequest } from './network/request.js'
 import type { UpResponse } from './network/response.js'
+import type { RenderOptions, ResolvedRenderOptions } from './fragment/render/render_options.js'
 
 /**
 A step of a render pass: which old element to update with which new element, and how.
+Each step inherits the render options of its pass.
 @internal
 */
-// TODO(types): A proper interface, once the render classes are typed.
-export type RenderStep = PlainObject
+export interface RenderStep extends ResolvedRenderOptions {
+  selector: string
+  placement: string
+  maybe: boolean
+  originalRenderOptions: RenderOptions
+  // Set when the step is matched.
+  oldElement?: HTMLElement
+  newElement?: HTMLElement
+  // An event to emit when a new element was matched, e.g. up:fragment:hungry.
+  selectEvent?: Event & { newFragment?: Element, renderOptions?: RenderOptions }
+  selectCallback?: (event: Event) => any
+  // Set while rendering, see UpdateSteps.
+  parentElement?: ParentNode
+  afterRemove?: () => void
+  descendantKeepPlans?: KeepPlan[]
+  descendantsOnly?: boolean
+}
 
 /**
 An element with [up-keep] that is kept in an update, and the element it would have been replaced with.

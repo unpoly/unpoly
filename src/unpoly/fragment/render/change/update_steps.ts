@@ -10,17 +10,39 @@ import { FragmentScrolling } from '../fragment_scrolling.js'
 import { animate, swap } from '../../../motion.js'
 import { block, clean, hello } from '../../../script.js'
 import { copyCursorProps, getSubtree } from '../../../viewport.js'
+import type { ResolvedRenderOptions } from '../render_options.js'
+import type { PartialRenderResult } from '../render_result.js'
+import type { ResponseDoc } from '../response_doc.js'
+import type { KeepPlan, RenderStep } from '../../../fragment.js'
 
+/**
+What inserting a render step produced, and what remains to be done after all steps were inserted.
+@internal
+*/
+export interface StepInsertion {
+  fragments: Element[]
+  focusElement?: HTMLElement
+  scrollElement?: HTMLElement
+  // Compiles the new elements.
+  welcome: () => any
+  // Starts the transition or animation.
+  startMotion?: () => Promise<any>
+}
+
+// Swaps the steps' old elements with their new elements. Used by UpdateLayer and OpenLayer.
 export class UpdateSteps extends Addition {
+  declare _steps: RenderStep[]
+  declare _noneOptions: ResolvedRenderOptions
+  declare responseDoc: ResponseDoc
 
-  constructor(options) {
+  constructor(options: ResolvedRenderOptions & { steps: RenderStep[], noneOptions?: ResolvedRenderOptions }) {
     super(options)
 
     this._steps = copy(assert(options.steps)) // we mutate it below
     this._noneOptions = options.noneOptions || {}
   }
 
-  execute(responseDoc) {
+  execute(responseDoc: ResponseDoc): PartialRenderResult[] {
     this.responseDoc = responseDoc
 
     // Fill in `step.newElement` unless it was already done by our caller.
@@ -37,7 +59,7 @@ export class UpdateSteps extends Addition {
     ]
   }
 
-  _executeSteps() {
+  _executeSteps(): PartialRenderResult {
     if (this._steps.length) {
       // (1) Insert all new fragments, in target order (hungry steps last).
       let insertions = this._steps.map((step) => this._insertStep(step))
@@ -53,7 +75,7 @@ export class UpdateSteps extends Addition {
 
   // Runs synchronously up to the `await`, so all phases happen in the same task.
   // Being async, an exception here rejects `finished` but not `up.render()`.
-  async _completeSteps(insertions) {
+  async _completeSteps(insertions: StepInsertion[]): Promise<void> {
     // (2) Compile all new fragments, in target order. Compilers see all fragments of this pass.
     let welcomed = insertions.map((insertion) => insertion.welcome())
 
@@ -71,7 +93,7 @@ export class UpdateSteps extends Addition {
     await Promise.all([...welcomed, ...motions])
   }
 
-  _assertLayersAlive() {
+  _assertLayersAlive(): PartialRenderResult {
     return {
       verifyFinished: () => {
         // If our layer was closed while animations are running, don't finish
@@ -83,7 +105,7 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _insertStep(step) {
+  _insertStep(step: RenderStep): StepInsertion {
     switch (step.placement) {
       case 'swap': {
         let keepPlan = findKeepPlan(step)
@@ -106,14 +128,14 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _executeNoSteps() {
+  _executeNoSteps(): PartialRenderResult {
     this._handleFocus(null, this._noneOptions)
     this._handleScroll(null, this._noneOptions)
 
     return {}
   }
 
-  _insertKeepEverythingStep(step, keepPlan) {
+  _insertKeepEverythingStep(step: RenderStep, keepPlan: KeepPlan): StepInsertion {
     // Nothing to mutate in the DOM.
     return {
       fragments: [],
@@ -123,7 +145,7 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _insertSwapStep(step) {
+  _insertSwapStep(step: RenderStep): StepInsertion {
     const parent = step.parentElement ?? step.oldElement.parentNode
 
     markFragmentAsDestroying(step.oldElement)
@@ -166,7 +188,7 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _insertSwapChildrenStep(step) {
+  _insertSwapChildrenStep(step: RenderStep): StepInsertion {
     // Make a copy since it's a live HTMLCollection, and we're going to move these elements.
     let newChildren = [...step.newElement.children]
 
@@ -191,7 +213,7 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _insertChildrenStep(step) {
+  _insertChildrenStep(step: RenderStep): StepInsertion {
     // Make a copy since it's a live HTMLCollection, and we're going to move these elements.
     let newChildren = [...step.newElement.children]
 
@@ -204,7 +226,7 @@ export class UpdateSteps extends Addition {
 
     // Note that since we're prepending/appending instead of replacing,
     // newElement will not actually be inserted into the DOM, only its children.
-    let position = step.placement === 'before' ? 'afterbegin' : 'beforeend'
+    let position: InsertPosition = step.placement === 'before' ? 'afterbegin' : 'beforeend'
     step.oldElement.insertAdjacentElement(position, wrapper)
 
     return {
@@ -212,7 +234,7 @@ export class UpdateSteps extends Addition {
       // (A) We never inserted step.newElement, only its children.
       // (B) We focus the first new element child. If it's all text nodes, we focus step.oldElement.
       // (C) Unwrapping preserves focus.
-      focusElement: leadingElement(wrapper.childNodes) || step.oldElement,
+      focusElement: leadingElement(wrapper.childNodes) as HTMLElement || step.oldElement,
       // Reveal the element that was being prepended/appended.
       scrollElement: wrapper,
       welcome: () => this._welcomeElement(wrapper, step),
@@ -220,7 +242,7 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _welcomeElement(element, step) {
+  _welcomeElement(element: Element, step: RenderStep): Promise<Element> {
     // Adopt CSP nonces and fix broken script tags
     this.responseDoc.finalizeElement(element)
 
@@ -234,8 +256,8 @@ export class UpdateSteps extends Addition {
   // This will find all [up-keep] descendants in oldElement, overwrite their partner
   // element in newElement and leave a visually identical clone in oldElement for a later transition.
   // Returns an array of keepPlans.
-  _preserveDescendantKeepables(step) {
-    const descendantKeepPlans = []
+  _preserveDescendantKeepables(step: RenderStep): void {
+    const descendantKeepPlans: KeepPlan[] = []
 
     if (step.keep) {
       for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
@@ -243,7 +265,7 @@ export class UpdateSteps extends Addition {
         if (keepPlan) {
           // Replace keepable with its clone so it looks good in a transition
           // between oldElement and newElement.
-          const keepableClone = keepable.cloneNode(true)
+          const keepableClone = keepable.cloneNode(true) as Element
           keepable.insertAdjacentElement('beforebegin', keepableClone)
 
           // Mark the original keepable to up.ResponseDoc#finalizeElement() knows to skip it.
@@ -285,7 +307,7 @@ export class UpdateSteps extends Addition {
     step.descendantKeepPlans = descendantKeepPlans
   }
 
-  _restoreDescendantKeepables(step) {
+  _restoreDescendantKeepables(step: RenderStep): void {
     for (let keepPlan of step.descendantKeepPlans) {
       // Now that we know the final destination of { newElement }, we can replace it with the keepable.
       keepPlan.newElement.replaceWith(keepPlan.oldElement)
@@ -296,7 +318,7 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _finalizeDescendantKeepables(step) {
+  _finalizeDescendantKeepables(step: RenderStep): void {
     for (let keepPlan of step.descendantKeepPlans) {
       keepPlan.oldElement.classList.remove('up-keeping')
       emitFragmentKept(keepPlan)
@@ -306,11 +328,11 @@ export class UpdateSteps extends Addition {
   // Legacy apps might e.g. replace the <body> and an element in the <head>.
   // In that case we cannot use the body as "safe harbor" to remporarily move
   // [up-keep] elements.
-  _willChangeBody() {
+  _willChangeBody(): boolean {
     return some(this._steps, (step) => step.oldElement.matches('body'))
   }
 
-  _handleFocus(fragment, options) {
+  _handleFocus(fragment: HTMLElement | null, options: ResolvedRenderOptions): void {
     const fragmentFocus = new FragmentFocus({
       ...options,
       fragment,
@@ -319,7 +341,7 @@ export class UpdateSteps extends Addition {
     fragmentFocus.process(options.focus)
   }
 
-  _handleScroll(fragment, options) {
+  _handleScroll(fragment: HTMLElement | null, options: ResolvedRenderOptions): void {
     const scrolling = new FragmentScrolling({
       ...options,
       fragment,
