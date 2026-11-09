@@ -1508,6 +1508,8 @@ export function evalOption<T>(value: ValueOrFunction<T>, ...args: any[]): T {
   return isFunction(value) ? value(...args) : value
 }
 
+// The value and its 'auto' meaning may each be a function that is called with the args.
+export function evalAutoOption<T, A>(value: ValueOrFunction<T | 'auto'>, autoMeans: ValueOrFunction<A>, ...args: any[]): Exclude<T, 'auto'> | A
 export function evalAutoOption(value: any, autoMeans: any, ...args: any[]): any {
   value = evalOption(value, ...args)
   // Allow functions to return 'auto'
