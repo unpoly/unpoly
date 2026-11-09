@@ -15,13 +15,15 @@ export type ListenerTarget = EventTarget & { upEventListeners?: Record<string, E
 /**
 A function registered with `up.on()`. It is called with the event, the element matching
 the selector (or the element it listens on) and, if it takes three arguments, the element's data.
+`this` is the element, too. TypeScript only infers that when a selector is given. Without one, a
+function in that position could also be a selector function, which has no `this`.
 
 The signature is taken from a method, since TypeScript checks method parameters bivariantly, even
 under `strictFunctionTypes`. That lets a listener annotate a narrower type than we can infer,
 like `(event, link: HTMLAnchorElement)` for a selector that only matches links.
 */
 export type ListenerCallback<E = Event> =
-  { listener(event: E, element: HTMLElement, data?: any): any }['listener'] & { upUid?: number }
+  { listener(this: HTMLElement, event: E, element: HTMLElement, data?: any): any }['listener'] & { upUid?: number }
 
 /**
 Everything an `up.EventListener` needs to know.
@@ -146,7 +148,8 @@ export class EventListener {
         return
       }
 
-      const applyCallback = this.callback.bind(element, ...args)
+      // The listener's type promises an HTMLElement for `this`, like for its second argument.
+      const applyCallback = this.callback.bind(element as HTMLElement, ...args)
 
       if (this.baseLayer) {
         // Unpoly will usually set up.layer.current when emitting an event.
