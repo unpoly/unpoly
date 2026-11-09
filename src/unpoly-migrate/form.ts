@@ -10,8 +10,9 @@ up.form.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'genericButtonSelectors', 'anyButtonSelectors', { label: 'up.form.config' })
 })
 
-up.migrate.migratedFormGroupSelectors = function() {
-  return up.form.config.groupSelectors.map((originalSelector) => {
+// Core calls this hook (form.ts).
+up.migrate.migratedFormGroupSelectors = function(): string[] {
+  return up.form.config.groupSelectors.map((originalSelector: string) => {
     let migratedSelector = originalSelector.replace(/:has\((:origin|&)\)$/, '')
     if (originalSelector !== migratedSelector) {
       up.migrate.warn('Selectors in up.form.config.groupSelectors must not contain ":has(:origin)". The suffix is added automatically where required. Found in "%s".', originalSelector)
@@ -27,7 +28,8 @@ up.migrate.migratedFormGroupSelectors = function() {
 // buttons that happens to make individual Switchers work: It only fires when the radio
 // button gets checked, not when it gets unchecked.
 // The new implementation uses up.watch(), which only works for a group of radio buttons.
-up.migrate.watchForSwitch = function(root, callback) {
+// Core calls this hook (Switcher in form/switcher.ts).
+up.migrate.watchForSwitch = function(root: Element, callback: (event: Event) => void) {
   if (root.matches('input[type=radio]')) {
     up.migrate.warn('Using [up-switch] on an individual radio button is deprecated (%o). Use [up-switch] on the container of a radio group instead.', root)
     return up.on(root, 'change', callback)
