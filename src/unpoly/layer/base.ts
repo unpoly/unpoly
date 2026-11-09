@@ -27,6 +27,11 @@ A layer mode. The root layer has the mode `'root'`, an overlay has one of the ot
 export type LayerMode = 'root' | 'modal' | 'drawer' | 'popup' | 'cover'
 
 /**
+A layer mode that opens an overlay. All modes except `'root'`.
+*/
+export type OverlayMode = Exclude<LayerMode, 'root'>
+
+/**
 Where an overlay is in its life cycle. The root layer has no state.
 @internal
 */

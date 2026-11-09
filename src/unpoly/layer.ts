@@ -7,7 +7,7 @@ import { on } from './event.js'
 import { render } from './fragment.js'
 import { RenderOptions } from './fragment/render/render_options.js'
 import { Layer } from './layer/base.js'
-import type { LayerMode, LayerOptions } from './layer/base.js'
+import type { LayerMode, LayerOptions, OverlayMode } from './layer/base.js'
 import type { LayerLookupArgs } from './layer/layer_lookup.js'
 import { LayerStack } from './layer/layer_stack.js'
 import { Config } from './util/config.js'
@@ -40,33 +40,20 @@ let layerClasses: LayerClass[] = []
 /**
 The settings in `up.layer.config`, described in its doc comment.
 
-Besides a few settings of its own, the config has one object of defaults for each layer mode
-(inherited from `ModeDefaults`), one for all overlays (`overlay`) and one for all layers (`any`).
+Besides a few settings of its own, the config has an object of defaults for all layers (`any`),
+for all overlays (`overlay`) and for each layer mode, so `config[mode]` is typed for every `LayerMode`.
 */
-export interface LayerConfig extends ModeDefaults {
+export interface LayerConfig {
   mode: OverlayMode
   any: LayerDefaults
-  overlay: OverlayDefaults
-  foreignOverlaySelectors: string[]
-}
-
-/**
-The defaults for each layer mode, like `up.layer.config.drawer`.
-
-The keys are exactly the layer modes, so `config[mode]` is typed for every `LayerMode`.
-*/
-export interface ModeDefaults {
   root: LayerDefaults
+  overlay: OverlayDefaults
   modal: OverlayDefaults
   drawer: DrawerDefaults
   popup: OverlayDefaults
   cover: OverlayDefaults
+  foreignOverlaySelectors: string[]
 }
-
-/**
-A layer mode that opens an overlay. All modes except `'root'`.
-*/
-export type OverlayMode = Exclude<LayerMode, 'root'>
 
 /**
 Defaults for new layers, like `up.layer.config.any` or `up.layer.config.root`.
@@ -76,7 +63,7 @@ Each object only holds the defaults set at its own level. `up.layer.open()` merg
 until an app sets it, but modals open with the animation from `up.layer.config.overlay`.
 */
 export interface LayerDefaults {
-  mainTargets?: string[]
+  mainTargets: string[]
   history?: boolean | 'auto'
   // Any option for up.layer.open() can have a default, render options included.
   // TODO(types): Extend the options of up.layer.open() instead, so a misspelled key is an error.
