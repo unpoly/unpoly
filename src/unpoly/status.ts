@@ -300,7 +300,8 @@ You can style revalidating fragments to convey that content might be stale:
 */
 
 export function runPreviews(request: UpRequest, renderOptions: PlainObject): () => void {
-  let { bindLayer } = request
+  // Previews run while the request is in flight, before it evicts its layers.
+  let { bindLayer } = request as UpRequest & { bindLayer: Layer }
   let focusCapsule = FocusCapsule.preserve(bindLayer)
   let applyPreviews = () => doRunPreviews(request, renderOptions)
   let revertPreviews = bindLayer.asCurrent(applyPreviews)
@@ -314,7 +315,7 @@ export function runPreviews(request: UpRequest, renderOptions: PlainObject): () 
 function doRunPreviews(request: UpRequest, renderOptions: PlainObject): () => void {
   let { fragment, fragments, origin } = request
   let cleaner = utilCleaner()
-  let previewForFragment = (fragment: Element) => new Preview({ fragment, request, renderOptions, cleaner })
+  let previewForFragment = (fragment: Element | undefined) => new Preview({ fragment, request, renderOptions, cleaner })
 
   // Some preview effects only run once per render pass.
   // The { fragment } for these previews will be the first fragment,

@@ -23,7 +23,8 @@ Everything an `up.Preview` needs to know.
 @internal
 */
 export interface PreviewOptions {
-  fragment: Element
+  // Undefined when opening a layer.
+  fragment: Element | undefined
   request: UpRequest
   renderOptions: PlainObject
   cleaner: Cleaner
@@ -42,7 +43,7 @@ See [Previews](/learn/previews) for an overview.
 @parent up.status
 */
 export class Preview {
-  declare fragment: Element
+  declare fragment: Element | undefined
   declare request: UpRequest
   declare renderOptions: PlainObject
   declare _cleaner: Cleaner
