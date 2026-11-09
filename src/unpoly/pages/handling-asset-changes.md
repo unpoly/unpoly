@@ -95,7 +95,7 @@ up.on('up:link:follow', function(event) {
 
 function isLoadPageSafe({ url, layer, method }) {
   // Default to 'GET' and uppercase the method string
-  let isSafeRequest = url && up.util.normalizeMethod(method) === 'GET'
+  let isSafeRequest = url && (method || 'GET').toUpperCase() === 'GET'
 
   // To prevent any overlays from closing, we only make a full page load
   // when the link is changing the root layer.
