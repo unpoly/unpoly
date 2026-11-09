@@ -11,6 +11,40 @@ import { registerMacro } from './script.js'
 import { Config } from './util/config.js'
 import { FIFOCache } from './util/fifo_cache.js'
 import { revealHash, revealHashFn, saveFocus, saveScroll } from './viewport.js'
+import type { NormalizeURLOptions, PlainObject } from './util.js'
+
+/**
+Why the location changed. `'detect'` is only used internally: we tell `'hash'` from `'pop'` later.
+*/
+export type LocationChangeReason = 'push' | 'replace' | 'pop' | 'hash' | 'detect' | null
+
+/**
+What Unpoly can update in the browser history. See `up.history.config.enabled`.
+*/
+export type HistoryAspect = 'location' | 'title' | 'metaTags' | 'lang'
+
+/**
+How to report the next location change. See `up:location:changed`.
+@internal
+*/
+export interface HistoryTrackOptions {
+  reason?: LocationChangeReason
+  // The change was made by Unpoly, which has already updated the page.
+  alreadyHandled?: boolean
+  // Ignore the next location change.
+  pauseTracking?: boolean
+}
+
+/**
+The `up:location:changed` event.
+*/
+export type LocationChangedEvent = Event & {
+  reason: LocationChangeReason
+  location: string
+  previousLocation: string | undefined
+  alreadyHandled: boolean
+  willHandle: boolean
+}
 
 /*-
 Features to update the browser history and handle the Back button.
@@ -133,12 +167,12 @@ If no previous history entry is known, returns `undefined`.
 @param {string} previousLocation
 @stable
 */
-export let previousLocation
-let nextPreviousLocation
-let nextTrackOptions
-let adoptedBases = new FIFOCache({ capacity: 100, normalizeKey: getBase })
+export let previousLocation: string | undefined
+let nextPreviousLocation: string | undefined
+let nextTrackOptions: HistoryTrackOptions | undefined
+let adoptedBases = new FIFOCache<string, boolean>({ capacity: 100, normalizeKey: getBase })
 
-function reset() {
+function reset(): void {
   previousLocation = undefined
   nextPreviousLocation = undefined
   nextTrackOptions = undefined
@@ -153,7 +187,7 @@ function reset() {
 // - list of elements (forced update of meta tags)
 // Values we want to override:
 // - true (do update with defaults)
-export function refineOption(existingValue, newValue) {
+export function refineOption(existingValue: any, newValue: any): any {
   if ((existingValue === false) || isString(existingValue) || isList(existingValue)) {
     return existingValue
   } else {
@@ -170,12 +204,12 @@ Returns whether `up.history.config.enabled` allows Unpoly to update the given as
 @return {boolean}
 @internal
 */
-export function isEnabled(aspect) {
+export function isEnabled(aspect: HistoryAspect): boolean {
   let { enabled } = config
   return isArray(enabled) ? enabled.includes(aspect) : !!enabled
 }
 
-export function historyOptions(options) {
+export function historyOptions(options: PlainObject): PlainObject {
   return pick(options, [
     'location',
     'title',
@@ -202,11 +236,11 @@ It will include a `#hash` fragment and query string, if present.
 @stable
 @signature
 */
-export function currentLocation() {
+export function currentLocation(): string {
   return normalizeURL(location.href)
 }
 
-function withTrackOptions(trackOptions, fn) {
+function withTrackOptions(trackOptions: HistoryTrackOptions | undefined, fn: () => void): void {
   try {
     nextTrackOptions = trackOptions
     fn()
@@ -221,7 +255,7 @@ Remembers the current URL so we can use `previousLocation` on pop.
 @function trackCurrentLocation
 @internal
 */
-function trackCurrentLocation(trackOptions) {
+function trackCurrentLocation(trackOptions: HistoryTrackOptions): void {
   let { reason, alreadyHandled, pauseTracking } = nextTrackOptions || trackOptions
   if (pauseTracking) return
 
@@ -256,7 +290,7 @@ function trackCurrentLocation(trackOptions) {
       alreadyHandled,
       willHandle,
       log: `New location is ${location}`
-    })
+    }) as LocationChangedEvent
 
     up.migrate.prepareLocationChangedEvent?.(locationChangedEvent)
 
@@ -342,11 +376,11 @@ Also see [History in overlays](/learn/history-in-overlays).
 @signature
 */
 
-function splitLocation(location) {
+function splitLocation(location: string | undefined): string[] {
   return location?.split(/(?=#)/) || []
 }
 
-function getBase(location) {
+function getBase(location: string | undefined): string | undefined {
   return splitLocation(location)[0]
 }
 
@@ -398,7 +432,7 @@ up.history.isLocation('http://other-host/foo') // result: false
   Whether the browser is currently at the given location.
 @stable
 */
-export function isLocation(url, options) {
+export function isLocation(url: string, options?: NormalizeURLOptions): boolean {
   return matchURLs(url, location.href, { hash: true, ...options })
 }
 
@@ -424,7 +458,7 @@ See [Turning off history aspects](/learn/updating-history#disabling).
 @param {string} url
 @experimental
 */
-export function replace(location, trackOptions) {
+export function replace(location: string, trackOptions?: HistoryTrackOptions): void {
   placeAdoptedHistoryEntry('replaceState', location, trackOptions)
 }
 
@@ -458,12 +492,12 @@ See [Turning off history aspects](/learn/updating-history#disabling).
   The URL for the history entry to be added.
 @experimental
 */
-export function push(location, trackOptions) {
+export function push(location: string, trackOptions?: HistoryTrackOptions): void {
   if (isLocation(location)) return
   placeAdoptedHistoryEntry('pushState', location, trackOptions)
 }
 
-function placeAdoptedHistoryEntry(method, location, trackOptions) {
+function placeAdoptedHistoryEntry(method: 'pushState' | 'replaceState', location: string, trackOptions?: HistoryTrackOptions): void {
   // When up.history.config.enabled excludes 'location', we do nothing.
   // We don't adopt a URL that we never pushed.
   if (isEnabled('location')) {
@@ -472,27 +506,30 @@ function placeAdoptedHistoryEntry(method, location, trackOptions) {
     withTrackOptions(trackOptions, function() {
       // Call this instead of originalPushState in case someone else has patched history.pushState()
       // Our own tests do this to rate-limit the use of the history API.
+      //
+      // TODO: { up: true } lands in the unused second argument (title), so the pushed state is null.
+      // TypeScript reports this. Probably meant history[method]({ up: true }, '', location). (Needs Henning)
       history[method](null, { up: true }, location)
     })
   }
 }
 
-function isAdoptedBase(location) {
+function isAdoptedBase(location: string): boolean {
   // We handle bases (path + query string) that were pushed or replaced via up.history methods.
   // All other bases we assume are pushed by external JS that wants to handle restoration itself.
   return !!adoptedBases.get(location)
 }
 
-function adoptBase(location = currentLocation()) {
+function adoptBase(location: string = currentLocation()): void {
   location = normalizeURL(location)
   adoptedBases.set(location, true)
 }
 
-function isAdoptedState() {
+function isAdoptedState(): boolean {
   return history.state?.up
 }
 
-function adoptState() {
+function adoptState(): void {
   let { state } = history
 
   // If we already have history.state.up, don't waste another replaceState() call.
@@ -508,7 +545,7 @@ function adoptState() {
   }
 }
 
-function restoreLocation(location) {
+function restoreLocation(location: string): void {
 
   // An up.Offline error (the server could not be reached) is critical and surfaces as an
   // unhandled rejection, while the page keeps its content. This is intentional: losing the
@@ -549,7 +586,7 @@ function restoreLocation(location) {
   }))
 }
 
-function reactToChange(event) {
+function reactToChange(event: LocationChangedEvent): void {
   if (event.alreadyHandled) {
     return
   }
@@ -597,7 +634,7 @@ When this event is emitted, the [browser location](/api/up.history.location) has
 @stable
 */
 
-export function findMetaTags(head = document.head) {
+export function findMetaTags(head: ParentNode = document.head): NodeListOf<Element> {
   return head.querySelectorAll(config.selector('metaTagSelectors'))
 }
 
@@ -649,7 +686,7 @@ To exclude elements by default, configure `up.history.config.noMetaTagSelectors`
 @stable
 */
 
-export function updateMetaTags(newMetaTags) {
+export function updateMetaTags(newMetaTags: Iterable<Element>): void {
   let oldMetaTags = findMetaTags()
   for (let oldMetaTag of oldMetaTags) {
     // We do not use up.destroy() as meta tags may be inserted/removed
@@ -662,7 +699,7 @@ export function updateMetaTags(newMetaTags) {
   }
 }
 
-export function getLang(doc = document) {
+export function getLang(doc: Document = document): string | undefined {
   // return e.attr(doc.documentElement, 'lang')
   let { documentElement } = doc
   if (documentElement.matches('html')) {
@@ -670,11 +707,11 @@ export function getLang(doc = document) {
   }
 }
 
-export function updateLang(newLang) {
+export function updateLang(newLang: string | undefined): void {
   setAttrPresence(getRoot(), 'lang', newLang, !!newLang)
 }
 
-function patchHistoryAPI() {
+function patchHistoryAPI(): void {
   const originalPushState = history.pushState
   history.pushState = function(...args) {
     originalPushState.apply(this, args)
@@ -688,7 +725,7 @@ function patchHistoryAPI() {
   }
 }
 
-function adoptInitialHistoryEntry() {
+function adoptInitialHistoryEntry(): void {
   // Unpoly replaces the initial page state so it can later restore it when the user
   // goes back to that initial URL. However, if the initial request was a POST,
   // Unpoly will wrongly assume that it can restore the state by reloading with GET.
@@ -702,7 +739,7 @@ function adoptInitialHistoryEntry() {
 }
 
 
-function onJumpLinkClicked(event, link) {
+function onJumpLinkClicked(event: MouseEvent, link: HTMLAnchorElement): void {
   // If other JavaScript already handled this click, do nothing.
   if (event.defaultPrevented) return
 
@@ -790,7 +827,7 @@ This link …
 @signature
 */
 
-export function install() {
+export function install(): void {
   // Wait until the framework is booted before we (1) patch window.history
   // and (2) replace the current history state.
   on('up:framework:boot', function({ mode }) {
