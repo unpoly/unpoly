@@ -5,7 +5,7 @@ extendDescribe('up.util', function() {
 
   extendDescribe('JavaScript', function() {
 
-    describe('up.util.sprintf', function() {
+    describe('up.internal.sprintf', function() {
 
       describe('with string argument', function() {
 
@@ -289,7 +289,7 @@ extendDescribe('up.util', function() {
       })
     })
 
-    describe('up.util.camelToKebabCase()', function() {
+    describe('up.internal.camelToKebabCase()', function() {
 
       it('converts camelCase to kebab-case', function() {
         expect(up.internal.camelToKebabCase('fooBar')).toEqual('foo-bar')
@@ -305,7 +305,7 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.kebabToCamelCase()', function() {
+    describe('up.internal.kebabToCamelCase()', function() {
 
       it('converts camelCase to kebab-case', function() {
         expect(up.internal.kebabToCamelCase('foo-bar')).toEqual('fooBar')
@@ -346,7 +346,7 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.getSimpleTokens()', function() {
+    describe('up.internal.getSimpleTokens()', function() {
 
       describe('tokens separated by whitespace', function() {
 
@@ -476,7 +476,7 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.getComplexTokens()', function() {
+    describe('up.internal.getComplexTokens()', function() {
 
       describe('tokens separated by whitespace', function() {
 
@@ -589,7 +589,7 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.maskPattern()', function() {
+    describe('up.internal.maskPattern()', function() {
 
       it('replaces the given RegExp with a placeholder, then restores it with { restore } fn', function() {
         let { masked, restore } = up.internal.maskPattern('foo <bar> baz <bam> qux', [/<[^>]+>/g])
@@ -636,7 +636,7 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.expressionOutline()', function() {
+    describe('up.internal.expressionOutline()', function() {
 
       it('simplifies a complex CSS selector', function() {
         let input = `input[foo="bar, ]baz"]:is(.control[qux]:not(.active)), .other:not(.mine)`
@@ -782,7 +782,7 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.parseString()', function() {
+    describe('up.internal.parseString()', function() {
 
       it('parses a double-quoted string', function() {
         expect(up.internal.parseString(`"foo"`)).toBe(`foo`)
@@ -913,7 +913,7 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.parseScalarJSONPairs()', function() {
+    describe('up.internal.parseScalarJSONPairs()', function() {
 
       describe('if the string ends in a JSON object', function() {
 

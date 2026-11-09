@@ -919,7 +919,7 @@ describe('up.fragment', function() {
 
     })
 
-    describe('up.fragment.failKey', function() {
+    describe('up.internal.failKey', function() {
 
       it('returns a failVariant for the given object key', function() {
         const result = up.internal.failKey('foo')
@@ -932,7 +932,7 @@ describe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.successKey', function() {
+    describe('up.internal.successKey', function() {
 
       it('returns the unprefixed key for the given failVariant', function() {
         const result = up.internal.successKey('failFoo')
@@ -1040,7 +1040,7 @@ describe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.insertTemp()', function() {
+    describe('up.internal.insertTemp()', function() {
 
       it('inserts a new element relative to the given reference element', function() {
         const reference = fixture('#reference')
@@ -1554,7 +1554,7 @@ describe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.provideNodes()', function() {
+    describe('up.internal.provideNodes()', function() {
 
       describe('with a string of HTML', function() {
 
@@ -1848,7 +1848,7 @@ describe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.defaultNormalizeKeepHTML()', function() {
+    describe('up.internal.defaultNormalizeKeepHTML()', function() {
 
       for (let attr of ['nonce', 'up-etag', 'up-time', 'up-source', 'up-on-rendered', 'up-watch', 'up-on-accepted']) {
 

@@ -3,7 +3,7 @@ const $ = jQuery
 
 describe('up.protocol', function() {
 
-  describe('up.protocol.csrfToken', function() {
+  describe('up.internal.csrfToken', function() {
 
     afterEach(function() {
       this.$meta?.remove()
@@ -25,7 +25,7 @@ describe('up.protocol', function() {
     })
   })
 
-  describe('up.protocol.csrfParam()', function() {
+  describe('up.internal.csrfParam()', function() {
 
     afterEach(function() {
       this.$meta?.remove()
@@ -47,7 +47,7 @@ describe('up.protocol', function() {
     })
   })
 
-  describe('up.protocol.headerize()', function() {
+  describe('up.internal.headerize()', function() {
     it('turns a camelized identifier into an X-Up-Foo-Bar style header name', function() {
       const header = up.internal.headerize('fooBar')
       expect(header).toEqual('X-Up-Foo-Bar')

@@ -776,7 +776,7 @@ describe('up.link', function() {
       }
     })
 
-    describe('up.link.shouldHandleClick', function() {
+    describe('up.internal.shouldHandleClick', function() {
 
       const buildEvent = function(target, attrs) {
         const event = Trigger.createMouseEvent('mousedown', attrs)

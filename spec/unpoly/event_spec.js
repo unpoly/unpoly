@@ -794,7 +794,7 @@ describe('up.event', function() {
       })
     })
 
-    describe('up.event.assertEmitted()', function() {
+    describe('up.internal.assertEmitted()', function() {
 
       it('emits the event', function() {
         const eventListener = jasmine.createSpy('event listener')
@@ -962,7 +962,7 @@ describe('up.event', function() {
       })
     })
 
-    describe('up.event.isModified()', function() {
+    describe('up.internal.isModified()', function() {
 
       it('returns false for a click event with the left mouse button', function() {
         const event = Trigger.createMouseEvent('mousedown', { button: 0 })

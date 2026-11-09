@@ -24,7 +24,7 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.spanObject()', function() {
+    describe('up.internal.spanObject()', function() {
 
       it('creates an object with the given property names, assigning all properties the given value', function() {
         const array = ['foo', 'bar', 'baz']
@@ -160,7 +160,7 @@ extendDescribe('up.util', function() {
       })
     })
 
-    describe('up.util.renameKey', function() {
+    describe('up.internal.renameKey', function() {
 
       it('renames a key in the given property', function() {
         const object = { a: 'a value', b: 'b value' }
@@ -185,7 +185,7 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.isOptions()', function() {
+    describe('up.internal.isOptions()', function() {
 
       it('returns true for an Object instance', () => {
         expect(up.internal.isOptions(new Object())).toBe(true)
@@ -336,7 +336,7 @@ extendDescribe('up.util', function() {
       })
     })
 
-    describe('up.util.mergeDefined', function() {
+    describe('up.internal.mergeDefined', function() {
 
       it('merges the given objects', function() {
         let obj = { a: '1', b: '2' }
@@ -464,7 +464,7 @@ extendDescribe('up.util', function() {
       })
     })
 
-    describe('up.util.withRenamedKeys', function() {
+    describe('up.internal.withRenamedKeys', function() {
 
       it('returns a copy of the given object, but with keys transformed by the given function', function() {
         const source = { foo: 1, bar: 2 }
@@ -497,7 +497,7 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.objectContains()', function() {
+    describe('up.internal.objectContains()', function() {
 
       it('returns true if the first object has all properties of the second object, and then some more', () => {
         expect(up.internal.objectContains({ a: 1, b: 2 }, { a: 1 })).toBe(true)

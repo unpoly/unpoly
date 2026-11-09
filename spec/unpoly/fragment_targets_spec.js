@@ -357,7 +357,7 @@ extendDescribe('up.fragment', function() {
 
     })
 
-    describe('up.fragment.expandTargets', function() {
+    describe('up.internal.expandTargets', function() {
 
       beforeEach(function() {
         up.layer.config.any.mainTargets = []
@@ -451,7 +451,7 @@ extendDescribe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.resolveOrigin()', function() {
+    describe('up.internal.resolveOrigin()', function() {
 
       it("it expands ':origin' to a selector for { origin }", function() {
         const origin = fixture('#foo')
@@ -523,7 +523,7 @@ extendDescribe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.splitTarget()', function() {
+    describe('up.internal.splitTarget()', function() {
 
       it('returns an array containing a single target', function() {
         const selectors = up.internal.splitTarget('.one')
@@ -541,7 +541,7 @@ extendDescribe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.parseTargetSteps()', function() {
+    describe('up.internal.parseTargetSteps()', function() {
 
       it('parses a single target', function() {
         const steps = up.internal.parseTargetSteps('.one')
@@ -634,7 +634,7 @@ extendDescribe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.compressNestedSteps()', function() {
+    describe('up.internal.compressNestedSteps()', function() {
 
       it("removes a step whose { oldElement } is contained by a later step's { oldElement }", function() {
         const container = fixture('.container')

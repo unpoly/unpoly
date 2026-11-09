@@ -4,7 +4,7 @@ extendDescribe('up.form', function() {
 
   extendDescribe('JavaScript', function() {
 
-    describe('up.form.trackFields()', function() {
+    describe('up.internal.trackFields()', function() {
 
       it('runs the callback for an existing field that is a descendant of the form', async function() {
         let detachCallback = jasmine.createSpy('detach callback')

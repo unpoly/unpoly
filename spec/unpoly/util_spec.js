@@ -28,7 +28,7 @@ describe('up.util', () => {
 
     require('./util_lists_spec')
 
-    describe('up.util.args()', function() {
+    describe('up.internal.parseArgs()', function() {
 
       describe('val slots', function() {
 
@@ -92,7 +92,7 @@ describe('up.util', () => {
 
     })
 
-    describe('up.util.cleaner()', function() {
+    describe('up.internal.cleaner()', function() {
 
       it('returns a function that collects clean-up action, which are executed when { clean } is called', function() {
         let cleaner = up.internal.cleaner()
@@ -612,7 +612,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.isElementLike', function() {
+    describe('up.internal.isElementLike', function() {
 
       it('returns true for an element', function() {
         const value = document.body
@@ -775,7 +775,7 @@ describe('up.util', () => {
 //            expect(callback).toHaveBeenCalledWith('return value')
 //            done()
 
-    describe('up.util.sequence', function() {
+    describe('up.internal.sequence', function() {
 
       it('combines an array of function into a single function', function() {
         const values = []
@@ -1065,7 +1065,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.unresolvablePromise', function() {
+    describe('up.internal.unresolvablePromise', function() {
 
       it('return a pending promise', function(done) {
         const promise = up.internal.unresolvablePromise()
@@ -1083,7 +1083,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.isCrossOrigin', function() {
+    describe('up.internal.isCrossOrigin', function() {
 
       it('returns false for an absolute path', () => {
         expect(up.internal.isCrossOrigin('/foo')).toBe(false)
@@ -1149,7 +1149,7 @@ describe('up.util', () => {
 //        obj = up.util.deepMerge(obj, other)
 //        expect(obj).toEqual { a: ['3', '4'] }
 
-    describe('up.util.memoize()', function() {
+    describe('up.internal.memoize()', function() {
 
       it('returns a function that calls the memoized function', function() {
         const fun = () => 'foo'
@@ -1382,7 +1382,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.isRegExp', function() {
+    describe('up.internal.isRegExp', function() {
 
       it('returns true for a RegExp', function() {
         const value = /foo/
@@ -1416,7 +1416,7 @@ describe('up.util', () => {
 //        result = up.util.unprefixCamelCase('prefix', 'prefix')
 //        expect(result).toBeUndefined()
 
-    describe('up.util.memoizeMethod()', function() {
+    describe('up.internal.memoizeMethod()', function() {
 
       it("caches a function property's return value", function() {
         const spy = jasmine.createSpy('method').and.returnValue('return value')
@@ -1596,7 +1596,7 @@ describe('up.util', () => {
       })
     })
 
-    describe('up.util.evalAutoOption()', function() {
+    describe('up.internal.evalAutoOption()', function() {
 
       describe('if the first argument is a primitive value', function() {
         it('returns the first argument', function() {

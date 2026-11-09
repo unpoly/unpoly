@@ -4,7 +4,7 @@ const $ = jQuery
 describe('up.log', () => {
   describe('JavaScript', function() {
 
-    describe('up.log.puts()', function() {
+    describe('up.internal.printToStandard()', function() {
 
       it('sends a log message to the developer console iff the log is enabled', function() {
         spyOn(console, 'log')
@@ -60,7 +60,7 @@ describe('up.log', () => {
 
     })
 
-    describe('up.log.error()', () => {
+    describe('up.internal.printToError()', () => {
       it('sends an error message to the developer console regardless whether the log is enabled or not', function() {
         spyOn(console, 'error')
 

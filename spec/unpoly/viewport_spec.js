@@ -215,7 +215,7 @@ describe('up.viewport', function() {
       })
     })
 
-    describe('up.viewport.focusedElementWithin()', function() {
+    describe('up.internal.focusedElementWithin()', function() {
 
       it('returns the focused element if it is contained by the given root', function() {
         const root = fixture('.root')
@@ -868,7 +868,7 @@ describe('up.viewport', function() {
       })
     }
 
-    describe('up.viewport.revealHash()', function() {
+    describe('up.internal.revealHash()', function() {
 
       it('reveals an element with an ID matching the given #hash', async function() {
         const revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
@@ -919,7 +919,7 @@ describe('up.viewport', function() {
       })
     })
 
-    describe('up.viewport.subtree()', function() {
+    describe('up.internal.getViewportSubtree()', function() {
 
       it('returns descendant viewports of the given element', function() {
         const $motherViewport = $fixture('.mother[up-viewport]')
@@ -939,7 +939,7 @@ describe('up.viewport', function() {
       })
     })
 
-    describe('up.viewport.around()', function() {
+    describe('up.internal.getViewportAround()', function() {
       it('returns viewports that  are either ancestors, descendants, or the given element itself', function() {
         const $motherViewport = $fixture('.mother[up-viewport]')
         const $element = $motherViewport.affix('.element')
@@ -1138,7 +1138,7 @@ describe('up.viewport', function() {
       })
     })
 
-    describe('up.viewport.absolutize()', function() {
+    describe('up.internal.absolutize()', function() {
 
       afterEach(function() {
         $('up-bounds, .fixture').remove()

@@ -134,7 +134,7 @@ describe('up.element', function() {
   }
 
 
-  describe('up.element.list()', function() {
+  describe('up.internal.getList()', function() {
 
     it('returns the given array of elements', function() {
       const array = [document.body]
@@ -244,7 +244,7 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.contains()', function() {
+  describe('up.internal.containsElement()', function() {
 
     it('can handle conflicts with forms where an input is named `contains` GH#507', function() {
       const $form = $fixture('form')
@@ -294,7 +294,7 @@ describe('up.element', function() {
     })
   }
 
-  describe('up.element.ancestor()', function() {
+  describe('up.internal.ancestor()', function() {
 
     it('returns the closest ancestor of the given root that matches the given selector', function() {
       const $grandGrandMother = $fixture('.match')
@@ -719,7 +719,7 @@ describe('up.element', function() {
   })
 
 
-  describe('up.element.createBrokenDocumentFromHTML', function() {
+  describe('up.internal.createBrokenDocumentFromHTML', function() {
 
     it('parses a string that contains a serialized HTML document', function() {
       const string = `
@@ -958,7 +958,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.fixedToAbsolute', function() {
+  describe('up.internal.fixedToAbsolute', function() {
 
     it("changes the given element's position from fixed to absolute, without changing its rendered position", function() {
       const $container = $fixture('.container').css({
@@ -1110,7 +1110,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.booleanOrStringAttr', function() {
+  describe('up.internal.booleanOrStringAttr', function() {
 
     it('returns true if the attribute value is empty', function() {
       const element = up.element.createFromHTML('<div foo></div>')
@@ -1143,7 +1143,7 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.booleanOrNumberAttr', function() {
+  describe('up.internal.booleanOrNumberAttr', function() {
 
     it('returns true if the attribute value is empty', function() {
       const element = up.element.createFromHTML('<div foo></div>')
@@ -1248,7 +1248,7 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.closestAttr', function() {
+  describe('up.internal.closestAttr', function() {
 
     it('returns the the value of the given attribute on the given element', function() {
       const element = fixture('div[foo=value]')
@@ -1317,7 +1317,7 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.setMissingAttr()', function() {
+  describe('up.internal.setMissingAttr()', function() {
 
     it('sets a missing attribute', function() {
       let element = document.createElement('div')
@@ -1351,7 +1351,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.setAttrsTemp()', function() {
+  describe('up.internal.setAttrsTemp()', function() {
 
     it('returns a function that restores the original attribute values', function() {
       let element = up.element.createFromSelector('div[foo=original]')
@@ -1377,7 +1377,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.addClassTemp()', function() {
+  describe('up.internal.addClassTemp()', function() {
 
     it('adds the given class to the given element', function() {
       let element = up.element.createFromSelector('.foo')
@@ -1415,7 +1415,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.removeClassTemp()', function() {
+  describe('up.internal.removeClassTemp()', function() {
 
     it('adds the given class to the given element', function() {
       let element = up.element.createFromSelector('.foo.bar')
@@ -1453,7 +1453,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.setStyleTemp()', function() {
+  describe('up.internal.setStyleTemp()', function() {
 
     it("sets the given inline styles and returns a function that will restore the previous inline styles", function() {
       const div = fixture('div[style="color: red"]')
@@ -1528,7 +1528,7 @@ describe('up.element', function() {
     }
   })
 
-  describe('up.element.inlineStyle', function() {
+  describe('up.internal.inlineStyle', function() {
 
     describe('with a string as second argument', function() {
 
@@ -1767,7 +1767,7 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.classSelector', function() {
+  describe('up.internal.classSelector', function() {
     it('escapes all colons', function() {
       const element = fixture('div')
       element.classList.add('print:sm:hidden')
@@ -1874,7 +1874,7 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.parseSelector()', function() {
+  describe('up.internal.parseSelector()', function() {
 
     it('parses a selector with tag name, IDs, classes and attributes', function() {
       const parsed = up.internal.parseSelector('tag-name#id.klass[attr=value]')
@@ -1969,7 +1969,7 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.extractSingular()', function() {
+  describe('up.internal.extractSingular()', function() {
 
     it('returns an Element for an array of only that Element', function() {
       let array = [document.head]
@@ -1995,7 +1995,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.unwrap()', function() {
+  describe('up.internal.unwrap()', function() {
 
     it("attaches the element's children to its parent, then removes the element", function() {
       let [container, wrapper, child1, child2] = htmlFixtureList(`
@@ -2049,7 +2049,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.leadingElement()', function() {
+  describe('up.internal.leadingElement()', function() {
 
     it('returns the first child node when it is an element', function() {
       const nodes = up.element.createFromHTML(`<div><span id="match"></span></div>`).childNodes
@@ -2094,7 +2094,7 @@ describe('up.element', function() {
 
   })
 
-  describe('up.element.removeAttrsFromHTML()', function() {
+  describe('up.internal.removeAttrsFromHTML()', function() {
     it('removes the given attributes from the given HTML', function() {
       const html = `
         <div id="container" class="foo" data-foo="bar">
@@ -2113,7 +2113,7 @@ describe('up.element', function() {
     })
   })
 
-  describe('up.element.trackDefinitions()', function() {
+  describe('up.internal.trackDefinitions()', function() {
 
     it('emits up:element:defined with the { localName } when a custom element in the given root gets defined', async function() {
       const { tagName, define } = lateFormAssociatedElement()

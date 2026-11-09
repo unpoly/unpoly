@@ -246,7 +246,7 @@ describe('up.history', function() {
       })
     })
 
-    describe('up.history.findMetaTags()', function() {
+    describe('up.internal.findMetaTags()', function() {
 
       it('does not find an [up-meta] element in the <body>', function() {
         const [element] = htmlFixtureList('<div up-meta>text</div>')

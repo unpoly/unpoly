@@ -391,7 +391,7 @@ describe('up.script', function() {
 
     require('./script_hello_spec')
 
-    describe('up.script.clean()', function() {
+    describe('up.internal.clean()', function() {
 
       it('allows compilers to return a function to call when the compiled element is cleaned', function() {
         const destructor = jasmine.createSpy('destructor')
@@ -495,7 +495,7 @@ describe('up.script', function() {
       })
     })
 
-    describe('up.script.findAssets()', function() {
+    describe('up.internal.findAssets()', function() {
 
       it('finds a link[rel=stylesheet] in the head', function() {
         const link = fixture(document.head, 'link[rel="stylesheet"][href="/styles.css"]')
@@ -556,7 +556,7 @@ describe('up.script', function() {
       })
     })
 
-    describe('up.script.cspNonce()', function() {
+    describe('up.internal.cspNonce()', function() {
 
       beforeEach(function() {
         // Remove the CSP meta to start with a clean slate.
@@ -589,7 +589,7 @@ describe('up.script', function() {
 
     })
 
-    describe('up.script.warnOfUnsafeCSP()', function() {
+    describe('up.internal.warnOfUnsafeCSP()', function() {
 
       let warnSpy
 
@@ -802,7 +802,7 @@ describe('up.script', function() {
 
     require('./script_adopt_new_fragment_spec')
 
-    describe('up.script.adoptDetachedHeadAsset()', function() {
+    describe('up.internal.adoptDetachedHeadAsset()', function() {
 
       function itBehavesLikeExamples() {
 

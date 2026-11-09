@@ -4,7 +4,7 @@ extendDescribe('up.script', function() {
 
   extendDescribe('JavaScript', function() {
 
-    describe('up.script.adoptNewFragment()', function() {
+    describe('up.internal.adoptNewFragment()', function() {
 
       describe('CSP nonces in body scripts', function() {
 

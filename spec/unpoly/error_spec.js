@@ -2,7 +2,7 @@ const u = up.util
 
 describe('up.error', function() {
 
-  describe('up.error.muteUncriticalRejection()', function() {
+  describe('up.internal.muteUncriticalRejection()', function() {
 
     it('does not mute a fulfilled promise', async function() {
       const value = 'fulfillment value'
@@ -45,7 +45,7 @@ describe('up.error', function() {
     })
   })
 
-  describe('up.error.guard()', function() {
+  describe('up.internal.guard()', function() {
 
     it('calls the given function and returns its return value', function() {
       let fn = () => 123
@@ -82,7 +82,7 @@ describe('up.error', function() {
 
   })
 
-  describe('up.error.guardFn()', function() {
+  describe('up.internal.guardFn()', function() {
 
     it('returns a function that calls the given functions', function() {
       let fn = jasmine.createSpy('wrapped function').and.returnValue(123)

@@ -11,7 +11,7 @@ describe('up.layer', function() {
 
     require('./layer_open_spec')
 
-    describe('up.layer.build()', function() {
+    describe('up.internal.buildLayer()', function() {
 
       it('merges all applicable layer configs', function() {
         up.layer.config.any.class = 'from-any'
@@ -632,7 +632,7 @@ describe('up.layer', function() {
       })
     })
 
-    describe('up.layer.normalizeOptions()', function() {
+    describe('up.internal.normalizeLayerOptions()', function() {
 
       describe('snapshotting the current layer', function() {
 

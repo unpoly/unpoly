@@ -5,7 +5,7 @@ describe('up.browser', function() {
 
   describe('JavaScript', function() {
 
-    describe('up.browser.assertConfirmed', function() {
+    describe('up.internal.assertConfirmed', function() {
 
       it('shows a confirmation dialog with the given message', function() {
         spyOn(window, 'confirm').and.returnValue(true)
@@ -38,7 +38,7 @@ describe('up.browser', function() {
       })
     })
 
-    describe('up.browser.popCookie', function() {
+    describe('up.internal.popCookie', function() {
 
       it('returns the value of the given cookie', function() {
         document.cookie = 'key=value'

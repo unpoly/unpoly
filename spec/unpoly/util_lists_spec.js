@@ -707,7 +707,7 @@ extendDescribe('up.util', function() {
       })
     })
 
-    describe('up.util.containsAll()', function() {
+    describe('up.internal.containsAll()', function() {
 
       it('returns true if the first array has all elements of the second array, and then some more', () => {
         expect(up.internal.containsAll(['a', 'b'], ['b'])).toBe(true)

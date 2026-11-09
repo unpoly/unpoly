@@ -6,7 +6,7 @@ describe('up.form', function() {
 
   describe('JavaScript', function() {
 
-    describe('up.form.get()', function() {
+    describe('up.internal.getForm()', function() {
 
       describe('for a form element', function() {
 
@@ -368,7 +368,7 @@ describe('up.form', function() {
       })
     })
 
-    describe('up.form.groupSolution()', function() {
+    describe('up.internal.findGroupSolution()', function() {
 
       it('returns a solution for the form group closest to the given element, distinguishing the selector from other form groups by refering to the given element with :has()', function() {
         const form = fixture('form')
@@ -459,7 +459,7 @@ describe('up.form', function() {
       })
     })
 
-    describe('up.form.groupSelectors()', function() {
+    describe('up.internal.getGroupSelectors()', function() {
 
       it('returns the configured up.form.config.groupSelectors', function() {
         up.form.config.groupSelectors = ['.form-group']
@@ -566,7 +566,7 @@ describe('up.form', function() {
       })
     }
 
-    describe('up.form.watchOptions()', function() {
+    describe('up.internal.watchOptions()', function() {
 
       it('parses the closest [up-watch-event] attribute into an { event } option', function() {
         const form = fixture('form')
@@ -671,7 +671,7 @@ describe('up.form', function() {
       })
     })
 
-    describe('up.form.validateOptions()', function() {
+    describe('up.internal.validateOptions()', function() {
 
       it('parses the closest [up-validate-url] attribute into a { url } option', function() {
         const form = fixture('form[action="/path1"]')
@@ -1252,7 +1252,7 @@ describe('up.form', function() {
 
     })
 
-    describe('up.form.submitButtonOverrides()', function() {
+    describe('up.internal.submitButtonOverrides()', function() {
 
       it('returns an empty object for a plain button (as to not accidentally override options parses from the form)', function() {
         let [form, submitButton] = htmlFixtureList(`
@@ -1375,7 +1375,7 @@ describe('up.form', function() {
 
     require('./form_validate_fn_spec')
 
-    describe('up.form.disableTemp()', function() {
+    describe('up.internal.disableContainerTemp()', function() {
 
       describe('custom form fields', function() {
 
