@@ -509,7 +509,7 @@ function placeAdoptedHistoryEntry(method: 'pushState' | 'replaceState', location
       //
       // TODO: { up: true } lands in the unused second argument (title), so the pushed state is null.
       // TypeScript reports this. Probably meant history[method]({ up: true }, '', location). (Needs Henning)
-      history[method](null, { up: true }, location)
+      history[method]({ up: true }, '', location)
     })
   }
 }
