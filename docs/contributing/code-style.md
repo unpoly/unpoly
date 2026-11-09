@@ -48,11 +48,17 @@ In a `.ts` module:
   new event gets a type in the module that documents it (like `LinkFollowEvent` in `link.ts`),
   with the properties from its doc comment, and an entry in the map.
 - Typing must not change what the build emits. Compare `unpoly.min.js` before and after.
+- The global `up` has the type `Up`, which `src/unpoly.ts` builds from every module's `api`. A
+  key that no `api` contributes is declared by merging it into `Up` (or into a namespace's type)
+  with a `declare module` block, next to the code that adds it.
 - `unpoly-migrate` is loosely typed for now. Its files are scripts, not modules: they patch
-  `window.up` (which TypeScript sees as `any`) and import nothing, since `unpoly-migrate.js` is a
-  separate bundle and a class imported from `src/unpoly/` would be a second copy. Type parameters
-  where it's easy, and mark each function that core calls on `up.migrate` with a "Core calls this
-  hook" comment.
+  `window.up` and import nothing, since `unpoly-migrate.js` is a separate bundle and a class
+  imported from `src/unpoly/` would be a second copy. Each file declares the keys it adds to `up`,
+  as `any` where a precise type isn't easy; a deprecated alias gets the type of its replacement.
+  A wrapper that forwards its `...args` to an overloaded function casts the callee:
+  `(up.element.get as any)(...args)`. Type parameters where it's easy. Core declares the hooks it
+  calls on `up.migrate` in `migrate_stub.ts`, and migrate marks each implementation with a "Core
+  calls this hook" comment.
 
 Public types also appear in [doc comments](documentation.md), in a notation loosely inspired
 by TypeScript. Those document intent for the reader; no tool verifies them.

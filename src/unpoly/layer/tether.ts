@@ -58,8 +58,10 @@ export class Tether {
 
   _changeEventSubscription(fn: 'on' | 'off'): void {
     let doScheduleSync = this._scheduleSync.bind(this)
-    up[fn](window, 'resize', doScheduleSync)
-    if (this._syncOnScroll) { up[fn](this._viewport, 'scroll', doScheduleSync) }
+    // up.on() and up.off() take the same arguments, but TypeScript can't call the union of their
+    // overloads. So we type both as up.off().
+    up[fn as 'off'](window, 'resize', doScheduleSync)
+    if (this._syncOnScroll) { up[fn as 'off'](this._viewport, 'scroll', doScheduleSync) }
   }
 
   _scheduleSync(): void {

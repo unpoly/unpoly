@@ -1,9 +1,9 @@
 // Ambient declarations for type checking (bin/typecheck). The build never reads this file.
 
 // Unpoly's own modules import each other and don't need the global `up`. A few places still reach
-// it at call time (e.g. `up.migrate.*`, which only exists when unpoly-migrate.js is loaded), so we
-// declare it as `any`.
-declare var up: any
+// it at call time (e.g. `up.migrate.*`, which only exists when unpoly-migrate.js is loaded).
+// unpoly-migrate and the Bootstrap entries are separate bundles, and only reach Unpoly through it.
+declare var up: import('../unpoly.js').Up
 
 // Globals we use only when the page has them: jQuery for interop, Jasmine in up.mockable().
 declare var jQuery: any
