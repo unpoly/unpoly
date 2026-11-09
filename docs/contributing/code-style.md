@@ -27,12 +27,13 @@ TypeScript 7's checker twice:
 
 - `tsconfig.json` checks all of `src/` with loose settings.
 - `tsconfig.core.json` checks Unpoly's core (`src/unpoly.ts` and `src/unpoly/`) with stricter
-  settings, so far `noImplicitAny`. `unpoly-migrate` isn't part of this check, so core can't
-  use the API that only migrate adds, like `up.migrate.deprecated()` or `config.patch()`. The
-  change classes in `src/unpoly/fragment/render/change/` wait for a restructure before they
-  get the stricter settings. TypeScript can't leave out a folder that other core files import,
-  so `bin/typecheck` drops that folder's errors of the stricter settings instead (see
-  `NOT_YET_STRICT` there).
+  settings, so far `noImplicitAny` and `strictNullChecks`. `unpoly-migrate` isn't part of this
+  check, so core can't use the API that only migrate adds, like `up.migrate.deprecated()` or
+  `config.patch()`. The change classes in `src/unpoly/fragment/render/change/` wait for a
+  restructure before they get the stricter settings. TypeScript can't leave out a folder that
+  other core files import, so `bin/typecheck` runs the core check a second time without the
+  stricter settings, and takes that folder's errors from the second run (see `NOT_YET_STRICT`
+  and `STRICT_SETTINGS` there).
 
 When a folder passes the stricter settings, remove it from `NOT_YET_STRICT`. When all of `src/`
 passes a setting, move it to `tsconfig.json`. CI runs `bin/typecheck` as a separate job, and a
@@ -54,6 +55,12 @@ In a `.ts` module:
   empty `{}` or `[]` that collects values. Callbacks get their parameter types from the function
   they're passed to (`up.compiler()`, `up.on()`), so prefer typing that function over annotating
   each callback.
+- Core code passes `strictNullChecks`. When TypeScript says a value may be `null` or
+  `undefined`, and the function you pass it to already handles that, widen the parameter's
+  type (`origin: Element | undefined`). When something guarantees the value, assert it with
+  `!`, and say what guarantees it in a comment unless the code nearby shows it. Don't add a
+  runtime check for a case that can't happen. A value that can really be missing, and then
+  breaks something, is a bug: fix it in its own change, with a spec.
 - When a function resolves its argument by reassigning it (`element = getSmart(element)`),
   TypeScript narrows the parameter to a member of its declared type: an `ElementOrSelector`
   becomes an `Element`, never the `HTMLElement` that `getSmart()` returns. When that's enough,

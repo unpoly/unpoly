@@ -4,7 +4,8 @@
   // passes it too.
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "strictNullChecks": true
   },
   // unpoly-migrate and the Bootstrap entries are left out. Core never imports them, and
   // must not use the API that unpoly-migrate adds (like `up.migrate.deprecated()`).

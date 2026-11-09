@@ -3,8 +3,8 @@
 //
 //   1. tsconfig.json: all of src/, with loose settings.
 //   2. tsconfig.core.json: Unpoly's core (src/unpoly/), with stricter settings and without
-//      unpoly-migrate's declarations. In the folders listed in NOT_YET_STRICT, we drop the
-//      errors of the stricter settings.
+//      unpoly-migrate's declarations. The folders listed in NOT_YET_STRICT get the same check
+//      without the stricter settings.
 //
 // Extra arguments are forwarded to tsc, so `bin/typecheck --extendedDiagnostics` works.
 // The build doesn't use TypeScript at all: esbuild strips the types.
@@ -18,16 +18,16 @@ const extraArgs = process.argv.slice(2)
 
 // Core folders that don't pass the stricter settings of tsconfig.core.json yet. tsc has no
 // per-file settings, and leaving a folder out of the config's `include` doesn't help: other
-// core files import it, so tsc checks it anyway. We drop its errors from the output instead.
+// core files import it, so tsc checks it anyway. We run the core check a second time without
+// the stricter settings, and take these folders' errors from that run.
 const NOT_YET_STRICT = [
   // The change classes wait for a restructure.
   'src/unpoly/fragment/render/change/',
 ]
 
-// The errors that the stricter settings report. We only drop these in NOT_YET_STRICT, so its
-// files are still checked without unpoly-migrate's declarations. When tsconfig.core.json gets
-// another setting, add its error codes.
-const STRICT_ERROR = /: error TS7\d{3}:/ // noImplicitAny
+// The settings that tsconfig.core.json adds to tsconfig.json. The second run turns them off.
+// When tsconfig.core.json gets another setting, add it here.
+const STRICT_SETTINGS = ['noImplicitAny', 'strictNullChecks']
 
 function tsc(args, stdio) {
   return new Promise((resolve) => {
@@ -53,17 +53,30 @@ function outputBlocks(output) {
   return blocks
 }
 
+function isNotYetStrict({ lines }) {
+  return NOT_YET_STRICT.some((folder) => lines[0].startsWith(folder))
+}
+
+// tsc may also fail without printing an error, e.g. when it crashes.
+function crashed({ code, stdout }) {
+  return code !== 0 && !outputBlocks(stdout).some(({ error }) => error)
+}
+
 let loose = await tsc(['--project', 'tsconfig.json', ...extraArgs], 'inherit')
-let core = await tsc(['--project', 'tsconfig.core.json', '--pretty', 'false', ...extraArgs], ['inherit', 'pipe', 'inherit'])
-let blocks = outputBlocks(core.stdout).filter(({ lines, error }) =>
-  !(error && STRICT_ERROR.test(lines[0]) && NOT_YET_STRICT.some((folder) => lines[0].startsWith(folder)))
-)
+let coreArgs = ['--project', 'tsconfig.core.json', '--pretty', 'false', ...extraArgs]
+let [core, coreNotYetStrict] = await Promise.all([
+  tsc(coreArgs, ['inherit', 'pipe', 'inherit']),
+  tsc([...coreArgs, ...STRICT_SETTINGS.flatMap((setting) => [`--${setting}`, 'false'])], ['inherit', 'pipe', 'inherit']),
+])
+let blocks = [
+  ...outputBlocks(core.stdout).filter((block) => !(block.error && isNotYetStrict(block))),
+  ...outputBlocks(coreNotYetStrict.stdout).filter((block) => block.error && isNotYetStrict(block)),
+]
 for (let { lines } of blocks) console.log(lines.join('\n'))
 let coreErrorCount = blocks.filter(({ error }) => error).length
 if (coreErrorCount) {
   console.log(`\nFound ${coreErrorCount} error${coreErrorCount === 1 ? '' : 's'} in the core check (tsconfig.core.json).`)
 }
-// tsc may also fail without printing an error, e.g. when it crashes.
-let coreFailed = coreErrorCount > 0 || (core.code !== 0 && !outputBlocks(core.stdout).some(({ error }) => error))
+let coreFailed = coreErrorCount > 0 || crashed(core) || crashed(coreNotYetStrict)
 
 process.exit(loose.code || (coreFailed ? 1 : 0))
