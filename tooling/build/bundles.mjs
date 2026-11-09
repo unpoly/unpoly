@@ -95,10 +95,12 @@ const minified = [
   unpolyMigrate({ min: true }),
 ]
 
-// The CI matrix tests the minified modern bundle, never a minified es6 one.
+// The CI matrix tests both minified unpoly bundles. The minified es6 one is the only tested
+// bundle that goes through the ES2015 cases of names.mjs.
 const ci = [
   ...development,
   unpoly({ es: 'modern', min: true }),
+  unpoly({ es: 'es6', min: true }),
   unpolyMigrate({ min: true }),
 ]
 

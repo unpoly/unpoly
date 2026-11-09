@@ -31,6 +31,6 @@ Some commits don't belong to a namespace. Make up a term that reads like one:
 
 CI runs the whole suite in multiple Chrome configurations: without CSP, under a nonce-only
 CSP, under a strict-dynamic CSP, against the `unpoly-migrate` build, against the ES6
-build and against the minified build.
+build, against the minified build and against the minified ES6 build.
 
 It runs on every pull request against `master`, and on every push to `master`.

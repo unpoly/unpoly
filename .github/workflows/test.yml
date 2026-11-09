@@ -91,6 +91,10 @@ jobs:
           - name: Chrome with minified build
             browser: chrome
             min: true
+          - name: Chrome with minified ES6 build
+            browser: chrome
+            es6: true
+            min: true
           # - name: Firefox
           #   browser: firefox
     name: ${{ matrix.name }}

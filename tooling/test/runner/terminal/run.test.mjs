@@ -74,7 +74,7 @@ test('--minify --migrate also judges the migrate bundle', () => {
     ['unpoly-migrate.min.js'])
 })
 
-test('--es6 --minify asks for the es6 bundle, which only --config=minified builds', () => {
+test('--es6 --minify asks for the minified es6 bundle', () => {
   assert.deepEqual(
     outdatedMinifiedFiles(Config.fromArgv(['--es6', '--minify']), dist(), NOW),
     ['unpoly.es6.min.js'])
