@@ -50,11 +50,11 @@ them too. The watcher itself keeps running, so your next edit can fix things.
 also strips TypeScript's types, and minifies with [Terser](https://terser.org/).
 `tooling/build/bundles.mjs` lists every bundle, and which `--config` builds it.
 
-The watcher rebuilds only the bundles that read the file you edited, usually within 200 ms, and
-lints the file with Oxlint if it is in `src/` (Oxlint's native rules only, see
-[Linting](code-style.md#linting)). Of the one-shot builds, only the production build
-(`bin/build` without `--config`, which `bin/release` runs) lints `src/`, with all rules, and fails
-on an error. `bin/lint` lints `src/`, `spec/` and `tooling/`, and CI runs it as its own job.
+The watcher rebuilds only the bundles that read the file you edited, and lints the file with
+Oxlint if it is in `src/` (see [Linting](code-style.md#linting)), usually within 300 ms. Of the
+one-shot builds, only the production build (`bin/build` without `--config`, which `bin/release`
+runs) lints `src/`, and fails on an error. `bin/lint` lints `src/`, `spec/` and `tooling/`, and
+CI runs it as its own job.
 
 ## Logs
 

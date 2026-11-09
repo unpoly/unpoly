@@ -4,10 +4,10 @@
 // `bin/lint --fix` works.
 //
 // Only the production build lints (src/ only, so bin/release refuses lint errors). The dev
-// watcher lints src/ after every change, with Oxlint's native rules only (tooling/build/lint.mjs),
-// so `bin/test` reports a lint error in src/ like a syntax error. Nothing else checks the code
-// style, spec/ and tooling/, in particular no-undef, which catches a spec file using something
-// from another file's scope. CI runs this as its own step.
+// watcher lints src/ after every change with the same config (tooling/build/lint.mjs), so
+// `bin/test` reports a lint error in src/ like a syntax error. Nothing else checks spec/ and
+// tooling/, in particular no-undef, which catches a spec file using something from another file's
+// scope. CI runs this as its own step.
 //
 // bin/ is not linted: its executables are extensionless, which Oxlint will not match.
 import { spawn } from 'node:child_process'

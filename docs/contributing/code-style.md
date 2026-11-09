@@ -124,14 +124,10 @@ direct call — cannot be `_`-prefixed: the name it asks for does not exist in
 (`tooling/lint/api_collisions.mjs`). Extra arguments are forwarded to Oxlint, so
 `bin/lint --fix` works.
 
-The rules are in two files in the project root. `.oxlintrc.native.json` has Oxlint's own rules,
-which are written in Rust. `.oxlintrc.json` extends it with the rules that run in JavaScript: the
-code style rules from `@stylistic/eslint-plugin`, and our own in `tooling/lint/unpoly_plugin.mjs`.
-Editors with the Oxc extension use `.oxlintrc.json`. To silence a rule for one line, write
-`// oxlint-disable-line rule-name`.
+The rules are in `.oxlintrc.json` in the project root. Most are Oxlint's own, which are written in
+Rust. The code style rules from `@stylistic/eslint-plugin` and our own in
+`tooling/lint/unpoly_plugin.mjs` run in JavaScript. Editors with the Oxc extension use the same
+config. To silence a rule for one line, write `// oxlint-disable-line rule-name`.
 
-Lint errors in `src/` fail the build, so `bin/test` surfaces them for you. The dev watcher only
-checks the native rules and the api collisions, though. The code style and `declare` on class
-fields wait for `bin/lint`, CI and the production build, because the JavaScript rules would add a
-second to every rebuild. Specs and the tooling are not part of the build, so only `bin/lint`
-(or CI's lint job) checks those.
+Lint errors in `src/` fail the build, so `bin/test` surfaces them for you. Specs and the tooling
+are not part of the build, so only `bin/lint` (or CI's lint job) checks those.

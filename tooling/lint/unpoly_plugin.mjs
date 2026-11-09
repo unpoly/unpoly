@@ -1,6 +1,5 @@
 // Unpoly's own lint rules, as an Oxlint JS plugin (Oxlint runs ESLint-style rules in JavaScript).
-// `.oxlintrc.json` turns them on. Like every JS plugin they only run in `bin/lint`, CI and
-// editors, not in the dev watcher (see tooling/build/lint.mjs).
+// `.oxlintrc.json` turns them on.
 
 // A class field that only states a type must be `declare`d. Without `declare` the compiled
 // class would define the property (as undefined), and only in builds whose target uses define

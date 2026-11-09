@@ -2,11 +2,11 @@
 // changed, so a lint error reaches `bin/test` and `bin/dev status` like a syntax error does.
 // The production build (what bin/release publishes) uses it once, to refuse code with errors.
 //
-// The watcher uses Oxlint's native rules only (`.oxlintrc.native.json`), which take ~50 ms for a
-// changed file. The rules that run in JavaScript (code style, `declare` on class fields) would add
-// a second to every round, so they wait for `bin/lint`, CI and the production build, which use
-// the full `.oxlintrc.json`. The entry's api collision check (tooling/lint/api_collisions.mjs)
-// runs with every round.
+// It uses all rules in `.oxlintrc.json`, like `bin/lint`. Linting a changed file takes ~0.2-0.3 s,
+// most of it for loading the rules that run in JavaScript (code style, `declare` on class fields).
+// Oxlint's native rules alone take ~50 ms. The lint runs while esbuild builds (~0.1 s), so a round
+// takes ~0.3 s instead of ~0.1 s (8 cores). The entry's api collision check
+// (tooling/lint/api_collisions.mjs) runs with every round.
 //
 // The other one-shot builds don't lint. CI and `bin/lint` lint src/, spec/ and tooling/. Like the
 // webpack build before, the watcher covers src/ only, and only errors fail a build. Warnings only
@@ -23,12 +23,10 @@ const LINTED_DIR = 'src'
 const LINTED_EXTENSIONS = ['.js', '.ts']
 const ENTRY = 'src/unpoly.ts'
 
-export const NATIVE_CONFIG = '.oxlintrc.native.json'
-export const FULL_CONFIG = '.oxlintrc.json'
+const CONFIG = '.oxlintrc.json'
 
 export class SourceLinter {
   #root
-  #config
   #apiCollisions
   // Absolute path → Oxlint's errors in that file, for every file that has errors.
   #failing = new Map()
@@ -42,10 +40,9 @@ export class SourceLinter {
   // don't fail a build, so they only go to the watcher's log.
   warnings = []
 
-  // `root` is a seam for the self-tests. `config` is relative to it.
-  constructor({ root = PROJECT_ROOT, config = NATIVE_CONFIG } = {}) {
+  // `root` is a seam for the self-tests.
+  constructor({ root = PROJECT_ROOT } = {}) {
     this.#root = root
-    this.#config = config
     this.#apiCollisions = new ApiCollisionCheck(path.join(root, ENTRY))
   }
 
@@ -86,7 +83,7 @@ export class SourceLinter {
   // The formatted errors of every file in src/, empty when there are none.
   format() {
     let blocks = this.#format(this.#failing)
-    if (this.#oxlintFailure) blocks.push(formatFile(this.#config, [{ severity: 'error', message: `Oxlint failed: ${this.#oxlintFailure}` }]))
+    if (this.#oxlintFailure) blocks.push(formatFile(CONFIG, [{ severity: 'error', message: `Oxlint failed: ${this.#oxlintFailure}` }]))
     if (this.#collisions.length) blocks.push(formatFile(ENTRY, this.#collisions))
     return blocks
   }
@@ -104,7 +101,7 @@ export class SourceLinter {
   // Resolves with { diagnostics }, Oxlint's errors and warnings in `targets` as { filename, line,
   // column, message, code, severity }, or with { failure } when Oxlint failed as a whole.
   #oxlint(targets) {
-    let args = ['-c', this.#config, '-f', 'json', '--no-error-on-unmatched-pattern', ...targets]
+    let args = ['-c', CONFIG, '-f', 'json', '--no-error-on-unmatched-pattern', ...targets]
     return new Promise((resolve) => {
       let child = spawn(OXLINT_BIN, args, { cwd: this.#root })
       let stdout = ''

@@ -20,7 +20,7 @@ function project(t, files) {
     let later = new Date(Date.now() + 5000)
     utimesSync(at(file), later, later)
   }
-  write('.oxlintrc.native.json', JSON.stringify({ categories: { correctness: 'off' }, rules: { 'no-debugger': 'error', 'no-var': 'warn' } }))
+  write('.oxlintrc.json', JSON.stringify({ categories: { correctness: 'off' }, rules: { 'no-debugger': 'error', 'no-var': 'warn' } }))
   for (let [file, content] of Object.entries(files)) write(file, content)
   return { root, at, write }
 }
@@ -70,14 +70,14 @@ test('a failed Oxlint run fails its round only, and the next round lints the fil
   let linter = new SourceLinter({ root })
   assert.deepEqual(files(await linter.lint([null])), ['src/unpoly/a.js'])
 
-  let config = readFileSync(at('.oxlintrc.native.json'), 'utf8')
-  write('.oxlintrc.native.json', '{ broken')
+  let config = readFileSync(at('.oxlintrc.json'), 'utf8')
+  write('.oxlintrc.json', '{ broken')
   write('src/unpoly/b.js', 'debugger\n')
   let errors = await linter.lint([at('src/unpoly/b.js')])
-  assert.deepEqual(files(errors), ['src/unpoly/a.js', '.oxlintrc.native.json'], 'the errors from before stand')
+  assert.deepEqual(files(errors), ['src/unpoly/a.js', '.oxlintrc.json'], 'the errors from before stand')
   assert.match(errors[1], /error {2}Oxlint failed: /)
 
-  write('.oxlintrc.native.json', config)
+  write('.oxlintrc.json', config)
   write('src/unpoly/c.js', 'let c = 2\n')
   assert.deepEqual(files(await linter.lint([at('src/unpoly/c.js')])), ['src/unpoly/a.js', 'src/unpoly/b.js'])
 
