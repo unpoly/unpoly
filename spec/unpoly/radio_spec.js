@@ -348,6 +348,54 @@ describe('up.radio', function() {
 
     })
 
+    describe('up.radio.pollOptions()', function() {
+
+      it('parses the fragment\'s [up-poll] attributes', function() {
+        const [fragment] = htmlFixtureList(`
+          <div id="score" up-poll up-interval="5000" up-if-layer="any" up-href="/score">Score: 1400</div>
+        `)
+
+        const options = up.radio.pollOptions(fragment)
+
+        expect(options).toEqual(jasmine.objectContaining({ interval: 5000, ifLayer: 'any', url: '/score' }))
+      })
+
+      it('defaults the interval to up.radio.config.pollInterval', function() {
+        up.radio.config.pollInterval = 1234
+        const [fragment] = htmlFixtureList('<div id="score" up-poll>Score: 1400</div>')
+
+        const options = up.radio.pollOptions(fragment)
+
+        expect(options).toEqual(jasmine.objectContaining({ interval: 1234, ifLayer: 'front', background: true, failTarget: ':none' }))
+      })
+
+      it('overrides attributes with the given options', function() {
+        const [fragment] = htmlFixtureList('<div id="score" up-poll up-interval="5000" up-href="/score">Score: 1400</div>')
+
+        const options = up.radio.pollOptions(fragment, { interval: 200, url: '/other' })
+
+        expect(options).toEqual(jasmine.objectContaining({ interval: 200, url: '/other' }))
+      })
+
+      it('accepts a selector for the fragment', function() {
+        htmlFixtureList('<div id="score" up-poll up-interval="5000">Score: 1400</div>')
+
+        const options = up.radio.pollOptions('#score')
+
+        expect(options.interval).toBe(5000)
+      })
+
+      it('does not change the given options object', function() {
+        const [fragment] = htmlFixtureList('<div id="score" up-poll up-interval="5000">Score: 1400</div>')
+        const givenOptions = { url: '/other' }
+
+        up.radio.pollOptions(fragment, givenOptions)
+
+        expect(givenOptions).toEqual({ url: '/other' })
+      })
+
+    })
+
     describe('up.radio.stopPolling()', function() {
 
       it("stops polling the given, polling element", async function() {

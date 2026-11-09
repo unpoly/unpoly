@@ -607,7 +607,50 @@ export function submitOptions(form: any, options?: RenderOptions, parserOptions?
   return options
 }
 
-export function watchOptions(field: Element, options?: PlainObject, parserOptions: OptionsParserOptions = {}): PlainObject {
+/*-
+Parses the [watch options](/learn/watch-options) that would be used to
+[watch](/api/up.watch) the given field, but does not watch it.
+
+## Example
+
+Given a field with some `[up-watch-...]` attributes on itself and its form:
+
+```html
+<form up-watch-disable>
+  <input name="query" up-watch-event="input" up-watch-delay="300">
+</form>
+```
+
+We can parse the field's watch options like this:
+
+```js
+let field = document.querySelector('input[name=query]')
+let options = up.form.watchOptions(field)
+// result: { event: ['input', 'change'], delay: 300, disable: true, ... }
+```
+
+The event type `'input'` is expanded into the events from `up.form.config.watchInputEvents`.
+
+@function up.form.watchOptions
+@param {Element|jQuery|string} field
+  The field for which to parse watch options.
+
+  Attributes are read from the field and its ancestors. The [closest](/learn/watch-options#multiple-fields)
+  attribute is honored.
+@param {Object} [options]
+  Additional options for watching the field.
+
+  Values from this object will override any attributes set on the field or its ancestors.
+@param {Object} [parserOptions]
+  Options for parsing the attributes, like `{ defaults }`.
+
+  @internal
+@return {Object}
+  The [watch options](/learn/watch-options) that `up.watch()` would use for the given field.
+@experimental
+*/
+export function watchOptions(field: ElementOrSelector, options?: PlainObject, parserOptions: OptionsParserOptions = {}): PlainObject {
+  field = getSmart(field)!
   options = newOptions(options)
 
   // Computing the effective options for a given field is pretty involved,
@@ -648,6 +691,9 @@ export function watchOptions(field: Element, options?: PlainObject, parserOption
 
   parserOptions.closest ??= true
   parserOptions.attrPrefix ??= 'up-watch-'
+  // Like up.watch(), watch the input event unless an attribute or option names another.
+  // up.validate() includes us with a default of 'change'.
+  parserOptions.defaults ??= { event: 'input' }
 
   let parser = new OptionsParser(field, options, parserOptions)
 
@@ -672,7 +718,50 @@ export function watchOptions(field: Element, options?: PlainObject, parserOption
   return options
 }
 
-export function validateOptions(field: Element, options?: PlainObject, parserOptions: OptionsParserOptions = {}): PlainObject {
+/*-
+Parses the options that would be used to [validate](/api/up.validate) the given field,
+but does not validate it.
+
+## Example
+
+Given a field with some `[up-validate-...]` and `[up-watch-...]` attributes:
+
+```html
+<form action="/users" method="post">
+  <input name="email" up-validate up-validate-url="/users/validate" up-watch-feedback="false">
+</form>
+```
+
+We can parse the field's validation options like this:
+
+```js
+let field = document.querySelector('input[name=email]')
+let options = up.form.validateOptions(field)
+// result: { url: '/users/validate', batch: true, event: ['change'], feedback: false, ... }
+```
+
+The options also contain the [watch options](/learn/watch-options) for the field,
+like `{ event }` or `{ delay }`.
+
+@function up.form.validateOptions
+@param {Element|jQuery|string} field
+  The field for which to parse validation options.
+
+  Attributes are read from the field and its ancestors. The closest attribute is honored.
+@param {Object} [options]
+  Additional options for validating the field.
+
+  Values from this object will override any attributes set on the field or its ancestors.
+@param {Object} [parserOptions]
+  Options for parsing the attributes, like `{ defaults }`.
+
+  @internal
+@return {Object}
+  The [options](/api/up.validate#parameters) that `up.validate()` would use for the given field.
+@experimental
+*/
+export function validateOptions(field: ElementOrSelector, options?: PlainObject, parserOptions: OptionsParserOptions = {}): PlainObject {
+  field = getSmart(field)!
   options = newOptions(options)
   let parser = new OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-validate-' })
   parser.string('url')
@@ -2591,7 +2680,9 @@ export const api = {
     submitOptions,
     isSubmittable,
     watch,
+    watchOptions,
     validate,
+    validateOptions,
     autosubmit,
     fields: findFields,
     isField,

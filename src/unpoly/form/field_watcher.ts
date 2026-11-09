@@ -1,4 +1,4 @@
-import { copy, isEqual, isPromise, omit, queueTask, scheduleTimer, sequence, some, uniq } from '../util.js'
+import { isEqual, isPromise, omit, queueTask, scheduleTimer, sequence, some, uniq } from '../util.js'
 import { fail as errorFail, guard } from '../error.js'
 import { on } from '../event.js'
 import { getRegion, isField, readFieldName, trackFields, watchOptions } from '../form.js'
@@ -104,8 +104,7 @@ export class FieldWatcher {
   }
 
   _fieldOptions(field: Element): PlainObject {
-    let rootOptions = copy(this._options)
-    return watchOptions(field, rootOptions, { defaults: { event: 'input' } })
+    return watchOptions(field, this._options)
   }
 
   _watchField(field: Element): () => void {

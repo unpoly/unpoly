@@ -7,6 +7,7 @@ Unreleased
 - When Unpoly adds or changes a history entry, it now calls the browser's History API once instead of twice. Browsers limit how often a page may change its history, so apps that update history often are less likely to hit that limit.
 - [`up.error.muteUncriticalRejection()`](/api/up.error.muteUncriticalRejection) is now public API. It ignores the expected rejections of a promise you don't handle, like an aborted request or an error response, so they don't show up as "Uncaught (in promise)" in the error console.
 - [`up.event.isModified()`](/api/up.event.isModified) is now public API. It returns whether the user clicked with a modifier key or a mouse button other than the primary button, so your own click handlers can leave these clicks to the browser, e.g. to open a link in a new tab.
+- [`up.form.watchOptions()`](/api/up.form.watchOptions), [`up.form.validateOptions()`](/api/up.form.validateOptions) and [`up.radio.pollOptions()`](/api/up.radio.pollOptions) are now public API. They parse an element's attributes into the options that `up.watch()`, `up.validate()` or `[up-poll]` would use, like `up.link.followOptions()` and `up.form.submitOptions()` do for links and forms. Your code can use them to see, e.g., which events a field is watched for and how long its changes are debounced.
 
 
 3.15.0

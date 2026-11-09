@@ -300,6 +300,8 @@ up.validate('.email-errors')
 
 Multiple validations within the same form are [batched](/api/up.validate#batching) into a single request.
 
+To see the options a field would be validated with, pass it to `up.form.validateOptions()`.
+
 
 @page validation
 @signature

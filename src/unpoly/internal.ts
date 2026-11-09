@@ -49,7 +49,7 @@ import { buildLayer, normalizeLayerOptions } from './layer.js'
 import { shouldHandleClick } from './link.js'
 import {
   disableContainerTemp, findGroupSolution, getForm, getGroupSelectors, readFieldDisabled,
-  submitButtonOverrides, trackFields, validateOptions, watchOptions,
+  submitButtonOverrides, trackFields,
 } from './form.js'
 import { Config } from './util/config.js'
 import { OptionsParser } from './element/options_parser.js'
@@ -210,8 +210,6 @@ export const api = {
     readFieldDisabled,
     submitButtonOverrides,
     trackFields,
-    validateOptions,
-    watchOptions,
 
     Config,
     OptionsParser,

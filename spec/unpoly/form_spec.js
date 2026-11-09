@@ -566,14 +566,53 @@ describe('up.form', function() {
       })
     }
 
-    describe('up.internal.watchOptions()', function() {
+    describe('up.form.watchOptions()', function() {
+
+      it('returns the options that up.watch() would use for a field without attributes', function() {
+        up.form.config.watchInputEvents = ['input', 'custom:event']
+        up.form.config.watchInputDelay = 55
+        const [form, field] = htmlFixtureList(`
+          <form>
+            <input name="foo">
+          </form>
+        `)
+
+        const options = up.form.watchOptions(field)
+
+        expect(options).toEqual(jasmine.objectContaining({ event: ['input', 'custom:event'], delay: 55, origin: field }))
+      })
+
+      it('accepts a selector for the field', function() {
+        htmlFixtureList(`
+          <form>
+            <input name="foo" up-watch-delay="300">
+          </form>
+        `)
+
+        const options = up.form.watchOptions('input[name=foo]')
+
+        expect(options.delay).toBe(300)
+      })
+
+      it('does not change the given options object', function() {
+        const [form, field] = htmlFixtureList(`
+          <form>
+            <input name="foo" up-watch-delay="300">
+          </form>
+        `)
+        const givenOptions = { feedback: false }
+
+        up.form.watchOptions(field, givenOptions)
+
+        expect(givenOptions).toEqual({ feedback: false })
+      })
 
       it('parses the closest [up-watch-event] attribute into an { event } option', function() {
         const form = fixture('form')
         const container = e.affix(form, 'div[up-watch-event="my:event"]')
         const field = e.affix(container, 'input[type="text"][name="foo"]')
 
-        const options = up.internal.watchOptions(field)
+        const options = up.form.watchOptions(field)
 
         expect(options.event).toBe('my:event')
       })
@@ -587,8 +626,8 @@ describe('up.form', function() {
           </form>
         `)
 
-        expect(up.internal.watchOptions(inputField).delay).toBe(77)
-        expect(up.internal.watchOptions(changeField).delay).toBeMissing()
+        expect(up.form.watchOptions(inputField).delay).toBe(77)
+        expect(up.form.watchOptions(changeField).delay).toBeMissing()
       })
 
       it('accepts a function for up.form.config.watchChangeEvents and watchInputEvents', function() {
@@ -601,8 +640,8 @@ describe('up.form', function() {
           </form>
         `)
 
-        expect(up.internal.watchOptions(datepicker).event).toEqual(['blur'])
-        expect(up.internal.watchOptions(textField).event).toEqual(['input'])
+        expect(up.form.watchOptions(datepicker).event).toEqual(['blur'])
+        expect(up.form.watchOptions(textField).event).toEqual(['input'])
       })
 
       it('expands [up-watch-event="change"] into up.form.config.watchChangeEvents', function() {
@@ -610,7 +649,7 @@ describe('up.form', function() {
         const field = e.affix(form, 'input[type="text"][name="foo"][up-watch-event="change"]')
         up.form.config.watchChangeEvents = ['change', 'blur']
 
-        const options = up.internal.watchOptions(field)
+        const options = up.form.watchOptions(field)
 
         expect(options.event).toEqual(['change', 'blur'])
       })
@@ -620,7 +659,7 @@ describe('up.form', function() {
         const field = e.affix(form, 'input[type="text"][name="foo"][up-watch-event="input"]')
         up.form.config.watchInputEvents = ['custom:event']
 
-        const options = up.internal.watchOptions(field)
+        const options = up.form.watchOptions(field)
 
         expect(options.event).toEqual(['custom:event'])
       })
@@ -629,7 +668,7 @@ describe('up.form', function() {
         const form = fixture('form[up-watch-disable=false]')
         const field = e.affix(form, 'input[type="text"][name="foo"]')
 
-        const options = up.internal.watchOptions(field, {}, { defaults: { disable: true, feedback: true } })
+        const options = up.form.watchOptions(field, {}, { defaults: { disable: true, feedback: true } })
 
         expect(options).toEqual(jasmine.objectContaining({ disable: false, feedback: true }))
       })
@@ -639,7 +678,7 @@ describe('up.form', function() {
         const container = e.affix(form, 'div[up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-placeholder="#placeholder"]')
         const field = e.affix(container, 'input[type="text"][name="foo"]')
 
-        const options = up.internal.watchOptions(field)
+        const options = up.form.watchOptions(field)
 
         expect(options).toEqual(
           jasmine.objectContaining({
@@ -656,7 +695,7 @@ describe('up.form', function() {
         const container = e.affix(form, 'div[up-watch-delay=500]')
         const field = e.affix(container, 'input[type="text"][name="foo"]')
 
-        const options = up.internal.watchOptions(field)
+        const options = up.form.watchOptions(field)
 
         expect(options).toEqual(jasmine.objectContaining({ delay: 500 }))
       })
@@ -665,20 +704,20 @@ describe('up.form', function() {
         const form = fixture('form[up-watch-delay=1000]')
         const field = e.affix(form, 'input[type="text"][name="foo"]')
 
-        const options = up.internal.watchOptions(field, { delay: 300 })
+        const options = up.form.watchOptions(field, { delay: 300 })
 
         expect(options).toEqual(jasmine.objectContaining({ delay: 300 }))
       })
     })
 
-    describe('up.internal.validateOptions()', function() {
+    describe('up.form.validateOptions()', function() {
 
       it('parses the closest [up-validate-url] attribute into a { url } option', function() {
         const form = fixture('form[action="/path1"]')
         const container = e.affix(form, 'div[up-validate-url="/path2"]')
         const field = e.affix(container, 'input[type="text"][name="foo"]')
 
-        const options = up.internal.validateOptions(field)
+        const options = up.form.validateOptions(field)
 
         expect(options.url).toBe('/path2')
       })
@@ -692,7 +731,7 @@ describe('up.form', function() {
           </form>
         `)
 
-        const options = up.internal.validateOptions(field)
+        const options = up.form.validateOptions(field)
 
         expect(options.method).toBe('GET')
       })
@@ -703,8 +742,8 @@ describe('up.form', function() {
         const field = e.affix(container, 'input[type="text"][name="foo"]')
         const fieldOutsideContainer = e.affix(form, 'input[type="text"][name="foo"]')
 
-        expect(up.internal.validateOptions(field).batch).toBe(false)
-        expect(up.internal.validateOptions(fieldOutsideContainer).batch).toBe(true)
+        expect(up.form.validateOptions(field).batch).toBe(false)
+        expect(up.form.validateOptions(fieldOutsideContainer).batch).toBe(true)
       })
 
       it('parses the closest [up-validate-params] attribute into a { params } option', function() {
@@ -712,7 +751,7 @@ describe('up.form', function() {
         const container = e.affix(form, 'div[up-validate-params="{ foo: 1, bar: 2 }"]')
         const field = e.affix(container, 'input[type="text"][name="foo"]')
 
-        const options = up.internal.validateOptions(field)
+        const options = up.form.validateOptions(field)
 
         expect(options.params).toEqual({ foo: 1, bar: 2 })
       })
@@ -722,7 +761,7 @@ describe('up.form', function() {
         const container = e.affix(form, 'div[up-validate-headers="{ foo: 1, bar: 2 }"]')
         const field = e.affix(container, 'input[type="text"][name="foo"]')
 
-        const options = up.internal.validateOptions(field)
+        const options = up.form.validateOptions(field)
 
         expect(options.headers).toEqual({ foo: 1, bar: 2 })
       })
@@ -732,7 +771,7 @@ describe('up.form', function() {
         const container = e.affix(form, 'div[up-watch-event="my:event"]')
         const field = e.affix(container, 'input[type="text"][name="foo"]')
 
-        const options = up.internal.validateOptions(field)
+        const options = up.form.validateOptions(field)
 
         expect(options.event).toBe('my:event')
       })
@@ -742,7 +781,7 @@ describe('up.form', function() {
         const container = e.affix(form, 'div[up-watch-disable="#disable"][up-watch-feedback="false"][up-watch-preview="my-preview"][up-watch-placeholder="#placeholder"]')
         const field = e.affix(container, 'input[type="text"][name="foo"]')
 
-        const options = up.internal.validateOptions(field)
+        const options = up.form.validateOptions(field)
 
         expect(options).toEqual(
           jasmine.objectContaining({
@@ -752,6 +791,44 @@ describe('up.form', function() {
             placeholder: '#placeholder'
           })
         )
+      })
+
+      it('returns the options that up.validate() would use for a field without attributes', function() {
+        up.form.config.watchChangeEvents = ['change', 'blur']
+        up.form.config.validateBatch = false
+        const [form, field] = htmlFixtureList(`
+          <form>
+            <input name="foo" up-validate>
+          </form>
+        `)
+
+        const options = up.form.validateOptions(field)
+
+        expect(options).toEqual(jasmine.objectContaining({ event: ['change', 'blur'], batch: false, origin: field }))
+      })
+
+      it('overrides all attributes with the given options hash', function() {
+        const [form, field] = htmlFixtureList(`
+          <form up-validate-url="/attr-path" up-watch-event="input">
+            <input name="foo" up-validate>
+          </form>
+        `)
+
+        const options = up.form.validateOptions(field, { url: '/option-path', event: 'custom:event' })
+
+        expect(options).toEqual(jasmine.objectContaining({ url: '/option-path', event: 'custom:event' }))
+      })
+
+      it('accepts a selector for the field', function() {
+        htmlFixtureList(`
+          <form>
+            <input name="foo" up-validate up-validate-url="/validate">
+          </form>
+        `)
+
+        const options = up.form.validateOptions('input[name=foo]')
+
+        expect(options.url).toBe('/validate')
       })
 
     })

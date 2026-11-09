@@ -1,7 +1,8 @@
+import { newOptions } from './util.js'
 import { isEmpty, setMissingAttrs, stringAttr } from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { build } from './event.js'
-import { compressNestedSteps, getAll, tryToTarget } from './fragment.js'
+import { compressNestedSteps, getAll, getSmart, tryToTarget } from './fragment.js'
 import { layerStack } from './layer.js'
 import { parseRequestOptions } from './link.js'
 import { printToWarn } from './log.js'
@@ -12,6 +13,7 @@ import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
 import type { ConfigWith } from './util/config.js'
 import type { PlainObject } from './util.js'
+import type { ElementOrSelector } from './element.js'
 import type { FragmentKeepEvent, RenderStep } from './fragment.js'
 import type { RenderOptions } from './fragment/render/render_options.js'
 
@@ -404,7 +406,44 @@ export function stopPolling(element: Element): void {
   FragmentPolling.forFragment(element).forceStop()
 }
 
-export function pollOptions(fragment: Element, options: PlainObject = {}): PlainObject {
+/*-
+Parses the options that would be used to [poll](/api/up-poll) the given fragment,
+but does not start polling.
+
+## Example
+
+Given a fragment with some `[up-poll]` attributes:
+
+```html
+<div id="score" up-poll up-interval="5000" up-href="/score">
+  Score: 1400
+</div>
+```
+
+We can parse the fragment's polling options like this:
+
+```js
+let fragment = document.querySelector('#score')
+let options = up.radio.pollOptions(fragment)
+// result: { interval: 5000, url: '/score', ifLayer: 'front', background: true, ... }
+```
+
+@function up.radio.pollOptions
+@param {Element|jQuery|string} fragment
+  The fragment for which to parse polling options.
+
+  The fragment does not need an `[up-poll]` attribute.
+@param {Object} [options]
+  Additional options for polling the fragment.
+
+  Values from this object will override any attributes set on the fragment.
+@return {Object}
+  The [options](/api/up.radio.startPolling#parameters) that Unpoly would use to poll the given fragment.
+@experimental
+*/
+export function pollOptions(fragment: ElementOrSelector, options?: PlainObject): PlainObject {
+  fragment = getSmart(fragment)!
+  options = newOptions(options)
   const defaults = { background: true }
   const parser = new OptionsParser(fragment, options, { defaults })
   parser.number('interval', { default: config.pollInterval })
@@ -607,5 +646,6 @@ export const api = {
     config,
     startPolling,
     stopPolling,
+    pollOptions,
   },
 }
