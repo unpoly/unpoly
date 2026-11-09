@@ -1,12 +1,19 @@
 import { getRoot } from '../../element.js'
 import { fail } from '../../error.js'
 import { Layer } from '../base.js'
+import type { LayerMode, LayerOptions } from '../base.js'
+
+/**
+The root layer's element. It remembers that the root layer's handlers are bound to it.
+@internal
+*/
+export type RootLayerElement = HTMLElement & { upHandlersApplied?: boolean }
 
 export class RootLayer extends Layer {
 
-  static mode = 'root'
+  static mode: LayerMode = 'root'
 
-  get element() {
+  get element(): RootLayerElement {
     // Let's talk about our choice of @element for the root layer.
     //
     // 1. We don't want to use `document`, since that is for our global event bus.
@@ -29,20 +36,20 @@ export class RootLayer extends Layer {
     return getRoot()
   }
 
-  constructor(options) {
+  constructor(options: LayerOptions) {
     super(options)
     this.setupHandlers()
   }
 
-  getFirstSwappableElement() {
+  getFirstSwappableElement(): HTMLElement {
     return document.body
   }
 
-  static selector() {
+  static selector(): string {
     return 'html'
   }
 
-  setupHandlers() {
+  setupHandlers(): void {
     // When we reset the framework during tests, we might re-initialize this
     // layer with the same <html> element. In this case we do not want to
     // setup handlers more than once.
@@ -52,29 +59,29 @@ export class RootLayer extends Layer {
     }
   }
 
-  sync() {
+  sync(): void {
     // In case a fragment update has swapped the <html> element we need to re-apply
     // event handlers to the new <html> element.
     this.setupHandlers()
   }
 
-  isAlive() {
+  isAlive(): boolean {
     return true
   }
 
-  accept() {
+  accept(): void {
     this._cannotCloseRoot()
   }
 
-  dismiss() {
+  dismiss(): void {
     this._cannotCloseRoot()
   }
 
-  _cannotCloseRoot() {
+  _cannotCloseRoot(): never {
     fail('Cannot close the root layer')
   }
 
-  toString() {
+  toString(): string {
     return "root layer"
   }
 }
