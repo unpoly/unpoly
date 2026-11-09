@@ -30,7 +30,7 @@ The settings in `up.network.config`, described in its doc comment.
 export interface NetworkConfig {
   concurrency: number | (() => number)
   wrapMethod: boolean
-  lateDelay: number | ((request: UpRequest) => number | false)
+  lateDelay: number | false | ((request: UpRequest) => number | false)
   timeout: number | undefined
   fail: boolean | ((response: UpResponse) => boolean)
   cacheEnabled: boolean
