@@ -82,13 +82,6 @@ export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
     }
   }
 
-  // This is required by up.RenderJob to handle { abort: 'target' }.
-  // TODO: I think this is no longer required. Instead _handleAbortOption() is called with { bindFragments }...
-
-  getPreflightProps(): RequestAttrs {
-    return this._getRequestAttrs()
-  }
-
   _preflightPropsForRenderOptions(renderOptions: RenderOptions): PreflightProps
   _preflightPropsForRenderOptions(renderOptions: RenderOptions, getPreflightPropsOptions: { optional: boolean }): PreflightProps | true
   _preflightPropsForRenderOptions(renderOptions, getPreflightPropsOptions?) {
