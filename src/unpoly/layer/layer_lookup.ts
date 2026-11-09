@@ -6,10 +6,49 @@ import { getOne } from '../element.js'
 import { fail } from '../error.js'
 import { normalizeOptions } from '../layer.js'
 import { Layer } from './base.js'
+import type { LayerStack } from './layer_stack.js'
+
+/**
+A value for the `{ layer }` option: an `up.Layer`, its index in the layer stack, an element in the layer,
+or a [layer name](/learn/targeting-other-layers) like `'current'` or `'parent'`.
+A string may contain several names, separated by spaces or commas.
+*/
+export type LayerOption = Layer | number | Element | string
+
+/**
+Options for looking up layers with `up.layer.get()` or `up.layer.getAll()`.
+*/
+export interface LayerLookupOptions {
+  layer?: LayerOption
+  /**
+  The layer that relative names like `'parent'` or `'current'` refer to.
+  */
+  baseLayer?: Layer | string
+  /**
+  An element in the layer that the `'origin'` name refers to.
+  */
+  origin?: Element
+  /** @internal */
+  originLayer?: Layer
+  /** @internal */
+  normalizeLayerOptions?: boolean
+  // Lookups often receive the render options, which have many more keys.
+  [key: string]: any
+}
+
+/**
+What a single layer name resolves to. The name `'new'` passes through as a string, for the
+render options that open a new overlay.
+@internal
+*/
+type ResolvedLayerValue = Layer | Layer[] | 'new' | undefined
 
 export class LayerLookup {
+  declare _stack: LayerStack
+  declare _options: LayerLookupOptions
+  declare _values: any[]
 
-  constructor(stack, options) {
+  constructor(stack: LayerStack, options: LayerLookupOptions) {
     this._stack = stack
 
     // Options normalization might change `options` relevant to the lookup:
@@ -24,14 +63,16 @@ export class LayerLookup {
     this._values = getSimpleTokens(options.layer)
   }
 
-  all() {
-    let results = flatMap(this._values, (value) => this._resolveValue(value))
+  // A { layer: 'new' } option resolves to the string 'new'. We type the result as layers,
+  // like the documentation of up.layer.getAll() does.
+  all(): Layer[] {
+    let results = flatMap<any, any>(this._values, (value) => this._resolveValue(value))
     results = compact(results)
     results = uniq(results)
     return results
   }
 
-  static all(stack, ...args) {
+  static all(stack: LayerStack, ...args: any[]): Layer[] {
     const options = parseArgIntoOptions(args, 'layer')
 
     // We can process some very frequent calls like all(up.Layer)
@@ -47,16 +88,16 @@ export class LayerLookup {
     return new this(stack, options).all()
   }
 
-  _forElement(element) {
+  _forElement(element: Element): Layer | undefined {
     element = getOne(element) // unwrap jQuery
     return this._stack.layers.findLast((layer) => layer.contains(element))
   }
 
-  _forIndex(value) {
+  _forIndex(value: number): Layer | undefined {
     return this._stack.at(value)
   }
 
-  _resolveValue(value) {
+  _resolveValue(value: any): ResolvedLayerValue {
     if (value instanceof Layer) {
       return value
     }
@@ -110,7 +151,7 @@ export class LayerLookup {
     }
   }
 
-  _getOriginLayer() {
+  _getOriginLayer(): Layer | undefined {
     let { origin, originLayer } = this._options
 
     if (originLayer) {
@@ -122,7 +163,7 @@ export class LayerLookup {
     }
   }
 
-  _getBaseLayer() {
+  _getBaseLayer(): Layer {
     let { baseLayer } = this._options
 
     if (isString(baseLayer)) {
@@ -130,7 +171,7 @@ export class LayerLookup {
       // In this case we look it up using a new up.LayerLookup instance, using
       // up.layer.current as the { baseLayer } for that second lookup.
       const recursiveOptions = { ...this._options, baseLayer: this._stack.current, normalizeLayerOptions: false, layer: baseLayer }
-      return this.constructor.all(this._stack, recursiveOptions)[0]
+      return (this.constructor as typeof LayerLookup).all(this._stack, recursiveOptions)[0]
     } else {
       return baseLayer || this._getOriginLayer() || this._stack.current
     }
