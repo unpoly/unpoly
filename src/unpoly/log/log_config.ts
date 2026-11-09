@@ -3,10 +3,19 @@ import { Config } from '../util/config.js'
 const enabledKey = 'up.log.enabled'
 let enabled = false
 
-export class LogConfig extends Config {
+/**
+The settings in `up.log.config` that the blueprint holds, described in the doc comment of `up.log.config`.
+The `enabled` setting is an accessor of `LogConfig` instead, since it is kept in the session storage.
+*/
+export interface LogSettings {
+  banner: boolean
+  format: boolean
+}
+
+export class LogConfig extends Config<LogSettings> {
 
   constructor() {
-    super('up.log.config', () => ({
+    super('up.log.config', (): LogSettings => ({
       banner: true,
       // Console styles are only useful for humans. A browser controlled by automation software
       // (Selenium, Playwright, Puppeteer) usually feeds the log into a test runner or agent.
