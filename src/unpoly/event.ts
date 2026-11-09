@@ -350,8 +350,8 @@ up.event.onClosest(element, 'click', function() {
   When the element is destroyed, the callback will be unsubscribed automatically.
 @experimental
 */
-export function onClosest<T extends EventTypes>(element: Element, types: T, callback: (event: ObservedEvent<T>) => any): UnbindFn
-export function onClosest<T extends EventTypes>(element: Element, types: T, options: { layer?: LayerReference }, callback: (event: ObservedEvent<T>) => any): UnbindFn
+export function onClosest<T extends EventTypes>(element: Element, types: T, callback: ListenerCallback<ObservedEvent<T>>): UnbindFn
+export function onClosest<T extends EventTypes>(element: Element, types: T, options: { layer?: LayerReference }, callback: ListenerCallback<ObservedEvent<T>>): UnbindFn
 export function onClosest(...args: any[]): UnbindFn {
   let [fragment, eventType, { layer }, callback] = parseArgs(args, 'val', 'val', 'options', 'callback')
   layer &&= layerStack.get(layer, { origin: fragment })

@@ -15,8 +15,13 @@ export type ListenerTarget = EventTarget & { upEventListeners?: Record<string, E
 /**
 A function registered with `up.on()`. It is called with the event, the element matching
 the selector (or the element it listens on) and, if it takes three arguments, the element's data.
+
+The signature is taken from a method, since TypeScript checks method parameters bivariantly, even
+under `strictFunctionTypes`. That lets a listener annotate a narrower type than we can infer,
+like `(event, link: HTMLAnchorElement)` for a selector that only matches links.
 */
-export type ListenerCallback<E = Event> = ((event: E, element: HTMLElement, data?: any) => any) & { upUid?: number }
+export type ListenerCallback<E = Event> =
+  { listener(event: E, element: HTMLElement, data?: any): any }['listener'] & { upUid?: number }
 
 /**
 Everything an `up.EventListener` needs to know.
