@@ -37,7 +37,7 @@ src/                      # Webpack entry points for Unpoly's main and optional 
     link.sass             # ... CSS for up.link namespace
     layer.ts              # ... Code for up.layer namespace
     layer/                # ... Classes owned by up.layer
-      base.js             # ...... Code for up.Layer class
+      base.ts             # ...... Code for up.Layer class
       modes/              # ...... One class per layer mode (ModalLayer, PopupLayer, ...)
     fragment/             # ... Classes owned by up.fragment
       render/             # ...... The classes behind up.render()
