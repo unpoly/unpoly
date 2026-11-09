@@ -90,7 +90,7 @@ The constructor does the work up front; `matches()`, `closest()`, `descendants()
    | Case | When | Layer filter | Custom selectors expanded for |
    |---|---|---|---|
    | 1 | `{ layer: 'new' }` | none | the new layer |
-   | 2 | detached or external document, `{ layer: 'any' }`, or only one layer in the DOM (`up.layer.attachedCount === 1`) | none | the root layer |
+   | 2 | detached or external document, `{ layer: 'any' }`, or only one layer in the DOM (`layerStack.attachedCount === 1`) | none | the root layer |
    | 3 | `up.layer.getAll(options)` found layers | only those layers | the first layer found |
    | 4 | the layer comes from an element (the root, `{ layer: element }`, or an `{ origin }` without an `{ originLayer }`), and no open layer contains it | nothing matches | (no selectors) |
    | 5 | a named layer that doesn't exist, or `{ layer: 'origin' }` without an `origin` | throws `up.CannotMatch` | |
@@ -112,7 +112,7 @@ The constructor does the work up front; `matches()`, `closest()`, `descendants()
    Case 2 counts the layers **in the DOM** (`attachedCount`: open layers plus closed overlays
    still animating out), not the open layers. Otherwise an overlay closing into the root layer
    would skip case 4.
-4. **Expand custom selectors** via `up.fragment.expandTargets()`, producing a list of plain
+4. **Expand custom selectors** via `expandTargets()` (fragment.ts), producing a list of plain
    CSS selectors that is also joined into one union selector for the cheap operations.
 
 If `up.fragment.config.mainTargets` is configured empty, `:main` expands to nothing and the
@@ -127,7 +127,7 @@ This distinction decides whether a render pass falls through to the next plan or
   throws `up.CannotMatch` — which `ChangeFromContent` swallows to try the next plan, as
   long as the plan hasn't started to change the page yet. After that it aborts the pass.
   A layer that comes from an element whose layer has closed is not an error (case 4).
-- An **unknown layer keyword** fails earlier, in `up.LayerLookup`, via `up.fail()`. That is a
+- An **unknown layer keyword** fails earlier, in `up.LayerLookup`, via `fail()`. That is a
   plain `up.Error`, *not* caught by the plan loop, so it aborts the whole pass.
 
 ### Order is a guarantee, not an accident
@@ -155,7 +155,7 @@ a single union query without changing those.
 
 ## Layer scoping defaults to one layer
 
-Which layer(s) a lookup searches is decided by `up.layer.normalizeOptions()`, in this order:
+Which layer(s) a lookup searches is decided by `normalizeLayerOptions()` (layer.ts), in this order:
 
 1. An explicit `{ layer }` — including the `'new'`, `'swap'` and `'shatter'` shorthands that
    mean "open one".
@@ -170,7 +170,7 @@ still want to avoid updating 'any' layer."* Opting out is explicit and rare: `{ 
 
 ## The custom selectors, and where each is resolved
 
-Three pseudo selectors are Unpoly's own. All are resolved in `up.fragment.expandTargets()`,
+Three pseudo selectors are Unpoly's own. All are resolved in `expandTargets()` (fragment.ts),
 by different mechanisms:
 
 | Selector | Expands to | Resolved by |
@@ -209,7 +209,7 @@ precedence and per-candidate plans depend on the order.
 
 Targets also carry pseudos that never reach the DOM: `:before`, `:after` and `:content` set a
 step's placement, `:maybe` marks a step optional, and `:none` means "render nothing".
-`up.fragment.parseTargetSteps()` strips these while building steps. If you add a pseudo,
+`parseTargetSteps()` (fragment.ts) strips these while building steps. If you add a pseudo,
 decide which kind it is — a matcher belongs in `expandTargets()`, a step modifier in
 `parseTargetSteps()`.
 
@@ -262,7 +262,7 @@ ultimately `<body>`, without anyone asking for a fallback. See
 
 - **A lookup bug is usually a scoping bug.** When an element is found that shouldn't be, check
   which layer the lookup resolved to before suspecting the selector.
-- **A single layer in the DOM hides layer bugs.** With `up.layer.attachedCount === 1` the
+- **A single layer in the DOM hides layer bugs.** With `layerStack.attachedCount === 1` the
   layer lookup is skipped entirely (case 2). Anything layer-sensitive needs a spec with a real
   overlay, and usually with two or more layers; see `makeLayers()` in [Testing](testing.md).
 - **Closing overlays are a state of their own.** Their elements stay in the DOM during the

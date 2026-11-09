@@ -205,7 +205,7 @@ Attribute values for a form submission are parsed in `up.form.submitOptions()`:
 ```diff
    function submitOptions(form, options, parserOptions) {
      ...
-     let parser = new up.OptionsParser(form, options, parserOptions)
+     let parser = new OptionsParser(form, options, parserOptions)
  
 +    parser.boolean('trim')
 +    if (options.trim) trim(form)

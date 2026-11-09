@@ -42,6 +42,7 @@ src/                      # Entry points for Unpoly's main and optional bundles
     fragment/             # ... Classes owned by up.fragment
       render/             # ...... The classes behind up.render()
     util/                 # ... Generic helper classes (up.Config, up.Rect, ...)
+    internal.ts           # ... Internals the specs and unpoly-migrate need, published as up.internal
     ...                   # ... Other namespaces and their classes
 
 spec/
@@ -152,7 +153,7 @@ A namespace definition has the following jobs:
 Each namespace is an ES module that exports:
 
 - **Named functions**, which other files `import`. Internal code never calls through the global (`up.link.follow()`), it imports `follow` from `./link.js`.
-- **`api`**, the module's contribution to `window.up`: the namespace object, plus any shortcuts like `up.follow`. Public names may differ from the internal ones (`get: getOne`).
+- **`api`**, the module's contribution to `window.up`: the namespace object, plus any shortcuts like `up.follow`. Public names may differ from the internal ones (`get: getOne`). It only holds public API, never an internal helper.
 - Optionally **`install()`**, which performs all the module's side effects: registering compilers, macros and event listeners.
 
 A module's top level only declares things. Nothing happens when it is imported.
@@ -221,30 +222,39 @@ Classes live in a folder named after the namespace that owns them, next to the n
 file: `form.ts` beside `form/`, `layer.ts` beside `layer/`. A published class goes where its
 docs are (`up.Params` is documented under `up.form`). Closely related classes share a
 sub-folder, like `fragment/render/` or `layer/modes/`. Generic helper classes live in
-`util/`. A class file exports the class, and an `api` if the class is published.
-
-Only top-level classes appear on `window.up`. Internal ones (like `up.ResponseDoc`) stay there
-under their flat name, marked `@internal`, because the specs are a separate bundle and can't
-import them. Subclasses and helpers that used to be nested (`up.Layer.Modal`) are not on
-`window.up` at all, and are named so they stand on their own (`ModalLayer`). A class named
+`util/`. A class file exports the class, and an `api` if the class is public. Classes are
+named so they stand on their own (`ModalLayer`, not a nested `up.Layer.Modal`). A class named
 like a browser global is a named class expression bound to an `Up` name
 (`export const UpRequest = class Request …`), so it keeps its runtime name without
 shadowing the global.
+
+`window.up` only holds public API. The specs and `unpoly-migrate` are separate bundles that
+can't import from `src/unpoly`, so the internal functions and classes they need are published
+on `up.internal`. `src/unpoly/internal.ts` imports each one and lists it under its export name,
+flat, without a namespace: `up.internal.sprintf`, `up.internal.ResponseDoc`. Because every key
+is an import binding, two keys can't collide. When an export name only makes sense next to its
+module (`getSubtree` in `viewport.ts`), rename the export where it is defined
+(`getViewportSubtree`) rather than the key. Add an internal only when a spec or
+`unpoly-migrate` needs it.
 
 The entry file `src/unpoly.ts` ties the modules together. It imports every module, copies
 each `api` onto `window.up` (the `apis` list), then calls each `install()` (the `installs`
 list, which is the explicit install order). Its comments also explain the rules for import
 cycles between modules. Two modules must not contribute the same key to `window.up`, or the
-later one silently replaces the earlier one; [`bin/lint`](code-style.md) reports that.
+later one silently replaces the earlier one; [`bin/lint`](code-style.md) reports that, and that
+`up.internal` keys are their export names.
 
 Because internal callers import functions directly, a spec that spies on `up.link.follow`
 doesn't intercept calls from other modules. A function that specs need to replace is wrapped
-in `mockable()`, and specs call `up.link.follow.mock()` (see
-[Testing](testing.md#spying-on-unpoly-functions)).
+in `mockable()`, and specs call `up.link.follow.mock()` or `up.internal.trackFields.mock()`
+(see [Testing](testing.md#spying-on-unpoly-functions)).
 
 `util.ts`, `element.ts`, `browser.ts`, `error.ts` and the classes in `util/` and `error/` are
 evaluated before any feature namespace, so they never import one like `up.fragment`.
-Where they need one, they call it through `window.up` at call time.
+Where they need one, move the function down into a module they may import, as we did with
+`copyCursorProps()` in `element.ts`. Only when that's not possible, call it through the
+global at call time: `error.ts` checks `instanceof up.Response`, and `Config` logs with
+`up.internal.printToError()`.
 
 
 ## Entry points and optional bundles

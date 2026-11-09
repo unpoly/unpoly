@@ -112,7 +112,7 @@ Acronyms are uppercased: `parseURL()`, not `parseUrl()`. Same for `escapeHTML()`
 ## Private members and the minified build
 
 Members prefixed with `_` are internal, and the minified build *mangles* their names to save
-bytes. So a member that a spec reaches by name — `spyOn(up.Switcher.prototype, '…')`, or a
+bytes. So a member that a spec reaches by name — `spyOn(up.internal.Switcher.prototype, '…')`, or a
 direct call — cannot be `_`-prefixed: the name it asks for does not exist in
 `dist/unpoly.min.js`. If a method is tested directly, drop the underscore and note why.
 

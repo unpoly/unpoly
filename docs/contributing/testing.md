@@ -34,6 +34,7 @@ spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
   - [Asserting on promises](#asserting-on-promises)
   - [When async/await isn't enough](#when-asyncawait-isnt-enough)
 - [Matchers](#matchers)
+- [Reaching internal functions](#reaching-internal-functions)
 - [Spying on Unpoly functions](#spying-on-unpoly-functions)
 - [Specs with special conditions](#specs-with-special-conditions)
 - [Trying something by hand](#trying-something-by-hand)
@@ -580,10 +581,26 @@ The ones you'll use constantly:
 Jasmine's `jasmine.createSpy()` and `spyOn()` carry a lot of the weight in function specs.
 
 
+## Reaching internal functions
+
+`window.up` only holds public API. The specs are a separate bundle and can't import from
+`src/unpoly`, so an internal function or class that a spec needs is published flat on
+`up.internal`, under its export name:
+
+```js
+up.internal.sprintf('%o', value)
+const doc = new up.internal.ResponseDoc({ document: html })
+```
+
+When a spec needs an internal that isn't there yet, add it to `src/unpoly/internal.ts`
+(see [Code organization](code-organization.md#namespace-pattern)).
+
+
 ## Spying on Unpoly functions
 
-`spyOn(up.form, 'trackFields')` replaces the function on `window.up`. It only catches calls
-that go through `window.up`: your spec's own calls, and calls from user code. Unpoly's own
+`spyOn(up.form, 'submit')` replaces the function on `window.up`, and
+`spyOn(up.internal, 'trackFields')` replaces it on `up.internal`. Such a spy only catches calls
+that go through the global: your spec's own calls, and calls from user code. Unpoly's own
 modules [import](code-organization.md#namespace-pattern) the function instead, so their calls
 pass the spy without a sound. A `toHaveBeenCalled()` expectation then fails for no visible
 reason. Worse, a `not.toHaveBeenCalled()` expectation passes no matter what Unpoly does, so
@@ -594,8 +611,8 @@ To intercept Unpoly's internal callers, the function must be wrapped in `mockabl
 defined. Then call `.mock()` on it, which returns a regular Jasmine spy:
 
 ```js
-const trackFieldsSpy = up.form.trackFields.mock().and.callThrough()
-up.element.isSingleton.mock().and.callFake((element) => element.matches('fake-body'))
+const trackFieldsSpy = up.internal.trackFields.mock().and.callThrough()
+up.internal.isSingleton.mock().and.callFake((element) => element.matches('fake-body'))
 ```
 
 If the function isn't mockable yet, wrap it in `mockable()` rather than reaching for a
@@ -605,8 +622,8 @@ unchanged when Jasmine isn't loaded.
 
 ## Specs with special conditions
 
-**Browser capabilities.** `describeFallback()` runs a group with an `up.browser`
-capability stubbed out, so you can cover the degraded path:
+**Browser capabilities.** `describeFallback()` runs a group with a capability check like
+`up.internal.canPushState()` stubbed out, so you can cover the degraded path:
 
 ```js
 describeFallback('canPushState', function() { ... })
