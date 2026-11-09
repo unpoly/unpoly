@@ -75,7 +75,7 @@ export function popCookie(name: string): string | undefined {
 @param {boolean} options.preload
 @internal
 */
-export const assertConfirmed = mockable(function assertConfirmed(options: { confirm?: string }): true {
+export const assertConfirmed = mockable(function assertConfirmed(options: { confirm?: string | false }): true {
   const confirmed = !isString(options.confirm) || !options.confirm || window.confirm(options.confirm)
   if (!confirmed) {
     throw new Aborted('User canceled action')
