@@ -82,6 +82,15 @@ Unpoly ships with [predefined transitions](/api/up.morph#named-transitions) and 
 
 const motionController = new MotionController('motion')
 
+/**
+The settings in `up.motion.config`, described in its doc comment.
+*/
+export interface MotionConfig {
+  duration: number
+  easing: string
+  enabled: boolean
+}
+
 /*-
 Sets default options for animations and transitions.
 
@@ -103,11 +112,11 @@ Sets default options for animations and transitions.
   This can be useful in full-stack integration tests.
 @stable
 */
-export const config = new Config<PlainObject>('up.motion.config', () => ({
+export const config = new Config('up.motion.config', (): MotionConfig => ({
   duration: 175,
   easing: 'ease',
   enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<MotionConfig>
 
 export let namedAnimations = new Registry<AnimationFn>('animation', findAnimationFn)
 
