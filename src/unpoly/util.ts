@@ -1,6 +1,86 @@
 import { guardFn } from './error.js'
 import { canJQuery } from './browser.js'
 
+/**
+A list that Unpoly's list functions accept: an array, a `NodeList`, an `HTMLCollection`,
+an `arguments` object or a jQuery collection.
+*/
+export type List<T> = ArrayLike<T> & Iterable<T>
+
+/**
+A function called for each item of a list, or the name of a property to read from each item.
+*/
+export type Iteratee<T, R> = ((item: T, index: number) => R) | string
+
+/**
+A plain object with string keys, like an options object or parsed JSON.
+*/
+export type PlainObject = Record<string, any>
+
+/**
+A value, or a function that returns the value. See `up.util.evalOption()`.
+*/
+export type ValueOrFunction<T> = T | ((...args: any[]) => T)
+
+/**
+The parts of a URL, as returned by `up.util.parseURL()`.
+A `URL`, a `Location` or an `<a>` element all have these properties.
+*/
+export type ParsedURL = Pick<URL, 'href' | 'protocol' | 'host' | 'hostname' | 'port' | 'pathname' | 'search' | 'hash'>
+
+/**
+Options for `up.util.normalizeURL()`.
+*/
+export interface NormalizeURLOptions {
+  host?: boolean | 'cross-domain'
+  hash?: boolean
+  search?: boolean
+  trailingSlash?: boolean
+}
+
+/** @internal */
+export type AnyFunction = (...args: any[]) => any
+
+/**
+A promise that can be resolved or rejected from the outside. See `up.util.newDeferred()`.
+@internal
+*/
+export type Deferred<T> = Promise<T> & {
+  resolve(value?: T | PromiseLike<T>): void
+  reject(reason?: any): void
+}
+
+/**
+Collects clean-up functions and runs them later. See `up.util.cleaner()`.
+@internal
+*/
+export interface Cleaner {
+  /** Adds functions to run on clean-up. Values that are not functions are ignored. */
+  (...values: any[]): void
+  /** Like calling the cleaner, but a function that throws doesn't stop the others. */
+  guard(...values: any[]): void
+  /** Runs all functions and forgets them. */
+  clean(...args: any[]): void
+}
+
+/**
+A string with some substrings replaced by placeholders, and a function to put them back.
+See `up.util.maskPattern()`.
+@internal
+*/
+export interface MaskedString {
+  masked: string
+  restore(string: string, transform?: (masked: string) => string): string
+}
+
+/**
+What `up.util.args()` should extract from the end of an argument list:
+`'options'` (a plain object), `'callback'` (a function), `'val'` (any value),
+or a function that tests whether the last argument matches.
+@internal
+*/
+export type ArgSpec = 'options' | 'callback' | 'val' | ((value: any) => boolean)
+
 /*-
 Helper functions for basic JavaScript values.
 
@@ -17,7 +97,7 @@ A function that does nothing.
 @function up.util.noop
 @stable
 */
-export function noop() {
+export function noop(): void {
 }
 
 /*-
@@ -26,7 +106,7 @@ A function that returns a resolved promise.
 @function up.util.asyncNoop
 @internal
 */
-export function asyncNoop(){
+export function asyncNoop(): Promise<void> {
   return Promise.resolve()
 }
 
@@ -40,10 +120,10 @@ doesn't distinguish between argument lists.
 @function up.util.memoize
 @internal
 */
-export function memoize(func, cacheProp) {
-  let cache = {}
+export function memoize<F extends AnyFunction>(func: F, cacheProp?: string): F {
+  let cache: { value?: [ReturnType<F>], error?: any } = {}
 
-  return function(...args) {
+  return function(this: any, ...args) {
     if (cacheProp) cache = (this[cacheProp] ||= {})
     if (cache.value) return cache.value[0]
     if (cache.error) throw cache.error
@@ -52,7 +132,7 @@ export function memoize(func, cacheProp) {
     } catch (error) {
       throw (cache.error = error)
     }
-  }
+  } as F
 }
 
 /*-
@@ -114,7 +194,7 @@ up.util.normalizeURL('/bar#hash', { hash: false }) // result: '/bar'
   The normalized URL.
 @stable
 */
-export function normalizeURL(url, options) {
+export function normalizeURL(url: string | ParsedURL, options?: NormalizeURLOptions): string {
   options = newOptions(options, { host: 'cross-domain' })
 
   const parts = parseURL(url)
@@ -146,18 +226,18 @@ export function normalizeURL(url, options) {
   return normalized
 }
 
-export function matchURLs(leftURL, rightURL, options) {
+export function matchURLs(leftURL: string, rightURL: string, options?: NormalizeURLOptions): boolean {
   return matchableURL(leftURL, options) === matchableURL(rightURL, options)
 }
 
 // Normalize the URL so it is better suited for path comparison.
 // In particular it strips the hash and trailing slash.
-export function matchableURL(url, options) {
+export function matchableURL(url: string | ParsedURL, options?: NormalizeURLOptions): string | undefined {
   if (!url) return
   return normalizeURL(url, { hash: false, trailingSlash: false, ...options })
 }
 
-export function matchableURLPatternAtom(patternAtom) {
+export function matchableURLPatternAtom(patternAtom: string): string | string[] {
   // Convert "https://our-host/foo" to "/foo", like matchableURL() normalizes same-origin URLs
   if (patternAtom.startsWith(APP_ORIGIN + '/')) patternAtom = patternAtom.slice(APP_ORIGIN.length)
 
@@ -181,7 +261,7 @@ const APP_PROTOCOL = location.protocol
 const APP_HOSTNAME = location.hostname
 const APP_ORIGIN = location.origin
 
-export function isCrossOrigin(urlOrAnchor) {
+export function isCrossOrigin(urlOrAnchor: string | ParsedURL): boolean {
   // If the given URL does not contain a hostname we know it cannot be cross-origin.
   // In that case we don't need to parse the URL.
   if (isString(urlOrAnchor) && (urlOrAnchor.indexOf('//') === -1)) {
@@ -214,16 +294,16 @@ parsed.hash // result: ''
   `{ protocol, hostname, port, pathname, search, hash }` properties.
 @stable
 */
-export function parseURL(url) {
-  if (url.pathname) {
-    return url
+export function parseURL(url: string | ParsedURL): ParsedURL {
+  if ((url as ParsedURL).pathname) {
+    return url as ParsedURL
   }
 
   // We would prefer to use `new URL(url, location.href)` here, but that is 30% slower
   // than creating a link (see benchmark at https://jsbench.me/l7l2x9cruf/1).
   // We're parsing a *lot* of URLs for .up-active, so this matters.
   let link = document.createElement('a')
-  link.href = url
+  link.href = url as string
   return link
 }
 
@@ -231,7 +311,7 @@ export function parseURL(url) {
 @function up.util.normalizeMethod
 @internal
 */
-export function normalizeMethod(method) {
+export function normalizeMethod(method?: string): string {
   return method ? method.toUpperCase() : 'GET'
 }
 
@@ -239,13 +319,13 @@ export function normalizeMethod(method) {
 @function up.util.methodAllowsPayload
 @internal
 */
-export function methodAllowsPayload(method) {
+export function methodAllowsPayload(method: string): boolean {
   return (method !== 'GET') && (method !== 'HEAD')
 }
 
-function iteratee(block) {
+function iteratee(block: AnyFunction | string): AnyFunction {
   if (isString(block)) {
-    return (item) => item[block]
+    return (item: any) => item[block]
   } else {
     return block
   }
@@ -280,7 +360,7 @@ up.util.map(['apple', 'cherry'], 'length') // result: [5, 6]
   A new array containing the result of each function call.
 @stable
 */
-export function map(list, block) {
+export function map<T, R = any>(list: List<T>, block: Iteratee<T, R>): R[] {
   if (list.length === 0) { return [] }
   block = iteratee(block)
   let mapped = []
@@ -318,7 +398,7 @@ up.util.mapObject(['alice', 'bob'], function(element) {
 @function up.util.mapObject
 @stable
 */
-export function mapObject(array, pairer) {
+export function mapObject<T>(array: T[], pairer: (item: T, index: number) => [PropertyKey, any]): PlainObject {
   return Object.fromEntries(array.map(pairer))
 }
 
@@ -332,7 +412,7 @@ of the given [list](/api/List) or iterator.
   A function that will be called with each element and (optional) iteration index.
 @stable
 */
-export function each(array, block) {
+export function each<T>(array: Iterable<T>, block: (item: T, index: number) => void): void {
   // note that the native Array.forEach is very slow (https://jsperf.com/fast-array-foreach)
   let i = 0
   for (let item of array) {
@@ -348,11 +428,11 @@ Returns whether the given argument is `null`.
 @return {boolean}
 @stable
 */
-export function isNull(value) {
+export function isNull(value: any): value is null {
   return value === null
 }
 
-function isTruthy(value) {
+function isTruthy(value: any): boolean {
   return !!value
 }
 
@@ -364,7 +444,7 @@ Returns whether the given argument is `undefined`.
 @return {boolean}
 @stable
 */
-export function isUndefined(value) {
+export function isUndefined(value: any): value is undefined {
   return value === undefined
 }
 
@@ -391,7 +471,7 @@ For the opposite of `up.util.isMissing()` see [`up.util.isGiven()`](/api/up.util
 @return {boolean}
 @stable
 */
-export function isMissing(value) {
+export function isMissing(value: any): value is null | undefined {
   return isUndefined(value) || isNull(value)
 }
 
@@ -437,7 +517,7 @@ see `up.util.isBlank.key`.
   Whether the value is blank.
 @stable
 */
-export function isBlank(value) {
+export function isBlank(value: any): boolean {
   if (isMissing(value)) {
     return true
   }
@@ -506,7 +586,7 @@ otherwise returns `undefined`.
 @return {any|undefined}
 @stable
 */
-export function presence(value, tester = isPresent) {
+export function presence<T>(value: T, tester: (value: T) => boolean = isPresent): T | undefined {
   if (tester(value)) {
     return value
   }
@@ -531,7 +611,7 @@ Returns whether the given argument is a function.
 @return {boolean}
 @stable
 */
-export function isFunction(value) {
+export function isFunction(value: any): value is AnyFunction {
   return typeof(value) === 'function'
 }
 
@@ -543,7 +623,8 @@ Returns whether the given argument is a string.
 @return {boolean}
 @stable
 */
-export function isString(value) {
+// Also true for `String` objects, which behave like strings in all places we care about.
+export function isString(value: any): value is string {
   return (typeof(value) === 'string') || value instanceof String
 }
 
@@ -555,7 +636,7 @@ Returns whether the given argument is a boolean value.
 @return {boolean}
 @stable
 */
-export function isBoolean(value) {
+export function isBoolean(value: any): value is boolean {
   return (typeof(value) === 'boolean') || value instanceof Boolean
 }
 
@@ -570,7 +651,7 @@ It will return `false` for a string like `"123"`.
 @return {boolean}
 @stable
 */
-export function isNumber(value) {
+export function isNumber(value: any): value is number {
   return (typeof(value) === 'number') || value instanceof Number
 }
 
@@ -585,7 +666,7 @@ functions, jQuery collections, promises, `FormData` instances and arrays.
 @return {boolean}
 @internal
 */
-export function isOptions(value) {
+export function isOptions(value: any): value is PlainObject {
   return (typeof(value) === 'object') && !isNull(value) && (isUndefined(value.constructor) || (value.constructor === Object))
 }
 
@@ -599,7 +680,7 @@ This also returns `true` for functions, which may behave like objects in JavaScr
 @return {boolean}
 @stable
 */
-export function isObject(value) {
+export function isObject(value: any): boolean {
   const typeOfResult = typeof(value)
   return ((typeOfResult === 'object') && !isNull(value)) || (typeOfResult === 'function')
 }
@@ -612,7 +693,7 @@ Returns whether the given argument is a [DOM element](https://developer.mozilla.
 @return {boolean}
 @stable
 */
-export function isElement(value) {
+export function isElement(value: any): value is Element {
   return value instanceof Element
 }
 
@@ -624,7 +705,7 @@ Returns whether the given argument is a [text node](https://developer.mozilla.or
 @return {boolean}
 @internal
 */
-export function isTextNode(value) {
+export function isTextNode(value: any): value is Text {
   return value instanceof Text
 }
 
@@ -636,7 +717,7 @@ Returns whether the given argument is a [regular expression](https://developer.m
 @return {boolean}
 @internal
 */
-export function isRegExp(value) {
+export function isRegExp(value: any): value is RegExp {
   return value instanceof RegExp
 }
 
@@ -648,7 +729,7 @@ Returns whether the given argument is an error instance.
 @return {boolean}
 @internal
 */
-function isError(value) {
+function isError(value: any): value is Error {
   return value instanceof Error
 }
 
@@ -660,7 +741,7 @@ Returns whether the given argument is a [jQuery collection](https://learn.jquery
 @return {boolean}
 @stable
 */
-export function isJQuery(value) {
+export function isJQuery(value: any): boolean {
   return canJQuery() && value instanceof jQuery
 }
 
@@ -670,7 +751,7 @@ export function isJQuery(value) {
 @return {boolean}
 @internal
 */
-export function isElementLike(value) {
+export function isElementLike(value: any): boolean {
   return !!(value && (value.addEventListener || (isJQuery(value) && value[0]?.addEventListener)))
 }
 
@@ -682,7 +763,7 @@ Returns whether the given argument is an object with a `then` method.
 @return {boolean}
 @stable
 */
-export function isPromise(value) {
+export function isPromise(value: any): value is Promise<any> {
   return isObject(value) && isFunction(value.then)
 }
 
@@ -707,7 +788,7 @@ Always returns `false` in browsers that don't support `FormData`.
 @return {boolean}
 @internal
 */
-export function isFormData(value) {
+export function isFormData(value: any): value is FormData {
   return value instanceof FormData
 }
 
@@ -721,7 +802,7 @@ If the given value is already an array, it is returned unchanged.
 @return {Array}
 @stable
 */
-export function toArray(value) {
+export function toArray<T>(value: List<T>): T[] {
   return isArray(value) ? value : copyArrayLike(value)
 }
 
@@ -735,7 +816,7 @@ To test whether a value is an actual `Array`, use [`up.util.isArray()`](/api/up.
 @return {boolean}
 @stable
 */
-export function isList(value) {
+export function isList(value: any): value is List<any> {
   return isArray(value) ||
     isNodeList(value) ||
     isArguments(value) ||
@@ -753,11 +834,11 @@ Returns whether the given value is a [`NodeList`](https://developer.mozilla.org/
 @return {boolean}
 @internal
 */
-function isNodeList(value) {
+function isNodeList(value: any): value is NodeList {
   return value instanceof NodeList
 }
 
-function isHTMLCollection(value) {
+function isHTMLCollection(value: any): value is HTMLCollection {
   return value instanceof HTMLCollection
 }
 
@@ -769,11 +850,11 @@ Returns whether the given value is an [arguments object](https://developer.mozil
 @return {boolean}
 @internal
 */
-function isArguments(value) {
+function isArguments(value: any): boolean {
   return Object.prototype.toString.call(value) === '[object Arguments]'
 }
 
-export function isAdjacentPosition(value) {
+export function isAdjacentPosition(value: string): boolean {
   return /^(before|after)/.test(value)
 }
 
@@ -797,6 +878,9 @@ up.util.wrapList(null) // result: []
 @return {Array|NodeList|jQuery}
 @stable
 */
+export function wrapList<T>(value: T[]): T[]
+export function wrapList<T>(value: List<T>): List<T>
+export function wrapList<T>(value: T | null | undefined): T[]
 export function wrapList(value) {
   if (isList(value)) {
     return value
@@ -825,18 +909,18 @@ Returns a shallow copy of the given value.
 @return {any}
 @stable
 */
-export function copy(value)  {
+export function copy<T>(value: T): T {
   if (isObject(value) && value[copy.key]) {
     value = value[copy.key]()
   } else if (isList(value)) {
-    value = copyArrayLike(value)
+    value = copyArrayLike(value) as T
   } else if (isOptions(value)) {
     value = Object.assign({}, value)
   }
   return value
 }
 
-function copyArrayLike(arrayLike) {
+function copyArrayLike<T>(arrayLike: ArrayLike<T>): T[] {
   return Array.prototype.slice.call(arrayLike)
 }
 
@@ -908,7 +992,7 @@ up.util.merge(a, b) // result: { a: '1', b: '3', c: '4' }
   A new object with all merged properties.
 @stable
 */
-export function merge(...sources) {
+export function merge(...sources: PlainObject[]): PlainObject {
   return Object.assign({}, ...sources)
 }
 
@@ -918,7 +1002,7 @@ export function merge(...sources) {
 @return {Object}
 @internal
 */
-export function mergeDefined(...sources) {
+export function mergeDefined(...sources: PlainObject[]): PlainObject {
   const result = {}
   for (let source of sources) {
     if (source) {
@@ -945,7 +1029,7 @@ We want to get rid of this in the future.
 @return {Object}
 @internal
 */
-export function newOptions(object, defaults) {
+export function newOptions(object?: PlainObject, defaults?: PlainObject): PlainObject {
   if (defaults) {
     return merge(defaults, object)
   } else if (object) {
@@ -955,7 +1039,7 @@ export function newOptions(object, defaults) {
   }
 }
 
-export function parseArgIntoOptions(args, argKey) {
+export function parseArgIntoOptions(args: any[], argKey: string): PlainObject {
   let [positionalArg, options] = parseArgs(args, 'val', 'options')
   if (isDefined(positionalArg)) {
     options[argKey] = positionalArg
@@ -975,7 +1059,7 @@ If no element matches, returns `undefined`.
 @return {T|undefined}
 @stable
 */
-export function findInList(list, tester) {
+export function findInList<T>(list: Iterable<T>, tester: ((item: T) => any) | string): T | undefined {
   tester = iteratee(tester)
   let match
   for (let element of list) {
@@ -999,7 +1083,7 @@ for any element in the given [array-like value](/api/List).
 @return {boolean}
 @stable
 */
-export function some(list, tester) {
+export function some<T>(list: Iterable<T>, tester: Iteratee<T, any>): boolean {
   return !!findResult(list, tester)
 }
 
@@ -1018,7 +1102,7 @@ value for any element in the list.
 @return {any|undefined}
 @stable
 */
-export function findResult(list, tester) {
+export function findResult<T, R = any>(list: Iterable<T>, tester: Iteratee<T, R>): R | undefined {
   tester = iteratee(tester)
   let i = 0
   for (let item of list) {
@@ -1041,7 +1125,7 @@ for all elements in the given [list](/api/List) or iterator.
 @return {boolean}
 @stable
 */
-export function every(list, tester) {
+export function every<T>(list: Iterable<T>, tester: Iteratee<T, any>): boolean {
   tester = iteratee(tester)
   let match = true
   let i = 0
@@ -1063,11 +1147,11 @@ neither `null` nor `undefined`.
 @return {Array<T>}
 @stable
 */
-export function compact(array) {
+export function compact<T>(array: List<T>): T[] {
   return filterList(array, isGiven)
 }
 
-export function compactObject(object) {
+export function compactObject<T extends object>(object: T): Partial<T> {
   return pickBy(object, isGiven)
 }
 
@@ -1080,7 +1164,7 @@ Returns the given array without duplicates.
 @stable
 @signature
 */
-export function uniq(array) {
+export function uniq<T>(array: T[]): T[] {
   if (array.length < 2) { return array }
   return Array.from(new Set(array))
 }
@@ -1096,7 +1180,7 @@ for which uniqueness is computed.
 @return {Array}
 @experimental
 */
-export function uniqBy(array, mapper) {
+export function uniqBy<T>(array: T[], mapper: Iteratee<T, any>): T[] {
   if (array.length < 2) { return array }
   mapper = iteratee(mapper)
   const seenElements = new Set()
@@ -1121,7 +1205,7 @@ a truthy value when passed to the given function.
 @return {Array}
 @stable
 */
-export function filterList(list, tester) {
+export function filterList<T>(list: Iterable<T>, tester: Iteratee<T, any>): T[] {
   tester = iteratee(tester)
   const matches = []
   each(list, function(element, index) {
@@ -1143,7 +1227,7 @@ a truthy value when passed to the given function.
 @stable
 @signature
 */
-export function reject(list, tester) {
+export function reject<T>(list: Iterable<T>, tester: Iteratee<T, any>): T[] {
   tester = negate(iteratee(tester))
   return filterList(list, tester)
 }
@@ -1156,7 +1240,7 @@ Implementation is not optimized. Don't use it for large arrays.
 @function up.util.intersect
 @internal
 */
-export function intersect(array1, array2) {
+export function intersect<T>(array1: List<T>, array2: List<T>): T[] {
   return filterList(array1, (element) => contains(array2, element))
 }
 
@@ -1187,7 +1271,7 @@ up.util.timer(3000, function() {
   To unschedule the task, pass this ID to [`clearTimeout()`](https://developer.mozilla.org/en-US/docs/Web/API/clearTimeout).
 @stable
 */
-export function scheduleTimer(millis, callback) {
+export function scheduleTimer(millis: number, callback: () => void): number {
   return setTimeout(callback, millis)
 }
 
@@ -1208,7 +1292,7 @@ console.log('Hello from current task!')
   The function to schedule.
 @stable
 */
-export function queueTask(task) {
+export function queueTask(task: () => void): void {
   setTimeout(task)
 }
 
@@ -1226,7 +1310,7 @@ This has pros and cons:
 @function up.util.fastTask
 @internal
 */
-export function queueFastTask(task) {
+export function queueFastTask(task: () => void): void {
   const channel = new MessageChannel()
   channel.port1.onmessage = () => task()
   channel.port2.postMessage(0)
@@ -1240,7 +1324,7 @@ Returns the last element of the given array or string.
 @return {T|string}
 @stable
 */
-export function last(value) {
+export function last<T>(value: ArrayLike<T>): T {
   return value[value.length - 1]
 }
 
@@ -1257,8 +1341,8 @@ If `value` is an array, this returns whether `subValue` is an element of `value`
 @return {boolean} Whether the value is contained.
 @stable
 */
-export function contains(value, subValue) {
-  let indexOf = value.indexOf || Array.prototype.indexOf
+export function contains(value: List<any> | string, subValue: any): boolean {
+  let indexOf = (value as any).indexOf || Array.prototype.indexOf
   return indexOf.call(value, subValue) >= 0
 }
 
@@ -1273,7 +1357,7 @@ Element order is ignored for this check.
 @return {boolean} Whether all values are contained.
 @internal
 */
-export function containsAll(values, subValues) {
+export function containsAll(values: List<any> | string, subValues: List<any>): boolean {
   return every(subValues, (subValue) => contains(values, subValue))
 }
 
@@ -1287,7 +1371,7 @@ of `subObject`'s entries.
 @param {Object} subObject
 @internal
 */
-export function objectContains(object, subObject) {
+export function objectContains(object: PlainObject, subObject: PlainObject): boolean {
   const reducedValue = pick(object, Object.keys(subObject))
   return isEqual(subObject, reducedValue)
 }
@@ -1310,8 +1394,8 @@ up.util.pick(object, ['foo', 'baz']) // result: { foo:1, baz: 3 }
 @stable
 @signature
 */
-export function pick(object, keys) {
-  const filtered = {}
+export function pick<T extends object, K extends keyof T>(object: T, keys: readonly K[]): Pick<T, K> {
+  const filtered = {} as Pick<T, K>
   for (let key of keys) {
     if (key in object) {
       filtered[key] = object[key]
@@ -1333,9 +1417,9 @@ properties that pass the given tester function.
 @return {Object}
 @experimental
 */
-export function pickBy(object, tester) {
+export function pickBy<T extends object>(object: T, tester: ((value: any, key: string) => any) | string): Partial<T> {
   tester = iteratee(tester)
-  const filtered = {}
+  const filtered: Partial<T> = {}
   for (let key in object) {
     const value = object[key]
     if (tester(value, key)) {
@@ -1361,8 +1445,8 @@ up.util.omit(object, ['foo', 'baz']) // result: { bar: 2 }
 @param {Array} keys
 @stable
 */
-export function omit(object, keys) {
-  return pickBy(object, (_value, key) => !contains(keys, key))
+export function omit<T extends object, K extends keyof T>(object: T, keys: readonly K[]): Omit<T, K> {
+  return pickBy(object, (_value, key) => !contains(keys, key)) as Omit<T, K>
 }
 
 /*-
@@ -1371,7 +1455,7 @@ Returns a promise that will never be resolved.
 @function up.util.unresolvablePromise
 @internal
 */
-export function unresolvablePromise() {
+export function unresolvablePromise(): Promise<never> {
   return new Promise(noop)
 }
 
@@ -1389,7 +1473,7 @@ This changes the given array.
   The removed element, or `undefined` if the array didn't contain the element.
 @stable
 */
-export function remove(array, element) {
+export function remove<T>(array: T[], element: T): T | undefined {
   const index = array.indexOf(element)
   if (index >= 0) {
     array.splice(index, 1)
@@ -1416,11 +1500,11 @@ up.util.evalOption(fn) // result: 3
 @return {any}
 @stable
 */
-export function evalOption(value, ...args) {
+export function evalOption<T>(value: ValueOrFunction<T>, ...args: any[]): T {
   return isFunction(value) ? value(...args) : value
 }
 
-export function evalAutoOption(value, autoMeans, ...args) {
+export function evalAutoOption(value: any, autoMeans: any, ...args: any[]): any {
   value = evalOption(value, ...args)
   // Allow functions to return 'auto'
   if (value === 'auto') {
@@ -1445,7 +1529,7 @@ Escapes the given string of HTML by replacing control chars with their HTML enti
   The text that should be escaped.
 @stable
 */
-export function escapeHTML(string) {
+export function escapeHTML(string: string): string {
   return string.replace(/[&<>"']/g, (char) => ESCAPE_HTML_ENTITY_MAP[char])
 }
 
@@ -1453,7 +1537,7 @@ export function escapeHTML(string) {
 @function up.util.escapeRegExp
 @internal
 */
-export function escapeRegExp(string) {
+export function escapeRegExp(string: string): string {
   // From https://github.com/benjamingr/RegExp.escape
   return string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
 }
@@ -1484,19 +1568,19 @@ and returns its value.
   If the object didn't have the property, returns `undefined`.
 @stable
 */
-export function pluckKey(object, key) {
+export function pluckKey(object: PlainObject, key: string): any {
   const value = object[key]
   delete object[key]
   return value
 }
 
-export function renameKey(object, oldKey, newKey) {
+export function renameKey(object: PlainObject, oldKey: string, newKey: string): void {
   if (oldKey in object) {
     object[newKey] = pluckKey(object, oldKey)
   }
 }
 
-function extractLastArg(args, tester) {
+function extractLastArg(args: any[], tester: (value: any) => boolean): any {
   if (tester(last(args))) {
     return args.pop()
   }
@@ -1507,11 +1591,11 @@ function extractLastArg(args, tester) {
 //    if tester(firstArg)
 //      return args.shift()
 
-export function extractCallback(args) {
+export function extractCallback(args: any[]): AnyFunction | undefined {
   return extractLastArg(args, isFunction)
 }
 
-export function extractOptions(args) {
+export function extractOptions(args: any[]): PlainObject {
   return extractLastArg(args, isOptions) || {}
 }
 
@@ -1538,7 +1622,7 @@ export function extractOptions(args) {
 //  }
 //}
 
-export function identity(arg) {
+export function identity(arg: any): any {
   return arg
 }
 
@@ -1586,13 +1670,13 @@ export function identity(arg) {
   Its arguments are passed on to each function.
 @internal
 */
-export function sequence(...fns) {
+export function sequence(...fns: any[]): (...args: any[]) => any[] {
   return (...callArgs) => callAll(fns, ...callArgs)
 }
 
-export function callAll(fns, ...args) {
+export function callAll(fns: any, ...args: any[]): any[] {
   fns = scanFunctions(fns)
-  return map(fns, (fn) => fn(...args))
+  return map(fns, (fn: AnyFunction) => fn(...args))
 }
 
 //  ###**
@@ -1640,7 +1724,7 @@ up.util.flatten(nested) // result: [1, 2, 3, 4]
   The flattened array
 @stable
 */
-export function flatten(array) {
+export function flatten<T>(array: List<T | List<T>>): T[] {
   const flattened = []
   for (let object of array) {
     if (isList(object)) {
@@ -1668,7 +1752,7 @@ then [flattens](/api/up.util.flatten) the result into a new array.
 @return {Array}
 @stable
 */
-export function flatMap(array, block) {
+export function flatMap<T, R = any>(array: List<T>, block: Iteratee<T, R | List<R>>): R[] {
   return flatten(map(array, block))
 }
 
@@ -1695,7 +1779,7 @@ console.log(value)
 @function up.util.always
 @internal
 */
-export function always(promise, callback = identity) {
+export function always<T>(promise: Promise<T>, callback: (valueOrError: any) => any = identity): Promise<any> {
   return promise.then(callback, callback)
 }
 
@@ -1703,8 +1787,8 @@ export function always(promise, callback = identity) {
 @function up.util.newDeferred
 @internal
 */
-export function newDeferred() {
-  let { promise, resolve, reject } = Promise.withResolvers()
+export function newDeferred<T = any>(): Deferred<T> {
+  let { promise, resolve, reject } = Promise.withResolvers<T>()
   return Object.assign(promise, { resolve, reject })
 }
 
@@ -1730,7 +1814,7 @@ export function newDeferred() {
 //        totalValue += entryValue
 //    totalValue
 
-export function isBasicObjectProperty(k) {
+export function isBasicObjectProperty(k: PropertyKey): boolean {
   return Object.hasOwn(Object.prototype, k)
 }
 
@@ -1755,7 +1839,7 @@ Returns whether the two arguments are equal by value.
   Whether the arguments are considered equal.
 @stable
 */
-export function isEqual(a, b) {
+export function isEqual(a: any, b: any): boolean {
   // When two values have trivial equality, return immediately instead of going
   // through the extensive normalization and comparison below.
   if (a === b) {
@@ -1788,7 +1872,7 @@ export function isEqual(a, b) {
   return false
 }
 
-function isEqualOptions(a, b) {
+function isEqualOptions(a: PlainObject, b: PlainObject): boolean {
   const aKeys = Object.keys(a)
   const bKeys = Object.keys(b)
   return isEqualList(aKeys, bKeys) && every(aKeys, (key) => isEqual(a[key], b[key]))
@@ -1837,11 +1921,11 @@ up.util.isEqual(one, three) // returns false
 */
 isEqual.key = 'up.util.isEqual'
 
-function isEqualList(a, b) {
+function isEqualList(a: List<any>, b: List<any>): boolean {
   return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
 }
 
-export function getSimpleTokens(value, { json = false, separator = /[,\s]/ } = {}) {
+export function getSimpleTokens(value: any, { json = false, separator = /[,\s]/ }: { json?: boolean, separator?: string | RegExp } = {}) {
   if (!isString(value)) {
     return wrapList(value)
   } else if (json && /^\[.*]$/.test(value)) {
@@ -1851,12 +1935,12 @@ export function getSimpleTokens(value, { json = false, separator = /[,\s]/ } = {
   }
 }
 
-function splitSimpleTokenString(value, separator) {
+function splitSimpleTokenString(value: string, separator: string | RegExp): string[] {
   let parts = up.migrate.splitAtOr?.(value) || value.split(separator)
   return parts.map((s) => s.trim()).filter(identity)
 }
 
-export function getComplexTokens(value) {
+export function getComplexTokens(value: any) {
   if (!isString(value)) {
     return wrapList(value)
   } else {
@@ -1865,13 +1949,13 @@ export function getComplexTokens(value) {
   }
 }
 
-function complexTokenOutlines(string) {
+function complexTokenOutlines(string: string) {
   let { masked, restore } = expressionOutline(string)
   let maskedTokens = splitSimpleTokenString(masked, ',')
   return { maskedTokens, restore }
 }
 
-export function wrapValue(constructor, ...args) {
+export function wrapValue<T>(constructor: new (...args: any[]) => T, ...args: any[]): T {
   return (args[0] instanceof constructor) ? args[0] : new constructor(...args)
 }
 
@@ -1885,7 +1969,7 @@ export function wrapValue(constructor, ...args) {
 
 let nextUid = 0
 
-export function uid() {
+export function uid(): number {
   return nextUid++
 }
 
@@ -1900,7 +1984,7 @@ will be omitted from the returned object.
 @param {Function(string): string|undefined} renameKeyFn
 @internal
 */
-export function withRenamedKeys(object, renameKeyFn) {
+export function withRenamedKeys(object: PlainObject, renameKeyFn: (key: string) => string | null | undefined): PlainObject {
   const renamed = {}
   for (let key in object) {
     let transformed = renameKeyFn(key)
@@ -1911,11 +1995,11 @@ export function withRenamedKeys(object, renameKeyFn) {
   return renamed
 }
 
-export function camelToKebabCase(str) {
+export function camelToKebabCase(str: string): string {
   return str.replace(/[A-Z]/g, (char) => '-' + char.toLowerCase())
 }
 
-export function kebabToCamelCase(str) {
+export function kebabToCamelCase(str: string): string {
   return str.replace(/-([a-z])/g, (_match, char) => char.toUpperCase())
 }
 
@@ -1931,15 +2015,15 @@ export function kebabToCamelCase(str) {
 //   }
 // }
 
-export function lowerCaseFirst(str) {
+export function lowerCaseFirst(str: string): string {
   return str[0].toLowerCase() + str.slice(1)
 }
 
-export function upperCaseFirst(str) {
+export function upperCaseFirst(str: string): string {
   return str[0].toUpperCase() + str.slice(1)
 }
 
-export function defineDelegates(object, props, targetProvider) {
+export function defineDelegates(object: object, props: string[], targetProvider: (this: any) => any): void {
   for (let prop of props) {
     Object.defineProperty(object, prop, {
       get() {
@@ -1958,7 +2042,7 @@ export function defineDelegates(object, props, targetProvider) {
   }
 }
 
-export function delegatePromise(object, targetProvider) {
+export function delegatePromise(object: object, targetProvider: (this: any) => any): void {
   return defineDelegates(
     object,
     ['then', 'catch', 'finally'],
@@ -1979,7 +2063,7 @@ export function delegatePromise(object, targetProvider) {
 //   return undo
 // }
 
-function stringifyArg(arg, placeholder = '%o', ancestors = new Set()) {
+function stringifyArg(arg: any, placeholder = '%o', ancestors = new Set()): string {
   let string
   const maxLength = 200
 
@@ -2056,7 +2140,7 @@ See https://developer.mozilla.org/en-US/docs/Web/API/Console#Using_string_substi
 @function up.util.sprintf
 @internal
 */
-export function sprintf(message, ...args) {
+export function sprintf(message: string, ...args: any[]): string {
   return message.replace(SPRINTF_PLACEHOLDERS, (placeholder) => stringifyArg(args.shift(), placeholder))
 }
 
@@ -2064,17 +2148,17 @@ const SERIALIZED_TAG_PATTERN = /<("[^"]*"|[^">])*>/
 
 // This could go in up.element, but we want up.util to not have any dependencies
 // so every other namespace can depend on up.util.
-function tagOuterHTML(element) {
-  return element.cloneNode().outerHTML.match(SERIALIZED_TAG_PATTERN)[0]
+function tagOuterHTML(element: Element): string {
+  return (element.cloneNode() as Element).outerHTML.match(SERIALIZED_TAG_PATTERN)[0]
 }
 
-function negate(fn) {
-  return function(...args) {
+function negate<A extends any[]>(fn: (...args: A) => any): (...args: A) => boolean {
+  return function(...args: A) {
     return !fn(...args)
   }
 }
 
-export function memoizeMethod(object, propLiteral) {
+export function memoizeMethod(object: object, propLiteral: PlainObject): void {
   // We're accepting the property names as the keys of an object. We don't care about the values.
   // We do this so that object's keys go through the same property mangling as the rest of the code.
   for (let prop in propLiteral) {
@@ -2086,23 +2170,23 @@ export function memoizeMethod(object, propLiteral) {
   }
 }
 
-export function safeStringifyJSON(value) {
+export function safeStringifyJSON(value: any): string {
   let json = JSON.stringify(value)
   return escapeHighASCII(json)
 }
 
-function escapeHighASCII(string) {
+function escapeHighASCII(string: string): string {
   let unicodeEscape = (char) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, '0')
   return string.replace(/[^\x00-\x7F]/g, unicodeEscape)
 }
 
-export function variant(source, changes = {}) {
+export function variant<T extends object>(source: T, changes: PlainObject = {}): T {
   let variant = Object.create(source)
   Object.assign(variant, changes)
   return variant
 }
 
-export function parseArgs(args, ...specs) {
+export function parseArgs(args: any[], ...specs: ArgSpec[]): any[] {
   let results = []
 
   // let originalArgs = copy(args)
@@ -2173,11 +2257,11 @@ export function parseArgs(args, ...specs) {
 //   return () => Object.assign(target, oldProps)
 // }
 
-export function scanFunctions(...values) {
+export function scanFunctions(...values: any[]): AnyFunction[] {
   return values.flat(2).filter(isFunction)
 }
 
-export function cleaner(order = 'lifo') {
+export function cleaner(order: 'lifo' | 'fifo' = 'lifo'): Cleaner {
   let fns = []
 
   let track = function(values, transform) {
@@ -2187,7 +2271,7 @@ export function cleaner(order = 'lifo') {
 
   let api = function(...values) {
     track(values, identity)
-  }
+  } as Cleaner
 
   api.guard = function(...values) {
     track(values, guardFn)
@@ -2214,7 +2298,7 @@ export function cleaner(order = 'lifo') {
   return api
 }
 
-export function maskPattern(str, patterns, { keepDelimiters = false } = {}) {
+export function maskPattern(str: string, patterns: RegExp[], { keepDelimiters = false }: { keepDelimiters?: boolean } = {}): MaskedString {
   let maskCount = 0
   let maskPattern = /§\d+/g
   let maskings = {}
@@ -2252,7 +2336,7 @@ export function maskPattern(str, patterns, { keepDelimiters = false } = {}) {
   // When we mask the given patterns, we allow an optional transform on restore.
   for (let pattern of patterns) replace(pattern, true)
 
-  let restore = (s, transform = identity) => {
+  let restore = (s: string, transform: (masked: string) => string = identity): string => {
     for (let { allowRestoreTransform } of replaceLayers) {
       let iterationTransform = allowRestoreTransform ? transform : identity
       s = s.replace(maskPattern, (match) => iterationTransform(assert(maskings[match], isString)))
@@ -2270,14 +2354,14 @@ const QUOTED_STRING_PATTERN = /'(?:\\\\|\\'|[^'])*'|"(?:\\\\|\\"|[^"])*"/g
 // const NESTED_BRACKETS = /\[(?:[^\[\]]|\[[^\[\]]*\])*\]/g
 const NESTED_GROUP_PATTERN = /{(?:[^{}]|{[^{}]*})*}|\((?:[^\(\)]|\([^\(\)]*\))*\)|\[(?:[^\[\]]|\[[^\[\]]*\])*\]/g // eslint-disable-line no-useless-escape
 
-export function expressionOutline(str) {
+export function expressionOutline(str: string): MaskedString {
   return maskPattern(str, [QUOTED_STRING_PATTERN, NESTED_GROUP_PATTERN], { keepDelimiters: true })
 }
 
 // ("foo") => ("foo")
 // ('foo') => ("foo")
 // ('foo"bar\'baz"') => ("foo\"bar'baz")
-function ensureDoubleQuotes(str) {
+function ensureDoubleQuotes(str: string): string {
   // If we already have double-quoted string, there's nothing to do.
   if (str[0] === '"') return str
   assert(str[0] === "'")
@@ -2291,7 +2375,7 @@ function ensureDoubleQuotes(str) {
   return '"' + transformed + '"'
 }
 
-export function parseString(value) {
+export function parseString(value: string): any {
   return JSON.parse(ensureDoubleQuotes(value))
 }
 
@@ -2316,7 +2400,7 @@ When the passed text is not in relaxed JSON format, a `SyntaxError` is thrown.
   The parsed JSON value.
 @experimental
 */
-export function parseRelaxedJSON(str) {
+export function parseRelaxedJSON(str: string): any {
   let { masked, restore } = maskPattern(str, [QUOTED_STRING_PATTERN])
   masked = masked.replace(/([a-z_$][\w$]*:)/gi, (unquotedProperty) => ('"' + unquotedProperty.slice(0, -1) + '":'))
   masked = masked.replace(/,\s*([}\]])/g, '$1')
@@ -2324,7 +2408,7 @@ export function parseRelaxedJSON(str) {
   return JSON.parse(masked)
 }
 
-export function parseScalarJSONPairs(str) {
+export function parseScalarJSONPairs(str: string) {
   let { maskedTokens, restore } = complexTokenOutlines(str)
 
   return maskedTokens.map((maskedToken) => {
@@ -2336,7 +2420,7 @@ export function parseScalarJSONPairs(str) {
   })
 }
 
-export function spanObject(keys, value) {
+export function spanObject(keys: string[], value: any): PlainObject {
   return mapObject(keys, (key) => [key, value])
 }
 
@@ -2450,7 +2534,7 @@ This function never throws an error and never returns `NaN`.
   If the argument cannot be parsed, `undefined` is returned.
 @experimental
 */
-export function parseNumber(str) {
+export function parseNumber(str: any): number | undefined {
   if (isNumber(str)) {
     return str
   } else if (isString(str) && /^-?\.?\d[\d._]*$/.test(str)) {
@@ -2458,7 +2542,7 @@ export function parseNumber(str) {
   }
 }
 
-export function assert(value, testFn = isTruthy) {
+export function assert<T>(value: T, testFn: (value: T) => boolean = isTruthy): T {
   if (testFn(value)) {
     return value
   } else {
@@ -2466,7 +2550,7 @@ export function assert(value, testFn = isTruthy) {
   }
 }
 
-export function install() {
+export function install(): void {
   // Implement up.util.copy protocol for Date
   Date.prototype[copy.key] = function() { return new Date(+this) }
 }
