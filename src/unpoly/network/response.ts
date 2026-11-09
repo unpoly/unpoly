@@ -168,11 +168,12 @@ export const UpResponse = class Response {
     // Like a default parameter, a default only replaces an undefined option.
     const { headers = {}, loadedAt = new Date() } = options
 
-    this.method = options.method
-    this.url = options.url
-    this.text = options.text
-    this.status = options.status
-    this.request = options.request
+    // up.Request always passes these.
+    this.method = options.method!
+    this.url = options.url!
+    this.text = options.text!
+    this.status = options.status!
+    this.request = options.request!
     this.xhr = options.xhr // optional
     this.target = options.target
     this.title = options.title
@@ -231,7 +232,7 @@ export const UpResponse = class Response {
     The value of the header.
   @stable
   */
-  header(name: string): string | undefined {
+  header(name: string): string | null | undefined {
     return this.headers[name] || this.xhr?.getResponseHeader(name)
   }
 
@@ -247,7 +248,7 @@ export const UpResponse = class Response {
   @param {string} contentType
   @stable
   */
-  get contentType(): string | undefined {
+  get contentType(): string | null | undefined {
     return this.header('Content-Type')
   }
 
@@ -265,7 +266,8 @@ export const UpResponse = class Response {
   @experimental
   */
   isHTML(): boolean {
-    return HTML_CONTENT_TYPE.test(this.contentType)
+    // test() stringifies a missing type, which doesn't match.
+    return HTML_CONTENT_TYPE.test(this.contentType!)
   }
 
   /*-
@@ -303,7 +305,7 @@ export const UpResponse = class Response {
   @param {string|undefined} etag
   @stable
   */
-  get etag(): string | undefined {
+  get etag(): string | null | undefined {
     return this.header('ETag')
   }
 

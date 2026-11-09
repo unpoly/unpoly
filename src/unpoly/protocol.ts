@@ -1062,8 +1062,8 @@ The settings in `up.protocol.config`, described in its doc comment.
 */
 export interface ProtocolConfig {
   methodParam: string
-  csrfParam: string | (() => string)
-  csrfToken: string | (() => string)
+  csrfParam: string | (() => string | undefined)
+  csrfToken: string | (() => string | undefined)
   csrfHeader: string
   maxHeaderSize: number
 }
@@ -1149,11 +1149,11 @@ export function csrfHeader(): string {
   return evalOption(config.csrfHeader)
 }
 
-export function csrfParam(): string {
+export function csrfParam(): string | undefined {
   return evalOption(config.csrfParam)
 }
 
-export function csrfToken(): string {
+export function csrfToken(): string | undefined {
   return evalOption(config.csrfToken)
 }
 

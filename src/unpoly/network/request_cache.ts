@@ -156,7 +156,8 @@ export class RequestCache {
     }
 
     if (value instanceof UpResponse) {
-      if (options.force || existingRequest.cacheRoute.satisfies(existingRequest, newRequest)) {
+      // A request in the cache has a route.
+      if (options.force || existingRequest.cacheRoute!.satisfies(existingRequest, newRequest)) {
         // Remember that newRequest was settled from cache.
         // This makes it a candidate for cache revalidation.
         newRequest.fromCache = true

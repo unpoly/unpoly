@@ -115,7 +115,7 @@ export const UpRequest = class Request {
   declare target: string | undefined
   declare failTarget: string | undefined
   declare headers: Record<string, string>
-  declare timeout: number | null
+  declare timeout: number | null | undefined
   declare background: boolean | undefined
   declare cache: boolean | 'auto' | undefined
   declare expireCache: any
@@ -452,7 +452,8 @@ export const UpRequest = class Request {
     this.state = 'new'
     this.expired = false
 
-    this.method = options.method
+    // _normalize() below sets the default.
+    this.method = options.method!
     this.url = options.url
     this.hash = options.hash
     this.params = new Params(options.params) // copies, which we want
@@ -691,7 +692,7 @@ export const UpRequest = class Request {
     return this.isSafe() || (this.method === 'POST')
   }
 
-  willCache(): boolean {
+  willCache(): boolean | undefined {
     return networkConfig.cacheEnabled && evalAutoOption(this.cache, networkConfig.autoCache, this)
   }
 
@@ -926,12 +927,12 @@ export const UpRequest = class Request {
     return protocolCsrfHeader()
   }
 
-  csrfParam(): string {
+  csrfParam(): string | undefined {
     return csrfParam()
   }
 
   // Returns a CSRF token if this request requires it
-  csrfToken(): string {
+  csrfToken(): string | undefined {
     if (!this.isSafe() && !this.isCrossOrigin()) {
       return protocolCsrfToken()
     }

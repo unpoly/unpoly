@@ -16,7 +16,7 @@ export interface AbortRequestsOptions {
   except?: UpRequest
   reason?: string | Error
   // A message to log before the first request is aborted.
-  logOnce?: LogArgs
+  logOnce?: LogArgs | null
 }
 
 export class RequestQueue {
