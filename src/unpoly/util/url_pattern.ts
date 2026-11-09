@@ -1,10 +1,24 @@
 import { escapeRegExp, flatMap, getSimpleTokens, matchableURL, matchableURLPatternAtom } from '../util.js'
 
+/**
+A named placeholder in a URL pattern (`:name` or `$name`), and how to cast its value.
+@internal
+*/
+export interface URLPatternGroup {
+  name: string
+  cast: (value: string) => string | number
+}
+
 // A class expression, so the class is still named `URLPattern` at runtime, while the binding
 // doesn't shadow the browser's `URLPattern` here or in importers.
 export const UpURLPattern = class URLPattern {
+  declare _groups: URLPatternGroup[]
+  declare _positiveRegexp: RegExp
+  declare _negativeRegexp: RegExp | undefined
 
-  constructor(fullPattern) {
+  // Takes a space-separated string of patterns, or an array of patterns.
+  // Patterns prefixed with a minus (`-/admin/*`) exclude URLs.
+  constructor(fullPattern: string | string[]) {
     this._groups = []
 
     const positiveList = []
@@ -22,7 +36,7 @@ export const UpURLPattern = class URLPattern {
     this._negativeRegexp = this._buildRegexp(negativeList, false)
   }
 
-  _buildRegexp(list, capture) {
+  _buildRegexp(list: string[], capture: boolean): RegExp | undefined {
     if (!list.length) { return }
 
     list = flatMap(list, matchableURLPatternAtom)
@@ -50,18 +64,18 @@ export const UpURLPattern = class URLPattern {
 
   // This method is performance-sensitive. It's called for every link in an [up-nav]
   // after every fragment update.
-  test(url, doNormalize = true) {
+  test(url: string, doNormalize = true): boolean {
     if (doNormalize) { url = matchableURL(url) }
     // Use RegExp#test() instead of RegExp#recognize() as building match groups is expensive,
     // and we only need to know whether the URL matches (true / false).
     return this._positiveRegexp.test(url) && !this._isExcluded(url)
   }
 
-  recognize(url, doNormalize = true) {
+  recognize(url: string, doNormalize = true): Record<string, string | number> | undefined {
     if (doNormalize) { url = matchableURL(url) }
     let match = this._positiveRegexp.exec(url)
     if (match && !this._isExcluded(url)) {
-      const resolution = {}
+      const resolution: Record<string, string | number> = {}
       this._groups.forEach((group, groupIndex) => {
         let value = match[groupIndex + 1]
         if (value) {
@@ -72,7 +86,7 @@ export const UpURLPattern = class URLPattern {
     }
   }
 
-  _isExcluded(url) {
+  _isExcluded(url: string): boolean {
     return this._negativeRegexp?.test(url)
   }
 }

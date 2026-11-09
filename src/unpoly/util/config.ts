@@ -1,9 +1,30 @@
 import { queueTask, upperCaseFirst } from '../util.js'
 import { unionSelector } from '../element.js'
+import type { PlainObject } from '../util.js'
+
+/**
+Returns a selector for a config property. See `up.util.Config#selectorFn()`.
+@internal
+*/
+export type SelectorFn = (condition?: string) => string
+
+/**
+Returns whether an element matches the selector of a config property. See `up.util.Config#matchesFn()`.
+@internal
+*/
+export type MatchesFn = (element: Element, condition?: string) => boolean
 
 export class Config {
+  // The settings are the keys of the object returned by the blueprint function.
+  // TODO(types): A namespace could declare its settings, e.g. `Config & NetworkSettings`.
+  [key: string]: any
 
-  constructor(label, blueprintFn = (() => ({}))) {
+  declare _label: string
+  declare _blueprintFn: () => PlainObject
+  declare _knownKeys: string[]
+
+
+  constructor(label: string, blueprintFn: () => PlainObject = (() => ({}))) {
     this._label = label
     this._blueprintFn = blueprintFn
     this._knownKeys = []
@@ -23,7 +44,7 @@ export class Config {
   // We only check once, right after booting. Settings made later are not checked.
   //
   // This method is not private because a spec calls it.
-  logUnknownKeys() {
+  logUnknownKeys(): void {
     for (let key of Object.keys(this)) {
       if (!this._knownKeys.includes(key)) {
         up.log.error(this._label, 'Ignoring unknown setting %s. Fix its name or remove it.', key)
@@ -31,29 +52,29 @@ export class Config {
     }
   }
 
-  reset() {
+  reset(): void {
     Object.assign(this, this._blueprintFn())
   }
 
-  matches(element, prop, condition) {
+  matches(element: Element, prop: string, condition?: string): boolean {
     return element?.matches(this.selector(prop, condition))
   }
 
-  matchesFn(prop) {
+  matchesFn(prop: string): MatchesFn {
     return (element, condition) => this.matches(element, prop, condition)
   }
 
-  selector(prop, condition = '') {
+  selector(prop: string, condition = ''): string {
     let includes = this[prop]
     let excludes = this['no' + upperCaseFirst(prop)]
     return unionSelector(includes, excludes, condition)
   }
 
-  selectorFn(prop) {
+  selectorFn(prop: string): SelectorFn {
     return (condition) => this.selector(prop, condition)
   }
 
-  selectorFns(prop) {
+  selectorFns(prop: string): [SelectorFn, MatchesFn] {
     return [this.selectorFn(prop), this.matchesFn(prop)]
   }
 }
