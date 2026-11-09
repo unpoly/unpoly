@@ -2052,6 +2052,16 @@ describe('up.form', function() {
         expect(jasmine.lastRequest().data()).toMatchParams({ 'input-name': 'new-value' })
       })
 
+      it('compiles a detached form (bugfix)', function() {
+        const form = up.element.createFromHTML(`
+          <form up-autosubmit>
+            <input name="input-name" value="old-value">
+          </form>
+        `)
+
+        expect(() => up.hello(form)).not.toThrow()
+      })
+
       it('does not ignore an [up-autosubmit] form in an overlay when an [up-autosubmit] element in the root layer encloses the overlay', async function() {
         // Overlays are attached to the <body>, so the <body> encloses them in the DOM.
         document.body.setAttribute('up-autosubmit', '')
