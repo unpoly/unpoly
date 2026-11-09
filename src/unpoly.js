@@ -192,6 +192,8 @@ const apis = [
 ]
 
 // Copy property descriptors, so getters (like `up.context`) stay live.
+// A later api would replace an earlier api's key without notice. The lint rule
+// tooling/eslint/no_api_collisions.mjs reports two apis that contribute the same key.
 for (let api of apis) {
   Object.defineProperties(up, Object.getOwnPropertyDescriptors(api))
 }

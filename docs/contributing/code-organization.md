@@ -234,7 +234,8 @@ shadowing the global.
 The entry file `src/unpoly.js` ties the modules together. It imports every module, copies
 each `api` onto `window.up` (the `apis` list), then calls each `install()` (the `installs`
 list, which is the explicit install order). Its comments also explain the rules for import
-cycles between modules.
+cycles between modules. Two modules must not contribute the same key to `window.up`, or the
+later one silently replaces the earlier one; [`bin/lint`](code-style.md) reports that.
 
 Because internal callers import functions directly, a spec that spies on `up.link.follow`
 doesn't intercept calls from other modules. A function that specs need to replace is wrapped

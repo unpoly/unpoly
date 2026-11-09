@@ -2,6 +2,7 @@ import eslint from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import stylistic from '@stylistic/eslint-plugin'
 import globals from 'globals'
+import { noApiCollisions } from './tooling/eslint/no_api_collisions.mjs'
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -42,6 +43,15 @@ export default tseslint.config(
       }],
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-unused-expressions': 'off',
+    },
+  },
+  {
+    files: ['src/unpoly.js'],
+    plugins: {
+      unpoly: { rules: { 'no-api-collisions': noApiCollisions } },
+    },
+    rules: {
+      'unpoly/no-api-collisions': 'error',
     },
   },
   {
