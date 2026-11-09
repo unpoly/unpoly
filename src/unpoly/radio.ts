@@ -35,6 +35,15 @@ An element with `[up-hungry]` is updated whenever a server response contains a m
 */
 
 
+/**
+The settings in `up.radio.config`, described in its doc comment.
+*/
+export interface RadioConfig {
+  hungrySelectors: string[]
+  noHungrySelectors: string[]
+  pollInterval: number
+}
+
 /*-
 Configures defaults for passive updates.
 
@@ -63,11 +72,11 @@ Configures defaults for passive updates.
 
 @stable
 */
-export const config = new Config<PlainObject>('up.radio.config', () => ({
+export const config = new Config('up.radio.config', (): RadioConfig => ({
   hungrySelectors: ['[up-hungry]'],
   noHungrySelectors: ['[up-hungry=false]'],
   pollInterval: 30000,
-})) as ConfigWith<PlainObject>
+})) as ConfigWith<RadioConfig>
 
 export function hungrySteps(renderOptions: PlainObject): HungrySteps {
   let { hungry, origin, layer: renderLayer, meta } = renderOptions
