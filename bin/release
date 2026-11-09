@@ -69,19 +69,15 @@ function confirm(message) {
   })
 }
 
+// Removes every build output, so we only publish what the production build writes. Removing
+// only files that paths() doesn't match left a dev or CI build's maps of the unminified bundles
+// (unpoly.js.map and friends) in dist/, which paths() matched and we published.
 function clean() {
-  const distPath = 'dist'
-  if (fs.existsSync(distPath)) {
-    console.log("Cleaning orphaned files...")
-    console.log()
-    globSync('dist/unpoly*{.css,.js}').forEach(filePath => {
-      if (!paths().includes(filePath)) {
-        console.log("Cleaning orphaned file: %o", filePath)
-        fs.unlinkSync(filePath)
-      }
-    })
-    console.log()
-  }
+  console.log("Removing previous build outputs...")
+  console.log()
+  globSync('dist/unpoly*{.css,.js,.map,.gz}').forEach(filePath => {
+    fs.unlinkSync(filePath)
+  })
 }
 
 function build() {
