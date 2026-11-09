@@ -882,7 +882,7 @@ up.util.wrapList(null) // result: []
 export function wrapList<T>(value: T[]): T[]
 export function wrapList<T>(value: List<T>): List<T>
 export function wrapList<T>(value: T | null | undefined): T[]
-export function wrapList(value) {
+export function wrapList(value: unknown) {
   if (isList(value)) {
     return value
   } else if (isMissing(value)) {
@@ -913,7 +913,7 @@ Returns a shallow copy of the given value.
 // A list (like a NodeList or an array) is copied into a new array.
 export function copy<T>(value: List<T> & object): T[]
 export function copy<T>(value: T): T
-export function copy(value) {
+export function copy(value: any) {
   if (isObject(value) && value[copy.key]) {
     value = value[copy.key]()
   } else if (isList(value)) {
@@ -1007,7 +1007,7 @@ export function merge(...sources: PlainObject[]): PlainObject {
 @internal
 */
 export function mergeDefined(...sources: PlainObject[]): PlainObject {
-  const result = {}
+  const result: PlainObject = {}
   for (let source of sources) {
     if (source) {
       for (let key in source) {
@@ -1211,7 +1211,7 @@ a truthy value when passed to the given function.
 */
 export function filterList<T>(list: Iterable<T>, tester: Iteratee<T, any>): T[] {
   tester = iteratee(tester)
-  const matches = []
+  const matches: T[] = []
   each(list, function(element, index) {
     if (tester(element, index)) {
       return matches.push(element)
@@ -1519,7 +1519,7 @@ export function evalAutoOption(value: any, autoMeans: any, ...args: any[]): any 
   return value
 }
 
-const ESCAPE_HTML_ENTITY_MAP = {
+const ESCAPE_HTML_ENTITY_MAP: Record<string, string> = {
   "&": "&amp;",
   "<": "&lt;",
   ">": "&gt;",
@@ -1943,7 +1943,7 @@ export function getSimpleTokens(value: any, { json = false, separator = /[,\s]/ 
 
 function splitSimpleTokenString(value: string, separator: string | RegExp): string[] {
   let parts = up.migrate.splitAtOr?.(value) || value.split(separator)
-  return parts.map((s) => s.trim()).filter(identity)
+  return parts.map((s: string) => s.trim()).filter(identity)
 }
 
 export function getComplexTokens(value: any) {
@@ -1991,7 +1991,7 @@ will be omitted from the returned object.
 @internal
 */
 export function withRenamedKeys(object: PlainObject, renameKeyFn: (key: string) => string | null | undefined): PlainObject {
-  const renamed = {}
+  const renamed: PlainObject = {}
   for (let key in object) {
     let transformed = renameKeyFn(key)
     if (isGiven(transformed)) {
@@ -2085,7 +2085,7 @@ function stringifyArg(arg: any, placeholder = '%o', ancestors = new Set()): stri
   }
 
   // Values nested in an array or object print like a value passed directly with %o.
-  let stringifyNested = (value) => stringifyArg(value, '%o', ancestors)
+  let stringifyNested = (value: unknown) => stringifyArg(value, '%o', ancestors)
 
   if (isString(arg)) {
     string = arg.trim().replace(/[\n\r\t ]+/g, ' ')
@@ -2164,7 +2164,7 @@ function negate<A extends any[]>(fn: (...args: A) => any): (...args: A) => boole
   }
 }
 
-export function memoizeMethod(object: object, propLiteral: PlainObject): void {
+export function memoizeMethod(object: PlainObject, propLiteral: PlainObject): void {
   // We're accepting the property names as the keys of an object. We don't care about the values.
   // We do this so that object's keys go through the same property mangling as the rest of the code.
   for (let prop in propLiteral) {
@@ -2182,7 +2182,7 @@ export function safeStringifyJSON(value: any): string {
 }
 
 function escapeHighASCII(string: string): string {
-  let unicodeEscape = (char) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, '0')
+  let unicodeEscape = (char: string) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, '0')
   return string.replace(/[^\x00-\x7F]/g, unicodeEscape)
 }
 
@@ -2270,9 +2270,9 @@ export function scanFunctions(...values: any[]): AnyFunction[] {
 }
 
 export function cleaner(order: 'lifo' | 'fifo' = 'lifo'): Cleaner {
-  let fns = []
+  let fns: AnyFunction[] = []
 
-  let track = function(values, transform) {
+  let track = function(values: unknown[], transform: (fn: AnyFunction) => unknown) {
     values = scanFunctions(values).map(transform)
     fns.push(...scanFunctions(values))
   }
@@ -2309,10 +2309,10 @@ export function cleaner(order: 'lifo' | 'fifo' = 'lifo'): Cleaner {
 export function maskPattern(str: string, patterns: RegExp[], { keepDelimiters = false }: { keepDelimiters?: boolean } = {}): MaskedString {
   let maskCount = 0
   let maskPattern = /§\d+/g
-  let maskings = {}
-  let replaceLayers = []
+  let maskings: Record<string, string> = {}
+  let replaceLayers: { allowRestoreTransform: boolean }[] = []
 
-  let replace = (replacePattern, allowRestoreTransform) => {
+  let replace = (replacePattern: RegExp, allowRestoreTransform: boolean) => {
     let didReplace = false
 
     str = str.replaceAll(replacePattern, function(match) {
@@ -2560,7 +2560,7 @@ export function assert<T>(value: T, testFn: (value: T) => boolean = isTruthy): T
 
 export function install(): void {
   // Implement up.util.copy protocol for Date
-  Date.prototype[copy.key] = function() { return new Date(+this) }
+  (Date.prototype as PlainObject)[copy.key] = function() { return new Date(+this) }
 }
 
 export const api = {
