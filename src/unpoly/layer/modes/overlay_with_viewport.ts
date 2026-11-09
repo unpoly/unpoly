@@ -4,7 +4,7 @@ import { bodyShifter } from '../../viewport.js'
 export class OverlayWithViewport extends Overlay {
 
   // For stubbing in tests
-  static getParentElement() {
+  static getParentElement(): HTMLElement {
     // Always make a fresh lookup of the <body>, since the <body>
     // might be swapped out with a new element.
     return document.body
@@ -14,20 +14,20 @@ export class OverlayWithViewport extends Overlay {
   @function OverlayWithViewport#openNow
   @internal
   */
-  createElements() {
+  createElements(): void {
     bodyShifter.raiseStack()
-    this.createElement(this.constructor.getParentElement())
+    this.createElement((this.constructor as typeof OverlayWithViewport).getParentElement())
     if (this.backdrop) { this.createBackdropElement(this.element) }
     this.createViewportElement(this.element)
     this.createBoxElement(this.viewportElement)
     this.createContentElement(this.boxElement)
   }
 
-  onElementsRemoved() {
+  onElementsRemoved(): void {
     bodyShifter.lowerStack()
   }
 
-  sync() {
+  sync(): void {
     // A swapping of <body> might have removed this overlay from the DOM, so we
     // attach it again.
     //
@@ -35,7 +35,7 @@ export class OverlayWithViewport extends Overlay {
     // that was already closed. In that case don't run the code below that might
     // re-attach the overlay.
     if (this.isAlive() && !this.element.isConnected) {
-      this.constructor.getParentElement().appendChild(this.element)
+      (this.constructor as typeof OverlayWithViewport).getParentElement().appendChild(this.element)
     }
   }
 }
