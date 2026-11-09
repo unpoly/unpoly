@@ -1,18 +1,30 @@
 import { affix } from '../../element.js'
 
-export class NonceableCallback {
+/**
+The names and values of the arguments for a callback string, and its `this`.
+@internal
+*/
+export interface EvalEnv {
+  argNames: string[]
+  argValues: any[]
+  thisContext?: any
+}
 
-  constructor(script, nonce) {
+export class NonceableCallback {
+  declare script: string
+  declare nonce: string | undefined
+
+  constructor(script: string, nonce?: string) {
     this.script = script
     this.nonce = nonce
   }
 
-  static fromCallbackString(string) {
+  static fromCallbackString(string: string): NonceableCallback {
     let match = string.match(/^(nonce-(\S+)\s)?(.*)$/)
     return new this(match[3], match[2])
   }
 
-  unsafeEval(evalEnv) {
+  unsafeEval(evalEnv: EvalEnv): any {
     if (this.nonce) {
       return this._runAsScriptElement(evalEnv)
     } else {
@@ -20,16 +32,16 @@ export class NonceableCallback {
     }
   }
 
-  toCallbackString() {
+  toCallbackString(): string {
     return `nonce-${this.nonce} ${this.script}`
   }
 
-  _runAsFunction({ argNames, argValues, thisContext }) {
+  _runAsFunction({ argNames, argValues, thisContext }: EvalEnv): any {
     let fn = new Function(...argNames, this.script)
     return fn.apply(thisContext, argValues)
   }
 
-  _runAsScriptElement(evalEnv) {
+  _runAsScriptElement(evalEnv: EvalEnv): any {
     // A strict CSP will block use of `eval()` or `new Function()`.
     // What we can do instead is insert an inline script that is allowed per a [nonce] attr.
     let wrappedScript = `
