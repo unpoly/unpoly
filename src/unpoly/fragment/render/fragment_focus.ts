@@ -2,12 +2,31 @@ import { isDefined, isString, pickBy } from '../../util.js'
 import { subtreeFirst } from '../../element.js'
 import { FragmentProcessor } from './fragment_processor.js'
 import { doFocus, firstHashTarget, restoreFocus } from '../../viewport.js'
+import type { FragmentProcessorOptions } from './fragment_processor.js'
+import type { PlainObject } from '../../util.js'
+import type { FocusCapsule } from '../../viewport/focus_capsule.js'
+import type { InputDevice } from '../../event.js'
+
+/**
+Options for an `up.FragmentFocus`.
+@internal
+*/
+export interface FragmentFocusOptions extends FragmentProcessorOptions {
+  hash?: string
+  focusVisible?: boolean | 'auto'
+  focusCapsule?: FocusCapsule
+  inputDevice?: InputDevice
+}
 
 const PREVENT_SCROLL_OPTIONS = { preventScroll: true }
 
 export class FragmentFocus extends FragmentProcessor {
+  declare hash: string | undefined
+  declare focusVisible: boolean | 'auto' | undefined
+  declare focusCapsule: FocusCapsule | undefined
+  declare inputDevice: InputDevice | undefined
 
-  constructor(options) {
+  constructor(options: FragmentFocusOptions) {
     super(options)
     this.hash = options.hash
     this.focusVisible = options.focusVisible
@@ -15,7 +34,7 @@ export class FragmentFocus extends FragmentProcessor {
     this.inputDevice = options.inputDevice
   }
 
-  attributes() {
+  attributes(): PlainObject {
     return pickBy({
       ...super.attributes(),
       hash: this.hash,
@@ -25,7 +44,7 @@ export class FragmentFocus extends FragmentProcessor {
     }, isDefined)
   }
 
-  processPrimitive(opt) {
+  processPrimitive(opt: any): boolean | undefined {
     switch (opt) {
       case 'keep':
         // Try to keep the focus from before the fragment update.
@@ -51,11 +70,11 @@ export class FragmentFocus extends FragmentProcessor {
     }
   }
 
-  processElement(element) {
+  processElement(element: HTMLElement): boolean | undefined {
     return this._focusElement(element)
   }
 
-  resolveCondition(condition) {
+  resolveCondition(condition: string): boolean | undefined {
     if (condition === 'lost') {
       return this._wasFocusLost()
     } else {
@@ -63,27 +82,27 @@ export class FragmentFocus extends FragmentProcessor {
     }
   }
 
-  _focusSelector(selector) {
+  _focusSelector(selector: string): boolean | undefined {
     let match = this.findSelector(selector)
     return this._focusElement(match)
   }
 
-  _restoreLostFocus() {
+  _restoreLostFocus(): boolean | undefined {
     return this.focusCapsule?.restore(this.layer, PREVENT_SCROLL_OPTIONS)
   }
 
-  _restorePreviousFocusForLocation() {
+  _restorePreviousFocusForLocation(): boolean {
     return restoreFocus({ layer: this.layer })
   }
 
-  _autofocus() {
+  _autofocus(): boolean | undefined {
     let autofocusElement = this.fragment && subtreeFirst(this.fragment, '[autofocus]')
     if (autofocusElement) {
       return this._focusElement(autofocusElement)
     }
   }
 
-  _focusElement(element) {
+  _focusElement(element: HTMLElement | undefined): boolean | undefined {
     if (element) {
       doFocus(element, {
         force: true, // force focus on otherwise non-focusable elements
@@ -95,14 +114,14 @@ export class FragmentFocus extends FragmentProcessor {
     }
   }
 
-  _focusHash() {
+  _focusHash(): boolean | undefined {
     let hashTarget = firstHashTarget(this.hash, { layer: this.layer })
     if (hashTarget) {
       return this._focusElement(hashTarget)
     }
   }
 
-  _wasFocusLost() {
+  _wasFocusLost(): boolean | undefined {
     return this.focusCapsule?.wasLost()
   }
 
