@@ -76,7 +76,7 @@ up.Request.Cache = class Cache {
         return cachedRequest
       } else {
         // Cache hit, but too old
-        this._delete(request, route)
+        this._delete(cachedRequest)
       }
     }
   }

@@ -655,6 +655,17 @@ describe('up.network', function() {
       it('returns undefined if the given request is not cached', function() {
         expect({ url: '/foo' }).not.toBeCached()
       })
+
+      it('removes an entry that is older than up.network.config.cacheEvictAge', async function() {
+        up.network.config.cacheEvictAge = 10
+        up.request({ url: '/foo', cache: true })
+        expect(up.cache.currentSize).toBe(1)
+
+        await wait(30)
+
+        expect(up.cache.get({ url: '/foo' })).toBeMissing()
+        expect(up.cache.currentSize).toBe(0)
+      })
     })
 
     describe('up.cache.put()', function() {
