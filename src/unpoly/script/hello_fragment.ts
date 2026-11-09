@@ -7,10 +7,50 @@ import { emitFragmentInserted, getSubtree } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { printToStandard } from '../log.js'
 import { readData, registerDestructor } from '../script.js'
+import type { PlainObject } from '../util.js'
+import type { Layer } from '../layer/base.js'
+
+/**
+A compiler or macro registered with `up.compiler()` or `up.macro()`: the compile function
+with its registration options.
+@internal
+*/
+export type Compiler = ((...args: any[]) => any) & {
+  selector: string | (() => string)
+  isDefault?: boolean
+  batch?: boolean
+  rerun?: boolean
+}
+
+/**
+Options for compiling a fragment. See `up.hello()`.
+@internal
+*/
+export interface HelloFragmentOptions {
+  layer?: Layer
+  data?: any
+  dataRoot?: Element
+  dataMap?: Record<string, any>
+  meta?: PlainObject
+  insertedEvent?: boolean
+}
+
+// Elements remember the data passed to up.hello(), and which compilers have run on them.
+type CompiledElement = Element & { upCompileData?: any, upAppliedCompilers?: Set<Compiler> }
 
 export class HelloFragment {
+  declare _root: Element
+  declare _macros: Compiler[]
+  declare _compilers: Compiler[]
+  declare _layer: Layer
+  declare _data: any
+  declare _dataRoot: CompiledElement
+  declare _dataMap: Record<string, any> | undefined
+  declare _compilePromises: Promise<any>[]
+  declare _insertedEvent: boolean
+  declare _meta: PlainObject
 
-  constructor(root, macros, compilers, { layer, data, dataRoot, dataMap, meta, insertedEvent }) {
+  constructor(root: Element, macros: Compiler[], compilers: Compiler[], { layer, data, dataRoot, dataMap, meta, insertedEvent }: HelloFragmentOptions) {
     // (1) If a caller has already looked up the layer we don't want to look it up again.
     // (2) Default to the current layer in case the user manually compiles a detached element.
     layer ||= layerStack.get(root) || layerStack.current
@@ -36,7 +76,7 @@ export class HelloFragment {
     this._meta = meta
   }
 
-  async run() {
+  async run(): Promise<Element> {
     printToStandard('up.hello()', "Compiling fragment %o", this._root)
     this._assignDataToElements()
 
@@ -56,17 +96,17 @@ export class HelloFragment {
     return this._root
   }
 
-  _emitCompileEvent() {
+  _emitCompileEvent(): void {
     emit(this._root, 'up:compilers:before', { log: false })
   }
 
-  _emitInsertedEvent() {
+  _emitInsertedEvent(): void {
     if (this._insertedEvent) {
       emitFragmentInserted(this._root, this._meta)
     }
   }
 
-  _assignDataToElements() {
+  _assignDataToElements(): void {
     if (this._data) {
       this._dataRoot.upCompileData = this._data
     }
@@ -80,7 +120,7 @@ export class HelloFragment {
     }
   }
 
-  _runCompilers(compilers) {
+  _runCompilers(compilers: Compiler[]): void {
     // If we're compiling a fragment in a background layer, we want
     // up.layer.current to resolve to that background layer, not the front layer.
     this._layer.asCurrent(() => {
@@ -90,7 +130,7 @@ export class HelloFragment {
     })
   }
 
-  _runCompiler(compiler) {
+  _runCompiler(compiler: Compiler): void {
     const matches = this._selectOnce(compiler)
     if (!matches.length) { return }
 
@@ -109,8 +149,8 @@ export class HelloFragment {
     up.migrate.postCompile?.(matches, compiler)
   }
 
-  _compileOneElement(compiler, element) {
-    const compileArgs = [element]
+  _compileOneElement(compiler: Compiler, element: Element): void {
+    const compileArgs: any[] = [element]
     // (A) For performance reason, do not parse [up-data] unless the compiler function expects a second argument.
     // (B) We must pass data for an argument count of 0, since then the function might take varargs.
     if (compiler.length !== 1) {
@@ -122,8 +162,8 @@ export class HelloFragment {
     this._applyCompilerFunction(compiler, element, compileArgs, onDestructor)
   }
 
-  _compileBatch(compiler, elements) {
-    const compileArgs = [elements]
+  _compileBatch(compiler: Compiler, elements: Element[]): void {
+    const compileArgs: any[] = [elements]
     // Do not retrieve and parse [up-data] unless the compiler function
     // expects a second argument. Note that we must pass data for an argument
     // count of 0, since then the function might take varargs.
@@ -136,7 +176,7 @@ export class HelloFragment {
     this._applyCompilerFunction(compiler, elements, compileArgs, onDestructor)
   }
 
-  async _applyCompilerFunction(compiler, elementOrElements, compileArgs, onDestructor) {
+  async _applyCompilerFunction(compiler: Compiler, elementOrElements: Element | Element[], compileArgs: any[], onDestructor: (destructor: any) => void): Promise<void> {
     let maybeDestructor = guard(() => compiler.apply(elementOrElements, compileArgs))
 
     if (isPromise(maybeDestructor)) {
@@ -156,16 +196,16 @@ export class HelloFragment {
     if (maybeDestructor) onDestructor(maybeDestructor)
   }
 
-  _reportBatchCompilerWithDestructor(compiler) {
+  _reportBatchCompilerWithDestructor(compiler: Compiler): void {
     let error = new UpError(['Batch compiler (%s) cannot return a destructor', compiler.selector])
     reportError(error)
   }
 
-  _select(selector) {
+  _select(selector: string | (() => string)): CompiledElement[] {
     return getSubtree(this._root, evalOption(selector), { layer: this._layer } )
   }
 
-  _selectOnce(compiler) {
+  _selectOnce(compiler: Compiler): CompiledElement[] {
     let matches = this._select(compiler.selector)
 
     if (!compiler.rerun) {
