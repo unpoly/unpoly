@@ -584,8 +584,10 @@ Jasmine's `jasmine.createSpy()` and `spyOn()` carry a lot of the weight in funct
 `spyOn(up.form, 'trackFields')` replaces the function on `window.up`. It only catches calls
 that go through `window.up`: your spec's own calls, and calls from user code. Unpoly's own
 modules [import](code-organization.md#namespace-pattern) the function instead, so their calls
-pass the spy without a sound, and a `toHaveBeenCalled()` expectation fails for no visible
-reason.
+pass the spy without a sound. A `toHaveBeenCalled()` expectation then fails for no visible
+reason. Worse, a `not.toHaveBeenCalled()` expectation passes no matter what Unpoly does, so
+the spec can never fail. Before you trust a negative expectation, check that the same spy
+records a call in the positive case.
 
 To intercept Unpoly's internal callers, the function must be wrapped in `mockable()` where it is
 defined. Then call `.mock()` on it, which returns a regular Jasmine spy:
