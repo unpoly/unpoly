@@ -27,7 +27,7 @@ import {
   setMissingAttr, setMissingAttrs, setStyleTemp, trackDefinitions, unionSelector, unwrap,
 } from './element.js'
 import { emitReset, isBeforeBoot, setClassName, startExtension, stopExtension } from './framework.js'
-import { assertEmitted, isModified, isSyntheticClick } from './event.js'
+import { assertEmitted, isSyntheticClick } from './event.js'
 import { csrfParam, csrfToken, headerize, initialRequestMethod } from './protocol.js'
 import { printToError, printToStandard, printToWarn } from './log.js'
 import {
@@ -149,7 +149,6 @@ export const api = {
     stopExtension,
 
     assertEmitted,
-    isModified,
     isSyntheticClick,
 
     csrfParam,

@@ -6,6 +6,7 @@ Unreleased
 - Fix a bug where rendering a [fallback target](/learn/targeting-fragments#providing-a-fallback-target) from a `{ document }`, `{ fragment }` or `{ response }` [aborted](/learn/aborting-requests) requests in the primary target, although the primary target was not updated. This happened with `{ abort: 'target' }`, which is the default.
 - When Unpoly adds or changes a history entry, it now calls the browser's History API once instead of twice. Browsers limit how often a page may change its history, so apps that update history often are less likely to hit that limit.
 - [`up.error.muteUncriticalRejection()`](/api/up.error.muteUncriticalRejection) is now public API. It ignores the expected rejections of a promise you don't handle, like an aborted request or an error response, so they don't show up as "Uncaught (in promise)" in the error console.
+- [`up.event.isModified()`](/api/up.event.isModified) is now public API. It returns whether the user clicked with a modifier key or a mouse button other than the primary button, so your own click handlers can leave these clicks to the browser, e.g. to open a link in a new tab.
 
 
 3.15.0

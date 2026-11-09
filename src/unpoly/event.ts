@@ -590,8 +590,34 @@ export type ModifierKey = 'metaKey' | 'shiftKey' | 'ctrlKey' | 'altKey'
 export const keyModifiers: ModifierKey[] = ['metaKey', 'shiftKey', 'ctrlKey', 'altKey']
 
 /*-
+Returns whether the given mouse event was made with a modifier key or a mouse button other than the primary button.
+
+An event is modified when the user held `Shift`, `Ctrl`, `Alt` or `Meta` (`Cmd` on macOS),
+or used a button other than the primary mouse button (`event.button > 0`), like the middle button.
+Browsers often give such clicks a special meaning, like opening a link in a new tab.
+
+## Example
+
+A click handler can return early for a modified click, so the browser's default behavior is not replaced:
+
+```js
+up.on('click', '.product-card', function(event, card) {
+  if (up.event.isModified(event)) return // mark: up.event.isModified(event)
+
+  event.preventDefault()
+  up.navigate({ url: card.dataset.url })
+})
+```
+
+`up:click` is [only emitted for unmodified clicks](/api/up:click#only-unmodified-clicks-are-considered),
+so listeners of `up:click` don't need this check.
+
 @function up.event.isModified
-@internal
+@param {MouseEvent} event
+  The event to test, like a `click` or `mousedown` event.
+@return {boolean}
+  Whether the event was modified.
+@experimental
 */
 export function isModified(event: Pick<MouseEvent, 'button' | ModifierKey>): boolean {
   return (event.button > 0) || some(keyModifiers, (modifier) => event[modifier])
@@ -805,6 +831,7 @@ export const api = {
     emit,
     onEscape,
     halt,
+    isModified,
     get inputDevice() { return getInputDevice() },
   },
   on,

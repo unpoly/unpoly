@@ -1052,8 +1052,9 @@ when the key is pressed even if the element has an `[up-instant]` attribute.
 
 To prevent overriding native browser behavior, the `up:click` event is only emitted for unmodified clicks.
 
-In particular, it is not emitted when the user holds `Shift`, `CTRL`, or `Meta` while clicking,
-nor when the user clicks with a secondary mouse button.
+In particular, it is not emitted when the user holds `Shift`, `Ctrl`, `Alt` or `Meta` while clicking,
+nor when the user clicks with a mouse button other than the primary button.
+To make the same check in your own click handler, use `up.event.isModified()`.
 
 @event up:click
 @param {Element} event.target
