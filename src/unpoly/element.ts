@@ -1547,7 +1547,7 @@ These `<div>` elements are *not* considered empty:
 @experimental
 */
 export function isEmpty(element: HTMLElement): boolean {
-  return !element.children.length > 0 && !element.innerText.trim()
+  return !element.children.length && !element.innerText.trim()
 }
 
 export function crossOriginSelector(attr: string): string {
