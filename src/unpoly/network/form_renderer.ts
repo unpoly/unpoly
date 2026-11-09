@@ -3,6 +3,8 @@ import { affix } from '../element.js'
 import { submitForm } from '../browser.js'
 import { Params } from '../form/params.js'
 import { wrapMethod } from '../protocol.js'
+import type { ParamEntry } from '../form/params.js'
+import type { UpRequest } from './request.js'
 
 // In HTML5, forms may only have a GET or POST method.
 // There were several proposals to extend this to PUT, DELETE, etc.
@@ -10,12 +12,15 @@ import { wrapMethod } from '../protocol.js'
 const HTML_FORM_METHODS = ['GET', 'POST']
 
 export class FormRenderer {
+  declare _request: UpRequest
+  declare _form: HTMLFormElement
+  declare params: Params
 
-  constructor(request) {
+  constructor(request: UpRequest) {
     this._request = request
   }
 
-  buildAndSubmit() {
+  buildAndSubmit(): void {
     // We cannot serialize binary entries as input fields
     this.params = this._request.params.withoutBinaryEntries()
 
@@ -34,7 +39,7 @@ export class FormRenderer {
       method = wrapMethod(method, this.params)
     }
 
-    this._form = affix(document.body, 'form.up-request-loader', { method, action })
+    this._form = affix(document.body, 'form.up-request-loader', { method, action }) as HTMLFormElement
 
     // We only need an [enctype] attribute if the user has explicitly
     // requested one. If none is given, we can use the browser's default
@@ -57,7 +62,7 @@ export class FormRenderer {
     submitForm(this._form)
   }
 
-  _addField(attrs) {
+  _addField(attrs: ParamEntry): void {
     affix(this._form, 'input[type=hidden]', attrs)
   }
 }
