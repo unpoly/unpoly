@@ -66,7 +66,7 @@ export class FieldWatcher {
   }
 
   _ensureWatchable(): void {
-    const fail = (message) => errorFail(message, this._logPrefix, this._root)
+    const fail = (message: string) => errorFail(message, this._logPrefix, this._root)
 
     if (!this._callback) {
       fail('No callback provided for %s (%o)')
@@ -90,12 +90,12 @@ export class FieldWatcher {
   }
 
   _trackAbort(): () => void {
-    let guard = ({ target }) => target.contains(this._region)
+    let guard = ({ target }: Event) => (target as Element).contains(this._region)
     return on('up:fragment:aborted', { guard }, () => this._abort())
   }
 
   _trackReset(): () => void {
-    let guard = ({ target }) => target === this._region
+    let guard = ({ target }: Event) => target === this._region
     return on('reset', { guard }, (event) => this._onFormReset(event))
   }
 
@@ -191,7 +191,7 @@ export class FieldWatcher {
   }
 
   _changedValues(previous: PlainObject, next: PlainObject): PlainObject {
-    const changes = {}
+    const changes: PlainObject = {}
     let keys = Object.keys(previous)
     keys = keys.concat(Object.keys(next))
     keys = uniq(keys)

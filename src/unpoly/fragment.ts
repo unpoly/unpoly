@@ -3434,7 +3434,7 @@ export function insertTemp(...args: any[]): () => void {
   The callback can return another function that is called when that element no longer matches.
 @internal
 */
-export function trackSelector(selectFn: () => List<Element>, callback: (element: Element) => any): () => void {
+export function trackSelector<E extends Element>(selectFn: () => List<E>, callback: (element: E) => any): () => void {
   let tracker = new SelectorTracker(selectFn, callback)
   return tracker.start()
 }

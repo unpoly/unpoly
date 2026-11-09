@@ -103,7 +103,7 @@ export class Params {
   @experimental
   */
   toObject(): PlainObject {
-    const obj = {}
+    const obj: PlainObject = {}
     for (let entry of this.entries) {
       const { name, value } = entry
       if (!isBasicObjectProperty(name)) {
@@ -560,7 +560,9 @@ export class Params {
   @stable
   */
   static fromForm(form: ElementOrSelector, options?: { submitButton?: ElementOrSelector | false }): Params
-  static fromForm(form, options: { submitButton?: ElementOrSelector | false } = {}) {
+  // The form is resolved in place. TypeScript can't narrow it to the form element, since a
+  // <form> is also a list of its fields.
+  static fromForm(form: any, options: { submitButton?: ElementOrSelector | false } = {}) {
     form = getOne(form)
     let restore = prepareParamsReadTemp(form)
 

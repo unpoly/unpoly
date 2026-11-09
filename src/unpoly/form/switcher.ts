@@ -7,9 +7,12 @@ import { Params } from './params.js'
 import { getSmart, getSubtree, trackSelector } from '../fragment.js'
 
 // A switchee remembers the field tokens it was last switched with.
-type Switchee = Element & { upSwitchValues?: string[] }
+type Switchee = HTMLElement & { upSwitchValues?: string[] }
 
-const BUILTIN_SWITCH_EFFECTS = [
+// What an [up-…-for] attribute does to a switchee.
+type SwitchEffect = { attr: string, toggle(target: HTMLElement, active: boolean): void }
+
+const BUILTIN_SWITCH_EFFECTS: SwitchEffect[] = [
   { attr: 'up-hide-for', toggle(target, active) { toggle(target, !active) } },
   { attr: 'up-show-for', toggle(target, active) { toggle(target, active) } },
   { attr: 'up-disable-for', toggle(target, active) { setContainerDisabled(target, active) } },
@@ -49,7 +52,7 @@ export class Switcher {
   }
 
   _trackNewSwitchees(): () => void {
-    let onSwitcheeAdded = (switchee) => this._switchSwitchee(switchee)
+    let onSwitcheeAdded = (switchee: Switchee) => this._switchSwitchee(switchee)
     return trackSelector(() => this._findSwitchees(), onSwitcheeAdded)
   }
 
@@ -73,7 +76,7 @@ export class Switcher {
   }
 
   // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
-  switchSwitcheeNow(switchee: Element, fieldTokens: string[]): void {
+  switchSwitcheeNow(switchee: HTMLElement, fieldTokens: string[]): void {
     for (let { attr, toggle } of BUILTIN_SWITCH_EFFECTS) {
       let attrValue = switchee.getAttribute(attr)
       if (attrValue) {

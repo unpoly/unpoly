@@ -198,6 +198,8 @@ export interface RenderOptions {
   defaultPlacement?: string
   // Prefer these elements when matching the target, e.g. when revalidating.
   preferOldElements?: Element[]
+  // The elements that show the loading state (up.status), like a form and its submit button.
+  activeElements?: Element[]
 
   // Internal options that ChangeFromResponse takes from the response.
   hash?: string

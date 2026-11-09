@@ -284,14 +284,13 @@ export const config = new Config('up.form.config', (): FormConfig => ({
   arrayParam: (name) => name.endsWith('[]'),
 })) as ConfigWith<FormConfig>
 
-function findFormElements(root: ElementOrSelector, selectorFn: SelectorFn): Field[]
-function findFormElements(root, selectorFn) {
+function findFormElements(root: ElementOrSelector, selectorFn: SelectorFn): Field[] {
   root = getOne(root) // unwrap jQuery
   let elements = getSubtree(root, selectorFn())
 
   // Like the browser, a [form] attribute takes precedence over the surrounding form.
   if (root.matches('form')) {
-    elements = elements.filter((element) => !element.hasAttribute('form') || getForm(element) === root)
+    elements = elements.filter((element: Element) => !element.hasAttribute('form') || getForm(element) === root)
   }
 
   // If findFormElements() is called with an entire form, gather fields outside the form
@@ -570,7 +569,9 @@ let options = up.form.submitOptions(form)
 @stable
 */
 export function submitOptions(form: ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions
-export function submitOptions(form, options, parserOptions) {
+// The form is resolved in place. TypeScript can't narrow it to the form element, since a
+// <form> is also a list of its fields.
+export function submitOptions(form: any, options?: RenderOptions, parserOptions?: OptionsParserOptions) {
   form = getSmart(form)
   form = getForm(form)
 
@@ -721,7 +722,8 @@ function disableControlTemp(control: Field, preview: boolean | undefined): (() =
   if (document.activeElement === control) focusFallback = findGroup(control, { targetable: false })
 
   let undoDisable = writeFieldDisabled(control, true)
-  if (focusFallback) doFocus(focusFallback, { force: true, preventScroll: true })
+  // A group in an HTML form is an HTML element.
+  if (focusFallback) doFocus(focusFallback as HTMLElement, { force: true, preventScroll: true })
 
   if (preview) {
     // Disabled by a preview to block input while a request is loading.
@@ -812,8 +814,7 @@ export function setContainerDisabled(container: Element, disabled: boolean): voi
 // This was extracted from submitOptions().
 // Validation needs to submit a form without options intended for the final submission,
 // like [up-scroll], [up-confirm], etc.
-export function destinationOptions(form: Element, options?: PlainObject, parserOptions?: OptionsParserOptions): PlainObject
-export function destinationOptions(form, options, parserOptions) {
+export function destinationOptions(form: Element, options?: PlainObject, parserOptions?: OptionsParserOptions): PlainObject {
   options = newOptions(options)
   form = getForm(form)
   const parser = new OptionsParser(form, options, parserOptions)
@@ -882,7 +883,7 @@ export function destinationOptions(form, options, parserOptions) {
   return options
 }
 
-export function submitButtonOverrides(submitButton: Element | undefined): PlainObject {
+export function submitButtonOverrides(submitButton: Element | false | undefined): PlainObject {
   if (!submitButton) return {}
   let followOptions = linkFollowOptions(submitButton, {}, { defaults: false })
   // The parsing of [formmethod] and [formaction] (into { method, url })
@@ -1164,7 +1165,7 @@ up.autosubmit(form)
 @stable
 */
 export function autosubmit(target: ElementOrSelector, options: PlainObject = {}): () => void {
-  const onChange = (_diff, renderOptions) => submit(target, renderOptions)
+  const onChange = (_diff: PlainObject, renderOptions: RenderOptions) => submit(target, renderOptions)
   return watch(target, { logPrefix: 'up.autosubmit()', ...options, batch: true }, onChange)
 }
 
@@ -1631,7 +1632,11 @@ function getOriginRegion(origin: Element | undefined): Element | undefined {
   The callback can return another function that is called when that field no longer matches.
 @internal
 */
-export const trackFields = mockable(function(...args: any[]): () => void {
+// The callback may return a function that is called when the field no longer matches.
+type TrackFieldsCallback = (field: Element) => unknown
+// The guard is a condition for a field to match, tested for truthiness.
+type TrackFieldsOptions = { guard?: (field: Element) => unknown }
+export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): () => void {
   let [root, { guard }, callback] = parseArgs(args, 'val', 'options', 'callback')
 
   let selectFn = function() {
@@ -1677,8 +1682,7 @@ To consider other selectors to be submittable, see `up.form.config.submitSelecto
   Whether the form will be submitted through Unpoly.
 @stable
 */
-export function isSubmittable(form: ElementOrSelector): boolean
-export function isSubmittable(form) {
+export function isSubmittable(form: ElementOrSelector): boolean {
   form = getSmart(form)
   return config.matches(form, 'submitSelectors')
 }
