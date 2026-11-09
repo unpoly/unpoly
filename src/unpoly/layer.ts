@@ -7,6 +7,7 @@ import { on } from './event.js'
 import { render } from './fragment.js'
 import { RenderOptions } from './fragment/render/render_options.js'
 import { Layer } from './layer/base.js'
+import type { LayerOptions } from './layer/base.js'
 import { LayerStack } from './layer/layer_stack.js'
 import { Config } from './util/config.js'
 import type { PlainObject } from './util.js'
@@ -15,7 +16,7 @@ import type { PlainObject } from './util.js'
 A layer subclass for a mode, like `ModalLayer`. Each has a static `{ mode }`.
 @internal
 */
-export type LayerClass = (typeof Layer) & { mode: string }
+export type LayerClass = (new (options: LayerOptions) => Layer) & Pick<typeof Layer, 'mode' | 'selector'>
 
 /*-
 Features to open, close and look up overlays.

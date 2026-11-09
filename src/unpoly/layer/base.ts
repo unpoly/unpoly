@@ -12,6 +12,77 @@ import {
 import { closestLayerElement, mainTargets } from '../layer.js'
 import { convertClicks } from '../link.js'
 import { newStateCache } from '../viewport.js'
+import type { List, PlainObject, ValueOrFunction } from '../util.js'
+import type { UnbindFn } from '../event.js'
+import type { EventListenerAttributes } from '../event/event_listener.js'
+import type { HistoryAspect } from '../history.js'
+import type { LayerStack } from './layer_stack.js'
+import type { AnimationValue } from '../motion.js'
+import type { UpResponse } from '../network/response.js'
+import type { FIFOCache } from '../util/fifo_cache.js'
+
+/**
+A layer mode. The root layer has the mode `'root'`, an overlay has one of the other modes.
+*/
+export type LayerMode = 'root' | 'modal' | 'drawer' | 'popup' | 'cover'
+
+/**
+Where an overlay is in its life cycle. The root layer has no state.
+@internal
+*/
+export type LayerState = 'opening' | 'opened' | 'closing' | 'closed'
+
+/**
+The options a layer is constructed with. `up.layer.build()` merges them from the
+layer config and the options for `up.layer.open()`.
+@internal
+*/
+export interface LayerOptions {
+  mode?: LayerMode
+  stack?: LayerStack
+  history?: boolean | 'auto'
+  context?: PlainObject
+  lastScrollTops?: FIFOCache<string, any>
+  lastFocusCapsules?: FIFOCache<string, any>
+  [key: string]: any
+}
+
+/**
+Options for closing an overlay with `up.Layer#accept()` or `up.Layer#dismiss()`.
+*/
+export interface LayerCloseOptions {
+  confirm?: string | boolean
+  /** @internal */
+  preventable?: boolean
+  response?: UpResponse
+  animation?: AnimationValue
+  duration?: number
+  easing?: string
+  onFinished?: () => void
+  history?: boolean
+  /** @internal */
+  origin?: Element
+}
+
+/**
+Options for `up.Layer#peel()`.
+*/
+export interface PeelOptions extends LayerCloseOptions {
+  value?: any
+  intent?: 'accept' | 'dismiss'
+}
+
+/**
+A function that `up.Layer#on()` calls with the event, the element the listener was registered on
+(or that matched its selector), and that element's [data](/data).
+*/
+// TODO(types): Look up the event type by its name, like `GlobalEventHandlersEventMap['click']`.
+export type LayerEventListener = (event: any, element: HTMLElement, data?: any) => any
+
+/**
+Options for listening to events with `up.Layer#on()`.
+*/
+export type LayerListenerOptions = Pick<EventListenerAttributes, 'passive' | 'once' | 'capture'>
 
 /*-
 Each layer has an `up.Layer` instance.
@@ -26,7 +97,22 @@ the background layer during compilation.
 @class up.Layer
 @parent up.layer
 */
-export class Layer {
+export abstract class Layer {
+  // Each subclass has its mode, like ModalLayer.mode = 'modal'.
+  declare static mode: LayerMode
+  declare stack: LayerStack
+  declare lastScrollTops: FIFOCache<string, any>
+  declare lastFocusCapsules: FIFOCache<string, any>
+  // Overlays set the elements that they create. The root layer has none of them.
+  declare contentElement: HTMLElement | undefined
+  declare boxElement: HTMLElement | undefined
+  declare state: LayerState | undefined
+  declare _index: number | undefined
+  declare _unbindLocationChanged: UnbindFn | undefined
+  declare _savedTitle: string | undefined
+  declare _savedMetaTags: List<Element> | undefined
+  declare _savedLocation: string | undefined
+  declare _savedLang: string | undefined
 
   /*-
   This layer's outmost container element.
@@ -46,6 +132,8 @@ export class Layer {
     The layer's container element.
   @stable
   */
+  // The root layer has an element getter, and an overlay sets the element when it opens.
+  abstract element: HTMLElement
 
   /*-
   Whether this layer has [visible history](/learn/history-in-overlays).
@@ -60,6 +148,8 @@ export class Layer {
     Whether this layer has visible history.
   @stable
   */
+  // While an overlay with { history: 'auto' } opens, OpenLayer decides between true and false.
+  declare history: boolean | 'auto'
 
   /*-
   This layer's mode which governs its appearance and behavior.
@@ -73,6 +163,7 @@ export class Layer {
     The layer mode.
   @stable
   */
+  declare mode: LayerMode
 
   /*-
   This layer's [context](/learn/layer-context).
@@ -96,8 +187,15 @@ export class Layer {
     If no context has been set an empty object is returned.
   @experimental
   */
+  declare context: PlainObject
 
-  constructor(options = {}) {
+  // Only overlays have these. They are documented with up.Layer in overlay.ts.
+  declare origin: Element | undefined
+  declare size: string | undefined
+  declare position: string | undefined
+  declare align: string | undefined
+
+  constructor(options: LayerOptions = {}) {
     // Like a default parameter, a default only replaces an undefined option.
     const {
       context = {},
@@ -116,16 +214,16 @@ export class Layer {
     assert(this.mode)
   }
 
-  setupHandlers() {
+  setupHandlers(): void {
     convertClicks(this)
     this._unbindLocationChanged = on('up:location:changed', (event) => this._onBrowserLocationChanged(event))
   }
 
-  teardownHandlers() {
+  teardownHandlers(): void {
     this._unbindLocationChanged?.()
   }
 
-  mainTargets() {
+  mainTargets(): string[] {
     return mainTargets(this.mode)
   }
 
@@ -140,7 +238,7 @@ export class Layer {
   @function up.Layer#sync
   @experimental
   */
-  sync() {
+  sync(): void {
     // no-op so users can blindly sync without knowing the current mode
   }
 
@@ -203,6 +301,7 @@ export class Layer {
       @experimental
   @stable
   */
+  accept(value?: any, options?: LayerCloseOptions): void
   accept() {
     throw new NotImplemented()
   }
@@ -229,6 +328,7 @@ export class Layer {
     See options for `up.Layer#accept()`.
   @stable
   */
+  dismiss(value?: any, options?: LayerCloseOptions): void
   dismiss() {
     throw new NotImplemented()
   }
@@ -267,11 +367,11 @@ export class Layer {
 
   @stable
   */
-  peel(options) {
+  peel(options?: PeelOptions): void {
     this.stack.peel(this, options)
   }
 
-  evalOption(option) {
+  evalOption<T>(option: ValueOrFunction<T>): T {
     return evalOption(option, this)
   }
 
@@ -283,7 +383,7 @@ export class Layer {
     Whether this layer is the current layer.
   @stable
   */
-  isCurrent() {
+  isCurrent(): boolean {
     return this.stack.isCurrent(this)
   }
 
@@ -295,7 +395,7 @@ export class Layer {
   @return {boolean}
   @stable
   */
-  isFront() {
+  isFront(): boolean {
     return this.stack.isFront(this)
   }
 
@@ -307,7 +407,7 @@ export class Layer {
     Whether this layer is the root layer.
   @stable
   */
-  isRoot() {
+  isRoot(): boolean {
     return this.stack.isRoot(this)
   }
 
@@ -318,7 +418,7 @@ export class Layer {
   @return {boolean}
   @stable
   */
-  isOverlay() {
+  isOverlay(): boolean {
     return this.stack.isOverlay(this)
   }
 
@@ -354,11 +454,11 @@ export class Layer {
     Whether this layer is considered alive.
   @stable
   */
-  isAlive() {
+  isAlive(): boolean {
     throw new NotImplemented()
   }
 
-  assertAlive() {
+  assertAlive(): void {
     if (!this.isAlive()) {
       // Wind up the call stack. Whoever has closed the layer will also clean up
       // elements, handlers, etc.
@@ -386,7 +486,7 @@ export class Layer {
     This layer's parent layer.
   @stable
   */
-  get parent() {
+  get parent(): Layer | undefined {
     return this.stack.parentOf(this)
   }
 
@@ -405,7 +505,7 @@ export class Layer {
     This layer's direct child overlay.
   @stable
   */
-  get child() {
+  get child(): Layer | undefined {
     return this.stack.childOf(this)
   }
 
@@ -431,7 +531,7 @@ export class Layer {
     This layer's ancestors.
   @stable
   */
-  get ancestors() {
+  get ancestors(): Layer[] {
     return this.stack.ancestorsOf(this)
   }
 
@@ -459,7 +559,7 @@ export class Layer {
     This layer's descendants.
   @stable
   */
-  get descendants() {
+  get descendants(): Layer[] {
     return this.stack.descendantsOf(this)
   }
 
@@ -478,7 +578,7 @@ export class Layer {
     An array of this layer and its descendants.
   @experimental
   */
-  get subtree() {
+  get subtree(): Layer[] {
     return [this, ...this.descendants]
   }
 
@@ -494,23 +594,23 @@ export class Layer {
     The position of this layer in the stack.
   @stable
   */
-  get index() {
+  get index(): number {
     return this._index ??= this.stack.indexOf(this)
   }
 
-  getContentElement() {
+  getContentElement(): HTMLElement {
     return this.contentElement || this.element
   }
 
-  getBoxElement() {
+  getBoxElement(): HTMLElement {
     return this.boxElement || this.element
   }
 
-  getFocusElement() {
+  getFocusElement(): HTMLElement {
     return this.getBoxElement()
   }
 
-  getFirstSwappableElement() {
+  getFirstSwappableElement(): HTMLElement {
     throw new NotImplemented()
   }
 
@@ -527,7 +627,7 @@ export class Layer {
     Whether the layer contains the element.
   @stable
   */
-  contains(element) {
+  contains(element: Element): boolean {
     // Test that the closest parent is the element and not another layer with elements nested
     // into this layer's element.
     return closestLayerElement(element) === this.element
@@ -578,6 +678,10 @@ export class Layer {
   @include up.on/after-element
   @stable
   */
+  on(types: string | string[], listener: LayerEventListener): UnbindFn
+  on(types: string | string[], selector: string, listener: LayerEventListener): UnbindFn
+  on(types: string | string[], options: LayerListenerOptions, listener: LayerEventListener): UnbindFn
+  on(types: string | string[], selector: string, options: LayerListenerOptions, listener: LayerEventListener): UnbindFn
   on(...args) {
     return this._buildEventListenerGroup(args).bind()
   }
@@ -589,11 +693,13 @@ export class Layer {
   @include up.off/after-element
   @stable
   */
+  off(types: string | string[], listener: LayerEventListener): void
+  off(types: string | string[], selector: string, listener: LayerEventListener): void
   off(...args) {
     return this._buildEventListenerGroup(args).unbind()
   }
 
-  _buildEventListenerGroup(args) {
+  _buildEventListenerGroup(args: any[]): EventListenerGroup {
     return EventListenerGroup.fromBindArgs(args, {
       guard: (event) => this._containsEventTarget(event),
       elements: [this.element],
@@ -601,19 +707,19 @@ export class Layer {
     })
   }
 
-  _containsEventTarget(event) {
+  _containsEventTarget(event: Event): boolean {
     // Since the root layer will receive events emitted on descendant layers
     // we need to manually check whether the event target is contained
     // by this layer.
-    return this.contains(event.target)
+    return this.contains(event.target as Element)
   }
 
-  wasHitByMouseEvent({ clientX, clientY }) {
+  wasHitByMouseEvent({ clientX, clientY }: MouseEvent): boolean {
     const hittableElement = document.elementFromPoint(clientX, clientY)
     return !hittableElement || this.contains(hittableElement)
   }
 
-  _buildEventEmitter(args) {
+  _buildEventEmitter(args: any[]): EventEmitter {
     return EventEmitter.fromEmitArgs(args, { layer: this })
   }
 
@@ -646,11 +752,15 @@ export class Layer {
     @like up.emit
   @stable
   */
+  emit(eventType: string, props?: PlainObject): Event
+  emit(event: Event, options?: PlainObject): Event
+  emit(eventPlan: PlainObject & { type: string }): Event
+  emit(target: EventTarget, eventType: string | Event, props?: PlainObject): Event
   emit(...args) {
     return this._buildEventEmitter(args).emit()
   }
 
-  saveHistory() {
+  saveHistory(): void {
     // (1) showsLiveHistory() would always return false unless we're the front layer
     // (2) Getters like this.title would always return this._savedTitle unless we're the front layer
     assert(this.isFront())
@@ -664,7 +774,7 @@ export class Layer {
     if (this.showsLiveHistory('lang')) this._savedLang = getLang()
   }
 
-  restoreHistory() {
+  restoreHistory(): void {
     // Only restore the aspects that Unpoly keeps in sync with the browser.
     // The app may have changed an excluded aspect while an overlay was open.
 
@@ -717,11 +827,11 @@ export class Layer {
   @function up.Layer#asCurrent
   @stable
   */
-  asCurrent(fn) {
+  asCurrent<T>(fn: () => T): T {
     return this.stack.asCurrent(this, fn)
   }
 
-  updateHistory(options) {
+  updateHistory(options: PlainObject): void {
     // (1) The layer always stores the values it rendered.
     // (2) The updaters only change the browser for an aspect that Unpoly keeps in sync (see showsLiveHistory()).
     //     Since up.history.config.enabled can exclude aspects, render options can only narrow the config,
@@ -751,13 +861,13 @@ export class Layer {
 
   // Returns whether Unpoly keeps the given history aspect of the browser in sync with this layer.
   // The aspect is one of 'location', 'title', 'metaTags' or 'lang'.
-  showsLiveHistory(aspect) {
+  showsLiveHistory(aspect: HistoryAspect): boolean {
     return this.history && this.isFront() && isEnabled(aspect)
   }
 
   // A layer's title, meta tags, lang or location is what it rendered,
   // unless Unpoly keeps that aspect of the browser in sync with the layer.
-  _getHistory(aspect, savedValue, getLiveValue) {
+  _getHistory<T>(aspect: HistoryAspect, savedValue: T, getLiveValue: () => T): T {
     // (1) Read a live aspect from the browser, so Unpoly-unaware code can change it directly,
     //     e.g. by setting document.title or calling history.pushState().
     // (2) Until the root layer has rendered a value, it shows what the initial page shows.
@@ -768,7 +878,7 @@ export class Layer {
     }
   }
 
-  _onBrowserLocationChanged({ location }) {
+  _onBrowserLocationChanged({ location }: { location: string }): void {
     if (this.showsLiveHistory('location')) {
       this.updateLocation(location, { push: false })
     }
@@ -790,12 +900,12 @@ export class Layer {
     This layer's title.
   @experimental
   */
-  get title() {
+  get title(): string {
     return this._getHistory('title', this._savedTitle, () => document.title)
   }
 
   // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
-  updateTitle(title) {
+  updateTitle(title: string): void {
     this._savedTitle = title
 
     if (this.showsLiveHistory('title')) {
@@ -803,11 +913,11 @@ export class Layer {
     }
   }
 
-  get metaTags() {
+  get metaTags(): List<Element> {
     return this._getHistory('metaTags', this._savedMetaTags, findMetaTags)
   }
 
-  _updateMetaTags(metaTags) {
+  _updateMetaTags(metaTags: List<Element>): void {
     this._savedMetaTags = metaTags
 
     if (this.showsLiveHistory('metaTags')) {
@@ -815,11 +925,11 @@ export class Layer {
     }
   }
 
-  get lang() {
+  get lang(): string | undefined {
     return this._getHistory('lang', this._savedLang, getLang)
   }
 
-  _updateLang(lang) {
+  _updateLang(lang: string): void {
     this._savedLang = lang
 
     if (this.showsLiveHistory('lang')) {
@@ -844,7 +954,7 @@ export class Layer {
     The layer's current location.
   @experimental
   */
-  get location() {
+  get location(): string {
     // (1) When up.history.config.enabled excludes 'location', this returns the location of the
     //     rendered content, not the unchanged browser URL. Hence [up-nav] follows the content.
     // (2) When the location is live, Unpoly-unaware code may use the pushState API directly.
@@ -853,7 +963,7 @@ export class Layer {
   }
 
   // No _ prefix: specs spy on this name, and _-prefixed members are mangled in the minified build.
-  updateLocation(newLocation, { push }) {
+  updateLocation(newLocation: string, { push }: { push: boolean }): void {
     let prevSavedLocation = this._savedLocation
     let liveLocation = currentLocation()
 
@@ -883,18 +993,18 @@ export class Layer {
     }
   }
 
-  selector(part) {
-    return this.constructor.selector(part)
+  selector(part?: string): string {
+    return (this.constructor as typeof Layer).selector(part)
   }
 
-  static selector(_part) {
+  static selector(_part?: string): string {
     throw new NotImplemented()
   }
 
   // Subclasses for each mode (RootLayer, ModalLayer, …) aren't public, so they all say up.Layer.
   get [Symbol.toStringTag]() { return 'up.Layer' }
 
-  toString() {
+  toString(): string {
     throw new NotImplemented()
   }
 
@@ -919,20 +1029,21 @@ export class Layer {
   @include up.element.createFromSelector/all
   @experimental
   */
+  affix(selector: string, attrs?: PlainObject): HTMLElement
   affix(...args) {
     return affix(this.getFirstSwappableElement(), ...args)
   }
 
-  [isEqual.key](other) {
+  [isEqual.key](other: Layer): boolean {
     return (this.constructor === other.constructor) && (this.element === other.element)
   }
 
-  hasFocus() {
+  hasFocus(): boolean {
     let focusedElement = document.activeElement
     return focusedElement !== document.body && this.element.contains(focusedElement)
   }
 
-  reset() {
+  reset(): void {
     this.context = {}
     this.lastScrollTops = newStateCache()
     this.lastFocusCapsules = newStateCache()
