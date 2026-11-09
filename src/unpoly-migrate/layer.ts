@@ -2,6 +2,12 @@
 @namespace up.layer
 */
 
+declare module '../unpoly/layer/base.js' {
+  interface Layer {
+    readonly historyVisible: Layer['history']
+  }
+}
+
 // Renamed keys and values that may be passed as layer options or set in a layer config object.
 function fixRenamedLayerKeys(object: any, source: { label: string, detail?: any }): void {
   up.migrate.fixKey(object, 'closable', 'dismissible', source)

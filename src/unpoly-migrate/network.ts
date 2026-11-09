@@ -4,7 +4,7 @@ const u = up.util
 @namespace up.network
 */
 
-// A deprecated alias has the type of the function that replaces it.
+// A deprecated alias has the type of the function or namespace that replaces it.
 declare module '../unpoly.js' {
   interface Up {
     network: CoreApi['network'] & {
@@ -14,6 +14,7 @@ declare module '../unpoly.js' {
       shouldReduceRequests(): boolean
     }
     ajax: any
+    readonly proxy: Up['network']
   }
 }
 

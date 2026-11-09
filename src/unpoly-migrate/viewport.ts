@@ -2,7 +2,7 @@
 @namespace up.viewport
 */
 
-// A deprecated alias has the type of the function that replaces it.
+// A deprecated alias has the type of the function or namespace that replaces it.
 declare module '../unpoly.js' {
   interface Up {
     viewport: CoreApi['viewport'] & {
@@ -10,6 +10,7 @@ declare module '../unpoly.js' {
       scroll: any
     }
     scroll: any
+    readonly layout: Up['viewport']
   }
 }
 

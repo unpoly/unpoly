@@ -2,6 +2,7 @@
 @namespace up.event
 */
 
+// A deprecated alias has the type of the namespace that replaces it.
 declare module '../unpoly.js' {
   interface Up {
     event: CoreApi['event'] & {
@@ -9,6 +10,7 @@ declare module '../unpoly.js' {
     }
     $on: any
     $off: any
+    readonly bus: Up['event']
   }
 }
 

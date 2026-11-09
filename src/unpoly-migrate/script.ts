@@ -2,10 +2,12 @@
 @namespace up.script
 */
 
+// A deprecated alias has the type of the namespace that replaces it.
 declare module '../unpoly.js' {
   interface Up {
     $compiler: any
     $macro: any
+    readonly syntax: Up['script']
   }
 }
 

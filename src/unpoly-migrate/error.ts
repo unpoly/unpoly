@@ -1,3 +1,9 @@
+declare module '../unpoly.js' {
+  interface Up {
+    readonly CannotCompile: any
+  }
+}
+
 class DeprecatedCannotCompile extends up.Error {}
 // unpoly.ts names the classes on window.up before this script runs, so we name this one ourselves.
 up.internal.setClassName(DeprecatedCannotCompile, 'up.CannotCompile')

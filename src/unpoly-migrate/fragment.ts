@@ -4,7 +4,7 @@ const u = up.util
 @namespace up.fragment
 */
 
-// A deprecated alias has the type of the function that replaces it.
+// A deprecated alias has the type of the function or namespace that replaces it.
 declare module '../unpoly.js' {
   interface Up {
     fragment: CoreApi['fragment'] & {
@@ -13,6 +13,8 @@ declare module '../unpoly.js' {
     first: CoreApi['fragment']['get']
     replace: any
     extract: any
+    readonly flow: Up['fragment']
+    readonly dom: Up['fragment']
   }
 }
 
