@@ -69,3 +69,26 @@ test('reports an api whose keys it cannot read', (t) => {
   assert.equal(problems.length, 1)
   assert.match(problems[0].message, /Cannot read the keys of this api/)
 })
+
+test('accepts up.internal with shorthand keys of imports that keep their names', (t) => {
+  let { check } = project(t, {
+    'src/unpoly/alpha.js': 'export function sprintf() {}\nexport const api = { util: {} }\n',
+    'src/unpoly/beta.ts': "import { sprintf } from './alpha.js'\nexport const api = { internal: { sprintf } }\n",
+  })
+  assert.deepEqual(check.check(), [])
+})
+
+test('reports an up.internal key that is not its export name', (t) => {
+  for (let beta of [
+    "import { sprintf } from './alpha.js'\nexport const api = { internal: { format: sprintf } }\n",
+    "import { sprintf as format } from './alpha.js'\nexport const api = { internal: { format } }\n",
+  ]) {
+    let { check } = project(t, {
+      'src/unpoly/alpha.js': 'export function sprintf() {}\nexport const api = { util: {} }\n',
+      'src/unpoly/beta.ts': beta,
+    })
+    let problems = check.check()
+    assert.equal(problems.length, 1)
+    assert.match(problems[0].message, /Publish up\.internal keys under their export names/)
+  }
+})

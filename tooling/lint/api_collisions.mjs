@@ -4,6 +4,10 @@
 // `api` object literal of each module in the entry's `apis` array and reports keys that more than
 // one module contributes. It costs no bytes in the bundle.
 //
+// The keys of `up.internal` (src/unpoly/internal.ts) can't collide, because each is an import
+// binding. This only holds while each key is the export's own name, so the check also reports a
+// key that isn't shorthand (`format: sprintf`), or an import that is renamed (`sprintf as format`).
+//
 // It is not an Oxlint rule, because it reads other files than the one being linted, which a
 // linter that only re-lints changed files can't know. `bin/lint` runs it, and the dev watcher
 // runs it with every round (it only parses the modules that changed, in a few milliseconds).
@@ -17,6 +21,7 @@ import { PROJECT_ROOT } from '../build/build_status.mjs'
 export const ENTRY = path.join(PROJECT_ROOT, 'src/unpoly.ts')
 
 const INVALID_API = 'Cannot read the keys of this api. Expected a module whose `export const api` is an object literal without spreads or computed keys.'
+const INVALID_INTERNAL = 'Publish up.internal keys under their export names. Expected a shorthand key (`sprintf`, not `format: sprintf`) for an import that isn\'t renamed (not `sprintf as format`).'
 
 export class ApiCollisionCheck {
   #entry
@@ -132,11 +137,22 @@ function readApiKeys(file) {
     let keys = new Set()
     for (let property of api.init.properties) {
       if (property.type !== 'Property' || property.computed) return INVALID_API
-      keys.add(property.key.name ?? String(property.key.value))
+      let key = property.key.name ?? String(property.key.value)
+      if (key === 'internal' && !isValidInternal(property.value, ast)) return INVALID_INTERNAL
+      keys.add(key)
     }
     return keys
   }
   return INVALID_API
+}
+
+// up.internal takes only shorthand keys from imports that keep their export names.
+function isValidInternal(object, ast) {
+  if (object.type !== 'ObjectExpression') return false
+  let renamedImport = ast.body.some((statement) => statement.type === 'ImportDeclaration' && statement.specifiers.some((specifier) =>
+    specifier.type === 'ImportSpecifier' && (specifier.imported.name ?? specifier.imported.value) !== specifier.local.name
+  ))
+  return !renamedImport && object.properties.every((property) => property.type === 'Property' && property.shorthand)
 }
 
 function parseModule(file, code) {
