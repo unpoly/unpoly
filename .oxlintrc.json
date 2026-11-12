@@ -184,7 +184,6 @@
         "src/unpoly-migrate/migrate.ts",
         "src/unpoly-migrate/network.ts",
         "src/unpoly-migrate/protocol.ts",
-        "src/unpoly/element.ts",
         "src/unpoly/event.ts",
         "src/unpoly/form.ts",
         "src/unpoly/form/field_watcher.ts",
@@ -215,7 +214,6 @@
         "src/unpoly/script/hello_fragment.ts",
         "src/unpoly/status.ts",
         "src/unpoly/status/preview.ts",
-        "src/unpoly/util.ts",
         "src/unpoly/viewport.ts"
       ],
       "rules": {
