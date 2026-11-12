@@ -1,6 +1,6 @@
 import * as e from '../../element.js'
 import { fail } from '../../error.js'
-import { type LayerMode, type LayerOptions } from '../../layer.js'
+import type * as t from '../types.js'
 import { Layer } from '../base.js'
 
 // The root layer's element. It remembers that the root layer's handlers are bound to it.
@@ -10,11 +10,11 @@ interface RootLayerElement extends HTMLElement {
 
 export class RootLayer extends Layer {
 
-  static mode: LayerMode = 'root'
+  static mode: t.LayerMode = 'root'
 
   declare element: RootLayerElement
 
-  constructor(options: LayerOptions) {
+  constructor(options: t.LayerOptions) {
     super(options)
     // Let's talk about our choice of @element for the root layer.
     //

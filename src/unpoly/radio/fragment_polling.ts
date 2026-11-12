@@ -7,8 +7,9 @@ import {
 } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
 import { printToStandard, printToWarn } from '../log.js'
-import { pollOptions, radioConfig, type PollOptions } from '../radio.js'
+import { pollOptions, radioConfig } from '../radio.js'
 import { registerDestructor } from '../script.js'
+import type * as t from './types.js'
 
 // An element with an `[up-poll]` attribute. It remembers its FragmentPolling.
 interface PollingElement extends Element {
@@ -17,7 +18,7 @@ interface PollingElement extends Element {
 
 export class FragmentPolling {
 
-  declare _options: PollOptions
+  declare _options: t.PollOptions
   declare _fragment: Element
   declare _state: 'stopped' | 'started'
   declare _forceIntent: 'stop' | 'start' | null
@@ -70,7 +71,7 @@ export class FragmentPolling {
     this._stop()
   }
 
-  _start(options?: PollOptions): void {
+  _start(options?: t.PollOptions): void {
     Object.assign(this._options, options)
 
     if (this._state === 'stopped') {
@@ -92,7 +93,7 @@ export class FragmentPolling {
     }
   }
 
-  forceStart(options?: PollOptions): void {
+  forceStart(options?: t.PollOptions): void {
     Object.assign(this._options, options)
     this._forceIntent = 'start'
     this._start()

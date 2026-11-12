@@ -1,20 +1,20 @@
 import * as u from '../util.js'
 import {
   closest, containsMainPseudo, fragmentConfig, getFirstDescendant, matches, splitTarget,
-  type FragmentFinderOptions,
 } from '../fragment.js'
+import type * as t from './types.js'
 
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
 export class FragmentFinder {
-  declare _options: FragmentFinderOptions
+  declare _options: t.FragmentFinderOptions
   declare _origin?: Element
   declare _selector: string
   declare _document: Document | Element
   declare _match: 'region' | 'first'
   declare _preferOldElements?: Element[]
 
-  constructor(options: FragmentFinderOptions) {
+  constructor(options: t.FragmentFinderOptions) {
     this._options = options
     this._origin = options.origin
     // Selector is a string, not an up.Selector

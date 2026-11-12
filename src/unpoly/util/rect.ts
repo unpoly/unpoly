@@ -1,4 +1,4 @@
-import type * as u from '../util.js'
+import type * as t from './types.js'
 
 export class Rect {
   declare left: number
@@ -7,7 +7,7 @@ export class Rect {
   declare height: number
 
   // Also takes a DOMRect, whose properties are getters on its prototype.
-  constructor({ left, top, width, height }: u.RectLike) {
+  constructor({ left, top, width, height }: t.RectLike) {
     this.left = left
     this.top = top
     this.width = width

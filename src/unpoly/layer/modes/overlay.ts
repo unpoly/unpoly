@@ -5,20 +5,18 @@ import { muteUncriticalSync } from '../../error.js'
 import { haltEvent, on, onEscape, type UnbindFn } from '../../event.js'
 import { focusedField, formFieldSelector, Params } from '../../form.js'
 import { CloseLayer, destroy, getAllFragments, type CloseLayerOptions } from '../../fragment.js'
-import {
-  isWithinForeignOverlay, type LayerAnimation, type LayerAnimationOptions, type LayerCloseOptions,
-  type LayerOptions,
-} from '../../layer.js'
+import { isWithinForeignOverlay } from '../../layer.js'
 import { type ClickEvent } from '../../link.js'
 import { printUserEvent } from '../../log.js'
 import { animate, isNone, type AnimationFn, type AnimationValue } from '../../motion.js'
 import { type UpResponse } from '../../network.js'
 import { readData } from '../../script.js'
+import type * as t from '../types.js'
 import { Layer } from '../base.js'
 import { OverlayFocus } from '../overlay_focus.js'
 
 // A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
-type CloseFn = (value: any, options?: LayerCloseOptions) => void
+type CloseFn = (value: any, options?: t.LayerCloseOptions) => void
 
 /*-
 @class up.Layer
@@ -75,8 +73,8 @@ export abstract class Overlay extends Layer {
   declare dismissible: string[]
   declare dismissLabel: string
   declare dismissARIALabel: string
-  declare openAnimation: LayerAnimation
-  declare closeAnimation: LayerAnimation
+  declare openAnimation: t.LayerAnimation
+  declare closeAnimation: t.LayerAnimation
   declare openDuration: number
   declare closeDuration: number
   declare openEasing: string
@@ -105,7 +103,7 @@ export abstract class Overlay extends Layer {
   declare _unbindEscapePressed?: UnbindFn
   declare wasEverVisible?: boolean
 
-  constructor(options: LayerOptions) {
+  constructor(options: t.LayerOptions) {
     super(options)
 
     // How the overlay looks and animates (see OVERLAY_VISUAL_KEYS)
@@ -480,7 +478,7 @@ export abstract class Overlay extends Layer {
     A resolved promise.
   @internal
   */
-  destroyElements(options: LayerCloseOptions): void {
+  destroyElements(options: t.LayerCloseOptions): void {
     const animationProps = this.closeAnimationProps(options)
 
     const onFinished = (): void => {
@@ -517,7 +515,7 @@ export abstract class Overlay extends Layer {
     }
   }
 
-  startOpenAnimation(options: LayerAnimationOptions = {}): Promise<void> {
+  startOpenAnimation(options: t.LayerAnimationOptions = {}): Promise<void> {
     const animationProps = this.openAnimationProps(options)
     const onFinished = (): void => {
       this.wasEverVisible = true
@@ -527,7 +525,7 @@ export abstract class Overlay extends Layer {
     return animate(this.element, animationProps.animation, { ...animationProps, onFinished })
   }
 
-  openAnimationProps(options: LayerAnimationOptions = {}): LayerAnimationOptions {
+  openAnimationProps(options: t.LayerAnimationOptions = {}): t.LayerAnimationOptions {
     let boxAnimation = options.animation ?? this.evalOption(this.openAnimation)
     let backdropAnimation = 'fade-in' // _animationFn() will ignore this animation unless the box is also animating
     let animationFn = this._animationFn(boxAnimation, backdropAnimation)
@@ -539,7 +537,7 @@ export abstract class Overlay extends Layer {
     }
   }
 
-  closeAnimationProps(options: LayerAnimationOptions = {}): LayerAnimationOptions {
+  closeAnimationProps(options: t.LayerAnimationOptions = {}): t.LayerAnimationOptions {
     let boxAnimation =  this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation))
     let backdropAnimation = 'fade-out' // _animationFn() will ignore this animation unless the box is also animating
     let animationFn = this._animationFn(boxAnimation, backdropAnimation)
@@ -557,12 +555,12 @@ export abstract class Overlay extends Layer {
   }
 
   // Documented in up.Layer
-  accept(value: any = null, options: LayerCloseOptions = {}): void {
+  accept(value: any = null, options: t.LayerCloseOptions = {}): void {
     return this._executeCloseChange('accept', value, options)
   }
 
   // Documented in up.Layer
-  dismiss(value: any = null, options: LayerCloseOptions = {}): void {
+  dismiss(value: any = null, options: t.LayerCloseOptions = {}): void {
     return this._executeCloseChange('dismiss', value, options)
   }
 

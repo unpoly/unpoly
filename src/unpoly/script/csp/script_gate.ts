@@ -3,9 +3,8 @@ import * as e from '../../element.js'
 import { Blocked, fail, NotImplemented } from '../../error.js'
 import { RenderOptions } from '../../fragment.js'
 import { printToStandard, printToWarn } from '../../log.js'
-import {
-  block, cspNonce, findScripts, isScript, scriptConfig, type EvalEnv, type PolicyString,
-} from '../../script.js'
+import { block, cspNonce, findScripts, isScript, scriptConfig } from '../../script.js'
+import type * as t from '../types.js'
 import { CSPInfo } from './csp_info.js'
 import { NonceableCallback } from './nonceable_callback.js'
 
@@ -45,7 +44,7 @@ export class ScriptGate {
     }
   }
 
-  evalCallback(nonceableCallback: NonceableCallback, evalEnv: EvalEnv): any {
+  evalCallback(nonceableCallback: NonceableCallback, evalEnv: t.EvalEnv): any {
     const policy = this._evalCallbackPolicy
 
     // There are multiple reasons why we explicitly check if a callback is allowed,
@@ -207,7 +206,7 @@ type PolicyConfigProp = 'evalCallbackPolicy' | 'scriptElementPolicy'
 
 class ConfigurablePolicy extends Policy {
   declare _configProp: PolicyConfigProp
-  declare policyString: PolicyString
+  declare policyString: t.PolicyString
 
   constructor(configProp: PolicyConfigProp, pageNonce: string | undefined, cspInfo: CSPInfo) {
     // Page nonce and CSP info must be known for #resolveAuto()
@@ -224,7 +223,7 @@ class ConfigurablePolicy extends Policy {
     this.policyString = policyString
   }
 
-  resolveAuto(): PolicyString {
+  resolveAuto(): t.PolicyString {
     throw new NotImplemented()
   }
 
@@ -265,7 +264,7 @@ class EvalCallbackPolicy extends ConfigurablePolicy {
     super('evalCallbackPolicy', ...args)
   }
 
-  resolveAuto(): PolicyString {
+  resolveAuto(): t.PolicyString {
     // When the user inserted a <meta name="csp-nonce">, we assume their intent is to
     // enforce nonces for any callback.
     if (this.pageNonce) {
@@ -289,7 +288,7 @@ class BodyScriptElementPolicy extends ConfigurablePolicy {
     super('scriptElementPolicy', ...args)
   }
 
-  resolveAuto(): PolicyString {
+  resolveAuto(): t.PolicyString {
     // (A) With a strict-dynamic CSP, it's a good idea to enforce nonces in the new content.
     //     Otherwise, we would allow *all* scripts as strict-dynamic is viral, and Unpoly is already an allowed script.
     // (B) Don't assume 'nonce' when we see a <meta name="csp-nonce">. The user might want to provide

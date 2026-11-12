@@ -1,11 +1,11 @@
 import * as e from '../../element.js'
-import { type EvalEnv } from '../../script.js'
+import type * as t from '../types.js'
 
 // The inline script that _runAsScriptElement() inserts can only reach us through the global `up`.
 declare module '../../../unpoly.js' {
   interface Up {
     /** @internal */
-    noncedEval?: EvalEnv & { value?: any, error?: any }
+    noncedEval?: t.EvalEnv & { value?: any, error?: any }
   }
 }
 
@@ -24,7 +24,7 @@ export class NonceableCallback {
     return new this(match[3], match[2])
   }
 
-  unsafeEval(evalEnv: EvalEnv): any {
+  unsafeEval(evalEnv: t.EvalEnv): any {
     if (this.nonce) {
       return this._runAsScriptElement(evalEnv)
     } else {
@@ -36,12 +36,12 @@ export class NonceableCallback {
     return `nonce-${this.nonce} ${this.script}`
   }
 
-  _runAsFunction({ argNames, argValues, thisContext }: EvalEnv): any {
+  _runAsFunction({ argNames, argValues, thisContext }: t.EvalEnv): any {
     let fn = new Function(...argNames, this.script)
     return fn.apply(thisContext, argValues)
   }
 
-  _runAsScriptElement(evalEnv: EvalEnv): any {
+  _runAsScriptElement(evalEnv: t.EvalEnv): any {
     // A strict CSP will block use of `eval()` or `new Function()`.
     // What we can do instead is insert an inline script that is allowed per a [nonce] attr.
     let wrappedScript = `

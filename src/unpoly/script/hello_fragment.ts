@@ -5,24 +5,22 @@ import { emit } from '../event.js'
 import { emitFragmentInserted, getSubtree } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
 import { printToStandard } from '../log.js'
-import {
-  readData, registerDestructor, type Compiler, type CompilerSelector, type HelloOptions,
-  type ScriptedElement,
-} from '../script.js'
+import { readData, registerDestructor } from '../script.js'
+import type * as t from './types.js'
 
 export class HelloFragment {
   declare _root: Element
-  declare _macros: Compiler[]
-  declare _compilers: Compiler[]
+  declare _macros: t.Compiler[]
+  declare _compilers: t.Compiler[]
   declare _layer: Layer
   declare _data: any
-  declare _dataRoot: ScriptedElement
+  declare _dataRoot: t.ScriptedElement
   declare _dataMap?: Record<string, any>
   declare _compilePromises: Promise<any>[]
   declare _insertedEvent: boolean
   declare _meta: u.PlainObject
 
-  constructor(root: Element, macros: Compiler[], compilers: Compiler[], { layer, data, dataRoot, dataMap, meta, insertedEvent }: HelloOptions) {
+  constructor(root: Element, macros: t.Compiler[], compilers: t.Compiler[], { layer, data, dataRoot, dataMap, meta, insertedEvent }: t.HelloOptions) {
     // (1) If a caller has already looked up the layer we don't want to look it up again.
     // (2) Default to the current layer in case the user manually compiles a detached element.
     layer ||= layerStack.get(root) || layerStack.current
@@ -92,7 +90,7 @@ export class HelloFragment {
     }
   }
 
-  _runCompilers(compilers: Compiler[]): void {
+  _runCompilers(compilers: t.Compiler[]): void {
     // If we're compiling a fragment in a background layer, we want
     // up.layer.current to resolve to that background layer, not the front layer.
     this._layer.asCurrent(() => {
@@ -102,7 +100,7 @@ export class HelloFragment {
     })
   }
 
-  _runCompiler(compiler: Compiler): void {
+  _runCompiler(compiler: t.Compiler): void {
     const matches = this._selectOnce(compiler)
     if (!matches.length) { return }
 
@@ -121,7 +119,7 @@ export class HelloFragment {
     up.migrate.postCompile?.(matches, compiler)
   }
 
-  _compileOneElement(compiler: Compiler, element: Element): void {
+  _compileOneElement(compiler: t.Compiler, element: Element): void {
     const compileArgs: any[] = [element]
     // (A) For performance reason, do not parse [up-data] unless the compiler function expects a second argument.
     // (B) We must pass data for an argument count of 0, since then the function might take varargs.
@@ -134,7 +132,7 @@ export class HelloFragment {
     this._applyCompilerFunction(compiler, element, compileArgs, onDestructor)
   }
 
-  _compileBatch(compiler: Compiler, elements: Element[]): void {
+  _compileBatch(compiler: t.Compiler, elements: Element[]): void {
     const compileArgs: any[] = [elements]
     // Do not retrieve and parse [up-data] unless the compiler function
     // expects a second argument. Note that we must pass data for an argument
@@ -148,7 +146,7 @@ export class HelloFragment {
     this._applyCompilerFunction(compiler, elements, compileArgs, onDestructor)
   }
 
-  async _applyCompilerFunction(compiler: Compiler, elementOrElements: Element | Element[], compileArgs: any[], onDestructor: (destructor: any) => void): Promise<void> {
+  async _applyCompilerFunction(compiler: t.Compiler, elementOrElements: Element | Element[], compileArgs: any[], onDestructor: (destructor: any) => void): Promise<void> {
     let maybeDestructor = guard(() => compiler.apply(elementOrElements, compileArgs))
 
     if (u.isPromise(maybeDestructor)) {
@@ -168,16 +166,16 @@ export class HelloFragment {
     if (maybeDestructor) onDestructor(maybeDestructor)
   }
 
-  _reportBatchCompilerWithDestructor(compiler: Compiler): void {
+  _reportBatchCompilerWithDestructor(compiler: t.Compiler): void {
     let error = new UpError(['Batch compiler (%s) cannot return a destructor', compiler.selector])
     reportError(error)
   }
 
-  _select(selector: CompilerSelector): ScriptedElement[] {
+  _select(selector: t.CompilerSelector): t.ScriptedElement[] {
     return getSubtree(this._root, u.evalOption(selector), { layer: this._layer } )
   }
 
-  _selectOnce(compiler: Compiler): ScriptedElement[] {
+  _selectOnce(compiler: t.Compiler): t.ScriptedElement[] {
     let matches = this._select(compiler.selector)
 
     if (!compiler.rerun) {

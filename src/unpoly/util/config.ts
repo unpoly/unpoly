@@ -1,5 +1,6 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
+import type * as t from './types.js'
 
 /**
 A config object with the settings `S`, like `up.network.config`.
@@ -56,26 +57,26 @@ export class Config<S extends object> {
     Object.defineProperties(this, Object.getOwnPropertyDescriptors(this._blueprintFn()))
   }
 
-  matches(element: Element, prop: u.SelectorKey<S>, condition?: string): boolean {
+  matches(element: Element, prop: t.SelectorKey<S>, condition?: string): boolean {
     return element?.matches(this.selector(prop, condition))
   }
 
-  matchesFn(prop: u.SelectorKey<S>): u.MatchesFn {
+  matchesFn(prop: t.SelectorKey<S>): t.MatchesFn {
     return (element, condition) => this.matches(element, prop, condition)
   }
 
-  selector(prop: u.SelectorKey<S>, condition = ''): string {
+  selector(prop: t.SelectorKey<S>, condition = ''): string {
     // The settings aren't members of the class, see ConfigWith.
     let includes = (this as any)[prop]
     let excludes = (this as any)['no' + u.upperCaseFirst(prop)]
     return e.unionSelector(includes, excludes, condition)
   }
 
-  selectorFn(prop: u.SelectorKey<S>): u.SelectorFn {
+  selectorFn(prop: t.SelectorKey<S>): t.SelectorFn {
     return (condition) => this.selector(prop, condition)
   }
 
-  selectorFns(prop: u.SelectorKey<S>): [u.SelectorFn, u.MatchesFn] {
+  selectorFns(prop: t.SelectorKey<S>): [t.SelectorFn, t.MatchesFn] {
     return [this.selectorFn(prop), this.matchesFn(prop)]
   }
 }

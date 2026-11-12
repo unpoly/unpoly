@@ -1,28 +1,26 @@
 import * as u from '../util.js'
 import { fail, guard } from '../error.js'
 import { on } from '../event.js'
-import {
-  getRegion, isField, readFieldName, trackFields, watchOptions, type WatchOptions,
-  type WatchCallback,
-} from '../form.js'
+import { getRegion, isField, readFieldName, trackFields, watchOptions } from '../form.js'
 import { isAlive, type FragmentAbortedEvent } from '../fragment.js'
 import { printUserEvent } from '../log.js'
+import type * as t from './types.js'
 import { Params } from './params.js'
 
 export class FieldWatcher {
-  declare _options: WatchOptions
+  declare _options: t.WatchOptions
   declare _root: Element
-  declare _callback: WatchCallback
+  declare _callback: t.WatchCallback
   declare _batch?: boolean
   declare _logPrefix: string
   declare _includeDisabled?: boolean
   declare _scheduledValues: u.PlainObject | null
-  declare _scheduledFieldOptions: WatchOptions | null
+  declare _scheduledFieldOptions: t.WatchOptions | null
   declare _processedValues: u.PlainObject
   declare _currentTimer: number | null
   declare _callbackRunning: boolean
 
-  constructor(root: Element, options: WatchOptions, callback: WatchCallback) {
+  constructor(root: Element, options: t.WatchOptions, callback: t.WatchCallback) {
     this._options = options
     this._root = root
     this._callback = callback
@@ -85,7 +83,7 @@ export class FieldWatcher {
     return getRegion(this._root)
   }
 
-  _fieldOptions(field: Element): WatchOptions {
+  _fieldOptions(field: Element): t.WatchOptions {
     return watchOptions(field, this._options)
   }
 
@@ -104,7 +102,7 @@ export class FieldWatcher {
     this._scheduledValues = null
   }
 
-  _scheduleValues(values: u.PlainObject, fieldOptions: WatchOptions): void {
+  _scheduleValues(values: u.PlainObject, fieldOptions: t.WatchOptions): void {
     this._scheduledValues = values
     this._scheduledFieldOptions = fieldOptions
     let delay = fieldOptions.delay || 0
@@ -192,7 +190,7 @@ export class FieldWatcher {
     return Params.fromContainer(this._root, { includeDisabled: this._includeDisabled }).toObject()
   }
 
-  _check(event: Event, fieldOptions: WatchOptions = {}): void {
+  _check(event: Event, fieldOptions: t.WatchOptions = {}): void {
     const values = this._readFieldValues()
 
     if (this._isNewValues(values)) {

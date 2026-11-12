@@ -1,8 +1,9 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
 import { CannotMatch } from '../error.js'
-import { expandTargets, isNotDestroying, type LookupOptions } from '../fragment.js'
+import { expandTargets, isNotDestroying } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
+import type * as t from './types.js'
 
 type ElementFilter = (element: Element) => boolean
 
@@ -12,7 +13,7 @@ export class Selector {
   declare _selectors: string[]
   declare _unionSelector: string
 
-  constructor(selector: string, elementOrDocument?: Element | Document, options: LookupOptions = {}) {
+  constructor(selector: string, elementOrDocument?: Element | Document, options: t.LookupOptions = {}) {
     // If we're given an element that is detached *or* from another document
     // (think up.ResponseDoc), it has no layer and no destroying ancestors.
     let externalDocument = elementOrDocument && !document.contains(elementOrDocument)

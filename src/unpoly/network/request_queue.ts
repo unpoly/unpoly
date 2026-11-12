@@ -1,7 +1,8 @@
 import * as u from '../util.js'
 import { emit } from '../event.js'
 import { printToStandard } from '../log.js'
-import { networkConfig, type AbortRequestsOptions, type RequestCondition } from '../network.js'
+import { networkConfig } from '../network.js'
+import type * as t from './types.js'
 import { UpRequest } from './request.js'
 
 export class RequestQueue {
@@ -133,7 +134,7 @@ export class RequestQueue {
 
   // Aborting a request will cause its promise to reject, which will also uncache it
   abort(...args: any[]): void {
-    let [conditions = true, { except, reason, logOnce }]: [RequestCondition, AbortRequestsOptions] = u.parseArgs(args, 'val', 'options')
+    let [conditions = true, { except, reason, logOnce }]: [t.RequestCondition, t.AbortRequestsOptions] = u.parseArgs(args, 'val', 'options')
 
     let tester = UpRequest.tester(conditions, { except })
 

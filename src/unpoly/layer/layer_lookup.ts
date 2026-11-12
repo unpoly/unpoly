@@ -1,7 +1,8 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
 import { fail } from '../error.js'
-import { normalizeLayerOptions, type LayerLookupArgs, type LayerLookupOptions } from '../layer.js'
+import { normalizeLayerOptions } from '../layer.js'
+import type * as t from './types.js'
 import { Layer } from './base.js'
 import { type LayerStack } from './layer_stack.js'
 
@@ -14,10 +15,10 @@ type ResolvedLayerValue = Layer | Layer[] | 'new' | undefined
 
 export class LayerLookup {
   declare _stack: LayerStack
-  declare _options: LayerLookupOptions
+  declare _options: t.LayerLookupOptions
   declare _values: any[]
 
-  constructor(stack: LayerStack, options: LayerLookupOptions) {
+  constructor(stack: LayerStack, options: t.LayerLookupOptions) {
     this._stack = stack
 
     // Options normalization might change `options` relevant to the lookup:
@@ -41,7 +42,7 @@ export class LayerLookup {
     return results
   }
 
-  static all(stack: LayerStack, ...args: LayerLookupArgs): Layer[] {
+  static all(stack: LayerStack, ...args: t.LayerLookupArgs): Layer[] {
     const options = u.parseArgIntoOptions(args, 'layer')
 
     // We can process some very frequent calls like all(up.Layer)

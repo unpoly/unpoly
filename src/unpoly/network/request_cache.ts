@@ -1,9 +1,7 @@
 import * as u from '../util.js'
 import { splitTarget } from '../fragment.js'
-import {
-  networkConfig, type CacheTrackOptions, type RequestCondition, type RequestOptions,
-  type RequestTesterOptions,
-} from '../network.js'
+import { networkConfig } from '../network.js'
+import type * as t from './types.js'
 import { UpRequest } from './request.js'
 import { UpResponse } from './response.js'
 
@@ -75,7 +73,7 @@ export class UpRequestCache {
     this._requests = []
   }
 
-  get(request: UpRequest | RequestOptions): UpRequest | undefined
+  get(request: UpRequest | t.RequestOptions): UpRequest | undefined
   // The request is wrapped in place, so the implementation takes the wrapped type.
   get(request: UpRequest): UpRequest | undefined {
     request = this._wrap(request)
@@ -92,7 +90,7 @@ export class UpRequestCache {
     }
   }
 
-  put(request: UpRequest | RequestOptions): Promise<void>
+  put(request: UpRequest | t.RequestOptions): Promise<void>
   // The request is wrapped in place, so the implementation takes the wrapped type.
   async put(request: UpRequest): Promise<void> {
     request = this._wrap(request)
@@ -125,7 +123,7 @@ export class UpRequestCache {
   }
 
   // TODO: Move this to up.Request
-  async track(existingRequest: UpRequest, newRequest: UpRequest, options: CacheTrackOptions = {}): Promise<void> {
+  async track(existingRequest: UpRequest, newRequest: UpRequest, options: t.CacheTrackOptions = {}): Promise<void> {
     newRequest.trackedRequest = existingRequest
     newRequest.state = 'tracking'
 
@@ -187,7 +185,7 @@ export class UpRequestCache {
     return existingRequest === newRequest || existingRequest === newRequest.trackedRequest
   }
 
-  evict(condition: RequestCondition = true, testerOptions?: RequestTesterOptions): void {
+  evict(condition: t.RequestCondition = true, testerOptions?: t.RequestTesterOptions): void {
     this._eachMatch(condition, testerOptions,
       // It is generally not a great idea to manipulate the list we're iterating over,
       // but this._eachMatch() copies results before iterating.
@@ -195,7 +193,7 @@ export class UpRequestCache {
     )
   }
 
-  expire(condition: RequestCondition = true, testerOptions?: RequestTesterOptions): void {
+  expire(condition: t.RequestCondition = true, testerOptions?: t.RequestTesterOptions): void {
     this._eachMatch(condition, testerOptions,
       // We need to force cached responses to be expired, regardless of their age.
       // It may seem strange that we're setting an { expired } property on the *request*
@@ -249,7 +247,7 @@ export class UpRequestCache {
     }
   }
 
-  _eachMatch(condition: RequestCondition = true, testerOptions: RequestTesterOptions | undefined, fn: (request: UpRequest) => void): void {
+  _eachMatch(condition: t.RequestCondition = true, testerOptions: t.RequestTesterOptions | undefined, fn: (request: UpRequest) => void): void {
     let tester = UpRequest.tester(condition, testerOptions)
 
     // Copy results so evict() can delete from the list we're iterating over
@@ -258,7 +256,7 @@ export class UpRequestCache {
     u.each(results, fn)
   }
 
-  _wrap(requestOrOptions: UpRequest | RequestOptions): UpRequest {
+  _wrap(requestOrOptions: UpRequest | t.RequestOptions): UpRequest {
     return u.wrapValue(UpRequest, requestOrOptions)
   }
 

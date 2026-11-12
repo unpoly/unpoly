@@ -4,16 +4,14 @@ import { EventEmitter, type EmitProps, type EmittedEvent } from '../event.js'
 import { Params } from '../form.js'
 import { getSmart, parseTargetSteps, splitTarget, type RenderOptions } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
-import {
-  abortRequests, cache, isSafeMethod, networkConfig, type RequestCondition, type RequestOptions,
-  type RequestState, type RequestTesterOptions,
-} from '../network.js'
+import { abortRequests, cache, isSafeMethod, networkConfig } from '../network.js'
 import {
   acceptLayerFromXHR, contextFromXHR, csrfHeader, csrfParam, csrfToken, dismissLayerFromXHR,
   eventPlansFromXHR, evictCacheFromXHR, expireCacheFromXHR, headerize, locationFromXHR,
   methodFromXHR, openLayerFromXHR, targetFromXHR, titleFromXHR,
 } from '../protocol.js'
 import { runPreviews } from '../status.js'
+import type * as t from './types.js'
 import { FormRenderer } from './form_renderer.js'
 import { type Route } from './request_cache.js'
 import { UpResponse } from './response.js'
@@ -41,7 +39,7 @@ console.log(response.text)
 export class UpRequest {
   // 'up.Request', set in unpoly.ts. TypeScript needs it to accept a request as a promise.
   declare [Symbol.toStringTag]: string
-  declare state: RequestState
+  declare state: t.RequestState
   declare expired: boolean
   declare method: string
   declare url: string
@@ -53,8 +51,8 @@ export class UpRequest {
   declare timeout?: number | null
   declare background?: boolean
   declare cache?: boolean | 'auto'
-  declare expireCache?: RequestCondition
-  declare evictCache?: RequestCondition
+  declare expireCache?: t.RequestCondition
+  declare evictCache?: t.RequestCondition
   // While the request is new, these may be a layer name like 'root' or 'new'.
   declare layer: any
   declare mode?: string
@@ -372,7 +370,7 @@ export class UpRequest {
   @param {number} [attrs.timeout]
   @internal
   */
-  constructor(options: RequestOptions) {
+  constructor(options: t.RequestOptions) {
     // Like a default parameter, a default only replaces an undefined option.
     // A null option stays null, e.g. { timeout: null } sends the request without a timeout.
     const {
@@ -1019,7 +1017,7 @@ export class UpRequest {
     this._fragments = u.uniq([...this.fragments, ...trackingRequest.fragments])
   }
 
-  static tester(condition: RequestCondition, { except }: RequestTesterOptions = {}): (request: UpRequest) => boolean {
+  static tester(condition: t.RequestCondition, { except }: t.RequestTesterOptions = {}): (request: UpRequest) => boolean {
     let testFn: (request: UpRequest) => boolean
     if (u.isFunction(condition)) {
       testFn = condition

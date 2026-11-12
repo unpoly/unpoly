@@ -2,8 +2,9 @@ import * as u from '../util.js'
 import { isCritical } from '../error.js'
 import { type EventPlan } from '../event.js'
 import { type RenderOptions } from '../fragment.js'
-import { cache, networkConfig, type ResponseOptions } from '../network.js'
+import { cache, networkConfig } from '../network.js'
 import { CSPInfo } from '../script.js'
+import type * as t from './types.js'
 import { type UpRequest } from './request.js'
 
 const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
@@ -139,7 +140,7 @@ export class UpResponse {
   @experimental
   */
 
-  constructor(options: ResponseOptions = {}) {
+  constructor(options: t.ResponseOptions = {}) {
     // Like a default parameter, a default only replaces an undefined option.
     const { headers = {}, loadedAt = new Date() } = options
 

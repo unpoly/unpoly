@@ -1,7 +1,6 @@
 import * as u from '../util.js'
-import {
-  buildLayer, type LayerCloseOptions, type LayerLookupArgs, type PeelOptions,
-} from '../layer.js'
+import { buildLayer } from '../layer.js'
+import type * as t from './types.js'
 import { type Layer } from './base.js'
 import { LayerLookup } from './layer_lookup.js'
 
@@ -26,7 +25,7 @@ export class LayerStack {
     this._closingLayers.push(layer)
   }
 
-  peel(layer: Layer, options: PeelOptions = {}): void {
+  peel(layer: Layer, options: t.PeelOptions = {}): void {
     // We will dismiss descendants closer to the front first to prevent
     // recursive calls of peel().
     const descendants = layer.descendants.toReversed()
@@ -92,11 +91,11 @@ export class LayerStack {
     return this.front === layer
   }
 
-  get(...args: LayerLookupArgs): Layer | undefined {
+  get(...args: t.LayerLookupArgs): Layer | undefined {
     return this.getAll(...args)[0]
   }
 
-  getAll(...args: LayerLookupArgs): Layer[] {
+  getAll(...args: t.LayerLookupArgs): Layer[] {
     return LayerLookup.all(this, ...args)
   }
 
@@ -119,7 +118,7 @@ export class LayerStack {
     return this.layers.toReversed()
   }
 
-  dismissOverlays(value: any = null, options: LayerCloseOptions = {}): void {
+  dismissOverlays(value: any = null, options: t.LayerCloseOptions = {}): void {
     for (let overlay of this.overlays.toReversed()) {
       overlay.dismiss(value, options)
     }

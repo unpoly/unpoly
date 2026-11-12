@@ -1,6 +1,7 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
 import { RenderOptions, toFailKey } from '../fragment.js'
+import type * as t from './types.js'
 
 export class OptionsParser {
   declare _options: u.PlainObject
@@ -27,7 +28,7 @@ export class OptionsParser {
     nor can be parsed from `element`.
   @internal
   */
-  constructor(element: Element, options: u.PlainObject, parserOptions: e.OptionsParserOptions = {}) {
+  constructor(element: Element, options: u.PlainObject, parserOptions: t.OptionsParserOptions = {}) {
     this._options = options
     this._element = element
     this._fail = parserOptions.fail
@@ -36,31 +37,31 @@ export class OptionsParser {
     this._defaults = parserOptions.defaults ?? {}
   }
 
-  string(key: string, keyOptions?: e.ParseKeyOptions): void {
+  string(key: string, keyOptions?: t.ParseKeyOptions): void {
     this.parse(e.stringAttr, key, keyOptions)
   }
 
-  boolean(key: string, keyOptions?: e.ParseKeyOptions): void {
+  boolean(key: string, keyOptions?: t.ParseKeyOptions): void {
     this.parse(e.booleanAttr, key, keyOptions)
   }
 
-  number(key: string, keyOptions?: e.ParseKeyOptions): void {
+  number(key: string, keyOptions?: t.ParseKeyOptions): void {
     this.parse(e.numberAttr, key, keyOptions)
   }
 
-  booleanOrString(key: string, keyOptions?: e.ParseKeyOptions): void {
+  booleanOrString(key: string, keyOptions?: t.ParseKeyOptions): void {
     this.parse(e.booleanOrStringAttr, key, keyOptions)
   }
 
-  booleanOrNumber(key: string, keyOptions?: e.ParseKeyOptions): void {
+  booleanOrNumber(key: string, keyOptions?: t.ParseKeyOptions): void {
     this.parse(e.booleanOrNumberAttr, key, keyOptions)
   }
 
-  booleanOrNumberOrString(key: string, keyOptions?: e.ParseKeyOptions): void {
+  booleanOrNumberOrString(key: string, keyOptions?: t.ParseKeyOptions): void {
     this.parse(e.booleanOrNumberOrStringAttr, key, keyOptions)
   }
 
-  json(key: string, keyOptions?: e.ParseKeyOptions): void {
+  json(key: string, keyOptions?: t.ParseKeyOptions): void {
     this.parse(e.jsonAttr, key, keyOptions)
   }
 
@@ -70,12 +71,12 @@ export class OptionsParser {
   //   this.parse(attrReader, key, keyOptions)
   // }
 
-  renderCallback(key: string, keyOptions: e.ParseKeyOptions = {}): void {
-    let attrReader: e.AttrReader = (link, attr) => RenderOptions.callbackAttr(link, attr, key)
+  renderCallback(key: string, keyOptions: t.ParseKeyOptions = {}): void {
+    let attrReader: t.AttrReader = (link, attr) => RenderOptions.callbackAttr(link, attr, key)
     this.parse(attrReader, key, keyOptions)
   }
 
-  parse(attrReader: e.AttrReader, key: string, keyOptions: e.ParseKeyOptions = {}): void {
+  parse(attrReader: t.AttrReader, key: string, keyOptions: t.ParseKeyOptions = {}): void {
     const attrNames = u.wrapList(keyOptions.attr ?? this._attrNameForKey(key))
 
     // Below we will only set @options[key] = value if value is defined.
@@ -105,13 +106,13 @@ export class OptionsParser {
     }
   }
 
-  include(optionsFn: (element: Element, options: u.PlainObject, parserOptions: e.OptionsParserOptions) => u.PlainObject, parserOptions?: e.OptionsParserOptions): void {
+  include(optionsFn: (element: Element, options: u.PlainObject, parserOptions: t.OptionsParserOptions) => u.PlainObject, parserOptions?: t.OptionsParserOptions): void {
     // let fnResult = optionsFn(this._element, this._options, this._parserOptions)
     let fnResult = optionsFn(this._element, this._options, { defaults: this._defaults, ...parserOptions })
     Object.assign(this._options, fnResult)
   }
 
-  _parseFromAttr(attrValueFn: e.AttrReader, element: Element, attrName: string): any {
+  _parseFromAttr(attrValueFn: t.AttrReader, element: Element, attrName: string): any {
     if (this._closest) {
       return e.closestAttr(element, attrName, attrValueFn)
     } else {

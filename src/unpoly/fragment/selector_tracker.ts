@@ -1,14 +1,15 @@
 import * as u from '../util.js'
 import { on, type UnbindFn } from '../event.js'
-import { afterMutate, type SelectorTrackerAddCallback } from '../fragment.js'
+import { afterMutate } from '../fragment.js'
+import type * as t from './types.js'
 
 export class SelectorTracker {
   declare _selectFn: () => Iterable<Element>
-  declare _addCallback: SelectorTrackerAddCallback
+  declare _addCallback: t.SelectorTrackerAddCallback
   declare _knownMatches: Map<Element, (element: Element) => void>
   declare _syncScheduled: boolean
 
-  constructor(selectFn: () => Iterable<Element>, addCallback: SelectorTrackerAddCallback) {
+  constructor(selectFn: () => Iterable<Element>, addCallback: t.SelectorTrackerAddCallback) {
     this._selectFn = selectFn
     this._addCallback = addCallback
     this._knownMatches = new Map()

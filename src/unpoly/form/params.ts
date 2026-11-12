@@ -3,11 +3,12 @@ import * as e from '../element.js'
 import { fail } from '../error.js'
 import {
   defaultSubmitButton, findFields, formConfig, prepareParamsReadTemp, readFieldDisabled,
-  readFieldName, readFieldValue, type ParamEntry, type ParamsLike,
+  readFieldName, readFieldValue,
 } from '../form.js'
+import type * as t from './types.js'
 
 // Without FormData#entries(), specs inspect the original entries.
-interface InspectableFormData extends FormData { originalArray?: ParamEntry[] }
+interface InspectableFormData extends FormData { originalArray?: t.ParamEntry[] }
 
 /*-
 The `up.Params` class offers a consistent API to read and manipulate request parameters
@@ -30,7 +31,7 @@ The following types of parameter representation are supported:
 @parent up.form
 */
 export class Params {
-  declare entries: ParamEntry[]
+  declare entries: t.ParamEntry[]
 
   /*-
   Constructs a new `up.Params` instance.
@@ -43,7 +44,7 @@ export class Params {
   @return {up.Params}
   @stable
   */
-  constructor(raw?: ParamsLike) {
+  constructor(raw?: t.ParamsLike) {
     this.clear()
     this.addAll(raw)
   }
@@ -122,7 +123,7 @@ export class Params {
   @return {Array}
   @experimental
   */
-  toArray(): ParamEntry[] {
+  toArray(): t.ParamEntry[] {
     return this.entries
   }
 
@@ -188,7 +189,7 @@ export class Params {
     return this.toQuery()
   }
 
-  _arrayEntryToQuery(entry: ParamEntry): string {
+  _arrayEntryToQuery(entry: t.ParamEntry): string {
     const { value } = entry
 
     let query = encodeURIComponent(entry.name)
@@ -211,7 +212,7 @@ export class Params {
   @function up.Params#_isBinaryEntry
   @internal
   */
-  _isBinaryEntry({ value }: ParamEntry): boolean {
+  _isBinaryEntry({ value }: t.ParamEntry): boolean {
     return value instanceof Blob
   }
 
@@ -281,7 +282,7 @@ export class Params {
   @param {Object|Array|string|FormData|up.Params|undefined} params
   @stable
   */
-  addAll(raw: ParamsLike): void {
+  addAll(raw: t.ParamsLike): void {
     if (u.isMissing(raw)) {
       // nothing to do
     } else if (raw instanceof this.constructor) {
@@ -382,7 +383,7 @@ export class Params {
     this.entries = u.reject(this.entries, this._matchEntryFn(name))
   }
 
-  _matchEntryFn(name: string): (entry: ParamEntry) => boolean {
+  _matchEntryFn(name: string): (entry: t.ParamEntry) => boolean {
     return (entry) => entry.name === name
   }
 
@@ -727,7 +728,7 @@ export class Params {
     return u.normalizeURL(url, { search: false })
   }
 
-  static merge(start: Params, ...objects: ParamsLike[]): Params {
+  static merge(start: Params, ...objects: t.ParamsLike[]): Params {
     let merged = u.copy(start)
 
     for (let object of objects) {

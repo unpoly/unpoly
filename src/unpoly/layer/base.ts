@@ -10,12 +10,10 @@ import {
   currentLocation, findMetaTags, getLang, isHistoryEnabled, pushLocation, updateLang,
   updateMetaTags, type HistoryAspect, type LocationChangedEvent,
 } from '../history.js'
-import {
-  closestLayerElement, mainTargets, type LayerCloseOptions, type LayerMode, type LayerOptions,
-  type LayerState, type PeelOptions,
-} from '../layer.js'
+import { closestLayerElement, mainTargets } from '../layer.js'
 import { convertClicks } from '../link.js'
 import { newStateCache } from '../viewport.js'
+import type * as t from './types.js'
 import { type LayerStack } from './layer_stack.js'
 import { type Overlay } from './modes/overlay.js'
 import { type OverlayFocus } from './overlay_focus.js'
@@ -35,7 +33,7 @@ the background layer during compilation.
 */
 export class Layer {
   // Each subclass has its mode, like ModalLayer.mode = 'modal'.
-  declare static mode: LayerMode
+  declare static mode: t.LayerMode
   // 'up.Layer' for every mode, set in unpoly.ts.
   declare [Symbol.toStringTag]: string
   declare stack: LayerStack
@@ -45,7 +43,7 @@ export class Layer {
   declare contentElement?: HTMLElement
   declare boxElement?: HTMLElement
   declare overlayFocus?: OverlayFocus
-  declare state?: LayerState
+  declare state?: t.LayerState
   declare _index?: number
   declare _unbindLocationChanged?: UnbindFn
   declare _savedTitle?: string
@@ -102,7 +100,7 @@ export class Layer {
     The layer mode.
   @stable
   */
-  declare mode: LayerMode
+  declare mode: t.LayerMode
 
   /*-
   This layer's [context](/learn/layer-context).
@@ -134,7 +132,7 @@ export class Layer {
   declare position?: string
   declare align?: string
 
-  constructor(options: LayerOptions = {}) {
+  constructor(options: t.LayerOptions = {}) {
     // Like a default parameter, a default only replaces an undefined option.
     const {
       context = {},
@@ -241,7 +239,7 @@ export class Layer {
       @experimental
   @stable
   */
-  accept(value?: any, options?: LayerCloseOptions): void
+  accept(value?: any, options?: t.LayerCloseOptions): void
   accept(): void {
     throw new NotImplemented()
   }
@@ -268,7 +266,7 @@ export class Layer {
     See options for `up.Layer#accept()`.
   @stable
   */
-  dismiss(value?: any, options?: LayerCloseOptions): void
+  dismiss(value?: any, options?: t.LayerCloseOptions): void
   dismiss(): void {
     throw new NotImplemented()
   }
@@ -307,7 +305,7 @@ export class Layer {
 
   @stable
   */
-  peel(options?: PeelOptions): void {
+  peel(options?: t.PeelOptions): void {
     this.stack.peel(this, options)
   }
 
