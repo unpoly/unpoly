@@ -48,7 +48,7 @@ export interface RevealHashOptions {
 }
 
 /**
-What `up.viewport.absolutize()` returns: the `<up-bounds>` element that now wraps the element,
+What `up.internal.absolutize()` returns: the `<up-bounds>` element that now wraps the element,
 and a function that moves it.
 @internal
 */

@@ -1249,7 +1249,7 @@ describe('up.viewport', function() {
           </div>
         `)
 
-        up.viewport.absolutize(element)
+        up.internal.absolutize(element)
 
         expect(hiddenFixedChild.style.top).toBe('10px')
       })
