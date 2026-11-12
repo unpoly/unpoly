@@ -11,8 +11,7 @@ import { layerStack } from './layer.js'
 import { printToStandard } from './log.js'
 import { LinkCurrentURLs } from './status/link_current_urls.js'
 import { Preview } from './status/preview.js'
-import { Config } from './util/config.js'
-import type { ConfigWith } from './util/config.js'
+import { newConfig } from './util/config.js'
 import { Registry } from './framework/registry.js'
 import { FocusCapsule } from './viewport/focus_capsule.js'
 import type { List, PlainObject } from './util.js'
@@ -94,14 +93,14 @@ Sets default options for status effects.
 
 @stable
 */
-export const statusConfig = new Config('up.status.config', (): StatusConfig => ({
+export const statusConfig = newConfig('up.status.config', (): StatusConfig => ({
   currentClasses: ['up-current'],
   activeClasses: ['up-active'],
   loadingClasses: ['up-loading'],
   revalidatingClasses: ['up-revalidating'],
   navSelectors: ['[up-nav]', 'nav'],
   noNavSelectors: ['[up-nav=false]'],
-})) as ConfigWith<StatusConfig>
+}))
 
 export let namedPreviewFns = new Registry<PreviewFn>('preview')
 

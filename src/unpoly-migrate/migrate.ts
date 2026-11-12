@@ -51,9 +51,9 @@ declare module '../unpoly/migrate_stub.js' {
 */
 up.migrate = (function() {
 
-  const config = new up.internal.Config('up.migrate.config', (): MigrateConfig => ({
+  const config = up.internal.newConfig('up.migrate.config', (): MigrateConfig => ({
     logLevel: 'error'
-  })) as import('../unpoly/util/config.js').ConfigWith<MigrateConfig>
+  }))
 
   // Pass a { label } like 'up.form.config' to name the object in the warning.
   // Without a label we print the object itself.

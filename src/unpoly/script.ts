@@ -16,8 +16,7 @@ import { NonceableCallback } from './script/csp/nonceable_callback.js'
 import { ScriptGate } from './script/csp/script_gate.js'
 import { DestructorPass } from './script/destructor_pass.js'
 import { HelloFragment } from './script/hello_fragment.js'
-import { Config } from './util/config.js'
-import type { ConfigWith } from './util/config.js'
+import { newConfig } from './util/config.js'
 import type { Cleaner, List, PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
 import type { CSPInfo } from './script/csp/csp_info.js'
@@ -217,7 +216,7 @@ Configures defaults for script handling and asset tracking.
 @property up.script.config
 @stable
 */
-export const scriptConfig = new Config('up.script.config', (): ScriptConfig => ({
+export const scriptConfig = newConfig('up.script.config', (): ScriptConfig => ({
   cspNonce() { return metaContent('csp-nonce') },
   cspWarnings: true,
   scriptElementPolicy: 'auto',
@@ -254,7 +253,7 @@ export const scriptConfig = new Config('up.script.config', (): ScriptConfig => (
   noScriptSelectors: [
     'script[type="application/ld+json"]'
   ]
-})) as ConfigWith<ScriptConfig>
+}))
 
 const SYSTEM_MACRO_PRIORITIES: Record<string, number> = {
   '[up-back]': -100,        // sets [up-href] to previous URL

@@ -51,7 +51,7 @@ import {
   disableContainerTemp, findGroupSolution, getGroupSelectors, readFieldDisabled,
   submitButtonOverrides, trackFields,
 } from './form.js'
-import { Config } from './util/config.js'
+import { Config, newConfig } from './util/config.js'
 import { OptionsParser } from './element/options_parser.js'
 import { FIFOCache } from './util/fifo_cache.js'
 import { Rect } from './util/rect.js'
@@ -210,6 +210,7 @@ export const api = {
     trackFields,
 
     Config,
+    newConfig,
     OptionsParser,
     FIFOCache,
     Rect,

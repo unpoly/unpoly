@@ -9,8 +9,7 @@ import { printToStandard, printUserEvent } from './log.js'
 import { mockable } from './mockable.js'
 import { initialRequestMethod } from './protocol.js'
 import { registerMacro } from './script.js'
-import { Config } from './util/config.js'
-import type { ConfigWith } from './util/config.js'
+import { newConfig } from './util/config.js'
 import { FIFOCache } from './util/fifo_cache.js'
 import { revealHash, revealHashFn, saveFocus, saveScroll } from './viewport.js'
 import type { NormalizeURLOptions, PlainObject } from './util.js'
@@ -158,7 +157,7 @@ Configures behavior when the user goes back or forward in browser history.
 
 @stable
 */
-export const historyConfig = new Config('up.history.config', (): HistoryConfig => ({
+export const historyConfig = newConfig('up.history.config', (): HistoryConfig => ({
   enabled: true,
   // Prefer restoring the body instead of :main, in case the last fragment update
   // changed the page layout. See https://github.com/unpoly/unpoly/issues/237.
@@ -178,7 +177,7 @@ export const historyConfig = new Config('up.history.config', (): HistoryConfig =
     // New nonced callbacks from the response will validates and then rewritten to match the existing nonce.
     'meta[name=csp-nonce]',
   ],
-})) as ConfigWith<HistoryConfig>
+}))
 
 /*-
 Returns a normalized URL for the previous history entry.

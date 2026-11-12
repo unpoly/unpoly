@@ -968,6 +968,18 @@ describe('up.fragment', function() {
         up.fragment.config.mainTargets = ['.new-target']
         expect(up.layer.config.any.mainTargets).toEqual(['.new-target'])
       })
+
+      it("doesn't change up.layer.config.any.mainTargets when up.fragment.config is reset", function() {
+        up.layer.config.any.mainTargets = ['.my-special-main-target']
+        up.fragment.config.reset()
+        expect(up.layer.config.any.mainTargets).toEqual(['.my-special-main-target'])
+      })
+
+      it('keeps forwarding to up.layer.config.any.mainTargets after up.fragment.config is reset', function() {
+        up.fragment.config.reset()
+        up.fragment.config.mainTargets = ['.new-target']
+        expect(up.layer.config.any.mainTargets).toEqual(['.new-target'])
+      })
     })
 
     describe('up.context', function() {

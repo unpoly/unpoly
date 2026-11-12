@@ -2,8 +2,7 @@ import { evalOption, identity, memoize, normalizeMethod, normalizeURL, parseRela
 import { metaContent } from './element.js'
 import { popCookie } from './browser.js'
 import { mockable } from './mockable.js'
-import { Config } from './util/config.js'
-import type { ConfigWith } from './util/config.js'
+import { newConfig } from './util/config.js'
 import type { Params } from './form/params.js'
 
 /*-
@@ -1136,14 +1135,14 @@ Configures strings used in the optional [server protocol](/api/up.protocol).
 
 @stable
 */
-export const protocolConfig = new Config('up.protocol.config', (): ProtocolConfig => ({
+export const protocolConfig = newConfig('up.protocol.config', (): ProtocolConfig => ({
   methodParam: '_method',
   csrfParam() { return metaContent('csrf-param') },
   csrfToken() { return metaContent('csrf-token') },
   // TODO: Let's move config.cspNonce() to up.script.config after all
   csrfHeader: 'X-CSRF-Token', // Used by Rails. Other frameworks use different headers.
   maxHeaderSize: 2048,
-})) as ConfigWith<ProtocolConfig>
+}))
 
 export function csrfHeader(): string {
   return evalOption(protocolConfig.csrfHeader)

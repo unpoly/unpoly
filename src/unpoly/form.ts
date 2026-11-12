@@ -19,8 +19,7 @@ import { closestLayerElement, layerStack } from './layer.js'
 import { followOptions } from './link.js'
 import { callbackAttr, registerAttrCompiler, registerCompiler, registerDestructor } from './script.js'
 import { statusOptions } from './status.js'
-import { Config } from './util/config.js'
-import type { ConfigWith } from './util/config.js'
+import { newConfig } from './util/config.js'
 import { doFocus, focusedElementWithin } from './viewport.js'
 import type { List, PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
@@ -256,7 +255,7 @@ Sets default options for form submission and validation.
 
 @stable
  */
-export const formConfig = new Config('up.form.config', (): FormConfig => ({
+export const formConfig = newConfig('up.form.config', (): FormConfig => ({
   groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
   fieldSelectors: [
     'select',
@@ -283,7 +282,7 @@ export const formConfig = new Config('up.form.config', (): FormConfig => ({
   watchChangeEvents: ['change'],
   watchableEvents: ['input', 'change'],
   arrayParam: (name) => name.endsWith('[]'),
-})) as ConfigWith<FormConfig>
+}))
 
 function findFormElements(root: ElementOrSelector, selectorFn: SelectorFn): Field[] {
   root = getOne(root) // unwrap jQuery

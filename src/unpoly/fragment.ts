@@ -1,9 +1,9 @@
 import './fragment.sass'
 import {
-  cleaner, copy, defineDelegates, evalAutoOption, filterList, findResult, getComplexTokens,
-  isAdjacentPosition, isDefined, isElement, isElementLike, isEqual, isFunction, isList, isRegExp,
-  isString, lowerCaseFirst, map, merge, normalizeURL, parseArgIntoOptions, parseArgs,
-  parseScalarJSONPairs, pick, presence, reject, some, uniq, uniqBy, upperCaseFirst, wrapList,
+  cleaner, copy, evalAutoOption, filterList, findResult, getComplexTokens, isAdjacentPosition,
+  isDefined, isElement, isElementLike, isEqual, isFunction, isList, isRegExp, isString,
+  lowerCaseFirst, map, merge, normalizeURL, parseArgIntoOptions, parseArgs, parseScalarJSONPairs,
+  pick, presence, reject, some, uniq, uniqBy, upperCaseFirst, wrapList,
 } from './util.js'
 import {
   attrSelector, booleanAttr, booleanOrStringAttr, classSelector, closestAttr,
@@ -28,8 +28,7 @@ import { abortRequests } from './network.js'
 import {
   callbackAttr, hello, isScript, readData, registerDestructor, registerMacro, scriptConfig,
 } from './script.js'
-import { Config } from './util/config.js'
-import type { ConfigWith } from './util/config.js'
+import { newConfig } from './util/config.js'
 import type { List, PlainObject } from './util.js'
 import type { ElementOrSelector } from './element.js'
 import type { UpRequest } from './network/request.js'
@@ -434,7 +433,13 @@ Configures defaults for fragment updates.
 
 @stable
 */
-export const fragmentConfig = new Config('up.fragment.config', (): Omit<FragmentConfig, 'mainTargets'> => ({
+export const fragmentConfig = newConfig('up.fragment.config', (): FragmentConfig => ({
+  // Users who are not using layers will prefer settings default targets
+  // as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
+  // A reset copies this accessor (see Config#reset()), so it leaves up.layer.config.any.mainTargets alone.
+  get mainTargets() { return layerConfig.any.mainTargets },
+  set mainTargets(value) { layerConfig.any.mainTargets = value },
+
   badTargetClasses: [/^up-/],
 
   strongTargetDerivers: STRONG_TARGET_DERIVERS,
@@ -497,11 +502,7 @@ export const fragmentConfig = new Config('up.fragment.config', (): Omit<Fragment
   skipResponse: defaultSkipResponse,
   renderableResponse: (response) => response.isHTML(),
   normalizeKeepHTML: defaultNormalizeKeepHTML
-})) as ConfigWith<FragmentConfig>
-
-// Users who are not using layers will prefer settings default targets
-// as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
-defineDelegates(fragmentConfig, ['mainTargets'], () => layerConfig.any)
+}))
 
 
 function defaultSkipResponse({ response, expiredResponse }: PlainObject): boolean {

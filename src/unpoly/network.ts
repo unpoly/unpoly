@@ -8,8 +8,7 @@ import { UpRequestCache } from './network/request_cache.js'
 import { RequestQueue } from './network/request_queue.js'
 import { UpRequest } from './network/request.js'
 import { UpResponse } from './network/response.js'
-import { Config } from './util/config.js'
-import type { ConfigWith } from './util/config.js'
+import { newConfig } from './util/config.js'
 import type { RequestOptions } from './network/request.js'
 import type { Layer } from './layer/base.js'
 
@@ -191,7 +190,7 @@ Sets default options for network requests.
 
 @stable
 */
-export const networkConfig = new Config('up.network.config', (): NetworkConfig => ({
+export const networkConfig = newConfig('up.network.config', (): NetworkConfig => ({
   concurrency: 6,
   wrapMethod: true,
   cacheEnabled: true,
@@ -205,7 +204,7 @@ export const networkConfig = new Config('up.network.config', (): NetworkConfig =
   evictCache: false,
   progressBar: true,
   timeout: 90_000,
-})) as ConfigWith<NetworkConfig>
+}))
 
 export const queue = new RequestQueue()
 

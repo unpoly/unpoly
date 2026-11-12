@@ -10,8 +10,7 @@ import { Layer } from './layer/base.js'
 import type { LayerMode, OverlayMode } from './layer/base.js'
 import type { LayerLookupArgs } from './layer/layer_lookup.js'
 import { LayerStack } from './layer/layer_stack.js'
-import { Config } from './util/config.js'
-import type { ConfigWith } from './util/config.js'
+import { newConfig } from './util/config.js'
 import type { PlainObject } from './util.js'
 import type { AnimationValue } from './motion.js'
 import type { UpResponse } from './network/response.js'
@@ -289,7 +288,7 @@ up.layer.config.overlay.mainTargets.unshift('.content')
 
 @stable
 */
-export const layerConfig = new Config('up.layer.config', (): LayerConfig => ({
+export const layerConfig = newConfig('up.layer.config', (): LayerConfig => ({
   mode: 'modal',
   any: {
     mainTargets: [
@@ -347,7 +346,7 @@ export const layerConfig = new Config('up.layer.config', (): LayerConfig => ({
     trapFocus: false,
   },
   foreignOverlaySelectors: ['dialog'],
-})) as ConfigWith<LayerConfig>
+}))
 
 /*-
 A list of layers that are currently open.

@@ -10,8 +10,7 @@ import { on } from './event.js'
 import { getSmart } from './fragment.js'
 import { printToStandard } from './log.js'
 import { MotionController } from './motion/motion_controller.js'
-import { Config } from './util/config.js'
-import type { ConfigWith } from './util/config.js'
+import { newConfig } from './util/config.js'
 import { Registry } from './framework/registry.js'
 import { absolutize, closest, rootHeight, rootWidth } from './viewport.js'
 import type { PlainObject } from './util.js'
@@ -120,11 +119,11 @@ Sets default options for animations and transitions.
   This can be useful in full-stack integration tests.
 @stable
 */
-export const motionConfig = new Config('up.motion.config', (): MotionConfig => ({
+export const motionConfig = newConfig('up.motion.config', (): MotionConfig => ({
   duration: 175,
   easing: 'ease',
   enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches
-})) as ConfigWith<MotionConfig>
+}))
 
 export let namedAnimations = new Registry<AnimationFn>('animation', findAnimationFn)
 

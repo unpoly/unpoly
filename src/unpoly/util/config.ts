@@ -23,7 +23,8 @@ export type SelectorKey<S> = { [K in keyof S]-?: S[K] extends string[] ? K : nev
 A config object with the settings `S`, like `up.network.config`.
 
 The `Config` class only has the methods. Its constructor copies the settings onto the instance,
-which a TypeScript class can't express. So a namespace casts its `new Config(...)` to this type.
+which a TypeScript class can't express. So a namespace builds its config with `newConfig()`,
+which returns this type.
 @internal
 */
 export type ConfigWith<S extends object> = Config<S> & S
@@ -65,7 +66,11 @@ export class Config<S extends object> {
   }
 
   reset(): void {
-    Object.assign(this, this._blueprintFn())
+    // We copy property descriptors instead of values, so the defaults can hold a getter and
+    // setter that forward a setting to another config (like up.fragment.config.mainTargets).
+    // Note that a defaults key matching an accessor on a Config subclass (like LogConfig#enabled,
+    // which writes sessionStorage) would shadow that accessor instead of calling its setter.
+    Object.defineProperties(this, Object.getOwnPropertyDescriptors(this._blueprintFn()))
   }
 
   matches(element: Element, prop: SelectorKey<S>, condition?: string): boolean {
@@ -90,4 +95,9 @@ export class Config<S extends object> {
   selectorFns(prop: SelectorKey<S>): [SelectorFn, MatchesFn] {
     return [this.selectorFn(prop), this.matchesFn(prop)]
   }
+}
+
+// Builds a config whose settings TypeScript knows (see ConfigWith).
+export function newConfig<S extends object>(label: string, blueprintFn: () => S): ConfigWith<S> {
+  return new Config(label, blueprintFn) as ConfigWith<S>
 }
