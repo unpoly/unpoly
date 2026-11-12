@@ -1,9 +1,6 @@
 import './viewport.sass'
-import { each, evalAutoOption, matchableURL, newOptions, parseArgs, queueFastTask } from './util.js'
-import {
-  around, attrSelector, createFromSelector, fixedToAbsolute, getRoot as elementGetRoot, idSelector,
-  insertBefore, setInlineStyle, subtree,
-} from './element.js'
+import * as u from './util.js'
+import * as e from './element.js'
 import { fail } from './error.js'
 import { mockable } from './mockable.js'
 import { getInputDevice, on } from './event.js'
@@ -18,8 +15,6 @@ import { Rect } from './util/rect.js'
 import { BodyShifter } from './viewport/body_shifter.js'
 import { FocusCapsule } from './viewport/focus_capsule.js'
 import { RevealMotion } from './viewport/reveal_motion.js'
-import type { List, PlainObject } from './util.js'
-import type { ElementOrSelector } from './element.js'
 import type { InputDevice } from './event.js'
 
 /**
@@ -236,9 +231,9 @@ To make `up.reveal()` aware of fixed elements you can either:
 @signature
 */
 // The element may also be a selector.
-export const reveal = mockable(function(element: any, options?: PlainObject): any {
+export const reveal = mockable(function(element: any, options?: u.PlainObject): any {
   // copy options, since we will mutate it below (options.layer = ...).
-  options = newOptions(options)
+  options = u.newOptions(options)
   element = getSmart(element, options)
 
   // Now that we have looked up the element with an option like { layer: 'any' },
@@ -316,7 +311,7 @@ export const doFocus = mockable(function doFocus(element: HTMLElement, { prevent
 
   inputDevice ??= getInputDevice()
   focusVisible ??= 'auto'
-  focusVisible = evalAutoOption(focusVisible, viewportConfig.autoFocusVisible, { element, inputDevice })
+  focusVisible = u.evalAutoOption(focusVisible, viewportConfig.autoFocusVisible, { element, inputDevice })
 
   element.focus({
     preventScroll: true, // Focus without scrolling, since we're going to use our custom scrolling logic below.
@@ -439,7 +434,7 @@ export function revealHashFn(hash: string, { strong, layer, origin, behavior = '
   if (match) {
     return () => {
       let doReveal = () => reveal(match, { top: true, behavior, focus })
-      if (strong) queueFastTask(doReveal)
+      if (strong) u.queueFastTask(doReveal)
       return doReveal()
     }
   } else if (hash === '#top') {
@@ -465,7 +460,7 @@ if no closer viewport exists.
 @return {Element}
 @stable
 */
-export function closest(target: ElementOrSelector, options: PlainObject = {}): HTMLElement {
+export function closest(target: e.ElementOrSelector, options: u.PlainObject = {}): HTMLElement {
   const element = getSmart(target, options)!
   // Use up.element.closest() which searches across layer boundaries.
   // It is OK to find a viewport in a parent layer. Layers without its
@@ -487,9 +482,9 @@ in the returned list.
 @return {List<Element>}
 @internal
 */
-export function getViewportSubtree(element: ElementOrSelector, options: PlainObject = {}): List<HTMLElement> {
+export function getViewportSubtree(element: e.ElementOrSelector, options: u.PlainObject = {}): u.List<HTMLElement> {
   element = getSmart(element, options)!
-  return subtree(element, allSelector())
+  return e.subtree(element, allSelector())
 }
 
 /*-
@@ -505,9 +500,9 @@ In that case we restore / reset the scroll tops of all viewports around the frag
 @return {List<Element>}
 @internal
 */
-export function getViewportAround(element: ElementOrSelector, options: PlainObject = {}): HTMLElement[] {
+export function getViewportAround(element: e.ElementOrSelector, options: u.PlainObject = {}): HTMLElement[] {
   element = getSmart(element, options)!
-  return around(element, allSelector())
+  return e.around(element, allSelector())
 }
 
 /*-
@@ -516,7 +511,7 @@ Returns a list of all the viewports on the current layer.
 @function up.viewport.all
 @internal
 */
-function getAll(options: PlainObject = {}): List<HTMLElement> {
+function getAll(options: u.PlainObject = {}): u.List<HTMLElement> {
   return getAllFragments(allSelector(), options)
 }
 
@@ -539,12 +534,12 @@ export function getRoot(): Element {
 
 export function rootWidth(): number {
   // This should happen on the <html> element, regardless of document.scrollingElement
-  return elementGetRoot().clientWidth
+  return e.getRoot().clientWidth
 }
 
 export function rootHeight(): number {
   // This should happen on the <html> element, regardless of document.scrollingElement
-  return elementGetRoot().clientHeight
+  return e.getRoot().clientHeight
 }
 
 export function isRoot(element: Element): boolean {
@@ -628,7 +623,7 @@ function getScrollTopsForViewportElements(viewports: Iterable<Element>): Record<
   return tops
 }
 
-export function getScrollTops(...args: [options?: PlainObject]): Record<string, number> {
+export function getScrollTops(...args: [options?: u.PlainObject]): Record<string, number> {
   let viewports = getAll(...args)
   return getScrollTopsForViewportElements(viewports)
 }
@@ -696,7 +691,7 @@ Unpoly automatically saves focus-related state before [navigating](/learn/naviga
   If omitted, state for the current layer will be saved.
 @stable
 */
-export function saveFocus(options: PlainObject = {}): void {
+export function saveFocus(options: u.PlainObject = {}): void {
   const layer = layerStack.get(options)!
   const location = options.location || layer.location
   if (location) {
@@ -723,7 +718,7 @@ Unpoly automatically restores focus-related state when the user [presses the bac
   Returns whether focus state could be restored.
 @stable
 */
-export function restoreFocus(options: PlainObject = {}): boolean {
+export function restoreFocus(options: u.PlainObject = {}): boolean {
   const layer = layerStack.get(options)!
   const location = options.location || layer.location
   const locationCapsule = layer.lastFocusCapsules.get(location)
@@ -737,11 +732,11 @@ export function restoreFocus(options: PlainObject = {}): boolean {
 }
 
 export function newStateCache(): FIFOCache<string, any> {
-  return new FIFOCache({ capacity: 30, normalizeKey: matchableURL })
+  return new FIFOCache({ capacity: 30, normalizeKey: u.matchableURL })
 }
 
-function parseOptions(args: any[]): [List<HTMLElement>, PlainObject] {
-  const [reference, options] = parseArgs(args, 'val', 'options')
+function parseOptions(args: any[]): [u.List<HTMLElement>, u.PlainObject] {
+  const [reference, options] = u.parseArgs(args, 'val', 'options')
 
   options.layer = layerStack.get(options)
 
@@ -795,7 +790,7 @@ export function absolutize(element: HTMLElement, options: { afterMeasure?: () =>
   // Allow the caller to run code before we start shifting elements around.
   options.afterMeasure?.()
 
-  setInlineStyle(element, {
+  e.setInlineStyle(element, {
     // If the element had a layout context before, make sure the
     // ghost will have layout context as well (and vice versa).
     position: element.style.position === 'static' ? 'static' : 'relative',
@@ -810,15 +805,15 @@ export function absolutize(element: HTMLElement, options: { afterMeasure?: () =>
   // Wrap the ghost in another container so its margin can expand
   // freely. If we would position the element directly (old implementation),
   // it would gain a layout context which cannot be crossed by margins.
-  const bounds = createFromSelector('up-bounds')
+  const bounds = e.createFromSelector('up-bounds')
   // Insert the bounds object before our element, then move element into it.
-  insertBefore(element, bounds)
+  e.insertBefore(element, bounds)
   bounds.appendChild(element)
 
   const moveBounds = function(diffX: number, diffY: number) {
     boundsRect.left += diffX
     boundsRect.top += diffY
-    return setInlineStyle(bounds, boundsRect, 'px')
+    return e.setInlineStyle(bounds, boundsRect, 'px')
   }
 
   // Position the bounds initially
@@ -832,7 +827,7 @@ export function absolutize(element: HTMLElement, options: { afterMeasure?: () =>
   const newElementRect = element.getBoundingClientRect()
   moveBounds(originalRect.left - newElementRect.left, originalRect.top - newElementRect.top)
 
-  each(fixedElements(element), fixedToAbsolute)
+  u.each(fixedElements(element), e.fixedToAbsolute)
 
   return {
     bounds,
@@ -1062,14 +1057,14 @@ that is now hidden, e.g. `15px`.
 @function up.viewport.firstHashTarget
 @internal
 */
-export function firstHashTarget(hash: string | undefined, options: PlainObject = {}): HTMLElement | undefined {
+export function firstHashTarget(hash: string | undefined, options: u.PlainObject = {}): HTMLElement | undefined {
   hash = pureHash(hash)
   if (hash) {
     const selector = [
       // Match an <* id="hash">
-      idSelector(hash),
+      e.idSelector(hash),
       // Match an <a name="hash">
-      'a' + attrSelector('name', hash)
+      'a' + e.attrSelector('name', hash)
     ].join()
     return getSmart(selector, options)
   }

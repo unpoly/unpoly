@@ -1,4 +1,4 @@
-import { remove, some } from '../util.js'
+import * as u from '../util.js'
 import { muteUncriticalRejection } from '../error.js'
 import { emit } from '../event.js'
 
@@ -52,7 +52,7 @@ export class MotionController {
     try {
       this._playingClusters.push(newCluster)
       let promise = muteUncriticalRejection(startMotionFn())
-      return promise.finally(() => remove(this._playingClusters, newCluster))
+      return promise.finally(() => u.remove(this._playingClusters, newCluster))
     } finally {
       // This must happen sync. We cannot await the promise above, or we will be too late.
       this._startingCount--
@@ -61,7 +61,7 @@ export class MotionController {
 
   finish(element: Element = document.body): void {
     for (let playingCluster of this._findPlayingClusters(element)) {
-      remove(this._playingClusters, playingCluster)
+      u.remove(this._playingClusters, playingCluster)
 
       for (let playingElement of playingCluster) {
         this._emitFinishEvent(playingElement)
@@ -71,7 +71,7 @@ export class MotionController {
 
   _findPlayingClusters(queryElement: Element): MotionCluster[] {
     return this._playingClusters.filter((cluster) => {
-      return some(cluster, (clusterElement) => queryElement.contains(clusterElement))
+      return u.some(cluster, (clusterElement) => queryElement.contains(clusterElement))
     })
   }
 

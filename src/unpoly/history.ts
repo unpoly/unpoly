@@ -1,5 +1,5 @@
-import { isArray, isBlank, isList, isObject, isString, matchURLs, normalizeURL, pick } from './util.js'
-import { getRoot, setAttrPresence, setMissingAttrs } from './element.js'
+import * as u from './util.js'
+import * as e from './element.js'
 import { muteUncriticalRejection } from './error.js'
 import { build, emit, haltEvent, isModified, on } from './event.js'
 import { render } from './fragment.js'
@@ -12,7 +12,6 @@ import { registerMacro } from './script.js'
 import { newConfig } from './util/config.js'
 import { FIFOCache } from './util/fifo_cache.js'
 import { revealHash, revealHashFn, saveFocus, saveScroll } from './viewport.js'
-import type { NormalizeURLOptions, PlainObject } from './util.js'
 import type { RenderOptions } from './fragment/render/render_options.js'
 import type { ClickEvent } from './link.js'
 
@@ -209,7 +208,7 @@ function reset(): void {
 // Values we want to override:
 // - true (do update with defaults)
 export function refineOption(existingValue: any, newValue: any): any {
-  if ((existingValue === false) || isString(existingValue) || isList(existingValue)) {
+  if ((existingValue === false) || u.isString(existingValue) || u.isList(existingValue)) {
     return existingValue
   } else {
     return newValue
@@ -227,7 +226,7 @@ Returns whether `up.history.config.enabled` allows Unpoly to update the given as
 */
 export function isHistoryEnabled(aspect: HistoryAspect): boolean {
   let { enabled } = historyConfig
-  return isArray(enabled) ? enabled.includes(aspect) : !!enabled
+  return u.isArray(enabled) ? enabled.includes(aspect) : !!enabled
 }
 
 /*-
@@ -264,8 +263,8 @@ export const canPushState = mockable(function canPushState(): boolean {
   return initialRequestMethod() === 'GET'
 })
 
-export function historyOptions(options: PlainObject): PlainObject {
-  return pick(options, [
+export function historyOptions(options: u.PlainObject): u.PlainObject {
+  return u.pick(options, [
     'location',
     'title',
     'metaTags',
@@ -292,7 +291,7 @@ It will include a `#hash` fragment and query string, if present.
 @signature
 */
 export function currentLocation(): string {
-  return normalizeURL(location.href)
+  return u.normalizeURL(location.href)
 }
 
 function withTrackOptions(trackOptions: HistoryTrackOptions | undefined, fn: () => void): void {
@@ -487,8 +486,8 @@ up.history.isLocation('http://other-host/foo') // result: false
   Whether the browser is currently at the given location.
 @stable
 */
-export function isLocation(url: string, options?: NormalizeURLOptions): boolean {
-  return matchURLs(url, location.href, { hash: true, ...options })
+export function isLocation(url: string, options?: u.NormalizeURLOptions): boolean {
+  return u.matchURLs(url, location.href, { hash: true, ...options })
 }
 
 /*-
@@ -573,7 +572,7 @@ function isAdoptedBase(location: string): boolean {
 }
 
 function adoptBase(location: string = currentLocation()): void {
-  location = normalizeURL(location)
+  location = u.normalizeURL(location)
   adoptedBases.set(location, true)
 }
 
@@ -590,7 +589,7 @@ function adoptState(): void {
 
   // Add our { up } key to "don't care" states like "", null or {}, but not
   // to other values.
-  if (isBlank(state) || isObject(state)) {
+  if (u.isBlank(state) || u.isObject(state)) {
     withTrackOptions({ pauseTracking: true }, function() {
       history.replaceState({ ...state, up: true }, '')
     })
@@ -761,7 +760,7 @@ export function getLang(doc: Document = document): string | undefined {
 
 export function updateLang(newLang: string | undefined): void {
   // setAttrPresence() only reads the value when it's present.
-  setAttrPresence(getRoot(), 'lang', newLang!, !!newLang)
+  e.setAttrPresence(e.getRoot(), 'lang', newLang!, !!newLang)
 }
 
 function patchHistoryAPI(): void {
@@ -800,7 +799,7 @@ function onJumpLinkClicked(event: ClickEvent, link: HTMLAnchorElement): void {
   if (isModified(event)) return
 
   let [currentBase, currentHash] = splitLocation(layerStack.current.location)
-  let [linkBase, linkHash] = splitLocation(normalizeURL(link))
+  let [linkBase, linkHash] = splitLocation(u.normalizeURL(link))
   // The listener only matches links with an [href].
   let verbatimHREF = link.getAttribute('href')!
 
@@ -914,7 +913,7 @@ export function install(): void {
 
   registerMacro('[up-back]', function(link) {
     if (previousLocation) {
-      setMissingAttrs(link, {
+      e.setMissingAttrs(link, {
         'up-href': previousLocation,
         'up-scroll': 'restore'
       })

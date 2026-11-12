@@ -1,5 +1,5 @@
-import { newOptions } from './util.js'
-import { isEmpty, setMissingAttrs, stringAttr } from './element.js'
+import * as u from './util.js'
+import * as e from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { build } from './event.js'
 import { compressNestedSteps, getAllFragments, getSmart, tryToTarget } from './fragment.js'
@@ -11,8 +11,6 @@ import { FragmentPolling } from './radio/fragment_polling.js'
 import { callbackAttr, registerAttrCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
 import { newConfig } from './util/config.js'
-import type { PlainObject } from './util.js'
-import type { ElementOrSelector } from './element.js'
 import type { FragmentKeepEvent, RenderStep } from './fragment.js'
 import type { RenderOptions } from './fragment/render/render_options.js'
 
@@ -97,7 +95,7 @@ export const radioConfig = newConfig('up.radio.config', (): RadioConfig => ({
   pollInterval: 30000,
 }))
 
-export function hungrySteps(renderOptions: PlainObject): HungrySteps {
+export function hungrySteps(renderOptions: u.PlainObject): HungrySteps {
   let { hungry, origin, layer: renderLayer, meta } = renderOptions
   let steps: HungrySteps = { current: [], other: [] }
 
@@ -122,7 +120,7 @@ export function hungrySteps(renderOptions: PlainObject): HungrySteps {
         continue
       }
 
-      let ifLayer = stringAttr(element, 'up-if-layer')
+      let ifLayer = e.stringAttr(element, 'up-if-layer')
       let applicableLayers = ifLayer ? layerStack.getAll(ifLayer, { baseLayer: elementLayer }) : [elementLayer]
 
       let elementMotion = motionOptions(element)
@@ -389,7 +387,7 @@ The given element does not need an `[up-poll]` attribute.
   @mix up.render/loading-state
 @stable
 */
-export function startPolling(fragment: Element, options: PlainObject = {}): void {
+export function startPolling(fragment: Element, options: u.PlainObject = {}): void {
   FragmentPolling.forFragment(fragment).forceStart(options)
 }
 
@@ -440,9 +438,9 @@ let options = up.radio.pollOptions(fragment)
   The [options](/api/up.radio.startPolling#parameters) that Unpoly would use to poll the given fragment.
 @experimental
 */
-export function pollOptions(fragment: ElementOrSelector, options?: PlainObject): PlainObject {
+export function pollOptions(fragment: e.ElementOrSelector, options?: u.PlainObject): u.PlainObject {
   fragment = getSmart(fragment)!
-  options = newOptions(options)
+  options = u.newOptions(options)
   const defaults = { background: true }
   const parser = new OptionsParser(fragment, options, { defaults })
   parser.number('interval', { default: radioConfig.pollInterval })
@@ -626,7 +624,7 @@ export function install(): void {
   })
 
   registerMacro('[up-flashes]', function(fragment) {
-    setMissingAttrs(fragment, {
+    e.setMissingAttrs(fragment, {
       'up-hungry': '',
       'up-if-layer': 'subtree',
       'up-keep': '',
@@ -635,7 +633,7 @@ export function install(): void {
 
     fragment.addEventListener('up:fragment:keep', function(event) {
       // A flash is an HTML element, so its new version is one too.
-      if (!isEmpty((event as FragmentKeepEvent).newFragment as HTMLElement)) event.preventDefault()
+      if (!e.isEmpty((event as FragmentKeepEvent).newFragment as HTMLElement)) event.preventDefault()
     })
   })
 }

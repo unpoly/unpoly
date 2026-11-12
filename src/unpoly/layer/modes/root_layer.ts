@@ -1,4 +1,4 @@
-import { getRoot } from '../../element.js'
+import * as e from '../../element.js'
 import { fail } from '../../error.js'
 import { Layer } from '../base.js'
 import type { LayerMode, LayerOptions } from '../base.js'
@@ -33,7 +33,7 @@ export class RootLayer extends Layer {
     //    will yield a result.
     // 5. Also it's nice that elements in the <head> also belong to the root layer.
     //    Otherwise they would not belong to any layer.
-    this.element = getRoot()
+    this.element = e.getRoot()
     this.setupHandlers()
   }
 

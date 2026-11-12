@@ -1,4 +1,4 @@
-import type { List, PlainObject } from './util.js'
+import * as u from './util.js'
 import type { Compiler } from './script/hello_fragment.js'
 import type { LocationChangedEvent } from './history.js'
 import type { Layer } from './layer/base.js'
@@ -21,7 +21,7 @@ export interface Migrate {
   formerlyAsync?(label: string): Promise<void>
   fixEventTypes?(eventTypes: string[]): string[]
   fixGetStyleProps?(keyOrKeys: string | string[]): string | string[]
-  fixSetStyleProps?(props: string | PlainObject, unit?: string): string | PlainObject
+  fixSetStyleProps?(props: string | u.PlainObject, unit?: string): string | u.PlainObject
   splitAtOr?(value: string): string[] | undefined
   clearCacheFromXHR?(xhr: XMLHttpRequest): string | false | undefined
   titleFromXHR?(xhr: XMLHttpRequest): string | false | undefined
@@ -29,16 +29,16 @@ export interface Migrate {
   watchForSwitch?(root: Element, callback: (event: Event) => void): (() => void) | undefined
   migratedFormGroupSelectors?(): string[]
   prepareLocationChangedEvent?(event: LocationChangedEvent): void
-  warnOfHungryMetaTags?(metaTags: List<Element>): void
-  handleResponseDocOptions?(docOptions: PlainObject): void
-  processHelloMeta?(meta: PlainObject, response: UpResponse): void
+  warnOfHungryMetaTags?(metaTags: u.List<Element>): void
+  handleResponseDocOptions?(docOptions: u.PlainObject): void
+  processHelloMeta?(meta: u.PlainObject, response: UpResponse): void
   preprocessRenderOptions?(options: RenderOptions): void
   postprocessReloadOptions?(options: RenderOptions): void
-  resolveOrigin?(target: string, options?: PlainObject): string
+  resolveOrigin?(target: string, options?: u.PlainObject): string
   handleRequestOptions?(options: RequestOptions): void
   preprocessAbortArgs?(args: any[]): void
-  handleLayerOptions?(options: PlainObject): void
-  handleLayerConfig?(modeConfig: PlainObject): void
+  handleLayerOptions?(options: u.PlainObject): void
+  handleLayerConfig?(modeConfig: u.PlainObject): void
   registerLayerCloser?(layer: Layer): void
 }
 

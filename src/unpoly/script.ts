@@ -1,10 +1,5 @@
-import {
-  cleaner, evalOption, filterList, isDefined, isOptions, map, newOptions, parseArgs, pick,
-  scanFunctions,
-} from './util.js'
-import {
-  addClassTemp, booleanOrStringAttr, jsonAttr, metaContent, parseAttr, removeAttrsFromHTML, subtree,
-} from './element.js'
+import * as u from './util.js'
+import * as e from './element.js'
 import { fail, guard } from './error.js'
 import { mockable } from './mockable.js'
 import { assertEmitted, on } from './event.js'
@@ -17,8 +12,6 @@ import { ScriptGate } from './script/csp/script_gate.js'
 import { DestructorPass } from './script/destructor_pass.js'
 import { HelloFragment } from './script/hello_fragment.js'
 import { newConfig } from './util/config.js'
-import type { Cleaner, List, PlainObject } from './util.js'
-import type { ElementOrSelector } from './element.js'
 import type { CSPInfo } from './script/csp/csp_info.js'
 import type { PolicyString } from './script/csp/script_gate.js'
 import type { Compiler, HelloFragmentOptions } from './script/hello_fragment.js'
@@ -106,17 +99,17 @@ export interface ParseCallbackOptions {
 // The properties Unpoly sets on elements to remember their data and destructors.
 type ScriptedElement = Element & {
   upData?: any
-  upTemplateData?: PlainObject
-  upCompileData?: PlainObject
-  upDestructors?: Cleaner
+  upTemplateData?: u.PlainObject
+  upCompileData?: u.PlainObject
+  upDestructors?: u.Cleaner
 }
 
 /**
 The `up:assets:changed` event.
 */
 export type AssetsChangedEvent = Event & {
-  newAssets: List<Element>
-  oldAssets: List<Element>
+  newAssets: u.List<Element>
+  oldAssets: u.List<Element>
   renderOptions: RenderOptions
   response: UpResponse | undefined
 }
@@ -217,7 +210,7 @@ Configures defaults for script handling and asset tracking.
 @stable
 */
 export const scriptConfig = newConfig('up.script.config', (): ScriptConfig => ({
-  cspNonce() { return metaContent('csp-nonce') },
+  cspNonce() { return e.metaContent('csp-nonce') },
   cspWarnings: true,
   scriptElementPolicy: 'auto',
   evalCallbackPolicy: 'auto',
@@ -577,14 +570,14 @@ export function registerAttrCompiler(...args: any[]): void {
   let { defaultValue } = options
 
   let callback = (element: HTMLElement) => {
-    let value = booleanOrStringAttr(element, attr)
+    let value = e.booleanOrStringAttr(element, attr)
 
     // Do nothing in a case like [up-defer=false]
     if (value === false) return
 
     // Some attributes have a default value in case no value is given.
     // E.g. [up-defer=""] or [up-defer="true"] defaults to [up-defer="insert"].
-    if (isDefined(defaultValue) && value === true) value = defaultValue
+    if (u.isDefined(defaultValue) && value === true) value = defaultValue
 
     return valueCallback(element, value)
   }
@@ -592,7 +585,7 @@ export function registerAttrCompiler(...args: any[]): void {
 }
 
 function detectSystemMacroPriority(macroSelector: string | (() => string)): number {
-  macroSelector = evalOption(macroSelector)
+  macroSelector = u.evalOption(macroSelector)
   for (let substr in SYSTEM_MACRO_PRIORITIES) {
     if (macroSelector.indexOf(substr) >= 0) {
       return SYSTEM_MACRO_PRIORITIES[substr]
@@ -601,7 +594,7 @@ function detectSystemMacroPriority(macroSelector: string | (() => string)): numb
   fail('Unregistered priority for system macro %o', macroSelector)
 }
 
-function registerProcessor(args: any[], overrides: PlainObject = {}): void {
+function registerProcessor(args: any[], overrides: u.PlainObject = {}): void {
   let processor = buildProcessor(args, overrides)
 
   if (processor.macro) {
@@ -618,13 +611,13 @@ function registerProcessor(args: any[], overrides: PlainObject = {}): void {
 }
 
 const parseProcessorArgs = function(args: any[]): any[] {
-  return parseArgs(args, 'val', 'options', 'callback')
+  return u.parseArgs(args, 'val', 'options', 'callback')
 }
 
-function buildProcessor(args: any[], overrides: PlainObject): Compiler & PlainObject {
+function buildProcessor(args: any[], overrides: u.PlainObject): Compiler & u.PlainObject {
   let [selector, options, callback] = parseProcessorArgs(args)
 
-  options = newOptions(options, {
+  options = u.newOptions(options, {
     selector,
     isDefault: isEvaling(),
     priority: 0,
@@ -634,7 +627,7 @@ function buildProcessor(args: any[], overrides: PlainObject): Compiler & PlainOb
   return Object.assign(callback, options, overrides)
 }
 
-function insertProcessor(queue: Compiler[], newCompiler: Compiler & PlainObject): Compiler {
+function insertProcessor(queue: Compiler[], newCompiler: Compiler & u.PlainObject): Compiler {
   let existingCompiler
   let index = 0
   while ((existingCompiler = queue[index]) && (existingCompiler.priority >= newCompiler.priority)) {
@@ -706,7 +699,7 @@ for (let element of document.querySelectorAll('div')) {
 @stable
 */
 export function registerDestructor(element: ScriptedElement, value: any): void {
-  let fns = scanFunctions(value)
+  let fns = u.scanFunctions(value)
   if (!fns.length) return
 
   // (A) If the element has already been destroyed, registering a destructor function
@@ -724,9 +717,9 @@ export function registerDestructor(element: ScriptedElement, value: any): void {
   }
 }
 
-function buildDestructorRegistry(element: Element): Cleaner {
-  let registry = cleaner()
-  registry(addClassTemp(element, 'up-can-clean'))
+function buildDestructorRegistry(element: Element): u.Cleaner {
+  let registry = u.cleaner()
+  registry(e.addClassTemp(element, 'up-can-clean'))
   return registry
 }
 
@@ -873,7 +866,7 @@ let compiled = await up.hello(textarea) // compiled === textarea
 @stable
 @signature
 */
-export function hello(element: ElementOrSelector, options: HelloOptions = {}): Promise<Element> {
+export function hello(element: e.ElementOrSelector, options: HelloOptions = {}): Promise<Element> {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   element = getSmart(element, options)!
 
@@ -897,7 +890,7 @@ and does not remove the element from the DOM.
 @param {up.Layer} options.layer
 @internal
 */
-export function clean(fragment: Element, options: PlainObject = {}): void {
+export function clean(fragment: Element, options: u.PlainObject = {}): void {
   new DestructorPass(fragment, options).run()
 }
 
@@ -1024,14 +1017,14 @@ export const readData = mockable(function readData(element: any): any {
 })
 
 function buildData(element: ScriptedElement & HTMLElement): any {
-  let parsedJSON = jsonAttr(element, 'up-data') ?? {}
+  let parsedJSON = e.jsonAttr(element, 'up-data') ?? {}
 
   // If the [up-data] JSON isn't an object then we cannot offer live merging
   // of [up-data] and [data-...] attributes.
   //
   // It would be better to parse this lazily, but I don't want to pay
   // the bytes for a second Proxy handler when dealing with this edge case.
-  if (!isOptions(parsedJSON)) {
+  if (!u.isOptions(parsedJSON)) {
     return parsedJSON
   }
 
@@ -1127,7 +1120,7 @@ By marking the `<meta>` tag with `[up-asset]`, it will also emit an `up:assets:c
 @stable
 */
 
-export function assertAssetsOK(newAssets: Iterable<Element> & { length?: number }, renderOptions: PlainObject): void {
+export function assertAssetsOK(newAssets: Iterable<Element> & { length?: number }, renderOptions: u.PlainObject): void {
   let { response } = renderOptions
   let oldAssets = findAssets()
 
@@ -1137,13 +1130,13 @@ export function assertAssetsOK(newAssets: Iterable<Element> & { length?: number 
 }
 
 function assetsIdentity(assets: Iterable<Element> & { length?: number }): string {
-  return map(assets, assetIdentity).join()
+  return u.map(assets, assetIdentity).join()
 }
 
 function assetIdentity(assetElement: Element): string {
   // Remove the [nonce] attribute which the browser usually masks from the outerHTML of <script> elements.
   // However it isn't masked for inert scripts (e.g. when they fail a CSP check).
-  return removeAttrsFromHTML(assetElement.outerHTML, ['nonce'])
+  return e.removeAttrsFromHTML(assetElement.outerHTML, ['nonce'])
 }
 
 /*-
@@ -1214,9 +1207,9 @@ export function block(root: ParentNode): void {
   }
 }
 
-export function findScripts(root: ParentNode, condition = ''): List<HTMLScriptElement> {
+export function findScripts(root: ParentNode, condition = ''): u.List<HTMLScriptElement> {
   let selector = scriptConfig.selector('scriptSelectors', condition)
-  return subtree(root, selector) as List<HTMLScriptElement>
+  return e.subtree(root, selector) as u.List<HTMLScriptElement>
 }
 
 export function isScript(value: Element): boolean {
@@ -1231,12 +1224,12 @@ export function adoptDetachedHeadAsset(script: Element, cspInfo: CSPInfo | undef
   new ScriptGate(cspInfo).adoptDetachedHeadAsset(script)
 }
 
-export function adoptRenderOptionsFromHeader(renderOptions: PlainObject, cspInfo: CSPInfo | undefined): void {
+export function adoptRenderOptionsFromHeader(renderOptions: u.PlainObject, cspInfo: CSPInfo | undefined): void {
   new ScriptGate(cspInfo).adoptRenderOptionsFromHeader(renderOptions)
 }
 
 export function callbackAttr(element: Element, attrName: string, parseOpts?: ParseCallbackOptions): ((...args: any[]) => any) | undefined {
-  return parseAttr(element, attrName, (code) => {
+  return e.parseAttr(element, attrName, (code) => {
     let fn = parseCallback(code, parseOpts)
     // Emulate the behavior of the `onclick` attribute, where `this` refers to the clicked element.
     return fn.bind(element)
@@ -1251,7 +1244,7 @@ export function parseCallback(code: string, { argNames = ['event'], expandObject
     if (expandObject) {
       let object = argValues[0]
       callArgNames = [...argNames, ...expandObject]
-      argValues = [object, ...Object.values(pick(object, expandObject))]
+      argValues = [object, ...Object.values(u.pick(object, expandObject))]
     }
 
     const nonceableCallback = NonceableCallback.fromCallbackString(code)
@@ -1261,7 +1254,7 @@ export function parseCallback(code: string, { argNames = ['event'], expandObject
 }
 
 export const cspNonce = mockable(function cspNonce(): string | undefined {
-  return evalOption(scriptConfig.cspNonce)
+  return u.evalOption(scriptConfig.cspNonce)
 })
 
 export function warnOfUnsafeCSP(cspInfo: CSPInfo | undefined): void {
@@ -1273,8 +1266,8 @@ Resets the list of registered compiler directives to the
 moment when the framework was booted.
 */
 function reset(): void {
-  registeredCompilers = filterList(registeredCompilers, 'isDefault')
-  registeredMacros = filterList(registeredMacros, 'isDefault')
+  registeredCompilers = u.filterList(registeredCompilers, 'isDefault')
+  registeredMacros = u.filterList(registeredMacros, 'isDefault')
 }
 
 export function install(): void {

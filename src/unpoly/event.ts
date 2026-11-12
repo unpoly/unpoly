@@ -1,5 +1,5 @@
-import { extractOptions, last, omit, parseArgs, pick, some } from './util.js'
-import { getRoot, jsonAttr, stringAttr } from './element.js'
+import * as u from './util.js'
+import * as e from './element.js'
 import { fail } from './error.js'
 import { mockable } from './mockable.js'
 import { EventEmitter } from './event/event_emitter.js'
@@ -8,10 +8,8 @@ import { UpEventListener } from './event/event_listener.js'
 import { layerStack } from './layer.js'
 import { printUserEvent } from './log.js'
 import { registerDestructor } from './script.js'
-import type { List, PlainObject } from './util.js'
 import type { AssetsChangedEvent } from './script.js'
 import type { ClickEvent, DeferredLoadEvent, LinkFollowEvent, LinkPreloadEvent } from './link.js'
-import type { ElementDefinedEvent } from './element.js'
 import type { EmitLogOption } from './event/event_emitter.js'
 import type { EventListenerAttributes, ListenerCallback } from './event/event_listener.js'
 import type { FormSubmitEvent, FormSwitchEvent, FormValidateEvent } from './form.js'
@@ -53,7 +51,7 @@ export interface UpEventMap {
   'up:assets:changed': AssetsChangedEvent
   'up:click': ClickEvent
   'up:deferred:load': DeferredLoadEvent
-  'up:element:defined': ElementDefinedEvent
+  'up:element:defined': e.ElementDefinedEvent
   'up:form:submit': FormSubmitEvent
   'up:form:switch': FormSwitchEvent
   'up:form:validate': FormValidateEvent
@@ -120,7 +118,7 @@ export type EventTypes = string | readonly string[]
 /**
 What `up.on()` listens on: an element, the document, the window, or a list of elements.
 */
-export type ListenerTargets = EventTarget | List<EventTarget>
+export type ListenerTargets = EventTarget | u.List<EventTarget>
 
 /**
 A selector for `up.on()` to delegate events, or a function that returns it.
@@ -144,14 +142,14 @@ export type ListenerArgs<E, O = ListenerOptions> =
 /**
 Where `up.emit()` emits an event: an element, the document, the window, a list with one element, or a layer.
 */
-export type EmitTarget = EventTarget | List<EventTarget> | Layer
+export type EmitTarget = EventTarget | u.List<EventTarget> | Layer
 
 /**
 Properties for an event emitted with `up.emit()`, and options for its emission.
 */
 export interface EmitProps {
   layer?: LayerReference | number
-  target?: Element | List<Element> | string
+  target?: Element | u.List<Element> | string
   log?: EmitLogOption
   [prop: string]: any
 }
@@ -172,7 +170,7 @@ Features to emit and observe DOM events.
 function reset(): void {
   // Resets the list of registered event listeners to the
   // moment when the framework was booted.
-  for (let globalElement of [window, document, getRoot(), document.body]) {
+  for (let globalElement of [window, document, e.getRoot(), document.body]) {
     for (let listener of UpEventListener.allNonDefault(globalElement)) {
       listener.unbind()
     }
@@ -353,7 +351,7 @@ up.event.onClosest(element, 'click', function() {
 export function onClosest<T extends EventTypes>(element: Element, types: T, callback: ListenerCallback<ObservedEvent<T>>): UnbindFn
 export function onClosest<T extends EventTypes>(element: Element, types: T, options: { layer?: LayerReference }, callback: ListenerCallback<ObservedEvent<T>>): UnbindFn
 export function onClosest(...args: any[]): UnbindFn {
-  let [fragment, eventType, { layer }, callback] = parseArgs(args, 'val', 'val', 'options', 'callback')
+  let [fragment, eventType, { layer }, callback] = u.parseArgs(args, 'val', 'val', 'options', 'callback')
   layer &&= layerStack.get(layer, { origin: fragment })
   let guard = (event: Event) => (event.target as Element).contains(fragment) && (!layer || layer.contains(event.target as Element))
   let unsubscribe = on(eventType, { guard }, callback)
@@ -396,7 +394,7 @@ export function off(...args: any[]): void {
   return buildListenerGroup(args).unbind()
 }
 
-function buildListenerGroup(args: any[], options?: PlainObject): EventListenerGroup {
+function buildListenerGroup(args: any[], options?: u.PlainObject): EventListenerGroup {
   return EventListenerGroup.fromBindArgs(args, options)
 }
 
@@ -503,14 +501,14 @@ up.emit(event)                       // emits the event
   The unemitted event object.
 @stable
 */
-export function build<T extends string>(type: T, props?: PlainObject): EmittedEvent<T>
-export function build<T extends string>(props: PlainObject & { type?: T }): EmittedEvent<T>
+export function build<T extends string>(type: T, props?: u.PlainObject): EmittedEvent<T>
+export function build<T extends string>(props: u.PlainObject & { type?: T }): EmittedEvent<T>
 export function build(...args: any[]): Event {
-  const props = extractOptions(args)
+  const props = u.extractOptions(args)
   const type = args[0] || props.type || fail('Missing event type')
 
   const event = new Event(type, { bubbles: true, cancelable: true })
-  Object.assign(event, omit(props, ['type', 'target']))
+  Object.assign(event, u.omit(props, ['type', 'target']))
 
   return event
 }
@@ -620,7 +618,7 @@ so listeners of `up:click` don't need this check.
 @experimental
 */
 export function isModified(event: Pick<MouseEvent, 'button' | ModifierKey>): boolean {
-  return (event.button > 0) || some(keyModifiers, (modifier) => event[modifier])
+  return (event.button > 0) || u.some(keyModifiers, (modifier) => event[modifier])
 }
 
 /*-
@@ -641,7 +639,7 @@ export const isSyntheticClick = mockable(function isSyntheticClick(event: Event)
 
 export function fork(originalEvent: Event, newType: string, copyKeys: string[] = []): ForkedEvent {
   // The keys may belong to a subclass, like MouseEvent#clientX.
-  const newEvent = build(newType, pick(originalEvent as PlainObject, copyKeys)) as ForkedEvent
+  const newEvent = build(newType, u.pick(originalEvent as u.PlainObject, copyKeys)) as ForkedEvent
   newEvent.originalEvent = originalEvent; // allow users to access other props through event.originalEvent.prop
 
   (['stopPropagation', 'stopImmediatePropagation', 'preventDefault'] as const).forEach(function(key) {
@@ -745,8 +743,8 @@ to the `/menu` path.
 function executeEmitAttr(event: ClickEvent, element: Element): void {
   if (isModified(event)) { return }
   // The listener only matches [up-emit].
-  const eventType = stringAttr(element, 'up-emit')!
-  const eventProps = jsonAttr(element, 'up-emit-props')
+  const eventType = e.stringAttr(element, 'up-emit')!
+  const eventProps = e.jsonAttr(element, 'up-emit-props')
   const forkedEvent = fork(event, eventType)
   Object.assign(forkedEvent, eventProps)
   emit(element, forkedEvent)
@@ -804,7 +802,7 @@ window.addEventListener('scroll', function() {
 @experimental
 */
 export function getInputDevice(): InputDevice {
-  return last(inputDevices)
+  return u.last(inputDevices)
 }
 
 function observeInputDevice(newModality: InputDevice): void {

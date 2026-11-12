@@ -1,9 +1,8 @@
-import { every, filterList, findResult, isElement, isElementLike, presence, some } from '../util.js'
-import { elementLikeMatches, subtree } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { CannotMatch } from '../error/cannot_match.js'
 import { expandTargets, isNotDestroying } from '../fragment.js'
 import { layerStack } from '../layer.js'
-import type { List, PlainObject } from '../util.js'
 import type { Layer } from '../layer/base.js'
 
 type ElementFilter = (element: Element) => boolean
@@ -15,7 +14,7 @@ export class Selector {
   declare _unionSelector: string
 
   // The options are lookup options like { layer, origin, destroying }, see up.fragment.get().
-  constructor(selector: any, elementOrDocument: Element | Document | undefined, options: PlainObject = {}) {
+  constructor(selector: any, elementOrDocument: Element | Document | undefined, options: u.PlainObject = {}) {
     // If we're given an element that is detached *or* from another document
     // (think up.ResponseDoc), it has no layer and no destroying ancestors.
     let externalDocument = elementOrDocument && !document.contains(elementOrDocument)
@@ -23,7 +22,7 @@ export class Selector {
 
     // Some up.fragment functions center around an element, like up.fragment.closest(element, selector).
     // In this case up.fragment passes us that element, and we search the element's layer unless told otherwise.
-    options.layer ??= presence(elementOrDocument, isElement)
+    options.layer ??= u.presence(elementOrDocument, u.isElement)
 
     // With a single layer in the DOM, every element belongs to it and we can skip the layer lookup.
     // We count layers in the DOM, not open layers: a closed overlay may still be playing its exit animation.
@@ -46,9 +45,9 @@ export class Selector {
       // (3) Only match within the given layers. Earlier layers are preferred.
       //     Use the first layer to expand layer-specific selectors like `:main` or `:layer`.
       this._layers = layers
-      this._filters.push((match) => some(layers, (layer) => layer.contains(match)))
+      this._filters.push((match) => u.some(layers, (layer) => layer.contains(match)))
       expandTargetLayer = layers[0]
-    } else if (isElementLike(options.layer) || (options.layer === 'origin' && options.origin)) {
+    } else if (u.isElementLike(options.layer) || (options.layer === 'origin' && options.origin)) {
       // (4) The layer of the given element-like value (root, { layer } or { origin }) has closed.
       //     Its elements may still be in the DOM, playing their exit animation,
       //     but nothing in a closed layer can match.
@@ -66,7 +65,7 @@ export class Selector {
   }
 
   matches(element: Element): boolean {
-    return elementLikeMatches(element, this._unionSelector) && this._passesFilter(element)
+    return e.elementLikeMatches(element, this._unionSelector) && this._passesFilter(element)
   }
 
   closest(element: Element): HTMLElement | undefined {
@@ -89,7 +88,7 @@ export class Selector {
     // A Document root narrows nothing, so it is not a root for our purposes. Treating it
     // as one would search the whole document and let the layer filter (which accepts a
     // match in *any* requested layer) pick, losing the layer preference below.
-    if (isElement(root)) {
+    if (u.isElement(root)) {
       return this._firstSelectorMatch((selector) => root.querySelectorAll<HTMLElement>(selector))
     } else if (!this._layers) {
       // With layers out of the picture the container is a whole document: the one we were
@@ -100,33 +99,33 @@ export class Selector {
       // up.fragment.get('main', { layer: 'current root' }) may match in both layers, but
       // must return the match in 'current'. A layer element may itself be the match, as in
       // up.fragment.get('body'), hence e.subtree().
-      return findResult(this._layers, (layer) => {
-        return this._firstSelectorMatch((selector) => subtree(layer.element, selector))
+      return u.findResult(this._layers, (layer) => {
+        return this._firstSelectorMatch((selector) => e.subtree(layer.element, selector))
       })
     }
   }
 
   subtree(root: Element): HTMLElement[] {
-    return this._filterMany(subtree(root, this._unionSelector))
+    return this._filterMany(e.subtree(root, this._unionSelector))
   }
 
-  _firstSelectorMatch(fn: (selector: string) => List<HTMLElement>): HTMLElement | undefined {
-    return findResult(this._selectors, (selector) => {
+  _firstSelectorMatch(fn: (selector: string) => u.List<HTMLElement>): HTMLElement | undefined {
+    return u.findResult(this._selectors, (selector) => {
       return this._filterMany(fn(selector))[0]
     })
   }
 
   _passesFilter(element: Element | null): boolean {
     // Null for a missing element, which callers treat like false.
-    return (element && every(this._filters, (filter) => filter(element))) as boolean
+    return (element && u.every(this._filters, (filter) => filter(element))) as boolean
   }
 
   _filterOne(element: HTMLElement | null): HTMLElement | undefined {
-    return presence(element, this._passesFilter.bind(this))
+    return u.presence(element, this._passesFilter.bind(this))
   }
 
-  _filterMany(elements: List<HTMLElement>): HTMLElement[] {
-    return filterList(elements, this._passesFilter.bind(this))
+  _filterMany(elements: u.List<HTMLElement>): HTMLElement[] {
+    return u.filterList(elements, this._passesFilter.bind(this))
   }
 
 }

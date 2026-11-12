@@ -1,6 +1,4 @@
-import {
-  always, containsAll, defineDelegates, each, every, filterList, last, remove, variant, wrapValue,
-} from '../util.js'
+import * as u from '../util.js'
 import { splitTarget } from '../fragment.js'
 import { networkConfig } from '../network.js'
 import { UpRequest } from './request.js'
@@ -30,11 +28,11 @@ class Route {
   matchBest(newRequest: UpRequest): UpRequest | undefined {
     let matches = this.requests.filter((cachedRequest) => this.satisfies(cachedRequest, newRequest))
     // Newer requests are always appended
-    return last(matches)
+    return u.last(matches)
   }
 
   delete(request: UpRequest): void {
-    remove(this.requests, request)
+    u.remove(this.requests, request)
   }
 
   put(request: UpRequest): void {
@@ -50,7 +48,7 @@ class Route {
   satisfies(cachedRequest: UpRequest, newRequest: UpRequest): boolean {
     if (cachedRequest === newRequest) return true
 
-    return every(this.varyHeaders, (varyHeader) => {
+    return u.every(this.varyHeaders, (varyHeader) => {
       let cachedValue = cachedRequest.header(varyHeader)
       let newValue = newRequest.header(varyHeader)
 
@@ -64,7 +62,7 @@ class Route {
         let cachedTokens = splitTarget(cachedValue)
         let newTokens = splitTarget(newValue)
 
-        return containsAll(cachedTokens, newTokens)
+        return u.containsAll(cachedTokens, newTokens)
       } else {
         return cachedValue === newValue
       }
@@ -148,7 +146,7 @@ export class UpRequestCache {
     } else {
       // Wait until existingRequest responds or errors.
       // Note that while we're waiting, existingRequest could be evicted, e.g. after a failed response.
-      value = await always(existingRequest)
+      value = await u.always(existingRequest)
 
       // If newRequest was aborted while waiting, it must stay aborted.
       // In particular we must not re-send it on a Vary mismatch, or delegate its state to existingRequest.
@@ -165,14 +163,14 @@ export class UpRequestCache {
         // Create a variant where response.request === newRequest.
         // This is needed so up.render({ response }) can see the correct value for response.request.fromCache,
         // which is true for the cache-missing request but false for the cache-hitting request.
-        value = variant(value, { request: newRequest })
+        value = u.variant(value, { request: newRequest })
 
         // respondWith() will check response.ok and either fulfill or reject newRequest's promise.
         newRequest.respondWith(value)
 
         // Since this request object is never in the cache, we need
         // to expire ourselves when otherRequest is expired.
-        defineDelegates(newRequest, ['expired', 'state'], () => existingRequest)
+        u.defineDelegates(newRequest, ['expired', 'state'], () => existingRequest)
       } else {
         // A supposed cache hit turns out to be a cache *miss* due to the response carrying
         // an incompatible Vary header.
@@ -230,7 +228,7 @@ export class UpRequestCache {
   }
 
   _delete(request: UpRequest): void {
-    remove(this._requests, request)
+    u.remove(this._requests, request)
     request.cacheRoute?.delete(request)
   }
 
@@ -263,13 +261,13 @@ export class UpRequestCache {
     let tester = UpRequest.tester(condition, testerOptions)
 
     // Copy results so evict() can delete from the list we're iterating over
-    let results = filterList(this._requests, tester)
+    let results = u.filterList(this._requests, tester)
 
-    each(results, fn)
+    u.each(results, fn)
   }
 
   _wrap(requestOrOptions: UpRequest | RequestOptions): UpRequest {
-    return wrapValue(UpRequest, requestOrOptions)
+    return u.wrapValue(UpRequest, requestOrOptions)
   }
 
 }

@@ -1,9 +1,6 @@
 import './link.sass'
-import { isUndefined, newOptions, normalizeMethod } from './util.js'
-import {
-  addClasses, booleanOrStringAttr, crossOriginSelector, getOne, numberAttr, setMissingAttr,
-  setMissingAttrs, stringAttr, upAttrs, upClasses,
-} from './element.js'
+import * as u from './util.js'
+import * as e from './element.js'
 import { muteUncriticalRejection } from './error.js'
 import { mockable } from './mockable.js'
 import { OptionsParser } from './element/options_parser.js'
@@ -23,8 +20,6 @@ import { registerAttrCompiler, registerCompiler, registerMacro } from './script.
 import { statusOptions } from './status.js'
 import { newConfig } from './util/config.js'
 import { doFocus } from './viewport.js'
-import type { PlainObject } from './util.js'
-import type { ElementOrSelector } from './element.js'
 import type { OptionsParserOptions } from './element/options_parser.js'
 import type { RenderJob } from './fragment/render/render_job.js'
 import type { Layer } from './layer/base.js'
@@ -208,7 +203,7 @@ export const linkConfig = newConfig('up.link.config', (): LinkConfig => ({
   //     Many web developers are used to give JavaScript-handled links an [href="#"]
   //     attribute. Also frameworks like Bootstrap only style links if they have an [href].
   // (3) We don't want to handle <a href="javascript:foo()"> links.
-  noFollowSelectors: ['[up-follow=false]', 'a[download]', 'a[target]', 'a[href^="javascript:"]', 'a[href^="mailto:"]', 'a[href^="tel:"]', `a[href^="#"]:not(${ATTRS_WITH_LOCAL_HTML})`, crossOriginSelector('href'), crossOriginSelector('up-href')],
+  noFollowSelectors: ['[up-follow=false]', 'a[download]', 'a[target]', 'a[href^="javascript:"]', 'a[href^="mailto:"]', 'a[href^="tel:"]', `a[href^="#"]:not(${ATTRS_WITH_LOCAL_HTML})`, e.crossOriginSelector('href'), e.crossOriginSelector('up-href')],
 
   instantSelectors: ['[up-instant]'],
   noInstantSelectors: ['[up-instant=false]', '[onclick]'],
@@ -344,13 +339,13 @@ up.follow(link)
 @stable
 @signature
 */
-export const follow = mockable(function(link: ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderJob {
+export const follow = mockable(function(link: e.ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderJob {
   return render(followOptions(link, options, parserOptions))
 })
 
 // TODO(types): Return RequestOptions once the render options have a type.
-export function parseRequestOptions(link: Element, options?: PlainObject, parserOptions?: OptionsParserOptions): any {
-  options = newOptions(options)
+export function parseRequestOptions(link: Element, options?: u.PlainObject, parserOptions?: OptionsParserOptions): any {
+  options = u.newOptions(options)
   const parser = new OptionsParser(link, options, { ...parserOptions, fail: false })
 
   options.url = followURL(link, options)
@@ -404,10 +399,10 @@ let options = up.link.followOptions(link)
   An object of [render options](/api/up.render#parameters).
 @stable
 */
-export function followOptions(link: ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions {
+export function followOptions(link: e.ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   link = effectiveLink(getSmart(link)!)
-  options = newOptions(options)
+  options = u.newOptions(options)
 
   const parser = new OptionsParser(link, options, { fail: true, ...parserOptions })
 
@@ -596,8 +591,8 @@ with pages the user is likely to click or that should be
 @stable
 */
 // Returns a Promise or an up.RenderJob, which has the API of a Promise.
-export function preload(link: ElementOrSelector, options?: PlainObject): Promise<any>
-export function preload(link: ElementOrSelector, options?: PlainObject) {
+export function preload(link: e.ElementOrSelector, options?: u.PlainObject): Promise<any>
+export function preload(link: e.ElementOrSelector, options?: u.PlainObject) {
   // If passed a selector, up.fragment.get() will match in the current layer.
   link = effectiveLink(getSmart(link)!)
 
@@ -693,11 +688,11 @@ Looks at the link's `[up-method]` or `[data-method]` attributes. Defaults to `"g
   The HTTP method.
 @internal
 */
-function followMethod(link: Element, options: PlainObject = {}): string {
-  return normalizeMethod(options.method || link.getAttribute('up-method') || link.getAttribute('data-method'))
+function followMethod(link: Element, options: u.PlainObject = {}): string {
+  return u.normalizeMethod(options.method || link.getAttribute('up-method') || link.getAttribute('data-method'))
 }
 
-function followURL(link: Element, options: PlainObject = {}): string | undefined {
+function followURL(link: Element, options: u.PlainObject = {}): string | undefined {
   const url = options.url || link.getAttribute('up-href') || link.getAttribute('href')
 
   // Developers sometimes make a <a href="#"> to give a JavaScript interaction standard
@@ -734,7 +729,7 @@ To make additional elements followable, see `up.link.config.followSelectors`.
   Whether Unpoly will handle the given link.
 @stable
 */
-export function isFollowable(link: ElementOrSelector): boolean {
+export function isFollowable(link: e.ElementOrSelector): boolean {
   link = getSmart(link)!
   return linkConfig.matches(link, 'followSelectors')
 }
@@ -762,7 +757,7 @@ function makeClickable(element: HTMLElement): void {
   let role = element.matches('a, [up-follow]') ? 'link' : 'button'
 
   // We set some defaults for interactivity and A11y, but preserve any existing attributes set by the user.
-  setMissingAttrs(element, {
+  e.setMissingAttrs(element, {
     tabindex: '0',     // Make them part of the natural tab order
     role,              // Make screen readers pronounce "button" or "link"
     'up-clickable': '' // Get pointer cursor from link.css
@@ -1090,7 +1085,7 @@ function onLoadCondition(condition: string | false, link: Element, callback: (op
       callback()
       break
     case 'reveal': {
-      let margin = numberAttr(link, 'up-intersect-margin')
+      let margin = e.numberAttr(link, 'up-intersect-margin')
       onFirstIntersect(link, callback, { margin })
       break
     }
@@ -1151,7 +1146,7 @@ Loads a [`[up-defer="manual"]`](/api/up-defer) placeholder.
 @stable
 @signature
 */
-export function loadDeferred(link: Element, options?: PlainObject): any {
+export function loadDeferred(link: Element, options?: u.PlainObject): any {
   let guardEvent = build('up:deferred:load', { log: ['Loading deferred %o', link] })
 
   // These options override up.link.follow() behavior
@@ -1604,7 +1599,7 @@ export function install(): void {
   registerMacro(linkConfig.selectorFn('clickableSelectors'), makeClickable)
 
   registerAttrCompiler('up-defer', { defaultValue: 'insert' }, function(link, condition) {
-    let doLoad = (options?: PlainObject) => muteUncriticalRejection(loadDeferred(link, options))
+    let doLoad = (options?: u.PlainObject) => muteUncriticalRejection(loadDeferred(link, options))
     onLoadCondition(condition, link, doLoad)
   })
 
@@ -1637,25 +1632,25 @@ export function install(): void {
   })
 
   registerAttrCompiler('up-expand', { defaultValue: 'a, [up-href]', macro: true }, function(area: HTMLElement & ExpandedElement, childLinkSelector) {
-    let childLink: HTMLElement & ExpandedElement = getOne(area, childLinkSelector)
+    let childLink: HTMLElement & ExpandedElement = e.getOne(area, childLinkSelector)
     if (childLink) {
       // Remember the expander and expandee so we can set .up-active classes efficiently,
       // and so we can hand a click on a non-followable area to the link.
       childLink.upExpandedPair = area.upExpandedPair = [area, childLink]
 
       // This is our current workaround for expanded areas gaining an .up-current class from the contained link.
-      addClasses(area, upClasses(childLink))
+      e.addClasses(area, e.upClasses(childLink))
 
       // [up-nav] only marks elements with a URL as .up-current.
       // We give the area its link's URL, whether or not Unpoly follows the link.
-      setMissingAttr(area, 'up-href', stringAttr(childLink, 'up-href') || stringAttr(childLink, 'href'))
+      e.setMissingAttr(area, 'up-href', e.stringAttr(childLink, 'up-href') || e.stringAttr(childLink, 'href'))
 
       // A click on the area does what a click on the link does.
       // When Unpoly follows the link, the area takes over the link's attributes, so it is followable, instant or
       // preloadable like the link. Following the area then follows the link (see effectiveLink()).
       // Otherwise a click on the area clicks the link (see below), so the browser does whatever the link does.
       if (isFollowable(childLink)) {
-        setMissingAttrs(area, upAttrs(childLink))
+        e.setMissingAttrs(area, e.upAttrs(childLink))
         makeFollowable(area)
       }
       // A11y: We could also consider making the area clickable, via makeClickable().
@@ -1682,7 +1677,7 @@ export function install(): void {
   registerCompiler(linkConfig.selectorFn('preloadSelectors'), function(link) {
     // An [up-expand] area preloads its link, so we check whether we can preload that link.
     if (!isPreloadDisabled(effectiveLink(link))) {
-      let doPreload = (options?: PlainObject) => muteUncriticalRejection(preload(link, options))
+      let doPreload = (options?: u.PlainObject) => muteUncriticalRejection(preload(link, options))
       // We need to map several cases here:
       //
       // (1) <a up-preload>              => 'hover'
@@ -1692,8 +1687,8 @@ export function install(): void {
       // (5) <a up-preload="insert">     => 'insert
       // (6) <a up-preload="false">      => do nothing (already excluded by config.noPreloadSelectors)
       // (7) <a>                         => only do something if we have it in config.preloadSelectors
-      let condition = booleanOrStringAttr(link, 'up-preload')
-      if (condition === true || isUndefined(condition)) condition = 'hover'
+      let condition = e.booleanOrStringAttr(link, 'up-preload')
+      if (condition === true || u.isUndefined(condition)) condition = 'hover'
       onLoadCondition(condition, link, doPreload)
     }
   })

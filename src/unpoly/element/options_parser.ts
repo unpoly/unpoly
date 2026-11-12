@@ -1,11 +1,7 @@
-import { camelToKebabCase, compact, isDefined, map, wrapList } from '../util.js'
-import {
-  booleanAttr, booleanOrNumberAttr, booleanOrNumberOrStringAttr, booleanOrStringAttr, closestAttr,
-  jsonAttr, numberAttr, stringAttr,
-} from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { toFailKey } from '../fragment.js'
 import { RenderOptions } from '../fragment/render/render_options.js'
-import type { PlainObject } from '../util.js'
 
 /**
 Reads an attribute value from an element, like `up.element.booleanAttr()`.
@@ -24,7 +20,7 @@ export interface OptionsParserOptions {
   closest?: boolean
   attrPrefix?: string
   // Defaults for options without an attribute, or `false` to set no defaults.
-  defaults?: PlainObject | false
+  defaults?: u.PlainObject | false
 }
 
 /**
@@ -39,12 +35,12 @@ export interface ParseKeyOptions {
 }
 
 export class OptionsParser {
-  declare _options: PlainObject
+  declare _options: u.PlainObject
   declare _element: Element
   declare _fail: boolean | undefined
   declare _closest: boolean | undefined
   declare _attrPrefix: string
-  declare _defaults: PlainObject | false
+  declare _defaults: u.PlainObject | false
 
   /*-
   @constructor up.OptionsParser
@@ -63,7 +59,7 @@ export class OptionsParser {
     nor can be parsed from `element`.
   @internal
   */
-  constructor(element: Element, options: PlainObject, parserOptions: OptionsParserOptions = {}) {
+  constructor(element: Element, options: u.PlainObject, parserOptions: OptionsParserOptions = {}) {
     this._options = options
     this._element = element
     this._fail = parserOptions.fail
@@ -73,31 +69,31 @@ export class OptionsParser {
   }
 
   string(key: string, keyOptions?: ParseKeyOptions): void {
-    this.parse(stringAttr, key, keyOptions)
+    this.parse(e.stringAttr, key, keyOptions)
   }
 
   boolean(key: string, keyOptions?: ParseKeyOptions): void {
-    this.parse(booleanAttr, key, keyOptions)
+    this.parse(e.booleanAttr, key, keyOptions)
   }
 
   number(key: string, keyOptions?: ParseKeyOptions): void {
-    this.parse(numberAttr, key, keyOptions)
+    this.parse(e.numberAttr, key, keyOptions)
   }
 
   booleanOrString(key: string, keyOptions?: ParseKeyOptions): void {
-    this.parse(booleanOrStringAttr, key, keyOptions)
+    this.parse(e.booleanOrStringAttr, key, keyOptions)
   }
 
   booleanOrNumber(key: string, keyOptions?: ParseKeyOptions): void {
-    this.parse(booleanOrNumberAttr, key, keyOptions)
+    this.parse(e.booleanOrNumberAttr, key, keyOptions)
   }
 
   booleanOrNumberOrString(key: string, keyOptions?: ParseKeyOptions): void {
-    this.parse(booleanOrNumberOrStringAttr, key, keyOptions)
+    this.parse(e.booleanOrNumberOrStringAttr, key, keyOptions)
   }
 
   json(key: string, keyOptions?: ParseKeyOptions): void {
-    this.parse(jsonAttr, key, keyOptions)
+    this.parse(e.jsonAttr, key, keyOptions)
   }
 
   // // Currently not needed anywhere
@@ -112,7 +108,7 @@ export class OptionsParser {
   }
 
   parse(attrReader: AttrReader, key: string, keyOptions: ParseKeyOptions = {}): void {
-    const attrNames = wrapList(keyOptions.attr ?? this._attrNameForKey(key))
+    const attrNames = u.wrapList(keyOptions.attr ?? this._attrNameForKey(key))
 
     // Below we will only set @options[key] = value if value is defined.
     let value = this._options[key]
@@ -125,7 +121,7 @@ export class OptionsParser {
       value ??= keyOptions.default ?? this._defaults[key]
     }
 
-    if (isDefined(value)) {
+    if (u.isDefined(value)) {
       let normalizeFn = keyOptions.normalize
       if (normalizeFn) {
         value = normalizeFn(value)
@@ -136,12 +132,12 @@ export class OptionsParser {
 
     let failKey
     if (this._fail && (failKey = toFailKey(key))) {
-      const failAttrNames = compact(map(attrNames, (attrName) => this._deriveFailAttrName(attrName)))
+      const failAttrNames = u.compact(u.map(attrNames, (attrName) => this._deriveFailAttrName(attrName)))
       this.parse(attrReader, failKey, { ... keyOptions, attr: failAttrNames })
     }
   }
 
-  include(optionsFn: (element: Element, options: PlainObject, parserOptions: OptionsParserOptions) => PlainObject, parserOptions?: OptionsParserOptions): void {
+  include(optionsFn: (element: Element, options: u.PlainObject, parserOptions: OptionsParserOptions) => u.PlainObject, parserOptions?: OptionsParserOptions): void {
     // let fnResult = optionsFn(this._element, this._options, this._parserOptions)
     let fnResult = optionsFn(this._element, this._options, { defaults: this._defaults, ...parserOptions })
     Object.assign(this._options, fnResult)
@@ -149,7 +145,7 @@ export class OptionsParser {
 
   _parseFromAttr(attrValueFn: AttrReader, element: Element, attrName: string): any {
     if (this._closest) {
-      return closestAttr(element, attrName, attrValueFn)
+      return e.closestAttr(element, attrName, attrValueFn)
     } else {
       return attrValueFn(element, attrName)
     }
@@ -167,6 +163,6 @@ export class OptionsParser {
   }
 
   _attrNameForKey(option: string): string {
-    return `${this._attrPrefix}${camelToKebabCase(option)}`
+    return `${this._attrPrefix}${u.camelToKebabCase(option)}`
   }
 }

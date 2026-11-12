@@ -1,5 +1,5 @@
-import { evalOption, filterList, isPromise, map } from '../util.js'
-import { trackDefinitions } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { guard, guardPromise } from '../error.js'
 import { UpError } from '../error/error.js'
 import { emit } from '../event.js'
@@ -7,7 +7,6 @@ import { emitFragmentInserted, getSubtree } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { printToStandard } from '../log.js'
 import { readData, registerDestructor } from '../script.js'
-import type { AnyFunction, PlainObject } from '../util.js'
 import type { Layer } from '../layer/base.js'
 
 /**
@@ -15,7 +14,7 @@ A compiler or macro registered with `up.compiler()` or `up.macro()`: the compile
 with its registration options.
 @internal
 */
-export type Compiler = AnyFunction & {
+export type Compiler = u.AnyFunction & {
   selector: string | (() => string)
   isDefault?: boolean
   priority: number
@@ -32,7 +31,7 @@ export interface HelloFragmentOptions {
   data?: any
   dataRoot?: Element
   dataMap?: Record<string, any>
-  meta?: PlainObject
+  meta?: u.PlainObject
   insertedEvent?: boolean
 }
 
@@ -49,7 +48,7 @@ export class HelloFragment {
   declare _dataMap: Record<string, any> | undefined
   declare _compilePromises: Promise<any>[]
   declare _insertedEvent: boolean
-  declare _meta: PlainObject
+  declare _meta: u.PlainObject
 
   constructor(root: Element, macros: Compiler[], compilers: Compiler[], { layer, data, dataRoot, dataMap, meta, insertedEvent }: HelloFragmentOptions) {
     // (1) If a caller has already looked up the layer we don't want to look it up again.
@@ -90,7 +89,7 @@ export class HelloFragment {
     // e.g. an up.SelectorTracker can sync again.
     //
     // We scan after running compilers, which may insert undefined custom elements themselves.
-    trackDefinitions(this._root)
+    e.trackDefinitions(this._root)
 
     this._emitInsertedEvent()
     await Promise.all(this._compilePromises)
@@ -169,7 +168,7 @@ export class HelloFragment {
     // expects a second argument. Note that we must pass data for an argument
     // count of 0, since then the function might take varargs.
     if (compiler.length !== 1) {
-      const dataList = map(elements, readData)
+      const dataList = u.map(elements, readData)
       compileArgs.push(dataList, this._meta)
     }
 
@@ -180,7 +179,7 @@ export class HelloFragment {
   async _applyCompilerFunction(compiler: Compiler, elementOrElements: Element | Element[], compileArgs: any[], onDestructor: (destructor: any) => void): Promise<void> {
     let maybeDestructor = guard(() => compiler.apply(elementOrElements, compileArgs))
 
-    if (isPromise(maybeDestructor)) {
+    if (u.isPromise(maybeDestructor)) {
       // If the async compiler rejects, emit an `error` event but don't reject.
       let guardedPromise = guardPromise(maybeDestructor)
 
@@ -203,14 +202,14 @@ export class HelloFragment {
   }
 
   _select(selector: string | (() => string)): CompiledElement[] {
-    return getSubtree(this._root, evalOption(selector), { layer: this._layer } )
+    return getSubtree(this._root, u.evalOption(selector), { layer: this._layer } )
   }
 
   _selectOnce(compiler: Compiler): CompiledElement[] {
     let matches = this._select(compiler.selector)
 
     if (!compiler.rerun) {
-      matches = filterList(matches, (element) => {
+      matches = u.filterList(matches, (element) => {
         let appliedCompilers = (element.upAppliedCompilers ||= new Set())
         if (!appliedCompilers.has(compiler)) {
           appliedCompilers.add(compiler)

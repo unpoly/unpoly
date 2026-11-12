@@ -1,7 +1,6 @@
-import { cleaner as utilCleaner, copy, extractOptions, getSimpleTokens, isJQuery, isList } from '../util.js'
+import * as u from '../util.js'
 import { UpEventListener } from './event_listener.js'
 import type { EventListenerAttributes, ListenerTarget } from './event_listener.js'
-import type { List, PlainObject } from '../util.js'
 
 /**
 The attributes for an `UpEventListener`, minus its single element and event type.
@@ -15,12 +14,12 @@ and the attributes for each `UpEventListener`.
 @internal
 */
 export interface EventListenerGroupAttributes extends SharedListenerAttributes {
-  elements: List<ListenerTarget>
+  elements: u.List<ListenerTarget>
   eventTypes: string[]
 }
 
 export class EventListenerGroup {
-  declare elements: List<ListenerTarget>
+  declare elements: u.List<ListenerTarget>
   declare eventTypes: string[]
   declare _listenerAttributes: SharedListenerAttributes
 
@@ -33,7 +32,7 @@ export class EventListenerGroup {
   }
 
   bind(): () => void {
-    const cleaner = utilCleaner()
+    const cleaner = u.cleaner()
 
     this._eachListenerAttributes(function(attrs) {
       const listener = new UpEventListener(attrs)
@@ -69,8 +68,8 @@ export class EventListenerGroup {
   @function up.EventListenerGroup.fromBindArgs
   @internal
   */
-  static fromBindArgs(args: any[], overrides?: PlainObject): EventListenerGroup {
-    args = copy(args)
+  static fromBindArgs(args: any[], overrides?: u.PlainObject): EventListenerGroup {
+    args = u.copy(args)
 
     // A callback function is given in all arg variants.
     const callback = args.pop()
@@ -80,20 +79,20 @@ export class EventListenerGroup {
     let elements
     if (args[0].addEventListener) {
       elements = [args.shift()]
-    } else if (isJQuery(args[0]) || (isList(args[0]) && args[0][0].addEventListener)) {
+    } else if (u.isJQuery(args[0]) || (u.isList(args[0]) && args[0][0].addEventListener)) {
       elements = args.shift()
     } else {
       elements = [document]
     }
 
     // Event names are given in all arg variants
-    let eventTypes = getSimpleTokens(args.shift())
+    let eventTypes = u.getSimpleTokens(args.shift())
     let fixTypes = up.migrate.fixEventTypes
     if (fixTypes) {
       eventTypes = fixTypes(eventTypes)
     }
 
-    const options = extractOptions(args)
+    const options = u.extractOptions(args)
 
     // A selector is given if the user wants to delegate events.
     // It might be undefined.

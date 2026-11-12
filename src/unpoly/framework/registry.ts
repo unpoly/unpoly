@@ -1,4 +1,4 @@
-import { identity, pickBy } from '../util.js'
+import * as u from '../util.js'
 import { fail } from '../error.js'
 // framework.ts is evaluated after Registry (and after up.motion and up.status, which use it).
 // put() reads isEvaling() when it runs: in an install() or later, when every module has been
@@ -12,7 +12,7 @@ export class Registry<T = any> {
   declare _normalize: (value: any) => T | undefined
   declare _valueDescription: string
 
-  constructor(valueDescription: string, normalize: (value: any) => T | undefined = identity) {
+  constructor(valueDescription: string, normalize: (value: any) => T | undefined = u.identity) {
     this._data = {}
     this._normalize = normalize
     this._valueDescription = valueDescription
@@ -31,7 +31,7 @@ export class Registry<T = any> {
   }
 
   reset(): void {
-    this._data = pickBy(this._data, 'isDefault')
+    this._data = u.pickBy(this._data, 'isDefault')
   }
 
 }

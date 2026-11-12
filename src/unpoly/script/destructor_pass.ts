@@ -1,12 +1,11 @@
-import { pluckKey } from '../util.js'
+import * as u from '../util.js'
 import { getSubtree } from '../fragment.js'
-import type { PlainObject } from '../util.js'
 
 export class DestructorPass {
   declare _fragment: Element
-  declare _options: PlainObject
+  declare _options: u.PlainObject
 
-  constructor(fragment: Element, options: PlainObject) {
+  constructor(fragment: Element, options: u.PlainObject) {
     this._fragment = fragment
     this._options = options
   }
@@ -15,7 +14,7 @@ export class DestructorPass {
     for (let cleanable of this._selectCleanables()) {
       // In the case of [up-keep] elements we may run on a clone that matches .up-can-clean
       // but has no { upDestructors } property.
-      let registry = pluckKey(cleanable, 'upDestructors')
+      let registry = u.pluckKey(cleanable, 'upDestructors')
       registry?.clean(cleanable)
     }
   }

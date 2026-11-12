@@ -1,6 +1,5 @@
-import { isString } from '../../util.js'
-import type { PlainObject } from '../../util.js'
-import { attrSelector, subtree } from '../../element.js'
+import * as u from '../../util.js'
+import * as e from '../../element.js'
 import { fail } from '../../error.js'
 import { Blocked } from '../../error/blocked.js'
 import { NotImplemented } from '../../error/not_implemented.js'
@@ -99,14 +98,14 @@ export class ScriptGate {
     this._detachedAssetPolicy.processItem(item)
   }
 
-  adoptRenderOptionsFromHeader(object: PlainObject): void {
+  adoptRenderOptionsFromHeader(object: u.PlainObject): void {
     let policy = this._evalCallbackPolicy
 
     for (let key of Object.keys(object)) {
       let script = object[key]
 
       // Any other on* key is a callback, so a mistyped key fails with "Unknown callback".
-      if (/^on[A-Z]/.test(key) && !NON_CALLBACK_KEYS.includes(key) && isString(script)) {
+      if (/^on[A-Z]/.test(key) && !NON_CALLBACK_KEYS.includes(key) && u.isString(script)) {
         let item = new ObjectPropertyItem(object, key)
         policy.processItem(item)
         object[key] = RenderOptions.parseCallback(key, object[key])
@@ -128,7 +127,7 @@ export class ScriptGate {
 
     // TODO: It is weird that we keep a list of callback options in RenderOptions, but the list of nonceable attrs is in up.script? Maybe at least move them together?
     for (let attribute of scriptConfig.nonceableAttributes) {
-      let matches = subtree(root, attrSelector(attribute))
+      let matches = e.subtree(root, e.attrSelector(attribute))
       for (let element of matches) {
         let item = new AttributeItem(element, attribute)
         policy.processItem(item)
@@ -361,7 +360,7 @@ class AttributeItem extends StringCallbackItem {
   }
 
   logBlockedDescriptor(): any[] {
-    return ['Blocked callback attribute: %s', attrSelector(this._attribute, this.readCallbackString())]
+    return ['Blocked callback attribute: %s', e.attrSelector(this._attribute, this.readCallbackString())]
   }
 
   // We only build an item for an element with the attribute.
@@ -376,10 +375,10 @@ class AttributeItem extends StringCallbackItem {
 }
 
 class ObjectPropertyItem extends StringCallbackItem {
-  declare _object: PlainObject
+  declare _object: u.PlainObject
   declare _key: string
 
-  constructor(object: PlainObject, key: string) {
+  constructor(object: u.PlainObject, key: string) {
     super()
     this._object = object
     this._key = key

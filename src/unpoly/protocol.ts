@@ -1,5 +1,5 @@
-import { evalOption, identity, memoize, normalizeMethod, normalizeURL, parseRelaxedJSON } from './util.js'
-import { metaContent } from './element.js'
+import * as u from './util.js'
+import * as e from './element.js'
 import { popCookie } from './browser.js'
 import { mockable } from './mockable.js'
 import { newConfig } from './util/config.js'
@@ -21,7 +21,7 @@ export const headerize = function(camel: string): string {
   return 'X-Up' + header
 }
 
-const extractHeader = function(xhr: XMLHttpRequest, shortHeader: string, parseFn: (value: string) => any = identity): any {
+const extractHeader = function(xhr: XMLHttpRequest, shortHeader: string, parseFn: (value: string) => any = u.identity): any {
   let value = xhr.getResponseHeader(headerize(shortHeader))
   if (value) {
     return parseFn(value)
@@ -486,7 +486,7 @@ on the link or form, or customize `up.network.config.expireCache`.
 */
 
 export function contextFromXHR(xhr: XMLHttpRequest) {
-  return extractHeader(xhr, 'context', parseRelaxedJSON)
+  return extractHeader(xhr, 'context', u.parseRelaxedJSON)
 }
 
 /*-
@@ -574,7 +574,7 @@ X-Up-Fail-Context: { "lives": 3 }
 @internal
 */
 export function methodFromXHR(xhr: XMLHttpRequest): string | undefined {
-  return extractHeader(xhr, 'method', normalizeMethod)
+  return extractHeader(xhr, 'method', u.normalizeMethod)
 }
 
 /*-
@@ -610,7 +610,7 @@ X-Up-Method: GET
 @internal
 */
 export function titleFromXHR(xhr: XMLHttpRequest) {
-  return up.migrate.titleFromXHR?.(xhr) ?? extractHeader(xhr, 'title', parseRelaxedJSON)
+  return up.migrate.titleFromXHR?.(xhr) ?? extractHeader(xhr, 'title', u.parseRelaxedJSON)
 }
 
 /*-
@@ -710,7 +710,7 @@ To prevent this, the header value is set to `:unknown` if its length exceeds `up
 */
 
 export function eventPlansFromXHR(xhr: XMLHttpRequest) {
-  return extractHeader(xhr, 'events', parseRelaxedJSON)
+  return extractHeader(xhr, 'events', u.parseRelaxedJSON)
 }
 
 /*-
@@ -759,7 +759,7 @@ X-Up-Events: [{ type: 'user:created', name: 'foobar', layer: 'current' }]
 
 export function openLayerFromXHR(xhr: XMLHttpRequest) {
   // When no specific options are given, the server will send X-Up-Open-Layer: {}
-  return extractHeader(xhr, 'openLayer', parseRelaxedJSON)
+  return extractHeader(xhr, 'openLayer', u.parseRelaxedJSON)
 }
 
 /*-
@@ -832,7 +832,7 @@ X-Up-Open-Layer: { onAcceptedReload: '#users-list' }
 export function acceptLayerFromXHR(xhr: XMLHttpRequest) {
   // Even if acceptance has no value, the server will send
   // X-Up-Accept-Layer: null
-  return extractHeader(xhr, 'acceptLayer', parseRelaxedJSON)
+  return extractHeader(xhr, 'acceptLayer', u.parseRelaxedJSON)
 }
 
 /*-
@@ -882,7 +882,7 @@ X-Up-Target: :none
 export function dismissLayerFromXHR(xhr: XMLHttpRequest) {
   // Even if dismissal has no value, the server will send
   // X-Up-Dismiss-Layer: null
-  return extractHeader(xhr, 'dismissLayer', parseRelaxedJSON)
+  return extractHeader(xhr, 'dismissLayer', u.parseRelaxedJSON)
 }
 
 /*-
@@ -943,8 +943,8 @@ export const initialRequestMethod = mockable(function initialRequestMethod(): st
 })
 
 // The cookie is deleted after reading, so we must only read it once.
-const readInitialRequestMethod = memoize(function(): string {
-  return normalizeMethod(popCookie('_up_method'))
+const readInitialRequestMethod = u.memoize(function(): string {
+  return u.normalizeMethod(popCookie('_up_method'))
 })
 
 /*-
@@ -995,7 +995,7 @@ export function locationFromXHR(xhr: XMLHttpRequest): string | undefined {
   // will still contain them.
   let location = extractHeader(xhr, 'location') || xhr.responseURL
   if (location) {
-    return normalizeURL(location)
+    return u.normalizeURL(location)
   }
 }
 
@@ -1137,23 +1137,23 @@ Configures strings used in the optional [server protocol](/api/up.protocol).
 */
 export const protocolConfig = newConfig('up.protocol.config', (): ProtocolConfig => ({
   methodParam: '_method',
-  csrfParam() { return metaContent('csrf-param') },
-  csrfToken() { return metaContent('csrf-token') },
+  csrfParam() { return e.metaContent('csrf-param') },
+  csrfToken() { return e.metaContent('csrf-token') },
   // TODO: Let's move config.cspNonce() to up.script.config after all
   csrfHeader: 'X-CSRF-Token', // Used by Rails. Other frameworks use different headers.
   maxHeaderSize: 2048,
 }))
 
 export function csrfHeader(): string {
-  return evalOption(protocolConfig.csrfHeader)
+  return u.evalOption(protocolConfig.csrfHeader)
 }
 
 export function csrfParam(): string | undefined {
-  return evalOption(protocolConfig.csrfParam)
+  return u.evalOption(protocolConfig.csrfParam)
 }
 
 export function csrfToken(): string | undefined {
-  return evalOption(protocolConfig.csrfToken)
+  return u.evalOption(protocolConfig.csrfToken)
 }
 
 export function wrapMethod(method: string, params: Params): string {

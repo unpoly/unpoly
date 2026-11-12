@@ -1,5 +1,5 @@
-import { isDefined } from '../util.js'
-import { computedStyleNumber, getRoot, setInlineStyle } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { fail } from '../error.js'
 import { isAlive } from '../fragment.js'
 import { closest } from '../viewport.js'
@@ -36,7 +36,7 @@ export class Tether {
 
     this._viewport = closest(this._anchor)
     // The document viewport is <html> on some browsers, and we cannot attach children to that.
-    this.parent = this._viewport === getRoot() ? document.body : this._viewport
+    this.parent = this._viewport === e.getRoot() ? document.body : this._viewport
 
     // If the offsetParent is within the viewport (or is the viewport) we can simply
     // `position: absolute` and it will move as the viewport scrolls, without JavaScript.
@@ -80,10 +80,10 @@ export class Tether {
 
     // A computed margin is never blank.
     const elementMargin = {
-      top:    computedStyleNumber(this._element, 'margin-top')!,
-      right:  computedStyleNumber(this._element, 'margin-right')!,
-      bottom: computedStyleNumber(this._element, 'margin-bottom')!,
-      left:   computedStyleNumber(this._element, 'margin-left')!
+      top:    e.computedStyleNumber(this._element, 'margin-top')!,
+      right:  e.computedStyleNumber(this._element, 'margin-right')!,
+      bottom: e.computedStyleNumber(this._element, 'margin-bottom')!,
+      left:   e.computedStyleNumber(this._element, 'margin-left')!
     }
 
     const anchorBox = this._anchor.getBoundingClientRect()
@@ -176,7 +176,7 @@ export class Tether {
 
     // TODO: A valid position with an invalid align (or the other way around) sets only one
     // coordinate. We then move to NaN instead of failing below. This should be &&.
-    if (isDefined(left) || isDefined(top)) {
+    if (u.isDefined(left) || u.isDefined(top)) {
       this._moveTo(left!, top!)
     } else {
       fail('Invalid tether constraints: %o', this._describeConstraints())
@@ -198,6 +198,6 @@ export class Tether {
   _setOffset(left: number, top: number): void {
     this.offsetLeft = left
     this.offsetTop = top
-    setInlineStyle(this._element, { left, top }, 'px')
+    e.setInlineStyle(this._element, { left, top }, 'px')
   }
 }

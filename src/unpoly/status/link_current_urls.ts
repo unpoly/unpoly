@@ -1,4 +1,4 @@
-import { matchableURL } from '../util.js'
+import * as u from '../util.js'
 import { isSafe } from '../link.js'
 import { UpURLPattern } from '../util/url_pattern.js'
 
@@ -15,12 +15,12 @@ export class LinkCurrentURLs {
     if (this._isSafe) {
       const href = link.getAttribute('href')
       if (href && (href !== '#')) {
-        this._href = matchableURL(href)
+        this._href = u.matchableURL(href)
       }
 
       const upHREF = link.getAttribute('up-href')
       if (upHREF) {
-        this._upHREF = matchableURL(upHREF)
+        this._upHREF = u.matchableURL(upHREF)
       }
 
       const alias = link.getAttribute('up-alias')

@@ -1,4 +1,4 @@
-import { escapeRegExp, flatMap, getSimpleTokens, matchableURL, matchableURLPatternAtom } from '../util.js'
+import * as u from '../util.js'
 
 /**
 A named placeholder in a URL pattern (`:name` or `$name`), and how to cast its value.
@@ -24,7 +24,7 @@ export class UpURLPattern {
     const positiveList = []
     const negativeList = []
 
-    for (let pattern of getSimpleTokens(fullPattern)) {
+    for (let pattern of u.getSimpleTokens(fullPattern)) {
       if (pattern[0] === '-') {
         negativeList.push(pattern.substring(1))
       } else {
@@ -41,8 +41,8 @@ export class UpURLPattern {
   _buildRegexp(list: string[], capture: boolean): RegExp | undefined {
     if (!list.length) { return }
 
-    list = flatMap(list, matchableURLPatternAtom)
-    list = list.map(escapeRegExp)
+    list = u.flatMap(list, u.matchableURLPatternAtom)
+    list = list.map(u.escapeRegExp)
 
     let reCode = list.join('|')
 
@@ -68,14 +68,14 @@ export class UpURLPattern {
   // after every fragment update.
   test(url: string, doNormalize = true): boolean {
     // matchableURL() only returns undefined for an empty URL.
-    if (doNormalize) { url = matchableURL(url)! }
+    if (doNormalize) { url = u.matchableURL(url)! }
     // Use RegExp#test() instead of RegExp#recognize() as building match groups is expensive,
     // and we only need to know whether the URL matches (true / false).
     return this._positiveRegexp.test(url) && !this._isExcluded(url)
   }
 
   recognize(url: string, doNormalize = true): Record<string, string | number> | undefined {
-    if (doNormalize) { url = matchableURL(url)! }
+    if (doNormalize) { url = u.matchableURL(url)! }
     let match = this._positiveRegexp.exec(url)
     if (match && !this._isExcluded(url)) {
       const resolution: Record<string, string | number> = {}

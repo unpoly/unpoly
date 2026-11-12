@@ -1,12 +1,11 @@
-import { evalOption, filterList, isNumber, map } from '../util.js'
-import { computedStyle, getOne, isVisible } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { fail } from '../error.js'
 import { getAllFragments } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { Rect } from '../util/rect.js'
 import { closest, isRoot, rootHeight, rootWidth, viewportConfig } from '../viewport.js'
 import type { Layer } from '../layer/base.js'
-import type { ValueOrFunction } from '../util.js'
 
 /**
 Options for `up.reveal()`. Each `reveal*` option is an alias used by render options.
@@ -21,8 +20,8 @@ export interface RevealOptions {
   revealPadding?: number
   top?: boolean
   revealTop?: boolean
-  max?: ValueOrFunction<number>
-  revealMax?: ValueOrFunction<number>
+  max?: u.ValueOrFunction<number>
+  revealMax?: u.ValueOrFunction<number>
 }
 
 export class RevealMotion {
@@ -33,13 +32,13 @@ export class RevealMotion {
   declare _snap: number
   declare _padding: number
   declare _top: boolean
-  declare _max: ValueOrFunction<number> | false
+  declare _max: u.ValueOrFunction<number> | false
   declare _topObstructionSelector: string
   declare _bottomObstructionSelector: string
 
   constructor(element: HTMLElement, options: RevealOptions = {}) {
     this._element = element
-    this._viewport = getOne(options.viewport) || closest(this._element)
+    this._viewport = e.getOne(options.viewport) || closest(this._element)
     this._obstructionsLayer = layerStack.get(this._viewport)!
     this._behavior = options.behavior ?? 'instant'
 
@@ -56,7 +55,7 @@ export class RevealMotion {
     const viewportRect = this._getViewportRect()
     const elementRect = Rect.fromElement(this._element)
     if (this._max) {
-      const maxPixels =  evalOption(this._max, this._element)
+      const maxPixels =  u.evalOption(this._max, this._element)
       elementRect.height = Math.min(elementRect.height, maxPixels)
     }
 
@@ -91,7 +90,7 @@ export class RevealMotion {
       // Do nothing.
     }
 
-    if (isNumber(this._snap) && (newScrollTop < this._snap) && (elementRect.top < (0.5 * viewportRect.height))) {
+    if (u.isNumber(this._snap) && (newScrollTop < this._snap) && (elementRect.top < (0.5 * viewportRect.height))) {
       newScrollTop = 0
     }
 
@@ -118,9 +117,9 @@ export class RevealMotion {
 
   _computeObstructionRects(selector: string): Rect[] {
     let elements: HTMLElement[] = getAllFragments(selector, { layer: this._obstructionsLayer })
-    elements = filterList(elements, isVisible)
-    return map(elements, (element) => {
-      if (computedStyle(element, 'position') === 'sticky') {
+    elements = u.filterList(elements, e.isVisible)
+    return u.map(elements, (element) => {
+      if (e.computedStyle(element, 'position') === 'sticky') {
         // There is no simple way to detect if a sticky element is in static or fixed positioning.
         // We pretend it is always fixed for the purpose of measuring obstruction.
         return Rect.fromElementAsFixed(element)

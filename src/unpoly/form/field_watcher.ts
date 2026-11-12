@@ -1,18 +1,17 @@
-import { isEqual, isPromise, omit, queueTask, scheduleTimer, sequence, some, uniq } from '../util.js'
+import * as u from '../util.js'
 import { fail, guard } from '../error.js'
 import { on } from '../event.js'
 import { getRegion, isField, readFieldName, trackFields, watchOptions } from '../form.js'
 import { Params } from './params.js'
 import { isAlive } from '../fragment.js'
 import { printUserEvent } from '../log.js'
-import type { AnyFunction, PlainObject } from '../util.js'
 
 /**
 The callback for `up.watch()`. It is called with the new value, the field name and the
 options for the change. With `{ batch: true }` it is called once with an object of all
 changed values and the options.
 */
-export type WatchCallback = AnyFunction
+export type WatchCallback = u.AnyFunction
 
 /**
 Options for an `up.FieldWatcher`. Other options are passed on to the callback.
@@ -34,9 +33,9 @@ export class FieldWatcher {
   declare _batch: boolean | undefined
   declare _logPrefix: string
   declare _includeDisabled: boolean | undefined
-  declare _scheduledValues: PlainObject | null
-  declare _scheduledFieldOptions: PlainObject | null
-  declare _processedValues: PlainObject
+  declare _scheduledValues: u.PlainObject | null
+  declare _scheduledFieldOptions: u.PlainObject | null
+  declare _processedValues: u.PlainObject
   declare _currentTimer: number | null
   declare _callbackRunning: boolean
 
@@ -57,7 +56,7 @@ export class FieldWatcher {
     this._currentTimer = null
     this._callbackRunning = false
 
-    return sequence(
+    return u.sequence(
       this._trackFields(),
       this._trackAbort(),
       this._trackReset(),
@@ -103,7 +102,7 @@ export class FieldWatcher {
     return getRegion(this._root)
   }
 
-  _fieldOptions(field: Element): PlainObject {
+  _fieldOptions(field: Element): u.PlainObject {
     return watchOptions(field, this._options)
   }
 
@@ -121,20 +120,20 @@ export class FieldWatcher {
     this._scheduledValues = null
   }
 
-  _scheduleValues(values: PlainObject, fieldOptions: PlainObject): void {
+  _scheduleValues(values: u.PlainObject, fieldOptions: u.PlainObject): void {
     this._scheduledValues = values
     this._scheduledFieldOptions = fieldOptions
     let delay = fieldOptions.delay || 0
     clearTimeout(this._currentTimer) // debounce a previously set timer
 
-    this._currentTimer = scheduleTimer(delay, () => {
+    this._currentTimer = u.scheduleTimer(delay, () => {
       this._currentTimer = null
       this._requestCallback()
     })
   }
 
-  _isNewValues(values: PlainObject): boolean {
-    return !isEqual(values, this._processedValues) && !isEqual(this._scheduledValues, values)
+  _isNewValues(values: u.PlainObject): boolean {
+    return !u.isEqual(values, this._processedValues) && !u.isEqual(this._scheduledValues, values)
   }
 
   async _requestCallback(): Promise<void> {
@@ -158,7 +157,7 @@ export class FieldWatcher {
     // (1) we have already processed them here and
     // (2) those aren't render options.
     // Set and cleared together with _scheduledValues, which we checked above.
-    let callbackOptions = omit(this._scheduledFieldOptions!, ['event', 'delay'])
+    let callbackOptions = u.omit(this._scheduledFieldOptions!, ['event', 'delay'])
     const diff = this._changedValues(this._processedValues, this._scheduledValues)
     this._processedValues = this._scheduledValues
     this._scheduledValues = null
@@ -175,7 +174,7 @@ export class FieldWatcher {
       }
     }
 
-    if (some(callbackReturnValues, isPromise)) {
+    if (u.some(callbackReturnValues, u.isPromise)) {
       let callbackDone = Promise.allSettled(callbackReturnValues)
       await callbackDone
     }
@@ -190,26 +189,26 @@ export class FieldWatcher {
     return guard(this._callback, ...args)
   }
 
-  _changedValues(previous: PlainObject, next: PlainObject): PlainObject {
-    const changes: PlainObject = {}
+  _changedValues(previous: u.PlainObject, next: u.PlainObject): u.PlainObject {
+    const changes: u.PlainObject = {}
     let keys = Object.keys(previous)
     keys = keys.concat(Object.keys(next))
-    keys = uniq(keys)
+    keys = u.uniq(keys)
     for (let key of keys) {
       const previousValue = previous[key]
       const nextValue = next[key]
-      if (!isEqual(previousValue, nextValue)) {
+      if (!u.isEqual(previousValue, nextValue)) {
         changes[key] = nextValue
       }
     }
     return changes
   }
 
-  _readFieldValues(): PlainObject {
+  _readFieldValues(): u.PlainObject {
     return Params.fromContainer(this._root, { includeDisabled: this._includeDisabled }).toObject()
   }
 
-  _check(event: Event, fieldOptions: PlainObject = {}): void {
+  _check(event: Event, fieldOptions: u.PlainObject = {}): void {
     const values = this._readFieldValues()
 
     if (this._isNewValues(values)) {
@@ -220,6 +219,6 @@ export class FieldWatcher {
 
   _onFormReset(event: Event): void {
     // We need to wait 1 task for the reset button to affect field values
-    queueTask(() => this._check(event))
+    u.queueTask(() => this._check(event))
   }
 }

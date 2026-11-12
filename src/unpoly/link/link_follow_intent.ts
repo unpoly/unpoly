@@ -1,5 +1,5 @@
-import { scheduleTimer } from '../util.js'
-import { numberAttr } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { on } from '../event.js'
 import { isAlive, onAborted } from '../fragment.js'
 import { linkConfig, shouldHandleClick } from '../link.js'
@@ -49,7 +49,7 @@ export class LinkFollowIntent {
     const applyDelay = (event.type === 'mouseenter')
     if (applyDelay) {
       let delay = this._parseDelay()
-      this._timer = scheduleTimer(delay, () => this._runCallback(event))
+      this._timer = u.scheduleTimer(delay, () => this._runCallback(event))
     } else {
       this._runCallback(event)
     }
@@ -66,7 +66,7 @@ export class LinkFollowIntent {
   }
 
   _parseDelay(): number {
-    return numberAttr(this._link, 'up-preload-delay') ?? linkConfig.preloadDelay
+    return e.numberAttr(this._link, 'up-preload-delay') ?? linkConfig.preloadDelay
   }
 
   _runCallback(event: Event): void {

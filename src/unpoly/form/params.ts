@@ -1,16 +1,10 @@
-import {
-  contains, copy, evalOption, filterList, findInList, isArray, isBasicObjectProperty, isBlank,
-  isDefined, isEqual, isFormData, isGiven, isMissing, isObject, isPresent, isString, map,
-  normalizeURL, parseURL, reject, some, wrapList, wrapValue,
-} from '../util.js'
-import { getOne } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { fail } from '../error.js'
 import {
   defaultSubmitButton, findFields, formConfig, prepareParamsReadTemp, readFieldDisabled,
   readFieldName, readFieldValue,
 } from '../form.js'
-import type { PlainObject } from '../util.js'
-import type { ElementOrSelector } from '../element.js'
 
 /**
 A single param. Its value is usually a string or a `File`. Other values are stringified
@@ -25,7 +19,7 @@ export interface ParamEntry {
 Anything that `new up.Params()` accepts: another `up.Params`, an array of entries, a query string,
 a `FormData` object or a plain object like `{ name: 'value' }`.
 */
-export type ParamsLike = Params | ParamEntry[] | string | FormData | PlainObject | null | undefined
+export type ParamsLike = Params | ParamEntry[] | string | FormData | u.PlainObject | null | undefined
 
 /*-
 The `up.Params` class offers a consistent API to read and manipulate request parameters
@@ -76,7 +70,7 @@ export class Params {
     this.entries = []
   }
 
-  [copy.key](): Params {
+  [u.copy.key](): Params {
     return new Params(this)
   }
 
@@ -102,11 +96,11 @@ export class Params {
   @return {Object}
   @experimental
   */
-  toObject(): PlainObject {
-    const obj: PlainObject = {}
+  toObject(): u.PlainObject {
+    const obj: u.PlainObject = {}
     for (let entry of this.entries) {
       const { name, value } = entry
-      if (!isBasicObjectProperty(name)) {
+      if (!u.isBasicObjectProperty(name)) {
         if (this._isArrayKey(name)) {
           obj[name] ||= []
           obj[name].push(value)
@@ -213,7 +207,7 @@ export class Params {
     // There is a subtle difference when encoding blank values:
     // 1. An undefined or null value is encoded to `key` with no equals sign
     // 2. An empty string value is encoded to `key=` with an equals sign but no value
-    if (isGiven(value)) {
+    if (u.isGiven(value)) {
       query += "="
       query += encodeURIComponent(value)
     }
@@ -234,11 +228,11 @@ export class Params {
   }
 
   hasBinaryEntries(): boolean {
-    return some(this.entries, this._isBinaryEntry)
+    return u.some(this.entries, this._isBinaryEntry)
   }
 
   withoutBinaryEntries(): Params {
-    let simpleEntries = reject(this.entries, this._isBinaryEntry)
+    let simpleEntries = u.reject(this.entries, this._isBinaryEntry)
     return new (this.constructor as typeof Params)(simpleEntries)
   }
 
@@ -258,8 +252,8 @@ export class Params {
   */
   toURL(base: string): string {
     let parts = [base, this.toQuery()]
-    parts = filterList(parts, isPresent)
-    const separator = contains(base, '?') ? '&' : '?'
+    parts = u.filterList(parts, u.isPresent)
+    const separator = u.contains(base, '?') ? '&' : '?'
     return parts.join(separator)
   }
 
@@ -300,18 +294,18 @@ export class Params {
   @stable
   */
   addAll(raw: ParamsLike): void {
-    if (isMissing(raw)) {
+    if (u.isMissing(raw)) {
       // nothing to do
     } else if (raw instanceof this.constructor) {
       this.entries.push(...raw.entries)
-    } else if (isArray(raw)) {
+    } else if (u.isArray(raw)) {
       // internal use for copying
       this.entries.push(...raw)
-    } else if (isString(raw)) {
+    } else if (u.isString(raw)) {
       this._addAllFromQuery(raw)
-    } else if (isFormData(raw)) {
+    } else if (u.isFormData(raw)) {
       this._addAllFromFormData(raw)
-    } else if (isObject(raw)) {
+    } else if (u.isObject(raw)) {
       this._addAllFromObject(raw)
     } else {
       fail("Unsupported params type: %o", raw)
@@ -323,7 +317,7 @@ export class Params {
   @internal
   */
   keys(): string[] {
-    return map(this.entries, 'name')
+    return u.map(this.entries, 'name')
   }
 
   /*-
@@ -331,14 +325,14 @@ export class Params {
   @internal
   */
   values(): any[] {
-    return map(this.entries, 'value')
+    return u.map(this.entries, 'value')
   }
 
-  _addAllFromObject(object: PlainObject): void {
+  _addAllFromObject(object: u.PlainObject): void {
     for (let key in object) {
       const value = object[key]
       // We cannot use up.util.wrapList() because we want to keep null as [null], not []
-      const valueElements = isArray(value) ? value : [value]
+      const valueElements = u.isArray(value) ? value : [value]
       for (let valueElement of valueElements) {
         this.add(key, valueElement)
       }
@@ -354,7 +348,7 @@ export class Params {
         // (1) foo=bar should become { name: 'foo', bar: 'bar' }
         // (2) foo=    should become { name: 'foo', bar: '' }
         // (3) foo     should become { name: 'foo', bar: null }
-        if (isGiven(value)) {
+        if (u.isGiven(value)) {
           value = decodeURIComponent(value)
         } else {
           value = null
@@ -397,7 +391,7 @@ export class Params {
   @stable
   */
   delete(name: string): void {
-    this.entries = reject(this.entries, this._matchEntryFn(name))
+    this.entries = u.reject(this.entries, this._matchEntryFn(name))
   }
 
   _matchEntryFn(name: string): (entry: ParamEntry) => boolean {
@@ -456,7 +450,7 @@ export class Params {
   @experimental
   */
   getFirst(name: string): any {
-    const entry = findInList(this.entries, this._matchEntryFn(name))
+    const entry = u.findInList(this.entries, this._matchEntryFn(name))
     return entry?.value
   }
 
@@ -472,15 +466,15 @@ export class Params {
   @experimental
   */
   getAll(name: string): any[] {
-    const entries = filterList(this.entries, this._matchEntryFn(name))
-    return map(entries, 'value')
+    const entries = u.filterList(this.entries, this._matchEntryFn(name))
+    return u.map(entries, 'value')
   }
 
   _isArrayKey(key: string): boolean {
-    return evalOption(formConfig.arrayParam, key)
+    return u.evalOption(formConfig.arrayParam, key)
   }
 
-  [isBlank.key](): boolean {
+  [u.isBlank.key](): boolean {
     return this.entries.length === 0
   }
 
@@ -559,17 +553,17 @@ export class Params {
     A new `up.Params` instance with values from the given form.
   @stable
   */
-  static fromForm(form: ElementOrSelector, options?: { submitButton?: ElementOrSelector | false }): Params
+  static fromForm(form: e.ElementOrSelector, options?: { submitButton?: e.ElementOrSelector | false }): Params
   // The form is resolved in place, so the implementation takes the resolved type. The cast is
   // needed since getOne() returns an HTMLElement.
-  static fromForm(form: HTMLFormElement, options: { submitButton?: ElementOrSelector | false } = {}) {
-    form = getOne(form) as HTMLFormElement
+  static fromForm(form: HTMLFormElement, options: { submitButton?: e.ElementOrSelector | false } = {}) {
+    form = e.getOne(form) as HTMLFormElement
     let restore = prepareParamsReadTemp(form)
 
     try {
       // The FormData constructor accepts undefined for no submitter, but throws for false.
       // It also throws for a button that doesn't belong to the form.
-      let submitButton = getOne(options.submitButton ?? defaultSubmitButton(form)) || undefined
+      let submitButton = e.getOne(options.submitButton ?? defaultSubmitButton(form)) || undefined
 
       // We let the browser serialize the form, instead of iterating over up.form.fields():
       //
@@ -631,9 +625,9 @@ export class Params {
   @return {up.Params}
   @experimental
   */
-  static fromFields(fields: ElementOrSelector, { includeDisabled }: { includeDisabled?: boolean } = {}): Params {
+  static fromFields(fields: e.ElementOrSelector, { includeDisabled }: { includeDisabled?: boolean } = {}): Params {
     const params = new this()
-    for (let field of wrapList(fields)) {
+    for (let field of u.wrapList(fields)) {
       params.addField(field, { includeDisabled })
     }
     return params
@@ -658,7 +652,7 @@ export class Params {
   */
   // TODO(types): A type for fields (input, select, textarea or a form-associated custom element).
   addField(field: any, { includeDisabled }: { includeDisabled?: boolean } = {}): void {
-    field = getOne(field) // unwrap jQuery
+    field = e.getOne(field) // unwrap jQuery
 
     // A field is excluded from a form submission if it has no name, or if it is disabled.
     let name = readFieldName(field)
@@ -669,7 +663,7 @@ export class Params {
 
     if (tagName === 'SELECT') {
       // A <select> can have multiple selected options.
-      values = map(field.selectedOptions, 'value')
+      values = u.map(field.selectedOptions, 'value')
     } else if ((type === 'checkbox') || (type === 'radio')) {
       if (field.checked) values = [readFieldValue(field)]
     } else if (type === 'file') {
@@ -680,7 +674,7 @@ export class Params {
       // A custom control may expose a { name } without a readable { value },
       // in which case it has nothing to contribute.
       let value = readFieldValue(field)
-      if (isDefined(value)) values = [value]
+      if (u.isDefined(value)) values = [value]
     }
 
     for (let value of values) {
@@ -688,8 +682,8 @@ export class Params {
     }
   }
 
-  [isEqual.key](other: Params): boolean {
-    return (this.constructor === other.constructor) && isEqual(this.entries, other.entries)
+  [u.isEqual.key](other: Params): boolean {
+    return (this.constructor === other.constructor) && u.isEqual(this.entries, other.entries)
   }
 
   /*-
@@ -715,7 +709,7 @@ export class Params {
   */
   static fromURL(url: string): Params {
     const params = new (this)()
-    const urlParts = parseURL(url)
+    const urlParts = u.parseURL(url)
     let query = urlParts.search
     if (query) {
       query = query.replace(/^\?/, '')
@@ -742,14 +736,14 @@ export class Params {
   @experimental
   */
   static stripURL(url: string): string {
-    return normalizeURL(url, { search: false })
+    return u.normalizeURL(url, { search: false })
   }
 
   static merge(start: Params, ...objects: ParamsLike[]): Params {
-    let merged = copy(start)
+    let merged = u.copy(start)
 
     for (let object of objects) {
-      let other = wrapValue(this, object)
+      let other = u.wrapValue(this, object)
       // We cannot use iterate over other.entries and call set(), since other.entries
       // might have multiple values for the same array key.
       for (let key of other.keys()) merged.delete(key)

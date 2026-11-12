@@ -1,7 +1,6 @@
-import { cleaner } from '../util.js'
-import { addClassTemp, computedStyle, getRoot, setStyleTemp } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { rootScrollbarWidth } from '../viewport.js'
-import type { Cleaner } from '../util.js'
 
 const SHIFT_CLASS = 'up-scrollbar-away'
 
@@ -15,13 +14,13 @@ const SHIFT_CLASS = 'up-scrollbar-away'
 export class BodyShifter {
   declare _anchoredElements: Set<HTMLElement>
   declare _stack: number
-  declare _cleaner: Cleaner
+  declare _cleaner: u.Cleaner
   declare _rootScrollbarWidth: number
 
   constructor() {
     this._anchoredElements = new Set()
     this._stack = 0
-    this._cleaner = cleaner()
+    this._cleaner = u.cleaner()
   }
 
   lowerStack(): void {
@@ -55,7 +54,7 @@ export class BodyShifter {
 
     // Always publish on the <html> element for consistency, even if the scrolling element
     // is sometimes <body>. The property will be inherited
-    this._cleaner(setStyleTemp(getRoot(), {
+    this._cleaner(e.setStyleTemp(e.getRoot(), {
       '--up-scrollbar-width': this._rootScrollbarWidth + 'px'
     }))
 
@@ -74,11 +73,11 @@ export class BodyShifter {
     if (!this._isShifted()) return
 
     // viewport.sass wants to add the scrollbar with to the value, so we store it in a separate property.
-    let originalValue = computedStyle(element, styleProp)
+    let originalValue = e.computedStyle(element, styleProp)
 
     this._cleaner(
-      setStyleTemp(element, { ['--up-original-' + styleProp]: originalValue }),
-      addClassTemp(element, SHIFT_CLASS),
+      e.setStyleTemp(element, { ['--up-original-' + styleProp]: originalValue }),
+      e.addClassTemp(element, SHIFT_CLASS),
     )
   }
 

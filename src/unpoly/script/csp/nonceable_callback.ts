@@ -1,4 +1,4 @@
-import { affix } from '../../element.js'
+import * as e from '../../element.js'
 
 /**
 The names and values of the arguments for a callback string, and its `this`.
@@ -66,7 +66,7 @@ export class NonceableCallback {
     let scriptElement
     try {
       up.noncedEval = { ...evalEnv }
-      scriptElement = affix(document.body, 'script', { nonce: this.nonce, text: wrappedScript })
+      scriptElement = e.affix(document.body, 'script', { nonce: this.nonce, text: wrappedScript })
       if (up.noncedEval.error) {
         throw up.noncedEval.error
       } else {

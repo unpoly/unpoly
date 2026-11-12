@@ -1,8 +1,5 @@
-import { isAdjacentPosition, parseArgs, pick } from '../util.js'
-import {
-  addClassTemp, hide, hideTemp, removeClassTemp, setAttrsTemp, setStyleTemp, showTemp, unwrap,
-  wrapChildren,
-} from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { guard } from '../error.js'
 import { UpError } from '../error/error.js'
 import { disableContainerTemp } from '../form.js'
@@ -11,8 +8,6 @@ import { layerStack, open } from '../layer.js'
 import { OVERLAY_VISUAL_KEYS } from '../layer/overlay_visuals.js'
 import { printToStandard } from '../log.js'
 import { resolvePreviewFns } from '../status.js'
-import type { ArgSpec, Cleaner, PlainObject } from '../util.js'
-import type { ElementOrSelector, StyleProps } from '../element.js'
 import type { Params } from '../form/params.js'
 import type { Layer } from '../layer/base.js'
 import type { LayerCloseEvent } from '../layer.js'
@@ -26,8 +21,8 @@ export interface PreviewOptions {
   // Undefined when opening a layer.
   fragment: Element | undefined
   request: UpRequest
-  renderOptions: PlainObject
-  cleaner: Cleaner
+  renderOptions: u.PlainObject
+  cleaner: u.Cleaner
 }
 
 /*-
@@ -45,8 +40,8 @@ See [Previews](/learn/previews) for an overview.
 export class Preview {
   declare fragment: Element | undefined
   declare request: UpRequest
-  declare renderOptions: PlainObject
-  declare _cleaner: Cleaner
+  declare renderOptions: u.PlainObject
+  declare _cleaner: u.Cleaner
 
   /*-
   @constructor up.Preview
@@ -347,7 +342,7 @@ export class Preview {
     to the other preview function.
   @experimental
   */
-  run(value: any, options: PlainObject = {}): void {
+  run(value: any, options: u.PlainObject = {}): void {
     for (let fn of resolvePreviewFns(value)) {
       this.undo(guard(fn, this, options))
     }
@@ -394,11 +389,11 @@ export class Preview {
     To remove an attribute, use a value of `null` or `undefined`.
   @stable
   */
-  setAttrs(attrs: PlainObject): void
-  setAttrs(element: ElementOrSelector, attrs: PlainObject): void
+  setAttrs(attrs: u.PlainObject): void
+  setAttrs(element: e.ElementOrSelector, attrs: u.PlainObject): void
   setAttrs(...args: unknown[]) {
     let [element, attrs] = this._parseMutatorArgs(args, 'val', 'val')
-    this.undo(setAttrsTemp(element, attrs))
+    this.undo(e.setAttrsTemp(element, attrs))
   }
 
   /*-
@@ -426,10 +421,10 @@ export class Preview {
   @stable
   */
   addClass(klass: string): void
-  addClass(element: ElementOrSelector, klass: string): void
+  addClass(element: e.ElementOrSelector, klass: string): void
   addClass(...args: unknown[]) {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
-    this.undo(addClassTemp(element, klass))
+    this.undo(e.addClassTemp(element, klass))
   }
 
   /*-
@@ -461,10 +456,10 @@ export class Preview {
   @stable
   */
   removeClass(klass: string): void
-  removeClass(element: ElementOrSelector, klass: string): void
+  removeClass(element: e.ElementOrSelector, klass: string): void
   removeClass(...args: unknown[]) {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
-    this.undo(removeClassTemp(element, klass))
+    this.undo(e.removeClassTemp(element, klass))
   }
 
   /*-
@@ -493,11 +488,11 @@ export class Preview {
     One or more CSS properties with kebab-case keys.
   @stable
   */
-  setStyle(styles: StyleProps): void
-  setStyle(element: ElementOrSelector, styles: StyleProps): void
+  setStyle(styles: e.StyleProps): void
+  setStyle(element: e.ElementOrSelector, styles: e.StyleProps): void
   setStyle(...args: unknown[]) {
     let [element, styles] = this._parseMutatorArgs(args, 'val', 'val')
-    this.undo(setStyleTemp(element, styles))
+    this.undo(e.setStyleTemp(element, styles))
   }
 
   /*-
@@ -525,7 +520,7 @@ export class Preview {
   @function up.Preview#disable
   @stable
   */
-  disable(element?: ElementOrSelector): void
+  disable(element?: e.ElementOrSelector): void
   disable(...args: unknown[]) {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(disableContainerTemp(element, { preview: true }))
@@ -651,8 +646,8 @@ export class Preview {
   @stable
   */
   insert(tempValue: any): void
-  insert(reference: ElementOrSelector, tempValue: any): void
-  insert(reference: ElementOrSelector, position: InsertPosition, tempValue: any): void
+  insert(reference: e.ElementOrSelector, tempValue: any): void
+  insert(reference: e.ElementOrSelector, position: InsertPosition, tempValue: any): void
   insert(...args: unknown[]) {
     // (1) tempValue can have on of the following forms:
     //     - A string of HTML
@@ -662,7 +657,7 @@ export class Preview {
     //     - A NodeList with mixed Element and Text nodes
     // (2) When tempValue resolves to multiple nodes, it will be wrapped
     //     in an <up-wrapper> container.
-    let [reference, position = 'beforeend', tempValue] = this._parseMutatorArgs(args, 'val', isAdjacentPosition, 'val')
+    let [reference, position = 'beforeend', tempValue] = this._parseMutatorArgs(args, 'val', u.isAdjacentPosition, 'val')
     this.undo(insertTemp(reference, position, tempValue))
   }
 
@@ -688,10 +683,10 @@ export class Preview {
     If omitted, the [targeted fragment](/api/up.Preview.prototype.fragment) will be changed.
   @stable
   */
-  show(element?: ElementOrSelector): void
+  show(element?: e.ElementOrSelector): void
   show(...args: unknown[]) {
     let [element] = this._parseMutatorArgs(args, 'val')
-    this.undo(showTemp(element))
+    this.undo(e.showTemp(element))
   }
 
   /*-
@@ -719,10 +714,10 @@ export class Preview {
     If omitted, the [targeted fragment](/api/up.Preview.prototype.fragment) will be changed.
   @stable
   */
-  hide(element?: ElementOrSelector): void
+  hide(element?: e.ElementOrSelector): void
   hide(...args: unknown[]) {
     let [element] = this._parseMutatorArgs(args, 'val')
-    this.undo(hideTemp(element))
+    this.undo(e.hideTemp(element))
   }
 
   /*-
@@ -755,13 +750,13 @@ export class Preview {
     If omitted, the children of the [targeted fragment](/api/up.Preview.prototype.fragment) will be hidden.
   @experimental
   */
-  hideContent(parent?: ElementOrSelector): void
+  hideContent(parent?: e.ElementOrSelector): void
   hideContent(...args: unknown[]) {
     let [parent] = this._parseMutatorArgs(args, 'val')
     // Place all children in a wrapper so we can hide text nodes.
-    let wrapper = wrapChildren(parent)
-    hide(wrapper)
-    this.undo(() => unwrap(wrapper))
+    let wrapper = e.wrapChildren(parent)
+    e.hide(wrapper)
+    this.undo(() => e.unwrap(wrapper))
   }
 
   /*-
@@ -812,7 +807,7 @@ export class Preview {
   @experimental
   */
   showPlaceholder(placeholder: any): void
-  showPlaceholder(parent: ElementOrSelector, placeholder: any): void
+  showPlaceholder(parent: e.ElementOrSelector, placeholder: any): void
   showPlaceholder(...args: unknown[]) {
     let [parent, placeholderReference] = this._parseMutatorArgs(args, 'val', 'val')
 
@@ -877,7 +872,7 @@ export class Preview {
   @experimental
   */
   swapContent(newContent: any): void
-  swapContent(parent: ElementOrSelector, newContent: any): void
+  swapContent(parent: e.ElementOrSelector, newContent: any): void
   swapContent(...args: unknown[]) {
     let [parent, newContent] = this._parseMutatorArgs(args, 'val', 'val')
     this.hideContent(parent)
@@ -909,7 +904,7 @@ export class Preview {
   @function up.Preview#openLayer
   @experimental
   */
-  openLayer(content: any, options: PlainObject = {}): Layer {
+  openLayer(content: any, options: u.PlainObject = {}): Layer {
     let undoDismissValue = ':undo-preview'
 
     let onDismiss = ({ value }: LayerCloseEvent) => {
@@ -919,7 +914,7 @@ export class Preview {
     }
 
     open({
-      ...pick(this.renderOptions, [...OVERLAY_VISUAL_KEYS, 'target']),
+      ...u.pick(this.renderOptions, [...OVERLAY_VISUAL_KEYS, 'target']),
       ...options,
       content,
       abort: false,
@@ -935,8 +930,8 @@ export class Preview {
     return overlay
   }
 
-  _parseMutatorArgs(args: any[], ...specs: ArgSpec[]): any[] {
-    let [element, ...rest] = parseArgs(args, ...specs)
+  _parseMutatorArgs(args: any[], ...specs: u.ArgSpec[]): any[] {
+    let [element, ...rest] = u.parseArgs(args, ...specs)
     // (1) up.fragment.get(undefined) returns undefined
     // (2) up.fragment.get(Element) returns the element
     // (3) this.fragment is undefined when opening a new layer

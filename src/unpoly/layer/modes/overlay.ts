@@ -1,5 +1,5 @@
-import { compact, compactObject, contains, findResult, getSimpleTokens, pick } from '../../util.js'
-import { affix, idSelector, jsonAttr, subtreeFirst } from '../../element.js'
+import * as u from '../../util.js'
+import * as e from '../../element.js'
 import { muteUncriticalSync } from '../../error.js'
 import { OptionsParser } from '../../element/options_parser.js'
 import { haltEvent, on, onEscape } from '../../event.js'
@@ -14,7 +14,6 @@ import { printUserEvent } from '../../log.js'
 import { animate, isNone } from '../../motion.js'
 import { readData } from '../../script.js'
 import { UpURLPattern } from '../../util/url_pattern.js'
-import type { AnyFunction, PlainObject, ValueOrFunction } from '../../util.js'
 import type { UnbindFn } from '../../event.js'
 import type { LayerCloseOptions, LayerOptions } from '../base.js'
 import type { AnimationFn, AnimationValue } from '../../motion.js'
@@ -89,18 +88,18 @@ export abstract class Overlay extends Layer {
   declare dismissible: string[] | boolean | string
   declare dismissLabel: string
   declare dismissARIALabel: string
-  declare openAnimation: ValueOrFunction<AnimationValue>
-  declare closeAnimation: ValueOrFunction<AnimationValue>
+  declare openAnimation: u.ValueOrFunction<AnimationValue>
+  declare closeAnimation: u.ValueOrFunction<AnimationValue>
   declare openDuration: number
   declare closeDuration: number
   declare openEasing: string
   declare closeEasing: string
   declare trapFocus: boolean
-  declare onOpened: AnyFunction | undefined
-  declare onAccept: AnyFunction | undefined
-  declare onAccepted: AnyFunction | undefined
-  declare onDismiss: AnyFunction | undefined
-  declare onDismissed: AnyFunction | undefined
+  declare onOpened: u.AnyFunction | undefined
+  declare onAccept: u.AnyFunction | undefined
+  declare onAccepted: u.AnyFunction | undefined
+  declare onDismiss: u.AnyFunction | undefined
+  declare onDismissed: u.AnyFunction | undefined
   declare onAcceptedReload: string | undefined
   declare onDismissedReload: string | undefined
   declare acceptEvent: string | undefined
@@ -166,7 +165,7 @@ export abstract class Overlay extends Layer {
     } else if (this.dismissible === false) {
       this.dismissible = []
     } else {
-      this.dismissible = getSimpleTokens(this.dismissible)
+      this.dismissible = u.getSimpleTokens(this.dismissible)
     }
 
     if (this.acceptLocation) {
@@ -178,7 +177,7 @@ export abstract class Overlay extends Layer {
     }
   }
 
-  callback(name: string): AnyFunction | undefined {
+  callback(name: string): u.AnyFunction | undefined {
     // Only binds the callback to the layer instance.
     // Note if the callback was created by an UJS attribute like [up-on-accepted], the
     // callback is already bound to the origin element to mimic the behavior of built-in
@@ -189,7 +188,7 @@ export abstract class Overlay extends Layer {
     // emission in OpenLayerPlan and CloseLayer
     //
     // The name is a callback property like 'onAccepted', built from a string by CloseLayer.
-    let fn = (this as PlainObject)[name]
+    let fn = (this as u.PlainObject)[name]
     if (fn) {
       return fn.bind(this)
     }
@@ -200,7 +199,7 @@ export abstract class Overlay extends Layer {
 
   createElement(parentElement: Element): void {
     this.nesting ||= this._suggestVisualNesting()
-    const elementAttrs = compactObject(pick(this, ['align', 'position', 'size', 'class', 'nesting']))
+    const elementAttrs = u.compactObject(u.pick(this, ['align', 'position', 'size', 'class', 'nesting']))
     this.element = this.affixPart(parentElement, null, elementAttrs)
   }
 
@@ -239,15 +238,15 @@ export abstract class Overlay extends Layer {
     })
     // Since the dismiss button already has an accessible [aria-label]
     // we hide the "X" label from screen readers.
-    return affix(this.dismissElement, 'span[aria-hidden="true"]', { text: this.dismissLabel })
+    return e.affix(this.dismissElement, 'span[aria-hidden="true"]', { text: this.dismissLabel })
   }
 
-  affixPart(parentElement: Element, part: string | null, options: PlainObject = {}): HTMLElement {
-    return affix(parentElement, this.selector(part), options)
+  affixPart(parentElement: Element, part: string | null, options: u.PlainObject = {}): HTMLElement {
+    return e.affix(parentElement, this.selector(part), options)
   }
 
   static selector(part?: string | null): string {
-    return compact(['up', this.mode, part]).join('-')
+    return u.compact(['up', this.mode, part]).join('-')
   }
 
   _suggestVisualNesting(): number {
@@ -326,7 +325,7 @@ export abstract class Overlay extends Layer {
     // The browser always focuses the first input matching the ID from [for].
     // The listener only matches label[for].
     let id = label.getAttribute('for')!
-    let fieldSelector = formFieldSelector(idSelector(id))
+    let fieldSelector = formFieldSelector(e.idSelector(id))
 
     let fieldsAnywhere = getAllFragments(fieldSelector, { layer: 'any' })
     let fieldsInLayer = getAllFragments(fieldSelector, { layer: this })
@@ -399,7 +398,7 @@ export abstract class Overlay extends Layer {
       // a link from being followed on the root layer.
       haltEvent(event, { log: true })
 
-      const value = jsonAttr(link, attribute)
+      const value = e.jsonAttr(link, attribute)
       this._onAttrCloserActivated(link, value, closeFn)
     })
   }
@@ -453,7 +452,7 @@ export abstract class Overlay extends Layer {
 
   _tryCloseForElements(selector: string | undefined, closeFn: CloseFn, newElements: Element[], response: UpResponse | undefined): void {
     // Without a selector we look for "undefined", which matches nothing.
-    let match = findResult(newElements, (element) => subtreeFirst(element, selector!))
+    let match = u.findResult(newElements, (element) => e.subtreeFirst(element, selector!))
     if (match) {
       const closeValue = readData(match)
       muteUncriticalSync(() =>
@@ -590,10 +589,10 @@ export abstract class Overlay extends Layer {
   }
 
   _supportsDismissMethod(method: string): boolean {
-    return contains(this.dismissible as string[], method)
+    return u.contains(this.dismissible as string[], method)
   }
 
-  _executeCloseChange(verb: 'accept' | 'dismiss', value: any, options: PlainObject): void {
+  _executeCloseChange(verb: 'accept' | 'dismiss', value: any, options: u.PlainObject): void {
     options = { ...options, verb, value, layer: this }
     return new CloseLayer(options as CloseLayerOptions).execute()
   }

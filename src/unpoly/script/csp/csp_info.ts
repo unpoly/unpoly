@@ -1,10 +1,10 @@
-import { map } from '../../util.js'
+import * as u from '../../util.js'
 
 const NONCE_PATTERN = /'nonce-([^']+)'/g
 
 function findNonces(cspPart: string): string[] {
   let matches = cspPart.matchAll(NONCE_PATTERN)
-  return map(matches, '1')
+  return u.map(matches, '1')
 }
 
 export class CSPInfo {

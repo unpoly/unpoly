@@ -1,5 +1,5 @@
-import { assert, evalOption, isEqual, isList, isString } from '../util.js'
-import { affix } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { Aborted } from '../error/aborted.js'
 import { NotImplemented } from '../error/not_implemented.js'
 import { on } from '../event.js'
@@ -12,7 +12,6 @@ import {
 import { closestLayerElement, mainTargets } from '../layer.js'
 import { convertClicks } from '../link.js'
 import { newStateCache } from '../viewport.js'
-import type { List, PlainObject, ValueOrFunction } from '../util.js'
 import type { EmitProps, EmittedEvent, EventTypes, ListenerArgs, ObservedEvent, UnbindFn } from '../event.js'
 import type { EventListenerAttributes } from '../event/event_listener.js'
 import type { HistoryAspect } from '../history.js'
@@ -48,7 +47,7 @@ export interface LayerOptions {
   mode?: LayerMode
   stack?: LayerStack
   history?: boolean | 'auto'
-  context?: PlainObject
+  context?: u.PlainObject
   lastScrollTops?: FIFOCache<string, any>
   lastFocusCapsules?: FIFOCache<string, any>
   [key: string]: any
@@ -113,7 +112,7 @@ export class Layer {
   declare _index: number | undefined
   declare _unbindLocationChanged: UnbindFn | undefined
   declare _savedTitle: string | undefined
-  declare _savedMetaTags: List<Element> | undefined
+  declare _savedMetaTags: u.List<Element> | undefined
   declare _savedLocation: string | undefined
   declare _savedLang: string | undefined
 
@@ -190,7 +189,7 @@ export class Layer {
     If no context has been set an empty object is returned.
   @experimental
   */
-  declare context: PlainObject
+  declare context: u.PlainObject
 
   // Only overlays have these. They are documented with up.Layer in overlay.ts.
   declare origin: Element | undefined
@@ -215,7 +214,7 @@ export class Layer {
     this.context = context
     this.lastScrollTops = lastScrollTops
     this.lastFocusCapsules = lastFocusCapsules
-    assert(this.mode)
+    u.assert(this.mode)
   }
 
   setupHandlers(): void {
@@ -375,8 +374,8 @@ export class Layer {
     this.stack.peel(this, options)
   }
 
-  evalOption<T>(option: ValueOrFunction<T>): T {
-    return evalOption(option, this)
+  evalOption<T>(option: u.ValueOrFunction<T>): T {
+    return u.evalOption(option, this)
   }
 
   /*-
@@ -764,7 +763,7 @@ export class Layer {
   saveHistory(): void {
     // (1) showsLiveHistory() would always return false unless we're the front layer
     // (2) Getters like this.title would always return this._savedTitle unless we're the front layer
-    assert(this.isFront())
+    u.assert(this.isFront())
 
     // (1) Only save the aspects that Unpoly keeps in sync with the browser.
     // (2) An aspect that is not live already holds what this layer rendered.
@@ -794,7 +793,7 @@ export class Layer {
       updateMetaTags(this._savedMetaTags)
     }
 
-    if (isString(this._savedLang) && this.showsLiveHistory('lang')) {
+    if (u.isString(this._savedLang) && this.showsLiveHistory('lang')) {
       updateLang(this._savedLang)
     }
   }
@@ -832,30 +831,30 @@ export class Layer {
     return this.stack.asCurrent(this, fn)
   }
 
-  updateHistory(options: PlainObject): void {
+  updateHistory(options: u.PlainObject): void {
     // (1) The layer always stores the values it rendered.
     // (2) The updaters only change the browser for an aspect that Unpoly keeps in sync (see showsLiveHistory()).
     //     Since up.history.config.enabled can exclude aspects, render options can only narrow the config,
     //     never update an aspect that it excludes.
 
     // Set unless { location: false }
-    if (isString(options.location)) {
+    if (u.isString(options.location)) {
       this.updateLocation(options.location, { push: true })
     }
 
     // Set unless { metaTags: false }
-    if (isList(options.metaTags)) {
+    if (u.isList(options.metaTags)) {
       up.migrate?.warnOfHungryMetaTags?.(options.metaTags)
       this._updateMetaTags(options.metaTags)
     }
 
     // Set unless { title: false }
-    if (isString(options.title)) {
+    if (u.isString(options.title)) {
       this.updateTitle(options.title)
     }
 
     // Set unless { lang: false }
-    if (isString(options.lang)) {
+    if (u.isString(options.lang)) {
       this._updateLang(options.lang)
     }
   }
@@ -914,11 +913,11 @@ export class Layer {
     }
   }
 
-  get metaTags(): List<Element> | undefined {
+  get metaTags(): u.List<Element> | undefined {
     return this._getHistory('metaTags', this._savedMetaTags, findMetaTags)
   }
 
-  _updateMetaTags(metaTags: List<Element>): void {
+  _updateMetaTags(metaTags: u.List<Element>): void {
     this._savedMetaTags = metaTags
 
     if (this.showsLiveHistory('metaTags')) {
@@ -1027,12 +1026,12 @@ export class Layer {
   @include up.element.createFromSelector/all
   @experimental
   */
-  affix(selector: string, attrs?: PlainObject): HTMLElement
-  affix(...args: [selector: string, attrs?: PlainObject]) {
-    return affix(this.getFirstSwappableElement(), ...args)
+  affix(selector: string, attrs?: u.PlainObject): HTMLElement
+  affix(...args: [selector: string, attrs?: u.PlainObject]) {
+    return e.affix(this.getFirstSwappableElement(), ...args)
   }
 
-  [isEqual.key](other: Layer): boolean {
+  [u.isEqual.key](other: Layer): boolean {
     return (this.constructor === other.constructor) && (this.element === other.element)
   }
 

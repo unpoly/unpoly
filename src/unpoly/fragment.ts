@@ -1,15 +1,6 @@
 import './fragment.sass'
-import {
-  cleaner, copy, evalAutoOption, filterList, findResult, getComplexTokens, isAdjacentPosition,
-  isDefined, isElement, isElementLike, isEqual, isFunction, isList, isRegExp, isString,
-  lowerCaseFirst, map, merge, normalizeURL, parseArgIntoOptions, parseArgs, parseScalarJSONPairs,
-  pick, presence, reject, some, uniq, uniqBy, upperCaseFirst, wrapList,
-} from './util.js'
-import {
-  attrSelector, booleanAttr, booleanOrStringAttr, classSelector, closestAttr,
-  containsElement, createNodesFromHTML, documentPosition, getOne, idSelector,
-  isIntersectingWindow, parseSelector, removeAttrsFromHTML, subtree, subtreeFirst, wrapIfRequired,
-} from './element.js'
+import * as u from './util.js'
+import * as e from './element.js'
 import { fail } from './error.js'
 import { mockable } from './mockable.js'
 import { CannotParse } from './error/cannot_parse.js'
@@ -29,8 +20,6 @@ import {
   callbackAttr, hello, isScript, readData, registerDestructor, registerMacro, scriptConfig,
 } from './script.js'
 import { newConfig } from './util/config.js'
-import type { List, PlainObject } from './util.js'
-import type { ElementOrSelector } from './element.js'
 import type { UpRequest } from './network/request.js'
 import type { UpResponse } from './network/response.js'
 import type {
@@ -79,7 +68,7 @@ export interface KeepPlan {
   oldElement: Element
   newElement: Element
   newData?: any
-  renderOptions?: PlainObject
+  renderOptions?: u.PlainObject
   // Set when rendering, see UpdateSteps.
   revivers?: any[]
 }
@@ -94,7 +83,7 @@ export type TargetDeriver = string | ((element: Element) => string | undefined)
 Parses an HTML string into nodes.
 @internal
 */
-export type HTMLParser = (html: string) => List<Node>
+export type HTMLParser = (html: string) => u.List<Node>
 
 // Properties Unpoly sets on fragments.
 type FragmentElement = Element & { upKeepIdentity?: any, upInserted?: boolean }
@@ -139,7 +128,7 @@ The `up:fragment:keep` event.
 export type FragmentKeepEvent = Event & {
   target: Element
   newFragment: Element
-  newData: PlainObject
+  newData: u.PlainObject
   renderOptions: RenderOptions
 }
 
@@ -149,7 +138,7 @@ The `up:fragment:kept` event.
 export type FragmentKeptEvent = Event & {
   target: Element
   newFragment: Element
-  newData: PlainObject
+  newData: u.PlainObject
 }
 
 /**
@@ -185,8 +174,8 @@ The `up:template:clone` event.
 */
 export type TemplateCloneEvent = Event & {
   target: Element
-  data: PlainObject
-  nodes: List<Node> | null
+  data: u.PlainObject
+  nodes: u.List<Node> | null
 }
 
 /*-
@@ -241,7 +230,7 @@ export interface FragmentConfig {
   autoFocus: FragmentProcessorValue[]
   normalizeKeepHTML: (html: string) => string
   autoRevalidate: boolean | ((response: UpResponse) => boolean)
-  skipResponse: (loadedEventProps: PlainObject) => boolean
+  skipResponse: (loadedEventProps: u.PlainObject) => boolean
   renderableResponse: (response: UpResponse) => boolean
 }
 
@@ -505,7 +494,7 @@ export const fragmentConfig = newConfig('up.fragment.config', (): FragmentConfig
 }))
 
 
-function defaultSkipResponse({ response, expiredResponse }: PlainObject): boolean {
+function defaultSkipResponse({ response, expiredResponse }: u.PlainObject): boolean {
   return !response.text || response.text === expiredResponse?.text
 }
 
@@ -538,15 +527,15 @@ up.fragment.source('#two') // returns '/foo'
   The URL from which the element was loaded.
 @stable
 */
-export function sourceOf(element: ElementOrSelector, options: PlainObject = {}): string | undefined {
+export function sourceOf(element: e.ElementOrSelector, options: u.PlainObject = {}): string | undefined {
   element = getSmart(element, options)!
-  return closestAttr(element, 'up-source')
+  return e.closestAttr(element, 'up-source')
 }
 
 export function normalizeSource(source: string): string {
   // Don't use u.matchableURL() here. We need to keep the trailing slash here,
   // to support backends that care about trailing slashes.
-  return normalizeURL(source, { hash: false })
+  return u.normalizeURL(source, { hash: false })
 }
 
 /*-
@@ -571,7 +560,7 @@ its modification time is sent as an `If-Modified-Since` request header. The serv
 @stable
 */
 export function timeOf(element: Element) {
-  let value = closestAttr(element, 'up-time')
+  let value = e.closestAttr(element, 'up-time')
   if (value && value !== 'false') {
     // We support both Unix timestamps (e.g. "1445412480")
     // and RFC 1123 times (e.g. "Wed, 21 Oct 2015 07:28:00 GMT").
@@ -637,7 +626,7 @@ its ETag is sent as an `If-None-Match` request header. The server may check the 
 @stable
 */
 export function etagOf(element: Element) {
-  let value = closestAttr(element, 'up-etag')
+  let value = e.closestAttr(element, 'up-etag')
   if (value && value !== 'false') {
     return value
   }
@@ -1187,7 +1176,7 @@ See [Keeping elements](/learn/keeping-elements) for elaborate examples.
 @signature
 */
 
-export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }: KeepPlan & { renderOptions: PlainObject }) {
+export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }: KeepPlan & { renderOptions: u.PlainObject }) {
   const log = ['Keeping fragment %o', oldElement]
   const callback = callbackAttr(oldElement, 'up-on-keep', { expandObject: ['newFragment', 'newData'] })
   return emit(oldElement, 'up:fragment:keep', { log, callback, newFragment, newData, renderOptions })
@@ -1270,7 +1259,7 @@ Otherwise returns undefined.
 @param {boolean} options.keep
 @internal
 */
-export function findKeepPlan(options: PlainObject): KeepPlan | undefined {
+export function findKeepPlan(options: u.PlainObject): KeepPlan | undefined {
   if (options.keep === false) return
 
   const { oldElement, newElement } = options
@@ -1294,7 +1283,7 @@ export function findKeepPlan(options: PlainObject): KeepPlan | undefined {
     // to use custom selectors like ":main" or "&" we use up.fragment.get().
     partner = getSmart(newElement, partnerSelector, lookupOpts)
   } else {
-    partner = subtreeFirst(newElement, partnerSelector)
+    partner = e.subtreeFirst(newElement, partnerSelector)
   }
 
   // (1) The partner must be matched
@@ -1310,7 +1299,7 @@ export function findKeepPlan(options: PlainObject): KeepPlan | undefined {
   let oldIdentity = keepIdentity(oldElement, oldElementMode)
   let partnerIdentity = keepIdentity(partner, oldElementMode)
 
-  if (!isEqual(oldIdentity, partnerIdentity)) return
+  if (!u.isEqual(oldIdentity, partnerIdentity)) return
 
   const plan = {
     oldElement, // the element that should be kept
@@ -1327,12 +1316,12 @@ export function findKeepPlan(options: PlainObject): KeepPlan | undefined {
 }
 
 function keepIdentity(element: FragmentElement, mode: string | boolean | undefined = keepMode(element)) {
-  return element.upKeepIdentity ??= copy(buildKeepIdentity(element, mode))
+  return element.upKeepIdentity ??= u.copy(buildKeepIdentity(element, mode))
 }
 
 export function defaultNormalizeKeepHTML(html: string): string {
   // Remove attributes that might fluctuate beteen responses, but don't normally contribute to element identity.
-  html = removeAttrsFromHTML(html, ['up-etag', 'up-source', 'up-time', 'nonce', ...scriptConfig.nonceableAttributes])
+  html = e.removeAttrsFromHTML(html, ['up-etag', 'up-source', 'up-time', 'nonce', ...scriptConfig.nonceableAttributes])
   // Remove leading spaces.
   html = html.replace(/^[ \t]+/mg, '')
   return html
@@ -1350,11 +1339,11 @@ function buildKeepIdentity(element: Element, mode: string | boolean | undefined)
 
 
 function keepMode(element: Element): string | boolean | undefined {
-  return booleanOrStringAttr(element, 'up-keep')
+  return e.booleanOrStringAttr(element, 'up-keep')
 }
 
 
-export function emitFragmentInserted(element: FragmentElement, meta: PlainObject): Event | undefined {
+export function emitFragmentInserted(element: FragmentElement, meta: u.PlainObject): Event | undefined {
   if (element.upInserted) return
   element.upInserted = true
 
@@ -1400,7 +1389,7 @@ up.on('up:fragment:inserted', function(event, fragment) {
 */
 
 
-export function emitFragmentDestroyed(fragment: Element, options: PlainObject) {
+export function emitFragmentDestroyed(fragment: Element, options: u.PlainObject) {
   const log = options.log ?? ['Destroyed fragment %o', fragment]
   const parent = options.parent || document
   return mutate(() => emit(parent, 'up:fragment:destroyed', { fragment, parent, log }))
@@ -1633,16 +1622,16 @@ without filtering by layer or destruction state.
 @signature
 */
 // Takes a selector or element, optionally preceded by a root element, and followed by options.
-export function getSmart(selector: ElementOrSelector, options?: PlainObject): HTMLElement | undefined
-export function getSmart(root: ParentNode, selector: ElementOrSelector, options?: PlainObject): HTMLElement | undefined
+export function getSmart(selector: e.ElementOrSelector, options?: u.PlainObject): HTMLElement | undefined
+export function getSmart(root: ParentNode, selector: e.ElementOrSelector, options?: u.PlainObject): HTMLElement | undefined
 export function getSmart(...args: any[]): any {
   let [root, selector, options] = parseGetArgs(args)
 
-  if (isElementLike(selector)) {
+  if (u.isElementLike(selector)) {
     // (1) up.fragment.get(root: Element, element: Element, [options]) should just return element.
     //     The given root and options are ignored. We also don't check if it's destroying.
     // (2) We do use e.get() to unwrap a jQuery collection.
-    return getOne(selector)
+    return e.getOne(selector)
   }
 
   if (root) {
@@ -1656,12 +1645,12 @@ export function getSmart(...args: any[]): any {
   // (2) We must not pass a { document } option to up.FragmentFinder.
   return new FragmentFinder({
     selector,
-    ...pick(options, ['layer', 'match', 'origin', 'destroying']),
+    ...u.pick(options, ['layer', 'match', 'origin', 'destroying']),
   }).find()
 }
 
-export function getFirstDescendant(selector: string, options?: PlainObject): HTMLElement | undefined
-export function getFirstDescendant(root: ParentNode, selector: string, options?: PlainObject): HTMLElement | undefined
+export function getFirstDescendant(selector: string, options?: u.PlainObject): HTMLElement | undefined
+export function getFirstDescendant(root: ParentNode, selector: string, options?: u.PlainObject): HTMLElement | undefined
 export function getFirstDescendant(...args: any[]): any {
   let [root, selectorString, options] = parseGetArgs(args)
 
@@ -1670,7 +1659,7 @@ export function getFirstDescendant(...args: any[]): any {
 }
 
 function parseGetArgs(args: any[]) {
-  return parseArgs(args, 'val', 'val', 'options')
+  return u.parseArgs(args, 'val', 'val', 'options')
 }
 
 /*-
@@ -1744,20 +1733,20 @@ let foosInContainer = up.fragment.all(container, '.foo')
 */
 // Takes a selector, optionally preceded by a root element, and followed by options.
 // A selector string gives an array. An element or list is returned as a list.
-export function getAllFragments(selector: string, options?: PlainObject): HTMLElement[]
-export function getAllFragments(root: ParentNode, selector: string, options?: PlainObject): HTMLElement[]
-export function getAllFragments(selector: ElementOrSelector, options?: PlainObject): List<HTMLElement>
-export function getAllFragments(root: ParentNode, selector: ElementOrSelector, options?: PlainObject): List<HTMLElement>
+export function getAllFragments(selector: string, options?: u.PlainObject): HTMLElement[]
+export function getAllFragments(root: ParentNode, selector: string, options?: u.PlainObject): HTMLElement[]
+export function getAllFragments(selector: e.ElementOrSelector, options?: u.PlainObject): u.List<HTMLElement>
+export function getAllFragments(root: ParentNode, selector: e.ElementOrSelector, options?: u.PlainObject): u.List<HTMLElement>
 export function getAllFragments(...args: any[]): any {
   let [root, selectorString, options] = parseGetArgs(args)
 
   // (0) up.fragment.all(element) or up.fragment.all(element, element) should return an array of that element.
-  if (isElement(selectorString)) {
+  if (u.isElement(selectorString)) {
     return [selectorString]
   }
 
   // (1) up.fragment.all(list) or up.fragment.all(element, list) should return the list unchanged
-  if (isList(selectorString)) {
+  if (u.isList(selectorString)) {
     return selectorString
   }
 
@@ -1823,7 +1812,7 @@ To include all elements matching the selector, use `up.element.subtree()`.
   A list of all matching elements.
 @stable
 */
-export function getSubtree(element: Element, selector: string, options: PlainObject = {}): any {
+export function getSubtree(element: Element, selector: string, options: u.PlainObject = {}): any {
   return new Selector(selector, element, options).subtree(element)
 }
 
@@ -1841,10 +1830,10 @@ Will always return `false` if the two elements are on different [layers](/api/up
 @experimental
 */
 export function contains(root: Element, selectorOrElement: any): boolean {
-  if (isElement(selectorOrElement)) {
+  if (u.isElement(selectorOrElement)) {
     // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
     // Returns undefined when the root is in no layer.
-    return (containsElement(root, selectorOrElement) && layerStack.get(root)?.contains(selectorOrElement)) as boolean
+    return (e.containsElement(root, selectorOrElement) && layerStack.get(root)?.contains(selectorOrElement)) as boolean
   } else {
     return getSubtree(root, selectorOrElement).length > 0
   }
@@ -1868,7 +1857,7 @@ the given element. To match ancestors regardless of layers, use `up.element.clos
   Returns `null` or `undefined` if no element matches in the same layer.
 @stable
 */
-export function closest(element: Element, selector: string, options?: PlainObject): HTMLElement | undefined {
+export function closest(element: Element, selector: string, options?: u.PlainObject): HTMLElement | undefined {
   return new Selector(selector, element, options).closest(element)
 }
 
@@ -1961,9 +1950,9 @@ export function destroy(...args: any[]): any {
   return up.migrate.formerlyAsync?.('up.destroy()')
 }
 
-function parseTargetAndOptions(args: any[]): PlainObject {
-  const options = parseArgIntoOptions(args, 'target')
-  if (isElement(options.target)) {
+function parseTargetAndOptions(args: any[]): u.PlainObject {
+  const options = u.parseArgIntoOptions(args, 'target')
+  if (u.isElement(options.target)) {
     options.origin ||= options.target
   }
   return options
@@ -2126,10 +2115,10 @@ export const reload = mockable(function reload(...args: RenderArgs | []): Render
   options.target ||= ':main'
   // up.reload() takes one element or selector, not a list of target selectors.
   // A target that matches nothing throws a TypeError below.
-  const element = getSmart(options.target as ElementOrSelector, options)!
+  const element = getSmart(options.target as e.ElementOrSelector, options)!
   options.url ||= sourceOf(element)
-  options.headers = merge(options.headers, conditionalHeaders(element))
-  if (options.keepData || booleanAttr(element, 'up-keep-data')) {
+  options.headers = u.merge(options.headers, conditionalHeaders(element))
+  if (options.keepData || e.booleanAttr(element, 'up-keep-data')) {
     options.data = readData(element)
   }
   up.migrate.postprocessReloadOptions?.(options)
@@ -2209,9 +2198,9 @@ export function toSuccessKey(key: string): string | undefined {
 
     switch (prefix) {
       case 'onFail':
-        return 'on' + upperCaseFirst(suffix)
+        return 'on' + u.upperCaseFirst(suffix)
       case 'fail':
-        return lowerCaseFirst(suffix)
+        return u.lowerCaseFirst(suffix)
     }
   }
 }
@@ -2240,9 +2229,9 @@ export function toFailKey(key: string): string | undefined {
 
     switch (prefix) {
       case 'on':
-        return 'onFail' + upperCaseFirst(suffix)
+        return 'onFail' + u.upperCaseFirst(suffix)
       case undefined:
-        return 'fail' + upperCaseFirst(suffix)
+        return 'fail' + u.upperCaseFirst(suffix)
     }
   }
 }
@@ -2285,8 +2274,8 @@ selector = up.fragment.toTarget(element) // returns '.klass'
   The derived selector string.
 @stable
 */
-export function toTarget(element: Element | string, options?: PlainObject): string {
-  return presence(element, isString) || tryToTarget(element, options) || cannotTarget(element)
+export function toTarget(element: Element | string, options?: u.PlainObject): string {
+  return u.presence(element, u.isString) || tryToTarget(element, options) || cannotTarget(element)
 }
 
 /*-
@@ -2307,7 +2296,7 @@ Returns whether Unpoly can [derive a target selector](/learn/target-derivation) 
   Whether a selector can be derived for the given element.
 @stable
 */
-export function isTargetable(element: Element, options?: PlainObject): boolean {
+export function isTargetable(element: Element, options?: u.PlainObject): boolean {
   return !!tryToTarget(element, options)
 }
 
@@ -2320,10 +2309,10 @@ function cannotTarget(element: any): never {
 }
 
 // The element may also be a selector string, which is returned unchanged.
-export function tryToTarget(element: any, options: PlainObject = {}): string | undefined {
+export function tryToTarget(element: any, options: u.PlainObject = {}): string | undefined {
   let derivers = options.strong ? fragmentConfig.strongTargetDerivers : fragmentConfig.targetDerivers
 
-  return findResult(derivers, function(deriver: TargetDeriver) {
+  return u.findResult(derivers, function(deriver: TargetDeriver) {
     let target = deriveTarget(element, deriver)
 
     if (target && isGoodTarget(target, element, options)) {
@@ -2333,7 +2322,7 @@ export function tryToTarget(element: any, options: PlainObject = {}): string | u
 }
 
 function deriveTarget(element: Element, deriver: TargetDeriver): string | undefined {
-  if (isFunction(deriver)) {
+  if (u.isFunction(deriver)) {
     return deriver(element)
   } else if (element.matches(deriver)) {
     try {
@@ -2341,14 +2330,14 @@ function deriveTarget(element: Element, deriver: TargetDeriver): string | undefi
       // the element's tag name and attribute to form a more specific target.
       // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
       return deriveTargetFromPattern(element, deriver)
-    } catch (e) {
-      if (e instanceof CannotParse) {
+    } catch (error) {
+      if (error instanceof CannotParse) {
         // This error can be thrown for two reasons:
         // (1) up.element.parseSelector() cannot parse the given string
         // (2) up.element.parseSelector() parses a selector with a depth > 1.
         return deriver
       } else {
-        throw e
+        throw error
       }
     }
   }
@@ -2359,7 +2348,7 @@ function deriveTargetFromPattern(element: Element, deriver: string): string | un
   // the element's tag name and attribute to form a more specific target.
   // E.g. a deriver '[up-id]' should result in a target '[up-id="messages"]'.
 
-  let { includePath, excludeRaw } = parseSelector(deriver)
+  let { includePath, excludeRaw } = e.parseSelector(deriver)
 
   if (includePath.length !== 1) {
     // It's not straightforward to improve a descendant selector like '.foo .bar' or '.foo > .bar'.
@@ -2383,11 +2372,11 @@ function deriveTargetFromPattern(element: Element, deriver: string): string | un
   }
 
   for (let className of classNames) {
-    result += classSelector(className)
+    result += e.classSelector(className)
   }
 
   if (id) {
-    result += idSelector(id)
+    result += e.idSelector(id)
   }
 
   for (let attributeName in attributes) {
@@ -2399,16 +2388,16 @@ function deriveTargetFromPattern(element: Element, deriver: string): string | un
     if (attributeName === 'id') {
       // We allow a deriver '[id]' to apply to all elements with an ID.
       // However, we want to use an ID selector ('#foo') instead of an attribute selector ('[id=foo]').
-      result += idSelector(attributeValue)
+      result += e.idSelector(attributeValue)
     } else if (attributeName === 'class') {
       // We allow a deriver '[class]' to apply to all elements with a class.
       // However, we want to (1) filter class against config.badTargetClasses and
       // (2) use an class selector ('.foo') instead of an attribute selector ('[class=foo]').
       for (let goodClass of goodClassesForTarget(element)) {
-        result += classSelector(goodClass)
+        result += e.classSelector(goodClass)
       }
     } else {
-      result += attrSelector(attributeName, attributeValue)
+      result += e.attrSelector(attributeName, attributeValue)
     }
   }
 
@@ -2419,7 +2408,7 @@ function deriveTargetFromPattern(element: Element, deriver: string): string | un
   return result
 }
 
-function isGoodTarget(target: string, element: Element, options: PlainObject = {}): boolean {
+function isGoodTarget(target: string, element: Element, options: u.PlainObject = {}): boolean {
   let verify = options.verify ?? fragmentConfig.verifyDerivedTarget
   return !isAlive(element) || !verify || getSmart(target, { layer: element, ...options }) === element
 }
@@ -2474,7 +2463,7 @@ up.fragment.toTarget(element)
 
 // The pattern is a string with optional * wildcards, a RegExp or a function.
 function matchesPattern(pattern: any, str: string): boolean {
-  if (isRegExp(pattern)) {
+  if (u.isRegExp(pattern)) {
     return pattern.test(str)
   } else {
     return pattern === str
@@ -2482,8 +2471,8 @@ function matchesPattern(pattern: any, str: string): boolean {
 }
 
 function goodClassesForTarget(element: Element): string[] {
-  let isGood = (klass: string) => !some(fragmentConfig.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
-  return filterList(element.classList, isGood)
+  let isGood = (klass: string) => !u.some(fragmentConfig.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
+  return u.filterList(element.classList, isGood)
 }
 
 const MAIN_PSEUDO = /:main\b/
@@ -2494,14 +2483,14 @@ export function containsMainPseudo(target: string): boolean {
   return MAIN_PSEUDO.test(target)
 }
 
-export function expandTargets(targets: any, options: PlainObject = {}): string[] {
+export function expandTargets(targets: any, options: u.PlainObject = {}): string[] {
   const { layer } = options
   if (layer !== 'new' && !(layer instanceof Layer)) {
     fail('Must pass an up.Layer as { layer } option, but got %o', layer)
   }
 
   // Copy the list since targets might be a jQuery collection, and this does not support shift or push.
-  targets = copy(wrapList(targets))
+  targets = u.copy(u.wrapList(targets))
 
   const expanded = []
 
@@ -2520,17 +2509,17 @@ export function expandTargets(targets: any, options: PlainObject = {}): string[]
       if (layer === 'new' || layer.state === 'opening') continue
       let firstSwappableTarget = toTarget(layer.getFirstSwappableElement(), options)
       targets.unshift(target.replace(LAYER_PSEUDO, firstSwappableTarget))
-    } else if (isElementLike(target)) {
+    } else if (u.isElementLike(target)) {
       expanded.push(toTarget(target, options))
-    } else if (isString(target)) {
+    } else if (u.isString(target)) {
       expanded.push(resolveOrigin(target, options))
     }
   }
 
-  return uniq(expanded)
+  return u.uniq(expanded)
 }
 
-function resolveMode({ layer, mode }: PlainObject): LayerMode {
+function resolveMode({ layer, mode }: u.PlainObject): LayerMode {
   if (layer === 'new') {
     return mode || fail('Must pass a { mode } option together with { layer: "new" }')
   } else {
@@ -2548,17 +2537,17 @@ function modernResolveOrigin(target: string, { origin }: { origin?: Element } = 
   })
 }
 
-export function resolveOrigin(target: any, options?: PlainObject): any {
+export function resolveOrigin(target: any, options?: u.PlainObject): any {
   // up.FormValidator sometimes calls resolveOrigin(undefined)
-  if (!isString(target)) return target
+  if (!u.isString(target)) return target
   return (up.migrate.resolveOrigin || modernResolveOrigin)(target, options)
 }
 
 export function splitTarget(target: string | undefined): string[] {
-  return getComplexTokens(target)
+  return u.getComplexTokens(target)
 }
 
-export function parseTargetSteps(target: string | undefined, options: PlainObject = {}): RenderStep[] {
+export function parseTargetSteps(target: string | undefined, options: u.PlainObject = {}): RenderStep[] {
   let defaultPlacement = options.defaultPlacement || 'swap'
   let defaultMaybe = options.defaultMaybe ?? false
 
@@ -2603,7 +2592,7 @@ export function hasAutoHistory(newFragments: Element[], layer: Layer): boolean {
   let vanillaSelector = expandTargets(fragmentConfig.autoHistoryTargets, { layer }).join()
 
   for (let newFragment of newFragments) {
-    if (subtree(newFragment, vanillaSelector).length) {
+    if (e.subtree(newFragment, vanillaSelector).length) {
       return true
     }
   }
@@ -2897,9 +2886,9 @@ up.fragment.matches(element, element) // result: true
 
 @stable
 */
-export function matches(element: ElementOrSelector, selector: string | Element, options: PlainObject = {}): boolean {
-  element = getOne(element)
-  if (isElement(selector)) {
+export function matches(element: e.ElementOrSelector, selector: string | Element, options: u.PlainObject = {}): boolean {
+  element = e.getOne(element)
+  if (u.isElement(selector)) {
     let target = tryToTarget(selector)
     // Returns undefined for an element without a target.
     return (target && element.matches(target)) as boolean
@@ -2908,12 +2897,12 @@ export function matches(element: ElementOrSelector, selector: string | Element, 
   }
 }
 
-export function matchSelectorMap(element: Element, selectorMap: PlainObject | undefined, { layer = element }: { layer?: any } = {}): any[] {
+export function matchSelectorMap(element: Element, selectorMap: u.PlainObject | undefined, { layer = element }: { layer?: any } = {}): any[] {
   let hits = []
 
   if (selectorMap && element) {
     for (let [selector, value] of Object.entries(selectorMap)) {
-      if (isDefined(value) && matches(element, selector, { layer })) {
+      if (u.isDefined(value) && matches(element, selector, { layer })) {
         hits.push(value)
       }
     }
@@ -2922,12 +2911,12 @@ export function matchSelectorMap(element: Element, selectorMap: PlainObject | un
   return hits
 }
 
-export function shouldRevalidate(request: UpRequest, response: UpResponse, options: PlainObject = {}): boolean {
-  return request.fromCache && evalAutoOption(options.revalidate, fragmentConfig.autoRevalidate, response)
+export function shouldRevalidate(request: UpRequest, response: UpResponse, options: u.PlainObject = {}): boolean {
+  return request.fromCache && u.evalAutoOption(options.revalidate, fragmentConfig.autoRevalidate, response)
 }
 
 function isContainedByRivalStep(steps: RenderStep[], candidateStep: RenderStep): boolean {
-  return some(steps, function(rivalStep) {
+  return u.some(steps, function(rivalStep) {
     return (rivalStep !== candidateStep) &&
       ((rivalStep.placement === 'swap') || (rivalStep.placement === 'content')) &&
       // Steps have an old element once their target is matched.
@@ -2937,8 +2926,8 @@ function isContainedByRivalStep(steps: RenderStep[], candidateStep: RenderStep):
 
 export function compressNestedSteps(steps: RenderStep[]): RenderStep[] {
   if (steps.length < 2) return steps
-  let compressed = uniqBy(steps, 'oldElement')
-  compressed = reject(compressed, (step) => isContainedByRivalStep(compressed, step))
+  let compressed = u.uniqBy(steps, 'oldElement')
+  compressed = u.reject(compressed, (step) => isContainedByRivalStep(compressed, step))
   return compressed
 }
 
@@ -3051,7 +3040,7 @@ export const abortFragment = mockable(function abortFragment(...args: any[]): vo
     // However, when we navigate on a layer, we want to abort *all* requests on
     // that layer, even requests with a target outside of main, e.g. a nav bar.
     let layers = layerStack.getAll(options)
-    elements = map(layers, 'element')
+    elements = u.map(layers, 'element')
     testFn = (request) => request.isBoundToLayers(layers)
     reason ||= 'Aborting requests within ' + layers.join(', ')
   }
@@ -3204,7 +3193,7 @@ export function onFirstIntersect(element: Element, callback: () => void, { margi
   // that both (1) already cached and (2) scrolled into viewport when inserted.
   // In that case we want to immediately render the cached content and not show
   // a flash of unloaded partial. The same is true when revalidating such a partial.
-  if (isIntersectingWindow(element, { margin })) {
+  if (e.isIntersectingWindow(element, { margin })) {
     callback()
     return
   }
@@ -3229,14 +3218,14 @@ export function onFirstIntersect(element: Element, callback: () => void, { margi
 
 const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
-export function provideNodes(value: any, { origin, originLayer, data, htmlParser = createNodesFromHTML }: ProvideNodesOptions = {}): List<Node> {
-  if (isString(value) && STARTS_WITH_SELECTOR.test(value)) {
-    let [parsedValue, parsedData] = parseScalarJSONPairs(value)[0]
+export function provideNodes(value: any, { origin, originLayer, data, htmlParser = e.createNodesFromHTML }: ProvideNodesOptions = {}): u.List<Node> {
+  if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
+    let [parsedValue, parsedData] = u.parseScalarJSONPairs(value)[0]
     data = { ...data, ...parsedData }
     value = getSmart(parsedValue, { layer: 'closest', origin, originLayer }) || fail(`Cannot find template "%s"`, value)
   }
 
-  if (isString(value)) {
+  if (u.isString(value)) {
     value = htmlParser(value)
   }
 
@@ -3244,11 +3233,11 @@ export function provideNodes(value: any, { origin, originLayer, data, htmlParser
     value = cloneTemplate(value, data, { htmlParser })
   }
 
-  return wrapList(value)
+  return u.wrapList(value)
 }
 
 function isTemplate(value: any): boolean {
-  return isElement(value) && value.matches('template, script[type]') && !isScript(value)
+  return u.isElement(value) && value.matches('template, script[type]') && !isScript(value)
 }
 
 /*-
@@ -3292,12 +3281,12 @@ let nodes = up.template.clone('#table-placeholder', { rows: 10 })
   You can pass this list to any rendering function, like `up.render()` or `up.Preview#insert()`.
 @stable
 */
-export function cloneTemplate(templateOrSelector: ElementOrSelector, data: any = {}, { origin, htmlParser }: ProvideNodesOptions = {}): List<Node> {
+export function cloneTemplate(templateOrSelector: e.ElementOrSelector, data: any = {}, { origin, htmlParser }: ProvideNodesOptions = {}): u.List<Node> {
   // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
   let template = getSmart(templateOrSelector, { origin, layer: 'closest' }) || fail('Template not found: %o', templateOrSelector)
   let event = emit(template, 'up:template:clone', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
   // Each node remembers the template variables for readData(), even a text node.
-  let nodes: List<Node & { upTemplateData?: any }> = event.nodes ?? defaultTemplateNodes(template, htmlParser)
+  let nodes: u.List<Node & { upTemplateData?: any }> = event.nodes ?? defaultTemplateNodes(template, htmlParser)
   for (let node of nodes) {
     node.upTemplateData = data
   }
@@ -3358,7 +3347,7 @@ Also see documentation for `up.element.createNodesFromHTML()`.
 @stable
 */
 
-function defaultTemplateNodes(template: Element, htmlParser: HTMLParser = createNodesFromHTML): List<Node> {
+function defaultTemplateNodes(template: Element, htmlParser: HTMLParser = e.createNodesFromHTML): u.List<Node> {
   let templateText = template.innerHTML
   return htmlParser(templateText)
 }
@@ -3400,18 +3389,18 @@ Returns a function that [destroys](/api/up.destroy) the inserted element and rem
 @internal
 */
 export function insertTemp(...args: any[]): () => void {
-  let [reference, position = 'beforeend', tempValue] = parseArgs(args, 'val', isAdjacentPosition, 'val')
+  let [reference, position = 'beforeend', tempValue] = u.parseArgs(args, 'val', u.isAdjacentPosition, 'val')
 
   let tempNodes = provideNodes(tempValue, { origin: reference })
   // We may be given a NodeList, or an HTML string without a single root Element.
   // In these cases we wrap it in an <up-wrapper> so we have a single root Element we
   // can pass into Element#insertAdjacentElement(), up.hello() or up.destroy().
   // This simplifies our code significantly.
-  let tempElement = wrapIfRequired(tempNodes)
+  let tempElement = e.wrapIfRequired(tempNodes)
 
   // In case the element was already attached to this document, we need to remember
   // its position so we can return it when reverting.
-  let oldPosition = document.contains(tempElement) && documentPosition(tempElement)
+  let oldPosition = document.contains(tempElement) && e.documentPosition(tempElement)
 
   reference.insertAdjacentElement(position, tempElement)
 
@@ -3438,13 +3427,13 @@ export function insertTemp(...args: any[]): () => void {
   The callback can return another function that is called when that element no longer matches.
 @internal
 */
-export function trackSelector<E extends Element>(selectFn: () => List<E>, callback: (element: E) => any): () => void {
+export function trackSelector<E extends Element>(selectFn: () => u.List<E>, callback: (element: E) => any): () => void {
   let tracker = new SelectorTracker(selectFn, callback)
   return tracker.start()
 }
 
 let mutateLevel = 0
-let afterMutateCleaner = cleaner('fifo')
+let afterMutateCleaner = u.cleaner('fifo')
 
 export function mutate<T>(callback: () => T): T {
   try {

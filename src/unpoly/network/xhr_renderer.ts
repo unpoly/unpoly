@@ -1,4 +1,4 @@
-import { copy, memoizeMethod } from '../util.js'
+import * as u from '../util.js'
 import { wrapMethod } from '../protocol.js'
 import type { Params } from '../form/params.js'
 import type { UpRequest } from './request.js'
@@ -23,7 +23,7 @@ export class XHRRenderer {
 
     // We copy params since we will modify them below.
     // This would confuse API clients and cache key logic in up.network.
-    this._params = copy(this._request.params)
+    this._params = u.copy(this._request.params)
 
     // IE11 explodes it we're setting an undefined timeout property
     if (this._request.timeout) {
@@ -103,7 +103,7 @@ export class XHRRenderer {
   }
 
   static {
-    memoizeMethod(this.prototype, {
+    u.memoizeMethod(this.prototype, {
       _finalizePayload: true,
       _getMethod: true,
     })

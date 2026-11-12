@@ -1,8 +1,5 @@
-import {
-  cleaner as utilCleaner, compact, flatMap, isArray, isEqual, isFunction, isString, map,
-  matchableURL, newOptions, parseScalarJSONPairs, wrapList,
-} from './util.js'
-import { around, setAttrPresence, stringAttr, subtree } from './element.js'
+import * as u from './util.js'
+import * as e from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { on } from './event.js'
 import { getDisablePreviewFn } from './form.js'
@@ -14,7 +11,6 @@ import { Preview } from './status/preview.js'
 import { newConfig } from './util/config.js'
 import { Registry } from './framework/registry.js'
 import { FocusCapsule } from './viewport/focus_capsule.js'
-import type { List, PlainObject } from './util.js'
 import type { OptionsParserOptions } from './element/options_parser.js'
 import type { Layer } from './layer/base.js'
 import type { UpRequest } from './network/request.js'
@@ -23,7 +19,7 @@ import type { UpRequest } from './network/request.js'
 A preview function, registered with `up.preview()` or passed as `{ preview }`.
 It changes the page while a request is loading, through the given `up.Preview`.
 */
-export type PreviewFn = (preview: Preview, options?: PlainObject) => any
+export type PreviewFn = (preview: Preview, options?: u.PlainObject) => any
 
 // A nav remembers the locations its links were last compared with.
 type NavElement = Element & { upNavLocations?: string[] }
@@ -169,12 +165,12 @@ function linkCurrentURLs(link: NavLink): LinkCurrentURLs {
 }
 
 function getNavLocations(nav: Element): string[] {
-  let layerRef = stringAttr(nav, 'up-layer') || 'origin'
+  let layerRef = e.stringAttr(nav, 'up-layer') || 'origin'
   let layers = layerStack.getAll(layerRef, { origin: nav })
-  return compact(layers.map(getMatchableLayerLocation))
+  return u.compact(layers.map(getMatchableLayerLocation))
 }
 
-function updateNav(nav: NavElement, links: List<Element>, { newLinks, anyLocationChanged }: NavUpdateOptions): void {
+function updateNav(nav: NavElement, links: u.List<Element>, { newLinks, anyLocationChanged }: NavUpdateOptions): void {
   // Only look up current layer locations when either:
   //
   // (1) the location changed (anyLocationChanged = true) or
@@ -187,13 +183,13 @@ function updateNav(nav: NavElement, links: List<Element>, { newLinks, anyLocatio
   //
   // (1) We have unprocessed links (newLinks = true)
   // (2) The location for this nav's [up-layer] setting changed
-  if (newLinks || !isEqual(nav.upNavLocations, currentLocations)) {
+  if (newLinks || !u.isEqual(nav.upNavLocations, currentLocations)) {
     for (let link of links) {
       const isCurrent = linkCurrentURLs(link).isAnyCurrent(currentLocations)
       for (let currentClass of statusConfig.currentClasses) {
         link.classList.toggle(currentClass, isCurrent)
       }
-      setAttrPresence(link, 'aria-current', 'page', isCurrent)
+      e.setAttrPresence(link, 'aria-current', 'page', isCurrent)
     }
 
     // Remember which locations we last processed
@@ -210,16 +206,16 @@ Because we update full navs, we only need to lookup layer locations once.
 */
 function updateNavsAround(root: Element, opts: NavUpdateOptions): void {
   const navSelector = statusConfig.selector('navSelectors')
-  const fullNavs = around(root, navSelector)
+  const fullNavs = e.around(root, navSelector)
 
   for (let fullNav of fullNavs) {
-    let links = subtree(fullNav, SELECTOR_LINK)
+    let links = e.subtree(fullNav, SELECTOR_LINK)
     updateNav(fullNav, links, opts)
   }
 }
 
 function getMatchableLayerLocation(layer: Layer): string | undefined {
-  return matchableURL(layer.location)
+  return u.matchableURL(layer.location)
 }
 
 
@@ -298,7 +294,7 @@ You can style revalidating fragments to convey that content might be stale:
 @experimental
 */
 
-export function runPreviews(request: UpRequest, renderOptions: PlainObject): () => void {
+export function runPreviews(request: UpRequest, renderOptions: u.PlainObject): () => void {
   // Previews run while the request is in flight, before it evicts its layers.
   let { bindLayer } = request as UpRequest & { bindLayer: Layer }
   let focusCapsule = FocusCapsule.preserve(bindLayer)
@@ -311,9 +307,9 @@ export function runPreviews(request: UpRequest, renderOptions: PlainObject): () 
   }
 }
 
-function doRunPreviews(request: UpRequest, renderOptions: PlainObject): () => void {
+function doRunPreviews(request: UpRequest, renderOptions: u.PlainObject): () => void {
   let { fragment, fragments, origin } = request
-  let cleaner = utilCleaner()
+  let cleaner = u.cleaner()
   let previewForFragment = (fragment: Element | undefined) => new Preview({ fragment, request, renderOptions, cleaner })
 
   // Some preview effects only run once per render pass.
@@ -433,11 +429,11 @@ function getPlaceholderPreviewFn(placeholder: any): PreviewFn | undefined {
 }
 
 export function resolvePreviewFns(value: any): PreviewFn[] {
-  if (isFunction(value)) {
+  if (u.isFunction(value)) {
     return [value]
-  } else if (isString(value)) {
+  } else if (u.isString(value)) {
     return resolvePreviewString(value)
-  } else if (isArray(value)) {
+  } else if (u.isArray(value)) {
     return value.flatMap(resolvePreviewFns)
   } else {
     return []
@@ -445,7 +441,7 @@ export function resolvePreviewFns(value: any): PreviewFn[] {
 }
 
 function resolvePreviewString(str: string): PreviewFn[] {
-  return map(parseScalarJSONPairs(str), ([name, parsedOptions]) => {
+  return u.map(u.parseScalarJSONPairs(str), ([name, parsedOptions]) => {
     let previewFn = namedPreviewFns.get(name)
 
     return function(preview, runOptions) {
@@ -455,10 +451,10 @@ function resolvePreviewString(str: string): PreviewFn[] {
   })
 }
 
-function getActiveElements({ origin, activeElements }: PlainObject): Element[] {
-  activeElements ||= wrapList(origin)
+function getActiveElements({ origin, activeElements }: u.PlainObject): Element[] {
+  activeElements ||= u.wrapList(origin)
   // If the link area was grown with [up-expand], we highlight the [up-expand] container.
-  return flatMap(activeElements, findActivatableAreas)
+  return u.flatMap(activeElements, findActivatableAreas)
 }
 
 function getFeedbackClassesPreviewFn(feedbackOption: boolean | undefined, fragments: Element[]): PreviewFn | undefined {
@@ -476,8 +472,8 @@ function getFeedbackClassesPreviewFn(feedbackOption: boolean | undefined, fragme
   }
 }
 
-export function statusOptions(element: Element, options?: PlainObject, parserOptions?: OptionsParserOptions): PlainObject {
-  options = newOptions(options)
+export function statusOptions(element: Element, options?: u.PlainObject, parserOptions?: OptionsParserOptions): u.PlainObject {
+  options = u.newOptions(options)
   const parser = new OptionsParser(element, options, parserOptions)
   parser.booleanOrString('disable')
   parser.boolean('feedback')

@@ -1,8 +1,7 @@
-import { affix, setAttrsTemp } from '../element.js'
+import * as e from '../element.js'
 import { on } from '../event.js'
 import { isWithinForeignOverlay } from '../layer.js'
 import { doFocus, tryFocus } from '../viewport.js'
-import type { UndoFunction } from '../element.js'
 import type { UnbindFn } from '../event.js'
 import type { Overlay } from './modes/overlay.js'
 import type { DoFocusOptions } from '../viewport.js'
@@ -15,7 +14,7 @@ export class OverlayFocus {
   declare _focusElement: HTMLElement
   declare _trapFocus: boolean
   declare _active: boolean | undefined
-  declare _unsetAttrs: UndoFunction
+  declare _unsetAttrs: e.UndoFunction
   declare _untrapFocus: UnbindFn
   declare _focusTrapBefore: HTMLElement
   declare _focusTrapAfter: HTMLElement
@@ -31,7 +30,7 @@ export class OverlayFocus {
     if (this._active) { return }
     this._active = true
 
-    this._unsetAttrs = setAttrsTemp(this._focusElement, {
+    this._unsetAttrs = e.setAttrsTemp(this._focusElement, {
       // Make layer.element focusable.
       // It would be slightly nicer to give it [tabindex=-1] to make it focusable through JS,
       // but remove it from the keyboard tab sequence. However, then we would need additional
@@ -46,8 +45,8 @@ export class OverlayFocus {
 
     if (this._trapFocus) {
       this._untrapFocus = on('focusin', (event: FocusInEvent) => this._onFocus(event))
-      this._focusTrapBefore = affix(this._focusElement, 'beforebegin', 'up-focus-trap[tabindex=0]')
-      this._focusTrapAfter = affix(this._focusElement, 'afterend', 'up-focus-trap[tabindex=0]')
+      this._focusTrapBefore = e.affix(this._focusElement, 'beforebegin', 'up-focus-trap[tabindex=0]')
+      this._focusTrapAfter = e.affix(this._focusElement, 'afterend', 'up-focus-trap[tabindex=0]')
     }
   }
 

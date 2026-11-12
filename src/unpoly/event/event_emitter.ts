@@ -1,5 +1,5 @@
-import { extractOptions, isArray, isElementLike, isGiven, isString, merge } from '../util.js'
-import { getOne } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { guard } from '../error.js'
 import { Aborted } from '../error/aborted.js'
 import { build } from '../event.js'
@@ -7,7 +7,6 @@ import { getSmart } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { Layer } from '../layer/base.js'
 import { logConfig, printToStandard } from '../log.js'
-import type { PlainObject } from '../util.js'
 
 /**
 What to log when an event is emitted: a message, an array of a message and its substitution values,
@@ -81,7 +80,7 @@ export class EventEmitter {
     let message = this.log
     let messageArgs
 
-    if (isArray(message)) {
+    if (u.isArray(message)) {
       [message, ...messageArgs] = message
     } else {
       messageArgs = []
@@ -89,14 +88,14 @@ export class EventEmitter {
 
     const { type } = this.event
 
-    if (isString(message)) {
+    if (u.isString(message)) {
       printToStandard(type, message, ...messageArgs)
     } else if (message !== false) {
       printToStandard(type, `Event ${type}`)
     }
   }
 
-  static fromEmitArgs(args: any[], defaults: PlainObject = {}): EventEmitter {
+  static fromEmitArgs(args: any[], defaults: u.PlainObject = {}): EventEmitter {
     // Event-emitting functions are crazy overloaded:
     //
     // - up.emit([target], eventType, [eventProps])
@@ -110,16 +109,16 @@ export class EventEmitter {
     // { type } property for the event type. In case we are passed a pre-built
     // Event object, the hash will contain emission that options that cannot be
     // carried by the event object, such as { layer } or { callback }.
-    let options = extractOptions(args)
+    let options = u.extractOptions(args)
 
     // Event-emitting functions may instantiate their up.EventEmitter with preconfigured
     // defaults. E.g. up.Layer#emit() will set the default { layer: this }.
-    options = merge(defaults, options)
+    options = u.merge(defaults, options)
 
     // If we are passed an element or layer as a first argument, this is the event
     // target. We remove it from the argument list and store it in options.
-    if (isElementLike(args[0])) {
-      options.target = getOne(args.shift())
+    if (u.isElementLike(args[0])) {
+      options.target = e.getOne(args.shift())
     } else if (args[0] instanceof Layer) {
       options.layer = args.shift()
     }
@@ -127,7 +126,7 @@ export class EventEmitter {
     // Setting a { layer } is a shorthand to (1) emit the event on the layer's
     // element and (2) to set up.layer.current to that layer during emission.
     let layer
-    if (isGiven(options.layer)) {
+    if (u.isGiven(options.layer)) {
       layer = layerStack.get(options.layer)!
       options.target ||= layer.element
       options.baseLayer ||= layer
@@ -140,7 +139,7 @@ export class EventEmitter {
       options.baseLayer = layerStack.get(options.baseLayer)
     }
 
-    if (isString(options.target)) {
+    if (u.isString(options.target)) {
       options.target = getSmart(options.target, { layer: options.layer })
     } else if (!options.target) {
       // If no element is given, we emit the event on the document.
@@ -152,7 +151,7 @@ export class EventEmitter {
       // up.emit([target], event, [emitOptions])
       options.event = args[0]
       options.log ??= args[0].log
-    } else if (isString(args[0])) {
+    } else if (u.isString(args[0])) {
       // In this branch we receive an Event type and props object.
       // The props object may also include options for the emission, such as
       // { layer }, { target }, { baseLayer } or { log }.

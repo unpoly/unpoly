@@ -1,5 +1,5 @@
-import { contains, each } from '../util.js'
-import { affix } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { submitForm } from '../browser.js'
 import { Params } from '../form/params.js'
 import { wrapMethod } from '../protocol.js'
@@ -33,13 +33,13 @@ export class FormRenderer {
     this.params.addAll(paramsFromQuery)
     action = Params.stripURL(action)
 
-    if (!contains(HTML_FORM_METHODS, method)) {
+    if (!u.contains(HTML_FORM_METHODS, method)) {
       // HTML forms can only have a GET or POST method. Other HTTP methods will be converted
       // to a `POST` request and carry their original method as a `_method` parameter.
       method = wrapMethod(method, this.params)
     }
 
-    this._form = affix(document.body, 'form.up-request-loader', { method, action }) as HTMLFormElement
+    this._form = e.affix(document.body, 'form.up-request-loader', { method, action }) as HTMLFormElement
 
     // We only need an [enctype] attribute if the user has explicitly
     // requested one. If none is given, we can use the browser's default
@@ -57,12 +57,12 @@ export class FormRenderer {
 
     // @params will be undefined for GET requests, since we have already
     // transfered all params to the URL during normalize().
-    each(this.params.toArray(), this._addField.bind(this))
+    u.each(this.params.toArray(), this._addField.bind(this))
 
     submitForm(this._form)
   }
 
   _addField(attrs: ParamEntry): void {
-    affix(this._form, 'input[type=hidden]', attrs)
+    e.affix(this._form, 'input[type=hidden]', attrs)
   }
 }

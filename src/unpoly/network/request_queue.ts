@@ -1,6 +1,4 @@
-import {
-  always, evalOption, filterList, findInList, parseArgs, queueTask, remove, scheduleTimer, some,
-} from '../util.js'
+import * as u from '../util.js'
 import { emit } from '../event.js'
 import { printToStandard } from '../log.js'
 import { networkConfig } from '../network.js'
@@ -42,7 +40,7 @@ export class RequestQueue {
     this._trackingRequests.push(request)
     // The braces matter: u.remove() returns the removed request, a thenable that would make
     // the derived promise adopt the request's rejection.
-    always(request, () => { remove(this._trackingRequests, request) })
+    u.always(request, () => { u.remove(this._trackingRequests, request) })
   }
 
   get allRequests(): UpRequest[] {
@@ -51,7 +49,7 @@ export class RequestQueue {
 
   asap(request: UpRequest): void {
     request.runQueuedCallbacks()
-    always(request, () => this._onRequestSettled(request))
+    u.always(request, () => this._onRequestSettled(request))
 
     // When considering whether a request is "slow", we're measuring the duration between request.queuedAt
     // and the moment when the request gets settled. Note that when setSlowTimer() occurs, it will
@@ -86,11 +84,11 @@ export class RequestQueue {
 
     // We may have multiple timers running concurrently.
     // Nonethess we don't emit duplicate events due to the check in @_checkLate().
-    scheduleTimer(timeUntilLate, () => this._checkForLate())
+    u.scheduleTimer(timeUntilLate, () => this._checkForLate())
   }
 
   _getMaxConcurrency(): number {
-    return evalOption(networkConfig.concurrency)
+    return u.evalOption(networkConfig.concurrency)
   }
 
   _hasConcurrencyLeft(): boolean {
@@ -116,9 +114,9 @@ export class RequestQueue {
     // Only when there is no foreground request left in the queue we will send a background request.
     // Note that if a queued preload request is requested without { preload: true } we will
     // promote it to the foreground (see @promoteToForeground()).
-    let request = findInList(this._queuedRequests, (request) => !request.background)
+    let request = u.findInList(this._queuedRequests, (request) => !request.background)
     request ||= this._queuedRequests[0]
-    return remove(this._queuedRequests, request)
+    return u.remove(this._queuedRequests, request)
   }
 
   _sendRequestNow(request: UpRequest): void {
@@ -129,14 +127,14 @@ export class RequestQueue {
 
   _onRequestSettled(request: UpRequest): void {
     // If the request was aborted before it was sent, it still sits in @queuedRequests.
-    remove(this._currentRequests, request) || remove(this._queuedRequests, request)
+    u.remove(this._currentRequests, request) || u.remove(this._queuedRequests, request)
 
     queueMicrotask(() => this._poke())
 
     // Check if we can emit up:network:recover after a previous up:network:late event.
     // We do give other code one more task to queue another requests, e.g. a queued watcher diff.
     // This way a long-running chain of requests only shows a single, un-interrupted progress bar.
-    queueTask(() => this._checkForRecover())
+    u.queueTask(() => this._checkForRecover())
   }
 
   _poke(): void {
@@ -148,12 +146,12 @@ export class RequestQueue {
 
   // Aborting a request will cause its promise to reject, which will also uncache it
   abort(...args: any[]): void {
-    let [conditions = true, { except, reason, logOnce }]: [RequestCondition, AbortRequestsOptions] = parseArgs(args, 'val', 'options')
+    let [conditions = true, { except, reason, logOnce }]: [RequestCondition, AbortRequestsOptions] = u.parseArgs(args, 'val', 'options')
 
     let tester = UpRequest.tester(conditions, { except })
 
     for (let list of [this._currentRequests, this._queuedRequests, this._trackingRequests]) {
-      const abortableRequests = filterList(list, tester)
+      const abortableRequests = u.filterList(list, tester)
       for (let abortableRequest of abortableRequests) {
         if (logOnce) {
           printToStandard(...logOnce)
@@ -161,7 +159,7 @@ export class RequestQueue {
         }
         abortableRequest.abort({ reason })
         // Avoid changing the list we're iterating over.
-        remove(list, abortableRequest)
+        u.remove(list, abortableRequest)
       }
     }
   }
@@ -200,7 +198,7 @@ export class RequestQueue {
     const timerTolerance = 1
     // A timed request has a numeric late time.
     const isLate = (request: UpRequest) => request.age >= ((request.effectiveLateTime as number) - timerTolerance)
-    return some(this._timedRequests, isLate)
+    return u.some(this._timedRequests, isLate)
   }
 
 }

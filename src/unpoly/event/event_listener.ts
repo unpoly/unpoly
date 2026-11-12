@@ -1,4 +1,4 @@
-import { compactObject, evalOption, pick, reject, uid } from '../util.js'
+import * as u from '../util.js'
 import { fail } from '../error.js'
 import { readFieldDisabled } from '../form.js'
 import { isBeforeBoot, isEvaling } from '../framework.js'
@@ -96,7 +96,7 @@ export class UpEventListener {
     // Avoid setting a default { passive: false } since some browsers have non-false
     // defaults for some event types like `touchstart`.
     // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#parameters
-    let options = compactObject(pick(this, ['once', 'passive', 'capture']))
+    let options = u.compactObject(u.pick(this, ['once', 'passive', 'capture']))
     return [this.eventType, this.nativeCallback, options]
   }
 
@@ -119,7 +119,7 @@ export class UpEventListener {
     // 3. There is only a single event bubbling up the DOM, so we are only called once.
     let element: Element | null = event.target as Element
     if (this.selector) {
-      let selector = evalOption(this.selector)
+      let selector = u.evalOption(this.selector)
       element = element.closest(selector)
     }
 
@@ -174,7 +174,7 @@ export class UpEventListener {
   static _buildKey(attributes: EventListenerAttributes): string {
     // Give the callback function a numeric identifier so it
     // can become part of the upEventListeners key.
-    attributes.callback.upUid ||= uid()
+    attributes.callback.upUid ||= u.uid()
 
     return [
       attributes.eventType,
@@ -187,7 +187,7 @@ export class UpEventListener {
     let map = element.upEventListeners
     if (map) {
       const listeners = Object.values(map)
-      return reject(listeners, 'isDefault')
+      return u.reject(listeners, 'isDefault')
     } else {
       return []
     }

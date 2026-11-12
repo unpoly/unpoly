@@ -1,8 +1,5 @@
-import {
-  cleaner, evalOption, extractOptions, filterList, findResult, flatMap, isArray, isElement,
-  isString, map, merge, newOptions, normalizeMethod, omit, parseArgs, presence, sequence, uid, uniq,
-} from './util.js'
-import { attrSelector, crossOriginSelector, getOne, idSelector, jsonAttr, setAttrsTemp } from './element.js'
+import * as u from './util.js'
+import * as e from './element.js'
 import { fail, muteUncriticalRejection } from './error.js'
 import { mockable } from './mockable.js'
 import { OptionsParser } from './element/options_parser.js'
@@ -21,8 +18,6 @@ import { callbackAttr, registerAttrCompiler, registerCompiler, registerDestructo
 import { statusOptions } from './status.js'
 import { newConfig } from './util/config.js'
 import { doFocus, focusedElementWithin } from './viewport.js'
-import type { List, PlainObject } from './util.js'
-import type { ElementOrSelector } from './element.js'
 import type { OptionsParserOptions } from './element/options_parser.js'
 import type { RenderOptions } from './fragment/render/render_options.js'
 import type { RenderJob } from './fragment/render/render_job.js'
@@ -60,7 +55,7 @@ export type FormValidateEvent = Event & {
   target: Element
   form: Element
   params: Params
-  fields: List<Element>
+  fields: u.List<Element>
   renderOptions: RenderOptions
 }
 
@@ -271,7 +266,7 @@ export const formConfig = newConfig('up.form.config', (): FormConfig => ({
   ],
   noFieldSelectors: [],
   submitSelectors: ['form:is([up-submit], [up-target], [up-layer], [up-transition])'],
-  noSubmitSelectors: ['[up-submit=false]', '[target]', crossOriginSelector('action')],
+  noSubmitSelectors: ['[up-submit=false]', '[target]', e.crossOriginSelector('action')],
   submitButtonSelectors: ['input[type=submit]', 'input[type=image]', 'button[type=submit]', 'button:not([type])'],
   anyButtonSelectors: ['button', 'input:is([type=submit], [type=image], [type=button], [type=reset])'],
   // Although we only need to bind to `input`, we always also bind to `change`
@@ -284,8 +279,8 @@ export const formConfig = newConfig('up.form.config', (): FormConfig => ({
   arrayParam: (name) => name.endsWith('[]'),
 }))
 
-function findFormElements(root: ElementOrSelector, selectorFn: SelectorFn): Field[] {
-  root = getOne(root) // unwrap jQuery
+function findFormElements(root: e.ElementOrSelector, selectorFn: SelectorFn): Field[] {
+  root = e.getOne(root) // unwrap jQuery
   let elements = getSubtree(root, selectorFn())
 
   // Like the browser, a [form] attribute takes precedence over the surrounding form.
@@ -297,10 +292,10 @@ function findFormElements(root: ElementOrSelector, selectorFn: SelectorFn): Fiel
   // element that are associated with the form (through <input form="id-of-form">, which
   // is an HTML feature.)
   if (root.matches('form[id]')) {
-    const formReference = attrSelector('form', root.getAttribute('id')!)
+    const formReference = e.attrSelector('form', root.getAttribute('id')!)
     const externalElementsSelector = selectorFn(formReference)
     const externalElements = getAllFragments(externalElementsSelector, { layer: root })
-    elements = uniq([...elements, ...externalElements])
+    elements = u.uniq([...elements, ...externalElements])
   }
 
   return elements
@@ -343,7 +338,7 @@ Fields in another [layer](/api/up.layer) and fields that are being [destroyed](/
   The field elements within the given element.
 @stable
 */
-export function findFields(root: ElementOrSelector): Field[] {
+export function findFields(root: e.ElementOrSelector): Field[] {
   return findFormElements(root, formFieldSelector)
 }
 
@@ -394,7 +389,7 @@ export function defaultSubmitButton(form: Element): Field | undefined {
   return findSubmitButtons(form)[0]
 }
 
-function findFieldsAndButtons(container: ElementOrSelector): Field[] {
+function findFieldsAndButtons(container: e.ElementOrSelector): Field[] {
   return [
     ...findFields(container),
     ...findAnyButtons(container),
@@ -418,7 +413,7 @@ Buttons in another [layer](/api/up.layer) and buttons that are being [destroyed]
   The list of found submit buttons.
 @experimental
 */
-export function findSubmitButtons(root: ElementOrSelector): Field[] {
+export function findSubmitButtons(root: e.ElementOrSelector): Field[] {
   return findFormElements(root, submitButtonSelector)
 }
 
@@ -430,7 +425,7 @@ Returns a selector for any button, including buttons that don't submit their for
 */
 export const [anyButtonSelector, isAnyButton] = formConfig.selectorFns('anyButtonSelectors')
 
-function findAnyButtons(root: ElementOrSelector): Field[] {
+function findAnyButtons(root: e.ElementOrSelector): Field[] {
   return findFormElements(root, anyButtonSelector)
 }
 
@@ -529,7 +524,7 @@ up.submit('form.new-user', { target: '.main' })
 
 @stable
 */
-export const submit = mockable((form: ElementOrSelector, options?: RenderOptions): RenderJob => {
+export const submit = mockable((form: e.ElementOrSelector, options?: RenderOptions): RenderJob => {
   return render(submitOptions(form, options))
 })
 
@@ -568,14 +563,14 @@ let options = up.form.submitOptions(form)
   The parsed submit options.
 @stable
 */
-export function submitOptions(form: ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions
+export function submitOptions(form: e.ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions
 // The form is resolved in place. The implementation can't take the resolved type: with
 // strictFunctionTypes, a function's overload must be assignable to it (TS2394).
 export function submitOptions(form: any, options?: RenderOptions, parserOptions?: OptionsParserOptions) {
   form = getSmart(form)
   form = getForm(form)
 
-  options = newOptions(options)
+  options = u.newOptions(options)
 
   let parser = new OptionsParser(form, options, parserOptions)
 
@@ -595,7 +590,7 @@ export function submitOptions(form: any, options?: RenderOptions, parserOptions?
   })
 
   options.origin ||= focusedElementWithin(form) || options.submitButton || form
-  options.activeElements = uniq([options.origin, options.submitButton, form].filter(isElement))
+  options.activeElements = u.uniq([options.origin, options.submitButton, form].filter(u.isElement))
 
   // Now that we have extracted everything form-specific into options, we can call
   // up.link.followOptions(). This will also parse the myriads of other options
@@ -649,9 +644,9 @@ The event type `'input'` is expanded into the events from `up.form.config.watchI
   The [watch options](/learn/watch-options) that `up.watch()` would use for the given field.
 @experimental
 */
-export function watchOptions(field: ElementOrSelector, options?: PlainObject, parserOptions: OptionsParserOptions = {}): PlainObject {
+export function watchOptions(field: e.ElementOrSelector, options?: u.PlainObject, parserOptions: OptionsParserOptions = {}): u.PlainObject {
   field = getSmart(field)!
-  options = newOptions(options)
+  options = u.newOptions(options)
 
   // Computing the effective options for a given field is pretty involved,
   // as there are multiple layers of defaults. In increasing priority these are:
@@ -704,10 +699,10 @@ export function watchOptions(field: ElementOrSelector, options?: PlainObject, pa
   if (options.event === 'input') {
     // Expand the event name via the map in `up.form.config.watchInputEvents`.
     // This way we can fix components
-    options.event = evalOption(formConfig.watchInputEvents, field)
+    options.event = u.evalOption(formConfig.watchInputEvents, field)
     options.delay ??= formConfig.watchInputDelay
   } else if (options.event === 'change') {
-    options.event = evalOption(formConfig.watchChangeEvents, field)
+    options.event = u.evalOption(formConfig.watchChangeEvents, field)
   }
 
   options.origin ||= field
@@ -760,12 +755,12 @@ like `{ event }` or `{ delay }`.
   The [options](/api/up.validate#parameters) that `up.validate()` would use for the given field.
 @experimental
 */
-export function validateOptions(field: ElementOrSelector, options?: PlainObject, parserOptions: OptionsParserOptions = {}): PlainObject {
+export function validateOptions(field: e.ElementOrSelector, options?: u.PlainObject, parserOptions: OptionsParserOptions = {}): u.PlainObject {
   field = getSmart(field)!
-  options = newOptions(options)
+  options = u.newOptions(options)
   let parser = new OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-validate-' })
   parser.string('url')
-  parser.string('method', { normalize: normalizeMethod })
+  parser.string('method', { normalize: u.normalizeMethod })
   parser.boolean('batch', { default: formConfig.validateBatch })
   parser.json('params')
   parser.json('headers')
@@ -798,7 +793,7 @@ In that case Unpoly will focus the [closest form group](/api/up.form.group) arou
 
 export function disableContainerTemp(container: Element, { preview }: { preview?: boolean } = {}): () => void {
   let controls = findFieldsAndButtons(container)
-  return sequence(map(controls, (control) => disableControlTemp(control, preview)))
+  return u.sequence(u.map(controls, (control) => disableControlTemp(control, preview)))
 }
 
 function disableControlTemp(control: Field, preview: boolean | undefined): (() => void) | undefined {
@@ -818,7 +813,7 @@ function disableControlTemp(control: Field, preview: boolean | undefined): (() =
     // Disabled by a preview to block input while a request is loading.
     // Still counts as enabled when we read params or watch values.
     control.upPreviewDisabled = true
-    undoDisable = sequence(undoDisable, () => delete control.upPreviewDisabled)
+    undoDisable = u.sequence(undoDisable, () => delete control.upPreviewDisabled)
   }
 
   // (1) This function is only returned if we didn't early-return above
@@ -836,12 +831,12 @@ function getDisableContainers(disable: any, origin: Element | undefined): Elemen
 
   if (disable === true) {
     return [originScope()]
-  } else if (isElement(disable)) {
+  } else if (u.isElement(disable)) {
     return [disable]
-  } else if (isString(disable)) {
+  } else if (u.isString(disable)) {
     return getSubtree(originScope(), disable, { origin })
-  } else if (isArray(disable)) {
-    return flatMap(disable, (d) => getDisableContainers(d, origin))
+  } else if (u.isArray(disable)) {
+    return u.flatMap(disable, (d) => getDisableContainers(d, origin))
   } else {
     return []
   }
@@ -863,7 +858,7 @@ export function getDisablePreviewFn(disable: any, origin: Element | undefined): 
 // belongs to the first form#X in document order, and a control within a <form> belongs to it
 // even when it is in another layer (a popup attached within the form). Unpoly isolates layers.
 export function prepareParamsReadTemp(form: HTMLFormElement): () => void {
-  let undo = cleaner()
+  let undo = u.cleaner()
   let ownControls = new Set(findFieldsAndButtons(form))
 
   // Fields and buttons that a preview disabled still count, e.g. for a second submission
@@ -877,16 +872,16 @@ export function prepareParamsReadTemp(form: HTMLFormElement): () => void {
   // We don't use form.id, which an <input name="id"> shadows.
   let id = form.getAttribute('id')
   if (id) {
-    for (let otherForm of document.querySelectorAll('form' + idSelector(id))) {
-      if (otherForm !== form) undo(setAttrsTemp(otherForm, { id: 'up-isolated-' + uid() }))
+    for (let otherForm of document.querySelectorAll('form' + e.idSelector(id))) {
+      if (otherForm !== form) undo(e.setAttrsTemp(otherForm, { id: 'up-isolated-' + u.uid() }))
     }
   }
 
   // Controls of other layers must not belong to our form.
   // We collect them before we change any, since form.elements is a live collection.
-  let foreignControls = filterList(form.elements, (control) => (isField(control) || isAnyButton(control)) && !ownControls.has(control))
+  let foreignControls = u.filterList(form.elements, (control) => (isField(control) || isAnyButton(control)) && !ownControls.has(control))
   for (let control of foreignControls) {
-    undo(setAttrsTemp(control, { form: 'up-isolated-' + uid() }))
+    undo(e.setAttrsTemp(control, { form: 'up-isolated-' + u.uid() }))
   }
 
   return undo.clean
@@ -903,8 +898,8 @@ export function setContainerDisabled(container: Element, disabled: boolean): voi
 // This was extracted from submitOptions().
 // Validation needs to submit a form without options intended for the final submission,
 // like [up-scroll], [up-confirm], etc.
-export function destinationOptions(form: Element, options?: PlainObject, parserOptions?: OptionsParserOptions): PlainObject {
-  options = newOptions(options)
+export function destinationOptions(form: Element, options?: u.PlainObject, parserOptions?: OptionsParserOptions): u.PlainObject {
+  options = u.newOptions(options)
   form = getForm(form)!
   const parser = new OptionsParser(form, options, parserOptions)
 
@@ -919,20 +914,20 @@ export function destinationOptions(form: Element, options?: PlainObject, parserO
   // Parse params from form fields.
   const paramParts = [
     Params.fromForm(form, options),
-    jsonAttr(form, 'up-params'),
+    e.jsonAttr(form, 'up-params'),
   ]
 
   const headerParts = [
-    jsonAttr(form, 'up-headers'),
+    e.jsonAttr(form, 'up-headers'),
   ]
 
   if (submitButton) {
     paramParts.push(
-      jsonAttr(submitButton, 'up-params')
+      e.jsonAttr(submitButton, 'up-params')
     )
 
     headerParts.push(
-      jsonAttr(submitButton, 'up-headers')
+      e.jsonAttr(submitButton, 'up-headers')
     )
 
     // Submit buttons may have [formmethod] and [formaction] attribute
@@ -948,7 +943,7 @@ export function destinationOptions(form: Element, options?: PlainObject, parserO
   )
 
   // We merge any { headers } option to the headers that we got from the form elements.
-  options.headers = merge(
+  options.headers = u.merge(
     ...headerParts,
     options.headers,
   )
@@ -959,7 +954,7 @@ export function destinationOptions(form: Element, options?: PlainObject, parserO
   parser.string('method', {
     attr: ['up-method', 'data-method', 'method'],
     default: 'GET',
-    normalize: normalizeMethod
+    normalize: u.normalizeMethod
   })
   if (options.method === 'GET') {
     // Only for GET forms, browsers discard all query params from the form's [action] URL.
@@ -972,12 +967,12 @@ export function destinationOptions(form: Element, options?: PlainObject, parserO
   return options
 }
 
-export function submitButtonOverrides(submitButton: Element | false | undefined): PlainObject {
+export function submitButtonOverrides(submitButton: Element | false | undefined): u.PlainObject {
   if (!submitButton) return {}
   let buttonOptions = followOptions(submitButton, {}, { defaults: false })
   // The parsing of [formmethod] and [formaction] (into { method, url })
   // already happens in destinationOptions()
-  return omit(buttonOptions, ['method', 'url', 'guardEvent', 'origin', 'params', 'headers'])
+  return u.omit(buttonOptions, ['method', 'url', 'guardEvent', 'origin', 'params', 'headers'])
 }
 
 /*-
@@ -1183,9 +1178,9 @@ up.watch('form', { batch: true }, function(diff, options) {
 @signature
 */
 export function watch(...args: any[]): () => void {
-  let [root, options, callback] = parseArgs(args, 'val', 'options', 'callback')
+  let [root, options, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
-  root = getOne(root) // unwrap jQuery
+  root = e.getOne(root) // unwrap jQuery
   callback ||= watchCallbackFromElement(root) || fail('No callback given for up.watch()')
 
   const watcher = new FieldWatcher(root, options, callback)
@@ -1253,8 +1248,8 @@ up.autosubmit(form)
 
 @stable
 */
-export function autosubmit(target: ElementOrSelector, options: PlainObject = {}): () => void {
-  const onChange = (_diff: PlainObject, renderOptions: RenderOptions) => submit(target, renderOptions)
+export function autosubmit(target: e.ElementOrSelector, options: u.PlainObject = {}): () => void {
+  const onChange = (_diff: u.PlainObject, renderOptions: RenderOptions) => submit(target, renderOptions)
   return watch(target, { logPrefix: 'up.autosubmit()', ...options, batch: true }, onChange)
 }
 
@@ -1359,7 +1354,7 @@ form groups after changing a field:
 // Returns the closest group around the given field, with a target selector whenever we can derive one.
 // With { targetable: true } we skip groups for which we cannot derive a target.
 export function findGroupSolution(field: Element, { targetable }: { targetable?: boolean }) {
-  return findResult(getGroupSelectors(), function(groupSelector) {
+  return u.findResult(getGroupSelectors(), function(groupSelector) {
     let group = field.closest(groupSelector)
     if (group) {
       let strongDerivedGroupTarget = tryToTarget(group, { strong: true })
@@ -1587,8 +1582,8 @@ See specs for examples.
 @function up.form.parseValidateArgs
 @internal
 */
-function parseValidateArgs(originOrTarget: any, ...args: any[]): PlainObject {
-  const options = extractOptions(args)
+function parseValidateArgs(originOrTarget: any, ...args: any[]): u.PlainObject {
+  const options = u.extractOptions(args)
 
   if (options.origin) {
     options.target ||= toTarget(originOrTarget)
@@ -1722,7 +1717,7 @@ function getAssociatedForm(element: Element): HTMLFormElement | undefined {
   // the first form with a matching [id].
   let formID = element.getAttribute('form')
   if (formID) {
-    let selector = 'form' + idSelector(formID)
+    let selector = 'form' + e.idSelector(formID)
     // The selector only matches a <form>.
     return getSmart(selector, { layer: element }) as HTMLFormElement
   }
@@ -1772,7 +1767,7 @@ type TrackFieldsCallback = (field: Element) => unknown
 // The guard is a condition for a field to match, tested for truthiness.
 type TrackFieldsOptions = { guard?: (field: Element) => unknown }
 export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): () => void {
-  let [root, { guard }, callback] = parseArgs(args, 'val', 'options', 'callback')
+  let [root, { guard }, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
   let selectFn = function() {
     // A detached root has no fields left to track.
@@ -1783,7 +1778,7 @@ export const trackFields = mockable(function(...args: [root: Element, callback: 
     // Only look at fields that can belong to the root, instead of every field on the page.
     // With many trackers (e.g. many small forms with [up-autosubmit]) the latter would cost
     // trackers × fields after every render pass.
-    return filterList(findFields(root), function(field) {
+    return u.filterList(findFields(root), function(field) {
       return (getRegion(field) === region) // will also match external fields with [form]
         && (!guard || guard(field)) // user-provided condition
     })
@@ -1793,7 +1788,7 @@ export const trackFields = mockable(function(...args: [root: Element, callback: 
 })
 
 export function focusedField(): Element | undefined {
-  return presence(document.activeElement, isField)
+  return u.presence(document.activeElement, isField)
 }
 
 /*-
@@ -1817,7 +1812,7 @@ To consider other selectors to be submittable, see `up.form.config.submitSelecto
   Whether the form will be submitted through Unpoly.
 @stable
 */
-export function isSubmittable(form: ElementOrSelector): boolean {
+export function isSubmittable(form: e.ElementOrSelector): boolean {
   form = getSmart(form)!
   return formConfig.matches(form, 'submitSelectors')
 }
@@ -2671,7 +2666,7 @@ export function install(): void {
   on('submit', formConfig.selectorFn('submitSelectors'), function(event, form) {
     // We pass on the event.submitter prop as a { submitButton } prop.
     // Otherwise submitOptions() would default to the first submit button.
-    const submitButton = presence(event.submitter, isSubmitButton)
+    const submitButton = u.presence(event.submitter, isSubmitButton)
 
     // Allow individual submit buttons from opting out of Unpoly handling.
     if (submitButton?.getAttribute('up-submit') === 'false') return

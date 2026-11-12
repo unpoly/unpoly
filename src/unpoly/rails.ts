@@ -1,4 +1,4 @@
-import { setMissingAttr } from './element.js'
+import * as e from './element.js'
 import { getForm, isSubmittable } from './form.js'
 import { isFollowable } from './link.js'
 import { registerMacro } from './script.js'
@@ -18,7 +18,7 @@ function isRailsUJSLoaded() {
 function swapAttr(element: Element, dataAttr: string, upAttr: string): void {
   if (element.hasAttribute(dataAttr)) {
     let dataValue = element.getAttribute(dataAttr)
-    setMissingAttr(element, upAttr, dataValue)
+    e.setMissingAttr(element, upAttr, dataValue)
     element.removeAttribute(dataAttr)
   }
 }

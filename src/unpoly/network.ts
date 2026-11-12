@@ -1,5 +1,5 @@
 import './network.sass'
-import { contains, evalOption, normalizeMethod, parseArgIntoOptions } from './util.js'
+import * as u from './util.js'
 import { mockable } from './mockable.js'
 import { on } from './event.js'
 import { printToStandard } from './log.js'
@@ -526,14 +526,14 @@ export const makeRequest = mockable(function makeRequest(...args: [url: string, 
 })
 
 function parseRequestOptions(args: any[]): RequestOptions {
-  let options = parseArgIntoOptions(args, 'url') as RequestOptions
+  let options = u.parseArgIntoOptions(args, 'url') as RequestOptions
   up.migrate.handleRequestOptions?.(options)
   return options
 }
 
 function processRequest(request: UpRequest): void {
-  cache.expire(request.expireCache ?? evalOption(networkConfig.expireCache, request) ?? false)
-  cache.evict(request.evictCache ?? evalOption(networkConfig.evictCache, request) ?? false)
+  cache.expire(request.expireCache ?? u.evalOption(networkConfig.expireCache, request) ?? false)
+  cache.evict(request.evictCache ?? u.evalOption(networkConfig.evictCache, request) ?? false)
   useCachedRequest(request) || queueRequest(request)
 }
 
@@ -989,11 +989,11 @@ To effectively [handle disconnects while rendering](/learn/network-issues#discon
 */
 
 export function isSafeMethod(method: string): boolean {
-  return contains(['GET', 'OPTIONS', 'HEAD'], normalizeMethod(method))
+  return u.contains(['GET', 'OPTIONS', 'HEAD'], u.normalizeMethod(method))
 }
 
 function onLate(): void {
-  if (evalOption(networkConfig.progressBar)) {
+  if (u.evalOption(networkConfig.progressBar)) {
     progressBar = new ProgressBar()
   }
 }

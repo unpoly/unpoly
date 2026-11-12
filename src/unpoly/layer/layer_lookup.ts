@@ -1,8 +1,5 @@
-import {
-  compact, flatMap, getSimpleTokens, isElementLike, isNumber, isString, memoizeMethod,
-  parseArgIntoOptions, uniq,
-} from '../util.js'
-import { getOne } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { fail } from '../error.js'
 import { normalizeLayerOptions } from '../layer.js'
 import { Layer } from './base.js'
@@ -65,20 +62,20 @@ export class LayerLookup {
     }
 
     this._options = options
-    this._values = getSimpleTokens(options.layer)
+    this._values = u.getSimpleTokens(options.layer)
   }
 
   // A { layer: 'new' } option resolves to the string 'new'. We type the result as layers,
   // like the documentation of up.layer.getAll() does.
   all(): Layer[] {
-    let results = flatMap<any, any>(this._values, (value) => this._resolveValue(value))
-    results = compact(results)
-    results = uniq(results)
+    let results = u.flatMap<any, any>(this._values, (value) => this._resolveValue(value))
+    results = u.compact(results)
+    results = u.uniq(results)
     return results
   }
 
   static all(stack: LayerStack, ...args: LayerLookupArgs): Layer[] {
-    const options = parseArgIntoOptions(args, 'layer')
+    const options = u.parseArgIntoOptions(args, 'layer')
 
     // We can process some very frequent calls like all(up.Layer)
     // without going through a full lookup, which would require layer options normalization etc.
@@ -94,7 +91,7 @@ export class LayerLookup {
   }
 
   _forElement(element: Element): Layer | undefined {
-    element = getOne(element) // unwrap jQuery
+    element = e.getOne(element) // unwrap jQuery
     return this._stack.layers.findLast((layer) => layer.contains(element))
   }
 
@@ -107,7 +104,7 @@ export class LayerLookup {
       return value
     }
 
-    if (isNumber(value)) {
+    if (u.isNumber(value)) {
       return this._forIndex(value)
     }
 
@@ -115,7 +112,7 @@ export class LayerLookup {
       return this._forIndex(Number(value))
     }
 
-    if (isElementLike(value)) {
+    if (u.isElementLike(value)) {
       return this._forElement(value)
     }
 
@@ -171,7 +168,7 @@ export class LayerLookup {
   _getBaseLayer(): Layer {
     let { baseLayer } = this._options
 
-    if (isString(baseLayer)) {
+    if (u.isString(baseLayer)) {
       // The { baseLayer } option may itself be a string like "parent".
       // In this case we look it up using a new up.LayerLookup instance, using
       // up.layer.current as the { baseLayer } for that second lookup.
@@ -183,7 +180,7 @@ export class LayerLookup {
   }
 
   static {
-    memoizeMethod(this.prototype, {
+    u.memoizeMethod(this.prototype, {
       _getBaseLayer: true,
       _getOriginLayer: true,
     })

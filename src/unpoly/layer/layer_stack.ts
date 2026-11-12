@@ -1,4 +1,4 @@
-import { last, remove } from '../util.js'
+import * as u from '../util.js'
 import { buildLayer } from '../layer.js'
 import { LayerLookup } from './layer_lookup.js'
 import type { LayerLookupArgs } from './layer_lookup.js'
@@ -20,7 +20,7 @@ export class LayerStack {
   }
 
   remove(layer: Layer): void {
-    remove(this.layers, layer)
+    u.remove(this.layers, layer)
     // A closed overlay may keep its element for its exit animation. See attachedCount.
     this._closingLayers.push(layer)
   }
@@ -156,11 +156,11 @@ export class LayerStack {
   get current(): Layer {
     // Event listeners and compilers will push into @currentOverrides
     // to temporarily set up.layer.current to the layer they operate in.
-    return last(this._currentOverrides) || this.front
+    return u.last(this._currentOverrides) || this.front
   }
 
   get front(): Layer {
-    return last(this.layers)
+    return u.last(this.layers)
   }
 
 }

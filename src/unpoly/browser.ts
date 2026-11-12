@@ -1,4 +1,4 @@
-import { isString } from './util.js'
+import * as u from './util.js'
 import { Aborted } from './error/aborted.js'
 import { mockable } from './mockable.js'
 
@@ -42,7 +42,7 @@ export function popCookie(name: string): string | undefined {
 @internal
 */
 export const assertConfirmed = mockable(function assertConfirmed(options: { confirm?: string | false }): true {
-  const confirmed = !isString(options.confirm) || !options.confirm || window.confirm(options.confirm)
+  const confirmed = !u.isString(options.confirm) || !options.confirm || window.confirm(options.confirm)
   if (!confirmed) {
     throw new Aborted('User canceled action')
   }

@@ -1,9 +1,9 @@
-import { copyCursorProps } from '../element.js'
+import * as e from '../element.js'
 import { on } from '../event.js'
 import { getSmart, tryToTarget } from '../fragment.js'
 import { doFocus, focusedElementWithin } from '../viewport.js'
 import type { Layer } from '../layer/base.js'
-import type { PlainObject } from '../util.js'
+import * as u from '../util.js'
 
 export class FocusCapsule {
   declare _element: Element
@@ -14,7 +14,7 @@ export class FocusCapsule {
   constructor(element: Element, target: string | undefined) {
     this._element = element
     this._target = target
-    this._cursorProps = copyCursorProps(this._element)
+    this._cursorProps = e.copyCursorProps(this._element)
   }
 
   wasLost(): boolean {
@@ -41,7 +41,7 @@ export class FocusCapsule {
     on('focusin', { once: true }, () => this._voided = true)
   }
 
-  restore(layer: Layer, focusOptions?: PlainObject): boolean | undefined {
+  restore(layer: Layer, focusOptions?: u.PlainObject): boolean | undefined {
     if (!this.wasLost()) {
       // Signal callers that we could not restore.
       // This matters to up.FragmentFocus to know that a { focus: ['restore', '.other'] }
@@ -53,7 +53,7 @@ export class FocusCapsule {
     let rediscoveredElement = this._target && getSmart(this._target, { layer })
     if (rediscoveredElement) {
       // Firefox needs focus-related props to be set *before* we focus the element
-      copyCursorProps(this._cursorProps, rediscoveredElement)
+      e.copyCursorProps(this._cursorProps, rediscoveredElement)
       doFocus(rediscoveredElement, focusOptions)
 
       // Signals callers that we could restore.

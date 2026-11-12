@@ -1,4 +1,4 @@
-import { findResult } from '../util.js'
+import * as u from '../util.js'
 import { closest, containsMainPseudo, fragmentConfig, getFirstDescendant, matches, splitTarget } from '../fragment.js'
 
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
@@ -61,7 +61,7 @@ export class FragmentFinder {
   _findDescendantInRegion(): HTMLElement | undefined {
     let simpleSelectors = splitTarget(this._selector)
 
-    return findResult(simpleSelectors, (simpleSelector) => {
+    return u.findResult(simpleSelectors, (simpleSelector) => {
       let parts = simpleSelector.match(DESCENDANT_SELECTOR)
       if (parts) {
         let parent = closest(this._origin!, parts[1], this._options)

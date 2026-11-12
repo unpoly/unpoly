@@ -1,4 +1,4 @@
-import { spanObject } from '../util.js'
+import * as u from '../util.js'
 
 // The options that control how an overlay looks and animates.
 // The Overlay constructor assigns each of them (Layer assigns { mode }). Keep both in sync.
@@ -25,4 +25,4 @@ export const OVERLAY_VISUAL_KEYS = [
   'trapFocus',
 ]
 
-export const UNSET_OVERLAY_VISUALS = spanObject(OVERLAY_VISUAL_KEYS, undefined)
+export const UNSET_OVERLAY_VISUALS = u.spanObject(OVERLAY_VISUAL_KEYS, undefined)

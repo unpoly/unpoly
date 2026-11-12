@@ -1,4 +1,4 @@
-import { sprintf } from './util.js'
+import * as u from './util.js'
 import { mockable } from './mockable.js'
 import { on } from './event.js'
 import { LogConfig } from './log/log_config.js'
@@ -105,7 +105,7 @@ function printToStreamStyled(stream: LogStream, prefix: string, customStyles: st
         ...args
       )
     } else {
-      console[stream](`[${prefix}] ${sprintf(message, ...args)}`)
+      console[stream](`[${prefix}] ${u.sprintf(message, ...args)}`)
     }
   }
 }

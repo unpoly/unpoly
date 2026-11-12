@@ -1,4 +1,4 @@
-import { noop, sequence } from '../util.js'
+import * as u from '../util.js'
 import { on } from '../event.js'
 import { afterMutate } from '../fragment.js'
 import type { UnbindFn } from '../event.js'
@@ -34,7 +34,7 @@ export class SelectorTracker {
     //     only syncs the current mutation (after up:fragment:insert) for performance reasons.
     this.sync()
 
-    return sequence(
+    return u.sequence(
       this._trackFragments(),
       () => this._removeAllMatches(),
     )
@@ -67,7 +67,7 @@ export class SelectorTracker {
     for (let newMatch of this._selectFn()) {
       let knownRemoveCallback = removeMap.get(newMatch)
       removeMap.delete(newMatch)
-      let removeCallback = knownRemoveCallback || this._addCallback(newMatch) || noop
+      let removeCallback = knownRemoveCallback || this._addCallback(newMatch) || u.noop
       this._knownMatches.set(newMatch, removeCallback)
     }
 

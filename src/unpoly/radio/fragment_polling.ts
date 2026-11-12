@@ -1,5 +1,5 @@
-import { uid } from '../util.js'
-import { numberAttr } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { throwCritical } from '../error.js'
 import { build, on } from '../event.js'
 import { isAlive, isTargetable, matches, onAborted, onKept, reload } from '../fragment.js'
@@ -7,7 +7,6 @@ import { layerStack } from '../layer.js'
 import { printToStandard, printToWarn } from '../log.js'
 import { pollOptions, radioConfig } from '../radio.js'
 import { registerDestructor } from '../script.js'
-import type { PlainObject } from '../util.js'
 import type { Layer } from '../layer/base.js'
 import type { RenderResult } from '../fragment/render/render_result.js'
 
@@ -19,7 +18,7 @@ export type PollingElement = Element & { upPolling?: FragmentPolling }
 
 export class FragmentPolling {
 
-  declare _options: PlainObject
+  declare _options: u.PlainObject
   declare _fragment: Element
   declare _state: 'stopped' | 'started'
   declare _forceIntent: 'stop' | 'start' | null
@@ -43,7 +42,7 @@ export class FragmentPolling {
     this._state = 'stopped' // stopped | started
     this._forceIntent = null // stop | start
 
-    this._reloadJID = uid()
+    this._reloadJID = u.uid()
 
     // this._abortable = true
     this._loading = false
@@ -72,7 +71,7 @@ export class FragmentPolling {
     this._stop()
   }
 
-  _start(options?: PlainObject): void {
+  _start(options?: u.PlainObject): void {
     Object.assign(this._options, options)
 
     if (this._state === 'stopped') {
@@ -94,7 +93,7 @@ export class FragmentPolling {
     }
   }
 
-  forceStart(options?: PlainObject): void {
+  forceStart(options?: u.PlainObject): void {
     Object.assign(this._options, options)
     this._forceIntent = 'start'
     this._start()
@@ -171,7 +170,7 @@ export class FragmentPolling {
   }
 
   _getFullDelay(): number {
-    return this._options.interval ?? numberAttr(this._fragment, 'up-interval') ?? radioConfig.pollInterval
+    return this._options.interval ?? e.numberAttr(this._fragment, 'up-interval') ?? radioConfig.pollInterval
   }
 
   _getRemainingDelay(): number {

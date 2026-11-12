@@ -1,9 +1,4 @@
-import {
-  always, compact, contains, delegatePromise, evalAutoOption, evalOption, isArray, isBlank,
-  isCrossOrigin, isFunction, isMissing, isNumber, isOptions, isString, map, matchURLs,
-  methodAllowsPayload, newDeferred, normalizeMethod, normalizeURL, queueTask, safeStringifyJSON,
-  some, uniq, wrapList,
-} from '../util.js'
+import * as u from '../util.js'
 import { Aborted } from '../error/aborted.js'
 import { Offline } from '../error/offline.js'
 import { EventEmitter } from '../event/event_emitter.js'
@@ -21,7 +16,6 @@ import {
 } from '../protocol.js'
 import { runPreviews } from '../status.js'
 import { UpURLPattern } from '../util/url_pattern.js'
-import type { Deferred, PlainObject, ValueOrFunction } from '../util.js'
 import type { ParamsLike } from '../form/params.js'
 import type { Layer } from '../layer/base.js'
 import type { Route } from './request_cache.js'
@@ -53,10 +47,10 @@ export interface RequestOptions {
   // A layer, or a name like 'root' or 'new'.
   layer?: Layer | string
   mode?: string
-  context?: PlainObject
+  context?: u.PlainObject
   failLayer?: Layer | string
   failMode?: string
-  failContext?: PlainObject
+  failContext?: u.PlainObject
   origin?: Element
   originLayer?: Layer
   originMode?: string
@@ -66,7 +60,7 @@ export interface RequestOptions {
   payload?: any
   onLoading?: () => any
   onSettle?: (responseOrError: UpResponse | Error) => any
-  fail?: ValueOrFunction<boolean>
+  fail?: u.ValueOrFunction<boolean>
   abortable?: boolean | null
   lateDelay?: number | false
   previews?: any[]
@@ -122,10 +116,10 @@ export class UpRequest {
   // While the request is new, these may be a layer name like 'root' or 'new'.
   declare layer: any
   declare mode: string | undefined
-  declare context: PlainObject | undefined
+  declare context: u.PlainObject | undefined
   declare failLayer: any
   declare failMode: string | undefined
-  declare failContext: PlainObject | undefined
+  declare failContext: u.PlainObject | undefined
   declare origin: Element | undefined
   declare originLayer: Layer | undefined
   declare originMode: string | undefined
@@ -135,7 +129,7 @@ export class UpRequest {
   declare payload: any
   declare onLoading: (() => any) | undefined
   declare onSettle: ((responseOrError: UpResponse | Error) => any) | undefined
-  declare fail: ValueOrFunction<boolean> | undefined
+  declare fail: u.ValueOrFunction<boolean> | undefined
   declare abortable: boolean | null
   declare lateDelay: number | false | undefined
   declare previews: any[]
@@ -144,7 +138,7 @@ export class UpRequest {
   declare fromCache: boolean | undefined
   declare _fragments: Element[] | undefined
   declare _bindFragments: Element[] | undefined
-  declare _deferred: Deferred<UpResponse>
+  declare _deferred: u.Deferred<UpResponse>
   declare _xhr: XMLHttpRequest | undefined
   declare _revertPreviews: (() => void) | undefined
   // Set by the request cache.
@@ -527,7 +521,7 @@ export class UpRequest {
     // This up.Request object is also promise for its up.Response.
     // We delegate all promise-related methods (then, catch, finally) to an internal
     // _deferred object.
-    this._deferred = newDeferred()
+    this._deferred = u.newDeferred()
 
     this._setAutoHeaders()
   }
@@ -536,12 +530,12 @@ export class UpRequest {
     if (this.background) {
       return false
     } else {
-      return this.lateDelay ?? evalOption(networkConfig.lateDelay, this)
+      return this.lateDelay ?? u.evalOption(networkConfig.lateDelay, this)
     }
   }
 
   isTimed(): boolean {
-    return isNumber(this.effectiveLateTime)
+    return u.isNumber(this.effectiveLateTime)
   }
 
   /*-
@@ -586,8 +580,8 @@ export class UpRequest {
     let steps = parseTargetSteps(this.target)
     let lookupOpts = { origin: this.origin, layer: this.layer }
     // Look for one match per step.
-    let matches = map(steps, (step) => getSmart(step.selector, lookupOpts))
-    return compact(matches)
+    let matches = u.map(steps, (step) => getSmart(step.selector, lookupOpts))
+    return u.compact(matches)
   }
 
   get bindFragments(): Element[] {
@@ -614,18 +608,18 @@ export class UpRequest {
   }
 
   _normalize() {
-    this.method = normalizeMethod(this.method)
+    this.method = u.normalizeMethod(this.method)
     this._extractHashFromURL()
     this._transferParamsToURL()
 
     // This consistently strips the hostname from same-origin requests.
-    this.url = normalizeURL(this.url)
+    this.url = u.normalizeURL(this.url)
   }
 
   _evictExpensiveAttrs() {
     // We want to allow up:request:loaded events etc. to still access the properties that
     // we are about to evict, so we wait for one more frame. It shouldn't matter for GC.
-    queueTask(() => {
+    u.queueTask(() => {
       // (1) While the request is still in flight, we require the target layer
       // to be able to cancel it when the layers gets closed. We now
       // evict this property, since response.request.layer.element will
@@ -660,7 +654,7 @@ export class UpRequest {
   }
 
   _transferParamsToURL() {
-    if (!this.url || this.allowsPayload() || isBlank(this.params)) {
+    if (!this.url || this.allowsPayload() || u.isBlank(this.params)) {
       return
     }
 
@@ -684,7 +678,7 @@ export class UpRequest {
   }
 
   allowsPayload(): boolean {
-    return methodAllowsPayload(this.method)
+    return u.methodAllowsPayload(this.method)
   }
 
   will302RedirectWithGET(): boolean {
@@ -692,11 +686,11 @@ export class UpRequest {
   }
 
   willCache(): boolean | undefined {
-    return networkConfig.cacheEnabled && evalAutoOption(this.cache, networkConfig.autoCache, this)
+    return networkConfig.cacheEnabled && u.evalAutoOption(this.cache, networkConfig.autoCache, this)
   }
 
   runQueuedCallbacks() {
-    always(this, () => this._evictExpensiveAttrs())
+    u.always(this, () => this._evictExpensiveAttrs())
   }
 
   load() {
@@ -739,7 +733,7 @@ export class UpRequest {
     }
   }
 
-  runPreviews(renderOptions: PlainObject): void {
+  runPreviews(renderOptions: u.PlainObject): void {
     if (!this.ended && !this.fromCache) {
       this._revertPreviews = runPreviews(this, renderOptions)
     }
@@ -938,7 +932,7 @@ export class UpRequest {
   }
 
   isCrossOrigin(): boolean {
-    return isCrossOrigin(this.url)
+    return u.isCrossOrigin(this.url)
   }
 
   _extractResponseFromXHR() {
@@ -972,7 +966,7 @@ export class UpRequest {
       // Unfortunately we cannot ask the XHR object for its response method.
       // The server may use the custom X-Up-Method for that. If that header is missing
       // AND the URLs changed between request and response, we assume GET.
-      if (!matchURLs(this.url, urlFromResponse)) {
+      if (!u.matchURLs(this.url, urlFromResponse)) {
         methodFromResponse ||= 'GET'
       }
 
@@ -1013,15 +1007,15 @@ export class UpRequest {
   }
 
   isBoundToSubtrees(subtreeRoots: Element[]): boolean {
-    subtreeRoots = wrapList(subtreeRoots)
+    subtreeRoots = u.wrapList(subtreeRoots)
 
-    return some(this.bindFragments, function(fragment) {
-      return some(subtreeRoots, (subtreeElement) => subtreeElement.contains(fragment))
+    return u.some(this.bindFragments, function(fragment) {
+      return u.some(subtreeRoots, (subtreeElement) => subtreeElement.contains(fragment))
     })
   }
 
   isBoundToLayers(layers: Layer[]): boolean {
-    return contains(layers, this.bindLayer)
+    return u.contains(layers, this.bindLayer)
   }
 
   get age(): number {
@@ -1056,12 +1050,12 @@ export class UpRequest {
   }
 
   _setAutoHeader(name: string, value: any): void {
-    if (isMissing(value)) {
+    if (u.isMissing(value)) {
       return
     }
 
-    if (isOptions(value) || isArray(value)) {
-      value = safeStringifyJSON(value)
+    if (u.isOptions(value) || u.isArray(value)) {
+      value = u.safeStringifyJSON(value)
     }
     this.headers[name] = value
   }
@@ -1077,19 +1071,19 @@ export class UpRequest {
     if (!this.target || !trackingRequest.target) return
 
     let targetAtoms = splitTarget(this.target + ',' + trackingRequest.target)
-    this.target = uniq(targetAtoms).join(', ')
+    this.target = u.uniq(targetAtoms).join(', ')
     this._setPropertyHeader('target') // X-Up-Target header was set in the response
 
-    this._fragments = uniq([...this.fragments, ...trackingRequest.fragments])
+    this._fragments = u.uniq([...this.fragments, ...trackingRequest.fragments])
   }
 
   static tester(condition: RequestCondition, { except }: { except?: UpRequest } = {}): (request: UpRequest) => boolean {
     let testFn: (request: UpRequest) => boolean
-    if (isFunction(condition)) {
+    if (u.isFunction(condition)) {
       testFn = condition
     } else if (condition instanceof this) {
       testFn = (request) => condition === request
-    } else if (isString(condition)) {
+    } else if (u.isString(condition)) {
       let pattern = new UpURLPattern(condition)
       testFn = (request) => pattern.test(request.url)
     } else { // boolean, truthy/falsy values
@@ -1137,7 +1131,7 @@ export class UpRequest {
   */
   static {
     // A request is also a promise ("thenable") for its response.
-    delegatePromise(this.prototype, function() { return this._deferred })
+    u.delegatePromise(this.prototype, function() { return this._deferred })
   }
 }
 

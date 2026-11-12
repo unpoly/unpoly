@@ -1,8 +1,5 @@
 import './layer.sass'
-import {
-  defineDelegates, filterList, flatMap, isElementLike, isGiven, isString, map, mergeDefined,
-  newOptions, pluckKey,
-} from './util.js'
+import * as u from './util.js'
 import { on } from './event.js'
 import { render } from './fragment.js'
 import { RenderOptions } from './fragment/render/render_options.js'
@@ -11,7 +8,6 @@ import type { LayerMode, OverlayMode } from './layer/base.js'
 import type { LayerLookupArgs } from './layer/layer_lookup.js'
 import { LayerStack } from './layer/layer_stack.js'
 import { newConfig } from './util/config.js'
-import type { PlainObject } from './util.js'
 import type { AnimationValue } from './motion.js'
 import type { UpResponse } from './network/response.js'
 
@@ -364,7 +360,7 @@ export let layerStack: LayerStack = null!
 let handlers: unknown[] = []
 
 export function mainTargets(mode: LayerMode): string[] {
-  return flatMap(modeConfigs(mode), 'mainTargets')
+  return u.flatMap(modeConfigs(mode), 'mainTargets')
 }
 
 /*
@@ -380,12 +376,12 @@ function modeConfigs(mode: LayerMode): LayerDefaults[] {
   }
 }
 
-function normalizeLayerOption(options: PlainObject): void {
+function normalizeLayerOption(options: u.PlainObject): void {
   if (options.layer instanceof Layer) return
 
   up.migrate.handleLayerOptions?.(options)
 
-  if (isGiven(options.layer)) { // might be the number 0, which is falsy
+  if (u.isGiven(options.layer)) { // might be the number 0, which is falsy
     let match = String(options.layer).match(/^(new|shatter|swap)( (\w+))?/)
     if (match) {
       options.layer = 'new'
@@ -412,7 +408,7 @@ function normalizeLayerOption(options: PlainObject): void {
     }
   // If no options.layer is given we still want to avoid updating "any" layer.
   // Other options might have a hint for a more appropriate layer.
-  } else if (isElementLike(options.target)) {
+  } else if (u.isElementLike(options.target)) {
     // If we are targeting an actual Element or jQuery collection (and not
     // a selector string) we operate in that element's layer.
     options.layer = layerStack.get(options.target, { normalizeLayerOptions: false })
@@ -425,7 +421,7 @@ function normalizeLayerOption(options: PlainObject): void {
   }
 }
 
-function setBaseLayerOption(options: PlainObject): void {
+function setBaseLayerOption(options: u.PlainObject): void {
   if (options.baseLayer instanceof Layer) return
 
   // Remember the layer that was current when the request was made,
@@ -435,13 +431,13 @@ function setBaseLayerOption(options: PlainObject): void {
   options.baseLayer = layerStack.get('current', { ...options, normalizeLayerOptions: false })
 }
 
-export function normalizeLayerOptions(options: PlainObject): void {
+export function normalizeLayerOptions(options: u.PlainObject): void {
   normalizeLayerOption(options)
   options.context ??= {}
   setBaseLayerOption(options)
 }
 
-export function buildLayer(options: PlainObject, beforeNew?: (options: PlainObject) => PlainObject): Layer {
+export function buildLayer(options: u.PlainObject, beforeNew?: (options: u.PlainObject) => u.PlainObject): Layer {
   const { mode } = options
   const Class = layerClasses.find((Class) => Class.mode === mode)
 
@@ -456,11 +452,11 @@ export function buildLayer(options: PlainObject, beforeNew?: (options: PlainObje
 
   // We allow to pass the open animation as up.layer.open({ animation, duration, easing })
   // or a[up-animation][up-duration][up-easing] options.
-  options.openAnimation ??= pluckKey(options, 'animation')
-  options.openDuration ??= pluckKey(options, 'duration')
-  options.openEasing ??= pluckKey(options, 'easing')
+  options.openAnimation ??= u.pluckKey(options, 'animation')
+  options.openDuration ??= u.pluckKey(options, 'duration')
+  options.openEasing ??= u.pluckKey(options, 'easing')
 
-  options = mergeDefined(...configs, { mode, stack: layerStack }, options)
+  options = u.mergeDefined(...configs, { mode, stack: layerStack }, options)
 
   if (beforeNew) {
     options = beforeNew(options)
@@ -472,7 +468,7 @@ export function buildLayer(options: PlainObject, beforeNew?: (options: PlainObje
 
 function reset(): void {
   layerStack.reset()
-  handlers = filterList(handlers, 'isDefault')
+  handlers = u.filterList(handlers, 'isDefault')
 }
 
 /*-
@@ -785,8 +781,8 @@ console.log(layer.mode) // logs "modal"
 
 @stable
 */
-export async function open(options: PlainObject): Promise<Layer> {
-  options = newOptions(options, {
+export async function open(options: u.PlainObject): Promise<Layer> {
+  options = u.newOptions(options, {
     layer: 'new',
     defaultToEmptyContent: true,
     navigate: true
@@ -941,7 +937,7 @@ try {
 @stable
 @signature
 */
-export function ask(options: PlainObject): Promise<any> {
+export function ask(options: u.PlainObject): Promise<any> {
   return new Promise(function(resolve, reject) {
     open(RenderOptions.chainCallbacks(options, {
       onAccepted: (event: LayerCloseEvent) => resolve(event.value),
@@ -961,7 +957,7 @@ export function closestLayerElement(element: Element): Element | null {
 }
 
 export function optionToString(option: any): string {
-  if (isString(option)) {
+  if (u.isString(option)) {
     return `layer "${option}"`
   } else {
     return option.toString()
@@ -1989,7 +1985,7 @@ See `up.Layer#affix` for more documentation.
 
 export function install(classes: (typeof Layer)[]): void {
   layerClasses = classes
-  anySelector = map(classes, (Class) => Class.selector()).join()
+  anySelector = u.map(classes, (Class) => Class.selector()).join()
 
   on('up:fragment:destroyed', function() {
     layerStack.sync()
@@ -2037,7 +2033,7 @@ declare module '../unpoly.js' {
 
 // Shortcuts for the current layer, like `up.layer.accept()` for `up.layer.current.accept()`.
 // A function is bound to the layer that is current when it is accessed, not when it is called.
-defineDelegates(api.layer, [
+u.defineDelegates(api.layer, [
   'accept',
   'dismiss',
   'isRoot',

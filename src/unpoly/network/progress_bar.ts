@@ -1,4 +1,4 @@
-import { affix, paint } from '../element.js'
+import * as e from '../element.js'
 
 const TRANSITION_DELAY = 300
 
@@ -10,13 +10,13 @@ export class ProgressBar {
 
   constructor() {
     this._step = 0
-    this._element = affix(document.body, 'up-progress-bar')
+    this._element = e.affix(document.body, 'up-progress-bar')
     this._element.style.transition = `width ${TRANSITION_DELAY}ms ease-out`
 
     this._moveTo(0)
     // The element must be painted at width: 0 before we apply the target width.
     // If the first paint sees the bar at the target width, we don't get an animated transition.
-    paint(this._element)
+    e.paint(this._element)
 
     this._width = 31
     this._nextStep()

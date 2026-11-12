@@ -1,8 +1,5 @@
-import {
-  asyncNoop, evalOption, isArray, isBlank, isFunction, isOptions, isString, kebabToCamelCase,
-  newOptions, withRenamedKeys,
-} from './util.js'
-import { computedStyle, insertBefore, isSingleton, setInlineStyle } from './element.js'
+import * as u from './util.js'
+import * as e from './element.js'
 import { guardFn } from './error.js'
 import { mockable } from './mockable.js'
 import { OptionsParser } from './element/options_parser.js'
@@ -13,8 +10,6 @@ import { MotionController } from './motion/motion_controller.js'
 import { newConfig } from './util/config.js'
 import { Registry } from './framework/registry.js'
 import { absolutize, closest, rootHeight, rootWidth } from './viewport.js'
-import type { PlainObject } from './util.js'
-import type { ElementOrSelector, StyleProps } from './element.js'
 import type { UnbindFn } from './event.js'
 import type { OptionsParserOptions } from './element/options_parser.js'
 
@@ -40,7 +35,7 @@ export type TransitionFn = (oldElement: HTMLElement, newElement: HTMLElement, op
 An animation: the name of a registered animation, the CSS properties of the last frame,
 a function, or `false` or `'none'` for no animation.
 */
-export type AnimationValue = string | StyleProps | AnimationFn | false
+export type AnimationValue = string | e.StyleProps | AnimationFn | false
 
 /**
 A transition: the name of a registered transition, a pair of animations (also as `'old/new'`),
@@ -320,7 +315,7 @@ export const animate = mockable(async function animate(element: any, animationVa
 })
 
 function canAnimateElement(element: Element): boolean {
-  return !isSingleton(element)
+  return !e.isSingleton(element)
 }
 
 /*-
@@ -362,11 +357,11 @@ finish event.
   A promise that fulfills when the animation ends.
 @internal
 */
-async function animateNow(element: HTMLElement, lastFrame: StyleProps, { duration, easing, finishedFrame }: TimingOptions & { finishedFrame?: StyleProps }): Promise<void> {
+async function animateNow(element: HTMLElement, lastFrame: e.StyleProps, { duration, easing, finishedFrame }: TimingOptions & { finishedFrame?: e.StyleProps }): Promise<void> {
   // There is also Animation#commitStyles(), but that has two issues:
   // (A) Throws on detached elements
   // (B) Can't set an empty last frame property, e.g. when we're transforming towards { transform: '' }
-  let applyFinishedFrame = () => setInlineStyle(element, finishedFrame ?? lastFrame)
+  let applyFinishedFrame = () => e.setInlineStyle(element, finishedFrame ?? lastFrame)
 
   // A Web Animation with a duration of 0 (e.g. with disabled motion) would only finish
   // on the next animation frame. We don't want to depend on the rendering loop when nothing moves.
@@ -374,7 +369,7 @@ async function animateNow(element: HTMLElement, lastFrame: StyleProps, { duratio
 
   // if (up.migrate.loaded) lastFrame = up.migrate.fixSetStyleProps(lastFrame)
   // TODO: We could accepting camelCase everywhere we now run fixSetStyleProps or fixStyleProps
-  let camelizedLastFrame = withRenamedKeys(lastFrame, kebabToCamelCase)
+  let camelizedLastFrame = u.withRenamedKeys(lastFrame, u.kebabToCamelCase)
   let animation = element.animate([ camelizedLastFrame ], { duration, easing, fill: 'forwards' })
   let offFinish: UnbindFn
   let conclude = () => {
@@ -409,9 +404,9 @@ Does nothing if there are no animations to complete.
   A promise that fulfills when animations and transitions have finished.
 @stable
 */
-export function finish(element?: ElementOrSelector): Promise<void> | undefined {
+export function finish(element?: e.ElementOrSelector): Promise<void> | undefined {
   // Without an element, getSmart() returns undefined, and we finish all animations.
-  element = getSmart(element as ElementOrSelector)
+  element = getSmart(element as e.ElementOrSelector)
   motionController.finish(element)
   // Finishing is synchronous. With unpoly-migrate, we return a promise that warns when awaited.
   return up.migrate.formerlyAsync?.('up.motion.finish()')
@@ -483,7 +478,7 @@ You can define additional named transitions using [`up.transition()`](/api/up.tr
   A promise that fulfills when the transition ends.
 @stable
 */
-export function morph(oldElement: ElementOrSelector, newElement: ElementOrSelector, transitionValue: TransitionValue, options?: SwapOptions): Promise<void>
+export function morph(oldElement: e.ElementOrSelector, newElement: e.ElementOrSelector, transitionValue: TransitionValue, options?: SwapOptions): Promise<void>
 // The elements are resolved in place. The implementation can't take the resolved type: with
 // strictFunctionTypes, a function's overload must be assignable to it (TS2394).
 export async function morph(oldElement: any, newElement: any, transitionValue: TransitionValue, options?: SwapOptions) {
@@ -529,7 +524,7 @@ export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitio
       const scrollTopBeforeScroll = viewport.scrollTop
 
       const oldRemote = absolutize(oldElement, {
-        afterMeasure: () => insertBefore(oldElement, newElement)
+        afterMeasure: () => e.insertBefore(oldElement, newElement)
       })
 
       play = async () => {
@@ -558,11 +553,11 @@ export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitio
 function findTransitionFn(value: TransitionValue): TransitionFn | undefined {
   if (isNone(value)) {
     return undefined
-  } else if (isFunction(value)) {
+  } else if (u.isFunction(value)) {
     return value
-  } else if (isArray(value)) {
+  } else if (u.isArray(value)) {
     return composeTransitionFn(...value)
-  } else if (isString(value) && value.includes('/')) {
+  } else if (u.isString(value) && value.includes('/')) {
     return composeTransitionFn(...value.split('/') as [string, string])
   } else {
     return namedTransitions.get(value as string)
@@ -573,8 +568,8 @@ function composeTransitionFn(oldAnimation: AnimationValue, newAnimation: Animati
   // A composition of two null-animations is a null-transform
   // and should be skipped. If only one half is a null-animation, we animate the other half.
   if (!isNone(oldAnimation) || !isNone(newAnimation)) {
-    const oldAnimationFn = findAnimationFn(oldAnimation) || asyncNoop
-    const newAnimationFn = findAnimationFn(newAnimation) || asyncNoop
+    const oldAnimationFn = findAnimationFn(oldAnimation) || u.asyncNoop
+    const newAnimationFn = findAnimationFn(newAnimation) || u.asyncNoop
     return (oldElement, newElement, options) => Promise.all([
       oldAnimationFn(oldElement, options),
       newAnimationFn(newElement, options)
@@ -585,9 +580,9 @@ function composeTransitionFn(oldAnimation: AnimationValue, newAnimation: Animati
 function findAnimationFn(value: AnimationValue | undefined): AnimationFn | undefined {
   if (isNone(value)) {
     return undefined
-  } else if (isFunction(value)) {
+  } else if (u.isFunction(value)) {
     return value
-  } else if (isOptions(value)) {
+  } else if (u.isOptions(value)) {
     return (element, options) => animateNow(element, value, options)
   } else {
     return namedAnimations.get(value as string)
@@ -599,8 +594,8 @@ export const swapElementsDirectly = mockable(function(oldElement: Element, newEl
   oldElement.replaceWith(newElement)
 })
 
-export function motionOptions(element: Element, options?: PlainObject, parserOptions?: OptionsParserOptions): PlainObject {
-  options = newOptions(options)
+export function motionOptions(element: Element, options?: u.PlainObject, parserOptions?: OptionsParserOptions): u.PlainObject {
+  options = u.newOptions(options)
   let parser = new OptionsParser(element, options, parserOptions)
 
   parser.booleanOrString('animation')
@@ -621,36 +616,36 @@ to be skipped.
 */
 export function isNone(motionValue: any): boolean {
   // false, undefined, '', null, the string "none" and an empty object of CSS properties are all ways to skip animations
-  return !motionValue || motionValue === 'none' || (isOptions(motionValue) && isBlank(motionValue))
+  return !motionValue || motionValue === 'none' || (u.isOptions(motionValue) && u.isBlank(motionValue))
 }
 
 // From is an opacity or a function that reads it from the element.
 function registerOpacityAnimation(name: string, from: any, to: number): void {
   namedAnimations.put(name, function(element: HTMLElement, options: TimingOptions) {
-    element.style.opacity = evalOption(from, element)
+    element.style.opacity = u.evalOption(from, element)
     return animateNow(element, { opacity: to }, options)
   })
 }
 
 function currentOpacity(element: Element): string {
-  return computedStyle(element, 'opacity')
+  return e.computedStyle(element, 'opacity')
 }
 
 
-function translateCSS(dx: number, dy: number): StyleProps {
+function translateCSS(dx: number, dy: number): e.StyleProps {
   return { transform: `translate(${dx}px, ${dy}px)` }
 }
 
-function zeroTranslateCSS(): StyleProps {
+function zeroTranslateCSS(): e.StyleProps {
   return { transform: 'translate(0, 0)' }
 }
 
 function untranslatedBox(element: HTMLElement): DOMRect {
-  setInlineStyle(element, zeroTranslateCSS())
+  e.setInlineStyle(element, zeroTranslateCSS())
   return element.getBoundingClientRect()
 }
 
-function registerMoveAnimations(direction: string, boxToTransform: (box: DOMRect) => StyleProps): void {
+function registerMoveAnimations(direction: string, boxToTransform: (box: DOMRect) => e.StyleProps): void {
   const animationToName = `move-to-${direction}`
   const animationFromName = `move-from-${direction}`
 
@@ -663,7 +658,7 @@ function registerMoveAnimations(direction: string, boxToTransform: (box: DOMRect
   namedAnimations.put(animationFromName, function(element: HTMLElement, options: TimingOptions) {
     const box = untranslatedBox(element)
     const transform = boxToTransform(box)
-    setInlineStyle(element, transform)
+    e.setInlineStyle(element, transform)
     return animateNow(element, zeroTranslateCSS(), { ...options, finishedFrame: { transform: '' } })
   })
 }

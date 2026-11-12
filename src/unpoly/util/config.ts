@@ -1,5 +1,5 @@
-import { queueTask, upperCaseFirst } from '../util.js'
-import { unionSelector } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 
 /**
 Returns a selector for a config property. See `up.util.Config#selectorFn()`.
@@ -46,7 +46,7 @@ export class Config<S extends object> {
     document.addEventListener('up:framework:reset', () => this.reset())
     // We check one task after booting, to also see settings made by up:framework:boot or
     // up:framework:booted listeners, or by compilers on the initial page.
-    document.addEventListener('up:framework:boot', () => queueTask(() => this.logUnknownKeys()))
+    document.addEventListener('up:framework:boot', () => u.queueTask(() => this.logUnknownKeys()))
   }
 
   // Logs an error for a setting that doesn't exist, e.g. a misspelled or renamed key.
@@ -84,8 +84,8 @@ export class Config<S extends object> {
   selector(prop: SelectorKey<S>, condition = ''): string {
     // The settings aren't members of the class, see ConfigWith.
     let includes = (this as any)[prop]
-    let excludes = (this as any)['no' + upperCaseFirst(prop)]
-    return unionSelector(includes, excludes, condition)
+    let excludes = (this as any)['no' + u.upperCaseFirst(prop)]
+    return e.unionSelector(includes, excludes, condition)
   }
 
   selectorFn(prop: SelectorKey<S>): SelectorFn {

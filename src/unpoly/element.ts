@@ -1,9 +1,4 @@
-import {
-  expressionOutline, filterList, flatMap, identity, isAdjacentPosition, isDefined, isElement,
-  isElementLike, isGiven, isList, isMissing, isPresent, isString, isTextNode, mapObject, noop,
-  parseArgs, parseNumber, parseRelaxedJSON, parseString, wrapList,
-} from './util.js'
-import type { List, PlainObject } from './util.js'
+import * as u from './util.js'
 import { fail } from './error.js'
 import { mockable } from './mockable.js'
 import { Rect } from './util/rect.js'
@@ -12,7 +7,7 @@ import './element.sass'
 /**
 A CSS selector, an element, or a list of elements. See `up.element.get()`.
 */
-export type ElementOrSelector = string | Element | List<Element>
+export type ElementOrSelector = string | Element | u.List<Element>
 
 /**
 A function that undoes a temporary change, like the one returned by `up.element.setAttrsTemp()`.
@@ -88,7 +83,7 @@ Returns the first descendant element matching the given selector.
 @internal
 */
 function first(...args: any[]): HTMLElement {
-  let [root = document, selector] = parseArgs(args, 'val', 'val')
+  let [root = document, selector] = u.parseArgs(args, 'val', 'val')
   return root.querySelector(selector)
 }
 
@@ -106,7 +101,7 @@ If the `root` element itself matches the selector, it is also included in the re
   A list of all matching elements.
 @stable
 */
-export function subtree(root: ParentNode, selector: string): List<HTMLElement> {
+export function subtree(root: ParentNode, selector: string): u.List<HTMLElement> {
   const descendantMatches = root.querySelectorAll<HTMLElement>(selector)
 
   if (elementLikeMatches(root, selector)) {
@@ -127,7 +122,7 @@ Like `Element#matches()`, but returns `false` for a `Document` or `Window` argum
 @internal
 */
 export function elementLikeMatches(elementLike: any, selector: string): boolean {
-  return isElement(elementLike) && elementLike.matches(selector)
+  return u.isElement(elementLike) && elementLike.matches(selector)
 }
 
 /*-
@@ -200,11 +195,11 @@ export function getOne<T>(value: T): T extends ElementOrSelector ? HTMLElement :
 export function getOne(...args: unknown[]) {
   const value = args.pop()
 
-  if (isElement(value)) { // Return an element before we run any other expensive checks
+  if (u.isElement(value)) { // Return an element before we run any other expensive checks
     return value
-  } else if (isString(value)) {
+  } else if (u.isString(value)) {
     return first(...args, value)
-  } else if (isList(value)) {
+  } else if (u.isList(value)) {
     if (value.length > 1) {
       fail('up.element.get(): Cannot cast multiple elements (%o) to a single element', value)
     }
@@ -241,14 +236,14 @@ elements = up.element.list($jquery, nodeList, undefined, element, selector)
 @internal
 */
 export function getList(...args: any[]): HTMLElement[] {
-  return flatMap(args, valueToList)
+  return u.flatMap(args, valueToList)
 }
 
-function valueToList(value: any): List<HTMLElement> {
-  if (isString(value)) {
+function valueToList(value: any): u.List<HTMLElement> {
+  if (u.isString(value)) {
     return document.querySelectorAll(value)
   } else {
-    return wrapList(value)
+    return u.wrapList(value)
   }
 }
 
@@ -347,7 +342,7 @@ export function hideTemp(element: HTMLElement): UndoFunction {
 }
 
 function setVisibleTemp(element: HTMLElement, newVisible: boolean): UndoFunction {
-  if (newVisible === isVisible(element)) return noop
+  if (newVisible === isVisible(element)) return u.noop
   setVisible(element, newVisible)
   return () => setVisible(element, !newVisible)
 }
@@ -421,10 +416,10 @@ element.getAttribute('tabindex') // result: "1"
   To remove an attribute, use a value of `null` or `undefined`.
 @stable
 */
-export function setAttrs(element: Element, attrs: PlainObject): void {
+export function setAttrs(element: Element, attrs: u.PlainObject): void {
   for (let key in attrs) {
     const value = attrs[key]
-    if (isGiven(value)) {
+    if (u.isGiven(value)) {
       element.setAttribute(key, value)
     } else {
       element.removeAttribute(key)
@@ -459,7 +454,7 @@ element.getAttribute('title') // result: "Original"
   A function that restores the attributes to their value before the change.
 @internal
 */
-export function setAttrsTemp(element: Element, attrs: PlainObject): UndoFunction {
+export function setAttrsTemp(element: Element, attrs: u.PlainObject): UndoFunction {
   let keys = Object.keys(attrs)
   let oldAttrs = pickAttrs(element, keys)
   setAttrs(element, attrs)
@@ -569,7 +564,7 @@ element = up.element.createFromSelector('div', { style: { color: 'red' }})
 @include up.element.createFromSelector/all
 @stable
 */
-export function createFromSelector(selector: string, attrs: PlainObject = {}): HTMLElement {
+export function createFromSelector(selector: string, attrs: u.PlainObject = {}): HTMLElement {
   let { includePath } = parseSelector(selector)
 
   // A selector has at least one segment, so the loop below assigns this.
@@ -599,16 +594,16 @@ export function createFromSelector(selector: string, attrs: PlainObject = {}): H
   for (let key in attrs) {
     let value = attrs[key]
     if (key === 'class') {
-      addClasses(rootElement, wrapList(value))
+      addClasses(rootElement, u.wrapList(value))
     } else if (key === 'style') {
       setInlineStyle(rootElement, value)
     } else if (key === 'text') {
       rootElement.textContent = value
     } else if (key === 'content') {
-      if (isString(value)) {
+      if (u.isString(value)) {
         rootElement.innerHTML = value
       } else {
-        rootElement.append(...wrapList(value))
+        rootElement.append(...u.wrapList(value))
       }
     } else {
       rootElement.setAttribute(key, value)
@@ -664,7 +659,7 @@ export function parseSelector(rawSelector: string): ParsedSelector {
   const {
     masked: selectorOutline,
     restore: restoreSelectorLiterals,
-  } = expressionOutline(rawSelector)
+  } = u.expressionOutline(rawSelector)
 
   const includeWithoutAttrs = selectorOutline.replace(/:not\([^)]*\)/, function(match) {
     excludeRaw = restoreSelectorLiterals(match)
@@ -705,7 +700,7 @@ export function parseSelector(rawSelector: string): ParsedSelector {
       //       instead of failing with "Cannot parse selector".
       let [_raw, name, _operator, quote, value] = attr.match(/\[\s*([\w-]+)\s*(?:([~|^$*]?=)\s*(["'])?(.*?)\3)?(?:\s+[is])?\s*]/is)!
       quote ||= '"'
-      parsed.attributes[name] = value ? parseString(quote + value + quote) : ''
+      parsed.attributes[name] = value ? u.parseString(quote + value + quote) : ''
       return ''
     })
 
@@ -753,7 +748,7 @@ See `up.element.createFromSelector()` for many more examples.
 @signature
 */
 export function affix(...args: any[]): HTMLElement {
-  let [parent, position = 'beforeend', selector, attributes] = parseArgs(args, 'val', isAdjacentPosition, 'val', 'options')
+  let [parent, position = 'beforeend', selector, attributes] = u.parseArgs(args, 'val', u.isAdjacentPosition, 'val', 'options')
   const element = createFromSelector(selector, attributes)
   parent.insertAdjacentElement(position, element)
   return element
@@ -773,7 +768,7 @@ export const isSingleton = mockable((element: Element): boolean => element.match
 @internal
 */
 export function attrSelector(attribute: string, value?: string): string {
-  if (isGiven(value)) {
+  if (u.isGiven(value)) {
     value = value.replace(/"/g, '\\"')
     // We could get away with omitting the quotes for simple alphanumeric strings,
     // but e.g. not for a string with quotes or spaces or a string that is all numbers.
@@ -897,12 +892,12 @@ or if the given list only contains a `Text` node.
 @return {Element}
 @internal
 */
-export function extractSingular(nodes: List<Node>): HTMLElement {
+export function extractSingular(nodes: u.List<Node>): HTMLElement {
   return tryExtractSingular(nodes) || fail('Expected a single element, but got %d nodes', nodes.length)
 }
 
-function tryExtractSingular(nodes: List<Node>): HTMLElement | undefined {
-  if (nodes.length === 1 && isElementLike(nodes[0])) {
+function tryExtractSingular(nodes: u.List<Node>): HTMLElement | undefined {
+  if (nodes.length === 1 && u.isElementLike(nodes[0])) {
     return nodes[0] as HTMLElement
   }
 }
@@ -1042,7 +1037,7 @@ Both functions set a value of `false` as the string `"false"`.
   A value of `null` or `undefined` is skipped.
 @experimental
 */
-export function setMissingAttrs(element: Element, attrs: PlainObject): void {
+export function setMissingAttrs(element: Element, attrs: u.PlainObject): void {
   for (let key in attrs) {
     setMissingAttr(element, key, attrs[key])
   }
@@ -1051,7 +1046,7 @@ export function setMissingAttrs(element: Element, attrs: PlainObject): void {
 export function setMissingAttr(element: Element, key: string, value: any): void {
   // (1) We skip a null or undefined value, e.g. from the attribute of another element that doesn't have it.
   // (2) We set false as "false". Some callers set [up-etag=false] on purpose.
-  if (isGiven(value) && isMissing(element.getAttribute(key))) {
+  if (u.isGiven(value) && u.isMissing(element.getAttribute(key))) {
     element.setAttribute(key, value)
   }
 }
@@ -1069,14 +1064,14 @@ export function unwrap(wrapper: Element): void {
   })
 }
 
-function wrapNodes(nodeOrNodes: List<Node>): HTMLElement {
+function wrapNodes(nodeOrNodes: u.List<Node>): HTMLElement {
   const wrapper = document.createElement('up-wrapper')
-  wrapper.append(...wrapList(nodeOrNodes))
+  wrapper.append(...u.wrapList(nodeOrNodes))
   return wrapper
 }
 
-export function wrapIfRequired(nodes: List<Node>): Element {
-  if (nodes.length === 1 && isElement(nodes[0])) {
+export function wrapIfRequired(nodes: u.List<Node>): Element {
+  if (nodes.length === 1 && u.isElement(nodes[0])) {
     return nodes[0] as Element
   } else {
     // There are multiple cases when we want to create a wrapper:
@@ -1136,7 +1131,7 @@ export function parseAttr(element: Element, attribute: string, ...parsers: AttrP
 
   for (let parser of parsers) {
     let parserResult = parser(rawValue, attribute, element)
-    if (isDefined(parserResult)) return parserResult
+    if (u.isDefined(parserResult)) return parserResult
   }
 }
 
@@ -1163,7 +1158,7 @@ export function stringAttr(element: Element, attribute: string): string | undefi
   return parseAttr(element, attribute, tryParseString)
 }
 
-let tryParseString: AttrParser = identity
+let tryParseString: AttrParser = u.identity
 
 /*-
 Returns the value of the given attribute on the given element, cast as a boolean value.
@@ -1294,7 +1289,7 @@ export function numberAttr(element: Element, attribute: string): number | undefi
 
 function tryParseNumber(value: string): number | undefined {
   // Call without second argument
-  return parseNumber(value)
+  return u.parseNumber(value)
 }
 
 /*-
@@ -1319,7 +1314,7 @@ export function jsonAttr(element: Element, attribute: string): any {
 
 function tryParseJSON(value: string): any {
   if (value?.trim()) {
-    return parseRelaxedJSON(value)
+    return u.parseRelaxedJSON(value)
   }
 }
 
@@ -1370,7 +1365,7 @@ export function removeClassTemp(element: Element, klass: string): UndoFunction {
 }
 
 function setClassStateTemp(element: Element, klass: string, targetState: boolean): UndoFunction {
-  if (element.classList.contains(klass) === targetState) return noop
+  if (element.classList.contains(klass) === targetState) return u.noop
   element.classList.toggle(klass, targetState)
   return () => element.classList.toggle(klass, !targetState)
 }
@@ -1441,7 +1436,7 @@ value = up.element.styleNumber(element, 'font-size')
 */
 export function computedStyleNumber(element: Element, prop: string): number | undefined {
   const rawValue = computedStyle(element, prop)
-  if (isPresent(rawValue)) {
+  if (u.isPresent(rawValue)) {
     return parseFloat(rawValue)
   }
 }
@@ -1469,10 +1464,10 @@ function extractFromStyleObject(style: CSSStyleDeclaration, keyOrKeys: string | 
   // unpoly-migrate defines all hooks.
   if (up.migrate.loaded) keyOrKeys = up.migrate.fixGetStyleProps!(keyOrKeys)
 
-  if (isString(keyOrKeys)) {
+  if (u.isString(keyOrKeys)) {
     return style.getPropertyValue(keyOrKeys)
   } else { // array
-    return mapObject(keyOrKeys, (key) => [key, style.getPropertyValue(key)])
+    return u.mapObject(keyOrKeys, (key) => [key, style.getPropertyValue(key)])
   }
 }
 
@@ -1495,7 +1490,7 @@ up.element.setStyle(element, { color: 'red', 'font-size': '2em' })
 export function setInlineStyle(element: HTMLElement, props: string | StyleProps, unit = ''): void {
   if (up.migrate.loaded) props = up.migrate.fixSetStyleProps!(props, unit)
 
-  if (isString(props)) {
+  if (u.isString(props)) {
     element.setAttribute('style', props)
   } else {
     const { style } = element
@@ -1565,7 +1560,7 @@ function isUpPrefixed(string: string): boolean {
 }
 
 function pickAttrs(element: Element, attrNames: string[]): Record<string, string> {
-  return mapObject(attrNames, (name) => [name, element.getAttribute(name)])
+  return u.mapObject(attrNames, (name) => [name, element.getAttribute(name)])
 }
 
 export function upAttrs(element: Element): Record<string, string> {
@@ -1574,7 +1569,7 @@ export function upAttrs(element: Element): Record<string, string> {
 }
 
 export function upClasses(element: Element): string[] {
-  return filterList(element.classList.values(), isUpPrefixed)
+  return u.filterList(element.classList.values(), isUpPrefixed)
 }
 
 /*-
@@ -1648,7 +1643,7 @@ up.element.unionSelector(['input', 'textarea'], ['.disabled', '[disabled]'], '.a
 */
 export function unionSelector(includes: string[], excludes?: string[], condition?: string): string {
   let selector = `:is(${includes.join()})`
-  if (isPresent(excludes)) selector += `:not(${excludes!.join()})`
+  if (u.isPresent(excludes)) selector += `:not(${excludes!.join()})`
   if (condition) selector += `:is(${condition})`
   return selector
 }
@@ -1678,9 +1673,9 @@ export function isFullDocumentHTML(html: string): boolean {
 
 export function leadingElement(nodes: Iterable<Node>): Element | undefined {
   for (let node of nodes) {
-    if (isElement(node)) {
+    if (u.isElement(node)) {
       return node
-    } else if (isTextNode(node) && node.textContent.trim()) {
+    } else if (u.isTextNode(node) && node.textContent.trim()) {
       return
     } else {
       // Empty text node or comment node. Try the next node.

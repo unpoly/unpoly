@@ -1,8 +1,7 @@
-import { evalOption, getSimpleTokens, variant } from '../util.js'
+import * as u from '../util.js'
 import { cache, networkConfig } from '../network.js'
 import { CSPInfo } from '../script/csp/csp_info.js'
 import { isCritical } from '../error.js'
-import type { PlainObject, ValueOrFunction } from '../util.js'
 import type { UpRequest } from './request.js'
 
 /**
@@ -18,17 +17,17 @@ export interface ResponseOptions {
   xhr?: XMLHttpRequest
   target?: string
   title?: string
-  openLayer?: PlainObject
+  openLayer?: u.PlainObject
   acceptLayer?: any
   dismissLayer?: any
-  eventPlans?: PlainObject[]
-  context?: PlainObject
+  eventPlans?: u.PlainObject[]
+  context?: u.PlainObject
   expireCache?: any
   evictCache?: any
   // Custom headers for synthetic responses without { xhr }.
   headers?: Record<string, string>
   loadedAt?: Date
-  fail?: ValueOrFunction<boolean>
+  fail?: u.ValueOrFunction<boolean>
 }
 
 const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
@@ -58,16 +57,16 @@ export class UpResponse {
   declare xhr: XMLHttpRequest | undefined
   declare target: string | undefined
   declare title: string | undefined
-  declare openLayer: PlainObject | undefined
+  declare openLayer: u.PlainObject | undefined
   declare acceptLayer: any
   declare dismissLayer: any
-  declare eventPlans: PlainObject[] | undefined
-  declare context: PlainObject | undefined
+  declare eventPlans: u.PlainObject[] | undefined
+  declare context: u.PlainObject | undefined
   declare expireCache: any
   declare evictCache: any
   declare headers: Record<string, string>
   declare loadedAt: Date
-  declare fail: ValueOrFunction<boolean> | undefined
+  declare fail: u.ValueOrFunction<boolean> | undefined
   declare parsedJSON: any
 
   /*-
@@ -197,7 +196,7 @@ export class UpResponse {
   @stable
   */
   get ok(): boolean {
-    return !evalOption(this.fail ?? networkConfig.fail, this)
+    return !u.evalOption(this.fail ?? networkConfig.fail, this)
   }
 
   /*-
@@ -238,7 +237,7 @@ export class UpResponse {
 
   get varyHeaderNames(): string[] {
     let varyHeaderValue = this.header('Vary')
-    return getSimpleTokens(varyHeaderValue, { separator: ',' })
+    return u.getSimpleTokens(varyHeaderValue, { separator: ',' })
   }
 
   /*-
@@ -373,7 +372,7 @@ export class UpResponse {
   get redirectRequest(): UpRequest | undefined {
     if (!this.redirect) return
 
-    let finalRequest = variant(this.request, {
+    let finalRequest = u.variant(this.request, {
       method: this.method,
       url: this.url,
       // The { cacheRoute } prop may no longer be correctly cached

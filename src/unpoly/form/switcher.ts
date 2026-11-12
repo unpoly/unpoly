@@ -1,5 +1,5 @@
-import { getSimpleTokens, intersect, isEqual, isPresent, sequence, some } from '../util.js'
-import { toggle } from '../element.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
 import { fail } from '../error.js'
 import { emit } from '../event.js'
 import { findFields, getRegion, setContainerDisabled, watch } from '../form.js'
@@ -13,8 +13,8 @@ type Switchee = HTMLElement & { upSwitchValues?: string[] }
 type SwitchEffect = { attr: string, toggle(target: HTMLElement, active: boolean): void }
 
 const BUILTIN_SWITCH_EFFECTS: SwitchEffect[] = [
-  { attr: 'up-hide-for', toggle(target, active) { toggle(target, !active) } },
-  { attr: 'up-show-for', toggle(target, active) { toggle(target, active) } },
+  { attr: 'up-hide-for', toggle(target, active) { e.toggle(target, !active) } },
+  { attr: 'up-show-for', toggle(target, active) { e.toggle(target, active) } },
   { attr: 'up-disable-for', toggle(target, active) { setContainerDisabled(target, active) } },
   { attr: 'up-enable-for', toggle(target, active) { setContainerDisabled(target, !active) } },
 ]
@@ -36,7 +36,7 @@ export class Switcher {
     // Don't risk unswitched state showing up in the browser.
     this._switchRegion()
 
-    return sequence(
+    return u.sequence(
       this._trackFieldChanges(),
       this._trackNewSwitchees(),
     )
@@ -69,7 +69,7 @@ export class Switcher {
 
   _switchSwitchee(switchee: Switchee, fieldTokens: string[] = this._buildFieldTokens()): void {
     let previousValues = switchee.upSwitchValues
-    if (!isEqual(previousValues, fieldTokens)) {
+    if (!u.isEqual(previousValues, fieldTokens)) {
       switchee.upSwitchValues = fieldTokens
       this.switchSwitcheeNow(switchee, fieldTokens)
     }
@@ -81,7 +81,7 @@ export class Switcher {
       let attrValue = switchee.getAttribute(attr)
       if (attrValue) {
         let activeTokens = this._parseSwitcheeTokens(attrValue)
-        let isActive = intersect(fieldTokens, activeTokens).length > 0
+        let isActive = u.intersect(fieldTokens, activeTokens).length > 0
         toggle(switchee, isActive)
       }
     }
@@ -103,19 +103,19 @@ export class Switcher {
   }
 
   _parseSwitcheeTokens(str: string): string[] {
-    return getSimpleTokens(str, { json: true })
+    return u.getSimpleTokens(str, { json: true })
   }
 
   _buildFieldTokens(): string[] {
     let values = Params.fromContainer(this._root, { includeDisabled: true }).values()
     let tokens = [...values]
 
-    let anyPresent = some(values, isPresent)
+    let anyPresent = u.some(values, u.isPresent)
     tokens.push(anyPresent ? ':present' : ':blank')
 
     let fields = findFields(this._root)
     if (fields[0]?.matches('[type=radio], [type=checkbox]')) {
-      let anyChecked = some(fields, 'checked')
+      let anyChecked = u.some(fields, 'checked')
       tokens.push(anyChecked ? ':checked' : ':unchecked')
     }
 
