@@ -85,8 +85,8 @@ export class Tether {
 
     const anchorBox = this._anchor.getBoundingClientRect()
 
-    let left
-    let top
+    let left: number | undefined
+    let top: number | undefined
 
     switch (this._alignAxis) {
       case 'horizontal': { // position is 'top' or 'bottom'

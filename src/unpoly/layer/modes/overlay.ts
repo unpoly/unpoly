@@ -483,7 +483,7 @@ export abstract class Overlay extends Layer {
   destroyElements(options: LayerCloseOptions): void {
     const animationProps = this.closeAnimationProps(options)
 
-    const onFinished = () => {
+    const onFinished = (): void => {
       this.onElementsRemoved() // callback for layer implementations that need to clean up
       options.onFinished?.() // callback for callers of up.layer.dismiss/accept()
     }
@@ -519,7 +519,7 @@ export abstract class Overlay extends Layer {
 
   startOpenAnimation(options: LayerAnimationOptions = {}): Promise<void> {
     const animationProps = this.openAnimationProps(options)
-    const onFinished = () => {
+    const onFinished = (): void => {
       this.wasEverVisible = true
       options.onFinished?.()
     }

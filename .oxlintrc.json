@@ -193,8 +193,6 @@
         "src/unpoly/fragment/render/render_options.ts",
         "src/unpoly/fragment/render/response_doc.ts",
         "src/unpoly/framework.ts",
-        "src/unpoly/layer/base.ts",
-        "src/unpoly/layer/modes/overlay.ts",
         "src/unpoly/link.ts",
         "src/unpoly/motion.ts",
         "src/unpoly/rails.ts",

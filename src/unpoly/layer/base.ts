@@ -242,7 +242,7 @@ export class Layer {
   @stable
   */
   accept(value?: any, options?: LayerCloseOptions): void
-  accept() {
+  accept(): void {
     throw new NotImplemented()
   }
 
@@ -269,7 +269,7 @@ export class Layer {
   @stable
   */
   dismiss(value?: any, options?: LayerCloseOptions): void
-  dismiss() {
+  dismiss(): void {
     throw new NotImplemented()
   }
 
@@ -619,7 +619,7 @@ export class Layer {
   @stable
   */
   on<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): UnbindFn
-  on(...args: unknown[]) {
+  on(...args: unknown[]): UnbindFn {
     return this._buildEventListenerGroup(args).bind()
   }
 
@@ -631,7 +631,7 @@ export class Layer {
   @stable
   */
   off<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): void
-  off(...args: unknown[]) {
+  off(...args: unknown[]): void {
     return this._buildEventListenerGroup(args).unbind()
   }
 
@@ -693,7 +693,7 @@ export class Layer {
   emit<E extends Event>(event: E, options?: EmitProps): E
   emit<T extends string>(target: EventTarget, eventType: T, props?: EmitProps): EmittedEvent<T>
   emit<E extends Event>(target: EventTarget, event: E, options?: EmitProps): E
-  emit(...args: unknown[]) {
+  emit(...args: unknown[]): Event {
     return this._buildEventEmitter(args).emit()
   }
 
