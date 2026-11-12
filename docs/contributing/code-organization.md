@@ -165,7 +165,7 @@ To illustrate, here is a *very* simplified version of `up.link`:
 
 ```ts
 // Import the functions, classes and types we need (see "Imports, exports and types" below).
-import * as u from './util.js'
+import { newConfig } from './util/config.js'
 import { emit } from './event.js'
 import type * as t from './link/types.js'
 export type * from './link/types.js'
@@ -173,7 +173,7 @@ import { LinkFollower } from './link/link_follower.js'
 
 // Settings to globally configure link handling.
 // Published as up.link.config.
-export const linkConfig = u.newConfig('up.link.config', (): t.LinkConfig => ({
+export const linkConfig = newConfig('up.link.config', (): t.LinkConfig => ({
   followSelector: '[up-follow]',
 }))
 
