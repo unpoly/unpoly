@@ -32,6 +32,29 @@ describe('up.Config', function() {
       object.reset()
       expect(object.reset).toBeDefined()
     })
+
+    it('keeps a getter and setter from the default settings without calling them, while resetting plain values', function() {
+      const target = { value: 1 }
+      const object = new up.internal.Config('up.test.config', () => ({
+        get forwarded() { return target.value },
+        set forwarded(value) { target.value = value },
+        plain: 1,
+      }))
+      object.forwarded = 2
+      object.plain = 2
+      expect(target.value).toBe(2)
+
+      object.reset()
+
+      expect(object.plain).toBe(1)
+      // The setter was not called with a default value
+      expect(target.value).toBe(2)
+      expect(object.forwarded).toBe(2)
+
+      // The accessor keeps forwarding after the reset
+      object.forwarded = 3
+      expect(target.value).toBe(3)
+    })
   })
 
   describe('#logUnknownKeys', function() {
