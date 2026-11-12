@@ -5,6 +5,7 @@ Unreleased
 - Fix a bug where [`up.element.affix()`](/api/up.element.affix) and [`up.element.createFromSelector()`](/api/up.element.createFromSelector) threw an error when a quoted attribute value contained a `]` character, like in `input[name="user[email]"]`.
 - Fix a bug where rendering a [fallback target](/learn/targeting-fragments#providing-a-fallback-target) from a `{ document }`, `{ fragment }` or `{ response }` [aborted](/learn/aborting-requests) requests in the primary target, although the primary target was not updated. This happened with `{ abort: 'target' }`, which is the default.
 - Fix a bug where [`up.layer.ask()`](/api/up.layer.ask) rejected with a `TypeError` when called without options.
+- Fix a bug where [`up.modal.contains()`](/api/up.modal.contains) and [`up.popup.contains()`](/api/up.popup.contains) threw a `TypeError` when given a selector string.
 - Fix a bug where rendering failed when a new fragment had a callback attribute like [`[up-on-loaded]`](/api/up-follow#up-on-loaded) whose code spanned multiple lines. Running such a callback failed as well.
 - Fix a bug where a [transition](/learn/transitions) failed when the old element contained a hidden [`[up-fixed=top]`](/api/up-fixed-top) or `[up-fixed=bottom]` element, like a collapsed navigation bar.
 - Fix a bug where [`up.hello()`](/api/up.hello) threw an error when called on a detached `<form>` with an [`[up-autosubmit]`](/api/up-autosubmit) attribute.

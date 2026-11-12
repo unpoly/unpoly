@@ -43,6 +43,16 @@ if (up.migrate.loaded) {
           expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining(`${name} has been deprecated`))
         }
       })
+
+      it('up.popup.contains() accepts a selector', async function() {
+        fixture('.in-root')
+        await up.layer.open({ mode: 'popup', origin: fixture('a#origin', { text: 'origin' }), fragment: '<div class="in-overlay"></div>' })
+        up.migrate.warn.mock()
+
+        expect(up.popup.contains('.in-overlay')).toBe(true)
+        expect(up.popup.contains('.in-root')).toBe(false)
+        expect(up.popup.contains('.missing')).toBe(false)
+      })
     })
 
     describe('up.popup.sync()', function() {

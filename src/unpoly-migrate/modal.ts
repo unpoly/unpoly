@@ -21,7 +21,7 @@ interface ModalApi {
   url(): string | undefined
   coveredUrl(): string | undefined
   readonly config: OverlayDefaults
-  contains(element: Element): boolean
+  contains(elementOrSelector: ElementOrSelector): boolean
   isOpen(): boolean
   readonly flavors: never
   flavor(): never
@@ -150,15 +150,16 @@ up.modal = {
   within the current layer.
 
   @function up.modal.contains
-  @param {string} elementOrSelector
-    The element to test
+  @param {Element|jQuery|string} elementOrSelector
+    The element to test, or a CSS selector for it.
   @return {boolean}
   @deprecated
     Use `up.layer.contains()` instead.
   */
-  contains(element) {
+  contains(elementOrSelector) {
     up.migrate.deprecated('up.modal.contains()', 'up.layer.contains()')
-    return up.layer.contains(element)
+    let element = up.fragment.get(elementOrSelector)
+    return !!element && up.layer.contains(element)
   },
 
   /*-
