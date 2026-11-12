@@ -23,42 +23,40 @@ most are not.
 
 ## TypeScript
 
-All of `src/` is TypeScript, except the ERB template `namespace.js.erb`. The code base is
-being migrated to the conventions below, and some of their lint rules don't exist yet. New and
-changed code follows them. Where modules, their types and their imports live is covered in
+All of `src/` is TypeScript, except the ERB template `namespace.js.erb`. Where types live and
+how modules import each other is covered in
 [Code organization](code-organization.md#imports-exports-and-types).
 
 ### Type checking
 
 The build doesn't use TypeScript at all: esbuild strips the types from each file, and never
-checks them. The only type check is `bin/typecheck`, which takes about two seconds and runs
-TypeScript 7's checker twice:
+checks them. Neither does the dev environment's watcher, so `bin/test` happily runs specs
+against code with type errors. The only type check is `bin/typecheck`. It takes about a second,
+so run it (and `bin/lint`) before the specs, which take fifteen seconds for a single one (see
+[Testing](testing.md#check-types-and-lint-first)). It prints nothing when all is well.
+
+`bin/typecheck` runs TypeScript 7's checker twice:
 
 - `tsconfig.json` checks all of `src/` with loose settings.
-- `tsconfig.core.json` checks Unpoly's core (`src/unpoly.ts` and `src/unpoly/`) with stricter
-  settings, so far `noImplicitAny` and `strictNullChecks`. `unpoly-migrate` isn't part of this
-  check, so core can't use the API that only migrate adds, like `up.migrate.deprecated()` or
-  `config.patch()`. A core folder that doesn't pass the stricter settings yet can be listed in
-  `NOT_YET_STRICT` (empty for now). TypeScript can't leave out a folder that other core files
-  import, so `bin/typecheck` runs the core check a second time without the stricter settings,
-  and takes that folder's errors from the second run (see `NOT_YET_STRICT` and
-  `STRICT_SETTINGS` there).
+- `tsconfig.core.json` checks Unpoly's core (`src/unpoly.ts` and `src/unpoly/`) with
+  `noImplicitAny` and `strictNullChecks` on. `unpoly-migrate` isn't part of this check, so core
+  can't use the API that only migrate adds, like `up.migrate.deprecated()` or `config.patch()`.
 
-When a folder passes the stricter settings, remove it from `NOT_YET_STRICT`. When all of `src/`
-passes a setting, move it to `tsconfig.json`. CI runs `bin/typecheck` as a separate job, and a
-type error in either check fails the workflow.
+An error that both checks find is printed twice. Your editor reads `tsconfig.json`, so it shows
+the loose check's errors, but not the ones only the core check finds. When all of `src/` passes a
+setting, move it to `tsconfig.json`. CI runs `bin/typecheck` as a separate job, and a type error
+in either check fails the workflow.
 
-Typing must not change what the build emits. Compare `unpoly.min.js` before and after.
-
-Public types also appear in the [API docs](documentation.md), in a notation loosely inspired
-by TypeScript. Those document intent for the reader; no tool verifies them.
+Adding or changing types must not change what the build emits. Compare `unpoly.min.js` before
+and after.
 
 ### Writing types
 
 - **Object shapes are interfaces.** Every object shape is an `interface`, including the
   properties Unpoly sets on elements (`interface FragmentElement extends Element { … }`). Use
-  `type` only for unions, tuples, function types and aliases. An interface can be passed where
-  a `PlainObject` is expected. Lint enforces this with `consistent-type-definitions`.
+  `type` only for unions, tuples, function types, mapped and conditional types, and aliases.
+  An interface can be passed where a `PlainObject` is expected. Lint enforces this with
+  `consistent-type-definitions`.
 - **`?` for optional values.** Write `origin?: Element`, not `origin: Element | undefined`,
   for parameters, properties and `declare`d class fields. Return types, and a parameter
   followed by a required one, still need `| undefined`.
@@ -66,6 +64,8 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
 
   ```ts
   function isAlive(fragment: Element): boolean {
+    return fragment.isConnected && isNotDestroying(fragment)
+  }
   ```
 
   This includes class methods, and an arrow function assigned to an untyped `const`. Agents
@@ -73,7 +73,8 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
   accidental widening where it happens. Lint enforces this with `explicit-function-return-type`.
 
   Inline callbacks and functions that get their type from context stay inferred. So do
-  functions in an object literal and a function returned directly by a named function.
+  functions in an object literal, and a named function whose body only returns a function
+  (both the outer and the returned one).
 - **Local variables are inferred.** Annotate one where inference can't do it (see
   [Strict checks](#strict-checks)), or where a type helps the reader.
 - **Refactor before type acrobatics.** When a type is hard to write, change the code so it's
@@ -90,13 +91,15 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
   makes the compiled class define the property, which costs bytes and changes behavior
   (differently in `unpoly.js` and `unpoly.es6.js`, whose targets treat class fields
   differently). `bin/lint` reports a field without `declare` or an initializer.
-- **Mark a type that isn't public API** with `@internal` in its `/** */` comment.
-- **A type parameter never takes the name of a namespace alias** (`u`, `e`, `t`).
-- **Type a config once**, as the interface its defaults function returns. `newConfig()` returns
-  it as a `ConfigWith<…>`, so the call site needs no cast:
+- **Comment a type with `/** */`.** Editors show the comment when you hover a use of the type.
+  Mark a type that isn't public API with `@internal` in that comment. These comments aren't
+  published: a public type's reference goes in its [doc entry](documentation.md#doc-files),
+  in a notation loosely inspired by TypeScript that no tool checks against the code.
+- **Type a config once**, as the interface its defaults function returns. `newConfig()` (from
+  `util/config.ts`) returns it as a `ConfigWith<…>`, so the call site needs no cast:
 
   ```ts
-  export const linkConfig = u.newConfig('up.link.config', (): t.LinkConfig => ({ … }))
+  export const linkConfig = newConfig('up.link.config', (): t.LinkConfig => ({ … }))
   ```
 
 - **Events are interfaces that extend `UpEvent`**, or the event they build on. Use one line
@@ -238,11 +241,16 @@ Acronyms are uppercased: `parseURL()`, not `parseUrl()`. Same for `escapeHTML()`
 
 ### Names that collide with globals
 
-A class or function named like a likely browser or JavaScript global gets an `Up` prefix:
-`UpRequest`, `UpResponse`, `UpURLPattern`, `UpError`, `UpEvent`, `UpEventListener`,
-`UpRequestCache`. Otherwise a forgotten import silently uses the global, and code that imports
-Unpoly's modules one day wouldn't know which `Response` is meant. A function may get a more
-specific name instead: viewport's `scrollToPosition()`, not `scrollTo()`.
+A class, function or type named like a likely browser or JavaScript global gets an `Up` prefix.
+That covers values like `Request` and types like fetch's `RequestCache`: `UpRequest`,
+`UpResponse`, `UpURLPattern`, `UpError`, `UpEvent`, `UpEventListener`, `UpRequestCache`.
+Otherwise a forgotten import silently uses the global, and code that imports Unpoly's modules
+one day wouldn't know which `Response` is meant. A function may get a more specific name
+instead: viewport's `scrollToPosition()`, not `scrollTo()`.
+
+Declare a prefixed class like any other (`export class UpRequest { … }`). Its `api` publishes it
+under its public name (`Request: UpRequest`), and `setClassName()` in `src/unpoly.ts` gives it
+that name at runtime, so the console says `up.Request`.
 
 The list isn't exhaustive, and we don't check every name against the browser's API. Cover the
 likely mix-ups. Names without a collision stay unprefixed (`Layer`, `Params`, `RenderResult`),
@@ -275,8 +283,10 @@ direct call — cannot be `_`-prefixed: the name it asks for does not exist in
 ## Linting
 
 `bin/lint` runs [Oxlint](https://oxc.rs/docs/guide/usage/linter) over `src/`, `spec/` and
-`tooling/`, and checks that no two modules contribute the same key to `window.up`
-(`tooling/lint/api_collisions.mjs`). Extra arguments are forwarded to Oxlint, so
+`tooling/`, checks that no two modules contribute the same key to `window.up`
+(`tooling/lint/api_collisions.mjs`), and checks the structure of the
+[doc files](documentation.md#doc-files) (`tooling/lint/doc_files.mjs`). It takes about a second
+and prints nothing when all is well. Extra arguments are forwarded to Oxlint, so
 `bin/lint --fix` works.
 
 The rules are in `.oxlintrc.json` in the project root. Most are Oxlint's own, which are written in
@@ -284,5 +294,5 @@ Rust. The code style rules from `@stylistic/eslint-plugin` and our own in
 `tooling/lint/unpoly_plugin.mjs` run in JavaScript. Editors with the Oxc extension use the same
 config. To silence a rule for one line, write `// oxlint-disable-line rule-name`.
 
-Lint errors in `src/` fail the build, so `bin/test` surfaces them for you. Specs and the tooling
-are not part of the build, so only `bin/lint` (or CI's lint job) checks those.
+Oxlint's errors in `src/` fail the build, so `bin/test` surfaces them for you. Specs, the tooling
+and the doc files are not part of the build, so only `bin/lint` (or CI's lint job) checks those.

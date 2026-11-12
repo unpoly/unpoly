@@ -1,7 +1,7 @@
 # Code organization
 
 Where code lives, why Unpoly is a `window.up` global, which namespace owns which topic,
-and how a namespace is structured internally.
+how a namespace is structured internally, and how modules import each other.
 
 <!-- toc -->
 - [Directory structure](#directory-structure)
@@ -32,7 +32,8 @@ src/                      # Entry points for Unpoly's main and optional bundles
   unpoly/                 # Source code (TS, CSS) and API docs for Unpoly's namespaces
     form.ts               # ... Code for up.form namespace
     form.md               # ... API docs for up.form namespace (see Documentation)
-    form/                 # ... Classes owned by up.form
+    form/                 # ... Classes and types owned by up.form
+      types.ts            # ...... Types for up.form
       params.ts           # ...... Code for up.Params class
       params.md           # ...... API docs for up.Params class
       ...
@@ -45,7 +46,7 @@ src/                      # Entry points for Unpoly's main and optional bundles
     fragment/             # ... Classes owned by up.fragment
       render/             # ...... The classes behind up.render()
     framework/            # ... Classes owned by up.framework (Registry)
-    util/                 # ... Generic helper classes (up.Config, up.Rect, ...)
+    util/                 # ... Generic helper classes (Config, Rect, ...)
     internal.ts           # ... Internals the specs and unpoly-migrate need, published as up.internal
     pages/                # ... Guide pages and shared partials (see Documentation)
     ...                   # ... Other namespaces and their classes
@@ -167,7 +168,8 @@ A module's top level only declares things. Nothing happens when it is imported.
 To illustrate, here is a *very* simplified version of `up.link`:
 
 ```ts
-// Import the functions, classes and types we need (see "Imports, exports and types" below).
+// Import the styles, functions, classes and types we need (see "Imports, exports and types" below).
+import './link.sass'
 import { newConfig } from './util/config.js'
 import { emit } from './event.js'
 import type * as t from './link/types.js'
@@ -268,9 +270,9 @@ with `up.internal.printToError()`.
 
 ### Imports, exports and types
 
-The code base is being migrated to this shape, and some of its lint rules don't exist yet. New
-and changed modules follow it. How to write the types themselves is covered in
-[Code style](code-style.md#typescript).
+A **main module** is a namespace file directly in `src/unpoly/`, like `fragment.ts` or
+`layer.ts`. It owns the folder of the same name: `fragment/` holds up.fragment's classes and
+types. How to write the types themselves is covered in [Code style](code-style.md#typescript).
 
 Import other modules by their `.js` name (`import { emit } from './event.js'`), also when they
 are `.ts` files. TypeScript and the build both resolve this to `event.ts`.
@@ -290,6 +292,9 @@ straight from its `types.ts`, also as `t`. That's `import type * as t from './ty
 `'../types.js'` from a sub-folder like `layer/modes/`. They still import values from the main
 module. In the header, the `t` import comes after the main modules (step 4 below).
 
+A type that only one file uses stays in that file. A module with only a few types, like
+`log.ts` or `framework.ts`, keeps them in its main file and has no `types.ts`.
+
 **Events.** An event's type lives with its module's other types, usually in `types.ts`. The
 same file lists the module's events in `UpEventMap`, so `up.on()` and `up.emit()` know their types:
 
@@ -306,8 +311,9 @@ declare module '../event.js' {
 class, and single uppercase letters are taken by type parameters. Use an alias only as
 `u.member`, for values and types alike (`u.map()`, `u.List<Element>`). Passing the alias
 itself around makes esbuild build the module's namespace object, which is 2.4 KB for util.
-Don't shadow an alias with a local variable (`catch (error)`, not `catch (e)`). `bin/lint`
-reports both (`unpoly/namespace-aliases`).
+Don't shadow an alias with a local variable (`catch (error)`, not `catch (e)`), and don't give a
+type parameter an alias's name. `bin/lint` reports the misuse and the shadowing
+(`unpoly/namespace-aliases`).
 
 **Other main modules** get one `import { … }` statement each, with types inline as `type X`.
 Import a class from the main module that owns it, not from its file:
@@ -319,9 +325,9 @@ Import a class from the main module that owns it, not from its file:
 2. `u` and `e`, then any class from `util/` or `element/` (see below)
 3. Other main modules, one statement each, alphabetically by path
 4. Own types: `import type * as t` and `export type *`
-5. Own classes and other files of the module's folder, alphabetically by path. Each import is
-   directly followed by its re-export. A class the module only re-exports gets a single
-   `export { … } from` line.
+5. Own classes and other files of the module's folder, alphabetically by path. When the module
+   re-exports a class it also imports, `export { X }` directly follows the import. A class the
+   module only re-exports gets a single `export { X } from …` line.
 
 ```ts
 import './fragment.sass'
@@ -360,6 +366,9 @@ A few imports can't go through the owning module:
   above the import.
 - `internal.ts` imports util and element functions by name, since every `up.internal` key must be
   a named import (see above).
+- The entry file `src/unpoly.ts` follows none of these rules. It imports every module as a
+  namespace (`import * as util`) and some class files directly, in an order that controls how
+  import cycles are entered. Its comments explain that order.
 
 
 ## Entry points and optional bundles
