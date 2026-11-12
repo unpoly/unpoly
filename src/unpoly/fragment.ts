@@ -3,7 +3,7 @@ import * as u from './util.js'
 import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { CannotParse, CannotTarget, fail } from './error.js'
-import { emit, on, onClosest } from './event.js'
+import { emit, on, onClosest, type UnbindFn } from './event.js'
 import { canPushState, isHistoryEnabled } from './history.js'
 import { Layer, layerConfig, layerStack, mainTargets, type LayerMode } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
@@ -2982,7 +2982,7 @@ up.fragment.onAborted(element, () => clearTimeout(timeout))
   When the element is destroyed, the callback will be unsubscribed automatically.
 @experimental
 */
-export function onAborted(fragment: Element, callback: (event: Event) => void): () => void {
+export function onAborted(fragment: Element, callback: (event: t.FragmentAbortedEvent) => void): UnbindFn {
   // Aborting the root layer should not abort a poller in an overlay, like it doesn't abort the overlay's requests.
   return onClosest(fragment, 'up:fragment:aborted', { layer: 'origin' }, callback)
 }
@@ -3003,7 +3003,7 @@ Runs a callback when the given element *or its ancestors in the same layer* were
   When the element is destroyed, the callback will be unsubscribed automatically.
 @experimental
 */
-export function onKept(fragment: Element, callback: (event: Event) => void): () => void {
+export function onKept(fragment: Element, callback: (event: t.FragmentKeptEvent) => void): UnbindFn {
   return onClosest(fragment, 'up:fragment:kept', { layer: 'origin' }, callback)
 }
 

@@ -1,4 +1,5 @@
 import type * as u from '../util.js'
+import { type UpEvent } from '../event.js'
 import { type Layer } from '../layer.js'
 import { type UpRequest, type UpResponse } from '../network.js'
 import { type FocusCapsule } from '../viewport.js'
@@ -74,80 +75,58 @@ export interface ProvideNodesOptions {
   htmlParser?: HTMLParser
 }
 
-/**
-The `up:fragment:loaded` event.
-*/
-export type FragmentLoadedEvent = Event & {
+/** The `up:fragment:loaded` event. */
+export interface FragmentLoadedEvent extends UpEvent {
   request: UpRequest
   response: UpResponse
   revalidating: boolean
-  expiredResponse: UpResponse | undefined
-  origin: Element | undefined
+  expiredResponse?: UpResponse
+  origin?: Element
   renderOptions: RenderOptions
   skip: () => void
 }
 
-/**
-The `up:fragment:offline` event.
-*/
-export type FragmentOfflineEvent = Event & {
+/** The `up:fragment:offline` event. */
+export interface FragmentOfflineEvent extends UpEvent {
   request: UpRequest
   renderOptions: RenderOptions
   retry: (retryOptions?: RenderOptions) => Promise<RenderResult>
-  origin: Element | undefined
+  origin?: Element
 }
 
-/**
-The `up:fragment:keep` event.
-*/
-export type FragmentKeepEvent = Event & {
-  target: Element
-  newFragment: Element
-  newData: u.PlainObject
-  renderOptions: RenderOptions
-}
-
-/**
-The `up:fragment:kept` event.
-*/
-export type FragmentKeptEvent = Event & {
+/** The `up:fragment:kept` event. */
+export interface FragmentKeptEvent extends UpEvent {
   target: Element
   newFragment: Element
   newData: u.PlainObject
 }
 
-/**
-The `up:fragment:inserted` event.
-*/
-export type FragmentInsertedEvent = Event & {
+/** The `up:fragment:keep` event. */
+export interface FragmentKeepEvent extends FragmentKeptEvent { renderOptions: RenderOptions }
+
+/** The `up:fragment:inserted` event. */
+export interface FragmentInsertedEvent extends UpEvent {
   target: Element
   layer: Layer
   ok: boolean
   revalidating: boolean
 }
 
-/**
-The `up:fragment:destroyed` event.
-*/
-export type FragmentDestroyedEvent = Event & {
+/** The `up:fragment:destroyed` event. Emitted on the fragment's former parent. */
+export interface FragmentDestroyedEvent extends UpEvent {
   fragment: Element
   parent: Element
-  target: Element
 }
 
-/**
-The `up:fragment:aborted` event.
-*/
-export type FragmentAbortedEvent = Event & {
+/** The `up:fragment:aborted` event. */
+export interface FragmentAbortedEvent extends UpEvent {
   target: Element
   reason: string
   newLayer: boolean
 }
 
-/**
-The `up:template:clone` event.
-*/
-export type TemplateCloneEvent = Event & {
+/** The `up:template:clone` event. */
+export interface TemplateCloneEvent extends UpEvent {
   target: Element
   data: u.PlainObject
   nodes: u.List<Node> | null
