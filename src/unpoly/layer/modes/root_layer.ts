@@ -13,7 +13,10 @@ export class RootLayer extends Layer {
 
   static mode: LayerMode = 'root'
 
-  get element(): RootLayerElement {
+  declare element: RootLayerElement
+
+  constructor(options: LayerOptions) {
+    super(options)
     // Let's talk about our choice of @element for the root layer.
     //
     // 1. We don't want to use `document`, since that is for our global event bus.
@@ -30,14 +33,7 @@ export class RootLayer extends Layer {
     //    will yield a result.
     // 5. Also it's nice that elements in the <head> also belong to the root layer.
     //    Otherwise they would not belong to any layer.
-    //
-    // We always return the current <html> instead of caching it,
-    // since the developer might replace it with a new version.
-    return getRoot()
-  }
-
-  constructor(options: LayerOptions) {
-    super(options)
+    this.element = getRoot()
     this.setupHandlers()
   }
 
@@ -57,12 +53,6 @@ export class RootLayer extends Layer {
       this.element.upHandlersApplied = true
       super.setupHandlers()
     }
-  }
-
-  sync(): void {
-    // In case a fragment update has swapped the <html> element we need to re-apply
-    // event handlers to the new <html> element.
-    this.setupHandlers()
   }
 
   isAlive(): boolean {

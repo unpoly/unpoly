@@ -97,7 +97,7 @@ the background layer during compilation.
 @class up.Layer
 @parent up.layer
 */
-export abstract class Layer {
+export class Layer {
   // Each subclass has its mode, like ModalLayer.mode = 'modal'.
   declare static mode: LayerMode
   // 'up.Layer' for every mode, set in unpoly.ts.
@@ -135,8 +135,8 @@ export abstract class Layer {
     The layer's container element.
   @stable
   */
-  // The root layer has an element getter, and an overlay sets the element when it opens.
-  abstract element: HTMLElement
+  // The root layer sets the element in its constructor, and an overlay sets it when it opens.
+  declare element: HTMLElement
 
   /*-
   Whether this layer has [visible history](/learn/history-in-overlays).
@@ -206,8 +206,8 @@ export abstract class Layer {
       lastFocusCapsules = newStateCache(),
     } = options
 
-    // A layer has no { element } option. The root layer has an element getter, and an overlay
-    // creates its element when it opens.
+    // A layer has no { element } option. The root layer sets its element in its constructor, and
+    // an overlay creates its element when it opens.
     // buildLayer() always passes these. The mode configs default { history }.
     this.stack = options.stack!
     this.history = options.history!

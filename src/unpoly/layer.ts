@@ -7,7 +7,7 @@ import { on } from './event.js'
 import { render } from './fragment.js'
 import { RenderOptions } from './fragment/render/render_options.js'
 import { Layer } from './layer/base.js'
-import type { LayerMode, LayerOptions, OverlayMode } from './layer/base.js'
+import type { LayerMode, OverlayMode } from './layer/base.js'
 import type { LayerLookupArgs } from './layer/layer_lookup.js'
 import { LayerStack } from './layer/layer_stack.js'
 import { Config } from './util/config.js'
@@ -15,12 +15,6 @@ import type { ConfigWith } from './util/config.js'
 import type { PlainObject } from './util.js'
 import type { AnimationValue } from './motion.js'
 import type { UpResponse } from './network/response.js'
-
-/**
-A layer subclass for a mode, like `ModalLayer`. Each has a static `{ mode }`.
-@internal
-*/
-export type LayerClass = (new (options: LayerOptions) => Layer) & Pick<typeof Layer, 'mode' | 'selector'>
 
 /**
 The `up:layer:open` event.
@@ -71,7 +65,7 @@ Add `[up-layer=new]` to a link or form to show its response in a new overlay, or
 
 // The layer class for each mode, like ModalLayer. The entry passes them to install(), so only
 // the entry and the mode classes themselves import a mode class (see the cycle rules in src/unpoly.ts).
-let layerClasses: LayerClass[] = []
+let layerClasses: (typeof Layer)[] = []
 
 /**
 The settings in `up.layer.config`, described in its doc comment.
@@ -1994,7 +1988,7 @@ See `up.Layer#affix` for more documentation.
 @experimental
 */
 
-export function install(classes: LayerClass[]): void {
+export function install(classes: (typeof Layer)[]): void {
   layerClasses = classes
   anySelector = map(classes, (Class) => Class.selector()).join()
 
