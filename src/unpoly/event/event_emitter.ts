@@ -10,10 +10,10 @@ import type * as t from './types.js'
 export class EventEmitter {
   declare target: EventTarget
   declare event: Event
-  declare baseLayer: Layer | undefined
-  declare callback: ((event: Event) => void) | undefined
-  declare log: t.EmitLogOption | undefined
-  declare ensureBubbles: boolean | undefined
+  declare baseLayer?: Layer
+  declare callback?: (event: Event) => void
+  declare log?: t.EmitLogOption
+  declare ensureBubbles?: boolean
 
   constructor(options: t.EventEmitterOptions) {
     this.target = options.target
@@ -73,7 +73,7 @@ export class EventEmitter {
     }
   }
 
-  static fromEmitArgs(args: any[], defaults: u.PlainObject = {}): EventEmitter {
+  static fromEmitArgs(args: any[], defaults: t.EmitProps = {}): EventEmitter {
     // Event-emitting functions are crazy overloaded:
     //
     // - up.emit([target], eventType, [eventProps])

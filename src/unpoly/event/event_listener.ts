@@ -9,13 +9,13 @@ import type * as t from './types.js'
 export class UpEventListener {
   declare element: t.ListenerTarget
   declare eventType: string
-  declare selector: string | (() => string) | undefined
+  declare selector?: t.ListenerSelector
   declare callback: t.ListenerCallback
-  declare guard: ((event: Event) => boolean) | undefined
-  declare baseLayer: Layer | undefined
-  declare passive: boolean | undefined
-  declare once: boolean | undefined
-  declare capture: boolean | undefined
+  declare guard?: (event: Event) => boolean
+  declare baseLayer?: Layer
+  declare passive?: boolean
+  declare once?: boolean
+  declare capture?: boolean
   declare beforeBoot: boolean
   declare isDefault: boolean
   declare _key: string
@@ -31,6 +31,7 @@ export class UpEventListener {
     this.once = attributes.once
     this.capture = attributes.capture
 
+    // Naming the class inside its body would make the build emit a named class expression.
     this._key = (this.constructor as typeof UpEventListener)._buildKey(attributes)
     this.isDefault = isEvaling()
 

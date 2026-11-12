@@ -251,8 +251,8 @@ export function off(...args: any[]): void {
   return buildListenerGroup(args).unbind()
 }
 
-function buildListenerGroup(args: any[], options?: u.PlainObject): EventListenerGroup {
-  return EventListenerGroup.fromBindArgs(args, options)
+function buildListenerGroup(args: any[]): EventListenerGroup {
+  return EventListenerGroup.fromBindArgs(args)
 }
 
 function buildEmitter(args: any[]): EventEmitter {
@@ -320,8 +320,8 @@ up.emit('my:event', { foo: 'bar' })
 */
 export function emit<T extends string>(type: T, props?: t.EmitProps): t.EmittedEvent<T>
 export function emit<T extends string>(target: t.EmitTarget, type: T, props?: t.EmitProps): t.EmittedEvent<T>
-export function emit<T extends string>(plan: t.EmitProps & { type: T }): t.EmittedEvent<T>
-export function emit<T extends string>(target: t.EmitTarget, plan: t.EmitProps & { type: T }): t.EmittedEvent<T>
+export function emit<T extends string>(plan: t.EventPlan<T>): t.EmittedEvent<T>
+export function emit<T extends string>(target: t.EmitTarget, plan: t.EventPlan<T>): t.EmittedEvent<T>
 export function emit<E extends Event>(event: E, options?: t.EmitProps): E
 export function emit<E extends Event>(target: t.EmitTarget, event: E, options?: t.EmitProps): E
 export function emit(...args: any[]): Event {

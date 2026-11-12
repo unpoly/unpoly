@@ -15,7 +15,7 @@ export class EventListenerGroup {
     this._listenerAttributes = listenerAttributes
   }
 
-  bind(): () => void {
+  bind(): t.UnbindFn {
     const cleaner = u.cleaner()
 
     this._eachListenerAttributes(function(attrs) {

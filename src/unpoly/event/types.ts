@@ -40,7 +40,9 @@ export type UnbindFn = () => void
 /**
 An event built by `up.event.fork()`, with the event it was forked from.
 */
-export type ForkedEvent = Event & { originalEvent: Event }
+export interface ForkedEvent extends Event {
+  originalEvent: Event
+}
 
 /**
 The device that the user last interacted with. See `up.event.inputDevice`.
@@ -97,7 +99,9 @@ export interface UpEventMap {
 An event whose type `UpEventMap` doesn't know, like a custom event emitted with `up.emit()`.
 It may have any property.
 */
-export type AnyEvent = Event & { [prop: string]: any }
+export interface AnyEvent extends Event {
+  [prop: string]: any
+}
 
 /**
 The event that `up.on()` passes to its listener for the given event type: an Unpoly event from `UpEventMap`,
@@ -132,9 +136,23 @@ A selector for `up.on()` to delegate events, or a function that returns it.
 export type ListenerSelector = string | (() => string)
 
 /**
-Options for `up.on()`. The `{ guard }` option is only used internally.
+Options for `up.on()`.
 */
-export type ListenerOptions = Pick<EventListenerAttributes, 'passive' | 'once' | 'capture' | 'guard'>
+export interface ListenerOptions {
+  passive?: boolean
+  once?: boolean
+  capture?: boolean
+  /**
+  Only call the listener for events that pass this check.
+  @internal
+  */
+  guard?: (event: Event) => boolean
+  /**
+  Also call the listener before Unpoly has booted. Defaults to `true` for `up:framework:*` events.
+  @internal
+  */
+  beforeBoot?: boolean
+}
 
 /**
 The arguments for `up.on()` after its event types: an optional selector, optional options and the listener.
@@ -163,7 +181,9 @@ export interface EmitProps {
 /**
 An event to emit, described by its `{ type }` and properties, like the ones a server sends in `X-Up-Events`.
 */
-export type EventPlan = EmitProps & { type: string }
+export interface EventPlan<T extends string = string> extends EmitProps {
+  type: T
+}
 
 /**
 A property of a mouse or keyboard event that says whether a modifier key was held.
@@ -176,7 +196,9 @@ An element, document or window that Unpoly listens on. It remembers its listener
 so `up.off()` can find them.
 @internal
 */
-export type ListenerTarget = EventTarget & { upEventListeners?: Record<string, UpEventListener> }
+export interface ListenerTarget extends EventTarget {
+  upEventListeners?: Record<string, UpEventListener>
+}
 
 /**
 A function registered with `up.on()`. It is called with the event, the element matching
@@ -192,27 +214,24 @@ export type ListenerCallback<E = Event> =
   { listener(this: HTMLElement, event: E, element: HTMLElement, data?: any): any }['listener'] & { upUid?: number }
 
 /**
-Everything an `UpEventListener` needs to know.
+What an `UpEventListener` and an `EventListenerGroup` both need to know: everything but the
+elements and event types to listen to.
 @internal
 */
-export interface EventListenerAttributes {
-  element: ListenerTarget
-  eventType: string
-  selector?: string | (() => string)
+export interface SharedListenerAttributes extends ListenerOptions {
+  selector?: ListenerSelector
   callback: ListenerCallback
-  guard?: (event: Event) => boolean
   baseLayer?: Layer
-  passive?: boolean
-  once?: boolean
-  capture?: boolean
-  beforeBoot?: boolean
 }
 
 /**
-The attributes for an `UpEventListener`, minus its single element and event type.
+Everything an `UpEventListener` needs to know.
 @internal
 */
-export type SharedListenerAttributes = Omit<EventListenerAttributes, 'element' | 'eventType'>
+export interface EventListenerAttributes extends SharedListenerAttributes {
+  element: ListenerTarget
+  eventType: string
+}
 
 /**
 Everything an `EventListenerGroup` needs to know: the elements and event types to listen to,
