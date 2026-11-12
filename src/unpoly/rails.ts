@@ -10,7 +10,7 @@ Play nice with Rails UJS
 Unpoly is mostly a superset of Rails UJS, so we convert attributes like `[data-method]` to `[up-method]´.
 */
 
-function isRailsUJSLoaded() {
+function isRailsUJSLoaded(): boolean {
   return window.Rails || // rails-ujs gem
     window.jQuery?.rails // jquery-ujs gem
 }
