@@ -4,7 +4,8 @@ import { type Layer } from '../layer.js'
 import { type UpRequest, type UpResponse } from '../network.js'
 import { type FocusCapsule } from '../viewport.js'
 import {
-  type FragmentProcessorValue, type RenderOptions, type RenderTarget, type ResolvedRenderOptions,
+  type FragmentProcessorValue, type LayerReference, type RenderOptions, type RenderTarget,
+  type ResolvedRenderOptions,
 } from './render/render_options.js'
 import { type RenderResult } from './render/render_result.js'
 
@@ -38,6 +39,24 @@ export interface RenderStep extends ResolvedRenderOptions {
 The arguments of `up.render()` and the functions built on it: a target and render options, or only render options.
 */
 export type RenderArgs = [target: RenderTarget, options?: RenderOptions] | [options: RenderOptions]
+
+/**
+Options for looking up fragments (`up.fragment.get()`) and for deriving targets (`up.fragment.toTarget()`).
+A render pass passes its render options.
+*/
+export interface LookupOptions {
+  layer?: LayerReference
+  // The mode of a new layer, for expanding `:main` with `{ layer: 'new' }`.
+  mode?: string
+  origin?: Element
+  originLayer?: Layer
+  match?: 'region' | 'first'
+  // Also match elements that are being destroyed.
+  destroying?: boolean
+  // For deriving targets: only use config.strongTargetDerivers, or check that the target matches.
+  strong?: boolean
+  verify?: boolean
+}
 
 /**
 An element with [up-keep] that is kept in an update, and the element it would have been replaced with.
@@ -166,13 +185,11 @@ Options for an `up.FragmentFinder`. Other options (like `{ layer }`) are passed 
 `up.fragment.closest()` and `up.fragment.get()`.
 @internal
 */
-export interface FragmentFinderOptions {
+export interface FragmentFinderOptions extends LookupOptions {
   selector: string
-  origin?: Element
+  // For matching in detached content, as needed by up.ResponseDoc.
   document?: Document | Element
-  match?: 'region' | 'first'
   preferOldElements?: Element[]
-  [key: string]: any
 }
 
 /**

@@ -351,7 +351,7 @@ up.fragment.source('#two') // returns '/foo'
   The URL from which the element was loaded.
 @stable
 */
-export function sourceOf(element: e.ElementOrSelector, options: u.PlainObject = {}): string | undefined {
+export function sourceOf(element: e.ElementOrSelector, options: t.LookupOptions = {}): string | undefined {
   element = getSmart(element, options)!
   return e.closestAttr(element, 'up-source')
 }
@@ -1446,8 +1446,8 @@ without filtering by layer or destruction state.
 @signature
 */
 // Takes a selector or element, optionally preceded by a root element, and followed by options.
-export function getSmart(selector: e.ElementOrSelector, options?: u.PlainObject): HTMLElement | undefined
-export function getSmart(root: ParentNode, selector: e.ElementOrSelector, options?: u.PlainObject): HTMLElement | undefined
+export function getSmart(selector: e.ElementOrSelector, options?: t.LookupOptions): HTMLElement | undefined
+export function getSmart(root: ParentNode, selector: e.ElementOrSelector, options?: t.LookupOptions): HTMLElement | undefined
 export function getSmart(...args: any[]): any {
   let [root, selector, options] = parseGetArgs(args)
 
@@ -1473,8 +1473,8 @@ export function getSmart(...args: any[]): any {
   }).find()
 }
 
-export function getFirstDescendant(selector: string, options?: u.PlainObject): HTMLElement | undefined
-export function getFirstDescendant(root: ParentNode, selector: string, options?: u.PlainObject): HTMLElement | undefined
+export function getFirstDescendant(selector: string, options?: t.LookupOptions): HTMLElement | undefined
+export function getFirstDescendant(root: ParentNode, selector: string, options?: t.LookupOptions): HTMLElement | undefined
 export function getFirstDescendant(...args: any[]): any {
   let [root, selectorString, options] = parseGetArgs(args)
 
@@ -1557,10 +1557,10 @@ let foosInContainer = up.fragment.all(container, '.foo')
 */
 // Takes a selector, optionally preceded by a root element, and followed by options.
 // A selector string gives an array. An element or list is returned as a list.
-export function getAllFragments(selector: string, options?: u.PlainObject): HTMLElement[]
-export function getAllFragments(root: ParentNode, selector: string, options?: u.PlainObject): HTMLElement[]
-export function getAllFragments(selector: e.ElementOrSelector, options?: u.PlainObject): u.List<HTMLElement>
-export function getAllFragments(root: ParentNode, selector: e.ElementOrSelector, options?: u.PlainObject): u.List<HTMLElement>
+export function getAllFragments(selector: string, options?: t.LookupOptions): HTMLElement[]
+export function getAllFragments(root: ParentNode, selector: string, options?: t.LookupOptions): HTMLElement[]
+export function getAllFragments(selector: e.ElementOrSelector, options?: t.LookupOptions): u.List<HTMLElement>
+export function getAllFragments(root: ParentNode, selector: e.ElementOrSelector, options?: t.LookupOptions): u.List<HTMLElement>
 export function getAllFragments(...args: any[]): any {
   let [root, selectorString, options] = parseGetArgs(args)
 
@@ -1636,7 +1636,7 @@ To include all elements matching the selector, use `up.element.subtree()`.
   A list of all matching elements.
 @stable
 */
-export function getSubtree(element: Element, selector: string, options: u.PlainObject = {}): any {
+export function getSubtree(element: Element, selector: string, options: t.LookupOptions = {}): HTMLElement[] {
   return new Selector(selector, element, options).subtree(element)
 }
 
@@ -1681,7 +1681,7 @@ the given element. To match ancestors regardless of layers, use `up.element.clos
   Returns `null` or `undefined` if no element matches in the same layer.
 @stable
 */
-export function closest(element: Element, selector: string, options?: u.PlainObject): HTMLElement | undefined {
+export function closest(element: Element, selector: string, options?: t.LookupOptions): HTMLElement | undefined {
   return new Selector(selector, element, options).closest(element)
 }
 
@@ -2098,8 +2098,9 @@ selector = up.fragment.toTarget(element) // returns '.klass'
   The derived selector string.
 @stable
 */
-export function toTarget(element: Element | string, options?: u.PlainObject): string {
-  return u.presence(element, u.isString) || tryToTarget(element, options) || cannotTarget(element)
+export function toTarget(element: Element | string, options?: t.LookupOptions): string {
+  // A string is returned as it is, so only an element gets to tryToTarget().
+  return u.presence(element, u.isString) || tryToTarget(element as Element, options) || cannotTarget(element)
 }
 
 /*-
@@ -2120,11 +2121,11 @@ Returns whether Unpoly can [derive a target selector](/learn/target-derivation) 
   Whether a selector can be derived for the given element.
 @stable
 */
-export function isTargetable(element: Element, options?: u.PlainObject): boolean {
+export function isTargetable(element: Element, options?: t.LookupOptions): boolean {
   return !!tryToTarget(element, options)
 }
 
-function untargetableMessage(element: any): string {
+function untargetableMessage(element: Element): string {
   return `Cannot derive good target selector from a <${element.localName}> element without identifying attributes. Try setting an [id] or configure up.fragment.config.targetDerivers.`
 }
 
@@ -2132,8 +2133,7 @@ function cannotTarget(element: any): never {
   throw new CannotTarget(untargetableMessage(element))
 }
 
-// The element may also be a selector string, which is returned unchanged.
-export function tryToTarget(element: any, options: u.PlainObject = {}): string | undefined {
+export function tryToTarget(element: Element, options: t.LookupOptions = {}): string | undefined {
   let derivers = options.strong ? fragmentConfig.strongTargetDerivers : fragmentConfig.targetDerivers
 
   return u.findResult(derivers, function(deriver: t.TargetDeriver) {
@@ -2232,7 +2232,7 @@ function deriveTargetFromPattern(element: Element, deriver: string): string | un
   return result
 }
 
-function isGoodTarget(target: string, element: Element, options: u.PlainObject = {}): boolean {
+function isGoodTarget(target: string, element: Element, options: t.LookupOptions = {}): boolean {
   let verify = options.verify ?? fragmentConfig.verifyDerivedTarget
   return !isAlive(element) || !verify || getSmart(target, { layer: element, ...options }) === element
 }
@@ -2307,7 +2307,7 @@ export function containsMainPseudo(target: string): boolean {
   return MAIN_PSEUDO.test(target)
 }
 
-export function expandTargets(targets: any, options: u.PlainObject = {}): string[] {
+export function expandTargets(targets: any, options: t.LookupOptions = {}): string[] {
   const { layer } = options
   if (layer !== 'new' && !(layer instanceof Layer)) {
     fail('Must pass an up.Layer as { layer } option, but got %o', layer)
@@ -2351,7 +2351,7 @@ function resolveMode({ layer, mode }: u.PlainObject): LayerMode {
   }
 }
 
-function modernResolveOrigin(target: string, { origin }: { origin?: Element } = {}): string {
+function modernResolveOrigin(target: string, { origin }: t.LookupOptions = {}): string {
   return target.replace(ORIGIN_PSEUDO, function(match) {
     if (origin) {
       return toTarget(origin)
@@ -2361,7 +2361,7 @@ function modernResolveOrigin(target: string, { origin }: { origin?: Element } = 
   })
 }
 
-export function resolveOrigin(target: any, options?: u.PlainObject): any {
+export function resolveOrigin(target: any, options?: t.LookupOptions): any {
   // up.FormValidator sometimes calls resolveOrigin(undefined)
   if (!u.isString(target)) return target
   return (up.migrate.resolveOrigin || modernResolveOrigin)(target, options)
@@ -2710,7 +2710,7 @@ up.fragment.matches(element, element) // result: true
 
 @stable
 */
-export function matches(element: e.ElementOrSelector, selector: string | Element, options: u.PlainObject = {}): boolean {
+export function matches(element: e.ElementOrSelector, selector: string | Element, options: t.LookupOptions = {}): boolean {
   element = e.getOne(element)
   if (u.isElement(selector)) {
     let target = tryToTarget(selector)
@@ -2721,8 +2721,8 @@ export function matches(element: e.ElementOrSelector, selector: string | Element
   }
 }
 
-export function matchSelectorMap(element: Element, selectorMap: u.PlainObject | undefined, { layer = element }: { layer?: any } = {}): any[] {
-  let hits = []
+export function matchSelectorMap(element: Element, selectorMap?: u.PlainObject, { layer = element }: t.LookupOptions = {}): any[] {
+  let hits: any[] = []
 
   if (selectorMap && element) {
     for (let [selector, value] of Object.entries(selectorMap)) {
