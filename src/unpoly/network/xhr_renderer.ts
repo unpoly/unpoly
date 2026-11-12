@@ -11,7 +11,7 @@ export class XHRRenderer {
   declare _request: UpRequest
   declare _params: Params
   declare _payload: any
-  declare _contentType: string | null | undefined
+  declare _contentType?: string | null
 
   constructor(request: UpRequest) {
     this._request = request

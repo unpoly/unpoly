@@ -27,7 +27,7 @@ export interface NetworkConfig {
   concurrency: number | (() => number)
   wrapMethod: boolean
   lateDelay: number | false | ((request: UpRequest) => number | false)
-  timeout: number | undefined
+  timeout?: number
   fail: boolean | ((response: UpResponse) => boolean)
   cacheEnabled: boolean
   cacheSize: number

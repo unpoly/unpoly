@@ -28,19 +28,19 @@ export class UpResponse {
   declare text: string
   declare status: number
   declare request: UpRequest
-  declare xhr: XMLHttpRequest | undefined
-  declare target: string | undefined
-  declare title: string | undefined
-  declare openLayer: u.PlainObject | undefined
+  declare xhr?: XMLHttpRequest
+  declare target?: string
+  declare title?: string
+  declare openLayer?: u.PlainObject
   declare acceptLayer: any
   declare dismissLayer: any
-  declare eventPlans: u.PlainObject[] | undefined
-  declare context: u.PlainObject | undefined
+  declare eventPlans?: u.PlainObject[]
+  declare context?: u.PlainObject
   declare expireCache: any
   declare evictCache: any
   declare headers: Record<string, string>
   declare loadedAt: Date
-  declare fail: u.ValueOrFunction<boolean> | undefined
+  declare fail?: u.ValueOrFunction<boolean>
   declare parsedJSON: any
 
   /*-

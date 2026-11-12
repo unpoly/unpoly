@@ -45,47 +45,47 @@ export class UpRequest {
   declare expired: boolean
   declare method: string
   declare url: string
-  declare hash: string | undefined
+  declare hash?: string
   declare params: Params
-  declare target: string | undefined
-  declare failTarget: string | undefined
+  declare target?: string
+  declare failTarget?: string
   declare headers: Record<string, string>
-  declare timeout: number | null | undefined
-  declare background: boolean | undefined
-  declare cache: boolean | 'auto' | undefined
+  declare timeout?: number | null
+  declare background?: boolean
+  declare cache?: boolean | 'auto'
   declare expireCache: any
   declare evictCache: any
   // While the request is new, these may be a layer name like 'root' or 'new'.
   declare layer: any
-  declare mode: string | undefined
-  declare context: u.PlainObject | undefined
+  declare mode?: string
+  declare context?: u.PlainObject
   declare failLayer: any
-  declare failMode: string | undefined
-  declare failContext: u.PlainObject | undefined
-  declare origin: Element | undefined
-  declare originLayer: Layer | undefined
-  declare originMode: string | undefined
+  declare failMode?: string
+  declare failContext?: u.PlainObject
+  declare origin?: Element
+  declare originLayer?: Layer
+  declare originMode?: string
   declare builtAt: Date
   declare wrapMethod: boolean | null
-  declare contentType: string | undefined
+  declare contentType?: string
   declare payload: any
-  declare onLoading: (() => any) | undefined
-  declare onSettle: ((responseOrError: UpResponse | Error) => any) | undefined
-  declare fail: u.ValueOrFunction<boolean> | undefined
+  declare onLoading?: () => any
+  declare onSettle?: (responseOrError: UpResponse | Error) => any
+  declare fail?: u.ValueOrFunction<boolean>
   declare abortable: boolean | null
-  declare lateDelay: number | false | undefined
+  declare lateDelay?: number | false
   declare previews: any[]
-  declare bindLayer: Layer | undefined
-  declare response: UpResponse | undefined
-  declare fromCache: boolean | undefined
-  declare _fragments: Element[] | undefined
-  declare _bindFragments: Element[] | undefined
+  declare bindLayer?: Layer
+  declare response?: UpResponse
+  declare fromCache?: boolean
+  declare _fragments?: Element[]
+  declare _bindFragments?: Element[]
   declare _deferred: u.Deferred<UpResponse>
-  declare _xhr: XMLHttpRequest | undefined
-  declare _revertPreviews: (() => void) | undefined
+  declare _xhr?: XMLHttpRequest
+  declare _revertPreviews?: () => void
   // Set by the request cache.
-  declare cacheRoute: Route | undefined
-  declare trackedRequest: UpRequest | undefined
+  declare cacheRoute?: Route
+  declare trackedRequest?: UpRequest
 
   // A request is also a promise for its response. The static block at the end delegates these.
   declare then: Promise<UpResponse>['then']
