@@ -5,7 +5,6 @@ import { newConfig } from './util/config.js'
 import { build } from './event.js'
 import {
   compressNestedSteps, getAllFragments, getSmart, tryToTarget, type FragmentKeepEvent,
-  type RenderOptions, type RenderStep,
 } from './fragment.js'
 import { layerStack } from './layer.js'
 import { parseRequestOptions } from './link.js'
@@ -13,33 +12,9 @@ import { printToWarn } from './log.js'
 import { motionOptions } from './motion.js'
 import { callbackAttr, registerAttrCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
+import type * as t from './radio/types.js'
+export type * from './radio/types.js'
 import { FragmentPolling } from './radio/fragment_polling.js'
-
-/**
-The render steps for hungry elements, on the targeted layer and on other layers.
-@internal
-*/
-export interface HungrySteps {
-  current: RenderStep[]
-  other: RenderStep[]
-}
-
-/**
-The `up:fragment:hungry` event.
-*/
-export type FragmentHungryEvent = Event & {
-  target: Element
-  newFragment: Element
-  renderOptions: RenderOptions
-}
-
-/**
-The `up:fragment:poll` event.
-*/
-export type FragmentPollEvent = Event & {
-  target: Element
-  renderOptions: RenderOptions
-}
 
 /*-
 Features to update fragments without a user click.
@@ -51,16 +26,6 @@ An element with `[up-hungry]` is updated whenever a server response contains a m
 
 @namespace up.radio
 */
-
-
-/**
-The settings in `up.radio.config`, described in its doc comment.
-*/
-export interface RadioConfig {
-  hungrySelectors: string[]
-  noHungrySelectors: string[]
-  pollInterval: number
-}
 
 /*-
 Configures defaults for passive updates.
@@ -90,15 +55,15 @@ Configures defaults for passive updates.
 
 @stable
 */
-export const radioConfig = newConfig('up.radio.config', (): RadioConfig => ({
+export const radioConfig = newConfig('up.radio.config', (): t.RadioConfig => ({
   hungrySelectors: ['[up-hungry]'],
   noHungrySelectors: ['[up-hungry=false]'],
   pollInterval: 30000,
 }))
 
-export function hungrySteps(renderOptions: u.PlainObject): HungrySteps {
+export function hungrySteps(renderOptions: u.PlainObject): t.HungrySteps {
   let { hungry, origin, layer: renderLayer, meta } = renderOptions
-  let steps: HungrySteps = { current: [], other: [] }
+  let steps: t.HungrySteps = { current: [], other: [] }
 
   if (!hungry) return steps
 
