@@ -203,6 +203,10 @@ extendDescribe('up.fragment', function() {
         expect(up.fragment.toTarget('.foo')).toBe('.foo')
       })
 
+      it('throws an up.CannotTarget error for an empty string', function() {
+        expect(() => up.fragment.toTarget('')).toThrowError(up.CannotTarget, /empty/i)
+      })
+
       describe('verification', function() {
 
         it("does not use a derived target that would match a different element", function() {

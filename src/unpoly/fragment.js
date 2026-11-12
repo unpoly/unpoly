@@ -2057,7 +2057,11 @@ up.fragment = (function() {
   @stable
   */
   function toTarget(element, options) {
-    return u.presence(element, u.isString) || tryToTarget(element, options) || cannotTarget(element)
+    if (u.isString(element)) {
+      return element || cannotTarget('Cannot target an empty selector')
+    }
+
+    return tryToTarget(element, options) || cannotTarget(untargetableMessage(element))
   }
 
   /*-
@@ -2086,8 +2090,8 @@ up.fragment = (function() {
     return `Cannot derive good target selector from a <${element.localName}> element without identifying attributes. Try setting an [id] or configure up.fragment.config.targetDerivers.`
   }
 
-  function cannotTarget(element) {
-    throw new up.CannotTarget(untargetableMessage(element))
+  function cannotTarget(message) {
+    throw new up.CannotTarget(message)
   }
 
   function tryToTarget(element, options = {}) {
