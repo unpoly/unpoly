@@ -289,7 +289,7 @@ function chainCallbacks<T extends u.PlainObject>(options: T, ownCallbacks: u.Pla
 }
 
 // The type of render options lives in fragment/types.ts. fragment.ts re-exports this object, and an
-// explicit re-export hides a name of the same type from `export type *`. This alias gives the object
+// explicit re-export hides the type of the same name from `export type *`. This alias gives the object
 // the type's name too, like a class has, so other modules import both as `RenderOptions`.
 export type RenderOptions = t.RenderOptions
 
