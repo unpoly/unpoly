@@ -1,8 +1,13 @@
 const u = up.util
 
-type AttributeScope = import('./migrate/types.js').AttributeScope
+type AttributeTransformer = import('./migrate/types.js').AttributeTransformer
+type FixKeyOptions = import('./migrate/types.js').FixKeyOptions
 type MigrateConfig = import('./migrate/types.js').MigrateConfig
 type PropertyWarningOptions = import('./migrate/types.js').PropertyWarningOptions
+type RemovedAttributeOptions = import('./migrate/types.js').RemovedAttributeOptions
+type RemovedPropertyOptions<T> = import('./migrate/types.js').RemovedPropertyOptions<T>
+type RenamedAttributeOptions = import('./migrate/types.js').RenamedAttributeOptions
+type TransformAttributeOptions = import('./migrate/types.js').TransformAttributeOptions
 
 /*-
 @namespace up.migrate
@@ -47,7 +52,7 @@ up.migrate = (function() {
   //
   // Pass a { value } to set an initial value without a warning.
   // It is restored when up.framework.reset() runs the config patch again.
-  function removedProperty(object: object, key: string, { label, warning, value }: PropertyWarningOptions & { value?: any } = {}): [any] {
+  function removedProperty<T>(object: object, key: string, { label, warning, value }: RemovedPropertyOptions<T> = {}): [T] {
     // We memoize the warning to prevent infinite recursion. The `found in %o` will access the getter
     // to print the object, which will call the warning, which will access the getter, etc.
     const doWarn = up.internal.memoize(function() {
@@ -63,7 +68,7 @@ up.migrate = (function() {
     // We only keep an existing data value. When up.framework.reset() runs a config patch again,
     // reading object[key] would call the getter from the previous definition, which warns and keeps the old value.
     // We return the reference so a polyfill can honor a value that the app sets.
-    let valueRef: [any] = [value ?? Object.getOwnPropertyDescriptor(object, key)?.value]
+    let valueRef: [T] = [value ?? Object.getOwnPropertyDescriptor(object, key)?.value]
 
     Object.defineProperty(object, key, {
       configurable: true,
@@ -86,12 +91,12 @@ up.migrate = (function() {
 
   // Called as transformAttribute(oldAttr, { scope }?, transformer).
   function transformAttribute(oldAttr: string, ...args: any[]): void {
-    let transformer: (element: Element, value: string) => void = up.internal.extractCallback(args)
-    let { scope }: { scope?: AttributeScope } = up.internal.extractOptions(args)
+    let transformer: AttributeTransformer = up.internal.extractCallback(args)
+    let { scope }: TransformAttributeOptions = up.internal.extractOptions(args)
 
     // Scope may be a selector string OR a function
     let selector = scope || `[${oldAttr}]`
-    up.macro(selector, { priority: -1000 }, function(element: Element) {
+    up.macro(selector, { priority: -1000 }, function(element) {
       // If scope is given as a function it does not select for the attribute
       if (element.hasAttribute(oldAttr)) {
         let value = element.getAttribute(oldAttr)
@@ -100,7 +105,7 @@ up.migrate = (function() {
     })
   }
 
-  function renamedAttribute(oldAttr: string, newAttr: string, { scope, mapValue }: { scope?: AttributeScope, mapValue?: string | ((value: string) => string) } = {}): void {
+  function renamedAttribute(oldAttr: string, newAttr: string, { scope, mapValue }: RenamedAttributeOptions = {}): void {
     transformAttribute(oldAttr, { scope }, function(element, value) {
       warn('Attribute [%s] has been renamed to [%s] (found in %o)', oldAttr, newAttr, element)
       if (mapValue) {
@@ -110,7 +115,7 @@ up.migrate = (function() {
     })
   }
 
-  function removedAttribute(oldAttr: string, { scope, replacement }: { scope?: AttributeScope, replacement?: string } = {}): void {
+  function removedAttribute(oldAttr: string, { scope, replacement }: RemovedAttributeOptions = {}): void {
     transformAttribute(oldAttr, { scope }, function(element, _value) {
       if (replacement) {
         warn('Attribute [%s] has been removed (found in %o). Use %s instead.', oldAttr, element, replacement)
@@ -126,7 +131,7 @@ up.migrate = (function() {
   //
   // Pass a { detail } like an origin element or URL to name the call site, e.g. 'render options for <a href="/foo">'.
   // Since warnings are deduplicated by their text, this prints the warning once per call site.
-  function fixKey(object: object, oldKey: string, newKey: string, { label, detail }: { label?: string, detail?: any } = {}): void {
+  function fixKey(object: object, oldKey: string, newKey: string, { label, detail }: FixKeyOptions = {}): void {
     if (u.isDefined(object[oldKey])) {
       if (label && detail) {
         warn('Property { %s } has been renamed to { %s } (found in %s for %o)', oldKey, newKey, label, detail)
@@ -189,11 +194,11 @@ up.migrate = (function() {
 
   let warnedMessages: Record<string, boolean> = {}
 
-  function reset() {
+  function reset(): void {
     warnedMessages = {}
   }
 
-  const warn: (message: string, ...args: any[]) => void = up.internal.mockable((message: string, ...args: any[]) => {
+  const warn = up.internal.mockable((message: string, ...args: unknown[]) => {
     const formattedMessage = up.internal.sprintf(message, ...args)
     const logLevel = config.logLevel
     if (logLevel !== 'none' && !warnedMessages[formattedMessage]) {
@@ -237,7 +242,7 @@ up.migrate = (function() {
     }
   }
 
-  function fixStylePropValue(prop: string, value: any, unit: string | undefined): any {
+  function fixStylePropValue(prop: string, value: any, unit?: string): any {
     if (!unit && CSS_LENGTH_PROPS.includes(prop) && /^[\d.]+$/.test(value)) {
       warn(`CSS length values must have a unit, but got "${prop}: ${value}". Use "${prop}: ${value}px" instead.`)
       return value + "px"
@@ -283,7 +288,7 @@ up.migrate = (function() {
   }
 
   function defineThrowingProps(object: object, forbiddenPrototype: object, errorMessage: string): void {
-    let complain = () => { throw new TypeError(errorMessage) }
+    let complain = (): never => { throw new TypeError(errorMessage) }
 
     for (const propName of Object.getOwnPropertyNames(forbiddenPrototype)) {
       if (!(propName in object)) {
