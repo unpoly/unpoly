@@ -1,4 +1,4 @@
-import { upperCaseFirst } from '../../../util.js'
+import * as u from '../../../util.js'
 import { assertConfirmed } from '../../../browser.js'
 import { guard, muteUncriticalRejection } from '../../../error.js'
 import { Aborted } from '../../../error/aborted.js'
@@ -7,7 +7,6 @@ import { abortFragment, reload } from '../../../fragment.js'
 import { Change } from './change.js'
 import { layerStack } from '../../../layer.js'
 import { doFocus } from '../../../viewport.js'
-import type { PlainObject } from '../../../util.js'
 import type { LayerReference } from '../render_options.js'
 import type { Layer } from '../../../layer/base.js'
 import type { Overlay } from '../../../layer/modes/overlay.js'
@@ -117,7 +116,7 @@ export class CloseLayer extends Change<CloseLayerOptions> {
 
   _reloadParent(parent: Layer): void {
     // The name is { onAcceptedReload } or { onDismissedReload }, built from a string.
-    let selector = (this.layer as PlainObject)[`on${upperCaseFirst(this._verb)}edReload`]
+    let selector = (this.layer as u.PlainObject)[`on${u.upperCaseFirst(this._verb)}edReload`]
     // When the parent layer is closing too, e.g. when it peels this overlay, there is nothing to reload.
     if (selector && parent.isAlive()) {
       // (1) We prefer a match near the link that opened the overlay, and allow :origin in the selector.
@@ -132,7 +131,7 @@ export class CloseLayer extends Change<CloseLayerOptions> {
     // The close event is emitted on the layer that is about to close.
     let event: CloseEvent = this.layer.emit(
       this._buildEvent(`up:layer:${this._verb}`), {
-      callback: this.layer.callback(`on${upperCaseFirst(this._verb)}`),
+      callback: this.layer.callback(`on${u.upperCaseFirst(this._verb)}`),
       log: [`Will ${this._verb} ${this.layer} with value %o`, this._value]
     })
 
@@ -149,7 +148,7 @@ export class CloseLayer extends Change<CloseLayerOptions> {
 
   _emitClosedEvent(formerParent: Layer): CloseEvent {
     const verbPast = `${this._verb}ed`
-    const verbPastUpperCaseFirst = upperCaseFirst(verbPast)
+    const verbPastUpperCaseFirst = u.upperCaseFirst(verbPast)
 
     // layer.emit({ ensureBubbles: true }) will automatically emit a second event on document
     // because the layer is detached. We do not want to emit it on the parent layer where users

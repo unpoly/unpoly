@@ -1,4 +1,4 @@
-import { always, isCrossOrigin, memoizeMethod, unresolvablePromise, withRenamedKeys } from '../../../util.js'
+import * as u from '../../../util.js'
 import { Offline } from '../../../error/offline.js'
 import { render, toFailKey } from '../../../fragment.js'
 import { ChangeFromContent } from './change_from_content.js'
@@ -32,7 +32,7 @@ export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
       loadPage(this.options as RequestOptions)
       // Prevent our caller from executing any further code, since we're already
       // navigating away from this JavaScript environment.
-      return unresolvablePromise()
+      return u.unresolvablePromise()
     }
 
     let requestAttrs = this._getRequestAttrs()
@@ -46,14 +46,14 @@ export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
 
     // Use always() since _onRequestSettled() will decide whether the promise
     // will be fulfilled or rejected.
-    return await always(request, (responseOrError) => this._onRequestSettled(responseOrError))
+    return await u.always(request, (responseOrError) => this._onRequestSettled(responseOrError))
   }
 
   _newPageReason(): string | undefined {
     // Rendering content from cross-origin URLs is out of scope for Unpoly.
     // We still allow users to call up.render() with a cross-origin URL, but
     // we will then make a full-page request.
-    if (isCrossOrigin(this.options.url)) {
+    if (u.isCrossOrigin(this.options.url)) {
       return 'Loading cross-origin content in new page'
     }
 
@@ -77,7 +77,7 @@ export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
     return {
       ...this.options, // contains preflight keys relevant for the request, e.g. { url, method }
       ...successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
-      ...withRenamedKeys(failAttrs, toFailKey), // contains meta information for a failed update, e.g. { failTarget },
+      ...u.withRenamedKeys(failAttrs, toFailKey), // contains meta information for a failed update, e.g. { failTarget },
     }
   }
 
@@ -129,7 +129,7 @@ export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
   }
 
   static {
-    memoizeMethod(this.prototype, {
+    u.memoizeMethod(this.prototype, {
       _getRequestAttrs: true,
     })
   }

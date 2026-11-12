@@ -1,4 +1,4 @@
-import { compact, memoize } from '../../../util.js'
+import * as u from '../../../util.js'
 import { CannotMatch } from '../../../error/cannot_match.js'
 import { assertEmitted } from '../../../event.js'
 import { getSmart, hasAutoHistory } from '../../../fragment.js'
@@ -17,7 +17,6 @@ import type { PartialRenderResult } from '../render_result.js'
 import type { ResponseDoc } from '../response_doc.js'
 import type { PreflightProps } from './addition.js'
 import type { HungrySteps } from '../../../radio.js'
-import type { PlainObject } from '../../../util.js'
 import type { Layer, PeelOptions } from '../../../layer/base.js'
 import type { Overlay } from '../../../layer/modes/overlay.js'
 
@@ -60,7 +59,7 @@ export class OpenLayerPlan extends Addition {
       // We associate this request with the base layer's main element. This way the request
       // will be aborted if the base layer receives a major navigation, but not when a
       // minor fragment is updated.
-      bindFragments: compact([getSmart(':main', { layer: this._baseLayer })]),
+      bindFragments: u.compact([getSmart(':main', { layer: this._baseLayer })]),
       fragments: [],
     }
   }
@@ -80,7 +79,7 @@ export class OpenLayerPlan extends Addition {
 
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
-    let renderOtherLayersOnce = memoize(() => this._renderOtherLayers(responseDoc))
+    let renderOtherLayersOnce = u.memoize(() => this._renderOtherLayers(responseDoc))
     let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
 
     try {
@@ -309,7 +308,7 @@ export class OpenLayerPlan extends Addition {
     }
   }
 
-  _getEffectiveHistoryOptions(): PlainObject {
+  _getEffectiveHistoryOptions(): u.PlainObject {
     // For the initial fragment insertion we always update its location, even if the layer
     // does not have visible history ({ history } attribute). This ensures that a
     // layer always has a #location.

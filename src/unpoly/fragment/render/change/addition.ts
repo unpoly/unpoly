@@ -1,12 +1,11 @@
-import { isDefined } from '../../../util.js'
-import { setMissingAttr } from '../../../element.js'
+import * as u from '../../../util.js'
+import * as e from '../../../element.js'
 import { emit } from '../../../event.js'
 import { normalizeSource, sourceOf } from '../../../fragment.js'
 import { Change } from './change.js'
 import type { RenderOptions } from '../render_options.js'
 import type { Layer } from '../../../layer/base.js'
 import type { UpResponse } from '../../../network/response.js'
-import type { PlainObject } from '../../../util.js'
 import type { EventPlan } from '../../../event.js'
 
 /**
@@ -20,7 +19,7 @@ export interface PreflightProps {
   // The layer whose fragments the request belongs to, for aborting.
   bindLayer: Layer
   mode: string
-  context: PlainObject
+  context: u.PlainObject
   origin: Element | undefined
   target: string
   fragments: Element[]
@@ -105,14 +104,14 @@ export class Addition extends Change {
 
   _tryAcceptLayerFromServer(): void {
     // When accepting without a value, the server will send X-Up-Accept-Layer: null
-    if (isDefined(this._acceptLayer)) {
+    if (u.isDefined(this._acceptLayer)) {
       this.layer.accept(this._acceptLayer, { response: this._response })
     }
   }
 
   _tryDismissLayerFromServer(): void {
     // When dismissing without a value, the server will send X-Up-Dismiss-Layer: null
-    if (isDefined(this._dismissLayer)) {
+    if (u.isDefined(this._dismissLayer)) {
       this.layer.dismiss(this._dismissLayer, { response: this._response })
     }
   }
@@ -130,20 +129,20 @@ export class Addition extends Change {
     // (3) Don't use u.matchableURL() here. We need to keep a trailing slash
     //     to support backends that care about trailing slashes.
     if (source) {
-      setMissingAttr(newElement, 'up-source', normalizeSource(source))
+      e.setMissingAttr(newElement, 'up-source', normalizeSource(source))
     }
   }
 
   _setTime({ newElement, time }: ReloadAttrsOptions): void {
     // If the server didn't send a Last-Modified header, tag the element
     // with [up-time=false] to indicate that we cannot use an ancestor's [up-time].
-    setMissingAttr(newElement, 'up-time', time ? time.toUTCString() : false)
+    e.setMissingAttr(newElement, 'up-time', time ? time.toUTCString() : false)
   }
 
   _setETag({ newElement, etag }: ReloadAttrsOptions): void {
     // If the server didn't send an Etag header, tag the element
     // with [up-etag=false] to indicate that we cannot use an ancestor's [up-etag].
-    setMissingAttr(newElement, 'up-etag', etag || false)
+    e.setMissingAttr(newElement, 'up-etag', etag || false)
   }
 
   setReloadAttrs(options: ReloadAttrsOptions): void {

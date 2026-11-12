@@ -1,5 +1,5 @@
-import { assert, copy, flatMap, map, some } from '../../../util.js'
-import { copyCursorProps, leadingElement, unwrap, wrapChildren } from '../../../element.js'
+import * as u from '../../../util.js'
+import * as e from '../../../element.js'
 import { fail } from '../../../error.js'
 import {
   emitFragmentDestroyed, emitFragmentKept, findKeepPlan, fragmentConfig, markFragmentAsDestroying,
@@ -38,7 +38,7 @@ export class UpdateSteps extends Addition {
   constructor(options: ResolvedRenderOptions & { steps: RenderStep[], noneOptions?: ResolvedRenderOptions }) {
     super(options)
 
-    this._steps = copy(assert(options.steps)) // we mutate it below
+    this._steps = u.copy(u.assert(options.steps)) // we mutate it below
     this._noneOptions = options.noneOptions || {}
   }
 
@@ -65,7 +65,7 @@ export class UpdateSteps extends Addition {
       let insertions = this._steps.map((step) => this._insertStep(step))
 
       return {
-        fragments: flatMap(insertions, 'fragments'),
+        fragments: u.flatMap(insertions, 'fragments'),
         finished: this._completeSteps(insertions),
       }
     } else {
@@ -192,8 +192,8 @@ export class UpdateSteps extends Addition {
     // Make a copy since it's a live HTMLCollection, and we're going to move these elements.
     let newChildren = [...step.newElement.children]
 
-    let oldWrapper = wrapChildren(step.oldElement)
-    let newWrapper = wrapChildren(step.newElement)
+    let oldWrapper = e.wrapChildren(step.oldElement)
+    let newWrapper = e.wrapChildren(step.newElement)
 
     let wrapperInsertion = this._insertSwapStep({
       ...step,
@@ -202,7 +202,7 @@ export class UpdateSteps extends Addition {
       oldElement: oldWrapper,
       newElement: newWrapper,
       // Unwrapping preserves focus.
-      afterRemove: () => unwrap(newWrapper),
+      afterRemove: () => e.unwrap(newWrapper),
     })
 
     return {
@@ -222,7 +222,7 @@ export class UpdateSteps extends Addition {
     // Text nodes are wrapped in an <up-wrapper> container so we can
     // animate them and measure their position/size for scrolling.
     // This is not possible for container-less text nodes.
-    let wrapper = wrapChildren(step.newElement)
+    let wrapper = e.wrapChildren(step.newElement)
 
     // Note that since we're prepending/appending instead of replacing,
     // newElement will not actually be inserted into the DOM, only its children.
@@ -234,11 +234,11 @@ export class UpdateSteps extends Addition {
       // (A) We never inserted step.newElement, only its children.
       // (B) We focus the first new element child. If it's all text nodes, we focus step.oldElement.
       // (C) Unwrapping preserves focus.
-      focusElement: leadingElement(wrapper.childNodes) as HTMLElement || step.oldElement,
+      focusElement: e.leadingElement(wrapper.childNodes) as HTMLElement || step.oldElement,
       // Reveal the element that was being prepended/appended.
       scrollElement: wrapper,
       welcome: () => this._welcomeElement(wrapper, step),
-      startMotion: () => animate(wrapper, step.animation, { ...step, onFinished: () => unwrap(wrapper) }),
+      startMotion: () => animate(wrapper, step.animation, { ...step, onFinished: () => e.unwrap(wrapper) }),
     }
   }
 
@@ -279,9 +279,9 @@ export class UpdateSteps extends Addition {
           // Attaching a viewport to another element will cause it to lose
           // its scroll position, even if both parents are in the same document.
           let viewports = getViewportSubtree(keepPlan.oldElement)
-          keepPlan.revivers = map(viewports, function(viewport) {
-            let cursorProps = copyCursorProps(viewport)
-            return () => copyCursorProps(cursorProps, viewport)
+          keepPlan.revivers = u.map(viewports, function(viewport) {
+            let cursorProps = e.copyCursorProps(viewport)
+            return () => e.copyCursorProps(cursorProps, viewport)
           })
 
           if (this._willChangeBody()) {
@@ -329,7 +329,7 @@ export class UpdateSteps extends Addition {
   // In that case we cannot use the body as "safe harbor" to remporarily move
   // [up-keep] elements.
   _willChangeBody(): boolean {
-    return some(this._steps, (step) => step.oldElement.matches('body'))
+    return u.some(this._steps, (step) => step.oldElement.matches('body'))
   }
 
   _handleFocus(fragment: HTMLElement | null, options: ResolvedRenderOptions): void {

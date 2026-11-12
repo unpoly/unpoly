@@ -1,10 +1,7 @@
-import {
-  findInList, getComplexTokens, isArray, isDefined, isElement, isFunction, isOptions, isString, pickBy,
-} from '../../util.js'
+import * as u from '../../util.js'
 import { guard } from '../../error.js'
 import { contains, getSmart } from '../../fragment.js'
 import { printToWarn } from '../../log.js'
-import type { PlainObject } from '../../util.js'
 import type { Layer } from '../../layer/base.js'
 
 /**
@@ -37,13 +34,13 @@ export abstract class FragmentProcessor {
 
   // The options that we pass to a function value, and to the processor for a match in a
   // selector map. Subclasses add their own.
-  attributes(): PlainObject {
-    return pickBy({
+  attributes(): u.PlainObject {
+    return u.pickBy({
       fragment: this.fragment,
       autoMeans: this.autoMeans,
       origin: this.origin,
       layer: this.layer,
-    }, isDefined)
+    }, u.isDefined)
   }
 
   // Returns a truthy value if the option was processed.
@@ -53,29 +50,29 @@ export abstract class FragmentProcessor {
   }
 
   preprocessOnce(opt: any): any {
-    return getComplexTokens(opt)
+    return u.getComplexTokens(opt)
   }
 
   tryProcess(opt: any): any {
-    if (isArray(opt)) {
+    if (u.isArray(opt)) {
       return this.processArray(opt)
     }
 
-    if (isOptions(opt)) {
+    if (u.isOptions(opt)) {
       return this.processSelectorMap(opt)
     }
 
-    if (isFunction(opt)) {
+    if (u.isFunction(opt)) {
       let result = guard(opt, this.fragment, this.attributes())
       // The function result can be another processable value.
       return this.tryProcess(result)
     }
 
-    if (isElement(opt)) {
+    if (u.isElement(opt)) {
       return this.processElement(opt as HTMLElement) // TODO: Test that { focus: Element } works
     }
 
-    if (isString(opt)) {
+    if (u.isString(opt)) {
       if (opt === 'auto') {
         return this.tryProcess(this.autoMeans)
       }
@@ -93,7 +90,7 @@ export abstract class FragmentProcessor {
 
   abstract processElement(element: HTMLElement): any
 
-  processSelectorMap(map: PlainObject): string[] {
+  processSelectorMap(map: u.PlainObject): string[] {
     return Object.keys(map).filter((selector) => {
       let match = this.findSelector(selector)
       if (match) {
@@ -105,7 +102,7 @@ export abstract class FragmentProcessor {
   }
 
   processArray(array: any[]): any {
-    return findInList(array, (opt) => this.tryProcess(opt))
+    return u.findInList(array, (opt) => this.tryProcess(opt))
   }
 
   resolveCondition(condition: string): boolean | undefined {

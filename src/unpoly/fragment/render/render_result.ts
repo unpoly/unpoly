@@ -1,4 +1,4 @@
-import { compact, map } from '../../util.js'
+import * as u from '../../util.js'
 import { isCritical } from '../../error.js'
 import type { RenderOptions } from './render_options.js'
 import type { Layer } from '../../layer/base.js'
@@ -144,7 +144,7 @@ export class RenderResult {
   }
 
   _partialPhase(partialResults: PartialRenderResult[], phase: keyof PartialRenderResult, extraValue?: any): any[] {
-    return compact([...map(partialResults, phase), extraValue])
+    return u.compact([...u.map(partialResults, phase), extraValue])
   }
 
   async _finish(partialResults: PartialRenderResult[]): Promise<RenderResult> {

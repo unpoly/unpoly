@@ -1,4 +1,4 @@
-import { evalAutoOption, map, memoize, memoizeMethod, merge, pick } from '../../../util.js'
+import * as u from '../../../util.js'
 import { CannotMatch } from '../../../error/cannot_match.js'
 import { abortFragment, compressNestedSteps, hasAutoHistory, parseTargetSteps } from '../../../fragment.js'
 import { FragmentFinder } from '../../fragment_finder.js'
@@ -11,7 +11,6 @@ import { printToStandard } from '../../../log.js'
 import { hungrySteps } from '../../../radio.js'
 import { getScrollTops, saveFocus, saveScroll } from '../../../viewport.js'
 import { FocusCapsule } from '../../../viewport/focus_capsule.js'
-import type { PlainObject } from '../../../util.js'
 import type { PeelOptions } from '../../../layer/base.js'
 import type { RenderStep } from '../../../fragment.js'
 import type { ResolvedRenderOptions } from '../render_options.js'
@@ -23,7 +22,7 @@ import type { HungrySteps } from '../../../radio.js'
 export class UpdateLayerPlan extends Addition {
   declare options: ResolvedRenderOptions
   declare target: string
-  declare _context: PlainObject | undefined
+  declare _context: u.PlainObject | undefined
   declare _steps: RenderStep[]
 
   constructor(options: ResolvedRenderOptions) {
@@ -47,7 +46,7 @@ export class UpdateLayerPlan extends Addition {
       layer: this.layer,
       bindLayer: this.layer,
       mode: this.layer.mode,
-      context: merge(this.layer.context, this._context),
+      context: u.merge(this.layer.context, this._context),
       origin: this.options.origin,
       target: this._bestPreflightSelector(),
       fragments,
@@ -60,14 +59,14 @@ export class UpdateLayerPlan extends Addition {
 
     const isProbable = (step: RenderStep) => !step.maybe || step.oldElement?.isConnected
     let bestSteps = this._steps.filter(isProbable)
-    let selectors = map(bestSteps, 'selector')
+    let selectors = u.map(bestSteps, 'selector')
     return selectors.join(', ') || ':none'
   }
 
   _getFragments(): Element[] {
     this._matchPreflight()
 
-    return map(this._steps, 'oldElement')
+    return u.map(this._steps, 'oldElement')
   }
 
   execute(responseDoc: ResponseDoc, onApplicable: () => void): RenderResult {
@@ -85,7 +84,7 @@ export class UpdateLayerPlan extends Addition {
 
     // If our layer ends up being closed during rendering, we still want to render
     // [up-hungry][up-if-layer=any] elements on other layers.
-    let renderOtherLayersOnce = memoize(() => this._renderOtherLayers(responseDoc))
+    let renderOtherLayersOnce = u.memoize(() => this._renderOtherLayers(responseDoc))
 
     // TODO: Can this be a try ... catch ?
     let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
@@ -164,7 +163,7 @@ export class UpdateLayerPlan extends Addition {
     // Note that @handleLayerChangeRequests() also throws an `up.Aborted` error
     // if any of these options cause the layer to close.
     this.handleLayerChangeRequests(
-      map(this._steps, 'newElement'),
+      u.map(this._steps, 'newElement'),
       this._getNewLocation(),
     )
 
@@ -205,7 +204,7 @@ export class UpdateLayerPlan extends Addition {
   _matchOldElements(): void {
     this._steps = this._steps.filter((step) => {
 
-      const finder = new FragmentFinder(pick(step, ['selector', 'origin', 'layer', 'match', 'preferOldElements'] as const))
+      const finder = new FragmentFinder(u.pick(step, ['selector', 'origin', 'layer', 'match', 'preferOldElements'] as const))
 
       // Try to find fragments matching step.selector within step.layer.
       // Note that step.oldElement might already have been set by up.radio.hungrySteps().
@@ -261,13 +260,13 @@ export class UpdateLayerPlan extends Addition {
   }
 
   _hasHistory(): boolean {
-    return evalAutoOption(this.options.history, this._hasAutoHistory.bind(this))
+    return u.evalAutoOption(this.options.history, this._hasAutoHistory.bind(this))
   }
 
   _hasAutoHistory(): boolean {
     // We update the history with { history: 'auto' } when at least
     // one targeted fragment has auto-history.
-    const oldFragments = map(this._steps, 'oldElement')
+    const oldFragments = u.map(this._steps, 'oldElement')
     return hasAutoHistory(oldFragments, this.layer)
   }
 
@@ -283,7 +282,7 @@ export class UpdateLayerPlan extends Addition {
     }
   }
 
-  _getEffectiveHistoryOptions(): PlainObject {
+  _getEffectiveHistoryOptions(): u.PlainObject {
     if (this._hasHistory()) {
       return historyOptions(this.options)
     } else {
@@ -292,7 +291,7 @@ export class UpdateLayerPlan extends Addition {
   }
 
   static {
-    memoizeMethod(this.prototype, {
+    u.memoizeMethod(this.prototype, {
       _matchPreflight: true,
       _matchOldElements: true,
       _hasHistory: true,

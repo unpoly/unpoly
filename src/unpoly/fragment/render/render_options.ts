@@ -1,12 +1,9 @@
-import {
-  isGiven, merge, normalizeURL as utilNormalizeURL, omit, pick, renameKey, sequence, some,
-} from '../../util.js'
+import * as u from '../../util.js'
 import { fail } from '../../error.js'
 import { getInputDevice } from '../../event.js'
 import { fragmentConfig, toSuccessKey } from '../../fragment.js'
 import { layerStack, normalizeLayerOptions } from '../../layer.js'
 import { callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback } from '../../script.js'
-import type { List, PlainObject, ValueOrFunction } from '../../util.js'
 import type { EventPlan, InputDevice } from '../../event.js'
 import type { ParseCallbackOptions } from '../../script.js'
 import type { Layer } from '../../layer/base.js'
@@ -24,7 +21,7 @@ import type { PreflightProps } from './change/addition.js'
 /**
 What to render: a target selector, an element to derive a selector from, or several alternatives.
 */
-export type RenderTarget = string | Element | List<Element> | string[]
+export type RenderTarget = string | Element | u.List<Element> | string[]
 
 /**
 A layer reference: a layer object, an element in a layer, or a name like `'current'`, `'parent'` or `'new'`.
@@ -69,12 +66,12 @@ export interface RenderOptions {
   method?: string
   params?: ParamsLike
   headers?: Record<string, string>
-  abort?: boolean | string | Element | List<Element> | ((options: PlainObject) => any)
+  abort?: boolean | string | Element | u.List<Element> | ((options: u.PlainObject) => any)
   abortable?: boolean
   background?: boolean
   lateDelay?: number | false
   timeout?: number
-  fail?: ValueOrFunction<boolean>
+  fail?: u.ValueOrFunction<boolean>
 
   // Caching
   cache?: boolean | 'auto'
@@ -85,7 +82,7 @@ export interface RenderOptions {
   evictCache?: any
 
   // Local content
-  content?: string | Element | List<Node>
+  content?: string | Element | u.List<Node>
   fragment?: string | Element
   document?: string | Element | Document
   response?: UpResponse
@@ -128,7 +125,7 @@ export interface RenderOptions {
 
   // Scrolling
   scroll?: FragmentProcessorValue
-  scrollMap?: PlainObject
+  scrollMap?: u.PlainObject
   scrollBehavior?: ScrollBehavior
   revealSnap?: number
   revealTop?: boolean
@@ -143,16 +140,16 @@ export interface RenderOptions {
 
   // Loading state
   disable?: boolean | string | Element | any[]
-  placeholder?: string | Element | List<Node> | false
+  placeholder?: string | Element | u.List<Node> | false
   preview?: PreviewValue
   feedback?: boolean
 
   // Client state
   data?: any
-  dataMap?: PlainObject
+  dataMap?: u.PlainObject
   keep?: boolean
   keepData?: boolean
-  context?: PlainObject
+  context?: u.PlainObject
 
   // Lifecycle hooks
   confirm?: string | false
@@ -212,7 +209,7 @@ export interface RenderOptions {
   time?: Date | false
   etag?: string | false
   // Passed to compilers as their third argument.
-  meta?: PlainObject
+  meta?: u.PlainObject
 
   // A renamed option that unpoly-migrate still accepts.
   html?: string
@@ -376,7 +373,7 @@ function normalizeURL({ url }: RenderOptions): RenderOptions | undefined {
   //     Then the location changes for some reason. Then a listener calls event.retry(),
   //     which renders with the original render options.
   if (url) {
-    return { url: utilNormalizeURL(url) }
+    return { url: u.normalizeURL(url) }
   }
 }
 
@@ -392,9 +389,9 @@ function normalizeURL({ url }: RenderOptions): RenderOptions | undefined {
 // between attributes and options, *except* for this one distinction, we also accept
 // { useData } for { data }.
 function removeUsePrefix(options: RenderOptions): void {
-  renameKey(options, 'useData', 'data')
-  renameKey(options, 'useHungry', 'hungry')
-  renameKey(options, 'useKeep', 'keep')
+  u.renameKey(options, 'useData', 'data')
+  u.renameKey(options, 'useHungry', 'hungry')
+  u.renameKey(options, 'useKeep', 'keep')
 }
 
 function preprocess(options: RenderOptions): RenderOptions {
@@ -402,18 +399,18 @@ function preprocess(options: RenderOptions): RenderOptions {
   normalizeLayerOptions(options)
   removeUsePrefix(options)
 
-  const defaults = merge(
+  const defaults = u.merge(
     fragmentConfig.renderOptions,
     navigateDefaults(options)
   )
 
-  return merge(
+  return u.merge(
     // Leave out properties for which there may be a better default later, in particular
     // from the layer config in OpenLayerPlan. If we merged it now we could
     // not distinguish a user option (which always has highest priority) with a
     // default that may be overridden by the layer config. If there is no better default
     // later, the original defaults will be applied in finalize().
-    omit(defaults, LATE_KEYS),
+    u.omit(defaults, LATE_KEYS),
     // Remember the defaults in a { default } prop so we can re-use it
     // later in deriveFailOptions() and finalize().
     { defaults },
@@ -438,7 +435,7 @@ function rememberOriginLayer({ origin, originLayer }: RenderOptions): RenderOpti
 
 function finalize<T extends RenderOptions>(preprocessedOptions: T, lateDefaults?: RenderOptions): T
 function finalize(preprocessedOptions: RenderOptions, lateDefaults?: RenderOptions) {
-  return merge(
+  return u.merge(
     preprocessedOptions.defaults,
     lateDefaults,
     preprocessedOptions
@@ -446,7 +443,7 @@ function finalize(preprocessedOptions: RenderOptions, lateDefaults?: RenderOptio
 }
 
 function assertContentGiven(options: RenderOptions): void {
-  if (!some(CONTENT_KEYS, (contentKey) => isGiven(options[contentKey]))) {
+  if (!u.some(CONTENT_KEYS, (contentKey) => u.isGiven(options[contentKey]))) {
     // up.layer.open() should open an empty layer without a content key.
     if (options.defaultToEmptyContent) {
       options.content = ''
@@ -457,11 +454,11 @@ function assertContentGiven(options: RenderOptions): void {
 }
 
 function failOverrides(options: RenderOptions): RenderOptions {
-  const overrides: PlainObject = {}
+  const overrides: u.PlainObject = {}
   for (let key in options) {
     // Note that up.fragment.toSuccessKey(key) only returns a value
     // if the given key is prefixed with "fail".
-    const value = (options as PlainObject)[key]
+    const value = (options as u.PlainObject)[key]
     let unprefixed = toSuccessKey(key)
     if (unprefixed) {
       overrides[unprefixed] = value
@@ -481,7 +478,7 @@ function deriveFailOptions(preprocessedOptions: RenderOptions): RenderOptions {
     return {
       // Only use global defaults and a few keys shared between success and failure.
       ...preprocessedOptions.defaults,
-      ...pick(preprocessedOptions, SHARED_KEYS),
+      ...u.pick(preprocessedOptions, SHARED_KEYS),
       ...overrides,
       // We sometimes want to log that fail-prefixed options were used, to alert the
       // user of the fact that there are different option sets for success and failure.
@@ -503,10 +500,10 @@ function deriveFailOptions(preprocessedOptions: RenderOptions): RenderOptions {
 
 // Returns a copy of the given options where each callback in ownCallbacks runs before
 // the caller's callback of the same name.
-function chainCallbacks<T extends PlainObject>(options: T, ownCallbacks: PlainObject): T {
-  let chained: PlainObject = { ...options }
+function chainCallbacks<T extends u.PlainObject>(options: T, ownCallbacks: u.PlainObject): T {
+  let chained: u.PlainObject = { ...options }
   for (let key in ownCallbacks) {
-    chained[key] = sequence(ownCallbacks[key], options[key])
+    chained[key] = u.sequence(ownCallbacks[key], options[key])
   }
   return chained as T
 }

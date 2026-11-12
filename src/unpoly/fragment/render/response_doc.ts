@@ -1,8 +1,5 @@
-import { isString, map, memoizeMethod, wrapList } from '../../util.js'
-import {
-  createBrokenDocumentFromHTML, createFromSelector, extractSingular, isFullDocumentHTML,
-  revivedClone, subtree,
-} from '../../element.js'
+import * as u from '../../util.js'
+import * as e from '../../element.js'
 import { fail } from '../../error.js'
 import { CannotMatch } from '../../error/cannot_match.js'
 import { emit } from '../../event.js'
@@ -10,7 +7,6 @@ import { parseTargetSteps, provideNodes, toTarget, tryToTarget } from '../../fra
 import { FragmentFinder } from '../fragment_finder.js'
 import { findMetaTags, getLang } from '../../history.js'
 import { adoptDetachedHeadAsset, adoptNewFragment, findAssets, warnOfUnsafeCSP } from '../../script.js'
-import type { List } from '../../util.js'
 import type { RenderStep } from '../../fragment.js'
 import type { CSPInfo } from '../../script/csp/csp_info.js'
 
@@ -21,7 +17,7 @@ Options for an `up.ResponseDoc`. One of `{ document }`, `{ fragment }` or `{ con
 export interface ResponseDocOptions {
   document?: string | Element | Document
   fragment?: string | Element
-  content?: string | Element | List<Node>
+  content?: string | Element | u.List<Node>
   target?: string
   origin?: Element
   data?: any
@@ -66,13 +62,13 @@ export class ResponseDoc {
     if (value instanceof Document) {  // Document
       this._document = value
       this._isFullDocument = true
-    } else if (isString(value)) { // String of HTML or maybe a <template> selector
+    } else if (u.isString(value)) { // String of HTML or maybe a <template> selector
       // Remember whether the HTML originally contained a full document.
       // Asset comparison needs to know whether the document has a <head> because
       // e.createBrokenDocumentFromHTML() always creates an (empty) <head> if missing in the HTML.
-      this._isFullDocument = isFullDocumentHTML(value)
+      this._isFullDocument = e.isFullDocumentHTML(value)
 
-      let htmlParser = (html: string) => [createBrokenDocumentFromHTML(html)]
+      let htmlParser = (html: string) => [e.createBrokenDocumentFromHTML(html)]
       let nodes = provideNodes(value, { origin, data, htmlParser })
 
       // If value is HTML, e.createBrokenDocumentFromHTML() will parse it into a Document.
@@ -91,26 +87,26 @@ export class ResponseDoc {
   }
 
   _parseFragment(value: string | Element, origin: Element | undefined, data: any): void {
-    let element = extractSingular(provideNodes(value, { origin, data }))
+    let element = e.extractSingular(provideNodes(value, { origin, data }))
     this._document = this._buildFauxDocument(element)
   }
 
-  _parseContent(value: string | Element | List<Node>, origin: Element | undefined, target: string | undefined, data: any): void {
+  _parseContent(value: string | Element | u.List<Node>, origin: Element | undefined, target: string | undefined, data: any): void {
     if (!target) fail("must pass a { target } when passing { content }")
 
     // We are only provided with inner child content.
     // To simplify other code we wrap it in an element matching { target }.
-    let simplifiedTarget = map(parseTargetSteps(target), 'selector').join()
+    let simplifiedTarget = u.map(parseTargetSteps(target), 'selector').join()
     let nodes = provideNodes(value, { origin, data })
-    let matchingElement = createFromSelector(simplifiedTarget, { content: nodes })
+    let matchingElement = e.createFromSelector(simplifiedTarget, { content: nodes })
 
     this._document = this._buildFauxDocument(matchingElement)
   }
 
-  _buildFauxDocument(nodes: Node | List<Node>): HTMLElement
+  _buildFauxDocument(nodes: Node | u.List<Node>): HTMLElement
   // The nodes are wrapped in a list in place, so the implementation takes the wrapped type.
-  _buildFauxDocument(nodes: List<Node>) {
-    nodes = wrapList(nodes)
+  _buildFauxDocument(nodes: u.List<Node>) {
+    nodes = u.wrapList(nodes)
 
     // We're creating a faux document to wrap around a fragment root that is not already a `Document`.
     // This has two motivations:
@@ -165,10 +161,10 @@ export class ResponseDoc {
       let assets = findAssets(head)
 
       // Need to use up.util.map() for a NodeList, which does not support #map()
-      return map(assets, (asset) => {
+      return u.map(assets, (asset) => {
         // (A) Assets might contain elements that need to be re-created in the current document context.
         // (B) Returns copies so multiple calls to #assets return the same array, even if some assets where inserted.
-        asset = revivedClone(asset)
+        asset = e.revivedClone(asset)
 
         // Rewrite [nonce] attributes so we don't see up:assets:changed with every request.
         adoptDetachedHeadAsset(asset, this._cspInfo)
@@ -281,9 +277,9 @@ export class ResponseDoc {
     // (2) <script> elements are inert and will not run code when inserted into the main `document`.
     // (3) Safari cannot parse (or move?) auto-playing media elements.
     if (this._document instanceof Document) {
-      for (let brokenElement of subtree(element, ':is(noscript, script, audio, video):not(.up-keeping, .up-keeping *)')) {
+      for (let brokenElement of e.subtree(element, ':is(noscript, script, audio, video):not(.up-keeping, .up-keeping *)')) {
         // throw "why does this not re-execute a <script> tag? wouldn't it be safer to disable all scripts, then revive some of them?"
-        let clone = revivedClone(brokenElement)
+        let clone = e.revivedClone(brokenElement)
         brokenElement.replaceWith(clone)
       }
     }
@@ -291,7 +287,7 @@ export class ResponseDoc {
 
   static {
     // Cache since multiple plans will query this.
-    memoizeMethod(this.prototype, {
+    u.memoizeMethod(this.prototype, {
       getHead: true,
     })
   }

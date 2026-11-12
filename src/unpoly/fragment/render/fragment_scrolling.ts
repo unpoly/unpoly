@@ -1,8 +1,7 @@
-import { isDefined, isNumber, isString, pickBy } from '../../util.js'
+import * as u from '../../util.js'
 import { FragmentProcessor } from './fragment_processor.js'
 import { restoreScroll, reveal, revealHash, scrollToPosition } from '../../viewport.js'
 import type { FragmentProcessorOptions } from './fragment_processor.js'
-import type { PlainObject } from '../../util.js'
 
 /**
 Options for an `up.FragmentScrolling`.
@@ -48,8 +47,8 @@ export class FragmentScrolling extends FragmentProcessor {
     this.oldScrollTops = options.oldScrollTops
   }
 
-  attributes(): PlainObject {
-    return pickBy({
+  attributes(): u.PlainObject {
+    return u.pickBy({
       ...super.attributes(),
       hash: this.hash,
       mode: this.mode,
@@ -59,7 +58,7 @@ export class FragmentScrolling extends FragmentProcessor {
       revealPadding: this.revealPadding,
       behavior: this.behavior,
       oldScrollTops: this.oldScrollTops,
-    }, isDefined)
+    }, u.isDefined)
   }
 
   processPrimitive(opt: any): any {
@@ -83,9 +82,9 @@ export class FragmentScrolling extends FragmentProcessor {
       case true:
         return this._revealElement(this.fragment)
       default:
-        if (isNumber(opt)) {
+        if (u.isNumber(opt)) {
           return this._scrollTo(opt)
-        } else if (isString(opt)) {
+        } else if (u.isString(opt)) {
           return this._revealSelector(opt)
         }
     }
@@ -127,7 +126,7 @@ export class FragmentScrolling extends FragmentProcessor {
     }
   }
 
-  _restoreSaved(extraOptions?: PlainObject): boolean {
+  _restoreSaved(extraOptions?: u.PlainObject): boolean {
     // With { around: undefined }, restoreScroll() restores all viewports in { layer }
     return restoreScroll({ ...this.attributes(), around: this.fragment, ...extraOptions })
   }

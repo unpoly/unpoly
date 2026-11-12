@@ -1,9 +1,8 @@
-import { isDefined, isString, pickBy } from '../../util.js'
-import { subtreeFirst } from '../../element.js'
+import * as u from '../../util.js'
+import * as e from '../../element.js'
 import { FragmentProcessor } from './fragment_processor.js'
 import { doFocus, firstHashTarget, restoreFocus } from '../../viewport.js'
 import type { FragmentProcessorOptions } from './fragment_processor.js'
-import type { PlainObject } from '../../util.js'
 import type { FocusCapsule } from '../../viewport/focus_capsule.js'
 import type { InputDevice } from '../../event.js'
 
@@ -34,14 +33,14 @@ export class FragmentFocus extends FragmentProcessor {
     this.inputDevice = options.inputDevice
   }
 
-  attributes(): PlainObject {
-    return pickBy({
+  attributes(): u.PlainObject {
+    return u.pickBy({
       ...super.attributes(),
       hash: this.hash,
       focusVisible: this.focusVisible,
       focusCapsule: this.focusCapsule,
       inputDevice: this.inputDevice,
-    }, isDefined)
+    }, u.isDefined)
   }
 
   processPrimitive(opt: any): boolean | undefined {
@@ -65,7 +64,7 @@ export class FragmentFocus extends FragmentProcessor {
       case 'autofocus':
         return this._autofocus()
       default:
-        if (isString(opt)) {
+        if (u.isString(opt)) {
           return this._focusSelector(opt)
         }
     }
@@ -97,7 +96,7 @@ export class FragmentFocus extends FragmentProcessor {
   }
 
   _autofocus(): boolean | undefined {
-    let autofocusElement = this.fragment && subtreeFirst(this.fragment, '[autofocus]')
+    let autofocusElement = this.fragment && e.subtreeFirst(this.fragment, '[autofocus]')
     if (autofocusElement) {
       return this._focusElement(autofocusElement)
     }

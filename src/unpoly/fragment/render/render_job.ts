@@ -1,4 +1,4 @@
-import { delegatePromise, isFunction, memoize, memoizeMethod, pluckKey } from '../../util.js'
+import * as u from '../../util.js'
 import { assertConfirmed } from '../../browser.js'
 import { guard } from '../../error.js'
 import { Aborted } from '../../error/aborted.js'
@@ -191,7 +191,7 @@ export class RenderJob {
     //     We memoize the callback so we only run it once.
     // (4) FromURL passes the preflight props of the change, plus the new { request }.
     //     FromContent passes the preflight props of the plan it renders, which may be a fallback.
-    let handleAbort = memoize((preflightProps: AbortOptionProps) => this._handleAbortOption(preflightProps))
+    let handleAbort = u.memoize((preflightProps: AbortOptionProps) => this._handleAbortOption(preflightProps))
     let renderOptions = { ...this.renderOptions, handleAbort }
 
     if (renderOptions.url) {
@@ -205,7 +205,7 @@ export class RenderJob {
   }
 
   _emitGuardEvent(): void {
-    let guardEvent = pluckKey(this.renderOptions, 'guardEvent')
+    let guardEvent = u.pluckKey(this.renderOptions, 'guardEvent')
     if (guardEvent) {
       // Allow guard event handlers to manipulate render options for the default behavior.
       //
@@ -245,7 +245,7 @@ export class RenderJob {
     } else if (abort === 'all' || abort === true) {
       // Abort requests targeting any fragment in any layer
       abortFragment({ ...abortOptions, layer: 'any' })
-    } else if (isFunction(abort)) {
+    } else if (u.isFunction(abort)) {
       // Required by unpoly-migrate to convert { solo: URLPatternString } and { solo: Function(up.Request): boolean }.
       // We don't advertise this variant as aborting arbitrary requests cannot support
       // up:fragment:aborted events or the up.fragment.onAborted() function.
@@ -280,9 +280,9 @@ export class RenderJob {
 
   static {
     // A request is also a promise ("thenable") for its initial render pass.
-    delegatePromise(this.prototype, function() { return this._rendered })
+    u.delegatePromise(this.prototype, function() { return this._rendered })
 
-    memoizeMethod(this.prototype, {
+    u.memoizeMethod(this.prototype, {
       _awaitFinished: true,
       _getChange: true,
     })

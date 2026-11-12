@@ -1,4 +1,4 @@
-import { filterList, map, memoizeMethod, pick, uniq } from '../../../util.js'
+import * as u from '../../../util.js'
 import { CannotMatch } from '../../../error/cannot_match.js'
 import { expandTargets, mutate } from '../../../fragment.js'
 import { Change } from './change.js'
@@ -55,7 +55,7 @@ export class ChangeFromContent extends Change {
   }
 
   _filterLayers(): void {
-    this._layers = filterList(this._layers, this._isRenderableLayer)
+    this._layers = u.filterList(this._layers, this._isRenderableLayer)
   }
 
   _expandIntoPlans(plans: LayerPlan[], layers: (Layer | 'new')[], targets: any): void {
@@ -128,7 +128,7 @@ export class ChangeFromContent extends Change {
   _getResponseDoc(): ResponseDoc | undefined {
     if (this._preflight) return
 
-    const docOptions = pick(this.options, [
+    const docOptions = u.pick(this.options, [
       'target',
       'content',
       'fragment',
@@ -202,7 +202,7 @@ export class ChangeFromContent extends Change {
 
   _cannotMatchTarget(reason: string): never {
     if (this._getPlans().length) {
-      const planTargets = uniq(map(this._getPlans(), 'target'))
+      const planTargets = u.uniq(u.map(this._getPlans(), 'target'))
       const humanizedLayerOption = optionToString(this.options.layer)
       throw new CannotMatch([reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption])
     } else if (this._layers.length === 0) {
@@ -234,7 +234,7 @@ export class ChangeFromContent extends Change {
   }
 
   static {
-    memoizeMethod(this.prototype, {
+    u.memoizeMethod(this.prototype, {
       _getPlans: true,
       _getResponseDoc: true,
       getPreflightProps: true,

@@ -1,4 +1,4 @@
-import { evalOption, memoizeMethod, merge, parseURL } from '../../../util.js'
+import * as u from '../../../util.js'
 import { CannotParse } from '../../../error/cannot_parse.js'
 import { fragmentConfig, reload, shouldRevalidate } from '../../../fragment.js'
 import { ChangeFromContent } from './change_from_content.js'
@@ -8,7 +8,6 @@ import { refineOption } from '../../../history.js'
 import { UNSET_OVERLAY_VISUALS } from '../../../layer/overlay_visuals.js'
 import { printToStandard, printToWarn } from '../../../log.js'
 import { adoptRenderOptionsFromHeader } from '../../../script.js'
-import type { PlainObject } from '../../../util.js'
 import type { EventPlan } from '../../../event.js'
 import type { RenderResult } from '../render_result.js'
 import type { UpRequest } from '../../../network/request.js'
@@ -45,7 +44,7 @@ export class ChangeFromResponse extends Change {
 
     // Listeners to up:fragment:loaded may have changed renderOptions.fail
     // to force success or failure options.
-    let fail = evalOption(this.options.fail, this._response) ?? !this._response.ok
+    let fail = u.evalOption(this.options.fail, this._response) ?? !this._response.ok
 
     if (fail) {
       throw this._updateContentFromResponse(this.deriveFailOptions())
@@ -141,7 +140,7 @@ export class ChangeFromResponse extends Change {
     }
   }
 
-  _loadedEventProps(): PlainObject {
+  _loadedEventProps(): u.PlainObject {
     const { expiredResponse } = this.options
 
     return {
@@ -153,7 +152,7 @@ export class ChangeFromResponse extends Change {
     }
   }
 
-  _helloMeta(): PlainObject {
+  _helloMeta(): u.PlainObject {
     // (1) We avoid exposing values that would prevent garbage collection
     //    by compilers holding a reference to their meta arg in their closure.
     //
@@ -173,7 +172,7 @@ export class ChangeFromResponse extends Change {
 
     // The server may send a #hash with X-Up-Location. Otherwise we keep the #hash of the requested URL,
     // like a browser does when it follows a redirect.
-    let responseHash = parseURL(responseURL).hash
+    let responseHash = u.parseURL(responseURL).hash
     let hash = responseHash || this._request.hash
     let serverLocation = responseHash ? responseURL : responseURL + (hash || '')
     if (hash) renderOptions.hash = hash
@@ -228,7 +227,7 @@ export class ChangeFromResponse extends Change {
 
     // If the server has provided an update to our context via the X-Up-Context
     // response header, merge it into our existing { context } option.
-    renderOptions.context = merge(renderOptions.context, this._response.context)
+    renderOptions.context = u.merge(renderOptions.context, this._response.context)
 
     renderOptions.cspInfo = this._response.cspInfo
     renderOptions.time ??= this._response.lastModified
@@ -236,7 +235,7 @@ export class ChangeFromResponse extends Change {
   }
 
   static {
-    memoizeMethod(this.prototype, {
+    u.memoizeMethod(this.prototype, {
       _loadedEventProps: true,
     })
   }
