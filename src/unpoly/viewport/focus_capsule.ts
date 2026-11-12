@@ -1,17 +1,17 @@
-import * as u from '../util.js'
 import * as e from '../element.js'
 import { on } from '../event.js'
 import { getSmart, tryToTarget } from '../fragment.js'
 import { type Layer } from '../layer.js'
 import { doFocus, focusedElementWithin } from '../viewport.js'
+import type * as t from './types.js'
 
 export class FocusCapsule {
   declare _element: Element
-  declare _target: string | undefined
+  declare _target?: string
   declare _cursorProps: any
-  declare _voided: boolean | undefined
+  declare _voided?: boolean
 
-  constructor(element: Element, target: string | undefined) {
+  constructor(element: Element, target?: string) {
     this._element = element
     this._target = target
     this._cursorProps = e.copyCursorProps(this._element)
@@ -41,7 +41,7 @@ export class FocusCapsule {
     on('focusin', { once: true }, () => this._voided = true)
   }
 
-  restore(layer: Layer, focusOptions?: u.PlainObject): boolean | undefined {
+  restore(layer: Layer, focusOptions?: t.DoFocusOptions): boolean | undefined {
     if (!this.wasLost()) {
       // Signal callers that we could not restore.
       // This matters to up.FragmentFocus to know that a { focus: ['restore', '.other'] }

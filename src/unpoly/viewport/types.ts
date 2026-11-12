@@ -1,5 +1,6 @@
 import * as u from '../util.js'
 import { type InputDevice } from '../event.js'
+import { type LayerReference } from '../fragment.js'
 
 /**
 Options for focusing an element.
@@ -20,7 +21,7 @@ Options for revealing the element that a URL #hash points to.
 export interface RevealHashOptions {
   // Reveal the target again after the browser had a chance to scroll.
   strong?: boolean
-  layer?: any
+  layer?: LayerReference
   origin?: Element
   behavior?: ScrollBehavior
   focus?: boolean
@@ -66,4 +67,9 @@ export interface RevealOptions {
   revealTop?: boolean
   max?: u.ValueOrFunction<number>
   revealMax?: u.ValueOrFunction<number>
+  // Also focus the element.
+  focus?: boolean
+  // For looking up the element. After the lookup, `up.reveal()` sets the element's layer.
+  layer?: LayerReference
+  origin?: Element
 }

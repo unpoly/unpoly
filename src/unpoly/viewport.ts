@@ -181,7 +181,7 @@ To make `up.reveal()` aware of fixed elements you can either:
 @signature
 */
 // The element may also be a selector.
-export const reveal = mockable(function(element: any, options?: u.PlainObject): any {
+export const reveal = mockable(function(element: any, options?: t.RevealOptions): true | Promise<void> {
   // copy options, since we will mutate it below (options.layer = ...).
   options = u.newOptions(options)
   element = getSmart(element, options)
@@ -247,7 +247,7 @@ Focusing an element will also [reveal](/api/up.reveal) it, unless `{ preventScro
 
 @stable
 */
-export const doFocus = mockable(function doFocus(element: HTMLElement, { preventScroll, force, inputDevice, focusVisible }: t.DoFocusOptions = {}): any {
+export const doFocus = mockable(function doFocus(element: HTMLElement, { preventScroll, force, inputDevice, focusVisible }: t.DoFocusOptions = {}): true | Promise<void> | undefined {
   if (force) {
     // (1) Element#tabIndex is -1 for all non-interactive elements,
     //     whether or not the element has an [tabindex=-1] attribute.
@@ -364,8 +364,8 @@ up.viewport.revealHash('#chapter2')
 @param {string} [options.behavior="instant"]
 @internal
 */
-export function revealHash(...args: Parameters<typeof revealHashFn>): any {
-  return revealHashFn(...args)?.()
+export function revealHash(hash: string, options?: t.RevealHashOptions): boolean | Promise<void> | undefined {
+  return revealHashFn(hash, options)?.()
 }
 
 /*-
@@ -376,7 +376,7 @@ Returns `undefined` if we cannot scroll.
 @function up.viewport.revealHashFn
 @internal
 */
-export function revealHashFn(hash: string, { strong, layer, origin, behavior = 'instant', focus = false }: t.RevealHashOptions = {}): (() => any) | undefined {
+export function revealHashFn(hash: string, { strong, layer, origin, behavior = 'instant', focus = false }: t.RevealHashOptions = {}): (() => boolean | Promise<void>) | undefined {
   if (!hash) return
 
   let match = firstHashTarget(hash, { layer, origin })
@@ -573,8 +573,8 @@ function getScrollTopsForViewportElements(viewports: Iterable<Element>): Record<
   return tops
 }
 
-export function getScrollTops(...args: [options?: u.PlainObject]): Record<string, number> {
-  let viewports = getAll(...args)
+export function getScrollTops(options?: u.PlainObject): Record<string, number> {
+  let viewports = getAll(options)
   return getScrollTopsForViewportElements(viewports)
 }
 
@@ -760,7 +760,7 @@ export function absolutize(element: HTMLElement, options: { afterMeasure?: () =>
   e.insertBefore(element, bounds)
   bounds.appendChild(element)
 
-  const moveBounds = function(diffX: number, diffY: number) {
+  const moveBounds = function(diffX: number, diffY: number): void {
     boundsRect.left += diffX
     boundsRect.top += diffY
     return e.setInlineStyle(bounds, boundsRect, 'px')
@@ -1007,7 +1007,7 @@ that is now hidden, e.g. `15px`.
 @function up.viewport.firstHashTarget
 @internal
 */
-export function firstHashTarget(hash: string | undefined, options: u.PlainObject = {}): HTMLElement | undefined {
+export function firstHashTarget(hash?: string, options: u.PlainObject = {}): HTMLElement | undefined {
   hash = pureHash(hash)
   if (hash) {
     const selector = [
@@ -1026,7 +1026,7 @@ Returns `'foo'` if the hash is `'#foo'`.
 @function pureHash
 @internal
 */
-function pureHash(value: string | undefined): string | undefined {
+function pureHash(value?: string): string | undefined {
   return value?.replace(/^#/, '')
 }
 
@@ -1045,8 +1045,8 @@ export function install(): void {
   // Wait until another element is focused. Otherwise we would lose .up-focus-hidden
   // when the user switches to another window, then returns to the app window (where
   // a content element might still be :focus-visible).
-  on('focusin', function({ relatedTarget }: FocusEvent & { relatedTarget: Element | null }) {
-    removeFocusClasses(relatedTarget)
+  on('focusin', function({ relatedTarget }) {
+    removeFocusClasses(relatedTarget as Element | null)
   })
 }
 
