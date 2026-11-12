@@ -12,16 +12,14 @@ import { abortRequests, type UpRequest, type UpResponse } from './network.js'
 import {
   callbackAttr, hello, isScript, readData, registerDestructor, registerMacro, scriptConfig,
 } from './script.js'
-import { type FocusCapsule } from './viewport.js'
+import type * as t from './fragment/types.js'
+export type * from './fragment/types.js'
 import { FragmentFinder } from './fragment/fragment_finder.js'
 export { CloseLayer, type CloseLayerOptions } from './fragment/render/change/close_layer.js'
 import { DestroyFragment } from './fragment/render/change/destroy_fragment.js'
 import { RenderJob } from './fragment/render/render_job.js'
 export { RenderJob }
-import {
-  RenderOptions, type FragmentProcessorValue, type LayerReference, type RenderTarget,
-  type ResolvedRenderOptions,
-} from './fragment/render/render_options.js'
+import { RenderOptions, type LayerReference } from './fragment/render/render_options.js'
 export { RenderOptions, type LayerReference }
 import { type RenderResult } from './fragment/render/render_result.js'
 export { type RenderResult }
@@ -30,154 +28,8 @@ import { Selector } from './fragment/selector.js'
 import { SelectorTracker } from './fragment/selector_tracker.js'
 export { SelectorTracker }
 
-/**
-A step of a render pass: which old element to update with which new element, and how.
-Each step inherits the render options of its pass.
-@internal
-*/
-export interface RenderStep extends ResolvedRenderOptions {
-  selector: string
-  placement: string
-  maybe: boolean
-  originalRenderOptions: RenderOptions
-  // Set when the step is matched.
-  oldElement?: HTMLElement
-  newElement?: HTMLElement
-  // An event to emit when a new element was matched, e.g. up:fragment:hungry.
-  selectEvent?: Event & { newFragment?: Element, renderOptions?: RenderOptions }
-  selectCallback?: (event: Event) => any
-  // Set while rendering, see UpdateSteps.
-  parentElement?: ParentNode
-  afterRemove?: () => void
-  descendantKeepPlans?: KeepPlan[]
-  // Set by UpdateLayer, for { focus: 'keep' } and { scroll: 'keep' }.
-  focusCapsule?: FocusCapsule
-  oldScrollTops?: Record<string, number>
-  descendantsOnly?: boolean
-}
-
-/**
-The arguments of `up.render()` and the functions built on it: a target and render options, or only render options.
-*/
-export type RenderArgs = [target: RenderTarget, options?: RenderOptions] | [options: RenderOptions]
-
-/**
-An element with [up-keep] that is kept in an update, and the element it would have been replaced with.
-@internal
-*/
-export interface KeepPlan {
-  oldElement: Element
-  newElement: Element
-  newData?: any
-  renderOptions?: u.PlainObject
-  // Set when rendering, see UpdateSteps.
-  revivers?: any[]
-}
-
-/**
-Derives a target selector for an element: a selector pattern like `'[id]'`, or a function.
-See `up.fragment.config.targetDerivers`.
-*/
-export type TargetDeriver = string | ((element: Element) => string | undefined)
-
-/**
-Parses an HTML string into nodes.
-@internal
-*/
-export type HTMLParser = (html: string) => u.List<Node>
-
 // Properties Unpoly sets on fragments.
 type FragmentElement = Element & { upKeepIdentity?: any, upInserted?: boolean }
-
-/**
-Options for turning a value (HTML, a template or nodes) into nodes.
-@internal
-*/
-export interface ProvideNodesOptions {
-  origin?: Element
-  originLayer?: Layer
-  data?: any
-  htmlParser?: HTMLParser
-}
-
-/**
-The `up:fragment:loaded` event.
-*/
-export type FragmentLoadedEvent = Event & {
-  request: UpRequest
-  response: UpResponse
-  revalidating: boolean
-  expiredResponse: UpResponse | undefined
-  origin: Element | undefined
-  renderOptions: RenderOptions
-  skip: () => void
-}
-
-/**
-The `up:fragment:offline` event.
-*/
-export type FragmentOfflineEvent = Event & {
-  request: UpRequest
-  renderOptions: RenderOptions
-  retry: (retryOptions?: RenderOptions) => Promise<RenderResult>
-  origin: Element | undefined
-}
-
-/**
-The `up:fragment:keep` event.
-*/
-export type FragmentKeepEvent = Event & {
-  target: Element
-  newFragment: Element
-  newData: u.PlainObject
-  renderOptions: RenderOptions
-}
-
-/**
-The `up:fragment:kept` event.
-*/
-export type FragmentKeptEvent = Event & {
-  target: Element
-  newFragment: Element
-  newData: u.PlainObject
-}
-
-/**
-The `up:fragment:inserted` event.
-*/
-export type FragmentInsertedEvent = Event & {
-  target: Element
-  layer: Layer
-  ok: boolean
-  revalidating: boolean
-}
-
-/**
-The `up:fragment:destroyed` event.
-*/
-export type FragmentDestroyedEvent = Event & {
-  fragment: Element
-  parent: Element
-  target: Element
-}
-
-/**
-The `up:fragment:aborted` event.
-*/
-export type FragmentAbortedEvent = Event & {
-  target: Element
-  reason: string
-  newLayer: boolean
-}
-
-/**
-The `up:template:clone` event.
-*/
-export type TemplateCloneEvent = Event & {
-  target: Element
-  data: u.PlainObject
-  nodes: u.List<Node> | null
-}
 
 /*-
 The JavaScript API to render, look up and destroy page fragments. Every link, form, overlay or poll that Unpoly handles ends in `up.render()`, and your own code can call it with the same options.
@@ -205,35 +57,6 @@ const STRONG_TARGET_DERIVERS = [
   'head',
   'body',
 ]
-
-/**
-The settings in `up.fragment.config`, described in its doc comment.
-*/
-export interface FragmentConfig {
-  /**
-  Not stored in `up.fragment.config`, but forwarded to `up.layer.config.any.mainTargets`.
-  */
-  mainTargets: string[]
-  targetDerivers: TargetDeriver[]
-  /**
-  The patterns for `up.fragment.toTarget(element, { strong: true })`.
-  @internal
-  */
-  strongTargetDerivers: string[]
-  badTargetClasses: (string | RegExp)[]
-  verifyDerivedTarget: boolean
-  match: 'region' | 'first'
-  navigateOptions: RenderOptions
-  renderOptions: RenderOptions
-  reloadOptions: RenderOptions
-  autoHistoryTargets: string[]
-  autoScroll: FragmentProcessorValue[]
-  autoFocus: FragmentProcessorValue[]
-  normalizeKeepHTML: (html: string) => string
-  autoRevalidate: boolean | ((response: UpResponse) => boolean)
-  skipResponse: (loadedEventProps: u.PlainObject) => boolean
-  renderableResponse: (response: UpResponse) => boolean
-}
 
 /*-
 Configures defaults for fragment updates.
@@ -423,7 +246,7 @@ Configures defaults for fragment updates.
 
 @stable
 */
-export const fragmentConfig = newConfig('up.fragment.config', (): FragmentConfig => ({
+export const fragmentConfig = newConfig('up.fragment.config', (): t.FragmentConfig => ({
   // Users who are not using layers will prefer settings default targets
   // as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
   // A reset copies this accessor (see Config#reset()), so it leaves up.layer.config.any.mainTargets alone.
@@ -828,7 +651,7 @@ You may control this behavior using the [`{ abort }`](#options.abort) option.
 @stable
 @signature
 */
-export const render = mockable((...args: RenderArgs): RenderJob => {
+export const render = mockable((...args: t.RenderArgs): RenderJob => {
   let options = parseTargetAndOptions(args)
   return new RenderJob(options).execute()
 })
@@ -898,7 +721,7 @@ Instead of calling `up.navigate()` you may also call `up.render({ navigate: true
   @like up.render
 @stable
 */
-export const navigate = mockable((...args: RenderArgs): RenderJob => {
+export const navigate = mockable((...args: t.RenderArgs): RenderJob => {
   const options = parseTargetAndOptions(args)
   return render({ ...options, navigate: true })
 })
@@ -1177,7 +1000,7 @@ See [Keeping elements](/learn/keeping-elements) for elaborate examples.
 @signature
 */
 
-export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }: KeepPlan & { renderOptions: u.PlainObject }) {
+export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }: t.KeepPlan & { renderOptions: u.PlainObject }) {
   const log = ['Keeping fragment %o', oldElement]
   const callback = callbackAttr(oldElement, 'up-on-keep', { expandObject: ['newFragment', 'newData'] })
   return emit(oldElement, 'up:fragment:keep', { log, callback, newFragment, newData, renderOptions })
@@ -1243,7 +1066,7 @@ The keeping can no longer be prevented. For this, use `up:fragment:keep` instead
 @experimental
 */
 
-export function emitFragmentKept({ oldElement, newElement: newFragment, newData }: KeepPlan) {
+export function emitFragmentKept({ oldElement, newElement: newFragment, newData }: t.KeepPlan) {
   return emit(oldElement, 'up:fragment:kept', { log: false, newFragment, newData })
 }
 
@@ -1260,7 +1083,7 @@ Otherwise returns undefined.
 @param {boolean} options.keep
 @internal
 */
-export function findKeepPlan(options: u.PlainObject): KeepPlan | undefined {
+export function findKeepPlan(options: u.PlainObject): t.KeepPlan | undefined {
   if (options.keep === false) return
 
   const { oldElement, newElement } = options
@@ -2111,7 +1934,7 @@ up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate: 'a
 @stable
 @signature
 */
-export const reload = mockable(function reload(...args: RenderArgs | []): RenderJob {
+export const reload = mockable(function reload(...args: t.RenderArgs | []): RenderJob {
   const options = { ...fragmentConfig.reloadOptions, ...parseTargetAndOptions(args) }
   options.target ||= ':main'
   // up.reload() takes one element or selector, not a list of target selectors.
@@ -2313,7 +2136,7 @@ function cannotTarget(element: any): never {
 export function tryToTarget(element: any, options: u.PlainObject = {}): string | undefined {
   let derivers = options.strong ? fragmentConfig.strongTargetDerivers : fragmentConfig.targetDerivers
 
-  return u.findResult(derivers, function(deriver: TargetDeriver) {
+  return u.findResult(derivers, function(deriver: t.TargetDeriver) {
     let target = deriveTarget(element, deriver)
 
     if (target && isGoodTarget(target, element, options)) {
@@ -2322,7 +2145,7 @@ export function tryToTarget(element: any, options: u.PlainObject = {}): string |
   })
 }
 
-function deriveTarget(element: Element, deriver: TargetDeriver): string | undefined {
+function deriveTarget(element: Element, deriver: t.TargetDeriver): string | undefined {
   if (u.isFunction(deriver)) {
     return deriver(element)
   } else if (element.matches(deriver)) {
@@ -2548,7 +2371,7 @@ export function splitTarget(target: string | undefined): string[] {
   return u.getComplexTokens(target)
 }
 
-export function parseTargetSteps(target: string | undefined, options: u.PlainObject = {}): RenderStep[] {
+export function parseTargetSteps(target: string | undefined, options: u.PlainObject = {}): t.RenderStep[] {
   let defaultPlacement = options.defaultPlacement || 'swap'
   let defaultMaybe = options.defaultMaybe ?? false
 
@@ -2916,7 +2739,7 @@ export function shouldRevalidate(request: UpRequest, response: UpResponse, optio
   return request.fromCache && u.evalAutoOption(options.revalidate, fragmentConfig.autoRevalidate, response)
 }
 
-function isContainedByRivalStep(steps: RenderStep[], candidateStep: RenderStep): boolean {
+function isContainedByRivalStep(steps: t.RenderStep[], candidateStep: t.RenderStep): boolean {
   return u.some(steps, function(rivalStep) {
     return (rivalStep !== candidateStep) &&
       ((rivalStep.placement === 'swap') || (rivalStep.placement === 'content')) &&
@@ -2925,7 +2748,7 @@ function isContainedByRivalStep(steps: RenderStep[], candidateStep: RenderStep):
   })
 }
 
-export function compressNestedSteps(steps: RenderStep[]): RenderStep[] {
+export function compressNestedSteps(steps: t.RenderStep[]): t.RenderStep[] {
   if (steps.length < 2) return steps
   let compressed = u.uniqBy(steps, 'oldElement')
   compressed = u.reject(compressed, (step) => isContainedByRivalStep(compressed, step))
@@ -3219,7 +3042,7 @@ export function onFirstIntersect(element: Element, callback: () => void, { margi
 
 const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
-export function provideNodes(value: any, { origin, originLayer, data, htmlParser = e.createNodesFromHTML }: ProvideNodesOptions = {}): u.List<Node> {
+export function provideNodes(value: any, { origin, originLayer, data, htmlParser = e.createNodesFromHTML }: t.ProvideNodesOptions = {}): u.List<Node> {
   if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
     let [parsedValue, parsedData] = u.parseScalarJSONPairs(value)[0]
     data = { ...data, ...parsedData }
@@ -3282,7 +3105,7 @@ let nodes = up.template.clone('#table-placeholder', { rows: 10 })
   You can pass this list to any rendering function, like `up.render()` or `up.Preview#insert()`.
 @stable
 */
-export function cloneTemplate(templateOrSelector: e.ElementOrSelector, data: any = {}, { origin, htmlParser }: ProvideNodesOptions = {}): u.List<Node> {
+export function cloneTemplate(templateOrSelector: e.ElementOrSelector, data: any = {}, { origin, htmlParser }: t.ProvideNodesOptions = {}): u.List<Node> {
   // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
   let template = getSmart(templateOrSelector, { origin, layer: 'closest' }) || fail('Template not found: %o', templateOrSelector)
   let event = emit(template, 'up:template:clone', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
@@ -3348,7 +3171,7 @@ Also see documentation for `up.element.createNodesFromHTML()`.
 @stable
 */
 
-function defaultTemplateNodes(template: Element, htmlParser: HTMLParser = e.createNodesFromHTML): u.List<Node> {
+function defaultTemplateNodes(template: Element, htmlParser: t.HTMLParser = e.createNodesFromHTML): u.List<Node> {
   let templateText = template.innerHTML
   return htmlParser(templateText)
 }

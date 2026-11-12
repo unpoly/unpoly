@@ -1,12 +1,6 @@
 import * as u from '../util.js'
 import { on, type UnbindFn } from '../event.js'
-import { afterMutate } from '../fragment.js'
-
-/**
-Called when an element starts matching. May return a function that is called when it stops matching.
-@internal
-*/
-export type SelectorTrackerAddCallback = (element: Element) => ((element: Element) => void) | void
+import { afterMutate, type SelectorTrackerAddCallback } from '../fragment.js'
 
 export class SelectorTracker {
   declare _selectFn: () => Iterable<Element>

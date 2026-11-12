@@ -1,23 +1,10 @@
 import * as u from '../util.js'
 import {
   closest, containsMainPseudo, fragmentConfig, getFirstDescendant, matches, splitTarget,
+  type FragmentFinderOptions,
 } from '../fragment.js'
 
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
-
-/**
-Options for an `up.FragmentFinder`. Other options (like `{ layer }`) are passed on to
-`up.fragment.closest()` and `up.fragment.get()`.
-@internal
-*/
-export interface FragmentFinderOptions {
-  selector: string
-  origin?: Element
-  document?: Document | Element
-  match?: 'region' | 'first'
-  preferOldElements?: Element[]
-  [key: string]: any
-}
 
 export class FragmentFinder {
   declare _options: FragmentFinderOptions
