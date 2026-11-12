@@ -91,7 +91,7 @@ up.element = (function() {
   @internal
   */
   function ancestor(element, selector) {
-    return element.parentNode?.closest(selector)
+    return element.parentElement?.closest(selector)
   }
 
   function around(element, selector) {

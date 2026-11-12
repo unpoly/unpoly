@@ -328,6 +328,11 @@ describe('up.element', function() {
       const result = up.element.ancestor($element[0], '.match')
       expect(result).toBeMissing()
     })
+
+    it('returns missing for the <html> element, which has no parent element', function() {
+      const result = up.element.ancestor(document.documentElement, '*')
+      expect(result).toBeMissing()
+    })
   })
 
   if (up.migrate.loaded) {
