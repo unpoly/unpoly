@@ -3,23 +3,8 @@ import * as e from '../element.js'
 import { fail } from '../error.js'
 import {
   defaultSubmitButton, findFields, formConfig, prepareParamsReadTemp, readFieldDisabled,
-  readFieldName, readFieldValue,
+  readFieldName, readFieldValue, type ParamEntry, type ParamsLike,
 } from '../form.js'
-
-/**
-A single param. Its value is usually a string or a `File`. Other values are stringified
-when the params are encoded.
-*/
-export interface ParamEntry {
-  name: string
-  value: any
-}
-
-/**
-Anything that `new up.Params()` accepts: another `up.Params`, an array of entries, a query string,
-a `FormData` object or a plain object like `{ name: 'value' }`.
-*/
-export type ParamsLike = Params | ParamEntry[] | string | FormData | u.PlainObject | null | undefined
 
 /*-
 The `up.Params` class offers a consistent API to read and manipulate request parameters

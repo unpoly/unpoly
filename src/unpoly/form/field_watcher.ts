@@ -1,30 +1,13 @@
 import * as u from '../util.js'
 import { fail, guard } from '../error.js'
 import { on } from '../event.js'
-import { getRegion, isField, readFieldName, trackFields, watchOptions } from '../form.js'
+import {
+  getRegion, isField, readFieldName, trackFields, watchOptions, type FieldWatcherOptions,
+  type WatchCallback,
+} from '../form.js'
 import { isAlive } from '../fragment.js'
 import { printUserEvent } from '../log.js'
 import { Params } from './params.js'
-
-/**
-The callback for `up.watch()`. It is called with the new value, the field name and the
-options for the change. With `{ batch: true }` it is called once with an object of all
-changed values and the options.
-*/
-export type WatchCallback = u.AnyFunction
-
-/**
-Options for an `up.FieldWatcher`. Other options are passed on to the callback.
-@internal
-*/
-export interface FieldWatcherOptions {
-  batch?: boolean
-  logPrefix?: string
-  includeDisabled?: boolean
-  event?: string
-  delay?: number
-  [key: string]: any
-}
 
 export class FieldWatcher {
   declare _options: FieldWatcherOptions

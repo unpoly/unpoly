@@ -4,37 +4,13 @@ import { Aborted, fail, muteUncriticalRejection } from '../error.js'
 import { build, on } from '../event.js'
 import {
   destinationOptions, findFields, findGroupSolution, isField, readFieldName, trackFields,
-  validateOptions,
+  validateOptions, type FoundValidationSolution, type ValidationSolution,
 } from '../form.js'
 import { getSmart, onAborted, render, resolveOrigin, splitTarget, toTarget } from '../fragment.js'
 import { printToStandard, printUserEvent } from '../log.js'
 import { headerize, protocolConfig } from '../protocol.js'
 import { readData } from '../script.js'
 import { Params } from './params.js'
-
-/**
-What to re-render to validate a field: an element, its target selector and the field that
-triggered the validation.
-@internal
-*/
-export interface FoundValidationSolution {
-  element: Element
-  target: string
-  origin: Element
-}
-
-/**
-A solution that is scheduled for rendering. `_getSolutions()` adds the render options and a
-deferred that settles when the validation has rendered.
-@internal
-*/
-export interface ValidationSolution extends FoundValidationSolution {
-  renderOptions: u.PlainObject
-  batch: boolean | undefined
-  // The method and URL. Solutions with the same destination can be validated in one request.
-  destination: string
-  deferred: u.Deferred<any>
-}
 
 export class FormValidator {
   declare _form: HTMLFormElement

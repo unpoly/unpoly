@@ -16,56 +16,14 @@ import {
 } from './script.js'
 import { statusOptions, type PreviewFn } from './status.js'
 import { doFocus, focusedElementWithin } from './viewport.js'
+import type * as t from './form/types.js'
+export type * from './form/types.js'
 import { FieldWatcher } from './form/field_watcher.js'
 import { FormValidator } from './form/form_validator.js'
-import { Params, type ParamEntry, type ParamsLike } from './form/params.js'
-export { Params, type ParamEntry, type ParamsLike }
+import { Params } from './form/params.js'
+export { Params }
 import { Switcher } from './form/switcher.js'
 export { Switcher }
-
-/**
-A form field or button: an `<input>`, `<select>`, `<textarea>`, `<button>` or a form-associated
-custom element. Unpoly reads its `{ name }`, `{ value }` and `{ disabled }` properties when it has them.
-*/
-export type Field = Element & {
-  name?: string
-  value?: any
-  disabled?: boolean
-  form?: HTMLFormElement | null
-  // Set while a preview disables the field, see disableControlTemp().
-  upPreviewDisabled?: boolean
-}
-
-/**
-The `up:form:submit` event.
-*/
-export type FormSubmitEvent = Event & {
-  target: Element
-  form: Element
-  params: Params
-  submitButton: Element | undefined
-  renderOptions: RenderOptions
-}
-
-/**
-The `up:form:validate` event.
-*/
-export type FormValidateEvent = Event & {
-  target: Element
-  form: Element
-  params: Params
-  fields: u.List<Element>
-  renderOptions: RenderOptions
-}
-
-/**
-The `up:form:switch` event.
-*/
-export type FormSwitchEvent = Event & {
-  target: Element
-  field: Element
-  fieldTokens: string[]
-}
 
 /*-
 Features to submit and validate forms without a full page load.
@@ -79,29 +37,6 @@ To render a new form state while the user is still typing, mark fields with `[up
 @namespace up.form
 */
 
-
-/**
-The settings in `up.form.config`, described in its doc comment.
-*/
-export interface FormConfig {
-  submitSelectors: string[]
-  noSubmitSelectors: string[]
-  groupSelectors: string[]
-  fieldSelectors: string[]
-  noFieldSelectors: string[]
-  submitButtonSelectors: string[]
-  anyButtonSelectors: string[]
-  arrayParam: boolean | ((name: string) => boolean)
-  watchInputDelay: number
-  watchInputEvents: string[] | ((field: Element) => string[])
-  watchChangeEvents: string[] | ((field: Element) => string[])
-  validateBatch: boolean
-  /**
-  Nothing reads this setting.
-  @internal
-  */
-  watchableEvents: string[]
-}
 
 /*-
 Sets default options for form submission and validation.
@@ -249,7 +184,7 @@ Sets default options for form submission and validation.
 
 @stable
  */
-export const formConfig = newConfig('up.form.config', (): FormConfig => ({
+export const formConfig = newConfig('up.form.config', (): t.FormConfig => ({
   groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
   fieldSelectors: [
     'select',
@@ -278,7 +213,7 @@ export const formConfig = newConfig('up.form.config', (): FormConfig => ({
   arrayParam: (name) => name.endsWith('[]'),
 }))
 
-function findFormElements(root: e.ElementOrSelector, selectorFn: u.SelectorFn): Field[] {
+function findFormElements(root: e.ElementOrSelector, selectorFn: u.SelectorFn): t.Field[] {
   root = e.getOne(root) // unwrap jQuery
   let elements = getSubtree(root, selectorFn())
 
@@ -337,7 +272,7 @@ Fields in another [layer](/api/up.layer) and fields that are being [destroyed](/
   The field elements within the given element.
 @stable
 */
-export function findFields(root: e.ElementOrSelector): Field[] {
+export function findFields(root: e.ElementOrSelector): t.Field[] {
   return findFormElements(root, formFieldSelector)
 }
 
@@ -345,13 +280,13 @@ export function findFields(root: e.ElementOrSelector): Field[] {
 // attribute access is wrong for at least one kind of field.
 
 // Falls back on absence, not falseness: a native field reports '' and means it.
-export function readFieldName(field: Field): string | null | undefined {
+export function readFieldName(field: t.Field): string | null | undefined {
   return field.name ?? field.getAttribute('name')
 }
 
 // The property is the only source. A form-associated element reports its value to the browser
 // through setFormValue(), which a script cannot read back.
-export function readFieldValue(field: Field): any {
+export function readFieldValue(field: t.Field): any {
   return field.value
 }
 
@@ -359,7 +294,7 @@ export function readFieldValue(field: Field): any {
 // which we deliberately don't track here. Only up.Params.fromForm() honors it, for request params.
 // Asks the same question as writeFieldDisabled(), so the two cannot disagree about which
 // spelling is authoritative.
-export function readFieldDisabled(field: Field): boolean {
+export function readFieldDisabled(field: t.Field): boolean {
   return 'disabled' in field ? field.disabled! : field.hasAttribute('disabled')
 }
 
@@ -371,7 +306,7 @@ export function readFieldDisabled(field: Field): boolean {
 // `() => writeFieldDisabled(field, false)`: a custom element that upgrades in between would be
 // disabled through its attribute and re-enabled through a property that only just appeared,
 // leaving our attribute on the element for good.
-export function writeFieldDisabled(field: Field, disabled: boolean): () => void {
+export function writeFieldDisabled(field: t.Field, disabled: boolean): () => void {
   if ('disabled' in field) {
     field.disabled = disabled
     return () => { field.disabled = !disabled }
@@ -384,11 +319,11 @@ export function writeFieldDisabled(field: Field, disabled: boolean): () => void 
 // A browser only submits the button that was pressed. With no submitter we assume the form's
 // first submit button, which is what the browser itself does for an implicit submission — press
 // Enter in a text field and event.submitter *is* the first submit button.
-export function defaultSubmitButton(form: Element): Field | undefined {
+export function defaultSubmitButton(form: Element): t.Field | undefined {
   return findSubmitButtons(form)[0]
 }
 
-function findFieldsAndButtons(container: e.ElementOrSelector): Field[] {
+function findFieldsAndButtons(container: e.ElementOrSelector): t.Field[] {
   return [
     ...findFields(container),
     ...findAnyButtons(container),
@@ -412,7 +347,7 @@ Buttons in another [layer](/api/up.layer) and buttons that are being [destroyed]
   The list of found submit buttons.
 @experimental
 */
-export function findSubmitButtons(root: e.ElementOrSelector): Field[] {
+export function findSubmitButtons(root: e.ElementOrSelector): t.Field[] {
   return findFormElements(root, submitButtonSelector)
 }
 
@@ -424,7 +359,7 @@ Returns a selector for any button, including buttons that don't submit their for
 */
 export const [anyButtonSelector, isAnyButton] = formConfig.selectorFns('anyButtonSelectors')
 
-function findAnyButtons(root: e.ElementOrSelector): Field[] {
+function findAnyButtons(root: e.ElementOrSelector): t.Field[] {
   return findFormElements(root, anyButtonSelector)
 }
 
@@ -795,7 +730,7 @@ export function disableContainerTemp(container: Element, { preview }: { preview?
   return u.sequence(u.map(controls, (control) => disableControlTemp(control, preview)))
 }
 
-function disableControlTemp(control: Field, preview: boolean | undefined): (() => void) | undefined {
+function disableControlTemp(control: t.Field, preview: boolean | undefined): (() => void) | undefined {
   // Ignore controls that were already disabled before us.
   // This way we don't accidentally re-enable a control that we didn't change.
   if (readFieldDisabled(control)) return
@@ -2679,7 +2614,7 @@ export function install(): void {
     // can then submit a form in another layer: when two layers have a form with the same ID, or when
     // [form] refers to a form that only exists in another layer. Layers don't share forms.
     // Either may be a control that isn't a field (or null), whose { form } is then undefined.
-    for (let control of [event.submitter, document.activeElement] as Field[]) {
+    for (let control of [event.submitter, document.activeElement] as t.Field[]) {
       if (control && control.form === form && getForm(control) !== form) {
         fail('Prevented %o from submitting a form in another layer ([form="%s"])', control, control.getAttribute('form'))
       }
