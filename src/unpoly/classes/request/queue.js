@@ -59,7 +59,7 @@ up.Request.Queue = class Queue {
 
     // In case the request was loading in the background before it was promoted to
     // the foreground, the request may have less time left than request.lateDelay.
-    let timeUntilLate = Math.max(request.effectiveLateTime - request.age)
+    let timeUntilLate = Math.max(request.effectiveLateTime - request.age, 0)
 
     // We may have multiple timers running concurrently.
     // Nonethess we don't emit duplicate events due to the check in @_checkLate().
