@@ -106,8 +106,8 @@ export function muteUncriticalRejection<T>(promise: Pick<Promise<T>, 'catch'>): 
 export function muteUncriticalSync<T>(block: () => T): T | undefined {
   try {
     return block()
-  } catch (e) {
-    throwCritical(e)
+  } catch (error) {
+    throwCritical(error)
   }
 }
 

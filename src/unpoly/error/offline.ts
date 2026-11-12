@@ -1,8 +1,9 @@
+import { type UpRequest } from '../network.js'
 import { UpError } from './error.js'
 
 export class Offline extends UpError {
   // Set from the props passed to the constructor.
-  declare request: any // up.Request
+  declare request: UpRequest
   declare reason: string
 }
 
