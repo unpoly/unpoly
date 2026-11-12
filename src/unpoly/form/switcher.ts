@@ -3,8 +3,8 @@ import * as e from '../element.js'
 import { fail } from '../error.js'
 import { emit } from '../event.js'
 import { findFields, getRegion, setContainerDisabled, watch } from '../form.js'
-import { Params } from './params.js'
 import { getSmart, getSubtree, trackSelector } from '../fragment.js'
+import { Params } from './params.js'
 
 // A switchee remembers the field tokens it was last switched with.
 type Switchee = HTMLElement & { upSwitchValues?: string[] }

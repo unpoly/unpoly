@@ -1,7 +1,6 @@
 import * as e from '../../element.js'
 import { fail } from '../../error.js'
-import { Layer } from '../base.js'
-import type { LayerMode, LayerOptions } from '../base.js'
+import { Layer, type LayerMode, type LayerOptions } from '../base.js'
 
 /**
 The root layer's element. It remembers that the root layer's handlers are bound to it.

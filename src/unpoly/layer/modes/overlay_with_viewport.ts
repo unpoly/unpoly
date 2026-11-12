@@ -1,5 +1,5 @@
-import { Overlay } from './overlay.js'
 import { bodyShifter } from '../../viewport.js'
+import { Overlay } from './overlay.js'
 
 export class OverlayWithViewport extends Overlay {
 

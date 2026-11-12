@@ -1,8 +1,7 @@
 import * as u from '../util.js'
 import { buildLayer } from '../layer.js'
-import { LayerLookup } from './layer_lookup.js'
-import type { LayerLookupArgs } from './layer_lookup.js'
-import type { Layer, LayerCloseOptions, PeelOptions } from './base.js'
+import { type Layer, type LayerCloseOptions, type PeelOptions } from './base.js'
+import { LayerLookup, type LayerLookupArgs } from './layer_lookup.js'
 
 export class LayerStack {
   declare _currentOverrides: Layer[]

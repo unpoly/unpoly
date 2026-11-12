@@ -1,10 +1,9 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
 import { submitForm } from '../browser.js'
-import { Params } from '../form/params.js'
+import { Params, type ParamEntry } from '../form.js'
 import { wrapMethod } from '../protocol.js'
-import type { ParamEntry } from '../form/params.js'
-import type { UpRequest } from './request.js'
+import { type UpRequest } from './request.js'
 
 // In HTML5, forms may only have a GET or POST method.
 // There were several proposals to extend this to PUT, DELETE, etc.

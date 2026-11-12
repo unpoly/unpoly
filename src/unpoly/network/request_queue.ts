@@ -1,10 +1,8 @@
 import * as u from '../util.js'
 import { emit } from '../event.js'
-import { printToStandard } from '../log.js'
+import { printToStandard, type LogArgs } from '../log.js'
 import { networkConfig } from '../network.js'
-import { UpRequest } from './request.js'
-import type { LogArgs } from '../log.js'
-import type { RequestCondition } from './request.js'
+import { UpRequest, type RequestCondition } from './request.js'
 
 /**
 Options for `RequestQueue#abort()`.

@@ -1,17 +1,14 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
-import { guard } from '../error.js'
-import { UpError } from '../error/error.js'
-import { disableContainerTemp } from '../form.js'
+import { guard, UpError } from '../error.js'
+import { disableContainerTemp, type Params } from '../form.js'
 import { getSmart, insertTemp, provideNodes } from '../fragment.js'
-import { layerStack, open } from '../layer.js'
-import { OVERLAY_VISUAL_KEYS } from '../layer/overlay_visuals.js'
+import {
+  layerStack, open, OVERLAY_VISUAL_KEYS, type Layer, type LayerCloseEvent,
+} from '../layer.js'
 import { printToStandard } from '../log.js'
+import { type UpRequest } from '../network.js'
 import { resolvePreviewFns } from '../status.js'
-import type { Params } from '../form/params.js'
-import type { Layer } from '../layer/base.js'
-import type { LayerCloseEvent } from '../layer.js'
-import type { UpRequest } from '../network/request.js'
 
 /**
 Everything an `up.Preview` needs to know.

@@ -1,18 +1,19 @@
 import * as u from './util.js'
 import * as e from './element.js'
 import { OptionsParser } from './element/options_parser.js'
+import { newConfig } from './util/config.js'
 import { build } from './event.js'
-import { compressNestedSteps, getAllFragments, getSmart, tryToTarget } from './fragment.js'
+import {
+  compressNestedSteps, getAllFragments, getSmart, tryToTarget, type FragmentKeepEvent,
+  type RenderOptions, type RenderStep,
+} from './fragment.js'
 import { layerStack } from './layer.js'
 import { parseRequestOptions } from './link.js'
 import { printToWarn } from './log.js'
 import { motionOptions } from './motion.js'
-import { FragmentPolling } from './radio/fragment_polling.js'
 import { callbackAttr, registerAttrCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
-import { newConfig } from './util/config.js'
-import type { FragmentKeepEvent, RenderStep } from './fragment.js'
-import type { RenderOptions } from './fragment/render/render_options.js'
+import { FragmentPolling } from './radio/fragment_polling.js'
 
 /**
 The render steps for hungry elements, on the targeted layer and on other layers.

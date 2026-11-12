@@ -1,5 +1,5 @@
-import { mockable } from './mockable.js'
 import { emit } from './event.js'
+import { mockable } from './mockable.js'
 
 /**
 The `up:framework:booted` event.

@@ -1,5 +1,5 @@
 import * as u from './util.js'
-import { Aborted } from './error/aborted.js'
+import { Aborted } from './error.js'
 import { mockable } from './mockable.js'
 
 /*-

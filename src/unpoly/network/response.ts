@@ -1,8 +1,8 @@
 import * as u from '../util.js'
-import { cache, networkConfig } from '../network.js'
-import { CSPInfo } from '../script/csp/csp_info.js'
 import { isCritical } from '../error.js'
-import type { UpRequest } from './request.js'
+import { cache, networkConfig } from '../network.js'
+import { CSPInfo } from '../script.js'
+import { type UpRequest } from './request.js'
 
 /**
 Options for constructing an `up.Response`. Most are read from the response headers.

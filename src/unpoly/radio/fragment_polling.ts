@@ -2,13 +2,13 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { throwCritical } from '../error.js'
 import { build, on } from '../event.js'
-import { isAlive, isTargetable, matches, onAborted, onKept, reload } from '../fragment.js'
-import { layerStack } from '../layer.js'
+import {
+  isAlive, isTargetable, matches, onAborted, onKept, reload, type RenderResult,
+} from '../fragment.js'
+import { layerStack, type Layer } from '../layer.js'
 import { printToStandard, printToWarn } from '../log.js'
 import { pollOptions, radioConfig } from '../radio.js'
 import { registerDestructor } from '../script.js'
-import type { Layer } from '../layer/base.js'
-import type { RenderResult } from '../fragment/render/render_result.js'
 
 /**
 An element with an `[up-poll]` attribute. It remembers its `up.FragmentPolling`.

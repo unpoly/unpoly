@@ -1,4 +1,12 @@
+export { Aborted } from './error/aborted.js'
+export { Blocked } from './error/blocked.js'
+export { CannotMatch } from './error/cannot_match.js'
+export { CannotParse } from './error/cannot_parse.js'
+export { CannotTarget } from './error/cannot_target.js'
 import { UpError } from './error/error.js'
+export { UpError }
+export { NotImplemented } from './error/not_implemented.js'
+export { Offline } from './error/offline.js'
 
 /*-
 Functions to deal with errors from Unpoly's rendering and network functions.

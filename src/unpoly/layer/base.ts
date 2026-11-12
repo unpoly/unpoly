@@ -1,26 +1,24 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
-import { Aborted } from '../error/aborted.js'
-import { NotImplemented } from '../error/not_implemented.js'
-import { on } from '../event.js'
-import { EventEmitter } from '../event/event_emitter.js'
-import { EventListenerGroup } from '../event/event_listener_group.js'
+import { type FIFOCache } from '../util/fifo_cache.js'
+import { Aborted, NotImplemented } from '../error.js'
+import {
+  EventEmitter, EventListenerGroup, on, type EmitProps, type EmittedEvent,
+  type EventListenerAttributes, type EventTypes, type ListenerArgs, type ObservedEvent,
+  type UnbindFn,
+} from '../event.js'
 import {
   currentLocation, findMetaTags, getLang, isHistoryEnabled, pushLocation, updateLang,
-  updateMetaTags,
+  updateMetaTags, type HistoryAspect,
 } from '../history.js'
 import { closestLayerElement, mainTargets } from '../layer.js'
 import { convertClicks } from '../link.js'
+import { type AnimationValue } from '../motion.js'
+import { type UpResponse } from '../network.js'
 import { newStateCache } from '../viewport.js'
-import type { EmitProps, EmittedEvent, EventTypes, ListenerArgs, ObservedEvent, UnbindFn } from '../event.js'
-import type { EventListenerAttributes } from '../event/event_listener.js'
-import type { HistoryAspect } from '../history.js'
-import type { LayerStack } from './layer_stack.js'
-import type { Overlay } from './modes/overlay.js'
-import type { OverlayFocus } from './overlay_focus.js'
-import type { AnimationValue } from '../motion.js'
-import type { UpResponse } from '../network/response.js'
-import type { FIFOCache } from '../util/fifo_cache.js'
+import { type LayerStack } from './layer_stack.js'
+import { type Overlay } from './modes/overlay.js'
+import { type OverlayFocus } from './overlay_focus.js'
 
 /**
 A layer mode. The root layer has the mode `'root'`, an overlay has one of the other modes.

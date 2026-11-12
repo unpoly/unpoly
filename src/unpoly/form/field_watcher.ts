@@ -2,9 +2,9 @@ import * as u from '../util.js'
 import { fail, guard } from '../error.js'
 import { on } from '../event.js'
 import { getRegion, isField, readFieldName, trackFields, watchOptions } from '../form.js'
-import { Params } from './params.js'
 import { isAlive } from '../fragment.js'
 import { printUserEvent } from '../log.js'
+import { Params } from './params.js'
 
 /**
 The callback for `up.watch()`. It is called with the new value, the field name and the

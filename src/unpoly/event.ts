@@ -1,30 +1,35 @@
 import * as u from './util.js'
 import * as e from './element.js'
 import { fail } from './error.js'
-import { mockable } from './mockable.js'
-import { EventEmitter } from './event/event_emitter.js'
-import { EventListenerGroup } from './event/event_listener_group.js'
-import { UpEventListener } from './event/event_listener.js'
-import { layerStack } from './layer.js'
-import { printUserEvent } from './log.js'
-import { registerDestructor } from './script.js'
-import type { AssetsChangedEvent } from './script.js'
-import type { ClickEvent, DeferredLoadEvent, LinkFollowEvent, LinkPreloadEvent } from './link.js'
-import type { EmitLogOption } from './event/event_emitter.js'
-import type { EventListenerAttributes, ListenerCallback } from './event/event_listener.js'
-import type { FormSubmitEvent, FormSwitchEvent, FormValidateEvent } from './form.js'
-import type {
-  FragmentAbortedEvent, FragmentDestroyedEvent, FragmentInsertedEvent, FragmentKeepEvent, FragmentKeptEvent,
-  FragmentLoadedEvent, FragmentOfflineEvent, TemplateCloneEvent,
+import { type FormSubmitEvent, type FormSwitchEvent, type FormValidateEvent } from './form.js'
+import {
+  type FragmentAbortedEvent, type FragmentDestroyedEvent, type FragmentInsertedEvent,
+  type FragmentKeepEvent, type FragmentKeptEvent, type FragmentLoadedEvent,
+  type FragmentOfflineEvent, type LayerReference, type TemplateCloneEvent,
 } from './fragment.js'
-import type { FragmentHungryEvent, FragmentPollEvent } from './radio.js'
-import type { FrameworkBootedEvent } from './framework.js'
-import type { LocationChangedEvent, LocationRestoreEvent } from './history.js'
-import type { Layer } from './layer/base.js'
-import type { LayerCloseEvent, LayerLocationChangedEvent, LayerOpenEvent, LayerOpenedEvent } from './layer.js'
-import type { LayerReference } from './fragment/render/render_options.js'
-import type { MotionFinishEvent } from './motion.js'
-import type { RequestEvent, RequestLoadedEvent } from './network.js'
+import { type FrameworkBootedEvent } from './framework.js'
+import { type LocationChangedEvent, type LocationRestoreEvent } from './history.js'
+import {
+  layerStack, type Layer, type LayerCloseEvent, type LayerLocationChangedEvent,
+  type LayerOpenedEvent, type LayerOpenEvent,
+} from './layer.js'
+import {
+  type ClickEvent, type DeferredLoadEvent, type LinkFollowEvent, type LinkPreloadEvent,
+} from './link.js'
+import { printUserEvent } from './log.js'
+import { mockable } from './mockable.js'
+import { type MotionFinishEvent } from './motion.js'
+import { type RequestEvent, type RequestLoadedEvent } from './network.js'
+import { type FragmentHungryEvent, type FragmentPollEvent } from './radio.js'
+import { registerDestructor, type AssetsChangedEvent } from './script.js'
+import { EventEmitter, type EmitLogOption } from './event/event_emitter.js'
+export { EventEmitter }
+import {
+  UpEventListener, type EventListenerAttributes, type ListenerCallback,
+} from './event/event_listener.js'
+export { UpEventListener, type EventListenerAttributes }
+import { EventListenerGroup } from './event/event_listener_group.js'
+export { EventListenerGroup }
 
 /**
 A function that removes the event listeners registered by `up.on()`.

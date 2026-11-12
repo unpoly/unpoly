@@ -1,25 +1,21 @@
 import * as u from '../util.js'
-import { Aborted } from '../error/aborted.js'
-import { Offline } from '../error/offline.js'
-import { EventEmitter } from '../event/event_emitter.js'
-import { Params } from '../form/params.js'
+import { UpURLPattern } from '../util/url_pattern.js'
+import { Aborted, Offline } from '../error.js'
+import { EventEmitter, type EmitProps, type EmittedEvent } from '../event.js'
+import { Params, type ParamsLike } from '../form.js'
 import { getSmart, parseTargetSteps, splitTarget } from '../fragment.js'
-import { layerStack } from '../layer.js'
+import { layerStack, type Layer } from '../layer.js'
 import { abortRequests, cache, isSafeMethod, networkConfig } from '../network.js'
-import { FormRenderer } from './form_renderer.js'
-import { UpResponse } from './response.js'
-import { XHRRenderer } from './xhr_renderer.js'
 import {
   acceptLayerFromXHR, contextFromXHR, csrfHeader, csrfParam, csrfToken, dismissLayerFromXHR,
   eventPlansFromXHR, evictCacheFromXHR, expireCacheFromXHR, headerize, locationFromXHR,
   methodFromXHR, openLayerFromXHR, targetFromXHR, titleFromXHR,
 } from '../protocol.js'
 import { runPreviews } from '../status.js'
-import { UpURLPattern } from '../util/url_pattern.js'
-import type { ParamsLike } from '../form/params.js'
-import type { Layer } from '../layer/base.js'
-import type { Route } from './request_cache.js'
-import type { EmitProps, EmittedEvent } from '../event.js'
+import { FormRenderer } from './form_renderer.js'
+import { type Route } from './request_cache.js'
+import { UpResponse } from './response.js'
+import { XHRRenderer } from './xhr_renderer.js'
 
 /**
 The state of an `up.Request` in its lifecycle.

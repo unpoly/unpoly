@@ -1,6 +1,7 @@
 import * as u from '../util.js'
-import { UpEventListener } from './event_listener.js'
-import type { EventListenerAttributes, ListenerTarget } from './event_listener.js'
+import {
+  UpEventListener, type EventListenerAttributes, type ListenerTarget,
+} from './event_listener.js'
 
 /**
 The attributes for an `UpEventListener`, minus its single element and event type.

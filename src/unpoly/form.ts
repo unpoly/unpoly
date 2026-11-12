@@ -1,28 +1,27 @@
 import * as u from './util.js'
 import * as e from './element.js'
+import { OptionsParser, type OptionsParserOptions } from './element/options_parser.js'
+import { newConfig, type SelectorFn } from './util/config.js'
 import { fail, muteUncriticalRejection } from './error.js'
-import { mockable } from './mockable.js'
-import { OptionsParser } from './element/options_parser.js'
 import { build, haltEvent, on } from './event.js'
-import { FieldWatcher } from './form/field_watcher.js'
-import { FormValidator } from './form/form_validator.js'
-import { Params } from './form/params.js'
-import { Switcher } from './form/switcher.js'
 import {
   closest, getAllFragments, getSmart, getSubtree, render, sourceOf, toTarget, trackSelector,
-  tryToTarget,
+  tryToTarget, type RenderJob, type RenderOptions,
 } from './fragment.js'
 import { closestLayerElement, layerStack } from './layer.js'
 import { followOptions } from './link.js'
-import { callbackAttr, registerAttrCompiler, registerCompiler, registerDestructor } from './script.js'
-import { statusOptions } from './status.js'
-import { newConfig } from './util/config.js'
+import { mockable } from './mockable.js'
+import {
+  callbackAttr, registerAttrCompiler, registerCompiler, registerDestructor,
+} from './script.js'
+import { statusOptions, type PreviewFn } from './status.js'
 import { doFocus, focusedElementWithin } from './viewport.js'
-import type { OptionsParserOptions } from './element/options_parser.js'
-import type { RenderOptions } from './fragment/render/render_options.js'
-import type { RenderJob } from './fragment/render/render_job.js'
-import type { SelectorFn } from './util/config.js'
-import type { PreviewFn } from './status.js'
+import { FieldWatcher } from './form/field_watcher.js'
+import { FormValidator } from './form/form_validator.js'
+import { Params, type ParamEntry, type ParamsLike } from './form/params.js'
+export { Params, type ParamEntry, type ParamsLike }
+import { Switcher } from './form/switcher.js'
+export { Switcher }
 
 /**
 A form field or button: an `<input>`, `<select>`, `<textarea>`, `<button>` or a form-associated

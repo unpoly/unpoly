@@ -4,7 +4,7 @@ import { on } from '../event.js'
 import { isAlive, onAborted } from '../fragment.js'
 import { linkConfig, shouldHandleClick } from '../link.js'
 import { printUserEvent } from '../log.js'
-import type { UpRequest } from '../network/request.js'
+import { type UpRequest } from '../network.js'
 
 /**
 Called when the user shows an intent to follow a link, e.g. by hovering over it.

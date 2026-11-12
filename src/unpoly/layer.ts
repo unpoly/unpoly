@@ -1,15 +1,17 @@
 import './layer.sass'
 import * as u from './util.js'
-import { on } from './event.js'
-import { render } from './fragment.js'
-import { RenderOptions } from './fragment/render/render_options.js'
-import { Layer } from './layer/base.js'
-import type { LayerMode, OverlayMode } from './layer/base.js'
-import type { LayerLookupArgs } from './layer/layer_lookup.js'
-import { LayerStack } from './layer/layer_stack.js'
 import { newConfig } from './util/config.js'
-import type { AnimationValue } from './motion.js'
-import type { UpResponse } from './network/response.js'
+import { on } from './event.js'
+import { render, RenderOptions } from './fragment.js'
+import { type AnimationValue } from './motion.js'
+import { type UpResponse } from './network.js'
+import { Layer, type LayerMode, type OverlayMode, type PeelOptions } from './layer/base.js'
+export { Layer, type LayerMode, type PeelOptions }
+import { type LayerLookupArgs } from './layer/layer_lookup.js'
+import { LayerStack } from './layer/layer_stack.js'
+export { type Overlay } from './layer/modes/overlay.js'
+export { OVERLAY_VISUAL_KEYS, UNSET_OVERLAY_VISUALS } from './layer/overlay_visuals.js'
+export { Tether } from './layer/tether.js'
 
 /**
 The `up:layer:open` event.

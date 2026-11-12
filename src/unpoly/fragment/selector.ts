@@ -1,9 +1,8 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
-import { CannotMatch } from '../error/cannot_match.js'
+import { CannotMatch } from '../error.js'
 import { expandTargets, isNotDestroying } from '../fragment.js'
-import { layerStack } from '../layer.js'
-import type { Layer } from '../layer/base.js'
+import { layerStack, type Layer } from '../layer.js'
 
 type ElementFilter = (element: Element) => boolean
 

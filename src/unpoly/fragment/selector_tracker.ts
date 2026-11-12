@@ -1,7 +1,6 @@
 import * as u from '../util.js'
-import { on } from '../event.js'
+import { on, type UnbindFn } from '../event.js'
 import { afterMutate } from '../fragment.js'
-import type { UnbindFn } from '../event.js'
 
 /**
 Called when an element starts matching. May return a function that is called when it stops matching.

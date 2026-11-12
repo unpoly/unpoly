@@ -1,9 +1,9 @@
+import * as u from '../util.js'
 import * as e from '../element.js'
 import { on } from '../event.js'
 import { getSmart, tryToTarget } from '../fragment.js'
+import { type Layer } from '../layer.js'
 import { doFocus, focusedElementWithin } from '../viewport.js'
-import type { Layer } from '../layer/base.js'
-import * as u from '../util.js'
 
 export class FocusCapsule {
   declare _element: Element

@@ -1,8 +1,8 @@
+import './element.sass'
 import * as u from './util.js'
+import { Rect } from './util/rect.js'
 import { fail } from './error.js'
 import { mockable } from './mockable.js'
-import { Rect } from './util/rect.js'
-import './element.sass'
 
 /**
 A CSS selector, an element, or a list of elements. See `up.element.get()`.

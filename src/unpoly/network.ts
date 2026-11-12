@@ -1,16 +1,17 @@
 import './network.sass'
 import * as u from './util.js'
-import { mockable } from './mockable.js'
+import { newConfig } from './util/config.js'
 import { on } from './event.js'
+import { type Layer } from './layer.js'
 import { printToStandard } from './log.js'
+import { mockable } from './mockable.js'
 import { ProgressBar } from './network/progress_bar.js'
+import { UpRequest, type RequestOptions } from './network/request.js'
+export { UpRequest, type RequestOptions }
 import { UpRequestCache } from './network/request_cache.js'
 import { RequestQueue } from './network/request_queue.js'
-import { UpRequest } from './network/request.js'
 import { UpResponse } from './network/response.js'
-import { newConfig } from './util/config.js'
-import type { RequestOptions } from './network/request.js'
-import type { Layer } from './layer/base.js'
+export { UpResponse }
 
 /**
 The `up:request:load`, `up:request:aborted` and `up:request:offline` events.

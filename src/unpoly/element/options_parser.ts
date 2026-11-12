@@ -1,7 +1,6 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
-import { toFailKey } from '../fragment.js'
-import { RenderOptions } from '../fragment/render/render_options.js'
+import { RenderOptions, toFailKey } from '../fragment.js'
 
 /**
 Reads an attribute value from an element, like `up.element.booleanAttr()`.

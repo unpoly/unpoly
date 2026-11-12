@@ -1,7 +1,7 @@
 import * as u from '../util.js'
+import { type Params } from '../form.js'
 import { wrapMethod } from '../protocol.js'
-import type { Params } from '../form/params.js'
-import type { UpRequest } from './request.js'
+import { type UpRequest } from './request.js'
 
 const CONTENT_TYPE_URL_ENCODED = 'application/x-www-form-urlencoded'
 const CONTENT_TYPE_FORM_DATA = 'multipart/form-data'

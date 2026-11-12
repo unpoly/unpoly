@@ -1,21 +1,21 @@
 import './viewport.sass'
 import * as u from './util.js'
 import * as e from './element.js'
+import { newConfig } from './util/config.js'
+import { FIFOCache } from './util/fifo_cache.js'
+import { Rect } from './util/rect.js'
 import { fail } from './error.js'
-import { mockable } from './mockable.js'
-import { getInputDevice, on } from './event.js'
+import { getInputDevice, on, type InputDevice } from './event.js'
 import { isField } from './form.js'
 import { contains, getAllFragments, getSmart, tryToTarget } from './fragment.js'
 import { layerStack } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
+import { mockable } from './mockable.js'
 import { registerCompiler } from './script.js'
-import { newConfig } from './util/config.js'
-import { FIFOCache } from './util/fifo_cache.js'
-import { Rect } from './util/rect.js'
 import { BodyShifter } from './viewport/body_shifter.js'
 import { FocusCapsule } from './viewport/focus_capsule.js'
+export { FocusCapsule }
 import { RevealMotion } from './viewport/reveal_motion.js'
-import type { InputDevice } from './event.js'
 
 /**
 Options for focusing an element.

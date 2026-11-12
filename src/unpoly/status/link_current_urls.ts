@@ -1,6 +1,6 @@
 import * as u from '../util.js'
-import { isSafe } from '../link.js'
 import { UpURLPattern } from '../util/url_pattern.js'
+import { isSafe } from '../link.js'
 
 export class LinkCurrentURLs {
   declare _isSafe: boolean

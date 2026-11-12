@@ -1,17 +1,17 @@
 import * as u from './util.js'
 import * as e from './element.js'
-import { guardFn } from './error.js'
-import { mockable } from './mockable.js'
-import { OptionsParser } from './element/options_parser.js'
-import { on } from './event.js'
-import { getSmart } from './fragment.js'
-import { printToStandard } from './log.js'
-import { MotionController } from './motion/motion_controller.js'
+import { OptionsParser, type OptionsParserOptions } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
+import { guardFn } from './error.js'
+import { on, type UnbindFn } from './event.js'
+import { getSmart } from './fragment.js'
+// Not through framework.js, which may not be evaluated yet when we create a Registry below.
 import { Registry } from './framework/registry.js'
+import { printToStandard } from './log.js'
+import { mockable } from './mockable.js'
 import { absolutize, closest, rootHeight, rootWidth } from './viewport.js'
-import type { UnbindFn } from './event.js'
-import type { OptionsParserOptions } from './element/options_parser.js'
+import { MotionController } from './motion/motion_controller.js'
+export { MotionController }
 
 /**
 The duration and easing of an animation, after applying the defaults from `up.motion.config`.

@@ -1,9 +1,9 @@
 import * as u from './util.js'
 import * as e from './element.js'
-import { popCookie } from './browser.js'
-import { mockable } from './mockable.js'
 import { newConfig } from './util/config.js'
-import type { Params } from './form/params.js'
+import { popCookie } from './browser.js'
+import { type Params } from './form.js'
+import { mockable } from './mockable.js'
 
 /*-
 HTTP headers that let your server inspect and steer Unpoly's rendering.

@@ -1,19 +1,17 @@
 import * as u from './util.js'
 import * as e from './element.js'
+import { newConfig } from './util/config.js'
+import { FIFOCache } from './util/fifo_cache.js'
 import { muteUncriticalRejection } from './error.js'
 import { build, emit, haltEvent, isModified, on } from './event.js'
-import { render } from './fragment.js'
+import { render, type RenderOptions } from './fragment.js'
 import { layerStack } from './layer.js'
-import { makeFollowable } from './link.js'
+import { makeFollowable, type ClickEvent } from './link.js'
 import { printToStandard, printUserEvent } from './log.js'
 import { mockable } from './mockable.js'
 import { initialRequestMethod } from './protocol.js'
 import { registerMacro } from './script.js'
-import { newConfig } from './util/config.js'
-import { FIFOCache } from './util/fifo_cache.js'
 import { revealHash, revealHashFn, saveFocus, saveScroll } from './viewport.js'
-import type { RenderOptions } from './fragment/render/render_options.js'
-import type { ClickEvent } from './link.js'
 
 /**
 Why the location changed. `'detect'` is only used internally: we tell `'hash'` from `'pop'` later.

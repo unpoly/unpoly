@@ -1,14 +1,11 @@
 import * as u from '../../util.js'
 import * as e from '../../element.js'
-import { fail } from '../../error.js'
-import { Blocked } from '../../error/blocked.js'
-import { NotImplemented } from '../../error/not_implemented.js'
-import { RenderOptions } from '../../fragment/render/render_options.js'
+import { Blocked, fail, NotImplemented } from '../../error.js'
+import { RenderOptions } from '../../fragment.js'
 import { printToStandard, printToWarn } from '../../log.js'
 import { block, cspNonce, findScripts, isScript, scriptConfig } from '../../script.js'
 import { CSPInfo } from './csp_info.js'
-import { NonceableCallback } from './nonceable_callback.js'
-import type { EvalEnv } from './nonceable_callback.js'
+import { NonceableCallback, type EvalEnv } from './nonceable_callback.js'
 
 /**
 A value that `up.script.config.evalCallbackPolicy` or `up.script.config.scriptElementPolicy` can be set to.

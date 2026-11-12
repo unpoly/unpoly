@@ -1,13 +1,11 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
-import { guard, guardPromise } from '../error.js'
-import { UpError } from '../error/error.js'
+import { guard, guardPromise, UpError } from '../error.js'
 import { emit } from '../event.js'
 import { emitFragmentInserted, getSubtree } from '../fragment.js'
-import { layerStack } from '../layer.js'
+import { layerStack, type Layer } from '../layer.js'
 import { printToStandard } from '../log.js'
 import { readData, registerDestructor } from '../script.js'
-import type { Layer } from '../layer/base.js'
 
 /**
 A compiler or macro registered with `up.compiler()` or `up.macro()`: the compile function

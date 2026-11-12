@@ -1,9 +1,8 @@
 import * as u from '../util.js'
 import { splitTarget } from '../fragment.js'
 import { networkConfig } from '../network.js'
-import { UpRequest } from './request.js'
+import { UpRequest, type RequestCondition, type RequestOptions } from './request.js'
 import { UpResponse } from './response.js'
-import type { RequestCondition, RequestOptions } from './request.js'
 
 /**
 Options for `up.cache.track()`.

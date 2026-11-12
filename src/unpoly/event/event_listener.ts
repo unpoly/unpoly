@@ -2,8 +2,8 @@ import * as u from '../util.js'
 import { fail } from '../error.js'
 import { readFieldDisabled } from '../form.js'
 import { isBeforeBoot, isEvaling } from '../framework.js'
+import { type Layer } from '../layer.js'
 import { readData } from '../script.js'
-import type { Layer } from '../layer/base.js'
 
 /**
 An element, document or window that Unpoly listens on. It remembers its listeners,

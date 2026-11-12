@@ -1,19 +1,18 @@
 import * as u from './util.js'
 import * as e from './element.js'
-import { OptionsParser } from './element/options_parser.js'
+import { OptionsParser, type OptionsParserOptions } from './element/options_parser.js'
+import { newConfig } from './util/config.js'
 import { on } from './event.js'
 import { getDisablePreviewFn } from './form.js'
 import { matchSelectorMap } from './fragment.js'
-import { layerStack } from './layer.js'
+// Not through framework.js, which may not be evaluated yet when we create a Registry below.
+import { Registry } from './framework/registry.js'
+import { layerStack, type Layer } from './layer.js'
 import { printToStandard } from './log.js'
+import { type UpRequest } from './network.js'
+import { FocusCapsule } from './viewport.js'
 import { LinkCurrentURLs } from './status/link_current_urls.js'
 import { Preview } from './status/preview.js'
-import { newConfig } from './util/config.js'
-import { Registry } from './framework/registry.js'
-import { FocusCapsule } from './viewport/focus_capsule.js'
-import type { OptionsParserOptions } from './element/options_parser.js'
-import type { Layer } from './layer/base.js'
-import type { UpRequest } from './network/request.js'
 
 /**
 A preview function, registered with `up.preview()` or passed as `{ preview }`.

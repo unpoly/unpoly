@@ -1,11 +1,10 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
+import { Rect } from '../util/rect.js'
 import { fail } from '../error.js'
 import { getAllFragments } from '../fragment.js'
-import { layerStack } from '../layer.js'
-import { Rect } from '../util/rect.js'
+import { layerStack, type Layer } from '../layer.js'
 import { closest, isRoot, rootHeight, rootWidth, viewportConfig } from '../viewport.js'
-import type { Layer } from '../layer/base.js'
 
 /**
 Options for `up.reveal()`. Each `reveal*` option is an alias used by render options.

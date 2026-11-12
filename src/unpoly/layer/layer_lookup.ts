@@ -3,7 +3,7 @@ import * as e from '../element.js'
 import { fail } from '../error.js'
 import { normalizeLayerOptions } from '../layer.js'
 import { Layer } from './base.js'
-import type { LayerStack } from './layer_stack.js'
+import { type LayerStack } from './layer_stack.js'
 
 /**
 A value for the `{ layer }` option: an `up.Layer`, its index in the layer stack, an element in the layer,

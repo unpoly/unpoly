@@ -1,5 +1,7 @@
 import * as u from '../util.js'
-import { closest, containsMainPseudo, fragmentConfig, getFirstDescendant, matches, splitTarget } from '../fragment.js'
+import {
+  closest, containsMainPseudo, fragmentConfig, getFirstDescendant, matches, splitTarget,
+} from '../fragment.js'
 
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 

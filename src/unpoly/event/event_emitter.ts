@@ -1,11 +1,9 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
-import { guard } from '../error.js'
-import { Aborted } from '../error/aborted.js'
+import { Aborted, guard } from '../error.js'
 import { build } from '../event.js'
 import { getSmart } from '../fragment.js'
-import { layerStack } from '../layer.js'
-import { Layer } from '../layer/base.js'
+import { Layer, layerStack } from '../layer.js'
 import { logConfig, printToStandard } from '../log.js'
 
 /**

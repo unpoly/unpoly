@@ -1,29 +1,24 @@
 import './link.sass'
 import * as u from './util.js'
 import * as e from './element.js'
-import { muteUncriticalRejection } from './error.js'
-import { mockable } from './mockable.js'
-import { OptionsParser } from './element/options_parser.js'
-import { UpError } from './error/error.js'
+import { OptionsParser, type OptionsParserOptions } from './element/options_parser.js'
+import { newConfig } from './util/config.js'
+import { muteUncriticalRejection, UpError } from './error.js'
 import {
   build, emit, fork, getInputDevice, haltEvent, isModified, isSyntheticClick, keyModifiers, on,
+  type ModifierKey,
 } from './event.js'
 import { anyButtonSelector, formFieldSelector } from './form.js'
-import { getSmart, onFirstIntersect, render } from './fragment.js'
-import { RenderOptions } from './fragment/render/render_options.js'
+import { getSmart, onFirstIntersect, render, RenderOptions, type RenderJob } from './fragment.js'
 import { canPushState, isHistoryEnabled } from './history.js'
-import { LinkFollowIntent } from './link/link_follow_intent.js'
+import { type Layer } from './layer.js'
+import { mockable } from './mockable.js'
 import { motionOptions } from './motion.js'
-import { isSafeMethod, networkConfig } from './network.js'
-import { UpRequest } from './network/request.js'
+import { isSafeMethod, networkConfig, UpRequest } from './network.js'
 import { registerAttrCompiler, registerCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
-import { newConfig } from './util/config.js'
 import { doFocus } from './viewport.js'
-import type { OptionsParserOptions } from './element/options_parser.js'
-import type { RenderJob } from './fragment/render/render_job.js'
-import type { Layer } from './layer/base.js'
-import type { ModifierKey } from './event.js'
+import { LinkFollowIntent } from './link/link_follow_intent.js'
 
 // A link expanded with [up-expand] remembers the area it expanded to, and the area remembers the link.
 type ExpandedElement = Element & { upExpandedPair?: HTMLElement[] }

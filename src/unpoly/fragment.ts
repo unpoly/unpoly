@@ -1,33 +1,34 @@
 import './fragment.sass'
 import * as u from './util.js'
 import * as e from './element.js'
-import { fail } from './error.js'
-import { mockable } from './mockable.js'
-import { CannotParse } from './error/cannot_parse.js'
-import { CannotTarget } from './error/cannot_target.js'
+import { newConfig } from './util/config.js'
+import { CannotParse, CannotTarget, fail } from './error.js'
 import { emit, on, onClosest } from './event.js'
-import { FragmentFinder } from './fragment/fragment_finder.js'
-import { DestroyFragment } from './fragment/render/change/destroy_fragment.js'
-import { RenderJob } from './fragment/render/render_job.js'
-import { SelectorTracker } from './fragment/selector_tracker.js'
-import { Selector } from './fragment/selector.js'
 import { canPushState, isHistoryEnabled } from './history.js'
-import { layerConfig, layerStack, mainTargets } from './layer.js'
-import { Layer } from './layer/base.js'
+import { Layer, layerConfig, layerStack, mainTargets, type LayerMode } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
-import { abortRequests } from './network.js'
+import { mockable } from './mockable.js'
+import { abortRequests, type UpRequest, type UpResponse } from './network.js'
 import {
   callbackAttr, hello, isScript, readData, registerDestructor, registerMacro, scriptConfig,
 } from './script.js'
-import { newConfig } from './util/config.js'
-import type { UpRequest } from './network/request.js'
-import type { UpResponse } from './network/response.js'
-import type {
-  FragmentProcessorValue, RenderOptions, RenderTarget, ResolvedRenderOptions,
+import { type FocusCapsule } from './viewport.js'
+import { FragmentFinder } from './fragment/fragment_finder.js'
+export { CloseLayer, type CloseLayerOptions } from './fragment/render/change/close_layer.js'
+import { DestroyFragment } from './fragment/render/change/destroy_fragment.js'
+import { RenderJob } from './fragment/render/render_job.js'
+export { RenderJob }
+import {
+  RenderOptions, type FragmentProcessorValue, type LayerReference, type RenderTarget,
+  type ResolvedRenderOptions,
 } from './fragment/render/render_options.js'
-import type { FocusCapsule } from './viewport/focus_capsule.js'
-import type { LayerMode } from './layer/base.js'
-import type { RenderResult } from './fragment/render/render_result.js'
+export { RenderOptions, type LayerReference }
+import { type RenderResult } from './fragment/render/render_result.js'
+export { type RenderResult }
+export { ResponseDoc } from './fragment/render/response_doc.js'
+import { Selector } from './fragment/selector.js'
+import { SelectorTracker } from './fragment/selector_tracker.js'
+export { SelectorTracker }
 
 /**
 A step of a render pass: which old element to update with which new element, and how.

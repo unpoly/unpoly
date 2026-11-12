@@ -1,5 +1,5 @@
-import { guardFn } from './error.js'
 import { canJQuery } from './browser.js'
+import { guardFn } from './error.js'
 
 /**
 A list that Unpoly's list functions accept: an array, a `NodeList`, an `HTMLCollection`,

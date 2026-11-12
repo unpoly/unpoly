@@ -1,8 +1,7 @@
 import * as u from './util.js'
-import { mockable } from './mockable.js'
 import { on } from './event.js'
-import { LogConfig } from './log/log_config.js'
-import type { LogSettings } from './log/log_config.js'
+import { mockable } from './mockable.js'
+import { LogConfig, type LogSettings } from './log/log_config.js'
 
 /*-
 Features to log Unpoly's activity to the browser console.
