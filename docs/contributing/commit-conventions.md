@@ -1,7 +1,7 @@
 # Commit conventions
 
-How we write commits and what happens to them: the namespace prefix every subject carries, and
-what CI runs when you open a pull request.
+How we write commits and what happens to them: the namespace prefix every subject carries, how
+mechanical changes keep `git blame` useful, and what CI runs when you open a pull request.
 
 ## Message prefix
 
@@ -24,6 +24,21 @@ Some commits don't belong to a namespace. Make up a term that reads like one:
 [version] Version 3.5.0
 [specs] Replace old fixtures helper
 [docs] Document optimistic rendering
+```
+
+
+## Mechanical changes
+
+A mechanical change, like a scripted refactoring, a rename, reformatting or moving code,
+goes into its own commit, without hand edits mixed in. End its message with the trailer
+`Blame-Ignore: true`, so we can list it in `.git-blame-ignore-revs` and `git blame` skips
+it. `git blame -w` already ignores whitespace changes, and `git blame -C -C` follows code
+that moved between files.
+
+```
+[util] Rename u.foo() to u.bar()
+
+Blame-Ignore: true
 ```
 
 
