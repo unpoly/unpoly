@@ -11,7 +11,6 @@ type OverlayDefaults = import('../unpoly/layer.js').OverlayDefaults
 
 /**
 The type of `up.modal`, whose functions moved to up.layer.
-@internal
 */
 interface ModalApi {
   visit(url: string, options?: RenderOptions): Promise<Layer>

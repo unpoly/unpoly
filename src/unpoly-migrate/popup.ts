@@ -10,7 +10,6 @@ type OverlayDefaults = import('../unpoly/layer.js').OverlayDefaults
 
 /**
 The type of `up.popup`, whose functions moved to up.layer.
-@internal
 */
 interface PopupApi {
   attach(origin: ElementOrSelector, options?: RenderOptions): Promise<Layer>

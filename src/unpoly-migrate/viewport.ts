@@ -7,7 +7,6 @@ type LookupOptions = import('../unpoly/fragment.js').LookupOptions
 
 /**
 Options for up.scroll(): where to look for the viewport, and how to scroll it.
-@internal
 */
 interface ViewportScrollOptions extends LookupOptions, ScrollOptions {}
 

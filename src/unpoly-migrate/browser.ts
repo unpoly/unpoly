@@ -7,7 +7,6 @@ type RequestOptions = import('../unpoly/network.js').RequestOptions
 
 /**
 The type of `up.browser`, whose functions moved to other namespaces.
-@internal
 */
 interface BrowserApi {
   loadPage(options: RequestOptions): void
