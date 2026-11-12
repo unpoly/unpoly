@@ -1,6 +1,6 @@
 import './element.sass'
 import * as u from './util.js'
-import { fail } from './error.js'
+import { CannotParse, fail } from './error.js'
 import { mockable } from './mockable.js'
 import type * as t from './element/types.js'
 export type * from './element/types.js'
@@ -266,12 +266,17 @@ export function parseSelector(rawSelector: string): t.ParsedSelector {
 
     depthSelector = depthSelector.replace(/\[[^\]]*]/g, function(attr) {
       attr = restoreSelectorLiterals(attr)
-      // We allow whitespace around the name, operator and value, and ignore a case-sensitivity flag ([foo="bar" i]).
-      // TODO: A namespaced attribute ([ns|foo]) or an invalid attribute selector doesn't match, and we throw a TypeError
-      //       instead of failing with "Cannot parse selector".
-      let [_raw, name, _operator, quote, value] = attr.match(/\[\s*([\w-]+)\s*(?:([~|^$*]?=)\s*(["'])?(.*?)\3)?(?:\s+[is])?\s*]/is)!
-      quote ||= '"'
-      parsed.attributes[name] = value ? u.parseString(quote + value + quote) : ''
+      // We don't support all attribute selector syntax, like whitespace around the operator
+      // ([foo = "bar"]) or a case-sensitivity flag ([foo="bar" i]). Such a selector either
+      // doesn't match our regexp, or yields a value that we cannot parse as a string.
+      try {
+        // When the regexp doesn't match, destructuring null throws, and we catch it below.
+        let [_raw, name, _operator, quote, value] = attr.match(/\[([\w-]+)(?:([~|^$*]?=)(["'])?(.*?)\3)?]/s)!
+        quote ||= '"'
+        parsed.attributes[name] = value ? u.parseString(quote + value + quote) : ''
+      } catch {
+        throw new CannotParse('Unsupported attribute selector: ' + attr)
+      }
       return ''
     })
 

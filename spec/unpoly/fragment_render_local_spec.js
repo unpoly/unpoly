@@ -51,20 +51,13 @@ extendDescribe('up.fragment', function() {
           expect('.main-element').toHaveText('new text')
         })
 
-        it('targets an attribute selector with whitespace around the operator (bugfix)', async function() {
+        it('rejects with up.CannotParse for a target with an attribute selector it cannot parse (bugfix)', async function() {
           htmlFixtureList('<div data-x="y">old text</div>')
 
-          await up.render({ target: '[data-x = "y"]', content: 'new text' })
+          const promise = up.render({ target: '[data-x = "y"]', content: 'new text' })
 
-          expect('[data-x="y"]').toHaveText('new text')
-        })
-
-        it('targets an attribute selector with a case-sensitivity flag (bugfix)', async function() {
-          htmlFixtureList('<div data-x="y">old text</div>')
-
-          await up.render({ target: '[data-x="Y" i]', content: 'new text' })
-
-          expect('[data-x="y"]').toHaveText('new text')
+          await expectAsync(promise).toBeRejectedWith(jasmine.any(up.CannotParse))
+          expect('[data-x="y"]').toHaveText('old text')
         })
 
         it("removes the target's inner HTML with { content: '' }", async function() {

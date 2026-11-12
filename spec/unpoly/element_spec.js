@@ -518,47 +518,6 @@ describe('up.element', function() {
       expect(element.getAttribute('name')).toEqual('user[email]')
     })
 
-    it('allows whitespace around the attribute operator', function() {
-      const element = up.element.createFromSelector('input[type = "text"]')
-      expect(element.tagName).toEqual('INPUT')
-      expect(element.getAttribute('type')).toEqual('text')
-    })
-
-    it('allows whitespace around an unquoted attribute value', function() {
-      const element = up.element.createFromSelector('ul[ foo = bar ]')
-      expect(element.getAttribute('foo')).toEqual('bar')
-    })
-
-    it('allows whitespace around a value-less attribute', function() {
-      const element = up.element.createFromSelector('ul[ foo ]')
-      expect(element.getAttribute('foo')).toEqual('')
-    })
-
-    it('ignores a case-insensitive flag in an attribute selector', function() {
-      const element = up.element.createFromSelector('ul[foo="bar" i]')
-      expect(element.getAttribute('foo')).toEqual('bar')
-    })
-
-    it('ignores a case-sensitive flag in an attribute selector', function() {
-      const element = up.element.createFromSelector("ul[foo='bar' s]")
-      expect(element.getAttribute('foo')).toEqual('bar')
-    })
-
-    it('ignores an uppercase case-sensitivity flag in an attribute selector', function() {
-      const element = up.element.createFromSelector('ul[foo="bar" I]')
-      expect(element.getAttribute('foo')).toEqual('bar')
-    })
-
-    it('ignores a case-sensitivity flag after an unquoted attribute value', function() {
-      const element = up.element.createFromSelector('ul[foo=bar i]')
-      expect(element.getAttribute('foo')).toEqual('bar')
-    })
-
-    it('keeps a quoted attribute value that ends in a space and a letter like a flag', function() {
-      const element = up.element.createFromSelector('ul[foo="bar i"]')
-      expect(element.getAttribute('foo')).toEqual('bar i')
-    })
-
     it('creates an element with an attribute set to a space-separated value', function() {
       const element = up.element.createFromSelector('ul[foo~=bar]')
       expect(element).toBeElement()
@@ -626,6 +585,16 @@ describe('up.element', function() {
     it('throws an error when encountering an unknown selector', function() {
       const parse = () => up.element.createFromSelector("ul~baz")
       expect(parse).toThrowError('Cannot parse selector: ul~baz')
+    })
+
+    it('throws an up.CannotParse error for an attribute selector with whitespace around the operator (bugfix)', function() {
+      const parse = () => up.element.createFromSelector('input[type = "text"]')
+      expect(parse).toThrowError(up.CannotParse, 'Unsupported attribute selector: [type = "text"]')
+    })
+
+    it('throws an up.CannotParse error for an attribute selector with a case-sensitivity flag (bugfix)', function() {
+      const parse = () => up.element.createFromSelector('[foo="bar" i]')
+      expect(parse).toThrowError(up.CannotParse, 'Unsupported attribute selector: [foo="bar" i]')
     })
 
     it('sets attributes from a second argument', function() {
