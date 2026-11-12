@@ -40,7 +40,7 @@ export class Config<S extends object> {
   logUnknownKeys(): void {
     for (let key of Object.keys(this)) {
       if (!this._knownKeys.includes(key)) {
-        // Config is evaluated before up.log, whose LogConfig extends it. So we can't import
+        // Config is evaluated before up.log, which uses it. So we can't import
         // printToError() and reach it through window.up when called.
         up.internal.printToError(this._label, 'Ignoring unknown setting %s. Fix its name or remove it.', key)
       }
@@ -49,9 +49,10 @@ export class Config<S extends object> {
 
   reset(): void {
     // We copy property descriptors instead of values, so the defaults can hold a getter and
-    // setter that forward a setting to another config (like up.fragment.config.mainTargets).
-    // Note that a defaults key matching an accessor on a Config subclass (like LogConfig#enabled,
-    // which writes sessionStorage) would shadow that accessor instead of calling its setter.
+    // setter that forward a setting to another config (like up.fragment.config.mainTargets)
+    // or to the session storage (like up.log.config.enabled).
+    // Note that a defaults key matching an accessor on a Config subclass would shadow that
+    // accessor instead of calling its setter.
     Object.defineProperties(this, Object.getOwnPropertyDescriptors(this._blueprintFn()))
   }
 
