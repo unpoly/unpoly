@@ -5,7 +5,7 @@ import {
   getRegion, isField, readFieldName, trackFields, watchOptions, type WatchOptions,
   type WatchCallback,
 } from '../form.js'
-import { isAlive } from '../fragment.js'
+import { isAlive, type FragmentAbortedEvent } from '../fragment.js'
 import { printUserEvent } from '../log.js'
 import { Params } from './params.js'
 
@@ -72,7 +72,7 @@ export class FieldWatcher {
   }
 
   _trackAbort(): () => void {
-    let guard = ({ target }: Event): boolean => (target as Element).contains(this._region)
+    let guard = ({ target }: FragmentAbortedEvent): boolean => target.contains(this._region)
     return on('up:fragment:aborted', { guard }, () => this._abort())
   }
 

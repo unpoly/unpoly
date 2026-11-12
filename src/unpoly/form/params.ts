@@ -638,7 +638,7 @@ export class Params {
     A field that a [preview](/api/up.Preview.prototype.disable) disabled is always added.
   @experimental
   */
-  // TODO(types): A type for fields (input, select, textarea or a form-associated custom element).
+  // Takes any, since it reads the properties of whichever kind of field it gets (checked, files, ...).
   addField(field: any, { includeDisabled }: { includeDisabled?: boolean } = {}): void {
     field = e.getOne(field) // unwrap jQuery
 

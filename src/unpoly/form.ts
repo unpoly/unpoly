@@ -846,7 +846,7 @@ export function destinationOptions(form: Element, options?: u.PlainObject, parse
   const submitButton = (options.submitButton ??= defaultSubmitButton(form))
 
   // Parse params from form fields.
-  const paramParts = [
+  const paramParts: [Params, ...t.ParamsLike[]] = [
     Params.fromForm(form, options),
     e.jsonAttr(form, 'up-params'),
   ]
@@ -872,7 +872,7 @@ export function destinationOptions(form: Element, options?: u.PlainObject, parse
 
   // We merge any { params } option into the params that we got from the form elements.
   options.params = Params.merge(
-    ...paramParts as [Params, ...Params[]],
+    ...paramParts,
     options.params,
   )
 
