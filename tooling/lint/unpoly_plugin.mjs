@@ -53,7 +53,8 @@ const LEGACY_OCTAL_ESCAPE = /(?<!\\)(?:\\\\)*\\(?:[1-7]|0[0-9])/
 // `export { u }`) makes esbuild build the module's namespace object, an object with every
 // export of the module (2.4 KB for util). A local binding of the same name (`catch (e)`) would
 // make `e.member` mean something else in its scope, so the alias may not be shadowed either.
-// See docs/contributing/code-organization.md.
+// Types are erased, so `typeof u` or any use of an `import type` alias costs nothing. We report
+// them anyway, so values and types follow the same rule. See docs/contributing/code-organization.md.
 const namespaceAliases = {
   meta: {
     type: 'problem',
@@ -69,18 +70,24 @@ const namespaceAliases = {
           if (statement.type !== 'ImportDeclaration') continue
           for (let specifier of statement.specifiers) {
             if (specifier.type !== 'ImportNamespaceSpecifier') continue
-            aliases.set(specifier.local.name, sourceCode.getDeclaredVariables(specifier)[0])
+            aliases.set(specifier.local.name, {
+              variable: sourceCode.getDeclaredVariables(specifier)[0],
+              typeOnly: statement.importKind === 'type',
+            })
           }
         }
         if (!aliases.size) return
 
-        for (let [name, variable] of aliases) {
+        for (let [name, { variable, typeOnly }] of aliases) {
           for (let reference of variable.references) {
-            if (!isMemberAccess(reference.identifier)) {
+            let { identifier } = reference
+            if (!isMemberAccess(identifier)) {
+              let reason = (typeOnly || isTypePosition(identifier))
+                ? 'Types follow the same rule as values.'
+                : 'Any other use makes esbuild build an object with every export of the module.'
               context.report({
-                node: reference.identifier,
-                message: `Only use the namespace import \`${name}\` to access a member by name, like \`${name}.member\`. ` +
-                  'Any other use makes esbuild build an object with every export of the module (2.4 KB for util).',
+                node: identifier,
+                message: `Only use the namespace import \`${name}\` to access a member by name, like \`${name}.member\`. ${reason}`,
               })
             }
           }
@@ -90,7 +97,7 @@ const namespaceAliases = {
         let shadowing = new Set()
         for (let scope of sourceCode.scopeManager.scopes) {
           for (let variable of scope.variables) {
-            let alias = aliases.get(variable.name)
+            let alias = aliases.get(variable.name)?.variable
             // A variable without definitions is a global from TypeScript's libs, like `event`,
             // which the import shadows, not the other way round.
             if (alias && alias !== variable && variable.defs.length) shadowing.add(variable.defs[0].name)
@@ -115,6 +122,11 @@ function isMemberAccess(identifier) {
     default:
       return false
   }
+}
+
+// `typeof u` in a type annotation. (`u.List` is a member access, so it never gets here.)
+function isTypePosition(identifier) {
+  return identifier.parent.type === 'TSTypeQuery'
 }
 
 export default {

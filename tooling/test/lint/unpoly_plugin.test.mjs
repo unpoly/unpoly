@@ -12,6 +12,14 @@ const PLUGIN = path.join(PROJECT_ROOT, 'tooling', 'lint', 'unpoly_plugin.mjs')
 // Lints `files` with nothing but `rule` from our plugin, and returns the reported lines per file,
 // in ascending order.
 function lint(t, rule, files) {
+  let lines = Object.fromEntries(Object.keys(files).map((file) => [file, []]))
+  for (let diagnostic of diagnostics(t, rule, files)) lines[diagnostic.filename].push(diagnostic.labels[0].span.line)
+  for (let fileLines of Object.values(lines)) fileLines.sort((a, b) => a - b)
+  return lines
+}
+
+// Lints `files` with nothing but `rule` from our plugin, and returns Oxlint's diagnostics.
+function diagnostics(t, rule, files) {
   let root = mkdtempSync(path.join(tmpdir(), 'unpoly-plugin-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))
   writeFileSync(path.join(root, '.oxlintrc.json'), JSON.stringify({
@@ -21,10 +29,7 @@ function lint(t, rule, files) {
   }))
   for (let [file, content] of Object.entries(files)) writeFileSync(path.join(root, file), content)
   let { stdout } = spawnSync(OXLINT_BIN, ['-f', 'json', ...Object.keys(files)], { cwd: root, encoding: 'utf8' })
-  let lines = Object.fromEntries(Object.keys(files).map((file) => [file, []]))
-  for (let diagnostic of JSON.parse(stdout).diagnostics) lines[diagnostic.filename].push(diagnostic.labels[0].span.line)
-  for (let fileLines of Object.values(lines)) fileLines.sort((a, b) => a - b)
-  return lines
+  return JSON.parse(stdout).diagnostics
 }
 
 test('declare-class-fields reports a TypeScript class field with neither declare nor initializer', (t) => {
@@ -92,6 +97,23 @@ test('namespace-aliases reports any other use of a namespace import', (t) => {
     ].join('\n'),
   })
   assert.deepEqual(lines, { 'module.ts': [3, 4, 5, 6, 7, 8, 9, 10] })
+})
+
+test('namespace-aliases only names the namespace object as the reason when the use is a value', (t) => {
+  let reported = diagnostics(t, 'namespace-aliases', {
+    'module.ts': [
+      "import * as u from './util.js'",
+      "import type * as t from './types.js'",
+      'console.log(u)',
+      'type Util = typeof u',
+      'export type { t }',
+      '',
+    ].join('\n'),
+  })
+  let reasons = reported
+    .sort((a, b) => a.labels[0].span.line - b.labels[0].span.line)
+    .map((diagnostic) => diagnostic.message.includes('esbuild') ? 'esbuild' : 'consistency')
+  assert.deepEqual(reasons, ['esbuild', 'consistency', 'consistency'])
 })
 
 test('namespace-aliases reports a local binding that shadows a namespace import', (t) => {
