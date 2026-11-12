@@ -82,6 +82,14 @@ if (up.migrate.loaded) {
         expect(up.modal.contains('.missing')).toBe(false)
       })
 
+      it('up.modal.url() returns undefined when the overlay has no location', async function() {
+        await up.layer.open({ mode: 'modal', fragment: '<div class="in-overlay"></div>' })
+        up.migrate.warn.mock()
+
+        expect(up.layer.current.location).toBeUndefined()
+        expect(up.modal.url()).toBeUndefined()
+      })
+
       it('throws for the removed up.modal.flavors and up.modal.flavor()', function() {
         expect(() => up.modal.flavors).toThrowError(/up.modal.flavors has been removed/)
         expect(() => up.modal.flavor('custom', {})).toThrowError(/up.modal.flavors has been removed/)

@@ -53,6 +53,14 @@ if (up.migrate.loaded) {
         expect(up.popup.contains('.in-root')).toBe(false)
         expect(up.popup.contains('.missing')).toBe(false)
       })
+
+      it('up.popup.url() returns undefined when the overlay has no location', async function() {
+        await up.layer.open({ mode: 'popup', origin: fixture('a#origin', { text: 'origin' }), fragment: '<div class="in-overlay"></div>' })
+        up.migrate.warn.mock()
+
+        expect(up.layer.current.location).toBeUndefined()
+        expect(up.popup.url()).toBeUndefined()
+      })
     })
 
     describe('up.popup.sync()', function() {
