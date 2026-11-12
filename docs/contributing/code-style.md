@@ -74,10 +74,6 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
 
   Inline callbacks and functions that get their type from context stay inferred. So do
   functions in an object literal and a function returned directly by a named function.
-
-  Lint skips `consistent-type-definitions` and `explicit-function-return-type` in the modules
-  that are not converted yet. Their override in `.oxlintrc.json` lists them in `excludeFiles`,
-  and a change that converts a module removes it there. New files are always checked.
 - **Local variables are inferred.** Annotate one where inference can't do it (see
   [Strict checks](#strict-checks)), or where a type helps the reader.
 - **Refactor before type acrobatics.** When a type is hard to write, change the code so it's

@@ -169,18 +169,9 @@
         "prefer-rest-params": "off",
         "prefer-spread": "off",
         // We allow `any` while converting (strictness is loose for now).
-        "typescript/no-explicit-any": "off"
-      }
-    },
-    {
-      // The TypeScript conventions in docs/contributing/code-style.md, as a ratchet: they apply to
-      // all of src/ except the modules in `excludeFiles`, which don't follow them yet. A step of
-      // the migration that converts a module removes it from the list. Once the list is empty,
-      // the rules can move to the override for **/*.ts above. New files are checked by default.
-      // Inline callbacks and functions whose type comes from context keep inferred return types.
-      "files": ["src/**/*.ts"],
-      "excludeFiles": [],
-      "rules": {
+        "typescript/no-explicit-any": "off",
+        // The TypeScript conventions in docs/contributing/code-style.md. Inline callbacks and
+        // functions whose type comes from context keep inferred return types.
         "typescript/explicit-function-return-type": ["error", {
           "allowExpressions": true,
           "allowTypedFunctionExpressions": true,

@@ -14,15 +14,19 @@ import { PROJECT_ROOT } from '../../build/build_status.mjs'
 const OXLINT_BIN = path.join(PROJECT_ROOT, 'node_modules', '.bin', 'oxlint')
 const CONFIG = path.join(PROJECT_ROOT, '.oxlintrc.json')
 
-// Code that breaks the rule, in a module of each file type that the rule checks.
+// Code that breaks the rule, in a module of each file type that the rule checks. A pair is the
+// code for JavaScript and for TypeScript, where a function needs a return type to pass lint.
 const STYLE = {
   '@stylistic/semi': 'export let semi = 1;\n',
-  '@stylistic/arrow-parens': 'export let arrowParens = x => x\n',
+  '@stylistic/arrow-parens': ['export let arrowParens = x => x\n', 'export let arrowParens: (x: number) => number = x => x\n'],
   '@stylistic/object-curly-spacing': 'export let objectCurlySpacing = {a: 1}\n',
-  '@stylistic/space-before-function-paren': 'export function spaceBeforeFunctionParen () {}\n',
+  '@stylistic/space-before-function-paren': ['export function spaceBeforeFunctionParen () {}\n', 'export function spaceBeforeFunctionParen (): void {}\n'],
 }
 const BROKEN = {
-  ...Object.fromEntries(Object.entries(STYLE).map(([rule, code]) => [rule, { 'module.js': code, 'module.ts': code }])),
+  ...Object.fromEntries(Object.entries(STYLE).map(([rule, code]) => {
+    let [js, ts = js] = [code].flat()
+    return [rule, { 'module.js': js, 'module.ts': ts }]
+  })),
   'unpoly/declare-class-fields': { 'module.ts': 'export class Box {\n  left: number\n}\n' },
   'unpoly/namespace-aliases': {
     'module.js': "import * as u from './util.js'\nexport default u\n",
