@@ -55,7 +55,7 @@ export class CloseLayer extends Change<t.CloseLayerOptions> {
     // Remember the parent, which will no longer be accessible once we
     // remove @layer from the @stack.
     // An overlay always has a parent.
-    const { parent } = this.layer
+    const parent = this.layer.parent!
 
     // Close any child-layers we might have.
     // We don't wait for peeling to finish, since changes that affect the
@@ -64,7 +64,7 @@ export class CloseLayer extends Change<t.CloseLayerOptions> {
 
     // Move focus before destroying elements, as this involves checking if the closing
     // overlay had focus.
-    this._handleFocus(parent!)
+    this._handleFocus(parent)
 
     this.layer.teardownHandlers()
 
@@ -78,16 +78,16 @@ export class CloseLayer extends Change<t.CloseLayerOptions> {
     // Restore the history of the parent layer we just uncovered.
     // This will only work after parent layer has become the front layer.
     if (this._history) {
-      parent!.restoreHistory()
+      parent.restoreHistory()
     }
 
     // We immediately emit up:layer:accepted/:dismissed and execute onAccepted/onDismissed callbacks.
     // We don't wait for the closing animation to finish.
     this.layer.state = 'closed'
-    this._emitClosedEvent(parent!)
+    this._emitClosedEvent(parent)
 
     // After an { onAccepted } or { onDismissed } callback, reload a fragment from { onAcceptedReload } or { onDismissedReload }.
-    this._reloadParent(parent!)
+    this._reloadParent(parent)
   }
 
   _reloadParent(parent: Layer): void {
