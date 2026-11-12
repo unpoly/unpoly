@@ -74,6 +74,8 @@ export class ChangeFromContent extends Change {
   }
 
   // Returns an up.RenderResult, or a promise when preloading local content.
+  // Kept `any`: RenderJob returns this as a RenderResult, which also hides that ChangeFromURL
+  // resolves with an up.Request when preloading.
   execute(): any {
     // Preloading from local content is a no-op.
     if (this.options.preload) {
