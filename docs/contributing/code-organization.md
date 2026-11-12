@@ -328,6 +328,15 @@ A module re-exports exactly the classes that other modules import, nothing more.
 > check that it doesn't use the class while it is being defined (`extends`, a static block, a
 > top-level call). The rules for cycles are in the comments of `src/unpoly.ts`.
 
+**Exceptions.** A module doesn't re-export a class when that would make it evaluate before a
+module the class imports. `util.ts` and `element.ts` don't re-export their classes: `Config`
+imports `element.ts`, and `OptionsParser` imports `fragment.ts`. Such classes are imported from
+their own file, like `import { newConfig } from './util/config.js'`. For the same reason,
+`motion.ts` and `status.ts` import `Registry` from `framework/registry.js`, since they create
+one before `framework.ts` is evaluated. `internal.ts` keeps named imports, also from `util.ts`
+and `element.ts`, because `bin/lint`'s api collision check needs each `up.internal` key to be
+a named import.
+
 
 ## Entry points and optional bundles
 
