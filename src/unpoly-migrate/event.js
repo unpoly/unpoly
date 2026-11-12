@@ -13,7 +13,7 @@ has prevented the default action.
 ```javascript
 if (up.event.nobodyPrevents('disk:erase')) {
   Disk.erase()
-})
+}
 ```
 
 @function up.event.nobodyPrevents
