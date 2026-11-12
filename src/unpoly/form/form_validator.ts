@@ -54,7 +54,7 @@ export class FormValidator {
   }
 
   _honorAbort(): void {
-    onAborted(this._form, (event: FragmentAbortedEvent) => this._onAborted(event))
+    onAborted(this._form, (event) => this._onAborted(event))
   }
 
   _onAborted(event: FragmentAbortedEvent): void {

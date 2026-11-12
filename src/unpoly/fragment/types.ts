@@ -143,6 +143,8 @@ export interface FragmentAbortedEvent extends UpEvent {
   target: Element
   reason: string
   newLayer: boolean
+  /** @internal The render job that aborted, so a poller can tell its own reload apart. */
+  jid?: number
 }
 
 /** The `up:template:clone` event. */

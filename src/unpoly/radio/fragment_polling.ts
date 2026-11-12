@@ -3,7 +3,8 @@ import * as e from '../element.js'
 import { throwCritical } from '../error.js'
 import { build, on } from '../event.js'
 import {
-  isAlive, isTargetable, matches, onAborted, onKept, reload, type RenderResult,
+  isAlive, isTargetable, matches, onAborted, onKept, reload, type FragmentAbortedEvent,
+  type RenderResult,
 } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
 import { printToStandard, printToWarn } from '../log.js'
@@ -53,7 +54,7 @@ export class FragmentPolling {
     this._start()
   }
 
-  _onFragmentAborted({ newLayer, jid }: Event & { newLayer?: boolean, jid?: number }): void {
+  _onFragmentAborted({ newLayer, jid }: FragmentAbortedEvent): void {
     const isOurAbort = (jid === this._reloadJID)
     if (isOurAbort || newLayer) return
     this._stop()
