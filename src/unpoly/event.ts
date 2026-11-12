@@ -575,7 +575,7 @@ up.on('click', 'a.disabled', function(event) {
   The event to stop processing for.
 @stable
 */
-export function halt(event: Event, options: { log?: boolean } = {}): void {
+export function haltEvent(event: Event, options: { log?: boolean } = {}): void {
   if (options.log) printUserEvent(event)
   event.stopImmediatePropagation()
   event.preventDefault()
@@ -830,7 +830,7 @@ export const api = {
     build,
     emit,
     onEscape,
-    halt,
+    halt: haltEvent,
     isModified,
     get inputDevice() { return getInputDevice() },
   },

@@ -6,7 +6,7 @@ import { on } from '../event.js'
 import { EventEmitter } from '../event/event_emitter.js'
 import { EventListenerGroup } from '../event/event_listener_group.js'
 import {
-  currentLocation, findMetaTags, getLang, isHistoryEnabled, push as historyPush, updateLang,
+  currentLocation, findMetaTags, getLang, isHistoryEnabled, pushLocation, updateLang,
   updateMetaTags,
 } from '../history.js'
 import { closestLayerElement, mainTargets } from '../layer.js'
@@ -783,7 +783,7 @@ export abstract class Layer {
     if (this._savedLocation && this.showsLiveHistory('location')) {
       // We cannot use the `this.title` setter as that does not
       // push a state if `newLocation === this._savedLocation`.
-      historyPush(this._savedLocation)
+      pushLocation(this._savedLocation)
     }
 
     if (this._savedTitle && this.showsLiveHistory('title')) {
@@ -984,7 +984,7 @@ export abstract class Layer {
     // - We end up not changing the URL from /overlay to /root, because neither peeling nor the fragment update
     //   has pushed a state.
     if (newLocation !== liveLocation && this.showsLiveHistory('location') && push) {
-      historyPush(newLocation)
+      pushLocation(newLocation)
     }
 
     // (A) Only emit up:layer:location:changed after we pushed a new history entry.

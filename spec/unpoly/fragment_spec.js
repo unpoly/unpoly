@@ -919,15 +919,15 @@ describe('up.fragment', function() {
 
     })
 
-    describe('up.internal.failKey', function() {
+    describe('up.internal.toFailKey', function() {
 
       it('returns a failVariant for the given object key', function() {
-        const result = up.internal.failKey('foo')
+        const result = up.internal.toFailKey('foo')
         expect(result).toEqual('failFoo')
       })
 
       it('returns undefined if the given key is already prefixed with "fail"', function() {
-        const result = up.internal.failKey('failFoo')
+        const result = up.internal.toFailKey('failFoo')
         expect(result).toBeUndefined()
       })
     })

@@ -1743,11 +1743,11 @@ let foosInContainer = up.fragment.all(container, '.foo')
 */
 // Takes a selector, optionally preceded by a root element, and followed by options.
 // A selector string gives an array. An element or list is returned as a list.
-export function getAll(selector: string, options?: PlainObject): HTMLElement[]
-export function getAll(root: ParentNode, selector: string, options?: PlainObject): HTMLElement[]
-export function getAll(selector: ElementOrSelector, options?: PlainObject): List<HTMLElement>
-export function getAll(root: ParentNode, selector: ElementOrSelector, options?: PlainObject): List<HTMLElement>
-export function getAll(...args: any[]): any {
+export function getAllFragments(selector: string, options?: PlainObject): HTMLElement[]
+export function getAllFragments(root: ParentNode, selector: string, options?: PlainObject): HTMLElement[]
+export function getAllFragments(selector: ElementOrSelector, options?: PlainObject): List<HTMLElement>
+export function getAllFragments(root: ParentNode, selector: ElementOrSelector, options?: PlainObject): List<HTMLElement>
+export function getAllFragments(...args: any[]): any {
   let [root, selectorString, options] = parseGetArgs(args)
 
   // (0) up.fragment.all(element) or up.fragment.all(element, element) should return an array of that element.
@@ -2223,16 +2223,16 @@ Returns `undefined` if the key already has a "fail" prefix or infix.
 ## Examples
 
 ```js
-failKey('target')         // result: 'failTarget'
-failKey('onFinished')     // result: 'onFailFinished'
-failKey('failTarget')     // result: undefined
-failKey('onFailFinished') // result: undefined
+toFailKey('target')         // result: 'failTarget'
+toFailKey('onFinished')     // result: 'onFailFinished'
+toFailKey('failTarget')     // result: undefined
+toFailKey('onFailFinished') // result: undefined
 ```
 
-@function up.fragment.failKey
+@function up.fragment.toFailKey
 @internal
 */
-export function failKey(key: string): string | undefined {
+export function toFailKey(key: string): string | undefined {
   let match = KEY_PATTERN.exec(key)
   if (match) {
     let [_, prefix, suffix] = match
@@ -3017,7 +3017,7 @@ can [react to being aborted](/api/up:fragment:aborted).
     If omitted, a default message will describe the abort conditions.
 @stable
 */
-export const abort = mockable(function abort(...args: any[]): void {
+export const abortFragment = mockable(function abortFragment(...args: any[]): void {
   let options = parseTargetAndOptions(args)
 
   // The function that checks whether a given function will be aborted.
@@ -3037,7 +3037,7 @@ export const abort = mockable(function abort(...args: any[]): void {
   if (options.target) {
     // If we're given an element or selector, we abort all requests
     // targeting that subtree.
-    elements = getAll(options.target, options)
+    elements = getAllFragments(options.target, options)
     testFn = (request) => request.isBoundToSubtrees(elements)
     reason ||= 'Aborting requests within fragment'
   } else {
@@ -3506,7 +3506,7 @@ export const api = {
     render,
     navigate,
     get: getSmart,
-    all: getAll,
+    all: getAllFragments,
     subtree: getSubtree,
     contains,
     closest,
@@ -3517,7 +3517,7 @@ export const api = {
     matches,
     time: timeOf,
     etag: etagOf,
-    abort,
+    abort: abortFragment,
     onAborted,
     onKept,
     isAlive,

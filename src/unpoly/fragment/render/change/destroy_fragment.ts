@@ -1,4 +1,4 @@
-import { abort, emitFragmentDestroyed, markFragmentAsDestroying } from '../../../fragment.js'
+import { abortFragment, emitFragmentDestroyed, markFragmentAsDestroying } from '../../../fragment.js'
 import { Change } from './change.js'
 import { RenderOptions } from '../render_options.js'
 import { layerStack } from '../../../layer.js'
@@ -65,7 +65,7 @@ export class DestroyFragment extends Change<DestroyFragmentOptions> {
 
   _erase(): void {
     this._layer.asCurrent(() => {
-      abort(this._element)
+      abortFragment(this._element)
       clean(this._element, { layer: this._layer })
       this._element.remove()
     })

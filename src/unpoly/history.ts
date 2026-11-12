@@ -1,7 +1,7 @@
 import { isArray, isBlank, isList, isObject, isString, matchURLs, normalizeURL, pick } from './util.js'
 import { getRoot, setAttrPresence, setMissingAttrs } from './element.js'
 import { muteUncriticalRejection } from './error.js'
-import { build, emit, halt, isModified, on } from './event.js'
+import { build, emit, haltEvent, isModified, on } from './event.js'
 import { render } from './fragment.js'
 import { layerStack } from './layer.js'
 import { makeFollowable } from './link.js'
@@ -548,7 +548,7 @@ See [Turning off history aspects](/learn/updating-history#disabling).
   The URL for the history entry to be added.
 @experimental
 */
-export function push(location: string, trackOptions?: HistoryTrackOptions): void {
+export function pushLocation(location: string, trackOptions?: HistoryTrackOptions): void {
   if (isLocation(location)) return
   placeAdoptedHistoryEntry('pushState', location, trackOptions)
 }
@@ -827,7 +827,7 @@ function onJumpLinkClicked(event: ClickEvent, link: HTMLAnchorElement): void {
   if (revealFn) {
     // (1) Prevent the browser, Unpoly or other JavaScript from following the link.
     // (2) This means we will be responsible to change the hash in the address bar.
-    halt(event)
+    haltEvent(event)
 
     printUserEvent(event)
 
@@ -837,7 +837,7 @@ function onJumpLinkClicked(event: ClickEvent, link: HTMLAnchorElement): void {
       // We use pushState() instead of setting location.hash so we don't trigger
       // a hashchange event or cause browser scrolling.
       let newHREF = currentBase + linkHash
-      push(newHREF, { reason: 'hash', alreadyHandled: true })
+      pushLocation(newHREF, { reason: 'hash', alreadyHandled: true })
     }
 
     revealFn()
@@ -930,7 +930,7 @@ export function install(): void {
 export const api = {
   history: {
     config: historyConfig,
-    push,
+    push: pushLocation,
     replace,
     get location() { return currentLocation() },
     get previousLocation() { return previousLocation },

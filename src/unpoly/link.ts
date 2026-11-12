@@ -9,9 +9,9 @@ import { mockable } from './mockable.js'
 import { OptionsParser } from './element/options_parser.js'
 import { UpError } from './error/error.js'
 import {
-  build, emit, fork, getInputDevice, halt, isModified, isSyntheticClick, keyModifiers, on,
+  build, emit, fork, getInputDevice, haltEvent, isModified, isSyntheticClick, keyModifiers, on,
 } from './event.js'
-import { anyButtonSelector, fieldSelector } from './form.js'
+import { anyButtonSelector, formFieldSelector } from './form.js'
 import { getSmart, onFirstIntersect, render } from './fragment.js'
 import { RenderOptions } from './fragment/render/render_options.js'
 import { canPushState, isHistoryEnabled } from './history.js'
@@ -868,7 +868,7 @@ function isClickTarget(target: Element, link: Element): boolean {
   // (2) A field always handles its own click.
   // (3) A link's buttons, labels and summaries are part of its content, so clicking them follows the link.
   //     A clickable container like an [up-expand] area leaves them to handle their own clicks.
-  const betterTargetSelector = `a, [up-follow], ${link.matches('a') ? fieldSelector() : interactiveSelector()}`
+  const betterTargetSelector = `a, [up-follow], ${link.matches('a') ? formFieldSelector() : interactiveSelector()}`
   const betterTarget = target.closest(betterTargetSelector)
   // The click is meant for the link if:
   // (1) Nothing more specific than the link was clicked.
@@ -880,7 +880,7 @@ function isClickTarget(target: Element, link: Element): boolean {
 
 // Elements within a clickable container that handle their own clicks.
 function interactiveSelector(): string {
-  return [fieldSelector(), anyButtonSelector(), 'label', 'summary'].join()
+  return [formFieldSelector(), anyButtonSelector(), 'label', 'summary'].join()
 }
 
 function isInstant(linkOrDescendant: Element): boolean | null {
@@ -935,7 +935,7 @@ export function convertClicks(layer: Layer): void {
     // (2) A11Y: We also need to check whether the [up-instant] behavior did trigger on mousedown.
     //     Keyboard navigation will not necessarily trigger a mousedown event.
     if (isInstant(element) && lastInstantTarget === element) {
-      halt(event)
+      haltEvent(event)
 
     // (1) In case mousedown has created a layer over the click coordinates,
     //     Chrome will emit an event with { target: document.body } on click.
@@ -1611,7 +1611,7 @@ export function install(): void {
 
   on('up:click', linkConfig.selectorFn('followSelectors'), function(event, link) {
     if (shouldHandleClick(event, link)) {
-      halt(event, { log: true })
+      haltEvent(event, { log: true })
 
       // When the user clicks an hyperlink, the browser will focus the link element on `click`.
       // However, for an `[up-instant]` link we will emit `up:click` on `mousedown` and halt the `click` event.
@@ -1673,7 +1673,7 @@ export function install(): void {
     //     childLink.click() emits below, so the area never handles its own forwarded click.
     // (3) We ignore clicks on other links, fields, buttons or labels in the area.
     if (childLink && !isFollowable(area) && !childLink.contains(event.target) && shouldHandleClick(event, area)) {
-      halt(event)
+      haltEvent(event)
       // The browser runs the link's default action within the user's click,
       // so popup blockers allow a link with [target=_blank].
       childLink.click()

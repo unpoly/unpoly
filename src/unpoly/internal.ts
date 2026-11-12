@@ -36,8 +36,8 @@ import {
 } from './script.js'
 import { canPushState, findMetaTags, isHistoryEnabled } from './history.js'
 import {
-  compressNestedSteps, defaultNormalizeKeepHTML, expandTargets, failKey, insertTemp, parseTargetSteps,
-  provideNodes, resolveOrigin, splitTarget, successKey, tryToTarget,
+  compressNestedSteps, defaultNormalizeKeepHTML, expandTargets, insertTemp, parseTargetSteps,
+  provideNodes, resolveOrigin, splitTarget, successKey, toFailKey, tryToTarget,
 } from './fragment.js'
 import {
   absolutize, focusedElementWithin, getViewportAround, getViewportSubtree, revealHash, rootHeight,
@@ -175,7 +175,7 @@ export const api = {
     compressNestedSteps,
     defaultNormalizeKeepHTML,
     expandTargets,
-    failKey,
+    toFailKey,
     insertTemp,
     parseTargetSteps,
     provideNodes,

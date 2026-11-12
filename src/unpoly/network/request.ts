@@ -15,10 +15,9 @@ import { FormRenderer } from './form_renderer.js'
 import { UpResponse } from './response.js'
 import { XHRRenderer } from './xhr_renderer.js'
 import {
-  acceptLayerFromXHR, contextFromXHR, csrfHeader as protocolCsrfHeader, csrfParam,
-  csrfToken as protocolCsrfToken, dismissLayerFromXHR, eventPlansFromXHR, evictCacheFromXHR,
-  expireCacheFromXHR, headerize, locationFromXHR, methodFromXHR, openLayerFromXHR, targetFromXHR,
-  titleFromXHR,
+  acceptLayerFromXHR, contextFromXHR, csrfHeader, csrfParam, csrfToken, dismissLayerFromXHR,
+  eventPlansFromXHR, evictCacheFromXHR, expireCacheFromXHR, headerize, locationFromXHR,
+  methodFromXHR, openLayerFromXHR, targetFromXHR, titleFromXHR,
 } from '../protocol.js'
 import { runPreviews } from '../status.js'
 import { UpURLPattern } from '../util/url_pattern.js'
@@ -924,7 +923,7 @@ export class UpRequest {
   }
 
   csrfHeader(): string {
-    return protocolCsrfHeader()
+    return csrfHeader()
   }
 
   csrfParam(): string | undefined {
@@ -934,7 +933,7 @@ export class UpRequest {
   // Returns a CSRF token if this request requires it
   csrfToken(): string | undefined {
     if (!this.isSafe() && !this.isCrossOrigin()) {
-      return protocolCsrfToken()
+      return csrfToken()
     }
   }
 
@@ -1041,9 +1040,9 @@ export class UpRequest {
       this._setPropertyHeader(key)
     }
 
-    let csrfHeader, csrfToken
-    if ((csrfHeader = this.csrfHeader()) && (csrfToken = this.csrfToken())) {
-      this._setAutoHeader(csrfHeader, csrfToken)
+    let header, token
+    if ((header = this.csrfHeader()) && (token = this.csrfToken())) {
+      this._setAutoHeader(header, token)
     }
 
     this._setAutoHeader(headerize('version'), up.version)

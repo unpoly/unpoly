@@ -6,16 +6,17 @@ import { attrSelector, crossOriginSelector, getOne, idSelector, jsonAttr, setAtt
 import { fail, muteUncriticalRejection } from './error.js'
 import { mockable } from './mockable.js'
 import { OptionsParser } from './element/options_parser.js'
-import { build, halt, on } from './event.js'
+import { build, haltEvent, on } from './event.js'
 import { FieldWatcher } from './form/field_watcher.js'
 import { FormValidator } from './form/form_validator.js'
 import { Params } from './form/params.js'
 import { Switcher } from './form/switcher.js'
 import {
-  closest, getAll, getSmart, getSubtree, render, sourceOf, toTarget, trackSelector, tryToTarget,
+  closest, getAllFragments, getSmart, getSubtree, render, sourceOf, toTarget, trackSelector,
+  tryToTarget,
 } from './fragment.js'
 import { closestLayerElement, layerStack } from './layer.js'
-import { followOptions as linkFollowOptions } from './link.js'
+import { followOptions } from './link.js'
 import { callbackAttr, registerAttrCompiler, registerCompiler, registerDestructor } from './script.js'
 import { statusOptions } from './status.js'
 import { Config } from './util/config.js'
@@ -299,14 +300,14 @@ function findFormElements(root: ElementOrSelector, selectorFn: SelectorFn): Fiel
   if (root.matches('form[id]')) {
     const formReference = attrSelector('form', root.getAttribute('id')!)
     const externalElementsSelector = selectorFn(formReference)
-    const externalElements = getAll(externalElementsSelector, { layer: root })
+    const externalElements = getAllFragments(externalElementsSelector, { layer: root })
     elements = uniq([...elements, ...externalElements])
   }
 
   return elements
 }
 
-export const [fieldSelector, isField] = formConfig.selectorFns('fieldSelectors')
+export const [formFieldSelector, isField] = formConfig.selectorFns('fieldSelectors')
 
 /*-
 Returns whether the given element is a form field, such as `input` or `select`.
@@ -344,7 +345,7 @@ Fields in another [layer](/api/up.layer) and fields that are being [destroyed](/
 @stable
 */
 export function findFields(root: ElementOrSelector): Field[] {
-  return findFormElements(root, fieldSelector)
+  return findFormElements(root, formFieldSelector)
 }
 
 // ALWAYS read and write a field's state through the accessors below. Direct property or
@@ -600,7 +601,7 @@ export function submitOptions(form: any, options?: RenderOptions, parserOptions?
   // Now that we have extracted everything form-specific into options, we can call
   // up.link.followOptions(). This will also parse the myriads of other options
   // that are possible on both <form> and <a> elements.
-  parser.include(linkFollowOptions)
+  parser.include(followOptions)
 
   Object.assign(options, submitButtonOverrides(options.submitButton))
 
@@ -974,10 +975,10 @@ export function destinationOptions(form: Element, options?: PlainObject, parserO
 
 export function submitButtonOverrides(submitButton: Element | false | undefined): PlainObject {
   if (!submitButton) return {}
-  let followOptions = linkFollowOptions(submitButton, {}, { defaults: false })
+  let buttonOptions = followOptions(submitButton, {}, { defaults: false })
   // The parsing of [formmethod] and [formaction] (into { method, url })
   // already happens in destinationOptions()
-  return omit(followOptions, ['method', 'url', 'guardEvent', 'origin', 'params', 'headers'])
+  return omit(buttonOptions, ['method', 'url', 'guardEvent', 'origin', 'params', 'headers'])
 }
 
 /*-
@@ -2679,7 +2680,7 @@ export function install(): void {
     // Don't handle a form that's already been handled by foreign code.
     if (event.defaultPrevented) return
 
-    halt(event, { log: true })
+    haltEvent(event, { log: true })
 
     // The browser resolves a [form] attribute across the whole page. A button or a field (pressing Enter)
     // can then submit a form in another layer: when two layers have a form with the same ID, or when

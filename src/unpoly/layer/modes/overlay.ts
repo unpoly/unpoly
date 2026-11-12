@@ -2,10 +2,10 @@ import { compact, compactObject, contains, findResult, getSimpleTokens, pick } f
 import { affix, idSelector, jsonAttr, subtreeFirst } from '../../element.js'
 import { muteUncriticalSync } from '../../error.js'
 import { OptionsParser } from '../../element/options_parser.js'
-import { halt as eventHalt, on, onEscape } from '../../event.js'
-import { fieldSelector as formFieldSelector, focusedField } from '../../form.js'
+import { haltEvent, on, onEscape } from '../../event.js'
+import { focusedField, formFieldSelector } from '../../form.js'
 import { Params } from '../../form/params.js'
-import { destroy, getAll } from '../../fragment.js'
+import { destroy, getAllFragments } from '../../fragment.js'
 import { CloseLayer } from '../../fragment/render/change/close_layer.js'
 import { isWithinForeignOverlay } from '../../layer.js'
 import { Layer } from '../base.js'
@@ -328,8 +328,8 @@ export abstract class Overlay extends Layer {
     let id = label.getAttribute('for')!
     let fieldSelector = formFieldSelector(idSelector(id))
 
-    let fieldsAnywhere = getAll(fieldSelector, { layer: 'any' })
-    let fieldsInLayer = getAll(fieldSelector, { layer: this })
+    let fieldsAnywhere = getAllFragments(fieldSelector, { layer: 'any' })
+    let fieldsInLayer = getAllFragments(fieldSelector, { layer: this })
 
     // We would much rather not interfere with label clicking logic,
     // and let the browser do its thing. Hence we only interfere if there
@@ -350,7 +350,7 @@ export abstract class Overlay extends Layer {
   _onOutsideClicked(event: Event & { originalEvent?: UIEvent, target: Element }, halt: boolean | undefined): void {
     printUserEvent(event)
     // We still halt a click we ignore below, or a popup's origin would be followed again.
-    if (halt) eventHalt(event)
+    if (halt) haltEvent(event)
 
     // When the user double-clicks a link that opens an overlay right away, the second click
     // lands outside the new overlay. We don't want to dismiss the overlay the user just opened.
@@ -379,7 +379,7 @@ export abstract class Overlay extends Layer {
         // modal with escape.
         (field as HTMLElement).blur()
       } else if (this._supportsDismissMethod('key')) {
-        eventHalt(event, { log: true })
+        haltEvent(event, { log: true })
         muteUncriticalSync(() =>
           this.dismiss(':key')
         )
@@ -397,7 +397,7 @@ export abstract class Overlay extends Layer {
     this.on('up:click', `[${attribute}]:not(form)`, (event, link) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
       // a link from being followed on the root layer.
-      eventHalt(event, { log: true })
+      haltEvent(event, { log: true })
 
       const value = jsonAttr(link, attribute)
       this._onAttrCloserActivated(link, value, closeFn)
@@ -409,7 +409,7 @@ export abstract class Overlay extends Layer {
     this.on('submit', `[${attribute}]`, (event: SubmitEvent & { target: HTMLFormElement }, element) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
       // a form from being submitted on the root layer.
-      eventHalt(event, { log: true })
+      haltEvent(event, { log: true })
 
       // (1) `element` is whichever element carries the attribute, which for the documented
       //     markup is the form itself. Read the form from the event instead, so we cannot

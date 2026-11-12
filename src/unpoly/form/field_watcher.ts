@@ -1,5 +1,5 @@
 import { isEqual, isPromise, omit, queueTask, scheduleTimer, sequence, some, uniq } from '../util.js'
-import { fail as errorFail, guard } from '../error.js'
+import { fail, guard } from '../error.js'
 import { on } from '../event.js'
 import { getRegion, isField, readFieldName, trackFields, watchOptions } from '../form.js'
 import { Params } from './params.js'
@@ -66,18 +66,18 @@ export class FieldWatcher {
   }
 
   _ensureWatchable(): void {
-    const fail = (message: string) => errorFail(message, this._logPrefix, this._root)
+    const failUnwatchable = (message: string) => fail(message, this._logPrefix, this._root)
 
     if (!this._callback) {
-      fail('No callback provided for %s (%o)')
+      failUnwatchable('No callback provided for %s (%o)')
     }
 
     if (this._root.matches('input[type=radio]')) {
-      fail('Use %s with the container of a radio group, not with an individual radio button (%o)')
+      failUnwatchable('Use %s with the container of a radio group, not with an individual radio button (%o)')
     }
 
     if (isField(this._root) && !readFieldName(this._root)) {
-      fail('%s can only watch fields with a name (%o)')
+      failUnwatchable('%s can only watch fields with a name (%o)')
     }
   }
 

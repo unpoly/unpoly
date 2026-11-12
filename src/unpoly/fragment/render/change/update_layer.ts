@@ -1,6 +1,6 @@
 import { evalAutoOption, map, memoize, memoizeMethod, merge, pick } from '../../../util.js'
 import { CannotMatch } from '../../../error/cannot_match.js'
-import { abort, compressNestedSteps, hasAutoHistory, parseTargetSteps } from '../../../fragment.js'
+import { abortFragment, compressNestedSteps, hasAutoHistory, parseTargetSteps } from '../../../fragment.js'
 import { FragmentFinder } from '../../fragment_finder.js'
 import { Addition } from './addition.js'
 import { UpdateSteps } from './update_steps.js'
@@ -142,7 +142,7 @@ export class UpdateLayerPlan extends Addition {
     // by passing { abort: false }, we abort pending requests targeting
     // the elements that we're about to remove.
     if (this.options.abort !== false) {
-      abort(this._getFragments(), {
+      abortFragment(this._getFragments(), {
         reason: 'Fragment is being replaced',
         jid: this.options.jid,
       })

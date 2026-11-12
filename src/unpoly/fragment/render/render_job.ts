@@ -3,7 +3,7 @@ import { assertConfirmed } from '../../browser.js'
 import { guard } from '../../error.js'
 import { Aborted } from '../../error/aborted.js'
 import { emit } from '../../event.js'
-import { abort as fragmentAbort } from '../../fragment.js'
+import { abortFragment } from '../../fragment.js'
 import { ChangeFromContent } from './change/change_from_content.js'
 import { ChangeFromResponse } from './change/change_from_response.js'
 import { ChangeFromURL } from './change/change_from_url.js'
@@ -238,13 +238,13 @@ export class RenderJob {
 
     if (abort === 'target') {
       // Abort requests in the subtree of the targeted fragment
-      fragmentAbort(bindFragments, { ...abortOptions })
+      abortFragment(bindFragments, { ...abortOptions })
     } else if (abort === 'layer') {
       // Abort requests targeting any fragment in the targeted layer
-      fragmentAbort({ ...abortOptions, layer: bindLayer })
+      abortFragment({ ...abortOptions, layer: bindLayer })
     } else if (abort === 'all' || abort === true) {
       // Abort requests targeting any fragment in any layer
-      fragmentAbort({ ...abortOptions, layer: 'any' })
+      abortFragment({ ...abortOptions, layer: 'any' })
     } else if (isFunction(abort)) {
       // Required by unpoly-migrate to convert { solo: URLPatternString } and { solo: Function(up.Request): boolean }.
       // We don't advertise this variant as aborting arbitrary requests cannot support
@@ -253,7 +253,7 @@ export class RenderJob {
     } else {
       // (1) Abort requests in the subtree of a given selector (string)
       // (2) Abort requests targeting a given element
-      fragmentAbort(abort, { ...abortOptions, layer: bindLayer })
+      abortFragment(abort, { ...abortOptions, layer: bindLayer })
     }
   }
 

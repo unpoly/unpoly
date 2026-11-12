@@ -2,11 +2,11 @@ import { newOptions } from './util.js'
 import { isEmpty, setMissingAttrs, stringAttr } from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { build } from './event.js'
-import { compressNestedSteps, getAll, getSmart, tryToTarget } from './fragment.js'
+import { compressNestedSteps, getAllFragments, getSmart, tryToTarget } from './fragment.js'
 import { layerStack } from './layer.js'
 import { parseRequestOptions } from './link.js'
 import { printToWarn } from './log.js'
-import { motionOptions as motionMotionOptions } from './motion.js'
+import { motionOptions } from './motion.js'
 import { FragmentPolling } from './radio/fragment_polling.js'
 import { callbackAttr, registerAttrCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
@@ -114,7 +114,7 @@ export function hungrySteps(renderOptions: PlainObject): HungrySteps {
   const layerPreference = [renderLayer, ...renderLayer.ancestors, ...renderLayer.descendants]
 
   for (let elementLayer of layerPreference) {
-    let hungries = getAll(elementLayer.element, hungrySelector, { layer: elementLayer })
+    let hungries = getAllFragments(elementLayer.element, hungrySelector, { layer: elementLayer })
 
     for (let element of hungries) {
       let selector = tryToTarget(element, { origin })
@@ -126,7 +126,7 @@ export function hungrySteps(renderOptions: PlainObject): HungrySteps {
       let ifLayer = stringAttr(element, 'up-if-layer')
       let applicableLayers = ifLayer ? layerStack.getAll(ifLayer, { baseLayer: elementLayer }) : [elementLayer]
 
-      let motionOptions = motionMotionOptions(element)
+      let elementMotion = motionOptions(element)
 
       // We cannot emit up:fragment:hungry here as we don't know { newElement } yet.
       let selectEvent = build('up:fragment:hungry', { log: false })
@@ -137,7 +137,7 @@ export function hungrySteps(renderOptions: PlainObject): HungrySteps {
         oldElement: element, // The match on the current page
         layer: elementLayer, // May be different from { layer } when we found an [up-hungry][up-if-layer=any]
         origin,              // The { origin } passed into the fn. will be used to match { newElement } later.
-        ...motionOptions,    // The hungry element defines its own transition, duration, easing.
+        ...elementMotion,    // The hungry element defines its own transition, duration, easing.
         placement: 'swap',   // Hungry elements are always swapped, never appended
         keep: true,          // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
         maybe: true,         // Don't fail if we cannot match { newElement } later.

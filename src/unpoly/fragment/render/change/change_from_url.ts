@@ -1,6 +1,6 @@
 import { always, isCrossOrigin, memoizeMethod, unresolvablePromise, withRenamedKeys } from '../../../util.js'
 import { Offline } from '../../../error/offline.js'
-import { failKey, render } from '../../../fragment.js'
+import { render, toFailKey } from '../../../fragment.js'
 import { ChangeFromContent } from './change_from_content.js'
 import { ChangeFromResponse } from './change_from_response.js'
 import { Change } from './change.js'
@@ -77,7 +77,7 @@ export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
     return {
       ...this.options, // contains preflight keys relevant for the request, e.g. { url, method }
       ...successAttrs, // contains meta information for an successful update, e.g. { layer, mode, context, target }
-      ...withRenamedKeys(failAttrs, failKey), // contains meta information for a failed update, e.g. { failTarget },
+      ...withRenamedKeys(failAttrs, toFailKey), // contains meta information for a failed update, e.g. { failTarget },
     }
   }
 

@@ -8,7 +8,7 @@ import { fail } from './error.js'
 import { mockable } from './mockable.js'
 import { getInputDevice, on } from './event.js'
 import { isField } from './form.js'
-import { contains, getAll as fragmentGetAll, getSmart, tryToTarget } from './fragment.js'
+import { contains, getAllFragments, getSmart, tryToTarget } from './fragment.js'
 import { layerStack } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
 import { registerCompiler } from './script.js'
@@ -518,7 +518,7 @@ Returns a list of all the viewports on the current layer.
 @internal
 */
 function getAll(options: PlainObject = {}): List<HTMLElement> {
-  return fragmentGetAll(allSelector(), options)
+  return getAllFragments(allSelector(), options)
 }
 
 function rootSelector(): string {

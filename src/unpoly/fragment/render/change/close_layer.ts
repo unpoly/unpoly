@@ -3,7 +3,7 @@ import { assertConfirmed } from '../../../browser.js'
 import { guard, muteUncriticalRejection } from '../../../error.js'
 import { Aborted } from '../../../error/aborted.js'
 import { build } from '../../../event.js'
-import { abort, reload } from '../../../fragment.js'
+import { abortFragment, reload } from '../../../fragment.js'
 import { Change } from './change.js'
 import { layerStack } from '../../../layer.js'
 import { doFocus } from '../../../viewport.js'
@@ -71,7 +71,7 @@ export class CloseLayer extends Change<CloseLayerOptions> {
     this._emitClosingEvent()
 
     // Abort all pending requests targeting the layer we're now closing.
-    abort({ reason: 'Layer is closing', layer: this.layer })
+    abortFragment({ reason: 'Layer is closing', layer: this.layer })
 
     // Mark the element as closing. This will prevent some actions that we don't want
     // during closing time, such as the overlay re-attaching itself after every

@@ -1,7 +1,7 @@
 import { evalOption, filterList, isNumber, map } from '../util.js'
 import { computedStyle, getOne, isVisible } from '../element.js'
 import { fail } from '../error.js'
-import { getAll } from '../fragment.js'
+import { getAllFragments } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { Rect } from '../util/rect.js'
 import { closest, isRoot, rootHeight, rootWidth, viewportConfig } from '../viewport.js'
@@ -117,7 +117,7 @@ export class RevealMotion {
   }
 
   _computeObstructionRects(selector: string): Rect[] {
-    let elements: HTMLElement[] = getAll(selector, { layer: this._obstructionsLayer })
+    let elements: HTMLElement[] = getAllFragments(selector, { layer: this._obstructionsLayer })
     elements = filterList(elements, isVisible)
     return map(elements, (element) => {
       if (computedStyle(element, 'position') === 'sticky') {
