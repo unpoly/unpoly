@@ -383,7 +383,7 @@ export function revealHashFn(hash: string, { strong, layer, origin, behavior = '
 
   if (match) {
     return () => {
-      let doReveal = () => reveal(match, { top: true, behavior, focus })
+      let doReveal = (): true | Promise<void> => reveal(match, { top: true, behavior, focus })
       if (strong) u.queueFastTask(doReveal)
       return doReveal()
     }

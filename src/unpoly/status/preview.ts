@@ -893,7 +893,7 @@ export class Preview {
   openLayer(content: any, options: u.PlainObject = {}): Layer {
     let undoDismissValue = ':undo-preview'
 
-    let onDismiss = ({ value }: LayerCloseEvent) => {
+    let onDismiss = ({ value }: LayerCloseEvent): void => {
       // Abort the request when the user dismisses the overlay,
       // but not when we ourselves dismiss it when reverting.
       if (value !== undoDismissValue) this.request.abort({ reason: 'Preview overlay dismissed' })

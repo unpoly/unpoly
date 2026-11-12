@@ -286,8 +286,7 @@ export function runPreviews(request: UpRequest, renderOptions: u.PlainObject): (
   // Previews run while the request is in flight, before it evicts its layers.
   let bindLayer = request.bindLayer!
   let focusCapsule = FocusCapsule.preserve(bindLayer)
-  let applyPreviews = () => doRunPreviews(request, renderOptions)
-  let revertPreviews = bindLayer.asCurrent(applyPreviews)
+  let revertPreviews = bindLayer.asCurrent(() => doRunPreviews(request, renderOptions))
   focusCapsule?.autoVoid()
   return () => {
     bindLayer.asCurrent(revertPreviews)
@@ -298,7 +297,7 @@ export function runPreviews(request: UpRequest, renderOptions: u.PlainObject): (
 function doRunPreviews(request: UpRequest, renderOptions: u.PlainObject): () => void {
   let { fragment, fragments, origin } = request
   let cleaner = u.cleaner()
-  let previewForFragment = (fragment: Element | undefined) => new Preview({ fragment, request, renderOptions, cleaner })
+  let previewForFragment = (fragment?: Element): Preview => new Preview({ fragment, request, renderOptions, cleaner })
 
   // Some preview effects only run once per render pass.
   // The { fragment } for these previews will be the first fragment,
