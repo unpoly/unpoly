@@ -92,8 +92,8 @@ export function containsElement(root: Node, selectorOrElement: t.ElementOrSelect
 @function up.element.ancestor
 @internal
 */
-export function ancestor(element: Element, selector: string): HTMLElement | null {
-  return (element.parentNode as Element)?.closest<HTMLElement>(selector)
+export function ancestor(element: Element, selector: string): HTMLElement | null | undefined {
+  return element.parentElement?.closest<HTMLElement>(selector)
 }
 
 export function around(element: Element, selector: string): HTMLElement[] {
