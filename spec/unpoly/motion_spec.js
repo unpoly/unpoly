@@ -24,19 +24,18 @@ describe('up.motion', function() {
 
       it('animates the given element to a frame of kebab-case CSS properties', async function() {
         const element = fixture('.element', { text: 'content', style: { opacity: 0 } })
-        up.animate(element, { opacity: 1 }, { duration: 200, easing: 'linear' })
+        const promise = up.animate(element, { opacity: 1 }, { duration: 200, easing: 'linear' })
 
-        await wait(1)
+        const animation = await jasmine.seekAnimation(element, 0)
+        expect(element).toHaveOwnOpacity(0.0, 0.05)
 
-        expect(element).toHaveOwnOpacity(0.0, 0.15)
+        animation.currentTime = 100
+        expect(element).toHaveOwnOpacity(0.5, 0.05)
 
-        await wait(100)
+        animation.play()
+        await promise
 
-        expect(element).toHaveOwnOpacity(0.5, 0.3)
-
-        await wait(260)
-
-        expect(element).toHaveOwnOpacity(1.0, 0.15)
+        expect(element).toHaveOwnOpacity(1.0)
       })
 
       describe('predefined animations', function() {
@@ -45,17 +44,16 @@ describe('up.motion', function() {
 
           it('fades in the element from 100% to 0% transparency', async function() {
             const element = fixture('.element', { text: 'content' })
-            up.animate(element, 'fade-in', { duration: 200, easing: 'linear' })
+            const promise = up.animate(element, 'fade-in', { duration: 200, easing: 'linear' })
 
-            await wait(1)
+            const animation = await jasmine.seekAnimation(element, 0)
+            expect(element).toHaveOwnOpacity(0.0, 0.05)
 
-            expect(element).toHaveOwnOpacity(0.0, 0.15)
+            animation.currentTime = 100
+            expect(element).toHaveOwnOpacity(0.5, 0.05)
 
-            await wait(100)
-
-            expect(element).toHaveOwnOpacity(0.5, 0.3)
-
-            await wait(260)
+            animation.play()
+            await promise
 
             expect(element).toHaveOwnOpacity(1.0, 0.0)
           })
@@ -66,34 +64,32 @@ describe('up.motion', function() {
 
           it('fades out the element from 0% to 100% transparency', async function() {
             const element = fixture('.element', { text: 'content' })
-            up.animate(element, 'fade-out', { duration: 200, easing: 'linear' })
+            const promise = up.animate(element, 'fade-out', { duration: 200, easing: 'linear' })
 
-            await wait(1)
+            const animation = await jasmine.seekAnimation(element, 0)
+            expect(element).toHaveOwnOpacity(1.0, 0.05)
 
-            expect(element).toHaveOwnOpacity(1.0, 0.15)
+            animation.currentTime = 100
+            expect(element).toHaveOwnOpacity(0.5, 0.05)
 
-            await wait(100)
-
-            expect(element).toHaveOwnOpacity(0.5, 0.3)
-
-            await wait(260)
+            animation.play()
+            await promise
 
             expect(element).toHaveOwnOpacity(0.0, 0.0)
           })
 
           it("starts the animation at a semi-transparent element's current opacity", async function() {
             const element = fixture('.element', { text: 'content', style: { 'opacity': '0.5' } })
-            up.animate(element, 'fade-out', { duration: 200, easing: 'linear' })
+            const promise = up.animate(element, 'fade-out', { duration: 200, easing: 'linear' })
 
-            await wait(1)
+            const animation = await jasmine.seekAnimation(element, 0)
+            expect(element).toHaveOwnOpacity(0.5, 0.05)
 
-            expect(element).toHaveOwnOpacity(0.5, 0.1)
+            animation.currentTime = 100
+            expect(element).toHaveOwnOpacity(0.25, 0.05)
 
-            await wait(100)
-
-            expect(element).toHaveOwnOpacity(0.3, 0.15)
-
-            await wait(260)
+            animation.play()
+            await promise
 
             expect(element).toHaveOwnOpacity(0.0, 0.0)
           })
@@ -260,30 +256,30 @@ describe('up.motion', function() {
 
         await wait()
 
-        up.animate($element, 'fade-in', { duration: 200, easing: 'linear' })
+        const promise = up.animate($element, 'fade-in', { duration: 200, easing: 'linear' })
 
         await wait()
 
         expect($element.css('font-size')).toEqual('40px')
         expect($element).toHaveOwnOpacity(0.0, 0.15)
 
-        await wait(250)
+        await promise
 
-        expect($element).toHaveOwnOpacity(1.0, 0.15)
+        expect($element).toHaveOwnOpacity(1.0)
       })
 
       it('cancels an existing animation on the element by instantly jumping to the last frame (sync)', async function() {
         const $element = $fixture('.element').text('content')
 
         up.animate($element, { 'font-size': '40px' }, { duration: 10000, easing: 'linear' })
-        up.animate($element, 'fade-in', { duration: 200, easing: 'linear' })
+        const promise = up.animate($element, 'fade-in', { duration: 200, easing: 'linear' })
 
         expect($element.css('font-size')).toEqual('40px')
         expect($element).toHaveOwnOpacity(0.0, 0.15)
 
-        await wait(250)
+        await promise
 
-        expect($element).toHaveOwnOpacity(1.0, 0.15)
+        expect($element).toHaveOwnOpacity(1.0)
       })
 
       it("cancels an existing animation when the current animation doesn't animate", async function() {
@@ -335,14 +331,15 @@ describe('up.motion', function() {
           let onFinished = jasmine.createSpy('onFinished callback')
 
           let element = fixture('.element', { text: 'content' })
-          up.animate(element, 'fade-in', { duration: 1000, easing: 'linear', onFinished })
+          const promise = up.animate(element, 'fade-in', { duration: 200, easing: 'linear', onFinished })
 
-          await wait(500)
+          const animation = await jasmine.seekAnimation(element, 100)
 
-          expect(element).toHaveOwnOpacity(0.5, 0.3)
+          expect(element).toHaveOwnOpacity(0.5, 0.05)
           expect(onFinished).not.toHaveBeenCalled()
 
-          await wait(500 + 250)
+          animation.play()
+          await promise
 
           expect(element).toHaveOwnOpacity(1.0)
           expect(onFinished).toHaveBeenCalled()
@@ -383,9 +380,9 @@ describe('up.motion', function() {
           const element = fixture('.element', { text: 'content' })
           up.animate(element, 'fade-in', { duration: 200, easing: 'linear' })
 
-          await wait(100)
+          await jasmine.seekAnimation(element, 100)
 
-          expect(element).toHaveOwnOpacity(0.5, 0.3)
+          expect(element).toHaveOwnOpacity(0.5, 0.05)
         })
 
         it('defaults to up.motion.config.duration if no { duration } is given', async function() {
@@ -395,9 +392,9 @@ describe('up.motion', function() {
           const element = fixture('.element', { text: 'content' })
           up.animate(element, 'fade-in', { easing: 'linear' })
 
-          await wait(200)
+          await jasmine.seekAnimation(element, 200)
 
-          expect(element).toHaveOwnOpacity(0.5, 0.3)
+          expect(element).toHaveOwnOpacity(0.5, 0.05)
         })
 
         it('animates instantly with { duration: 0 }', async function() {
