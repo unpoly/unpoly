@@ -1,5 +1,6 @@
 import * as u from '../../../util.js'
-import { CannotMatch } from '../../../error.js'
+import * as e from '../../../element.js'
+import { CannotMatch, CannotTarget } from '../../../error.js'
 import {
   abortFragment, compressNestedSteps, hasAutoHistory, parseTargetSteps, type RenderStep,
 } from '../../../fragment.js'
@@ -205,6 +206,7 @@ export class UpdateLayerPlan extends Addition {
       // Try to find fragments matching step.selector within step.layer.
       // Note that step.oldElement might already have been set by up.radio.hungrySteps().
       step.oldElement ||= finder.find()
+      if (step.oldElement === e.getRoot()) throw new CannotTarget('Cannot swap <html>')
 
       if (step.oldElement) {
         return true
