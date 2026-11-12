@@ -2,6 +2,8 @@
 // esbuild declares every module-level binding with `var`, so such a read silently returns
 // `undefined` instead of throwing. We turn those `var`s into `let`, so a read before initialization
 // throws a ReferenceError, and load the bundle in headless Chrome.
+// We test esbuild's raw output, without the strict directive and Terser pass that finish() adds
+// to the shipped file. Neither changes when a module is evaluated.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import esbuild from 'esbuild'
