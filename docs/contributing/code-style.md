@@ -163,13 +163,21 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
   `util: CoreApi['util'] & { … }`. Only one place may redeclare a namespace: a second,
   different redeclaration fails with TS2717 ("Subsequent property declarations must have the
   same type").
-- `unpoly-migrate` is loosely typed for now. Its files are scripts, not modules: they patch
-  `window.up` and import nothing at runtime, since `unpoly-migrate.js` is a separate bundle and a
-  class imported from `src/unpoly/` would be a second copy. Type-only imports like
-  `import('../unpoly/util.js').List<Element>` are fine, since they're erased. Each file declares
-  the keys it adds to `up`, as `any` where a precise type isn't easy; a deprecated alias gets
-  the type of its replacement. A method added to a class like `up.Layer` is merged into the
-  class's interface.
+- `unpoly-migrate`'s files are scripts, not modules: they patch `window.up` and import nothing
+  at runtime, since `unpoly-migrate.js` is a separate bundle and a class imported from
+  `src/unpoly/` would be a second copy.
+- A migrate file has no `import` or `export` statement at all, not even `import type`: esbuild
+  would turn the script into an ES module, which changes the bundle. It reaches a core type
+  through an alias at the top of the file, sorted by path like an import header:
+  `type RenderOptions = import('../unpoly/fragment.js').RenderOptions`. The alias is erased.
+  The types of `up.migrate` and its helpers live in `migrate/types.ts`, which nothing bundles,
+  so other migrate files can share them.
+- Each migrate file declares the keys it adds to `up`; a deprecated alias gets the type of its
+  replacement. A method added to a class like `up.Layer` is merged into the class's interface.
+  The implementations take their types from these declarations, so
+  `up.element.matches = function(element, selector) {…}` needs no annotations. A hook that sees
+  keys core no longer knows names them in an interface (`LegacyCompiler`), or takes a
+  `PlainObject`.
   A wrapper that forwards its `...args` casts the callee unless the callee has a rest
   parameter: `(up.element.get as any)(...args)`. TypeScript only spreads an `any[]` into a rest
   parameter (TS2556). Type parameters where it's easy. Core declares the hooks it
