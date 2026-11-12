@@ -495,7 +495,7 @@ already-queued callbacks to run:
 
 ```js
 await wait()        // one macrotask
-await wait(50)      // 50ms of real time — only for animations, see below
+await wait(50)      // 50ms of real time — only for time-based code, see below
 ```
 
 `spec/helpers/wait.js` holds finer-grained variants (microtasks, a number of macrotasks, an
@@ -513,6 +513,10 @@ keep it short:
   milliseconds, then wait that plus 50–100 ms for timer inaccuracy.
 - Assert an earlier sign instead of the end state, like a progress bar's full width
   instead of its removal after the animation.
+- Don't wait for an intermediate animation frame, which a busy CI machine may not render in
+  time. `await jasmine.seekAnimation(element, ms)` pauses the element's animation at that
+  time and returns it. Then call `play()` on it and await `up.animate()`'s promise for the
+  last frame.
 
 Don't install `jasmine.clock()`, except to make a mocked request time out:
 `jasmine.lastRequest().responseTimeout()` only works with the clock installed.
