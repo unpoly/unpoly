@@ -1,7 +1,3 @@
-/*-
-@namespace up.link
-*/
-
 const followSelectorFn = up.link.config.selectorFn('followSelectors')
 const submitSelectorFn = up.form.config.selectorFn('submitSelectors')
 const preloadSelectorFn = up.link.config.selectorFn('preloadSelectors')
@@ -93,33 +89,6 @@ up.migrate.transformAttribute('up-restore-scroll', function(link, restoreScroll)
   }
 })
 
-/*-
-[Follows](/api/up.follow) this link as fast as possible.
-
-This is done by:
-
-- [Following the link](/api/up-follow) without a full page load
-- [Preloading the link's destination URL](/learn/preloading)
-- [Triggering the link on `mousedown`](/api/up-instant) instead of on `click`
-
-## Example
-
-Use `[up-dash]` like this:
-
-    <a href="/users" up-dash=".main">User list</a>
-
-This is shorthand for:
-
-    <a href="/users" up-target=".main" up-instant up-preload>User list</a>
-
-@selector [up-dash]
-@param [up-dash='body']
-  The CSS selector to replace
-
-  Inside the CSS selector you may refer to this link as `:origin`.
-@deprecated
-  To accelerate all links use `up.link.config.instantSelectors` and `up.link.config.preloadSelectors`.
-*/
 up.migrate.targetMacro('up-dash', { 'up-preload': '', 'up-instant': '' }, 'up.link.config.instantSelectors and up.link.config.preloadSelectors')
 
 up.migrate.renamedAttribute('up-delay', 'up-preload-delay', { scope: preloadSelectorFn })
@@ -134,27 +103,6 @@ up.on('up:link:preload', function(event) {
     event.preventDefault()
   }
 })
-
-/*-
-Makes any element [behave like a hyperlink](/learn/faux-interactive-elements).
-
-## Example
-
-The following `<span>` element will [navigate](/api/up-follow) to `/details` when clicked:
-
-```html
-<span up-href="/details">Read more</span>
-```
-
-@selector [up-href]
-@param [up-href]
-  The URL to load when activated.
-@params-note
-  All modifying attributes for `[up-follow]` may also be used.
-@deprecated
-  Following an element with only an `[up-href]` attribute is deprecated.
-  Also set an `[up-follow]` attribute on the same element.
-*/
 
 const LEGACY_UP_HREF_FOLLOW_SELECTOR = '[up-href]:not([up-follow], [up-poll], [up-defer], [up-expand])'
 

@@ -17,23 +17,6 @@ import { type Route } from './request_cache.js'
 import { UpResponse } from './response.js'
 import { XHRRenderer } from './xhr_renderer.js'
 
-/*-
-A normalized description of an [HTTP request](/api/up.request).
-
-You can queue a request using the `up.request()` method:
-
-```js
-let request = up.request('/foo')
-console.log(request.url)
-
-// A request object is also a promise for its response
-let response = await request
-console.log(response.text)
-```
-
-@class up.Request
-@parent up.network
-*/
 // Prefixed, so the binding doesn't shadow the browser's `Request` here or in importers.
 // At runtime the class is named `up.Request` (see unpoly.ts).
 export class UpRequest {
@@ -90,286 +73,6 @@ export class UpRequest {
   declare catch: Promise<UpResponse>['catch']
   declare finally: Promise<UpResponse>['finally']
 
-  /*-
-  The HTTP method for the request.
-
-  @property up.Request#method
-  @param {string} method
-  @stable
-  */
-
-  /*-
-  The requested URL.
-
-  @property up.Request#url
-  @param {string} url
-  @stable
-  */
-
-  /*-
-  The [hash component](https://en.wikipedia.org/wiki/URI_fragment) of this request's URL.
-
-  The `{ hash }` property is automatically extracted from the given URL:
-
-  ```js
-  let request = up.request({ url: '/path#section' })
-  request.url // result: '/path'
-  request.hash // result: '#section'
-  ```
-
-  @property up.Request#hash
-  @param {string} hash
-  @stable
-  */
-
-  /*-
-  [Parameters](/api/up.Params) that should be sent as the request's payload.
-
-  @property up.Request#params
-  @param {Object|FormData|string|Array} params
-  @stable
-  */
-
-  /*-
-  The CSS selector [targeted](/learn/targeting-fragments) by this request.
-
-  The selector will be sent as an `X-Up-Target` header.
-
-  @learn-ref targeting-fragments
-
-  @property up.Request#target
-  @param {string} target
-  @stable
-  */
-
-  /*-
-  The CSS selector [targeted](/learn/targeting-fragments) by this request in case
-  the server responds with an [error code](/learn/error-responses).
-
-  The selector will be sent as an `X-Up-Fail-Target` header.
-
-  @learn-ref error-responses#fail-options
-
-  @property up.Request#failTarget
-  @param {string} failTarget
-  @stable
-  */
-
-  /*-
-  An object of HTTP headers that will be sent with this request.
-
-  Unpoly will by default send a number of custom request headers.
-  See `up.protocol` for details.
-
-  To read a single header, use `up.Request#header()`.
-
-  @property up.Request#headers
-  @param {Object} headers
-  @stable
-  */
-
-  /*-
-  Returns the HTTP request header value with the given name.
-
-  Returns `undefined` if the given header name will not be sent with this request.
-
-  > [note]
-  > For implementation reasons, the search for the header is case-sensitive.
-
-  @function up.Request#header
-  @param {string} name
-    The case-sensitive name.
-  @return {string|undefined}
-    The value of the header.
-  @stable
-  */
-
-  /*-
-  A timeout in milliseconds.
-
-  If the request is queued due to [many concurrent requests](/api/up.network.config#config.concurrency),
-  the timeout will not include the time spent waiting in the queue.
-
-  @property up.Request#timeout
-  @param {Object|undefined} timeout
-  @stable
-  */
-
-  /*-
-  Whether to wrap non-standard HTTP methods in a POST request.
-
-  If this is set, methods other than GET and POST will be converted to a `POST` request
-  and carry their original method as a `_method` parameter. This is to [prevent unexpected redirect behavior](https://makandracards.com/makandra/38347).
-
-  Defaults to [`up.network.config`](/api/up.network.config#config.wrapMethod).
-
-  @property up.Request#wrapMethod
-  @param {boolean} wrapMethod
-  @stable
-  */
-
-  /*-
-  The [context](/learn/layer-context) of the layer targeted by this request.
-
-  The context object will be sent as an `X-Up-Context` header.
-
-  @learn-ref layer-context
-
-  @property up.Request#context
-  @param {Object} context
-  @experimental
-  */
-
-  /*-
-  The [context](/learn/layer-context) of the layer targeted by this request in case the server responds with an [error code](/learn/error-responses).
-
-  The context object will be sent as an `X-Up-Fail-Context` header.
-
-  @property up.Request#failContext
-  @param {Object} failContext
-  @experimental
-  */
-
-  /*-
-  The [layer](/api/up.layer) targeted by this request.
-
-  Setting the `{ layer }` property will automatically derive `{ context }` and `{ mode }` properties.
-
-  When this request will [open a new overlay](/learn/opening-overlays), the string `"new"` is returned.
-
-  To prevent memory leaks, this property is removed shortly after the response is received.
-
-  @property up.Request#layer
-  @param {up.Layer|string} layer
-  @stable
-  */
-
-  /*-
-  The [layer](/api/up.layer) targeted by this request in case the server responds with an [error code](/learn/error-responses).
-
-  Setting the `{ failLayer }` property will automatically derive `{ failContext }` and `{ failMode }` properties.
-
-  To prevent memory leaks, this property is removed shortly after the response is received.
-
-  @property up.Request#failLayer
-  @param {up.Layer} layer
-  @stable
-  */
-
-  /*-
-  The element that triggered the request.
-
-  For example, when this request was triggered by a click on a link, the link
-  element is set as the `{ origin }`.
-
-  To prevent memory leaks, this property is removed shortly after the response is received.
-
-  @property up.Request#origin
-  @param {Element} origin
-  @stable
-  */
-
-  /*-
-  The [mode](/api/up.Layer.prototype.mode) of the layer targeted by this request.
-
-  The value will be sent as an `X-Up-Mode` header.
-
-  @learn-ref customizing-overlays
-
-  @property up.Request#mode
-  @param {string} mode
-  @stable
-  */
-
-  /*-
-  The [mode](/api/up.Layer.prototype.mode) of the layer targeted by this request in case the server responds with an [error code](/learn/error-responses).
-
-  The value will be sent as an `X-Up-Fail-Mode` header.
-
-  @property up.Request#failMode
-  @param {string} failMode
-  @stable
-  */
-
-  /*-
-  The [mode](/api/up.Layer.prototype.mode) of the layer from which the interaction [originated](/api/origin).
-
-  The value will be sent as an `X-Up-Origin-Mode` header.
-
-  @property up.Request#originMode
-  @param {string} originMode
-  @experimental
-  */
-
-  /*-
-  The format in which the [request params](/api/up.Request.prototype.params) will be encoded.
-
-  @property up.Request#contentType
-  @param {string} contentType
-  @stable
-  */
-
-  /*-
-  The payload that the request will encode into its body.
-
-  By default Unpoly will build a payload from the given `{ params }` option.
-
-  @property up.Request#payload
-  @param {string} payload
-  @stable
-  */
-
-  /*-
-  Whether the request is abortable through `up.fragment.abort()`.
-
-  This belongs to the `up.fragment` API, not `up.request`.
-  A request with `{ abortable: false }` can still be aborted through `up.network.abort()`.
-
-  @property up.Request#abortable
-  @param {boolean} [abortable=true]
-  @internal
-  */
-
-  /*-
-  Whether this request is loading in the background.
-
-  Background requests are deprioritized over foreground requests.
-  Background requests also won't emit `up:network:late` events and won't trigger
-  the [progress bar](/learn/progress-bar).
-
-  @learn-ref background-requests
-
-  @property up.Request#background
-  @param {boolean} [background=false]
-  @stable
-  */
-
-  /*-
-  The number of milliseconds after which this request can cause
-  an `up:network:late` event and show the [progress bar](/learn/progress-bar).
-
-  Defaults to `up.network.config.lateDelay`.
-
-  @property up.Request#lateDelay
-  @param {number|boolean} [lateDelay]
-  @stable
-  */
-
-  /*-
-  Creates a new `up.Request` object.
-
-  This will not actually send the request over the network. For that use `up.request()`.
-
-  @constructor up.Request
-  @param {string} attrs.url
-  @param {string} [attrs.method='get']
-  @param {up.Params|string|Object|Array|FormData} [attrs.params]
-  @param {string} [attrs.target]
-  @param {string} [attrs.failTarget]
-  @param {Object<string, string>} [attrs.headers]
-  @param {number} [attrs.timeout]
-  @internal
-  */
   constructor(options: t.RequestOptions) {
     // Like a default parameter, a default only replaces an undefined option.
     // A null option stays null, e.g. { timeout: null } sends the request without a timeout.
@@ -478,31 +181,12 @@ export class UpRequest {
     return u.isNumber(this.effectiveLateTime)
   }
 
-  /*-
-  Returns the underlying `XMLHttpRequest` instance.
-
-  @property up.Request#xhr
-  @param {XMLHttpRequest} xhr
-  @stable
-  */
   get xhr(): XMLHttpRequest {
     // Initialize the xhr request on first access,
     // so listeners on up:request:send events have a chance to access the xhr.
     return this._xhr ??= new XMLHttpRequest()
   }
 
-  /*-
-  Returns the fragments matched by this request's [target selector](/api/up.Request.prototype.target).
-
-  When this request will [open a new overlay](/learn/opening-overlays), an empty array is returned.
-
-  See also `up.RenderResult#fragments`.
-
-  @property up.Request#fragments
-  @param {List<Element>} fragments
-    A list of targeted fragments.
-  @stable
-  */
   get fragments(): Element[] {
     // This property is required for `up.fragment.abort()` to select requests within
     // the subtree that we're canceling.
@@ -528,21 +212,6 @@ export class UpRequest {
     return this._bindFragments || this.fragments
   }
 
-  /*-
-  Returns the fragment matched by this request's [target selector](/api/up.Request.prototype.target).
-
-  When [multiple fragments](/learn/targeting-fragments#multiple) are targeted, the first fragment is returned.
-  To get a list of all targeted fragments, use the [`{ fragments }`](/api/up.Request.prototype.fragments) property.
-
-  When this request will [open a new overlay](/learn/opening-overlays), `undefined` is returned.
-
-  See also `up.RenderResult#fragment`.
-
-  @property up.Request#fragment
-  @param {Element} fragment
-    The first targeted fragment.
-  @stable
-  */
   get fragment(): Element | undefined {
     return this.fragments?.[0]
   }
@@ -604,15 +273,6 @@ export class UpRequest {
     this.params.clear()
   }
 
-  /*-
-  Returns whether this request uses a [safe](https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.1.1)
-  HTTP method like `GET`.
-
-  @function up.Request#isSafe
-  @return {boolean}
-    Whether the request uses a safe HTTP method.
-  @experimental
-  */
   isSafe(): boolean {
     return isSafeMethod(this.method)
   }
@@ -684,27 +344,6 @@ export class UpRequest {
     return !event.defaultPrevented
   }
 
-  /*-
-  Loads this request object as a full-page request, replacing the entire browser environment
-  with a new page from the server response.
-
-  The full-page request will be loaded with the [URL](/api/up.Request.prototype.url),
-  [method](/api/up.Request.prototype.method) and [params](/api/up.Request.prototype.params)
-  from this request object.
-
-  Aborts all pending requests.
-
-  ## Limitations
-
-  Some request properties cannot be transported with a full-page request and will be ignored.
-  Such properties include:
-
-  - Custom HTTP headers
-  - Binary param values (from file inputs)
-
-  @function up.Request#loadPage
-  @stable
-  */
   loadPage(): void {
     // This method works independently of @state, since it is often
     // a fallback for a request that cannot be processed as a fragment update
@@ -743,36 +382,6 @@ export class UpRequest {
     this._setAbortedState()
   }
 
-  /*-
-  Aborts this request.
-
-  The request's promise will reject with an `up.Aborted` error.
-
-  ### Example
-
-  ```javascript
-  let request = up.request('/path')
-
-  request.abort()
-
-  try {
-    let response = await request
-  } catch (result) {
-    if (result.name === 'AbortError') {
-      console.log('Request was aborted.')
-    }
-  }
-  ```
-
-  @function up.Request#abort
-  @param {string} [options.reason]
-    A message describing the reason for aborting this request.
-
-    If omitted, a generic reason like `"Aborted request to GET /path"` will be used.
-
-    The reason will be set as the error's message.
-  @stable
-  */
   abort({ reason }: { reason?: string | Error } = {}): void {
     // _setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     // will call _setAbortedState() a second time, without a message.
@@ -837,21 +446,6 @@ export class UpRequest {
     this.onSettle?.(responseOrError)
   }
 
-  /*-
-  Returns whether this request is no longer waiting for the network.
-
-  A request is considered to have ended in one of the following states:
-
-  - A response has been loaded, with any [status code](/api/up.Response.prototype.status).
-  - It has been [aborted](/learn/aborting-requests).
-  - It failed due to a [network issue](/learn/network-issues).
-  - It failed due to a timeout.
-
-  @property up.Request#ended
-  @param {boolean} ended
-    Whether this request has ended.
-  @stable
-  */
   get ended(): boolean {
     return (this.state !== 'new') && (this.state !== 'loading') && (this.state !== 'tracking')
   }
@@ -1037,38 +631,6 @@ export class UpRequest {
     }
   }
 
-  /*-
-  An `up.Request` is also a promise for the server response.
-
-  A request is *fulfilled* with an `up.Response` when the server sends a response
-  with a status code of 2xx or [304](/learn/conditional-requests#rendering-nothing).
-
-  The promise will reject for responses with an [HTTP error status](/learn/error-responses),
-  when the request is [aborted](/learn/aborting-requests) or when there is a
-  [network issue](/learn/network-issues).
-
-  ### Example
-
-  ```js
-  try {
-    let response = await up.request('foo')
-    console.log('Successful response:', response.text)
-  } catch (error) {
-    if (error instanceof up.Response) {
-      console.log('Response with error code:', error.text)
-    } else {
-      console.log("Other error during request:", error)
-    }
-  }
-  ```
-
-  @function up.Request#then
-  @param {Function(up.Response)} onFulfilled
-  @param {Function(up.Response|Error)} onRejected
-  @return {Promise<up.Response>}
-    A promise that fulfills when the server response was fully loaded.
-  @stable
-  */
   static {
     // A request is also a promise ("thenable") for its response.
     u.delegatePromise(this.prototype, function() { return this._deferred })

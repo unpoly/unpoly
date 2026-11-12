@@ -1,4 +1,5 @@
-/*-
+# List
+
 The Unpoly documentation uses the term `List` to refer to an array-like value.
 
 There is no actual `List` class. Instead, that term refers to an abstract interface
@@ -52,4 +53,3 @@ let array = up.util.toArray(list)
 
 @class List
 @stable
-*/

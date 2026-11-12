@@ -6,10 +6,6 @@ type RequestOptions = import('../unpoly/network.js').RequestOptions
 type RequestTesterOptions = import('../unpoly/network.js').RequestTesterOptions
 type UpResponse = import('../unpoly/network.js').UpResponse
 
-/*-
-@namespace up.network
-*/
-
 // A deprecated alias has the type of the function or namespace that replaces it.
 declare module '../unpoly.js' {
   interface Up {
@@ -125,58 +121,17 @@ up.on('up:request:loaded', function(event) {
   }
 })
 
-/*-
-Makes a request to the given URL and caches the response.
-
-The function returns a promise that fulfills with the response text.
-
-### Example
-
-```
-up.ajax('/search', { params: { query: 'sunshine' } }).then(function(text) {
-  console.log('The response text is %o', text)
-}).catch(function() {
-  console.error('The request failed')
-})
-```
-
-@function up.ajax
-@param {string} [url]
-  The requested URL.
-
-  Instead of passing the URL as a string argument, you can also pass it as an `{ url }` option.
-@param {Object} [options]
-  See options for `up.request()`.
-@return {Promise<string>}
-  A promise for the response text.
-@deprecated
-  Use `up.request()` instead.
-*/
 up.ajax = function(...args) {
   up.migrate.deprecated('up.ajax()', 'up.request()')
   const pickResponseText = (response: UpResponse): string => response.text
   return up.request(...args).then(pickResponseText)
 }
 
-/*-
-Expires all cache entries.
-
-@function up.proxy.clear
-@deprecated
-  Use `up.cache.expire()` instead.
-*/
 up.network.clear = function() {
   up.migrate.deprecated('up.proxy.clear()', 'up.cache.expire()')
   up.cache.expire()
 }
 
-/*-
-Expires cache entries.
-
-@function up.cache.clear
-@deprecated
-  Use `up.cache.expire()` instead.
-*/
 // The cache's class isn't on window.up, and importing it here would patch a second copy
 // of the class, since unpoly-migrate.js is a separate bundle. So we patch the prototype
 // of the up.cache instance.
@@ -185,14 +140,6 @@ Object.getPrototypeOf(up.cache).clear = function(...args: any[]) {
   this.expire(...args)
 }
 
-/*-
-Preloads the given link.
-
-@function up.proxy.preload
-@param {Element} link
-@deprecated
-  Use `up.link.preload()` instead.
-*/
 up.network.preload = function(...args) {
   up.migrate.deprecated('up.proxy.preload(link)', 'up.link.preload(link)')
   return up.link.preload(...args)
@@ -206,115 +153,30 @@ up.migrate.preprocessAbortArgs = function(args) {
   }
 }
 
-/*-
-Returns whether Unpoly is *not* currently loading a [request](/api/up.request).
-
-The network is also considered [busy](/api/up.network.isBusy) while requests are [loading in the background](/api/up.request#options.background).
-
-See also `up.network.isBusy()`.
-
-@function up.network.isIdle
-@return {boolean}
-@deprecated
-  Use `!up.network.isBusy()` instead.
-*/
 up.network.isIdle = function() {
   up.migrate.deprecated('up.network.isIdle()', '!up.network.isBusy()')
   return !up.network.isBusy()
 }
 
-/*-
-@class up.Request
-*/
-
-/*-
-Loads this request object as a full-page request, replacing the entire browser environment
-with a new page from the server response.
-
-The full-page request will be loaded with the [URL](/api/up.Request.prototype.url),
-[method](/api/up.Request.prototype.method) and [params](/api/up.Request.prototype.params)
-from this request object.
-Properties that are not possible in a full-page request (such as custom HTTP headers)
-will be ignored.
-
-Aborts all pending requests.
-
-@function up.Request#navigate
-@deprecated
-  Use `up.Request#loadPage()` instead.
-*/
 up.Request.prototype.navigate = function() {
   up.migrate.deprecated('up.Request#navigate()', 'up.Request#loadPage()')
   this.loadPage()
 }
 
-/*-
-Whether this request is [preloading](/learn/preloading) content.
-
-@property up.Request#preload
-@param {boolean} [preload=false]
-@deprecated
-  Use `up.Request#background` instead.
-*/
 up.migrate.renamedProperty(up.Request.prototype, 'preload', 'background', { warning: 'Property up.Request#preload has been renamed to up.Request#background' })
 
-/*-
-The number of milliseconds after which this request can cause
-an `up:network:late` event and show the [progress bar](/learn/progress-bar).
-
-Defaults to `up.network.config.lateDelay`.
-
-@property up.Request#badResponseTime
-@param {number} [badResponseTime]
-@deprecated
-  Use `up.Request#lateDelay` instead.
-*/
 up.migrate.renamedProperty(up.Request.prototype, 'badResponseTime', 'lateDelay', { warning: 'Property up.Request#badResponseTime has been renamed to up.Request#lateDelay' })
 
-/*-
-@class up.Response
-*/
-
-/*-
-Returns whether the server responded with a 2xx HTTP status.
-
-@function up.Response#isSuccess
-@return {boolean}
-@deprecated
-  Use `up.Response#ok` instead.
-*/
 up.Response.prototype.isSuccess = function() {
   up.migrate.deprecated('up.Response#isSuccess()', 'up.Response#ok')
   return this.ok
 }
 
-/*-
-Returns the HTTP header value with the given name.
-
-The search for the header name is case-insensitive.
-
-Returns `undefined` if the given header name was not included in the response.
-
-@function up.Response#getHeader
-@param {string} name
-@return {string|undefined}
-  The value of the header.
-@deprecated
-  Use `up.Response#header` instead.
-*/
 up.Response.prototype.getHeader = function(name: string) {
   up.migrate.deprecated('up.Response#getHeader()', 'up.Response#header()')
   return this.header(name)
 }
 
-/*-
-Returns whether the response was not [successful](/api/up.Response.prototype.ok).
-
-@function up.Response#isError
-@return {boolean}
-@deprecated
-  Use `!up.Response#ok` instead.
-*/
 up.Response.prototype.isError = function() {
   up.migrate.deprecated('up.Response#isError()', '!up.Response#ok')
   return !this.ok

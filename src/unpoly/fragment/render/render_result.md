@@ -1,0 +1,154 @@
+# up.RenderResult
+
+Instances of `up.RenderResult` describe the effects of [rendering](/api/up.render).
+
+Functions like `up.render()`, `up.follow()` or `up.submit()` return a promise
+that resolves with an `up.RenderResult`:
+
+```js
+let result = await up.render('.target', { content: 'foo' })
+console.log(result.fragments)     // result: [<div class="target">...</div>]
+console.log(result.layer)         // result: up.Layer (root layer)
+console.log(result.renderOptions) // result: { target: '.target', content: 'foo', ... }
+```
+
+@class up.RenderResult
+@parent up.fragment
+
+-----
+
+# up.RenderResult#fragments
+
+The effective fragments that ended up being inserted.
+
+@property up.RenderResult#fragments
+@param {Array<Element>} fragments
+@stable
+
+-----
+
+# up.RenderResult#layer
+
+The updated [layer](/api/up.layer).
+
+@property up.RenderResult#layer
+@param {up.Layer} layer
+@stable
+
+-----
+
+# up.RenderResult#target
+
+The [target selector](/learn/targeting-fragments) for the rendered fragments.
+
+When the given target contains an abstract selector like `:main` or `:layer`,
+this property describes the specific selector that matched:
+
+```js
+let result = await up.render({ target: ':main' })
+result.target // result: "[up-main='']"
+```
+
+If any `[up-hungry]` elements were added to the render pass, they
+are *not* included in `result.target`.
+
+@property up.RenderResult#target
+@param {string} target
+@experimental
+
+-----
+
+# up.RenderResult#renderOptions
+
+The [render](/api/up.render) options used to produce this result.
+
+If this result was produced from an [error response](/learn/error-responses),
+[`fail` prefixes](/learn/error-responses#fail-options)
+have been removed from the render options.
+
+@property up.RenderResult#renderOptions
+@param {Object} renderOptions
+@experimental
+
+-----
+
+# up.RenderResult#finished
+
+A promise that settles when no further DOM changes will be caused by this render pass.
+
+In particular:
+
+- [Animations](/api/up.motion) have concluded and [transitioned](/api/up-transition) elements were removed from the DOM tree.
+- A [cached response](/api/up.render#options.cache) was [revalidated with the server](/learn/caching#revalidation).
+  If the server has responded with new content, this content has also been rendered.
+
+The promise resolves to the last `up.RenderResult` that updated a fragment.
+If [revalidation](/learn/caching#revalidation) re-rendered the fragment, it is the result from the
+second render pass. If no revalidation was performed, or if revalidation yielded an [empty response](/learn/caching#when-nothing-changed),
+it is the result from the initial render pass.
+
+The promise will reject if the server sends an error status,
+if there is a network issue, or if targets could not be matched.
+
+Also see [Awaiting postprocessing](/learn/render-lifecycle#postprocessing).
+
+### Example
+
+```js
+let result = await up.render({ url: '/path' }).finished
+console.log(result.fragments)
+```
+
+@property up.RenderResult#finished
+@param {Promise<up.RenderResult>} finished
+  A promise that settles after all DOM changes.
+@stable
+
+-----
+
+# up.RenderResult#none
+
+Whether this render pass did not result in any fragments being rendered.
+
+There are some cases where no fragments were rendered:
+
+- The server sent HTTP status `304 Not Modified` to [avoid re-rendering unchanged content](/learn/conditional-requests).
+- The server sent HTTP status `204 No Content`.
+- The target selector was set to `':none'` by either client or server.
+- The server sent an `X-Up-Accept-Layer` or `X-Up-Dismiss-Layer` header.
+  This [closes an overlay](/learn/closing-overlays#from-server) before content is rendered.
+- Every targeted element was [kept](/learn/keeping-elements) by `[up-keep]`.
+
+@property up.RenderResult#none
+@param {boolean} none
+@stable
+
+-----
+
+# up.RenderResult#fragment
+
+Returns the inserted fragment.
+
+When [multiple fragments](/learn/targeting-fragments#multiple) were inserted, the first fragment is returned.
+To get a list of all inserted fragments, use the [`{ fragments }`](/api/up.RenderResult.prototype.fragments) property.
+
+See also `up.Request#fragment`.
+
+@property up.RenderResult#fragment
+@param {Element} fragment
+@stable
+
+-----
+
+# up.RenderResult#ok
+
+Whether this render pass has rendered a successful response.
+
+By default responses with a `2xx` status code are considered successful.
+Other HTTP codes (like `500` or `404`) are considered [error responses](/learn/error-responses#fail-options).
+
+Rendering a [string of HTML](/learn/providing-html#string) is always successful.
+
+@property up.RenderResult#ok
+@param {boolean} up.RenderResult#ok
+@experimental

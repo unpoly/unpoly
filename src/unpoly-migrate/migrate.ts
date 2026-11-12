@@ -11,10 +11,6 @@ type RemovedPropertyOptions<T> = import('./migrate/types.js').RemovedPropertyOpt
 type RenamedAttributeOptions = import('./migrate/types.js').RenamedAttributeOptions
 type TransformAttributeOptions = import('./migrate/types.js').TransformAttributeOptions
 
-/*-
-@namespace up.migrate
-@internal
-*/
 up.migrate = (function() {
 
   const config = up.internal.newConfig('up.migrate.config', (): MigrateConfig => ({

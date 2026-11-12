@@ -1,7 +1,3 @@
-/*-
-@namespace up.util
-*/
-
 // A deprecated alias has the type of the function that replaces it.
 declare module '../unpoly.js' {
   interface Up {
@@ -25,31 +21,11 @@ declare module '../unpoly.js' {
   }
 }
 
-/*-
-Returns a copy of the given object that only contains
-the given keys.
-
-@function up.util.only
-@param {Object} object
-@param {Array} ...keys
-@deprecated
-  Use `up.util.pick()` instead.
-*/
 up.util.only = function(object, ...keys) {
   up.migrate.deprecated('up.util.only(object, ...keys)', 'up.util.pick(object, keys)')
   return up.util.pick(object, keys)
 }
 
-/*-
-Returns a copy of the given object that contains all except
-the given keys.
-
-@function up.util.except
-@param {Object} object
-@param {Array} ...keys
-@deprecated
-  Use `up.util.omit(object, keys)` (with an array argument) instead of `up.util.except(object, ...keys)` (with rest arguments).
-*/
 up.util.except = function(object, ...keys) {
   up.migrate.deprecated('up.util.except(object, ...keys)', 'up.util.omit(object, keys)')
   return up.util.omit(object, keys)
@@ -100,15 +76,6 @@ up.util.nextFrame = function(...args) {
   return up.util.task(...args)
 }
 
-/*-
-Calls the given function for the given number of times.
-
-@function up.util.times
-@param {number} count
-@param {Function()} block
-@deprecated
-  Use a `for` loop instead.
-*/
 up.util.times = function(count, block) {
   up.migrate.deprecated('up.util.times()', 'a `for` loop')
   for (let i = 0; i < count; i++) {
@@ -116,46 +83,16 @@ up.util.times = function(count, block) {
   }
 }
 
-/*-
-Merge the own properties of one or more `sources` into the `target` object.
-
-@function up.util.assign
-@param {Object} target
-@param {Array<Object>} ...sources
-@deprecated
-  Use [`Object.assign()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) instead.
-*/
 up.util.assign = function(...args: [object, ...any[]]) {
   up.migrate.deprecated('up.util.assign()', 'Object.assign()')
   return Object.assign(...args)
 }
 
-/*-
-Returns an array of values of the given object.
-
-@function up.util.values
-@param {Object} object
-@return {Array<string>}
-@deprecated
-  Use [`Object.values()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values) instead.
-*/
 up.util.values = function(...args: [object]) {
   up.migrate.deprecated('up.util.values()', 'Object.values()')
   return Object.values(...args)
 }
 
-/*-
-Pushes the given function to the [JavaScript microtask queue](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/).
-
-@function up.util.microtask
-@param {Function()} task
-@return {Promise}
-  A promise that is resolved with the return value of `task`.
-
-  If `task` throws an error, the promise is rejected with that error.
-@deprecated
-  Use [`queueMicrotask()`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask) instead.
-*/
 up.util.microtask = function(task) {
   up.migrate.deprecated('up.util.microtask()', 'queueMicrotask()')
   return Promise.resolve().then(task)

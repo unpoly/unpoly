@@ -10,10 +10,6 @@ export class OverlayWithViewport extends Overlay {
     return document.body
   }
 
-  /*-
-  @function OverlayWithViewport#openNow
-  @internal
-  */
   createElements(): void {
     bodyShifter.raiseStack()
     this.createElement((this.constructor as typeof OverlayWithViewport).getParentElement())

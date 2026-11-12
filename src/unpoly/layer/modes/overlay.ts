@@ -18,54 +18,7 @@ import { OverlayFocus } from '../overlay_focus.js'
 // A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
 type CloseFn = (value: any, options?: t.LayerCloseOptions) => void
 
-/*-
-@class up.Layer
-*/
 export abstract class Overlay extends Layer {
-
-  /*-
-  The button or link that opened this overlay.
-
-  @property up.Layer#origin
-  @param {Element} origin
-    The element that opened this overlay.
-  @stable
-  */
-
-  /*-
-  The [size](/learn/customizing-overlays#overlay-sizes) of this overlay.
-
-  Returns a string like `'medium'` or `'large'`.
-
-  @property up.Layer#size
-  @param {string} size
-    This layer's size setting.
-  @stable
-  */
-
-  /*-
-  The [position](/learn/customizing-overlays#popup-position) of this popup or drawer overlay.
-
-  Returns a string like `'top'`, '`right`', `'bottom'` or `'left'`.
-
-  @property up.Layer#position
-  @param {string} [position]
-    This layer's position setting.
-  @stable
-  */
-
-  /*-
-  The [alignment](/learn/customizing-overlays#popup-position) of this popup overlay.
-
-  Returns a string like `'left'` or `'right'`.
-
-  Returns `undefined` for an overlay that isn't a popup.
-
-  @property up.Layer#align
-  @param {string} align
-    This layer's alignment setting.
-  @stable
-  */
 
   declare class?: string
   declare backdrop: boolean
@@ -464,20 +417,6 @@ export abstract class Overlay extends Layer {
     this._unbindEscapePressed?.()
   }
 
-  /*-
-  Destroys the elements that make up this overlay.
-
-  @function up.Layer.prototype.destroyElements
-  @param {string|Function(Element, Object)} [options.animation=this.closeAnimation]
-  @param {number} [options.duration=this.closeDuration]
-  @param {string} [options.easing=this.closeEasing]
-  @param {Function} [options.onFinished]
-    A callback that will run when the elements have been removed from the DOM.
-    If the destruction is animated, the callback will run after the animation has finished.
-  @return {Promise}
-    A resolved promise.
-  @internal
-  */
   destroyElements(options: t.LayerCloseOptions): void {
     const animationProps = this.closeAnimationProps(options)
 

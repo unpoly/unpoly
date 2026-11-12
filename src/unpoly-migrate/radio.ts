@@ -2,10 +2,6 @@ const e = up.element
 
 type FragmentHungryEvent = import('../unpoly/radio.js').FragmentHungryEvent
 
-/*-
-@namespace up.radio
-*/
-
 up.radio.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'hungry', 'hungrySelectors', { label: 'up.radio.config' })
 })

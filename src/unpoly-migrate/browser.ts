@@ -1,10 +1,5 @@
 type RequestOptions = import('../unpoly/network.js').RequestOptions
 
-/*-
-@namespace up.browser
-@internal
-*/
-
 /**
 The type of `up.browser`, whose functions moved to other namespaces.
 */

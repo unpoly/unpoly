@@ -1,7 +1,3 @@
-/*-
-@namespace up.history
-*/
-
 declare module '../unpoly.js' {
   interface Up {
     history: CoreApi['history'] & {
@@ -14,13 +10,6 @@ up.history.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'popTargets', 'restoreTargets', { label: 'up.history.config' })
 })
 
-/*-
-Returns a normalized URL for the current history entry.
-
-@function up.history.url
-@return {string}
-@deprecated Use the `up.history.location` property instead.
-*/
 up.history.url = function() {
   up.migrate.deprecated('up.history.url()', 'up.history.location')
   return up.history.location

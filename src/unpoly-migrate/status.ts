@@ -1,7 +1,3 @@
-/*-
-@namespace up.status
-*/
-
 // A deprecated alias has the type of the namespace that replaces it.
 declare module '../unpoly.js' {
   interface Up {

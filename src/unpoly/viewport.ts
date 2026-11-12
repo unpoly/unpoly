@@ -17,94 +17,7 @@ import { FocusCapsule } from './viewport/focus_capsule.js'
 export { FocusCapsule }
 import { RevealMotion } from './viewport/reveal_motion.js'
 
-/*-
-Features to control scrolling and focus when fragments are updated.
 
-The default viewport is the [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement). Mark additional scrolling containers, like a pane that scrolls on its own, with `[up-viewport]` so Unpoly can scroll them when revealing an element and save their scroll positions for history restoration. Elements fixed to the screen edge, like a sticky header, get `[up-fixed=top]` so revealed content is not hidden behind them.
-
-From JavaScript, `up.reveal()` scrolls an element into view, and `up.viewport.saveScroll()` and `up.viewport.restoreScroll()` save and restore scroll positions. Defaults like the reveal padding live in `up.viewport.config`.
-
-@learn-ref scrolling-and-focus
-
-@namespace up.viewport
-*/
-
-
-/*-
-Configures defaults for scrolling.
-
-@property up.viewport.config
-@section Layout
-  @param {Array} [config.viewportSelectors]
-    An array of CSS selectors that match viewports.
-
-    By default this contains the `[up-viewport]` attribute.
-
-    Matching elements must have a [derivable target selector](/learn/target-derivation).
-
-  @param {Array} [config.fixedTopSelectors]
-    An array of CSS selectors that find elements fixed to the
-    top edge of the screen (using `position: fixed`).
-
-    See [`[up-fixed="top"]`](/api/up-fixed-top) for details.
-  @param {Array} [config.fixedBottomSelectors]
-    An array of CSS selectors that match elements fixed to the
-    bottom edge of the screen (using `position: fixed`).
-
-    See [`[up-fixed="bottom"]`](/api/up-fixed-bottom) for details.
-  @param {Array} [config.anchoredRightSelectors]
-    An array of CSS selectors that find elements anchored to the
-    right edge of the screen (using `right:0` with `position: fixed` or `position: absolute`).
-
-    See [`[up-anchored="right"]`](/api/up-anchored-right) for details.
-
-@section Scrolling
-  @param {number} [config.revealSnap]
-    When [revealing](/api/up.reveal) elements, Unpoly will scroll a viewport
-    to the top when the revealed element is closer to the viewport's top edge
-    than `config.revealSnap`.
-
-    Set to `0` to disable snapping.
-  @param {number} [config.revealPadding]
-    The desired padding between a [revealed](/api/up.reveal) element and the
-    closest [viewport](/api/up.viewport) edge (in pixels).
-  @param {number} [config.revealMax]
-    A number indicating how many top pixel rows of a tall element to [reveal](/api/up.reveal).
-
-    Defaults to 50% of the available window height.
-
-    You may set this to `false` to always reveal as much of the element as the viewport allows.
-
-    You may also pass a function that receives an argument `{ viewportRect, elementRect }` and returns
-    a maximum height in pixels. Each given rectangle has properties `{ top, right, bottom, left, width, height }`.
-
-    @experimental
-  @param {number} [config.revealTop=false]
-    Whether to always scroll a [revealed](/api/up.reveal) element to the top.
-
-    By default Unpoly will scroll as little as possible to make the element visible.
-
-@section Focus
-  @param {Function(Object): boolean} [config.autoFocusVisible]
-    Whether elements focused by Unpoly should have a [visible focus ring](/learn/focus-visibility).
-
-    By default the focus ring will be visible if either the user [interacted with the keyboard](/api/up.event.inputDevice)
-    or the focused element is a [form field](/api/up.form.config#config.fieldSelectors).
-
-    The value is a function that accepts an object with `{ element, inputDevice }` properties and returns
-    a boolean. The `{ element }` property is the focused element. The `{ inputDevice }` property is a string
-    denoting the [interaction's input device](/api/up.event.inputDevice).
-
-    The default configuration is implemented like this:
-
-    ```js
-    up.viewport.config.autoFocusVisible = ({ element, inputDevice }) =>
-      inputDevice === 'key' || up.form.isField(element)
-    ```
-
-    @experimental
-@stable
-*/
 export const viewportConfig = newConfig('up.viewport.config', (): t.ViewportConfig => ({
   viewportSelectors: ['[up-viewport]', '[up-fixed]'],
   fixedTopSelectors: ['[up-fixed~=top]'],
@@ -120,66 +33,6 @@ export const viewportConfig = newConfig('up.viewport.config', (): t.ViewportConf
 export const bodyShifter = new BodyShifter()
 
 
-/*-
-Scrolls the given element's viewport so the first rows of the
-element are visible for the user.
-
-### Fixed elements obstructing the viewport
-
-Many applications have a navigation bar fixed to the top or bottom,
-obstructing the view of an element.
-
-You can make `up.reveal()` aware of these fixed elements
-so it can scroll the viewport far enough so the revealed element is fully visible.
-To make `up.reveal()` aware of fixed elements you can either:
-
-- give the element an attribute [`up-fixed="top"`](/api/up-fixed-top) or [`up-fixed="bottom"`](/api/up-fixed-bottom)
-- [configure default options](/api/up.viewport.config) for `{ fixedTopSelectors }` or `{ fixedBottomSelectors }`
-
-@learn-ref scrolling#reveal
-@function up.reveal
-
-@param {string|Element|jQuery} element
-  The element to reveal.
-
-@param {number} [options.snap]
-  When the revealed element would be closer to the viewport's top edge
-  than this value, Unpoly will scroll the viewport to the top.
-
-  Set to `0` to disable snapping.
-
-  Defaults to `up.viewport.config.revealSnap`.
-
-@param {boolean} [options.top]
-  Whether to scroll the viewport so that the first element row aligns
-  with the top edge of the viewport.
-
-  Defaults to `up.viewport.config.revealTop`.
-
-@param {number} [options.padding]
-  The desired padding between the revealed element and the
-  closest [viewport](/api/up.viewport) edge (in pixels).
-
-  Defaults to `up.viewport.config.revealPadding`.
-
-@param {string}[options.behavior='instant']
-  When set to `'instant'`, this will immediately scroll to the new position.
-
-  When set to `'smooth'`, this will scroll smoothly to the new position.
-
-  When set to `'auto'`, the behavior is determined by the CSS property
-  [`scroll-behavior`](https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior) of the viewport element.
-
-@param {string|Element|jQuery} [options.viewport]
-  The scrolling element to scroll.
-
-  Defaults to the [given element's viewport](/api/up.viewport.get).
-
-@return {undefined}
-
-@stable
-@signature
-*/
 // The element may also be a selector.
 export const reveal = mockable(function(element: any, options?: t.RevealOptions): true | Promise<void> {
   // copy options, since we will mutate it below (options.layer = ...).
@@ -202,51 +55,6 @@ export const reveal = mockable(function(element: any, options?: t.RevealOptions)
   return up.migrate.formerlyAsync?.('up.reveal()') || true
 })
 
-/*-
-Focuses the given element.
-
-Focusing an element will also [reveal](/api/up.reveal) it, unless `{ preventScroll: true }` is passed.
-
-@learn-ref focus#js
-@function up.focus
-
-@param {string|Element|jQuery} element
-  The element to focus.
-
-@param {boolean} [options.preventScroll=false]
-  Whether to prevent changes to the scroll position.
-
-@param {string} [options.inputDevice]
-  The [input device](/api/up.event.inputDevice) used for the current interaction.
-
-  Accepts values `'key'`, `'pointer'` and `'unknown'`.
-
-  Defaults to the [current input device](up.event.inputDevice).
-
-  @internal
-
-@param {boolean|string} [options.focusVisible='auto']
-  Whether the focused element should have a [visible focus ring](/learn/focus-visibility).
-
-  If set to `true` the element will be assigned the `.up-focus-visible` class.
-
-  If set to `false` the element will be assigned the `.up-focus-hidden` class.
-
-  If set to `'auto'` (the default), focus will be visible if `up.viewport.config.autoFocusVisible()`
-  returns `true` for the given element and [current input device](/api/up.event.inputDevice).
-
-  The [`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible) pseudo-class will
-  also be set or removed accordingly on [supporting browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
-
-  @experimental
-
-@param {boolean} [options.force=false]
-  Whether to force focus even if `element` would otherwise not be a focusable element.
-
-  @stable
-
-@stable
-*/
 export const doFocus = mockable(function doFocus(element: HTMLElement, { preventScroll, force, inputDevice, focusVisible }: t.DoFocusOptions = {}): true | Promise<void> | undefined {
   if (force) {
     // (1) Element#tabIndex is -1 for all non-interactive elements,
@@ -285,97 +93,15 @@ function removeFocusClasses(element: Element | null): void {
 }
 
 
-/*-
-This class is assigned to elements that were [focused by Unpoly](/learn/focus) but should not
-have a [visible focus ring](/learn/focus-visibility).
-
-You can use this class to [remove an unwanted focus outline](#example).
-
-@learn-ref focus-visibility
-
-## Relation to `:focus-visible`
-
-Unpoly will try to unset `:focus-visible` whenever it sets `.up-focus-visible`, but can only do so
-in [some browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
-Because of this the `.up-focus-hidden` class may be set on elements that the browser considers to be
-[`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible).
-
-## Example
-
-@include focus-ring-hide-example
-
-@selector .up-focus-hidden
-@experimental
-*/
-
-/*-
-This class is assigned to elements that were [focused by Unpoly](/learn/focus) and should
-have a [visible focus ring](/learn/focus-visibility).
-
-You can use this class to [give a new component a focus ring](#example) for keyboard users,
-while not rendering a focus ring for mouse or touch users.
-
-@learn-ref focus-visibility
-
-## Relation to `:focus-visible`
-
-Unpoly will try to force `:focus-visible` whenever it sets `.up-focus-visible`, but can only do so
-in [some browsers](https://caniuse.com/mdn-api_htmlelement_focus_options_focusvisible_parameter).
-Because of this the `.up-focus-visible` class may be set on elements that the browser considers to *not* be
-[`:focus-visible`](https://developer.mozilla.org/en-US/docs/Web/CSS/:focus-visible).
-
-## Example
-
-@include focus-ring-show-example
-
-@selector .up-focus-visible
-@experimental
-*/
-
 export function tryFocus(element: HTMLElement, options?: t.DoFocusOptions): boolean {
   doFocus(element, options)
   return element === document.activeElement
 }
 
-/*-
-[Reveals](/api/up.reveal) an element matching the given `#hash` anchor.
-
-Other than the default behavior found in browsers, `up.viewport.revealHash()` works with
-[multiple viewports](/api/up-viewport) and honors [fixed elements](/api/up-fixed-top) obstructing the user's
-view of the viewport.
-
-When the page initially loads, this function is automatically called with the hash from
-the current URL.
-
-If no element matches the given `#hash` anchor, a falsy value is returned.
-
-### Example
-
-```js
-up.viewport.revealHash('#chapter2')
-```
-
-@function up.viewport.revealHash
-@param {string} hash
-  Must be given!
-@param {up.Layer|string} [options.layer]
-@param {Element} [options.origin]
-@param {boolean} [options.strong]
-@param {string} [options.behavior="instant"]
-@internal
-*/
 export function revealHash(hash: string, options?: t.RevealHashOptions): boolean | Promise<void> | undefined {
   return revealHashFn(hash, options)?.()
 }
 
-/*-
-Returns a function that [reveals](/api/up.reveal) an element matching the given `#hash` anchor.
-Returns a function that scrolls to the top if the hash is `#top` or `#`.
-Returns `undefined` if we cannot scroll.
-
-@function up.viewport.revealHashFn
-@internal
-*/
 export function revealHashFn(hash: string, { strong, layer, origin, behavior = 'instant', focus = false }: t.RevealHashOptions = {}): (() => boolean | Promise<void>) | undefined {
   if (!hash) return
 
@@ -399,17 +125,6 @@ function allSelector(): string {
   return [rootSelector(), ...viewportConfig.viewportSelectors].join()
 }
 
-/*-
-Returns the scrolling container for the given element.
-
-Returns the [document's scrolling element](/api/up.viewport.root)
-if no closer viewport exists.
-
-@function up.viewport.get
-@param {string|Element|jQuery} target
-@return {Element}
-@stable
-*/
 export function closest(target: e.ElementOrSelector, options: u.PlainObject = {}): HTMLElement {
   const element = getSmart(target, options)!
   // Use up.element.closest() which searches across layer boundaries.
@@ -419,48 +134,16 @@ export function closest(target: e.ElementOrSelector, options: u.PlainObject = {}
   return element.closest<HTMLElement>(allSelector())!
 }
 
-/*-
-Returns a list of all viewports contained within the
-given selector or element.
-
-If the given element itself is a viewport, it is included
-in the returned list.
-
-@function up.viewport.subtree
-@param {string|Element|jQuery} target
-@param {Object} options
-@return {List<Element>}
-@internal
-*/
 export function getViewportSubtree(element: e.ElementOrSelector, options: u.PlainObject = {}): u.List<HTMLElement> {
   element = getSmart(element, options)!
   return e.subtree(element, allSelector())
 }
 
-/*-
-Returns the closest viewport around the given element, and all viewports
-contained within the given element.
-
-This is relevant when updating a fragment with `{ scroll: 'top' | 'bottom' | 'restore' }` or a pixel value.
-In that case we restore / reset the scroll tops of all viewports around the fragment.
-
-@function up.viewport.around
-@param {string|Element|jQuery} element
-@param {Object} options
-@return {List<Element>}
-@internal
-*/
 export function getViewportAround(element: e.ElementOrSelector, options: u.PlainObject = {}): HTMLElement[] {
   element = getSmart(element, options)!
   return e.around(element, allSelector())
 }
 
-/*-
-Returns a list of all the viewports on the current layer.
-
-@function up.viewport.all
-@internal
-*/
 function getAll(options: u.PlainObject = {}): u.List<HTMLElement> {
   return getAllFragments(allSelector(), options)
 }
@@ -469,14 +152,6 @@ function rootSelector(): string {
   return getRoot().tagName
 }
 
-/*-
-Returns the [scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/document/scrollingElement)
-for the browser's main content area.
-
-@property up.viewport.root
-@param {Element} root
-@stable
-*/
 export function getRoot(): Element {
   // Only a quirks-mode document has no scrolling element.
   return document.scrollingElement!
@@ -504,40 +179,11 @@ function scrollTopKey(viewport: Element): string | undefined {
   return tryToTarget(viewport)
 }
 
-/*-
-@function up.viewport.fixedElements
-@internal
-*/
 function fixedElements(root: ParentNode = document): NodeListOf<HTMLElement> {
   const queryParts = ['[up-fixed]'].concat(viewportConfig.fixedTopSelectors).concat(viewportConfig.fixedBottomSelectors)
   return root.querySelectorAll<HTMLElement>(queryParts.join())
 }
 
-/*-
-Saves scroll positions for later restoration.
-
-The scroll positions will be associated with the current URL.
-They can later be restored by calling `up.viewport.restoreScroll()`
-at the same URL, or by following a link with an [`[up-scroll="restore"]`](/learn/scrolling#restore)
-attribute.
-
-Unpoly automatically saves scroll positions before [navigating](/learn/navigation-defaults).
-
-@function up.viewport.saveScroll
-@param {Element|Array<Element>} [viewport]
-  The viewports for which to save scroll positions.
-
-  Defaults to all viewports within the given layer.
-@param {string} [options.location]
-  The URL for which to save scroll positions.
-
-  If omitted, the given [layer's location](/api/up.Layer.prototype.location) is used.
-@param {string} [options.layer = 'current']
-  The layer for which to save scroll positions.
-
-  If omitted, positions for the current layer will be saved.
-@stable
-*/
 export function saveScroll(...args: any[]): void {
   const [viewports, options] = parseOptions(args)
   const location = options.location || options.layer.location
@@ -547,19 +193,6 @@ export function saveScroll(...args: any[]): void {
   }
 }
 
-/*-
-Returns a hash with scroll positions.
-
-Each key in the hash is a viewport selector. The corresponding
-value is the viewport's vertical scroll position:
-
-    getScrollTopsForSave(viewports)
-    => { '.main': 0, '.sidebar': 73 }
-
-@function getScrollTopsForSave
-@return {Object<string, number>}
-@internal
-*/
 function getScrollTopsForViewportElements(viewports: Iterable<Element>): Record<string, number> {
   let tops: Record<string, number> = {}
   for (let viewport of viewports) {
@@ -578,29 +211,6 @@ export function getScrollTops(options?: u.PlainObject): Record<string, number> {
   return getScrollTopsForViewportElements(viewports)
 }
 
-/*-
-Restores [previously saved](/api/up.viewport.saveScroll) scroll positions.
-
-If no saved scroll position is known, scroll positions are not changed
-and `false` is returned.
-
-Unpoly automatically restores scroll positions when the user [presses the back button](/learn/restoring-history).
-
-@function up.viewport.restoreScroll
-@param {Element|Array<Element>} [viewport]
-  The viewports for which to restore scroll positions.
-
-  Defaults to all viewports within the given layer.
-@param {up.Layer|string} [options.layer='current']
-  The layer on which to restore scroll positions.
-@param {string} [options.location]
-  The URL for which to restore scroll positions.
-
-  If omitted, the given [layer's location](/api/up.Layer.prototype.location) is used.
-@return {boolean}
-  Returns whether scroll positions could be restored.
-@stable
-*/
 export function restoreScroll(...args: any[]): boolean {
   const [viewports, options] = parseOptions(args)
   const location = options.location || options.layer.location
@@ -614,33 +224,6 @@ export function restoreScroll(...args: any[]): boolean {
   }
 }
 
-/*-
-Saves focus-related state for later restoration.
-
-Saved state includes:
-
-@include focus-state
-
-State can only be preserved if the focused element is [targetable](/api/up.fragment.isTargetable).
-
-Saved state will be associated with the given layer's location.
-It can later be restored by calling `up.viewport.restoreFocus()`
-at the same location, or by following a link with an [`[up-focus="restore"]`](/learn/focus#restore)
-attribute to that same location.
-
-Unpoly automatically saves focus-related state before [navigating](/learn/navigation-defaults).
-
-@function up.viewport.saveFocus
-@param {string} [options.location]
-  The URL for which to save focus state.
-
-  If omitted, the given [layer's location](/api/up.Layer.prototype.location) is used.
-@param {string} [options.layer = 'current']
-  The layer for which to save focus state.
-
-  If omitted, state for the current layer will be saved.
-@stable
-*/
 export function saveFocus(options: u.PlainObject = {}): void {
   const layer = layerStack.get(options)!
   const location = options.location || layer.location
@@ -652,22 +235,6 @@ export function saveFocus(options: u.PlainObject = {}): void {
   }
 }
 
-/*-
-Restores [previously saved](/api/up.viewport.saveFocus) focus-related state.
-
-Unpoly automatically restores focus-related state when the user [presses the back button](/learn/restoring-history).
-
-@function up.viewport.restoreFocus
-@param {up.Layer|string} [options.layer='current']
-  The layer on which to restore focus-related state.
-@param {string} [options.location]
-  The URL for which to restore focus-related state.
-
-  If omitted, the given [layer's location](/api/up.Layer.prototype.location) is used.
-@return {boolean}
-  Returns whether focus state could be restored.
-@stable
-*/
 export function restoreFocus(options: u.PlainObject = {}): boolean {
   const layer = layerStack.get(options)!
   const location = options.location || layer.location
@@ -785,228 +352,7 @@ export function absolutize(element: HTMLElement, options: { afterMeasure?: () =>
   }
 }
 
-/*-
-Marks this element as a scrolling container ("viewport").
 
-Apply this attribute if your app uses a custom panel layout with fixed positioning
-instead of scrolling the [document's scrolling element](https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollingElement). Alternatively, you can also push a selector
-matching your custom viewport to the `up.viewport.config.viewportSelectors` array.
-
-When [scrolling](/learn/scrolling), Unpoly will always scroll the viewport closest
-to the updated element. By default this is the document's scrolling element.
-
-Elements with the `[up-viewport]` attribute must also have a [derivable target selector](/learn/target-derivation).
-
-### Example
-
-Here is an example of a layout for an e-mail client, showing a list of e-mails
-on the left side and the e-mail text on the right side:
-
-```css
-.side {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 100px;
-  overflow-y: scroll;
-}
-
-.main {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 100px;
-  right: 0;
-  overflow-y: scroll;
-}
-```
-
-This would be the HTML (notice the `up-viewport` attribute):
-
-```html
-<div class="side" up-viewport>
-  <a href="/emails/5001" up-target=".main">Re: Your invoice</a>
-  <a href="/emails/2023" up-target=".main">Quote for services</a>
-  <a href="/emails/9002" up-target=".main">Fwd: Room reservation</a>
-</div>
-
-<div class="main" up-viewport>
-  <h1>Re: Your Invoice</h1>
-  <p>
-    Lorem ipsum dolor sit amet, consetetur sadipscing elitr.
-    Stet clita kasd gubergren, no sea takimata sanctus est.
-  </p>
-</div>
-```
-
-@learn-ref scrolling#multiple-viewports
-@selector [up-viewport]
-@stable
-@signature
-*/
-
-/*-
-Marks this element as being fixed to the top edge of the screen
-using `position: fixed`.
-
-When [following a link](/api/up-follow), the viewport is scrolled
-so the targeted element becomes visible. By using this attribute you can make
-Unpoly aware of fixed elements that are obstructing the viewport contents.
-Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
-
-Instead of using this attribute,
-you can also configure a selector in `up.viewport.config.fixedTopSelectors`.
-
-### Example
-
-```html
-<div class="top-nav" up-fixed="top">
-  <!-- chip: Navigation bar fixed to the top edge -->
-</div>
-```
-
-### Use with sticky positioning
-
-You can use `[up-fixed]` on elements with [`position: sticky`](https://www.w3schools.com/howto/howto_css_sticky_element.asp).
-
-Unpoly will measure sticky elements like permanently fixed elements.
-The current scroll position is not taken into account.
-
-@learn-ref scroll-tuning#fixed-layout-elements-obstructing-the-viewport
-@selector [up-fixed=top]
-@stable
-@signature
-*/
-
-/*-
-Marks this element as being fixed to the bottom edge of the screen
-using `position: fixed`.
-
-When [following a link](/api/up-follow), the viewport is scrolled
-so the targeted element becomes visible. By using this attribute you can make
-Unpoly aware of fixed elements that are obstructing the viewport contents.
-Unpoly will then scroll the viewport far enough that the revealed element is fully visible.
-
-Instead of using this attribute,
-you can also configure a selector in `up.viewport.config.fixedBottomSelectors`.
-
-### Example
-
-```html
-<div class="bottom-nav" up-fixed="bottom">
-  <!-- chip: Navigation bar fixed to the bottom edge -->
-</div>
-```
-
-### Use with sticky positioning
-
-You can use `[up-fixed]` on elements with [`position: sticky`](https://www.w3schools.com/howto/howto_css_sticky_element.asp).
-
-Unpoly will measure sticky elements like permanently fixed elements.
-The current scroll position is not taken into account.
-
-@learn-ref scroll-tuning#fixed-layout-elements-obstructing-the-viewport
-@selector [up-fixed=bottom]
-@stable
-*/
-
-
-/*-
-Marks this element as being anchored to the right edge of the screen,
-like a fixed navigation bar.
-
-@learn-ref overlays
-
-Since [overlays](/api/up.layer) hide the document scroll bar,
-elements anchored to the right appear to jump when an overlay opens or
-closes. Applying this attribute to anchored elements will make Unpoly
-aware of the issue and adjust the `right` property accordingly.
-You may customize this behavior by styling the `.up-scrollbar-away` class.
-
-Instead of applying this attribute to each affected element,
-you can also configure a selector in `up.viewport.config.anchoredRightSelectors`.
-
-> [note]
-> Elements with `[up-fixed=top]` or `[up-fixed=bottom]` are also considered to be right-anchored.
-
-### Example
-
-Here is the CSS for a navigation bar that is anchored to the top edge of the screen:
-
-```css
-.top-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-}
-```
-
-By adding an `up-anchored="right"` attribute to the element, we can prevent the
-`right` edge from jumping when an [overlay](/api/up.layer) opens or closes:
-
-```html
-<div class="top-nav" up-anchored="right">...</div>
-```
-
-@selector [up-anchored=right]
-@stable
-*/
-
-/*-
-This class is assigned to the `<body>` and [right-anchored](/api/up-anchored-right)
-elements while an [overlay](/api/up.layer) with a scrolling viewport is open.
-
-@learn-ref overlays
-
-Overlays temporarily hide the document's main scroll bar to prevent multiple scrollbars from being rendered.
-Without a scrollbar, the `<body>` becomes wider. This may cause elements to jump in width as the overlay opens and
-closes. Elements can use this class to compensate by setting a larger `right` or `margin-right` style in their CSS.
-
-### Default styles
-
-Unpoly sets some default styles for `.up-scrollbar-away` that will usually stabilize
-the width of absolutely positioned elements without additional CSS:
-
-- The right padding of the `<body>` element is increased by the scrollbar width
-- The `right` property of [right-anchored](/api/up-anchored-right) elements is increased by the scrollbar width.
-
-You can inspect the default styles
-in [`viewport.sass`](https://github.com/unpoly/unpoly/blob/master/src/unpoly/viewport.sass).
-
-### Customizing styles
-
-A chat support box is fixed to the bottom-right part of the screen, keeping a distance of 20 pixels from the window corner:
-
-```css
-.chat {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-}
-```
-
-While a scrolling overlay is open, we want to add the scrollbar width to the `right`
-so its position remains stable:
-
-```css
-.chat.up-scrollbar-away {
-  right: calc(20px + var(--up-scrollbar-width)) !important
-}
-```
-
-The `var(--up-scrollbar-width)` property is provided by Unpoly. It contains the width of the main document scrollbar
-that is now hidden, e.g. `15px`.
-
-@selector .up-scrollbar-away
-@experimental
-*/
-
-/*-
-@function up.viewport.firstHashTarget
-@internal
-*/
 export function firstHashTarget(hash?: string, options: u.PlainObject = {}): HTMLElement | undefined {
   hash = pureHash(hash)
   if (hash) {
@@ -1020,12 +366,6 @@ export function firstHashTarget(hash?: string, options: u.PlainObject = {}): HTM
   }
 }
 
-/*-
-Returns `'foo'` if the hash is `'#foo'`.
-
-@function pureHash
-@internal
-*/
 function pureHash(value?: string): string | undefined {
   return value?.replace(/^#/, '')
 }

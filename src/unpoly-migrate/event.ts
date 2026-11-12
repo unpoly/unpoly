@@ -1,10 +1,6 @@
 type EmitProps = import('../unpoly/event.js').EmitProps
 type UnbindFn = import('../unpoly/event.js').UnbindFn
 
-/*-
-@namespace up.event
-*/
-
 // A deprecated alias has the type of the namespace that replaces it.
 declare module '../unpoly.js' {
   interface Up {
@@ -20,75 +16,12 @@ declare module '../unpoly.js' {
 
 up.migrate.renamedNamespace('bus', 'event')
 
-/*-
-[Emits an event](/api/up.emit) and returns whether no listener
-has prevented the default action.
-
-### Example
-
-```javascript
-if (up.event.nobodyPrevents('disk:erase')) {
-  Disk.erase()
-}
-```
-
-@function up.event.nobodyPrevents
-@param {string} eventType
-@param {Object} eventProps
-@return {boolean}
-  whether no listener has prevented the default action
-@deprecated
-  Use `!up.emit(type).defaultPrevented` instead.
-*/
 up.event.nobodyPrevents = function(...args) {
   up.migrate.deprecated('up.event.nobodyPrevents(type)', '!up.emit(type).defaultPrevented')
   const event = up.emit(...args)
   return !event.defaultPrevented
 }
 
-/*-
-Listens to an event on `document` or a given element.
-The event handler is called with the event target as a
-[jQuery collection](https://learn.jquery.com/using-jquery-core/jquery-object/).
-
-If you're not using jQuery, use `up.on()` instead, which calls
-event handlers with a native element.
-
-### Example
-
-```
-up.$on('click', 'a', function(event, $link) {
-  console.log("Click on a link with destination %s", $link.attr('href'))
-})
-```
-
-@function up.$on
-@param {Element|jQuery} [element=document]
-  The element on which to register the event listener.
-
-  If no element is given, the listener is registered on the `document`.
-@param {string} events
-  A space-separated list of types names to bind to.
-@param {string} [selector]
-  The selector of an element on which the event must be triggered.
-  Omit the selector to listen to all events with that name, regardless
-  of the event target.
-@param {boolean} [options.passive=false]
-  Whether to register a [passive event listener](https://developers.google.com/web/updates/2016/06/passive-event-listeners).
-
-  A passive event listener may not call `event.preventDefault()`.
-  This in particular may improve the frame rate when registering
-  `touchstart` and `touchmove` events.
-@param {Function(event, [element], [data])} listener
-  The listener function that should be called.
-
-  The function takes the event as the first argument and the observed element as the second argument.
-  The element's [attached data](/learn/data) is passed as a third argument.
-@return {Function()}
-  A function that unbinds the event listeners when called.
-@deprecated
-  Use `up.on()` with a callback that wraps the given native element in a jQuery collection.
-*/
 up.$on = function(...definitionArgs) {
   up.migrate.warn('up.$on() has been deprecated. Instead use up.on() with a callback that wraps the given native element in a jQuery collection.')
   let callback = definitionArgs.pop()

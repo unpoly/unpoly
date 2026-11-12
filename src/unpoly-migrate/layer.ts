@@ -2,10 +2,6 @@ type Overlay = import('../unpoly/layer.js').Overlay
 type PlainObject = import('../unpoly/util.js').PlainObject
 type FixKeyOptions = import('./migrate/types.js').FixKeyOptions
 
-/*-
-@namespace up.layer
-*/
-
 // Renamed keys and values that may be passed as layer options or set in a layer config object.
 function fixRenamedLayerKeys(object: PlainObject, source: FixKeyOptions): void {
   up.migrate.fixKey(object, 'closable', 'dismissible', source)
@@ -69,20 +65,6 @@ up.migrate.handleLayerOptions = function(options) {
 
 }
 
-/*-
-When this element is clicked, closes a currently open overlay.
-
-Does nothing if no overlay is currently open.
-
-To make a link that closes the current overlay, but follows to
-a fallback destination on the root layer:
-
-    <a href="/fallback" up-close>Okay</a>
-
-@selector [up-close]
-@deprecated
-  Use `[up-dismiss]` instead.
-*/
 // Core calls this hook (Overlay).
 up.migrate.registerLayerCloser = (layer: Overlay) => // <a up-close>Close</a> (legacy close attribute)
 layer.registerAttrCloser('up-close', (value, closeOptions) => {

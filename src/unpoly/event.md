@@ -1,0 +1,542 @@
+# up.event
+
+Features to emit and observe DOM events.
+
+`up.on()` listens on `document` or a given element, and can delegate to a selector so it also catches events from elements inserted later. It returns a function that unbinds the listener, and unbinds automatically when the element is destroyed. `up.emit()` emits a custom event with the given properties and returns it, so you can check whether a listener prevented it. An `[up-emit]` attribute emits a custom event when the element is clicked.
+
+@namespace up.event
+
+-----
+
+# up.on()
+
+Listens to a [DOM event](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Events)
+on `document` or a given element.
+
+`up.on()` has some quality of life improvements over
+[`Element#addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener):
+
+- You may pass a selector for [event delegation](https://davidwalsh.name/event-delegate).
+- The [event target](https://developer.mozilla.org/en-US/docs/Web/API/Event/target) is automatically passed as a second argument.
+- Your event listener will not be called when Unpoly has not [booted](/api/up.boot) in an unsupported browser
+- You may register a listener to multiple events by passing a space-separated list of event names (e.g. `"click mousedown"`)
+- You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/api/List) of elements.
+- Any [data attached to the observed element](/learn/data) will be passed as a third argument to your handler function.
+
+You can prevent the event from being processed further with [up.event.halt(event)](/api/up.event.halt).
+
+### Basic example
+
+The code below will call the listener when a `<a>` is clicked
+anywhere in the `document`:
+
+```js
+up.on('click', 'a', function(event, element) {
+  console.log("Click on a link %o", element)
+})
+```
+
+You may also bind the listener to a given element instead of `document`:
+
+```js
+let form = document.querySelector('form')
+up.on(form, 'click', function(event, form) {
+  console.log("Click within %o", form)
+})
+```
+
+### Event delegation
+
+You may pass both an element and a selector
+for [event delegation](https://davidwalsh.name/event-delegate).
+
+The example below registers a single event listener to the given `form`,
+but only calls the listener when the clicked element is a `select` element:
+
+```
+let form = document.querySelector('form')
+up.on(form, 'click', 'select', function(event, select) {
+  console.log("Click on select %o within %o", select, form)
+})
+```
+
+### Attaching data
+
+Any [data attached to the observed element](/learn/data) will be passed to your event handler.
+
+For instance, this element has attached data in its `[up-data]` attribute:
+
+```html
+<span class="user" up-data="{ age: 18, name: 'Bob' }">Bob</span>
+```
+
+The parsed data will be passed to your event handler as a third argument:
+
+```js
+up.on('click', '.user', function(event, element, data) {
+  console.log("This is %o who is %o years old", data.name, data.age)
+})
+```
+
+### Unbinding an event listener
+
+`up.on()` returns a function that unbinds the event listeners when called:
+
+```js
+// Define the listener
+let listener =  function(event) { ... }
+
+// Binding the listener returns an unbind function
+let unbind = up.on('click', listener)
+
+// Unbind the listener
+unbind()
+```
+
+There is also a function [`up.off()`](/api/up.off) which you can use for the same purpose:
+
+```js
+// Define the listener
+let listener =  function(event) { ... }
+
+// Bind the listener
+up.on('click', listener)
+
+// Unbind the listener
+up.off('click', listener)
+```
+
+### Binding to multiple elements
+
+You may register a listener to multiple elements in a single `up.on()` call, by passing a [list](/api/List) of elements:
+
+```js
+let allForms = document.querySelectorAll('form')
+up.on(allForms, 'submit', function(event, form) {
+  console.log('Submitting form %o', form)
+})
+```
+
+### Binding to multiple event types
+
+You may register a listener to multiple event types by separating types with a space or comma:
+
+```js
+let element = document.querySelector(...)
+up.on(element, 'mouseenter mouseleave', function(event) {
+  console.log('Mouse entered or left')
+})
+```
+
+@function up.on
+
+@section Observed events
+  @param {Element|jQuery} [element=document]
+    The element on which to register the event listener.
+
+    If no element is given, the listener is registered on the `document`.
+
+@include up.on/after-element
+
+@stable
+@signature
+
+-----
+
+# up.event.onClosest()
+
+Runs a callback when the given event is observed on the given element *or its ancestors*.
+
+## Example
+
+```js
+up.event.onClosest(element, 'click', function() {
+  // chip: Someone clicked on element or its ancestors
+})
+```
+
+@function up.event.onClosest
+@param {Element} element
+  The element to observe with its ancestors.
+@param {string} eventType
+  The event type to observe.
+@param {string|up.Layer} [options.layer]
+  Only observe ancestors in the given [layer](/api/up.layer).
+
+  The layer is looked up with the observed element as `{ origin }`.
+  Pass `'origin'` to observe ancestors in the element's own layer.
+
+  By default the callback runs for any ancestor in the DOM, including the element of a parent layer.
+@param {Function(event)} callback
+  The callback to run.
+
+  It will be called with the observed event.
+@return {Function}
+  A function that unsubscribes the callback.
+
+  When the element is destroyed, the callback will be unsubscribed automatically.
+@experimental
+
+-----
+
+# up.off()
+
+Unbinds an event listener previously bound with `up.on()`.
+
+### Example
+
+Let's say you are listening to clicks on `.button` elements:
+
+```js
+let listener = function() { ... }
+up.on('click', '.button', listener)
+```
+
+You can stop listening to these events like this:
+
+```js
+up.off('click', '.button', listener)
+```
+
+@function up.off
+
+@section Observed events
+  @param {Element|jQuery} [element=document]
+    The element from which to unbind the listener.
+@include up.off/after-element
+@stable
+
+-----
+
+# up.emit()
+
+Emits a custom event with the given name and properties.
+
+The event will be dispatched on the `document` or on the given element.
+
+You can listen to events of that type using
+[`addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener)
+or [`up.on()`](/api/up.on).
+
+### Example
+
+```js
+up.on('my:event', function(event) {
+  console.log(event.foo)
+})
+
+up.emit('my:event', { foo: 'bar' })
+// Prints "bar" to the console
+```
+
+@function up.emit
+
+@section Event
+  @param {Element|jQuery} [target=document]
+    The element on which the event is triggered.
+
+    If omitted, the event will be emitted on the `document`.
+
+  @param {string} eventType
+    The event type, e.g. `my:event`.
+
+  @param {Object} [props={}]
+    A list of properties to become part of the event object that will be passed to listeners.
+
+@section Options
+  @param {up.Layer|string|number} [props.layer]
+    The [layer](/api/up.layer) on which to emit this event.
+
+    If this property is set, the event will be emitted on the [layer's outmost element](/api/up.Layer.prototype.element).
+    Also [up.layer.current](/api/up.layer.current) will be set to the given layer while event listeners
+    are running.
+
+  @param {Element|jQuery} [props.target=document]
+    The element on which the event is triggered.
+
+    Alternatively the target element may be passed as the first argument.
+
+  @param {string|Array} [props.log]
+    A message to print to the [log](/api/up.log) when the event is emitted.
+
+    Pass `false` to not log this event emission.
+
+    @experimental
+
+@return {Event}
+  The emitted event object.
+@stable
+@signature
+
+-----
+
+# up.event.build()
+
+Builds an event with the given type and properties.
+
+The returned event is not [emitted](/api/up.emit).
+
+## Example
+
+```js
+let event = up.event.build('my:event', { foo: 'bar' })
+console.log(event.type)              // logs "my:event"
+console.log(event.foo)               // logs "bar"
+console.log(event.defaultPrevented)  // logs "false"
+up.emit(event)                       // emits the event
+```
+
+@function up.event.build
+@param {string} [type]
+  The event type.
+
+  May also be passed as a property `{ type }`.
+@param {Object} [props={}]
+  An object with event properties.
+@param {string} [props.type]
+  The event type.
+
+  May also be passed as a first string argument.
+@return {Event}
+  The unemitted event object.
+@stable
+
+-----
+
+# up.event.assertEmitted()
+
+[Emits](/api/up.emit) the given event and throws an `up.Aborted` error if it was prevented.
+
+@function up.event.assertEmitted
+@param {string} eventType
+@param {Object} eventProps
+@param {string|Array} [eventProps.message]
+@return {Event}
+@internal
+
+-----
+
+# up.event.onEscape()
+
+Registers an event listener to be called when the user
+presses the `Escape` key.
+
+### Example
+
+```js
+up.event.onEscape(function(event) {
+  console.log('Escape pressed!')
+})
+```
+@function up.event.onEscape
+@param {Function(Event)} listener
+  The listener function that will be called when `Escape` is pressed.
+@experimental
+
+-----
+
+# up.event.halt()
+
+Prevents the event from being processed further.
+
+In detail:
+
+- It prevents the event from bubbling up the DOM tree.
+- It prevents other event handlers bound on the same element.
+- It prevents the event's default action.
+
+### Example
+
+```js
+up.on('click', 'a.disabled', function(event) {
+  up.event.halt(event)
+})
+```
+
+@function up.event.halt
+@param {Event} event
+  The event to stop processing for.
+@stable
+
+-----
+
+# up.event.isModified()
+
+Returns whether the given mouse event was made with a modifier key or a mouse button other than the primary button.
+
+An event is modified when the user held `Shift`, `Ctrl`, `Alt` or `Meta` (`Cmd` on macOS),
+or used a button other than the primary mouse button (`event.button > 0`), like the middle button.
+Browsers often give such clicks a special meaning, like opening a link in a new tab.
+
+## Example
+
+A click handler can return early for a modified click, so the browser's default behavior is not replaced:
+
+```js
+up.on('click', '.product-card', function(event, card) {
+  if (up.event.isModified(event)) return // mark: up.event.isModified(event)
+
+  event.preventDefault()
+  up.navigate({ url: card.dataset.url })
+})
+```
+
+`up:click` is [only emitted for unmodified clicks](/api/up:click#only-unmodified-clicks-are-considered),
+so listeners of `up:click` don't need this check.
+
+@function up.event.isModified
+@param {MouseEvent} event
+  The event to test, like a `click` or `mousedown` event.
+@return {boolean}
+  Whether the event was modified.
+@experimental
+
+-----
+
+# up.event.isSyntheticClick()
+
+Returns whether the given click was made by JavaScript, e.g. with `element.click()` or `dispatchEvent()`.
+
+Clicks from a real mouse, touch or keyboard are trusted by the browser.
+A click made by code has no meaningful coordinates and no preceding `mousedown`,
+so `up.link.convertClicks()` skips its checks against mouse effects for such clicks.
+
+@function up.event.isSyntheticClick
+@param {Event} event
+@return {boolean}
+@internal
+
+-----
+
+# [up-emit]
+
+Emits a custom event when this element is clicked.
+
+The event is emitted on this element and bubbles up to the `document`.
+To listen to the event, use [`addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener) or `up.on()`
+on the element, or on its ancestors.
+
+While the `[up-emit]` attribute is often used with an `<a>` or `<button>` element,
+you can also apply it to non-interactive elements, like a `<span>`.
+
+@learn-ref faux-interactive-elements
+
+### Example
+
+This button will emit a `user:select` event when pressed:
+
+```html
+<button type="button" up-emit='user:select'>Alice</button>
+```
+
+The event can be handled by a listener:
+
+```js
+document.addEventListener('user:select', function(event) {
+  up.reload('#user-details')
+})
+```
+
+### Event properties
+
+By default `[up-emit]` will emit an event with only basic properties like [`{ target }`](https://developer.mozilla.org/en-US/docs/Web/API/Event/target).
+
+To set custom properties on the event object, encode them as [relaxed JSON](/api/relaxed-json) in an `[up-emit-props]` attribute:
+
+```html
+<button type="button"
+  up-emit="user:select"
+  up-emit-props="{ id: 5, firstName: 'Alice' }">
+  Alice
+</button>
+
+<script>
+  up.on('user:select', function(event) {
+    console.log(event.id)        // logs 5
+    console.log(event.firstName) // logs "Alice"
+  })
+</script>
+```
+
+### Fallback URLs {#fallback}
+
+Use `[up-emit]` on a link to define a fallback URL that is rendered in case no listener handles the event:
+
+```html
+<a href="/menu" up-emit='menu:open'>Menu</a>
+```
+
+When a listener has handled the `menu:open` event, it should call `event.preventDefault()`.
+This also prevents the original `click` event, causing the link to no longer be followed:
+
+```js
+document.addEventListener('menu:open', function(event) {
+  event.preventDefault() // prevent the link from being followed
+})
+```
+
+If no listener prevents the `menu:open` event, the browser will [navigate](/api/up-follow)
+to the `/menu` path.
+
+> [tip]
+> When an [event closes an overlay](/learn/subinteractions#event-condition) via `[up-accept-event]` or `[up-dismiss-event]`, its default is prevented.
+> You can use fallback URLs to make a link that emits a closing event in an overlay, but navigates to a different page on the [root layer](/api/up.layer.root).
+
+
+@selector [up-emit]
+@param up-emit
+  The [type](https://developer.mozilla.org/en-US/docs/Web/API/Event/type) of the event to be emitted, e.g. `my:event`.
+@param [up-emit-props='{}']
+  The event properties, serialized as [relaxed JSON](/api/relaxed-json).
+@stable
+
+-----
+
+# up.event.inputDevice
+
+The class of input device used to cause the current event.
+
+It can assume one of the following values:
+
+| Value        | Meaning                                                                 |
+|--------------|-------------------------------------------------------------------------|
+| `'key'`      | The event was caused by a keyboard interaction.                         |
+| `'pointer'`  | The event was caused by an interaction via mouse, touch or stylus.      |
+| `'unknown'`  | The input device is unknown or this event was not caused by user input. |
+
+## Example
+
+In event listeners, `up.event.inputDevice` returns the type of input device that caused the event:
+
+```js
+document.addEventListener('mousedown', function() {
+  console.log(up.event.inputDevice) // will print "pointer"
+})
+
+document.addEventListener('keydown', function() {
+  console.log(up.event.inputDevice) // will print "key"
+})
+
+document.addEventListener('click', function() {
+  // will print either "pointer" or "key", depending on
+  // whether the link was activated with mouse or keyboard
+  console.log(up.event.inputDevice)
+})
+```
+
+## Limitations
+
+Unpoly can only detect the input device when the user interacts with the document area.
+Interactions with browser-drawn UI elements (like the back button or scroll bar) cannot be detected:
+
+```js
+window.addEventListener('scroll', function() {
+  console.log(up.event.inputDevice) // will print "unknown"
+})
+```
+
+
+@property up.event.inputDevice
+@param {string} inputDevice
+  A string describing the current input device class.
+@experimental
