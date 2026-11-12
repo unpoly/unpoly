@@ -3,13 +3,13 @@ import * as e from '../../../element.js'
 import { fail } from '../../../error.js'
 import {
   emitFragmentDestroyed, emitFragmentKept, findKeepPlan, fragmentConfig, markFragmentAsDestroying,
+  setReloadAttrs,
 } from '../../../fragment.js'
 import { type Layer } from '../../../layer.js'
 import { animate, swap } from '../../../motion.js'
 import { block, clean, hello } from '../../../script.js'
 import { getViewportSubtree } from '../../../viewport.js'
 import type * as t from '../../types.js'
-import { LayerPlan } from './layer_plan.js'
 import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
 import { type ResponseDoc } from '../response_doc.js'
@@ -25,9 +25,8 @@ interface StepInsertion {
   startMotion?: () => Promise<any>
 }
 
-// Options for UpdateSteps. It extends LayerPlan, which takes render options, but its callers
-// only pass the steps, and the options to focus and scroll with when there are none.
-interface UpdateStepsOptions extends t.RenderOptions {
+// The steps to swap, and the options to focus and scroll with when there are none.
+interface UpdateStepsOptions {
   steps: t.RenderStep[]
   noneOptions?: t.ResolvedRenderOptions
 }
@@ -40,14 +39,12 @@ interface MatchedStep extends t.RenderStep {
 }
 
 // Swaps the steps' old elements with their new elements. Used by UpdateLayerPlan and OpenLayerPlan.
-export class UpdateSteps extends LayerPlan {
+export class UpdateSteps {
   declare _steps: MatchedStep[]
   declare _noneOptions: t.ResolvedRenderOptions
   declare responseDoc: ResponseDoc
 
   constructor(options: UpdateStepsOptions) {
-    super(options)
-
     // Our callers pass steps for a layer, with a matched old element. execute() matches
     // the new elements before anything reads them.
     this._steps = u.copy(u.assert(options.steps)) as MatchedStep[] // we mutate it below
@@ -259,7 +256,7 @@ export class UpdateSteps extends LayerPlan {
     this.responseDoc.finalizeElement(element)
 
     // Set [up-source], [up-etag], [up-time] from request/response.
-    this.setReloadAttrs(step)
+    setReloadAttrs(step)
 
     // Run macros and compilers. This also snapshots for [up-keep="same-html"].
     return hello(element, step)

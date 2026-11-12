@@ -165,10 +165,10 @@ task, but an exception after inserting rejects `up.RenderResult#finished` instea
 calls the internal `swap()` (motion.ts), which inserts now and returns a function that starts the
 transition later; `up.morph()` is just both calls in a row.
 
-`LayerPlan` is the base class for everything that inserts content, and carries the
-concerns that outlive the swap: honouring a server's request to accept or dismiss a layer,
-and stamping each new fragment with the `[up-source]`, `[up-time]` and `[up-etag]` attributes
-that later reloads and revalidation depend on (`setReloadAttrs()`).
+`LayerPlan` is the base class of both plans, and honours a server's request to accept or
+dismiss a layer. Both `UpdateSteps` and `OpenLayerPlan` stamp each new fragment with the
+`[up-source]`, `[up-time]` and `[up-etag]` attributes that later reloads and revalidation
+depend on (`setReloadAttrs()` in fragment.ts).
 
 
 ## One options object, refined in stages
@@ -263,7 +263,7 @@ becomes an `OpenLayerPlan`.
 The same method folds the rest of the response into the options: `X-Up-Target` overrides the
 target, `X-Up-Context` merges into the context, `X-Up-Title` and the response URL feed
 history, and `ETag` / `Last-Modified` are recorded (only with `??=`, so an explicit option
-wins) for `LayerPlan#setReloadAttrs()` to stamp later. For a non-GET response it sets
+wins) for `setReloadAttrs()` to stamp later. For a non-GET response it sets
 `{ source: 'keep' }` — the fragment keeps the *previous* source, so it stays reloadable from
 the old GET URL rather than from the URL that was POSTed to — and allows history only if an
 explicit `{ location }` was given.

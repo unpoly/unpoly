@@ -1,7 +1,7 @@
 import * as u from '../../../util.js'
 import { CannotMatch } from '../../../error.js'
 import { assertEmitted } from '../../../event.js'
-import { getSmart, hasAutoHistory } from '../../../fragment.js'
+import { getSmart, hasAutoHistory, setReloadAttrs } from '../../../fragment.js'
 import { historyOptions } from '../../../history.js'
 import {
   buildLayer, layerStack, type Layer, type Overlay, type PeelOptions,
@@ -172,7 +172,7 @@ export class OpenLayerPlan extends LayerPlan {
     this._handleHistory()
 
     // Remember where the element came from to support up.reload(element).
-    this.setReloadAttrs({ newElement: this._content, source: this.options.source })
+    setReloadAttrs({ newElement: this._content, source: this.options.source })
 
     // Start compilation in the sync phase of postprocessing.
     let compilePromise = this._compileLayer()

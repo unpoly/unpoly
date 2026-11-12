@@ -1,20 +1,9 @@
 import * as u from '../../../util.js'
-import * as e from '../../../element.js'
 import { emit, type EventPlan } from '../../../event.js'
-import { normalizeSource, sourceOf } from '../../../fragment.js'
 import { type Layer } from '../../../layer.js'
 import { type UpResponse } from '../../../network.js'
 import type * as t from '../../types.js'
 import { Change } from './change.js'
-
-// The values that LayerPlan#setReloadAttrs() sets as [up-source], [up-time] and [up-etag].
-interface ReloadAttrsOptions {
-  oldElement?: Element
-  newElement: Element
-  source?: string | false
-  time?: Date | false
-  etag?: string | false | null
-}
 
 // A change that adds new content to a layer: by updating it (UpdateLayerPlan) or by opening it (OpenLayerPlan).
 export class LayerPlan extends Change {
@@ -92,41 +81,6 @@ export class LayerPlan extends Change {
     if (u.isDefined(this._dismissLayer)) {
       this.layer.dismiss(this._dismissLayer, { response: this._response })
     }
-  }
-
-  _setSource({ oldElement, newElement, source }: ReloadAttrsOptions): void {
-    // (1) When the server responds with an error, or when the request method is not
-    //     reloadable (not GET), we keep the same source as before.
-    // (2) Don't set a source if someone tries to 'keep' when opening a new layer
-    if (source === 'keep') {
-      source = (oldElement && sourceOf(oldElement))
-    }
-
-    // (1) Don't set a source if { false } is passed.
-    // (2) Don't set a source if the element HTML already has an [up-source] attribute.
-    // (3) Don't use u.matchableURL() here. We need to keep a trailing slash
-    //     to support backends that care about trailing slashes.
-    if (source) {
-      e.setMissingAttr(newElement, 'up-source', normalizeSource(source))
-    }
-  }
-
-  _setTime({ newElement, time }: ReloadAttrsOptions): void {
-    // If the server didn't send a Last-Modified header, tag the element
-    // with [up-time=false] to indicate that we cannot use an ancestor's [up-time].
-    e.setMissingAttr(newElement, 'up-time', time ? time.toUTCString() : false)
-  }
-
-  _setETag({ newElement, etag }: ReloadAttrsOptions): void {
-    // If the server didn't send an Etag header, tag the element
-    // with [up-etag=false] to indicate that we cannot use an ancestor's [up-etag].
-    e.setMissingAttr(newElement, 'up-etag', etag || false)
-  }
-
-  setReloadAttrs(options: ReloadAttrsOptions): void {
-    this._setSource(options)
-    this._setTime(options)
-    this._setETag(options)
   }
 
 }
