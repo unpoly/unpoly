@@ -1,4 +1,4 @@
-import { type LayerMode } from '../base.js'
+import { type LayerMode } from '../../layer.js'
 import { OverlayWithViewport } from './overlay_with_viewport.js'
 
 export class ModalLayer extends OverlayWithViewport {

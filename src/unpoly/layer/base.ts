@@ -2,83 +2,22 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { Aborted, NotImplemented } from '../error.js'
 import {
-  EventEmitter, EventListenerGroup, on, type EmitProps, type EmittedEvent,
-  type EventListenerAttributes, type EventTypes, type ListenerArgs, type ObservedEvent,
-  type UnbindFn,
+  EventEmitter, EventListenerGroup, on, type EmitProps, type EmittedEvent, type EventTypes,
+  type ListenerArgs, type ObservedEvent, type UnbindFn,
 } from '../event.js'
 import {
   currentLocation, findMetaTags, getLang, isHistoryEnabled, pushLocation, updateLang,
   updateMetaTags, type HistoryAspect,
 } from '../history.js'
-import { closestLayerElement, mainTargets } from '../layer.js'
+import {
+  closestLayerElement, mainTargets, type LayerCloseOptions, type LayerListenerOptions, type LayerMode,
+  type LayerOptions, type LayerState, type PeelOptions,
+} from '../layer.js'
 import { convertClicks } from '../link.js'
-import { type AnimationValue } from '../motion.js'
-import { type UpResponse } from '../network.js'
 import { newStateCache } from '../viewport.js'
 import { type LayerStack } from './layer_stack.js'
 import { type Overlay } from './modes/overlay.js'
 import { type OverlayFocus } from './overlay_focus.js'
-
-/**
-A layer mode. The root layer has the mode `'root'`, an overlay has one of the other modes.
-*/
-export type LayerMode = 'root' | 'modal' | 'drawer' | 'popup' | 'cover'
-
-/**
-A layer mode that opens an overlay. All modes except `'root'`.
-*/
-export type OverlayMode = Exclude<LayerMode, 'root'>
-
-/**
-Where an overlay is in its life cycle. The root layer has no state.
-@internal
-*/
-export type LayerState = 'opening' | 'opened' | 'closing' | 'closed'
-
-/**
-The options a layer is constructed with. `up.layer.build()` merges them from the
-layer config and the options for `up.layer.open()`.
-@internal
-*/
-export interface LayerOptions {
-  mode?: LayerMode
-  stack?: LayerStack
-  history?: boolean | 'auto'
-  context?: u.PlainObject
-  lastScrollTops?: u.FIFOCache<string, any>
-  lastFocusCapsules?: u.FIFOCache<string, any>
-  [key: string]: any
-}
-
-/**
-Options for closing an overlay with `up.Layer#accept()` or `up.Layer#dismiss()`.
-*/
-export interface LayerCloseOptions {
-  confirm?: string | boolean
-  /** @internal */
-  preventable?: boolean
-  response?: UpResponse
-  animation?: AnimationValue
-  duration?: number
-  easing?: string
-  onFinished?: () => void
-  history?: boolean
-  /** @internal */
-  origin?: Element
-}
-
-/**
-Options for `up.Layer#peel()`.
-*/
-export interface PeelOptions extends LayerCloseOptions {
-  value?: any
-  intent?: 'accept' | 'dismiss'
-}
-
-/**
-Options for listening to events with `up.Layer#on()`.
-*/
-export type LayerListenerOptions = Pick<EventListenerAttributes, 'passive' | 'once' | 'capture'>
 
 /*-
 Each layer has an `up.Layer` instance.

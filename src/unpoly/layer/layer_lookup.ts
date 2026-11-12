@@ -1,42 +1,9 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
 import { fail } from '../error.js'
-import { normalizeLayerOptions } from '../layer.js'
+import { normalizeLayerOptions, type LayerLookupArgs, type LayerLookupOptions } from '../layer.js'
 import { Layer } from './base.js'
 import { type LayerStack } from './layer_stack.js'
-
-/**
-A value for the `{ layer }` option: an `up.Layer`, its index in the layer stack, an element in the layer,
-or a [layer name](/learn/targeting-other-layers) like `'current'` or `'parent'`.
-A string may contain several names, separated by spaces or commas.
-*/
-export type LayerOption = Layer | number | Element | string
-
-/**
-Options for looking up layers with `up.layer.get()` or `up.layer.getAll()`.
-*/
-export interface LayerLookupOptions {
-  layer?: LayerOption
-  /**
-  The layer that relative names like `'parent'` or `'current'` refer to.
-  */
-  baseLayer?: Layer | string
-  /**
-  An element in the layer that the `'origin'` name refers to.
-  */
-  origin?: Element
-  /** @internal */
-  originLayer?: Layer
-  /** @internal */
-  normalizeLayerOptions?: boolean
-  // Lookups often receive the render options, which have many more keys.
-  [key: string]: any
-}
-
-/**
-The arguments of `up.layer.get()` and `up.layer.getAll()`: a layer value, lookup options, or both.
-*/
-export type LayerLookupArgs = [value?: LayerOption | LayerLookupOptions, options?: LayerLookupOptions]
 
 /**
 What a single layer name resolves to. The name `'new'` passes through as a string, for the

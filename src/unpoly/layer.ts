@@ -3,50 +3,14 @@ import * as u from './util.js'
 import { newConfig } from './util/config.js'
 import { on } from './event.js'
 import { render, RenderOptions } from './fragment.js'
-import { type AnimationValue } from './motion.js'
-import { type UpResponse } from './network.js'
-import { Layer, type LayerMode, type OverlayMode, type PeelOptions } from './layer/base.js'
-export { Layer, type LayerMode, type PeelOptions }
-import { type LayerLookupArgs } from './layer/layer_lookup.js'
+import type * as t from './layer/types.js'
+export type * from './layer/types.js'
+import { Layer } from './layer/base.js'
+export { Layer }
 import { LayerStack } from './layer/layer_stack.js'
 export { type Overlay } from './layer/modes/overlay.js'
 export { OVERLAY_VISUAL_KEYS, UNSET_OVERLAY_VISUALS } from './layer/overlay_visuals.js'
 export { Tether } from './layer/tether.js'
-
-/**
-The `up:layer:open` event.
-*/
-export type LayerOpenEvent = Event & {
-  layerOptions: RenderOptions
-  origin: Element
-}
-
-/**
-The `up:layer:opened` event.
-*/
-export type LayerOpenedEvent = Event & {
-  origin: Element
-  layer: Layer
-}
-
-/**
-The `up:layer:location:changed` event.
-*/
-export type LayerLocationChangedEvent = Event & {
-  location: string
-  previousLocation: string | undefined
-  layer: Layer
-}
-
-/**
-The `up:layer:accept`, `up:layer:accepted`, `up:layer:dismiss` and `up:layer:dismissed` events.
-*/
-export type LayerCloseEvent = Event & {
-  layer: Layer
-  value?: any
-  origin: Element | undefined
-  response: UpResponse | undefined
-}
 
 /*-
 Features to open, close and look up overlays.
@@ -63,74 +27,6 @@ Add `[up-layer=new]` to a link or form to show its response in a new overlay, or
 // The layer class for each mode, like ModalLayer. The entry passes them to install(), so only
 // the entry and the mode classes themselves import a mode class (see the cycle rules in src/unpoly.ts).
 let layerClasses: (typeof Layer)[] = []
-
-/**
-The settings in `up.layer.config`, described in its doc comment.
-
-Besides a few settings of its own, the config has an object of defaults for all layers (`any`),
-for all overlays (`overlay`) and for each layer mode, so `config[mode]` is typed for every `LayerMode`.
-*/
-export interface LayerConfig {
-  mode: OverlayMode
-  any: LayerDefaults
-  root: LayerDefaults
-  overlay: OverlayDefaults
-  modal: OverlayDefaults
-  drawer: DrawerDefaults
-  popup: OverlayDefaults
-  cover: OverlayDefaults
-  foreignOverlaySelectors: string[]
-}
-
-/**
-Defaults for new layers, like `up.layer.config.any` or `up.layer.config.root`.
-
-Each object only holds the defaults set at its own level. `up.layer.open()` merges the levels
-(`any`, then `overlay`, then the mode). E.g. `up.layer.config.modal.openAnimation` is `undefined`
-until an app sets it, but modals open with the animation from `up.layer.config.overlay`.
-*/
-export interface LayerDefaults {
-  mainTargets: string[]
-  history?: boolean | 'auto'
-  // Any option for up.layer.open() can have a default, render options included.
-  // TODO(types): Extend the options of up.layer.open() instead, so a misspelled key is an error.
-  [option: string]: any
-}
-
-/**
-Defaults for new overlays, like `up.layer.config.overlay` or `up.layer.config.modal`.
-*/
-export interface OverlayDefaults extends LayerDefaults {
-  openAnimation?: LayerAnimation
-  openDuration?: number
-  openEasing?: string
-  closeAnimation?: LayerAnimation
-  closeDuration?: number
-  closeEasing?: string
-  dismissible?: boolean | string | string[]
-  dismissLabel?: string
-  dismissARIALabel?: string
-  trapFocus?: boolean
-  backdrop?: boolean
-  class?: string
-  size?: 'small' | 'medium' | 'large' | 'full' | 'grow'
-  // Popups take any position, drawers only 'left' or 'right' (see DrawerDefaults).
-  position?: 'top' | 'bottom' | 'left' | 'right'
-  // Only popups have an alignment.
-  align?: 'left' | 'right' | 'center' | 'top' | 'bottom'
-}
-
-/**
-Defaults for new drawers, like `up.layer.config.drawer`.
-*/
-export interface DrawerDefaults extends OverlayDefaults {
-  position?: 'left' | 'right'
-}
-
-/**
-The animation for opening or closing an overlay. A function receives the overlay and returns the animation.
-*/
-export type LayerAnimation = AnimationValue | ((layer: Layer) => AnimationValue)
 
 /*-
 Configures default attributes for new overlays.
@@ -286,7 +182,7 @@ up.layer.config.overlay.mainTargets.unshift('.content')
 
 @stable
 */
-export const layerConfig = newConfig('up.layer.config', (): LayerConfig => ({
+export const layerConfig = newConfig('up.layer.config', (): t.LayerConfig => ({
   mode: 'modal',
   any: {
     mainTargets: [
@@ -361,7 +257,7 @@ export let layerStack: LayerStack = null!
 
 let handlers: unknown[] = []
 
-export function mainTargets(mode: LayerMode): string[] {
+export function mainTargets(mode: t.LayerMode): string[] {
   return u.flatMap(modeConfigs(mode), 'mainTargets')
 }
 
@@ -370,7 +266,7 @@ Returns an array of config objects that apply to the given mode name.
 
 The config objects are in descending order of specificity.
 */
-function modeConfigs(mode: LayerMode): LayerDefaults[] {
+function modeConfigs(mode: t.LayerMode): t.LayerDefaults[] {
   if (mode === 'root') {
     return [layerConfig.root, layerConfig.any]
   } else {
@@ -942,8 +838,8 @@ try {
 export function ask(options: u.PlainObject): Promise<any> {
   return new Promise(function(resolve, reject) {
     open(RenderOptions.chainCallbacks(options, {
-      onAccepted: (event: LayerCloseEvent) => resolve(event.value),
-      onDismissed: (event: LayerCloseEvent) => reject(event.value),
+      onAccepted: (event: t.LayerCloseEvent) => resolve(event.value),
+      onDismissed: (event: t.LayerCloseEvent) => reject(event.value),
     }))
   })
 }
@@ -2009,8 +1905,8 @@ export const api = {
     open,
     ask,
     get stack() { return layerStack.layers },
-    get(...args: LayerLookupArgs): Layer | undefined { return layerStack.get(...args) },
-    getAll(...args: LayerLookupArgs): Layer[] { return layerStack.getAll(...args) },
+    get(...args: t.LayerLookupArgs): Layer | undefined { return layerStack.get(...args) },
+    getAll(...args: t.LayerLookupArgs): Layer[] { return layerStack.getAll(...args) },
     get root() { return layerStack.root },
     get overlays() { return layerStack.overlays },
     get current() { return layerStack.current },
