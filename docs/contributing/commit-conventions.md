@@ -31,15 +31,26 @@ Some commits don't belong to a namespace. Make up a term that reads like one:
 
 A mechanical change, like a scripted refactoring, a rename, reformatting or moving code,
 goes into its own commit, without hand edits mixed in. End its message with the trailer
-`Blame-Ignore: true`, so we can list it in `.git-blame-ignore-revs` and `git blame` skips
-it. `git blame -w` already ignores whitespace changes, and `git blame -C -C` follows code
-that moved between files.
+`Blame-Ignore: true`. Pure reformatting and moved code get the trailer too, even though
+`git blame -w` and `git blame -C -C` can see through some of it.
 
 ```
 [util] Rename u.foo() to u.bar()
 
 Blame-Ignore: true
 ```
+
+`git blame` skips the commits listed in `.git-blame-ignore-revs`. GitHub reads that file
+on its own; locally, run `git config blame.ignoreRevsFile .git-blame-ignore-revs` once.
+The file is generated from the trailers:
+
+```sh
+git log --format=%H --grep='^Blame-Ignore: true' > .git-blame-ignore-revs
+```
+
+The file doesn't exist yet. We generate it when the TypeScript migration is merged into
+master. From then on, whoever lands a mechanical commit on master runs the command
+again and commits the result.
 
 
 ## Continuous integration
