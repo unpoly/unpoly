@@ -179,13 +179,7 @@
       // the rules can move to the override for **/*.ts above. New files are checked by default.
       // Inline callbacks and functions whose type comes from context keep inferred return types.
       "files": ["src/**/*.ts"],
-      "excludeFiles": [
-        "src/unpoly-migrate/fragment.ts",
-        "src/unpoly-migrate/migrate.ts",
-        "src/unpoly-migrate/migrate/types.ts",
-        "src/unpoly-migrate/network.ts",
-        "src/unpoly-migrate/protocol.ts"
-      ],
+      "excludeFiles": [],
       "rules": {
         "typescript/explicit-function-return-type": ["error", {
           "allowExpressions": true,
