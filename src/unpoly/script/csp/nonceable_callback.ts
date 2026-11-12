@@ -73,7 +73,8 @@ export class NonceableCallback {
         return up.noncedEval.value
       }
     } finally {
-      up.noncedEval = undefined
+      // Delete rather than assign undefined, so window.up has no key left that is undefined.
+      delete up.noncedEval
       scriptElement?.remove()
     }
   }
