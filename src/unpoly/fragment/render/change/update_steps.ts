@@ -39,7 +39,7 @@ interface MatchedStep extends t.RenderStep {
   newElement: HTMLElement
 }
 
-// Swaps the steps' old elements with their new elements. Used by UpdateLayer and OpenLayer.
+// Swaps the steps' old elements with their new elements. Used by UpdateLayerPlan and OpenLayerPlan.
 export class UpdateSteps extends LayerPlan {
   declare _steps: MatchedStep[]
   declare _noneOptions: t.ResolvedRenderOptions

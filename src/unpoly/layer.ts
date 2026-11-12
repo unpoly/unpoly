@@ -203,7 +203,7 @@ export async function open(options?: RenderOptions): Promise<Layer> {
   // Even if we are given { content } we need to pipe this through up.render()
   // since a lot of options processing is happening there.
   //
-  // Defaults for the layer mode will be merged in later, by OpenLayer via up.layer.build().
+  // Defaults for the layer mode will be merged in later, by OpenLayerPlan via up.layer.build().
   let result = await render(options)
   return result.layer
 }

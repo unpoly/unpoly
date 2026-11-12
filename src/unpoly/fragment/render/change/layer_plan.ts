@@ -16,7 +16,7 @@ interface ReloadAttrsOptions {
   etag?: string | false | null
 }
 
-// A change that adds new content to a layer: by updating it (UpdateLayer) or by opening it (OpenLayer).
+// A change that adds new content to a layer: by updating it (UpdateLayerPlan) or by opening it (OpenLayerPlan).
 export class LayerPlan extends Change {
   // Set by subclasses.
   declare layer: Layer

@@ -41,7 +41,7 @@ export class Layer {
   // The root layer sets the element in its constructor, and an overlay sets it when it opens.
   declare element: HTMLElement
 
-  // While an overlay with { history: 'auto' } opens, OpenLayer decides between true and false.
+  // While an overlay with { history: 'auto' } opens, OpenLayerPlan decides between true and false.
   declare history: boolean | 'auto'
 
   declare mode: t.LayerMode

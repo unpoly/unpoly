@@ -217,7 +217,7 @@ export interface RenderOptions {
 
 
 /**
-Render options once the render pass has found the layer to render in (in UpdateLayer and OpenLayer).
+Render options once the render pass has found the layer to render in (in UpdateLayerPlan and OpenLayerPlan).
 @internal
 */
 export interface ResolvedRenderOptions extends RenderOptions {
@@ -341,7 +341,7 @@ export interface RenderStep extends ResolvedRenderOptions {
   parentElement?: ParentNode | null
   afterRemove?: () => void
   descendantKeepPlans?: KeepPlan[]
-  // Set by UpdateLayer, for { focus: 'keep' } and { scroll: 'keep' }.
+  // Set by UpdateLayerPlan, for { focus: 'keep' } and { scroll: 'keep' }.
   focusCapsule?: FocusCapsule
   oldScrollTops?: Record<string, number>
   descendantsOnly?: boolean
