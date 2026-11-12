@@ -14,12 +14,10 @@ import { FragmentFinder } from '../../fragment_finder.js'
 import { LayerPlan } from './layer_plan.js'
 import { UpdateSteps } from './update_steps.js'
 import { RenderOptions } from '../render_options.js'
-import { RenderResult } from '../render_result.js'
 import { type ResponseDoc } from '../response_doc.js'
 
 export class UpdateLayerPlan extends LayerPlan {
   declare options: t.ResolvedRenderOptions
-  declare target: string
   declare _context?: u.PlainObject
   declare _steps: t.RenderStep[]
 
@@ -68,43 +66,7 @@ export class UpdateLayerPlan extends LayerPlan {
     return u.map(this._steps, 'oldElement')
   }
 
-  execute(responseDoc: ResponseDoc, onApplicable: () => void): RenderResult {
-    // (1) For each step, find a `step.newElement` that matches both in this.layer
-    //     and in the response document.
-    // (2) Match newElements here instead of relying on UpdateSteps to
-    //     do it later. This way we will throw up.CannotMatch early, and our caller
-    //     ChangeFromContent knows that this plan is not applicable. It can then
-    //     try a fallback plan.
-    this._matchPostflight(responseDoc)
-
-    // If our steps can be matched, ChangeFromContent wants a chance to some final
-    // preparations before we start rendering.
-    onApplicable()
-
-    // If our layer ends up being closed during rendering, we still want to render
-    // [up-hungry][up-if-layer=any] elements on other layers.
-    let renderOtherLayersOnce = u.memoize(() => this._renderOtherLayers(responseDoc))
-
-    // TODO: Can this be a try ... catch ?
-    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
-    try {
-      let partialResults = [
-        ...this._renderCurrentLayer(responseDoc),
-        ...renderOtherLayersOnce(),
-      ]
-
-      return new RenderResult({
-        target: this.target,
-        layer: this.layer,
-        renderOptions: this.options,
-        partialResults,
-      })
-    } finally {
-      unbindClosing()
-    }
-  }
-
-  _renderCurrentLayer(responseDoc: ResponseDoc): t.PartialRenderResult[] {
+  _renderOwnLayer(responseDoc: ResponseDoc): t.PartialRenderResult[] {
     if (this._steps.length) {
       // Don't log this.target since that does not include hungry elements
       printToStandard('up.render()', `Updating "${this._bestPreflightSelector()}" in ${this.layer}`)
@@ -172,24 +134,18 @@ export class UpdateLayerPlan extends LayerPlan {
     return new UpdateSteps({ steps: this._steps, noneOptions: this.options }).execute(responseDoc)
   }
 
-  _renderOtherLayers(responseDoc: ResponseDoc): t.PartialRenderResult[] {
-    // We execute steps on other layers after this layer. However, if the render pass ends up
-    // closing this layer (e.g. by reaching a close condition or X-Up-Accept-Layer), we execute them
-    // before the layer closes (see execute()). This way we can:
-    //
-    // (1) ... use the discarded content for hungry elements on other layers that have [up-if-layer=any].
-    // (2) ... see updated hungry elements on other layers in onDismissed/onAccepted handlers.
-    let otherLayerSteps = this._getHungrySteps().other
-
-    return new UpdateSteps({ steps: otherLayerSteps }).execute(responseDoc)
-  }
-
   _matchPreflight(): void {
     this._matchOldElements()
     this._compressNestedSteps()
   }
 
   _matchPostflight(responseDoc: ResponseDoc): void {
+    // (1) For each step, find a `step.newElement` that matches both in this.layer
+    //     and in the response document.
+    // (2) Match newElements here instead of relying on UpdateSteps to
+    //     do it later. This way we will throw up.CannotMatch early, and our caller
+    //     ChangeFromContent knows that this plan is not applicable. It can then
+    //     try a fallback plan.
     this._matchOldElements()
     this._addHungryStepsOnCurrentLayer()
     this._compressNestedSteps()

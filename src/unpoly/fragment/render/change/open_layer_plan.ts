@@ -11,16 +11,13 @@ import { hungrySteps, type HungrySteps } from '../../../radio.js'
 import { hello } from '../../../script.js'
 import type * as t from '../../types.js'
 import { LayerPlan } from './layer_plan.js'
-import { UpdateSteps } from './update_steps.js'
 import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
 import { RenderOptions } from '../render_options.js'
-import { RenderResult } from '../render_result.js'
 import { type ResponseDoc } from '../response_doc.js'
 
 export class OpenLayerPlan extends LayerPlan {
   declare layer: Overlay
-  declare target: string
   declare _origin?: Element
   declare _baseLayer: Layer
   // Set by _matchPostflight(), which throws when there is no content.
@@ -65,41 +62,6 @@ export class OpenLayerPlan extends LayerPlan {
     }
   }
 
-  execute(responseDoc: ResponseDoc, onApplicable: () => void): RenderResult {
-    // Find our target in the responseDoc.
-    // If it cannot be matched, up.CannotMatch is thrown and ChangeFromContent will try the next plan.
-    this._matchPostflight(responseDoc)
-
-    // If our steps can be matched, ChangeFromContent wants a chance to some final
-    // preparations before we start rendering.
-    onApplicable()
-
-    // Create the overlay elements, but don't render content yet.
-    // This sets this.layer.
-    this._createOverlay()
-
-    // If our layer ends up being closed during rendering, we still want to render
-    // [up-hungry][up-if-layer=any] elements on other layers.
-    let renderOtherLayersOnce = u.memoize(() => this._renderOtherLayers(responseDoc))
-    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
-
-    try {
-      let partialResults = [
-        this._renderOverlayContent(responseDoc),
-        ...renderOtherLayersOnce(),
-      ]
-
-      return new RenderResult({
-        layer: this.layer,
-        target: this.target,
-        renderOptions: this.options,
-        partialResults,
-      })
-    } finally {
-      unbindClosing()
-    }
-  }
-
   _matchPostflight(responseDoc: ResponseDoc): void {
     if (this.target === ':none') {
       this._content = document.createElement('up-none')
@@ -114,7 +76,8 @@ export class OpenLayerPlan extends LayerPlan {
     }
   }
 
-  _createOverlay(): void {
+  // Creates the overlay elements, but doesn't render content yet. This sets this.layer.
+  _prepareLayer(): void {
     printToStandard('up.render()', `Opening element "${this.target}" in new overlay`)
 
     this._assertOpenEventEmitted()
@@ -143,6 +106,10 @@ export class OpenLayerPlan extends LayerPlan {
 
     this.layer.createElements()
     this.layer.setupHandlers()
+  }
+
+  _renderOwnLayer(responseDoc: ResponseDoc): t.PartialRenderResult[] {
+    return [this._renderOverlayContent(responseDoc)]
   }
 
   _renderOverlayContent(responseDoc: ResponseDoc): t.PartialRenderResult {
@@ -200,17 +167,6 @@ export class OpenLayerPlan extends LayerPlan {
       finished: Promise.all([compilePromise, animatePromise]),
       verifyFinished: () => this.layer.assertAlive()
     }
-  }
-
-  _renderOtherLayers(responseDoc: ResponseDoc): t.PartialRenderResult[] {
-    // We execute steps on other layers after this layer. However, if the render pass ends up
-    // closing this layer (e.g. by reaching a close condition or X-Up-Accept-Layer), we execute them
-    // before the layer closes (see execute()). This way we can:
-    //
-    // (1) ... use the discarded content for hungry elements on other layers that have [up-if-layer=any].
-    // (2) ... see updated hungry elements on other layers in onDismissed/onAccepted handlers.
-    let steps = this._getHungrySteps().other
-    return new UpdateSteps({ steps }).execute(responseDoc)
   }
 
   async _compileLayer(): Promise<void> {

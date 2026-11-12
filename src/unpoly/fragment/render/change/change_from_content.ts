@@ -7,13 +7,11 @@ import { printToStandard } from '../../../log.js'
 import { assertAssetsOK } from '../../../script.js'
 import type * as t from '../../types.js'
 import { Change } from './change.js'
+import { type LayerPlan } from './layer_plan.js'
 import { OpenLayerPlan } from './open_layer_plan.js'
 import { UpdateLayerPlan } from './update_layer_plan.js'
 import { type RenderResult } from '../render_result.js'
 import { ResponseDoc } from '../response_doc.js'
-
-// A way to render: updating a target in an existing layer, or opening a new overlay.
-type LayerPlan = OpenLayerPlan | UpdateLayerPlan
 
 // Renders content that is already known (a string, an element or a response text). Also computes
 // the preflight props for ChangeFromURL, before the request is sent.

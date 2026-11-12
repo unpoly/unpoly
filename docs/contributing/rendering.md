@@ -85,7 +85,8 @@ it. The classes live in
 [`src/unpoly/fragment/render/change/`](../../src/unpoly/fragment/render/change/) and extend `Change`.
 Note that there are two different contracts among them: the top-level changes implement
 `execute()` with no arguments, while a *plan* (`UpdateLayerPlan`, `OpenLayerPlan`) implements
-`execute(responseDoc, onApplicable)` **and** `getPreflightProps()`. If you add a change
+`execute(responseDoc, onApplicable)` **and** `getPreflightProps()`. The plans inherit
+`execute()` from their base class `LayerPlan` and fill in its hooks. If you add a change
 class, pick the right one.
 
 `ChangeFromURL` carries more than the table suggests. It derives the request from the
@@ -165,8 +166,10 @@ task, but an exception after inserting rejects `up.RenderResult#finished` instea
 calls the internal `swap()` (motion.ts), which inserts now and returns a function that starts the
 transition later; `up.morph()` is just both calls in a row.
 
-`LayerPlan` is the base class of both plans, and honours a server's request to accept or
-dismiss a layer. Both `UpdateSteps` and `OpenLayerPlan` stamp each new fragment with the
+`LayerPlan` is the base class of both plans. Its `execute()` matches the response
+(`_matchPostflight()`), lets `OpenLayerPlan` create its overlay (`_prepareLayer()`), and
+renders the plan's own layer (`_renderOwnLayer()`), then the other layers. It also honours a
+server's request to accept or dismiss a layer. Both `UpdateSteps` and `OpenLayerPlan` stamp each new fragment with the
 `[up-source]`, `[up-time]` and `[up-etag]` attributes that later reloads and revalidation
 depend on (`setReloadAttrs()` in fragment.ts).
 
@@ -212,7 +215,7 @@ when two hungry elements on different layers want the same new element, the rend
 first, then ancestors (closest first), then descendants (closest first).
 
 The other-layer steps normally run **after** the current layer's
-(`_renderOtherLayers()`, on both `UpdateLayerPlan` and `OpenLayerPlan`). The interesting case is when
+(`LayerPlan#_renderOtherLayers()`). The interesting case is when
 the pass closes the very layer it renders into: a listener on
 `up:layer:accepting up:layer:dismissing` pulls that work forward, so the other layers are
 updated *before* the teardown. That is what lets a server response accept an overlay and

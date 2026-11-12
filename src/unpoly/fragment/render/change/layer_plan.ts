@@ -2,13 +2,19 @@ import * as u from '../../../util.js'
 import { emit, type EventPlan } from '../../../event.js'
 import { type Layer } from '../../../layer.js'
 import { type UpResponse } from '../../../network.js'
+import { type HungrySteps } from '../../../radio.js'
 import type * as t from '../../types.js'
 import { Change } from './change.js'
+import { UpdateSteps } from './update_steps.js'
+import { RenderResult } from '../render_result.js'
+import { type ResponseDoc } from '../response_doc.js'
 
 // A change that adds new content to a layer: by updating it (UpdateLayerPlan) or by opening it (OpenLayerPlan).
-export class LayerPlan extends Change {
+// ChangeFromContent tries its plans in order and renders the first one that matches the response.
+export abstract class LayerPlan extends Change {
   // Set by subclasses.
   declare layer: Layer
+  declare target: string
   declare _acceptLayer: any
   declare _dismissLayer: any
   declare _eventPlans: EventPlan[]
@@ -20,6 +26,67 @@ export class LayerPlan extends Change {
     this._dismissLayer = options.dismissLayer
     this._eventPlans = options.eventPlans || []
     this._response = options.response
+  }
+
+  // The props that ChangeFromURL needs to send a request, before we have a response.
+  abstract getPreflightProps(): t.PreflightProps
+
+  // Finds the new content in the response. Throws up.CannotMatch when it isn't there,
+  // so ChangeFromContent knows that this plan is not applicable, and can try the next plan.
+  abstract _matchPostflight(responseDoc: ResponseDoc): void
+
+  // Renders the matched content into this.layer.
+  abstract _renderOwnLayer(responseDoc: ResponseDoc): t.PartialRenderResult[]
+
+  // The [up-hungry] steps for this render pass, on this.layer and on other layers.
+  abstract _getHungrySteps(): HungrySteps
+
+  execute(responseDoc: ResponseDoc, onApplicable: () => void): RenderResult {
+    this._matchPostflight(responseDoc)
+
+    // If our steps can be matched, ChangeFromContent wants a chance to some final
+    // preparations before we start rendering.
+    onApplicable()
+
+    // OpenLayerPlan creates its overlay here, so this.layer is only set after this call.
+    this._prepareLayer()
+
+    // If our layer ends up being closed during rendering, we still want to render
+    // [up-hungry][up-if-layer=any] elements on other layers.
+    let renderOtherLayersOnce = u.memoize(() => this._renderOtherLayers(responseDoc))
+
+    // TODO: Can this be a try ... catch ?
+    let unbindClosing = this.layer.on('up:layer:accepting up:layer:dismissing', renderOtherLayersOnce)
+    try {
+      let partialResults = [
+        ...this._renderOwnLayer(responseDoc),
+        ...renderOtherLayersOnce(),
+      ]
+
+      return new RenderResult({
+        target: this.target,
+        layer: this.layer,
+        renderOptions: this.options,
+        partialResults,
+      })
+    } finally {
+      unbindClosing()
+    }
+  }
+
+  // Runs after onApplicable() and before we listen to this.layer closing.
+  _prepareLayer(): void {
+  }
+
+  _renderOtherLayers(responseDoc: ResponseDoc): t.PartialRenderResult[] {
+    // We execute steps on other layers after this layer. However, if the render pass ends up
+    // closing this layer (e.g. by reaching a close condition or X-Up-Accept-Layer), we execute them
+    // before the layer closes (see execute()). This way we can:
+    //
+    // (1) ... use the discarded content for hungry elements on other layers that have [up-if-layer=any].
+    // (2) ... see updated hungry elements on other layers in onDismissed/onAccepted handlers.
+    let steps = this._getHungrySteps().other
+    return new UpdateSteps({ steps }).execute(responseDoc)
   }
 
   // TODO: Consider moving this to up.Layer
