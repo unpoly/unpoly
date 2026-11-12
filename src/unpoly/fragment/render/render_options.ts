@@ -3,10 +3,7 @@ import { fail } from '../../error.js'
 import { getInputDevice } from '../../event.js'
 import { fragmentConfig, toSuccessKey } from '../../fragment.js'
 import { layerStack, normalizeLayerOptions } from '../../layer.js'
-import {
-  callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback,
-  type ParseCallbackOptions,
-} from '../../script.js'
+import { callbackAttr, parseCallback, type ParseCallbackOptions } from '../../script.js'
 import type * as t from '../types.js'
 
 // Sometimes we need to use given render options, but disable preview effects.
@@ -105,7 +102,7 @@ const LATE_KEYS: (keyof t.RenderOptions)[] = [
   'scroll',
 ]
 
-const EVENT_CALLBACK: ParseCallbackOptions = {} // default in up.element.parseCallback() is { mainKey: 'event' }
+const EVENT_CALLBACK: ParseCallbackOptions = {} // default in parseCallback() is { argNames: ['event'] }
 const RESULT_CALLBACK: ParseCallbackOptions = { argNames: ['result'] }
 const ERROR_CALLBACK: ParseCallbackOptions = { argNames: ['error'] }
 const OPEN_LAYER_CALLBACK: ParseCallbackOptions = { expandObject: ['layer'] }
@@ -124,17 +121,19 @@ const CALLBACKS: Record<string, ParseCallbackOptions> = {
   onDismissed: CLOSE_LAYER_CALLBACK,
 }
 
-function parseCallback(key: string, code: string): (...args: any[]) => any {
-  return scriptParseCallback(code, parseCallbackOptions(key))
+// Parses the code for a callback option like { onLoaded }, with the arguments of that callback.
+function parseRenderCallback(key: string, code: string): u.AnyFunction {
+  return parseCallback(code, parseCallbackOptions(key))
 }
 
 function parseCallbackOptions(key: string): ParseCallbackOptions {
   return CALLBACKS[key] ?? fail(`Unknown callback { ${key} }`)
 }
 
-function callbackAttr(element: Element, attrName: string, key: string): ((...args: any[]) => any) | undefined {
-  // return e.parseAttr(element, attrName, (value) => parseCallback(key, value))
-  return scriptCallbackAttr(element, attrName, parseCallbackOptions(key))
+// Reads an attribute like [up-on-loaded] as the callback option it sets, with the arguments of that callback.
+function renderCallbackAttr(element: Element, attrName: string, key: string): u.AnyFunction | undefined {
+  // return e.parseAttr(element, attrName, (value) => parseRenderCallback(key, value))
+  return callbackAttr(element, attrName, parseCallbackOptions(key))
 }
 
 function navigateDefaults(options: t.RenderOptions): t.RenderOptions | undefined {
@@ -299,8 +298,8 @@ export const RenderOptions = {
   finalize,
   assertContentGiven,
   deriveFailOptions,
-  parseCallback,
-  callbackAttr,
+  parseRenderCallback,
+  renderCallbackAttr,
   chainCallbacks,
   NO_PREVIEWS,
   NO_MOTION,

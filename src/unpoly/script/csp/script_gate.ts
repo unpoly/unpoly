@@ -100,7 +100,7 @@ export class ScriptGate {
       if (/^on[A-Z]/.test(key) && !NON_CALLBACK_KEYS.includes(key) && u.isString(script)) {
         let item = new ObjectPropertyItem(object, key)
         policy.processItem(item)
-        object[key] = RenderOptions.parseCallback(key, object[key])
+        object[key] = RenderOptions.parseRenderCallback(key, object[key])
       }
     }
   }
