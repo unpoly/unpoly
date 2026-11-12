@@ -610,6 +610,20 @@ describe('up.layer', function() {
         await expectAsync(promise).toBeRejectedWith('dismissal value')
         expect(onDismissed).toHaveBeenCalledWith(jasmine.objectContaining({ type: 'up:layer:dismissed', value: 'dismissal value' }))
       })
+
+      it('opens an empty overlay when called without options', async function() {
+        up.motion.config.enabled = false
+
+        const promise = up.layer.ask()
+        await wait()
+
+        expect(up.layer.isOverlay()).toBe(true)
+        await expectAsync(promise).toBePending()
+
+        up.layer.accept('acceptance value')
+
+        await expectAsync(promise).toBeResolvedTo('acceptance value')
+      })
     })
 
     describe('up.layer.current', function() {

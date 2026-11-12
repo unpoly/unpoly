@@ -835,7 +835,7 @@ try {
 @stable
 @signature
 */
-export function ask(options: RenderOptions): Promise<any> {
+export function ask(options: RenderOptions = {}): Promise<any> {
   return new Promise(function(resolve, reject) {
     open(RenderOptions.chainCallbacks(options, {
       onAccepted: (event: t.LayerCloseEvent) => resolve(event.value),
