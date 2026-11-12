@@ -2104,8 +2104,11 @@ selector = up.fragment.toTarget(element) // returns '.klass'
 @stable
 */
 export function toTarget(element: Element | string, options?: t.LookupOptions): string {
-  // A string is returned as it is, so only an element gets to tryToTarget().
-  return u.presence(element, u.isString) || tryToTarget(element as Element, options) || cannotTarget(element)
+  if (u.isString(element)) {
+    return element || cannotTarget('Cannot target an empty selector')
+  }
+
+  return tryToTarget(element, options) || cannotTarget(untargetableMessage(element))
 }
 
 /*-
@@ -2134,8 +2137,8 @@ function untargetableMessage(element: Element): string {
   return `Cannot derive good target selector from a <${element.localName}> element without identifying attributes. Try setting an [id] or configure up.fragment.config.targetDerivers.`
 }
 
-function cannotTarget(element: any): never {
-  throw new CannotTarget(untargetableMessage(element))
+function cannotTarget(message: string): never {
+  throw new CannotTarget(message)
 }
 
 export function tryToTarget(element: Element, options: t.LookupOptions = {}): string | undefined {
