@@ -117,9 +117,10 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
   export interface FragmentKeepEvent extends FragmentKeptEvent { renderOptions: RenderOptions }
   ```
 
-  `UpEventMap` in `event.ts` maps each event type to its interface, like `HTMLElementEventMap`
-  does for DOM events, and `up.on()` and `up.emit()` look it up. A new event gets an interface
-  with the properties from its doc comment, and an entry in the map.
+  `UpEventMap` maps each event type to its interface, like `HTMLElementEventMap` does for DOM
+  events, and `up.on()` and `up.emit()` look it up. A new event gets an interface with the
+  properties from its doc comment, and an entry in its module's `UpEventMap` block (see
+  [Code organization](code-organization.md#imports-exports-and-types) › Events).
 
 ### Strict checks
 
