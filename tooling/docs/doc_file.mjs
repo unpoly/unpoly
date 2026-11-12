@@ -6,6 +6,7 @@
 // match. We don't repeat its title rules here.
 //
 // tooling/lint/doc_files.mjs (bin/lint) reports the problems that parseDocFile() finds.
+// tooling/docs/api_probe.mjs (bin/typecheck) checks that the entries name API that exists.
 import fs from 'node:fs'
 import path from 'node:path'
 import { PROJECT_ROOT } from '../build/build_status.mjs'
