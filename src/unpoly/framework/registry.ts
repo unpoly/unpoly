@@ -7,7 +7,7 @@ import { fail } from '../error.js'
 import { isEvaling } from '../framework.js'
 
 export class Registry<T = any> {
-  declare _data: Partial<Record<string, T>>
+  declare _data: Record<string, T | undefined>
   // Returns undefined for an invalid value, like an animation named 'none'.
   declare _normalize: (value: any) => T | undefined
   declare _valueDescription: string
