@@ -20,7 +20,7 @@ import { type ResponseDoc } from '../response_doc.js'
 export class UpdateLayerPlan extends Addition {
   declare options: t.ResolvedRenderOptions
   declare target: string
-  declare _context: u.PlainObject | undefined
+  declare _context?: u.PlainObject
   declare _steps: t.RenderStep[]
 
   constructor(options: t.ResolvedRenderOptions) {
@@ -55,7 +55,7 @@ export class UpdateLayerPlan extends Addition {
   _bestPreflightSelector(): string {
     this._matchPreflight()
 
-    const isProbable = (step: t.RenderStep) => !step.maybe || step.oldElement?.isConnected
+    const isProbable = (step: t.RenderStep): boolean | undefined => !step.maybe || step.oldElement?.isConnected
     let bestSteps = this._steps.filter(isProbable)
     let selectors = u.map(bestSteps, 'selector')
     return selectors.join(', ') || ':none'

@@ -8,11 +8,8 @@ import type * as t from '../../types.js'
 import { Change } from './change.js'
 import { RenderOptions } from '../render_options.js'
 
-/**
-Options for `up.destroy()`, plus the element to destroy.
-@internal
-*/
-export interface DestroyFragmentOptions {
+// Options for up.destroy(), plus the element to destroy.
+interface DestroyFragmentOptions {
   element: Element
   animation?: AnimationValue
   duration?: number
@@ -26,7 +23,7 @@ export interface DestroyFragmentOptions {
 export class DestroyFragment extends Change<DestroyFragmentOptions> {
   declare _layer: Layer
   declare _element: Element
-  declare _animation: AnimationValue | undefined
+  declare _animation?: AnimationValue
   declare _log: any
   declare _parent: ParentNode | null
 

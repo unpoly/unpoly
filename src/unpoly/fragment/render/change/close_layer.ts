@@ -3,22 +3,19 @@ import { assertConfirmed } from '../../../browser.js'
 import { Aborted, guard, muteUncriticalRejection } from '../../../error.js'
 import { build } from '../../../event.js'
 import { abortFragment, reload } from '../../../fragment.js'
-import { layerStack, type Layer, type Overlay } from '../../../layer.js'
+import { layerStack, type Layer, type LayerCloseEvent, type Overlay } from '../../../layer.js'
 import { type UpResponse } from '../../../network.js'
 import { doFocus } from '../../../viewport.js'
 import type * as t from '../../types.js'
 import { Change } from './change.js'
 
-// An event for the closing overlay, e.g. up:layer:accepted.
-type CloseEvent = Event & { value?: any }
-
 export class CloseLayer extends Change<t.CloseLayerOptions> {
   declare _verb: 'accept' | 'dismiss'
   declare layer: Overlay
-  declare _origin: Element | undefined
+  declare _origin?: Element
   declare _value: any
   declare _preventable: boolean
-  declare _response: UpResponse | undefined
+  declare _response?: UpResponse
   declare _history: boolean
 
   constructor(options: t.CloseLayerOptions) {
@@ -105,9 +102,9 @@ export class CloseLayer extends Change<t.CloseLayerOptions> {
     }
   }
 
-  _emitCloseEvent(): CloseEvent {
+  _emitCloseEvent(): LayerCloseEvent {
     // The close event is emitted on the layer that is about to close.
-    let event: CloseEvent = this.layer.emit(
+    let event: LayerCloseEvent = this.layer.emit(
       this._buildEvent(`up:layer:${this._verb}`), {
       callback: this.layer.callback(`on${u.upperCaseFirst(this._verb)}`),
       log: [`Will ${this._verb} ${this.layer} with value %o`, this._value]
@@ -124,7 +121,7 @@ export class CloseLayer extends Change<t.CloseLayerOptions> {
     this.layer.emit(event, { log: false })
   }
 
-  _emitClosedEvent(formerParent: Layer): CloseEvent {
+  _emitClosedEvent(formerParent: Layer): LayerCloseEvent {
     const verbPast = `${this._verb}ed`
     const verbPastUpperCaseFirst = u.upperCaseFirst(verbPast)
 
@@ -146,13 +143,15 @@ export class CloseLayer extends Change<t.CloseLayerOptions> {
     )
   }
 
-  _buildEvent(name: string): CloseEvent {
+  // Builds up:layer:accept, up:layer:accepting, up:layer:accepted or their dismiss variants.
+  // build() can't look up the type of a name we put together, so we cast.
+  _buildEvent(name: string): LayerCloseEvent {
     return build(name, {
       layer: this.layer,
       value: this._value,
       origin: this._origin,
       response: this._response,
-    })
+    }) as LayerCloseEvent
   }
 
   _handleFocus(formerParent: Layer): void {

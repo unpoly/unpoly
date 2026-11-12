@@ -377,7 +377,7 @@ export interface KeepPlan {
   newData: u.PlainObject
   renderOptions: RenderOptions
   // Set when rendering, see UpdateSteps.
-  revivers?: any[]
+  revivers?: (() => void)[]
 }
 
 /**
@@ -403,14 +403,21 @@ export interface ProvideNodesOptions {
   htmlParser?: HTMLParser
 }
 
-/** The `up:fragment:loaded` event. */
-export interface FragmentLoadedEvent extends UpEvent {
+/**
+What `up.fragment.config.skipResponse()` gets to decide whether to skip a response. The `up:fragment:loaded` event
+has the same properties.
+*/
+export interface FragmentLoadedProps {
   request: UpRequest
   response: UpResponse
+  renderOptions: RenderOptions
   revalidating: boolean
   expiredResponse?: UpResponse
+}
+
+/** The `up:fragment:loaded` event. */
+export interface FragmentLoadedEvent extends UpEvent, FragmentLoadedProps {
   origin?: Element
-  renderOptions: RenderOptions
   skip: () => void
 }
 
@@ -487,7 +494,7 @@ export interface FragmentConfig {
   autoFocus: FragmentProcessorValue[]
   normalizeKeepHTML: (html: string) => string
   autoRevalidate: boolean | ((response: UpResponse) => boolean)
-  skipResponse: (loadedEventProps: u.PlainObject) => boolean
+  skipResponse: (loadedEventProps: FragmentLoadedProps) => boolean
   renderableResponse: (response: UpResponse) => boolean
 }
 

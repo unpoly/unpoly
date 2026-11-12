@@ -1,6 +1,5 @@
 import * as u from '../../../util.js'
 import { CannotParse } from '../../../error.js'
-import { type EventPlan } from '../../../event.js'
 import { fragmentConfig, reload, shouldRevalidate } from '../../../fragment.js'
 import { refineOption } from '../../../history.js'
 import { UNSET_OVERLAY_VISUALS } from '../../../layer.js'
@@ -132,7 +131,7 @@ export class ChangeFromResponse extends Change {
     }
   }
 
-  _revalidatePreview({ preview, revalidatePreview }: t.RenderOptions): t.RenderOptions['preview'] {
+  _revalidatePreview({ preview, revalidatePreview }: t.RenderOptions): t.PreviewValue | undefined {
     if (revalidatePreview === true) {
       return preview
     } else {
@@ -140,7 +139,7 @@ export class ChangeFromResponse extends Change {
     }
   }
 
-  _loadedEventProps(): u.PlainObject {
+  _loadedEventProps(): t.FragmentLoadedProps {
     const { expiredResponse } = this.options
 
     return {
@@ -209,8 +208,7 @@ export class ChangeFromResponse extends Change {
 
     renderOptions.location = refineOption(renderOptions.location, serverLocation)
     renderOptions.title = refineOption(renderOptions.title, this._response.title)
-    // TODO(types): Type up.Response#eventPlans as EventPlan[], then drop this cast.
-    renderOptions.eventPlans = this._response.eventPlans as EventPlan[]
+    renderOptions.eventPlans = this._response.eventPlans
 
     let serverTarget = this._response.target
     if (serverTarget) {

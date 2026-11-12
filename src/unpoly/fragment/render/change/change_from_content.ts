@@ -18,8 +18,8 @@ type LayerPlan = OpenLayerPlan | UpdateLayerPlan
 // Renders content that is already known (a string, an element or a response text). Also computes
 // the preflight props for ChangeFromURL, before the request is sent.
 export class ChangeFromContent extends Change {
-  declare _origin: Element | undefined
-  declare _preflight: boolean | undefined
+  declare _origin?: Element
+  declare _preflight?: boolean
   declare _layers: (Layer | 'new')[]
   declare _planApplied: boolean
 
@@ -47,7 +47,7 @@ export class ChangeFromContent extends Change {
     return plans
   }
 
-  _isRenderableLayer(layer: Layer | 'new') {
+  _isRenderableLayer(layer: Layer | 'new'): boolean {
     return (layer === 'new') || layer.isAlive()
   }
 
@@ -55,7 +55,7 @@ export class ChangeFromContent extends Change {
     this._layers = u.filterList(this._layers, this._isRenderableLayer)
   }
 
-  _expandIntoPlans(plans: LayerPlan[], layers: (Layer | 'new')[], targets: any): void {
+  _expandIntoPlans(plans: LayerPlan[], layers: (Layer | 'new')[], targets: t.RenderTarget | boolean | undefined): void {
     for (let layer of layers) {
       // An abstract selector like :main may expand into multiple
       // concrete selectors, like ['main', '.content'].
@@ -69,10 +69,11 @@ export class ChangeFromContent extends Change {
     }
   }
 
-  _expandTargets(targets: any, layer: Layer | 'new'): string[] {
+  _expandTargets(targets: t.RenderTarget | boolean | undefined, layer: Layer | 'new'): string[] {
     return expandTargets(targets, { layer, mode: this.options.mode, origin: this._origin })
   }
 
+  // Returns an up.RenderResult, or a promise when preloading local content.
   execute(): any {
     // Preloading from local content is a no-op.
     if (this.options.preload) {
@@ -184,8 +185,8 @@ export class ChangeFromContent extends Change {
   // With { optional: true }, returns an empty object instead of throwing when no target matches.
   getPreflightProps(opts?: { optional?: false }): t.PreflightProps
   getPreflightProps(opts: { optional: boolean }): Partial<t.PreflightProps>
-  getPreflightProps(opts: { optional?: boolean } = {}) {
-    const getPlanProps = (plan: LayerPlan) => plan.getPreflightProps()
+  getPreflightProps(opts: { optional?: boolean } = {}): Partial<t.PreflightProps> {
+    const getPlanProps = (plan: LayerPlan): t.PreflightProps => plan.getPreflightProps()
     return this._seekPlan(getPlanProps) || (opts.optional ? {} : this._cannotMatchPreflightTarget())
   }
 

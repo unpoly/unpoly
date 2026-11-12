@@ -13,7 +13,7 @@ export class Change<O extends object = t.RenderOptions> {
 
   // Subclasses may take arguments.
   execute(...args: any[]): any
-  execute() {
+  execute(): never {
     throw new NotImplemented()
   }
 

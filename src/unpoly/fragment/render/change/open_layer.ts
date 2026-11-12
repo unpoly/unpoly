@@ -21,12 +21,12 @@ import { type ResponseDoc } from '../response_doc.js'
 export class OpenLayerPlan extends Addition {
   declare layer: Overlay
   declare target: string
-  declare _origin: Element | undefined
+  declare _origin?: Element
   declare _baseLayer: Layer
-  declare _content: HTMLElement | undefined
+  declare _content?: HTMLElement
 
   // ChangeFromContent has turned { target } into a selector string.
-  constructor(options: t.RenderOptions & { target?: string }) {
+  constructor(options: t.RenderOptions & { target: string }) {
     super(options)
     this.target = options.target
     this._origin = options.origin
@@ -220,7 +220,7 @@ export class OpenLayerPlan extends Addition {
   }
 
   _buildLayer(): Overlay {
-    const beforeNew = (optionsWithLayerDefaults: t.RenderOptions) => {
+    const beforeNew = (optionsWithLayerDefaults: t.RenderOptions): t.RenderOptions => {
       return this.options = RenderOptions.finalize(optionsWithLayerDefaults)
     }
 

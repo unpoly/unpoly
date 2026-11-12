@@ -12,12 +12,9 @@ import { ChangeFromContent } from './change_from_content.js'
 import { ChangeFromResponse } from './change_from_response.js'
 import { type RenderResult } from '../render_result.js'
 
-/**
-The options for the request of a `ChangeFromURL`: the render options plus the preflight props
-of the success and fail options.
-@internal
-*/
-export type RequestAttrs = t.RenderOptions & t.PreflightProps & { url: string }
+// The options for the request of a ChangeFromURL: the render options plus the preflight props
+// of the success and fail options.
+type RequestAttrs = t.RenderOptions & t.PreflightProps & { url: string }
 
 export class ChangeFromURL extends Change<t.RenderOptions & { url: string }> {
   declare request: UpRequest
@@ -82,7 +79,7 @@ export class ChangeFromURL extends Change<t.RenderOptions & { url: string }> {
 
   _preflightPropsForRenderOptions(renderOptions: t.RenderOptions): t.PreflightProps
   _preflightPropsForRenderOptions(renderOptions: t.RenderOptions, getPreflightPropsOptions: { optional: boolean }): Partial<t.PreflightProps>
-  _preflightPropsForRenderOptions(renderOptions, getPreflightPropsOptions?) {
+  _preflightPropsForRenderOptions(renderOptions: t.RenderOptions, getPreflightPropsOptions?: { optional: boolean }): Partial<t.PreflightProps> {
     const preflightChange = new ChangeFromContent({ ...renderOptions, preflight: true })
     // #getPreflightProps() will return meta information about the change that is most
     // likely before the request was dispatched.

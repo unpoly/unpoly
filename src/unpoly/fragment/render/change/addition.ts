@@ -7,11 +7,8 @@ import { type UpResponse } from '../../../network.js'
 import type * as t from '../../types.js'
 import { Change } from './change.js'
 
-/**
-The values that `Addition#setReloadAttrs()` sets as `[up-source]`, `[up-time]` and `[up-etag]`.
-@internal
-*/
-export interface ReloadAttrsOptions {
+// The values that Addition#setReloadAttrs() sets as [up-source], [up-time] and [up-etag].
+interface ReloadAttrsOptions {
   oldElement?: Element
   newElement?: Element
   source?: string | false
@@ -26,7 +23,7 @@ export class Addition extends Change {
   declare _acceptLayer: any
   declare _dismissLayer: any
   declare _eventPlans: EventPlan[]
-  declare _response: UpResponse | undefined
+  declare _response?: UpResponse
 
   constructor(options: t.RenderOptions) {
     super(options)

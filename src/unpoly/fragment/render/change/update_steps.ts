@@ -13,11 +13,8 @@ import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
 import { type ResponseDoc } from '../response_doc.js'
 
-/**
-What inserting a render step produced, and what remains to be done after all steps were inserted.
-@internal
-*/
-export interface StepInsertion {
+// What inserting a render step produced, and what remains to be done after all steps were inserted.
+interface StepInsertion {
   fragments: Element[]
   focusElement?: HTMLElement
   scrollElement?: HTMLElement
@@ -27,13 +24,20 @@ export interface StepInsertion {
   startMotion?: () => Promise<any>
 }
 
+// Options for UpdateSteps. It extends Addition, which takes render options, but its callers
+// only pass the steps, and the options to focus and scroll with when there are none.
+interface UpdateStepsOptions extends t.RenderOptions {
+  steps: t.RenderStep[]
+  noneOptions?: t.ResolvedRenderOptions
+}
+
 // Swaps the steps' old elements with their new elements. Used by UpdateLayer and OpenLayer.
 export class UpdateSteps extends Addition {
   declare _steps: t.RenderStep[]
   declare _noneOptions: t.ResolvedRenderOptions
   declare responseDoc: ResponseDoc
 
-  constructor(options: t.ResolvedRenderOptions & { steps: t.RenderStep[], noneOptions?: t.ResolvedRenderOptions }) {
+  constructor(options: UpdateStepsOptions) {
     super(options)
 
     this._steps = u.copy(u.assert(options.steps)) // we mutate it below
@@ -258,7 +262,7 @@ export class UpdateSteps extends Addition {
     const descendantKeepPlans: t.KeepPlan[] = []
 
     if (step.keep) {
-      for (let keepable of step.oldElement.querySelectorAll('[up-keep]')) {
+      for (let keepable of step.oldElement.querySelectorAll<HTMLElement>('[up-keep]')) {
         let keepPlan = findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
         if (keepPlan) {
           // Replace keepable with its clone so it looks good in a transition
