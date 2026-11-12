@@ -134,7 +134,7 @@ Matching happens **twice**, and this is the distinction worth internalising:
 - **Postflight** (`_matchPostflight()`), against the response document: which new elements
   did the server actually send? Steps whose new element is missing are dropped or fail here.
 
-"The response document" is an [`up.ResponseDoc`](../../src/unpoly/fragment/render/response_doc.ts),
+"The response document" is a [`ResponseDoc`](../../src/unpoly/fragment/render/response_doc.ts),
 and it does more than parse HTML. It matches steps against itself (`selectSteps()`), adopts
 CSP nonces, and *detaches* each new element as it is committed, so a later hungry step
 cannot steal an element that is already spoken for.

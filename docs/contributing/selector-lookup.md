@@ -1,8 +1,8 @@
 # Selector lookup deep-dive
 
 Read this before you write internal code that looks up an element, and before you change
-[`up.Selector`](../../src/unpoly/fragment/selector.ts),
-[`up.FragmentFinder`](../../src/unpoly/fragment/fragment_finder.ts) or the lookup functions in
+[`Selector`](../../src/unpoly/fragment/selector.ts),
+[`FragmentFinder`](../../src/unpoly/fragment/fragment_finder.ts) or the lookup functions in
 [`src/unpoly/fragment.ts`](../../src/unpoly/fragment.ts).
 
 The short version: **prefer `up.fragment.*` over native `querySelector()` when you are
@@ -21,7 +21,7 @@ depend on layers, liveness or Unpoly's custom selectors, go through `up.fragment
 <!-- toc -->
 - [Why we have our own lookup engine](#why-we-have-our-own-lookup-engine)
 - [Which entry point does what](#which-entry-point-does-what)
-- [What `up.Selector` does when you construct it](#what-upselector-does-when-you-construct-it)
+- [What `Selector` does when you construct it](#what-selector-does-when-you-construct-it)
   - [Failing to resolve a layer: two different errors](#failing-to-resolve-a-layer-two-different-errors)
   - [Order is a guarantee, not an accident](#order-is-a-guarantee-not-an-accident)
   - [Root handling](#root-handling)
@@ -58,15 +58,15 @@ particular is **not** automatic — it depends on which entry point you call.
 
 | Entry point | Engine | Region-aware? |
 |---|---|---|
-| `up.fragment.get(selector)` — no root | `up.FragmentFinder` | **Yes** |
-| `up.fragment.get(root, selector)` — with a root | `up.Selector` | No, deliberately |
-| `up.fragment.all()`, `.subtree()`, `.closest()`, `.matches()` | `up.Selector` | No |
-| `getFirstDescendant()` (fragment.ts) | `up.Selector` | No — this is the explicit "just the first match" entry point |
-| Render steps (`UpdateLayerPlan#_matchOldElements()`) | `up.FragmentFinder` | Yes |
-| Response matching (`up.ResponseDoc#select()`) | `up.FragmentFinder` | Yes, against a *rediscovered* origin |
+| `up.fragment.get(selector)` — no root | `FragmentFinder` | **Yes** |
+| `up.fragment.get(root, selector)` — with a root | `Selector` | No, deliberately |
+| `up.fragment.all()`, `.subtree()`, `.closest()`, `.matches()` | `Selector` | No |
+| `getFirstDescendant()` (fragment.ts) | `Selector` | No — this is the explicit "just the first match" entry point |
+| Render steps (`UpdateLayerPlan#_matchOldElements()`) | `FragmentFinder` | Yes |
+| Response matching (`ResponseDoc#select()`) | `FragmentFinder` | Yes, against a *rediscovered* origin |
 
-So the two classes are layered, not parallel: **`up.FragmentFinder` is a strategy on top of
-`up.Selector`.** It decides *which* match to prefer, and delegates every actual match back
+So the two classes are layered, not parallel: **`FragmentFinder` is a strategy on top of
+`Selector`.** It decides *which* match to prefer, and delegates every actual match back
 down (through `up.fragment.closest()` and `getFirstDescendant()`).
 
 Two consequences that catch people out: `up.fragment.all('.card')` never prefers anything
@@ -75,13 +75,13 @@ too — the source says why, *"We don't match around { origin } if we're given a
 search"*.
 
 
-## What `up.Selector` does when you construct it
+## What `Selector` does when you construct it
 
 The constructor does the work up front; `matches()`, `closest()`, `descendants()`,
 `firstDescendant()` and `subtree()` then reuse it.
 
 1. **Install the liveness filter.** `isNotDestroying()` (fragment.ts), unless `{ destroying: true }`
-   was passed or we are matching in an external/detached document — an `up.ResponseDoc` has no
+   was passed or we are matching in an external/detached document — a `ResponseDoc` has no
    dying elements to speak of.
 2. **Default the layer to the root element's.** If a root *element* was given (as in
    `up.fragment.closest(element, …)`) and no `{ layer }`, the element is the layer reference.
@@ -127,7 +127,7 @@ This distinction decides whether a render pass falls through to the next plan or
   throws `up.CannotMatch` — which `ChangeFromContent` swallows to try the next plan, as
   long as the plan hasn't started to change the page yet. After that it aborts the pass.
   A layer that comes from an element whose layer has closed is not an error (case 4).
-- An **unknown layer keyword** fails earlier, in `up.LayerLookup`, via `fail()`. That is a
+- An **unknown layer keyword** fails earlier, in `LayerLookup`, via `fail()`. That is a
   plain `up.Error`, *not* caught by the plan loop, so it aborts the whole pass.
 
 ### Order is a guarantee, not an accident
@@ -198,7 +198,7 @@ Worth having:
   [`target-derivation.md`](../../src/unpoly/pages/target-derivation.md).
 
 Beyond the pseudos, much matching is **configured** rather than hard-coded.
-`up.Config#selector()` builds one union selector from a config list plus its `no…`
+`Config#selector()` builds one union selector from a config list plus its `no…`
 counterpart, as used for `hungrySelectors`, `assetSelectors`, `fieldSelectors`,
 `followSelectors` and others. When you need to match "the kind of element the user
 configured", use that so configuration and negation keep working. Note `:main` is *not* one of
@@ -219,7 +219,7 @@ decide which kind it is — a matcher belongs in `expandTargets()`, a step modif
 When a selector is ambiguous — three `.card` elements on the page — Unpoly prefers the one
 near the element the user interacted with. The user-facing rules are
 [resolving ambiguous selectors](../../src/unpoly/pages/targeting-fragments.md#ambiguous-selectors);
-the implementation is `up.FragmentFinder#find()`, which tries three strategies in order:
+the implementation is `FragmentFinder#find()`, which tries three strategies in order:
 
 1. **Preferred elements.** If `{ preferOldElements }` was passed, reuse one — but only if it
    is still in the document *and* still matches the selector. This is how cache revalidation
@@ -241,10 +241,10 @@ the implementation is `up.FragmentFinder#find()`, which tries three strategies i
 
 `{ match: 'first' }` skips step 2 entirely.
 
-Region matching is **not** limited to the current page. `up.ResponseDoc` runs the same finder
+Region matching is **not** limited to the current page. `ResponseDoc` runs the same finder
 against the response document, using a *rediscovered* origin: it derives a selector for the
 origin and looks that up inside the response. If the origin can't be derived or re-found, the
-response lookup degrades to "first match" — which is why `up.FragmentFinder` takes a
+response lookup degrades to "first match" — which is why `FragmentFinder` takes a
 `{ document }` option at all. `:main` stays excluded on purpose, since a main target is by
 definition not resolved by proximity.
 
@@ -269,8 +269,8 @@ ultimately `<body>`, without anyone asking for a fallback. See
   exit animation, after the layer has left the stack. The spec helpers disable close
   animations, so this state never occurs in a spec unless you open the overlay with one.
 - **Two more lookup modes exist** that this guide doesn't cover: `trackSelector()` (fragment.ts)
-  / `up.SelectorTracker` for "match now and as elements appear", and the special cases where
+  / `SelectorTracker` for "match now and as elements appear", and the special cases where
   an Element is passed *as the selector* (`up.fragment.matches()` derives a target for it;
   `up.fragment.get(root, element)` returns it unfiltered, destroying or not).
 - **Ordering is specified.** Before simplifying the multi-query loop in
-  `up.Selector#firstDescendant()`, read the comment above it and the `:main` precedence specs.
+  `Selector#firstDescendant()`, read the comment above it and the `:main` precedence specs.

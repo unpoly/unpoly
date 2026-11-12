@@ -39,9 +39,17 @@ before hand-rolling one. Two examples follow.
 
 ### Renaming a function
 
-The old function announces itself, then delegates:
+The old function announces itself, then delegates. The migrate file declares each key it adds
+to `up`, and the function takes its types from that declaration (see
+[Code style](code-style.md#the-global-up-and-unpoly-migrate)):
 
-```js
+```ts
+declare module '../unpoly.js' {
+  interface Up {
+    replace(target: RenderOptions['target'], url: string, options?: RenderOptions): RenderJob
+  }
+}
+
 up.replace = function(target, url, options) {
   up.migrate.deprecated('up.replace(target, url)', 'up.navigate(target, { url })')
   return up.navigate({ ...options, target, url })
@@ -69,7 +77,7 @@ from a new page fetched from the server.
 
 Most renames need no implementation at all:
 
-```js
+```ts
 up.migrate.renamedAttribute('up-observe', 'up-watch')
 ```
 
