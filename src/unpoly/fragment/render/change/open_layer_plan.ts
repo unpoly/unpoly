@@ -10,7 +10,7 @@ import { printToStandard } from '../../../log.js'
 import { hungrySteps, type HungrySteps } from '../../../radio.js'
 import { hello } from '../../../script.js'
 import type * as t from '../../types.js'
-import { Addition } from './layer_plan.js'
+import { LayerPlan } from './layer_plan.js'
 import { UpdateSteps } from './update_steps.js'
 import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
@@ -18,7 +18,7 @@ import { RenderOptions } from '../render_options.js'
 import { RenderResult } from '../render_result.js'
 import { type ResponseDoc } from '../response_doc.js'
 
-export class OpenLayerPlan extends Addition {
+export class OpenLayerPlan extends LayerPlan {
   declare layer: Overlay
   declare target: string
   declare _origin?: Element

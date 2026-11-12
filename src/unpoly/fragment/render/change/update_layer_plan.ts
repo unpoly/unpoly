@@ -11,13 +11,13 @@ import { hungrySteps, type HungrySteps } from '../../../radio.js'
 import { FocusCapsule, getScrollTops, saveFocus, saveScroll } from '../../../viewport.js'
 import type * as t from '../../types.js'
 import { FragmentFinder } from '../../fragment_finder.js'
-import { Addition } from './layer_plan.js'
+import { LayerPlan } from './layer_plan.js'
 import { UpdateSteps } from './update_steps.js'
 import { RenderOptions } from '../render_options.js'
 import { RenderResult } from '../render_result.js'
 import { type ResponseDoc } from '../response_doc.js'
 
-export class UpdateLayerPlan extends Addition {
+export class UpdateLayerPlan extends LayerPlan {
   declare options: t.ResolvedRenderOptions
   declare target: string
   declare _context?: u.PlainObject

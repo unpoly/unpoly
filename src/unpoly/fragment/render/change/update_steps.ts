@@ -9,7 +9,7 @@ import { animate, swap } from '../../../motion.js'
 import { block, clean, hello } from '../../../script.js'
 import { getViewportSubtree } from '../../../viewport.js'
 import type * as t from '../../types.js'
-import { Addition } from './layer_plan.js'
+import { LayerPlan } from './layer_plan.js'
 import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
 import { type ResponseDoc } from '../response_doc.js'
@@ -25,7 +25,7 @@ interface StepInsertion {
   startMotion?: () => Promise<any>
 }
 
-// Options for UpdateSteps. It extends Addition, which takes render options, but its callers
+// Options for UpdateSteps. It extends LayerPlan, which takes render options, but its callers
 // only pass the steps, and the options to focus and scroll with when there are none.
 interface UpdateStepsOptions extends t.RenderOptions {
   steps: t.RenderStep[]
@@ -40,7 +40,7 @@ interface MatchedStep extends t.RenderStep {
 }
 
 // Swaps the steps' old elements with their new elements. Used by UpdateLayer and OpenLayer.
-export class UpdateSteps extends Addition {
+export class UpdateSteps extends LayerPlan {
   declare _steps: MatchedStep[]
   declare _noneOptions: t.ResolvedRenderOptions
   declare responseDoc: ResponseDoc

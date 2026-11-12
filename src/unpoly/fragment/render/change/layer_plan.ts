@@ -7,7 +7,7 @@ import { type UpResponse } from '../../../network.js'
 import type * as t from '../../types.js'
 import { Change } from './change.js'
 
-// The values that Addition#setReloadAttrs() sets as [up-source], [up-time] and [up-etag].
+// The values that LayerPlan#setReloadAttrs() sets as [up-source], [up-time] and [up-etag].
 interface ReloadAttrsOptions {
   oldElement?: Element
   newElement: Element
@@ -17,7 +17,7 @@ interface ReloadAttrsOptions {
 }
 
 // A change that adds new content to a layer: by updating it (UpdateLayer) or by opening it (OpenLayer).
-export class Addition extends Change {
+export class LayerPlan extends Change {
   // Set by subclasses.
   declare layer: Layer
   declare _acceptLayer: any

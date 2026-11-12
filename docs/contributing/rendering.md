@@ -165,7 +165,7 @@ task, but an exception after inserting rejects `up.RenderResult#finished` instea
 calls the internal `swap()` (motion.ts), which inserts now and returns a function that starts the
 transition later; `up.morph()` is just both calls in a row.
 
-`Addition` is the base class for everything that inserts content, and carries the
+`LayerPlan` is the base class for everything that inserts content, and carries the
 concerns that outlive the swap: honouring a server's request to accept or dismiss a layer,
 and stamping each new fragment with the `[up-source]`, `[up-time]` and `[up-etag]` attributes
 that later reloads and revalidation depend on (`setReloadAttrs()`).
@@ -238,7 +238,7 @@ a sequence; the option only chooses the intent. Either way an `up:layer:dismiss`
 `up:layer:accept` listener cannot keep a peeled overlay open: peeling happens after the
 response, when preventing it could no longer stop the request.
 
-**The server can close a layer.** `Addition#handleLayerChangeRequests()` tries the
+**The server can close a layer.** `LayerPlan#handleLayerChangeRequests()` tries the
 close reasons in a fixed order — `X-Up-Accept-Layer`, then the `{ acceptLocation }` close
 condition, then accept-triggering elements in the new content, then the same three for
 dismissal — calling `layer.assertAlive()` after each, so the first reason that closes the
@@ -263,7 +263,7 @@ becomes an `OpenLayerPlan`.
 The same method folds the rest of the response into the options: `X-Up-Target` overrides the
 target, `X-Up-Context` merges into the context, `X-Up-Title` and the response URL feed
 history, and `ETag` / `Last-Modified` are recorded (only with `??=`, so an explicit option
-wins) for `Addition#setReloadAttrs()` to stamp later. For a non-GET response it sets
+wins) for `LayerPlan#setReloadAttrs()` to stamp later. For a non-GET response it sets
 `{ source: 'keep' }` — the fragment keeps the *previous* source, so it stays reloadable from
 the old GET URL rather than from the URL that was POSTed to — and allows history only if an
 explicit `{ location }` was given.
@@ -350,7 +350,7 @@ the DOM is concerned, and a rejection as far as the caller is concerned.
   [Testing](testing.md#finding-the-spec-for-a-feature).
 - **Expect to touch two layers of abstraction.** A bug in "what gets updated" usually lives
   in `ChangeFromContent` (plans) or `UpdateLayerPlan` (steps); a bug in "how it gets updated" lives in
-  `UpdateSteps` or `Addition`.
+  `UpdateSteps` or `LayerPlan`.
 - **Check the lifecycle page when you change observable behavior.** If your change alters
   when a hook fires or what it receives,
   [`render-lifecycle.md`](../../src/unpoly/pages/render-lifecycle.md) and its diagram have to
