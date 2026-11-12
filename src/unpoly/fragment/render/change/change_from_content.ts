@@ -192,7 +192,7 @@ export class ChangeFromContent extends Change {
   getPreflightProps(opts?: { optional?: false }): t.PreflightProps
   getPreflightProps(opts?: { optional?: boolean }): Partial<t.PreflightProps>
   getPreflightProps(opts: { optional?: boolean } = {}): Partial<t.PreflightProps> {
-    const getPlanProps = (plan: LayerPlan): t.PreflightProps => plan.getPreflightProps()
+    const getPlanProps = (plan: LayerPlan) => plan.getPreflightProps()
     return this._seekPlan(getPlanProps) || (opts.optional ? {} : this._cannotMatchPreflightTarget())
   }
 

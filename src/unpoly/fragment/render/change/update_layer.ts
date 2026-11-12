@@ -56,7 +56,7 @@ export class UpdateLayerPlan extends Addition {
   _bestPreflightSelector(): string {
     this._matchPreflight()
 
-    const isProbable = (step: t.RenderStep): boolean | undefined => !step.maybe || step.oldElement?.isConnected
+    const isProbable = (step: t.RenderStep) => !step.maybe || step.oldElement?.isConnected
     let bestSteps = this._steps.filter(isProbable)
     let selectors = u.map(bestSteps, 'selector')
     return selectors.join(', ') || ':none'

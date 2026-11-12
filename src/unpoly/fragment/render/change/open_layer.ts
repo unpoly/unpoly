@@ -224,7 +224,7 @@ export class OpenLayerPlan extends Addition {
   }
 
   _buildLayer(): Overlay {
-    const beforeNew = (optionsWithLayerDefaults: t.RenderOptions): t.RenderOptions => {
+    const beforeNew = (optionsWithLayerDefaults: t.RenderOptions) => {
       return this.options = RenderOptions.finalize(optionsWithLayerDefaults)
     }
 
