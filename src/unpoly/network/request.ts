@@ -518,7 +518,7 @@ export class UpRequest {
     return (this._fragments ||= this._findFragments())
   }
 
-  _findFragments() {
+  _findFragments(): Element[] {
     let steps = parseTargetSteps(this.target)
     let lookupOpts = { origin: this.origin, layer: this.layer }
     // Look for one match per step.
@@ -549,7 +549,7 @@ export class UpRequest {
     return this.fragments?.[0]
   }
 
-  _normalize() {
+  _normalize(): void {
     this.method = u.normalizeMethod(this.method)
     this._extractHashFromURL()
     this._transferParamsToURL()
@@ -558,7 +558,7 @@ export class UpRequest {
     this.url = u.normalizeURL(this.url)
   }
 
-  _evictExpensiveAttrs() {
+  _evictExpensiveAttrs(): void {
     // We want to allow up:request:loaded events etc. to still access the properties that
     // we are about to evict, so we wait for one more frame. It shouldn't matter for GC.
     u.queueTask(() => {
@@ -586,7 +586,7 @@ export class UpRequest {
     })
   }
 
-  _extractHashFromURL() {
+  _extractHashFromURL(): string | undefined {
     let match = this.url?.match(/^([^#]*)(#.+)$/)
     if (match) {
       this.url = match[1]
@@ -595,7 +595,7 @@ export class UpRequest {
     }
   }
 
-  _transferParamsToURL() {
+  _transferParamsToURL(): void {
     if (!this.url || this.allowsPayload() || u.isBlank(this.params)) {
       return
     }
@@ -631,11 +631,11 @@ export class UpRequest {
     return networkConfig.cacheEnabled && u.evalAutoOption(this.cache, networkConfig.autoCache, this)
   }
 
-  runQueuedCallbacks() {
+  runQueuedCallbacks(): void {
     u.always(this, () => this._evictExpensiveAttrs())
   }
 
-  load() {
+  load(): boolean | undefined {
     // If the request was aborted before it was sent (e.g. because it was queued)
     // we don't send it.
     if (this.state !== 'new') return
@@ -681,7 +681,7 @@ export class UpRequest {
     }
   }
 
-  _emitLoad() {
+  _emitLoad(): boolean {
     let event = this.emit('up:request:load', { log: ['Loading %s', this] })
     return !event.defaultPrevented
   }
@@ -707,7 +707,7 @@ export class UpRequest {
   @function up.Request#loadPage
   @stable
   */
-  loadPage() {
+  loadPage(): void {
     // This method works independently of @state, since it is often
     // a fallback for a request that cannot be processed as a fragment update
     // (see up:fragment:loaded event).
@@ -718,7 +718,7 @@ export class UpRequest {
     new FormRenderer(this).buildAndSubmit()
   }
 
-  _onXHRLoad() {
+  _onXHRLoad(): void {
     const response = this._extractResponseFromXHR()
 
     const log = ['Loaded %s', response]
@@ -727,20 +727,20 @@ export class UpRequest {
     this.respondWith(response)
   }
 
-  _onXHRError() {
+  _onXHRError(): void {
     // Neither XHR nor fetch() provide any meaningful error message.
     // Hence we ignore the passed ProgressEvent and use our own error message.
     this._setOfflineState('Network error')
   }
 
-  _onXHRTimeout() {
+  _onXHRTimeout(): void {
     // We used to treat timeouts like a client-side abort. While this is technically
     // what happens, it is more practical for users to consider a timeout like a failed
     // connection that we can retry with up.render({ onOffline }) etc.
     this._setOfflineState('Timeout')
   }
 
-  _onXHRAbort() {
+  _onXHRAbort(): void {
     // Use the default message that callers of request.abort() would also get.
     this._setAbortedState()
   }
@@ -783,7 +783,7 @@ export class UpRequest {
     }
   }
 
-  _setAbortedState(reason: string | Error = 'Unknown reason') {
+  _setAbortedState(reason: string | Error = 'Unknown reason'): boolean | undefined {
     if (this.ended) return
 
     let log = ["Aborted request to %s: %s", this, reason]
@@ -795,7 +795,7 @@ export class UpRequest {
     return true
   }
 
-  _setOfflineState(reason: string = 'Unknown reason') {
+  _setOfflineState(reason: string = 'Unknown reason'): void {
     if (this.ended) return
 
     let log = ['Cannot load request from %s: %s', this, reason]
@@ -877,7 +877,7 @@ export class UpRequest {
     return u.isCrossOrigin(this.url)
   }
 
-  _extractResponseFromXHR() {
+  _extractResponseFromXHR(): UpResponse {
     const responseAttrs = {
       method: this.method,
       url: this.url,
@@ -969,14 +969,14 @@ export class UpRequest {
     return this.headers[name]
   }
 
-  _setAutoHeaders() {
+  _setAutoHeaders(): void {
     // Add information about the response's intended use, so the server may
     // customize or shorten its response.
     for (let key of ['target', 'failTarget', 'mode', 'failMode', 'context', 'failContext', 'originMode'] as const) {
       this._setPropertyHeader(key)
     }
 
-    let header, token
+    let header: string, token: string | undefined
     if ((header = this.csrfHeader()) && (token = this.csrfToken())) {
       this._setAutoHeader(header, token)
     }

@@ -125,7 +125,7 @@ export class RequestQueue {
   }
 
   _poke(): void {
-    let request
+    let request: UpRequest | undefined
     if (this._hasConcurrencyLeft() && (request = this._pluckNextRequest())) {
       return this._sendRequestNow(request)
     }
@@ -184,7 +184,7 @@ export class RequestQueue {
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1
     // A timed request has a numeric late time.
-    const isLate = (request: UpRequest) => request.age >= ((request.effectiveLateTime as number) - timerTolerance)
+    const isLate = (request: UpRequest): boolean => request.age >= ((request.effectiveLateTime as number) - timerTolerance)
     return u.some(this._timedRequests, isLate)
   }
 

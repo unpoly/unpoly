@@ -2,7 +2,9 @@ import * as u from './util.js'
 import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { popCookie } from './browser.js'
+import { type EventPlan } from './event.js'
 import { type Params } from './form.js'
+import { type RenderOptions } from './fragment.js'
 import { mockable } from './mockable.js'
 import type * as t from './protocol/types.js'
 export type * from './protocol/types.js'
@@ -487,7 +489,7 @@ on the link or form, or customize `up.network.config.expireCache`.
 @stable
 */
 
-export function contextFromXHR(xhr: XMLHttpRequest) {
+export function contextFromXHR(xhr: XMLHttpRequest): u.PlainObject | undefined {
   return extractHeader(xhr, 'context', u.parseRelaxedJSON)
 }
 
@@ -611,7 +613,7 @@ X-Up-Method: GET
 @function up.protocol.titleFromXHR
 @internal
 */
-export function titleFromXHR(xhr: XMLHttpRequest) {
+export function titleFromXHR(xhr: XMLHttpRequest): string | undefined {
   return up.migrate.titleFromXHR?.(xhr) ?? extractHeader(xhr, 'title', u.parseRelaxedJSON)
 }
 
@@ -711,7 +713,7 @@ To prevent this, the header value is set to `:unknown` if its length exceeds `up
 @signature
 */
 
-export function eventPlansFromXHR(xhr: XMLHttpRequest) {
+export function eventPlansFromXHR(xhr: XMLHttpRequest): EventPlan[] | undefined {
   return extractHeader(xhr, 'events', u.parseRelaxedJSON)
 }
 
@@ -759,7 +761,7 @@ X-Up-Events: [{ type: 'user:created', name: 'foobar', layer: 'current' }]
 @stable
 */
 
-export function openLayerFromXHR(xhr: XMLHttpRequest) {
+export function openLayerFromXHR(xhr: XMLHttpRequest): RenderOptions | undefined {
   // When no specific options are given, the server will send X-Up-Open-Layer: {}
   return extractHeader(xhr, 'openLayer', u.parseRelaxedJSON)
 }
@@ -831,7 +833,7 @@ X-Up-Open-Layer: { onAcceptedReload: '#users-list' }
 @experimental
 */
 
-export function acceptLayerFromXHR(xhr: XMLHttpRequest) {
+export function acceptLayerFromXHR(xhr: XMLHttpRequest): any {
   // Even if acceptance has no value, the server will send
   // X-Up-Accept-Layer: null
   return extractHeader(xhr, 'acceptLayer', u.parseRelaxedJSON)
@@ -881,7 +883,7 @@ X-Up-Target: :none
 @signature
 */
 
-export function dismissLayerFromXHR(xhr: XMLHttpRequest) {
+export function dismissLayerFromXHR(xhr: XMLHttpRequest): any {
   // Even if dismissal has no value, the server will send
   // X-Up-Dismiss-Layer: null
   return extractHeader(xhr, 'dismissLayer', u.parseRelaxedJSON)

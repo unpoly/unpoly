@@ -77,7 +77,7 @@ export class UpRequestCache {
 
   get(request: UpRequest | RequestOptions): UpRequest | undefined
   // The request is wrapped in place, so the implementation takes the wrapped type.
-  get(request: UpRequest) {
+  get(request: UpRequest): UpRequest | undefined {
     request = this._wrap(request)
     let route = this._getRoute(request)
 
@@ -94,7 +94,7 @@ export class UpRequestCache {
 
   put(request: UpRequest | RequestOptions): Promise<void>
   // The request is wrapped in place, so the implementation takes the wrapped type.
-  async put(request: UpRequest) {
+  async put(request: UpRequest): Promise<void> {
     request = this._wrap(request)
     let route = this._getRoute(request)
 
@@ -129,7 +129,7 @@ export class UpRequestCache {
     newRequest.trackedRequest = existingRequest
     newRequest.state = 'tracking'
 
-    let value
+    let value: UpResponse | Error
 
     // In case existingRequest is already settled, we need to settle newRequest sync, not one microtask later.
     // This is required to reliably revert active previews before making a new request.

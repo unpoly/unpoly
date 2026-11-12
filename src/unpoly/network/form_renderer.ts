@@ -49,7 +49,7 @@ export class FormRenderer {
       this._form.setAttribute('enctype', contentType)
     }
 
-    let csrfParam, csrfToken
+    let csrfParam: string | undefined, csrfToken: string | undefined
     if ((csrfParam = this._request.csrfParam()) && (csrfToken = this._request.csrfToken())) {
       this.params.add(csrfParam, csrfToken)
     }

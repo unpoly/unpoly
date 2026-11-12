@@ -497,10 +497,10 @@ function processRequest(request: UpRequest): void {
   useCachedRequest(request) || queueRequest(request)
 }
 
-function useCachedRequest(newRequest: UpRequest) {
+function useCachedRequest(newRequest: UpRequest): boolean | undefined {
   // If we have an existing promise matching this new request,
   // we use it unless `request.cache` is explicitly set to `false`.
-  let cachedRequest
+  let cachedRequest: UpRequest | undefined
   if (newRequest.willCache() && (cachedRequest = cache.get(newRequest))) {
     printToStandard('up.request()', 'Re-using previous request to %s', newRequest)
 
@@ -540,7 +540,7 @@ function useCachedRequest(newRequest: UpRequest) {
 }
 
 // If no existing promise is available, we queue a network request.
-function queueRequest(request: UpRequest) {
+function queueRequest(request: UpRequest): boolean {
   handleCaching(request)
 
   queue.asap(request)
