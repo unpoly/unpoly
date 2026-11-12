@@ -68,10 +68,12 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
   function isAlive(fragment: Element): boolean {
   ```
 
-  This includes methods, and an arrow function assigned to an untyped `const`. Inline
-  callbacks and functions that get their type from context stay inferred. Agents (and humans)
-  read code with `grep`, not by hovering, and an explicit type catches an accidental widening
-  where it happens. Lint enforces this with `explicit-function-return-type`.
+  This includes class methods, and an arrow function assigned to an untyped `const`. Agents
+  (and humans) read code with `grep`, not by hovering, and an explicit type catches an
+  accidental widening where it happens. Lint enforces this with `explicit-function-return-type`.
+
+  Inline callbacks and functions that get their type from context stay inferred. So do
+  functions in an object literal and a function returned directly by a named function.
 
   Lint skips `consistent-type-definitions` and `explicit-function-return-type` in the modules
   that are not converted yet. Their override in `.oxlintrc.json` lists them in `excludeFiles`,
