@@ -1,4 +1,5 @@
 import type * as u from '../util.js'
+import type { UpEvent } from '../event.js'
 import type { RenderOptions } from '../fragment.js'
 import type { Params } from './params.js'
 
@@ -6,7 +7,7 @@ import type { Params } from './params.js'
 A form field or button: an `<input>`, `<select>`, `<textarea>`, `<button>` or a form-associated
 custom element. Unpoly reads its `{ name }`, `{ value }` and `{ disabled }` properties when it has them.
 */
-export type Field = Element & {
+export interface Field extends Element {
   name?: string
   value?: any
   disabled?: boolean
@@ -18,18 +19,18 @@ export type Field = Element & {
 /**
 The `up:form:submit` event.
 */
-export type FormSubmitEvent = Event & {
+export interface FormSubmitEvent extends UpEvent {
   target: Element
   form: Element
   params: Params
-  submitButton: Element | undefined
+  submitButton?: Element
   renderOptions: RenderOptions
 }
 
 /**
 The `up:form:validate` event.
 */
-export type FormValidateEvent = Event & {
+export interface FormValidateEvent extends UpEvent {
   target: Element
   form: Element
   params: Params
@@ -40,7 +41,7 @@ export type FormValidateEvent = Event & {
 /**
 The `up:form:switch` event.
 */
-export type FormSwitchEvent = Event & {
+export interface FormSwitchEvent extends UpEvent {
   target: Element
   field: Element
   fieldTokens: string[]
@@ -107,7 +108,7 @@ deferred that settles when the validation has rendered.
 */
 export interface ValidationSolution extends FoundValidationSolution {
   renderOptions: u.PlainObject
-  batch: boolean | undefined
+  batch?: boolean
   // The method and URL. Solutions with the same destination can be validated in one request.
   destination: string
   deferred: u.Deferred<any>

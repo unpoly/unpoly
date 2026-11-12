@@ -6,7 +6,9 @@ import {
   destinationOptions, findFields, findGroupSolution, isField, readFieldName, trackFields,
   validateOptions, type FoundValidationSolution, type ValidationSolution,
 } from '../form.js'
-import { getSmart, onAborted, render, resolveOrigin, splitTarget, toTarget } from '../fragment.js'
+import {
+  getSmart, onAborted, render, resolveOrigin, splitTarget, toTarget, type FragmentAbortedEvent,
+} from '../fragment.js'
 import { printToStandard, printUserEvent } from '../log.js'
 import { headerize, protocolConfig } from '../protocol.js'
 import { readData } from '../script.js'
@@ -49,10 +51,10 @@ export class FormValidator {
   }
 
   _honorAbort(): void {
-    onAborted(this._form, (event) => this._onAborted(event))
+    onAborted(this._form, (event: FragmentAbortedEvent) => this._onAborted(event))
   }
 
-  _onAborted(event: Event & { reason?: any }): void {
+  _onAborted(event: FragmentAbortedEvent): void {
     let abortedError = new Aborted(event.reason)
     let solution
     while (solution = this._dirtySolutions.shift()) {

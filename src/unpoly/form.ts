@@ -730,7 +730,7 @@ export function disableContainerTemp(container: Element, { preview }: { preview?
   return u.sequence(u.map(controls, (control) => disableControlTemp(control, preview)))
 }
 
-function disableControlTemp(control: t.Field, preview: boolean | undefined): (() => void) | undefined {
+function disableControlTemp(control: t.Field, preview?: boolean): (() => void) | undefined {
   // Ignore controls that were already disabled before us.
   // This way we don't accidentally re-enable a control that we didn't change.
   if (readFieldDisabled(control)) return
@@ -760,7 +760,7 @@ function disableControlTemp(control: t.Field, preview: boolean | undefined): (()
 }
 
 // Disable is true (the origin's form), an element, a selector or an array of these.
-function getDisableContainers(disable: any, origin: Element | undefined): Element[] {
+function getDisableContainers(disable: any, origin?: Element): Element[] {
   let originScope = () => getRegion(origin)
 
   if (disable === true) {
@@ -776,7 +776,7 @@ function getDisableContainers(disable: any, origin: Element | undefined): Elemen
   }
 }
 
-export function getDisablePreviewFn(disable: any, origin: Element | undefined): PreviewFn {
+export function getDisablePreviewFn(disable: any, origin?: Element): PreviewFn {
   return function(preview) {
     let containers = getDisableContainers(disable, origin)
     for (let container of containers) {
@@ -901,7 +901,7 @@ export function destinationOptions(form: Element, options?: u.PlainObject, parse
   return options
 }
 
-export function submitButtonOverrides(submitButton: Element | false | undefined): u.PlainObject {
+export function submitButtonOverrides(submitButton?: Element | false): u.PlainObject {
   if (!submitButton) return {}
   let buttonOptions = followOptions(submitButton, {}, { defaults: false })
   // The parsing of [formmethod] and [formaction] (into { method, url })
@@ -1657,7 +1657,10 @@ function getAssociatedForm(element: Element): HTMLFormElement | undefined {
   }
 }
 
-function getFormValidator(form: HTMLFormElement & { upFormValidator?: FormValidator }): FormValidator {
+// A form remembers its validator.
+interface ValidatingForm extends HTMLFormElement { upFormValidator?: FormValidator }
+
+function getFormValidator(form: ValidatingForm): FormValidator {
   return form.upFormValidator ||= setupFormValidator(form)
 }
 
@@ -1675,11 +1678,11 @@ function setupFormValidator(form: HTMLFormElement): FormValidator {
 // (3) Called without an origin element => Returns the current layer element
 //
 // Does not support a selector string as a first argument. Only works with Element arguments.
-export function getRegion(origin: Element | undefined): Element {
+export function getRegion(origin?: Element): Element {
   return getOriginRegion(origin) || layerStack.current.element
 }
 
-function getOriginRegion(origin: Element | undefined): Element | null | undefined {
+function getOriginRegion(origin?: Element): Element | null | undefined {
   if (origin) {
     return getForm(origin) || closestLayerElement(origin)
   }
@@ -1699,7 +1702,7 @@ function getOriginRegion(origin: Element | undefined): Element | null | undefine
 // The callback may return a function that is called when the field no longer matches.
 type TrackFieldsCallback = (field: Element) => unknown
 // The guard is a condition for a field to match, tested for truthiness.
-type TrackFieldsOptions = { guard?: (field: Element) => unknown }
+interface TrackFieldsOptions { guard?: (field: Element) => unknown }
 export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): () => void {
   let [root, { guard }, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 

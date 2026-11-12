@@ -7,10 +7,10 @@ import { getSmart, getSubtree, trackSelector } from '../fragment.js'
 import { Params } from './params.js'
 
 // A switchee remembers the field tokens it was last switched with.
-type Switchee = HTMLElement & { upSwitchValues?: string[] }
+interface Switchee extends HTMLElement { upSwitchValues?: string[] }
 
 // What an [up-…-for] attribute does to a switchee.
-type SwitchEffect = { attr: string, toggle(target: HTMLElement, active: boolean): void }
+interface SwitchEffect { attr: string, toggle(target: HTMLElement, active: boolean): void }
 
 const BUILTIN_SWITCH_EFFECTS: SwitchEffect[] = [
   { attr: 'up-hide-for', toggle(target, active) { e.toggle(target, !active) } },

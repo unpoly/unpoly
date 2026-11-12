@@ -6,6 +6,9 @@ import {
   readFieldName, readFieldValue, type ParamEntry, type ParamsLike,
 } from '../form.js'
 
+// Without FormData#entries(), specs inspect the original entries.
+interface InspectableFormData extends FormData { originalArray?: ParamEntry[] }
+
 /*-
 The `up.Params` class offers a consistent API to read and manipulate request parameters
 independent of their type.
@@ -142,7 +145,7 @@ export class Params {
   @stable
   */
   toFormData(): FormData {
-    const formData: FormData & { originalArray?: ParamEntry[] } = new FormData()
+    const formData: InspectableFormData = new FormData()
     for (let entry of this.entries) {
       formData.append(entry.name, entry.value)
     }

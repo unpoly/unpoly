@@ -13,9 +13,9 @@ export class FieldWatcher {
   declare _options: FieldWatcherOptions
   declare _root: Element
   declare _callback: WatchCallback
-  declare _batch: boolean | undefined
+  declare _batch?: boolean
   declare _logPrefix: string
-  declare _includeDisabled: boolean | undefined
+  declare _includeDisabled?: boolean
   declare _scheduledValues: u.PlainObject | null
   declare _scheduledFieldOptions: u.PlainObject | null
   declare _processedValues: u.PlainObject
