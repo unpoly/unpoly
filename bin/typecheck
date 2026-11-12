@@ -21,8 +21,7 @@ const extraArgs = process.argv.slice(2)
 // core files import it, so tsc checks it anyway. We run the core check a second time without
 // the stricter settings, and take these folders' errors from that run.
 const NOT_YET_STRICT = [
-  // The change classes wait for a restructure.
-  'src/unpoly/fragment/render/change/',
+  // All of core passes the stricter settings now.
 ]
 
 // The settings that tsconfig.core.json adds to tsconfig.json. The second run turns them off.

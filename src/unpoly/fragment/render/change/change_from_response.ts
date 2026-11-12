@@ -19,7 +19,8 @@ export class ChangeFromResponse extends Change {
   constructor(options: t.RenderOptions) {
     super(options)
 
-    this._response = options.response
+    // RenderJob and ChangeFromURL only build a ChangeFromResponse with a { response }.
+    this._response = options.response!
     this._request = this._response.request
   }
 

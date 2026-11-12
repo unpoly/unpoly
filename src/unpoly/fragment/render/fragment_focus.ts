@@ -70,7 +70,7 @@ export class FragmentFocus extends FragmentProcessor {
     return this._focusElement(element)
   }
 
-  resolveCondition(condition: string): boolean | undefined {
+  resolveCondition(condition: string): boolean | null | undefined {
     if (condition === 'lost') {
       return this._wasFocusLost()
     } else {
@@ -98,7 +98,7 @@ export class FragmentFocus extends FragmentProcessor {
     }
   }
 
-  _focusElement(element: HTMLElement | undefined): boolean | undefined {
+  _focusElement(element?: HTMLElement | null): boolean | undefined {
     if (element) {
       doFocus(element, {
         force: true, // force focus on otherwise non-focusable elements

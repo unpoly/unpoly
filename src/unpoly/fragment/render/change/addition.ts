@@ -10,10 +10,10 @@ import { Change } from './change.js'
 // The values that Addition#setReloadAttrs() sets as [up-source], [up-time] and [up-etag].
 interface ReloadAttrsOptions {
   oldElement?: Element
-  newElement?: Element
+  newElement: Element
   source?: string | false
   time?: Date | false
-  etag?: string | false
+  etag?: string | false | null
 }
 
 // A change that adds new content to a layer: by updating it (UpdateLayer) or by opening it (OpenLayer).

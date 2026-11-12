@@ -23,14 +23,16 @@ export class OpenLayerPlan extends Addition {
   declare target: string
   declare _origin?: Element
   declare _baseLayer: Layer
-  declare _content?: HTMLElement
+  // Set by _matchPostflight(), which throws when there is no content.
+  declare _content: HTMLElement
 
   // ChangeFromContent has turned { target } into a selector string.
   constructor(options: t.RenderOptions & { target: string }) {
     super(options)
     this.target = options.target
     this._origin = options.origin
-    this._baseLayer = options.baseLayer
+    // normalizeLayerOptions() always sets a { baseLayer }.
+    this._baseLayer = options.baseLayer!
     // Don't extract too many @properties from @options, since listeners
     // to up:layer:open may modify layer options.
   }
@@ -40,7 +42,8 @@ export class OpenLayerPlan extends Addition {
     // Hence this change will always be applicable.
 
     return {
-      mode: this.options.mode,
+      // normalizeLayerOptions() sets a { mode } for { layer: 'new' }.
+      mode: this.options.mode!,
       context: this._buildLayer().context,
       origin: this.options.origin,
 
@@ -101,7 +104,8 @@ export class OpenLayerPlan extends Addition {
     if (this.target === ':none') {
       this._content = document.createElement('up-none')
     } else {
-      this._content = responseDoc.select(this.target)
+      // We throw below when nothing matches.
+      this._content = responseDoc.select(this.target)!
     }
 
     if (!this._content || !this._baseLayer.isAlive()) {

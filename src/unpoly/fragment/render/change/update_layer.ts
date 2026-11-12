@@ -26,8 +26,9 @@ export class UpdateLayerPlan extends Addition {
   constructor(options: t.ResolvedRenderOptions) {
     options = RenderOptions.finalize(options)
     super(options)
-    this.layer = options.layer
-    this.target = options.target
+    // ChangeFromContent passes the layer and an expanded target.
+    this.layer = options.layer!
+    this.target = options.target!
     this._context = options.context
     // up.fragment.expandTargets() was already called by ChangeFromContent
     this._steps = parseTargetSteps(this.target, this.options)

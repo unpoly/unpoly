@@ -90,7 +90,8 @@ export class ChangeFromContent extends Change {
     // ignore any events in between.
     return mutate(() =>
       matchedPlan.execute(
-        this._getResponseDoc(),
+        // We only execute plans outside of preflight, where there is a response doc.
+        this._getResponseDoc()!,
         this._onPlanApplicable.bind(this, matchedPlan)
       )
     )
@@ -109,7 +110,8 @@ export class ChangeFromContent extends Change {
       printToStandard('up.render()', 'Could not match primary target "%s". Updating a fallback target "%s".', primaryPlan.target, plan.target)
     }
 
-    let { assets } = this._getResponseDoc()
+    // Plans only become applicable when executed, which is never in preflight.
+    let { assets } = this._getResponseDoc()!
     if (assets) {
       assertAssetsOK(assets, plan.options)
     }
@@ -117,7 +119,8 @@ export class ChangeFromContent extends Change {
     // Used by up.RenderJob.
     // Pass the props of the plan we are rendering. this.getPreflightProps() would use the first
     // plan that matches the current page, which may not be in the response when we render a fallback.
-    this.options.handleAbort(plan.getPreflightProps())
+    // RenderJob always sets { handleAbort }.
+    this.options.handleAbort!(plan.getPreflightProps())
 
     // From here on the plan changes the page.
     this._planApplied = true
@@ -152,7 +155,8 @@ export class ChangeFromContent extends Change {
   _improveOptionsFromResponseDoc(): void {
     if (this._preflight) return
 
-    let responseDoc = this._getResponseDoc()
+    // Outside of preflight there is a response doc.
+    let responseDoc = this._getResponseDoc()!
 
     if (this.options.fragment) {
       // ResponseDoc allows to pass innerHTML as { fragment }, but then it also
@@ -184,7 +188,7 @@ export class ChangeFromContent extends Change {
   // This might change postflight if the response does not contain the desired target.
   // With { optional: true }, returns an empty object instead of throwing when no target matches.
   getPreflightProps(opts?: { optional?: false }): t.PreflightProps
-  getPreflightProps(opts: { optional: boolean }): Partial<t.PreflightProps>
+  getPreflightProps(opts?: { optional?: boolean }): Partial<t.PreflightProps>
   getPreflightProps(opts: { optional?: boolean } = {}): Partial<t.PreflightProps> {
     const getPlanProps = (plan: LayerPlan): t.PreflightProps => plan.getPreflightProps()
     return this._seekPlan(getPlanProps) || (opts.optional ? {} : this._cannotMatchPreflightTarget())
@@ -201,7 +205,8 @@ export class ChangeFromContent extends Change {
   _cannotMatchTarget(reason: string): never {
     if (this._getPlans().length) {
       const planTargets = u.uniq(u.map(this._getPlans(), 'target'))
-      const humanizedLayerOption = optionToString(this.options.layer)
+      // normalizeLayerOptions() always sets a { layer }.
+      const humanizedLayerOption = optionToString(this.options.layer!)
       throw new CannotMatch([reason + " (tried selectors %o in %s)", planTargets, humanizedLayerOption])
     } else if (this._layers.length === 0) {
       this._cannotMatchLayer()

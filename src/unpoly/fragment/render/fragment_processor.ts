@@ -8,7 +8,7 @@ import type * as t from '../types.js'
 // Processes a { focus } or { scroll } render option. The option can be a string, an element, a function,
 // an array of alternatives or a selector map, so its type stays `any`.
 export abstract class FragmentProcessor {
-  declare fragment?: HTMLElement
+  declare fragment?: HTMLElement | null
   declare autoMeans: t.FragmentProcessorValue
   declare origin?: Element
   declare layer?: Layer
@@ -93,7 +93,7 @@ export abstract class FragmentProcessor {
     return u.findInList(array, (opt) => this.tryProcess(opt))
   }
 
-  resolveCondition(condition: string): boolean | undefined {
+  resolveCondition(condition: string): boolean | null | undefined {
     if (condition === 'main') {
       return this.fragment && contains(this.fragment, ':main')
     }

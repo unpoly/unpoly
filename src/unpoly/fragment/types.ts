@@ -151,7 +151,8 @@ export interface RenderOptions {
   onLoaded?: (event: FragmentLoadedEvent) => any
   onOffline?: (event: FragmentOfflineEvent) => any
   onRendered?: (result: RenderResult) => any
-  onFinished?: (result: RenderResult) => any
+  // A revalidating render pass sets null, so it doesn't run the callback of the pass it revalidates.
+  onFinished?: ((result: RenderResult) => any) | null
   onError?: (error: any) => any
   onOpened?: (event: LayerOpenedEvent) => any
   onAccept?: (event: LayerCloseEvent) => any
@@ -203,7 +204,8 @@ export interface RenderOptions {
   dismissLayer?: any
   cspInfo?: CSPInfo
   time?: Date | false
-  etag?: string | false
+  // null when the response has no ETag header.
+  etag?: string | false | null
   // Passed to compilers as their third argument.
   meta?: u.PlainObject
 
@@ -261,7 +263,8 @@ Options for an `up.FragmentProcessor`. Subclasses take more.
 @internal
 */
 export interface FragmentProcessorOptions {
-  fragment?: HTMLElement
+  // UpdateSteps passes null when it has no steps.
+  fragment?: HTMLElement | null
   // What { focus: 'auto' } or { scroll: 'auto' } means, as another processable value.
   autoMeans?: FragmentProcessorValue
   origin?: Element
@@ -335,7 +338,7 @@ export interface RenderStep extends ResolvedRenderOptions {
   selectEvent?: FragmentHungryEvent
   selectCallback?: (event: Event) => any
   // Set while rendering, see UpdateSteps.
-  parentElement?: ParentNode
+  parentElement?: ParentNode | null
   afterRemove?: () => void
   descendantKeepPlans?: KeepPlan[]
   // Set by UpdateLayer, for { focus: 'keep' } and { scroll: 'keep' }.

@@ -4,6 +4,7 @@ import { fail } from '../../../error.js'
 import {
   emitFragmentDestroyed, emitFragmentKept, findKeepPlan, fragmentConfig, markFragmentAsDestroying,
 } from '../../../fragment.js'
+import { type Layer } from '../../../layer.js'
 import { animate, swap } from '../../../motion.js'
 import { block, clean, hello } from '../../../script.js'
 import { getViewportSubtree } from '../../../viewport.js'
@@ -16,8 +17,8 @@ import { type ResponseDoc } from '../response_doc.js'
 // What inserting a render step produced, and what remains to be done after all steps were inserted.
 interface StepInsertion {
   fragments: Element[]
-  focusElement?: HTMLElement
-  scrollElement?: HTMLElement
+  focusElement: HTMLElement
+  scrollElement: HTMLElement
   // Compiles the new elements.
   welcome: () => any
   // Starts the transition or animation.
@@ -31,16 +32,25 @@ interface UpdateStepsOptions extends t.RenderOptions {
   noneOptions?: t.ResolvedRenderOptions
 }
 
+// A step that we can insert: it has a layer, an old element and a new element.
+interface MatchedStep extends t.RenderStep {
+  layer: Layer
+  oldElement: HTMLElement
+  newElement: HTMLElement
+}
+
 // Swaps the steps' old elements with their new elements. Used by UpdateLayer and OpenLayer.
 export class UpdateSteps extends Addition {
-  declare _steps: t.RenderStep[]
+  declare _steps: MatchedStep[]
   declare _noneOptions: t.ResolvedRenderOptions
   declare responseDoc: ResponseDoc
 
   constructor(options: UpdateStepsOptions) {
     super(options)
 
-    this._steps = u.copy(u.assert(options.steps)) // we mutate it below
+    // Our callers pass steps for a layer, with a matched old element. execute() matches
+    // the new elements before anything reads them.
+    this._steps = u.copy(u.assert(options.steps)) as MatchedStep[] // we mutate it below
     this._noneOptions = options.noneOptions || {}
   }
 
@@ -107,7 +117,7 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _insertStep(step: t.RenderStep): StepInsertion {
+  _insertStep(step: MatchedStep): StepInsertion {
     switch (step.placement) {
       case 'swap': {
         let keepPlan = findKeepPlan(step)
@@ -137,7 +147,7 @@ export class UpdateSteps extends Addition {
     return {}
   }
 
-  _insertKeepEverythingStep(step: t.RenderStep, keepPlan: t.KeepPlan): StepInsertion {
+  _insertKeepEverythingStep(step: MatchedStep, keepPlan: t.KeepPlan): StepInsertion {
     // Nothing to mutate in the DOM.
     return {
       fragments: [],
@@ -147,7 +157,7 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _insertSwapStep(step: t.RenderStep): StepInsertion {
+  _insertSwapStep(step: MatchedStep): StepInsertion {
     const parent = step.parentElement ?? step.oldElement.parentNode
 
     markFragmentAsDestroying(step.oldElement)
@@ -190,7 +200,7 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _insertSwapChildrenStep(step: t.RenderStep): StepInsertion {
+  _insertSwapChildrenStep(step: MatchedStep): StepInsertion {
     // Make a copy since it's a live HTMLCollection, and we're going to move these elements.
     let newChildren = [...step.newElement.children]
 
@@ -215,7 +225,7 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _insertChildrenStep(step: t.RenderStep): StepInsertion {
+  _insertChildrenStep(step: MatchedStep): StepInsertion {
     // Make a copy since it's a live HTMLCollection, and we're going to move these elements.
     let newChildren = [...step.newElement.children]
 
@@ -244,7 +254,7 @@ export class UpdateSteps extends Addition {
     }
   }
 
-  _welcomeElement(element: Element, step: t.RenderStep): Promise<Element> {
+  _welcomeElement(element: Element, step: MatchedStep): Promise<Element> {
     // Adopt CSP nonces and fix broken script tags
     this.responseDoc.finalizeElement(element)
 
@@ -258,7 +268,7 @@ export class UpdateSteps extends Addition {
   // This will find all [up-keep] descendants in oldElement, overwrite their partner
   // element in newElement and leave a visually identical clone in oldElement for a later transition.
   // Returns an array of keepPlans.
-  _preserveDescendantKeepables(step: t.RenderStep): void {
+  _preserveDescendantKeepables(step: MatchedStep): void {
     const descendantKeepPlans: t.KeepPlan[] = []
 
     if (step.keep) {
@@ -309,19 +319,21 @@ export class UpdateSteps extends Addition {
     step.descendantKeepPlans = descendantKeepPlans
   }
 
-  _restoreDescendantKeepables(step: t.RenderStep): void {
-    for (let keepPlan of step.descendantKeepPlans) {
+  _restoreDescendantKeepables(step: MatchedStep): void {
+    // _preserveDescendantKeepables() has set the keep plans, and the revivers of each plan.
+    for (let keepPlan of step.descendantKeepPlans!) {
       // Now that we know the final destination of { newElement }, we can replace it with the keepable.
       keepPlan.newElement.replaceWith(keepPlan.oldElement)
 
-      for (let reviver of keepPlan.revivers) {
+      for (let reviver of keepPlan.revivers!) {
         reviver()
       }
     }
   }
 
-  _finalizeDescendantKeepables(step: t.RenderStep): void {
-    for (let keepPlan of step.descendantKeepPlans) {
+  _finalizeDescendantKeepables(step: MatchedStep): void {
+    // _preserveDescendantKeepables() has set the keep plans.
+    for (let keepPlan of step.descendantKeepPlans!) {
       keepPlan.oldElement.classList.remove('up-keeping')
       emitFragmentKept(keepPlan)
     }

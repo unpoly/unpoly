@@ -37,7 +37,8 @@ export class ChangeFromURL extends Change<t.RenderOptions & { url: string }> {
 
     if (this.options.preload) return request
 
-    this.options.handleAbort({ request, ...requestAttrs })
+    // RenderJob always sets { handleAbort }.
+    this.options.handleAbort!({ request, ...requestAttrs })
     request.runPreviews(this.options)
 
     // Use always() since _onRequestSettled() will decide whether the promise

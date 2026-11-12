@@ -188,13 +188,13 @@ export class ResponseDoc {
     return finder.find()
   }
 
-  selectSteps(steps: t.RenderStep[]): t.RenderStep[] {
+  selectSteps<S extends t.RenderStep>(steps: S[]): S[] {
     return steps.filter((step) => {
       return this._trySelectStep(step) || this._cannotMatchStep(step)
     })
   }
 
-  commitSteps(steps: t.RenderStep[]): t.RenderStep[] {
+  commitSteps<S extends t.RenderStep>(steps: S[]): S[] {
     // If multiple steps want to match the same new element, the first step will remain in the left.
     // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
     // Steps have a new element once they're matched.

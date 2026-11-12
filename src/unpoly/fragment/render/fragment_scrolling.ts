@@ -92,7 +92,7 @@ export class FragmentScrolling extends FragmentProcessor {
     return this._revealElement(element)
   }
 
-  _revealElement(element: HTMLElement | undefined): boolean | undefined {
+  _revealElement(element?: HTMLElement | null): boolean | undefined {
     if (element) {
       reveal(element, this.attributes())
       return true

@@ -437,7 +437,7 @@ export async function morph(oldElement: any, newElement: any, transitionValue: t
 // (A) Compilers may change newElement's size or position.
 // (B) Compilers capture an [up-keep] identity before a transition adds inline styles.
 // (C) We scroll newElement into position before we start the enter animation.
-export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitionValue: t.TransitionValue, { duration, easing, beforeRemove, afterRemove }: t.SwapOptions = {}): () => Promise<any> {
+export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitionValue?: t.TransitionValue, { duration, easing, beforeRemove, afterRemove }: t.SwapOptions = {}): () => Promise<any> {
   // Convert the given transition value to a function we can call.
   // This returns undefined for values like `undefined`, `false`, `[null, null]` etc.
   const transitionFn = guardFn(findTransitionFn(transitionValue))
@@ -489,7 +489,7 @@ export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitio
   return () => motionController.startFunction(cluster, async () => play?.())
 }
 
-function findTransitionFn(value: t.TransitionValue): t.TransitionFn | undefined {
+function findTransitionFn(value?: t.TransitionValue): t.TransitionFn | undefined {
   if (isNone(value)) {
     return undefined
   } else if (u.isFunction(value)) {
