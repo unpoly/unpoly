@@ -1,8 +1,8 @@
 import * as u from '../../util.js'
 import { guard } from '../../error.js'
 import { contains, getSmart } from '../../fragment.js'
+import { type Layer } from '../../layer.js'
 import { printToWarn } from '../../log.js'
-import type { Layer } from '../../layer/base.js'
 
 /**
 Options for an `up.FragmentProcessor`. Subclasses take more.

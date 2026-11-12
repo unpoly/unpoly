@@ -1,17 +1,16 @@
 import * as u from '../../util.js'
 import { assertConfirmed } from '../../browser.js'
-import { guard } from '../../error.js'
-import { Aborted } from '../../error/aborted.js'
+import { Aborted, guard } from '../../error.js'
 import { emit } from '../../event.js'
 import { abortFragment } from '../../fragment.js'
+import { printToStandard } from '../../log.js'
+import { type UpRequest } from '../../network.js'
+import { type PreflightProps } from './change/addition.js'
 import { ChangeFromContent } from './change/change_from_content.js'
 import { ChangeFromResponse } from './change/change_from_response.js'
 import { ChangeFromURL } from './change/change_from_url.js'
 import { RenderOptions } from './render_options.js'
 import { RenderResult } from './render_result.js'
-import { printToStandard } from '../../log.js'
-import type { PreflightProps } from './change/addition.js'
-import type { UpRequest } from '../../network/request.js'
 
 // What the { abort } option needs to know about a change: its preflight props, and its request if it has one.
 type AbortOptionProps = PreflightProps & { request?: UpRequest }

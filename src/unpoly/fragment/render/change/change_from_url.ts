@@ -1,17 +1,17 @@
 import * as u from '../../../util.js'
-import { Offline } from '../../../error/offline.js'
+import { Offline } from '../../../error.js'
 import { render, toFailKey } from '../../../fragment.js'
-import { ChangeFromContent } from './change_from_content.js'
-import { ChangeFromResponse } from './change_from_response.js'
-import { Change } from './change.js'
 import { canPushState, isHistoryEnabled } from '../../../history.js'
 import { printToStandard } from '../../../log.js'
-import { loadPage, makeRequest } from '../../../network.js'
-import { UpResponse } from '../../../network/response.js'
-import type { RenderOptions } from '../render_options.js'
-import type { RenderResult } from '../render_result.js'
-import type { PreflightProps } from './addition.js'
-import type { RequestOptions, UpRequest } from '../../../network/request.js'
+import {
+  loadPage, makeRequest, UpResponse, type RequestOptions, type UpRequest,
+} from '../../../network.js'
+import { type PreflightProps } from './addition.js'
+import { Change } from './change.js'
+import { ChangeFromContent } from './change_from_content.js'
+import { ChangeFromResponse } from './change_from_response.js'
+import { type RenderOptions } from '../render_options.js'
+import { type RenderResult } from '../render_result.js'
 
 /**
 The options for the request of a `ChangeFromURL`: the render options plus the preflight props

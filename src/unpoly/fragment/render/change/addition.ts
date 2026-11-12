@@ -1,12 +1,11 @@
 import * as u from '../../../util.js'
 import * as e from '../../../element.js'
-import { emit } from '../../../event.js'
+import { emit, type EventPlan } from '../../../event.js'
 import { normalizeSource, sourceOf } from '../../../fragment.js'
+import { type Layer } from '../../../layer.js'
+import { type UpResponse } from '../../../network.js'
 import { Change } from './change.js'
-import type { RenderOptions } from '../render_options.js'
-import type { Layer } from '../../../layer/base.js'
-import type { UpResponse } from '../../../network/response.js'
-import type { EventPlan } from '../../../event.js'
+import { type RenderOptions } from '../render_options.js'
 
 /**
 What a change will update, known before its request is sent. ChangeFromURL makes them request options,

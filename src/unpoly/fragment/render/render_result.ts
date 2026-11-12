@@ -1,7 +1,7 @@
 import * as u from '../../util.js'
 import { isCritical } from '../../error.js'
-import type { RenderOptions } from './render_options.js'
-import type { Layer } from '../../layer/base.js'
+import { type Layer } from '../../layer.js'
+import { type RenderOptions } from './render_options.js'
 
 /**
 Checks a finished render pass, e.g. that its layer is still open. May return a new `up.RenderResult`

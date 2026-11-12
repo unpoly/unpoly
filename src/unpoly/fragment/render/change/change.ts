@@ -1,4 +1,4 @@
-import { NotImplemented } from '../../../error/not_implemented.js'
+import { NotImplemented } from '../../../error.js'
 import { RenderOptions } from '../render_options.js'
 
 // The base class of all render passes and their parts. Most work with render options,

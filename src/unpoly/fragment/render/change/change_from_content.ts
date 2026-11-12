@@ -1,19 +1,19 @@
 import * as u from '../../../util.js'
-import { CannotMatch } from '../../../error/cannot_match.js'
+import { CannotMatch } from '../../../error.js'
 import { expandTargets, mutate } from '../../../fragment.js'
+import { refineOption } from '../../../history.js'
+import { layerStack, optionToString, type Layer } from '../../../layer.js'
+import { printToStandard } from '../../../log.js'
+import { assertAssetsOK } from '../../../script.js'
+import { type PreflightProps } from './addition.js'
 import { Change } from './change.js'
 import { OpenLayerPlan } from './open_layer.js'
 import { UpdateLayerPlan } from './update_layer.js'
-import { ResponseDoc } from '../response_doc.js'
-import { refineOption } from '../../../history.js'
-import { layerStack, optionToString } from '../../../layer.js'
-import { printToStandard } from '../../../log.js'
-import { assertAssetsOK } from '../../../script.js'
-import type { RenderOptions, RenderTarget, ResolvedRenderOptions } from '../render_options.js'
-import type { ResponseDocOptions } from '../response_doc.js'
-import type { PreflightProps } from './addition.js'
-import type { Layer } from '../../../layer/base.js'
-import type { RenderResult } from '../render_result.js'
+import {
+  type RenderOptions, type RenderTarget, type ResolvedRenderOptions,
+} from '../render_options.js'
+import { type RenderResult } from '../render_result.js'
+import { ResponseDoc, type ResponseDocOptions } from '../response_doc.js'
 
 // A way to render: updating a target in an existing layer, or opening a new overlay.
 type LayerPlan = OpenLayerPlan | UpdateLayerPlan

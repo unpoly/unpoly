@@ -1,22 +1,22 @@
 import * as u from '../../util.js'
 import { fail } from '../../error.js'
-import { getInputDevice } from '../../event.js'
-import { fragmentConfig, toSuccessKey } from '../../fragment.js'
-import { layerStack, normalizeLayerOptions } from '../../layer.js'
-import { callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback } from '../../script.js'
-import type { EventPlan, InputDevice } from '../../event.js'
-import type { ParseCallbackOptions } from '../../script.js'
-import type { Layer } from '../../layer/base.js'
-import type { LayerCloseEvent, LayerOpenedEvent } from '../../layer.js'
-import type { FragmentLoadedEvent, FragmentOfflineEvent } from '../../fragment.js'
-import type { ParamsLike } from '../../form/params.js'
-import type { AnimationValue, TransitionValue } from '../../motion.js'
-import type { PreviewFn } from '../../status.js'
-import type { UpRequest } from '../../network/request.js'
-import type { UpResponse } from '../../network/response.js'
-import type { RenderResult } from './render_result.js'
-import type { CSPInfo } from '../../script/csp/csp_info.js'
-import type { PreflightProps } from './change/addition.js'
+import { getInputDevice, type EventPlan, type InputDevice } from '../../event.js'
+import { type ParamsLike } from '../../form.js'
+import {
+  fragmentConfig, toSuccessKey, type FragmentLoadedEvent, type FragmentOfflineEvent,
+} from '../../fragment.js'
+import {
+  layerStack, normalizeLayerOptions, type Layer, type LayerCloseEvent, type LayerOpenedEvent,
+} from '../../layer.js'
+import { type AnimationValue, type TransitionValue } from '../../motion.js'
+import { type UpRequest, type UpResponse } from '../../network.js'
+import {
+  callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback, type CSPInfo,
+  type ParseCallbackOptions,
+} from '../../script.js'
+import { type PreviewFn } from '../../status.js'
+import { type PreflightProps } from './change/addition.js'
+import { type RenderResult } from './render_result.js'
 
 /**
 What to render: a target selector, an element to derive a selector from, or several alternatives.

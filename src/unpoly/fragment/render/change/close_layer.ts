@@ -1,16 +1,13 @@
 import * as u from '../../../util.js'
 import { assertConfirmed } from '../../../browser.js'
-import { guard, muteUncriticalRejection } from '../../../error.js'
-import { Aborted } from '../../../error/aborted.js'
+import { Aborted, guard, muteUncriticalRejection } from '../../../error.js'
 import { build } from '../../../event.js'
 import { abortFragment, reload } from '../../../fragment.js'
-import { Change } from './change.js'
-import { layerStack } from '../../../layer.js'
+import { layerStack, type Layer, type Overlay } from '../../../layer.js'
+import { type UpResponse } from '../../../network.js'
 import { doFocus } from '../../../viewport.js'
-import type { LayerReference } from '../render_options.js'
-import type { Layer } from '../../../layer/base.js'
-import type { Overlay } from '../../../layer/modes/overlay.js'
-import type { UpResponse } from '../../../network/response.js'
+import { Change } from './change.js'
+import { type LayerReference } from '../render_options.js'
 
 /**
 Options for accepting or dismissing an overlay.

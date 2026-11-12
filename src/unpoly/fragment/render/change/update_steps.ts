@@ -3,17 +3,17 @@ import * as e from '../../../element.js'
 import { fail } from '../../../error.js'
 import {
   emitFragmentDestroyed, emitFragmentKept, findKeepPlan, fragmentConfig, markFragmentAsDestroying,
+  type KeepPlan, type RenderStep,
 } from '../../../fragment.js'
-import { Addition } from './addition.js'
-import { FragmentFocus } from '../fragment_focus.js'
-import { FragmentScrolling } from '../fragment_scrolling.js'
 import { animate, swap } from '../../../motion.js'
 import { block, clean, hello } from '../../../script.js'
 import { getViewportSubtree } from '../../../viewport.js'
-import type { ResolvedRenderOptions } from '../render_options.js'
-import type { PartialRenderResult } from '../render_result.js'
-import type { ResponseDoc } from '../response_doc.js'
-import type { KeepPlan, RenderStep } from '../../../fragment.js'
+import { Addition } from './addition.js'
+import { FragmentFocus } from '../fragment_focus.js'
+import { FragmentScrolling } from '../fragment_scrolling.js'
+import { type ResolvedRenderOptions } from '../render_options.js'
+import { type PartialRenderResult } from '../render_result.js'
+import { type ResponseDoc } from '../response_doc.js'
 
 /**
 What inserting a render step produced, and what remains to be done after all steps were inserted.

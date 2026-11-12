@@ -1,12 +1,11 @@
-import { abortFragment, emitFragmentDestroyed, markFragmentAsDestroying } from '../../../fragment.js'
-import { Change } from './change.js'
-import { RenderOptions } from '../render_options.js'
-import { layerStack } from '../../../layer.js'
-import { animate } from '../../../motion.js'
+import {
+  abortFragment, emitFragmentDestroyed, markFragmentAsDestroying,
+} from '../../../fragment.js'
+import { layerStack, type Layer } from '../../../layer.js'
+import { animate, type AnimationValue } from '../../../motion.js'
 import { clean } from '../../../script.js'
-import type { AnimationValue } from '../../../motion.js'
-import type { LayerReference } from '../render_options.js'
-import type { Layer } from '../../../layer/base.js'
+import { Change } from './change.js'
+import { RenderOptions, type LayerReference } from '../render_options.js'
 
 /**
 Options for `up.destroy()`, plus the element to destroy.

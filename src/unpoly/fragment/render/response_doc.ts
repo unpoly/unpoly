@@ -1,14 +1,15 @@
 import * as u from '../../util.js'
 import * as e from '../../element.js'
-import { fail } from '../../error.js'
-import { CannotMatch } from '../../error/cannot_match.js'
+import { CannotMatch, fail } from '../../error.js'
 import { emit } from '../../event.js'
-import { parseTargetSteps, provideNodes, toTarget, tryToTarget } from '../../fragment.js'
-import { FragmentFinder } from '../fragment_finder.js'
+import {
+  parseTargetSteps, provideNodes, toTarget, tryToTarget, type RenderStep,
+} from '../../fragment.js'
 import { findMetaTags, getLang } from '../../history.js'
-import { adoptDetachedHeadAsset, adoptNewFragment, findAssets, warnOfUnsafeCSP } from '../../script.js'
-import type { RenderStep } from '../../fragment.js'
-import type { CSPInfo } from '../../script/csp/csp_info.js'
+import {
+  adoptDetachedHeadAsset, adoptNewFragment, findAssets, warnOfUnsafeCSP, type CSPInfo,
+} from '../../script.js'
+import { FragmentFinder } from '../fragment_finder.js'
 
 /**
 Options for an `up.ResponseDoc`. One of `{ document }`, `{ fragment }` or `{ content }` holds the new HTML.

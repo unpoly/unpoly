@@ -1,7 +1,6 @@
 import * as u from '../../util.js'
-import { FragmentProcessor } from './fragment_processor.js'
 import { restoreScroll, reveal, revealHash, scrollToPosition } from '../../viewport.js'
-import type { FragmentProcessorOptions } from './fragment_processor.js'
+import { FragmentProcessor, type FragmentProcessorOptions } from './fragment_processor.js'
 
 /**
 Options for an `up.FragmentScrolling`.
