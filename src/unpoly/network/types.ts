@@ -1,4 +1,5 @@
 import * as u from '../util.js'
+import { type UpEvent } from '../event.js'
 import { type ParamsLike } from '../form.js'
 import { type Layer } from '../layer.js'
 import { type LogArgs } from '../log.js'
@@ -8,18 +9,16 @@ import { type UpResponse } from './response.js'
 /**
 The `up:request:load`, `up:request:aborted` and `up:request:offline` events.
 */
-export type RequestEvent = Event & {
+export interface RequestEvent extends UpEvent {
   request: UpRequest
-  layer: Layer | undefined
-  origin: Element | undefined
+  layer?: Layer
+  origin?: Element
 }
 
 /**
 The `up:request:loaded` event.
 */
-export type RequestLoadedEvent = RequestEvent & {
-  response: UpResponse
-}
+export interface RequestLoadedEvent extends RequestEvent { response: UpResponse }
 
 /**
 The settings in `up.network.config`, described in its doc comment.
