@@ -236,7 +236,7 @@ export function parseURL(url: string | t.ParsedURL): t.ParsedURL {
 @function up.util.normalizeMethod
 @internal
 */
-export function normalizeMethod(method?: string): string {
+export function normalizeMethod(method?: string | null): string {
   return method ? method.toUpperCase() : 'GET'
 }
 

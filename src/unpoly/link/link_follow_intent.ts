@@ -2,17 +2,17 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { on } from '../event.js'
 import { isAlive, onAborted } from '../fragment.js'
-import { linkConfig, shouldHandleClick, type FollowIntentCallback } from '../link.js'
+import { linkConfig, shouldHandleClick, type FollowCallback } from '../link.js'
 import { printUserEvent } from '../log.js'
 import { type UpRequest } from '../network.js'
 
 export class LinkFollowIntent {
   declare _link: Element
-  declare _callback: FollowIntentCallback
+  declare _callback: FollowCallback
   declare _lastRequest: UpRequest | null
-  declare _timer: number | undefined
+  declare _timer?: number
 
-  constructor(link: Element, callback: FollowIntentCallback) {
+  constructor(link: Element, callback: FollowCallback) {
     this._link = link
     this._callback = callback
     this._lastRequest = null

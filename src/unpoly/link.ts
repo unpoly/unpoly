@@ -22,7 +22,9 @@ export type * from './link/types.js'
 import { LinkFollowIntent } from './link/link_follow_intent.js'
 
 // A link expanded with [up-expand] remembers the area it expanded to, and the area remembers the link.
-type ExpandedElement = Element & { upExpandedPair?: HTMLElement[] }
+interface ExpandedElement extends HTMLElement {
+  upExpandedPair?: [area: HTMLElement, link: HTMLElement]
+}
 
 /*-
 Features to follow links without a full page load.
@@ -538,8 +540,7 @@ with pages the user is likely to click or that should be
 @stable
 */
 // Returns a Promise or an up.RenderJob, which has the API of a Promise.
-export function preload(link: e.ElementOrSelector, options?: u.PlainObject): Promise<any>
-export function preload(link: e.ElementOrSelector, options?: u.PlainObject) {
+export function preload(link: e.ElementOrSelector, options?: RenderOptions): Promise<void> | RenderJob {
   // If passed a selector, up.fragment.get() will match in the current layer.
   link = effectiveLink(getSmart(link)!)
 
@@ -635,11 +636,11 @@ Looks at the link's `[up-method]` or `[data-method]` attributes. Defaults to `"g
   The HTTP method.
 @internal
 */
-function followMethod(link: Element, options: u.PlainObject = {}): string {
+function followMethod(link: Element, options: RenderOptions = {}): string {
   return u.normalizeMethod(options.method || link.getAttribute('up-method') || link.getAttribute('data-method'))
 }
 
-function followURL(link: Element, options: u.PlainObject = {}): string | undefined {
+function followURL(link: Element, options: RenderOptions = {}): string | null | undefined {
   const url = options.url || link.getAttribute('up-href') || link.getAttribute('href')
 
   // Developers sometimes make a <a href="#"> to give a JavaScript interaction standard
@@ -931,7 +932,7 @@ export function convertClicks(layer: Layer): void {
   })
 }
 
-function isLongPressPossible(mousedownEvent: MouseEvent) {
+function isLongPressPossible(mousedownEvent: MouseEvent): Element | false | null {
   let mousedownTarget = mousedownEvent.target as Element
   return (lastTouchstartTarget === mousedownTarget) && mousedownTarget.closest('[href]')
 }
@@ -1026,7 +1027,7 @@ export function isSafe(link: Element): boolean {
 }
 
 // The condition is 'insert', 'reveal', 'hover' or 'manual'.
-function onLoadCondition(condition: string | false, link: Element, callback: (options?: any) => void): void {
+function onLoadCondition(condition: string | false, link: Element, callback: t.FollowCallback): void {
   switch (condition) {
     case 'insert':
       callback()
@@ -1093,7 +1094,7 @@ Loads a [`[up-defer="manual"]`](/api/up-defer) placeholder.
 @stable
 @signature
 */
-export function loadDeferred(link: Element, options?: u.PlainObject): any {
+export function loadDeferred(link: Element, options?: RenderOptions): RenderJob {
   let guardEvent = build('up:deferred:load', { log: ['Loading deferred %o', link] })
 
   // These options override up.link.follow() behavior
@@ -1546,7 +1547,7 @@ export function install(): void {
   registerMacro(linkConfig.selectorFn('clickableSelectors'), makeClickable)
 
   registerAttrCompiler('up-defer', { defaultValue: 'insert' }, function(link, condition) {
-    let doLoad = (options?: u.PlainObject) => muteUncriticalRejection(loadDeferred(link, options))
+    let doLoad: t.FollowCallback = (options) => muteUncriticalRejection(loadDeferred(link, options))
     onLoadCondition(condition, link, doLoad)
   })
 
@@ -1578,8 +1579,8 @@ export function install(): void {
     }
   })
 
-  registerAttrCompiler('up-expand', { defaultValue: 'a, [up-href]', macro: true }, function(area: HTMLElement & ExpandedElement, childLinkSelector) {
-    let childLink: HTMLElement & ExpandedElement = e.getOne(area, childLinkSelector)
+  registerAttrCompiler('up-expand', { defaultValue: 'a, [up-href]', macro: true }, function(area: ExpandedElement, childLinkSelector) {
+    let childLink: ExpandedElement = e.getOne(area, childLinkSelector)
     if (childLink) {
       // Remember the expander and expandee so we can set .up-active classes efficiently,
       // and so we can hand a click on a non-followable area to the link.
@@ -1624,7 +1625,7 @@ export function install(): void {
   registerCompiler(linkConfig.selectorFn('preloadSelectors'), function(link) {
     // An [up-expand] area preloads its link, so we check whether we can preload that link.
     if (!isPreloadDisabled(effectiveLink(link))) {
-      let doPreload = (options?: u.PlainObject) => muteUncriticalRejection(preload(link, options))
+      let doPreload: t.FollowCallback = (options) => muteUncriticalRejection(preload(link, options))
       // We need to map several cases here:
       //
       // (1) <a up-preload>              => 'hover'
