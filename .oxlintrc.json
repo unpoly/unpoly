@@ -191,10 +191,7 @@
         "src/unpoly/fragment/render/change/update_layer.ts",
         "src/unpoly/fragment/render/render_job.ts",
         "src/unpoly/fragment/render/render_options.ts",
-        "src/unpoly/fragment/render/response_doc.ts",
-        "src/unpoly/framework.ts",
-        "src/unpoly/motion.ts",
-        "src/unpoly/rails.ts"
+        "src/unpoly/fragment/render/response_doc.ts"
       ],
       "rules": {
         "typescript/explicit-function-return-type": ["error", {
