@@ -2,7 +2,7 @@ import { scheduleTimer } from '../util.js'
 import { numberAttr } from '../element.js'
 import { on } from '../event.js'
 import { isAlive, onAborted } from '../fragment.js'
-import { config, shouldHandleClick } from '../link.js'
+import { linkConfig, shouldHandleClick } from '../link.js'
 import { printUserEvent } from '../log.js'
 import type { UpRequest } from '../network/request.js'
 
@@ -66,7 +66,7 @@ export class LinkFollowIntent {
   }
 
   _parseDelay(): number {
-    return numberAttr(this._link, 'up-preload-delay') ?? config.preloadDelay
+    return numberAttr(this._link, 'up-preload-delay') ?? linkConfig.preloadDelay
   }
 
   _runCallback(event: Event): void {

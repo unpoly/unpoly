@@ -6,8 +6,8 @@ import {
 import { getOne } from '../element.js'
 import { fail } from '../error.js'
 import {
-  config, defaultSubmitButton, findFields, prepareParamsReadTemp, readFieldDisabled, readFieldName,
-  readFieldValue,
+  defaultSubmitButton, findFields, formConfig, prepareParamsReadTemp, readFieldDisabled,
+  readFieldName, readFieldValue,
 } from '../form.js'
 import type { PlainObject } from '../util.js'
 import type { ElementOrSelector } from '../element.js'
@@ -477,7 +477,7 @@ export class Params {
   }
 
   _isArrayKey(key: string): boolean {
-    return evalOption(config.arrayParam, key)
+    return evalOption(formConfig.arrayParam, key)
   }
 
   [isBlank.key](): boolean {

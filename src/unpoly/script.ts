@@ -217,7 +217,7 @@ Configures defaults for script handling and asset tracking.
 @property up.script.config
 @stable
 */
-export const config = new Config('up.script.config', (): ScriptConfig => ({
+export const scriptConfig = new Config('up.script.config', (): ScriptConfig => ({
   cspNonce() { return metaContent('csp-nonce') },
   cspWarnings: true,
   scriptElementPolicy: 'auto',
@@ -1051,7 +1051,7 @@ function buildData(element: ScriptedElement & HTMLElement): any {
 @internal
 */
 export function findAssets(head: ParentNode = document.head): NodeListOf<Element> {
-  return head.querySelectorAll(config.selector('assetSelectors'))
+  return head.querySelectorAll(scriptConfig.selector('assetSelectors'))
 }
 
 /*-
@@ -1216,12 +1216,12 @@ export function block(root: ParentNode): void {
 }
 
 export function findScripts(root: ParentNode, condition = ''): List<HTMLScriptElement> {
-  let selector = config.selector('scriptSelectors', condition)
+  let selector = scriptConfig.selector('scriptSelectors', condition)
   return subtree(root, selector) as List<HTMLScriptElement>
 }
 
 export function isScript(value: Element): boolean {
-  return config.matches(value, 'scriptSelectors')
+  return scriptConfig.matches(value, 'scriptSelectors')
 }
 
 export function adoptNewFragment(fragment: Element, cspInfo: CSPInfo | undefined): void {
@@ -1262,7 +1262,7 @@ export function parseCallback(code: string, { argNames = ['event'], expandObject
 }
 
 export const cspNonce = mockable(function cspNonce(): string | undefined {
-  return evalOption(config.cspNonce)
+  return evalOption(scriptConfig.cspNonce)
 })
 
 export function warnOfUnsafeCSP(cspInfo: CSPInfo | undefined): void {
@@ -1284,7 +1284,7 @@ export function install(): void {
 
 export const api = {
   script: {
-    config,
+    config: scriptConfig,
     compiler: registerCompiler,
     macro: registerMacro,
     destructor: registerDestructor,

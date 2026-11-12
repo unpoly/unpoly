@@ -3,7 +3,7 @@ import {
 } from '../../util.js'
 import { fail } from '../../error.js'
 import { getInputDevice } from '../../event.js'
-import { config, successKey } from '../../fragment.js'
+import { fragmentConfig, successKey } from '../../fragment.js'
 import { layerStack, normalizeLayerOptions } from '../../layer.js'
 import { callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback } from '../../script.js'
 import type { List, PlainObject, ValueOrFunction } from '../../util.js'
@@ -361,7 +361,7 @@ function callbackAttr(element: Element, attrName: string, key: string): ((...arg
 
 function navigateDefaults(options: RenderOptions): RenderOptions | undefined {
   if (options.navigate) {
-    return config.navigateOptions
+    return fragmentConfig.navigateOptions
   }
 }
 
@@ -403,7 +403,7 @@ function preprocess(options: RenderOptions): RenderOptions {
   removeUsePrefix(options)
 
   const defaults = merge(
-    config.renderOptions,
+    fragmentConfig.renderOptions,
     navigateDefaults(options)
   )
 

@@ -295,7 +295,7 @@ up.layer.config.overlay.mainTargets.unshift('.content')
 
 @stable
 */
-export const config = new Config('up.layer.config', (): LayerConfig => ({
+export const layerConfig = new Config('up.layer.config', (): LayerConfig => ({
   mode: 'modal',
   any: {
     mainTargets: [
@@ -381,9 +381,9 @@ The config objects are in descending order of specificity.
 */
 function modeConfigs(mode: LayerMode): LayerDefaults[] {
   if (mode === 'root') {
-    return [config.root, config.any]
+    return [layerConfig.root, layerConfig.any]
   } else {
-    return [config[mode], config.overlay, config.any]
+    return [layerConfig[mode], layerConfig.overlay, layerConfig.any]
   }
 }
 
@@ -404,7 +404,7 @@ function normalizeLayerOption(options: PlainObject): void {
       // (1) As { mode } option
       // (2) As a { layer } short hand like { layer: 'new popup' }
       // (3) As the default in config.mode
-      options.mode ||= shorthandMode || config.mode
+      options.mode ||= shorthandMode || layerConfig.mode
 
       if (openMethod === 'swap') {
         // If an overlay is already open, we replace that with a new overlay.
@@ -976,7 +976,7 @@ export function optionToString(option: any): string {
 }
 
 export function isWithinForeignOverlay(element: Element): boolean {
-  let selector = config.selector('foreignOverlaySelectors')
+  let selector = layerConfig.selector('foreignOverlaySelectors')
   return !!(selector && element.closest(selector))
 }
 
@@ -2014,7 +2014,7 @@ export function install(classes: LayerClass[]): void {
 
 export const api = {
   layer: {
-    config,
+    config: layerConfig,
     open,
     ask,
     get stack() { return layerStack.layers },

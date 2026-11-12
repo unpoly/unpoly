@@ -120,7 +120,7 @@ Sets default options for animations and transitions.
   This can be useful in full-stack integration tests.
 @stable
 */
-export const config = new Config('up.motion.config', (): MotionConfig => ({
+export const motionConfig = new Config('up.motion.config', (): MotionConfig => ({
   duration: 175,
   easing: 'ease',
   enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -336,8 +336,8 @@ This function will:
 */
 function effectiveTimingOptions({ duration, easing }: { duration?: number, easing?: string }): TimingOptions {
   return {
-    duration: config.enabled ? (duration ?? config.duration) : 0,
-    easing: easing ?? config.easing,
+    duration: motionConfig.enabled ? (duration ?? motionConfig.duration) : 0,
+    easing: easing ?? motionConfig.easing,
   }
 }
 
@@ -731,7 +731,7 @@ export function install(): void {
   on('up:framework:boot', function() {
     // Explain to the user why animations aren't working.
     // E.g. the user might have disabled animations in her OS.
-    if (!config.enabled) {
+    if (!motionConfig.enabled) {
       printToStandard('up.motion', 'Animations are disabled')
     }
   })
@@ -780,7 +780,7 @@ export const api = {
     finish,
     transition: namedTransitions.put,
     animation: namedAnimations.put,
-    config,
+    config: motionConfig,
   },
   transition: namedTransitions.put,
   animation: namedAnimations.put,

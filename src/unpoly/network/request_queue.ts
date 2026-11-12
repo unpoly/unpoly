@@ -3,7 +3,7 @@ import {
 } from '../util.js'
 import { emit } from '../event.js'
 import { printToStandard } from '../log.js'
-import { config } from '../network.js'
+import { networkConfig } from '../network.js'
 import { UpRequest } from './request.js'
 import type { LogArgs } from '../log.js'
 import type { RequestCondition } from './request.js'
@@ -90,7 +90,7 @@ export class RequestQueue {
   }
 
   _getMaxConcurrency(): number {
-    return evalOption(config.concurrency)
+    return evalOption(networkConfig.concurrency)
   }
 
   _hasConcurrencyLeft(): boolean {

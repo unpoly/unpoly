@@ -1136,7 +1136,7 @@ Configures strings used in the optional [server protocol](/api/up.protocol).
 
 @stable
 */
-export const config = new Config('up.protocol.config', (): ProtocolConfig => ({
+export const protocolConfig = new Config('up.protocol.config', (): ProtocolConfig => ({
   methodParam: '_method',
   csrfParam() { return metaContent('csrf-param') },
   csrfToken() { return metaContent('csrf-token') },
@@ -1146,24 +1146,24 @@ export const config = new Config('up.protocol.config', (): ProtocolConfig => ({
 })) as ConfigWith<ProtocolConfig>
 
 export function csrfHeader(): string {
-  return evalOption(config.csrfHeader)
+  return evalOption(protocolConfig.csrfHeader)
 }
 
 export function csrfParam(): string | undefined {
-  return evalOption(config.csrfParam)
+  return evalOption(protocolConfig.csrfParam)
 }
 
 export function csrfToken(): string | undefined {
-  return evalOption(config.csrfToken)
+  return evalOption(protocolConfig.csrfToken)
 }
 
 export function wrapMethod(method: string, params: Params): string {
-  params.add(config.methodParam, method)
+  params.add(protocolConfig.methodParam, method)
   return 'POST'
 }
 
 export const api = {
   protocol: {
-    config,
+    config: protocolConfig,
   },
 }

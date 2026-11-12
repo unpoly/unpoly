@@ -2,7 +2,7 @@ import {
   always, containsAll, defineDelegates, each, every, filterList, last, remove, variant, wrapValue,
 } from '../util.js'
 import { splitTarget } from '../fragment.js'
-import { config } from '../network.js'
+import { networkConfig } from '../network.js'
 import { UpRequest } from './request.js'
 import { UpResponse } from './response.js'
 import type { RequestCondition, RequestOptions } from './request.js'
@@ -239,7 +239,7 @@ export class UpRequestCache {
   }
 
   _isUsable(request: UpRequest): boolean {
-    return request.age < config.cacheEvictAge
+    return request.age < networkConfig.cacheEvictAge
   }
 
   // Read by specs
@@ -248,7 +248,7 @@ export class UpRequestCache {
   }
 
   get _capacity(): number {
-    return config.cacheSize
+    return networkConfig.cacheSize
 
   }
 

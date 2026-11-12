@@ -4,7 +4,7 @@ import { fail } from '../error.js'
 import { getAll } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { Rect } from '../util/rect.js'
-import { closest, config, isRoot, rootHeight, rootWidth } from '../viewport.js'
+import { closest, isRoot, rootHeight, rootWidth, viewportConfig } from '../viewport.js'
 import type { Layer } from '../layer/base.js'
 import type { ValueOrFunction } from '../util.js'
 
@@ -43,7 +43,6 @@ export class RevealMotion {
     this._obstructionsLayer = layerStack.get(this._viewport)!
     this._behavior = options.behavior ?? 'instant'
 
-    const viewportConfig = config
     this._snap    = options.snap    ?? options.revealSnap    ?? viewportConfig.revealSnap
     this._padding = options.padding ?? options.revealPadding ?? viewportConfig.revealPadding
     this._top     = options.top     ?? options.revealTop     ?? viewportConfig.revealTop

@@ -161,7 +161,7 @@ Configures defaults for scrolling.
     @experimental
 @stable
 */
-export const config = new Config('up.viewport.config', (): ViewportConfig => ({
+export const viewportConfig = new Config('up.viewport.config', (): ViewportConfig => ({
   viewportSelectors: ['[up-viewport]', '[up-fixed]'],
   fixedTopSelectors: ['[up-fixed~=top]'],
   fixedBottomSelectors: ['[up-fixed~=bottom]'],
@@ -317,7 +317,7 @@ export const doFocus = mockable(function doFocus(element: HTMLElement, { prevent
 
   inputDevice ??= getInputDevice()
   focusVisible ??= 'auto'
-  focusVisible = evalAutoOption(focusVisible, config.autoFocusVisible, { element, inputDevice })
+  focusVisible = evalAutoOption(focusVisible, viewportConfig.autoFocusVisible, { element, inputDevice })
 
   element.focus({
     preventScroll: true, // Focus without scrolling, since we're going to use our custom scrolling logic below.
@@ -452,7 +452,7 @@ export function revealHashFn(hash: string, { strong, layer, origin, behavior = '
 
 function allSelector(): string {
   // On Edge the document viewport can be changed from CSS
-  return [rootSelector(), ...config.viewportSelectors].join()
+  return [rootSelector(), ...viewportConfig.viewportSelectors].join()
 }
 
 /*-
@@ -565,7 +565,7 @@ function scrollTopKey(viewport: Element): string | undefined {
 @internal
 */
 function fixedElements(root: ParentNode = document): NodeListOf<HTMLElement> {
-  const queryParts = ['[up-fixed]'].concat(config.fixedTopSelectors).concat(config.fixedBottomSelectors)
+  const queryParts = ['[up-fixed]'].concat(viewportConfig.fixedTopSelectors).concat(viewportConfig.fixedBottomSelectors)
   return root.querySelectorAll<HTMLElement>(queryParts.join())
 }
 
@@ -1094,7 +1094,7 @@ export function focusedElementWithin(scopeElement: Element): Element | undefined
 }
 
 export function install(): void {
-  registerCompiler(config.selectorFn('anchoredRightSelectors'), function(element) {
+  registerCompiler(viewportConfig.selectorFn('anchoredRightSelectors'), function(element) {
     return bodyShifter.onAnchoredElementInserted(element)
   })
 
@@ -1109,7 +1109,7 @@ export function install(): void {
 export const api = {
   viewport: {
     reveal,
-    config,
+    config: viewportConfig,
     get: closest,
     get root() { return getRoot() },
     saveScroll,

@@ -92,7 +92,7 @@ Configures defaults for passive updates.
 
 @stable
 */
-export const config = new Config('up.radio.config', (): RadioConfig => ({
+export const radioConfig = new Config('up.radio.config', (): RadioConfig => ({
   hungrySelectors: ['[up-hungry]'],
   noHungrySelectors: ['[up-hungry=false]'],
   pollInterval: 30000,
@@ -104,7 +104,7 @@ export function hungrySteps(renderOptions: PlainObject): HungrySteps {
 
   if (!hungry) return steps
 
-  let hungrySelector = config.selector('hungrySelectors')
+  let hungrySelector = radioConfig.selector('hungrySelectors')
 
   // When multiple steps target the same new selector, we're updating the layer
   // that's closer to the layer of the render pass.
@@ -446,7 +446,7 @@ export function pollOptions(fragment: ElementOrSelector, options?: PlainObject):
   options = newOptions(options)
   const defaults = { background: true }
   const parser = new OptionsParser(fragment, options, { defaults })
-  parser.number('interval', { default: config.pollInterval })
+  parser.number('interval', { default: radioConfig.pollInterval })
   parser.string('ifLayer', { default: 'front' })
   parser.include(parseRequestOptions)
   parser.include(statusOptions)
@@ -643,7 +643,7 @@ export function install(): void {
 
 export const api = {
   radio: {
-    config,
+    config: radioConfig,
     startPolling,
     stopPolling,
     pollOptions,

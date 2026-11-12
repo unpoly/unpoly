@@ -5,7 +5,7 @@ import { build, on } from '../event.js'
 import { isAlive, isTargetable, matches, onAborted, onKept, reload } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { printToStandard, printToWarn } from '../log.js'
-import { config, pollOptions } from '../radio.js'
+import { pollOptions, radioConfig } from '../radio.js'
 import { registerDestructor } from '../script.js'
 import type { PlainObject } from '../util.js'
 import type { Layer } from '../layer/base.js'
@@ -171,7 +171,7 @@ export class FragmentPolling {
   }
 
   _getFullDelay(): number {
-    return this._options.interval ?? numberAttr(this._fragment, 'up-interval') ?? config.pollInterval
+    return this._options.interval ?? numberAttr(this._fragment, 'up-interval') ?? radioConfig.pollInterval
   }
 
   _getRemainingDelay(): number {

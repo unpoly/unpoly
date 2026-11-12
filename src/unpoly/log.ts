@@ -48,7 +48,7 @@ Configures the logging output to the developer console.
   This keeps the log readable for test runners and coding agents that read the console as plain text.
 @stable
 */
-export const config = new LogConfig() as LogConfig & LogSettings
+export const logConfig = new LogConfig() as LogConfig & LogSettings
 
 /**
 The arguments for a log message: a prefix (usually the event type or function name), a message
@@ -70,7 +70,7 @@ Prints a logging message to the browser console.
 @internal
 */
 export const printToStandard = mockable(function printToStandard(...args: LogArgs): void {
-  if (config.enabled) {
+  if (logConfig.enabled) {
     printToStream('log', ...args)
   }
 })
@@ -97,7 +97,7 @@ function printToStream(stream: LogStream, prefix: string, message?: string, ...a
 
 function printToStreamStyled(stream: LogStream, prefix: string, customStyles: string, message?: string, ...args: any[]): void {
   if (message) {
-    if (config.format) {
+    if (logConfig.format) {
       console[stream](
         `%c${prefix}%c ${message}`,
         'color: #666666; padding: 1px 3px; border: 1px solid #bbbbbb; border-radius: 2px; font-size: 90%; display: inline-block;' + customStyles,
@@ -114,7 +114,7 @@ function printToStreamStyled(stream: LogStream, prefix: string, customStyles: st
 let lastPrintedUserEvent: Event | undefined
 
 export function printUserEvent(event: Event & { originalEvent?: Event }): void {
-  if (config.enabled && lastPrintedUserEvent !== event) {
+  if (logConfig.enabled && lastPrintedUserEvent !== event) {
     lastPrintedUserEvent = event
     let originalEvent = event.originalEvent || event
     let color = '#5566cc'
@@ -123,7 +123,7 @@ export function printUserEvent(event: Event & { originalEvent?: Event }): void {
 }
 
 function printBanner(): void {
-  if (!config.banner) { return }
+  if (!logConfig.banner) { return }
 
   // The ASCII art looks broken in code since we need to escape backslashes
   const logo =
@@ -138,7 +138,7 @@ function printBanner(): void {
     text += "Load unpoly-migrate.js to polyfill deprecated APIs.\n\n"
   }
 
-  if (config.enabled) {
+  if (logConfig.enabled) {
     text += "Call `up.log.disable()` to disable logging for this session."
   } else {
     text += "Call `up.log.enable()` to enable logging for this session."
@@ -146,7 +146,7 @@ function printBanner(): void {
 
   const color = 'color: #777777'
 
-  if (config.format) {
+  if (logConfig.format) {
     console.log('%c' + logo + '%c' + text, 'font-family: monospace;' + color, color)
   } else {
     console.log(logo + text)
@@ -167,7 +167,7 @@ Errors will always be printed, regardless of this setting.
 @signature
 */
 export function enable(): void {
-  config.enabled = true
+  logConfig.enabled = true
 }
 
 /*-
@@ -180,7 +180,7 @@ Errors will still be printed, even with logging disabled.
 @signature
 */
 export function disable(): void {
-  config.enabled = false
+  logConfig.enabled = false
 }
 
 export function install(): void {
@@ -189,7 +189,7 @@ export function install(): void {
 
 export const api = {
   log: {
-    config,
+    config: logConfig,
     enable,
     disable,
   },

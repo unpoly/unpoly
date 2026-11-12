@@ -17,7 +17,7 @@ import { RenderOptions } from './fragment/render/render_options.js'
 import { canPushState, isHistoryEnabled } from './history.js'
 import { LinkFollowIntent } from './link/link_follow_intent.js'
 import { motionOptions } from './motion.js'
-import { config as networkConfig, isSafeMethod } from './network.js'
+import { isSafeMethod, networkConfig } from './network.js'
 import { UpRequest } from './network/request.js'
 import { registerAttrCompiler, registerCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
@@ -193,7 +193,7 @@ without requiring developers to set `[up-...]` attributes.
 
 @stable
 */
-export const config = new Config('up.link.config', (): LinkConfig => ({
+export const linkConfig = new Config('up.link.config', (): LinkConfig => ({
   // (1) We want to follow all elements with an [up-follow] attribute.
   //     This can be an <a up-follow href="/path"> or an <span up-follow up-href="/path">
   // (2) Users expect a link to be followable if it uses a signature attribute
@@ -737,7 +737,7 @@ To make additional elements followable, see `up.link.config.followSelectors`.
 */
 export function isFollowable(link: ElementOrSelector): boolean {
   link = getSmart(link)!
-  return config.matches(link, 'followSelectors')
+  return linkConfig.matches(link, 'followSelectors')
 }
 
 /*-
@@ -884,7 +884,7 @@ function interactiveSelector(): string {
 }
 
 function isInstant(linkOrDescendant: Element): boolean | null {
-  const element = linkOrDescendant.closest(config.selector('instantSelectors'))
+  const element = linkOrDescendant.closest(linkConfig.selector('instantSelectors'))
   // (1) Allow users to configure up.link.config.instantSelectors.push('a')
   //     but opt out individual links with [up-follow=false].
   // (2) A press on an element that handles its own click is not instant. Otherwise we would
@@ -900,7 +900,7 @@ function isInstantDisabled(link: Element): boolean {
   // (3) A link that matches config.instantSelectors, but neither config.followSelectors nor
   //     config.noFollowSelectors, stays instant even though nothing follows it. This is intentional:
   //     users may handle its up:click themselves. The docs ask that instant links are also followable.
-  return config.matches(link, 'noInstantSelectors') || config.matches(link, 'noFollowSelectors')
+  return linkConfig.matches(link, 'noInstantSelectors') || linkConfig.matches(link, 'noFollowSelectors')
 }
 
 /*-
@@ -1602,14 +1602,14 @@ Links with an `[up-preload]` attribute are always [followed by Unpoly](/api/up-f
 */
 
 export function install(): void {
-  registerMacro(config.selectorFn('clickableSelectors'), makeClickable)
+  registerMacro(linkConfig.selectorFn('clickableSelectors'), makeClickable)
 
   registerAttrCompiler('up-defer', { defaultValue: 'insert' }, function(link, condition) {
     let doLoad = (options?: PlainObject) => muteUncriticalRejection(loadDeferred(link, options))
     onLoadCondition(condition, link, doLoad)
   })
 
-  on('up:click', config.selectorFn('followSelectors'), function(event, link) {
+  on('up:click', linkConfig.selectorFn('followSelectors'), function(event, link) {
     if (shouldHandleClick(event, link)) {
       halt(event, { log: true })
 
@@ -1680,7 +1680,7 @@ export function install(): void {
     }
   })
 
-  registerCompiler(config.selectorFn('preloadSelectors'), function(link) {
+  registerCompiler(linkConfig.selectorFn('preloadSelectors'), function(link) {
     // An [up-expand] area preloads its link, so we check whether we can preload that link.
     if (!isPreloadDisabled(effectiveLink(link))) {
       let doPreload = (options?: PlainObject) => muteUncriticalRejection(preload(link, options))
@@ -1710,7 +1710,7 @@ export const api = {
     makeFollowable,
     isSafe,
     isFollowable,
-    config,
+    config: linkConfig,
     loadDeferred,
   },
   follow,

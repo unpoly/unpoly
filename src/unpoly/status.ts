@@ -94,7 +94,7 @@ Sets default options for status effects.
 
 @stable
 */
-export const config = new Config('up.status.config', (): StatusConfig => ({
+export const statusConfig = new Config('up.status.config', (): StatusConfig => ({
   currentClasses: ['up-current'],
   activeClasses: ['up-active'],
   loadingClasses: ['up-loading'],
@@ -191,7 +191,7 @@ function updateNav(nav: NavElement, links: List<Element>, { newLinks, anyLocatio
   if (newLinks || !isEqual(nav.upNavLocations, currentLocations)) {
     for (let link of links) {
       const isCurrent = linkCurrentURLs(link).isAnyCurrent(currentLocations)
-      for (let currentClass of config.currentClasses) {
+      for (let currentClass of statusConfig.currentClasses) {
         link.classList.toggle(currentClass, isCurrent)
       }
       setAttrPresence(link, 'aria-current', 'page', isCurrent)
@@ -210,7 +210,7 @@ Because we update full navs, we only need to lookup layer locations once.
 @internal
 */
 function updateNavsAround(root: Element, opts: NavUpdateOptions): void {
-  const navSelector = config.selector('navSelectors')
+  const navSelector = statusConfig.selector('navSelectors')
   const fullNavs = around(root, navSelector)
 
   for (let fullNav of fullNavs) {
@@ -469,10 +469,10 @@ function getFeedbackClassesPreviewFn(feedbackOption: boolean | undefined, fragme
     const { renderOptions } = preview
 
     if (renderOptions.expiredResponse) {
-      preview.addClassBatch(fragments, config.revalidatingClasses)
+      preview.addClassBatch(fragments, statusConfig.revalidatingClasses)
     } else {
-      preview.addClassBatch(getActiveElements(renderOptions), config.activeClasses)
-      preview.addClassBatch(fragments, config.loadingClasses)
+      preview.addClassBatch(getActiveElements(renderOptions), statusConfig.activeClasses)
+      preview.addClassBatch(fragments, statusConfig.loadingClasses)
     }
   }
 }
@@ -635,7 +635,7 @@ export function install(): void {
 
 export const api = {
   status: {
-    config,
+    config: statusConfig,
     // showAroundRequest,
     preview: namedPreviewFns.put,
   },

@@ -2,7 +2,7 @@ import { assert, copy, flatMap, map, some } from '../../../util.js'
 import { copyCursorProps, leadingElement, unwrap, wrapChildren } from '../../../element.js'
 import { fail } from '../../../error.js'
 import {
-  config, emitFragmentDestroyed, emitFragmentKept, findKeepPlan, markFragmentAsDestroying,
+  emitFragmentDestroyed, emitFragmentKept, findKeepPlan, fragmentConfig, markFragmentAsDestroying,
 } from '../../../fragment.js'
 import { Addition } from './addition.js'
 import { FragmentFocus } from '../fragment_focus.js'
@@ -336,7 +336,7 @@ export class UpdateSteps extends Addition {
     const fragmentFocus = new FragmentFocus({
       ...options,
       fragment,
-      autoMeans: config.autoFocus,
+      autoMeans: fragmentConfig.autoFocus,
     })
     fragmentFocus.process(options.focus)
   }
@@ -345,7 +345,7 @@ export class UpdateSteps extends Addition {
     const scrolling = new FragmentScrolling({
       ...options,
       fragment,
-      autoMeans: config.autoScroll
+      autoMeans: fragmentConfig.autoScroll
     })
     scrolling.process(options.scrollMap ?? options.scroll)
   }

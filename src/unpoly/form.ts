@@ -255,7 +255,7 @@ Sets default options for form submission and validation.
 
 @stable
  */
-export const config = new Config('up.form.config', (): FormConfig => ({
+export const formConfig = new Config('up.form.config', (): FormConfig => ({
   groupSelectors: ['[up-form-group]', 'fieldset', 'label', 'form'],
   fieldSelectors: [
     'select',
@@ -306,7 +306,7 @@ function findFormElements(root: ElementOrSelector, selectorFn: SelectorFn): Fiel
   return elements
 }
 
-export const [fieldSelector, isField] = config.selectorFns('fieldSelectors')
+export const [fieldSelector, isField] = formConfig.selectorFns('fieldSelectors')
 
 /*-
 Returns whether the given element is a form field, such as `input` or `select`.
@@ -401,7 +401,7 @@ function findFieldsAndButtons(container: ElementOrSelector): Field[] {
   ]
 }
 
-const [submitButtonSelector, isSubmitButton] = config.selectorFns('submitButtonSelectors')
+const [submitButtonSelector, isSubmitButton] = formConfig.selectorFns('submitButtonSelectors')
 
 /*-
 Returns a list of submit buttons within the given element.
@@ -428,7 +428,7 @@ Returns a selector for any button, including buttons that don't submit their for
 @function up.form.anyButtonSelector
 @internal
 */
-export const [anyButtonSelector, isAnyButton] = config.selectorFns('anyButtonSelectors')
+export const [anyButtonSelector, isAnyButton] = formConfig.selectorFns('anyButtonSelectors')
 
 function findAnyButtons(root: ElementOrSelector): Field[] {
   return findFormElements(root, anyButtonSelector)
@@ -704,10 +704,10 @@ export function watchOptions(field: ElementOrSelector, options?: PlainObject, pa
   if (options.event === 'input') {
     // Expand the event name via the map in `up.form.config.watchInputEvents`.
     // This way we can fix components
-    options.event = evalOption(config.watchInputEvents, field)
-    options.delay ??= config.watchInputDelay
+    options.event = evalOption(formConfig.watchInputEvents, field)
+    options.delay ??= formConfig.watchInputDelay
   } else if (options.event === 'change') {
-    options.event = evalOption(config.watchChangeEvents, field)
+    options.event = evalOption(formConfig.watchChangeEvents, field)
   }
 
   options.origin ||= field
@@ -766,7 +766,7 @@ export function validateOptions(field: ElementOrSelector, options?: PlainObject,
   let parser = new OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-validate-' })
   parser.string('url')
   parser.string('method', { normalize: normalizeMethod })
-  parser.boolean('batch', { default: config.validateBatch })
+  parser.boolean('batch', { default: formConfig.validateBatch })
   parser.json('params')
   parser.json('headers')
   // parser.include(destinationOptions)
@@ -1259,7 +1259,7 @@ export function autosubmit(target: ElementOrSelector, options: PlainObject = {})
 }
 
 export function getGroupSelectors(): string[] {
-  return up.migrate.migratedFormGroupSelectors?.() || config.groupSelectors
+  return up.migrate.migratedFormGroupSelectors?.() || formConfig.groupSelectors
 }
 
 /*-
@@ -1819,7 +1819,7 @@ To consider other selectors to be submittable, see `up.form.config.submitSelecto
 */
 export function isSubmittable(form: ElementOrSelector): boolean {
   form = getSmart(form)!
-  return config.matches(form, 'submitSelectors')
+  return formConfig.matches(form, 'submitSelectors')
 }
 
 /*-
@@ -2668,7 +2668,7 @@ element containing the entire button group:
 */
 
 export function install(): void {
-  on('submit', config.selectorFn('submitSelectors'), function(event, form) {
+  on('submit', formConfig.selectorFn('submitSelectors'), function(event, form) {
     // We pass on the event.submitter prop as a { submitButton } prop.
     // Otherwise submitOptions() would default to the first submit button.
     const submitButton = presence(event.submitter, isSubmitButton)
@@ -2722,7 +2722,7 @@ export function install(): void {
 
 export const api = {
   form: {
-    config,
+    config: formConfig,
     get: getForm,
     submit,
     submitOptions,

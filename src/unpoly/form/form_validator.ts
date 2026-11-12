@@ -13,7 +13,7 @@ import {
 import { Params } from './params.js'
 import { getSmart, onAborted, render, resolveOrigin, splitTarget, toTarget } from '../fragment.js'
 import { printToStandard, printUserEvent } from '../log.js'
-import { config, headerize } from '../protocol.js'
+import { headerize, protocolConfig } from '../protocol.js'
 import { readData } from '../script.js'
 import type { Deferred, PlainObject } from '../util.js'
 
@@ -374,7 +374,7 @@ export class FormValidator {
   _addValidateHeader(headers: Record<string, string>, names: string[]): void {
     let key = headerize('validate')
     let value = names.join(' ')
-    if (!value || value.length > config.maxHeaderSize) value = ':unknown'
+    if (!value || value.length > protocolConfig.maxHeaderSize) value = ':unknown'
     headers[key] = value
   }
 

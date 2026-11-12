@@ -158,7 +158,7 @@ Configures behavior when the user goes back or forward in browser history.
 
 @stable
 */
-export const config = new Config('up.history.config', (): HistoryConfig => ({
+export const historyConfig = new Config('up.history.config', (): HistoryConfig => ({
   enabled: true,
   // Prefer restoring the body instead of :main, in case the last fragment update
   // changed the page layout. See https://github.com/unpoly/unpoly/issues/237.
@@ -227,7 +227,7 @@ Returns whether `up.history.config.enabled` allows Unpoly to update the given as
 @internal
 */
 export function isHistoryEnabled(aspect: HistoryAspect): boolean {
-  let { enabled } = config
+  let { enabled } = historyConfig
   return isArray(enabled) ? enabled.includes(aspect) : !!enabled
 }
 
@@ -609,7 +609,7 @@ function restoreLocation(location: string): void {
     // The browser has already restored the URL, but hasn't changed content
     // four our synthetic history state. We're now fetching the content for the restored URL.
     url: location,
-    target: config.restoreTargets,
+    target: historyConfig.restoreTargets,
 
     // The browser won't let us prevent the state restoration, so we're
     // rendering whatever the server sends us.
@@ -688,7 +688,7 @@ When this event is emitted, the [browser location](/api/up.history.location) has
 */
 
 export function findMetaTags(head: ParentNode = document.head): NodeListOf<Element> {
-  return head.querySelectorAll(config.selector('metaTagSelectors'))
+  return head.querySelectorAll(historyConfig.selector('metaTagSelectors'))
 }
 
 /*-
@@ -929,7 +929,7 @@ export function install(): void {
 
 export const api = {
   history: {
-    config,
+    config: historyConfig,
     push,
     replace,
     get location() { return currentLocation() },

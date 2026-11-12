@@ -1,5 +1,5 @@
 import { findResult } from '../util.js'
-import { closest, config, containsMainPseudo, getFirstDescendant, matches, splitTarget } from '../fragment.js'
+import { closest, containsMainPseudo, fragmentConfig, getFirstDescendant, matches, splitTarget } from '../fragment.js'
 
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
@@ -32,7 +32,7 @@ export class FragmentFinder {
     this._selector = options.selector
     // This option is for matching fragments in detached content, as needed by up.ResponseDoc.
     this._document = options.document || window.document
-    this._match = options.match ?? config.match
+    this._match = options.match ?? fragmentConfig.match
     this._preferOldElements = options.preferOldElements
   }
 

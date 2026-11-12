@@ -1,5 +1,5 @@
 import { evalOption, getSimpleTokens, variant } from '../util.js'
-import { cache, config } from '../network.js'
+import { cache, networkConfig } from '../network.js'
 import { CSPInfo } from '../script/csp/csp_info.js'
 import { isCritical } from '../error.js'
 import type { PlainObject, ValueOrFunction } from '../util.js'
@@ -197,7 +197,7 @@ export class UpResponse {
   @stable
   */
   get ok(): boolean {
-    return !evalOption(this.fail ?? config.fail, this)
+    return !evalOption(this.fail ?? networkConfig.fail, this)
   }
 
   /*-
@@ -356,7 +356,7 @@ export class UpResponse {
   @stable
   */
   get expired(): boolean {
-    return this.age > config.cacheExpireAge ||
+    return this.age > networkConfig.cacheExpireAge ||
       // When the user calls up.cache.expire() it will expire requests, not responses.
       // Hence we need to delegate to our request.
       this.request.expired

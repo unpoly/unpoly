@@ -191,7 +191,7 @@ Sets default options for network requests.
 
 @stable
 */
-export const config = new Config('up.network.config', (): NetworkConfig => ({
+export const networkConfig = new Config('up.network.config', (): NetworkConfig => ({
   concurrency: 6,
   wrapMethod: true,
   cacheEnabled: true,
@@ -533,8 +533,8 @@ function parseRequestOptions(args: any[]): RequestOptions {
 }
 
 function processRequest(request: UpRequest): void {
-  cache.expire(request.expireCache ?? evalOption(config.expireCache, request) ?? false)
-  cache.evict(request.evictCache ?? evalOption(config.evictCache, request) ?? false)
+  cache.expire(request.expireCache ?? evalOption(networkConfig.expireCache, request) ?? false)
+  cache.evict(request.evictCache ?? evalOption(networkConfig.evictCache, request) ?? false)
   useCachedRequest(request) || queueRequest(request)
 }
 
@@ -994,7 +994,7 @@ export function isSafeMethod(method: string): boolean {
 }
 
 function onLate(): void {
-  if (evalOption(config.progressBar)) {
+  if (evalOption(networkConfig.progressBar)) {
     progressBar = new ProgressBar()
   }
 }
@@ -1018,7 +1018,7 @@ export const api = {
     // processRequest,
     cache,
     isBusy,
-    config,
+    config: networkConfig,
     abort: abortRequests,
     loadPage,
   },

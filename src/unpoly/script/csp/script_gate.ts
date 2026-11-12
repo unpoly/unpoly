@@ -6,7 +6,7 @@ import { Blocked } from '../../error/blocked.js'
 import { NotImplemented } from '../../error/not_implemented.js'
 import { RenderOptions } from '../../fragment/render/render_options.js'
 import { printToStandard, printToWarn } from '../../log.js'
-import { block, config, cspNonce, findScripts, isScript } from '../../script.js'
+import { block, cspNonce, findScripts, isScript, scriptConfig } from '../../script.js'
 import { CSPInfo } from './csp_info.js'
 import { NonceableCallback } from './nonceable_callback.js'
 import type { EvalEnv } from './nonceable_callback.js'
@@ -47,7 +47,7 @@ export class ScriptGate {
   }
 
   warnOfUnsafeCSP(): void {
-    if (config.cspWarnings) {
+    if (scriptConfig.cspWarnings) {
       this._evalCallbackPolicy.warnOfUnsafeCSP()
       this._scriptElementPolicy.warnOfUnsafeCSP()
     }
@@ -127,7 +127,7 @@ export class ScriptGate {
     const policy = this._evalCallbackPolicy
 
     // TODO: It is weird that we keep a list of callback options in RenderOptions, but the list of nonceable attrs is in up.script? Maybe at least move them together?
-    for (let attribute of config.nonceableAttributes) {
+    for (let attribute of scriptConfig.nonceableAttributes) {
       let matches = subtree(root, attrSelector(attribute))
       for (let element of matches) {
         let item = new AttributeItem(element, attribute)
@@ -220,7 +220,7 @@ class ConfigurablePolicy extends Policy {
 
     this._configProp = configProp
 
-    let policyString = config[configProp]
+    let policyString = scriptConfig[configProp]
     if (policyString === 'auto') policyString = this.resolveAuto()
     if (policyString === 'nonce' && !this.pageNonce) {
       this.warn('Enforcing nonces requires a <meta name="csp-nonce">.')

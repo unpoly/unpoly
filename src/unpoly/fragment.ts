@@ -21,13 +21,12 @@ import { RenderJob } from './fragment/render/render_job.js'
 import { SelectorTracker } from './fragment/selector_tracker.js'
 import { Selector } from './fragment/selector.js'
 import { canPushState, isHistoryEnabled } from './history.js'
-import { config as layerConfig, layerStack, mainTargets } from './layer.js'
+import { layerConfig, layerStack, mainTargets } from './layer.js'
 import { Layer } from './layer/base.js'
 import { printToStandard, printToWarn } from './log.js'
 import { abortRequests } from './network.js'
 import {
-  callbackAttr, config as scriptConfig, hello, isScript, readData, registerDestructor,
-  registerMacro,
+  callbackAttr, hello, isScript, readData, registerDestructor, registerMacro, scriptConfig,
 } from './script.js'
 import { Config } from './util/config.js'
 import type { ConfigWith } from './util/config.js'
@@ -435,7 +434,7 @@ Configures defaults for fragment updates.
 
 @stable
 */
-export const config = new Config('up.fragment.config', (): Omit<FragmentConfig, 'mainTargets'> => ({
+export const fragmentConfig = new Config('up.fragment.config', (): Omit<FragmentConfig, 'mainTargets'> => ({
   badTargetClasses: [/^up-/],
 
   strongTargetDerivers: STRONG_TARGET_DERIVERS,
@@ -502,7 +501,7 @@ export const config = new Config('up.fragment.config', (): Omit<FragmentConfig, 
 
 // Users who are not using layers will prefer settings default targets
 // as up.fragment.config.mainTargets instead of up.layer.config.any.mainTargets.
-defineDelegates(config, ['mainTargets'], () => layerConfig.any)
+defineDelegates(fragmentConfig, ['mainTargets'], () => layerConfig.any)
 
 
 function defaultSkipResponse({ response, expiredResponse }: PlainObject): boolean {
@@ -1340,7 +1339,7 @@ export function defaultNormalizeKeepHTML(html: string): string {
 
 function buildKeepIdentity(element: Element, mode: string | boolean | undefined) {
   if (mode === 'same-html') {
-    return config.normalizeKeepHTML(element.outerHTML)
+    return fragmentConfig.normalizeKeepHTML(element.outerHTML)
   } else if (mode === 'same-data') {
     return readData(element)
   } else {
@@ -2122,7 +2121,7 @@ up.reload('.inbox', { cache: true, revalidate: 'auto' }) // mark: revalidate: 'a
 @signature
 */
 export const reload = mockable(function reload(...args: RenderArgs | []): RenderJob {
-  const options = { ...config.reloadOptions, ...parseTargetAndOptions(args) }
+  const options = { ...fragmentConfig.reloadOptions, ...parseTargetAndOptions(args) }
   options.target ||= ':main'
   // up.reload() takes one element or selector, not a list of target selectors.
   // A target that matches nothing throws a TypeError below.
@@ -2321,7 +2320,7 @@ function cannotTarget(element: any): never {
 
 // The element may also be a selector string, which is returned unchanged.
 export function tryToTarget(element: any, options: PlainObject = {}): string | undefined {
-  let derivers = options.strong ? config.strongTargetDerivers : config.targetDerivers
+  let derivers = options.strong ? fragmentConfig.strongTargetDerivers : fragmentConfig.targetDerivers
 
   return findResult(derivers, function(deriver: TargetDeriver) {
     let target = deriveTarget(element, deriver)
@@ -2420,7 +2419,7 @@ function deriveTargetFromPattern(element: Element, deriver: string): string | un
 }
 
 function isGoodTarget(target: string, element: Element, options: PlainObject = {}): boolean {
-  let verify = options.verify ?? config.verifyDerivedTarget
+  let verify = options.verify ?? fragmentConfig.verifyDerivedTarget
   return !isAlive(element) || !verify || getSmart(target, { layer: element, ...options }) === element
 }
 
@@ -2482,7 +2481,7 @@ function matchesPattern(pattern: any, str: string): boolean {
 }
 
 function goodClassesForTarget(element: Element): string[] {
-  let isGood = (klass: string) => !some(config.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
+  let isGood = (klass: string) => !some(fragmentConfig.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
   return filterList(element.classList, isGood)
 }
 
@@ -2600,7 +2599,7 @@ export function hasAutoHistory(newFragments: Element[], layer: Layer): boolean {
   // We cannot use up.fragment.contains(fragment, config.autoHistoryTargets)
   // because fragment is not yet attached when we are called from OpenLayerPlan.
 
-  let vanillaSelector = expandTargets(config.autoHistoryTargets, { layer }).join()
+  let vanillaSelector = expandTargets(fragmentConfig.autoHistoryTargets, { layer }).join()
 
   for (let newFragment of newFragments) {
     if (subtree(newFragment, vanillaSelector).length) {
@@ -2923,7 +2922,7 @@ export function matchSelectorMap(element: Element, selectorMap: PlainObject | un
 }
 
 export function shouldRevalidate(request: UpRequest, response: UpResponse, options: PlainObject = {}): boolean {
-  return request.fromCache && evalAutoOption(options.revalidate, config.autoRevalidate, response)
+  return request.fromCache && evalAutoOption(options.revalidate, fragmentConfig.autoRevalidate, response)
 }
 
 function isContainedByRivalStep(steps: RenderStep[], candidateStep: RenderStep): boolean {
@@ -3501,7 +3500,7 @@ export function install(): void {
 
 export const api = {
   fragment: {
-    config,
+    config: fragmentConfig,
     reload,
     destroy,
     render,

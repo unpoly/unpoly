@@ -6,7 +6,7 @@ import { build } from '../event.js'
 import { getSmart } from '../fragment.js'
 import { layerStack } from '../layer.js'
 import { Layer } from '../layer/base.js'
-import { config, printToStandard } from '../log.js'
+import { logConfig, printToStandard } from '../log.js'
 import type { PlainObject } from '../util.js'
 
 /**
@@ -76,7 +76,7 @@ export class EventEmitter {
   }
 
   _logEmission(): void {
-    if (!config.enabled) { return }
+    if (!logConfig.enabled) { return }
 
     let message = this.log
     let messageArgs

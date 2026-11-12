@@ -1,6 +1,6 @@
 import { evalOption, memoizeMethod, merge, parseURL } from '../../../util.js'
 import { CannotParse } from '../../../error/cannot_parse.js'
-import { config, reload, shouldRevalidate } from '../../../fragment.js'
+import { fragmentConfig, reload, shouldRevalidate } from '../../../fragment.js'
 import { ChangeFromContent } from './change_from_content.js'
 import { Change } from './change.js'
 import { RenderOptions } from '../render_options.js'
@@ -26,7 +26,7 @@ export class ChangeFromResponse extends Change {
   }
 
   execute(): RenderResult {
-    if (config.skipResponse(this._loadedEventProps())) {
+    if (fragmentConfig.skipResponse(this._loadedEventProps())) {
       this._skip()
     } else {
       // Allow listeners to inspect the response and either prevent the fragment change
@@ -55,7 +55,7 @@ export class ChangeFromResponse extends Change {
   }
 
   _assetRenderableResponse(): void {
-    if (!config.renderableResponse(this._response)) {
+    if (!fragmentConfig.renderableResponse(this._response)) {
       throw new CannotParse(['Cannot render response with content-type "%s" (configure with up.fragment.config.renderableResponse)', this._response.contentType])
     }
   }
@@ -202,7 +202,7 @@ export class ChangeFromResponse extends Change {
       Object.assign(renderOptions, {
         ...UNSET_OVERLAY_VISUALS,              // When we're already opening an overlay, don't adopt its visuals.
         target: undefined,                     // The original target may no longer be appropriate, even if it exists in the response.
-        ...config.navigateOptions, // Options like `{ history, focus, scroll }` might no longer work. Also enable a fallback target.
+        ...fragmentConfig.navigateOptions, // Options like `{ history, focus, scroll }` might no longer work. Also enable a fallback target.
         ...openLayerOptions,                   // Anything explicitly passed as the value of `X-Up-Open-Layer`.
         layer: 'new',                          // Don't accept `X-Up-Open-Layer: { layer: 'parent' }`.
       })
