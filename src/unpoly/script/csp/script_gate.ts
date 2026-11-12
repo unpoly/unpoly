@@ -87,7 +87,7 @@ export class ScriptGate {
     // (A) These assets are not normally going to be inserted into the page, but may emit up:assets:changed.
     // (B) We need to adopt script[nonce] attributes for the comparison, and in case the user wants to insert manually.
     // (C) We don't block untrusted scripts for the same reason.
-    let item = new ScriptElementItem(asset as HTMLScriptElement)
+    let item = new ScriptElementItem(asset)
     this._detachedAssetPolicy.processItem(item)
   }
 
@@ -130,8 +130,11 @@ export class ScriptGate {
 
 }
 
+// The arguments of a policy's constructor, which its subclasses pass on.
+type PolicyArgs = [pageNonce: string | undefined, cspInfo: CSPInfo]
+
 class Policy {
-  declare pageNonce: string | undefined
+  declare pageNonce?: string
   declare cspInfo: CSPInfo
   declare _validNonces: Set<string>
 
@@ -147,7 +150,7 @@ class Policy {
     if (pageNonce) this._validNonces.add(pageNonce)
   }
 
-  isValidNonce(nonce: string | undefined): boolean {
+  isValidNonce(nonce?: string): boolean {
     // has(undefined) is false.
     return this._validNonces.has(nonce!)
   }
@@ -181,7 +184,7 @@ class Policy {
     }
   }
 
-  passesItem(_itemNonce: string | undefined): boolean {
+  passesItem(_itemNonce?: string): boolean {
     throw new NotImplemented()
   }
 
@@ -189,11 +192,11 @@ class Policy {
 
 class DetachedAssetPolicy extends Policy {
 
-  constructor(...args: ConstructorParameters<typeof Policy>) {
+  constructor(...args: PolicyArgs) {
     super(...args)
   }
 
-  passesItem(_itemNonce: string | undefined): boolean {
+  passesItem(_itemNonce?: string): boolean {
     return true
   }
 
@@ -225,7 +228,7 @@ class ConfigurablePolicy extends Policy {
     throw new NotImplemented()
   }
 
-  passesItem(itemNonce: string | undefined): boolean {
+  passesItem(itemNonce?: string): boolean {
     switch (this.policyString) {
       // Always pass. Script must pass CSP.
       // Bad idea for a strict-dynamic CSP, which allows everything.
@@ -258,7 +261,7 @@ class ConfigurablePolicy extends Policy {
 
 class EvalCallbackPolicy extends ConfigurablePolicy {
 
-  constructor(...args: [string | undefined, CSPInfo]) {
+  constructor(...args: PolicyArgs) {
     super('evalCallbackPolicy', ...args)
   }
 
@@ -282,7 +285,7 @@ class EvalCallbackPolicy extends ConfigurablePolicy {
 
 class BodyScriptElementPolicy extends ConfigurablePolicy {
 
-  constructor(...args: [string | undefined, CSPInfo]) {
+  constructor(...args: PolicyArgs) {
     super('scriptElementPolicy', ...args)
   }
 
@@ -308,7 +311,7 @@ class BodyScriptElementPolicy extends ConfigurablePolicy {
 
 
 class StringCallbackItem implements PolicyItem {
-  declare _cacheCallback: NonceableCallback | undefined
+  declare _cacheCallback?: NonceableCallback
 
   readNonce(): string | undefined {
     return this._getCallback().nonce

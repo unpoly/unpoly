@@ -24,7 +24,7 @@ export class CSPInfo {
     return this.declaration.includes("'unsafe-eval'")
   }
 
-  static fromHeader(cspHeader: string | null | undefined): CSPInfo {
+  static fromHeader(cspHeader?: string | null): CSPInfo {
     let results: Record<string, [declaration: string, nonces: string[]]> = {}
 
     if (cspHeader) {

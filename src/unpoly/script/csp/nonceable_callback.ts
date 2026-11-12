@@ -11,7 +11,7 @@ declare module '../../../unpoly.js' {
 
 export class NonceableCallback {
   declare script: string
-  declare nonce: string | undefined
+  declare nonce?: string
 
   constructor(script: string, nonce?: string) {
     this.script = script

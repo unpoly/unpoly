@@ -3,7 +3,7 @@ import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { fail, guard } from './error.js'
 import { assertEmitted, on } from './event.js'
-import { getSmart } from './fragment.js'
+import { getSmart, type RenderOptions } from './fragment.js'
 import { isBooted, isEvaling } from './framework.js'
 import { layerStack } from './layer.js'
 import { printToStandard } from './log.js'
@@ -17,14 +17,6 @@ export { NonceableCallback }
 import { ScriptGate } from './script/csp/script_gate.js'
 import { DestructorPass } from './script/destructor_pass.js'
 import { HelloFragment } from './script/hello_fragment.js'
-
-// The properties Unpoly sets on elements to remember their data and destructors.
-type ScriptedElement = Element & {
-  upData?: any
-  upTemplateData?: u.PlainObject
-  upCompileData?: u.PlainObject
-  upDestructors?: u.Cleaner
-}
 
 /*-
 Features to attach JavaScript behavior to HTML elements whenever they enter the page.
@@ -384,9 +376,9 @@ or manually call `up.hello()` on an element that should be
 @stable
 @signature
 */
-export function registerCompiler<E extends Element = HTMLElement>(selector: t.Compiler['selector'], callback: t.CompilerCallback<E>): void
-export function registerCompiler<E extends Element = HTMLElement>(selector: t.Compiler['selector'], options: t.CompilerOptions & { batch: true }, callback: t.BatchCompilerCallback<E>): void
-export function registerCompiler<E extends Element = HTMLElement>(selector: t.Compiler['selector'], options: t.CompilerOptions, callback: t.CompilerCallback<E>): void
+export function registerCompiler<E extends Element = HTMLElement>(selector: t.CompilerSelector, callback: t.CompilerCallback<E>): void
+export function registerCompiler<E extends Element = HTMLElement>(selector: t.CompilerSelector, options: t.BatchCompilerOptions, callback: t.BatchCompilerCallback<E>): void
+export function registerCompiler<E extends Element = HTMLElement>(selector: t.CompilerSelector, options: t.CompilerOptions, callback: t.CompilerCallback<E>): void
 export function registerCompiler(...args: any[]): void {
   registerProcessor(args)
 }
@@ -446,9 +438,9 @@ up.macro('[shake-modal]', function(link) {
 @stable
 @signature
 */
-export function registerMacro<E extends Element = HTMLElement>(selector: t.Compiler['selector'], callback: t.CompilerCallback<E>): void
-export function registerMacro<E extends Element = HTMLElement>(selector: t.Compiler['selector'], options: t.CompilerOptions & { batch: true }, callback: t.BatchCompilerCallback<E>): void
-export function registerMacro<E extends Element = HTMLElement>(selector: t.Compiler['selector'], options: t.CompilerOptions, callback: t.CompilerCallback<E>): void
+export function registerMacro<E extends Element = HTMLElement>(selector: t.CompilerSelector, callback: t.CompilerCallback<E>): void
+export function registerMacro<E extends Element = HTMLElement>(selector: t.CompilerSelector, options: t.BatchCompilerOptions, callback: t.BatchCompilerCallback<E>): void
+export function registerMacro<E extends Element = HTMLElement>(selector: t.CompilerSelector, options: t.CompilerOptions, callback: t.CompilerCallback<E>): void
 export function registerMacro(...args: any[]): void {
   registerProcessor(args, { macro: true })
 }
@@ -462,7 +454,7 @@ export function registerAttrCompiler(...args: any[]): void {
   let selector = `[${attr}]`
   let { defaultValue } = options
 
-  let callback = (element: HTMLElement) => {
+  let callback: t.CompilerCallback = (element) => {
     let value = e.booleanOrStringAttr(element, attr)
 
     // Do nothing in a case like [up-defer=false]
@@ -477,7 +469,7 @@ export function registerAttrCompiler(...args: any[]): void {
   registerProcessor([selector, options, callback])
 }
 
-function detectSystemMacroPriority(macroSelector: string | (() => string)): number {
+function detectSystemMacroPriority(macroSelector: t.CompilerSelector): number {
   macroSelector = u.evalOption(macroSelector)
   for (let substr in SYSTEM_MACRO_PRIORITIES) {
     if (macroSelector.indexOf(substr) >= 0) {
@@ -487,7 +479,7 @@ function detectSystemMacroPriority(macroSelector: string | (() => string)): numb
   fail('Unregistered priority for system macro %o', macroSelector)
 }
 
-function registerProcessor(args: any[], overrides: u.PlainObject = {}): void {
+function registerProcessor(args: any[], overrides: t.CompilerOptions = {}): void {
   let processor = buildProcessor(args, overrides)
 
   if (processor.macro) {
@@ -507,7 +499,7 @@ const parseProcessorArgs = function(args: any[]): any[] {
   return u.parseArgs(args, 'val', 'options', 'callback')
 }
 
-function buildProcessor(args: any[], overrides: u.PlainObject): t.Compiler & u.PlainObject {
+function buildProcessor(args: any[], overrides: t.CompilerOptions): t.Compiler {
   let [selector, options, callback] = parseProcessorArgs(args)
 
   options = u.newOptions(options, {
@@ -520,7 +512,7 @@ function buildProcessor(args: any[], overrides: u.PlainObject): t.Compiler & u.P
   return Object.assign(callback, options, overrides)
 }
 
-function insertProcessor(queue: t.Compiler[], newCompiler: t.Compiler & u.PlainObject): t.Compiler {
+function insertProcessor(queue: t.Compiler[], newCompiler: t.Compiler): t.Compiler {
   let existingCompiler
   let index = 0
   while ((existingCompiler = queue[index]) && (existingCompiler.priority >= newCompiler.priority)) {
@@ -591,7 +583,7 @@ for (let element of document.querySelectorAll('div')) {
   One or more destructor functions.
 @stable
 */
-export function registerDestructor(element: ScriptedElement, value: any): void {
+export function registerDestructor(element: t.ScriptedElement, value: any): void {
   let fns = u.scanFunctions(value)
   if (!fns.length) return
 
@@ -909,7 +901,7 @@ export const readData = mockable(function readData(element: any): any {
   return element.upData ||= buildData(element)
 })
 
-function buildData(element: ScriptedElement & HTMLElement): any {
+function buildData(element: t.ScriptedElement & HTMLElement): any {
   let parsedJSON = e.jsonAttr(element, 'up-data') ?? {}
 
   // If the [up-data] JSON isn't an object then we cannot offer live merging
@@ -1013,7 +1005,7 @@ By marking the `<meta>` tag with `[up-asset]`, it will also emit an `up:assets:c
 @stable
 */
 
-export function assertAssetsOK(newAssets: Iterable<Element> & { length?: number }, renderOptions: u.PlainObject): void {
+export function assertAssetsOK(newAssets: u.List<Element>, renderOptions: RenderOptions): void {
   let { response } = renderOptions
   let oldAssets = findAssets()
 
@@ -1022,7 +1014,7 @@ export function assertAssetsOK(newAssets: Iterable<Element> & { length?: number 
   }
 }
 
-function assetsIdentity(assets: Iterable<Element> & { length?: number }): string {
+function assetsIdentity(assets: u.List<Element>): string {
   return u.map(assets, assetIdentity).join()
 }
 
@@ -1105,23 +1097,23 @@ export function findScripts(root: ParentNode, condition = ''): u.List<HTMLScript
   return e.subtree(root, selector) as u.List<HTMLScriptElement>
 }
 
-export function isScript(value: Element): boolean {
+export function isScript(value: Element): value is HTMLScriptElement {
   return scriptConfig.matches(value, 'scriptSelectors')
 }
 
-export function adoptNewFragment(fragment: Element, cspInfo: CSPInfo | undefined): void {
+export function adoptNewFragment(fragment: Element, cspInfo?: CSPInfo): void {
   new ScriptGate(cspInfo).adoptNewFragment(fragment)
 }
 
-export function adoptDetachedHeadAsset(script: Element, cspInfo: CSPInfo | undefined): void {
+export function adoptDetachedHeadAsset(script: Element, cspInfo?: CSPInfo): void {
   new ScriptGate(cspInfo).adoptDetachedHeadAsset(script)
 }
 
-export function adoptRenderOptionsFromHeader(renderOptions: u.PlainObject, cspInfo: CSPInfo | undefined): void {
+export function adoptRenderOptionsFromHeader(renderOptions: u.PlainObject, cspInfo?: CSPInfo): void {
   new ScriptGate(cspInfo).adoptRenderOptionsFromHeader(renderOptions)
 }
 
-export function callbackAttr(element: Element, attrName: string, parseOpts?: t.ParseCallbackOptions): ((...args: any[]) => any) | undefined {
+export function callbackAttr(element: Element, attrName: string, parseOpts?: t.ParseCallbackOptions): u.AnyFunction | undefined {
   return e.parseAttr(element, attrName, (code) => {
     let fn = parseCallback(code, parseOpts)
     // Emulate the behavior of the `onclick` attribute, where `this` refers to the clicked element.
@@ -1129,7 +1121,7 @@ export function callbackAttr(element: Element, attrName: string, parseOpts?: t.P
   })
 }
 
-export function parseCallback(code: string, { argNames = ['event'], expandObject = false }: t.ParseCallbackOptions = {}): (...argValues: any[]) => any {
+export function parseCallback(code: string, { argNames = ['event'], expandObject = false }: t.ParseCallbackOptions = {}): u.AnyFunction {
   // Return an unbound function so callers can bind to an object of their choice.
   return function(...argValues) {
     let callArgNames = argNames
@@ -1150,7 +1142,7 @@ export const cspNonce = mockable(function cspNonce(): string | undefined {
   return u.evalOption(scriptConfig.cspNonce)
 })
 
-export function warnOfUnsafeCSP(cspInfo: CSPInfo | undefined): void {
+export function warnOfUnsafeCSP(cspInfo?: CSPInfo): void {
   new ScriptGate(cspInfo).warnOfUnsafeCSP()
 }
 

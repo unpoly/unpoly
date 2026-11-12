@@ -1,4 +1,5 @@
 import type * as u from '../util.js'
+import type { UpEvent } from '../event.js'
 import type { RenderOptions } from '../fragment.js'
 import type { Layer } from '../layer.js'
 import type { UpResponse } from '../network.js'
@@ -6,11 +7,17 @@ import type { UpResponse } from '../network.js'
 /**
 Options for `up.hello()`.
 */
-export interface HelloOptions extends HelloFragmentOptions {
+export interface HelloOptions {
+  layer?: Layer
+  data?: any
+  dataMap?: Record<string, any>
+  meta?: u.PlainObject
+  insertedEvent?: boolean
   // Only run these macros and compilers (default: all registered ones).
   macros?: Compiler[]
   compilers?: Compiler[]
-  [key: string]: any
+  // The element that gets the { data }, if not the compiled element.
+  dataRoot?: Element
 }
 
 /**
@@ -21,6 +28,15 @@ export interface CompilerOptions {
   batch?: boolean
   /** @internal Also run on elements that the compiler already compiled. */
   rerun?: boolean
+  /** @internal Register a macro. */
+  macro?: boolean
+}
+
+/**
+Options for `up.compiler()` and `up.macro()` with a compiler that gets all matching elements at once.
+*/
+export interface BatchCompilerOptions extends CompilerOptions {
+  batch: true
 }
 
 /**
@@ -33,6 +49,12 @@ export interface CompilerMeta {
   revalidating: boolean
   [key: string]: any
 }
+
+/**
+The selector of a compiler or macro. A function is called each time the compiler runs, so the
+selector can come from a config that changes later.
+*/
+export type CompilerSelector = string | (() => string)
 
 /**
 The function passed to `up.compiler()` or `up.macro()`. It is called with a matching element, its
@@ -49,7 +71,8 @@ The function passed to `up.compiler()` or `up.macro()` with `{ batch: true }`. I
 with all matching elements and their data.
 
 TypeScript only picks this callback type when `batch` is the literal `true`. Options from a
-variable need `as const`, or `batch` is widened to `boolean` and the callback gets one element.
+variable need the type `BatchCompilerOptions` or `as const`, or `batch` is widened to `boolean`
+and the callback gets one element.
 */
 export type BatchCompilerCallback<E extends Element = HTMLElement> = (elements: E[], data: any[], meta: CompilerMeta) => unknown
 
@@ -60,7 +83,6 @@ Options for `registerAttrCompiler()`.
 export interface AttrCompilerOptions extends CompilerOptions {
   // The value for an attribute set without a value, or to "true".
   defaultValue?: string
-  macro?: boolean
 }
 
 /**
@@ -83,11 +105,11 @@ export interface ParseCallbackOptions {
 /**
 The `up:assets:changed` event.
 */
-export type AssetsChangedEvent = Event & {
+export interface AssetsChangedEvent extends UpEvent {
   newAssets: u.List<Element>
   oldAssets: u.List<Element>
   renderOptions: RenderOptions
-  response: UpResponse | undefined
+  response?: UpResponse
 }
 
 /**
@@ -114,25 +136,25 @@ A compiler or macro registered with `up.compiler()` or `up.macro()`: the compile
 with its registration options.
 @internal
 */
-export type Compiler = u.AnyFunction & {
-  selector: string | (() => string)
-  isDefault?: boolean
+export interface Compiler extends CompilerOptions {
+  (...args: any[]): any
+  selector: CompilerSelector
   priority: number
-  batch?: boolean
-  rerun?: boolean
+  // Registered while Unpoly boots, so a reset keeps it.
+  isDefault?: boolean
 }
 
 /**
-Options for compiling a fragment. See `up.hello()`.
+Properties Unpoly sets on elements to remember their data, their destructors and the compilers
+that ran on them.
 @internal
 */
-export interface HelloFragmentOptions {
-  layer?: Layer
-  data?: any
-  dataRoot?: Element
-  dataMap?: Record<string, any>
-  meta?: u.PlainObject
-  insertedEvent?: boolean
+export interface ScriptedElement extends Element {
+  upData?: any
+  upTemplateData?: u.PlainObject
+  upCompileData?: u.PlainObject
+  upDestructors?: u.Cleaner
+  upAppliedCompilers?: Set<Compiler>
 }
 
 /**

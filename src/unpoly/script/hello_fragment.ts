@@ -5,10 +5,10 @@ import { emit } from '../event.js'
 import { emitFragmentInserted, getSubtree } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
 import { printToStandard } from '../log.js'
-import { readData, registerDestructor, type Compiler, type HelloFragmentOptions } from '../script.js'
-
-// Elements remember the data passed to up.hello(), and which compilers have run on them.
-type CompiledElement = Element & { upCompileData?: any, upAppliedCompilers?: Set<Compiler> }
+import {
+  readData, registerDestructor, type Compiler, type CompilerSelector, type HelloOptions,
+  type ScriptedElement,
+} from '../script.js'
 
 export class HelloFragment {
   declare _root: Element
@@ -16,13 +16,13 @@ export class HelloFragment {
   declare _compilers: Compiler[]
   declare _layer: Layer
   declare _data: any
-  declare _dataRoot: CompiledElement
-  declare _dataMap: Record<string, any> | undefined
+  declare _dataRoot: ScriptedElement
+  declare _dataMap?: Record<string, any>
   declare _compilePromises: Promise<any>[]
   declare _insertedEvent: boolean
   declare _meta: u.PlainObject
 
-  constructor(root: Element, macros: Compiler[], compilers: Compiler[], { layer, data, dataRoot, dataMap, meta, insertedEvent }: HelloFragmentOptions) {
+  constructor(root: Element, macros: Compiler[], compilers: Compiler[], { layer, data, dataRoot, dataMap, meta, insertedEvent }: HelloOptions) {
     // (1) If a caller has already looked up the layer we don't want to look it up again.
     // (2) Default to the current layer in case the user manually compiles a detached element.
     layer ||= layerStack.get(root) || layerStack.current
@@ -130,7 +130,7 @@ export class HelloFragment {
       compileArgs.push(data, this._meta)
     }
 
-    let onDestructor = (destructor: unknown) => registerDestructor(element, destructor)
+    let onDestructor = (destructor: unknown): void => registerDestructor(element, destructor)
     this._applyCompilerFunction(compiler, element, compileArgs, onDestructor)
   }
 
@@ -144,7 +144,7 @@ export class HelloFragment {
       compileArgs.push(dataList, this._meta)
     }
 
-    let onDestructor = () => this._reportBatchCompilerWithDestructor(compiler)
+    let onDestructor = (): void => this._reportBatchCompilerWithDestructor(compiler)
     this._applyCompilerFunction(compiler, elements, compileArgs, onDestructor)
   }
 
@@ -173,11 +173,11 @@ export class HelloFragment {
     reportError(error)
   }
 
-  _select(selector: string | (() => string)): CompiledElement[] {
+  _select(selector: CompilerSelector): ScriptedElement[] {
     return getSubtree(this._root, u.evalOption(selector), { layer: this._layer } )
   }
 
-  _selectOnce(compiler: Compiler): CompiledElement[] {
+  _selectOnce(compiler: Compiler): ScriptedElement[] {
     let matches = this._select(compiler.selector)
 
     if (!compiler.rerun) {
