@@ -141,7 +141,7 @@ export function getOne(root: ParentNode, selector: string): HTMLElement
 // Other values (undefined, null, false, Window, Document, DocumentFragment, ...) are returned unchanged.
 // Distributes over a union, so `ElementOrSelector | false` becomes `HTMLElement | false`.
 export function getOne<T>(value: T): T extends t.ElementOrSelector ? HTMLElement : T
-export function getOne(...args: unknown[]) {
+export function getOne(...args: unknown[]): unknown {
   const value = args.pop()
 
   if (u.isElement(value)) { // Return an element before we run any other expensive checks
@@ -696,6 +696,8 @@ See `up.element.createFromSelector()` for many more examples.
 @stable
 @signature
 */
+export function affix(parent: Element, selector: string, attrs?: u.PlainObject): HTMLElement
+export function affix(parent: Element, position: InsertPosition, selector: string, attrs?: u.PlainObject): HTMLElement
 export function affix(...args: any[]): HTMLElement {
   let [parent, position = 'beforeend', selector, attributes] = u.parseArgs(args, 'val', u.isAdjacentPosition, 'val', 'options')
   const element = createFromSelector(selector, attributes)
@@ -1021,7 +1023,7 @@ function wrapNodes(nodeOrNodes: u.List<Node>): HTMLElement {
 
 export function wrapIfRequired(nodes: u.List<Node>): Element {
   if (nodes.length === 1 && u.isElement(nodes[0])) {
-    return nodes[0] as Element
+    return nodes[0]
   } else {
     // There are multiple cases when we want to create a wrapper:
     // (1) We have multiple nodes, possibly a mix of Element and Text nodes
@@ -1267,7 +1269,7 @@ function tryParseJSON(value: string): any {
   }
 }
 
-export function closestAttr(element: Element, attr: string, readAttrFn: (element: Element, attribute: string) => any = stringAttr): any {
+export function closestAttr(element: Element, attr: string, readAttrFn: t.AttrReader = stringAttr): any {
   let match = element.closest('[' + attr + ']')
   if (match) {
     return readAttrFn(match, attr)
@@ -1351,7 +1353,7 @@ let value = up.element.style(element, ['font-size', 'margin-top'])
 */
 export function computedStyle(element: Element, prop: string): string
 export function computedStyle(element: Element, props: string[]): Record<string, string>
-export function computedStyle(element: Element, props: string | string[]) {
+export function computedStyle(element: Element, props: string | string[]): string | Record<string, string> {
   const style = window.getComputedStyle(element)
   return extractFromStyleObject(style, props)
 }
@@ -1404,7 +1406,7 @@ If a property is not set, it will be returned as an empty string.
 */
 export function inlineStyle(element: HTMLElement, prop: string): string
 export function inlineStyle(element: HTMLElement, props: string[]): Record<string, string>
-export function inlineStyle(element: HTMLElement, props: string | string[]) {
+export function inlineStyle(element: HTMLElement, props: string | string[]): string | Record<string, string> {
   const { style } = element
   return extractFromStyleObject(style, props)
 }
@@ -1635,7 +1637,7 @@ export function leadingElement(nodes: Iterable<Node>): Element | undefined {
 export function removeAttrsFromHTML(html: string, attrs: string[]): string {
   let tagPattern = /<[^<]+>/g
   let attrPattern = new RegExp(`\\s+(${attrs.join('|')})="[^"]*"`, 'g')
-  let cleanTag = (match: string) => match.replace(attrPattern, '')
+  let cleanTag = (match: string): string => match.replace(attrPattern, '')
   html = html.replace(tagPattern, cleanTag)
   return html
 }
@@ -1647,7 +1649,7 @@ export function removeAttrsFromHTML(html: string, attrs: string[]): string {
 // start a second promise for the same definition. A tag name that is never defined
 // (e.g. a custom element that only exists for CSS) leaves one pending promise that
 // references nothing else.
-const awaitedTagNames = new Set()
+const awaitedTagNames = new Set<string>()
 
 /*-
 Emits `up:element:defined` when a custom element in the given root gets defined.

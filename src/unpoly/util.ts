@@ -157,7 +157,7 @@ export function matchURLs(leftURL: string, rightURL: string, options?: t.Normali
 
 // Normalize the URL so it is better suited for path comparison.
 // In particular it strips the hash and trailing slash.
-export function matchableURL(url: string | t.ParsedURL | undefined, options?: t.NormalizeURLOptions): string | undefined {
+export function matchableURL(url?: string | t.ParsedURL, options?: t.NormalizeURLOptions): string | undefined {
   if (!url) return
   return normalizeURL(url, { hash: false, trailingSlash: false, ...options })
 }
@@ -808,7 +808,7 @@ up.util.wrapList(null) // result: []
 export function wrapList<T>(value: T[]): T[]
 export function wrapList<T>(value: t.List<T>): t.List<T>
 export function wrapList<T>(value: T | null | undefined): T[]
-export function wrapList(value: unknown) {
+export function wrapList(value: unknown): t.List<unknown> {
   if (isList(value)) {
     return value
   } else if (isMissing(value)) {
@@ -837,9 +837,10 @@ Returns a shallow copy of the given value.
 @stable
 */
 // A list (like a NodeList or an array) is copied into a new array.
+// A string is a list of characters, too, but `& object` keeps it out of this overload.
 export function copy<T>(value: t.List<T> & object): T[]
 export function copy<T>(value: T): T
-export function copy(value: any) {
+export function copy(value: any): any {
   if (isObject(value) && value[copy.key]) {
     value = value[copy.key]()
   } else if (isList(value)) {
@@ -1857,7 +1858,7 @@ function isEqualList(a: t.List<any>, b: t.List<any>): boolean {
   return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
 }
 
-export function getSimpleTokens(value: any, { json = false, separator = /[,\s]/ }: { json?: boolean, separator?: string | RegExp } = {}) {
+export function getSimpleTokens(value: any, { json = false, separator = /[,\s]/ }: { json?: boolean, separator?: string | RegExp } = {}): any[] {
   if (!isString(value)) {
     return wrapList(value)
   } else if (json && /^\[.*]$/.test(value)) {
@@ -1872,7 +1873,7 @@ function splitSimpleTokenString(value: string, separator: string | RegExp): stri
   return parts.map((s: string) => s.trim()).filter(identity)
 }
 
-export function getComplexTokens(value: any) {
+export function getComplexTokens(value: any): any[] {
   if (!isString(value)) {
     return wrapList(value)
   } else {
@@ -1881,7 +1882,13 @@ export function getComplexTokens(value: any) {
   }
 }
 
-function complexTokenOutlines(string: string) {
+// What complexTokenOutlines() returns.
+interface MaskedTokens {
+  maskedTokens: string[]
+  restore: t.MaskedString['restore']
+}
+
+function complexTokenOutlines(string: string): MaskedTokens {
   let { masked, restore } = expressionOutline(string)
   let maskedTokens = splitSimpleTokenString(masked, ',')
   return { maskedTokens, restore }
@@ -2011,7 +2018,7 @@ function stringifyArg(arg: any, placeholder = '%o', ancestors = new Set()): stri
   }
 
   // Values nested in an array or object print like a value passed directly with %o.
-  let stringifyNested = (value: unknown) => stringifyArg(value, '%o', ancestors)
+  let stringifyNested = (value: unknown): string => stringifyArg(value, '%o', ancestors)
 
   if (isString(arg)) {
     string = arg.trim().replace(/[\n\r\t ]+/g, ' ')
@@ -2109,7 +2116,7 @@ export function safeStringifyJSON(value: any): string {
 }
 
 function escapeHighASCII(string: string): string {
-  let unicodeEscape = (char: string) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, '0')
+  let unicodeEscape = (char: string): string => "\\u" + char.charCodeAt(0).toString(16).padStart(4, '0')
   return string.replace(/[^\x00-\x7F]/g, unicodeEscape)
 }
 
@@ -2199,7 +2206,7 @@ export function scanFunctions(...values: any[]): t.AnyFunction[] {
 export function cleaner(order: 'lifo' | 'fifo' = 'lifo'): t.Cleaner {
   let fns: t.AnyFunction[] = []
 
-  let track = function(values: unknown[], transform: (fn: t.AnyFunction) => unknown) {
+  let track = function(values: unknown[], transform: (fn: t.AnyFunction) => unknown): void {
     values = scanFunctions(values).map(transform)
     fns.push(...scanFunctions(values))
   }
@@ -2239,7 +2246,7 @@ export function maskPattern(str: string, patterns: RegExp[], { keepDelimiters = 
   let maskings: Record<string, string> = {}
   let replaceLayers: { allowRestoreTransform: boolean }[] = []
 
-  let replace = (replacePattern: RegExp, allowRestoreTransform: boolean) => {
+  let replace = (replacePattern: RegExp, allowRestoreTransform: boolean): void => {
     let didReplace = false
 
     str = str.replaceAll(replacePattern, function(match) {
@@ -2343,7 +2350,7 @@ export function parseRelaxedJSON(str: string): any {
   return JSON.parse(masked)
 }
 
-export function parseScalarJSONPairs(str: string) {
+export function parseScalarJSONPairs(str: string): [string, any][] {
   let { maskedTokens, restore } = complexTokenOutlines(str)
 
   return maskedTokens.map((maskedToken) => {
