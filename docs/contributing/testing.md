@@ -9,6 +9,7 @@ spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
 
 <!-- toc -->
 - [Running tests](#running-tests)
+  - [Check types and lint first](#check-types-and-lint-first)
   - [Reading a failure](#reading-a-failure)
   - [Debugging a failure](#debugging-a-failure)
   - [Options and filters](#options-and-filters)
@@ -52,6 +53,22 @@ bin/test --all                               # the whole suite (~9 minutes)
 
 `bin/test` needs a running [dev environment](dev-environment.md) and starts one in
 the background if none is running.
+
+### Check types and lint first
+
+The specs are the slowest check we have. Run the fast ones before them:
+
+```
+bin/typecheck        # type errors (~1 second)
+bin/lint             # Oxlint, api collisions, doc files (~1 second)
+bin/test --spec="…"  # the specs that cover your change (~15 seconds for a single spec)
+```
+
+`bin/typecheck` and `bin/lint` print nothing when all is well. The build doesn't check types,
+so a type error never stops `bin/test`: the specs run, and may even pass. A lint error in `src/`
+does stop it, but a lint error in a spec or in a doc file doesn't. CI runs all three, plus
+`bin/self-test` (~4 seconds). That one tests our tooling, and also checks the order in which
+modules are evaluated, so run it when you change `tooling/`, `bin/` or the imports between modules.
 
 ### Reading a failure
 
@@ -168,6 +185,8 @@ exercises, like `--csp=…` for CSP work or `--migrate` for a new polyfill.
 
 
 ## If you are an agent
+
+**Type-check and lint before you run specs** (see [above](#check-types-and-lint-first)).
 
 **Filter before you run** (see [above](#the-full-test-suite-is-slow)).
 

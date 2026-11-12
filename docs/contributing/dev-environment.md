@@ -3,6 +3,15 @@
 Specs never run against `src/` directly, but against a transpiled build in `dist/`. One
 command boots the build watcher, the spec server and the documentation site.
 
+<!-- toc -->
+- [Installing development dependencies](#installing-development-dependencies)
+- [Running the dev environment](#running-the-dev-environment)
+- [The build](#the-build)
+- [Logs](#logs)
+- [What it runs](#what-it-runs)
+- [Running more than one checkout](#running-more-than-one-checkout)
+<!-- /toc -->
+
 ## Installing development dependencies
 
 To build Unpoly you require Node.js and the npm packages from `package.json` (esbuild,
@@ -44,6 +53,10 @@ If a build has errors — a syntax slip, or a lint error — `bin/test` prints
 them instead of running the specs and exits non-zero, and `bin/dev status` reports
 them too. The watcher itself keeps running, so your next edit can fix things.
 
+A **type error** doesn't break the build, and nothing in the dev environment reports it:
+the specs run against code with type errors. Run `bin/typecheck` for those, together with
+`bin/lint`, before you run specs (see [Testing](testing.md#check-types-and-lint-first)).
+
 ## The build
 
 `bin/build` bundles every entry point in `src/` with [esbuild](https://esbuild.github.io/), which
@@ -51,10 +64,12 @@ also strips TypeScript's types, and minifies with [Terser](https://terser.org/).
 `tooling/build/bundles.mjs` lists every bundle, and which `--config` builds it.
 
 The watcher rebuilds only the bundles that read the file you edited, and lints the file with
-Oxlint if it is in `src/` (see [Linting](code-style.md#linting)), usually within 300 ms. Of the
-one-shot builds, only the production build (`bin/build` without `--config`, which `bin/release`
-runs) lints `src/`, and fails on an error. `bin/lint` lints `src/`, `spec/` and `tooling/`, and
-CI runs it as its own job.
+Oxlint if it is in `src/` (see [Linting](code-style.md#linting)), usually within 300 ms. It
+doesn't check types: esbuild only strips them, and `bin/typecheck` is the only type check (see
+[Type checking](code-style.md#type-checking)). Of the one-shot builds, only the production build
+(`bin/build` without `--config`, which `bin/release` runs) lints `src/`, and fails on an error.
+`bin/lint` lints `src/`, `spec/`, `tooling/` and the doc files, and CI runs it as its own job,
+next to `bin/typecheck`.
 
 ## Logs
 
