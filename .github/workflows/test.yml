@@ -65,6 +65,30 @@ jobs:
       - name: Type-check src
         run: bin/typecheck
 
+  # The tooling's own unit tests (build, lint rules, spec runner, scratch server). They build what
+  # they need in memory and need no dist/. One test launches Chrome, which `npm ci` downloads.
+  self-test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    name: Tooling tests
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+
+      - name: Install Node.js vom .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ steps.nvm.outputs.NVMRC }}"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Test the tooling
+        run: bin/self-test
+
   test:
     runs-on: ubuntu-22.04
     timeout-minutes: 16
