@@ -24,6 +24,10 @@ const STYLE = {
 const BROKEN = {
   ...Object.fromEntries(Object.entries(STYLE).map(([rule, code]) => [rule, { 'module.js': code, 'module.ts': code }])),
   'unpoly/declare-class-fields': { 'module.ts': 'export class Box {\n  left: number\n}\n' },
+  'unpoly/namespace-aliases': {
+    'module.js': "import * as u from './util.js'\nexport default u\n",
+    'module.ts': "import * as u from './util.js'\nexport default u\n",
+  },
   // No import or export, so Oxlint parses it as a script.
   'unpoly/no-octal': { 'script.js': "window.octal = 010 + '\\07'\n" },
 }

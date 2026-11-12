@@ -47,10 +47,80 @@ const noOctal = {
 // alone is the null character, and `\8` and `\9` are no-nonoctal-decimal-escape's.
 const LEGACY_OCTAL_ESCAPE = /(?<!\\)(?:\\\\)*\\(?:[1-7]|0[0-9])/
 
+// A namespace alias (`import * as u`, `import type * as t`) may only be used to reach a member
+// by name: `u.map()` as a value, `u.List<T>` as a type. esbuild then references the member
+// directly. Any other use of the alias (passing it, spreading it, `u[key]`, `typeof u`,
+// `export { u }`) makes esbuild build the module's namespace object, an object with every
+// export of the module (2.4 KB for util). A local binding of the same name (`catch (e)`) would
+// make `e.member` mean something else in its scope, so the alias may not be shadowed either.
+// See docs/contributing/code-organization.md.
+const namespaceAliases = {
+  meta: {
+    type: 'problem',
+    docs: { description: 'Only use a namespace import as `alias.member`, and never shadow it' },
+    schema: [],
+  },
+  create(context) {
+    return {
+      'Program:exit'(program) {
+        let { sourceCode } = context
+        let aliases = new Map()
+        for (let statement of program.body) {
+          if (statement.type !== 'ImportDeclaration') continue
+          for (let specifier of statement.specifiers) {
+            if (specifier.type !== 'ImportNamespaceSpecifier') continue
+            aliases.set(specifier.local.name, sourceCode.getDeclaredVariables(specifier)[0])
+          }
+        }
+        if (!aliases.size) return
+
+        for (let [name, variable] of aliases) {
+          for (let reference of variable.references) {
+            if (!isMemberAccess(reference.identifier)) {
+              context.report({
+                node: reference.identifier,
+                message: `Only use the namespace import \`${name}\` to access a member by name, like \`${name}.member\`. ` +
+                  'Any other use makes esbuild build an object with every export of the module (2.4 KB for util).',
+              })
+            }
+          }
+        }
+
+        // A class declaration has a variable in its own scope too, so we report by name node.
+        let shadowing = new Set()
+        for (let scope of sourceCode.scopeManager.scopes) {
+          for (let variable of scope.variables) {
+            let alias = aliases.get(variable.name)
+            // A variable without definitions is a global from TypeScript's libs, like `event`,
+            // which the import shadows, not the other way round.
+            if (alias && alias !== variable && variable.defs.length) shadowing.add(variable.defs[0].name)
+          }
+        }
+        for (let node of shadowing) {
+          context.report({ node, message: `\`${node.name}\` shadows the namespace import \`${node.name}\`. Choose another name.` })
+        }
+      },
+    }
+  },
+}
+
+function isMemberAccess(identifier) {
+  let { parent } = identifier
+  switch (parent.type) {
+    case 'MemberExpression':
+      return parent.object === identifier && !parent.computed
+    case 'TSQualifiedName':
+      return parent.left === identifier
+    default:
+      return false
+  }
+}
+
 export default {
   meta: { name: 'unpoly' },
   rules: {
     'declare-class-fields': declareClassFields,
+    'namespace-aliases': namespaceAliases,
     'no-octal': noOctal,
   },
 }

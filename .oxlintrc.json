@@ -127,6 +127,7 @@
       "asyncArrow": "always"
     }],
     "unpoly/declare-class-fields": "error",
+    "unpoly/namespace-aliases": "error",
     "unpoly/no-octal": "error"
   },
   "overrides": [

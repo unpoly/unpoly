@@ -287,7 +287,8 @@ export type * from './fragment/types.js'
 class, and single uppercase letters are taken by type parameters. Use an alias only as
 `u.member`, for values and types alike (`u.map()`, `u.List<Element>`). Passing the alias
 itself around makes esbuild build the module's namespace object, which is 2.4 KB for util.
-Don't shadow an alias with a local variable (`catch (error)`, not `catch (e)`).
+Don't shadow an alias with a local variable (`catch (error)`, not `catch (e)`). `bin/lint`
+reports both (`unpoly/namespace-aliases`).
 
 **Other main modules** get one `import { … }` statement each, with types inline as `type X`.
 Import a class from the main module that owns it, not from its file:
