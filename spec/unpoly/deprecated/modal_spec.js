@@ -72,6 +72,16 @@ if (up.migrate.loaded) {
         }
       })
 
+      it('up.modal.contains() accepts a selector', async function() {
+        fixture('.in-root')
+        await up.layer.open({ mode: 'modal', fragment: '<div class="in-overlay"></div>' })
+        up.migrate.warn.mock()
+
+        expect(up.modal.contains('.in-overlay')).toBe(true)
+        expect(up.modal.contains('.in-root')).toBe(false)
+        expect(up.modal.contains('.missing')).toBe(false)
+      })
+
       it('throws for the removed up.modal.flavors and up.modal.flavor()', function() {
         expect(() => up.modal.flavors).toThrowError(/up.modal.flavors has been removed/)
         expect(() => up.modal.flavor('custom', {})).toThrowError(/up.modal.flavors has been removed/)
