@@ -87,10 +87,11 @@ test('namespace-aliases reports any other use of a namespace import', (t) => {
       'let shorthand = { e }',
       'export { e }',
       'export default u',
+      'u?.map([], u.identity)',
       '',
     ].join('\n'),
   })
-  assert.deepEqual(lines, { 'module.ts': [3, 4, 5, 6, 7, 8, 9] })
+  assert.deepEqual(lines, { 'module.ts': [3, 4, 5, 6, 7, 8, 9, 10] })
 })
 
 test('namespace-aliases reports a local binding that shadows a namespace import', (t) => {

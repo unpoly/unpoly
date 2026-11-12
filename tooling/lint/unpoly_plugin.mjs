@@ -108,7 +108,8 @@ function isMemberAccess(identifier) {
   let { parent } = identifier
   switch (parent.type) {
     case 'MemberExpression':
-      return parent.object === identifier && !parent.computed
+      // esbuild builds the namespace object for `u?.map` (but not for `u.map?.()`).
+      return parent.object === identifier && !parent.computed && !parent.optional
     case 'TSQualifiedName':
       return parent.left === identifier
     default:
