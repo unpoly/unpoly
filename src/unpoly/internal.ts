@@ -37,7 +37,7 @@ import {
 import { canPushState, findMetaTags, isHistoryEnabled } from './history.js'
 import {
   compressNestedSteps, defaultNormalizeKeepHTML, expandTargets, insertTemp, parseTargetSteps,
-  provideNodes, resolveOrigin, splitTarget, successKey, toFailKey, tryToTarget,
+  provideNodes, resolveOrigin, splitTarget, toFailKey, toSuccessKey, tryToTarget,
 } from './fragment.js'
 import {
   absolutize, focusedElementWithin, getViewportAround, getViewportSubtree, revealHash, rootHeight,
@@ -181,7 +181,7 @@ export const api = {
     provideNodes,
     resolveOrigin,
     splitTarget,
-    successKey,
+    toSuccessKey,
     tryToTarget,
 
     absolutize,

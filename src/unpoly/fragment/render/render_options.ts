@@ -3,7 +3,7 @@ import {
 } from '../../util.js'
 import { fail } from '../../error.js'
 import { getInputDevice } from '../../event.js'
-import { fragmentConfig, successKey } from '../../fragment.js'
+import { fragmentConfig, toSuccessKey } from '../../fragment.js'
 import { layerStack, normalizeLayerOptions } from '../../layer.js'
 import { callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback } from '../../script.js'
 import type { List, PlainObject, ValueOrFunction } from '../../util.js'
@@ -459,10 +459,10 @@ function assertContentGiven(options: RenderOptions): void {
 function failOverrides(options: RenderOptions): RenderOptions {
   const overrides: PlainObject = {}
   for (let key in options) {
-    // Note that up.fragment.successKey(key) only returns a value
+    // Note that up.fragment.toSuccessKey(key) only returns a value
     // if the given key is prefixed with "fail".
     const value = (options as PlainObject)[key]
-    let unprefixed = successKey(key)
+    let unprefixed = toSuccessKey(key)
     if (unprefixed) {
       overrides[unprefixed] = value
     }

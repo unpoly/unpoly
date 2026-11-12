@@ -2193,16 +2193,16 @@ Returns `undefined` if the given key has no "fail" prefix or infix.
 ## Examples
 
 ```js
-successKey('target')         // result: undefined
-successKey('onFinished')     // result: undefined
-successKey('failTarget')     // result: 'target'
-successKey('onFailFinished') // result: 'onFinished'
+toSuccessKey('target')         // result: undefined
+toSuccessKey('onFinished')     // result: undefined
+toSuccessKey('failTarget')     // result: 'target'
+toSuccessKey('onFailFinished') // result: 'onFinished'
 ```
 
-@function up.fragment.successKey
+@function up.fragment.toSuccessKey
 @internal
 */
-export function successKey(key: string): string | undefined {
+export function toSuccessKey(key: string): string | undefined {
   let match = KEY_PATTERN.exec(key)
   if (match) {
     let [_, prefix, suffix] = match

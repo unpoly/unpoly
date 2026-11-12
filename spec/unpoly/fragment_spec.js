@@ -932,25 +932,25 @@ describe('up.fragment', function() {
       })
     })
 
-    describe('up.internal.successKey', function() {
+    describe('up.internal.toSuccessKey', function() {
 
       it('returns the unprefixed key for the given failVariant', function() {
-        const result = up.internal.successKey('failFoo')
+        const result = up.internal.toSuccessKey('failFoo')
         expect(result).toEqual('foo')
       })
 
       it('returns undefined if the given key is not prefixed with "fail"', function() {
-        const result = up.internal.successKey('foo')
+        const result = up.internal.toSuccessKey('foo')
         expect(result).toBeUndefined()
       })
 
       it('returns undefined for the key "fail"', function() {
-        const result = up.internal.successKey('fail')
+        const result = up.internal.toSuccessKey('fail')
         expect(result).toBeUndefined()
       })
 
       it('prioritizes the prefix "on", converting onFailFoo to onFoo', function() {
-        const result = up.internal.successKey('onFailFoo')
+        const result = up.internal.toSuccessKey('onFailFoo')
         expect(result).toEqual('onFoo')
       })
     })
