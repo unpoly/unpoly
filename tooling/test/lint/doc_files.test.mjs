@@ -3,7 +3,8 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { checkDocFile, checkDocFiles, formatProblems, SRC } from '../../lint/doc_files.mjs'
+import { SRC } from '../../docs/doc_file.mjs'
+import { checkDocFile, checkDocFiles, formatProblems } from '../../lint/doc_files.mjs'
 
 const A = '# up.a()\n\n@function up.a\n@stable'
 const B = '# [up-b]\n\n@selector [up-b]\n@stable'
@@ -27,19 +28,8 @@ test('accepts a blank file', () => {
   assert.deepEqual(checkDocFile('\n\n'), [])
 })
 
-test('accepts the spellings of a title that the site accepts', () => {
-  assert.deepEqual(checkDocFile(docFile(
-    '# up.Request.prototype.abort()\n\n@function up.Request.prototype.abort\n@stable',
-    '# up.Request#abort()\n\n@function up.Request.prototype.abort\n@stable',
-    '# up.Request#abort()\n\n@function up.Request#abort\n@stable',
-    '# up.Request#url\n\n@property up.Request.prototype.url\n@stable',
-    '# new up.Request()\n\n@constructor up.Request\n@stable',
-    '# up.layer\n\n@namespace up.layer\n@menu-title Layers',
-    '# Layers\n\n@namespace up.layer\n@menu-title Layers',
-    '# Installing Unpoly\n\n@page install\n\nInstalling Unpoly\n=================\n\nText.',
-    '# up.render/targeting\n\n@partial up.render/targeting\n\nText.',
-    '# \\[up-b] ##\n\n@selector [up-b]\n@stable',
-  )), [])
+test('accepts any H1, which only the site checks against the directives', () => {
+  assert.deepEqual(checkDocFile(docFile('# up.b()\n\n@selector [up-b]\n@stable', '# up.a()\n\nJust prose.')), [])
 })
 
 test('accepts dashes, H1s and fences that belong to an entry', () => {
@@ -61,16 +51,6 @@ test('reports an entry without an H1', () => {
 test('reports a second H1 in an entry, from a missing separator', () => {
   let problems = checkDocFile(A + '\n\n' + B + '\n')
   assert.deepEqual(problems, [{ line: 6, message: 'A second H1 in one entry. Is a ----- separator missing above it?' }])
-})
-
-test('reports an H1 that does not match the directives', () => {
-  let problems = checkDocFile(docFile(A, '# up.b()\n\n@selector [up-b]\n@stable'))
-  assert.deepEqual(problems, [{ line: 8, message: "H1 '# up.b()' does not match the entry's directives. Expected '# [up-b]'." }])
-  assert.match(checkDocFile('# up.Request()\n\n@function up.Request.prototype.abort\n')[0].message, /Expected '# up.Request.prototype.abort\(\)' or '# up.Request#abort\(\)'/)
-})
-
-test('reports an entry that no directive titles', () => {
-  assert.match(checkDocFile('# up.a()\n\nJust prose.\n')[0].message, /no directive that the site can title it by/)
 })
 
 test('reports an empty entry', () => {
@@ -98,7 +78,7 @@ test('reports a separator before the first entry or after the last', () => {
 })
 
 test('reports every problem, in the order of the lines', () => {
-  assert.deepEqual(lines(docFile('# up.x()\n\n@function up.a\n@stable', A + '\n\n' + B, 'Prose.')), [1, 13, 20])
+  assert.deepEqual(lines(docFile(A + '\n\n' + B, 'Prose.', '# up.c()\n\n```js\nup.c()')), [6, 13, 19])
 })
 
 // ---- files -------------------------------------------------------------------

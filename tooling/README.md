@@ -11,7 +11,7 @@ tooling/
   scratch/      the scratch server — real pages on port 4001 (own README)
   build/        bin/build (esbuild + Terser), the watcher, and the build-freshness protocol
   lint/         our own lint checks: an Oxlint plugin, api collision and doc file checks (bin/lint)
-  docs/         extract_docs.mjs, which moves doc comments from .ts files into sibling .md files
+  docs/         doc_file.mjs, which splits the API doc files into entries
   dev_env.mjs   the dev environment behind bin/dev
   find_spec.mjs spec-title search behind bin/find-spec and bin/test --file
   outline.mjs   Markdown sections with line ranges, behind bin/outline
@@ -310,9 +310,7 @@ suite. What's covered today:
 - `receiver`: canned event arrays → captured output + exit code.
 - `scratch`: page resolution and the name guard, layout wrapping vs. pass-through, EJS locals
   and error positions, plus an Express instance with the build gate and log injected.
-- `extract_docs`: the H1 for each kind of doc comment (by unpoly-site's title rules), the
-  separators between entries, the notes on comments that may not move cleanly, and a round
-  trip from comments to doc file and back.
+- `doc_files`: the structural checks on the API doc files.
 - `dev_env`: the state machine, the start lock, pid-file identity — plus `createLog`: both
   sinks reached, escapes stripped from the file only, one timestamp shared by both lines,
   truncation per session, and `terminal: false` writing the file alone.

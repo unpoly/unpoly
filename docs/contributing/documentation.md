@@ -124,12 +124,14 @@ Replaces elements on the current page with matching elements from a server respo
 
 - There is no separator before the first entry or after the last.
 - The H1 is for you and for Markdown previews: the site titles a page from its directives.
-  But `bin/lint` and the site build check the H1 against that title, so it must match it:
+  But the site build checks the H1 against that title, so it must match it:
   `up.render()` for a function, `up.Request#abort()` for an instance method,
   `new up.Request()` for a constructor, and the plain name for everything else
   (`[up-target]`, `up:fragment:loaded`, `up.fragment.config`, `X-Up-Target`).
 - Inside an entry, headings start at `##`. A second H1 in one entry most likely means a
   missing separator, and `bin/lint` reports it.
+- `bin/lint` checks a doc file's structure: an H1 at the start of each entry, the separators and
+  the code fences. It doesn't check what an H1 says, the site build does.
 - A shorter rule (`---`), a line of dashes under a line of text, and anything in a code
   block belong to the entry.
 - A doc file takes no front matter.
@@ -998,8 +1000,8 @@ Two things to know:
 
 ## Previewing your changes
 
-Previewing is **optional**. Apart from `bin/lint`, which checks a doc file's H1s and
-separators, documentation has no automated tests, and a wrong directive
+Previewing is **optional**. Apart from `bin/lint`, which checks a doc file's
+structure, documentation has no automated tests, and a wrong directive
 is a code-review fix rather than a blocker — so don't stall on it. Write the prose, make
 your best attempt at the syntax, and flag anything you're unsure of in the pull request.
 
