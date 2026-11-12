@@ -673,8 +673,8 @@ export function install(): void {
     // A second watcher would submit the form twice for the same change.
     // We don't warn, since a partial with [up-autosubmit] may be rendered with or without an outer one.
     // An outer [up-autosubmit] of another form doesn't see our fields, e.g. for <input form="other-form">.
-    // A detached element has no parent, and therefore no outer [up-autosubmit].
-    let outer = formOrField.parentElement && closest(formOrField.parentElement, '[up-autosubmit]:not([up-autosubmit=false])')
+    // Compilers only run on attached elements, which have a parent.
+    let outer = closest(formOrField.parentElement!, '[up-autosubmit]:not([up-autosubmit=false])')
     if (outer && getForm(outer) === getForm(formOrField)) return
 
     return autosubmit(formOrField, { logPrefix: '[up-autosubmit]' })
