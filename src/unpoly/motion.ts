@@ -10,64 +10,10 @@ import { Registry } from './framework/registry.js'
 import { printToStandard } from './log.js'
 import { mockable } from './mockable.js'
 import { absolutize, closest, rootHeight, rootWidth } from './viewport.js'
+import type * as t from './motion/types.js'
+export type * from './motion/types.js'
 import { MotionController } from './motion/motion_controller.js'
 export { MotionController }
-
-/**
-The duration and easing of an animation, after applying the defaults from `up.motion.config`.
-*/
-export interface TimingOptions {
-  duration: number
-  easing: string
-}
-
-/**
-A function that animates an element. See `up.animation()`.
-*/
-export type AnimationFn = (element: HTMLElement, options: TimingOptions) => Promise<any>
-
-/**
-A function that animates the transition from an old to a new element. See `up.transition()`.
-*/
-export type TransitionFn = (oldElement: HTMLElement, newElement: HTMLElement, options: TimingOptions) => Promise<any>
-
-/**
-An animation: the name of a registered animation, the CSS properties of the last frame,
-a function, or `false` or `'none'` for no animation.
-*/
-export type AnimationValue = string | e.StyleProps | AnimationFn | false
-
-/**
-A transition: the name of a registered transition, a pair of animations (also as `'old/new'`),
-a function, or `false` or `'none'` for no transition.
-*/
-export type TransitionValue = string | [AnimationValue, AnimationValue] | TransitionFn | false
-
-/**
-Options for `up.animate()`.
-*/
-export interface AnimateOptions {
-  duration?: number
-  easing?: string
-  onFinished?: () => void
-}
-
-/**
-Options for `up.morph()` and `up.motion.swap()`.
-*/
-export interface SwapOptions {
-  duration?: number
-  easing?: string
-  beforeRemove?: () => void
-  afterRemove?: () => void
-}
-
-/**
-The `up:motion:finish` event.
-*/
-export type MotionFinishEvent = Event & {
-  target: Element
-}
 
 /*-
 Features to animate fragment updates.
@@ -83,15 +29,6 @@ Unpoly ships with [predefined transitions](/api/up.morph#named-transitions) and 
 
 
 const motionController = new MotionController('motion')
-
-/**
-The settings in `up.motion.config`, described in its doc comment.
-*/
-export interface MotionConfig {
-  duration: number
-  easing: string
-  enabled: boolean
-}
 
 /*-
 Sets default options for animations and transitions.
@@ -114,13 +51,13 @@ Sets default options for animations and transitions.
   This can be useful in full-stack integration tests.
 @stable
 */
-export const motionConfig = newConfig('up.motion.config', (): MotionConfig => ({
+export const motionConfig = newConfig('up.motion.config', (): t.MotionConfig => ({
   duration: 175,
   easing: 'ease',
   enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches
 }))
 
-export let namedAnimations = new Registry<AnimationFn>('animation', findAnimationFn)
+export let namedAnimations = new Registry<t.AnimationFn>('animation', findAnimationFn)
 
 /*-
 Defines a named animation.
@@ -164,7 +101,7 @@ will take care of all these points.
 @signature
 */
 
-export let namedTransitions = new Registry<TransitionFn>('transition', findTransitionFn)
+export let namedTransitions = new Registry<t.TransitionFn>('transition', findTransitionFn)
 
 /*-
 Defines a named transition that [morphs](/api/up.morph) from one element to another.
@@ -282,7 +219,7 @@ the new animation begins.
 @stable
 */
 // The element may also be a selector.
-export const animate = mockable(async function animate(element: any, animationValue: AnimationValue | undefined, { duration, easing, onFinished }: AnimateOptions = {}): Promise<void> {
+export const animate = mockable(async function animate(element: any, animationValue: t.AnimationValue | undefined, { duration, easing, onFinished }: t.AnimateOptions = {}): Promise<void> {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   element = getSmart(element)
 
@@ -328,7 +265,7 @@ This function will:
 @function effectiveTimingOptions
 @internal
 */
-function effectiveTimingOptions({ duration, easing }: { duration?: number, easing?: string }): TimingOptions {
+function effectiveTimingOptions({ duration, easing }: { duration?: number, easing?: string }): t.TimingOptions {
   return {
     duration: motionConfig.enabled ? (duration ?? motionConfig.duration) : 0,
     easing: easing ?? motionConfig.easing,
@@ -357,7 +294,7 @@ finish event.
   A promise that fulfills when the animation ends.
 @internal
 */
-async function animateNow(element: HTMLElement, lastFrame: e.StyleProps, { duration, easing, finishedFrame }: TimingOptions & { finishedFrame?: e.StyleProps }): Promise<void> {
+async function animateNow(element: HTMLElement, lastFrame: e.StyleProps, { duration, easing, finishedFrame }: t.TimingOptions & { finishedFrame?: e.StyleProps }): Promise<void> {
   // There is also Animation#commitStyles(), but that has two issues:
   // (A) Throws on detached elements
   // (B) Can't set an empty last frame property, e.g. when we're transforming towards { transform: '' }
@@ -478,10 +415,10 @@ You can define additional named transitions using [`up.transition()`](/api/up.tr
   A promise that fulfills when the transition ends.
 @stable
 */
-export function morph(oldElement: e.ElementOrSelector, newElement: e.ElementOrSelector, transitionValue: TransitionValue, options?: SwapOptions): Promise<void>
+export function morph(oldElement: e.ElementOrSelector, newElement: e.ElementOrSelector, transitionValue: t.TransitionValue, options?: t.SwapOptions): Promise<void>
 // The elements are resolved in place. The implementation can't take the resolved type: with
 // strictFunctionTypes, a function's overload must be assignable to it (TS2394).
-export async function morph(oldElement: any, newElement: any, transitionValue: TransitionValue, options?: SwapOptions) {
+export async function morph(oldElement: any, newElement: any, transitionValue: t.TransitionValue, options?: t.SwapOptions) {
   // (A) If passed a selector, up.fragment.get() will prefer a match on the current layer.
   // (B) This also unwraps jQuery collections.
   oldElement = getSmart(oldElement)
@@ -498,7 +435,7 @@ export async function morph(oldElement: any, newElement: any, transitionValue: T
 // (A) Compilers may change newElement's size or position.
 // (B) Compilers capture an [up-keep] identity before a transition adds inline styles.
 // (C) We scroll newElement into position before we start the enter animation.
-export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitionValue: TransitionValue, { duration, easing, beforeRemove, afterRemove }: SwapOptions = {}): () => Promise<any> {
+export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitionValue: t.TransitionValue, { duration, easing, beforeRemove, afterRemove }: t.SwapOptions = {}): () => Promise<any> {
   // Convert the given transition value to a function we can call.
   // This returns undefined for values like `undefined`, `false`, `[null, null]` etc.
   const transitionFn = guardFn(findTransitionFn(transitionValue))
@@ -550,7 +487,7 @@ export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitio
   return () => motionController.startFunction(cluster, async () => play?.())
 }
 
-function findTransitionFn(value: TransitionValue): TransitionFn | undefined {
+function findTransitionFn(value: t.TransitionValue): t.TransitionFn | undefined {
   if (isNone(value)) {
     return undefined
   } else if (u.isFunction(value)) {
@@ -564,7 +501,7 @@ function findTransitionFn(value: TransitionValue): TransitionFn | undefined {
   }
 }
 
-function composeTransitionFn(oldAnimation: AnimationValue, newAnimation: AnimationValue): TransitionFn | undefined {
+function composeTransitionFn(oldAnimation: t.AnimationValue, newAnimation: t.AnimationValue): t.TransitionFn | undefined {
   // A composition of two null-animations is a null-transform
   // and should be skipped. If only one half is a null-animation, we animate the other half.
   if (!isNone(oldAnimation) || !isNone(newAnimation)) {
@@ -577,7 +514,7 @@ function composeTransitionFn(oldAnimation: AnimationValue, newAnimation: Animati
   }
 }
 
-function findAnimationFn(value: AnimationValue | undefined): AnimationFn | undefined {
+function findAnimationFn(value: t.AnimationValue | undefined): t.AnimationFn | undefined {
   if (isNone(value)) {
     return undefined
   } else if (u.isFunction(value)) {
@@ -621,7 +558,7 @@ export function isNone(motionValue: any): boolean {
 
 // From is an opacity or a function that reads it from the element.
 function registerOpacityAnimation(name: string, from: any, to: number): void {
-  namedAnimations.put(name, function(element: HTMLElement, options: TimingOptions) {
+  namedAnimations.put(name, function(element: HTMLElement, options: t.TimingOptions) {
     element.style.opacity = u.evalOption(from, element)
     return animateNow(element, { opacity: to }, options)
   })
@@ -649,13 +586,13 @@ function registerMoveAnimations(direction: string, boxToTransform: (box: DOMRect
   const animationToName = `move-to-${direction}`
   const animationFromName = `move-from-${direction}`
 
-  namedAnimations.put(animationToName, function(element: HTMLElement, options: TimingOptions) {
+  namedAnimations.put(animationToName, function(element: HTMLElement, options: t.TimingOptions) {
     const box = untranslatedBox(element)
     const transform = boxToTransform(box)
     return animateNow(element, transform, options)
   })
 
-  namedAnimations.put(animationFromName, function(element: HTMLElement, options: TimingOptions) {
+  namedAnimations.put(animationFromName, function(element: HTMLElement, options: t.TimingOptions) {
     const box = untranslatedBox(element)
     const transform = boxToTransform(box)
     e.setInlineStyle(element, transform)
