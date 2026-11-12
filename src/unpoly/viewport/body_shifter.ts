@@ -1,5 +1,6 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
+import { type UnbindFn } from '../event.js'
 import { rootScrollbarWidth } from '../viewport.js'
 
 const SHIFT_CLASS = 'up-scrollbar-away'
@@ -31,7 +32,7 @@ export class BodyShifter {
     if (++this._stack === 1) this._shiftNow()
   }
 
-  onAnchoredElementInserted(element: HTMLElement): () => void {
+  onAnchoredElementInserted(element: HTMLElement): UnbindFn {
     this._anchoredElements.add(element)
 
     // If the new element was inserted after we shifted, we must now shift its { right }.

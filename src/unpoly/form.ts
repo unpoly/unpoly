@@ -3,7 +3,7 @@ import * as e from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { fail, muteUncriticalRejection } from './error.js'
-import { build, haltEvent, on } from './event.js'
+import { build, haltEvent, on, type UnbindFn } from './event.js'
 import {
   closest, getAllFragments, getSmart, getSubtree, render, sourceOf, toTarget, trackSelector,
   tryToTarget, type RenderJob, type RenderOptions, type RenderResult,
@@ -1112,7 +1112,7 @@ up.watch('form', { batch: true }, function(diff, options) {
 @stable
 @signature
 */
-export function watch(...args: any[]): () => void {
+export function watch(...args: any[]): UnbindFn {
   let [root, options, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
   root = e.getOne(root) // unwrap jQuery
@@ -1183,7 +1183,7 @@ up.autosubmit(form)
 
 @stable
 */
-export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): () => void {
+export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): UnbindFn {
   const onChange = (_diff: u.PlainObject, renderOptions: RenderOptions): RenderJob => submit(target, renderOptions)
   return watch(target, { logPrefix: 'up.autosubmit()', ...options, batch: true }, onChange)
 }
@@ -1705,7 +1705,7 @@ function getOriginRegion(origin?: Element): Element | null | undefined {
 type TrackFieldsCallback = (field: Element) => unknown
 // The guard is a condition for a field to match, tested for truthiness.
 interface TrackFieldsOptions { guard?: (field: Element) => unknown }
-export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): () => void {
+export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): UnbindFn {
   let [root, { guard }, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
   let selectFn = function(): Element[] {

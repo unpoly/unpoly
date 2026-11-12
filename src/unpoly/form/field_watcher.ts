@@ -1,6 +1,6 @@
 import * as u from '../util.js'
 import { fail, guard } from '../error.js'
-import { on } from '../event.js'
+import { on, type UnbindFn } from '../event.js'
 import { getRegion, isField, readFieldName, trackFields, watchOptions } from '../form.js'
 import { isAlive, type FragmentAbortedEvent } from '../fragment.js'
 import { printUserEvent } from '../log.js'
@@ -31,7 +31,7 @@ export class FieldWatcher {
     this._ensureWatchable()
   }
 
-  start(): () => void {
+  start(): UnbindFn {
     this._scheduledValues = null
     this._processedValues = this._readFieldValues()
     this._currentTimer = null
@@ -61,7 +61,7 @@ export class FieldWatcher {
     }
   }
 
-  _trackFields(): () => void {
+  _trackFields(): UnbindFn {
     if (isField(this._root)) {
       return this._watchField(this._root)
     } else {
@@ -69,12 +69,12 @@ export class FieldWatcher {
     }
   }
 
-  _trackAbort(): () => void {
+  _trackAbort(): UnbindFn {
     let guard = ({ target }: FragmentAbortedEvent): boolean => target.contains(this._region)
     return on('up:fragment:aborted', { guard }, () => this._abort())
   }
 
-  _trackReset(): () => void {
+  _trackReset(): UnbindFn {
     let guard = ({ target }: Event): boolean => target === this._region
     return on('reset', { guard }, (event) => this._onFormReset(event))
   }
@@ -87,7 +87,7 @@ export class FieldWatcher {
     return watchOptions(field, this._options)
   }
 
-  _watchField(field: Element): () => void {
+  _watchField(field: Element): UnbindFn {
     let fieldOptions = this._fieldOptions(field)
     // watchOptions() always sets an { event }.
     let eventType = fieldOptions.event!
