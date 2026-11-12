@@ -4,6 +4,8 @@ import { newConfig } from './util/config.js'
 import { popCookie } from './browser.js'
 import { type Params } from './form.js'
 import { mockable } from './mockable.js'
+import type * as t from './protocol/types.js'
+export type * from './protocol/types.js'
 
 /*-
 HTTP headers that let your server inspect and steer Unpoly's rendering.
@@ -1056,17 +1058,6 @@ See [How cache entries are matched](/learn/optimizing-responses#cache-matching) 
 @stable
 */
 
-/**
-The settings in `up.protocol.config`, described in its doc comment.
-*/
-export interface ProtocolConfig {
-  methodParam: string
-  csrfParam: string | (() => string | undefined)
-  csrfToken: string | (() => string | undefined)
-  csrfHeader: string
-  maxHeaderSize: number
-}
-
 /*-
 Configures strings used in the optional [server protocol](/api/up.protocol).
 
@@ -1135,7 +1126,7 @@ Configures strings used in the optional [server protocol](/api/up.protocol).
 
 @stable
 */
-export const protocolConfig = newConfig('up.protocol.config', (): ProtocolConfig => ({
+export const protocolConfig = newConfig('up.protocol.config', (): t.ProtocolConfig => ({
   methodParam: '_method',
   csrfParam() { return e.metaContent('csrf-param') },
   csrfToken() { return e.metaContent('csrf-token') },

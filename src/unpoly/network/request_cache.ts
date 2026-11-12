@@ -1,18 +1,10 @@
 import * as u from '../util.js'
 import { splitTarget } from '../fragment.js'
-import { networkConfig } from '../network.js'
-import { UpRequest, type RequestCondition, type RequestOptions } from './request.js'
+import {
+  networkConfig, type RequestCondition, type RequestOptions, type TrackOptions,
+} from '../network.js'
+import { UpRequest } from './request.js'
 import { UpResponse } from './response.js'
-
-/**
-Options for `up.cache.track()`.
-@internal
-*/
-export interface TrackOptions {
-  // Track even if the requests would not get the same response.
-  force?: boolean
-  onIncompatible?: (newRequest: UpRequest) => void
-}
 
 // One route per method and URL.
 class Route {

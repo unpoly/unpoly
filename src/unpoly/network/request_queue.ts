@@ -1,19 +1,8 @@
 import * as u from '../util.js'
 import { emit } from '../event.js'
-import { printToStandard, type LogArgs } from '../log.js'
-import { networkConfig } from '../network.js'
-import { UpRequest, type RequestCondition } from './request.js'
-
-/**
-Options for `RequestQueue#abort()`.
-@internal
-*/
-export interface AbortRequestsOptions {
-  except?: UpRequest
-  reason?: string | Error
-  // A message to log before the first request is aborted.
-  logOnce?: LogArgs | null
-}
+import { printToStandard } from '../log.js'
+import { networkConfig, type AbortRequestsOptions, type RequestCondition } from '../network.js'
+import { UpRequest } from './request.js'
 
 export class RequestQueue {
   declare _queuedRequests: UpRequest[]

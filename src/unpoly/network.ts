@@ -2,32 +2,17 @@ import './network.sass'
 import * as u from './util.js'
 import { newConfig } from './util/config.js'
 import { on } from './event.js'
-import { type Layer } from './layer.js'
 import { printToStandard } from './log.js'
 import { mockable } from './mockable.js'
+import type * as t from './network/types.js'
+export type * from './network/types.js'
 import { ProgressBar } from './network/progress_bar.js'
-import { UpRequest, type RequestOptions } from './network/request.js'
-export { UpRequest, type RequestOptions }
+import { UpRequest } from './network/request.js'
+export { UpRequest }
 import { UpRequestCache } from './network/request_cache.js'
 import { RequestQueue } from './network/request_queue.js'
 import { UpResponse } from './network/response.js'
 export { UpResponse }
-
-/**
-The `up:request:load`, `up:request:aborted` and `up:request:offline` events.
-*/
-export type RequestEvent = Event & {
-  request: UpRequest
-  layer: Layer | undefined
-  origin: Element | undefined
-}
-
-/**
-The `up:request:loaded` event.
-*/
-export type RequestLoadedEvent = RequestEvent & {
-  response: UpResponse
-}
 
 /*-
 Features to make HTTP requests and cache their responses.
@@ -40,32 +25,6 @@ Events are emitted throughout the request lifecycle. `up:network:late` fires whe
 
 @namespace up.network
 */
-
-/**
-The settings in `up.network.config`, described in its doc comment.
-*/
-export interface NetworkConfig {
-  concurrency: number | (() => number)
-  wrapMethod: boolean
-  lateDelay: number | false | ((request: UpRequest) => number | false)
-  timeout: number | undefined
-  fail: boolean | ((response: UpResponse) => boolean)
-  cacheEnabled: boolean
-  cacheSize: number
-  cacheExpireAge: number
-  cacheEvictAge: number
-  autoCache: (request: UpRequest) => boolean
-  expireCache: CacheMatcher
-  evictCache: CacheMatcher
-  progressBar: boolean | (() => boolean)
-}
-
-/**
-Which cache entries to expire or evict: `true` for all, `false` for none.
-A function receives the request and may also return a URL pattern.
-@internal
-*/
-export type CacheMatcher = boolean | ((request: UpRequest) => boolean | string)
 
 /*-
 Sets default options for network requests.
@@ -191,7 +150,7 @@ Sets default options for network requests.
 
 @stable
 */
-export const networkConfig = newConfig('up.network.config', (): NetworkConfig => ({
+export const networkConfig = newConfig('up.network.config', (): t.NetworkConfig => ({
   concurrency: 6,
   wrapMethod: true,
   cacheEnabled: true,
@@ -519,15 +478,15 @@ See [Caching](/learn/caching) for more details and examples.
 @stable
 @signature
 */
-export const makeRequest = mockable(function makeRequest(...args: [url: string, options?: Partial<RequestOptions>] | [options: RequestOptions]): UpRequest {
+export const makeRequest = mockable(function makeRequest(...args: [url: string, options?: Partial<t.RequestOptions>] | [options: t.RequestOptions]): UpRequest {
   const options = parseRequestOptions(args)
   const request = new UpRequest(options)
   processRequest(request)
   return request
 })
 
-function parseRequestOptions(args: any[]): RequestOptions {
-  let options = u.parseArgIntoOptions(args, 'url') as RequestOptions
+function parseRequestOptions(args: any[]): t.RequestOptions {
+  let options = u.parseArgIntoOptions(args, 'url') as t.RequestOptions
   up.migrate.handleRequestOptions?.(options)
   return options
 }
@@ -694,7 +653,7 @@ Also see `up.Request#loadPage()`.
   Binary values from file inputs will be removed from the given params.
 @stable
 */
-export const loadPage = mockable(function loadPage(requestsAttrs: RequestOptions): void {
+export const loadPage = mockable(function loadPage(requestsAttrs: t.RequestOptions): void {
   new UpRequest(requestsAttrs).loadPage()
 })
 

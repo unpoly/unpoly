@@ -1,10 +1,13 @@
 import * as u from '../util.js'
 import { Aborted, Offline } from '../error.js'
 import { EventEmitter, type EmitProps, type EmittedEvent } from '../event.js'
-import { Params, type ParamsLike } from '../form.js'
+import { Params } from '../form.js'
 import { getSmart, parseTargetSteps, splitTarget } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
-import { abortRequests, cache, isSafeMethod, networkConfig } from '../network.js'
+import {
+  abortRequests, cache, isSafeMethod, networkConfig, type RequestCondition, type RequestOptions,
+  type RequestState,
+} from '../network.js'
 import {
   acceptLayerFromXHR, contextFromXHR, csrfHeader, csrfParam, csrfToken, dismissLayerFromXHR,
   eventPlansFromXHR, evictCacheFromXHR, expireCacheFromXHR, headerize, locationFromXHR,
@@ -15,62 +18,6 @@ import { FormRenderer } from './form_renderer.js'
 import { type Route } from './request_cache.js'
 import { UpResponse } from './response.js'
 import { XHRRenderer } from './xhr_renderer.js'
-
-/**
-The state of an `up.Request` in its lifecycle.
-*/
-// The request cache sets 'tracking' while a request waits for the response of an earlier, equivalent request.
-export type RequestState = 'new' | 'loading' | 'tracking' | 'loaded' | 'aborted' | 'offline'
-
-/**
-Options for constructing an `up.Request`. See `up.request()` for most of them.
-@internal
-*/
-export interface RequestOptions {
-  url: string
-  method?: string
-  hash?: string
-  params?: ParamsLike
-  target?: string
-  failTarget?: string
-  headers?: Record<string, string>
-  timeout?: number | null
-  background?: boolean
-  cache?: boolean | 'auto'
-  expireCache?: any
-  evictCache?: any
-  // A layer, or a name like 'root' or 'new'.
-  layer?: Layer | string
-  mode?: string
-  context?: u.PlainObject
-  failLayer?: Layer | string
-  failMode?: string
-  failContext?: u.PlainObject
-  origin?: Element
-  originLayer?: Layer
-  originMode?: string
-  builtAt?: Date
-  wrapMethod?: boolean | null
-  contentType?: string
-  payload?: any
-  onLoading?: () => any
-  onSettle?: (responseOrError: UpResponse | Error) => any
-  fail?: u.ValueOrFunction<boolean>
-  abortable?: boolean | null
-  lateDelay?: number | false
-  previews?: any[]
-  // Skip looking up layers, e.g. for a request that is only used as a cache key.
-  basic?: boolean
-  bindLayer?: Layer
-  fragments?: Element[]
-  bindFragments?: Element[]
-}
-
-/**
-What `up.Request.tester()` accepts: a request, a URL pattern, a function or a boolean.
-@internal
-*/
-export type RequestCondition = UpRequest | string | ((request: UpRequest) => boolean) | boolean
 
 /*-
 A normalized description of an [HTTP request](/api/up.request).

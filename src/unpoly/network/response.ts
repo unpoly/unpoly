@@ -1,34 +1,8 @@
 import * as u from '../util.js'
 import { isCritical } from '../error.js'
-import { cache, networkConfig } from '../network.js'
+import { cache, networkConfig, type ResponseOptions } from '../network.js'
 import { CSPInfo } from '../script.js'
 import { type UpRequest } from './request.js'
-
-/**
-Options for constructing an `up.Response`. Most are read from the response headers.
-@internal
-*/
-export interface ResponseOptions {
-  method?: string
-  url?: string
-  text?: string
-  status?: number
-  request?: UpRequest
-  xhr?: XMLHttpRequest
-  target?: string
-  title?: string
-  openLayer?: u.PlainObject
-  acceptLayer?: any
-  dismissLayer?: any
-  eventPlans?: u.PlainObject[]
-  context?: u.PlainObject
-  expireCache?: any
-  evictCache?: any
-  // Custom headers for synthetic responses without { xhr }.
-  headers?: Record<string, string>
-  loadedAt?: Date
-  fail?: u.ValueOrFunction<boolean>
-}
 
 const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
 
