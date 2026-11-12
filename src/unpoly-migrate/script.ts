@@ -1,3 +1,5 @@
+const u = up.util
+
 /*-
 @namespace up.script
 */
@@ -10,8 +12,6 @@ declare module '../unpoly.js' {
     readonly syntax: Up['script']
   }
 }
-
-const u = up.util
 
 up.migrate.renamedNamespace('syntax', 'script')
 
