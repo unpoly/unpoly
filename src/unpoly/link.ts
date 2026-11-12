@@ -1,7 +1,7 @@
 import './link.sass'
 import * as u from './util.js'
 import * as e from './element.js'
-import { OptionsParser, type OptionsParserOptions } from './element/options_parser.js'
+import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { muteUncriticalRejection, UpError } from './error.js'
 import {
@@ -334,12 +334,12 @@ up.follow(link)
 @stable
 @signature
 */
-export const follow = mockable(function(link: e.ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderJob {
+export const follow = mockable(function(link: e.ElementOrSelector, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderJob {
   return render(followOptions(link, options, parserOptions))
 })
 
 // TODO(types): Return RequestOptions once the render options have a type.
-export function parseRequestOptions(link: Element, options?: u.PlainObject, parserOptions?: OptionsParserOptions): any {
+export function parseRequestOptions(link: Element, options?: u.PlainObject, parserOptions?: e.OptionsParserOptions): any {
   options = u.newOptions(options)
   const parser = new OptionsParser(link, options, { ...parserOptions, fail: false })
 
@@ -394,7 +394,7 @@ let options = up.link.followOptions(link)
   An object of [render options](/api/up.render#parameters).
 @stable
 */
-export function followOptions(link: e.ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions {
+export function followOptions(link: e.ElementOrSelector, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderOptions {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   link = effectiveLink(getSmart(link)!)
   options = u.newOptions(options)

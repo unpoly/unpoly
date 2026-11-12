@@ -2,58 +2,8 @@ import './element.sass'
 import * as u from './util.js'
 import { fail } from './error.js'
 import { mockable } from './mockable.js'
-
-/**
-A CSS selector, an element, or a list of elements. See `up.element.get()`.
-*/
-export type ElementOrSelector = string | Element | u.List<Element>
-
-/**
-A function that undoes a temporary change, like the one returned by `up.element.setAttrsTemp()`.
-*/
-export type UndoFunction = () => void
-
-/**
-Inline styles as an object, with property names in kebab-case (`'font-size'`).
-Values are strings, or numbers that get the unit passed to `up.element.setStyle()`.
-Any object with such properties works, e.g. an `up.Rect`.
-*/
-export type StyleProps = Record<string, any>
-
-/**
-Parses the value of an attribute. Returns `undefined` if it cannot parse the value,
-so `up.element.parseAttr()` tries the next parser.
-@internal
-*/
-export type AttrParser = (value: string, attribute: string, element: Element) => any
-
-/**
-One element in a parsed selector's descendant path (`div.foo#bar[baz]` in `main > div.foo#bar[baz]`).
-@internal
-*/
-export interface SelectorSegment {
-  tagName: string | null
-  classNames: string[]
-  id: string | null
-  attributes: Record<string, string>
-}
-
-/**
-What `up.element.parseSelector()` returns.
-@internal
-*/
-export interface ParsedSelector {
-  includePath: SelectorSegment[]
-  includeRaw: string
-  excludeRaw: string | undefined
-}
-
-/**
-The `up:element:defined` event.
-*/
-export type ElementDefinedEvent = Event & {
-  localName: string
-}
+import type * as t from './element/types.js'
+export type * from './element/types.js'
 
 /*-
 Low-level functions to access and change the DOM.
@@ -131,7 +81,7 @@ or its descendants.
 @function contains
 @internal
 */
-export function containsElement(root: Node, selectorOrElement: ElementOrSelector): boolean {
+export function containsElement(root: Node, selectorOrElement: t.ElementOrSelector): boolean {
   const element = getOne(selectorOrElement)
   // We cannot use `root.contains(element)` as <form> elements with an input named "contains"
   // would define `root.contains` to return that input (GH#507).
@@ -186,11 +136,11 @@ up.element.get('.foo') // returns the first matching element
   The obtained `Element`.
 @stable
 */
-export function getOne(selectorOrElement: ElementOrSelector): HTMLElement
+export function getOne(selectorOrElement: t.ElementOrSelector): HTMLElement
 export function getOne(root: ParentNode, selector: string): HTMLElement
 // Other values (undefined, null, false, Window, Document, DocumentFragment, ...) are returned unchanged.
 // Distributes over a union, so `ElementOrSelector | false` becomes `HTMLElement | false`.
-export function getOne<T>(value: T): T extends ElementOrSelector ? HTMLElement : T
+export function getOne<T>(value: T): T extends t.ElementOrSelector ? HTMLElement : T
 export function getOne(...args: unknown[]) {
   const value = args.pop()
 
@@ -332,15 +282,15 @@ export function show(element: HTMLElement): void {
   setVisible(element, true)
 }
 
-export function showTemp(element: HTMLElement): UndoFunction {
+export function showTemp(element: HTMLElement): t.UndoFunction {
   return setVisibleTemp(element, true)
 }
 
-export function hideTemp(element: HTMLElement): UndoFunction {
+export function hideTemp(element: HTMLElement): t.UndoFunction {
   return setVisibleTemp(element, false)
 }
 
-function setVisibleTemp(element: HTMLElement, newVisible: boolean): UndoFunction {
+function setVisibleTemp(element: HTMLElement, newVisible: boolean): t.UndoFunction {
   if (newVisible === isVisible(element)) return u.noop
   setVisible(element, newVisible)
   return () => setVisible(element, !newVisible)
@@ -453,7 +403,7 @@ element.getAttribute('title') // result: "Original"
   A function that restores the attributes to their value before the change.
 @internal
 */
-export function setAttrsTemp(element: Element, attrs: u.PlainObject): UndoFunction {
+export function setAttrsTemp(element: Element, attrs: u.PlainObject): t.UndoFunction {
   let keys = Object.keys(attrs)
   let oldAttrs = pickAttrs(element, keys)
   setAttrs(element, attrs)
@@ -612,7 +562,7 @@ export function createFromSelector(selector: string, attrs: u.PlainObject = {}):
   return rootElement
 }
 
-function makeVariation(element: Element, { id, classNames, attributes }: SelectorSegment): void {
+function makeVariation(element: Element, { id, classNames, attributes }: t.SelectorSegment): void {
   if (id) {
     element.id = id
   }
@@ -652,7 +602,7 @@ up.element.parseSelector('.content > form[action="/"]:not(.bar)')
 @function up.element.parseSelector
 @internal
 */
-export function parseSelector(rawSelector: string): ParsedSelector {
+export function parseSelector(rawSelector: string): t.ParsedSelector {
   let excludeRaw
 
   const {
@@ -670,7 +620,7 @@ export function parseSelector(rawSelector: string): ParsedSelector {
   const includeSegments = includeWithoutAttrs.split(/[ >]+/)
 
   let includePath = includeSegments.map(function(depthSelector) {
-    let parsed: SelectorSegment = {
+    let parsed: t.SelectorSegment = {
       tagName: null,
       classNames: [],
       id: null,
@@ -1123,7 +1073,7 @@ function preservingFocus<T>(fn: () => T): T {
   }
 }
 
-export function parseAttr(element: Element, attribute: string, ...parsers: AttrParser[]): any {
+export function parseAttr(element: Element, attribute: string, ...parsers: t.AttrParser[]): any {
   // The document does not respond to #hasAttribute()
   if (!element.hasAttribute?.(attribute)) return undefined
   let rawValue = element.getAttribute(attribute)!
@@ -1157,7 +1107,7 @@ export function stringAttr(element: Element, attribute: string): string | undefi
   return parseAttr(element, attribute, tryParseString)
 }
 
-let tryParseString: AttrParser = u.identity
+let tryParseString: t.AttrParser = u.identity
 
 /*-
 Returns the value of the given attribute on the given element, cast as a boolean value.
@@ -1355,15 +1305,15 @@ element.className // result: 'foo'
   A function that restores the original class list when called.
 @internal
 */
-export function addClassTemp(element: Element, klass: string): UndoFunction {
+export function addClassTemp(element: Element, klass: string): t.UndoFunction {
   return setClassStateTemp(element, klass, true)
 }
 
-export function removeClassTemp(element: Element, klass: string): UndoFunction {
+export function removeClassTemp(element: Element, klass: string): t.UndoFunction {
   return setClassStateTemp(element, klass, false)
 }
 
-function setClassStateTemp(element: Element, klass: string, targetState: boolean): UndoFunction {
+function setClassStateTemp(element: Element, klass: string, targetState: boolean): t.UndoFunction {
   if (element.classList.contains(klass) === targetState) return u.noop
   element.classList.toggle(klass, targetState)
   return () => element.classList.toggle(klass, !targetState)
@@ -1486,7 +1436,7 @@ up.element.setStyle(element, { color: 'red', 'font-size': '2em' })
   One or more CSS properties with kebab-case keys.
 @stable
 */
-export function setInlineStyle(element: HTMLElement, props: string | StyleProps, unit = ''): void {
+export function setInlineStyle(element: HTMLElement, props: string | t.StyleProps, unit = ''): void {
   if (up.migrate.loaded) props = up.migrate.fixSetStyleProps!(props, unit)
 
   if (u.isString(props)) {
@@ -1528,7 +1478,7 @@ getComputedStyle(element).fontSize // result: '12px'
   A function that restores the original inline styles when called.
 @internal
 */
-export function setStyleTemp(element: HTMLElement, newStyles: StyleProps): UndoFunction {
+export function setStyleTemp(element: HTMLElement, newStyles: t.StyleProps): t.UndoFunction {
   const oldStyles = inlineStyle(element, Object.keys(newStyles))
   setInlineStyle(element, newStyles)
   return () => setInlineStyle(element, oldStyles)

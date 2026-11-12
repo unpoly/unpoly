@@ -1,6 +1,6 @@
 import * as u from './util.js'
 import * as e from './element.js'
-import { OptionsParser, type OptionsParserOptions } from './element/options_parser.js'
+import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { guardFn } from './error.js'
 import { on, type UnbindFn } from './event.js'
@@ -594,7 +594,7 @@ export const swapElementsDirectly = mockable(function(oldElement: Element, newEl
   oldElement.replaceWith(newElement)
 })
 
-export function motionOptions(element: Element, options?: u.PlainObject, parserOptions?: OptionsParserOptions): u.PlainObject {
+export function motionOptions(element: Element, options?: u.PlainObject, parserOptions?: e.OptionsParserOptions): u.PlainObject {
   options = u.newOptions(options)
   let parser = new OptionsParser(element, options, parserOptions)
 

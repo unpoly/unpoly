@@ -2,24 +2,6 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 
 /**
-Returns a selector for a config property. See `up.util.Config#selectorFn()`.
-@internal
-*/
-export type SelectorFn = (condition?: string) => string
-
-/**
-Returns whether an element matches the selector of a config property. See `up.util.Config#matchesFn()`.
-@internal
-*/
-export type MatchesFn = (element: Element, condition?: string) => boolean
-
-/**
-The keys of settings `S` that hold a list of CSS selectors, like `'followSelectors'`.
-@internal
-*/
-export type SelectorKey<S> = { [K in keyof S]-?: S[K] extends string[] ? K : never }[keyof S] & string
-
-/**
 A config object with the settings `S`, like `up.network.config`.
 
 The `Config` class only has the methods. Its constructor copies the settings onto the instance,
@@ -73,26 +55,26 @@ export class Config<S extends object> {
     Object.defineProperties(this, Object.getOwnPropertyDescriptors(this._blueprintFn()))
   }
 
-  matches(element: Element, prop: SelectorKey<S>, condition?: string): boolean {
+  matches(element: Element, prop: u.SelectorKey<S>, condition?: string): boolean {
     return element?.matches(this.selector(prop, condition))
   }
 
-  matchesFn(prop: SelectorKey<S>): MatchesFn {
+  matchesFn(prop: u.SelectorKey<S>): u.MatchesFn {
     return (element, condition) => this.matches(element, prop, condition)
   }
 
-  selector(prop: SelectorKey<S>, condition = ''): string {
+  selector(prop: u.SelectorKey<S>, condition = ''): string {
     // The settings aren't members of the class, see ConfigWith.
     let includes = (this as any)[prop]
     let excludes = (this as any)['no' + u.upperCaseFirst(prop)]
     return e.unionSelector(includes, excludes, condition)
   }
 
-  selectorFn(prop: SelectorKey<S>): SelectorFn {
+  selectorFn(prop: u.SelectorKey<S>): u.SelectorFn {
     return (condition) => this.selector(prop, condition)
   }
 
-  selectorFns(prop: SelectorKey<S>): [SelectorFn, MatchesFn] {
+  selectorFns(prop: u.SelectorKey<S>): [u.SelectorFn, u.MatchesFn] {
     return [this.selectorFn(prop), this.matchesFn(prop)]
   }
 }

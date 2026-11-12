@@ -1,13 +1,4 @@
-/**
-An object with a rectangle's position and size, like a `DOMRect` or an `up.Rect`.
-@internal
-*/
-export interface RectLike {
-  left: number
-  top: number
-  width: number
-  height: number
-}
+import type * as u from '../util.js'
 
 export class Rect {
   declare left: number
@@ -16,7 +7,7 @@ export class Rect {
   declare height: number
 
   // Also takes a DOMRect, whose properties are getters on its prototype.
-  constructor({ left, top, width, height }: RectLike) {
+  constructor({ left, top, width, height }: u.RectLike) {
     this.left = left
     this.top = top
     this.width = width

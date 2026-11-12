@@ -1,7 +1,7 @@
 import * as u from './util.js'
 import * as e from './element.js'
-import { OptionsParser, type OptionsParserOptions } from './element/options_parser.js'
-import { newConfig, type SelectorFn } from './util/config.js'
+import { OptionsParser } from './element/options_parser.js'
+import { newConfig } from './util/config.js'
 import { fail, muteUncriticalRejection } from './error.js'
 import { build, haltEvent, on } from './event.js'
 import {
@@ -278,7 +278,7 @@ export const formConfig = newConfig('up.form.config', (): FormConfig => ({
   arrayParam: (name) => name.endsWith('[]'),
 }))
 
-function findFormElements(root: e.ElementOrSelector, selectorFn: SelectorFn): Field[] {
+function findFormElements(root: e.ElementOrSelector, selectorFn: u.SelectorFn): Field[] {
   root = e.getOne(root) // unwrap jQuery
   let elements = getSubtree(root, selectorFn())
 
@@ -562,10 +562,10 @@ let options = up.form.submitOptions(form)
   The parsed submit options.
 @stable
 */
-export function submitOptions(form: e.ElementOrSelector, options?: RenderOptions, parserOptions?: OptionsParserOptions): RenderOptions
+export function submitOptions(form: e.ElementOrSelector, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderOptions
 // The form is resolved in place. The implementation can't take the resolved type: with
 // strictFunctionTypes, a function's overload must be assignable to it (TS2394).
-export function submitOptions(form: any, options?: RenderOptions, parserOptions?: OptionsParserOptions) {
+export function submitOptions(form: any, options?: RenderOptions, parserOptions?: e.OptionsParserOptions) {
   form = getSmart(form)
   form = getForm(form)
 
@@ -643,7 +643,7 @@ The event type `'input'` is expanded into the events from `up.form.config.watchI
   The [watch options](/learn/watch-options) that `up.watch()` would use for the given field.
 @experimental
 */
-export function watchOptions(field: e.ElementOrSelector, options?: u.PlainObject, parserOptions: OptionsParserOptions = {}): u.PlainObject {
+export function watchOptions(field: e.ElementOrSelector, options?: u.PlainObject, parserOptions: e.OptionsParserOptions = {}): u.PlainObject {
   field = getSmart(field)!
   options = u.newOptions(options)
 
@@ -754,7 +754,7 @@ like `{ event }` or `{ delay }`.
   The [options](/api/up.validate#parameters) that `up.validate()` would use for the given field.
 @experimental
 */
-export function validateOptions(field: e.ElementOrSelector, options?: u.PlainObject, parserOptions: OptionsParserOptions = {}): u.PlainObject {
+export function validateOptions(field: e.ElementOrSelector, options?: u.PlainObject, parserOptions: e.OptionsParserOptions = {}): u.PlainObject {
   field = getSmart(field)!
   options = u.newOptions(options)
   let parser = new OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-validate-' })
@@ -897,7 +897,7 @@ export function setContainerDisabled(container: Element, disabled: boolean): voi
 // This was extracted from submitOptions().
 // Validation needs to submit a form without options intended for the final submission,
 // like [up-scroll], [up-confirm], etc.
-export function destinationOptions(form: Element, options?: u.PlainObject, parserOptions?: OptionsParserOptions): u.PlainObject {
+export function destinationOptions(form: Element, options?: u.PlainObject, parserOptions?: e.OptionsParserOptions): u.PlainObject {
   options = u.newOptions(options)
   form = getForm(form)!
   const parser = new OptionsParser(form, options, parserOptions)
