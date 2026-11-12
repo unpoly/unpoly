@@ -29,7 +29,11 @@ import { SelectorTracker } from './fragment/selector_tracker.js'
 export { SelectorTracker }
 
 // Properties Unpoly sets on fragments.
-type FragmentElement = Element & { upKeepIdentity?: any, upInserted?: boolean }
+interface FragmentElement extends Element {
+  // An opaque value that u.isEqual() compares, see buildKeepIdentity().
+  upKeepIdentity?: unknown
+  upInserted?: boolean
+}
 
 /*-
 The JavaScript API to render, look up and destroy page fragments. Every link, form, overlay or poll that Unpoly handles ends in `up.render()`, and your own code can call it with the same options.
@@ -43,7 +47,7 @@ Lookup functions like `up.fragment.get()` differ from `document.querySelector()`
 @namespace up.fragment
 */
 
-function upTagName(element: Element) {
+function upTagName(element: Element): string | undefined {
   let tagName = element.localName
   if (tagName.startsWith('up-')) {
     return tagName
@@ -383,7 +387,7 @@ its modification time is sent as an `If-Modified-Since` request header. The serv
   Returns `undefined` if the fragment was rendered without a modification time.
 @stable
 */
-export function timeOf(element: Element) {
+export function timeOf(element: Element): Date | undefined {
   let value = e.closestAttr(element, 'up-time')
   if (value && value !== 'false') {
     // We support both Unix timestamps (e.g. "1445412480")
@@ -449,7 +453,7 @@ its ETag is sent as an `If-None-Match` request header. The server may check the 
   Returns `undefined` if the fragment was rendered without an ETag.
 @stable
 */
-export function etagOf(element: Element) {
+export function etagOf(element: Element): string | undefined {
   let value = e.closestAttr(element, 'up-etag')
   if (value && value !== 'false') {
     return value
@@ -1000,7 +1004,7 @@ See [Keeping elements](/learn/keeping-elements) for elaborate examples.
 @signature
 */
 
-export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }: t.KeepPlan & { renderOptions: u.PlainObject }) {
+export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }: t.KeepPlan): t.FragmentKeepEvent {
   const log = ['Keeping fragment %o', oldElement]
   const callback = callbackAttr(oldElement, 'up-on-keep', { expandObject: ['newFragment', 'newData'] })
   return emit(oldElement, 'up:fragment:keep', { log, callback, newFragment, newData, renderOptions })
@@ -1066,7 +1070,7 @@ The keeping can no longer be prevented. For this, use `up:fragment:keep` instead
 @experimental
 */
 
-export function emitFragmentKept({ oldElement, newElement: newFragment, newData }: t.KeepPlan) {
+export function emitFragmentKept({ oldElement, newElement: newFragment, newData }: t.KeepPlan): t.FragmentKeptEvent {
   return emit(oldElement, 'up:fragment:kept', { log: false, newFragment, newData })
 }
 
@@ -1092,7 +1096,7 @@ export function findKeepPlan(options: u.PlainObject): t.KeepPlan | undefined {
   // Early return if no [up-keep] attr or if [up-keep=false]
   if (!oldElementMode) { return }
 
-  let partner
+  let partner: Element | null | undefined
   // Without a target we keep looking for "undefined", which matches nothing.
   let partnerSelector = tryToTarget(oldElement)!
   if (!partnerSelector) {
@@ -1139,7 +1143,7 @@ export function findKeepPlan(options: u.PlainObject): t.KeepPlan | undefined {
   return plan
 }
 
-function keepIdentity(element: FragmentElement, mode: string | boolean | undefined = keepMode(element)) {
+function keepIdentity(element: FragmentElement, mode = keepMode(element)): unknown {
   return element.upKeepIdentity ??= u.copy(buildKeepIdentity(element, mode))
 }
 
@@ -1151,7 +1155,7 @@ export function defaultNormalizeKeepHTML(html: string): string {
   return html
 }
 
-function buildKeepIdentity(element: Element, mode: string | boolean | undefined) {
+function buildKeepIdentity(element: Element, mode?: string | boolean): unknown {
   if (mode === 'same-html') {
     return fragmentConfig.normalizeKeepHTML(element.outerHTML)
   } else if (mode === 'same-data') {
@@ -1167,7 +1171,7 @@ function keepMode(element: Element): string | boolean | undefined {
 }
 
 
-export function emitFragmentInserted(element: FragmentElement, meta: u.PlainObject): Event | undefined {
+export function emitFragmentInserted(element: FragmentElement, meta: u.PlainObject): t.FragmentInsertedEvent | undefined {
   if (element.upInserted) return
   element.upInserted = true
 
@@ -1213,7 +1217,7 @@ up.on('up:fragment:inserted', function(event, fragment) {
 */
 
 
-export function emitFragmentDestroyed(fragment: Element, options: u.PlainObject) {
+export function emitFragmentDestroyed(fragment: Element, options: u.PlainObject): t.FragmentDestroyedEvent {
   const log = options.log ?? ['Destroyed fragment %o', fragment]
   const parent = options.parent || document
   return mutate(() => emit(parent, 'up:fragment:destroyed', { fragment, parent, log }))
@@ -1482,7 +1486,7 @@ export function getFirstDescendant(...args: any[]): any {
   return selector.firstDescendant(root)
 }
 
-function parseGetArgs(args: any[]) {
+function parseGetArgs(args: any[]): any[] {
   return u.parseArgs(args, 'val', 'val', 'options')
 }
 
@@ -1653,6 +1657,7 @@ Will always return `false` if the two elements are on different [layers](/api/up
   Whether the root contains the given element or selector.
 @experimental
 */
+// Takes a selector or an element. viewport's focusedElementWithin() also passes null, which matches nothing.
 export function contains(root: Element, selectorOrElement: any): boolean {
   if (u.isElement(selectorOrElement)) {
     // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
@@ -1763,7 +1768,7 @@ See [errors in user code](/learn/render-lifecycle#errors-in-user-code) for detai
 @stable
 @signature
 */
-export function destroy(...args: any[]): any {
+export function destroy(...args: any[]): Promise<void> | undefined {
   const options = parseTargetAndOptions(args)
   const element = getSmart(options.target, options)
 
@@ -2136,7 +2141,7 @@ function cannotTarget(element: any): never {
 export function tryToTarget(element: Element, options: t.LookupOptions = {}): string | undefined {
   let derivers = options.strong ? fragmentConfig.strongTargetDerivers : fragmentConfig.targetDerivers
 
-  return u.findResult(derivers, function(deriver: t.TargetDeriver) {
+  return u.findResult(derivers, function(deriver) {
     let target = deriveTarget(element, deriver)
 
     if (target && isGoodTarget(target, element, options)) {
@@ -2285,8 +2290,7 @@ up.fragment.toTarget(element)
 @stable
 */
 
-// The pattern is a string with optional * wildcards, a RegExp or a function.
-function matchesPattern(pattern: any, str: string): boolean {
+function matchesPattern(pattern: string | RegExp, str: string): boolean {
   if (u.isRegExp(pattern)) {
     return pattern.test(str)
   } else {
@@ -2295,7 +2299,7 @@ function matchesPattern(pattern: any, str: string): boolean {
 }
 
 function goodClassesForTarget(element: Element): string[] {
-  let isGood = (klass: string) => !u.some(fragmentConfig.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
+  let isGood = (klass: string): boolean => !u.some(fragmentConfig.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
   return u.filterList(element.classList, isGood)
 }
 
@@ -2316,7 +2320,7 @@ export function expandTargets(targets: any, options: t.LookupOptions = {}): stri
   // Copy the list since targets might be a jQuery collection, and this does not support shift or push.
   targets = u.copy(u.wrapList(targets))
 
-  const expanded = []
+  const expanded: string[] = []
 
   while (targets.length) {
     let target = targets.shift()
@@ -2367,15 +2371,15 @@ export function resolveOrigin(target: any, options?: t.LookupOptions): any {
   return (up.migrate.resolveOrigin || modernResolveOrigin)(target, options)
 }
 
-export function splitTarget(target: string | undefined): string[] {
+export function splitTarget(target?: string): string[] {
   return u.getComplexTokens(target)
 }
 
-export function parseTargetSteps(target: string | undefined, options: u.PlainObject = {}): t.RenderStep[] {
+export function parseTargetSteps(target?: string, options: u.PlainObject = {}): t.RenderStep[] {
   let defaultPlacement = options.defaultPlacement || 'swap'
   let defaultMaybe = options.defaultMaybe ?? false
 
-  let steps = []
+  let steps: t.RenderStep[] = []
   let simpleSelectors = splitTarget(target)
 
   for (let selector of simpleSelectors) {
@@ -2735,7 +2739,7 @@ export function matchSelectorMap(element: Element, selectorMap?: u.PlainObject, 
   return hits
 }
 
-export function shouldRevalidate(request: UpRequest, response: UpResponse, options: u.PlainObject = {}): boolean {
+export function shouldRevalidate(request: UpRequest, response: UpResponse, options: RenderOptions = {}): boolean | undefined {
   return request.fromCache && u.evalAutoOption(options.revalidate, fragmentConfig.autoRevalidate, response)
 }
 
@@ -2869,7 +2873,7 @@ export const abortFragment = mockable(function abortFragment(...args: any[]): vo
     reason ||= 'Aborting requests within ' + layers.join(', ')
   }
 
-  let testFnWithAbortable = (request: UpRequest) => request.abortable && testFn(request)
+  let testFnWithAbortable = (request: UpRequest): boolean | null => request.abortable && testFn(request)
   abortRequests(testFnWithAbortable, { ...options, reason })
 
   // We *always* emit an `up:fragment:aborted` event, even when there is no
@@ -3024,7 +3028,7 @@ export function onFirstIntersect(element: Element, callback: () => void, { margi
 
   // This function will be called (1) for the initial intersection check
   // and (2) whenever the intersection state changes.
-  function processIntersectEntries(entries: IntersectionObserverEntry[]) {
+  function processIntersectEntries(entries: IntersectionObserverEntry[]): void {
     for (let entry of entries) {
       if (entry.isIntersecting) {
         disconnect()
@@ -3035,7 +3039,7 @@ export function onFirstIntersect(element: Element, callback: () => void, { margi
   }
 
   let observer = new IntersectionObserver(processIntersectEntries, { rootMargin: `${margin}px` })
-  let disconnect = () => observer.disconnect()
+  let disconnect = (): void => observer.disconnect()
   observer.observe(element)
   registerDestructor(element, disconnect)
 }
@@ -3105,12 +3109,15 @@ let nodes = up.template.clone('#table-placeholder', { rows: 10 })
   You can pass this list to any rendering function, like `up.render()` or `up.Preview#insert()`.
 @stable
 */
+// A node cloned from a template. It remembers the template's data for readData().
+interface TemplateNode extends Node { upTemplateData?: u.PlainObject }
+
 export function cloneTemplate(templateOrSelector: e.ElementOrSelector, data: any = {}, { origin, htmlParser }: t.ProvideNodesOptions = {}): u.List<Node> {
   // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
   let template = getSmart(templateOrSelector, { origin, layer: 'closest' }) || fail('Template not found: %o', templateOrSelector)
   let event = emit(template, 'up:template:clone', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
   // Each node remembers the template variables for readData(), even a text node.
-  let nodes: u.List<Node & { upTemplateData?: any }> = event.nodes ?? defaultTemplateNodes(template, htmlParser)
+  let nodes: u.List<TemplateNode> = event.nodes ?? defaultTemplateNodes(template, htmlParser)
   for (let node of nodes) {
     node.upTemplateData = data
   }
@@ -3251,7 +3258,7 @@ export function insertTemp(...args: any[]): () => void {
   The callback can return another function that is called when that element no longer matches.
 @internal
 */
-export function trackSelector<E extends Element>(selectFn: () => u.List<E>, callback: (element: E) => any): () => void {
+export function trackSelector<E extends Element>(selectFn: () => u.List<E>, callback: (element: E) => any): UnbindFn {
   let tracker = new SelectorTracker(selectFn, callback)
   return tracker.start()
 }

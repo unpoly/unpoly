@@ -2,6 +2,7 @@ import type * as u from '../util.js'
 import { type UpEvent } from '../event.js'
 import { type Layer } from '../layer.js'
 import { type UpRequest, type UpResponse } from '../network.js'
+import { type FragmentHungryEvent } from '../radio.js'
 import { type FocusCapsule } from '../viewport.js'
 import {
   type FragmentProcessorValue, type LayerReference, type RenderOptions, type RenderTarget,
@@ -22,8 +23,8 @@ export interface RenderStep extends ResolvedRenderOptions {
   // Set when the step is matched.
   oldElement?: HTMLElement
   newElement?: HTMLElement
-  // An event to emit when a new element was matched, e.g. up:fragment:hungry.
-  selectEvent?: Event & { newFragment?: Element, renderOptions?: RenderOptions }
+  // Emitted when a new element was matched. Only hungry steps have one.
+  selectEvent?: FragmentHungryEvent
   selectCallback?: (event: Event) => any
   // Set while rendering, see UpdateSteps.
   parentElement?: ParentNode
@@ -65,8 +66,8 @@ An element with [up-keep] that is kept in an update, and the element it would ha
 export interface KeepPlan {
   oldElement: Element
   newElement: Element
-  newData?: any
-  renderOptions?: u.PlainObject
+  newData: u.PlainObject
+  renderOptions: RenderOptions
   // Set when rendering, see UpdateSteps.
   revivers?: any[]
 }

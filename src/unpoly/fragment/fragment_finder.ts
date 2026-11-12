@@ -8,11 +8,11 @@ const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
 export class FragmentFinder {
   declare _options: FragmentFinderOptions
-  declare _origin: Element | undefined
+  declare _origin?: Element
   declare _selector: string
   declare _document: Document | Element
   declare _match: 'region' | 'first'
-  declare _preferOldElements: Element[] | undefined
+  declare _preferOldElements?: Element[]
 
   constructor(options: FragmentFinderOptions) {
     this._options = options
