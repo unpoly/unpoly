@@ -213,5 +213,7 @@ Options passed from JavaScript override all attributes:
 up.validate(field, { disable: true })
 ```
 
+To see the options a field ends up with, pass it to `up.form.watchOptions()`.
+
 
 @page watch-options

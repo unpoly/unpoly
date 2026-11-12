@@ -272,7 +272,7 @@ extendDescribe('up.form', function() {
       })
 
       it('does not submit the form while a HTML5 validation is violated', async function() {
-        const submitSpy = up.submit.mock().and.returnValue(u.unresolvablePromise())
+        const submitSpy = up.submit.mock().and.returnValue(up.internal.unresolvablePromise())
 
         const form = fixture('form[action="/form-target"][up-submit]')
         const input = e.affix(form, 'input[type=text][name=title][required]')
@@ -971,9 +971,12 @@ extendDescribe('up.form', function() {
 
       describe('origin of submission', function() {
 
-        beforeEach(function() { spyOn(up, 'RenderJob').and.callThrough() })
+        let lastOrigin
 
-        const lastOrigin = () => up.RenderJob.calls.mostRecent().args[0].origin
+        beforeEach(function() {
+          lastOrigin = () => undefined
+          up.on('up:form:submit', ({ renderOptions }) => lastOrigin = () => renderOptions.origin)
+        })
 
         it('sets the origin to the clicked submit button', function() {
           const form = fixture('form[action="/path"][up-submit]')

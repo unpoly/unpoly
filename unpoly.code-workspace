@@ -11,5 +11,9 @@
 			"node_modules": true,
 			"tmp": true,
 		}
+	},
+	"extensions": {
+		// Shows lint errors from .oxlintrc.json as you type.
+		"recommendations": ["oxc.oxc-vscode"]
 	}
 }

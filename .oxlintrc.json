@@ -1,0 +1,289 @@
+// The lint config for `bin/lint`, CI, editors, the dev watcher and the production build.
+//
+// Most rules are Oxlint's own, written in Rust. They are those of ESLint's and typescript-eslint's
+// recommended configs, which we used before Oxlint, with our own options. The code style rules
+// from @stylistic and our own rules in tooling/lint/unpoly_plugin.mjs run in JavaScript.
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript"],
+  "jsPlugins": [
+    // Only the @stylistic rules we use, which loads faster than all of @stylistic/eslint-plugin.
+    { "name": "@stylistic", "specifier": "./tooling/lint/stylistic_plugin.mjs" },
+    "./tooling/lint/unpoly_plugin.mjs"
+  ],
+  // Only the rules below, not Oxlint's defaults.
+  "categories": {
+    "correctness": "off"
+  },
+  "options": {
+    // Like ESLint did.
+    "reportUnusedDisableDirectives": "warn"
+  },
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "es2024": true
+  },
+  "globals": {
+    "up": "writable",
+    "jQuery": "readonly",
+    "require": "readonly",
+    "module": "readonly"
+  },
+  "rules": {
+    "constructor-super": "error",
+    "for-direction": "error",
+    "no-array-constructor": "error",
+    "no-async-promise-executor": "error",
+    "no-case-declarations": "error",
+    "no-class-assign": "error",
+    "no-compare-neg-zero": "error",
+    "no-const-assign": "error",
+    "no-constant-binary-expression": "error",
+    "no-constant-condition": ["error", { "checkLoops": "allExceptWhileTrue" }],
+    "no-debugger": "error",
+    "no-delete-var": "error",
+    "no-dupe-class-members": "error",
+    "no-dupe-else-if": "error",
+    "no-dupe-keys": "error",
+    "no-duplicate-case": "error",
+    "no-empty": ["error", { "allowEmptyCatch": false }],
+    "no-empty-character-class": "error",
+    "no-empty-pattern": "error",
+    "no-empty-static-block": "error",
+    "no-ex-assign": "error",
+    "no-extra-boolean-cast": "error",
+    "no-fallthrough": ["error", { "allowEmptyCase": false, "reportUnusedFallthroughComment": false }],
+    "no-func-assign": "error",
+    "no-global-assign": "error",
+    "no-import-assign": "error",
+    "no-invalid-regexp": "error",
+    "no-irregular-whitespace": "error",
+    "no-loss-of-precision": "error",
+    "no-misleading-character-class": "error",
+    "no-new-native-nonconstructor": "error",
+    "no-nonoctal-decimal-escape": "error",
+    "no-obj-calls": "error",
+    "no-prototype-builtins": "error",
+    // ESLint parsed every file as a module, where builtinGlobals has nothing to check (it only
+    // looks at the global scope). Oxlint parses a .js file without import or export as a script,
+    // so builtinGlobals would now report a spec helper that defines a global like `helloFixture`.
+    "no-redeclare": ["error", { "builtinGlobals": false }],
+    "no-regex-spaces": "error",
+    "no-self-assign": ["error", { "props": true }],
+    "no-setter-return": "error",
+    "no-shadow-restricted-names": ["error", { "reportGlobalThis": false }],
+    "no-sparse-arrays": "error",
+    "no-this-before-super": "error",
+    // typescript-eslint's recommended config turns no-undef off for .ts files (see below), since
+    // TypeScript covers it. JavaScript needs it, specs most of all: a spec file extracted from a
+    // larger one is its own module, so anything it used from the enclosing file's scope is now
+    // undefined. It also catches an assignment that forgot its const, which leaks a global that
+    // outlives the fixture it points at.
+    "no-undef": ["error", { "typeof": false }],
+    "no-unexpected-multiline": "error",
+    "no-unreachable": "error",
+    "no-unsafe-finally": "error",
+    "no-unsafe-negation": ["error", { "enforceForOrderingRelations": false }],
+    "no-unsafe-optional-chaining": ["error", { "disallowArithmeticOperators": false }],
+    "no-unused-labels": "error",
+    "no-unused-private-class-members": "error",
+    "no-unused-vars": ["warn", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_",
+      "caughtErrorsIgnorePattern": "^_"
+    }],
+    "no-useless-backreference": "error",
+    "no-useless-catch": "error",
+    "no-useless-escape": "warn",
+    "no-with": "error",
+    "require-yield": "error",
+    "use-isnan": ["error", { "enforceForIndexOf": false, "enforceForSwitchCase": true }],
+    "valid-typeof": ["error", { "requireStringLiterals": false }],
+    // Unlike typescript-eslint's, Oxlint's TypeScript rules only run on TypeScript files. So this
+    // doesn't check a `@ts-ignore` in a .js file (specs, tooling). bin/typecheck doesn't read those either.
+    "typescript/ban-ts-comment": "error",
+    "typescript/no-duplicate-enum-values": "error",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-extra-non-null-assertion": "error",
+    "typescript/no-misused-new": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-non-null-asserted-optional-chain": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-declaration-merging": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/no-wrapper-object-types": "error",
+    "typescript/prefer-as-const": "error",
+    "typescript/prefer-namespace-keyword": "error",
+    "typescript/triple-slash-reference": "error",
+    // Oxlint has no stylistic rules of its own. Its formatter (oxfmt) would reformat everything.
+    "@stylistic/semi": ["error", "never"],
+    "@stylistic/arrow-parens": ["error", "always"],
+    "@stylistic/object-curly-spacing": ["error", "always"],
+    "@stylistic/space-before-function-paren": ["error", {
+      "anonymous": "never",
+      "named": "never",
+      "asyncArrow": "always"
+    }],
+    "unpoly/declare-class-fields": "error",
+    "unpoly/namespace-aliases": "error",
+    "unpoly/no-octal": "error"
+  },
+  "overrides": [
+    {
+      // What typescript-eslint's recommended config did for TypeScript files: TypeScript
+      // itself reports these, so the rules are off. It also turned on no-var, prefer-const,
+      // prefer-rest-params and prefer-spread, which we keep for the TypeScript file types that
+      // we don't use.
+      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+      "rules": {
+        "constructor-super": "off",
+        "no-class-assign": "off",
+        "no-const-assign": "off",
+        "no-dupe-class-members": "off",
+        "no-dupe-keys": "off",
+        "no-func-assign": "off",
+        "no-import-assign": "off",
+        "no-new-native-nonconstructor": "off",
+        "no-obj-calls": "off",
+        "no-redeclare": "off",
+        "no-setter-return": "off",
+        "no-this-before-super": "off",
+        "no-undef": "off",
+        "no-unreachable": "off",
+        "no-unsafe-negation": "off",
+        "no-with": "off",
+        "no-var": "error",
+        "prefer-const": "error",
+        "prefer-rest-params": "error",
+        "prefer-spread": "error"
+      }
+    },
+    {
+      // Unpoly's code style is the same in JavaScript and TypeScript.
+      "files": ["**/*.ts"],
+      "rules": {
+        "no-var": "off",
+        "prefer-const": "off",
+        "prefer-rest-params": "off",
+        "prefer-spread": "off",
+        // We allow `any` while converting (strictness is loose for now).
+        "typescript/no-explicit-any": "off"
+      }
+    },
+    {
+      // The TypeScript conventions in docs/contributing/code-style.md, as a ratchet: they apply to
+      // all of src/ except the modules in `excludeFiles`, which don't follow them yet. A step of
+      // the migration that converts a module removes it from the list. Once the list is empty,
+      // the rules can move to the override for **/*.ts above. New files are checked by default.
+      // Inline callbacks and functions whose type comes from context keep inferred return types.
+      "files": ["src/**/*.ts"],
+      "excludeFiles": [
+        "src/unpoly-migrate/fragment.ts",
+        "src/unpoly-migrate/migrate.ts",
+        "src/unpoly-migrate/network.ts",
+        "src/unpoly-migrate/protocol.ts",
+        "src/unpoly/element.ts",
+        "src/unpoly/event.ts",
+        "src/unpoly/form.ts",
+        "src/unpoly/form/field_watcher.ts",
+        "src/unpoly/form/form_validator.ts",
+        "src/unpoly/form/params.ts",
+        "src/unpoly/form/switcher.ts",
+        "src/unpoly/fragment.ts",
+        "src/unpoly/fragment/render/change/change.ts",
+        "src/unpoly/fragment/render/change/change_from_content.ts",
+        "src/unpoly/fragment/render/change/change_from_url.ts",
+        "src/unpoly/fragment/render/change/open_layer.ts",
+        "src/unpoly/fragment/render/change/update_layer.ts",
+        "src/unpoly/fragment/render/render_job.ts",
+        "src/unpoly/fragment/render/render_options.ts",
+        "src/unpoly/fragment/render/response_doc.ts",
+        "src/unpoly/framework.ts",
+        "src/unpoly/layer/base.ts",
+        "src/unpoly/layer/modes/overlay.ts",
+        "src/unpoly/link.ts",
+        "src/unpoly/motion.ts",
+        "src/unpoly/network.ts",
+        "src/unpoly/network/request.ts",
+        "src/unpoly/network/request_cache.ts",
+        "src/unpoly/network/request_queue.ts",
+        "src/unpoly/protocol.ts",
+        "src/unpoly/rails.ts",
+        "src/unpoly/script.ts",
+        "src/unpoly/script/hello_fragment.ts",
+        "src/unpoly/status.ts",
+        "src/unpoly/status/preview.ts",
+        "src/unpoly/util.ts",
+        "src/unpoly/viewport.ts"
+      ],
+      "rules": {
+        "typescript/explicit-function-return-type": ["error", {
+          "allowExpressions": true,
+          "allowTypedFunctionExpressions": true,
+          "allowHigherOrderFunctions": true
+        }],
+        "typescript/consistent-type-definitions": ["error", "interface"]
+      }
+    },
+    {
+      "files": ["spec/**/*.js"],
+      "globals": {
+        "jasmine": "writable",
+        "describe": "readonly",
+        "fdescribe": "readonly",
+        "xdescribe": "readonly",
+        "it": "readonly",
+        "fit": "readonly",
+        "xit": "readonly",
+        "expect": "readonly",
+        "expectAsync": "readonly",
+        "beforeEach": "readonly",
+        "beforeAll": "readonly",
+        "afterEach": "readonly",
+        "spyOn": "readonly",
+        "spyOnProperty": "readonly",
+        "pending": "readonly",
+        "fixture": "readonly",
+        "helloFixture": "readonly",
+        "fixtureStyle": "readonly",
+        "fixtureStyleSheet": "readonly",
+        "htmlFixture": "readonly",
+        "htmlFixtureList": "readonly",
+        "$fixture": "readonly",
+        "wait": "readonly",
+        "registerFixture": "readonly",
+        "fileList": "readonly",
+        "makeLayers": "readonly",
+        "Trigger": "readonly",
+        "promiseState": "readonly",
+        "countQueryResults": "readonly",
+        "lateFormAssociatedElement": "readonly",
+        "allowGlobalErrors": "readonly",
+        "describeFallback": "readonly",
+        "extendDescribe": "readonly",
+        "AgentDetector": "readonly",
+        "specs": "writable"
+      },
+      "rules": {
+        "no-unused-vars": "off"
+      }
+    },
+    {
+      "files": ["bin/**/*.{js,mjs}", "tooling/**/*.{js,mjs}"],
+      "globals": {
+        "process": "readonly"
+      }
+    },
+    {
+      // The one part of the runner that ships to the browser: a Jasmine reporter that
+      // posts to the terminal. See tooling/README.md.
+      "files": ["tooling/runner/browser/poster.js"],
+      "globals": {
+        "jasmine": "readonly",
+        "specs": "readonly"
+      }
+    }
+  ]
+}

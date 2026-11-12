@@ -411,6 +411,29 @@ extendDescribe('up.form', function() {
         })
       })
 
+      describe('with a blank [up-validate] value', function() {
+        for (let value of [' ', ',']) {
+          it(`validates an enclosing form group with [up-validate="${value}"] (bugfix)`, async function() {
+            const [form, group, emailInput] = htmlFixtureList(`
+              <form action="/users">
+                <div up-form-group>
+                  <input type="text" name="email" up-validate="${value}">
+                </div>
+              </form>
+            `)
+            up.hello(form)
+
+            emailInput.value = 'foo@bar.com'
+            Trigger.change(emailInput)
+
+            await wait()
+
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+            expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="email"])')
+          })
+        }
+      })
+
       describe('with [up-validate=false]', function() {
         it('does not validate when the field is changed', async function() {
           const form = htmlFixture(`
@@ -552,7 +575,7 @@ extendDescribe('up.form', function() {
       })
 
       it("does not use form attributes intended for submission results, like [up-scroll] or [up-confirm] (bugfix)", async function() {
-        const renderSpy = spyOn(up, 'render').and.returnValue(u.unresolvablePromise())
+        const renderSpy = up.render.mock().and.returnValue(up.internal.unresolvablePromise())
         const form = fixture('form[up-submit][action="/path"]')
         form.setAttribute('up-scroll', 'main')
         form.setAttribute('up-confirm', 'really submit?')

@@ -71,6 +71,33 @@ describe('up.form', function() {
           expect(up.form.get(overlayInput)).toBe(overlayForm)
         })
 
+        it('does not return a form with the [form] ID from another layer', function() {
+          makeLayers([
+            { fragment: '<form id="my-form"></form>' },
+            { fragment: '<div id="container"><input id="my-field" form="my-form"></div>' },
+          ])
+
+          let rootForm = up.fragment.get('#my-form', { layer: 'root' })
+          let overlayInput = up.fragment.get('#my-field', { layer: 'overlay' })
+          expect(rootForm).toBeAttached()
+          expect(overlayInput).toBeAttached()
+          // The browser's own lookup finds the form in the root layer.
+          expect(overlayInput.form).toBe(rootForm)
+
+          expect(up.form.get(overlayInput)).toBeMissing()
+        })
+
+        it('returns the associated form for a submit button outside the form', function() {
+          const [form, input, button] = htmlFixtureList(`
+            <form id="search-form">
+              <input name="query">
+            </form>
+            <button type="submit" form="search-form">Search</button>
+          `)
+
+          expect(up.form.get(button)).toBe(form)
+        })
+
         it('prefers the form from a [form] attribute over an ancestor form, like the browser', function() {
           const [formA, input, formB] = htmlFixtureList(`
             <form id="form-a">
@@ -368,14 +395,14 @@ describe('up.form', function() {
       })
     })
 
-    describe('up.form.groupSolution()', function() {
+    describe('up.internal.findGroupSolution()', function() {
 
       it('returns a solution for the form group closest to the given element, distinguishing the selector from other form groups by refering to the given element with :has()', function() {
         const form = fixture('form')
         const group = e.affix(form, '[up-form-group]')
         const input = e.affix(group, 'input[name=foo]')
 
-        const groupSolution = up.form.groupSolution(input, { targetable: true })
+        const groupSolution = up.internal.findGroupSolution(input, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: group,
@@ -388,7 +415,7 @@ describe('up.form', function() {
         const container = e.affix(form, 'div')
         const input = e.affix(container, 'input[name=foo]')
 
-        const groupSolution = up.form.groupSolution(input, { targetable: true })
+        const groupSolution = up.internal.findGroupSolution(input, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: form,
@@ -401,7 +428,7 @@ describe('up.form', function() {
         const container = e.affix(form, '[up-form-group]')
         const input = e.affix(container, 'input')
 
-        const groupSolution = up.form.groupSolution(input, { targetable: true })
+        const groupSolution = up.internal.findGroupSolution(input, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: form,
@@ -414,7 +441,7 @@ describe('up.form', function() {
         const container = e.affix(form, '[up-form-group]')
         const input = e.affix(container, 'input')
 
-        const groupSolution = up.form.groupSolution(input, { targetable: false })
+        const groupSolution = up.internal.findGroupSolution(input, { targetable: false })
 
         expect(groupSolution.element).toBe(container)
         expect(groupSolution.target).toBeFalsy()
@@ -425,7 +452,7 @@ describe('up.form', function() {
         const container = e.affix(form, '[up-form-group].form-group')
         const input = e.affix(container, 'input[name=foo]')
 
-        const groupSolution = up.form.groupSolution(input, { targetable: true })
+        const groupSolution = up.internal.findGroupSolution(input, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: container,
@@ -437,7 +464,7 @@ describe('up.form', function() {
         const form = fixture('form')
         const group = e.affix(form, '#group[up-form-group]')
 
-        const groupSolution = up.form.groupSolution(group, { targetable: true })
+        const groupSolution = up.internal.findGroupSolution(group, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: group,
@@ -450,7 +477,7 @@ describe('up.form', function() {
         const group = e.affix(form, '#group[up-form-group]')
         const input = e.affix(group, 'input[name=foo]')
 
-        const groupSolution = up.form.groupSolution(input, { targetable: true })
+        const groupSolution = up.internal.findGroupSolution(input, { targetable: true })
 
         expect(groupSolution).toEqual(jasmine.objectContaining({
           element: group,
@@ -459,25 +486,25 @@ describe('up.form', function() {
       })
     })
 
-    describe('up.form.groupSelectors()', function() {
+    describe('up.internal.getGroupSelectors()', function() {
 
       it('returns the configured up.form.config.groupSelectors', function() {
         up.form.config.groupSelectors = ['.form-group']
 
-        expect(up.form.groupSelectors()).toEqual(['.form-group'])
+        expect(up.internal.getGroupSelectors()).toEqual(['.form-group'])
       })
 
       if (up.migrate.loaded) {
         it('removes a :has(&) suffix from custom user selectors', function() {
           up.form.config.groupSelectors = ['.form-group:has(&)']
 
-          expect(up.form.groupSelectors()).toEqual(['.form-group'])
+          expect(up.internal.getGroupSelectors()).toEqual(['.form-group'])
         })
 
         it('removes a :has(:origin) suffix from custom user selectors', function() {
           up.form.config.groupSelectors = ['.form-group:has(:origin)']
 
-          expect(up.form.groupSelectors()).toEqual(['.form-group'])
+          expect(up.internal.getGroupSelectors()).toEqual(['.form-group'])
         })
       }
     })
@@ -567,6 +594,45 @@ describe('up.form', function() {
     }
 
     describe('up.form.watchOptions()', function() {
+
+      it('returns the options that up.watch() would use for a field without attributes', function() {
+        up.form.config.watchInputEvents = ['input', 'custom:event']
+        up.form.config.watchInputDelay = 55
+        const [form, field] = htmlFixtureList(`
+          <form>
+            <input name="foo">
+          </form>
+        `)
+
+        const options = up.form.watchOptions(field)
+
+        expect(options).toEqual(jasmine.objectContaining({ event: ['input', 'custom:event'], delay: 55, origin: field }))
+      })
+
+      it('accepts a selector for the field', function() {
+        htmlFixtureList(`
+          <form>
+            <input name="foo" up-watch-delay="300">
+          </form>
+        `)
+
+        const options = up.form.watchOptions('input[name=foo]')
+
+        expect(options.delay).toBe(300)
+      })
+
+      it('does not change the given options object', function() {
+        const [form, field] = htmlFixtureList(`
+          <form>
+            <input name="foo" up-watch-delay="300">
+          </form>
+        `)
+        const givenOptions = { feedback: false }
+
+        up.form.watchOptions(field, givenOptions)
+
+        expect(givenOptions).toEqual({ feedback: false })
+      })
 
       it('parses the closest [up-watch-event] attribute into an { event } option', function() {
         const form = fixture('form')
@@ -754,6 +820,44 @@ describe('up.form', function() {
         )
       })
 
+      it('returns the options that up.validate() would use for a field without attributes', function() {
+        up.form.config.watchChangeEvents = ['change', 'blur']
+        up.form.config.validateBatch = false
+        const [form, field] = htmlFixtureList(`
+          <form>
+            <input name="foo" up-validate>
+          </form>
+        `)
+
+        const options = up.form.validateOptions(field)
+
+        expect(options).toEqual(jasmine.objectContaining({ event: ['change', 'blur'], batch: false, origin: field }))
+      })
+
+      it('overrides all attributes with the given options hash', function() {
+        const [form, field] = htmlFixtureList(`
+          <form up-validate-url="/attr-path" up-watch-event="input">
+            <input name="foo" up-validate>
+          </form>
+        `)
+
+        const options = up.form.validateOptions(field, { url: '/option-path', event: 'custom:event' })
+
+        expect(options).toEqual(jasmine.objectContaining({ url: '/option-path', event: 'custom:event' }))
+      })
+
+      it('accepts a selector for the field', function() {
+        htmlFixtureList(`
+          <form>
+            <input name="foo" up-validate up-validate-url="/validate">
+          </form>
+        `)
+
+        const options = up.form.validateOptions('input[name=foo]')
+
+        expect(options.url).toBe('/validate')
+      })
+
     })
 
     require('./form_submit_fn_spec')
@@ -783,10 +887,10 @@ describe('up.form', function() {
       })
 
       it('does not render', function() {
-        spyOn(up, 'render')
+        const renderSpy = up.render.mock()
         const form = fixture('form[action="/path"][up-method="PUT"][up-layer="new"]')
         const options = up.form.submitOptions(form)
-        expect(up.render).not.toHaveBeenCalled()
+        expect(renderSpy).not.toHaveBeenCalled()
       })
 
       it('parses the form method from a [data-method] attribute so we can replace the Rails UJS adapter with Unpoly', function() {
@@ -1252,7 +1356,7 @@ describe('up.form', function() {
 
     })
 
-    describe('up.form.submitButtonOverrides()', function() {
+    describe('up.internal.submitButtonOverrides()', function() {
 
       it('returns an empty object for a plain button (as to not accidentally override options parses from the form)', function() {
         let [form, submitButton] = htmlFixtureList(`
@@ -1261,7 +1365,7 @@ describe('up.form', function() {
           </form>
         `)
 
-        expect(up.form.submitButtonOverrides(submitButton)).toEqual({})
+        expect(up.internal.submitButtonOverrides(submitButton)).toEqual({})
       })
 
       it('allows to override targets', function() {
@@ -1271,7 +1375,7 @@ describe('up.form', function() {
           </form>
         `)
 
-        expect(up.form.submitButtonOverrides(submitButton)).toEqual({
+        expect(up.internal.submitButtonOverrides(submitButton)).toEqual({
           target: '#button-target',
           failTarget: '#button-fail-target',
         })
@@ -1284,7 +1388,7 @@ describe('up.form', function() {
           </form>
         `)
 
-        expect(up.form.submitButtonOverrides(submitButton)).toEqual({
+        expect(up.internal.submitButtonOverrides(submitButton)).toEqual({
           confirm: 'button confirmation',
         })
       })
@@ -1296,7 +1400,7 @@ describe('up.form', function() {
           </form>
         `)
 
-        expect(up.form.submitButtonOverrides(submitButton)).toEqual({
+        expect(up.internal.submitButtonOverrides(submitButton)).toEqual({
           layer: 'new',
           mode: 'drawer',
           size: 'small',
@@ -1375,7 +1479,7 @@ describe('up.form', function() {
 
     require('./form_validate_fn_spec')
 
-    describe('up.form.disableTemp()', function() {
+    describe('up.internal.disableContainerTemp()', function() {
 
       describe('custom form fields', function() {
 
@@ -1388,7 +1492,7 @@ describe('up.form', function() {
             </form>
           `)
 
-          up.form.disableTemp(form)
+          up.internal.disableContainerTemp(form)
 
           // The element's own property is unreflected, so an attribute here could only have
           // come from us — and writing both spellings is what we must not do.
@@ -1407,7 +1511,7 @@ describe('up.form', function() {
             </form>
           `)
 
-          const reenable = up.form.disableTemp(form)
+          const reenable = up.internal.disableContainerTemp(form)
           expect(field.hasAttribute('disabled')).toBe(true)
 
           // The definition arrives and the element gains the property it never had. Its own
@@ -1423,7 +1527,7 @@ describe('up.form', function() {
 
           // We must remove the attribute we set, rather than write the property that appeared.
           expect(field.hasAttribute('disabled')).toBe(false)
-          expect(up.form.readFieldDisabled(field)).toBe(false)
+          expect(up.internal.readFieldDisabled(field)).toBe(false)
         })
 
         it('does not create a { disabled } property on an element that has none', function() {
@@ -1435,7 +1539,7 @@ describe('up.form', function() {
             </form>
           `)
 
-          up.form.disableTemp(form)()
+          up.internal.disableContainerTemp(form)()
 
           expect('disabled' in field).toBe(false)
 
@@ -1453,7 +1557,7 @@ describe('up.form', function() {
           `)
           expect(field.matches('[disabled]')).toBe(false)
 
-          const reenable = up.form.disableTemp(form)
+          const reenable = up.internal.disableContainerTemp(form)
           expect(field.matches('[disabled]')).toBe(true)
 
           reenable()
@@ -1467,7 +1571,7 @@ describe('up.form', function() {
             </form>
           `)
 
-          const reenable = up.form.disableTemp(form)
+          const reenable = up.internal.disableContainerTemp(form)
           reenable()
 
           // We never enable a control that we did not disable.
@@ -1482,7 +1586,7 @@ describe('up.form', function() {
           `)
           expect(field).not.toBeDisabled()
 
-          const reenable = up.form.disableTemp(form)
+          const reenable = up.internal.disableContainerTemp(form)
           expect(field).toBeDisabled()
 
           reenable()
@@ -1499,7 +1603,7 @@ describe('up.form', function() {
           `)
           expect(field).not.toBeDisabled()
 
-          up.form.disableTemp(form)
+          up.internal.disableContainerTemp(form)
 
           expect(field).toBeDisabled()
         })
@@ -1513,7 +1617,7 @@ describe('up.form', function() {
             </form>
           `)
 
-          const reenable = up.form.disableTemp(form)
+          const reenable = up.internal.disableContainerTemp(form)
           expect(field).toBeDisabled()
 
           reenable()
@@ -1528,7 +1632,7 @@ describe('up.form', function() {
             </form>
           `)
 
-          up.form.disableTemp(form)
+          up.internal.disableContainerTemp(form)
 
           expect(field).not.toBeDisabled()
         })
@@ -1543,7 +1647,7 @@ describe('up.form', function() {
         expect(textField).not.toBeDisabled()
         expect(selectField).not.toBeDisabled()
 
-        up.form.disableTemp(form)
+        up.internal.disableContainerTemp(form)
 
         expect(textField).toBeDisabled()
         expect(selectField).toBeDisabled()
@@ -1556,7 +1660,7 @@ describe('up.form', function() {
         const fieldInContainer1 = e.affix(container1, 'input[name=email][type=text]')
         const fieldInContainer2 = e.affix(container2, 'input[name=password][type=text]')
 
-        up.form.disableTemp(container2)
+        up.internal.disableContainerTemp(container2)
 
         expect(fieldInContainer1).not.toBeDisabled()
         expect(fieldInContainer2).toBeDisabled()
@@ -1569,7 +1673,7 @@ describe('up.form', function() {
         expect(submitInput).not.toBeDisabled()
         expect(selectButton).not.toBeDisabled()
 
-        up.form.disableTemp(form)
+        up.internal.disableContainerTemp(form)
 
         expect(submitInput).toBeDisabled()
         expect(selectButton).toBeDisabled()
@@ -1580,7 +1684,7 @@ describe('up.form', function() {
         const field = e.affix(form, 'input[name=email][type=text]')
         expect(field).not.toBeDisabled()
 
-        const reenable = up.form.disableTemp(form)
+        const reenable = up.internal.disableContainerTemp(form)
 
         expect(field).toBeDisabled()
 
@@ -1594,7 +1698,7 @@ describe('up.form', function() {
         const field = e.affix(form, 'input[name=email][type=text][disabled]')
         expect(field).toBeDisabled()
 
-        const reenable = up.form.disableTemp(form)
+        const reenable = up.internal.disableContainerTemp(form)
 
         expect(field).toBeDisabled()
 
@@ -1611,7 +1715,7 @@ describe('up.form', function() {
           field.focus()
           expect(field).toBeFocused()
 
-          up.form.disableTemp(form)
+          up.internal.disableContainerTemp(form)
           await wait(10)
 
           expect(form).toBeFocused()
@@ -1624,7 +1728,7 @@ describe('up.form', function() {
           field.focus()
           expect(field).toBeFocused()
 
-          up.form.disableTemp(field)
+          up.internal.disableContainerTemp(field)
           await wait(10)
 
           expect(group).toBeFocused()
@@ -1637,7 +1741,7 @@ describe('up.form', function() {
           field.focus()
           expect(field).toBeFocused()
 
-          up.form.disableTemp(form)
+          up.internal.disableContainerTemp(form)
           await wait(10)
 
           expect(group).toBeFocused()
@@ -1649,7 +1753,7 @@ describe('up.form', function() {
           fieldOutsideForm.focus()
           expect(fieldOutsideForm).toBeFocused()
 
-          up.form.disableTemp(form)
+          up.internal.disableContainerTemp(form)
           await wait(10)
 
           expect(fieldOutsideForm).toBeFocused()
@@ -1663,7 +1767,7 @@ describe('up.form', function() {
           const button = e.affix(form, 'button[type=button]', { text: 'label' })
           expect(button).not.toBeDisabled()
 
-          up.form.disableTemp(form)
+          up.internal.disableContainerTemp(form)
 
           expect(button).toBeDisabled()
         })
@@ -1673,7 +1777,7 @@ describe('up.form', function() {
           const button = e.affix(form, 'input[type=button]', { value: 'label' })
           expect(button).not.toBeDisabled()
 
-          up.form.disableTemp(form)
+          up.internal.disableContainerTemp(form)
 
           expect(button).toBeDisabled()
         })
@@ -1898,7 +2002,7 @@ describe('up.form', function() {
           </form>
         `)
         htmlFixture('<div id="target"></div>')
-        const submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
+        const submitSpy = up.form.submit.mock().and.returnValue(up.internal.unresolvablePromise())
         up.hello(form)
 
         field.value = 'new-value'
@@ -1916,7 +2020,7 @@ describe('up.form', function() {
           </form>
         `)
         htmlFixture('<div id="target"></div>')
-        const submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
+        const submitSpy = up.form.submit.mock().and.returnValue(up.internal.unresolvablePromise())
         up.hello(form)
 
         field.value = 'new-value'
@@ -1948,6 +2052,16 @@ describe('up.form', function() {
         expect(jasmine.lastRequest().data()).toMatchParams({ 'input-name': 'new-value' })
       })
 
+      it('compiles a detached form (bugfix)', function() {
+        const form = up.element.createFromHTML(`
+          <form up-autosubmit>
+            <input name="input-name" value="old-value">
+          </form>
+        `)
+
+        expect(() => up.hello(form)).not.toThrow()
+      })
+
       it('does not ignore an [up-autosubmit] form in an overlay when an [up-autosubmit] element in the root layer encloses the overlay', async function() {
         // Overlays are attached to the <body>, so the <body> encloses them in the DOM.
         document.body.setAttribute('up-autosubmit', '')
@@ -1957,7 +2071,7 @@ describe('up.form', function() {
             {},
             { fragment: '<form up-autosubmit id="overlay-form"><input name="input-name" value="old-value"></form>' },
           ])
-          const submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
+          const submitSpy = up.form.submit.mock().and.returnValue(up.internal.unresolvablePromise())
 
           const field = up.fragment.get('#overlay-form input', { layer: 'overlay' })
           field.value = 'new-value'
@@ -1976,7 +2090,7 @@ describe('up.form', function() {
         const form = fixture('form[up-autosubmit][up-target="#target"]')
         const target = fixture('#target')
         const field = e.affix(form, 'input[name="input-name"][value="old-value"]')
-        const submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
+        const submitSpy = up.form.submit.mock().and.returnValue(up.internal.unresolvablePromise())
         up.hello(form)
 
         field.value = 'new-value'
@@ -2036,7 +2150,7 @@ describe('up.form', function() {
         const form = fixture('form[up-autosubmit][up-target="#target"]')
         const target = fixture('#target')
         const field1 = e.affix(form, 'input[name="input1"][value="old-value"]')
-        const submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
+        const submitSpy = up.form.submit.mock().and.returnValue(up.internal.unresolvablePromise())
         up.hello(form)
 
         const field2 = e.affix(form, 'input[name="input2"][value="old-value"]')
@@ -2057,7 +2171,7 @@ describe('up.form', function() {
           const $form = $fixture('form[up-autosubmit][up-watch-delay="50"][up-target="#target"]')
           const $field = $form.affix('input[name="input-name"][value="old-value"]')
           up.hello($form)
-          const submitSpy = up.form.submit.mock().and.returnValue(u.unresolvablePromise())
+          const submitSpy = up.form.submit.mock().and.returnValue(up.internal.unresolvablePromise())
 
           $field.val('new-value-1')
           Trigger.change($field)

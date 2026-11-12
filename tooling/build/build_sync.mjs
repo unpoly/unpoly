@@ -5,11 +5,12 @@
 
 import { readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
-import { readStatus, PROJECT_ROOT } from './build_status.mjs'
+import { readStatus, requestBuild, PROJECT_ROOT } from './build_status.mjs'
 
-const SKIP_DIRS = new Set(['node_modules', 'dist', 'tmp', '.git'])
+// Never scanned or watched.
+export const SKIP_DIRS = new Set(['node_modules', 'dist', 'tmp', '.git'])
 
-// Where a webpack input can live. `src` and `spec` are obvious; `tooling/runner/browser` is here
+// Where a bundle input can live. `src` and `spec` are obvious; `tooling/runner/browser` is here
 // because spec/helpers/terminal_reporter.js imports poster.js from it, which pulls in
 // log_value.mjs and dom_snapshot.js — so those are compiled into dist/specs.js like any other
 // source. It is that directory rather than all of `tooling` because everything else under
@@ -18,70 +19,92 @@ const SKIP_DIRS = new Set(['node_modules', 'dist', 'tmp', '.git'])
 // not a guess: the directory exists to hold the browser-side runner, and a self-test walks the
 // imports from poster.js and fails if any of them lands outside a scanned directory.
 //
+// The dev watcher (watch.mjs) watches the same directories.
+//
 // We deliberately do **not** try to tell inputs from non-inputs. Every scheme for it is a
-// hand-maintained approximation of webpack's dependency graph, and it drifts the moment anyone
+// hand-maintained approximation of the bundler's dependency graph, and it drifts the moment anyone
 // adds a file: `src` alone holds 117 guide pages, an images tree of diagrams and recordings and
-// an `.htaccess`; `spec` holds two fixture videos; `tooling` holds Node-only `.mjs` modules and
-// the webpack configs themselves. A path list or an extension allowlist would have to be
-// extended for the next README somebody writes.
+// an `.htaccess`; `spec` holds two fixture videos. A path list or an extension allowlist would
+// have to be extended for the next README somebody writes.
 //
 // A residue remains that no extension list can catch: a file with a watchable extension that
-// webpack nevertheless does not import — a `.js` under src/ that nothing requires, say. That is
+// no bundle imports — a `.js` under src/ that nothing requires, say. That is
 // what IDLE_GRACE_MS is for. It costs three seconds and needs no maintenance. Missing a real input is the failure that actually matters — it runs the suite
 // against a stale bundle without saying so — and over-scanning cannot cause it.
 export const SOURCE_DIRS = ['src', 'spec', 'tooling/runner/browser']
 
-// The extensions webpack has a loader for, from the rules in tooling/build/webpack/shared.js:
-// `/\.js$/` and `/\.js\.erb$/` (both via ts-loader) and `/\.(css|sass|scss)$/`. `.ts` is listed
-// because ts-loader is already configured for it.
+// The extensions a bundle can import, from LOADED_EXTENSIONS in tooling/build/esbuild.mjs. Also
+// what makes the dev watcher start a rebuild.
 //
 // An allowlist, not a list of things to skip. A skip list only skips what someone remembered to
 // name, so every guide page, diagram, fixture video and `.htaccess` had to be enumerated, and the
 // next one silently rots it. This way anything that is not a build input is ignored by default,
 // including file types nobody has invented yet, and only a *new loader* needs attention — a
-// deliberate edit to the webpack config, guarded by a self-test that fails if an extension gains
-// a loader without being listed here.
+// deliberate edit to the build, guarded by a self-test that fails if esbuild.mjs loads an
+// extension that isn't listed here. (The list is not imported from there, because that would
+// load esbuild and Sass into every `bin/test` run.)
 //
-// Known gap: tooling/runner/browser/log_value.mjs is bundled into dist/specs.js but `.mjs` is not
-// listed, since it otherwise means Node-only throughout tooling/. Editing that one file is not
-// detected, so a run started within about a second of saving it can use the previous build. It is
-// a pure formatting helper that changes rarely, and a second run is correct.
-export const WATCHABLE_SUFFIXES = ['.js', '.ts', '.js.erb', '.css', '.sass', '.scss']
+// `.mjs` is listed for tooling/runner/browser/log_value.mjs, which is bundled into dist/specs.js.
+// Elsewhere under the scanned directories there are no `.mjs` files.
+export const WATCHABLE_SUFFIXES = ['.js', '.ts', '.mjs', '.js.erb', '.css', '.sass', '.scss']
 
 const isWatchable = (name) => WATCHABLE_SUFFIXES.some((suffix) => name.endsWith(suffix))
 
-// The newest file webpack might rebuild for, as `{ mtime, file }`. The path is carried so the
-// caller can name it — either when reporting that nothing rebuilt, or on a timeout.
+// The newest file the watcher might rebuild for, as `{ mtime, file }`. The path is carried so the
+// caller can name it — either when reporting that nothing rebuilt, or on a timeout. `sources`
+// lists every file and directory as `{ file, mtime }`, newest first, so the caller can check them
+// one by one against what the watcher has seen (see unbuiltSources()).
+//
+// Directories count too. Deleting or moving a file changes no file's mtime, only its directory's,
+// and moved files keep theirs. Without the directory, a run started right after `rm` would find
+// everything fresh before the watcher had even seen the deletion. A non-source file (a guide
+// page, an image, a swap file) moves its directory's mtime too, so the watcher answers every
+// change in these directories with a round, an empty one if nothing needs building.
 export function newestSource(root = PROJECT_ROOT, dirs = SOURCE_DIRS) {
-  let newest = 0
-  let newestFile = null
-  let seen = 0
+  let sources = []
+  let files = 0
+  let consider = (mtime, full) => sources.push({ file: path.relative(root, full), mtime })
 
   for (let dir of dirs) {
-    walk(path.join(root, dir), (mtime, full) => {
-      seen++
-      if (mtime > newest) { newest = mtime; newestFile = full }
-    })
+    let full = path.join(root, dir)
+    try { consider(statSync(full).mtimeMs, full) } catch { continue }
+    walk(full, (mtime, file) => {
+      files++
+      consider(mtime, file)
+    }, consider)
   }
 
   // No sources at all means the wrong cwd (or a broken checkout). Reporting 0 would say
   // "everything is fresh" and let the run proceed against whatever is in dist/.
-  if (seen === 0) throw new Error(`No source files found under ${root}. Run from the project root.`)
-  return { mtime: newest, file: newestFile && path.relative(root, newestFile) }
+  if (files === 0) throw new Error(`No source files found under ${root}. Run from the project root.`)
+  sources.sort((a, b) => b.mtime - a.mtime)
+  return { mtime: sources[0].mtime, file: sources[0].file, sources }
+}
+
+// The `sources` (see newestSource()) that the watcher's last round may not include, newest first.
+// A source is included when a round that built and linted everything started after its mtime, or
+// when the watcher had an event for it and started a round after its mtime. Time alone is not
+// enough: a later round for another file would vouch for an edit the watcher never saw.
+export function unbuiltSources(status, sources) {
+  // A watcher from before `seen` existed. All we can go by is its last round.
+  if (status.fullStartedAt === undefined) return sources.filter(({ mtime }) => mtime > status.startedAt)
+  let full = status.fullStartedAt ?? -Infinity
+  return sources.filter(({ file, mtime }) => mtime > full && !(status.seen?.[file] >= mtime))
 }
 
 export function newestSourceMtime(...args) {
   return newestSource(...args).mtime
 }
 
-function walk(dir, onFile) {
+function walk(dir, onFile, onDir) {
   let entries
   try { entries = readdirSync(dir, { withFileTypes: true }) } catch { return }
   for (let entry of entries) {
     if (SKIP_DIRS.has(entry.name)) continue
     let full = path.join(dir, entry.name)
     if (entry.isDirectory()) {
-      walk(full, onFile)
+      try { onDir(statSync(full).mtimeMs, full) } catch { /* ignore */ }
+      walk(full, onFile, onDir)
     } else if (isWatchable(entry.name)) {
       try { onFile(statSync(full).mtimeMs, full) } catch { /* ignore */ }
     }
@@ -96,10 +119,14 @@ function defaultSleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-// How long to wait for the watcher to react before concluding it is not going to. Webpack
-// starts a build well within a second of a change it cares about; three seconds is generous
-// enough to survive polling on a network or WSL filesystem, and the cost of being generous is
-// only that a docs-only edit delays a run by that much.
+// How long to wait for the watcher to react before asking it to rebuild (see requestBuild()).
+// The watcher answers every change in the source directories with a round, 20 ms after the
+// event, so after a second it has missed the change, not just been slow about it.
+const REQUEST_AFTER_MS = 1_000
+
+// How long to wait for the watcher to react before concluding it is not going to. Only a watcher
+// that does not answer requests gets here: one started before requests existed, or one that has
+// lost its watch on tmp/.
 const IDLE_GRACE_MS = 3_000
 
 export class BuildSyncError extends Error {}
@@ -112,20 +139,29 @@ export class BuildFailedError extends Error {
   }
 }
 
+// Names a few files for a message.
+function describe(files) {
+  let named = files.slice(0, 3).join(', ')
+  return files.length > 3 ? `${named} and ${files.length - 3} more` : named
+}
+
+// `sources` are the files and directories to wait for (see newestSource()). The self-tests may
+// pass just the newest one, as `newestMtime` and `newestFile`.
 export async function waitForFreshBuild({
   read = () => readStatus(),
   newestMtime,
   newestFile = null,
+  sources,
   isAlive = defaultIsAlive,
   now = Date.now,
   sleep = defaultSleep,
   timeoutMs = 30_000,
+  requestAfterMs = REQUEST_AFTER_MS,
   idleGraceMs = IDLE_GRACE_MS,
+  request = requestBuild,
 } = {}) {
-  if (newestMtime === undefined) {
-    const newest = newestSource()
-    newestMtime = newest.mtime
-    newestFile = newest.file
+  if (sources === undefined) {
+    sources = newestMtime === undefined ? newestSource().sources : [{ file: newestFile, mtime: newestMtime }]
   }
 
   let status = read()
@@ -136,30 +172,56 @@ export async function waitForFreshBuild({
     throw new BuildSyncError('Build watcher not running (its process is gone). Start it with `bin/dev`.')
   }
 
-  const enteredAt = now()
-  const startedAtOnEntry = status.startedAt
-  let deadline = enteredAt + timeoutMs
+  let requestedAt = null
+  let requested = []
+  // The watcher's last `startedAt`, and since when it has stood. We judge whether the watcher has
+  // reacted by how long it has been quiet, not by its `startedAt` on entry: a round that started
+  // just after we were called (the change was still in the watcher's debounce) is the watcher
+  // reacting, and if it still didn't include every source, the request below must still come.
+  let lastStartedAt = status.startedAt
+  let quietSince = now()
+  let deadline = quietSince + timeoutMs
   while (true) {
     status = read()
-    if (status && status.state === 'idle' && status.startedAt >= newestMtime) {
+    let idle = status?.state === 'idle'
+    let unbuilt = idle ? unbuiltSources(status, sources).map(({ file }) => file) : null
+    if (idle && !unbuilt.length) {
       if (status.ok === false) throw new BuildFailedError(status.errors || '(no error output captured)')
-      return status
+      // `missedEdit` names the files the watcher only built on request, so a watcher that misses
+      // changes doesn't go unnoticed.
+      return requestedAt === null ? status : { ...status, missedEdit: describe(requested) }
     }
-    // Nothing is going to happen. The watcher reacts to a change it cares about in well under a
-    // second, so an idle status whose build has not moved after the grace period means our
-    // newest file is not one webpack consumes — a guide page, an image, a Node-only module.
-    // dist/ is already current for everything webpack does read, so run. `unbuiltEdit` lets the
-    // caller say which file it was; reading that name is what tells you whether to be relaxed
-    // (`pages/foo.md`) or suspicious (`unpoly/link.js`), with no list to maintain.
-    if (status && status.state === 'idle' && status.startedAt === startedAtOnEntry && now() - enteredAt >= idleGraceMs) {
+    let time = now()
+    if (status && status.startedAt !== lastStartedAt) {
+      lastStartedAt = status.startedAt
+      quietSince = time
+    }
+    let quietFor = idle ? time - quietSince : 0
+    if (requestedAt === null && quietFor >= requestAfterMs) {
+      requestedAt = time
+      requested = unbuilt
+      request(unbuilt)
+    }
+    // The watcher built on our request, and still doesn't include a source: its mtime lies in
+    // the future (a clock skew, `touch -d`). No build will ever get past it, so run.
+    if (idle && requestedAt !== null && status.startedAt >= requestedAt) {
       if (status.ok === false) throw new BuildFailedError(status.errors || '(no error output captured)')
-      return { ...status, unbuiltEdit: newestFile }
+      return { ...status, unbuiltEdit: describe(unbuilt) }
     }
-    if (now() >= deadline) {
+    // Nothing is going to happen: the watcher did not react to the change or to our request.
+    // dist/ may well be current anyway (an old watcher does not answer guide-page saves), so
+    // run. `unbuiltEdit` lets the caller say which file it was; reading that name is what tells
+    // you whether to be relaxed (`pages/foo.md`) or suspicious (`unpoly/link.js`).
+    if (quietFor >= idleGraceMs) {
+      if (status.ok === false) throw new BuildFailedError(status.errors || '(no error output captured)')
+      return { ...status, unbuiltEdit: describe(unbuilt) }
+    }
+    if (time >= deadline) {
       // Reaching here means the watcher kept working without ever finishing a build that
       // includes the edit — a build that never settles, or one rebuild chasing another. "Nothing
       // rebuilt at all" no longer lands here; it is handled above.
-      const edit = newestFile ? ` (newest edit: ${newestFile})` : ''
+      const newest = unbuilt?.[0] ?? sources[0]?.file
+      const edit = newest ? ` (newest edit: ${newest})` : ''
       throw new BuildSyncError(`Build watcher didn't finish a build including your latest edit within ${Math.round(timeoutMs / 1000)}s${edit}. Check its output in tmp/dev.log, or restart it with \`bin/dev stop && bin/dev\`.`)
     }
     await sleep(100)

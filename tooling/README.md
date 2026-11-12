@@ -9,7 +9,8 @@ For *using* it (`bin/test`, filters, options, exit codes) see
 tooling/
   runner/       the spec runner, split by where the code runs (below)
   scratch/      the scratch server — real pages on port 4001 (own README)
-  build/        bin/build, the Webpack configs, and the build-freshness protocol
+  build/        bin/build (esbuild + Terser), the watcher, and the build-freshness protocol
+  lint/         our own lint checks: an Oxlint plugin and the api collision check (bin/lint)
   dev_env.mjs   the dev environment behind bin/dev
   find_spec.mjs spec-title search behind bin/find-spec and bin/test --file
   outline.mjs   Markdown sections with line ranges, behind bin/outline
@@ -52,8 +53,8 @@ runner/terminal (runs in Node, drives the browser)
   urls.mjs        PURE: spec deep-links etc.
 
 build/ (runs in Node, one step removed from the runner)
-webpack --watch (build/webpack/development.js) ─► build/build_status.mjs plugin ─► tmp/build-status.json
-run.mjs (dev) ── build/build_sync.mjs waits until fresh ◄───────────────────────────┘
+bin/build --watch (build/watch.mjs, in rounds) ─► build/build_status.mjs writer ─► tmp/build-status.json
+run.mjs (dev) ── build/build_sync.mjs waits until fresh ◄───────────────────────────────┘
 ```
 
 `runner/browser/log_value.mjs` is the odd one: it runs in the browser but is a pure
@@ -77,13 +78,14 @@ function, so its tests live in Node with the rest.
 - `test/` — the self-tests: `bin/self-test`.
 - `bin/test`, `bin/ci`, `bin/dev`, `bin/find-spec`, `bin/outline`, `bin/update-contributing-tocs` — thin **extensionless** executables (shebang +
   `chmod +x`), relying on Node 22's extensionless-ESM detection. The package is
-  deliberately *not* `type: module` (that would break the CommonJS webpack configs),
-  so everything under `tooling/**` is `.mjs` — except the three browser files and the
-  webpack configs, where the extension is what picks the module system.
+  deliberately *not* `type: module` (that would make Node and esbuild treat every `.js` file
+  as an ES module, while most of `src/` and `spec/` are still scripts), so everything under
+  `tooling/**` is `.mjs` — except the three browser files, where the extension is what picks
+  the module system.
 
 Where another tree needs tooling code, use a thin stub rather than a symlink:
 `spec/helpers/terminal_reporter.js` is a one-line `import` of `runner/browser/poster.js`,
-so webpack's `require.context` picks it up.
+so the `require('./helpers/**/*.js')` glob in `spec/specs.js` picks it up.
 
 ## Contracts
 
@@ -121,43 +123,54 @@ Dispatched by `spec/helpers/reset_up.js` at the *top* of its `afterEach`, i.e. b
 teardown, while the failure state is still on the page. `poster.js` listens and
 snapshots the DOM for a failed spec, then closes the log buffer.
 
-### `tmp/build-status.json` (webpack → runner)
+### `tmp/build-status.json` (watcher → runner)
 
-`{ pid, state: "building" | "idle", startedAt, ok, errors }`. A single
-shared plugin instance counts in-flight sub-compilers, so `idle` means *all* current
-rebuilds finished (no partial-read race) — and `errors` is deduplicated, because the same
-source is built by several sub-compilers and would otherwise report each failure once per
-variant. `waitForFreshBuild` errors if the file is missing or the pid is dead, else waits
+`{ pid, state: "building" | "idle", startedAt, ok, errors }`. The watcher (`build/watch.mjs`)
+watches the files itself and rebuilds in **rounds**: a round takes its `startedAt` before any
+bundle reads a source, rebuilds every bundle that read a changed file, lints changed files in
+`src/`, and only then writes `idle`. A change that arrives during a round starts another round
+before `idle` is written. So `idle` means *every* bundle includes every edit the watcher has seen
+(no partial-read race). esbuild's own per-context watchers could not promise that: each picks up
+an edit on its own schedule, so all of them can be idle while one has not started on the edit yet.
+`errors` is deduplicated, because the modern and es6 bundles report the same syntax error. `waitForFreshBuild` errors if the file is missing or the pid is dead, else waits
 until `idle && startedAt >= newestSourceMtime`, then throws if `ok` is false;
 `bin/dev status` reads the same two fields through `lastBuildErrors()`.
 
 `newestSourceMtime` walks `src`, `spec` and `tooling/runner/browser`, counting only the
-extensions webpack has a loader for (`WATCHABLE_SUFFIXES`). That last directory is in because
+extensions a bundle can import (`WATCHABLE_SUFFIXES`, which also decides what makes the watcher
+rebuild), plus every directory: a deleted or moved file changes no file's mtime, only its
+directory's. The watcher in turn rebuilds everything when a directory appears, moves or vanishes.
+It watches each directory on its own (`build/watch_tree.mjs`), not with Node's recursive
+`fs.watch()`, which on Linux watches each file's inode and so went deaf to a file after its first
+atomic save, Edit-tool write or `git checkout`. `tooling/runner/browser` is in because
 `spec/helpers/terminal_reporter.js` imports `poster.js` from it, which pulls two more modules into
 `dist/specs.js`; the rest of `tooling` runs in Node and can never be bundled. One self-test derives
 the bundled set from the imports and fails if any of it moves outside a scanned directory; another
-fails if a webpack loader gains an extension that isn't listed — the drift that would otherwise stop
-those edits counting and run the suite against a stale bundle in silence.
+fails if `build/esbuild.mjs` loads an extension that isn't listed — the drift that would otherwise
+stop those edits counting and run the suite against a stale bundle in silence.
 
 An allowlist rather than a skip list, because a skip list only skips what someone remembered to
 name: `src` alone holds 117 guide pages, an images tree of diagrams and recordings, and an
 `.htaccess`, and any of them being the newest file used to make the predicate unsatisfiable, so
-`bin/test` waited 30s and refused to run. Known gap: `runner/browser/log_value.mjs` is bundled but
-`.mjs` is not listed, since it means Node-only everywhere else under `tooling`.
+`bin/test` waited 30s and refused to run. `.mjs` is listed for `runner/browser/log_value.mjs`,
+which is bundled; the Node-only `.mjs` files elsewhere in `tooling` are never scanned.
 
-What no extension list can catch is a file with a watchable extension that webpack does not import.
-That is what the 3s grace is for: if the watcher is still `idle` with an unchanged `startedAt`,
-nothing needed building, so the run proceeds and reports `unbuiltEdit` so `bin/test` can name the
-file. Under-scanning is the failure that matters, and over-scanning cannot cause it. The 30s timeout
-now means only that a build started and never finished.
+The watcher answers every change in these directories with a round, an empty one for a file no
+bundle reads (a guide page, a swap file), so `startedAt` passes every mtime the runner can see. If
+the watcher is still `idle` with an unchanged `startedAt` after 1s, it has missed a file event.
+`waitForFreshBuild` then writes the newest file's path to `tmp/build-request`, which the watcher
+watches, and the watcher rebuilds for it. `bin/test` names the file (`missedEdit`), since a watcher
+that misses events deserves a look. A watcher that ignores the request (one started before requests
+existed) gets a 3s grace, after which the run proceeds and reports `unbuiltEdit`. Under-scanning is
+the failure that matters, and over-scanning cannot cause it. The 30s timeout now means only that a
+build started and never finished.
 
-**Only a watching compiler writes it**, which is what keeps it single-writer. The
-plugin arms itself on `watchRun` (watch-only) and ignores `done` until then, because
-`done` fires for one-shot builds too and `build/webpack/ci.js` reuses the watcher's configs,
-plugin included — so `bin/build --config=ci` used to overwrite a running watcher's
-status with its own pid, and every reader then concluded the environment was gone.
+**Only the watcher writes it**, which is what keeps it single-writer: one-shot builds
+(`build/build.mjs`) never create a `BuildStatus`. Under webpack, `bin/build --config=ci` reused
+the watcher's plugin and overwrote a running watcher's status with its own pid, and every reader
+then concluded the environment was gone.
 
-Transient files (`build-status.json`, any `.pid`, any `.log`) belong in the gitignored `tmp/`.
+Transient files (`build-status.json`, `build-request`, any `.pid`, any `.log`) belong in the gitignored `tmp/`.
 
 ## Output
 
@@ -208,7 +221,7 @@ process manager. The rules, in one place:
   `bin/test` spawn the identical supervisor; only its stdio differs (your terminal
   vs. `tmp/dev.log`).
 - **One pid file.** Both start paths spawn the supervisor `detached`, so its pid *is*
-  a process group id and `killGroup()` sweeps every descendant — `sh`, `npm`, webpack,
+  a process group id and `killGroup()` sweeps every descendant — `sh`, `npm`, esbuild,
   Ruby and all. `killGroup()` has no bare-pid fallback on purpose: that would signal
   one process, orphan the descendants, and report success. The supervisor removes
   `tmp/dev.pid` as it exits, so a wedged one stays reachable for a second
@@ -224,12 +237,12 @@ process manager. The rules, in one place:
   match never fires. Only child text is stripped — our labels come in two variants, so we never
   colorize and undo it. Children are *asked* for colors (`FORCE_COLOR`) only when there is a
   terminal to show them on, and `NO_COLOR` still wins; they are piped, so otherwise they
-  turn their own colors off and webpack's coloured errors were being thrown away even with a
+  turn their own colors off and the build's coloured errors were being thrown away even with a
   human watching. `DEV_ENV_BACKGROUND` tells a background supervisor it has no terminal:
   without it, its terminal sink *is* the file its raw stdio points at, and every line lands
   twice (169 lines in each, measured). The timestamp comes from the supervisor, since
-  third-party children cannot be made to agree on a format — WEBrick stamps its own, webpack
-  stamps nothing — though it marks when the pipe delivered, not when the child spoke.
+  third-party children cannot be made to agree on a format — WEBrick stamps its own, the
+  build watcher stamps nothing — though it marks when the pipe delivered, not when the child spoke.
 - **One port table.** `tooling/ports.mjs` owns all four (spec server, scratch, start lock,
   docs), and `PORT_OFFSET` moves them together so a second checkout can run its own
   environment. They are fixed numbers rather than derived from the checkout path because the

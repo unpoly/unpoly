@@ -20,7 +20,7 @@ to list them all.
 Some commits don't belong to a namespace. Make up a term that reads like one:
 
 ```
-[build] Upgrade Webpack
+[build] Upgrade esbuild
 [version] Version 3.5.0
 [specs] Replace old fixtures helper
 [docs] Document optimistic rendering
@@ -31,6 +31,7 @@ Some commits don't belong to a namespace. Make up a term that reads like one:
 
 CI runs the whole suite in multiple Chrome configurations: without CSP, under a nonce-only
 CSP, under a strict-dynamic CSP, against the `unpoly-migrate` build, against the ES6
-build and against the minified build.
+build, against the minified build and against the minified ES6 build. Separate jobs run
+`bin/lint`, `bin/typecheck` and the tooling's own tests (`bin/self-test`).
 
 It runs on every pull request against `master`, and on every push to `master`.

@@ -6,7 +6,7 @@
 import pc from 'picocolors'
 import { renderOutline } from './dom_outline.mjs'
 
-// A build (webpack / ts-loader syntax / ESLint) failed — render its errors the way
+// A build (esbuild syntax error / Oxlint) failed — render its errors the way
 // we render a spec failure: a red header and the indented error output.
 export function buildFailure(errors) {
   let lines = []

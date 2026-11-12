@@ -1,193 +1,111 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { BuildStatusPlugin } from '../../build/build_status.mjs'
+import { mkdtempSync, readdirSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import { BuildStatus, requestBuild, takeBuildRequest } from '../../build/build_status.mjs'
 
-// A minimal stand-in for a webpack compiler: it captures the callbacks the plugin
-// taps onto watchRun/done so a test can fire them by hand. The real dev config
-// applies one shared plugin instance to every sub-compiler, so we mirror that by
-// applying to several fake compilers.
-function fakeCompiler() {
-  let taps = {}
-  let hook = (name) => ({ tap: (_id, fn) => { taps[name] = fn } })
-  return {
-    hooks: { watchRun: hook('watchRun'), done: hook('done'), failed: hook('failed') },
-    fire: (name, arg) => taps[name](arg),
-  }
+// A status wired to a capture array and a hand-driven clock, plus `last()` for the latest write.
+function statusWithCapture() {
+  let statuses = []
+  let clock = { now: 1000 }
+  let status = new BuildStatus({ write: (written) => statuses.push(written), now: () => clock.now })
+  return { status, statuses, clock, last: () => statuses.at(-1) }
 }
 
-const okStats = { hasErrors: () => false, toString: () => '' }
-const errStats = (message) => ({ hasErrors: () => true, toString: () => message })
+test('a clean round writes building, then an idle, ok status', () => {
+  let { status, statuses, last } = statusWithCapture()
 
-// A plugin wired to a fresh capture array, plus `last()` for the latest status.
-function pluginWithCapture() {
-  let statuses = []
-  let plugin = new BuildStatusPlugin({ write: (status) => statuses.push(status) })
-  return { plugin, statuses, last: () => statuses.at(-1) }
-}
+  status.start()
+  status.finish([])
 
-test('a clean build writes an idle, ok status', () => {
-  let { plugin, last } = pluginWithCapture()
-  let compiler = fakeCompiler()
-  plugin.apply(compiler)
-
-  compiler.fire('watchRun')
-  compiler.fire('done', okStats)
-
-  assert.equal(last().state, 'idle')
+  assert.deepEqual(statuses.map((written) => written.state), ['building', 'idle'])
   assert.equal(last().ok, true)
   assert.equal(last().errors, '')
+  assert.equal(last().pid, process.pid)
 })
 
-test('a failed build writes ok:false and captures the error text', () => {
-  let { plugin, last } = pluginWithCapture()
-  let compiler = fakeCompiler()
-  plugin.apply(compiler)
+test('a failed round writes ok:false and the error text', () => {
+  let { status, last } = statusWithCapture()
 
-  compiler.fire('watchRun')
-  compiler.fire('done', errStats('ERROR in ./src/unpoly/foo.js\nSyntaxError'))
+  status.start()
+  status.finish(['✘ [ERROR] Unexpected end of file\n\n    src/unpoly/foo.js:12:0'])
 
   assert.equal(last().state, 'idle')
   assert.equal(last().ok, false)
-  assert.match(last().errors, /SyntaxError/)
+  assert.match(last().errors, /Unexpected end of file/)
 })
 
-test('idle is only written once every sub-compiler has finished', () => {
-  let { plugin, last } = pluginWithCapture()
-  let a = fakeCompiler(), b = fakeCompiler()
-  plugin.apply(a)
-  plugin.apply(b)
+test('identical errors from several bundles are collapsed', () => {
+  // The modern and es6 bundles read the same file and report the same syntax error.
+  let { status, last } = statusWithCapture()
 
-  a.fire('watchRun')
-  b.fire('watchRun')
-  a.fire('done', okStats)
-  assert.equal(last().state, 'building') // b is still building
+  status.start()
+  status.finish(['ERROR X', 'ERROR X', 'ERROR Y'])
 
-  b.fire('done', okStats)
-  assert.equal(last().state, 'idle')
+  assert.equal(last().errors, 'ERROR X\n\nERROR Y')
 })
 
-test('an error from any sub-compiler makes the round not ok', () => {
-  let { plugin, last } = pluginWithCapture()
-  let a = fakeCompiler(), b = fakeCompiler()
-  plugin.apply(a)
-  plugin.apply(b)
+test('a new round reports building and ok, whatever the last round did', () => {
+  let { status, last } = statusWithCapture()
 
-  a.fire('watchRun')
-  b.fire('watchRun')
-  a.fire('done', okStats)
-  b.fire('done', errStats('ERROR in ./src/unpoly/bar.js\nboom'))
+  status.start()
+  status.finish(['ERROR X'])
+  status.start()
 
-  assert.equal(last().ok, false)
-  assert.match(last().errors, /boom/)
-})
-
-test('identical errors across sub-compilers are collapsed', () => {
-  let { plugin, last } = pluginWithCapture()
-  let a = fakeCompiler(), b = fakeCompiler()
-  plugin.apply(a)
-  plugin.apply(b)
-
-  a.fire('watchRun')
-  b.fire('watchRun')
-  a.fire('done', errStats('ERROR X'))
-  b.fire('done', errStats('ERROR X'))
-
-  assert.equal(last().errors, 'ERROR X')
-})
-
-test('a fresh round clears the previous round\'s errors', () => {
-  let { plugin, last } = pluginWithCapture()
-  let compiler = fakeCompiler()
-  plugin.apply(compiler)
-
-  compiler.fire('watchRun')
-  compiler.fire('done', errStats('ERROR X'))
-  assert.equal(last().ok, false)
-
-  compiler.fire('watchRun') // new round — resets the accumulated errors
-  compiler.fire('done', okStats)
-  assert.equal(last().ok, true)
-  assert.equal(last().errors, '')
-})
-
-test('a one-shot build never writes the status file', () => {
-  // tooling/build/webpack/ci.js reuses the watcher's configs, plugin included, so `bin/build` runs
-  // this plugin too. Only `watchRun` fires under --watch, while `done` fires for every
-  // compilation — without the guard, a one-shot build overwrote a running watcher's
-  // status with its own pid and the dev environment looked dead.
-  let { plugin, statuses } = pluginWithCapture()
-  let compiler = fakeCompiler()
-  plugin.apply(compiler)
-
-  compiler.fire('done', okStats) // no watchRun before it
-
-  assert.deepEqual(statuses, [])
-})
-
-test('a watcher that has built once keeps reporting later builds', () => {
-  let { plugin, statuses } = pluginWithCapture()
-  let compiler = fakeCompiler()
-  plugin.apply(compiler)
-
-  compiler.fire('watchRun')
-  compiler.fire('done', okStats)
-  compiler.fire('watchRun')
-  compiler.fire('done', okStats)
-
-  assert.deepEqual(statuses.map((status) => status.state), ['building', 'idle', 'building', 'idle'])
-})
-
-test('a rebuild triggered by a later edit refreshes startedAt across overlapping rounds', () => {
-  // Deterministic clock: the two logical rounds are milliseconds apart in reality.
-  // The compilers rebuild independently, so a fast one can finish round 1 and start
-  // round 2 while a slow one is still on round 1 — the in-flight counter never returns
-  // to zero between the two logical rounds. Keying startedAt off that counter left it
-  // stuck at round 1's time, and waitForFreshBuild() then timed out insisting the
-  // watcher had not picked up an edit it had in fact built.
-  let clock = 1000
-  let statuses = []
-  let plugin = new BuildStatusPlugin({ write: (status) => statuses.push(status), now: () => clock })
-  let last = () => statuses.at(-1)
-  let fast = fakeCompiler()
-  let slow = fakeCompiler()
-  plugin.apply(fast)
-  plugin.apply(slow)
-
-  fast.fire('watchRun')                 // round 1 for edit #1
-  slow.fire('watchRun')
-  const round1 = last().startedAt
-
-  clock = 1100
-  fast.fire('done', okStats)            // fast finishes round 1
-  const editAt = clock                  // ... edit #2 lands here
-  clock = 1200
-  fast.fire('watchRun')                 // fast starts round 2 (counter never hits 0)
-  slow.fire('done', okStats)            // slow finishes round 1
-  clock = 1250
-  slow.fire('watchRun')                 // slow starts round 2 too
-  fast.fire('done', okStats)
-  slow.fire('done', okStats)            // busy period ends
-
-  assert.equal(last().state, 'idle')
-  assert.equal(round1, 1000)
-  assert.ok(last().startedAt >= editAt,
-    `startedAt must cover edit #2 at ${editAt}, got ${last().startedAt}`)
-})
-
-test('a hard watch failure settles the status instead of leaving it "building" for ever', () => {
-  // Webpack fires `failed` — not `done` — when a watch cycle dies outside compilation
-  // (fs error on emit, EMFILE, a plugin throwing). Untapped, the counter never returned
-  // to zero and every later bin/test timed out blaming a healthy watcher.
-  let { plugin, last } = pluginWithCapture()
-  let compiler = fakeCompiler()
-  plugin.apply(compiler)
-
-  compiler.fire('watchRun')
   assert.equal(last().state, 'building')
+  assert.equal(last().ok, true)
+})
 
-  compiler.fire('failed', new Error('EMFILE: too many open files'))
+test('startedAt is when the round started, not when it finished', () => {
+  // waitForFreshBuild() trusts a round to include an edit only if it started after the edit's
+  // mtime. A round's end time would certify edits that landed while it was already building.
+  let { status, clock, last } = statusWithCapture()
 
-  assert.equal(last().state, 'idle')
-  assert.equal(last().ok, false)
-  assert.match(last().errors, /EMFILE/)
+  clock.now = 2000
+  status.start()
+  clock.now = 2500
+  status.finish([])
+
+  assert.equal(last().startedAt, 2000)
+})
+
+test('a full round vouches for everything, other rounds for the paths they saw', () => {
+  // waitForFreshBuild() checks every source against these, so that a round for one file doesn't
+  // vouch for an edit to another one that the watcher never saw.
+  let statuses = []
+  let clock = { now: 1000 }
+  let status = new BuildStatus({ write: (written) => statuses.push(written), now: () => clock.now, root: '/project' })
+  let last = () => statuses.at(-1)
+
+  status.start({ full: true })
+  assert.equal(last().fullStartedAt, 1000)
+  assert.deepEqual(last().seen, {})
+
+  clock.now = 2000
+  status.start({ seen: ['/project/src/unpoly/link.ts', '/project/src/unpoly'] })
+  clock.now = 3000
+  status.start({ seen: ['/project/src/unpoly/link.ts'] })
+  status.finish([])
+  assert.equal(last().fullStartedAt, 1000)
+  assert.deepEqual(last().seen, { 'src/unpoly/link.ts': 3000, 'src/unpoly': 2000 })
+
+  clock.now = 4000
+  status.start({ seen: ['/project/src/unpoly/form.ts'], full: true })
+  assert.equal(last().fullStartedAt, 4000)
+  assert.deepEqual(last().seen, {}, 'a full round includes what the others saw')
+})
+
+test('a rebuild request carries the files to the watcher, once', (t) => {
+  let root = mkdtempSync(path.join(tmpdir(), 'build-request-'))
+  t.after(() => rmSync(root, { recursive: true, force: true }))
+  assert.equal(takeBuildRequest(root), null)
+  requestBuild(['src/unpoly/link.ts', 'spec/helpers'], root)
+  assert.deepEqual(takeBuildRequest(root), ['src/unpoly/link.ts', 'spec/helpers'])
+  assert.equal(takeBuildRequest(root), null, 'a request is served once')
+  requestBuild('src/unpoly/link.ts', root)
+  assert.deepEqual(takeBuildRequest(root), ['src/unpoly/link.ts'])
+  requestBuild(null, root)
+  assert.deepEqual(takeBuildRequest(root), [])
+  assert.deepEqual(readdirSync(path.join(root, 'tmp')), [], 'nothing is left behind')
 })

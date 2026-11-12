@@ -6,8 +6,8 @@ describe('up.specUtil', function() {
     beforeEach(function() {
       this.body = document.body
       this.html = document.documentElement
-      this.restoreBodyOverflowY = e.setStyleTemp(this.body, { 'overflow-y': 'visible' })
-      this.restoreHTMLOverflowY = e.setStyleTemp(this.html, { 'overflow-y': 'visible' })
+      this.restoreBodyOverflowY = up.internal.setStyleTemp(this.body, { 'overflow-y': 'visible' })
+      this.restoreHTMLOverflowY = up.internal.setStyleTemp(this.html, { 'overflow-y': 'visible' })
     })
 
     afterEach(function() {

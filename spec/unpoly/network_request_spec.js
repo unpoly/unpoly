@@ -351,6 +351,15 @@ extendDescribe('up.network', function() {
             expect(jasmine.lastRequest().timeout).toBeFalsy()
           })
 
+          it('does not use a timeout when passed { timeout: null }', async function() {
+            up.network.config.timeout = 456789
+            const request = up.request('/url', { timeout: null })
+            await wait()
+
+            expect(request.timeout).toBeMissing()
+            expect(jasmine.lastRequest().timeout).toBeFalsy()
+          })
+
         })
 
       })
@@ -1435,6 +1444,15 @@ extendDescribe('up.network', function() {
               expect(request.data()['_method']).toBeUndefined()
             })
           })
+        })
+
+        it('does not wrap the method when passed { wrapMethod: null }', async function() {
+          up.request({ url: '/foo', method: 'PUT', wrapMethod: null })
+          await wait()
+
+          const request = jasmine.lastRequest()
+          expect(request.method).toEqual('PUT')
+          expect(request.data()['_method']).toBeUndefined()
         })
 
         it('does not wrap the method when up.network.config.wrapMethod is false', async function() {

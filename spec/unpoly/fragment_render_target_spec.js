@@ -1555,7 +1555,7 @@ extendDescribe('up.fragment', function() {
             `)
 
             // Throw while the first plan is changing the page. We spy on a method that the plan
-            // looks up at call time, and that runs after up.Change.FromContent has called onApplicable().
+            // looks up at call time, and that runs after ChangeFromContent has called onApplicable().
             const error = new up.CannotMatch('Error while rendering')
             const originalUpdateHistory = up.Layer.prototype.updateHistory
             const updateHistorySpy = spyOn(up.Layer.prototype, 'updateHistory').and.callFake(function(...args) {

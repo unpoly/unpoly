@@ -1,9 +1,9 @@
 # Selector lookup deep-dive
 
 Read this before you write internal code that looks up an element, and before you change
-[`up.Selector`](../../src/unpoly/classes/selector.js),
-[`up.FragmentFinder`](../../src/unpoly/classes/fragment_finder.js) or the lookup functions in
-[`src/unpoly/fragment.js`](../../src/unpoly/fragment.js).
+[`up.Selector`](../../src/unpoly/fragment/selector.ts),
+[`up.FragmentFinder`](../../src/unpoly/fragment/fragment_finder.ts) or the lookup functions in
+[`src/unpoly/fragment.ts`](../../src/unpoly/fragment.ts).
 
 The short version: **prefer `up.fragment.*` over native `querySelector()` when you are
 looking for a fragment.** A native query silently ignores everything Unpoly adds — most
@@ -61,8 +61,8 @@ particular is **not** automatic — it depends on which entry point you call.
 | `up.fragment.get(selector)` — no root | `up.FragmentFinder` | **Yes** |
 | `up.fragment.get(root, selector)` — with a root | `up.Selector` | No, deliberately |
 | `up.fragment.all()`, `.subtree()`, `.closest()`, `.matches()` | `up.Selector` | No |
-| `up.fragment.getFirstDescendant()` | `up.Selector` | No — this is the explicit "just the first match" entry point |
-| Render steps (`up.Change.UpdateLayer#_matchOldElements()`) | `up.FragmentFinder` | Yes |
+| `getFirstDescendant()` (fragment.ts) | `up.Selector` | No — this is the explicit "just the first match" entry point |
+| Render steps (`UpdateLayerPlan#_matchOldElements()`) | `up.FragmentFinder` | Yes |
 | Response matching (`up.ResponseDoc#select()`) | `up.FragmentFinder` | Yes, against a *rediscovered* origin |
 
 So the two classes are layered, not parallel: **`up.FragmentFinder` is a strategy on top of
@@ -80,7 +80,7 @@ search"*.
 The constructor does the work up front; `matches()`, `closest()`, `descendants()`,
 `firstDescendant()` and `subtree()` then reuse it.
 
-1. **Install the liveness filter.** `up.fragment.isNotDestroying`, unless `{ destroying: true }`
+1. **Install the liveness filter.** `isNotDestroying()` (fragment.ts), unless `{ destroying: true }`
    was passed or we are matching in an external/detached document — an `up.ResponseDoc` has no
    dying elements to speak of.
 2. **Default the layer to the root element's.** If a root *element* was given (as in
@@ -90,7 +90,7 @@ The constructor does the work up front; `matches()`, `closest()`, `descendants()
    | Case | When | Layer filter | Custom selectors expanded for |
    |---|---|---|---|
    | 1 | `{ layer: 'new' }` | none | the new layer |
-   | 2 | detached or external document, `{ layer: 'any' }`, or only one layer in the DOM (`up.layer.attachedCount === 1`) | none | the root layer |
+   | 2 | detached or external document, `{ layer: 'any' }`, or only one layer in the DOM (`layerStack.attachedCount === 1`) | none | the root layer |
    | 3 | `up.layer.getAll(options)` found layers | only those layers | the first layer found |
    | 4 | the layer comes from an element (the root, `{ layer: element }`, or an `{ origin }` without an `{ originLayer }`), and no open layer contains it | nothing matches | (no selectors) |
    | 5 | a named layer that doesn't exist, or `{ layer: 'origin' }` without an `origin` | throws `up.CannotMatch` | |
@@ -112,7 +112,7 @@ The constructor does the work up front; `matches()`, `closest()`, `descendants()
    Case 2 counts the layers **in the DOM** (`attachedCount`: open layers plus closed overlays
    still animating out), not the open layers. Otherwise an overlay closing into the root layer
    would skip case 4.
-4. **Expand custom selectors** via `up.fragment.expandTargets()`, producing a list of plain
+4. **Expand custom selectors** via `expandTargets()` (fragment.ts), producing a list of plain
    CSS selectors that is also joined into one union selector for the cheap operations.
 
 If `up.fragment.config.mainTargets` is configured empty, `:main` expands to nothing and the
@@ -124,10 +124,10 @@ instead of accidentally matching everything.
 This distinction decides whether a render pass falls through to the next plan or dies:
 
 - A layer reference that resolves to **no layer** (`{ layer: 3 }` on a two-layer stack)
-  throws `up.CannotMatch` — which `up.Change.FromContent` swallows to try the next plan, as
+  throws `up.CannotMatch` — which `ChangeFromContent` swallows to try the next plan, as
   long as the plan hasn't started to change the page yet. After that it aborts the pass.
   A layer that comes from an element whose layer has closed is not an error (case 4).
-- An **unknown layer keyword** fails earlier, in `up.LayerLookup`, via `up.fail()`. That is a
+- An **unknown layer keyword** fails earlier, in `up.LayerLookup`, via `fail()`. That is a
   plain `up.Error`, *not* caught by the plan loop, so it aborts the whole pass.
 
 ### Order is a guarantee, not an accident
@@ -155,7 +155,7 @@ a single union query without changing those.
 
 ## Layer scoping defaults to one layer
 
-Which layer(s) a lookup searches is decided by `up.layer.normalizeOptions()`, in this order:
+Which layer(s) a lookup searches is decided by `normalizeLayerOptions()` (layer.ts), in this order:
 
 1. An explicit `{ layer }` — including the `'new'`, `'swap'` and `'shatter'` shorthands that
    mean "open one".
@@ -170,12 +170,12 @@ still want to avoid updating 'any' layer."* Opting out is explicit and rare: `{ 
 
 ## The custom selectors, and where each is resolved
 
-Three pseudo selectors are Unpoly's own. All are resolved in `up.fragment.expandTargets()`,
+Three pseudo selectors are Unpoly's own. All are resolved in `expandTargets()` (fragment.ts),
 by different mechanisms:
 
 | Selector | Expands to | Resolved by |
 |---|---|---|
-| `:main` | every entry of `up.layer.mainTargets(mode)`, as *separate* candidates | `expandTargets()`, looping until no `:main` remains |
+| `:main` | every entry of `mainTargets(mode)` (layer.ts), as *separate* candidates | `expandTargets()`, looping until no `:main` remains |
 | `:layer` | a derived target for the layer's first swappable element | `expandTargets()`, via `layer.getFirstSwappableElement()` |
 | `:origin` | a derived target for the `{ origin }` element | `resolveOrigin()`, called from `expandTargets()` |
 
@@ -202,14 +202,14 @@ Beyond the pseudos, much matching is **configured** rather than hard-coded.
 counterpart, as used for `hungrySelectors`, `assetSelectors`, `fieldSelectors`,
 `followSelectors` and others. When you need to match "the kind of element the user
 configured", use that so configuration and negation keep working. Note `:main` is *not* one of
-these: `up.layer.mainTargets()` deliberately returns an unmerged candidate list, because
+these: `mainTargets()` (layer.ts) deliberately returns an unmerged candidate list, because
 precedence and per-candidate plans depend on the order.
 
 ### Not every pseudo is a matcher
 
 Targets also carry pseudos that never reach the DOM: `:before`, `:after` and `:content` set a
 step's placement, `:maybe` marks a step optional, and `:none` means "render nothing".
-`up.fragment.parseTargetSteps()` strips these while building steps. If you add a pseudo,
+`parseTargetSteps()` (fragment.ts) strips these while building steps. If you add a pseudo,
 decide which kind it is — a matcher belongs in `expandTargets()`, a step modifier in
 `parseTargetSteps()`.
 
@@ -252,7 +252,7 @@ definition not resolved by proximity.
 ## Expansion during rendering
 
 Rendering is where expansion becomes visible: `:main` becomes one candidate per configured
-main target, and `up.Change.FromContent` turns **each candidate into its own plan**, tried in
+main target, and `ChangeFromContent` turns **each candidate into its own plan**, tried in
 order. That is why a page whose `[up-main]` element is missing still updates `main`, or
 ultimately `<body>`, without anyone asking for a fallback. See
 [Rendering](rendering.md#plans-and-why-a-pass-can-change-its-mind).
@@ -262,13 +262,13 @@ ultimately `<body>`, without anyone asking for a fallback. See
 
 - **A lookup bug is usually a scoping bug.** When an element is found that shouldn't be, check
   which layer the lookup resolved to before suspecting the selector.
-- **A single layer in the DOM hides layer bugs.** With `up.layer.attachedCount === 1` the
+- **A single layer in the DOM hides layer bugs.** With `layerStack.attachedCount === 1` the
   layer lookup is skipped entirely (case 2). Anything layer-sensitive needs a spec with a real
   overlay, and usually with two or more layers; see `makeLayers()` in [Testing](testing.md).
 - **Closing overlays are a state of their own.** Their elements stay in the DOM during the
   exit animation, after the layer has left the stack. The spec helpers disable close
   animations, so this state never occurs in a spec unless you open the overlay with one.
-- **Two more lookup modes exist** that this guide doesn't cover: `up.fragment.trackSelector()`
+- **Two more lookup modes exist** that this guide doesn't cover: `trackSelector()` (fragment.ts)
   / `up.SelectorTracker` for "match now and as elements appear", and the special cases where
   an Element is passed *as the selector* (`up.fragment.matches()` derives a target for it;
   `up.fragment.get(root, element)` returns it unfiltered, destroying or not).

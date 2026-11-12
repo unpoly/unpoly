@@ -130,7 +130,7 @@ extendDescribe('up.layer', function() {
             up.layer.open({ fragment: '<div class="new-overlay-element"></div>', baseLayer: 'root' })
 
             // Peel destructors run in the next microtask because of implementation details in
-            // up.Layer.Overlay#destroyElements().
+            // Overlay#destroyElements().
             await wait(300)
 
             expect(destructor).toHaveBeenCalled()
@@ -274,7 +274,8 @@ extendDescribe('up.layer', function() {
             const event1Plan = { type: 'foo', prop: 'bar ' }
             const event2Plan = { type: 'baz', prop: 'bam ' }
 
-            spyOn(up, 'emit').and.callThrough()
+            const emittedEvents = []
+            up.on('foo baz', (event) => emittedEvents.push(event))
 
             await wait()
 
@@ -285,8 +286,7 @@ extendDescribe('up.layer', function() {
 
             await wait()
 
-            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event1Plan))
-            expect(up.emit).toHaveBeenCalledWith(jasmine.objectContaining(event2Plan))
+            expect(emittedEvents.map(({ type, prop }) => ({ type, prop }))).toEqual([event1Plan, event2Plan])
           })
         })
       })
@@ -511,7 +511,7 @@ extendDescribe('up.layer', function() {
 
         it('uses the given { duration } and { easing } for the opening animation', async function() {
           up.motion.config.enabled = true
-          const animateSpy = spyOn(up, 'animate').and.callThrough()
+          const animateSpy = up.animate.mock().and.callThrough()
 
           await up.layer.open({ mode: 'modal', animation: 'fade-in', duration: 33, easing: 'linear' })
 
@@ -536,33 +536,33 @@ extendDescribe('up.layer', function() {
 
         it('uses a different animation with { animation } option', async function() {
           up.motion.config.enabled = true
-          spyOn(up, 'animate').and.callThrough()
+          const animateSpy = up.animate.mock().and.callThrough()
 
           await up.layer.open({ animation: 'move-from-top' })
 
-          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-top', jasmine.anything())
+          expect(animateSpy).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-top', jasmine.anything())
         })
 
         it('uses a different animation with { openAnimation } option', async function() {
           up.motion.config.enabled = true
-          spyOn(up, 'animate').and.callThrough()
+          const animateSpy = up.animate.mock().and.callThrough()
 
           await up.layer.open({ openAnimation: 'move-from-top' })
 
-          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-top', jasmine.anything())
+          expect(animateSpy).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-top', jasmine.anything())
         })
 
         it('accepts a { closeAnimation } option for closing', async function() {
           up.motion.config.enabled = true
-          spyOn(up, 'animate').and.callThrough()
+          const animateSpy = up.animate.mock().and.callThrough()
 
           await up.layer.open({ openAnimation: false, closeAnimation: 'move-to-bottom' })
 
-          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), false, jasmine.anything())
+          expect(animateSpy).toHaveBeenCalledWith(jasmine.any(Element), false, jasmine.anything())
 
           await up.layer.dismiss()
 
-          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
+          expect(animateSpy).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-bottom', jasmine.anything())
 
         })
 
@@ -592,16 +592,16 @@ extendDescribe('up.layer', function() {
           up.layer.config.reset()
           up.layer.config.drawer.openDuration = 5
           up.layer.config.drawer.closeDuration = 5
-          spyOn(up, 'animate').and.callThrough()
+          const animateSpy = up.animate.mock().and.callThrough()
 
           // Wait until the open animation has finished, so the drawer also animates when closing
           await new Promise((resolve) => up.layer.open({ mode: 'drawer', position: 'right', onFinished: resolve }))
 
-          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-right', jasmine.anything())
+          expect(animateSpy).toHaveBeenCalledWith(jasmine.any(Element), 'move-from-right', jasmine.anything())
 
           await up.layer.dismiss()
 
-          expect(up.animate).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-right', jasmine.anything())
+          expect(animateSpy).toHaveBeenCalledWith(jasmine.any(Element), 'move-to-right', jasmine.anything())
         })
       })
 

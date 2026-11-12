@@ -1,0 +1,155 @@
+import { isDefined } from '../../../util.js'
+import { setMissingAttr } from '../../../element.js'
+import { emit } from '../../../event.js'
+import { normalizeSource, sourceOf } from '../../../fragment.js'
+import { Change } from './change.js'
+import type { RenderOptions } from '../render_options.js'
+import type { Layer } from '../../../layer/base.js'
+import type { UpResponse } from '../../../network/response.js'
+import type { PlainObject } from '../../../util.js'
+import type { EventPlan } from '../../../event.js'
+
+/**
+What a change will update, known before its request is sent. ChangeFromURL makes them request options,
+RenderJob passes them to the `{ abort }` option.
+@internal
+*/
+export interface PreflightProps {
+  // The layer to update, or 'new' when opening an overlay.
+  layer: Layer | 'new'
+  // The layer whose fragments the request belongs to, for aborting.
+  bindLayer: Layer
+  mode: string
+  context: PlainObject
+  origin: Element | undefined
+  target: string
+  fragments: Element[]
+  bindFragments: Element[]
+}
+
+/**
+The values that `Addition#setReloadAttrs()` sets as `[up-source]`, `[up-time]` and `[up-etag]`.
+@internal
+*/
+export interface ReloadAttrsOptions {
+  oldElement?: Element
+  newElement?: Element
+  source?: string | false
+  time?: Date | false
+  etag?: string | false
+}
+
+// A change that adds new content to a layer: by updating it (UpdateLayer) or by opening it (OpenLayer).
+export class Addition extends Change {
+  // Set by subclasses.
+  declare layer: Layer
+  declare _acceptLayer: any
+  declare _dismissLayer: any
+  declare _eventPlans: EventPlan[]
+  declare _response: UpResponse | undefined
+
+  constructor(options: RenderOptions) {
+    super(options)
+    this._acceptLayer = options.acceptLayer
+    this._dismissLayer = options.dismissLayer
+    this._eventPlans = options.eventPlans || []
+    this._response = options.response
+  }
+
+  // TODO: Consider moving this to up.Layer
+  // { location: true } only makes sense with a response, and refineOption() replaces it with the response URL.
+  handleLayerChangeRequests(newElements: Element[], newLocation: string | false | undefined): void {
+    if (this.layer.isOverlay()) {
+      // TODO: Can we do this with "close"? Please recheck
+
+      // The server may send an HTTP header `X-Up-Accept-Layer: value`
+      this._tryAcceptLayerFromServer()
+      this.layer.assertAlive()
+
+      // A close condition { acceptLocation: '/path' } might have been
+      // set when the layer was opened.
+      this.layer.tryAcceptForLocation(newLocation, this._response)
+      this.layer.assertAlive()
+
+      this.layer.tryAcceptForElements(newElements, this._response)
+      this.layer.assertAlive()
+
+      // The server may send an HTTP header `X-Up-Dismiss-Layer: value`
+      this._tryDismissLayerFromServer()
+      this.layer.assertAlive()
+
+      // A close condition { dismissLocation: '/path' } might have been
+      // set when the layer was opened.
+      this.layer.tryDismissForLocation(newLocation, this._response)
+      this.layer.assertAlive()
+
+      this.layer.tryDismissForElements(newElements, this._response)
+      this.layer.assertAlive()
+    }
+
+    // On the server we support up.layer.emit('foo'), which sends:
+    //
+    //     X-Up-Events: [{ layer: 'current', type: 'foo'}]
+    //
+    // We must set the current layer to @layer so { layer: 'current' } will emit on
+    // the layer that is being updated, instead of the front layer.
+    //
+    // A listener to such a server-sent event might also close the layer.
+    this.layer.asCurrent(() => {
+      for (let eventPlan of this._eventPlans) {
+        emit({ ...eventPlan, response: this._response })
+        this.layer.assertAlive()
+      }
+    })
+  }
+
+  _tryAcceptLayerFromServer(): void {
+    // When accepting without a value, the server will send X-Up-Accept-Layer: null
+    if (isDefined(this._acceptLayer)) {
+      this.layer.accept(this._acceptLayer, { response: this._response })
+    }
+  }
+
+  _tryDismissLayerFromServer(): void {
+    // When dismissing without a value, the server will send X-Up-Dismiss-Layer: null
+    if (isDefined(this._dismissLayer)) {
+      this.layer.dismiss(this._dismissLayer, { response: this._response })
+    }
+  }
+
+  _setSource({ oldElement, newElement, source }: ReloadAttrsOptions): void {
+    // (1) When the server responds with an error, or when the request method is not
+    //     reloadable (not GET), we keep the same source as before.
+    // (2) Don't set a source if someone tries to 'keep' when opening a new layer
+    if (source === 'keep') {
+      source = (oldElement && sourceOf(oldElement))
+    }
+
+    // (1) Don't set a source if { false } is passed.
+    // (2) Don't set a source if the element HTML already has an [up-source] attribute.
+    // (3) Don't use u.matchableURL() here. We need to keep a trailing slash
+    //     to support backends that care about trailing slashes.
+    if (source) {
+      setMissingAttr(newElement, 'up-source', normalizeSource(source))
+    }
+  }
+
+  _setTime({ newElement, time }: ReloadAttrsOptions): void {
+    // If the server didn't send a Last-Modified header, tag the element
+    // with [up-time=false] to indicate that we cannot use an ancestor's [up-time].
+    setMissingAttr(newElement, 'up-time', time ? time.toUTCString() : false)
+  }
+
+  _setETag({ newElement, etag }: ReloadAttrsOptions): void {
+    // If the server didn't send an Etag header, tag the element
+    // with [up-etag=false] to indicate that we cannot use an ancestor's [up-etag].
+    setMissingAttr(newElement, 'up-etag', etag || false)
+  }
+
+  setReloadAttrs(options: ReloadAttrsOptions): void {
+    this._setSource(options)
+    this._setTime(options)
+    this._setETag(options)
+  }
+
+}

@@ -1,0 +1,314 @@
+import { mockable } from './mockable.js'
+import { emit } from './event.js'
+
+/**
+The `up:framework:booted` event.
+*/
+export type FrameworkBootedEvent = Event & {
+  mode: 'auto' | 'manual'
+}
+
+/*-
+Features to control when Unpoly boots.
+
+By default Unpoly boots on `DOMContentLoaded`, after your own scripts have had a chance to configure it and register compilers. You rarely need this namespace. Boot manually with `up.boot()` only when you load Unpoly with `<script async>`, or when you set `[up-boot=manual]` on the `<html>` element and boot later yourself. `up.framework.isSupported()` returns whether Unpoly can boot in the current browser. On an unsupported browser Unpoly stays inactive, leaving a server-side web application without JavaScript enhancements.
+
+@namespace up.framework
+*/
+
+// Event                          up.framework.readyState   document.readyState
+// ------------------------------------------------------------------------------------------------------
+// Browser starts parsing HTML    -                         loading
+// Unpoly script is running       evaling                   loading (if sync) or interactive (if defered)
+// ... namespaces are running     evaling                   loading (if sync) or interactive (if defered)
+// User scripts are running       configuring               loading (if sync) or interactive (if defered)
+// DOMContentLoaded               configuring => booting    interactive
+// Initial page is compiling      booting                   interactive
+// Document resources loaded      booted                    complete
+type ReadyState = 'evaling' | 'configuring' | 'booting' | 'booted'
+
+let readyState: ReadyState = 'evaling' // evaling => configuring => booting => booted
+
+/*-
+Whether Unpoly has finished booting.
+
+Compilers may query this property to check if the initial page is being compiled
+(as opposed to a subsequent fragment update).
+
+@property up.framework.booted
+@param {boolean} boolean
+@experimental
+*/
+
+/*-
+Resets Unpoly to the state when it was booted.
+All custom event handlers, animations, etc. that have been registered
+will be discarded.
+
+Emits event [`up:framework:reset`](/up:framework:reset).
+
+@function up.framework.reset
+@internal
+*/
+export function emitReset(): void {
+  emit('up:framework:reset', { log: false })
+}
+
+/*-
+This event is [emitted](/api/up.emit) when Unpoly is [reset](/up.framework.reset) during unit tests.
+
+@event up:framework:reset
+@internal
+*/
+
+/*-
+Manually boots the Unpoly framework.
+
+It is not usually necessary to call `up.boot()` yourself. When you load [Unpoly's JavaScript file](/learn/install),
+Unpoly will automatically boot on [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
+There are only two cases when you would boot manually:
+
+- When you load Unpoly with `<script async>`
+- When you explicitly ask to manually boot by setting an [`<html up-boot="manual">`](/api/up-boot-manual) attribute.
+
+Before you manually boot, Unpoly should be configured and compilers should be registered.
+Booting will cause Unpoly to [compile](/api/up.hello) the initial page.
+
+Unpoly will refuse to boot if the current browser is [not supported](/api/up.framework.isSupported).
+This leaves you with a classic server-side application on legacy browsers.
+
+@function up.boot
+@experimental
+@signature
+*/
+export function boot({ mode = 'manual' }: { mode?: 'manual' | 'auto' } = {}): void {
+  if (readyState !== 'configuring') {
+    // In an app with a lot of async script the user may attempt to boot us twice.
+    console.error('Unpoly has already booted')
+    return
+  }
+
+  // This is called synchronously after all Unpoly namespaces have been parsed
+  // and executed. We cannot delay booting until the DOM is ready, since by then
+  // all user-defined event listeners and compilers will have registered.
+  // Note that any non-async scripts after us will delay DOMContentLoaded.
+  let issue = supportIssue()
+  if (!issue) {
+    // Change the state in case any user-provided compiler calls up.boot().
+    // up.boot() is a no-op unless readyState === 'configuring'.
+    readyState = 'booting'
+    emit('up:framework:boot', { mode, log: false })
+    readyState = 'booted'
+    // The initial page has been compiled, so CSS can stop hiding unprocessed elements.
+    document.documentElement.classList.add('up-booted')
+    emit('up:framework:booted', { mode, log: false })
+  } else {
+    console.error("Unpoly cannot boot: %s", issue)
+  }
+}
+
+function mustManualBoot() {
+  // (A) If we're loaded via <script async>, there are no guarantees when we're called or when
+  //     subsequent scripts that configure Unpoly have executed.
+  // (B) We cannot rely on document.currentScript being present.
+  //     This function runs before the support check, we may be dealing with a browser that doesn't support `document.currentScript` (e.g. IE11).
+  //     Also `document.currentScript` is `undefined` for a `<script type="module">`.
+  if ((document.currentScript as HTMLScriptElement)?.async) {
+    return true
+  }
+
+  // (A) If we're loaded with <html up-boot="manual"> the user explicitly requested to boot Unpoly manually.
+  // (B) There is a legacy API to also allow <script up-boot="manual">.
+  //     We cannot migrate this in unpoly-migrate, as unpoly-migrate will be evaled after us.
+  if (document.querySelector('[up-boot=manual]:is(html, script)')) {
+    return true
+  }
+
+  // If we're loaded this late, someone loads us dynamically.
+  // We don't know when subsequent scripts that configure Unpoly
+  // have executed.
+  if (document.readyState === 'complete') {
+    return true
+  }
+}
+
+/*-
+This event is emitted after Unpoly has [booted](/api/up.boot).
+
+@learn-ref install
+
+For most apps this event will be emitted in the same [task](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
+as [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
+All [compilers](/api/up.script) will already have run on the initial page content.
+
+@event up:framework:booted
+@param {string} event.mode
+  A string indicating what caused Unpoly to boot.
+
+  If set to `'auto'`, Unpoly was booted automatically on `DOMContentLoaded`.
+
+  If set to `'manual'`, Unpoly was booted [manually](/api/up-boot-manual).
+
+  @experimental
+@experimental
+*/
+
+/*-
+This class is set on the `<html>` element after Unpoly has [booted](/api/up.boot).
+
+@learn-ref switching-form-state#before-booting
+
+All [compilers](/api/up.script) will already have run on the initial page content.
+
+You can use this class to hide elements until Unpoly has processed them,
+e.g. to [hide switched elements before booting](/learn/switching-form-state#before-booting):
+
+```css
+html:not(.up-booted) :is([up-show-for], [up-hide-for]) {
+  display: none;
+}
+```
+
+The class is not set when Unpoly [cannot boot](/api/up.framework.isSupported) or fails to load.
+Elements hidden by such a rule would then stay hidden.
+
+@selector .up-booted
+@experimental
+*/
+
+/*-
+Prevent Unpoly from booting automatically.
+
+@learn-ref install
+
+By default Unpoly [automatically boots](/learn/install#initialization)
+on [`DOMContentLoaded`](https://developer.mozilla.org/en-US/docs/Web/API/Window/DOMContentLoaded_event).
+To prevent this, add an `[up-boot="manual"]` attribute to the `<html>` element:
+
+```html
+<html up-boot="manual"> <!-- mark: up-boot="manual" -->
+  ...
+</html>
+```
+You may then call `up.boot()` to manually boot Unpoly at a later time.
+
+@selector [up-boot=manual]
+@experimental
+@signature
+*/
+
+export function onEvaled(): void {
+  emit('up:framework:evaled', { log: false })
+
+  if (mustManualBoot()) {
+    console.debug('Call up.boot() after you have configured Unpoly')
+  } else {
+    // (1) On DOMContentLoaded we know that all non-[async] scripts have executed.
+    // (2) Deferred scripts execute after the DOM was parsed (document.readyState === 'interactive'),
+    //     but before DOMContentLoaded. That's why we must *not* boot synchonously when
+    //     document.readyState === 'interactive'. We must wait until DOMContentLoaded, when we know that
+    //     subsequent users scripts have executed and (possibly) configured Unpoly.
+    // (3) There are no guarantees when [async] scripts execute. These must boot Unpoly manually.
+    document.addEventListener('DOMContentLoaded', () => boot({ mode: 'auto' }))
+  }
+
+  // After this line user scripts may run and configure Unpoly, add compilers, etc.
+  readyState = 'configuring'
+}
+
+export function startExtension(): void {
+  if (readyState !== 'configuring') {
+    throw new Error('Unpoly extensions must be loaded before booting')
+  }
+  readyState = 'evaling'
+}
+
+export function stopExtension(): void {
+  readyState = 'configuring'
+}
+
+/*-
+Returns whether Unpoly can boot in the current browser.
+
+If this returns `false` Unpoly will not automatically [boot](/api/up.boot)
+and will not [compile](/learn/enhancing-elements) the initial page.
+This leaves you with a server-side web application without any JavaScript enhancements.
+
+The support check is very cursory. While it will exclude most legacy browsers
+like Internet Explorer, there may be cases where `up.framework.isSupported()`
+returns `true` on a browser with other support issues.
+To use your own conditions for browser support, [boot manually](/api/up-boot-manual).
+
+### Browser support
+
+Unpoly aims to support all modern browsers.
+
+#### Chrome, Firefox, Microsoft Edge
+
+Unpoly supports recent versions of these [evergreen](https://stephenweiss.dev/evergreen-browsers) browsers.
+
+#### Safari, Mobile Safari
+
+Unpoly supports the last two major versions of Safari.
+
+#### Internet Explorer
+
+Internet Explorer 11 or lower is [no longer supported](https://github.com/unpoly/unpoly/discussions/340).
+
+If you need to support Internet Explorer 11, use Unpoly 2.
+
+@function up.framework.isSupported
+@stable
+@signature
+*/
+export function isSupported(): boolean {
+  return !supportIssue()
+}
+
+export function isEvaling(): boolean {
+  return readyState === 'evaling'
+}
+
+export function isBooted(): boolean {
+  return readyState === 'booted'
+}
+
+// Mockable, so specs can pretend that Unpoly hasn't booted.
+export const isBeforeBoot = mockable(function isBeforeBoot(): boolean {
+  return readyState !== 'booting' && readyState !== 'booted'
+})
+
+// Gives a class its public name, which survives minification (see unpoly.ts). We define the
+// tag instead of assigning it, which would throw when the class inherits a getter or read-only tag.
+// The tag stays writable and configurable, so an app can still assign its own tag to a subclass or instance.
+export function setClassName(klass: abstract new (...args: any[]) => any, name: string): void {
+  Object.defineProperty(klass, 'name', { value: name })
+  Object.defineProperty(klass.prototype, Symbol.toStringTag, { value: name, writable: true, configurable: true })
+}
+
+function supportIssue(): string | undefined {
+  for (let feature of ['Promise', 'DOMParser', 'FormData', 'reportError'] as const) {
+    if (!window[feature]) {
+      return `Browser doesn't support the ${feature} API`
+    }
+  }
+
+  if (document.compatMode === 'BackCompat') {
+    return 'Browser is in quirks mode (missing DOCTYPE?)'
+  }
+
+  for (let selector of [':is(*)', ':has(*)']) {
+    if (!CSS.supports(`selector(${selector})`)) {
+      return `Browser doesn't support the ${selector} selector`
+    }
+  }
+}
+
+export const api = {
+  framework: {
+    boot,
+    get booted() { return isBooted() },
+    isSupported,
+  },
+  boot,
+}

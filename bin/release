@@ -69,18 +69,26 @@ function confirm(message) {
   })
 }
 
+// Removes every build output, so we only publish what the production build writes. Removing
+// only files that paths() doesn't match left a dev or CI build's maps of the unminified bundles
+// (unpoly.js.map and friends) in dist/, which paths() matched and we published.
 function clean() {
-  const distPath = 'dist'
-  if (fs.existsSync(distPath)) {
-    console.log("Cleaning orphaned files...")
-    console.log()
-    globSync('dist/unpoly*{.css,.js}').forEach(filePath => {
-      if (!paths().includes(filePath)) {
-        console.log("Cleaning orphaned file: %o", filePath)
-        fs.unlinkSync(filePath)
-      }
-    })
-    console.log()
+  console.log("Removing previous build outputs...")
+  console.log()
+  globSync('dist/unpoly*{.css,.js,.map,.gz}').forEach(filePath => {
+    fs.unlinkSync(filePath)
+  })
+}
+
+// A running dev environment writes to dist/ too. bin/build stops it, but only after clean(), so a
+// dev rebuild in between could leave its source maps for us to publish. Stop it first.
+async function stopDevEnv() {
+  const { stopDevEnv } = await import('../tooling/dev_env.mjs')
+  const { result, pid } = await stopDevEnv()
+  if (result === 'stopped') {
+    console.log(colors.yellow('Stopped the dev environment, since it writes to dist/ too. Restart it with bin/dev.'))
+  } else if (result === 'wedged') {
+    throw new Error(`The dev environment (PID ${pid}) would not stop. Stop it by hand, then release again.`)
   }
 }
 
@@ -167,6 +175,7 @@ function paths() {
 
 async function processRelease() {
   checkChangelog()
+  await stopDevEnv()
   await clean()
   await build()
   await confirmRelease()

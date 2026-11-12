@@ -1,0 +1,277 @@
+import {
+  always, containsAll, defineDelegates, each, every, filterList, last, remove, variant, wrapValue,
+} from '../util.js'
+import { splitTarget } from '../fragment.js'
+import { networkConfig } from '../network.js'
+import { UpRequest } from './request.js'
+import { UpResponse } from './response.js'
+import type { RequestCondition, RequestOptions } from './request.js'
+
+/**
+Options for `up.cache.track()`.
+@internal
+*/
+export interface TrackOptions {
+  // Track even if the requests would not get the same response.
+  force?: boolean
+  onIncompatible?: (newRequest: UpRequest) => void
+}
+
+// One route per method and URL.
+class Route {
+
+  // A list of `Vary` header names that we have seen in responses
+  // to earlier requests with this route's method and URL.
+  varyHeaders: Set<string> = new Set()
+
+  // Cached requests for this route's method and URL.
+  requests: UpRequest[] = []
+
+  matchBest(newRequest: UpRequest): UpRequest | undefined {
+    let matches = this.requests.filter((cachedRequest) => this.satisfies(cachedRequest, newRequest))
+    // Newer requests are always appended
+    return last(matches)
+  }
+
+  delete(request: UpRequest): void {
+    remove(this.requests, request)
+  }
+
+  put(request: UpRequest): void {
+    this.requests.push(request)
+  }
+
+  updateVary(response: UpResponse): void {
+    for (let headerName of response.varyHeaderNames) {
+      this.varyHeaders.add(headerName)
+    }
+  }
+
+  satisfies(cachedRequest: UpRequest, newRequest: UpRequest): boolean {
+    if (cachedRequest === newRequest) return true
+
+    return every(this.varyHeaders, (varyHeader) => {
+      let cachedValue = cachedRequest.header(varyHeader)
+      let newValue = newRequest.header(varyHeader)
+
+      if (varyHeader === 'X-Up-Target' || varyHeader === 'X-Up-Fail-Target') {
+        // A response that was not tailored to a target is a match for all targets
+        if (!cachedValue) return true
+
+        // A response tailored to a target is never a match for a response without a target
+        if (!newValue) return false
+
+        let cachedTokens = splitTarget(cachedValue)
+        let newTokens = splitTarget(newValue)
+
+        return containsAll(cachedTokens, newTokens)
+      } else {
+        return cachedValue === newValue
+      }
+    })
+  }
+}
+
+export class UpRequestCache {
+  declare _routes: Record<string, Route>
+  declare _requests: UpRequest[]
+
+  constructor() {
+    this.reset()
+  }
+
+  reset(): void {
+    this._routes = {}
+    this._requests = []
+  }
+
+  get(request: UpRequest | RequestOptions): UpRequest | undefined
+  // The request is wrapped in place, so the implementation takes the wrapped type.
+  get(request: UpRequest) {
+    request = this._wrap(request)
+    let route = this._getRoute(request)
+
+    let cachedRequest = route.matchBest(request)
+    if (cachedRequest) {
+      if (this._isUsable(cachedRequest)) {
+        return cachedRequest
+      } else {
+        // Cache hit, but too old
+        this._delete(cachedRequest)
+      }
+    }
+  }
+
+  put(request: UpRequest | RequestOptions): Promise<void>
+  // The request is wrapped in place, so the implementation takes the wrapped type.
+  async put(request: UpRequest) {
+    request = this._wrap(request)
+    let route = this._getRoute(request)
+
+    // put() is called both (1) before the request was made and (2) when the response was received.
+    // A response may carry new Vary headers that we need to respect for future cache lookups.
+    let { response } = request
+    if (response) route.updateVary(response)
+
+    // Delete all cached requests for which this newer request is also a match.
+    // This could also match an earlier entry for the same request.
+    let superseded = route.requests.filter((oldRequest) => route.satisfies(request, oldRequest))
+    // Delete in two steps so we (1) don't change the list we're iterating over and
+    // (2) only rewrite the requests array if necessary.
+    for (let r of superseded) { this._delete(r) }
+
+    // Wait for deletion above before we set request.cacheRoute.
+    // We are often going to match and delete our own request, and this clears request.cacheRoute.
+    request.cacheRoute = route
+
+    // Store the request with the route for fast lookup.
+    route.put(request)
+
+    // Store the request in a global list for quick iteration over all cache entries.
+    this._requests.push(request)
+
+    // Make sure that our size doesn't exceed our capacity.
+    this._limitSize()
+  }
+
+  // TODO: Move this to up.Request
+  async track(existingRequest: UpRequest, newRequest: UpRequest, options: TrackOptions = {}): Promise<void> {
+    newRequest.trackedRequest = existingRequest
+    newRequest.state = 'tracking'
+
+    let value
+
+    // In case existingRequest is already settled, we need to settle newRequest sync, not one microtask later.
+    // This is required to reliably revert active previews before making a new request.
+    if (existingRequest.ended && existingRequest.response) {
+      value = existingRequest.response
+    } else {
+      // Wait until existingRequest responds or errors.
+      // Note that while we're waiting, existingRequest could be evicted, e.g. after a failed response.
+      value = await always(existingRequest)
+
+      // If newRequest was aborted while waiting, it must stay aborted.
+      // In particular we must not re-send it on a Vary mismatch, or delegate its state to existingRequest.
+      if (newRequest.ended) return
+    }
+
+    if (value instanceof UpResponse) {
+      // A request in the cache has a route.
+      if (options.force || existingRequest.cacheRoute!.satisfies(existingRequest, newRequest)) {
+        // Remember that newRequest was settled from cache.
+        // This makes it a candidate for cache revalidation.
+        newRequest.fromCache = true
+
+        // Create a variant where response.request === newRequest.
+        // This is needed so up.render({ response }) can see the correct value for response.request.fromCache,
+        // which is true for the cache-missing request but false for the cache-hitting request.
+        value = variant(value, { request: newRequest })
+
+        // respondWith() will check response.ok and either fulfill or reject newRequest's promise.
+        newRequest.respondWith(value)
+
+        // Since this request object is never in the cache, we need
+        // to expire ourselves when otherRequest is expired.
+        defineDelegates(newRequest, ['expired', 'state'], () => existingRequest)
+      } else {
+        // A supposed cache hit turns out to be a cache *miss* due to the response carrying
+        // an incompatible Vary header.
+        delete newRequest.trackedRequest
+        newRequest.state = 'new'
+
+        // The two requests turned out to not be cache hits for each other, as
+        // the response carried a Vary header. We will re-process newRequest as if it
+        // was just queued.
+        options.onIncompatible?.(newRequest)
+      }
+    } else {
+      // Copy terminal state like 'offline' or 'aborted'
+      newRequest.state = existingRequest.state
+      // If we did not get an up.Response, it must be an error
+      newRequest._reject(value)
+    }
+  }
+
+  // Used by UpRequest.tester()
+  willHaveSameResponse(existingRequest: UpRequest, newRequest: UpRequest): boolean {
+    return existingRequest === newRequest || existingRequest === newRequest.trackedRequest
+  }
+
+  evict(condition: RequestCondition = true, testerOptions?: { except?: UpRequest }): void {
+    this._eachMatch(condition, testerOptions,
+      // It is generally not a great idea to manipulate the list we're iterating over,
+      // but this._eachMatch() copies results before iterating.
+      (request) => this._delete(request)
+    )
+  }
+
+  expire(condition: RequestCondition = true, testerOptions?: { except?: UpRequest }): void {
+    this._eachMatch(condition, testerOptions,
+      // We need to force cached responses to be expired, regardless of their age.
+      // It may seem strange that we're setting an { expired } property on the *request*
+      // instead, but there are two good reasons:
+      //
+      // (1) The cache only holds request references. These are also promises for their
+      //     responses, but we only have sync access to the requests.
+      // (2) By marking in-flight requests as stale, this will also expire their responses
+      //     when they are eventually received.
+      (request) => request.expired = true
+    )
+  }
+
+  reindex(request: UpRequest): void {
+    this._delete(request)
+
+    // The cacheRoute is about to change because the request
+    // changed URL or params in up:request:load.
+    delete request.cacheRoute
+
+    this.put(request)
+  }
+
+  _delete(request: UpRequest): void {
+    remove(this._requests, request)
+    request.cacheRoute?.delete(request)
+  }
+
+  _getRoute(request: UpRequest): Route {
+    return request.cacheRoute || (this._routes[request.method + ' ' + request.url] ||= new Route())
+  }
+
+  _isUsable(request: UpRequest): boolean {
+    return request.age < networkConfig.cacheEvictAge
+  }
+
+  // Read by specs
+  get currentSize(): number {
+    return this._requests.length
+  }
+
+  get _capacity(): number {
+    return networkConfig.cacheSize
+
+  }
+
+  _limitSize(): void {
+    for (let i = 0; i < (this.currentSize - this._capacity); i++) {
+      // The _requests array is in insertion order, so the oldest entry will be first
+      this._delete(this._requests[0])
+    }
+  }
+
+  _eachMatch(condition: RequestCondition = true, testerOptions: { except?: UpRequest } | undefined, fn: (request: UpRequest) => void): void {
+    let tester = UpRequest.tester(condition, testerOptions)
+
+    // Copy results so evict() can delete from the list we're iterating over
+    let results = filterList(this._requests, tester)
+
+    each(results, fn)
+  }
+
+  _wrap(requestOrOptions: UpRequest | RequestOptions): UpRequest {
+    return wrapValue(UpRequest, requestOrOptions)
+  }
+
+}
+
+export type { Route }

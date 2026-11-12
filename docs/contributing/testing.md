@@ -4,7 +4,7 @@
 every change are what let you alter code you don't fully understand and find out immediately whether you broke it.
 Treat a green suite as permission to be bold, and a red one as the cheapest possible bug report.
 
-"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each namespace file `foo.js` has a
+"Tests", "specs" and "examples" are used interchangeably. Source lives in `src/unpoly/`; each namespace file `foo.ts` has a
 spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
 
 <!-- toc -->
@@ -34,6 +34,8 @@ spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
   - [Asserting on promises](#asserting-on-promises)
   - [When async/await isn't enough](#when-asyncawait-isnt-enough)
 - [Matchers](#matchers)
+- [Reaching internal functions](#reaching-internal-functions)
+- [Spying on Unpoly functions](#spying-on-unpoly-functions)
 - [Specs with special conditions](#specs-with-special-conditions)
 - [Trying something by hand](#trying-something-by-hand)
 <!-- /toc -->
@@ -65,7 +67,7 @@ F1) up.Params → #toQuery → returns the query section for the given object
     Expected 'foo-key=foo%20value&bar-key=bar%20value' to equal 'foo-key=foo+value&bar-key=bar+value'.
 
   Stacktrace:
-    spec/unpoly/classes/params_spec.js:35 in anonymous function
+    spec/unpoly/form/params_spec.js:35 in anonymous function
 
   Debug in browser:
     http://localhost:4000/specs?spec=up.Params%20%23toQuery%20returns%20the%20query%20section
@@ -192,9 +194,9 @@ See [Compatibility](compatibility.md#browser-support) for which browsers CI exer
 
 ## How specs are organized
 
-A source file's specs live at the mirrored path. `src/unpoly/form.js` is tested by
-`spec/unpoly/form_spec.js`, and `src/unpoly/classes/params.js` by
-`spec/unpoly/classes/params_spec.js`. Where a group of specs grew too large to live
+A source file's specs live at the mirrored path. `src/unpoly/form.ts` is tested by
+`spec/unpoly/form_spec.js`, and `src/unpoly/form/params.ts` by
+`spec/unpoly/form/params_spec.js`. Where a group of specs grew too large to live
 there, it moved into a sibling file that shares the namespace's prefix — see
 [extracted spec files](#extracted-spec-files) below.
 
@@ -271,8 +273,8 @@ after the quotes; run it with the matching option (`--migrate`).
 Or let `--file` work out the filter from a location:
 
 ```
-bin/test --file=spec/unpoly/classes/params_spec.js        # what that file declares
-bin/test --file=spec/unpoly/classes/params_spec.js:29     # just the group on line 29
+bin/test --file=spec/unpoly/form/params_spec.js        # what that file declares
+bin/test --file=spec/unpoly/form/params_spec.js:29     # just the group on line 29
 ```
 
 On an [extracted file](#extracted-spec-files), `--file` runs just the blocks that file
@@ -399,7 +401,7 @@ This keeps the two versions visibly identical apart from the one thing that diff
 ### Fixtures are not compiled
 
 `htmlFixtureList()` inserts elements without running [compilers](https://unpoly.com/api/up.compiler).
-When the feature under test is implemented as a compiler or with `up.attribute()`, call
+When the feature under test is implemented as a compiler (including `registerAttrCompiler()`), call
 `up.hello()` yourself:
 
 ```js
@@ -579,10 +581,49 @@ The ones you'll use constantly:
 Jasmine's `jasmine.createSpy()` and `spyOn()` carry a lot of the weight in function specs.
 
 
+## Reaching internal functions
+
+`window.up` only holds public API. The specs are a separate bundle and can't import from
+`src/unpoly`, so an internal function or class that a spec needs is published flat on
+`up.internal`, under its export name:
+
+```js
+up.internal.sprintf('%o', value)
+const doc = new up.internal.ResponseDoc({ document: html })
+```
+
+When a spec needs an internal that isn't there yet, add it to `src/unpoly/internal.ts`
+(see [Code organization](code-organization.md#namespace-pattern)).
+
+
+## Spying on Unpoly functions
+
+`spyOn(up.form, 'submit')` replaces the function on `window.up`, and
+`spyOn(up.internal, 'trackFields')` replaces it on `up.internal`. Such a spy only catches calls
+that go through the global: your spec's own calls, and calls from user code. Unpoly's own
+modules [import](code-organization.md#namespace-pattern) the function instead, so their calls
+pass the spy without a sound. A `toHaveBeenCalled()` expectation then fails for no visible
+reason. Worse, a `not.toHaveBeenCalled()` expectation passes no matter what Unpoly does, so
+the spec can never fail. Before you trust a negative expectation, check that the same spy
+records a call in the positive case.
+
+To intercept Unpoly's internal callers, the function must be wrapped in `mockable()` where it is
+defined. Then call `.mock()` on it, which returns a regular Jasmine spy:
+
+```js
+const trackFieldsSpy = up.internal.trackFields.mock().and.callThrough()
+up.internal.isSingleton.mock().and.callFake((element) => element.matches('fake-body'))
+```
+
+If the function isn't mockable yet, wrap it in `mockable()` rather than reaching for a
+workaround. `mockable()` costs nothing outside the test suite: it returns the function
+unchanged when Jasmine isn't loaded.
+
+
 ## Specs with special conditions
 
-**Browser capabilities.** `describeFallback()` runs a group with an `up.browser`
-capability stubbed out, so you can cover the degraded path:
+**Browser capabilities.** `describeFallback()` runs a group with a capability check like
+`up.internal.canPushState()` stubbed out, so you can cover the degraded path:
 
 ```js
 describeFallback('canPushState', function() { ... })

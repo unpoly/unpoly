@@ -195,7 +195,7 @@ extendDescribe('up.fragment', function() {
           describe(`when the CSP is ${strictDynamic ? 'strict-dynamic' : 'not strict-dynamic'}`, function() {
 
             function cspString() {
-              if (u.assert(strictDynamic, u.isGiven)) {
+              if (up.internal.assert(strictDynamic, u.isGiven)) {
                 return "script-src 'strict-dynamic' 'nonce-response111'"
               } else {
                 return "script-src 'self' 'nonce-response111'"
@@ -600,7 +600,7 @@ extendDescribe('up.fragment', function() {
 
           describe('if the page nonce is not known', function() {
             beforeEach(function() {
-              spyOn(up.script, 'cspNonce').and.returnValue(null)
+              up.internal.cspNonce.mock().and.returnValue(null)
             })
 
             itBehavesLikeBlock()

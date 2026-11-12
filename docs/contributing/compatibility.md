@@ -13,8 +13,9 @@ Only Chrome and Firefox have automated specs (`bin/test --browser=firefox`), and
 Modern *syntax* is safe: the build transpiles it down (to ES2024 for `unpoly.js`, to ES6
 for the optional `unpoly.es6.js`). Modern *APIs* are not, since transpiling doesn't
 polyfill them. An API that all three browsers have supported for two years
-([caniuse.com](https://caniuse.com)) needs no runtime check. A newer one needs a feature check
-in `up.browser`, e.g. `up.browser.canPushState()`, and a path that degrades rather than throws.
+([caniuse.com](https://caniuse.com)) needs no runtime check. A newer one needs a feature check that specs can stub, like
+`canPushState()` (see [`describeFallback()`](testing.md#specs-with-special-conditions)), and a
+path that degrades rather than throws.
 Skipping an animation is fine.
 
 
@@ -28,11 +29,11 @@ warning in the console; apps that don't, break — which is why the polyfill is 
 of the rename.
 
 `src/unpoly-migrate/` mirrors the [namespaces](code-organization.md#responsibilities),
-so a renamed `up.form` API gets its polyfill in `src/unpoly-migrate/form.js`.
+so a renamed `up.form` API gets its polyfill in `src/unpoly-migrate/form.ts`.
 
 `up.migrate` has helpers for the usual cases — renamed or removed attributes, events and
 properties, renamed namespaces, functions that used to be async. A renamed *function* is
-delegated by hand with `up.migrate.deprecated()`. Read `src/unpoly-migrate/migrate.js`
+delegated by hand with `up.migrate.deprecated()`. Read `src/unpoly-migrate/migrate.ts`
 before hand-rolling one. Two examples follow.
 
 

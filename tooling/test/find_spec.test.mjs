@@ -354,16 +354,16 @@ describe('up.Params', function() {
   })
 
 })
-`, {}, 'spec/unpoly/classes/params_spec.js')
+`, {}, 'spec/unpoly/form/params_spec.js')
 
 const names = (filters) => filters?.map((filter) => filter.name) ?? null
 
 test('a file resolves to its outermost group', () => {
-  assert.deepEqual(names(specFiltersFor(PARAMS, 'spec/unpoly/classes/params_spec.js')), ['up.Params'])
+  assert.deepEqual(names(specFiltersFor(PARAMS, 'spec/unpoly/form/params_spec.js')), ['up.Params'])
 })
 
 test('a line resolves to the full name of the block declared there', () => {
-  const file = 'spec/unpoly/classes/params_spec.js'
+  const file = 'spec/unpoly/form/params_spec.js'
   assert.deepEqual(names(specFiltersFor(PARAMS, file, 4)), ['up.Params #toQuery'])
   assert.deepEqual(names(specFiltersFor(PARAMS, file, 6)), ['up.Params #toQuery returns the query section'])
 })
@@ -371,7 +371,7 @@ test('a line resolves to the full name of the block declared there', () => {
 test('a line with no block declared on it resolves to nothing', () => {
   // The caller turns this into an error naming the file and line, rather than silently
   // running something the reader did not point at.
-  assert.equal(specFiltersFor(PARAMS, 'spec/unpoly/classes/params_spec.js', 5), null)
+  assert.equal(specFiltersFor(PARAMS, 'spec/unpoly/form/params_spec.js', 5), null)
 })
 
 test('a file that declares nothing resolves to nothing', () => {

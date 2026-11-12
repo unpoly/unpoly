@@ -148,7 +148,7 @@ extendDescribe('up.radio', function() {
       it("does not reload a hungry element if it has a weak selector", async function() {
         $fixture("div[up-hungry]").text("old hungry")
         $fixture(".target").text("old target")
-        const warnSpy = spyOn(up, "warn")
+        const warnSpy = up.internal.printToWarn.mock()
 
         const renderJob = up.render(".target", { url: "/path" })
 
@@ -576,9 +576,6 @@ extendDescribe('up.radio', function() {
       describe('restriction by layer', function() {
 
         it('only updates [up-hungry] elements in the targeted layer, even if the response would yield matching elements for multiple layers', function() {
-          up.layer.config.openDuration = 0
-          up.layer.config.closeDuration = 0
-
           $fixture('.outside').text('old outside').attr('up-hungry', true)
 
           const closeEventHandler = jasmine.createSpy('close event handler')
@@ -611,11 +608,6 @@ extendDescribe('up.radio', function() {
         })
 
         describe('with [up-if-layer=any]', function() {
-
-          beforeEach(function() {
-            up.layer.config.openDuration = 0
-            up.layer.config.closeDuration = 0
-          })
 
           describe('when updating an existing overlay', function() {
 

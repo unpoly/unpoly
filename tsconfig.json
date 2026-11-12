@@ -1,1 +1,32 @@
-{}
+{
+  // Type checking only (bin/typecheck). The build (esbuild) doesn't read this file, see
+  // tsconfigRaw in tooling/build/esbuild.mjs.
+  "compilerOptions": {
+    "noEmit": true,
+
+    // Loose while we convert. A later pass tightens these.
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+
+    "target": "es2024",
+    "lib": ["es2024", "dom", "dom.iterable"],
+    "module": "preserve",
+    // Source files are ES modules that export `api` and `install()` (see src/unpoly.ts).
+    // The unpoly-migrate files and the Bootstrap entries are scripts that assign to `window.up`.
+    // Checking them as modules too gives each its own scope, so `const u = up.util` doesn't
+    // clash between files.
+    "moduleDetection": "force",
+    // Don't load @types packages of our dev dependencies (node, express, ...).
+    "types": [],
+    "skipLibCheck": true,
+    // The build strips types from each file on its own (esbuild). Flag code that needs
+    // whole-program information to emit, like re-exported types without `export type`.
+    "isolatedModules": true,
+    // Forbid TypeScript syntax that has runtime semantics (enum, namespace, parameter
+    // properties), so stripping the types is all it takes to get JavaScript. That keeps us
+    // independent of the tool that strips them.
+    "erasableSyntaxOnly": true
+  },
+  "include": ["src/**/*.ts"]
+}

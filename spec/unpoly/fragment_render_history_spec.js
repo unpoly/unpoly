@@ -1067,6 +1067,35 @@ extendDescribe('up.fragment', function() {
               expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining('Remove the [up-hungry] attribute'), jasmine.anything())
             })
 
+            it("does not warn about an [up-hungry] meta tag when up.history.config.enabled excludes meta tags", async function() {
+              up.history.config.enabled = ['location', 'title']
+              fixture(document.head, 'link[rel="canonical"][href="/old-canonical"][up-hungry]')
+              const warnSpy = up.migrate.warn.mock()
+
+              fixture('.container', { text: 'old container text' })
+              up.render('.container', { url: '/path', history: true })
+
+              await wait()
+
+              jasmine.respondWith(`
+                <html>
+                  <head>
+                    <link rel='canonical' href='/new-canonical' up-hungry>
+                  </head>
+                  <body>
+                    <div class='container'>
+                      new container text
+                    </div>
+                  </body>
+                </html>
+              `)
+
+              await wait()
+
+              expect('.container').toHaveText('new container text')
+              expect(warnSpy).not.toHaveBeenCalledWith(jasmine.stringContaining('Remove the [up-hungry] attribute'), jasmine.anything())
+            })
+
             describe('with up.history.config.updateMetaTags (deprecated)', function() {
 
               const response = `
@@ -1451,13 +1480,13 @@ extendDescribe('up.fragment', function() {
         describe('when the initial page was loaded with a POST request', function() {
 
           beforeEach(function() {
-            spyOn(up.protocol, 'initialRequestMethod').and.returnValue('POST')
+            up.internal.initialRequestMethod.mock().and.returnValue('POST')
             htmlFixtureList('<div id="container">old container text</div>')
           })
 
           it("renders in the current page when up.history.config.enabled excludes the 'location' aspect", async function() {
             up.history.config.enabled = ['lang']
-            const loadPage = spyOn(up.network, 'loadPage')
+            const loadPage = up.network.loadPage.mock()
 
             up.render('#container', { url: '/path', history: true })
             await wait()
@@ -1474,7 +1503,7 @@ extendDescribe('up.fragment', function() {
 
           it('renders in the current page with up.history.config.enabled = false', async function() {
             up.history.config.enabled = false
-            const loadPage = spyOn(up.network, 'loadPage')
+            const loadPage = up.network.loadPage.mock()
 
             up.render('#container', { url: '/path', history: true })
             await wait()

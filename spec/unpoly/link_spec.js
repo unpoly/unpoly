@@ -21,10 +21,10 @@ describe('up.link', function() {
       })
 
       it('does not render', function() {
-        spyOn(up, 'render').and.returnValue(Promise.resolve())
+        const renderSpy = up.render.mock().and.returnValue(Promise.resolve())
         const link = fixture('a[href="/path"][up-method="PUT"][up-layer="new"]')
         const options = up.link.followOptions(link)
-        expect(up.render).not.toHaveBeenCalled()
+        expect(renderSpy).not.toHaveBeenCalled()
       })
 
       it('parses the link method from a [data-method] attribute so we can replace the Rails UJS adapter with Unpoly', function() {
@@ -449,6 +449,22 @@ describe('up.link', function() {
         delete window.onLoadedCallback
       })
 
+      it('parses an [up-on-loaded] attribute that spans multiple lines', function() {
+        window.onLoadedCallback = jasmine.createSpy('onLoaded callback')
+        const [link] = htmlFixtureList(`
+          <a href="/foo" up-on-loaded="nonce-specs-nonce
+            window.onLoadedCallback('first line')
+            window.onLoadedCallback('second line')
+          ">label</a>
+        `)
+        const options = up.link.followOptions(link)
+
+        options.onLoaded(up.event.build('up:fragment:loaded'))
+
+        expect(window.onLoadedCallback.calls.allArgs()).toEqual([['first line'], ['second line']])
+        delete window.onLoadedCallback
+      })
+
       it('parses an [up-on-rendered] attribute into a function that receives the result', function() {
         window.onRenderedCallback = jasmine.createSpy('onRendered callback')
         const [link] = htmlFixtureList('<a href="/foo" up-on-rendered="nonce-specs-nonce window.onRenderedCallback(this, result)">label</a>')
@@ -776,7 +792,7 @@ describe('up.link', function() {
       }
     })
 
-    describe('up.link.shouldHandleClick', function() {
+    describe('up.internal.shouldHandleClick', function() {
 
       const buildEvent = function(target, attrs) {
         const event = Trigger.createMouseEvent('mousedown', attrs)
@@ -788,28 +804,28 @@ describe('up.link', function() {
       it("returns true when the given event's target is the given link itself", function() {
         const $link = $fixture('a[href="/foo"]')
         const event = buildEvent($link[0])
-        expect(up.link.shouldHandleClick(event, $link[0])).toBe(true)
+        expect(up.internal.shouldHandleClick(event, $link[0])).toBe(true)
       })
 
       it("returns true when the given event's target is a non-link child of the given link", function() {
         const $link = $fixture('a[href="/foo"]')
         const $span = $link.affix('span')
         const event = buildEvent($span[0])
-        expect(up.link.shouldHandleClick(event, $link[0])).toBe(true)
+        expect(up.internal.shouldHandleClick(event, $link[0])).toBe(true)
       })
 
       it("returns false when the given event's target is a child link of the given link (think [up-expand])", function() {
         const $link = $fixture('div[up-href="/foo"]')
         const $childLink = $link.affix('a[href="/bar"]')
         const event = buildEvent($childLink[0])
-        expect(up.link.shouldHandleClick(event, $link[0])).toBe(false)
+        expect(up.internal.shouldHandleClick(event, $link[0])).toBe(false)
       })
 
       it("returns false when the given event's target is a child input of the given link (think [up-expand])", function() {
         const $link = $fixture('div[up-href="/foo"]')
         const $childInput = $link.affix('input[type="text"]')
         const event = buildEvent($childInput[0])
-        expect(up.link.shouldHandleClick(event, $link[0])).toBe(false)
+        expect(up.internal.shouldHandleClick(event, $link[0])).toBe(false)
       })
     })
 
@@ -1131,7 +1147,7 @@ describe('up.link', function() {
       })
 
       it('sends a { background: true } request', async function() {
-        const requestSpy = spyOn(up, 'request').and.callThrough()
+        const requestSpy = up.request.mock().and.callThrough()
         const [link] = htmlFixtureList('<a href="/path" up-target=".target">label</a>')
 
         up.link.preload(link)
@@ -1267,7 +1283,7 @@ describe('up.link', function() {
         })
 
         it('calls up.request() with a { background: true } option', async function() {
-          const requestSpy = spyOn(up, 'request').and.callThrough()
+          const requestSpy = up.request.mock().and.callThrough()
 
           const $link = $fixture('a[href="/path"][up-target=".target"][up-layer="new modal"]')
           up.hello($link)
@@ -1487,7 +1503,7 @@ describe('up.link', function() {
           up.link.config.preloadEnabled = false
           const warnSpy = up.migrate.warn.mock()
 
-          up.framework.reset()
+          up.internal.emitReset()
 
           expect(warnSpy).not.toHaveBeenCalled()
           const link = fixture('a[href="/path"][up-preload]')
@@ -1540,7 +1556,7 @@ describe('up.link', function() {
 
           expect(link).toHaveAttribute('up-scroll', '.element')
           expect(up.link.followOptions(link).scroll).toBe('.element')
-          expect(u.sprintf(...warnSpy.calls.argsFor(0))).toContain('Attribute [up-reveal=".element"] has been replaced with [up-scroll=".element"]')
+          expect(up.internal.sprintf(...warnSpy.calls.argsFor(0))).toContain('Attribute [up-reveal=".element"] has been replaced with [up-scroll=".element"]')
         })
       })
 
@@ -1807,11 +1823,11 @@ describe('up.link', function() {
           </div>
         `)
         up.hello(area)
-        spyOn(up, 'render').and.returnValue(Promise.resolve())
+        const renderSpy = up.render.mock().and.returnValue(Promise.resolve())
         Trigger.clickSequence(area)
         await wait()
 
-        expect(up.render).toHaveBeenCalled()
+        expect(renderSpy).toHaveBeenCalled()
       })
 
       it('does nothing when the user clicks another link in the expanded area', async function() {
@@ -1842,11 +1858,11 @@ describe('up.link', function() {
       it('does not trigger multiple replaces when the user clicks on the expanded area of an [up-instant] link (bugfix)', async function() {
         const $area = $fixture('div[up-expand] a[href="/path"][up-follow][up-instant]')
         up.hello($area)
-        spyOn(up, 'render').and.returnValue(Promise.resolve())
+        const renderSpy = up.render.mock().and.returnValue(Promise.resolve())
         Trigger.clickSequence($area)
         await wait()
 
-        expect(up.render.calls.count()).toEqual(1)
+        expect(renderSpy.calls.count()).toEqual(1)
       })
 
       describe('when Unpoly follows the expanded link', function() {

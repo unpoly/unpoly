@@ -471,7 +471,7 @@ describe('up.motion', function() {
         })
 
         it("finishes animations only once", function(done) {
-          const finishSpy = spyOn(up.MotionController.prototype, 'finish').and.callThrough()
+          const finishSpy = spyOn(up.internal.MotionController.prototype, 'finish').and.callThrough()
           const $element = $fixture('.element').text('content')
 
           const animation = function(element, options) {
@@ -992,6 +992,22 @@ describe('up.motion', function() {
         expect($('up-bounds').length).toBe(0)
       })
 
+      it('transitions an old element that contains a hidden [up-fixed] element (bugfix)', async function() {
+        const [v1, hiddenFixed] = htmlFixtureList(`
+          <div class="v1">
+            v1
+            <nav up-fixed="top" style="position: fixed; top: 0; display: none">nav</nav>
+          </div>
+        `)
+        const v2 = up.element.createFromHTML('<div class="v2">v2</div>')
+
+        await up.morph(v1, v2, 'cross-fade', { duration: 5 })
+
+        expect(v1).toBeDetached()
+        expect(v2).toBeAttached()
+        expect(hiddenFixed.style.left).toBe('')
+      })
+
       // https://github.com/unpoly/unpoly/issues/439
       it('does not leave a `transition` CSS property once the transition finishes, as to not affect the positioning of child elements', async function() {
         const v1 = fixture('.element', { text: 'v1' })
@@ -1041,7 +1057,7 @@ describe('up.motion', function() {
         })
 
         it('finishes animations only once per element', async function() {
-          const finishSpy = spyOn(up.MotionController.prototype, 'finish').and.callThrough()
+          const finishSpy = spyOn(up.internal.MotionController.prototype, 'finish').and.callThrough()
 
           const oldFixture = fixture('.old', { text: 'old content' })
           const newFixture = up.element.createFromSelector('.new', { text: 'new content' }) // need detached element
@@ -1099,7 +1115,7 @@ describe('up.motion', function() {
 
 
         it("finishes animations only once", async function() {
-          const finishSpy = spyOn(up.MotionController.prototype, 'finish').and.callThrough()
+          const finishSpy = spyOn(up.internal.MotionController.prototype, 'finish').and.callThrough()
 
           const oldFixture = fixture('.old', { text: 'old content' })
           const newFixture = up.element.createFromSelector('.new', { text: 'new content' })  // need detached element

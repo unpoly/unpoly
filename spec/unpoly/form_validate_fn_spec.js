@@ -561,6 +561,24 @@ extendDescribe('up.form', function() {
           expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
         })
 
+        it('updates the form group with a blank { target } option (bugfix)', async function() {
+          const [form, group, field] = htmlFixtureList(`
+            <form action="/form">
+              <div up-form-group>
+                <input name="email">
+              </div>
+            </form>
+          `)
+
+          const promise = up.validate(field, { target: ' ' })
+
+          await wait()
+
+          expect(promise).toEqual(jasmine.any(Promise))
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Target']).toEqual('[up-form-group]:has(input[name="email"])')
+          expect(jasmine.lastRequest().requestHeaders['X-Up-Validate']).toEqual('email')
+        })
+
         it("updates a different target found in the element's [up-validate] attribute", async function() {
           const form = fixture('form[action=/form]')
           const group = e.affix(form, '[up-form-group]')

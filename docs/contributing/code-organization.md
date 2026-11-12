@@ -11,6 +11,7 @@ and how a namespace is structured internally.
   - [Not an ESM module](#not-an-esm-module)
   - [Responsibilities](#responsibilities)
   - [Namespace pattern](#namespace-pattern)
+  - [Imports, exports and types](#imports-exports-and-types)
 - [Entry points and optional bundles](#entry-points-and-optional-bundles)
 <!-- /toc -->
 
@@ -23,37 +24,38 @@ themselves are structured is covered in [Testing](testing.md#how-specs-are-organ
 This repository is organized like this:
 
 ```
-src/                      # Webpack entry points for Unpoly's main and optional bundles
-  unpoly.js               # ... Entry point for main Unpoly bundle (JS, CSS)
-  unpoly-migrate.js       # ... Entry point for optional bundle that polyfills deprecated features
+src/                      # Entry points for Unpoly's main and optional bundles
+  unpoly.ts               # ... Entry point for main Unpoly bundle (JS, CSS)
+  unpoly-migrate.ts       # ... Entry point for optional bundle that polyfills deprecated features
   ...                     # ... Other entry points for optional bundles
 
-  unpoly/                 # Source code (JS, CSS) for Unpoly's namespaces
-    form.js               # ... Code for up.form namespace
-    link.js               # ... Code for up.link namespace
+  unpoly/                 # Source code (TS, CSS) for Unpoly's namespaces
+    form.ts               # ... Code for up.form namespace
+    form/                 # ... Classes owned by up.form
+      params.ts           # ...... Code for up.Params class
+      ...
+    link.ts               # ... Code for up.link namespace
     link.sass             # ... CSS for up.link namespace
-    layer.js              # ... Code for up.layer namespace
-    ...                   # ... Code for other namespaces
-
-    classes/              # Class definitions used by namespaces
-      params.js           # ... Code for up.Params class
-      request.js          # ... Code for up.Request class
-      response.js         # ... Code for up.Response class
-      ...                 # ... Other class definitions
+    layer.ts              # ... Code for up.layer namespace
+    layer/                # ... Classes owned by up.layer
+      base.ts             # ...... Code for up.Layer class
+      modes/              # ...... One class per layer mode (ModalLayer, PopupLayer, ...)
+    fragment/             # ... Classes owned by up.fragment
+      render/             # ...... The classes behind up.render()
+    framework/            # ... Classes owned by up.framework (Registry)
+    util/                 # ... Generic helper classes (up.Config, up.Rect, ...)
+    internal.ts           # ... Internals the specs and unpoly-migrate need, published as up.internal
+    ...                   # ... Other namespaces and their classes
 
 spec/
-  unpoly/                 # Tests (Jasmine specs)
+  unpoly/                 # Tests (Jasmine specs), mirroring src/unpoly
     form_spec.js          # ... Tests for up.form namespace
     form_switch_spec.js   # ... Tests for [up-switch], too large to keep in form_spec.js
+    form/                 # ... Tests for classes owned by up.form
+      params_spec.js      # ...... Tests for up.Params class
     link_spec.js          # ... Tests for up.link namespace
     layer_spec.js         # ... Tests for up.layer namespace
-    ...                   # ... Tests for other namespaces
-
-    classes/              # Tests for classes in src/unpoly/classes
-      params_spec.js      # ... Tests for up.Params class
-      request_spec.js     # ... Tests for up.Request class
-      response_spec.js    # ... Tests for up.Response class
-      ...                 # ... Tests for other classes
+    ...                   # ... Tests for other namespaces and classes
 
   helpers/                # Utility helpers and custom matchers for Jasmine specs
     reset_up.js           # ... Cleans up global state after each test
@@ -62,7 +64,7 @@ spec/
     ...                   # ... Other helpers
 
 bin/                      # Scripts for development
-  dev                     # ... Start or stop dev environment (Webpack bundler, Jasmine runner)
+  dev                     # ... Start or stop dev environment (build watcher, Jasmine runner)
   test                    # ... Run tests from terminal (will execute in headless Chrome internally)
   find-spec               # ... Find specs by a phrase in their describe()/it() titles
   ...                     # ... other dev scripts
@@ -70,7 +72,7 @@ bin/                      # Scripts for development
 tooling/                  # Our own dev machinery, never shipped (rarely need to edit here)
   runner/                 # ... Runs the specs: server, terminal driver, in-page reporter
   scratch/                # ... Pages for trying a change by hand (see Trying out changes)
-  build/                  # ... bin/build and the Webpack configuration
+  build/                  # ... bin/build: esbuild, Terser and the build watcher
   dev_env.mjs             # ... The dev environment behind bin/dev
   find_spec.mjs           # ... Spec-title search behind bin/find-spec
   test/                   # ... Unit tests for all of the above (bin/self-test)
@@ -79,7 +81,7 @@ docs/                     # Documentation for contributors, never shipped
   contributing/           # ... The guides linked from CONTRIBUTING.md
   plans/                  # ... Implementation plans (gitignored)
 
-dist/                     # Output directory for the Webpack bundler (gitignored, never edit directly)
+dist/                     # Output directory for the build (gitignored, never edit directly)
   unpoly.js               # ... Main Unpoly bundle (JS)
   unpoly.css              # ... Main Unpoly bundle (CSS)
   unpoly.min.js           # ... Minified Unpoly bundle (JS)
@@ -111,7 +113,7 @@ Unpoly isn't an ESM module that can be imported. Instead it defines a global `wi
 - The server-rendered HTML document can directly use Unpoly's HTML extensions (e.g. `[up-follow]`, `[up-submit]`).
 - Callback attributes (like `[onclick]`, `[up-on-accepted]`) can directly call functions on the `up` global (no way to `import` here).
 
-*Internally* Unpoly is free to use ESM modules and `import`/`export`, which Webpack will compile away.
+*Internally* Unpoly's files are ES modules that `import` from each other. esbuild bundles them into one script that sets `window.up`. See the [namespace pattern](#namespace-pattern) below.
 
 ### Responsibilities
 
@@ -136,99 +138,215 @@ Unpoly's functionality is split into the namespaces below. Each namespace handle
 | `up.util` | JavaScript helpers, relaxed JSON | — | `up.util.isBlank()`, `up.util.copy()` | — |
 | `up.framework` | Booting, feature detection | `[up-boot=manual]` | `up.boot()` | `up:framework:booted` |
 | `up.log` | Console logging | — | `up.log.enable()` | — |
+| `up.error` | Error classes, expected rejections | — | `up.error.muteUncriticalRejection()` | — |
 
 We rarely add a new namespace. We sometimes rename an existing namespace when its responsibilities change, and the name no longer fits.
 
 
 ### Namespace pattern
 
-Namespaces live in `src/unpoly`. E.g. `src/unpoly/link.js` defines the `up.link` namespace that deals with hyperlinks.
+Namespaces live in `src/unpoly`. E.g. `src/unpoly/link.ts` defines the `up.link` namespace that deals with hyperlinks.
 
 A namespace definition has the following jobs:
 
 - Implement any HTML extensions, mostly new attributes like `[up-follow]`. These are either handled by event listeners, or by activating behavior on new DOM elements with a compiler.
-- Define a companion JavaScript API (like `up.link.follow()`). Public JS API is exposed on the `window.up` global, internal API is hidden within closures.
+- Define a companion JavaScript API (like `up.link.follow()`), published on the `window.up` global.
 - Often expose a configuration property (like `up.link.config`) that lets the developer configure the namespace's behavior.
+
+Each namespace is an ES module that exports:
+
+- **Named functions**, which other files `import`. Internal code never calls through the global (`up.link.follow()`), it imports `follow` from `./link.js`.
+- **`api`**, the module's contribution to `window.up`: the namespace object, plus any shortcuts like `up.follow`. Public names may differ from the internal ones (`get: getSmart`, `config: linkConfig`). It only holds public API, never an internal helper.
+- Optionally **`install()`**, which performs all the module's side effects: registering compilers, macros and event listeners.
+
+A module's top level only declares things. Nothing happens when it is imported.
 
 To illustrate, here is a *very* simplified version of `up.link`:
 
-```js
-// An Unpoly namespace is simply an object property of the `window.up` global.
-// Here we assign `up.link` to an IIFE that returns the public symbols (classic "module pattern")
-up.link = (function() {
-  
-  // Short aliases for our two utility namespaces.
-  const u = up.util
-  const e = up.element
-  
-  // Settings to globally configure link handling.
-  // Published as up.link.config.
-  const config = new up.Config(() => ({
-    followSelector: '[up-follow]',
-  }))
+```ts
+// Import the functions, classes and types we need (see "Imports, exports and types" below).
+import * as u from './util.js'
+import { emit } from './event.js'
+import type * as t from './link/types.js'
+export type * from './link/types.js'
+import { LinkFollower } from './link/link_follower.js'
 
-  // Programmatically follow a link.
-  // Published as up.link.follow()
-  function follow(link) {
-    // Allow listeners to prevent the follow
-    if (emitFollowEvent(link).defaultPrevented) return
-    
-    // Instantiate a helper class to handle the following
-    return new up.LinkFollower(link).execute()
-  }
+// Settings to globally configure link handling.
+// Published as up.link.config.
+export const linkConfig = u.newConfig('up.link.config', (): t.LinkConfig => ({
+  followSelector: '[up-follow]',
+}))
 
-  // Return whether a link will be followed by Unpoly.
-  // Published as up.link.isFollowable()
-  function isFollowable(link) {
-    return !!link.closest(config.followSelector)
-  }
+// Programmatically follow a link.
+// Published as up.link.follow() and up.follow()
+export function follow(link: Element): void {
+  // Allow listeners to prevent the follow
+  if (emitFollowEvent(link).defaultPrevented) return
 
-  // Internal helper to emit an up:link:follow event.
-  // Not published.
-  function emitFollowEvent(link) {
-    return up.emit(link, 'up:link:follow')
-  }
-  
+  // Instantiate a helper class to handle the following
+  new LinkFollower(link).execute()
+}
+
+// Return whether a link will be followed by Unpoly.
+// Published as up.link.isFollowable()
+export function isFollowable(link: Element): boolean {
+  return !!link.closest(linkConfig.followSelector)
+}
+
+// Internal helper to emit an up:link:follow event.
+// Not exported, not published.
+function emitFollowEvent(link: Element): t.LinkFollowEvent {
+  return emit(link, 'up:link:follow')
+}
+
+// Side effects only run when the entry file calls install().
+export function install(): void {
   // Handle clicks on links with an [up-follow] attribute
   document.addEventListener('click', function(event) {
-    if (isFollowable(event.target)) {
-      follow(event.target)
+    let link = event.target as Element
+    if (isFollowable(link)) {
+      follow(link)
     }
   })
-  
-  // Return the public functions and values that will be set as up.link properties.
-  // Do not return internal helpers.
-  return {
-    config,       // becomes up.link.config
-    follow,       // becomes up.link.follow()
-    isFollowable, // becomes up.link.isFollowable()
-  }
-})()
+}
 
-// We usually expose functions as `up.namespace.verb()`.
-// Frequently used functions are aliased directly on `window.up` to shorten call sites.
-up.follow = up.link.follow
+// The public functions and values that will be set as up.link properties.
+// Do not add internal helpers.
+export const api = {
+  link: {
+    config: linkConfig, // becomes up.link.config
+    follow,             // becomes up.link.follow()
+    isFollowable,       // becomes up.link.isFollowable()
+  },
+  // We usually expose functions as `up.namespace.verb()`.
+  // Frequently used functions also get a shortcut directly on `window.up`.
+  follow,               // becomes up.follow()
+}
 ```
+
+Classes live in a folder named after the namespace that owns them, next to the namespace
+file: `form.ts` beside `form/`, `layer.ts` beside `layer/`. A published class goes where its
+docs are (`up.Params` is documented under `up.form`). Closely related classes share a
+sub-folder, like `fragment/render/` or `layer/modes/`. Generic helper classes live in
+`util/`. A class file exports the class, and an `api` if the class is public. Classes are
+named so they stand on their own (`ModalLayer`, not a nested `up.Layer.Modal`). A class named
+like a browser global gets an `Up` prefix (`UpRequest`, see
+[Naming](code-style.md#names-that-collide-with-globals)).
+
+`window.up` only holds public API. The specs and `unpoly-migrate` are separate bundles that
+can't import from `src/unpoly`, so the internal functions and classes they need are published
+on `up.internal`. `src/unpoly/internal.ts` imports each one and lists it under its export name,
+flat, without a namespace: `up.internal.sprintf`, `up.internal.ResponseDoc`. Because every key
+is an import binding, two keys can't collide. When an export name only makes sense next to its
+module (`getSubtree` in `viewport.ts`), rename the export where it is defined
+(`getViewportSubtree`) rather than the key. Add an internal only when a spec or
+`unpoly-migrate` needs it.
+
+The entry file `src/unpoly.ts` ties the modules together. It imports every module, copies
+each `api` onto `window.up` (the `apis` list), then calls each `install()` (the `installs`
+list, which is the explicit install order). Its comments also explain the rules for import
+cycles between modules. Two modules must not contribute the same key to `window.up`, or the
+later one silently replaces the earlier one; [`bin/lint`](code-style.md) reports that, and that
+`up.internal` keys are their export names.
+
+Because internal callers import functions directly, a spec that spies on `up.link.follow`
+doesn't intercept calls from other modules. A function that specs need to replace is wrapped
+in `mockable()`, and specs call `up.link.follow.mock()` or `up.internal.trackFields.mock()`
+(see [Testing](testing.md#spying-on-unpoly-functions)).
+
+`util.ts`, `element.ts`, `browser.ts`, `error.ts` and the classes in `util/` and `error/` are
+evaluated before any feature namespace, so they never import one like `up.fragment`.
+Where they need one, move the function down into a module they may import, as we did with
+`copyCursorProps()` in `element.ts`. Instead of checking `instanceof` against a class
+from a feature namespace, define a protocol key that the class implements, like
+`up.util.copy.key`: `error.ts` defines `isCritical.key`, and `up.Response` implements it. Only
+when neither is possible, call the function through the global at call time, as `Config` logs
+with `up.internal.printToError()`.
+
+### Imports, exports and types
+
+The code base is being migrated to this shape, and some of its lint rules don't exist yet. New
+and changed modules follow it. How to write the types themselves is covered in
+[Code style](code-style.md#typescript).
+
+Import other modules by their `.js` name (`import { emit } from './event.js'`), also when they
+are `.ts` files. TypeScript and the build both resolve this to `event.ts`.
+
+**Types.** A module's types live in `<module>/types.ts`, next to its classes:
+`fragment/types.ts` for `fragment.ts`. Their `/** */` comments stay with them. The module
+imports them as `t` and re-exports them, so other modules import types from the main module,
+never from a `types.ts`:
+
+```ts
+import type * as t from './fragment/types.js'
+export type * from './fragment/types.js'
+```
+
+**Namespace aliases.** `util.ts` and `element.ts` are imported as `import * as u` and
+`import * as e`. Aliases are lowercase (`u`, `e`, `t`): lowercase means a module, uppercase a
+class, and single uppercase letters are taken by type parameters. Use an alias only as
+`u.member`, for values and types alike (`u.map()`, `u.List<Element>`). Passing the alias
+itself around makes esbuild build the module's namespace object, which is 2.4 KB for util.
+Don't shadow an alias with a local variable (`catch (error)`, not `catch (e)`). `bin/lint`
+reports both (`unpoly/namespace-aliases`).
+
+**Other main modules** get one `import { … }` statement each, with types inline as `type X`.
+Import a class from the main module that owns it, not from its file:
+`import { Layer, layerConfig, type LayerMode } from './layer.js'`.
+
+**Header order:**
+
+1. The module's Sass file
+2. `u` and `e`
+3. Other main modules, one statement each
+4. Own types: `import type * as t` and `export type *`
+5. Own classes, grouped by source file. Each import is directly followed by its re-export. A
+   class the module only re-exports gets a single `export { … } from` line.
+
+```ts
+import './fragment.sass'
+import * as u from './util.js'
+import * as e from './element.js'
+import { CannotTarget, fail } from './error.js'
+import { emit, on } from './event.js'
+import { Layer, layerConfig } from './layer.js'
+import type * as t from './fragment/types.js'
+export type * from './fragment/types.js'
+import { FragmentFinder } from './fragment/fragment_finder.js'
+import { RenderJob } from './fragment/render/render_job.js'
+export { RenderJob }
+export { RenderResult } from './fragment/render/render_result.js'
+```
+
+A module re-exports exactly the classes that other modules import, nothing more.
+`internal.ts` counts as another module, since it's how the specs reach a class.
+
+> [!WARNING]
+> A re-export can change when an importer gets the class. In an import cycle, the importer
+> may be evaluated before the main module has imported the class file, and esbuild gives it a
+> silent `undefined` instead of an error. Before a module imports a class through a re-export,
+> check that it doesn't use the class while it is being defined (`extends`, a static block, a
+> top-level call). The rules for cycles are in the comments of `src/unpoly.ts`.
 
 
 ## Entry points and optional bundles
 
-Files directly in `src/` are Webpack entry points, one per bundle we publish. Everything
+Files directly in `src/` are entry points, one per bundle we publish. Everything
 in `src/unpoly/` is only ever reached through one of them.
 
-- `src/unpoly.js` is the main bundle. It is built twice: `unpoly.js` for current
+- `src/unpoly.ts` is the main bundle. It is built twice: `unpoly.js` for current
   browsers, and `unpoly.es6.js` for
   [older ones](https://unpoly.com/install/legacy-browsers).
-- `src/unpoly-migrate.js` polyfills renamed and removed APIs, so an app can
+- `src/unpoly-migrate.ts` polyfills renamed and removed APIs, so an app can
   [upgrade](https://unpoly.com/changes/upgrading) without changing all its call sites at
   once. See [Compatibility](compatibility.md#breaking-changes) for how to write one.
-- `src/unpoly-bootstrap{3,4,5}.js` adapt Unpoly to
+- `src/unpoly-bootstrap{3,4,5}.ts` adapt Unpoly to
   [Bootstrap](https://unpoly.com/install/bootstrap).
 
 Read one of the Bootstrap entries before you add anything to `src/`. They contain no
 behavior at all — only configuration:
 
-```js
+```ts
 up.status.config.currentClasses.push('active')
 up.viewport.config.fixedTopSelectors.push('.navbar.fixed-top')
 ```
@@ -238,5 +356,5 @@ ecosystem, plus a sibling `.sass` file. If a bundle seems to need behavior of it
 that behavior belongs in a namespace, reachable through config from outside.
 `unpoly-migrate` is the exception, and it earns it by shipping polyfills.
 
-A new bundle needs an entry in `tooling/build/webpack/entries.js` *and* its output files listed in
+A new bundle needs an entry in `tooling/build/bundles.mjs` *and* its output files listed in
 `bin/release`, or it won't be published.

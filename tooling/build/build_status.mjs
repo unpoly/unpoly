@@ -1,11 +1,9 @@
-// The build-status protocol, in one place: the webpack plugin that WRITES
-// tmp/build-status.json (added to tooling/build/webpack/development.js, the watcher's config)
-// and the reader that build_sync.mjs uses. One shared plugin instance is pushed
-// onto every dev sub-config, so its counter reflects *all* in-flight compilers —
-// the status only flips to "idle" when every current rebuild has finished, which
-// avoids a runner reading a half-written dist bundle.
+// The build-status protocol, in one place: the writer that the dev watcher (watch.mjs) uses for
+// tmp/build-status.json, and the reader that build_sync.mjs, `bin/dev status` and the scratch
+// server use. The watcher rebuilds every bundle together, in rounds, and reports a round as
+// "idle" only once all of its bundles are written, so a runner never reads a half-written dist/.
 
-import { writeFileSync, mkdirSync, readFileSync, renameSync } from 'node:fs'
+import { writeFileSync, mkdirSync, readFileSync, renameSync, unlinkSync } from 'node:fs'
 import path from 'node:path'
 
 // The repo root, derived from this file rather than the cwd: a `bin/test` run from a
@@ -22,108 +20,119 @@ export function readStatus(root = PROJECT_ROOT) {
   }
 }
 
-export class BuildStatusPlugin {
-  #building = 0
+// Only the watcher creates one of these, so there is exactly one writer. (Under webpack, a
+// one-shot `bin/build --config=ci` reused the watcher's plugin and overwrote a running
+// watcher's status with its own pid; everything that read the file then saw a dead process.)
+//
+// Besides the state, the status says which edits the watcher's builds include, file by file, so
+// that waitForFreshBuild() can tell a missed edit from one that was built. A start time alone
+// couldn't: any later round, for another file or for a swap file, would certify every older
+// edit, including one the watcher never saw. `fullStartedAt` is the start of the last round
+// that built and linted everything, so it includes every edit older than that. `seen` maps the
+// files and directories the watcher had an event for since then (relative to the project root)
+// to the start of the last round after such an event.
+export class BuildStatus {
   #startedAt
-  #errors = []
+  #fullStartedAt = null
+  #seen = new Map()
   #sink
-  #watching = false
-  #startedPerCompiler = new Map()
-
   #now
+  #root
 
-  // `write` and `now` are seams for the self-tests; production uses the file writer and
-  // the wall clock.
-  constructor({ write = writeStatusFile, now = Date.now } = {}) {
+  // `write`, `now` and `root` are seams for the self-tests; production uses the file writer, the
+  // wall clock and the project root.
+  constructor({ write = writeStatusFile, now = Date.now, root = PROJECT_ROOT } = {}) {
     this.#sink = write
     this.#now = now
+    this.#root = root
     this.#startedAt = now()
   }
 
-  apply(compiler) {
-    // Only a *watching* compiler may write the status file, so there is exactly one
-    // writer: the dev environment's watcher. `watchRun` fires only under --watch, and
-    // arming on it is what makes this structural — `done` fires for one-shot builds
-    // too, and tooling/build/webpack/ci.js reuses the watcher's configs (plugin included), so
-    // `bin/build --config=ci` used to overwrite a running watcher's status with its
-    // own pid. Everything that read the file then saw a dead process and concluded
-    // the dev environment was gone.
-    compiler.hooks.watchRun.tap('BuildStatusPlugin', () => {
-      this.#watching = true
-      if (this.#building === 0) this.#errors = [] // start of a fresh rebuild round
-      this.#building++
-      // Per compiler, because they rebuild independently: a fast one can finish and
-      // start again while a slow one is still going, so the counter never returns to
-      // zero between two logical rounds. Keying `startedAt` off that counter left it
-      // stuck at the first round's time, and `waitForFreshBuild()` then waited out its
-      // timeout insisting the watcher had not picked up an edit it had already built.
-      this.#startedPerCompiler.set(compiler, this.#now())
-      this.#write('building')
-    })
-    compiler.hooks.done.tap('BuildStatusPlugin', (stats) => {
-      if (!this.#watching) return // a one-shot build: not ours to report
-      // Runs for failed compilations too (webpack, ts-loader syntax errors, and
-      // ESLint via eslint-webpack-plugin all surface as compilation errors). We
-      // record them but never throw — the watcher must keep watching.
-      if (stats.hasErrors()) {
-        this.#errors.push(stats.toString({ all: false, errors: true, colors: false }))
+  // A round of rebuilds begins. Called before any bundle reads a source, so `startedAt` is
+  // older than every file the round sees: waitForFreshBuild() trusts a round to include an edit
+  // only if the round started after the edit's mtime.
+  //
+  // `seen` are the absolute paths that had an event since the last round. `full` says that the
+  // round builds and lints everything.
+  start({ seen = [], full = false } = {}) {
+    this.#startedAt = this.#now()
+    if (full) {
+      this.#fullStartedAt = this.#startedAt
+      this.#seen.clear()
+    } else {
+      for (let file of seen) {
+        if (file) this.#seen.set(path.relative(this.#root, file), this.#startedAt)
       }
-      this.#settle()
-    })
-    // A watch cycle can fail *without* reaching `done` — an fs error while emitting,
-    // EMFILE, a plugin throwing. Webpack fires `failed` instead, and without this tap
-    // the counter never returned to zero: the status stayed "building" for ever and
-    // every later bin/test timed out blaming a watcher that was fine.
-    compiler.hooks.failed.tap('BuildStatusPlugin', (error) => {
-      if (!this.#watching) return
-      this.#errors.push(String(error && error.stack || error))
-      this.#settle()
-    })
+    }
+    this.#write('building', [])
   }
 
-  #settle() {
-    this.#building = Math.max(0, this.#building - 1)
-    if (this.#building > 0) return
-
-    this.#write('idle')
-    // The busy period is over, so the next one starts from a clean slate. Without this
-    // a compiler that stops taking part would pin `startedAt` to its last start for
-    // ever, and nothing would ever look fresh again.
-    this.#startedPerCompiler.clear()
+  // The round is over, and dist/ is complete. `errors` are formatted messages (build and lint),
+  // empty for a clean round. Also called when a round fails in an unexpected way, so the status
+  // never stays "building" for ever.
+  finish(errors) {
+    this.#write('idle', errors)
   }
 
-  // The oldest start among the compilers taking part in the current busy period.
-  // Reporting the newest would certify an edit that only the fastest compiler picked up;
-  // the oldest is conservative, so the worst case is waiting for one more rebuild.
-  #oldestStart() {
-    const starts = [...this.#startedPerCompiler.values()]
-    return starts.length ? Math.min(...starts) : this.#startedAt
-  }
-
-  #write(state) {
+  #write(state, errors) {
     this.#sink({
       pid: process.pid,
       state,
-      startedAt: this.#oldestStart(),
-      ok: this.#errors.length === 0,
-      // Several sub-compilers build the same source (es5/es6, CSP variants…), so
-      // the same file's error shows up more than once — collapse the duplicates.
-      errors: [...new Set(this.#errors)].join('\n\n'),
+      startedAt: this.#startedAt,
+      fullStartedAt: this.#fullStartedAt,
+      seen: Object.fromEntries(this.#seen),
+      ok: errors.length === 0,
+      // Several bundles build the same source (modern/es6, unpoly/specs…), so the same file's
+      // error shows up more than once. Collapse the duplicates.
+      errors: [...new Set(errors)].join('\n\n'),
     })
   }
 }
 
 function writeStatusFile(status) {
   try {
-    let file = path.join(PROJECT_ROOT, STATUS_PATH)
-    mkdirSync(path.dirname(file), { recursive: true })
-    // Write-then-rename, because a reader polling every 100ms can otherwise catch a
-    // half-written file: readStatus() returns null for it, and the runner reported a
-    // healthy watcher as missing.
-    let temp = `${file}.${process.pid}.tmp`
-    writeFileSync(temp, JSON.stringify(status))
-    renameSync(temp, file)
+    writeAtomically(path.join(PROJECT_ROOT, STATUS_PATH), JSON.stringify(status))
   } catch {
     // best effort — never fail a build over status bookkeeping
   }
+}
+
+// The other direction, runner → watcher: a request to rebuild for files the watcher has not
+// reacted to. Should never be needed, since the watcher sees every change in the source
+// directories. It is the backstop for a missed file event (an inotify limit, a network
+// filesystem, a Node bug), which would otherwise run bin/test against a stale bundle. The file
+// holds the paths of the files, relative to the project root, one per line, or nothing.
+export const REQUEST_PATH = 'tmp/build-request'
+
+export function requestBuild(files, root = PROJECT_ROOT) {
+  try {
+    writeAtomically(path.join(root, REQUEST_PATH), [files ?? []].flat().join('\n'))
+  } catch {
+    // best effort: without the request, waitForFreshBuild() falls back to its grace period
+  }
+}
+
+// Takes the request off the disk, and returns the paths it names (empty when it names none), or
+// null when there is no request. Moving it away first means a request written while we read
+// lands as a new file, for the next call.
+export function takeBuildRequest(root = PROJECT_ROOT) {
+  let file = path.join(root, REQUEST_PATH)
+  let taken = `${file}.${process.pid}.taken`
+  try {
+    renameSync(file, taken)
+    let files = readFileSync(taken, 'utf8').split('\n').filter(Boolean)
+    unlinkSync(taken)
+    return files
+  } catch {
+    return null
+  }
+}
+
+// Write-then-rename, because a reader polling every 100ms can otherwise catch a half-written
+// file: readStatus() returns null for it, and the runner reported a healthy watcher as missing.
+function writeAtomically(file, content) {
+  mkdirSync(path.dirname(file), { recursive: true })
+  let temp = `${file}.${process.pid}.tmp`
+  writeFileSync(temp, content)
+  renameSync(temp, file)
 }

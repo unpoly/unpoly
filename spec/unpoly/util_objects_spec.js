@@ -24,11 +24,11 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.spanObject()', function() {
+    describe('up.internal.spanObject()', function() {
 
       it('creates an object with the given property names, assigning all properties the given value', function() {
         const array = ['foo', 'bar', 'baz']
-        const object = up.util.spanObject(array, 123)
+        const object = up.internal.spanObject(array, 123)
         expect(object).toEqual({
           foo: 123,
           bar: 123,
@@ -38,7 +38,7 @@ extendDescribe('up.util', function() {
 
       it('sets all properties to undefined if no value is given', function() {
         const array = ['foo', 'bar', 'baz']
-        const object = up.util.spanObject(array)
+        const object = up.internal.spanObject(array)
         expect(object).toEqual({
           foo: undefined,
           bar: undefined,
@@ -160,81 +160,81 @@ extendDescribe('up.util', function() {
       })
     })
 
-    describe('up.util.renameKey', function() {
+    describe('up.internal.renameKey', function() {
 
       it('renames a key in the given property', function() {
         const object = { a: 'a value', b: 'b value' }
-        u.renameKey(object, 'a', 'c')
+        up.internal.renameKey(object, 'a', 'c')
         expect(object.b).toBe('b value')
         expect(object.c).toBe('a value')
       })
 
       it('deletes a renamed key from the object', function() {
         const object = { a: 'a value' }
-        u.renameKey(object, 'a', 'c')
+        up.internal.renameKey(object, 'a', 'c')
         expect(object.c).toBe('a value')
         expect(object).not.toHaveKey('a')
       })
 
       it('does not create undefined keys when the original key was never on the object', function() {
         const object = {}
-        u.renameKey(object, 'a', 'b')
+        up.internal.renameKey(object, 'a', 'b')
         expect(object).not.toHaveKey('a')
         expect(object).not.toHaveKey('b')
       })
 
     })
 
-    describe('up.util.isOptions()', function() {
+    describe('up.internal.isOptions()', function() {
 
       it('returns true for an Object instance', () => {
-        expect(up.util.isOptions(new Object())).toBe(true)
+        expect(up.internal.isOptions(new Object())).toBe(true)
       })
 
       it('returns true for an object literal', () => {
-        expect(up.util.isOptions({ foo: 'bar' })).toBe(true)
+        expect(up.internal.isOptions({ foo: 'bar' })).toBe(true)
       })
 
       it('returns true for a prototype-less object', () => {
-        expect(up.util.isOptions(Object.create(null))).toBe(true)
+        expect(up.internal.isOptions(Object.create(null))).toBe(true)
       })
 
       it('returns false for undefined', () => {
-        expect(up.util.isOptions(undefined)).toBe(false)
+        expect(up.internal.isOptions(undefined)).toBe(false)
       })
 
       it('returns false for null', () => {
-        expect(up.util.isOptions(null)).toBe(false)
+        expect(up.internal.isOptions(null)).toBe(false)
       })
 
       it('returns false for a function (which is technically an object)', function() {
         const fn = () => 'foo'
         fn.key = 'value'
-        expect(up.util.isOptions(fn)).toBe(false)
+        expect(up.internal.isOptions(fn)).toBe(false)
       })
 
       it('returns false for an Array', () => {
-        expect(up.util.isOptions(['foo'])).toBe(false)
+        expect(up.internal.isOptions(['foo'])).toBe(false)
       })
 
       it('returns false for a jQuery collection', () => {
-        expect(up.util.isOptions($('body'))).toBe(false)
+        expect(up.internal.isOptions($('body'))).toBe(false)
       })
 
       it('returns false for a Promise', () => {
-        expect(up.util.isOptions(Promise.resolve())).toBe(false)
+        expect(up.internal.isOptions(Promise.resolve())).toBe(false)
       })
 
       it('returns false for a FormData object', () => {
-        expect(up.util.isOptions(new FormData())).toBe(false)
+        expect(up.internal.isOptions(new FormData())).toBe(false)
       })
 
       it('returns false for a Date', () => {
-        expect(up.util.isOptions(new Date())).toBe(false)
+        expect(up.internal.isOptions(new Date())).toBe(false)
       })
 
       it('returns false for a RegExp', () => {
-        expect(up.util.isOptions(/foo/)).toBe(false)
+        expect(up.internal.isOptions(/foo/)).toBe(false)
       })
     })
 
@@ -336,19 +336,19 @@ extendDescribe('up.util', function() {
       })
     })
 
-    describe('up.util.mergeDefined', function() {
+    describe('up.internal.mergeDefined', function() {
 
       it('merges the given objects', function() {
         let obj = { a: '1', b: '2' }
         const other = { b: '3', c: '4' }
-        obj = up.util.mergeDefined(obj, other)
+        obj = up.internal.mergeDefined(obj, other)
         expect(obj).toEqual({ a: '1', b: '3', c: '4' })
       })
 
       it('does not override values with an undefined value (unlike up.util.merge)', function() {
         let obj = { a: '1', b: '2' }
         const other = { b: undefined, c: '4' }
-        obj = up.util.mergeDefined(obj, other)
+        obj = up.internal.mergeDefined(obj, other)
         expect(obj).toEqual({ a: '1', b: '2', c: '4' })
       })
     })
@@ -464,19 +464,19 @@ extendDescribe('up.util', function() {
       })
     })
 
-    describe('up.util.withRenamedKeys', function() {
+    describe('up.internal.withRenamedKeys', function() {
 
       it('returns a copy of the given object, but with keys transformed by the given function', function() {
         const source = { foo: 1, bar: 2 }
         const upcase = (str) => str.toUpperCase()
-        const copy = up.util.withRenamedKeys(source, upcase)
+        const copy = up.internal.withRenamedKeys(source, upcase)
         expect(copy).toEqual({ FOO: 1, BAR: 2 })
       })
 
       it('does not change the given object', function() {
         const source = { foo: 1 }
         const upcase = (str) => str.toUpperCase()
-        up.util.withRenamedKeys(source, upcase)
+        up.internal.withRenamedKeys(source, upcase)
         expect(source).toEqual({ foo: 1  })
       })
 
@@ -488,7 +488,7 @@ extendDescribe('up.util', function() {
         expect(transformKey('foo')).toBe(undefined)
         expect(transformKey('bar')).toBe('BAR')
 
-        const copy = up.util.withRenamedKeys(source, transformKey)
+        const copy = up.internal.withRenamedKeys(source, transformKey)
 
         expect(copy).toEqual({ BAR: 2 })
         expect(copy).not.toHaveKey('foo')
@@ -497,22 +497,22 @@ extendDescribe('up.util', function() {
 
     })
 
-    describe('up.util.objectContains()', function() {
+    describe('up.internal.objectContains()', function() {
 
       it('returns true if the first object has all properties of the second object, and then some more', () => {
-        expect(up.util.objectContains({ a: 1, b: 2 }, { a: 1 })).toBe(true)
+        expect(up.internal.objectContains({ a: 1, b: 2 }, { a: 1 })).toBe(true)
       })
 
       it('returns true if both objects have the same properties', () => {
-        expect(up.util.objectContains({ a: 1, b: 2 }, { a: 1, b: 2 })).toBe(true)
+        expect(up.internal.objectContains({ a: 1, b: 2 }, { a: 1, b: 2 })).toBe(true)
       })
 
       it('returns false if a property value differs', () => {
-        expect(up.util.objectContains({ a: 1, b: 2 }, { a: 3 })).toBe(false)
+        expect(up.internal.objectContains({ a: 1, b: 2 }, { a: 3 })).toBe(false)
       })
 
       it('returns false if the second object has additional keys', () => {
-        expect(up.util.objectContains({ a: 1, b: 2 }, { a: 1, d: 3 })).toBe(false)
+        expect(up.internal.objectContains({ a: 1, b: 2 }, { a: 1, d: 3 })).toBe(false)
       })
     })
 

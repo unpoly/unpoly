@@ -140,7 +140,7 @@ export async function startUnderLock(openStdio, { probe = devEnvState, spawnIt =
   // Only now, past the point of no return, do we touch the log — opening it truncates,
   // and a start that turns back here would otherwise wipe a live environment's log. The
   // lock does not help with that: a winner releases it in milliseconds and then boots
-  // for ~15s, during which a second `bin/test` sees 'booting' and turns back right here.
+  // for a few seconds, during which a second `bin/test` sees 'booting' and turns back right here.
   const { stdio, env, close } = openStdio()
   try {
     const supervisor = spawnIt(stdio, claim, env)
@@ -376,7 +376,7 @@ export async function withStartLock(body) {
 
 // Signals the process group led by `pid`. Everything we spawn is detached, so its
 // pid *is* a group id. There is deliberately no fallback to signalling the bare
-// pid: that would hit one process and leave the sh/npm/webpack/Ruby descendants we
+// pid: that would hit one process and leave the sh/npm/esbuild/Ruby descendants we
 // are trying to sweep, while reporting success.
 function killGroup(pid, signal = 'SIGTERM') {
   try {
@@ -424,7 +424,7 @@ function superviseDevEnv() {
       shell: true,
       cwd: proc.cwd ? path.resolve(proc.cwd) : PROJECT_ROOT,
       // Children are piped, so they see no terminal and turn their own colors off —
-      // which silently cost us webpack's coloured errors even when a human was watching.
+      // which silently cost us the build's coloured errors even when a human was watching.
       // proc.env stays last so a process can still overrule us.
       env: { ...process.env, ...(wantColor() ? { FORCE_COLOR: '1' } : {}), ...proc.env },
       stdio: ['ignore', 'pipe', 'pipe'],

@@ -373,6 +373,21 @@ Note how we use a `fail`-prefixed render option `{ failTarget }` to update a dif
 See [Handling error responses](/learn/error-responses) for more details on handling server responses with an error code.
 
 
+### Ignoring expected rejections
+
+When you call a rendering function without handling its promise, browsers print every rejection to the error console as "Uncaught (in promise)".
+This includes routine outcomes like an [aborted](/learn/aborting-requests) request or an [error response](/learn/error-responses).
+
+To ignore these expected rejections while still seeing other errors, pass the promise to `up.error.muteUncriticalRejection()`:
+
+```js
+up.on('click', '.refresh', function() {
+  let job = up.reload('.content')
+  up.error.muteUncriticalRejection(job) // mark: up.error.muteUncriticalRejection
+})
+```
+
+
 ### Errors in user code
 
 Unpoly functions are generally not interrupted by errors in user code, such as compilers, transitions or callbacks.

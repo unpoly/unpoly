@@ -516,7 +516,7 @@ extendDescribe('up.link', function() {
 
           it('allows to load the partial earlier with a positive [up-intersect-margin]', async function() {
             const beforeHeight = 50000
-            const clientHeight = up.viewport.rootHeight()
+            const clientHeight = up.internal.rootHeight()
             const partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]', {
               text: 'label',
               style: `position: absolute; top: ${beforeHeight}px; height: 100px; background-color: green;`,
@@ -536,7 +536,7 @@ extendDescribe('up.link', function() {
           })
 
           it('immediately honors the [up-intersect-margin] if the element is already in the viewport', async function() {
-            const clientHeight = up.viewport.rootHeight()
+            const clientHeight = up.internal.rootHeight()
             const partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]', {
               text: 'label',
               style: `position: absolute; top: ${clientHeight + 10}px; height: 100px; background-color: green;`,
@@ -551,7 +551,7 @@ extendDescribe('up.link', function() {
 
           it('allows to load the partial later with a negative [up-intersect-margin]', async function() {
             const beforeHeight = 50000
-            const clientHeight = up.viewport.rootHeight()
+            const clientHeight = up.internal.rootHeight()
             const partial = fixture('a#slow[up-defer="reveal"][href="/slow-path"]', {
               text: 'label',
               style: `position: absolute; top: ${beforeHeight}px; height: 100px; background-color: green;`,

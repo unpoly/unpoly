@@ -70,7 +70,7 @@ duplication is intended (see [Reusing text](#reusing-text)).
 
 Both are parsed from files in this repository. The difference is the container:
 
-- In a `.js` file, each `/*- … */` comment is one documentation block. A file can hold
+- In a `.ts` file, each `/*- … */` comment is one documentation block. A file can hold
   many blocks.
 - In a `.md` file, the **entire file** is one documentation block.
 
@@ -100,7 +100,7 @@ would report JSDoc errors.
 
 ## Anatomy of a doc comment
 
-Here is a complete one, from `src/unpoly/util.js`:
+Here is a complete one, from `src/unpoly/util.ts`:
 
 ```js
 /*-
@@ -219,7 +219,7 @@ Returns `undefined` if no param value with that name is set.
 ```
 
 At the other end, `up.render()` — the function most of Unpoly delegates to. The real
-comment in `src/unpoly/fragment.js` runs 131 lines; this is trimmed hard, with `...`
+comment in `src/unpoly/fragment.ts` runs 131 lines; this is trimmed hard, with `...`
 marking what's left out:
 
 ```js
@@ -931,13 +931,13 @@ Two things to know:
 - **Every file that documents features must declare its own `@namespace` (or `@class`)
   first.** Features attach to the most recently parsed interface, so a file without one
   would file its features under whichever namespace happened to be parsed before it.
-  `src/unpoly-migrate/form.js` opens with `@namespace up.form` for exactly this reason;
+  `src/unpoly-migrate/form.ts` opens with `@namespace up.form` for exactly this reason;
   repeated declarations of the same namespace are merged.
 - **There is no `@see` directive.** Point at related features in the prose, e.g.
   "See also `up.network.isBusy()`.", and at guide pages with `@learn-ref`.
 
 `@class` blocks also use `@parent` to nest under a namespace in the menu, e.g.
-`src/unpoly/classes/params.js` declares `@parent up.form`.
+`src/unpoly/form/params.ts` declares `@parent up.form`.
 
 
 ## Previewing your changes

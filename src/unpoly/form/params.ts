@@ -1,0 +1,766 @@
+import {
+  contains, copy, evalOption, filterList, findInList, isArray, isBasicObjectProperty, isBlank,
+  isDefined, isEqual, isFormData, isGiven, isMissing, isObject, isPresent, isString, map,
+  normalizeURL, parseURL, reject, some, wrapList, wrapValue,
+} from '../util.js'
+import { getOne } from '../element.js'
+import { fail } from '../error.js'
+import {
+  defaultSubmitButton, findFields, formConfig, prepareParamsReadTemp, readFieldDisabled,
+  readFieldName, readFieldValue,
+} from '../form.js'
+import type { PlainObject } from '../util.js'
+import type { ElementOrSelector } from '../element.js'
+
+/**
+A single param. Its value is usually a string or a `File`. Other values are stringified
+when the params are encoded.
+*/
+export interface ParamEntry {
+  name: string
+  value: any
+}
+
+/**
+Anything that `new up.Params()` accepts: another `up.Params`, an array of entries, a query string,
+a `FormData` object or a plain object like `{ name: 'value' }`.
+*/
+export type ParamsLike = Params | ParamEntry[] | string | FormData | PlainObject | null | undefined
+
+/*-
+The `up.Params` class offers a consistent API to read and manipulate request parameters
+independent of their type.
+
+Request parameters are used in [form submissions](/api/up.Params.fromForm) and
+[URLs](/api/up.Params.fromURL). Methods like `up.submit()` or `up.render()` accept
+request parameters as a `{ params }` option.
+
+### Supported parameter types
+
+The following types of parameter representation are supported:
+
+1. An object like `{ email: 'foo@bar.com' }`
+2. A query string like `'email=foo%40bar.com'`
+3. An array of `{ name, value }` objects like `[{ name: 'email', value: 'foo@bar.com' }]`
+4. A [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData) object.
+
+@class up.Params
+@parent up.form
+*/
+export class Params {
+  declare entries: ParamEntry[]
+
+  /*-
+  Constructs a new `up.Params` instance.
+
+  @constructor up.Params
+  @param {Object|Array|string|FormData|up.Params} [params]
+    An existing list of params with which to initialize the new `up.Params` object.
+
+    The given params value may be of any [supported type](/api/up.Params).
+  @return {up.Params}
+  @stable
+  */
+  constructor(raw?: ParamsLike) {
+    this.clear()
+    this.addAll(raw)
+  }
+
+  /*-
+  Removes all params from this object.
+
+  @function up.Params#clear
+  @stable
+  */
+  clear(): void {
+    this.entries = []
+  }
+
+  [copy.key](): Params {
+    return new Params(this)
+  }
+
+  /*-
+  Returns an object representation of this `up.Params` instance.
+
+  The returned value is a simple JavaScript object with properties
+  that correspond to the key/values in the given `params`.
+
+  ### Example
+
+  ```js
+  let params = new up.Params('foo=bar&baz=bam')
+  let object = params.toObject()
+
+  // object is now: {
+  //   foo: 'bar',
+  //   baz: 'bam'
+  // }
+  ```
+
+  @function up.Params#toObject
+  @return {Object}
+  @experimental
+  */
+  toObject(): PlainObject {
+    const obj: PlainObject = {}
+    for (let entry of this.entries) {
+      const { name, value } = entry
+      if (!isBasicObjectProperty(name)) {
+        if (this._isArrayKey(name)) {
+          obj[name] ||= []
+          obj[name].push(value)
+        } else {
+          obj[name] = value
+        }
+      }
+    }
+    return obj
+  }
+
+  /*-
+  Returns an array representation of this `up.Params` instance.
+
+  The returned value is a JavaScript array with elements that are objects with
+  `{ name }` and `{ value }` properties.
+
+  ### Example
+
+  ```js
+  let params = new up.Params('foo=bar&baz=bam')
+  let array = params.toArray()
+
+  // array is now: [
+  //   { name: 'foo', value: 'bar' },
+  //   { name: 'baz', value: 'bam' }
+  // ]
+  ```
+
+  @function up.Params#toArray
+  @return {Array}
+  @experimental
+  */
+  toArray(): ParamEntry[] {
+    return this.entries
+  }
+
+  /*-
+  Returns a [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) representation
+  of this `up.Params` instance.
+
+  ### Example
+
+  ```js
+  let params = new up.Params('foo=bar&baz=bam')
+  let formData = params.toFormData()
+
+  formData.get('foo') // 'bar'
+  formData.get('baz') // 'bam'
+  ```
+
+  @function up.Params#toFormData
+  @return {FormData}
+  @stable
+  */
+  toFormData(): FormData {
+    const formData: FormData & { originalArray?: ParamEntry[] } = new FormData()
+    for (let entry of this.entries) {
+      formData.append(entry.name, entry.value)
+    }
+    if (!formData.entries) {
+      // If this browser cannot inspect FormData with the #entries()
+      // iterator, assign the original array for inspection by specs.
+      formData.originalArray = this.entries
+    }
+    return formData
+  }
+
+  /*-
+  Returns a [query string](https://en.wikipedia.org/wiki/Query_string) for this `up.Params` instance.
+
+  The keys and values in the returned query string will be [percent-encoded](https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding).
+  Non-primitive values (like [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File)) will be omitted from
+  the returned query string.
+
+  ### Example
+
+  ```js
+  let params = new up.Params({ foo: 'bar', baz: 'bam' })
+  let query = params.toQuery()
+
+  // query is now: 'foo=bar&baz=bam'
+  ```
+
+  @function up.Params#toQuery
+  @return {string}
+    A query string built from this `up.Params` instance.
+  @stable
+  */
+  toQuery(): string {
+    let simpleEntries = this.withoutBinaryEntries().entries
+    let parts = simpleEntries.map(this._arrayEntryToQuery)
+    return parts.join('&')
+  }
+
+  toString(): string {
+    return this.toQuery()
+  }
+
+  _arrayEntryToQuery(entry: ParamEntry): string {
+    const { value } = entry
+
+    let query = encodeURIComponent(entry.name)
+    // There is a subtle difference when encoding blank values:
+    // 1. An undefined or null value is encoded to `key` with no equals sign
+    // 2. An empty string value is encoded to `key=` with an equals sign but no value
+    if (isGiven(value)) {
+      query += "="
+      query += encodeURIComponent(value)
+    }
+    return query
+  }
+
+  /*-
+  Returns whether the given entry cannot be encoded into a query string.
+
+  We will have `File` values in our params when we serialize a form with a file input.
+  These entries will be filtered out when converting to a query string.
+
+  @function up.Params#_isBinaryEntry
+  @internal
+  */
+  _isBinaryEntry({ value }: ParamEntry): boolean {
+    return value instanceof Blob
+  }
+
+  hasBinaryEntries(): boolean {
+    return some(this.entries, this._isBinaryEntry)
+  }
+
+  withoutBinaryEntries(): Params {
+    let simpleEntries = reject(this.entries, this._isBinaryEntry)
+    return new (this.constructor as typeof Params)(simpleEntries)
+  }
+
+  /*-
+  Builds a URL string from the given base URL and
+  this `up.Params` instance as a [query string](https://en.wikipedia.org/wiki/Query_string).
+
+  The base URL may or may not already contain a query string. The
+  additional query string will be joined with `&` or `?` accordingly.
+
+  @function up.Params#toURL
+  @param {string} base
+    The base URL that will be prepended to this `up.Params` object as a query string.
+  @return {string}
+    The built URL.
+  @experimental
+  */
+  toURL(base: string): string {
+    let parts = [base, this.toQuery()]
+    parts = filterList(parts, isPresent)
+    const separator = contains(base, '?') ? '&' : '?'
+    return parts.join(separator)
+  }
+
+  /*-
+  Adds a new entry with the given `name` and `value`.
+
+  An `up.Params` instance can hold multiple entries with the same name.
+  To overwrite all existing entries with the given `name`, use `up.Params#set()` instead.
+
+  ### Example
+
+  ```js
+  let params = new up.Params()
+  params.add('foo', 'fooValue')
+
+  let foo = params.get('foo')
+  // foo is now 'fooValue'
+  ```
+
+  @function up.Params#add
+  @param {string} name
+    The name of the new entry.
+  @param {any} value
+    The value of the new entry.
+  @stable
+  */
+  add(name: string, value: any): void {
+    this.entries.push({ name, value })
+  }
+
+  /*-
+  Adds all entries from the given list of params.
+
+  The given params value may be of any [supported type](/api/up.Params).
+
+  @function up.Params#addAll
+  @param {Object|Array|string|FormData|up.Params|undefined} params
+  @stable
+  */
+  addAll(raw: ParamsLike): void {
+    if (isMissing(raw)) {
+      // nothing to do
+    } else if (raw instanceof this.constructor) {
+      this.entries.push(...raw.entries)
+    } else if (isArray(raw)) {
+      // internal use for copying
+      this.entries.push(...raw)
+    } else if (isString(raw)) {
+      this._addAllFromQuery(raw)
+    } else if (isFormData(raw)) {
+      this._addAllFromFormData(raw)
+    } else if (isObject(raw)) {
+      this._addAllFromObject(raw)
+    } else {
+      fail("Unsupported params type: %o", raw)
+    }
+  }
+
+  /*-
+  @function up.Params#keys
+  @internal
+  */
+  keys(): string[] {
+    return map(this.entries, 'name')
+  }
+
+  /*-
+  @function up.Params#values
+  @internal
+  */
+  values(): any[] {
+    return map(this.entries, 'value')
+  }
+
+  _addAllFromObject(object: PlainObject): void {
+    for (let key in object) {
+      const value = object[key]
+      // We cannot use up.util.wrapList() because we want to keep null as [null], not []
+      const valueElements = isArray(value) ? value : [value]
+      for (let valueElement of valueElements) {
+        this.add(key, valueElement)
+      }
+    }
+  }
+
+  _addAllFromQuery(query: string): void {
+    for (let part of query.split('&')) {
+      if (part) {
+        let [name, value] = part.split('=') as [string, string | null | undefined]
+        name = decodeURIComponent(name)
+        // There are three forms we need to handle:
+        // (1) foo=bar should become { name: 'foo', bar: 'bar' }
+        // (2) foo=    should become { name: 'foo', bar: '' }
+        // (3) foo     should become { name: 'foo', bar: null }
+        if (isGiven(value)) {
+          value = decodeURIComponent(value)
+        } else {
+          value = null
+        }
+        this.add(name, value)
+      }
+    }
+  }
+
+  _addAllFromFormData(formData: FormData): void {
+    for (let value of formData.entries()) {
+      this.add(...value)
+    }
+  }
+
+  /*-
+  Sets the `value` for the entry with given `name`.
+
+  An `up.Params` instance can hold multiple entries with the same name.
+  All existing entries with the given `name` are [deleted](/api/up.Params.prototype.delete) before the
+  new entry is set. To add a new entry even if the `name` is taken, use `up.Params#add()`.
+
+  @function up.Params#set
+  @param {string} name
+    The name of the entry to set.
+  @param {any} value
+    The new value of the entry.
+  @stable
+  */
+  set(name: string, value: any): void {
+    this.delete(name)
+    this.add(name, value)
+  }
+
+  /*-
+  Deletes all entries with the given `name`.
+
+  @function up.Params#delete
+  @param {string} name
+  @stable
+  */
+  delete(name: string): void {
+    this.entries = reject(this.entries, this._matchEntryFn(name))
+  }
+
+  _matchEntryFn(name: string): (entry: ParamEntry) => boolean {
+    return (entry) => entry.name === name
+  }
+
+  /*-
+  Returns the first param value with the given `name`.
+
+  Returns `undefined` if no param value with that name is set.
+
+  If the `name` denotes an array field (e.g. `foo[]`), *all* param values with the given `name`
+  are returned as an array. If no param value with that array name is set, an empty
+  array is returned.
+
+  To always return a single value, use `up.Params#getFirst()` instead.
+  To always return an array of values, use `up.Params#getAll()` instead.
+
+  ### Example
+
+  ```js
+  let params = new up.Params([
+    { name: 'foo', value: 'fooValue' },
+    { name: 'bar[]', value: 'barValue1' },
+    { name: 'bar[]', value: 'barValue2' }
+  ])
+
+  let foo = params.get('foo')
+  // foo is now 'fooValue'
+
+  let bar = params.get('bar[]')
+  // bar is now ['barValue1', 'barValue2']
+  ```
+
+  @function up.Params#get
+  @param {string} name
+  @stable
+  */
+  get(name: string): any {
+    if (this._isArrayKey(name)) {
+      return this.getAll(name)
+    } else {
+      return this.getFirst(name)
+    }
+  }
+
+  /*-
+  Returns the first param value with the given `name`.
+
+  Returns `undefined` if no param value with that name is set.
+
+  @function up.Params#getFirst
+  @param {string} name
+  @return {any}
+    The value of the param with the given name.
+  @experimental
+  */
+  getFirst(name: string): any {
+    const entry = findInList(this.entries, this._matchEntryFn(name))
+    return entry?.value
+  }
+
+  /*-
+  Returns an array of all param values with the given `name`.
+
+  Returns an empty array if no param value with that name is set.
+
+  @function up.Params#getAll
+  @param {string} name
+  @return {Array}
+    An array of all values with the given name.
+  @experimental
+  */
+  getAll(name: string): any[] {
+    const entries = filterList(this.entries, this._matchEntryFn(name))
+    return map(entries, 'value')
+  }
+
+  _isArrayKey(key: string): boolean {
+    return evalOption(formConfig.arrayParam, key)
+  }
+
+  [isBlank.key](): boolean {
+    return this.entries.length === 0
+  }
+
+  /*-
+  Constructs a new `up.Params` instance from the given `<form>`.
+
+  The returned params may be passed as `{ params }` option to
+  `up.request()` or `up.render()`.
+
+  The params are built with the browser's own
+  [form-data algorithm](https://developer.mozilla.org/en-US/docs/Web/API/FormData/FormData),
+  so they contain exactly what a regular form submission would send:
+
+  - All `<input>` types are supported.
+  - Field values are usually strings, but an `<input type="file">` will produce
+    [`File`](https://developer.mozilla.org/en-US/docs/Web/API/File) values.
+  - An `<input type="radio">` or `<input type="checkbox">` is only added if it is checked.
+  - A `<select>` adds every selected option.
+  - Fields that are disabled, or inside a `<fieldset disabled>`, are ignored.
+  - Fields without a `[name]` attribute are ignored.
+  - Fields [outside the form](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#form)
+    that reference it with a `[form]` attribute are included.
+  - [Form-associated custom elements](/learn/custom-form-fields#form-associated) are included.
+  - Values appended by a [`formdata`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/formdata_event)
+    event listener are included.
+  - The [submit button](#submit-button) contributes its `[name]` and `[value]`.
+
+  On top of that, [elements registered as fields](/learn/custom-form-fields#registering) in
+  `up.form.config.fieldSelectors` are included. The browser cannot know about those.
+
+  ### Example
+
+  Given this HTML form:
+
+  ```html
+  <form id="signup">
+    <input type="text" name="email" value="foo@bar.com">
+    <input type="password" name="pass" value="secret">
+  </form>
+  ```
+
+  This serializes the form into params:
+
+  ```js
+  let params = up.Params.fromForm(document.querySelector('#signup'))
+  let email = params.get('email') // email is now 'foo@bar.com'
+  let pass = params.get('pass') // pass is now 'secret'
+  ```
+
+  ### Submit buttons {#submit-button}
+
+  A submit button only contributes params when it is the one that submitted the form.
+  Pass the button as a `{ submitButton }` option, or `false` to submit no button at all.
+  Without the option the first submit button is assumed, which is also what a browser
+  does when the user submits from a field by pressing `Enter`.
+
+  The button must belong to the form. Like the browser's `FormData`, `up.Params.fromForm()` throws
+  an error for a button of another form.
+
+  ### Disabled fields {#disabled-fields}
+
+  Like in a browser submission, a disabled field contributes no params.
+  The exceptions are fields and buttons that a [preview](/api/up.Preview.prototype.disable) disabled while a request is loading,
+  e.g. with [`[up-disable]`](/api/up-submit#up-disable). These still count as part of the form,
+  so a second submission sends the same params as the first one.
+
+  @function up.Params.fromForm
+  @param {Element} form
+    A `<form>` element.
+  @param {Element|false} [options.submitButton]
+    The submit button that submitted the form.
+
+    The button must belong to the form, or an error is thrown.
+    Pass `false` to include no submit button.
+  @return {up.Params}
+    A new `up.Params` instance with values from the given form.
+  @stable
+  */
+  static fromForm(form: ElementOrSelector, options?: { submitButton?: ElementOrSelector | false }): Params
+  // The form is resolved in place, so the implementation takes the resolved type. The cast is
+  // needed since getOne() returns an HTMLElement.
+  static fromForm(form: HTMLFormElement, options: { submitButton?: ElementOrSelector | false } = {}) {
+    form = getOne(form) as HTMLFormElement
+    let restore = prepareParamsReadTemp(form)
+
+    try {
+      // The FormData constructor accepts undefined for no submitter, but throws for false.
+      // It also throws for a button that doesn't belong to the form.
+      let submitButton = getOne(options.submitButton ?? defaultSubmitButton(form)) || undefined
+
+      // We let the browser serialize the form, instead of iterating over up.form.fields():
+      //
+      // - Only the browser can read the value of a form-associated custom element. The element
+      //   reports it through ElementInternals.setFormValue(), which no script can read back.
+      // - The browser knows the full serialization rules: files, <select multiple>, the submitter
+      //   (including an image button's click coordinates), [dirname], fields in a
+      //   <fieldset disabled>, newline normalization, and whatever comes next.
+      let params = new this(new FormData(form, submitButton))
+
+      // up.form.fields() also finds elements registered through up.form.config.fieldSelectors.
+      // The browser doesn't know they are fields.
+      //
+      // We recognize the fields the browser already handled by their membership in form.elements,
+      // since a FormData entry cannot be mapped back to the element that contributed it.
+      // A control that *is* in form.elements but that the browser refuses to serialize (a reset
+      // button, an <output>) is therefore not re-added.
+      let browserControls = new Set(form.elements)
+      for (let field of findFields(form)) {
+        if (!browserControls.has(field) && !field.closest('fieldset:disabled')) params.addField(field)
+      }
+      return params
+    } finally {
+      restore()
+    }
+  }
+
+  /*-
+  Constructs a new `up.Params` instance from the fields within the given container.
+
+  Unlike `up.Params.fromForm()`, the container may be any element.
+  The params contain the values of all [fields](/api/up.form.fields) within the container,
+  and no submit button.
+
+  @function up.Params.fromContainer
+  @param {Element|jQuery} container
+    The element to scan for fields.
+  @param {boolean} [options.includeDisabled=false]
+    Whether to add fields that are disabled.
+  @return {up.Params}
+  @experimental
+  */
+  static fromContainer(container: Element, options?: { includeDisabled?: boolean }): Params {
+    return this.fromFields(findFields(container), options)
+  }
+
+  /*-
+  Constructs a new `up.Params` instance from one or more
+  [HTML form fields](https://www.w3schools.com/html/html_form_elements.asp).
+
+  The constructed `up.Params` will include exactly those form values that would be
+  included for the given fields in a regular form submission. If a given field wouldn't
+  submit a value (like an unchecked `<input type="checkbox">`), nothing will be added.
+
+  See `up.Params.fromForm()` for more details and examples.
+
+  @function up.Params.fromFields
+  @param {Element|List<Element>|jQuery} fields
+  @return {up.Params}
+  @experimental
+  */
+  static fromFields(fields: ElementOrSelector, { includeDisabled }: { includeDisabled?: boolean } = {}): Params {
+    const params = new this()
+    for (let field of wrapList(fields)) {
+      params.addField(field, { includeDisabled })
+    }
+    return params
+  }
+
+  /*-
+  Adds params from the given [HTML form field](https://www.w3schools.com/html/html_form_elements.asp).
+
+  The added params will include exactly those form values that would be
+  included for the given field in a regular form submission. If the given field wouldn't
+  submit a value (like an unchecked `<input type="checkbox">`), nothing will be added.
+
+  See `up.Params.fromForm()` for more details and examples.
+
+  @function up.Params#addField
+  @param {Element|jQuery} field
+  @param {boolean} [options.includeDisabled=false]
+    Whether to add a field that is disabled.
+
+    A field that a [preview](/api/up.Preview.prototype.disable) disabled is always added.
+  @experimental
+  */
+  // TODO(types): A type for fields (input, select, textarea or a form-associated custom element).
+  addField(field: any, { includeDisabled }: { includeDisabled?: boolean } = {}): void {
+    field = getOne(field) // unwrap jQuery
+
+    // A field is excluded from a form submission if it has no name, or if it is disabled.
+    let name = readFieldName(field)
+    if (!name || (readFieldDisabled(field) && !includeDisabled && !field.upPreviewDisabled)) return
+
+    let { tagName, type } = field
+    let values = []
+
+    if (tagName === 'SELECT') {
+      // A <select> can have multiple selected options.
+      values = map(field.selectedOptions, 'value')
+    } else if ((type === 'checkbox') || (type === 'radio')) {
+      if (field.checked) values = [readFieldValue(field)]
+    } else if (type === 'file') {
+      // The value of an input[type=file] is the local path displayed in the form.
+      // The actual File objects are in the #files property.
+      values = field.files
+    } else {
+      // A custom control may expose a { name } without a readable { value },
+      // in which case it has nothing to contribute.
+      let value = readFieldValue(field)
+      if (isDefined(value)) values = [value]
+    }
+
+    for (let value of values) {
+      this.add(name, value)
+    }
+  }
+
+  [isEqual.key](other: Params): boolean {
+    return (this.constructor === other.constructor) && isEqual(this.entries, other.entries)
+  }
+
+  /*-
+  Constructs a new `up.Params` instance from the given URL's
+  [query string](https://en.wikipedia.org/wiki/Query_string).
+
+  Constructs an empty `up.Params` instance if the given URL has no query string.
+
+  ### Example
+
+  ```js
+  let params = up.Params.fromURL('http://foo.com?foo=fooValue&bar=barValue')
+  let foo = params.get('foo')
+  // foo is now: 'fooValue'
+  ```
+
+  @function up.Params.fromURL
+  @param {string} url
+    The URL from which to extract the query string.
+  @return {up.Params}
+    The params from the given URL's query string.
+  @stable
+  */
+  static fromURL(url: string): Params {
+    const params = new (this)()
+    const urlParts = parseURL(url)
+    let query = urlParts.search
+    if (query) {
+      query = query.replace(/^\?/, '')
+      params.addAll(query)
+    }
+    return params
+  }
+
+  /*-
+  Returns the given URL without its [query string](https://en.wikipedia.org/wiki/Query_string).
+
+  ### Example
+
+  ```js
+  let url = up.Params.stripURL('http://foo.com?key=value')
+  // url is now: 'http://foo.com/'
+  ```
+
+  @function up.Params.stripURL
+  @param {string} url
+    A URL (with or without a query string).
+  @return {string}
+    The given URL without its query string.
+  @experimental
+  */
+  static stripURL(url: string): string {
+    return normalizeURL(url, { search: false })
+  }
+
+  static merge(start: Params, ...objects: ParamsLike[]): Params {
+    let merged = copy(start)
+
+    for (let object of objects) {
+      let other = wrapValue(this, object)
+      // We cannot use iterate over other.entries and call set(), since other.entries
+      // might have multiple values for the same array key.
+      for (let key of other.keys()) merged.delete(key)
+      merged.addAll(other)
+    }
+
+    return merged
+  }
+
+}
+
+export const api = {
+  Params,
+}

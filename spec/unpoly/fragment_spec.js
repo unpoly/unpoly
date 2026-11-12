@@ -919,38 +919,38 @@ describe('up.fragment', function() {
 
     })
 
-    describe('up.fragment.failKey', function() {
+    describe('up.internal.toFailKey', function() {
 
       it('returns a failVariant for the given object key', function() {
-        const result = up.fragment.failKey('foo')
+        const result = up.internal.toFailKey('foo')
         expect(result).toEqual('failFoo')
       })
 
       it('returns undefined if the given key is already prefixed with "fail"', function() {
-        const result = up.fragment.failKey('failFoo')
+        const result = up.internal.toFailKey('failFoo')
         expect(result).toBeUndefined()
       })
     })
 
-    describe('up.fragment.successKey', function() {
+    describe('up.internal.successKey', function() {
 
       it('returns the unprefixed key for the given failVariant', function() {
-        const result = up.fragment.successKey('failFoo')
+        const result = up.internal.successKey('failFoo')
         expect(result).toEqual('foo')
       })
 
       it('returns undefined if the given key is not prefixed with "fail"', function() {
-        const result = up.fragment.successKey('foo')
+        const result = up.internal.successKey('foo')
         expect(result).toBeUndefined()
       })
 
       it('returns undefined for the key "fail"', function() {
-        const result = up.fragment.successKey('fail')
+        const result = up.internal.successKey('fail')
         expect(result).toBeUndefined()
       })
 
       it('prioritizes the prefix "on", converting onFailFoo to onFoo', function() {
-        const result = up.fragment.successKey('onFailFoo')
+        const result = up.internal.successKey('onFailFoo')
         expect(result).toEqual('onFoo')
       })
     })
@@ -965,6 +965,18 @@ describe('up.fragment', function() {
       })
 
       it('sets up.layer.config.any.mainTargets', function() {
+        up.fragment.config.mainTargets = ['.new-target']
+        expect(up.layer.config.any.mainTargets).toEqual(['.new-target'])
+      })
+
+      it("doesn't change up.layer.config.any.mainTargets when up.fragment.config is reset", function() {
+        up.layer.config.any.mainTargets = ['.my-special-main-target']
+        up.fragment.config.reset()
+        expect(up.layer.config.any.mainTargets).toEqual(['.my-special-main-target'])
+      })
+
+      it('keeps forwarding to up.layer.config.any.mainTargets after up.fragment.config is reset', function() {
+        up.fragment.config.reset()
         up.fragment.config.mainTargets = ['.new-target']
         expect(up.layer.config.any.mainTargets).toEqual(['.new-target'])
       })
@@ -1040,12 +1052,12 @@ describe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.insertTemp()', function() {
+    describe('up.internal.insertTemp()', function() {
 
       it('inserts a new element relative to the given reference element', function() {
         const reference = fixture('#reference')
         const newElement = document.createElement('div')
-        up.fragment.insertTemp(reference, newElement)
+        up.internal.insertTemp(reference, newElement)
 
         expect(reference.children[0]).toBe(newElement)
       })
@@ -1053,7 +1065,7 @@ describe('up.fragment', function() {
       it('allows to choose a different position relative to the reference element', function() {
         const reference = fixture('#reference')
         const newElement = document.createElement('div')
-        up.fragment.insertTemp(reference, 'beforebegin', newElement)
+        up.internal.insertTemp(reference, 'beforebegin', newElement)
 
         expect(reference.previousElementSibling).toBe(newElement)
       })
@@ -1064,7 +1076,7 @@ describe('up.fragment', function() {
         up.compiler('my-element', compilerFunction)
         const newElement = document.createElement('my-element')
 
-        up.fragment.insertTemp(reference, newElement)
+        up.internal.insertTemp(reference, newElement)
 
         expect(compilerFunction).toHaveBeenCalledWith(newElement, jasmine.anything(), jasmine.anything())
       })
@@ -1072,7 +1084,7 @@ describe('up.fragment', function() {
       it('parses a string of HTML', function() {
         const reference = fixture('#reference')
         const newElementHTML = '<my-element></my-element>'
-        up.fragment.insertTemp(reference, newElementHTML)
+        up.internal.insertTemp(reference, newElementHTML)
 
         expect(reference.children[0]).toBeElement()
         expect(reference.children[0]).toMatchSelector('my-element')
@@ -1092,7 +1104,7 @@ describe('up.fragment', function() {
 
         const reference = fixture('#reference')
 
-        up.fragment.insertTemp(reference, '#my-template')
+        up.internal.insertTemp(reference, '#my-template')
         expect(reference.children.length).toBe(1)
         expect(reference.children[0]).toMatchSelector('#my-element')
         expect(reference.children[0]).toHaveText('element content')
@@ -1113,7 +1125,7 @@ describe('up.fragment', function() {
 
         const reference = fixture('#reference')
 
-        up.fragment.insertTemp(reference, givenNodes)
+        up.internal.insertTemp(reference, givenNodes)
 
         expect(reference).toHaveText('foo bar baz')
 
@@ -1128,7 +1140,7 @@ describe('up.fragment', function() {
         it('detaches the element', function() {
           const reference = fixture('#reference')
           const newElement = document.createElement('div')
-          const undo = up.fragment.insertTemp(reference, newElement)
+          const undo = up.internal.insertTemp(reference, newElement)
 
           expect(newElement).toBeAttached()
 
@@ -1142,7 +1154,7 @@ describe('up.fragment', function() {
           const destructorFunction = jasmine.createSpy('destructor function')
           up.compiler('my-element', (element) => destructorFunction)
           const newElement = document.createElement('my-element')
-          const undo = up.fragment.insertTemp(reference, newElement)
+          const undo = up.internal.insertTemp(reference, newElement)
 
           expect(destructorFunction).not.toHaveBeenCalled()
 
@@ -1158,7 +1170,7 @@ describe('up.fragment', function() {
           const reference = fixture('#reference')
           const newElement = fixture('my-element')
 
-          up.fragment.insertTemp(reference, newElement)
+          up.internal.insertTemp(reference, newElement)
 
           expect(newElement.parentElement).toBe(reference)
         })
@@ -1169,7 +1181,7 @@ describe('up.fragment', function() {
           up.compiler('my-element', compilerFunction)
           const newElement = fixture('my-element')
 
-          up.fragment.insertTemp(reference, newElement)
+          up.internal.insertTemp(reference, newElement)
 
           expect(compilerFunction).not.toHaveBeenCalled()
         })
@@ -1183,7 +1195,7 @@ describe('up.fragment', function() {
             up.compiler('my-element', compilerFunction)
             const newElement = fixture('my-element')
 
-            const undo = up.fragment.insertTemp(reference, newElement)
+            const undo = up.internal.insertTemp(reference, newElement)
             expect(compilerFunction).not.toHaveBeenCalled()
             expect(destructorFunction).not.toHaveBeenCalled()
 
@@ -1197,7 +1209,7 @@ describe('up.fragment', function() {
             const oldContainer = fixture('#container')
             const tempElement = e.affix(oldContainer, '#movee')
 
-            const undo = up.fragment.insertTemp(reference, tempElement)
+            const undo = up.internal.insertTemp(reference, tempElement)
             expect(tempElement.parentElement).toBe(reference)
 
             undo()
@@ -1211,7 +1223,7 @@ describe('up.fragment', function() {
             const tempElement = e.affix(oldContainer, '#movee')
             const oldNextSibling = e.affix(oldContainer, '#sibling')
 
-            const undo = up.fragment.insertTemp(reference, tempElement)
+            const undo = up.internal.insertTemp(reference, tempElement)
 
             expect(tempElement.parentElement).toBe(reference)
 
@@ -1227,7 +1239,7 @@ describe('up.fragment', function() {
             const oldPreviousSibling = e.affix(oldContainer, '#sibling')
             const tempElement = e.affix(oldContainer, '#movee')
 
-            const undo = up.fragment.insertTemp(reference, tempElement)
+            const undo = up.internal.insertTemp(reference, tempElement)
 
             expect(tempElement.parentElement).toBe(reference)
 
@@ -1554,12 +1566,12 @@ describe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.provideNodes()', function() {
+    describe('up.internal.provideNodes()', function() {
 
       describe('with a string of HTML', function() {
 
         it('parses a HTML fragment and returns a list containing its root Element', function() {
-          const nodes = up.fragment.provideNodes('<div>root</div>')
+          const nodes = up.internal.provideNodes('<div>root</div>')
 
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBeElement()
@@ -1567,14 +1579,14 @@ describe('up.fragment', function() {
         })
 
         it('parses a Text node without a containing Element', function() {
-          const nodes = up.fragment.provideNodes('foo')
+          const nodes = up.internal.provideNodes('foo')
 
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBeTextNode('foo')
         })
 
         it('parses multiple HTML elements without a containing root element', function() {
-          const nodes = up.fragment.provideNodes("<div>sibling1</div><div>sibling2</div>")
+          const nodes = up.internal.provideNodes("<div>sibling1</div><div>sibling2</div>")
 
           expect(nodes).toHaveLength(2)
           expect(nodes[0].outerHTML).toBe('<div>sibling1</div>')
@@ -1582,7 +1594,7 @@ describe('up.fragment', function() {
         })
 
         it('parses a mix of Element nodes and Text nodes without a containing root element', function() {
-          const nodes = up.fragment.provideNodes("foo<b>bar</b>baz")
+          const nodes = up.internal.provideNodes("foo<b>bar</b>baz")
           expect(nodes).toHaveLength(3)
 
           expect(nodes[0]).toBeTextNode('foo')
@@ -1594,7 +1606,7 @@ describe('up.fragment', function() {
       describe('with a non-template element', function() {
         it('returns an list of the given element without making a copy, so users can temporarily move an element into an overlay', function() {
           const element = document.createElement('div')
-          const nodes = up.fragment.provideNodes(element)
+          const nodes = up.internal.provideNodes(element)
 
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBe(element)
@@ -1609,7 +1621,7 @@ describe('up.fragment', function() {
               foo<b>bar</b>baz
             </template>
           `)
-          const nodes = up.fragment.provideNodes(template)
+          const nodes = up.internal.provideNodes(template)
 
           expect(nodes[0]).toBeTextNode('foo')
           expect(nodes[1].outerHTML).toBe('<b>bar</b>')
@@ -1649,7 +1661,7 @@ describe('up.fragment', function() {
 
         it('returns an list of the given element without making a copy', function() {
           const element = up.element.createFromSelector('script[type="text/javascript"]')
-          const nodes = up.fragment.provideNodes(element)
+          const nodes = up.internal.provideNodes(element)
 
           expect(nodes).toHaveLength(1)
           expect(nodes[0]).toBe(element)
@@ -1670,7 +1682,7 @@ describe('up.fragment', function() {
 
           up.on('up:template:clone', 'script[type="text/minimustache"]', templateHandler)
 
-          const nodes = up.fragment.provideNodes('#my-template { name: "Alice" }')
+          const nodes = up.internal.provideNodes('#my-template { name: "Alice" }')
 
           expect(templateHandler).toHaveBeenCalledWith(jasmine.objectContaining({ target: template, data: { name: "Alice" } }), jasmine.anything(), jasmine.anything())
           expect(nodes[0]).toBeTextNode('Hello, ')
@@ -1684,7 +1696,7 @@ describe('up.fragment', function() {
         it('returns a list containing the first matching element', function() {
           const element1 = fixture('.my-element')
           const element2 = fixture('.my-element')
-          const nodes = up.fragment.provideNodes('.my-element')
+          const nodes = up.internal.provideNodes('.my-element')
 
           expect(nodes).toEqual([element1])
         })
@@ -1696,13 +1708,13 @@ describe('up.fragment', function() {
           const layer0Match = registerFixture(layer0.affix('.match#layer0-element'))
           const layer1Match = layer1.affix('.match#layer1-element')
 
-          expect(up.fragment.provideNodes('.match', { origin: layer0.element })).toEqual([layer0Match])
-          expect(up.fragment.provideNodes('.match', { origin: layer1.element })).toEqual([layer1Match])
-          expect(up.fragment.provideNodes('.match', { origin: layer2.element })).toEqual([layer1Match])
+          expect(up.internal.provideNodes('.match', { origin: layer0.element })).toEqual([layer0Match])
+          expect(up.internal.provideNodes('.match', { origin: layer1.element })).toEqual([layer1Match])
+          expect(up.internal.provideNodes('.match', { origin: layer2.element })).toEqual([layer1Match])
         })
 
         it('throws an error if the selector cannot be matched', function() {
-          const provide = () => up.fragment.provideNodes('#my-element')
+          const provide = () => up.internal.provideNodes('#my-element')
           expect(provide).toThrowError('Cannot find template "#my-element"')
         })
 
@@ -1712,7 +1724,7 @@ describe('up.fragment', function() {
               foo<b>bar</b>baz
             </template>
           `)
-          const nodes = up.fragment.provideNodes('#my-template')
+          const nodes = up.internal.provideNodes('#my-template')
 
           expect(nodes[0]).toBeTextNode('foo')
           expect(nodes[1].outerHTML).toBe('<b>bar</b>')
@@ -1722,14 +1734,14 @@ describe('up.fragment', function() {
       describe('with a list of elements', function() {
         it('returns that list', function() {
           const list = [document.head, document.body]
-          const nodes = up.fragment.provideNodes(list)
+          const nodes = up.internal.provideNodes(list)
           expect(nodes).toEqual([document.head, document.body])
         })
       })
 
       describe('with a Document', function() {
         it('returns that Document', function() {
-          const nodes = up.fragment.provideNodes(document)
+          const nodes = up.internal.provideNodes(document)
           expect(nodes).toEqual([document])
         })
       })
@@ -1848,25 +1860,25 @@ describe('up.fragment', function() {
       })
     })
 
-    describe('up.fragment.defaultNormalizeKeepHTML()', function() {
+    describe('up.internal.defaultNormalizeKeepHTML()', function() {
 
       for (let attr of ['nonce', 'up-etag', 'up-time', 'up-source', 'up-on-rendered', 'up-watch', 'up-on-accepted']) {
 
         it(`removes a [${attr}] attribute from the root element`, function() {
           let input = `<div ${attr}="value"></div>`
-          let output = up.fragment.defaultNormalizeKeepHTML(input)
+          let output = up.internal.defaultNormalizeKeepHTML(input)
           expect(output).toBe('<div></div>')
         })
 
         it(`removes a [${attr}] attribute but leaves other attributes`, function() {
           let input = `<div data-x="x" ${attr}="value" data-y="y"></div>`
-          let output = up.fragment.defaultNormalizeKeepHTML(input)
+          let output = up.internal.defaultNormalizeKeepHTML(input)
           expect(output).toBe('<div data-x="x" data-y="y"></div>')
         })
 
         it(`removes multiple [${attr}] attributes in descendants`, function() {
           let input = `<div><span ${attr}="value"></span><span ${attr}="value"></span></div>`
-          let output = up.fragment.defaultNormalizeKeepHTML(input)
+          let output = up.internal.defaultNormalizeKeepHTML(input)
           expect(output).toBe('<div><span></span><span></span></div>')
         })
 
@@ -1874,7 +1886,7 @@ describe('up.fragment', function() {
 
       it('removes multiple attributes from the same tag', function() {
         let input = `<a id="keepable" href="/path" up-keep="same-html" up-on-rendered="nonce-page-secret foo()" data-x="x" up-on-finished="nonce-page-secret bar()" data-y="y">text</a>`
-        let output = up.fragment.defaultNormalizeKeepHTML(input)
+        let output = up.internal.defaultNormalizeKeepHTML(input)
         expect(output).toBe(`<a id="keepable" href="/path" up-keep="same-html" data-x="x" data-y="y">text</a>`)
       })
 

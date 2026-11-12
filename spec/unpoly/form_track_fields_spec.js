@@ -4,7 +4,7 @@ extendDescribe('up.form', function() {
 
   extendDescribe('JavaScript', function() {
 
-    describe('up.form.trackFields()', function() {
+    describe('up.internal.trackFields()', function() {
 
       it('runs the callback for an existing field that is a descendant of the form', async function() {
         let detachCallback = jasmine.createSpy('detach callback')
@@ -17,7 +17,7 @@ extendDescribe('up.form', function() {
           </form>
         `)
 
-        up.form.trackFields(form, attachCallback)
+        up.internal.trackFields(form, attachCallback)
 
         expect(attachCallback.calls.allArgs()).toEqual([[field1], [field2]])
       })
@@ -37,7 +37,7 @@ extendDescribe('up.form', function() {
           </main>
         `)
 
-        up.form.trackFields(form1, attachCallback)
+        up.internal.trackFields(form1, attachCallback)
 
         expect(attachCallback.calls.allArgs()).toEqual([[field1]])
       })
@@ -53,7 +53,7 @@ extendDescribe('up.form', function() {
           </form>
         `)
 
-        up.form.trackFields(form, (field) => {
+        up.internal.trackFields(form, (field) => {
           attachSpy(field.name)
           return () => detachSpy(field.name)
         })
@@ -80,7 +80,7 @@ extendDescribe('up.form', function() {
           </form>
         `)
 
-        up.form.trackFields(form, (field) => {
+        up.internal.trackFields(form, (field) => {
           attachSpy(field.name)
           return () => detachSpy(field.name)
         })
@@ -111,7 +111,7 @@ extendDescribe('up.form', function() {
           </main>
         `)
 
-        up.form.trackFields(form1, (field) => {
+        up.internal.trackFields(form1, (field) => {
           attachSpy(field.name)
           return () => detachSpy(field.name)
         })
@@ -141,7 +141,7 @@ extendDescribe('up.form', function() {
           </form>
         `)
 
-        up.form.trackFields(form, (field) => attachSpy(field.name))
+        up.internal.trackFields(form, (field) => attachSpy(field.name))
 
         expect(attachSpy.calls.allArgs()).toEqual([['field1']])
 
@@ -171,7 +171,7 @@ extendDescribe('up.form', function() {
           </form>
         `)
 
-        up.form.trackFields(form, attachCallback)
+        up.internal.trackFields(form, attachCallback)
 
         expect(attachCallback.calls.allArgs()).toEqual([[field1], [field2], [field3], [field4]])
 
@@ -192,7 +192,7 @@ extendDescribe('up.form', function() {
           </form>
         `)
 
-        up.form.trackFields(form, attachCallback)
+        up.internal.trackFields(form, attachCallback)
 
         expect(attachCallback.calls.allArgs()).toEqual([[field1], [field2]])
 
@@ -216,7 +216,7 @@ extendDescribe('up.form', function() {
 
         let form = up.fragment.get('#form')
 
-        up.form.trackFields(form, (field) => {
+        up.internal.trackFields(form, (field) => {
           attachSpy(field.name)
           return () => detachSpy(field.name)
         })
@@ -240,7 +240,7 @@ extendDescribe('up.form', function() {
           </form>
         `)
 
-        let stopTracking = up.form.trackFields(form, (field) => {
+        let stopTracking = up.internal.trackFields(form, (field) => {
           attachSpy(field.name)
           return () => detachSpy(field.name)
         })
@@ -276,7 +276,7 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.form.trackFields(form, (field) => attachSpy(field.getAttribute('name')))
+          up.internal.trackFields(form, (field) => attachSpy(field.getAttribute('name')))
           await up.render({ fragment: `
             <div id="target">
               <${tagName} name="field2"></${tagName}>
@@ -303,7 +303,7 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.form.trackFields(form, (field) => attachSpy(field.getAttribute('name')))
+          up.internal.trackFields(form, (field) => attachSpy(field.getAttribute('name')))
           await up.render({ fragment: `
             <div id="target">
               <${tagName} name="styled-only"></${tagName}>
@@ -336,7 +336,7 @@ extendDescribe('up.form', function() {
           `)
 
           up.compiler('form', function(form) {
-            up.form.trackFields(form, (field) => {
+            up.internal.trackFields(form, (field) => {
               changeSpy('attach', form.name, field.name)
               return () => changeSpy('detach', form.name, field.name)
             })
@@ -371,7 +371,7 @@ extendDescribe('up.form', function() {
           `)
 
           up.compiler('form', function(form) {
-            up.form.trackFields(form, (field) => {
+            up.internal.trackFields(form, (field) => {
               changeSpy('attach', form.name, field.name)
               return () => changeSpy('detach', form.name, field.name)
             })
@@ -405,7 +405,7 @@ extendDescribe('up.form', function() {
 
           up.hello(oldForm)
 
-          up.form.trackFields(keepField, (field) => {
+          up.internal.trackFields(keepField, (field) => {
             changeSpy('insert', oldForm.name, field.name)
             return () => changeSpy('destroy', oldForm.name, field.name)
           })
@@ -447,7 +447,7 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.form.trackFields(root, (field) => {
+          up.internal.trackFields(root, (field) => {
             changeSpy('attach', form.name, field.name)
             return () => changeSpy('detach', form.name, field.name)
           })
@@ -468,7 +468,7 @@ extendDescribe('up.form', function() {
             <input type="text" name="field2" form="form1">
           `)
 
-          up.form.trackFields(root, (field) => {
+          up.internal.trackFields(root, (field) => {
             changeSpy('attach', form.name, field.name)
             return () => changeSpy('detach', form.name, field.name)
           })
@@ -492,7 +492,7 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.form.trackFields(root, (field) => {
+          up.internal.trackFields(root, (field) => {
             changeSpy('attach', form.name, field.name)
             return () => changeSpy('detach', form.name, field.name)
           })
@@ -533,7 +533,7 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.form.trackFields(field1, (f) => {
+          up.internal.trackFields(field1, (f) => {
             changeSpy('attach', f.name)
             return () => changeSpy('detach', f.name)
           })
@@ -548,7 +548,7 @@ extendDescribe('up.form', function() {
             <input type="text" name="field1">
           `)
 
-          up.form.trackFields(field1, (f) => {
+          up.internal.trackFields(field1, (f) => {
             changeSpy('attach', f.name)
             return () => changeSpy('detach', f.name)
           })
@@ -566,7 +566,7 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.form.trackFields(field1, (f) => {
+          up.internal.trackFields(field1, (f) => {
             changeSpy('attach', f.name)
             return () => changeSpy('detach', f.name)
           })
@@ -594,7 +594,7 @@ extendDescribe('up.form', function() {
           `)
 
           up.compiler('form', function(form) {
-            up.form.trackFields(form, (field) => {
+            up.internal.trackFields(form, (field) => {
               changeSpy('attach', form.name, field.name)
               return () => changeSpy('detach', form.name, field.name)
             })
@@ -616,7 +616,7 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.form.trackFields(form, attachSpy)
+          up.internal.trackFields(form, attachSpy)
           expect(attachSpy.calls.allArgs()).toEqual([[field]])
 
           up.hello(up.element.affix(document.body, 'div'))
@@ -640,7 +640,7 @@ extendDescribe('up.form', function() {
           `)
 
           up.compiler('form', function(form) {
-            up.form.trackFields(form, (field) => {
+            up.internal.trackFields(form, (field) => {
               changeSpy('attach', form.name, field.name)
               return () => changeSpy('detach', form.name, field.name)
             })
@@ -677,7 +677,7 @@ extendDescribe('up.form', function() {
             <input type="text" name="field2" form="form">
           `)
 
-          up.form.trackFields(form, attachCallback)
+          up.internal.trackFields(form, attachCallback)
 
           expect(attachCallback.calls.allArgs()).toEqual([[field1], [field2]])
 
@@ -703,7 +703,7 @@ extendDescribe('up.form', function() {
 
           let form = up.fragment.get('#form')
 
-          up.form.trackFields(form, (field) => {
+          up.internal.trackFields(form, (field) => {
             attachSpy(field.name)
             return () => detachSpy(field.name)
           })
@@ -722,7 +722,7 @@ extendDescribe('up.form', function() {
       describe('performance', function() {
 
         it('syncs once after initialization', async function() {
-          const syncSpy = spyOn(up.SelectorTracker.prototype, 'sync').and.callThrough()
+          const syncSpy = spyOn(up.internal.SelectorTracker.prototype, 'sync').and.callThrough()
 
           const [form, field1, field2] = htmlFixtureList(`
             <form>
@@ -731,7 +731,7 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.form.trackFields(form, u.noop)
+          up.internal.trackFields(form, u.noop)
           await wait()
 
           expect(syncSpy.calls.count()).toBe(1)
@@ -744,10 +744,10 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.form.trackFields(form, u.noop)
+          up.internal.trackFields(form, u.noop)
           await wait()
 
-          const syncSpy = spyOn(up.SelectorTracker.prototype, 'sync').and.callThrough()
+          const syncSpy = spyOn(up.internal.SelectorTracker.prototype, 'sync').and.callThrough()
 
           up.render({ fragment: `
             <input type="text" name="field2" id="field">
@@ -766,10 +766,10 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.form.trackFields(form, u.noop)
+          up.internal.trackFields(form, u.noop)
           await wait()
 
-          const syncSpy = spyOn(up.SelectorTracker.prototype, 'sync').and.callThrough()
+          const syncSpy = spyOn(up.internal.SelectorTracker.prototype, 'sync').and.callThrough()
 
           up.render({ fragment: `
             <div id="target">
@@ -791,10 +791,10 @@ extendDescribe('up.form', function() {
             </form>
           `)
 
-          up.form.trackFields(form, u.noop)
+          up.internal.trackFields(form, u.noop)
           await wait()
 
-          const syncSpy = spyOn(up.SelectorTracker.prototype, 'sync').and.callThrough()
+          const syncSpy = spyOn(up.internal.SelectorTracker.prototype, 'sync').and.callThrough()
 
           let field2 = up.element.createFromHTML('<input type="text" name="field2">')
           form.append(field2)
@@ -815,10 +815,10 @@ extendDescribe('up.form', function() {
           `
           const [form, field1, field2] = htmlFixtureList(html)
 
-          up.form.trackFields(form, u.noop)
+          up.internal.trackFields(form, u.noop)
           await wait()
 
-          const syncSpy = spyOn(up.SelectorTracker.prototype, 'sync').and.callThrough()
+          const syncSpy = spyOn(up.internal.SelectorTracker.prototype, 'sync').and.callThrough()
 
           let result = await up.render({
             target: 'input[name=field1], input[name=field2]',
@@ -851,7 +851,7 @@ extendDescribe('up.form', function() {
             let queryResultCount = countQueryResults()
 
             for (let form of document.querySelectorAll('form')) {
-              up.form.trackFields(form, u.noop)
+              up.internal.trackFields(form, u.noop)
             }
 
             // Inspecting all fields for every tracker would be FORM_COUNT * FORM_COUNT * 2 = 20,000.
@@ -862,7 +862,7 @@ extendDescribe('up.form', function() {
             htmlFixtureList(htmlWithForms())
 
             for (let form of document.querySelectorAll('form')) {
-              up.form.trackFields(form, u.noop)
+              up.internal.trackFields(form, u.noop)
             }
 
             let queryResultCount = countQueryResults()
@@ -878,7 +878,7 @@ extendDescribe('up.form', function() {
             htmlFixtureList(htmlWithForms({ ids: true }))
 
             for (let form of document.querySelectorAll('form')) {
-              up.form.trackFields(form, u.noop)
+              up.internal.trackFields(form, u.noop)
             }
 
             let queryResultCount = countQueryResults()
@@ -894,7 +894,7 @@ extendDescribe('up.form', function() {
             for (let form of document.querySelectorAll('form')) {
               let container = up.element.affix(form, 'div.container')
               container.append(...form.querySelectorAll('input'))
-              up.form.trackFields(container, u.noop)
+              up.internal.trackFields(container, u.noop)
             }
 
             let queryResultCount = countQueryResults()

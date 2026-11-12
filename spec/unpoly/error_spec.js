@@ -28,8 +28,24 @@ describe('up.error', function() {
       await expectAsync(mutedPromise).toBeResolved()
     })
 
+    it('mutes a rejected promise if the rejection value is an instance of a subclass of up.Response', async function() {
+      const ResponseSubclass = class extends up.Response {}
+      const promise = Promise.reject(new ResponseSubclass())
+      const mutedPromise = up.error.muteUncriticalRejection(promise)
+
+      await expectAsync(mutedPromise).toBeResolved()
+    })
+
     it('mutes a rejected promise if the rejection value is an AbortError', async function() {
       const abortError = new up.Aborted('User aborted')
+      const promise = Promise.reject(abortError)
+      const mutedPromise = up.error.muteUncriticalRejection(promise)
+
+      await expectAsync(mutedPromise).toBeResolved()
+    })
+
+    it('mutes a rejected promise if the rejection value is a native AbortError', async function() {
+      const abortError = new DOMException('Aborted by the browser', 'AbortError')
       const promise = Promise.reject(abortError)
       const mutedPromise = up.error.muteUncriticalRejection(promise)
 
@@ -43,13 +59,20 @@ describe('up.error', function() {
 
       await expectAsync(mutedPromise).toBeRejectedWith(error)
     })
+
+    it('does not mute a rejected promise if the rejection value is not an object', async function() {
+      const promise = Promise.reject('reason')
+      const mutedPromise = up.error.muteUncriticalRejection(promise)
+
+      await expectAsync(mutedPromise).toBeRejectedWith('reason')
+    })
   })
 
-  describe('up.error.guard()', function() {
+  describe('up.internal.guard()', function() {
 
     it('calls the given function and returns its return value', function() {
       let fn = () => 123
-      expect(up.error.guard(fn)).toBe(123)
+      expect(up.internal.guard(fn)).toBe(123)
     })
 
     describe('when the function throws an error', function() {
@@ -57,7 +80,7 @@ describe('up.error', function() {
       it('does not crash', async function() {
         await jasmine.spyOnGlobalErrorsAsync(async function() {
           let fn = () => { throw new Error('error message') }
-          let runGuarded = () => up.error.guard(fn)
+          let runGuarded = () => up.internal.guard(fn)
           expect(runGuarded).not.toThrowError()
         })
       })
@@ -65,7 +88,7 @@ describe('up.error', function() {
       it('returns undefined', async function() {
         await jasmine.spyOnGlobalErrorsAsync(async function() {
           let fn = () => { throw new Error('error message') }
-          expect(up.error.guard(fn)).toBe(undefined)
+          expect(up.internal.guard(fn)).toBe(undefined)
         })
       })
 
@@ -74,7 +97,7 @@ describe('up.error', function() {
         let fn = () => { throw error }
 
         await jasmine.expectGlobalError(error, async function() {
-          up.error.guard(fn)
+          up.internal.guard(fn)
         })
       })
 
@@ -82,11 +105,11 @@ describe('up.error', function() {
 
   })
 
-  describe('up.error.guardFn()', function() {
+  describe('up.internal.guardFn()', function() {
 
     it('returns a function that calls the given functions', function() {
       let fn = jasmine.createSpy('wrapped function').and.returnValue(123)
-      let guarded = up.error.guardFn(fn)
+      let guarded = up.internal.guardFn(fn)
 
       expect(guarded).toEqual(jasmine.any(Function))
       expect(fn).not.toHaveBeenCalled()
@@ -98,7 +121,7 @@ describe('up.error', function() {
     it('calls the wrapped function with a guard', async function() {
       let error = new Error('error message')
       let fn = jasmine.createSpy('wrapped function').and.throwError(error)
-      let guarded = up.error.guardFn(fn)
+      let guarded = up.internal.guardFn(fn)
 
       await jasmine.expectGlobalError(error, async function() {
         expect(guarded).not.toThrowError()
@@ -128,6 +151,18 @@ describe('up.error', function() {
       expect(error.toString()).toBe('up.Minified: message')
     })
 
+    it("lets a subclass assign its own [Symbol.toStringTag], which becomes the error's name", function() {
+      class AppError extends up.Error {}
+      AppError.prototype[Symbol.toStringTag] = 'AppError'
+
+      const error = new AppError('message')
+      expect(error.name).toBe('AppError')
+      expect(error.toString()).toBe('AppError: message')
+
+      error[Symbol.toStringTag] = 'AppError.Instance'
+      expect(Object.prototype.toString.call(error)).toBe('[object AppError.Instance]')
+    })
+
     it("names an up.Aborted error 'AbortError', like a native abort error", function() {
       const error = new up.Aborted('message')
       expect(error.name).toBe('AbortError')
@@ -148,6 +183,9 @@ describe('up.error', function() {
       it('is named up.CannotCompile', function() {
         up.migrate.warn.mock()
         expect(new up.CannotCompile().name).toBe('up.CannotCompile')
+        expect(up.CannotCompile.name).toBe('up.CannotCompile')
+        // A data property on the class's own prototype, since Chrome ignores a getter (see src/unpoly.ts).
+        expect(Object.getOwnPropertyDescriptor(up.CannotCompile.prototype, Symbol.toStringTag)?.value).toBe('up.CannotCompile')
       })
     })
   }

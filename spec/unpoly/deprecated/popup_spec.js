@@ -45,6 +45,22 @@ if (up.migrate.loaded) {
       })
     })
 
+    describe('up.popup.sync()', function() {
+      it('syncs every layer', async function() {
+        const origin = fixture('a#origin', { text: 'origin' })
+        await up.layer.open({ mode: 'popup', origin, content: 'popup content' })
+        up.migrate.warn.mock()
+        const syncSpies = up.layer.stack.map((layer) => spyOn(layer, 'sync'))
+        expect(syncSpies.length).toBe(2)
+
+        up.popup.sync()
+
+        for (let syncSpy of syncSpies) {
+          expect(syncSpy).toHaveBeenCalled()
+        }
+      })
+    })
+
     describe('position with alignment, like { position: "bottom-right" }', function() {
       it('is split into { position } and { align } for the layer and its element', async function() {
         const warnSpy = up.migrate.warn.mock()

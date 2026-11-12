@@ -1,0 +1,82 @@
+#!/usr/bin/env node
+// Type-check src/ with TypeScript 7. Runs two checks:
+//
+//   1. tsconfig.json: all of src/, with loose settings.
+//   2. tsconfig.core.json: Unpoly's core (src/unpoly/), with stricter settings and without
+//      unpoly-migrate's declarations. The folders listed in NOT_YET_STRICT get the same check
+//      without the stricter settings.
+//
+// Extra arguments are forwarded to tsc, so `bin/typecheck --extendedDiagnostics` works.
+// The build doesn't use TypeScript at all: esbuild strips the types.
+import { spawn } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const tscBin = path.join(projectRoot, 'node_modules', 'typescript', 'bin', 'tsc')
+const extraArgs = process.argv.slice(2)
+
+// Core folders that don't pass the stricter settings of tsconfig.core.json yet. tsc has no
+// per-file settings, and leaving a folder out of the config's `include` doesn't help: other
+// core files import it, so tsc checks it anyway. We run the core check a second time without
+// the stricter settings, and take these folders' errors from that run.
+const NOT_YET_STRICT = [
+  // The change classes wait for a restructure.
+  'src/unpoly/fragment/render/change/',
+]
+
+// The settings that tsconfig.core.json adds to tsconfig.json. The second run turns them off.
+// When tsconfig.core.json gets another setting, add it here.
+const STRICT_SETTINGS = ['noImplicitAny', 'strictNullChecks']
+
+function tsc(args, stdio) {
+  return new Promise((resolve) => {
+    let child = spawn(tscBin, args, { stdio, cwd: projectRoot })
+    let stdout = ''
+    child.stdout?.on('data', (chunk) => stdout += chunk)
+    child.on('exit', (code) => resolve({ code: code ?? 1, stdout }))
+  })
+}
+
+// Splits tsc's plain output (`--pretty false`) into blocks. An error starts with
+// `path(line,col): error`, followed by indented lines that elaborate it. An error without a
+// location, like a missing type library, starts with `error`. Any other line is a block of its own.
+function outputBlocks(output) {
+  let blocks = []
+  for (let line of output.split('\n')) {
+    if (/^\s/.test(line) && blocks.length) {
+      blocks.at(-1).lines.push(line)
+    } else if (line) {
+      blocks.push({ lines: [line], error: /^(\S+\(\d+,\d+\): )?error TS\d+/.test(line) })
+    }
+  }
+  return blocks
+}
+
+function isNotYetStrict({ lines }) {
+  return NOT_YET_STRICT.some((folder) => lines[0].startsWith(folder))
+}
+
+// tsc may also fail without printing an error, e.g. when it crashes.
+function crashed({ code, stdout }) {
+  return code !== 0 && !outputBlocks(stdout).some(({ error }) => error)
+}
+
+let loose = await tsc(['--project', 'tsconfig.json', ...extraArgs], 'inherit')
+let coreArgs = ['--project', 'tsconfig.core.json', '--pretty', 'false', ...extraArgs]
+let [core, coreNotYetStrict] = await Promise.all([
+  tsc(coreArgs, ['inherit', 'pipe', 'inherit']),
+  tsc([...coreArgs, ...STRICT_SETTINGS.flatMap((setting) => [`--${setting}`, 'false'])], ['inherit', 'pipe', 'inherit']),
+])
+let blocks = [
+  ...outputBlocks(core.stdout).filter((block) => !(block.error && isNotYetStrict(block))),
+  ...outputBlocks(coreNotYetStrict.stdout).filter((block) => block.error && isNotYetStrict(block)),
+]
+for (let { lines } of blocks) console.log(lines.join('\n'))
+let coreErrorCount = blocks.filter(({ error }) => error).length
+if (coreErrorCount) {
+  console.log(`\nFound ${coreErrorCount} error${coreErrorCount === 1 ? '' : 's'} in the core check (tsconfig.core.json).`)
+}
+let coreFailed = coreErrorCount > 0 || crashed(core) || crashed(coreNotYetStrict)
+
+process.exit(loose.code || (coreFailed ? 1 : 0))

@@ -330,7 +330,7 @@ extendDescribe('up.history', function() {
           // We can't really reload the browser without losing the spec runner.
           // Instead we reset the framework to throw away internal state that we would also
           // lose during a reload.
-          up.framework.reset()
+          up.internal.emitReset()
           await wait()
           configure()
         }
