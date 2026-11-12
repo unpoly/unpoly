@@ -126,7 +126,7 @@ export class RequestQueue {
   }
 
   _poke(): void {
-    let request: UpRequest | undefined
+    let request
     if (this._hasConcurrencyLeft() && (request = this._pluckNextRequest())) {
       return this._sendRequestNow(request)
     }

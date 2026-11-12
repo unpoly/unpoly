@@ -142,7 +142,7 @@ export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitio
 
   const cluster = [newElement, oldElement]
   const { nested } = motionController
-  let play: (() => Promise<void> | void) | undefined
+  let play
 
   // Finish previous transitions before we measure or replace elements.
   if (!nested) cluster.forEach((element) => motionController.finish(element))

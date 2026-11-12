@@ -66,7 +66,7 @@ function processRequest(request: UpRequest): void {
 function useCachedRequest(newRequest: UpRequest): boolean | undefined {
   // If we have an existing promise matching this new request,
   // we use it unless `request.cache` is explicitly set to `false`.
-  let cachedRequest: UpRequest | undefined
+  let cachedRequest
   if (newRequest.willCache() && (cachedRequest = cache.get(newRequest))) {
     printToStandard('up.request()', 'Re-using previous request to %s', newRequest)
 

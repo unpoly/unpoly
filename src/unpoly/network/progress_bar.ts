@@ -23,7 +23,7 @@ export class ProgressBar {
   }
 
   _nextStep(): void {
-    let diff: number
+    let diff
     if (this._width < 80) {
       if (Math.random() < 0.15) {
         // Sometimes the bar grows quickly by (7..12) percent.

@@ -568,7 +568,7 @@ export class UpRequest {
       this._setPropertyHeader(key)
     }
 
-    let header: string, token: string | undefined
+    let header, token
     if ((header = this.csrfHeader()) && (token = this.csrfToken())) {
       this._setAutoHeader(header, token)
     }

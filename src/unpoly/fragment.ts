@@ -185,7 +185,7 @@ export function findKeepPlan(options: u.PlainObject): t.KeepPlan | undefined {
   // Early return if no [up-keep] attr or if [up-keep=false]
   if (!oldElementMode) { return }
 
-  let partner: Element | null | undefined
+  let partner
   // Without a target we keep looking for "undefined", which matches nothing.
   let partnerSelector = tryToTarget(oldElement)!
   if (!partnerSelector) {

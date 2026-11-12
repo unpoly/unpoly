@@ -127,7 +127,7 @@ export class UpRequestCache {
     newRequest.trackedRequest = existingRequest
     newRequest.state = 'tracking'
 
-    let value: UpResponse | Error
+    let value
 
     // In case existingRequest is already settled, we need to settle newRequest sync, not one microtask later.
     // This is required to reliably revert active previews before making a new request.

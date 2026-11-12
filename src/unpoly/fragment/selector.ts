@@ -30,7 +30,7 @@ export class Selector {
     // Also normalizes options: a missing { layer } with an { origin } becomes 'origin'.
     // False for a new layer or without layers. The branches below only read it as an array.
     let layers = (options.layer !== 'new' && !noLayers && layerStack.getAll(options)) as Layer[]
-    let expandTargetLayer: Layer | 'new' | undefined
+    let expandTargetLayer
 
     if (options.layer === 'new') {
       // (1) A layer that is about to open does not exist yet, so we cannot filter by it.
