@@ -80,6 +80,9 @@ and after.
   (both the outer and the returned one).
 - **Local variables are inferred.** Annotate one where inference can't do it (see
   [Strict checks](#strict-checks)), or where a type helps the reader.
+- **Don't annotate a `let` without an initializer.** TypeScript infers its type from the
+  assignments. Add a type only when `bin/typecheck` reports that the variable implicitly has
+  type `any`.
 - **Refactor before type acrobatics.** When a type is hard to write, change the code so it's
   easy to type. Don't build intersections, `Pick` or `Omit` where a refactor or a named type
   does.
@@ -126,8 +129,8 @@ and after.
 
 ### Strict checks
 
-- Core code has no implicit `any`: type every parameter, a `let` without an initializer, and an
-  empty `{}` or `[]` that collects values. Callbacks get their parameter types from the function
+- Core code has no implicit `any`: type every parameter, and an empty `{}` or `[]` that
+  collects values. Callbacks get their parameter types from the function
   they're passed to (`up.compiler()`, `up.on()`), so prefer typing that function over annotating
   each callback.
 - Core code passes `strictNullChecks`. When TypeScript says a value may be `null` or
