@@ -20,10 +20,12 @@ declare module '../unpoly.js' {
   }
 }
 
-// Adds methods to up.Request, up.Response and up.cache that core doesn't declare, so they exist only with unpoly-migrate.
+// Adds methods and properties to up.Request, up.Response and up.cache that core doesn't declare, so they exist only with unpoly-migrate.
 declare module '../unpoly/network/request.js' {
   interface UpRequest {
     navigate(): void
+    preload?: UpRequest['background']
+    badResponseTime?: UpRequest['lateDelay']
   }
 }
 
