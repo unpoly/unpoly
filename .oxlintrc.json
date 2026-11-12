@@ -173,11 +173,51 @@
       }
     },
     {
-      // Rules for the modules that follow the TypeScript conventions in docs/contributing/code-style.md,
-      // as a ratchet: each step of the migration adds the modules it converted to `files`, until
-      // the list covers all of src/ and the rules can move to the override for **/*.ts above.
+      // The TypeScript conventions in docs/contributing/code-style.md, as a ratchet: they apply to
+      // all of src/ except the modules in `excludeFiles`, which don't follow them yet. A step of
+      // the migration that converts a module removes it from the list. Once the list is empty,
+      // the rules can move to the override for **/*.ts above. New files are checked by default.
       // Inline callbacks and functions whose type comes from context keep inferred return types.
-      "files": [],
+      "files": ["src/**/*.ts"],
+      "excludeFiles": [
+        "src/unpoly-migrate/fragment.ts",
+        "src/unpoly-migrate/migrate.ts",
+        "src/unpoly-migrate/network.ts",
+        "src/unpoly-migrate/protocol.ts",
+        "src/unpoly/element.ts",
+        "src/unpoly/event.ts",
+        "src/unpoly/form.ts",
+        "src/unpoly/form/field_watcher.ts",
+        "src/unpoly/form/form_validator.ts",
+        "src/unpoly/form/params.ts",
+        "src/unpoly/form/switcher.ts",
+        "src/unpoly/fragment.ts",
+        "src/unpoly/fragment/render/change/change.ts",
+        "src/unpoly/fragment/render/change/change_from_content.ts",
+        "src/unpoly/fragment/render/change/change_from_url.ts",
+        "src/unpoly/fragment/render/change/open_layer.ts",
+        "src/unpoly/fragment/render/change/update_layer.ts",
+        "src/unpoly/fragment/render/render_job.ts",
+        "src/unpoly/fragment/render/render_options.ts",
+        "src/unpoly/fragment/render/response_doc.ts",
+        "src/unpoly/framework.ts",
+        "src/unpoly/layer/base.ts",
+        "src/unpoly/layer/modes/overlay.ts",
+        "src/unpoly/link.ts",
+        "src/unpoly/motion.ts",
+        "src/unpoly/network.ts",
+        "src/unpoly/network/request.ts",
+        "src/unpoly/network/request_cache.ts",
+        "src/unpoly/network/request_queue.ts",
+        "src/unpoly/protocol.ts",
+        "src/unpoly/rails.ts",
+        "src/unpoly/script.ts",
+        "src/unpoly/script/hello_fragment.ts",
+        "src/unpoly/status.ts",
+        "src/unpoly/status/preview.ts",
+        "src/unpoly/util.ts",
+        "src/unpoly/viewport.ts"
+      ],
       "rules": {
         "typescript/explicit-function-return-type": ["error", {
           "allowExpressions": true,

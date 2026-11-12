@@ -73,8 +73,9 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
   read code with `grep`, not by hovering, and an explicit type catches an accidental widening
   where it happens. Lint enforces this with `explicit-function-return-type`.
 
-  Both rules only check the modules that are converted already. Their override in
-  `.oxlintrc.json` lists them, and a change that converts a module adds it there.
+  Lint skips `consistent-type-definitions` and `explicit-function-return-type` in the modules
+  that are not converted yet. Their override in `.oxlintrc.json` lists them in `excludeFiles`,
+  and a change that converts a module removes it there. New files are always checked.
 - **Local variables are inferred.** Annotate one where inference can't do it (see
   [Strict checks](#strict-checks)), or where a type helps the reader.
 - **Refactor before type acrobatics.** When a type is hard to write, change the code so it's
