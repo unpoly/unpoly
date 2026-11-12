@@ -72,7 +72,7 @@ export abstract class Overlay extends Layer {
   declare class?: string
   declare backdrop: boolean
   // The constructor turns the option (true, false or a string) into an array of methods.
-  declare dismissible: string[] | boolean | string
+  declare dismissible: string[]
   declare dismissLabel: string
   declare dismissARIALabel: string
   declare openAnimation: LayerAnimation
@@ -115,7 +115,6 @@ export abstract class Overlay extends Layer {
     this.origin = options.origin // for tethered anchor element
     this.class = options.class
     this.backdrop = options.backdrop
-    this.dismissible = options.dismissible
     this.dismissLabel = options.dismissLabel
     this.dismissARIALabel = options.dismissARIALabel
     this.openAnimation = options.openAnimation
@@ -136,8 +135,8 @@ export abstract class Overlay extends Layer {
     this.onDismissedReload = options.onDismissedReload
     this.acceptEvent = options.acceptEvent
     this.dismissEvent = options.dismissEvent
-    this.acceptLocation = options.acceptLocation
-    this.dismissLocation = options.dismissLocation
+    this.acceptLocation = options.acceptLocation && new u.UpURLPattern(options.acceptLocation)
+    this.dismissLocation = options.dismissLocation && new u.UpURLPattern(options.dismissLocation)
     this.acceptFragment = options.acceptFragment
     this.dismissFragment = options.dismissFragment
 
@@ -147,20 +146,12 @@ export abstract class Overlay extends Layer {
     // this would otherwise cause auto-history for *every* overlay regardless of initial target.
     this.state = 'opening'
 
-    if (this.dismissible === true) {
+    if (options.dismissible === true) {
       this.dismissible = ['button', 'key', 'outside']
-    } else if (this.dismissible === false) {
+    } else if (options.dismissible === false) {
       this.dismissible = []
     } else {
-      this.dismissible = u.getSimpleTokens(this.dismissible)
-    }
-
-    if (this.acceptLocation) {
-      this.acceptLocation = new u.UpURLPattern(this.acceptLocation as any)
-    }
-
-    if (this.dismissLocation) {
-      this.dismissLocation = new u.UpURLPattern(this.dismissLocation as any)
+      this.dismissible = u.getSimpleTokens(options.dismissible)
     }
   }
 
@@ -237,10 +228,10 @@ export abstract class Overlay extends Layer {
   }
 
   _suggestVisualNesting(): number {
-    // An overlay always has a parent.
-    const { parent } = this as { parent: Layer }
+    // An overlay always has a parent. Only an overlay parent can have our mode.
+    const parent = this.parent as Overlay
     if (this.mode === parent.mode) {
-      return 1 + (parent as Overlay)._suggestVisualNesting()
+      return 1 + parent._suggestVisualNesting()
     } else {
       return 0
     }
@@ -576,7 +567,7 @@ export abstract class Overlay extends Layer {
   }
 
   _supportsDismissMethod(method: string): boolean {
-    return u.contains(this.dismissible as string[], method)
+    return u.contains(this.dismissible, method)
   }
 
   _executeCloseChange(verb: 'accept' | 'dismiss', value: any, options: u.PlainObject): void {
