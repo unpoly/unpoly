@@ -4,16 +4,12 @@ import { Aborted, guard } from '../../error.js'
 import { emit } from '../../event.js'
 import { abortFragment } from '../../fragment.js'
 import { printToStandard } from '../../log.js'
-import { type UpRequest } from '../../network.js'
 import type * as t from '../types.js'
 import { ChangeFromContent } from './change/change_from_content.js'
 import { ChangeFromResponse } from './change/change_from_response.js'
 import { ChangeFromURL } from './change/change_from_url.js'
 import { RenderOptions } from './render_options.js'
 import { RenderResult } from './render_result.js'
-
-// What the { abort } option needs to know about a change: its preflight props, and its request if it has one.
-type AbortOptionProps = t.PreflightProps & { request?: UpRequest }
 
 /*-
 A queued render task.
@@ -190,7 +186,7 @@ export class RenderJob {
     //     We memoize the callback so we only run it once.
     // (4) FromURL passes the preflight props of the change, plus the new { request }.
     //     FromContent passes the preflight props of the plan it renders, which may be a fallback.
-    let handleAbort = u.memoize((preflightProps: AbortOptionProps) => this._handleAbortOption(preflightProps))
+    let handleAbort = u.memoize((preflightProps: t.AbortOptionProps) => this._handleAbortOption(preflightProps))
     let renderOptions = { ...this.renderOptions, handleAbort }
 
     if (renderOptions.url) {
@@ -218,7 +214,7 @@ export class RenderJob {
     }
   }
 
-  _handleAbortOption({ bindFragments, bindLayer, origin, layer, request }: AbortOptionProps): void {
+  _handleAbortOption({ bindFragments, bindLayer, origin, layer, request }: t.AbortOptionProps): void {
     // When preloading up.RenderOptions forces { abort: false }.
     let { abort } = this.renderOptions
 

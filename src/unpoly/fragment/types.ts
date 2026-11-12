@@ -1,9 +1,9 @@
 import type * as u from '../util.js'
 import { type EventPlan, type InputDevice, type UpEvent } from '../event.js'
 import { type ParamsLike } from '../form.js'
-import { type Layer, type LayerCloseEvent, type LayerOpenedEvent } from '../layer.js'
+import { type Layer, type LayerCloseEvent, type LayerMode, type LayerOpenedEvent } from '../layer.js'
 import { type AnimationValue, type TransitionValue } from '../motion.js'
-import { type UpRequest, type UpResponse } from '../network.js'
+import { type RequestCondition, type UpRequest, type UpResponse } from '../network.js'
 import { type FragmentHungryEvent } from '../radio.js'
 import { type CSPInfo } from '../script.js'
 import { type PreviewFn } from '../status.js'
@@ -70,8 +70,8 @@ export interface RenderOptions {
   revalidate?: boolean | 'auto' | ((response: UpResponse) => boolean)
   // With true, the { preview } is used.
   revalidatePreview?: PreviewValue | true
-  expireCache?: any
-  evictCache?: any
+  expireCache?: RequestCondition
+  evictCache?: RequestCondition
 
   // Local content
   content?: string | Element | u.List<Node>
@@ -82,7 +82,7 @@ export interface RenderOptions {
   // Layer
   layer?: LayerReference
   peel?: boolean | 'accept' | 'dismiss'
-  mode?: string
+  mode?: LayerMode
   size?: string
   class?: string
   position?: string
@@ -135,6 +135,9 @@ export interface RenderOptions {
   placeholder?: string | Element | u.List<Node> | false
   preview?: PreviewValue
   feedback?: boolean
+  // A { preview } and { placeholder } per target selector, when up.validate() renders several targets at once.
+  previewMap?: u.PlainObject
+  placeholderMap?: u.PlainObject
 
   // Client state
   data?: any
@@ -172,21 +175,22 @@ export interface RenderOptions {
   inputDevice?: InputDevice
   // Opens an empty overlay when no content option is given (up.layer.open()).
   defaultToEmptyContent?: boolean
-  // An event to emit before rendering, e.g. up:link:follow. Rendering is aborted when it is prevented.
-  guardEvent?: Event & { renderOptions?: RenderOptions }
+  guardEvent?: RenderGuardEvent
   // Set by RenderJob, called with the change's preflight props once a plan applies.
-  handleAbort?: (props: PreflightProps & { request?: UpRequest }) => void
+  handleAbort?: (props: AbortOptionProps) => void
   // An identifier for a render pass. See up.fragment.abort().
-  jid?: any
+  jid?: number
   // Only use the response if it was cached (up.link.preload()).
   preload?: boolean
   expiredResponse?: UpResponse
-  verifyFinished?: (result: RenderResult) => any
+  verifyFinished?: VerifyFinishedFn
   onRequestKnown?: (request: UpRequest) => void
   // Only compute the preflight props, there is no content yet (ChangeFromURL).
   preflight?: boolean
   // How a step updates its target when the target has no ::before/::after/::content suffix.
   defaultPlacement?: string
+  // Whether a step is optional when the target has no :maybe suffix (up.validate()).
+  defaultMaybe?: boolean
   // Prefer these elements when matching the target, e.g. when revalidating.
   preferOldElements?: Element[]
   // The elements that show the loading state (up.status), like a form and its submit button.
@@ -259,10 +263,9 @@ Options for an `up.FragmentProcessor`. Subclasses take more.
 export interface FragmentProcessorOptions {
   fragment?: HTMLElement
   // What { focus: 'auto' } or { scroll: 'auto' } means, as another processable value.
-  autoMeans?: any
+  autoMeans?: FragmentProcessorValue
   origin?: Element
   layer?: Layer
-  [key: string]: any
 }
 
 /**
@@ -275,13 +278,26 @@ export interface PreflightProps {
   layer: Layer | 'new'
   // The layer whose fragments the request belongs to, for aborting.
   bindLayer: Layer
-  mode: string
+  mode: LayerMode
   context: u.PlainObject
-  origin: Element | undefined
+  origin?: Element
   target: string
   fragments: Element[]
   bindFragments: Element[]
 }
+
+/**
+What the `{ abort }` option needs to know about a change: its preflight props, and its request if it has one.
+@internal
+*/
+export interface AbortOptionProps extends PreflightProps { request?: UpRequest }
+
+/**
+An event that a render pass emits before it renders, like `up:link:follow`. Rendering is aborted
+when the event is prevented. Listeners find the render options in `event.renderOptions`.
+@internal
+*/
+export interface RenderGuardEvent extends UpEvent { renderOptions?: RenderOptions }
 
 /**
 Options for accepting or dismissing an overlay.
