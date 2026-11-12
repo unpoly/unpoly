@@ -836,7 +836,7 @@ up.layer = (function() {
   @stable
   @signature
   */
-  function ask(options) {
+  function ask(options = {}) {
     return new Promise(function(resolve, reject) {
       open(up.RenderOptions.chainCallbacks(options, {
         onAccepted: (event) => resolve(event.value),
