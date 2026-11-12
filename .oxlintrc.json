@@ -182,6 +182,7 @@
       "excludeFiles": [
         "src/unpoly-migrate/fragment.ts",
         "src/unpoly-migrate/migrate.ts",
+        "src/unpoly-migrate/migrate/types.ts",
         "src/unpoly-migrate/network.ts",
         "src/unpoly-migrate/protocol.ts"
       ],
