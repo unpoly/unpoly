@@ -50,34 +50,23 @@ describe('up.framework', function() {
       // esbuild turns top-level `const`, `let` and `class` into `var`. So when a module reads a
       // binding from a module that is not evaluated yet (an import cycle entered from the wrong
       // side, see src/unpoly.ts), it gets `undefined` instead of an error. An api object that
-      // captured such a binding puts `undefined` on window.up. This test catches that, and nothing
-      // that is only read while a module is evaluated (like a class in a top-level closure).
+      // captured such a binding puts `undefined` on window.up. This test catches that. It can't see
+      // a binding that a module only keeps for itself (see src/unpoly.ts).
       //
-      // Keys that are undefined or throw on purpose, with the reason. They are all getters, which
-      // read their bindings when called.
-      const ON_PURPOSE = {
-        'up.history.previousLocation': 'Nothing has navigated yet',
-        'up.layer.parent': 'The current layer is the root layer, which has no parent',
-        'up.layer.size': 'The root layer has no size',
-        'up.modal.flavors': 'unpoly-migrate throws for a property that was removed without replacement',
-      }
+      // We only check data properties. A getter reads its bindings when it is called, after every
+      // module has been evaluated, so its value says nothing about the order. Calling it could also
+      // print a deprecation warning from unpoly-migrate.
 
       it('publishes no undefined value on window.up, in its namespaces or on up.internal', function() {
         let problems = []
 
-        // A getter that throws counts as a problem too.
         function check(object, path) {
           let values = {}
           for (let key of Object.getOwnPropertyNames(object)) {
-            let keyPath = `${path}.${key}`
-            if (keyPath in ON_PURPOSE) continue
-            try {
-              values[key] = object[key]
-            } catch (error) {
-              problems.push(`${keyPath} throws ${error}`)
-              continue
-            }
-            if (values[key] === undefined) problems.push(`${keyPath} is undefined`)
+            let descriptor = Object.getOwnPropertyDescriptor(object, key)
+            if (!('value' in descriptor)) continue
+            values[key] = descriptor.value
+            if (descriptor.value === undefined) problems.push(`${path}.${key} is undefined`)
           }
           return values
         }
