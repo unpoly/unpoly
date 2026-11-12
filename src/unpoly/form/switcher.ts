@@ -43,7 +43,7 @@ export class Switcher {
   }
 
   _trackFieldChanges(): UnbindFn {
-    let callback = (): void => this._onFieldChanged()
+    let callback = () => this._onFieldChanged()
     return up.migrate.watchForSwitch?.(this._root, callback)
       // Switching effects are client-side and cheap, so we never debounce them.
       // A { delay } meant for requests (from config or [up-watch-delay]) would only make switching lag,
@@ -52,7 +52,7 @@ export class Switcher {
   }
 
   _trackNewSwitchees(): UnbindFn {
-    let onSwitcheeAdded = (switchee: Switchee): void => this._switchSwitchee(switchee)
+    let onSwitcheeAdded = (switchee: Switchee) => this._switchSwitchee(switchee)
     return trackSelector(() => this._findSwitchees(), onSwitcheeAdded)
   }
 

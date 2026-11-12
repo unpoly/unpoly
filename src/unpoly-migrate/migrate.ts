@@ -287,7 +287,7 @@ up.migrate = (function() {
   }
 
   function defineThrowingProps(object: object, forbiddenPrototype: object, errorMessage: string): void {
-    let complain = (): never => { throw new TypeError(errorMessage) }
+    let complain = () => { throw new TypeError(errorMessage) }
 
     for (const propName of Object.getOwnPropertyNames(forbiddenPrototype)) {
       if (!(propName in object)) {

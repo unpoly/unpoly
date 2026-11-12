@@ -31,7 +31,7 @@ up.migrate.titleFromXHR = function(xhr) {
 }
 
 up.protocol.config.patch(function() {
-  const cspNonceMoved = (): void => up.migrate.deprecated('up.protocol.config.cspNonce', 'up.script.config.cspNonce')
+  const cspNonceMoved = () => up.migrate.deprecated('up.protocol.config.cspNonce', 'up.script.config.cspNonce')
 
   Object.defineProperty(this, 'cspNonce', {
     configurable: true,

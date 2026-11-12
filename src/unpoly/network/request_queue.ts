@@ -185,7 +185,7 @@ export class RequestQueue {
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1
     // A timed request has a numeric late time.
-    const isLate = (request: UpRequest): boolean => request.age >= ((request.effectiveLateTime as number) - timerTolerance)
+    const isLate = (request: UpRequest) => request.age >= ((request.effectiveLateTime as number) - timerTolerance)
     return u.some(this._timedRequests, isLate)
   }
 

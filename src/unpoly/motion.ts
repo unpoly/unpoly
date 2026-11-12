@@ -49,7 +49,7 @@ export const animate = mockable(async function animate(element: any, animationVa
   // (C) Leave out our callbacks, so a nested call from the motion function won't call them again.
   const timingOptions = effectiveTimingOptions({ duration, easing })
 
-  let trackable = async function(): Promise<void> {
+  let trackable = async function() {
     if (animationFn && canAnimateElement(element)) {
       try {
         await animationFn(element, timingOptions)
@@ -80,7 +80,7 @@ async function animateNow(element: HTMLElement, lastFrame: e.StyleProps, { durat
   // There is also Animation#commitStyles(), but that has two issues:
   // (A) Throws on detached elements
   // (B) Can't set an empty last frame property, e.g. when we're transforming towards { transform: '' }
-  let applyFinishedFrame = (): void => e.setInlineStyle(element, finishedFrame ?? lastFrame)
+  let applyFinishedFrame = () => e.setInlineStyle(element, finishedFrame ?? lastFrame)
 
   // A Web Animation with a duration of 0 (e.g. with disabled motion) would only finish
   // on the next animation frame. We don't want to depend on the rendering loop when nothing moves.
@@ -91,7 +91,7 @@ async function animateNow(element: HTMLElement, lastFrame: e.StyleProps, { durat
   let camelizedLastFrame = u.withRenamedKeys(lastFrame, u.kebabToCamelCase)
   let animation = element.animate([ camelizedLastFrame ], { duration, easing, fill: 'forwards' })
   let offFinish: UnbindFn
-  let conclude = (): void => {
+  let conclude = () => {
     animation.finish()
     applyFinishedFrame()
     animation.cancel()

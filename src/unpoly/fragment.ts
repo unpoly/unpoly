@@ -592,7 +592,7 @@ function matchesPattern(pattern: string | RegExp, str: string): boolean {
 }
 
 function goodClassesForTarget(element: Element): string[] {
-  let isGood = (klass: string): boolean => !u.some(fragmentConfig.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
+  let isGood = (klass: string) => !u.some(fragmentConfig.badTargetClasses, (badTargetClass) => matchesPattern(badTargetClass, klass))
   return u.filterList(element.classList, isGood)
 }
 
@@ -806,7 +806,7 @@ export const abortFragment = mockable(function abortFragment(...args: any[]): vo
     reason ||= 'Aborting requests within ' + layers.join(', ')
   }
 
-  let testFnWithAbortable = (request: UpRequest): boolean | null => request.abortable && testFn(request)
+  let testFnWithAbortable = (request: UpRequest) => request.abortable && testFn(request)
   abortRequests(testFnWithAbortable, { ...options, reason })
 
   // We *always* emit an `up:fragment:aborted` event, even when there is no
@@ -854,7 +854,7 @@ export function onFirstIntersect(element: Element, callback: () => void, { margi
 
   // This function will be called (1) for the initial intersection check
   // and (2) whenever the intersection state changes.
-  function processIntersectEntries(entries: IntersectionObserverEntry[]): void {
+  function processIntersectEntries(entries: IntersectionObserverEntry[]) {
     for (let entry of entries) {
       if (entry.isIntersecting) {
         disconnect()
@@ -865,7 +865,7 @@ export function onFirstIntersect(element: Element, callback: () => void, { margi
   }
 
   let observer = new IntersectionObserver(processIntersectEntries, { rootMargin: `${margin}px` })
-  let disconnect = (): void => observer.disconnect()
+  let disconnect = () => observer.disconnect()
   observer.observe(element)
   registerDestructor(element, disconnect)
 }

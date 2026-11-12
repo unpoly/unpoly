@@ -37,7 +37,7 @@ export function onClosest<T extends t.EventTypes>(element: Element, types: T, op
 export function onClosest(...args: any[]): t.UnbindFn {
   let [fragment, eventType, { layer }, callback] = u.parseArgs(args, 'val', 'val', 'options', 'callback')
   layer &&= layerStack.get(layer, { origin: fragment })
-  let guard = (event: Event): boolean => (event.target as Element).contains(fragment) && (!layer || layer.contains(event.target as Element))
+  let guard = (event: Event) => (event.target as Element).contains(fragment) && (!layer || layer.contains(event.target as Element))
   let unsubscribe = on(eventType, { guard }, callback)
 
   // Since we're binding to an element that is an ancestor of the fragment,

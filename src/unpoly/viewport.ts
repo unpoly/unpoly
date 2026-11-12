@@ -109,7 +109,7 @@ export function revealHashFn(hash: string, { strong, layer, origin, behavior = '
 
   if (match) {
     return () => {
-      let doReveal = (): true | Promise<void> => reveal(match, { top: true, behavior, focus })
+      let doReveal = () => reveal(match, { top: true, behavior, focus })
       if (strong) u.queueFastTask(doReveal)
       return doReveal()
     }
@@ -327,7 +327,7 @@ export function absolutize(element: HTMLElement, options: { afterMeasure?: () =>
   e.insertBefore(element, bounds)
   bounds.appendChild(element)
 
-  const moveBounds = function(diffX: number, diffY: number): void {
+  const moveBounds = function(diffX: number, diffY: number) {
     boundsRect.left += diffX
     boundsRect.top += diffY
     return e.setInlineStyle(bounds, boundsRect, 'px')

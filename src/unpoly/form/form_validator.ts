@@ -31,8 +31,8 @@ export class FormValidator {
   }
 
   start(): UnbindFn {
-    let guard = (field: Element): Element | null => this._isValidatingField(field)
-    let callback = (field: Element): UnbindFn => this._onFieldAdded(field)
+    let guard = (field: Element) => this._isValidatingField(field)
+    let callback = (field: Element) => this._onFieldAdded(field)
     return trackFields(this._form, { guard }, callback)
   }
 

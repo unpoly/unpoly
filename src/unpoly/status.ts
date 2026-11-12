@@ -122,7 +122,7 @@ export function runPreviews(request: UpRequest, renderOptions: u.PlainObject): (
 function doRunPreviews(request: UpRequest, renderOptions: u.PlainObject): () => void {
   let { fragment, fragments, origin } = request
   let cleaner = u.cleaner()
-  let previewForFragment = (fragment?: Element): Preview => new Preview({ fragment, request, renderOptions, cleaner })
+  let previewForFragment = (fragment?: Element) => new Preview({ fragment, request, renderOptions, cleaner })
 
   // Some preview effects only run once per render pass.
   // The { fragment } for these previews will be the first fragment,

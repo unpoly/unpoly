@@ -46,7 +46,7 @@ export class FieldWatcher {
   }
 
   _ensureWatchable(): void {
-    const failUnwatchable = (message: string): never => fail(message, this._logPrefix, this._root)
+    const failUnwatchable = (message: string) => fail(message, this._logPrefix, this._root)
 
     if (!this._callback) {
       failUnwatchable('No callback provided for %s (%o)')
@@ -70,12 +70,12 @@ export class FieldWatcher {
   }
 
   _trackAbort(): UnbindFn {
-    let guard = ({ target }: FragmentAbortedEvent): boolean => target.contains(this._region)
+    let guard = ({ target }: FragmentAbortedEvent) => target.contains(this._region)
     return on('up:fragment:aborted', { guard }, () => this._abort())
   }
 
   _trackReset(): UnbindFn {
-    let guard = ({ target }: Event): boolean => target === this._region
+    let guard = ({ target }: Event) => target === this._region
     return on('reset', { guard }, (event) => this._onFormReset(event))
   }
 

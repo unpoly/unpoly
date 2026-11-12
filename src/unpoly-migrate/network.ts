@@ -55,7 +55,7 @@ up.migrate.renamedEvent('up:request:recover', 'up:network:recover') // renamed i
 
 // The `config.preloadDelay` configuration was defined on up.proxy in V1. It was moved to up.link in V2.
 up.network.config.patch(function(config) {
-  const preloadDelayMoved = (): void => up.migrate.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
+  const preloadDelayMoved = () => up.migrate.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
   Object.defineProperty(config, 'preloadDelay', {
     configurable: true,
     get() {
@@ -123,7 +123,7 @@ up.on('up:request:loaded', function(event) {
 
 up.ajax = function(...args) {
   up.migrate.deprecated('up.ajax()', 'up.request()')
-  const pickResponseText = (response: UpResponse): string => response.text
+  const pickResponseText = (response: UpResponse) => response.text
   return up.request(...args).then(pickResponseText)
 }
 

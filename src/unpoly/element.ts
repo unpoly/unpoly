@@ -749,7 +749,7 @@ export function leadingElement(nodes: Iterable<Node>): Element | undefined {
 export function removeAttrsFromHTML(html: string, attrs: string[]): string {
   let tagPattern = /<[^<]+>/g
   let attrPattern = new RegExp(`\\s+(${attrs.join('|')})="[^"]*"`, 'g')
-  let cleanTag = (match: string): string => match.replace(attrPattern, '')
+  let cleanTag = (match: string) => match.replace(attrPattern, '')
   html = html.replace(tagPattern, cleanTag)
   return html
 }

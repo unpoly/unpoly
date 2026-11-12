@@ -128,7 +128,7 @@ export class HelloFragment {
       compileArgs.push(data, this._meta)
     }
 
-    let onDestructor = (destructor: unknown): void => registerDestructor(element, destructor)
+    let onDestructor = (destructor: unknown) => registerDestructor(element, destructor)
     this._applyCompilerFunction(compiler, element, compileArgs, onDestructor)
   }
 
@@ -142,7 +142,7 @@ export class HelloFragment {
       compileArgs.push(dataList, this._meta)
     }
 
-    let onDestructor = (): void => this._reportBatchCompilerWithDestructor(compiler)
+    let onDestructor = () => this._reportBatchCompilerWithDestructor(compiler)
     this._applyCompilerFunction(compiler, elements, compileArgs, onDestructor)
   }
 

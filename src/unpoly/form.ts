@@ -312,7 +312,7 @@ function disableControlTemp(control: t.Field, preview?: boolean): (() => void) |
 
 // Disable is true (the origin's form), an element, a selector or an array of these.
 function getDisableContainers(disable: any, origin?: Element): Element[] {
-  let originScope = (): Element => getRegion(origin)
+  let originScope = () => getRegion(origin)
 
   if (disable === true) {
     return [originScope()]
@@ -476,7 +476,7 @@ function watchCallbackFromElement(element: Element): t.WatchCallback | undefined
 }
 
 export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): UnbindFn {
-  const onChange = (_diff: u.PlainObject, renderOptions: RenderOptions): RenderJob => submit(target, renderOptions)
+  const onChange = (_diff: u.PlainObject, renderOptions: RenderOptions) => submit(target, renderOptions)
   return watch(target, { logPrefix: 'up.autosubmit()', ...options, batch: true }, onChange)
 }
 
@@ -599,7 +599,7 @@ interface TrackFieldsOptions { guard?: (field: Element) => unknown }
 export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): UnbindFn {
   let [root, { guard }, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
-  let selectFn = function(): Element[] {
+  let selectFn = function() {
     // A detached root has no fields left to track.
     if (!root.isConnected) return []
 

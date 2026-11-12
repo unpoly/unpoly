@@ -950,7 +950,7 @@ function stringifyArg(arg: any, placeholder = '%o', ancestors = new Set()): stri
   }
 
   // Values nested in an array or object print like a value passed directly with %o.
-  let stringifyNested = (value: unknown): string => stringifyArg(value, '%o', ancestors)
+  let stringifyNested = (value: unknown) => stringifyArg(value, '%o', ancestors)
 
   if (isString(arg)) {
     string = arg.trim().replace(/[\n\r\t ]+/g, ' ')
@@ -1042,7 +1042,7 @@ export function safeStringifyJSON(value: any): string {
 }
 
 function escapeHighASCII(string: string): string {
-  let unicodeEscape = (char: string): string => "\\u" + char.charCodeAt(0).toString(16).padStart(4, '0')
+  let unicodeEscape = (char: string) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, '0')
   return string.replace(/[^\x00-\x7F]/g, unicodeEscape)
 }
 
@@ -1132,7 +1132,7 @@ export function scanFunctions(...values: any[]): t.AnyFunction[] {
 export function cleaner(order: 'lifo' | 'fifo' = 'lifo'): t.Cleaner {
   let fns: t.AnyFunction[] = []
 
-  let track = function(values: unknown[], transform: (fn: t.AnyFunction) => unknown): void {
+  let track = function(values: unknown[], transform: (fn: t.AnyFunction) => unknown) {
     values = scanFunctions(values).map(transform)
     fns.push(...scanFunctions(values))
   }
@@ -1172,7 +1172,7 @@ export function maskPattern(str: string, patterns: RegExp[], { keepDelimiters = 
   let maskings: Record<string, string> = {}
   let replaceLayers: { allowRestoreTransform: boolean }[] = []
 
-  let replace = (replacePattern: RegExp, allowRestoreTransform: boolean): void => {
+  let replace = (replacePattern: RegExp, allowRestoreTransform: boolean) => {
     let didReplace = false
 
     str = str.replaceAll(replacePattern, function(match) {
@@ -1204,7 +1204,7 @@ export function maskPattern(str: string, patterns: RegExp[], { keepDelimiters = 
   // When we mask the given patterns, we allow an optional transform on restore.
   for (let pattern of patterns) replace(pattern, true)
 
-  let restore = (s: string, transform: (masked: string) => string = identity): string => {
+  let restore = (s: string, transform: (masked: string) => string = identity) => {
     for (let { allowRestoreTransform } of replaceLayers) {
       let iterationTransform = allowRestoreTransform ? transform : identity
       s = s.replace(maskPattern, (match) => iterationTransform(assert(maskings[match], isString)))

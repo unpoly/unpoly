@@ -34,7 +34,7 @@ const renderOptionsSource = (options: RenderOptions): FixKeyOptions => ({ label:
 up.migrate.handleResponseDocOptions = (docOptions) => up.migrate.fixKey(docOptions, 'html', 'document', renderOptionsSource(docOptions))
 
 up.fragment.config.patch(function(config) {
-  let matchAroundOriginDeprecated = (): void => up.migrate.deprecated('up.fragment.config.matchAroundOrigin', 'up.fragment.config.match')
+  let matchAroundOriginDeprecated = () => up.migrate.deprecated('up.fragment.config.matchAroundOrigin', 'up.fragment.config.match')
   Object.defineProperty(config, 'matchAroundOrigin', {
     configurable: true,
     get: function() {
