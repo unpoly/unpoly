@@ -214,7 +214,8 @@ export const formConfig = newConfig('up.form.config', (): t.FormConfig => ({
 }))
 
 function findFormElements(root: e.ElementOrSelector, selectorFn: u.SelectorFn): t.Field[] {
-  root = e.getOne(root) // unwrap jQuery
+  // Unwrap jQuery. Callers pass an element, or a selector that they know matches.
+  root = e.getOne(root)!
   let elements = getSubtree(root, selectorFn())
 
   // Like the browser, a [form] attribute takes precedence over the surrounding form.

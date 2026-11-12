@@ -31,7 +31,7 @@ Returns the first descendant element matching the given selector.
   Returns `null` or `undefined` if no element matches.
 @internal
 */
-function first(...args: any[]): HTMLElement {
+function first(...args: any[]): HTMLElement | null {
   let [root = document, selector] = u.parseArgs(args, 'val', 'val')
   return root.querySelector(selector)
 }
@@ -136,11 +136,13 @@ up.element.get('.foo') // returns the first matching element
   The obtained `Element`.
 @stable
 */
-export function getOne(selectorOrElement: t.ElementOrSelector): HTMLElement
-export function getOne(root: ParentNode, selector: string): HTMLElement
+export function getOne(element: Element): HTMLElement
+// A selector that matches nothing returns null. An empty list returns undefined.
+export function getOne(selectorOrElement: t.ElementOrSelector): HTMLElement | null | undefined
+export function getOne(root: ParentNode, selector: string): HTMLElement | null
 // Other values (undefined, null, false, Window, Document, DocumentFragment, ...) are returned unchanged.
-// Distributes over a union, so `ElementOrSelector | false` becomes `HTMLElement | false`.
-export function getOne<T>(value: T): T extends t.ElementOrSelector ? HTMLElement : T
+// Distributes over a union, so `Element | false` becomes `HTMLElement | false`.
+export function getOne<T>(value: T): T extends Element ? HTMLElement : T extends t.ElementOrSelector ? HTMLElement | null | undefined : T
 export function getOne(...args: unknown[]): unknown {
   const value = args.pop()
 

@@ -1580,7 +1580,7 @@ export function install(): void {
   })
 
   registerAttrCompiler('up-expand', { defaultValue: 'a, [up-href]', macro: true }, function(area: ExpandedElement, childLinkSelector) {
-    let childLink: ExpandedElement = e.getOne(area, childLinkSelector)
+    let childLink: ExpandedElement | null = e.getOne(area, childLinkSelector)
     if (childLink) {
       // Remember the expander and expandee so we can set .up-active classes efficiently,
       // and so we can hand a click on a non-followable area to the link.

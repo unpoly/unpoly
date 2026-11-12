@@ -2715,7 +2715,8 @@ up.fragment.matches(element, element) // result: true
 @stable
 */
 export function matches(element: e.ElementOrSelector, selector: string | Element, options: t.LookupOptions = {}): boolean {
-  element = e.getOne(element)
+  // The fragment is documented as an Element. A selector must match.
+  element = e.getOne(element)!
   if (u.isElement(selector)) {
     let target = tryToTarget(selector)
     // Returns undefined for an element without a target.
