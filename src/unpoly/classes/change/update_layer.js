@@ -1,4 +1,5 @@
 const u = up.util
+const e = up.element
 
 up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
 
@@ -191,6 +192,7 @@ up.Change.UpdateLayer = class UpdateLayer extends up.Change.Addition {
       // Try to find fragments matching step.selector within step.layer.
       // Note that step.oldElement might already have been set by up.radio.hungrySteps().
       step.oldElement ||= finder.find()
+      if (step.oldElement === e.root) throw new up.CannotTarget('Cannot swap <html>')
 
       if (step.oldElement) {
         return true

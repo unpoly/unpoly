@@ -94,6 +94,19 @@ extendDescribe('up.fragment', function() {
           expect(jasmine.Ajax.requests.count()).toBe(0)
         })
 
+        it('rejects with up.CannotTarget when targeting the <html> element', async function() {
+          const promise = up.render({ target: 'html', document: '<html><body>new</body></html>' })
+
+          await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotTarget', /Cannot swap <html>/))
+        })
+
+        it('rejects with up.CannotTarget before making a request when targeting the <html> element', async function() {
+          const promise = up.render({ target: 'html', url: '/path' })
+
+          await expectAsync(promise).toBeRejectedWith(jasmine.anyError('up.CannotTarget', /Cannot swap <html>/))
+          expect(jasmine.Ajax.requests.count()).toBe(0)
+        })
+
         it("ignores an element that matches the selector but also matches .up-destroying", async function() {
           const document = '<div class="foo-bar">text</div>'
           $fixture('.foo-bar.up-destroying')
