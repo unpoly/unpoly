@@ -22,6 +22,8 @@ import { type MotionFinishEvent } from './motion.js'
 import { type RequestEvent, type RequestLoadedEvent } from './network.js'
 import { type FragmentHungryEvent, type FragmentPollEvent } from './radio.js'
 import { registerDestructor, type AssetsChangedEvent } from './script.js'
+import type * as t from './event/types.js'
+export type * from './event/types.js'
 import { EventEmitter, type EmitLogOption } from './event/event_emitter.js'
 export { EventEmitter }
 import {
