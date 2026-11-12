@@ -282,6 +282,11 @@ import type * as t from './fragment/types.js'
 export type * from './fragment/types.js'
 ```
 
+Files inside the module's own folder are the exception: they import the module's types
+straight from its `types.ts`, also as `t`. That's `import type * as t from './types.js'`, or
+`'../types.js'` from a sub-folder like `layer/modes/`. They still import values from the main
+module. In the header, the `t` import comes after the main modules (step 4 below).
+
 **Namespace aliases.** `util.ts` and `element.ts` are imported as `import * as u` and
 `import * as e`. Aliases are lowercase (`u`, `e`, `t`): lowercase means a module, uppercase a
 class, and single uppercase letters are taken by type parameters. Use an alias only as
