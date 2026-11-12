@@ -203,11 +203,6 @@
         "src/unpoly/layer/modes/overlay.ts",
         "src/unpoly/link.ts",
         "src/unpoly/motion.ts",
-        "src/unpoly/network.ts",
-        "src/unpoly/network/request.ts",
-        "src/unpoly/network/request_cache.ts",
-        "src/unpoly/network/request_queue.ts",
-        "src/unpoly/protocol.ts",
         "src/unpoly/rails.ts",
         "src/unpoly/script.ts",
         "src/unpoly/script/hello_fragment.ts"
