@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// Lint src/, spec/ and tooling/ with Oxlint (`.oxlintrc.json`), and check src/unpoly.ts for api
-// collisions (tooling/lint/api_collisions.mjs). Extra arguments are forwarded to Oxlint, so
-// `bin/lint --fix` works.
+// Lint src/, spec/ and tooling/ with Oxlint (`.oxlintrc.json`), check src/unpoly.ts for api
+// collisions (tooling/lint/api_collisions.mjs), and check the API doc files below src/
+// (tooling/lint/doc_files.mjs). Extra arguments are forwarded to Oxlint, so `bin/lint --fix` works.
 //
 // Two builds also lint src/, with the same config (tooling/build/lint.mjs): the production build,
 // so bin/release refuses lint errors, and the dev watcher, after every change, so `bin/test`
@@ -14,6 +14,7 @@ import { spawn } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { ApiCollisionCheck, formatProblems } from '../tooling/lint/api_collisions.mjs'
+import { checkDocFiles, formatProblems as formatDocFileProblems } from '../tooling/lint/doc_files.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const oxlintBin = path.join(projectRoot, 'node_modules', '.bin', 'oxlint')
@@ -32,9 +33,14 @@ function oxlint(stdio) {
 if (args.some((arg) => arg.startsWith('--fix'))) await oxlint('ignore')
 let linted = oxlint('inherit')
 let collisions = new ApiCollisionCheck().check()
+let docFileProblems = checkDocFiles()
 let code = await linted
 if (collisions.length) {
   console.log(formatProblems(collisions))
+  code ||= 1
+}
+if (docFileProblems.length) {
+  console.log(formatDocFileProblems(docFileProblems))
   code ||= 1
 }
 process.exit(code)

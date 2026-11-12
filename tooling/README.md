@@ -10,7 +10,7 @@ tooling/
   runner/       the spec runner, split by where the code runs (below)
   scratch/      the scratch server — real pages on port 4001 (own README)
   build/        bin/build (esbuild + Terser), the watcher, and the build-freshness protocol
-  lint/         our own lint checks: an Oxlint plugin and the api collision check (bin/lint)
+  lint/         our own lint checks: an Oxlint plugin, api collision and doc file checks (bin/lint)
   docs/         extract_docs.mjs, which moves doc comments from .ts files into sibling .md files
   dev_env.mjs   the dev environment behind bin/dev
   find_spec.mjs spec-title search behind bin/find-spec and bin/test --file

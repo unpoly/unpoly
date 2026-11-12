@@ -13,6 +13,7 @@
 //
 // Prints a note for every comment that may not move cleanly; a note means: look at it by hand.
 // The core is PURE: extract(), title() and parseDocFile() take text and touch no files.
+// tooling/lint/doc_files.mjs checks the doc files with titles(), codeLines() and the patterns.
 import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
@@ -21,14 +22,15 @@ import { fileURLToPath } from 'node:url'
 const INTERFACE = /@(class|namespace|page) (.+)/
 const FEATURE = /@(function|selector|event|property|constructor|header|cookie) (.+)/
 const PARTIAL = /@partial (.+)/
+const MENU_TITLE = /@menu-title (.+)/
 
 // A @page may be titled by a setext H1 at the start of its text (after the @page line is gone).
 const PAGE_TITLE = /^[ \t\n]*(.+)\n={3,}(\n|$)/
 
 // The site's DocComment patterns.
-const SEPARATOR = /^-{5,}[ \t]*$/
-const HEADING = /^#[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$/
-const ESCAPED_PUNCTUATION = /\\([!-/:-@[-`{-~])/g
+export const SEPARATOR = /^-{5,}[ \t]*$/
+export const HEADING = /^#[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$/
+export const ESCAPED_PUNCTUATION = /\\([!-/:-@[-`{-~])/g
 const OPENING_FENCE = /^[ \t]*(?:(?:[-+*]|\d{1,9}[.)])[ \t]+)*(`{3,}(?=[^`]*$)|~{3,})/
 const CLOSING_FENCE = /^[ \t]*(`{3,}|~{3,})[ \t]*$/
 
@@ -59,6 +61,22 @@ export function title(body) {
   }
 }
 
+// Every H1 that unpoly-site accepts for a comment body (Parser#verify_heading!): its title, then
+// its menu title where that differs. A @menu-title names an interface in the menu, and the menu
+// names an instance method or property with a `#` (`up.Request.prototype.abort()` →
+// `up.Request#abort()`). Empty if the site cannot title the body.
+export function titles(body) {
+  let first = title(body)
+  if (!first) return []
+  let menu
+  if (INTERFACE.test(body)) {
+    menu = body.match(MENU_TITLE)?.[1]
+  } else if (['function', 'property'].includes(body.match(FEATURE)?.[1])) {
+    menu = first.replace('.prototype.', '#')
+  }
+  return menu && menu !== first ? [first, menu] : [first]
+}
+
 // Like the site's Util.unindent: removes the indentation that all non-blank lines share.
 function unindent(text) {
   let indents = text.split('\n').filter((line) => line.trim()).map((line) => line.match(/^[ \t]*/)[0].length)
@@ -66,10 +84,11 @@ function unindent(text) {
   return shared === Infinity ? text : text.split('\n').map((line) => line.slice(Math.min(shared, line.match(/^[ \t]*/)[0].length))).join('\n')
 }
 
-// The indexes of lines in fenced code blocks, fences included. Undefined fence = still open at the end.
-function codeLines(lines) {
+// The indexes of lines in fenced code blocks, fences included, and the index of a fence that is
+// still open at the end (undefined if none is).
+export function codeLines(lines) {
   let code = new Set()
-  let fence
+  let fence, fenceIndex
   lines.forEach((line, index) => {
     let match
     if (fence) {
@@ -78,9 +97,10 @@ function codeLines(lines) {
     } else if ((match = line.match(OPENING_FENCE))) {
       code.add(index)
       fence = match[1]
+      fenceIndex = index
     }
   })
-  return { code, unclosed: !!fence }
+  return { code, unclosed: fence ? fenceIndex : undefined }
 }
 
 // What would keep the site from reading a body back as the same entry.
@@ -88,7 +108,7 @@ function bodyProblems(body) {
   let lines = body.split('\n')
   let { code, unclosed } = codeLines(lines)
   let problems = []
-  if (unclosed) problems.push('has an unclosed code fence, which would swallow the entries after it')
+  if (unclosed !== undefined) problems.push('has an unclosed code fence, which would swallow the entries after it')
   lines.forEach((line, index) => {
     if (code.has(index)) return
     let blankAround = (lines[index - 1] ?? '').trim() === '' && (lines[index + 1] ?? '').trim() === ''
