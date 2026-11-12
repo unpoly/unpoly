@@ -3,7 +3,7 @@ import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { muteUncriticalRejection } from './error.js'
 import { build, emit, haltEvent, isModified, on } from './event.js'
-import { render, type RenderOptions } from './fragment.js'
+import { render } from './fragment.js'
 import { layerStack } from './layer.js'
 import { makeFollowable, type ClickEvent } from './link.js'
 import { printToStandard, printUserEvent } from './log.js'
@@ -11,47 +11,8 @@ import { mockable } from './mockable.js'
 import { initialRequestMethod } from './protocol.js'
 import { registerMacro } from './script.js'
 import { revealHash, revealHashFn, saveFocus, saveScroll } from './viewport.js'
-
-/**
-Why the location changed. `'detect'` is only used internally: we tell `'hash'` from `'pop'` later.
-*/
-export type LocationChangeReason = 'push' | 'replace' | 'pop' | 'hash' | 'detect' | null
-
-/**
-What Unpoly can update in the browser history. See `up.history.config.enabled`.
-*/
-export type HistoryAspect = 'location' | 'title' | 'metaTags' | 'lang'
-
-/**
-How to report the next location change. See `up:location:changed`.
-@internal
-*/
-export interface HistoryTrackOptions {
-  reason?: LocationChangeReason
-  // The change was made by Unpoly, which has already updated the page.
-  alreadyHandled?: boolean
-  // Ignore the next location change.
-  pauseTracking?: boolean
-}
-
-/**
-The `up:location:changed` event.
-*/
-export type LocationChangedEvent = Event & {
-  reason: LocationChangeReason
-  location: string
-  previousLocation: string | undefined
-  alreadyHandled: boolean
-  willHandle: boolean
-}
-
-/**
-The `up:location:restore` event.
-*/
-export type LocationRestoreEvent = Event & {
-  location: string
-  renderOptions: RenderOptions
-}
+import type * as t from './history/types.js'
+export type * from './history/types.js'
 
 /*-
 Features to update the browser history and handle the Back button.
@@ -62,17 +23,6 @@ Features to update the browser history and handle the Back button.
 
 @namespace up.history
 */
-
-
-/**
-The settings in `up.history.config`, described in its doc comment.
-*/
-export interface HistoryConfig {
-  enabled: boolean | HistoryAspect[]
-  restoreTargets: string[]
-  metaTagSelectors: string[]
-  noMetaTagSelectors: string[]
-}
 
 /*-
 Configures behavior when the user goes back or forward in browser history.
@@ -153,7 +103,7 @@ Configures behavior when the user goes back or forward in browser history.
 
 @stable
 */
-export const historyConfig = newConfig('up.history.config', (): HistoryConfig => ({
+export const historyConfig = newConfig('up.history.config', (): t.HistoryConfig => ({
   enabled: true,
   // Prefer restoring the body instead of :main, in case the last fragment update
   // changed the page layout. See https://github.com/unpoly/unpoly/issues/237.
@@ -186,7 +136,7 @@ If no previous history entry is known, returns `undefined`.
 */
 export let previousLocation: string | undefined
 let nextPreviousLocation: string | undefined
-let nextTrackOptions: HistoryTrackOptions | undefined
+let nextTrackOptions: t.HistoryTrackOptions | undefined
 let adoptedBases = new u.FIFOCache<string, boolean>({ capacity: 100, normalizeKey: getBase })
 
 function reset(): void {
@@ -221,7 +171,7 @@ Returns whether `up.history.config.enabled` allows Unpoly to update the given as
 @return {boolean}
 @internal
 */
-export function isHistoryEnabled(aspect: HistoryAspect): boolean {
+export function isHistoryEnabled(aspect: t.HistoryAspect): boolean {
   let { enabled } = historyConfig
   return u.isArray(enabled) ? enabled.includes(aspect) : !!enabled
 }
@@ -291,7 +241,7 @@ export function currentLocation(): string {
   return u.normalizeURL(location.href)
 }
 
-function withTrackOptions(trackOptions: HistoryTrackOptions | undefined, fn: () => void): void {
+function withTrackOptions(trackOptions: t.HistoryTrackOptions | undefined, fn: () => void): void {
   try {
     nextTrackOptions = trackOptions
     fn()
@@ -306,7 +256,7 @@ Remembers the current URL so we can use `previousLocation` on pop.
 @function trackCurrentLocation
 @internal
 */
-function trackCurrentLocation(trackOptions: HistoryTrackOptions): void {
+function trackCurrentLocation(trackOptions: t.HistoryTrackOptions): void {
   let { reason, alreadyHandled, pauseTracking } = nextTrackOptions || trackOptions
   if (pauseTracking) return
 
@@ -341,7 +291,7 @@ function trackCurrentLocation(trackOptions: HistoryTrackOptions): void {
       alreadyHandled,
       willHandle,
       log: `New location is ${location}`
-    }) as LocationChangedEvent
+    }) as t.LocationChangedEvent
 
     up.migrate.prepareLocationChangedEvent?.(locationChangedEvent)
 
@@ -509,7 +459,7 @@ See [Turning off history aspects](/learn/updating-history#disabling).
 @param {string} url
 @experimental
 */
-export function replace(location: string, trackOptions?: HistoryTrackOptions): void {
+export function replace(location: string, trackOptions?: t.HistoryTrackOptions): void {
   placeAdoptedHistoryEntry('replaceState', location, trackOptions)
 }
 
@@ -543,12 +493,12 @@ See [Turning off history aspects](/learn/updating-history#disabling).
   The URL for the history entry to be added.
 @experimental
 */
-export function pushLocation(location: string, trackOptions?: HistoryTrackOptions): void {
+export function pushLocation(location: string, trackOptions?: t.HistoryTrackOptions): void {
   if (isLocation(location)) return
   placeAdoptedHistoryEntry('pushState', location, trackOptions)
 }
 
-function placeAdoptedHistoryEntry(method: 'pushState' | 'replaceState', location: string, trackOptions?: HistoryTrackOptions): void {
+function placeAdoptedHistoryEntry(method: 'pushState' | 'replaceState', location: string, trackOptions?: t.HistoryTrackOptions): void {
   // When up.history.config.enabled excludes 'location', we do nothing.
   // We don't adopt a URL that we never pushed.
   if (isHistoryEnabled('location')) {
@@ -634,7 +584,7 @@ function restoreLocation(location: string): void {
   }))
 }
 
-function reactToChange(event: LocationChangedEvent): void {
+function reactToChange(event: t.LocationChangedEvent): void {
   if (event.alreadyHandled) {
     return
   }
