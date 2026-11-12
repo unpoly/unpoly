@@ -33,7 +33,8 @@
 // `let` and `class` into `var`. A binding read too early is just `undefined`: calling it throws a
 // TypeError (`… is not a function`, `Class extends value undefined`), but reading a value does not
 // fail at all. So after changing imports, check which modules a changed module reads while it is
-// evaluated, and that they come first.
+// evaluated, and that they come first. A spec in framework_spec.js fails when an api object
+// captured such an `undefined`, but it can't see a value that only a module's own code holds.
 import * as namespace from './unpoly/namespace.js.erb'
 import * as util from './unpoly/util.js'
 import * as error from './unpoly/error.js'

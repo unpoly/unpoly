@@ -45,6 +45,53 @@ describe('up.framework', function() {
 
     })
 
+    describe('evaluation order', function() {
+
+      // esbuild turns top-level `const`, `let` and `class` into `var`. So when a module reads a
+      // binding from a module that is not evaluated yet (an import cycle entered from the wrong
+      // side, see src/unpoly.ts), it gets `undefined` instead of an error. An api object that
+      // captured such a binding puts `undefined` on window.up. This test catches that, and nothing
+      // that is only read while a module is evaluated (like a class in a top-level closure).
+      //
+      // Keys that are undefined or throw on purpose, with the reason. They are all getters, which
+      // read their bindings when called.
+      const ON_PURPOSE = {
+        'up.history.previousLocation': 'Nothing has navigated yet',
+        'up.layer.parent': 'The current layer is the root layer, which has no parent',
+        'up.layer.size': 'The root layer has no size',
+        'up.modal.flavors': 'unpoly-migrate throws for a property that was removed without replacement',
+      }
+
+      it('publishes no undefined value on window.up, in its namespaces or on up.internal', function() {
+        let problems = []
+
+        // A getter that throws counts as a problem too.
+        function check(object, path) {
+          let values = {}
+          for (let key of Object.getOwnPropertyNames(object)) {
+            let keyPath = `${path}.${key}`
+            if (keyPath in ON_PURPOSE) continue
+            try {
+              values[key] = object[key]
+            } catch (error) {
+              problems.push(`${keyPath} throws ${error}`)
+              continue
+            }
+            if (values[key] === undefined) problems.push(`${keyPath} is undefined`)
+          }
+          return values
+        }
+
+        for (let [key, value] of Object.entries(check(up, 'up'))) {
+          // A namespace, like up.link or up.internal. Not a class or a function.
+          if (typeof value === 'object' && value !== null) check(value, `up.${key}`)
+        }
+
+        expect(problems).toEqual([])
+      })
+
+    })
+
     describe('up.framework.isSupported', function() {
 
       it('returns true on a supported browser', function() {
