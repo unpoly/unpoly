@@ -51,3 +51,10 @@ export interface HistoryConfig {
   metaTagSelectors: string[]
   noMetaTagSelectors: string[]
 }
+
+declare module '../event.js' {
+  interface UpEventMap {
+    'up:location:changed': LocationChangedEvent
+    'up:location:restore': LocationRestoreEvent
+  }
+}

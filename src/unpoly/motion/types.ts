@@ -65,3 +65,9 @@ export interface MotionConfig {
   easing: string
   enabled: boolean
 }
+
+declare module '../event.js' {
+  interface UpEventMap {
+    'up:motion:finish': MotionFinishEvent
+  }
+}

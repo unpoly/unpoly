@@ -204,3 +204,15 @@ export interface LayerCloseEvent extends UpEvent {
   origin?: Element
   response?: UpResponse
 }
+
+declare module '../event.js' {
+  interface UpEventMap {
+    'up:layer:accept': LayerCloseEvent
+    'up:layer:accepted': LayerCloseEvent
+    'up:layer:dismiss': LayerCloseEvent
+    'up:layer:dismissed': LayerCloseEvent
+    'up:layer:location:changed': LayerLocationChangedEvent
+    'up:layer:open': LayerOpenEvent
+    'up:layer:opened': LayerOpenedEvent
+  }
+}

@@ -64,3 +64,12 @@ the request when the user moves away.
 @internal
 */
 export type FollowCallback = (options?: RenderOptions) => void
+
+declare module '../event.js' {
+  interface UpEventMap {
+    'up:click': ClickEvent
+    'up:deferred:load': DeferredLoadEvent
+    'up:link:follow': LinkFollowEvent
+    'up:link:preload': LinkPreloadEvent
+  }
+}

@@ -8,6 +8,13 @@ export interface FrameworkBootedEvent extends UpEvent {
   mode: 'auto' | 'manual'
 }
 
+declare module './event.js' {
+  interface UpEventMap {
+    'up:framework:booted': FrameworkBootedEvent
+    'up:framework:reset': Event
+  }
+}
+
 /*-
 Features to control when Unpoly boots.
 

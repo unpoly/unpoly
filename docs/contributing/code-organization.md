@@ -287,6 +287,17 @@ straight from its `types.ts`, also as `t`. That's `import type * as t from './ty
 `'../types.js'` from a sub-folder like `layer/modes/`. They still import values from the main
 module. In the header, the `t` import comes after the main modules (step 4 below).
 
+**Events.** An event's type lives with its module's other types, usually in `types.ts`. The
+same file lists the module's events in `UpEventMap`, so `up.on()` and `up.emit()` know their types:
+
+```ts
+declare module '../event.js' {
+  interface UpEventMap {
+    'up:form:submit': FormSubmitEvent
+  }
+}
+```
+
 **Namespace aliases.** `util.ts` and `element.ts` are imported as `import * as u` and
 `import * as e`. Aliases are lowercase (`u`, `e`, `t`): lowercase means a module, uppercase a
 class, and single uppercase letters are taken by type parameters. Use an alias only as

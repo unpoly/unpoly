@@ -1,24 +1,6 @@
 import * as u from '../util.js'
-import * as e from '../element.js'
-import { type FormSubmitEvent, type FormSwitchEvent, type FormValidateEvent } from '../form.js'
-import {
-  type FragmentAbortedEvent, type FragmentDestroyedEvent, type FragmentInsertedEvent,
-  type FragmentKeepEvent, type FragmentKeptEvent, type FragmentLoadedEvent,
-  type FragmentOfflineEvent, type LayerReference, type TemplateCloneEvent,
-} from '../fragment.js'
-import { type FrameworkBootedEvent } from '../framework.js'
-import { type LocationChangedEvent, type LocationRestoreEvent } from '../history.js'
-import {
-  type Layer, type LayerCloseEvent, type LayerLocationChangedEvent, type LayerOpenedEvent,
-  type LayerOpenEvent,
-} from '../layer.js'
-import {
-  type ClickEvent, type DeferredLoadEvent, type LinkFollowEvent, type LinkPreloadEvent,
-} from '../link.js'
-import { type MotionFinishEvent } from '../motion.js'
-import { type RequestEvent, type RequestLoadedEvent } from '../network.js'
-import { type FragmentHungryEvent, type FragmentPollEvent } from '../radio.js'
-import { type AssetsChangedEvent } from '../script.js'
+import { type LayerReference } from '../fragment.js'
+import { type Layer } from '../layer.js'
 import { type UpEventListener } from './event_listener.js'
 
 /**
@@ -53,47 +35,10 @@ export type InputDevice = 'unknown' | 'key' | 'pointer'
 Maps the type of each Unpoly event to its event object, like `HTMLElementEventMap` does for DOM events.
 `up.on()` and `up.emit()` look up the event type here.
 
-An event without documented properties maps to `Event`.
+Each module adds its own events, next to their types, with a `declare module '../event.js'` block
+that extends this interface. An event without documented properties maps to `Event`.
 */
-export interface UpEventMap {
-  'up:assets:changed': AssetsChangedEvent
-  'up:click': ClickEvent
-  'up:deferred:load': DeferredLoadEvent
-  'up:element:defined': e.ElementDefinedEvent
-  'up:form:submit': FormSubmitEvent
-  'up:form:switch': FormSwitchEvent
-  'up:form:validate': FormValidateEvent
-  'up:fragment:aborted': FragmentAbortedEvent
-  'up:fragment:destroyed': FragmentDestroyedEvent
-  'up:fragment:hungry': FragmentHungryEvent
-  'up:fragment:inserted': FragmentInsertedEvent
-  'up:fragment:keep': FragmentKeepEvent
-  'up:fragment:kept': FragmentKeptEvent
-  'up:fragment:loaded': FragmentLoadedEvent
-  'up:fragment:offline': FragmentOfflineEvent
-  'up:fragment:poll': FragmentPollEvent
-  'up:framework:booted': FrameworkBootedEvent
-  'up:framework:reset': Event
-  'up:layer:accept': LayerCloseEvent
-  'up:layer:accepted': LayerCloseEvent
-  'up:layer:dismiss': LayerCloseEvent
-  'up:layer:dismissed': LayerCloseEvent
-  'up:layer:location:changed': LayerLocationChangedEvent
-  'up:layer:open': LayerOpenEvent
-  'up:layer:opened': LayerOpenedEvent
-  'up:link:follow': LinkFollowEvent
-  'up:link:preload': LinkPreloadEvent
-  'up:location:changed': LocationChangedEvent
-  'up:location:restore': LocationRestoreEvent
-  'up:motion:finish': MotionFinishEvent
-  'up:network:late': Event
-  'up:network:recover': Event
-  'up:request:aborted': RequestEvent
-  'up:request:load': RequestEvent
-  'up:request:loaded': RequestLoadedEvent
-  'up:request:offline': RequestEvent
-  'up:template:clone': TemplateCloneEvent
-}
+export interface UpEventMap {} // oxlint-disable-line typescript/no-empty-object-type
 
 /**
 An event whose type `UpEventMap` doesn't know, like a custom event emitted with `up.emit()`.

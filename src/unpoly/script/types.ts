@@ -172,3 +172,9 @@ export interface EvalEnv {
   argValues: any[]
   thisContext?: any
 }
+
+declare module '../event.js' {
+  interface UpEventMap {
+    'up:assets:changed': AssetsChangedEvent
+  }
+}

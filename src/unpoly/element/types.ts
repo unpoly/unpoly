@@ -81,3 +81,9 @@ export interface ParseKeyOptions {
   default?: any
   normalize?: (value: any) => any
 }
+
+declare module '../event.js' {
+  interface UpEventMap {
+    'up:element:defined': ElementDefinedEvent
+  }
+}

@@ -198,3 +198,16 @@ Called when an element starts matching. May return a function that is called whe
 @internal
 */
 export type SelectorTrackerAddCallback = (element: Element) => ((element: Element) => void) | void
+
+declare module '../event.js' {
+  interface UpEventMap {
+    'up:fragment:aborted': FragmentAbortedEvent
+    'up:fragment:destroyed': FragmentDestroyedEvent
+    'up:fragment:inserted': FragmentInsertedEvent
+    'up:fragment:keep': FragmentKeepEvent
+    'up:fragment:kept': FragmentKeptEvent
+    'up:fragment:loaded': FragmentLoadedEvent
+    'up:fragment:offline': FragmentOfflineEvent
+    'up:template:clone': TemplateCloneEvent
+  }
+}

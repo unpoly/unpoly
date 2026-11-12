@@ -157,3 +157,14 @@ export interface AbortRequestsOptions extends RequestTesterOptions {
   // A message to log before the first request is aborted.
   logOnce?: LogArgs | null
 }
+
+declare module '../event.js' {
+  interface UpEventMap {
+    'up:network:late': Event
+    'up:network:recover': Event
+    'up:request:aborted': RequestEvent
+    'up:request:load': RequestEvent
+    'up:request:loaded': RequestLoadedEvent
+    'up:request:offline': RequestEvent
+  }
+}

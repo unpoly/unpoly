@@ -44,3 +44,10 @@ export interface PollOptions extends RenderOptions {
   interval?: number
   ifLayer?: 'front' | 'any'
 }
+
+declare module '../event.js' {
+  interface UpEventMap {
+    'up:fragment:hungry': FragmentHungryEvent
+    'up:fragment:poll': FragmentPollEvent
+  }
+}
