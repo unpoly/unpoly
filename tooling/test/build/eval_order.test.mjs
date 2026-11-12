@@ -13,10 +13,10 @@ async function buildWithLet(out) {
   let bundle = CONFIGS.production.bundles.find((bundle) => bundle.out === out)
   let result = await esbuild.build(esbuildOptions({ ...bundle, styles: false }, { sourcemap: false }))
   let js = result.outputFiles.find((file) => file.path.endsWith('.js')).text
-  let bindingCount = js.match(/^  var /gm)?.length ?? 0
+  let bindingCount = js.match(/^ {2}var /gm)?.length ?? 0
   // If esbuild changes its output, the replacement below would do nothing and prove nothing.
   assert.ok(bindingCount > 100, `Expected over 100 top-level vars in ${out}, found ${bindingCount}`)
-  return js.replace(/^  var /gm, '  let ')
+  return js.replace(/^ {2}var /gm, '  let ')
 }
 
 for (let out of ['unpoly.js', 'unpoly.es6.js']) {
