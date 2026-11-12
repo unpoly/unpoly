@@ -468,8 +468,9 @@ so listeners of `up:click` don't need this check.
   Whether the event was modified.
 @experimental
 */
-export function isModified(event: Pick<MouseEvent, 'button' | t.ModifierKey>): boolean {
-  return (event.button > 0) || u.some(keyModifiers, (modifier) => event[modifier])
+export function isModified(event: { button?: number } & Pick<MouseEvent, t.ModifierKey>): boolean {
+  // An up:click from a keyboard event has no { button }, and undefined > 0 is false.
+  return (event.button! > 0) || u.some(keyModifiers, (modifier) => event[modifier])
 }
 
 /*-
