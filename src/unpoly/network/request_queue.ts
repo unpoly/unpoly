@@ -32,7 +32,7 @@ export class RequestQueue {
   reset(): void {
     this._queuedRequests = []
     this._currentRequests = []
-    // Requests that reuse a cached request in flight (see RequestCache#track()).
+    // Requests that reuse a cached request in flight (see UpRequestCache#track()).
     // They never load, so they don't count for concurrency or late/recover, but they can be aborted.
     this._trackingRequests = []
     this._emittedLate = false

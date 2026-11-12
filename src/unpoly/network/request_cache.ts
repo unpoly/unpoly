@@ -72,7 +72,7 @@ class Route {
   }
 }
 
-export class RequestCache {
+export class UpRequestCache {
   declare _routes: Record<string, Route>
   declare _requests: UpRequest[]
 

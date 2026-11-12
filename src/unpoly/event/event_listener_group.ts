@@ -1,5 +1,5 @@
 import { cleaner as utilCleaner, copy, extractOptions, getSimpleTokens, isJQuery, isList } from '../util.js'
-import { EventListener } from './event_listener.js'
+import { UpEventListener } from './event_listener.js'
 import type { EventListenerAttributes, ListenerTarget } from './event_listener.js'
 import type { List, PlainObject } from '../util.js'
 
@@ -27,7 +27,7 @@ export class EventListenerGroup {
   constructor({ elements, eventTypes, ...listenerAttributes }: EventListenerGroupAttributes) {
     this.elements = elements
     this.eventTypes = eventTypes
-    // The other attributes (selector, callback, options) are for the EventListener we build
+    // The other attributes (selector, callback, options) are for the UpEventListener we build
     // for each element and event type. It picks the ones it knows.
     this._listenerAttributes = listenerAttributes
   }
@@ -36,7 +36,7 @@ export class EventListenerGroup {
     const cleaner = utilCleaner()
 
     this._eachListenerAttributes(function(attrs) {
-      const listener = new EventListener(attrs)
+      const listener = new UpEventListener(attrs)
       listener.bind()
       return cleaner(listener.unbind.bind(listener))
     })
@@ -54,7 +54,7 @@ export class EventListenerGroup {
 
   unbind(): void {
     this._eachListenerAttributes(function(attrs) {
-      let listener = EventListener.fromElement(attrs)
+      let listener = UpEventListener.fromElement(attrs)
       if (listener) {
         listener.unbind()
       }

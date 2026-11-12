@@ -445,7 +445,7 @@ export function revealHashFn(hash: string, { strong, layer, origin, behavior = '
     }
   } else if (hash === '#top') {
     return () => {
-      return scrollTo(0, { behavior })
+      return scrollToPosition(0, { behavior })
     }
   }
 }
@@ -759,7 +759,7 @@ function parseOptions(args: any[]): [List<HTMLElement>, PlainObject] {
   return [viewports, options]
 }
 
-export function scrollTo(position: number, ...args: any[]): boolean {
+export function scrollToPosition(position: number, ...args: any[]): boolean {
   const [viewports, options] = parseOptions(args)
   setScrollPositions(viewports, {}, position, options.behavior)
   return true

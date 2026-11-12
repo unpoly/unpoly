@@ -4,7 +4,7 @@ import { mockable } from './mockable.js'
 import { on } from './event.js'
 import { printToStandard } from './log.js'
 import { ProgressBar } from './network/progress_bar.js'
-import { RequestCache } from './network/request_cache.js'
+import { UpRequestCache } from './network/request_cache.js'
 import { RequestQueue } from './network/request_queue.js'
 import { UpRequest } from './network/request.js'
 import { UpResponse } from './network/response.js'
@@ -209,7 +209,7 @@ export const config = new Config('up.network.config', (): NetworkConfig => ({
 
 export const queue = new RequestQueue()
 
-export const cache = new RequestCache()
+export const cache = new UpRequestCache()
 
 let progressBar: ProgressBar | null = null
 

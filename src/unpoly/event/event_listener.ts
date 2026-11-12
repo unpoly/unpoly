@@ -10,7 +10,7 @@ An element, document or window that Unpoly listens on. It remembers its listener
 so `up.off()` can find them.
 @internal
 */
-export type ListenerTarget = EventTarget & { upEventListeners?: Record<string, EventListener> }
+export type ListenerTarget = EventTarget & { upEventListeners?: Record<string, UpEventListener> }
 
 /**
 A function registered with `up.on()`. It is called with the event, the element matching
@@ -42,7 +42,7 @@ export interface EventListenerAttributes {
   beforeBoot?: boolean
 }
 
-export class EventListener {
+export class UpEventListener {
   declare element: ListenerTarget
   declare eventType: string
   declare selector: string | (() => string) | undefined
@@ -67,7 +67,7 @@ export class EventListener {
     this.once = attributes.once
     this.capture = attributes.capture
 
-    this._key = (this.constructor as typeof EventListener)._buildKey(attributes)
+    this._key = (this.constructor as typeof UpEventListener)._buildKey(attributes)
     this.isDefault = isEvaling()
 
     // We don't usually run up.on() listeners before Unpoly has booted.
@@ -163,7 +163,7 @@ export class EventListener {
     }
   }
 
-  static fromElement(attributes: EventListenerAttributes): EventListener | undefined {
+  static fromElement(attributes: EventListenerAttributes): UpEventListener | undefined {
     let map = attributes.element.upEventListeners
     if (map) {
       const key = this._buildKey(attributes)
@@ -183,7 +183,7 @@ export class EventListener {
     ].join('|')
   }
 
-  static allNonDefault(element: ListenerTarget): EventListener[] {
+  static allNonDefault(element: ListenerTarget): UpEventListener[] {
     let map = element.upEventListeners
     if (map) {
       const listeners = Object.values(map)

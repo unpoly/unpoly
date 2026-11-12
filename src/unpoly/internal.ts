@@ -57,7 +57,7 @@ import { FIFOCache } from './util/fifo_cache.js'
 import { Rect } from './util/rect.js'
 import { UpURLPattern } from './util/url_pattern.js'
 import { EventEmitter } from './event/event_emitter.js'
-import { EventListener } from './event/event_listener.js'
+import { UpEventListener } from './event/event_listener.js'
 import { CSPInfo } from './script/csp/csp_info.js'
 import { NonceableCallback } from './script/csp/nonceable_callback.js'
 import { Switcher } from './form/switcher.js'
@@ -215,7 +215,7 @@ export const api = {
     Rect,
     UpURLPattern,
     EventEmitter,
-    EventListener,
+    UpEventListener,
     CSPInfo,
     NonceableCallback,
     Switcher,

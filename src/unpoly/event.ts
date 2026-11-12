@@ -4,7 +4,7 @@ import { fail } from './error.js'
 import { mockable } from './mockable.js'
 import { EventEmitter } from './event/event_emitter.js'
 import { EventListenerGroup } from './event/event_listener_group.js'
-import { EventListener } from './event/event_listener.js'
+import { UpEventListener } from './event/event_listener.js'
 import { layerStack } from './layer.js'
 import { printUserEvent } from './log.js'
 import { registerDestructor } from './script.js'
@@ -173,7 +173,7 @@ function reset(): void {
   // Resets the list of registered event listeners to the
   // moment when the framework was booted.
   for (let globalElement of [window, document, getRoot(), document.body]) {
-    for (let listener of EventListener.allNonDefault(globalElement)) {
+    for (let listener of UpEventListener.allNonDefault(globalElement)) {
       listener.unbind()
     }
   }

@@ -1,6 +1,6 @@
 import { isDefined, isNumber, isString, pickBy } from '../../util.js'
 import { FragmentProcessor } from './fragment_processor.js'
-import { restoreScroll, reveal, revealHash, scrollTo } from '../../viewport.js'
+import { restoreScroll, reveal, revealHash, scrollToPosition } from '../../viewport.js'
 import type { FragmentProcessorOptions } from './fragment_processor.js'
 import type { PlainObject } from '../../util.js'
 
@@ -118,7 +118,7 @@ export class FragmentScrolling extends FragmentProcessor {
 
   _scrollTo(position: number): boolean {
     // With { around: undefined }, scrollToTop() resets all viewports in { layer }
-    return scrollTo(position, { ...this.attributes(), around: this.fragment })
+    return scrollToPosition(position, { ...this.attributes(), around: this.fragment })
   }
 
   _restoreOld(): boolean | undefined {

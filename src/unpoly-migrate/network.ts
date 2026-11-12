@@ -301,7 +301,7 @@ up.Response.prototype.isError = function() {
 }
 
 function mayHaveCustomIndicator() {
-  const listeners = up.internal.EventListener.allNonDefault(document)
+  const listeners = up.internal.UpEventListener.allNonDefault(document)
   return u.find(listeners, (listener) => listener.eventType === 'up:network:late')
 }
 
