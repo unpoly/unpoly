@@ -80,7 +80,10 @@ up.modal = {
   Returns the location URL of the fragment displayed in the current overlay.
 
   @function up.modal.url
-  @return {string}
+  @return {string|undefined}
+    The overlay's location URL.
+
+    Returns `undefined` if the overlay has no location, e.g. when it was opened from a string of HTML.
   @deprecated
     Use `up.layer.location` instead.
   */
@@ -93,7 +96,10 @@ up.modal = {
   Returns the location URL of the layer behind the current overlay.
 
   @function up.modal.coveredUrl
-  @return {string}
+  @return {string|undefined}
+    The location URL of the layer behind the current overlay.
+
+    Returns `undefined` if no overlay is open.
   @deprecated
     Use `up.layer.parent.location` instead.
   */
