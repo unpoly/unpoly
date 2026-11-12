@@ -26,7 +26,7 @@ export type ListenerCallback<E = Event> =
   { listener(this: HTMLElement, event: E, element: HTMLElement, data?: any): any }['listener'] & { upUid?: number }
 
 /**
-Everything an `up.EventListener` needs to know.
+Everything an `UpEventListener` needs to know.
 @internal
 */
 export interface EventListenerAttributes {

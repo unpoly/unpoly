@@ -13,7 +13,7 @@
 //
 // - Anything that runs when a module or class is defined must only use bindings that are
 //   already evaluated. That means `extends`, computed keys (`[isEqual.key]`), static fields and
-//   blocks (`static { memoizeMethod(…) }`) and top-level calls (`new Config()`, `mockable()`).
+//   blocks (`static { memoizeMethod(…) }`) and top-level calls (`newConfig()`, `mockable()`).
 //   These are safe for bindings from util and element, because this file imports them before
 //   any namespace or class.
 //   Only the few low-level modules they import themselves are evaluated earlier: mockable,
@@ -175,7 +175,7 @@ for (let mode of layerModes) {
 // entries created now are marked as defaults (`isDefault`), which a reset between specs keeps
 // (see event_listener.ts, framework/registry.ts, script.ts).
 //
-// Some things already happen when a module is evaluated, before any install: a `new Config()`
+// Some things already happen when a module is evaluated, before any install: a `newConfig()`
 // builds its defaults and listens for `up:framework:reset`, and a few namespaces create helper
 // objects (like up.network's request queue and cache).
 const installs = [

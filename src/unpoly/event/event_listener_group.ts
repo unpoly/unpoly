@@ -4,14 +4,14 @@ import type { EventListenerAttributes, ListenerTarget } from './event_listener.j
 import type { List, PlainObject } from '../util.js'
 
 /**
-The attributes for an `up.EventListener`, minus its single element and event type.
+The attributes for an `UpEventListener`, minus its single element and event type.
 @internal
 */
 export type SharedListenerAttributes = Omit<EventListenerAttributes, 'element' | 'eventType'>
 
 /**
-Everything an `up.EventListenerGroup` needs to know: the elements and event types to listen to,
-and the attributes for each `up.EventListener`.
+Everything an `EventListenerGroup` needs to know: the elements and event types to listen to,
+and the attributes for each `UpEventListener`.
 @internal
 */
 export interface EventListenerGroupAttributes extends SharedListenerAttributes {
@@ -62,7 +62,7 @@ export class EventListenerGroup {
   }
 
   /*
-  Constructs a new up.EventListenerGroup from arguments with many different combinations:
+  Constructs a new EventListenerGroup from arguments with many different combinations:
 
       [[elements], eventTypes, [selector], [options], callback]
 
