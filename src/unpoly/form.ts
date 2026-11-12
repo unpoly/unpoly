@@ -6,7 +6,7 @@ import { fail, muteUncriticalRejection } from './error.js'
 import { build, haltEvent, on } from './event.js'
 import {
   closest, getAllFragments, getSmart, getSubtree, render, sourceOf, toTarget, trackSelector,
-  tryToTarget, type RenderJob, type RenderOptions,
+  tryToTarget, type RenderJob, type RenderOptions, type RenderResult,
 } from './fragment.js'
 import { closestLayerElement, layerStack } from './layer.js'
 import { followOptions } from './link.js'
@@ -578,7 +578,7 @@ The event type `'input'` is expanded into the events from `up.form.config.watchI
   The [watch options](/learn/watch-options) that `up.watch()` would use for the given field.
 @experimental
 */
-export function watchOptions(field: e.ElementOrSelector, options?: u.PlainObject, parserOptions: e.OptionsParserOptions = {}): u.PlainObject {
+export function watchOptions(field: e.ElementOrSelector, options?: t.WatchOptions, parserOptions: e.OptionsParserOptions = {}): t.WatchOptions {
   field = getSmart(field)!
   options = u.newOptions(options)
 
@@ -689,7 +689,7 @@ like `{ event }` or `{ delay }`.
   The [options](/api/up.validate#parameters) that `up.validate()` would use for the given field.
 @experimental
 */
-export function validateOptions(field: e.ElementOrSelector, options?: u.PlainObject, parserOptions: e.OptionsParserOptions = {}): u.PlainObject {
+export function validateOptions(field: e.ElementOrSelector, options?: t.ValidateOptions, parserOptions: e.OptionsParserOptions = {}): t.ValidateOptions {
   field = getSmart(field)!
   options = u.newOptions(options)
   let parser = new OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-validate-' })
@@ -901,7 +901,7 @@ export function destinationOptions(form: Element, options?: u.PlainObject, parse
   return options
 }
 
-export function submitButtonOverrides(submitButton?: Element | false): u.PlainObject {
+export function submitButtonOverrides(submitButton?: Element | false): RenderOptions {
   if (!submitButton) return {}
   let buttonOptions = followOptions(submitButton, {}, { defaults: false })
   // The parsing of [formmethod] and [formaction] (into { method, url })
@@ -1182,7 +1182,7 @@ up.autosubmit(form)
 
 @stable
 */
-export function autosubmit(target: e.ElementOrSelector, options: u.PlainObject = {}): () => void {
+export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): () => void {
   const onChange = (_diff: u.PlainObject, renderOptions: RenderOptions) => submit(target, renderOptions)
   return watch(target, { logPrefix: 'up.autosubmit()', ...options, batch: true }, onChange)
 }
@@ -1501,11 +1501,12 @@ See [preventing race conditions](/learn/reactive-server-forms#race-conditions) f
 
 @stable
 */
-export function validate(...args: [originOrTarget: any, ...rest: any[]]): any {
+export function validate(...args: [originOrTarget: e.ElementOrSelector, options?: t.ValidateOptions]): Promise<RenderResult> {
   let options = parseValidateArgs(...args)
   let form = getForm(options.origin)!
   let validator = getFormValidator(form)
-  return validator.validate(options)
+  // Validating always finds a solution, at least the origin itself.
+  return validator.validate(options)!
 }
 
 /*-

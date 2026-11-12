@@ -1,6 +1,6 @@
 import type * as u from '../util.js'
 import type { UpEvent } from '../event.js'
-import type { RenderOptions } from '../fragment.js'
+import type { RenderOptions, RenderResult } from '../fragment.js'
 import type { Params } from './params.js'
 
 /**
@@ -78,16 +78,24 @@ changed values and the options.
 export type WatchCallback = u.AnyFunction
 
 /**
-Options for an `up.FieldWatcher`. Other options are passed on to the callback.
-@internal
+Options for `up.watch()` and `up.autosubmit()`, and the options that `up.form.watchOptions()` parses
+for a field. The callback receives them without `{ event, delay }`.
 */
-export interface FieldWatcherOptions {
-  batch?: boolean
-  logPrefix?: string
-  includeDisabled?: boolean
-  event?: string
+export interface WatchOptions extends RenderOptions {
+  event?: string | string[]
   delay?: number
-  [key: string]: any
+  batch?: boolean
+  /** @internal */
+  logPrefix?: string
+  /** @internal */
+  includeDisabled?: boolean
+}
+
+/**
+Options for `up.validate()`, and the options that `up.form.validateOptions()` parses for a field.
+*/
+export interface ValidateOptions extends WatchOptions {
+  formGroup?: boolean
 }
 
 /**
@@ -107,11 +115,11 @@ deferred that settles when the validation has rendered.
 @internal
 */
 export interface ValidationSolution extends FoundValidationSolution {
-  renderOptions: u.PlainObject
+  renderOptions: ValidateOptions
   batch?: boolean
   // The method and URL. Solutions with the same destination can be validated in one request.
   destination: string
-  deferred: u.Deferred<any>
+  deferred: u.Deferred<RenderResult>
 }
 
 /**

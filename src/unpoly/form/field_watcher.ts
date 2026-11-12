@@ -2,7 +2,7 @@ import * as u from '../util.js'
 import { fail, guard } from '../error.js'
 import { on } from '../event.js'
 import {
-  getRegion, isField, readFieldName, trackFields, watchOptions, type FieldWatcherOptions,
+  getRegion, isField, readFieldName, trackFields, watchOptions, type WatchOptions,
   type WatchCallback,
 } from '../form.js'
 import { isAlive } from '../fragment.js'
@@ -10,19 +10,19 @@ import { printUserEvent } from '../log.js'
 import { Params } from './params.js'
 
 export class FieldWatcher {
-  declare _options: FieldWatcherOptions
+  declare _options: WatchOptions
   declare _root: Element
   declare _callback: WatchCallback
   declare _batch?: boolean
   declare _logPrefix: string
   declare _includeDisabled?: boolean
   declare _scheduledValues: u.PlainObject | null
-  declare _scheduledFieldOptions: u.PlainObject | null
+  declare _scheduledFieldOptions: WatchOptions | null
   declare _processedValues: u.PlainObject
   declare _currentTimer: number | null
   declare _callbackRunning: boolean
 
-  constructor(root: Element, options: FieldWatcherOptions, callback: WatchCallback) {
+  constructor(root: Element, options: WatchOptions, callback: WatchCallback) {
     this._options = options
     this._root = root
     this._callback = callback
@@ -85,13 +85,14 @@ export class FieldWatcher {
     return getRegion(this._root)
   }
 
-  _fieldOptions(field: Element): u.PlainObject {
+  _fieldOptions(field: Element): WatchOptions {
     return watchOptions(field, this._options)
   }
 
   _watchField(field: Element): () => void {
     let fieldOptions = this._fieldOptions(field)
-    let eventType = fieldOptions.event
+    // watchOptions() always sets an { event }.
+    let eventType = fieldOptions.event!
 
     // Return a function that unbinds all events when the field is removed from _root.
     // Note that an [up-keep] field may be moved to another root.
@@ -103,7 +104,7 @@ export class FieldWatcher {
     this._scheduledValues = null
   }
 
-  _scheduleValues(values: u.PlainObject, fieldOptions: u.PlainObject): void {
+  _scheduleValues(values: u.PlainObject, fieldOptions: WatchOptions): void {
     this._scheduledValues = values
     this._scheduledFieldOptions = fieldOptions
     let delay = fieldOptions.delay || 0
@@ -191,7 +192,7 @@ export class FieldWatcher {
     return Params.fromContainer(this._root, { includeDisabled: this._includeDisabled }).toObject()
   }
 
-  _check(event: Event, fieldOptions: u.PlainObject = {}): void {
+  _check(event: Event, fieldOptions: WatchOptions = {}): void {
     const values = this._readFieldValues()
 
     if (this._isNewValues(values)) {

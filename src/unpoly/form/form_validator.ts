@@ -4,10 +4,11 @@ import { Aborted, fail, muteUncriticalRejection } from '../error.js'
 import { build, on } from '../event.js'
 import {
   destinationOptions, findFields, findGroupSolution, isField, readFieldName, trackFields,
-  validateOptions, type FoundValidationSolution, type ValidationSolution,
+  validateOptions, type FoundValidationSolution, type ValidateOptions, type ValidationSolution,
 } from '../form.js'
 import {
   getSmart, onAborted, render, resolveOrigin, splitTarget, toTarget, type FragmentAbortedEvent,
+  type RenderOptions, type RenderResult,
 } from '../fragment.js'
 import { printToStandard, printUserEvent } from '../log.js'
 import { headerize, protocolConfig } from '../protocol.js'
@@ -39,7 +40,8 @@ export class FormValidator {
   }
 
   _onFieldAdded(field: Element): () => void {
-    let eventType = validateOptions(field).event
+    // validateOptions() always sets an { event }.
+    let eventType = validateOptions(field).event!
     return on(field, eventType, (event) => {
       if (!field.closest('.up-keeping')) {
         printUserEvent(event)
@@ -62,18 +64,19 @@ export class FormValidator {
     }
   }
 
-  validate(options: u.PlainObject = {}): u.Deferred<any> | undefined {
+  validate(options: ValidateOptions = {}): u.Deferred<RenderResult> | undefined {
     let newSolutions = this._getSolutions(options)
     this._dirtySolutions.push(...newSolutions)
     this._scheduleNextRender()
     return newSolutions[0]?.deferred
   }
 
-  _getSolutions(options: u.PlainObject): ValidationSolution[] {
+  _getSolutions(options: ValidateOptions): ValidationSolution[] {
     // The loop below adds the props of a scheduled solution.
     let solutions = (this._getTargetSelectorSolutions(options)
       || this._getFieldSolutions(options)
-      || this._getElementSolutions(options.origin)) as ValidationSolution[]
+      // up.validate() and _onFieldAdded() always pass an { origin }.
+      || this._getElementSolutions(options.origin!)) as ValidationSolution[]
 
     // Although a single validate() call may update multiple fragments,
     // they will all share the same render pass.
@@ -104,7 +107,7 @@ export class FormValidator {
     }
   }
 
-  _getFormGroupSolutions(field: Element, { formGroup = true }: u.PlainObject): FoundValidationSolution[] | undefined {
+  _getFormGroupSolutions(field: Element, { formGroup = true }: ValidateOptions): FoundValidationSolution[] | undefined {
     if (!formGroup) return
 
     let solution = findGroupSolution(field, { targetable: true })
@@ -115,6 +118,7 @@ export class FormValidator {
     }
   }
 
+  // The target may also be a boolean from an [up-validate] attribute.
   _getTargetSelectorSolutions({ target, origin }: u.PlainObject): FoundValidationSolution[] | undefined {
     if (u.isString(target)) {
       printToStandard('up.validate()', 'Validating target "%s"', target)
@@ -158,7 +162,8 @@ export class FormValidator {
 
   _scheduleNextRender(): void {
     let solutionDelays = this._dirtySolutions.map((solution) => solution.renderOptions.delay)
-    let shortestDelay = Math.min(...solutionDelays) || 0
+    // A missing delay makes Math.min() return NaN, which falls back to 0.
+    let shortestDelay = Math.min(...solutionDelays as number[]) || 0
     // Render requests always reset the timer, using their then-current delay.
     clearTimeout(this._nextRenderTimer)
     this._nextRenderTimer = u.scheduleTimer(shortestDelay, () => {
@@ -229,7 +234,7 @@ export class FormValidator {
     return s1.destination === s2.destination && s1.batch && s2.batch
   }
 
-  _mergeRenderOptions(dirtySolutions: ValidationSolution[]): u.PlainObject {
+  _mergeRenderOptions(dirtySolutions: ValidationSolution[]): RenderOptions {
     // Dirty fields are the fields that triggered the validation, not the fields contained
     // by the solution elements. This is not the same thing in a scenario like this:
     //
