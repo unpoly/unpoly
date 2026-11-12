@@ -11,6 +11,7 @@ and how a namespace is structured internally.
   - [Not an ESM module](#not-an-esm-module)
   - [Responsibilities](#responsibilities)
   - [Namespace pattern](#namespace-pattern)
+  - [Imports, exports and types](#imports-exports-and-types)
 - [Entry points and optional bundles](#entry-points-and-optional-bundles)
 <!-- /toc -->
 
@@ -155,53 +156,56 @@ A namespace definition has the following jobs:
 Each namespace is an ES module that exports:
 
 - **Named functions**, which other files `import`. Internal code never calls through the global (`up.link.follow()`), it imports `follow` from `./link.js`.
-- **`api`**, the module's contribution to `window.up`: the namespace object, plus any shortcuts like `up.follow`. Public names may differ from the internal ones (`get: getOne`). It only holds public API, never an internal helper.
+- **`api`**, the module's contribution to `window.up`: the namespace object, plus any shortcuts like `up.follow`. Public names may differ from the internal ones (`get: getSmart`, `config: linkConfig`). It only holds public API, never an internal helper.
 - Optionally **`install()`**, which performs all the module's side effects: registering compilers, macros and event listeners.
 
 A module's top level only declares things. Nothing happens when it is imported.
 
 To illustrate, here is a *very* simplified version of `up.link`:
 
-```js
-// Import the functions and classes we need from other modules.
-import { Config } from './util/config.js'
+```ts
+// Import the functions, classes and types we need (see "Imports, exports and types" below).
+import * as u from './util.js'
 import { emit } from './event.js'
+import type * as t from './link/types.js'
+export type * from './link/types.js'
 import { LinkFollower } from './link/link_follower.js'
 
 // Settings to globally configure link handling.
 // Published as up.link.config.
-export const config = new Config('up.link.config', () => ({
+export const linkConfig = u.newConfig('up.link.config', (): t.LinkConfig => ({
   followSelector: '[up-follow]',
 }))
 
 // Programmatically follow a link.
 // Published as up.link.follow() and up.follow()
-export function follow(link) {
+export function follow(link: Element): void {
   // Allow listeners to prevent the follow
   if (emitFollowEvent(link).defaultPrevented) return
 
   // Instantiate a helper class to handle the following
-  return new LinkFollower(link).execute()
+  new LinkFollower(link).execute()
 }
 
 // Return whether a link will be followed by Unpoly.
 // Published as up.link.isFollowable()
-export function isFollowable(link) {
-  return !!link.closest(config.followSelector)
+export function isFollowable(link: Element): boolean {
+  return !!link.closest(linkConfig.followSelector)
 }
 
 // Internal helper to emit an up:link:follow event.
 // Not exported, not published.
-function emitFollowEvent(link) {
+function emitFollowEvent(link: Element): t.LinkFollowEvent {
   return emit(link, 'up:link:follow')
 }
 
 // Side effects only run when the entry file calls install().
-export function install() {
+export function install(): void {
   // Handle clicks on links with an [up-follow] attribute
   document.addEventListener('click', function(event) {
-    if (isFollowable(event.target)) {
-      follow(event.target)
+    let link = event.target as Element
+    if (isFollowable(link)) {
+      follow(link)
     }
   })
 }
@@ -210,13 +214,13 @@ export function install() {
 // Do not add internal helpers.
 export const api = {
   link: {
-    config,       // becomes up.link.config
-    follow,       // becomes up.link.follow()
-    isFollowable, // becomes up.link.isFollowable()
+    config: linkConfig, // becomes up.link.config
+    follow,             // becomes up.link.follow()
+    isFollowable,       // becomes up.link.isFollowable()
   },
   // We usually expose functions as `up.namespace.verb()`.
   // Frequently used functions also get a shortcut directly on `window.up`.
-  follow,         // becomes up.follow()
+  follow,               // becomes up.follow()
 }
 ```
 
@@ -226,9 +230,8 @@ docs are (`up.Params` is documented under `up.form`). Closely related classes sh
 sub-folder, like `fragment/render/` or `layer/modes/`. Generic helper classes live in
 `util/`. A class file exports the class, and an `api` if the class is public. Classes are
 named so they stand on their own (`ModalLayer`, not a nested `up.Layer.Modal`). A class named
-like a browser global is a named class expression bound to an `Up` name
-(`export const UpRequest = class Request …`), so it keeps its runtime name without
-shadowing the global.
+like a browser global gets an `Up` prefix (`UpRequest`, see
+[Naming](code-style.md#names-that-collide-with-globals)).
 
 `window.up` only holds public API. The specs and `unpoly-migrate` are separate bundles that
 can't import from `src/unpoly`, so the internal functions and classes they need are published
@@ -259,6 +262,70 @@ from a feature namespace, define a protocol key that the class implements, like
 `up.util.copy.key`: `error.ts` defines `isCritical.key`, and `up.Response` implements it. Only
 when neither is possible, call the function through the global at call time, as `Config` logs
 with `up.internal.printToError()`.
+
+### Imports, exports and types
+
+The code base is being migrated to this shape, and some of its lint rules don't exist yet. New
+and changed modules follow it. How to write the types themselves is covered in
+[Code style](code-style.md#typescript).
+
+Import other modules by their `.js` name (`import { emit } from './event.js'`), also when they
+are `.ts` files. TypeScript and the build both resolve this to `event.ts`.
+
+**Types.** A module's types live in `<module>/types.ts`, next to its classes:
+`fragment/types.ts` for `fragment.ts`. Their `/** */` comments stay with them. The module
+imports them as `t` and re-exports them, so other modules import types from the main module,
+never from a `types.ts`:
+
+```ts
+import type * as t from './fragment/types.js'
+export type * from './fragment/types.js'
+```
+
+**Namespace aliases.** `util.ts` and `element.ts` are imported as `import * as u` and
+`import * as e`. Aliases are lowercase (`u`, `e`, `t`): lowercase means a module, uppercase a
+class, and single uppercase letters are taken by type parameters. Use an alias only as
+`u.member`, for values and types alike (`u.map()`, `u.List<Element>`). Passing the alias
+itself around makes esbuild build the module's namespace object, which is 2.4 KB for util.
+Don't shadow an alias with a local variable (`catch (error)`, not `catch (e)`).
+
+**Other main modules** get one `import { … }` statement each, with types inline as `type X`.
+Import a class from the main module that owns it, not from its file:
+`import { Layer, layerConfig, type LayerMode } from './layer.js'`.
+
+**Header order:**
+
+1. The module's Sass file
+2. `u` and `e`
+3. Other main modules, one statement each
+4. Own types: `import type * as t` and `export type *`
+5. Own classes, grouped by source file. Each import is directly followed by its re-export. A
+   class the module only re-exports gets a single `export { … } from` line.
+
+```ts
+import './fragment.sass'
+import * as u from './util.js'
+import * as e from './element.js'
+import { CannotTarget, fail } from './error.js'
+import { emit, on } from './event.js'
+import { Layer, layerConfig } from './layer.js'
+import type * as t from './fragment/types.js'
+export type * from './fragment/types.js'
+import { FragmentFinder } from './fragment/fragment_finder.js'
+import { RenderJob } from './fragment/render/render_job.js'
+export { RenderJob }
+export { RenderResult } from './fragment/render/render_result.js'
+```
+
+A module re-exports exactly the classes that other modules import, nothing more.
+`internal.ts` counts as another module, since it's how the specs reach a class.
+
+> [!WARNING]
+> A re-export can change when an importer gets the class. In an import cycle, the importer
+> may be evaluated before the main module has imported the class file, and esbuild gives it a
+> silent `undefined` instead of an error. Before a module imports a class through a re-export,
+> check that it doesn't use the class while it is being defined (`extends`, a static block, a
+> top-level call). The rules for cycles are in the comments of `src/unpoly.ts`.
 
 
 ## Entry points and optional bundles

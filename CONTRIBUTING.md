@@ -54,7 +54,7 @@ feature, or before reviewing someone else's.
 ### [🗂️ Code organization](docs/contributing/code-organization.md)
 
 > Where files live, why Unpoly is a `window.up` global, which namespace owns which topic,
-> how we structure namespaces internally, and how to find tests for a given file.
+> how namespaces are structured, typed and imported, and how to find tests for a given file.
 > Implementation plans for larger changes go in `docs/plans/`, named after their subject.
 
 [Read the code organization guide](docs/contributing/code-organization.md) before
@@ -88,7 +88,7 @@ changing documentation. The directive set is large and you won't guess it.
 
 ### [👗 Code style](docs/contributing/code-style.md)
 
-> Moving to TypeScript module by module, no dependencies, no jQuery.
+> How we write TypeScript types and name exports. No dependencies, no jQuery.
 > Byte count is a real constraint that sometimes
 > justifies unconventional code.
 > You can run Oxlint with `bin/lint`, and the type check with `bin/typecheck`.

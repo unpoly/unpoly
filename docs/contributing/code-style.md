@@ -4,22 +4,31 @@ How Unpoly's own source is written. Some of these rules are enforced by Oxlint (
 most are not.
 
 <!-- toc -->
-- [Moving to TypeScript](#moving-to-typescript)
+- [TypeScript](#typescript)
+  - [Type checking](#type-checking)
+  - [Writing types](#writing-types)
+  - [Strict checks](#strict-checks)
+  - [The global `up` and unpoly-migrate](#the-global-up-and-unpoly-migrate)
 - [Every byte counts](#every-byte-counts)
 - [Leave it to the minifier](#leave-it-to-the-minifier)
 - [No dependencies](#no-dependencies)
 - [No jQuery](#no-jquery)
 - [Naming](#naming)
+  - [Names that collide with globals](#names-that-collide-with-globals)
+  - [Export names](#export-names)
 - [Private members and the minified build](#private-members-and-the-minified-build)
 - [Linting](#linting)
 <!-- /toc -->
 
 
-## Moving to TypeScript
+## TypeScript
 
-We migrated Unpoly to TypeScript one module at a time, leaf modules first. All of `src/` is
-TypeScript now, except the ERB template `namespace.js.erb`. The types are still loose, and many
-are provisional.
+All of `src/` is TypeScript, except the ERB template `namespace.js.erb`. The code base is
+being migrated to the conventions below, and some of their lint rules don't exist yet. New and
+changed code follows them. Where modules, their types and their imports live is covered in
+[Code organization](code-organization.md#imports-exports-and-types).
+
+### Type checking
 
 The build doesn't use TypeScript at all: esbuild strips the types from each file, and never
 checks them. The only type check is `bin/typecheck`, which takes about two seconds and runs
@@ -39,28 +48,85 @@ When a folder passes the stricter settings, remove it from `NOT_YET_STRICT`. Whe
 passes a setting, move it to `tsconfig.json`. CI runs `bin/typecheck` as a separate job, and a
 type error in either check fails the workflow.
 
-In a `.ts` module:
+Typing must not change what the build emits. Compare `unpoly.min.js` before and after.
 
-- Import other modules by their `.js` name (`import { map } from './util.js'`), also when they
-  are `.ts` files. TypeScript and the build both resolve this to `util.ts`.
-- Annotate exported functions (parameters, and return types where they aren't obvious). Let
-  TypeScript infer the types of local variables, unless a type helps the reader.
-- Give a reusable shape a name (`export type`, `export interface`), like `List<T>` or
-  `NormalizeURLOptions`. Mark a type that isn't public API with `@internal` in a `/** */` comment.
-- Declare class fields with `declare` (`declare left: number`). A field without `declare` makes
-  the compiled class define the property, which costs bytes and changes behavior (differently in
-  `unpoly.js` and `unpoly.es6.js`, whose targets treat class fields differently). `bin/lint`
-  reports a field without `declare` or an initializer.
+Public types also appear in [doc comments](documentation.md), in a notation loosely inspired
+by TypeScript. Those document intent for the reader; no tool verifies them.
+
+### Writing types
+
+- **Object shapes are interfaces.** Every object shape is an `interface`, including the
+  properties Unpoly sets on elements (`interface FragmentElement extends Element { … }`). Use
+  `type` only for unions, tuples, function types and aliases. An interface can be passed where
+  a `PlainObject` is expected.
+- **`?` for optional values.** Write `origin?: Element`, not `origin: Element | undefined`,
+  for parameters, properties and `declare`d class fields. Return types, and a parameter
+  followed by a required one, still need `| undefined`.
+- **Named functions declare their return type**, exported or not:
+
+  ```ts
+  function isAlive(fragment: Element): boolean {
+  ```
+
+  This includes methods, and an arrow function assigned to an untyped `const`. Inline
+  callbacks and functions that get their type from context stay inferred. Agents (and humans)
+  read code with `grep`, not by hovering, and an explicit type catches an accidental widening
+  where it happens. Lint enforces this with `explicit-function-return-type`.
+- **Local variables are inferred.** Annotate one where inference can't do it (see
+  [Strict checks](#strict-checks)), or where a type helps the reader.
+- **Refactor before type acrobatics.** When a type is hard to write, change the code so it's
+  easy to type. Don't build intersections, `Pick` or `Omit` where a refactor or a named type
+  does.
+- **Share slightly wider types.** One `LookupOptions` for all of up.fragment's lookups beats a
+  precise options type per function. Don't widen where that loses a real check.
+- **Real types instead of `PlainObject`**, where that's cheap. `any` is fine where a precise
+  type would be complex.
+- **No cast that a refactor can remove.** A cast is fine where TypeScript can't know
+  (`affix(…) as HTMLFormElement`), or where the honest code would emit differently, with a
+  comment: `(now as any) - (this.loadedAt as any)` instead of `now.getTime() - …`.
+- **Declare class fields** with `declare` (`declare left: number`). A field without `declare`
+  makes the compiled class define the property, which costs bytes and changes behavior
+  (differently in `unpoly.js` and `unpoly.es6.js`, whose targets treat class fields
+  differently). `bin/lint` reports a field without `declare` or an initializer.
+- **Mark a type that isn't public API** with `@internal` in its `/** */` comment.
+- **A type parameter never takes the name of a namespace alias** (`u`, `e`, `t`).
+- **Type a config once**, as the interface its defaults function returns. `newConfig()` returns
+  it as a `ConfigWith<…>`, so the call site needs no cast:
+
+  ```ts
+  export const linkConfig = u.newConfig('up.link.config', (): t.LinkConfig => ({ … }))
+  ```
+
+- **Events are interfaces that extend `UpEvent`**, or the event they build on. Use one line
+  per property when that's clearer:
+
+  ```ts
+  /** The `up:fragment:kept` event. */
+  export interface FragmentKeptEvent extends UpEvent {
+    newFragment: Element
+    newData: PlainObject
+  }
+
+  /** The `up:fragment:keep` event. */
+  export interface FragmentKeepEvent extends FragmentKeptEvent { renderOptions: RenderOptions }
+  ```
+
+  `UpEventMap` in `event.ts` maps each event type to its interface, like `HTMLElementEventMap`
+  does for DOM events, and `up.on()` and `up.emit()` look it up. A new event gets an interface
+  with the properties from its doc comment, and an entry in the map.
+
+### Strict checks
+
 - Core code has no implicit `any`: type every parameter, a `let` without an initializer, and an
   empty `{}` or `[]` that collects values. Callbacks get their parameter types from the function
   they're passed to (`up.compiler()`, `up.on()`), so prefer typing that function over annotating
   each callback.
 - Core code passes `strictNullChecks`. When TypeScript says a value may be `null` or
   `undefined`, and the function you pass it to already handles that, widen the parameter's
-  type (`origin: Element | undefined`). When something guarantees the value, assert it with
-  `!`, and say what guarantees it in a comment unless the code nearby shows it. Don't add a
-  runtime check for a case that can't happen. A value that can really be missing, and then
-  breaks something, is a bug: fix it in its own change, with a spec.
+  type (`origin?: Element`). When something guarantees the value, assert it with `!`, and say
+  what guarantees it in a comment unless the code nearby shows it. Don't add a runtime check
+  for a case that can't happen. A value that can really be missing, and then breaks something,
+  is a bug: fix it in its own change, with a spec.
 - When a function resolves its argument by reassigning it (`element = getSmart(element)`),
   TypeScript narrows the parameter to a member of its declared type: an `ElementOrSelector`
   becomes an `Element`, never the `HTMLElement` that `getSmart()` returns. When that's enough,
@@ -70,7 +136,7 @@ In a `.ts` module:
   ```ts
   get(request: UpRequest | RequestOptions): UpRequest | undefined
   // The request is wrapped in place, so the implementation takes the wrapped type.
-  get(request: UpRequest) {
+  get(request: UpRequest): UpRequest | undefined {
     request = this._wrap(request)
   ```
 
@@ -81,14 +147,9 @@ In a `.ts` module:
   emits nothing, but it takes one cast per use. A new local variable would change the emitted
   code. A function expression passed to `mockable()` can't have overloads. Type its rest
   parameter as a union of tuples (like `trackFields()` does), or as `any` with a comment.
-- Where the honest code would emit differently, a cast with a comment is fine, e.g.
-  `(now as any) - (this.loadedAt as any)` instead of `now.getTime() - …`.
-- `any` is fine where a precise type would be complex.
-- Unpoly's events are typed by name, like DOM events in `HTMLElementEventMap`. `UpEventMap` in
-  `event.ts` maps each event type to its event object, and `up.on()` and `up.emit()` look it up. A
-  new event gets a type in the module that documents it (like `LinkFollowEvent` in `link.ts`),
-  with the properties from its doc comment, and an entry in the map.
-- Typing must not change what the build emits. Compare `unpoly.min.js` before and after.
+
+### The global `up` and unpoly-migrate
+
 - The global `up` has the type `Up`, which `src/unpoly.ts` builds from every module's `api`. A
   key that no `api` contributes is declared by merging it into `Up` with a `declare module`
   block, next to the code that adds it. A namespace's type can't be merged into. To add keys to
@@ -109,9 +170,6 @@ In a `.ts` module:
   parameter (TS2556). Type parameters where it's easy. Core declares the hooks it
   calls on `up.migrate` in `migrate_stub.ts`, and migrate marks each implementation with a "Core
   calls this hook" comment.
-
-Public types also appear in [doc comments](documentation.md), in a notation loosely inspired
-by TypeScript. Those document intent for the reader; no tool verifies them.
 
 
 ## Every byte counts
@@ -167,6 +225,33 @@ attribute.
 Acronyms are uppercased: `parseURL()`, not `parseUrl()`. Same for `escapeHTML()` or
 `parseRelaxedJSON()`. A *leading* acronym stays lowercase, as camelCase requires:
 `jsonAttr()`.
+
+### Names that collide with globals
+
+A class or function named like a likely browser or JavaScript global gets an `Up` prefix:
+`UpRequest`, `UpResponse`, `UpURLPattern`, `UpError`, `UpEvent`, `UpEventListener`,
+`UpRequestCache`. Otherwise a forgotten import silently uses the global, and code that imports
+Unpoly's modules one day wouldn't know which `Response` is meant. A function may get a more
+specific name instead: viewport's `scrollToPosition()`, not `scrollTo()`.
+
+The list isn't exhaustive, and we don't check every name against the browser's API. Cover the
+likely mix-ups. Names without a collision stay unprefixed (`Layer`, `Params`, `RenderResult`),
+and public names don't change (`up.Request`).
+
+### Export names
+
+An exported name must make sense at every import site, without its module next to it.
+
+- An alias at the import site (`import { halt as haltEvent }`) is a smell. Consider a more
+  qualified export name instead.
+- A qualified name reads as English, verb plus object: `haltEvent`, `getElementRoot`,
+  `pushLocation`, `abortFragment`, `getAllFragments`, `toFailKey`. Not a module name glued
+  on (`eventHalt`).
+- When the export name is already good and a local variable is in the way, rename the local.
+- Every `config` export is qualified (`fragmentConfig`, `layerConfig`). The module's `api`
+  maps it back to its public name (`config: fragmentConfig`), like `get: getSmart`.
+- Before renaming an export, check whether the specs or `unpoly-migrate` use it through
+  `up.internal`.
 
 
 ## Private members and the minified build
