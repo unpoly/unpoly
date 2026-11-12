@@ -160,8 +160,8 @@ export interface AbortRequestsOptions extends RequestTesterOptions {
 
 declare module '../event.js' {
   interface UpEventMap {
-    'up:network:late': Event
-    'up:network:recover': Event
+    'up:network:late': UpEvent
+    'up:network:recover': UpEvent
     'up:request:aborted': RequestEvent
     'up:request:load': RequestEvent
     'up:request:loaded': RequestLoadedEvent

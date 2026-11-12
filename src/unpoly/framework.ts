@@ -2,7 +2,7 @@ import { emit, type UpEvent } from './event.js'
 import { mockable } from './mockable.js'
 
 /**
-The `up:framework:booted` event.
+The `up:framework:boot` and `up:framework:booted` events.
 */
 export interface FrameworkBootedEvent extends UpEvent {
   mode: 'auto' | 'manual'
@@ -10,8 +10,9 @@ export interface FrameworkBootedEvent extends UpEvent {
 
 declare module './event.js' {
   interface UpEventMap {
+    'up:framework:boot': FrameworkBootedEvent
     'up:framework:booted': FrameworkBootedEvent
-    'up:framework:reset': Event
+    'up:framework:reset': UpEvent
   }
 }
 

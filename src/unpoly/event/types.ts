@@ -36,7 +36,7 @@ Maps the type of each Unpoly event to its event object, like `HTMLElementEventMa
 `up.on()` and `up.emit()` look up the event type here.
 
 Each module adds its own events, next to their types, with a `declare module '../event.js'` block
-that extends this interface. An event without documented properties maps to `Event`.
+that extends this interface. An event without documented properties maps to `UpEvent`.
 */
 export interface UpEventMap {} // oxlint-disable-line typescript/no-empty-object-type
 

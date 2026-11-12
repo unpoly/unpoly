@@ -2,8 +2,8 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { Aborted, NotImplemented } from '../error.js'
 import {
-  EventEmitter, EventListenerGroup, on, type EmitProps, type EmittedEvent, type EventTypes,
-  type ListenerArgs, type ObservedEvent, type UnbindFn,
+  EventEmitter, EventListenerGroup, on, type EmitProps, type EmittedEvent, type EventPlan,
+  type EventTypes, type ListenerArgs, type ObservedEvent, type UnbindFn,
 } from '../event.js'
 import { type RenderOptions } from '../fragment.js'
 import {
@@ -687,7 +687,7 @@ export class Layer {
   @stable
   */
   emit<T extends string>(eventType: T, props?: EmitProps): EmittedEvent<T>
-  emit<T extends string>(eventPlan: EmitProps & { type: T }): EmittedEvent<T>
+  emit<T extends string>(eventPlan: EventPlan<T>): EmittedEvent<T>
   emit<E extends Event>(event: E, options?: EmitProps): E
   emit<T extends string>(target: EventTarget, eventType: T, props?: EmitProps): EmittedEvent<T>
   emit<E extends Event>(target: EventTarget, event: E, options?: EmitProps): E
