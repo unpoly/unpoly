@@ -6,8 +6,8 @@
 declare module '../unpoly.js' {
   interface Up {
     util: CoreApi['util'] & {
-      only: any
-      except: any
+      only<T extends object, K extends keyof T>(object: T, ...keys: K[]): Pick<T, K>
+      except<T extends object, K extends keyof T>(object: T, ...keys: K[]): Omit<T, K>
       parseUrl: CoreApi['util']['parseURL']
       any: CoreApi['util']['some']
       all: CoreApi['util']['every']
@@ -17,10 +17,10 @@ declare module '../unpoly.js' {
       escapeHtml: CoreApi['util']['escapeHTML']
       selectorForElement: CoreApi['fragment']['toTarget']
       nextFrame: CoreApi['util']['task']
-      times: any
-      assign: any
-      values: any
-      microtask: any
+      times(count: number, block: () => void): void
+      assign: ObjectConstructor['assign']
+      values: ObjectConstructor['values']
+      microtask<T>(task: () => T): Promise<T>
     }
   }
 }
@@ -35,7 +35,7 @@ the given keys.
 @deprecated
   Use `up.util.pick()` instead.
 */
-up.util.only = function(object: Record<string, any>, ...keys: string[]) {
+up.util.only = function(object, ...keys) {
   up.migrate.deprecated('up.util.only(object, ...keys)', 'up.util.pick(object, keys)')
   return up.util.pick(object, keys)
 }
@@ -50,7 +50,7 @@ the given keys.
 @deprecated
   Use `up.util.omit(object, keys)` (with an array argument) instead of `up.util.except(object, ...keys)` (with rest arguments).
 */
-up.util.except = function(object: Record<string, any>, ...keys: string[]) {
+up.util.except = function(object, ...keys) {
   up.migrate.deprecated('up.util.except(object, ...keys)', 'up.util.omit(object, keys)')
   return up.util.omit(object, keys)
 }
@@ -109,7 +109,7 @@ Calls the given function for the given number of times.
 @deprecated
   Use a `for` loop instead.
 */
-up.util.times = function(count: number, block: () => void) {
+up.util.times = function(count, block) {
   up.migrate.deprecated('up.util.times()', 'a `for` loop')
   for (let i = 0; i < count; i++) {
     block()
@@ -156,13 +156,13 @@ Pushes the given function to the [JavaScript microtask queue](https://jakearchib
 @deprecated
   Use [`queueMicrotask()`](https://developer.mozilla.org/en-US/docs/Web/API/queueMicrotask) instead.
 */
-up.util.microtask = function(task: () => any) {
+up.util.microtask = function(task) {
   up.migrate.deprecated('up.util.microtask()', 'queueMicrotask()')
   return Promise.resolve().then(task)
 }
 
 // Core calls this hook (up.util).
-up.migrate.splitAtOr = function(value: string): string[] | undefined {
+up.migrate.splitAtOr = function(value) {
   let parts = value.split(/\s+or\s+/)
   if (parts.length >= 2) {
     up.migrate.warn(`Separating tokens by \`or\` has been deprecated. Use a comma (\`,\`) instead. Found in "${value}".`)

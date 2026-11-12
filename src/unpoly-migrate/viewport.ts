@@ -1,15 +1,24 @@
+type ElementOrSelector = import('../unpoly/element.js').ElementOrSelector
+type LookupOptions = import('../unpoly/fragment.js').LookupOptions
+
 /*-
 @namespace up.viewport
 */
+
+/**
+Options for up.scroll(): where to look for the viewport, and how to scroll it.
+@internal
+*/
+interface ViewportScrollOptions extends LookupOptions, ScrollOptions {}
 
 // A deprecated alias has the type of the function or namespace that replaces it.
 declare module '../unpoly.js' {
   interface Up {
     viewport: CoreApi['viewport'] & {
       closest: CoreApi['viewport']['get']
-      scroll: any
+      scroll(viewport: ElementOrSelector, top: number, options?: ViewportScrollOptions): Promise<void>
     }
-    scroll: any
+    scroll: Up['viewport']['scroll']
     readonly layout: Up['viewport']
   }
 }
@@ -76,7 +85,7 @@ up.scroll('.main', 100, { behavior: 'smooth' })
 @deprecated
   Use [`Element#scrollTo()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollTo) instead.
 */
-up.viewport.scroll = function(viewport, top: number, options: object = {}) {
+up.viewport.scroll = function(viewport, top, options = {}) {
   up.migrate.deprecated('up.scroll()', 'Element#scrollTo()')
 
   viewport = up.fragment.get(viewport, options)

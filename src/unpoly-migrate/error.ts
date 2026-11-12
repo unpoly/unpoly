@@ -1,6 +1,6 @@
 declare module '../unpoly.js' {
   interface Up {
-    readonly CannotCompile: any
+    readonly CannotCompile: CoreApi['Error']
   }
 }
 

@@ -1,3 +1,6 @@
+type EmitProps = import('../unpoly/event.js').EmitProps
+type UnbindFn = import('../unpoly/event.js').UnbindFn
+
 /*-
 @namespace up.event
 */
@@ -6,10 +9,11 @@
 declare module '../unpoly.js' {
   interface Up {
     event: CoreApi['event'] & {
-      nobodyPrevents: any
+      nobodyPrevents(eventType: string, eventProps?: EmitProps): boolean
     }
-    $on: any
-    $off: any
+    // The listener takes a jQuery collection instead of an element.
+    $on(...args: any[]): UnbindFn
+    $off(...args: any[]): void
     readonly bus: Up['event']
   }
 }
@@ -38,7 +42,7 @@ if (up.event.nobodyPrevents('disk:erase')) {
 */
 up.event.nobodyPrevents = function(...args) {
   up.migrate.deprecated('up.event.nobodyPrevents(type)', '!up.emit(type).defaultPrevented')
-  const event = (up.emit as any)(...args)
+  const event = up.emit(...args)
   return !event.defaultPrevented
 }
 

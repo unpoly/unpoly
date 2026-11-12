@@ -8,15 +8,16 @@ declare module '../unpoly.js' {
     element: CoreApi['element'] & {
       first: CoreApi['element']['get']
       createFromHtml: CoreApi['element']['createFromHTML']
-      remove: any
-      matches: any
-      closest: any
-      replace: any
-      all: any
-      toggleClass: any
+      remove(element: Element): void
+      matches(element: Element, selector: string): boolean
+      closest(element: Element, selector: string): Element | null
+      replace(oldElement: Element, newElement: Node): void
+      all(selector: string): NodeListOf<Element>
+      all(parent: ParentNode, selector: string): NodeListOf<Element>
+      toggleClass(element: Element, className: string, newPresent?: boolean): void
       toSelector: CoreApi['fragment']['toTarget']
-      isAttached: any
-      isDetached: any
+      isAttached(element: Node): boolean
+      isDetached(element: Node): boolean
     }
   }
 }
@@ -38,7 +39,7 @@ Returns the first descendant element matching the given selector.
 @deprecated
   Use `up.element.get()` instead.
 */
-up.element.first = function(...args) {
+up.element.first = function(...args: any[]) {
   up.migrate.deprecated('up.element.first()', 'up.element.get()')
   return (up.element.get as any)(...args)
 }
@@ -61,7 +62,7 @@ Removes the given element from the DOM tree.
 @deprecated
   Use [`Element#remove()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/remove) instead.
 */
-up.element.remove = function(element: Element) {
+up.element.remove = function(element) {
   up.migrate.deprecated('up.element.remove()', 'Element#remove()')
   return element.remove()
 }
@@ -82,7 +83,7 @@ use `up.fragment.matches()` instead.
 @deprecated
   Use [`Element#matches()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/matches) instead.
 */
-up.element.matches = function(element: Element, selector: string) {
+up.element.matches = function(element, selector) {
   up.migrate.deprecated('up.element.matches()', 'Element#matches()')
   return element.matches(selector)
 }
@@ -103,7 +104,7 @@ and traversing up through its ancestors in the DOM tree.
 @deprecated
   Use [`Element#closest()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/closest) instead.
 */
-up.element.closest = function(element: Element, selector: string) {
+up.element.closest = function(element, selector) {
   up.migrate.deprecated('up.element.closest()', 'Element#closest()')
   return element.closest(selector)
 }
@@ -119,7 +120,7 @@ The old element will be removed from the DOM tree.
 @deprecated
   Use [`Element#replaceWith()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/replaceWith) instead.
 */
-up.element.replace = function(oldElement: Element, newElement: Node) {
+up.element.replace = function(oldElement, newElement) {
   up.migrate.deprecated('up.element.replace()', 'Element#replaceWith()')
   return oldElement.replaceWith(newElement)
 }
@@ -142,7 +143,8 @@ Returns all descendant elements matching the given selector.
   Use [`Document#querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll) or
   [`Element#querySelectorAll()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/querySelectorAll) instead
 */
-up.element.all = function(...args) {
+// The parameters are any, since TypeScript doesn't type a function expression from overloads.
+up.element.all = function(...args: any[]) {
   up.migrate.deprecated('up.element.all()', 'Document#querySelectorAll() or Element#querySelectorAll()')
   const selector = args.pop()
   const root = args[0] || document
@@ -164,7 +166,7 @@ Adds or removes the given class from the given element.
 @deprecated
   Use [`Element#classList.toggle(className)`](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList) instead.
 */
-up.element.toggleClass = function(element: Element, klass: string, newPresent?: boolean) {
+up.element.toggleClass = function(element, klass, newPresent) {
   up.migrate.deprecated('up.element.toggleClass()', 'element.classList.toggle()')
   const list = element.classList
   if (newPresent == null) { newPresent = !list.contains(klass) }
@@ -202,7 +204,7 @@ See also `up.element.isDetached()`.
 @deprecated
   Use `element.isConnected` instead.
 */
-up.element.isAttached = function(element: Node) {
+up.element.isAttached = function(element) {
   up.migrate.deprecated('up.element.isAttached()', 'element.isConnected')
   return document.contains(element)
 }
@@ -216,7 +218,7 @@ Returns whether the given element has been removed from the DOM tree.
 @deprecated
   Use `!element.isConnected` instead.
 */
-up.element.isDetached = function(element: Node) {
+up.element.isDetached = function(element) {
   up.migrate.deprecated('up.element.isDetached()', '!element.isConnected')
   return !up.element.isAttached(element)
 }

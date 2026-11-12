@@ -1,10 +1,35 @@
+type ElementOrSelector = import('../unpoly/element.js').ElementOrSelector
+type RenderJob = import('../unpoly/fragment.js').RenderJob
+type RenderOptions = import('../unpoly/fragment.js').RenderOptions
+type Layer = import('../unpoly/layer.js').Layer
+type LayerCloseOptions = import('../unpoly/layer.js').LayerCloseOptions
+type OverlayDefaults = import('../unpoly/layer.js').OverlayDefaults
+
 /*-
 @namespace up.layer
 */
 
+/**
+The type of `up.modal`, whose functions moved to up.layer.
+@internal
+*/
+interface ModalApi {
+  visit(url: string, options?: RenderOptions): Promise<Layer>
+  follow(link: ElementOrSelector, options?: RenderOptions): RenderJob
+  extract(target: string, html: string, options?: RenderOptions): Promise<Layer>
+  close(options?: LayerCloseOptions): Promise<void>
+  url(): string | undefined
+  coveredUrl(): string | undefined
+  readonly config: OverlayDefaults
+  contains(element: Element): boolean
+  isOpen(): boolean
+  readonly flavors: never
+  flavor(): never
+}
+
 declare module '../unpoly.js' {
   interface Up {
-    modal: any
+    modal: ModalApi
   }
 }
 
@@ -23,7 +48,7 @@ up.modal = {
   @deprecated
     Use `up.layer.open({ url, mode: "modal" })` instead.
   */
-  visit(url: string, options: object = {}) {
+  visit(url, options = {}) {
     up.migrate.deprecated('up.modal.visit(url)', 'up.layer.open({ url, mode: "modal" })')
     return up.layer.open({ ...options, url, mode: 'modal' })
   },
@@ -41,7 +66,7 @@ up.modal = {
   @deprecated
     Use `up.follow(link, { layer: "new modal" })` instead.
   */
-  follow(link: any, options: object = {}) {
+  follow(link, options = {}) {
     up.migrate.deprecated('up.modal.follow(link)', 'up.follow(link, { layer: "new modal" })')
     return up.follow(link, { ...options, layer: 'new', mode: 'modal' })
   },
@@ -62,7 +87,7 @@ up.modal = {
   @deprecated
     Use `up.layer.open({ document, mode: "modal" })` instead.
   */
-  extract(target: string, html: string, options: object = {}) {
+  extract(target, html, options = {}) {
     up.migrate.deprecated('up.modal.extract(target, document)', 'up.layer.open({ document, mode: "modal" })')
     return up.layer.open({ ...options, target, document: html, layer: 'new', mode: 'modal' })
   },
@@ -76,7 +101,7 @@ up.modal = {
   @deprecated
     Use `up.layer.dismiss()` instead.
   */
-  close(options: object = {}) {
+  close(options = {}) {
     up.migrate.deprecated('up.modal.close()', 'up.layer.dismiss()')
     up.layer.dismiss(null, options)
     return up.migrate.formerlyAsync('up.layer.dismiss()')
@@ -131,7 +156,7 @@ up.modal = {
   @deprecated
     Use `up.layer.contains()` instead.
   */
-  contains(element: any) {
+  contains(element) {
     up.migrate.deprecated('up.modal.contains()', 'up.layer.contains()')
     return up.layer.contains(element)
   },
@@ -149,11 +174,11 @@ up.modal = {
     return up.layer.isOverlay()
   },
 
-  get flavors() {
+  get flavors(): never {
     throw FLAVORS_ERROR
   },
 
-  flavor() {
+  flavor(): never {
     throw FLAVORS_ERROR
   }
 }

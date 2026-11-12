@@ -1,10 +1,31 @@
+type ElementOrSelector = import('../unpoly/element.js').ElementOrSelector
+type RenderOptions = import('../unpoly/fragment.js').RenderOptions
+type Layer = import('../unpoly/layer.js').Layer
+type LayerCloseOptions = import('../unpoly/layer.js').LayerCloseOptions
+type OverlayDefaults = import('../unpoly/layer.js').OverlayDefaults
+
 /*-
 @namespace up.layer
 */
 
+/**
+The type of `up.popup`, whose functions moved to up.layer.
+@internal
+*/
+interface PopupApi {
+  attach(origin: ElementOrSelector, options?: RenderOptions): Promise<Layer>
+  close(options?: LayerCloseOptions): Promise<void>
+  url(): string | undefined
+  coveredUrl(): string | undefined
+  readonly config: OverlayDefaults
+  contains(element: Element): boolean
+  isOpen(): boolean
+  sync(): void
+}
+
 declare module '../unpoly.js' {
   interface Up {
-    popup: any
+    popup: PopupApi
   }
 }
 
@@ -21,7 +42,7 @@ up.popup = {
   @deprecated
     Use `up.layer.open({ origin, mode: 'popup' })` instead.
   */
-  attach(origin, options: object = {}) {
+  attach(origin, options = {}) {
     origin = up.fragment.get(origin)
     up.migrate.deprecated('up.popup.attach(origin)', "up.layer.open({ origin, mode: 'popup' })")
     return up.layer.open({ ...options, origin, layer: 'new', mode: 'popup' })
@@ -36,7 +57,7 @@ up.popup = {
   @deprecated
     Use `up.layer.dismiss()` instead.
   */
-  close(options: object = {}) {
+  close(options = {}) {
     up.migrate.deprecated('up.popup.close()', 'up.layer.dismiss()')
     up.layer.dismiss(null, options)
     return up.migrate.formerlyAsync('up.layer.dismiss()')
@@ -91,7 +112,7 @@ up.popup = {
   @deprecated
     Use `up.layer.contains()` instead.
   */
-  contains(element: any) {
+  contains(element) {
     up.migrate.deprecated('up.popup.contains()', 'up.layer.contains()')
     return up.layer.contains(element)
   },
