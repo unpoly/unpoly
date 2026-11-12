@@ -24,6 +24,7 @@ Documentation lives in this repository, beside the code it describes. A sister p
   - [A note above the params](#a-note-above-the-params)
   - [Return values](#return-values)
 - [Visibility](#visibility)
+  - [Public API must exist](#public-api-must-exist)
 - [Writing prose](#writing-prose)
   - [Markdown flavor](#markdown-flavor)
   - [Referring to features](#referring-to-features)
@@ -513,6 +514,23 @@ single option as provisional without destabilizing the rest. `@internal` **hides
 from the parameter list *and* from the rendered signature — which is how a public
 function keeps an argument that only Unpoly itself passes.
 
+### Public API must exist
+
+Everything documented as public in a doc file must exist in the code: `bin/typecheck` checks
+every public function, property, class member and event against the types. When you rename or
+remove public API, update its doc entry, and add a deprecation in unpoly-migrate.
+
+The check takes an entry's declaration (`@function up.Request#abort`) and looks the name up in the
+type of `window.up`, or in `UpEventMap` for an event. A failure reads like this:
+
+```text
+src/unpoly/network/request.md(42,11): error TS2339: Documented as up.Request#abort, but `Up['Request']['prototype']` has no `abort`.
+```
+
+It only checks that the name exists, not its params or types. Selectors, attributes, headers and
+cookies have no types, so nothing checks those. An entry in `src/unpoly-migrate/` is checked against
+the types with unpoly-migrate's declarations, so a polyfill for removed API must declare it, too.
+
 
 ## Writing prose
 
@@ -1000,8 +1018,9 @@ Two things to know:
 
 ## Previewing your changes
 
-Previewing is **optional**. Apart from `bin/lint`, which checks a doc file's
-structure, documentation has no automated tests, and a wrong directive
+Previewing is **optional**. Apart from `bin/lint`, which checks a doc file's structure, and
+`bin/typecheck`, which checks that [public API exists](#public-api-must-exist), documentation
+has no automated tests, and a wrong directive
 is a code-review fix rather than a blocker — so don't stall on it. Write the prose, make
 your best attempt at the syntax, and flag anything you're unsure of in the pull request.
 
