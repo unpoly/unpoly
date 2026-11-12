@@ -1,4 +1,5 @@
 import type * as e from '../element.js'
+import type { UpEvent } from '../event.js'
 
 /**
 The duration and easing of an animation, after applying the defaults from `up.motion.config`.
@@ -52,7 +53,7 @@ export interface SwapOptions {
 /**
 The `up:motion:finish` event.
 */
-export type MotionFinishEvent = Event & {
+export interface MotionFinishEvent extends UpEvent {
   target: Element
 }
 

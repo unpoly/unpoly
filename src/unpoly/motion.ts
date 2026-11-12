@@ -235,7 +235,7 @@ export const animate = mockable(async function animate(element: any, animationVa
   // (C) Leave out our callbacks, so a nested call from the motion function won't call them again.
   const timingOptions = effectiveTimingOptions({ duration, easing })
 
-  let trackable = async function() {
+  let trackable = async function(): Promise<void> {
     if (animationFn && canAnimateElement(element)) {
       try {
         await animationFn(element, timingOptions)
@@ -290,15 +290,17 @@ finish event.
   The timing function that controls the animation's acceleration.
   See [MDN documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-timing-function)
   for a list of pre-defined timing functions.
+@param {Object} [finishedFrame=lastFrame]
+  The CSS properties to set when the animation has finished.
 @return {Promise}
   A promise that fulfills when the animation ends.
 @internal
 */
-async function animateNow(element: HTMLElement, lastFrame: e.StyleProps, { duration, easing, finishedFrame }: t.TimingOptions & { finishedFrame?: e.StyleProps }): Promise<void> {
+async function animateNow(element: HTMLElement, lastFrame: e.StyleProps, { duration, easing }: t.TimingOptions, finishedFrame?: e.StyleProps): Promise<void> {
   // There is also Animation#commitStyles(), but that has two issues:
   // (A) Throws on detached elements
   // (B) Can't set an empty last frame property, e.g. when we're transforming towards { transform: '' }
-  let applyFinishedFrame = () => e.setInlineStyle(element, finishedFrame ?? lastFrame)
+  let applyFinishedFrame = (): void => e.setInlineStyle(element, finishedFrame ?? lastFrame)
 
   // A Web Animation with a duration of 0 (e.g. with disabled motion) would only finish
   // on the next animation frame. We don't want to depend on the rendering loop when nothing moves.
@@ -309,7 +311,7 @@ async function animateNow(element: HTMLElement, lastFrame: e.StyleProps, { durat
   let camelizedLastFrame = u.withRenamedKeys(lastFrame, u.kebabToCamelCase)
   let animation = element.animate([ camelizedLastFrame ], { duration, easing, fill: 'forwards' })
   let offFinish: UnbindFn
-  let conclude = () => {
+  let conclude = (): void => {
     animation.finish()
     applyFinishedFrame()
     animation.cancel()
@@ -418,7 +420,7 @@ You can define additional named transitions using [`up.transition()`](/api/up.tr
 export function morph(oldElement: e.ElementOrSelector, newElement: e.ElementOrSelector, transitionValue: t.TransitionValue, options?: t.SwapOptions): Promise<void>
 // The elements are resolved in place. The implementation can't take the resolved type: with
 // strictFunctionTypes, a function's overload must be assignable to it (TS2394).
-export async function morph(oldElement: any, newElement: any, transitionValue: t.TransitionValue, options?: t.SwapOptions) {
+export async function morph(oldElement: any, newElement: any, transitionValue: t.TransitionValue, options?: t.SwapOptions): Promise<void> {
   // (A) If passed a selector, up.fragment.get() will prefer a match on the current layer.
   // (B) This also unwraps jQuery collections.
   oldElement = getSmart(oldElement)
@@ -447,7 +449,7 @@ export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitio
 
   const cluster = [newElement, oldElement]
   const { nested } = motionController
-  let play
+  let play: (() => Promise<void> | void) | undefined
 
   // Finish previous transitions before we measure or replace elements.
   if (!nested) cluster.forEach((element) => motionController.finish(element))
@@ -596,7 +598,7 @@ function registerMoveAnimations(direction: string, boxToTransform: (box: DOMRect
     const box = untranslatedBox(element)
     const transform = boxToTransform(box)
     e.setInlineStyle(element, transform)
-    return animateNow(element, zeroTranslateCSS(), { ...options, finishedFrame: { transform: '' } })
+    return animateNow(element, zeroTranslateCSS(), options, { transform: '' })
   })
 }
 
