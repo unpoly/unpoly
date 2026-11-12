@@ -2,11 +2,11 @@ import * as u from '../util.js'
 import { Aborted, Offline } from '../error.js'
 import { EventEmitter, type EmitProps, type EmittedEvent } from '../event.js'
 import { Params } from '../form.js'
-import { getSmart, parseTargetSteps, splitTarget } from '../fragment.js'
+import { getSmart, parseTargetSteps, splitTarget, type RenderOptions } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
 import {
   abortRequests, cache, isSafeMethod, networkConfig, type RequestCondition, type RequestOptions,
-  type RequestState,
+  type RequestState, type RequestTesterOptions,
 } from '../network.js'
 import {
   acceptLayerFromXHR, contextFromXHR, csrfHeader, csrfParam, csrfToken, dismissLayerFromXHR,
@@ -53,8 +53,8 @@ export class UpRequest {
   declare timeout?: number | null
   declare background?: boolean
   declare cache?: boolean | 'auto'
-  declare expireCache: any
-  declare evictCache: any
+  declare expireCache?: RequestCondition
+  declare evictCache?: RequestCondition
   // While the request is new, these may be a layer name like 'root' or 'new'.
   declare layer: any
   declare mode?: string
@@ -69,8 +69,8 @@ export class UpRequest {
   declare wrapMethod: boolean | null
   declare contentType?: string
   declare payload: any
-  declare onLoading?: () => any
-  declare onSettle?: (responseOrError: UpResponse | Error) => any
+  declare onLoading?: () => void
+  declare onSettle?: (responseOrError: UpResponse | Error) => void
   declare fail?: u.ValueOrFunction<boolean>
   declare abortable: boolean | null
   declare lateDelay?: number | false
@@ -675,7 +675,7 @@ export class UpRequest {
     }
   }
 
-  runPreviews(renderOptions: u.PlainObject): void {
+  runPreviews(renderOptions: RenderOptions): void {
     if (!this.ended && !this.fromCache) {
       this._revertPreviews = runPreviews(this, renderOptions)
     }
@@ -1019,7 +1019,7 @@ export class UpRequest {
     this._fragments = u.uniq([...this.fragments, ...trackingRequest.fragments])
   }
 
-  static tester(condition: RequestCondition, { except }: { except?: UpRequest } = {}): (request: UpRequest) => boolean {
+  static tester(condition: RequestCondition, { except }: RequestTesterOptions = {}): (request: UpRequest) => boolean {
     let testFn: (request: UpRequest) => boolean
     if (u.isFunction(condition)) {
       testFn = condition

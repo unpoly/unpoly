@@ -1,5 +1,7 @@
 import * as u from '../util.js'
 import { isCritical } from '../error.js'
+import { type EventPlan } from '../event.js'
+import { type RenderOptions } from '../fragment.js'
 import { cache, networkConfig, type ResponseOptions } from '../network.js'
 import { CSPInfo } from '../script.js'
 import { type UpRequest } from './request.js'
@@ -31,13 +33,13 @@ export class UpResponse {
   declare xhr?: XMLHttpRequest
   declare target?: string
   declare title?: string
-  declare openLayer?: u.PlainObject
+  declare openLayer?: RenderOptions
   declare acceptLayer: any
   declare dismissLayer: any
-  declare eventPlans?: u.PlainObject[]
+  declare eventPlans?: EventPlan[]
   declare context?: u.PlainObject
-  declare expireCache: any
-  declare evictCache: any
+  declare expireCache?: string | false
+  declare evictCache?: string | false
   declare headers: Record<string, string>
   declare loadedAt: Date
   declare fail?: u.ValueOrFunction<boolean>

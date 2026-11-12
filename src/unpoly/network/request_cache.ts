@@ -1,7 +1,8 @@
 import * as u from '../util.js'
 import { splitTarget } from '../fragment.js'
 import {
-  networkConfig, type RequestCondition, type RequestOptions, type TrackOptions,
+  networkConfig, type CacheTrackOptions, type RequestCondition, type RequestOptions,
+  type RequestTesterOptions,
 } from '../network.js'
 import { UpRequest } from './request.js'
 import { UpResponse } from './response.js'
@@ -124,7 +125,7 @@ export class UpRequestCache {
   }
 
   // TODO: Move this to up.Request
-  async track(existingRequest: UpRequest, newRequest: UpRequest, options: TrackOptions = {}): Promise<void> {
+  async track(existingRequest: UpRequest, newRequest: UpRequest, options: CacheTrackOptions = {}): Promise<void> {
     newRequest.trackedRequest = existingRequest
     newRequest.state = 'tracking'
 
@@ -186,7 +187,7 @@ export class UpRequestCache {
     return existingRequest === newRequest || existingRequest === newRequest.trackedRequest
   }
 
-  evict(condition: RequestCondition = true, testerOptions?: { except?: UpRequest }): void {
+  evict(condition: RequestCondition = true, testerOptions?: RequestTesterOptions): void {
     this._eachMatch(condition, testerOptions,
       // It is generally not a great idea to manipulate the list we're iterating over,
       // but this._eachMatch() copies results before iterating.
@@ -194,7 +195,7 @@ export class UpRequestCache {
     )
   }
 
-  expire(condition: RequestCondition = true, testerOptions?: { except?: UpRequest }): void {
+  expire(condition: RequestCondition = true, testerOptions?: RequestTesterOptions): void {
     this._eachMatch(condition, testerOptions,
       // We need to force cached responses to be expired, regardless of their age.
       // It may seem strange that we're setting an { expired } property on the *request*
@@ -248,7 +249,7 @@ export class UpRequestCache {
     }
   }
 
-  _eachMatch(condition: RequestCondition = true, testerOptions: { except?: UpRequest } | undefined, fn: (request: UpRequest) => void): void {
+  _eachMatch(condition: RequestCondition = true, testerOptions: RequestTesterOptions | undefined, fn: (request: UpRequest) => void): void {
     let tester = UpRequest.tester(condition, testerOptions)
 
     // Copy results so evict() can delete from the list we're iterating over
