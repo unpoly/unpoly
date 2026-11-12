@@ -35,7 +35,8 @@ against code with type errors. The only type check is `bin/typecheck`. It takes 
 so run it (and `bin/lint`) before the specs, which take fifteen seconds for a single one (see
 [Testing](testing.md#check-types-and-lint-first)). It prints nothing when all is well.
 
-`bin/typecheck` runs TypeScript 7's checker twice:
+Besides the [public-API probe](documentation.md#public-api-must-exist), which checks that
+documented API exists in the types, `bin/typecheck` runs TypeScript 7's checker twice:
 
 - `tsconfig.json` checks all of `src/` with loose settings.
 - `tsconfig.core.json` checks Unpoly's core (`src/unpoly.ts` and `src/unpoly/`) with
