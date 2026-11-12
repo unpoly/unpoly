@@ -5,18 +5,20 @@ import { doFocus, tryFocus, type DoFocusOptions } from '../viewport.js'
 import { type Overlay } from './modes/overlay.js'
 
 // A focusin event on the document, whose target is the focused element.
-type FocusInEvent = FocusEvent & { target: HTMLElement }
+interface FocusInEvent extends FocusEvent {
+  target: HTMLElement
+}
 
 export class OverlayFocus {
   declare _layer: Overlay
   declare _focusElement: HTMLElement
   declare _trapFocus: boolean
-  declare _active: boolean | undefined
+  declare _active?: boolean
   declare _unsetAttrs: e.UndoFunction
   declare _untrapFocus: UnbindFn
   declare _focusTrapBefore: HTMLElement
   declare _focusTrapAfter: HTMLElement
-  declare _processingFocusEvent: boolean | undefined
+  declare _processingFocusEvent?: boolean
 
   constructor(layer: Overlay) {
     this._layer = layer

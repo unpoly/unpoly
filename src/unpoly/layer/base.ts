@@ -41,16 +41,16 @@ export class Layer {
   declare lastScrollTops: u.FIFOCache<string, any>
   declare lastFocusCapsules: u.FIFOCache<string, any>
   // Overlays set the elements that they create. The root layer has none of them.
-  declare contentElement: HTMLElement | undefined
-  declare boxElement: HTMLElement | undefined
-  declare overlayFocus: OverlayFocus | undefined
-  declare state: LayerState | undefined
-  declare _index: number | undefined
-  declare _unbindLocationChanged: UnbindFn | undefined
-  declare _savedTitle: string | undefined
-  declare _savedMetaTags: u.List<Element> | undefined
-  declare _savedLocation: string | undefined
-  declare _savedLang: string | undefined
+  declare contentElement?: HTMLElement
+  declare boxElement?: HTMLElement
+  declare overlayFocus?: OverlayFocus
+  declare state?: LayerState
+  declare _index?: number
+  declare _unbindLocationChanged?: UnbindFn
+  declare _savedTitle?: string
+  declare _savedMetaTags?: u.List<Element>
+  declare _savedLocation?: string
+  declare _savedLang?: string
 
   /*-
   This layer's outmost container element.
@@ -128,10 +128,10 @@ export class Layer {
   declare context: u.PlainObject
 
   // Only overlays have these. They are documented with up.Layer in overlay.ts.
-  declare origin: Element | undefined
-  declare size: string | undefined
-  declare position: string | undefined
-  declare align: string | undefined
+  declare origin?: Element
+  declare size?: string
+  declare position?: string
+  declare align?: string
 
   constructor(options: LayerOptions = {}) {
     // Like a default parameter, a default only replaces an undefined option.

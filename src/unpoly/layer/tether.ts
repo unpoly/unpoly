@@ -4,11 +4,8 @@ import { fail } from '../error.js'
 import { isAlive } from '../fragment.js'
 import { closest } from '../viewport.js'
 
-/**
-Where a popup sits relative to its anchor (`position`), and how it lines up with the anchor (`align`).
-@internal
-*/
-export interface TetherOptions {
+// Where a popup sits relative to its anchor (`position`), and how it lines up with the anchor (`align`).
+interface TetherOptions {
   anchor: HTMLElement
   align: string
   position: string

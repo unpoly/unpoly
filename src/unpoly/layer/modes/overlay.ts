@@ -13,11 +13,8 @@ import { readData } from '../../script.js'
 import { Layer } from '../base.js'
 import { OverlayFocus } from '../overlay_focus.js'
 
-/**
-A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
-@internal
-*/
-export type CloseFn = (value: any, options?: LayerCloseOptions) => void
+// A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
+type CloseFn = (value: any, options?: LayerCloseOptions) => void
 
 /**
 How to animate an overlay as it opens or closes.
@@ -74,8 +71,7 @@ export abstract class Overlay extends Layer {
   @stable
   */
 
-  declare element: HTMLElement
-  declare class: string | undefined
+  declare class?: string
   declare backdrop: boolean
   // The constructor turns the option (true, false or a string) into an array of methods.
   declare dismissible: string[] | boolean | string
@@ -88,28 +84,28 @@ export abstract class Overlay extends Layer {
   declare openEasing: string
   declare closeEasing: string
   declare trapFocus: boolean
-  declare onOpened: u.AnyFunction | undefined
-  declare onAccept: u.AnyFunction | undefined
-  declare onAccepted: u.AnyFunction | undefined
-  declare onDismiss: u.AnyFunction | undefined
-  declare onDismissed: u.AnyFunction | undefined
-  declare onAcceptedReload: string | undefined
-  declare onDismissedReload: string | undefined
-  declare acceptEvent: string | undefined
-  declare dismissEvent: string | undefined
+  declare onOpened?: u.AnyFunction
+  declare onAccept?: u.AnyFunction
+  declare onAccepted?: u.AnyFunction
+  declare onDismiss?: u.AnyFunction
+  declare onDismissed?: u.AnyFunction
+  declare onAcceptedReload?: string
+  declare onDismissedReload?: string
+  declare acceptEvent?: string
+  declare dismissEvent?: string
   // The constructor turns the option (a URL pattern string) into an UpURLPattern.
-  declare acceptLocation: u.UpURLPattern | undefined
-  declare dismissLocation: u.UpURLPattern | undefined
-  declare acceptFragment: string | undefined
-  declare dismissFragment: string | undefined
+  declare acceptLocation?: u.UpURLPattern
+  declare dismissLocation?: u.UpURLPattern
+  declare acceptFragment?: string
+  declare dismissFragment?: string
   declare nesting: number
-  declare backdropElement: HTMLElement | undefined
-  declare viewportElement: HTMLElement | undefined
-  declare dismissElement: HTMLElement | undefined
+  declare backdropElement?: HTMLElement
+  declare viewportElement?: HTMLElement
+  declare dismissElement?: HTMLElement
   declare overlayFocus: OverlayFocus
-  declare _unbindParentClicked: UnbindFn | undefined
-  declare _unbindEscapePressed: UnbindFn | undefined
-  declare wasEverVisible: boolean | undefined
+  declare _unbindParentClicked?: UnbindFn
+  declare _unbindEscapePressed?: UnbindFn
+  declare wasEverVisible?: boolean
 
   constructor(options: LayerOptions) {
     super(options)
@@ -443,7 +439,7 @@ export abstract class Overlay extends Layer {
     this._tryCloseForElements(this.dismissFragment, this.dismiss, newElements, response)
   }
 
-  _tryCloseForElements(selector: string | undefined, closeFn: CloseFn, newElements: Element[], response: UpResponse | undefined): void {
+  _tryCloseForElements(selector: string | undefined, closeFn: CloseFn, newElements: Element[], response?: UpResponse): void {
     // Without a selector we look for "undefined", which matches nothing.
     let match = u.findResult(newElements, (element) => e.subtreeFirst(element, selector!))
     if (match) {
@@ -454,15 +450,15 @@ export abstract class Overlay extends Layer {
     }
   }
 
-  tryAcceptForLocation(newLocation: string | false | undefined, response?: UpResponse): void {
+  tryAcceptForLocation(newLocation?: string | false, response?: UpResponse): void {
     this._tryCloseForLocation(newLocation, this.acceptLocation, this.accept, response)
   }
 
-  tryDismissForLocation(newLocation: string | false | undefined, response?: UpResponse): void {
+  tryDismissForLocation(newLocation?: string | false, response?: UpResponse): void {
     this._tryCloseForLocation(newLocation, this.dismissLocation, this.dismiss, response)
   }
 
-  _tryCloseForLocation(newLocation: string | false | undefined, urlPattern: u.UpURLPattern | undefined, closeFn: CloseFn, response: UpResponse | undefined): void {
+  _tryCloseForLocation(newLocation: string | false | undefined, urlPattern: u.UpURLPattern | undefined, closeFn: CloseFn, response?: UpResponse): void {
     let resolution = newLocation && urlPattern?.recognize(newLocation)
     if (resolution) {
       // resolution now contains named capture groups, e.g. when

@@ -3,11 +3,10 @@ import { fail } from '../../error.js'
 import { type LayerMode, type LayerOptions } from '../../layer.js'
 import { Layer } from '../base.js'
 
-/**
-The root layer's element. It remembers that the root layer's handlers are bound to it.
-@internal
-*/
-export type RootLayerElement = HTMLElement & { upHandlersApplied?: boolean }
+// The root layer's element. It remembers that the root layer's handlers are bound to it.
+interface RootLayerElement extends HTMLElement {
+  upHandlersApplied?: boolean
+}
 
 export class RootLayer extends Layer {
 
