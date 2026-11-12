@@ -333,11 +333,11 @@ class.
 
 A few imports can't go through the owning module:
 
-- `util.ts` and `element.ts` don't re-export `Config` and `OptionsParser`, because those import
-  modules that are evaluated later (`element.ts`, `fragment.ts`). Import them from their files,
-  right after `u` and `e`: `import { newConfig } from './util/config.js'`.
+- `util.ts` doesn't re-export `Config`, and `element.ts` doesn't re-export `OptionsParser`,
+  because they import modules that are evaluated later (`element.ts`, `fragment.ts`). Import
+  them from their files, right after `u` and `e`: `import { newConfig } from './util/config.js'`.
 - A module that uses a class at its top level, like `new Registry()` in `status.ts`, imports it
-  from its file when the owning module may still be evaluating at that point. Say so in a comment
+  from its file when the owning module may not be evaluated yet at that point. Say so in a comment
   above the import.
 - `internal.ts` imports util and element functions by name, since every `up.internal` key must be
   a named import (see above).
