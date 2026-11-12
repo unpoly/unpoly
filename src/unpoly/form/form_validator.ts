@@ -30,8 +30,8 @@ export class FormValidator {
   }
 
   start(): () => void {
-    let guard = (field: Element) => this._isValidatingField(field)
-    let callback = (field: Element) => this._onFieldAdded(field)
+    let guard = (field: Element): Element | null => this._isValidatingField(field)
+    let callback = (field: Element): () => void => this._onFieldAdded(field)
     return trackFields(this._form, { guard }, callback)
   }
 

@@ -99,14 +99,22 @@ export interface ValidateOptions extends WatchOptions {
 }
 
 /**
+The closest form group around a field. Its target is falsy when none can be derived.
+@internal
+*/
+export interface FormGroupSolution {
+  element: Element
+  target?: string | false
+  origin: Element
+}
+
+/**
 What to re-render to validate a field: an element, its target selector and the field that
 triggered the validation.
 @internal
 */
-export interface FoundValidationSolution {
-  element: Element
+export interface FoundValidationSolution extends FormGroupSolution {
   target: string
-  origin: Element
 }
 
 /**

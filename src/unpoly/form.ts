@@ -500,7 +500,7 @@ let options = up.form.submitOptions(form)
 export function submitOptions(form: e.ElementOrSelector, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderOptions
 // The form is resolved in place. The implementation can't take the resolved type: with
 // strictFunctionTypes, a function's overload must be assignable to it (TS2394).
-export function submitOptions(form: any, options?: RenderOptions, parserOptions?: e.OptionsParserOptions) {
+export function submitOptions(form: any, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderOptions {
   form = getSmart(form)
   form = getForm(form)
 
@@ -761,7 +761,7 @@ function disableControlTemp(control: t.Field, preview?: boolean): (() => void) |
 
 // Disable is true (the origin's form), an element, a selector or an array of these.
 function getDisableContainers(disable: any, origin?: Element): Element[] {
-  let originScope = () => getRegion(origin)
+  let originScope = (): Element => getRegion(origin)
 
   if (disable === true) {
     return [originScope()]
@@ -1122,7 +1122,7 @@ export function watch(...args: any[]): () => void {
   return watcher.start()
 }
 
-function watchCallbackFromElement(element: Element) {
+function watchCallbackFromElement(element: Element): t.WatchCallback | undefined {
   return callbackAttr(element, 'up-watch', { argNames: ['value', 'name', 'options'] })
 }
 
@@ -1183,7 +1183,7 @@ up.autosubmit(form)
 @stable
 */
 export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): () => void {
-  const onChange = (_diff: u.PlainObject, renderOptions: RenderOptions) => submit(target, renderOptions)
+  const onChange = (_diff: u.PlainObject, renderOptions: RenderOptions): RenderJob => submit(target, renderOptions)
   return watch(target, { logPrefix: 'up.autosubmit()', ...options, batch: true }, onChange)
 }
 
@@ -1287,7 +1287,7 @@ form groups after changing a field:
 
 // Returns the closest group around the given field, with a target selector whenever we can derive one.
 // With { targetable: true } we skip groups for which we cannot derive a target.
-export function findGroupSolution(field: Element, { targetable }: { targetable?: boolean }) {
+export function findGroupSolution(field: Element, { targetable }: { targetable?: boolean }): t.FormGroupSolution | undefined {
   return u.findResult(getGroupSelectors(), function(groupSelector) {
     let group = field.closest(groupSelector)
     if (group) {
@@ -1707,7 +1707,7 @@ interface TrackFieldsOptions { guard?: (field: Element) => unknown }
 export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): () => void {
   let [root, { guard }, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
-  let selectFn = function() {
+  let selectFn = function(): Element[] {
     // A detached root has no fields left to track.
     if (!root.isConnected) return []
 

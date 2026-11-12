@@ -544,7 +544,7 @@ export class Params {
   static fromForm(form: e.ElementOrSelector, options?: { submitButton?: e.ElementOrSelector | false }): Params
   // The form is resolved in place, so the implementation takes the resolved type. The cast is
   // needed since getOne() returns an HTMLElement.
-  static fromForm(form: HTMLFormElement, options: { submitButton?: e.ElementOrSelector | false } = {}) {
+  static fromForm(form: HTMLFormElement, options: { submitButton?: e.ElementOrSelector | false } = {}): Params {
     form = e.getOne(form) as HTMLFormElement
     let restore = prepareParamsReadTemp(form)
 
