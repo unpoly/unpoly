@@ -7,27 +7,26 @@ import {
 } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
 import { printToStandard, printToWarn } from '../log.js'
-import { pollOptions, radioConfig } from '../radio.js'
+import { pollOptions, radioConfig, type PollOptions } from '../radio.js'
 import { registerDestructor } from '../script.js'
 
-/**
-An element with an `[up-poll]` attribute. It remembers its `up.FragmentPolling`.
-@internal
-*/
-export type PollingElement = Element & { upPolling?: FragmentPolling }
+// An element with an `[up-poll]` attribute. It remembers its FragmentPolling.
+interface PollingElement extends Element {
+  upPolling?: FragmentPolling
+}
 
 export class FragmentPolling {
 
-  declare _options: u.PlainObject
+  declare _options: PollOptions
   declare _fragment: Element
   declare _state: 'stopped' | 'started'
   declare _forceIntent: 'stop' | 'start' | null
   declare _reloadJID: number
   declare _loading: boolean
-  declare _eventsBound: boolean | undefined
-  declare _reloadTimer: ReturnType<typeof setTimeout> | null | undefined
+  declare _eventsBound?: boolean
+  declare _reloadTimer?: number | null
   declare _lastAttempt: Date
-  declare layer: Layer | undefined
+  declare layer?: Layer
 
   static forFragment(fragment: PollingElement): FragmentPolling {
     return fragment.upPolling ||= new this(fragment)
@@ -71,7 +70,7 @@ export class FragmentPolling {
     this._stop()
   }
 
-  _start(options?: u.PlainObject): void {
+  _start(options?: PollOptions): void {
     Object.assign(this._options, options)
 
     if (this._state === 'stopped') {
@@ -93,7 +92,7 @@ export class FragmentPolling {
     }
   }
 
-  forceStart(options?: u.PlainObject): void {
+  forceStart(options?: PollOptions): void {
     Object.assign(this._options, options)
     this._forceIntent = 'start'
     this._start()
@@ -224,7 +223,7 @@ export class FragmentPolling {
   _onFragmentSwapped(newFragment: Element): void {
     if (this._forceIntent === 'start' && matches(this._fragment, newFragment)) {
       // Force start the new up.Polling instance for the new fragment.
-      (this.constructor as typeof FragmentPolling).forFragment(newFragment).forceStart(this._options)
+      FragmentPolling.forFragment(newFragment).forceStart(this._options)
     }
   }
 

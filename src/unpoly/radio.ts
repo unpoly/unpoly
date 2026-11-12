@@ -353,7 +353,7 @@ The given element does not need an `[up-poll]` attribute.
   @mix up.render/loading-state
 @stable
 */
-export function startPolling(fragment: Element, options: u.PlainObject = {}): void {
+export function startPolling(fragment: Element, options: t.PollOptions = {}): void {
   FragmentPolling.forFragment(fragment).forceStart(options)
 }
 
@@ -404,7 +404,7 @@ let options = up.radio.pollOptions(fragment)
   The [options](/api/up.radio.startPolling#parameters) that Unpoly would use to poll the given fragment.
 @experimental
 */
-export function pollOptions(fragment: e.ElementOrSelector, options?: u.PlainObject): u.PlainObject {
+export function pollOptions(fragment: e.ElementOrSelector, options?: t.PollOptions): t.PollOptions {
   fragment = getSmart(fragment)!
   options = u.newOptions(options)
   const defaults = { background: true }
