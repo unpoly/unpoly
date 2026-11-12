@@ -1,5 +1,5 @@
 import type * as u from '../util.js'
-import { type EventListenerAttributes } from '../event.js'
+import { type EventListenerAttributes, type UpEvent } from '../event.js'
 import { type RenderOptions } from '../fragment.js'
 import { type AnimationValue } from '../motion.js'
 import { type UpResponse } from '../network.js'
@@ -169,36 +169,40 @@ The arguments of `up.layer.get()` and `up.layer.getAll()`: a layer value, lookup
 export type LayerLookupArgs = [value?: LayerOption | LayerLookupOptions, options?: LayerLookupOptions]
 
 /**
-The `up:layer:open` event.
+The `up:layer:open` event. It is emitted on the document, since the overlay has no element yet.
 */
-export type LayerOpenEvent = Event & {
+export interface LayerOpenEvent extends UpEvent {
   layerOptions: RenderOptions
-  origin: Element
+  // Missing when the overlay is opened from JavaScript.
+  origin?: Element
 }
 
 /**
-The `up:layer:opened` event.
+The `up:layer:opened` event, emitted on the new overlay's element.
 */
-export type LayerOpenedEvent = Event & {
-  origin: Element
+export interface LayerOpenedEvent extends UpEvent {
+  target: Element
+  // Missing when the overlay was opened from JavaScript.
+  origin?: Element
   layer: Layer
 }
 
 /**
-The `up:layer:location:changed` event.
+The `up:layer:location:changed` event, emitted on the layer's element.
 */
-export type LayerLocationChangedEvent = Event & {
+export interface LayerLocationChangedEvent extends UpEvent {
+  target: Element
   location: string
-  previousLocation: string | undefined
+  previousLocation?: string
   layer: Layer
 }
 
 /**
 The `up:layer:accept`, `up:layer:accepted`, `up:layer:dismiss` and `up:layer:dismissed` events.
 */
-export type LayerCloseEvent = Event & {
+export interface LayerCloseEvent extends UpEvent {
   layer: Layer
   value?: any
-  origin: Element | undefined
-  response: UpResponse | undefined
+  origin?: Element
+  response?: UpResponse
 }
