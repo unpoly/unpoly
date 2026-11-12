@@ -88,8 +88,11 @@ declarations are available:
 A block that declares none of these is an error, so every doc entry has exactly one.
 
 Comments in `.ts` files (`/* … */`, `// …`) are internal comments for other maintainers.
-They are never published. The one exception is the old format of API references, a
-comment opening with `/*-`: the site still publishes it, so don't write one.
+They are never published. Neither are the `/** */` comments on types: editors show them on
+hover, and `@internal` in one marks a type that isn't public API (see
+[Code style](code-style.md#writing-types)). A public symbol's reference always goes in its doc
+entry. The one exception is the old format of API references, a comment opening with `/*-`:
+the site still publishes it, so don't write one.
 
 Our syntax is a *superset* of JSDoc — it adds directives
 JSDoc has no concept of (`@selector`, `@event`, `@section`, `@mix`) and writes `@param`
@@ -121,12 +124,12 @@ Replaces elements on the current page with matching elements from a server respo
 
 - There is no separator before the first entry or after the last.
 - The H1 is for you and for Markdown previews: the site titles a page from its directives.
-  But the build checks the H1 against that title, so it must match it: `up.render()` for a
-  function, `up.Request#abort()` for an instance method, `new up.Request()` for a
-  constructor, and the plain name for everything else (`[up-target]`, `up:fragment:loaded`,
-  `up.fragment.config`, `X-Up-Target`).
+  But `bin/lint` and the site build check the H1 against that title, so it must match it:
+  `up.render()` for a function, `up.Request#abort()` for an instance method,
+  `new up.Request()` for a constructor, and the plain name for everything else
+  (`[up-target]`, `up:fragment:loaded`, `up.fragment.config`, `X-Up-Target`).
 - Inside an entry, headings start at `##`. A second H1 in one entry most likely means a
-  missing separator, and fails the build.
+  missing separator, and `bin/lint` reports it.
 - A shorter rule (`---`), a line of dashes under a line of text, and anything in a code
   block belong to the entry.
 - A doc file takes no front matter.
@@ -180,7 +183,13 @@ don't need to match the surrounding page.
 
 Put the entry in the doc file of the source file that holds the code it documents — the
 function, the compiler, the property. Keep the entries in the order of that code, so the
-doc file reads alongside its source.
+doc file reads alongside its source. If the source file has no doc file yet, create one beside
+it (`foo.md` for `foo.ts`), and open it with the `@namespace` or `@class` its entries
+belong to (see [Namespaces and classes](#namespaces-and-classes)).
+
+The code name of a function may differ from its public name. The module's `api` object maps
+one to the other: `get: getSmart` publishes `getSmart()` as `up.fragment.get()`. The H1 and
+the declaration always use the public name, so search the doc file for that.
 
 Some code defines several public APIs at once: a function may emit events, a compiler
 implements an attribute. Give what the code *is* its entry first, and each API it merely
@@ -989,7 +998,8 @@ Two things to know:
 
 ## Previewing your changes
 
-Previewing is **optional**. Documentation has no automated tests, and a wrong directive
+Previewing is **optional**. Apart from `bin/lint`, which checks a doc file's H1s and
+separators, documentation has no automated tests, and a wrong directive
 is a code-review fix rather than a blocker — so don't stall on it. Write the prose, make
 your best attempt at the syntax, and flag anything you're unsure of in the pull request.
 
