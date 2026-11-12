@@ -139,6 +139,11 @@ and after.
   what guarantees it in a comment unless the code nearby shows it. Don't add a runtime check
   for a case that can't happen. A value that can really be missing, and then breaks something,
   is a bug: fix it in its own change, with a spec.
+
+  Assert a guaranteed value once, where the guarantee comes from: assign the asserted value to
+  a variable, or give the function that produces it a return type without `undefined`. Don't
+  repeat `!` at each use. If code right after a `!` checks whether the value is missing, the
+  `!` is wrong; restructure instead.
 - When a function resolves its argument by reassigning it (`element = getSmart(element)`),
   TypeScript narrows the parameter to a member of its declared type: an `ElementOrSelector`
   becomes an `Element`, never the `HTMLElement` that `getSmart()` returns. When that's enough,
