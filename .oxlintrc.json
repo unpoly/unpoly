@@ -183,15 +183,7 @@
         "src/unpoly-migrate/fragment.ts",
         "src/unpoly-migrate/migrate.ts",
         "src/unpoly-migrate/network.ts",
-        "src/unpoly-migrate/protocol.ts",
-        "src/unpoly/fragment/render/change/change.ts",
-        "src/unpoly/fragment/render/change/change_from_content.ts",
-        "src/unpoly/fragment/render/change/change_from_url.ts",
-        "src/unpoly/fragment/render/change/open_layer.ts",
-        "src/unpoly/fragment/render/change/update_layer.ts",
-        "src/unpoly/fragment/render/render_job.ts",
-        "src/unpoly/fragment/render/render_options.ts",
-        "src/unpoly/fragment/render/response_doc.ts"
+        "src/unpoly-migrate/protocol.ts"
       ],
       "rules": {
         "typescript/explicit-function-return-type": ["error", {
