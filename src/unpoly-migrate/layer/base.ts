@@ -7,6 +7,7 @@ declare module '../../unpoly/layer/base.js' {
   interface Layer {
     isOpen(): boolean
     isClosed(): boolean
+    readonly historyVisible: Layer['history']
   }
 }
 
@@ -45,3 +46,8 @@ up.Layer.prototype.isClosed = function() {
   up.migrate.deprecated('up.Layer#isClosed()', '!up.Layer#isAlive()')
   return !this.isAlive()
 }
+
+Object.defineProperty(up.Layer.prototype, 'historyVisible', { get: function() {
+  up.migrate.deprecated('up.Layer#historyVisible', 'up.Layer#history')
+  return this.history
+} })
