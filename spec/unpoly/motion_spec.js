@@ -129,17 +129,16 @@ describe('up.motion', function() {
 
             let promise = up.animate(element, 'move-to-top', { duration: 400, easing: 'linear' })
 
-            await wait(200)
+            const animation = await jasmine.seekAnimation(element, 200)
 
             expect(element.getBoundingClientRect().left).toBe(100)
-            expect(element.getBoundingClientRect().top).toBeAround(0, 20)
+            expect(element.getBoundingClientRect().top).toBeAround(0, 1)
 
-            await wait(250)
+            animation.play()
+            await promise
 
             expect(element.getBoundingClientRect().left).toBe(100)
-            expect(element.getBoundingClientRect().top).toBeAround(-100, 20)
-
-            await expectAsync(promise).already.toBeResolved()
+            expect(element.getBoundingClientRect().top).toBeAround(-100, 1)
           })
 
           it('immediately moves the element out of the screen when motion is disabled', async function() {
@@ -184,19 +183,20 @@ describe('up.motion', function() {
             expect(element.getBoundingClientRect().left).toBe(100)
             expect(element.getBoundingClientRect().top).toBe(100)
 
-            up.animate(element, 'move-from-top', { duration: 400, easing: 'linear' })
+            const promise = up.animate(element, 'move-from-top', { duration: 400, easing: 'linear' })
 
-            await wait()
-
-            expect(element.getBoundingClientRect().left).toBe(100)
-            expect(element.getBoundingClientRect().top).toBeAround(-100, 20)
-
-            await wait(200)
+            const animation = await jasmine.seekAnimation(element, 0)
 
             expect(element.getBoundingClientRect().left).toBe(100)
-            expect(element.getBoundingClientRect().top).toBeAround(0, 20)
+            expect(element.getBoundingClientRect().top).toBeAround(-100, 1)
 
-            await wait(250)
+            animation.currentTime = 200
+
+            expect(element.getBoundingClientRect().left).toBe(100)
+            expect(element.getBoundingClientRect().top).toBeAround(0, 1)
+
+            animation.play()
+            await promise
 
             expect(element.getBoundingClientRect().left).toBe(100)
             expect(element.getBoundingClientRect().top).toBe(100)
@@ -220,34 +220,31 @@ describe('up.motion', function() {
           const warnSpy = up.migrate.warn.mock()
           const element = fixture('.element', { text: 'content', style: { 'font-size': '0px' } })
 
-          up.animate(element, { fontSize: '100px' }, { duration: 400, easing: 'linear' })
-          await wait(0)
+          const promise = up.animate(element, { fontSize: '100px' }, { duration: 400, easing: 'linear' })
 
-          expect(up.element.styleNumber(element, 'font-size')).toBeAround(0, 15)
-          await wait(200)
+          const animation = await jasmine.seekAnimation(element, 0)
+          expect(up.element.styleNumber(element, 'font-size')).toBeAround(0, 1)
 
-          expect(up.element.styleNumber(element, 'font-size')).toBeAround(50, 30)
-          await wait(420)
+          animation.currentTime = 200
+          expect(up.element.styleNumber(element, 'font-size')).toBeAround(50, 1)
 
-          expect(up.element.styleNumber(element, 'font-size')).toBeAround(100, 15)
+          animation.play()
+          await promise
+
+          expect(up.element.styleNumber(element, 'font-size')).toBeAround(100, 1)
         })
       }
 
-      it('returns a promise that is fulfilled when the animation has completed', function(done) {
-        const $element = $fixture('.element').text('content')
-        const resolveSpy = jasmine.createSpy('resolve')
+      it('returns a promise that is fulfilled when the animation has completed', async function() {
+        const element = fixture('.element', { text: 'content' })
 
-        const promise = up.animate($element, 'fade-in', { duration: 100, easing: 'linear' })
-        promise.then(resolveSpy)
+        const promise = up.animate(element, 'fade-in', { duration: 100, easing: 'linear' })
 
-        u.timer(50, function() {
-          let timingTolerance
-          expect(resolveSpy).not.toHaveBeenCalled()
-          u.timer(50 + (timingTolerance = 120), function() {
-            expect(resolveSpy).toHaveBeenCalled()
-            done()
-          })
-        })
+        const animation = await jasmine.seekAnimation(element, 50)
+        await expectAsync(promise).toBePending()
+
+        animation.play()
+        await expectAsync(promise).toBeResolved()
       })
 
       it('cancels an existing animation on the element by instantly jumping to the last frame (async)', async function() {
@@ -258,11 +255,12 @@ describe('up.motion', function() {
 
         const promise = up.animate($element, 'fade-in', { duration: 200, easing: 'linear' })
 
-        await wait()
+        const animation = await jasmine.seekAnimation($element[0], 0)
 
         expect($element.css('font-size')).toEqual('40px')
-        expect($element).toHaveOwnOpacity(0.0, 0.15)
+        expect($element).toHaveOwnOpacity(0.0, 0.05)
 
+        animation.play()
         await promise
 
         expect($element).toHaveOwnOpacity(1.0)
@@ -312,17 +310,29 @@ describe('up.motion', function() {
 
         up.animate($element, 'fade-in', { duration: 1000, easing: 'linear' })
 
-        await wait(500)
+        // The two CSS transitions and the fade-in's Web Animation.
+        // jasmine.seekAnimation() only seeks one animation, so we seek all three by hand.
+        const animations = $element[0].getAnimations()
+        expect(animations.length).toBe(3)
+        await Promise.all(animations.map((animation) => animation.ready))
+        for (let animation of animations) {
+          animation.pause()
+          animation.currentTime = 500
+        }
 
-        expect(parseFloat($element.css('fontSize'))).toBeAround(0.5 * (100 - 10), 30)
-        expect(parseFloat($element.css('height'))).toBeAround(0.5 * (200 - 20), 30)
-        expect(parseFloat($element.css('opacity'))).toBeAround(0.5, 0.25)
+        expect(parseFloat($element.css('fontSize'))).toBeAround(10 + 0.5 * (100 - 10), 1)
+        expect(parseFloat($element.css('height'))).toBeAround(20 + 0.5 * (200 - 20), 1)
+        expect(parseFloat($element.css('opacity'))).toBeAround(0.5, 0.05)
 
-        await wait(500 + 50)
+        // Take the promises before resuming. up.animate() cancels its animation when it ends,
+        // which replaces that animation's { finished } promise with one that never settles.
+        const finished = animations.map((animation) => animation.finished)
+        for (let animation of animations) animation.play()
+        await Promise.all(finished)
 
-        expect(parseFloat($element.css('opacity'))).toBeAround(1.0, 0.1)
-        expect(parseFloat($element.css('fontSize'))).toBeAround(100, 20)
-        expect(parseFloat($element.css('height'))).toBeAround(200, 20)
+        expect(parseFloat($element.css('opacity'))).toBeAround(1.0, 0.01)
+        expect(parseFloat($element.css('fontSize'))).toBeAround(100, 1)
+        expect(parseFloat($element.css('height'))).toBeAround(200, 1)
       })
 
       describe('{ onFinished } option', function() {
@@ -452,19 +462,18 @@ describe('up.motion', function() {
             return up.animate($element, { opacity: 1 }, options)
           }
 
-          up.animate($element, animation, { duration: 2000, easing: 'linear' })
+          const promise = up.animate($element, animation, { duration: 200, easing: 'linear' })
 
-          await wait(5)
+          const webAnimation = await jasmine.seekAnimation($element[0], 0)
+          expect($element).toHaveOwnOpacity(0.0, 0.05)
 
-          expect($element).toHaveOwnOpacity(0.0, 0.25)
+          webAnimation.currentTime = 100
+          expect($element).toHaveOwnOpacity(0.5, 0.05)
 
-          await wait(1000)
+          webAnimation.play()
+          await promise
 
-          expect($element).toHaveOwnOpacity(0.5, 0.25)
-
-          await wait(1000)
-
-          expect($element).toHaveOwnOpacity(1.0, 0.25)
+          expect($element).toHaveOwnOpacity(1.0)
         })
 
         it("finishes animations only once", function(done) {
@@ -505,20 +514,21 @@ describe('up.motion', function() {
 
             }
 
-            const animatePromise = up.animate(container, animation, { duration: 1000, easing: 'linear' })
-            await wait(500)
+            const animatePromise = up.animate(container, animation, { duration: 200, easing: 'linear' })
+            const child1Animation = await jasmine.seekAnimation(child1, 100)
+            const child2Animation = await jasmine.seekAnimation(child2, 100)
 
-            expect(child1).toHaveOwnOpacity(0.5, 0.2)
-            expect(child2).toHaveOwnOpacity(0.5, 0.2)
+            expect(child1).toHaveOwnOpacity(0.5, 0.05)
+            expect(child2).toHaveOwnOpacity(0.5, 0.05)
 
             await expectAsync(animatePromise).toBePending()
 
-            await wait(600)
+            child1Animation.play()
+            child2Animation.play()
+            await animatePromise
 
-            expect(child1).toHaveOwnOpacity(1.0, 0.2)
-            expect(child1).toHaveOwnOpacity(1.0, 0.2)
-
-            await expectAsync(animatePromise).already.toBeResolved()
+            expect(child1).toHaveOwnOpacity(1.0)
+            expect(child2).toHaveOwnOpacity(1.0)
           })
 
           it('finishes child animations when the container animation is finished', async function() {
@@ -540,19 +550,20 @@ describe('up.motion', function() {
 
             }
 
-            const animatePromise = up.animate(container, animation, { duration: 1000, easing: 'linear' })
-            await wait(250)
+            const animatePromise = up.animate(container, animation, { duration: 200, easing: 'linear' })
+            await jasmine.seekAnimation(child1, 50)
+            await jasmine.seekAnimation(child2, 50)
 
-            expect(child1).toHaveOwnOpacity(0.25, 0.2)
-            expect(child2).toHaveOwnOpacity(0.25, 0.2)
+            expect(child1).toHaveOwnOpacity(0.25, 0.05)
+            expect(child2).toHaveOwnOpacity(0.25, 0.05)
 
             await expectAsync(animatePromise).toBePending()
 
             up.motion.finish(container)
             await wait(1)
 
-            expect(child1).toHaveOwnOpacity(1.0, 0.2)
-            expect(child1).toHaveOwnOpacity(1.0, 0.2)
+            expect(child1).toHaveOwnOpacity(1.0)
+            expect(child2).toHaveOwnOpacity(1.0)
 
             await expectAsync(animatePromise).already.toBeResolved()
           })
