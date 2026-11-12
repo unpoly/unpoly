@@ -29,10 +29,12 @@ src/                      # Entry points for Unpoly's main and optional bundles
   unpoly-migrate.ts       # ... Entry point for optional bundle that polyfills deprecated features
   ...                     # ... Other entry points for optional bundles
 
-  unpoly/                 # Source code (TS, CSS) for Unpoly's namespaces
+  unpoly/                 # Source code (TS, CSS) and API docs for Unpoly's namespaces
     form.ts               # ... Code for up.form namespace
+    form.md               # ... API docs for up.form namespace (see Documentation)
     form/                 # ... Classes owned by up.form
       params.ts           # ...... Code for up.Params class
+      params.md           # ...... API docs for up.Params class
       ...
     link.ts               # ... Code for up.link namespace
     link.sass             # ... CSS for up.link namespace
@@ -45,6 +47,7 @@ src/                      # Entry points for Unpoly's main and optional bundles
     framework/            # ... Classes owned by up.framework (Registry)
     util/                 # ... Generic helper classes (up.Config, up.Rect, ...)
     internal.ts           # ... Internals the specs and unpoly-migrate need, published as up.internal
+    pages/                # ... Guide pages and shared partials (see Documentation)
     ...                   # ... Other namespaces and their classes
 
 spec/

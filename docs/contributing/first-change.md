@@ -49,11 +49,12 @@ git checkout -b up-trim
 ## Where the code goes
 
 Every feature belongs to exactly one [namespace](code-organization.md#responsibilities).
-Forms are the topic of `up.form`, so we work in two files:
+Forms are the topic of `up.form`, so we work in three files:
 
 - `src/unpoly/form.ts` for the implementation
 - `spec/unpoly/form_spec.js` for the specs — except the `[up-submit]` specs, which grew
   large enough to live in a sibling file, `spec/unpoly/form_submit_attr_spec.js`
+- `src/unpoly/form.md` for the documentation
 
 Every namespace file `foo.ts` has a spec `foo_spec.js`, and a feature with a lot of specs may have
 one of its own. `bin/find-spec "[up-submit]"` tells you which file to open; see
@@ -240,23 +241,28 @@ git commit -m "[form] Support [up-trim] modifier on submitting forms"
 
 ## 3. Documentation
 
-All public API must be documented. Doc comments live beside the code they describe, in
-a [superset of JSDoc](documentation.md) with directives like `@function`, `@selector`
-and `@param`. We added three surfaces, so we document three things.
+All public API must be documented. The documentation for `form.ts` lives beside it in
+`form.md`, a [doc file](documentation.md#doc-files) with one entry per feature. Entries are
+written in a [superset of JSDoc](documentation.md) with directives like `@function`,
+`@selector` and `@param`. We added three surfaces, so we document three things.
 
-`up.form.trim()` is a new function, so it needs a doc comment of its own. New API starts out `@experimental` and will be promoted to `@stable` when we're still happy with it some releases later.
+`up.form.trim()` is a new function, so it needs a doc entry of its own. Each entry starts with
+an H1 naming the feature, and a line of five dashes separates it from its neighbors. We put
+the new entry where `trim()` sits in `form.ts`. New API starts out `@experimental` and will
+be promoted to `@stable` when we're still happy with it some releases later.
 
 ```diff
-+  /*-
-+  Removes leading and trailing whitespace from all text inputs in the given form.
++# up.form.trim()
 +
-+  @function up.form.trim
-+  @param {Element} form
-+  @experimental
-+  */
-   function trim(form) {
-     ...
-   }
++Removes leading and trailing whitespace from all text inputs in the given form.
++
++@function up.form.trim
++@param {Element} form
++@experimental
++
++-----
++
+ # up.form.submitButtons()
 ```
 
 `up.submit()` only gains a new option. Its params are grouped into `@section`s, and
@@ -264,22 +270,22 @@ some sections pull shared text from a partial with `@mix` — so add the new `@p
 into the section it belongs to, at the section's indentation:
 
 ```diff
-   /*-
-   ...
-   @function up.submit
-   ...
-   @section Request
-     @mix up.submit/request
+ # up.submit()
+
+ ...
+ @function up.submit
+ ...
+ @section Request
+   @mix up.submit/request
 +
-+    @param {boolean} [options.trim=false]
-+      Whether to remove leading and trailing whitespace from all text inputs
-+      before submitting.
-   ...
-   @stable
-   */
++  @param {boolean} [options.trim=false]
++    Whether to remove leading and trailing whitespace from all text inputs
++    before submitting.
+ ...
+ @stable
 ```
 
-The comment says `@function up.submit`, not `up.form.submit`, because the function is
+The entry says `@function up.submit`, not `up.form.submit`, because the function is
 [aliased](code-organization.md#namespace-pattern) onto the `up` global — which is
 also why its doc page is `/api/up.submit`.
 
@@ -289,23 +295,20 @@ Same for the `[up-submit]` selector, which gains a new attribute. Note how prose
 quoted:
 
 ```diff
-   /*-
-   ...
-   @selector [up-submit]
-   ...
-   @section Request
-     @param action
-       ...
-+
-+    @param [up-trim='false']
-+      Whether to remove leading and trailing whitespace from all text inputs
-+      before submitting.
-   ...
-   @stable
-   */
-   up.on('submit', config.selectorFn('submitSelectors'), function(event, form) {
+ # [up-submit]
+
+ ...
+ @selector [up-submit]
+ ...
+ @section Request
+   @param action
      ...
-   })
++
++  @param [up-trim='false']
++    Whether to remove leading and trailing whitespace from all text inputs
++    before submitting.
+ ...
+ @stable
 ```
 
 A small modifier like this needs no [guide page](documentation.md). Those are for

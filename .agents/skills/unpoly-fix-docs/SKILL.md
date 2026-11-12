@@ -1,6 +1,6 @@
 ---
 name: unpoly-fix-docs
-description: Copy-edit the Unpoly documentation embedded in this repository — the `/*-` doc comments in `src/unpoly/**/*.{js,ts}` and the guide pages under `src/unpoly/pages/` — fixing typos, grammar, awkward English and obvious factual errors without touching structure, JSDoc directives, links or code. Use when asked to proofread, revise or fix the wording of Unpoly's API reference or guides. This is not a general-purpose documentation writing skill.
+description: Copy-edit the Unpoly documentation embedded in this repository — the API docs in the doc files beside the sources (`src/**/*.md` outside `pages/`) and the guide pages under `src/unpoly/pages/` — fixing typos, grammar, awkward English and obvious factual errors without touching structure, JSDoc directives, links or code. Use when asked to proofread, revise or fix the wording of Unpoly's API reference or guides. This is not a general-purpose documentation writing skill.
 ---
 
 # Revising Unpoly's embedded documentation
@@ -16,9 +16,11 @@ the reference for how this documentation is written. Read it before your first e
 it is what tells you whether something you want to "fix" is actually correct. It
 covers, among other things:
 
-- **Where documentation lives** — that `/*-` opens a doc comment while `/*` and `//` are
-  internal comments you must leave alone, and that a whole `.md` file is one block.
-- **Anatomy of a doc comment** and **Documenting parameters** — the directive set, which
+- **Where documentation lives** — that API docs are entries in doc files beside the
+  sources (`fragment.md` for `fragment.ts`), each headed by an H1 and separated by a line
+  of five dashes, while a guide page is one block in its entirety. Comments in `.ts`
+  files are internal; leave them alone.
+- **Anatomy of a doc entry** and **Documenting parameters** — the directive set, which
   is a superset of JSDoc and larger than you will guess.
 - **Writing prose** — the house conventions for referring to features (`up.render()` with
   parens, `[up-target]` in brackets, `.up-current` with a dot).
@@ -57,5 +59,7 @@ than one useful review can cover.
 - **Markdown that looks broken.** Don't "repair" invalid-looking syntax — the renderer
   accepts constructs a standard parser doesn't, and the guide's syntax sections explain
   several of them. Leave trailing backslashes and don't rewrap paragraphs.
-- **Code.** Don't touch source code outside doc comments. Inside a code block, change
+- **H1s and separators** in doc files. The H1 must match the entry's directives, and
+  the `-----` lines split the file into entries.
+- **Code.** Don't touch source code. Inside a code block, change
   something only for an obvious syntax error — not to modernize or restyle it.

@@ -42,7 +42,19 @@ before hand-rolling one. Two examples follow.
 The old function announces itself, then delegates:
 
 ```js
-/*-
+up.replace = function(target, url, options) {
+  up.migrate.deprecated('up.replace(target, url)', 'up.navigate(target, { url })')
+  return up.navigate({ ...options, target, url })
+}
+```
+
+Its [doc entry](documentation.md#doc-files) moves along to the doc file beside the polyfill
+(`src/unpoly-migrate/fragment.md`), so the old name keeps its page in the documentation.
+`@deprecated` marks it as such and names the replacement:
+
+```md
+# up.replace()
+
 Replaces elements on the current page with corresponding elements
 from a new page fetched from the server.
 
@@ -50,15 +62,7 @@ from a new page fetched from the server.
 ...
 @deprecated
   Use `up.render()` or `up.navigate()` instead.
-*/
-up.replace = function(target, url, options) {
-  up.migrate.deprecated('up.replace(target, url)', 'up.navigate(target, { url })')
-  return up.navigate({ ...options, target, url })
-}
 ```
-
-The doc comment moves here with the code, so the old name keeps its page in the
-documentation. `@deprecated` marks it as such and names the replacement.
 
 
 ### Renaming an attribute
@@ -66,15 +70,20 @@ documentation. `@deprecated` marks it as such and names the replacement.
 Most renames need no implementation at all:
 
 ```js
-/*-
+up.migrate.renamedAttribute('up-observe', 'up-watch')
+```
+
+The old attribute still gets a doc entry, in `src/unpoly-migrate/form.md`:
+
+```md
+# [up-observe]
+
 ...
 @selector [up-observe]
 @param up-observe
   The code to run when any field's value changes.
 @deprecated
   Use `[up-watch]` instead.
-*/
-up.migrate.renamedAttribute('up-observe', 'up-watch')
 ```
 
 

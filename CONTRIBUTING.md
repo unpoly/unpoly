@@ -77,8 +77,9 @@ Many old specs use deprecated patterns, so don't copy a neighbour.
 ### [📖 Documentation](docs/contributing/documentation.md)
 
 > All public API must be documented thoroughly.
-> API references live in `/*- ... */` doc comments beside the code they describe,
-> written in a superset of JSDoc with custom directives like `@selector`.
+> API references live in Markdown doc files beside the code they describe (`fragment.md`
+> for `fragment.ts`), one entry per symbol, written in a superset of JSDoc with custom
+> directives like `@selector`.
 > Additionally, holistic guides in `src/unpoly/pages` show how to tie multiple features
 > together for common use cases. A sibling repo (`../unpoly-site`) parses and serves all of it.
 

@@ -50,7 +50,7 @@ type error in either check fails the workflow.
 
 Typing must not change what the build emits. Compare `unpoly.min.js` before and after.
 
-Public types also appear in [doc comments](documentation.md), in a notation loosely inspired
+Public types also appear in the [API docs](documentation.md), in a notation loosely inspired
 by TypeScript. Those document intent for the reader; no tool verifies them.
 
 ### Writing types
@@ -115,7 +115,7 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
 
   `UpEventMap` maps each event type to its interface, like `HTMLElementEventMap` does for DOM
   events, and `up.on()` and `up.emit()` look it up. A new event gets an interface with the
-  properties from its doc comment, and an entry in its module's `UpEventMap` block (see
+  properties its API docs list, and an entry in its module's `UpEventMap` block (see
   [Code organization](code-organization.md#imports-exports-and-types) › Events).
 
 ### Strict checks

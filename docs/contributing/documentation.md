@@ -9,11 +9,12 @@ Documentation lives in this repository, beside the code it describes. A sister p
 
 <!-- toc -->
 - [Where documentation lives](#where-documentation-lives)
-- [Anatomy of a doc comment](#anatomy-of-a-doc-comment)
-  - [Where to put the comment](#where-to-put-the-comment)
+  - [Doc files](#doc-files)
+- [Anatomy of a doc entry](#anatomy-of-a-doc-entry)
+  - [Where to put the entry](#where-to-put-the-entry)
   - [Every symbol gets its own URL](#every-symbol-gets-its-own-url)
 - [The feature types](#the-feature-types)
-  - [How large a doc comment gets](#how-large-a-doc-comment-gets)
+  - [How large a doc entry gets](#how-large-a-doc-entry-gets)
 - [Documenting parameters](#documenting-parameters)
   - [Names, optionality and defaults](#names-optionality-and-defaults)
   - [Structured objects](#structured-objects)
@@ -58,7 +59,7 @@ Unpoly has two kinds of documentation, and they do different jobs:
 | | **API references** | **Guide pages** |
 |---|---|---|
 | Purpose | Technical reference for one symbol | Holistic article about one topic |
-| Written as | A `/*- … */` comment beside the code | A Markdown file in `src/unpoly/pages/*.md` |
+| Written as | An entry in a doc file beside the code | A Markdown file in `src/unpoly/pages/*.md` |
 | Reader intent | *"What arguments are accepted?"* | *"How do I implement this requirement?"* |
 | Example | [`/api/up.submit`](https://unpoly.com/api/up.submit) | [`/learn/submitting-forms`](https://unpoly.com/learn/submitting-forms) |
 
@@ -68,42 +69,82 @@ edge cases. A reference is for a reader who has already chosen the feature: it c
 option, the precise behavior and the edge cases. The same topic often needs both, and some
 duplication is intended (see [Reusing text](#reusing-text)).
 
-Both are parsed from files in this repository. The difference is the container:
+Both are Markdown files in `src/`. Where a file lives decides what it holds:
 
-- In a `.ts` file, each `/*- … */` comment is one documentation block. A file can hold
-  many blocks.
-- In a `.md` file, the **entire file** is one documentation block.
+- A **doc file** sits next to the source file it documents, with the same base name:
+  `src/unpoly/fragment.md` holds the API references for `src/unpoly/fragment.ts`.
+  It holds many **doc entries**, one per symbol. See [Doc files](#doc-files).
+- A Markdown file in `src/unpoly/pages/` is a guide page or a partial. The
+  **entire file** is one documentation block.
 
-Every block declares what it documents, and the container decides which declarations
-are available:
+Every entry or page declares what it documents, and the container decides which
+declarations are available:
 
 | Container | Can declare |
 |---|---|
-| `.md` file | `@page`, `@partial` |
-| `/*- … */` comment | `@namespace`, `@class`, `@function`, `@selector`, `@event`, `@property`, `@constructor`, `@header`, `@cookie` |
+| File in `src/unpoly/pages/` | `@page`, `@partial` |
+| Entry in a doc file | `@namespace`, `@class`, `@function`, `@selector`, `@event`, `@property`, `@constructor`, `@header`, `@cookie` |
 
-A block that declares none of these is an error, so every doc comment has exactly one.
+A block that declares none of these is an error, so every doc entry has exactly one.
 
-The dash in `/*-` is load-bearing:
-
-| Opener | Meaning |
-|---|---|
-| `/*- … */` | Documentation. Parsed and published. |
-| `/* … */`, `// …` | An internal comment for other maintainers. |
+Comments in `.ts` files (`/* … */`, `// …`) are internal comments for other maintainers.
+They are never published. The one exception is the old format of API references, a
+comment opening with `/*-`: the site still publishes it, so don't write one.
 
 Our syntax is a *superset* of JSDoc — it adds directives
 JSDoc has no concept of (`@selector`, `@event`, `@section`, `@mix`) and writes `@param`
 in ways JSDoc doesn't allow, such as attributes without a type.
-We avoid JSDoc's `/**` opener because IDEs and build tools detect it automatically and
-would report JSDoc errors.
+
+### Doc files
+
+A doc file is a list of entries. Each entry starts with an H1 naming the symbol, followed
+by its prose and directives. Entries are separated by a line of five dashes with a blank
+line above and below:
+
+```md
+# up.render()
+
+Replaces elements on the current page with matching elements from a server response or HTML string.
+
+...
+
+@function up.render
+...
+@stable
+
+-----
+
+# up.navigate()
+
+...
+```
+
+- There is no separator before the first entry or after the last.
+- The H1 is for you and for Markdown previews: the site titles a page from its directives.
+  But the build checks the H1 against that title, so it must match it: `up.render()` for a
+  function, `up.Request#abort()` for an instance method, `new up.Request()` for a
+  constructor, and the plain name for everything else (`[up-target]`, `up:fragment:loaded`,
+  `up.fragment.config`, `X-Up-Target`).
+- Inside an entry, headings start at `##`. A second H1 in one entry most likely means a
+  missing separator, and fails the build.
+- A shorter rule (`---`), a line of dashes under a line of text, and anything in a code
+  block belong to the entry.
+- A doc file takes no front matter.
+
+A doc file usually has a source file next to it, but needs none. `src/unpoly/util/list.md`
+documents the `List` concept, which has no code of its own.
+
+`bin/outline src/unpoly/fragment.md` lists a doc file's entries with their line ranges, so you
+can read a single entry without the whole file.
 
 
-## Anatomy of a doc comment
+## Anatomy of a doc entry
 
-Here is a complete one, from `src/unpoly/util.ts`:
+Here is a complete one, from `src/unpoly/util.md`:
 
-```js
-/*-
+```md
+# up.util.isNumber()
+
 Returns whether the given argument is a number.
 
 Note that this will check the argument's *type*.
@@ -113,49 +154,55 @@ It will return `false` for a string like `"123"`.
 @param {any} value
 @return {boolean}
 @stable
-*/
-function isNumber(value) {
+```
+
+It documents this function in `src/unpoly/util.ts`:
+
+```ts
+export function isNumber(value: any): value is number {
   return (typeof(value) === 'number') || value instanceof Number
 }
 ```
 
-Four parts, always in this order:
+Five parts, always in this order:
 
-1. **Prose**, as Markdown. Lead with a summary of one or two sentences: the first
+1. **The H1**, naming the symbol. See [Doc files](#doc-files).
+2. **Prose**, as Markdown. Lead with a summary of one or two sentences: the first
    paragraph is reused on its own in namespace listings and search results, so it must stand alone.
-2. **The declaration** — what this is (`@function`) and its plain name (`up.util.isNumber`).
-3. **Parameters and return value.**
-4. **A mandatory visibility tag.** See [Visibility](#visibility).
+3. **The declaration** — what this is (`@function`) and its plain name (`up.util.isNumber`).
+4. **Parameters and return value.**
+5. **A mandatory visibility tag.** See [Visibility](#visibility).
 
 Use `##` for headings inside the prose. Levels are normalized on the site, so they
 don't need to match the surrounding page.
 
-### Where to put the comment
+### Where to put the entry
 
-Put the comment **directly above the code it documents** — the function, the compiler,
-the property. Nothing in between.
+Put the entry in the doc file of the source file that holds the code it documents — the
+function, the compiler, the property. Keep the entries in the order of that code, so the
+doc file reads alongside its source.
 
 Some code defines several public APIs at once: a function may emit events, a compiler
-implements an attribute. Document what the code *is* above it, and give each API it
-merely *produces* its own comment **below** the implementation. So a function `up.thing.verb()`
-that emits `up:thing:foo` and `up:thing:bar` events is laid out in this order:
+implements an attribute. Give what the code *is* its entry first, and each API it merely
+*produces* its own entry right after it. So a function `up.thing.verb()` that emits
+`up:thing:foo` and `up:thing:bar` events gets three entries in this order:
 
-```js
-/*-
+```md
+# up.thing.verb()
+
 @function up.thing.verb
-*/
-function verb() {
-  up.emit('up:thing:foo')
-  up.emit('up:thing:bar')
-}
 
-/*-
+-----
+
+# up:thing:foo
+
 @event up:thing:foo
-*/
 
-/*-
+-----
+
+# up:thing:bar
+
 @event up:thing:bar
-*/
 ```
 
 ### Every symbol gets its own URL
@@ -196,16 +243,17 @@ document the things JSDoc has no concept of — attributes, events, headers:
 `@selector` covers all three CSS-ish shapes, because that's how a developer reaches the
 feature — by writing something in their HTML or CSS.
 
-### How large a doc comment gets
+### How large a doc entry gets
 
-Feature comments range from a handful of lines to well over a hundred. Both ends are
+Feature entries range from a handful of lines to well over a hundred. Both ends are
 normal, and the syntax is the same either way.
 
 At the small end, a method with one argument and a return value. Note the `#` for an
 instance method, and that a return value can carry its own description:
 
-```js
-/*-
+```md
+# up.Params#getFirst()
+
 Returns the first param value with the given `name`.
 
 Returns `undefined` if no param value with that name is set.
@@ -215,15 +263,15 @@ Returns `undefined` if no param value with that name is set.
 @return {any}
   The value of the param with the given name.
 @experimental
-*/
 ```
 
 At the other end, `up.render()` — the function most of Unpoly delegates to. The real
-comment in `src/unpoly/fragment.ts` runs 131 lines; this is trimmed hard, with `...`
+entry in `src/unpoly/fragment.md` runs 131 lines; this is trimmed hard, with `...`
 marking what's left out:
 
-```js
-/*-
+```md
+# up.render()
+
 Replaces elements on the current page with matching elements from a server response or HTML string.
 
 ## Choosing which fragment to update
@@ -258,7 +306,6 @@ Replaces elements on the current page with matching elements from a server respo
   ...
 
 @stable
-*/
 ```
 
 Notice what carries the weight: thirteen `@section` groups, but only a *single* literal
@@ -410,7 +457,7 @@ the feature discussion or in code review.
 `@internal` is the only visibility not published on unpoly.com. Internal features get
 no page, and mentions of them elsewhere in the docs are silently left unlinked. There's
 no expectation that internal API is documented at all — most isn't — but *if* you write
-a doc comment for something internal, it must say `@internal`.
+a doc entry for something internal, it must say `@internal`.
 
 **Omitting the tag fails the site build** for any feature whose name looks public
 (`up.…`, `up:…`, `up-…`). That's deliberate: an untagged feature would otherwise
@@ -419,8 +466,9 @@ default to internal and quietly vanish from the site.
 `@deprecated` takes a comment naming the replacement, which doubles as the deprecation
 notice on the page:
 
-```js
-/*-
+```md
+# up.util.only()
+
 Returns a copy of the given object that only contains the given keys.
 
 @function up.util.only
@@ -428,10 +476,9 @@ Returns a copy of the given object that only contains the given keys.
 @param {Array} ...keys
 @deprecated
   Use `up.util.pick()` instead.
-*/
 ```
 
-Because the old name keeps its own doc comment, it keeps its own page — which is why
+Because the old name keeps its own doc entry, it keeps its own page — which is why
 renaming an API needs no URL redirect. See
 [Compatibility](compatibility.md#breaking-changes) for the polyfill that goes with it.
 
@@ -460,7 +507,7 @@ function keeps an argument that only Unpoly itself passes.
 
 ### Markdown flavor
 
-`unpoly-site` renders doc comments and guide pages with
+`unpoly-site` renders doc entries and guide pages with
 [commonmarker](https://github.com/gjtorikian/commonmarker): [CommonMark](https://commonmark.org/)
 with GitHub's tables, strikethrough and autolinks, plus the extras in this guide. Raw HTML
 passes through, and an HTML block ends at the first blank line. Quotes, dashes and `...`
@@ -498,7 +545,7 @@ Link by hand when you want a different label, or when autolinking can't resolve 
 code: anything `@internal`, nested parentheses like `up.render(up.foo())`, snippets
 containing ` = `, and code inside headings or fenced blocks. A mention of the page
 you're currently on isn't linked either, so you can write `` `up.render()` `` freely in
-its own doc comment.
+its own doc entry.
 
 Guide pages are autolinked with a **wikilink**: the page's slug in double brackets,
 optionally with an anchor:
@@ -687,7 +734,7 @@ Naming a param the partial doesn't define is an error, so overrides can't silent
 Most of this machinery serves `up.render()`, `up.follow()`, `up.submit()`, `[up-follow]`
 and `[up-submit]`, the funnel nearly everything else delegates to. So a **new render
 option belongs in `pages/params/up.render/<section>.md`**, the canonical copy feeding
-around ten pages. Writing it into a doc comment instead would silently desync
+around ten pages. Writing it into a feature's doc entry instead would silently desync
 `up.follow`, `[up-follow]`, `up.submit` and the rest.
 
 ### Inheriting a single param
@@ -911,33 +958,33 @@ TOC, a long guide without one, or a link to a heading that no longer exists.
 
 ## Namespaces and classes
 
-You'll rarely add one of these, but every file with doc comments depends on one.
+You'll rarely add one of these, but every doc file depends on one.
 
-A namespace or class block gives a [namespace](code-organization.md#responsibilities) or
+A namespace or class entry gives a [namespace](code-organization.md#responsibilities) or
 class its own page, titled by its name:
 
-```js
-/*-
+```md
+# up.form
+
 Features to submit and validate forms without a full page load.
 
 @learn-ref forms
 
 @namespace up.form
-*/
 ```
 
 Two things to know:
 
-- **Every file that documents features must declare its own `@namespace` (or `@class`)
-  first.** Features attach to the most recently parsed interface, so a file without one
+- **Every doc file that documents features must declare its own `@namespace` (or `@class`)
+  in its first entry.** Features attach to the most recently parsed interface, so a file without one
   would file its features under whichever namespace happened to be parsed before it.
-  `src/unpoly-migrate/form.ts` opens with `@namespace up.form` for exactly this reason;
+  `src/unpoly-migrate/form.md` opens with `@namespace up.form` for exactly this reason;
   repeated declarations of the same namespace are merged.
 - **There is no `@see` directive.** Point at related features in the prose, e.g.
   "See also `up.network.isBusy()`.", and at guide pages with `@learn-ref`.
 
-`@class` blocks also use `@parent` to nest under a namespace in the menu, e.g.
-`src/unpoly/form/params.ts` declares `@parent up.form`.
+`@class` entries also use `@parent` to nest under a namespace in the menu, e.g.
+`src/unpoly/form/params.md` declares `@parent up.form`.
 
 
 ## Previewing your changes
