@@ -5,33 +5,7 @@ import { emit } from '../event.js'
 import { emitFragmentInserted, getSubtree } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
 import { printToStandard } from '../log.js'
-import { readData, registerDestructor } from '../script.js'
-
-/**
-A compiler or macro registered with `up.compiler()` or `up.macro()`: the compile function
-with its registration options.
-@internal
-*/
-export type Compiler = u.AnyFunction & {
-  selector: string | (() => string)
-  isDefault?: boolean
-  priority: number
-  batch?: boolean
-  rerun?: boolean
-}
-
-/**
-Options for compiling a fragment. See `up.hello()`.
-@internal
-*/
-export interface HelloFragmentOptions {
-  layer?: Layer
-  data?: any
-  dataRoot?: Element
-  dataMap?: Record<string, any>
-  meta?: u.PlainObject
-  insertedEvent?: boolean
-}
+import { readData, registerDestructor, type Compiler, type HelloFragmentOptions } from '../script.js'
 
 // Elements remember the data passed to up.hello(), and which compilers have run on them.
 type CompiledElement = Element & { upCompileData?: any, upAppliedCompilers?: Set<Compiler> }

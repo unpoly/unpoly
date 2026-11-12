@@ -2,16 +2,9 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { on } from '../event.js'
 import { isAlive, onAborted } from '../fragment.js'
-import { linkConfig, shouldHandleClick } from '../link.js'
+import { linkConfig, shouldHandleClick, type FollowIntentCallback } from '../link.js'
 import { printUserEvent } from '../log.js'
 import { type UpRequest } from '../network.js'
-
-/**
-Called when the user shows an intent to follow a link, e.g. by hovering over it.
-It reports the request it makes, so the intent can abort it when the user moves away.
-@internal
-*/
-export type FollowIntentCallback = (options: { onRequestKnown: (request: UpRequest) => void }) => void
 
 export class LinkFollowIntent {
   declare _link: Element

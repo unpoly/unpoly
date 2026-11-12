@@ -6,7 +6,6 @@ import { newConfig } from './util/config.js'
 import { muteUncriticalRejection, UpError } from './error.js'
 import {
   build, emit, fork, getInputDevice, haltEvent, isModified, isSyntheticClick, keyModifiers, on,
-  type ModifierKey,
 } from './event.js'
 import { anyButtonSelector, formFieldSelector } from './form.js'
 import { getSmart, onFirstIntersect, render, RenderOptions, type RenderJob } from './fragment.js'
@@ -18,44 +17,12 @@ import { isSafeMethod, networkConfig, UpRequest } from './network.js'
 import { registerAttrCompiler, registerCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
 import { doFocus } from './viewport.js'
+import type * as t from './link/types.js'
+export type * from './link/types.js'
 import { LinkFollowIntent } from './link/link_follow_intent.js'
 
 // A link expanded with [up-expand] remembers the area it expanded to, and the area remembers the link.
 type ExpandedElement = Element & { upExpandedPair?: HTMLElement[] }
-
-/**
-The `up:link:follow` event.
-*/
-export type LinkFollowEvent = Event & {
-  target: Element
-  renderOptions: RenderOptions
-}
-
-/**
-The `up:link:preload` event.
-*/
-export type LinkPreloadEvent = Event & {
-  target: Element
-  renderOptions: RenderOptions
-}
-
-/**
-The `up:click` event.
-*/
-// It also has the properties that forkEventAsUpClick() copies from the original event.
-// They are undefined when the original event has no such property, like the { button } of a keyboard event.
-export type ClickEvent = Event & Pick<MouseEvent, 'clientX' | 'clientY' | 'button' | ModifierKey> & {
-  target: Element
-  originalEvent: MouseEvent | KeyboardEvent
-}
-
-/**
-The `up:deferred:load` event.
-*/
-export type DeferredLoadEvent = Event & {
-  target: Element
-  renderOptions: RenderOptions
-}
 
 /*-
 Features to follow links without a full page load.
@@ -77,21 +44,6 @@ let lastInstantTarget: Element | null = null
 const ATTRS_WITH_LOCAL_HTML = '[up-content], [up-fragment], [up-document]'
 const ATTRS_SUGGESTING_FOLLOW = `${ATTRS_WITH_LOCAL_HTML}, [up-target], [up-layer], [up-transition], [up-preload]`
 const DEFAULT_INTERACTIVE_ELEMENT = 'a[href], button'
-
-/**
-The settings in `up.link.config`, described in its doc comment.
-*/
-export interface LinkConfig {
-  followSelectors: string[]
-  noFollowSelectors: string[]
-  instantSelectors: string[]
-  noInstantSelectors: string[]
-  preloadSelectors: string[]
-  noPreloadSelectors: string[]
-  clickableSelectors: string[]
-  noClickableSelectors: string[]
-  preloadDelay: number
-}
 
 /*-
 Configures defaults for link handling.
@@ -182,7 +134,7 @@ without requiring developers to set `[up-...]` attributes.
 
 @stable
 */
-export const linkConfig = newConfig('up.link.config', (): LinkConfig => ({
+export const linkConfig = newConfig('up.link.config', (): t.LinkConfig => ({
   // (1) We want to follow all elements with an [up-follow] attribute.
   //     This can be an <a up-follow href="/path"> or an <span up-follow up-href="/path">
   // (2) Users expect a link to be followable if it uses a signature attribute

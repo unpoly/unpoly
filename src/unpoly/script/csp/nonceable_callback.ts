@@ -1,14 +1,5 @@
 import * as e from '../../element.js'
-
-/**
-The names and values of the arguments for a callback string, and its `this`.
-@internal
-*/
-export interface EvalEnv {
-  argNames: string[]
-  argValues: any[]
-  thisContext?: any
-}
+import { type EvalEnv } from '../../script.js'
 
 // The inline script that _runAsScriptElement() inserts can only reach us through the global `up`.
 declare module '../../../unpoly.js' {

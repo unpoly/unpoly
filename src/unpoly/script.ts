@@ -3,97 +3,20 @@ import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { fail, guard } from './error.js'
 import { assertEmitted, on } from './event.js'
-import { getSmart, type RenderOptions } from './fragment.js'
+import { getSmart } from './fragment.js'
 import { isBooted, isEvaling } from './framework.js'
-import { layerStack, type Layer } from './layer.js'
+import { layerStack } from './layer.js'
 import { printToStandard } from './log.js'
 import { mockable } from './mockable.js'
-import { type UpResponse } from './network.js'
+import type * as t from './script/types.js'
+export type * from './script/types.js'
 import { CSPInfo } from './script/csp/csp_info.js'
 export { CSPInfo }
 import { NonceableCallback } from './script/csp/nonceable_callback.js'
 export { NonceableCallback }
-import { ScriptGate, type PolicyString } from './script/csp/script_gate.js'
+import { ScriptGate } from './script/csp/script_gate.js'
 import { DestructorPass } from './script/destructor_pass.js'
-import { HelloFragment, type Compiler, type HelloFragmentOptions } from './script/hello_fragment.js'
-export { type Compiler }
-
-/**
-Options for `up.hello()`.
-*/
-export interface HelloOptions extends HelloFragmentOptions {
-  // Only run these macros and compilers (default: all registered ones).
-  macros?: Compiler[]
-  compilers?: Compiler[]
-  [key: string]: any
-}
-
-/**
-Options for `up.compiler()` and `up.macro()`.
-*/
-export interface CompilerOptions {
-  priority?: number
-  batch?: boolean
-  /** @internal Also run on elements that the compiler already compiled. */
-  rerun?: boolean
-}
-
-/**
-[Information about the render pass](/learn/enhancing-elements#meta) that a compiler gets as its
-third argument. The `{ meta }` option of `up.hello()` may add more keys.
-*/
-export interface CompilerMeta {
-  layer: Layer
-  ok: boolean
-  revalidating: boolean
-  [key: string]: any
-}
-
-/**
-The function passed to `up.compiler()` or `up.macro()`. It is called with a matching element, its
-[data](/learn/data) and [meta information](/learn/enhancing-elements#meta) about the render pass.
-It may return a destructor function, an array of destructors, or a promise.
-
-A compiler gets any element that matches its selector, so the element type is a parameter. It
-defaults to `HTMLElement`. A compiler for SVG elements can annotate its argument as `SVGElement`.
-*/
-export type CompilerCallback<E extends Element = HTMLElement> = (element: E, data: any, meta: CompilerMeta) => unknown
-
-/**
-The function passed to `up.compiler()` or `up.macro()` with `{ batch: true }`. It is called once
-with all matching elements and their data.
-
-TypeScript only picks this callback type when `batch` is the literal `true`. Options from a
-variable need `as const`, or `batch` is widened to `boolean` and the callback gets one element.
-*/
-export type BatchCompilerCallback<E extends Element = HTMLElement> = (elements: E[], data: any[], meta: CompilerMeta) => unknown
-
-/**
-Options for `registerAttrCompiler()`.
-@internal
-*/
-export interface AttrCompilerOptions extends CompilerOptions {
-  // The value for an attribute set without a value, or to "true".
-  defaultValue?: string
-  macro?: boolean
-}
-
-/**
-A compiler for `registerAttrCompiler()`. It is called with the element and its attribute value.
-Without a `{ defaultValue }`, the value of an attribute set without a value (or to "true") is `true`.
-@internal
-*/
-export type AttrCompilerCallback<V = string | true, E extends Element = HTMLElement> = (element: E, value: V) => unknown
-
-/**
-Options for `up.script.parseCallback()`.
-@internal
-*/
-export interface ParseCallbackOptions {
-  argNames?: string[]
-  // Also pass these properties of the first argument as arguments.
-  expandObject?: string[] | false
-}
+import { HelloFragment } from './script/hello_fragment.js'
 
 // The properties Unpoly sets on elements to remember their data and destructors.
 type ScriptedElement = Element & {
@@ -101,16 +24,6 @@ type ScriptedElement = Element & {
   upTemplateData?: u.PlainObject
   upCompileData?: u.PlainObject
   upDestructors?: u.Cleaner
-}
-
-/**
-The `up:assets:changed` event.
-*/
-export type AssetsChangedEvent = Event & {
-  newAssets: u.List<Element>
-  oldAssets: u.List<Element>
-  renderOptions: RenderOptions
-  response: UpResponse | undefined
 }
 
 /*-
@@ -125,25 +38,6 @@ When your own code inserts HTML into the page, call `up.hello()` on the new elem
 @namespace up.script
 */
 
-
-/**
-The settings in `up.script.config`, described in its doc comment.
-*/
-export interface ScriptConfig {
-  assetSelectors: string[]
-  noAssetSelectors: string[]
-  scriptSelectors: string[]
-  noScriptSelectors: string[]
-  evalCallbackPolicy: PolicyString
-  scriptElementPolicy: PolicyString
-  cspNonce: string | (() => string | undefined)
-  cspWarnings: boolean
-  /**
-  Callback attributes like `[up-on-loaded]`, which may carry a CSP nonce.
-  @internal
-  */
-  nonceableAttributes: string[]
-}
 
 /*-
 Configures defaults for script handling and asset tracking.
@@ -208,7 +102,7 @@ Configures defaults for script handling and asset tracking.
 @property up.script.config
 @stable
 */
-export const scriptConfig = newConfig('up.script.config', (): ScriptConfig => ({
+export const scriptConfig = newConfig('up.script.config', (): t.ScriptConfig => ({
   cspNonce() { return e.metaContent('csp-nonce') },
   cspWarnings: true,
   scriptElementPolicy: 'auto',
@@ -263,8 +157,8 @@ const SYSTEM_MACRO_PRIORITIES: Record<string, number> = {
   '[up-keep]': 9999999999,  // cache the identity of e.g. [up-keep="same-html"] before any client-side changes
 }
 
-let registeredCompilers: Compiler[] = []
-let registeredMacros: Compiler[] = []
+let registeredCompilers: t.Compiler[] = []
+let registeredMacros: t.Compiler[] = []
 
 /*-
 Registers a function to be called when Unpoly inserts a matching element.
@@ -490,9 +384,9 @@ or manually call `up.hello()` on an element that should be
 @stable
 @signature
 */
-export function registerCompiler<E extends Element = HTMLElement>(selector: Compiler['selector'], callback: CompilerCallback<E>): void
-export function registerCompiler<E extends Element = HTMLElement>(selector: Compiler['selector'], options: CompilerOptions & { batch: true }, callback: BatchCompilerCallback<E>): void
-export function registerCompiler<E extends Element = HTMLElement>(selector: Compiler['selector'], options: CompilerOptions, callback: CompilerCallback<E>): void
+export function registerCompiler<E extends Element = HTMLElement>(selector: t.Compiler['selector'], callback: t.CompilerCallback<E>): void
+export function registerCompiler<E extends Element = HTMLElement>(selector: t.Compiler['selector'], options: t.CompilerOptions & { batch: true }, callback: t.BatchCompilerCallback<E>): void
+export function registerCompiler<E extends Element = HTMLElement>(selector: t.Compiler['selector'], options: t.CompilerOptions, callback: t.CompilerCallback<E>): void
 export function registerCompiler(...args: any[]): void {
   registerProcessor(args)
 }
@@ -552,16 +446,16 @@ up.macro('[shake-modal]', function(link) {
 @stable
 @signature
 */
-export function registerMacro<E extends Element = HTMLElement>(selector: Compiler['selector'], callback: CompilerCallback<E>): void
-export function registerMacro<E extends Element = HTMLElement>(selector: Compiler['selector'], options: CompilerOptions & { batch: true }, callback: BatchCompilerCallback<E>): void
-export function registerMacro<E extends Element = HTMLElement>(selector: Compiler['selector'], options: CompilerOptions, callback: CompilerCallback<E>): void
+export function registerMacro<E extends Element = HTMLElement>(selector: t.Compiler['selector'], callback: t.CompilerCallback<E>): void
+export function registerMacro<E extends Element = HTMLElement>(selector: t.Compiler['selector'], options: t.CompilerOptions & { batch: true }, callback: t.BatchCompilerCallback<E>): void
+export function registerMacro<E extends Element = HTMLElement>(selector: t.Compiler['selector'], options: t.CompilerOptions, callback: t.CompilerCallback<E>): void
 export function registerMacro(...args: any[]): void {
   registerProcessor(args, { macro: true })
 }
 
-export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, callback: AttrCompilerCallback<string | true, E>): void
-export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, options: AttrCompilerOptions & { defaultValue: string }, callback: AttrCompilerCallback<string, E>): void
-export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, options: AttrCompilerOptions, callback: AttrCompilerCallback<string | true, E>): void
+export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, callback: t.AttrCompilerCallback<string | true, E>): void
+export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, options: t.AttrCompilerOptions & { defaultValue: string }, callback: t.AttrCompilerCallback<string, E>): void
+export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, options: t.AttrCompilerOptions, callback: t.AttrCompilerCallback<string | true, E>): void
 export function registerAttrCompiler(...args: any[]): void {
   let [attr, options, valueCallback] = parseProcessorArgs(args)
 
@@ -613,7 +507,7 @@ const parseProcessorArgs = function(args: any[]): any[] {
   return u.parseArgs(args, 'val', 'options', 'callback')
 }
 
-function buildProcessor(args: any[], overrides: u.PlainObject): Compiler & u.PlainObject {
+function buildProcessor(args: any[], overrides: u.PlainObject): t.Compiler & u.PlainObject {
   let [selector, options, callback] = parseProcessorArgs(args)
 
   options = u.newOptions(options, {
@@ -626,7 +520,7 @@ function buildProcessor(args: any[], overrides: u.PlainObject): Compiler & u.Pla
   return Object.assign(callback, options, overrides)
 }
 
-function insertProcessor(queue: Compiler[], newCompiler: Compiler & u.PlainObject): Compiler {
+function insertProcessor(queue: t.Compiler[], newCompiler: t.Compiler & u.PlainObject): t.Compiler {
   let existingCompiler
   let index = 0
   while ((existingCompiler = queue[index]) && (existingCompiler.priority >= newCompiler.priority)) {
@@ -865,7 +759,7 @@ let compiled = await up.hello(textarea) // compiled === textarea
 @stable
 @signature
 */
-export function hello(element: e.ElementOrSelector, options: HelloOptions = {}): Promise<Element> {
+export function hello(element: e.ElementOrSelector, options: t.HelloOptions = {}): Promise<Element> {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   element = getSmart(element, options)!
 
@@ -1227,7 +1121,7 @@ export function adoptRenderOptionsFromHeader(renderOptions: u.PlainObject, cspIn
   new ScriptGate(cspInfo).adoptRenderOptionsFromHeader(renderOptions)
 }
 
-export function callbackAttr(element: Element, attrName: string, parseOpts?: ParseCallbackOptions): ((...args: any[]) => any) | undefined {
+export function callbackAttr(element: Element, attrName: string, parseOpts?: t.ParseCallbackOptions): ((...args: any[]) => any) | undefined {
   return e.parseAttr(element, attrName, (code) => {
     let fn = parseCallback(code, parseOpts)
     // Emulate the behavior of the `onclick` attribute, where `this` refers to the clicked element.
@@ -1235,7 +1129,7 @@ export function callbackAttr(element: Element, attrName: string, parseOpts?: Par
   })
 }
 
-export function parseCallback(code: string, { argNames = ['event'], expandObject = false }: ParseCallbackOptions = {}): (...argValues: any[]) => any {
+export function parseCallback(code: string, { argNames = ['event'], expandObject = false }: t.ParseCallbackOptions = {}): (...argValues: any[]) => any {
   // Return an unbound function so callers can bind to an object of their choice.
   return function(...argValues) {
     let callArgNames = argNames

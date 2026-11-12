@@ -3,15 +3,11 @@ import * as e from '../../element.js'
 import { Blocked, fail, NotImplemented } from '../../error.js'
 import { RenderOptions } from '../../fragment.js'
 import { printToStandard, printToWarn } from '../../log.js'
-import { block, cspNonce, findScripts, isScript, scriptConfig } from '../../script.js'
+import {
+  block, cspNonce, findScripts, isScript, scriptConfig, type EvalEnv, type PolicyString,
+} from '../../script.js'
 import { CSPInfo } from './csp_info.js'
-import { NonceableCallback, type EvalEnv } from './nonceable_callback.js'
-
-/**
-A value that `up.script.config.evalCallbackPolicy` or `up.script.config.scriptElementPolicy` can be set to.
-@internal
-*/
-export type PolicyString = 'pass' | 'block' | 'nonce' | 'auto'
+import { NonceableCallback } from './nonceable_callback.js'
 
 /**
 Something that may carry a nonce, like a `<script>` element or an `[up-on-…]` attribute.
