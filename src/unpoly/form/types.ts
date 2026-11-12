@@ -1,7 +1,7 @@
 import type * as u from '../util.js'
-import type { UpEvent } from '../event.js'
-import type { RenderOptions, RenderResult } from '../fragment.js'
-import type { Params } from './params.js'
+import { type UpEvent } from '../event.js'
+import { type RenderOptions, type RenderResult } from '../fragment.js'
+import { type Params } from './params.js'
 
 /**
 A form field or button: an `<input>`, `<select>`, `<textarea>`, `<button>` or a form-associated

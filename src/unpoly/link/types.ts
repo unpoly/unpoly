@@ -1,5 +1,5 @@
-import type { UpEvent } from '../event.js'
-import type { RenderOptions } from '../fragment.js'
+import { type UpEvent } from '../event.js'
+import { type RenderOptions } from '../fragment.js'
 
 /**
 The `up:link:follow` event.

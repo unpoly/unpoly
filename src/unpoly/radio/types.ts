@@ -1,5 +1,5 @@
-import type { UpEvent } from '../event.js'
-import type { RenderOptions, RenderStep } from '../fragment.js'
+import { type UpEvent } from '../event.js'
+import { type RenderOptions, type RenderStep } from '../fragment.js'
 
 /**
 The render steps for hungry elements, on the targeted layer and on other layers.

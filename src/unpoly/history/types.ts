@@ -1,5 +1,5 @@
-import type { UpEvent } from '../event.js'
-import type { RenderOptions } from '../fragment.js'
+import { type UpEvent } from '../event.js'
+import { type RenderOptions } from '../fragment.js'
 
 /**
 Why the location changed. `'detect'` is only used internally: we tell `'hash'` from `'pop'` later.

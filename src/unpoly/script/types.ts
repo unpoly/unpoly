@@ -1,8 +1,8 @@
 import type * as u from '../util.js'
-import type { UpEvent } from '../event.js'
-import type { RenderOptions } from '../fragment.js'
-import type { Layer } from '../layer.js'
-import type { UpResponse } from '../network.js'
+import { type UpEvent } from '../event.js'
+import { type RenderOptions } from '../fragment.js'
+import { type Layer } from '../layer.js'
+import { type UpResponse } from '../network.js'
 
 /**
 Options for `up.hello()`.

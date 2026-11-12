@@ -1,5 +1,5 @@
 import type * as u from '../util.js'
-import type { UpEvent } from '../event.js'
+import { type UpEvent } from '../event.js'
 
 /**
 A CSS selector, an element, or a list of elements. See `up.element.get()`.
