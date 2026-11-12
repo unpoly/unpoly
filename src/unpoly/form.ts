@@ -517,8 +517,7 @@ export function validate(...args: [originOrTarget: e.ElementOrSelector, options?
   let options = parseValidateArgs(...args)
   let form = getForm(options.origin)!
   let validator = getFormValidator(form)
-  // Validating always finds a solution, at least the origin itself.
-  return validator.validate(options)!
+  return validator.validate(options)
 }
 
 function parseValidateArgs(originOrTarget: any, ...args: any[]): u.PlainObject {

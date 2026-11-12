@@ -46,9 +46,7 @@ export class FormValidator {
     return on(field, eventType, (event) => {
       if (!field.closest('.up-keeping')) {
         printUserEvent(event)
-        // Validating a field always finds a solution, at least the field itself.
-        // A blank [up-validate] value falls back like a missing one.
-        muteUncriticalRejection(this.validate({ origin: field })!)
+        muteUncriticalRejection(this.validate({ origin: field }))
       }
     })
   }
@@ -65,23 +63,24 @@ export class FormValidator {
     }
   }
 
-  validate(options: t.ValidateOptions = {}): u.Deferred<RenderResult> | undefined {
-    let newSolutions = this._getSolutions(options)
+  validate(options: t.ValidateOptions = {}): u.Deferred<RenderResult> {
+    // Although a single validate() call may update multiple fragments,
+    // they will all share the same render pass.
+    let deferred = u.newDeferred<RenderResult>()
+    let newSolutions = this._getSolutions(options, deferred)
     this._dirtySolutions.push(...newSolutions)
     this._scheduleNextRender()
-    return newSolutions[0]?.deferred
+    return deferred
   }
 
-  _getSolutions(options: t.ValidateOptions): t.ValidationSolution[] {
+  // Returns at least one solution, for the origin itself if nothing else, so the deferred settles.
+  // A blank [up-validate] value falls back like a missing one.
+  _getSolutions(options: t.ValidateOptions, deferred: u.Deferred<RenderResult>): t.ValidationSolution[] {
     // The loop below adds the props of a scheduled solution.
     let solutions = (this._getTargetSelectorSolutions(options)
       || this._getFieldSolutions(options)
       // up.validate() and _onFieldAdded() always pass an { origin }.
       || this._getElementSolutions(options.origin!)) as t.ValidationSolution[]
-
-    // Although a single validate() call may update multiple fragments,
-    // they will all share the same render pass.
-    let deferred = u.newDeferred()
 
     for (let solution of solutions) {
       // Remember solution-specific render options from
