@@ -5,6 +5,7 @@ how a namespace is structured internally, and how modules import each other.
 
 <!-- toc -->
 - [Directory structure](#directory-structure)
+  - [File names](#file-names)
   - [Where to find a namespace's specs](#where-to-find-a-namespaces-specs)
   - [Implementation plans](#implementation-plans)
 - [Architecture](#architecture)
@@ -92,6 +93,11 @@ dist/                     # Output directory for the build (gitignored, never ed
   unpoly.min.css          # ... Minified Unpoly bundle (CSS)
   ...
 ```
+
+### File names
+
+A file whose main export is a class is named after that class, in snake case:
+`UpdateLayerPlan` lives in `update_layer_plan.ts`.
 
 ### Where to find a namespace's specs
 
