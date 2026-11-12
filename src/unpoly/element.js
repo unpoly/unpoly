@@ -633,9 +633,16 @@ up.element = (function() {
 
       depthSelector = depthSelector.replace(/\[[^\]]*]/g, function(attr) {
         attr = restoreSelectorLiterals(attr)
-        let [_raw, name, _operator, quote, value] = attr.match(/\[([\w-]+)(?:([~|^$*]?=)(["'])?(.*?)\3)?]/s)
-        quote ||= '"'
-        parsed.attributes[name] = value ? u.parseString(quote + value + quote) : ''
+        // We don't support all attribute selector syntax, like whitespace around the operator
+        // ([foo = "bar"]) or a case-sensitivity flag ([foo="bar" i]). Such a selector either
+        // doesn't match our regexp, or yields a value that we cannot parse as a string.
+        try {
+          let [_raw, name, _operator, quote, value] = attr.match(/\[([\w-]+)(?:([~|^$*]?=)(["'])?(.*?)\3)?]/s)
+          quote ||= '"'
+          parsed.attributes[name] = value ? u.parseString(quote + value + quote) : ''
+        } catch {
+          throw new up.CannotParse('Unsupported attribute selector: ' + attr)
+        }
         return ''
       })
 

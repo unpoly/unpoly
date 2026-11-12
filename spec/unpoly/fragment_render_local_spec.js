@@ -51,6 +51,15 @@ extendDescribe('up.fragment', function() {
           expect('.main-element').toHaveText('new text')
         })
 
+        it('rejects with up.CannotParse for a target with an attribute selector it cannot parse (bugfix)', async function() {
+          htmlFixtureList('<div data-x="y">old text</div>')
+
+          const promise = up.render({ target: '[data-x = "y"]', content: 'new text' })
+
+          await expectAsync(promise).toBeRejectedWith(jasmine.any(up.CannotParse))
+          expect('[data-x="y"]').toHaveText('old text')
+        })
+
         it("removes the target's inner HTML with { content: '' }", async function() {
           fixture('.target', { text: 'old text' })
 

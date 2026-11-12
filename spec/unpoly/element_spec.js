@@ -587,6 +587,16 @@ describe('up.element', function() {
       expect(parse).toThrowError('Cannot parse selector: ul~baz')
     })
 
+    it('throws an up.CannotParse error for an attribute selector with whitespace around the operator (bugfix)', function() {
+      const parse = () => up.element.createFromSelector('input[type = "text"]')
+      expect(parse).toThrowError(up.CannotParse, 'Unsupported attribute selector: [type = "text"]')
+    })
+
+    it('throws an up.CannotParse error for an attribute selector with a case-sensitivity flag (bugfix)', function() {
+      const parse = () => up.element.createFromSelector('[foo="bar" i]')
+      expect(parse).toThrowError(up.CannotParse, 'Unsupported attribute selector: [foo="bar" i]')
+    })
+
     it('sets attributes from a second argument', function() {
       const element = up.element.createFromSelector('div', { foo: 'one', bar: 'two' })
       expect(element.getAttribute('foo')).toEqual('one')
