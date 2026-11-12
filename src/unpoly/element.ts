@@ -132,8 +132,10 @@ up.element.get('.foo') // returns the first matching element
   If omitted, all elements in the `document` will be searched.
 @param {Element|jQuery|string} value
   The value to look up.
-@return {Element}
+@return {Element|null|undefined}
   The obtained `Element`.
+
+  Returns `null` or `undefined` if no element matches.
 @stable
 */
 export function getOne(element: Element): HTMLElement
