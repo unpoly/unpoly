@@ -18,7 +18,7 @@ export class Config<S extends object> {
   declare _knownKeys: string[]
 
 
-  constructor(label: string, blueprintFn: () => S = (() => ({}) as S)) {
+  constructor(label: string, blueprintFn: () => S) {
     this._label = label
     this._blueprintFn = blueprintFn
     this._knownKeys = []
@@ -52,8 +52,6 @@ export class Config<S extends object> {
     // We copy property descriptors instead of values, so the defaults can hold a getter and
     // setter that forward a setting to another config (like up.fragment.config.mainTargets)
     // or to the session storage (like up.log.config.enabled).
-    // Note that a defaults key matching an accessor on a Config subclass would shadow that
-    // accessor instead of calling its setter.
     Object.defineProperties(this, Object.getOwnPropertyDescriptors(this._blueprintFn()))
   }
 
