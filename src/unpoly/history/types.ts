@@ -1,3 +1,4 @@
+import type { UpEvent } from '../event.js'
 import type { RenderOptions } from '../fragment.js'
 
 /**
@@ -25,10 +26,10 @@ export interface HistoryTrackOptions {
 /**
 The `up:location:changed` event.
 */
-export type LocationChangedEvent = Event & {
+export interface LocationChangedEvent extends UpEvent {
   reason: LocationChangeReason
   location: string
-  previousLocation: string | undefined
+  previousLocation?: string
   alreadyHandled: boolean
   willHandle: boolean
 }
@@ -36,12 +37,10 @@ export type LocationChangedEvent = Event & {
 /**
 The `up:location:restore` event.
 */
-export type LocationRestoreEvent = Event & {
+export interface LocationRestoreEvent extends UpEvent {
   location: string
   renderOptions: RenderOptions
 }
-
-
 
 /**
 The settings in `up.history.config`, described in its doc comment.

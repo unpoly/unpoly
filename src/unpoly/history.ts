@@ -3,7 +3,7 @@ import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { muteUncriticalRejection } from './error.js'
 import { build, emit, haltEvent, isModified, on } from './event.js'
-import { render } from './fragment.js'
+import { render, type RenderOptions } from './fragment.js'
 import { layerStack } from './layer.js'
 import { makeFollowable, type ClickEvent } from './link.js'
 import { printToStandard, printUserEvent } from './log.js'
@@ -210,7 +210,7 @@ export const canPushState = mockable(function canPushState(): boolean {
   return initialRequestMethod() === 'GET'
 })
 
-export function historyOptions(options: u.PlainObject): u.PlainObject {
+export function historyOptions(options: RenderOptions): u.PlainObject {
   return u.pick(options, [
     'location',
     'title',
@@ -291,7 +291,7 @@ function trackCurrentLocation(trackOptions: t.HistoryTrackOptions): void {
       alreadyHandled,
       willHandle,
       log: `New location is ${location}`
-    }) as t.LocationChangedEvent
+    })
 
     up.migrate.prepareLocationChangedEvent?.(locationChangedEvent)
 
@@ -377,11 +377,11 @@ Also see [History in overlays](/learn/history-in-overlays).
 @signature
 */
 
-function splitLocation(location: string | undefined): string[] {
+function splitLocation(location?: string): string[] {
   return location?.split(/(?=#)/) || []
 }
 
-function getBase(location: string | undefined): string | undefined {
+function getBase(location?: string): string | undefined {
   return splitLocation(location)[0]
 }
 
@@ -705,7 +705,7 @@ export function getLang(doc: Document = document): string | undefined {
   }
 }
 
-export function updateLang(newLang: string | undefined): void {
+export function updateLang(newLang?: string): void {
   // setAttrPresence() only reads the value when it's present.
   e.setAttrPresence(e.getRoot(), 'lang', newLang!, !!newLang)
 }
