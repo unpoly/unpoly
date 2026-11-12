@@ -1,5 +1,11 @@
 const u = up.util
 
+type FragmentKeepEvent = import('../unpoly/fragment.js').FragmentKeepEvent
+type RenderJob = import('../unpoly/fragment.js').RenderJob
+type RenderOptions = import('../unpoly/fragment.js').RenderOptions
+type PlainObject = import('../unpoly/util.js').PlainObject
+type FixKeyOptions = import('./migrate/types.js').FixKeyOptions
+
 /*-
 @namespace up.fragment
 */
@@ -11,8 +17,8 @@ declare module '../unpoly.js' {
       first: CoreApi['fragment']['get']
     }
     first: CoreApi['fragment']['get']
-    replace: any
-    extract: any
+    replace(target: RenderOptions['target'], url: string, options?: RenderOptions): RenderJob
+    extract(target: RenderOptions['target'], document: string, options?: RenderOptions): RenderJob
     readonly flow: Up['fragment']
     readonly dom: Up['fragment']
   }
@@ -26,13 +32,13 @@ up.fragment.config.patch(function(config) {
 })
 
 // Names the call site of a render pass in a warning about its options.
-const renderOptionsSource = (options: any) => ({ label: 'render options', detail: options.origin || options.url || options.target })
+const renderOptionsSource = (options: RenderOptions): FixKeyOptions => ({ label: 'render options', detail: options.origin || options.url || options.target })
 
 // Core calls this hook (ChangeFromContent).
-up.migrate.handleResponseDocOptions = (docOptions: any) => up.migrate.fixKey(docOptions, 'html', 'document', renderOptionsSource(docOptions))
+up.migrate.handleResponseDocOptions = (docOptions) => up.migrate.fixKey(docOptions, 'html', 'document', renderOptionsSource(docOptions))
 
 up.fragment.config.patch(function(config) {
-  let matchAroundOriginDeprecated = () => up.migrate.deprecated('up.fragment.config.matchAroundOrigin', 'up.fragment.config.match')
+  let matchAroundOriginDeprecated = (): void => up.migrate.deprecated('up.fragment.config.matchAroundOrigin', 'up.fragment.config.match')
   Object.defineProperty(config, 'matchAroundOrigin', {
     configurable: true,
     get: function() {
@@ -63,7 +69,7 @@ from a new page fetched from the server.
 @deprecated
   Use `up.render()` or `up.navigate()` instead.
 */
-up.replace = function(target: any, url: string, options?: object) {
+up.replace = function(target, url, options) {
   up.migrate.deprecated('up.replace(target, url)', 'up.navigate(target, { url })')
   return up.navigate({ ...options, target, url })
 }
@@ -106,7 +112,7 @@ discarded, since it didn't match the selector.
 @deprecated
   Use `up.render()` or `up.navigate()` instead.
 */
-up.extract = function(target: any, document: string, options?: object) {
+up.extract = function(target, document, options) {
   up.migrate.deprecated('up.extract(target, document)', 'up.navigate(target, { document })')
   return up.navigate({ ...options, target, document })
 }
@@ -137,15 +143,17 @@ Returns `undefined` if no element matches these conditions.
 @deprecated
   Use `up.fragment.get()` instead.
 */
-up.fragment.first = function(...args) {
+up.fragment.first = function(...args: any[]) {
   up.migrate.deprecated('up.fragment.first()', 'up.fragment.get()')
   return (up.fragment.get as any)(...args)
 }
 
 up.first = up.fragment.first
 
-// Core calls this hook (RenderOptions). Render options have no type yet.
-up.migrate.preprocessRenderOptions = function(options: any) {
+// Core calls this hook (RenderOptions).
+// The options are a PlainObject, since they may have keys and values that RenderOptions no longer allows,
+// like { solo } or { fail: 'auto' }.
+up.migrate.preprocessRenderOptions = function(options: PlainObject) {
   // Rewrite deprecated { history: URLString } option
   if (u.isString(options.history) && (options.history !== 'auto')) {
     up.migrate.warn("Passing a URL as { history } option is deprecated. Pass it as { location } instead.")
@@ -175,10 +183,10 @@ up.migrate.preprocessRenderOptions = function(options: any) {
     // Old { solo } option did not accept a string, but some users were passing a string as a truthy value.
     // This would break the { abort } option, where a string is parsed a CSS selector.
     up.migrate.warn("The up.render() option { solo } has been replaced with { abort } and { abort } no longer accepts a URL pattern. Check if you can use { abort: 'target'} or use up.network.abort(pattern) instead.")
-    options.abort = (options) => up.network.abort(solo, options)
+    options.abort = (options: PlainObject) => up.network.abort(solo, options)
   } else if (u.isFunction(solo)) {
     up.migrate.warn("The up.render() option { solo } has been replaced with { abort } and { abort } no longer accepts a Function(up.Request): boolean. Check if you can use { abort: 'target'} or use up.network.abort(fn) instead.")
-    options.abort = (options) => { up.network.abort(solo, options) }
+    options.abort = (options: PlainObject) => { up.network.abort(solo, options) }
   } else if (solo === true) {
     up.migrate.deprecated('Option { solo: true }', "{ abort: 'all' }")
     options.abort = 'all'
@@ -230,7 +238,7 @@ up.migrate.preprocessRenderOptions = function(options: any) {
 }
 
 // Core calls this hook (up.reload()).
-up.migrate.postprocessReloadOptions = function(options: any) {
+up.migrate.postprocessReloadOptions = function(options) {
   let lastModified = options.headers?.['If-Modified-Since']
   let legacyHeader
   if (lastModified) {
@@ -246,7 +254,15 @@ up.migrate.postprocessReloadOptions = function(options: any) {
 // Modern versions only support ":origin". This legacy implementation
 // also supports the old shorthand "&".
 // Core uses this instead of its own implementation when unpoly-migrate is loaded (up.fragment).
-up.migrate.resolveOrigin = function(target: string, { origin }: { origin?: Element & { form?: HTMLFormElement } } = {}): string {
+/**
+An element that may be a form field or button, which has a `form` property.
+@internal
+*/
+interface FormFieldElement extends Element {
+  form?: HTMLFormElement | null
+}
+
+up.migrate.resolveOrigin = function(target, { origin }: { origin?: FormFieldElement } = {}) {
   // We skip over attribute selector values, which may contain an ampersand, e.g. 'a[href="/notes?page=2&order=created"]'
   let pattern = /"[^"]*"|'[^']*'|&|:origin\b/g
 
@@ -298,13 +314,13 @@ up.fragment.config.patch(function() {
 })
 
 // up.compiler('[up-keep]:not([up-keep=true]):not([up-keep=""])', function(element) {
-up.compiler('[up-keep]', function(element: Element) {
+up.compiler('[up-keep]', function(element) {
   let selector = up.internal.booleanOrStringAttr(element, 'up-keep')
   if (u.isString(selector) && /[.[#]/.test(selector)) {
     up.migrate.warn('The [up-keep] attribute no longer supports a selector value (found in %o). Elements will be matched by their derived target. You may prevent keeping with [up-on-keep="if(condition) event.preventDefault()"].', element)
     // The best we can do here is prevent matching of the old and new element if the new element
     // does not match the selector.
-    element.addEventListener('up:fragment:keep', function(event: any) {
+    element.addEventListener('up:fragment:keep', function(event: FragmentKeepEvent) {
       if (event.target === element && !event.newFragment.matches(selector)) {
         event.preventDefault()
       }

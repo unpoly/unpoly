@@ -2,7 +2,7 @@
 @class up.Layer
 */
 
-// Adds methods to up.Layer that core doesn't declare, so they exist only with unpoly-migrate.
+// Adds members to up.Layer that core doesn't declare, so they exist only with unpoly-migrate.
 declare module '../../unpoly/layer/base.js' {
   interface Layer {
     isOpen(): boolean

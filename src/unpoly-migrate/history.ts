@@ -34,7 +34,7 @@ up.migrate.renamedEvent('up:history:restored', 'up:location:changed')
 up.migrate.renamedEvent('up:history:replaced', 'up:location:changed')
 
 // Core calls this hook (up.history).
-up.migrate.prepareLocationChangedEvent = function(event: import('../unpoly/history.js').LocationChangedEvent) {
+up.migrate.prepareLocationChangedEvent = function(event) {
   up.migrate.renamedProperty(event, 'url', 'location', { warning: 'Property event.url of up:location:changed has been renamed to event.location' })
   // up.migrate.removedProperty(event, 'reason')
 }
@@ -68,12 +68,12 @@ up.history.config.patch(function() {
 // up.compiler('[up-hungry]')
 
 // Core calls this hook (up.Layer).
-up.migrate.warnOfHungryMetaTags = function(metaTags: import('../unpoly/util.js').List<Element>) {
+up.migrate.warnOfHungryMetaTags = function(metaTags) {
   // Meta tags are not updated automatically when up.history.config.enabled excludes them.
   if (!up.internal.isHistoryEnabled('metaTags')) return
 
   let fullHungrySelector = up.radio.config.selector('hungrySelectors')
-  let hungryMetaTags = up.util.filter(metaTags, (meta: Element) => meta.matches(fullHungrySelector))
+  let hungryMetaTags = up.util.filter(metaTags, (meta) => meta.matches(fullHungrySelector))
   if (hungryMetaTags.length) {
     up.migrate.warn('Meta tags in the <head> are now updated automatically. Remove the [up-hungry] attribute from %o.', hungryMetaTags)
   }

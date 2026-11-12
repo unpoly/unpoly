@@ -1,3 +1,5 @@
+import { type Up } from '../../unpoly.js'
+import { type PlainObject } from '../../unpoly/util.js'
 import { type ConfigWith } from '../../unpoly/util/config.js'
 
 /**
@@ -78,7 +80,7 @@ declare module '../../unpoly/migrate_stub.js' {
   interface Migrate {
     config: ConfigWith<MigrateConfig>
     deprecated(deprecatedExpression: string, replacementExpression: string): void
-    renamedNamespace(oldName: string, newName: string): void
+    renamedNamespace(oldName: string, newName: keyof Up): void
     renamedProperty(object: object, oldKey: string, newKey: string, options?: PropertyWarningOptions): void
     // Returns a reference to the property's value, which a polyfill can read.
     removedProperty<T>(object: object, key: string, options?: RemovedPropertyOptions<T>): [T]
@@ -89,7 +91,7 @@ declare module '../../unpoly/migrate_stub.js' {
     removedAttribute(oldAttr: string, options?: RemovedAttributeOptions): void
     renamedEvent(oldType: string, newType: string): void
     removedEvent(type: string, replacementExpression?: string | null): void
-    fixKey(object: object, oldKey: string, newKey: string, options?: FixKeyOptions): void
+    fixKey(object: PlainObject, oldKey: string, newKey: string, options?: FixKeyOptions): void
     warn(message: string, ...args: unknown[]): void
     // Added by other files of unpoly-migrate.
     targetMacro?(queryAttr: string, fixedResultAttrs: Record<string, string>, replacement: string): void

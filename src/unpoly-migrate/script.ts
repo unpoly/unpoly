@@ -1,5 +1,7 @@
 const u = up.util
 
+type Compiler = import('../unpoly/script.js').Compiler
+
 /*-
 @namespace up.script
 */
@@ -7,8 +9,9 @@ const u = up.util
 // A deprecated alias has the type of the namespace that replaces it.
 declare module '../unpoly.js' {
   interface Up {
-    $compiler: any
-    $macro: any
+    // The compiler function takes a jQuery collection instead of an element.
+    $compiler(...args: any[]): void
+    $macro(...args: any[]): void
     readonly syntax: Up['script']
   }
 }
@@ -20,9 +23,16 @@ up.script.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'callbackPolicy', 'evalCallbackPolicy', { warning: 'There is no setting up.script.config.callbackPolicy. Use up.script.config.evalCallbackPolicy instead.' })
 })
 
+/**
+A compiler registered with the { keep } option, which core no longer knows.
+@internal
+*/
+interface LegacyCompiler extends Compiler {
+  keep?: boolean | string
+}
+
 // Core calls this hook (HelloFragment).
-// The compiler is any because its legacy { keep } option no longer exists in core's types.
-up.migrate.postCompile = function(elements: Element[], compiler: any) {
+up.migrate.postCompile = function(elements, compiler: LegacyCompiler) {
   // up.compiler() has a legacy { keep } option that will automatically
   // set [up-keep] on the elements it compiles
   let keepValue
@@ -35,8 +45,8 @@ up.migrate.postCompile = function(elements: Element[], compiler: any) {
   }
 }
 
-up.migrate.targetMacro = function(queryAttr: string, fixedResultAttrs: Record<string, string>, replacement: string) {
-  up.macro(`[${queryAttr}]`, function(link: Element) {
+up.migrate.targetMacro = function(queryAttr, fixedResultAttrs, replacement) {
+  up.macro(`[${queryAttr}]`, function(link) {
     up.migrate.warn('Attribute [%s] has been deprecated. Use %s instead (found in %o).', queryAttr, replacement, link)
     let optionalTarget
     const resultAttrs = u.copy(fixedResultAttrs)
@@ -86,7 +96,7 @@ up.$compiler = function(...definitionArgs) {
 
   let $fn = definitionArgs.pop()
 
-  return (up.compiler as any)(...definitionArgs, function(element: Element, ...fnArgs) {
+  return (up.compiler as any)(...definitionArgs, function(element: Element, ...fnArgs: any[]) {
     let $element = jQuery(element)
     return $fn($element, ...fnArgs)
   })
@@ -128,14 +138,14 @@ up.$macro = function(...definitionArgs) {
 
   let $fn = definitionArgs.pop()
 
-  return (up.macro as any)(...definitionArgs, function(element: Element, ...fnArgs) {
+  return (up.macro as any)(...definitionArgs, function(element: Element, ...fnArgs: any[]) {
     let $element = jQuery(element)
     return $fn($element, ...fnArgs)
   })
 }
 
 // Core calls this hook (ChangeFromResponse).
-up.migrate.processHelloMeta = function(meta: object, response: any) {
+up.migrate.processHelloMeta = function(meta, response) {
   Object.defineProperty(meta, 'response', { get() {
     up.migrate.warn('Accessing meta.response from a compiler has been deprecated without replacement. Avoid fragments that compile differently for the initial page load vs. subsequent fragment updates.')
       return response

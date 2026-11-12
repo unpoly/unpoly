@@ -1,5 +1,7 @@
 const u = up.util
 
+type Up = import('../unpoly.js').Up
+type PlainObject = import('../unpoly/util.js').PlainObject
 type AttributeTransformer = import('./migrate/types.js').AttributeTransformer
 type FixKeyOptions = import('./migrate/types.js').FixKeyOptions
 type MigrateConfig = import('./migrate/types.js').MigrateConfig
@@ -89,7 +91,8 @@ up.migrate = (function() {
     return valueRef
   }
 
-  // Called as transformAttribute(oldAttr, { scope }?, transformer).
+  function transformAttribute(oldAttr: string, transformer: AttributeTransformer): void
+  function transformAttribute(oldAttr: string, options: TransformAttributeOptions, transformer: AttributeTransformer): void
   function transformAttribute(oldAttr: string, ...args: any[]): void {
     let transformer: AttributeTransformer = up.internal.extractCallback(args)
     let { scope }: TransformAttributeOptions = up.internal.extractOptions(args)
@@ -131,7 +134,7 @@ up.migrate = (function() {
   //
   // Pass a { detail } like an origin element or URL to name the call site, e.g. 'render options for <a href="/foo">'.
   // Since warnings are deduplicated by their text, this prints the warning once per call site.
-  function fixKey(object: object, oldKey: string, newKey: string, { label, detail }: FixKeyOptions = {}): void {
+  function fixKey(object: PlainObject, oldKey: string, newKey: string, { label, detail }: FixKeyOptions = {}): void {
     if (u.isDefined(object[oldKey])) {
       if (label && detail) {
         warn('Property { %s } has been renamed to { %s } (found in %s for %o)', oldKey, newKey, label, detail)
@@ -182,7 +185,7 @@ up.migrate = (function() {
     return u.uniq(u.map(eventTypes, fixEventType))
   }
 
-  function renamedNamespace(oldName: string, newName: string): void {
+  function renamedNamespace(oldName: string, newName: keyof Up): void {
     Object.defineProperty(up, oldName, {
       configurable: true,
       get() {

@@ -3,7 +3,7 @@
 */
 
 // Core calls this hook (up.protocol).
-up.migrate.clearCacheFromXHR = function(xhr: XMLHttpRequest): string | false | undefined {
+up.migrate.clearCacheFromXHR = function(xhr) {
   let value = xhr.getResponseHeader('X-Up-Clear-Cache')
 
   if (value) {
@@ -37,7 +37,7 @@ X-Up-Clear-Cache: /notes/*
 // We now require it to be a JSON-encoded string so we can escape high-ASCII characters:
 // https://makandracards.com/makandra/536174-http-headers-can-only-transport-us-ascii-characters-safely
 // Core calls this hook (up.protocol).
-up.migrate.titleFromXHR = function(xhr: XMLHttpRequest): string | false | undefined {
+up.migrate.titleFromXHR = function(xhr) {
   let value = xhr.getResponseHeader('X-Up-Title')
 
   if (value) {
@@ -78,7 +78,7 @@ If no timestamp is known, Unpoly will send a value of zero (`X-Up-Reload-From-Ti
 */
 
 up.protocol.config.patch(function() {
-  const cspNonceMoved = () => up.migrate.deprecated('up.protocol.config.cspNonce', 'up.script.config.cspNonce')
+  const cspNonceMoved = (): void => up.migrate.deprecated('up.protocol.config.cspNonce', 'up.script.config.cspNonce')
 
   Object.defineProperty(this, 'cspNonce', {
     configurable: true,

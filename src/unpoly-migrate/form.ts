@@ -4,7 +4,7 @@
 
 declare module '../unpoly.js' {
   interface Up {
-    observe: any
+    observe: CoreApi['watch']
   }
 }
 
@@ -18,7 +18,7 @@ up.form.config.patch(function(config) {
 
 // Core calls this hook (up.form).
 up.migrate.migratedFormGroupSelectors = function(): string[] {
-  return up.form.config.groupSelectors.map((originalSelector: string) => {
+  return up.form.config.groupSelectors.map((originalSelector) => {
     let migratedSelector = originalSelector.replace(/:has\((:origin|&)\)$/, '')
     if (originalSelector !== migratedSelector) {
       up.migrate.warn('Selectors in up.form.config.groupSelectors must not contain ":has(:origin)". The suffix is added automatically where required. Found in "%s".', originalSelector)
@@ -35,7 +35,7 @@ up.migrate.migratedFormGroupSelectors = function(): string[] {
 // button gets checked, not when it gets unchecked.
 // The new implementation uses up.watch(), which only works for a group of radio buttons.
 // Core calls this hook (Switcher).
-up.migrate.watchForSwitch = function(root: Element, callback: (event: Event) => void) {
+up.migrate.watchForSwitch = function(root, callback) {
   if (root.matches('input[type=radio]')) {
     up.migrate.warn('Using [up-switch] on an individual radio button is deprecated (%o). Use [up-switch] on the container of a radio group instead.', root)
     return up.on(root, 'change', callback)

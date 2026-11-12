@@ -1,5 +1,11 @@
 const u = up.util
 
+type UpEventListener = import('../unpoly/event.js').UpEventListener
+type RequestCondition = import('../unpoly/network.js').RequestCondition
+type RequestOptions = import('../unpoly/network.js').RequestOptions
+type RequestTesterOptions = import('../unpoly/network.js').RequestTesterOptions
+type UpResponse = import('../unpoly/network.js').UpResponse
+
 /*-
 @namespace up.network
 */
@@ -13,15 +19,21 @@ declare module '../unpoly.js' {
       isIdle(): boolean
       shouldReduceRequests(): boolean
     }
-    ajax: any
+    ajax(...args: [url: string, options?: RequestOptions] | [options: RequestOptions]): Promise<string>
     readonly proxy: Up['network']
   }
 }
 
-// Adds methods to up.Request and up.Response that core doesn't declare, so they exist only with unpoly-migrate.
+// Adds methods to up.Request, up.Response and up.cache that core doesn't declare, so they exist only with unpoly-migrate.
 declare module '../unpoly/network/request.js' {
   interface UpRequest {
     navigate(): void
+  }
+}
+
+declare module '../unpoly/network/request_cache.js' {
+  interface UpRequestCache {
+    clear(condition?: RequestCondition, testerOptions?: RequestTesterOptions): void
   }
 }
 
@@ -47,7 +59,7 @@ up.migrate.renamedEvent('up:request:recover', 'up:network:recover') // renamed i
 
 // The `config.preloadDelay` configuration was defined on up.proxy in V1. It was moved to up.link in V2.
 up.network.config.patch(function(config) {
-  const preloadDelayMoved = () => up.migrate.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
+  const preloadDelayMoved = (): void => up.migrate.deprecated('up.proxy.config.preloadDelay', 'up.link.config.preloadDelay')
   Object.defineProperty(config, 'preloadDelay', {
     configurable: true,
     get() {
@@ -86,8 +98,16 @@ up.network.config.patch(function(config) {
   up.migrate.removedProperty(config, 'requestMetaKeys', { value: [], warning: 'The configuration up.network.config.requestMetaKeys has been removed. Servers that optimize responses based on request headers should instead set a Vary response header.' })
 })
 
-// Core calls this hook (up.request()). The options are any, since they may have keys that core no longer knows.
-up.migrate.handleRequestOptions = function(options: any) {
+/**
+Request options with keys that core no longer knows.
+@internal
+*/
+interface LegacyRequestOptions extends RequestOptions {
+  solo?: unknown
+}
+
+// Core calls this hook (up.request()).
+up.migrate.handleRequestOptions = function(options: LegacyRequestOptions) {
   up.migrate.fixKey(options, 'clearCache', 'expireCache', { label: 'request options', detail: options.url })
 
   if (options.solo) {
@@ -134,8 +154,8 @@ up.ajax('/search', { params: { query: 'sunshine' } }).then(function(text) {
 */
 up.ajax = function(...args) {
   up.migrate.deprecated('up.ajax()', 'up.request()')
-  const pickResponseText = (response) => response.text
-  return (up.request as any)(...args).then(pickResponseText)
+  const pickResponseText = (response: UpResponse): string => response.text
+  return up.request(...args).then(pickResponseText)
 }
 
 /*-
@@ -160,7 +180,7 @@ Expires cache entries.
 // The cache's class isn't on window.up, and importing it here would patch a second copy
 // of the class, since unpoly-migrate.js is a separate bundle. So we patch the prototype
 // of the up.cache instance.
-Object.getPrototypeOf(up.cache).clear = function(...args) {
+Object.getPrototypeOf(up.cache).clear = function(...args: any[]) {
   up.migrate.deprecated('up.cache.clear()', 'up.cache.expire()')
   this.expire(...args)
 }
@@ -179,7 +199,7 @@ up.network.preload = function(...args) {
 }
 
 // Core calls this hook (up.network.abort()).
-up.migrate.preprocessAbortArgs = function(args: any[]) {
+up.migrate.preprocessAbortArgs = function(args) {
   if (args.length === 2 && u.isString(args[1])) {
     up.migrate.warn('up.network.abort() no longer takes a reason as a second argument. Pass it as { reason } option instead.')
     args[1] = { reason: args[1] }
@@ -300,7 +320,7 @@ up.Response.prototype.isError = function() {
   return !this.ok
 }
 
-function mayHaveCustomIndicator() {
+function mayHaveCustomIndicator(): UpEventListener | undefined {
   const listeners = up.internal.UpEventListener.allNonDefault(document)
   return u.find(listeners, (listener) => listener.eventType === 'up:network:late')
 }

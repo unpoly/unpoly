@@ -1,5 +1,7 @@
 const e = up.element
 
+type FragmentHungryEvent = import('../unpoly/radio.js').FragmentHungryEvent
+
 /*-
 @namespace up.radio
 */
@@ -20,13 +22,13 @@ up.on('up:fragment:poll', function(event) {
   }
 })
 
-up.compiler('[up-hungry][up-if-history]', function(element: HTMLElement) {
+up.compiler('[up-hungry][up-if-history]', function(element) {
   let ifHistory = e.booleanAttr(element, 'up-if-history')
   if (!ifHistory) return
 
   up.migrate.warn('Attribute [up-if-history] has been deprecated. Use [up-on-hungry="if (!renderOptions.history) event.preventDefault()"] instead (found in %o).', element)
 
-  element.addEventListener('up:fragment:hungry', function(event: any) {
+  element.addEventListener('up:fragment:hungry', function(event: FragmentHungryEvent) {
     if (!event.renderOptions.history) {
       event.preventDefault()
     }
