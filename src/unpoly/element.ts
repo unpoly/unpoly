@@ -416,17 +416,17 @@ export function paint(element: HTMLElement): void {
 }
 
 export function fixedToAbsolute(element: HTMLElement): void {
+  // A hidden element (e.g. with `display: none`) has no position to preserve.
+  // It would also not gain an offsetParent below.
+  if (!isVisible(element)) return
+
   const elementRectAsFixed = element.getBoundingClientRect()
 
   // Set the position to 'absolute' so it gains an offsetParent
   element.style.position = 'absolute'
 
-  // A hidden element (e.g. with `display: none`) has no offsetParent.
-  // It is invisible, so it has no position to preserve.
-  const { offsetParent } = element
-  if (!offsetParent) return
-
-  const offsetParentRect = offsetParent.getBoundingClientRect()
+  // A visible element with `position: absolute` has an offsetParent.
+  const offsetParentRect = element.offsetParent!.getBoundingClientRect()
 
   // A computed margin is never blank.
   setInlineStyle(element, {
