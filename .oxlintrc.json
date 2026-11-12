@@ -173,6 +173,21 @@
       }
     },
     {
+      // Rules for the modules that follow the TypeScript conventions in docs/contributing/code-style.md,
+      // as a ratchet: each step of the migration adds the modules it converted to `files`, until
+      // the list covers all of src/ and the rules can move to the override for **/*.ts above.
+      // Inline callbacks and functions whose type comes from context keep inferred return types.
+      "files": [],
+      "rules": {
+        "typescript/explicit-function-return-type": ["error", {
+          "allowExpressions": true,
+          "allowTypedFunctionExpressions": true,
+          "allowHigherOrderFunctions": true
+        }],
+        "typescript/consistent-type-definitions": ["error", "interface"]
+      }
+    },
+    {
       "files": ["spec/**/*.js"],
       "globals": {
         "jasmine": "writable",

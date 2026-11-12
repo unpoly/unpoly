@@ -58,7 +58,7 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
 - **Object shapes are interfaces.** Every object shape is an `interface`, including the
   properties Unpoly sets on elements (`interface FragmentElement extends Element { … }`). Use
   `type` only for unions, tuples, function types and aliases. An interface can be passed where
-  a `PlainObject` is expected.
+  a `PlainObject` is expected. Lint enforces this with `consistent-type-definitions`.
 - **`?` for optional values.** Write `origin?: Element`, not `origin: Element | undefined`,
   for parameters, properties and `declare`d class fields. Return types, and a parameter
   followed by a required one, still need `| undefined`.
@@ -72,6 +72,9 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
   callbacks and functions that get their type from context stay inferred. Agents (and humans)
   read code with `grep`, not by hovering, and an explicit type catches an accidental widening
   where it happens. Lint enforces this with `explicit-function-return-type`.
+
+  Both rules only check the modules that are converted already. Their override in
+  `.oxlintrc.json` lists them, and a change that converts a module adds it there.
 - **Local variables are inferred.** Annotate one where inference can't do it (see
   [Strict checks](#strict-checks)), or where a type helps the reader.
 - **Refactor before type acrobatics.** When a type is hard to write, change the code so it's
