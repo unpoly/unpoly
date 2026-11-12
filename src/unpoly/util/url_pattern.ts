@@ -4,7 +4,7 @@ import * as u from '../util.js'
 A named placeholder in a URL pattern (`:name` or `$name`), and how to cast its value.
 @internal
 */
-export interface URLPatternGroup {
+interface URLPatternGroup {
   name: string
   cast: (value: string) => string | number
 }
@@ -14,7 +14,7 @@ export interface URLPatternGroup {
 export class UpURLPattern {
   declare _groups: URLPatternGroup[]
   declare _positiveRegexp: RegExp
-  declare _negativeRegexp: RegExp | undefined
+  declare _negativeRegexp?: RegExp
 
   // Takes a space-separated string of patterns, or an array of patterns.
   // Patterns prefixed with a minus (`-/admin/*`) exclude URLs.

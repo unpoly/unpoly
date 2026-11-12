@@ -5,8 +5,8 @@ import { RenderOptions, toFailKey } from '../fragment.js'
 export class OptionsParser {
   declare _options: u.PlainObject
   declare _element: Element
-  declare _fail: boolean | undefined
-  declare _closest: boolean | undefined
+  declare _fail?: boolean
+  declare _closest?: boolean
   declare _attrPrefix: string
   declare _defaults: u.PlainObject | false
 

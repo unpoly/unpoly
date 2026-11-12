@@ -2,7 +2,7 @@
 A list that Unpoly's list functions accept: an array, a `NodeList`, an `HTMLCollection`,
 an `arguments` object or a jQuery collection.
 */
-export type List<T> = ArrayLike<T> & Iterable<T>
+export interface List<T> extends ArrayLike<T>, Iterable<T> {}
 
 /**
 A function called for each item of a list, or the name of a property to read from each item.
@@ -23,7 +23,16 @@ export type ValueOrFunction<T> = T | ((...args: any[]) => T)
 The parts of a URL, as returned by `up.util.parseURL()`.
 A `URL`, a `Location` or an `<a>` element all have these properties.
 */
-export type ParsedURL = Pick<URL, 'href' | 'protocol' | 'host' | 'hostname' | 'port' | 'pathname' | 'search' | 'hash'>
+export interface ParsedURL {
+  href: string
+  protocol: string
+  host: string
+  hostname: string
+  port: string
+  pathname: string
+  search: string
+  hash: string
+}
 
 /**
 Options for `up.util.normalizeURL()`.
@@ -42,7 +51,7 @@ export type AnyFunction = (...args: any[]) => any
 A promise that can be resolved or rejected from the outside. See `up.util.newDeferred()`.
 @internal
 */
-export type Deferred<T> = Promise<T> & {
+export interface Deferred<T> extends Promise<T> {
   resolve(value?: T | PromiseLike<T>): void
   reject(reason?: any): void
 }

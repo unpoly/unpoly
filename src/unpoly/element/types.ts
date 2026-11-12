@@ -1,4 +1,5 @@
 import type * as u from '../util.js'
+import type { UpEvent } from '../event.js'
 
 /**
 A CSS selector, an element, or a list of elements. See `up.element.get()`.
@@ -42,15 +43,13 @@ What `up.element.parseSelector()` returns.
 export interface ParsedSelector {
   includePath: SelectorSegment[]
   includeRaw: string
-  excludeRaw: string | undefined
+  excludeRaw?: string
 }
 
 /**
 The `up:element:defined` event.
 */
-export type ElementDefinedEvent = Event & {
-  localName: string
-}
+export interface ElementDefinedEvent extends UpEvent { localName: string }
 
 /**
 Reads an attribute value from an element, like `up.element.booleanAttr()`.
