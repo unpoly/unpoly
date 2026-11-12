@@ -5,13 +5,14 @@ import {
   EventEmitter, EventListenerGroup, on, type EmitProps, type EmittedEvent, type EventTypes,
   type ListenerArgs, type ObservedEvent, type UnbindFn,
 } from '../event.js'
+import { type RenderOptions } from '../fragment.js'
 import {
   currentLocation, findMetaTags, getLang, isHistoryEnabled, pushLocation, updateLang,
-  updateMetaTags, type HistoryAspect,
+  updateMetaTags, type HistoryAspect, type LocationChangedEvent,
 } from '../history.js'
 import {
-  closestLayerElement, mainTargets, type LayerCloseOptions, type LayerListenerOptions, type LayerMode,
-  type LayerOptions, type LayerState, type PeelOptions,
+  closestLayerElement, mainTargets, type LayerCloseOptions, type LayerMode, type LayerOptions,
+  type LayerState, type PeelOptions,
 } from '../layer.js'
 import { convertClicks } from '../link.js'
 import { newStateCache } from '../viewport.js'
@@ -617,7 +618,7 @@ export class Layer {
   @include up.on/after-element
   @stable
   */
-  on<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>, LayerListenerOptions>): UnbindFn
+  on<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): UnbindFn
   on(...args: unknown[]) {
     return this._buildEventListenerGroup(args).bind()
   }
@@ -629,7 +630,7 @@ export class Layer {
   @include up.off/after-element
   @stable
   */
-  off<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>, LayerListenerOptions>): void
+  off<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): void
   off(...args: unknown[]) {
     return this._buildEventListenerGroup(args).unbind()
   }
@@ -767,7 +768,7 @@ export class Layer {
     return this.stack.asCurrent(this, fn)
   }
 
-  updateHistory(options: u.PlainObject): void {
+  updateHistory(options: RenderOptions): void {
     // (1) The layer always stores the values it rendered.
     // (2) The updaters only change the browser for an aspect that Unpoly keeps in sync (see showsLiveHistory()).
     //     Since up.history.config.enabled can exclude aspects, render options can only narrow the config,
@@ -814,7 +815,7 @@ export class Layer {
     }
   }
 
-  _onBrowserLocationChanged({ location }: { location: string }): void {
+  _onBrowserLocationChanged({ location }: LocationChangedEvent): void {
     if (this.showsLiveHistory('location')) {
       this.updateLocation(location, { push: false })
     }
@@ -962,8 +963,7 @@ export class Layer {
   @include up.element.createFromSelector/all
   @experimental
   */
-  affix(selector: string, attrs?: u.PlainObject): HTMLElement
-  affix(...args: [selector: string, attrs?: u.PlainObject]) {
+  affix(...args: [selector: string, attrs?: u.PlainObject]): HTMLElement {
     return e.affix(this.getFirstSwappableElement(), ...args)
   }
 

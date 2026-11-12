@@ -5,7 +5,11 @@ import { muteUncriticalSync } from '../../error.js'
 import { haltEvent, on, onEscape, type UnbindFn } from '../../event.js'
 import { focusedField, formFieldSelector, Params } from '../../form.js'
 import { CloseLayer, destroy, getAllFragments, type CloseLayerOptions } from '../../fragment.js'
-import { isWithinForeignOverlay, type LayerCloseOptions, type LayerOptions } from '../../layer.js'
+import {
+  isWithinForeignOverlay, type LayerAnimation, type LayerAnimationOptions, type LayerCloseOptions,
+  type LayerOptions,
+} from '../../layer.js'
+import { type ClickEvent } from '../../link.js'
 import { printUserEvent } from '../../log.js'
 import { animate, isNone, type AnimationFn, type AnimationValue } from '../../motion.js'
 import { type UpResponse } from '../../network.js'
@@ -15,12 +19,6 @@ import { OverlayFocus } from '../overlay_focus.js'
 
 // A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
 type CloseFn = (value: any, options?: LayerCloseOptions) => void
-
-/**
-How to animate an overlay as it opens or closes.
-@internal
-*/
-export type OverlayAnimationOptions = Pick<LayerCloseOptions, 'animation' | 'duration' | 'easing' | 'onFinished'>
 
 /*-
 @class up.Layer
@@ -77,8 +75,8 @@ export abstract class Overlay extends Layer {
   declare dismissible: string[] | boolean | string
   declare dismissLabel: string
   declare dismissARIALabel: string
-  declare openAnimation: u.ValueOrFunction<AnimationValue>
-  declare closeAnimation: u.ValueOrFunction<AnimationValue>
+  declare openAnimation: LayerAnimation
+  declare closeAnimation: LayerAnimation
   declare openDuration: number
   declare closeDuration: number
   declare openEasing: string
@@ -335,7 +333,7 @@ export abstract class Overlay extends Layer {
     }
   }
 
-  _onOutsideClicked(event: Event & { originalEvent?: UIEvent, target: Element }, halt: boolean | undefined): void {
+  _onOutsideClicked(event: ClickEvent, halt?: boolean): void {
     printUserEvent(event)
     // We still halt a click we ignore below, or a popup's origin would be followed again.
     if (halt) haltEvent(event)
@@ -345,7 +343,7 @@ export abstract class Overlay extends Layer {
     // The up:click event has no { detail }, so we read the click count from the native event.
     // Keyboard activations and element.click() have a { detail } of 0.
     // Without an original event we compare undefined, which is never > 1.
-    if ((event.originalEvent?.detail as number) > 1) return
+    if (event.originalEvent?.detail > 1) return
 
     muteUncriticalSync(() =>
       this.dismiss(':outside', { origin: event.target })
@@ -394,7 +392,7 @@ export abstract class Overlay extends Layer {
 
   _registerSubmitCloser(attribute: string, closeFn: CloseFn): void {
     // Allow the fallbacks to be both vanilla forms and Unpoly [up-submit] forms
-    this.on('submit', `[${attribute}]`, (event: SubmitEvent & { target: HTMLFormElement }, element) => {
+    this.on('submit', `[${attribute}]`, (event, element) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
       // a form from being submitted on the root layer.
       haltEvent(event, { log: true })
@@ -405,7 +403,7 @@ export abstract class Overlay extends Layer {
       // (2) The opener is interested in the form's full params, including the button the user
       //     pressed. When nothing submitted the form (a script dispatched the event) there is
       //     no button to attribute, and we must not guess the form's first one.
-      const value = Params.fromForm(event.target, { submitButton: event.submitter ?? false })
+      const value = Params.fromForm(event.target as HTMLFormElement, { submitButton: event.submitter ?? false })
       this._onAttrCloserActivated(element, value, closeFn)
     })
   }
@@ -528,7 +526,7 @@ export abstract class Overlay extends Layer {
     }
   }
 
-  startOpenAnimation(options: OverlayAnimationOptions = {}): Promise<void> {
+  startOpenAnimation(options: LayerAnimationOptions = {}): Promise<void> {
     const animationProps = this.openAnimationProps(options)
     const onFinished = () => {
       this.wasEverVisible = true
@@ -538,7 +536,7 @@ export abstract class Overlay extends Layer {
     return animate(this.element, animationProps.animation, { ...animationProps, onFinished })
   }
 
-  openAnimationProps(options: OverlayAnimationOptions = {}): OverlayAnimationOptions {
+  openAnimationProps(options: LayerAnimationOptions = {}): LayerAnimationOptions {
     let boxAnimation = options.animation ?? this.evalOption(this.openAnimation)
     let backdropAnimation = 'fade-in' // _animationFn() will ignore this animation unless the box is also animating
     let animationFn = this._animationFn(boxAnimation, backdropAnimation)
@@ -550,7 +548,7 @@ export abstract class Overlay extends Layer {
     }
   }
 
-  closeAnimationProps(options: OverlayAnimationOptions = {}): OverlayAnimationOptions {
+  closeAnimationProps(options: LayerAnimationOptions = {}): LayerAnimationOptions {
     let boxAnimation =  this.wasEverVisible && (options.animation ?? this.evalOption(this.closeAnimation))
     let backdropAnimation = 'fade-out' // _animationFn() will ignore this animation unless the box is also animating
     let animationFn = this._animationFn(boxAnimation, backdropAnimation)

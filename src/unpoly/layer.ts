@@ -274,7 +274,7 @@ function modeConfigs(mode: t.LayerMode): t.LayerDefaults[] {
   }
 }
 
-function normalizeLayerOption(options: u.PlainObject): void {
+function normalizeLayerOption(options: t.LayerLookupOptions): void {
   if (options.layer instanceof Layer) return
 
   up.migrate.handleLayerOptions?.(options)
@@ -319,7 +319,7 @@ function normalizeLayerOption(options: u.PlainObject): void {
   }
 }
 
-function setBaseLayerOption(options: u.PlainObject): void {
+function setBaseLayerOption(options: t.LayerLookupOptions): void {
   if (options.baseLayer instanceof Layer) return
 
   // Remember the layer that was current when the request was made,
@@ -329,7 +329,7 @@ function setBaseLayerOption(options: u.PlainObject): void {
   options.baseLayer = layerStack.get('current', { ...options, normalizeLayerOptions: false })
 }
 
-export function normalizeLayerOptions(options: u.PlainObject): void {
+export function normalizeLayerOptions(options: t.LayerLookupOptions): void {
   normalizeLayerOption(options)
   options.context ??= {}
   setBaseLayerOption(options)
@@ -679,7 +679,7 @@ console.log(layer.mode) // logs "modal"
 
 @stable
 */
-export async function open(options: u.PlainObject): Promise<Layer> {
+export async function open(options?: RenderOptions): Promise<Layer> {
   options = u.newOptions(options, {
     layer: 'new',
     defaultToEmptyContent: true,
@@ -835,7 +835,7 @@ try {
 @stable
 @signature
 */
-export function ask(options: u.PlainObject): Promise<any> {
+export function ask(options: RenderOptions): Promise<any> {
   return new Promise(function(resolve, reject) {
     open(RenderOptions.chainCallbacks(options, {
       onAccepted: (event: t.LayerCloseEvent) => resolve(event.value),
@@ -854,7 +854,7 @@ export function closestLayerElement(element: Element): Element | null {
   return element.closest(anySelector)
 }
 
-export function optionToString(option: any): string {
+export function optionToString(option: t.LayerOption): string {
   if (u.isString(option)) {
     return `layer "${option}"`
   } else {
@@ -1912,7 +1912,7 @@ export const api = {
     get current() { return layerStack.current },
     get front() { return layerStack.front },
     get count() { return layerStack.count },
-    dismissOverlays(...args: Parameters<LayerStack['dismissOverlays']>): void { return layerStack.dismissOverlays(...args) },
+    dismissOverlays(...args: [value?: any, options?: t.LayerCloseOptions]): void { return layerStack.dismissOverlays(...args) },
   },
 }
 

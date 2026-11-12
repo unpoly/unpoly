@@ -1,7 +1,7 @@
 import type * as u from '../util.js'
-import { type EventListenerAttributes, type UpEvent } from '../event.js'
+import { type UpEvent } from '../event.js'
 import { type RenderOptions } from '../fragment.js'
-import { type AnimationValue } from '../motion.js'
+import { type AnimateOptions, type AnimationValue } from '../motion.js'
 import { type UpResponse } from '../network.js'
 import { type Layer } from './base.js'
 import { type LayerStack } from './layer_stack.js'
@@ -77,12 +77,12 @@ export type LayerAnimation = AnimationValue | ((layer: Layer) => AnimationValue)
 /**
 A layer mode. The root layer has the mode `'root'`, an overlay has one of the other modes.
 */
-export type LayerMode = 'root' | 'modal' | 'drawer' | 'popup' | 'cover'
+export type LayerMode = 'root' | OverlayMode
 
 /**
 A layer mode that opens an overlay. All modes except `'root'`.
 */
-export type OverlayMode = Exclude<LayerMode, 'root'>
+export type OverlayMode = 'modal' | 'drawer' | 'popup' | 'cover'
 
 /**
 Where an overlay is in its life cycle. The root layer has no state.
@@ -106,17 +106,20 @@ export interface LayerOptions {
 }
 
 /**
+How an overlay animates as it opens or closes.
+*/
+export interface LayerAnimationOptions extends AnimateOptions {
+  animation?: AnimationValue
+}
+
+/**
 Options for closing an overlay with `up.Layer#accept()` or `up.Layer#dismiss()`.
 */
-export interface LayerCloseOptions {
+export interface LayerCloseOptions extends LayerAnimationOptions {
   confirm?: string | boolean
   /** @internal */
   preventable?: boolean
   response?: UpResponse
-  animation?: AnimationValue
-  duration?: number
-  easing?: string
-  onFinished?: () => void
   history?: boolean
   /** @internal */
   origin?: Element
@@ -129,11 +132,6 @@ export interface PeelOptions extends LayerCloseOptions {
   value?: any
   intent?: 'accept' | 'dismiss'
 }
-
-/**
-Options for listening to events with `up.Layer#on()`.
-*/
-export type LayerListenerOptions = Pick<EventListenerAttributes, 'passive' | 'once' | 'capture'>
 
 /**
 A value for the `{ layer }` option: an `up.Layer`, its index in the layer stack, an element in the layer,
