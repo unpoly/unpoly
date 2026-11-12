@@ -297,11 +297,12 @@ Import a class from the main module that owns it, not from its file:
 **Header order:**
 
 1. The module's Sass file
-2. `u` and `e`
-3. Other main modules, one statement each
+2. `u` and `e`, then any class from `util/` or `element/` (see below)
+3. Other main modules, one statement each, alphabetically by path
 4. Own types: `import type * as t` and `export type *`
-5. Own classes, grouped by source file. Each import is directly followed by its re-export. A
-   class the module only re-exports gets a single `export { … } from` line.
+5. Own classes and other files of the module's folder, alphabetically by path. Each import is
+   directly followed by its re-export. A class the module only re-exports gets a single
+   `export { … } from` line.
 
 ```ts
 import './fragment.sass'
@@ -318,8 +319,9 @@ export { RenderJob }
 export { RenderResult } from './fragment/render/render_result.js'
 ```
 
-A module re-exports exactly the classes that other modules import, nothing more.
-`internal.ts` counts as another module, since it's how the specs reach a class.
+A module re-exports exactly the classes, types and values of its folder that other modules
+import, nothing more. `internal.ts` counts as another module, since it's how the specs reach a
+class.
 
 > [!WARNING]
 > A re-export can change when an importer gets the class. In an import cycle, the importer
@@ -327,15 +329,18 @@ A module re-exports exactly the classes that other modules import, nothing more.
 > silent `undefined` instead of an error. Before a module imports a class through a re-export,
 > check that it doesn't use the class while it is being defined (`extends`, a static block, a
 > top-level call). The rules for cycles are in the comments of `src/unpoly.ts`.
+> `bin/self-test` fails if a module reads a binding before it is evaluated.
 
-**Exceptions.** A module doesn't re-export a class when that would make it evaluate before a
-module the class imports. `util.ts` and `element.ts` don't re-export their classes: `Config`
-imports `element.ts`, and `OptionsParser` imports `fragment.ts`. Such classes are imported from
-their own file, like `import { newConfig } from './util/config.js'`. For the same reason,
-`motion.ts` and `status.ts` import `Registry` from `framework/registry.js`, since they create
-one before `framework.ts` is evaluated. `internal.ts` keeps named imports, also from `util.ts`
-and `element.ts`, because `bin/lint`'s api collision check needs each `up.internal` key to be
-a named import.
+A few imports can't go through the owning module:
+
+- `util.ts` and `element.ts` don't re-export `Config` and `OptionsParser`, because those import
+  modules that are evaluated later (`element.ts`, `fragment.ts`). Import them from their files,
+  right after `u` and `e`: `import { newConfig } from './util/config.js'`.
+- A module that uses a class at its top level, like `new Registry()` in `status.ts`, imports it
+  from its file when the owning module may still be evaluating at that point. Say so in a comment
+  above the import.
+- `internal.ts` imports util and element functions by name, since every `up.internal` key must be
+  a named import (see above).
 
 
 ## Entry points and optional bundles
