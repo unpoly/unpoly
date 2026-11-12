@@ -132,11 +132,10 @@ Every api above, merged.
 
 @internal
 */
-export type CoreApi = MergeApis<typeof apis>
+export type CoreApi = Intersect<typeof apis>
 
-type MergeApis<T extends readonly object[]> = T extends readonly [infer First, ...infer Rest extends readonly object[]]
-  ? First & MergeApis<Rest>
-  : unknown
+// Intersects the types in a tuple: `[A, B, C]` becomes `A & B & C`.
+type Intersect<T> = T extends readonly [infer First, ...infer Rest] ? First & Intersect<Rest> : unknown
 
 // Copy property descriptors, so getters (like `up.context`) stay live.
 // A later api would replace an earlier api's key without notice. The lint check in
