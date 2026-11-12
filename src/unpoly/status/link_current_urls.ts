@@ -3,9 +3,9 @@ import { isSafe } from '../link.js'
 
 export class LinkCurrentURLs {
   declare _isSafe: boolean
-  declare _href: string | undefined
-  declare _upHREF: string | undefined
-  declare _aliasPattern: u.UpURLPattern | undefined
+  declare _href?: string
+  declare _upHREF?: string
+  declare _aliasPattern?: u.UpURLPattern
 
   constructor(link: Element) {
     // A link with an unsafe method will never be highlighted with .up-current.
@@ -29,7 +29,7 @@ export class LinkCurrentURLs {
     }
   }
 
-  isCurrent(normalizedLocation: string | undefined): boolean {
+  isCurrent(normalizedLocation?: string): boolean {
     // In overlays without history no link is considered current.
     if (!normalizedLocation) {
       return false

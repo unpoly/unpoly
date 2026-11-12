@@ -25,8 +25,8 @@ Everything an `up.Preview` needs to know.
 @internal
 */
 export interface PreviewOptions {
-  // Undefined when opening a layer.
-  fragment: Element | undefined
+  // Missing when opening a layer.
+  fragment?: Element
   request: UpRequest
   renderOptions: u.PlainObject
   cleaner: u.Cleaner

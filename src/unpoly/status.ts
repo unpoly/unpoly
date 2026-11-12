@@ -17,10 +17,15 @@ import { LinkCurrentURLs } from './status/link_current_urls.js'
 import { Preview } from './status/preview.js'
 
 // A nav remembers the locations its links were last compared with.
-type NavElement = Element & { upNavLocations?: string[] }
+interface NavElement extends Element {
+  upNavLocations?: string[]
+}
 
 // A link remembers its parsed URLs, and the area it expands to with [up-expand].
-type NavLink = Element & { upCurrentURLs?: LinkCurrentURLs, upExpandedPair?: Element[] }
+interface NavLink extends Element {
+  upCurrentURLs?: LinkCurrentURLs
+  upExpandedPair?: Element[]
+}
 
 interface NavUpdateOptions {
   // The links in the navs have changed.
@@ -279,7 +284,7 @@ You can style revalidating fragments to convey that content might be stale:
 
 export function runPreviews(request: UpRequest, renderOptions: u.PlainObject): () => void {
   // Previews run while the request is in flight, before it evicts its layers.
-  let { bindLayer } = request as UpRequest & { bindLayer: Layer }
+  let bindLayer = request.bindLayer!
   let focusCapsule = FocusCapsule.preserve(bindLayer)
   let applyPreviews = () => doRunPreviews(request, renderOptions)
   let revertPreviews = bindLayer.asCurrent(applyPreviews)

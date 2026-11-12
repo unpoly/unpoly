@@ -7,7 +7,7 @@ import {
   layerStack, open, OVERLAY_VISUAL_KEYS, type Layer, type LayerCloseEvent,
 } from '../layer.js'
 import { printToStandard } from '../log.js'
-import { type UpRequest } from '../network.js'
+import { type UpRequest, type UpResponse } from '../network.js'
 import { resolvePreviewFns } from '../status.js'
 import type * as t from './types.js'
 
@@ -24,7 +24,7 @@ See [Previews](/learn/previews) for an overview.
 @parent up.status
 */
 export class Preview {
-  declare fragment: Element | undefined
+  declare fragment?: Element
   declare request: UpRequest
   declare renderOptions: u.PlainObject
   declare _cleaner: u.Cleaner
@@ -185,7 +185,7 @@ export class Preview {
   @stable
   */
   // A layer, or 'new' when the request opens an overlay.
-  get layer(): any {
+  get layer(): Layer | 'new' {
     return this.request.layer
   }
 
@@ -217,7 +217,7 @@ export class Preview {
     The expired response object.
   @experimental
   */
-  get expiredResponse(): any {
+  get expiredResponse(): UpResponse | undefined {
     return this.renderOptions.expiredResponse
   }
 
@@ -377,7 +377,7 @@ export class Preview {
   */
   setAttrs(attrs: u.PlainObject): void
   setAttrs(element: e.ElementOrSelector, attrs: u.PlainObject): void
-  setAttrs(...args: unknown[]) {
+  setAttrs(...args: unknown[]): void {
     let [element, attrs] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.setAttrsTemp(element, attrs))
   }
@@ -408,7 +408,7 @@ export class Preview {
   */
   addClass(klass: string): void
   addClass(element: e.ElementOrSelector, klass: string): void
-  addClass(...args: unknown[]) {
+  addClass(...args: unknown[]): void {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.addClassTemp(element, klass))
   }
@@ -443,7 +443,7 @@ export class Preview {
   */
   removeClass(klass: string): void
   removeClass(element: e.ElementOrSelector, klass: string): void
-  removeClass(...args: unknown[]) {
+  removeClass(...args: unknown[]): void {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.removeClassTemp(element, klass))
   }
@@ -476,7 +476,7 @@ export class Preview {
   */
   setStyle(styles: e.StyleProps): void
   setStyle(element: e.ElementOrSelector, styles: e.StyleProps): void
-  setStyle(...args: unknown[]) {
+  setStyle(...args: unknown[]): void {
     let [element, styles] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.setStyleTemp(element, styles))
   }
@@ -507,7 +507,7 @@ export class Preview {
   @stable
   */
   disable(element?: e.ElementOrSelector): void
-  disable(...args: unknown[]) {
+  disable(...args: unknown[]): void {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(disableContainerTemp(element, { preview: true }))
   }
@@ -634,7 +634,7 @@ export class Preview {
   insert(tempValue: any): void
   insert(reference: e.ElementOrSelector, tempValue: any): void
   insert(reference: e.ElementOrSelector, position: InsertPosition, tempValue: any): void
-  insert(...args: unknown[]) {
+  insert(...args: unknown[]): void {
     // (1) tempValue can have on of the following forms:
     //     - A string of HTML
     //     - A CSS selector string matching a template
@@ -670,7 +670,7 @@ export class Preview {
   @stable
   */
   show(element?: e.ElementOrSelector): void
-  show(...args: unknown[]) {
+  show(...args: unknown[]): void {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(e.showTemp(element))
   }
@@ -701,7 +701,7 @@ export class Preview {
   @stable
   */
   hide(element?: e.ElementOrSelector): void
-  hide(...args: unknown[]) {
+  hide(...args: unknown[]): void {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(e.hideTemp(element))
   }
@@ -737,7 +737,7 @@ export class Preview {
   @experimental
   */
   hideContent(parent?: e.ElementOrSelector): void
-  hideContent(...args: unknown[]) {
+  hideContent(...args: unknown[]): void {
     let [parent] = this._parseMutatorArgs(args, 'val')
     // Place all children in a wrapper so we can hide text nodes.
     let wrapper = e.wrapChildren(parent)
@@ -794,7 +794,7 @@ export class Preview {
   */
   showPlaceholder(placeholder: any): void
   showPlaceholder(parent: e.ElementOrSelector, placeholder: any): void
-  showPlaceholder(...args: unknown[]) {
+  showPlaceholder(...args: unknown[]): void {
     let [parent, placeholderReference] = this._parseMutatorArgs(args, 'val', 'val')
 
     // We do not need to wrap a NodeList of mixed Text and Element nodes.
@@ -859,7 +859,7 @@ export class Preview {
   */
   swapContent(newContent: any): void
   swapContent(parent: e.ElementOrSelector, newContent: any): void
-  swapContent(...args: unknown[]) {
+  swapContent(...args: unknown[]): void {
     let [parent, newContent] = this._parseMutatorArgs(args, 'val', 'val')
     this.hideContent(parent)
     this.insert(parent, newContent)
