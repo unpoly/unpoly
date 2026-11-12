@@ -101,9 +101,9 @@ console.log(response.text)
 @class up.Request
 @parent up.network
 */
-// A class expression, so the binding doesn't shadow the browser's `Request` here or in importers.
+// Prefixed, so the binding doesn't shadow the browser's `Request` here or in importers.
 // At runtime the class is named `up.Request` (see unpoly.ts).
-export const UpRequest = class Request {
+export class UpRequest {
   // 'up.Request', set in unpoly.ts. TypeScript needs it to accept a request as a promise.
   declare [Symbol.toStringTag]: string
   declare state: RequestState
@@ -1141,11 +1141,6 @@ export const UpRequest = class Request {
     delegatePromise(this.prototype, function() { return this._deferred })
   }
 }
-
-/**
-An instance of `up.Request`.
-*/
-export type UpRequest = InstanceType<typeof UpRequest>
 
 export const api = {
   Request: UpRequest,

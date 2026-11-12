@@ -165,9 +165,8 @@ by TypeScript. Those document intent for the reader; no tool verifies them.
   class imported from `src/unpoly/` would be a second copy. Type-only imports like
   `import('../unpoly/util.js').List<Element>` are fine, since they're erased. Each file declares
   the keys it adds to `up`, as `any` where a precise type isn't easy; a deprecated alias gets
-  the type of its replacement. A method added to a class declaration like `up.Layer` is merged
-  into the class's interface. `up.Request` and `up.Response` are class expressions, which can't
-  be merged into, so their methods are added through a cast and stay undeclared.
+  the type of its replacement. A method added to a class like `up.Layer` is merged into the
+  class's interface.
   A wrapper that forwards its `...args` casts the callee unless the callee has a rest
   parameter: `(up.element.get as any)(...args)`. TypeScript only spreads an `any[]` into a rest
   parameter (TS2556). Type parameters where it's easy. Core declares the hooks it

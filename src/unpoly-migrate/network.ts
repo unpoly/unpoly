@@ -18,6 +18,21 @@ declare module '../unpoly.js' {
   }
 }
 
+// Adds methods to up.Request and up.Response that core doesn't declare, so they exist only with unpoly-migrate.
+declare module '../unpoly/network/request.js' {
+  interface UpRequest {
+    navigate(): void
+  }
+}
+
+declare module '../unpoly/network/response.js' {
+  interface UpResponse {
+    isSuccess(): boolean
+    getHeader(name: string): string | undefined
+    isError(): boolean
+  }
+}
+
 up.migrate.renamedNamespace('proxy', 'network')
 up.migrate.renamedEvent('up:proxy:load',     'up:request:load')    // renamed in 1.0.0
 up.migrate.renamedEvent('up:proxy:received', 'up:request:loaded')  // renamed in 0.50.0
@@ -208,8 +223,7 @@ Aborts all pending requests.
 @deprecated
   Use `up.Request#loadPage()` instead.
 */
-// up.Request is a class expression, so we can't declare the method by declaration merging.
-;(up.Request.prototype as any).navigate = function() {
+up.Request.prototype.navigate = function() {
   up.migrate.deprecated('up.Request#navigate()', 'up.Request#loadPage()')
   this.loadPage()
 }
@@ -249,8 +263,7 @@ Returns whether the server responded with a 2xx HTTP status.
 @deprecated
   Use `up.Response#ok` instead.
 */
-// up.Response is a class expression, so we can't declare its methods by declaration merging.
-;(up.Response.prototype as any).isSuccess = function() {
+up.Response.prototype.isSuccess = function() {
   up.migrate.deprecated('up.Response#isSuccess()', 'up.Response#ok')
   return this.ok
 }
@@ -269,7 +282,7 @@ Returns `undefined` if the given header name was not included in the response.
 @deprecated
   Use `up.Response#header` instead.
 */
-;(up.Response.prototype as any).getHeader = function(name: string) {
+up.Response.prototype.getHeader = function(name: string) {
   up.migrate.deprecated('up.Response#getHeader()', 'up.Response#header()')
   return this.header(name)
 }
@@ -282,7 +295,7 @@ Returns whether the response was not [successful](/api/up.Response.prototype.ok)
 @deprecated
   Use `!up.Response#ok` instead.
 */
-;(up.Response.prototype as any).isError = function() {
+up.Response.prototype.isError = function() {
   up.migrate.deprecated('up.Response#isError()', '!up.Response#ok')
   return !this.ok
 }

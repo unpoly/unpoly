@@ -47,9 +47,9 @@ console.log(response.text)   // "<html><body>..."
 @class up.Response
 @parent up.network
 */
-// A class expression, so the binding doesn't shadow the browser's `Response` here or in importers.
+// Prefixed, so the binding doesn't shadow the browser's `Response` here or in importers.
 // At runtime the class is named `up.Response` (see unpoly.ts).
-export const UpResponse = class Response {
+export class UpResponse {
   declare method: string
   declare url: string
   declare text: string
@@ -394,11 +394,6 @@ export const UpResponse = class Response {
   }
 
 }
-
-/**
-An instance of `up.Response`.
-*/
-export type UpResponse = InstanceType<typeof UpResponse>
 
 export const api = {
   Response: UpResponse,
