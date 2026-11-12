@@ -20,6 +20,76 @@ const declareClassFields = {
   },
 }
 
+// A function or method at module or class level must declare its return type. One inside another
+// function's body may leave it to inference. See docs/contributing/code-style.md.
+//
+// This is typescript-eslint's explicit-function-return-type with `allowExpressions`,
+// `allowTypedFunctionExpressions` and `allowHigherOrderFunctions`, which has no option for the
+// nesting. So these need no return type either: constructors and setters; a function that isn't
+// the value of a declaration (a callback, an object literal's method, a returned function); one
+// assigned to a typed variable or class field; and one whose body only returns a function.
+const topLevelReturnTypes = {
+  meta: {
+    type: 'suggestion',
+    docs: { description: 'Require a return type on functions and methods at module or class level' },
+    schema: [],
+  },
+  create(context) {
+    if (!context.filename.endsWith('.ts')) return {}
+    let check = (node) => {
+      if (node.returnType || !isDeclaredFunction(node) || isHigherOrder(node) || isInsideFunction(node)) return
+      let { parent } = node
+      context.report({
+        node: node.id ?? parent.key ?? parent.id ?? node,
+        message: 'Declare the return type of a function or method at module or class level.',
+      })
+    }
+    return {
+      FunctionDeclaration: check,
+      FunctionExpression: check,
+      ArrowFunctionExpression: check,
+    }
+  },
+}
+
+// A function declaration, or a function expression that is the value of a declaration without a type.
+function isDeclaredFunction(node) {
+  if (node.type === 'FunctionDeclaration') return true
+  let { parent } = node
+  switch (parent.type) {
+    case 'ExportDefaultDeclaration':
+      return true
+    case 'VariableDeclarator':
+      return parent.init === node && !parent.id.typeAnnotation
+    case 'MethodDefinition':
+      return parent.kind !== 'constructor' && parent.kind !== 'set'
+    case 'PropertyDefinition':
+      return !parent.typeAnnotation
+    default:
+      return false
+  }
+}
+
+// `() => () => …`, or a body with nothing but `return function() { … }`.
+function isHigherOrder({ body }) {
+  if (body.type === 'BlockStatement') {
+    let [statement, ...rest] = body.body
+    body = !rest.length && statement?.type === 'ReturnStatement' && statement.argument
+  }
+  return isFunction(body)
+}
+
+function isInsideFunction(node) {
+  while ((node = node.parent)) {
+    if (isFunction(node)) return true
+  }
+  return false
+}
+
+function isFunction(node) {
+  return ['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'].includes(node?.type)
+}
+
 // ESLint parsed every file as a module, where a legacy octal literal (`010`) or escape (`'\07'`)
 // is a syntax error. Oxlint parses a .js file without import or export (like most specs) as a
 // script, which allows both, and has no rule for them. Our build bundles these files as modules,
@@ -135,5 +205,6 @@ export default {
     'declare-class-fields': declareClassFields,
     'namespace-aliases': namespaceAliases,
     'no-octal': noOctal,
+    'top-level-return-types': topLevelReturnTypes,
   },
 }

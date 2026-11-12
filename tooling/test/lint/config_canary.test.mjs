@@ -34,6 +34,7 @@ const BROKEN = {
   },
   // No import or export, so Oxlint parses it as a script.
   'unpoly/no-octal': { 'script.js': "window.octal = 010 + '\\07'\n" },
+  'unpoly/top-level-return-types': { 'module.ts': 'export function topLevelReturnTypes() {}\n' },
 }
 
 test('the canary below covers every rule of .oxlintrc.json that runs in JavaScript', () => {

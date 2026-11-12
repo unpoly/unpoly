@@ -60,17 +60,20 @@ and after.
 - **`?` for optional values.** Write `origin?: Element`, not `origin: Element | undefined`,
   for parameters, properties and `declare`d class fields. Return types, and a parameter
   followed by a required one, still need `| undefined`.
-- **Named functions declare their return type**, exported or not:
+- **Declare the return type of every function and method at module or class level.** A
+  function inside another function's body may leave it to inference. `bin/lint` enforces both.
 
   ```ts
   function isAlive(fragment: Element): boolean {
-    return fragment.isConnected && isNotDestroying(fragment)
+    let isDestroying = (element: Element) => element.matches('.up-destroying')
+    return fragment.isConnected && !isDestroying(fragment)
   }
   ```
 
-  This includes class methods, and an arrow function assigned to an untyped `const`. Agents
-  (and humans) read code with `grep`, not by hovering, and an explicit type catches an
-  accidental widening where it happens. Lint enforces this with `explicit-function-return-type`.
+  This includes functions that aren't exported, class methods, and an arrow function assigned
+  to an untyped `const` at module level. Agents (and humans) read code with `grep`, not by
+  hovering, and an explicit type catches an accidental widening where it happens. A nested
+  function's body is right next to it, and its return type flows into whatever checks its call.
 
   Inline callbacks and functions that get their type from context stay inferred. So do
   functions in an object literal, and a named function whose body only returns a function

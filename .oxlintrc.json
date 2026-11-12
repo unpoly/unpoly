@@ -170,13 +170,9 @@
         "prefer-spread": "off",
         // We allow `any` while converting (strictness is loose for now).
         "typescript/no-explicit-any": "off",
-        // The TypeScript conventions in docs/contributing/code-style.md. Inline callbacks and
-        // functions whose type comes from context keep inferred return types.
-        "typescript/explicit-function-return-type": ["error", {
-          "allowExpressions": true,
-          "allowTypedFunctionExpressions": true,
-          "allowHigherOrderFunctions": true
-        }],
+        // The TypeScript conventions in docs/contributing/code-style.md. Our own rule for return
+        // types replaces explicit-function-return-type, which can't exempt nested functions.
+        "unpoly/top-level-return-types": "error",
         "typescript/consistent-type-definitions": ["error", "interface"]
       }
     },

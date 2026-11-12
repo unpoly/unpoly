@@ -41,6 +41,74 @@ test('declare-class-fields reports a TypeScript class field with neither declare
   assert.deepEqual(lines, { 'box.ts': [2, 5], 'box.js': [] })
 })
 
+test('top-level-return-types reports a function or method at module or class level without a return type', (t) => {
+  let lines = lint(t, 'top-level-return-types', {
+    'module.ts': [
+      'export function declared() { return 1 }',
+      'const arrow = () => 1',
+      'let expression = function() { return 1 }',
+      'export default function() { return 1 }',
+      'export class Box {',
+      '  method() { return 1 }',
+      '  get getter() { return 1 }',
+      '  field = () => 1',
+      '  static staticMethod() { return 1 }',
+      '}',
+      'if (arrow()) { function inBlock() { return 1 } }',
+      '',
+    ].join('\n'),
+    // JavaScript has no return types.
+    'module.js': 'export function declared() { return 1 }\n',
+  })
+  assert.deepEqual(lines, { 'module.ts': [1, 2, 3, 4, 6, 7, 8, 9, 11], 'module.js': [] })
+})
+
+test('top-level-return-types allows a function inside another function to leave its return type to inference', (t) => {
+  let lines = lint(t, 'top-level-return-types', {
+    'module.ts': [
+      'export function outer(): number {',
+      '  function inner() { return 1 }',
+      '  let arrow = () => inner()',
+      '  return arrow()',
+      '}',
+      'export class Box {',
+      '  method(): number {',
+      '    let arrow = () => 1',
+      '    class Local { method() { return arrow() } }',
+      '    return new Local().method()',
+      '  }',
+      '}',
+      'export const callback = [1].map(function(x) { let double = () => x * 2; return double() })',
+      '',
+    ].join('\n'),
+  })
+  assert.deepEqual(lines, { 'module.ts': [] })
+})
+
+test('top-level-return-types keeps the exemptions of explicit-function-return-type', (t) => {
+  let lines = lint(t, 'top-level-return-types', {
+    'module.ts': [
+      // An inline callback, an object literal's method, and an IIFE.
+      'export const doubled = [1].map((x) => x * 2)',
+      'export const object = { method() { return 1 }, arrow: () => 1 }',
+      'export const iife = (() => 1)()',
+      // A typed variable or class field, or a cast.
+      'export const typed: () => number = () => 1',
+      'export const cast = (() => 1) as () => number',
+      'export class Box {',
+      '  constructor() { console.log(1) }',
+      '  set setter(value: number) { console.log(value) }',
+      '  typedField: () => number = () => 1',
+      '}',
+      // A body that only returns a function. The returned function is an expression.
+      'export function higherOrder() { return () => 1 }',
+      'export const curried = () => () => 1',
+      '',
+    ].join('\n'),
+  })
+  assert.deepEqual(lines, { 'module.ts': [] })
+})
+
 test('no-octal reports a legacy octal literal, also in a file that Oxlint parses as a script', (t) => {
   let lines = lint(t, 'no-octal', {
     // No import or export: a script to Oxlint, where `010` is no syntax error.
