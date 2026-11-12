@@ -5,11 +5,8 @@ import { doFocus, firstHashTarget, restoreFocus, type FocusCapsule } from '../..
 import type * as t from '../types.js'
 import { FragmentProcessor } from './fragment_processor.js'
 
-/**
-Options for an `up.FragmentFocus`.
-@internal
-*/
-export interface FragmentFocusOptions extends t.FragmentProcessorOptions {
+// Options for an up.FragmentFocus.
+interface FragmentFocusOptions extends t.FragmentProcessorOptions {
   hash?: string
   focusVisible?: boolean | 'auto'
   focusCapsule?: FocusCapsule
@@ -19,10 +16,10 @@ export interface FragmentFocusOptions extends t.FragmentProcessorOptions {
 const PREVENT_SCROLL_OPTIONS = { preventScroll: true }
 
 export class FragmentFocus extends FragmentProcessor {
-  declare hash: string | undefined
-  declare focusVisible: boolean | 'auto' | undefined
-  declare focusCapsule: FocusCapsule | undefined
-  declare inputDevice: InputDevice | undefined
+  declare hash?: string
+  declare focusVisible?: boolean | 'auto'
+  declare focusCapsule?: FocusCapsule
+  declare inputDevice?: InputDevice
 
   constructor(options: FragmentFocusOptions) {
     super(options)

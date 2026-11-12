@@ -3,11 +3,8 @@ import { isCritical } from '../../error.js'
 import { type Layer } from '../../layer.js'
 import type * as t from '../types.js'
 
-/**
-Options for constructing an `up.RenderResult`.
-@internal
-*/
-export interface RenderResultOptions {
+// Options for constructing an up.RenderResult.
+interface RenderResultOptions {
   layer?: Layer
   target?: string
   renderOptions?: t.RenderOptions

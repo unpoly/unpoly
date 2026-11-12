@@ -99,7 +99,7 @@ const CONTENT_KEYS: (keyof t.RenderOptions)[] = [
 
 // preprocess() will leave out properties for which there may be a better default
 // later, in particular from the layer config in OpenLayerPlan.
-const LATE_KEYS: string[] = [
+const LATE_KEYS: (keyof t.RenderOptions)[] = [
   'history',
   'focus',
   'scroll',
@@ -215,7 +215,7 @@ function rememberOriginLayer({ origin, originLayer }: t.RenderOptions): t.Render
 }
 
 function finalize<T extends t.RenderOptions>(preprocessedOptions: T, lateDefaults?: t.RenderOptions): T
-function finalize(preprocessedOptions: t.RenderOptions, lateDefaults?: t.RenderOptions) {
+function finalize(preprocessedOptions: t.RenderOptions, lateDefaults?: t.RenderOptions): t.RenderOptions {
   return u.merge(
     preprocessedOptions.defaults,
     lateDefaults,

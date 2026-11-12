@@ -1,33 +1,31 @@
 import * as u from '../../util.js'
+import { type LayerMode } from '../../layer.js'
 import { restoreScroll, reveal, revealHash, scrollToPosition } from '../../viewport.js'
 import type * as t from '../types.js'
 import { FragmentProcessor } from './fragment_processor.js'
 
-/**
-Options for an `up.FragmentScrolling`.
-@internal
-*/
-export interface FragmentScrollingOptions extends t.FragmentProcessorOptions {
+// Options for an up.FragmentScrolling.
+interface FragmentScrollingOptions extends t.FragmentProcessorOptions {
   hash?: string
-  mode?: string
+  mode?: LayerMode
   revealTop?: boolean
   revealMax?: number | ((viewportHeight: number) => number)
   revealSnap?: number
   revealPadding?: number
   scrollBehavior?: ScrollBehavior
   // Scroll positions from before the update, for { scroll: 'keep' }.
-  oldScrollTops?: any
+  oldScrollTops?: Record<string, number>
 }
 
 export class FragmentScrolling extends FragmentProcessor {
-  declare hash: string | undefined
-  declare mode: string | undefined
-  declare revealTop: boolean | undefined
-  declare revealMax: number | ((viewportHeight: number) => number) | undefined
-  declare revealSnap: number | undefined
-  declare revealPadding: number | undefined
-  declare behavior: ScrollBehavior | undefined
-  declare oldScrollTops: any
+  declare hash?: string
+  declare mode?: LayerMode
+  declare revealTop?: boolean
+  declare revealMax?: number | ((viewportHeight: number) => number)
+  declare revealSnap?: number
+  declare revealPadding?: number
+  declare behavior?: ScrollBehavior
+  declare oldScrollTops?: Record<string, number>
 
   constructor(options: FragmentScrollingOptions) {
     super(options)

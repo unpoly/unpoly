@@ -8,10 +8,10 @@ import type * as t from '../types.js'
 // Processes a { focus } or { scroll } render option. The option can be a string, an element, a function,
 // an array of alternatives or a selector map, so its type stays `any`.
 export abstract class FragmentProcessor {
-  declare fragment: HTMLElement | undefined
-  declare autoMeans: any
-  declare origin: Element | undefined
-  declare layer: Layer | undefined
+  declare fragment?: HTMLElement
+  declare autoMeans: t.FragmentProcessorValue
+  declare origin?: Element
+  declare layer?: Layer
 
   constructor(options: t.FragmentProcessorOptions) {
     this.fragment = options.fragment
@@ -32,7 +32,7 @@ export abstract class FragmentProcessor {
   }
 
   // Returns a truthy value if the option was processed.
-  process(opt: any): any {
+  process(opt: t.FragmentProcessorValue): any {
     let preprocessed = this.preprocessOnce(opt)
     return this.tryProcess(preprocessed)
   }

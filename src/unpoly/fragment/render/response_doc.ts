@@ -13,10 +13,10 @@ import { FragmentFinder } from '../fragment_finder.js'
 export class ResponseDoc {
   // A parsed Document for a full HTML document, or an <up-document> element wrapping a fragment.
   declare _document: Document | HTMLElement
-  declare _isFullDocument: boolean | undefined
-  declare _cspInfo: CSPInfo | undefined
-  declare _rediscoveredOrigin: Element | undefined
-  declare _match: 'region' | 'first' | undefined
+  declare _isFullDocument?: boolean
+  declare _cspInfo?: CSPInfo
+  declare _rediscoveredOrigin?: Element
+  declare _match?: 'region' | 'first'
 
   constructor({ document, fragment, content, target, origin, data, cspInfo, match }: t.ResponseDocOptions) {
     if (document) {
@@ -53,14 +53,14 @@ export class ResponseDoc {
       // e.createBrokenDocumentFromHTML() always creates an (empty) <head> if missing in the HTML.
       this._isFullDocument = e.isFullDocumentHTML(value)
 
-      let htmlParser = (html: string) => [e.createBrokenDocumentFromHTML(html)]
+      let htmlParser: t.HTMLParser = (html) => [e.createBrokenDocumentFromHTML(html)]
       let nodes = provideNodes(value, { origin, data, htmlParser })
 
       // If value is HTML, e.createBrokenDocumentFromHTML() will parse it into a Document.
       // Even if value is only a fragment, or multiple sibling nodes, it will always be
       // wrapped into a Document.
       if (nodes[0] instanceof Document) {
-        this._document = nodes[0] as Document
+        this._document = nodes[0]
       } else {
         // If value is a template reference, a custom up:template:clone handler
         // may have passed us a non-document.
@@ -90,7 +90,7 @@ export class ResponseDoc {
 
   _buildFauxDocument(nodes: Node | u.List<Node>): HTMLElement
   // The nodes are wrapped in a list in place, so the implementation takes the wrapped type.
-  _buildFauxDocument(nodes: u.List<Node>) {
+  _buildFauxDocument(nodes: u.List<Node>): HTMLElement {
     nodes = u.wrapList(nodes)
 
     // We're creating a faux document to wrap around a fragment root that is not already a `Document`.

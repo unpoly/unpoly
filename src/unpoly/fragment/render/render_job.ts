@@ -112,7 +112,7 @@ export class RenderJob {
       // (1) Only access result.finished through this.finished to avoid creating new promises
       // (2) The then() will create a new chain, and we don't want to fail that
 
-      let guardedOnFinished = function(result: RenderResult) {
+      let guardedOnFinished = function(result: RenderResult): void {
         guard(() => onFinished?.(result))
       }
 
