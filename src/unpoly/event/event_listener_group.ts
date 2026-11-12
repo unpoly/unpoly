@@ -1,30 +1,13 @@
 import * as u from '../util.js'
-import {
-  UpEventListener, type EventListenerAttributes, type ListenerTarget,
-} from './event_listener.js'
-
-/**
-The attributes for an `UpEventListener`, minus its single element and event type.
-@internal
-*/
-export type SharedListenerAttributes = Omit<EventListenerAttributes, 'element' | 'eventType'>
-
-/**
-Everything an `EventListenerGroup` needs to know: the elements and event types to listen to,
-and the attributes for each `UpEventListener`.
-@internal
-*/
-export interface EventListenerGroupAttributes extends SharedListenerAttributes {
-  elements: u.List<ListenerTarget>
-  eventTypes: string[]
-}
+import type * as t from './types.js'
+import { UpEventListener } from './event_listener.js'
 
 export class EventListenerGroup {
-  declare elements: u.List<ListenerTarget>
+  declare elements: u.List<t.ListenerTarget>
   declare eventTypes: string[]
-  declare _listenerAttributes: SharedListenerAttributes
+  declare _listenerAttributes: t.SharedListenerAttributes
 
-  constructor({ elements, eventTypes, ...listenerAttributes }: EventListenerGroupAttributes) {
+  constructor({ elements, eventTypes, ...listenerAttributes }: t.EventListenerGroupAttributes) {
     this.elements = elements
     this.eventTypes = eventTypes
     // The other attributes (selector, callback, options) are for the UpEventListener we build
@@ -44,7 +27,7 @@ export class EventListenerGroup {
     return cleaner.clean
   }
 
-  _eachListenerAttributes(fn: (attributes: EventListenerAttributes) => void): void {
+  _eachListenerAttributes(fn: (attributes: t.EventListenerAttributes) => void): void {
     for (let element of this.elements) {
       for (let eventType of this.eventTypes) {
         fn({ ...this._listenerAttributes, element, eventType })

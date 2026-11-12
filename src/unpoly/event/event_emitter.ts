@@ -5,37 +5,17 @@ import { build } from '../event.js'
 import { getSmart } from '../fragment.js'
 import { Layer, layerStack } from '../layer.js'
 import { logConfig, printToStandard } from '../log.js'
-
-/**
-What to log when an event is emitted: a message, an array of a message and its substitution values,
-or `false` to log nothing. When missing, the event type is logged.
-@internal
-*/
-export type EmitLogOption = string | any[] | false
-
-/**
-Everything an `up.EventEmitter` needs to know. `up.EventEmitter.fromEmitArgs()` builds this
-from the many ways `up.emit()` can be called.
-@internal
-*/
-export interface EventEmitterOptions {
-  target: EventTarget
-  event: Event
-  baseLayer?: Layer
-  callback?: (event: Event) => void
-  log?: EmitLogOption
-  ensureBubbles?: boolean
-}
+import type * as t from './types.js'
 
 export class EventEmitter {
   declare target: EventTarget
   declare event: Event
   declare baseLayer: Layer | undefined
   declare callback: ((event: Event) => void) | undefined
-  declare log: EmitLogOption | undefined
+  declare log: t.EmitLogOption | undefined
   declare ensureBubbles: boolean | undefined
 
-  constructor(options: EventEmitterOptions) {
+  constructor(options: t.EventEmitterOptions) {
     this.target = options.target
     this.event = options.event
     this.baseLayer = options.baseLayer
@@ -161,6 +141,6 @@ export class EventEmitter {
       options.event = build(options)
     }
 
-    return new (this)(options as EventEmitterOptions)
+    return new (this)(options as t.EventEmitterOptions)
   }
 }

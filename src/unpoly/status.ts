@@ -11,14 +11,10 @@ import { layerStack, type Layer } from './layer.js'
 import { printToStandard } from './log.js'
 import { type UpRequest } from './network.js'
 import { FocusCapsule } from './viewport.js'
+import type * as t from './status/types.js'
+export type * from './status/types.js'
 import { LinkCurrentURLs } from './status/link_current_urls.js'
 import { Preview } from './status/preview.js'
-
-/**
-A preview function, registered with `up.preview()` or passed as `{ preview }`.
-It changes the page while a request is loading, through the given `up.Preview`.
-*/
-export type PreviewFn = (preview: Preview, options?: u.PlainObject) => any
 
 // A nav remembers the locations its links were last compared with.
 type NavElement = Element & { upNavLocations?: string[] }
@@ -46,18 +42,6 @@ Within an `[up-nav]` container, links pointing to the current location are marke
 @namespace up.status
 */
 
-
-/**
-The settings in `up.status.config`, described in its doc comment.
-*/
-export interface StatusConfig {
-  currentClasses: string[]
-  activeClasses: string[]
-  loadingClasses: string[]
-  revalidatingClasses: string[]
-  navSelectors: string[]
-  noNavSelectors: string[]
-}
 
 /*-
 Sets default options for status effects.
@@ -88,7 +72,7 @@ Sets default options for status effects.
 
 @stable
 */
-export const statusConfig = newConfig('up.status.config', (): StatusConfig => ({
+export const statusConfig = newConfig('up.status.config', (): t.StatusConfig => ({
   currentClasses: ['up-current'],
   activeClasses: ['up-active'],
   loadingClasses: ['up-loading'],
@@ -97,7 +81,7 @@ export const statusConfig = newConfig('up.status.config', (): StatusConfig => ({
   noNavSelectors: ['[up-nav=false]'],
 }))
 
-export let namedPreviewFns = new Registry<PreviewFn>('preview')
+export let namedPreviewFns = new Registry<t.PreviewFn>('preview')
 
 /*-
 Registers a named [preview](/learn/previews) function.
@@ -419,7 +403,7 @@ See [Placeholders](/learn/placeholders) for details and elaborate examples.
 @signature
 */
 
-function getPlaceholderPreviewFn(placeholder: any): PreviewFn | undefined {
+function getPlaceholderPreviewFn(placeholder: any): t.PreviewFn | undefined {
   if (!placeholder) return
 
   return function(preview) {
@@ -427,7 +411,7 @@ function getPlaceholderPreviewFn(placeholder: any): PreviewFn | undefined {
   }
 }
 
-export function resolvePreviewFns(value: any): PreviewFn[] {
+export function resolvePreviewFns(value: any): t.PreviewFn[] {
   if (u.isFunction(value)) {
     return [value]
   } else if (u.isString(value)) {
@@ -439,7 +423,7 @@ export function resolvePreviewFns(value: any): PreviewFn[] {
   }
 }
 
-function resolvePreviewString(str: string): PreviewFn[] {
+function resolvePreviewString(str: string): t.PreviewFn[] {
   return u.map(u.parseScalarJSONPairs(str), ([name, parsedOptions]) => {
     let previewFn = namedPreviewFns.get(name)
 
@@ -456,7 +440,7 @@ function getActiveElements({ origin, activeElements }: u.PlainObject): Element[]
   return u.flatMap(activeElements, findActivatableAreas)
 }
 
-function getFeedbackClassesPreviewFn(feedbackOption: boolean | undefined, fragments: Element[]): PreviewFn | undefined {
+function getFeedbackClassesPreviewFn(feedbackOption: boolean | undefined, fragments: Element[]): t.PreviewFn | undefined {
   if (!feedbackOption) return
 
   return function(preview) {

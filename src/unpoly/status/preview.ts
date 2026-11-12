@@ -9,18 +9,7 @@ import {
 import { printToStandard } from '../log.js'
 import { type UpRequest } from '../network.js'
 import { resolvePreviewFns } from '../status.js'
-
-/**
-Everything an `up.Preview` needs to know.
-@internal
-*/
-export interface PreviewOptions {
-  // Undefined when opening a layer.
-  fragment: Element | undefined
-  request: UpRequest
-  renderOptions: u.PlainObject
-  cleaner: u.Cleaner
-}
+import type * as t from './types.js'
 
 /*-
 Instances of `up.Preview` can describe temporary changes to a page.
@@ -44,7 +33,7 @@ export class Preview {
   @constructor up.Preview
   @internal
   */
-  constructor({ fragment, request, renderOptions, cleaner }: PreviewOptions) {
+  constructor({ fragment, request, renderOptions, cleaner }: t.PreviewOptions) {
     this.fragment = fragment
     this.request = request
     this.renderOptions = renderOptions

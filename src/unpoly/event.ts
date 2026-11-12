@@ -1,170 +1,20 @@
 import * as u from './util.js'
 import * as e from './element.js'
 import { fail } from './error.js'
-import { type FormSubmitEvent, type FormSwitchEvent, type FormValidateEvent } from './form.js'
-import {
-  type FragmentAbortedEvent, type FragmentDestroyedEvent, type FragmentInsertedEvent,
-  type FragmentKeepEvent, type FragmentKeptEvent, type FragmentLoadedEvent,
-  type FragmentOfflineEvent, type LayerReference, type TemplateCloneEvent,
-} from './fragment.js'
-import { type FrameworkBootedEvent } from './framework.js'
-import { type LocationChangedEvent, type LocationRestoreEvent } from './history.js'
-import {
-  layerStack, type Layer, type LayerCloseEvent, type LayerLocationChangedEvent,
-  type LayerOpenedEvent, type LayerOpenEvent,
-} from './layer.js'
-import {
-  type ClickEvent, type DeferredLoadEvent, type LinkFollowEvent, type LinkPreloadEvent,
-} from './link.js'
+import { type LayerReference } from './fragment.js'
+import { layerStack } from './layer.js'
+import { type ClickEvent } from './link.js'
 import { printUserEvent } from './log.js'
 import { mockable } from './mockable.js'
-import { type MotionFinishEvent } from './motion.js'
-import { type RequestEvent, type RequestLoadedEvent } from './network.js'
-import { type FragmentHungryEvent, type FragmentPollEvent } from './radio.js'
-import { registerDestructor, type AssetsChangedEvent } from './script.js'
+import { registerDestructor } from './script.js'
 import type * as t from './event/types.js'
 export type * from './event/types.js'
-import { EventEmitter, type EmitLogOption } from './event/event_emitter.js'
+import { EventEmitter } from './event/event_emitter.js'
 export { EventEmitter }
-import {
-  UpEventListener, type EventListenerAttributes, type ListenerCallback,
-} from './event/event_listener.js'
-export { UpEventListener, type EventListenerAttributes }
+import { UpEventListener } from './event/event_listener.js'
+export { UpEventListener }
 import { EventListenerGroup } from './event/event_listener_group.js'
 export { EventListenerGroup }
-
-/**
-A function that removes the event listeners registered by `up.on()`.
-*/
-export type UnbindFn = () => void
-
-/**
-An event built by `up.event.fork()`, with the event it was forked from.
-*/
-export type ForkedEvent = Event & { originalEvent: Event }
-
-/**
-The device that the user last interacted with. See `up.event.inputDevice`.
-*/
-export type InputDevice = 'unknown' | 'key' | 'pointer'
-
-/**
-Maps the type of each Unpoly event to its event object, like `HTMLElementEventMap` does for DOM events.
-`up.on()` and `up.emit()` look up the event type here.
-
-An event without documented properties maps to `Event`.
-*/
-export interface UpEventMap {
-  'up:assets:changed': AssetsChangedEvent
-  'up:click': ClickEvent
-  'up:deferred:load': DeferredLoadEvent
-  'up:element:defined': e.ElementDefinedEvent
-  'up:form:submit': FormSubmitEvent
-  'up:form:switch': FormSwitchEvent
-  'up:form:validate': FormValidateEvent
-  'up:fragment:aborted': FragmentAbortedEvent
-  'up:fragment:destroyed': FragmentDestroyedEvent
-  'up:fragment:hungry': FragmentHungryEvent
-  'up:fragment:inserted': FragmentInsertedEvent
-  'up:fragment:keep': FragmentKeepEvent
-  'up:fragment:kept': FragmentKeptEvent
-  'up:fragment:loaded': FragmentLoadedEvent
-  'up:fragment:offline': FragmentOfflineEvent
-  'up:fragment:poll': FragmentPollEvent
-  'up:framework:booted': FrameworkBootedEvent
-  'up:framework:reset': Event
-  'up:layer:accept': LayerCloseEvent
-  'up:layer:accepted': LayerCloseEvent
-  'up:layer:dismiss': LayerCloseEvent
-  'up:layer:dismissed': LayerCloseEvent
-  'up:layer:location:changed': LayerLocationChangedEvent
-  'up:layer:open': LayerOpenEvent
-  'up:layer:opened': LayerOpenedEvent
-  'up:link:follow': LinkFollowEvent
-  'up:link:preload': LinkPreloadEvent
-  'up:location:changed': LocationChangedEvent
-  'up:location:restore': LocationRestoreEvent
-  'up:motion:finish': MotionFinishEvent
-  'up:network:late': Event
-  'up:network:recover': Event
-  'up:request:aborted': RequestEvent
-  'up:request:load': RequestEvent
-  'up:request:loaded': RequestLoadedEvent
-  'up:request:offline': RequestEvent
-  'up:template:clone': TemplateCloneEvent
-}
-
-/**
-An event whose type `UpEventMap` doesn't know, like a custom event emitted with `up.emit()`.
-It may have any property.
-*/
-export type AnyEvent = Event & { [prop: string]: any }
-
-/**
-The event that `up.on()` passes to its listener for the given event type: an Unpoly event from `UpEventMap`,
-a DOM event, or `AnyEvent` for other types. Several types in one string (`'foo bar'`) also get `AnyEvent`.
-*/
-export type ObservedEvent<T> =
-  T extends keyof UpEventMap ? UpEventMap[T] :
-  T extends keyof HTMLElementEventMap ? HTMLElementEventMap[T] :
-  T extends keyof DocumentEventMap ? DocumentEventMap[T] :
-  T extends keyof WindowEventMap ? WindowEventMap[T] :
-  AnyEvent
-
-/**
-The event that `up.emit()` emits for the given event type. Unlike `ObservedEvent`, it knows no DOM events,
-since `up.emit('click')` emits a plain `Event`.
-*/
-export type EmittedEvent<T> = T extends keyof UpEventMap ? UpEventMap[T] : AnyEvent
-
-/**
-One or more event types for `up.on()`, separated by spaces or commas, or as an array.
-*/
-export type EventTypes = string | readonly string[]
-
-/**
-What `up.on()` listens on: an element, the document, the window, or a list of elements.
-*/
-export type ListenerTargets = EventTarget | u.List<EventTarget>
-
-/**
-A selector for `up.on()` to delegate events, or a function that returns it.
-*/
-export type ListenerSelector = string | (() => string)
-
-/**
-Options for `up.on()`. The `{ guard }` option is only used internally.
-*/
-export type ListenerOptions = Pick<EventListenerAttributes, 'passive' | 'once' | 'capture' | 'guard'>
-
-/**
-The arguments for `up.on()` after its event types: an optional selector, optional options and the listener.
-*/
-export type ListenerArgs<E, O = ListenerOptions> =
-  | [listener: ListenerCallback<E>]
-  | [selector: ListenerSelector, listener: ListenerCallback<E>]
-  | [options: O, listener: ListenerCallback<E>]
-  | [selector: ListenerSelector, options: O, listener: ListenerCallback<E>]
-
-/**
-Where `up.emit()` emits an event: an element, the document, the window, a list with one element, or a layer.
-*/
-export type EmitTarget = EventTarget | u.List<EventTarget> | Layer
-
-/**
-Properties for an event emitted with `up.emit()`, and options for its emission.
-*/
-export interface EmitProps {
-  layer?: LayerReference | number
-  target?: Element | u.List<Element> | string
-  log?: EmitLogOption
-  [prop: string]: any
-}
-
-/**
-An event to emit, described by its `{ type }` and properties, like the ones a server sends in `X-Up-Events`.
-*/
-export type EventPlan = EmitProps & { type: string }
 
 /*-
 Features to emit and observe DOM events.
@@ -316,9 +166,9 @@ up.on(element, 'mouseenter mouseleave', function(event) {
 @stable
 @signature
 */
-export function on<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): UnbindFn
-export function on<T extends EventTypes>(targets: ListenerTargets, types: T, ...args: ListenerArgs<ObservedEvent<T>>): UnbindFn
-export function on(...args: any[]): UnbindFn {
+export function on<T extends t.EventTypes>(types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): t.UnbindFn
+export function on<T extends t.EventTypes>(targets: t.ListenerTargets, types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): t.UnbindFn
+export function on(...args: any[]): t.UnbindFn {
   return buildListenerGroup(args).bind()
 }
 
@@ -355,9 +205,9 @@ up.event.onClosest(element, 'click', function() {
   When the element is destroyed, the callback will be unsubscribed automatically.
 @experimental
 */
-export function onClosest<T extends EventTypes>(element: Element, types: T, callback: ListenerCallback<ObservedEvent<T>>): UnbindFn
-export function onClosest<T extends EventTypes>(element: Element, types: T, options: { layer?: LayerReference }, callback: ListenerCallback<ObservedEvent<T>>): UnbindFn
-export function onClosest(...args: any[]): UnbindFn {
+export function onClosest<T extends t.EventTypes>(element: Element, types: T, callback: t.ListenerCallback<t.ObservedEvent<T>>): t.UnbindFn
+export function onClosest<T extends t.EventTypes>(element: Element, types: T, options: { layer?: LayerReference }, callback: t.ListenerCallback<t.ObservedEvent<T>>): t.UnbindFn
+export function onClosest(...args: any[]): t.UnbindFn {
   let [fragment, eventType, { layer }, callback] = u.parseArgs(args, 'val', 'val', 'options', 'callback')
   layer &&= layerStack.get(layer, { origin: fragment })
   let guard = (event: Event) => (event.target as Element).contains(fragment) && (!layer || layer.contains(event.target as Element))
@@ -395,8 +245,8 @@ up.off('click', '.button', listener)
 @include up.off/after-element
 @stable
 */
-export function off<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): void
-export function off<T extends EventTypes>(targets: ListenerTargets, types: T, ...args: ListenerArgs<ObservedEvent<T>>): void
+export function off<T extends t.EventTypes>(types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): void
+export function off<T extends t.EventTypes>(targets: t.ListenerTargets, types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): void
 export function off(...args: any[]): void {
   return buildListenerGroup(args).unbind()
 }
@@ -468,12 +318,12 @@ up.emit('my:event', { foo: 'bar' })
 @stable
 @signature
 */
-export function emit<T extends string>(type: T, props?: EmitProps): EmittedEvent<T>
-export function emit<T extends string>(target: EmitTarget, type: T, props?: EmitProps): EmittedEvent<T>
-export function emit<T extends string>(plan: EmitProps & { type: T }): EmittedEvent<T>
-export function emit<T extends string>(target: EmitTarget, plan: EmitProps & { type: T }): EmittedEvent<T>
-export function emit<E extends Event>(event: E, options?: EmitProps): E
-export function emit<E extends Event>(target: EmitTarget, event: E, options?: EmitProps): E
+export function emit<T extends string>(type: T, props?: t.EmitProps): t.EmittedEvent<T>
+export function emit<T extends string>(target: t.EmitTarget, type: T, props?: t.EmitProps): t.EmittedEvent<T>
+export function emit<T extends string>(plan: t.EmitProps & { type: T }): t.EmittedEvent<T>
+export function emit<T extends string>(target: t.EmitTarget, plan: t.EmitProps & { type: T }): t.EmittedEvent<T>
+export function emit<E extends Event>(event: E, options?: t.EmitProps): E
+export function emit<E extends Event>(target: t.EmitTarget, event: E, options?: t.EmitProps): E
 export function emit(...args: any[]): Event {
   return buildEmitter(args).emit()
 }
@@ -508,8 +358,8 @@ up.emit(event)                       // emits the event
   The unemitted event object.
 @stable
 */
-export function build<T extends string>(type: T, props?: u.PlainObject): EmittedEvent<T>
-export function build<T extends string>(props: u.PlainObject & { type?: T }): EmittedEvent<T>
+export function build<T extends string>(type: T, props?: u.PlainObject): t.EmittedEvent<T>
+export function build<T extends string>(props: u.PlainObject & { type?: T }): t.EmittedEvent<T>
 export function build(...args: any[]): Event {
   const props = u.extractOptions(args)
   const type = args[0] || props.type || fail('Missing event type')
@@ -550,7 +400,7 @@ up.event.onEscape(function(event) {
   The listener function that will be called when `Escape` is pressed.
 @experimental
 */
-export function onEscape(listener: (event: KeyboardEvent) => any): UnbindFn {
+export function onEscape(listener: (event: KeyboardEvent) => any): t.UnbindFn {
   return on('keydown', function(event) {
     if (event.key === 'Escape') {
       return listener(event)
@@ -586,13 +436,7 @@ export function haltEvent(event: Event, options: { log?: boolean } = {}): void {
   event.preventDefault()
 }
 
-/**
-A property of a mouse or keyboard event that says whether a modifier key was held.
-@internal
-*/
-export type ModifierKey = 'metaKey' | 'shiftKey' | 'ctrlKey' | 'altKey'
-
-export const keyModifiers: ModifierKey[] = ['metaKey', 'shiftKey', 'ctrlKey', 'altKey']
+export const keyModifiers: t.ModifierKey[] = ['metaKey', 'shiftKey', 'ctrlKey', 'altKey']
 
 /*-
 Returns whether the given mouse event was made with a modifier key or a mouse button other than the primary button.
@@ -624,7 +468,7 @@ so listeners of `up:click` don't need this check.
   Whether the event was modified.
 @experimental
 */
-export function isModified(event: Pick<MouseEvent, 'button' | ModifierKey>): boolean {
+export function isModified(event: Pick<MouseEvent, 'button' | t.ModifierKey>): boolean {
   return (event.button > 0) || u.some(keyModifiers, (modifier) => event[modifier])
 }
 
@@ -644,9 +488,9 @@ export const isSyntheticClick = mockable(function isSyntheticClick(event: Event)
   return !event.isTrusted
 })
 
-export function fork(originalEvent: Event, newType: string, copyKeys: string[] = []): ForkedEvent {
+export function fork(originalEvent: Event, newType: string, copyKeys: string[] = []): t.ForkedEvent {
   // The keys may belong to a subclass, like MouseEvent#clientX.
-  const newEvent = build(newType, u.pick(originalEvent as u.PlainObject, copyKeys)) as ForkedEvent
+  const newEvent = build(newType, u.pick(originalEvent as u.PlainObject, copyKeys)) as t.ForkedEvent
   newEvent.originalEvent = originalEvent; // allow users to access other props through event.originalEvent.prop
 
   (['stopPropagation', 'stopImmediatePropagation', 'preventDefault'] as const).forEach(function(key) {
@@ -758,7 +602,7 @@ function executeEmitAttr(event: ClickEvent, element: Element): void {
 }
 
 
-let inputDevices: InputDevice[] = ['unknown']
+let inputDevices: t.InputDevice[] = ['unknown']
 
 /*-
 The class of input device used to cause the current event.
@@ -808,11 +652,11 @@ window.addEventListener('scroll', function() {
   A string describing the current input device class.
 @experimental
 */
-export function getInputDevice(): InputDevice {
+export function getInputDevice(): t.InputDevice {
   return u.last(inputDevices)
 }
 
-function observeInputDevice(newModality: InputDevice): void {
+function observeInputDevice(newModality: t.InputDevice): void {
   inputDevices.push(newModality)
   setTimeout(() => inputDevices.pop())
 }

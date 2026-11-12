@@ -3,52 +3,19 @@ import * as u from './util.js'
 import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { fail } from './error.js'
-import { getInputDevice, on, type InputDevice } from './event.js'
+import { getInputDevice, on } from './event.js'
 import { isField } from './form.js'
 import { contains, getAllFragments, getSmart, tryToTarget } from './fragment.js'
 import { layerStack } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
 import { mockable } from './mockable.js'
 import { registerCompiler } from './script.js'
+import type * as t from './viewport/types.js'
+export type * from './viewport/types.js'
 import { BodyShifter } from './viewport/body_shifter.js'
 import { FocusCapsule } from './viewport/focus_capsule.js'
 export { FocusCapsule }
 import { RevealMotion } from './viewport/reveal_motion.js'
-
-/**
-Options for focusing an element.
-@internal
-*/
-export interface DoFocusOptions {
-  preventScroll?: boolean
-  // Focus an element that isn't focusable, by giving it [tabindex=-1].
-  force?: boolean
-  inputDevice?: InputDevice
-  focusVisible?: boolean | 'auto'
-}
-
-/**
-Options for revealing the element that a URL #hash points to.
-@internal
-*/
-export interface RevealHashOptions {
-  // Reveal the target again after the browser had a chance to scroll.
-  strong?: boolean
-  layer?: any
-  origin?: Element
-  behavior?: ScrollBehavior
-  focus?: boolean
-}
-
-/**
-What `up.internal.absolutize()` returns: the `<up-bounds>` element that now wraps the element,
-and a function that moves it.
-@internal
-*/
-export interface Absolutization {
-  bounds: HTMLElement
-  moveBounds(diffX: number, diffY: number): void
-}
 
 /*-
 Features to control scrolling and focus when fragments are updated.
@@ -62,21 +29,6 @@ From JavaScript, `up.reveal()` scrolls an element into view, and `up.viewport.sa
 @namespace up.viewport
 */
 
-
-/**
-The settings in `up.viewport.config`, described in its doc comment.
-*/
-export interface ViewportConfig {
-  viewportSelectors: string[]
-  fixedTopSelectors: string[]
-  fixedBottomSelectors: string[]
-  anchoredRightSelectors: string[]
-  revealSnap: number
-  revealPadding: number
-  revealMax: number | false | ((element: Element) => number)
-  revealTop: boolean
-  autoFocusVisible: (props: { element: Element, inputDevice: InputDevice }) => boolean
-}
 
 /*-
 Configures defaults for scrolling.
@@ -153,7 +105,7 @@ Configures defaults for scrolling.
     @experimental
 @stable
 */
-export const viewportConfig = newConfig('up.viewport.config', (): ViewportConfig => ({
+export const viewportConfig = newConfig('up.viewport.config', (): t.ViewportConfig => ({
   viewportSelectors: ['[up-viewport]', '[up-fixed]'],
   fixedTopSelectors: ['[up-fixed~=top]'],
   fixedBottomSelectors: ['[up-fixed~=bottom]'],
@@ -295,7 +247,7 @@ Focusing an element will also [reveal](/api/up.reveal) it, unless `{ preventScro
 
 @stable
 */
-export const doFocus = mockable(function doFocus(element: HTMLElement, { preventScroll, force, inputDevice, focusVisible }: DoFocusOptions = {}): any {
+export const doFocus = mockable(function doFocus(element: HTMLElement, { preventScroll, force, inputDevice, focusVisible }: t.DoFocusOptions = {}): any {
   if (force) {
     // (1) Element#tabIndex is -1 for all non-interactive elements,
     //     whether or not the element has an [tabindex=-1] attribute.
@@ -380,7 +332,7 @@ Because of this the `.up-focus-visible` class may be set on elements that the br
 @experimental
 */
 
-export function tryFocus(element: HTMLElement, options?: DoFocusOptions): boolean {
+export function tryFocus(element: HTMLElement, options?: t.DoFocusOptions): boolean {
   doFocus(element, options)
   return element === document.activeElement
 }
@@ -424,7 +376,7 @@ Returns `undefined` if we cannot scroll.
 @function up.viewport.revealHashFn
 @internal
 */
-export function revealHashFn(hash: string, { strong, layer, origin, behavior = 'instant', focus = false }: RevealHashOptions = {}): (() => any) | undefined {
+export function revealHashFn(hash: string, { strong, layer, origin, behavior = 'instant', focus = false }: t.RevealHashOptions = {}): (() => any) | undefined {
   if (!hash) return
 
   let match = firstHashTarget(hash, { layer, origin })
@@ -772,7 +724,7 @@ function setScrollPositions(viewports: Iterable<HTMLElement>, tops: Record<strin
   }
 }
 
-export function absolutize(element: HTMLElement, options: { afterMeasure?: () => void } = {}): Absolutization {
+export function absolutize(element: HTMLElement, options: { afterMeasure?: () => void } = {}): t.Absolutization {
   const viewport = closest(element)
 
   const viewportRect = viewport.getBoundingClientRect()

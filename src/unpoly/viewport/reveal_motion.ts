@@ -4,23 +4,7 @@ import { fail } from '../error.js'
 import { getAllFragments } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
 import { closest, isRoot, rootHeight, rootWidth, viewportConfig } from '../viewport.js'
-
-/**
-Options for `up.reveal()`. Each `reveal*` option is an alias used by render options.
-@internal
-*/
-export interface RevealOptions {
-  viewport?: Element | string
-  behavior?: ScrollBehavior
-  snap?: number
-  revealSnap?: number
-  padding?: number
-  revealPadding?: number
-  top?: boolean
-  revealTop?: boolean
-  max?: u.ValueOrFunction<number>
-  revealMax?: u.ValueOrFunction<number>
-}
+import type * as t from './types.js'
 
 export class RevealMotion {
   declare _element: HTMLElement
@@ -34,7 +18,7 @@ export class RevealMotion {
   declare _topObstructionSelector: string
   declare _bottomObstructionSelector: string
 
-  constructor(element: HTMLElement, options: RevealOptions = {}) {
+  constructor(element: HTMLElement, options: t.RevealOptions = {}) {
     this._element = element
     this._viewport = e.getOne(options.viewport) || closest(this._element)
     this._obstructionsLayer = layerStack.get(this._viewport)!

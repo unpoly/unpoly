@@ -4,49 +4,13 @@ import { readFieldDisabled } from '../form.js'
 import { isBeforeBoot, isEvaling } from '../framework.js'
 import { type Layer } from '../layer.js'
 import { readData } from '../script.js'
-
-/**
-An element, document or window that Unpoly listens on. It remembers its listeners,
-so `up.off()` can find them.
-@internal
-*/
-export type ListenerTarget = EventTarget & { upEventListeners?: Record<string, UpEventListener> }
-
-/**
-A function registered with `up.on()`. It is called with the event, the element matching
-the selector (or the element it listens on) and, if it takes three arguments, the element's data.
-`this` is the element, too. TypeScript only infers that when a selector is given. Without one, a
-function in that position could also be a selector function, which has no `this`.
-
-The signature is taken from a method, since TypeScript checks method parameters bivariantly, even
-under `strictFunctionTypes`. That lets a listener annotate a narrower type than we can infer,
-like `(event, link: HTMLAnchorElement)` for a selector that only matches links.
-*/
-export type ListenerCallback<E = Event> =
-  { listener(this: HTMLElement, event: E, element: HTMLElement, data?: any): any }['listener'] & { upUid?: number }
-
-/**
-Everything an `UpEventListener` needs to know.
-@internal
-*/
-export interface EventListenerAttributes {
-  element: ListenerTarget
-  eventType: string
-  selector?: string | (() => string)
-  callback: ListenerCallback
-  guard?: (event: Event) => boolean
-  baseLayer?: Layer
-  passive?: boolean
-  once?: boolean
-  capture?: boolean
-  beforeBoot?: boolean
-}
+import type * as t from './types.js'
 
 export class UpEventListener {
-  declare element: ListenerTarget
+  declare element: t.ListenerTarget
   declare eventType: string
   declare selector: string | (() => string) | undefined
-  declare callback: ListenerCallback
+  declare callback: t.ListenerCallback
   declare guard: ((event: Event) => boolean) | undefined
   declare baseLayer: Layer | undefined
   declare passive: boolean | undefined
@@ -56,7 +20,7 @@ export class UpEventListener {
   declare isDefault: boolean
   declare _key: string
 
-  constructor(attributes: EventListenerAttributes) {
+  constructor(attributes: t.EventListenerAttributes) {
     this.element = attributes.element
     this.eventType = attributes.eventType
     this.selector = attributes.selector
@@ -163,7 +127,7 @@ export class UpEventListener {
     }
   }
 
-  static fromElement(attributes: EventListenerAttributes): UpEventListener | undefined {
+  static fromElement(attributes: t.EventListenerAttributes): UpEventListener | undefined {
     let map = attributes.element.upEventListeners
     if (map) {
       const key = this._buildKey(attributes)
@@ -171,7 +135,7 @@ export class UpEventListener {
     }
   }
 
-  static _buildKey(attributes: EventListenerAttributes): string {
+  static _buildKey(attributes: t.EventListenerAttributes): string {
     // Give the callback function a numeric identifier so it
     // can become part of the upEventListeners key.
     attributes.callback.upUid ||= u.uid()
@@ -183,7 +147,7 @@ export class UpEventListener {
     ].join('|')
   }
 
-  static allNonDefault(element: ListenerTarget): UpEventListener[] {
+  static allNonDefault(element: t.ListenerTarget): UpEventListener[] {
     let map = element.upEventListeners
     if (map) {
       const listeners = Object.values(map)
