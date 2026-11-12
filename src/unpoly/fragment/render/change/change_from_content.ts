@@ -92,8 +92,7 @@ export class ChangeFromContent extends Change {
     // ignore any events in between.
     return mutate(() =>
       matchedPlan.execute(
-        // We only execute plans outside of preflight, where there is a response doc.
-        this._getResponseDoc()!,
+        this._getResponseDoc(),
         this._onPlanApplicable.bind(this, matchedPlan)
       )
     )
@@ -112,8 +111,7 @@ export class ChangeFromContent extends Change {
       printToStandard('up.render()', 'Could not match primary target "%s". Updating a fallback target "%s".', primaryPlan.target, plan.target)
     }
 
-    // Plans only become applicable when executed, which is never in preflight.
-    let { assets } = this._getResponseDoc()!
+    let { assets } = this._getResponseDoc()
     if (assets) {
       assertAssetsOK(assets, plan.options)
     }
@@ -128,9 +126,9 @@ export class ChangeFromContent extends Change {
     this._planApplied = true
   }
 
-  _getResponseDoc(): ResponseDoc | undefined {
-    if (this._preflight) return
-
+  // Only call this outside of preflight, which runs before there is a response. The one caller
+  // that also runs in preflight, _improveOptionsFromResponseDoc(), checks for it first.
+  _getResponseDoc(): ResponseDoc {
     const docOptions = u.pick(this.options, [
       'target',
       'content',
@@ -157,8 +155,7 @@ export class ChangeFromContent extends Change {
   _improveOptionsFromResponseDoc(): void {
     if (this._preflight) return
 
-    // Outside of preflight there is a response doc.
-    let responseDoc = this._getResponseDoc()!
+    let responseDoc = this._getResponseDoc()
 
     if (this.options.fragment) {
       // ResponseDoc allows to pass innerHTML as { fragment }, but then it also
