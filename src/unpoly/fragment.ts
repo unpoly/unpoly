@@ -186,10 +186,10 @@ export function findKeepPlan(options: u.PlainObject): t.KeepPlan | undefined {
   if (!oldElementMode) { return }
 
   let partner
-  // Without a target we keep looking for "undefined", which matches nothing.
-  let partnerSelector = tryToTarget(oldElement)!
+  let partnerSelector = tryToTarget(oldElement)
   if (!partnerSelector) {
     printToWarn('[up-keep]', 'Cannot keep untargetable %o', oldElement)
+    return
   }
 
   const lookupOpts = { layer: options.layer }
