@@ -6,32 +6,13 @@ import { abortFragment, reload } from '../../../fragment.js'
 import { layerStack, type Layer, type Overlay } from '../../../layer.js'
 import { type UpResponse } from '../../../network.js'
 import { doFocus } from '../../../viewport.js'
+import type * as t from '../../types.js'
 import { Change } from './change.js'
-import { type LayerReference } from '../render_options.js'
-
-/**
-Options for accepting or dismissing an overlay.
-@internal
-*/
-export interface CloseLayerOptions {
-  verb: 'accept' | 'dismiss'
-  layer: LayerReference
-  value?: any
-  origin?: Element
-  // Whether a listener may prevent the overlay from closing.
-  preventable?: boolean
-  response?: UpResponse
-  // Whether to restore the parent layer's history.
-  history?: boolean
-  confirm?: string | false
-  // Other options go to Overlay#destroyElements(), e.g. { animation }.
-  [key: string]: any
-}
 
 // An event for the closing overlay, e.g. up:layer:accepted.
 type CloseEvent = Event & { value?: any }
 
-export class CloseLayer extends Change<CloseLayerOptions> {
+export class CloseLayer extends Change<t.CloseLayerOptions> {
   declare _verb: 'accept' | 'dismiss'
   declare layer: Overlay
   declare _origin: Element | undefined
@@ -40,7 +21,7 @@ export class CloseLayer extends Change<CloseLayerOptions> {
   declare _response: UpResponse | undefined
   declare _history: boolean
 
-  constructor(options: CloseLayerOptions) {
+  constructor(options: t.CloseLayerOptions) {
     super(options)
 
     this._verb = options.verb

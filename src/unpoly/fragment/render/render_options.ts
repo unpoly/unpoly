@@ -1,235 +1,16 @@
 import * as u from '../../util.js'
 import { fail } from '../../error.js'
-import { getInputDevice, type EventPlan, type InputDevice } from '../../event.js'
-import { type ParamsLike } from '../../form.js'
+import { getInputDevice } from '../../event.js'
+import { fragmentConfig, toSuccessKey } from '../../fragment.js'
+import { layerStack, normalizeLayerOptions } from '../../layer.js'
 import {
-  fragmentConfig, toSuccessKey, type FragmentLoadedEvent, type FragmentOfflineEvent,
-} from '../../fragment.js'
-import {
-  layerStack, normalizeLayerOptions, type Layer, type LayerCloseEvent, type LayerOpenedEvent,
-} from '../../layer.js'
-import { type AnimationValue, type TransitionValue } from '../../motion.js'
-import { type UpRequest, type UpResponse } from '../../network.js'
-import {
-  callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback, type CSPInfo,
+  callbackAttr as scriptCallbackAttr, parseCallback as scriptParseCallback,
   type ParseCallbackOptions,
 } from '../../script.js'
-import { type PreviewFn } from '../../status.js'
-import { type PreflightProps } from './change/addition.js'
-import { type RenderResult } from './render_result.js'
-
-/**
-What to render: a target selector, an element to derive a selector from, or several alternatives.
-*/
-export type RenderTarget = string | Element | u.List<Element> | string[]
-
-/**
-A layer reference: a layer object, an element in a layer, or a name like `'current'`, `'parent'` or `'new'`.
-*/
-export type LayerReference = string | Layer | Element
-
-/**
-A `{ focus }` or `{ scroll }` option: a keyword like `'auto'` or `'keep'`, a selector, an element, a function,
-an array of alternatives or a selector map. See `up.FragmentProcessor`.
-*/
-export type FragmentProcessorValue = any
-
-/**
-A `{ preview }` option: the name of a preview, a preview function, or a list of them.
-*/
-export type PreviewValue = string | PreviewFn | (string | PreviewFn)[] | false
-
-/**
-The options that `up.render()`, `up.navigate()` and the functions built on them (`up.follow()`,
-`up.submit()`, `up.layer.open()`, ...) pass through a render pass.
-
-The public options are documented in `up.render()` and `up.layer.open()`.
-Every option can also be given with a `fail` prefix (`{ failTarget }`, `{ failScroll }`, ...),
-which is used instead for an [error response](/learn/error-responses#fail-options).
-The render pass adds internal options while it runs, listed at the end.
-*/
-export interface RenderOptions {
-  // Targeting
-  target?: RenderTarget
-  fallback?: string | boolean
-  match?: 'region' | 'first'
-  origin?: Element
-  hungry?: boolean
-
-  // Navigation
-  navigate?: boolean
-
-  // Request
-  url?: string
-  // The button that submitted a form (up.submit()), or false for none.
-  submitButton?: Element | false
-  method?: string
-  params?: ParamsLike
-  headers?: Record<string, string>
-  abort?: boolean | string | Element | u.List<Element> | ((options: u.PlainObject) => any)
-  abortable?: boolean
-  background?: boolean
-  lateDelay?: number | false
-  timeout?: number
-  fail?: u.ValueOrFunction<boolean>
-
-  // Caching
-  cache?: boolean | 'auto'
-  revalidate?: boolean | 'auto' | ((response: UpResponse) => boolean)
-  // With true, the { preview } is used.
-  revalidatePreview?: PreviewValue | true
-  expireCache?: any
-  evictCache?: any
-
-  // Local content
-  content?: string | Element | u.List<Node>
-  fragment?: string | Element
-  document?: string | Element | Document
-  response?: UpResponse
-
-  // Layer
-  layer?: LayerReference
-  peel?: boolean | 'accept' | 'dismiss'
-  mode?: string
-  size?: string
-  class?: string
-  position?: string
-  align?: string
-  dismissible?: boolean | string | string[]
-  dismissLabel?: string
-  dismissARIALabel?: string
-  trapFocus?: boolean
-  acceptEvent?: string | string[]
-  dismissEvent?: string | string[]
-  acceptLocation?: string | string[]
-  dismissLocation?: string | string[]
-  acceptFragment?: string
-  dismissFragment?: string
-
-  // History
-  history?: boolean | 'auto'
-  title?: boolean | string
-  location?: boolean | string
-  metaTags?: boolean | Element[]
-  lang?: boolean | string
-
-  // Animation
-  transition?: TransitionValue
-  animation?: AnimationValue
-  openAnimation?: AnimationValue
-  closeAnimation?: AnimationValue
-  duration?: number
-  easing?: string
-  closeDuration?: number
-  closeEasing?: string
-
-  // Scrolling
-  scroll?: FragmentProcessorValue
-  scrollMap?: u.PlainObject
-  scrollBehavior?: ScrollBehavior
-  revealSnap?: number
-  revealTop?: boolean
-  revealPadding?: number
-  revealMax?: number | ((viewportHeight: number) => number)
-  saveScroll?: boolean
-
-  // Focus
-  focus?: FragmentProcessorValue
-  focusVisible?: boolean | 'auto'
-  saveFocus?: boolean
-
-  // Loading state
-  disable?: boolean | string | Element | any[]
-  placeholder?: string | Element | u.List<Node> | false
-  preview?: PreviewValue
-  feedback?: boolean
-
-  // Client state
-  data?: any
-  dataMap?: u.PlainObject
-  keep?: boolean
-  keepData?: boolean
-  context?: u.PlainObject
-
-  // Lifecycle hooks
-  confirm?: string | false
-  onLoaded?: (event: FragmentLoadedEvent) => any
-  onOffline?: (event: FragmentOfflineEvent) => any
-  onRendered?: (result: RenderResult) => any
-  onFinished?: (result: RenderResult) => any
-  onError?: (error: any) => any
-  onOpened?: (event: LayerOpenedEvent) => any
-  onAccept?: (event: LayerCloseEvent) => any
-  onAccepted?: (event: LayerCloseEvent) => any
-  onDismiss?: (event: LayerCloseEvent) => any
-  onDismissed?: (event: LayerCloseEvent) => any
-  // A selector to reload after the overlay was accepted or dismissed.
-  onAcceptedReload?: string
-  onDismissedReload?: string
-
-  // Internal options, set by Unpoly's own callers or by the render pass.
-  baseLayer?: Layer
-  originLayer?: Layer
-  source?: string | false
-  // Use the fail-prefixed options for an error response, instead of the success options.
-  failOptions?: boolean
-  didFail?: boolean
-  didForceFailOptions?: boolean
-  // The defaults from up.fragment.config, merged in by RenderOptions.finalize().
-  defaults?: RenderOptions
-  inputDevice?: InputDevice
-  // Opens an empty overlay when no content option is given (up.layer.open()).
-  defaultToEmptyContent?: boolean
-  // An event to emit before rendering, e.g. up:link:follow. Rendering is aborted when it is prevented.
-  guardEvent?: Event & { renderOptions?: RenderOptions }
-  // Set by RenderJob, called with the change's preflight props once a plan applies.
-  handleAbort?: (props: PreflightProps & { request?: UpRequest }) => void
-  // An identifier for a render pass. See up.fragment.abort().
-  jid?: any
-  // Only use the response if it was cached (up.link.preload()).
-  preload?: boolean
-  expiredResponse?: UpResponse
-  verifyFinished?: (result: RenderResult) => any
-  onRequestKnown?: (request: UpRequest) => void
-  // Only compute the preflight props, there is no content yet (ChangeFromURL).
-  preflight?: boolean
-  // How a step updates its target when the target has no ::before/::after/::content suffix.
-  defaultPlacement?: string
-  // Prefer these elements when matching the target, e.g. when revalidating.
-  preferOldElements?: Element[]
-  // The elements that show the loading state (up.status), like a form and its submit button.
-  activeElements?: Element[]
-
-  // Internal options that ChangeFromResponse takes from the response.
-  hash?: string
-  eventPlans?: EventPlan[]
-  acceptLayer?: any
-  dismissLayer?: any
-  cspInfo?: CSPInfo
-  time?: Date | false
-  etag?: string | false
-  // Passed to compilers as their third argument.
-  meta?: u.PlainObject
-
-  // A renamed option that unpoly-migrate still accepts.
-  html?: string
-
-  [key: `fail${string}`]: any
-}
-
-
-/**
-Render options once the render pass has found the layer to render in (in UpdateLayer and OpenLayer).
-@internal
-*/
-export interface ResolvedRenderOptions extends RenderOptions {
-  layer?: Layer
-  // A selector string, see up.fragment.toTarget().
-  target?: string
-}
+import type * as t from '../types.js'
 
 // Sometimes we need to use given render options, but disable preview effects.
-const NO_PREVIEWS: RenderOptions = {
+const NO_PREVIEWS: t.RenderOptions = {
   preview: false,
   disable: false,
   placeholder: false,
@@ -237,14 +18,14 @@ const NO_PREVIEWS: RenderOptions = {
 }
 
 // Sometimes we need to use given render options, but disable meddling with user control.
-const NO_INPUT_INTERFERENCE: RenderOptions = {
+const NO_INPUT_INTERFERENCE: t.RenderOptions = {
   scroll: 'keep',
   focus: 'keep',
   confirm: false,
 }
 
 // Sometimes we need to use given render options, but disable animation.
-const NO_MOTION: RenderOptions = {
+const NO_MOTION: t.RenderOptions = {
   transition: false,
   animation: false,
   openAnimation: false,
@@ -253,7 +34,7 @@ const NO_MOTION: RenderOptions = {
 
 // These properties are used before the request is sent.
 // Hence there cannot be a failVariant.
-const PREFLIGHT_KEYS: (keyof RenderOptions)[] = [
+const PREFLIGHT_KEYS: (keyof t.RenderOptions)[] = [
   'url',
   'method',
   'origin',
@@ -308,7 +89,7 @@ const SHARED_KEYS = PREFLIGHT_KEYS.concat([
 ])
 
 // At least one of these properties must be given for Unpoly to render content.
-const CONTENT_KEYS: (keyof RenderOptions)[] = [
+const CONTENT_KEYS: (keyof t.RenderOptions)[] = [
   'url',
   'response',
   'content',
@@ -356,13 +137,13 @@ function callbackAttr(element: Element, attrName: string, key: string): ((...arg
   return scriptCallbackAttr(element, attrName, parseCallbackOptions(key))
 }
 
-function navigateDefaults(options: RenderOptions): RenderOptions | undefined {
+function navigateDefaults(options: t.RenderOptions): t.RenderOptions | undefined {
   if (options.navigate) {
     return fragmentConfig.navigateOptions
   }
 }
 
-function normalizeURL({ url }: RenderOptions): RenderOptions | undefined {
+function normalizeURL({ url }: t.RenderOptions): t.RenderOptions | undefined {
   // Absolutize a relative URL in case render options are re-used later,
   // after the location base changed. For example:
   //
@@ -388,13 +169,13 @@ function normalizeURL({ url }: RenderOptions): RenderOptions | undefined {
 // be { data, dataMap }, not { useData, useDataMap }. Because we otherwise have full symmetry
 // between attributes and options, *except* for this one distinction, we also accept
 // { useData } for { data }.
-function removeUsePrefix(options: RenderOptions): void {
+function removeUsePrefix(options: t.RenderOptions): void {
   u.renameKey(options, 'useData', 'data')
   u.renameKey(options, 'useHungry', 'hungry')
   u.renameKey(options, 'useKeep', 'keep')
 }
 
-function preprocess(options: RenderOptions): RenderOptions {
+function preprocess(options: t.RenderOptions): t.RenderOptions {
   up.migrate.preprocessRenderOptions?.(options)
   normalizeLayerOptions(options)
   removeUsePrefix(options)
@@ -425,7 +206,7 @@ function preprocess(options: RenderOptions): RenderOptions {
 // In case of { layer: 'origin' } the { origin } element may get removed while the request was in flight,
 // making ChangeFromContent#execute() fail with a message like "layer { origin } does not exist" or
 // "Could not find a layer to render in. You may have passed an unmatchable layer reference, or a detached element.".
-function rememberOriginLayer({ origin, originLayer }: RenderOptions): RenderOptions | undefined {
+function rememberOriginLayer({ origin, originLayer }: t.RenderOptions): t.RenderOptions | undefined {
   if (origin && !originLayer) {
     return {
       originLayer: layerStack.get(origin),
@@ -433,8 +214,8 @@ function rememberOriginLayer({ origin, originLayer }: RenderOptions): RenderOpti
   }
 }
 
-function finalize<T extends RenderOptions>(preprocessedOptions: T, lateDefaults?: RenderOptions): T
-function finalize(preprocessedOptions: RenderOptions, lateDefaults?: RenderOptions) {
+function finalize<T extends t.RenderOptions>(preprocessedOptions: T, lateDefaults?: t.RenderOptions): T
+function finalize(preprocessedOptions: t.RenderOptions, lateDefaults?: t.RenderOptions) {
   return u.merge(
     preprocessedOptions.defaults,
     lateDefaults,
@@ -442,7 +223,7 @@ function finalize(preprocessedOptions: RenderOptions, lateDefaults?: RenderOptio
   )
 }
 
-function assertContentGiven(options: RenderOptions): void {
+function assertContentGiven(options: t.RenderOptions): void {
   if (!u.some(CONTENT_KEYS, (contentKey) => u.isGiven(options[contentKey]))) {
     // up.layer.open() should open an empty layer without a content key.
     if (options.defaultToEmptyContent) {
@@ -453,7 +234,7 @@ function assertContentGiven(options: RenderOptions): void {
   }
 }
 
-function failOverrides(options: RenderOptions): RenderOptions {
+function failOverrides(options: t.RenderOptions): t.RenderOptions {
   const overrides: u.PlainObject = {}
   for (let key in options) {
     // Note that up.fragment.toSuccessKey(key) only returns a value
@@ -467,7 +248,7 @@ function failOverrides(options: RenderOptions): RenderOptions {
   return overrides
 }
 
-function deriveFailOptions(preprocessedOptions: RenderOptions): RenderOptions {
+function deriveFailOptions(preprocessedOptions: t.RenderOptions): t.RenderOptions {
   // Remember that this pass was a failure (for up.RenderResult#ok)
   let markFailure = { didFail: true }
 
@@ -507,6 +288,11 @@ function chainCallbacks<T extends u.PlainObject>(options: T, ownCallbacks: u.Pla
   }
   return chained as T
 }
+
+// The type of render options lives in fragment/types.ts. fragment.ts re-exports this object, and an
+// explicit re-export hides a name of the same type from `export type *`. This alias gives the object
+// the type's name too, like a class has, so other modules import both as `RenderOptions`.
+export type RenderOptions = t.RenderOptions
 
 export const RenderOptions = {
   preprocess,

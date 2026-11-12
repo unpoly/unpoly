@@ -5,15 +5,12 @@ import { refineOption } from '../../../history.js'
 import { layerStack, optionToString, type Layer } from '../../../layer.js'
 import { printToStandard } from '../../../log.js'
 import { assertAssetsOK } from '../../../script.js'
-import { type PreflightProps } from './addition.js'
+import type * as t from '../../types.js'
 import { Change } from './change.js'
 import { OpenLayerPlan } from './open_layer.js'
 import { UpdateLayerPlan } from './update_layer.js'
-import {
-  type RenderOptions, type RenderTarget, type ResolvedRenderOptions,
-} from '../render_options.js'
 import { type RenderResult } from '../render_result.js'
-import { ResponseDoc, type ResponseDocOptions } from '../response_doc.js'
+import { ResponseDoc } from '../response_doc.js'
 
 // A way to render: updating a target in an existing layer, or opening a new overlay.
 type LayerPlan = OpenLayerPlan | UpdateLayerPlan
@@ -26,7 +23,7 @@ export class ChangeFromContent extends Change {
   declare _layers: (Layer | 'new')[]
   declare _planApplied: boolean
 
-  constructor(options: RenderOptions) {
+  constructor(options: t.RenderOptions) {
     super(options)
 
     // Only extract options required for step building, since #execute() will be called with an
@@ -66,7 +63,7 @@ export class ChangeFromContent extends Change {
         // Any plans we add will inherit all properties from @options
         const props = { ...this.options, target, layer, defaultPlacement: this._defaultPlacement() }
         // TypeScript doesn't narrow props.layer through the layer variable.
-        const change = layer === 'new' ? new OpenLayerPlan(props) : new UpdateLayerPlan(props as ResolvedRenderOptions)
+        const change = layer === 'new' ? new OpenLayerPlan(props) : new UpdateLayerPlan(props as t.ResolvedRenderOptions)
         plans.push(change)
       }
     }
@@ -148,7 +145,7 @@ export class ChangeFromContent extends Change {
     }
 
     // With content, { target } is a selector string by now (see above).
-    return new ResponseDoc(docOptions as ResponseDocOptions)
+    return new ResponseDoc(docOptions as t.ResponseDocOptions)
   }
 
   _improveOptionsFromResponseDoc(): void {
@@ -175,7 +172,7 @@ export class ChangeFromContent extends Change {
 
   // When the user provided a { content } we need an actual CSS selector for
   // which up.ResponseDoc can create a matching element.
-  _firstExpandedTarget(target: RenderTarget | undefined): string {
+  _firstExpandedTarget(target: t.RenderTarget | undefined): string {
     // When the user passes a closed layer as { layer } option, we expand the target with the root
     // layer instead of having up.fragment.expandTargets() throw. In many cases we get the same result.
     let layer = this._layers[0] || layerStack.root
@@ -185,8 +182,8 @@ export class ChangeFromContent extends Change {
   // Returns information about the change that is most likely before the request was dispatched.
   // This might change postflight if the response does not contain the desired target.
   // With { optional: true }, returns an empty object instead of throwing when no target matches.
-  getPreflightProps(opts?: { optional?: false }): PreflightProps
-  getPreflightProps(opts: { optional: boolean }): Partial<PreflightProps>
+  getPreflightProps(opts?: { optional?: false }): t.PreflightProps
+  getPreflightProps(opts: { optional: boolean }): Partial<t.PreflightProps>
   getPreflightProps(opts: { optional?: boolean } = {}) {
     const getPlanProps = (plan: LayerPlan) => plan.getPreflightProps()
     return this._seekPlan(getPlanProps) || (opts.optional ? {} : this._cannotMatchPreflightTarget())

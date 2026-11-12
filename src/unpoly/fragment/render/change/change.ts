@@ -1,9 +1,10 @@
 import { NotImplemented } from '../../../error.js'
+import type * as t from '../../types.js'
 import { RenderOptions } from '../render_options.js'
 
 // The base class of all render passes and their parts. Most work with render options,
 // up.destroy() passes its own options.
-export class Change<O extends object = RenderOptions> {
+export class Change<O extends object = t.RenderOptions> {
   declare options: O
 
   constructor(options: O) {
@@ -16,7 +17,7 @@ export class Change<O extends object = RenderOptions> {
     throw new NotImplemented()
   }
 
-  deriveFailOptions(this: Change<RenderOptions>): RenderOptions {
+  deriveFailOptions(this: Change<t.RenderOptions>): t.RenderOptions {
     // This will merge shared keys and unprefix failKeys.
     return RenderOptions.deriveFailOptions(this.options)
   }

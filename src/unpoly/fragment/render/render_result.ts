@@ -1,24 +1,7 @@
 import * as u from '../../util.js'
 import { isCritical } from '../../error.js'
 import { type Layer } from '../../layer.js'
-import { type RenderOptions } from './render_options.js'
-
-/**
-Checks a finished render pass, e.g. that its layer is still open. May return a new `up.RenderResult`
-that replaces the finished result.
-@internal
-*/
-export type VerifyFinishedFn = (result: RenderResult) => RenderResult | void | Promise<RenderResult | void>
-
-/**
-What a step of a render pass contributes to its `up.RenderResult`.
-@internal
-*/
-export interface PartialRenderResult {
-  fragments?: Element[]
-  finished?: Promise<any>
-  verifyFinished?: VerifyFinishedFn
-}
+import type * as t from '../types.js'
 
 /**
 Options for constructing an `up.RenderResult`.
@@ -27,8 +10,8 @@ Options for constructing an `up.RenderResult`.
 export interface RenderResultOptions {
   layer?: Layer
   target?: string
-  renderOptions?: RenderOptions
-  partialResults?: PartialRenderResult[]
+  renderOptions?: t.RenderOptions
+  partialResults?: t.PartialRenderResult[]
 }
 
 /*-
@@ -50,7 +33,7 @@ console.log(result.renderOptions) // result: { target: '.target', content: 'foo'
 export class RenderResult {
   declare layer: Layer
   declare target: string
-  declare renderOptions: RenderOptions
+  declare renderOptions: t.RenderOptions
   declare fragments: Element[]
   declare finished: Promise<RenderResult>
 
@@ -143,11 +126,11 @@ export class RenderResult {
     this.finished = this._finish(partialResults)
   }
 
-  _partialPhase(partialResults: PartialRenderResult[], phase: keyof PartialRenderResult, extraValue?: any): any[] {
+  _partialPhase(partialResults: t.PartialRenderResult[], phase: keyof t.PartialRenderResult, extraValue?: any): any[] {
     return u.compact([...u.map(partialResults, phase), extraValue])
   }
 
-  async _finish(partialResults: PartialRenderResult[]): Promise<RenderResult> {
+  async _finish(partialResults: t.PartialRenderResult[]): Promise<RenderResult> {
     let finishedPromises = this._partialPhase(partialResults, 'finished')
     let verifyFns = this._partialPhase(partialResults, 'verifyFinished', this.renderOptions.verifyFinished)
     await Promise.all(finishedPromises)

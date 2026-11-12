@@ -6,11 +6,10 @@ import { printToStandard } from '../../../log.js'
 import {
   loadPage, makeRequest, UpResponse, type RequestOptions, type UpRequest,
 } from '../../../network.js'
-import { type PreflightProps } from './addition.js'
+import type * as t from '../../types.js'
 import { Change } from './change.js'
 import { ChangeFromContent } from './change_from_content.js'
 import { ChangeFromResponse } from './change_from_response.js'
-import { type RenderOptions } from '../render_options.js'
 import { type RenderResult } from '../render_result.js'
 
 /**
@@ -18,9 +17,9 @@ The options for the request of a `ChangeFromURL`: the render options plus the pr
 of the success and fail options.
 @internal
 */
-export type RequestAttrs = RenderOptions & PreflightProps & { url: string }
+export type RequestAttrs = t.RenderOptions & t.PreflightProps & { url: string }
 
-export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
+export class ChangeFromURL extends Change<t.RenderOptions & { url: string }> {
   declare request: UpRequest
 
   // Fulfills with a request for { preload: true }.
@@ -81,8 +80,8 @@ export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
     }
   }
 
-  _preflightPropsForRenderOptions(renderOptions: RenderOptions): PreflightProps
-  _preflightPropsForRenderOptions(renderOptions: RenderOptions, getPreflightPropsOptions: { optional: boolean }): Partial<PreflightProps>
+  _preflightPropsForRenderOptions(renderOptions: t.RenderOptions): t.PreflightProps
+  _preflightPropsForRenderOptions(renderOptions: t.RenderOptions, getPreflightPropsOptions: { optional: boolean }): Partial<t.PreflightProps>
   _preflightPropsForRenderOptions(renderOptions, getPreflightPropsOptions?) {
     const preflightChange = new ChangeFromContent({ ...renderOptions, preflight: true })
     // #getPreflightProps() will return meta information about the change that is most
@@ -112,7 +111,7 @@ export class ChangeFromURL extends Change<RenderOptions & { url: string }> {
       this.request.emit('up:fragment:offline', {
         callback: this.options.onOffline,
         renderOptions: this.options,
-        retry: (retryOptions: RenderOptions) => render({ ...this.options, ...retryOptions }),
+        retry: (retryOptions: t.RenderOptions) => render({ ...this.options, ...retryOptions }),
         log,
       })
     }

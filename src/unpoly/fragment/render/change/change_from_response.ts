@@ -7,6 +7,7 @@ import { UNSET_OVERLAY_VISUALS } from '../../../layer.js'
 import { printToStandard, printToWarn } from '../../../log.js'
 import { type UpRequest, type UpResponse } from '../../../network.js'
 import { adoptRenderOptionsFromHeader } from '../../../script.js'
+import type * as t from '../../types.js'
 import { Change } from './change.js'
 import { ChangeFromContent } from './change_from_content.js'
 import { RenderOptions } from '../render_options.js'
@@ -16,7 +17,7 @@ export class ChangeFromResponse extends Change {
   declare _response: UpResponse
   declare _request: UpRequest
 
-  constructor(options: RenderOptions) {
+  constructor(options: t.RenderOptions) {
     super(options)
 
     this._response = options.response
@@ -64,7 +65,7 @@ export class ChangeFromResponse extends Change {
     this.options.failTarget = ':none'
   }
 
-  _updateContentFromResponse(finalRenderOptions: RenderOptions): RenderResult {
+  _updateContentFromResponse(finalRenderOptions: t.RenderOptions): RenderResult {
     if (finalRenderOptions.didForceFailOptions) {
       printToStandard('up.render()', 'Rendering error response using fail-prefixed options (https://unpoly.com/learn/error-responses)')
     }
@@ -83,7 +84,7 @@ export class ChangeFromResponse extends Change {
     return new ChangeFromContent(finalRenderOptions).execute()
   }
 
-  async _revalidate(renderResult: RenderResult, originalRenderOptions: RenderOptions): Promise<RenderResult | undefined> {
+  async _revalidate(renderResult: RenderResult, originalRenderOptions: t.RenderOptions): Promise<RenderResult | undefined> {
     if (!shouldRevalidate(this._request, this._response, originalRenderOptions)) return
 
     // This is an explicit target passed as `{ target }` option.
@@ -131,7 +132,7 @@ export class ChangeFromResponse extends Change {
     }
   }
 
-  _revalidatePreview({ preview, revalidatePreview }: RenderOptions): RenderOptions['preview'] {
+  _revalidatePreview({ preview, revalidatePreview }: t.RenderOptions): t.RenderOptions['preview'] {
     if (revalidatePreview === true) {
       return preview
     } else {
@@ -164,7 +165,7 @@ export class ChangeFromResponse extends Change {
     return meta
   }
 
-  _augmentOptionsFromResponse(renderOptions: RenderOptions): void {
+  _augmentOptionsFromResponse(renderOptions: t.RenderOptions): void {
     // Also see preprocessing of server response in up.Request#extractResponseFromXHR().
 
     const responseURL = this._response.url

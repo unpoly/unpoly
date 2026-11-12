@@ -2,27 +2,28 @@ import * as u from '../../../util.js'
 import * as e from '../../../element.js'
 import { CannotMatch, CannotTarget } from '../../../error.js'
 import {
-  abortFragment, compressNestedSteps, hasAutoHistory, parseTargetSteps, type RenderStep,
+  abortFragment, compressNestedSteps, hasAutoHistory, parseTargetSteps,
 } from '../../../fragment.js'
 import { historyOptions } from '../../../history.js'
 import { type PeelOptions } from '../../../layer.js'
 import { printToStandard } from '../../../log.js'
 import { hungrySteps, type HungrySteps } from '../../../radio.js'
 import { FocusCapsule, getScrollTops, saveFocus, saveScroll } from '../../../viewport.js'
+import type * as t from '../../types.js'
 import { FragmentFinder } from '../../fragment_finder.js'
-import { Addition, type PreflightProps } from './addition.js'
+import { Addition } from './addition.js'
 import { UpdateSteps } from './update_steps.js'
-import { RenderOptions, type ResolvedRenderOptions } from '../render_options.js'
-import { RenderResult, type PartialRenderResult } from '../render_result.js'
+import { RenderOptions } from '../render_options.js'
+import { RenderResult } from '../render_result.js'
 import { type ResponseDoc } from '../response_doc.js'
 
 export class UpdateLayerPlan extends Addition {
-  declare options: ResolvedRenderOptions
+  declare options: t.ResolvedRenderOptions
   declare target: string
   declare _context: u.PlainObject | undefined
-  declare _steps: RenderStep[]
+  declare _steps: t.RenderStep[]
 
-  constructor(options: ResolvedRenderOptions) {
+  constructor(options: t.ResolvedRenderOptions) {
     options = RenderOptions.finalize(options)
     super(options)
     this.layer = options.layer
@@ -33,7 +34,7 @@ export class UpdateLayerPlan extends Addition {
     // this.uid = Math.random()
   }
 
-  getPreflightProps(): PreflightProps {
+  getPreflightProps(): t.PreflightProps {
     // This will throw up.CannotMatch if { target } cannot be found in { layer }.
     this._matchPreflight()
 
@@ -54,7 +55,7 @@ export class UpdateLayerPlan extends Addition {
   _bestPreflightSelector(): string {
     this._matchPreflight()
 
-    const isProbable = (step: RenderStep) => !step.maybe || step.oldElement?.isConnected
+    const isProbable = (step: t.RenderStep) => !step.maybe || step.oldElement?.isConnected
     let bestSteps = this._steps.filter(isProbable)
     let selectors = u.map(bestSteps, 'selector')
     return selectors.join(', ') || ':none'
@@ -102,7 +103,7 @@ export class UpdateLayerPlan extends Addition {
     }
   }
 
-  _renderCurrentLayer(responseDoc: ResponseDoc): PartialRenderResult[] {
+  _renderCurrentLayer(responseDoc: ResponseDoc): t.PartialRenderResult[] {
     if (this._steps.length) {
       // Don't log this.target since that does not include hungry elements
       printToStandard('up.render()', `Updating "${this._bestPreflightSelector()}" in ${this.layer}`)
@@ -170,7 +171,7 @@ export class UpdateLayerPlan extends Addition {
     return new UpdateSteps({ steps: this._steps, noneOptions: this.options }).execute(responseDoc)
   }
 
-  _renderOtherLayers(responseDoc: ResponseDoc): PartialRenderResult[] {
+  _renderOtherLayers(responseDoc: ResponseDoc): t.PartialRenderResult[] {
     // We execute steps on other layers after this layer. However, if the render pass ends up
     // closing this layer (e.g. by reaching a close condition or X-Up-Accept-Layer), we execute them
     // before the layer closes (see execute()). This way we can:
@@ -272,7 +273,7 @@ export class UpdateLayerPlan extends Addition {
     return this._getEffectiveHistoryOptions().location
   }
 
-  _getEffectiveRenderOptions(): ResolvedRenderOptions {
+  _getEffectiveRenderOptions(): t.ResolvedRenderOptions {
     return {
       ...this.options,
       layer: this.layer,

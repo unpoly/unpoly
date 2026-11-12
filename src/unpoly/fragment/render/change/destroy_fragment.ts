@@ -4,8 +4,9 @@ import {
 import { layerStack, type Layer } from '../../../layer.js'
 import { animate, type AnimationValue } from '../../../motion.js'
 import { clean } from '../../../script.js'
+import type * as t from '../../types.js'
 import { Change } from './change.js'
-import { RenderOptions, type LayerReference } from '../render_options.js'
+import { RenderOptions } from '../render_options.js'
 
 /**
 Options for `up.destroy()`, plus the element to destroy.
@@ -18,7 +19,7 @@ export interface DestroyFragmentOptions {
   easing?: string
   onFinished?: () => void
   log?: any
-  layer?: LayerReference
+  layer?: t.LayerReference
   [key: string]: any
 }
 

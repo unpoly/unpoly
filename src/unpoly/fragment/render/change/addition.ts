@@ -4,26 +4,8 @@ import { emit, type EventPlan } from '../../../event.js'
 import { normalizeSource, sourceOf } from '../../../fragment.js'
 import { type Layer } from '../../../layer.js'
 import { type UpResponse } from '../../../network.js'
+import type * as t from '../../types.js'
 import { Change } from './change.js'
-import { type RenderOptions } from '../render_options.js'
-
-/**
-What a change will update, known before its request is sent. ChangeFromURL makes them request options,
-RenderJob passes them to the `{ abort }` option.
-@internal
-*/
-export interface PreflightProps {
-  // The layer to update, or 'new' when opening an overlay.
-  layer: Layer | 'new'
-  // The layer whose fragments the request belongs to, for aborting.
-  bindLayer: Layer
-  mode: string
-  context: u.PlainObject
-  origin: Element | undefined
-  target: string
-  fragments: Element[]
-  bindFragments: Element[]
-}
 
 /**
 The values that `Addition#setReloadAttrs()` sets as `[up-source]`, `[up-time]` and `[up-etag]`.
@@ -46,7 +28,7 @@ export class Addition extends Change {
   declare _eventPlans: EventPlan[]
   declare _response: UpResponse | undefined
 
-  constructor(options: RenderOptions) {
+  constructor(options: t.RenderOptions) {
     super(options)
     this._acceptLayer = options.acceptLayer
     this._dismissLayer = options.dismissLayer

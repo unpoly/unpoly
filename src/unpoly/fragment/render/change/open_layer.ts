@@ -9,12 +9,13 @@ import {
 import { printToStandard } from '../../../log.js'
 import { hungrySteps, type HungrySteps } from '../../../radio.js'
 import { hello } from '../../../script.js'
-import { Addition, type PreflightProps } from './addition.js'
+import type * as t from '../../types.js'
+import { Addition } from './addition.js'
 import { UpdateSteps } from './update_steps.js'
 import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
 import { RenderOptions } from '../render_options.js'
-import { RenderResult, type PartialRenderResult } from '../render_result.js'
+import { RenderResult } from '../render_result.js'
 import { type ResponseDoc } from '../response_doc.js'
 
 export class OpenLayerPlan extends Addition {
@@ -25,7 +26,7 @@ export class OpenLayerPlan extends Addition {
   declare _content: HTMLElement | undefined
 
   // ChangeFromContent has turned { target } into a selector string.
-  constructor(options: RenderOptions & { target?: string }) {
+  constructor(options: t.RenderOptions & { target?: string }) {
     super(options)
     this.target = options.target
     this._origin = options.origin
@@ -34,7 +35,7 @@ export class OpenLayerPlan extends Addition {
     // to up:layer:open may modify layer options.
   }
 
-  getPreflightProps(): PreflightProps {
+  getPreflightProps(): t.PreflightProps {
     // We assume that the server will respond with our target.
     // Hence this change will always be applicable.
 
@@ -140,7 +141,7 @@ export class OpenLayerPlan extends Addition {
     this.layer.setupHandlers()
   }
 
-  _renderOverlayContent(responseDoc: ResponseDoc): PartialRenderResult {
+  _renderOverlayContent(responseDoc: ResponseDoc): t.PartialRenderResult {
     // The server may trigger multiple signals that may cause the overlay to close immediately:
     //
     // - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
@@ -197,7 +198,7 @@ export class OpenLayerPlan extends Addition {
     }
   }
 
-  _renderOtherLayers(responseDoc: ResponseDoc): PartialRenderResult[] {
+  _renderOtherLayers(responseDoc: ResponseDoc): t.PartialRenderResult[] {
     // We execute steps on other layers after this layer. However, if the render pass ends up
     // closing this layer (e.g. by reaching a close condition or X-Up-Accept-Layer), we execute them
     // before the layer closes (see execute()). This way we can:
@@ -219,7 +220,7 @@ export class OpenLayerPlan extends Addition {
   }
 
   _buildLayer(): Overlay {
-    const beforeNew = (optionsWithLayerDefaults: RenderOptions) => {
+    const beforeNew = (optionsWithLayerDefaults: t.RenderOptions) => {
       return this.options = RenderOptions.finalize(optionsWithLayerDefaults)
     }
 
@@ -297,7 +298,7 @@ export class OpenLayerPlan extends Addition {
     return hungrySteps(this._getEffectiveRenderOptions())
   }
 
-  _getEffectiveRenderOptions(): RenderOptions {
+  _getEffectiveRenderOptions(): t.RenderOptions {
     return {
       ...this.options,
       layer: this.layer,

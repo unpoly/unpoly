@@ -5,7 +5,7 @@ import { emit } from '../../event.js'
 import { abortFragment } from '../../fragment.js'
 import { printToStandard } from '../../log.js'
 import { type UpRequest } from '../../network.js'
-import { type PreflightProps } from './change/addition.js'
+import type * as t from '../types.js'
 import { ChangeFromContent } from './change/change_from_content.js'
 import { ChangeFromResponse } from './change/change_from_response.js'
 import { ChangeFromURL } from './change/change_from_url.js'
@@ -13,7 +13,7 @@ import { RenderOptions } from './render_options.js'
 import { RenderResult } from './render_result.js'
 
 // What the { abort } option needs to know about a change: its preflight props, and its request if it has one.
-type AbortOptionProps = PreflightProps & { request?: UpRequest }
+type AbortOptionProps = t.PreflightProps & { request?: UpRequest }
 
 /*-
 A queued render task.
@@ -40,14 +40,14 @@ console.log(finalResult.fragment) // logs the revalidated fragment
 @parent up.fragment
 */
 export class RenderJob {
-  declare renderOptions: RenderOptions
+  declare renderOptions: t.RenderOptions
   declare _rendered: Promise<RenderResult>
   // The promise methods are delegated to the render promise, see the static block below.
   declare then: Promise<RenderResult>['then']
   declare catch: Promise<RenderResult>['catch']
   declare finally: Promise<RenderResult>['finally']
 
-  constructor(renderOptions: RenderOptions) {
+  constructor(renderOptions: t.RenderOptions) {
     this.renderOptions = renderOptions
   }
 
@@ -195,7 +195,7 @@ export class RenderJob {
 
     if (renderOptions.url) {
       // TypeScript doesn't narrow the object through renderOptions.url.
-      return new ChangeFromURL(renderOptions as RenderOptions & { url: string })
+      return new ChangeFromURL(renderOptions as t.RenderOptions & { url: string })
     } else if (renderOptions.response) {
       return new ChangeFromResponse(renderOptions)
     } else {

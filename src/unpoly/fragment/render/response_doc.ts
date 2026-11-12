@@ -2,29 +2,13 @@ import * as u from '../../util.js'
 import * as e from '../../element.js'
 import { CannotMatch, fail } from '../../error.js'
 import { emit } from '../../event.js'
-import {
-  parseTargetSteps, provideNodes, toTarget, tryToTarget, type RenderStep,
-} from '../../fragment.js'
+import { parseTargetSteps, provideNodes, toTarget, tryToTarget } from '../../fragment.js'
 import { findMetaTags, getLang } from '../../history.js'
 import {
   adoptDetachedHeadAsset, adoptNewFragment, findAssets, warnOfUnsafeCSP, type CSPInfo,
 } from '../../script.js'
+import type * as t from '../types.js'
 import { FragmentFinder } from '../fragment_finder.js'
-
-/**
-Options for an `up.ResponseDoc`. One of `{ document }`, `{ fragment }` or `{ content }` holds the new HTML.
-@internal
-*/
-export interface ResponseDocOptions {
-  document?: string | Element | Document
-  fragment?: string | Element
-  content?: string | Element | u.List<Node>
-  target?: string
-  origin?: Element
-  data?: any
-  cspInfo?: CSPInfo
-  match?: 'region' | 'first'
-}
 
 export class ResponseDoc {
   // A parsed Document for a full HTML document, or an <up-document> element wrapping a fragment.
@@ -34,7 +18,7 @@ export class ResponseDoc {
   declare _rediscoveredOrigin: Element | undefined
   declare _match: 'region' | 'first' | undefined
 
-  constructor({ document, fragment, content, target, origin, data, cspInfo, match }: ResponseDocOptions) {
+  constructor({ document, fragment, content, target, origin, data, cspInfo, match }: t.ResponseDocOptions) {
     if (document) {
       this._parseDocument(document, origin, data)
     } else if (fragment) {
@@ -204,20 +188,20 @@ export class ResponseDoc {
     return finder.find()
   }
 
-  selectSteps(steps: RenderStep[]): RenderStep[] {
+  selectSteps(steps: t.RenderStep[]): t.RenderStep[] {
     return steps.filter((step) => {
       return this._trySelectStep(step) || this._cannotMatchStep(step)
     })
   }
 
-  commitSteps(steps: RenderStep[]): RenderStep[] {
+  commitSteps(steps: t.RenderStep[]): t.RenderStep[] {
     // If multiple steps want to match the same new element, the first step will remain in the left.
     // This will happen when multiple layers have the same hungry element with [up-if-layer=any].
     // Steps have a new element once they're matched.
     return steps.filter((step) => this.commitElement(step.newElement!))
   }
 
-  _trySelectStep(step: RenderStep): boolean | undefined {
+  _trySelectStep(step: t.RenderStep): boolean | undefined {
     // TODO: Why do we need this check?
     if (step.newElement) {
       return true
@@ -245,7 +229,7 @@ export class ResponseDoc {
     return true
   }
 
-  _cannotMatchStep(step: RenderStep): void {
+  _cannotMatchStep(step: t.RenderStep): void {
     if (!step.maybe) {
       // An error message will be chosen by ChangeFromContent
       throw new CannotMatch()

@@ -3,19 +3,7 @@ import { guard } from '../../error.js'
 import { contains, getSmart } from '../../fragment.js'
 import { type Layer } from '../../layer.js'
 import { printToWarn } from '../../log.js'
-
-/**
-Options for an `up.FragmentProcessor`. Subclasses take more.
-@internal
-*/
-export interface FragmentProcessorOptions {
-  fragment?: HTMLElement
-  // What { focus: 'auto' } or { scroll: 'auto' } means, as another processable value.
-  autoMeans?: any
-  origin?: Element
-  layer?: Layer
-  [key: string]: any
-}
+import type * as t from '../types.js'
 
 // Processes a { focus } or { scroll } render option. The option can be a string, an element, a function,
 // an array of alternatives or a selector map, so its type stays `any`.
@@ -25,7 +13,7 @@ export abstract class FragmentProcessor {
   declare origin: Element | undefined
   declare layer: Layer | undefined
 
-  constructor(options: FragmentProcessorOptions) {
+  constructor(options: t.FragmentProcessorOptions) {
     this.fragment = options.fragment
     this.autoMeans = options.autoMeans
     this.origin = options.origin

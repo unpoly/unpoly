@@ -15,12 +15,12 @@ import {
 import type * as t from './fragment/types.js'
 export type * from './fragment/types.js'
 import { FragmentFinder } from './fragment/fragment_finder.js'
-export { CloseLayer, type CloseLayerOptions } from './fragment/render/change/close_layer.js'
+export { CloseLayer } from './fragment/render/change/close_layer.js'
 import { DestroyFragment } from './fragment/render/change/destroy_fragment.js'
 import { RenderJob } from './fragment/render/render_job.js'
 export { RenderJob }
-import { RenderOptions, type LayerReference } from './fragment/render/render_options.js'
-export { RenderOptions, type LayerReference }
+import { RenderOptions } from './fragment/render/render_options.js'
+export { RenderOptions }
 import { type RenderResult } from './fragment/render/render_result.js'
 export { type RenderResult }
 export { ResponseDoc } from './fragment/render/response_doc.js'
@@ -1997,7 +1997,7 @@ up.visit('/users')
 
 @stable
 */
-export function visit(url: string, options?: RenderOptions): RenderJob {
+export function visit(url: string, options?: t.RenderOptions): RenderJob {
   return navigate({ ...options, url })
 }
 
@@ -2739,7 +2739,7 @@ export function matchSelectorMap(element: Element, selectorMap?: u.PlainObject, 
   return hits
 }
 
-export function shouldRevalidate(request: UpRequest, response: UpResponse, options: RenderOptions = {}): boolean | undefined {
+export function shouldRevalidate(request: UpRequest, response: UpResponse, options: t.RenderOptions = {}): boolean | undefined {
   return request.fromCache && u.evalAutoOption(options.revalidate, fragmentConfig.autoRevalidate, response)
 }
 

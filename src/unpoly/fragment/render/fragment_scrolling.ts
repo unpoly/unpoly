@@ -1,12 +1,13 @@
 import * as u from '../../util.js'
 import { restoreScroll, reveal, revealHash, scrollToPosition } from '../../viewport.js'
-import { FragmentProcessor, type FragmentProcessorOptions } from './fragment_processor.js'
+import type * as t from '../types.js'
+import { FragmentProcessor } from './fragment_processor.js'
 
 /**
 Options for an `up.FragmentScrolling`.
 @internal
 */
-export interface FragmentScrollingOptions extends FragmentProcessorOptions {
+export interface FragmentScrollingOptions extends t.FragmentProcessorOptions {
   hash?: string
   mode?: string
   revealTop?: boolean

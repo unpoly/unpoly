@@ -2,13 +2,14 @@ import * as u from '../../util.js'
 import * as e from '../../element.js'
 import { type InputDevice } from '../../event.js'
 import { doFocus, firstHashTarget, restoreFocus, type FocusCapsule } from '../../viewport.js'
-import { FragmentProcessor, type FragmentProcessorOptions } from './fragment_processor.js'
+import type * as t from '../types.js'
+import { FragmentProcessor } from './fragment_processor.js'
 
 /**
 Options for an `up.FragmentFocus`.
 @internal
 */
-export interface FragmentFocusOptions extends FragmentProcessorOptions {
+export interface FragmentFocusOptions extends t.FragmentProcessorOptions {
   hash?: string
   focusVisible?: boolean | 'auto'
   focusCapsule?: FocusCapsule
