@@ -1,5 +1,8 @@
 import { canJQuery } from './browser.js'
 import { guardFn } from './error.js'
+export { FIFOCache } from './util/fifo_cache.js'
+export { Rect } from './util/rect.js'
+export { UpURLPattern } from './util/url_pattern.js'
 
 /**
 A list that Unpoly's list functions accept: an array, a `NodeList`, an `HTMLCollection`,

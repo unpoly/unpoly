@@ -1,6 +1,5 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
-import { Rect } from '../util/rect.js'
 import { fail } from '../error.js'
 import { getAllFragments } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
@@ -52,7 +51,7 @@ export class RevealMotion {
 
   start(): void {
     const viewportRect = this._getViewportRect()
-    const elementRect = Rect.fromElement(this._element)
+    const elementRect = u.Rect.fromElement(this._element)
     if (this._max) {
       const maxPixels =  u.evalOption(this._max, this._element)
       elementRect.height = Math.min(elementRect.height, maxPixels)
@@ -98,37 +97,37 @@ export class RevealMotion {
     }
   }
 
-  _getViewportRect(): Rect {
+  _getViewportRect(): u.Rect {
     if (isRoot(this._viewport)) {
       // Other than an element with overflow-y, the document viewport
       // stretches to the full height of its contents. So we create a viewport
       // sized to the usuable screen area.
-      return new Rect({
+      return new u.Rect({
         left: 0,
         top: 0,
         width: rootWidth(),
         height: rootHeight()
       })
     } else {
-      return Rect.fromElement(this._viewport)
+      return u.Rect.fromElement(this._viewport)
     }
   }
 
-  _computeObstructionRects(selector: string): Rect[] {
+  _computeObstructionRects(selector: string): u.Rect[] {
     let elements: HTMLElement[] = getAllFragments(selector, { layer: this._obstructionsLayer })
     elements = u.filterList(elements, e.isVisible)
     return u.map(elements, (element) => {
       if (e.computedStyle(element, 'position') === 'sticky') {
         // There is no simple way to detect if a sticky element is in static or fixed positioning.
         // We pretend it is always fixed for the purpose of measuring obstruction.
-        return Rect.fromElementAsFixed(element)
+        return u.Rect.fromElementAsFixed(element)
       } else {
-        return Rect.fromElement(element)
+        return u.Rect.fromElement(element)
       }
     })
   }
 
-  _substractObstructions(viewportRect: Rect): void {
+  _substractObstructions(viewportRect: u.Rect): void {
     for (let obstructionRect of this._computeObstructionRects(this._topObstructionSelector)) {
       let diff = obstructionRect.bottom - viewportRect.top
       if (diff > 0) {

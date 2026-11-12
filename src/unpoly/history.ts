@@ -1,7 +1,6 @@
 import * as u from './util.js'
 import * as e from './element.js'
 import { newConfig } from './util/config.js'
-import { FIFOCache } from './util/fifo_cache.js'
 import { muteUncriticalRejection } from './error.js'
 import { build, emit, haltEvent, isModified, on } from './event.js'
 import { render, type RenderOptions } from './fragment.js'
@@ -188,7 +187,7 @@ If no previous history entry is known, returns `undefined`.
 export let previousLocation: string | undefined
 let nextPreviousLocation: string | undefined
 let nextTrackOptions: HistoryTrackOptions | undefined
-let adoptedBases = new FIFOCache<string, boolean>({ capacity: 100, normalizeKey: getBase })
+let adoptedBases = new u.FIFOCache<string, boolean>({ capacity: 100, normalizeKey: getBase })
 
 function reset(): void {
   previousLocation = undefined

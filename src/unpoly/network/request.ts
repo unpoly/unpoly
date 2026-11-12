@@ -1,5 +1,4 @@
 import * as u from '../util.js'
-import { UpURLPattern } from '../util/url_pattern.js'
 import { Aborted, Offline } from '../error.js'
 import { EventEmitter, type EmitProps, type EmittedEvent } from '../event.js'
 import { Params, type ParamsLike } from '../form.js'
@@ -1080,7 +1079,7 @@ export class UpRequest {
     } else if (condition instanceof this) {
       testFn = (request) => condition === request
     } else if (u.isString(condition)) {
-      let pattern = new UpURLPattern(condition)
+      let pattern = new u.UpURLPattern(condition)
       testFn = (request) => pattern.test(request.url)
     } else { // boolean, truthy/falsy values
       testFn = (_request) => condition

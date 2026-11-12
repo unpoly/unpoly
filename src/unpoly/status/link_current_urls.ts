@@ -1,12 +1,11 @@
 import * as u from '../util.js'
-import { UpURLPattern } from '../util/url_pattern.js'
 import { isSafe } from '../link.js'
 
 export class LinkCurrentURLs {
   declare _isSafe: boolean
   declare _href: string | undefined
   declare _upHREF: string | undefined
-  declare _aliasPattern: UpURLPattern | undefined
+  declare _aliasPattern: u.UpURLPattern | undefined
 
   constructor(link: Element) {
     // A link with an unsafe method will never be highlighted with .up-current.
@@ -25,7 +24,7 @@ export class LinkCurrentURLs {
 
       const alias = link.getAttribute('up-alias')
       if (alias) {
-        this._aliasPattern = new UpURLPattern(alias)
+        this._aliasPattern = new u.UpURLPattern(alias)
       }
     }
   }

@@ -1,7 +1,6 @@
 import * as u from '../../util.js'
 import * as e from '../../element.js'
 import { OptionsParser } from '../../element/options_parser.js'
-import { UpURLPattern } from '../../util/url_pattern.js'
 import { muteUncriticalSync } from '../../error.js'
 import { haltEvent, on, onEscape, type UnbindFn } from '../../event.js'
 import { focusedField, formFieldSelector, Params } from '../../form.js'
@@ -99,8 +98,8 @@ export abstract class Overlay extends Layer {
   declare acceptEvent: string | undefined
   declare dismissEvent: string | undefined
   // The constructor turns the option (a URL pattern string) into an UpURLPattern.
-  declare acceptLocation: UpURLPattern | undefined
-  declare dismissLocation: UpURLPattern | undefined
+  declare acceptLocation: u.UpURLPattern | undefined
+  declare dismissLocation: u.UpURLPattern | undefined
   declare acceptFragment: string | undefined
   declare dismissFragment: string | undefined
   declare nesting: number
@@ -163,11 +162,11 @@ export abstract class Overlay extends Layer {
     }
 
     if (this.acceptLocation) {
-      this.acceptLocation = new UpURLPattern(this.acceptLocation as any)
+      this.acceptLocation = new u.UpURLPattern(this.acceptLocation as any)
     }
 
     if (this.dismissLocation) {
-      this.dismissLocation = new UpURLPattern(this.dismissLocation as any)
+      this.dismissLocation = new u.UpURLPattern(this.dismissLocation as any)
     }
   }
 
@@ -463,7 +462,7 @@ export abstract class Overlay extends Layer {
     this._tryCloseForLocation(newLocation, this.dismissLocation, this.dismiss, response)
   }
 
-  _tryCloseForLocation(newLocation: string | false | undefined, urlPattern: UpURLPattern | undefined, closeFn: CloseFn, response: UpResponse | undefined): void {
+  _tryCloseForLocation(newLocation: string | false | undefined, urlPattern: u.UpURLPattern | undefined, closeFn: CloseFn, response: UpResponse | undefined): void {
     let resolution = newLocation && urlPattern?.recognize(newLocation)
     if (resolution) {
       // resolution now contains named capture groups, e.g. when

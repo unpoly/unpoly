@@ -2,8 +2,6 @@ import './viewport.sass'
 import * as u from './util.js'
 import * as e from './element.js'
 import { newConfig } from './util/config.js'
-import { FIFOCache } from './util/fifo_cache.js'
-import { Rect } from './util/rect.js'
 import { fail } from './error.js'
 import { getInputDevice, on, type InputDevice } from './event.js'
 import { isField } from './form.js'
@@ -731,8 +729,8 @@ export function restoreFocus(options: u.PlainObject = {}): boolean {
   }
 }
 
-export function newStateCache(): FIFOCache<string, any> {
-  return new FIFOCache({ capacity: 30, normalizeKey: u.matchableURL })
+export function newStateCache(): u.FIFOCache<string, any> {
+  return new u.FIFOCache({ capacity: 30, normalizeKey: u.matchableURL })
 }
 
 function parseOptions(args: any[]): [u.List<HTMLElement>, u.PlainObject] {
@@ -780,7 +778,7 @@ export function absolutize(element: HTMLElement, options: { afterMeasure?: () =>
   const viewportRect = viewport.getBoundingClientRect()
   const originalRect = element.getBoundingClientRect()
 
-  const boundsRect = new Rect({
+  const boundsRect = new u.Rect({
     left: originalRect.left - viewportRect.left,
     top: originalRect.top - viewportRect.top,
     width: originalRect.width,

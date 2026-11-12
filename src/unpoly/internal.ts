@@ -12,11 +12,11 @@
 // order in which modules are evaluated.
 import {
   assert, camelToKebabCase, cleaner, containsAll, evalAutoOption, expressionOutline,
-  extractCallback, extractOptions, getComplexTokens, getSimpleTokens, isCrossOrigin, isElementLike,
-  isFormData, isOptions, isRegExp, kebabToCamelCase, maskPattern, matchURLs, memoize, memoizeMethod,
-  mergeDefined, newDeferred, newOptions, normalizeMethod, objectContains, parseArgs,
-  parseScalarJSONPairs, parseString, renameKey, sequence, spanObject, sprintf, unresolvablePromise,
-  withRenamedKeys, wrapValue,
+  extractCallback, extractOptions, FIFOCache, getComplexTokens, getSimpleTokens, isCrossOrigin,
+  isElementLike, isFormData, isOptions, isRegExp, kebabToCamelCase, maskPattern, matchURLs,
+  memoize, memoizeMethod, mergeDefined, newDeferred, newOptions, normalizeMethod, objectContains,
+  parseArgs, parseScalarJSONPairs, parseString, Rect, renameKey, sequence, spanObject, sprintf,
+  unresolvablePromise, UpURLPattern, withRenamedKeys, wrapValue,
 } from './util.js'
 import {
   addClassTemp, ancestor, attrSelector, booleanOrNumberAttr, booleanOrStringAttr, classSelector,
@@ -27,9 +27,6 @@ import {
 } from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { Config, newConfig } from './util/config.js'
-import { FIFOCache } from './util/fifo_cache.js'
-import { Rect } from './util/rect.js'
-import { UpURLPattern } from './util/url_pattern.js'
 import { assertConfirmed, popCookie, submitForm } from './browser.js'
 import { fail, guard, guardFn } from './error.js'
 import { assertEmitted, EventEmitter, isSyntheticClick, UpEventListener } from './event.js'

@@ -1,6 +1,5 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
-import { type FIFOCache } from '../util/fifo_cache.js'
 import { Aborted, NotImplemented } from '../error.js'
 import {
   EventEmitter, EventListenerGroup, on, type EmitProps, type EmittedEvent,
@@ -46,8 +45,8 @@ export interface LayerOptions {
   stack?: LayerStack
   history?: boolean | 'auto'
   context?: u.PlainObject
-  lastScrollTops?: FIFOCache<string, any>
-  lastFocusCapsules?: FIFOCache<string, any>
+  lastScrollTops?: u.FIFOCache<string, any>
+  lastFocusCapsules?: u.FIFOCache<string, any>
   [key: string]: any
 }
 
@@ -100,8 +99,8 @@ export class Layer {
   // 'up.Layer' for every mode, set in unpoly.ts.
   declare [Symbol.toStringTag]: string
   declare stack: LayerStack
-  declare lastScrollTops: FIFOCache<string, any>
-  declare lastFocusCapsules: FIFOCache<string, any>
+  declare lastScrollTops: u.FIFOCache<string, any>
+  declare lastFocusCapsules: u.FIFOCache<string, any>
   // Overlays set the elements that they create. The root layer has none of them.
   declare contentElement: HTMLElement | undefined
   declare boxElement: HTMLElement | undefined
