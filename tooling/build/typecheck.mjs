@@ -43,10 +43,11 @@ const STRICT_SETTINGS = ['noImplicitAny', 'strictNullChecks']
 export const PROBE_DIR = 'tmp/api_probe'
 
 // Resolves with tsc's exit code and output. `signal` aborts the run (see AbortController), and
-// the promise then resolves with `aborted: true`.
-export function tsc(args, { root = PROJECT_ROOT, stdio = 'pipe', signal } = {}) {
+// the promise then resolves with `aborted: true`. When tsc can't be spawned, `stderr` says why.
+// `bin` is a seam for the self-tests.
+export function tsc(args, { root = PROJECT_ROOT, stdio = 'pipe', signal, bin = TSC_BIN } = {}) {
   return new Promise((resolve) => {
-    let child = spawn(TSC_BIN, args, { stdio, cwd: root, signal })
+    let child = spawn(bin, args, { stdio, cwd: root, signal })
     let stdout = ''
     let stderr = ''
     child.stdout?.on('data', (chunk) => stdout += chunk)
@@ -117,11 +118,12 @@ function probeErrors(probe, blocks) {
 //   loose:  the loose check's (tsconfig.json)
 //   probe:  both probes', pointed at their doc entries
 //
-// and the runs that `crashed` (with their stderr), or `aborted: true` when `signal` aborted a run.
-// An error that both checks find is in `core` and in `loose`.
-export async function checkTypes({ root = PROJECT_ROOT, probeDir = PROBE_DIR, extraArgs = [], stderr = 'pipe', signal } = {}) {
+// and the `crashes`: the runs that crashed (see crashed()), with their config. Resolves with
+// `aborted: true` instead when `signal` aborted a run. An error that both checks find is in `core`
+// and in `loose`. `bin` is a seam for the self-tests.
+export async function checkTypes({ root = PROJECT_ROOT, probeDir = PROBE_DIR, extraArgs = [], signal, bin } = {}) {
   let probes = writeProbes(root, probeDir)
-  let run = (args) => tsc([...args, '--pretty', 'false', ...extraArgs], { root, signal, stdio: ['ignore', 'pipe', stderr] })
+  let run = (args) => tsc([...args, '--pretty', 'false', ...extraArgs], { root, signal, bin, stdio: ['ignore', 'pipe', 'pipe'] })
   let coreArgs = ['--project', probes.core.config]
   let [core, coreNotYetStrict, migrate] = await Promise.all([
     run(coreArgs),
@@ -139,7 +141,7 @@ export async function checkTypes({ root = PROJECT_ROOT, probeDir = PROBE_DIR, ex
     core: coreBlocks.filter((block) => !isIn(probes.core, block)),
     loose: migrateBlocks.filter((block) => !isIn(probes.migrate, block)),
     probe: [...probeErrors(probes.core, coreBlocks), ...probeErrors(probes.migrate, migrateBlocks)],
-    crashed: [
+    crashes: [
       ...[core, coreNotYetStrict].filter((result) => result && crashed(result)).map((result) => ({ config: 'tsconfig.core.json', ...result })),
       ...(crashed(migrate) ? [{ config: 'tsconfig.json', ...migrate }] : []),
     ],
@@ -164,10 +166,38 @@ export async function watchTypeErrors({ root = PROJECT_ROOT, signal } = {}) {
     byFile.set(file, [...(byFile.get(file) ?? []), diagnostic])
   }
   let errors = [...byFile].map(([file, diagnostics]) => formatFile(file, diagnostics))
-  for (let { config, code, stdout, stderr } of result.crashed) {
-    errors.push(formatFile(config, [{ severity: 'error', message: `tsc failed (exit code ${code}): ${(stderr || stdout).trim() || 'no output'}` }]))
+  errors.push(...result.crashes.map(tscFailure))
+  return { errors, count: unique.length + result.crashes.length }
+}
+
+// A tsc run that crashed or couldn't be spawned, formatted like an error in its config.
+export function tscFailure({ config, code, stdout, stderr }) {
+  return formatFile(config, [{ severity: 'error', message: `tsc failed (exit code ${code}): ${(stderr || stdout).trim() || 'no output'}` }])
+}
+
+// What `bin/typecheck` does: runs the checks and prints their errors. checkTypes() runs the loose
+// check too, with the migrate probe, but without tsc's pretty output. We only take the probe's
+// errors from that run, and let a run of its own print the loose check's errors as tsc prints
+// them. An error that both checks find is printed twice. Resolves with the exit code. `root`,
+// `bin` and `log` are seams for the self-tests.
+export async function runTypecheck({ extraArgs = [], root = PROJECT_ROOT, bin, log = console.log } = {}) {
+  let checks = checkTypes({ root, extraArgs, bin })
+  let loose = await tsc(['--project', 'tsconfig.json', ...extraArgs], { root, bin, stdio: 'inherit' })
+  let { core, probe, crashes } = await checks
+  // tsc has printed its own failures, but not that it could not start.
+  if (loose.stderr) crashes.unshift({ config: 'tsconfig.json', ...loose })
+  for (let { lines } of [...core, ...probe]) log(lines.join('\n'))
+  // The loose check and the migrate probe's run fail the same way when tsc can't start.
+  for (let failure of new Set(crashes.map(tscFailure))) log(failure)
+  let coreErrorCount = count(core)
+  if (coreErrorCount) {
+    log(`\nFound ${coreErrorCount} error${coreErrorCount === 1 ? '' : 's'} in the core check (tsconfig.core.json).`)
   }
-  return { errors, count: unique.length + result.crashed.length }
+  let probeErrorCount = count(probe)
+  if (probeErrorCount) {
+    log(`\nFound ${probeErrorCount} doc ${probeErrorCount === 1 ? 'entry' : 'entries'} for public API that the types don't have (tooling/docs/api_probe.mjs).`)
+  }
+  return loose.code || (coreErrorCount || probeErrorCount || crashes.length ? 1 : 0)
 }
 
 // The lines of an error block (see outputBlocks()) as `{ file, line, column, message, code }`.
@@ -175,6 +205,7 @@ export async function watchTypeErrors({ root = PROJECT_ROOT, signal } = {}) {
 // under "tsc".
 export function parseError([first, ...rest]) {
   let match = first.match(/^(?:(\S+)\((\d+),(\d+)\): )?error (TS\d+): (.*)$/)
-  let [, file = 'tsc', line, column, code, message] = match ?? [null, undefined, undefined, undefined, undefined, first]
+  if (!match) return { file: 'tsc', severity: 'error', message: [first, ...rest].join('\n') }
+  let [, file = 'tsc', line, column, code, message] = match
   return { file, line: line && Number(line), column: column && Number(column), severity: 'error', message: [message, ...rest].join('\n'), code }
 }

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { parseError, watchTypeErrors } from '../../build/typecheck.mjs'
+import { parseError, runTypecheck, watchTypeErrors } from '../../build/typecheck.mjs'
 import { formatFile } from '../../build/lint.mjs'
 
 test('an error from tsc keeps its location, code and the lines that elaborate it', () => {
@@ -94,4 +94,26 @@ test('an aborted check resolves with null', async (t) => {
   let check = watchTypeErrors({ root, signal: controller.signal })
   controller.abort()
   assert.equal(await check, null)
+})
+
+test('bin/typecheck says so when tsc cannot start, and fails', async (t) => {
+  // It used to exit 1 without a word.
+  let root = project(t, {})
+  let output = []
+  let code = await runTypecheck({ root, bin: path.join(root, 'no-tsc'), log: (text) => output.push(text) })
+  assert.equal(code, 1)
+  assert.deepEqual(output.map((text) => text.split('\n')[0]), ['tsconfig.json', 'tsconfig.core.json'])
+  for (let text of output) assert.match(text, /error {2}tsc failed \(exit code 1\): spawn .*no-tsc ENOENT/)
+})
+
+test('bin/typecheck prints the core and probe errors, and fails', async (t) => {
+  let root = project(t, {
+    'src/unpoly/a.ts': 'export function f(x) { return x }\n',
+    'src/unpoly/a.md': '# up.a.c\n\nDoes nothing.\n\n@function up.a.c\n',
+  })
+  let output = []
+  let code = await runTypecheck({ root, log: (text) => output.push(text) })
+  assert.equal(code, 1)
+  assert.match(output.join('\n'), /^src\/unpoly\/a\.ts\(1,19\): error TS7006/m)
+  assert.match(output.join('\n'), /^src\/unpoly\/a\.md\(5,11\): error TS2339: Documented as up\.a\.c/m)
 })

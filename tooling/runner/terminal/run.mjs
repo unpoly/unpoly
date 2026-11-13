@@ -27,7 +27,7 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const WINDOW = { width: 1200, height: 800 }
 const WATCHDOG_TIMEOUT = 30_000
 
-// The specs passed, but the watcher's type check found errors (see runDev()).
+// The specs passed, but the watcher's type check found errors (see typeCheckReport()).
 const TYPE_ERRORS = 7
 
 // Parses config, or prints the error and signals exit code 5. Returns the Config,
@@ -149,8 +149,9 @@ export async function runDev(argv, env) {
     }
   }
 
+  let build
   try {
-    const build = await waitForFreshBuild()
+    build = await waitForFreshBuild()
     // The watcher never reacted, so nothing needed building. Say which file that was: reading
     // the name is what tells you whether to shrug (a guide page) or look closer (a source file
     // the watcher should have picked up).
@@ -203,48 +204,58 @@ export async function runDev(argv, env) {
   }
 
   // The watcher checks types after it has written the bundles, which we don't wait for: a type
-  // error doesn't stop the specs. It is often in another file than the code under test (a changed
-  // signature breaks its callers), and a refactoring may want to see the specs before every
-  // caller is fixed. Lint errors do stop them, see waitForFreshBuild().
-  //
-  // But a run with type errors is not green. We print them before the specs when the check is
-  // done by then, which it usually is (it takes ~0.5 s, about as long as launching the browser),
-  // or else after them, and exit non-zero.
-  let typeCheck = trackTypeCheck()
-  let reportedTypes = false
-  let reportTypes = () => {
-    reportedTypes = true
-    let result = typeCheck.result
-    if (result?.timedOut) {
-      console.error(pc.yellow('The dev watcher did not finish its type check in time. Run `bin/typecheck` before you commit.'))
-    } else if (result?.ok === false) {
-      process.stdout.write(typeErrors(result.errors))
-    }
-  }
+  // error doesn't stop the specs (see typeCheckReport()). We print the errors before the specs
+  // when the check is done by then, which it usually is (it takes ~0.5 s, about as long as
+  // launching the browser), or else after them.
+  let typeCheck = trackTypeCheck(build.startedAt)
+  let early
   let code = await drive(config, {
     beforeSpecs() {
-      if (typeCheck.done) reportTypes()
+      early = typeCheck.peek()
+      process.stdout.write(typeCheckReport({ early }).before)
     },
   })
-  if (reportedTypes) {
-    if (typeCheck.result?.ok === false) console.log(pc.red('✗ There are type errors (listed above, before the specs).'))
-  } else {
-    await typeCheck.promise
-    reportTypes()
-  }
-  return code === 0 && typeCheck.result?.ok === false ? TYPE_ERRORS : code
+  let late = early === undefined ? await typeCheck.promise : undefined
+  let report = typeCheckReport({ early, late, code })
+  process.stdout.write(report.after)
+  return report.code
 }
 
-// waitForTypeCheck(), with its result readable without waiting once it is there.
-function trackTypeCheck() {
-  let tracked = { done: false, result: null }
-  tracked.promise = waitForTypeCheck().then((result) => {
-    Object.assign(tracked, { done: true, result })
-  }, () => {
-    // Reading the status failed in an unexpected way. The type check is not worth failing for.
-    tracked.done = true
-  })
-  return tracked
+// waitForTypeCheck() for the build that `builtAt` started, with its result readable without
+// waiting once it is there (`peek()` returns undefined before).
+function trackTypeCheck(builtAt) {
+  let result
+  // Reading the status failed in an unexpected way. The type check is not worth failing for.
+  let promise = waitForTypeCheck({ builtAt }).catch(() => null).then((value) => result = value)
+  return { promise, peek: () => result }
+}
+
+// What bin/test says about the watcher's type check (see waitForTypeCheck()), and the exit code.
+// `early` is the check's result when it was there before the specs started, `late` the result
+// after the specs when it wasn't. `code` is the specs' exit code. Returns the text to print
+// before the specs and after them, and the exit code.
+//
+// A type error doesn't stop the specs, unlike a lint error (see waitForFreshBuild()). It is often
+// in another file than the code under test (a changed signature breaks its callers), and a
+// refactoring may want to see the specs before every caller is fixed. But a run with type errors
+// is not green: it exits with TYPE_ERRORS when the specs pass. A check that didn't finish, or
+// that came too late for the tested build, leaves the code alone.
+export function typeCheckReport({ early, late, code }) {
+  let result = early ?? late
+  let text = ''
+  if (result?.timedOut) {
+    text = pc.yellow('The dev watcher did not finish its type check in time. Run `bin/typecheck` before you commit.') + '\n'
+  } else if (result?.outdated) {
+    text = pc.yellow('The sources changed during the run, so its type check is not reported. Run `bin/typecheck` before you commit.') + '\n'
+  } else if (result?.ok === false) {
+    text = typeErrors(result.errors)
+  }
+  let failed = result?.ok === false
+  return {
+    before: early ? text : '',
+    after: early ? (failed ? pc.red('✗ There are type errors (listed above, before the specs).') + '\n' : '') : text,
+    code: code === 0 && failed ? TYPE_ERRORS : code,
+  }
 }
 
 export async function runCI(argv, env) {

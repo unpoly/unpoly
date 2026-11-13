@@ -4,24 +4,7 @@
 //
 // Extra arguments are forwarded to tsc, so `bin/typecheck --extendedDiagnostics` works.
 // The build doesn't use TypeScript at all: esbuild strips the types. The dev watcher runs the same
-// checks after every change in src/, and `bin/test` prints the errors it found.
-import { checkTypes, count, tsc } from '../tooling/build/typecheck.mjs'
+// checks after every change in src/ or a tsconfig, and `bin/test` prints the errors it found.
+import { runTypecheck } from '../tooling/build/typecheck.mjs'
 
-const extraArgs = process.argv.slice(2)
-
-// checkTypes() runs the loose check too, with the migrate probe, but without tsc's pretty output.
-// We only take the probe's errors from that run, and print the loose check's as tsc prints them.
-let checks = checkTypes({ extraArgs, stderr: 'inherit' })
-let loose = await tsc(['--project', 'tsconfig.json', ...extraArgs], { stdio: 'inherit' })
-let { core, probe, crashed } = await checks
-for (let { lines } of [...core, ...probe]) console.log(lines.join('\n'))
-let coreErrorCount = count(core)
-if (coreErrorCount) {
-  console.log(`\nFound ${coreErrorCount} error${coreErrorCount === 1 ? '' : 's'} in the core check (tsconfig.core.json).`)
-}
-let probeErrorCount = count(probe)
-if (probeErrorCount) {
-  console.log(`\nFound ${probeErrorCount} doc ${probeErrorCount === 1 ? 'entry' : 'entries'} for public API that the types don't have (tooling/docs/api_probe.mjs).`)
-}
-
-process.exit(loose.code || (coreErrorCount || probeErrorCount || crashed.length ? 1 : 0))
+process.exit(await runTypecheck({ extraArgs: process.argv.slice(2) }))

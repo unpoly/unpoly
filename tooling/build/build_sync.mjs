@@ -92,6 +92,28 @@ export function unbuiltSources(status, sources) {
   return sources.filter(({ file, mtime }) => mtime > full && !(status.seen?.[file] >= mtime))
 }
 
+// The tsconfigs in the project root, as `{ file, mtime }`. Only the watcher's type check reads
+// them, but waitForFreshBuild() waits for them like for a source, so that bin/test doesn't take
+// a type check against the old settings for current. They don't count for newestSource(): a
+// tsconfig doesn't make the minified bundles outdated (see outdatedMinifiedFiles()).
+export function tsconfigs(root = PROJECT_ROOT) {
+  let files = []
+  try {
+    for (let name of readdirSync(root)) {
+      if (/^tsconfig.*\.json$/.test(name)) files.push({ file: name, mtime: statSync(path.join(root, name)).mtimeMs })
+    }
+  } catch {
+    // No tsconfig to wait for.
+  }
+  return files
+}
+
+// What waitForFreshBuild() waits for: the sources (see newestSource()) and the tsconfigs, newest
+// first.
+export function freshnessSources(root = PROJECT_ROOT) {
+  return [...newestSource(root).sources, ...tsconfigs(root)].sort((a, b) => b.mtime - a.mtime)
+}
+
 export function newestSourceMtime(...args) {
   return newestSource(...args).mtime
 }
@@ -145,8 +167,9 @@ function describe(files) {
   return files.length > 3 ? `${named} and ${files.length - 3} more` : named
 }
 
-// `sources` are the files and directories to wait for (see newestSource()). The self-tests may
-// pass just the newest one, as `newestMtime` and `newestFile`.
+// `sources` are the files and directories to wait for (see newestSource()), and the tsconfigs
+// (see tsconfigs()). The self-tests may pass just the newest one, as `newestMtime` and
+// `newestFile`.
 export async function waitForFreshBuild({
   read = () => readStatus(),
   newestMtime,
@@ -161,7 +184,7 @@ export async function waitForFreshBuild({
   request = requestBuild,
 } = {}) {
   if (sources === undefined) {
-    sources = newestMtime === undefined ? newestSource().sources : [{ file: newestFile, mtime: newestMtime }]
+    sources = newestMtime === undefined ? freshnessSources() : [{ file: newestFile, mtime: newestMtime }]
   }
 
   let status = read()
@@ -232,11 +255,15 @@ export async function waitForFreshBuild({
 // that bin/test waited for.
 const TYPE_CHECK_TIMEOUT_MS = 10_000
 
-// Waits for the watcher's type check to include every edit the watcher has seen, and resolves
-// with what it found, as `{ ok, errors }`. Call it after waitForFreshBuild(). Resolves with
-// `{ timedOut: true }` when the check doesn't finish in time, and with null for a watcher that
-// doesn't check types (one started before it could). See BuildStatus for `types`.
+// Waits for the watcher's type check of the build that waitForFreshBuild() resolved with, and
+// resolves with what it found, as `{ ok, errors }`. `builtAt` is that build's `startedAt`.
+// Resolves with `{ outdated: true }` when the watcher has started another round since (an edit
+// during the spec run, say), since the check then may include edits the specs didn't test. A
+// round that edits nothing the check reads does that too, which we can't tell apart. Resolves
+// with `{ timedOut: true }` when the check doesn't finish in time, and with null for a watcher
+// that doesn't check types (one started before it could). See BuildStatus for `types`.
 export async function waitForTypeCheck({
+  builtAt,
   read = () => readStatus(),
   now = Date.now,
   sleep = defaultSleep,
@@ -244,8 +271,10 @@ export async function waitForTypeCheck({
 } = {}) {
   let deadline = now() + timeoutMs
   while (true) {
-    let types = read()?.types
+    let status = read()
+    let types = status?.types
     if (!types) return null
+    if (builtAt !== undefined && status.startedAt > builtAt) return { outdated: true }
     if (types.state === 'done') return { ok: types.ok, errors: types.errors }
     if (now() >= deadline) return { timedOut: true }
     await sleep(100)

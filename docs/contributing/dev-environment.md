@@ -65,13 +65,15 @@ also strips TypeScript's types, and minifies with [Terser](https://terser.org/).
 `tooling/build/bundles.mjs` lists every bundle, and which `--config` builds it.
 
 The watcher rebuilds only the bundles that read the file you edited, and lints the file with
-Oxlint if it is in `src/` (see [Linting](code-style.md#linting)), usually within 350 ms.
+Oxlint if it is in `src/` (see [Linting](code-style.md#linting)), usually within 300 ms.
 
-esbuild only strips the types. After a change in `src/` (a doc file or a `tsconfig*.json`
-included), the watcher runs the checks of `bin/typecheck` (see
-[Type checking](code-style.md#type-checking)), which takes another ~0.5 s. It waits until the
-bundles are written, so they are ready as early as without it, and a change that comes in
-during a check aborts it and checks again afterwards.
+esbuild only strips the types. After a change in `src/` (a doc file included) or in a
+`tsconfig*.json`, the watcher runs the checks of `bin/typecheck` (see
+[Type checking](code-style.md#type-checking)) in two tsc processes, which take another ~0.5 s
+and every core. They start once the bundles are written, so the bundles are ready as early as
+without them, and `bin/test` doesn't wait for them either: they run while it launches the
+browser and the first specs run. A change that comes in during a check aborts it, and the
+check runs again after that change's rebuild.
 
 Of the one-shot builds, only the production build
 (`bin/build` without `--config`, which `bin/release` runs) lints `src/`, and fails on an error.
@@ -96,7 +98,7 @@ Each line of the dev log is `HH:MM:SS.mmm service | output`:
 09:48:40.233 watch       | Built 9 of 9 bundles in 1326 ms
 09:48:40.811 watch       | Checked types in 578 ms
 09:48:41.217 docs        | == The Middleman is loading
-09:49:12.480 watch       | Built 2 of 9 bundles in 338 ms
+09:49:12.480 watch       | Built 2 of 9 bundles in 118 ms
 09:49:13.012 watch       | Found 1 type error in 531 ms:
 09:49:13.012 watch       | src/unpoly/link.ts
 09:49:13.012 watch       |   635:14   error  Type 'string' is not assignable to type 'number'.  TS2322

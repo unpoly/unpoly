@@ -66,8 +66,8 @@ bin/test --spec="…"  # the specs that cover your change (~15 seconds for a sin
 
 `bin/typecheck` and `bin/lint` print nothing when all is well.
 
-The dev watcher also lints `src/` and checks types after every change, so `bin/test` knows of
-the errors when you forget. A lint error in `src/` stops it: it prints the error instead of
+The dev watcher also lints `src/` and checks types after every change in `src/` or a tsconfig,
+so `bin/test` knows of the errors when you forget. A lint error in `src/` stops it: it prints the error instead of
 running the specs. A type error doesn't: `bin/test` prints the type errors before the specs, runs
 them anyway, and exits non-zero (7) even when they all pass. A type error is often in another
 file than the code under test, like the callers of a function whose signature you changed, and
