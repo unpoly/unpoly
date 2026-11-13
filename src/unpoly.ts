@@ -17,9 +17,9 @@
 //   These are safe for bindings from util and element, because this file imports them before
 //   any namespace or class.
 //   Only the few low-level modules they import themselves are evaluated earlier: mockable,
-//   browser, error and the classes in error/ evaluate before util has finished, so they must
-//   not use a binding from util while they are defined. This is also why util and element
-//   must never import a feature namespace, or a class outside util/ and error/.
+//   browser, error and the classes in error/errors.ts evaluate before util has finished, so they
+//   must not use a binding from util while they are defined. This is also why util and element
+//   must never import a feature namespace, or a class outside util/ and error/errors.ts.
 // - A base class must be evaluated before its subclasses. When a base class reaches one of
 //   its subclasses through its own imports, `class Sub extends Base` runs before `Base` exists.
 //   So code outside a class hierarchy imports the base class, not a subclass, wherever it can

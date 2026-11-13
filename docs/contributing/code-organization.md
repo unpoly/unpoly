@@ -297,7 +297,7 @@ doesn't intercept calls from other modules. A function that specs need to replac
 in `mockable()`, and specs call `up.link.follow.mock()` or `up.internal.trackFields.mock()`
 (see [Testing](testing.md#spying-on-unpoly-functions)).
 
-`util.ts`, `element.ts`, `browser.ts`, `error.ts` and the classes in `util/` and `error/` are
+`util.ts`, `element.ts`, `browser.ts`, `error.ts`, `error/errors.ts` and the classes in `util/` are
 evaluated before any feature namespace, so they never import one like `up.fragment`.
 Where they need one, move the function down into a module they may import, as we did with
 `copyCursorProps()` in `element.ts`. Instead of checking `instanceof` against a class
