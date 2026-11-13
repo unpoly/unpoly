@@ -7,7 +7,6 @@ import {
   buildLayer, layerStack, type Layer, type Overlay, type PeelOptions,
 } from '../../layer.js'
 import { printToStandard } from '../../log.js'
-import { hungrySteps, type HungrySteps } from '../../radio.js'
 import { hello } from '../../script.js'
 import type * as t from '../types.js'
 import { LayerPlan } from './layer_plan.js'
@@ -246,10 +245,6 @@ export class OpenLayerPlan extends LayerPlan {
       log: `Opened new ${this.layer}`
     }
     )
-  }
-
-  _getHungrySteps(): HungrySteps {
-    return hungrySteps(this._getEffectiveRenderOptions())
   }
 
   _getEffectiveRenderOptions(): t.RenderOptions {

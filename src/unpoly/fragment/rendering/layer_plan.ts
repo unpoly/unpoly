@@ -2,7 +2,7 @@ import * as u from '../../util.js'
 import { emit, type EventPlan } from '../../event.js'
 import { type Layer } from '../../layer.js'
 import { type UpResponse } from '../../network.js'
-import { type HungrySteps } from '../../radio.js'
+import { hungrySteps, type HungrySteps } from '../../radio.js'
 import type * as t from '../types.js'
 import { updateSteps } from './update_steps.js'
 import { RenderResult } from './render_result.js'
@@ -42,8 +42,8 @@ export abstract class LayerPlan {
   // Renders the matched content into this.layer.
   abstract _renderOwnLayer(responseDoc: ResponseDoc): t.PartialRenderResult[]
 
-  // The [up-hungry] steps for this render pass, on this.layer and on other layers.
-  abstract _getHungrySteps(): HungrySteps
+  // The render options as they apply to this.layer, for finding [up-hungry] elements.
+  abstract _getEffectiveRenderOptions(): t.RenderOptions
 
   // Renders the content that match() found. From here on the plan changes the page,
   // so any error propagates instead of trying the next plan.
@@ -136,6 +136,12 @@ export abstract class LayerPlan {
     })
   }
 
+  // The [up-hungry] steps for this render pass, on this.layer and on other layers.
+  // UpdateLayerPlan calls this in match() and again in render(), so we memoize it.
+  _getHungrySteps(): HungrySteps {
+    return hungrySteps(this._getEffectiveRenderOptions())
+  }
+
   _tryAcceptLayerFromServer(): void {
     // When accepting without a value, the server will send X-Up-Accept-Layer: null
     if (u.isDefined(this._acceptLayer)) {
@@ -148,6 +154,12 @@ export abstract class LayerPlan {
     if (u.isDefined(this._dismissLayer)) {
       this.layer.dismiss(this._dismissLayer, { response: this._response })
     }
+  }
+
+  static {
+    u.memoizeMethod(this.prototype, {
+      _getHungrySteps: true,
+    })
   }
 
 }

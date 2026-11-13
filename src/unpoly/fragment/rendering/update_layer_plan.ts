@@ -7,7 +7,6 @@ import {
 import { historyOptions } from '../../history.js'
 import { type PeelOptions } from '../../layer.js'
 import { printToStandard } from '../../log.js'
-import { hungrySteps, type HungrySteps } from '../../radio.js'
 import { FocusCapsule, getScrollTops, saveFocus, saveScroll } from '../../viewport.js'
 import type * as t from '../types.js'
 import { findFragment } from '../matching/fragment_finder.js'
@@ -169,11 +168,6 @@ export class UpdateLayerPlan extends LayerPlan {
     this._steps = compressNestedSteps(this._steps)
   }
 
-  _getHungrySteps(): HungrySteps {
-    // Find all [up-hungry] elements matching our layer and fragments.
-    return hungrySteps(this._getEffectiveRenderOptions())
-  }
-
   _coordinateSteps(): void {
     // Store the focused element's selector, scroll position and selection range
     // in an up.FocusCapsule for later restoration.
@@ -237,7 +231,6 @@ export class UpdateLayerPlan extends LayerPlan {
       _matchPreflight: true,
       _matchOldElements: true,
       _hasHistory: true,
-      _getHungrySteps: true,
     })
   }
 
