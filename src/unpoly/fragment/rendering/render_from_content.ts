@@ -15,6 +15,51 @@ import { ResponseDoc } from './response_doc.js'
 // renderFromContent(). Also computes the preflight props for renderFromURL(), before the request
 // is sent, with preflightPropsFromContent().
 
+// Returns an up.RenderResult, or a promise when preloading local content.
+// Kept `any`: RenderJob returns this as a RenderResult, which also hides that renderFromURL()
+// resolves with an up.Request when preloading.
+export function renderFromContent(options: t.RenderOptions): any {
+  // Preloading from local content is a no-op.
+  if (options.preload) {
+    // TODO: This is not an async method? So just return undefined?
+    return Promise.resolve()
+  }
+
+  let layers = getLayers(options)
+  let responseDoc = getResponseDoc(options, layers)
+  // This changes the options that the plans copy below.
+  improveOptionsFromResponseDoc(options, responseDoc)
+  let plans = getPlans(options, layers)
+
+  // A plan that throws up.CannotMatch in match() is not applicable, and we try the next plan.
+  let plan = seekPlan(plans, (plan) => { plan.match(responseDoc); return plan })
+    || cannotMatchTarget('Could not find common target in current page and response', plans, layers, options)
+
+  // Group compilation and emission of up:fragment:inserted into a mutation block.
+  // This allows up.SelectorTracker to only sync once after the mutation, and
+  // ignore any events in between.
+  return mutate(() => {
+    onPlanApplicable(plan, plans[0], responseDoc, options)
+    // Once a plan has started to change the page, we cannot try another plan on top of it.
+    // Hence any error from here on propagates, including an up.CannotMatch.
+    return plan.render(responseDoc)
+  })
+}
+
+// Returns information about the change that is most likely before the request was dispatched.
+// This might change postflight if the response does not contain the desired target.
+// With { optional: true }, returns an empty object instead of throwing when no target matches.
+export function preflightPropsFromContent(options: t.RenderOptions, opts?: { optional?: false }): t.PreflightProps
+export function preflightPropsFromContent(options: t.RenderOptions, opts?: { optional?: boolean }): Partial<t.PreflightProps>
+export function preflightPropsFromContent(options: t.RenderOptions, opts: { optional?: boolean } = {}): Partial<t.PreflightProps> {
+  // Don't change the caller's options (see getLayers()).
+  options = { ...options }
+
+  let layers = getLayers(options)
+  let plans = getPlans(options, layers)
+  return seekPlan(plans, (plan) => plan.getPreflightProps()) || (opts.optional ? {} : cannotMatchTarget('Could not find target in current page', plans, layers, options))
+}
+
 // The layer lookup normalizes the options in place, e.g. it sets a { baseLayer }.
 // The plans copy the options later, and need them normalized.
 // renderFromContent() gets options that belong to this render pass, and changes them anyway, so it passes them as they are.
@@ -53,37 +98,6 @@ function expandIntoPlans(layers: (Layer | 'new')[], targets: t.RenderTarget | bo
 
 function expandTargetsInLayer(targets: t.RenderTarget | boolean | undefined, layer: Layer | 'new', options: t.RenderOptions): string[] {
   return expandTargets(targets, { layer, mode: options.mode, origin: options.origin })
-}
-
-// Returns an up.RenderResult, or a promise when preloading local content.
-// Kept `any`: RenderJob returns this as a RenderResult, which also hides that renderFromURL()
-// resolves with an up.Request when preloading.
-export function renderFromContent(options: t.RenderOptions): any {
-  // Preloading from local content is a no-op.
-  if (options.preload) {
-    // TODO: This is not an async method? So just return undefined?
-    return Promise.resolve()
-  }
-
-  let layers = getLayers(options)
-  let responseDoc = getResponseDoc(options, layers)
-  // This changes the options that the plans copy below.
-  improveOptionsFromResponseDoc(options, responseDoc)
-  let plans = getPlans(options, layers)
-
-  // A plan that throws up.CannotMatch in match() is not applicable, and we try the next plan.
-  let plan = seekPlan(plans, (plan) => { plan.match(responseDoc); return plan })
-    || cannotMatchTarget('Could not find common target in current page and response', plans, layers, options)
-
-  // Group compilation and emission of up:fragment:inserted into a mutation block.
-  // This allows up.SelectorTracker to only sync once after the mutation, and
-  // ignore any events in between.
-  return mutate(() => {
-    onPlanApplicable(plan, plans[0], responseDoc, options)
-    // Once a plan has started to change the page, we cannot try another plan on top of it.
-    // Hence any error from here on propagates, including an up.CannotMatch.
-    return plan.render(responseDoc)
-  })
 }
 
 // Final preparations before elements are being changed.
@@ -154,20 +168,6 @@ function firstExpandedTarget(target: t.RenderTarget | undefined, layers: (Layer 
   // layer instead of having up.fragment.expandTargets() throw. In many cases we get the same result.
   let layer = layers[0] || layerStack.root
   return expandTargetsInLayer(target || ':main', layer, options)[0]
-}
-
-// Returns information about the change that is most likely before the request was dispatched.
-// This might change postflight if the response does not contain the desired target.
-// With { optional: true }, returns an empty object instead of throwing when no target matches.
-export function preflightPropsFromContent(options: t.RenderOptions, opts?: { optional?: false }): t.PreflightProps
-export function preflightPropsFromContent(options: t.RenderOptions, opts?: { optional?: boolean }): Partial<t.PreflightProps>
-export function preflightPropsFromContent(options: t.RenderOptions, opts: { optional?: boolean } = {}): Partial<t.PreflightProps> {
-  // Don't change the caller's options (see getLayers()).
-  options = { ...options }
-
-  let layers = getLayers(options)
-  let plans = getPlans(options, layers)
-  return seekPlan(plans, (plan) => plan.getPreflightProps()) || (opts.optional ? {} : cannotMatchTarget('Could not find target in current page', plans, layers, options))
 }
 
 function cannotMatchTarget(reason: string, plans: LayerPlan[], layers: (Layer | 'new')[], options: t.RenderOptions): never {
