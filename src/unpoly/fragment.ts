@@ -18,8 +18,10 @@ import { FragmentFinder } from './fragment/fragment_finder.js'
 import { destroyFragment } from './fragment/render/change/destroy_fragment.js'
 import { RenderJob } from './fragment/render/render_job.js'
 export { RenderJob }
-import { RenderOptions } from './fragment/render/render_options.js'
-export { RenderOptions }
+export {
+  chainCallbacks, deriveFailOptions, NO_INPUT_INTERFERENCE, NO_PREVIEWS, parseRenderCallback,
+  preprocessRenderOptions, renderCallbackAttr,
+} from './fragment/render/render_options.js'
 import { type RenderResult } from './fragment/render/render_result.js'
 export { type RenderResult }
 export { ResponseDoc } from './fragment/render/response_doc.js'

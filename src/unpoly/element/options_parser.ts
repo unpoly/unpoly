@@ -1,6 +1,6 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
-import { RenderOptions, toFailKey } from '../fragment.js'
+import { renderCallbackAttr, toFailKey } from '../fragment.js'
 import type * as t from './types.js'
 
 export class OptionsParser {
@@ -55,7 +55,7 @@ export class OptionsParser {
   // }
 
   renderCallback(key: string, keyOptions: t.ParseKeyOptions = {}): void {
-    let attrReader: t.AttrReader = (link, attr) => RenderOptions.renderCallbackAttr(link, attr, key)
+    let attrReader: t.AttrReader = (link, attr) => renderCallbackAttr(link, attr, key)
     this.parse(attrReader, key, keyOptions)
   }
 

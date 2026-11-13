@@ -171,7 +171,7 @@ export interface RenderOptions {
   failOptions?: boolean
   didFail?: boolean
   didForceFailOptions?: boolean
-  // The defaults from up.fragment.config, merged in by RenderOptions.finalize().
+  // The defaults from up.fragment.config, merged in by finalizeRenderOptions().
   defaults?: RenderOptions
   inputDevice?: InputDevice
   // Opens an empty overlay when no content option is given (up.layer.open()).

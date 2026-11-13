@@ -9,7 +9,7 @@ import {
 import type * as t from '../../types.js'
 import { preflightPropsFromContent } from './render_from_content.js'
 import { renderFromResponse } from './render_from_response.js'
-import { RenderOptions } from '../render_options.js'
+import { deriveFailOptions } from '../render_options.js'
 import { type RenderResult } from '../render_result.js'
 
 // The options for the request of renderFromURL(): the render options plus the preflight props
@@ -69,7 +69,7 @@ function getRequestAttrs(options: t.RenderOptions & { url: string }): RequestAtt
   // This might change postflight if the response does not contain the desired target.
   const successAttrs = preflightPropsFromContent(options)
   // This is empty when the fail options match no target.
-  const failAttrs = preflightPropsFromContent(RenderOptions.deriveFailOptions(options), { optional: true })
+  const failAttrs = preflightPropsFromContent(deriveFailOptions(options), { optional: true })
 
   return {
     ...options, // contains preflight keys relevant for the request, e.g. { url, method }

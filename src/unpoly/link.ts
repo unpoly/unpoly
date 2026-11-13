@@ -8,7 +8,9 @@ import {
   build, emit, fork, getInputDevice, haltEvent, isModified, isSyntheticClick, keyModifiers, on,
 } from './event.js'
 import { anyButtonSelector, formFieldSelector } from './form.js'
-import { getSmart, onFirstIntersect, render, RenderOptions, type RenderJob } from './fragment.js'
+import {
+  getSmart, NO_INPUT_INTERFERENCE, NO_PREVIEWS, onFirstIntersect, render, type RenderJob, type RenderOptions,
+} from './fragment.js'
 import { canPushState, isHistoryEnabled } from './history.js'
 import { type Layer } from './layer.js'
 import { mockable } from './mockable.js'
@@ -242,8 +244,8 @@ export function preload(link: e.ElementOrSelector, options?: RenderOptions): Pro
     background: true,
     cache: true,
     ...options,
-    ...RenderOptions.NO_INPUT_INTERFERENCE,
-    ...RenderOptions.NO_PREVIEWS,
+    ...NO_INPUT_INTERFERENCE,
+    ...NO_PREVIEWS,
     guardEvent,
     preload: true, // hint to renderFromURL() to stop execution after sending the request
   })

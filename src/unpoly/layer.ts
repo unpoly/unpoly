@@ -2,7 +2,7 @@ import './layer.sass'
 import * as u from './util.js'
 import { newConfig } from './util/config.js'
 import { on } from './event.js'
-import { render, RenderOptions } from './fragment.js'
+import { chainCallbacks, render, type RenderOptions } from './fragment.js'
 import type * as t from './layer/types.js'
 export type * from './layer/types.js'
 import { Layer } from './layer/base.js'
@@ -210,7 +210,7 @@ export async function open(options?: RenderOptions): Promise<Layer> {
 
 export function ask(options: RenderOptions = {}): Promise<any> {
   return new Promise(function(resolve, reject) {
-    open(RenderOptions.chainCallbacks(options, {
+    open(chainCallbacks(options, {
       onAccepted: (event: t.LayerCloseEvent) => resolve(event.value),
       onDismissed: (event: t.LayerCloseEvent) => reject(event.value),
     }))

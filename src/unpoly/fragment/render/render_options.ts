@@ -7,7 +7,7 @@ import { callbackAttr, parseCallback, type ParseCallbackOptions } from '../../sc
 import type * as t from '../types.js'
 
 // Sometimes we need to use given render options, but disable preview effects.
-const NO_PREVIEWS: t.RenderOptions = {
+export const NO_PREVIEWS: t.RenderOptions = {
   preview: false,
   disable: false,
   placeholder: false,
@@ -15,14 +15,14 @@ const NO_PREVIEWS: t.RenderOptions = {
 }
 
 // Sometimes we need to use given render options, but disable meddling with user control.
-const NO_INPUT_INTERFERENCE: t.RenderOptions = {
+export const NO_INPUT_INTERFERENCE: t.RenderOptions = {
   scroll: 'keep',
   focus: 'keep',
   confirm: false,
 }
 
 // Sometimes we need to use given render options, but disable animation.
-const NO_MOTION: t.RenderOptions = {
+export const NO_MOTION: t.RenderOptions = {
   transition: false,
   animation: false,
   openAnimation: false,
@@ -94,7 +94,7 @@ const CONTENT_KEYS: (keyof t.RenderOptions)[] = [
   'document',
 ]
 
-// preprocess() will leave out properties for which there may be a better default
+// preprocessRenderOptions() will leave out properties for which there may be a better default
 // later, in particular from the layer config in OpenLayerPlan.
 const LATE_KEYS: (keyof t.RenderOptions)[] = [
   'history',
@@ -122,7 +122,7 @@ const CALLBACKS: Record<string, ParseCallbackOptions> = {
 }
 
 // Parses the code for a callback option like { onLoaded }, with the arguments of that callback.
-function parseRenderCallback(key: string, code: string): u.AnyFunction {
+export function parseRenderCallback(key: string, code: string): u.AnyFunction {
   return parseCallback(code, parseCallbackOptions(key))
 }
 
@@ -131,7 +131,7 @@ function parseCallbackOptions(key: string): ParseCallbackOptions {
 }
 
 // Reads an attribute like [up-on-loaded] as the callback option it sets, with the arguments of that callback.
-function renderCallbackAttr(element: Element, attrName: string, key: string): u.AnyFunction | undefined {
+export function renderCallbackAttr(element: Element, attrName: string, key: string): u.AnyFunction | undefined {
   // return e.parseAttr(element, attrName, (value) => parseRenderCallback(key, value))
   return callbackAttr(element, attrName, parseCallbackOptions(key))
 }
@@ -174,7 +174,7 @@ function removeUsePrefix(options: t.RenderOptions): void {
   u.renameKey(options, 'useKeep', 'keep')
 }
 
-function preprocess(options: t.RenderOptions): t.RenderOptions {
+export function preprocessRenderOptions(options: t.RenderOptions): t.RenderOptions {
   up.migrate.preprocessRenderOptions?.(options)
   normalizeLayerOptions(options)
   removeUsePrefix(options)
@@ -189,10 +189,10 @@ function preprocess(options: t.RenderOptions): t.RenderOptions {
     // from the layer config in OpenLayerPlan. If we merged it now we could
     // not distinguish a user option (which always has highest priority) with a
     // default that may be overridden by the layer config. If there is no better default
-    // later, the original defaults will be applied in finalize().
+    // later, the original defaults will be applied in finalizeRenderOptions().
     u.omit(defaults, LATE_KEYS),
     // Remember the defaults in a { default } prop so we can re-use it
-    // later in deriveFailOptions() and finalize().
+    // later in deriveFailOptions() and finalizeRenderOptions().
     { defaults },
     { inputDevice: getInputDevice() },
     options,
@@ -213,8 +213,8 @@ function rememberOriginLayer({ origin, originLayer }: t.RenderOptions): t.Render
   }
 }
 
-function finalize<T extends t.RenderOptions>(preprocessedOptions: T, lateDefaults?: t.RenderOptions): T
-function finalize(preprocessedOptions: t.RenderOptions, lateDefaults?: t.RenderOptions): t.RenderOptions {
+export function finalizeRenderOptions<T extends t.RenderOptions>(preprocessedOptions: T, lateDefaults?: t.RenderOptions): T
+export function finalizeRenderOptions(preprocessedOptions: t.RenderOptions, lateDefaults?: t.RenderOptions): t.RenderOptions {
   return u.merge(
     preprocessedOptions.defaults,
     lateDefaults,
@@ -222,7 +222,7 @@ function finalize(preprocessedOptions: t.RenderOptions, lateDefaults?: t.RenderO
   )
 }
 
-function assertContentGiven(options: t.RenderOptions): void {
+export function assertContentGiven(options: t.RenderOptions): void {
   if (!u.some(CONTENT_KEYS, (contentKey) => u.isGiven(options[contentKey]))) {
     // up.layer.open() should open an empty layer without a content key.
     if (options.defaultToEmptyContent) {
@@ -247,7 +247,7 @@ function failOverrides(options: t.RenderOptions): t.RenderOptions {
   return overrides
 }
 
-function deriveFailOptions(preprocessedOptions: t.RenderOptions): t.RenderOptions {
+export function deriveFailOptions(preprocessedOptions: t.RenderOptions): t.RenderOptions {
   // Remember that this pass was a failure (for up.RenderResult#ok)
   let markFailure = { didFail: true }
 
@@ -280,28 +280,10 @@ function deriveFailOptions(preprocessedOptions: t.RenderOptions): t.RenderOption
 
 // Returns a copy of the given options where each callback in ownCallbacks runs before
 // the caller's callback of the same name.
-function chainCallbacks<T extends u.PlainObject>(options: T, ownCallbacks: u.PlainObject): T {
+export function chainCallbacks<T extends u.PlainObject>(options: T, ownCallbacks: u.PlainObject): T {
   let chained: u.PlainObject = { ...options }
   for (let key in ownCallbacks) {
     chained[key] = u.sequence(ownCallbacks[key], options[key])
   }
   return chained as T
-}
-
-// The type of render options lives in fragment/types.ts. fragment.ts re-exports this object, and an
-// explicit re-export hides the type of the same name from `export type *`. This alias gives the object
-// the type's name too, like a class has, so other modules import both as `RenderOptions`.
-export type RenderOptions = t.RenderOptions
-
-export const RenderOptions = {
-  preprocess,
-  finalize,
-  assertContentGiven,
-  deriveFailOptions,
-  parseRenderCallback,
-  renderCallbackAttr,
-  chainCallbacks,
-  NO_PREVIEWS,
-  NO_MOTION,
-  NO_INPUT_INTERFERENCE,
 }

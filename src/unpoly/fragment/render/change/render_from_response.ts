@@ -8,7 +8,7 @@ import { type UpResponse } from '../../../network.js'
 import { adoptRenderOptionsFromHeader } from '../../../script.js'
 import type * as t from '../../types.js'
 import { renderFromContent } from './render_from_content.js'
-import { RenderOptions } from '../render_options.js'
+import { deriveFailOptions, NO_INPUT_INTERFERENCE, NO_MOTION, NO_PREVIEWS } from '../render_options.js'
 import { type RenderResult } from '../render_result.js'
 
 export function renderFromResponse(options: t.RenderOptions): RenderResult {
@@ -43,7 +43,7 @@ export function renderFromResponse(options: t.RenderOptions): RenderResult {
   let meta = helloMeta(options, response)
 
   if (fail) {
-    throw updateContentFromResponse(RenderOptions.deriveFailOptions(options), meta, response)
+    throw updateContentFromResponse(deriveFailOptions(options), meta, response)
   }
 
   return updateContentFromResponse(options, meta, response)
@@ -102,9 +102,9 @@ async function revalidate(renderResult: RenderResult, originalRenderOptions: t.R
     printToStandard('up.render()', 'Revalidating cached response for target "%s"', effectiveTarget)
     let revalidateResult = await reload(effectiveTarget, {
       ...originalRenderOptions,
-      ...RenderOptions.NO_MOTION, // offering something like { verifyTransition } would mean we need to delay { onFinished } even further
-      ...RenderOptions.NO_INPUT_INTERFERENCE,
-      ...RenderOptions.NO_PREVIEWS,
+      ...NO_MOTION, // offering something like { verifyTransition } would mean we need to delay { onFinished } even further
+      ...NO_INPUT_INTERFERENCE,
+      ...NO_PREVIEWS,
       feedback: originalRenderOptions.feedback, // we do want to keep { feedback } for .up-revalidating
       preferOldElements: renderResult.fragments, // ensure we match the same fragments when initial render pass matched around { origin } and { origin } has been detached
       layer: renderResult.layer, // if the original render opened a layer, we now update it

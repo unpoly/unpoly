@@ -187,18 +187,18 @@ depend on (`setReloadAttrs()` in fragment.ts).
 
 There is no separate config object per stage. Conceptually one render-options object travels
 the whole pass, each stage adding to it or overriding it. (Literally, stages copy or
-re-derive it — `finalize()` returns a new object, and `renderFromContent()` copies it per plan — so
+re-derive it — `finalizeRenderOptions()` returns a new object, and `renderFromContent()` copies it per plan — so
 don't expect a mutation in one stage to be visible in another.) Knowing *where* an option
 acquires its value is most of debugging "why did it render that?".
 
 | Stage | What happens to the options |
 |---|---|
-| `up.RenderJob#_executePromise()` | The guard event is emitted **first**, on raw options — so `up:link:follow` and `up:form:submit` listeners see shorthands like `{ layer: 'new modal' }` unexpanded. Only then `RenderOptions.preprocess()` (render_options.ts) normalizes layer references, renames `use`-prefixed keys (`useKeep` → `keep`), and merges `config.renderOptions` plus, with `{ navigate: true }`, `config.navigateOptions`. It keeps the merged defaults in a `{ defaults }` prop, and resolves `{ origin }` to an `originLayer` *before* the request, since the origin may be gone by the time the response arrives. |
+| `up.RenderJob#_executePromise()` | The guard event is emitted **first**, on raw options — so `up:link:follow` and `up:form:submit` listeners see shorthands like `{ layer: 'new modal' }` unexpanded. Only then `preprocessRenderOptions()` (render_options.ts) normalizes layer references, renames `use`-prefixed keys (`useKeep` → `keep`), and merges `config.renderOptions` plus, with `{ navigate: true }`, `config.navigateOptions`. It keeps the merged defaults in a `{ defaults }` prop, and resolves `{ origin }` to an `originLayer` *before* the request, since the origin may be gone by the time the response arrives. |
 | `up:fragment:loaded` listeners | User code may mutate the options here, or force `{ fail }` either way. This is the documented escape hatch for responses that can't be rendered as a fragment. |
 | `renderFromResponse()` | *Then* success or fail options are picked. With `{ failOptions }` (a `config.renderOptions` default), `deriveFailOptions()` re-derives the object from the defaults plus the `fail`-prefixed keys; without it — as in `up.validate()` — the success options are kept and only the `fail`-prefixed keys override individually. |
 | `augmentOptionsFromResponse()` | The server's turn — see the layers section below. |
 | `renderFromContent()` | Expands the object into one *plan* per layer per target. |
-| `UpdateLayerPlan` / `OpenLayerPlan` | `RenderOptions.finalize()` applies the defaults deliberately withheld until now (`LATE_KEYS`: `history`, `focus`, `scroll`), because an overlay's own config may have a better one. `OpenLayerPlan` merges the layer config first, then finalizes. |
+| `UpdateLayerPlan` / `OpenLayerPlan` | `finalizeRenderOptions()` applies the defaults deliberately withheld until now (`LATE_KEYS`: `history`, `focus`, `scroll`), because an overlay's own config may have a better one. `OpenLayerPlan` merges the layer config first, then finalizes. |
 
 
 ## Hungry elements join late, and may live on another layer

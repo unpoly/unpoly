@@ -35,9 +35,9 @@ import {
   submitButtonOverrides, Switcher, trackFields,
 } from './form.js'
 import {
-  compressNestedSteps, defaultNormalizeKeepHTML, expandTargets, insertTemp, parseTargetSteps,
-  provideNodes, RenderOptions, resolveOrigin, ResponseDoc, SelectorTracker, splitTarget, toFailKey,
-  toSuccessKey, tryToTarget,
+  compressNestedSteps, defaultNormalizeKeepHTML, deriveFailOptions, expandTargets, insertTemp,
+  parseTargetSteps, preprocessRenderOptions, provideNodes, resolveOrigin, ResponseDoc, SelectorTracker,
+  splitTarget, toFailKey, toSuccessKey, tryToTarget,
 } from './fragment.js'
 import {
   emitReset, isBeforeBoot, setClassName, startExtension, stopExtension,
@@ -166,10 +166,12 @@ export const api = {
 
     compressNestedSteps,
     defaultNormalizeKeepHTML,
+    deriveFailOptions,
     expandTargets,
     toFailKey,
     insertTemp,
     parseTargetSteps,
+    preprocessRenderOptions,
     provideNodes,
     resolveOrigin,
     splitTarget,
@@ -215,7 +217,6 @@ export const api = {
     MotionController,
     SelectorTracker,
     Tether,
-    RenderOptions,
     ResponseDoc,
   },
 }

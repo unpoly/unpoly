@@ -13,7 +13,7 @@ import type * as t from '../../types.js'
 import { FragmentFinder } from '../../fragment_finder.js'
 import { LayerPlan } from './layer_plan.js'
 import { updateSteps } from './update_steps.js'
-import { RenderOptions } from '../render_options.js'
+import { finalizeRenderOptions } from '../render_options.js'
 import { type ResponseDoc } from '../response_doc.js'
 
 export class UpdateLayerPlan extends LayerPlan {
@@ -22,7 +22,7 @@ export class UpdateLayerPlan extends LayerPlan {
   declare _steps: t.RenderStep[]
 
   constructor(options: t.ResolvedRenderOptions) {
-    options = RenderOptions.finalize(options)
+    options = finalizeRenderOptions(options)
     super(options)
     // renderFromContent() passes the layer and an expanded target.
     this.layer = options.layer!

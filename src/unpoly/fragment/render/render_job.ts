@@ -8,7 +8,7 @@ import type * as t from '../types.js'
 import { renderFromContent } from './change/render_from_content.js'
 import { renderFromResponse } from './change/render_from_response.js'
 import { renderFromURL } from './change/render_from_url.js'
-import { RenderOptions } from './render_options.js'
+import { assertContentGiven, preprocessRenderOptions } from './render_options.js'
 import { RenderResult } from './render_result.js'
 
 export class RenderJob {
@@ -34,7 +34,7 @@ export class RenderJob {
 
       // Do this after emitting { guardEvent }, in case listeners want to augment render options
       // that are shortcuts (e.g. { layer: 'new modal' }) or that affect other options.
-      this.renderOptions = RenderOptions.preprocess(this.renderOptions)
+      this.renderOptions = preprocessRenderOptions(this.renderOptions)
 
       // Throw if { confirm } is given and the user rejects the dialog.
       // Do this after emitting { guardEvent }, in case listeners want to augment render options.
@@ -42,7 +42,7 @@ export class RenderJob {
 
       // Ensure we have either { url, content, fragment, document } option.
       // Do this after emitting { guardEvent }, in case listeners want to augment render options.
-      RenderOptions.assertContentGiven(this.renderOptions)
+      assertContentGiven(this.renderOptions)
 
       // TODO: Should the change always return a successful result for easier handling here, and we then throw on !result.ok?
 

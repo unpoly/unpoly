@@ -1,10 +1,10 @@
-describe('up.RenderOptions', function() {
+describe('render options', function() {
 
-  describe('.preprocess()', function() {
+  describe('up.internal.preprocessRenderOptions()', function() {
 
     it('sets global defaults', function() {
       const givenOptions = {}
-      const options = up.internal.RenderOptions.preprocess(givenOptions)
+      const options = up.internal.preprocessRenderOptions(givenOptions)
       expect(options.hungry).toBe(true)
       expect(options.keep).toBe(true)
       expect(options.abort).toBe('target')
@@ -15,7 +15,7 @@ describe('up.RenderOptions', function() {
       up.fragment.config.renderOptions.easing = 'linear'
 
       for (let navigate of [false, true]) {
-        const options = up.internal.RenderOptions.preprocess({ navigate })
+        const options = up.internal.preprocessRenderOptions({ navigate })
         expect(options.hungry).toBe(false)
         expect(options.easing).toBe('linear')
       }
@@ -23,14 +23,14 @@ describe('up.RenderOptions', function() {
 
     it('normalizes a { layer } shortcut like "new drawer"', function() {
       const givenOptions = { layer: 'new drawer' }
-      const options = up.internal.RenderOptions.preprocess(givenOptions)
+      const options = up.internal.preprocessRenderOptions(givenOptions)
       expect(options.layer).toBe('new')
       expect(options.mode).toBe('drawer')
     })
 
     it('removes the "use" prefix from option keys', function() {
       const givenOptions = { target: '#content', useHungry: false, useKeep: false, useData: { foo: 'bar' } }
-      const options = up.internal.RenderOptions.preprocess(givenOptions)
+      const options = up.internal.preprocessRenderOptions(givenOptions)
       expect(options.target).toBe('#content')
       expect(options.hungry).toBe(false)
       expect(options).not.toHaveKey('useHungry')
@@ -44,7 +44,7 @@ describe('up.RenderOptions', function() {
 
       it('sets defaults appropriate for user navigation', function() {
         const givenOptions = { navigate: true }
-        const options = up.internal.RenderOptions.preprocess(givenOptions)
+        const options = up.internal.preprocessRenderOptions(givenOptions)
 
         expect(options.feedback).toBe(true)
         expect(options.fallback).toBe(true)
@@ -58,7 +58,7 @@ describe('up.RenderOptions', function() {
         up.fragment.config.navigateOptions.transition = 'move-left'
 
         const givenOptions = { navigate: true }
-        const options = up.internal.RenderOptions.preprocess(givenOptions)
+        const options = up.internal.preprocessRenderOptions(givenOptions)
 
         expect(options.feedback).toBe(false)
         expect(options.transition).toBe('move-left')
@@ -67,7 +67,7 @@ describe('up.RenderOptions', function() {
       it('lets the given options override the defaults from up.fragment.config.navigateOptions', function() {
         up.fragment.config.navigateOptions.feedback = false
         const givenOptions = { navigate: true, feedback: true }
-        const options = up.internal.RenderOptions.preprocess(givenOptions)
+        const options = up.internal.preprocessRenderOptions(givenOptions)
 
         expect(options.feedback).toBe(true)
       })
@@ -78,7 +78,7 @@ describe('up.RenderOptions', function() {
         up.fragment.config.navigateOptions.history = 'auto'
 
         const givenOptions = { navigate: true }
-        const options = up.internal.RenderOptions.preprocess(givenOptions)
+        const options = up.internal.preprocessRenderOptions(givenOptions)
         expect(options.focus).toBeUndefined()
         expect(options.scroll).toBeUndefined()
         expect(options.history).toBeUndefined()
@@ -89,7 +89,7 @@ describe('up.RenderOptions', function() {
 
       it('does not set navigation defaults, which are often in the way for smaller fragment changes', function() {
         const givenOptions = { navigate: false }
-        const options = up.internal.RenderOptions.preprocess(givenOptions)
+        const options = up.internal.preprocessRenderOptions(givenOptions)
 
         expect(options.fallback).toBeUndefined()
         expect(options.peel).toBeUndefined()
@@ -99,7 +99,7 @@ describe('up.RenderOptions', function() {
 
       it('does not set a truthy { history } to not update { title, location } props, even in history-less layers', function() {
         const givenOptions = { navigate: false }
-        const options = up.internal.RenderOptions.preprocess(givenOptions)
+        const options = up.internal.preprocessRenderOptions(givenOptions)
 
         expect(options.history).toBeFalsy()
       })
@@ -107,7 +107,7 @@ describe('up.RenderOptions', function() {
 
     it('overrides defaults with given options', function() {
       const givenOptions = { navigate: false, hungry: false, source: '/other-source' }
-      const options = up.internal.RenderOptions.preprocess(givenOptions)
+      const options = up.internal.preprocessRenderOptions(givenOptions)
 
       expect(options.hungry).toBe(false)
       expect(options.source).toBe('/other-source')
@@ -118,7 +118,7 @@ describe('up.RenderOptions', function() {
         const options = { history: '/foo' }
         const warnSpy = up.migrate.warn.mock()
 
-        up.internal.RenderOptions.preprocess(options)
+        up.internal.preprocessRenderOptions(options)
 
         expect(options).toEqual(jasmine.objectContaining({ history: 'auto', location: '/foo' }))
         expect(warnSpy).toHaveBeenCalled()
@@ -128,7 +128,7 @@ describe('up.RenderOptions', function() {
         const options = { location: '/foo' }
         const warnSpy = up.migrate.warn.mock()
 
-        up.internal.RenderOptions.preprocess(options)
+        up.internal.preprocessRenderOptions(options)
 
         expect(options).toEqual(jasmine.objectContaining({ location: '/foo' }))
         expect(warnSpy).not.toHaveBeenCalled()
@@ -159,7 +159,7 @@ describe('up.RenderOptions', function() {
           it(`migrates ${JSON.stringify(legacyOptions)} with a single warning`, function() {
             const warnSpy = up.migrate.warn.mock()
 
-            const options = up.internal.RenderOptions.preprocess({ ...legacyOptions })
+            const options = up.internal.preprocessRenderOptions({ ...legacyOptions })
 
             expect(options).toEqual(jasmine.objectContaining(expectedOptions))
             expect(warnSpy.calls.count()).toBe(1)
@@ -169,13 +169,13 @@ describe('up.RenderOptions', function() {
     }
   })
 
-  describe('.deriveFailOptions()', function() {
+  describe('up.internal.deriveFailOptions()', function() {
 
     // In the code flow in up.fragment, options are first preprocessed and then
     // failOptions are derived. Mimic this behavior here.
     const preprocessAndDerive = function(options) {
-      options = up.internal.RenderOptions.preprocess(options)
-      options = up.internal.RenderOptions.deriveFailOptions(options)
+      options = up.internal.preprocessRenderOptions(options)
+      options = up.internal.deriveFailOptions(options)
       return options
     }
 

@@ -1,7 +1,7 @@
 import * as u from '../../util.js'
 import * as e from '../../element.js'
 import { Blocked, fail, NotImplemented } from '../../error.js'
-import { RenderOptions } from '../../fragment.js'
+import { parseRenderCallback } from '../../fragment.js'
 import { printToStandard, printToWarn } from '../../log.js'
 import { block, cspNonce, findScripts, isScript, scriptConfig } from '../../script.js'
 import type * as t from '../types.js'
@@ -100,7 +100,7 @@ export class ScriptGate {
       if (/^on[A-Z]/.test(key) && !NON_CALLBACK_KEYS.includes(key) && u.isString(script)) {
         let item = new ObjectPropertyItem(object, key)
         policy.processItem(item)
-        object[key] = RenderOptions.parseRenderCallback(key, object[key])
+        object[key] = parseRenderCallback(key, object[key])
       }
     }
   }
@@ -117,7 +117,7 @@ export class ScriptGate {
   _adoptAttrCallbacks(root: Element): void {
     const policy = this._evalCallbackPolicy
 
-    // TODO: It is weird that we keep a list of callback options in RenderOptions, but the list of nonceable attrs is in up.script? Maybe at least move them together?
+    // TODO: It is weird that we keep a list of callback options in render_options.ts, but the list of nonceable attrs is in up.script? Maybe at least move them together?
     for (let attribute of scriptConfig.nonceableAttributes) {
       let matches = e.subtree(root, e.attrSelector(attribute))
       for (let element of matches) {

@@ -13,7 +13,7 @@ import type * as t from '../../types.js'
 import { LayerPlan } from './layer_plan.js'
 import { FragmentFocus } from '../fragment_focus.js'
 import { FragmentScrolling } from '../fragment_scrolling.js'
-import { RenderOptions } from '../render_options.js'
+import { finalizeRenderOptions } from '../render_options.js'
 import { type ResponseDoc } from '../response_doc.js'
 
 export class OpenLayerPlan extends LayerPlan {
@@ -181,7 +181,7 @@ export class OpenLayerPlan extends LayerPlan {
 
   _buildLayer(): Overlay {
     const beforeNew = (optionsWithLayerDefaults: t.RenderOptions) => {
-      return this.options = RenderOptions.finalize(optionsWithLayerDefaults)
+      return this.options = finalizeRenderOptions(optionsWithLayerDefaults)
     }
 
     return buildLayer(this.options, beforeNew) as Overlay

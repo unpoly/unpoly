@@ -5,7 +5,7 @@ import { layerStack } from '../../../layer.js'
 import { animate, type AnimationValue } from '../../../motion.js'
 import { clean } from '../../../script.js'
 import type * as t from '../../types.js'
-import { RenderOptions } from '../render_options.js'
+import { chainCallbacks } from '../render_options.js'
 
 // Options for up.destroy().
 interface DestroyFragmentOptions {
@@ -39,7 +39,7 @@ export function destroyFragment(fragment: Element, options: DestroyFragmentOptio
   // removal animation.
   markFragmentAsDestroying(fragment)
 
-  animate(fragment, options.animation, RenderOptions.chainCallbacks(options, {
+  animate(fragment, options.animation, chainCallbacks(options, {
     onFinished: () => {
       layer.asCurrent(() => {
         abortFragment(fragment)
