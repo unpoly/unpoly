@@ -91,10 +91,8 @@ export abstract class LayerPlan {
 
   // TODO: Consider moving this to up.Layer
   // { location: true } only makes sense with a response, and refineOption() replaces it with the response URL.
-  handleLayerChangeRequests(newElements: Element[], newLocation: string | false | undefined): void {
+  closeIfRequested(newElements: Element[], newLocation: string | false | undefined): void {
     if (this.layer.isOverlay()) {
-      // TODO: Can we do this with "close"? Please recheck
-
       // The server may send an HTTP header `X-Up-Accept-Layer: value`
       this._tryAcceptLayerFromServer()
       this.layer.assertAlive()
@@ -119,7 +117,9 @@ export abstract class LayerPlan {
       this.layer.tryDismissForElements(newElements, this._response)
       this.layer.assertAlive()
     }
+  }
 
+  emitServerEvents(): void {
     // On the server we support up.layer.emit('foo'), which sends:
     //
     //     X-Up-Events: [{ layer: 'current', type: 'foo'}]

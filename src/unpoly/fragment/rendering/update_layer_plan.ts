@@ -112,21 +112,10 @@ export class UpdateLayerPlan extends LayerPlan {
     // This is intentional: a null value may be meaningful, and there is no need to delete keys over the protocol.
     Object.assign(this.layer.context, this._context)
 
-    // If the update causes the overlay to close, we don't want to render changes.
-    //
-    // The server may trigger multiple signals that may cause the layer to close:
-    //
-    // - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
-    // - Event an event with X-Up-Events, to which a listener may close the layer
-    // - Update the location to a URL for which { acceptLocation } or { dismissLocation }
-    //   will close the layer.
-    //
-    // Note that @handleLayerChangeRequests() also throws an `up.Aborted` error
-    // if any of these options cause the layer to close.
-    this.handleLayerChangeRequests(
-      u.map(this._steps, 'newElement'),
-      this._getNewLocation(),
-    )
+    // The server may close the layer, or a listener to a server-sent event may close it.
+    // Both throw up.Aborted, so we don't insert content into a closed layer.
+    this.closeIfRequested(u.map(this._steps, 'newElement'), this._getNewLocation())
+    this.emitServerEvents()
 
     // Change history before compilation, so new fragments see the new location.
     this.layer.updateHistory(this._getEffectiveHistoryOptions())

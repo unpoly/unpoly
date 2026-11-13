@@ -250,7 +250,7 @@ a sequence; the option only chooses the intent. Either way an `up:layer:dismiss`
 `up:layer:accept` listener cannot keep a peeled overlay open: peeling happens after the
 response, when preventing it could no longer stop the request.
 
-**The server can close a layer.** `LayerPlan#handleLayerChangeRequests()` tries the
+**The server can close a layer.** `LayerPlan#closeIfRequested()` tries the
 close reasons in a fixed order — `X-Up-Accept-Layer`, then the `{ acceptLocation }` close
 condition, then accept-triggering elements in the new content, then the same three for
 dismissal — calling `layer.assertAlive()` after each, so the first reason that closes the
@@ -262,8 +262,9 @@ layer stops the rest. Two things about it are easy to get wrong:
 - Closing this way throws `up.Aborted`, so the render promise **rejects**. It does not
   resolve with an empty result.
 
-Only those six close checks are gated on the layer being an overlay. The `X-Up-Events` loop
-in the same method runs for any layer — and a listener there can close a layer too.
+These six close checks only run for overlays. Right after them,
+`LayerPlan#emitServerEvents()` emits the `X-Up-Events` on any layer — and a listener there can
+close a layer too, which also throws `up.Aborted`.
 
 **The server can open one.** An `X-Up-Open-Layer` response header makes
 `augmentOptionsFromResponse()` (render_from_response.ts) rewrite the pass into an overlay: it clears the original

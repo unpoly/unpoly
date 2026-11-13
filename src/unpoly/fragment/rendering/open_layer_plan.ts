@@ -113,22 +113,16 @@ export class OpenLayerPlan extends LayerPlan {
   }
 
   _renderOverlayContent(responseDoc: ResponseDoc): t.PartialRenderResult {
-    // The server may trigger multiple signals that may cause the overlay to close immediately:
-    //
-    // - Close the layer directly through X-Up-Accept-Layer or X-Up-Dismiss-Layer
-    // - Emit an event with X-Up-Events, to which a listener may close the layer
-    // - Update the location to a URL for which { acceptLocation } or { dismissLocation }
-    //   will close the layer.
-    //
-    // Note that @handleLayerChangeRequests() also throws an up.Aborted error
-    // if any of these options cause the layer to close.
-    this.handleLayerChangeRequests([this._content], this._getNewLocation())
+    // The server may close the layer, or a listener to a server-sent event may close it.
+    // Both throw up.Aborted, so we don't insert content into a closed layer.
+    this.closeIfRequested([this._content], this._getNewLocation())
+    this.emitServerEvents()
 
     // Preprocess content element before insertion.
     responseDoc.commitElement(this._content)
 
-    // Only if handleLayerChangeRequests() does not abort, we insert the content in the overlay.
-    // If it does abort we want to use the content for [up-hungry][up-if-layer=any] elements
+    // We only get here when the layer is still open.
+    // When it was closed, we want to use the content for [up-hungry][up-if-layer=any] elements
     // on background layers.
     this.layer.setContent(this._content)
 
