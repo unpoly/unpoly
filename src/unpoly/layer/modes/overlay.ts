@@ -4,7 +4,7 @@ import { OptionsParser } from '../../element/options_parser.js'
 import { muteUncriticalSync } from '../../error.js'
 import { haltEvent, on, onEscape, type UnbindFn } from '../../event.js'
 import { focusedField, formFieldSelector, Params } from '../../form.js'
-import { destroy, getAllFragments, type CloseLayerOptions } from '../../fragment.js'
+import { destroy, getAllFragments } from '../../fragment.js'
 import { isWithinForeignOverlay } from '../../layer.js'
 import { type ClickEvent } from '../../link.js'
 import { printUserEvent } from '../../log.js'
@@ -13,7 +13,7 @@ import { type UpResponse } from '../../network.js'
 import { readData } from '../../script.js'
 import type * as t from '../types.js'
 import { Layer } from '../base.js'
-import { CloseLayer } from '../close_layer.js'
+import { closeLayer } from '../close_layer.js'
 import { OverlayFocus } from '../overlay_focus.js'
 
 // A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
@@ -496,21 +496,21 @@ export abstract class Overlay extends Layer {
 
   // Documented in up.Layer
   accept(value: any = null, options: t.LayerCloseOptions = {}): void {
-    return this._executeCloseChange('accept', value, options)
+    return this._close('accept', value, options)
   }
 
   // Documented in up.Layer
   dismiss(value: any = null, options: t.LayerCloseOptions = {}): void {
-    return this._executeCloseChange('dismiss', value, options)
+    return this._close('dismiss', value, options)
   }
 
   _supportsDismissMethod(method: string): boolean {
     return u.contains(this.dismissible, method)
   }
 
-  _executeCloseChange(verb: 'accept' | 'dismiss', value: any, options: u.PlainObject): void {
-    options = { ...options, verb, value, layer: this }
-    return new CloseLayer(options as CloseLayerOptions).execute()
+  _close(verb: 'accept' | 'dismiss', value: any, options: t.LayerCloseOptions): void {
+    // The cast allows { confirm: true }, which assertConfirmed() handles like { confirm: false }.
+    closeLayer({ ...options, verb, value, layer: this } as t.CloseLayerOptions)
   }
 
   getFirstSwappableElement(): HTMLElement {

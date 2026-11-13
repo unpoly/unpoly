@@ -301,25 +301,6 @@ when the event is prevented. Listeners find the render options in `event.renderO
 export interface RenderGuardEvent extends UpEvent { renderOptions?: RenderOptions }
 
 /**
-Options for accepting or dismissing an overlay.
-@internal
-*/
-export interface CloseLayerOptions {
-  verb: 'accept' | 'dismiss'
-  layer: LayerReference
-  value?: any
-  origin?: Element
-  // Whether a listener may prevent the overlay from closing.
-  preventable?: boolean
-  response?: UpResponse
-  // Whether to restore the parent layer's history.
-  history?: boolean
-  confirm?: string | false
-  // Other options go to Overlay#destroyElements(), e.g. { animation }.
-  [key: string]: any
-}
-
-/**
 A step of a render pass: which old element to update with which new element, and how.
 Each step inherits the render options of its pass.
 @internal
