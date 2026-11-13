@@ -115,9 +115,9 @@ export abstract class Overlay extends Layer {
     // no effect.
     //
     // The up.layer.current value within a callback is controlled by the event
-    // emission in OpenLayerPlan and CloseLayer
+    // emission in OpenLayerPlan and closeLayer()
     //
-    // The name is a callback property like 'onAccepted', built from a string by CloseLayer.
+    // The name is a callback property like 'onAccepted', built from a string by closeLayer().
     let fn = (this as u.PlainObject)[name]
     if (fn) {
       return fn.bind(this)

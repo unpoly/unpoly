@@ -19,7 +19,7 @@ export class RootLayer extends Layer {
     // Let's talk about our choice of @element for the root layer.
     //
     // 1. We don't want to use `document`, since that is for our global event bus.
-    //    For instance, take a look how CloseLayer emits the up:layer:dismiss
+    //    For instance, take a look how closeLayer() emits the up:layer:dismiss
     //    event first on `@layer.element`, then on `document`.
     //    Also `document` is not really an element, just an event target.
     // 2. We might want but cannot use <body> element. Since Unpoly boots before

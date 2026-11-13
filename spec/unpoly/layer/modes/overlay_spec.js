@@ -208,7 +208,7 @@ describe('Overlay', function() {
       expect(opener).toBeFocused()
     })
 
-    // Pending: CloseLayer#_handleFocus() focuses the parent's non-focusable layer.element instead of its focus element.
+    // Pending: closeLayer() focuses the parent's non-focusable layer.element instead of its focus element.
     it('focuses the parent layer if the overlay was opened without an { origin }', async function() {
       up.specUtil.assertTabFocused()
       const parentOverlay = await up.layer.open({ content: 'parent overlay' })

@@ -63,7 +63,7 @@ up.render()
           └─ renderFromResponse()       fail options, server headers, revalidation hook
               └─ renderFromContent()    expands options into plans
                   └─ UpdateLayerPlan    plan → steps  (or OpenLayerPlan)
-                      └─ UpdateSteps    the actual swaps
+                      └─ updateSteps()  the actual swaps
 ```
 
 `up.render()` returns an [`up.RenderJob`](../../src/unpoly/fragment/render/render_job.ts) — the
@@ -89,7 +89,7 @@ stage. Its helpers are private to the module and get what they need as arguments
 The *plans* (`UpdateLayerPlan`, `OpenLayerPlan`) are classes: a plan is asked more than once,
 and each fills in the hooks of its base class `LayerPlan`. A plan implements
 `execute(responseDoc, onApplicable)` **and** `getPreflightProps()`, and inherits `execute()`
-from `LayerPlan`.
+from `LayerPlan`. The swaps a plan ends with are a module function again, `updateSteps()`.
 
 `renderFromURL()` carries more than the table suggests. It derives the request from the
 options (see preflight below), owns preloading, and turns a failed network into
@@ -117,8 +117,8 @@ understand a surprising update:
 ```
 
 Each plan is either an `UpdateLayerPlan` or, for `{ layer: 'new' }`, an
-`OpenLayerPlan`. (`CloseLayer` is *not* a plan — it is reached through
-`layer.accept()` / `layer.dismiss()`.)
+`OpenLayerPlan`. (Closing a layer is *not* a plan. `layer.accept()` and `layer.dismiss()`
+call `closeLayer()` in [`layer/close_layer.ts`](../../src/unpoly/layer/close_layer.ts).)
 
 
 ## Steps, and matching twice
@@ -149,7 +149,7 @@ context and the fragments to bind the request to. It builds the same plans as
 `renderFromContent()`, but no response doc, and only asks them for their preflight props. So the
 plan machinery runs once before the request exists, with its results discarded.
 
-`UpdateSteps` then performs the swaps in **four phases**, each running over all
+`updateSteps()` then performs the swaps in **four phases**, each running over all
 steps before the next one starts:
 
 1. **Insert** every new fragment, in target order (hungry steps last). Destructors of
@@ -162,17 +162,17 @@ steps before the next one starts:
 4. **Start motions**: transitions and animations, then removing old elements,
    `up:fragment:destroyed` and unwrapping `<up-wrapper>` elements.
 
-Phases 2 to 4 run in one async method that is called synchronously, so they happen in the same
+Phases 2 to 4 run in one async function that is called synchronously, so they happen in the same
 task, but an exception after inserting rejects `up.RenderResult#finished` instead of
 `up.render()`. The per-step object that carries a step from phase 1 to the others never leaves
-`UpdateSteps`. To make the cut between inserting and transitioning, `UpdateSteps`
+`update_steps.ts`. To make the cut between inserting and transitioning, `updateSteps()`
 calls the internal `swap()` (motion.ts), which inserts now and returns a function that starts the
 transition later; `up.morph()` is just both calls in a row.
 
 `LayerPlan` is the base class of both plans. Its `execute()` matches the response
 (`_matchPostflight()`), lets `OpenLayerPlan` create its overlay (`_prepareLayer()`), and
 renders the plan's own layer (`_renderOwnLayer()`), then the other layers. It also honours a
-server's request to accept or dismiss a layer. Both `UpdateSteps` and `OpenLayerPlan` stamp each new fragment with the
+server's request to accept or dismiss a layer. Both `updateSteps()` and `OpenLayerPlan` stamp each new fragment with the
 `[up-source]`, `[up-time]` and `[up-etag]` attributes that later reloads and revalidation
 depend on (`setReloadAttrs()` in fragment.ts).
 
@@ -224,7 +224,7 @@ the pass closes the very layer it renders into: a listener on
 updated *before* the teardown. That is what lets a server response accept an overlay and
 still deliver a flash message to the layer underneath, and lets `onAccepted` / `onDismissed`
 handlers observe it. The call is memoized so it happens exactly once either way.
-Either way, the other-layer steps go through a separate `UpdateSteps` with its own four
+Either way, the other-layer steps go through a separate `updateSteps()` call with its own four
 phases. They are not compiled together with the current layer's fragments.
 
 
@@ -356,7 +356,7 @@ the DOM is concerned, and a rejection as far as the caller is concerned.
   [Testing](testing.md#finding-the-spec-for-a-feature).
 - **Expect to touch two layers of abstraction.** A bug in "what gets updated" usually lives
   in `renderFromContent()` (plans) or `UpdateLayerPlan` (steps); a bug in "how it gets updated" lives in
-  `UpdateSteps` or `LayerPlan`.
+  `updateSteps()` or `LayerPlan`.
 - **Check the lifecycle page when you change observable behavior.** If your change alters
   when a hook fires or what it receives,
   [`render-lifecycle.md`](../../src/unpoly/pages/render-lifecycle.md) and its diagram have to

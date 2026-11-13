@@ -261,7 +261,7 @@ Options for an `up.FragmentProcessor`. Subclasses take more.
 @internal
 */
 export interface FragmentProcessorOptions {
-  // UpdateSteps passes null when it has no steps.
+  // updateSteps() passes null when it has no steps.
   fragment?: HTMLElement | null
   // What { focus: 'auto' } or { scroll: 'auto' } means, as another processable value.
   autoMeans?: FragmentProcessorValue
@@ -316,7 +316,7 @@ export interface RenderStep extends ResolvedRenderOptions {
   // Emitted when a new element was matched. Only hungry steps have one.
   selectEvent?: FragmentHungryEvent
   selectCallback?: (event: Event) => any
-  // Set while rendering, see UpdateSteps.
+  // Set while rendering, see updateSteps().
   parentElement?: ParentNode | null
   afterRemove?: () => void
   descendantKeepPlans?: KeepPlan[]
@@ -358,7 +358,7 @@ export interface KeepPlan {
   newElement: Element
   newData: u.PlainObject
   renderOptions: RenderOptions
-  // Set when rendering, see UpdateSteps.
+  // Set when rendering, see updateSteps().
   revivers?: (() => void)[]
 }
 
