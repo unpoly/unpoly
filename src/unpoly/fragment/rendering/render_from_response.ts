@@ -14,7 +14,10 @@ import { type RenderResult } from './render_result.js'
 export function renderFromResponse(options: t.RenderOptions): RenderResult {
   // RenderJob and renderFromURL() only call us with a { response }.
   let response = options.response!
-  let loadedProps = loadedEventProps(options, response)
+  // The compiler { meta } also gets this. We take it from the original options,
+  // since fail options may not have the { expiredResponse }.
+  let revalidating = !!options.expiredResponse
+  let loadedProps = loadedEventProps(options, response, revalidating)
 
   if (fragmentConfig.skipResponse(loadedProps)) {
     skip(options, response)
@@ -39,8 +42,7 @@ export function renderFromResponse(options: t.RenderOptions): RenderResult {
 
   // When renderFromContent() eventually compiles fragments, the { meta } object
   // will be passed as a third argument to compilers.
-  // We build it from these options, since fail options may not have the { expiredResponse }.
-  let meta = helloMeta(options, response)
+  let meta = helloMeta(revalidating, response)
 
   if (fail) {
     throw updateContentFromResponse(deriveFailOptions(options), meta, response)
@@ -138,19 +140,17 @@ function revalidatePreview(options: t.RenderOptions): t.PreviewValue | undefined
   }
 }
 
-function loadedEventProps(options: t.RenderOptions, response: UpResponse): t.FragmentLoadedProps {
-  const { expiredResponse } = options
-
+function loadedEventProps(options: t.RenderOptions, response: UpResponse, revalidating: boolean): t.FragmentLoadedProps {
   return {
     request: response.request,
     response,
     renderOptions: options,
-    revalidating: !!expiredResponse,
-    expiredResponse,
+    revalidating,
+    expiredResponse: options.expiredResponse,
   }
 }
 
-function helloMeta(options: t.RenderOptions, response: UpResponse): u.PlainObject {
+function helloMeta(revalidating: boolean, response: UpResponse): u.PlainObject {
   // (1) We avoid exposing values that would prevent garbage collection
   //    by compilers holding a reference to their meta arg in their closure.
   //
@@ -158,7 +158,7 @@ function helloMeta(options: t.RenderOptions, response: UpResponse): u.PlainObjec
   //     That includes the request and response.
   //
   // (3) Another property { layer } will be assigned by up.hello().
-  let meta = { revalidating: !!options.expiredResponse, ok: response.ok }
+  let meta = { revalidating, ok: response.ok }
   up.migrate.processHelloMeta?.(meta, response)
   return meta
 }

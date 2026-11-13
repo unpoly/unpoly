@@ -741,6 +741,26 @@ extendDescribe('up.fragment', function() {
             expect(onFailFinished.calls.argsFor(0)[0].fragment).toHaveText('new failure text')
           })
 
+          it('calls compilers in the { failTarget } with { revalidating: true, ok: false } if the revalidation response has an error code', async function() {
+            const compiler = jasmine.createSpy('compiler')
+            up.compiler('.fail-target', compiler)
+            htmlFixtureList('<div class="fail-target">old failure text</div>')
+
+            const job = up.render({ target: '.target', failTarget: '.fail-target', url: '/cached-path', cache: true, revalidate: true })
+            await wait()
+
+            expect('.target').toHaveText('cached text')
+            expect(compiler).not.toHaveBeenCalled()
+
+            jasmine.respondWithSelector('.fail-target', { text: 'new failure text', status: 500 })
+
+            await expectAsync(job.finished).toBeRejectedWith(jasmine.any(up.RenderResult))
+
+            expect('.fail-target').toHaveText('new failure text')
+            expect(compiler.calls.count()).toBe(1)
+            expect(compiler.calls.argsFor(0)[2]).toEqual(jasmine.objectContaining({ revalidating: true, ok: false }))
+          })
+
           it('revalidates when a link in an overlay is loading cached content into a parent layer (bugfix)', async function() {
             expect('.target').toHaveText('initial text')
 
