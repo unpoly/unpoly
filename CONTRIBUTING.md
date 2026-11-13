@@ -21,7 +21,7 @@ Run `bin/outline <guide>` to see a guide's sections with line ranges.
 
 > Tests don't run against `src/` directly, but against a transpiled
 > build in `dist/`.\
-> The `bin/dev` tool boots a build watcher (it lints, but doesn't type-check), a test server and the docs site.\
+> The `bin/dev` tool boots a build watcher (it lints and checks types after every change), a test server and the docs site.\
 > Everything they print lands in `tmp/dev.log`, however the environment was started.
 
 [Read the dev environment guide](docs/contributing/dev-environment.md) before trying out your changes,

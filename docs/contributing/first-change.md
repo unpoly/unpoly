@@ -141,8 +141,8 @@ function does (see [Code style](code-style.md#writing-types)). `u` is `up.util`,
 Exporting `trim` lets other modules import it. Only the `api` object reaches `window.up`, so
 listing `trim` there is what publishes `up.form.trim()`.
 
-Before the specs, run the type check and the linter. Both take a second or two, while even a
-single spec takes about fifteen:
+Before the specs, [run the type check and the linter](testing.md#check-types-and-lint-first).
+Both take a second or two, while even a single spec takes about fifteen:
 
 ```
 bin/typecheck

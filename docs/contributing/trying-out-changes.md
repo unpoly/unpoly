@@ -39,7 +39,8 @@ this repository under `tooling/scratch`.
 **Page requests wait for the build.** If you edit `src/unpoly/link.ts` and reload a scratch
 page, the request blocks until the build watcher has finished, so you never look at the previous build
 and conclude your change did nothing. If the build is *broken*, the page shows you the
-compile errors instead — file, line and all.
+compile or lint errors instead — file, line and all. A type error doesn't block the page. The
+watcher logs it to [`tmp/dev.log`](dev-environment.md#logs).
 
 
 ## The pages that ship

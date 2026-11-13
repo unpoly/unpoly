@@ -31,9 +31,8 @@ how modules import each other is covered in
 
 The build doesn't use TypeScript at all: esbuild strips the types from each file, and never
 checks them. `bin/typecheck` checks them, in about a second, and prints nothing when all is
-well. The dev environment's watcher runs the same checks after every change in `src/` or a
-tsconfig, and `bin/test` prints their errors before the specs, which it runs anyway (see
-[Testing](testing.md#check-types-and-lint-first)).
+well. Run it before the specs. The dev watcher runs the same checks after every change, and
+`bin/test` reports what they found (see [Testing](testing.md#check-types-and-lint-first)).
 
 Besides the [public-API probe](documentation.md#public-api-must-exist), which checks that
 documented API exists in the types, `bin/typecheck` checks with TypeScript 7 against two
@@ -46,8 +45,7 @@ configs:
 
 `bin/typecheck` prints an error that both checks find twice; the watcher lists it once. Your
 editor reads `tsconfig.json`, so it shows the loose check's errors, but not the ones only the
-core check finds. When all of `src/` passes a setting, move it to `tsconfig.json`. CI runs
-`bin/typecheck` as a separate job, and a type error in either check fails the workflow.
+core check finds. When all of `src/` passes a setting, move it to `tsconfig.json`.
 
 Adding or changing types must not change what the build emits. Compare `unpoly.min.js` before
 and after.
@@ -99,6 +97,10 @@ and after.
   makes the compiled class define the property, which costs bytes and changes behavior
   (differently in `unpoly.js` and `unpoly.es6.js`, whose targets treat class fields
   differently). `bin/lint` reports a field without `declare` or an initializer.
+- **Only syntax that strips away.** No `enum`, `namespace` or constructor parameter
+  properties (`constructor(private x)`): they emit code, and the build only strips types.
+  Re-export a type with `export type`, because esbuild compiles one file at a time.
+  `bin/typecheck` reports both (`erasableSyntaxOnly` and `isolatedModules` in `tsconfig.json`).
 - **Comment a type with `/** */`.** Editors show the comment when you hover a use of the type.
   Mark a type that isn't public API with `@internal` in that comment. These comments aren't
   published: a public type's reference goes in its [doc entry](documentation.md#doc-files),
@@ -228,10 +230,8 @@ removing work or reusing a helper, not by compressing its syntax:
 
 ## No dependencies
 
-Unpoly has zero runtime dependencies, and always will.
-
-Development dependencies are fine. The spec runner, the specs and the build pipeline
-use plenty.
+Unpoly has [zero runtime dependencies](philosophy.md#values). Development dependencies are
+fine. The spec runner, the specs and the build pipeline use plenty.
 
 
 ## No jQuery
@@ -307,5 +307,5 @@ Rust. The code style rules from `@stylistic/eslint-plugin` and our own in
 `tooling/lint/unpoly_plugin.mjs` run in JavaScript. Editors with the Oxc extension use the same
 config. To silence a rule for one line, write `// oxlint-disable-line rule-name`.
 
-Oxlint's errors in `src/` fail the build, so `bin/test` surfaces them for you. Specs, the tooling
-and the doc files are not part of the build, so only `bin/lint` (or CI's lint job) checks those.
+The dev watcher lints `src/` too, but only `bin/lint` checks the specs, the tooling and the doc
+files. Run it before the specs (see [Testing](testing.md#check-types-and-lint-first)).

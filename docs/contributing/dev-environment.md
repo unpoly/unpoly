@@ -53,10 +53,9 @@ If a build has errors — a syntax slip, or a lint error — `bin/test` prints
 them instead of running the specs and exits non-zero, and `bin/dev status` reports
 them too. The watcher itself keeps running, so your next edit can fix things.
 
-A **type error** doesn't break the build. The watcher checks types too, and `bin/test` prints
-the type errors before the specs, runs the specs anyway, and exits non-zero even when they pass
-(see [Testing](testing.md#check-types-and-lint-first)). `bin/dev status` lists them, but still
-reports the environment as usable.
+A **type error** doesn't break the build, and `bin/test` runs the specs anyway (see
+[Testing](testing.md#check-types-and-lint-first)). `bin/dev status` lists type errors, but
+still reports the environment as usable.
 
 ## The build
 
@@ -77,8 +76,8 @@ check runs again after that change's rebuild.
 
 Of the one-shot builds, only the production build
 (`bin/build` without `--config`, which `bin/release` runs) lints `src/`, and fails on an error.
-`bin/lint` lints `src/`, `spec/`, `tooling/` and the doc files, and CI runs it as its own job,
-next to `bin/typecheck`.
+None of them checks types. To check without the watcher, run `bin/typecheck` and `bin/lint` (see
+[Testing](testing.md#check-types-and-lint-first)).
 
 ## Logs
 

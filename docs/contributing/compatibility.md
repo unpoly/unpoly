@@ -18,6 +18,9 @@ polyfill them. An API that all three browsers have supported for two years
 path that degrades rather than throws.
 Skipping an animation is fine.
 
+`bin/typecheck` doesn't help here. Its DOM types (`lib` in `tsconfig.json`) know every API
+that TypeScript knows, however new.
+
 
 ## Breaking changes
 
@@ -44,6 +47,9 @@ to `up`, and the function takes its types from that declaration (see
 [Code style](code-style.md#the-global-up-and-unpoly-migrate)):
 
 ```ts
+type RenderJob = import('../unpoly/fragment.js').RenderJob
+type RenderOptions = import('../unpoly/fragment.js').RenderOptions
+
 declare module '../unpoly.js' {
   interface Up {
     replace(target: RenderOptions['target'], url: string, options?: RenderOptions): RenderJob
