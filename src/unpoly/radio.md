@@ -306,6 +306,10 @@ let options = up.radio.pollOptions(fragment)
 // result: { interval: 5000, url: '/score', ifLayer: 'front', background: true, ... }
 ```
 
+Attributes are only read from the fragment itself, not from its ancestors.
+For an attribute the fragment doesn't have, the options contain Unpoly's default,
+like the `{ ifLayer: 'front' }` above or an `{ interval }` from `up.radio.config.pollInterval`.
+
 @function up.radio.pollOptions
 @param {Element|jQuery|string} fragment
   The fragment for which to parse polling options.

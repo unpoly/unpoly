@@ -55,16 +55,20 @@ This function registers a rejection handler that ignores the following rejection
 Any other rejection, like an `up.CannotMatch` or `up.Offline` error, or an exception in your own code,
 still rejects the returned promise.
 
+When you `await` the promise or handle its rejection yourself, you don't need this function.
+
 ## Example
 
-You can mute the rejection of a promise that you don't handle yourself:
+A button reloads a fragment, but nothing waits for the reload to finish:
 
 ```js
-up.on('submit', 'form[up-target]', (event, form) => {
-  let promise = up.submit(form)
-  up.error.muteUncriticalRejection(promise)
+document.querySelector('#refresh').addEventListener('click', () => {
+  let job = up.reload('#notifications')
+  up.error.muteUncriticalRejection(job) // mark: up.error.muteUncriticalRejection(job)
 })
 ```
+
+When the reload is aborted, or the server responds with an error code, nothing is printed to the error console.
 
 @learn-ref render-lifecycle#handling-errors
 

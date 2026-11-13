@@ -165,7 +165,18 @@ Sets default options for form submission and validation.
 
 Returns whether the given element is a form field, such as `input` or `select`.
 
-To configure what Unpoly considers a form field, use `up.form.config.fieldSelectors`.
+Buttons are not fields, including an `<input type="submit">`.
+[Form-associated custom elements](/learn/custom-form-fields#form-associated) are fields.
+
+To configure what Unpoly considers a form field, use `up.form.config.fieldSelectors`
+and `up.form.config.noFieldSelectors`.
+
+## Example
+
+```js
+up.form.isField(document.querySelector('input[name=email]')) // result: true
+up.form.isField(document.querySelector('button[type=submit]')) // result: false
+```
 
 @function up.form.isField
 @param {Element} element
@@ -187,8 +198,29 @@ If the given element is itself a form field, a list of that given element is ret
 
 If the given element is a `<form>` with an `[id]`, the list also includes fields outside the form
 that are associated with it through a [`[form]`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#form) attribute.
+Like in the browser, a field within the form whose `[form]` attribute names another form is not included.
 
 Fields in another [layer](/api/up.layer) and fields that are being [destroyed](/api/up.destroy) are ignored.
+
+## Example
+
+Given a form with a field outside of it:
+
+```html
+<form id="order">
+  <input name="email">
+  <button type="submit">Order</button>
+</form>
+
+<input name="coupon" form="order"> <!-- mark: form="order" -->
+```
+
+We can find all fields of the form like this:
+
+```js
+let form = document.querySelector('#order')
+up.form.fields(form) // result: [<input name="email">, <input name="coupon">]
+```
 
 @function up.form.fields
 @param {Element|jQuery} root
@@ -387,14 +419,17 @@ let options = up.form.watchOptions(field)
 // result: { event: ['input', 'change'], delay: 300, disable: true, ... }
 ```
 
-The event type `'input'` is expanded into the events from `up.form.config.watchInputEvents`.
+Like `up.watch()`, a field without an `[up-watch-event]` attribute is watched for the `input` event.
+The event type `'input'` is expanded into the events from `up.form.config.watchInputEvents`,
+and `'change'` into the events from `up.form.config.watchChangeEvents`.
 
 @function up.form.watchOptions
 @param {Element|jQuery|string} field
   The field for which to parse watch options.
 
-  Attributes are read from the field and its ancestors. The [closest](/learn/watch-options#multiple-fields)
-  attribute is honored.
+  Attributes are read from the field and its ancestors.
+  When more than one of them sets the same option, the closest attribute wins.
+  See [setting options for multiple fields](/learn/watch-options#multiple-fields).
 @param {Object} [options]
   Additional options for watching the field.
 
@@ -434,12 +469,17 @@ let options = up.form.validateOptions(field)
 
 The options also contain the [watch options](/learn/watch-options) for the field,
 like `{ event }` or `{ delay }`.
+Unlike `up.form.watchOptions()`, a field without an `[up-watch-event]` attribute is validated on `change`.
+
+The options don't say which fragment to update.
+`up.validate()` takes the target from the `[up-validate]` attribute's value, or from the field's [form group](/api/up-form-group).
 
 @function up.form.validateOptions
 @param {Element|jQuery|string} field
   The field for which to parse validation options.
 
-  Attributes are read from the field and its ancestors. The closest attribute is honored.
+  Attributes are read from the field and its ancestors.
+  When more than one of them sets the same option, the closest attribute wins.
 @param {Object} [options]
   Additional options for validating the field.
 
