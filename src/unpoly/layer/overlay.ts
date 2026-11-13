@@ -575,6 +575,12 @@ export class CoverLayer extends OverlayWithViewport {
 export class OverlayWithTether extends Overlay {
   declare _tether: Tether
 
+  constructor(options: t.LayerOptions) {
+    super(options)
+    // The default alignment follows the axis of the position.
+    this.align ??= (this.position === 'top' || this.position === 'bottom') ? 'left' : 'top'
+  }
+
   createElements(): void {
     if (!this.origin) {
       fail('Missing { origin } option')
@@ -584,7 +590,7 @@ export class OverlayWithTether extends Overlay {
     // ask for its parent element.
     this._tether = new Tether({
       anchor: this.origin as HTMLElement,
-      // The popup's mode config defaults both.
+      // The popup's mode config defaults the position, our constructor the alignment.
       align: this.align!,
       position: this.position!
     })

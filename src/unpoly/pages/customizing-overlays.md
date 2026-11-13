@@ -110,6 +110,9 @@ The following combinations are supported:
 | `right`        | `bottom`    | Popup sits right of the origin. Bottom edges align.     |
 | `right`        | `center`    | Popup sits right of the origin. Vertical centers align. |
 
+When you set a `{ position }` without an `{ align }`, popups above or below the origin align their left edges,
+and popups left or right of the origin align their top edges. Any other combination throws an error.
+
 To change the default for all popups, configure `up.layer.config.popup.position` and `up.layer.config.popup.align`.
 
 

@@ -70,7 +70,6 @@ export const layerConfig = newConfig('up.layer.config', (): t.LayerConfig => ({
     mainTargets: ['[up-main~=popup]'],
     position: 'bottom',
     size: 'medium',
-    align: 'left',
     dismissible: 'outside key',
     trapFocus: false,
   },

@@ -171,10 +171,8 @@ export class Tether {
       }
     }
 
-    // TODO: A valid position with an invalid align (or the other way around) sets only one
-    // coordinate. We then move to NaN instead of failing below. This should be &&.
-    if (u.isDefined(left) || u.isDefined(top)) {
-      this._moveTo(left!, top!)
+    if (u.isDefined(left) && u.isDefined(top)) {
+      this._moveTo(left, top)
     } else {
       fail('Invalid tether constraints: %o', this._describeConstraints())
     }

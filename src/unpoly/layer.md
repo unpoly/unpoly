@@ -245,6 +245,9 @@ console.log(layer.mode) // logs "modal"
     For **popups**, the alignment of the popup within its `{ position }`.
     See [popup position](/learn/customizing-overlays#popup-position).
 
+    By default, popups above or below the origin align their left edges,
+    and popups left or right of the origin align their top edges.
+
 @section Request
   @mix up.render/request
     @param options.abort
