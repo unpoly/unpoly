@@ -837,6 +837,74 @@ extendDescribe('up.fragment', function() {
             expect('.target').toHaveText('verified text')
           })
 
+          it('sets [up-etag] and [up-time] from the revalidation response instead of the expired response (bugfix)', async function() {
+            htmlFixture('<div id="target">initial text</div>')
+            await jasmine.populateCache('/path', {
+              responseText: '<div id="target">expired text</div>',
+              responseHeaders: {
+                'ETag': 'W/"expired"',
+                'Last-Modified': 'Wed, 21 Oct 2015 18:14:00 GMT'
+              }
+            })
+            up.cache.expire()
+
+            up.render('#target', { url: '/path', cache: true, revalidate: true })
+            await wait()
+
+            expect('#target').toHaveText('expired text')
+            expect('#target').toHaveAttribute('up-etag', 'W/"expired"')
+            expect('#target').toHaveAttribute('up-time', 'Wed, 21 Oct 2015 18:14:00 GMT')
+
+            jasmine.respondWith({
+              responseText: '<div id="target">fresh text</div>',
+              responseHeaders: {
+                'ETag': 'W/"fresh"',
+                'Last-Modified': 'Thu, 22 Oct 2015 09:30:00 GMT'
+              }
+            })
+            await wait()
+
+            expect('#target').toHaveText('fresh text')
+            expect('#target').toHaveAttribute('up-etag', 'W/"fresh"')
+            expect('#target').toHaveAttribute('up-time', 'Thu, 22 Oct 2015 09:30:00 GMT')
+
+            up.reload('#target')
+            await wait()
+
+            expect(jasmine.lastRequest().requestHeaders['If-None-Match']).toBe('W/"fresh"')
+            expect(jasmine.lastRequest().requestHeaders['If-Modified-Since']).toBe('Thu, 22 Oct 2015 09:30:00 GMT')
+          })
+
+          it('sets the document title from the revalidation response instead of the expired response (bugfix)', async function() {
+            up.history.config.enabled = true
+            let html = (prefix) => `
+              <html>
+                <head>
+                  <title>${prefix} title</title>
+                </head>
+                <body>
+                  <div id="target">${prefix} text</div>
+                </body>
+              </html>
+            `
+
+            htmlFixture('<div id="target">initial text</div>')
+            await jasmine.populateCache('/path', html('expired'))
+            up.cache.expire()
+
+            up.render('#target', { url: '/path', cache: true, revalidate: true, history: true })
+            await wait()
+
+            expect('#target').toHaveText('expired text')
+            expect(document.title).toBe('expired title')
+
+            jasmine.respondWith(html('fresh'))
+            await wait()
+
+            expect('#target').toHaveText('fresh text')
+            expect(document.title).toBe('fresh title')
+          })
+
           describe('if revalidation responded with 304 Not Modified', function() {
 
             it('does not call { onRendered } a second time', async function() {
