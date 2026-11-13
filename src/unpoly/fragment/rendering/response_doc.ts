@@ -8,7 +8,7 @@ import {
   adoptDetachedHeadAsset, adoptNewFragment, findAssets, warnOfUnsafeCSP, type CSPInfo,
 } from '../../script.js'
 import type * as t from '../types.js'
-import { FragmentFinder } from '../matching/fragment_finder.js'
+import { findFragment } from '../matching/fragment_finder.js'
 
 export class ResponseDoc {
   // A parsed Document for a full HTML document, or an <up-document> element wrapping a fragment.
@@ -179,13 +179,12 @@ export class ResponseDoc {
   // (3) Supports origin-aware lookup priorities.
   // (4) Returns undefined if there is no match.
   select(selector: string): HTMLElement | undefined {
-    let finder = new FragmentFinder({
+    return findFragment({
       selector: selector,
       origin: this._rediscoveredOrigin,
       document: this._document,
       match: this._match,
     })
-    return finder.find()
   }
 
   selectSteps<S extends t.RenderStep>(steps: S[]): S[] {

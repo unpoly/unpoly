@@ -481,7 +481,7 @@ export interface FragmentConfig {
 }
 
 /**
-Options for an `up.FragmentFinder`. Other options (like `{ layer }`) are passed on to
+Options for `findFragment()`. Other options (like `{ layer }`) are passed on to
 `up.fragment.closest()` and `up.fragment.get()`.
 @internal
 */

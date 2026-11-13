@@ -14,7 +14,7 @@ import {
 } from './script.js'
 import type * as t from './fragment/types.js'
 export type * from './fragment/types.js'
-import { FragmentFinder } from './fragment/matching/fragment_finder.js'
+import { findFragment } from './fragment/matching/fragment_finder.js'
 import { destroyFragment } from './fragment/destroy_fragment.js'
 import { RenderJob } from './fragment/rendering/render_job.js'
 export { RenderJob }
@@ -353,11 +353,11 @@ export function getSmart(...args: any[]): any {
   // (1) If we don't have a root element we will use a context-sensitive lookup strategy
   //     that tries to match elements in the region of { origin } before going through
   //     the entire layer.
-  // (2) We must not pass a { document } option to up.FragmentFinder.
-  return new FragmentFinder({
+  // (2) We must not pass a { document } option to findFragment().
+  return findFragment({
     selector,
     ...u.pick(options, ['layer', 'match', 'origin', 'destroying']),
-  }).find()
+  })
 }
 
 export function getFirstDescendant(selector: string, options?: t.LookupOptions): HTMLElement | undefined

@@ -2,7 +2,7 @@
 
 Read this before you write internal code that looks up an element, and before you change
 [`Selector`](../../src/unpoly/fragment/matching/selector.ts),
-[`FragmentFinder`](../../src/unpoly/fragment/matching/fragment_finder.ts) or the lookup functions in
+[`findFragment()`](../../src/unpoly/fragment/matching/fragment_finder.ts) or the lookup functions in
 [`src/unpoly/fragment.ts`](../../src/unpoly/fragment.ts).
 
 The short version: **prefer `up.fragment.*` over native `querySelector()` when you are
@@ -58,14 +58,14 @@ particular is **not** automatic — it depends on which entry point you call.
 
 | Entry point | Engine | Region-aware? |
 |---|---|---|
-| `up.fragment.get(selector)` — no root | `FragmentFinder` | **Yes** |
+| `up.fragment.get(selector)` — no root | `findFragment()` | **Yes** |
 | `up.fragment.get(root, selector)` — with a root | `Selector` | No, deliberately |
 | `up.fragment.all()`, `.subtree()`, `.closest()`, `.matches()` | `Selector` | No |
 | `getFirstDescendant()` (fragment.ts) | `Selector` | No — this is the explicit "just the first match" entry point |
-| Render steps (`UpdateLayerPlan#_matchOldElements()`) | `FragmentFinder` | Yes |
-| Response matching (`ResponseDoc#select()`) | `FragmentFinder` | Yes, against a *rediscovered* origin |
+| Render steps (`UpdateLayerPlan#_matchOldElements()`) | `findFragment()` | Yes |
+| Response matching (`ResponseDoc#select()`) | `findFragment()` | Yes, against a *rediscovered* origin |
 
-So the two classes are layered, not parallel: **`FragmentFinder` is a strategy on top of
+So the two are layered, not parallel: **`findFragment()` is a strategy on top of
 `Selector`.** It decides *which* match to prefer, and delegates every actual match back
 down (through `up.fragment.closest()` and `getFirstDescendant()`).
 
@@ -219,7 +219,7 @@ decide which kind it is — a matcher belongs in `expandTargets()`, a step modif
 When a selector is ambiguous — three `.card` elements on the page — Unpoly prefers the one
 near the element the user interacted with. The user-facing rules are
 [resolving ambiguous selectors](../../src/unpoly/pages/targeting-fragments.md#ambiguous-selectors);
-the implementation is `FragmentFinder#find()`, which tries three strategies in order:
+the implementation is `findFragment()`, which tries three strategies in order:
 
 1. **Preferred elements.** If `{ preferOldElements }` was passed, reuse one — but only if it
    is still in the document *and* still matches the selector. This is how cache revalidation
@@ -244,7 +244,7 @@ the implementation is `FragmentFinder#find()`, which tries three strategies in o
 Region matching is **not** limited to the current page. `ResponseDoc` runs the same finder
 against the response document, using a *rediscovered* origin: it derives a selector for the
 origin and looks that up inside the response. If the origin can't be derived or re-found, the
-response lookup degrades to "first match" — which is why `FragmentFinder` takes a
+response lookup degrades to "first match" — which is why `findFragment()` takes a
 `{ document }` option at all. `:main` stays excluded on purpose, since a main target is by
 definition not resolved by proximity.
 

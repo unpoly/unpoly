@@ -6,61 +6,47 @@ import type * as t from '../types.js'
 
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
-export class FragmentFinder {
-  declare _options: t.FragmentFinderOptions
-  declare _origin?: Element
-  declare _selector: string
-  declare _document: Document | Element
-  declare _match: 'region' | 'first'
-  declare _preferOldElements?: Element[]
+// Unpoly works with HTML elements, see up.fragment.get().
+export function findFragment(options: t.FragmentFinderOptions): HTMLElement | undefined {
+  // Selector is a string, not an up.Selector
+  let { selector, origin, preferOldElements } = options
+  // This option is for matching fragments in detached content, as needed by up.ResponseDoc.
+  let document = options.document || window.document
+  let match = options.match ?? fragmentConfig.match
 
-  constructor(options: t.FragmentFinderOptions) {
-    this._options = options
-    this._origin = options.origin
-    // Selector is a string, not an up.Selector
-    this._selector = options.selector
-    // This option is for matching fragments in detached content, as needed by up.ResponseDoc.
-    this._document = options.document || window.document
-    this._match = options.match ?? fragmentConfig.match
-    this._preferOldElements = options.preferOldElements
+  return findInPreferredElements(selector, document, preferOldElements) || findInRegion(selector, origin, match, options) || findFirst(selector, document, options)
+}
+
+function findInPreferredElements(selector: string, document: Document | Element, preferOldElements?: Element[]): HTMLElement | undefined {
+  if (preferOldElements) {
+    return preferOldElements.find((preferOldElement) => document.contains(preferOldElement) && matches(preferOldElement, selector)) as HTMLElement
   }
+}
 
-  // Unpoly works with HTML elements, see up.fragment.get().
-  find(): HTMLElement | undefined {
-    return this._findInPreferredElements() || this._findInRegion() || this._findFirst()
+function findInRegion(selector: string, origin: Element | undefined, match: 'region' | 'first', options: t.FragmentFinderOptions): HTMLElement | undefined {
+  if (match === 'region' && !containsMainPseudo(selector) && origin?.isConnected) {
+    return findClosest(selector, origin, options) || findDescendantInRegion(selector, origin, options)
   }
+}
 
-  _findInPreferredElements(): HTMLElement | undefined {
-    if (this._preferOldElements) {
-      return this._preferOldElements.find((preferOldElement) => this._document.contains(preferOldElement) && matches(preferOldElement, this._selector)) as HTMLElement
-    }
-  }
+function findClosest(selector: string, origin: Element, options: t.FragmentFinderOptions): HTMLElement | undefined {
+  return closest(origin, selector, options)
+}
 
-  _findInRegion(): HTMLElement | undefined {
-    if (this._match === 'region' && !containsMainPseudo(this._selector) && this._origin?.isConnected) {
-      return this._findClosest(this._origin) || this._findDescendantInRegion(this._origin)
-    }
-  }
+function findDescendantInRegion(selector: string, origin: Element, options: t.FragmentFinderOptions): HTMLElement | undefined {
+  let simpleSelectors = splitTarget(selector)
 
-  _findClosest(origin: Element): HTMLElement | undefined {
-    return closest(origin, this._selector, this._options)
-  }
-
-  _findDescendantInRegion(origin: Element): HTMLElement | undefined {
-    let simpleSelectors = splitTarget(this._selector)
-
-    return u.findResult(simpleSelectors, (simpleSelector) => {
-      let parts = simpleSelector.match(DESCENDANT_SELECTOR)
-      if (parts) {
-        let parent = closest(origin, parts[1], this._options)
-        if (parent) {
-          return getFirstDescendant(parent, parts[2], this._options)
-        }
+  return u.findResult(simpleSelectors, (simpleSelector) => {
+    let parts = simpleSelector.match(DESCENDANT_SELECTOR)
+    if (parts) {
+      let parent = closest(origin, parts[1], options)
+      if (parent) {
+        return getFirstDescendant(parent, parts[2], options)
       }
-    })
-  }
+    }
+  })
+}
 
-  _findFirst(): HTMLElement | undefined {
-    return getFirstDescendant(this._document, this._selector, this._options)
-  }
+function findFirst(selector: string, document: Document | Element, options: t.FragmentFinderOptions): HTMLElement | undefined {
+  return getFirstDescendant(document, selector, options)
 }

@@ -10,7 +10,7 @@ import { printToStandard } from '../../log.js'
 import { hungrySteps, type HungrySteps } from '../../radio.js'
 import { FocusCapsule, getScrollTops, saveFocus, saveScroll } from '../../viewport.js'
 import type * as t from '../types.js'
-import { FragmentFinder } from '../matching/fragment_finder.js'
+import { findFragment } from '../matching/fragment_finder.js'
 import { LayerPlan } from './layer_plan.js'
 import { updateSteps } from './update_steps.js'
 import { finalizeRenderOptions } from './render_options.js'
@@ -158,12 +158,9 @@ export class UpdateLayerPlan extends LayerPlan {
 
   _matchOldElements(): void {
     this._steps = this._steps.filter((step) => {
-
-      const finder = new FragmentFinder(u.pick(step, ['selector', 'origin', 'layer', 'match', 'preferOldElements'] as const))
-
       // Try to find fragments matching step.selector within step.layer.
       // Note that step.oldElement might already have been set by up.radio.hungrySteps().
-      step.oldElement ||= finder.find()
+      step.oldElement ||= findFragment(u.pick(step, ['selector', 'origin', 'layer', 'match', 'preferOldElements'] as const))
       if (step.oldElement === e.getRoot()) throw new CannotTarget('Cannot swap <html>')
 
       if (step.oldElement) {
