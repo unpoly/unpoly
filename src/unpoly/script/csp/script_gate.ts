@@ -22,111 +22,97 @@ interface PolicyItem {
 // Options in an X-Up-Open-Layer header that start with "on", but take a selector instead of a callback.
 const NON_CALLBACK_KEYS = ['onAcceptedReload', 'onDismissedReload']
 
-export class ScriptGate {
-  declare _evalCallbackPolicy: EvalCallbackPolicy
-  declare _scriptElementPolicy: BodyScriptElementPolicy
-  declare _detachedAssetPolicy: DetachedAssetPolicy
-
-  constructor(cspInfo = CSPInfo.none()) {
-    // Only parse the page nonce once for adopting multiple items.
-    // TODO: Consider moving page none parsing to CSPInfo
+export function warnOfUnsafeCSP(cspInfo = CSPInfo.none()): void {
+  if (scriptConfig.cspWarnings) {
     let pageNonce = cspNonce()
-
-    this._evalCallbackPolicy = new EvalCallbackPolicy(pageNonce, cspInfo)
-    this._scriptElementPolicy = new BodyScriptElementPolicy(pageNonce, cspInfo)
-    this._detachedAssetPolicy = new DetachedAssetPolicy(pageNonce, cspInfo)
+    new EvalCallbackPolicy(pageNonce, cspInfo).warnOfUnsafeCSP()
+    new BodyScriptElementPolicy(pageNonce, cspInfo).warnOfUnsafeCSP()
   }
+}
 
-  warnOfUnsafeCSP(): void {
-    if (scriptConfig.cspWarnings) {
-      this._evalCallbackPolicy.warnOfUnsafeCSP()
-      this._scriptElementPolicy.warnOfUnsafeCSP()
-    }
-  }
+export function evalCallback(nonceableCallback: NonceableCallback, evalEnv: t.EvalEnv): any {
+  const policy = new EvalCallbackPolicy(cspNonce(), CSPInfo.none())
 
-  evalCallback(nonceableCallback: NonceableCallback, evalEnv: t.EvalEnv): any {
-    const policy = this._evalCallbackPolicy
-
-    // There are multiple reasons why we explicitly check if a callback is allowed,
-    // instead of relying on the document's CSP checks:
-    //
-    // (A) The user might have configured a blocking script policy in up.script.config.evalCallbackPolicy.
-    //     This policy might be stricter than the CSP, e.g. to prevent callbacks entirely.
-    // (B) While we proactively block scripts in new fragments, we may have unprocessed scripts
-    //     from the initial page load, or from an attacker that has some control over the HTML.
-    // (C) We might have a nonced callback, meaning we need to execute using a <script nonce> element.
-    //     With a viral strict-dynamic CSP the browser will happily let Unpoly execute *any* <script>,
-    //     even if a nonce is missing or incorrect. In this case we want to explicitly check for
-    //     a valid nonce. Otherwise an attacker could set an [up-on-loaded] callback with an incorrect nonce,
-    //     trigger <script nonce> execution and run arbitrary JavaScript.
-    if (policy.passesItem(nonceableCallback.nonce)) {
-      try {
-        return nonceableCallback.unsafeEval(evalEnv)
-      } catch (error) {
-        if (error instanceof EvalError) {
-          throw new Blocked(error.message)
-        } else {
-          throw error
-        }
-      }
-    } else {
-      // We don't rewrite the callback string in the DOM.
-      throw new Blocked('Blocked callback: ' + nonceableCallback.script)
-    }
-  }
-
-  adoptNewFragment(fragment: Element): void {
-    this._adoptScriptElements(fragment)
-    this._adoptAttrCallbacks(fragment)
-  }
-
-  adoptDetachedHeadAsset(asset: Element): void {
-    if (!isScript(asset)) return
-
-    // (A) These assets are not normally going to be inserted into the page, but may emit up:assets:changed.
-    // (B) We need to adopt script[nonce] attributes for the comparison, and in case the user wants to insert manually.
-    // (C) We don't block untrusted scripts for the same reason.
-    let item = new ScriptElementItem(asset)
-    this._detachedAssetPolicy.processItem(item)
-  }
-
-  adoptRenderOptionsFromHeader(object: u.PlainObject): void {
-    let policy = this._evalCallbackPolicy
-
-    for (let key of Object.keys(object)) {
-      let script = object[key]
-
-      // Any other on* key is a callback, so a mistyped key fails with "Unknown callback".
-      if (/^on[A-Z]/.test(key) && !NON_CALLBACK_KEYS.includes(key) && u.isString(script)) {
-        let item = new ObjectPropertyItem(object, key)
-        policy.processItem(item)
-        object[key] = parseRenderCallback(key, object[key])
+  // There are multiple reasons why we explicitly check if a callback is allowed,
+  // instead of relying on the document's CSP checks:
+  //
+  // (A) The user might have configured a blocking script policy in up.script.config.evalCallbackPolicy.
+  //     This policy might be stricter than the CSP, e.g. to prevent callbacks entirely.
+  // (B) While we proactively block scripts in new fragments, we may have unprocessed scripts
+  //     from the initial page load, or from an attacker that has some control over the HTML.
+  // (C) We might have a nonced callback, meaning we need to execute using a <script nonce> element.
+  //     With a viral strict-dynamic CSP the browser will happily let Unpoly execute *any* <script>,
+  //     even if a nonce is missing or incorrect. In this case we want to explicitly check for
+  //     a valid nonce. Otherwise an attacker could set an [up-on-loaded] callback with an incorrect nonce,
+  //     trigger <script nonce> execution and run arbitrary JavaScript.
+  if (policy.passesItem(nonceableCallback.nonce)) {
+    try {
+      return nonceableCallback.unsafeEval(evalEnv)
+    } catch (error) {
+      if (error instanceof EvalError) {
+        throw new Blocked(error.message)
+      } else {
+        throw error
       }
     }
+  } else {
+    // We don't rewrite the callback string in the DOM.
+    throw new Blocked('Blocked callback: ' + nonceableCallback.script)
   }
+}
 
-  _adoptScriptElements(root: Element): void {
-    const policy = this._scriptElementPolicy
+export function adoptNewFragment(fragment: Element, cspInfo = CSPInfo.none()): void {
+  // Only parse the page nonce once for adopting multiple items.
+  // TODO: Consider moving page nonce parsing to CSPInfo
+  let pageNonce = cspNonce()
+  let evalCallbackPolicy = new EvalCallbackPolicy(pageNonce, cspInfo)
+  let scriptElementPolicy = new BodyScriptElementPolicy(pageNonce, cspInfo)
 
-    for (let script of findScripts(root)) {
-      let item = new ScriptElementItem(script)
+  adoptScriptElements(fragment, scriptElementPolicy)
+  adoptAttrCallbacks(fragment, evalCallbackPolicy)
+}
+
+export function adoptDetachedHeadAsset(asset: Element, cspInfo = CSPInfo.none()): void {
+  if (!isScript(asset)) return
+
+  // (A) These assets are not normally going to be inserted into the page, but may emit up:assets:changed.
+  // (B) We need to adopt script[nonce] attributes for the comparison, and in case the user wants to insert manually.
+  // (C) We don't block untrusted scripts for the same reason.
+  let item = new ScriptElementItem(asset)
+  new DetachedAssetPolicy(cspNonce(), cspInfo).processItem(item)
+}
+
+export function adoptRenderOptionsFromHeader(object: u.PlainObject, cspInfo = CSPInfo.none()): void {
+  let policy = new EvalCallbackPolicy(cspNonce(), cspInfo)
+
+  for (let key of Object.keys(object)) {
+    let script = object[key]
+
+    // Any other on* key is a callback, so a mistyped key fails with "Unknown callback".
+    if (/^on[A-Z]/.test(key) && !NON_CALLBACK_KEYS.includes(key) && u.isString(script)) {
+      let item = new ObjectPropertyItem(object, key)
+      policy.processItem(item)
+      object[key] = parseRenderCallback(key, object[key])
+    }
+  }
+}
+
+function adoptScriptElements(root: Element, policy: Policy): void {
+  for (let script of findScripts(root)) {
+    let item = new ScriptElementItem(script)
+    policy.processItem(item)
+  }
+}
+
+function adoptAttrCallbacks(root: Element, policy: Policy): void {
+  // TODO: It is weird that we keep a list of callback options in render_options.ts, but the list of nonceable attrs is in up.script? Maybe at least move them together?
+  for (let attribute of scriptConfig.nonceableAttributes) {
+    let matches = e.subtree(root, e.attrSelector(attribute))
+    for (let element of matches) {
+      let item = new AttributeItem(element, attribute)
       policy.processItem(item)
     }
   }
-
-  _adoptAttrCallbacks(root: Element): void {
-    const policy = this._evalCallbackPolicy
-
-    // TODO: It is weird that we keep a list of callback options in render_options.ts, but the list of nonceable attrs is in up.script? Maybe at least move them together?
-    for (let attribute of scriptConfig.nonceableAttributes) {
-      let matches = e.subtree(root, e.attrSelector(attribute))
-      for (let element of matches) {
-        let item = new AttributeItem(element, attribute)
-        policy.processItem(item)
-      }
-    }
-  }
-
 }
 
 // The arguments of a policy's constructor, which its subclasses pass on.

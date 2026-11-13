@@ -14,7 +14,10 @@ import { CSPInfo } from './script/csp/csp_info.js'
 export { CSPInfo }
 import { NonceableCallback } from './script/csp/nonceable_callback.js'
 export { NonceableCallback }
-import { ScriptGate } from './script/csp/script_gate.js'
+import { evalCallback } from './script/csp/script_gate.js'
+export {
+  adoptDetachedHeadAsset, adoptNewFragment, adoptRenderOptionsFromHeader, warnOfUnsafeCSP,
+} from './script/csp/script_gate.js'
 import { HelloFragment } from './script/hello_fragment.js'
 
 
@@ -294,18 +297,6 @@ export function isScript(value: Element): value is HTMLScriptElement {
   return scriptConfig.matches(value, 'scriptSelectors')
 }
 
-export function adoptNewFragment(fragment: Element, cspInfo?: CSPInfo): void {
-  new ScriptGate(cspInfo).adoptNewFragment(fragment)
-}
-
-export function adoptDetachedHeadAsset(script: Element, cspInfo?: CSPInfo): void {
-  new ScriptGate(cspInfo).adoptDetachedHeadAsset(script)
-}
-
-export function adoptRenderOptionsFromHeader(renderOptions: u.PlainObject, cspInfo?: CSPInfo): void {
-  new ScriptGate(cspInfo).adoptRenderOptionsFromHeader(renderOptions)
-}
-
 export function callbackAttr(element: Element, attrName: string, parseOpts?: t.ParseCallbackOptions): u.AnyFunction | undefined {
   return e.parseAttr(element, attrName, (code) => {
     let fn = parseCallback(code, parseOpts)
@@ -327,17 +318,13 @@ export function parseCallback(code: string, { argNames = ['event'], expandObject
 
     const nonceableCallback = NonceableCallback.fromCallbackString(code)
     const evalEnv = { thisContext: this, argNames: callArgNames, argValues }
-    return new ScriptGate().evalCallback(nonceableCallback, evalEnv)
+    return evalCallback(nonceableCallback, evalEnv)
   }
 }
 
 export const cspNonce = mockable(function cspNonce(): string | undefined {
   return u.evalOption(scriptConfig.cspNonce)
 })
-
-export function warnOfUnsafeCSP(cspInfo?: CSPInfo): void {
-  new ScriptGate(cspInfo).warnOfUnsafeCSP()
-}
 
 /*
 Resets the list of registered compiler directives to the
