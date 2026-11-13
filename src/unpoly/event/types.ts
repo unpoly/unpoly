@@ -196,7 +196,7 @@ or `false` to log nothing. When missing, the event type is logged.
 export type EmitLogOption = string | any[] | false
 
 /**
-Everything an `up.EventEmitter` needs to know. `up.EventEmitter.fromEmitArgs()` builds this
+Everything `emitParsed()` needs to know. `parseEmitArgs()` builds this
 from the many ways `up.emit()` can be called.
 @internal
 */

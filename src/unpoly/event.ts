@@ -9,8 +9,8 @@ import { mockable } from './mockable.js'
 import { registerDestructor } from './script.js'
 import type * as t from './event/types.js'
 export type * from './event/types.js'
-import { EventEmitter } from './event/event_emitter.js'
-export { EventEmitter }
+import { assertParsedEmitted, emitParsed, parseEmitArgs } from './event/event_emitter.js'
+export { assertParsedEmitted, emitParsed, parseEmitArgs }
 import { UpEventListener } from './event/event_listener.js'
 export { UpEventListener }
 import { EventListenerGroup } from './event/event_listener_group.js'
@@ -56,10 +56,6 @@ function buildListenerGroup(args: any[]): EventListenerGroup {
   return EventListenerGroup.fromBindArgs(args)
 }
 
-function buildEmitter(args: any[]): EventEmitter {
-  return EventEmitter.fromEmitArgs(args)
-}
-
 export function emit<T extends string>(type: T, props?: t.EmitProps): t.EmittedEvent<T>
 export function emit<T extends string>(target: t.EmitTarget, type: T, props?: t.EmitProps): t.EmittedEvent<T>
 export function emit<T extends string>(plan: t.EventPlan<T>): t.EmittedEvent<T>
@@ -67,7 +63,7 @@ export function emit<T extends string>(target: t.EmitTarget, plan: t.EventPlan<T
 export function emit<E extends Event>(event: E, options?: t.EmitProps): E
 export function emit<E extends Event>(target: t.EmitTarget, event: E, options?: t.EmitProps): E
 export function emit(...args: any[]): Event {
-  return buildEmitter(args).emit()
+  return emitParsed(parseEmitArgs(args))
 }
 
 export function build<T extends string>(type: T, props?: u.PlainObject): t.EmittedEvent<T>
@@ -83,7 +79,7 @@ export function build(...args: any[]): Event {
 }
 
 export function assertEmitted(...args: any[]): void {
-  return buildEmitter(args).assertEmitted()
+  return assertParsedEmitted(parseEmitArgs(args))
 }
 
 export function onEscape(listener: (event: KeyboardEvent) => any): t.UnbindFn {

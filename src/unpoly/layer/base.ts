@@ -2,8 +2,9 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { Aborted, NotImplemented } from '../error.js'
 import {
-  EventEmitter, EventListenerGroup, on, type EmitProps, type EmittedEvent, type EventPlan,
-  type EventTypes, type ListenerArgs, type ObservedEvent, type UnbindFn,
+  emitParsed, EventListenerGroup, on, parseEmitArgs, type EmitProps, type EmittedEvent,
+  type EventEmitterOptions, type EventPlan, type EventTypes, type ListenerArgs, type ObservedEvent,
+  type UnbindFn,
 } from '../event.js'
 import { type RenderOptions } from '../fragment.js'
 import {
@@ -213,8 +214,8 @@ export class Layer {
     return !hittableElement || this.contains(hittableElement)
   }
 
-  _buildEventEmitter(args: any[]): EventEmitter {
-    return EventEmitter.fromEmitArgs(args, { layer: this })
+  _parseEmitArgs(args: any[]): EventEmitterOptions {
+    return parseEmitArgs(args, { layer: this })
   }
 
   emit<T extends string>(eventType: T, props?: EmitProps): EmittedEvent<T>
@@ -223,7 +224,7 @@ export class Layer {
   emit<T extends string>(target: EventTarget, eventType: T, props?: EmitProps): EmittedEvent<T>
   emit<E extends Event>(target: EventTarget, event: E, options?: EmitProps): E
   emit(...args: unknown[]): Event {
-    return this._buildEventEmitter(args).emit()
+    return emitParsed(this._parseEmitArgs(args))
   }
 
   saveHistory(): void {

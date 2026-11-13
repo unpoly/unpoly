@@ -29,7 +29,7 @@ import { OptionsParser } from './element/options_parser.js'
 import { Config, newConfig } from './util/config.js'
 import { assertConfirmed, popCookie, submitForm } from './browser.js'
 import { fail, guard, guardFn } from './error.js'
-import { assertEmitted, EventEmitter, isSyntheticClick, UpEventListener } from './event.js'
+import { assertEmitted, isSyntheticClick, parseEmitArgs, UpEventListener } from './event.js'
 import {
   disableContainerTemp, findGroupSolution, getGroupSelectors, readFieldDisabled,
   submitButtonOverrides, Switcher, trackFields,
@@ -141,6 +141,7 @@ export const api = {
 
     assertEmitted,
     isSyntheticClick,
+    parseEmitArgs,
 
     csrfParam,
     csrfToken,
@@ -209,7 +210,6 @@ export const api = {
     FIFOCache,
     Rect,
     UpURLPattern,
-    EventEmitter,
     UpEventListener,
     CSPInfo,
     NonceableCallback,

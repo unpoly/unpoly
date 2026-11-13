@@ -1,6 +1,9 @@
 import * as u from '../util.js'
 import { Aborted, Offline } from '../error.js'
-import { EventEmitter, type EmitProps, type EmittedEvent } from '../event.js'
+import {
+  assertParsedEmitted, emitParsed, parseEmitArgs, type EmitProps, type EmittedEvent,
+  type EventEmitterOptions,
+} from '../event.js'
 import { Params } from '../form.js'
 import { getSmart, parseTargetSteps, splitTarget, type RenderOptions } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
@@ -514,12 +517,12 @@ export class UpRequest {
     return new UpResponse(responseAttrs)
   }
 
-  _buildEventEmitter(args: any[]): EventEmitter {
+  _parseEmitArgs(args: any[]): EventEmitterOptions {
     // We prefer emitting request-related events on the targeted layer.
     // This way listeners can observe event-related events on a given layer.
     // This request has an optional { layer } attribute, which is used by
-    // EventEmitter.
-    return EventEmitter.fromEmitArgs(args, {
+    // parseEmitArgs().
+    return parseEmitArgs(args, {
       layer: this.bindLayer,
       request: this,
       origin: this.origin
@@ -529,11 +532,11 @@ export class UpRequest {
   emit<T extends string>(eventType: T, props?: EmitProps): EmittedEvent<T>
   emit<E extends Event>(event: E, options?: EmitProps): E
   emit(...args: any[]): Event {
-    return this._buildEventEmitter(args).emit()
+    return emitParsed(this._parseEmitArgs(args))
   }
 
   assertEmitted(...args: any[]): void {
-    this._buildEventEmitter(args).assertEmitted()
+    assertParsedEmitted(this._parseEmitArgs(args))
   }
 
   toString(): string {
