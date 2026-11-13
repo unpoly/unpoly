@@ -8,7 +8,7 @@ import { type FragmentHungryEvent } from '../radio.js'
 import { type CSPInfo } from '../script.js'
 import { type PreviewFn } from '../status.js'
 import { type FocusCapsule } from '../viewport.js'
-import { type RenderResult } from './render/render_result.js'
+import { type RenderResult } from './rendering/render_result.js'
 
 /**
 What to render: a target selector, an element to derive a selector from, or several alternatives.

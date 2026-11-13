@@ -1,18 +1,18 @@
-import * as u from '../../../util.js'
-import * as e from '../../../element.js'
-import { fail } from '../../../error.js'
+import * as u from '../../util.js'
+import * as e from '../../element.js'
+import { fail } from '../../error.js'
 import {
   emitFragmentDestroyed, emitFragmentKept, findKeepPlan, fragmentConfig, markFragmentAsDestroying,
   setReloadAttrs,
-} from '../../../fragment.js'
-import { type Layer } from '../../../layer.js'
-import { animate, swap } from '../../../motion.js'
-import { block, clean, hello } from '../../../script.js'
-import { getViewportSubtree } from '../../../viewport.js'
-import type * as t from '../../types.js'
-import { FragmentFocus } from '../fragment_focus.js'
-import { FragmentScrolling } from '../fragment_scrolling.js'
-import { type ResponseDoc } from '../response_doc.js'
+} from '../../fragment.js'
+import { type Layer } from '../../layer.js'
+import { animate, swap } from '../../motion.js'
+import { block, clean, hello } from '../../script.js'
+import { getViewportSubtree } from '../../viewport.js'
+import type * as t from '../types.js'
+import { FragmentFocus } from './fragment_focus.js'
+import { FragmentScrolling } from './fragment_scrolling.js'
+import { type ResponseDoc } from './response_doc.js'
 
 // What inserting a render step produced, and what remains to be done after all steps were inserted.
 interface StepInsertion {

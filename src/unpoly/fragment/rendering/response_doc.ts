@@ -8,7 +8,7 @@ import {
   adoptDetachedHeadAsset, adoptNewFragment, findAssets, warnOfUnsafeCSP, type CSPInfo,
 } from '../../script.js'
 import type * as t from '../types.js'
-import { FragmentFinder } from '../fragment_finder.js'
+import { FragmentFinder } from '../matching/fragment_finder.js'
 
 export class ResponseDoc {
   // A parsed Document for a full HTML document, or an <up-document> element wrapping a fragment.

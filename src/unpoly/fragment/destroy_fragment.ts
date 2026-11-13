@@ -1,11 +1,11 @@
 import {
   abortFragment, emitFragmentDestroyed, markFragmentAsDestroying,
-} from '../../../fragment.js'
-import { layerStack } from '../../../layer.js'
-import { animate, type AnimationValue } from '../../../motion.js'
-import { clean } from '../../../script.js'
-import type * as t from '../../types.js'
-import { chainCallbacks } from '../render_options.js'
+} from '../fragment.js'
+import { layerStack } from '../layer.js'
+import { animate, type AnimationValue } from '../motion.js'
+import { clean } from '../script.js'
+import type * as t from './types.js'
+import { chainCallbacks } from './rendering/render_options.js'
 
 // Options for up.destroy().
 interface DestroyFragmentOptions {

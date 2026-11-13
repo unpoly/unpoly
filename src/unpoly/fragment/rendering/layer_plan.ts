@@ -1,12 +1,12 @@
-import * as u from '../../../util.js'
-import { emit, type EventPlan } from '../../../event.js'
-import { type Layer } from '../../../layer.js'
-import { type UpResponse } from '../../../network.js'
-import { type HungrySteps } from '../../../radio.js'
-import type * as t from '../../types.js'
+import * as u from '../../util.js'
+import { emit, type EventPlan } from '../../event.js'
+import { type Layer } from '../../layer.js'
+import { type UpResponse } from '../../network.js'
+import { type HungrySteps } from '../../radio.js'
+import type * as t from '../types.js'
 import { updateSteps } from './update_steps.js'
-import { RenderResult } from '../render_result.js'
-import { type ResponseDoc } from '../response_doc.js'
+import { RenderResult } from './render_result.js'
+import { type ResponseDoc } from './response_doc.js'
 
 // A plan to add new content to a layer: by updating it (UpdateLayerPlan) or by opening it (OpenLayerPlan).
 // renderFromContent() calls match() on its plans in order, then render() on the first one that matches the response.

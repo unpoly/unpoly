@@ -1,7 +1,7 @@
-import * as u from '../util.js'
-import { on, type UnbindFn } from '../event.js'
-import { afterMutate } from '../fragment.js'
-import type * as t from './types.js'
+import * as u from '../../util.js'
+import { on, type UnbindFn } from '../../event.js'
+import { afterMutate } from '../../fragment.js'
+import type * as t from '../types.js'
 
 export class SelectorTracker {
   declare _selectFn: () => Iterable<Element>

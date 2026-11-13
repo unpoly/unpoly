@@ -14,19 +14,19 @@ import {
 } from './script.js'
 import type * as t from './fragment/types.js'
 export type * from './fragment/types.js'
-import { FragmentFinder } from './fragment/fragment_finder.js'
-import { destroyFragment } from './fragment/render/change/destroy_fragment.js'
-import { RenderJob } from './fragment/render/render_job.js'
+import { FragmentFinder } from './fragment/matching/fragment_finder.js'
+import { destroyFragment } from './fragment/destroy_fragment.js'
+import { RenderJob } from './fragment/rendering/render_job.js'
 export { RenderJob }
 export {
   chainCallbacks, deriveFailOptions, NO_INPUT_INTERFERENCE, NO_PREVIEWS, parseRenderCallback,
   preprocessRenderOptions, renderCallbackAttr,
-} from './fragment/render/render_options.js'
-import { type RenderResult } from './fragment/render/render_result.js'
+} from './fragment/rendering/render_options.js'
+import { type RenderResult } from './fragment/rendering/render_result.js'
 export { type RenderResult }
-export { ResponseDoc } from './fragment/render/response_doc.js'
-import { Selector } from './fragment/selector.js'
-import { SelectorTracker } from './fragment/selector_tracker.js'
+export { ResponseDoc } from './fragment/rendering/response_doc.js'
+import { Selector } from './fragment/matching/selector.js'
+import { SelectorTracker } from './fragment/matching/selector_tracker.js'
 export { SelectorTracker }
 
 // Properties Unpoly sets on fragments.

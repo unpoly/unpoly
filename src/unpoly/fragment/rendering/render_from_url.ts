@@ -1,16 +1,16 @@
-import * as u from '../../../util.js'
-import { Offline } from '../../../error.js'
-import { render, toFailKey } from '../../../fragment.js'
-import { canPushState, isHistoryEnabled } from '../../../history.js'
-import { printToStandard } from '../../../log.js'
+import * as u from '../../util.js'
+import { Offline } from '../../error.js'
+import { render, toFailKey } from '../../fragment.js'
+import { canPushState, isHistoryEnabled } from '../../history.js'
+import { printToStandard } from '../../log.js'
 import {
   loadPage, makeRequest, UpResponse, type RequestOptions, type UpRequest,
-} from '../../../network.js'
-import type * as t from '../../types.js'
+} from '../../network.js'
+import type * as t from '../types.js'
 import { preflightPropsFromContent } from './render_from_content.js'
 import { renderFromResponse } from './render_from_response.js'
-import { deriveFailOptions } from '../render_options.js'
-import { type RenderResult } from '../render_result.js'
+import { deriveFailOptions } from './render_options.js'
+import { type RenderResult } from './render_result.js'
 
 // The options for the request of renderFromURL(): the render options plus the preflight props
 // of the success and fail options.
