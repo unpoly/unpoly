@@ -106,8 +106,9 @@ module (a file with exported functions and private helpers), and a class only wh
 - callers keep an object and call it more than once, or at different times;
 - several instances live at the same time, each with its own state;
 - subclasses override parts of its behavior;
-- it's a singleton with mutable state. Reset it by replacing the instance, so state added
-  later can't be forgotten.
+- it's a singleton with mutable state. Initialize its state only in a `reset()` method, which
+  the constructor calls and which runs on `up:framework:reset`. Teardown, like closing overlays
+  or finishing animations, comes first in `reset()`.
 
 A one-shot computation is a function, even when its helpers share values: pass each helper
 the values it needs. Keep a class only when most helpers need most of the same values.
