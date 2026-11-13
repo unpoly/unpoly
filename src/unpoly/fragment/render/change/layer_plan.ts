@@ -5,7 +5,7 @@ import { type UpResponse } from '../../../network.js'
 import { type HungrySteps } from '../../../radio.js'
 import type * as t from '../../types.js'
 import { Change } from './change.js'
-import { UpdateSteps } from './update_steps.js'
+import { updateSteps } from './update_steps.js'
 import { RenderResult } from '../render_result.js'
 import { type ResponseDoc } from '../response_doc.js'
 
@@ -86,7 +86,7 @@ export abstract class LayerPlan extends Change {
     // (1) ... use the discarded content for hungry elements on other layers that have [up-if-layer=any].
     // (2) ... see updated hungry elements on other layers in onDismissed/onAccepted handlers.
     let steps = this._getHungrySteps().other
-    return new UpdateSteps({ steps }).execute(responseDoc)
+    return updateSteps(responseDoc, steps)
   }
 
   // TODO: Consider moving this to up.Layer

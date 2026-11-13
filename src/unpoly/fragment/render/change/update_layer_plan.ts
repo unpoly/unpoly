@@ -12,7 +12,7 @@ import { FocusCapsule, getScrollTops, saveFocus, saveScroll } from '../../../vie
 import type * as t from '../../types.js'
 import { FragmentFinder } from '../../fragment_finder.js'
 import { LayerPlan } from './layer_plan.js'
-import { UpdateSteps } from './update_steps.js'
+import { updateSteps } from './update_steps.js'
 import { RenderOptions } from '../render_options.js'
 import { type ResponseDoc } from '../response_doc.js'
 
@@ -131,7 +131,7 @@ export class UpdateLayerPlan extends LayerPlan {
     // Change history before compilation, so new fragments see the new location.
     this.layer.updateHistory(this._getEffectiveHistoryOptions())
 
-    return new UpdateSteps({ steps: this._steps, noneOptions: this.options }).execute(responseDoc)
+    return updateSteps(responseDoc, this._steps, this.options)
   }
 
   _matchPreflight(): void {
@@ -142,7 +142,7 @@ export class UpdateLayerPlan extends LayerPlan {
   _matchPostflight(responseDoc: ResponseDoc): void {
     // (1) For each step, find a `step.newElement` that matches both in this.layer
     //     and in the response document.
-    // (2) Match newElements here instead of relying on UpdateSteps to
+    // (2) Match newElements here instead of relying on updateSteps() to
     //     do it later. This way we will throw up.CannotMatch early, and our caller
     //     renderFromContent() knows that this plan is not applicable. It can then
     //     try a fallback plan.
