@@ -1,5 +1,5 @@
 // Adds members to up.Layer that core doesn't declare, so they exist only with unpoly-migrate.
-declare module '../../unpoly/layer/base.js' {
+declare module '../../unpoly/layer/layer.js' {
   interface Layer {
     isOpen(): boolean
     isClosed(): boolean

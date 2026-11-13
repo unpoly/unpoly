@@ -5,7 +5,7 @@ import { on } from './event.js'
 import { chainCallbacks, render, type RenderOptions } from './fragment.js'
 import type * as t from './layer/types.js'
 export type * from './layer/types.js'
-import { Layer } from './layer/base.js'
+import { Layer } from './layer/layer.js'
 export { Layer }
 import { LayerStack } from './layer/layer_stack.js'
 import { bodyShifter } from './viewport.js'

@@ -1,7 +1,7 @@
 import * as u from '../util.js'
 import { buildLayer } from '../layer.js'
 import type * as t from './types.js'
-import { type Layer } from './base.js'
+import { type Layer } from './layer.js'
 import { LayerLookup } from './layer_lookup.js'
 
 export class LayerStack {
