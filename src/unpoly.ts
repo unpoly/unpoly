@@ -65,7 +65,7 @@ import * as responseClass from './unpoly/network/response.js'
 import * as renderJobClass from './unpoly/fragment/rendering/render_job.js'
 import * as renderResultClass from './unpoly/fragment/rendering/render_result.js'
 import { RootLayer } from './unpoly/layer/root_layer.js'
-import { ModalLayer, PopupLayer, DrawerLayer, CoverLayer } from './unpoly/layer/overlay_modes.js'
+import { ModalLayer, PopupLayer, DrawerLayer, CoverLayer } from './unpoly/layer/overlay.js'
 // up.internal, for the specs and unpoly-migrate. Imported last, so it doesn't change the order
 // in which modules are evaluated.
 import * as internal from './unpoly/internal.js'
