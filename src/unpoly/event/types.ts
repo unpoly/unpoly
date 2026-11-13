@@ -1,7 +1,7 @@
 import * as u from '../util.js'
 import { type LayerReference } from '../fragment.js'
 import { type Layer } from '../layer.js'
-import { type UpEventListener } from './event_listener.js'
+import { type UpEventListener } from './listeners.js'
 
 /**
 An event emitted by Unpoly.

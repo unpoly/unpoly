@@ -9,12 +9,10 @@ import { mockable } from './mockable.js'
 import { registerDestructor } from './script.js'
 import type * as t from './event/types.js'
 export type * from './event/types.js'
-import { assertEventEmitted, emitEvent, parseEmitArgs } from './event/event_emitter.js'
+import { assertEventEmitted, emitEvent, parseEmitArgs } from './event/emission.js'
 export { assertEventEmitted, emitEvent, parseEmitArgs }
-import { UpEventListener } from './event/event_listener.js'
-export { UpEventListener }
-import { bindListeners, parseBindArgs, unbindListeners } from './event/event_listener_group.js'
-export { bindListeners, parseBindArgs, unbindListeners }
+import { UpEventListener, bindListeners, parseBindArgs, unbindListeners } from './event/listeners.js'
+export { UpEventListener, bindListeners, parseBindArgs, unbindListeners }
 
 function reset(): void {
   // Resets the list of registered event listeners to the

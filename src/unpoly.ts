@@ -158,7 +158,7 @@ for (let mode of layerModes) {
 // effects before they were ES modules. All installs run before `framework.onEvaled()` below,
 // while `isEvaling()` is still true. Event listeners, compilers, macros and registry
 // entries created now are marked as defaults (`isDefault`), which a reset between specs keeps
-// (see event_listener.ts, framework/registry.ts, script.ts).
+// (see event/listeners.ts, framework/registry.ts, script.ts).
 //
 // Some things already happen when a module is evaluated, before any install: a `newConfig()`
 // builds its defaults and listens for `up:framework:reset`, and a few namespaces create helper
