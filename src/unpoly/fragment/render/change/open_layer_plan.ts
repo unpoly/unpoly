@@ -20,7 +20,7 @@ export class OpenLayerPlan extends LayerPlan {
   declare layer: Overlay
   declare _origin?: Element
   declare _baseLayer: Layer
-  // Set by _matchPostflight(), which throws when there is no content.
+  // Set by match(), which throws when there is no content.
   declare _content: HTMLElement
 
   // renderFromContent() has turned { target } into a selector string.
@@ -62,7 +62,7 @@ export class OpenLayerPlan extends LayerPlan {
     }
   }
 
-  _matchPostflight(responseDoc: ResponseDoc): void {
+  match(responseDoc: ResponseDoc): void {
     if (this.target === ':none') {
       this._content = document.createElement('up-none')
     } else {

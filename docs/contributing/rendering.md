@@ -88,7 +88,7 @@ stage. Its helpers are private to the module and get what they need as arguments
 
 The *plans* (`UpdateLayerPlan`, `OpenLayerPlan`) are classes: a plan is asked more than once,
 and each fills in the hooks of its base class `LayerPlan`. A plan implements
-`execute(responseDoc, onApplicable)` **and** `getPreflightProps()`, and inherits `execute()`
+`match(responseDoc)` **and** `getPreflightProps()`, and inherits `render(responseDoc)`
 from `LayerPlan`. The swaps a plan ends with are a module function again, `updateSteps()`.
 
 `renderFromURL()` carries more than the table suggests. It derives the request from the
@@ -107,8 +107,12 @@ options (see preflight below), owns preloading, and turns a failed network into
   → plan 2: update 'main' in the current layer
 ```
 
-It then tries each plan in turn. A plan that cannot find its element throws
-`up.CannotMatch`, which is the signal to try the next one; any other error aborts the pass.
+It then calls `match(responseDoc)` on each plan in turn. A plan that cannot find its element
+throws `up.CannotMatch`, which is the signal to try the next one; any other error aborts the pass.
+Matching does not change the page, so a discarded plan leaves it untouched.
+The first plan that matches is rendered with `render(responseDoc)`. Once that has started to
+change the page there is no going back: any error from `render()` propagates, even an
+`up.CannotMatch`, and no other plan is tried.
 When a fallback wins, Unpoly logs it — that log line is usually the fastest way to
 understand a surprising update:
 
@@ -134,8 +138,10 @@ Matching happens **twice**, and this is the distinction worth internalising:
   This decides what to request, which requests to abort, and whether the plan is viable at
   all. An unmatched step is dropped if it is optional (`foo:maybe`, or a hungry step);
   otherwise it throws `up.CannotMatch` and the plan is discarded.
-- **Postflight** (`_matchPostflight()`), against the response document: which new elements
+- **Postflight** (`match()`), against the response document: which new elements
   did the server actually send? Steps whose new element is missing are dropped or fail here.
+  This is also where hungry steps on the plan's layer join, and where `up:fragment:hungry`
+  is emitted.
 
 "The response document" is a [`ResponseDoc`](../../src/unpoly/fragment/render/response_doc.ts),
 and it does more than parse HTML. It matches steps against itself (`selectSteps()`), adopts
@@ -169,10 +175,10 @@ task, but an exception after inserting rejects `up.RenderResult#finished` instea
 calls the internal `swap()` (motion.ts), which inserts now and returns a function that starts the
 transition later; `up.morph()` is just both calls in a row.
 
-`LayerPlan` is the base class of both plans. Its `execute()` matches the response
-(`_matchPostflight()`), lets `OpenLayerPlan` create its overlay (`_prepareLayer()`), and
-renders the plan's own layer (`_renderOwnLayer()`), then the other layers. It also honours a
-server's request to accept or dismiss a layer. Both `updateSteps()` and `OpenLayerPlan` stamp each new fragment with the
+`LayerPlan` is the base class of both plans. Its `render()` lets `OpenLayerPlan` create
+its overlay (`_prepareLayer()`), and renders the plan's own layer (`_renderOwnLayer()`), then
+the other layers. Matching the response is not part of it: `renderFromContent()` has called
+`match()` before. It also honours a server's request to accept or dismiss a layer. Both `updateSteps()` and `OpenLayerPlan` stamp each new fragment with the
 `[up-source]`, `[up-time]` and `[up-etag]` attributes that later reloads and revalidation
 depend on (`setReloadAttrs()` in fragment.ts).
 

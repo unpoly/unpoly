@@ -9,7 +9,7 @@ import { RenderResult } from '../render_result.js'
 import { type ResponseDoc } from '../response_doc.js'
 
 // A plan to add new content to a layer: by updating it (UpdateLayerPlan) or by opening it (OpenLayerPlan).
-// renderFromContent() tries its plans in order and renders the first one that matches the response.
+// renderFromContent() calls match() on its plans in order, then render() on the first one that matches the response.
 export abstract class LayerPlan {
   declare options: t.RenderOptions
 
@@ -34,7 +34,10 @@ export abstract class LayerPlan {
 
   // Finds the new content in the response. Throws up.CannotMatch when it isn't there,
   // so renderFromContent() knows that this plan is not applicable, and can try the next plan.
-  abstract _matchPostflight(responseDoc: ResponseDoc): void
+  // Must not change the page, as a later plan may still render instead, and renderFromContent()
+  // calls it outside of mutate(). (UpdateLayerPlan emits up:fragment:hungry here, whose
+  // listeners decide whether a hungry element is updated.)
+  abstract match(responseDoc: ResponseDoc): void
 
   // Renders the matched content into this.layer.
   abstract _renderOwnLayer(responseDoc: ResponseDoc): t.PartialRenderResult[]
@@ -42,13 +45,9 @@ export abstract class LayerPlan {
   // The [up-hungry] steps for this render pass, on this.layer and on other layers.
   abstract _getHungrySteps(): HungrySteps
 
-  execute(responseDoc: ResponseDoc, onApplicable: () => void): RenderResult {
-    this._matchPostflight(responseDoc)
-
-    // If our steps can be matched, renderFromContent() wants a chance to some final
-    // preparations before we start rendering.
-    onApplicable()
-
+  // Renders the content that match() found. From here on the plan changes the page,
+  // so any error propagates instead of trying the next plan.
+  render(responseDoc: ResponseDoc): RenderResult {
     // OpenLayerPlan creates its overlay here, so this.layer is only set after this call.
     this._prepareLayer()
 
@@ -75,14 +74,14 @@ export abstract class LayerPlan {
     }
   }
 
-  // Runs after onApplicable() and before we listen to this.layer closing.
+  // Runs first in render(), before we listen to this.layer closing.
   _prepareLayer(): void {
   }
 
   _renderOtherLayers(responseDoc: ResponseDoc): t.PartialRenderResult[] {
     // We execute steps on other layers after this layer. However, if the render pass ends up
     // closing this layer (e.g. by reaching a close condition or X-Up-Accept-Layer), we execute them
-    // before the layer closes (see execute()). This way we can:
+    // before the layer closes (see render()). This way we can:
     //
     // (1) ... use the discarded content for hungry elements on other layers that have [up-if-layer=any].
     // (2) ... see updated hungry elements on other layers in onDismissed/onAccepted handlers.

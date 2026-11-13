@@ -139,7 +139,7 @@ export class UpdateLayerPlan extends LayerPlan {
     this._compressNestedSteps()
   }
 
-  _matchPostflight(responseDoc: ResponseDoc): void {
+  match(responseDoc: ResponseDoc): void {
     // (1) For each step, find a `step.newElement` that matches both in this.layer
     //     and in the response document.
     // (2) Match newElements here instead of relying on updateSteps() to

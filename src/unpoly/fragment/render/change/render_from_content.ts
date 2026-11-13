@@ -9,7 +9,6 @@ import type * as t from '../../types.js'
 import { type LayerPlan } from './layer_plan.js'
 import { OpenLayerPlan } from './open_layer_plan.js'
 import { UpdateLayerPlan } from './update_layer_plan.js'
-import { type RenderResult } from '../render_result.js'
 import { ResponseDoc } from '../response_doc.js'
 
 // Renders content that is already known (a string, an element or a response text), with
@@ -68,30 +67,19 @@ export function renderFromContent(options: t.RenderOptions): any {
   improveOptionsFromResponseDoc(options, responseDoc)
   let plans = getPlans(options, layers)
 
-  // Set by the onApplicable callback below, once a plan starts to change the page.
-  let planApplied = false
-
-  let executePlan = (matchedPlan: LayerPlan): RenderResult => {
-    // Group compilation and emission of up:fragment:inserted into a mutation block.
-    // This allows up.SelectorTracker to only sync once after the mutation, and
-    // ignore any events in between.
-    return mutate(() =>
-      matchedPlan.execute(responseDoc, () => {
-        onPlanApplicable(matchedPlan, plans[0], responseDoc, options)
-        // From here on the plan changes the page.
-        planApplied = true
-      })
-    )
-  }
-
-  return seekPlan(plans, executePlan, () => planApplied)
+  // A plan that throws up.CannotMatch in match() is not applicable, and we try the next plan.
+  let plan = seekPlan(plans, (plan) => { plan.match(responseDoc); return plan })
     || cannotMatchTarget('Could not find common target in current page and response', plans, layers, options)
-}
 
-function isApplicablePlanError(error: any, planApplied: boolean): boolean {
-  // (1) Only an up.CannotMatch means "this plan doesn't fit, try the next one".
-  // (2) Once a plan has started to change the page, we cannot try another plan on top of it.
-  return !(error instanceof CannotMatch) || planApplied
+  // Group compilation and emission of up:fragment:inserted into a mutation block.
+  // This allows up.SelectorTracker to only sync once after the mutation, and
+  // ignore any events in between.
+  return mutate(() => {
+    onPlanApplicable(plan, plans[0], responseDoc, options)
+    // Once a plan has started to change the page, we cannot try another plan on top of it.
+    // Hence any error from here on propagates, including an up.CannotMatch.
+    return plan.render(responseDoc)
+  })
 }
 
 // Final preparations before elements are being changed.
@@ -198,9 +186,9 @@ function cannotMatchLayer(): never {
   throw new CannotMatch('Could not find a layer to render in. You may have passed an unmatchable layer reference, or a detached element.')
 }
 
-// Without an isPlanApplied() function no plan ever changes the page, as in preflight, which only
-// asks the plans for their props.
-function seekPlan<T>(plans: LayerPlan[], fn: (plan: LayerPlan) => T, isPlanApplied?: () => boolean): T | undefined {
+// Returns what fn() returns for the first plan that doesn't throw up.CannotMatch.
+// fn() must not change the page, so we can try the next plan.
+function seekPlan<T>(plans: LayerPlan[], fn: (plan: LayerPlan) => T): T | undefined {
   for (let plan of plans) {
     try {
       // A return statement stops iteration of a vanilla for loop,
@@ -208,7 +196,7 @@ function seekPlan<T>(plans: LayerPlan[], fn: (plan: LayerPlan) => T, isPlanAppli
       return fn(plan)
     } catch (error) {
       // Re-throw any unexpected type of error, but ignore up.CannotMatch to try the next plan.
-      if (isApplicablePlanError(error, !!isPlanApplied?.())) {
+      if (!(error instanceof CannotMatch)) {
         throw error
       }
     }
