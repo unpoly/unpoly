@@ -43,8 +43,8 @@ src/                      # Entry points for Unpoly's main and optional bundles
     link.sass             # ... CSS for up.link namespace
     layer.ts              # ... Code for up.layer namespace
     layer/                # ... Classes owned by up.layer
-      base.ts             # ...... Code for up.Layer class
-      modes/              # ...... One class per layer mode (ModalLayer, PopupLayer, ...)
+      layer.ts            # ...... Code for up.Layer class
+      overlay.ts          # ...... Overlay and its subclasses, one per mode (ModalLayer, PopupLayer, ...)
     fragment/             # ... Classes owned by up.fragment
       matching/           # ...... The selector engine behind fragment lookups
       rendering/          # ...... The functions and classes behind up.render()
@@ -269,9 +269,9 @@ export const api = {
 
 Classes live in a folder named after the namespace that owns them, next to the namespace
 file: `form.ts` beside `form/`, `layer.ts` beside `layer/`. A published class goes where its
-docs are (`up.Params` is documented under `up.form`). Closely related classes share a
-sub-folder, like `fragment/rendering/` or `layer/modes/`. Generic helper classes live in
-`util/`. A class file exports the class, and an `api` if the class is public. Classes are
+docs are (`up.Params` is documented under `up.form`). A larger topic gets a sub-folder,
+like `fragment/matching/` or `fragment/rendering/`. Generic helper classes live in
+`util/`. A file exports its classes, and an `api` with the public ones. Classes are
 named so they stand on their own (`ModalLayer`, not a nested `up.Layer.Modal`). A class named
 like a browser global gets an `Up` prefix (`UpRequest`, see
 [Naming](code-style.md#names-that-collide-with-globals)).
@@ -327,7 +327,7 @@ export type * from './fragment/types.js'
 
 Files inside the module's own folder are the exception: they import the module's types
 straight from its `types.ts`, also as `t`. That's `import type * as t from './types.js'`, or
-`'../types.js'` from a sub-folder like `layer/modes/`. They still import values from the main
+`'../types.js'` from a sub-folder like `fragment/rendering/`. They still import values from the main
 module. In the header, the `t` import comes after the main modules (step 4 below).
 
 A type that only one file uses stays in that file. A module with only a few types, like
