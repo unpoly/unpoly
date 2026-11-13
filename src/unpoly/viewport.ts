@@ -15,7 +15,7 @@ export type * from './viewport/types.js'
 import { BodyShifter } from './viewport/body_shifter.js'
 import { FocusCapsule } from './viewport/focus_capsule.js'
 export { FocusCapsule }
-import { RevealMotion } from './viewport/reveal_motion.js'
+import { RevealMotion } from './viewport/reveal_in_viewport.js'
 
 
 export const viewportConfig = newConfig('up.viewport.config', (): t.ViewportConfig => ({
