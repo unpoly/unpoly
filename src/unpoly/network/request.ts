@@ -14,8 +14,8 @@ import { runPreviews } from '../status.js'
 import type * as t from './types.js'
 import { type Route } from './request_cache.js'
 import { UpResponse } from './response.js'
-import { XHRRenderer } from './send_with_xhr.js'
-import { FormRenderer } from './submit_with_form.js'
+import { sendWithXHR } from './send_with_xhr.js'
+import { submitWithForm } from './submit_with_form.js'
 
 // Prefixed, so the binding doesn't shadow the browser's `Request` here or in importers.
 // At runtime the class is named `up.Request` (see unpoly.ts).
@@ -319,7 +319,7 @@ export class UpRequest {
       this.expired = false
 
       // Convert from XHR's callback-based API to up.Request's promise-based API
-      new XHRRenderer(this).buildAndSend({
+      sendWithXHR(this, {
         onload: () => this._onXHRLoad(),
         onerror: () => this._onXHRError(),
         ontimeout: () => this._onXHRTimeout(),
@@ -352,7 +352,7 @@ export class UpRequest {
     // Abort all pending requests so their callbacks won't run
     // while we're already navigating away.
     abortRequests()
-    new FormRenderer(this).buildAndSubmit()
+    submitWithForm(this)
   }
 
   _onXHRLoad(): void {
