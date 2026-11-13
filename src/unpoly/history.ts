@@ -311,8 +311,8 @@ export function getLang(doc: Document = document): string | undefined {
 }
 
 export function updateLang(newLang?: string): void {
-  // setAttrPresence() only reads the value when it's present.
-  e.setAttrPresence(e.getRoot(), 'lang', newLang!, !!newLang)
+  // An empty lang removes the attribute.
+  e.setAttrs(e.getRoot(), { lang: newLang || null })
 }
 
 function patchHistoryAPI(): void {
