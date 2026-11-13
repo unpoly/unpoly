@@ -721,6 +721,16 @@ describe('up.network', function() {
         expect({ url: '/foo/2' }).not.toBeCached()
         expect({ url: '/bar/1' }).toBeCached()
       })
+
+      it('evicts every other entry when the URL pattern only has minus-prefixed patterns', function() {
+        up.request({ url: '/foo/1', cache: true })
+        up.request({ url: '/bar/1', cache: true })
+
+        up.cache.evict('-/foo/*')
+
+        expect({ url: '/foo/1' }).toBeCached()
+        expect({ url: '/bar/1' }).not.toBeCached()
+      })
     })
 
     describe('up.cache.expire()', function() {

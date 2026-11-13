@@ -32,8 +32,9 @@ export class UpURLPattern {
       }
     }
 
-    // TODO: A pattern without positive atoms (like "-/admin") has no positive regexp, and
-    // test() and recognize() throw.
+    // A pattern with only exclusions, like "-/admin/*", matches every other URL.
+    if (!positiveList.length) positiveList.push('*')
+
     this._positiveRegexp = this._buildRegexp(positiveList, true)!
     this._negativeRegexp = this._buildRegexp(negativeList, false)
   }
