@@ -129,7 +129,7 @@ A main module orchestrates and defines the public API. Implementation details li
 in the module's folder, so merge closely related code into a file there, not into the main
 module.
 
-A folder with only one file goes away. Move the file up a level.
+An inner folder inside a module folder (`<module>/<folder>/`) with only one file goes away. Move the file up into the module folder. A module folder itself may hold a single file, since keeping implementation details out of the main module matters more.
 
 ### Where to find a namespace's specs
 
