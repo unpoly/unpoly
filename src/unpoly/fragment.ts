@@ -15,7 +15,6 @@ import {
 import type * as t from './fragment/types.js'
 export type * from './fragment/types.js'
 import { FragmentFinder } from './fragment/fragment_finder.js'
-export { CloseLayer } from './fragment/render/change/close_layer.js'
 import { destroyFragment } from './fragment/render/change/destroy_fragment.js'
 import { RenderJob } from './fragment/render/render_job.js'
 export { RenderJob }
