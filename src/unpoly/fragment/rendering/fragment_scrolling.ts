@@ -38,9 +38,8 @@ export class FragmentScrolling extends FragmentProcessor {
     // Render options call it { scrollBehavior } to stand out among many other options.
     // The viewport functions we call only take scrolling options, and call it { behavior }.
     //
-    // The processor for a match in a selector map is built from our attributes, which have
-    // { behavior } but no { scrollBehavior }, so it scrolls instantly. This is how it has
-    // always worked, but it may be a bug.
+    // Our attributes keep { scrollBehavior }, because the processor for a match in a
+    // selector map is built from them.
     this.behavior = options.scrollBehavior
     this.oldScrollTops = options.oldScrollTops
   }
@@ -55,6 +54,7 @@ export class FragmentScrolling extends FragmentProcessor {
       revealSnap: this.revealSnap,
       revealPadding: this.revealPadding,
       behavior: this.behavior,
+      scrollBehavior: this.behavior,
       oldScrollTops: this.oldScrollTops,
     }, u.isDefined)
   }
