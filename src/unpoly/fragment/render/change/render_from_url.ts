@@ -9,7 +9,7 @@ import {
 import type * as t from '../../types.js'
 import { Change } from './change.js'
 import { preflightPropsFromContent } from './render_from_content.js'
-import { ChangeFromResponse } from './render_from_response.js'
+import { renderFromResponse } from './render_from_response.js'
 import { type RenderResult } from '../render_result.js'
 
 // The options for the request of a ChangeFromURL: the render options plus the preflight props
@@ -99,7 +99,7 @@ export class ChangeFromURL extends Change<t.RenderOptions & { url: string }> {
   }
 
   _onRequestSettledWithResponse(response: UpResponse): RenderResult {
-    return new ChangeFromResponse({ ...this.options, response }).execute()
+    return renderFromResponse({ ...this.options, response })
   }
 
   _onRequestSettledWithError(error: Error): never {

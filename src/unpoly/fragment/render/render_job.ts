@@ -6,7 +6,7 @@ import { abortFragment } from '../../fragment.js'
 import { printToStandard } from '../../log.js'
 import type * as t from '../types.js'
 import { renderFromContent } from './change/render_from_content.js'
-import { ChangeFromResponse } from './change/render_from_response.js'
+import { renderFromResponse } from './change/render_from_response.js'
 import { ChangeFromURL } from './change/render_from_url.js'
 import { RenderOptions } from './render_options.js'
 import { RenderResult } from './render_result.js'
@@ -150,7 +150,7 @@ export class RenderJob {
       // TypeScript doesn't narrow the object through renderOptions.url.
       return new ChangeFromURL(renderOptions as t.RenderOptions & { url: string }).execute()
     } else if (renderOptions.response) {
-      return new ChangeFromResponse(renderOptions).execute()
+      return renderFromResponse(renderOptions)
     } else {
       return renderFromContent(renderOptions)
     }
