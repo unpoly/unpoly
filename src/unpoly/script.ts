@@ -10,14 +10,11 @@ import { printToStandard } from './log.js'
 import { mockable } from './mockable.js'
 import type * as t from './script/types.js'
 export type * from './script/types.js'
-import { CSPInfo } from './script/csp/csp_info.js'
-export { CSPInfo }
-import { NonceableCallback } from './script/csp/nonceable_callback.js'
-export { NonceableCallback }
-import { evalCallback } from './script/csp/script_gate.js'
+import { CSPInfo, evalCallback, NonceableCallback } from './script/csp.js'
+export { CSPInfo, NonceableCallback }
 export {
   adoptDetachedHeadAsset, adoptNewFragment, adoptRenderOptionsFromHeader, warnOfUnsafeCSP,
-} from './script/csp/script_gate.js'
+} from './script/csp.js'
 import { HelloFragment } from './script/hello_fragment.js'
 
 

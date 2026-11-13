@@ -1,12 +1,132 @@
-import * as u from '../../util.js'
-import * as e from '../../element.js'
-import { Blocked, fail, NotImplemented } from '../../error.js'
-import { parseRenderCallback } from '../../fragment.js'
-import { printToStandard, printToWarn } from '../../log.js'
-import { block, cspNonce, findScripts, isScript, scriptConfig } from '../../script.js'
-import type * as t from '../types.js'
-import { CSPInfo } from './csp_info.js'
-import { NonceableCallback } from './nonceable_callback.js'
+import * as u from '../util.js'
+import * as e from '../element.js'
+import { Blocked, fail, NotImplemented } from '../error.js'
+import { parseRenderCallback } from '../fragment.js'
+import { printToStandard, printToWarn } from '../log.js'
+import { block, cspNonce, findScripts, isScript, scriptConfig } from '../script.js'
+import type * as t from './types.js'
+
+const NONCE_PATTERN = /'nonce-([^']+)'/g
+
+function findNonces(cspPart: string): string[] {
+  let matches = cspPart.matchAll(NONCE_PATTERN)
+  return u.map(matches, '1')
+}
+
+export class CSPInfo {
+  declare declaration: string
+  declare nonces: string[]
+
+  constructor(declaration = '', nonces: string[] = []) {
+    this.declaration = declaration
+    this.nonces = nonces
+  }
+
+  isStrictDynamic(): boolean {
+    return this.declaration.includes("'strict-dynamic'")
+  }
+
+  isUnsafeEval(): boolean {
+    return this.declaration.includes("'unsafe-eval'")
+  }
+
+  static fromHeader(cspHeader?: string | null): CSPInfo {
+    let results: Record<string, [declaration: string, nonces: string[]]> = {}
+
+    if (cspHeader) {
+      let declarations = cspHeader.split(/\s*;\s*/)
+      for (let declaration of declarations) {
+        let directive = declaration.match(/^(script|default)-src\s/)?.[1]
+        if (directive) {
+          results[directive] = [declaration, findNonces(declaration)]
+        }
+      }
+    }
+
+    let bestResult = results.script || results.default
+    if (bestResult) {
+      return new this(...bestResult)
+    } else {
+      return this.none()
+    }
+  }
+
+  static none(): CSPInfo {
+    return new this()
+  }
+
+}
+
+// The inline script that _runAsScriptElement() inserts can only reach us through the global `up`.
+declare module '../../unpoly.js' {
+  interface Up {
+    /** @internal */
+    noncedEval?: t.EvalEnv & { value?: any, error?: any }
+  }
+}
+
+export class NonceableCallback {
+  declare script: string
+  declare nonce?: string
+
+  constructor(script: string, nonce?: string) {
+    this.script = script
+    this.nonce = nonce
+  }
+
+  static fromCallbackString(string: string): NonceableCallback {
+    // With the s flag, the pattern matches any string, including one with line breaks.
+    let match = string.match(/^(nonce-(\S+)\s)?(.*)$/s)!
+    return new this(match[3], match[2])
+  }
+
+  unsafeEval(evalEnv: t.EvalEnv): any {
+    if (this.nonce) {
+      return this._runAsScriptElement(evalEnv)
+    } else {
+      return this._runAsFunction(evalEnv)
+    }
+  }
+
+  toCallbackString(): string {
+    return `nonce-${this.nonce} ${this.script}`
+  }
+
+  _runAsFunction({ argNames, argValues, thisContext }: t.EvalEnv): any {
+    let fn = new Function(...argNames, this.script)
+    return fn.apply(thisContext, argValues)
+  }
+
+  _runAsScriptElement(evalEnv: t.EvalEnv): any {
+    // A strict CSP will block use of `eval()` or `new Function()`.
+    // What we can do instead is insert an inline script that is allowed per a [nonce] attr.
+    let wrappedScript = `
+      try {
+        up.noncedEval.value = (function(${evalEnv.argNames.join()}) {
+          ${this.script}
+        }).apply(up.noncedEval.thisContext, up.noncedEval.argValues)
+      } catch (error) {
+        up.noncedEval.error = error
+      }
+    `
+
+    let scriptElement
+    try {
+      up.noncedEval = { ...evalEnv }
+      scriptElement = e.affix(document.body, 'script', { nonce: this.nonce, text: wrappedScript })
+      if (up.noncedEval.error) {
+        throw up.noncedEval.error
+      } else {
+        return up.noncedEval.value
+      }
+    } finally {
+      // Delete rather than assign undefined, so window.up has no key left that is undefined.
+      delete up.noncedEval
+      scriptElement?.remove()
+    }
+  }
+
+}
 
 /**
 Something that may carry a nonce, like a `<script>` element or an `[up-on-…]` attribute.
