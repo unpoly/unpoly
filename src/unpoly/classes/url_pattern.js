@@ -16,6 +16,9 @@ up.URLPattern = class URLPattern {
       }
     }
 
+    // A pattern with only exclusions, like "-/admin/*", matches every other URL.
+    if (!positiveList.length) positiveList.push('*')
+
     this._positiveRegexp = this._buildRegexp(positiveList, true)
     this._negativeRegexp = this._buildRegexp(negativeList, false)
   }

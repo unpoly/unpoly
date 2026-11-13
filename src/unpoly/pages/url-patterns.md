@@ -136,6 +136,8 @@ The following URL pattern matches `/users/123`, but not `/users/456`:
 /users/* -/users/456
 ```
 
+A URL pattern with only exclusions matches all other URLs. For example, `-/admin/*` matches every URL outside `/admin/`.
+
 ### Example
 
 ```html

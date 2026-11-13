@@ -756,6 +756,28 @@ extendDescribe('up.status', function() {
 
       })
 
+      it('marks a link as .up-current for every other URL if its [up-alias] only has minus-prefixed patterns', function() {
+        replaceURL('/foo')
+        const [nav, link] = htmlFixtureList(`
+          <div up-nav>
+            <a href="/x" up-alias="-/admin/*">label</a>
+          </div>
+        `)
+        up.hello(nav)
+        expect(link).toHaveClass('up-current')
+      })
+
+      it('does not mark a link as .up-current for an excluded URL if its [up-alias] only has minus-prefixed patterns', function() {
+        replaceURL('/admin/users')
+        const [nav, link] = htmlFixtureList(`
+          <div up-nav>
+            <a href="/x" up-alias="-/admin/*">label</a>
+          </div>
+        `)
+        up.hello(nav)
+        expect(link).not.toHaveClass('up-current')
+      })
+
       it('has an [up-alias] ending in "/*" match a query string (#542)', function() {
         replaceURL('/test/?whatever')
         const nav = fixture('div[up-nav]')

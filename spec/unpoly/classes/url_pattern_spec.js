@@ -178,6 +178,14 @@ describe('up.URLPattern', function() {
         expect(pattern.test('/foo/baz')).toBe(true)
       })
     })
+
+    it('matches every other URL if the pattern only has minus-prefixed patterns', function() {
+      const pattern = new up.URLPattern('-/admin/*')
+      expect(pattern.test('/foo')).toBe(true)
+      expect(pattern.test('/users/123')).toBe(true)
+      expect(pattern.test('/admin')).toBe(false)
+      expect(pattern.test('/admin/users')).toBe(false)
+    })
   })
 
   describe('#recognize', function() {
@@ -225,6 +233,12 @@ describe('up.URLPattern', function() {
     it('allows to exclude multiple patterns', function() {
       const pattern = new up.URLPattern('/foo/:one -/foo/bar -/foo/baz')
       expect(pattern.recognize('/foo/baz')).toBeMissing()
+    })
+
+    it('returns an empty object for every other URL if the pattern only has minus-prefixed patterns', function() {
+      const pattern = new up.URLPattern('-/admin/*')
+      expect(pattern.recognize('/foo')).toEqual({})
+      expect(pattern.recognize('/admin/users')).toBeMissing()
     })
 
     it('does not override named segments when a blacklisted pattern has a segment with the same name', function() {
