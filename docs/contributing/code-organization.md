@@ -45,7 +45,8 @@ src/                      # Entry points for Unpoly's main and optional bundles
       base.ts             # ...... Code for up.Layer class
       modes/              # ...... One class per layer mode (ModalLayer, PopupLayer, ...)
     fragment/             # ... Classes owned by up.fragment
-      render/             # ...... The classes behind up.render()
+      matching/           # ...... The selector engine behind fragment lookups
+      rendering/          # ...... The functions and classes behind up.render()
     framework/            # ... Classes owned by up.framework (Registry)
     util/                 # ... Generic helper classes (Config, Rect, ...)
     internal.ts           # ... Internals the specs and unpoly-migrate need, published as up.internal
@@ -238,7 +239,7 @@ export const api = {
 Classes live in a folder named after the namespace that owns them, next to the namespace
 file: `form.ts` beside `form/`, `layer.ts` beside `layer/`. A published class goes where its
 docs are (`up.Params` is documented under `up.form`). Closely related classes share a
-sub-folder, like `fragment/render/` or `layer/modes/`. Generic helper classes live in
+sub-folder, like `fragment/rendering/` or `layer/modes/`. Generic helper classes live in
 `util/`. A class file exports the class, and an `api` if the class is public. Classes are
 named so they stand on their own (`ModalLayer`, not a nested `up.Layer.Modal`). A class named
 like a browser global gets an `Up` prefix (`UpRequest`, see
@@ -344,10 +345,10 @@ import { emit, on } from './event.js'
 import { Layer, layerConfig } from './layer.js'
 import type * as t from './fragment/types.js'
 export type * from './fragment/types.js'
-import { FragmentFinder } from './fragment/fragment_finder.js'
-import { RenderJob } from './fragment/render/render_job.js'
+import { FragmentFinder } from './fragment/matching/fragment_finder.js'
+import { RenderJob } from './fragment/rendering/render_job.js'
 export { RenderJob }
-export { RenderResult } from './fragment/render/render_result.js'
+export { RenderResult } from './fragment/rendering/render_result.js'
 ```
 
 A module re-exports exactly the classes, types and values of its folder that other modules

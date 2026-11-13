@@ -1,8 +1,8 @@
 # Selector lookup deep-dive
 
 Read this before you write internal code that looks up an element, and before you change
-[`Selector`](../../src/unpoly/fragment/selector.ts),
-[`FragmentFinder`](../../src/unpoly/fragment/fragment_finder.ts) or the lookup functions in
+[`Selector`](../../src/unpoly/fragment/matching/selector.ts),
+[`FragmentFinder`](../../src/unpoly/fragment/matching/fragment_finder.ts) or the lookup functions in
 [`src/unpoly/fragment.ts`](../../src/unpoly/fragment.ts).
 
 The short version: **prefer `up.fragment.*` over native `querySelector()` when you are

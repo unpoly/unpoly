@@ -115,7 +115,7 @@ commit.
 > Control flow moves through numerous functions and objects.
 
 [Read the rendering deep-dive](docs/contributing/rendering.md) before touching
-`up.render()` or files in `src/unpoly/fragment/render/`.
+`up.render()` or files in `src/unpoly/fragment/rendering/`.
 
 
 ### [🔍 Selector lookup deep-dive](docs/contributing/selector-lookup.md)

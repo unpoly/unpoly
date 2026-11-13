@@ -1,6 +1,6 @@
 # Rendering core deep-dive
 
-Read this before you touch `up.render()` or anything in `src/unpoly/fragment/render/`.
+Read this before you touch `up.render()` or anything in `src/unpoly/fragment/rendering/`.
 If you are working on any other part of Unpoly, you don't need it: the rendering core is
 reached through a small public surface, and the rest of the library treats it as a black
 box.
@@ -66,7 +66,7 @@ up.render()
                       └─ updateSteps()  the actual swaps
 ```
 
-`up.render()` returns an [`up.RenderJob`](../../src/unpoly/fragment/render/render_job.ts) — the
+`up.render()` returns an [`up.RenderJob`](../../src/unpoly/fragment/rendering/render_job.ts) — the
 promise-like object callers await. It resolves with an `up.RenderResult` describing what was
 actually updated, and exposes a second promise, `.finished`, that waits for animations and
 revalidation to settle too.
@@ -82,7 +82,7 @@ Which *stage* the job starts with depends on where the content comes from
 
 These are entry points, not alternatives — a `{ url }` pass passes through every row below
 it. Each stage is a module function in its own file in
-[`src/unpoly/fragment/render/change/`](../../src/unpoly/fragment/render/change/)
+[`src/unpoly/fragment/rendering/`](../../src/unpoly/fragment/rendering/)
 (`render_from_url.ts` and so on). It takes the render options and hands them on to the next
 stage. Its helpers are private to the module and get what they need as arguments.
 
@@ -143,7 +143,7 @@ Matching happens **twice**, and this is the distinction worth internalising:
   This is also where hungry steps on the plan's layer join, and where `up:fragment:hungry`
   is emitted.
 
-"The response document" is a [`ResponseDoc`](../../src/unpoly/fragment/render/response_doc.ts),
+"The response document" is a [`ResponseDoc`](../../src/unpoly/fragment/rendering/response_doc.ts),
 and it does more than parse HTML. It matches steps against itself (`selectSteps()`), adopts
 CSP nonces, and *detaches* each new element as it is committed, so a later hungry step
 cannot steal an element that is already spoken for.
