@@ -1,5 +1,11 @@
 up.Layer.OverlayWithTether = class OverlayWithTether extends up.Layer.Overlay {
 
+  constructor(options) {
+    super(options)
+    // The default alignment follows the axis of the position.
+    this.align ??= (this.position === 'top' || this.position === 'bottom') ? 'left' : 'top'
+  }
+
   createElements() {
     if (!this.origin) {
       up.fail('Missing { origin } option')

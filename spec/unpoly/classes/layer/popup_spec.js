@@ -111,6 +111,51 @@ describe('up.Layer.Popup', function() {
       expect(syncSpy.calls.count()).toBe(1)
     })
 
+    describe('with { position: "right" } but no { align }', function() {
+      it('is positioned to the right of the origin, with top edges aligned', function() {
+        const { popup, popupRect, originRect } = openPopup({ position: 'right' })
+
+        expect(popupRect.left).toBe(originRect.right)
+        expect(popupRect.top).toBe(originRect.top)
+        expect(popup.align).toBe('top')
+      })
+    })
+
+    describe('with { position: "left" } but no { align }', function() {
+      it('is positioned to the left of the origin, with top edges aligned', function() {
+        const { popup, popupRect, originRect } = openPopup({ position: 'left' })
+
+        expect(popupRect.right).toBe(originRect.left)
+        expect(popupRect.top).toBe(originRect.top)
+        expect(popup.align).toBe('top')
+      })
+    })
+
+    describe('with { position: "top" } but no { align }', function() {
+      it('is positioned above the origin, with left edges aligned', function() {
+        const { popup, popupRect, originRect } = openPopup({ position: 'top' })
+
+        expect(popupRect.bottom).toBe(originRect.top)
+        expect(popupRect.left).toBe(originRect.left)
+        expect(popup.align).toBe('left')
+      })
+    })
+
+    it('uses a configured up.layer.config.popup.align for a top or bottom position', function() {
+      up.layer.config.popup.align = 'right'
+      const { popupRect, originRect } = openPopup({ position: 'bottom' })
+
+      expect(popupRect.top).toBe(originRect.bottom)
+      expect(popupRect.right).toBe(originRect.right)
+    })
+
+    it('throws an error for an { align } that does not fit the { position }', async function() {
+      const [origin] = htmlFixtureList('<a href="#">opener</a>')
+      const promise = up.layer.open({ mode: 'popup', origin, content: 'popup content', position: 'right', align: 'left' })
+
+      await expectAsync(promise).toBeRejectedWith(jasmine.objectContaining({ message: jasmine.stringMatching(/Invalid tether constraints/) }))
+    })
+
     describe('with { position: "bottom", align: "left" }', function() {
 
       it('is positioned below the origin and grows from the left origin edge to the right', function() {

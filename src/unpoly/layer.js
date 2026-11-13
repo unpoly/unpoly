@@ -231,7 +231,6 @@ up.layer = (function() {
         mainTargets: ['[up-main~=popup]'],
         position: 'bottom',
         size: 'medium',
-        align: 'left',
         dismissible: 'outside key',
         trapFocus: false,
       },
@@ -431,6 +430,9 @@ up.layer = (function() {
     @param {string} [options.align]
       For **popups**, the alignment of the popup within its `{ position }`.
       See [popup position](/learn/customizing-overlays#popup-position).
+
+      By default, popups above or below the origin align their left edges,
+      and popups left or right of the origin align their top edges.
 
   @section Request
     @mix up.render/request

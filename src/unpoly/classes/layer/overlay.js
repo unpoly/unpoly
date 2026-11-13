@@ -40,7 +40,7 @@ up.Layer.Overlay = class Overlay extends up.Layer {
   /*-
   The [alignment](/learn/customizing-overlays#popup-position) of this popup overlay.
 
-  Returns a string like `'left'` or `'right'`.
+  Returns a string like `'left'` or `'top'`.
 
   Returns `undefined` for an overlay that isn't a popup.
 

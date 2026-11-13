@@ -147,7 +147,7 @@ up.Tether = class Tether {
       }
     }
 
-    if (u.isDefined(left) || u.isDefined(top)) {
+    if (u.isDefined(left) && u.isDefined(top)) {
       this._moveTo(left, top)
     } else {
       up.fail('Invalid tether constraints: %o', this._describeConstraints())
