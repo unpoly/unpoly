@@ -2,7 +2,7 @@
 
 The base class of all errors thrown by Unpoly.
 
-Every error class on this page inherits from `up.Error`, which inherits from the browser's
+All errors thrown by Unpoly inherit from `up.Error`, which inherits from the browser's
 [`Error`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error).
 To tell an error from Unpoly apart from an error in your own code, check `instanceof up.Error`:
 
@@ -18,11 +18,8 @@ try {
 }
 ```
 
-Unpoly throws a subclass like `up.CannotMatch` or `up.Offline` when you might want to handle a failure.
-It throws a plain `up.Error` for other failures, like when you try to preload an unsafe link.
-
-An error's `{ name }` is the name of its class, like `'up.CannotMatch'`. An `up.Aborted` error is the exception:
-its name is `'AbortError'`.
+When you might want to handle a failure, Unpoly throws a subclass like `up.CannotMatch` or `up.Offline`.
+Other failures throw a plain `up.Error`.
 
 Rendering functions don't only reject with errors. After rendering an [error response](/learn/error-responses),
 they reject with an `up.RenderResult`. When the server responds with an error code, `up.request()` rejects with an `up.Response`.
@@ -39,13 +36,9 @@ Neither of them is an `up.Error`.
 
 An error thrown when a request or render pass was [aborted](/learn/aborting-requests).
 
-Unpoly throws `up.Aborted` in cases like these:
-
-- A request is aborted, e.g. because another request [targets the same fragment](/learn/aborting-requests#aborting-conflicting-requests),
-  or because you called `up.fragment.abort()` or `up.Request#abort()`.
-- A preventable event like `up:link:follow` or `up:fragment:loaded` was prevented.
-- The user canceled a [confirmation dialog](/learn/confirmation-dialogs).
-- An overlay closed while it was being rendered into, or a listener prevented it from closing.
+Unpoly throws `up.Aborted` when it stops work before it is done.
+The work may have been superseded by newer work, canceled by the user or your code,
+or prevented by an event listener.
 
 Its `{ name }` is `'AbortError'`, like the `DOMException` that `fetch()` and other native APIs throw when they are aborted.
 To detect both kinds of aborts, check the error's name:
@@ -76,8 +69,8 @@ pass the promise to `up.error.muteUncriticalRejection()`.
 
 An error thrown when Unpoly refuses to run a callback from an HTML attribute, like `[up-on-loaded]`.
 
-A callback is blocked when `up.script.config.evalCallbackPolicy` doesn't allow it,
-or when your [Content Security Policy](/learn/script-security) doesn't allow `eval()`.
+Unpoly throws `up.Blocked` when your [callback policy](/learn/script-security#callback-policy)
+or [Content Security Policy](/learn/script-security) doesn't allow a callback to run.
 See [running callbacks with a strict CSP](/learn/script-security#callback-with-strict-csp) for ways to fix this.
 
 @learn-ref script-security#callback-policy
@@ -91,26 +84,13 @@ See [running callbacks with a strict CSP](/learn/script-security#callback-with-s
 
 An error thrown when a [target selector](/learn/targeting-fragments) cannot be matched.
 
-Rendering functions like `up.render()` reject with `up.CannotMatch` in cases like these:
-
-- The target is missing in the current page or in the server response, and no [fallback target](/learn/targeting-fragments#missing-targets) matched either.
-- The server responded with an error code, and no [fail target](/learn/error-responses) was given.
-- The given [layer](/api/up.layer) could not be found.
-
+Unpoly throws `up.CannotMatch` when it cannot find the fragment or layer it should update,
+in the current page or in the server response.
 The error message names the selectors that were tried, and the layer in which they were looked up.
 
 To make a target optional, use the [`:maybe`](/learn/targeting-fragments#optional-targets) pseudo-selector.
 To render something else when a target is missing, configure a [fallback target](/learn/targeting-fragments#providing-a-fallback-target).
-
-```js
-try {
-  await up.render({ url: '/path', target: '.content' })
-} catch (error) {
-  if (error instanceof up.CannotMatch) { // mark: error instanceof up.CannotMatch
-    console.log('Could not find .content in the current page or the response')
-  }
-}
-```
+To handle the error in your own code, check `error instanceof up.CannotMatch`.
 
 @learn-ref targeting-fragments#missing-targets
 
@@ -123,12 +103,8 @@ try {
 
 An error thrown when Unpoly cannot process a given selector or response.
 
-Unpoly throws `up.CannotParse` in cases like these:
-
-- `up.element.createFromSelector()` or `up.element.affix()` is given an attribute selector it doesn't support,
-  like `input[type = "text"]` or `[lang="en" i]`.
-- A rendering function receives a response that is not HTML.
-  You can configure which responses are rendered with `up.fragment.config.renderableResponse`.
+Unpoly throws `up.CannotParse` when it is given input in a form it doesn't support,
+like a selector syntax it cannot handle, or a response that is not HTML.
 
 @class up.CannotParse
 @parent up.error
@@ -139,11 +115,9 @@ Unpoly throws `up.CannotParse` in cases like these:
 
 An error thrown when Unpoly cannot [derive a target selector](/learn/target-derivation) for an element.
 
-Unpoly throws `up.CannotTarget` in cases like these:
-
-- `up.fragment.toTarget()` cannot derive a selector that matches the given element.
-  To fix this, give the element an `[id]` attribute, or configure `up.fragment.config.targetDerivers`.
-- You try to render into the `<html>` element. Make a full page load instead.
+Unpoly throws `up.CannotTarget` when it needs a selector for an element, but cannot build one
+that matches the element.
+To fix this, give the element an `[id]` attribute, or configure `up.fragment.config.targetDerivers`.
 
 @learn-ref target-derivation
 
@@ -156,22 +130,13 @@ Unpoly throws `up.CannotTarget` in cases like these:
 
 An error thrown when a request could not reach the server, because of a [network issue or timeout](/learn/network-issues).
 
-`up.request()` and rendering functions like `up.render()` reject with `up.Offline` when the connection is lost, or when
-a request takes longer than its [timeout](/api/up.network.config#config.timeout).
-When [revalidating](/learn/caching#revalidation) an expired cache entry fails, `up.RenderJob#finished` rejects with `up.Offline`.
+Unpoly throws `up.Offline` when the connection is lost, or when a request takes longer than its
+[timeout](/api/up.network.config#config.timeout).
+Rendering functions also run their [`{ onOffline }`](/learn/network-issues) callback,
+where you can retry the request or render something else.
 
-Rendering functions also run their [`{ onOffline }`](/learn/network-issues) callback and emit `up:fragment:offline`,
-where you can retry the request or render something else. `up.request()` emits `up:request:offline`.
-
-```js
-try {
-  await up.render({ url: '/path', target: '.content' })
-} catch (error) {
-  if (error instanceof up.Offline) { // mark: error instanceof up.Offline
-    console.log('Could not load ' + error.request.url)
-  }
-}
-```
+To handle the error in your own code, check `error instanceof up.Offline`.
+The `up.Offline#request` property holds the request that could not reach the server.
 
 @learn-ref network-issues
 
