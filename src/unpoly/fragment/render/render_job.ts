@@ -172,7 +172,7 @@ export class RenderJob {
   }
 
   _handleAbortOption({ bindFragments, bindLayer, origin, layer, request }: t.AbortOptionProps): void {
-    // When preloading up.RenderOptions forces { abort: false }.
+    // When preloading, up.link.preload() forces { abort: false }.
     let { abort } = this.renderOptions
 
     // The only case where we don't call up.fragment.abort() is with { abort: false }.
