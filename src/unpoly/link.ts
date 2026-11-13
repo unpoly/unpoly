@@ -254,8 +254,7 @@ export function preload(link: e.ElementOrSelector, options?: RenderOptions): Pro
 // A link that was expanded with [up-expand] stands for the link inside it.
 function effectiveLink(element: ExpandedElement): Element {
   let link = element.upExpandedPair?.[1]
-  // contains(undefined) is false.
-  return element.contains(link!) ? link! : element
+  return link && element.contains(link) ? link : element
 }
 
 function preloadIssue(link: Element): string | undefined {
