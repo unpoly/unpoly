@@ -5,7 +5,7 @@ import { emit } from '../../event.js'
 import { abortFragment } from '../../fragment.js'
 import { printToStandard } from '../../log.js'
 import type * as t from '../types.js'
-import { ChangeFromContent } from './change/render_from_content.js'
+import { renderFromContent } from './change/render_from_content.js'
 import { ChangeFromResponse } from './change/render_from_response.js'
 import { ChangeFromURL } from './change/render_from_url.js'
 import { RenderOptions } from './render_options.js'
@@ -46,7 +46,7 @@ export class RenderJob {
 
       // TODO: Should the change always return a successful result for easier handling here, and we then throw on !result.ok?
 
-      let result = await this._getChange().execute()
+      let result = await this._render()
       this._handleResult(result)
       return result
     } catch (resultOrError) {
@@ -129,14 +129,16 @@ export class RenderJob {
     }
   }
 
-  _getChange(): ChangeFromURL | ChangeFromResponse | ChangeFromContent {
+  // Kept `any`, like renderFromContent(): we return the result as a RenderResult,
+  // which hides that ChangeFromURL fulfills with an up.Request when preloading.
+  _render(): any {
     // (1) With a given { url } we want to handle { abort } when the new request is known.
     //     This way we can exclude the new request from aborting.
     //     The { handleAbort } callback is called in ChangeFromURL#execute()
     // (2) When rendering local content, we want to handle { abort } when we render.
     //     This way we don't abort when the pass was aborted by { guardEvent }, { confirm }
     //     or any other error on the way.
-    //     The { handleAbort } callback is called in ChangeFromContent#_onPlanApplicable()
+    //     The { handleAbort } callback is called in onPlanApplicable() (render_from_content.ts)
     // (3) FromURL is eventually going to call FromContent.
     //     We memoize the callback so we only run it once.
     // (4) FromURL passes the preflight props of the change, plus the new { request }.
@@ -146,11 +148,11 @@ export class RenderJob {
 
     if (renderOptions.url) {
       // TypeScript doesn't narrow the object through renderOptions.url.
-      return new ChangeFromURL(renderOptions as t.RenderOptions & { url: string })
+      return new ChangeFromURL(renderOptions as t.RenderOptions & { url: string }).execute()
     } else if (renderOptions.response) {
-      return new ChangeFromResponse(renderOptions)
+      return new ChangeFromResponse(renderOptions).execute()
     } else {
-      return new ChangeFromContent(renderOptions)
+      return renderFromContent(renderOptions)
     }
   }
 
@@ -213,7 +215,6 @@ export class RenderJob {
 
     u.memoizeMethod(this.prototype, {
       _awaitFinished: true,
-      _getChange: true,
     })
   }
 

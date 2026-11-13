@@ -186,8 +186,6 @@ export interface RenderOptions {
   expiredResponse?: UpResponse
   verifyFinished?: VerifyFinishedFn
   onRequestKnown?: (request: UpRequest) => void
-  // Only compute the preflight props, there is no content yet (ChangeFromURL).
-  preflight?: boolean
   // How a step updates its target when the target has no ::before/::after/::content suffix.
   defaultPlacement?: string
   // Whether a step is optional when the target has no :maybe suffix (up.validate()).

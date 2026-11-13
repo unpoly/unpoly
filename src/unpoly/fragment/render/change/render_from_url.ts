@@ -8,7 +8,7 @@ import {
 } from '../../../network.js'
 import type * as t from '../../types.js'
 import { Change } from './change.js'
-import { ChangeFromContent } from './render_from_content.js'
+import { preflightPropsFromContent } from './render_from_content.js'
 import { ChangeFromResponse } from './render_from_response.js'
 import { type RenderResult } from '../render_result.js'
 
@@ -81,11 +81,10 @@ export class ChangeFromURL extends Change<t.RenderOptions & { url: string }> {
   _preflightPropsForRenderOptions(renderOptions: t.RenderOptions): t.PreflightProps
   _preflightPropsForRenderOptions(renderOptions: t.RenderOptions, getPreflightPropsOptions: { optional: boolean }): Partial<t.PreflightProps>
   _preflightPropsForRenderOptions(renderOptions: t.RenderOptions, getPreflightPropsOptions?: { optional: boolean }): Partial<t.PreflightProps> {
-    const preflightChange = new ChangeFromContent({ ...renderOptions, preflight: true })
-    // #getPreflightProps() will return meta information about the change that is most
+    // preflightPropsFromContent() will return meta information about the change that is most
     // likely before the request was dispatched.
     // This might change postflight if the response does not contain the desired target.
-    return preflightChange.getPreflightProps(getPreflightPropsOptions)
+    return preflightPropsFromContent(renderOptions, getPreflightPropsOptions)
   }
 
   _onRequestSettled(response: UpResponse | Error): RenderResult {

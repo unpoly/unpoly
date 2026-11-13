@@ -8,7 +8,7 @@ import { type UpRequest, type UpResponse } from '../../../network.js'
 import { adoptRenderOptionsFromHeader } from '../../../script.js'
 import type * as t from '../../types.js'
 import { Change } from './change.js'
-import { ChangeFromContent } from './render_from_content.js'
+import { renderFromContent } from './render_from_content.js'
 import { RenderOptions } from '../render_options.js'
 import { type RenderResult } from '../render_result.js'
 
@@ -81,7 +81,7 @@ export class ChangeFromResponse extends Change {
     // After the initial render pass has finished, consider reloading stale content.
     finalRenderOptions.verifyFinished = (result) => this._revalidate(result, finalRenderOptions)
 
-    return new ChangeFromContent(finalRenderOptions).execute()
+    return renderFromContent(finalRenderOptions)
   }
 
   async _revalidate(renderResult: RenderResult, originalRenderOptions: t.RenderOptions): Promise<RenderResult | undefined> {
