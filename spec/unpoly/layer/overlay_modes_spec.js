@@ -50,9 +50,6 @@ describe('OverlayWithViewport', function() {
 
 describe('ModalLayer', function() {
 
-  const e = up.element
-  const u = up.util
-
   describe('styles', function() {
 
     it('is as high as its content, plus padding', function() {
