@@ -4,7 +4,8 @@
   "compilerOptions": {
     "noEmit": true,
 
-    // Loose while we convert. A later pass tightens these.
+    // Loose, because unpoly-migrate doesn't pass the stricter settings yet. tsconfig.core.json
+    // checks core with them.
     "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": false,

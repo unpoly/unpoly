@@ -49,7 +49,7 @@ export class Layer {
 
   declare context: u.PlainObject
 
-  // Only overlays have these. They are documented with up.Layer in overlay.ts.
+  // Only overlays have these. They are documented with up.Layer in overlay.md.
   declare origin?: Element
   declare size?: string
   declare position?: string

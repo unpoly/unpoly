@@ -1,7 +1,7 @@
 import * as u from './util.js'
 
 /**
-A function wrapped by `up.mockable()`. In specs, `fn.mock()` replaces the original with a Jasmine spy.
+A function wrapped by `mockable()`. In specs, `fn.mock()` replaces the original with a Jasmine spy.
 Outside of specs there is no wrapper and no `mock()`.
 @internal
 */

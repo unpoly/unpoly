@@ -77,10 +77,10 @@ function, so its tests live in Node with the rest.
   Its own process, deliberately not a route on the spec server, which `bin/ci` boots. See
   [its README](scratch/README.md) and [Trying out changes](../docs/contributing/trying-out-changes.md).
 - `test/` — the self-tests: `bin/self-test`.
-- `bin/test`, `bin/ci`, `bin/dev`, `bin/find-spec`, `bin/outline`, `bin/update-contributing-tocs` — thin **extensionless** executables (shebang +
+- `bin/test`, `bin/ci`, `bin/dev`, `bin/find-spec`, `bin/outline`, `bin/typecheck`, `bin/update-contributing-tocs` — thin **extensionless** executables (shebang +
   `chmod +x`), relying on Node 22's extensionless-ESM detection. The package is
   deliberately *not* `type: module` (that would make Node and esbuild treat every `.js` file
-  as an ES module, while most of `src/` and `spec/` are still scripts), so everything under
+  as an ES module, while the specs are still scripts), so everything under
   `tooling/**` is `.mjs` — except the three browser files, where the extension is what picks
   the module system.
 
@@ -126,7 +126,7 @@ snapshots the DOM for a failed spec, then closes the log buffer.
 
 ### `tmp/build-status.json` (watcher → runner)
 
-`{ pid, state: "building" | "idle", startedAt, ok, errors }`. The watcher (`build/watch.mjs`)
+`{ pid, state: "building" | "idle", startedAt, ok, errors, types }`. The watcher (`build/watch.mjs`)
 watches the files itself and rebuilds in **rounds**: a round takes its `startedAt` before any
 bundle reads a source, rebuilds every bundle that read a changed file, lints changed files in
 `src/`, and only then writes `idle`. A change that arrives during a round starts another round
@@ -135,7 +135,9 @@ before `idle` is written. So `idle` means *every* bundle includes every edit the
 an edit on its own schedule, so all of them can be idle while one has not started on the edit yet.
 `errors` is deduplicated, because the modern and es6 bundles report the same syntax error. `waitForFreshBuild` errors if the file is missing or the pid is dead, else waits
 until `idle && startedAt >= newestSourceMtime`, then throws if `ok` is false;
-`bin/dev status` reads the same two fields through `lastBuildErrors()`.
+`bin/dev status` reads the same two fields through `lastBuildErrors()`. `types` is the type check
+that the watcher runs after a round (`build/build_status.mjs` explains its fields). It never
+makes `ok` false.
 
 `newestSourceMtime` walks `src`, `spec` and `tooling/runner/browser`, counting only the
 extensions a bundle can import (`WATCHABLE_SUFFIXES`, which also decides what makes the watcher
@@ -191,7 +193,7 @@ the browser log plus the HTML state as a CSS-selector outline (`#id.class[attr="
 - `bin/test` → `runDev(argv, env)`: require a filter or `--all` (else exit `5`) → ensure a
   dev environment (start it if needed, else exit `3`) → `waitForFreshBuild` (else exit `4`) →
   build the minified bundles if this run loads stale ones → confirm the bundles the page loads
-  are in `dist` (else exit `4`) → puppeteer → receiver → exit 0/1.
+  are in `dist` (else exit `4`) → puppeteer → receiver → exit 0/1, or `7` for type errors.
   The watcher builds everything except the minified bundles, which is why that one build lives
   here. The `dist` check comes *after* the build wait, because `dist` is gitignored: before the
   watcher's first build everything is missing, and asking up front failed every fresh clone's
@@ -203,7 +205,8 @@ the browser log plus the HTML state as a CSS-selector outline (`#id.class[attr="
 - Exit codes: `0` pass · `1` failures · `2` runner timeout (the watchdog fires when the
   receiver sees no event for 30s) · `3` no dev environment · `4` build stale, or a bundle
   the page loads is absent from `dist` · `5` bad config/flags, or an unfiltered run
-  without `--all` · `6` build failed (compile/lint errors).
+  without `--all` · `6` build failed (compile/lint errors) · `7` the specs passed, but the
+  watcher's type check found errors.
 
 `up.log.config.format` deliberately stays at its default (`true`): some specs assert on
 the exact `%c`-styled arguments Unpoly passes to `console.warn`/`debug`. The console
@@ -293,8 +296,9 @@ process manager. The rules, in one place:
 
 ## Self-tests
 
-`bin/self-test` (`node --test 'tooling/test/**/*.test.mjs'`, `NO_COLOR=1`) — no
-browser, no build, runs in a second. Cover changes here rather than through the
+`bin/self-test` (`node --test 'tooling/test/**/*.test.mjs'`, `NO_COLOR=1`) runs in about
+four seconds. Only the evaluation-order test (`build/eval_order.test.mjs`) builds bundles and
+starts a browser. Cover changes here rather than through the
 suite. What's covered today:
 
 - `formatter` / `stack` / `dom_outline` / `urls`: progress line, compact vs. verbose

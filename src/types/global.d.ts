@@ -5,7 +5,7 @@
 // unpoly-migrate and the Bootstrap entries are separate bundles, and only reach Unpoly through it.
 declare var up: import('../unpoly.js').Up
 
-// Globals we use only when the page has them: jQuery for interop, Jasmine in up.mockable().
+// Globals we use only when the page has them: jQuery for interop, Jasmine in mockable().
 declare var jQuery: any
 declare var spyOn: any
 interface Window {
