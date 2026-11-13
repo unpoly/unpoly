@@ -8,6 +8,7 @@ export type * from './layer/types.js'
 import { Layer } from './layer/base.js'
 export { Layer }
 import { LayerStack } from './layer/layer_stack.js'
+import { bodyShifter } from './viewport.js'
 export { type Overlay } from './layer/modes/overlay.js'
 export { OVERLAY_VISUAL_KEYS, UNSET_OVERLAY_VISUALS } from './layer/overlay_visuals.js'
 export { Tether } from './layer/tether.js'
@@ -190,6 +191,9 @@ export function buildLayer(options: u.PlainObject, beforeNew?: (options: u.Plain
 
 function reset(): void {
   layerStack.reset()
+  // The body shifter is up.viewport state, but we reset it here, after closing the overlays.
+  // Each closing overlay lowers its stack, which would fall below zero on a fresh shifter.
+  bodyShifter.reset()
   handlers = u.filterList(handlers, 'isDefault')
 }
 

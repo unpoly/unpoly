@@ -16,9 +16,14 @@ export class BodyShifter {
   declare _anchoredElements: Set<HTMLElement>
   declare _stack: number
   declare _cleaner: u.Cleaner
-  declare _rootScrollbarWidth: number
 
   constructor() {
+    this.reset()
+  }
+
+  reset(): void {
+    // Undo an active shift. The first call from the constructor has nothing to undo.
+    this._cleaner?.clean()
     this._anchoredElements = new Set()
     this._stack = 0
     this._cleaner = u.cleaner()
@@ -51,12 +56,12 @@ export class BodyShifter {
   _shiftNow(): void {
     // Remember whether the root viewport has a visible scrollbar at rest.
     // It will disappear when we set overflow-y: hidden below.
-    this._rootScrollbarWidth = rootScrollbarWidth()
+    let scrollbarWidth = rootScrollbarWidth()
 
     // Always publish on the <html> element for consistency, even if the scrolling element
     // is sometimes <body>. The property will be inherited
     this._cleaner(e.setStyleTemp(e.getRoot(), {
-      '--up-scrollbar-width': this._rootScrollbarWidth + 'px'
+      '--up-scrollbar-width': scrollbarWidth + 'px'
     }))
 
     this._shiftElement(document.body, 'padding-right')
