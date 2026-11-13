@@ -3,7 +3,7 @@ import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { fail, guard } from './error.js'
 import { assertEmitted, on } from './event.js'
-import { getSmart, type RenderOptions } from './fragment.js'
+import { getSmart, getSubtree, type RenderOptions } from './fragment.js'
 import { isBooted, isEvaling } from './framework.js'
 import { layerStack } from './layer.js'
 import { printToStandard } from './log.js'
@@ -15,7 +15,6 @@ export { CSPInfo }
 import { NonceableCallback } from './script/csp/nonceable_callback.js'
 export { NonceableCallback }
 import { ScriptGate } from './script/csp/script_gate.js'
-import { DestructorPass } from './script/destructor_pass.js'
 import { HelloFragment } from './script/hello_fragment.js'
 
 
@@ -218,7 +217,15 @@ export function hello(element: e.ElementOrSelector, options: t.HelloOptions = {}
 }
 
 export function clean(fragment: Element, options: u.PlainObject = {}): void {
-  new DestructorPass(fragment, options).run()
+  // fragment functions usually ignore elements that are being destroyed
+  let cleanables = getSubtree(fragment, '.up-can-clean', { ...options, destroying: true })
+
+  for (let cleanable of cleanables) {
+    // In the case of [up-keep] elements we may run on a clone that matches .up-can-clean
+    // but has no { upDestructors } property.
+    let registry = u.pluckKey(cleanable, 'upDestructors')
+    registry?.clean(cleanable)
+  }
 }
 
 // The element may also be a selector.
