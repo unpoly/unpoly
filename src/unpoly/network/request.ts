@@ -17,8 +17,7 @@ import { runPreviews } from '../status.js'
 import type * as t from './types.js'
 import { type Route } from './request_cache.js'
 import { UpResponse } from './response.js'
-import { sendWithXHR } from './send_with_xhr.js'
-import { submitWithForm } from './submit_with_form.js'
+import { sendWithXHR, submitWithForm } from './transports.js'
 
 // Prefixed, so the binding doesn't shadow the browser's `Request` here or in importers.
 // At runtime the class is named `up.Request` (see unpoly.ts).
