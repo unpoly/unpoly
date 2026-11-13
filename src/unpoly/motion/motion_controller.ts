@@ -16,7 +16,7 @@ export class MotionController {
   constructor(name: string) {
     // TODO: Make finishEvent concrete string everywhere. We only have a singgle MotionController.
     this.finishEvent = `up:${name}:finish`
-    this._resetProps()
+    this.reset()
   }
 
   // Whether we're currently starting a motion function.
@@ -59,13 +59,10 @@ export class MotionController {
     return emit(element, this.finishEvent, { log: false })
   }
 
-  _resetProps(): void {
+  reset(): void {
+    // The first call from the constructor has no motions to finish.
+    if (this._playingClusters) this.finish()
     this._startingCount = 0
     this._playingClusters = []
-  }
-
-  reset(): void {
-    this.finish()
-    this._resetProps()
   }
 }
