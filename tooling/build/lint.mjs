@@ -135,11 +135,15 @@ export class SourceLinter {
   }
 }
 
-// Like ESLint's "stylish" format. The status file is plain text, bin/test colors it itself.
-function formatFile(file, diagnostics) {
+// Like ESLint's "stylish" format. The status file is plain text, bin/test colors it itself. The
+// type check (typecheck.mjs) formats its errors the same way. Their messages can have more lines,
+// which we indent to the first one.
+export function formatFile(file, diagnostics) {
   let lines = diagnostics.map(({ line, column, message, code, severity }) => {
     let position = line ? `${line}:${column}` : ''
-    return `  ${position.padEnd(7)}  ${severity}  ${message}${code ? `  ${code}` : ''}`
+    let prefix = `  ${position.padEnd(7)}  ${severity}  `
+    let [first, ...more] = message.split('\n')
+    return [`${prefix}${first}${code ? `  ${code}` : ''}`, ...more.map((text) => ' '.repeat(prefix.length - 2) + text)].join('\n')
   })
   return [file, ...lines].join('\n')
 }

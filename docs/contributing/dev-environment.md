@@ -53,9 +53,10 @@ If a build has errors — a syntax slip, or a lint error — `bin/test` prints
 them instead of running the specs and exits non-zero, and `bin/dev status` reports
 them too. The watcher itself keeps running, so your next edit can fix things.
 
-A **type error** doesn't break the build, and nothing in the dev environment reports it:
-the specs run against code with type errors. Run `bin/typecheck` for those, together with
-`bin/lint`, before you run specs (see [Testing](testing.md#check-types-and-lint-first)).
+A **type error** doesn't break the build. The watcher checks types too, and `bin/test` prints
+the type errors before the specs, runs the specs anyway, and exits non-zero even when they pass
+(see [Testing](testing.md#check-types-and-lint-first)). `bin/dev status` lists them, but still
+reports the environment as usable.
 
 ## The build
 
@@ -64,9 +65,15 @@ also strips TypeScript's types, and minifies with [Terser](https://terser.org/).
 `tooling/build/bundles.mjs` lists every bundle, and which `--config` builds it.
 
 The watcher rebuilds only the bundles that read the file you edited, and lints the file with
-Oxlint if it is in `src/` (see [Linting](code-style.md#linting)), usually within 300 ms. It
-doesn't check types: esbuild only strips them, and `bin/typecheck` is the only type check (see
-[Type checking](code-style.md#type-checking)). Of the one-shot builds, only the production build
+Oxlint if it is in `src/` (see [Linting](code-style.md#linting)), usually within 350 ms.
+
+esbuild only strips the types. After a change in `src/` (a doc file or a `tsconfig*.json`
+included), the watcher runs the checks of `bin/typecheck` (see
+[Type checking](code-style.md#type-checking)), which takes another ~0.5 s. It waits until the
+bundles are written, so they are ready as early as without it, and a change that comes in
+during a check aborts it and checks again afterwards.
+
+Of the one-shot builds, only the production build
 (`bin/build` without `--config`, which `bin/release` runs) lints `src/`, and fails on an error.
 `bin/lint` lints `src/`, `spec/`, `tooling/` and the doc files, and CI runs it as its own job,
 next to `bin/typecheck`.
@@ -87,14 +94,19 @@ Each line of the dev log is `HH:MM:SS.mmm service | output`:
 09:48:38.636 server      | Unpoly specs serving on http://localhost:4000. Press CTRL+C to quit.
 09:48:38.902 watch       | Watching src, spec, tooling/runner/browser for changes…
 09:48:40.233 watch       | Built 9 of 9 bundles in 1326 ms
+09:48:40.811 watch       | Checked types in 578 ms
 09:48:41.217 docs        | == The Middleman is loading
-09:49:12.480 watch       | Built 2 of 9 bundles in 118 ms
+09:49:12.480 watch       | Built 2 of 9 bundles in 338 ms
+09:49:13.012 watch       | Found 1 type error in 531 ms:
+09:49:13.012 watch       | src/unpoly/link.ts
+09:49:13.012 watch       |   635:14   error  Type 'string' is not assignable to type 'number'.  TS2322
 ```
 
 What you can find in there:
 
-- `watch` — the build watcher. How many bundles it rebuilt and how long it took, and the
-  verbatim compile or lint errors when a build breaks.
+- `watch` — the build watcher. How many bundles it rebuilt and how long it took, the
+  verbatim compile or lint errors when a build breaks, and the type check's errors, formatted
+  like the lint errors.
 - `server` — the spec server, including the port it came up on.
 - `docs` — the documentation site, if you have that sibling repository checked out.
 - `dev` — the supervisor itself: a service exiting, a sibling repository being skipped
@@ -109,7 +121,8 @@ grep -E '^[0-9:.]+ watch ' tmp/dev.log      # just the build
 The log is truncated each time an environment starts, so what you are reading is the current
 session and nothing older. For a **broken build** you don't need the log at all: `bin/test`
 prints the errors instead of running the specs, and `bin/dev status` reports them too — both
-read them from `tmp/build-status.json`.
+read them from `tmp/build-status.json`. The same goes for type errors, which that file keeps
+apart from the build's, under `types`.
 
 One neighbour, `tmp/dev-crash.log`, is not a second log. It catches the supervisor's raw
 output for the one case the log cannot cover: dying before it opens the log, which in

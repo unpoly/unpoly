@@ -31,10 +31,22 @@ export function readStatus(root = PROJECT_ROOT) {
 // that built and linted everything, so it includes every edit older than that. `seen` maps the
 // files and directories the watcher had an event for since then (relative to the project root)
 // to the start of the last round after such an event.
+//
+// `types` reports the watcher's type check (see TypeChecks in watch.mjs), which runs after the
+// rounds, so that bin/test gets its bundles as early as without it. It doesn't touch `state`, `ok`
+// or `errors`, which only ever report the bundles and the linter: a type error doesn't fail a
+// build. `types.state` is "checking" from the start of a round that changes a file the check
+// reads until a check that started after that round is done, then "done". `types.startedAt` is
+// when that check started, `types.ok` and `types.errors` (formatted like `errors`) what it
+// found. While checking, they are null and empty. A watcher from before the type check writes no
+// `types` at all.
 export class BuildStatus {
   #startedAt
   #fullStartedAt = null
   #seen = new Map()
+  #state = 'building'
+  #errors = []
+  #types = { state: 'checking', startedAt: null, ok: null, errors: '' }
   #sink
   #now
   #root
@@ -64,29 +76,51 @@ export class BuildStatus {
         if (file) this.#seen.set(path.relative(this.#root, file), this.#startedAt)
       }
     }
-    this.#write('building', [])
+    this.#state = 'building'
+    this.#errors = []
+    this.#write()
   }
 
   // The round is over, and dist/ is complete. `errors` are formatted messages (build and lint),
   // empty for a clean round. Also called when a round fails in an unexpected way, so the status
   // never stays "building" for ever.
   finish(errors) {
-    this.#write('idle', errors)
+    this.#state = 'idle'
+    this.#errors = errors
+    this.#write()
   }
 
-  #write(state, errors) {
+  // The last type check no longer includes every edit: a round changed a file that it reads.
+  startTypes() {
+    this.#types = { state: 'checking', startedAt: null, ok: null, errors: '' }
+    this.#write()
+  }
+
+  // A type check that started at `startedAt` is done. `errors` are formatted messages, empty when
+  // there are none.
+  finishTypes(startedAt, errors) {
+    this.#types = { state: 'done', startedAt, ok: errors.length === 0, errors: joinErrors(errors) }
+    this.#write()
+  }
+
+  #write() {
     this.#sink({
       pid: process.pid,
-      state,
+      state: this.#state,
       startedAt: this.#startedAt,
       fullStartedAt: this.#fullStartedAt,
       seen: Object.fromEntries(this.#seen),
-      ok: errors.length === 0,
-      // Several bundles build the same source (modern/es6, unpoly/specs…), so the same file's
-      // error shows up more than once. Collapse the duplicates.
-      errors: [...new Set(errors)].join('\n\n'),
+      ok: this.#errors.length === 0,
+      errors: joinErrors(this.#errors),
+      types: this.#types,
     })
   }
+}
+
+// Several bundles build the same source (modern/es6, unpoly/specs…), so the same file's error
+// shows up more than once. Collapse the duplicates.
+function joinErrors(errors) {
+  return [...new Set(errors)].join('\n\n')
 }
 
 function writeStatusFile(status) {

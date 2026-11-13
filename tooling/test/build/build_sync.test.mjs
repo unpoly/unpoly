@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { waitForFreshBuild, newestSource, newestSourceMtime, WATCHABLE_SUFFIXES, SOURCE_DIRS, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
+import { waitForFreshBuild, waitForTypeCheck, newestSource, newestSourceMtime, WATCHABLE_SUFFIXES, SOURCE_DIRS, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
 import { LOADED_EXTENSIONS } from '../../build/esbuild.mjs'
 
 const noop = async () => {}
@@ -360,4 +360,31 @@ test('the timeout names the newest edit', async () => {
     }),
     /newest edit: src\/unpoly\/link\.js/
   )
+})
+
+// --- waitForTypeCheck() --------------------------------------------------------
+
+test('the type check is waited for until it is done', async () => {
+  let reads = [
+    { state: 'idle', types: { state: 'checking', startedAt: null, ok: null, errors: '' } },
+    { state: 'idle', types: { state: 'done', startedAt: 300, ok: false, errors: 'src/a.ts\n  1:1  error  X' } },
+  ]
+  let result = await waitForTypeCheck({ read: () => reads.length > 1 ? reads.shift() : reads[0], sleep: noop })
+  assert.deepEqual(result, { ok: false, errors: 'src/a.ts\n  1:1  error  X' })
+})
+
+test('a watcher that does not check types has no type check to wait for', async () => {
+  // One started before the watcher could, which writes no `types`.
+  assert.equal(await waitForTypeCheck({ read: () => ({ state: 'idle', ok: true }), sleep: noop }), null)
+})
+
+test('a type check that does not finish times out', async () => {
+  let clock = { now: 0 }
+  let result = await waitForTypeCheck({
+    read: () => ({ state: 'idle', types: { state: 'checking' } }),
+    now: () => clock.now,
+    sleep: async (ms) => { clock.now += ms },
+    timeoutMs: 1000,
+  })
+  assert.deepEqual(result, { timedOut: true })
 })

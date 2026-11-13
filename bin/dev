@@ -5,8 +5,8 @@
 //   bin/dev status    report whether one is running
 // All the logic lives in tooling/dev_env.mjs, which is also the only thing that decides
 // whether an environment exists — we just switch on the state it reports.
-import { devEnvState, runDevEnvForeground, stopDevEnv, lastBuildErrors } from '../tooling/dev_env.mjs'
-import { buildFailure } from '../tooling/runner/terminal/formatter.mjs'
+import { devEnvState, runDevEnvForeground, stopDevEnv, lastBuildErrors, lastTypeErrors } from '../tooling/dev_env.mjs'
+import { buildFailure, typeErrors } from '../tooling/runner/terminal/formatter.mjs'
 import pc from 'picocolors'
 
 const command = process.argv[2] || 'start'
@@ -70,6 +70,13 @@ if (command === 'start') {
     console.log(pc.green(`Dev environment is ${where}, but the latest build failed:`))
     process.stdout.write(buildFailure(errors))
     process.exit(1)
+  }
+  // A type error doesn't make the environment unusable: bin/test runs the specs anyway.
+  const types = lastTypeErrors()
+  if (types) {
+    console.log(pc.green(`Dev environment is ${where}, but the latest type check found errors:`))
+    process.stdout.write(typeErrors(types))
+    process.exit(0)
   }
   console.log(pc.green(`Dev environment is ${where}.`))
   process.exit(0)

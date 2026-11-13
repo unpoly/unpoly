@@ -64,9 +64,18 @@ bin/lint             # Oxlint, api collisions, doc files (~1 second)
 bin/test --spec="…"  # the specs that cover your change (~15 seconds for a single spec)
 ```
 
-`bin/typecheck` and `bin/lint` print nothing when all is well. The build doesn't check types,
-so a type error never stops `bin/test`: the specs run, and may even pass. A lint error in `src/`
-does stop it, but a lint error in a spec or in a doc file doesn't. CI runs all three, plus
+`bin/typecheck` and `bin/lint` print nothing when all is well.
+
+The dev watcher also lints `src/` and checks types after every change, so `bin/test` knows of
+the errors when you forget. A lint error in `src/` stops it: it prints the error instead of
+running the specs. A type error doesn't: `bin/test` prints the type errors before the specs, runs
+them anyway, and exits non-zero (7) even when they all pass. A type error is often in another
+file than the code under test, like the callers of a function whose signature you changed, and
+in the middle of a refactoring you want to see the specs before every caller is fixed.
+
+Running the two first is still quicker than waiting for a spec run to tell you, and `bin/lint`
+also covers what the watcher doesn't lint: `spec/`, `tooling/` and the doc files. CI runs all
+three, plus
 `bin/self-test` (~4 seconds). That one tests our tooling, and also checks the order in which
 modules are evaluated, so run it when you change `tooling/`, `bin/` or the imports between modules.
 

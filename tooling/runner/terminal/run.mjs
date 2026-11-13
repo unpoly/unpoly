@@ -13,12 +13,12 @@ import { fileURLToPath } from 'node:url'
 import pc from 'picocolors'
 import { Config } from '../config.mjs'
 import { serverURL, isServerRunning, startServer } from '../server/server.mjs'
-import { waitForFreshBuild, newestSourceMtime, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
+import { waitForFreshBuild, waitForTypeCheck, newestSourceMtime, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
 import { runBuild } from '../../build/build.mjs'
 import { PROJECT_ROOT } from '../../build/build_status.mjs'
 import { createRemapper } from './source_map.mjs'
 import { createReceiver } from './receiver.mjs'
-import { buildFailure } from './formatter.mjs'
+import { buildFailure, typeErrors } from './formatter.mjs'
 import { specsURL } from './urls.mjs'
 import { parseLocation, parseSuite, readSources, specFiltersFor } from '../../find_spec.mjs'
 import { isDevEnvRunning, startDevEnv } from '../../dev_env.mjs'
@@ -26,6 +26,9 @@ import { isDevEnvRunning, startDevEnv } from '../../dev_env.mjs'
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 const WINDOW = { width: 1200, height: 800 }
 const WATCHDOG_TIMEOUT = 30_000
+
+// The specs passed, but the watcher's type check found errors (see runDev()).
+const TYPE_ERRORS = 7
 
 // Parses config, or prints the error and signals exit code 5. Returns the Config,
 // or null if parsing failed (caller should return CONFIG_ERROR).
@@ -199,7 +202,49 @@ export async function runDev(argv, env) {
     return 4
   }
 
-  return await drive(config)
+  // The watcher checks types after it has written the bundles, which we don't wait for: a type
+  // error doesn't stop the specs. It is often in another file than the code under test (a changed
+  // signature breaks its callers), and a refactoring may want to see the specs before every
+  // caller is fixed. Lint errors do stop them, see waitForFreshBuild().
+  //
+  // But a run with type errors is not green. We print them before the specs when the check is
+  // done by then, which it usually is (it takes ~0.5 s, about as long as launching the browser),
+  // or else after them, and exit non-zero.
+  let typeCheck = trackTypeCheck()
+  let reportedTypes = false
+  let reportTypes = () => {
+    reportedTypes = true
+    let result = typeCheck.result
+    if (result?.timedOut) {
+      console.error(pc.yellow('The dev watcher did not finish its type check in time. Run `bin/typecheck` before you commit.'))
+    } else if (result?.ok === false) {
+      process.stdout.write(typeErrors(result.errors))
+    }
+  }
+  let code = await drive(config, {
+    beforeSpecs() {
+      if (typeCheck.done) reportTypes()
+    },
+  })
+  if (reportedTypes) {
+    if (typeCheck.result?.ok === false) console.log(pc.red('✗ There are type errors (listed above, before the specs).'))
+  } else {
+    await typeCheck.promise
+    reportTypes()
+  }
+  return code === 0 && typeCheck.result?.ok === false ? TYPE_ERRORS : code
+}
+
+// waitForTypeCheck(), with its result readable without waiting once it is there.
+function trackTypeCheck() {
+  let tracked = { done: false, result: null }
+  tracked.promise = waitForTypeCheck().then((result) => {
+    Object.assign(tracked, { done: true, result })
+  }, () => {
+    // Reading the status failed in an unexpected way. The type check is not worth failing for.
+    tracked.done = true
+  })
+  return tracked
 }
 
 export async function runCI(argv, env) {
@@ -215,7 +260,8 @@ export async function runCI(argv, env) {
   }
 }
 
-async function drive(config) {
+// `beforeSpecs()` is called once the browser is up, right before the specs start.
+async function drive(config, { beforeSpecs } = {}) {
   const browser = await puppeteer.launch({
     browser: config.browser,
     headless: config.headless,
@@ -248,6 +294,7 @@ async function drive(config) {
     // trigger global errors on purpose (error-handling tests); Jasmine catches
     // and reports the genuine failures via the events above.
 
+    beforeSpecs?.()
     await page.goto(specsURL(serverURL, config.toParams()))
 
     const watchdog = startWatchdog(receiver, () => {

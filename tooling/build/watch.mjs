@@ -6,6 +6,10 @@
 // times, so there are moments where all of them are idle, but one has not even started on the
 // edit yet: a runner reading "idle" would then test a stale specs.js. A round has one start time,
 // taken before any bundle reads a source, and ends when every affected bundle is written.
+//
+// After the rounds that change something in src/, the watcher checks types, like bin/typecheck
+// (see TypeChecks). That takes ~0.5 s and keeps every core busy, so it waits for the round to
+// end, and bin/test gets its bundles as early as without it.
 
 import { mkdirSync, watch } from 'node:fs'
 import path from 'node:path'
@@ -16,6 +20,7 @@ import { SKIP_DIRS, SOURCE_DIRS, WATCHABLE_SUFFIXES } from './build_sync.mjs'
 import { esbuildOptions, finish } from './esbuild.mjs'
 import { formatError, formatWarnings } from './build.mjs'
 import { SourceLinter } from './lint.mjs'
+import { watchTypeErrors } from './typecheck.mjs'
 import { TerserPool } from './terser.mjs'
 import { watchTree } from './watch_tree.mjs'
 
@@ -60,8 +65,27 @@ export async function runWatch({ bundles, sourcemap }) {
     return [...new Set([...errors.flat(), ...await linter.format()])]
   }
 
+  let status = new BuildStatus()
+  let typeChecks = new TypeChecks({
+    status,
+    async check(signal) {
+      let startedAt = Date.now()
+      let result = await watchTypeErrors({ signal })
+      // A round started, and the check will run again after it.
+      if (!result) return null
+      let ms = Date.now() - startedAt
+      if (result.count) {
+        console.log(pc.red(`Found ${result.count} type error${result.count === 1 ? '' : 's'} in ${ms} ms:`))
+        console.log(result.errors.join('\n\n'))
+      } else {
+        console.log(pc.green(`Checked types in ${ms} ms`))
+      }
+      return result.errors
+    },
+  })
+
   let rounds = new Rounds({
-    status: new BuildStatus(),
+    status: roundStatus(status, typeChecks),
     async run(changedFiles) {
       // Only files that no bundle reads have changed. The round itself is the point: its
       // `startedAt` passes the new directory mtime, which waitForFreshBuild() compares against.
@@ -91,6 +115,7 @@ export async function runWatch({ bundles, sourcemap }) {
   return new Promise((resolve) => {
     let stop = async () => {
       watcher.close()
+      typeChecks.close()
       await Promise.all(contexts.map((context) => context.dispose()))
       await terser.close()
       resolve(0)
@@ -123,6 +148,8 @@ export function watchSources(rounds, { root = PROJECT_ROOT, log = console.log } 
   // saving the file by rename would end a watch on the file itself.
   let rootWatcher = watch(root, (_event, name) => {
     if (name === 'package.json') rounds.change(null)
+    // Only the type check reads these (see isTypeChecked()).
+    if (TSCONFIG.test(name)) rounds.touch(path.join(root, name))
   })
   rootWatcher.on('error', (error) => cannotWatch(error, root))
 
@@ -170,6 +197,30 @@ export function affectedBundles(inputs, changedFiles) {
   let known = (file) => file !== null && inputs.some((set) => set?.has(file))
   if (inputs.includes(null) || ![...changedFiles].every(known)) return all
   return all.filter((index) => [...changedFiles].some((file) => inputs[index].has(file)))
+}
+
+// What Rounds reports to: the status, and the type checks, which wait for the rounds (see
+// TypeChecks). `root` is a seam for the self-tests.
+export function roundStatus(status, typeChecks, root = PROJECT_ROOT) {
+  return {
+    start(round) {
+      status.start(round)
+      typeChecks.roundStarted({ outdated: round.full || round.seen.some((seen) => isTypeChecked(seen, root)) })
+    },
+    finish(errors) {
+      status.finish(errors)
+      typeChecks.roundFinished()
+    },
+  }
+}
+
+const TSCONFIG = /^tsconfig.*\.json$/
+
+// Whether the type check reads the file or directory at the absolute path `seen`, or may read
+// something in it: anything in src/ (the doc files too, for the API probe) and the tsconfigs.
+export function isTypeChecked(seen, root = PROJECT_ROOT) {
+  let relative = path.relative(root, seen)
+  return relative === 'src' || relative.startsWith('src' + path.sep) || TSCONFIG.test(relative)
 }
 
 // Bundles only ever import files with these extensions, so nothing else needs a rebuild.
@@ -251,6 +302,86 @@ export class Rounds {
         }
         // Edits arrived while we were building: build again before saying we're done.
         if (!this.#pending) this.#status.finish(errors)
+      }
+    } finally {
+      this.#running = false
+    }
+  }
+}
+
+// Runs the type check after the rounds that change what it reads, one check at a time, and never
+// during a round: tsc keeps every core busy for ~0.5 s, and would slow down the bundles that
+// bin/test waits for. A round that starts during a check aborts it, and the check runs again
+// once the round is done. bin/test reads the result from the status (see BuildStatus).
+export class TypeChecks {
+  #status
+  #check
+  #now
+  // A check is due, and starts when no round is running.
+  #due = false
+  #inRound = false
+  #running = false
+  #controller = null
+  #idle = null
+
+  // `check(signal)` checks types, and resolves with a list of errors. When `signal` aborts it, it
+  // may resolve with anything. `status` gets the results (see BuildStatus#startTypes() and
+  // #finishTypes()). `now` is a seam for the self-tests.
+  constructor({ status, check, now = Date.now }) {
+    this.#status = status
+    this.#check = check
+    this.#now = now
+  }
+
+  // A round of rebuilds begins. `outdated` says that it changes something the check reads.
+  roundStarted({ outdated }) {
+    this.#inRound = true
+    if (this.#controller) {
+      // Its result would still be good when the round is not `outdated`, but it would slow
+      // down the round. It runs again after the round.
+      this.#controller.abort()
+      this.#due = true
+    }
+    if (outdated) {
+      this.#due = true
+      this.#status.startTypes()
+    }
+  }
+
+  // The round is over, with every bundle written.
+  roundFinished() {
+    this.#inRound = false
+    if (this.#due && !this.#running) this.#idle = this.#loop()
+  }
+
+  // Aborts a running check, for good.
+  close() {
+    this.#due = false
+    this.#controller?.abort()
+  }
+
+  // Resolves once no check is running. For the self-tests.
+  get idle() {
+    return this.#idle ?? Promise.resolve()
+  }
+
+  async #loop() {
+    this.#running = true
+    try {
+      // A round that started during the check aborted it, and the check is due again. When that
+      // round is over, we go on here, or roundFinished() starts a new loop.
+      while (this.#due && !this.#inRound) {
+        this.#due = false
+        let controller = this.#controller = new AbortController()
+        let startedAt = this.#now()
+        let errors
+        try {
+          errors = await this.#check(controller.signal)
+        } catch (error) {
+          errors = [String(error?.stack || error)]
+        }
+        this.#controller = null
+        if (!controller.signal.aborted) this.#status.finishTypes(startedAt, errors)
       }
     } finally {
       this.#running = false

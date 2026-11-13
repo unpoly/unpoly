@@ -96,6 +96,32 @@ test('a full round vouches for everything, other rounds for the paths they saw',
   assert.deepEqual(last().seen, {}, 'a full round includes what the others saw')
 })
 
+test('the type check reports in its own fields, and never fails the build', () => {
+  // bin/test refuses to run specs for `ok: false`, and runs them for a type error. A watcher from
+  // before the type check writes no `types`, so they had to be new fields.
+  let { status, statuses, last } = statusWithCapture()
+
+  status.start()
+  assert.deepEqual(last().types, { state: 'checking', startedAt: null, ok: null, errors: '' }, 'nothing checked yet')
+  status.finish([])
+  status.finishTypes(1200, ['src/a.ts\n  1:1  error  X', 'src/a.ts\n  1:1  error  X'])
+  assert.equal(last().state, 'idle')
+  assert.equal(last().ok, true)
+  assert.equal(last().errors, '')
+  assert.deepEqual(last().types, { state: 'done', startedAt: 1200, ok: false, errors: 'src/a.ts\n  1:1  error  X' })
+
+  status.startTypes()
+  assert.deepEqual(last().types, { state: 'checking', startedAt: null, ok: null, errors: '' }, 'no results while checking')
+  assert.equal(last().state, 'idle', 'a type check leaves the build alone')
+  status.finishTypes(1300, [])
+  assert.deepEqual(last().types, { state: 'done', startedAt: 1300, ok: true, errors: '' })
+
+  status.start()
+  status.finish(['ERROR X'])
+  assert.equal(last().types.state, 'done', 'a round leaves the type check alone')
+  assert.equal(statuses.length, 7)
+})
+
 test('a rebuild request carries the files to the watcher, once', (t) => {
   let root = mkdtempSync(path.join(tmpdir(), 'build-request-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))

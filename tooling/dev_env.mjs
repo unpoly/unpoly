@@ -108,6 +108,13 @@ export function lastBuildErrors(read = readStatus) {
   return status && status.ok === false ? (status.errors || '(no error output captured)') : null
 }
 
+// The type errors from the watcher's most recent type check, or null if it found none (or is
+// still checking, or the watcher doesn't check types).
+export function lastTypeErrors(read = readStatus) {
+  const types = read()?.types
+  return types?.state === 'done' && types.ok === false ? (types.errors || '(no error output captured)') : null
+}
+
 // --- Starting --------------------------------------------------------------
 
 // Starts the environment in the background and resolves once it is ready: the

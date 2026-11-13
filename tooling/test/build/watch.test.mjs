@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { Rounds, affectedBundles, watchSources } from '../../build/watch.mjs'
+import { Rounds, TypeChecks, affectedBundles, isTypeChecked, roundStatus, watchSources } from '../../build/watch.mjs'
 import { REQUEST_PATH, requestBuild } from '../../build/build_status.mjs'
 import { SOURCE_DIRS } from '../../build/build_sync.mjs'
 
@@ -139,6 +139,144 @@ test('the status learns which paths a round has seen', async () => {
   assert.deepEqual(starts, [{ seen: ['/src/pages', '/src/a.js'], full: false }, { seen: [], full: true }])
 })
 
+// --- TypeChecks ---------------------------------------------------------------
+
+// TypeChecks with checks that finish when the test says so (`checks[i].finish(errors)`), and a
+// recording status.
+function typeChecks() {
+  let log = []
+  let checks = []
+  let clock = { now: 1000 }
+  let status = {
+    startTypes: () => log.push('checking'),
+    finishTypes: (startedAt, errors) => log.push(`done at ${startedAt}${errors.length ? `: ${errors.join(', ')}` : ''}`),
+  }
+  let subject = new TypeChecks({
+    status,
+    now: () => clock.now,
+    check: (signal) => new Promise((resolve, reject) => {
+      let check = { signal, finish: resolve, fail: reject }
+      checks.push(check)
+      // Like tsc: an aborted run ends.
+      signal.addEventListener('abort', () => resolve(['ABORTED']))
+    }),
+  })
+  // Lets the checks' promises settle.
+  let tick = () => new Promise((resolve) => setTimeout(resolve))
+  return { subject, log, checks, clock, tick }
+}
+
+test('a round that changes what the check reads makes it run after the round', async () => {
+  // tsc keeps every core busy, so during a round it would slow down the bundles bin/test waits for.
+  let { subject, log, checks, clock, tick } = typeChecks()
+
+  subject.roundStarted({ outdated: true })
+  assert.deepEqual(log, ['checking'])
+  await tick()
+  assert.equal(checks.length, 0, 'not during the round')
+
+  clock.now = 2000
+  subject.roundFinished()
+  assert.equal(checks.length, 1)
+  checks[0].finish(['TYPE ERROR'])
+  await subject.idle
+  assert.deepEqual(log, ['checking', 'done at 2000: TYPE ERROR'])
+})
+
+test('a round that changes nothing the check reads checks nothing', async () => {
+  let { subject, log, checks } = typeChecks()
+
+  subject.roundStarted({ outdated: false })
+  subject.roundFinished()
+  await subject.idle
+
+  assert.equal(checks.length, 0)
+  assert.deepEqual(log, [])
+})
+
+test('a round that starts during a check aborts it, and the check runs again after the round', async () => {
+  let { subject, log, checks, clock, tick } = typeChecks()
+  subject.roundStarted({ outdated: true })
+  subject.roundFinished()
+
+  // A spec edit, say. The check's result would still be good, but it would slow down the round.
+  subject.roundStarted({ outdated: false })
+  assert.ok(checks[0].signal.aborted)
+  await tick()
+  assert.equal(checks.length, 1, 'not during the round')
+
+  clock.now = 3000
+  subject.roundFinished()
+  await tick()
+  assert.equal(checks.length, 2)
+  checks[1].finish([])
+  await subject.idle
+  assert.deepEqual(log, ['checking', 'done at 3000'], 'the aborted check reports nothing')
+})
+
+test('rounds back to back make one check, after the last one', async () => {
+  let { subject, log, checks, tick } = typeChecks()
+
+  subject.roundStarted({ outdated: true })
+  subject.roundFinished()
+  subject.roundStarted({ outdated: true })
+  subject.roundFinished()
+  await tick()
+  checks.at(-1).finish([])
+  await subject.idle
+
+  assert.equal(checks.filter(({ signal }) => !signal.aborted).length, 1)
+  assert.deepEqual(log, ['checking', 'checking', 'done at 1000'])
+})
+
+test('a check that throws reports its error, so the status does not say "checking" for ever', async () => {
+  let { subject, log, checks } = typeChecks()
+
+  subject.roundStarted({ outdated: true })
+  subject.roundFinished()
+  checks[0].fail(new Error('spawn ENOENT'))
+  await subject.idle
+
+  assert.match(log[1], /^done at 1000: Error: spawn ENOENT/)
+})
+
+test('close() aborts a running check for good', async () => {
+  let { subject, log, checks, tick } = typeChecks()
+
+  subject.roundStarted({ outdated: true })
+  subject.roundFinished()
+  subject.close()
+  await subject.idle
+  await tick()
+
+  assert.ok(checks[0].signal.aborted)
+  assert.equal(checks.length, 1)
+  assert.deepEqual(log, ['checking'])
+})
+
+test('the type check reads src/, the doc files in it and the tsconfigs, nothing else', () => {
+  for (let file of ['src', 'src/unpoly/link.ts', 'src/unpoly/link.md', 'src/unpoly', 'tsconfig.json', 'tsconfig.core.json']) {
+    assert.ok(isTypeChecked(path.join('/project', file), '/project'), file)
+  }
+  for (let file of ['spec/unpoly/link_spec.js', 'tooling/runner/browser/poster.js', 'package.json', 'srcfoo/a.ts']) {
+    assert.ok(!isTypeChecked(path.join('/project', file), '/project'), file)
+  }
+})
+
+test('a round outdates the type check when it saw something in src/, or built everything', () => {
+  let log = []
+  let status = { start: () => log.push('start'), finish: () => log.push('finish') }
+  let typeChecks = { roundStarted: ({ outdated }) => log.push(`outdated: ${outdated}`), roundFinished: () => log.push('finished') }
+  let reporter = roundStatus(status, typeChecks, '/project')
+
+  reporter.start({ seen: ['/project/spec/unpoly', '/project/spec/unpoly/link_spec.js'], full: false })
+  reporter.finish([])
+  reporter.start({ seen: ['/project/spec/unpoly', '/project/src/unpoly/link.md'], full: false })
+  reporter.start({ seen: [], full: true })
+
+  assert.deepEqual(log, ['start', 'outdated: false', 'finish', 'finished', 'start', 'outdated: true', 'start', 'outdated: true'])
+})
+
 // --- affectedBundles() ------------------------------------------------------
 
 const unpoly = new Set(['/src/unpoly.js', '/src/unpoly/util.js'])
@@ -225,6 +363,14 @@ test('package.json rebuilds everything, also when saved by rename again', async 
       renameSync(at('package.json.tmp'), at('package.json'))
     })
   }
+})
+
+test('a tsconfig makes a round, which builds nothing', async (t) => {
+  // Only the type check reads it.
+  let { at, calls, expect, settle } = project(t)
+  await expect([['touch', 'tsconfig.core.json']], () => writeFileSync(at('tsconfig.core.json'), '{}'))
+  await settle()
+  assert.ok(!calls.some(([kind]) => kind === 'change'))
 })
 
 test('a rebuild request rebuilds the files it names, once', async (t) => {

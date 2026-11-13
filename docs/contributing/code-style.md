@@ -30,10 +30,10 @@ how modules import each other is covered in
 ### Type checking
 
 The build doesn't use TypeScript at all: esbuild strips the types from each file, and never
-checks them. Neither does the dev environment's watcher, so `bin/test` happily runs specs
-against code with type errors. The only type check is `bin/typecheck`. It takes about a second,
-so run it (and `bin/lint`) before the specs, which take fifteen seconds for a single one (see
-[Testing](testing.md#check-types-and-lint-first)). It prints nothing when all is well.
+checks them. `bin/typecheck` checks them, in about a second, and prints nothing when all is
+well. The dev environment's watcher runs the same checks after every change in `src/`, and
+`bin/test` prints their errors before the specs, which it runs anyway (see
+[Testing](testing.md#check-types-and-lint-first)).
 
 Besides the [public-API probe](documentation.md#public-api-must-exist), which checks that
 documented API exists in the types, `bin/typecheck` runs TypeScript 7's checker twice:

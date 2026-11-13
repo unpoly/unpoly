@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { closeSync, mkdtempSync, readFileSync, rmSync, writeSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { createLog, devEnvState, isSupervisor, lastBuildErrors, startUnderLock, withStartLock } from '../dev_env.mjs'
+import { createLog, devEnvState, isSupervisor, lastBuildErrors, lastTypeErrors, startUnderLock, withStartLock } from '../dev_env.mjs'
 
 const SERVING = async () => true
 const SILENT = async () => false
@@ -121,6 +121,19 @@ test('lastBuildErrors returns the errors when the last build failed', () => {
 
 test('lastBuildErrors falls back to a placeholder when a failed build has no text', () => {
   assert.match(lastBuildErrors(() => ({ ok: false, errors: '' })), /no error output/)
+})
+
+// --- lastTypeErrors -------------------------------------------------------
+
+test('lastTypeErrors returns the errors of a finished type check that found some', () => {
+  assert.equal(lastTypeErrors(() => ({ ok: true, types: { state: 'done', ok: false, errors: 'boom' } })), 'boom')
+})
+
+test('lastTypeErrors is null while checking, after a clean check, and for a watcher without type checks', () => {
+  assert.equal(lastTypeErrors(() => ({ ok: true, types: { state: 'checking', ok: null, errors: '' } })), null)
+  assert.equal(lastTypeErrors(() => ({ ok: true, types: { state: 'done', ok: true, errors: '' } })), null)
+  assert.equal(lastTypeErrors(() => ({ ok: true })), null)
+  assert.equal(lastTypeErrors(() => null), null)
 })
 
 // --- startUnderLock: the sequence that broke three times ---------------------

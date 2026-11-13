@@ -227,3 +227,27 @@ export async function waitForFreshBuild({
     await sleep(100)
   }
 }
+
+// How long bin/test waits for the watcher's type check. A check takes ~0.5 s after the round
+// that bin/test waited for.
+const TYPE_CHECK_TIMEOUT_MS = 10_000
+
+// Waits for the watcher's type check to include every edit the watcher has seen, and resolves
+// with what it found, as `{ ok, errors }`. Call it after waitForFreshBuild(). Resolves with
+// `{ timedOut: true }` when the check doesn't finish in time, and with null for a watcher that
+// doesn't check types (one started before it could). See BuildStatus for `types`.
+export async function waitForTypeCheck({
+  read = () => readStatus(),
+  now = Date.now,
+  sleep = defaultSleep,
+  timeoutMs = TYPE_CHECK_TIMEOUT_MS,
+} = {}) {
+  let deadline = now() + timeoutMs
+  while (true) {
+    let types = read()?.types
+    if (!types) return null
+    if (types.state === 'done') return { ok: types.ok, errors: types.errors }
+    if (now() >= deadline) return { timedOut: true }
+    await sleep(100)
+  }
+}

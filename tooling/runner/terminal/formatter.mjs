@@ -18,6 +18,18 @@ export function buildFailure(errors) {
   return lines.join('\n') + '\n'
 }
 
+// The dev watcher's type check found errors. They don't stop the specs (see runDev()), so the
+// header says that.
+export function typeErrors(errors) {
+  let lines = []
+  lines.push('')
+  lines.push(pc.red('✗ Type errors') + ' (the specs run anyway)')
+  lines.push('')
+  lines.push(indent((errors || '').trim() || '(no error output captured)', 2))
+  lines.push('')
+  return lines.join('\n') + '\n'
+}
+
 // One character per spec in the live progress line.
 export function mark(status) {
   switch (status) {

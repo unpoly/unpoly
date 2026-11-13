@@ -1,127 +1,27 @@
 #!/usr/bin/env node
-// Type-check src/ with TypeScript 7. Runs three checks:
-//
-//   1. tsconfig.json: all of src/, with loose settings.
-//   2. tsconfig.core.json: Unpoly's core (src/unpoly/), with stricter settings and without
-//      unpoly-migrate's declarations. The folders listed in NOT_YET_STRICT get the same check
-//      without the stricter settings.
-//   3. The API probe: everything that the doc files below src/ document as public must exist in
-//      the types (tooling/docs/api_probe.mjs). The core probe runs in check 2, the migrate probe
-//      gets a run of its own with the settings of check 1.
+// Type-check src/ with TypeScript 7: the loose check (tsconfig.json), the core check
+// (tsconfig.core.json) and the API probe. tooling/build/typecheck.mjs explains them.
 //
 // Extra arguments are forwarded to tsc, so `bin/typecheck --extendedDiagnostics` works.
-// The build doesn't use TypeScript at all: esbuild strips the types.
-import { spawn } from 'node:child_process'
-import fs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { collectProbes, probeSource, translateError } from '../tooling/docs/api_probe.mjs'
+// The build doesn't use TypeScript at all: esbuild strips the types. The dev watcher runs the same
+// checks after every change in src/, and `bin/test` prints the errors it found.
+import { checkTypes, count, tsc } from '../tooling/build/typecheck.mjs'
 
-const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const tscBin = path.join(projectRoot, 'node_modules', 'typescript', 'bin', 'tsc')
 const extraArgs = process.argv.slice(2)
 
-// Core folders that don't pass the stricter settings of tsconfig.core.json yet. tsc has no
-// per-file settings, and leaving a folder out of the config's `include` doesn't help: other
-// core files import it, so tsc checks it anyway. We run the core check a second time without
-// the stricter settings, and take these folders' errors from that run.
-const NOT_YET_STRICT = [
-  // All of core passes the stricter settings now.
-]
-
-// The settings that tsconfig.core.json adds to tsconfig.json. The second run turns them off.
-// When tsconfig.core.json gets another setting, add it here.
-const STRICT_SETTINGS = ['noImplicitAny', 'strictNullChecks']
-
-function tsc(args, stdio) {
-  return new Promise((resolve) => {
-    let child = spawn(tscBin, args, { stdio, cwd: projectRoot })
-    let stdout = ''
-    child.stdout?.on('data', (chunk) => stdout += chunk)
-    child.on('exit', (code) => resolve({ code: code ?? 1, stdout }))
-  })
-}
-
-// Splits tsc's plain output (`--pretty false`) into blocks. An error starts with
-// `path(line,col): error`, followed by indented lines that elaborate it. An error without a
-// location, like a missing type library, starts with `error`. Any other line is a block of its own.
-function outputBlocks(output) {
-  let blocks = []
-  for (let line of output.split('\n')) {
-    if (/^\s/.test(line) && blocks.length) {
-      blocks.at(-1).lines.push(line)
-    } else if (line) {
-      blocks.push({ lines: [line], error: /^(\S+\(\d+,\d+\): )?error TS\d+/.test(line) })
-    }
-  }
-  return blocks
-}
-
-function isNotYetStrict({ lines }) {
-  return NOT_YET_STRICT.some((folder) => lines[0].startsWith(folder))
-}
-
-// tsc may also fail without printing an error, e.g. when it crashes.
-function crashed({ code, stdout }) {
-  return code !== 0 && !outputBlocks(stdout).some(({ error }) => error)
-}
-
-// Writes a probe file into tmp/ (gitignored), with a tsconfig that adds it to the given config.
-const PROBE_DIR = 'tmp/api_probe'
-let probes = collectProbes(projectRoot)
-function writeProbe(name, config) {
-  let dir = path.join(projectRoot, PROBE_DIR)
-  fs.mkdirSync(dir, { recursive: true })
-  let { source, headerLines } = probeSource(probes[name], '../../src')
-  fs.writeFileSync(path.join(dir, `${name}.ts`), source)
-  let probeConfig = { extends: `../../${config}`, files: [`${name}.ts`] }
-  fs.writeFileSync(path.join(dir, `tsconfig.${name}.json`), JSON.stringify(probeConfig, null, 2) + '\n')
-  return { probes: probes[name], file: `${PROBE_DIR}/${name}.ts`, config: `${PROBE_DIR}/tsconfig.${name}.json`, headerLines }
-}
-let coreProbe = writeProbe('core', 'tsconfig.core.json')
-let migrateProbe = writeProbe('migrate', 'tsconfig.json')
-
-function isIn(probe, { lines }) {
-  return lines[0].startsWith(`${probe.file}(`)
-}
-
-// The blocks about a probe file, pointed at the doc entries they probe.
-function probeErrors(probe, blocks) {
-  return blocks.filter((block) => isIn(probe, block)).map((block) => {
-    return { ...block, lines: translateError(block.lines, probe.probes, probe.headerLines) ?? block.lines }
-  })
-}
-
-function count(blocks) {
-  return blocks.filter(({ error }) => error).length
-}
-
-// This run checks all of src/ again, but we only take the probe's errors from it: check 1 reports
-// the others. It runs beside check 1, which prints as it goes.
-let migrateRun = tsc(['--project', migrateProbe.config, '--pretty', 'false', ...extraArgs], ['inherit', 'pipe', 'inherit'])
-let loose = await tsc(['--project', 'tsconfig.json', ...extraArgs], 'inherit')
-let coreArgs = ['--project', coreProbe.config, '--pretty', 'false', ...extraArgs]
-let [core, coreNotYetStrict, migrate] = await Promise.all([
-  tsc(coreArgs, ['inherit', 'pipe', 'inherit']),
-  tsc([...coreArgs, ...STRICT_SETTINGS.flatMap((setting) => [`--${setting}`, 'false'])], ['inherit', 'pipe', 'inherit']),
-  migrateRun,
-])
-let blocks = [
-  ...outputBlocks(core.stdout).filter((block) => !(block.error && isNotYetStrict(block))),
-  ...outputBlocks(coreNotYetStrict.stdout).filter((block) => block.error && isNotYetStrict(block)),
-]
-let coreBlocks = blocks.filter((block) => !isIn(coreProbe, block))
-let probeBlocks = [...probeErrors(coreProbe, blocks), ...probeErrors(migrateProbe, outputBlocks(migrate.stdout))]
-for (let { lines } of [...coreBlocks, ...probeBlocks]) console.log(lines.join('\n'))
-let coreErrorCount = count(coreBlocks)
+// checkTypes() runs the loose check too, with the migrate probe, but without tsc's pretty output.
+// We only take the probe's errors from that run, and print the loose check's as tsc prints them.
+let checks = checkTypes({ extraArgs, stderr: 'inherit' })
+let loose = await tsc(['--project', 'tsconfig.json', ...extraArgs], { stdio: 'inherit' })
+let { core, probe, crashed } = await checks
+for (let { lines } of [...core, ...probe]) console.log(lines.join('\n'))
+let coreErrorCount = count(core)
 if (coreErrorCount) {
   console.log(`\nFound ${coreErrorCount} error${coreErrorCount === 1 ? '' : 's'} in the core check (tsconfig.core.json).`)
 }
-let probeErrorCount = count(probeBlocks)
+let probeErrorCount = count(probe)
 if (probeErrorCount) {
   console.log(`\nFound ${probeErrorCount} doc ${probeErrorCount === 1 ? 'entry' : 'entries'} for public API that the types don't have (tooling/docs/api_probe.mjs).`)
 }
-let coreFailed = coreErrorCount > 0 || crashed(core) || crashed(coreNotYetStrict)
-let probeFailed = probeErrorCount > 0 || crashed(migrate)
 
-process.exit(loose.code || (coreFailed || probeFailed ? 1 : 0))
+process.exit(loose.code || (coreErrorCount || probeErrorCount || crashed.length ? 1 : 0))

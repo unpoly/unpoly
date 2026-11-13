@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { failureBlock, runSummary, groupSummary, mark, buildFailure } from '../../../runner/terminal/formatter.mjs'
+import { failureBlock, runSummary, groupSummary, mark, buildFailure, typeErrors } from '../../../runner/terminal/formatter.mjs'
 
 const FAILURE = {
   index: 1,
@@ -72,4 +72,11 @@ test('buildFailure tolerates empty error text', () => {
   let out = buildFailure('')
   assert.match(out, /Build failed/)
   assert.match(out, /no error output captured/)
+})
+
+test('typeErrors says the specs run anyway, and indents the errors', () => {
+  let out = typeErrors('src/unpoly/link.ts\n  635:14   error  Type \'string\' is not assignable to type \'number\'.  TS2322')
+  assert.match(out, /Type errors \(the specs run anyway\)/)
+  assert.match(out, /^ {2}src\/unpoly\/link\.ts$/m)
+  assert.match(out, /^ {4}635:14 /m)
 })
