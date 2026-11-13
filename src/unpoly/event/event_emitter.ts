@@ -7,7 +7,7 @@ import { Layer, layerStack } from '../layer.js'
 import { logConfig, printToStandard } from '../log.js'
 import type * as t from './types.js'
 
-export function emitParsed(emission: t.EventEmitterOptions): Event {
+export function emitEvent(emission: t.EventEmitterOptions): Event {
   logEmission(emission)
 
   if (emission.baseLayer) {
@@ -28,8 +28,8 @@ function dispatch({ target, event, ensureBubbles, callback }: t.EventEmitterOpti
   guard(() => callback?.(event))
 }
 
-export function assertParsedEmitted(emission: t.EventEmitterOptions): void {
-  const event = emitParsed(emission)
+export function assertEventEmitted(emission: t.EventEmitterOptions): void {
+  const event = emitEvent(emission)
   if (event.defaultPrevented) {
     throw new Aborted(`Event ${event.type} was prevented`)
   }

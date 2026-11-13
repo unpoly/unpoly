@@ -1,7 +1,7 @@
 import * as u from '../util.js'
 import { Aborted, Offline } from '../error.js'
 import {
-  assertParsedEmitted, emitParsed, parseEmitArgs, type EmitProps, type EmittedEvent,
+  assertEventEmitted, emitEvent, parseEmitArgs, type EmitProps, type EmittedEvent,
   type EventEmitterOptions,
 } from '../event.js'
 import { Params } from '../form.js'
@@ -532,11 +532,11 @@ export class UpRequest {
   emit<T extends string>(eventType: T, props?: EmitProps): EmittedEvent<T>
   emit<E extends Event>(event: E, options?: EmitProps): E
   emit(...args: any[]): Event {
-    return emitParsed(this._parseEmitArgs(args))
+    return emitEvent(this._parseEmitArgs(args))
   }
 
   assertEmitted(...args: any[]): void {
-    assertParsedEmitted(this._parseEmitArgs(args))
+    assertEventEmitted(this._parseEmitArgs(args))
   }
 
   toString(): string {

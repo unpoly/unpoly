@@ -2,7 +2,7 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { Aborted, NotImplemented } from '../error.js'
 import {
-  bindListeners, emitParsed, on, parseBindArgs, parseEmitArgs, unbindListeners, type EmitProps,
+  bindListeners, emitEvent, on, parseBindArgs, parseEmitArgs, unbindListeners, type EmitProps,
   type EmittedEvent, type EventEmitterOptions, type EventPlan, type EventTypes, type ListenerArgs,
   type ListenerGroup, type ObservedEvent, type UnbindFn,
 } from '../event.js'
@@ -224,7 +224,7 @@ export class Layer {
   emit<T extends string>(target: EventTarget, eventType: T, props?: EmitProps): EmittedEvent<T>
   emit<E extends Event>(target: EventTarget, event: E, options?: EmitProps): E
   emit(...args: unknown[]): Event {
-    return emitParsed(this._parseEmitArgs(args))
+    return emitEvent(this._parseEmitArgs(args))
   }
 
   saveHistory(): void {
