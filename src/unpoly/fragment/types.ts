@@ -485,7 +485,7 @@ Options for `findFragment()`. Other options (like `{ layer }`) are passed on to
 `up.fragment.closest()` and `up.fragment.get()`.
 @internal
 */
-export interface FragmentFinderOptions extends LookupOptions {
+export interface FindFragmentOptions extends LookupOptions {
   selector: string
   // For matching in detached content, as needed by up.ResponseDoc.
   document?: Document | Element

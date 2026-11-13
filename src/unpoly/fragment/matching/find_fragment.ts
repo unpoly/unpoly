@@ -7,7 +7,7 @@ import type * as t from '../types.js'
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
 // Unpoly works with HTML elements, see up.fragment.get().
-export function findFragment(options: t.FragmentFinderOptions): HTMLElement | undefined {
+export function findFragment(options: t.FindFragmentOptions): HTMLElement | undefined {
   // Selector is a string, not an up.Selector
   let { selector, origin, preferOldElements } = options
   // This option is for matching fragments in detached content, as needed by up.ResponseDoc.
@@ -23,17 +23,17 @@ function findInPreferredElements(selector: string, document: Document | Element,
   }
 }
 
-function findInRegion(selector: string, origin: Element | undefined, match: 'region' | 'first', options: t.FragmentFinderOptions): HTMLElement | undefined {
+function findInRegion(selector: string, origin: Element | undefined, match: 'region' | 'first', options: t.FindFragmentOptions): HTMLElement | undefined {
   if (match === 'region' && !containsMainPseudo(selector) && origin?.isConnected) {
     return findClosest(selector, origin, options) || findDescendantInRegion(selector, origin, options)
   }
 }
 
-function findClosest(selector: string, origin: Element, options: t.FragmentFinderOptions): HTMLElement | undefined {
+function findClosest(selector: string, origin: Element, options: t.FindFragmentOptions): HTMLElement | undefined {
   return closest(origin, selector, options)
 }
 
-function findDescendantInRegion(selector: string, origin: Element, options: t.FragmentFinderOptions): HTMLElement | undefined {
+function findDescendantInRegion(selector: string, origin: Element, options: t.FindFragmentOptions): HTMLElement | undefined {
   let simpleSelectors = splitTarget(selector)
 
   return u.findResult(simpleSelectors, (simpleSelector) => {
@@ -47,6 +47,6 @@ function findDescendantInRegion(selector: string, origin: Element, options: t.Fr
   })
 }
 
-function findFirst(selector: string, document: Document | Element, options: t.FragmentFinderOptions): HTMLElement | undefined {
+function findFirst(selector: string, document: Document | Element, options: t.FindFragmentOptions): HTMLElement | undefined {
   return getFirstDescendant(document, selector, options)
 }
