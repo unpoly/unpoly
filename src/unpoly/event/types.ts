@@ -159,7 +159,7 @@ export type ListenerCallback<E = Event> =
   { listener(this: HTMLElement, event: E, element: HTMLElement, data?: any): any }['listener'] & { upUid?: number }
 
 /**
-What an `UpEventListener` and an `EventListenerGroup` both need to know: everything but the
+What an `UpEventListener` and a `ListenerGroup` both need to know: everything but the
 elements and event types to listen to.
 @internal
 */
@@ -179,11 +179,12 @@ export interface EventListenerAttributes extends SharedListenerAttributes {
 }
 
 /**
-Everything an `EventListenerGroup` needs to know: the elements and event types to listen to,
-and the attributes for each `UpEventListener`.
+The listeners that `up.on()` binds and `up.off()` unbinds: the elements and event types to
+listen to, and the attributes for each `UpEventListener`. `parseBindArgs()` builds this from the
+many ways `up.on()` can be called.
 @internal
 */
-export interface EventListenerGroupAttributes extends SharedListenerAttributes {
+export interface ListenerGroup extends SharedListenerAttributes {
   elements: u.List<ListenerTarget>
   eventTypes: string[]
 }

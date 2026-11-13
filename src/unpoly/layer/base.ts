@@ -2,9 +2,9 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { Aborted, NotImplemented } from '../error.js'
 import {
-  emitParsed, EventListenerGroup, on, parseEmitArgs, type EmitProps, type EmittedEvent,
-  type EventEmitterOptions, type EventPlan, type EventTypes, type ListenerArgs, type ObservedEvent,
-  type UnbindFn,
+  bindListeners, emitParsed, on, parseBindArgs, parseEmitArgs, unbindListeners, type EmitProps,
+  type EmittedEvent, type EventEmitterOptions, type EventPlan, type EventTypes, type ListenerArgs,
+  type ListenerGroup, type ObservedEvent, type UnbindFn,
 } from '../event.js'
 import { type RenderOptions } from '../fragment.js'
 import {
@@ -186,16 +186,16 @@ export class Layer {
 
   on<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): UnbindFn
   on(...args: unknown[]): UnbindFn {
-    return this._buildEventListenerGroup(args).bind()
+    return bindListeners(this._parseBindArgs(args))
   }
 
   off<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): void
   off(...args: unknown[]): void {
-    return this._buildEventListenerGroup(args).unbind()
+    return unbindListeners(this._parseBindArgs(args))
   }
 
-  _buildEventListenerGroup(args: any[]): EventListenerGroup {
-    return EventListenerGroup.fromBindArgs(args, {
+  _parseBindArgs(args: any[]): ListenerGroup {
+    return parseBindArgs(args, {
       guard: (event: Event) => this._containsEventTarget(event),
       elements: [this.element],
       baseLayer: this

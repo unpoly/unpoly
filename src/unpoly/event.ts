@@ -13,8 +13,8 @@ import { assertParsedEmitted, emitParsed, parseEmitArgs } from './event/event_em
 export { assertParsedEmitted, emitParsed, parseEmitArgs }
 import { UpEventListener } from './event/event_listener.js'
 export { UpEventListener }
-import { EventListenerGroup } from './event/event_listener_group.js'
-export { EventListenerGroup }
+import { bindListeners, parseBindArgs, unbindListeners } from './event/event_listener_group.js'
+export { bindListeners, parseBindArgs, unbindListeners }
 
 function reset(): void {
   // Resets the list of registered event listeners to the
@@ -29,7 +29,7 @@ function reset(): void {
 export function on<T extends t.EventTypes>(types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): t.UnbindFn
 export function on<T extends t.EventTypes>(targets: t.ListenerTargets, types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): t.UnbindFn
 export function on(...args: any[]): t.UnbindFn {
-  return buildListenerGroup(args).bind()
+  return bindListeners(parseBindArgs(args))
 }
 
 export function onClosest<T extends t.EventTypes>(element: Element, types: T, callback: t.ListenerCallback<t.ObservedEvent<T>>): t.UnbindFn
@@ -49,11 +49,7 @@ export function onClosest(...args: any[]): t.UnbindFn {
 export function off<T extends t.EventTypes>(types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): void
 export function off<T extends t.EventTypes>(targets: t.ListenerTargets, types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): void
 export function off(...args: any[]): void {
-  return buildListenerGroup(args).unbind()
-}
-
-function buildListenerGroup(args: any[]): EventListenerGroup {
-  return EventListenerGroup.fromBindArgs(args)
+  return unbindListeners(parseBindArgs(args))
 }
 
 export function emit<T extends string>(type: T, props?: t.EmitProps): t.EmittedEvent<T>
