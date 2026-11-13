@@ -13,7 +13,7 @@ import { type RenderResult } from '../render_result.js'
 import { ResponseDoc } from '../response_doc.js'
 
 // Renders content that is already known (a string, an element or a response text), with
-// renderFromContent(). Also computes the preflight props for ChangeFromURL, before the request
+// renderFromContent(). Also computes the preflight props for renderFromURL(), before the request
 // is sent, with preflightPropsFromContent().
 
 function getPlans(options: t.RenderOptions, layers: (Layer | 'new')[]): LayerPlan[] {
@@ -53,7 +53,7 @@ function expandTargetsInLayer(targets: t.RenderTarget | boolean | undefined, lay
 }
 
 // Returns an up.RenderResult, or a promise when preloading local content.
-// Kept `any`: RenderJob returns this as a RenderResult, which also hides that ChangeFromURL
+// Kept `any`: RenderJob returns this as a RenderResult, which also hides that renderFromURL()
 // resolves with an up.Request when preloading.
 export function renderFromContent(options: t.RenderOptions): any {
   // Preloading from local content is a no-op.

@@ -7,7 +7,7 @@ import { printToStandard } from '../../log.js'
 import type * as t from '../types.js'
 import { renderFromContent } from './change/render_from_content.js'
 import { renderFromResponse } from './change/render_from_response.js'
-import { ChangeFromURL } from './change/render_from_url.js'
+import { renderFromURL } from './change/render_from_url.js'
 import { RenderOptions } from './render_options.js'
 import { RenderResult } from './render_result.js'
 
@@ -130,25 +130,25 @@ export class RenderJob {
   }
 
   // Kept `any`, like renderFromContent(): we return the result as a RenderResult,
-  // which hides that ChangeFromURL fulfills with an up.Request when preloading.
+  // which hides that renderFromURL() fulfills with an up.Request when preloading.
   _render(): any {
     // (1) With a given { url } we want to handle { abort } when the new request is known.
     //     This way we can exclude the new request from aborting.
-    //     The { handleAbort } callback is called in ChangeFromURL#execute()
+    //     The { handleAbort } callback is called in renderFromURL()
     // (2) When rendering local content, we want to handle { abort } when we render.
     //     This way we don't abort when the pass was aborted by { guardEvent }, { confirm }
     //     or any other error on the way.
     //     The { handleAbort } callback is called in onPlanApplicable() (render_from_content.ts)
-    // (3) FromURL is eventually going to call FromContent.
+    // (3) renderFromURL() is eventually going to call renderFromContent().
     //     We memoize the callback so we only run it once.
-    // (4) FromURL passes the preflight props of the change, plus the new { request }.
-    //     FromContent passes the preflight props of the plan it renders, which may be a fallback.
+    // (4) renderFromURL() passes the preflight props of the change, plus the new { request }.
+    //     renderFromContent() passes the preflight props of the plan it renders, which may be a fallback.
     let handleAbort = u.memoize((preflightProps: t.AbortOptionProps) => this._handleAbortOption(preflightProps))
     let renderOptions = { ...this.renderOptions, handleAbort }
 
     if (renderOptions.url) {
       // TypeScript doesn't narrow the object through renderOptions.url.
-      return new ChangeFromURL(renderOptions as t.RenderOptions & { url: string }).execute()
+      return renderFromURL(renderOptions as t.RenderOptions & { url: string })
     } else if (renderOptions.response) {
       return renderFromResponse(renderOptions)
     } else {

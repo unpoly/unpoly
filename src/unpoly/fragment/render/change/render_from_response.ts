@@ -12,7 +12,7 @@ import { RenderOptions } from '../render_options.js'
 import { type RenderResult } from '../render_result.js'
 
 export function renderFromResponse(options: t.RenderOptions): RenderResult {
-  // RenderJob and ChangeFromURL only call us with a { response }.
+  // RenderJob and renderFromURL() only call us with a { response }.
   let response = options.response!
   let loadedProps = loadedEventProps(options, response)
 
