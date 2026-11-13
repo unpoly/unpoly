@@ -233,8 +233,8 @@ the implementation is `findFragment()`, which tries three strategies in order:
    - failing that, a **descendant within the region**. Each comma-separated token is split at
      its first space — and only if the parent part contains no space, `>`, `+` or `(`, so
      `.card > .card-text` is *not* eligible. The closest `.card` to the origin is found, then
-     `.card-text` inside it. Note this branch does not forward the lookup options, so
-     `{ destroying }` and layer options are dropped in it.
+     `.card-text` inside it. Both lookups get the lookup options, so `{ destroying }` and
+     the layer options apply here too.
 3. **The first match**, via `getFirstDescendant()` — which means the two precedence rules
    above (expanded-selector order, then layer order) still apply. It is not raw document
    order.

@@ -58,7 +58,7 @@ For a request-backed pass, control moves through *all* of these in turn:
 
 ```
 up.render()
-  └─ up.RenderJob#_executePromise()   guard event, preprocess options, confirm
+  └─ up.RenderJob#_executePromise()     guard event, preprocess options, confirm
       └─ renderFromURL()                preflight props → request → response
           └─ renderFromResponse()       fail options, server headers, revalidation hook
               └─ renderFromContent()    expands options into plans
@@ -86,10 +86,10 @@ it. Each stage is a module function in its own file in
 (`render_from_url.ts` and so on). It takes the render options and hands them on to the next
 stage. Its helpers are private to the module and get what they need as arguments.
 
-The *plans* (`UpdateLayerPlan`, `OpenLayerPlan`) are classes: a plan is asked more than once,
-and each fills in the hooks of its base class `LayerPlan`. A plan implements
-`match(responseDoc)` **and** `getPreflightProps()`, and inherits `render(responseDoc)`
-from `LayerPlan`. The swaps a plan ends with are a module function again, `updateSteps()`.
+The *plans* (`UpdateLayerPlan`, `OpenLayerPlan`) are classes, since a plan is asked more than
+once. A plan implements `getPreflightProps()`, `match(responseDoc)` and the hooks of its base
+class `LayerPlan`. It inherits `render(responseDoc)`, which calls those hooks in a fixed order.
+The swaps a plan ends with are a module function again, `updateSteps()`.
 
 `renderFromURL()` carries more than the table suggests. It derives the request from the
 options (see preflight below), owns preloading, and turns a failed network into
