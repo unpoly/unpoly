@@ -11,6 +11,7 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
       'revealSnap',
       'revealPadding',
       'behavior',
+      'scrollBehavior',
       'oldScrollTops',
     ])
   }
@@ -18,6 +19,9 @@ up.FragmentScrolling = class FragmentScrolling extends up.FragmentProcessor {
   constructor(options) {
     // Render options call it { scrollBehavior } to stand out among many other options.
     // The viewport functions we call only take scrolling options, and call it { behavior }.
+    //
+    // Our attributes keep { scrollBehavior }, because the processor for a match in a
+    // selector map is built from them.
     super({ ...options, behavior: options.scrollBehavior })
   }
 

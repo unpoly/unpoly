@@ -1197,6 +1197,28 @@ extendDescribe('up.fragment', function() {
             expect(this.revealOptions.behavior).toEqual('smooth')
           })
 
+          it('animates the revealing of each fragment in a { scrollMap }', async function() {
+            const revealSpy = up.reveal.mock().and.returnValue(Promise.resolve())
+
+            htmlFixtureList(`
+              <div id="target1">old target1</div>
+              <div id="target2">old target2</div>
+            `)
+
+            await up.render({
+              target: '#target1, #target2',
+              document: `
+                <div id="target1">new target1</div>
+                <div id="target2">new target2</div>
+              `,
+              scrollMap: { '#target1': 'target', '#target2': 'target' },
+              scrollBehavior: 'smooth'
+            })
+
+            let revealBehaviors = revealSpy.calls.all().map((call) => call.args[1].behavior)
+            expect(revealBehaviors).toEqual(['smooth', 'smooth'])
+          })
+
           it('animates the revealing when swapping out an element', async function() {
             const highElement = fixture('.high', { style: { height: '30000px' } }) // ensure we can scroll
 
