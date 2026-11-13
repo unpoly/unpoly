@@ -15,14 +15,21 @@ import { ResponseDoc } from './response_doc.js'
 // renderFromContent(). Also computes the preflight props for renderFromURL(), before the request
 // is sent, with preflightPropsFromContent().
 
+// The layer lookup normalizes the options in place, e.g. it sets a { baseLayer }.
+// The plans copy the options later, and need them normalized.
+// renderFromContent() gets options that belong to this render pass, and changes them anyway, so it passes them as they are.
+// preflightPropsFromContent() is a query, so it passes a copy. That copy is only defensive:
+// RenderJob has normalized the success options already, and deriveFailOptions() returns a new object.
+function getLayers(options: t.RenderOptions): (Layer | 'new')[] {
+  return filterLayers(layerStack.getAll(options))
+}
+
 function getPlans(options: t.RenderOptions, layers: (Layer | 'new')[]): LayerPlan[] {
-  let plans: LayerPlan[] = []
-
   // First seek { target } in all layers, then seek { fallback } in all layers.
-  expandIntoPlans(plans, layers, options.target, options)
-  expandIntoPlans(plans, layers, options.fallback, options)
-
-  return plans
+  return [
+    ...expandIntoPlans(layers, options.target, options),
+    ...expandIntoPlans(layers, options.fallback, options),
+  ]
 }
 
 function isRenderableLayer(layer: Layer | 'new'): boolean {
@@ -33,18 +40,15 @@ function filterLayers(layers: (Layer | 'new')[]): (Layer | 'new')[] {
   return u.filterList(layers, isRenderableLayer)
 }
 
-function expandIntoPlans(plans: LayerPlan[], layers: (Layer | 'new')[], targets: t.RenderTarget | boolean | undefined, options: t.RenderOptions): void {
-  for (let layer of layers) {
-    // An abstract selector like :main may expand into multiple
-    // concrete selectors, like ['main', '.content'].
-    for (let target of expandTargetsInLayer(targets, layer, options)) {
-      // Any plans we add will inherit all properties from @options
-      const props = { ...options, target, layer, defaultPlacement: defaultPlacement(options) }
-      // TypeScript doesn't narrow props.layer through the layer variable.
-      const change = layer === 'new' ? new OpenLayerPlan(props) : new UpdateLayerPlan(props as t.ResolvedRenderOptions)
-      plans.push(change)
-    }
-  }
+function expandIntoPlans(layers: (Layer | 'new')[], targets: t.RenderTarget | boolean | undefined, options: t.RenderOptions): LayerPlan[] {
+  // An abstract selector like :main may expand into multiple
+  // concrete selectors, like ['main', '.content'].
+  return layers.flatMap((layer) => expandTargetsInLayer(targets, layer, options).map((target) => {
+    // Any plans we add will inherit all properties from @options
+    const props = { ...options, target, layer, defaultPlacement: defaultPlacement(options) }
+    // TypeScript doesn't narrow props.layer through the layer variable.
+    return layer === 'new' ? new OpenLayerPlan(props) : new UpdateLayerPlan(props as t.ResolvedRenderOptions)
+  }))
 }
 
 function expandTargetsInLayer(targets: t.RenderTarget | boolean | undefined, layer: Layer | 'new', options: t.RenderOptions): string[] {
@@ -61,7 +65,7 @@ export function renderFromContent(options: t.RenderOptions): any {
     return Promise.resolve()
   }
 
-  let layers = filterLayers(layerStack.getAll(options))
+  let layers = getLayers(options)
   let responseDoc = getResponseDoc(options, layers)
   // This changes the options that the plans copy below.
   improveOptionsFromResponseDoc(options, responseDoc)
@@ -158,13 +162,12 @@ function firstExpandedTarget(target: t.RenderTarget | undefined, layers: (Layer 
 export function preflightPropsFromContent(options: t.RenderOptions, opts?: { optional?: false }): t.PreflightProps
 export function preflightPropsFromContent(options: t.RenderOptions, opts?: { optional?: boolean }): Partial<t.PreflightProps>
 export function preflightPropsFromContent(options: t.RenderOptions, opts: { optional?: boolean } = {}): Partial<t.PreflightProps> {
-  // Don't change the caller's options: the layer lookup normalizes them in place.
+  // Don't change the caller's options (see getLayers()).
   options = { ...options }
 
-  let layers = filterLayers(layerStack.getAll(options))
+  let layers = getLayers(options)
   let plans = getPlans(options, layers)
-  const getPlanProps = (plan: LayerPlan) => plan.getPreflightProps()
-  return seekPlan(plans, getPlanProps) || (opts.optional ? {} : cannotMatchTarget('Could not find target in current page', plans, layers, options))
+  return seekPlan(plans, (plan) => plan.getPreflightProps()) || (opts.optional ? {} : cannotMatchTarget('Could not find target in current page', plans, layers, options))
 }
 
 function cannotMatchTarget(reason: string, plans: LayerPlan[], layers: (Layer | 'new')[], options: t.RenderOptions): never {
