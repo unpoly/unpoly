@@ -1,10 +1,14 @@
 # up.error
 
-Functions to deal with errors from Unpoly's rendering and network functions.
+Functions and classes to deal with errors from Unpoly's rendering and network functions.
 
 Functions like `up.render()`, `up.follow()` or `up.request()` return a promise that rejects when they fail.
 Some of these rejections are expected, like an aborted request or an error response from the server.
 `up.error.muteUncriticalRejection()` lets you ignore the expected rejections, while other errors still reach the error console.
+
+Every error thrown by Unpoly inherits from `up.Error`. Its subclasses tell you what went wrong,
+like a request that was aborted (`up.Aborted`), a server that could not be reached (`up.Offline`)
+or a target selector that could not be matched (`up.CannotMatch`).
 
 @learn-ref render-lifecycle#handling-errors
 
