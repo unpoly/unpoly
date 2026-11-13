@@ -133,11 +133,17 @@ describe('up.error', function() {
   describe('up.Error', function() {
 
     it("names each error class after its public name", function() {
-      for (let name of ['Error', 'Blocked', 'CannotMatch', 'CannotParse', 'CannotTarget', 'NotImplemented', 'Offline']) {
+      for (let name of ['Error', 'Blocked', 'CannotMatch', 'CannotParse', 'CannotTarget', 'Offline']) {
         const error = new up[name]('message')
         expect(error.name).toBe('up.' + name)
         expect(error.toString()).toBe(`up.${name}: message`)
       }
+    })
+
+    it("names the internal up.internal.NotImplemented, which abstract methods throw", function() {
+      const error = new up.internal.NotImplemented('message')
+      expect(error.name).toBe('up.NotImplemented')
+      expect(error.toString()).toBe('up.NotImplemented: message')
     })
 
     it("does not depend on the class name, which a minifier may drop", function() {

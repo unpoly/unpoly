@@ -138,7 +138,8 @@ for (let api of apis) {
 //   `constructor`, whichever comes first. So each class needs a tag on its own prototype.
 // The tag also names our objects in Object.prototype.toString() and u.inspect(), and our errors (see
 // error.ts). The layer modes aren't public, so they all say up.Layer. Internal classes on up.internal
-// keep whatever name the minifier gives them. None of them is an error class.
+// keep whatever name the minifier gives them, except up.internal.NotImplemented: an error that
+// reaches the console should say what it is.
 const layerModes = [RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]
 for (let key in up) {
   // Test the key first, so we don't call a getter like `up.context`.
@@ -150,6 +151,7 @@ for (let key in up) {
 for (let mode of layerModes) {
   framework.setClassName(mode, 'up.Layer')
 }
+framework.setClassName(errorClasses.NotImplemented, 'up.NotImplemented')
 
 // The explicit install order. It is the order in which the namespaces registered their side
 // effects before they were ES modules. All installs run before `framework.onEvaled()` below,

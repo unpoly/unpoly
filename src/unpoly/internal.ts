@@ -28,7 +28,7 @@ import {
 import { OptionsParser } from './element/options_parser.js'
 import { Config, newConfig } from './util/config.js'
 import { assertConfirmed, popCookie, submitForm } from './browser.js'
-import { fail, guard, guardFn } from './error.js'
+import { fail, guard, guardFn, NotImplemented } from './error.js'
 import { assertEmitted, isSyntheticClick, parseEmitArgs, UpEventListener } from './event.js'
 import {
   disableContainerTemp, findGroupSolution, getGroupSelectors, readFieldDisabled,
@@ -218,5 +218,6 @@ export const api = {
     SelectorTracker,
     Tether,
     ResponseDoc,
+    NotImplemented,
   },
 }

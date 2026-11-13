@@ -42,7 +42,6 @@ export class Offline extends UpError {
 
 export const api = {
   Error: UpError,
-  NotImplemented,
   Aborted,
   Blocked,
   CannotMatch,
