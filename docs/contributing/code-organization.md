@@ -54,6 +54,8 @@ src/                      # Entry points for Unpoly's main and optional bundles
     pages/                # ... Guide pages and shared partials (see Documentation)
     ...                   # ... Other namespaces and their classes
 
+  types/global.d.ts       # Types of globals like window.up, only read by the type check
+
 spec/
   unpoly/                 # Tests (Jasmine specs), mirroring src/unpoly
     form_spec.js          # ... Tests for up.form namespace
@@ -74,12 +76,16 @@ bin/                      # Scripts for development
   dev                     # ... Start or stop dev environment (build watcher, Jasmine runner)
   test                    # ... Run tests from terminal (will execute in headless Chrome internally)
   find-spec               # ... Find specs by a phrase in their describe()/it() titles
+  typecheck               # ... Check types (see Code style)
+  lint                    # ... Lint src/, spec/, tooling/ and the doc files (see Code style)
   ...                     # ... other dev scripts
 
 tooling/                  # Our own dev machinery, never shipped (rarely need to edit here)
   runner/                 # ... Runs the specs: server, terminal driver, in-page reporter
   scratch/                # ... Pages for trying a change by hand (see Trying out changes)
-  build/                  # ... bin/build: esbuild, Terser and the build watcher
+  build/                  # ... bin/build: esbuild, Terser, the build watcher and the type check
+  lint/                   # ... Our own lint rules and checks behind bin/lint
+  docs/                   # ... Reads the doc files, for bin/lint and bin/typecheck
   dev_env.mjs             # ... The dev environment behind bin/dev
   find_spec.mjs           # ... Spec-title search behind bin/find-spec
   test/                   # ... Unit tests for all of the above (bin/self-test)
@@ -87,6 +93,9 @@ tooling/                  # Our own dev machinery, never shipped (rarely need to
 docs/                     # Documentation for contributors, never shipped
   contributing/           # ... The guides linked from CONTRIBUTING.md
   plans/                  # ... Implementation plans (gitignored)
+
+tsconfig.json             # Settings for bin/typecheck, with tsconfig.core.json (see Code style)
+.oxlintrc.json            # Rules for bin/lint (see Code style)
 
 dist/                     # Output directory for the build (gitignored, never edit directly)
   unpoly.js               # ... Main Unpoly bundle (JS)
@@ -129,7 +138,9 @@ A main module orchestrates and defines the public API. Implementation details li
 in the module's folder, so merge closely related code into a file there, not into the main
 module.
 
-An inner folder inside a module folder (`<module>/<folder>/`) with only one file goes away. Move the file up into the module folder. A module folder itself may hold a single file, since keeping implementation details out of the main module matters more.
+An inner folder inside a module folder (`<module>/<folder>/`) with only one file goes away.
+Move the file up into the module folder. A module folder itself may hold a single file, since
+keeping implementation details out of the main module matters more.
 
 ### Where to find a namespace's specs
 
@@ -289,7 +300,7 @@ The entry file `src/unpoly.ts` ties the modules together. It imports every modul
 each `api` onto `window.up` (the `apis` list), then calls each `install()` (the `installs`
 list, which is the explicit install order). Its comments also explain the rules for import
 cycles between modules. Two modules must not contribute the same key to `window.up`, or the
-later one silently replaces the earlier one; [`bin/lint`](code-style.md) reports that, and that
+later one silently replaces the earlier one; [`bin/lint`](code-style.md#linting) reports that, and that
 `up.internal` keys are their export names.
 
 Because internal callers import functions directly, a spec that spies on `up.link.follow`

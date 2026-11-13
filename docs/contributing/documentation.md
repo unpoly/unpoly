@@ -89,8 +89,7 @@ declarations are available:
 A block that declares none of these is an error, so every doc entry has exactly one.
 
 Comments in `.ts` files (`/* … */`, `// …`) are internal comments for other maintainers.
-They are never published. Neither are the `/** */` comments on types: editors show them on
-hover, and `@internal` in one marks a type that isn't public API (see
+They are never published. Neither are the `/** */` comments on types (see
 [Code style](code-style.md#writing-types)). A public symbol's reference always goes in its doc
 entry. The one exception is the old format of API references, a comment opening with `/*-`:
 the site still publishes it, so don't write one.
