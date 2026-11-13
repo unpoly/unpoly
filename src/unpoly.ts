@@ -56,14 +56,7 @@ import * as form from './unpoly/form.js'
 import * as status from './unpoly/status.js'
 import * as radio from './unpoly/radio.js'
 import * as rails from './unpoly/rails.js'
-import * as baseError from './unpoly/error/error.js'
-import * as notImplementedError from './unpoly/error/not_implemented.js'
-import * as abortedError from './unpoly/error/aborted.js'
-import * as blockedError from './unpoly/error/blocked.js'
-import * as cannotMatchError from './unpoly/error/cannot_match.js'
-import * as cannotParseError from './unpoly/error/cannot_parse.js'
-import * as cannotTargetError from './unpoly/error/cannot_target.js'
-import * as offlineError from './unpoly/error/offline.js'
+import * as errorClasses from './unpoly/error/errors.js'
 import * as paramsClass from './unpoly/form/params.js'
 import * as previewClass from './unpoly/status/preview.js'
 import * as layerClass from './unpoly/layer/base.js'
@@ -103,14 +96,7 @@ const apis = [
   form.api,
   status.api,
   radio.api,
-  baseError.api,
-  notImplementedError.api,
-  abortedError.api,
-  blockedError.api,
-  cannotMatchError.api,
-  cannotParseError.api,
-  cannotTargetError.api,
-  offlineError.api,
+  errorClasses.api,
   paramsClass.api,
   previewClass.api,
   layerClass.api,
