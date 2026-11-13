@@ -9,7 +9,7 @@ import { Layer } from './layer/base.js'
 export { Layer }
 import { LayerStack } from './layer/layer_stack.js'
 import { bodyShifter } from './viewport.js'
-export { type Overlay } from './layer/modes/overlay.js'
+export { type Overlay } from './layer/overlay.js'
 export { OVERLAY_VISUAL_KEYS, UNSET_OVERLAY_VISUALS } from './layer/overlay_visuals.js'
 export { Tether } from './layer/tether.js'
 

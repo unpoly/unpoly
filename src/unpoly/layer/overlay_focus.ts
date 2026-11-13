@@ -2,7 +2,7 @@ import * as e from '../element.js'
 import { on, type UnbindFn } from '../event.js'
 import { isWithinForeignOverlay } from '../layer.js'
 import { doFocus, tryFocus, type DoFocusOptions } from '../viewport.js'
-import { type Overlay } from './modes/overlay.js'
+import { type Overlay } from './overlay.js'
 
 // A focusin event on the document, whose target is the focused element.
 interface FocusInEvent extends FocusEvent {

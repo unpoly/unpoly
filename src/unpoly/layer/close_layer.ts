@@ -6,7 +6,7 @@ import { abortFragment, reload } from '../fragment.js'
 import { doFocus } from '../viewport.js'
 import type * as t from './types.js'
 import { type Layer } from './base.js'
-import { type Overlay } from './modes/overlay.js'
+import { type Overlay } from './overlay.js'
 
 // Accepts or dismisses an overlay, for up.Layer#accept() and up.Layer#dismiss().
 export function closeLayer(options: t.CloseLayerOptions): void {

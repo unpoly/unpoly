@@ -16,7 +16,7 @@ import { convertClicks } from '../link.js'
 import { newStateCache } from '../viewport.js'
 import type * as t from './types.js'
 import { type LayerStack } from './layer_stack.js'
-import { type Overlay } from './modes/overlay.js'
+import { type Overlay } from './overlay.js'
 import { type OverlayFocus } from './overlay_focus.js'
 
 export class Layer {
