@@ -231,7 +231,7 @@ export class ResponseDoc {
 
   _cannotMatchStep(step: t.RenderStep): void {
     if (!step.maybe) {
-      // An error message will be chosen by ChangeFromContent
+      // An error message will be chosen by renderFromContent()
       throw new CannotMatch()
     }
   }

@@ -203,7 +203,7 @@ function preprocess(options: t.RenderOptions): t.RenderOptions {
 
 // Look up the origin layers*before* we make the request.
 // In case of { layer: 'origin' } the { origin } element may get removed while the request was in flight,
-// making ChangeFromContent#execute() fail with a message like "layer { origin } does not exist" or
+// making renderFromContent() fail with a message like "layer { origin } does not exist" or
 // "Could not find a layer to render in. You may have passed an unmatchable layer reference, or a detached element.".
 function rememberOriginLayer({ origin, originLayer }: t.RenderOptions): t.RenderOptions | undefined {
   if (origin && !originLayer) {

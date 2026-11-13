@@ -79,7 +79,7 @@ up.$macro = function(...definitionArgs) {
   })
 }
 
-// Core calls this hook (ChangeFromResponse).
+// Core calls this hook in renderFromResponse().
 up.migrate.processHelloMeta = function(meta, response) {
   Object.defineProperty(meta, 'response', { get() {
     up.migrate.warn('Accessing meta.response from a compiler has been deprecated without replacement. Avoid fragments that compile differently for the initial page load vs. subsequent fragment updates.')

@@ -245,7 +245,7 @@ export function preload(link: e.ElementOrSelector, options?: RenderOptions): Pro
     ...RenderOptions.NO_INPUT_INTERFERENCE,
     ...RenderOptions.NO_PREVIEWS,
     guardEvent,
-    preload: true, // hint to ChangeFromURL to stop execution after sending the request
+    preload: true, // hint to renderFromURL() to stop execution after sending the request
   })
 }
 

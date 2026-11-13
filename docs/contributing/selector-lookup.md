@@ -124,7 +124,7 @@ instead of accidentally matching everything.
 This distinction decides whether a render pass falls through to the next plan or dies:
 
 - A layer reference that resolves to **no layer** (`{ layer: 3 }` on a two-layer stack)
-  throws `up.CannotMatch` — which `ChangeFromContent` swallows to try the next plan, as
+  throws `up.CannotMatch` — which `renderFromContent()` swallows to try the next plan, as
   long as the plan hasn't started to change the page yet. After that it aborts the pass.
   A layer that comes from an element whose layer has closed is not an error (case 4).
 - An **unknown layer keyword** fails earlier, in `LayerLookup`, via `fail()`. That is a
@@ -252,7 +252,7 @@ definition not resolved by proximity.
 ## Expansion during rendering
 
 Rendering is where expansion becomes visible: `:main` becomes one candidate per configured
-main target, and `ChangeFromContent` turns **each candidate into its own plan**, tried in
+main target, and `renderFromContent()` turns **each candidate into its own plan**, tried in
 order. That is why a page whose `[up-main]` element is missing still updates `main`, or
 ultimately `<body>`, without anyone asking for a fallback. See
 [Rendering](rendering.md#plans-and-why-a-pass-can-change-its-mind).

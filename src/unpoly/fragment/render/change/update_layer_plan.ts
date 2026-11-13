@@ -24,11 +24,11 @@ export class UpdateLayerPlan extends LayerPlan {
   constructor(options: t.ResolvedRenderOptions) {
     options = RenderOptions.finalize(options)
     super(options)
-    // ChangeFromContent passes the layer and an expanded target.
+    // renderFromContent() passes the layer and an expanded target.
     this.layer = options.layer!
     this.target = options.target!
     this._context = options.context
-    // up.fragment.expandTargets() was already called by ChangeFromContent
+    // up.fragment.expandTargets() was already called by renderFromContent()
     this._steps = parseTargetSteps(this.target, this.options)
     // this.uid = Math.random()
   }
@@ -144,7 +144,7 @@ export class UpdateLayerPlan extends LayerPlan {
     //     and in the response document.
     // (2) Match newElements here instead of relying on UpdateSteps to
     //     do it later. This way we will throw up.CannotMatch early, and our caller
-    //     ChangeFromContent knows that this plan is not applicable. It can then
+    //     renderFromContent() knows that this plan is not applicable. It can then
     //     try a fallback plan.
     this._matchOldElements()
     this._addHungryStepsOnCurrentLayer()
@@ -169,7 +169,7 @@ export class UpdateLayerPlan extends LayerPlan {
       if (step.oldElement) {
         return true
       } else if (!step.maybe) {
-        // An error message will be chosen by ChangeFromContent
+        // An error message will be chosen by renderFromContent()
         throw new CannotMatch()
       }
     })

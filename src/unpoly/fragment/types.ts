@@ -195,7 +195,7 @@ export interface RenderOptions {
   // The elements that show the loading state (up.status), like a form and its submit button.
   activeElements?: Element[]
 
-  // Internal options that ChangeFromResponse takes from the response.
+  // Internal options that renderFromResponse() takes from the response.
   hash?: string
   eventPlans?: EventPlan[]
   acceptLayer?: any
@@ -270,7 +270,7 @@ export interface FragmentProcessorOptions {
 }
 
 /**
-What a change will update, known before its request is sent. ChangeFromURL makes them request options,
+What a change will update, known before its request is sent. renderFromURL() makes them request options,
 RenderJob passes them to the `{ abort }` option.
 @internal
 */

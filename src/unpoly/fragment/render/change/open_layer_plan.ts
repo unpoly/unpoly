@@ -23,7 +23,7 @@ export class OpenLayerPlan extends LayerPlan {
   // Set by _matchPostflight(), which throws when there is no content.
   declare _content: HTMLElement
 
-  // ChangeFromContent has turned { target } into a selector string.
+  // renderFromContent() has turned { target } into a selector string.
   constructor(options: t.RenderOptions & { target: string }) {
     super(options)
     this.target = options.target
@@ -71,7 +71,7 @@ export class OpenLayerPlan extends LayerPlan {
     }
 
     if (!this._content || !this._baseLayer.isAlive()) {
-      // An error message will be chosen by ChangeFromContent
+      // An error message will be chosen by renderFromContent()
       throw new CannotMatch()
     }
   }

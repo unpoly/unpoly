@@ -46,8 +46,8 @@ the response arrives.
 Before reading the internals, know the lifecycle we promise to users. It is documented as a
 guide page, [`render-lifecycle.md`](../../src/unpoly/pages/render-lifecycle.md), which opens
 with a [diagram of the whole sequence](../../src/unpoly/pages/images/render-lifecycle.svg) —
-every stage, edge case and error state on one page. That page is the contract; the classes
-below are how we keep it. It also names the hooks that constrain the implementation
+every stage, edge case and error state on one page. That page is the contract; the code
+below is how we keep it. It also names the hooks that constrain the implementation
 (`up:fragment:loaded`, `onRendered`, `{ onFinished }`, `up:fragment:aborted`), which is what
 tells you whether a change of yours is observable.
 
@@ -59,11 +59,11 @@ For a request-backed pass, control moves through *all* of these in turn:
 ```
 up.render()
   └─ up.RenderJob#_executePromise()   guard event, preprocess options, confirm
-      └─ ChangeFromURL                preflight props → request → response
-          └─ ChangeFromResponse       fail options, server headers, revalidation hook
-              └─ ChangeFromContent    expands options into plans
-                  └─ UpdateLayerPlan  plan → steps  (or OpenLayerPlan)
-                      └─ UpdateSteps  the actual swaps
+      └─ renderFromURL()                preflight props → request → response
+          └─ renderFromResponse()       fail options, server headers, revalidation hook
+              └─ renderFromContent()    expands options into plans
+                  └─ UpdateLayerPlan    plan → steps  (or OpenLayerPlan)
+                      └─ UpdateSteps    the actual swaps
 ```
 
 `up.render()` returns an [`up.RenderJob`](../../src/unpoly/fragment/render/render_job.ts) — the
@@ -71,32 +71,34 @@ promise-like object callers await. It resolves with an `up.RenderResult` describ
 actually updated, and exposes a second promise, `.finished`, that waits for animations and
 revalidation to settle too.
 
-Which *change* the job starts with depends on where the content comes from
-(`up.RenderJob#_getChange()`):
+Which *stage* the job starts with depends on where the content comes from
+(`up.RenderJob#_render()`):
 
-| option | change class |
+| option | stage function |
 |---|---|
-| `{ url }` | `ChangeFromURL` |
-| `{ response }` | `ChangeFromResponse` |
-| local content (`{ fragment }`, `{ content }`, `{ document }`) | `ChangeFromContent` |
+| `{ url }` | `renderFromURL()` |
+| `{ response }` | `renderFromResponse()` |
+| local content (`{ fragment }`, `{ content }`, `{ document }`) | `renderFromContent()` |
 
 These are entry points, not alternatives — a `{ url }` pass passes through every row below
-it. The classes live in
-[`src/unpoly/fragment/render/change/`](../../src/unpoly/fragment/render/change/) and extend `Change`.
-Note that there are two different contracts among them: the top-level changes implement
-`execute()` with no arguments, while a *plan* (`UpdateLayerPlan`, `OpenLayerPlan`) implements
-`execute(responseDoc, onApplicable)` **and** `getPreflightProps()`. The plans inherit
-`execute()` from their base class `LayerPlan` and fill in its hooks. If you add a change
-class, pick the right one.
+it. Each stage is a module function in its own file in
+[`src/unpoly/fragment/render/change/`](../../src/unpoly/fragment/render/change/)
+(`render_from_url.ts` and so on). It takes the render options and hands them on to the next
+stage. Its helpers are private to the module and get what they need as arguments.
 
-`ChangeFromURL` carries more than the table suggests. It derives the request from the
+The *plans* (`UpdateLayerPlan`, `OpenLayerPlan`) are classes: a plan is asked more than once,
+and each fills in the hooks of its base class `LayerPlan`. A plan implements
+`execute(responseDoc, onApplicable)` **and** `getPreflightProps()`, and inherits `execute()`
+from `LayerPlan`.
+
+`renderFromURL()` carries more than the table suggests. It derives the request from the
 options (see preflight below), owns preloading, and turns a failed network into
 `up:fragment:offline` with a `retry()` the user can call.
 
 
 ## Plans, and why a pass can change its mind
 
-`ChangeFromContent` does the negotiating. It expands the options into a list of
+`renderFromContent()` does the negotiating. It expands the options into a list of
 **plans** — one per layer per target — first for `{ target }`, then for `{ fallback }`:
 
 ```
@@ -140,11 +142,12 @@ and it does more than parse HTML. It matches steps against itself (`selectSteps(
 CSP nonces, and *detaches* each new element as it is committed, so a later hungry step
 cannot steal an element that is already spoken for.
 
-Preflight has a concrete mechanism worth knowing: `ChangeFromURL` builds a **throwaway**
-`ChangeFromContent({ preflight: true })` — twice, once for success options and once for
+Preflight has a concrete mechanism worth knowing: `renderFromURL()` calls
+`preflightPropsFromContent()` — twice, once for success options and once for
 `deriveFailOptions()` — purely to derive `X-Up-Target` / `X-Up-Fail-Target`, the mode, the
-context and the fragments to bind the request to. So the plan machinery runs once before the
-request exists, with its results discarded.
+context and the fragments to bind the request to. It builds the same plans as
+`renderFromContent()`, but no response doc, and only asks them for their preflight props. So the
+plan machinery runs once before the request exists, with its results discarded.
 
 `UpdateSteps` then performs the swaps in **four phases**, each running over all
 steps before the next one starts:
@@ -178,7 +181,7 @@ depend on (`setReloadAttrs()` in fragment.ts).
 
 There is no separate config object per stage. Conceptually one render-options object travels
 the whole pass, each stage adding to it or overriding it. (Literally, stages copy or
-re-derive it — `finalize()` returns a new object, and `ChangeFromContent` copies it per plan — so
+re-derive it — `finalize()` returns a new object, and `renderFromContent()` copies it per plan — so
 don't expect a mutation in one stage to be visible in another.) Knowing *where* an option
 acquires its value is most of debugging "why did it render that?".
 
@@ -186,9 +189,9 @@ acquires its value is most of debugging "why did it render that?".
 |---|---|
 | `up.RenderJob#_executePromise()` | The guard event is emitted **first**, on raw options — so `up:link:follow` and `up:form:submit` listeners see shorthands like `{ layer: 'new modal' }` unexpanded. Only then `RenderOptions.preprocess()` (render_options.ts) normalizes layer references, renames `use`-prefixed keys (`useKeep` → `keep`), and merges `config.renderOptions` plus, with `{ navigate: true }`, `config.navigateOptions`. It keeps the merged defaults in a `{ defaults }` prop, and resolves `{ origin }` to an `originLayer` *before* the request, since the origin may be gone by the time the response arrives. |
 | `up:fragment:loaded` listeners | User code may mutate the options here, or force `{ fail }` either way. This is the documented escape hatch for responses that can't be rendered as a fragment. |
-| `ChangeFromResponse` | *Then* success or fail options are picked. With `{ failOptions }` (a `config.renderOptions` default), `deriveFailOptions()` re-derives the object from the defaults plus the `fail`-prefixed keys; without it — as in `up.validate()` — the success options are kept and only the `fail`-prefixed keys override individually. |
-| `_augmentOptionsFromResponse()` | The server's turn — see the layers section below. |
-| `ChangeFromContent` | Expands the object into one *plan* per layer per target. |
+| `renderFromResponse()` | *Then* success or fail options are picked. With `{ failOptions }` (a `config.renderOptions` default), `deriveFailOptions()` re-derives the object from the defaults plus the `fail`-prefixed keys; without it — as in `up.validate()` — the success options are kept and only the `fail`-prefixed keys override individually. |
+| `augmentOptionsFromResponse()` | The server's turn — see the layers section below. |
+| `renderFromContent()` | Expands the object into one *plan* per layer per target. |
 | `UpdateLayerPlan` / `OpenLayerPlan` | `RenderOptions.finalize()` applies the defaults deliberately withheld until now (`LATE_KEYS`: `history`, `focus`, `scroll`), because an overlay's own config may have a better one. `OpenLayerPlan` merges the layer config first, then finalizes. |
 
 
@@ -257,7 +260,7 @@ Only those six close checks are gated on the layer being an overlay. The `X-Up-E
 in the same method runs for any layer — and a listener there can close a layer too.
 
 **The server can open one.** An `X-Up-Open-Layer` response header makes
-`_augmentOptionsFromResponse()` rewrite the pass into an overlay: it clears the original
+`augmentOptionsFromResponse()` (render_from_response.ts) rewrite the pass into an overlay: it clears the original
 `{ target }` (which may no longer be appropriate), applies `config.navigateOptions` so
 history, focus and a fallback target work, merges whatever the header specified, and then
 forces `{ layer: 'new' }`. A request that expected to update a fragment in place therefore
@@ -278,7 +281,7 @@ When a pass renders content that came from the cache, Unpoly can render *again* 
 copy. This is the one place where a single `up.render()` call produces two passes, two
 `up:fragment:inserted` events and two sets of compiler runs, so it surprises people.
 
-The mechanism is a hook rather than a loop. `ChangeFromResponse` puts a `verifyFinished`
+The mechanism is a hook rather than a loop. `renderFromResponse()` puts a `verifyFinished`
 callback on the render options; `up.RenderResult#_finish()` awaits every `finished` promise
 (animations, transitions) and *then* calls it. So revalidation is sequenced after the visible
 pass has settled, which is why it is observable through `.finished` but not through the
@@ -332,7 +335,7 @@ The taxonomy matters here, because throwing the wrong error changes control flow
 
 | Thrown | Meaning |
 |---|---|
-| `up.CannotMatch` | This plan doesn't apply — try the next one. Swallowed by `ChangeFromContent`. |
+| `up.CannotMatch` | This plan doesn't apply — try the next one. Swallowed by `renderFromContent()`. |
 | `up.Aborted` | The pass is over (a layer closed, or something aborted it). Propagates. |
 | `up.Offline` | The network failed; becomes `up:fragment:offline` with `event.retry()`. |
 | `up.CannotParse` | The response's content type is not renderable. |
@@ -352,7 +355,7 @@ the DOM is concerned, and a rejection as far as the caller is concerned.
   `bin/find-spec "up.render()"` to list them, and see
   [Testing](testing.md#finding-the-spec-for-a-feature).
 - **Expect to touch two layers of abstraction.** A bug in "what gets updated" usually lives
-  in `ChangeFromContent` (plans) or `UpdateLayerPlan` (steps); a bug in "how it gets updated" lives in
+  in `renderFromContent()` (plans) or `UpdateLayerPlan` (steps); a bug in "how it gets updated" lives in
   `UpdateSteps` or `LayerPlan`.
 - **Check the lifecycle page when you change observable behavior.** If your change alters
   when a hook fires or what it receives,

@@ -192,7 +192,7 @@ export class UpRequest {
     // the subtree that we're canceling.
     //
     // We allow users to pass in pre-matched `{ fragments }` in the constructor.
-    // We use this in `ChangeFromURL` since we already know the element's we're trying
+    // We use this in `renderFromURL()` since we already know the element's we're trying
     // to replace.
     //
     // If we haven't received a `{ fragments }` property (or if it has been deleted by

@@ -24,7 +24,7 @@
 //   its subclasses through its own imports, `class Sub extends Base` runs before `Base` exists.
 //   So code outside a class hierarchy imports the base class, not a subclass, wherever it can
 //   (the layer modes are only imported by each other and by this file). Where it can't
-//   (`RenderJob` creates a `ChangeFromURL`), that code must be evaluated before the base class.
+//   (`renderFromContent()` creates an `UpdateLayerPlan`), that code must be evaluated before the base class.
 // - This file imports the namespaces before the classes, and so enters every cycle through a
 //   namespace.
 //

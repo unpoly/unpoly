@@ -10,7 +10,7 @@ import { RenderResult } from '../render_result.js'
 import { type ResponseDoc } from '../response_doc.js'
 
 // A change that adds new content to a layer: by updating it (UpdateLayerPlan) or by opening it (OpenLayerPlan).
-// ChangeFromContent tries its plans in order and renders the first one that matches the response.
+// renderFromContent() tries its plans in order and renders the first one that matches the response.
 export abstract class LayerPlan extends Change {
   // Set by subclasses.
   declare layer: Layer
@@ -28,11 +28,11 @@ export abstract class LayerPlan extends Change {
     this._response = options.response
   }
 
-  // The props that ChangeFromURL needs to send a request, before we have a response.
+  // The props that renderFromURL() needs to send a request, before we have a response.
   abstract getPreflightProps(): t.PreflightProps
 
   // Finds the new content in the response. Throws up.CannotMatch when it isn't there,
-  // so ChangeFromContent knows that this plan is not applicable, and can try the next plan.
+  // so renderFromContent() knows that this plan is not applicable, and can try the next plan.
   abstract _matchPostflight(responseDoc: ResponseDoc): void
 
   // Renders the matched content into this.layer.
@@ -44,7 +44,7 @@ export abstract class LayerPlan extends Change {
   execute(responseDoc: ResponseDoc, onApplicable: () => void): RenderResult {
     this._matchPostflight(responseDoc)
 
-    // If our steps can be matched, ChangeFromContent wants a chance to some final
+    // If our steps can be matched, renderFromContent() wants a chance to some final
     // preparations before we start rendering.
     onApplicable()
 
