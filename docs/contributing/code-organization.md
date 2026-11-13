@@ -376,7 +376,7 @@ import { emit, on } from './event.js'
 import { Layer, layerConfig } from './layer.js'
 import type * as t from './fragment/types.js'
 export type * from './fragment/types.js'
-import { findFragment } from './fragment/matching/fragment_finder.js'
+import { findFragment } from './fragment/matching/find_fragment.js'
 import { RenderJob } from './fragment/rendering/render_job.js'
 export { RenderJob }
 export { RenderResult } from './fragment/rendering/render_result.js'
