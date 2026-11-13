@@ -8,7 +8,7 @@ import { type UpRequest, type UpResponse } from '../../../network.js'
 import { adoptRenderOptionsFromHeader } from '../../../script.js'
 import type * as t from '../../types.js'
 import { Change } from './change.js'
-import { ChangeFromContent } from './change_from_content.js'
+import { ChangeFromContent } from './render_from_content.js'
 import { RenderOptions } from '../render_options.js'
 import { type RenderResult } from '../render_result.js'
 

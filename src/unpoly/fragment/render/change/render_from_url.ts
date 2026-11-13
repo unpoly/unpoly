@@ -8,8 +8,8 @@ import {
 } from '../../../network.js'
 import type * as t from '../../types.js'
 import { Change } from './change.js'
-import { ChangeFromContent } from './change_from_content.js'
-import { ChangeFromResponse } from './change_from_response.js'
+import { ChangeFromContent } from './render_from_content.js'
+import { ChangeFromResponse } from './render_from_response.js'
 import { type RenderResult } from '../render_result.js'
 
 // The options for the request of a ChangeFromURL: the render options plus the preflight props
