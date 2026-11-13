@@ -120,10 +120,16 @@ helpers as functions instead of inheriting them.
 
 ### File names
 
-A file whose main export is a class is named after that class, in snake case:
-`UpdateLayerPlan` lives in `update_layer_plan.ts`. A module file is named after its main
-export where one dominates (`render_from_url.ts`), or after its topic otherwise
-(`render_options.ts`).
+Group closely related functions and classes in one file: ones on the same topic, or ones
+that share many helpers. Name the file after the group, with a noun or gerund
+(`event/emission.ts`), not a verb, which reads like a function. A file with a single
+function or class is named after it, in snake case (`render_from_url.ts`).
+
+A main module orchestrates and defines the public API. Implementation details live in files
+in the module's folder, so merge closely related code into a file there, not into the main
+module.
+
+A folder with only one file goes away. Move the file up a level.
 
 ### Where to find a namespace's specs
 
