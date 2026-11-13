@@ -4,14 +4,15 @@ import { type Layer } from '../../../layer.js'
 import { type UpResponse } from '../../../network.js'
 import { type HungrySteps } from '../../../radio.js'
 import type * as t from '../../types.js'
-import { Change } from './change.js'
 import { updateSteps } from './update_steps.js'
 import { RenderResult } from '../render_result.js'
 import { type ResponseDoc } from '../response_doc.js'
 
-// A change that adds new content to a layer: by updating it (UpdateLayerPlan) or by opening it (OpenLayerPlan).
+// A plan to add new content to a layer: by updating it (UpdateLayerPlan) or by opening it (OpenLayerPlan).
 // renderFromContent() tries its plans in order and renders the first one that matches the response.
-export abstract class LayerPlan extends Change {
+export abstract class LayerPlan {
+  declare options: t.RenderOptions
+
   // Set by subclasses.
   declare layer: Layer
   declare target: string
@@ -21,7 +22,7 @@ export abstract class LayerPlan extends Change {
   declare _response?: UpResponse
 
   constructor(options: t.RenderOptions) {
-    super(options)
+    this.options = options
     this._acceptLayer = options.acceptLayer
     this._dismissLayer = options.dismissLayer
     this._eventPlans = options.eventPlans || []
