@@ -16,7 +16,7 @@ import type * as t from './fragment/types.js'
 export type * from './fragment/types.js'
 import { FragmentFinder } from './fragment/fragment_finder.js'
 export { CloseLayer } from './fragment/render/change/close_layer.js'
-import { DestroyFragment } from './fragment/render/change/destroy_fragment.js'
+import { destroyFragment } from './fragment/render/change/destroy_fragment.js'
 import { RenderJob } from './fragment/render/render_job.js'
 export { RenderJob }
 import { RenderOptions } from './fragment/render/render_options.js'
@@ -423,7 +423,7 @@ export function destroy(...args: any[]): Promise<void> | undefined {
   const element = getSmart(options.target, options)
 
   if (element) {
-    new DestroyFragment({ ...options, element }).execute()
+    destroyFragment(element, options)
   }
 
   return up.migrate.formerlyAsync?.('up.destroy()')

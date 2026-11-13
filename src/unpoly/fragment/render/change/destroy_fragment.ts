@@ -1,16 +1,14 @@
 import {
   abortFragment, emitFragmentDestroyed, markFragmentAsDestroying,
 } from '../../../fragment.js'
-import { layerStack, type Layer } from '../../../layer.js'
+import { layerStack } from '../../../layer.js'
 import { animate, type AnimationValue } from '../../../motion.js'
 import { clean } from '../../../script.js'
 import type * as t from '../../types.js'
-import { Change } from './change.js'
 import { RenderOptions } from '../render_options.js'
 
-// Options for up.destroy(), plus the element to destroy.
+// Options for up.destroy().
 interface DestroyFragmentOptions {
-  element: Element
   animation?: AnimationValue
   duration?: number
   easing?: string
@@ -20,56 +18,36 @@ interface DestroyFragmentOptions {
   [key: string]: any
 }
 
-export class DestroyFragment extends Change<DestroyFragmentOptions> {
-  declare _layer: Layer
-  declare _element: Element
-  declare _animation?: AnimationValue
-  declare _log: any
-  declare _parent: ParentNode | null
+// Removes a fragment for up.destroy(), after playing its { animation }.
+export function destroyFragment(fragment: Element, options: DestroyFragmentOptions): void {
+  // Looking up the layer normalizes the options it is given, so it gets a copy of the caller's options.
+  let layer = layerStack.get({ ...options }) || layerStack.current
 
-  constructor(options: DestroyFragmentOptions) {
-    super(options)
-    this._layer = layerStack.get(options) || layerStack.current
-    this._element = this.options.element
-    this._animation = this.options.animation
-    this._log = this.options.log
-  }
+  // Destroying a fragment is a sync function.
+  //
+  // A variant of the logic below can also be found in updateSteps().
+  // Updating (swapping) a fragment also involves destroying the old version,
+  // but the logic needs to be interwoven with the insertion logic for the new
+  // version.
 
-  execute(): void {
-    // Destroying a fragment is a sync function.
-    //
-    // A variant of the logic below can also be found in UpdateLayerPlan.
-    // Updating (swapping) a fragment also involves destroying the old version,
-    // but the logic needs to be interwoven with the insertion logic for the new
-    // version.
+  // Save the parent because we emit up:fragment:destroyed on the parent
+  // after removing the fragment.
+  let parent = fragment.parentNode
 
-    // Save the parent because we emit up:fragment:destroyed on the parent
-    // after removing @element.
-    this._parent = this._element.parentNode
+  // The destroying fragment gets an .up-destroying class so we can
+  // recognize elements that are being destroyed but are still playing out their
+  // removal animation.
+  markFragmentAsDestroying(fragment)
 
-    // The destroying fragment gets an .up-destroying class so we can
-    // recognize elements that are being destroyed but are still playing out their
-    // removal animation.
-    markFragmentAsDestroying(this._element)
+  animate(fragment, options.animation, RenderOptions.chainCallbacks(options, {
+    onFinished: () => {
+      layer.asCurrent(() => {
+        abortFragment(fragment)
+        clean(fragment, { layer })
+        fragment.remove()
+      })
 
-    animate(this._element, this._animation, RenderOptions.chainCallbacks(this.options, {
-      onFinished: () => {
-        this._erase()
-        this._emitDestroyed()
-      }
-    }))
-  }
-
-  _erase(): void {
-    this._layer.asCurrent(() => {
-      abortFragment(this._element)
-      clean(this._element, { layer: this._layer })
-      this._element.remove()
-    })
-  }
-
-  _emitDestroyed(): void {
-    emitFragmentDestroyed(this._element, { parent: this._parent, log: this._log })
-  }
-
+      emitFragmentDestroyed(fragment, { parent, log: options.log })
+    }
+  }))
 }
