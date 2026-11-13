@@ -5,6 +5,7 @@ how a namespace is structured internally, and how modules import each other.
 
 <!-- toc -->
 - [Directory structure](#directory-structure)
+  - [Module or class](#module-or-class)
   - [File names](#file-names)
   - [Where to find a namespace's specs](#where-to-find-a-namespaces-specs)
   - [Implementation plans](#implementation-plans)
@@ -95,10 +96,33 @@ dist/                     # Output directory for the build (gitignored, never ed
   ...
 ```
 
+### Module or class
+
+Choose the shape that makes the callers' code simplest, even if the implementation gets
+longer. Any minifier shortens a module's function names, but class members only when
+properties are mangled, which apps that minify Unpoly themselves usually don't do. So write a
+module (a file with exported functions and private helpers), and a class only when:
+
+- callers keep an object and call it more than once, or at different times;
+- several instances live at the same time, each with its own state;
+- subclasses override parts of its behavior;
+- it's a singleton with mutable state. Reset it by replacing the instance, so state added
+  later can't be forgotten.
+
+A one-shot computation is a function, even when its helpers share values: pass each helper
+the values it needs. Keep a class only when most helpers need most of the same values.
+
+A class that only its main module uses doesn't need a function facade of its own.
+
+A base class may exist only to share state and the methods that use it. Share stateless
+helpers as functions instead of inheriting them.
+
 ### File names
 
 A file whose main export is a class is named after that class, in snake case:
-`UpdateLayerPlan` lives in `update_layer_plan.ts`.
+`UpdateLayerPlan` lives in `update_layer_plan.ts`. A module file is named after its main
+export where one dominates (`render_from_url.ts`), or after its topic otherwise
+(`render_options.ts`).
 
 ### Where to find a namespace's specs
 
@@ -181,7 +205,7 @@ import { newConfig } from './util/config.js'
 import { emit } from './event.js'
 import type * as t from './link/types.js'
 export type * from './link/types.js'
-import { LinkFollower } from './link/link_follower.js'
+import { followLink } from './link/follow_link.js'
 
 // Settings to globally configure link handling.
 // Published as up.link.config.
@@ -195,8 +219,8 @@ export function follow(link: Element): void {
   // Allow listeners to prevent the follow
   if (emitFollowEvent(link).defaultPrevented) return
 
-  // Instantiate a helper class to handle the following
-  new LinkFollower(link).execute()
+  // Call a function from the module's folder to handle the following
+  followLink(link)
 }
 
 // Return whether a link will be followed by Unpoly.
