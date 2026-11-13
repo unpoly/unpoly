@@ -18,8 +18,9 @@ polyfill them. An API that all three browsers have supported for two years
 path that degrades rather than throws.
 Skipping an animation is fine.
 
-`bin/typecheck` doesn't help here. Its DOM types (`lib` in `tsconfig.json`) know every API
-that TypeScript knows, however new.
+`bin/typecheck` only helps with JavaScript built-ins. `lib` in `tsconfig.json` stops at
+ES2024, so it rejects a newer built-in like `Set#union()` (TS2550). Its DOM types know every
+browser API that TypeScript knows, however new.
 
 
 ## Breaking changes

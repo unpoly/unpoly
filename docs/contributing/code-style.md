@@ -98,8 +98,10 @@ and after.
   (differently in `unpoly.js` and `unpoly.es6.js`, whose targets treat class fields
   differently). `bin/lint` reports a field without `declare` or an initializer.
 - **Only syntax that strips away.** No `enum`, `namespace` or constructor parameter
-  properties (`constructor(private x)`): they emit code, and the build only strips types.
-  Re-export a type with `export type`, because esbuild compiles one file at a time.
+  properties (`constructor(private x)`). They compile to runtime code, so our output would
+  depend on the tool that strips the types. A parameter property also defines a class field
+  (see the `declare` bullet above). Re-export a type with `export type`, because esbuild
+  compiles one file at a time.
   `bin/typecheck` reports both (`erasableSyntaxOnly` and `isolatedModules` in `tsconfig.json`).
 - **Comment a type with `/** */`.** Editors show the comment when you hover a use of the type.
   Mark a type that isn't public API with `@internal` in that comment. These comments aren't

@@ -53,8 +53,8 @@ If a build has errors — a syntax slip, or a lint error — `bin/test` prints
 them instead of running the specs and exits non-zero, and `bin/dev status` reports
 them too. The watcher itself keeps running, so your next edit can fix things.
 
-A **type error** doesn't break the build, and `bin/test` runs the specs anyway (see
-[Testing](testing.md#check-types-and-lint-first)). `bin/dev status` lists type errors, but
+A **type error** doesn't break the build. `bin/test` runs the specs anyway, and exits 7 even
+when they pass (see [Testing](testing.md#check-types-and-lint-first)). `bin/dev status` lists type errors, but
 still reports the environment as usable.
 
 ## The build

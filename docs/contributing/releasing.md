@@ -24,8 +24,9 @@ confirmation, pushes the `v<version>` tag, and publishes to npm. A version conta
 `pre` or `alpha` is published under the npm tag `next` instead of `latest`, so it never
 reaches users who just run `npm install unpoly`.
 
-The tool runs no specs and no type check, and its build only lints `src/`. Release a commit
-that [CI](commit-conventions.md#continuous-integration) has passed.
+The tool runs no specs and no type check, and its build lints only `src/`. It builds the
+working tree and tags `HEAD`, so release from a clean working tree, at a pushed commit that
+[CI](commit-conventions.md#continuous-integration) has passed.
 
 Afterwards it prints the manual follow-ups it cannot do for you: a matching
 [`unpoly-rails`](https://github.com/unpoly/unpoly-rails) release, deploying

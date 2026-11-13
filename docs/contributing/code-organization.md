@@ -54,7 +54,7 @@ src/                      # Entry points for Unpoly's main and optional bundles
     pages/                # ... Guide pages and shared partials (see Documentation)
     ...                   # ... Other namespaces and their classes
 
-  types/global.d.ts       # Types of globals like window.up, only read by the type check
+  types/global.d.ts       # Types of globals like window.up, read by the type check
 
 spec/
   unpoly/                 # Tests (Jasmine specs), mirroring src/unpoly
@@ -94,7 +94,8 @@ docs/                     # Documentation for contributors, never shipped
   contributing/           # ... The guides linked from CONTRIBUTING.md
   plans/                  # ... Implementation plans (gitignored)
 
-tsconfig.json             # Settings for bin/typecheck, with tsconfig.core.json (see Code style)
+tsconfig.json             # Loose type check of all of src/ (bin/typecheck, see Code style)
+tsconfig.core.json        # Strict type check of core, src/unpoly/ (bin/typecheck)
 .oxlintrc.json            # Rules for bin/lint (see Code style)
 
 dist/                     # Output directory for the build (gitignored, never edit directly)
@@ -300,8 +301,8 @@ The entry file `src/unpoly.ts` ties the modules together. It imports every modul
 each `api` onto `window.up` (the `apis` list), then calls each `install()` (the `installs`
 list, which is the explicit install order). Its comments also explain the rules for import
 cycles between modules. Two modules must not contribute the same key to `window.up`, or the
-later one silently replaces the earlier one; [`bin/lint`](code-style.md#linting) reports that, and that
-`up.internal` keys are their export names.
+later one silently replaces the earlier one; [`bin/lint`](code-style.md#linting) reports that,
+and that `up.internal` keys are their export names.
 
 Because internal callers import functions directly, a spec that spies on `up.link.follow`
 doesn't intercept calls from other modules. A function that specs need to replace is wrapped

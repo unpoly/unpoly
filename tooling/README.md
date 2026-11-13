@@ -18,7 +18,8 @@ tooling/
   test/         self-tests for all of the above, mirroring this layout
 ```
 
-The `bin/*` executables hold no logic; each is a shebang plus one import from here.
+The `bin/*` executables are thin: they read their arguments and print results, and the logic
+lives here.
 
 
 ## The spec runner's invariant
@@ -77,8 +78,8 @@ function, so its tests live in Node with the rest.
   Its own process, deliberately not a route on the spec server, which `bin/ci` boots. See
   [its README](scratch/README.md) and [Trying out changes](../docs/contributing/trying-out-changes.md).
 - `test/` — the self-tests: `bin/self-test`.
-- `bin/test`, `bin/ci`, `bin/dev`, `bin/find-spec`, `bin/outline`, `bin/typecheck`, `bin/update-contributing-tocs` — thin **extensionless** executables (shebang +
-  `chmod +x`), relying on Node 22's extensionless-ESM detection. The package is
+- The `bin/` executables are **extensionless** (shebang + `chmod +x`). All but `bin/release`,
+  which is CommonJS, rely on Node 22's extensionless-ESM detection. The package is
   deliberately *not* `type: module` (that would make Node and esbuild treat every `.js` file
   as an ES module, while the specs are still scripts), so everything under
   `tooling/**` is `.mjs` — except the three browser files, where the extension is what picks
@@ -297,9 +298,9 @@ process manager. The rules, in one place:
 ## Self-tests
 
 `bin/self-test` (`node --test 'tooling/test/**/*.test.mjs'`, `NO_COLOR=1`) runs in about
-four seconds. Only the evaluation-order test (`build/eval_order.test.mjs`) builds bundles and
-starts a browser. Cover changes here rather than through the
-suite. What's covered today:
+four seconds. Only two tests build bundles and start a browser: `build/eval_order.test.mjs`
+and `build/class_names.test.mjs`. Cover changes here rather than through the suite. What's
+covered today:
 
 - `formatter` / `stack` / `dom_outline` / `urls`: progress line, compact vs. verbose
   failure block, frame selection, selector outline, summary.

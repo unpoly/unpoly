@@ -65,13 +65,13 @@ particular is **not** automatic — it depends on which entry point you call.
 | Render steps (`UpdateLayerPlan#_matchOldElements()`) | `findFragment()` | Yes |
 | Response matching (`ResponseDoc#select()`) | `findFragment()` | Yes, against a *rediscovered* origin |
 
-The lookup functions and `Selector` share one options type, `LookupOptions` in
-`fragment/types.ts`, and `findFragment()`'s options extend it (see
-[Code style](code-style.md#writing-types) for why it is shared).
-
 So the two are layered, not parallel: **`findFragment()` is a strategy on top of
 `Selector`.** It decides *which* match to prefer, and delegates every actual match back
 down (through `up.fragment.closest()` and `getFirstDescendant()`).
+
+The lookup functions and `Selector` share one options type, `LookupOptions` in
+`fragment/types.ts`, and `findFragment()`'s options extend it (see
+[Code style](code-style.md#writing-types) for why it is shared).
 
 Two consequences that catch people out: `up.fragment.all('.card')` never prefers anything
 near the origin, and `up.fragment.get(container, '.card', { origin })` ignores the origin

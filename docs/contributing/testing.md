@@ -69,12 +69,14 @@ bin/test --spec="…"  # the specs that cover your change (~15 seconds for a sin
 
 The dev watcher also lints `src/` and checks types after every change in `src/` or a tsconfig,
 so `bin/test` knows of the errors when you forget. A lint error in `src/` stops it: it prints the
-error instead of running the specs. A type error doesn't: `bin/test` prints the type errors
-before the specs, runs them anyway, and exits non-zero (7) even when they all pass. A type error
-is often in another file than the code under test, like the callers of a function whose
-signature you changed, and in the middle of a refactoring you want to see the specs before every
-caller is fixed. When the watcher's check didn't finish in time for the run, `bin/test` says so
-and reports no type errors, so run `bin/typecheck` before you commit.
+error instead of running the specs. A type error doesn't: `bin/test` runs the specs anyway,
+and exits non-zero (7) even when they all pass. A type error is often in another file than the
+code under test, like the callers of a function whose signature you changed, and in the middle
+of a refactoring you want to see the specs before every caller is fixed.
+
+`bin/test` prints the type errors before the specs, or after them when the check finishes
+later. When the check timed out, or the sources changed during the run, it says so and reports
+no type errors. Run `bin/typecheck` before you commit.
 
 Running the two first is still quicker than waiting for a spec run to tell you, and `bin/lint`
 also covers what the watcher doesn't lint: `spec/`, `tooling/` and the doc files. CI runs all

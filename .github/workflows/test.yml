@@ -66,7 +66,7 @@ jobs:
         run: bin/typecheck
 
   # The tooling's own unit tests (build, lint rules, spec runner, scratch server). They build what
-  # they need in memory and need no dist/. One test launches Chrome, which `npm ci` downloads.
+  # they need in memory and need no dist/. Two tests launch Chrome, which `npm ci` downloads.
   self-test:
     runs-on: ubuntu-22.04
     timeout-minutes: 5

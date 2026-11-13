@@ -192,9 +192,9 @@ re-derive it — `finalizeRenderOptions()` returns a new object, and `renderFrom
 don't expect a mutation in one stage to be visible in another.) Knowing *where* an option
 acquires its value is most of debugging "why did it render that?".
 
-The object's type is `RenderOptions` in `fragment/types.ts`, which lists every option, the
-internal ones a stage adds included. A plan that has resolved its layer works with
-`ResolvedRenderOptions`, and each step is a `RenderStep` that extends them. A new option,
+The object's type is `RenderOptions` in `fragment/types.ts`, which lists every option,
+including the internal ones a stage adds. A plan that has resolved its layer works with
+`ResolvedRenderOptions`, and each step is a `RenderStep` that extends it. A new option,
 public or internal, goes into `RenderOptions`.
 
 | Stage | What happens to the options |
