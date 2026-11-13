@@ -224,7 +224,7 @@ extendDescribe('up.fragment', function() {
           htmlFixture(html)
           const videoBeforeRender = document.querySelector('#video')
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()
@@ -242,7 +242,7 @@ extendDescribe('up.fragment', function() {
           const container = htmlFixture(html)
           document.querySelector('#video')
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()
@@ -261,7 +261,7 @@ extendDescribe('up.fragment', function() {
           htmlFixture(html)
           const audioBeforeRender = document.querySelector('#audio')
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()
@@ -288,7 +288,7 @@ extendDescribe('up.fragment', function() {
             // This may have two reasons:
             //
             // 1. Rendering from a URL is async, rendering a local string is sync
-            // 2. Rendering from a URL uses DOMParser and fixParserDamage(), rendering from a local string
+            // 2. Rendering from a URL uses DOMParser and revivedClone(), rendering from a local string
             //    creates elements within the current browsing context.
             const promise = up.render({ target: '#player', url: '/video2' })
 
@@ -337,7 +337,7 @@ extendDescribe('up.fragment', function() {
           htmlFixture(html)
           const scriptBeforeRender = document.querySelector('#script')
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involved.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involved.
           up.render('#container', { document: html })
 
           await wait()
@@ -359,7 +359,7 @@ extendDescribe('up.fragment', function() {
 
           expect(window.keepSpy.calls.count()).toBe(1)
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()
@@ -367,7 +367,7 @@ extendDescribe('up.fragment', function() {
           expect(document.querySelector('#script')).toBe(scriptBeforeRender)
           expect(window.keepSpy.calls.count()).toBe(1)
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html, keep: false })
 
           await wait()
@@ -391,7 +391,7 @@ extendDescribe('up.fragment', function() {
           htmlFixture(html)
           expect(window.specSpy.calls.count()).toBe(1)
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()
@@ -436,7 +436,7 @@ extendDescribe('up.fragment', function() {
           htmlFixture(html)
           const noscriptBeforeRender = document.querySelector('#noscript')
 
-          // Must render from { url } or { document } so DOMParser and fixParserDamage() is involed.
+          // Must render from { url } or { document } so DOMParser and revivedClone() is involed.
           up.render('#container', { document: html })
 
           await wait()

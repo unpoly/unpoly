@@ -1086,45 +1086,6 @@ export function parseArgs(args: any[], ...specs: t.ArgSpec[]): any[] {
   return results
 }
 
-// /*-
-// [Assigns](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign) the given properties to the given object.
-//
-// Returns a function that restores the object's properties to the value they had before assignment.
-//
-// ### Example
-//
-// ```js
-// let obj = { a: 1, b: 2, c: 3, d: 4 }
-// let undo = up.util.assignTemp(obj, { b: 20, c: 30 })
-// console.log(obj) // logs { a: 1, b: 20, c: 30, d: 4 }
-//
-// undo()
-// console.log(obj) // logs { a: 1, b: 2, c: 3, d: 4 }
-// ```
-//
-// ### Limitations
-//
-// The returned function can only restore properties that existed before re-assignment.
-//
-// @function up.util.assignTemp
-// @param {Object} target
-//   The target object to mutate.
-// @param {Object} props
-//   An object containing the properties you want to apply.
-//
-//   All enumerable own properties of `props` will be copied to `object`.
-// @return {Function}
-//   A function that undoes the mutation of `target` when called.
-//
-//   Only properties listed in `props` will be restored.
-// @experimental
-// */
-// function assignTemp(target, props) {
-//   let oldProps = pick(target, Object.keys(props))
-//   Object.assign(target, props)
-//   return () => Object.assign(target, oldProps)
-// }
-
 export function scanFunctions(...values: any[]): t.AnyFunction[] {
   return values.flat(2).filter(isFunction)
 }
