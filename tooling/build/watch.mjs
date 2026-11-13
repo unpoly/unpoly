@@ -16,7 +16,7 @@ import path from 'node:path'
 import esbuild from 'esbuild'
 import pc from 'picocolors'
 import { BuildStatus, PROJECT_ROOT, REQUEST_PATH, takeBuildRequest } from './build_status.mjs'
-import { SKIP_DIRS, SOURCE_DIRS, WATCHABLE_SUFFIXES } from './build_sync.mjs'
+import { SKIP_DIRS, SOURCE_DIRS, TSCONFIG, WATCHABLE_SUFFIXES, isTypeChecked } from './build_sync.mjs'
 import { esbuildOptions, finish } from './esbuild.mjs'
 import { formatError, formatWarnings } from './build.mjs'
 import { SourceLinter } from './lint.mjs'
@@ -168,8 +168,9 @@ export function watchSources(rounds, { root = PROJECT_ROOT, log = console.log } 
     if (!files.length) rounds.change(null)
     for (let file of files) {
       let absolute = path.join(root, file)
-      // A directory: something in it came or went.
-      rounds.change(isWatchable(absolute) ? absolute : null)
+      // A directory: something in it came or went. A tsconfig needs no rebuild.
+      if (TSCONFIG.test(file)) rounds.touch(absolute)
+      else rounds.change(isWatchable(absolute) ? absolute : null)
     }
   }, {
     skip: () => true,
@@ -212,15 +213,6 @@ export function roundStatus(status, typeChecks, root = PROJECT_ROOT) {
       typeChecks.roundFinished()
     },
   }
-}
-
-const TSCONFIG = /^tsconfig.*\.json$/
-
-// Whether the type check reads the file or directory at the absolute path `seen`, or may read
-// something in it: anything in src/ (the doc files too, for the API probe) and the tsconfigs.
-export function isTypeChecked(seen, root = PROJECT_ROOT) {
-  let relative = path.relative(root, seen)
-  return relative === 'src' || relative.startsWith('src' + path.sep) || TSCONFIG.test(relative)
 }
 
 // Bundles only ever import files with these extensions, so nothing else needs a rebuild.

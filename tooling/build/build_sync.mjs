@@ -92,6 +92,16 @@ export function unbuiltSources(status, sources) {
   return sources.filter(({ file, mtime }) => mtime > full && !(status.seen?.[file] >= mtime))
 }
 
+// The names of the tsconfigs in the project root.
+export const TSCONFIG = /^tsconfig.*\.json$/
+
+// Whether the type check reads the file or directory at the absolute path `seen`, or may read
+// something in it: anything in src/ (the doc files too, for the API probe) and the tsconfigs.
+export function isTypeChecked(seen, root = PROJECT_ROOT) {
+  let relative = path.relative(root, seen)
+  return relative === 'src' || relative.startsWith('src' + path.sep) || TSCONFIG.test(relative)
+}
+
 // The tsconfigs in the project root, as `{ file, mtime }`. Only the watcher's type check reads
 // them, but waitForFreshBuild() waits for them like for a source, so that bin/test doesn't take
 // a type check against the old settings for current. They don't count for newestSource(): a
@@ -100,7 +110,7 @@ export function tsconfigs(root = PROJECT_ROOT) {
   let files = []
   try {
     for (let name of readdirSync(root)) {
-      if (/^tsconfig.*\.json$/.test(name)) files.push({ file: name, mtime: statSync(path.join(root, name)).mtimeMs })
+      if (TSCONFIG.test(name)) files.push({ file: name, mtime: statSync(path.join(root, name)).mtimeMs })
     }
   } catch {
     // No tsconfig to wait for.
@@ -251,19 +261,28 @@ export async function waitForFreshBuild({
   }
 }
 
+// Whether the watcher started a round after `builtAt` that changed something the type check reads.
+function outdatesTypeCheck({ fullStartedAt, seen = {} }, builtAt, root) {
+  if (fullStartedAt > builtAt) return true
+  return Object.entries(seen).some(([file, startedAt]) => startedAt > builtAt && isTypeChecked(path.join(root, file), root))
+}
+
 // How long bin/test waits for the watcher's type check. A check takes ~0.5 s after the round
 // that bin/test waited for.
 const TYPE_CHECK_TIMEOUT_MS = 10_000
 
 // Waits for the watcher's type check of the build that waitForFreshBuild() resolved with, and
 // resolves with what it found, as `{ ok, errors }`. `builtAt` is that build's `startedAt`.
-// Resolves with `{ outdated: true }` when the watcher has started another round since (an edit
-// during the spec run, say), since the check then may include edits the specs didn't test. A
-// round that edits nothing the check reads does that too, which we can't tell apart. Resolves
-// with `{ timedOut: true }` when the check doesn't finish in time, and with null for a watcher
-// that doesn't check types (one started before it could). See BuildStatus for `types`.
+// Resolves with `{ outdated: true }` when the watcher has started a round since that changed
+// something the check reads (an edit in src/ during the spec run, say), since the check then may
+// include edits the specs didn't test: a round that built everything, or one that saw a path the
+// check reads (see `fullStartedAt` and `seen` in BuildStatus). A round for a spec or a swap file
+// in spec/ keeps the result. Resolves with `{ timedOut: true }` when the check doesn't finish in
+// time, and with null for a watcher that doesn't check types (one started before it could). See
+// BuildStatus for `types`. `root` is a seam for the self-tests.
 export async function waitForTypeCheck({
   builtAt,
+  root = PROJECT_ROOT,
   read = () => readStatus(),
   now = Date.now,
   sleep = defaultSleep,
@@ -274,7 +293,7 @@ export async function waitForTypeCheck({
     let status = read()
     let types = status?.types
     if (!types) return null
-    if (builtAt !== undefined && status.startedAt > builtAt) return { outdated: true }
+    if (builtAt !== undefined && outdatesTypeCheck(status, builtAt, root)) return { outdated: true }
     if (types.state === 'done') return { ok: types.ok, errors: types.errors }
     if (now() >= deadline) return { timedOut: true }
     await sleep(100)

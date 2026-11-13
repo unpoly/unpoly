@@ -3,9 +3,9 @@ import assert from 'node:assert/strict'
 import { existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { Rounds, TypeChecks, affectedBundles, isTypeChecked, roundStatus, watchSources } from '../../build/watch.mjs'
+import { Rounds, TypeChecks, affectedBundles, roundStatus, watchSources } from '../../build/watch.mjs'
 import { REQUEST_PATH, requestBuild } from '../../build/build_status.mjs'
-import { SOURCE_DIRS } from '../../build/build_sync.mjs'
+import { SOURCE_DIRS, isTypeChecked } from '../../build/build_sync.mjs'
 
 // --- Rounds -------------------------------------------------------------------
 
@@ -380,6 +380,13 @@ test('a rebuild request rebuilds the files it names, once', async (t) => {
   assert.ok(!existsSync(at(REQUEST_PATH)), 'the request is taken')
   await settle()
   assert.equal(calls.filter(([kind]) => kind === 'change').length, 2, 'and served once')
+})
+
+test('a rebuild request for a tsconfig makes a round that builds nothing', async (t) => {
+  let { root, calls, expect, settle } = project(t)
+  await expect([['touch', 'tsconfig.json']], () => requestBuild(['tsconfig.json'], root))
+  await settle()
+  assert.ok(!calls.some(([kind]) => kind === 'change'))
 })
 
 test('rebuild requests still arrive after tmp/ was deleted', async (t) => {

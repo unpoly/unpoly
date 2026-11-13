@@ -32,8 +32,7 @@ how modules import each other is covered in
 The build doesn't use TypeScript at all: esbuild strips the types from each file, and never
 checks them. `bin/typecheck` checks them, in about a second, and prints nothing when all is
 well. The dev environment's watcher runs the same checks after every change in `src/` or a
-tsconfig, and
-`bin/test` prints their errors before the specs, which it runs anyway (see
+tsconfig, and `bin/test` prints their errors before the specs, which it runs anyway (see
 [Testing](testing.md#check-types-and-lint-first)).
 
 Besides the [public-API probe](documentation.md#public-api-must-exist), which checks that
@@ -45,10 +44,10 @@ configs:
   `noImplicitAny` and `strictNullChecks` on. `unpoly-migrate` isn't part of this check, so core
   can't use the API that only migrate adds, like `up.migrate.deprecated()` or `config.patch()`.
 
-`bin/typecheck` prints an error that both checks find twice, the watcher lists it once. Your editor reads `tsconfig.json`, so it shows
-the loose check's errors, but not the ones only the core check finds. When all of `src/` passes a
-setting, move it to `tsconfig.json`. CI runs `bin/typecheck` as a separate job, and a type error
-in either check fails the workflow.
+`bin/typecheck` prints an error that both checks find twice; the watcher lists it once. Your
+editor reads `tsconfig.json`, so it shows the loose check's errors, but not the ones only the
+core check finds. When all of `src/` passes a setting, move it to `tsconfig.json`. CI runs
+`bin/typecheck` as a separate job, and a type error in either check fails the workflow.
 
 Adding or changing types must not change what the build emits. Compare `unpoly.min.js` before
 and after.
