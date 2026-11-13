@@ -2,7 +2,7 @@ import * as u from '../../util.js'
 import * as e from '../../element.js'
 import { fail } from '../../error.js'
 import {
-  emitFragmentDestroyed, emitFragmentKept, findKeepPlan, fragmentConfig, markFragmentAsDestroying,
+  emitFragmentDestroyed, emitFragmentKept, findKeepMatch, fragmentConfig, markFragmentAsDestroying,
   setReloadAttrs,
 } from '../../fragment.js'
 import { type Layer } from '../../layer.js'
@@ -107,9 +107,9 @@ function assertLayersAlive(steps: MatchedStep[]): t.PartialRenderResult {
 function insertStep(step: MatchedStep, willChangeBody: boolean): StepInsertion {
   switch (step.placement) {
     case 'swap': {
-      let keepPlan = findKeepPlan(step)
-      if (keepPlan) {
-        return insertKeepEverythingStep(step, keepPlan)
+      let keepMatch = findKeepMatch(step)
+      if (keepMatch) {
+        return insertKeepEverythingStep(step, keepMatch)
       } else {
         return insertSwapStep(step, willChangeBody)
       }
@@ -134,13 +134,13 @@ function executeNoSteps(noneOptions: t.ResolvedRenderOptions): t.PartialRenderRe
   return {}
 }
 
-function insertKeepEverythingStep(step: MatchedStep, keepPlan: t.KeepPlan): StepInsertion {
+function insertKeepEverythingStep(step: MatchedStep, keepMatch: t.KeepMatch): StepInsertion {
   // Nothing to mutate in the DOM.
   return {
     fragments: [],
     focusElement: step.oldElement,
     scrollElement: step.oldElement,
-    welcome: () => emitFragmentKept(keepPlan),
+    welcome: () => emitFragmentKept(keepMatch),
   }
 }
 
@@ -167,7 +167,7 @@ function insertSwapStep(step: MatchedStep, willChangeBody: boolean): StepInserti
   })
 
   // Restore keepable before finalizing. Finalizing will rewrite elements that DOMParser broke,
-  // causing a keepPlans's newElement to point to a rewritten element that is now detached.
+  // causing a keepMatch's newElement to point to a rewritten element that is now detached.
   // Hence we lose the original position of the keepable.
   restoreDescendantKeepables(step)
 
@@ -254,14 +254,14 @@ function welcomeElement(element: Element, step: MatchedStep, responseDoc: Respon
 
 // This will find all [up-keep] descendants in oldElement, overwrite their partner
 // element in newElement and leave a visually identical clone in oldElement for a later transition.
-// Returns an array of keepPlans.
+// Returns an array of keep matches.
 function preserveDescendantKeepables(step: MatchedStep, willChangeBody: boolean): void {
-  const descendantKeepPlans: t.KeepPlan[] = []
+  const descendantKeepMatches: t.KeepMatch[] = []
 
   if (step.keep) {
     for (let keepable of step.oldElement.querySelectorAll<HTMLElement>('[up-keep]')) {
-      let keepPlan = findKeepPlan({ ...step, oldElement: keepable, descendantsOnly: true })
-      if (keepPlan) {
+      let keepMatch = findKeepMatch({ ...step, oldElement: keepable, descendantsOnly: true })
+      if (keepMatch) {
         // Replace keepable with its clone so it looks good in a transition
         // between oldElement and newElement.
         const keepableClone = keepable.cloneNode(true) as Element
@@ -273,12 +273,12 @@ function preserveDescendantKeepables(step: MatchedStep, willChangeBody: boolean)
         // When the newElement from the response has a response, it will be inserted
         // into the DOM during the transition. Only at the end it will be replaced by the keepable.
         // To prevent the execution of these placeholder-scripts, we change their { type }.
-        block(keepPlan.newElement)
+        block(keepMatch.newElement)
 
         // Attaching a viewport to another element will cause it to lose
         // its scroll position, even if both parents are in the same document.
-        let viewports = getViewportSubtree(keepPlan.oldElement)
-        keepPlan.revivers = u.map(viewports, function(viewport) {
+        let viewports = getViewportSubtree(keepMatch.oldElement)
+        keepMatch.revivers = u.map(viewports, function(viewport) {
           let cursorProps = e.copyCursorProps(viewport)
           return () => e.copyCursorProps(cursorProps, viewport)
         })
@@ -286,10 +286,10 @@ function preserveDescendantKeepables(step: MatchedStep, willChangeBody: boolean)
         if (willChangeBody) {
           // Since we're going to swap the entire oldElement and newElement containers afterwards,
           // replace the matching element with keepable so it will eventually return to the DOM.
-          keepPlan.newElement.replaceWith(keepable)
+          keepMatch.newElement.replaceWith(keepable)
         } else {
           // If keepable is a media element, detaching it (or attaching it to another document) would cause it
-          // to lose playback state. To avoid this we temporarily move the keepable (keepPlan.oldElement)
+          // to lose playback state. To avoid this we temporarily move the keepable (keepMatch.oldElement)
           // so it can remain attached while we swap fragment versions. We will move it to its place within
           // the new fragment version once the swap is complete.
           document.body.append(keepable)
@@ -297,32 +297,32 @@ function preserveDescendantKeepables(step: MatchedStep, willChangeBody: boolean)
 
         // // Since we're going to swap the entire oldElement and newElement containers afterwards,
         // // replace the matching element with keepable so it will eventually return to the DOM.
-        // keepPlan.newElement.replaceWith(keepable)
-        descendantKeepPlans.push(keepPlan)
+        // keepMatch.newElement.replaceWith(keepable)
+        descendantKeepMatches.push(keepMatch)
       }
     }
   }
 
-  step.descendantKeepPlans = descendantKeepPlans
+  step.descendantKeepMatches = descendantKeepMatches
 }
 
 function restoreDescendantKeepables(step: MatchedStep): void {
-  // preserveDescendantKeepables() has set the keep plans, and the revivers of each plan.
-  for (let keepPlan of step.descendantKeepPlans!) {
+  // preserveDescendantKeepables() has set the keep matches, and the revivers of each match.
+  for (let keepMatch of step.descendantKeepMatches!) {
     // Now that we know the final destination of { newElement }, we can replace it with the keepable.
-    keepPlan.newElement.replaceWith(keepPlan.oldElement)
+    keepMatch.newElement.replaceWith(keepMatch.oldElement)
 
-    for (let reviver of keepPlan.revivers!) {
+    for (let reviver of keepMatch.revivers!) {
       reviver()
     }
   }
 }
 
 function finalizeDescendantKeepables(step: MatchedStep): void {
-  // preserveDescendantKeepables() has set the keep plans.
-  for (let keepPlan of step.descendantKeepPlans!) {
-    keepPlan.oldElement.classList.remove('up-keeping')
-    emitFragmentKept(keepPlan)
+  // preserveDescendantKeepables() has set the keep matches.
+  for (let keepMatch of step.descendantKeepMatches!) {
+    keepMatch.oldElement.classList.remove('up-keeping')
+    emitFragmentKept(keepMatch)
   }
 }
 

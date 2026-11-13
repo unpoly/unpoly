@@ -212,17 +212,17 @@ export const navigate = mockable((...args: t.RenderArgs): RenderJob => {
   return render({ ...options, navigate: true })
 })
 
-export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }: t.KeepPlan): t.FragmentKeepEvent {
+export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }: t.KeepMatch): t.FragmentKeepEvent {
   const log = ['Keeping fragment %o', oldElement]
   const callback = callbackAttr(oldElement, 'up-on-keep', { expandObject: ['newFragment', 'newData'] })
   return emit(oldElement, 'up:fragment:keep', { log, callback, newFragment, newData, renderOptions })
 }
 
-export function emitFragmentKept({ oldElement, newElement: newFragment, newData }: t.KeepPlan): t.FragmentKeptEvent {
+export function emitFragmentKept({ oldElement, newElement: newFragment, newData }: t.KeepMatch): t.FragmentKeptEvent {
   return emit(oldElement, 'up:fragment:kept', { log: false, newFragment, newData })
 }
 
-export function findKeepPlan(options: u.PlainObject): t.KeepPlan | undefined {
+export function findKeepMatch(options: u.PlainObject): t.KeepMatch | undefined {
   if (options.keep === false) return
 
   const { oldElement, newElement } = options
@@ -256,7 +256,7 @@ export function findKeepPlan(options: u.PlainObject): t.KeepPlan | undefined {
   let partnerMode = keepMode(partner)
 
   // (1) The partner must not be [up-keep=false], regardless of oldElement's state.
-  // (2) We already tested old element for [up-keep=false] at the beginning of findKeepPlan().
+  // (2) We already tested old element for [up-keep=false] at the beginning of findKeepMatch().
   if (partnerMode === false) return
 
   let oldIdentity = keepIdentity(oldElement, oldElementMode)
@@ -264,7 +264,7 @@ export function findKeepPlan(options: u.PlainObject): t.KeepPlan | undefined {
 
   if (!u.isEqual(oldIdentity, partnerIdentity)) return
 
-  const plan = {
+  const match = {
     oldElement, // the element that should be kept
     newElement: partner, // the element that would have replaced it but now does not
     newData: readData(partner), // the parsed up-data attribute of the element we will discard
@@ -272,10 +272,10 @@ export function findKeepPlan(options: u.PlainObject): t.KeepPlan | undefined {
   }
 
   // Preventing up:fragment:keep will force a replacement
-  if (emitFragmentKeep(plan).defaultPrevented) return
+  if (emitFragmentKeep(match).defaultPrevented) return
 
   // If we came this far, we can keep oldElement.
-  return plan
+  return match
 }
 
 function keepIdentity(element: FragmentElement, mode = keepMode(element)): unknown {

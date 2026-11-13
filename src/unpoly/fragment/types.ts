@@ -319,7 +319,7 @@ export interface RenderStep extends ResolvedRenderOptions {
   // Set while rendering, see updateSteps().
   parentElement?: ParentNode | null
   afterRemove?: () => void
-  descendantKeepPlans?: KeepPlan[]
+  descendantKeepMatches?: KeepMatch[]
   // Set by UpdateLayerPlan, for { focus: 'keep' } and { scroll: 'keep' }.
   focusCapsule?: FocusCapsule
   oldScrollTops?: Record<string, number>
@@ -353,7 +353,7 @@ export interface LookupOptions {
 An element with [up-keep] that is kept in an update, and the element it would have been replaced with.
 @internal
 */
-export interface KeepPlan {
+export interface KeepMatch {
   oldElement: Element
   newElement: Element
   newData: u.PlainObject

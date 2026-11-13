@@ -932,14 +932,14 @@ The keeping can no longer be prevented. For this, use `up:fragment:keep` instead
 
 -----
 
-# up.fragment.keepPlan()
+# up.fragment.keepMatch()
 
 Returns a object detailing a keep operation iff the given { oldElement } is [up-keep] and
 we can find a matching partner in { newElement }.
 
 Otherwise returns undefined.
 
-@function up.fragment.keepPlan
+@function up.fragment.keepMatch
 @param {Element} options.oldElement
 @param {Element} options.newElement
 @param {boolean} options.descendantsOnly
