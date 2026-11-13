@@ -55,6 +55,10 @@ up.Change.FromResponse = class FromResponse extends up.Change {
       up.puts('up.render()', 'Rendering error response using fail-prefixed options (https://unpoly.com/learn/error-responses)')
     }
 
+    // Revalidation must start from the options as they were before this response changed them.
+    // Otherwise the fresh response could not change values the expired response has set, like { etag }, { time } or { title }.
+    let revalidateOptions = { ...finalRenderOptions }
+
     // The response might carry some updates for our change options,
     // like a server-set location, or server-sent events.
     this._augmentOptionsFromResponse(finalRenderOptions)
@@ -64,7 +68,7 @@ up.Change.FromResponse = class FromResponse extends up.Change {
     finalRenderOptions.meta = this._helloMeta()
 
     // After the initial render pass has finished, consider reloading stale content.
-    finalRenderOptions.verifyFinished = (result) => this._revalidate(result, finalRenderOptions)
+    finalRenderOptions.verifyFinished = (result) => this._revalidate(result, revalidateOptions)
 
     return new up.Change.FromContent(finalRenderOptions).execute()
   }
