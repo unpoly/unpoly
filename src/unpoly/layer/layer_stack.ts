@@ -10,13 +10,22 @@ export class LayerStack {
   declare _closingLayers: Layer[]
 
   constructor() {
-    this._currentOverrides = []
-    this.layers = [this._buildRoot()]
-    this._closingLayers = []
+    this.reset()
   }
 
-  _buildRoot(): Layer {
-    return buildLayer({ mode: 'root', stack: this })
+  reset(): void {
+    // We keep the root layer object. Its handlers are bound only once (see RootLayer#setupHandlers()),
+    // so they would keep calling the old object. The first call from the constructor has no layers yet.
+    let root = this.layers?.[0]
+    if (root) {
+      this.peel(root, { animation: false })
+      root.reset()
+    } else {
+      root = buildLayer({ mode: 'root', stack: this })
+    }
+    this.layers = [root]
+    this._currentOverrides = []
+    this._closingLayers = []
   }
 
   remove(layer: Layer): void {
@@ -45,12 +54,6 @@ export class LayerStack {
     for (let descendant of descendants) {
       descendant[closeMethod](closeValue, closeOptions)
     }
-  }
-
-  reset(): void {
-    this.peel(this.root, { animation: false })
-    this._currentOverrides = []
-    this.root.reset()
   }
 
   parentOf(layer: Layer): Layer | undefined {
