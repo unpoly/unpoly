@@ -4,7 +4,7 @@ import { guard, UpError } from '../error.js'
 import { disableContainerTemp, type Params } from '../form.js'
 import { getSmart, insertTemp, provideNodes } from '../fragment.js'
 import {
-  layerStack, open, OVERLAY_VISUAL_KEYS, type Layer, type LayerCloseEvent,
+  layerStack, open, OVERLAY_VISUAL_KEYS, type Layer, type LayerDismissEvent,
 } from '../layer.js'
 import { printToStandard } from '../log.js'
 import { type UpRequest, type UpResponse } from '../network.js'
@@ -186,7 +186,7 @@ export class Preview {
   openLayer(content: any, options: u.PlainObject = {}): Layer {
     let undoDismissValue = ':undo-preview'
 
-    let onDismiss = ({ value }: LayerCloseEvent) => {
+    let onDismiss = ({ value }: LayerDismissEvent) => {
       // Abort the request when the user dismisses the overlay,
       // but not when we ourselves dismiss it when reverting.
       if (value !== undoDismissValue) this.request.abort({ reason: 'Preview overlay dismissed' })

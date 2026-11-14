@@ -214,8 +214,8 @@ export async function open(options?: RenderOptions): Promise<Layer> {
 export function ask(options: RenderOptions = {}): Promise<any> {
   return new Promise(function(resolve, reject) {
     open(chainCallbacks(options, {
-      onAccepted: (event: t.LayerCloseEvent) => resolve(event.value),
-      onDismissed: (event: t.LayerCloseEvent) => reject(event.value),
+      onAccepted: (event: t.LayerAcceptedEvent) => resolve(event.value),
+      onDismissed: (event: t.LayerDismissedEvent) => reject(event.value),
     }))
   })
 }

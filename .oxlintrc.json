@@ -104,7 +104,8 @@
     // doesn't check a `@ts-ignore` in a .js file (specs, tooling). bin/typecheck doesn't read those either.
     "typescript/ban-ts-comment": "error",
     "typescript/no-duplicate-enum-values": "error",
-    "typescript/no-empty-object-type": "error",
+    // An event without properties of its own is an empty interface that extends its base event.
+    "typescript/no-empty-object-type": ["error", { "allowInterfaces": "with-single-extends" }],
     "typescript/no-explicit-any": "error",
     "typescript/no-extra-non-null-assertion": "error",
     "typescript/no-misused-new": "error",

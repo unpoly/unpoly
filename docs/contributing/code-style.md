@@ -128,6 +128,16 @@ and after.
   export interface FragmentKeepEvent extends FragmentKeptEvent { renderOptions: RenderOptions }
   ```
 
+  Every event has its own interface (never a type alias), named after the event in PascalCase
+  plus `Event`: `up:fragment:kept` → `FragmentKeptEvent`. That holds for an event without
+  properties of its own, too. Events that share properties extend a base named after what they
+  have in common:
+
+  ```ts
+  /** The `up:layer:dismissed` event. */
+  export interface LayerDismissedEvent extends LayerCloseEvent {}
+  ```
+
   `UpEventMap` maps each event type to its interface, like `HTMLElementEventMap` does for DOM
   events, and `up.on()` and `up.emit()` look it up. A new event gets an interface with the
   properties its API docs list, and an entry in its module's `UpEventMap` block (see

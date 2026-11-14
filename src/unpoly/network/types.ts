@@ -8,7 +8,7 @@ import { type UpRequest } from './request.js'
 import { type UpResponse } from './response.js'
 
 /**
-The `up:request:load`, `up:request:aborted` and `up:request:offline` events.
+The properties of the `up:request:*` events.
 */
 export interface RequestEvent extends UpEvent {
   request: UpRequest
@@ -16,10 +16,23 @@ export interface RequestEvent extends UpEvent {
   origin?: Element
 }
 
-/**
-The `up:request:loaded` event.
-*/
+/** The `up:request:load` event. */
+export interface RequestLoadEvent extends RequestEvent {}
+
+/** The `up:request:loaded` event. */
 export interface RequestLoadedEvent extends RequestEvent { response: UpResponse }
+
+/** The `up:request:aborted` event. */
+export interface RequestAbortedEvent extends RequestEvent {}
+
+/** The `up:request:offline` event. */
+export interface RequestOfflineEvent extends RequestEvent {}
+
+/** The `up:network:late` event. */
+export interface NetworkLateEvent extends UpEvent {}
+
+/** The `up:network:recover` event. */
+export interface NetworkRecoverEvent extends UpEvent {}
 
 /**
 The settings in `up.network.config`, described in its doc comment.
@@ -160,11 +173,11 @@ export interface AbortRequestsOptions extends RequestTesterOptions {
 
 declare module '../event.js' {
   interface UpEventMap {
-    'up:network:late': UpEvent
-    'up:network:recover': UpEvent
-    'up:request:aborted': RequestEvent
-    'up:request:load': RequestEvent
+    'up:network:late': NetworkLateEvent
+    'up:network:recover': NetworkRecoverEvent
+    'up:request:aborted': RequestAbortedEvent
+    'up:request:load': RequestLoadEvent
     'up:request:loaded': RequestLoadedEvent
-    'up:request:offline': RequestEvent
+    'up:request:offline': RequestOfflineEvent
   }
 }

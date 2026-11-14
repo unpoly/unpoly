@@ -1,7 +1,10 @@
 import type * as u from '../util.js'
 import { type EventPlan, type InputDevice, type UpEvent } from '../event.js'
 import { type ParamsLike } from '../form.js'
-import { type Layer, type LayerCloseEvent, type LayerMode, type LayerOpenedEvent } from '../layer.js'
+import {
+  type Layer, type LayerAcceptEvent, type LayerAcceptedEvent, type LayerDismissEvent, type LayerDismissedEvent,
+  type LayerMode, type LayerOpenedEvent,
+} from '../layer.js'
 import { type AnimationValue, type TransitionValue } from '../motion.js'
 import { type RequestCondition, type UpRequest, type UpResponse } from '../network.js'
 import { type FragmentHungryEvent } from '../radio.js'
@@ -155,10 +158,10 @@ export interface RenderOptions {
   onFinished?: ((result: RenderResult) => any) | null
   onError?: (error: any) => any
   onOpened?: (event: LayerOpenedEvent) => any
-  onAccept?: (event: LayerCloseEvent) => any
-  onAccepted?: (event: LayerCloseEvent) => any
-  onDismiss?: (event: LayerCloseEvent) => any
-  onDismissed?: (event: LayerCloseEvent) => any
+  onAccept?: (event: LayerAcceptEvent) => any
+  onAccepted?: (event: LayerAcceptedEvent) => any
+  onDismiss?: (event: LayerDismissEvent) => any
+  onDismissed?: (event: LayerDismissedEvent) => any
   // A selector to reload after the overlay was accepted or dismissed.
   onAcceptedReload?: string
   onDismissedReload?: string

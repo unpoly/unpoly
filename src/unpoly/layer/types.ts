@@ -216,7 +216,7 @@ export interface LayerLocationChangedEvent extends UpEvent {
 }
 
 /**
-The `up:layer:accept`, `up:layer:accepted`, `up:layer:dismiss` and `up:layer:dismissed` events.
+The properties of the `up:layer:accept`, `up:layer:accepted`, `up:layer:dismiss` and `up:layer:dismissed` events.
 */
 export interface LayerCloseEvent extends UpEvent {
   layer: Layer
@@ -225,12 +225,24 @@ export interface LayerCloseEvent extends UpEvent {
   response?: UpResponse
 }
 
+/** The `up:layer:accept` event. */
+export interface LayerAcceptEvent extends LayerCloseEvent {}
+
+/** The `up:layer:accepted` event. */
+export interface LayerAcceptedEvent extends LayerCloseEvent {}
+
+/** The `up:layer:dismiss` event. */
+export interface LayerDismissEvent extends LayerCloseEvent {}
+
+/** The `up:layer:dismissed` event. */
+export interface LayerDismissedEvent extends LayerCloseEvent {}
+
 declare module '../event.js' {
   interface UpEventMap {
-    'up:layer:accept': LayerCloseEvent
-    'up:layer:accepted': LayerCloseEvent
-    'up:layer:dismiss': LayerCloseEvent
-    'up:layer:dismissed': LayerCloseEvent
+    'up:layer:accept': LayerAcceptEvent
+    'up:layer:accepted': LayerAcceptedEvent
+    'up:layer:dismiss': LayerDismissEvent
+    'up:layer:dismissed': LayerDismissedEvent
     'up:layer:location:changed': LayerLocationChangedEvent
     'up:layer:open': LayerOpenEvent
     'up:layer:opened': LayerOpenedEvent
