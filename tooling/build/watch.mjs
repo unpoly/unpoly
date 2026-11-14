@@ -19,7 +19,7 @@ import { BuildStatus, PROJECT_ROOT, REQUEST_PATH, takeBuildRequest } from './bui
 import { SKIP_DIRS, SOURCE_DIRS, TSCONFIG, WATCHABLE_SUFFIXES, isTypeChecked } from './build_sync.mjs'
 import { esbuildOptions, finish } from './esbuild.mjs'
 import { formatError, formatWarnings } from './build.mjs'
-import { SourceLinter } from './lint.mjs'
+import { SourceLinter, countErrors } from './lint.mjs'
 import { watchTypeErrors } from './typecheck.mjs'
 import { TerserPool } from './terser.mjs'
 import { watchTree } from './watch_tree.mjs'
@@ -60,9 +60,9 @@ export async function runWatch({ bundles, sourcemap }) {
     return { built: affected.length, errors: errors.flat() }
   }
 
-  // What the last builds and lints found, without building or linting anything.
-  async function standingErrors() {
-    return [...new Set([...errors.flat(), ...await linter.format()])]
+  // What the last builds found, without building anything.
+  function standingErrors() {
+    return [...new Set(errors.flat())]
   }
 
   let status = new BuildStatus()
@@ -96,12 +96,19 @@ export async function runWatch({ bundles, sourcemap }) {
       // Printed, but not reported to bin/specs: a warning doesn't fail a build.
       if (linter.warnings.length) console.log(pc.yellow(linter.warnings.join('\n')))
       // The modern and es6 bundles report the same syntax error.
-      let roundErrors = [...new Set([...buildErrors, ...lintErrors])]
+      let roundErrors = [...new Set(buildErrors)]
       if (roundErrors.length) {
         console.log(pc.red(`Build failed in ${Date.now() - startedAt} ms:`))
         console.log(roundErrors.join('\n\n'))
       } else {
         console.log(pc.green(`Built ${built} of ${bundles.length} bundles in ${Date.now() - startedAt} ms`))
+      }
+      // A lint error doesn't fail the build: bin/specs runs the specs anyway, and mentions it.
+      status.lint(lintErrors)
+      if (lintErrors.length) {
+        let count = countErrors(lintErrors.join('\n'))
+        console.log(pc.red(`Found ${count} lint error${count === 1 ? '' : 's'}:`))
+        console.log(lintErrors.join('\n\n'))
       }
       return roundErrors
     },
@@ -168,9 +175,8 @@ export function watchSources(rounds, { root = PROJECT_ROOT, log = console.log } 
     if (!files.length) rounds.change(null)
     for (let file of files) {
       let absolute = path.join(root, file)
-      // A directory: something in it came or went. A tsconfig needs no rebuild.
-      if (TSCONFIG.test(file)) rounds.touch(absolute)
-      else rounds.change(isWatchable(absolute) ? absolute : null)
+      // A directory: something in it came or went.
+      rounds.change(isWatchable(absolute) ? absolute : null)
     }
   }, {
     skip: () => true,

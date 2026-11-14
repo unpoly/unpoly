@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { closeSync, mkdtempSync, readFileSync, rmSync, writeSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { createLog, devEnvState, isSupervisor, lastBuildErrors, lastTypeErrors, startUnderLock, withStartLock } from '../dev_env.mjs'
+import { createLog, devEnvState, isSupervisor, lastBuildErrors, lastLintErrors, lastTypeErrors, startUnderLock, withStartLock } from '../dev_env.mjs'
 
 const SERVING = async () => true
 const SILENT = async () => false
@@ -134,6 +134,14 @@ test('lastTypeErrors is null while checking, after a clean check, and for a watc
   assert.equal(lastTypeErrors(() => ({ ok: true, types: { state: 'done', ok: true, errors: '' } })), null)
   assert.equal(lastTypeErrors(() => ({ ok: true })), null)
   assert.equal(lastTypeErrors(() => null), null)
+})
+
+// --- lastLintErrors -------------------------------------------------------
+
+test('lastLintErrors returns the lint errors of the last round, and null without', () => {
+  assert.equal(lastLintErrors(() => ({ ok: true, lint: { ok: false, errors: 'boom' } })), 'boom')
+  assert.equal(lastLintErrors(() => ({ ok: true, lint: { ok: true, errors: '' } })), null)
+  assert.equal(lastLintErrors(() => null), null)
 })
 
 // --- startUnderLock: the sequence that broke three times ---------------------

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { SourceLinter } from '../../build/lint.mjs'
+import { SourceLinter, countErrors, formatFile } from '../../build/lint.mjs'
 
 // An entry without apis, so it has no collisions.
 const EMPTY_ENTRY = 'const apis = []\n'
@@ -100,4 +100,16 @@ test('a change to any module checks the entry for api collisions again', async (
   let errors = await linter.lint([at('src/unpoly/beta.js')])
   assert.equal(errors.length, 1)
   assert.match(errors[0], /^src\/unpoly\.ts\n.*up\.fragment is contributed by both alpha and beta/)
+})
+
+test('countErrors counts the errors that formatFile() formatted, and no warnings', () => {
+  let text = [
+    formatFile('src/a.ts', [
+      { line: 1, column: 1, message: 'X\nwith a second line', severity: 'error' },
+      { line: 1234, column: 56, message: 'Y', severity: 'warning' },
+    ]),
+    formatFile('src/unpoly.ts', [{ message: 'Z', severity: 'error' }]),
+  ].join('\n\n')
+  assert.equal(countErrors(text), 2)
+  assert.equal(countErrors(''), 0)
 })

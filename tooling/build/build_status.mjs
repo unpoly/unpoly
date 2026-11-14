@@ -32,10 +32,12 @@ export function readStatus(root = PROJECT_ROOT) {
 // files and directories the watcher had an event for since then (relative to the project root)
 // to the start of the last round after such an event.
 //
+// `ok` and `errors` only ever report the bundles. `lint` reports the linter's errors in src/
+// (`lint.ok` and `lint.errors`, formatted like `errors`), which don't fail a build either.
+//
 // `types` reports the watcher's type check (see TypeChecks in watch.mjs), which runs after the
-// rounds, so that bin/specs gets its bundles as early as without it. It doesn't touch `state`, `ok`
-// or `errors`, which only ever report the bundles and the linter: a type error doesn't fail a
-// build. `types.state` is "checking" from the start of a round that changes a file the check
+// rounds, so that bin/specs gets its bundles as early as without it. It doesn't touch `state`,
+// `ok` or `errors`: a type error doesn't fail a build. `types.state` is "checking" from the start of a round that changes a file the check
 // reads until a check that started after that round is done, then "done". `types.startedAt` is
 // when that check started, `types.ok` and `types.errors` (formatted like `errors`) what it
 // found. While checking, they are null and empty. A watcher from before the type check writes no
@@ -47,6 +49,7 @@ export class BuildStatus {
   #state = 'building'
   #errors = []
   #types = { state: 'checking', startedAt: null, ok: null, errors: '' }
+  #lint = { ok: true, errors: '' }
   #sink
   #now
   #root
@@ -81,12 +84,19 @@ export class BuildStatus {
     this.#write()
   }
 
-  // The round is over, and dist/ is complete. `errors` are formatted messages (build and lint),
+  // The round is over, and dist/ is complete. `errors` are formatted build messages,
   // empty for a clean round. Also called when a round fails in an unexpected way, so the status
   // never stays "building" for ever.
   finish(errors) {
     this.#state = 'idle'
     this.#errors = errors
+    this.#write()
+  }
+
+  // The linter found `errors` in src/ (formatted messages, empty when there are none). They stand
+  // until the next round that lints.
+  lint(errors) {
+    this.#lint = { ok: errors.length === 0, errors: joinErrors(errors) }
     this.#write()
   }
 
@@ -112,6 +122,7 @@ export class BuildStatus {
       seen: Object.fromEntries(this.#seen),
       ok: this.#errors.length === 0,
       errors: joinErrors(this.#errors),
+      lint: this.#lint,
       types: this.#types,
     })
   }

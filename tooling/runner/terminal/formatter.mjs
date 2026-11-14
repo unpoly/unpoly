@@ -5,8 +5,9 @@
 
 import pc from 'picocolors'
 import { renderOutline } from './dom_outline.mjs'
+import { countErrors } from '../../build/lint.mjs'
 
-// A build (esbuild syntax error / Oxlint) failed — render its errors the way
+// A build (esbuild syntax error) failed — render its errors the way
 // we render a spec failure: a red header and the indented error output.
 export function buildFailure(errors) {
   let lines = []
@@ -18,16 +19,29 @@ export function buildFailure(errors) {
   return lines.join('\n') + '\n'
 }
 
-// The dev watcher's type check found errors. They don't stop the specs (see runDev()), so the
-// header says that.
-export function typeErrors(errors) {
+// Errors that the dev watcher found and that don't stop the specs: lint and type errors.
+// `bin/dev status` lists them under `heading`.
+export function checkErrors(heading, errors) {
   let lines = []
   lines.push('')
-  lines.push(pc.red('✗ Type errors') + ' (the specs run anyway)')
+  lines.push(pc.red(`✗ ${heading}`) + ' (bin/specs runs the specs anyway)')
   lines.push('')
   lines.push(indent((errors || '').trim() || '(no error output captured)', 2))
   lines.push('')
   return lines.join('\n') + '\n'
+}
+
+// The line bin/specs prints after the results when the dev watcher's `status` (see BuildStatus)
+// has lint or type errors, or '' when it has none (or there is no status).
+export function checksHint(status) {
+  let counts = [[status?.types, 'type error'], [status?.lint, 'lint error']]
+    .filter(([check]) => check?.ok === false)
+    .map(([check, noun]) => {
+      let count = Math.max(1, countErrors(check.errors))
+      return `${count} ${noun}${count === 1 ? '' : 's'}`
+    })
+  if (!counts.length) return ''
+  return pc.yellow(`Watcher: ${counts.join(', ')} in src/, run bin/lint and bin/typecheck`) + '\n'
 }
 
 // One character per spec in the live progress line.

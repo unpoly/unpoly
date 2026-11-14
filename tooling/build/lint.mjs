@@ -1,6 +1,7 @@
 // Oxlint for the dev watcher: keeps the lint errors of every file in src/ and re-lints only what
-// changed, so a lint error reaches `bin/specs` and `bin/dev status` like a syntax error does.
-// The production build (what bin/release publishes) uses it once, to refuse code with errors.
+// changed, so that `bin/specs` and `bin/dev status` can mention them. They don't fail the
+// watcher's build. The production build (what bin/release publishes) uses it once, to refuse code
+// with errors.
 //
 // It uses all rules in `.oxlintrc.json`, like `bin/lint`. Linting a changed file takes ~0.2-0.3 s,
 // most of it for loading the rules that run in JavaScript (code style, `declare` on class fields).
@@ -9,8 +10,7 @@
 // (tooling/lint/api_collisions.mjs) runs with every round.
 //
 // The other one-shot builds don't lint. CI and `bin/lint` lint src/, spec/ and tooling/. Like the
-// webpack build before, the watcher covers src/ only, and only errors fail a build. Warnings only
-// go to the watcher's log.
+// webpack build before, the watcher covers src/ only. Warnings only go to the watcher's log.
 
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -135,7 +135,7 @@ export class SourceLinter {
   }
 }
 
-// Like ESLint's "stylish" format. The status file is plain text, bin/specs colors it itself. The
+// Like ESLint's "stylish" format. The status file is plain text, bin/dev colors it itself. The
 // type check (typecheck.mjs) formats its errors the same way. Their messages can have more lines,
 // which we indent to the first one.
 export function formatFile(file, diagnostics) {
@@ -146,4 +146,9 @@ export function formatFile(file, diagnostics) {
     return [`${prefix}${first}${code ? `  ${code}` : ''}`, ...more.map((text) => ' '.repeat(prefix.length - 2) + text)].join('\n')
   })
   return [file, ...lines].join('\n')
+}
+
+// The number of errors in `text`, which formatFile() formatted, one block or several.
+export function countErrors(text) {
+  return text.match(/^ {2}\S* +error {2}/gm)?.length ?? 0
 }

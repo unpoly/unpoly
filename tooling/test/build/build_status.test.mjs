@@ -122,6 +122,21 @@ test('the type check reports in its own fields, and never fails the build', () =
   assert.equal(statuses.length, 7)
 })
 
+test('lint errors report in their own field, and never fail the build', () => {
+  let { status, last } = statusWithCapture()
+  status.start()
+  status.lint(['src/a.ts\n  1:1  error  X', 'src/a.ts\n  1:1  error  X'])
+  status.finish([])
+  assert.equal(last().ok, true)
+  assert.deepEqual(last().lint, { ok: false, errors: 'src/a.ts\n  1:1  error  X' })
+
+  status.start()
+  assert.equal(last().lint.ok, false, 'they stand until the next lint')
+  status.lint([])
+  status.finish([])
+  assert.deepEqual(last().lint, { ok: true, errors: '' })
+})
+
 test('a rebuild request carries the files to the watcher, once', (t) => {
   let root = mkdtempSync(path.join(tmpdir(), 'build-request-'))
   t.after(() => rmSync(root, { recursive: true, force: true }))

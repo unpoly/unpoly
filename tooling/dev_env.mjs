@@ -115,6 +115,12 @@ export function lastTypeErrors(read = readStatus) {
   return types?.state === 'done' && types.ok === false ? (types.errors || '(no error output captured)') : null
 }
 
+// The lint errors in src/ from the watcher's most recent round, or null if it found none.
+export function lastLintErrors(read = readStatus) {
+  const lint = read()?.lint
+  return lint?.ok === false ? (lint.errors || '(no error output captured)') : null
+}
+
 // --- Starting --------------------------------------------------------------
 
 // Starts the environment in the background and resolves once it is ready: the

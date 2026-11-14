@@ -127,7 +127,7 @@ snapshots the DOM for a failed spec, then closes the log buffer.
 
 ### `tmp/build-status.json` (watcher → runner)
 
-`{ pid, state: "building" | "idle", startedAt, ok, errors, types }`. The watcher (`build/watch.mjs`)
+`{ pid, state: "building" | "idle", startedAt, ok, errors, lint, types }`. The watcher (`build/watch.mjs`)
 watches the files itself and rebuilds in **rounds**: a round takes its `startedAt` before any
 bundle reads a source, rebuilds every bundle that read a changed file, lints changed files in
 `src/`, and only then writes `idle`. A change that arrives during a round starts another round
@@ -136,9 +136,9 @@ before `idle` is written. So `idle` means *every* bundle includes every edit the
 an edit on its own schedule, so all of them can be idle while one has not started on the edit yet.
 `errors` is deduplicated, because the modern and es6 bundles report the same syntax error. `waitForFreshBuild` errors if the file is missing or the pid is dead, else waits
 until `idle && startedAt >= newestSourceMtime`, then throws if `ok` is false;
-`bin/dev status` reads the same two fields through `lastBuildErrors()`. `types` is the type check
-that the watcher runs after a round (`build/build_status.mjs` explains its fields). It never
-makes `ok` false.
+`bin/dev status` reads the same two fields through `lastBuildErrors()`. `lint` holds the lint
+errors in `src/`, and `types` the type check that the watcher runs after a round
+(`build/build_status.mjs` explains their fields). Neither makes `ok` false.
 
 `newestSourceMtime` walks `src`, `spec` and `tooling/runner/browser`, counting only the
 extensions a bundle can import (`WATCHABLE_SUFFIXES`, which also decides what makes the watcher
@@ -194,7 +194,9 @@ the browser log plus the HTML state as a CSS-selector outline (`#id.class[attr="
 - `bin/specs` → `runDev(argv, env)`: require a filter or `--all` (else exit `5`) → ensure a
   dev environment (start it if needed, else exit `3`) → `waitForFreshBuild` (else exit `4`) →
   build the minified bundles if this run loads stale ones → confirm the bundles the page loads
-  are in `dist` (else exit `4`) → puppeteer → receiver → exit 0/1, or `7` for type errors.
+  are in `dist` (else exit `4`) → puppeteer → receiver → exit 0/1 → one line about the
+  watcher's lint and type errors, if it knows of any (`checksHint()`; they don't change the
+  exit code).
   The watcher builds everything except the minified bundles, which is why that one build lives
   here. The `dist` check comes *after* the build wait, because `dist` is gitignored: before the
   watcher's first build everything is missing, and asking up front failed every fresh clone's
@@ -206,8 +208,7 @@ the browser log plus the HTML state as a CSS-selector outline (`#id.class[attr="
 - Exit codes: `0` pass · `1` failures · `2` runner timeout (the watchdog fires when the
   receiver sees no event for 30s) · `3` no dev environment · `4` build stale, or a bundle
   the page loads is absent from `dist` · `5` bad config/flags, or an unfiltered run
-  without `--all` · `6` build failed (compile/lint errors) · `7` the specs passed, but the
-  watcher's type check found errors.
+  without `--all` · `6` build failed (compile errors).
 
 `up.log.config.format` deliberately stays at its default (`true`): some specs assert on
 the exact `%c`-styled arguments Unpoly passes to `console.warn`/`debug`. The console

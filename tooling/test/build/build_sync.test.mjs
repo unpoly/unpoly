@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { waitForFreshBuild, waitForTypeCheck, freshnessSources, newestSource, newestSourceMtime, WATCHABLE_SUFFIXES, SOURCE_DIRS, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
+import { waitForFreshBuild, newestSource, newestSourceMtime, WATCHABLE_SUFFIXES, SOURCE_DIRS, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
 import { LOADED_EXTENSIONS } from '../../build/esbuild.mjs'
 
 const noop = async () => {}
@@ -360,95 +360,4 @@ test('the timeout names the newest edit', async () => {
     }),
     /newest edit: src\/unpoly\/link\.js/
   )
-})
-
-// --- waitForTypeCheck() --------------------------------------------------------
-
-test('the type check is waited for until it is done', async () => {
-  let reads = [
-    { state: 'idle', types: { state: 'checking', startedAt: null, ok: null, errors: '' } },
-    { state: 'idle', types: { state: 'done', startedAt: 300, ok: false, errors: 'src/a.ts\n  1:1  error  X' } },
-  ]
-  let result = await waitForTypeCheck({ read: () => reads.length > 1 ? reads.shift() : reads[0], sleep: noop })
-  assert.deepEqual(result, { ok: false, errors: 'src/a.ts\n  1:1  error  X' })
-})
-
-test('a watcher that does not check types has no type check to wait for', async () => {
-  // One started before the watcher could, which writes no `types`.
-  assert.equal(await waitForTypeCheck({ read: () => ({ state: 'idle', ok: true }), sleep: noop }), null)
-})
-
-test('a type check that does not finish times out', async () => {
-  let clock = { now: 0 }
-  let result = await waitForTypeCheck({
-    read: () => ({ state: 'idle', types: { state: 'checking' } }),
-    now: () => clock.now,
-    sleep: async (ms) => { clock.now += ms },
-    timeoutMs: 1000,
-  })
-  assert.deepEqual(result, { timedOut: true })
-})
-
-test('a type check after a newer round in src/ is not reported', async () => {
-  // An edit during the spec run, say: the check may include what the specs didn't test.
-  let types = { state: 'done', startedAt: 250, ok: false, errors: 'X' }
-  for (let status of [
-    { startedAt: 200, fullStartedAt: 50, seen: { 'src/unpoly': 200, 'src/unpoly/link.ts': 200 } },
-    { startedAt: 200, fullStartedAt: 50, seen: { 'tsconfig.json': 200 } },
-    { startedAt: 200, fullStartedAt: 200, seen: {} },
-  ]) {
-    let result = await waitForTypeCheck({ builtAt: 100, root: '/project', read: () => ({ state: 'idle', ...status, types }), sleep: noop })
-    assert.deepEqual(result, { outdated: true }, JSON.stringify(status))
-  }
-})
-
-test('a type check after a newer round in spec/ is reported', async () => {
-  // A spec save, or an editor's swap file. Turning real type errors into a notice would make the
-  // run green.
-  let result = await waitForTypeCheck({
-    builtAt: 100,
-    root: '/project',
-    read: () => ({
-      state: 'idle', startedAt: 200, fullStartedAt: 50,
-      seen: { 'src/unpoly/link.ts': 100, 'spec/unpoly': 200, 'spec/unpoly/.link_spec.js.swp': 200 },
-      types: { state: 'done', startedAt: 250, ok: false, errors: 'X' },
-    }),
-    sleep: noop,
-  })
-  assert.deepEqual(result, { ok: false, errors: 'X' })
-})
-
-test('a type check of the tested build is reported, although it started after the build', async () => {
-  // It always does: the watcher checks types once a round's bundles are written.
-  let result = await waitForTypeCheck({
-    builtAt: 100,
-    read: () => ({ state: 'idle', startedAt: 100, types: { state: 'done', startedAt: 150, ok: true, errors: '' } }),
-    sleep: noop,
-  })
-  assert.deepEqual(result, { ok: true, errors: '' })
-})
-
-test('the tsconfigs count as sources to wait for, so a type check never uses the old settings', async (t) => {
-  let root = mkdtempSync(path.join(tmpdir(), 'freshness-'))
-  t.after(() => rmSync(root, { recursive: true, force: true }))
-  mkdirSync(path.join(root, 'src'))
-  writeFileSync(path.join(root, 'src/a.ts'), '')
-  writeFileSync(path.join(root, 'tsconfig.core.json'), '{}')
-  writeFileSync(path.join(root, 'tsconfig.json.bak'), '{}')
-  utimesSync(path.join(root, 'tsconfig.core.json'), new Date(5_000_000), new Date(5_000_000))
-  utimesSync(path.join(root, 'src/a.ts'), new Date(4_000_000), new Date(4_000_000))
-  utimesSync(path.join(root, 'src'), new Date(4_000_000), new Date(4_000_000))
-
-  let sources = freshnessSources(root)
-  assert.deepEqual(sources.map(({ file }) => file), ['tsconfig.core.json', 'src', 'src/a.ts'])
-
-  // A round that saw the source but not the tsconfig doesn't do.
-  let requested = []
-  let built = { pid: 1, state: 'idle', startedAt: 4_500_000, fullStartedAt: 0, seen: { src: 4_500_000, 'src/a.ts': 4_500_000 }, ok: true }
-  let clock = { now: 0 }
-  await waitForFreshBuild({
-    sources, read: () => built, isAlive: () => true,
-    now: () => clock.now, sleep: async (ms) => { clock.now += ms }, request: (files) => requested.push(files),
-  })
-  assert.deepEqual(requested, [['tsconfig.core.json']])
 })

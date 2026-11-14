@@ -13,12 +13,12 @@ import { fileURLToPath } from 'node:url'
 import pc from 'picocolors'
 import { Config } from '../config.mjs'
 import { serverURL, isServerRunning, startServer } from '../server/server.mjs'
-import { waitForFreshBuild, waitForTypeCheck, newestSourceMtime, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
+import { waitForFreshBuild, newestSourceMtime, BuildSyncError, BuildFailedError } from '../../build/build_sync.mjs'
 import { runBuild } from '../../build/build.mjs'
-import { PROJECT_ROOT } from '../../build/build_status.mjs'
+import { PROJECT_ROOT, readStatus } from '../../build/build_status.mjs'
 import { createRemapper } from './source_map.mjs'
 import { createReceiver } from './receiver.mjs'
-import { buildFailure, typeErrors } from './formatter.mjs'
+import { buildFailure, checksHint } from './formatter.mjs'
 import { specsURL } from './urls.mjs'
 import { parseLocation, parseSuite, readSources, specFiltersFor } from '../../find_spec.mjs'
 import { isDevEnvRunning, startDevEnv } from '../../dev_env.mjs'
@@ -26,9 +26,6 @@ import { isDevEnvRunning, startDevEnv } from '../../dev_env.mjs'
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 const WINDOW = { width: 1200, height: 800 }
 const WATCHDOG_TIMEOUT = 30_000
-
-// The specs passed, but the watcher's type check found errors (see typeCheckReport()).
-const TYPE_ERRORS = 7
 
 // Parses config, or prints the error and signals exit code 5. Returns the Config,
 // or null if parsing failed (caller should return CONFIG_ERROR).
@@ -203,58 +200,24 @@ export async function runDev(argv, env) {
     return 4
   }
 
-  // The watcher checks types after it has written the bundles, which we don't wait for: a type
-  // error doesn't stop the specs (see typeCheckReport()). We print the errors before the specs
-  // when the check is done by then, which it usually is (it takes ~0.5 s, about as long as
-  // launching the browser), or else after them.
-  let typeCheck = trackTypeCheck(build.startedAt)
-  let early
-  let code = await drive(config, {
-    beforeSpecs() {
-      early = typeCheck.peek()
-      process.stdout.write(typeCheckReport({ early }).before)
-    },
-  })
-  let late = early === undefined ? await typeCheck.promise : undefined
-  let report = typeCheckReport({ early, late, code })
-  process.stdout.write(report.after)
-  return report.code
+  // Lint and type errors don't stop the specs: they are often in another file than the code under
+  // test (a changed signature breaks its callers), and a refactoring may want to see the specs
+  // before every caller is fixed. We mention them after the results.
+  let code = await drive(config)
+  process.stdout.write(checksHint(await settledStatus()))
+  return code
 }
 
-// waitForTypeCheck() for the build that `builtAt` started, with its result readable without
-// waiting once it is there (`peek()` returns undefined before).
-function trackTypeCheck(builtAt) {
-  let result
-  // Reading the status failed in an unexpected way. The type check is not worth failing for.
-  let promise = waitForTypeCheck({ builtAt }).catch(() => null).then((value) => result = value)
-  return { promise, peek: () => result }
-}
-
-// What bin/specs says about the watcher's type check (see waitForTypeCheck()), and the exit code.
-// `early` is the check's result when it was there before the specs started, `late` the result
-// after the specs when it wasn't. `code` is the specs' exit code. Returns the text to print
-// before the specs and after them, and the exit code.
-//
-// A type error doesn't stop the specs, unlike a lint error (see waitForFreshBuild()). It is often
-// in another file than the code under test (a changed signature breaks its callers), and a
-// refactoring may want to see the specs before every caller is fixed. But a run with type errors
-// is not green: it exits with TYPE_ERRORS when the specs pass. A check that didn't finish, or
-// that came too late for the tested build, leaves the code alone.
-export function typeCheckReport({ early, late, code }) {
-  let result = early ?? late
-  let text = ''
-  if (result?.timedOut) {
-    text = pc.yellow('The dev watcher did not finish its type check in time. Run `bin/typecheck` before you commit.') + '\n'
-  } else if (result?.outdated) {
-    text = pc.yellow('The sources changed during the run, so its type check is not reported. Run `bin/typecheck` before you commit.') + '\n'
-  } else if (result?.ok === false) {
-    text = typeErrors(result.errors)
-  }
-  let failed = result?.ok === false
-  return {
-    before: early ? text : '',
-    after: early ? (failed ? pc.red('✗ There are type errors (listed above, before the specs).') + '\n' : '') : text,
-    code: code === 0 && failed ? TYPE_ERRORS : code,
+// The watcher's status once its round and type check are done, or null when they aren't within
+// `timeoutMs`. A type check takes ~0.5 s and has usually finished before the specs, so we don't
+// wait long for one.
+async function settledStatus(timeoutMs = 1_000) {
+  let deadline = Date.now() + timeoutMs
+  while (true) {
+    let status = readStatus()
+    if (status?.state === 'idle' && status.types?.state !== 'checking') return status
+    if (Date.now() >= deadline) return null
+    await new Promise((resolve) => setTimeout(resolve, 100))
   }
 }
 
@@ -271,8 +234,7 @@ export async function runCI(argv, env) {
   }
 }
 
-// `beforeSpecs()` is called once the browser is up, right before the specs start.
-async function drive(config, { beforeSpecs } = {}) {
+async function drive(config) {
   const browser = await puppeteer.launch({
     browser: config.browser,
     headless: config.headless,
@@ -305,7 +267,6 @@ async function drive(config, { beforeSpecs } = {}) {
     // trigger global errors on purpose (error-handling tests); Jasmine catches
     // and reports the genuine failures via the events above.
 
-    beforeSpecs?.()
     await page.goto(specsURL(serverURL, config.toParams()))
 
     const watchdog = startWatchdog(receiver, () => {

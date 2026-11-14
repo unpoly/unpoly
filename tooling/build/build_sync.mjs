@@ -102,28 +102,6 @@ export function isTypeChecked(seen, root = PROJECT_ROOT) {
   return relative === 'src' || relative.startsWith('src' + path.sep) || TSCONFIG.test(relative)
 }
 
-// The tsconfigs in the project root, as `{ file, mtime }`. Only the watcher's type check reads
-// them, but waitForFreshBuild() waits for them like for a source, so that bin/specs doesn't take
-// a type check against the old settings for current. They don't count for newestSource(): a
-// tsconfig doesn't make the minified bundles outdated (see outdatedMinifiedFiles()).
-export function tsconfigs(root = PROJECT_ROOT) {
-  let files = []
-  try {
-    for (let name of readdirSync(root)) {
-      if (TSCONFIG.test(name)) files.push({ file: name, mtime: statSync(path.join(root, name)).mtimeMs })
-    }
-  } catch {
-    // No tsconfig to wait for.
-  }
-  return files
-}
-
-// What waitForFreshBuild() waits for: the sources (see newestSource()) and the tsconfigs, newest
-// first.
-export function freshnessSources(root = PROJECT_ROOT) {
-  return [...newestSource(root).sources, ...tsconfigs(root)].sort((a, b) => b.mtime - a.mtime)
-}
-
 export function newestSourceMtime(...args) {
   return newestSource(...args).mtime
 }
@@ -163,7 +141,7 @@ const IDLE_GRACE_MS = 3_000
 
 export class BuildSyncError extends Error {}
 
-// The watcher produced a fresh build, but it has compile/lint errors.
+// The watcher produced a fresh build, but it has compile errors. Lint errors don't count.
 export class BuildFailedError extends Error {
   constructor(errors) {
     super('Build failed')
@@ -177,9 +155,8 @@ function describe(files) {
   return files.length > 3 ? `${named} and ${files.length - 3} more` : named
 }
 
-// `sources` are the files and directories to wait for (see newestSource()), and the tsconfigs
-// (see tsconfigs()). The self-tests may pass just the newest one, as `newestMtime` and
-// `newestFile`.
+// `sources` are the files and directories to wait for (see newestSource()). The self-tests may
+// pass just the newest one, as `newestMtime` and `newestFile`.
 export async function waitForFreshBuild({
   read = () => readStatus(),
   newestMtime,
@@ -194,7 +171,7 @@ export async function waitForFreshBuild({
   request = requestBuild,
 } = {}) {
   if (sources === undefined) {
-    sources = newestMtime === undefined ? freshnessSources() : [{ file: newestFile, mtime: newestMtime }]
+    sources = newestMtime === undefined ? newestSource().sources : [{ file: newestFile, mtime: newestMtime }]
   }
 
   let status = read()
@@ -257,45 +234,6 @@ export async function waitForFreshBuild({
       const edit = newest ? ` (newest edit: ${newest})` : ''
       throw new BuildSyncError(`Build watcher didn't finish a build including your latest edit within ${Math.round(timeoutMs / 1000)}s${edit}. Check its output in tmp/dev.log, or restart it with \`bin/dev stop && bin/dev\`.`)
     }
-    await sleep(100)
-  }
-}
-
-// Whether the watcher started a round after `builtAt` that changed something the type check reads.
-function outdatesTypeCheck({ fullStartedAt, seen = {} }, builtAt, root) {
-  if (fullStartedAt > builtAt) return true
-  return Object.entries(seen).some(([file, startedAt]) => startedAt > builtAt && isTypeChecked(path.join(root, file), root))
-}
-
-// How long bin/specs waits for the watcher's type check. A check takes ~0.5 s after the round
-// that bin/specs waited for.
-const TYPE_CHECK_TIMEOUT_MS = 10_000
-
-// Waits for the watcher's type check of the build that waitForFreshBuild() resolved with, and
-// resolves with what it found, as `{ ok, errors }`. `builtAt` is that build's `startedAt`.
-// Resolves with `{ outdated: true }` when the watcher has started a round since that changed
-// something the check reads (an edit in src/ during the spec run, say), since the check then may
-// include edits the specs didn't test: a round that built everything, or one that saw a path the
-// check reads (see `fullStartedAt` and `seen` in BuildStatus). A round for a spec or a swap file
-// in spec/ keeps the result. Resolves with `{ timedOut: true }` when the check doesn't finish in
-// time, and with null for a watcher that doesn't check types (one started before it could). See
-// BuildStatus for `types`. `root` is a seam for the self-tests.
-export async function waitForTypeCheck({
-  builtAt,
-  root = PROJECT_ROOT,
-  read = () => readStatus(),
-  now = Date.now,
-  sleep = defaultSleep,
-  timeoutMs = TYPE_CHECK_TIMEOUT_MS,
-} = {}) {
-  let deadline = now() + timeoutMs
-  while (true) {
-    let status = read()
-    let types = status?.types
-    if (!types) return null
-    if (builtAt !== undefined && outdatesTypeCheck(status, builtAt, root)) return { outdated: true }
-    if (types.state === 'done') return { ok: types.ok, errors: types.errors }
-    if (now() >= deadline) return { timedOut: true }
     await sleep(100)
   }
 }

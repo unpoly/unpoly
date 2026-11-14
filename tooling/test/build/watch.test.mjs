@@ -382,13 +382,6 @@ test('a rebuild request rebuilds the files it names, once', async (t) => {
   assert.equal(calls.filter(([kind]) => kind === 'change').length, 2, 'and served once')
 })
 
-test('a rebuild request for a tsconfig makes a round that builds nothing', async (t) => {
-  let { root, calls, expect, settle } = project(t)
-  await expect([['touch', 'tsconfig.json']], () => requestBuild(['tsconfig.json'], root))
-  await settle()
-  assert.ok(!calls.some(([kind]) => kind === 'change'))
-})
-
 test('rebuild requests still arrive after tmp/ was deleted', async (t) => {
   let { root, at, expect, settle } = project(t)
   rmSync(at('tmp'), { recursive: true })
