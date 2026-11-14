@@ -87,7 +87,7 @@ const development = [
   jasmine(),
 ]
 
-// Every minified bundle the runner page can ask for, for `bin/test --minify` to build on demand.
+// Every minified bundle the runner page can ask for, for `bin/specs --minify` to build on demand.
 // See distFilenames() in tooling/runner/config.mjs. The dev watcher never builds these.
 const minified = [
   unpoly({ es: 'modern', min: true }),

@@ -58,6 +58,6 @@ again and commits the result.
 CI runs the whole suite in multiple Chrome configurations: without CSP, under a nonce-only
 CSP, under a strict-dynamic CSP, against the `unpoly-migrate` build, against the ES6
 build, against the minified build and against the minified ES6 build. Separate jobs run
-`bin/lint`, `bin/typecheck` and the tooling's own tests (`bin/self-test`).
+`bin/lint`, `bin/typecheck` and the tooling's own tests (`bin/tooling-tests`).
 
 It runs on every pull request against `master`, and on every push to `master`.

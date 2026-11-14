@@ -9,7 +9,7 @@
 //
 // After the rounds that change something in src/, the watcher checks types, like bin/typecheck
 // (see TypeChecks). That takes ~0.5 s and keeps every core busy, so it waits for the round to
-// end, and bin/test gets its bundles as early as without it.
+// end, and bin/specs gets its bundles as early as without it.
 
 import { mkdirSync, watch } from 'node:fs'
 import path from 'node:path'
@@ -55,7 +55,7 @@ export async function runWatch({ bundles, sourcemap }) {
         errors[index] = await formatError(error)
       }
     }))
-    // Printed, but not reported to bin/test: a warning doesn't fail a build.
+    // Printed, but not reported to bin/specs: a warning doesn't fail a build.
     if (warnings.size) console.log(pc.yellow([...warnings].join('\n')))
     return { built: affected.length, errors: errors.flat() }
   }
@@ -93,7 +93,7 @@ export async function runWatch({ bundles, sourcemap }) {
       let startedAt = Date.now()
       // Oxlint runs in its own process, like esbuild. Terser works in its own threads.
       let [{ built, errors: buildErrors }, lintErrors] = await Promise.all([build(changedFiles), linter.lint(changedFiles)])
-      // Printed, but not reported to bin/test: a warning doesn't fail a build.
+      // Printed, but not reported to bin/specs: a warning doesn't fail a build.
       if (linter.warnings.length) console.log(pc.yellow(linter.warnings.join('\n')))
       // The modern and es6 bundles report the same syntax error.
       let roundErrors = [...new Set([...buildErrors, ...lintErrors])]
@@ -126,7 +126,7 @@ export async function runWatch({ bundles, sourcemap }) {
 }
 
 // Tells `rounds` about every change in the source directories (see Rounds#change() and
-// #touch()), in package.json, and every rebuild request from bin/test. `root` and `log` are seams
+// #touch()), in package.json, and every rebuild request from bin/specs. `root` and `log` are seams
 // for the self-tests. Returns `{ close() }`.
 export function watchSources(rounds, { root = PROJECT_ROOT, log = console.log } = {}) {
   let cannotWatch = (error, dir) => log(pc.red(`Cannot watch ${path.relative(root, dir) || '.'} (${error.code}). Edits in it will not rebuild.`))
@@ -134,7 +134,7 @@ export function watchSources(rounds, { root = PROJECT_ROOT, log = console.log } 
     // A directory that appears, moves or vanishes brings or takes files without an event of
     // their own. Rebuild and lint everything.
     if (directory || !file) return rounds.change(null)
-    // An event for a name in a directory may have moved the directory's mtime, which bin/test
+    // An event for a name in a directory may have moved the directory's mtime, which bin/specs
     // looks at (see newestSource()).
     rounds.touch(path.dirname(file))
     // A guide page, an image or an editor's swap file needs nothing else.
@@ -153,7 +153,7 @@ export function watchSources(rounds, { root = PROJECT_ROOT, log = console.log } 
   })
   rootWatcher.on('error', (error) => cannotWatch(error, root))
 
-  // bin/test asks for a rebuild when it finds a source newer than our last round. That means we
+  // bin/specs asks for a rebuild when it finds a source newer than our last round. That means we
   // missed a file event, so say so. A tree of one directory, so that `rm -rf tmp` doesn't end
   // the requests.
   let requestFile = path.join(root, REQUEST_PATH)
@@ -289,7 +289,7 @@ export class Rounds {
           errors = await this.#run(files)
         } catch (error) {
           // A round that blows up must still end, or the status says "building" for ever and
-          // every later bin/test times out blaming a watcher that is fine.
+          // every later bin/specs times out blaming a watcher that is fine.
           errors = [String(error?.stack || error)]
         }
         // Edits arrived while we were building: build again before saying we're done.
@@ -303,8 +303,8 @@ export class Rounds {
 
 // Runs the type check after the rounds that change what it reads, one check at a time, and never
 // during a round: tsc keeps every core busy for ~0.5 s, and would slow down the bundles that
-// bin/test waits for. A round that starts during a check aborts it, and the check runs again
-// once the round is done. bin/test reads the result from the status (see BuildStatus).
+// bin/specs waits for. A round that starts during a check aborts it, and the check runs again
+// once the round is done. bin/specs reads the result from the status (see BuildStatus).
 export class TypeChecks {
   #status
   #check

@@ -32,7 +32,7 @@ how modules import each other is covered in
 The build doesn't use TypeScript at all: esbuild strips the types from each file, and never
 checks them. `bin/typecheck` checks them, in about a second, and prints nothing when all is
 well. Run it before the specs. The dev watcher runs the same checks after every change, and
-`bin/test` reports what they found (see [Testing](testing.md#check-types-and-lint-first)).
+`bin/specs` reports what they found (see [Testing](testing.md#check-types-and-lint-first)).
 
 Besides the [public-API probe](documentation.md#public-api-must-exist), which checks that
 documented API exists in the types, `bin/typecheck` checks with TypeScript 7 against two

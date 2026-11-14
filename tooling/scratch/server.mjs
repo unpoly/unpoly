@@ -3,7 +3,7 @@
 // docs/contributing/trying-out-changes.md for how to drive one.
 //
 // Its own process on its own port, not a route on the spec server — that one is booted by
-// `bin/ci`, and dynamically importing whatever uncommitted files happen to be in pages/ has
+// `bin/specs --ci`, and dynamically importing whatever uncommitted files happen to be in pages/ has
 // no business anywhere near a CI run.
 
 import express from 'express'

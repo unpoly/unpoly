@@ -67,7 +67,7 @@ jobs:
 
   # The tooling's own unit tests (build, lint rules, spec runner, scratch server). They build what
   # they need in memory and need no dist/. Two tests launch Chrome, which `npm ci` downloads.
-  self-test:
+  tooling-tests:
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     name: Tooling tests
@@ -87,7 +87,7 @@ jobs:
         run: npm ci
 
       - name: Test the tooling
-        run: bin/self-test
+        run: bin/tooling-tests
 
   test:
     runs-on: ubuntu-22.04
@@ -129,7 +129,7 @@ jobs:
       # Config reads MINIFY (the `minify` setting); MIN would be silently ignored.
       MINIFY: "${{ matrix.min }}"
       # To debug Puppeteer/CDP issues in CI, uncomment (the runner leaves DEBUG free
-      # for Puppeteer's own `debug` logging — locally: `DEBUG=puppeteer:* bin/ci`):
+      # for Puppeteer's own `debug` logging — locally: `DEBUG=puppeteer:* bin/specs --ci`):
       # DEBUG: "puppeteer:*,-puppeteer:protocol:*,-puppeteer:webDriverBiDi:*"
     steps:
       - uses: actions/checkout@v3
@@ -153,7 +153,7 @@ jobs:
       - name: Build Unpoly and tests
         run: bin/build --config=ci
 
-      # bin/ci boots its own spec server in-process and runs against the CI build
+      # bin/specs --ci boots its own spec server in-process and runs against the CI build
       # artifacts, so there is no separate "start server" / "wait for server" step.
       - name: Run tests
-        run: bin/ci
+        run: bin/specs --ci

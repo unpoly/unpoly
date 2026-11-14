@@ -2,7 +2,7 @@
 
 Our own development machinery: it runs the specs, builds the bundles and manages the dev
 environment. None of it ships — the npm package contains only `unpoly*.js` and friends.
-For *using* it (`bin/test`, filters, options, exit codes) see
+For *using* it (`bin/specs`, filters, options, exit codes) see
 [Testing](../docs/contributing/testing.md). This file is for *changing* it.
 
 ```
@@ -13,7 +13,7 @@ tooling/
   lint/         our own lint checks: an Oxlint plugin, api collision and doc file checks (bin/lint)
   docs/         the API doc files: splitting them into entries, and the API probe behind bin/typecheck
   dev_env.mjs   the dev environment behind bin/dev
-  find_spec.mjs spec-title search behind bin/find-spec and bin/test --file
+  find_spec.mjs spec-title search behind bin/find-spec and bin/specs --file
   outline.mjs   Markdown sections with line ranges, behind bin/outline
   test/         self-tests for all of the above, mirroring this layout
 ```
@@ -33,7 +33,7 @@ Two more rules that keep the seams thin:
 - Browser↔Node coupling is exactly one binding (`window.__postToTerminal`) plus one
   lifecycle event (`specs:reset`).
 - **Nothing branches on `CI=true`.** Dev and CI are separate entry points
-  (`bin/test` / `bin/ci`) that differ in their preflight, not in their behavior.
+  (`bin/specs` / `bin/specs --ci`) that differ in their preflight, not in their behavior.
 
 ## Modules
 
@@ -75,9 +75,9 @@ function, so its tests live in Node with the rest.
 - `dev_env.mjs` — the dev environment: one process table, one supervisor, one pid
   file (`tmp/dev.pid`). See [its own contract](#the-dev-environment) below.
 - `scratch/` — the scratch server behind port 4001: real pages for trying a change by hand.
-  Its own process, deliberately not a route on the spec server, which `bin/ci` boots. See
+  Its own process, deliberately not a route on the spec server, which `bin/specs --ci` boots. See
   [its README](scratch/README.md) and [Trying out changes](../docs/contributing/trying-out-changes.md).
-- `test/` — the self-tests: `bin/self-test`.
+- `test/` — the self-tests: `bin/tooling-tests`.
 - The `bin/` executables are **extensionless** (shebang + `chmod +x`). All but `bin/release`,
   which is CommonJS, rely on Node 22's extensionless-ESM detection. The package is
   deliberately *not* `type: module` (that would make Node and esbuild treat every `.js` file
@@ -156,14 +156,14 @@ stop those edits counting and run the suite against a stale bundle in silence.
 An allowlist rather than a skip list, because a skip list only skips what someone remembered to
 name: `src` alone holds 117 guide pages, an images tree of diagrams and recordings, and an
 `.htaccess`, and any of them being the newest file used to make the predicate unsatisfiable, so
-`bin/test` waited 30s and refused to run. `.mjs` is listed for `runner/browser/log_value.mjs`,
+`bin/specs` waited 30s and refused to run. `.mjs` is listed for `runner/browser/log_value.mjs`,
 which is bundled; the Node-only `.mjs` files elsewhere in `tooling` are never scanned.
 
 The watcher answers every change in these directories with a round, an empty one for a file no
 bundle reads (a guide page, a swap file), so `startedAt` passes every mtime the runner can see. If
 the watcher is still `idle` with an unchanged `startedAt` after 1s, it has missed a file event.
 `waitForFreshBuild` then writes the newest file's path to `tmp/build-request`, which the watcher
-watches, and the watcher rebuilds for it. `bin/test` names the file (`missedEdit`), since a watcher
+watches, and the watcher rebuilds for it. `bin/specs` names the file (`missedEdit`), since a watcher
 that misses events deserves a look. A watcher that ignores the request (one started before requests
 existed) gets a 3s grace, after which the run proceeds and reports `unbuiltEdit`. Under-scanning is
 the failure that matters, and over-scanning cannot cause it. The 30s timeout now means only that a
@@ -191,7 +191,7 @@ the browser log plus the HTML state as a CSS-selector outline (`#id.class[attr="
 
 ## Lifecycle
 
-- `bin/test` → `runDev(argv, env)`: require a filter or `--all` (else exit `5`) → ensure a
+- `bin/specs` → `runDev(argv, env)`: require a filter or `--all` (else exit `5`) → ensure a
   dev environment (start it if needed, else exit `3`) → `waitForFreshBuild` (else exit `4`) →
   build the minified bundles if this run loads stale ones → confirm the bundles the page loads
   are in `dist` (else exit `4`) → puppeteer → receiver → exit 0/1, or `7` for type errors.
@@ -199,10 +199,10 @@ the browser log plus the HTML state as a CSS-selector outline (`#id.class[attr="
   here. The `dist` check comes *after* the build wait, because `dist` is gitignored: before the
   watcher's first build everything is missing, and asking up front failed every fresh clone's
   first run.
-  `bin/test` also mirrors everything it prints into `tmp/test.log` (colours stripped), so a
+  `bin/specs` also mirrors everything it prints into `tmp/test.log` (colours stripped), so a
   truncated terminal never costs a run.
-- `bin/ci` → `runCI(argv, env)`: boots its own server, skips the build wait, runs
-  against `bin/build --config=ci` artifacts. CI workflow: `npm ci` (install) → `bin/build --config=ci` → `bin/ci`.
+- `bin/specs --ci` → `runCI(argv, env)`: boots its own server, skips the build wait, runs
+  against `bin/build --config=ci` artifacts. CI workflow: `npm ci` (install) → `bin/build --config=ci` → `bin/specs --ci`.
 - Exit codes: `0` pass · `1` failures · `2` runner timeout (the watchdog fires when the
   receiver sees no event for 30s) · `3` no dev environment · `4` build stale, or a bundle
   the page loads is absent from `dist` · `5` bad config/flags, or an unfiltered run
@@ -223,7 +223,7 @@ process manager. The rules, in one place:
   environment down. Everything else is required — if it exits, the environment stops.
 - **One supervisor.** `spawnSupervisor()` runs `node tooling/dev_env.mjs`, which
   executes the table and prefixes each child's output with its name. `bin/dev` and
-  `bin/test` spawn the identical supervisor; only its stdio differs (your terminal
+  `bin/specs` spawn the identical supervisor; only its stdio differs (your terminal
   vs. `tmp/dev.log`).
 - **One pid file.** Both start paths spawn the supervisor `detached`, so its pid *is*
   a process group id and `killGroup()` sweeps every descendant — `sh`, `npm`, esbuild,
@@ -275,7 +275,7 @@ process manager. The rules, in one place:
     rather than for existence.)
 - **One start lock.** `withStartLock()` holds a listening socket on `START_LOCK_PORT`
   for the whole of `startUnderLock()` — probe, clear a leftover, claim, spawn, **write
-  the pid** — so `bin/dev` and `bin/test` fired together cannot both get through; the
+  the pid** — so `bin/dev` and `bin/specs` fired together cannot both get through; the
   loser is told the port is taken. A socket is the only lock available without a
   dependency that the OS also *releases* for us, so it cannot outlive its holder and
   never needs recovering. Readiness is awaited *outside* the lock: by then the pid file
@@ -297,7 +297,7 @@ process manager. The rules, in one place:
 
 ## Self-tests
 
-`bin/self-test` (`node --test 'tooling/test/**/*.test.mjs'`, `NO_COLOR=1`) runs in about
+`bin/tooling-tests` (`node --test 'tooling/test/**/*.test.mjs'`, `NO_COLOR=1`) runs in about
 four seconds. Only two tests build bundles and start a browser: `build/eval_order.test.mjs`
 and `build/class_names.test.mjs`. Cover changes here rather than through the suite. What's
 covered today:

@@ -975,7 +975,7 @@ GitHub's generated slug (`testing.md#how-specs-are-organized`), and write admoni
 `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]` or `> [!CAUTION]`.
 
 Long guides carry a generated table of contents between `<!-- toc -->` markers. Run
-`bin/update-contributing-tocs` after changing a heading. `bin/self-test` fails on a stale
+`bin/update-contributing-tocs` after changing a heading. `bin/tooling-tests` fails on a stale
 TOC, a long guide without one, or a link to a heading that no longer exists.
 
 > [!IMPORTANT]

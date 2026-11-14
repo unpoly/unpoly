@@ -115,7 +115,7 @@ const idle = (startedAt, ok = true) => ({ pid: 1, state: 'idle', startedAt, ok }
 
 test('only extensions a bundle can import count', () => {
   // The bug this replaced: every one of these used to make the freshness predicate
-  // unsatisfiable, so bin/test waited 30s and refused to run. An allowlist ignores them, and
+  // unsatisfiable, so bin/specs waited 30s and refused to run. An allowlist ignores them, and
   // ignores the next file type nobody has thought of yet.
   const root = checkout({
     'src/unpoly/link.js': 1000,
@@ -157,7 +157,7 @@ test('a deleted or moved file counts, through its directory', () => {
 
 test('WATCHABLE_SUFFIXES covers every extension the build loads', () => {
   // The guard on the one direction that bites silently: let the build load a new extension without
-  // listing it here and those edits stop counting, so bin/test runs against a stale bundle
+  // listing it here and those edits stop counting, so bin/specs runs against a stale bundle
   // without saying so, and the dev watcher doesn't even rebuild. This fails instead.
   for (const extension of LOADED_EXTENSIONS) {
     assert.ok(WATCHABLE_SUFFIXES.includes(extension),
@@ -179,7 +179,7 @@ test('the browser-side runner directory is scanned, its Node-only siblings are n
 })
 
 test('an idle watcher that never reacts means nothing needed building', async () => {
-  // The bug this fixes: editing a guide page made the predicate unsatisfiable, so bin/test
+  // The bug this fixes: editing a guide page made the predicate unsatisfiable, so bin/specs
   // waited out 30s and refused to run at all.
   let clock = 0
   const build = await waitForFreshBuild({ request: noop,
@@ -207,7 +207,7 @@ test('it does not give up before the grace period', async () => {
 })
 
 test('asks the watcher to rebuild when it does not react, and names the file it missed', async () => {
-  // The backstop for a file event the watcher never got. Without it, bin/test ran against a stale
+  // The backstop for a file event the watcher never got. Without it, bin/specs ran against a stale
   // bundle after the grace period.
   let clock = 0
   let requests = []

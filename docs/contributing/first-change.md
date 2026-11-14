@@ -102,7 +102,7 @@ Run only this example. The [`--spec` filter](testing.md#running-tests) matches a
 part of an example's full name:
 
 ```
-bin/test --spec="up.form.trim()"
+bin/specs --spec="up.form.trim()"
 ```
 
 Watch it fail. A failure proves that our test actually covers something.
@@ -213,7 +213,7 @@ its effect. This effectively waits for one macrotask, by which all promises (or 
 Run the spec and watch it fail:
 
 ```
-bin/test --spec="up-trim"
+bin/specs --spec="up-trim"
 ```
 
 Attribute values for a form submission are parsed in `up.form.submitOptions()`:

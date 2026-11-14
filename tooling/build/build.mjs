@@ -43,7 +43,7 @@ export function parseBuildArgs(argv) {
   if (gzip === null) gzip = config === 'production'
   // The production build is what bin/release publishes, so it refuses code that fails the linter,
   // as the webpack build did. Linting all of src/ takes ~0.5 s, though, so the other configs leave
-  // it to bin/lint, CI's Lint job and the dev watcher. bin/test --minify builds the minified
+  // it to bin/lint, CI's Lint job and the dev watcher. bin/specs --minify builds the minified
   // bundles often and must stay fast.
   let lint = config === 'production'
 

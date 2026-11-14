@@ -1378,7 +1378,7 @@ batch 2 after this one's review proves the voice.
   Henning; then Henning reviews the chapter ON THE LIVE PREVIEW in reading order, one
   sitting, per-page diff links + every derived example flagged in the report.
 - EVIDENCE: site builds green ("All links OK"), rake docs:check_urls still 78/78 (+
-  any new redirect), unpoly bin/self-test, the chapter renders in the final frame.
+  any new redirect), unpoly bin/tooling-tests, the chapter renders in the final frame.
 
 ## Content station frame (settled with Henning 2026-10-03; T1-T6 and the September
 ## settlements continue to apply — this adds the operational frame)

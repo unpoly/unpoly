@@ -97,7 +97,7 @@ test('a full round vouches for everything, other rounds for the paths they saw',
 })
 
 test('the type check reports in its own fields, and never fails the build', () => {
-  // bin/test refuses to run specs for `ok: false`, and runs them for a type error. A watcher from
+  // bin/specs refuses to run specs for `ok: false`, and runs them for a type error. A watcher from
   // before the type check writes no `types`, so they had to be new fields.
   let { status, statuses, last } = statusWithCapture()
 

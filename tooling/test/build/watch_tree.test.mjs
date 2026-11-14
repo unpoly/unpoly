@@ -138,7 +138,7 @@ test('a directory deleted and recreated under the same name is watched again', a
 })
 
 test('a root deleted and created again is watched again', async (t) => {
-  // `rm -rf tmp` used to end the watch on tmp/ for good, and with it bin/test's rebuild requests.
+  // `rm -rf tmp` used to end the watch on tmp/ for good, and with it bin/specs's rebuild requests.
   let { root, at, events, expectEvent } = tree(t, { 'sub/a.js': '0' })
   await expectEvent('', () => rmSync(root, { recursive: true }))
   assert.ok(events.find((event) => event.file === '').directory)

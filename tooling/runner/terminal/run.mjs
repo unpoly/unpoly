@@ -127,16 +127,16 @@ export async function runDev(argv, env) {
     if (!config.all) {
       console.error(pc.red('Running every spec takes ~9 minutes. Narrow the run, or ask for all of it:'))
       console.error('')
-      console.error(`  ${pc.bold('bin/find-spec "phrase"')}        find the groups that cover your change`)
-      console.error(`  ${pc.bold('bin/test --spec="up.form"')}     run those groups`)
-      console.error(`  ${pc.bold('bin/test --file=path[:line]')}   run what a file, or one line, declares`)
-      console.error(`  ${pc.bold('bin/test --all')}                run everything anyway`)
+      console.error(`  ${pc.bold('bin/find-spec "phrase"')}         find the groups that cover your change`)
+      console.error(`  ${pc.bold('bin/specs --spec="up.form"')}    run those groups`)
+      console.error(`  ${pc.bold('bin/specs --file=path[:line]')}  run what a file, or one line, declares`)
+      console.error(`  ${pc.bold('bin/specs --all')}               run everything anyway`)
       return CONFIG_ERROR
     }
     console.error(pc.blue('Running every spec — expect ~9 minutes.'))
   }
 
-  // Start one in the background if none is up, so `bin/test` needs no manual setup.
+  // Start one in the background if none is up, so `bin/specs` needs no manual setup.
   if (!(await isDevEnvRunning())) {
     try {
       console.error(pc.blue('Starting the dev environment in the background — the first build may take a few seconds…'))
@@ -176,7 +176,7 @@ export async function runDev(argv, env) {
   }
 
   // The watcher leaves the minified bundles alone, so build them here rather than run against
-  // whatever `dist` happens to hold. `bin/test` already starts a dev environment when none is
+  // whatever `dist` happens to hold. `bin/specs` already starts a dev environment when none is
   // running; this is the same courtesy for the one artifact that environment does not produce.
   let outdated = outdatedMinifiedFiles(config)
   if (outdated.length) {
@@ -189,7 +189,7 @@ export async function runDev(argv, env) {
 
   // Only now, with a green build behind us, does an absent bundle mean anything: `dist` is
   // gitignored, so before the watcher's first build *everything* is missing. Asking up
-  // front turned every fresh clone's first `bin/test` into a hard error naming files the
+  // front turned every fresh clone's first `bin/specs` into a hard error naming files the
   // watcher was about to produce — and it sent you to the CI build, which also produces
   // the minified ones, so it never recurred for anyone who hit it once.
   //
@@ -230,7 +230,7 @@ function trackTypeCheck(builtAt) {
   return { promise, peek: () => result }
 }
 
-// What bin/test says about the watcher's type check (see waitForTypeCheck()), and the exit code.
+// What bin/specs says about the watcher's type check (see waitForTypeCheck()), and the exit code.
 // `early` is the check's result when it was there before the specs started, `late` the result
 // after the specs when it wasn't. `code` is the specs' exit code. Returns the text to print
 // before the specs and after them, and the exit code.

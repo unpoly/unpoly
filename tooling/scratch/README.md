@@ -20,7 +20,7 @@ dev environment runs it from the process table in `tooling/dev_env.mjs`.
 
 ## Rules that keep it small
 
-- **Its own process, not a route on the spec server.** `bin/ci` boots that one, and
+- **Its own process, not a route on the spec server.** `bin/specs --ci` boots that one, and
   dynamically importing whatever uncommitted files sit in `pages/` has no business near a CI
   run. It also gives the scratch pages the root of their own URL space.
 - **Everything in `pages/` is a route.** No ignore lists, no underscore prefixes — which is
@@ -39,7 +39,7 @@ dev environment runs it from the process table in `tooling/dev_env.mjs`.
 - **The index and the error pages load no bundle**, so they still work when the build is
   broken — which is exactly when you need them.
 - **The build protocol is reused, not reimplemented.** The gate is `waitForFreshBuild()` from
-  `tooling/build/build_sync.mjs`, the same function `bin/test` waits on.
+  `tooling/build/build_sync.mjs`, the same function `bin/specs` waits on.
 - **Log lines carry no timestamp.** Under `bin/dev` the supervisor stamps and prefixes every
   line; stamping here too would print two.
 

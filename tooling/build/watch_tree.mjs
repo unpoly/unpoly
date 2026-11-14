@@ -6,7 +6,7 @@
 // watch per *file*. A file that is replaced on disk (a new inode) loses its watch for good, and
 // that is how most writes happen: atomic editor saves, Claude Code's Edit tool, and every
 // `git checkout`, `stash`, `rebase` or `switch`. From then on, edits to that file triggered no
-// rebuild, and `bin/test` ran against a stale bundle. Node also keeps watching a renamed directory
+// rebuild, and `bin/specs` ran against a stale bundle. Node also keeps watching a renamed directory
 // under its old name. A directory watch has neither problem: it reports every name that is
 // written, created, renamed or deleted in it, whatever happens to the inodes.
 

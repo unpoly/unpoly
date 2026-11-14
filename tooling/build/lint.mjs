@@ -1,5 +1,5 @@
 // Oxlint for the dev watcher: keeps the lint errors of every file in src/ and re-lints only what
-// changed, so a lint error reaches `bin/test` and `bin/dev status` like a syntax error does.
+// changed, so a lint error reaches `bin/specs` and `bin/dev status` like a syntax error does.
 // The production build (what bin/release publishes) uses it once, to refuse code with errors.
 //
 // It uses all rules in `.oxlintrc.json`, like `bin/lint`. Linting a changed file takes ~0.2-0.3 s,
@@ -135,7 +135,7 @@ export class SourceLinter {
   }
 }
 
-// Like ESLint's "stylish" format. The status file is plain text, bin/test colors it itself. The
+// Like ESLint's "stylish" format. The status file is plain text, bin/specs colors it itself. The
 // type check (typecheck.mjs) formats its errors the same way. Their messages can have more lines,
 // which we indent to the first one.
 export function formatFile(file, diagnostics) {

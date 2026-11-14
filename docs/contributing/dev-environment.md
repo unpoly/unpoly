@@ -29,7 +29,7 @@ npm install
 ## Running the dev environment
 
 Specs don't consume the sources directly, but a transpiled build in `dist/`. Hence
-`bin/test` needs a **dev environment**: a build watcher, the spec server and the
+`bin/specs` needs a **dev environment**: a build watcher, the spec server and the
 [scratch server](trying-out-changes.md). It
 starts one in the background if none is running (the first build takes a few seconds), reuses
 it on later runs, and waits for the watcher to pick up your latest edit — so you
@@ -49,11 +49,11 @@ bin/dev stop                         # stop a running environment
 bin/dev status                       # report whether one is running (and flag a broken build)
 ```
 
-If a build has errors — a syntax slip, or a lint error — `bin/test` prints
+If a build has errors — a syntax slip, or a lint error — `bin/specs` prints
 them instead of running the specs and exits non-zero, and `bin/dev status` reports
 them too. The watcher itself keeps running, so your next edit can fix things.
 
-A **type error** doesn't break the build. `bin/test` runs the specs anyway, and exits 7 even
+A **type error** doesn't break the build. `bin/specs` runs the specs anyway, and exits 7 even
 when they pass (see [Testing](testing.md#check-types-and-lint-first)). `bin/dev status` lists type errors, but
 still reports the environment as usable.
 
@@ -70,7 +70,7 @@ esbuild only strips the types. After a change in `src/` (a doc file included) or
 `tsconfig*.json`, the watcher runs the checks of `bin/typecheck` (see
 [Type checking](code-style.md#type-checking)) in two tsc processes, which take another ~0.5 s
 and every core. They start once the bundles are written, so the bundles are ready as early as
-without them, and `bin/test` doesn't wait for them either: they run while it launches the
+without them, and `bin/specs` doesn't wait for them either: they run while it launches the
 browser and the first specs run. A change that comes in during a check aborts it, and the
 check runs again after that change's rebuild.
 
@@ -82,11 +82,11 @@ None of them checks types. To check without the watcher, run `bin/typecheck` and
 ## Logs
 
 Everything the dev environment prints goes to **`tmp/dev.log`**, whether you started it with
-`bin/dev` or left `bin/test` to start one in the background. The location never depends on
+`bin/dev` or left `bin/specs` to start one in the background. The location never depends on
 how it was started, so you can read it without knowing who started what. Your terminal gets
 the same lines in colour; the file is plain text.
 
-A spec run is logged separately: `bin/test` mirrors its own output into **`tmp/test.log`**,
+A spec run is logged separately: `bin/specs` mirrors its own output into **`tmp/test.log`**,
 so a red run can be re-read instead of re-run.
 
 Each line of the dev log is `HH:MM:SS.mmm service | output`:
@@ -120,7 +120,7 @@ grep -E '^[0-9:.]+ watch ' tmp/dev.log      # just the build
 ```
 
 The log is truncated each time an environment starts, so what you are reading is the current
-session and nothing older. For a **broken build** you don't need the log at all: `bin/test`
+session and nothing older. For a **broken build** you don't need the log at all: `bin/specs`
 prints the errors instead of running the specs, and `bin/dev status` reports them too — both
 read them from `tmp/build-status.json`. The same goes for type errors, which that file keeps
 apart from the build's, under `types`.
@@ -167,7 +167,7 @@ export PORT_OFFSET=100    # spec runner 4100, scratch 4101, docs 4667
 bin/dev
 ```
 
-Set it for **every** command in that checkout, `bin/test` included — the runner finds the
+Set it for **every** command in that checkout, `bin/specs` included — the runner finds the
 environment by probing its port, so a mismatch makes it conclude nothing is running. That
 failure is loud rather than subtle: starting a second environment on ports another checkout
 already holds stops immediately with `Port 4000 is already in use`.

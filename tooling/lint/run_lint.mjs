@@ -3,7 +3,7 @@
 // (doc_files.mjs). Extra arguments are forwarded to Oxlint, so `bin/lint --fix` works.
 //
 // Two builds also lint src/, with the same config (tooling/build/lint.mjs): the production build,
-// so bin/release refuses lint errors, and the dev watcher, after every change, so `bin/test`
+// so bin/release refuses lint errors, and the dev watcher, after every change, so `bin/specs`
 // reports a lint error in src/ like a syntax error. The other builds don't lint. Nothing else
 // checks spec/ and tooling/, in particular no-undef, which catches a spec file using something
 // from another file's scope. CI runs this as its own step.

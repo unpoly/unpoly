@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Runs the tooling's OWN unit tests (Node's test runner), not the browser specs.
+// Runs the tooling's OWN unit tests (Node's test runner), not the browser specs (bin/specs).
 // NO_COLOR keeps the output stable so the formatter tests can assert on plain text.
 import { spawn } from 'node:child_process'
 import path from 'node:path'

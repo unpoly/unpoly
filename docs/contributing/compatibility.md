@@ -7,7 +7,7 @@ public API: a polyfill in `unpoly-migrate.js` rather than a major version bump.
 
 We support browser versions from the last two years, in Chrome, Firefox and Safari.
 
-Only Chrome and Firefox have automated specs (`bin/test --browser=firefox`), and
+Only Chrome and Firefox have automated specs (`bin/specs --browser=firefox`), and
 [CI](commit-conventions.md#continuous-integration) runs Chrome. Safari you check by hand.
 
 Modern *syntax* is safe: the build transpiles it down (to ES2024 for `unpoly.js`, to ES6

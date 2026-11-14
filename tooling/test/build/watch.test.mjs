@@ -65,7 +65,7 @@ test('a change during a round starts another round before reporting idle', async
 })
 
 test('a round that throws still ends, with the error as a build error', async () => {
-  // Otherwise the status says "building" for ever, and every later bin/test times out blaming a
+  // Otherwise the status says "building" for ever, and every later bin/specs times out blaming a
   // watcher that is fine.
   let { subject, log, fireTimers } = rounds({ run: async () => { throw new Error('EMFILE: too many open files') } })
 
@@ -99,7 +99,7 @@ test('a change without a file name is passed on as null', async () => {
 })
 
 test('a change that needs no rebuild still makes a round, with no files', async () => {
-  // A guide page saved by rename moves its directory's mtime, which bin/test waits for. Without a
+  // A guide page saved by rename moves its directory's mtime, which bin/specs waits for. Without a
   // round, every run waited out the grace period until the next source edit.
   let calls = []
   let { subject, log, fireTimers } = rounds({ run: async (files) => { calls.push([...files]); return [] } })
@@ -167,7 +167,7 @@ function typeChecks() {
 }
 
 test('a round that changes what the check reads makes it run after the round', async () => {
-  // tsc keeps every core busy, so during a round it would slow down the bundles bin/test waits for.
+  // tsc keeps every core busy, so during a round it would slow down the bundles bin/specs waits for.
   let { subject, log, checks, clock, tick } = typeChecks()
 
   subject.roundStarted({ outdated: true })

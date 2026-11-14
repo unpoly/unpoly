@@ -42,7 +42,7 @@ export const SOURCE_DIRS = ['src', 'spec', 'tooling/runner/browser']
 // including file types nobody has invented yet, and only a *new loader* needs attention — a
 // deliberate edit to the build, guarded by a self-test that fails if esbuild.mjs loads an
 // extension that isn't listed here. (The list is not imported from there, because that would
-// load esbuild and Sass into every `bin/test` run.)
+// load esbuild and Sass into every `bin/specs` run.)
 //
 // `.mjs` is listed for tooling/runner/browser/log_value.mjs, which is bundled into dist/specs.js.
 // Elsewhere under the scanned directories there are no `.mjs` files.
@@ -103,7 +103,7 @@ export function isTypeChecked(seen, root = PROJECT_ROOT) {
 }
 
 // The tsconfigs in the project root, as `{ file, mtime }`. Only the watcher's type check reads
-// them, but waitForFreshBuild() waits for them like for a source, so that bin/test doesn't take
+// them, but waitForFreshBuild() waits for them like for a source, so that bin/specs doesn't take
 // a type check against the old settings for current. They don't count for newestSource(): a
 // tsconfig doesn't make the minified bundles outdated (see outdatedMinifiedFiles()).
 export function tsconfigs(root = PROJECT_ROOT) {
@@ -267,8 +267,8 @@ function outdatesTypeCheck({ fullStartedAt, seen = {} }, builtAt, root) {
   return Object.entries(seen).some(([file, startedAt]) => startedAt > builtAt && isTypeChecked(path.join(root, file), root))
 }
 
-// How long bin/test waits for the watcher's type check. A check takes ~0.5 s after the round
-// that bin/test waited for.
+// How long bin/specs waits for the watcher's type check. A check takes ~0.5 s after the round
+// that bin/specs waited for.
 const TYPE_CHECK_TIMEOUT_MS = 10_000
 
 // Waits for the watcher's type check of the build that waitForFreshBuild() resolved with, and

@@ -88,7 +88,7 @@ tooling/                  # Our own dev machinery, never shipped (rarely need to
   docs/                   # ... Reads the doc files, for bin/lint and bin/typecheck
   dev_env.mjs             # ... The dev environment behind bin/dev
   find_spec.mjs           # ... Spec-title search behind bin/find-spec
-  test/                   # ... Unit tests for all of the above (bin/self-test)
+  test/                   # ... Unit tests for all of the above (bin/tooling-tests)
 
 docs/                     # Documentation for contributors, never shipped
   contributing/           # ... The guides linked from CONTRIBUTING.md
@@ -404,7 +404,7 @@ class.
 > silent `undefined` instead of an error. Before a module imports a class through a re-export,
 > check that it doesn't use the class while it is being defined (`extends`, a static block, a
 > top-level call). The rules for cycles are in the comments of `src/unpoly.ts`.
-> `bin/self-test` fails if a module reads a binding before it is evaluated.
+> `bin/tooling-tests` fails if a module reads a binding before it is evaluated.
 
 A few imports can't go through the owning module:
 

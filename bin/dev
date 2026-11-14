@@ -59,8 +59,8 @@ if (command === 'start') {
     process.exit(3)
   }
   if (state === 'unidentified') {
-    // Exit 3, not 0: bin/test refuses to run in this state, so `bin/dev status &&
-    // bin/test` must not green-light it.
+    // Exit 3, not 0: bin/specs refuses to run in this state, so `bin/dev status &&
+    // bin/specs` must not green-light it.
     console.log(pc.yellow(`tmp/dev.pid names PID ${pid}, which is alive but cannot be identified.`))
     process.exit(3)
   }
@@ -71,7 +71,7 @@ if (command === 'start') {
     process.stdout.write(buildFailure(errors))
     process.exit(1)
   }
-  // A type error doesn't make the environment unusable: bin/test runs the specs anyway.
+  // A type error doesn't make the environment unusable: bin/specs runs the specs anyway.
   const types = lastTypeErrors()
   if (types) {
     console.log(pc.green(`Dev environment is ${where}, but the latest type check found errors:`))

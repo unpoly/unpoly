@@ -6,7 +6,7 @@
 import { writeFileSync, mkdirSync, readFileSync, renameSync, unlinkSync } from 'node:fs'
 import path from 'node:path'
 
-// The repo root, derived from this file rather than the cwd: a `bin/test` run from a
+// The repo root, derived from this file rather than the cwd: a `bin/specs` run from a
 // subdirectory has to read the very file the watcher wrote, and resolving against the cwd
 // silently read a different (absent) path — which reported a healthy watcher as missing.
 export const PROJECT_ROOT = path.dirname(path.dirname(path.dirname(import.meta.filename)))
@@ -33,7 +33,7 @@ export function readStatus(root = PROJECT_ROOT) {
 // to the start of the last round after such an event.
 //
 // `types` reports the watcher's type check (see TypeChecks in watch.mjs), which runs after the
-// rounds, so that bin/test gets its bundles as early as without it. It doesn't touch `state`, `ok`
+// rounds, so that bin/specs gets its bundles as early as without it. It doesn't touch `state`, `ok`
 // or `errors`, which only ever report the bundles and the linter: a type error doesn't fail a
 // build. `types.state` is "checking" from the start of a round that changes a file the check
 // reads until a check that started after that round is done, then "done". `types.startedAt` is
@@ -134,7 +134,7 @@ function writeStatusFile(status) {
 // The other direction, runner → watcher: a request to rebuild for files the watcher has not
 // reacted to. Should never be needed, since the watcher sees every change in the source
 // directories. It is the backstop for a missed file event (an inotify limit, a network
-// filesystem, a Node bug), which would otherwise run bin/test against a stale bundle. The file
+// filesystem, a Node bug), which would otherwise run bin/specs against a stale bundle. The file
 // holds the paths of the files, relative to the project root, one per line, or nothing.
 export const REQUEST_PATH = 'tmp/build-request'
 

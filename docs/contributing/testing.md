@@ -47,11 +47,11 @@ spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
 Unpoly's specs run in a real browser, driven from your terminal:
 
 ```
-bin/test --spec="up.form HTML [up-switch]"   # only specs whose full name contains this
-bin/test --all                               # the whole suite (~9 minutes)
+bin/specs --spec="up.form HTML [up-switch]"  # only specs whose full name contains this
+bin/specs --all                              # the whole suite (~9 minutes)
 ```
 
-`bin/test` needs a running [dev environment](dev-environment.md) and starts one in
+`bin/specs` needs a running [dev environment](dev-environment.md) and starts one in
 the background if none is running.
 
 ### Check types and lint first
@@ -61,26 +61,26 @@ The specs are the slowest check we have. Run the fast ones before them:
 ```
 bin/typecheck        # type errors (~1 second)
 bin/lint             # Oxlint, api collisions, doc files (~1 second)
-bin/test --spec="…"  # the specs that cover your change (~15 seconds for a single spec)
+bin/specs --spec="…" # the specs that cover your change (~15 seconds for a single spec)
 ```
 
 `bin/typecheck` and `bin/lint` print nothing when all is well. `bin/typecheck` only checks
 `src/`. The specs are JavaScript, and `bin/lint` is their only static check.
 
 The dev watcher also lints `src/` and checks types after every change in `src/` or a tsconfig,
-so `bin/test` knows of the errors when you forget. A lint error in `src/` stops it: it prints the
-error instead of running the specs. A type error doesn't: `bin/test` runs the specs anyway,
+so `bin/specs` knows of the errors when you forget. A lint error in `src/` stops it: it prints the
+error instead of running the specs. A type error doesn't: `bin/specs` runs the specs anyway,
 and exits non-zero (7) even when they all pass. A type error is often in another file than the
 code under test, like the callers of a function whose signature you changed, and in the middle
 of a refactoring you want to see the specs before every caller is fixed.
 
-`bin/test` prints the type errors before the specs, or after them when the check finishes
+`bin/specs` prints the type errors before the specs, or after them when the check finishes
 later. When the check timed out, or the sources changed during the run, it says so and reports
 no type errors. Run `bin/typecheck` before you commit.
 
 Running the two first is still quicker than waiting for a spec run to tell you, and `bin/lint`
 also covers what the watcher doesn't lint: `spec/`, `tooling/` and the doc files. CI runs all
-three, plus `bin/self-test` (~4 seconds). That one tests our tooling, and also checks the order
+three, plus `bin/tooling-tests` (~4 seconds). That one tests our tooling, and also checks the order
 in which modules are evaluated, so run it when you change `tooling/`, `bin/` or the imports
 between modules.
 
@@ -154,13 +154,13 @@ never compiled, an overlay still on the stack, a fragment inserted in the wrong 
 (overlaps run once):
 
 ```
-bin/test --spec="up.form HTML [up-switch]" --spec="up.Params"
-bin/test --file=spec/unpoly/form_switch_spec.js --file=spec/unpoly/radio_spec.js:88
+bin/specs --spec="up.form HTML [up-switch]" --spec="up.Params"
+bin/specs --file=spec/unpoly/form_switch_spec.js --file=spec/unpoly/radio_spec.js:88
 ```
 
 `--minify` runs the specs against the bundle we actually ship, where every `_`-prefixed
 member is renamed (see [private members](code-style.md#private-members-and-the-minified-build)).
-`bin/test` builds the minified bundles itself when they are missing or stale.
+`bin/specs` builds the minified bundles itself when they are missing or stale.
 
 A failed spec exits non-zero. The spec runner itself is documented in
 [`tooling/README.md`](../../tooling/README.md).
@@ -168,7 +168,7 @@ A failed spec exits non-zero. The spec runner itself is documented in
 
 ## The full test suite is slow
 
-`bin/test --all` takes about **nine minutes**, which is why an unfiltered run needs the flag.
+`bin/specs --all` takes about **nine minutes**, which is why an unfiltered run needs the flag.
 Don't run it after every edit.
 
 **Find the specs that cover your change and run only those.** `bin/find-spec` searches
@@ -275,9 +275,9 @@ Nested group names concatenate with spaces to form a spec's *full name*, which i
 `--spec` matches against. So the example above can be narrowed at any depth:
 
 ```
-bin/test --spec="up.link"                       # the whole namespace
-bin/test --spec="up.link HTML"                  # only the attribute specs
-bin/test --spec="up.follow()"                   # one function
+bin/specs --spec="up.link"                      # the whole namespace
+bin/specs --spec="up.link HTML"                 # only the attribute specs
+bin/specs --spec="up.follow()"                  # one function
 ```
 
 Full names never change when specs move between files.
@@ -306,8 +306,8 @@ after the quotes; run it with the matching option (`--migrate`).
 Or let `--file` work out the filter from a location:
 
 ```
-bin/test --file=spec/unpoly/form/params_spec.js        # what that file declares
-bin/test --file=spec/unpoly/form/params_spec.js:29     # just the group on line 29
+bin/specs --file=spec/unpoly/form/params_spec.js       # what that file declares
+bin/specs --file=spec/unpoly/form/params_spec.js:29    # just the group on line 29
 ```
 
 On an [extracted file](#extracted-spec-files), `--file` runs just the blocks that file
@@ -357,7 +357,7 @@ extendDescribe('up.fragment', function() {
 So the split is invisible from the outside: one suite per namespace, unchanged full names,
 and `beforeEach` hooks from the namespace file still apply.
 
-`bin/self-test` fails if nothing loads an extracted file, or if its `extendDescribe()` chain
+`bin/tooling-tests` fails if nothing loads an extracted file, or if its `extendDescribe()` chain
 doesn't match where it is required. `bin/lint` names any alias you need to redeclare.
 
 

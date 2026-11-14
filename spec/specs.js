@@ -1,4 +1,4 @@
-// Detect once whether the terminal harness (bin/test.mjs) is driving us. It
+// Detect once whether the terminal harness (bin/specs) is driving us. It
 // installs the window.__postToTerminal binding before any page script runs, so
 // this is set before the helpers below read specs.drivenByTerminal.
 window.specs.drivenByTerminal = !!window.__postToTerminal
