@@ -21,7 +21,7 @@ Verified green at the end of the session:
 - `bundle exec rake docs:check_urls` — "No lost URL: all 78 published addresses still
   resolve", with one entry under PENDING: `/tutorial -> /how-unpoly-works`, whose target
   Build·Content will write.
-- `node bin/tooling-tests` and `node bin/lint` in unpoly — pass.
+- `node bin/self-test` and `node bin/lint` in unpoly — pass.
 
 What landed, in one paragraph: `src/unpoly/pages/toc.yml` plus an `Unpoly::Guide::Toc`
 model with strict build checks; the Learn/API navigation split rendered by one shared node

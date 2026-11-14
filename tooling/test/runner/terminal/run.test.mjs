@@ -4,7 +4,7 @@ import { mkdtempSync, writeFileSync, utimesSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { Config } from '../../../runner/config.mjs'
-import { missingDistFiles, outdatedMinifiedFiles } from '../../../runner/terminal/run.mjs'
+import { missingDistFiles, outdatedMinifiedFiles, settledStatus } from '../../../runner/terminal/run.mjs'
 
 // A throwaway dist/ holding exactly `names`.
 function dist(names = []) {
@@ -78,4 +78,23 @@ test('--es6 --minify asks for the minified es6 bundle', () => {
   assert.deepEqual(
     outdatedMinifiedFiles(Config.fromArgv(['--es6', '--minify']), dist(), NOW),
     ['unpoly.es6.min.js'])
+})
+
+// --- settledStatus() -----------------------------------------------------------
+
+test('settledStatus waits for the round and the type check to be done', async () => {
+  let reads = [
+    { state: 'building', lint: { ok: true, errors: '' }, types: { state: 'checking', ok: null } },
+    { state: 'idle', lint: { ok: false, errors: 'X' }, types: { state: 'checking', ok: null } },
+    { state: 'idle', lint: { ok: false, errors: 'X' }, types: { state: 'done', ok: true } },
+  ]
+  let status = await settledStatus({ read: () => reads.length > 1 ? reads.shift() : reads[0], sleep: async () => {} })
+  assert.equal(status.types.state, 'done')
+})
+
+test('settledStatus takes the last status after the timeout, so standing lint errors are still mentioned', async () => {
+  let clock = 0
+  let busy = { state: 'building', lint: { ok: false, errors: 'X' }, types: { state: 'checking', ok: null } }
+  let status = await settledStatus({ read: () => busy, now: () => clock, sleep: async (ms) => { clock += ms }, timeoutMs: 1000 })
+  assert.equal(status, busy)
 })

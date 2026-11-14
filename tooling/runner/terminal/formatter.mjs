@@ -33,15 +33,19 @@ export function checkErrors(heading, errors) {
 
 // The line bin/specs prints after the results when the dev watcher's `status` (see BuildStatus)
 // has lint or type errors, or '' when it has none (or there is no status).
+// It names the scripts that list the errors in full.
 export function checksHint(status) {
-  let counts = [[status?.types, 'type error'], [status?.lint, 'lint error']]
-    .filter(([check]) => check?.ok === false)
-    .map(([check, noun]) => {
-      let count = Math.max(1, countErrors(check.errors))
-      return `${count} ${noun}${count === 1 ? '' : 's'}`
-    })
-  if (!counts.length) return ''
-  return pc.yellow(`Watcher: ${counts.join(', ')} in src/, run bin/lint and bin/typecheck`) + '\n'
+  let failed = [
+    { check: status?.types, noun: 'type error', script: 'bin/typecheck' },
+    { check: status?.lint, noun: 'lint error', script: 'bin/lint' },
+  ].filter(({ check }) => check?.ok === false)
+  if (!failed.length) return ''
+  let counts = failed.map(({ check, noun }) => {
+    let count = Math.max(1, countErrors(check.errors))
+    return `${count} ${noun}${count === 1 ? '' : 's'}`
+  })
+  let scripts = failed.map(({ script }) => script).reverse()
+  return pc.yellow(`Watcher: ${counts.join(', ')} in src/, run ${scripts.join(' and ')}`) + '\n'
 }
 
 // One character per spec in the live progress line.

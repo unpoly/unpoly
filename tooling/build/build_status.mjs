@@ -33,15 +33,15 @@ export function readStatus(root = PROJECT_ROOT) {
 // to the start of the last round after such an event.
 //
 // `ok` and `errors` only ever report the bundles. `lint` reports the linter's errors in src/
-// (`lint.ok` and `lint.errors`, formatted like `errors`), which don't fail a build either.
+// (`lint.ok` and `lint.errors`, formatted like `errors`), which don't fail a build.
 //
 // `types` reports the watcher's type check (see TypeChecks in watch.mjs), which runs after the
 // rounds, so that bin/specs gets its bundles as early as without it. It doesn't touch `state`,
-// `ok` or `errors`: a type error doesn't fail a build. `types.state` is "checking" from the start of a round that changes a file the check
-// reads until a check that started after that round is done, then "done". `types.startedAt` is
-// when that check started, `types.ok` and `types.errors` (formatted like `errors`) what it
-// found. While checking, they are null and empty. A watcher from before the type check writes no
-// `types` at all.
+// `ok` or `errors`: a type error doesn't fail a build. `types.state` is "checking" from the
+// start of a round that changes a file the check reads until a check that started after that
+// round is done, then "done". `types.startedAt` is when that check started, `types.ok` and
+// `types.errors` (formatted like `errors`) what it found. While checking, they are null and
+// empty. A watcher from before the type check writes no `types` at all.
 export class BuildStatus {
   #startedAt
   #fullStartedAt = null

@@ -199,7 +199,7 @@ the two repositories are siblings (`unpoly`, `unpoly-site`).
    `url-move-dryrun-2`, cherry-pick them too): its rename advice still named the
    generated `RedirectMatch` rule ("[docs] Explain that a renamed page also redirects
    its short path"), and its new code span `[label](/learn/caching#expiration)` broke
-   `bin/tooling-tests`'s contributor-link test ("[tooling] Don't resolve links into
+   `bin/self-test`'s contributor-link test ("[tooling] Don't resolve links into
    unpoly.com as contributor docs").
 
 5. In unpoly-site, update the specs' expectations for new pages: run the suite (step 6)
@@ -355,7 +355,7 @@ script ran fresh on the current content.
   changed. The second run changed nothing.
 - `rake docs:check_urls`: 78 published addresses and 631 old document paths resolve,
   162 hand-written redirects take one hop, no legacy link. Build: "No legacy link",
-  717 files link-checked, "All links OK." `bin/tooling-tests` and `bin/lint` pass.
+  717 files link-checked, "All links OK." `bin/self-test` and `bin/lint` pass.
 - `rake docs:check_redirects` against Apache 2.4.57: 1,893 old-path variants, 2
   short URLs and 162 redirect sources in one hop to a 200, 10 root pages 200, an
   unknown path 404.

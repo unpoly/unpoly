@@ -113,7 +113,7 @@ export class SourceLinter {
         try {
           report = JSON.parse(stdout)
         } catch {
-          // A broken config, for example. Fail the build with what Oxlint said.
+          // A broken config, for example. Report what Oxlint said.
           resolve({ failure: (stderr || stdout).trim() })
           return
         }

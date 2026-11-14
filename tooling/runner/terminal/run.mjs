@@ -208,16 +208,23 @@ export async function runDev(argv, env) {
   return code
 }
 
-// The watcher's status once its round and type check are done, or null when they aren't within
-// `timeoutMs`. A type check takes ~0.5 s and has usually finished before the specs, so we don't
-// wait long for one.
-async function settledStatus(timeoutMs = 1_000) {
-  let deadline = Date.now() + timeoutMs
+// The watcher's status once its round and type check are done. A type check takes ~0.5 s and has
+// usually finished before the specs, so we don't wait long for one: after `timeoutMs`, we take
+// the last status we read. Its lint errors stand until the next round has linted, and a type
+// check that is still running has no result (`types.ok` is null). `read`, `now` and `sleep` are
+// seams for the self-tests.
+export async function settledStatus({
+  read = () => readStatus(),
+  now = Date.now,
+  sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  timeoutMs = 1_000,
+} = {}) {
+  let deadline = now() + timeoutMs
   while (true) {
-    let status = readStatus()
+    let status = read()
     if (status?.state === 'idle' && status.types?.state !== 'checking') return status
-    if (Date.now() >= deadline) return null
-    await new Promise((resolve) => setTimeout(resolve, 100))
+    if (now() >= deadline) return status
+    await sleep(100)
   }
 }
 

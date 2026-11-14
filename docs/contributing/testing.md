@@ -60,7 +60,7 @@ the background if none is running.
 |---|---|
 | anything | `bin/lint`, `bin/typecheck` |
 | `src/` or `spec/` | `bin/specs` with the specs likely to be affected (find them with [`bin/find-spec`](#finding-the-spec-for-a-feature)) |
-| `tooling/` | `bin/tooling-tests` |
+| `tooling/` or `bin/` | `bin/tooling-tests` |
 | a contributing guide | `bin/update-contributing-tocs` |
 
 CI runs the full suite and the variants; read its result after pushing.

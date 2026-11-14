@@ -7,7 +7,7 @@ claims those notes plan to add are checked at the end.
 
 Classes: **A** = doc clearly wrong (correction given). **Q** = docs and code disagree, either could be intended.
 
-Four throwaway specs were run with `bin/specs` to settle what reading left open (appended to
+Four throwaway specs were run with `bin/test` to settle what reading left open (appended to
 `form_validate_fn_spec.js` temporarily, then removed). Their results are quoted as "Temp spec".
 
 

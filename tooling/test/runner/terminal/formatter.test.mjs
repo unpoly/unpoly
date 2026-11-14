@@ -89,6 +89,13 @@ test('checksHint counts the lint and type errors in one line', () => {
   assert.equal(out, 'Watcher: 2 type errors, 1 lint error in src/, run bin/lint and bin/typecheck\n')
 })
 
+test('checksHint names only the script for the kind of error there is', () => {
+  let lint = { ok: false, errors: 'src/a.ts\n  1:1      error  X  eslint(no-var)' }
+  let types = { ok: false, errors: 'src/a.ts\n  1:1      error  X  TS2322' }
+  assert.equal(checksHint({ lint }), 'Watcher: 1 lint error in src/, run bin/lint\n')
+  assert.equal(checksHint({ lint: { ok: true, errors: '' }, types }), 'Watcher: 1 type error in src/, run bin/typecheck\n')
+})
+
 test('checksHint is empty without errors, while checking, and without a status', () => {
   assert.equal(checksHint({ lint: { ok: true, errors: '' }, types: { state: 'done', ok: true, errors: '' } }), '')
   assert.equal(checksHint({ lint: { ok: true, errors: '' }, types: { state: 'checking', ok: null, errors: '' } }), '')
