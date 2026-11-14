@@ -9,7 +9,7 @@ spec `spec/unpoly/foo_spec.js`, listed in `spec/specs.js`.
 
 <!-- toc -->
 - [Running tests](#running-tests)
-  - [Check types and lint first](#check-types-and-lint-first)
+  - [Before committing](#before-committing)
   - [Reading a failure](#reading-a-failure)
   - [Debugging a failure](#debugging-a-failure)
   - [Options and filters](#options-and-filters)
@@ -54,35 +54,29 @@ bin/specs --all                              # the whole suite (~9 minutes)
 `bin/specs` needs a running [dev environment](dev-environment.md) and starts one in
 the background if none is running.
 
-### Check types and lint first
+### Before committing
 
-The specs are the slowest check we have. Run the fast ones before them:
+| You changed | Before committing, run |
+|---|---|
+| anything | `bin/lint`, `bin/typecheck` |
+| `src/` or `spec/` | `bin/specs` with the specs likely to be affected (find them with [`bin/find-spec`](#finding-the-spec-for-a-feature)) |
+| `tooling/` | `bin/tooling-tests` |
+| a contributing guide | `bin/update-contributing-tocs` |
+
+CI runs the full suite and the variants; read its result after pushing.
+
+While you edit, the dev watcher reports lint and type errors in `src/` after each save, in
+`tmp/dev.log` and `bin/dev status`. Fix the ones in your own code before running specs; specs
+are slow. `bin/specs` runs anyway, and prints one line after the results when the watcher knows
+of errors:
 
 ```
-bin/typecheck        # type errors (~1 second)
-bin/lint             # Oxlint, api collisions, doc files (~1 second)
-bin/specs --spec="…" # the specs that cover your change (~15 seconds for a single spec)
+Watcher: 2 type errors, 1 lint error in src/, run bin/lint and bin/typecheck
 ```
 
-`bin/typecheck` and `bin/lint` print nothing when all is well. `bin/typecheck` only checks
-`src/`. The specs are JavaScript, and `bin/lint` is their only static check.
-
-The dev watcher also lints `src/` and checks types after every change in `src/` or a tsconfig,
-so `bin/specs` knows of the errors when you forget. A lint error in `src/` stops it: it prints the
-error instead of running the specs. A type error doesn't: `bin/specs` runs the specs anyway,
-and exits non-zero (7) even when they all pass. A type error is often in another file than the
-code under test, like the callers of a function whose signature you changed, and in the middle
-of a refactoring you want to see the specs before every caller is fixed.
-
-`bin/specs` prints the type errors before the specs, or after them when the check finishes
-later. When the check timed out, or the sources changed during the run, it says so and reports
-no type errors. Run `bin/typecheck` before you commit.
-
-Running the two first is still quicker than waiting for a spec run to tell you, and `bin/lint`
-also covers what the watcher doesn't lint: `spec/`, `tooling/` and the doc files. CI runs all
-three, plus `bin/tooling-tests` (~4 seconds). That one tests our tooling, and also checks the order
-in which modules are evaluated, so run it when you change `tooling/`, `bin/` or the imports
-between modules.
+`bin/typecheck` only checks `src/`; `bin/lint` also covers `spec/`, `tooling/` and the doc files.
+`bin/tooling-tests` also checks the order in which modules are evaluated, so run it when you
+change the imports between modules.
 
 ### Reading a failure
 
@@ -200,7 +194,7 @@ exercises, like `--csp=…` for CSP work or `--migrate` for a new polyfill.
 
 ## If you are an agent
 
-**Type-check and lint before you run specs** (see [above](#check-types-and-lint-first)).
+**Fix the watcher's lint and type errors in your code before you run specs** (see [above](#before-committing)).
 
 **Filter before you run** (see [above](#the-full-test-suite-is-slow)).
 

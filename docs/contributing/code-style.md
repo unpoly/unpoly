@@ -31,8 +31,8 @@ how modules import each other is covered in
 
 The build doesn't use TypeScript at all: esbuild strips the types from each file, and never
 checks them. `bin/typecheck` checks them, in about a second, and prints nothing when all is
-well. Run it before the specs. The dev watcher runs the same checks after every change, and
-`bin/specs` reports what they found (see [Testing](testing.md#check-types-and-lint-first)).
+well. The dev watcher runs the same checks after every change. When to run what is in
+[Testing](testing.md#before-committing).
 
 Besides the [public-API probe](documentation.md#public-api-must-exist), which checks that
 documented API exists in the types, `bin/typecheck` checks with TypeScript 7 against two
@@ -310,4 +310,4 @@ Rust. The code style rules from `@stylistic/eslint-plugin` and our own in
 config. To silence a rule for one line, write `// oxlint-disable-line rule-name`.
 
 The dev watcher lints `src/` too, but only `bin/lint` checks the specs, the tooling and the doc
-files. Run it before the specs (see [Testing](testing.md#check-types-and-lint-first)).
+files. When to run what is in [Testing](testing.md#before-committing).

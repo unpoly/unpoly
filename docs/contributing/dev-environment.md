@@ -49,12 +49,12 @@ bin/dev stop                         # stop a running environment
 bin/dev status                       # report whether one is running (and flag a broken build)
 ```
 
-If a build has errors — a syntax slip, or a lint error — `bin/specs` prints
-them instead of running the specs and exits non-zero, and `bin/dev status` reports
-them too. The watcher itself keeps running, so your next edit can fix things.
+If a build has errors, like a syntax slip, `bin/specs` prints them instead of running the
+specs and exits non-zero, and `bin/dev status` reports them too. The watcher itself keeps
+running, so your next edit can fix things.
 
-A **type error** doesn't break the build. `bin/specs` runs the specs anyway, and exits 7 even
-when they pass (see [Testing](testing.md#check-types-and-lint-first)). `bin/dev status` lists type errors, but
+**Lint and type errors** don't break the build. `bin/specs` runs the specs anyway and mentions
+them in one line (see [Testing](testing.md#before-committing)). `bin/dev status` lists them, but
 still reports the environment as usable.
 
 ## The build
@@ -77,7 +77,7 @@ check runs again after that change's rebuild.
 Of the one-shot builds, only the production build
 (`bin/build` without `--config`, which `bin/release` runs) lints `src/`, and fails on an error.
 None of them checks types. To check without the watcher, run `bin/typecheck` and `bin/lint` (see
-[Testing](testing.md#check-types-and-lint-first)).
+[Testing](testing.md#before-committing)).
 
 ## Logs
 
@@ -106,8 +106,8 @@ Each line of the dev log is `HH:MM:SS.mmm service | output`:
 What you can find in there:
 
 - `watch` — the build watcher. How many bundles it rebuilt and how long it took, the
-  verbatim compile or lint errors when a build breaks, and the type check's errors, formatted
-  like the lint errors.
+  verbatim compile errors when a build breaks, the lint errors, and the type check's errors,
+  formatted like the lint errors.
 - `server` — the spec server, including the port it came up on.
 - `docs` — the documentation site, if you have that sibling repository checked out.
 - `dev` — the supervisor itself: a service exiting, a sibling repository being skipped
@@ -122,8 +122,8 @@ grep -E '^[0-9:.]+ watch ' tmp/dev.log      # just the build
 The log is truncated each time an environment starts, so what you are reading is the current
 session and nothing older. For a **broken build** you don't need the log at all: `bin/specs`
 prints the errors instead of running the specs, and `bin/dev status` reports them too — both
-read them from `tmp/build-status.json`. The same goes for type errors, which that file keeps
-apart from the build's, under `types`.
+read them from `tmp/build-status.json`. That file keeps lint and type errors apart from the
+build's, under `lint` and `types`, and `bin/specs` counts them from there.
 
 One neighbour, `tmp/dev-crash.log`, is not a second log. It catches the supervisor's raw
 output for the one case the log cannot cover: dying before it opens the log, which in
