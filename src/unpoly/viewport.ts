@@ -304,8 +304,8 @@ function setScrollPositions(
 ): void {
   for (let viewport of viewports) {
     const key = scrollTopKey(viewport)
-    // An untargetable viewport has no key, and has no saved position under tops['undefined'].
-    let top = tops[key!] || defaultTop
+    // An untargetable viewport has no key, and no saved position.
+    let top = (key && tops[key]) || defaultTop
 
     // Negative numbers scroll to the bottom, leaving an unscrolled buffer.
     if (top < 0 || Object.is(top, -0)) {

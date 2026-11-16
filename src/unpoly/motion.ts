@@ -110,8 +110,8 @@ async function animateNow(
 }
 
 export function finish(element?: e.ElementOrSelector): Promise<void> | undefined {
-  // Without an element, getFragment() returns undefined, and we finish all animations.
-  element = getFragment(element as e.ElementOrSelector)
+  // Without an element we finish all animations.
+  element = element ? getFragment(element) : undefined
   motionController.finish(element)
   // Finishing is synchronous. With unpoly-migrate, we return a promise that warns when awaited.
   return up.migrate.formerlyAsync?.('up.motion.finish()')

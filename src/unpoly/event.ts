@@ -108,8 +108,8 @@ export function haltEvent(event: Event, options: { log?: boolean } = {}): void {
 export const keyModifiers: ModifierKey[] = ['metaKey', 'shiftKey', 'ctrlKey', 'altKey']
 
 export function isModified(event: { button?: number } & Pick<MouseEvent, ModifierKey>): boolean {
-  // An up:click from a keyboard event has no { button }, and undefined > 0 is false.
-  return (event.button! > 0) || u.some(keyModifiers, (modifier) => event[modifier])
+  // An up:click from a keyboard event has no { button }.
+  return ((event.button ?? 0) > 0) || u.some(keyModifiers, (modifier) => event[modifier])
 }
 
 export const isSyntheticClick = mockable(function isSyntheticClick(event: Event): boolean {

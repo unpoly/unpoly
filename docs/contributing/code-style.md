@@ -174,6 +174,9 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   a variable, or give the function that produces it a return type without `undefined`. Don't
   repeat `!` at each use. If code right after a `!` checks whether the value is missing, the
   `!` is wrong; restructure instead.
+
+  `!` only where something guarantees the value. Where a value may be missing, write the code
+  that handles it (`?? 0`, `x && …`), even if a built-in would cope with `undefined`.
 - When a function resolves its argument by reassigning it (`element = getFragment(element)`),
   TypeScript narrows the parameter to a member of its declared type: an `ElementOrSelector`
   becomes an `Element`, never the `HTMLElement` that `getFragment()` returns. When that's enough,

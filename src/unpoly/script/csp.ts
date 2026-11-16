@@ -260,8 +260,7 @@ class Policy {
   }
 
   isValidNonce(nonce?: string): boolean {
-    // has(undefined) is false.
-    return this._validNonces.has(nonce!)
+    return !!nonce && this._validNonces.has(nonce)
   }
 
   tryRewriteNonce(allowedItem: PolicyItem, nonce = allowedItem.readNonce()): void {

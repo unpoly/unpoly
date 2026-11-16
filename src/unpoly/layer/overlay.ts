@@ -364,8 +364,7 @@ export abstract class Overlay extends Layer {
   }
 
   _tryCloseForElements(selector: string | undefined, closeFn: CloseFunction, newElements: Element[], response?: UpResponse): void {
-    // Without a selector we look for "undefined", which matches nothing.
-    let match = u.findResult(newElements, (element) => e.subtreeFirst(element, selector!))
+    let match = selector && u.findResult(newElements, (element) => e.subtreeFirst(element, selector))
     if (match) {
       const closeValue = readData(match)
       muteUncriticalSync(() =>
@@ -433,13 +432,10 @@ export abstract class Overlay extends Layer {
     // If we don't animate the box, we don't animate the backdrop either.
     if (isNone(boxAnimation)) return false
 
-    // Only animate the backdrop element if this layer has a backdrop.
-    backdropAnimation = this.backdrop && backdropAnimation
-
     return (_element, animateOptions) => {
       const boxDone = animate(this.getBoxElement(), boxAnimation, animateOptions)
-      // Without a backdrop there is no element, but then there is no backdropAnimation either.
-      const backdropDone = animate(this.backdropElement!, backdropAnimation, animateOptions)
+      // Only a layer with a { backdrop } has a backdrop element.
+      const backdropDone = this.backdropElement && animate(this.backdropElement, backdropAnimation, animateOptions)
 
       // Promise.all() ignores non-Thenables in the given array
       return Promise.all([boxDone, backdropDone])
@@ -481,8 +477,7 @@ export abstract class Overlay extends Layer {
   }
 
   isAlive(): boolean {
-    // includes() takes an undefined state and returns false.
-    return ['opening', 'opened'].includes(this.state!)
+    return this.state === 'opening' || this.state === 'opened'
   }
 
   // Documented in up.Layer

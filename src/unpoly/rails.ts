@@ -36,6 +36,9 @@ function defineMacro(elementSelector: string, relevantFn: (element: Element) => 
 
 export function install(): void {
   defineMacro('a[href], [up-href]', (el) => isFollowable(el))
-  // A button outside a form has no form. isSubmittable() then finds no element and returns a falsy value.
-  defineMacro('form, input[type=submit], button[type=submit], button:not([type])', (el) => isSubmittable(getForm(el)!))
+  defineMacro('form, input[type=submit], button[type=submit], button:not([type])', (el) => {
+    // A button outside a form has no form.
+    let form = getForm(el)
+    return !!form && isSubmittable(form)
+  })
 }

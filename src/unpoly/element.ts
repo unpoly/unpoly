@@ -356,8 +356,7 @@ export function createBrokenDocumentFromHTML(html: string): Document {
   // DOMParser is usually smart enough to parse an incomplete HTML fragment into a full <html> document.
   // However, any table components without an enclosing <table> will be parsed into a simple text node.
   const firstTag = firstTagNameInHTML(html)
-  // includes() takes an undefined tag name and returns false.
-  if (['TR', 'TD', 'TH', 'THEAD', 'TBODY'].includes(firstTag!)) {
+  if (firstTag && ['TR', 'TD', 'TH', 'THEAD', 'TBODY'].includes(firstTag)) {
     html = `<table>${html}</table>`
   }
   return new DOMParser().parseFromString(html, 'text/html')

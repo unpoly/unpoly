@@ -95,8 +95,7 @@ export class UpResponse {
   }
 
   isHTML(): boolean {
-    // test() stringifies a missing type, which doesn't match.
-    return HTML_CONTENT_TYPE.test(this.contentType!)
+    return !!this.contentType && HTML_CONTENT_TYPE.test(this.contentType)
   }
 
   get cspInfo(): CSPInfo {
