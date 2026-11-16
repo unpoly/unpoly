@@ -167,13 +167,11 @@ function registerProcessor(args: unknown[], overrides: t.CompilerOptions = {}): 
     if (isEvaling()) {
       // Don't allow the default priority (0) for Unpoly's own macros.
       processor.priority ||= detectSystemMacroPriority(processor.selector)
-
     }
     insertProcessor(registeredMacros, processor)
   } else {
     insertProcessor(registeredCompilers, processor)
   }
-
 }
 
 // oxlint-disable-next-line typescript/no-explicit-any -- parsed arguments of any type
