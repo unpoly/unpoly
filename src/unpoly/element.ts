@@ -446,7 +446,6 @@ export function setMissingAttr(element: Element, key: string, value: unknown): v
   // (1) We skip a null or undefined value, e.g. from the attribute of another element that doesn't have it.
   // (2) We set false as "false". Some callers set [up-etag=false] on purpose.
   if (u.isGiven(value) && u.isMissing(element.getAttribute(key))) {
-    // setAttribute() stringifies the value.
     element.setAttribute(key, value as string)
   }
 }

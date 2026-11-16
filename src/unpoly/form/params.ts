@@ -49,7 +49,6 @@ export class Params {
   toFormData(): FormData {
     const formData: InspectableFormData = new FormData()
     for (let entry of this.entries) {
-      // FormData stringifies a value that isn't a Blob.
       formData.append(entry.name, entry.value as string | Blob)
     }
     if (!formData.entries) {
@@ -260,7 +259,6 @@ export class Params {
     return params
   }
 
-  // Takes any, since it reads the properties of whichever kind of field it gets (checked, files, ...).
   // oxlint-disable-next-line typescript/no-explicit-any -- any kind of field
   addField(field: any, { includeDisabled }: { includeDisabled?: boolean } = {}): void {
     field = e.getOne(field) // unwrap jQuery

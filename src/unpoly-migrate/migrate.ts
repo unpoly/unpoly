@@ -238,7 +238,6 @@ up.migrate = (function() {
   }
 
   function fixStylePropValue(prop: string, value: unknown, unit?: string): unknown {
-    // test() stringifies a number.
     if (!unit && CSS_LENGTH_PROPS.includes(prop) && /^[\d.]+$/.test(value as string)) {
       warn(`CSS length values must have a unit, but got "${prop}: ${value}". Use "${prop}: ${value}px" instead.`)
       return value + "px"

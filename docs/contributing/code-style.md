@@ -227,9 +227,9 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   `PlainObject`.
   A wrapper that forwards its `...args` casts the callee unless the callee has a rest
   parameter: `(up.element.get as AnyFunction)(...args)`. TypeScript only spreads an array of
-  unknown length into a rest parameter (TS2556). Type parameters where it's easy. Core declares the hooks it
-  calls on `up.migrate` in `migrate_stub.ts`, and migrate marks each implementation with a "Core
-  calls this hook" comment.
+  unknown length into a rest parameter (TS2556). Type parameters where it's easy. Core declares
+  the hooks it calls on `up.migrate` in `migrate_stub.ts`, and migrate marks each implementation
+  with a "Core calls this hook" comment.
 
 
 ## Every byte counts

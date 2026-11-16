@@ -311,7 +311,6 @@ up.emit(event)                       // emits the event
 @param {string} eventType
 @param {Object} eventProps
 @param {string|Array} [eventProps.message]
-@return {Event}
 @internal
 
 -----

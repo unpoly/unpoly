@@ -573,7 +573,6 @@ export class UpRequest {
     if (u.isOptions(value) || u.isArray(value)) {
       value = u.safeStringifyJSON(value)
     }
-    // A header stringifies other values.
     this.headers[name] = value as string
   }
 

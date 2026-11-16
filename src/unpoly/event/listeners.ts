@@ -25,7 +25,6 @@ export class UpEventListener {
     this.once = attributes.once
     this.capture = attributes.capture
 
-    // Naming the class inside its body would make the build emit a named class expression.
     this._key = UpEventListener._buildKey(attributes)
     this.isDefault = isEvaling()
 

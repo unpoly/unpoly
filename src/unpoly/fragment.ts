@@ -413,7 +413,7 @@ export function getSubtree(element: Element, selector: string, options: t.Lookup
   return new Selector(selector, element, options).subtree(element)
 }
 
-// Takes a selector or an element. viewport's focusedElementWithin() also passes null, which matches nothing.
+// Takes a selector or an element.
 export function containsFragment(root: Element, selectorOrElement: string | Element): boolean | undefined {
   if (u.isElement(selectorOrElement)) {
     // The root may be in no layer, e.g. while a closed overlay plays its closing animation.

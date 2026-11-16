@@ -264,7 +264,6 @@ export function isNone(motionValue: unknown): boolean {
 // From is an opacity or a function that reads it from the element.
 function registerOpacityAnimation(name: string, from: u.ValueOrFunction<number | string>, to: number): void {
   namedAnimations.put(name, function(element, options) {
-    // The style property stringifies a number.
     element.style.opacity = u.evalOption(from, element) as string
     return animateNow(element, { opacity: to }, options)
   })
