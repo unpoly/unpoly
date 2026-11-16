@@ -180,7 +180,7 @@ export class RenderJob {
     // so non-network async jobs can wait for up:fragment:aborted as an aborting signal.
     if (!abort) return
 
-    let abortOptions = {
+    let abortOptions: t.AbortFragmentOptions = {
       except: request, // don't abort the request we just made
       logOnce: ['up.render()', 'Change with { abort } option will abort other requests'],
       newLayer: (layer === 'new'),
