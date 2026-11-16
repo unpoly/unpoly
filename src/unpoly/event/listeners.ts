@@ -26,7 +26,7 @@ export class UpEventListener {
     this.capture = attributes.capture
 
     // Naming the class inside its body would make the build emit a named class expression.
-    this._key = (this.constructor as typeof UpEventListener)._buildKey(attributes)
+    this._key = UpEventListener._buildKey(attributes)
     this.isDefault = isEvaling()
 
     // We don't usually run up.on() listeners before Unpoly has booted.

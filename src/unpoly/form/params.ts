@@ -94,7 +94,7 @@ export class Params {
 
   withoutBinaryEntries(): Params {
     let simpleEntries = u.reject(this.entries, this._isBinaryEntry)
-    return new (this.constructor as typeof Params)(simpleEntries)
+    return new Params(simpleEntries)
   }
 
   toURL(base: string): string {

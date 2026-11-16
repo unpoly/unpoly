@@ -103,6 +103,8 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
 - **A class that copies its options onto itself** merges with an interface for those properties
   (`interface UpRequest extends RequestProps {}`) instead of declaring each one. Use `declare` for
   the other fields, and for an option that the instance holds with a narrower type.
+- **Call a static method through `this.constructor` only where one of our own subclasses
+  overrides it.** Apps subclassing our public classes isn't supported.
 - **Only syntax that strips away.** No `enum`, `namespace` or constructor parameter
   properties (`constructor(private x)`). They compile to runtime code, so our output would
   depend on the tool that strips the types. A parameter property also defines a class field
