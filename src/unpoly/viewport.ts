@@ -206,7 +206,7 @@ function fixedElements(root: ParentNode = document): NodeListOf<HTMLElement> {
 
 export function saveScroll(viewport?: e.ElementOrSelector, options?: t.ScrollPositionOptions): void
 export function saveScroll(options: t.ScrollPositionOptions): void
-export function saveScroll(...args: any[]): void {
+export function saveScroll(...args: unknown[]): void {
   const [viewports, options] = parseOptions(args)
   const location = options.location || options.layer.location
   if (location) {
@@ -235,7 +235,7 @@ export function getScrollTops(options?: LookupOptions): Record<string, number> {
 
 export function restoreScroll(viewport?: e.ElementOrSelector, options?: t.ScrollPositionOptions): boolean
 export function restoreScroll(options: t.ScrollPositionOptions): boolean
-export function restoreScroll(...args: any[]): boolean {
+export function restoreScroll(...args: unknown[]): boolean {
   const [viewports, options] = parseOptions(args)
   const location = options.location || options.layer.location
   const scrollTops = options.scrollTops ?? options.layer.lastScrollTops.get(location)
@@ -272,11 +272,11 @@ export function restoreFocus(options: u.PlainObject = {}): boolean {
   }
 }
 
-export function newStateCache(): u.FIFOCache<string, any> {
+export function newStateCache<V>(): u.FIFOCache<string, V> {
   return new u.FIFOCache({ capacity: 30, normalizeKey: u.matchableURL })
 }
 
-function parseOptions(args: any[]): [u.List<HTMLElement>, u.PlainObject] {
+function parseOptions(args: unknown[]): [u.List<HTMLElement>, u.PlainObject] {
   const [reference, options] = u.parseArgs(args, 'val', 'options')
 
   options.layer = layerStack.get(options)
@@ -294,7 +294,7 @@ function parseOptions(args: any[]): [u.List<HTMLElement>, u.PlainObject] {
   return [viewports, options]
 }
 
-export function scrollToPosition(position: number, ...args: any[]): boolean {
+export function scrollToPosition(position: number, ...args: unknown[]): boolean {
   const [viewports, options] = parseOptions(args)
   setScrollPositions(viewports, {}, position, options.behavior)
   return true

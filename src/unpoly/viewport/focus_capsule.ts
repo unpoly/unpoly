@@ -1,3 +1,4 @@
+import type * as u from '../util.js'
 import * as e from '../element.js'
 import { on } from '../event.js'
 import { getFragment, tryToTarget } from '../fragment.js'
@@ -8,7 +9,7 @@ import type * as t from './types.js'
 export class FocusCapsule {
   declare _element: Element
   declare _target?: string
-  declare _cursorProps: any
+  declare _cursorProps: u.PlainObject
   declare _voided?: boolean
 
   constructor(element: Element, target?: string) {
