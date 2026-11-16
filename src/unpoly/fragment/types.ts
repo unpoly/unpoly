@@ -118,7 +118,7 @@ export interface RenderOptions {
   history?: boolean | 'auto'
   title?: boolean | string
   location?: boolean | string
-  metaTags?: boolean | Element[]
+  metaTags?: boolean | u.List<Element>
   lang?: boolean | string
 
   // Animation

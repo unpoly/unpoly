@@ -65,7 +65,7 @@ function reset(): void {
 // - list of elements (forced update of meta tags)
 // Values we want to override:
 // - true (do update with defaults)
-export function refineOption(existingValue: any, newValue: any): any {
+export function refineOption<E, N>(existingValue: E, newValue: N): E | N {
   if ((existingValue === false) || u.isString(existingValue) || u.isList(existingValue)) {
     return existingValue
   } else {
