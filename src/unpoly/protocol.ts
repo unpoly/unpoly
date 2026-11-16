@@ -6,8 +6,17 @@ import { type EventPlan } from './event.js'
 import { type Params } from './form.js'
 import { type RenderOptions } from './fragment.js'
 import { mockable } from './mockable.js'
-import type * as t from './protocol/types.js'
-export type * from './protocol/types.js'
+
+/**
+The settings in `up.protocol.config`, described in its doc comment.
+*/
+export interface ProtocolConfig {
+  methodParam: string
+  csrfParam: string | (() => string | undefined)
+  csrfToken: string | (() => string | undefined)
+  csrfHeader: string
+  maxHeaderSize: number
+}
 
 
 export const headerize = function(camel: string): string {
@@ -101,7 +110,7 @@ export function locationFromXHR(xhr: XMLHttpRequest): string | undefined {
   }
 }
 
-export const protocolConfig = newConfig('up.protocol.config', (): t.ProtocolConfig => ({
+export const protocolConfig = newConfig('up.protocol.config', (): ProtocolConfig => ({
   methodParam: '_method',
   csrfParam() { return e.metaContent('csrf-param') },
   csrfToken() { return e.metaContent('csrf-token') },
