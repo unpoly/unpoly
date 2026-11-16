@@ -41,21 +41,39 @@ export interface LayerDefaults {
 }
 
 /**
+The options that an overlay copies onto itself. The layer config has defaults for most of them.
+@internal
+*/
+export interface OverlayProps {
+  class?: string
+  backdrop: boolean
+  dismissLabel: string
+  dismissARIALabel: string
+  openAnimation: LayerAnimation
+  openDuration: number
+  openEasing: string
+  closeAnimation: LayerAnimation
+  closeDuration: number
+  closeEasing: string
+  trapFocus: boolean
+  onOpened?: (event: LayerOpenedEvent) => any
+  onAccept?: (event: LayerAcceptEvent) => any
+  onAccepted?: (event: LayerAcceptedEvent) => any
+  onDismiss?: (event: LayerDismissEvent) => any
+  onDismissed?: (event: LayerDismissedEvent) => any
+  onAcceptedReload?: string
+  onDismissedReload?: string
+  acceptEvent?: string
+  dismissEvent?: string
+  acceptFragment?: string
+  dismissFragment?: string
+}
+
+/**
 Defaults for new overlays, like `up.layer.config.overlay` or `up.layer.config.modal`.
 */
-export interface OverlayDefaults extends LayerDefaults {
-  openAnimation?: LayerAnimation
-  openDuration?: number
-  openEasing?: string
-  closeAnimation?: LayerAnimation
-  closeDuration?: number
-  closeEasing?: string
+export interface OverlayDefaults extends LayerDefaults, Partial<OverlayProps> {
   dismissible?: boolean | string | string[]
-  dismissLabel?: string
-  dismissARIALabel?: string
-  trapFocus?: boolean
-  backdrop?: boolean
-  class?: string
   size?: 'small' | 'medium' | 'large' | 'full' | 'grow'
   // Popups take any position, drawers only 'left' or 'right' (see DrawerDefaults).
   position?: 'top' | 'bottom' | 'left' | 'right'

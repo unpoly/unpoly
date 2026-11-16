@@ -21,35 +21,16 @@ import { Tether } from './tether.js'
 // A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
 type CloseFunction = (value: any, options?: t.CloseLayerOptions) => void
 
+// The constructor copies these options onto the overlay.
+export interface Overlay extends t.OverlayProps {} // oxlint-disable-line typescript/no-unsafe-declaration-merging
+
 export abstract class Overlay extends Layer {
 
-  declare class?: string
-  declare backdrop: boolean
   // The constructor turns the option (true, false or a string) into an array of methods.
   declare dismissible: string[]
-  declare dismissLabel: string
-  declare dismissARIALabel: string
-  declare openAnimation: t.LayerAnimation
-  declare closeAnimation: t.LayerAnimation
-  declare openDuration: number
-  declare closeDuration: number
-  declare openEasing: string
-  declare closeEasing: string
-  declare trapFocus: boolean
-  declare onOpened?: (event: t.LayerOpenedEvent) => any
-  declare onAccept?: (event: t.LayerAcceptEvent) => any
-  declare onAccepted?: (event: t.LayerAcceptedEvent) => any
-  declare onDismiss?: (event: t.LayerDismissEvent) => any
-  declare onDismissed?: (event: t.LayerDismissedEvent) => any
-  declare onAcceptedReload?: string
-  declare onDismissedReload?: string
-  declare acceptEvent?: string
-  declare dismissEvent?: string
   // The constructor turns the option (a URL pattern string) into an UpURLPattern.
   declare acceptLocation?: u.UpURLPattern
   declare dismissLocation?: u.UpURLPattern
-  declare acceptFragment?: string
-  declare dismissFragment?: string
   declare nesting: number
   declare backdropElement?: HTMLElement
   declare viewportElement?: HTMLElement
