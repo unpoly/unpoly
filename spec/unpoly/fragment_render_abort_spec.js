@@ -243,8 +243,11 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(abortFn).toHaveBeenCalledWith(jasmine.any(up.Request))
-            expect(abortFn.calls.allArgs().map(([request]) => request.url)).toContain('/path2')
+            let seenURLs = abortFn.calls.allArgs().map(([request]) => request.url)
+            expect(seenURLs).toContain('/path2')
+            expect(seenURLs).not.toContain('/path3')
             expect(change1Error).toBeAbortError()
+            expect(change1Error.message).toContain('Aborting requests picked by { abort } function')
             expect(change2Error).toBeUndefined()
             expect(u.map(up.internal.queue.allRequests, 'url')).toEqual(['/path2', '/path3'])
           })
@@ -325,6 +328,24 @@ extendDescribe('up.fragment', function() {
 
             expect(preloadError).toBeUndefined()
             expect(followError).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+          })
+
+          it('never aborts a cached request that the render pass reuses', async function() {
+            fixture('.element')
+
+            let cachedRequestError = undefined
+            up.request('/path', { cache: true }).catch((e) => cachedRequestError = e)
+            await wait()
+
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+
+            let changeError = undefined
+            up.render('.element', { url: '/path', cache: true, abort: () => true }).catch((e) => changeError = e)
+            await wait()
+
+            expect(cachedRequestError).toBeUndefined()
+            expect(changeError).toBeUndefined()
             expect(up.internal.queue.allRequests.length).toEqual(1)
           })
 
