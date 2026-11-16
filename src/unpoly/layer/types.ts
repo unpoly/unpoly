@@ -5,7 +5,6 @@ import type { AnimateOptions, AnimationValue } from '../motion.js'
 import type { UpResponse } from '../network.js'
 import type { Layer } from './layer.js'
 import type { LayerStack } from './layer_stack.js'
-import type { Overlay } from './overlay.js'
 
 /**
 The settings in `up.layer.config`, described in its doc comment.
@@ -130,9 +129,11 @@ Options for closing an overlay with `up.Layer#accept()` or `up.Layer#dismiss()`.
 */
 export interface CloseLayerOptions extends LayerAnimationOptions {
   confirm?: string | boolean
+  // Whether a listener may prevent the overlay from closing.
   /** @internal */
   preventable?: boolean
   response?: UpResponse
+  // Whether to restore the parent layer's history.
   history?: boolean
   /** @internal */
   origin?: Element
@@ -142,25 +143,6 @@ export interface CloseLayerOptions extends LayerAnimationOptions {
 How an overlay closes: by accepting or by dismissing it.
 */
 export type CloseVerb = 'accept' | 'dismiss'
-
-/**
-Options for accepting or dismissing an overlay.
-@internal
-*/
-export interface CloseLayerArgs {
-  verb: CloseVerb
-  layer: Overlay
-  value?: any
-  origin?: Element
-  // Whether a listener may prevent the overlay from closing.
-  preventable?: boolean
-  response?: UpResponse
-  // Whether to restore the parent layer's history.
-  history?: boolean
-  confirm?: string | false
-  // Other options go to Overlay#destroyElements(), e.g. { animation }.
-  [key: string]: any
-}
 
 /**
 Options for `up.Layer#peel()`.

@@ -418,6 +418,8 @@ export abstract class Overlay extends Layer {
     destroy(this.element, {
       ...options,
       ...animationProps,
+      // The element is still in this layer. Our options can't override it.
+      layer: this,
       onFinished,
       log: false,
     })
@@ -498,8 +500,7 @@ export abstract class Overlay extends Layer {
   }
 
   _close(verb: t.CloseVerb, value: any, options: t.CloseLayerOptions): void {
-    // The cast allows { confirm: true }, which assertConfirmed() handles like { confirm: false }.
-    closeLayer({ ...options, verb, value, layer: this } as t.CloseLayerArgs)
+    closeLayer(this, verb, value, options)
   }
 
   getFirstSwappableElement(): HTMLElement {
