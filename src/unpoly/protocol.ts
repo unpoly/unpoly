@@ -19,12 +19,12 @@ export interface ProtocolConfig {
 }
 
 
-export const headerize = function(camel: string): string {
+export function headerize(camel: string): string {
   const header = camel.replace(/(^.|[A-Z])/g, (char) => '-' + char.toUpperCase())
   return 'X-Up' + header
 }
 
-const extractHeader = function(xhr: XMLHttpRequest, shortHeader: string, parseFn: (value: string) => any = u.identity): any {
+function extractHeader(xhr: XMLHttpRequest, shortHeader: string, parseFn: (value: string) => any = u.identity): any {
   let value = xhr.getResponseHeader(headerize(shortHeader))
   if (value) {
     return parseFn(value)

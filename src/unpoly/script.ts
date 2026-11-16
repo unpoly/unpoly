@@ -176,7 +176,7 @@ function registerProcessor(args: any[], overrides: t.CompilerOptions = {}): void
 
 }
 
-const parseProcessorArgs = function(args: any[]): any[] {
+function parseProcessorArgs(args: any[]): any[] {
   return u.parseArgs(args, 'val', 'options', 'callback')
 }
 
