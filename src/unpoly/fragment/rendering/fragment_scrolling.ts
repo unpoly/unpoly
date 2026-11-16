@@ -17,46 +17,17 @@ interface FragmentScrollingOptions extends t.FragmentProcessorOptions {
   oldScrollTops?: Record<string, number>
 }
 
-export class FragmentScrolling extends FragmentProcessor {
-  declare hash?: string
-  declare mode?: LayerMode
-  declare revealTop?: boolean
-  declare revealMax?: number | ((viewportHeight: number) => number)
-  declare revealSnap?: number
-  declare revealPadding?: number
-  declare behavior?: ScrollBehavior
-  declare oldScrollTops?: Record<string, number>
-
-  constructor(options: FragmentScrollingOptions) {
-    super(options)
-    this.hash = options.hash
-    this.mode = options.mode
-    this.revealTop = options.revealTop
-    this.revealMax = options.revealMax
-    this.revealSnap = options.revealSnap
-    this.revealPadding = options.revealPadding
-    // Render options call it { scrollBehavior } to stand out among many other options.
-    // The viewport functions we call only take scrolling options, and call it { behavior }.
-    //
-    // Our attributes keep { scrollBehavior }, because the processor for a match in a
-    // selector map is built from them.
-    this.behavior = options.scrollBehavior
-    this.oldScrollTops = options.oldScrollTops
-  }
-
-  attributes(): u.PlainObject {
-    return u.pickBy({
-      ...super.attributes(),
-      hash: this.hash,
-      mode: this.mode,
-      revealTop: this.revealTop,
-      revealMax: this.revealMax,
-      revealSnap: this.revealSnap,
-      revealPadding: this.revealPadding,
-      behavior: this.behavior,
-      scrollBehavior: this.behavior,
-      oldScrollTops: this.oldScrollTops,
-    }, u.isDefined)
+export class FragmentScrolling extends FragmentProcessor<FragmentScrollingOptions> {
+  // The options for the viewport functions we call.
+  //
+  // We don't pass all our options, since a render pass passes all its render options,
+  // and reveal() would act on { focus }, restoreScroll() on { location }.
+  //
+  // Render options call it { scrollBehavior } to stand out among many other options.
+  // The viewport functions only take scrolling options, and call it { behavior }.
+  _viewportOptions(): u.PlainObject {
+    let { layer, origin, mode, revealTop, revealMax, revealSnap, revealPadding, scrollBehavior } = this.options
+    return { layer, origin, mode, revealTop, revealMax, revealSnap, revealPadding, behavior: scrollBehavior }
   }
 
   processPrimitive(opt: any): any {
@@ -74,11 +45,11 @@ export class FragmentScrolling extends FragmentProcessor {
       case 'restore':
         return this._restoreSaved()
       case 'hash':
-        return this.hash && revealHash(this.hash, this.attributes())
+        return this.options.hash && revealHash(this.options.hash, this._viewportOptions())
       case 'target':
       case 'reveal':
       case true:
-        return this._revealElement(this.fragment)
+        return this._revealElement(this.options.fragment)
       default:
         if (u.isNumber(opt)) {
           return this._scrollTo(opt)
@@ -94,7 +65,7 @@ export class FragmentScrolling extends FragmentProcessor {
 
   _revealElement(element?: HTMLElement | null): boolean | undefined {
     if (element) {
-      reveal(element, this.attributes())
+      reveal(element, this._viewportOptions())
       return true
     }
   }
@@ -110,23 +81,24 @@ export class FragmentScrolling extends FragmentProcessor {
     // scroll the layer viewport. Revealing the layer element would scroll
     // the main document viewport.
     // The render pass always passes a { layer }.
-    return this._revealElement(this.layer!.getBoxElement())
+    return this._revealElement(this.options.layer!.getBoxElement())
   }
 
   _scrollTo(position: number): boolean {
     // With { around: undefined }, scrollToPosition() resets all viewports in { layer }
-    return scrollToPosition(position, { ...this.attributes(), around: this.fragment })
+    return scrollToPosition(position, { ...this._viewportOptions(), around: this.options.fragment })
   }
 
   _restoreOld(): boolean | undefined {
-    if (this.oldScrollTops) {
-      return this._restoreSaved({ scrollTops: this.oldScrollTops })
+    let { oldScrollTops } = this.options
+    if (oldScrollTops) {
+      return this._restoreSaved({ scrollTops: oldScrollTops })
     }
   }
 
   _restoreSaved(extraOptions?: u.PlainObject): boolean {
     // With { around: undefined }, restoreScroll() restores all viewports in { layer }
-    return restoreScroll({ ...this.attributes(), around: this.fragment, ...extraOptions })
+    return restoreScroll({ ...this._viewportOptions(), around: this.options.fragment, ...extraOptions })
   }
 
 }

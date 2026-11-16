@@ -1,34 +1,18 @@
 import * as u from '../../util.js'
 import { guard } from '../../error.js'
 import { containsFragment, getSmart } from '../../fragment.js'
-import type { Layer } from '../../layer.js'
 import { printToWarn } from '../../log.js'
 import type * as t from '../types.js'
 
 // Processes a { focus } or { scroll } render option. The option can be a string, an element, a function,
 // an array of alternatives or a selector map, so its type stays `any`.
-export abstract class FragmentProcessor {
-  declare fragment?: HTMLElement | null
-  declare autoMeans: t.ScrollOption | t.FocusOption
-  declare origin?: Element
-  declare layer?: Layer
+export abstract class FragmentProcessor<O extends t.FragmentProcessorOptions = t.FragmentProcessorOptions> {
+  // A render pass passes all its render options, so this holds more keys than `O` lists.
+  // A function value receives it, and so does the processor for a match in a selector map.
+  declare options: O
 
-  constructor(options: t.FragmentProcessorOptions) {
-    this.fragment = options.fragment
-    this.autoMeans = options.autoMeans
-    this.origin = options.origin
-    this.layer = options.layer
-  }
-
-  // The options that we pass to a function value, and to the processor for a match in a
-  // selector map. Subclasses add their own.
-  attributes(): u.PlainObject {
-    return u.pickBy({
-      fragment: this.fragment,
-      autoMeans: this.autoMeans,
-      origin: this.origin,
-      layer: this.layer,
-    }, u.isDefined)
+  constructor(options: O) {
+    this.options = options
   }
 
   // Returns a truthy value if the option was processed.
@@ -51,7 +35,7 @@ export abstract class FragmentProcessor {
     }
 
     if (u.isFunction(opt)) {
-      let result = guard(opt, this.fragment, this.attributes())
+      let result = guard(opt, this.options.fragment, this.options)
       // The function result can be another processable value.
       return this.tryProcess(result)
     }
@@ -62,7 +46,7 @@ export abstract class FragmentProcessor {
 
     if (u.isString(opt)) {
       if (opt === 'auto') {
-        return this.tryProcess(this.autoMeans)
+        return this.tryProcess(this.options.autoMeans)
       }
 
       let match = opt.match(/^(.+?)-if-(.+?)$/)
@@ -82,7 +66,8 @@ export abstract class FragmentProcessor {
     return Object.keys(map).filter((selector) => {
       let match = this.findSelector(selector)
       if (match) {
-        let matchProcessor = new (this.constructor as any)({ ...this.attributes(), fragment: match })
+        let MatchProcessor = this.constructor as new (options: O) => this
+        let matchProcessor = new MatchProcessor({ ...this.options, fragment: match })
         let opt = map[selector]
         return matchProcessor.process(opt)
       }
@@ -95,15 +80,17 @@ export abstract class FragmentProcessor {
 
   resolveCondition(condition: string): boolean | null | undefined {
     if (condition === 'main') {
-      return this.fragment && containsFragment(this.fragment, ':main')
+      let { fragment } = this.options
+      return fragment && containsFragment(fragment, ':main')
     }
   }
 
   findSelector(selector: string): HTMLElement | undefined {
-    const lookupOpts = { layer: this.layer, origin: this.origin }
+    let { fragment, layer, origin } = this.options
+    const lookupOpts = { layer, origin }
 
-    let matchWithinFragment = this.fragment && getSmart(this.fragment, selector, lookupOpts)
-    // Prefer selecting a descendant of this.fragment, but if not possible search through this.fragment's entire layer
+    let matchWithinFragment = fragment && getSmart(fragment, selector, lookupOpts)
+    // Prefer selecting a descendant of the fragment, but if not possible search through the fragment's entire layer
     let match = matchWithinFragment || getSmart(selector, lookupOpts)
 
     if (match) {
