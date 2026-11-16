@@ -202,10 +202,11 @@ export class RenderJob {
     } else if (u.isFunction(abort)) {
       // Abort the requests in any layer for which the function returns true, like up.network.abort(fn),
       // but keep requests made with { abortable: false }, like the other { abort } values do.
-      // A request picked by a function belongs to no fragment, so there is no up:fragment:aborted event.
+      // The function picks requests, not fragments, so there is no up:fragment:aborted event.
       // { except } keeps our own request, and a cached request that it waits for.
       let test = (otherRequest: UpRequest) => otherRequest.abortable && abort(otherRequest)
-      abortRequests(test, { except: request, logOnce: abortOptions.logOnce })
+      let reason = 'Aborting requests picked by { abort } function'
+      abortRequests(test, { except: request, reason, logOnce: abortOptions.logOnce })
     } else {
       // (1) Abort requests in the subtree of a given selector (string)
       // (2) Abort requests targeting a given element
