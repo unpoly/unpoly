@@ -19,7 +19,7 @@ A function that removes the event listeners registered by `up.on()`.
 export type UnbindFunction = () => void
 
 /**
-An event built by `up.event.fork()`, with the event it was forked from.
+An event built by `forkEvent()`, with the event it was forked from.
 */
 export interface ForkedEvent extends Event {
   originalEvent: Event

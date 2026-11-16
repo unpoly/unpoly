@@ -3,9 +3,9 @@ import * as e from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { fail, muteUncriticalRejection } from './error.js'
-import { build, haltEvent, on } from './event.js'
+import { buildEvent, haltEvent, on } from './event.js'
 import {
-  closest, getAllFragments, getSmart, getSubtree, render, sourceOf, toTarget, trackSelector,
+  closestFragment, getAllFragments, getSmart, getSubtree, render, sourceOf, toTarget, trackSelector,
   tryToTarget, type RenderJob, type RenderOptions, type RenderResult,
 } from './fragment.js'
 import { closestLayerElement, layerStack } from './layer.js'
@@ -173,7 +173,7 @@ export function submitOptions(form: any, options?: RenderOptions, parserOptions?
   parser.string('failTarget', { default: tryToTarget(form) })
 
   // The guardEvent will also be assigned an { renderOptions } property in up.render()
-  options.guardEvent ||= build('up:form:submit', {
+  options.guardEvent ||= buildEvent('up:form:submit', {
     submitButton: options.submitButton,
     log: 'Submitting form',
     params: options.params,
@@ -682,7 +682,7 @@ export function install(): void {
     // We don't warn, since a partial with [up-autosubmit] may be rendered with or without an outer one.
     // An outer [up-autosubmit] of another form doesn't see our fields, e.g. for <input form="other-form">.
     // Compilers only run on attached elements, which have a parent.
-    let outer = closest(formOrField.parentElement!, '[up-autosubmit]:not([up-autosubmit=false])')
+    let outer = closestFragment(formOrField.parentElement!, '[up-autosubmit]:not([up-autosubmit=false])')
     if (outer && getForm(outer) === getForm(formOrField)) return
 
     return autosubmit(formOrField, { logPrefix: '[up-autosubmit]' })

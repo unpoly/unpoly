@@ -1,6 +1,6 @@
 import * as u from '../../util.js'
 import {
-  closest, containsMainPseudo, fragmentConfig, getFirstDescendant, matches, splitTarget,
+  closestFragment, containsMainPseudo, fragmentConfig, getFirstDescendant, matches, splitTarget,
 } from '../../fragment.js'
 import type * as t from '../types.js'
 
@@ -35,7 +35,7 @@ function findInRegion(
 }
 
 function findClosest(selector: string, origin: Element, options: t.FindFragmentOptions): HTMLElement | undefined {
-  return closest(origin, selector, options)
+  return closestFragment(origin, selector, options)
 }
 
 function findDescendantInRegion(selector: string, origin: Element, options: t.FindFragmentOptions): HTMLElement | undefined {
@@ -44,7 +44,7 @@ function findDescendantInRegion(selector: string, origin: Element, options: t.Fi
   return u.findResult(simpleSelectors, (simpleSelector) => {
     let parts = simpleSelector.match(DESCENDANT_SELECTOR)
     if (parts) {
-      let parent = closest(origin, parts[1], options)
+      let parent = closestFragment(origin, parts[1], options)
       if (parent) {
         return getFirstDescendant(parent, parts[2], options)
       }

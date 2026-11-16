@@ -1,7 +1,7 @@
 import * as u from '../util.js'
 import { assertConfirmed } from '../browser.js'
 import { Aborted, guard, muteUncriticalRejection } from '../error.js'
-import { build } from '../event.js'
+import { buildEvent } from '../event.js'
 import { abortFragment, reload } from '../fragment.js'
 import { doFocus } from '../viewport.js'
 import type * as t from './types.js'
@@ -130,10 +130,10 @@ function emitClosedEvent(options: t.CloseLayerArgs, value: any, formerParent: La
 }
 
 // Builds up:layer:accept, up:layer:accepting, up:layer:accepted or their dismiss variants.
-// build() can't look up the type of a name we put together, so we cast.
+// buildEvent() can't look up the type of a name we put together, so we cast.
 // The value is passed separately, since a listener of the close event may have replaced { value }.
 function buildCloseEvent(name: string, { layer, origin, response }: t.CloseLayerArgs, value: any): t.LayerCloseEvent {
-  return build(name, {
+  return buildEvent(name, {
     layer,
     value,
     origin,

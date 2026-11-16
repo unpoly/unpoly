@@ -2,7 +2,7 @@ import * as u from './util.js'
 import * as e from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
-import { build } from './event.js'
+import { buildEvent } from './event.js'
 import {
   compressNestedSteps, getAllFragments, getSmart, tryToTarget, type FragmentKeepEvent,
 } from './fragment.js'
@@ -53,7 +53,7 @@ export function hungrySteps(renderOptions: u.PlainObject): t.HungrySteps {
       let elementMotion = motionOptions(element)
 
       // We cannot emit up:fragment:hungry here as we don't know { newElement } yet.
-      let selectEvent = build('up:fragment:hungry', { log: false })
+      let selectEvent = buildEvent('up:fragment:hungry', { log: false })
       let selectCallback = callbackAttr(element, 'up-on-hungry', { expandObject: ['newFragment', 'renderOptions'] })
 
       let step = {

@@ -2,7 +2,7 @@ import * as u from '../util.js'
 import { isCritical } from '../error.js'
 import { type EventPlan } from '../event.js'
 import { type RenderOptions } from '../fragment.js'
-import { cache, networkConfig } from '../network.js'
+import { networkConfig, requestCache } from '../network.js'
 import { CSPInfo } from '../script.js'
 import type * as t from './types.js'
 import { type UpRequest } from './request.js'
@@ -137,7 +137,7 @@ export class UpResponse {
       onSettle: null,
     })
 
-    cache.track(this.request, finalRequest, { force: true })
+    requestCache.track(this.request, finalRequest, { force: true })
 
     return finalRequest
   }

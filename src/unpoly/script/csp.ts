@@ -3,7 +3,7 @@ import * as e from '../element.js'
 import { Blocked, fail, NotImplemented } from '../error.js'
 import { parseRenderCallback } from '../fragment.js'
 import { printToStandard, printToWarn } from '../log.js'
-import { block, cspNonce, findScripts, isScript, scriptConfig } from '../script.js'
+import { blockScripts, cspNonce, findScripts, isScript, scriptConfig } from '../script.js'
 import type * as t from './types.js'
 
 const NONCE_PATTERN = /'nonce-([^']+)'/g
@@ -520,7 +520,7 @@ class ScriptElementItem implements PolicyItem {
   }
 
   block(): void {
-    block(this._element)
+    blockScripts(this._element)
   }
 
 }

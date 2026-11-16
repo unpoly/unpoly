@@ -172,8 +172,8 @@ Phases 2 to 4 run in one async function that is called synchronously, so they ha
 task, but an exception after inserting rejects `up.RenderResult#finished` instead of
 `up.render()`. The per-step object that carries a step from phase 1 to the others never leaves
 `update_steps.ts`. To make the cut between inserting and transitioning, `updateSteps()`
-calls the internal `swap()` (motion.ts), which inserts now and returns a function that starts the
-transition later; `up.morph()` is just both calls in a row.
+calls the internal `swapElements()` (motion.ts), which inserts now and returns a function that
+starts the transition later; `up.morph()` is just both calls in a row.
 
 `LayerPlan` is the base class of both plans. Its `render()` lets `OpenLayerPlan` create
 its overlay (`_prepareLayer()`), and renders the plan's own layer (`_renderOwnLayer()`), then

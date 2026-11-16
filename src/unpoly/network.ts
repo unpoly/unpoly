@@ -32,14 +32,14 @@ export const networkConfig = newConfig('up.network.config', (): t.NetworkConfig 
 
 export const queue = new RequestQueue()
 
-export const cache = new UpRequestCache()
+export const requestCache = new UpRequestCache()
 
 let progressBar: ProgressBar | null = null
 
 function reset(): void {
   abortRequests()
   queue.reset()
-  cache.reset()
+  requestCache.reset()
   progressBar?.destroy()
   progressBar = null
 }
@@ -58,8 +58,8 @@ function parseRequestOptions(args: any[]): t.RequestOptions {
 }
 
 function processRequest(request: UpRequest): void {
-  cache.expire(request.expireCache ?? u.evalOption(networkConfig.expireCache, request) ?? false)
-  cache.evict(request.evictCache ?? u.evalOption(networkConfig.evictCache, request) ?? false)
+  requestCache.expire(request.expireCache ?? u.evalOption(networkConfig.expireCache, request) ?? false)
+  requestCache.evict(request.evictCache ?? u.evalOption(networkConfig.evictCache, request) ?? false)
   useCachedRequest(request) || queueRequest(request)
 }
 
@@ -67,7 +67,7 @@ function useCachedRequest(newRequest: UpRequest): boolean | undefined {
   // If we have an existing promise matching this new request,
   // we use it unless `request.cache` is explicitly set to `false`.
   let cachedRequest
-  if (newRequest.willCache() && (cachedRequest = cache.get(newRequest))) {
+  if (newRequest.willCache() && (cachedRequest = requestCache.get(newRequest))) {
     printToStandard('up.request()', 'Re-using previous request to %s', newRequest)
 
     // Check if we need to upgrade a cached background request to a foreground request.
@@ -95,7 +95,7 @@ function useCachedRequest(newRequest: UpRequest): boolean | undefined {
     // There is also the edge case where a cached request is still in-flight and, when the
     // response is finally received, has a Vary header that makes it incompatible with
     // `newRequest`. In this case we re-process `newRequest` as if it was just made.
-    cache.track(cachedRequest, newRequest, { onIncompatible: processRequest })
+    requestCache.track(cachedRequest, newRequest, { onIncompatible: processRequest })
 
     // Make newRequest abortable on its own, e.g. by up.fragment.abort().
     // Aborting it only rejects newRequest, while cachedRequest keeps loading for others.
@@ -131,10 +131,10 @@ function handleCaching(request: UpRequest): void {
     // Cache the request before it is queued and loaded.
     // This way additional requests to the same endpoint will hit and track this request.
     // Since nothing was cached for this request, we're not overriding an existing cache entry.
-    cache.put(request)
+    requestCache.put(request)
 
     // If the request changed its URL or params in up:request:load, the cache needs to re-index.
-    request.onLoading = () => cache.reindex(request)
+    request.onLoading = () => requestCache.reindex(request)
   }
 
   // Once we receive a response we honor options/headers for eviction/expiration,
@@ -145,8 +145,8 @@ function handleCaching(request: UpRequest): void {
   // would hit the aborted request in the cache.
   // An up.Response, or an error (which has no { expireCache } or { evictCache }).
   request.onSettle = function(responseOrError: any) {
-    cache.expire(responseOrError.expireCache ?? false, { except: request })
-    cache.evict(responseOrError.evictCache ?? false, { except: request })
+    requestCache.expire(responseOrError.expireCache ?? false, { except: request })
+    requestCache.evict(responseOrError.evictCache ?? false, { except: request })
 
     let isResponse = responseOrError instanceof UpResponse
     let isNetworkError = !isResponse
@@ -157,13 +157,13 @@ function handleCaching(request: UpRequest): void {
 
     if (isErrorResponse) {
       // Evict an earlier cache entry with a successful response (as we now know a better state, even if that state is an error page).
-      cache.evict(request.url)
+      requestCache.evict(request.url)
     } else if (isNetworkError || isEmptyResponse) {
       // Only evict this one request instance in case we put it into the cache at the start of this function.
       // We keep other requests for the same URL but with a different { cacheRoute } (due to Vary).
-      cache.evict(request)
+      requestCache.evict(request)
     } else if (isSuccessResponse) {
-      if (cache.get(request)) {
+      if (requestCache.get(request)) {
         // We now re-put the request into the cache, regardless of its { cache } setting, for multiple reasons:
         //
         // (1) In case we evicted the entire cache above, we must re-cache a cacheable request.
@@ -171,14 +171,14 @@ function handleCaching(request: UpRequest): void {
         //     (written by a earlier, cacheable request with the same cache key)
         //     since the later response will be fresher.
         // (3) Now that we have a response the cache needs to be updated with Vary info.
-        cache.put(request)
+        requestCache.put(request)
       }
 
-      if (redirectRequest && (redirectRequest.willCache() || cache.get(redirectRequest))) {
+      if (redirectRequest && (redirectRequest.willCache() || requestCache.get(redirectRequest))) {
         // (1) If GET /foo redirected to GET /bar, both /foo and /bar should yield the cached response.
         // (2) If POST /foo redirected to GET /bar, we should now cache GET /bar (although we didn't cache POST /foo)
         // (3) If POST /foo redirected to GET /bar without caching, but /bar was already cached, update cache for /bar
-        cache.put(redirectRequest)
+        requestCache.put(redirectRequest)
       }
     }
   }
@@ -224,12 +224,12 @@ export const api = {
     request: makeRequest,
     // buildRequest,
     // processRequest,
-    cache,
+    cache: requestCache,
     isBusy,
     config: networkConfig,
     abort: abortRequests,
     loadPage,
   },
   request: makeRequest,
-  cache,
+  cache: requestCache,
 }

@@ -5,7 +5,7 @@ import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { muteUncriticalRejection, UpError } from './error.js'
 import {
-  build, emit, fork, getInputDevice, haltEvent, isModified, isSyntheticClick, keyModifiers, on,
+  buildEvent, emit, forkEvent, getInputDevice, haltEvent, isModified, isSyntheticClick, keyModifiers, on,
 } from './event.js'
 import { anyButtonSelector, formFieldSelector } from './form.js'
 import {
@@ -219,7 +219,7 @@ export function followOptions(link: e.ElementOrSelector, options?: RenderOptions
   // This is the event that may be prevented to stop the follow.
   // up.form.submit() changes this to be up:form:submit instead.
   // The guardEvent will also be assigned a { renderOptions } property in up.render()
-  options.guardEvent ??= build('up:link:follow', { log: ['Following link %o', link] })
+  options.guardEvent ??= buildEvent('up:link:follow', { log: ['Following link %o', link] })
 
   return options
 }
@@ -237,7 +237,7 @@ export function preload(link: e.ElementOrSelector, options?: RenderOptions): Pro
   // Preloading only serves to fill the cache
   if (!networkConfig.cacheEnabled) return Promise.resolve()
 
-  const guardEvent = build('up:link:preload', { log: ['Preloading link %o', link] })
+  const guardEvent = buildEvent('up:link:preload', { log: ['Preloading link %o', link] })
 
   return follow(link, {
     // These are forced, so [up-background] or [up-abortable] attributes on the link have no effect.
@@ -466,7 +466,7 @@ function didUserDragAway(clickEvent: MouseEvent): boolean | null {
 
 function forkEventAsUpClick(originalEvent: MouseEvent | KeyboardEvent): void {
   let forwardedProps = ['clientX', 'clientY', 'button', ...keyModifiers]
-  const newEvent = fork(originalEvent, 'up:click', forwardedProps)
+  const newEvent = forkEvent(originalEvent, 'up:click', forwardedProps)
   emit(originalEvent.target!, newEvent, { log: false })
 }
 
@@ -496,7 +496,7 @@ function onLoadCondition(condition: string | false, link: Element, callback: t.F
 }
 
 export function loadDeferred(link: Element, options?: RenderOptions): RenderJob {
-  let guardEvent = build('up:deferred:load', { log: ['Loading deferred %o', link] })
+  let guardEvent = buildEvent('up:deferred:load', { log: ['Loading deferred %o', link] })
 
   // These options override up.link.follow() behavior
   let forcedOptions = {

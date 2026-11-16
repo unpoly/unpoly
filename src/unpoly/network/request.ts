@@ -7,7 +7,7 @@ import {
 import { Params } from '../form.js'
 import { getSmart, parseTargetSteps, splitTarget, type RenderOptions } from '../fragment.js'
 import { layerStack, type Layer, type LayerMode } from '../layer.js'
-import { abortRequests, cache, isSafeMethod, networkConfig } from '../network.js'
+import { abortRequests, isSafeMethod, networkConfig, requestCache } from '../network.js'
 import {
   acceptLayerFromXHR, contextFromXHR, csrfHeader, csrfParam, csrfToken, dismissLayerFromXHR,
   eventPlansFromXHR, evictCacheFromXHR, expireCacheFromXHR, headerize, locationFromXHR,
@@ -627,7 +627,7 @@ export class UpRequest {
     }
 
     if (except) {
-      return (request) => !cache.willHaveSameResponse(request, except) && testFn(request)
+      return (request) => !requestCache.willHaveSameResponse(request, except) && testFn(request)
     } else {
       return testFn
     }

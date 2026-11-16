@@ -306,7 +306,7 @@ function assetIdentity(assetElement: Element): string {
   return e.removeAttrsFromHTML(assetElement.outerHTML, ['nonce'])
 }
 
-export function block(root: ParentNode): void {
+export function blockScripts(root: ParentNode): void {
   for (let script of findScripts(root)) {
     script.type = 'up-blocked-script'
   }

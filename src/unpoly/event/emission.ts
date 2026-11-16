@@ -1,7 +1,7 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
 import { Aborted, guard } from '../error.js'
-import { build } from '../event.js'
+import { buildEvent } from '../event.js'
 import { getSmart } from '../fragment.js'
 import { Layer, layerStack } from '../layer.js'
 import { logConfig, printToStandard } from '../log.js'
@@ -117,11 +117,11 @@ export function parseEmitArgs(args: any[], defaults: t.EmitProps = {}): t.Emissi
     // The props object may also include options for the emission, such as
     // { layer }, { target }, { baseLayer } or { log }.
     // up.emit([target], eventType, [eventPropsAndEmitOptions])
-    options.event = build(args[0], options)
+    options.event = buildEvent(args[0], options)
   } else {
     // In this branch we receive an object that contains the event type as a { type } property:
     // up.emit([target, { type: 'foo', prop: 'value' }
-    options.event = build(options)
+    options.event = buildEvent(options)
   }
 
   return options as t.Emission

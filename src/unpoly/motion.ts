@@ -9,7 +9,7 @@ import { getSmart } from './fragment.js'
 import { Registry } from './framework/registry.js'
 import { printToStandard } from './log.js'
 import { mockable } from './mockable.js'
-import { absolutize, closest, rootHeight, rootWidth } from './viewport.js'
+import { absolutize, closestViewport, rootHeight, rootWidth } from './viewport.js'
 import type * as t from './motion/types.js'
 export type * from './motion/types.js'
 import { MotionController } from './motion/motion_controller.js'
@@ -133,7 +133,7 @@ export async function morph(oldElement: any, newElement: any, transitionValue: t
   oldElement = getSmart(oldElement)
   newElement = getSmart(newElement)
 
-  await swap(oldElement, newElement, transitionValue, options)()
+  await swapElements(oldElement, newElement, transitionValue, options)()
 }
 
 // Inserts newElement now: before the absolutized oldElement when transitioning, in place of it otherwise.
@@ -144,7 +144,7 @@ export async function morph(oldElement: any, newElement: any, transitionValue: t
 // (A) Compilers may change newElement's size or position.
 // (B) Compilers capture an [up-keep] identity before a transition adds inline styles.
 // (C) We scroll newElement into position before we start the enter animation.
-export function swap(
+export function swapElements(
   oldElement: HTMLElement,
   newElement: HTMLElement,
   transitionValue?: t.TransitionValue,
@@ -171,7 +171,7 @@ export function swap(
       // If morph() is called inside a transition function, we don't want to create additional absolutized bounds.
       play = () => transitionFn(oldElement, newElement, timingOptions)
     } else {
-      const viewport = closest(oldElement)
+      const viewport = closestViewport(oldElement)
       const scrollTopBeforeScroll = viewport.scrollTop
 
       const oldRemote = absolutize(oldElement, {

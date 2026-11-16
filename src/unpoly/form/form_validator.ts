@@ -1,7 +1,7 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
 import { Aborted, fail, muteUncriticalRejection } from '../error.js'
-import { build, on, type UnbindFunction } from '../event.js'
+import { buildEvent, on, type UnbindFunction } from '../event.js'
 import {
   destinationOptions, findFields, findGroupSolution, isField, readFieldName, trackFields,
   validateOptions,
@@ -339,7 +339,7 @@ export class FormValidator {
 
     // The guardEvent will be emitted on the render pass' { origin }, so the form in this case.
     // The guardEvent will also be assigned a { renderOptions } attribute in up.render()
-    options.guardEvent = build('up:form:validate', {
+    options.guardEvent = buildEvent('up:form:validate', {
       fields: dirtyFields,
       log: 'Validating form',
       params: options.params,

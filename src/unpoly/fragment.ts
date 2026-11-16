@@ -405,7 +405,7 @@ export function getSubtree(element: Element, selector: string, options: t.Lookup
 }
 
 // Takes a selector or an element. viewport's focusedElementWithin() also passes null, which matches nothing.
-export function contains(root: Element, selectorOrElement: any): boolean | undefined {
+export function containsFragment(root: Element, selectorOrElement: any): boolean | undefined {
   if (u.isElement(selectorOrElement)) {
     // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
     // Returns undefined when the root is in no layer.
@@ -415,7 +415,7 @@ export function contains(root: Element, selectorOrElement: any): boolean | undef
   }
 }
 
-export function closest(element: Element, selector: string, options?: t.LookupOptions): HTMLElement | undefined {
+export function closestFragment(element: Element, selector: string, options?: t.LookupOptions): HTMLElement | undefined {
   return new Selector(selector, element, options).closest(element)
 }
 
@@ -1051,8 +1051,8 @@ export const api = {
     get: getSmart,
     all: getAllFragments,
     subtree: getSubtree,
-    contains,
-    closest,
+    contains: containsFragment,
+    closest: closestFragment,
     source: sourceOf,
     visit,
     toTarget,

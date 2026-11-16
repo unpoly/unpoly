@@ -2,7 +2,7 @@ import * as u from './util.js'
 import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { muteUncriticalRejection } from './error.js'
-import { build, emit, haltEvent, isModified, on } from './event.js'
+import { buildEvent, emit, haltEvent, isModified, on } from './event.js'
 import { render, type RenderOptions } from './fragment.js'
 import { layerStack } from './layer.js'
 import { makeFollowable, type ClickEvent } from './link.js'
@@ -139,7 +139,7 @@ function trackCurrentLocation(trackOptions: t.HistoryTrackOptions): void {
 
     let willHandle = !alreadyHandled && isAdoptedBase(location)
 
-    let locationChangedEvent = build('up:location:changed', {
+    let locationChangedEvent = buildEvent('up:location:changed', {
       reason,
       location,
       previousLocation,
@@ -229,7 +229,7 @@ function restoreLocation(location: string): void {
   // unhandled rejection, while the page keeps its content. This is intentional: losing the
   // connection while restoring is worth reporting, unlike an error status, which we render.
   muteUncriticalRejection(render({
-    guardEvent: build('up:location:restore', { location, log: `Restoring location ${location}` }),
+    guardEvent: buildEvent('up:location:restore', { location, log: `Restoring location ${location}` }),
 
     // The browser has already restored the URL, but hasn't changed content
     // four our synthetic history state. We're now fetching the content for the restored URL.

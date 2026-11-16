@@ -72,9 +72,9 @@ export function emit(...args: any[]): Event {
   return emitEvent(parseEmitArgs(args))
 }
 
-export function build<T extends string>(type: T, props?: u.PlainObject): t.EmittedEvent<T>
-export function build<T extends string>(props: u.PlainObject & { type?: T }): t.EmittedEvent<T>
-export function build(...args: any[]): Event {
+export function buildEvent<T extends string>(type: T, props?: u.PlainObject): t.EmittedEvent<T>
+export function buildEvent<T extends string>(props: u.PlainObject & { type?: T }): t.EmittedEvent<T>
+export function buildEvent(...args: any[]): Event {
   const props = u.extractOptions(args)
   const type = args[0] || props.type || fail('Missing event type')
 
@@ -113,9 +113,9 @@ export const isSyntheticClick = mockable(function isSyntheticClick(event: Event)
   return !event.isTrusted
 })
 
-export function fork(originalEvent: Event, newType: string, copyKeys: string[] = []): t.ForkedEvent {
+export function forkEvent(originalEvent: Event, newType: string, copyKeys: string[] = []): t.ForkedEvent {
   // The keys may belong to a subclass, like MouseEvent#clientX.
-  const newEvent = build(newType, u.pick(originalEvent as u.PlainObject, copyKeys)) as t.ForkedEvent
+  const newEvent = buildEvent(newType, u.pick(originalEvent as u.PlainObject, copyKeys)) as t.ForkedEvent
   newEvent.originalEvent = originalEvent; // allow users to access other props through event.originalEvent.prop
 
   (['stopPropagation', 'stopImmediatePropagation', 'preventDefault'] as const).forEach(function(key) {
@@ -140,7 +140,7 @@ function executeEmitAttr(event: ClickEvent, element: Element): void {
   // The listener only matches [up-emit].
   const eventType = e.stringAttr(element, 'up-emit')!
   const eventProps = e.jsonAttr(element, 'up-emit-props')
-  const forkedEvent = fork(event, eventType)
+  const forkedEvent = forkEvent(event, eventType)
   Object.assign(forkedEvent, eventProps)
   emit(element, forkedEvent)
 }
@@ -172,7 +172,7 @@ export const api = {
     on,
     onClosest,
     off,
-    build,
+    build: buildEvent,
     emit,
     onEscape,
     halt: haltEvent,

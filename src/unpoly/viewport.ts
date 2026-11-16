@@ -5,7 +5,7 @@ import { newConfig } from './util/config.js'
 import { fail } from './error.js'
 import { getInputDevice, on } from './event.js'
 import { isField } from './form.js'
-import { contains, getAllFragments, getSmart, tryToTarget } from './fragment.js'
+import { containsFragment, getAllFragments, getSmart, tryToTarget } from './fragment.js'
 import { layerStack } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
 import { mockable } from './mockable.js'
@@ -130,7 +130,7 @@ function allSelector(): string {
   return [rootSelector(), ...viewportConfig.viewportSelectors].join()
 }
 
-export function closest(target: e.ElementOrSelector, options: u.PlainObject = {}): HTMLElement {
+export function closestViewport(target: e.ElementOrSelector, options: u.PlainObject = {}): HTMLElement {
   const element = getSmart(target, options)!
   // Use up.element.closest() which searches across layer boundaries.
   // It is OK to find a viewport in a parent layer. Layers without its
@@ -154,10 +154,10 @@ function getAll(options: u.PlainObject = {}): u.List<HTMLElement> {
 }
 
 function rootSelector(): string {
-  return getRoot().tagName
+  return getRootViewport().tagName
 }
 
-export function getRoot(): Element {
+export function getRootViewport(): Element {
   // Only a quirks-mode document has no scrolling element.
   return document.scrollingElement!
 }
@@ -173,7 +173,7 @@ export function rootHeight(): number {
 }
 
 export function isRoot(element: Element): boolean {
-  return element === getRoot()
+  return element === getRootViewport()
 }
 
 export const rootScrollbarWidth = mockable(function rootScrollbarWidth(): number {
@@ -264,7 +264,7 @@ function parseOptions(args: any[]): [u.List<HTMLElement>, u.PlainObject] {
 
   let viewports
   if (reference) {
-    viewports = [closest(reference, options)]
+    viewports = [closestViewport(reference, options)]
   } else if (options.around) {
     // This is relevant when updating a fragment with { scroll: 'restore' | 'reset' }.
     // In tht case we restore / reset the scroll tops of all viewports around the fragment.
@@ -302,7 +302,7 @@ function setScrollPositions(
 }
 
 export function absolutize(element: HTMLElement, options: { afterMeasure?: () => void } = {}): t.Absolutization {
-  const viewport = closest(element)
+  const viewport = closestViewport(element)
 
   const viewportRect = viewport.getBoundingClientRect()
   const originalRect = element.getBoundingClientRect()
@@ -382,7 +382,7 @@ function pureHash(value?: string): string | undefined {
 
 export function focusedElementWithin(scopeElement: Element): Element | undefined {
   const focusedElement = document.activeElement
-  if (contains(scopeElement, focusedElement)) {
+  if (containsFragment(scopeElement, focusedElement)) {
     return focusedElement!
   }
 }
@@ -404,8 +404,8 @@ export const api = {
   viewport: {
     reveal,
     config: viewportConfig,
-    get: closest,
-    get root() { return getRoot() },
+    get: closestViewport,
+    get root() { return getRootViewport() },
     saveScroll,
     restoreScroll,
     saveFocus,

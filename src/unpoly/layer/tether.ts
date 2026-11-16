@@ -2,7 +2,7 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { fail } from '../error.js'
 import { isAlive } from '../fragment.js'
-import { closest } from '../viewport.js'
+import { closestViewport } from '../viewport.js'
 
 // Where a popup sits relative to its anchor (`position`), and how it lines up with the anchor (`align`).
 interface TetherOptions {
@@ -31,7 +31,7 @@ export class Tether {
 
     this._alignAxis = (this._position === 'top') || (this._position === 'bottom') ? 'horizontal' : 'vertical'
 
-    this._viewport = closest(this._anchor)
+    this._viewport = closestViewport(this._anchor)
     // The document viewport is <html> on some browsers, and we cannot attach children to that.
     this.parent = this._viewport === e.getRoot() ? document.body : this._viewport
 

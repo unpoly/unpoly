@@ -1,7 +1,7 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
 import { throwCritical } from '../error.js'
-import { build, on } from '../event.js'
+import { buildEvent, on } from '../event.js'
 import {
   isAlive, isTargetable, matches, onAborted, onKept, reload, type FragmentAbortedEvent,
   type RenderResult,
@@ -196,7 +196,7 @@ export class FragmentPolling {
     // Don't schedule timers while we're loading. _onReloadSuccess() and _onReloadFailure() will do that for us.
     this._loading = true
 
-    let guardEvent = build('up:fragment:poll', { log: ['Polling fragment', this._fragment] })
+    let guardEvent = buildEvent('up:fragment:poll', { log: ['Polling fragment', this._fragment] })
     let reloadOptions = { ...this._options, guardEvent, jid: this._reloadJID }
 
     reload(this._fragment, reloadOptions).then(

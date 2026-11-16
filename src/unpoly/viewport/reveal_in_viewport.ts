@@ -3,11 +3,11 @@ import * as e from '../element.js'
 import { fail } from '../error.js'
 import { getAllFragments } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
-import { closest, isRoot, rootHeight, rootWidth, viewportConfig } from '../viewport.js'
+import { closestViewport, isRoot, rootHeight, rootWidth, viewportConfig } from '../viewport.js'
 import type * as t from './types.js'
 
 export function revealInViewport(element: HTMLElement, options: t.RevealOptions = {}): void {
-  const viewport = e.getOne(options.viewport) || closest(element)
+  const viewport = e.getOne(options.viewport) || closestViewport(element)
   const obstructionsLayer = layerStack.get(viewport)!
   const behavior = options.behavior ?? 'instant'
 
