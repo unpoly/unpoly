@@ -121,7 +121,7 @@ export class LayerStack {
     return this.layers.toReversed()
   }
 
-  dismissOverlays(value: any = null, options: t.CloseLayerOptions = {}): void {
+  dismissOverlays(value: unknown = null, options: t.CloseLayerOptions = {}): void {
     for (let overlay of this.overlays.toReversed()) {
       overlay.dismiss(value, options)
     }

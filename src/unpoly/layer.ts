@@ -211,6 +211,7 @@ export async function open(options?: RenderOptions): Promise<Layer> {
   return result.layer
 }
 
+// oxlint-disable-next-line typescript/no-explicit-any -- the overlay's result, a user value of any type
 export function ask(options: RenderOptions = {}): Promise<any> {
   return new Promise(function(resolve, reject) {
     open(chainCallbacks(options, {
@@ -280,7 +281,7 @@ export const api = {
     get current() { return layerStack.current },
     get front() { return layerStack.front },
     get count() { return layerStack.count },
-    dismissOverlays(value?: any, options?: t.CloseLayerOptions): void { return layerStack.dismissOverlays(value, options) },
+    dismissOverlays(value?: unknown, options?: t.CloseLayerOptions): void { return layerStack.dismissOverlays(value, options) },
   },
 }
 

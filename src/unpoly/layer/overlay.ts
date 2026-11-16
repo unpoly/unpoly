@@ -19,7 +19,7 @@ import { OverlayFocus } from './overlay_focus.js'
 import { Tether } from './tether.js'
 
 // A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
-type CloseFunction = (value: any, options?: t.CloseLayerOptions) => void
+type CloseFunction = (value: unknown, options?: t.CloseLayerOptions) => void
 
 // The constructor copies these options onto the overlay.
 export interface Overlay extends t.OverlayProps {} // oxlint-disable-line typescript/no-unsafe-declaration-merging
@@ -334,7 +334,7 @@ export abstract class Overlay extends Layer {
     })
   }
 
-  _onAttrCloserActivated(origin: Element, value: any, closeFn: CloseFunction): void {
+  _onAttrCloserActivated(origin: Element, value: unknown, closeFn: CloseFunction): void {
     const closeOptions = { origin }
     const parser = new OptionsParser(origin, closeOptions)
     parser.booleanOrString('animation')
@@ -481,12 +481,12 @@ export abstract class Overlay extends Layer {
   }
 
   // Documented in up.Layer
-  accept(value: any = null, options: t.CloseLayerOptions = {}): void {
+  accept(value: unknown = null, options: t.CloseLayerOptions = {}): void {
     return this._close('accept', value, options)
   }
 
   // Documented in up.Layer
-  dismiss(value: any = null, options: t.CloseLayerOptions = {}): void {
+  dismiss(value: unknown = null, options: t.CloseLayerOptions = {}): void {
     return this._close('dismiss', value, options)
   }
 
@@ -494,7 +494,7 @@ export abstract class Overlay extends Layer {
     return u.contains(this.dismissible, method)
   }
 
-  _close(verb: t.CloseVerb, value: any, options: t.CloseLayerOptions): void {
+  _close(verb: t.CloseVerb, value: unknown, options: t.CloseLayerOptions): void {
     closeLayer(this, verb, value, options)
   }
 

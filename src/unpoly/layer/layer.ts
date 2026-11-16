@@ -13,7 +13,7 @@ import {
 } from '../history.js'
 import { closestLayerElement, mainTargets } from '../layer.js'
 import { convertClicks } from '../link.js'
-import { newStateCache } from '../viewport.js'
+import { newStateCache, type FocusCapsule } from '../viewport.js'
 import type * as t from './types.js'
 import type { LayerStack } from './layer_stack.js'
 import type { Overlay } from './overlay.js'
@@ -28,8 +28,8 @@ export class Layer {
   // 'up.Layer' for every mode, set in unpoly.ts.
   declare [Symbol.toStringTag]: string
   declare stack: LayerStack
-  declare lastScrollTops: u.FIFOCache<string, any>
-  declare lastFocusCapsules: u.FIFOCache<string, any>
+  declare lastScrollTops: u.FIFOCache<string, Record<string, number>>
+  declare lastFocusCapsules: u.FIFOCache<string, FocusCapsule | undefined>
   // Overlays set the elements that they create. The root layer has none of them.
   declare contentElement?: HTMLElement
   declare boxElement?: HTMLElement
@@ -95,12 +95,12 @@ export class Layer {
     // no-op so users can blindly sync without knowing the current mode
   }
 
-  accept(value?: any, options?: t.CloseLayerOptions): void
+  accept(value?: unknown, options?: t.CloseLayerOptions): void
   accept(): void {
     throw new NotImplemented()
   }
 
-  dismiss(value?: any, options?: t.CloseLayerOptions): void
+  dismiss(value?: unknown, options?: t.CloseLayerOptions): void
   dismiss(): void {
     throw new NotImplemented()
   }
@@ -188,16 +188,16 @@ export class Layer {
   }
 
   on<const T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): UnbindFunction
-  on(...args: any[]): UnbindFunction {
+  on(...args: unknown[]): UnbindFunction {
     return bindListeners(this._parseBindArgs(args))
   }
 
   off<const T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): void
-  off(...args: any[]): void {
+  off(...args: unknown[]): void {
     return unbindListeners(this._parseBindArgs(args))
   }
 
-  _parseBindArgs(args: any[]): ListenerGroup {
+  _parseBindArgs(args: unknown[]): ListenerGroup {
     return parseBindArgs(args, {
       guard: (event: Event) => this._containsEventTarget(event),
       elements: [this.element],
@@ -217,7 +217,7 @@ export class Layer {
     return !hittableElement || this.contains(hittableElement)
   }
 
-  _parseEmitArgs(args: any[]): Emission {
+  _parseEmitArgs(args: unknown[]): Emission {
     return parseEmitArgs(args, { layer: this })
   }
 
@@ -226,7 +226,7 @@ export class Layer {
   emit<E extends Event>(event: E, options?: EmitProps): E
   emit<T extends string>(target: EventTarget, eventType: T, props?: EmitProps): EmittedEvent<T>
   emit<E extends Event>(target: EventTarget, event: E, options?: EmitProps): E
-  emit(...args: any[]): Event {
+  emit(...args: unknown[]): Event {
     return emitEvent(this._parseEmitArgs(args))
   }
 

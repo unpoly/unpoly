@@ -3,6 +3,7 @@ import type { UpEvent } from '../event.js'
 import type { RenderOptions } from '../fragment.js'
 import type { AnimateOptions, AnimationValue } from '../motion.js'
 import type { UpResponse } from '../network.js'
+import type { FocusCapsule } from '../viewport.js'
 import type { Layer } from './layer.js'
 import type { LayerStack } from './layer_stack.js'
 
@@ -36,6 +37,7 @@ export interface LayerDefaults {
   history?: boolean | 'auto'
   // Any option for up.layer.open() can have a default, render options included.
   // TODO(types): Extend the options of up.layer.open() instead, so a misspelled key is an error.
+  // oxlint-disable-next-line typescript/no-explicit-any -- any option for up.layer.open()
   [option: string]: any
 }
 
@@ -55,11 +57,11 @@ export interface OverlayProps {
   closeDuration: number
   closeEasing: string
   trapFocus: boolean
-  onOpened?: (event: LayerOpenedEvent) => any
-  onAccept?: (event: LayerAcceptEvent) => any
-  onAccepted?: (event: LayerAcceptedEvent) => any
-  onDismiss?: (event: LayerDismissEvent) => any
-  onDismissed?: (event: LayerDismissedEvent) => any
+  onOpened?: (event: LayerOpenedEvent) => unknown
+  onAccept?: (event: LayerAcceptEvent) => unknown
+  onAccepted?: (event: LayerAcceptedEvent) => unknown
+  onDismiss?: (event: LayerDismissEvent) => unknown
+  onDismissed?: (event: LayerDismissedEvent) => unknown
   onAcceptedReload?: string
   onDismissedReload?: string
   acceptEvent?: string
@@ -112,8 +114,9 @@ export interface LayerOptions {
   stack?: LayerStack
   history?: boolean | 'auto'
   context?: u.PlainObject
-  lastScrollTops?: u.FIFOCache<string, any>
-  lastFocusCapsules?: u.FIFOCache<string, any>
+  lastScrollTops?: u.FIFOCache<string, Record<string, number>>
+  lastFocusCapsules?: u.FIFOCache<string, FocusCapsule | undefined>
+  // oxlint-disable-next-line typescript/no-explicit-any -- the options of any layer mode
   [key: string]: any
 }
 
@@ -148,7 +151,7 @@ export type CloseVerb = 'accept' | 'dismiss'
 Options for `up.Layer#peel()`.
 */
 export interface PeelOptions extends CloseLayerOptions {
-  value?: any
+  value?: unknown
   intent?: CloseVerb
 }
 
@@ -185,6 +188,7 @@ export interface LayerLookupOptions {
   /** @internal */
   normalizeLayerOptions?: boolean
   // Lookups often receive the render options, which have many more keys.
+  // oxlint-disable-next-line typescript/no-explicit-any -- render options of any type
   [key: string]: any
 }
 
@@ -229,6 +233,7 @@ The properties of the `up:layer:accept`, `up:layer:accepted`, `up:layer:dismiss`
 */
 export interface LayerCloseEvent extends UpEvent {
   layer: Layer
+  // oxlint-disable-next-line typescript/no-explicit-any -- the overlay's result, a user value of any type
   value?: any
   origin?: Element
   response?: UpResponse
