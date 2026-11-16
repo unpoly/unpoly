@@ -1,5 +1,5 @@
 import * as e from '../element.js'
-import { on, type UnbindFn } from '../event.js'
+import { on, type UnbindFunction } from '../event.js'
 import { isWithinForeignOverlay } from '../layer.js'
 import { doFocus, tryFocus, type DoFocusOptions } from '../viewport.js'
 import { type Overlay } from './overlay.js'
@@ -15,7 +15,7 @@ export class OverlayFocus {
   declare _trapFocus: boolean
   declare _active?: boolean
   declare _unsetAttrs: e.UndoFunction
-  declare _untrapFocus: UnbindFn
+  declare _untrapFocus: UnbindFunction
   declare _focusTrapBefore: HTMLElement
   declare _focusTrapAfter: HTMLElement
   declare _processingFocusEvent?: boolean

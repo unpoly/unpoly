@@ -7,7 +7,7 @@ import { type Preview } from './preview.js'
 A preview function, registered with `up.preview()` or passed as `{ preview }`.
 It changes the page while a request is loading, through the given `up.Preview`.
 */
-export type PreviewFn = (preview: Preview, options?: u.PlainObject) => any
+export type PreviewFunction = (preview: Preview, options?: u.PlainObject) => any
 
 /**
 The settings in `up.status.config`, described in its doc comment.

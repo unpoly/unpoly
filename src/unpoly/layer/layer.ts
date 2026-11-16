@@ -4,7 +4,7 @@ import { Aborted, NotImplemented } from '../error.js'
 import {
   bindListeners, emitEvent, on, parseBindArgs, parseEmitArgs, unbindListeners, type EmitProps,
   type Emission, type EmittedEvent, type EventPlan, type EventTypes, type ListenerArgs,
-  type ListenerGroup, type ObservedEvent, type UnbindFn,
+  type ListenerGroup, type ObservedEvent, type UnbindFunction,
 } from '../event.js'
 import { type RenderOptions } from '../fragment.js'
 import {
@@ -33,7 +33,7 @@ export class Layer {
   declare overlayFocus?: OverlayFocus
   declare state?: t.LayerState
   declare _index?: number
-  declare _unbindLocationChanged?: UnbindFn
+  declare _unbindLocationChanged?: UnbindFunction
   declare _savedTitle?: string
   declare _savedMetaTags?: u.List<Element>
   declare _savedLocation?: string
@@ -184,8 +184,8 @@ export class Layer {
     return closestLayerElement(element) === this.element
   }
 
-  on<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): UnbindFn
-  on(...args: any[]): UnbindFn {
+  on<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): UnbindFunction
+  on(...args: any[]): UnbindFunction {
     return bindListeners(this._parseBindArgs(args))
   }
 

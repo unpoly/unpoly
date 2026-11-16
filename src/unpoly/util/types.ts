@@ -91,13 +91,13 @@ export type ArgSpec = 'options' | 'callback' | 'val' | ((value: any) => boolean)
 Returns a selector for a config property. See `up.util.Config#selectorFn()`.
 @internal
 */
-export type SelectorFn = (condition?: string) => string
+export type SelectorFunction = (condition?: string) => string
 
 /**
 Returns whether an element matches the selector of a config property. See `up.util.Config#matchesFn()`.
 @internal
 */
-export type MatchesFn = (element: Element, condition?: string) => boolean
+export type MatchesFunction = (element: Element, condition?: string) => boolean
 
 /**
 The keys of settings `S` that hold a list of CSS selectors, like `'followSelectors'`.

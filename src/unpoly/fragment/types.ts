@@ -9,7 +9,7 @@ import { type AnimationValue, type TransitionValue } from '../motion.js'
 import { type RequestCondition, type UpRequest, type UpResponse } from '../network.js'
 import { type FragmentHungryEvent } from '../radio.js'
 import { type CSPInfo } from '../script.js'
-import { type PreviewFn } from '../status.js'
+import { type PreviewFunction } from '../status.js'
 import { type FocusCapsule } from '../viewport.js'
 import { type RenderResult } from './rendering/render_result.js'
 
@@ -33,7 +33,7 @@ export type FocusOption = any
 /**
 A `{ preview }` option: the name of a preview, a preview function, or a list of them.
 */
-export type PreviewValue = string | PreviewFn | (string | PreviewFn)[] | false
+export type PreviewValue = string | PreviewFunction | (string | PreviewFunction)[] | false
 
 /**
 How a selector with several matches is resolved. See `up.fragment.config.match`.
@@ -198,7 +198,7 @@ export interface RenderOptions {
   // Only use the response if it was cached (up.link.preload()).
   preload?: boolean
   expiredResponse?: UpResponse
-  verifyFinished?: VerifyFinishedFn
+  verifyFinished?: VerifyFinishedFunction
   onRequestKnown?: (request: UpRequest) => void
   // How a step updates its target when the target has no ::before/::after/::content suffix.
   defaultPlacement?: string
@@ -243,7 +243,7 @@ Checks a finished render pass, e.g. that its layer is still open. May return a n
 that replaces the finished result.
 @internal
 */
-export type VerifyFinishedFn = (result: RenderResult) => RenderResult | void | Promise<RenderResult | void>
+export type VerifyFinishedFunction = (result: RenderResult) => RenderResult | void | Promise<RenderResult | void>
 
 /**
 What a step of a render pass contributes to its `up.RenderResult`.
@@ -252,7 +252,7 @@ What a step of a render pass contributes to its `up.RenderResult`.
 export interface PartialRenderResult {
   fragments?: Element[]
   finished?: Promise<any>
-  verifyFinished?: VerifyFinishedFn
+  verifyFinished?: VerifyFinishedFunction
 }
 
 /**

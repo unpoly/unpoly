@@ -3,7 +3,7 @@ import * as e from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { fail, muteUncriticalRejection } from './error.js'
-import { build, haltEvent, on, type UnbindFn } from './event.js'
+import { build, haltEvent, on, type UnbindFunction } from './event.js'
 import {
   closest, getAllFragments, getSmart, getSubtree, render, sourceOf, toTarget, trackSelector,
   tryToTarget, type RenderJob, type RenderOptions, type RenderResult,
@@ -14,7 +14,7 @@ import { mockable } from './mockable.js'
 import {
   callbackAttr, registerAttrCompiler, registerCompiler, registerDestructor,
 } from './script.js'
-import { statusOptions, type PreviewFn } from './status.js'
+import { statusOptions, type PreviewFunction } from './status.js'
 import { doFocus, focusedElementWithin } from './viewport.js'
 import type * as t from './form/types.js'
 export type * from './form/types.js'
@@ -55,7 +55,7 @@ export const formConfig = newConfig('up.form.config', (): t.FormConfig => ({
   arrayParam: (name) => name.endsWith('[]'),
 }))
 
-function findFormElements(root: e.ElementOrSelector, selectorFn: u.SelectorFn): t.Field[] {
+function findFormElements(root: e.ElementOrSelector, selectorFn: u.SelectorFunction): t.Field[] {
   // Unwrap jQuery. Callers pass an element, or a selector that they know matches.
   root = e.getOne(root)!
   let elements = getSubtree(root, selectorFn())
@@ -327,7 +327,7 @@ function getDisableContainers(disable: any, origin?: Element): Element[] {
   }
 }
 
-export function getDisablePreviewFn(disable: any, origin?: Element): PreviewFn {
+export function getDisablePreviewFn(disable: any, origin?: Element): PreviewFunction {
   return function(preview) {
     let containers = getDisableContainers(disable, origin)
     for (let container of containers) {
@@ -460,7 +460,7 @@ export function submitButtonOverrides(submitButton?: Element | false): RenderOpt
   return u.omit(buttonOptions, ['method', 'url', 'guardEvent', 'origin', 'params', 'headers'])
 }
 
-export function watch(...args: any[]): UnbindFn {
+export function watch(...args: any[]): UnbindFunction {
   let [root, options, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
   root = e.getOne(root) // unwrap jQuery
@@ -475,7 +475,7 @@ function watchCallbackFromElement(element: Element): t.WatchCallback | undefined
   return callbackAttr(element, 'up-watch', { argNames: ['value', 'name', 'options'] })
 }
 
-export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): UnbindFn {
+export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): UnbindFunction {
   const onChange = (_diff: u.PlainObject, renderOptions: RenderOptions) => submit(target, renderOptions)
   return watch(target, { logPrefix: 'up.autosubmit()', ...options, batch: true }, onChange)
 }
@@ -595,7 +595,7 @@ function getOriginRegion(origin?: Element): Element | null | undefined {
 type TrackFieldsCallback = (field: Element) => unknown
 // The guard is a condition for a field to match, tested for truthiness.
 interface TrackFieldsOptions { guard?: (field: Element) => unknown }
-export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): UnbindFn {
+export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): UnbindFunction {
   let [root, { guard }, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
   let selectFn = function() {

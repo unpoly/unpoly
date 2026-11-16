@@ -1,5 +1,5 @@
 type EmitProps = import('../unpoly/event.js').EmitProps
-type UnbindFn = import('../unpoly/event.js').UnbindFn
+type UnbindFunction = import('../unpoly/event.js').UnbindFunction
 
 // A deprecated alias has the type of the namespace that replaces it.
 declare module '../unpoly.js' {
@@ -8,7 +8,7 @@ declare module '../unpoly.js' {
       nobodyPrevents(eventType: string, eventProps?: EmitProps): boolean
     }
     // The listener takes a jQuery collection instead of an element.
-    $on(...args: any[]): UnbindFn
+    $on(...args: any[]): UnbindFunction
     $off(...args: any[]): void
     readonly bus: Up['event']
   }

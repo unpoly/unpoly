@@ -159,7 +159,7 @@ export class UpEventListener {
   }
 }
 
-export function bindListeners(group: t.ListenerGroup): t.UnbindFn {
+export function bindListeners(group: t.ListenerGroup): t.UnbindFunction {
   const cleaner = u.cleaner()
 
   eachListenerAttributes(group, function(attrs) {

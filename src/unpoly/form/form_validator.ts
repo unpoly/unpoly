@@ -1,7 +1,7 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
 import { Aborted, fail, muteUncriticalRejection } from '../error.js'
-import { build, on, type UnbindFn } from '../event.js'
+import { build, on, type UnbindFunction } from '../event.js'
 import {
   destinationOptions, findFields, findGroupSolution, isField, readFieldName, trackFields,
   validateOptions,
@@ -30,7 +30,7 @@ export class FormValidator {
     this._honorAbort()
   }
 
-  start(): UnbindFn {
+  start(): UnbindFunction {
     let guard = (field: Element) => this._isValidatingField(field)
     let callback = (field: Element) => this._onFieldAdded(field)
     return trackFields(this._form, { guard }, callback)
@@ -40,7 +40,7 @@ export class FormValidator {
     return field.closest('[up-validate]:not([up-validate=false])')
   }
 
-  _onFieldAdded(field: Element): UnbindFn {
+  _onFieldAdded(field: Element): UnbindFunction {
     // validateOptions() always sets an { event }.
     let eventType = validateOptions(field).event!
     return on(field, eventType, (event) => {

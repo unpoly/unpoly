@@ -2,13 +2,13 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { OptionsParser } from '../element/options_parser.js'
 import { fail, muteUncriticalSync } from '../error.js'
-import { haltEvent, on, onEscape, type UnbindFn } from '../event.js'
+import { haltEvent, on, onEscape, type UnbindFunction } from '../event.js'
 import { focusedField, formFieldSelector, Params } from '../form.js'
 import { destroy, getAllFragments, isAlive } from '../fragment.js'
 import { isWithinForeignOverlay } from '../layer.js'
 import { type ClickEvent } from '../link.js'
 import { printUserEvent } from '../log.js'
-import { animate, isNone, type AnimationFn, type AnimationValue } from '../motion.js'
+import { animate, isNone, type AnimationFunction, type AnimationValue } from '../motion.js'
 import { type UpResponse } from '../network.js'
 import { readData } from '../script.js'
 import { bodyShifter } from '../viewport.js'
@@ -19,7 +19,7 @@ import { OverlayFocus } from './overlay_focus.js'
 import { Tether } from './tether.js'
 
 // A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
-type CloseFn = (value: any, options?: t.CloseLayerOptions) => void
+type CloseFunction = (value: any, options?: t.CloseLayerOptions) => void
 
 export abstract class Overlay extends Layer {
 
@@ -55,8 +55,8 @@ export abstract class Overlay extends Layer {
   declare viewportElement?: HTMLElement
   declare dismissElement?: HTMLElement
   declare overlayFocus: OverlayFocus
-  declare _unbindParentClicked?: UnbindFn
-  declare _unbindEscapePressed?: UnbindFn
+  declare _unbindParentClicked?: UnbindFunction
+  declare _unbindEscapePressed?: UnbindFunction
   declare wasEverVisible?: boolean
 
   constructor(options: t.LayerOptions) {
@@ -318,12 +318,12 @@ export abstract class Overlay extends Layer {
     }
   }
 
-  registerAttrCloser(attribute: string, closeFn: CloseFn): void {
+  registerAttrCloser(attribute: string, closeFn: CloseFunction): void {
     this._registerClickCloser(attribute, closeFn)
     this._registerSubmitCloser(attribute, closeFn)
   }
 
-  _registerClickCloser(attribute: string, closeFn: CloseFn): void {
+  _registerClickCloser(attribute: string, closeFn: CloseFunction): void {
     // Allow the fallbacks to be both vanilla links and Unpoly [up-follow] links
     this.on('up:click', `[${attribute}]:not(form)`, (event, link) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
@@ -335,7 +335,7 @@ export abstract class Overlay extends Layer {
     })
   }
 
-  _registerSubmitCloser(attribute: string, closeFn: CloseFn): void {
+  _registerSubmitCloser(attribute: string, closeFn: CloseFunction): void {
     // Allow the fallbacks to be both vanilla forms and Unpoly [up-submit] forms
     this.on('submit', `[${attribute}]`, (event, element) => {
       // Since we're defining this handler on up.Overlay, we will not prevent
@@ -353,7 +353,7 @@ export abstract class Overlay extends Layer {
     })
   }
 
-  _onAttrCloserActivated(origin: Element, value: any, closeFn: CloseFn): void {
+  _onAttrCloserActivated(origin: Element, value: any, closeFn: CloseFunction): void {
     const closeOptions = { origin }
     const parser = new OptionsParser(origin, closeOptions)
     parser.booleanOrString('animation')
@@ -364,7 +364,7 @@ export abstract class Overlay extends Layer {
     muteUncriticalSync(() => closeFn(value, closeOptions))
   }
 
-  _registerExternalEventCloser(eventTypes: string | undefined, closeFn: CloseFn): UnbindFn | undefined {
+  _registerExternalEventCloser(eventTypes: string | undefined, closeFn: CloseFunction): UnbindFunction | undefined {
     if (!eventTypes) { return }
     return this.on(eventTypes, (event) => {
       event.preventDefault()
@@ -382,7 +382,7 @@ export abstract class Overlay extends Layer {
     this._tryCloseForElements(this.dismissFragment, this.dismiss, newElements, response)
   }
 
-  _tryCloseForElements(selector: string | undefined, closeFn: CloseFn, newElements: Element[], response?: UpResponse): void {
+  _tryCloseForElements(selector: string | undefined, closeFn: CloseFunction, newElements: Element[], response?: UpResponse): void {
     // Without a selector we look for "undefined", which matches nothing.
     let match = u.findResult(newElements, (element) => e.subtreeFirst(element, selector!))
     if (match) {
@@ -401,7 +401,7 @@ export abstract class Overlay extends Layer {
     this._tryCloseForLocation(newLocation, this.dismissLocation, this.dismiss, response)
   }
 
-  _tryCloseForLocation(newLocation: string | false | undefined, urlPattern: u.UpURLPattern | undefined, closeFn: CloseFn, response?: UpResponse): void {
+  _tryCloseForLocation(newLocation: string | false | undefined, urlPattern: u.UpURLPattern | undefined, closeFn: CloseFunction, response?: UpResponse): void {
     let resolution = newLocation && urlPattern?.recognize(newLocation)
     if (resolution) {
       // resolution now contains named capture groups, e.g. when
@@ -441,7 +441,7 @@ export abstract class Overlay extends Layer {
   onElementsRemoved(): void {
   }
 
-  _animationFn(boxAnimation: AnimationValue | undefined, backdropAnimation: AnimationValue): AnimationFn | false {
+  _animationFn(boxAnimation: AnimationValue | undefined, backdropAnimation: AnimationValue): AnimationFunction | false {
     // If we don't animate the box, we don't animate the backdrop either.
     if (isNone(boxAnimation)) return false
 

@@ -16,7 +16,7 @@ export interface UpEvent extends Event {
 /**
 A function that removes the event listeners registered by `up.on()`.
 */
-export type UnbindFn = () => void
+export type UnbindFunction = () => void
 
 /**
 An event built by `up.event.fork()`, with the event it was forked from.

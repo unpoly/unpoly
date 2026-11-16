@@ -3,7 +3,7 @@ import * as u from './util.js'
 import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { CannotParse, CannotTarget, fail } from './error.js'
-import { emit, on, onClosest, type UnbindFn } from './event.js'
+import { emit, on, onClosest, type UnbindFunction } from './event.js'
 import { canPushState, isHistoryEnabled } from './history.js'
 import { Layer, layerConfig, layerStack, mainTargets, type LayerMode } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
@@ -874,12 +874,12 @@ export const abortFragment = mockable(function abortFragment(...args: any[]): vo
   }
 })
 
-export function onAborted(fragment: Element, callback: (event: t.FragmentAbortedEvent) => void): UnbindFn {
+export function onAborted(fragment: Element, callback: (event: t.FragmentAbortedEvent) => void): UnbindFunction {
   // Aborting the root layer should not abort a poller in an overlay, like it doesn't abort the overlay's requests.
   return onClosest(fragment, 'up:fragment:aborted', { layer: 'origin' }, callback)
 }
 
-export function onKept(fragment: Element, callback: (event: t.FragmentKeptEvent) => void): UnbindFn {
+export function onKept(fragment: Element, callback: (event: t.FragmentKeptEvent) => void): UnbindFunction {
   return onClosest(fragment, 'up:fragment:kept', { layer: 'origin' }, callback)
 }
 
@@ -987,7 +987,7 @@ export function insertTemp(...args: any[]): () => void {
   }
 }
 
-export function trackSelector<E extends Element>(selectFn: () => u.List<E>, callback: (element: E) => any): UnbindFn {
+export function trackSelector<E extends Element>(selectFn: () => u.List<E>, callback: (element: E) => any): UnbindFunction {
   let tracker = new SelectorTracker(selectFn, callback)
   return tracker.start()
 }

@@ -3,7 +3,7 @@ import * as e from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { guardFn } from './error.js'
-import { on, type UnbindFn } from './event.js'
+import { on, type UnbindFunction } from './event.js'
 import { getSmart } from './fragment.js'
 // Not through framework.js, which may not be evaluated yet when we create a Registry below.
 import { Registry } from './framework/registry.js'
@@ -24,9 +24,9 @@ export const motionConfig = newConfig('up.motion.config', (): t.MotionConfig => 
   enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches
 }))
 
-export let namedAnimations = new Registry<t.AnimationFn>('animation', findAnimationFn)
+export let namedAnimations = new Registry<t.AnimationFunction>('animation', findAnimationFn)
 
-export let namedTransitions = new Registry<t.TransitionFn>('transition', findTransitionFn)
+export let namedTransitions = new Registry<t.TransitionFunction>('transition', findTransitionFn)
 
 function reset(): void {
   motionController.reset()
@@ -90,7 +90,7 @@ async function animateNow(element: HTMLElement, lastFrame: e.StyleProps, { durat
   // TODO: We could accepting camelCase everywhere we now run fixSetStyleProps or fixStyleProps
   let camelizedLastFrame = u.withRenamedKeys(lastFrame, u.kebabToCamelCase)
   let animation = element.animate([ camelizedLastFrame ], { duration, easing, fill: 'forwards' })
-  let offFinish: UnbindFn
+  let offFinish: UnbindFunction
   let conclude = () => {
     animation.finish()
     applyFinishedFrame()
@@ -182,7 +182,7 @@ export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitio
   return () => motionController.startFunction(cluster, async () => play?.())
 }
 
-function findTransitionFn(value?: t.TransitionValue): t.TransitionFn | undefined {
+function findTransitionFn(value?: t.TransitionValue): t.TransitionFunction | undefined {
   if (isNone(value)) {
     return undefined
   } else if (u.isFunction(value)) {
@@ -196,7 +196,7 @@ function findTransitionFn(value?: t.TransitionValue): t.TransitionFn | undefined
   }
 }
 
-function composeTransitionFn(oldAnimation: t.AnimationValue, newAnimation: t.AnimationValue): t.TransitionFn | undefined {
+function composeTransitionFn(oldAnimation: t.AnimationValue, newAnimation: t.AnimationValue): t.TransitionFunction | undefined {
   // A composition of two null-animations is a null-transform
   // and should be skipped. If only one half is a null-animation, we animate the other half.
   if (!isNone(oldAnimation) || !isNone(newAnimation)) {
@@ -209,7 +209,7 @@ function composeTransitionFn(oldAnimation: t.AnimationValue, newAnimation: t.Ani
   }
 }
 
-function findAnimationFn(value: t.AnimationValue | undefined): t.AnimationFn | undefined {
+function findAnimationFn(value: t.AnimationValue | undefined): t.AnimationFunction | undefined {
   if (isNone(value)) {
     return undefined
   } else if (u.isFunction(value)) {

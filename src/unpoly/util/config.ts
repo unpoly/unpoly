@@ -59,7 +59,7 @@ export class Config<S extends object> {
     return element?.matches(this.selector(prop, condition))
   }
 
-  matchesFn(prop: t.SelectorKey<S>): t.MatchesFn {
+  matchesFn(prop: t.SelectorKey<S>): t.MatchesFunction {
     return (element, condition) => this.matches(element, prop, condition)
   }
 
@@ -70,11 +70,11 @@ export class Config<S extends object> {
     return e.unionSelector(includes, excludes, condition)
   }
 
-  selectorFn(prop: t.SelectorKey<S>): t.SelectorFn {
+  selectorFn(prop: t.SelectorKey<S>): t.SelectorFunction {
     return (condition) => this.selector(prop, condition)
   }
 
-  selectorFns(prop: t.SelectorKey<S>): [t.SelectorFn, t.MatchesFn] {
+  selectorFns(prop: t.SelectorKey<S>): [t.SelectorFunction, t.MatchesFunction] {
     return [this.selectorFn(prop), this.matchesFn(prop)]
   }
 }

@@ -23,15 +23,15 @@ function reset(): void {
   }
 }
 
-export function on<T extends t.EventTypes>(types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): t.UnbindFn
-export function on<T extends t.EventTypes>(targets: t.ListenerTargets, types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): t.UnbindFn
-export function on(...args: any[]): t.UnbindFn {
+export function on<T extends t.EventTypes>(types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): t.UnbindFunction
+export function on<T extends t.EventTypes>(targets: t.ListenerTargets, types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): t.UnbindFunction
+export function on(...args: any[]): t.UnbindFunction {
   return bindListeners(parseBindArgs(args))
 }
 
-export function onClosest<T extends t.EventTypes>(element: Element, types: T, callback: t.ListenerCallback<t.ObservedEvent<T>>): t.UnbindFn
-export function onClosest<T extends t.EventTypes>(element: Element, types: T, options: { layer?: LayerReference }, callback: t.ListenerCallback<t.ObservedEvent<T>>): t.UnbindFn
-export function onClosest(...args: any[]): t.UnbindFn {
+export function onClosest<T extends t.EventTypes>(element: Element, types: T, callback: t.ListenerCallback<t.ObservedEvent<T>>): t.UnbindFunction
+export function onClosest<T extends t.EventTypes>(element: Element, types: T, options: { layer?: LayerReference }, callback: t.ListenerCallback<t.ObservedEvent<T>>): t.UnbindFunction
+export function onClosest(...args: any[]): t.UnbindFunction {
   let [fragment, eventType, { layer }, callback] = u.parseArgs(args, 'val', 'val', 'options', 'callback')
   layer &&= layerStack.get(layer, { origin: fragment })
   let guard = (event: Event) => (event.target as Element).contains(fragment) && (!layer || layer.contains(event.target as Element))
@@ -75,7 +75,7 @@ export function assertEmitted(...args: any[]): void {
   return assertEventEmitted(parseEmitArgs(args))
 }
 
-export function onEscape(listener: (event: KeyboardEvent) => any): t.UnbindFn {
+export function onEscape(listener: (event: KeyboardEvent) => any): t.UnbindFunction {
   return on('keydown', function(event) {
     if (event.key === 'Escape') {
       return listener(event)

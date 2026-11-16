@@ -44,7 +44,7 @@ export const statusConfig = newConfig('up.status.config', (): t.StatusConfig => 
   noNavSelectors: ['[up-nav=false]'],
 }))
 
-export let namedPreviewFns = new Registry<t.PreviewFn>('preview')
+export let namedPreviewFns = new Registry<t.PreviewFunction>('preview')
 
 const SELECTOR_LINK = 'a, [up-href]'
 
@@ -145,7 +145,7 @@ function doRunPreviews(request: UpRequest, renderOptions: RenderOptions): () => 
   return cleaner.clean
 }
 
-function getPlaceholderPreviewFn(placeholder: any): t.PreviewFn | undefined {
+function getPlaceholderPreviewFn(placeholder: any): t.PreviewFunction | undefined {
   if (!placeholder) return
 
   return function(preview) {
@@ -153,7 +153,7 @@ function getPlaceholderPreviewFn(placeholder: any): t.PreviewFn | undefined {
   }
 }
 
-export function resolvePreviewFns(value: any): t.PreviewFn[] {
+export function resolvePreviewFns(value: any): t.PreviewFunction[] {
   if (u.isFunction(value)) {
     return [value]
   } else if (u.isString(value)) {
@@ -165,7 +165,7 @@ export function resolvePreviewFns(value: any): t.PreviewFn[] {
   }
 }
 
-function resolvePreviewString(str: string): t.PreviewFn[] {
+function resolvePreviewString(str: string): t.PreviewFunction[] {
   return u.map(u.parseScalarJSONPairs(str), ([name, parsedOptions]) => {
     let previewFn = namedPreviewFns.get(name)
 
@@ -182,7 +182,7 @@ function getActiveElements({ origin, activeElements }: u.PlainObject): Element[]
   return u.flatMap(activeElements, findActivatableAreas)
 }
 
-function getFeedbackClassesPreviewFn(feedbackOption: boolean | undefined, fragments: Element[]): t.PreviewFn | undefined {
+function getFeedbackClassesPreviewFn(feedbackOption: boolean | undefined, fragments: Element[]): t.PreviewFunction | undefined {
   if (!feedbackOption) return
 
   return function(preview) {

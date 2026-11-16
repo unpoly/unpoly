@@ -1,5 +1,5 @@
 import * as u from '../../util.js'
-import { on, type UnbindFn } from '../../event.js'
+import { on, type UnbindFunction } from '../../event.js'
 import { afterMutate } from '../../fragment.js'
 import type * as t from '../types.js'
 
@@ -16,7 +16,7 @@ export class SelectorTracker {
     this._syncScheduled = false
   }
 
-  start(): UnbindFn {
+  start(): UnbindFunction {
     // Get initial matches immediately. If we waited for scheduleSync(), the following race condition
     // could occur:
     //
@@ -34,7 +34,7 @@ export class SelectorTracker {
     )
   }
 
-  _trackFragments(): UnbindFn {
+  _trackFragments(): UnbindFunction {
     // A custom element may only match our selector after its definition, which can arrive
     // after the element was inserted (e.g. a form-associated custom element only matches
     // :enabled once defined).
