@@ -34,7 +34,6 @@ export const NO_MOTION: t.RenderOptions = {
 const PREFLIGHT_KEYS: (keyof t.RenderOptions)[] = [
   'url',
   'method',
-  'origin',
   'headers',
   'params',
   'cache',

@@ -23,7 +23,7 @@ export function findFragment(options: FindFragmentOptions): HTMLElement | undefi
   let document = options.document || window.document
   let match = options.match ?? fragmentConfig.match
 
-  return findInPreferredElements(selector, document, preferOldElements) || findInRegion(selector, origin, match, options) || findFirst(selector, document, options)
+  return findInPreferredElements(selector, document, preferOldElements) || findInRegion(selector, origin, match, options) || getFirstDescendant(document, selector, options)
 }
 
 function findInPreferredElements(selector: string, document: Document | Element, preferOldElements?: Element[]): HTMLElement | undefined {
@@ -39,12 +39,8 @@ function findInRegion(
   options: FindFragmentOptions,
 ): HTMLElement | undefined {
   if (match === 'region' && !containsMainPseudo(selector) && origin?.isConnected) {
-    return findClosest(selector, origin, options) || findDescendantInRegion(selector, origin, options)
+    return closestFragment(origin, selector, options) || findDescendantInRegion(selector, origin, options)
   }
-}
-
-function findClosest(selector: string, origin: Element, options: FindFragmentOptions): HTMLElement | undefined {
-  return closestFragment(origin, selector, options)
 }
 
 function findDescendantInRegion(selector: string, origin: Element, options: FindFragmentOptions): HTMLElement | undefined {
@@ -59,8 +55,4 @@ function findDescendantInRegion(selector: string, origin: Element, options: Find
       }
     }
   })
-}
-
-function findFirst(selector: string, document: Document | Element, options: FindFragmentOptions): HTMLElement | undefined {
-  return getFirstDescendant(document, selector, options)
 }

@@ -1,6 +1,7 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
 import { fail } from '../error.js'
+import { off, on } from '../event.js'
 import { isAlive } from '../fragment.js'
 import { closestViewport } from '../viewport.js'
 
@@ -46,19 +47,17 @@ export class Tether {
     this._element.style.position = 'absolute'
     this._setOffset(0, 0)
     this.sync()
-    this._changeEventSubscription('on')
+    this._changeEventSubscription(on)
   }
 
   stop(): void {
-    this._changeEventSubscription('off')
+    this._changeEventSubscription(off)
   }
 
-  _changeEventSubscription(fn: 'on' | 'off'): void {
+  _changeEventSubscription(fn: typeof off): void {
     let doScheduleSync = this._scheduleSync.bind(this)
-    // up.on() and up.off() take the same arguments, but TypeScript can't call the union of their
-    // overloads. So we type both as up.off().
-    up[fn as 'off'](window, 'resize', doScheduleSync)
-    if (this._syncOnScroll) { up[fn as 'off'](this._viewport, 'scroll', doScheduleSync) }
+    fn(window, 'resize', doScheduleSync)
+    if (this._syncOnScroll) { fn(this._viewport, 'scroll', doScheduleSync) }
   }
 
   _scheduleSync(): void {

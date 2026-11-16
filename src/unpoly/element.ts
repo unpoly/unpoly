@@ -633,7 +633,7 @@ export function inlineStyle(element: HTMLElement, props: string | string[]): str
 
 function extractFromStyleObject(style: CSSStyleDeclaration, keyOrKeys: string | string[]): string | Record<string, string> {
   // unpoly-migrate defines all hooks.
-  if (up.migrate.loaded) keyOrKeys = up.migrate.fixGetStyleProps!(keyOrKeys)
+  keyOrKeys = up.migrate.fixGetStyleProps?.(keyOrKeys) ?? keyOrKeys
 
   if (u.isString(keyOrKeys)) {
     return style.getPropertyValue(keyOrKeys)
@@ -643,7 +643,7 @@ function extractFromStyleObject(style: CSSStyleDeclaration, keyOrKeys: string | 
 }
 
 export function setInlineStyle(element: HTMLElement, props: string | t.StyleProps, unit = ''): void {
-  if (up.migrate.loaded) props = up.migrate.fixSetStyleProps!(props, unit)
+  props = up.migrate.fixSetStyleProps?.(props, unit) ?? props
 
   if (u.isString(props)) {
     element.setAttribute('style', props)

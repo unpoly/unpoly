@@ -288,8 +288,7 @@ class Policy {
     if (blocked) {
       // (A) Script elements need to be blocked on adoption, as inserting a script immediately executes them.
       // (B) Callback strings will get another check during execution. We still block them during adoption for debuggability.
-      // Only a ConfigurablePolicy, which has a log() method, can block an item.
-      (this as any).log(...item.logBlockedDescriptor())
+      this.log(...item.logBlockedDescriptor())
       item.block()
     } else {
       this.tryRewriteNonce(item, nonce)
@@ -300,13 +299,13 @@ class Policy {
     throw new NotImplemented()
   }
 
+  log(..._descriptorArgs: any[]): void {
+    throw new NotImplemented()
+  }
+
 }
 
 class DetachedAssetPolicy extends Policy {
-
-  constructor(...args: PolicyArgs) {
-    super(...args)
-  }
 
   passesItem(_itemNonce?: string): boolean {
     return true

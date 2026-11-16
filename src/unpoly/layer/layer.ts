@@ -285,7 +285,7 @@ export class Layer {
 
     // Set unless { metaTags: false }
     if (u.isList(options.metaTags)) {
-      up.migrate?.warnOfHungryMetaTags?.(options.metaTags)
+      up.migrate.warnOfHungryMetaTags?.(options.metaTags)
       this._updateMetaTags(options.metaTags)
     }
 
