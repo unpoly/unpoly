@@ -57,9 +57,9 @@ export class Preview {
     return this.request.params
   }
 
-  // A layer, or 'new' when the request opens an overlay.
+  // A layer, or 'new' when the request opens an overlay. A render pass's request always targets one.
   get layer(): Layer | 'new' {
-    return this.request.layer
+    return this.request.layer!
   }
 
   get ended(): boolean {

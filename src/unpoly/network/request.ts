@@ -48,12 +48,9 @@ export class UpRequest {
   declare wrapMethod: boolean | null
   declare abortable: boolean | null
   declare previews: unknown[]
-  // They hold the { layer } and { failLayer } options until the constructor resolves them
-  // into a layer or 'new' (unless the request is { basic }).
-  /* oxlint-disable typescript/no-explicit-any -- an option before and a layer after the constructor */
-  declare layer: any
-  declare failLayer: any
-  /* oxlint-enable typescript/no-explicit-any */
+  // The constructor resolves the { layer } and { failLayer } options.
+  declare layer?: Layer | 'new'
+  declare failLayer?: Layer | 'new'
 
   // A request is also a promise for its response. The static block at the end delegates these.
   declare then: Promise<UpResponse>['then']
@@ -94,10 +91,8 @@ export class UpRequest {
     // Note that when opening a new layer, this { layer } attribute will be the set to
     // the current layer. The { mode } and { failMode } attributes will belong to the
     // new layer being opened.
-    this.layer = options.layer
     this.mode = options.mode // we would love to delegate this.mode to this.layer.mode, but this.layer might be the string "new"
     this.context = options.context // we would love to delegate this.context to this.layer.context, but this.layer might be string "new"
-    this.failLayer = options.failLayer
     this.failMode = options.failMode // we would love to delegate this.failMode to this.failLayer.mode, but this.failLayer might be the string "new"
     this.failContext = options.failContext // we would love to delegate this.failContext to this.failLayer.mode, but this.failLayer might be the string "new"
     this.origin = options.origin
@@ -117,7 +112,8 @@ export class UpRequest {
     // Normalize a first time to get a normalized cache key.
     this._normalize()
 
-    if ((this.target || this.layer || this.origin) && !options.basic) {
+    let layer
+    if ((this.target || options.layer || this.origin) && !options.basic) {
       const layerLookupOptions = { origin: this.origin }
       // Calling up.layer.get() will give us:
       //
@@ -128,11 +124,11 @@ export class UpRequest {
       // up.layer.get('new') will return 'new' unchanged, but I'm not sure
       // if any code actually calls up.request({ ..., layer: 'new' }).
       // In OpenLayerPlan we connect requests to the base layer we're stacking upon.
-      this.layer = layerStack.get(this.layer, layerLookupOptions)
-      this.context ||= this.layer.context || {} // this.layer might be "new", so we default to {}
-      this.mode ||= this.layer.mode
+      layer = this.layer = layerStack.get(options.layer, layerLookupOptions)
+      this.context ||= layer?.context || {} // layer might be "new", so we default to {}
+      this.mode ||= layer?.mode
 
-      this.failLayer = layerStack.get(this.failLayer, layerLookupOptions)
+      this.failLayer = layerStack.get(options.failLayer, layerLookupOptions)
       this.failContext ||= this.failLayer?.context || {} // this.failLayer might be "new", so we default to {}
       this.failMode ||= this.failLayer?.mode
 
@@ -140,7 +136,7 @@ export class UpRequest {
       this.originMode ||= this.originLayer?.mode
     }
 
-    this.bindLayer = options.bindLayer || this.layer
+    this.bindLayer = options.bindLayer || layer
 
     this._fragments = options.fragments
 
