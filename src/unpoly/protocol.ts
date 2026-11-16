@@ -24,7 +24,9 @@ export function headerize(camel: string): string {
   return 'X-Up' + header
 }
 
-function extractHeader(xhr: XMLHttpRequest, shortHeader: string, parseFn: (value: string) => any = u.identity): any {
+function extractHeader(xhr: XMLHttpRequest, shortHeader: string): string | undefined
+function extractHeader<R>(xhr: XMLHttpRequest, shortHeader: string, parseFn: (value: string) => R): R | undefined
+function extractHeader(xhr: XMLHttpRequest, shortHeader: string, parseFn: (value: string) => unknown = u.identity): unknown {
   let value = xhr.getResponseHeader(headerize(shortHeader))
   if (value) {
     return parseFn(value)
@@ -73,13 +75,13 @@ export function openLayerFromXHR(xhr: XMLHttpRequest): RenderOptions | undefined
   return extractHeader(xhr, 'openLayer', u.parseRelaxedJSON)
 }
 
-export function acceptLayerFromXHR(xhr: XMLHttpRequest): any {
+export function acceptLayerFromXHR(xhr: XMLHttpRequest): unknown {
   // Even if acceptance has no value, the server will send
   // X-Up-Accept-Layer: null
   return extractHeader(xhr, 'acceptLayer', u.parseRelaxedJSON)
 }
 
-export function dismissLayerFromXHR(xhr: XMLHttpRequest): any {
+export function dismissLayerFromXHR(xhr: XMLHttpRequest): unknown {
   // Even if dismissal has no value, the server will send
   // X-Up-Dismiss-Layer: null
   return extractHeader(xhr, 'dismissLayer', u.parseRelaxedJSON)
