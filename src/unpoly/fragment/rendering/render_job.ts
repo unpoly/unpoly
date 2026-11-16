@@ -129,8 +129,8 @@ export class RenderJob {
     }
   }
 
-  // Kept `any`, like renderFromContent(): we return the result as a RenderResult,
-  // which hides that renderFromURL() fulfills with an up.Request when preloading.
+  // Returns an up.RenderResult, or a promise for one. When preloading, the promise fulfills
+  // with an up.Request (renderFromURL()) or with nothing (renderFromContent()).
   _render(): any {
     // (1) With a given { url } we want to handle { abort } when the new request is known.
     //     This way we can exclude the new request from aborting.
@@ -210,7 +210,7 @@ export class RenderJob {
   }
 
   static {
-    // A request is also a promise ("thenable") for its initial render pass.
+    // A render job is also a promise ("thenable") for its render pass.
     u.delegatePromise(this.prototype, function() { return this._rendered })
 
     u.memoizeMethod(this.prototype, {

@@ -15,9 +15,7 @@ import { ResponseDoc } from './response_doc.js'
 // renderFromContent(). Also computes the preflight props for renderFromURL(), before the request
 // is sent, with preflightPropsFromContent().
 
-// Returns an up.RenderResult, or a promise when preloading local content.
-// Kept `any`: RenderJob returns this as a RenderResult, which also hides that renderFromURL()
-// resolves with an up.Request when preloading.
+// Returns an up.RenderResult, or a promise that fulfills with nothing when preloading local content.
 export function renderFromContent(options: t.RenderOptions): any {
   // Preloading from local content is a no-op.
   if (options.preload) {
