@@ -71,8 +71,9 @@ function jasmine() {
 
 const both = (fn, options) => [fn({ ...options, min: false }), fn({ ...options, min: true })]
 
-// What we publish. Source maps only for the minified bundles, so the unminified unpoly.js
-// carries no sourceMappingURL comment.
+// What we publish. Every bundle has a source map and names it in a sourceMappingURL comment.
+// Apps load the unminified unpoly.js in development (package.json's "main"), and the map shows
+// their developers our TypeScript sources.
 const production = [
   ...both(unpoly, { es: 'modern' }),
   ...both(unpoly, { es: 'es6' }),
@@ -108,7 +109,7 @@ const ci = [
 ]
 
 export const CONFIGS = {
-  production: { bundles: production, sourcemap: (bundle) => bundle.min },
+  production: { bundles: production, sourcemap: () => true },
   development: { bundles: development, sourcemap: () => true },
   ci: { bundles: ci, sourcemap: () => true },
   minified: { bundles: minified, sourcemap: () => true },

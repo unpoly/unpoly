@@ -85,10 +85,13 @@ export async function finish(bundle, result, { terser, strip }) {
 
   if (bundle.min) {
     await minifyStyles(files, bundle.target)
-  } else if (strip) {
-    for (let [file, content] of files) {
-      if (file.endsWith('.css')) files.set(file, stripStylePaths(content))
+  } else {
+    if (strip) {
+      for (let [file, content] of files) {
+        if (file.endsWith('.css')) files.set(file, stripStylePaths(content))
+      }
     }
+    linkStyleMaps(files)
   }
 
   if (bundle.declaration) {
@@ -111,6 +114,16 @@ export const DECLARATION = '// Real types will come later. The bundle sets (or e
 // unpoly.min.js → unpoly.min.d.ts
 export function declarationFile(bundle) {
   return bundle.out.replace(/\.js$/, '.d.ts')
+}
+
+// esbuild writes an unminified stylesheet's map without naming it in the stylesheet, so a browser
+// wouldn't find it. (minifyStyles() names the minified ones' maps. Terser names the JS maps.)
+function linkStyleMaps(files) {
+  for (let [cssPath, css] of files) {
+    if (cssPath.endsWith('.css') && files.has(`${cssPath}.map`) && !css.includes('sourceMappingURL=')) {
+      files.set(cssPath, `${css}/*# sourceMappingURL=${path.basename(cssPath)}.map */\n`)
+    }
+  }
 }
 
 // esbuild only minifies CSS together with JS, and Terser does our JS. So the stylesheet esbuild

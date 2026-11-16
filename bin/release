@@ -69,9 +69,8 @@ function confirm(message) {
   })
 }
 
-// Removes every build output, so we only publish what the production build writes. Removing
-// only files that paths() doesn't match left a dev or CI build's maps of the unminified bundles
-// (unpoly.js.map and friends) in dist/, which paths() matched and we published.
+// Removes every build output, so we only publish what the production build writes, never a file
+// that a dev or CI build left in dist/ (their bundles keep comments and source paths).
 function clean() {
   console.log("Removing previous build outputs...")
   console.log()
@@ -81,7 +80,7 @@ function clean() {
 }
 
 // A running dev environment writes to dist/ too. bin/build stops it, but only after clean(), so a
-// dev rebuild in between could leave its source maps for us to publish. Stop it first.
+// dev rebuild in between could leave its bundles for us to publish. Stop it first.
 async function stopDevEnv() {
   const { stopDevEnv } = await import('../tooling/dev_env.mjs')
   const { result, pid } = await stopDevEnv()
@@ -157,20 +156,19 @@ async function publishToNpm() {
   console.log()
 }
 
+// Exactly the files we publish: what the production build writes (but the .gz files, which it
+// only writes to measure), and the package files. No patterns, so a stray file can't slip in, and
+// a missing one fails the copy.
 function paths() {
-  const globs = [
-    'package.json',
-    'dist/unpoly{.js,.js.map,.d.ts,.min.js,.min.js.map,.min.d.ts}',
-    'dist/unpoly.es6{.js,.js.map,.d.ts,.min.js,.min.js.map,.min.d.ts}',
-    'dist/unpoly{.css,.css.map,.min.css,.min.css.map}',
-    'dist/unpoly-migrate{.js,.js.map,.d.ts,.min.js,.min.js.map,.min.d.ts}',
-    'dist/unpoly-bootstrap{3,4,5}{.js,.js.map,.d.ts,.min.js,.min.js.map,.min.d.ts}',
-    'dist/unpoly-bootstrap{3,4,5}{.css,.css.map,.min.css,.min.css.map}',
-    'dist/README.md',
-    'dist/CHANGELOG.md',
-    'dist/LICENSE'
-  ]
-  return globs.flatMap((file) => globSync(file))
+  const bundles = ['unpoly', 'unpoly.es6', 'unpoly-migrate', 'unpoly-bootstrap3', 'unpoly-bootstrap4', 'unpoly-bootstrap5']
+  const stylesheets = ['unpoly', 'unpoly-bootstrap3', 'unpoly-bootstrap4', 'unpoly-bootstrap5']
+  const files = ['package.json']
+  for (const min of ['', '.min']) {
+    for (const name of bundles) files.push(`dist/${name}${min}.js`, `dist/${name}${min}.js.map`, `dist/${name}${min}.d.ts`)
+    for (const name of stylesheets) files.push(`dist/${name}${min}.css`, `dist/${name}${min}.css.map`)
+  }
+  files.push('dist/README.md', 'dist/CHANGELOG.md', 'dist/LICENSE')
+  return files
 }
 
 async function processRelease() {

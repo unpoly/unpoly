@@ -32,6 +32,14 @@ test('the npm package contains every declaration file, and points `types` at the
   assert.equal(pkg.types, declarationFile({ out: pkg.main }))
 })
 
+test('every bundle we publish has a source map, and the npm package contains it', () => {
+  // Apps debug against the unminified unpoly.js ("main"), and the map shows them our sources.
+  for (let bundle of published) {
+    assert.ok(CONFIGS.production.sourcemap(bundle), `${bundle.out} gets no source map`)
+    assert.ok(isPacked(`${bundle.out}.map`), `package.json { files } misses ${bundle.out}.map`)
+  }
+})
+
 test('the declaration file makes the bundle a module, but declares nothing', () => {
   // A declared `up` would collide with the one an app declares itself.
   let code = DECLARATION.replace(/^\/\/.*$/gm, '').trim()
