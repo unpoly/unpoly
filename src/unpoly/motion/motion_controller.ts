@@ -25,7 +25,7 @@ export class MotionController {
     return this._startingCount > 0
   }
 
-  startFunction(newCluster: MotionCluster, startMotionFn: () => Promise<any>): Promise<any> {
+  startFunction(newCluster: MotionCluster, startMotionFn: () => Promise<unknown>): Promise<unknown> {
     // Remember that we're currently starting a motion function.
     this._startingCount++
 

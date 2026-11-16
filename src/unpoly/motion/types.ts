@@ -12,12 +12,12 @@ export interface TimingOptions {
 /**
 A function that animates an element. See `up.animation()`.
 */
-export type AnimationFunction = (element: HTMLElement, options: TimingOptions) => Promise<any>
+export type AnimationFunction = (element: HTMLElement, options: TimingOptions) => Promise<unknown>
 
 /**
 A function that animates the transition from an old to a new element. See `up.transition()`.
 */
-export type TransitionFunction = (oldElement: HTMLElement, newElement: HTMLElement, options: TimingOptions) => Promise<any>
+export type TransitionFunction = (oldElement: HTMLElement, newElement: HTMLElement, options: TimingOptions) => Promise<unknown>
 
 /**
 An animation: the name of a registered animation, the CSS properties of the last frame,

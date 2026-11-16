@@ -141,7 +141,7 @@ export function swapElements(
   newElement: HTMLElement,
   transitionValue?: t.TransitionValue,
   { duration, easing, beforeRemove, afterRemove }: t.SwapOptions = {},
-): () => Promise<any> {
+): () => Promise<unknown> {
   // Convert the given transition value to a function we can call.
   // This returns undefined for values like `undefined`, `false`, `[null, null]` etc.
   const transitionFn = guardFn(findTransitionFn(transitionValue))
@@ -256,15 +256,16 @@ export function motionOptions(element: Element, options?: u.PlainObject, parserO
 }
 
 
-export function isNone(motionValue: any): boolean {
+export function isNone(motionValue: unknown): boolean {
   // false, undefined, '', null, the string "none" and an empty object of CSS properties are all ways to skip animations
   return !motionValue || motionValue === 'none' || (u.isOptions(motionValue) && u.isBlank(motionValue))
 }
 
 // From is an opacity or a function that reads it from the element.
-function registerOpacityAnimation(name: string, from: any, to: number): void {
+function registerOpacityAnimation(name: string, from: u.ValueOrFunction<number | string>, to: number): void {
   namedAnimations.put(name, function(element, options) {
-    element.style.opacity = u.evalOption(from, element)
+    // The style property stringifies a number.
+    element.style.opacity = u.evalOption(from, element) as string
     return animateNow(element, { opacity: to }, options)
   })
 }
