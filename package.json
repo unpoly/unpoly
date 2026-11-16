@@ -3,12 +3,14 @@
   "version": "3.15.0",
   "description": "Build a complete frontend in HTML",
   "main": "unpoly.js",
+  "types": "unpoly.d.ts",
   "style": "unpoly.css",
   "files": [
     "LICENSE",
     "README.md",
     "CHANGELOG.md",
     "unpoly*.js",
+    "unpoly*.d.ts",
     "unpoly*.css",
     "unpoly*.map"
   ],

@@ -75,7 +75,7 @@ function confirm(message) {
 function clean() {
   console.log("Removing previous build outputs...")
   console.log()
-  globSync('dist/unpoly*{.css,.js,.map,.gz}').forEach(filePath => {
+  globSync('dist/unpoly*{.css,.js,.d.ts,.map,.gz}').forEach(filePath => {
     fs.unlinkSync(filePath)
   })
 }
@@ -160,11 +160,11 @@ async function publishToNpm() {
 function paths() {
   const globs = [
     'package.json',
-    'dist/unpoly{.js,.js.map,.min.js,.min.js.map}',
-    'dist/unpoly.es6{.js,.js.map,.min.js,.min.js.map}',
+    'dist/unpoly{.js,.js.map,.d.ts,.min.js,.min.js.map,.min.d.ts}',
+    'dist/unpoly.es6{.js,.js.map,.d.ts,.min.js,.min.js.map,.min.d.ts}',
     'dist/unpoly{.css,.css.map,.min.css,.min.css.map}',
-    'dist/unpoly-migrate{.js,.js.map,.min.js,.min.js.map}',
-    'dist/unpoly-bootstrap{3,4,5}{.js,.js.map,.min.js,.min.js.map}',
+    'dist/unpoly-migrate{.js,.js.map,.d.ts,.min.js,.min.js.map,.min.d.ts}',
+    'dist/unpoly-bootstrap{3,4,5}{.js,.js.map,.d.ts,.min.js,.min.js.map,.min.d.ts}',
     'dist/unpoly-bootstrap{3,4,5}{.css,.css.map,.min.css,.min.css.map}',
     'dist/README.md',
     'dist/CHANGELOG.md',

@@ -1,8 +1,9 @@
 // Every bundle we build, and which of them each `bin/build --config=…` produces.
 //
 // A bundle is a plain description: an entry file, an output file in dist/, a language target,
-// whether Terser minifies it, and whether it gets its stylesheet. tooling/build/esbuild.mjs turns
-// one into esbuild options.
+// whether Terser minifies it, whether it gets its stylesheet, and whether apps can import it (and
+// so get a placeholder declaration file, see DECLARATION in esbuild.mjs).
+// tooling/build/esbuild.mjs turns one into esbuild options.
 
 // `modern` is what we ship as unpoly.js. `es6` is the legacy build for old browsers.
 const TARGETS = { modern: 'es2024', es6: 'es2015' }
@@ -18,6 +19,7 @@ function unpoly({ es, min }) {
     // The namespaces are ES modules and were strict under webpack. esbuild hoists them into one
     // function without a directive, so we put one back (see esbuild.mjs).
     strict: true,
+    declaration: true,
   }
 }
 
@@ -29,6 +31,7 @@ function unpolyMigrate({ min }) {
     target: TARGETS.es6,
     min,
     styles: false,
+    declaration: true,
   }
 }
 
@@ -40,6 +43,7 @@ function unpolyBootstrap({ version, min }) {
     target: TARGETS.es6,
     min,
     styles: true,
+    declaration: true,
   }
 }
 

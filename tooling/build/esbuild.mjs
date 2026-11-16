@@ -91,10 +91,26 @@ export async function finish(bundle, result, { terser, strip }) {
     }
   }
 
+  if (bundle.declaration) {
+    files.set(path.join(DIST, declarationFile(bundle)), DECLARATION)
+  }
+
   mkdirSync(DIST, { recursive: true })
   for (let [file, content] of files) {
     writeFileSync(file, content)
   }
+}
+
+// Our bundles contain no module syntax, so a TypeScript app with `allowJs` that imports one
+// (`await import('unpoly')`) fails with "File 'unpoly.js' is not a module" (TS2306). The webpack
+// bundles had escaped this by containing `module.exports`. A declaration file beside the bundle
+// makes TypeScript read that instead of the bundle. It declares nothing, so it can't collide with
+// an app's own declaration of `up`.
+export const DECLARATION = '// Real types will come later. The bundle sets (or extends) the global window.up.\nexport {}\n'
+
+// unpoly.min.js → unpoly.min.d.ts
+export function declarationFile(bundle) {
+  return bundle.out.replace(/\.js$/, '.d.ts')
 }
 
 // esbuild only minifies CSS together with JS, and Terser does our JS. So the stylesheet esbuild

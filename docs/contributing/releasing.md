@@ -24,6 +24,10 @@ confirmation, pushes the `v<version>` tag, and publishes to npm. A version conta
 `pre` or `alpha` is published under the npm tag `next` instead of `latest`, so it never
 reaches users who just run `npm install unpoly`.
 
+Every bundle in the package has a placeholder declaration beside it (`unpoly.js` → `unpoly.d.ts`)
+that contains only `export {}`. It lets TypeScript apps with `allowJs` import the bundle, which has
+no module syntax. The build writes them; real types will replace them later.
+
 The tool runs no specs and no type check, and its build lints only `src/`. It builds the
 working tree and tags `HEAD`, so release from a clean working tree, at a pushed commit that
 [CI](commit-conventions.md#continuous-integration) has passed.
