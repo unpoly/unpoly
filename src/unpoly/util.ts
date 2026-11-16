@@ -894,9 +894,6 @@ export function parseArgs<S extends t.ArgSpec[]>(args: any[], ...specs: S): { [K
 export function parseArgs(args: any[], ...specs: t.ArgSpec[]): any[] {
   let results = []
 
-  // let originalArgs = copy(args)
-  // let originalSpecs = copy(specs)
-
   while (specs.length) {
     let lastSpec = specs.pop()
 
@@ -915,10 +912,6 @@ export function parseArgs(args: any[], ...specs: t.ArgSpec[]): any[] {
       results.unshift(value)
     }
   }
-
-  // if (args.length) {
-  //   throw new up.CannotParse(['Invalid argument list (%o vs. %o), left is %o', originalArgs, originalSpecs, args])
-  // }
 
   return results
 }
@@ -1014,10 +1007,6 @@ export function maskPattern(str: string, patterns: RegExp[], { keepDelimiters = 
 }
 
 const QUOTED_STRING_PATTERN = /'(?:\\\\|\\'|[^'])*'|"(?:\\\\|\\"|[^"])*"/g
-// TODO: Remove
-// const NESTED_BRACES = /{(?:[^{}]|{[^{}]*})*}/g
-// const NESTED_PARENTHESES = /\((?:[^\(\)]|\([^\(\)]*\))*\)/g
-// const NESTED_BRACKETS = /\[(?:[^\[\]]|\[[^\[\]]*\])*\]/g
 const NESTED_GROUP_PATTERN = /{(?:[^{}]|{[^{}]*})*}|\((?:[^\(\)]|\([^\(\)]*\))*\)|\[(?:[^\[\]]|\[[^\[\]]*\])*\]/g // oxlint-disable-line no-useless-escape
 
 export function expressionOutline(str: string): t.MaskedString {

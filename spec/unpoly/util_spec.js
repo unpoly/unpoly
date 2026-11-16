@@ -640,57 +640,6 @@ describe('up.util', () => {
       })
     })
 
-
-//    describe 'up.util.parsePath', ->
-//
-//      it 'parses a plain name', ->
-//        path = up.util.parsePath("foo")
-//        expect(path).toEqual ['foo']
-//
-//      it 'considers underscores to be part of a name', ->
-//        path = up.util.parsePath("foo_bar")
-//        expect(path).toEqual ['foo_bar']
-//
-//      it 'considers dashes to be part of a name', ->
-//        path = up.util.parsePath("foo-bar")
-//        expect(path).toEqual ['foo-bar']
-//
-//      it 'parses dot-separated names into multiple path segments', ->
-//        path = up.util.parsePath('foo.bar.baz')
-//        expect(path).toEqual ['foo', 'bar', 'baz']
-//
-//      it 'parses nested params notation with square brackets', ->
-//        path = up.util.parsePath('user[account][email]')
-//        expect(path).toEqual ['user', 'account', 'email']
-//
-//      it 'parses double quotes in square brackets', ->
-//        path = up.util.parsePath('user["account"]["email"]')
-//        expect(path).toEqual ['user', 'account', 'email']
-//
-//      it 'parses single quotes in square brackets', ->
-//        path = up.util.parsePath("user['account']['email']")
-//        expect(path).toEqual ['user', 'account', 'email']
-//
-//      it 'allows square brackets inside quotes', ->
-//        path = up.util.parsePath("element['a[up-href]']")
-//        expect(path).toEqual ['element', 'a[up-href]']
-//
-//      it 'allows single quotes inside double quotes', ->
-//        path = up.util.parsePath("element[\"a[up-href='foo']\"]")
-//        expect(path).toEqual ['element', "a[up-href='foo']"]
-//
-//      it 'allows double quotes inside single quotes', ->
-//        path = up.util.parsePath("element['a[up-href=\"foo\"]']")
-//        expect(path).toEqual ['element', 'a[up-href="foo"]']
-//
-//      it 'allows dots in square brackets when it is quoted', ->
-//        path = up.util.parsePath('elements[".foo"]')
-//        expect(path).toEqual ['elements', '.foo']
-//
-//      it 'allows different notation for each segment', ->
-//        path = up.util.parsePath('foo.bar[baz]["bam"][\'qux\']')
-//        expect(path).toEqual ['foo', 'bar', 'baz', 'bam', 'qux']
-
     describe('up.util.parseURL', function() {
 
       it('parses a full URL', function() {
@@ -739,41 +688,6 @@ describe('up.util', () => {
     })
 
     require('./util_objects_spec')
-
-//    describe 'up.util.previewable', ->
-//
-//      it 'wraps a function into a proxy function with an additional .promise attribute', ->
-//        fun = -> 'return value'
-//        proxy = up.util.previewable(fun)
-//        expect(u.isFunction(proxy)).toBe(true)
-//        expect(u.isPromise(proxy.promise)).toBe(true)
-//        expect(proxy()).toEqual('return value')
-//
-//      it "resolves the proxy's .promise when the inner function returns", (done) ->
-//        fun = -> 'return value'
-//        proxy = up.util.previewable(fun)
-//        callback = jasmine.createSpy('promise callback')
-//        proxy.promise.then(callback)
-//        u.task ->
-//          expect(callback).not.toHaveBeenCalled()
-//          proxy()
-//          u.task ->
-//            expect(callback).toHaveBeenCalledWith('return value')
-//            done()
-//
-//      it "delays resolution of the proxy's .promise if the inner function returns a promise", (done) ->
-//        funDeferred = u.newDeferred()
-//        fun = -> funDeferred
-//        proxy = up.util.previewable(fun)
-//        callback = jasmine.createSpy('promise callback')
-//        proxy.promise.then(callback)
-//        proxy()
-//        u.task ->
-//          expect(callback).not.toHaveBeenCalled()
-//          funDeferred.resolve('return value')
-//          u.task ->
-//            expect(callback).toHaveBeenCalledWith('return value')
-//            done()
 
     describe('up.internal.sequence', function() {
 
@@ -1401,20 +1315,6 @@ describe('up.util', () => {
     })
 
     require('./util_strings_spec')
-
-//    describe 'up.util.unprefixCamelCase', ->
-//
-//      it 'returns the given key without the given prefixed', ->
-//        result = up.util.unprefixCamelCase('prefixFoo', 'prefix')
-//        expect(result).toEqual('foo')
-//
-//      it 'returns undefined if the given key is not prefixed with the given prefix', ->
-//        result = up.util.unprefixCamelCase('foo', 'prefix')
-//        expect(result).toBeUndefined()
-//
-//      it 'returns undefined if the given prefix is the full given key', ->
-//        result = up.util.unprefixCamelCase('prefix', 'prefix')
-//        expect(result).toBeUndefined()
 
     describe('up.internal.memoizeMethod()', function() {
 
