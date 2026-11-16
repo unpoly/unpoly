@@ -595,7 +595,8 @@ function getOriginRegion(origin?: Element): Element | null | undefined {
 type TrackFieldsCallback = (field: Element) => unknown
 // The guard is a condition for a field to match, tested for truthiness.
 interface TrackFieldsOptions { guard?: (field: Element) => unknown }
-export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): u.UndoFunction {
+type TrackFieldsArgs = [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]
+export const trackFields = mockable(function(...args: TrackFieldsArgs): u.UndoFunction {
   let [root, { guard }, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
   let selectFn = function() {

@@ -44,7 +44,7 @@ function reset(): void {
   progressBar = null
 }
 
-export const makeRequest = mockable(function makeRequest(...args: [url: string, options?: Partial<t.RequestOptions>] | [options: t.RequestOptions]): UpRequest {
+export const makeRequest = mockable(function makeRequest(...args: t.RequestArgs): UpRequest {
   const options = parseRequestOptions(args)
   const request = new UpRequest(options)
   processRequest(request)

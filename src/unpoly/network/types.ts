@@ -110,6 +110,11 @@ export interface RequestOptions {
 }
 
 /**
+The arguments for `up.request()`: a URL and optional options, or options with a `{ url }`.
+*/
+export type RequestArgs = [url: string, options?: Partial<RequestOptions>] | [options: RequestOptions]
+
+/**
 What `up.Request.tester()` accepts: a request, a URL pattern, a function or a boolean.
 @internal
 */
