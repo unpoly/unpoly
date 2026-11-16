@@ -191,7 +191,7 @@ export interface RenderOptions {
   onRendered?: (result: RenderResult) => unknown
   // A revalidating render pass sets null, so it doesn't run the callback of the pass it revalidates.
   onFinished?: ((result: RenderResult) => unknown) | null
-  onError?: (error: unknown) => unknown
+  onError?: (error: Error) => unknown
   onOpened?: (event: LayerOpenedEvent) => unknown
   onAccept?: (event: LayerAcceptEvent) => unknown
   onAccepted?: (event: LayerAcceptedEvent) => unknown
