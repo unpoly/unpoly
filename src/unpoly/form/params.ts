@@ -104,7 +104,7 @@ export class Params {
     return parts.join(separator)
   }
 
-  add(name: string, value: unknown): void {
+  add(name: string, value: t.ParamValue): void {
     this.entries.push({ name, value })
   }
 
@@ -131,7 +131,7 @@ export class Params {
     return u.map(this.entries, 'name')
   }
 
-  values(): unknown[] {
+  values(): t.ParamValue[] {
     return u.map(this.entries, 'value')
   }
 
@@ -171,7 +171,7 @@ export class Params {
     }
   }
 
-  set(name: string, value: unknown): void {
+  set(name: string, value: t.ParamValue): void {
     this.delete(name)
     this.add(name, value)
   }
@@ -184,7 +184,7 @@ export class Params {
     return (entry) => entry.name === name
   }
 
-  get(name: string): unknown {
+  get(name: string): t.ParamValue | t.ParamValue[] {
     if (this._isArrayKey(name)) {
       return this.getAll(name)
     } else {
@@ -192,12 +192,12 @@ export class Params {
     }
   }
 
-  getFirst(name: string): unknown {
+  getFirst(name: string): t.ParamValue {
     const entry = u.findInList(this.entries, this._matchEntryFn(name))
     return entry?.value
   }
 
-  getAll(name: string): unknown[] {
+  getAll(name: string): t.ParamValue[] {
     const entries = u.filterList(this.entries, this._matchEntryFn(name))
     return u.map(entries, 'value')
   }

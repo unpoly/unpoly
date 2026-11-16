@@ -109,12 +109,17 @@ export interface FormGroupSolution {
 }
 
 /**
-A single param. Its value is usually a string or a `File`. Other values are stringified
-when the params are encoded.
+A param value that `up.Params` can encode: a string, a number, a boolean or a `Blob` (like a `File`).
+A value of `null` or `undefined` encodes the name without a value in a query string.
+*/
+export type ParamValue = string | number | boolean | Blob | null | undefined
+
+/**
+A single param.
 */
 export interface ParamEntry {
   name: string
-  value: unknown
+  value: ParamValue
 }
 
 /**
