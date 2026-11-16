@@ -16,7 +16,7 @@ export class ResponseDoc {
   declare _isFullDocument?: boolean
   declare _cspInfo?: CSPInfo
   declare _rediscoveredOrigin?: Element
-  declare _match?: 'region' | 'first'
+  declare _match?: t.MatchMode
 
   constructor({ document, fragment, content, target, origin, data, cspInfo, match }: t.ResponseDocOptions) {
     if (document) {
@@ -76,7 +76,7 @@ export class ResponseDoc {
     this._document = this._buildFauxDocument(element)
   }
 
-  _parseContent(value: string | Element | u.List<Node>, origin: Element | undefined, target: string | undefined, data: any): void {
+  _parseContent(value: t.ContentValue, origin: Element | undefined, target: string | undefined, data: any): void {
     if (!target) fail("must pass a { target } when passing { content }")
 
     // We are only provided with inner child content.
