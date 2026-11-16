@@ -132,7 +132,6 @@ function parseCallbackOptions(key: string): ParseCallbackOptions {
 
 // Reads an attribute like [up-on-loaded] as the callback option it sets, with the arguments of that callback.
 export function renderCallbackAttr(element: Element, attrName: string, key: string): u.AnyFunction | undefined {
-  // return e.parseAttr(element, attrName, (value) => parseRenderCallback(key, value))
   return callbackAttr(element, attrName, parseCallbackOptions(key))
 }
 

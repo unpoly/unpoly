@@ -29,7 +29,6 @@ export class UpdateLayerPlan extends LayerPlan {
     this._context = options.context
     // up.fragment.expandTargets() was already called by renderFromContent()
     this._steps = parseTargetSteps(this.target, this.options)
-    // this.uid = Math.random()
   }
 
   getPreflightProps(): t.PreflightProps {

@@ -299,9 +299,6 @@ function preserveDescendantKeepables(step: MatchedStep, willChangeBody: boolean)
           document.body.append(keepable)
         }
 
-        // // Since we're going to swap the entire oldElement and newElement containers afterwards,
-        // // replace the matching element with keepable so it will eventually return to the DOM.
-        // keepMatch.newElement.replaceWith(keepable)
         descendantKeepMatches.push(keepMatch)
       }
     }

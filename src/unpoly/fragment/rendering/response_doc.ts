@@ -262,7 +262,7 @@ export class ResponseDoc {
     // (3) Safari cannot parse (or move?) auto-playing media elements.
     if (this._document instanceof Document) {
       for (let brokenElement of e.subtree(element, ':is(noscript, script, audio, video):not(.up-keeping, .up-keeping *)')) {
-        // throw "why does this not re-execute a <script> tag? wouldn't it be safer to disable all scripts, then revive some of them?"
+        // TODO: Why does this not re-execute a <script> tag? Wouldn't it be safer to disable all scripts, then revive some of them?
         let clone = e.revivedClone(brokenElement)
         brokenElement.replaceWith(clone)
       }
