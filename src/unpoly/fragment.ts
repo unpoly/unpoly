@@ -929,7 +929,7 @@ export function onFirstIntersect(element: Element, callback: () => void, { margi
 const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
 export function provideNodes(
-  value: any,
+  value: t.NodesValue,
   { origin, originLayer, data, htmlParser = e.createNodesFromHTML }: ProvideNodesOptions = {},
 ): u.List<Node> {
   if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
@@ -946,10 +946,11 @@ export function provideNodes(
     value = cloneTemplate(value, data, { htmlParser })
   }
 
-  return u.wrapList(value)
+  // A list is returned as it is.
+  return u.wrapList(value) as u.List<Node>
 }
 
-function isTemplate(value: any): boolean {
+function isTemplate(value: unknown): value is Element {
   return u.isElement(value) && value.matches('template, script[type]') && !isScript(value)
 }
 

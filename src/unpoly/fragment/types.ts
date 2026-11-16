@@ -48,6 +48,12 @@ A `{ content }` option: an HTML string, an element, or a list of nodes.
 export type ContentValue = string | Element | u.List<Node>
 
 /**
+What a preview inserts or shows as a placeholder: an HTML string, a template selector (optionally followed by
+template data), an element, a text node, or a list of nodes.
+*/
+export type NodesValue = string | Node | u.List<Node>
+
+/**
 The options that `up.render()`, `up.navigate()` and the functions built on them (`up.follow()`,
 `up.submit()`, `up.layer.open()`, ...) pass through a render pass.
 

@@ -4,7 +4,7 @@ import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { on } from './event.js'
 import { getDisablePreviewFn } from './form.js'
-import { matchSelectorMap, type RenderOptions } from './fragment.js'
+import { matchSelectorMap, type NodesValue, type RenderOptions } from './fragment.js'
 // Not through framework.js, which may not be evaluated yet when we create a Registry below.
 import { Registry } from './framework/registry.js'
 import { layerStack, type Layer } from './layer.js'
@@ -146,7 +146,7 @@ function doRunPreviews(request: UpRequest, renderOptions: RenderOptions): u.Undo
   return cleaner.clean
 }
 
-function getPlaceholderPreviewFn(placeholder: any): t.PreviewFunction | undefined {
+function getPlaceholderPreviewFn(placeholder: NodesValue | false | undefined): t.PreviewFunction | undefined {
   if (!placeholder) return
 
   return function(preview) {
@@ -154,7 +154,7 @@ function getPlaceholderPreviewFn(placeholder: any): t.PreviewFunction | undefine
   }
 }
 
-export function resolvePreviewFns(value: any): t.PreviewFunction[] {
+export function resolvePreviewFns(value: unknown): t.PreviewFunction[] {
   if (u.isFunction(value)) {
     return [value]
   } else if (u.isString(value)) {

@@ -2,7 +2,9 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { guard, UpError } from '../error.js'
 import { disableContainerTemp, type Params } from '../form.js'
-import { getFragment, insertTemp, provideNodes, type RenderOptions } from '../fragment.js'
+import {
+  getFragment, insertTemp, provideNodes, type ContentValue, type NodesValue, type RenderOptions,
+} from '../fragment.js'
 import {
   layerStack, open, OVERLAY_VISUAL_KEYS, type Layer, type LayerDismissEvent,
 } from '../layer.js'
@@ -72,9 +74,10 @@ export class Preview {
     return !!this.expiredResponse
   }
 
-  run(value: any, options: u.PlainObject = {}): void {
+  run(value: unknown, options: u.PlainObject = {}): void {
     for (let fn of resolvePreviewFns(value)) {
-      this.undo(guard(fn, this, options))
+      // A preview function may return an undo function. undo() ignores other values.
+      this.undo(guard(fn, this, options) as u.UndoFunction)
     }
   }
 
@@ -84,14 +87,14 @@ export class Preview {
 
   setAttrs(attrs: u.PlainObject): void
   setAttrs(element: e.ElementOrSelector, attrs: u.PlainObject): void
-  setAttrs(...args: any[]): void {
+  setAttrs(...args: unknown[]): void {
     let [element, attrs] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.setAttrsTemp(element, attrs))
   }
 
   addClass(klass: string): void
   addClass(element: e.ElementOrSelector, klass: string): void
-  addClass(...args: any[]): void {
+  addClass(...args: unknown[]): void {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.addClassTemp(element, klass))
   }
@@ -106,14 +109,14 @@ export class Preview {
 
   removeClass(klass: string): void
   removeClass(element: e.ElementOrSelector, klass: string): void
-  removeClass(...args: any[]): void {
+  removeClass(...args: unknown[]): void {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.removeClassTemp(element, klass))
   }
 
   setStyle(styles: e.StyleProps): void
   setStyle(element: e.ElementOrSelector, styles: e.StyleProps): void
-  setStyle(...args: any[]): void {
+  setStyle(...args: unknown[]): void {
     let [element, styles] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.setStyleTemp(element, styles))
   }
@@ -123,10 +126,10 @@ export class Preview {
     this.undo(disableContainerTemp(element, { preview: true }))
   }
 
-  insert(tempValue: any): void
-  insert(reference: e.ElementOrSelector, tempValue: any): void
-  insert(reference: e.ElementOrSelector, position: InsertPosition, tempValue: any): void
-  insert(...args: any[]): void {
+  insert(tempValue: NodesValue): void
+  insert(reference: e.ElementOrSelector, tempValue: NodesValue): void
+  insert(reference: e.ElementOrSelector, position: InsertPosition, tempValue: NodesValue): void
+  insert(...args: unknown[]): void {
     // (1) tempValue can have on of the following forms:
     //     - A string of HTML
     //     - A CSS selector string matching a template
@@ -157,9 +160,9 @@ export class Preview {
     this.undo(() => e.unwrap(wrapper))
   }
 
-  showPlaceholder(placeholder: any): void
-  showPlaceholder(parent: e.ElementOrSelector, placeholder: any): void
-  showPlaceholder(...args: any[]): void {
+  showPlaceholder(placeholder: NodesValue): void
+  showPlaceholder(parent: e.ElementOrSelector, placeholder: NodesValue): void
+  showPlaceholder(...args: unknown[]): void {
     let [parent, placeholderReference] = this._parseMutatorArgs(args, 'val', 'val')
 
     // We do not need to wrap a NodeList of mixed Text and Element nodes.
@@ -179,15 +182,15 @@ export class Preview {
     }
   }
 
-  swapContent(newContent: any): void
-  swapContent(parent: e.ElementOrSelector, newContent: any): void
-  swapContent(...args: any[]): void {
+  swapContent(newContent: NodesValue): void
+  swapContent(parent: e.ElementOrSelector, newContent: NodesValue): void
+  swapContent(...args: unknown[]): void {
     let [parent, newContent] = this._parseMutatorArgs(args, 'val', 'val')
     this.hideContent(parent)
     this.insert(parent, newContent)
   }
 
-  openLayer(content: any, options: u.PlainObject = {}): Layer {
+  openLayer(content: ContentValue, options: u.PlainObject = {}): Layer {
     let undoDismissValue = ':undo-preview'
 
     let onDismiss = ({ value }: LayerDismissEvent) => {
@@ -213,7 +216,8 @@ export class Preview {
     return overlay
   }
 
-  _parseMutatorArgs(args: any[], ...specs: u.ArgSpec[]): any[] {
+  // oxlint-disable-next-line typescript/no-explicit-any -- parsed arguments of any type
+  _parseMutatorArgs(args: unknown[], ...specs: u.ArgSpec[]): any[] {
     let [element, ...rest] = u.parseArgs(args, ...specs)
     // (1) up.fragment.get(undefined) returns undefined
     // (2) up.fragment.get(Element) returns the element
