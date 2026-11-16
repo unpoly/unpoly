@@ -3,7 +3,7 @@ import * as e from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { fail, muteUncriticalRejection } from './error.js'
-import { build, haltEvent, on, type UnbindFunction } from './event.js'
+import { build, haltEvent, on } from './event.js'
 import {
   closest, getAllFragments, getSmart, getSubtree, render, sourceOf, toTarget, trackSelector,
   tryToTarget, type RenderJob, type RenderOptions, type RenderResult,
@@ -114,7 +114,7 @@ export function readFieldDisabled(field: t.Field): boolean {
 // `() => writeFieldDisabled(field, false)`: a custom element that upgrades in between would be
 // disabled through its attribute and re-enabled through a property that only just appeared,
 // leaving our attribute on the element for good.
-export function writeFieldDisabled(field: t.Field, disabled: boolean): () => void {
+export function writeFieldDisabled(field: t.Field, disabled: boolean): u.UndoFunction {
   if ('disabled' in field) {
     field.disabled = disabled
     return () => { field.disabled = !disabled }
@@ -276,12 +276,12 @@ export function validateOptions(field: e.ElementOrSelector, options?: t.Validate
   return options
 }
 
-export function disableContainerTemp(container: Element, { preview }: { preview?: boolean } = {}): () => void {
+export function disableContainerTemp(container: Element, { preview }: { preview?: boolean } = {}): u.UndoFunction {
   let controls = findFieldsAndButtons(container)
   return u.sequence(u.map(controls, (control) => disableControlTemp(control, preview)))
 }
 
-function disableControlTemp(control: t.Field, preview?: boolean): (() => void) | undefined {
+function disableControlTemp(control: t.Field, preview?: boolean): u.UndoFunction | undefined {
   // Ignore controls that were already disabled before us.
   // This way we don't accidentally re-enable a control that we didn't change.
   if (readFieldDisabled(control)) return
@@ -342,7 +342,7 @@ export function getDisablePreviewFn(disable: any, origin?: Element): PreviewFunc
 // The browser decides the form owner of a control across the whole page: A [form="X"] control
 // belongs to the first form#X in document order, and a control within a <form> belongs to it
 // even when it is in another layer (a popup attached within the form). Unpoly isolates layers.
-export function prepareParamsReadTemp(form: HTMLFormElement): () => void {
+export function prepareParamsReadTemp(form: HTMLFormElement): u.UndoFunction {
   let undo = u.cleaner()
   let ownControls = new Set(findFieldsAndButtons(form))
 
@@ -460,7 +460,7 @@ export function submitButtonOverrides(submitButton?: Element | false): RenderOpt
   return u.omit(buttonOptions, ['method', 'url', 'guardEvent', 'origin', 'params', 'headers'])
 }
 
-export function watch(...args: any[]): UnbindFunction {
+export function watch(...args: any[]): u.UndoFunction {
   let [root, options, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
   root = e.getOne(root) // unwrap jQuery
@@ -475,7 +475,7 @@ function watchCallbackFromElement(element: Element): t.WatchCallback | undefined
   return callbackAttr(element, 'up-watch', { argNames: ['value', 'name', 'options'] })
 }
 
-export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): UnbindFunction {
+export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): u.UndoFunction {
   const onChange = (_diff: u.PlainObject, renderOptions: RenderOptions) => submit(target, renderOptions)
   return watch(target, { logPrefix: 'up.autosubmit()', ...options, batch: true }, onChange)
 }
@@ -595,7 +595,7 @@ function getOriginRegion(origin?: Element): Element | null | undefined {
 type TrackFieldsCallback = (field: Element) => unknown
 // The guard is a condition for a field to match, tested for truthiness.
 interface TrackFieldsOptions { guard?: (field: Element) => unknown }
-export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): UnbindFunction {
+export const trackFields = mockable(function(...args: [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]): u.UndoFunction {
   let [root, { guard }, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
   let selectFn = function() {

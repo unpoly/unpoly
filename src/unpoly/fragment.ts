@@ -960,7 +960,7 @@ function defaultTemplateNodes(template: Element, htmlParser: t.HTMLParser = e.cr
   return htmlParser(templateText)
 }
 
-export function insertTemp(...args: any[]): () => void {
+export function insertTemp(...args: any[]): u.UndoFunction {
   let [reference, position = 'beforeend', tempValue] = u.parseArgs(args, 'val', u.isAdjacentPosition, 'val')
 
   let tempNodes = provideNodes(tempValue, { origin: reference })
@@ -987,7 +987,7 @@ export function insertTemp(...args: any[]): () => void {
   }
 }
 
-export function trackSelector<E extends Element>(selectFn: () => u.List<E>, callback: (element: E) => any): UnbindFunction {
+export function trackSelector<E extends Element>(selectFn: () => u.List<E>, callback: (element: E) => any): u.UndoFunction {
   let tracker = new SelectorTracker(selectFn, callback)
   return tracker.start()
 }

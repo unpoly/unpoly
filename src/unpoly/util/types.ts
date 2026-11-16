@@ -44,6 +44,11 @@ export interface NormalizeURLOptions {
   trailingSlash?: boolean
 }
 
+/**
+A function that undoes a temporary change, like the one returned by `up.element.setAttrsTemp()`.
+*/
+export type UndoFunction = () => void
+
 /** @internal */
 export type AnyFunction = (...args: any[]) => any
 

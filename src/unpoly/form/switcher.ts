@@ -1,7 +1,7 @@
 import * as u from '../util.js'
 import * as e from '../element.js'
 import { fail } from '../error.js'
-import { emit, type UnbindFunction } from '../event.js'
+import { emit } from '../event.js'
 import { findFields, getRegion, setContainerDisabled, watch } from '../form.js'
 import { getSmart, getSubtree, trackSelector } from '../fragment.js'
 import { Params } from './params.js'
@@ -31,7 +31,7 @@ export class Switcher {
     this._regionSelector = root.getAttribute('up-switch-region')
   }
 
-  start(): UnbindFunction {
+  start(): u.UndoFunction {
     // Switch our region once immediately.
     // Don't risk unswitched state showing up in the browser.
     this._switchRegion()
@@ -42,7 +42,7 @@ export class Switcher {
     )
   }
 
-  _trackFieldChanges(): UnbindFunction {
+  _trackFieldChanges(): u.UndoFunction {
     let callback = () => this._onFieldChanged()
     return up.migrate.watchForSwitch?.(this._root, callback)
       // Switching effects are client-side and cheap, so we never debounce them.
@@ -51,7 +51,7 @@ export class Switcher {
       || watch(this._root, { logPrefix: '[up-switch]', includeDisabled: true, delay: 0 }, callback)
   }
 
-  _trackNewSwitchees(): UnbindFunction {
+  _trackNewSwitchees(): u.UndoFunction {
     let onSwitcheeAdded = (switchee: Switchee) => this._switchSwitchee(switchee)
     return trackSelector(() => this._findSwitchees(), onSwitcheeAdded)
   }

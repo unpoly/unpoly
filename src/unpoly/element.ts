@@ -91,15 +91,15 @@ export function show(element: HTMLElement): void {
   setVisible(element, true)
 }
 
-export function showTemp(element: HTMLElement): t.UndoFunction {
+export function showTemp(element: HTMLElement): u.UndoFunction {
   return setVisibleTemp(element, true)
 }
 
-export function hideTemp(element: HTMLElement): t.UndoFunction {
+export function hideTemp(element: HTMLElement): u.UndoFunction {
   return setVisibleTemp(element, false)
 }
 
-function setVisibleTemp(element: HTMLElement, newVisible: boolean): t.UndoFunction {
+function setVisibleTemp(element: HTMLElement, newVisible: boolean): u.UndoFunction {
   if (newVisible === isVisible(element)) return u.noop
   setVisible(element, newVisible)
   return () => setVisible(element, !newVisible)
@@ -146,7 +146,7 @@ export function setAttrs(element: Element, attrs: u.PlainObject): void {
   }
 }
 
-export function setAttrsTemp(element: Element, attrs: u.PlainObject): t.UndoFunction {
+export function setAttrsTemp(element: Element, attrs: u.PlainObject): u.UndoFunction {
   let keys = Object.keys(attrs)
   let oldAttrs = pickAttrs(element, keys)
   setAttrs(element, attrs)
@@ -577,15 +577,15 @@ export function addClasses(element: Element, classes: Iterable<string>): void {
   for (let klass of classes) element.classList.add(klass)
 }
 
-export function addClassTemp(element: Element, klass: string): t.UndoFunction {
+export function addClassTemp(element: Element, klass: string): u.UndoFunction {
   return setClassStateTemp(element, klass, true)
 }
 
-export function removeClassTemp(element: Element, klass: string): t.UndoFunction {
+export function removeClassTemp(element: Element, klass: string): u.UndoFunction {
   return setClassStateTemp(element, klass, false)
 }
 
-function setClassStateTemp(element: Element, klass: string, targetState: boolean): t.UndoFunction {
+function setClassStateTemp(element: Element, klass: string, targetState: boolean): u.UndoFunction {
   if (element.classList.contains(klass) === targetState) return u.noop
   element.classList.toggle(klass, targetState)
   return () => element.classList.toggle(klass, !targetState)
@@ -638,7 +638,7 @@ export function setInlineStyle(element: HTMLElement, props: string | t.StyleProp
   }
 }
 
-export function setStyleTemp(element: HTMLElement, newStyles: t.StyleProps): t.UndoFunction {
+export function setStyleTemp(element: HTMLElement, newStyles: t.StyleProps): u.UndoFunction {
   const oldStyles = inlineStyle(element, Object.keys(newStyles))
   setInlineStyle(element, newStyles)
   return () => setInlineStyle(element, oldStyles)

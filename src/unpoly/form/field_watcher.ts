@@ -31,7 +31,7 @@ export class FieldWatcher {
     this._ensureWatchable()
   }
 
-  start(): UnbindFunction {
+  start(): u.UndoFunction {
     this._scheduledValues = null
     this._processedValues = this._readFieldValues()
     this._currentTimer = null
@@ -61,7 +61,7 @@ export class FieldWatcher {
     }
   }
 
-  _trackFields(): UnbindFunction {
+  _trackFields(): u.UndoFunction {
     if (isField(this._root)) {
       return this._watchField(this._root)
     } else {

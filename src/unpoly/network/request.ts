@@ -65,7 +65,7 @@ export class UpRequest {
   declare _bindFragments?: Element[]
   declare _deferred: u.Deferred<UpResponse>
   declare _xhr?: XMLHttpRequest
-  declare _revertPreviews?: () => void
+  declare _revertPreviews?: u.UndoFunction
   // Set by the request cache.
   declare cacheRoute?: Route
   declare trackedRequest?: UpRequest

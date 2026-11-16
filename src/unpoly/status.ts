@@ -107,7 +107,7 @@ function findActivatableAreas(element: NavLink): Element[] {
   return element.upExpandedPair || [element]
 }
 
-export function runPreviews(request: UpRequest, renderOptions: RenderOptions): () => void {
+export function runPreviews(request: UpRequest, renderOptions: RenderOptions): u.UndoFunction {
   // Previews run while the request is in flight, before it evicts its layers.
   let bindLayer = request.bindLayer!
   let focusCapsule = FocusCapsule.preserve(bindLayer)
@@ -119,7 +119,7 @@ export function runPreviews(request: UpRequest, renderOptions: RenderOptions): (
   }
 }
 
-function doRunPreviews(request: UpRequest, renderOptions: RenderOptions): () => void {
+function doRunPreviews(request: UpRequest, renderOptions: RenderOptions): u.UndoFunction {
   let { fragment, fragments, origin } = request
   let cleaner = u.cleaner()
   let previewForFragment = (fragment?: Element) => new Preview({ fragment, request, renderOptions, cleaner })

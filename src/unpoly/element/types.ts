@@ -7,11 +7,6 @@ A CSS selector, an element, or a list of elements. See `up.element.get()`.
 export type ElementOrSelector = string | Element | u.List<Element>
 
 /**
-A function that undoes a temporary change, like the one returned by `up.element.setAttrsTemp()`.
-*/
-export type UndoFunction = () => void
-
-/**
 Inline styles as an object, with property names in kebab-case (`'font-size'`).
 Values are strings, or numbers that get the unit passed to `up.element.setStyle()`.
 Any object with such properties works, e.g. an `up.Rect`.

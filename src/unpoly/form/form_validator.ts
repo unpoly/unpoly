@@ -30,7 +30,7 @@ export class FormValidator {
     this._honorAbort()
   }
 
-  start(): UnbindFunction {
+  start(): u.UndoFunction {
     let guard = (field: Element) => this._isValidatingField(field)
     let callback = (field: Element) => this._onFieldAdded(field)
     return trackFields(this._form, { guard }, callback)

@@ -16,7 +16,7 @@ export class SelectorTracker {
     this._syncScheduled = false
   }
 
-  start(): UnbindFunction {
+  start(): u.UndoFunction {
     // Get initial matches immediately. If we waited for scheduleSync(), the following race condition
     // could occur:
     //
