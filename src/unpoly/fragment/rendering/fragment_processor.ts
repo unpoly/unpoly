@@ -5,13 +5,11 @@ import { type Layer } from '../../layer.js'
 import { printToWarn } from '../../log.js'
 import type * as t from '../types.js'
 
-type ProcessorOption = t.FocusOption | t.ScrollOption
-
 // Processes a { focus } or { scroll } render option. The option can be a string, an element, a function,
 // an array of alternatives or a selector map, so its type stays `any`.
 export abstract class FragmentProcessor {
   declare fragment?: HTMLElement | null
-  declare autoMeans: ProcessorOption
+  declare autoMeans: t.ScrollOption | t.FocusOption
   declare origin?: Element
   declare layer?: Layer
 
@@ -34,7 +32,7 @@ export abstract class FragmentProcessor {
   }
 
   // Returns a truthy value if the option was processed.
-  process(opt: ProcessorOption): any {
+  process(opt: t.ScrollOption | t.FocusOption): any {
     let preprocessed = this.preprocessOnce(opt)
     return this.tryProcess(preprocessed)
   }
