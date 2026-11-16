@@ -32,7 +32,7 @@ export class Preview {
     this._cleaner = cleaner
   }
 
-  undo(...args: any[]): void {
+  undo(...args: [undoFn: u.UndoFunction]): void {
     if (this.ended) {
       // We might have the idea to immediately undo an effect when the preview has ended,
       // but it might lead to infinite loops in cases like this:
