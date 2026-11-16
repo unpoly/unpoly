@@ -1,7 +1,7 @@
 import type * as u from '../util.js'
-import { type RenderOptions } from '../fragment.js'
-import { type UpRequest } from '../network.js'
-import { type Preview } from './preview.js'
+import type { RenderOptions } from '../fragment.js'
+import type { UpRequest } from '../network.js'
+import type { Preview } from './preview.js'
 
 /**
 A preview function, registered with `up.preview()` or passed as `{ preview }`.

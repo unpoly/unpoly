@@ -22,7 +22,7 @@ export {
   chainCallbacks, deriveFailOptions, NO_INPUT_INTERFERENCE, NO_PREVIEWS, parseRenderCallback,
   preprocessRenderOptions, renderCallbackAttr,
 } from './fragment/rendering/render_options.js'
-import { type RenderResult } from './fragment/rendering/render_result.js'
+import type { RenderResult } from './fragment/rendering/render_result.js'
 export { type RenderResult }
 export { ResponseDoc } from './fragment/rendering/response_doc.js'
 import { Selector } from './fragment/matching/selector.js'

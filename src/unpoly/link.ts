@@ -12,7 +12,7 @@ import {
   getSmart, NO_INPUT_INTERFERENCE, NO_PREVIEWS, onFirstIntersect, render, type RenderJob, type RenderOptions,
 } from './fragment.js'
 import { canPushState, isHistoryEnabled } from './history.js'
-import { type Layer } from './layer.js'
+import type { Layer } from './layer.js'
 import { mockable } from './mockable.js'
 import { motionOptions } from './motion.js'
 import { isSafeMethod, networkConfig, UpRequest } from './network.js'

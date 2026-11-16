@@ -1,6 +1,6 @@
 import type * as u from '../util.js'
-import { type Layer, type LayerReference } from '../layer.js'
-import { type UpEventListener } from './listeners.js'
+import type { Layer, LayerReference } from '../layer.js'
+import type { UpEventListener } from './listeners.js'
 
 /**
 An event emitted by Unpoly.

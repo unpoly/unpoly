@@ -4,7 +4,7 @@ import { fail } from '../error.js'
 import { normalizeLayerOptions } from '../layer.js'
 import type * as t from './types.js'
 import { Layer } from './layer.js'
-import { type LayerStack } from './layer_stack.js'
+import type { LayerStack } from './layer_stack.js'
 
 export class LayerLookup {
   declare _stack: LayerStack

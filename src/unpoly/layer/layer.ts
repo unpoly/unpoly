@@ -6,7 +6,7 @@ import {
   type Emission, type EmittedEvent, type EventPlan, type EventTypes, type ListenerArgs,
   type ListenerGroup, type ObservedEvent, type UnbindFunction,
 } from '../event.js'
-import { type RenderOptions } from '../fragment.js'
+import type { RenderOptions } from '../fragment.js'
 import {
   currentLocation, findMetaTags, getLang, isHistoryEnabled, pushLocation, updateLang,
   updateMetaTags, type HistoryAspect, type LocationChangedEvent,
@@ -15,9 +15,9 @@ import { closestLayerElement, mainTargets } from '../layer.js'
 import { convertClicks } from '../link.js'
 import { newStateCache } from '../viewport.js'
 import type * as t from './types.js'
-import { type LayerStack } from './layer_stack.js'
-import { type Overlay } from './overlay.js'
-import { type OverlayFocus } from './overlay_focus.js'
+import type { LayerStack } from './layer_stack.js'
+import type { Overlay } from './overlay.js'
+import type { OverlayFocus } from './overlay_focus.js'
 
 export class Layer {
   // Each subclass has its mode, like ModalLayer.mode = 'modal'.

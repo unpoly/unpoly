@@ -1,6 +1,6 @@
-import { type Up } from '../../unpoly.js'
-import { type PlainObject } from '../../unpoly/util.js'
-import { type ConfigWith } from '../../unpoly/util/config.js'
+import type { Up } from '../../unpoly.js'
+import type { PlainObject } from '../../unpoly/util.js'
+import type { ConfigWith } from '../../unpoly/util/config.js'
 
 /**
 Options for the warning that up.migrate.renamedProperty() and up.migrate.removedProperty() print.

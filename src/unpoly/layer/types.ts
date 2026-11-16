@@ -1,11 +1,11 @@
 import type * as u from '../util.js'
-import { type UpEvent } from '../event.js'
-import { type RenderOptions } from '../fragment.js'
-import { type AnimateOptions, type AnimationValue } from '../motion.js'
-import { type UpResponse } from '../network.js'
-import { type Layer } from './layer.js'
-import { type LayerStack } from './layer_stack.js'
-import { type Overlay } from './overlay.js'
+import type { UpEvent } from '../event.js'
+import type { RenderOptions } from '../fragment.js'
+import type { AnimateOptions, AnimationValue } from '../motion.js'
+import type { UpResponse } from '../network.js'
+import type { Layer } from './layer.js'
+import type { LayerStack } from './layer_stack.js'
+import type { Overlay } from './overlay.js'
 
 /**
 The settings in `up.layer.config`, described in its doc comment.

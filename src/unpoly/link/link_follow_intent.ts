@@ -4,7 +4,7 @@ import { on } from '../event.js'
 import { isAlive, onAborted } from '../fragment.js'
 import { linkConfig, shouldHandleClick } from '../link.js'
 import { printUserEvent } from '../log.js'
-import { type UpRequest } from '../network.js'
+import type { UpRequest } from '../network.js'
 import type * as t from './types.js'
 
 export class LinkFollowIntent {

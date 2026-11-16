@@ -1,4 +1,4 @@
-import { type UpRequest } from '../network.js'
+import type { UpRequest } from '../network.js'
 import * as u from '../util.js'
 
 export class UpError extends Error {

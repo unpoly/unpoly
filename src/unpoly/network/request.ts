@@ -15,7 +15,7 @@ import {
 } from '../protocol.js'
 import { runPreviews } from '../status.js'
 import type * as t from './types.js'
-import { type Route } from './request_cache.js'
+import type { Route } from './request_cache.js'
 import { UpResponse } from './response.js'
 import { sendWithXHR, submitWithForm } from './transports.js'
 

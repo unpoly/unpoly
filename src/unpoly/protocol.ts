@@ -2,9 +2,9 @@ import * as u from './util.js'
 import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { popCookie } from './browser.js'
-import { type EventPlan } from './event.js'
-import { type Params } from './form.js'
-import { type RenderOptions } from './fragment.js'
+import type { EventPlan } from './event.js'
+import type { Params } from './form.js'
+import type { RenderOptions } from './fragment.js'
 import { mockable } from './mockable.js'
 
 /**

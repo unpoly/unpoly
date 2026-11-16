@@ -3,7 +3,7 @@ import { isCritical } from '../error.js'
 import { networkConfig, requestCache } from '../network.js'
 import { CSPInfo } from '../script.js'
 import type * as t from './types.js'
-import { type UpRequest } from './request.js'
+import type { UpRequest } from './request.js'
 
 const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
 

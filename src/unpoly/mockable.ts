@@ -1,4 +1,4 @@
-import * as u from './util.js'
+import type * as u from './util.js'
 
 /**
 A function wrapped by `mockable()`. In specs, `fn.mock()` replaces the original with a Jasmine spy.

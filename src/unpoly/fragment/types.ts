@@ -1,17 +1,17 @@
 import type * as u from '../util.js'
-import { type EventPlan, type InputDevice, type UpEvent } from '../event.js'
-import { type ParamsLike } from '../form.js'
-import {
-  type CloseVerb, type Layer, type LayerAcceptEvent, type LayerAcceptedEvent, type LayerDismissEvent,
-  type LayerDismissedEvent, type LayerMode, type LayerOpenedEvent, type LayerReference, type NewLayer,
+import type { EventPlan, InputDevice, UpEvent } from '../event.js'
+import type { ParamsLike } from '../form.js'
+import type {
+  CloseVerb, Layer, LayerAcceptEvent, LayerAcceptedEvent, LayerDismissEvent, LayerDismissedEvent,
+  LayerMode, LayerOpenedEvent, LayerReference, NewLayer,
 } from '../layer.js'
-import { type AnimationValue, type TransitionValue } from '../motion.js'
-import { type RequestCondition, type UpRequest, type UpResponse } from '../network.js'
-import { type FragmentHungryEvent } from '../radio.js'
-import { type CSPInfo } from '../script.js'
-import { type PreviewFunction } from '../status.js'
-import { type FocusCapsule } from '../viewport.js'
-import { type RenderResult } from './rendering/render_result.js'
+import type { AnimationValue, TransitionValue } from '../motion.js'
+import type { RequestCondition, UpRequest, UpResponse } from '../network.js'
+import type { FragmentHungryEvent } from '../radio.js'
+import type { CSPInfo } from '../script.js'
+import type { PreviewFunction } from '../status.js'
+import type { FocusCapsule } from '../viewport.js'
+import type { RenderResult } from './rendering/render_result.js'
 
 /**
 What to render: a target selector, an element to derive a selector from, or several alternatives.

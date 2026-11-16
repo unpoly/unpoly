@@ -3,7 +3,7 @@ import * as e from '../element.js'
 import { submitForm } from '../browser.js'
 import { Params, type ParamEntry } from '../form.js'
 import { wrapMethod } from '../protocol.js'
-import { type UpRequest } from './request.js'
+import type { UpRequest } from './request.js'
 
 const CONTENT_TYPE_URL_ENCODED = 'application/x-www-form-urlencoded'
 const CONTENT_TYPE_FORM_DATA = 'multipart/form-data'

@@ -1,7 +1,7 @@
 import * as e from '../element.js'
 import { on } from '../event.js'
 import { getSmart, tryToTarget } from '../fragment.js'
-import { type Layer } from '../layer.js'
+import type { Layer } from '../layer.js'
 import { doFocus, focusedElementWithin } from '../viewport.js'
 import type * as t from './types.js'
 

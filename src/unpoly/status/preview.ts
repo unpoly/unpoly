@@ -7,7 +7,7 @@ import {
   layerStack, open, OVERLAY_VISUAL_KEYS, type Layer, type LayerDismissEvent,
 } from '../layer.js'
 import { printToStandard } from '../log.js'
-import { type UpRequest, type UpResponse } from '../network.js'
+import type { UpRequest, UpResponse } from '../network.js'
 import { resolvePreviewFns } from '../status.js'
 import type * as t from './types.js'
 

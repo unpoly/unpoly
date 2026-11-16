@@ -1,9 +1,9 @@
-import * as u from './util.js'
-import { type RenderOptions } from './fragment.js'
-import { type LocationChangedEvent } from './history.js'
-import { type Layer } from './layer.js'
-import { type RequestOptions, type UpResponse } from './network.js'
-import { type Compiler } from './script.js'
+import type * as u from './util.js'
+import type { RenderOptions } from './fragment.js'
+import type { LocationChangedEvent } from './history.js'
+import type { Layer } from './layer.js'
+import type { RequestOptions, UpResponse } from './network.js'
+import type { Compiler } from './script.js'
 
 /**
 The type of `up.migrate`.
