@@ -15,7 +15,7 @@ import { canPushState, isHistoryEnabled } from './history.js'
 import type { Layer } from './layer.js'
 import { mockable } from './mockable.js'
 import { motionOptions } from './motion.js'
-import { isSafeMethod, networkConfig, UpRequest } from './network.js'
+import { isSafeMethod, networkConfig, UpRequest, type RequestOptions } from './network.js'
 import { registerAttrCompiler, registerCompiler, registerMacro } from './script.js'
 import { statusOptions } from './status.js'
 import { doFocus } from './viewport.js'
@@ -81,7 +81,8 @@ function willCache(link: Element): boolean | undefined {
   if (options.url) {
     if (options.cache == null) { options.cache = 'auto' }
     options.basic = true
-    const request = new UpRequest(options)
+    // The { url } check above doesn't narrow a PlainObject.
+    const request = new UpRequest(options as RequestOptions)
     return request.willCache()
   }
 }
@@ -101,7 +102,7 @@ export const follow = mockable(function(
 })
 
 // TODO(types): Return RequestOptions once the render options have a type.
-export function parseRequestOptions(link: Element, options?: u.PlainObject, parserOptions?: e.OptionsParserOptions): any {
+export function parseRequestOptions(link: Element, options?: u.PlainObject, parserOptions?: e.OptionsParserOptions): u.PlainObject {
   options = u.newOptions(options)
   const parser = new OptionsParser(link, options, { ...parserOptions, fail: false })
 
