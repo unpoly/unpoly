@@ -62,17 +62,14 @@ export class OpenLayerPlan extends LayerPlan {
   }
 
   match(responseDoc: ResponseDoc): void {
-    if (this.target === ':none') {
-      this._content = document.createElement('up-none')
-    } else {
-      // We throw below when nothing matches.
-      this._content = responseDoc.select(this.target)!
-    }
+    let content = this.target === ':none' ? document.createElement('up-none') : responseDoc.select(this.target)
 
-    if (!this._content || !this._baseLayer.isAlive()) {
+    if (!content || !this._baseLayer.isAlive()) {
       // An error message will be chosen by renderFromContent()
       throw new CannotMatch()
     }
+
+    this._content = content
   }
 
   // Creates the overlay elements, but doesn't render content yet. This sets this.layer.
