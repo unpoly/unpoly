@@ -7,7 +7,7 @@ export type * from './element/types.js'
 
 // Parses the value of an attribute. Returns `undefined` if it cannot parse the value,
 // so `up.element.parseAttr()` tries the next parser.
-type AttrParser = (value: string, attribute: string, element: Element) => any
+type AttrParser<R> = (value: string, attribute: string, element: Element) => R | undefined
 
 // One element in a parsed selector's descendant path (`div.foo#bar[baz]` in `main > div.foo#bar[baz]`).
 interface SelectorSegment {
@@ -24,7 +24,7 @@ interface ParsedSelector {
   excludeRaw?: string
 }
 
-function first(...args: any[]): HTMLElement | null {
+function first(...args: [root: ParentNode, selector: string] | [selector: string]): HTMLElement | null {
   let [root = document, selector] = u.parseArgs(args, 'val', 'val')
   return root.querySelector(selector)
 }
@@ -43,7 +43,7 @@ export function subtreeFirst(root: ParentNode, selector: string): HTMLElement | 
   return elementLikeMatches(root, selector) ? root as HTMLElement : root.querySelector<HTMLElement>(selector)
 }
 
-export function elementLikeMatches(elementLike: any, selector: string): boolean {
+export function elementLikeMatches(elementLike: unknown, selector: string): boolean {
   return u.isElement(elementLike) && elementLike.matches(selector)
 }
 
@@ -72,13 +72,13 @@ export function getOne(root: ParentNode, selector: string): HTMLElement | null
 // Other values (undefined, null, false, Window, Document, DocumentFragment, ...) are returned unchanged.
 // Distributes over a union, so `Element | false` becomes `HTMLElement | false`.
 export function getOne<T>(value: T): T extends Element ? HTMLElement : T extends t.ElementOrSelector ? HTMLElement | null | undefined : T
-export function getOne(...args: any[]): unknown {
+export function getOne(...args: unknown[]): unknown {
   const value = args.pop()
 
   if (u.isElement(value)) { // Return an element before we run any other expensive checks
     return value
   } else if (u.isString(value)) {
-    return first(...args, value)
+    return first(...args as [ParentNode], value)
   } else if (u.isList(value)) {
     if (value.length > 1) {
       fail('up.element.get(): Cannot cast multiple elements (%o) to a single element', value)
@@ -90,15 +90,18 @@ export function getOne(...args: any[]): unknown {
   }
 }
 
-export function getList(...args: any[]): HTMLElement[] {
-  return u.flatMap(args, valueToList)
+// Takes selectors, elements, lists of elements, null and undefined.
+export function getList(...args: (t.ElementOrSelector | null | undefined)[]): HTMLElement[] {
+  // Unpoly works with HTML elements, see up.fragment.get().
+  return u.flatMap(args, valueToList) as HTMLElement[]
 }
 
-function valueToList(value: any): u.List<HTMLElement> {
+function valueToList(value: t.ElementOrSelector | null | undefined): u.List<Element> {
   if (u.isString(value)) {
     return document.querySelectorAll(value)
   } else {
-    return u.wrapList(value)
+    // A list is returned as it is.
+    return u.wrapList(value) as u.List<Element>
   }
 }
 
@@ -315,7 +318,7 @@ export function parseSelector(rawSelector: string): ParsedSelector {
 
 export function affix(parent: Element, selector: string, attrs?: u.PlainObject): HTMLElement
 export function affix(parent: Element, position: InsertPosition, selector: string, attrs?: u.PlainObject): HTMLElement
-export function affix(...args: any[]): HTMLElement {
+export function affix(...args: unknown[]): HTMLElement {
   let [parent, position = 'beforeend', selector, attributes] = u.parseArgs(args, 'val', u.isAdjacentPosition, 'val', 'options')
   const element = createFromSelector(selector, attributes)
   parent.insertAdjacentElement(position, element)
@@ -439,11 +442,12 @@ export function setMissingAttrs(element: Element, attrs: u.PlainObject): void {
   }
 }
 
-export function setMissingAttr(element: Element, key: string, value: any): void {
+export function setMissingAttr(element: Element, key: string, value: unknown): void {
   // (1) We skip a null or undefined value, e.g. from the attribute of another element that doesn't have it.
   // (2) We set false as "false". Some callers set [up-etag=false] on purpose.
   if (u.isGiven(value) && u.isMissing(element.getAttribute(key))) {
-    element.setAttribute(key, value)
+    // setAttribute() stringifies the value.
+    element.setAttribute(key, value as string)
   }
 }
 
@@ -489,7 +493,7 @@ export function wrapChildren(element: Element): HTMLElement {
 const CURSOR_PROPS = ['selectionStart', 'selectionEnd', 'scrollLeft', 'scrollTop']
 
 // Copies the selection and scroll position of a field. Without a target, copies them into an object.
-export function copyCursorProps(from: any, to: any = {}): any {
+export function copyCursorProps(from: u.PlainObject, to: u.PlainObject = {}): u.PlainObject {
   for (let key of CURSOR_PROPS) {
     try {
       to[key] = from[key]
@@ -516,7 +520,9 @@ function preservingFocus<T>(fn: () => T): T {
   }
 }
 
-export function parseAttr(element: Element, attribute: string, ...parsers: AttrParser[]): any {
+// Returns what the first parser returns that doesn't return undefined.
+export function parseAttr<P extends AttrParser<unknown>[]>(element: Element, attribute: string, ...parsers: P): ReturnType<P[number]>
+export function parseAttr(element: Element, attribute: string, ...parsers: AttrParser<unknown>[]): unknown {
   // The document does not respond to #hasAttribute()
   if (!element.hasAttribute?.(attribute)) return undefined
   let rawValue = element.getAttribute(attribute)!
@@ -531,7 +537,7 @@ export function stringAttr(element: Element, attribute: string): string | undefi
   return parseAttr(element, attribute, tryParseString)
 }
 
-let tryParseString: AttrParser = u.identity
+let tryParseString: AttrParser<string> = u.identity
 
 export function booleanAttr(element: Element, attribute: string): boolean | undefined {
   return parseAttr(element, attribute, tryParseBoolean)
@@ -572,17 +578,21 @@ function tryParseNumber(value: string): number | undefined {
   return u.parseNumber(value)
 }
 
+// oxlint-disable-next-line typescript/no-explicit-any -- parsed JSON, like JSON.parse()
 export function jsonAttr(element: Element, attribute: string): any {
   return parseAttr(element, attribute, tryParseJSON)
 }
 
+// oxlint-disable-next-line typescript/no-explicit-any -- parsed JSON, like JSON.parse()
 function tryParseJSON(value: string): any {
   if (value?.trim()) {
     return u.parseRelaxedJSON(value)
   }
 }
 
-export function closestAttr(element: Element, attr: string, readAttrFn: t.AttrReader = stringAttr): any {
+export function closestAttr(element: Element, attr: string): string | undefined
+export function closestAttr<R>(element: Element, attr: string, readAttrFn: t.AttrReader<R>): R | undefined
+export function closestAttr(element: Element, attr: string, readAttrFn: t.AttrReader = stringAttr): unknown {
   let match = element.closest('[' + attr + ']')
   if (match) {
     return readAttrFn(match, attr)

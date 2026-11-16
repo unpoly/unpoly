@@ -11,6 +11,7 @@ Inline styles as an object, with property names in kebab-case (`'font-size'`).
 Values are strings, or numbers that get the unit passed to `up.element.setStyle()`.
 Any object with such properties works, e.g. an `up.Rect`.
 */
+// oxlint-disable-next-line typescript/no-explicit-any -- any object with style properties, like an up.Rect
 export type StyleProps = Record<string, any>
 
 /**
@@ -22,7 +23,7 @@ export interface ElementDefinedEvent extends UpEvent { localName: string }
 Reads an attribute value from an element, like `up.element.booleanAttr()`.
 @internal
 */
-export type AttrReader = (element: Element, attribute: string) => any
+export type AttrReader<R = unknown> = (element: Element, attribute: string) => R
 
 /**
 Options for an `up.OptionsParser`.

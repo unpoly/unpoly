@@ -7,8 +7,8 @@ import type * as t from './types.js'
 interface ParseKeyOptions {
   // The attribute(s) to read. Defaults to the kebab-cased key with the parser's prefix.
   attr?: string | string[]
-  default?: any
-  normalize?: (value: any) => any
+  default?: unknown
+  normalize?: (value: string) => unknown
 }
 
 export class OptionsParser {
@@ -99,7 +99,7 @@ export class OptionsParser {
     Object.assign(this._options, fnResult)
   }
 
-  _parseFromAttr(attrValueFn: t.AttrReader, element: Element, attrName: string): any {
+  _parseFromAttr(attrValueFn: t.AttrReader, element: Element, attrName: string): unknown {
     if (this._closest) {
       return e.closestAttr(element, attrName, attrValueFn)
     } else {
