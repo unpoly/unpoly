@@ -101,25 +101,25 @@ export class FormValidator {
     return solutions
   }
 
-  _getFieldSolutions({ origin, ...options }: u.PlainObject): t.FoundValidationSolution[] | undefined {
+  _getFieldSolutions({ origin, ...options }: u.PlainObject): t.TargetedSolution[] | undefined {
     if (isField(origin)) {
       return this._getValidateAttrSolutions(origin) || this._getFormGroupSolutions(origin, options)
     }
   }
 
-  _getFormGroupSolutions(field: Element, { formGroup = true }: t.ValidateOptions): t.FoundValidationSolution[] | undefined {
+  _getFormGroupSolutions(field: Element, { formGroup = true }: t.ValidateOptions): t.TargetedSolution[] | undefined {
     if (!formGroup) return
 
     let solution = findGroupSolution(field, { targetable: true })
     if (solution) {
       printToStandard('up.validate()', 'Validating form group of field %o', field)
       // A { targetable } solution has a target.
-      return [solution as t.FoundValidationSolution]
+      return [solution as t.TargetedSolution]
     }
   }
 
   // The target may also be a boolean from an [up-validate] attribute.
-  _getTargetSelectorSolutions({ target, origin }: u.PlainObject): t.FoundValidationSolution[] | undefined {
+  _getTargetSelectorSolutions({ target, origin }: u.PlainObject): t.TargetedSolution[] | undefined {
     if (u.isString(target)) {
       printToStandard('up.validate()', 'Validating target "%s"', target)
       let simpleSelectors = splitTarget(target)
@@ -140,7 +140,7 @@ export class FormValidator {
     }
   }
 
-  _getElementSolutions(element: Element): t.FoundValidationSolution[] {
+  _getElementSolutions(element: Element): t.TargetedSolution[] {
     printToStandard('up.validate()', 'Validating element %o', element)
     return [{
       element,
@@ -149,7 +149,7 @@ export class FormValidator {
     }]
   }
 
-  _getValidateAttrSolutions(field: Element): t.FoundValidationSolution[] | undefined {
+  _getValidateAttrSolutions(field: Element): t.TargetedSolution[] | undefined {
     // In case of radio buttons the [up-validate] attribute will
     // be set on a container containing the entire radio button group.
     let containerWithAttr = field.closest('[up-validate]')

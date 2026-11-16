@@ -113,7 +113,7 @@ What to re-render to validate a field: an element, its target selector and the f
 triggered the validation.
 @internal
 */
-export interface FoundValidationSolution extends FormGroupSolution {
+export interface TargetedSolution extends FormGroupSolution {
   target: string
 }
 
@@ -122,7 +122,7 @@ A solution that is scheduled for rendering. `_getSolutions()` adds the render op
 deferred that settles when the validation has rendered.
 @internal
 */
-export interface ValidationSolution extends FoundValidationSolution {
+export interface ValidationSolution extends TargetedSolution {
   renderOptions: ValidateOptions
   batch?: boolean
   // The method and URL. Solutions with the same destination can be validated in one request.
