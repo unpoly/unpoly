@@ -141,11 +141,12 @@ for (let api of apis) {
 // keep whatever name the minifier gives them, except up.internal.NotImplemented: an error that
 // reaches the console should say what it is.
 const layerModes = [RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]
-for (let key in up) {
+// `Up` has no index signature, so we read its keys through a PlainObject.
+const upByKey: util.PlainObject = up
+for (let key in upByKey) {
   // Test the key first, so we don't call a getter like `up.context`.
-  // `Up` has no index signature, so we read the key through a PlainObject.
-  if (/^[A-Z]/.test(key) && (up as util.PlainObject)[key].prototype) {
-    framework.setClassName((up as util.PlainObject)[key], 'up.' + key)
+  if (/^[A-Z]/.test(key) && upByKey[key].prototype) {
+    framework.setClassName(upByKey[key], 'up.' + key)
   }
 }
 for (let mode of layerModes) {
