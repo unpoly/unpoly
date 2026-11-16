@@ -225,6 +225,17 @@ extendDescribe('up.network', function() {
           expect(request.originMode).toEqual('drawer')
         })
 
+        it('leaves the layer undefined when a { layer } name matches no layer', async function() {
+          expect(up.layer.isRoot()).toBe(true)
+
+          const request = up.request({ url: '/foo', layer: 'overlay' })
+          await wait()
+
+          expect(request.layer).toBeUndefined()
+          expect(request.mode).toBeUndefined()
+          expect('X-Up-Mode' in jasmine.lastRequest().requestHeaders).toBe(false)
+        })
+
         it('assumes no layer if neither { layer, failLayer, origin } are given', function() {
           makeLayers([
             { mode: 'root', context: { rootKey: 'rootValue' } },
