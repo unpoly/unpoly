@@ -7,7 +7,7 @@ import { printToStandard } from '../../log.js'
 import type * as t from '../types.js'
 import { renderFromContent } from './render_from_content.js'
 import { renderFromResponse } from './render_from_response.js'
-import { renderFromURL } from './render_from_url.js'
+import { renderFromURL, type URLRenderOptions } from './render_from_url.js'
 import { assertContentGiven, preprocessRenderOptions } from './render_options.js'
 import { RenderResult } from './render_result.js'
 
@@ -148,7 +148,7 @@ export class RenderJob {
 
     if (renderOptions.url) {
       // TypeScript doesn't narrow the object through renderOptions.url.
-      return renderFromURL(renderOptions as t.RenderOptions & { url: string })
+      return renderFromURL(renderOptions as URLRenderOptions)
     } else if (renderOptions.response) {
       return renderFromResponse(renderOptions)
     } else {

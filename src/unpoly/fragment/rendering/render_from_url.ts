@@ -12,12 +12,15 @@ import { renderFromResponse } from './render_from_response.js'
 import { deriveFailOptions } from './render_options.js'
 import type { RenderResult } from './render_result.js'
 
+// Render options with a { url }, which RenderJob checks before it calls us.
+export interface URLRenderOptions extends t.RenderOptions { url: string }
+
 // The options for the request of renderFromURL(): the render options plus the preflight props
 // of the success and fail options.
-type RequestAttrs = t.RenderOptions & t.PreflightProps & { url: string }
+type RequestAttrs = URLRenderOptions & t.PreflightProps
 
 // Fulfills with a request for { preload: true }.
-export async function renderFromURL(options: t.RenderOptions & { url: string }): Promise<RenderResult | UpRequest> {
+export async function renderFromURL(options: URLRenderOptions): Promise<RenderResult | UpRequest> {
   let reason = newPageReason(options)
   if (reason) {
     printToStandard('up.render()', reason)
@@ -43,7 +46,7 @@ export async function renderFromURL(options: t.RenderOptions & { url: string }):
   return await u.always(request, (responseOrError) => onRequestSettled(responseOrError, options, request))
 }
 
-function newPageReason(options: t.RenderOptions & { url: string }): string | undefined {
+function newPageReason(options: URLRenderOptions): string | undefined {
   // Rendering content from cross-origin URLs is out of scope for Unpoly.
   // We still allow users to call up.render() with a cross-origin URL, but
   // we will then make a full-page request.
@@ -63,7 +66,7 @@ function newPageReason(options: t.RenderOptions & { url: string }): string | und
 // - Includes the render options
 // - Includes the preflight props of the success options
 // - Includes the preflight props for fail-prefixed options
-function getRequestAttrs(options: t.RenderOptions & { url: string }): RequestAttrs {
+function getRequestAttrs(options: URLRenderOptions): RequestAttrs {
   // preflightPropsFromContent() will return meta information about the change that is most
   // likely before the request was dispatched.
   // This might change postflight if the response does not contain the desired target.
