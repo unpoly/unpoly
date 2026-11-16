@@ -79,8 +79,6 @@ export const layerConfig = newConfig('up.layer.config', (): t.LayerConfig => ({
 // Set by install().
 export let layerStack: LayerStack = null!
 
-let handlers: unknown[] = []
-
 export function mainTargets(mode: t.LayerMode): string[] {
   return u.flatMap(modeConfigs(mode), 'mainTargets')
 }
@@ -193,7 +191,6 @@ function reset(): void {
   // The body shifter is up.viewport state, but we reset it here, after closing the overlays.
   // Each closing overlay lowers its stack, which would fall below zero on a fresh shifter.
   bodyShifter.reset()
-  handlers = u.filterList(handlers, 'isDefault')
 }
 
 export async function open(options?: RenderOptions): Promise<Layer> {
