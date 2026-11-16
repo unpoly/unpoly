@@ -101,7 +101,7 @@ export class RequestQueue {
     // We always prioritize foreground requests over background requests.
     // Only when there is no foreground request left in the queue we will send a background request.
     // Note that if a queued preload request is requested without { preload: true } we will
-    // promote it to the foreground (see @promoteToForeground()).
+    // promote it to the foreground (see promoteToForeground()).
     let request = u.findInList(this._queuedRequests, (request) => !request.background)
     request ||= this._queuedRequests[0]
     return u.remove(this._queuedRequests, request)
@@ -114,7 +114,7 @@ export class RequestQueue {
   }
 
   _onRequestSettled(request: UpRequest): void {
-    // If the request was aborted before it was sent, it still sits in @queuedRequests.
+    // If the request was aborted before it was sent, it still sits in this._queuedRequests.
     u.remove(this._currentRequests, request) || u.remove(this._queuedRequests, request)
 
     queueMicrotask(() => this._poke())

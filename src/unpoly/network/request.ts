@@ -110,11 +110,11 @@ export class UpRequest {
     // the current layer. The { mode } and { failMode } attributes will belong to the
     // new layer being opened.
     this.layer = options.layer
-    this.mode = options.mode // we would love to delegate @mode to @layer.mode, but @layer might be the string "new"
-    this.context = options.context // we would love to delegate @context to @layer.context, but @layer might be string "new"
+    this.mode = options.mode // we would love to delegate this.mode to this.layer.mode, but this.layer might be the string "new"
+    this.context = options.context // we would love to delegate this.context to this.layer.context, but this.layer might be string "new"
     this.failLayer = options.failLayer
-    this.failMode = options.failMode // we would love to delegate @failMode to @failLayer.mode, but @failLayer might be the string "new"
-    this.failContext = options.failContext // we would love to delegate @failContext to @failLayer.mode, but @failLayer might be the string "new"
+    this.failMode = options.failMode // we would love to delegate this.failMode to this.failLayer.mode, but this.failLayer might be the string "new"
+    this.failContext = options.failContext // we would love to delegate this.failContext to this.failLayer.mode, but this.failLayer might be the string "new"
     this.origin = options.origin
     this.originLayer = options.originLayer
     this.originMode = options.originMode
@@ -144,11 +144,11 @@ export class UpRequest {
       // if any code actually calls up.request({ ..., layer: 'new' }).
       // In OpenLayerPlan we connect requests to the base layer we're stacking upon.
       this.layer = layerStack.get(this.layer, layerLookupOptions)
-      this.context ||= this.layer.context || {} // @layer might be "new", so we default to {}
+      this.context ||= this.layer.context || {} // this.layer might be "new", so we default to {}
       this.mode ||= this.layer.mode
 
       this.failLayer = layerStack.get(this.failLayer, layerLookupOptions)
-      this.failContext ||= this.failLayer?.context || {} // @failLayer might be "new", so we default to {}
+      this.failContext ||= this.failLayer?.context || {} // this.failLayer might be "new", so we default to {}
       this.failMode ||= this.failLayer?.mode
 
       this.originLayer ||= layerStack.get(this.origin) || layerStack.current
@@ -347,7 +347,7 @@ export class UpRequest {
   }
 
   loadPage(): void {
-    // This method works independently of @state, since it is often
+    // This method works independently of this.state, since it is often
     // a fallback for a request that cannot be processed as a fragment update
     // (see up:fragment:loaded event).
 

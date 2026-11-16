@@ -157,7 +157,7 @@ export class LayerStack {
   }
 
   get current(): Layer {
-    // Event listeners and compilers will push into @currentOverrides
+    // Event listeners and compilers will push into this._currentOverrides
     // to temporarily set up.layer.current to the layer they operate in.
     return u.last(this._currentOverrides) || this.front
   }

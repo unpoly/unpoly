@@ -197,7 +197,7 @@ export class FormValidator {
     let renderOptions = this._mergeRenderOptions(solutionsBatch)
 
     // We don't render concurrently. If additional fields want to validate
-    // while our request is in flight, they add to a new @dirtySolutions array.
+    // while our request is in flight, they add to a new this._dirtySolutions array.
     this._rendering = true
 
     try {

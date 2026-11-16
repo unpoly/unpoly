@@ -62,7 +62,7 @@ export class OptionsParser {
   parse(attrReader: t.AttrReader, key: string, keyOptions: t.ParseKeyOptions = {}): void {
     const attrNames = u.wrapList(keyOptions.attr ?? this._attrNameForKey(key))
 
-    // Below we will only set @options[key] = value if value is defined.
+    // Below we will only set this._options[key] = value if value is defined.
     let value = this._options[key]
 
     for (let attrName of attrNames) {

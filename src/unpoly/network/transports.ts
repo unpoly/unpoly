@@ -126,7 +126,7 @@ export function submitWithForm(request: UpRequest): void {
     params.add(csrfParam, csrfToken)
   }
 
-  // @params will be undefined for GET requests, since we have already
+  // params will be undefined for GET requests, since we have already
   // transfered all params to the URL during normalize().
   u.each(params.toArray(), (attrs) => addField(form, attrs))
 
