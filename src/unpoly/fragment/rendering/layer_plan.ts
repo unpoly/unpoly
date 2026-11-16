@@ -124,7 +124,7 @@ export abstract class LayerPlan {
     //
     //     X-Up-Events: [{ layer: 'current', type: 'foo'}]
     //
-    // We must set the current layer to @layer so { layer: 'current' } will emit on
+    // We must set the current layer to this.layer so { layer: 'current' } will emit on
     // the layer that is being updated, instead of the front layer.
     //
     // A listener to such a server-sent event might also close the layer.

@@ -87,7 +87,7 @@ function expandIntoPlans(layers: (Layer | 'new')[], targets: t.RenderTarget | bo
   // An abstract selector like :main may expand into multiple
   // concrete selectors, like ['main', '.content'].
   return layers.flatMap((layer) => expandTargetsInLayer(targets, layer, options).map((target) => {
-    // Any plans we add will inherit all properties from @options
+    // Any plans we add will inherit all properties from options
     const props = { ...options, target, layer, defaultPlacement: defaultPlacement(options) }
     // TypeScript doesn't narrow props.layer through the layer variable.
     return layer === 'new' ? new OpenLayerPlan(props) : new UpdateLayerPlan(props as t.ResolvedRenderOptions)

@@ -29,7 +29,7 @@ export class OpenLayerPlan extends LayerPlan {
     this._origin = options.origin
     // normalizeLayerOptions() always sets a { baseLayer }.
     this._baseLayer = options.baseLayer!
-    // Don't extract too many @properties from @options, since listeners
+    // Don't extract too many properties from options, since listeners
     // to up:layer:open may modify layer options.
   }
 
@@ -188,7 +188,7 @@ export class OpenLayerPlan extends LayerPlan {
     }
 
     // If an ancestor layer was opened with the wish to not affect history, this
-    // child layer must not affect it either, regardless of its @history setting.
+    // child layer must not affect it either, regardless of its history setting.
     this.layer.history &&= this._baseLayer.history
 
     // For the initial fragment insertion we always update its location, even if the layer
@@ -226,8 +226,8 @@ export class OpenLayerPlan extends LayerPlan {
   _assertOpenEventEmitted(): void {
     // The initial up:layer:open event is emitted on the document, since the layer
     // element has not been attached yet and there is no obvious element it should
-    // be emitted on. We don't want to emit it on @layer.parent.element since users
-    // might confuse this with the event for @layer.parent itself opening.
+    // be emitted on. We don't want to emit it on this.layer.parent.element since users
+    // might confuse this with the event for this.layer.parent itself opening.
     //
     // There is no { onOpen } or [up-on-open] handler to accompany the DOM event.
     assertEmitted('up:layer:open', {

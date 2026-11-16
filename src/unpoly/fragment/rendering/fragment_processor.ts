@@ -103,7 +103,7 @@ export abstract class FragmentProcessor {
     const lookupOpts = { layer: this.layer, origin: this.origin }
 
     let matchWithinFragment = this.fragment && getSmart(this.fragment, selector, lookupOpts)
-    // Prefer selecting a descendant of @fragment, but if not possible search through @fragment's entire layer
+    // Prefer selecting a descendant of this.fragment, but if not possible search through this.fragment's entire layer
     let match = matchWithinFragment || getSmart(selector, lookupOpts)
 
     if (match) {
