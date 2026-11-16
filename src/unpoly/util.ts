@@ -300,10 +300,7 @@ export function isAdjacentPosition(value: string): boolean {
   return /^(before|after)/.test(value)
 }
 
-export function wrapList<T>(value: T[]): T[]
-export function wrapList<T>(value: t.List<T>): t.List<T>
-export function wrapList<T>(value: T | t.List<T> | null | undefined): t.List<T>
-export function wrapList<T>(value: T | null | undefined): T[]
+export function wrapList<V>(value: V): t.WrappedList<V>
 export function wrapList(value: unknown): t.List<unknown> {
   if (isList(value)) {
     return value

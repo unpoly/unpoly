@@ -5,6 +5,24 @@ an `arguments` object or a jQuery collection.
 export interface List<T> extends ArrayLike<T>, Iterable<T> {}
 
 /**
+What `up.util.wrapList()` returns for a value of type `V`:
+
+- a single value gives an array,
+- a list gives that list,
+- `null` or `undefined` give an empty array,
+- a value that may be a single value or a list gives a `List` of items.
+*/
+export type WrappedList<V> =
+  unknown extends V ? List<V>
+  : [ListMember<V>] extends [never] ? NonNullable<V>[]
+  : [NonNullable<V>] extends [ListMember<V>] ? (V extends null | undefined ? never[] : V)
+  : List<ListItem<V>>
+
+// A string is array-like, but wrapList() wraps it like any other single value.
+type ListMember<V> = Exclude<Extract<V, List<unknown>>, string>
+type ListItem<V> = V extends null | undefined ? never : V extends string ? V : V extends List<infer T> ? T : V
+
+/**
 A function called for each item of a list, or the name of a property to read from each item.
 */
 export type Iteratee<T, R> = ((item: NoInfer<T>, index: number) => R) | string
