@@ -93,10 +93,7 @@ up.network.config.patch(function(config) {
   up.migrate.removedProperty(config, 'requestMetaKeys', { value: [], warning: 'The configuration up.network.config.requestMetaKeys has been removed. Servers that optimize responses based on request headers should instead set a Vary response header.' })
 })
 
-/**
-Request options with keys that core no longer knows.
-@internal
-*/
+// Request options with keys that core no longer knows.
 interface LegacyRequestOptions extends RequestOptions {
   solo?: unknown
 }

@@ -58,10 +58,10 @@ A function receives the request and may also return a URL pattern.
 */
 export type CacheMatcher = boolean | ((request: UpRequest) => boolean | string)
 
+// The request cache sets 'tracking' while a request waits for the response of an earlier, equivalent request.
 /**
 The state of an `up.Request` in its lifecycle.
 */
-// The request cache sets 'tracking' while a request waits for the response of an earlier, equivalent request.
 export type RequestState = 'new' | 'loading' | 'tracking' | 'loaded' | 'aborted' | 'offline'
 
 /**

@@ -17,11 +17,11 @@ export interface LinkPreloadEvent extends UpEvent {
   renderOptions: RenderOptions
 }
 
+// It also has the properties that forkEventAsUpClick() copies from the original event.
+// A keyboard event has no { clientX, clientY, button }, so they're missing when Enter or Space activates an element.
 /**
 The `up:click` event.
 */
-// It also has the properties that forkEventAsUpClick() copies from the original event.
-// A keyboard event has no { clientX, clientY, button }, so they're missing when Enter or Space activates an element.
 export interface ClickEvent extends UpEvent {
   target: Element
   originalEvent: MouseEvent | KeyboardEvent

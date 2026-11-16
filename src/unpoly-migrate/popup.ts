@@ -2,9 +2,7 @@ import type { ElementOrSelector } from '../unpoly/element.js'
 import type { RenderOptions } from '../unpoly/fragment.js'
 import type { CloseLayerOptions, Layer, OverlayDefaults } from '../unpoly/layer.js'
 
-/**
-The type of `up.popup`, whose functions moved to up.layer.
-*/
+// The type of `up.popup`, whose functions moved to up.layer.
 interface PopupApi {
   attach(origin: ElementOrSelector, options?: RenderOptions): Promise<Layer>
   close(options?: CloseLayerOptions): Promise<void>

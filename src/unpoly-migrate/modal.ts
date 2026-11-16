@@ -2,9 +2,7 @@ import type { ElementOrSelector } from '../unpoly/element.js'
 import type { RenderJob, RenderOptions } from '../unpoly/fragment.js'
 import type { CloseLayerOptions, Layer, OverlayDefaults } from '../unpoly/layer.js'
 
-/**
-The type of `up.modal`, whose functions moved to up.layer.
-*/
+// The type of `up.modal`, whose functions moved to up.layer.
 interface ModalApi {
   visit(url: string, options?: RenderOptions): Promise<Layer>
   follow(link: ElementOrSelector, options?: RenderOptions): RenderJob

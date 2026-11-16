@@ -1,8 +1,6 @@
 import type { RequestOptions } from '../unpoly/network.js'
 
-/**
-The type of `up.browser`, whose functions moved to other namespaces.
-*/
+// The type of `up.browser`, whose functions moved to other namespaces.
 interface BrowserApi {
   loadPage(options: RequestOptions): void
   isSupported(): boolean

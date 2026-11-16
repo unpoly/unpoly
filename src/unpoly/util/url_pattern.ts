@@ -1,9 +1,6 @@
 import * as u from '../util.js'
 
-/**
-A named placeholder in a URL pattern (`:name` or `$name`), and how to cast its value.
-@internal
-*/
+// A named placeholder in a URL pattern (`:name` or `$name`), and how to cast its value.
 interface URLPatternGroup {
   name: string
   cast: (value: string) => string | number

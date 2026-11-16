@@ -1,9 +1,7 @@
 import type { ElementOrSelector } from '../unpoly/element.js'
 import type { LookupOptions } from '../unpoly/fragment.js'
 
-/**
-Options for up.scroll(): where to look for the viewport, and how to scroll it.
-*/
+// Options for up.scroll(): where to look for the viewport, and how to scroll it.
 interface ViewportScrollOptions extends LookupOptions, ScrollOptions {}
 
 // A deprecated alias has the type of the function or namespace that replaces it.

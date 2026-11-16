@@ -19,10 +19,7 @@ up.script.config.patch(function(config) {
   up.migrate.renamedProperty(config, 'callbackPolicy', 'evalCallbackPolicy', { warning: 'There is no setting up.script.config.callbackPolicy. Use up.script.config.evalCallbackPolicy instead.' })
 })
 
-/**
-A compiler registered with the { keep } option, which core no longer knows.
-@internal
-*/
+// A compiler registered with the { keep } option, which core no longer knows.
 interface LegacyCompiler extends Compiler {
   keep?: boolean | string
 }

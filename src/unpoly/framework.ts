@@ -1,7 +1,7 @@
 import { emit, type UpEvent } from './event.js'
 import { mockable } from './mockable.js'
 
-/** Whether Unpoly booted on its own, or the app called `up.boot()`. */
+// Whether Unpoly booted on its own, or the app called `up.boot()`.
 type BootMode = 'auto' | 'manual'
 
 /** The `up:framework:boot` event. */

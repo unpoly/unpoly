@@ -106,10 +106,10 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   (see the `declare` bullet above). Re-export a type with `export type`, because esbuild
   compiles one file at a time.
   `bin/typecheck` reports both (`erasableSyntaxOnly` and `isolatedModules` in `tsconfig.json`).
-- **Comment a type with `/** */`.** Editors show the comment when you hover a use of the type.
-  Mark a type that isn't public API with `@internal` in that comment. These comments aren't
-  published: a public type's reference goes in its [doc entry](documentation.md#doc-files),
-  in a notation loosely inspired by TypeScript that no tool checks against the code.
+- **Comment exported types with `/** */`**, and properties an editor should explain on hover.
+  Use `//` for types local to a file and for notes to maintainers. Put `@internal` only on
+  something exported. These comments aren't published: a public type's reference goes in its
+  [doc entry](documentation.md#doc-files).
 - **Type a config once**, as the interface its defaults function returns. `newConfig()` (from
   `util/config.ts`) returns it as a `ConfigWith<…>`, so the call site needs no cast:
 

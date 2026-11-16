@@ -135,10 +135,7 @@ export class NonceableCallback {
 
 }
 
-/**
-Something that may carry a nonce, like a `<script>` element or an `[up-on-…]` attribute.
-@internal
-*/
+// Something that may carry a nonce, like a `<script>` element or an `[up-on-…]` attribute.
 interface PolicyItem {
   readNonce(): string | undefined
   writeNonce(nonce: string): void
