@@ -365,7 +365,7 @@ export class UpRequest {
     this._setAbortedState()
   }
 
-  abort({ reason }: { reason?: string | Error } = {}): void {
+  abort({ reason }: { reason?: string } = {}): void {
     // _setAbortedState() must be called before xhr.abort(), since xhr's event handlers
     // will call _setAbortedState() a second time, without a message.
     if (this._setAbortedState(reason) && this._xhr) {
@@ -373,7 +373,7 @@ export class UpRequest {
     }
   }
 
-  _setAbortedState(reason: string | Error = 'Unknown reason'): boolean | undefined {
+  _setAbortedState(reason: string = 'Unknown reason'): boolean | undefined {
     if (this.ended) return
 
     let log = ["Aborted request to %s: %s", this, reason]

@@ -138,7 +138,7 @@ export interface RequestTesterOptions {
 Options for `up.network.abort()`.
 */
 export interface AbortRequestsOptions extends RequestTesterOptions {
-  reason?: string | Error
+  reason?: string
   /** A message to log before the first request is aborted. @internal */
   logOnce?: LogArgs | null
 }
