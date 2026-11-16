@@ -17,7 +17,7 @@ The arguments for a log message: a prefix (usually the event type or function na
 with optional substitution marks, and the values for the marks.
 @internal
 */
-export type LogArgs = [prefix: string, message?: string, ...vars: any[]]
+export type LogArgs = [prefix: string, message?: string, ...vars: unknown[]]
 
 type LogStream = 'log' | 'warn' | 'error'
 
@@ -73,11 +73,11 @@ export const printToError = mockable(function printToError(...args: LogArgs): vo
   printToStream('error', ...args)
 })
 
-function printToStream(stream: LogStream, prefix: string, message?: string, ...args: any[]): void {
+function printToStream(stream: LogStream, prefix: string, message?: string, ...args: unknown[]): void {
   printToStreamStyled(stream, prefix, '', message, ...args)
 }
 
-function printToStreamStyled(stream: LogStream, prefix: string, customStyles: string, message?: string, ...args: any[]): void {
+function printToStreamStyled(stream: LogStream, prefix: string, customStyles: string, message?: string, ...args: unknown[]): void {
   if (message) {
     if (logConfig.format) {
       console[stream](
