@@ -118,8 +118,7 @@ export class Preview {
     this.undo(e.setStyleTemp(element, styles))
   }
 
-  disable(element?: e.ElementOrSelector): void
-  disable(...args: any[]): void {
+  disable(...args: [element?: e.ElementOrSelector]): void {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(disableContainerTemp(element, { preview: true }))
   }
@@ -140,20 +139,17 @@ export class Preview {
     this.undo(insertTemp(reference, position, tempValue))
   }
 
-  show(element?: e.ElementOrSelector): void
-  show(...args: any[]): void {
+  show(...args: [element?: e.ElementOrSelector]): void {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(e.showTemp(element))
   }
 
-  hide(element?: e.ElementOrSelector): void
-  hide(...args: any[]): void {
+  hide(...args: [element?: e.ElementOrSelector]): void {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(e.hideTemp(element))
   }
 
-  hideContent(parent?: e.ElementOrSelector): void
-  hideContent(...args: any[]): void {
+  hideContent(...args: [parent?: e.ElementOrSelector]): void {
     let [parent] = this._parseMutatorArgs(args, 'val')
     // Place all children in a wrapper so we can hide text nodes.
     let wrapper = e.wrapChildren(parent)
