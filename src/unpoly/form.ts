@@ -257,7 +257,7 @@ export function watchOptions(
   options.origin ||= field
 
   // The callback to [up-watch] is not parsed here.
-  // It is parsed in watch(), which calls watchCallbackFromElement().
+  // It is parsed in watchRoot(), which calls watchCallbackFromElement().
 
   return options
 }
@@ -463,18 +463,17 @@ export function submitButtonOverrides(submitButton?: Element | false): RenderOpt
   return u.omit(buttonOptions, ['method', 'url', 'guardEvent', 'origin', 'params', 'headers'])
 }
 
-// Without a callback, the root's [up-watch] attribute gives it.
-export function watch(root: e.ElementOrSelector, callback?: t.WatchCallback): UnbindFunction
-export function watch(root: e.ElementOrSelector, options: t.WatchOptions, callback?: t.WatchCallback): UnbindFunction
+export function watch(root: e.ElementOrSelector, callback: t.WatchCallback): UnbindFunction
+export function watch(root: e.ElementOrSelector, options: t.WatchOptions, callback: t.WatchCallback): UnbindFunction
 export function watch(...args: unknown[]): UnbindFunction {
   let [root, options, callback] = u.parseArgs(args, 'val', 'options', 'callback')
+  return watchRoot(e.getOne(root), options, callback) // unwrap jQuery
+}
 
-  root = e.getOne(root) // unwrap jQuery
+// The [up-watch] compiler passes no callback, so the root's attribute gives it.
+function watchRoot(root: Element, options: t.WatchOptions, callback?: t.WatchCallback): UnbindFunction {
   callback ||= watchCallbackFromElement(root) || fail('No callback given for up.watch()')
-
-  const watcher = new FieldWatcher(root, options, callback)
-
-  return watcher.start()
+  return new FieldWatcher(root, options, callback).start()
 }
 
 function watchCallbackFromElement(element: Element): t.WatchCallback | undefined {
@@ -668,7 +667,7 @@ export function install(): void {
     return new Switcher(switcher).start()
   })
 
-  registerAttrCompiler('up-watch', (formOrField) => watch(formOrField))
+  registerAttrCompiler('up-watch', (formOrField) => watchRoot(formOrField, {}))
 
   registerCompiler('[up-validate]', { rerun: true }, function(element) {
     // There are non-intuitive ways that an [up-validate] field can find its way into a <form>,
