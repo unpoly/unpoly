@@ -111,7 +111,7 @@ export class Params {
   addAll(raw: t.ParamsLike): void {
     if (u.isMissing(raw)) {
       // nothing to do
-    } else if (raw instanceof this.constructor) {
+    } else if (raw instanceof Params) {
       this.entries.push(...raw.entries)
     } else if (u.isArray(raw)) {
       // internal use for copying
@@ -293,8 +293,8 @@ export class Params {
     }
   }
 
-  [u.isEqual.key](other: Params): boolean {
-    return (this.constructor === other.constructor) && u.isEqual(this.entries, other.entries)
+  [u.isEqual.key](other: unknown): boolean {
+    return (other instanceof Params) && u.isEqual(this.entries, other.entries)
   }
 
   static fromURL(url: string): Params {
