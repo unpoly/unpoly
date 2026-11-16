@@ -2,20 +2,14 @@ import * as u from '../util.js'
 import { fail } from '../error.js'
 import { readFieldDisabled } from '../form.js'
 import { isBeforeBoot, isEvaling } from '../framework.js'
-import { type Layer } from '../layer.js'
 import { readData } from '../script.js'
 import type * as t from './types.js'
 
+// The constructor copies these attributes onto the listener.
+export interface UpEventListener extends t.BoundListenerSpec {} // oxlint-disable-line typescript/no-unsafe-declaration-merging
+
 export class UpEventListener {
-  declare element: t.ObservedTarget
-  declare eventType: string
-  declare selector?: t.ListenerSelector
-  declare callback: t.ListenerCallback
-  declare guard?: (event: Event) => boolean
-  declare baseLayer?: Layer
-  declare passive?: boolean
-  declare once?: boolean
-  declare capture?: boolean
+  // The constructor defaults this option.
   declare beforeBoot: boolean
   declare isDefault: boolean
   declare _key: string
