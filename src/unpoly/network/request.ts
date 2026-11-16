@@ -19,7 +19,7 @@ import type { Route } from './request_cache.js'
 import { UpResponse } from './response.js'
 import { sendWithXHR, submitWithForm } from './transports.js'
 
-// The properties that _setAutoHeaders() sends as headers.
+// The properties that _setAutoHeaders() sends in headers.
 type AutoHeaderProp = 'target' | 'failTarget' | 'mode' | 'failMode' | 'context' | 'failContext' | 'originMode'
 
 // The constructor copies these options onto the request.

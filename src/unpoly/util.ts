@@ -697,7 +697,7 @@ function isEqualList(a: t.List<unknown>, b: t.List<unknown>): boolean {
   return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
 }
 
-// A string is split into tokens, with { json } also a JSON array. A list is returned as it is,
+// A string is split into tokens, with { json } also a JSON array. A list is returned unchanged,
 // and any other value wrapped into an array. The overloads promise an array, since the only lists
 // we get are arrays, or a jQuery { layer } that LayerLookup only iterates.
 export function getSimpleTokens(value: string | string[] | null | undefined, options?: SimpleTokenOptions): string[]
