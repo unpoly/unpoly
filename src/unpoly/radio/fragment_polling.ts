@@ -227,7 +227,7 @@ export class FragmentPolling {
     }
   }
 
-  _onReloadFailure(reason: any): void {
+  _onReloadFailure(reason: unknown): void {
     // An error response rejects with an up.RenderResult (rendered into { failTarget: ':none' }),
     // which is not critical. Only a fatal render error will be thrown below.
     this._loading = false
