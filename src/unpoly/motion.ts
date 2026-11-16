@@ -94,7 +94,6 @@ async function animateNow(
   // on the next animation frame. We don't want to depend on the rendering loop when nothing moves.
   if (!duration) return applyFinishedFrame()
 
-  // if (up.migrate.loaded) lastFrame = up.migrate.fixSetStyleProps(lastFrame)
   // TODO: We could accepting camelCase everywhere we now run fixSetStyleProps or fixStyleProps
   let camelizedLastFrame = u.withRenamedKeys(lastFrame, u.kebabToCamelCase)
   let animation = element.animate([ camelizedLastFrame ], { duration, easing, fill: 'forwards' })

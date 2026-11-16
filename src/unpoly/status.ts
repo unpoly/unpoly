@@ -221,7 +221,6 @@ export function install(): void {
 export const api = {
   status: {
     config: statusConfig,
-    // showAroundRequest,
     preview: namedPreviewFns.put,
   },
   preview: namedPreviewFns.put,

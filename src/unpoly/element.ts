@@ -651,7 +651,6 @@ export function setInlineStyle(element: HTMLElement, props: string | t.StyleProp
     const { style } = element
     for (let key in props) {
       let value = props[key]
-      // value = normalizeStyleValueForWrite(key, value)
       style.setProperty(key, value + unit)
     }
   }

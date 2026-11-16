@@ -56,12 +56,6 @@ export class OptionsParser {
     this.parse(e.jsonAttr, key, keyOptions)
   }
 
-  // // Currently not needed anywhere
-  // callback(key, keyOptions = {}) {
-  //   let attrReader = (link, attr) => e.callbackAttr(link, attr, keyOptions)
-  //   this.parse(attrReader, key, keyOptions)
-  // }
-
   renderCallback(key: string, keyOptions: ParseKeyOptions = {}): void {
     let attrReader: t.AttrReader = (link, attr) => renderCallbackAttr(link, attr, key)
     this.parse(attrReader, key, keyOptions)
@@ -101,7 +95,6 @@ export class OptionsParser {
     optionsFn: (element: Element, options: u.PlainObject, parserOptions: t.OptionsParserOptions) => u.PlainObject,
     parserOptions?: t.OptionsParserOptions,
   ): void {
-    // let fnResult = optionsFn(this._element, this._options, this._parserOptions)
     let fnResult = optionsFn(this._element, this._options, { defaults: this._defaults, ...parserOptions })
     Object.assign(this._options, fnResult)
   }

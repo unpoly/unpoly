@@ -312,7 +312,6 @@ export function updateMetaTags(newMetaTags: Iterable<Element>): void {
 }
 
 export function getLang(doc: Document = document): string | undefined {
-  // return e.attr(doc.documentElement, 'lang')
   let { documentElement } = doc
   if (documentElement.matches('html')) {
     return doc.documentElement.lang

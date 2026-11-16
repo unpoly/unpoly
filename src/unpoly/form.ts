@@ -275,7 +275,6 @@ export function validateOptions(
   parser.boolean('batch', { default: formConfig.validateBatch })
   parser.json('params')
   parser.json('headers')
-  // parser.include(destinationOptions)
   parser.include(watchOptions, { defaults: { event: 'change' } })
   return options
 }
@@ -702,8 +701,6 @@ export const api = {
     fields: findFields,
     isField,
     submitButtons: findSubmitButtons,
-    // disableWhile,
-    // handleDisableOption,
     group: findGroup,
   },
   submit,

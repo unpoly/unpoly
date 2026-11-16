@@ -222,8 +222,6 @@ export function install(): void {
 export const api = {
   network: {
     request: makeRequest,
-    // buildRequest,
-    // processRequest,
     cache: requestCache,
     isBusy,
     config: networkConfig,

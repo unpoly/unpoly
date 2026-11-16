@@ -45,7 +45,6 @@ export class FragmentPolling {
 
     this._reloadJID = u.uid()
 
-    // this._abortable = true
     this._loading = false
     this._satisfyInterval()
   }

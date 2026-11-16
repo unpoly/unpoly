@@ -1133,8 +1133,6 @@ export const api = {
     isJQuery,
     isPromise,
     isArray,
-    // isNodeList,
-    // isArguments,
     isList,
     timer: scheduleTimer,
     contains,

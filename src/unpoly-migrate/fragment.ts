@@ -225,7 +225,6 @@ up.fragment.config.patch(function() {
   })
 })
 
-// up.compiler('[up-keep]:not([up-keep=true]):not([up-keep=""])', function(element) {
 up.compiler('[up-keep]', function(element) {
   let selector = up.internal.booleanOrStringAttr(element, 'up-keep')
   if (u.isString(selector) && /[.[#]/.test(selector)) {

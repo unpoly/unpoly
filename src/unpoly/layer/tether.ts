@@ -68,7 +68,6 @@ export class Tether {
   }
 
   isAlive(): boolean {
-    // return !this.parent.isConnected || !this._anchor.isConnected
     return isAlive(this.parent) && isAlive(this._anchor)
   }
 

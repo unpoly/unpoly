@@ -1073,9 +1073,6 @@ export const api = {
     onKept,
     isAlive,
     cloneTemplate,
-    // export for testing
-    // swapTemp,
-    // timer: scheduleTimer
   },
   reload,
   destroy,

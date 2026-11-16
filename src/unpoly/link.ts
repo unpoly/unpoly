@@ -318,11 +318,6 @@ function makeClickable(element: HTMLElement): void {
   })
 }
 
-// function willJump(link) {
-//   let [linkBase, linkHash] = splitLocation(u.normalizeURL(link))
-//   let verbatimHREF = link.getAttribute('href')
-// }
-
 export function shouldHandleClick(event: Event, link: Element): boolean {
   // Users may configure up.link.config.followSelectors.push('a')
   // and then opt out individual links with [up-follow=false].
