@@ -19,12 +19,6 @@ What to render: a target selector, an element to derive a selector from, or seve
 export type RenderTarget = string | Element | u.List<Element> | string[]
 
 /**
-A `{ focus }` or `{ scroll }` option: a keyword like `'auto'` or `'keep'`, a selector, an element, a function,
-an array of alternatives or a selector map. See `up.FragmentProcessor`.
-*/
-export type FragmentProcessorValue = any
-
-/**
 A `{ scroll }` option: a keyword like `'auto'`, `'top'` or `'keep'`, a selector, an element, a function,
 an array of alternatives or a selector map.
 */
