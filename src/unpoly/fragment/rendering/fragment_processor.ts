@@ -1,6 +1,6 @@
 import * as u from '../../util.js'
 import { guard } from '../../error.js'
-import { containsFragment, getSmart } from '../../fragment.js'
+import { containsFragment, getFragment } from '../../fragment.js'
 import { printToWarn } from '../../log.js'
 import type * as t from '../types.js'
 
@@ -89,9 +89,9 @@ export abstract class FragmentProcessor<O extends t.FragmentProcessorOptions = t
     let { fragment, layer, origin } = this.options
     const lookupOpts = { layer, origin }
 
-    let matchWithinFragment = fragment && getSmart(fragment, selector, lookupOpts)
+    let matchWithinFragment = fragment && getFragment(fragment, selector, lookupOpts)
     // Prefer selecting a descendant of the fragment, but if not possible search through the fragment's entire layer
-    let match = matchWithinFragment || getSmart(selector, lookupOpts)
+    let match = matchWithinFragment || getFragment(selector, lookupOpts)
 
     if (match) {
       return match

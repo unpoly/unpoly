@@ -1,7 +1,7 @@
 import * as u from '../../util.js'
 import { CannotMatch } from '../../error.js'
 import { assertEmitted } from '../../event.js'
-import { getSmart, hasAutoHistory, setReloadAttrs } from '../../fragment.js'
+import { getFragment, hasAutoHistory, setReloadAttrs } from '../../fragment.js'
 import { historyOptions } from '../../history.js'
 import {
   buildLayer, layerStack, type Layer, type Overlay, type PeelOptions,
@@ -56,7 +56,7 @@ export class OpenLayerPlan extends LayerPlan {
       // We associate this request with the base layer's main element. This way the request
       // will be aborted if the base layer receives a major navigation, but not when a
       // minor fragment is updated.
-      bindFragments: u.compact([getSmart(':main', { layer: this._baseLayer })]),
+      bindFragments: u.compact([getFragment(':main', { layer: this._baseLayer })]),
       fragments: [],
     }
   }
