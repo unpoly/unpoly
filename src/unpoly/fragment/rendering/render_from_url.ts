@@ -81,7 +81,7 @@ function getRequestAttrs(options: URLRenderOptions): RequestAttrs {
   }
 }
 
-function onRequestSettled(response: UpResponse | Error, options: t.RenderOptions, request: UpRequest): RenderResult {
+function onRequestSettled(response: unknown, options: t.RenderOptions, request: UpRequest): RenderResult {
   if (response instanceof UpResponse) {
     return renderFromResponse({ ...options, response })
   } else {
@@ -92,7 +92,7 @@ function onRequestSettled(response: UpResponse | Error, options: t.RenderOptions
   }
 }
 
-function onRequestSettledWithError(error: Error, options: t.RenderOptions, request: UpRequest): never {
+function onRequestSettledWithError(error: unknown, options: t.RenderOptions, request: UpRequest): never {
   if (error instanceof Offline) {
     let log = ['Cannot load fragment from %s: %s', error.request, error.reason]
     request.emit('up:fragment:offline', {

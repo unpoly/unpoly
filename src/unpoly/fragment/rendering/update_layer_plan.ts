@@ -61,7 +61,8 @@ export class UpdateLayerPlan extends LayerPlan {
   _getFragments(): Element[] {
     this._matchPreflight()
 
-    return u.map(this._steps, 'oldElement')
+    // Steps without an old element were dropped when matching.
+    return u.map(this._steps, 'oldElement') as HTMLElement[]
   }
 
   _renderOwnLayer(responseDoc: ResponseDoc): t.PartialRenderResult[] {
@@ -112,7 +113,8 @@ export class UpdateLayerPlan extends LayerPlan {
 
     // The server may close the layer, or a listener to a server-sent event may close it.
     // Both throw up.Aborted, so we don't insert content into a closed layer.
-    this.closeIfRequested(u.map(this._steps, 'newElement'), this._getNewLocation())
+    // ResponseDoc#selectSteps() dropped the steps without a new element.
+    this.closeIfRequested(u.map(this._steps, 'newElement') as HTMLElement[], this._getNewLocation())
     this.emitServerEvents()
 
     // Change history before compilation, so new fragments see the new location.
@@ -201,7 +203,7 @@ export class UpdateLayerPlan extends LayerPlan {
   _hasAutoHistory(): boolean {
     // We update the history with { history: 'auto' } when at least
     // one targeted fragment has auto-history.
-    const oldFragments = u.map(this._steps, 'oldElement')
+    const oldFragments = u.map(this._steps, 'oldElement') as HTMLElement[]
     return hasAutoHistory(oldFragments, this.layer)
   }
 
