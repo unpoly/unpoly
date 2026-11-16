@@ -1,5 +1,5 @@
 import type * as u from '../util.js'
-import { type UpEvent } from '../event.js'
+import { type ElementEvent, type UpEvent } from '../event.js'
 import { type RenderOptions } from '../fragment.js'
 import { type AnimateOptions, type AnimationValue } from '../motion.js'
 import { type UpResponse } from '../network.js'
@@ -213,8 +213,7 @@ export interface LayerOpenEvent extends UpEvent {
 /**
 The `up:layer:opened` event, emitted on the new overlay's element.
 */
-export interface LayerOpenedEvent extends UpEvent {
-  target: Element
+export interface LayerOpenedEvent extends ElementEvent {
   // Missing when the overlay was opened from JavaScript.
   origin?: Element
   layer: Layer
@@ -223,8 +222,7 @@ export interface LayerOpenedEvent extends UpEvent {
 /**
 The `up:layer:location:changed` event, emitted on the layer's element.
 */
-export interface LayerLocationChangedEvent extends UpEvent {
-  target: Element
+export interface LayerLocationChangedEvent extends ElementEvent {
   location: string
   previousLocation?: string
   layer: Layer

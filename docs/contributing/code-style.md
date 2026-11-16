@@ -114,12 +114,13 @@ and after.
   export const linkConfig = newConfig('up.link.config', (): t.LinkConfig => ({ … }))
   ```
 
-- **Events are interfaces that extend `UpEvent`**, or the event they build on. Use one line
-  per property when that's clearer:
+- **Events are interfaces that extend `UpEvent`**, a shared base, or the event they build on.
+  The shared bases are `ElementEvent` for an event that is always emitted on an element, and
+  `GuardEvent` for one emitted before a render pass. Use one line per property when that's clearer:
 
   ```ts
   /** The `up:fragment:kept` event. */
-  export interface FragmentKeptEvent extends UpEvent {
+  export interface FragmentKeptEvent extends ElementEvent {
     newFragment: Element
     newData: PlainObject
   }

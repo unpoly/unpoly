@@ -13,6 +13,9 @@ export interface UpEvent extends Event {
   target: Element | Document
 }
 
+/** An event that is always emitted on an element. */
+export interface ElementEvent extends UpEvent { target: Element }
+
 /**
 A function that removes the event listeners registered by `up.on()`.
 */

@@ -1,5 +1,5 @@
-import { type UpEvent } from '../event.js'
-import { type RenderOptions, type RenderStep } from '../fragment.js'
+import { type ElementEvent } from '../event.js'
+import { type GuardEvent, type RenderOptions, type RenderStep } from '../fragment.js'
 
 /**
 The render steps for hungry elements, on the targeted layer and on other layers.
@@ -13,8 +13,7 @@ export interface HungrySteps {
 /**
 The `up:fragment:hungry` event.
 */
-export interface FragmentHungryEvent extends UpEvent {
-  target: Element
+export interface FragmentHungryEvent extends ElementEvent {
   newFragment: Element
   renderOptions: RenderOptions
 }
@@ -22,10 +21,7 @@ export interface FragmentHungryEvent extends UpEvent {
 /**
 The `up:fragment:poll` event.
 */
-export interface FragmentPollEvent extends UpEvent {
-  target: Element
-  renderOptions: RenderOptions
-}
+export interface FragmentPollEvent extends GuardEvent {}
 
 /**
 The settings in `up.radio.config`, described in its doc comment.

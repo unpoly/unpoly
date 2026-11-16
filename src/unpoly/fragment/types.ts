@@ -1,5 +1,5 @@
 import type * as u from '../util.js'
-import { type EventPlan, type InputDevice, type UpEvent } from '../event.js'
+import { type ElementEvent, type EventPlan, type InputDevice, type UpEvent } from '../event.js'
 import { type ParamsLike } from '../form.js'
 import {
   type CloseVerb, type Layer, type LayerAcceptEvent, type LayerAcceptedEvent, type LayerDismissEvent,
@@ -307,9 +307,13 @@ What the `{ abort }` option needs to know about a change: its preflight props, a
 */
 export interface AbortOptionProps extends PreflightProps { request?: UpRequest }
 
+/** An event emitted before a render pass. Listeners can change its render options, or prevent it to abort the pass. */
+export interface GuardEvent extends ElementEvent { renderOptions: RenderOptions }
+
 /**
 An event that a render pass emits before it renders, like `up:link:follow`. Rendering is aborted
 when the event is prevented. Listeners find the render options in `event.renderOptions`.
+Unlike a `GuardEvent` it may be emitted on the document: `up:location:restore` has no `{ origin }`.
 @internal
 */
 export interface RenderGuardEvent extends UpEvent { renderOptions?: RenderOptions }
@@ -427,8 +431,7 @@ export interface FragmentOfflineEvent extends UpEvent {
 }
 
 /** The `up:fragment:kept` event. */
-export interface FragmentKeptEvent extends UpEvent {
-  target: Element
+export interface FragmentKeptEvent extends ElementEvent {
   newFragment: Element
   newData: u.PlainObject
 }
@@ -437,8 +440,7 @@ export interface FragmentKeptEvent extends UpEvent {
 export interface FragmentKeepEvent extends FragmentKeptEvent { renderOptions: RenderOptions }
 
 /** The `up:fragment:inserted` event. */
-export interface FragmentInsertedEvent extends UpEvent {
-  target: Element
+export interface FragmentInsertedEvent extends ElementEvent {
   layer: Layer
   ok: boolean
   revalidating: boolean
@@ -451,8 +453,7 @@ export interface FragmentDestroyedEvent extends UpEvent {
 }
 
 /** The `up:fragment:aborted` event. */
-export interface FragmentAbortedEvent extends UpEvent {
-  target: Element
+export interface FragmentAbortedEvent extends ElementEvent {
   reason: string
   newLayer: boolean
   /** @internal The render job that aborted, so a poller can tell its own reload apart. */
@@ -460,8 +461,7 @@ export interface FragmentAbortedEvent extends UpEvent {
 }
 
 /** The `up:template:clone` event. */
-export interface TemplateCloneEvent extends UpEvent {
-  target: Element
+export interface TemplateCloneEvent extends ElementEvent {
   data: u.PlainObject
   nodes: u.List<Node> | null
 }
