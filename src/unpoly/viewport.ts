@@ -401,8 +401,8 @@ function pureHash(value?: string): string | undefined {
 
 export function focusedElementWithin(scopeElement: Element): Element | undefined {
   const focusedElement = document.activeElement
-  if (containsFragment(scopeElement, focusedElement)) {
-    return focusedElement!
+  if (focusedElement && containsFragment(scopeElement, focusedElement)) {
+    return focusedElement
   }
 }
 
