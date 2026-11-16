@@ -7,9 +7,9 @@ export class UpError extends Error {
 
   // The message may be an array of a message with substitution marks and its values,
   // like `['Unexpected result %o', result]`.
-  constructor(message?: string | any[], props: u.PlainObject = {}) {
+  constructor(message?: string | unknown[], props: u.PlainObject = {}) {
     if (Array.isArray(message)) {
-      message = u.sprintf(...message as [string, ...any[]])
+      message = u.sprintf(...message as [string, ...unknown[]])
     }
     super(message)
     // Minifiers rename our classes, but not a string from our tag.
@@ -21,7 +21,7 @@ export class NotImplemented extends UpError {}
 
 // AbortController already throws an abort error, which is really a DOMException(message, 'AbortError')
 export class Aborted extends UpError {
-  constructor(message: string | any[]) {
+  constructor(message: string | unknown[]) {
     super(message, { name: 'AbortError' })
   }
 }
