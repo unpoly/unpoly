@@ -87,7 +87,7 @@ export function buildEvent(...args: any[]): Event {
   return event
 }
 
-export function assertEmitted(...args: any[]): void {
+export function assertEmitted(...args: [type: string, props?: t.EmitProps]): void {
   return assertEventEmitted(parseEmitArgs(args))
 }
 
