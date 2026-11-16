@@ -1,6 +1,6 @@
 import type { Field } from '../unpoly/form.js'
 import type { FragmentKeepEvent, RenderJob, RenderOptions } from '../unpoly/fragment.js'
-import type { PlainObject } from '../unpoly/util.js'
+import type { AnyFunction, PlainObject } from '../unpoly/util.js'
 import type { FixKeyOptions } from './migrate/types.js'
 
 const u = up.util
@@ -57,9 +57,9 @@ up.extract = function(target, document, options) {
   return up.navigate({ ...options, target, document })
 }
 
-up.fragment.first = function(...args: any[]) {
+up.fragment.first = function(...args: unknown[]) {
   up.migrate.deprecated('up.fragment.first()', 'up.fragment.get()')
-  return (up.fragment.get as any)(...args)
+  return (up.fragment.get as AnyFunction)(...args)
 }
 
 up.first = up.fragment.first

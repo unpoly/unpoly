@@ -85,7 +85,7 @@ up.migrate = (function() {
 
   function transformAttribute(oldAttr: string, transformer: AttributeTransformer): void
   function transformAttribute(oldAttr: string, options: TransformAttributeOptions, transformer: AttributeTransformer): void
-  function transformAttribute(oldAttr: string, ...args: any[]): void {
+  function transformAttribute(oldAttr: string, ...args: unknown[]): void {
     let transformer: AttributeTransformer = up.internal.extractCallback(args)
     let { scope }: TransformAttributeOptions = up.internal.extractOptions(args)
 
@@ -237,8 +237,9 @@ up.migrate = (function() {
     }
   }
 
-  function fixStylePropValue(prop: string, value: any, unit?: string): any {
-    if (!unit && CSS_LENGTH_PROPS.includes(prop) && /^[\d.]+$/.test(value)) {
+  function fixStylePropValue(prop: string, value: unknown, unit?: string): unknown {
+    // test() stringifies a number.
+    if (!unit && CSS_LENGTH_PROPS.includes(prop) && /^[\d.]+$/.test(value as string)) {
       warn(`CSS length values must have a unit, but got "${prop}: ${value}". Use "${prop}: ${value}px" instead.`)
       return value + "px"
     } else {
@@ -263,6 +264,7 @@ up.migrate = (function() {
   }
 
   // Takes an object of props or a string. Typed any because u.isObject() isn't a type predicate, so it doesn't narrow.
+  // oxlint-disable-next-line typescript/no-explicit-any -- see above
   function fixSetStyleProps(props: any, unit?: string): any {
     let transformed
 

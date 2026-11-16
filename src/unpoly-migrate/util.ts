@@ -1,3 +1,5 @@
+import type { AnyFunction } from '../unpoly/util.js'
+
 // A deprecated alias has the type of the function that replaces it.
 declare module '../unpoly.js' {
   interface Up {
@@ -53,7 +55,7 @@ up.util.detect = function(...args) {
 
 up.util.select = function(...args) {
   up.migrate.deprecated('up.util.select()', 'up.util.filter()')
-  return (up.util.filter as any)(...args)
+  return (up.util.filter as AnyFunction)(...args)
 }
 
 up.util.setTimer = function(...args) {
@@ -83,7 +85,7 @@ up.util.times = function(count, block) {
   }
 }
 
-up.util.assign = function(...args: [object, ...any[]]) {
+up.util.assign = function(...args: [object, ...unknown[]]) {
   up.migrate.deprecated('up.util.assign()', 'Object.assign()')
   return Object.assign(...args)
 }

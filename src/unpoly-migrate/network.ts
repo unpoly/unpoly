@@ -131,7 +131,7 @@ up.network.clear = function() {
 // The cache's class isn't on window.up, and importing it here would patch a second copy
 // of the class, since unpoly-migrate.js is a separate bundle. So we patch the prototype
 // of the up.cache instance.
-Object.getPrototypeOf(up.cache).clear = function(...args: any[]) {
+Object.getPrototypeOf(up.cache).clear = function(...args: unknown[]) {
   up.migrate.deprecated('up.cache.clear()', 'up.cache.expire()')
   this.expire(...args)
 }

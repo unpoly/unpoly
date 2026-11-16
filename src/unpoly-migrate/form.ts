@@ -1,3 +1,5 @@
+import type { AnyFunction } from '../unpoly/util.js'
+
 declare module '../unpoly.js' {
   interface Up {
     observe: CoreApi['watch']
@@ -52,9 +54,9 @@ up.observe = function(...args) {
   if (up.util.isList(args[0]) && args[0].length > 1) {
     let list = args.shift()
     up.migrate.warn('Calling up.observe() with a list of multiple elements is no longer supported by up.watch()')
-    let unwatchFns = up.util.map(list, (firstArg) => (up.watch as any)(firstArg, ...args))
+    let unwatchFns = up.util.map(list, (firstArg) => (up.watch as AnyFunction)(firstArg, ...args))
     return up.internal.sequence(unwatchFns)
   }
 
-  return (up.watch as any)(...args)
+  return (up.watch as AnyFunction)(...args)
 }

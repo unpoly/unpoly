@@ -1,4 +1,5 @@
 import type { Compiler } from '../unpoly/script.js'
+import type { AnyFunction } from '../unpoly/util.js'
 
 const u = up.util
 
@@ -6,8 +7,8 @@ const u = up.util
 declare module '../unpoly.js' {
   interface Up {
     // The compiler function takes a jQuery collection instead of an element.
-    $compiler(...args: any[]): void
-    $macro(...args: any[]): void
+    $compiler(...args: unknown[]): void
+    $macro(...args: unknown[]): void
     readonly syntax: Up['script']
   }
 }
@@ -56,9 +57,9 @@ up.migrate.targetMacro = function(queryAttr, fixedResultAttrs, replacement) {
 up.$compiler = function(...definitionArgs) {
   up.migrate.warn('up.$compiler() has been deprecated. Instead use up.compiler() with a callback that wraps the given native element in a jQuery collection.')
 
-  let $fn = definitionArgs.pop()
+  let $fn = definitionArgs.pop() as AnyFunction
 
-  return (up.compiler as any)(...definitionArgs, function(element: Element, ...fnArgs: any[]) {
+  return (up.compiler as AnyFunction)(...definitionArgs, function(element: Element, ...fnArgs: unknown[]) {
     let $element = jQuery(element)
     return $fn($element, ...fnArgs)
   })
@@ -67,9 +68,9 @@ up.$compiler = function(...definitionArgs) {
 up.$macro = function(...definitionArgs) {
   up.migrate.warn('up.$macro() has been deprecated. Instead use up.macro() with a callback that wraps the given native element in a jQuery collection.')
 
-  let $fn = definitionArgs.pop()
+  let $fn = definitionArgs.pop() as AnyFunction
 
-  return (up.macro as any)(...definitionArgs, function(element: Element, ...fnArgs: any[]) {
+  return (up.macro as AnyFunction)(...definitionArgs, function(element: Element, ...fnArgs: unknown[]) {
     let $element = jQuery(element)
     return $fn($element, ...fnArgs)
   })
@@ -86,7 +87,7 @@ up.migrate.processHelloMeta = function(meta, response) {
 let modernHello = up.hello
 let errorMessage = 'up.hello() is now async and returns a promise'
 
-class WasElementIsPromise extends Promise<any> {}
+class WasElementIsPromise extends Promise<unknown> {}
 up.migrate.defineThrowingProps(WasElementIsPromise.prototype, Element.prototype, errorMessage)
 up.migrate.defineThrowingProps(WasElementIsPromise.prototype, Node.prototype, errorMessage)
 up.migrate.defineThrowingProps(WasElementIsPromise.prototype, EventTarget.prototype, errorMessage)

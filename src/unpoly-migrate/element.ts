@@ -1,3 +1,5 @@
+import type { AnyFunction } from '../unpoly/util.js'
+
 // A deprecated alias has the type of the function that replaces it.
 declare module '../unpoly.js' {
   interface Up {
@@ -18,9 +20,9 @@ declare module '../unpoly.js' {
   }
 }
 
-up.element.first = function(...args: any[]) {
+up.element.first = function(...args: unknown[]) {
   up.migrate.deprecated('up.element.first()', 'up.element.get()')
-  return (up.element.get as any)(...args)
+  return (up.element.get as AnyFunction)(...args)
 }
 
 up.element.createFromHtml = function(...args) {
@@ -49,6 +51,7 @@ up.element.replace = function(oldElement, newElement) {
 }
 
 // The parameters are any, since TypeScript doesn't type a function expression from overloads.
+// oxlint-disable-next-line typescript/no-explicit-any -- see above
 up.element.all = function(...args: any[]) {
   up.migrate.deprecated('up.element.all()', 'Document#querySelectorAll() or Element#querySelectorAll()')
   const selector = args.pop()
