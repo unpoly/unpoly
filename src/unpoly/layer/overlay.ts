@@ -36,11 +36,11 @@ export abstract class Overlay extends Layer {
   declare openEasing: string
   declare closeEasing: string
   declare trapFocus: boolean
-  declare onOpened?: u.AnyFunction
-  declare onAccept?: u.AnyFunction
-  declare onAccepted?: u.AnyFunction
-  declare onDismiss?: u.AnyFunction
-  declare onDismissed?: u.AnyFunction
+  declare onOpened?: (event: t.LayerOpenedEvent) => any
+  declare onAccept?: (event: t.LayerAcceptEvent) => any
+  declare onAccepted?: (event: t.LayerAcceptedEvent) => any
+  declare onDismiss?: (event: t.LayerDismissEvent) => any
+  declare onDismissed?: (event: t.LayerDismissedEvent) => any
   declare onAcceptedReload?: string
   declare onDismissedReload?: string
   declare acceptEvent?: string

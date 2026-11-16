@@ -4,7 +4,7 @@ import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { on } from './event.js'
 import { getDisablePreviewFn } from './form.js'
-import { matchSelectorMap } from './fragment.js'
+import { matchSelectorMap, type RenderOptions } from './fragment.js'
 // Not through framework.js, which may not be evaluated yet when we create a Registry below.
 import { Registry } from './framework/registry.js'
 import { layerStack, type Layer } from './layer.js'
@@ -107,7 +107,7 @@ function findActivatableAreas(element: NavLink): Element[] {
   return element.upExpandedPair || [element]
 }
 
-export function runPreviews(request: UpRequest, renderOptions: u.PlainObject): () => void {
+export function runPreviews(request: UpRequest, renderOptions: RenderOptions): () => void {
   // Previews run while the request is in flight, before it evicts its layers.
   let bindLayer = request.bindLayer!
   let focusCapsule = FocusCapsule.preserve(bindLayer)
@@ -119,7 +119,7 @@ export function runPreviews(request: UpRequest, renderOptions: u.PlainObject): (
   }
 }
 
-function doRunPreviews(request: UpRequest, renderOptions: u.PlainObject): () => void {
+function doRunPreviews(request: UpRequest, renderOptions: RenderOptions): () => void {
   let { fragment, fragments, origin } = request
   let cleaner = u.cleaner()
   let previewForFragment = (fragment?: Element) => new Preview({ fragment, request, renderOptions, cleaner })

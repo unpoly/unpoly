@@ -123,7 +123,7 @@ export const fragmentConfig = newConfig('up.fragment.config', (): t.FragmentConf
 }))
 
 
-function defaultSkipResponse({ response, expiredResponse }: u.PlainObject): boolean {
+function defaultSkipResponse({ response, expiredResponse }: t.FragmentLoadedProps): boolean {
   return !response.text || response.text === expiredResponse?.text
 }
 
