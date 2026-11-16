@@ -167,7 +167,7 @@ up.migrate.postprocessReloadOptions = function(options) {
 // Modern versions only support ":origin". This legacy implementation
 // also supports the old shorthand "&".
 // Core uses this instead of its own implementation when unpoly-migrate is loaded (up.fragment).
-up.migrate.resolveOrigin = function(target, { origin }: { origin?: Field } = {}) {
+up.migrate.resolveOrigin = function(target, { origin }: { origin?: Element & Pick<Field, 'form'> } = {}) {
   // We skip over attribute selector values, which may contain an ampersand, e.g. 'a[href="/notes?page=2&order=created"]'
   let pattern = /"[^"]*"|'[^']*'|&|:origin\b/g
 
