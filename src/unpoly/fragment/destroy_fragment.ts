@@ -1,24 +1,13 @@
 import {
-  abortFragment, emitFragmentDestroyed, markFragmentAsDestroying,
+  abortFragment, emitFragmentDestroyed, markFragmentAsDestroying, type DestroyOptions,
 } from '../fragment.js'
-import { layerStack, type LayerReference } from '../layer.js'
-import { animate, type AnimationValue } from '../motion.js'
+import { layerStack } from '../layer.js'
+import { animate } from '../motion.js'
 import { clean } from '../script.js'
 import { chainCallbacks } from './rendering/render_options.js'
 
-// Options for up.destroy().
-interface DestroyFragmentOptions {
-  animation?: AnimationValue
-  duration?: number
-  easing?: string
-  onFinished?: () => void
-  log?: any
-  layer?: LayerReference
-  [key: string]: any
-}
-
 // Removes a fragment for up.destroy(), after playing its { animation }.
-export function destroyFragment(fragment: Element, options: DestroyFragmentOptions): void {
+export function destroyFragment(fragment: Element, options: DestroyOptions): void {
   // Looking up the layer normalizes the options it is given, so it gets a copy of the caller's options.
   let layer = layerStack.get({ ...options }) || layerStack.current
 

@@ -33,7 +33,7 @@ export { SelectorTracker }
 interface ProvideNodesOptions {
   origin?: Element
   originLayer?: Layer
-  data?: any
+  data?: u.PlainObject
   htmlParser?: t.HTMLParser
 }
 
@@ -343,7 +343,7 @@ export function isAlive(fragment: Element): boolean {
 // Takes a selector or element, optionally preceded by a root element, and followed by options.
 export function getFragment(selector: e.ElementOrSelector, options?: t.LookupOptions): HTMLElement | undefined
 export function getFragment(root: ParentNode, selector: e.ElementOrSelector, options?: t.LookupOptions): HTMLElement | undefined
-export function getFragment(...args: any[]): any {
+export function getFragment(...args: unknown[]): unknown {
   let [root, selector, options] = parseGetArgs(args)
 
   if (u.isElementLike(selector)) {
@@ -370,14 +370,15 @@ export function getFragment(...args: any[]): any {
 
 export function getFirstDescendant(selector: string, options?: t.LookupOptions): HTMLElement | undefined
 export function getFirstDescendant(root: ParentNode, selector: string, options?: t.LookupOptions): HTMLElement | undefined
-export function getFirstDescendant(...args: any[]): any {
+export function getFirstDescendant(...args: unknown[]): unknown {
   let [root, selectorString, options] = parseGetArgs(args)
 
   let selector = new Selector(selectorString, root, options)
   return selector.firstDescendant(root)
 }
 
-function parseGetArgs(args: any[]): any[] {
+// oxlint-disable-next-line typescript/no-explicit-any -- parsed arguments of any type
+function parseGetArgs(args: unknown[]): any[] {
   return u.parseArgs(args, 'val', 'val', 'options')
 }
 
@@ -387,7 +388,7 @@ export function getAllFragments(selector: string, options?: t.LookupOptions): HT
 export function getAllFragments(root: ParentNode, selector: string, options?: t.LookupOptions): HTMLElement[]
 export function getAllFragments(selector: e.ElementOrSelector, options?: t.LookupOptions): u.List<HTMLElement>
 export function getAllFragments(root: ParentNode, selector: e.ElementOrSelector, options?: t.LookupOptions): u.List<HTMLElement>
-export function getAllFragments(...args: any[]): any {
+export function getAllFragments(...args: unknown[]): unknown {
   let [root, selectorString, options] = parseGetArgs(args)
 
   // (0) up.fragment.all(element) or up.fragment.all(element, element) should return an array of that element.
@@ -413,7 +414,7 @@ export function getSubtree(element: Element, selector: string, options: t.Lookup
 }
 
 // Takes a selector or an element. viewport's focusedElementWithin() also passes null, which matches nothing.
-export function containsFragment(root: Element, selectorOrElement: any): boolean | undefined {
+export function containsFragment(root: Element, selectorOrElement: string | Element): boolean | undefined {
   if (u.isElement(selectorOrElement)) {
     // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
     // Returns undefined when the root is in no layer.
@@ -428,7 +429,7 @@ export function closestFragment(element: Element, selector: string, options?: t.
 }
 
 export function destroy(target: e.ElementOrSelector, options?: t.DestroyOptions): Promise<void> | undefined
-export function destroy(...args: any[]): Promise<void> | undefined {
+export function destroy(...args: unknown[]): Promise<void> | undefined {
   const options = parseTargetAndOptions(args)
   const element = getFragment(options.target, options)
 
@@ -439,7 +440,7 @@ export function destroy(...args: any[]): Promise<void> | undefined {
   return up.migrate.formerlyAsync?.('up.destroy()')
 }
 
-function parseTargetAndOptions(args: any[]): u.PlainObject {
+function parseTargetAndOptions(args: unknown[]): u.PlainObject {
   const options = u.parseArgIntoOptions(args, 'target')
   if (u.isElement(options.target)) {
     options.origin ||= options.target
@@ -660,6 +661,8 @@ export function containsMainPseudo(target: string): boolean {
   return MAIN_PSEUDO.test(target)
 }
 
+// Takes a target, an element, `true` for :main, or a list of these.
+// oxlint-disable-next-line typescript/no-explicit-any -- probes targets of several kinds
 export function expandTargets(targets: any, options: t.LookupOptions = {}): string[] {
   const { layer } = options
   if (layer !== 'new' && !(layer instanceof Layer)) {
@@ -714,7 +717,7 @@ function modernResolveOrigin(target: string, { origin }: t.LookupOptions = {}): 
   })
 }
 
-export function resolveOrigin(target: any, options?: t.LookupOptions): any {
+export function resolveOrigin<T>(target: T, options?: t.LookupOptions): T | string {
   // up.FormValidator sometimes calls resolveOrigin(undefined)
   if (!u.isString(target)) return target
   return (up.migrate.resolveOrigin || modernResolveOrigin)(target, options)
@@ -790,8 +793,8 @@ export function matches(element: e.ElementOrSelector, selector: string | Element
   }
 }
 
-export function matchSelectorMap(element: Element, selectorMap?: u.PlainObject, { layer = element }: t.LookupOptions = {}): any[] {
-  let hits: any[] = []
+export function matchSelectorMap<V>(element: Element, selectorMap?: Record<string, V>, { layer = element }: t.LookupOptions = {}): V[] {
+  let hits: V[] = []
 
   if (selectorMap && element) {
     for (let [selector, value] of Object.entries(selectorMap)) {
@@ -959,7 +962,7 @@ interface TemplateNode extends Node { upTemplateData?: u.PlainObject }
 
 export function cloneTemplate(
   templateOrSelector: e.ElementOrSelector,
-  data: any = {},
+  data: u.PlainObject = {},
   { origin, htmlParser }: ProvideNodesOptions = {},
 ): u.List<Node> {
   // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
@@ -978,7 +981,9 @@ function defaultTemplateNodes(template: Element, htmlParser: t.HTMLParser = e.cr
   return htmlParser(templateText)
 }
 
-export function insertTemp(...args: any[]): u.UndoFunction {
+export function insertTemp(
+  ...args: [reference: Element, tempValue: t.NodesValue] | [reference: Element, position: InsertPosition, tempValue: t.NodesValue]
+): u.UndoFunction {
   let [reference, position = 'beforeend', tempValue] = u.parseArgs(args, 'val', u.isAdjacentPosition, 'val')
 
   let tempNodes = provideNodes(tempValue, { origin: reference })
@@ -1005,7 +1010,10 @@ export function insertTemp(...args: any[]): u.UndoFunction {
   }
 }
 
-export function trackSelector<E extends Element>(selectFn: () => u.List<E>, callback: (element: E) => any): u.UndoFunction {
+export function trackSelector<E extends Element>(
+  selectFn: () => u.List<E>,
+  callback: (element: E) => ((element: Element) => void) | void,
+): u.UndoFunction {
   let tracker = new SelectorTracker(selectFn, callback)
   return tracker.start()
 }

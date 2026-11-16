@@ -21,16 +21,27 @@ What to render: a target selector, an element to derive a selector from, or seve
 export type RenderTarget = string | Element | u.List<Element> | string[]
 
 /**
-A `{ scroll }` option: a keyword like `'auto'`, `'top'` or `'keep'`, a selector, an element, a function,
-an array of alternatives or a selector map.
+A `{ scroll }` option: a keyword like `'auto'`, `'top'` or `'keep'`, a selector, a pixel position, an element,
+a function, an array of alternatives or a selector map.
 */
-export type ScrollOption = any
+export type ScrollOption = ProcessorOption
 
 /**
 A `{ focus }` option: a keyword like `'auto'`, `'target'` or `'keep'`, a selector, an element, a function,
 an array of alternatives or a selector map.
 */
-export type FocusOption = any
+export type FocusOption = ProcessorOption
+
+// A { scroll } or { focus } option. A function is called with the fragment and the render options,
+// and may return another such option.
+type ProcessorOption =
+  | boolean
+  | number
+  | string
+  | Element
+  | ((fragment: HTMLElement | null | undefined, options: u.PlainObject) => unknown)
+  | ProcessorOption[]
+  | { [selector: string]: ProcessorOption }
 
 /**
 A `{ preview }` option: the name of a preview, a preview function, or a list of them.
@@ -85,7 +96,7 @@ export interface RenderOptions {
   method?: string
   params?: ParamsLike
   headers?: Record<string, string>
-  abort?: boolean | string | Element | u.List<Element> | ((options: u.PlainObject) => any)
+  abort?: boolean | string | Element | u.List<Element> | ((options: u.PlainObject) => unknown)
   abortable?: boolean
   background?: boolean
   lateDelay?: number | false
@@ -167,7 +178,7 @@ export interface RenderOptions {
   placeholderMap?: u.PlainObject
 
   // Client state
-  data?: any
+  data?: u.PlainObject
   dataMap?: u.PlainObject
   keep?: boolean
   keepData?: boolean
@@ -175,17 +186,17 @@ export interface RenderOptions {
 
   // Lifecycle hooks
   confirm?: string | false
-  onLoaded?: (event: FragmentLoadedEvent) => any
-  onOffline?: (event: FragmentOfflineEvent) => any
-  onRendered?: (result: RenderResult) => any
+  onLoaded?: (event: FragmentLoadedEvent) => unknown
+  onOffline?: (event: FragmentOfflineEvent) => unknown
+  onRendered?: (result: RenderResult) => unknown
   // A revalidating render pass sets null, so it doesn't run the callback of the pass it revalidates.
-  onFinished?: ((result: RenderResult) => any) | null
-  onError?: (error: any) => any
-  onOpened?: (event: LayerOpenedEvent) => any
-  onAccept?: (event: LayerAcceptEvent) => any
-  onAccepted?: (event: LayerAcceptedEvent) => any
-  onDismiss?: (event: LayerDismissEvent) => any
-  onDismissed?: (event: LayerDismissedEvent) => any
+  onFinished?: ((result: RenderResult) => unknown) | null
+  onError?: (error: unknown) => unknown
+  onOpened?: (event: LayerOpenedEvent) => unknown
+  onAccept?: (event: LayerAcceptEvent) => unknown
+  onAccepted?: (event: LayerAcceptedEvent) => unknown
+  onDismiss?: (event: LayerDismissEvent) => unknown
+  onDismissed?: (event: LayerDismissedEvent) => unknown
   // A selector to reload after the overlay was accepted or dismissed.
   onAcceptedReload?: string
   onDismissedReload?: string
@@ -225,8 +236,8 @@ export interface RenderOptions {
   // Internal options that renderFromResponse() takes from the response.
   hash?: string
   eventPlans?: EventPlan[]
-  acceptLayer?: any
-  dismissLayer?: any
+  acceptLayer?: unknown
+  dismissLayer?: unknown
   cspInfo?: CSPInfo
   time?: Date | false
   // null when the response has no ETag header.
@@ -237,6 +248,7 @@ export interface RenderOptions {
   // A renamed option that unpoly-migrate still accepts.
   html?: string
 
+  // oxlint-disable-next-line typescript/no-explicit-any -- the fail variant of any option
   [key: `fail${string}`]: any
 }
 
@@ -264,7 +276,7 @@ What a step of a render pass contributes to its `up.RenderResult`.
 */
 export interface PartialRenderResult {
   fragments?: Element[]
-  finished?: Promise<any>
+  finished?: Promise<unknown>
   verifyFinished?: VerifyFinishedFunction
 }
 
@@ -278,7 +290,7 @@ export interface ResponseDocOptions {
   content?: ContentValue
   target?: string
   origin?: Element
-  data?: any
+  data?: u.PlainObject
   cspInfo?: CSPInfo
   match?: MatchMode
 }
@@ -338,7 +350,7 @@ export interface RenderStep extends ResolvedRenderOptions {
   newElement?: HTMLElement
   // Emitted when a new element was matched. Only hungry steps have one.
   selectEvent?: FragmentHungryEvent
-  selectCallback?: (event: Event) => any
+  selectCallback?: (event: Event) => unknown
   // Set while rendering, see updateSteps().
   parentElement?: ParentNode | null
   afterRemove?: () => void
