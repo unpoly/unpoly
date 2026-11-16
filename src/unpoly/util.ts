@@ -180,9 +180,6 @@ export function isMissing(value: any): value is null | undefined {
 
 export const isGiven = negate(isMissing) as <T>(value: T) => value is NonNullable<T>
 
-// isNan = (object) ->
-//   isNumber(value) && value != +value
-
 export function isBlank(value: any): boolean {
   if (isMissing(value)) {
     return true
@@ -561,17 +558,6 @@ export function escapeRegExp(string: string): string {
   return string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
 }
 
-// function groupBy(list, block) {
-//   block = iteratee(block)
-//   let groups = {}
-//   for (let entry in list) {
-//     let key = block(entry)
-//     let group = (groups[key] ||= [])
-//     group.push(entry)
-//   }
-//   return groups
-// }
-
 export function pluckKey(object: t.PlainObject, key: string): any {
   const value = object[key]
   delete object[key]
@@ -590,11 +576,6 @@ function extractLastArg(args: any[], tester: (value: any) => boolean): any {
   }
 }
 
-//  extractFirstArg = (args, tester) ->
-//    firstArg = args[0]
-//    if tester(firstArg)
-//      return args.shift()
-
 export function extractCallback(args: any[]): t.AnyFunction | undefined {
   return extractLastArg(args, isFunction)
 }
@@ -603,66 +584,9 @@ export function extractOptions(args: any[]): t.PlainObject {
   return extractLastArg(args, isOptions) || {}
 }
 
-//  partial = (fn, fixedArgs...) ->
-//    return (callArgs...) ->
-//      fn.apply(this, fixedArgs.concat(callArgs))
-//
-//   function partialRight(fn, ...fixedArgs) {
-//     return function(...callArgs) {
-//       return fn.apply(this, [...callArgs, ...fixedArgs])
-//     }
-//   }
-
-//function throttle(callback, limit) { // From https://jsfiddle.net/jonathansampson/m7G64/
-//  var wait = false                   // Initially, we're not waiting
-//  return function () {               // We return a throttled function
-//    if (!wait) {                     // If we're not waiting
-//      callback.call()                // Execute users function
-//      wait = true                    // Prevent future invocations
-//      setTimeout(function () {       // After a period of time
-//        wait = false                 // And allow future invocations
-//      }, limit)
-//    }
-//  }
-//}
-
 export function identity(arg: any): any {
   return arg
 }
-
-//  ###**
-//  ###
-//  parsePath = (input) ->
-//    path = []
-//    pattern = /([^\.\[\]\"\']+)|\[\'([^\']+?)\'\]|\[\"([^\"]+?)\"\]|\[([^\]]+?)\]/g
-//    while match = pattern.exec(input)
-//      path.push(match[1] || match[2] || match[3] || match[4])
-//    path
-
-//  ###**
-//  Given an async function that will return a promise, returns a proxy function
-//  with an additional `.promise` attribute.
-//
-//  When the proxy is called, the inner function is called.
-//  The proxy's `.promise` attribute is available even before the function is called
-//  and will resolve when the inner function's returned promise resolves.
-//
-//  If the inner function does not return a promise, the proxy's `.promise` attribute
-//  will resolve as soon as the inner function returns.
-//
-//  @function up.util.previewable
-//  @internal
-//  ###
-//  previewable = (fun) ->
-//    deferred = newDeferred()
-//    preview = (args...) ->
-//      funValue = fun(args...)
-//      # If funValue is again a Promise, it will defer resolution of `deferred`
-//      # until `funValue` is resolved.
-//      deferred.resolve(funValue)
-//      funValue
-//    preview.promise = deferred.promise()
-//    preview
 
 export function sequence(...fns: any[]): (...args: any[]) => any[] {
   return (...callArgs) => callAll(fns, ...callArgs)
@@ -672,32 +596,6 @@ export function callAll(fns: any, ...args: any[]): any[] {
   fns = scanFunctions(fns)
   return map(fns, (fn: t.AnyFunction) => fn(...args))
 }
-
-//  ###**
-//  @function up.util.race
-//  @internal
-//  ###
-//  race = (promises...) ->
-//    raceDone = newDeferred()
-//    each promises, (promise) ->
-//      promise.then -> raceDone.resolve()
-//    raceDone.promise()
-
-//  ###**
-//  Returns `'left'` if the center of the given element is in the left 50% of the screen.
-//  Otherwise returns `'right'`.
-//
-//  @function up.util.horizontalScreenHalf
-//  @internal
-//  ###
-//  horizontalScreenHalf = (element) ->
-//    elementDims = element.getBoundingClientRect()
-//    elementMid = elementDims.left + 0.5 * elementDims.width
-//    screenMid = 0.5 * up.viewport.rootWidth()
-//    if elementMid < screenMid
-//      'left'
-//    else
-//      'right'
 
 export function flatten<T>(array: t.List<T | t.List<T>>): T[] {
   const flattened = []
@@ -711,12 +609,6 @@ export function flatten<T>(array: t.List<T | t.List<T>>): T[] {
   return flattened
 }
 
-//  flattenObject = (object) ->
-//    result = {}
-//    for key, value of object
-//      result[key] = value
-//    result
-
 export function flatMap<T, R = any>(array: t.List<T>, block: t.Iteratee<T, R | t.List<R>>): R[] {
   return flatten(map(array, block))
 }
@@ -729,28 +621,6 @@ export function newDeferred<T = any>(): t.Deferred<T> {
   let { promise, resolve, reject } = Promise.withResolvers<T>()
   return Object.assign(promise, { resolve, reject })
 }
-
-//  ###**
-//  Calls the given block. If the block throws an exception,
-//  a rejected promise is returned instead.
-//
-//  @function up.util.rejectOnError
-//  @internal
-//  ###
-//  rejectOnError = (block) ->
-//    try
-//      block()
-//    catch error
-//      Promise.reject(error)
-
-//  sum = (list, block) ->
-//    block = iteratee(block)
-//    totalValue = 0
-//    for entry in list
-//      entryValue = block(entry)
-//      if isGiven(entryValue) # ignore undefined/null, like SQL would do
-//        totalValue += entryValue
-//    totalValue
 
 export function isBasicObjectProperty(k: PropertyKey): boolean {
   return Object.hasOwn(Object.prototype, k)
@@ -841,14 +711,6 @@ export function wrapValue<T>(constructor: new (...args: any[]) => T, ...args: an
   return (args[0] instanceof constructor) ? args[0] : new constructor(...args)
 }
 
-//  wrapArray = (objOrArray) ->
-//    if isUndefined(objOrArray)
-//      []
-//    else if isArray(objOrArray)
-//      objOrArray
-//    else
-//      [objOrArray]
-
 let nextUid = 0
 
 export function uid(): number {
@@ -873,18 +735,6 @@ export function camelToKebabCase(str: string): string {
 export function kebabToCamelCase(str: string): string {
   return str.replace(/-([a-z])/g, (_match, char) => char.toUpperCase())
 }
-
-// function prefixCamelCase(str, prefix) {
-//   return prefix + upperCaseFirst(str)
-// }
-//
-// function unprefixCamelCase(str, prefix) {
-//   const pattern = new RegExp('^' + prefix + '(.+)$')
-//   let match = str.match(pattern)
-//   if (match) {
-//     return lowerCaseFirst(match[1])
-//   }
-// }
 
 export function lowerCaseFirst(str: string): string {
   return str[0].toLowerCase() + str.slice(1)
@@ -920,19 +770,6 @@ export function delegatePromise(object: object, targetProvider: (this: any) => a
     targetProvider
   )
 }
-
-// function defineTemporaryDelegates(object, props, targetProvider) {
-//   let undo = sequence(props.map((prop) => {
-//     let oldDescriptor = Object.getOwnPropertyDescriptor(object, prop)
-//     // There's a case where Object.getOwnPropertyDescriptor() is missing because it is
-//     // a inherited property. In this case it is non-trivial to undo the temporary delegation.
-//     // Since we don't need that case, we don't handle it.
-//     return () => Object.defineProperty(object, prop, oldDescriptor)
-//     }
-//   ))
-//   defineDelegates(object, props, targetProvider)
-//   return undo
-// }
 
 function stringifyArg(arg: any, placeholder = '%o', ancestors = new Set()): string {
   let string
@@ -1309,12 +1146,7 @@ export const api = {
     task: queueTask,
     isEqual,
     wrapList,
-    // temporaryDelegate: defineTemporaryDelegates,
-    // prefixCamelCase,
-    // unprefixCamelCase,
-    // groupBy,
     parseRelaxedJSON,
     parseNumber,
-    // partialRight,
   },
 }
