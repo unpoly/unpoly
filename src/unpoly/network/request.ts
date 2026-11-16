@@ -6,7 +6,7 @@ import {
 } from '../event.js'
 import { Params } from '../form.js'
 import { getSmart, parseTargetSteps, splitTarget, type RenderOptions } from '../fragment.js'
-import { layerStack, type Layer, type LayerMode } from '../layer.js'
+import { layerStack, type Layer } from '../layer.js'
 import { abortRequests, isSafeMethod, networkConfig, requestCache } from '../network.js'
 import {
   acceptLayerFromXHR, contextFromXHR, csrfHeader, csrfParam, csrfToken, dismissLayerFromXHR,
@@ -19,6 +19,9 @@ import { type Route } from './request_cache.js'
 import { UpResponse } from './response.js'
 import { sendWithXHR, submitWithForm } from './transports.js'
 
+// The constructor copies these options onto the request.
+export interface UpRequest extends t.RequestProps {} // oxlint-disable-line typescript/no-unsafe-declaration-merging
+
 // Prefixed, so the binding doesn't shadow the browser's `Request` here or in importers.
 // At runtime the class is named `up.Request` (see unpoly.ts).
 export class UpRequest {
@@ -26,39 +29,6 @@ export class UpRequest {
   declare [Symbol.toStringTag]: string
   declare state: t.RequestState
   declare expired: boolean
-  declare method: string
-  declare url: string
-  declare hash?: string
-  declare params: Params
-  declare target?: string
-  declare failTarget?: string
-  declare headers: Record<string, string>
-  declare timeout?: number | null
-  declare background?: boolean
-  declare cache?: boolean | 'auto'
-  declare expireCache?: t.RequestCondition
-  declare evictCache?: t.RequestCondition
-  // While the request is new, these may be a layer name like 'root' or 'new'.
-  declare layer: any
-  declare mode?: LayerMode
-  declare context?: u.PlainObject
-  declare failLayer: any
-  declare failMode?: LayerMode
-  declare failContext?: u.PlainObject
-  declare origin?: Element
-  declare originLayer?: Layer
-  declare originMode?: LayerMode
-  declare builtAt: Date
-  declare wrapMethod: boolean | null
-  declare contentType?: string
-  declare payload: any
-  declare onLoading?: () => void
-  declare onSettle?: (responseOrError: UpResponse | Error) => void
-  declare fail?: u.ValueOrFunction<boolean>
-  declare abortable: boolean | null
-  declare lateDelay?: number | false
-  declare previews: any[]
-  declare bindLayer?: Layer
   declare response?: UpResponse
   declare fromCache?: boolean
   declare _fragments?: Element[]
@@ -69,6 +39,18 @@ export class UpRequest {
   // Set by the request cache.
   declare cacheRoute?: Route
   declare trackedRequest?: UpRequest
+
+  // Options that the constructor defaults or resolves.
+  declare method: string
+  declare params: Params
+  declare headers: Record<string, string>
+  declare builtAt: Date
+  declare wrapMethod: boolean | null
+  declare abortable: boolean | null
+  declare previews: any[]
+  // While the request is new, these may be a layer name like 'root' or 'new'.
+  declare layer: any
+  declare failLayer: any
 
   // A request is also a promise for its response. The static block at the end delegates these.
   declare then: Promise<UpResponse>['then']

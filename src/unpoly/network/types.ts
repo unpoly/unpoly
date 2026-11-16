@@ -67,10 +67,10 @@ The state of an `up.Request` in its lifecycle.
 export type RequestState = 'new' | 'loading' | 'tracking' | 'loaded' | 'aborted' | 'offline'
 
 /**
-Options for constructing an `up.Request`. See `up.request()` for most of them.
+The options that an `up.Request` copies onto itself.
 @internal
 */
-export interface RequestOptions {
+export interface RequestProps {
   url: string
   method?: string
   hash?: string
@@ -102,9 +102,16 @@ export interface RequestOptions {
   abortable?: boolean | null
   lateDelay?: number | false
   previews?: any[]
+  bindLayer?: Layer
+}
+
+/**
+Options for constructing an `up.Request`. See `up.request()` for most of them.
+@internal
+*/
+export interface RequestOptions extends RequestProps {
   // Skip looking up layers, e.g. for a request that is only used as a cache key.
   basic?: boolean
-  bindLayer?: Layer
   fragments?: Element[]
   bindFragments?: Element[]
 }

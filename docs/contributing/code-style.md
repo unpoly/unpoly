@@ -97,6 +97,9 @@ and after.
   makes the compiled class define the property, which costs bytes and changes behavior
   (differently in `unpoly.js` and `unpoly.es6.js`, whose targets treat class fields
   differently). `bin/lint` reports a field without `declare` or an initializer.
+- **A class that copies its options onto itself** merges with an interface for those properties
+  (`interface UpRequest extends RequestProps {}`) instead of declaring each one. Use `declare` for
+  the other fields, and for an option that the instance holds with a narrower type.
 - **Only syntax that strips away.** No `enum`, `namespace` or constructor parameter
   properties (`constructor(private x)`). They compile to runtime code, so our output would
   depend on the tool that strips the types. A parameter property also defines a class field
