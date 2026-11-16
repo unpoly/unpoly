@@ -209,7 +209,7 @@ export function presence<T>(value: T, tester: (value: T) => boolean = isPresent)
   }
 }
 
-export const isPresent = negate(isBlank) as <T>(value: T) => value is NonNullable<T>
+export const isPresent = negate(isBlank)
 
 export function isFunction(value: unknown): value is t.AnyFunction {
   return typeof(value) === 'function'

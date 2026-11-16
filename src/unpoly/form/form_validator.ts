@@ -265,7 +265,8 @@ export class FormValidator {
     // Without this filter an unnamed field pads the header with an empty token ("email "). Two of
     // them can even join into a truthy " " — u.uniq() keeps both when one reports '' and the other
     // null — which would skip the ':unknown' fallback in _addValidateHeader() below.
-    let dirtyNames = u.uniq(u.filterList(u.map(dirtyFields, readFieldName), u.isPresent))
+    // u.isPresent() drops null and undefined, but isn't a type predicate.
+    let dirtyNames = u.uniq(u.filterList(u.map(dirtyFields, readFieldName), u.isPresent)) as string[]
     let dirtyRenderOptionsList = u.map(dirtySolutions, 'renderOptions')
 
     // A validation is not a real submission: no button was pressed, so only the <form> element
