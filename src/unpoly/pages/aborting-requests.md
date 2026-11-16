@@ -104,8 +104,9 @@ only requests aborted by screen region let components [react to being aborted](#
 Reacting to aborted requests {#reacting}
 ----------------------------
 
-When requests are aborted through `{ abort }` or `up.fragment.abort()`, an `up:fragment:aborted` event
-is emitted on the element for which requests were aborted, and an `up:request:aborted` event for each aborted request.
+When requests are aborted through `{ abort }` or `up.fragment.abort()`, an `up:request:aborted` event is emitted for
+each aborted request. Unless `{ abort }` is a function, an `up:fragment:aborted` event is also emitted on the element
+for which requests were aborted.
 
 A rendering function whose request was aborted rejects with an `up.Aborted` error.
 Its `{ name }` is `'AbortError'`, like the `DOMException` that `fetch()` and other native APIs reject with when aborted.
