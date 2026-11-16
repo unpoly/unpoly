@@ -4,10 +4,19 @@ import {
 } from '../../fragment.js'
 import type * as t from '../types.js'
 
+// Options for `findFragment()`. Other options (like `{ layer }`) are passed on to
+// `up.fragment.closest()` and `up.fragment.get()`.
+interface FindFragmentOptions extends t.LookupOptions {
+  selector: string
+  // For matching in detached content, as needed by up.ResponseDoc.
+  document?: Document | Element
+  preferOldElements?: Element[]
+}
+
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
 // Unpoly works with HTML elements, see up.fragment.get().
-export function findFragment(options: t.FindFragmentOptions): HTMLElement | undefined {
+export function findFragment(options: FindFragmentOptions): HTMLElement | undefined {
   // Selector is a string, not an up.Selector
   let { selector, origin, preferOldElements } = options
   // This option is for matching fragments in detached content, as needed by up.ResponseDoc.
@@ -27,18 +36,18 @@ function findInRegion(
   selector: string,
   origin: Element | undefined,
   match: t.MatchMode,
-  options: t.FindFragmentOptions,
+  options: FindFragmentOptions,
 ): HTMLElement | undefined {
   if (match === 'region' && !containsMainPseudo(selector) && origin?.isConnected) {
     return findClosest(selector, origin, options) || findDescendantInRegion(selector, origin, options)
   }
 }
 
-function findClosest(selector: string, origin: Element, options: t.FindFragmentOptions): HTMLElement | undefined {
+function findClosest(selector: string, origin: Element, options: FindFragmentOptions): HTMLElement | undefined {
   return closestFragment(origin, selector, options)
 }
 
-function findDescendantInRegion(selector: string, origin: Element, options: t.FindFragmentOptions): HTMLElement | undefined {
+function findDescendantInRegion(selector: string, origin: Element, options: FindFragmentOptions): HTMLElement | undefined {
   let simpleSelectors = splitTarget(selector)
 
   return u.findResult(simpleSelectors, (simpleSelector) => {
@@ -52,6 +61,6 @@ function findDescendantInRegion(selector: string, origin: Element, options: t.Fi
   })
 }
 
-function findFirst(selector: string, document: Document | Element, options: t.FindFragmentOptions): HTMLElement | undefined {
+function findFirst(selector: string, document: Document | Element, options: FindFragmentOptions): HTMLElement | undefined {
   return getFirstDescendant(document, selector, options)
 }

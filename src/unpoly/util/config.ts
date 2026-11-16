@@ -2,6 +2,12 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import type * as t from './types.js'
 
+// The keys of settings `S` that hold a list of CSS selectors, like `'followSelectors'`.
+type SelectorKey<S> = { [K in keyof S]-?: S[K] extends string[] ? K : never }[keyof S] & string
+
+// Returns whether an element matches the selector of a config property. See `up.util.Config#matchesFn()`.
+type MatchesFunction = (element: Element, condition?: string) => boolean
+
 /**
 A config object with the settings `S`, like `up.network.config`.
 
@@ -55,26 +61,26 @@ export class Config<S extends object> {
     Object.defineProperties(this, Object.getOwnPropertyDescriptors(this._blueprintFn()))
   }
 
-  matches(element: Element, prop: t.SelectorKey<S>, condition?: string): boolean {
+  matches(element: Element, prop: SelectorKey<S>, condition?: string): boolean {
     return element?.matches(this.selector(prop, condition))
   }
 
-  matchesFn(prop: t.SelectorKey<S>): t.MatchesFunction {
+  matchesFn(prop: SelectorKey<S>): MatchesFunction {
     return (element, condition) => this.matches(element, prop, condition)
   }
 
-  selector(prop: t.SelectorKey<S>, condition = ''): string {
+  selector(prop: SelectorKey<S>, condition = ''): string {
     // The settings aren't members of the class, see ConfigWith.
     let includes = (this as any)[prop]
     let excludes = (this as any)['no' + u.upperCaseFirst(prop)]
     return e.unionSelector(includes, excludes, condition)
   }
 
-  selectorFn(prop: t.SelectorKey<S>): t.SelectorFunction {
+  selectorFn(prop: SelectorKey<S>): t.SelectorFunction {
     return (condition) => this.selector(prop, condition)
   }
 
-  selectorFns(prop: t.SelectorKey<S>): [t.SelectorFunction, t.MatchesFunction] {
+  selectorFns(prop: SelectorKey<S>): [t.SelectorFunction, MatchesFunction] {
     return [this.selectorFn(prop), this.matchesFn(prop)]
   }
 }

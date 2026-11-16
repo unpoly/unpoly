@@ -1,9 +1,7 @@
 import type * as u from '../util.js'
-import type { EventPlan, UpEvent } from '../event.js'
+import type { UpEvent } from '../event.js'
 import type { ParamsLike } from '../form.js'
-import type { RenderOptions } from '../fragment.js'
 import type { Layer, LayerMode, LayerReference, NewLayer } from '../layer.js'
-import type { LogArgs } from '../log.js'
 import type { UpRequest } from './request.js'
 import type { UpResponse } from './response.js'
 
@@ -128,58 +126,12 @@ What `up.Request.tester()` accepts: a request, a URL pattern, a function or a bo
 export type RequestCondition = UpRequest | string | ((request: UpRequest) => boolean) | boolean
 
 /**
-Options for constructing an `up.Response`. Most are read from the response headers.
-@internal
-*/
-export interface ResponseOptions {
-  method?: string
-  url?: string
-  text?: string
-  status?: number
-  request?: UpRequest
-  xhr?: XMLHttpRequest
-  target?: string
-  title?: string
-  openLayer?: RenderOptions
-  acceptLayer?: any
-  dismissLayer?: any
-  eventPlans?: EventPlan[]
-  context?: u.PlainObject
-  expireCache?: string | false
-  evictCache?: string | false
-  // Custom headers for synthetic responses without { xhr }.
-  headers?: Record<string, string>
-  loadedAt?: Date
-  fail?: u.ValueOrFunction<boolean>
-}
-
-/**
-Options for `up.cache.track()`.
-@internal
-*/
-export interface CacheTrackOptions {
-  // Track even if the requests would not get the same response.
-  force?: boolean
-  onIncompatible?: (newRequest: UpRequest) => void
-}
-
-/**
 Options for `up.Request.tester()`, and for the cache and queue methods that use it.
 @internal
 */
 export interface RequestTesterOptions {
   // Never match this request, or the cached request whose response it waits for.
   except?: UpRequest
-}
-
-/**
-Options for `RequestQueue#abort()`.
-@internal
-*/
-export interface AbortRequestsOptions extends RequestTesterOptions {
-  reason?: string | Error
-  // A message to log before the first request is aborted.
-  logOnce?: LogArgs | null
 }
 
 declare module '../event.js' {

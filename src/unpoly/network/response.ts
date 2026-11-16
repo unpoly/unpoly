@@ -1,14 +1,38 @@
 import * as u from '../util.js'
 import { isCritical } from '../error.js'
+import type { EventPlan } from '../event.js'
+import type { RenderOptions } from '../fragment.js'
 import { networkConfig, requestCache } from '../network.js'
 import { CSPInfo } from '../script.js'
-import type * as t from './types.js'
 import type { UpRequest } from './request.js'
+
+// Options for constructing an `up.Response`. Most are read from the response headers.
+interface ResponseOptions {
+  method?: string
+  url?: string
+  text?: string
+  status?: number
+  request?: UpRequest
+  xhr?: XMLHttpRequest
+  target?: string
+  title?: string
+  openLayer?: RenderOptions
+  acceptLayer?: any
+  dismissLayer?: any
+  eventPlans?: EventPlan[]
+  context?: u.PlainObject
+  expireCache?: string | false
+  evictCache?: string | false
+  // Custom headers for synthetic responses without { xhr }.
+  headers?: Record<string, string>
+  loadedAt?: Date
+  fail?: u.ValueOrFunction<boolean>
+}
 
 const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
 
 // The constructor copies these options onto the response.
-export interface UpResponse extends t.ResponseOptions {} // oxlint-disable-line typescript/no-unsafe-declaration-merging
+export interface UpResponse extends ResponseOptions {} // oxlint-disable-line typescript/no-unsafe-declaration-merging
 
 // Prefixed, so the binding doesn't shadow the browser's `Response` here or in importers.
 // At runtime the class is named `up.Response` (see unpoly.ts).
@@ -24,7 +48,7 @@ export class UpResponse {
   declare headers: Record<string, string>
   declare loadedAt: Date
 
-  constructor(options: t.ResponseOptions = {}) {
+  constructor(options: ResponseOptions = {}) {
     // Like a default parameter, a default only replaces an undefined option.
     const { headers = {}, loadedAt = new Date() } = options
 

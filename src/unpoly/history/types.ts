@@ -12,18 +12,6 @@ What Unpoly can update in the browser history. See `up.history.config.enabled`.
 export type HistoryAspect = 'location' | 'title' | 'metaTags' | 'lang'
 
 /**
-How to report the next location change. See `up:location:changed`.
-@internal
-*/
-export interface HistoryTrackOptions {
-  reason?: LocationChangeReason
-  // The change was made by Unpoly, which has already updated the page.
-  alreadyHandled?: boolean
-  // Ignore the next location change.
-  pauseTracking?: boolean
-}
-
-/**
 The `up:location:changed` event.
 */
 export interface LocationChangedEvent extends UpEvent {

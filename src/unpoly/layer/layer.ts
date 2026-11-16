@@ -19,6 +19,9 @@ import type { LayerStack } from './layer_stack.js'
 import type { Overlay } from './overlay.js'
 import type { OverlayFocus } from './overlay_focus.js'
 
+// Where an overlay is in its life cycle. The root layer has no state.
+type LayerState = 'opening' | 'opened' | 'closing' | 'closed'
+
 export class Layer {
   // Each subclass has its mode, like ModalLayer.mode = 'modal'.
   declare static mode: t.LayerMode
@@ -31,7 +34,7 @@ export class Layer {
   declare contentElement?: HTMLElement
   declare boxElement?: HTMLElement
   declare overlayFocus?: OverlayFocus
-  declare state?: t.LayerState
+  declare state?: LayerState
   declare _index?: number
   declare _unbindLocationChanged?: UnbindFunction
   declare _savedTitle?: string

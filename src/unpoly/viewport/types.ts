@@ -15,29 +15,6 @@ export interface DoFocusOptions {
 }
 
 /**
-Options for revealing the element that a URL #hash points to.
-@internal
-*/
-export interface RevealHashOptions {
-  // Reveal the target again after the browser had a chance to scroll.
-  strong?: boolean
-  layer?: LayerReference
-  origin?: Element
-  behavior?: ScrollBehavior
-  focus?: boolean
-}
-
-/**
-What `up.internal.absolutize()` returns: the `<up-bounds>` element that now wraps the element,
-and a function that moves it.
-@internal
-*/
-export interface Absolutization {
-  bounds: HTMLElement
-  moveBounds(diffX: number, diffY: number): void
-}
-
-/**
 The settings in `up.viewport.config`, described in its doc comment.
 */
 export interface ViewportConfig {

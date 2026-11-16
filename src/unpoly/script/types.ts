@@ -77,22 +77,6 @@ and the callback gets one element.
 export type BatchCompilerCallback<E extends Element = HTMLElement> = (elements: E[], data: any[], meta: CompilerMeta) => unknown
 
 /**
-Options for `registerAttrCompiler()`.
-@internal
-*/
-export interface AttrCompilerOptions extends CompilerOptions {
-  // The value for an attribute set without a value, or to "true".
-  defaultValue?: string
-}
-
-/**
-A compiler for `registerAttrCompiler()`. It is called with the element and its attribute value.
-Without a `{ defaultValue }`, the value of an attribute set without a value (or to "true") is `true`.
-@internal
-*/
-export type AttrCompilerCallback<V = string | true, E extends Element = HTMLElement> = (element: E, value: V) => unknown
-
-/**
 Options for `up.script.parseCallback()`.
 @internal
 */
@@ -162,16 +146,6 @@ A value that `up.script.config.evalCallbackPolicy` or `up.script.config.scriptEl
 @internal
 */
 export type PolicyString = 'pass' | 'block' | 'nonce' | 'auto'
-
-/**
-The names and values of the arguments for a callback string, and its `this`.
-@internal
-*/
-export interface EvalEnv {
-  argNames: string[]
-  argValues: any[]
-  thisContext?: any
-}
 
 declare module '../event.js' {
   interface UpEventMap {

@@ -1,6 +1,4 @@
 import type * as u from '../util.js'
-import type { RenderOptions } from '../fragment.js'
-import type { UpRequest } from '../network.js'
 import type { Preview } from './preview.js'
 
 /**
@@ -19,16 +17,4 @@ export interface StatusConfig {
   revalidatingClasses: string[]
   navSelectors: string[]
   noNavSelectors: string[]
-}
-
-/**
-Everything an `up.Preview` needs to know.
-@internal
-*/
-export interface PreviewOptions {
-  // Missing when opening a layer.
-  fragment?: Element
-  request: UpRequest
-  renderOptions: RenderOptions
-  cleaner: u.Cleaner
 }

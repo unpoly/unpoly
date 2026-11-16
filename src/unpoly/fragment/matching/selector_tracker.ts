@@ -1,15 +1,17 @@
 import * as u from '../../util.js'
 import { on, type UnbindFunction } from '../../event.js'
 import { afterMutate } from '../../fragment.js'
-import type * as t from '../types.js'
+
+// Called when an element starts matching. May return a function that is called when it stops matching.
+type SelectorTrackerAddCallback = (element: Element) => ((element: Element) => void) | void
 
 export class SelectorTracker {
   declare _selectFn: () => Iterable<Element>
-  declare _addCallback: t.SelectorTrackerAddCallback
+  declare _addCallback: SelectorTrackerAddCallback
   declare _knownMatches: Map<Element, (element: Element) => void>
   declare _syncScheduled: boolean
 
-  constructor(selectFn: () => Iterable<Element>, addCallback: t.SelectorTrackerAddCallback) {
+  constructor(selectFn: () => Iterable<Element>, addCallback: SelectorTrackerAddCallback) {
     this._selectFn = selectFn
     this._addCallback = addCallback
     this._knownMatches = new Map()

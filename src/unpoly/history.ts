@@ -14,6 +14,15 @@ import { revealHash, revealHashFn, saveFocus, saveScroll } from './viewport.js'
 import type * as t from './history/types.js'
 export type * from './history/types.js'
 
+// How to report the next location change. See `up:location:changed`.
+interface HistoryTrackOptions {
+  reason?: t.LocationChangeReason
+  // The change was made by Unpoly, which has already updated the page.
+  alreadyHandled?: boolean
+  // Ignore the next location change.
+  pauseTracking?: boolean
+}
+
 export const historyConfig = newConfig('up.history.config', (): t.HistoryConfig => ({
   enabled: true,
   // Prefer restoring the body instead of :main, in case the last fragment update
@@ -38,7 +47,7 @@ export const historyConfig = newConfig('up.history.config', (): t.HistoryConfig 
 
 export let previousLocation: string | undefined
 let nextPreviousLocation: string | undefined
-let nextTrackOptions: t.HistoryTrackOptions | undefined
+let nextTrackOptions: HistoryTrackOptions | undefined
 let adoptedBases = new u.FIFOCache<string, boolean>({ capacity: 100, normalizeKey: getBase })
 
 function reset(): void {
@@ -102,7 +111,7 @@ export function currentLocation(): string {
   return u.normalizeURL(location.href)
 }
 
-function withTrackOptions(trackOptions: t.HistoryTrackOptions | undefined, fn: () => void): void {
+function withTrackOptions(trackOptions: HistoryTrackOptions | undefined, fn: () => void): void {
   try {
     nextTrackOptions = trackOptions
     fn()
@@ -111,7 +120,7 @@ function withTrackOptions(trackOptions: t.HistoryTrackOptions | undefined, fn: (
   }
 }
 
-function trackCurrentLocation(trackOptions: t.HistoryTrackOptions): void {
+function trackCurrentLocation(trackOptions: HistoryTrackOptions): void {
   let { reason, alreadyHandled, pauseTracking } = nextTrackOptions || trackOptions
   if (pauseTracking) return
 
@@ -169,16 +178,16 @@ export function isLocation(url: string, options?: u.NormalizeURLOptions): boolea
   return u.matchURLs(url, location.href, { hash: true, ...options })
 }
 
-export function replace(location: string, trackOptions?: t.HistoryTrackOptions): void {
+export function replace(location: string, trackOptions?: HistoryTrackOptions): void {
   placeAdoptedHistoryEntry('replaceState', location, trackOptions)
 }
 
-export function pushLocation(location: string, trackOptions?: t.HistoryTrackOptions): void {
+export function pushLocation(location: string, trackOptions?: HistoryTrackOptions): void {
   if (isLocation(location)) return
   placeAdoptedHistoryEntry('pushState', location, trackOptions)
 }
 
-function placeAdoptedHistoryEntry(method: 'pushState' | 'replaceState', location: string, trackOptions?: t.HistoryTrackOptions): void {
+function placeAdoptedHistoryEntry(method: 'pushState' | 'replaceState', location: string, trackOptions?: HistoryTrackOptions): void {
   // When up.history.config.enabled excludes 'location', we do nothing.
   // We don't adopt a URL that we never pushed.
   if (isHistoryEnabled('location')) {

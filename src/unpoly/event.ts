@@ -13,6 +13,9 @@ export { assertEventEmitted, emitEvent, parseEmitArgs }
 import { UpEventListener, bindListeners, parseBindArgs, unbindListeners } from './event/listeners.js'
 export { UpEventListener, bindListeners, parseBindArgs, unbindListeners }
 
+// A property of a mouse or keyboard event that says whether a modifier key was held.
+type ModifierKey = 'metaKey' | 'shiftKey' | 'ctrlKey' | 'altKey'
+
 function reset(): void {
   // Resets the list of registered event listeners to the
   // moment when the framework was booted.
@@ -102,9 +105,9 @@ export function haltEvent(event: Event, options: { log?: boolean } = {}): void {
   event.preventDefault()
 }
 
-export const keyModifiers: t.ModifierKey[] = ['metaKey', 'shiftKey', 'ctrlKey', 'altKey']
+export const keyModifiers: ModifierKey[] = ['metaKey', 'shiftKey', 'ctrlKey', 'altKey']
 
-export function isModified(event: { button?: number } & Pick<MouseEvent, t.ModifierKey>): boolean {
+export function isModified(event: { button?: number } & Pick<MouseEvent, ModifierKey>): boolean {
   // An up:click from a keyboard event has no { button }, and undefined > 0 is false.
   return (event.button! > 0) || u.some(keyModifiers, (modifier) => event[modifier])
 }

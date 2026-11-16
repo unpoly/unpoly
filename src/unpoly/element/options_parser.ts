@@ -3,6 +3,14 @@ import * as e from '../element.js'
 import { renderCallbackAttr, toFailKey } from '../fragment.js'
 import type * as t from './types.js'
 
+// Options for parsing a single option with an `up.OptionsParser`.
+interface ParseKeyOptions {
+  // The attribute(s) to read. Defaults to the kebab-cased key with the parser's prefix.
+  attr?: string | string[]
+  default?: any
+  normalize?: (value: any) => any
+}
+
 export class OptionsParser {
   declare _options: u.PlainObject
   declare _element: Element
@@ -20,31 +28,31 @@ export class OptionsParser {
     this._defaults = parserOptions.defaults ?? {}
   }
 
-  string(key: string, keyOptions?: t.ParseKeyOptions): void {
+  string(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(e.stringAttr, key, keyOptions)
   }
 
-  boolean(key: string, keyOptions?: t.ParseKeyOptions): void {
+  boolean(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(e.booleanAttr, key, keyOptions)
   }
 
-  number(key: string, keyOptions?: t.ParseKeyOptions): void {
+  number(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(e.numberAttr, key, keyOptions)
   }
 
-  booleanOrString(key: string, keyOptions?: t.ParseKeyOptions): void {
+  booleanOrString(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(e.booleanOrStringAttr, key, keyOptions)
   }
 
-  booleanOrNumber(key: string, keyOptions?: t.ParseKeyOptions): void {
+  booleanOrNumber(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(e.booleanOrNumberAttr, key, keyOptions)
   }
 
-  booleanOrNumberOrString(key: string, keyOptions?: t.ParseKeyOptions): void {
+  booleanOrNumberOrString(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(e.booleanOrNumberOrStringAttr, key, keyOptions)
   }
 
-  json(key: string, keyOptions?: t.ParseKeyOptions): void {
+  json(key: string, keyOptions?: ParseKeyOptions): void {
     this.parse(e.jsonAttr, key, keyOptions)
   }
 
@@ -54,12 +62,12 @@ export class OptionsParser {
   //   this.parse(attrReader, key, keyOptions)
   // }
 
-  renderCallback(key: string, keyOptions: t.ParseKeyOptions = {}): void {
+  renderCallback(key: string, keyOptions: ParseKeyOptions = {}): void {
     let attrReader: t.AttrReader = (link, attr) => renderCallbackAttr(link, attr, key)
     this.parse(attrReader, key, keyOptions)
   }
 
-  parse(attrReader: t.AttrReader, key: string, keyOptions: t.ParseKeyOptions = {}): void {
+  parse(attrReader: t.AttrReader, key: string, keyOptions: ParseKeyOptions = {}): void {
     const attrNames = u.wrapList(keyOptions.attr ?? this._attrNameForKey(key))
 
     // Below we will only set this._options[key] = value if value is defined.

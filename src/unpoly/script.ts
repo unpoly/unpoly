@@ -17,6 +17,15 @@ export {
 } from './script/csp.js'
 import { HelloFragment } from './script/hello_fragment.js'
 
+// Options for `registerAttrCompiler()`.
+interface AttrCompilerOptions extends t.CompilerOptions {
+  // The value for an attribute set without a value, or to "true".
+  defaultValue?: string
+}
+
+// A compiler for `registerAttrCompiler()`. It is called with the element and its attribute value.
+// Without a `{ defaultValue }`, the value of an attribute set without a value (or to "true") is `true`.
+type AttrCompilerCallback<V = string | true, E extends Element = HTMLElement> = (element: E, value: V) => unknown
 
 export const scriptConfig = newConfig('up.script.config', (): t.ScriptConfig => ({
   cspNonce() { return e.metaContent('csp-nonce') },
@@ -108,17 +117,17 @@ export function registerMacro(...args: any[]): void {
 
 export function registerAttrCompiler<E extends Element = HTMLElement>(
   attr: string,
-  callback: t.AttrCompilerCallback<string | true, E>,
+  callback: AttrCompilerCallback<string | true, E>,
 ): void
 export function registerAttrCompiler<E extends Element = HTMLElement>(
   attr: string,
-  options: t.AttrCompilerOptions & { defaultValue: string },
-  callback: t.AttrCompilerCallback<string, E>,
+  options: AttrCompilerOptions & { defaultValue: string },
+  callback: AttrCompilerCallback<string, E>,
 ): void
 export function registerAttrCompiler<E extends Element = HTMLElement>(
   attr: string,
-  options: t.AttrCompilerOptions,
-  callback: t.AttrCompilerCallback<string | true, E>,
+  options: AttrCompilerOptions,
+  callback: AttrCompilerCallback<string | true, E>,
 ): void
 export function registerAttrCompiler(...args: any[]): void {
   let [attr, options, valueCallback] = parseProcessorArgs(args)

@@ -5,6 +5,25 @@ import { mockable } from './mockable.js'
 import type * as t from './element/types.js'
 export type * from './element/types.js'
 
+// Parses the value of an attribute. Returns `undefined` if it cannot parse the value,
+// so `up.element.parseAttr()` tries the next parser.
+type AttrParser = (value: string, attribute: string, element: Element) => any
+
+// One element in a parsed selector's descendant path (`div.foo#bar[baz]` in `main > div.foo#bar[baz]`).
+interface SelectorSegment {
+  tagName: string | null
+  classNames: string[]
+  id: string | null
+  attributes: Record<string, string>
+}
+
+// What `up.element.parseSelector()` returns.
+interface ParsedSelector {
+  includePath: SelectorSegment[]
+  includeRaw: string
+  excludeRaw?: string
+}
+
 function first(...args: any[]): HTMLElement | null {
   let [root = document, selector] = u.parseArgs(args, 'val', 'val')
   return root.querySelector(selector)
@@ -212,7 +231,7 @@ export function createFromSelector(selector: string, attrs: u.PlainObject = {}):
   return rootElement
 }
 
-function makeVariation(element: Element, { id, classNames, attributes }: t.SelectorSegment): void {
+function makeVariation(element: Element, { id, classNames, attributes }: SelectorSegment): void {
   if (id) {
     element.id = id
   }
@@ -224,7 +243,7 @@ function makeVariation(element: Element, { id, classNames, attributes }: t.Selec
   addClasses(element, classNames)
 }
 
-export function parseSelector(rawSelector: string): t.ParsedSelector {
+export function parseSelector(rawSelector: string): ParsedSelector {
   let excludeRaw
 
   const {
@@ -242,7 +261,7 @@ export function parseSelector(rawSelector: string): t.ParsedSelector {
   const includeSegments = includeWithoutAttrs.split(/[ >]+/)
 
   let includePath = includeSegments.map(function(depthSelector) {
-    let parsed: t.SelectorSegment = {
+    let parsed: SelectorSegment = {
       tagName: null,
       classNames: [],
       id: null,
@@ -498,7 +517,7 @@ function preservingFocus<T>(fn: () => T): T {
   }
 }
 
-export function parseAttr(element: Element, attribute: string, ...parsers: t.AttrParser[]): any {
+export function parseAttr(element: Element, attribute: string, ...parsers: AttrParser[]): any {
   // The document does not respond to #hasAttribute()
   if (!element.hasAttribute?.(attribute)) return undefined
   let rawValue = element.getAttribute(attribute)!
@@ -513,7 +532,7 @@ export function stringAttr(element: Element, attribute: string): string | undefi
   return parseAttr(element, attribute, tryParseString)
 }
 
-let tryParseString: t.AttrParser = u.identity
+let tryParseString: AttrParser = u.identity
 
 export function booleanAttr(element: Element, attribute: string): boolean | undefined {
   return parseAttr(element, attribute, tryParseBoolean)

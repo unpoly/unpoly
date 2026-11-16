@@ -6,7 +6,7 @@ import { fail } from './error.js'
 import { getInputDevice, on } from './event.js'
 import { isField } from './form.js'
 import { containsFragment, getAllFragments, getSmart, tryToTarget } from './fragment.js'
-import { layerStack } from './layer.js'
+import { layerStack, type LayerReference } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
 import { mockable } from './mockable.js'
 import { registerCompiler } from './script.js'
@@ -17,6 +17,22 @@ import { FocusCapsule } from './viewport/focus_capsule.js'
 export { FocusCapsule }
 import { revealInViewport } from './viewport/reveal_in_viewport.js'
 
+// Options for revealing the element that a URL #hash points to.
+interface RevealHashOptions {
+  // Reveal the target again after the browser had a chance to scroll.
+  strong?: boolean
+  layer?: LayerReference
+  origin?: Element
+  behavior?: ScrollBehavior
+  focus?: boolean
+}
+
+// What `up.internal.absolutize()` returns: the `<up-bounds>` element that now wraps the element,
+// and a function that moves it.
+interface Absolutization {
+  bounds: HTMLElement
+  moveBounds(diffX: number, diffY: number): void
+}
 
 export const viewportConfig = newConfig('up.viewport.config', (): t.ViewportConfig => ({
   viewportSelectors: ['[up-viewport]', '[up-fixed]'],
@@ -99,13 +115,13 @@ export function tryFocus(element: HTMLElement, options?: t.DoFocusOptions): bool
   return element === document.activeElement
 }
 
-export function revealHash(hash: string, options?: t.RevealHashOptions): boolean | Promise<void> | undefined {
+export function revealHash(hash: string, options?: RevealHashOptions): boolean | Promise<void> | undefined {
   return revealHashFn(hash, options)?.()
 }
 
 export function revealHashFn(
   hash: string,
-  { strong, layer, origin, behavior = 'instant', focus = false }: t.RevealHashOptions = {},
+  { strong, layer, origin, behavior = 'instant', focus = false }: RevealHashOptions = {},
 ): (() => boolean | Promise<void>) | undefined {
   if (!hash) return
 
@@ -300,7 +316,7 @@ function setScrollPositions(
   }
 }
 
-export function absolutize(element: HTMLElement, options: { afterMeasure?: () => void } = {}): t.Absolutization {
+export function absolutize(element: HTMLElement, options: { afterMeasure?: () => void } = {}): Absolutization {
   const viewport = closestViewport(element)
 
   const viewportRect = viewport.getBoundingClientRect()

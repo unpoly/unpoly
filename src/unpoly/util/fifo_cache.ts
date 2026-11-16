@@ -1,12 +1,17 @@
 import * as u from '../util.js'
-import type * as t from './types.js'
+
+// Options for `up.FIFOCache`.
+interface FIFOCacheOptions<K> {
+  capacity?: number
+  normalizeKey?: (key: K) => any
+}
 
 export class FIFOCache<K = any, V = any> {
   declare _map: Map<any, V>
   declare _capacity: number
   declare _normalizeKey: (key: K) => any
 
-  constructor({ capacity = 10, normalizeKey = u.identity }: t.FIFOCacheOptions<K> = {}) {
+  constructor({ capacity = 10, normalizeKey = u.identity }: FIFOCacheOptions<K> = {}) {
     this._map = new Map()
     this._capacity = capacity
     this._normalizeKey = normalizeKey

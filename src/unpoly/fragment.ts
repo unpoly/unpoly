@@ -29,6 +29,14 @@ import { Selector } from './fragment/matching/selector.js'
 import { SelectorTracker } from './fragment/matching/selector_tracker.js'
 export { SelectorTracker }
 
+// Options for turning a value (HTML, a template or nodes) into nodes.
+interface ProvideNodesOptions {
+  origin?: Element
+  originLayer?: Layer
+  data?: any
+  htmlParser?: t.HTMLParser
+}
+
 // Properties Unpoly sets on fragments.
 interface FragmentElement extends Element {
   // An opaque value that u.isEqual() compares, see buildKeepIdentity().
@@ -921,7 +929,7 @@ const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
 export function provideNodes(
   value: any,
-  { origin, originLayer, data, htmlParser = e.createNodesFromHTML }: t.ProvideNodesOptions = {},
+  { origin, originLayer, data, htmlParser = e.createNodesFromHTML }: ProvideNodesOptions = {},
 ): u.List<Node> {
   if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
     let [parsedValue, parsedData] = u.parseScalarJSONPairs(value)[0]
@@ -950,7 +958,7 @@ interface TemplateNode extends Node { upTemplateData?: u.PlainObject }
 export function cloneTemplate(
   templateOrSelector: e.ElementOrSelector,
   data: any = {},
-  { origin, htmlParser }: t.ProvideNodesOptions = {},
+  { origin, htmlParser }: ProvideNodesOptions = {},
 ): u.List<Node> {
   // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
   let template = getSmart(templateOrSelector, { origin, layer: 'closest' }) || fail('Template not found: %o', templateOrSelector)

@@ -6,6 +6,13 @@ import { printToStandard, printToWarn } from '../log.js'
 import { blockScripts, cspNonce, findScripts, isScript, scriptConfig } from '../script.js'
 import type * as t from './types.js'
 
+// The names and values of the arguments for a callback string, and its `this`.
+interface EvalEnv {
+  argNames: string[]
+  argValues: any[]
+  thisContext?: any
+}
+
 const NONCE_PATTERN = /'nonce-([^']+)'/g
 
 function findNonces(cspPart: string): string[] {
@@ -61,7 +68,7 @@ export class CSPInfo {
 declare module '../../unpoly.js' {
   interface Up {
     /** @internal */
-    noncedEval?: t.EvalEnv & { value?: any, error?: any }
+    noncedEval?: EvalEnv & { value?: any, error?: any }
   }
 }
 
@@ -80,7 +87,7 @@ export class NonceableCallback {
     return new this(match[3], match[2])
   }
 
-  unsafeEval(evalEnv: t.EvalEnv): any {
+  unsafeEval(evalEnv: EvalEnv): any {
     if (this.nonce) {
       return this._runAsScriptElement(evalEnv)
     } else {
@@ -92,12 +99,12 @@ export class NonceableCallback {
     return `nonce-${this.nonce} ${this.script}`
   }
 
-  _runAsFunction({ argNames, argValues, thisContext }: t.EvalEnv): any {
+  _runAsFunction({ argNames, argValues, thisContext }: EvalEnv): any {
     let fn = new Function(...argNames, this.script)
     return fn.apply(thisContext, argValues)
   }
 
-  _runAsScriptElement(evalEnv: t.EvalEnv): any {
+  _runAsScriptElement(evalEnv: EvalEnv): any {
     // A strict CSP will block use of `eval()` or `new Function()`.
     // What we can do instead is insert an inline script that is allowed per a [nonce] attr.
     let wrappedScript = `
@@ -150,7 +157,7 @@ export function warnOfUnsafeCSP(cspInfo = CSPInfo.none()): void {
   }
 }
 
-export function evalCallback(nonceableCallback: NonceableCallback, evalEnv: t.EvalEnv): any {
+export function evalCallback(nonceableCallback: NonceableCallback, evalEnv: EvalEnv): any {
   const policy = new EvalCallbackPolicy(cspNonce(), CSPInfo.none())
 
   // There are multiple reasons why we explicitly check if a callback is allowed,

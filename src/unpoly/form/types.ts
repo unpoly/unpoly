@@ -1,6 +1,6 @@
 import type * as u from '../util.js'
 import type { UpEvent } from '../event.js'
-import type { RenderOptions, RenderResult } from '../fragment.js'
+import type { RenderOptions } from '../fragment.js'
 import type { Params } from './params.js'
 
 /**
@@ -106,28 +106,6 @@ export interface FormGroupSolution {
   element: Element
   target?: string | false
   origin: Element
-}
-
-/**
-What to re-render to validate a field: an element, its target selector and the field that
-triggered the validation.
-@internal
-*/
-export interface TargetedSolution extends FormGroupSolution {
-  target: string
-}
-
-/**
-A solution that is scheduled for rendering. `_getSolutions()` adds the render options and a
-deferred that settles when the validation has rendered.
-@internal
-*/
-export interface ValidationSolution extends TargetedSolution {
-  renderOptions: ValidateOptions
-  batch?: boolean
-  // The method and URL. Solutions with the same destination can be validated in one request.
-  destination: string
-  deferred: u.Deferred<RenderResult>
 }
 
 /**

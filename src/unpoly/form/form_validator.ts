@@ -16,9 +16,25 @@ import { readData } from '../script.js'
 import type * as t from './types.js'
 import { Params } from './params.js'
 
+// What to re-render to validate a field: an element, its target selector and the field that
+// triggered the validation.
+interface TargetedSolution extends t.FormGroupSolution {
+  target: string
+}
+
+// A solution that is scheduled for rendering. `_getSolutions()` adds the render options and a
+// deferred that settles when the validation has rendered.
+interface ValidationSolution extends TargetedSolution {
+  renderOptions: t.ValidateOptions
+  batch?: boolean
+  // The method and URL. Solutions with the same destination can be validated in one request.
+  destination: string
+  deferred: u.Deferred<RenderResult>
+}
+
 export class FormValidator {
   declare _form: HTMLFormElement
-  declare _dirtySolutions: t.ValidationSolution[]
+  declare _dirtySolutions: ValidationSolution[]
   declare _nextRenderTimer: number | null
   declare _rendering: boolean
 
@@ -75,12 +91,12 @@ export class FormValidator {
 
   // Returns at least one solution, for the origin itself if nothing else, so the deferred settles.
   // A blank [up-validate] value falls back like a missing one.
-  _getSolutions(options: t.ValidateOptions, deferred: u.Deferred<RenderResult>): t.ValidationSolution[] {
+  _getSolutions(options: t.ValidateOptions, deferred: u.Deferred<RenderResult>): ValidationSolution[] {
     // The loop below adds the props of a scheduled solution.
     let solutions = (this._getTargetSelectorSolutions(options)
       || this._getFieldSolutions(options)
       // up.validate() and _onFieldAdded() always pass an { origin }.
-      || this._getElementSolutions(options.origin!)) as t.ValidationSolution[]
+      || this._getElementSolutions(options.origin!)) as ValidationSolution[]
 
     for (let solution of solutions) {
       // Remember solution-specific render options from
@@ -101,25 +117,25 @@ export class FormValidator {
     return solutions
   }
 
-  _getFieldSolutions({ origin, ...options }: u.PlainObject): t.TargetedSolution[] | undefined {
+  _getFieldSolutions({ origin, ...options }: u.PlainObject): TargetedSolution[] | undefined {
     if (isField(origin)) {
       return this._getValidateAttrSolutions(origin) || this._getFormGroupSolutions(origin, options)
     }
   }
 
-  _getFormGroupSolutions(field: Element, { formGroup = true }: t.ValidateOptions): t.TargetedSolution[] | undefined {
+  _getFormGroupSolutions(field: Element, { formGroup = true }: t.ValidateOptions): TargetedSolution[] | undefined {
     if (!formGroup) return
 
     let solution = findGroupSolution(field, { targetable: true })
     if (solution) {
       printToStandard('up.validate()', 'Validating form group of field %o', field)
       // A { targetable } solution has a target.
-      return [solution as t.TargetedSolution]
+      return [solution as TargetedSolution]
     }
   }
 
   // The target may also be a boolean from an [up-validate] attribute.
-  _getTargetSelectorSolutions({ target, origin }: u.PlainObject): t.TargetedSolution[] | undefined {
+  _getTargetSelectorSolutions({ target, origin }: u.PlainObject): TargetedSolution[] | undefined {
     if (u.isString(target)) {
       printToStandard('up.validate()', 'Validating target "%s"', target)
       let simpleSelectors = splitTarget(target)
@@ -140,7 +156,7 @@ export class FormValidator {
     }
   }
 
-  _getElementSolutions(element: Element): t.TargetedSolution[] {
+  _getElementSolutions(element: Element): TargetedSolution[] {
     printToStandard('up.validate()', 'Validating element %o', element)
     return [{
       element,
@@ -149,7 +165,7 @@ export class FormValidator {
     }]
   }
 
-  _getValidateAttrSolutions(field: Element): t.TargetedSolution[] | undefined {
+  _getValidateAttrSolutions(field: Element): TargetedSolution[] | undefined {
     // In case of radio buttons the [up-validate] attribute will
     // be set on a container containing the entire radio button group.
     let containerWithAttr = field.closest('[up-validate]')
@@ -215,7 +231,7 @@ export class FormValidator {
     }
   }
 
-  _selectDirtySolutionsBatch(): t.ValidationSolution[] {
+  _selectDirtySolutionsBatch(): ValidationSolution[] {
     let batch = []
     let i = 0
     while (i < this._dirtySolutions.length) {
@@ -230,11 +246,11 @@ export class FormValidator {
     return batch
   }
 
-  _canBatchSolutions(s1: t.ValidationSolution, s2: t.ValidationSolution): boolean | undefined {
+  _canBatchSolutions(s1: ValidationSolution, s2: ValidationSolution): boolean | undefined {
     return s1.destination === s2.destination && s1.batch && s2.batch
   }
 
-  _mergeRenderOptions(dirtySolutions: t.ValidationSolution[]): RenderOptions {
+  _mergeRenderOptions(dirtySolutions: ValidationSolution[]): RenderOptions {
     // Dirty fields are the fields that triggered the validation, not the fields contained
     // by the solution elements. This is not the same thing in a scenario like this:
     //

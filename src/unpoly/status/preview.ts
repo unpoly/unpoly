@@ -2,14 +2,22 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { guard, UpError } from '../error.js'
 import { disableContainerTemp, type Params } from '../form.js'
-import { getSmart, insertTemp, provideNodes } from '../fragment.js'
+import { getSmart, insertTemp, provideNodes, type RenderOptions } from '../fragment.js'
 import {
   layerStack, open, OVERLAY_VISUAL_KEYS, type Layer, type LayerDismissEvent,
 } from '../layer.js'
 import { printToStandard } from '../log.js'
 import type { UpRequest, UpResponse } from '../network.js'
 import { resolvePreviewFns } from '../status.js'
-import type * as t from './types.js'
+
+// Everything an `up.Preview` needs to know.
+interface PreviewOptions {
+  // Missing when opening a layer.
+  fragment?: Element
+  request: UpRequest
+  renderOptions: RenderOptions
+  cleaner: u.Cleaner
+}
 
 export class Preview {
   declare fragment?: Element
@@ -17,7 +25,7 @@ export class Preview {
   declare renderOptions: u.PlainObject
   declare _cleaner: u.Cleaner
 
-  constructor({ fragment, request, renderOptions, cleaner }: t.PreviewOptions) {
+  constructor({ fragment, request, renderOptions, cleaner }: PreviewOptions) {
     this.fragment = fragment
     this.request = request
     this.renderOptions = renderOptions

@@ -75,16 +75,6 @@ export interface Cleaner {
 }
 
 /**
-A string with some substrings replaced by placeholders, and a function to put them back.
-See `up.util.maskPattern()`.
-@internal
-*/
-export interface MaskedString {
-  masked: string
-  restore(string: string, transform?: (masked: string) => string): string
-}
-
-/**
 What `up.util.args()` should extract from the end of an argument list:
 `'options'` (a plain object), `'callback'` (a function), `'val'` (any value),
 or a function that tests whether the last argument matches.
@@ -97,35 +87,3 @@ Returns a selector for a config property. See `up.util.Config#selectorFn()`.
 @internal
 */
 export type SelectorFunction = (condition?: string) => string
-
-/**
-Returns whether an element matches the selector of a config property. See `up.util.Config#matchesFn()`.
-@internal
-*/
-export type MatchesFunction = (element: Element, condition?: string) => boolean
-
-/**
-The keys of settings `S` that hold a list of CSS selectors, like `'followSelectors'`.
-@internal
-*/
-export type SelectorKey<S> = { [K in keyof S]-?: S[K] extends string[] ? K : never }[keyof S] & string
-
-/**
-Options for `up.FIFOCache`.
-@internal
-*/
-export interface FIFOCacheOptions<K> {
-  capacity?: number
-  normalizeKey?: (key: K) => any
-}
-
-/**
-An object with a rectangle's position and size, like a `DOMRect` or an `up.Rect`.
-@internal
-*/
-export interface RectLike {
-  left: number
-  top: number
-  width: number
-  height: number
-}

@@ -144,12 +144,6 @@ export interface EventPlan<T extends string = string> extends EmitProps {
 }
 
 /**
-A property of a mouse or keyboard event that says whether a modifier key was held.
-@internal
-*/
-export type ModifierKey = 'metaKey' | 'shiftKey' | 'ctrlKey' | 'altKey'
-
-/**
 An element, document or window that Unpoly listens on. It remembers its listeners,
 so `up.off()` can find them.
 @internal

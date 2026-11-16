@@ -5,6 +5,13 @@ import type * as t from './types.js'
 import { UpRequest } from './request.js'
 import { UpResponse } from './response.js'
 
+// Options for `up.cache.track()`.
+interface CacheTrackOptions {
+  // Track even if the requests would not get the same response.
+  force?: boolean
+  onIncompatible?: (newRequest: UpRequest) => void
+}
+
 // One route per method and URL.
 class Route {
 
@@ -123,7 +130,7 @@ export class UpRequestCache {
   }
 
   // TODO: Move this to up.Request
-  async track(existingRequest: UpRequest, newRequest: UpRequest, options: t.CacheTrackOptions = {}): Promise<void> {
+  async track(existingRequest: UpRequest, newRequest: UpRequest, options: CacheTrackOptions = {}): Promise<void> {
     newRequest.trackedRequest = existingRequest
     newRequest.state = 'tracking'
 

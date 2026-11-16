@@ -386,17 +386,6 @@ Parses an HTML string into nodes.
 export type HTMLParser = (html: string) => u.List<Node>
 
 /**
-Options for turning a value (HTML, a template or nodes) into nodes.
-@internal
-*/
-export interface ProvideNodesOptions {
-  origin?: Element
-  originLayer?: Layer
-  data?: any
-  htmlParser?: HTMLParser
-}
-
-/**
 What `up.fragment.config.skipResponse()` gets to decide whether to skip a response. The `up:fragment:loaded` event
 has the same properties.
 */
@@ -495,24 +484,6 @@ export interface FragmentConfig {
   skipResponse: (loadedEventProps: FragmentLoadedProps) => boolean
   renderableResponse: (response: UpResponse) => boolean
 }
-
-/**
-Options for `findFragment()`. Other options (like `{ layer }`) are passed on to
-`up.fragment.closest()` and `up.fragment.get()`.
-@internal
-*/
-export interface FindFragmentOptions extends LookupOptions {
-  selector: string
-  // For matching in detached content, as needed by up.ResponseDoc.
-  document?: Document | Element
-  preferOldElements?: Element[]
-}
-
-/**
-Called when an element starts matching. May return a function that is called when it stops matching.
-@internal
-*/
-export type SelectorTrackerAddCallback = (element: Element) => ((element: Element) => void) | void
 
 declare module '../event.js' {
   interface UpEventMap {

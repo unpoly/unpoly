@@ -702,10 +702,17 @@ export function getComplexTokens(value: any): any[] {
   }
 }
 
+// A string with some substrings replaced by placeholders, and a function to put them back.
+// See `up.util.maskPattern()`.
+interface MaskedString {
+  masked: string
+  restore(string: string, transform?: (masked: string) => string): string
+}
+
 // What complexTokenOutlines() returns.
 interface MaskedTokens {
   maskedTokens: string[]
-  restore: t.MaskedString['restore']
+  restore: MaskedString['restore']
 }
 
 function complexTokenOutlines(string: string): MaskedTokens {
@@ -968,7 +975,7 @@ export function maskPattern(
   str: string,
   patterns: RegExp[],
   { keepDelimiters = false }: { keepDelimiters?: boolean } = {},
-): t.MaskedString {
+): MaskedString {
   let maskCount = 0
   let maskPattern = /§\d+/g
   let maskings: Record<string, string> = {}
@@ -1020,7 +1027,7 @@ export function maskPattern(
 const QUOTED_STRING_PATTERN = /'(?:\\\\|\\'|[^'])*'|"(?:\\\\|\\"|[^"])*"/g
 const NESTED_GROUP_PATTERN = /{(?:[^{}]|{[^{}]*})*}|\((?:[^\(\)]|\([^\(\)]*\))*\)|\[(?:[^\[\]]|\[[^\[\]]*\])*\]/g // oxlint-disable-line no-useless-escape
 
-export function expressionOutline(str: string): t.MaskedString {
+export function expressionOutline(str: string): MaskedString {
   return maskPattern(str, [QUOTED_STRING_PATTERN, NESTED_GROUP_PATTERN], { keepDelimiters: true })
 }
 
