@@ -31,7 +31,7 @@ export class FieldWatcher {
     this._ensureWatchable()
   }
 
-  start(): u.UndoFunction {
+  start(): UnbindFunction {
     this._scheduledValues = null
     this._processedValues = this._readFieldValues()
     this._currentTimer = null

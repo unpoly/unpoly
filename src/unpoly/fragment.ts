@@ -448,7 +448,7 @@ export const reload = mockable(function reload(...args: t.RenderArgs | []): Rend
   options.target ||= ':main'
   // up.reload() takes one element or selector, not a list of target selectors.
   // A target that matches nothing throws a TypeError below.
-  // A reload doesn't open a layer, so its { layer } is no NewLayer like 'swap'.
+  // A reload updates an existing layer, so its { layer } is never a NewLayer like 'swap'.
   const element = getSmart(options.target as e.ElementOrSelector, options as t.LookupOptions)!
   options.url ||= sourceOf(element)
   options.headers = u.merge(options.headers, conditionalHeaders(element))

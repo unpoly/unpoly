@@ -3,7 +3,7 @@ import * as e from './element.js'
 import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { fail, muteUncriticalRejection } from './error.js'
-import { buildEvent, haltEvent, on } from './event.js'
+import { buildEvent, haltEvent, on, type UnbindFunction } from './event.js'
 import {
   closestFragment, getAllFragments, getSmart, getSubtree, render, sourceOf, toTarget, trackSelector,
   tryToTarget, type RenderJob, type RenderOptions, type RenderResult,
@@ -468,7 +468,7 @@ export function submitButtonOverrides(submitButton?: Element | false): RenderOpt
   return u.omit(buttonOptions, ['method', 'url', 'guardEvent', 'origin', 'params', 'headers'])
 }
 
-export function watch(...args: any[]): u.UndoFunction {
+export function watch(...args: any[]): UnbindFunction {
   let [root, options, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
   root = e.getOne(root) // unwrap jQuery
@@ -483,7 +483,7 @@ function watchCallbackFromElement(element: Element): t.WatchCallback | undefined
   return callbackAttr(element, 'up-watch', { argNames: ['value', 'name', 'options'] })
 }
 
-export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): u.UndoFunction {
+export function autosubmit(target: e.ElementOrSelector, options: t.WatchOptions = {}): UnbindFunction {
   const onChange = (_diff: u.PlainObject, renderOptions: RenderOptions) => submit(target, renderOptions)
   return watch(target, { logPrefix: 'up.autosubmit()', ...options, batch: true }, onChange)
 }
@@ -603,7 +603,9 @@ function getOriginRegion(origin?: Element): Element | null | undefined {
 type TrackFieldsCallback = (field: Element) => unknown
 // The guard is a condition for a field to match, tested for truthiness.
 interface TrackFieldsOptions { guard?: (field: Element) => unknown }
-type TrackFieldsArgs = [root: Element, callback: TrackFieldsCallback] | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]
+type TrackFieldsArgs =
+  | [root: Element, callback: TrackFieldsCallback]
+  | [root: Element, options: TrackFieldsOptions, callback: TrackFieldsCallback]
 export const trackFields = mockable(function(...args: TrackFieldsArgs): u.UndoFunction {
   let [root, { guard }, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 

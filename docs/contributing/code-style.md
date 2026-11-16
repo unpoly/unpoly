@@ -266,7 +266,8 @@ Acronyms are uppercased: `parseURL()`, not `parseUrl()`. Same for `escapeHTML()`
 
 A function type is named the way the docs refer to it: `…Callback` where the docs say callback,
 `…Function` otherwise. Don't abbreviate to `Fn`. A function that undoes a temporary change is an
-`UndoFunction`. `UnbindFunction` is only for removing event listeners, like the function `up.on()` returns.
+`UndoFunction`. `UnbindFunction` is only for unsubscribing, like the functions `up.on()` and
+`up.watch()` return.
 
 ### Names that collide with globals
 

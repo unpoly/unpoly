@@ -269,12 +269,12 @@ export const api = {
     open,
     ask,
     get stack() { return layerStack.layers },
-    get(
-      ...args: [value?: t.LayerReference | null | t.LayerLookupOptions, options?: t.LayerLookupOptions]
-    ): Layer | undefined { return layerStack.get(...args) },
-    getAll(
-      ...args: [value?: t.LayerReference | t.LayerLookupOptions, options?: t.LayerLookupOptions]
-    ): Layer[] { return layerStack.getAll(...args) },
+    get(...args: [value?: t.LayerReference | null | t.LayerLookupOptions, options?: t.LayerLookupOptions]): Layer | undefined {
+      return layerStack.get(...args)
+    },
+    getAll(...args: [value?: t.LayerReference | t.LayerLookupOptions, options?: t.LayerLookupOptions]): Layer[] {
+      return layerStack.getAll(...args)
+    },
     get root() { return layerStack.root },
     get overlays() { return layerStack.overlays },
     get current() { return layerStack.current },
