@@ -6,8 +6,8 @@ import {
   setReloadAttrs,
 } from '../../fragment.js'
 import { type Layer } from '../../layer.js'
-import { animate, swap } from '../../motion.js'
-import { block, clean, hello } from '../../script.js'
+import { animate, swapElements } from '../../motion.js'
+import { blockScripts, clean, hello } from '../../script.js'
 import { getViewportSubtree } from '../../viewport.js'
 import type * as t from '../types.js'
 import { FragmentFocus } from './fragment_focus.js'
@@ -159,7 +159,7 @@ function insertSwapStep(step: MatchedStep, willChangeBody: boolean): StepInserti
 
   // up.motion decides when the old element leaves the DOM: now, or after the transition.
   // We tell it what to do at that moment. Everything else happens in our phases (see the returned object).
-  let startMotion = swap(step.oldElement, step.newElement, step.transition, {
+  let startMotion = swapElements(step.oldElement, step.newElement, step.transition, {
     ...step,
     beforeRemove: () => {
       clean(step.oldElement, { layer: step.layer })
@@ -277,7 +277,7 @@ function preserveDescendantKeepables(step: MatchedStep, willChangeBody: boolean)
         // When the newElement from the response has a response, it will be inserted
         // into the DOM during the transition. Only at the end it will be replaced by the keepable.
         // To prevent the execution of these placeholder-scripts, we change their { type }.
-        block(keepMatch.newElement)
+        blockScripts(keepMatch.newElement)
 
         // Attaching a viewport to another element will cause it to lose
         // its scroll position, even if both parents are in the same document.

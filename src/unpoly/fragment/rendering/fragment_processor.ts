@@ -1,6 +1,6 @@
 import * as u from '../../util.js'
 import { guard } from '../../error.js'
-import { contains, getSmart } from '../../fragment.js'
+import { containsFragment, getSmart } from '../../fragment.js'
 import { type Layer } from '../../layer.js'
 import { printToWarn } from '../../log.js'
 import type * as t from '../types.js'
@@ -95,7 +95,7 @@ export abstract class FragmentProcessor {
 
   resolveCondition(condition: string): boolean | null | undefined {
     if (condition === 'main') {
-      return this.fragment && contains(this.fragment, ':main')
+      return this.fragment && containsFragment(this.fragment, ':main')
     }
   }
 
