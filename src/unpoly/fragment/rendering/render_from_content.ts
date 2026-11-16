@@ -16,6 +16,11 @@ import { ResponseDoc } from './response_doc.js'
 // renderFromContent(). Also computes the preflight props for renderFromURL(), before the request
 // is sent, with preflightPropsFromContent().
 
+// Options for preflightPropsFromContent().
+interface PreflightOptions {
+  optional?: boolean
+}
+
 // Returns an up.RenderResult, or a promise that fulfills with nothing when preloading local content.
 export function renderFromContent(options: t.RenderOptions): RenderResult | Promise<void> {
   // Preloading from local content is a no-op.
@@ -48,9 +53,12 @@ export function renderFromContent(options: t.RenderOptions): RenderResult | Prom
 // Returns information about the change that is most likely before the request was dispatched.
 // This might change postflight if the response does not contain the desired target.
 // With { optional: true }, returns an empty object instead of throwing when no target matches.
-export function preflightPropsFromContent(options: t.RenderOptions, opts?: { optional?: false }): t.PreflightProps
-export function preflightPropsFromContent(options: t.RenderOptions, opts?: { optional?: boolean }): Partial<t.PreflightProps>
-export function preflightPropsFromContent(options: t.RenderOptions, opts: { optional?: boolean } = {}): Partial<t.PreflightProps> {
+export function preflightPropsFromContent(options: t.RenderOptions): t.PreflightProps
+export function preflightPropsFromContent(options: t.RenderOptions, opts: PreflightOptions): Partial<t.PreflightProps>
+export function preflightPropsFromContent(
+  options: t.RenderOptions,
+  opts: PreflightOptions = {},
+): Partial<t.PreflightProps> {
   // Don't change the caller's options (see getLayers()).
   options = { ...options }
 
@@ -61,9 +69,6 @@ export function preflightPropsFromContent(options: t.RenderOptions, opts: { opti
 
 // The layer lookup normalizes the options in place, e.g. it sets a { baseLayer }.
 // The plans copy the options later, and need them normalized.
-// renderFromContent() gets options that belong to this render pass, and changes them anyway, so it passes them as they are.
-// preflightPropsFromContent() is a query, so it passes a copy. That copy is only defensive:
-// RenderJob has normalized the success options already, and deriveFailOptions() returns a new object.
 function getLayers(options: t.RenderOptions): (Layer | 'new')[] {
   return filterLayers(layerStack.getAll(options))
 }
@@ -154,7 +159,7 @@ function improveOptionsFromResponseDoc(options: t.RenderOptions, responseDoc: Re
   options.lang = refineOption(options.lang, responseDoc.lang)
 }
 
-function defaultPlacement(options: t.RenderOptions): string | undefined {
+function defaultPlacement(options: t.RenderOptions): 'content' | undefined {
   if (!options.document && !options.fragment) {
     return 'content'
   }
