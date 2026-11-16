@@ -48,8 +48,7 @@ to `up`, and the function takes its types from that declaration (see
 [Code style](code-style.md#the-global-up-and-unpoly-migrate)):
 
 ```ts
-type RenderJob = import('../unpoly/fragment.js').RenderJob
-type RenderOptions = import('../unpoly/fragment.js').RenderOptions
+import type { RenderJob, RenderOptions } from '../unpoly/fragment.js'
 
 declare module '../unpoly.js' {
   interface Up {
