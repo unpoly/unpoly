@@ -29,6 +29,7 @@ export function renderFromContent(options: t.RenderOptions): RenderResult | Prom
     return Promise.resolve()
   }
 
+  // The options belong to this render pass, so the lookup may change them in place.
   let layers = getLayers(options)
   let responseDoc = getResponseDoc(options, layers)
   // This changes the options that the plans copy below.
@@ -59,7 +60,8 @@ export function preflightPropsFromContent(
   options: t.RenderOptions,
   opts: PreflightOptions = {},
 ): Partial<t.PreflightProps> {
-  // Don't change the caller's options (see getLayers()).
+  // Don't change the caller's options (see getLayers()). The copy is only defensive: RenderJob has
+  // normalized the success options already, and deriveFailOptions() returns a new object.
   options = { ...options }
 
   let layers = getLayers(options)
