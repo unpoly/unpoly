@@ -19,6 +19,9 @@ import type { Route } from './request_cache.js'
 import { UpResponse } from './response.js'
 import { sendWithXHR, submitWithForm } from './transports.js'
 
+// The properties that _setAutoHeaders() sends as headers.
+type AutoHeaderProp = 'target' | 'failTarget' | 'mode' | 'failMode' | 'context' | 'failContext' | 'originMode'
+
 // The constructor copies these options onto the request.
 export interface UpRequest extends t.RequestProps {} // oxlint-disable-line typescript/no-unsafe-declaration-merging
 
@@ -558,14 +561,14 @@ export class UpRequest {
     this._setAutoHeader(headerize('version'), up.version)
   }
 
-  _setPropertyHeader(key: keyof UpRequest & string): void {
+  _setPropertyHeader(key: AutoHeaderProp): void {
     this._setAutoHeader(
       headerize(key),
       this[key]
     )
   }
 
-  _setAutoHeader(name: string, value: unknown): void {
+  _setAutoHeader(name: string, value: string | u.PlainObject | null | undefined): void {
     if (u.isMissing(value)) {
       return
     }
@@ -573,7 +576,7 @@ export class UpRequest {
     if (u.isOptions(value) || u.isArray(value)) {
       value = u.safeStringifyJSON(value)
     }
-    this.headers[name] = value as string
+    this.headers[name] = value
   }
 
   mergeIfUnsent(trackingRequest: UpRequest): void {
