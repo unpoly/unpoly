@@ -262,9 +262,8 @@ up.migrate = (function() {
     return transformed
   }
 
-  // Takes an object of props or a string. Typed any because u.isObject() isn't a type predicate, so it doesn't narrow.
-  // oxlint-disable-next-line typescript/no-explicit-any -- see above
-  function fixSetStyleProps(props: any, unit?: string): any {
+  // Takes an object of props or a string.
+  function fixSetStyleProps(props: string | PlainObject, unit?: string): string | PlainObject {
     let transformed
 
     if (u.isObject(props)) {

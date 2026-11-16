@@ -186,8 +186,8 @@ export function isBlank(value: unknown): boolean {
   if (isMissing(value)) {
     return true
   }
-  if (isObject(value) && (value as t.PlainObject)[isBlank.key]) {
-    return (value as t.PlainObject)[isBlank.key]()
+  if (isObject(value) && value[isBlank.key]) {
+    return value[isBlank.key]()
   }
   if (isString(value) || isList(value)) {
     return value.length === 0
@@ -232,7 +232,7 @@ export function isOptions(value: unknown): value is t.PlainObject {
   return (typeof(value) === 'object') && !isNull(value) && (isUndefined(value.constructor) || (value.constructor === Object))
 }
 
-export function isObject(value: unknown): boolean {
+export function isObject<T>(value: T): value is T & t.PlainObject {
   const typeOfResult = typeof(value)
   return ((typeOfResult === 'object') && !isNull(value)) || (typeOfResult === 'function')
 }
@@ -258,11 +258,11 @@ export function isJQuery(value: unknown): boolean {
 }
 
 export function isElementLike(value: unknown): boolean {
-  return !!(value && ((value as t.PlainObject).addEventListener || (isJQuery(value) && (value as t.PlainObject)[0]?.addEventListener)))
+  return isObject(value) && !!(value.addEventListener || (isJQuery(value) && value[0]?.addEventListener))
 }
 
 export function isPromise(value: unknown): value is Promise<unknown> {
-  return isObject(value) && isFunction((value as t.PlainObject).then)
+  return isObject(value) && isFunction(value.then)
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
@@ -318,8 +318,8 @@ export function wrapList(value: unknown): t.List<unknown> {
 export function copy<T>(value: t.List<T> & object): T[]
 export function copy<T>(value: T): T
 export function copy(value: unknown): unknown {
-  if (isObject(value) && (value as t.PlainObject)[copy.key]) {
-    value = (value as t.PlainObject)[copy.key]()
+  if (isObject(value) && value[copy.key]) {
+    value = value[copy.key]()
   } else if (isList(value)) {
     value = copyArrayLike(value)
   } else if (isOptions(value)) {
