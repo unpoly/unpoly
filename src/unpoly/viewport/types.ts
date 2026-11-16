@@ -1,4 +1,4 @@
-import * as u from '../util.js'
+import type * as u from '../util.js'
 import { type InputDevice } from '../event.js'
 import { type LayerReference } from '../fragment.js'
 

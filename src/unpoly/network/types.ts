@@ -1,4 +1,4 @@
-import * as u from '../util.js'
+import type * as u from '../util.js'
 import { type EventPlan, type UpEvent } from '../event.js'
 import { type ParamsLike } from '../form.js'
 import { type RenderOptions } from '../fragment.js'

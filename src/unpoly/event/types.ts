@@ -1,4 +1,4 @@
-import * as u from '../util.js'
+import type * as u from '../util.js'
 import { type LayerReference } from '../fragment.js'
 import { type Layer } from '../layer.js'
 import { type UpEventListener } from './listeners.js'
