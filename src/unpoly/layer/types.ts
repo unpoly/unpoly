@@ -251,8 +251,8 @@ export interface LayerDismissEvent extends LayerCloseEvent {}
 /** The `up:layer:dismissed` event. */
 export interface LayerDismissedEvent extends LayerCloseEvent {}
 
-declare module '../event.js' {
-  interface UpEventMap {
+declare global {
+  interface GlobalEventHandlersEventMap {
     'up:layer:accept': LayerAcceptEvent
     'up:layer:accepted': LayerAcceptedEvent
     'up:layer:dismiss': LayerDismissEvent

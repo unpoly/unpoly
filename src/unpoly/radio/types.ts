@@ -45,8 +45,8 @@ export interface PollOptions extends RenderOptions {
   ifLayer?: 'front' | 'any'
 }
 
-declare module '../event.js' {
-  interface UpEventMap {
+declare global {
+  interface GlobalEventHandlersEventMap {
     'up:fragment:hungry': FragmentHungryEvent
     'up:fragment:poll': FragmentPollEvent
   }

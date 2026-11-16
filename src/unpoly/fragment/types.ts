@@ -540,8 +540,8 @@ export interface FragmentConfig {
   renderableResponse: (response: UpResponse) => boolean
 }
 
-declare module '../event.js' {
-  interface UpEventMap {
+declare global {
+  interface GlobalEventHandlersEventMap {
     'up:fragment:aborted': FragmentAbortedEvent
     'up:fragment:destroyed': FragmentDestroyedEvent
     'up:fragment:inserted': FragmentInsertedEvent

@@ -150,8 +150,8 @@ A value that `up.script.config.evalCallbackPolicy` or `up.script.config.scriptEl
 */
 export type PolicyString = 'pass' | 'block' | 'nonce' | 'auto'
 
-declare module '../event.js' {
-  interface UpEventMap {
+declare global {
+  interface GlobalEventHandlersEventMap {
     'up:assets:changed': AssetsChangedEvent
   }
 }

@@ -520,7 +520,7 @@ every public function, property, class member and event against the types. When 
 remove public API, update its doc entry, and add a deprecation in unpoly-migrate.
 
 The check takes an entry's declaration (`@function up.Request#abort`) and looks the name up in the
-type of `window.up`, or in `UpEventMap` for an event. A failure reads like this:
+type of `window.up`, or in `GlobalEventHandlersEventMap` for an event. A failure reads like this:
 
 ```text
 src/unpoly/network/request.md(42,11): error TS2339: Documented as up.Request#abort, but `Up['Request']['prototype']` has no `abort`.

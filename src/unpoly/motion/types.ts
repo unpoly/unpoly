@@ -66,8 +66,8 @@ export interface MotionConfig {
   enabled: boolean
 }
 
-declare module '../event.js' {
-  interface UpEventMap {
+declare global {
+  interface GlobalEventHandlersEventMap {
     'up:motion:finish': MotionFinishEvent
   }
 }

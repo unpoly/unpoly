@@ -53,9 +53,8 @@ function project(t, files) {
     compilerOptions: { noImplicitAny: true },
     include: ['src/unpoly.ts', 'src/unpoly/**/*.ts'],
   }))
-  // What the probe files import.
+  // What the probe file imports.
   write('src/unpoly.ts', 'export interface Up { a: { b(): void } }\n')
-  write('src/unpoly/event.ts', "export interface UpEventMap { 'up:a': Event }\n")
   for (let [file, content] of Object.entries(files)) write(file, content)
   return root
 }

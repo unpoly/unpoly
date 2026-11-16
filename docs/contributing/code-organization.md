@@ -346,11 +346,12 @@ A type that only one file uses stays in that file. A module with only a few type
 `log.ts` or `framework.ts`, keeps them in its main file and has no `types.ts`.
 
 **Events.** An event's type lives with its module's other types, usually in `types.ts`. The
-same file lists the module's events in `UpEventMap`, so `up.on()` and `up.emit()` know their types:
+same file adds the module's events to the DOM's `GlobalEventHandlersEventMap`, so
+`addEventListener()`, `up.on()` and `up.emit()` know their types:
 
 ```ts
-declare module '../event.js' {
-  interface UpEventMap {
+declare global {
+  interface GlobalEventHandlersEventMap {
     'up:form:submit': FormSubmitEvent
   }
 }

@@ -73,8 +73,8 @@ export interface ExpandedElement extends HTMLElement {
   upExpandedPair?: [area: HTMLElement, link: HTMLElement]
 }
 
-declare module '../event.js' {
-  interface UpEventMap {
+declare global {
+  interface GlobalEventHandlersEventMap {
     'up:click': ClickEvent
     'up:deferred:load': DeferredLoadEvent
     'up:link:follow': LinkFollowEvent

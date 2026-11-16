@@ -143,8 +143,8 @@ export interface AbortRequestsOptions extends RequestTesterOptions {
   logOnce?: LogArgs | null
 }
 
-declare module '../event.js' {
-  interface UpEventMap {
+declare global {
+  interface GlobalEventHandlersEventMap {
     'up:network:late': NetworkLateEvent
     'up:network:recover': NetworkRecoverEvent
     'up:request:aborted': RequestAbortedEvent

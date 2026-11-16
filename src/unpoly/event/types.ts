@@ -30,17 +30,13 @@ The device that the user last interacted with. See `up.event.inputDevice`.
 */
 export type InputDevice = 'unknown' | 'key' | 'pointer'
 
-/**
-Maps the type of each Unpoly event to its event object, like `HTMLElementEventMap` does for DOM events.
-`up.on()` and `up.emit()` look up the event type here.
-
-Each module adds its own events, next to their types, with a `declare module '../event.js'` block
-that extends this interface. Each event maps to its own interface, even one without properties.
-*/
-export interface UpEventMap {} // oxlint-disable-line typescript/no-empty-object-type
+// Each module declares its up:* events by extending the DOM's `GlobalEventHandlersEventMap` in a
+// `declare global` block, next to their types. `addEventListener()` on an element, the document or
+// the window then knows them, and so do `up.on()` and `up.emit()`. Apps declare their own events
+// the same way.
 
 /**
-An event whose type `UpEventMap` doesn't know, like a custom event emitted with `up.emit()`.
+An event whose type the global event maps don't know, like a custom event emitted with `up.emit()`.
 It may have any property.
 */
 export interface AnyEvent extends Event {
@@ -49,14 +45,15 @@ export interface AnyEvent extends Event {
 }
 
 /**
-The event that `up.on()` passes to its listener for the given event types: an Unpoly event from `UpEventMap`,
-a DOM event, or `AnyEvent` for other types. Several types (`'click keydown'` or an array) get a union.
+The event that `up.on()` passes to its listener for the given event types: an event from the global
+event maps (DOM events, and Unpoly's or an app's events), or `AnyEvent` for other types. Several types
+(`'click keydown'` or an array) get a union.
 */
 export type ObservedEvent<T> = SingleObservedEvent<SplitEventTypes<T>>
 
-// Distributes over a union of event types.
+// Distributes over a union of event types. HTMLElementEventMap includes GlobalEventHandlersEventMap.
+// The document and the window have a few events of their own, like 'DOMContentLoaded' or 'popstate'.
 type SingleObservedEvent<T> =
-  T extends keyof UpEventMap ? UpEventMap[T] :
   T extends keyof HTMLElementEventMap ? HTMLElementEventMap[T] :
   T extends keyof DocumentEventMap ? DocumentEventMap[T] :
   T extends keyof WindowEventMap ? WindowEventMap[T] :
@@ -72,9 +69,12 @@ type SplitEventTypes<T> =
 
 /**
 The event that `up.emit()` emits for the given event type. Unlike `ObservedEvent`, it knows no DOM events,
-since `up.emit('click')` emits a plain `Event`.
+since `up.emit('click')` emits a plain `Event`. It only looks up a type with a colon, like `up:link:follow`
+or an app's `app:foo`, which no DOM event has.
 */
-export type EmittedEvent<T> = T extends keyof UpEventMap ? UpEventMap[T] : AnyEvent
+export type EmittedEvent<T> = T extends `${string}:${string}` & keyof GlobalEventHandlersEventMap
+  ? GlobalEventHandlersEventMap[T]
+  : AnyEvent
 
 /**
 One or more event types for `up.on()`, separated by spaces or commas, or as an array.
@@ -82,7 +82,7 @@ One or more event types for `up.on()`, separated by spaces or commas, or as an a
 export type EventTypes = EventType | readonly EventType[]
 
 // Editors suggest the event types that up.on() knows. `string & {}` keeps every other string allowed.
-type EventType = keyof UpEventMap | keyof HTMLElementEventMap | keyof DocumentEventMap | keyof WindowEventMap | (string & {})
+type EventType = keyof HTMLElementEventMap | keyof DocumentEventMap | keyof WindowEventMap | (string & {})
 
 /**
 What `up.on()` listens on: an element, the document, the window, or a list of elements.

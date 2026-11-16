@@ -39,8 +39,8 @@ export interface OptionsParserOptions {
   defaults?: u.PlainObject | false
 }
 
-declare module '../event.js' {
-  interface UpEventMap {
+declare global {
+  interface GlobalEventHandlersEventMap {
     'up:element:defined': ElementDefinedEvent
   }
 }

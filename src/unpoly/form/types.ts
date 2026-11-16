@@ -123,8 +123,8 @@ a `FormData` object or a plain object like `{ name: 'value' }`.
 */
 export type ParamsLike = Params | ParamEntry[] | string | FormData | u.PlainObject | null | undefined
 
-declare module '../event.js' {
-  interface UpEventMap {
+declare global {
+  interface GlobalEventHandlersEventMap {
     'up:form:submit': FormSubmitEvent
     'up:form:switch': FormSwitchEvent
     'up:form:validate': FormValidateEvent

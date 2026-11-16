@@ -157,9 +157,10 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   A type like `GuardEvent` may exist without any event extending it, when an option needs it
   (`{ guardEvent }`). The events fit it structurally.
 
-  `UpEventMap` maps each event type to its interface, like `HTMLElementEventMap` does for DOM
-  events, and `up.on()` and `up.emit()` look it up. A new event gets an interface with the
-  properties its API docs list, and an entry in its module's `UpEventMap` block (see
+  Events are declared by extending the DOM's `GlobalEventHandlersEventMap`, which maps each
+  event type to its interface. `addEventListener()`, `up.on()` and `up.emit()` look it up, and
+  apps add their own events the same way. A new event gets an interface with the properties its
+  API docs list, and an entry in its module's `declare global` block (see
   [Code organization](code-organization.md#imports-exports-and-types) › Events).
 
 ### Strict checks

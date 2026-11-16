@@ -22,7 +22,7 @@ const PROBES = {
   'a namespace': ['@namespace up.fragment', 'Up fragment'],
   'a class': ['@class up.Request', 'Up Request'],
   'a constructor': ['@constructor up.Request', 'Up Request'],
-  'an event': ['@event up:link:follow', 'UpEventMap up:link:follow'],
+  'an event': ['@event up:link:follow', 'GlobalEventHandlersEventMap up:link:follow'],
 }
 
 for (let [kind, [declaration, expected]] of Object.entries(PROBES)) {
@@ -70,7 +70,7 @@ test('ignores directives in code blocks', () => {
 const REQUEST = { kind: 'property', name: 'up.Request#url', root: 'Up', keys: ['Request', 'prototype', 'url'], file: 'src/unpoly/network/request.md', line: 42, column: 11 }
 const RENDER = { kind: 'function', name: 'up.render', root: 'Up', keys: ['render'], file: 'src/unpoly/fragment.md', line: 7, column: 11 }
 const REQUEST_CLASS = { kind: 'constructor', name: 'up.Request', root: 'Up', keys: ['Request'], file: 'src/unpoly/network/request.md', line: 3, column: 14 }
-const EVENT = { kind: 'event', name: "up:it's", root: 'UpEventMap', keys: ["up:it's"], file: 'src/unpoly/event.md', line: 9, column: 8 }
+const EVENT = { kind: 'event', name: "up:it's", root: 'GlobalEventHandlersEventMap', keys: ["up:it's"], file: 'src/unpoly/event.md', line: 9, column: 8 }
 
 test('writes one probe per line, after a header', () => {
   let { source, headerLines } = probeSource([REQUEST, RENDER, REQUEST_CLASS, EVENT], '../../src')
@@ -80,7 +80,7 @@ test('writes one probe per line, after a header', () => {
     "type P1 = Up['Request']['prototype']['url'] // src/unpoly/network/request.md:42",
     "type P2 = Parameters<Up['render']> // src/unpoly/fragment.md:7",
     "type P3 = ConstructorParameters<Up['Request']> // src/unpoly/network/request.md:3",
-    "type P4 = UpEventMap['up:it\\'s'] // src/unpoly/event.md:9",
+    "type P4 = GlobalEventHandlersEventMap['up:it\\'s'] // src/unpoly/event.md:9",
     '',
   ])
 })
@@ -101,8 +101,8 @@ test('names the key that is missing', () => {
   assert.deepEqual(translate(1, 14, "error TS2339: Property 'Request' does not exist on type 'Up'."), [
     "src/unpoly/network/request.md(42,11): error TS2339: Documented as up.Request#url, but `Up` has no `Request`.",
   ])
-  assert.deepEqual(translate(4, 22, "error TS2339: Property 'up:it's' does not exist on type 'UpEventMap'."), [
-    "src/unpoly/event.md(9,8): error TS2339: Documented as up:it's, but `UpEventMap` has no `up:it's`.",
+  assert.deepEqual(translate(4, 39, "error TS2339: Property 'up:it's' does not exist on type 'GlobalEventHandlersEventMap'."), [
+    "src/unpoly/event.md(9,8): error TS2339: Documented as up:it's, but `GlobalEventHandlersEventMap` has no `up:it's`.",
   ])
 })
 

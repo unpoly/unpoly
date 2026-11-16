@@ -13,8 +13,8 @@ export interface FrameworkBootedEvent extends UpEvent { mode: BootMode }
 /** The `up:framework:reset` event. */
 export interface FrameworkResetEvent extends UpEvent {}
 
-declare module './event.js' {
-  interface UpEventMap {
+declare global {
+  interface GlobalEventHandlersEventMap {
     'up:framework:boot': FrameworkBootEvent
     'up:framework:booted': FrameworkBootedEvent
     'up:framework:reset': FrameworkResetEvent
