@@ -257,7 +257,9 @@ export function isJQuery(value: unknown): boolean {
   return canJQuery() && value instanceof jQuery
 }
 
-export function isElementLike(value: unknown): value is EventTarget | t.List<EventTarget> {
+// Not a type predicate: a jQuery collection passes, but an empty one, a NodeList or an array of
+// elements doesn't. No predicate type is right for both branches.
+export function isElementLike(value: unknown): boolean {
   return isObject(value) && !!(value.addEventListener || (isJQuery(value) && value[0]?.addEventListener))
 }
 

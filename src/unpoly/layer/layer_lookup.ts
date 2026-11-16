@@ -71,11 +71,13 @@ export class LayerLookup {
       return this._forIndex(value)
     }
 
+    // isElementLike() rejects strings, so only an element (or a jQuery collection) gets here.
     if (u.isElementLike(value)) {
-      return this._forElement(value)
+      return this._forElement(value as Element)
     }
 
-    if (/^\d+$/.test(value)) {
+    // Only strings are left.
+    if (/^\d+$/.test(value as string)) {
       return this._forIndex(Number(value))
     }
 
