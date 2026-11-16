@@ -919,7 +919,10 @@ export function onFirstIntersect(element: Element, callback: () => void, { margi
 
 const STARTS_WITH_SELECTOR = /^([\w-]+|\*)?(#|\.|[:[][a-z-]{3,})/
 
-export function provideNodes(value: any, { origin, originLayer, data, htmlParser = e.createNodesFromHTML }: t.ProvideNodesOptions = {}): u.List<Node> {
+export function provideNodes(
+  value: any,
+  { origin, originLayer, data, htmlParser = e.createNodesFromHTML }: t.ProvideNodesOptions = {},
+): u.List<Node> {
   if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
     let [parsedValue, parsedData] = u.parseScalarJSONPairs(value)[0]
     data = { ...data, ...parsedData }
@@ -944,7 +947,11 @@ function isTemplate(value: any): boolean {
 // A node cloned from a template. It remembers the template's data for readData().
 interface TemplateNode extends Node { upTemplateData?: u.PlainObject }
 
-export function cloneTemplate(templateOrSelector: e.ElementOrSelector, data: any = {}, { origin, htmlParser }: t.ProvideNodesOptions = {}): u.List<Node> {
+export function cloneTemplate(
+  templateOrSelector: e.ElementOrSelector,
+  data: any = {},
+  { origin, htmlParser }: t.ProvideNodesOptions = {},
+): u.List<Node> {
   // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
   let template = getSmart(templateOrSelector, { origin, layer: 'closest' }) || fail('Template not found: %o', templateOrSelector)
   let event = emit(template, 'up:template:clone', { data, nodes: null, log: ["Using template %o", templateOrSelector] })

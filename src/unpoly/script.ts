@@ -77,22 +77,49 @@ let registeredCompilers: t.Compiler[] = []
 let registeredMacros: t.Compiler[] = []
 
 export function registerCompiler<E extends Element = HTMLElement>(selector: t.CompilerSelector, callback: t.CompilerCallback<E>): void
-export function registerCompiler<E extends Element = HTMLElement>(selector: t.CompilerSelector, options: t.BatchCompilerOptions, callback: t.BatchCompilerCallback<E>): void
-export function registerCompiler<E extends Element = HTMLElement>(selector: t.CompilerSelector, options: t.CompilerOptions, callback: t.CompilerCallback<E>): void
+export function registerCompiler<E extends Element = HTMLElement>(
+  selector: t.CompilerSelector,
+  options: t.BatchCompilerOptions,
+  callback: t.BatchCompilerCallback<E>,
+): void
+export function registerCompiler<E extends Element = HTMLElement>(
+  selector: t.CompilerSelector,
+  options: t.CompilerOptions,
+  callback: t.CompilerCallback<E>,
+): void
 export function registerCompiler(...args: any[]): void {
   registerProcessor(args)
 }
 
 export function registerMacro<E extends Element = HTMLElement>(selector: t.CompilerSelector, callback: t.CompilerCallback<E>): void
-export function registerMacro<E extends Element = HTMLElement>(selector: t.CompilerSelector, options: t.BatchCompilerOptions, callback: t.BatchCompilerCallback<E>): void
-export function registerMacro<E extends Element = HTMLElement>(selector: t.CompilerSelector, options: t.CompilerOptions, callback: t.CompilerCallback<E>): void
+export function registerMacro<E extends Element = HTMLElement>(
+  selector: t.CompilerSelector,
+  options: t.BatchCompilerOptions,
+  callback: t.BatchCompilerCallback<E>,
+): void
+export function registerMacro<E extends Element = HTMLElement>(
+  selector: t.CompilerSelector,
+  options: t.CompilerOptions,
+  callback: t.CompilerCallback<E>,
+): void
 export function registerMacro(...args: any[]): void {
   registerProcessor(args, { macro: true })
 }
 
-export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, callback: t.AttrCompilerCallback<string | true, E>): void
-export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, options: t.AttrCompilerOptions & { defaultValue: string }, callback: t.AttrCompilerCallback<string, E>): void
-export function registerAttrCompiler<E extends Element = HTMLElement>(attr: string, options: t.AttrCompilerOptions, callback: t.AttrCompilerCallback<string | true, E>): void
+export function registerAttrCompiler<E extends Element = HTMLElement>(
+  attr: string,
+  callback: t.AttrCompilerCallback<string | true, E>,
+): void
+export function registerAttrCompiler<E extends Element = HTMLElement>(
+  attr: string,
+  options: t.AttrCompilerOptions & { defaultValue: string },
+  callback: t.AttrCompilerCallback<string, E>,
+): void
+export function registerAttrCompiler<E extends Element = HTMLElement>(
+  attr: string,
+  options: t.AttrCompilerOptions,
+  callback: t.AttrCompilerCallback<string | true, E>,
+): void
 export function registerAttrCompiler(...args: any[]): void {
   let [attr, options, valueCallback] = parseProcessorArgs(args)
 

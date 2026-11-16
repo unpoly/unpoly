@@ -97,7 +97,11 @@ function reset(): void {
   lastInstantTarget = null
 }
 
-export const follow = mockable(function(link: e.ElementOrSelector, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderJob {
+export const follow = mockable(function(
+  link: e.ElementOrSelector,
+  options?: RenderOptions,
+  parserOptions?: e.OptionsParserOptions,
+): RenderJob {
   return render(followOptions(link, options, parserOptions))
 })
 

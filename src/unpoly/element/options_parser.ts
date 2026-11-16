@@ -89,7 +89,10 @@ export class OptionsParser {
     }
   }
 
-  include(optionsFn: (element: Element, options: u.PlainObject, parserOptions: t.OptionsParserOptions) => u.PlainObject, parserOptions?: t.OptionsParserOptions): void {
+  include(
+    optionsFn: (element: Element, options: u.PlainObject, parserOptions: t.OptionsParserOptions) => u.PlainObject,
+    parserOptions?: t.OptionsParserOptions,
+  ): void {
     // let fnResult = optionsFn(this._element, this._options, this._parserOptions)
     let fnResult = optionsFn(this._element, this._options, { defaults: this._defaults, ...parserOptions })
     Object.assign(this._options, fnResult)

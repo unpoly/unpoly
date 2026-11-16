@@ -20,7 +20,12 @@ export class HelloFragment {
   declare _insertedEvent: boolean
   declare _meta: u.PlainObject
 
-  constructor(root: Element, macros: t.Compiler[], compilers: t.Compiler[], { layer, data, dataRoot, dataMap, meta, insertedEvent }: t.HelloOptions) {
+  constructor(
+    root: Element,
+    macros: t.Compiler[],
+    compilers: t.Compiler[],
+    { layer, data, dataRoot, dataMap, meta, insertedEvent }: t.HelloOptions,
+  ) {
     // (1) If a caller has already looked up the layer we don't want to look it up again.
     // (2) Default to the current layer in case the user manually compiles a detached element.
     layer ||= layerStack.get(root) || layerStack.current
@@ -146,7 +151,12 @@ export class HelloFragment {
     this._applyCompilerFunction(compiler, elements, compileArgs, onDestructor)
   }
 
-  async _applyCompilerFunction(compiler: t.Compiler, elementOrElements: Element | Element[], compileArgs: any[], onDestructor: (destructor: any) => void): Promise<void> {
+  async _applyCompilerFunction(
+    compiler: t.Compiler,
+    elementOrElements: Element | Element[],
+    compileArgs: any[],
+    onDestructor: (destructor: any) => void,
+  ): Promise<void> {
     let maybeDestructor = guard(() => compiler.apply(elementOrElements, compileArgs))
 
     if (u.isPromise(maybeDestructor)) {

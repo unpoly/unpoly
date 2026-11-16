@@ -33,7 +33,11 @@ function reset(): void {
 }
 
 // The element may also be a selector.
-export const animate = mockable(async function animate(element: any, animationValue: t.AnimationValue | undefined, { duration, easing, onFinished }: t.AnimateOptions = {}): Promise<void> {
+export const animate = mockable(async function animate(
+  element: any,
+  animationValue: t.AnimationValue | undefined,
+  { duration, easing, onFinished }: t.AnimateOptions = {},
+): Promise<void> {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   element = getSmart(element)
 
@@ -76,7 +80,12 @@ function effectiveTimingOptions({ duration, easing }: { duration?: number, easin
   }
 }
 
-async function animateNow(element: HTMLElement, lastFrame: e.StyleProps, { duration, easing }: t.TimingOptions, finishedFrame?: e.StyleProps): Promise<void> {
+async function animateNow(
+  element: HTMLElement,
+  lastFrame: e.StyleProps,
+  { duration, easing }: t.TimingOptions,
+  finishedFrame?: e.StyleProps,
+): Promise<void> {
   // There is also Animation#commitStyles(), but that has two issues:
   // (A) Throws on detached elements
   // (B) Can't set an empty last frame property, e.g. when we're transforming towards { transform: '' }
@@ -110,7 +119,12 @@ export function finish(element?: e.ElementOrSelector): Promise<void> | undefined
   return up.migrate.formerlyAsync?.('up.motion.finish()')
 }
 
-export function morph(oldElement: e.ElementOrSelector, newElement: e.ElementOrSelector, transitionValue: t.TransitionValue, options?: t.SwapOptions): Promise<void>
+export function morph(
+  oldElement: e.ElementOrSelector,
+  newElement: e.ElementOrSelector,
+  transitionValue: t.TransitionValue,
+  options?: t.SwapOptions,
+): Promise<void>
 // The elements are resolved in place. The implementation can't take the resolved type: with
 // strictFunctionTypes, a function's overload must be assignable to it (TS2394).
 export async function morph(oldElement: any, newElement: any, transitionValue: t.TransitionValue, options?: t.SwapOptions): Promise<void> {
@@ -130,7 +144,12 @@ export async function morph(oldElement: any, newElement: any, transitionValue: t
 // (A) Compilers may change newElement's size or position.
 // (B) Compilers capture an [up-keep] identity before a transition adds inline styles.
 // (C) We scroll newElement into position before we start the enter animation.
-export function swap(oldElement: HTMLElement, newElement: HTMLElement, transitionValue?: t.TransitionValue, { duration, easing, beforeRemove, afterRemove }: t.SwapOptions = {}): () => Promise<any> {
+export function swap(
+  oldElement: HTMLElement,
+  newElement: HTMLElement,
+  transitionValue?: t.TransitionValue,
+  { duration, easing, beforeRemove, afterRemove }: t.SwapOptions = {},
+): () => Promise<any> {
   // Convert the given transition value to a function we can call.
   // This returns undefined for values like `undefined`, `false`, `[null, null]` etc.
   const transitionFn = guardFn(findTransitionFn(transitionValue))

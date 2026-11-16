@@ -247,7 +247,11 @@ export class UpRequestCache {
     }
   }
 
-  _eachMatch(condition: t.RequestCondition = true, testerOptions: t.RequestTesterOptions | undefined, fn: (request: UpRequest) => void): void {
+  _eachMatch(
+    condition: t.RequestCondition = true,
+    testerOptions: t.RequestTesterOptions | undefined,
+    fn: (request: UpRequest) => void,
+  ): void {
     let tester = UpRequest.tester(condition, testerOptions)
 
     // Copy results so evict() can delete from the list we're iterating over

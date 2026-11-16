@@ -54,7 +54,10 @@ export const reveal = mockable(function(element: any, options?: t.RevealOptions)
   return up.migrate.formerlyAsync?.('up.reveal()') || true
 })
 
-export const doFocus = mockable(function doFocus(element: HTMLElement, { preventScroll, force, inputDevice, focusVisible }: t.DoFocusOptions = {}): true | Promise<void> | undefined {
+export const doFocus = mockable(function doFocus(
+  element: HTMLElement,
+  { preventScroll, force, inputDevice, focusVisible }: t.DoFocusOptions = {},
+): true | Promise<void> | undefined {
   if (force) {
     // (1) Element#tabIndex is -1 for all non-interactive elements,
     //     whether or not the element has an [tabindex=-1] attribute.
@@ -101,7 +104,10 @@ export function revealHash(hash: string, options?: t.RevealHashOptions): boolean
   return revealHashFn(hash, options)?.()
 }
 
-export function revealHashFn(hash: string, { strong, layer, origin, behavior = 'instant', focus = false }: t.RevealHashOptions = {}): (() => boolean | Promise<void>) | undefined {
+export function revealHashFn(
+  hash: string,
+  { strong, layer, origin, behavior = 'instant', focus = false }: t.RevealHashOptions = {},
+): (() => boolean | Promise<void>) | undefined {
   if (!hash) return
 
   let match = firstHashTarget(hash, { layer, origin })
@@ -275,7 +281,12 @@ export function scrollToPosition(position: number, ...args: any[]): boolean {
   return true
 }
 
-function setScrollPositions(viewports: Iterable<HTMLElement>, tops: Record<string, number>, defaultTop: number, behavior: ScrollBehavior = 'instant'): void {
+function setScrollPositions(
+  viewports: Iterable<HTMLElement>,
+  tops: Record<string, number>,
+  defaultTop: number,
+  behavior: ScrollBehavior = 'instant',
+): void {
   for (let viewport of viewports) {
     const key = scrollTopKey(viewport)
     // An untargetable viewport has no key, and has no saved position under tops['undefined'].

@@ -193,7 +193,11 @@ export function submitOptions(form: any, options?: RenderOptions, parserOptions?
   return options
 }
 
-export function watchOptions(field: e.ElementOrSelector, options?: t.WatchOptions, parserOptions: e.OptionsParserOptions = {}): t.WatchOptions {
+export function watchOptions(
+  field: e.ElementOrSelector,
+  options?: t.WatchOptions,
+  parserOptions: e.OptionsParserOptions = {},
+): t.WatchOptions {
   field = getSmart(field)!
   options = u.newOptions(options)
 
@@ -262,7 +266,11 @@ export function watchOptions(field: e.ElementOrSelector, options?: t.WatchOption
   return options
 }
 
-export function validateOptions(field: e.ElementOrSelector, options?: t.ValidateOptions, parserOptions: e.OptionsParserOptions = {}): t.ValidateOptions {
+export function validateOptions(
+  field: e.ElementOrSelector,
+  options?: t.ValidateOptions,
+  parserOptions: e.OptionsParserOptions = {},
+): t.ValidateOptions {
   field = getSmart(field)!
   options = u.newOptions(options)
   let parser = new OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-validate-' })

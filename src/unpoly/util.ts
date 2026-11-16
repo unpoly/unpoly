@@ -531,7 +531,11 @@ export function evalOption<T>(value: t.ValueOrFunction<T>, ...args: any[]): T {
 }
 
 // The value and its 'auto' meaning may each be a function that is called with the args.
-export function evalAutoOption<T, A>(value: t.ValueOrFunction<T | 'auto'>, autoMeans: t.ValueOrFunction<A>, ...args: any[]): Exclude<T, 'auto'> | A
+export function evalAutoOption<T, A>(
+  value: t.ValueOrFunction<T | 'auto'>,
+  autoMeans: t.ValueOrFunction<A>,
+  ...args: any[]
+): Exclude<T, 'auto'> | A
 export function evalAutoOption(value: any, autoMeans: any, ...args: any[]): any {
   value = evalOption(value, ...args)
   // Allow functions to return 'auto'
@@ -671,7 +675,10 @@ function isEqualList(a: t.List<any>, b: t.List<any>): boolean {
   return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
 }
 
-export function getSimpleTokens(value: any, { json = false, separator = /[,\s]/ }: { json?: boolean, separator?: string | RegExp } = {}): any[] {
+export function getSimpleTokens(
+  value: any,
+  { json = false, separator = /[,\s]/ }: { json?: boolean, separator?: string | RegExp } = {},
+): any[] {
   if (!isString(value)) {
     return wrapList(value)
   } else if (json && /^\[.*]$/.test(value)) {
@@ -957,7 +964,11 @@ export function cleaner(order: 'lifo' | 'fifo' = 'lifo'): t.Cleaner {
   return api
 }
 
-export function maskPattern(str: string, patterns: RegExp[], { keepDelimiters = false }: { keepDelimiters?: boolean } = {}): t.MaskedString {
+export function maskPattern(
+  str: string,
+  patterns: RegExp[],
+  { keepDelimiters = false }: { keepDelimiters?: boolean } = {},
+): t.MaskedString {
   let maskCount = 0
   let maskPattern = /§\d+/g
   let maskings: Record<string, string> = {}

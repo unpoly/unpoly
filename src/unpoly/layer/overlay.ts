@@ -401,7 +401,12 @@ export abstract class Overlay extends Layer {
     this._tryCloseForLocation(newLocation, this.dismissLocation, this.dismiss, response)
   }
 
-  _tryCloseForLocation(newLocation: string | false | undefined, urlPattern: u.UpURLPattern | undefined, closeFn: CloseFunction, response?: UpResponse): void {
+  _tryCloseForLocation(
+    newLocation: string | false | undefined,
+    urlPattern: u.UpURLPattern | undefined,
+    closeFn: CloseFunction,
+    response?: UpResponse,
+  ): void {
     let resolution = newLocation && urlPattern?.recognize(newLocation)
     if (resolution) {
       // resolution now contains named capture groups, e.g. when
