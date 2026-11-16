@@ -6,10 +6,13 @@ import type * as t from './types.js'
 import { Layer } from './layer.js'
 import type { LayerStack } from './layer_stack.js'
 
+// A single value of a { layer } option, like a layer, an element, an index or a name.
+type LayerValue = Layer | Element | number | string
+
 export class LayerLookup {
   declare _stack: LayerStack
   declare _options: t.LayerLookupOptions
-  declare _values: any[]
+  declare _values: LayerValue[]
 
   constructor(stack: LayerStack, options: t.LayerLookupOptions) {
     this._stack = stack
@@ -23,16 +26,14 @@ export class LayerLookup {
     }
 
     this._options = options
-    this._values = u.getSimpleTokens(options.layer)
+    this._values = u.getSimpleTokens<LayerValue>(options.layer)
   }
 
   // A { layer: 'new' } option resolves to the string 'new'. We type the result as layers,
   // like the documentation of up.layer.getAll() does.
   all(): Layer[] {
-    let results = u.flatMap<any, any>(this._values, (value) => this._resolveValue(value))
-    results = u.compact(results)
-    results = u.uniq(results)
-    return results
+    let results = u.flatMap(this._values, (value) => this._resolveValue(value))
+    return u.uniq(u.compact(results)) as Layer[]
   }
 
   static all(stack: LayerStack, ...args: t.LayerLookupArgs): Layer[] {
@@ -61,7 +62,7 @@ export class LayerLookup {
   }
 
   // The name 'new' passes through as a string, for the render options that open a new overlay.
-  _resolveValue(value: any): Layer | Layer[] | 'new' | undefined {
+  _resolveValue(value: LayerValue): Layer | Layer[] | 'new' | undefined {
     if (value instanceof Layer) {
       return value
     }
@@ -70,12 +71,12 @@ export class LayerLookup {
       return this._forIndex(value)
     }
 
-    if (/^\d+$/.test(value)) {
+    if (/^\d+$/.test(value as string)) {
       return this._forIndex(Number(value))
     }
 
     if (u.isElementLike(value)) {
-      return this._forElement(value)
+      return this._forElement(value as Element)
     }
 
     switch (value) {
