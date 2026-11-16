@@ -257,7 +257,7 @@ export function isJQuery(value: unknown): boolean {
   return canJQuery() && value instanceof jQuery
 }
 
-export function isElementLike(value: unknown): boolean {
+export function isElementLike(value: unknown): value is EventTarget | t.List<EventTarget> {
   return isObject(value) && !!(value.addEventListener || (isJQuery(value) && value[0]?.addEventListener))
 }
 

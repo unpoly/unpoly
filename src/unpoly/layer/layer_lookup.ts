@@ -71,12 +71,12 @@ export class LayerLookup {
       return this._forIndex(value)
     }
 
-    if (/^\d+$/.test(value as string)) {
-      return this._forIndex(Number(value))
+    if (u.isElementLike(value)) {
+      return this._forElement(value)
     }
 
-    if (u.isElementLike(value)) {
-      return this._forElement(value as Element)
+    if (/^\d+$/.test(value)) {
+      return this._forIndex(Number(value))
     }
 
     switch (value) {

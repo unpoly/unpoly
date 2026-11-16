@@ -690,7 +690,7 @@ export function expandTargets(targets: any, options: t.LookupOptions = {}): stri
       let firstSwappableTarget = toTarget(layer.getFirstSwappableElement(), options)
       targets.unshift(target.replace(LAYER_PSEUDO, firstSwappableTarget))
     } else if (u.isElementLike(target)) {
-      expanded.push(toTarget(target, options))
+      expanded.push(toTarget(target as Element, options))
     } else if (u.isString(target)) {
       expanded.push(resolveOrigin(target, options))
     }
