@@ -114,7 +114,7 @@ export class FragmentScrolling extends FragmentProcessor {
   }
 
   _scrollTo(position: number): boolean {
-    // With { around: undefined }, scrollToTop() resets all viewports in { layer }
+    // With { around: undefined }, scrollToPosition() resets all viewports in { layer }
     return scrollToPosition(position, { ...this.attributes(), around: this.fragment })
   }
 

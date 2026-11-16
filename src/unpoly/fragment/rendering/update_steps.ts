@@ -258,7 +258,7 @@ function welcomeElement(element: Element, step: MatchedStep, responseDoc: Respon
 
 // This will find all [up-keep] descendants in oldElement, overwrite their partner
 // element in newElement and leave a visually identical clone in oldElement for a later transition.
-// Returns an array of keep matches.
+// Sets the step's { descendantKeepMatches }.
 function preserveDescendantKeepables(step: MatchedStep, willChangeBody: boolean): void {
   const descendantKeepMatches: t.KeepMatch[] = []
 

@@ -78,7 +78,7 @@ export class UpdateLayerPlan extends LayerPlan {
     }
 
     if (this.options.saveFocus) {
-      // TODO: This creates the same up.FocusCapsule that we already built in _setScrollAndFocusOption()
+      // TODO: This creates the same up.FocusCapsule that we already built in _coordinateSteps()
       saveFocus({ layer: this.layer })
     }
 

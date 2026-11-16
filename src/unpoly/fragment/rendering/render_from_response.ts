@@ -120,7 +120,7 @@ async function revalidate(
       abort: false,
       cache: false, // This implies { revalidate: false }. We will still update the expired cache entry.
       background: true,
-      // The guardEvent was already plucked from render options in up.RenderJob#guardRender().
+      // The guardEvent was already plucked from render options in up.RenderJob#_emitGuardEvent().
     })
 
     // A well-behaved server will respond with "304 Not Modified" if the reload
