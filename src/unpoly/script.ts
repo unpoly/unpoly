@@ -96,7 +96,7 @@ export function registerCompiler<E extends Element = HTMLElement>(
   options: t.CompilerOptions,
   callback: t.CompilerCallback<E>,
 ): void
-export function registerCompiler(...args: any[]): void {
+export function registerCompiler(...args: unknown[]): void {
   registerProcessor(args)
 }
 
@@ -111,7 +111,7 @@ export function registerMacro<E extends Element = HTMLElement>(
   options: t.CompilerOptions,
   callback: t.CompilerCallback<E>,
 ): void
-export function registerMacro(...args: any[]): void {
+export function registerMacro(...args: unknown[]): void {
   registerProcessor(args, { macro: true })
 }
 
@@ -129,7 +129,7 @@ export function registerAttrCompiler<E extends Element = HTMLElement>(
   options: AttrCompilerOptions,
   callback: AttrCompilerCallback<string | true, E>,
 ): void
-export function registerAttrCompiler(...args: any[]): void {
+export function registerAttrCompiler(...args: unknown[]): void {
   let [attr, options, valueCallback] = parseProcessorArgs(args)
 
   let selector = `[${attr}]`
@@ -160,7 +160,7 @@ function detectSystemMacroPriority(macroSelector: t.CompilerSelector): number {
   fail('Unregistered priority for system macro %o', macroSelector)
 }
 
-function registerProcessor(args: any[], overrides: t.CompilerOptions = {}): void {
+function registerProcessor(args: unknown[], overrides: t.CompilerOptions = {}): void {
   let processor = buildProcessor(args, overrides)
 
   if (processor.macro) {
@@ -176,11 +176,12 @@ function registerProcessor(args: any[], overrides: t.CompilerOptions = {}): void
 
 }
 
-function parseProcessorArgs(args: any[]): any[] {
+// oxlint-disable-next-line typescript/no-explicit-any -- parsed arguments of any type
+function parseProcessorArgs(args: unknown[]): any[] {
   return u.parseArgs(args, 'val', 'options', 'callback')
 }
 
-function buildProcessor(args: any[], overrides: t.CompilerOptions): t.Compiler {
+function buildProcessor(args: unknown[], overrides: t.CompilerOptions): t.Compiler {
   let [selector, options, callback] = parseProcessorArgs(args)
 
   options = u.newOptions(options, {
@@ -214,7 +215,7 @@ function insertProcessor(queue: t.Compiler[], newCompiler: t.Compiler): t.Compil
   return newCompiler
 }
 
-export function registerDestructor(element: t.ScriptedElement, value: any): void {
+export function registerDestructor(element: t.ScriptedElement, value: unknown): void {
   let fns = u.scanFunctions(value)
   if (!fns.length) return
 
@@ -264,13 +265,14 @@ export function clean(fragment: Element, options: LookupOptions = {}): void {
   }
 }
 
+// oxlint-disable-next-line typescript/no-explicit-any -- the element's data, a user value of any type
 export const readData = mockable(function readData(elementOrSelector: e.ElementOrSelector): any {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
   let element: t.ScriptedElement & HTMLElement = getFragment(elementOrSelector)!
   return element.upData ||= buildData(element)
 })
 
-function buildData(element: t.ScriptedElement & HTMLElement): any {
+function buildData(element: t.ScriptedElement & HTMLElement): unknown {
   let parsedJSON = e.jsonAttr(element, 'up-data') ?? {}
 
   // If the [up-data] JSON isn't an object then we cannot offer live merging

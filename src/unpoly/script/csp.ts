@@ -9,9 +9,12 @@ import type * as t from './types.js'
 // The names and values of the arguments for a callback string, and its `this`.
 interface EvalEnv {
   argNames: string[]
-  argValues: any[]
-  thisContext?: any
+  argValues: unknown[]
+  thisContext?: unknown
 }
+
+// A message to log and its substitution values.
+type LogDescriptor = [message: string, ...vars: unknown[]]
 
 const NONCE_PATTERN = /'nonce-([^']+)'/g
 
@@ -68,7 +71,7 @@ export class CSPInfo {
 declare module '../../unpoly.js' {
   interface Up {
     /** @internal */
-    noncedEval?: EvalEnv & { value?: any, error?: any }
+    noncedEval?: EvalEnv & { value?: unknown, error?: unknown }
   }
 }
 
@@ -87,7 +90,7 @@ export class NonceableCallback {
     return new this(match[3], match[2])
   }
 
-  unsafeEval(evalEnv: EvalEnv): any {
+  unsafeEval(evalEnv: EvalEnv): unknown {
     if (this.nonce) {
       return this._runAsScriptElement(evalEnv)
     } else {
@@ -99,12 +102,12 @@ export class NonceableCallback {
     return `nonce-${this.nonce} ${this.script}`
   }
 
-  _runAsFunction({ argNames, argValues, thisContext }: EvalEnv): any {
+  _runAsFunction({ argNames, argValues, thisContext }: EvalEnv): unknown {
     let fn = new Function(...argNames, this.script)
     return fn.apply(thisContext, argValues)
   }
 
-  _runAsScriptElement(evalEnv: EvalEnv): any {
+  _runAsScriptElement(evalEnv: EvalEnv): unknown {
     // A strict CSP will block use of `eval()` or `new Function()`.
     // What we can do instead is insert an inline script that is allowed per a [nonce] attr.
     let wrappedScript = `
@@ -139,7 +142,7 @@ export class NonceableCallback {
 interface PolicyItem {
   readNonce(): string | undefined
   writeNonce(nonce: string): void
-  logBlockedDescriptor(): any[]
+  logBlockedDescriptor(): LogDescriptor
   block(): void
 }
 
@@ -154,7 +157,7 @@ export function warnOfUnsafeCSP(cspInfo = CSPInfo.none()): void {
   }
 }
 
-export function evalCallback(nonceableCallback: NonceableCallback, evalEnv: EvalEnv): any {
+export function evalCallback(nonceableCallback: NonceableCallback, evalEnv: EvalEnv): unknown {
   const policy = new EvalCallbackPolicy(cspNonce(), CSPInfo.none())
 
   // There are multiple reasons why we explicitly check if a callback is allowed,
@@ -295,7 +298,7 @@ class Policy {
     throw new NotImplemented()
   }
 
-  log(..._descriptorArgs: any[]): void {
+  log(..._descriptorArgs: LogDescriptor): void {
     throw new NotImplemented()
   }
 
@@ -352,11 +355,11 @@ class ConfigurablePolicy extends Policy {
     }
   }
 
-  log(...descriptorArgs: any[]): void {
+  log(...descriptorArgs: LogDescriptor): void {
     printToStandard(this.configExpression(), ...descriptorArgs)
   }
 
-  warn(...descriptorArgs: any[]): void {
+  warn(...descriptorArgs: LogDescriptor): void {
     printToWarn(this.configExpression(), ...descriptorArgs)
   }
 
@@ -434,7 +437,7 @@ class StringCallbackItem implements PolicyItem {
     return this._cacheCallback ||= NonceableCallback.fromCallbackString(this.readCallbackString())
   }
 
-  logBlockedDescriptor(): any[] {
+  logBlockedDescriptor(): LogDescriptor {
     throw new NotImplemented()
   }
 
@@ -462,7 +465,7 @@ class AttributeItem extends StringCallbackItem {
     this._attribute = attribute
   }
 
-  logBlockedDescriptor(): any[] {
+  logBlockedDescriptor(): LogDescriptor {
     return ['Blocked callback attribute: %s', e.attrSelector(this._attribute, this.readCallbackString())]
   }
 
@@ -487,7 +490,7 @@ class ObjectPropertyItem extends StringCallbackItem {
     this._key = key
   }
 
-  logBlockedDescriptor(): any[] {
+  logBlockedDescriptor(): LogDescriptor {
     return ['Blocked string callback: { %s: %o }', this._key, this.readCallbackString()]
   }
 
@@ -517,7 +520,7 @@ class ScriptElementItem implements PolicyItem {
     this._element.setAttribute('nonce', nonce)
   }
 
-  logBlockedDescriptor(): any[] {
+  logBlockedDescriptor(): LogDescriptor {
     return ['Blocked <script> element: %o', this._element]
   }
 

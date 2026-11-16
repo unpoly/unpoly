@@ -9,8 +9,8 @@ Options for `up.hello()`.
 */
 export interface HelloOptions {
   layer?: Layer
-  data?: any
-  dataMap?: Record<string, any>
+  data?: u.PlainObject
+  dataMap?: Record<string, u.PlainObject>
   meta?: u.PlainObject
   insertedEvent?: boolean
   // Only run these macros and compilers (default: all registered ones).
@@ -47,6 +47,7 @@ export interface CompilerMeta {
   layer: Layer
   ok: boolean
   revalidating: boolean
+  // oxlint-disable-next-line typescript/no-explicit-any -- keys from up.hello()'s { meta }, of any type
   [key: string]: any
 }
 
@@ -64,6 +65,7 @@ It may return a destructor function, an array of destructors, or a promise.
 A compiler gets any element that matches its selector, so the element type is a parameter. It
 defaults to `HTMLElement`. A compiler for SVG elements can annotate its argument as `SVGElement`.
 */
+// oxlint-disable-next-line typescript/no-explicit-any -- the element's data, a user value of any type
 export type CompilerCallback<E extends Element = HTMLElement> = (element: E, data: any, meta: CompilerMeta) => unknown
 
 /**
@@ -74,6 +76,7 @@ TypeScript only picks this callback type when `batch` is the literal `true`. Opt
 variable need the type `BatchCompilerOptions` or `as const`, or `batch` is widened to `boolean`
 and the callback gets one element.
 */
+// oxlint-disable-next-line typescript/no-explicit-any -- the elements' data, user values of any type
 export type BatchCompilerCallback<E extends Element = HTMLElement> = (elements: E[], data: any[], meta: CompilerMeta) => unknown
 
 /**
@@ -120,8 +123,7 @@ A compiler or macro registered with `up.compiler()` or `up.macro()`: the compile
 with its registration options.
 @internal
 */
-export interface Compiler extends CompilerOptions {
-  (...args: any[]): any
+export interface Compiler extends CompilerOptions, u.AnyFunction {
   selector: CompilerSelector
   priority: number
   // Registered while Unpoly boots, so a reset keeps it.
@@ -134,6 +136,7 @@ that ran on them.
 @internal
 */
 export interface ScriptedElement extends Element {
+  // oxlint-disable-next-line typescript/no-explicit-any -- the element's data, a user value of any type
   upData?: any
   upTemplateData?: u.PlainObject
   upCompileData?: u.PlainObject

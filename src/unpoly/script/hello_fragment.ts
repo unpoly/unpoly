@@ -13,10 +13,10 @@ export class HelloFragment {
   declare _macros: t.Compiler[]
   declare _compilers: t.Compiler[]
   declare _layer: Layer
-  declare _data: any
+  declare _data?: u.PlainObject
   declare _dataRoot: t.ScriptedElement
-  declare _dataMap?: Record<string, any>
-  declare _compilePromises: Promise<any>[]
+  declare _dataMap?: Record<string, u.PlainObject>
+  declare _compilePromises: Promise<unknown>[]
   declare _insertedEvent: boolean
   declare _meta: u.PlainObject
 
@@ -125,7 +125,7 @@ export class HelloFragment {
   }
 
   _compileOneElement(compiler: t.Compiler, element: Element): void {
-    const compileArgs: any[] = [element]
+    const compileArgs: unknown[] = [element]
     // (A) For performance reason, do not parse [up-data] unless the compiler function expects a second argument.
     // (B) We must pass data for an argument count of 0, since then the function might take varargs.
     if (compiler.length !== 1) {
@@ -138,7 +138,7 @@ export class HelloFragment {
   }
 
   _compileBatch(compiler: t.Compiler, elements: Element[]): void {
-    const compileArgs: any[] = [elements]
+    const compileArgs: unknown[] = [elements]
     // Do not retrieve and parse [up-data] unless the compiler function
     // expects a second argument. Note that we must pass data for an argument
     // count of 0, since then the function might take varargs.
@@ -154,8 +154,8 @@ export class HelloFragment {
   async _applyCompilerFunction(
     compiler: t.Compiler,
     elementOrElements: Element | Element[],
-    compileArgs: any[],
-    onDestructor: (destructor: any) => void,
+    compileArgs: unknown[],
+    onDestructor: (destructor: unknown) => void,
   ): Promise<void> {
     let maybeDestructor = guard(() => compiler.apply(elementOrElements, compileArgs))
 
