@@ -6,7 +6,7 @@ interface FIFOCacheOptions<K> {
   normalizeKey?: (key: K) => any
 }
 
-export class FIFOCache<K = any, V = any> {
+export class FIFOCache<K, V> {
   declare _map: Map<any, V>
   declare _capacity: number
   declare _normalizeKey: (key: K) => any

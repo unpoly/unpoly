@@ -6,7 +6,7 @@ import { fail } from '../error.js'
 // without an error, and the entry would not be kept as a default between specs.
 import { isEvaling } from '../framework.js'
 
-export class Registry<T = any> {
+export class Registry<T> {
   declare _data: Record<string, T | undefined>
   // Returns undefined for an invalid value, like an animation named 'none'.
   declare _normalize: (value: any) => T | undefined

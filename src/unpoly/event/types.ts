@@ -115,11 +115,11 @@ export interface ListenerOptions {
 /**
 The arguments for `up.on()` after its event types: an optional selector, optional options and the listener.
 */
-export type ListenerArgs<E, O = ListenerOptions> =
+export type ListenerArgs<E> =
   | [listener: ListenerCallback<E>]
   | [selector: ListenerSelector, listener: ListenerCallback<E>]
-  | [options: O, listener: ListenerCallback<E>]
-  | [selector: ListenerSelector, options: O, listener: ListenerCallback<E>]
+  | [options: ListenerOptions, listener: ListenerCallback<E>]
+  | [selector: ListenerSelector, options: ListenerOptions, listener: ListenerCallback<E>]
 
 /**
 Where `up.emit()` emits an event: an element, the document, the window, a list with one element, or a layer.

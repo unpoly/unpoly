@@ -25,7 +25,7 @@ interface AttrCompilerOptions extends t.CompilerOptions {
 
 // A compiler for `registerAttrCompiler()`. It is called with the element and its attribute value.
 // Without a `{ defaultValue }`, the value of an attribute set without a value (or to "true") is `true`.
-type AttrCompilerCallback<V = string | true, E extends Element = HTMLElement> = (element: E, value: V) => unknown
+type AttrCompilerCallback<V, E extends Element> = (element: E, value: V) => unknown
 
 export const scriptConfig = newConfig('up.script.config', (): t.ScriptConfig => ({
   cspNonce() { return e.metaContent('csp-nonce') },
