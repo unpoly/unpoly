@@ -5,7 +5,7 @@ import { newConfig } from './util/config.js'
 import { fail, muteUncriticalRejection } from './error.js'
 import { buildEvent, haltEvent, on, type UnbindFunction } from './event.js'
 import {
-  closestFragment, getAllFragments, getSmart, getSubtree, render, sourceOf, toTarget, trackSelector,
+  closestFragment, getAllFragments, getFragment, getSubtree, render, sourceOf, toTarget, trackSelector,
   tryToTarget, type RenderJob, type RenderOptions, type RenderResult,
 } from './fragment.js'
 import { closestLayerElement, layerStack } from './layer.js'
@@ -155,7 +155,7 @@ export const submit = mockable((form: e.ElementOrSelector, options?: RenderOptio
 })
 
 export function submitOptions(formOrSelector: e.ElementOrSelector, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderOptions {
-  let form = getForm(getSmart(formOrSelector)!)!
+  let form = getForm(getFragment(formOrSelector)!)!
 
   options = u.newOptions(options)
 
@@ -194,7 +194,7 @@ export function watchOptions(
   options?: t.WatchOptions,
   parserOptions: e.OptionsParserOptions = {},
 ): t.WatchOptions {
-  field = getSmart(field)!
+  field = getFragment(field)!
   options = u.newOptions(options)
 
   // Computing the effective options for a given field is pretty involved,
@@ -267,7 +267,7 @@ export function validateOptions(
   options?: t.ValidateOptions,
   parserOptions: e.OptionsParserOptions = {},
 ): t.ValidateOptions {
-  field = getSmart(field)!
+  field = getFragment(field)!
   options = u.newOptions(options)
   let parser = new OptionsParser(field, options, { ...parserOptions, closest: true, attrPrefix: 'up-validate-' })
   parser.string('url')
@@ -529,7 +529,7 @@ function parseValidateArgs(originOrTarget: any, ...args: any[]): u.PlainObject {
   if (options.origin) {
     options.target ||= toTarget(originOrTarget)
   } else {
-    options.origin ||= getSmart(originOrTarget)
+    options.origin ||= getFragment(originOrTarget)
   }
 
   return options
@@ -559,7 +559,7 @@ function getAssociatedForm(element: Element): HTMLFormElement | undefined {
   if (formID) {
     let selector = 'form' + e.idSelector(formID)
     // The selector only matches a <form>.
-    return getSmart(selector, { layer: element }) as HTMLFormElement
+    return getFragment(selector, { layer: element }) as HTMLFormElement
   }
 }
 
@@ -627,7 +627,7 @@ export function focusedField(): Element | undefined {
 }
 
 export function isSubmittable(form: e.ElementOrSelector): boolean {
-  form = getSmart(form)!
+  form = getFragment(form)!
   return formConfig.matches(form, 'submitSelectors')
 }
 

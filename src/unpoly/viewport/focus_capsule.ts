@@ -1,6 +1,6 @@
 import * as e from '../element.js'
 import { on } from '../event.js'
-import { getSmart, tryToTarget } from '../fragment.js'
+import { getFragment, tryToTarget } from '../fragment.js'
 import type { Layer } from '../layer.js'
 import { doFocus, focusedElementWithin } from '../viewport.js'
 import type * as t from './types.js'
@@ -34,7 +34,7 @@ export class FocusCapsule {
     }
 
     // Without a target we cannot rediscover the element in a new fragment.
-    let rediscoveredElement = this._target && getSmart(this._target, { layer })
+    let rediscoveredElement = this._target && getFragment(this._target, { layer })
     if (rediscoveredElement) {
       // Firefox needs focus-related props to be set *before* we focus the element
       e.copyCursorProps(this._cursorProps, rediscoveredElement)

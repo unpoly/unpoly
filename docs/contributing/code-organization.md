@@ -210,7 +210,7 @@ A namespace definition has the following jobs:
 Each namespace is an ES module that exports:
 
 - **Named functions**, which other files `import`. Internal code never calls through the global (`up.link.follow()`), it imports `follow` from `./link.js`.
-- **`api`**, the module's contribution to `window.up`: the namespace object, plus any shortcuts like `up.follow`. Public names may differ from the internal ones (`get: getSmart`, `config: linkConfig`). It only holds public API, never an internal helper.
+- **`api`**, the module's contribution to `window.up`: the namespace object, plus any shortcuts like `up.follow`. Public names may differ from the internal ones (`get: getFragment`, `config: linkConfig`). It only holds public API, never an internal helper.
 - Optionally **`install()`**, which performs all the module's side effects: registering compilers, macros and event listeners.
 
 A module's top level only declares things. Nothing happens when it is imported.

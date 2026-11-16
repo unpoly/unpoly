@@ -190,7 +190,7 @@ it (`foo.md` for `foo.ts`), and open it with the `@namespace` or `@class` its en
 belong to (see [Namespaces and classes](#namespaces-and-classes)).
 
 The code name of a function may differ from its public name. The module's `api` object maps
-one to the other: `get: getSmart` publishes `getSmart()` as `up.fragment.get()`. The H1 and
+one to the other: `get: getFragment` publishes `getFragment()` as `up.fragment.get()`. The H1 and
 the declaration always use the public name, so search the doc file for that.
 
 Some code defines several public APIs at once: a function may emit events, a compiler

@@ -174,9 +174,9 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   a variable, or give the function that produces it a return type without `undefined`. Don't
   repeat `!` at each use. If code right after a `!` checks whether the value is missing, the
   `!` is wrong; restructure instead.
-- When a function resolves its argument by reassigning it (`element = getSmart(element)`),
+- When a function resolves its argument by reassigning it (`element = getFragment(element)`),
   TypeScript narrows the parameter to a member of its declared type: an `ElementOrSelector`
-  becomes an `Element`, never the `HTMLElement` that `getSmart()` returns. When that's enough,
+  becomes an `Element`, never the `HTMLElement` that `getFragment()` returns. When that's enough,
   type the parameter as usual. Otherwise write the typed signature as an overload, and give the
   implementation the resolved type:
 
@@ -190,7 +190,7 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   Callers get the typed signature, and the body stays as it was. This works for methods, whose
   parameters TypeScript compares bivariantly. A function declaration's overload must be
   assignable to its implementation once `strictFunctionTypes` is on (TS2394), so a function
-  resolves into a new local instead (`let element = getSmart(elementOrSelector)!`, like
+  resolves into a new local instead (`let element = getFragment(elementOrSelector)!`, like
   `animate()`). A function expression passed to `mockable()` can't have overloads. Type its rest
   parameter as a union of tuples (like `trackFields()` does), or as `any` with a comment.
 
@@ -306,7 +306,7 @@ An exported name must make sense at every import site, without its module next t
   on (`eventHalt`).
 - When the export name is already good and a local variable is in the way, rename the local.
 - Every `config` export is qualified (`fragmentConfig`, `layerConfig`). The module's `api`
-  maps it back to its public name (`config: fragmentConfig`), like `get: getSmart`.
+  maps it back to its public name (`config: fragmentConfig`), like `get: getFragment`.
 - Before renaming an export, check whether the specs or `unpoly-migrate` use it through
   `up.internal`.
 

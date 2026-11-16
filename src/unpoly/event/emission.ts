@@ -2,7 +2,7 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { Aborted, guard } from '../error.js'
 import { buildEvent } from '../event.js'
-import { getSmart } from '../fragment.js'
+import { getFragment } from '../fragment.js'
 import { Layer, layerStack } from '../layer.js'
 import { logConfig, printToStandard } from '../log.js'
 import type * as t from './types.js'
@@ -101,7 +101,7 @@ export function parseEmitArgs(args: any[], defaults: t.EmitProps = {}): t.Emissi
   }
 
   if (u.isString(options.target)) {
-    options.target = getSmart(options.target, { layer: options.layer })
+    options.target = getFragment(options.target, { layer: options.layer })
   } else if (!options.target) {
     // If no element is given, we emit the event on the document.
     options.target = document

@@ -4,7 +4,7 @@ import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { buildEvent } from './event.js'
 import {
-  compressNestedSteps, getAllFragments, getSmart, tryToTarget, type FragmentKeepEvent,
+  compressNestedSteps, getAllFragments, getFragment, tryToTarget, type FragmentKeepEvent,
 } from './fragment.js'
 import { layerStack } from './layer.js'
 import { parseRequestOptions } from './link.js'
@@ -100,7 +100,7 @@ export function stopPolling(element: Element): void {
 }
 
 export function pollOptions(fragment: e.ElementOrSelector, options?: t.PollOptions): t.PollOptions {
-  fragment = getSmart(fragment)!
+  fragment = getFragment(fragment)!
   options = u.newOptions(options)
   const defaults = { background: true }
   const parser = new OptionsParser(fragment, options, { defaults })

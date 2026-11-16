@@ -5,7 +5,7 @@ import { newConfig } from './util/config.js'
 import { fail } from './error.js'
 import { getInputDevice, on } from './event.js'
 import { isField } from './form.js'
-import { containsFragment, getAllFragments, getSmart, tryToTarget, type LookupOptions } from './fragment.js'
+import { containsFragment, getAllFragments, getFragment, tryToTarget, type LookupOptions } from './fragment.js'
 import { layerStack, type LayerReference } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
 import { mockable } from './mockable.js'
@@ -52,7 +52,7 @@ export const bodyShifter = new BodyShifter()
 export const reveal = mockable(function(elementOrSelector: e.ElementOrSelector, options?: t.RevealOptions): true | Promise<void> {
   // copy options, since we will mutate it below (options.layer = ...).
   options = u.newOptions(options)
-  let element = getSmart(elementOrSelector, options)!
+  let element = getFragment(elementOrSelector, options)!
 
   // Now that we have looked up the element with an option like { layer: 'any' },
   // the only layer relevant from here on is the element's layer.
@@ -146,7 +146,7 @@ function allSelector(): string {
 }
 
 export function closestViewport(target: e.ElementOrSelector, options: LookupOptions = {}): HTMLElement {
-  const element = getSmart(target, options)!
+  const element = getFragment(target, options)!
   // Use up.element.closest() which searches across layer boundaries.
   // It is OK to find a viewport in a parent layer. Layers without its
   // own viewport (like popups) are scrolled by the parent layer's viewport.
@@ -155,12 +155,12 @@ export function closestViewport(target: e.ElementOrSelector, options: LookupOpti
 }
 
 export function getViewportSubtree(element: e.ElementOrSelector, options: LookupOptions = {}): u.List<HTMLElement> {
-  element = getSmart(element, options)!
+  element = getFragment(element, options)!
   return e.subtree(element, allSelector())
 }
 
 export function getViewportAround(element: e.ElementOrSelector, options: LookupOptions = {}): HTMLElement[] {
-  element = getSmart(element, options)!
+  element = getFragment(element, options)!
   return e.around(element, allSelector())
 }
 
@@ -387,7 +387,7 @@ export function firstHashTarget(hash?: string, options: LookupOptions = {}): HTM
       // Match an <a name="hash">
       'a' + e.attrSelector('name', hash)
     ].join()
-    return getSmart(selector, options)
+    return getFragment(selector, options)
   }
 }
 

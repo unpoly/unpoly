@@ -3,7 +3,7 @@ import * as e from '../element.js'
 import { fail } from '../error.js'
 import { emit } from '../event.js'
 import { findFields, getRegion, setContainerDisabled, watch } from '../form.js'
-import { getSmart, getSubtree, trackSelector } from '../fragment.js'
+import { getFragment, getSubtree, trackSelector } from '../fragment.js'
 import { Params } from './params.js'
 
 // A switchee remembers the field tokens it was last switched with.
@@ -96,7 +96,7 @@ export class Switcher {
 
   get _scope(): Element | undefined {
     if (this._regionSelector) {
-      return getSmart(this._regionSelector, { origin: this._root })
+      return getFragment(this._regionSelector, { origin: this._root })
     } else {
       return getRegion(this._root)
     }

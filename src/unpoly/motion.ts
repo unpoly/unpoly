@@ -4,7 +4,7 @@ import { OptionsParser } from './element/options_parser.js'
 import { newConfig } from './util/config.js'
 import { guardFn } from './error.js'
 import { on, type UnbindFunction } from './event.js'
-import { getSmart } from './fragment.js'
+import { getFragment } from './fragment.js'
 // Not through framework.js, which may not be evaluated yet when we create a Registry below.
 import { Registry } from './framework/registry.js'
 import { printToStandard } from './log.js'
@@ -38,7 +38,7 @@ export const animate = mockable(async function animate(
   { duration, easing, onFinished }: t.AnimateOptions = {},
 ): Promise<void> {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-  let element = getSmart(elementOrSelector)!
+  let element = getFragment(elementOrSelector)!
 
   // Finish a previous animation, unless we're called from an animation or transition function.
   if (!motionController.nested) motionController.finish(element)
@@ -110,8 +110,8 @@ async function animateNow(
 }
 
 export function finish(element?: e.ElementOrSelector): Promise<void> | undefined {
-  // Without an element, getSmart() returns undefined, and we finish all animations.
-  element = getSmart(element as e.ElementOrSelector)
+  // Without an element, getFragment() returns undefined, and we finish all animations.
+  element = getFragment(element as e.ElementOrSelector)
   motionController.finish(element)
   // Finishing is synchronous. With unpoly-migrate, we return a promise that warns when awaited.
   return up.migrate.formerlyAsync?.('up.motion.finish()')
@@ -125,7 +125,7 @@ export async function morph(
 ): Promise<void> {
   // (A) If passed a selector, up.fragment.get() will prefer a match on the current layer.
   // (B) This also unwraps jQuery collections.
-  await swapElements(getSmart(oldElement)!, getSmart(newElement)!, transitionValue, options)()
+  await swapElements(getFragment(oldElement)!, getFragment(newElement)!, transitionValue, options)()
 }
 
 // Inserts newElement now: before the absolutized oldElement when transitioning, in place of it otherwise.

@@ -9,7 +9,7 @@ import {
 } from './event.js'
 import { anyButtonSelector, formFieldSelector } from './form.js'
 import {
-  getSmart, NO_INPUT_INTERFERENCE, NO_PREVIEWS, onFirstIntersect, render, type RenderJob, type RenderOptions,
+  getFragment, NO_INPUT_INTERFERENCE, NO_PREVIEWS, onFirstIntersect, render, type RenderJob, type RenderOptions,
 } from './fragment.js'
 import { canPushState, isHistoryEnabled } from './history.js'
 import type { Layer } from './layer.js'
@@ -126,7 +126,7 @@ export function parseRequestOptions(link: Element, options?: u.PlainObject, pars
 
 export function followOptions(link: e.ElementOrSelector, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderOptions {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-  link = effectiveLink(getSmart(link)!)
+  link = effectiveLink(getFragment(link)!)
   options = u.newOptions(options)
 
   const parser = new OptionsParser(link, options, { fail: true, ...parserOptions })
@@ -222,7 +222,7 @@ export function followOptions(link: e.ElementOrSelector, options?: RenderOptions
 // Returns a Promise or an up.RenderJob, which has the API of a Promise.
 export function preload(link: e.ElementOrSelector, options?: RenderOptions): Promise<void> | RenderJob {
   // If passed a selector, up.fragment.get() will match in the current layer.
-  link = effectiveLink(getSmart(link)!)
+  link = effectiveLink(getFragment(link)!)
 
   let issue = preloadIssue(link)
   if (issue) {
@@ -281,7 +281,7 @@ function followURL(link: Element, options: RenderOptions = {}): string | null | 
 }
 
 export function isFollowable(link: e.ElementOrSelector): boolean {
-  link = getSmart(link)!
+  link = getFragment(link)!
   return linkConfig.matches(link, 'followSelectors')
 }
 

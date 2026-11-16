@@ -3,7 +3,7 @@ import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { fail, guard } from './error.js'
 import { assertEmitted, on } from './event.js'
-import { getSmart, getSubtree, type LookupOptions, type RenderOptions } from './fragment.js'
+import { getFragment, getSubtree, type LookupOptions, type RenderOptions } from './fragment.js'
 import { isBooted, isEvaling } from './framework.js'
 import { layerStack } from './layer.js'
 import { printToStandard } from './log.js'
@@ -241,7 +241,7 @@ function buildDestructorRegistry(element: Element): u.Cleaner {
 
 export function hello(element: e.ElementOrSelector, options: t.HelloOptions = {}): Promise<Element> {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-  element = getSmart(element, options)!
+  element = getFragment(element, options)!
 
   // We default to running all registered processor fns, but callers
   // can opt to only run given processor arguments.
@@ -266,7 +266,7 @@ export function clean(fragment: Element, options: LookupOptions = {}): void {
 
 export const readData = mockable(function readData(elementOrSelector: e.ElementOrSelector): any {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-  let element: t.ScriptedElement & HTMLElement = getSmart(elementOrSelector)!
+  let element: t.ScriptedElement & HTMLElement = getFragment(elementOrSelector)!
   return element.upData ||= buildData(element)
 })
 

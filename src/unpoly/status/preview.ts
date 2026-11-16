@@ -2,7 +2,7 @@ import * as u from '../util.js'
 import * as e from '../element.js'
 import { guard, UpError } from '../error.js'
 import { disableContainerTemp, type Params } from '../form.js'
-import { getSmart, insertTemp, provideNodes, type RenderOptions } from '../fragment.js'
+import { getFragment, insertTemp, provideNodes, type RenderOptions } from '../fragment.js'
 import {
   layerStack, open, OVERLAY_VISUAL_KEYS, type Layer, type LayerDismissEvent,
 } from '../layer.js'
@@ -222,7 +222,7 @@ export class Preview {
     // (1) up.fragment.get(undefined) returns undefined
     // (2) up.fragment.get(Element) returns the element
     // (3) this.fragment is undefined when opening a new layer
-    element = getSmart(element, { layer: this.layer, origin: this.origin }) || this.fragment
+    element = getFragment(element, { layer: this.layer, origin: this.origin }) || this.fragment
     return [element, ...rest]
   }
 

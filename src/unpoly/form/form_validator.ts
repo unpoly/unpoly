@@ -7,7 +7,7 @@ import {
   validateOptions,
 } from '../form.js'
 import {
-  getSmart, onAborted, render, resolveOrigin, splitTarget, toTarget, type FragmentAbortedEvent,
+  getFragment, onAborted, render, resolveOrigin, splitTarget, toTarget, type FragmentAbortedEvent,
   type RenderOptions, type RenderResult,
 } from '../fragment.js'
 import { printToStandard, printUserEvent } from '../log.js'
@@ -142,7 +142,7 @@ export class FormValidator {
       // A blank target (like " " or ",") has no selectors. We return undefined
       // so the caller falls back to the validation target it would use without a target.
       return u.presence(u.compact(simpleSelectors.map(function(simpleSelector) {
-        let element = getSmart(simpleSelector, { origin })
+        let element = getFragment(simpleSelector, { origin })
         if (element) {
           return {
             element,

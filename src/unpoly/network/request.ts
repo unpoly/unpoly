@@ -5,7 +5,7 @@ import {
   type Emission,
 } from '../event.js'
 import { Params } from '../form.js'
-import { getSmart, parseTargetSteps, splitTarget, type RenderOptions } from '../fragment.js'
+import { getFragment, parseTargetSteps, splitTarget, type RenderOptions } from '../fragment.js'
 import { layerStack, type Layer } from '../layer.js'
 import { abortRequests, isSafeMethod, networkConfig, requestCache } from '../network.js'
 import {
@@ -188,7 +188,7 @@ export class UpRequest {
     let steps = parseTargetSteps(this.target)
     let lookupOpts = { origin: this.origin, layer: this.layer }
     // Look for one match per step.
-    let matches = u.map(steps, (step) => getSmart(step.selector, lookupOpts))
+    let matches = u.map(steps, (step) => getFragment(step.selector, lookupOpts))
     return u.compact(matches)
   }
 

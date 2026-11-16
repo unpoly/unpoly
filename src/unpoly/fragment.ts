@@ -136,7 +136,7 @@ function defaultSkipResponse({ response, expiredResponse }: t.FragmentLoadedProp
 }
 
 export function sourceOf(element: e.ElementOrSelector, options: t.LookupOptions = {}): string | undefined {
-  element = getSmart(element, options)!
+  element = getFragment(element, options)!
   return e.closestAttr(element, 'up-source')
 }
 
@@ -252,7 +252,7 @@ export function findKeepMatch(options: u.PlainObject): t.KeepMatch | undefined {
     // Since newElement is from a freshly parsed HTML document, we could use
     // up.element functions to match the selector. However, since we also want
     // to use custom selectors like ":main" or "&" we use up.fragment.get().
-    partner = getSmart(newElement, partnerSelector, lookupOpts)
+    partner = getFragment(newElement, partnerSelector, lookupOpts)
   } else {
     partner = e.subtreeFirst(newElement, partnerSelector)
   }
@@ -341,9 +341,9 @@ export function isAlive(fragment: Element): boolean {
 }
 
 // Takes a selector or element, optionally preceded by a root element, and followed by options.
-export function getSmart(selector: e.ElementOrSelector, options?: t.LookupOptions): HTMLElement | undefined
-export function getSmart(root: ParentNode, selector: e.ElementOrSelector, options?: t.LookupOptions): HTMLElement | undefined
-export function getSmart(...args: any[]): any {
+export function getFragment(selector: e.ElementOrSelector, options?: t.LookupOptions): HTMLElement | undefined
+export function getFragment(root: ParentNode, selector: e.ElementOrSelector, options?: t.LookupOptions): HTMLElement | undefined
+export function getFragment(...args: any[]): any {
   let [root, selector, options] = parseGetArgs(args)
 
   if (u.isElementLike(selector)) {
@@ -429,7 +429,7 @@ export function closestFragment(element: Element, selector: string, options?: t.
 
 export function destroy(...args: any[]): Promise<void> | undefined {
   const options = parseTargetAndOptions(args)
-  const element = getSmart(options.target, options)
+  const element = getFragment(options.target, options)
 
   if (element) {
     destroyFragment(element, options)
@@ -457,7 +457,7 @@ export const reload = mockable(function reload(...args: t.RenderArgs | []): Rend
   // up.reload() takes one element or selector, not a list of target selectors.
   // A target that matches nothing throws a TypeError below.
   // A reload updates an existing layer, so its { layer } is never a NewLayer like 'swap'.
-  const element = getSmart(options.target as e.ElementOrSelector, options as t.LookupOptions)!
+  const element = getFragment(options.target as e.ElementOrSelector, options as t.LookupOptions)!
   options.url ||= sourceOf(element)
   options.headers = u.merge(options.headers, conditionalHeaders(element))
   if (options.keepData || e.booleanAttr(element, 'up-keep-data')) {
@@ -635,7 +635,7 @@ function deriveTargetFromPattern(element: Element, deriver: string): string | un
 
 function isGoodTarget(target: string, element: Element, options: t.LookupOptions = {}): boolean {
   let verify = options.verify ?? fragmentConfig.verifyDerivedTarget
-  return !isAlive(element) || !verify || getSmart(target, { layer: element, ...options }) === element
+  return !isAlive(element) || !verify || getFragment(target, { layer: element, ...options }) === element
 }
 
 function matchesPattern(pattern: string | RegExp, str: string): boolean {
@@ -934,7 +934,7 @@ export function provideNodes(
   if (u.isString(value) && STARTS_WITH_SELECTOR.test(value)) {
     let [parsedValue, parsedData] = u.parseScalarJSONPairs(value)[0]
     data = { ...data, ...parsedData }
-    value = getSmart(parsedValue, { layer: 'closest', origin, originLayer }) || fail(`Cannot find template "%s"`, value)
+    value = getFragment(parsedValue, { layer: 'closest', origin, originLayer }) || fail(`Cannot find template "%s"`, value)
   }
 
   if (u.isString(value)) {
@@ -961,7 +961,7 @@ export function cloneTemplate(
   { origin, htmlParser }: ProvideNodesOptions = {},
 ): u.List<Node> {
   // Like provideNodes(), look in the origin's layer first, then in ancestor layers.
-  let template = getSmart(templateOrSelector, { origin, layer: 'closest' }) || fail('Template not found: %o', templateOrSelector)
+  let template = getFragment(templateOrSelector, { origin, layer: 'closest' }) || fail('Template not found: %o', templateOrSelector)
   let event = emit(template, 'up:template:clone', { data, nodes: null, log: ["Using template %o", templateOrSelector] })
   // Each node remembers the template variables for readData(), even a text node.
   let nodes: u.List<TemplateNode> = event.nodes ?? defaultTemplateNodes(template, htmlParser)
@@ -1056,7 +1056,7 @@ export const api = {
     destroy,
     render,
     navigate,
-    get: getSmart,
+    get: getFragment,
     all: getAllFragments,
     subtree: getSubtree,
     contains: containsFragment,
