@@ -38,8 +38,9 @@ export function assertEventEmitted(emission: t.Emission): void {
 function logEmission({ log, event }: t.Emission): void {
   if (!logConfig.enabled) { return }
 
-  let message = log
-  let messageArgs
+  // The first element of an array is the message.
+  let message: unknown = log
+  let messageArgs: unknown[]
 
   if (u.isArray(message)) {
     [message, ...messageArgs] = message
@@ -56,6 +57,7 @@ function logEmission({ log, event }: t.Emission): void {
   }
 }
 
+// oxlint-disable-next-line typescript/no-explicit-any -- probes the arguments of up.emit()
 export function parseEmitArgs(args: any[], defaults: t.EmitProps = {}): t.Emission {
   // Event-emitting functions are crazy overloaded:
   //

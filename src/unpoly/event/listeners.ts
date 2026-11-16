@@ -188,6 +188,7 @@ export function unbindListeners(group: t.ListenerGroup): void {
 // Parses the arguments of up.on() and up.off(), which come in many different combinations:
 //
 //     [[elements], eventTypes, [selector], [options], callback]
+// oxlint-disable-next-line typescript/no-explicit-any -- probes the arguments of up.on()
 export function parseBindArgs(args: any[], overrides?: u.PlainObject): t.ListenerGroup {
   args = u.copy(args)
 

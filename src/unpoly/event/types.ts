@@ -44,6 +44,7 @@ An event whose type `UpEventMap` doesn't know, like a custom event emitted with 
 It may have any property.
 */
 export interface AnyEvent extends Event {
+  // oxlint-disable-next-line typescript/no-explicit-any -- custom event properties of any type
   [prop: string]: any
 }
 
@@ -133,6 +134,7 @@ export interface EmitProps {
   layer?: LayerReference
   target?: Element | u.List<Element> | string
   log?: EmitLogOption
+  // oxlint-disable-next-line typescript/no-explicit-any -- custom event properties of any type
   [prop: string]: any
 }
 
@@ -163,7 +165,8 @@ under `strictFunctionTypes`. That lets a listener annotate a narrower type than 
 like `(event, link: HTMLAnchorElement)` for a selector that only matches links.
 */
 export type ListenerCallback<E = Event> =
-  { listener(this: HTMLElement, event: E, element: HTMLElement, data?: any): any }['listener'] & { upUid?: number }
+  // oxlint-disable-next-line typescript/no-explicit-any -- the element's data, a user value of any type
+  { listener(this: HTMLElement, event: E, element: HTMLElement, data?: any): unknown }['listener'] & { upUid?: number }
 
 /**
 What an `UpEventListener` and a `ListenerGroup` both need to know: everything but the
@@ -201,7 +204,7 @@ What to log when an event is emitted: a message, an array of a message and its s
 or `false` to log nothing. When missing, the event type is logged.
 @internal
 */
-export type EmitLogOption = string | any[] | false
+export type EmitLogOption = string | unknown[] | false
 
 /**
 Everything `emitEvent()` needs to know. `parseEmitArgs()` builds this

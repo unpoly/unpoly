@@ -32,7 +32,7 @@ export function on<const T extends t.EventTypes>(
   types: T,
   ...args: t.ListenerArgs<t.ObservedEvent<T>>
 ): t.UnbindFunction
-export function on(...args: any[]): t.UnbindFunction {
+export function on(...args: unknown[]): t.UnbindFunction {
   return bindListeners(parseBindArgs(args))
 }
 
@@ -47,7 +47,7 @@ export function onClosest<const T extends t.EventTypes>(
   options: { layer?: LayerReference },
   callback: t.ListenerCallback<t.ObservedEvent<T>>,
 ): t.UnbindFunction
-export function onClosest(...args: any[]): t.UnbindFunction {
+export function onClosest(...args: unknown[]): t.UnbindFunction {
   let [fragment, eventType, { layer }, callback] = u.parseArgs(args, 'val', 'val', 'options', 'callback')
   layer &&= layerStack.get(layer, { origin: fragment })
   let guard = (event: Event) => (event.target as Element).contains(fragment) && (!layer || layer.contains(event.target as Element))
@@ -61,7 +61,7 @@ export function onClosest(...args: any[]): t.UnbindFunction {
 
 export function off<const T extends t.EventTypes>(types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): void
 export function off<const T extends t.EventTypes>(targets: t.ListenerTargets, types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): void
-export function off(...args: any[]): void {
+export function off(...args: unknown[]): void {
   return unbindListeners(parseBindArgs(args))
 }
 
@@ -71,13 +71,13 @@ export function emit<T extends string>(plan: t.EventPlan<T>): t.EmittedEvent<T>
 export function emit<T extends string>(target: t.EmitTarget, plan: t.EventPlan<T>): t.EmittedEvent<T>
 export function emit<E extends Event>(event: E, options?: t.EmitProps): E
 export function emit<E extends Event>(target: t.EmitTarget, event: E, options?: t.EmitProps): E
-export function emit(...args: any[]): Event {
+export function emit(...args: unknown[]): Event {
   return emitEvent(parseEmitArgs(args))
 }
 
 export function buildEvent<T extends string>(type: T, props?: u.PlainObject): t.EmittedEvent<T>
 export function buildEvent<T extends string>(props: u.PlainObject & { type?: T }): t.EmittedEvent<T>
-export function buildEvent(...args: any[]): Event {
+export function buildEvent(...args: unknown[]): Event {
   const props = u.extractOptions(args)
   const type = args[0] || props.type || fail('Missing event type')
 
@@ -91,7 +91,7 @@ export function assertEmitted(...args: [type: string, props?: t.EmitProps]): voi
   return assertEventEmitted(parseEmitArgs(args))
 }
 
-export function onEscape(listener: (event: KeyboardEvent) => any): t.UnbindFunction {
+export function onEscape(listener: (event: KeyboardEvent) => unknown): t.UnbindFunction {
   return on('keydown', function(event) {
     if (event.key === 'Escape') {
       return listener(event)
