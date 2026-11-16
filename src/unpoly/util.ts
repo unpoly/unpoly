@@ -506,7 +506,7 @@ export function pick<T extends object, K extends keyof T>(object: T, keys: reado
   return filtered
 }
 
-export function pickBy<T extends object>(object: T, tester: ((value: unknown, key: string) => unknown) | string): Partial<T> {
+export function pickBy<T extends object>(object: T, tester: ((value: T[keyof T], key: string) => unknown) | string): Partial<T> {
   tester = iteratee(tester)
   const filtered: Partial<T> = {}
   for (let key in object) {
