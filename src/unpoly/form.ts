@@ -307,7 +307,7 @@ function disableControlTemp(control: t.Field, preview?: boolean): u.UndoFunction
   // (1) This function is only returned if we didn't early-return above
   //     for a control that is already disabled.
   // (2) In case our disabling caused focus loss: We don't care about restoring focus,
-  //     selection or scroll position here. The up.form.disableTemp() function is *only*
+  //     selection or scroll position here. The disableContainerTemp() function is *only*
   //     used via up.Preview#disable(), and previews already use a FocusCapsule
   //     to preserve and restore focus-related state.
   return undoDisable

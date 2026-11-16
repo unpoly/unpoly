@@ -136,7 +136,7 @@ for (let api of apis) {
 // - For an instance of a subclass, Chrome walks up the prototype chain and takes the first own
 //   [Symbol.toStringTag] *data* property (it skips a getter) or the original name of an own
 //   `constructor`, whichever comes first. So each class needs a tag on its own prototype.
-// The tag also names our objects in Object.prototype.toString() and u.inspect(), and our errors (see
+// The tag also names our objects in Object.prototype.toString() and u.sprintf()'s %o, and our errors (see
 // error.ts). The layer modes aren't public, so they all say up.Layer. Internal classes on up.internal
 // keep whatever name the minifier gives them, except up.internal.NotImplemented: an error that
 // reaches the console should say what it is.

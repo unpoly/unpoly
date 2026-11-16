@@ -920,7 +920,7 @@ export function parseArgs(args: any[], ...specs: t.ArgSpec[]): any[] {
       // Write undefined if the tester failed. This makes the result order deterministic.
       // The caller can set a default liike this:
       //
-      //     let [foo = 'default'] = up.util.args(args, tester)
+      //     let [foo = 'default'] = u.parseArgs(args, tester)
       results.unshift(value)
     }
   }

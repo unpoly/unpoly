@@ -200,10 +200,10 @@ export class FormValidator {
     if (!this._dirtySolutions.length) return
 
     // We don't run callbacks when a prior async callback is still running.
-    // We will call _requestCallback() again once the prior callback terminates.
+    // We will call _renderDirtySolutions() again once the prior callback terminates.
     if (this._rendering) return
 
-    // When we re-called _requestCallback() after waiting for a prior callback, another
+    // When we re-called _renderDirtySolutions() after waiting for a prior callback, another
     // debounce delay may have started while waiting for the prior callback.
     // We must not shorted that debounce delay.
     if (this._nextRenderTimer) return
@@ -283,7 +283,7 @@ export class FormValidator {
     options.target = u.map(dirtySolutions, 'target').join(', ')
 
     // Since we may render multiple dirty elements we cannot have individual origins
-    // for each. We already resolved an :origin selector in getSolution(), so we don't
+    // for each. We already resolved an :origin selector in _getSolutions(), so we don't
     // need { origin } for target resolution.
     options.origin = this._form
 
@@ -349,7 +349,7 @@ export class FormValidator {
     // Since up.render() can only take a single { origin },
     // we resolve it here.
     //
-    // Disabling the same elements multiple time is not an issue since up.form.disableTemp()
+    // Disabling the same elements multiple time is not an issue since disableContainerTemp()
     // only sees enabled elements.
     options.disable = dirtySolutions.map((solution) => resolveOrigin(solution.renderOptions.disable, solution))
 

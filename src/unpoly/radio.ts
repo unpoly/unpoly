@@ -66,8 +66,8 @@ export function hungrySteps(renderOptions: u.PlainObject): t.HungrySteps {
         keep: true,          // Always honor [up-keep] in hungry elements. Set here because we don't inherit default render options.
         maybe: true,         // Don't fail if we cannot match { newElement } later.
         meta,
-        selectEvent,         // Used by up.ResponseDoc#selectStep()
-        selectCallback,      // Used by up.ResponseDoc#selectStep()
+        selectEvent,         // Used by up.ResponseDoc#selectSteps()
+        selectCallback,      // Used by up.ResponseDoc#selectSteps()
         // The step also gets a reference to the original render options.
         // Although these render options are not used to render the hungry step, it will be
         // passed to up:fragment:hungry listener to e.g. only update hungry elements if the

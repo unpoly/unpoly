@@ -265,7 +265,7 @@ function restoreLocation(location: string): void {
     cache: 'auto',
     revalidate: 'auto',
 
-    // We already saved view state in onPop()
+    // We already saved view state in reactToChange()
     saveScroll: false,
     scroll: ['restore', 'auto'],
     saveFocus: false,

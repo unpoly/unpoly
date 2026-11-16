@@ -47,7 +47,7 @@ export class RequestQueue {
     u.always(request, () => this._onRequestSettled(request))
 
     // When considering whether a request is "slow", we're measuring the duration between request.queuedAt
-    // and the moment when the request gets settled. Note that when setSlowTimer() occurs, it will
+    // and the moment when the request gets settled. Note that when _scheduleSlowTimer() occurs, it will
     // make its own check whether a request in the queue is considered slow.
     this._scheduleSlowTimer(request)
     this._queueRequest(request)
@@ -78,7 +78,7 @@ export class RequestQueue {
     let timeUntilLate = Math.max(request.effectiveLateTime as number - request.age, 0)
 
     // We may have multiple timers running concurrently.
-    // Nonethess we don't emit duplicate events due to the check in @_checkLate().
+    // _checkForLate() makes sure we don't emit duplicate events.
     u.scheduleTimer(timeUntilLate, () => this._checkForLate())
   }
 
@@ -186,8 +186,8 @@ export class RequestQueue {
   // Returns queued requests that are (1) timed (effectiveLateTime not false)
   // and (2) have been longer queued than their effectiveLateTime.
   _hasLateTimedRequests(): boolean {
-    // If lateDelay is 200, we're scheduling the _checkLate() timer after 200 ms.
-    // The request must be slow when _checkLate() is called, or we will never look
+    // If lateDelay is 200, we're scheduling the _checkForLate() timer after 200 ms.
+    // The request must be slow when _checkForLate() is called, or we will never look
     // at it again. Since the JavaScript setTimeout() is inaccurate, we allow a request
     // to "be slow" a few ms earlier than actually configured.
     const timerTolerance = 1

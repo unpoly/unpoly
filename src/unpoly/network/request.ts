@@ -180,7 +180,7 @@ export class UpRequest {
     // to replace.
     //
     // If we haven't received a `{ fragments }` property (or if it has been deleted by
-    // evictExpensitveAttrs()) but did we receive a `{ target }`, we find matching elements here.
+    // _evictExpensiveAttrs()) but did we receive a `{ target }`, we find matching elements here.
     return (this._fragments ||= this._findFragments())
   }
 
@@ -219,7 +219,7 @@ export class UpRequest {
       // prevent the layer DOM tree from garbage collection while the response
       // is cached by up.network.
       //
-      // (2) Although we must take care to not evict attributes that are part of our #cacheKey(),
+      // (2) Although we must take care to not evict attributes that the cache uses to match requests,
       // we have already copied all layer-relevant properties, e.g. this.mode, this.context.
       this.layer = undefined
       this.failLayer = undefined

@@ -538,7 +538,7 @@ export class OverlayWithViewport extends Overlay {
     // A swapping of <body> might have removed this overlay from the DOM, so we
     // attach it again.
     //
-    // We also check #isOpen() in case some async code calls #sync() on a layer
+    // We also check #isAlive() in case some async code calls #sync() on a layer
     // that was already closed. In that case don't run the code below that might
     // re-attach the overlay.
     if (this.isAlive() && !this.element.isConnected) {
