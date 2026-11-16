@@ -204,6 +204,8 @@ function fixedElements(root: ParentNode = document): NodeListOf<HTMLElement> {
   return root.querySelectorAll<HTMLElement>(queryParts.join())
 }
 
+export function saveScroll(viewport?: e.ElementOrSelector, options?: t.ScrollPositionOptions): void
+export function saveScroll(options: t.ScrollPositionOptions): void
 export function saveScroll(...args: any[]): void {
   const [viewports, options] = parseOptions(args)
   const location = options.location || options.layer.location
@@ -231,6 +233,8 @@ export function getScrollTops(options?: LookupOptions): Record<string, number> {
   return getScrollTopsForViewportElements(viewports)
 }
 
+export function restoreScroll(viewport?: e.ElementOrSelector, options?: t.ScrollPositionOptions): boolean
+export function restoreScroll(options: t.ScrollPositionOptions): boolean
 export function restoreScroll(...args: any[]): boolean {
   const [viewports, options] = parseOptions(args)
   const location = options.location || options.layer.location

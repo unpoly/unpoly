@@ -1,5 +1,6 @@
 import type * as u from '../util.js'
 import type { InputDevice } from '../event.js'
+import type { LookupOptions } from '../fragment.js'
 import type { LayerReference } from '../layer.js'
 
 /**
@@ -49,4 +50,17 @@ export interface RevealOptions {
   // For looking up the element. After the lookup, `up.reveal()` sets the element's layer.
   layer?: LayerReference
   origin?: Element
+}
+
+/**
+Options for `up.viewport.saveScroll()` and `up.viewport.restoreScroll()`.
+*/
+export interface ScrollPositionOptions extends LookupOptions {
+  location?: string
+  // Use the viewports around this element instead of all viewports in the layer.
+  /** @internal */
+  around?: Element | null
+  // Restore these positions instead of the saved ones.
+  /** @internal */
+  scrollTops?: Record<string, number>
 }
