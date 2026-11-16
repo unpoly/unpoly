@@ -405,11 +405,11 @@ export function getSubtree(element: Element, selector: string, options: t.Lookup
 }
 
 // Takes a selector or an element. viewport's focusedElementWithin() also passes null, which matches nothing.
-export function contains(root: Element, selectorOrElement: any): boolean {
+export function contains(root: Element, selectorOrElement: any): boolean | undefined {
   if (u.isElement(selectorOrElement)) {
     // The root may be in no layer, e.g. while a closed overlay plays its closing animation.
     // Returns undefined when the root is in no layer.
-    return (e.containsElement(root, selectorOrElement) && layerStack.get(root)?.contains(selectorOrElement)) as boolean
+    return e.containsElement(root, selectorOrElement) && layerStack.get(root)?.contains(selectorOrElement)
   } else {
     return getSubtree(root, selectorOrElement).length > 0
   }
