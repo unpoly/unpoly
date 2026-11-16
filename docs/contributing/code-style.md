@@ -89,8 +89,11 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   does.
 - **Share slightly wider types.** One `LookupOptions` for all of up.fragment's lookups beats a
   precise options type per function. Don't widen where that loses a real check.
-- **Real types instead of `PlainObject`**, where that's cheap. `any` is fine where a precise
-  type would be complex.
+- **Real types instead of `PlainObject`**, where that's cheap.
+- **No `any` without a reason.** Prefer the real type, then `unknown`. Where `any` is right,
+  disable the lint rule on that line with the reason:
+  `// oxlint-disable-next-line typescript/no-explicit-any -- any user value`. An implementation
+  signature behind overloads takes `...args: unknown[]`.
 - **No cast that a refactor can remove.** A cast is fine where TypeScript can't know
   (`affix(…) as HTMLFormElement`).
 - **Declare class fields** with `declare` (`declare left: number`). A field without `declare`
@@ -195,7 +198,7 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   assignable to its implementation once `strictFunctionTypes` is on (TS2394), so a function
   resolves into a new local instead (`let element = getFragment(elementOrSelector)!`, like
   `animate()`). A function expression passed to `mockable()` can't have overloads. Type its rest
-  parameter as a union of tuples (like `trackFields()` does), or as `any` with a comment.
+  parameter as a union of tuples (like `trackFields()` does).
 - **Overloads only for more than one signature.** A rest tuple only where the body needs the
   arguments as an array. Otherwise plain parameters.
 
@@ -220,8 +223,8 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   keys core no longer knows names them in an interface (`LegacyCompiler`), or takes a
   `PlainObject`.
   A wrapper that forwards its `...args` casts the callee unless the callee has a rest
-  parameter: `(up.element.get as any)(...args)`. TypeScript only spreads an `any[]` into a rest
-  parameter (TS2556). Type parameters where it's easy. Core declares the hooks it
+  parameter: `(up.element.get as AnyFunction)(...args)`. TypeScript only spreads an array of
+  unknown length into a rest parameter (TS2556). Type parameters where it's easy. Core declares the hooks it
   calls on `up.migrate` in `migrate_stub.ts`, and migrate marks each implementation with a "Core
   calls this hook" comment.
 
