@@ -108,7 +108,8 @@ export class Switcher {
 
   _buildFieldTokens(): string[] {
     let values = Params.fromContainer(this._root, { includeDisabled: true }).values()
-    let tokens = [...values]
+    // The fields that switch other elements have string values.
+    let tokens = [...values] as string[]
 
     let anyPresent = u.some(values, u.isPresent)
     tokens.push(anyPresent ? ':present' : ':blank')

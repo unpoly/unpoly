@@ -167,7 +167,7 @@ export class FieldWatcher {
     this._requestCallback()
   }
 
-  _runCallback(...args: any[]): any {
+  _runCallback(...args: unknown[]): unknown {
     return guard(this._callback, ...args)
   }
 

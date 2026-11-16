@@ -48,6 +48,11 @@ A `{ content }` option: an HTML string, an element, or a list of nodes.
 export type ContentValue = string | Element | u.List<Node>
 
 /**
+A `{ disable }` option: `true` for the origin's form, a selector, an element, or an array of selectors and elements.
+*/
+export type DisableOption = boolean | string | Element | (string | Element)[]
+
+/**
 What a preview inserts or shows as a placeholder: an HTML string, a template selector (optionally followed by
 template data), an element, a text node, or a list of nodes.
 */
@@ -153,7 +158,7 @@ export interface RenderOptions {
   saveFocus?: boolean
 
   // Loading state
-  disable?: boolean | string | Element | any[]
+  disable?: DisableOption
   placeholder?: ContentValue | false
   preview?: PreviewValue
   feedback?: boolean

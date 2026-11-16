@@ -6,7 +6,7 @@ import { fail, muteUncriticalRejection } from './error.js'
 import { buildEvent, haltEvent, on, type UnbindFunction } from './event.js'
 import {
   closestFragment, getAllFragments, getFragment, getSubtree, render, sourceOf, toTarget, trackSelector,
-  tryToTarget, type RenderJob, type RenderOptions, type RenderResult,
+  tryToTarget, type DisableOption, type RenderJob, type RenderOptions, type RenderResult,
 } from './fragment.js'
 import { closestLayerElement, layerStack } from './layer.js'
 import { followOptions } from './link.js'
@@ -94,7 +94,7 @@ export function readFieldName(field: t.Field): string | null | undefined {
 
 // The property is the only source. A form-associated element reports its value to the browser
 // through setFormValue(), which a script cannot read back.
-export function readFieldValue(field: t.Field): any {
+export function readFieldValue(field: t.Field): unknown {
   return field.value
 }
 
@@ -314,7 +314,7 @@ function disableControlTemp(control: t.Field, preview?: boolean): u.UndoFunction
 }
 
 // Disable is true (the origin's form), an element, a selector or an array of these.
-function getDisableContainers(disable: any, origin?: Element): Element[] {
+function getDisableContainers(disable: DisableOption | undefined, origin?: Element): Element[] {
   let originScope = () => getRegion(origin)
 
   if (disable === true) {
@@ -330,7 +330,7 @@ function getDisableContainers(disable: any, origin?: Element): Element[] {
   }
 }
 
-export function getDisablePreviewFn(disable: any, origin?: Element): PreviewFunction {
+export function getDisablePreviewFn(disable: DisableOption | undefined, origin?: Element): PreviewFunction {
   return function(preview) {
     let containers = getDisableContainers(disable, origin)
     for (let container of containers) {
@@ -466,7 +466,7 @@ export function submitButtonOverrides(submitButton?: Element | false): RenderOpt
 // Without a callback, the root's [up-watch] attribute gives it.
 export function watch(root: e.ElementOrSelector, callback?: t.WatchCallback): UnbindFunction
 export function watch(root: e.ElementOrSelector, options: t.WatchOptions, callback?: t.WatchCallback): UnbindFunction
-export function watch(...args: any[]): UnbindFunction {
+export function watch(...args: unknown[]): UnbindFunction {
   let [root, options, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
   root = e.getOne(root) // unwrap jQuery
@@ -526,11 +526,12 @@ export function validate(originOrTarget: e.ElementOrSelector, options?: t.Valida
   return validator.validate(parsedOptions)
 }
 
-function parseValidateArgs(originOrTarget: any, ...args: any[]): u.PlainObject {
+function parseValidateArgs(originOrTarget: e.ElementOrSelector, ...args: unknown[]): u.PlainObject {
   const options = u.extractOptions(args)
 
   if (options.origin) {
-    options.target ||= toTarget(originOrTarget)
+    // toTarget() doesn't unwrap a jQuery collection, which the docs allow here.
+    options.target ||= toTarget(originOrTarget as Element | string)
   } else {
     options.origin ||= getFragment(originOrTarget)
   }

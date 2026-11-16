@@ -9,7 +9,7 @@ custom element. Unpoly reads its `{ name }`, `{ value }` and `{ disabled }` prop
 */
 export interface Field extends Element {
   name?: string
-  value?: any
+  value?: unknown
   disabled?: boolean
   form?: HTMLFormElement | null
   // Set while a preview disables the field, see disableControlTemp().
@@ -114,7 +114,7 @@ when the params are encoded.
 */
 export interface ParamEntry {
   name: string
-  value: any
+  value: unknown
 }
 
 /**

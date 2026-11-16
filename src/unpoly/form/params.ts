@@ -49,7 +49,8 @@ export class Params {
   toFormData(): FormData {
     const formData: InspectableFormData = new FormData()
     for (let entry of this.entries) {
-      formData.append(entry.name, entry.value)
+      // FormData stringifies a value that isn't a Blob.
+      formData.append(entry.name, entry.value as string | Blob)
     }
     if (!formData.entries) {
       // If this browser cannot inspect FormData with the #entries()
@@ -78,7 +79,7 @@ export class Params {
     // 2. An empty string value is encoded to `key=` with an equals sign but no value
     if (u.isGiven(value)) {
       query += "="
-      query += encodeURIComponent(value)
+      query += encodeURIComponent(value as string)
     }
     return query
   }
@@ -103,7 +104,7 @@ export class Params {
     return parts.join(separator)
   }
 
-  add(name: string, value: any): void {
+  add(name: string, value: unknown): void {
     this.entries.push({ name, value })
   }
 
@@ -130,7 +131,7 @@ export class Params {
     return u.map(this.entries, 'name')
   }
 
-  values(): any[] {
+  values(): unknown[] {
     return u.map(this.entries, 'value')
   }
 
@@ -170,7 +171,7 @@ export class Params {
     }
   }
 
-  set(name: string, value: any): void {
+  set(name: string, value: unknown): void {
     this.delete(name)
     this.add(name, value)
   }
@@ -183,7 +184,7 @@ export class Params {
     return (entry) => entry.name === name
   }
 
-  get(name: string): any {
+  get(name: string): unknown {
     if (this._isArrayKey(name)) {
       return this.getAll(name)
     } else {
@@ -191,12 +192,12 @@ export class Params {
     }
   }
 
-  getFirst(name: string): any {
+  getFirst(name: string): unknown {
     const entry = u.findInList(this.entries, this._matchEntryFn(name))
     return entry?.value
   }
 
-  getAll(name: string): any[] {
+  getAll(name: string): unknown[] {
     const entries = u.filterList(this.entries, this._matchEntryFn(name))
     return u.map(entries, 'value')
   }
@@ -260,6 +261,7 @@ export class Params {
   }
 
   // Takes any, since it reads the properties of whichever kind of field it gets (checked, files, ...).
+  // oxlint-disable-next-line typescript/no-explicit-any -- any kind of field
   addField(field: any, { includeDisabled }: { includeDisabled?: boolean } = {}): void {
     field = e.getOne(field) // unwrap jQuery
 
