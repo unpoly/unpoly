@@ -34,7 +34,11 @@ interface MatchedStep extends t.RenderStep {
 
 // Swaps the steps' old elements with their new elements. Used by UpdateLayerPlan, and by LayerPlan
 // for the other layers. When there are no steps, we focus and scroll with { noneOptions }.
-export function updateSteps(responseDoc: ResponseDoc, steps: t.RenderStep[], noneOptions: t.ResolvedRenderOptions = {}): t.PartialRenderResult[] {
+export function updateSteps(
+  responseDoc: ResponseDoc,
+  steps: t.RenderStep[],
+  noneOptions: t.ResolvedRenderOptions = {},
+): t.PartialRenderResult[] {
   // Our callers pass steps for a layer, with a matched old element. We match the new elements
   // below, before anything reads them.
   let matchedSteps = steps as MatchedStep[]

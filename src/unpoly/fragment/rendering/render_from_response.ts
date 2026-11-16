@@ -84,7 +84,11 @@ function updateContentFromResponse(finalRenderOptions: t.RenderOptions, meta: u.
   return renderFromContent(finalRenderOptions)
 }
 
-async function revalidate(renderResult: RenderResult, originalRenderOptions: t.RenderOptions, response: UpResponse): Promise<RenderResult | undefined> {
+async function revalidate(
+  renderResult: RenderResult,
+  originalRenderOptions: t.RenderOptions,
+  response: UpResponse,
+): Promise<RenderResult | undefined> {
   if (!shouldRevalidate(response.request, response, originalRenderOptions)) return
 
   // This is an explicit target passed as `{ target }` option.
