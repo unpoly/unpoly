@@ -510,7 +510,7 @@ export abstract class Overlay extends Layer {
     return u.contains(this.dismissible, method)
   }
 
-  _close(verb: 'accept' | 'dismiss', value: any, options: t.LayerCloseOptions): void {
+  _close(verb: t.CloseVerb, value: any, options: t.LayerCloseOptions): void {
     // The cast allows { confirm: true }, which assertConfirmed() handles like { confirm: false }.
     closeLayer({ ...options, verb, value, layer: this } as t.CloseLayerOptions)
   }

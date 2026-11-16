@@ -2,8 +2,8 @@ import type * as u from '../util.js'
 import { type EventPlan, type InputDevice, type UpEvent } from '../event.js'
 import { type ParamsLike } from '../form.js'
 import {
-  type Layer, type LayerAcceptEvent, type LayerAcceptedEvent, type LayerDismissEvent, type LayerDismissedEvent,
-  type LayerMode, type LayerOpenedEvent,
+  type CloseVerb, type Layer, type LayerAcceptEvent, type LayerAcceptedEvent, type LayerDismissEvent,
+  type LayerDismissedEvent, type LayerMode, type LayerOpenedEvent,
 } from '../layer.js'
 import { type AnimationValue, type TransitionValue } from '../motion.js'
 import { type RequestCondition, type UpRequest, type UpResponse } from '../network.js'
@@ -35,6 +35,16 @@ A `{ preview }` option: the name of a preview, a preview function, or a list of 
 export type PreviewValue = string | PreviewFn | (string | PreviewFn)[] | false
 
 /**
+How a selector with several matches is resolved. See `up.fragment.config.match`.
+*/
+export type MatchMode = 'region' | 'first'
+
+/**
+A `{ content }` option: an HTML string, an element, or a list of nodes.
+*/
+export type ContentValue = string | Element | u.List<Node>
+
+/**
 The options that `up.render()`, `up.navigate()` and the functions built on them (`up.follow()`,
 `up.submit()`, `up.layer.open()`, ...) pass through a render pass.
 
@@ -47,7 +57,7 @@ export interface RenderOptions {
   // Targeting
   target?: RenderTarget
   fallback?: string | boolean
-  match?: 'region' | 'first'
+  match?: MatchMode
   origin?: Element
   hungry?: boolean
 
@@ -77,14 +87,14 @@ export interface RenderOptions {
   evictCache?: RequestCondition
 
   // Local content
-  content?: string | Element | u.List<Node>
+  content?: ContentValue
   fragment?: string | Element
   document?: string | Element | Document
   response?: UpResponse
 
   // Layer
   layer?: LayerReference
-  peel?: boolean | 'accept' | 'dismiss'
+  peel?: boolean | CloseVerb
   mode?: LayerMode
   size?: string
   class?: string
@@ -135,7 +145,7 @@ export interface RenderOptions {
 
   // Loading state
   disable?: boolean | string | Element | any[]
-  placeholder?: string | Element | u.List<Node> | false
+  placeholder?: ContentValue | false
   preview?: PreviewValue
   feedback?: boolean
   // A { preview } and { placeholder } per target selector, when up.validate() renders several targets at once.
@@ -251,12 +261,12 @@ Options for an `up.ResponseDoc`. One of `{ document }`, `{ fragment }` or `{ con
 export interface ResponseDocOptions {
   document?: string | Element | Document
   fragment?: string | Element
-  content?: string | Element | u.List<Node>
+  content?: ContentValue
   target?: string
   origin?: Element
   data?: any
   cspInfo?: CSPInfo
-  match?: 'region' | 'first'
+  match?: MatchMode
 }
 
 /**
@@ -344,7 +354,7 @@ export interface LookupOptions {
   mode?: string
   origin?: Element
   originLayer?: Layer
-  match?: 'region' | 'first'
+  match?: MatchMode
   // Also match elements that are being destroyed.
   destroying?: boolean
   // For deriving targets: only use config.strongTargetDerivers, or check that the target matches.
@@ -470,7 +480,7 @@ export interface FragmentConfig {
   strongTargetDerivers: string[]
   badTargetClasses: (string | RegExp)[]
   verifyDerivedTarget: boolean
-  match: 'region' | 'first'
+  match: MatchMode
   navigateOptions: RenderOptions
   renderOptions: RenderOptions
   reloadOptions: RenderOptions

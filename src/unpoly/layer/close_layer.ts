@@ -76,7 +76,7 @@ export function closeLayer(options: t.CloseLayerOptions): void {
   reloadParent(layer, verb, parent)
 }
 
-function reloadParent(layer: Overlay, verb: 'accept' | 'dismiss', parent: Layer): void {
+function reloadParent(layer: Overlay, verb: t.CloseVerb, parent: Layer): void {
   // The name is { onAcceptedReload } or { onDismissedReload }, built from a string.
   let selector = (layer as u.PlainObject)[`on${u.upperCaseFirst(verb)}edReload`]
   // When the parent layer is closing too, e.g. when it peels this overlay, there is nothing to reload.

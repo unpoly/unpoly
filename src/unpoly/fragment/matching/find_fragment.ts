@@ -23,7 +23,7 @@ function findInPreferredElements(selector: string, document: Document | Element,
   }
 }
 
-function findInRegion(selector: string, origin: Element | undefined, match: 'region' | 'first', options: t.FindFragmentOptions): HTMLElement | undefined {
+function findInRegion(selector: string, origin: Element | undefined, match: t.MatchMode, options: t.FindFragmentOptions): HTMLElement | undefined {
   if (match === 'region' && !containsMainPseudo(selector) && origin?.isConnected) {
     return findClosest(selector, origin, options) || findDescendantInRegion(selector, origin, options)
   }
