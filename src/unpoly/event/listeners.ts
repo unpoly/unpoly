@@ -191,14 +191,9 @@ export function unbindListeners(group: t.ListenerGroup): void {
   })
 }
 
-/*
-Parses the arguments of up.on() and up.off(), which come in many different combinations:
-
-    [[elements], eventTypes, [selector], [options], callback]
-
-@function parseBindArgs
-@internal
-*/
+// Parses the arguments of up.on() and up.off(), which come in many different combinations:
+//
+//     [[elements], eventTypes, [selector], [options], callback]
 export function parseBindArgs(args: any[], overrides?: u.PlainObject): t.ListenerGroup {
   args = u.copy(args)
 
