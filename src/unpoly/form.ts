@@ -530,8 +530,8 @@ function parseValidateArgs(originOrTarget: e.ElementOrSelector, ...args: unknown
   const options = u.extractOptions(args)
 
   if (options.origin) {
-    // toTarget() doesn't unwrap a jQuery collection, which the docs allow here.
-    options.target ||= toTarget(originOrTarget as Element | string)
+    // A selector is the target. An element or a jQuery collection derives one.
+    options.target ||= toTarget(u.isString(originOrTarget) ? originOrTarget : e.getOne(originOrTarget)!)
   } else {
     options.origin ||= getFragment(originOrTarget)
   }
