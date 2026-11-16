@@ -89,11 +89,6 @@ export class UpRequest {
     this.expireCache = options.expireCache  // since up.network.request() options are sometimes wrapped in this class
     this.evictCache = options.evictCache  // since up.network.request() options are sometimes wrapped in this class
 
-    // While requests are queued or in flight we keep the layer they're targeting.
-    // If that layer is closed we will cancel all pending requests targeting that layer.
-    // Note that when opening a new layer, this { layer } attribute will be the set to
-    // the current layer. The { mode } and { failMode } attributes will belong to the
-    // new layer being opened.
     this.mode = options.mode // we would love to delegate this.mode to this.layer.mode, but this.layer might be the string "new"
     this.context = options.context // we would love to delegate this.context to this.layer.context, but this.layer might be string "new"
     this.failMode = options.failMode // we would love to delegate this.failMode to this.failLayer.mode, but this.failLayer might be the string "new"
@@ -127,6 +122,12 @@ export class UpRequest {
       // up.layer.get('new') will return 'new' unchanged, but I'm not sure
       // if any code actually calls up.request({ ..., layer: 'new' }).
       // In OpenLayerPlan we connect requests to the base layer we're stacking upon.
+      //
+      // While requests are queued or in flight we keep the layer they're targeting.
+      // If that layer is closed we will cancel all pending requests targeting that layer.
+      // Note that when opening a new layer, this { layer } attribute will be set to
+      // the current layer. The { mode } and { failMode } attributes will belong to the
+      // new layer being opened. A { layer } that matches no layer leaves it undefined.
       layer = this.layer = layerStack.get(options.layer, layerLookupOptions)
       this.context ||= layer?.context || {} // layer might be "new", so we default to {}
       this.mode ||= layer?.mode
