@@ -3,7 +3,7 @@ import { type EventPlan, type InputDevice, type UpEvent } from '../event.js'
 import { type ParamsLike } from '../form.js'
 import {
   type CloseVerb, type Layer, type LayerAcceptEvent, type LayerAcceptedEvent, type LayerDismissEvent,
-  type LayerDismissedEvent, type LayerMode, type LayerOpenedEvent, type LayerOption, type LayerReference, type NewLayer,
+  type LayerDismissedEvent, type LayerMode, type LayerOpenedEvent, type LayerReference, type NewLayer,
 } from '../layer.js'
 import { type AnimationValue, type TransitionValue } from '../motion.js'
 import { type RequestCondition, type UpRequest, type UpResponse } from '../network.js'
@@ -351,7 +351,7 @@ A render pass passes its render options.
 */
 export interface LookupOptions {
   // Not only a LayerReference: a render pass passes its options, so this may be 'new' (see Selector).
-  layer?: LayerOption
+  layer?: LayerReference | 'new'
   // The mode of a new layer, for expanding `:main` with `{ layer: 'new' }`.
   mode?: LayerMode
   origin?: Element

@@ -134,7 +134,7 @@ export class LayerLookup {
       // The { baseLayer } option may itself be a string like "parent".
       // In this case we look it up using a new up.LayerLookup instance, using
       // up.layer.current as the { baseLayer } for that second lookup.
-      const recursiveOptions = { ...this._options, baseLayer: this._stack.current, normalizeLayerOptions: false, layer: baseLayer }
+      const recursiveOptions = { ...this._options, baseLayer: this._stack.current, normalizeLayerOptions: false, layer: baseLayer as t.LayerReference }
       return (this.constructor as typeof LayerLookup).all(this._stack, recursiveOptions)[0]
     } else {
       return baseLayer || this._getOriginLayer() || this._stack.current

@@ -174,17 +174,10 @@ export type LayerReference = Layer | Element | number | `${number}`
 export type NewLayer = 'new' | 'swap' | 'shatter' | `${'new' | 'swap' | 'shatter'} ${OverlayMode}`
 
 /**
-A `{ layer }` value as the lookup code receives it internally. Besides a `LayerReference`, it may be
-a `NewLayer` from the render options (which the lookup passes through as `'new'`), or any string from
-an attribute like `[up-if-layer]`, which the lookup checks at runtime.
-*/
-export type LayerOption = Layer | number | Element | string
-
-/**
 Options for looking up layers with `up.layer.get()` or `up.layer.getAll()`.
 */
 export interface LayerLookupOptions {
-  layer?: LayerOption
+  layer?: LayerReference | NewLayer
   /**
   The layer that relative names like `'parent'` or `'current'` refer to.
   */
@@ -206,7 +199,7 @@ The arguments of `layerStack.get()` and `layerStack.getAll()`: a layer value, lo
 `up.layer.get()` and `up.layer.getAll()` take the same, but only a `LayerReference` as the value.
 @internal
 */
-export type LayerLookupArgs = [value?: LayerOption | null | LayerLookupOptions, options?: LayerLookupOptions]
+export type LayerLookupArgs = [value?: Layer | Element | number | string | null | LayerLookupOptions, options?: LayerLookupOptions]
 
 /**
 The `up:layer:open` event. It is emitted on the document, since the overlay has no element yet.
