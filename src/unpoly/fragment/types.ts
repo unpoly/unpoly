@@ -25,6 +25,18 @@ an array of alternatives or a selector map. See `up.FragmentProcessor`.
 export type FragmentProcessorValue = any
 
 /**
+A `{ scroll }` option: a keyword like `'auto'`, `'top'` or `'keep'`, a selector, an element, a function,
+an array of alternatives or a selector map.
+*/
+export type ScrollOption = any
+
+/**
+A `{ focus }` option: a keyword like `'auto'`, `'target'` or `'keep'`, a selector, an element, a function,
+an array of alternatives or a selector map.
+*/
+export type FocusOption = any
+
+/**
 A `{ preview }` option: the name of a preview, a preview function, or a list of them.
 */
 export type PreviewValue = string | PreviewFn | (string | PreviewFn)[] | false
@@ -124,7 +136,7 @@ export interface RenderOptions {
   closeEasing?: string
 
   // Scrolling
-  scroll?: FragmentProcessorValue
+  scroll?: ScrollOption
   scrollMap?: u.PlainObject
   scrollBehavior?: ScrollBehavior
   revealSnap?: number
@@ -134,7 +146,7 @@ export interface RenderOptions {
   saveScroll?: boolean
 
   // Focus
-  focus?: FragmentProcessorValue
+  focus?: FocusOption
   focusVisible?: boolean | 'auto'
   saveFocus?: boolean
 
@@ -272,7 +284,7 @@ export interface FragmentProcessorOptions {
   // updateSteps() passes null when it has no steps.
   fragment?: HTMLElement | null
   // What { focus: 'auto' } or { scroll: 'auto' } means, as another processable value.
-  autoMeans?: FragmentProcessorValue
+  autoMeans?: ScrollOption | FocusOption
   origin?: Element
   layer?: Layer
 }
@@ -481,8 +493,8 @@ export interface FragmentConfig {
   renderOptions: RenderOptions
   reloadOptions: RenderOptions
   autoHistoryTargets: string[]
-  autoScroll: FragmentProcessorValue[]
-  autoFocus: FragmentProcessorValue[]
+  autoScroll: ScrollOption[]
+  autoFocus: FocusOption[]
   normalizeKeepHTML: (html: string) => string
   autoRevalidate: boolean | ((response: UpResponse) => boolean)
   skipResponse: (loadedEventProps: FragmentLoadedProps) => boolean
