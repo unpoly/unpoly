@@ -6,24 +6,20 @@ import { fail } from '../error.js'
 // without an error, and the entry would not be kept as a default between specs.
 import { isEvaling } from '../framework.js'
 
-export class Registry<T> {
+export class Registry<T extends object> {
   declare _data: Record<string, T | undefined>
-  // Returns undefined for an invalid value, like an animation named 'none'.
-  declare _normalize: (value: any) => T | undefined
   declare _valueDescription: string
 
-  constructor(valueDescription: string, normalize: (value: any) => T | undefined = u.identity) {
+  constructor(valueDescription: string) {
     this._data = {}
-    this._normalize = normalize
     this._valueDescription = valueDescription
     this.put = this.put.bind(this)
     document.addEventListener('up:framework:reset', () => this.reset())
   }
 
-  put(key: string, object: any): void {
-    object = this._normalize(object)
-    object.isDefault = isEvaling()
-    this._data[key] = object
+  put(name: string, value: T): void {
+    // reset() keeps the values registered while Unpoly evaluates.
+    this._data[name] = Object.assign(value, { isDefault: isEvaling() })
   }
 
   get(name: string): T {

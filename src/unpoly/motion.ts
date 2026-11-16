@@ -24,9 +24,9 @@ export const motionConfig = newConfig('up.motion.config', (): t.MotionConfig => 
   enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches
 }))
 
-let namedAnimations = new Registry<t.AnimationFunction>('animation', findAnimationFn)
+let namedAnimations = new Registry<t.AnimationFunction>('animation')
 
-let namedTransitions = new Registry<t.TransitionFunction>('transition', findTransitionFn)
+let namedTransitions = new Registry<t.TransitionFunction>('transition')
 
 function reset(): void {
   motionController.reset()
@@ -220,6 +220,12 @@ function composeTransitionFn(oldAnimation: t.AnimationValue, newAnimation: t.Ani
   }
 }
 
+// A transition that plays one named animation on the old element and another on the new element.
+// The names are looked up when the transition runs, so redefining an animation also changes the transition.
+function animationPair(oldAnimation: string, newAnimation: string): t.TransitionFunction {
+  return (oldElement, newElement, options) => composeTransitionFn(oldAnimation, newAnimation)!(oldElement, newElement, options)
+}
+
 function findAnimationFn(value: t.AnimationValue | undefined): t.AnimationFunction | undefined {
   if (isNone(value)) {
     return undefined
@@ -257,7 +263,7 @@ export function isNone(motionValue: any): boolean {
 
 // From is an opacity or a function that reads it from the element.
 function registerOpacityAnimation(name: string, from: any, to: number): void {
-  namedAnimations.put(name, function(element: HTMLElement, options: t.TimingOptions) {
+  namedAnimations.put(name, function(element, options) {
     element.style.opacity = u.evalOption(from, element)
     return animateNow(element, { opacity: to }, options)
   })
@@ -285,13 +291,13 @@ function registerMoveAnimations(direction: string, boxToTransform: (box: DOMRect
   const animationToName = `move-to-${direction}`
   const animationFromName = `move-from-${direction}`
 
-  namedAnimations.put(animationToName, function(element: HTMLElement, options: t.TimingOptions) {
+  namedAnimations.put(animationToName, function(element, options) {
     const box = untranslatedBox(element)
     const transform = boxToTransform(box)
     return animateNow(element, transform, options)
   })
 
-  namedAnimations.put(animationFromName, function(element: HTMLElement, options: t.TimingOptions) {
+  namedAnimations.put(animationFromName, function(element, options) {
     const box = untranslatedBox(element)
     const transform = boxToTransform(box)
     e.setInlineStyle(element, transform)
@@ -333,15 +339,15 @@ export function install(): void {
     return translateCSS(travelDistance, 0)
   })
 
-  namedTransitions.put('cross-fade', ['fade-out', 'fade-in'])
+  namedTransitions.put('cross-fade', animationPair('fade-out', 'fade-in'))
 
-  namedTransitions.put('move-left', ['move-to-left', 'move-from-right'])
+  namedTransitions.put('move-left', animationPair('move-to-left', 'move-from-right'))
 
-  namedTransitions.put('move-right', ['move-to-right', 'move-from-left'])
+  namedTransitions.put('move-right', animationPair('move-to-right', 'move-from-left'))
 
-  namedTransitions.put('move-up', ['move-to-top', 'move-from-bottom'])
+  namedTransitions.put('move-up', animationPair('move-to-top', 'move-from-bottom'))
 
-  namedTransitions.put('move-down', ['move-to-bottom', 'move-from-top'])
+  namedTransitions.put('move-down', animationPair('move-to-bottom', 'move-from-top'))
 
   on('up:framework:reset', reset)
 }
