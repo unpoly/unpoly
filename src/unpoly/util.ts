@@ -14,9 +14,9 @@ export function asyncNoop(): Promise<void> {
 }
 
 export function memoize<F extends t.AnyFunction>(func: F, cacheProp?: string): F {
-  let cache: { value?: [ReturnType<F>], error?: any } = {}
+  let cache: { value?: [ReturnType<F>], error?: unknown } = {}
 
-  return function(this: any, ...args) {
+  return function(this: t.PlainObject, ...args) {
     if (cacheProp) cache = (this[cacheProp] ||= {})
     if (cache.value) return cache.value[0]
     if (cache.error) throw cache.error
@@ -129,14 +129,16 @@ export function methodAllowsPayload(method: string): boolean {
 
 function iteratee(block: t.AnyFunction | string): t.AnyFunction {
   if (isString(block)) {
-    return (item: any) => item[block]
+    return (item: t.PlainObject) => item[block]
   } else {
     return block
   }
 }
 
 // Also takes an iterator, like the one returned by String#matchAll(). It has no length.
-export function map<T, R = any>(list: Iterable<T> & { length?: number }, block: t.Iteratee<T, R>): R[] {
+export function map<T, K extends keyof T>(list: Iterable<T> & { length?: number }, key: K): T[K][]
+export function map<T, R>(list: Iterable<T> & { length?: number }, block: t.Iteratee<T, R>): R[]
+export function map<T, R>(list: Iterable<T> & { length?: number }, block: t.Iteratee<T, R>): R[] {
   if (list.length === 0) { return [] }
   block = iteratee(block)
   let mapped = []
@@ -147,7 +149,7 @@ export function map<T, R = any>(list: Iterable<T> & { length?: number }, block: 
   return mapped
 }
 
-export function mapObject<T>(array: T[], pairer: (item: T, index: number) => [PropertyKey, any]): t.PlainObject {
+export function mapObject<T>(array: T[], pairer: (item: T, index: number) => [PropertyKey, unknown]): t.PlainObject {
   return Object.fromEntries(array.map(pairer))
 }
 
@@ -159,33 +161,33 @@ export function each<T>(array: Iterable<T>, block: (item: T, index: number) => v
   }
 }
 
-export function isNull(value: any): value is null {
+export function isNull(value: unknown): value is null {
   return value === null
 }
 
-function isTruthy(value: any): boolean {
+function isTruthy(value: unknown): boolean {
   return !!value
 }
 
-export function isUndefined(value: any): value is undefined {
+export function isUndefined(value: unknown): value is undefined {
   return value === undefined
 }
 
 
 export const isDefined = negate(isUndefined) as <T>(value: T) => value is Exclude<T, undefined>
 
-export function isMissing(value: any): value is null | undefined {
+export function isMissing(value: unknown): value is null | undefined {
   return isUndefined(value) || isNull(value)
 }
 
 export const isGiven = negate(isMissing) as <T>(value: T) => value is NonNullable<T>
 
-export function isBlank(value: any): boolean {
+export function isBlank(value: unknown): boolean {
   if (isMissing(value)) {
     return true
   }
-  if (isObject(value) && value[isBlank.key]) {
-    return value[isBlank.key]()
+  if (isObject(value) && (value as t.PlainObject)[isBlank.key]) {
+    return (value as t.PlainObject)[isBlank.key]()
   }
   if (isString(value) || isList(value)) {
     return value.length === 0
@@ -198,6 +200,8 @@ export function isBlank(value: any): boolean {
 
 isBlank.key = 'up.util.isBlank' as const
 
+export function presence<T, S extends T>(value: T, tester: (value: T) => value is S): S | undefined
+export function presence<T>(value: T, tester?: (value: T) => boolean): NonNullable<T> | undefined
 export function presence<T>(value: T, tester: (value: T) => boolean = isPresent): NonNullable<T> | undefined {
   if (tester(value)) {
     // We assume that the tester rejects null and undefined, like every tester we pass.
@@ -205,66 +209,66 @@ export function presence<T>(value: T, tester: (value: T) => boolean = isPresent)
   }
 }
 
-export const isPresent = negate(isBlank)
+export const isPresent = negate(isBlank) as <T>(value: T) => value is NonNullable<T>
 
-export function isFunction(value: any): value is t.AnyFunction {
+export function isFunction(value: unknown): value is t.AnyFunction {
   return typeof(value) === 'function'
 }
 
 // Also true for `String` objects, which behave like strings in all places we care about.
-export function isString(value: any): value is string {
+export function isString(value: unknown): value is string {
   return (typeof(value) === 'string') || value instanceof String
 }
 
-export function isBoolean(value: any): value is boolean {
+export function isBoolean(value: unknown): value is boolean {
   return (typeof(value) === 'boolean') || value instanceof Boolean
 }
 
-export function isNumber(value: any): value is number {
+export function isNumber(value: unknown): value is number {
   return (typeof(value) === 'number') || value instanceof Number
 }
 
-export function isOptions(value: any): value is t.PlainObject {
+export function isOptions(value: unknown): value is t.PlainObject {
   return (typeof(value) === 'object') && !isNull(value) && (isUndefined(value.constructor) || (value.constructor === Object))
 }
 
-export function isObject(value: any): boolean {
+export function isObject(value: unknown): boolean {
   const typeOfResult = typeof(value)
   return ((typeOfResult === 'object') && !isNull(value)) || (typeOfResult === 'function')
 }
 
-export function isElement(value: any): value is Element {
+export function isElement(value: unknown): value is Element {
   return value instanceof Element
 }
 
-export function isTextNode(value: any): value is Text {
+export function isTextNode(value: unknown): value is Text {
   return value instanceof Text
 }
 
-export function isRegExp(value: any): value is RegExp {
+export function isRegExp(value: unknown): value is RegExp {
   return value instanceof RegExp
 }
 
-function isError(value: any): value is Error {
+function isError(value: unknown): value is Error {
   return value instanceof Error
 }
 
-export function isJQuery(value: any): boolean {
+export function isJQuery(value: unknown): boolean {
   return canJQuery() && value instanceof jQuery
 }
 
-export function isElementLike(value: any): boolean {
-  return !!(value && (value.addEventListener || (isJQuery(value) && value[0]?.addEventListener)))
+export function isElementLike(value: unknown): boolean {
+  return !!(value && ((value as t.PlainObject).addEventListener || (isJQuery(value) && (value as t.PlainObject)[0]?.addEventListener)))
 }
 
-export function isPromise(value: any): value is Promise<any> {
-  return isObject(value) && isFunction(value.then)
+export function isPromise(value: unknown): value is Promise<unknown> {
+  return isObject(value) && isFunction((value as t.PlainObject).then)
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray
 export const { isArray } = Array
 
-export function isFormData(value: any): value is FormData {
+export function isFormData(value: unknown): value is FormData {
   return value instanceof FormData
 }
 
@@ -272,7 +276,7 @@ export function toArray<T>(value: t.List<T>): T[] {
   return isArray(value) ? value : copyArrayLike(value)
 }
 
-export function isList(value: any): value is t.List<any> {
+export function isList(value: unknown): value is t.List<unknown> {
   return isArray(value) ||
     isNodeList(value) ||
     isArguments(value) ||
@@ -280,15 +284,15 @@ export function isList(value: any): value is t.List<any> {
     isHTMLCollection(value)
 }
 
-function isNodeList(value: any): value is NodeList {
+function isNodeList(value: unknown): value is NodeList {
   return value instanceof NodeList
 }
 
-function isHTMLCollection(value: any): value is HTMLCollection {
+function isHTMLCollection(value: unknown): value is HTMLCollection {
   return value instanceof HTMLCollection
 }
 
-function isArguments(value: any): boolean {
+function isArguments(value: unknown): boolean {
   return Object.prototype.toString.call(value) === '[object Arguments]'
 }
 
@@ -313,9 +317,9 @@ export function wrapList(value: unknown): t.List<unknown> {
 // A string is a list of characters, too, but `& object` keeps it out of this overload.
 export function copy<T>(value: t.List<T> & object): T[]
 export function copy<T>(value: T): T
-export function copy(value: any): any {
-  if (isObject(value) && value[copy.key]) {
-    value = value[copy.key]()
+export function copy(value: unknown): unknown {
+  if (isObject(value) && (value as t.PlainObject)[copy.key]) {
+    value = (value as t.PlainObject)[copy.key]()
   } else if (isList(value)) {
     value = copyArrayLike(value)
   } else if (isOptions(value)) {
@@ -359,7 +363,7 @@ export function newOptions(object?: t.PlainObject, defaults?: t.PlainObject): t.
   }
 }
 
-export function parseArgIntoOptions(args: any[], argKey: string): t.PlainObject {
+export function parseArgIntoOptions(args: unknown[], argKey: string): t.PlainObject {
   let [positionalArg, options] = parseArgs(args, 'val', 'options')
   if (isDefined(positionalArg)) {
     options[argKey] = positionalArg
@@ -367,7 +371,7 @@ export function parseArgIntoOptions(args: any[], argKey: string): t.PlainObject 
   return options
 }
 
-export function findInList<T>(list: Iterable<T>, tester: ((item: T) => any) | string): T | undefined {
+export function findInList<T>(list: Iterable<T>, tester: ((item: T) => unknown) | string): T | undefined {
   tester = iteratee(tester)
   let match
   for (let element of list) {
@@ -379,11 +383,11 @@ export function findInList<T>(list: Iterable<T>, tester: ((item: T) => any) | st
   return match
 }
 
-export function some<T>(list: Iterable<T>, tester: t.Iteratee<T, any>): boolean {
+export function some<T>(list: Iterable<T>, tester: t.Iteratee<T, unknown>): boolean {
   return !!findResult(list, tester)
 }
 
-export function findResult<T, R = any>(list: Iterable<T>, tester: t.Iteratee<T, R>): R | undefined {
+export function findResult<T, R = unknown>(list: Iterable<T>, tester: t.Iteratee<T, R>): R | undefined {
   tester = iteratee(tester)
   let i = 0
   for (let item of list) {
@@ -394,7 +398,7 @@ export function findResult<T, R = any>(list: Iterable<T>, tester: t.Iteratee<T, 
   }
 }
 
-export function every<T>(list: Iterable<T>, tester: t.Iteratee<T, any>): boolean {
+export function every<T>(list: Iterable<T>, tester: t.Iteratee<T, unknown>): boolean {
   tester = iteratee(tester)
   let match = true
   let i = 0
@@ -408,7 +412,7 @@ export function every<T>(list: Iterable<T>, tester: t.Iteratee<T, any>): boolean
 }
 
 export function compact<T>(array: t.List<T>): NonNullable<T>[] {
-  return filterList(array, isGiven) as NonNullable<T>[]
+  return filterList(array, isGiven)
 }
 
 export function compactObject<T extends object>(object: T): Partial<T> {
@@ -420,7 +424,7 @@ export function uniq<T>(array: T[]): T[] {
   return Array.from(new Set(array))
 }
 
-export function uniqBy<T>(array: T[], mapper: t.Iteratee<T, any>): T[] {
+export function uniqBy<T>(array: T[], mapper: t.Iteratee<T, unknown>): T[] {
   if (array.length < 2) { return array }
   mapper = iteratee(mapper)
   const seenElements = new Set()
@@ -435,7 +439,9 @@ export function uniqBy<T>(array: T[], mapper: t.Iteratee<T, any>): T[] {
   })
 }
 
-export function filterList<T>(list: Iterable<T>, tester: t.Iteratee<T, any>): T[] {
+export function filterList<T, S extends T>(list: Iterable<T>, tester: (item: T, index: number) => item is S): S[]
+export function filterList<T>(list: Iterable<T>, tester: t.Iteratee<T, unknown>): T[]
+export function filterList<T>(list: Iterable<T>, tester: t.Iteratee<T, unknown>): T[] {
   tester = iteratee(tester)
   const matches: T[] = []
   each(list, function(element, index) {
@@ -446,7 +452,7 @@ export function filterList<T>(list: Iterable<T>, tester: t.Iteratee<T, any>): T[
   return matches
 }
 
-export function reject<T>(list: Iterable<T>, tester: t.Iteratee<T, any>): T[] {
+export function reject<T>(list: Iterable<T>, tester: t.Iteratee<T, unknown>): T[] {
   tester = negate(iteratee(tester))
   return filterList(list, tester)
 }
@@ -473,12 +479,13 @@ export function last<T>(value: ArrayLike<T>): T {
   return value[value.length - 1]
 }
 
-export function contains(value: t.List<any> | string, subValue: any): boolean {
-  let indexOf = (value as any).indexOf || Array.prototype.indexOf
+export function contains(value: t.List<unknown> | string, subValue: unknown): boolean {
+  // A NodeList or jQuery collection has no indexOf().
+  let indexOf = (value as unknown[]).indexOf || Array.prototype.indexOf
   return indexOf.call(value, subValue) >= 0
 }
 
-export function containsAll(values: t.List<any> | string, subValues: t.List<any>): boolean {
+export function containsAll(values: t.List<unknown> | string, subValues: t.List<unknown>): boolean {
   return every(subValues, (subValue) => contains(values, subValue))
 }
 
@@ -498,7 +505,7 @@ export function pick<T extends object, K extends keyof T>(object: T, keys: reado
   return filtered
 }
 
-export function pickBy<T extends object>(object: T, tester: ((value: any, key: string) => any) | string): Partial<T> {
+export function pickBy<T extends object>(object: T, tester: ((value: unknown, key: string) => unknown) | string): Partial<T> {
   tester = iteratee(tester)
   const filtered: Partial<T> = {}
   for (let key in object) {
@@ -526,7 +533,7 @@ export function remove<T>(array: T[], element: T): T | undefined {
   }
 }
 
-export function evalOption<T>(value: t.ValueOrFunction<T>, ...args: any[]): T {
+export function evalOption<T>(value: t.ValueOrFunction<T>, ...args: unknown[]): T {
   return isFunction(value) ? value(...args) : value
 }
 
@@ -534,9 +541,9 @@ export function evalOption<T>(value: t.ValueOrFunction<T>, ...args: any[]): T {
 export function evalAutoOption<T, A>(
   value: t.ValueOrFunction<T | 'auto'>,
   autoMeans: t.ValueOrFunction<A>,
-  ...args: any[]
+  ...args: unknown[]
 ): Exclude<T, 'auto'> | A
-export function evalAutoOption(value: any, autoMeans: any, ...args: any[]): any {
+export function evalAutoOption(value: unknown, autoMeans: unknown, ...args: unknown[]): unknown {
   value = evalOption(value, ...args)
   // Allow functions to return 'auto'
   if (value === 'auto') {
@@ -562,7 +569,7 @@ export function escapeRegExp(string: string): string {
   return string.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
 }
 
-export function pluckKey(object: t.PlainObject, key: string): any {
+export function pluckKey<T extends object, K extends keyof T>(object: T, key: K): T[K] {
   const value = object[key]
   delete object[key]
   return value
@@ -574,31 +581,31 @@ export function renameKey(object: t.PlainObject, oldKey: string, newKey: string)
   }
 }
 
-function extractLastArg(args: any[], tester: (value: any) => boolean): any {
+function extractLastArg<T>(args: unknown[], tester: (value: unknown) => value is T): T | undefined {
   if (tester(last(args))) {
-    return args.pop()
+    return args.pop() as T
   }
 }
 
-export function extractCallback(args: any[]): t.AnyFunction | undefined {
+export function extractCallback(args: unknown[]): t.AnyFunction | undefined {
   return extractLastArg(args, isFunction)
 }
 
-export function extractOptions(args: any[]): t.PlainObject {
+export function extractOptions(args: unknown[]): t.PlainObject {
   return extractLastArg(args, isOptions) || {}
 }
 
-export function identity(arg: any): any {
+export function identity<T>(arg: T): T {
   return arg
 }
 
-export function sequence(...fns: any[]): (...args: any[]) => any[] {
+// Takes functions, lists of functions, or other values, which are ignored.
+export function sequence(...fns: unknown[]): (...args: unknown[]) => unknown[] {
   return (...callArgs) => callAll(fns, ...callArgs)
 }
 
-function callAll(fns: any, ...args: any[]): any[] {
-  fns = scanFunctions(fns)
-  return map(fns, (fn: t.AnyFunction) => fn(...args))
+function callAll(fns: unknown, ...args: unknown[]): unknown[] {
+  return map(scanFunctions(fns), (fn) => fn(...args))
 }
 
 export function flatten<T>(array: t.List<T | t.List<T>>): T[] {
@@ -613,15 +620,22 @@ export function flatten<T>(array: t.List<T | t.List<T>>): T[] {
   return flattened
 }
 
-export function flatMap<T, R = any>(array: t.List<T>, block: t.Iteratee<T, R | t.List<R>>): R[] {
+// The items of a list, or a value that is no list. A string is a list of characters, but `& object` keeps it out.
+type Flattened<U> = U extends t.List<infer R> & object ? R : U
+
+export function flatMap<T, K extends keyof T>(array: t.List<T>, key: K): Flattened<T[K]>[]
+export function flatMap<T, U>(array: t.List<T>, block: t.Iteratee<T, U>): Flattened<U>[]
+export function flatMap<T, U>(array: t.List<T>, block: t.Iteratee<T, U>): unknown[] {
   return flatten(map(array, block))
 }
 
-export function always<T>(promise: Promise<T>, callback: (valueOrError: any) => any = identity): Promise<any> {
+export function always(promise: Promise<unknown>): Promise<unknown>
+export function always<R>(promise: Promise<unknown>, callback: (valueOrError: unknown) => R): Promise<R>
+export function always(promise: Promise<unknown>, callback: (valueOrError: unknown) => unknown = identity): Promise<unknown> {
   return promise.then(callback, callback)
 }
 
-export function newDeferred<T = any>(): t.Deferred<T> {
+export function newDeferred<T = unknown>(): t.Deferred<T> {
   let { promise, resolve, reject } = Promise.withResolvers<T>()
   return Object.assign(promise, { resolve, reject })
 }
@@ -630,6 +644,7 @@ export function isBasicObjectProperty(k: PropertyKey): boolean {
   return Object.hasOwn(Object.prototype, k)
 }
 
+// oxlint-disable-next-line typescript/no-explicit-any -- probes values of any type
 export function isEqual(a: any, b: any): boolean {
   // When two values have trivial equality, return immediately instead of going
   // through the extensive normalization and comparison below.
@@ -671,14 +686,21 @@ function isEqualOptions(a: t.PlainObject, b: t.PlainObject): boolean {
 
 isEqual.key = 'up.util.isEqual' as const
 
-function isEqualList(a: t.List<any>, b: t.List<any>): boolean {
+// Options for getSimpleTokens().
+interface SimpleTokenOptions {
+  json?: boolean
+  separator?: string | RegExp
+}
+
+function isEqualList(a: t.List<unknown>, b: t.List<unknown>): boolean {
   return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
 }
 
-export function getSimpleTokens(
-  value: any,
-  { json = false, separator = /[,\s]/ }: { json?: boolean, separator?: string | RegExp } = {},
-): any[] {
+// A string is split into tokens, with { json } also a JSON array. A list is returned as an array,
+// and any other value wrapped into one.
+export function getSimpleTokens(value: string | string[] | null | undefined, options?: SimpleTokenOptions): string[]
+export function getSimpleTokens<T>(value: string | T | t.List<T> | null | undefined, options?: SimpleTokenOptions): (string | T)[]
+export function getSimpleTokens(value: unknown, { json = false, separator = /[,\s]/ }: SimpleTokenOptions = {}): unknown[] {
   if (!isString(value)) {
     return wrapList(value)
   } else if (json && /^\[.*]$/.test(value)) {
@@ -693,7 +715,9 @@ function splitSimpleTokenString(value: string, separator: string | RegExp): stri
   return parts.map((s) => s.trim()).filter(identity)
 }
 
-export function getComplexTokens(value: any): any[] {
+export function getComplexTokens(value: string | string[] | null | undefined): string[]
+export function getComplexTokens<T>(value: string | T | t.List<T> | null | undefined): (string | T)[]
+export function getComplexTokens(value: unknown): unknown[] {
   if (!isString(value)) {
     return wrapList(value)
   } else {
@@ -721,8 +745,9 @@ function complexTokenOutlines(string: string): MaskedTokens {
   return { maskedTokens, restore }
 }
 
-export function wrapValue<T>(constructor: new (...args: any[]) => T, ...args: any[]): T {
-  return (args[0] instanceof constructor) ? args[0] : new constructor(...args)
+// Returns an instance as it is, or constructs one from the arguments.
+export function wrapValue<A extends unknown[], T>(constructor: new (...args: A) => T, ...args: NoInfer<A | [T]>): T {
+  return (args[0] instanceof constructor) ? args[0] : new constructor(...args as A)
 }
 
 let nextUid = 0
@@ -758,7 +783,7 @@ export function upperCaseFirst(str: string): string {
   return str[0].toUpperCase() + str.slice(1)
 }
 
-export function defineDelegates(object: object, props: string[], targetProvider: (this: any) => any): void {
+export function defineDelegates<O extends object>(object: O, props: string[], targetProvider: (this: O) => object): void {
   for (let prop of props) {
     Object.defineProperty(object, prop, {
       get() {
@@ -777,7 +802,7 @@ export function defineDelegates(object: object, props: string[], targetProvider:
   }
 }
 
-export function delegatePromise(object: object, targetProvider: (this: any) => any): void {
+export function delegatePromise<O extends object>(object: O, targetProvider: (this: O) => Promise<unknown>): void {
   return defineDelegates(
     object,
     ['then', 'catch', 'finally'],
@@ -785,6 +810,7 @@ export function delegatePromise(object: object, targetProvider: (this: any) => a
   )
 }
 
+// oxlint-disable-next-line typescript/no-explicit-any -- probes values of any type
 function stringifyArg(arg: any, placeholder = '%o', ancestors = new Set()): string {
   let string
   const maxLength = 200
@@ -856,7 +882,7 @@ function stringifyArg(arg: any, placeholder = '%o', ancestors = new Set()): stri
 
 const SPRINTF_PLACEHOLDERS = /%[oOdisfc]/g
 
-export function sprintf(message: string, ...args: any[]): string {
+export function sprintf(message: string, ...args: unknown[]): string {
   return message.replace(SPRINTF_PLACEHOLDERS, (placeholder) => stringifyArg(args.shift(), placeholder))
 }
 
@@ -868,7 +894,7 @@ function tagOuterHTML(element: Element): string {
   return (element.cloneNode() as Element).outerHTML.match(SERIALIZED_TAG_PATTERN)![0]
 }
 
-function negate<A extends any[]>(fn: (...args: A) => any): (...args: A) => boolean {
+function negate<A extends unknown[]>(fn: (...args: A) => unknown): (...args: A) => boolean {
   return function(...args: A) {
     return !fn(...args)
   }
@@ -887,7 +913,7 @@ export function memoizeMethod(object: t.PlainObject, propLiteral: t.PlainObject)
   }
 }
 
-export function safeStringifyJSON(value: any): string {
+export function safeStringifyJSON(value: unknown): string {
   let json = JSON.stringify(value)
   return escapeHighASCII(json)
 }
@@ -903,7 +929,9 @@ export function variant<T extends object>(source: T, changes: t.PlainObject = {}
   return variant
 }
 
-export function parseArgs(args: any[], ...specs: t.ArgSpec[]): any[] {
+// The results have the types of the arguments, which the caller's overloads describe.
+// oxlint-disable-next-line typescript/no-explicit-any -- parsed arguments of any type
+export function parseArgs(args: unknown[], ...specs: t.ArgSpec[]): any[] {
   let results = []
 
   while (specs.length) {
@@ -928,7 +956,7 @@ export function parseArgs(args: any[], ...specs: t.ArgSpec[]): any[] {
   return results
 }
 
-export function scanFunctions(...values: any[]): t.AnyFunction[] {
+export function scanFunctions(...values: unknown[]): t.AnyFunction[] {
   return values.flat(2).filter(isFunction)
 }
 
@@ -1046,10 +1074,12 @@ function ensureDoubleQuotes(str: string): string {
   return '"' + transformed + '"'
 }
 
-export function parseString(value: string): any {
+// Parses a quoted string literal.
+export function parseString(value: string): string {
   return JSON.parse(ensureDoubleQuotes(value))
 }
 
+// oxlint-disable-next-line typescript/no-explicit-any -- parsed JSON, like JSON.parse()
 export function parseRelaxedJSON(str: string): any {
   let { masked, restore } = maskPattern(str, [QUOTED_STRING_PATTERN])
   masked = masked.replace(/([a-z_$][\w$]*:)/gi, (unquotedProperty) => ('"' + unquotedProperty.slice(0, -1) + '":'))
@@ -1058,7 +1088,7 @@ export function parseRelaxedJSON(str: string): any {
   return JSON.parse(masked)
 }
 
-export function parseScalarJSONPairs(str: string): [string, any][] {
+export function parseScalarJSONPairs(str: string): [string, t.PlainObject | undefined][] {
   let { maskedTokens, restore } = complexTokenOutlines(str)
 
   return maskedTokens.map((maskedToken) => {
@@ -1071,11 +1101,11 @@ export function parseScalarJSONPairs(str: string): [string, any][] {
   })
 }
 
-export function spanObject(keys: string[], value: any): t.PlainObject {
+export function spanObject(keys: string[], value: unknown): t.PlainObject {
   return mapObject(keys, (key) => [key, value])
 }
 
-export function parseNumber(str: any): number | undefined {
+export function parseNumber(str: unknown): number | undefined {
   if (isNumber(str)) {
     return str
   } else if (isString(str) && /^-?\.?\d[\d._]*$/.test(str)) {
@@ -1083,6 +1113,8 @@ export function parseNumber(str: any): number | undefined {
   }
 }
 
+export function assert<T, S extends T>(value: T, testFn: (value: T) => value is S): S
+export function assert<T>(value: T, testFn?: (value: T) => boolean): T
 export function assert<T>(value: T, testFn: (value: T) => boolean = isTruthy): T {
   if (testFn(value)) {
     return value

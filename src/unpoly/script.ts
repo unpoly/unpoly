@@ -254,7 +254,7 @@ export function hello(element: e.ElementOrSelector, options: t.HelloOptions = {}
 
 export function clean(fragment: Element, options: LookupOptions = {}): void {
   // fragment functions usually ignore elements that are being destroyed
-  let cleanables = getSubtree(fragment, '.up-can-clean', { ...options, destroying: true })
+  let cleanables: t.ScriptedElement[] = getSubtree(fragment, '.up-can-clean', { ...options, destroying: true })
 
   for (let cleanable of cleanables) {
     // In the case of [up-keep] elements we may run on a clone that matches .up-can-clean

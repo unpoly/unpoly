@@ -3,13 +3,13 @@ import * as u from '../util.js'
 // Options for `up.FIFOCache`.
 interface FIFOCacheOptions<K> {
   capacity?: number
-  normalizeKey?: (key: K) => any
+  normalizeKey?: (key: K) => unknown
 }
 
 export class FIFOCache<K, V> {
-  declare _map: Map<any, V>
+  declare _map: Map<unknown, V>
   declare _capacity: number
-  declare _normalizeKey: (key: K) => any
+  declare _normalizeKey: (key: K) => unknown
 
   constructor({ capacity = 10, normalizeKey = u.identity }: FIFOCacheOptions<K> = {}) {
     this._map = new Map()
@@ -18,8 +18,7 @@ export class FIFOCache<K, V> {
   }
 
   get(key: K): V | undefined {
-    key = this._normalizeKey(key)
-    return this._map.get(key)
+    return this._map.get(this._normalizeKey(key))
   }
 
   set(key: K, value: V): void {
@@ -28,8 +27,7 @@ export class FIFOCache<K, V> {
       this._map.delete(oldestKey)
     }
 
-    key = this._normalizeKey(key)
-    this._map.set(key, value)
+    this._map.set(this._normalizeKey(key), value)
   }
 
   clear(): void {

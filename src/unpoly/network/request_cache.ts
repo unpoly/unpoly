@@ -183,7 +183,7 @@ export class UpRequestCache {
       // Copy terminal state like 'offline' or 'aborted'
       newRequest.state = existingRequest.state
       // If we did not get an up.Response, it must be an error
-      newRequest._reject(value)
+      newRequest._reject(value as Error)
     }
   }
 

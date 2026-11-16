@@ -53,7 +53,7 @@ up.util.detect = function(...args) {
 
 up.util.select = function(...args) {
   up.migrate.deprecated('up.util.select()', 'up.util.filter()')
-  return up.util.filter(...args)
+  return (up.util.filter as any)(...args)
 }
 
 up.util.setTimer = function(...args) {

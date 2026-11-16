@@ -71,8 +71,8 @@ export class Config<S extends object> {
 
   selector(prop: SelectorKey<S>, condition = ''): string {
     // The settings aren't members of the class, see ConfigWith.
-    let includes = (this as any)[prop]
-    let excludes = (this as any)['no' + u.upperCaseFirst(prop)]
+    let includes = (this as u.PlainObject)[prop]
+    let excludes = (this as u.PlainObject)['no' + u.upperCaseFirst(prop)]
     return e.unionSelector(includes, excludes, condition)
   }
 

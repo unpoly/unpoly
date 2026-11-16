@@ -199,7 +199,7 @@ export function parseBindArgs(args: any[], overrides?: u.PlainObject): t.Listene
   let elements
   if (args[0].addEventListener) {
     elements = [args.shift()]
-  } else if (u.isJQuery(args[0]) || (u.isList(args[0]) && args[0][0].addEventListener)) {
+  } else if (u.isJQuery(args[0]) || (u.isList(args[0]) && (args[0][0] as EventTarget).addEventListener)) {
     elements = args.shift()
   } else {
     elements = [document]
