@@ -9,7 +9,7 @@ import { type Layer } from './layer.js'
 import { type Overlay } from './overlay.js'
 
 // Accepts or dismisses an overlay, for up.Layer#accept() and up.Layer#dismiss().
-export function closeLayer(options: t.CloseLayerOptions): void {
+export function closeLayer(options: t.CloseLayerArgs): void {
   let { verb, layer } = options
 
   // Closing a layer is a sync function.
@@ -90,7 +90,7 @@ function reloadParent(layer: Overlay, verb: t.CloseVerb, parent: Layer): void {
 }
 
 // Emits up:layer:accept or up:layer:dismiss with the value the overlay is closed with.
-function emitCloseEvent(options: t.CloseLayerOptions): t.LayerCloseEvent {
+function emitCloseEvent(options: t.CloseLayerArgs): t.LayerCloseEvent {
   let { verb, layer, value } = options
 
   // The close event is emitted on the layer that is about to close.
@@ -101,12 +101,12 @@ function emitCloseEvent(options: t.CloseLayerOptions): t.LayerCloseEvent {
   })
 }
 
-function emitClosingEvent(options: t.CloseLayerOptions, value: any): void {
+function emitClosingEvent(options: t.CloseLayerArgs, value: any): void {
   let event = buildCloseEvent(`up:layer:${options.verb}ing`, options, value)
   options.layer.emit(event, { log: false })
 }
 
-function emitClosedEvent(options: t.CloseLayerOptions, value: any, formerParent: Layer): t.LayerCloseEvent {
+function emitClosedEvent(options: t.CloseLayerArgs, value: any, formerParent: Layer): t.LayerCloseEvent {
   let { verb, layer } = options
   const verbPast = `${verb}ed`
   const verbPastUpperCaseFirst = u.upperCaseFirst(verbPast)
@@ -132,7 +132,7 @@ function emitClosedEvent(options: t.CloseLayerOptions, value: any, formerParent:
 // Builds up:layer:accept, up:layer:accepting, up:layer:accepted or their dismiss variants.
 // build() can't look up the type of a name we put together, so we cast.
 // The value is passed separately, since a listener of the close event may have replaced { value }.
-function buildCloseEvent(name: string, { layer, origin, response }: t.CloseLayerOptions, value: any): t.LayerCloseEvent {
+function buildCloseEvent(name: string, { layer, origin, response }: t.CloseLayerArgs, value: any): t.LayerCloseEvent {
   return build(name, {
     layer,
     value,

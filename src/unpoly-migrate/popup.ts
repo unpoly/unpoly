@@ -1,7 +1,7 @@
 type ElementOrSelector = import('../unpoly/element.js').ElementOrSelector
 type RenderOptions = import('../unpoly/fragment.js').RenderOptions
 type Layer = import('../unpoly/layer.js').Layer
-type LayerCloseOptions = import('../unpoly/layer.js').LayerCloseOptions
+type CloseLayerOptions = import('../unpoly/layer.js').CloseLayerOptions
 type OverlayDefaults = import('../unpoly/layer.js').OverlayDefaults
 
 /**
@@ -9,7 +9,7 @@ The type of `up.popup`, whose functions moved to up.layer.
 */
 interface PopupApi {
   attach(origin: ElementOrSelector, options?: RenderOptions): Promise<Layer>
-  close(options?: LayerCloseOptions): Promise<void>
+  close(options?: CloseLayerOptions): Promise<void>
   url(): string | undefined
   coveredUrl(): string | undefined
   readonly config: OverlayDefaults

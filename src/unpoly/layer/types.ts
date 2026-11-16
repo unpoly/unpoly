@@ -116,7 +116,7 @@ export interface LayerAnimationOptions extends AnimateOptions {
 /**
 Options for closing an overlay with `up.Layer#accept()` or `up.Layer#dismiss()`.
 */
-export interface LayerCloseOptions extends LayerAnimationOptions {
+export interface CloseLayerOptions extends LayerAnimationOptions {
   confirm?: string | boolean
   /** @internal */
   preventable?: boolean
@@ -135,7 +135,7 @@ export type CloseVerb = 'accept' | 'dismiss'
 Options for accepting or dismissing an overlay.
 @internal
 */
-export interface CloseLayerOptions {
+export interface CloseLayerArgs {
   verb: CloseVerb
   layer: Overlay
   value?: any
@@ -153,7 +153,7 @@ export interface CloseLayerOptions {
 /**
 Options for `up.Layer#peel()`.
 */
-export interface PeelOptions extends LayerCloseOptions {
+export interface PeelOptions extends CloseLayerOptions {
   value?: any
   intent?: CloseVerb
 }

@@ -276,7 +276,7 @@ export const api = {
     get current() { return layerStack.current },
     get front() { return layerStack.front },
     get count() { return layerStack.count },
-    dismissOverlays(...args: [value?: any, options?: t.LayerCloseOptions]): void { return layerStack.dismissOverlays(...args) },
+    dismissOverlays(...args: [value?: any, options?: t.CloseLayerOptions]): void { return layerStack.dismissOverlays(...args) },
   },
 }
 

@@ -92,12 +92,12 @@ export class Layer {
     // no-op so users can blindly sync without knowing the current mode
   }
 
-  accept(value?: any, options?: t.LayerCloseOptions): void
+  accept(value?: any, options?: t.CloseLayerOptions): void
   accept(): void {
     throw new NotImplemented()
   }
 
-  dismiss(value?: any, options?: t.LayerCloseOptions): void
+  dismiss(value?: any, options?: t.CloseLayerOptions): void
   dismiss(): void {
     throw new NotImplemented()
   }

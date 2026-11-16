@@ -2,7 +2,7 @@ type ElementOrSelector = import('../unpoly/element.js').ElementOrSelector
 type RenderJob = import('../unpoly/fragment.js').RenderJob
 type RenderOptions = import('../unpoly/fragment.js').RenderOptions
 type Layer = import('../unpoly/layer.js').Layer
-type LayerCloseOptions = import('../unpoly/layer.js').LayerCloseOptions
+type CloseLayerOptions = import('../unpoly/layer.js').CloseLayerOptions
 type OverlayDefaults = import('../unpoly/layer.js').OverlayDefaults
 
 /**
@@ -12,7 +12,7 @@ interface ModalApi {
   visit(url: string, options?: RenderOptions): Promise<Layer>
   follow(link: ElementOrSelector, options?: RenderOptions): RenderJob
   extract(target: string, html: string, options?: RenderOptions): Promise<Layer>
-  close(options?: LayerCloseOptions): Promise<void>
+  close(options?: CloseLayerOptions): Promise<void>
   url(): string | undefined
   coveredUrl(): string | undefined
   readonly config: OverlayDefaults

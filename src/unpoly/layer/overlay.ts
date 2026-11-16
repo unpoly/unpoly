@@ -19,7 +19,7 @@ import { OverlayFocus } from './overlay_focus.js'
 import { Tether } from './tether.js'
 
 // A function that closes an overlay, like `up.Layer#accept()` or `up.Layer#dismiss()`.
-type CloseFn = (value: any, options?: t.LayerCloseOptions) => void
+type CloseFn = (value: any, options?: t.CloseLayerOptions) => void
 
 export abstract class Overlay extends Layer {
 
@@ -420,7 +420,7 @@ export abstract class Overlay extends Layer {
     this._unbindEscapePressed?.()
   }
 
-  destroyElements(options: t.LayerCloseOptions): void {
+  destroyElements(options: t.CloseLayerOptions): void {
     const animationProps = this.closeAnimationProps(options)
 
     const onFinished = () => {
@@ -497,12 +497,12 @@ export abstract class Overlay extends Layer {
   }
 
   // Documented in up.Layer
-  accept(value: any = null, options: t.LayerCloseOptions = {}): void {
+  accept(value: any = null, options: t.CloseLayerOptions = {}): void {
     return this._close('accept', value, options)
   }
 
   // Documented in up.Layer
-  dismiss(value: any = null, options: t.LayerCloseOptions = {}): void {
+  dismiss(value: any = null, options: t.CloseLayerOptions = {}): void {
     return this._close('dismiss', value, options)
   }
 
@@ -510,9 +510,9 @@ export abstract class Overlay extends Layer {
     return u.contains(this.dismissible, method)
   }
 
-  _close(verb: t.CloseVerb, value: any, options: t.LayerCloseOptions): void {
+  _close(verb: t.CloseVerb, value: any, options: t.CloseLayerOptions): void {
     // The cast allows { confirm: true }, which assertConfirmed() handles like { confirm: false }.
-    closeLayer({ ...options, verb, value, layer: this } as t.CloseLayerOptions)
+    closeLayer({ ...options, verb, value, layer: this } as t.CloseLayerArgs)
   }
 
   getFirstSwappableElement(): HTMLElement {
