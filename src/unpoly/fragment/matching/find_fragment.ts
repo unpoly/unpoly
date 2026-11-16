@@ -8,36 +8,32 @@ import type * as t from '../types.js'
 // `up.fragment.closest()` and `up.fragment.get()`.
 interface FindFragmentOptions extends t.LookupOptions {
   selector: string
-  // For matching in detached content, as needed by up.ResponseDoc.
+  // For matching fragments in detached content, as needed by up.ResponseDoc.
   document?: Document | Element
   preferOldElements?: Element[]
 }
 
 const DESCENDANT_SELECTOR = /^([^ >+(]+) (.+)$/
 
-// Unpoly works with HTML elements, see up.fragment.get().
 export function findFragment(options: FindFragmentOptions): HTMLElement | undefined {
-  // Selector is a string, not an up.Selector
-  let { selector, origin, preferOldElements } = options
-  // This option is for matching fragments in detached content, as needed by up.ResponseDoc.
+  let { selector, preferOldElements } = options
   let document = options.document || window.document
-  let match = options.match ?? fragmentConfig.match
 
-  return findInPreferredElements(selector, document, preferOldElements) || findInRegion(selector, origin, match, options) || getFirstDescendant(document, selector, options)
+  return findInPreferredElements(selector, document, preferOldElements)
+    || findInRegion(options)
+    || getFirstDescendant(document, selector, options)
 }
 
 function findInPreferredElements(selector: string, document: Document | Element, preferOldElements?: Element[]): HTMLElement | undefined {
   if (preferOldElements) {
+    // Unpoly works with HTML elements, see up.fragment.get().
     return preferOldElements.find((preferOldElement) => document.contains(preferOldElement) && matches(preferOldElement, selector)) as HTMLElement
   }
 }
 
-function findInRegion(
-  selector: string,
-  origin: Element | undefined,
-  match: t.MatchMode,
-  options: FindFragmentOptions,
-): HTMLElement | undefined {
+function findInRegion(options: FindFragmentOptions): HTMLElement | undefined {
+  let { selector, origin } = options
+  let match = options.match ?? fragmentConfig.match
   if (match === 'region' && !containsMainPseudo(selector) && origin?.isConnected) {
     return closestFragment(origin, selector, options) || findDescendantInRegion(selector, origin, options)
   }
