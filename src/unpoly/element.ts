@@ -53,7 +53,7 @@ export function getOne(root: ParentNode, selector: string): HTMLElement | null
 // Other values (undefined, null, false, Window, Document, DocumentFragment, ...) are returned unchanged.
 // Distributes over a union, so `Element | false` becomes `HTMLElement | false`.
 export function getOne<T>(value: T): T extends Element ? HTMLElement : T extends t.ElementOrSelector ? HTMLElement | null | undefined : T
-export function getOne(...args: unknown[]): unknown {
+export function getOne(...args: any[]): unknown {
   const value = args.pop()
 
   if (u.isElement(value)) { // Return an element before we run any other expensive checks

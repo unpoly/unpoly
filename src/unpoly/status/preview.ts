@@ -76,14 +76,14 @@ export class Preview {
 
   setAttrs(attrs: u.PlainObject): void
   setAttrs(element: e.ElementOrSelector, attrs: u.PlainObject): void
-  setAttrs(...args: unknown[]): void {
+  setAttrs(...args: any[]): void {
     let [element, attrs] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.setAttrsTemp(element, attrs))
   }
 
   addClass(klass: string): void
   addClass(element: e.ElementOrSelector, klass: string): void
-  addClass(...args: unknown[]): void {
+  addClass(...args: any[]): void {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.addClassTemp(element, klass))
   }
@@ -98,20 +98,20 @@ export class Preview {
 
   removeClass(klass: string): void
   removeClass(element: e.ElementOrSelector, klass: string): void
-  removeClass(...args: unknown[]): void {
+  removeClass(...args: any[]): void {
     let [element, klass] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.removeClassTemp(element, klass))
   }
 
   setStyle(styles: e.StyleProps): void
   setStyle(element: e.ElementOrSelector, styles: e.StyleProps): void
-  setStyle(...args: unknown[]): void {
+  setStyle(...args: any[]): void {
     let [element, styles] = this._parseMutatorArgs(args, 'val', 'val')
     this.undo(e.setStyleTemp(element, styles))
   }
 
   disable(element?: e.ElementOrSelector): void
-  disable(...args: unknown[]): void {
+  disable(...args: any[]): void {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(disableContainerTemp(element, { preview: true }))
   }
@@ -119,7 +119,7 @@ export class Preview {
   insert(tempValue: any): void
   insert(reference: e.ElementOrSelector, tempValue: any): void
   insert(reference: e.ElementOrSelector, position: InsertPosition, tempValue: any): void
-  insert(...args: unknown[]): void {
+  insert(...args: any[]): void {
     // (1) tempValue can have on of the following forms:
     //     - A string of HTML
     //     - A CSS selector string matching a template
@@ -133,19 +133,19 @@ export class Preview {
   }
 
   show(element?: e.ElementOrSelector): void
-  show(...args: unknown[]): void {
+  show(...args: any[]): void {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(e.showTemp(element))
   }
 
   hide(element?: e.ElementOrSelector): void
-  hide(...args: unknown[]): void {
+  hide(...args: any[]): void {
     let [element] = this._parseMutatorArgs(args, 'val')
     this.undo(e.hideTemp(element))
   }
 
   hideContent(parent?: e.ElementOrSelector): void
-  hideContent(...args: unknown[]): void {
+  hideContent(...args: any[]): void {
     let [parent] = this._parseMutatorArgs(args, 'val')
     // Place all children in a wrapper so we can hide text nodes.
     let wrapper = e.wrapChildren(parent)
@@ -155,7 +155,7 @@ export class Preview {
 
   showPlaceholder(placeholder: any): void
   showPlaceholder(parent: e.ElementOrSelector, placeholder: any): void
-  showPlaceholder(...args: unknown[]): void {
+  showPlaceholder(...args: any[]): void {
     let [parent, placeholderReference] = this._parseMutatorArgs(args, 'val', 'val')
 
     // We do not need to wrap a NodeList of mixed Text and Element nodes.
@@ -177,7 +177,7 @@ export class Preview {
 
   swapContent(newContent: any): void
   swapContent(parent: e.ElementOrSelector, newContent: any): void
-  swapContent(...args: unknown[]): void {
+  swapContent(...args: any[]): void {
     let [parent, newContent] = this._parseMutatorArgs(args, 'val', 'val')
     this.hideContent(parent)
     this.insert(parent, newContent)

@@ -185,12 +185,12 @@ export class Layer {
   }
 
   on<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): UnbindFn
-  on(...args: unknown[]): UnbindFn {
+  on(...args: any[]): UnbindFn {
     return bindListeners(this._parseBindArgs(args))
   }
 
   off<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): void
-  off(...args: unknown[]): void {
+  off(...args: any[]): void {
     return unbindListeners(this._parseBindArgs(args))
   }
 
@@ -223,7 +223,7 @@ export class Layer {
   emit<E extends Event>(event: E, options?: EmitProps): E
   emit<T extends string>(target: EventTarget, eventType: T, props?: EmitProps): EmittedEvent<T>
   emit<E extends Event>(target: EventTarget, event: E, options?: EmitProps): E
-  emit(...args: unknown[]): Event {
+  emit(...args: any[]): Event {
     return emitEvent(this._parseEmitArgs(args))
   }
 
