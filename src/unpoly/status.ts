@@ -198,7 +198,7 @@ function getFeedbackClassesPreviewFn(feedbackOption: boolean | undefined, fragme
   }
 }
 
-export function statusOptions(element: Element, options?: u.PlainObject, parserOptions?: e.OptionsParserOptions): u.PlainObject {
+export function statusOptions(element: Element, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderOptions {
   options = u.newOptions(options)
   const parser = new OptionsParser(element, options, parserOptions)
   parser.booleanOrString('disable')

@@ -5,7 +5,7 @@ import { newConfig } from './util/config.js'
 import { fail } from './error.js'
 import { getInputDevice, on } from './event.js'
 import { isField } from './form.js'
-import { containsFragment, getAllFragments, getSmart, tryToTarget } from './fragment.js'
+import { containsFragment, getAllFragments, getSmart, tryToTarget, type LookupOptions } from './fragment.js'
 import { layerStack, type LayerReference } from './layer.js'
 import { printToStandard, printToWarn } from './log.js'
 import { mockable } from './mockable.js'
@@ -145,7 +145,7 @@ function allSelector(): string {
   return [rootSelector(), ...viewportConfig.viewportSelectors].join()
 }
 
-export function closestViewport(target: e.ElementOrSelector, options: u.PlainObject = {}): HTMLElement {
+export function closestViewport(target: e.ElementOrSelector, options: LookupOptions = {}): HTMLElement {
   const element = getSmart(target, options)!
   // Use up.element.closest() which searches across layer boundaries.
   // It is OK to find a viewport in a parent layer. Layers without its
@@ -154,17 +154,17 @@ export function closestViewport(target: e.ElementOrSelector, options: u.PlainObj
   return element.closest<HTMLElement>(allSelector())!
 }
 
-export function getViewportSubtree(element: e.ElementOrSelector, options: u.PlainObject = {}): u.List<HTMLElement> {
+export function getViewportSubtree(element: e.ElementOrSelector, options: LookupOptions = {}): u.List<HTMLElement> {
   element = getSmart(element, options)!
   return e.subtree(element, allSelector())
 }
 
-export function getViewportAround(element: e.ElementOrSelector, options: u.PlainObject = {}): HTMLElement[] {
+export function getViewportAround(element: e.ElementOrSelector, options: LookupOptions = {}): HTMLElement[] {
   element = getSmart(element, options)!
   return e.around(element, allSelector())
 }
 
-function getAll(options: u.PlainObject = {}): u.List<HTMLElement> {
+function getAll(options: LookupOptions = {}): u.List<HTMLElement> {
   return getAllFragments(allSelector(), options)
 }
 
@@ -226,7 +226,7 @@ function getScrollTopsForViewportElements(viewports: Iterable<Element>): Record<
   return tops
 }
 
-export function getScrollTops(options?: u.PlainObject): Record<string, number> {
+export function getScrollTops(options?: LookupOptions): Record<string, number> {
   let viewports = getAll(options)
   return getScrollTopsForViewportElements(viewports)
 }
@@ -378,7 +378,7 @@ export function absolutize(element: HTMLElement, options: { afterMeasure?: () =>
 }
 
 
-export function firstHashTarget(hash?: string, options: u.PlainObject = {}): HTMLElement | undefined {
+export function firstHashTarget(hash?: string, options: LookupOptions = {}): HTMLElement | undefined {
   hash = pureHash(hash)
   if (hash) {
     const selector = [

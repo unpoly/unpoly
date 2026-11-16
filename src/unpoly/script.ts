@@ -3,7 +3,7 @@ import * as e from './element.js'
 import { newConfig } from './util/config.js'
 import { fail, guard } from './error.js'
 import { assertEmitted, on } from './event.js'
-import { getSmart, getSubtree, type RenderOptions } from './fragment.js'
+import { getSmart, getSubtree, type LookupOptions, type RenderOptions } from './fragment.js'
 import { isBooted, isEvaling } from './framework.js'
 import { layerStack } from './layer.js'
 import { printToStandard } from './log.js'
@@ -252,7 +252,7 @@ export function hello(element: e.ElementOrSelector, options: t.HelloOptions = {}
   return pass.run()
 }
 
-export function clean(fragment: Element, options: u.PlainObject = {}): void {
+export function clean(fragment: Element, options: LookupOptions = {}): void {
   // fragment functions usually ignore elements that are being destroyed
   let cleanables = getSubtree(fragment, '.up-can-clean', { ...options, destroying: true })
 
