@@ -20,7 +20,7 @@ export class Tether {
   declare parent: HTMLElement
   declare _syncOnScroll: boolean
   declare _element: HTMLElement
-  declare _syncTimer: ReturnType<typeof setTimeout>
+  declare _syncTimer: number
   declare offsetLeft: number
   declare offsetTop: number
 

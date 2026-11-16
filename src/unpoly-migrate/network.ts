@@ -1,5 +1,5 @@
 import type { UpEventListener } from '../unpoly/event.js'
-import type { RequestCondition, RequestOptions, RequestTesterOptions, UpResponse } from '../unpoly/network.js'
+import type { RequestArgs, RequestCondition, RequestOptions, RequestTesterOptions, UpResponse } from '../unpoly/network.js'
 
 const u = up.util
 
@@ -12,7 +12,7 @@ declare module '../unpoly.js' {
       isIdle(): boolean
       shouldReduceRequests(): boolean
     }
-    ajax(...args: [url: string, options?: RequestOptions] | [options: RequestOptions]): Promise<string>
+    ajax(...args: RequestArgs): Promise<string>
     readonly proxy: Up['network']
   }
 }

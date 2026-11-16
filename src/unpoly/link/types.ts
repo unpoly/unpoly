@@ -65,6 +65,14 @@ the request when the user moves away.
 */
 export type FollowCallback = (options?: RenderOptions) => void
 
+/**
+A link expanded with `[up-expand]` remembers the area it expanded to, and the area remembers the link.
+@internal
+*/
+export interface ExpandedElement extends HTMLElement {
+  upExpandedPair?: [area: HTMLElement, link: HTMLElement]
+}
+
 declare module '../event.js' {
   interface UpEventMap {
     'up:click': ClickEvent

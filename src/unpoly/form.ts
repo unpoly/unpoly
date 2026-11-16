@@ -62,7 +62,7 @@ function findFormElements(root: e.ElementOrSelector, selectorFn: u.SelectorFunct
 
   // Like the browser, a [form] attribute takes precedence over the surrounding form.
   if (root.matches('form')) {
-    elements = elements.filter((element: Element) => !element.hasAttribute('form') || getForm(element) === root)
+    elements = elements.filter((element) => !element.hasAttribute('form') || getForm(element) === root)
   }
 
   // If findFormElements() is called with an entire form, gather fields outside the form
@@ -114,7 +114,7 @@ export function readFieldDisabled(field: t.Field): boolean {
 // `() => writeFieldDisabled(field, false)`: a custom element that upgrades in between would be
 // disabled through its attribute and re-enabled through a property that only just appeared,
 // leaving our attribute on the element for good.
-export function writeFieldDisabled(field: t.Field, disabled: boolean): u.UndoFunction {
+function writeFieldDisabled(field: t.Field, disabled: boolean): u.UndoFunction {
   if ('disabled' in field) {
     field.disabled = disabled
     return () => { field.disabled = !disabled }

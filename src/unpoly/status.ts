@@ -8,6 +8,7 @@ import { matchSelectorMap, type RenderOptions } from './fragment.js'
 // Not through framework.js, which may not be evaluated yet when we create a Registry below.
 import { Registry } from './framework/registry.js'
 import { layerStack, type Layer } from './layer.js'
+import type { ExpandedElement } from './link.js'
 import { printToStandard } from './log.js'
 import type { UpRequest } from './network.js'
 import { FocusCapsule } from './viewport.js'
@@ -24,7 +25,7 @@ interface NavElement extends Element {
 // A link remembers its parsed URLs, and the area it expands to with [up-expand].
 interface NavLink extends Element {
   upCurrentURLs?: LinkCurrentURLs
-  upExpandedPair?: Element[]
+  upExpandedPair?: ExpandedElement['upExpandedPair']
 }
 
 interface NavUpdateOptions {
@@ -44,7 +45,7 @@ export const statusConfig = newConfig('up.status.config', (): t.StatusConfig => 
   noNavSelectors: ['[up-nav=false]'],
 }))
 
-export let namedPreviewFns = new Registry<t.PreviewFunction>('preview')
+let namedPreviewFns = new Registry<t.PreviewFunction>('preview')
 
 const SELECTOR_LINK = 'a, [up-href]'
 

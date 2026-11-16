@@ -1,3 +1,4 @@
+import type { Field } from '../unpoly/form.js'
 import type { FragmentKeepEvent, RenderJob, RenderOptions } from '../unpoly/fragment.js'
 import type { PlainObject } from '../unpoly/util.js'
 import type { FixKeyOptions } from './migrate/types.js'
@@ -166,15 +167,7 @@ up.migrate.postprocessReloadOptions = function(options) {
 // Modern versions only support ":origin". This legacy implementation
 // also supports the old shorthand "&".
 // Core uses this instead of its own implementation when unpoly-migrate is loaded (up.fragment).
-/**
-An element that may be a form field or button, which has a `form` property.
-@internal
-*/
-interface FormFieldElement extends Element {
-  form?: HTMLFormElement | null
-}
-
-up.migrate.resolveOrigin = function(target, { origin }: { origin?: FormFieldElement } = {}) {
+up.migrate.resolveOrigin = function(target, { origin }: { origin?: Field } = {}) {
   // We skip over attribute selector values, which may contain an ampersand, e.g. 'a[href="/notes?page=2&order=created"]'
   let pattern = /"[^"]*"|'[^']*'|&|:origin\b/g
 

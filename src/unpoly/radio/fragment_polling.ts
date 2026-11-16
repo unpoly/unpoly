@@ -40,8 +40,8 @@ export class FragmentPolling {
     this._fragment = fragment
     registerDestructor(fragment, this._onFragmentDestroyed.bind(this))
 
-    this._state = 'stopped' // stopped | started
-    this._forceIntent = null // stop | start
+    this._state = 'stopped'
+    this._forceIntent = null
 
     this._reloadJID = u.uid()
 

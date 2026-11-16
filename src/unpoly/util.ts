@@ -596,7 +596,7 @@ export function sequence(...fns: any[]): (...args: any[]) => any[] {
   return (...callArgs) => callAll(fns, ...callArgs)
 }
 
-export function callAll(fns: any, ...args: any[]): any[] {
+function callAll(fns: any, ...args: any[]): any[] {
   fns = scanFunctions(fns)
   return map(fns, (fn: t.AnyFunction) => fn(...args))
 }
@@ -690,7 +690,7 @@ export function getSimpleTokens(
 
 function splitSimpleTokenString(value: string, separator: string | RegExp): string[] {
   let parts = up.migrate.splitAtOr?.(value) || value.split(separator)
-  return parts.map((s: string) => s.trim()).filter(identity)
+  return parts.map((s) => s.trim()).filter(identity)
 }
 
 export function getComplexTokens(value: any): any[] {

@@ -301,7 +301,6 @@ export class Layer {
   }
 
   // Returns whether Unpoly keeps the given history aspect of the browser in sync with this layer.
-  // The aspect is one of 'location', 'title', 'metaTags' or 'lang'.
   showsLiveHistory(aspect: HistoryAspect): boolean {
     return this.history && this.isFront() && isHistoryEnabled(aspect)
   }

@@ -140,7 +140,7 @@ export function sourceOf(element: e.ElementOrSelector, options: t.LookupOptions 
   return e.closestAttr(element, 'up-source')
 }
 
-export function normalizeSource(source: string): string {
+function normalizeSource(source: string): string {
   // Don't use u.matchableURL() here. We need to keep the trailing slash here,
   // to support backends that care about trailing slashes.
   return u.normalizeURL(source, { hash: false })
@@ -220,7 +220,7 @@ export const navigate = mockable((...args: t.RenderArgs): RenderJob => {
   return render({ ...options, navigate: true })
 })
 
-export function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }: t.KeepMatch): t.FragmentKeepEvent {
+function emitFragmentKeep({ oldElement, newElement: newFragment, newData, renderOptions }: t.KeepMatch): t.FragmentKeepEvent {
   const log = ['Keeping fragment %o', oldElement]
   const callback = callbackAttr(oldElement, 'up-on-keep', { expandObject: ['newFragment', 'newData'] })
   return emit(oldElement, 'up:fragment:keep', { log, callback, newFragment, newData, renderOptions })

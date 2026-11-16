@@ -511,7 +511,7 @@ export abstract class Overlay extends Layer {
   }
 }
 
-export class OverlayWithViewport extends Overlay {
+class OverlayWithViewport extends Overlay {
 
   // For stubbing in tests
   static getParentElement(): HTMLElement {
@@ -559,7 +559,7 @@ export class CoverLayer extends OverlayWithViewport {
   static mode: t.LayerMode = 'cover'
 }
 
-export class OverlayWithTether extends Overlay {
+class OverlayWithTether extends Overlay {
   declare _tether: Tether
 
   constructor(options: t.LayerOptions) {

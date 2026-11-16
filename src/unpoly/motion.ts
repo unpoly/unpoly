@@ -24,9 +24,9 @@ export const motionConfig = newConfig('up.motion.config', (): t.MotionConfig => 
   enabled: !matchMedia('(prefers-reduced-motion: reduce)').matches
 }))
 
-export let namedAnimations = new Registry<t.AnimationFunction>('animation', findAnimationFn)
+let namedAnimations = new Registry<t.AnimationFunction>('animation', findAnimationFn)
 
-export let namedTransitions = new Registry<t.TransitionFunction>('transition', findTransitionFn)
+let namedTransitions = new Registry<t.TransitionFunction>('transition', findTransitionFn)
 
 function reset(): void {
   motionController.reset()

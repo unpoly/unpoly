@@ -23,11 +23,6 @@ import type * as t from './link/types.js'
 export type * from './link/types.js'
 import { LinkFollowIntent } from './link/link_follow_intent.js'
 
-// A link expanded with [up-expand] remembers the area it expanded to, and the area remembers the link.
-interface ExpandedElement extends HTMLElement {
-  upExpandedPair?: [area: HTMLElement, link: HTMLElement]
-}
-
 
 let lastTouchstartTarget: EventTarget | null = null
 let lastMousedownTarget: EventTarget | null = null
@@ -258,7 +253,7 @@ export function preload(link: e.ElementOrSelector, options?: RenderOptions): Pro
 // A click on an [up-expand] area follows its link.
 // Returns that link for an area, and the given element otherwise.
 // A link that was expanded with [up-expand] stands for the link inside it.
-function effectiveLink(element: ExpandedElement): Element {
+function effectiveLink(element: t.ExpandedElement): Element {
   let link = element.upExpandedPair?.[1]
   return link && element.contains(link) ? link : element
 }
@@ -337,7 +332,7 @@ function isClickTarget(target: Element, link: Element): boolean {
   // (2) The area is not the element we're testing, e.g. when the area asks about a click on itself.
   // (3) The area is inside the element. closest() may also find an area around it,
   //     but that outer area does not take the click from its content.
-  const innerArea: ExpandedElement | null = target.closest('[up-expand]')
+  const innerArea: t.ExpandedElement | null = target.closest('[up-expand]')
   if (innerArea?.upExpandedPair && innerArea !== link && link.contains(innerArea)) {
     return false
   }
@@ -551,8 +546,8 @@ export function install(): void {
     }
   })
 
-  registerAttrCompiler('up-expand', { defaultValue: 'a, [up-href]', macro: true }, function(area: ExpandedElement, childLinkSelector) {
-    let childLink: ExpandedElement | null = e.getOne(area, childLinkSelector)
+  registerAttrCompiler('up-expand', { defaultValue: 'a, [up-href]', macro: true }, function(area: t.ExpandedElement, childLinkSelector) {
+    let childLink: t.ExpandedElement | null = e.getOne(area, childLinkSelector)
     if (childLink) {
       // Remember the expander and expandee so we can set .up-active classes efficiently,
       // and so we can hand a click on a non-followable area to the link.
@@ -580,7 +575,7 @@ export function install(): void {
     }
   })
 
-  on('up:click', '[up-expand]', function(event, area: ExpandedElement) {
+  on('up:click', '[up-expand]', function(event, area: t.ExpandedElement) {
     let childLink = area.upExpandedPair?.[1]
     // (1) A followable area is followed by the [up-follow] handler.
     // (2) A click within the expanded element belongs to that element. This includes the up:click that
