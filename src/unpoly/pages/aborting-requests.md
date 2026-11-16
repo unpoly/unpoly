@@ -51,6 +51,7 @@ like `up.follow()`, `up.submit()` or `up.render()`. In your HTML, set an `[up-ab
 | `'target'` | Aborts earlier requests targeting fragments within *your* targeted fragments. This is the default. |
 | `'layer'` | Aborts all requests targeting a fragment on the same [layer](/api/up.layer) as you. |
 | `'all'` | Aborts all requests targeting any fragment on any layer. |
+| A function | Aborts the requests on any layer for which `fn(request)` returns `true`. This emits no `up:fragment:aborted` event, since the requests belong to no fragment. |
 | `false` | Aborts nothing. |
 
 With `{ abort: false }`, two requests targeting the same fragment are rendered in the order of their responses.
