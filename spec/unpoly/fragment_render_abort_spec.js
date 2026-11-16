@@ -1,3 +1,6 @@
+const u = up.util
+const e = up.element
+
 extendDescribe('up.fragment', function() {
 
   extendDescribe('JavaScript', function() {
@@ -216,6 +219,140 @@ extendDescribe('up.fragment', function() {
             await wait()
 
             expect(abortSpy).toHaveBeenCalledWith(element, jasmine.anything())
+          })
+        })
+
+        describe('with { abort } option set to a function', function() {
+
+          it('calls the function with each pending up.Request and aborts the requests for which it returns true', async function() {
+            fixture('.element1')
+            fixture('.element2')
+            fixture('.element3')
+
+            let change1Error = undefined
+            let change2Error = undefined
+
+            up.render('.element1', { url: '/path1' }).catch((e) => change1Error = e)
+            up.render('.element2', { url: '/path2' }).catch((e) => change2Error = e)
+            await wait()
+
+            expect(up.internal.queue.allRequests.length).toEqual(2)
+
+            const abortFn = jasmine.createSpy('abort function').and.callFake((request) => request.url === '/path1')
+            up.render('.element3', { url: '/path3', abort: abortFn })
+            await wait()
+
+            expect(abortFn).toHaveBeenCalledWith(jasmine.any(up.Request))
+            expect(abortFn.calls.allArgs().map(([request]) => request.url)).toContain('/path2')
+            expect(change1Error).toBeAbortError()
+            expect(change2Error).toBeUndefined()
+            expect(u.map(up.internal.queue.allRequests, 'url')).toEqual(['/path2', '/path3'])
+          })
+
+          it('keeps a request for which the function returns false', async function() {
+            fixture('.element1')
+            fixture('.element2')
+
+            let change1Error = undefined
+            up.render('.element1', { url: '/path1' }).catch((e) => change1Error = e)
+            await wait()
+
+            up.render('.element2', { url: '/path2', abort: () => false })
+            await wait()
+
+            expect(change1Error).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(2)
+          })
+
+          it('does not abort a request that was made with { abortable: false }', async function() {
+            fixture('.element1')
+            fixture('.element2')
+
+            let change1Error = undefined
+            up.render('.element1', { url: '/path1', abortable: false }).catch((e) => change1Error = e)
+            await wait()
+
+            up.render('.element2', { url: '/path2', abort: () => true })
+            await wait()
+
+            expect(change1Error).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(2)
+          })
+
+          it('emits up:request:aborted, but no up:fragment:aborted', async function() {
+            fixture('.element1')
+            fixture('.element2')
+
+            up.render('.element1', { url: '/path1' }).catch(u.noop)
+            await wait()
+
+            const requestAbortedListener = jasmine.createSpy('up:request:aborted listener')
+            up.on('up:request:aborted', requestAbortedListener)
+            const fragmentAbortedListener = jasmine.createSpy('up:fragment:aborted listener')
+            up.on('up:fragment:aborted', fragmentAbortedListener)
+
+            up.render('.element2', { url: '/path2', abort: (request) => request.url === '/path1' })
+            await wait()
+
+            expect(requestAbortedListener).toHaveBeenCalledWith(jasmine.objectContaining({ request: jasmine.objectContaining({ url: '/path1' }) }), jasmine.anything(), jasmine.anything())
+            expect(fragmentAbortedListener).not.toHaveBeenCalled()
+          })
+
+          it("never aborts the render pass's own request", async function() {
+            fixture('.element')
+
+            let changeError = undefined
+            up.render('.element', { url: '/path', abort: () => true }).catch((e) => changeError = e)
+            await wait()
+
+            expect(changeError).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+          })
+
+          it("never aborts a preload request that the render pass reuses", async function() {
+            fixture('.element')
+            const link = fixture('a[href="/path"][up-target=".element"]')
+
+            let preloadError = undefined
+            up.link.preload(link).catch((e) => preloadError = e)
+            await wait()
+
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+
+            let followError = undefined
+            up.follow(link, { abort: () => true }).catch((e) => followError = e)
+            await wait()
+
+            expect(preloadError).toBeUndefined()
+            expect(followError).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+          })
+
+          it('aborts a validation request in an overlay when a form submission into the root layer picks it', async function() {
+            fixture('.root-target', { text: 'old root content' })
+            const layers = makeLayers(2)
+            const form = layers[1].affix('form#form[action="/submit"][method="post"][up-target=".root-target"][up-layer="root"]')
+            const field = e.affix(form, 'input[name=email]')
+
+            up.on('up:form:submit', (event) => {
+              event.renderOptions.abort = (request) => event.form.contains(request.origin)
+            })
+
+            let validateError = undefined
+            up.validate(field).catch((e) => validateError = e)
+            await wait()
+
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+            expect(validateError).toBeUndefined()
+
+            let submitError = undefined
+            up.submit(form).catch((e) => submitError = e)
+            await wait()
+
+            expect(validateError).toBeAbortError()
+            expect(submitError).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(1)
+            expect(up.internal.queue.allRequests[0].url).toMatchURL('/submit')
           })
         })
 

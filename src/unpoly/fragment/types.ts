@@ -96,7 +96,7 @@ export interface RenderOptions {
   method?: string
   params?: ParamsLike
   headers?: Record<string, string>
-  abort?: boolean | string | Element | u.List<Element> | ((options: u.PlainObject) => unknown)
+  abort?: boolean | string | Element | u.List<Element> | ((request: UpRequest) => boolean)
   abortable?: boolean
   background?: boolean
   lateDelay?: number | false
