@@ -1,6 +1,6 @@
 import * as u from '../../util.js'
 import { isCritical } from '../../error.js'
-import { type Layer } from '../../layer.js'
+import type { Layer } from '../../layer.js'
 import type * as t from '../types.js'
 
 // Options for constructing an up.RenderResult.

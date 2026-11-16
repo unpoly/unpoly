@@ -1,7 +1,7 @@
 import * as u from '../../util.js'
 import { guard } from '../../error.js'
 import { containsFragment, getSmart } from '../../fragment.js'
-import { type Layer } from '../../layer.js'
+import type { Layer } from '../../layer.js'
 import { printToWarn } from '../../log.js'
 import type * as t from '../types.js'
 

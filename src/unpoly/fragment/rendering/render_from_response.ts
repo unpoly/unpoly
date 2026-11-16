@@ -4,12 +4,12 @@ import { fragmentConfig, reload, shouldRevalidate } from '../../fragment.js'
 import { refineOption } from '../../history.js'
 import { UNSET_OVERLAY_VISUALS } from '../../layer.js'
 import { printToStandard, printToWarn } from '../../log.js'
-import { type UpResponse } from '../../network.js'
+import type { UpResponse } from '../../network.js'
 import { adoptRenderOptionsFromHeader } from '../../script.js'
 import type * as t from '../types.js'
 import { renderFromContent } from './render_from_content.js'
 import { deriveFailOptions, NO_INPUT_INTERFERENCE, NO_MOTION, NO_PREVIEWS } from './render_options.js'
-import { type RenderResult } from './render_result.js'
+import type { RenderResult } from './render_result.js'
 
 export function renderFromResponse(options: t.RenderOptions): RenderResult {
   // RenderJob and renderFromURL() only call us with a { response }.

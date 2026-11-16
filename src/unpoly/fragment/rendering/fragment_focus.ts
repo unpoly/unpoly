@@ -1,6 +1,6 @@
 import * as u from '../../util.js'
 import * as e from '../../element.js'
-import { type InputDevice } from '../../event.js'
+import type { InputDevice } from '../../event.js'
 import { doFocus, firstHashTarget, restoreFocus, type FocusCapsule } from '../../viewport.js'
 import type * as t from '../types.js'
 import { FragmentProcessor } from './fragment_processor.js'

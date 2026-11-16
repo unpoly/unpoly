@@ -5,7 +5,7 @@ import {
   abortFragment, compressNestedSteps, hasAutoHistory, parseTargetSteps,
 } from '../../fragment.js'
 import { historyOptions } from '../../history.js'
-import { type PeelOptions } from '../../layer.js'
+import type { PeelOptions } from '../../layer.js'
 import { printToStandard } from '../../log.js'
 import { FocusCapsule, getScrollTops, saveFocus, saveScroll } from '../../viewport.js'
 import type * as t from '../types.js'
@@ -13,7 +13,7 @@ import { findFragment } from '../matching/find_fragment.js'
 import { LayerPlan } from './layer_plan.js'
 import { updateSteps } from './update_steps.js'
 import { finalizeRenderOptions } from './render_options.js'
-import { type ResponseDoc } from './response_doc.js'
+import type { ResponseDoc } from './response_doc.js'
 
 export class UpdateLayerPlan extends LayerPlan {
   declare options: t.ResolvedRenderOptions

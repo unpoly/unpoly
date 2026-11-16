@@ -1,5 +1,5 @@
 import * as u from '../../util.js'
-import { type LayerMode } from '../../layer.js'
+import type { LayerMode } from '../../layer.js'
 import { restoreScroll, reveal, revealHash, scrollToPosition } from '../../viewport.js'
 import type * as t from '../types.js'
 import { FragmentProcessor } from './fragment_processor.js'

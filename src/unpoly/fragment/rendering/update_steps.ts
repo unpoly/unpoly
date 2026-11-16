@@ -5,14 +5,14 @@ import {
   emitFragmentDestroyed, emitFragmentKept, findKeepMatch, fragmentConfig, markFragmentAsDestroying,
   setReloadAttrs,
 } from '../../fragment.js'
-import { type Layer } from '../../layer.js'
+import type { Layer } from '../../layer.js'
 import { animate, swapElements } from '../../motion.js'
 import { blockScripts, clean, hello } from '../../script.js'
 import { getViewportSubtree } from '../../viewport.js'
 import type * as t from '../types.js'
 import { FragmentFocus } from './fragment_focus.js'
 import { FragmentScrolling } from './fragment_scrolling.js'
-import { type ResponseDoc } from './response_doc.js'
+import type { ResponseDoc } from './response_doc.js'
 
 // What inserting a render step produced, and what remains to be done after all steps were inserted.
 interface StepInsertion {

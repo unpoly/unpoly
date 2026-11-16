@@ -10,7 +10,7 @@ import type * as t from '../types.js'
 import { preflightPropsFromContent } from './render_from_content.js'
 import { renderFromResponse } from './render_from_response.js'
 import { deriveFailOptions } from './render_options.js'
-import { type RenderResult } from './render_result.js'
+import type { RenderResult } from './render_result.js'
 
 // The options for the request of renderFromURL(): the render options plus the preflight props
 // of the success and fail options.

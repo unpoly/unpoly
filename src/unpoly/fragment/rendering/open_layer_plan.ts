@@ -13,7 +13,7 @@ import { LayerPlan } from './layer_plan.js'
 import { FragmentFocus } from './fragment_focus.js'
 import { FragmentScrolling } from './fragment_scrolling.js'
 import { finalizeRenderOptions } from './render_options.js'
-import { type ResponseDoc } from './response_doc.js'
+import type { ResponseDoc } from './response_doc.js'
 
 export class OpenLayerPlan extends LayerPlan {
   declare layer: Overlay
