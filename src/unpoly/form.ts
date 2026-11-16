@@ -463,6 +463,9 @@ export function submitButtonOverrides(submitButton?: Element | false): RenderOpt
   return u.omit(buttonOptions, ['method', 'url', 'guardEvent', 'origin', 'params', 'headers'])
 }
 
+// Without a callback, the root's [up-watch] attribute gives it.
+export function watch(root: e.ElementOrSelector, callback?: t.WatchCallback): UnbindFunction
+export function watch(root: e.ElementOrSelector, options: t.WatchOptions, callback?: t.WatchCallback): UnbindFunction
 export function watch(...args: any[]): UnbindFunction {
   let [root, options, callback] = u.parseArgs(args, 'val', 'options', 'callback')
 
