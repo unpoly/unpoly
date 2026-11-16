@@ -1,5 +1,6 @@
 import type { Field } from '../unpoly/form.js'
 import type { FragmentKeepEvent, RenderJob, RenderOptions } from '../unpoly/fragment.js'
+import type { UpRequest } from '../unpoly/network.js'
 import type { AnyFunction, PlainObject } from '../unpoly/util.js'
 import type { FixKeyOptions } from './migrate/types.js'
 
@@ -94,13 +95,13 @@ up.migrate.preprocessRenderOptions = function(options: PlainObject) {
 
   let solo = u.pluckKey(options, 'solo')
   if (u.isString(solo)) {
-    // Old { solo } option did not accept a string, but some users were passing a string as a truthy value.
-    // This would break the { abort } option, where a string is parsed a CSS selector.
-    up.migrate.warn("The up.render() option { solo } has been replaced with { abort } and { abort } no longer accepts a URL pattern. Check if you can use { abort: 'target'} or use up.network.abort(pattern) instead.")
-    options.abort = (options: PlainObject) => up.network.abort(solo, options)
+    // { abort } parses a string as a CSS selector, so we convert the URL pattern into a function.
+    up.migrate.warn("The up.render() option { solo } has been replaced with { abort }, which doesn't accept a URL pattern. Check if you can use { abort: 'target' }, or pass a function that tests the request's URL.")
+    let pattern = new up.internal.UpURLPattern(solo)
+    options.abort = (request: UpRequest) => pattern.test(request.url)
   } else if (u.isFunction(solo)) {
-    up.migrate.warn("The up.render() option { solo } has been replaced with { abort } and { abort } no longer accepts a Function(up.Request): boolean. Check if you can use { abort: 'target'} or use up.network.abort(fn) instead.")
-    options.abort = (options: PlainObject) => { up.network.abort(solo, options) }
+    up.migrate.deprecated('Option { solo: Function }', '{ abort: Function }')
+    options.abort = solo
   } else if (solo === true) {
     up.migrate.deprecated('Option { solo: true }', "{ abort: 'all' }")
     options.abort = 'all'

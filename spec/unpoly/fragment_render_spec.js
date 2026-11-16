@@ -1116,6 +1116,44 @@ extendDescribe('up.fragment', function() {
 
             expect(up.internal.queue.allRequests.length).toEqual(1)
           })
+
+          it('prints a deprecation warning when passed a function, and passes it as { abort }', async function() {
+            fixture('.element')
+            const warnSpy = up.migrate.warn.mock()
+            const soloFn = () => false
+
+            const job = up.render('.element', { content: 'new content', solo: soloFn })
+            await wait()
+
+            expect(job.renderOptions.abort).toBe(soloFn)
+            expect(warnSpy).toHaveBeenCalledWith('Option { solo: Function } has been deprecated. Use { abort: Function } instead.')
+          })
+
+          it('may be passed as a URL pattern that matches the requests to abort, but not its own request', async function() {
+            fixture('.element1')
+            fixture('.element2')
+            fixture('.element3')
+
+            let change1Error = undefined
+            let change2Error = undefined
+            let change3Error = undefined
+
+            up.render('.element1', { url: '/path1', abort: false }).catch((e) => change1Error = e)
+            up.render('.element2', { url: '/other', abort: false }).catch((e) => change2Error = e)
+
+            await wait()
+
+            const warnSpy = up.migrate.warn.mock()
+            up.render('.element3', { url: '/path3', solo: '/path*' }).catch((e) => change3Error = e)
+
+            await wait()
+
+            expect(change1Error).toBeAbortError()
+            expect(change2Error).toBeUndefined()
+            expect(change3Error).toBeUndefined()
+            expect(up.internal.queue.allRequests.length).toEqual(2)
+            expect(warnSpy).toHaveBeenCalledWith(jasmine.stringContaining("{ solo } has been replaced with { abort }, which doesn't accept a URL pattern"))
+          })
         })
       }
 
