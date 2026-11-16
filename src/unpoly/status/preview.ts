@@ -34,7 +34,7 @@ export class Preview {
     this._cleaner = cleaner
   }
 
-  undo(...args: [undoFn: u.UndoFunction]): void {
+  undo(undoFn: u.UndoFunction): void {
     if (this.ended) {
       // We might have the idea to immediately undo an effect when the preview has ended,
       // but it might lead to infinite loops in cases like this:
@@ -45,7 +45,7 @@ export class Preview {
       //    })
       reportError(new UpError('Preview used after end of request'))
     } else {
-      this._cleaner.guard(...args)
+      this._cleaner.guard(undoFn)
     }
   }
 
