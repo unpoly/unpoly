@@ -204,10 +204,12 @@ The [layer](/api/up.layer) targeted by this request in case the server responds 
 
 Setting the `{ failLayer }` property will automatically derive `{ failContext }` and `{ failMode }` properties.
 
+When an error response will [open a new overlay](/learn/opening-overlays), the string `"new"` is returned.
+
 To prevent memory leaks, this property is removed shortly after the response is received.
 
 @property up.Request#failLayer
-@param {up.Layer} layer
+@param {up.Layer|string} layer
 @stable
 
 -----
