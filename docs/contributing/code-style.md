@@ -193,6 +193,8 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   resolves into a new local instead (`let element = getFragment(elementOrSelector)!`, like
   `animate()`). A function expression passed to `mockable()` can't have overloads. Type its rest
   parameter as a union of tuples (like `trackFields()` does), or as `any` with a comment.
+- **Overloads only for more than one signature.** A rest tuple only where the body needs the
+  arguments as an array. Otherwise plain parameters.
 
 ### The global `up` and unpoly-migrate
 

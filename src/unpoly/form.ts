@@ -516,11 +516,11 @@ export function findGroupSolution(field: Element, { targetable }: { targetable?:
 }
 
 
-export function validate(...args: [originOrTarget: e.ElementOrSelector, options?: t.ValidateOptions]): Promise<RenderResult> {
-  let options = parseValidateArgs(...args)
-  let form = getForm(options.origin)!
+export function validate(originOrTarget: e.ElementOrSelector, options?: t.ValidateOptions): Promise<RenderResult> {
+  let parsedOptions = parseValidateArgs(originOrTarget, options)
+  let form = getForm(parsedOptions.origin)!
   let validator = getFormValidator(form)
-  return validator.validate(options)
+  return validator.validate(parsedOptions)
 }
 
 function parseValidateArgs(originOrTarget: any, ...args: any[]): u.PlainObject {
