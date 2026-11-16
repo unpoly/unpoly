@@ -6,6 +6,8 @@
 declare var up: import('../unpoly.js').Up
 
 // Globals we use only when the page has them: jQuery for interop, Jasmine in mockable().
+// We don't load their types.
+/* oxlint-disable typescript/no-explicit-any -- untyped third-party globals */
 declare var jQuery: any
 declare var spyOn: any
 interface Window {
@@ -14,6 +16,7 @@ interface Window {
   // The rails-ujs gem
   Rails?: any
 }
+/* oxlint-enable typescript/no-explicit-any */
 
 // The browser ignores a null timer ID, and we store a cleared timer as null.
 declare function clearTimeout(id: number | null | undefined): void

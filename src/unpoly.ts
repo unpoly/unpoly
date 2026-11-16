@@ -143,9 +143,9 @@ for (let api of apis) {
 const layerModes = [RootLayer, ModalLayer, PopupLayer, DrawerLayer, CoverLayer]
 for (let key in up) {
   // Test the key first, so we don't call a getter like `up.context`.
-  // `Up` has no index signature, so we read the key from an untyped `up`.
-  if (/^[A-Z]/.test(key) && (up as any)[key].prototype) {
-    framework.setClassName((up as any)[key], 'up.' + key)
+  // `Up` has no index signature, so we read the key through a PlainObject.
+  if (/^[A-Z]/.test(key) && (up as util.PlainObject)[key].prototype) {
+    framework.setClassName((up as util.PlainObject)[key], 'up.' + key)
   }
 }
 for (let mode of layerModes) {

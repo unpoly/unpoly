@@ -5,7 +5,7 @@ A function wrapped by `mockable()`. In specs, `fn.mock()` replaces the original 
 Outside of specs there is no wrapper and no `mock()`.
 @internal
 */
-export type MockableFunction<F extends u.AnyFunction> = F & { mock(): any }
+export type MockableFunction<F extends u.AnyFunction> = F & { mock(): unknown }
 
 export function mockable<F extends u.AnyFunction>(originalFn: F): MockableFunction<F> {
   if (window.jasmine) {
