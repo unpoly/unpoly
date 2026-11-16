@@ -1,7 +1,5 @@
 import * as u from '../util.js'
 import { isCritical } from '../error.js'
-import { type EventPlan } from '../event.js'
-import { type RenderOptions } from '../fragment.js'
 import { networkConfig, requestCache } from '../network.js'
 import { CSPInfo } from '../script.js'
 import type * as t from './types.js'
@@ -9,28 +7,22 @@ import { type UpRequest } from './request.js'
 
 const HTML_CONTENT_TYPE = /^(text\/html|application\/xhtml\+xml) *(;|$)/i
 
+// The constructor copies these options onto the response.
+export interface UpResponse extends t.ResponseOptions {} // oxlint-disable-line typescript/no-unsafe-declaration-merging
+
 // Prefixed, so the binding doesn't shadow the browser's `Response` here or in importers.
 // At runtime the class is named `up.Response` (see unpoly.ts).
 export class UpResponse {
+  declare parsedJSON: any
+
+  // Options that up.Request always passes, or that the constructor defaults.
   declare method: string
   declare url: string
   declare text: string
   declare status: number
   declare request: UpRequest
-  declare xhr?: XMLHttpRequest
-  declare target?: string
-  declare title?: string
-  declare openLayer?: RenderOptions
-  declare acceptLayer: any
-  declare dismissLayer: any
-  declare eventPlans?: EventPlan[]
-  declare context?: u.PlainObject
-  declare expireCache?: string | false
-  declare evictCache?: string | false
   declare headers: Record<string, string>
   declare loadedAt: Date
-  declare fail?: u.ValueOrFunction<boolean>
-  declare parsedJSON: any
 
   constructor(options: t.ResponseOptions = {}) {
     // Like a default parameter, a default only replaces an undefined option.
