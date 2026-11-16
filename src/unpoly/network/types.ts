@@ -2,6 +2,7 @@ import type * as u from '../util.js'
 import type { UpEvent } from '../event.js'
 import type { ParamsLike } from '../form.js'
 import type { Layer, LayerMode, LayerReference, NewLayer } from '../layer.js'
+import type { LogArgs } from '../log.js'
 import type { UpRequest } from './request.js'
 import type { UpResponse } from './response.js'
 
@@ -120,18 +121,26 @@ The arguments for `up.request()`: a URL and optional options, or options with a 
 export type RequestArgs = [url: string, options?: Partial<RequestOptions>] | [options: RequestOptions]
 
 /**
-What `up.Request.tester()` accepts: a request, a URL pattern, a function or a boolean.
-@internal
+Which requests `up.network.abort()` aborts: a request, a URL pattern, a function or a boolean.
+A function may return any truthy or falsy value. `up.Request.tester()` accepts the same.
 */
-export type RequestCondition = UpRequest | string | ((request: UpRequest) => boolean) | boolean
+export type RequestCondition = UpRequest | string | ((request: UpRequest) => unknown) | boolean
 
 /**
 Options for `up.Request.tester()`, and for the cache and queue methods that use it.
-@internal
 */
 export interface RequestTesterOptions {
   // Never match this request, or the cached request whose response it waits for.
   except?: UpRequest
+}
+
+/**
+Options for `up.network.abort()`.
+*/
+export interface AbortRequestsOptions extends RequestTesterOptions {
+  reason?: string | Error
+  /** A message to log before the first request is aborted. @internal */
+  logOnce?: LogArgs | null
 }
 
 declare module '../event.js' {

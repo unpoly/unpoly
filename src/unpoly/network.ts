@@ -192,6 +192,8 @@ export const loadPage = mockable(function loadPage(requestsAttrs: t.RequestOptio
   new UpRequest(requestsAttrs).loadPage()
 })
 
+export function abortRequests(condition?: t.RequestCondition, options?: t.AbortRequestsOptions): void
+export function abortRequests(options: t.AbortRequestsOptions): void
 export function abortRequests(...args: any[]): void {
   up.migrate.preprocessAbortArgs?.(args)
   queue.abort(...args)

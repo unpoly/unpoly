@@ -1,16 +1,9 @@
 import * as u from '../util.js'
 import { emit } from '../event.js'
-import { printToStandard, type LogArgs } from '../log.js'
+import { printToStandard } from '../log.js'
 import { networkConfig } from '../network.js'
 import type * as t from './types.js'
 import { UpRequest } from './request.js'
-
-// Options for `RequestQueue#abort()`.
-interface AbortRequestsOptions extends t.RequestTesterOptions {
-  reason?: string | Error
-  // A message to log before the first request is aborted.
-  logOnce?: LogArgs | null
-}
 
 export class RequestQueue {
   declare _queuedRequests: UpRequest[]
@@ -141,7 +134,7 @@ export class RequestQueue {
 
   // Aborting a request will cause its promise to reject, which will also uncache it
   abort(...args: any[]): void {
-    let [conditions = true, { except, reason, logOnce }] = u.parseArgs(args, 'val', 'options') as [t.RequestCondition, AbortRequestsOptions]
+    let [conditions = true, { except, reason, logOnce }] = u.parseArgs(args, 'val', 'options') as [t.RequestCondition, t.AbortRequestsOptions]
 
     let tester = UpRequest.tester(conditions, { except })
 

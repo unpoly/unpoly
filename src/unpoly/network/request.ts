@@ -516,7 +516,7 @@ export class UpRequest {
     return emitEvent(this._parseEmitArgs(args))
   }
 
-  assertEmitted(...args: any[]): void {
+  assertEmitted(...args: [eventType: string, props?: EmitProps]): void {
     assertEventEmitted(this._parseEmitArgs(args))
   }
 
@@ -594,8 +594,8 @@ export class UpRequest {
     this._fragments = u.uniq([...this.fragments, ...trackingRequest.fragments])
   }
 
-  static tester(condition: t.RequestCondition, { except }: t.RequestTesterOptions = {}): (request: UpRequest) => boolean {
-    let testFn: (request: UpRequest) => boolean
+  static tester(condition: t.RequestCondition, { except }: t.RequestTesterOptions = {}): (request: UpRequest) => unknown {
+    let testFn: (request: UpRequest) => unknown
     if (u.isFunction(condition)) {
       testFn = condition
     } else if (condition instanceof this) {
