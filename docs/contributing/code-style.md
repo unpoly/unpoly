@@ -203,15 +203,11 @@ cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by 
   `util: CoreApi['util'] & { … }`. Only one place may redeclare a namespace: a second,
   different redeclaration fails with TS2717 ("Subsequent property declarations must have the
   same type").
-- `unpoly-migrate`'s files are scripts, not modules: they patch `window.up` and import nothing
-  at runtime, since `unpoly-migrate.js` is a separate bundle and a class imported from
-  `src/unpoly/` would be a second copy.
-- A migrate file has no `import` or `export` statement at all, not even `import type`: esbuild
-  would turn the script into an ES module, which changes the bundle. It reaches a core type
-  through an alias at the top of the file, sorted by path like an import header:
-  `type RenderOptions = import('../unpoly/fragment.js').RenderOptions`. The alias is erased.
-  The types of `up.migrate` and its helpers live in `migrate/types.ts`, which nothing bundles,
-  so other migrate files can share them.
+- `unpoly-migrate`'s files are ES modules that patch `window.up` when they are evaluated.
+  `src/unpoly-migrate.ts` imports them in order, between `start_extension.js` and
+  `stop_extension.js`. From core they only import types (`import type`), since
+  `unpoly-migrate.js` is a separate bundle and a class imported from `src/unpoly/` would be a
+  second copy. The types of `up.migrate` and its helpers live in `migrate/types.ts`.
 - Each migrate file declares the keys it adds to `up`; a deprecated alias gets the type of its
   replacement. A method added to a class like `up.Layer` is merged into the class's interface.
   The implementations take their types from these declarations, so

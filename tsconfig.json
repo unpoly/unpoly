@@ -14,9 +14,8 @@
     "lib": ["es2024", "dom", "dom.iterable"],
     "module": "preserve",
     // Source files are ES modules that export `api` and `install()` (see src/unpoly.ts).
-    // The unpoly-migrate files and the Bootstrap entries are scripts that assign to `window.up`.
-    // Checking them as modules too gives each its own scope, so `const u = up.util` doesn't
-    // clash between files.
+    // Some unpoly-migrate files and the Bootstrap entries have no import or export. Checking them
+    // as modules too gives each its own scope, so `const u = up.util` doesn't clash between files.
     "moduleDetection": "force",
     // Don't load @types packages of our dev dependencies (node, express, ...).
     "types": [],

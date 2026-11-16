@@ -1,6 +1,6 @@
-type Overlay = import('../unpoly/layer.js').Overlay
-type PlainObject = import('../unpoly/util.js').PlainObject
-type FixKeyOptions = import('./migrate/types.js').FixKeyOptions
+import type { Overlay } from '../unpoly/layer.js'
+import type { PlainObject } from '../unpoly/util.js'
+import type { FixKeyOptions } from './migrate/types.js'
 
 // Renamed keys and values that may be passed as layer options or set in a layer config object.
 function fixRenamedLayerKeys(object: PlainObject, source: FixKeyOptions): void {

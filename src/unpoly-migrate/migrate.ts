@@ -1,15 +1,11 @@
-const u = up.util
+import type { Up } from '../unpoly.js'
+import type { PlainObject } from '../unpoly/util.js'
+import type {
+  AttributeTransformer, FixKeyOptions, MigrateConfig, PropertyWarningOptions, RemovedAttributeOptions,
+  RemovedPropertyOptions, RenamedAttributeOptions, TransformAttributeOptions,
+} from './migrate/types.js'
 
-type Up = import('../unpoly.js').Up
-type PlainObject = import('../unpoly/util.js').PlainObject
-type AttributeTransformer = import('./migrate/types.js').AttributeTransformer
-type FixKeyOptions = import('./migrate/types.js').FixKeyOptions
-type MigrateConfig = import('./migrate/types.js').MigrateConfig
-type PropertyWarningOptions = import('./migrate/types.js').PropertyWarningOptions
-type RemovedAttributeOptions = import('./migrate/types.js').RemovedAttributeOptions
-type RemovedPropertyOptions<T> = import('./migrate/types.js').RemovedPropertyOptions<T>
-type RenamedAttributeOptions = import('./migrate/types.js').RenamedAttributeOptions
-type TransformAttributeOptions = import('./migrate/types.js').TransformAttributeOptions
+const u = up.util
 
 up.migrate = (function() {
 

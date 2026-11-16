@@ -1,6 +1,6 @@
-const u = up.util
+import type { Compiler } from '../unpoly/script.js'
 
-type Compiler = import('../unpoly/script.js').Compiler
+const u = up.util
 
 // A deprecated alias has the type of the namespace that replaces it.
 declare module '../unpoly.js' {
@@ -66,7 +66,6 @@ up.$compiler = function(...definitionArgs) {
     return $fn($element, ...fnArgs)
   })
 }
-
 
 up.$macro = function(...definitionArgs) {
   up.migrate.warn('up.$macro() has been deprecated. Instead use up.macro() with a callback that wraps the given native element in a jQuery collection.')

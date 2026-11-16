@@ -1,8 +1,6 @@
-type ElementOrSelector = import('../unpoly/element.js').ElementOrSelector
-type RenderOptions = import('../unpoly/fragment.js').RenderOptions
-type Layer = import('../unpoly/layer.js').Layer
-type CloseLayerOptions = import('../unpoly/layer.js').CloseLayerOptions
-type OverlayDefaults = import('../unpoly/layer.js').OverlayDefaults
+import type { ElementOrSelector } from '../unpoly/element.js'
+import type { RenderOptions } from '../unpoly/fragment.js'
+import type { CloseLayerOptions, Layer, OverlayDefaults } from '../unpoly/layer.js'
 
 /**
 The type of `up.popup`, whose functions moved to up.layer.

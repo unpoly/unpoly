@@ -1,10 +1,7 @@
-const u = up.util
+import type { UpEventListener } from '../unpoly/event.js'
+import type { RequestCondition, RequestOptions, RequestTesterOptions, UpResponse } from '../unpoly/network.js'
 
-type UpEventListener = import('../unpoly/event.js').UpEventListener
-type RequestCondition = import('../unpoly/network.js').RequestCondition
-type RequestOptions = import('../unpoly/network.js').RequestOptions
-type RequestTesterOptions = import('../unpoly/network.js').RequestTesterOptions
-type UpResponse = import('../unpoly/network.js').UpResponse
+const u = up.util
 
 // A deprecated alias has the type of the function or namespace that replaces it.
 declare module '../unpoly.js' {

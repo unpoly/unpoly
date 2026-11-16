@@ -1,4 +1,4 @@
-type RequestOptions = import('../unpoly/network.js').RequestOptions
+import type { RequestOptions } from '../unpoly/network.js'
 
 /**
 The type of `up.browser`, whose functions moved to other namespaces.

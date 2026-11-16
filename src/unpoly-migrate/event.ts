@@ -1,5 +1,4 @@
-type EmitProps = import('../unpoly/event.js').EmitProps
-type UnbindFunction = import('../unpoly/event.js').UnbindFunction
+import type { EmitProps, UnbindFunction } from '../unpoly/event.js'
 
 // A deprecated alias has the type of the namespace that replaces it.
 declare module '../unpoly.js' {

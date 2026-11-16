@@ -1,10 +1,8 @@
-const u = up.util
+import type { FragmentKeepEvent, RenderJob, RenderOptions } from '../unpoly/fragment.js'
+import type { PlainObject } from '../unpoly/util.js'
+import type { FixKeyOptions } from './migrate/types.js'
 
-type FragmentKeepEvent = import('../unpoly/fragment.js').FragmentKeepEvent
-type RenderJob = import('../unpoly/fragment.js').RenderJob
-type RenderOptions = import('../unpoly/fragment.js').RenderOptions
-type PlainObject = import('../unpoly/util.js').PlainObject
-type FixKeyOptions = import('./migrate/types.js').FixKeyOptions
+const u = up.util
 
 // A deprecated alias has the type of the function or namespace that replaces it.
 declare module '../unpoly.js' {

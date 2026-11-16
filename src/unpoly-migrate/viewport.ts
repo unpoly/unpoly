@@ -1,5 +1,5 @@
-type ElementOrSelector = import('../unpoly/element.js').ElementOrSelector
-type LookupOptions = import('../unpoly/fragment.js').LookupOptions
+import type { ElementOrSelector } from '../unpoly/element.js'
+import type { LookupOptions } from '../unpoly/fragment.js'
 
 /**
 Options for up.scroll(): where to look for the viewport, and how to scroll it.
