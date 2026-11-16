@@ -264,6 +264,10 @@ Acronyms are uppercased: `parseURL()`, not `parseUrl()`. Same for `escapeHTML()`
 `parseRelaxedJSON()`. A *leading* acronym stays lowercase, as camelCase requires:
 `jsonAttr()`.
 
+A function type is named the way the docs refer to it: `…Callback` where the docs say callback,
+`…Function` otherwise. Don't abbreviate to `Fn`. A function that undoes a temporary change is an
+`UndoFunction`. `UnbindFunction` is only for removing event listeners, like the function `up.on()` returns.
+
 ### Names that collide with globals
 
 A class, function or type named like a likely browser or JavaScript global gets an `Up` prefix.
