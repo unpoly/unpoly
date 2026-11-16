@@ -7,7 +7,7 @@ import { readData } from '../script.js'
 import type * as t from './types.js'
 
 export class UpEventListener {
-  declare element: t.ListenerTarget
+  declare element: t.ObservedTarget
   declare eventType: string
   declare selector?: t.ListenerSelector
   declare callback: t.ListenerCallback
@@ -20,7 +20,7 @@ export class UpEventListener {
   declare isDefault: boolean
   declare _key: string
 
-  constructor(attributes: t.EventListenerAttributes) {
+  constructor(attributes: t.BoundListenerSpec) {
     this.element = attributes.element
     this.eventType = attributes.eventType
     this.selector = attributes.selector
@@ -128,7 +128,7 @@ export class UpEventListener {
     }
   }
 
-  static fromElement(attributes: t.EventListenerAttributes): UpEventListener | undefined {
+  static fromElement(attributes: t.BoundListenerSpec): UpEventListener | undefined {
     let map = attributes.element.upEventListeners
     if (map) {
       const key = this._buildKey(attributes)
@@ -136,7 +136,7 @@ export class UpEventListener {
     }
   }
 
-  static _buildKey(attributes: t.EventListenerAttributes): string {
+  static _buildKey(attributes: t.BoundListenerSpec): string {
     // Give the callback function a numeric identifier so it
     // can become part of the upEventListeners key.
     attributes.callback.upUid ||= u.uid()
@@ -148,7 +148,7 @@ export class UpEventListener {
     ].join('|')
   }
 
-  static allNonDefault(element: t.ListenerTarget): UpEventListener[] {
+  static allNonDefault(element: t.ObservedTarget): UpEventListener[] {
     let map = element.upEventListeners
     if (map) {
       const listeners = Object.values(map)
@@ -171,7 +171,7 @@ export function bindListeners(group: t.ListenerGroup): t.UnbindFn {
   return cleaner.clean
 }
 
-function eachListenerAttributes(group: t.ListenerGroup, fn: (attributes: t.EventListenerAttributes) => void): void {
+function eachListenerAttributes(group: t.ListenerGroup, fn: (attributes: t.BoundListenerSpec) => void): void {
   for (let element of group.elements) {
     for (let eventType of group.eventTypes) {
       // The other attributes (selector, callback, options) are for the UpEventListener we build

@@ -3,7 +3,7 @@ import * as e from '../element.js'
 import { Aborted, NotImplemented } from '../error.js'
 import {
   bindListeners, emitEvent, on, parseBindArgs, parseEmitArgs, unbindListeners, type EmitProps,
-  type EmittedEvent, type EventEmitterOptions, type EventPlan, type EventTypes, type ListenerArgs,
+  type Emission, type EmittedEvent, type EventPlan, type EventTypes, type ListenerArgs,
   type ListenerGroup, type ObservedEvent, type UnbindFn,
 } from '../event.js'
 import { type RenderOptions } from '../fragment.js'
@@ -214,7 +214,7 @@ export class Layer {
     return !hittableElement || this.contains(hittableElement)
   }
 
-  _parseEmitArgs(args: any[]): EventEmitterOptions {
+  _parseEmitArgs(args: any[]): Emission {
     return parseEmitArgs(args, { layer: this })
   }
 

@@ -7,7 +7,7 @@ import { Layer, layerStack } from '../layer.js'
 import { logConfig, printToStandard } from '../log.js'
 import type * as t from './types.js'
 
-export function emitEvent(emission: t.EventEmitterOptions): Event {
+export function emitEvent(emission: t.Emission): Event {
   logEmission(emission)
 
   if (emission.baseLayer) {
@@ -18,7 +18,7 @@ export function emitEvent(emission: t.EventEmitterOptions): Event {
   return emission.event
 }
 
-function dispatch({ target, event, ensureBubbles, callback }: t.EventEmitterOptions): void {
+function dispatch({ target, event, ensureBubbles, callback }: t.Emission): void {
   target.dispatchEvent(event)
 
   if (ensureBubbles && !(target as Node).isConnected) {
@@ -28,14 +28,14 @@ function dispatch({ target, event, ensureBubbles, callback }: t.EventEmitterOpti
   guard(() => callback?.(event))
 }
 
-export function assertEventEmitted(emission: t.EventEmitterOptions): void {
+export function assertEventEmitted(emission: t.Emission): void {
   const event = emitEvent(emission)
   if (event.defaultPrevented) {
     throw new Aborted(`Event ${event.type} was prevented`)
   }
 }
 
-function logEmission({ log, event }: t.EventEmitterOptions): void {
+function logEmission({ log, event }: t.Emission): void {
   if (!logConfig.enabled) { return }
 
   let message = log
@@ -56,7 +56,7 @@ function logEmission({ log, event }: t.EventEmitterOptions): void {
   }
 }
 
-export function parseEmitArgs(args: any[], defaults: t.EmitProps = {}): t.EventEmitterOptions {
+export function parseEmitArgs(args: any[], defaults: t.EmitProps = {}): t.Emission {
   // Event-emitting functions are crazy overloaded:
   //
   // - up.emit([target], eventType, [eventProps])
@@ -124,5 +124,5 @@ export function parseEmitArgs(args: any[], defaults: t.EmitProps = {}): t.EventE
     options.event = build(options)
   }
 
-  return options as t.EventEmitterOptions
+  return options as t.Emission
 }

@@ -2,7 +2,7 @@ import * as u from '../util.js'
 import { Aborted, Offline } from '../error.js'
 import {
   assertEventEmitted, emitEvent, parseEmitArgs, type EmitProps, type EmittedEvent,
-  type EventEmitterOptions,
+  type Emission,
 } from '../event.js'
 import { Params } from '../form.js'
 import { getSmart, parseTargetSteps, splitTarget, type RenderOptions } from '../fragment.js'
@@ -516,7 +516,7 @@ export class UpRequest {
     return new UpResponse(responseAttrs)
   }
 
-  _parseEmitArgs(args: any[]): EventEmitterOptions {
+  _parseEmitArgs(args: any[]): Emission {
     // We prefer emitting request-related events on the targeted layer.
     // This way listeners can observe event-related events on a given layer.
     // This request has an optional { layer } attribute, which is used by

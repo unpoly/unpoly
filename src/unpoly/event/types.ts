@@ -140,7 +140,7 @@ An element, document or window that Unpoly listens on. It remembers its listener
 so `up.off()` can find them.
 @internal
 */
-export interface ListenerTarget extends EventTarget {
+export interface ObservedTarget extends EventTarget {
   upEventListeners?: Record<string, UpEventListener>
 }
 
@@ -162,7 +162,7 @@ What an `UpEventListener` and a `ListenerGroup` both need to know: everything bu
 elements and event types to listen to.
 @internal
 */
-export interface SharedListenerAttributes extends ListenerOptions {
+export interface ListenerSpec extends ListenerOptions {
   selector?: ListenerSelector
   callback: ListenerCallback
   baseLayer?: Layer
@@ -172,8 +172,8 @@ export interface SharedListenerAttributes extends ListenerOptions {
 Everything an `UpEventListener` needs to know.
 @internal
 */
-export interface EventListenerAttributes extends SharedListenerAttributes {
-  element: ListenerTarget
+export interface BoundListenerSpec extends ListenerSpec {
+  element: ObservedTarget
   eventType: string
 }
 
@@ -183,8 +183,8 @@ listen to, and the attributes for each `UpEventListener`. `parseBindArgs()` buil
 many ways `up.on()` can be called.
 @internal
 */
-export interface ListenerGroup extends SharedListenerAttributes {
-  elements: u.List<ListenerTarget>
+export interface ListenerGroup extends ListenerSpec {
+  elements: u.List<ObservedTarget>
   eventTypes: string[]
 }
 
@@ -200,7 +200,7 @@ Everything `emitEvent()` needs to know. `parseEmitArgs()` builds this
 from the many ways `up.emit()` can be called.
 @internal
 */
-export interface EventEmitterOptions {
+export interface Emission {
   target: EventTarget
   event: Event
   baseLayer?: Layer
