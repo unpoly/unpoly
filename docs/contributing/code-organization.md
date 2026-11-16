@@ -366,6 +366,7 @@ type parameter an alias's name. `bin/lint` reports the misuse and the shadowing
 (`unpoly/namespace-aliases`).
 
 **Other main modules** get one `import { … }` statement each, with types inline as `type X`.
+When an import contains only types, write `import type { … }`. `bin/lint` reports both.
 Import a class from the main module that owns it, not from its file:
 `import { Layer, layerConfig, type LayerMode } from './layer.js'`.
 
