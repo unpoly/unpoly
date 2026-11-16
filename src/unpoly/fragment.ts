@@ -949,8 +949,7 @@ export function provideNodes(
     value = cloneTemplate(value, data, { htmlParser })
   }
 
-  // A list is returned as it is.
-  return u.wrapList(value) as u.List<Node>
+  return u.wrapList(value)
 }
 
 function isTemplate(value: unknown): value is Element {

@@ -100,8 +100,7 @@ function valueToList(value: t.ElementOrSelector | null | undefined): u.List<Elem
   if (u.isString(value)) {
     return document.querySelectorAll(value)
   } else {
-    // A list is returned as it is.
-    return u.wrapList(value) as u.List<Element>
+    return u.wrapList(value)
   }
 }
 

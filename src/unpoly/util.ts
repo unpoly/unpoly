@@ -302,6 +302,7 @@ export function isAdjacentPosition(value: string): boolean {
 
 export function wrapList<T>(value: T[]): T[]
 export function wrapList<T>(value: t.List<T>): t.List<T>
+export function wrapList<T>(value: T | t.List<T> | null | undefined): t.List<T>
 export function wrapList<T>(value: T | null | undefined): T[]
 export function wrapList(value: unknown): t.List<unknown> {
   if (isList(value)) {
@@ -696,11 +697,12 @@ function isEqualList(a: t.List<unknown>, b: t.List<unknown>): boolean {
   return (a.length === b.length) && every(a, (elem, index) => isEqual(elem, b[index]))
 }
 
-// A string is split into tokens, with { json } also a JSON array. A list is returned as an array,
-// and any other value wrapped into one.
+// A string is split into tokens, with { json } also a JSON array. A list is returned as it is,
+// and any other value wrapped into an array. The overloads promise an array, since the only lists
+// we get are arrays, or a jQuery { layer } that LayerLookup only iterates.
 export function getSimpleTokens(value: string | string[] | null | undefined, options?: SimpleTokenOptions): string[]
 export function getSimpleTokens<T>(value: string | T | t.List<T> | null | undefined, options?: SimpleTokenOptions): (string | T)[]
-export function getSimpleTokens(value: unknown, { json = false, separator = /[,\s]/ }: SimpleTokenOptions = {}): unknown[] {
+export function getSimpleTokens(value: unknown, { json = false, separator = /[,\s]/ }: SimpleTokenOptions = {}): t.List<unknown> {
   if (!isString(value)) {
     return wrapList(value)
   } else if (json && /^\[.*]$/.test(value)) {
@@ -717,7 +719,7 @@ function splitSimpleTokenString(value: string, separator: string | RegExp): stri
 
 export function getComplexTokens(value: string | string[] | null | undefined): string[]
 export function getComplexTokens<T>(value: string | T | t.List<T> | null | undefined): (string | T)[]
-export function getComplexTokens(value: unknown): unknown[] {
+export function getComplexTokens(value: unknown): t.List<unknown> {
   if (!isString(value)) {
     return wrapList(value)
   } else {
