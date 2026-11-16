@@ -255,11 +255,9 @@ export function clean(fragment: Element, options: u.PlainObject = {}): void {
   }
 }
 
-// The element may also be a selector.
-export const readData = mockable(function readData(element: any): any {
+export const readData = mockable(function readData(elementOrSelector: e.ElementOrSelector): any {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-  element = getSmart(element)
-
+  let element: t.ScriptedElement & HTMLElement = getSmart(elementOrSelector)!
   return element.upData ||= buildData(element)
 })
 

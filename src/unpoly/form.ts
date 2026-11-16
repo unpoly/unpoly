@@ -154,12 +154,8 @@ export const submit = mockable((form: e.ElementOrSelector, options?: RenderOptio
   return render(submitOptions(form, options))
 })
 
-export function submitOptions(form: e.ElementOrSelector, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderOptions
-// The form is resolved in place. The implementation can't take the resolved type: with
-// strictFunctionTypes, a function's overload must be assignable to it (TS2394).
-export function submitOptions(form: any, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderOptions {
-  form = getSmart(form)
-  form = getForm(form)
+export function submitOptions(formOrSelector: e.ElementOrSelector, options?: RenderOptions, parserOptions?: e.OptionsParserOptions): RenderOptions {
+  let form = getForm(getSmart(formOrSelector)!)!
 
   options = u.newOptions(options)
 

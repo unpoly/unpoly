@@ -157,8 +157,7 @@ up.migrate.postprocessReloadOptions = function(options) {
   let lastModified = options.headers?.['If-Modified-Since']
   let legacyHeader
   if (lastModified) {
-    // A date converts to its timestamp in arithmetic. TypeScript wants getTime(), which would change the emitted code.
-    legacyHeader = Math.floor((new Date(lastModified) as any) * 0.001).toString()
+    legacyHeader = Math.floor(+new Date(lastModified) * 0.001).toString()
   } else {
     legacyHeader = '0'
   }

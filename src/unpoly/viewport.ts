@@ -33,11 +33,10 @@ export const viewportConfig = newConfig('up.viewport.config', (): t.ViewportConf
 export const bodyShifter = new BodyShifter()
 
 
-// The element may also be a selector.
-export const reveal = mockable(function(element: any, options?: t.RevealOptions): true | Promise<void> {
+export const reveal = mockable(function(elementOrSelector: e.ElementOrSelector, options?: t.RevealOptions): true | Promise<void> {
   // copy options, since we will mutate it below (options.layer = ...).
   options = u.newOptions(options)
-  element = getSmart(element, options)
+  let element = getSmart(elementOrSelector, options)!
 
   // Now that we have looked up the element with an option like { layer: 'any' },
   // the only layer relevant from here on is the element's layer.

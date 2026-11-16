@@ -436,7 +436,8 @@ export abstract class Overlay extends Layer {
 
     return (_element, animateOptions) => {
       const boxDone = animate(this.getBoxElement(), boxAnimation, animateOptions)
-      const backdropDone = animate(this.backdropElement, backdropAnimation, animateOptions)
+      // Without a backdrop there is no element, but then there is no backdropAnimation either.
+      const backdropDone = animate(this.backdropElement!, backdropAnimation, animateOptions)
 
       // Promise.all() ignores non-Thenables in the given array
       return Promise.all([boxDone, backdropDone])

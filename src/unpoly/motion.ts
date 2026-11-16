@@ -32,14 +32,13 @@ function reset(): void {
   motionController.reset()
 }
 
-// The element may also be a selector.
 export const animate = mockable(async function animate(
-  element: any,
+  elementOrSelector: e.ElementOrSelector,
   animationValue: t.AnimationValue | undefined,
   { duration, easing, onFinished }: t.AnimateOptions = {},
 ): Promise<void> {
   // If passed a selector, up.fragment.get() will prefer a match on the current layer.
-  element = getSmart(element)
+  let element = getSmart(elementOrSelector)!
 
   // Finish a previous animation, unless we're called from an animation or transition function.
   if (!motionController.nested) motionController.finish(element)
@@ -119,21 +118,15 @@ export function finish(element?: e.ElementOrSelector): Promise<void> | undefined
   return up.migrate.formerlyAsync?.('up.motion.finish()')
 }
 
-export function morph(
+export async function morph(
   oldElement: e.ElementOrSelector,
   newElement: e.ElementOrSelector,
   transitionValue: t.TransitionValue,
   options?: t.SwapOptions,
-): Promise<void>
-// The elements are resolved in place. The implementation can't take the resolved type: with
-// strictFunctionTypes, a function's overload must be assignable to it (TS2394).
-export async function morph(oldElement: any, newElement: any, transitionValue: t.TransitionValue, options?: t.SwapOptions): Promise<void> {
+): Promise<void> {
   // (A) If passed a selector, up.fragment.get() will prefer a match on the current layer.
   // (B) This also unwraps jQuery collections.
-  oldElement = getSmart(oldElement)
-  newElement = getSmart(newElement)
-
-  await swapElements(oldElement, newElement, transitionValue, options)()
+  await swapElements(getSmart(oldElement)!, getSmart(newElement)!, transitionValue, options)()
 }
 
 // Inserts newElement now: before the absolutized oldElement when transitioning, in place of it otherwise.

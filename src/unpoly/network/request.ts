@@ -537,8 +537,7 @@ export class UpRequest {
   }
 
   get age(): number {
-    // Subtracting dates gives milliseconds. TypeScript only allows arithmetic on numbers.
-    return (new Date() as any) - (this.builtAt as any)
+    return Date.now() - +this.builtAt
   }
 
   header(name: string): string | undefined {

@@ -96,9 +96,7 @@ export class UpResponse {
   }
 
   get age(): number {
-    let now = new Date()
-    // Subtracting dates gives milliseconds. TypeScript only allows arithmetic on numbers.
-    return (now as any) - (this.loadedAt as any)
+    return Date.now() - +this.loadedAt
   }
 
   get expired(): boolean {

@@ -47,8 +47,9 @@ configs:
 editor reads `tsconfig.json`, so it shows the loose check's errors, but not the ones only the
 core check finds. When all of `src/` passes a setting, move it to `tsconfig.json`.
 
-Adding or changing types must not change what the build emits. Compare `unpoly.min.js` before
-and after.
+Adding or changing types shouldn't change what the build emits. Compare `unpoly.min.js` before
+and after. A change that removes a cast or an `any`, together with its explanatory comment, may
+cost a few bytes. [Every byte counts](#every-byte-counts) still decides case by case.
 
 ### Writing types
 
@@ -91,8 +92,7 @@ and after.
 - **Real types instead of `PlainObject`**, where that's cheap. `any` is fine where a precise
   type would be complex.
 - **No cast that a refactor can remove.** A cast is fine where TypeScript can't know
-  (`affix(…) as HTMLFormElement`), or where the honest code would emit differently, with a
-  comment: `(now as any) - (this.loadedAt as any)` instead of `now.getTime() - …`.
+  (`affix(…) as HTMLFormElement`).
 - **Declare class fields** with `declare` (`declare left: number`). A field without `declare`
   makes the compiled class define the property, which costs bytes and changes behavior
   (differently in `unpoly.js` and `unpoly.es6.js`, whose targets treat class fields
@@ -190,9 +190,8 @@ and after.
   Callers get the typed signature, and the body stays as it was. This works for methods, whose
   parameters TypeScript compares bivariantly. A function declaration's overload must be
   assignable to its implementation once `strictFunctionTypes` is on (TS2394), so a function
-  takes `any` instead, with a comment (like `morph()`). A cast at each use would work too, and
-  emits nothing, but it takes one cast per use. A new local variable would change the emitted
-  code. A function expression passed to `mockable()` can't have overloads. Type its rest
+  resolves into a new local instead (`let element = getSmart(elementOrSelector)!`, like
+  `animate()`). A function expression passed to `mockable()` can't have overloads. Type its rest
   parameter as a union of tuples (like `trackFields()` does), or as `any` with a comment.
 
 ### The global `up` and unpoly-migrate

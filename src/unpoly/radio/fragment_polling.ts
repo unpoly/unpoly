@@ -179,8 +179,7 @@ export class FragmentPolling {
   }
 
   _getFragmentAge(): number {
-    // Subtracting dates gives milliseconds. TypeScript only allows it with getTime(), which would add bytes.
-    return (new Date() as any) - (this._lastAttempt as any)
+    return Date.now() - +this._lastAttempt
   }
 
   _isOnFrontLayer(): boolean | undefined {
