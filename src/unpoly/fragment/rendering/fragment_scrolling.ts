@@ -30,7 +30,7 @@ export class FragmentScrolling extends FragmentProcessor<FragmentScrollingOption
     return { layer, origin, mode, revealTop, revealMax, revealSnap, revealPadding, behavior: scrollBehavior }
   }
 
-  processPrimitive(opt: any): any {
+  processPrimitive(opt: unknown): unknown {
     switch (opt) {
       case 'top':
         return this._scrollTo(0)

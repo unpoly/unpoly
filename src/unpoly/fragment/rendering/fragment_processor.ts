@@ -5,7 +5,7 @@ import { printToWarn } from '../../log.js'
 import type * as t from '../types.js'
 
 // Processes a { focus } or { scroll } render option. The option can be a string, an element, a function,
-// an array of alternatives or a selector map, so its type stays `any`.
+// an array of alternatives or a selector map. A function may return any value, so the methods take `unknown`.
 export abstract class FragmentProcessor<O extends t.FragmentProcessorOptions = t.FragmentProcessorOptions> {
   // A render pass passes all its render options, so this holds more keys than `O` lists.
   // A function value receives it, and so does the processor for a match in a selector map.
@@ -16,16 +16,16 @@ export abstract class FragmentProcessor<O extends t.FragmentProcessorOptions = t
   }
 
   // Returns a truthy value if the option was processed.
-  process(opt: t.ScrollOption | t.FocusOption): any {
+  process(opt: unknown): unknown {
     let preprocessed = this.preprocessOnce(opt)
     return this.tryProcess(preprocessed)
   }
 
-  preprocessOnce(opt: any): any {
+  preprocessOnce(opt: unknown): unknown {
     return u.getComplexTokens(opt)
   }
 
-  tryProcess(opt: any): any {
+  tryProcess(opt: unknown): unknown {
     if (u.isArray(opt)) {
       return this.processArray(opt)
     }
@@ -58,9 +58,9 @@ export abstract class FragmentProcessor<O extends t.FragmentProcessorOptions = t
     return this.processPrimitive(opt)
   }
 
-  abstract processPrimitive(opt: any): any
+  abstract processPrimitive(opt: unknown): unknown
 
-  abstract processElement(element: HTMLElement): any
+  abstract processElement(element: HTMLElement): unknown
 
   processSelectorMap(map: u.PlainObject): string[] {
     return Object.keys(map).filter((selector) => {
@@ -74,7 +74,7 @@ export abstract class FragmentProcessor<O extends t.FragmentProcessorOptions = t
     })
   }
 
-  processArray(array: any[]): any {
+  processArray(array: unknown[]): unknown {
     return u.findInList(array, (opt) => this.tryProcess(opt))
   }
 

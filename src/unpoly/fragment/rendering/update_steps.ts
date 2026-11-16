@@ -20,9 +20,9 @@ interface StepInsertion {
   focusElement: HTMLElement
   scrollElement: HTMLElement
   // Compiles the new elements.
-  welcome: (responseDoc: ResponseDoc) => any
+  welcome: (responseDoc: ResponseDoc) => unknown
   // Starts the transition or animation.
-  startMotion?: () => Promise<any>
+  startMotion?: () => Promise<unknown>
 }
 
 // A step that we can insert: it has a layer, an old element and a new element.

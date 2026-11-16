@@ -7,6 +7,7 @@ import { printToStandard } from '../../log.js'
 import { assertAssetsOK } from '../../script.js'
 import type * as t from '../types.js'
 import type { LayerPlan } from './layer_plan.js'
+import type { RenderResult } from './render_result.js'
 import { OpenLayerPlan } from './open_layer_plan.js'
 import { UpdateLayerPlan } from './update_layer_plan.js'
 import { ResponseDoc } from './response_doc.js'
@@ -16,7 +17,7 @@ import { ResponseDoc } from './response_doc.js'
 // is sent, with preflightPropsFromContent().
 
 // Returns an up.RenderResult, or a promise that fulfills with nothing when preloading local content.
-export function renderFromContent(options: t.RenderOptions): any {
+export function renderFromContent(options: t.RenderOptions): RenderResult | Promise<void> {
   // Preloading from local content is a no-op.
   if (options.preload) {
     // TODO: This is not an async method? So just return undefined?

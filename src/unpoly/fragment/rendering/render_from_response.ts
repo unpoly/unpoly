@@ -81,7 +81,8 @@ function updateContentFromResponse(finalRenderOptions: t.RenderOptions, meta: u.
   // After the initial render pass has finished, consider reloading stale content.
   finalRenderOptions.verifyFinished = (result) => revalidate(result, revalidateOptions, response)
 
-  return renderFromContent(finalRenderOptions)
+  // Only renderFromURL() preloads, so we get a result.
+  return renderFromContent(finalRenderOptions) as RenderResult
 }
 
 async function revalidate(

@@ -16,8 +16,8 @@ export abstract class LayerPlan {
   // Set by subclasses.
   declare layer: Layer
   declare target: string
-  declare _acceptLayer: any
-  declare _dismissLayer: any
+  declare _acceptLayer: unknown
+  declare _dismissLayer: unknown
   declare _eventPlans: EventPlan[]
   declare _response?: UpResponse
 

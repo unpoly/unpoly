@@ -28,7 +28,11 @@ export class RenderResult {
     this.finished = this._finish(partialResults)
   }
 
-  _partialPhase(partialResults: t.PartialRenderResult[], phase: keyof t.PartialRenderResult, extraValue?: any): any[] {
+  _partialPhase<K extends keyof t.PartialRenderResult>(
+    partialResults: t.PartialRenderResult[],
+    phase: K,
+    extraValue?: t.PartialRenderResult[K],
+  ): NonNullable<t.PartialRenderResult[K]>[] {
     return u.compact([...u.map(partialResults, phase), extraValue])
   }
 

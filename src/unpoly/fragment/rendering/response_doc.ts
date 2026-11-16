@@ -43,7 +43,7 @@ export class ResponseDoc {
     this._match = match
   }
 
-  _parseDocument(value: string | Element | Document, origin: Element | undefined, data: any): void {
+  _parseDocument(value: string | Element | Document, origin: Element | undefined, data?: u.PlainObject): void {
     if (value instanceof Document) {  // Document
       this._document = value
       this._isFullDocument = true
@@ -71,12 +71,12 @@ export class ResponseDoc {
     }
   }
 
-  _parseFragment(value: string | Element, origin: Element | undefined, data: any): void {
+  _parseFragment(value: string | Element, origin: Element | undefined, data?: u.PlainObject): void {
     let element = e.extractSingular(provideNodes(value, { origin, data }))
     this._document = this._buildFauxDocument(element)
   }
 
-  _parseContent(value: t.ContentValue, origin: Element | undefined, target: string | undefined, data: any): void {
+  _parseContent(value: t.ContentValue, origin: Element | undefined, target: string | undefined, data?: u.PlainObject): void {
     if (!target) fail("must pass a { target } when passing { content }")
 
     // We are only provided with inner child content.

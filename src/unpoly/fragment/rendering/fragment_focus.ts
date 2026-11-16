@@ -16,7 +16,7 @@ interface FragmentFocusOptions extends t.FragmentProcessorOptions {
 const PREVENT_SCROLL_OPTIONS = { preventScroll: true }
 
 export class FragmentFocus extends FragmentProcessor<FragmentFocusOptions> {
-  processPrimitive(opt: any): boolean | undefined {
+  processPrimitive(opt: unknown): boolean | undefined {
     switch (opt) {
       case 'keep':
         // Try to keep the focus from before the fragment update.

@@ -4,6 +4,7 @@ import { Aborted, guard } from '../../error.js'
 import { emit } from '../../event.js'
 import { abortFragment } from '../../fragment.js'
 import { printToStandard } from '../../log.js'
+import type { UpRequest } from '../../network.js'
 import type * as t from '../types.js'
 import { renderFromContent } from './render_from_content.js'
 import { renderFromResponse } from './render_from_response.js'
@@ -48,14 +49,15 @@ export class RenderJob {
 
       let result = await this._render()
       this._handleResult(result)
-      return result
+      // When preloading, the job fulfills with an up.Request or nothing (see _render()).
+      return result as RenderResult
     } catch (resultOrError) {
       this._handleResult(resultOrError) || this._handleError(resultOrError)
       throw resultOrError
     }
   }
 
-  _handleResult(result: any): true | undefined {
+  _handleResult(result: unknown): true | undefined {
     // There may be multiple reasons why `result` is not an up.RenderResult:
     //
     // (1) There was an error during the request (return value is up.Offline, up.Aborted, etc.)
@@ -104,7 +106,7 @@ export class RenderJob {
     }
   }
 
-  _handleError(error: any): void {
+  _handleError(error: Error): void {
     let prefix = error instanceof Aborted ? 'Rendering was aborted' : 'Error while rendering'
     printToStandard('up.render()', `${prefix}: ${error.name}: ${error.message}`)
     guard(() => this.renderOptions.onError?.(error))
@@ -131,7 +133,7 @@ export class RenderJob {
 
   // Returns an up.RenderResult, or a promise for one. When preloading, the promise fulfills
   // with an up.Request (renderFromURL()) or with nothing (renderFromContent()).
-  _render(): any {
+  _render(): RenderResult | Promise<RenderResult | UpRequest | void> {
     // (1) With a given { url } we want to handle { abort } when the new request is known.
     //     This way we can exclude the new request from aborting.
     //     The { handleAbort } callback is called in renderFromURL()
