@@ -1,12 +1,14 @@
 import type * as u from '../util.js'
-import type { EventPlan, InputDevice, UpEvent } from '../event.js'
+import type { ElementOrSelector } from '../element.js'
+import type { EmitLogOption, EventPlan, InputDevice, UpEvent } from '../event.js'
 import type { ParamsLike } from '../form.js'
 import type {
   CloseVerb, Layer, LayerAcceptEvent, LayerAcceptedEvent, LayerDismissEvent, LayerDismissedEvent,
   LayerMode, LayerOpenedEvent, LayerReference, NewLayer,
 } from '../layer.js'
+import type { LogArgs } from '../log.js'
 import type { AnimationValue, TransitionValue } from '../motion.js'
-import type { RequestCondition, UpRequest, UpResponse } from '../network.js'
+import type { RequestCondition, RequestTesterOptions, UpRequest, UpResponse } from '../network.js'
 import type { FragmentHungryEvent } from '../radio.js'
 import type { CSPInfo } from '../script.js'
 import type { PreviewFunction } from '../status.js'
@@ -359,6 +361,36 @@ export interface LookupOptions {
   strong?: boolean
   verify?: boolean
 }
+
+/**
+Options for `up.destroy()`.
+*/
+export interface DestroyOptions extends LookupOptions {
+  animation?: AnimationValue
+  duration?: number
+  easing?: string
+  onFinished?: () => void
+  /** @internal */
+  log?: EmitLogOption
+}
+
+/**
+Options for `up.fragment.abort()`.
+*/
+export interface AbortFragmentOptions extends LookupOptions, RequestTesterOptions {
+  reason?: string
+  /** @internal */
+  newLayer?: boolean
+  /** @internal */
+  jid?: number
+  /** @internal */
+  logOnce?: LogArgs
+}
+
+/**
+The arguments of `up.fragment.abort()`: an element or selector and options, or only options.
+*/
+export type AbortFragmentArgs = [target?: ElementOrSelector, options?: AbortFragmentOptions] | [options: AbortFragmentOptions]
 
 /**
 An element with [up-keep] that is kept in an update, and the element it would have been replaced with.

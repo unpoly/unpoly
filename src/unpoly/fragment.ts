@@ -427,6 +427,7 @@ export function closestFragment(element: Element, selector: string, options?: t.
   return new Selector(selector, element, options).closest(element)
 }
 
+export function destroy(target: e.ElementOrSelector, options?: t.DestroyOptions): Promise<void> | undefined
 export function destroy(...args: any[]): Promise<void> | undefined {
   const options = parseTargetAndOptions(args)
   const element = getFragment(options.target, options)
@@ -823,7 +824,7 @@ export function compressNestedSteps(steps: t.RenderStep[]): t.RenderStep[] {
   return compressed
 }
 
-export const abortFragment = mockable(function abortFragment(...args: any[]): void {
+export const abortFragment = mockable(function abortFragment(...args: t.AbortFragmentArgs): void {
   let options = parseTargetAndOptions(args)
 
   // The function that checks whether a given function will be aborted.
