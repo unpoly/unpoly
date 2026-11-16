@@ -17,8 +17,8 @@ interface ResponseOptions {
   target?: string
   title?: string
   openLayer?: RenderOptions
-  acceptLayer?: any
-  dismissLayer?: any
+  acceptLayer?: unknown
+  dismissLayer?: unknown
   eventPlans?: EventPlan[]
   context?: u.PlainObject
   expireCache?: string | false
@@ -37,7 +37,7 @@ export interface UpResponse extends ResponseOptions {} // oxlint-disable-line ty
 // Prefixed, so the binding doesn't shadow the browser's `Response` here or in importers.
 // At runtime the class is named `up.Response` (see unpoly.ts).
 export class UpResponse {
-  declare parsedJSON: any
+  declare parsedJSON: unknown
 
   // Options that up.Request always passes, or that the constructor defaults.
   declare method: string
@@ -114,6 +114,7 @@ export class UpResponse {
     return this.header('ETag')
   }
 
+  // oxlint-disable-next-line typescript/no-explicit-any -- parsed JSON, like JSON.parse()
   get json(): any {
     return this.parsedJSON ||= JSON.parse(this.text)
   }

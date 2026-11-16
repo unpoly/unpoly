@@ -55,7 +55,7 @@ function getMethod(request: UpRequest, params: Params): string {
   return method
 }
 
-function buildPayload(request: UpRequest, params: Params): [payload: any, contentType: string | null | undefined] {
+function buildPayload(request: UpRequest, params: Params): [payload: XMLHttpRequestBodyInit | undefined, contentType: string | null | undefined] {
   let payload = request.payload
   let contentType: string | null | undefined = request.contentType
 

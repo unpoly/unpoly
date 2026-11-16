@@ -47,10 +47,13 @@ export class UpRequest {
   declare builtAt: Date
   declare wrapMethod: boolean | null
   declare abortable: boolean | null
-  declare previews: any[]
-  // While the request is new, these may be a layer name like 'root' or 'new'.
+  declare previews: unknown[]
+  // They hold the { layer } and { failLayer } options until the constructor resolves them
+  // into a layer or 'new' (unless the request is { basic }).
+  /* oxlint-disable typescript/no-explicit-any -- an option before and a layer after the constructor */
   declare layer: any
   declare failLayer: any
+  /* oxlint-enable typescript/no-explicit-any */
 
   // A request is also a promise for its response. The static block at the end delegates these.
   declare then: Promise<UpResponse>['then']
@@ -498,7 +501,7 @@ export class UpRequest {
     return new UpResponse(responseAttrs)
   }
 
-  _parseEmitArgs(args: any[]): Emission {
+  _parseEmitArgs(args: unknown[]): Emission {
     // We prefer emitting request-related events on the targeted layer.
     // This way listeners can observe event-related events on a given layer.
     // This request has an optional { layer } attribute, which is used by
@@ -512,7 +515,7 @@ export class UpRequest {
 
   emit<T extends string>(eventType: T, props?: EmitProps): EmittedEvent<T>
   emit<E extends Event>(event: E, options?: EmitProps): E
-  emit(...args: any[]): Event {
+  emit(...args: unknown[]): Event {
     return emitEvent(this._parseEmitArgs(args))
   }
 
@@ -566,7 +569,7 @@ export class UpRequest {
     )
   }
 
-  _setAutoHeader(name: string, value: any): void {
+  _setAutoHeader(name: string, value: unknown): void {
     if (u.isMissing(value)) {
       return
     }
@@ -574,7 +577,8 @@ export class UpRequest {
     if (u.isOptions(value) || u.isArray(value)) {
       value = u.safeStringifyJSON(value)
     }
-    this.headers[name] = value
+    // A header stringifies other values.
+    this.headers[name] = value as string
   }
 
   mergeIfUnsent(trackingRequest: UpRequest): void {

@@ -94,13 +94,13 @@ export interface RequestProps {
   builtAt?: Date
   wrapMethod?: boolean | null
   contentType?: string
-  payload?: any
+  payload?: XMLHttpRequestBodyInit
   onLoading?: () => void
   onSettle?: (responseOrError: UpResponse | Error) => void
   fail?: u.ValueOrFunction<boolean>
   abortable?: boolean | null
   lateDelay?: number | false
-  previews?: any[]
+  previews?: unknown[]
   bindLayer?: Layer
 }
 

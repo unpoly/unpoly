@@ -35,7 +35,7 @@ export interface Migrate {
   postprocessReloadOptions?(options: RenderOptions): void
   resolveOrigin?(target: string, options?: u.PlainObject): string
   handleRequestOptions?(options: RequestOptions): void
-  preprocessAbortArgs?(args: any[]): void
+  preprocessAbortArgs?(args: unknown[]): void
   handleLayerOptions?(options: u.PlainObject): void
   handleLayerConfig?(modeConfig: u.PlainObject): void
   registerLayerCloser?(layer: Layer): void

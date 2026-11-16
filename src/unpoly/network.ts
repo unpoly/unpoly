@@ -51,7 +51,7 @@ export const makeRequest = mockable(function makeRequest(...args: t.RequestArgs)
   return request
 })
 
-function parseRequestOptions(args: any[]): t.RequestOptions {
+function parseRequestOptions(args: unknown[]): t.RequestOptions {
   let options = u.parseArgIntoOptions(args, 'url') as t.RequestOptions
   up.migrate.handleRequestOptions?.(options)
   return options
@@ -144,7 +144,7 @@ function handleCaching(request: UpRequest): void {
   // synchronously after an abort (e.g. by a compiler during the render that aborted it)
   // would hit the aborted request in the cache.
   // An up.Response, or an error (which has no { expireCache } or { evictCache }).
-  request.onSettle = function(responseOrError: any) {
+  request.onSettle = function(responseOrError: u.PlainObject) {
     requestCache.expire(responseOrError.expireCache ?? false, { except: request })
     requestCache.evict(responseOrError.evictCache ?? false, { except: request })
 
@@ -194,7 +194,7 @@ export const loadPage = mockable(function loadPage(requestsAttrs: t.RequestOptio
 
 export function abortRequests(condition?: t.RequestCondition, options?: t.AbortRequestsOptions): void
 export function abortRequests(options: t.AbortRequestsOptions): void
-export function abortRequests(...args: any[]): void {
+export function abortRequests(...args: unknown[]): void {
   up.migrate.preprocessAbortArgs?.(args)
   queue.abort(...args)
 }
