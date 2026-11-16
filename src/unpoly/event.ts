@@ -23,8 +23,8 @@ function reset(): void {
   }
 }
 
-export function on<T extends t.EventTypes>(types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): t.UnbindFunction
-export function on<T extends t.EventTypes>(
+export function on<const T extends t.EventTypes>(types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): t.UnbindFunction
+export function on<const T extends t.EventTypes>(
   targets: t.ListenerTargets,
   types: T,
   ...args: t.ListenerArgs<t.ObservedEvent<T>>
@@ -33,12 +33,12 @@ export function on(...args: any[]): t.UnbindFunction {
   return bindListeners(parseBindArgs(args))
 }
 
-export function onClosest<T extends t.EventTypes>(
+export function onClosest<const T extends t.EventTypes>(
   element: Element,
   types: T,
   callback: t.ListenerCallback<t.ObservedEvent<T>>,
 ): t.UnbindFunction
-export function onClosest<T extends t.EventTypes>(
+export function onClosest<const T extends t.EventTypes>(
   element: Element,
   types: T,
   options: { layer?: LayerReference },
@@ -56,8 +56,8 @@ export function onClosest(...args: any[]): t.UnbindFunction {
   return unsubscribe
 }
 
-export function off<T extends t.EventTypes>(types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): void
-export function off<T extends t.EventTypes>(targets: t.ListenerTargets, types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): void
+export function off<const T extends t.EventTypes>(types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): void
+export function off<const T extends t.EventTypes>(targets: t.ListenerTargets, types: T, ...args: t.ListenerArgs<t.ObservedEvent<T>>): void
 export function off(...args: any[]): void {
   return unbindListeners(parseBindArgs(args))
 }

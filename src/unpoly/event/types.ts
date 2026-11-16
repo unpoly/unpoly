@@ -48,15 +48,26 @@ export interface AnyEvent extends Event {
 }
 
 /**
-The event that `up.on()` passes to its listener for the given event type: an Unpoly event from `UpEventMap`,
-a DOM event, or `AnyEvent` for other types. Several types in one string (`'foo bar'`) also get `AnyEvent`.
+The event that `up.on()` passes to its listener for the given event types: an Unpoly event from `UpEventMap`,
+a DOM event, or `AnyEvent` for other types. Several types (`'click keydown'` or an array) get a union.
 */
-export type ObservedEvent<T> =
+export type ObservedEvent<T> = SingleObservedEvent<SplitEventTypes<T>>
+
+// Distributes over a union of event types.
+type SingleObservedEvent<T> =
   T extends keyof UpEventMap ? UpEventMap[T] :
   T extends keyof HTMLElementEventMap ? HTMLElementEventMap[T] :
   T extends keyof DocumentEventMap ? DocumentEventMap[T] :
   T extends keyof WindowEventMap ? WindowEventMap[T] :
   AnyEvent
+
+// The single types in an EventTypes value, like `'click' | 'keydown'` for `'click keydown'`.
+type SplitEventTypes<T> =
+  T extends readonly (infer Type)[] ? SplitEventTypes<Type> :
+  T extends `${infer First} ${infer Rest}` ? SplitEventTypes<First> | SplitEventTypes<Rest> :
+  T extends `${infer First},${infer Rest}` ? SplitEventTypes<First> | SplitEventTypes<Rest> :
+  T extends '' ? never :
+  T
 
 /**
 The event that `up.emit()` emits for the given event type. Unlike `ObservedEvent`, it knows no DOM events,
@@ -67,7 +78,10 @@ export type EmittedEvent<T> = T extends keyof UpEventMap ? UpEventMap[T] : AnyEv
 /**
 One or more event types for `up.on()`, separated by spaces or commas, or as an array.
 */
-export type EventTypes = string | readonly string[]
+export type EventTypes = EventType | readonly EventType[]
+
+// Editors suggest the event types that up.on() knows. `string & {}` keeps every other string allowed.
+type EventType = keyof UpEventMap | keyof HTMLElementEventMap | keyof DocumentEventMap | keyof WindowEventMap | (string & {})
 
 /**
 What `up.on()` listens on: an element, the document, the window, or a list of elements.

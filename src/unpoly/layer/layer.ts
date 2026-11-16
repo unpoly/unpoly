@@ -184,12 +184,12 @@ export class Layer {
     return closestLayerElement(element) === this.element
   }
 
-  on<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): UnbindFunction
+  on<const T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): UnbindFunction
   on(...args: any[]): UnbindFunction {
     return bindListeners(this._parseBindArgs(args))
   }
 
-  off<T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): void
+  off<const T extends EventTypes>(types: T, ...args: ListenerArgs<ObservedEvent<T>>): void
   off(...args: any[]): void {
     return unbindListeners(this._parseBindArgs(args))
   }
