@@ -1,6 +1,5 @@
 import type * as u from '../util.js'
-import { type LayerReference } from '../fragment.js'
-import { type Layer } from '../layer.js'
+import { type Layer, type LayerReference } from '../layer.js'
 import { type UpEventListener } from './listeners.js'
 
 /**
@@ -117,7 +116,7 @@ export type EmitTarget = EventTarget | u.List<EventTarget> | Layer
 Properties for an event emitted with `up.emit()`, and options for its emission.
 */
 export interface EmitProps {
-  layer?: LayerReference | number
+  layer?: LayerReference
   target?: Element | u.List<Element> | string
   log?: EmitLogOption
   [prop: string]: any

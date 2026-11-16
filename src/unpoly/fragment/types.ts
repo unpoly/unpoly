@@ -3,7 +3,7 @@ import { type EventPlan, type InputDevice, type UpEvent } from '../event.js'
 import { type ParamsLike } from '../form.js'
 import {
   type CloseVerb, type Layer, type LayerAcceptEvent, type LayerAcceptedEvent, type LayerDismissEvent,
-  type LayerDismissedEvent, type LayerMode, type LayerOpenedEvent,
+  type LayerDismissedEvent, type LayerMode, type LayerOpenedEvent, type LayerOption, type LayerReference, type NewLayer,
 } from '../layer.js'
 import { type AnimationValue, type TransitionValue } from '../motion.js'
 import { type RequestCondition, type UpRequest, type UpResponse } from '../network.js'
@@ -17,11 +17,6 @@ import { type RenderResult } from './rendering/render_result.js'
 What to render: a target selector, an element to derive a selector from, or several alternatives.
 */
 export type RenderTarget = string | Element | u.List<Element> | string[]
-
-/**
-A layer reference: a layer object, an element in a layer, or a name like `'current'`, `'parent'` or `'new'`.
-*/
-export type LayerReference = string | Layer | Element
 
 /**
 A `{ focus }` or `{ scroll }` option: a keyword like `'auto'` or `'keep'`, a selector, an element, a function,
@@ -93,7 +88,7 @@ export interface RenderOptions {
   response?: UpResponse
 
   // Layer
-  layer?: LayerReference
+  layer?: LayerReference | NewLayer
   peel?: boolean | CloseVerb
   mode?: LayerMode
   size?: string
@@ -349,7 +344,8 @@ Options for looking up fragments (`up.fragment.get()`) and for deriving targets 
 A render pass passes its render options.
 */
 export interface LookupOptions {
-  layer?: LayerReference
+  // Not only a LayerReference: a render pass passes its options, so this may be 'new' (see Selector).
+  layer?: LayerOption
   // The mode of a new layer, for expanding `:main` with `{ layer: 'new' }`.
   mode?: LayerMode
   origin?: Element

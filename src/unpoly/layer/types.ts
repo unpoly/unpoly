@@ -158,10 +158,25 @@ export interface PeelOptions extends LayerCloseOptions {
   intent?: CloseVerb
 }
 
+// Not exported (not even internally): a building block for LayerReference only.
+type LayerKeyword = 'current' | 'closest' | 'parent' | 'ancestor' | 'ancestors' | 'child'
+  | 'descendant' | 'descendants' | 'subtree' | 'root' | 'overlay' | 'overlays' | 'front' | 'origin' | 'any'
+
+// Several alternatives in one string ('parent, root'), as documented for up.layer.get().
+// Only the first keyword is checked; the rest stays free, so autocomplete lists only the keywords.
+type LayerAlternativeSeparator = ' ' | ', ' | ','
+
+/** A layer to look up: the layer itself, an element in it, its index, or a keyword like 'parent'. */
+export type LayerReference = Layer | Element | number | `${number}`
+  | LayerKeyword | `${LayerKeyword}${LayerAlternativeSeparator}${string}`
+
+/** A way to ask for a new overlay, optionally with its mode: 'new', 'swap modal', 'shatter'… */
+export type NewLayer = 'new' | 'swap' | 'shatter' | `${'new' | 'swap' | 'shatter'} ${OverlayMode}`
+
 /**
-A value for the `{ layer }` option: an `up.Layer`, its index in the layer stack, an element in the layer,
-or a [layer name](/learn/targeting-other-layers) like `'current'` or `'parent'`.
-A string may contain several names, separated by spaces or commas.
+A `{ layer }` value as the lookup code receives it internally. Besides a `LayerReference`, it may be
+a `NewLayer` from the render options (which the lookup passes through as `'new'`), or any string from
+an attribute like `[up-if-layer]`, which the lookup checks at runtime.
 */
 export type LayerOption = Layer | number | Element | string
 
@@ -187,9 +202,11 @@ export interface LayerLookupOptions {
 }
 
 /**
-The arguments of `up.layer.get()` and `up.layer.getAll()`: a layer value, lookup options, or both.
+The arguments of `layerStack.get()` and `layerStack.getAll()`: a layer value, lookup options, or both.
+`up.layer.get()` and `up.layer.getAll()` take the same, but only a `LayerReference` as the value.
+@internal
 */
-export type LayerLookupArgs = [value?: LayerOption | LayerLookupOptions, options?: LayerLookupOptions]
+export type LayerLookupArgs = [value?: LayerOption | null | LayerLookupOptions, options?: LayerLookupOptions]
 
 /**
 The `up:layer:open` event. It is emitted on the document, since the overlay has no element yet.

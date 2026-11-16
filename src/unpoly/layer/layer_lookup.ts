@@ -6,13 +6,6 @@ import type * as t from './types.js'
 import { Layer } from './layer.js'
 import { type LayerStack } from './layer_stack.js'
 
-/**
-What a single layer name resolves to. The name `'new'` passes through as a string, for the
-render options that open a new overlay.
-@internal
-*/
-type ResolvedLayerValue = Layer | Layer[] | 'new' | undefined
-
 export class LayerLookup {
   declare _stack: LayerStack
   declare _options: t.LayerLookupOptions
@@ -67,7 +60,8 @@ export class LayerLookup {
     return this._stack.at(value)
   }
 
-  _resolveValue(value: any): ResolvedLayerValue {
+  // The name 'new' passes through as a string, for the render options that open a new overlay.
+  _resolveValue(value: any): Layer | Layer[] | 'new' | undefined {
     if (value instanceof Layer) {
       return value
     }

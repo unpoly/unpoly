@@ -230,7 +230,7 @@ export function closestLayerElement(element: Element): Element | null {
   return element.closest(anySelector)
 }
 
-export function optionToString(option: t.LayerOption): string {
+export function optionToString(option: t.LayerReference | t.NewLayer): string {
   if (u.isString(option)) {
     return `layer "${option}"`
   } else {
@@ -269,8 +269,8 @@ export const api = {
     open,
     ask,
     get stack() { return layerStack.layers },
-    get(...args: t.LayerLookupArgs): Layer | undefined { return layerStack.get(...args) },
-    getAll(...args: t.LayerLookupArgs): Layer[] { return layerStack.getAll(...args) },
+    get(...args: [value?: t.LayerReference | null | t.LayerLookupOptions, options?: t.LayerLookupOptions]): Layer | undefined { return layerStack.get(...args) },
+    getAll(...args: [value?: t.LayerReference | t.LayerLookupOptions, options?: t.LayerLookupOptions]): Layer[] { return layerStack.getAll(...args) },
     get root() { return layerStack.root },
     get overlays() { return layerStack.overlays },
     get current() { return layerStack.current },
