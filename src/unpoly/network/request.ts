@@ -6,7 +6,7 @@ import {
 } from '../event.js'
 import { Params } from '../form.js'
 import { getSmart, parseTargetSteps, splitTarget, type RenderOptions } from '../fragment.js'
-import { layerStack, type Layer } from '../layer.js'
+import { layerStack, type Layer, type LayerMode } from '../layer.js'
 import { abortRequests, cache, isSafeMethod, networkConfig } from '../network.js'
 import {
   acceptLayerFromXHR, contextFromXHR, csrfHeader, csrfParam, csrfToken, dismissLayerFromXHR,
@@ -40,14 +40,14 @@ export class UpRequest {
   declare evictCache?: t.RequestCondition
   // While the request is new, these may be a layer name like 'root' or 'new'.
   declare layer: any
-  declare mode?: string
+  declare mode?: LayerMode
   declare context?: u.PlainObject
   declare failLayer: any
-  declare failMode?: string
+  declare failMode?: LayerMode
   declare failContext?: u.PlainObject
   declare origin?: Element
   declare originLayer?: Layer
-  declare originMode?: string
+  declare originMode?: LayerMode
   declare builtAt: Date
   declare wrapMethod: boolean | null
   declare contentType?: string

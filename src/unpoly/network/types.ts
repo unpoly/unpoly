@@ -2,7 +2,7 @@ import * as u from '../util.js'
 import { type EventPlan, type UpEvent } from '../event.js'
 import { type ParamsLike } from '../form.js'
 import { type RenderOptions } from '../fragment.js'
-import { type Layer } from '../layer.js'
+import { type Layer, type LayerMode } from '../layer.js'
 import { type LogArgs } from '../log.js'
 import { type UpRequest } from './request.js'
 import { type UpResponse } from './response.js'
@@ -85,14 +85,14 @@ export interface RequestOptions {
   evictCache?: RequestCondition
   // A layer, or a name like 'root' or 'new'.
   layer?: Layer | string
-  mode?: string
+  mode?: LayerMode
   context?: u.PlainObject
   failLayer?: Layer | string
-  failMode?: string
+  failMode?: LayerMode
   failContext?: u.PlainObject
   origin?: Element
   originLayer?: Layer
-  originMode?: string
+  originMode?: LayerMode
   builtAt?: Date
   wrapMethod?: boolean | null
   contentType?: string

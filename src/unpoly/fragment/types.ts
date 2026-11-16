@@ -351,7 +351,7 @@ A render pass passes its render options.
 export interface LookupOptions {
   layer?: LayerReference
   // The mode of a new layer, for expanding `:main` with `{ layer: 'new' }`.
-  mode?: string
+  mode?: LayerMode
   origin?: Element
   originLayer?: Layer
   match?: MatchMode
