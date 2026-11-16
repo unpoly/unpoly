@@ -1505,6 +1505,48 @@ describe('up.layer', function() {
 
       })
 
+      describe('[up-accept-fragment]', function() {
+
+        it('ignores an empty value when the overlay opens and updates', async function() {
+          const [link] = htmlFixtureList('<a href="/overlay" up-layer="new" up-target="#content" up-accept-fragment="">label</a>')
+
+          Trigger.clickSequence(link)
+          await wait()
+          jasmine.respondWithSelector('#content', { text: 'overlay text' })
+          await wait()
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('overlay text')
+
+          await up.render({ fragment: '<div id="content">updated text</div>' })
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('updated text')
+        })
+
+      })
+
+      describe('[up-dismiss-fragment]', function() {
+
+        it('ignores an empty value when the overlay opens and updates', async function() {
+          const [link] = htmlFixtureList('<a href="/overlay" up-layer="new" up-target="#content" up-dismiss-fragment="">label</a>')
+
+          Trigger.clickSequence(link)
+          await wait()
+          jasmine.respondWithSelector('#content', { text: 'overlay text' })
+          await wait()
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('overlay text')
+
+          await up.render({ fragment: '<div id="content">updated text</div>' })
+
+          expect(up.layer.isOverlay()).toBe(true)
+          expect(up.layer.current).toHaveText('updated text')
+        })
+
+      })
+
       describe('history', function() {
 
         beforeEach(function() {
