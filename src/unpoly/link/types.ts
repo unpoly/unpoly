@@ -1,22 +1,29 @@
-import { type ElementEvent } from '../event.js'
-import { type GuardEvent, type RenderOptions } from '../fragment.js'
+import { type UpEvent } from '../event.js'
+import { type RenderOptions } from '../fragment.js'
 
 /**
 The `up:link:follow` event.
 */
-export interface LinkFollowEvent extends GuardEvent {}
+export interface LinkFollowEvent extends UpEvent {
+  target: Element
+  renderOptions: RenderOptions
+}
 
 /**
 The `up:link:preload` event.
 */
-export interface LinkPreloadEvent extends GuardEvent {}
+export interface LinkPreloadEvent extends UpEvent {
+  target: Element
+  renderOptions: RenderOptions
+}
 
 /**
 The `up:click` event.
 */
 // It also has the properties that forkEventAsUpClick() copies from the original event.
 // A keyboard event has no { clientX, clientY, button }, so they're missing when Enter or Space activates an element.
-export interface ClickEvent extends ElementEvent {
+export interface ClickEvent extends UpEvent {
+  target: Element
   originalEvent: MouseEvent | KeyboardEvent
   clientX?: number
   clientY?: number
@@ -30,7 +37,10 @@ export interface ClickEvent extends ElementEvent {
 /**
 The `up:deferred:load` event.
 */
-export interface DeferredLoadEvent extends GuardEvent {}
+export interface DeferredLoadEvent extends UpEvent {
+  target: Element
+  renderOptions: RenderOptions
+}
 
 /**
 The settings in `up.link.config`, described in its doc comment.

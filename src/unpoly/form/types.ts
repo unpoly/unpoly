@@ -1,6 +1,6 @@
 import type * as u from '../util.js'
-import { type ElementEvent } from '../event.js'
-import { type GuardEvent, type RenderOptions, type RenderResult } from '../fragment.js'
+import { type UpEvent } from '../event.js'
+import { type RenderOptions, type RenderResult } from '../fragment.js'
 import { type Params } from './params.js'
 
 /**
@@ -19,25 +19,30 @@ export interface Field extends Element {
 /**
 The `up:form:submit` event.
 */
-export interface FormSubmitEvent extends GuardEvent {
+export interface FormSubmitEvent extends UpEvent {
+  target: Element
   form: Element
   params: Params
   submitButton?: Element
+  renderOptions: RenderOptions
 }
 
 /**
 The `up:form:validate` event.
 */
-export interface FormValidateEvent extends GuardEvent {
+export interface FormValidateEvent extends UpEvent {
+  target: Element
   form: Element
   params: Params
   fields: u.List<Element>
+  renderOptions: RenderOptions
 }
 
 /**
 The `up:form:switch` event.
 */
-export interface FormSwitchEvent extends ElementEvent {
+export interface FormSwitchEvent extends UpEvent {
+  target: Element
   field: Element
   fieldTokens: string[]
 }

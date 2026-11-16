@@ -1,5 +1,5 @@
 import type * as u from '../util.js'
-import { type ElementEvent, type EventPlan, type InputDevice, type UpEvent } from '../event.js'
+import { type EventPlan, type InputDevice, type UpEvent } from '../event.js'
 import { type ParamsLike } from '../form.js'
 import {
   type CloseVerb, type Layer, type LayerAcceptEvent, type LayerAcceptedEvent, type LayerDismissEvent,
@@ -190,7 +190,7 @@ export interface RenderOptions {
   inputDevice?: InputDevice
   // Opens an empty overlay when no content option is given (up.layer.open()).
   defaultToEmptyContent?: boolean
-  guardEvent?: RenderGuardEvent
+  guardEvent?: GuardEvent
   // Set by RenderJob, called with the change's preflight props once a plan applies.
   handleAbort?: (props: AbortOptionProps) => void
   // An identifier for a render pass. See up.fragment.abort().
@@ -307,16 +307,8 @@ What the `{ abort }` option needs to know about a change: its preflight props, a
 */
 export interface AbortOptionProps extends PreflightProps { request?: UpRequest }
 
-/** An event emitted before a render pass. Listeners can change its render options, or prevent it to abort the pass. */
-export interface GuardEvent extends ElementEvent { renderOptions: RenderOptions }
-
-/**
-An event that a render pass emits before it renders, like `up:link:follow`. Rendering is aborted
-when the event is prevented. Listeners find the render options in `event.renderOptions`.
-Unlike a `GuardEvent` it may be emitted on the document: `up:location:restore` has no `{ origin }`.
-@internal
-*/
-export interface RenderGuardEvent extends UpEvent { renderOptions?: RenderOptions }
+/** An event that guards a render pass. Listeners can change its render options, or prevent it. */
+export interface GuardEvent extends UpEvent { renderOptions: RenderOptions }
 
 /**
 A step of a render pass: which old element to update with which new element, and how.
@@ -431,16 +423,23 @@ export interface FragmentOfflineEvent extends UpEvent {
 }
 
 /** The `up:fragment:kept` event. */
-export interface FragmentKeptEvent extends ElementEvent {
+export interface FragmentKeptEvent extends UpEvent {
+  target: Element
   newFragment: Element
   newData: u.PlainObject
 }
 
 /** The `up:fragment:keep` event. */
-export interface FragmentKeepEvent extends FragmentKeptEvent { renderOptions: RenderOptions }
+export interface FragmentKeepEvent extends UpEvent {
+  target: Element
+  newFragment: Element
+  newData: u.PlainObject
+  renderOptions: RenderOptions
+}
 
 /** The `up:fragment:inserted` event. */
-export interface FragmentInsertedEvent extends ElementEvent {
+export interface FragmentInsertedEvent extends UpEvent {
+  target: Element
   layer: Layer
   ok: boolean
   revalidating: boolean
@@ -453,7 +452,8 @@ export interface FragmentDestroyedEvent extends UpEvent {
 }
 
 /** The `up:fragment:aborted` event. */
-export interface FragmentAbortedEvent extends ElementEvent {
+export interface FragmentAbortedEvent extends UpEvent {
+  target: Element
   reason: string
   newLayer: boolean
   /** @internal The render job that aborted, so a poller can tell its own reload apart. */
@@ -461,7 +461,8 @@ export interface FragmentAbortedEvent extends ElementEvent {
 }
 
 /** The `up:template:clone` event. */
-export interface TemplateCloneEvent extends ElementEvent {
+export interface TemplateCloneEvent extends UpEvent {
+  target: Element
   data: u.PlainObject
   nodes: u.List<Node> | null
 }

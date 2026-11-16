@@ -1,13 +1,14 @@
 import { emit, type UpEvent } from './event.js'
 import { mockable } from './mockable.js'
 
+/** Whether Unpoly booted on its own, or the app called `up.boot()`. */
+type BootMode = 'auto' | 'manual'
+
 /** The `up:framework:boot` event. */
-export interface FrameworkBootEvent extends UpEvent {
-  mode: 'auto' | 'manual'
-}
+export interface FrameworkBootEvent extends UpEvent { mode: BootMode }
 
 /** The `up:framework:booted` event. */
-export interface FrameworkBootedEvent extends FrameworkBootEvent {}
+export interface FrameworkBootedEvent extends UpEvent { mode: BootMode }
 
 /** The `up:framework:reset` event. */
 export interface FrameworkResetEvent extends UpEvent {}
@@ -37,7 +38,7 @@ export function emitReset(): void {
   emit('up:framework:reset', { log: false })
 }
 
-export function boot({ mode = 'manual' }: { mode?: 'manual' | 'auto' } = {}): void {
+export function boot({ mode = 'manual' }: { mode?: BootMode } = {}): void {
   if (readyState !== 'configuring') {
     // In an app with a lot of async script the user may attempt to boot us twice.
     console.error('Unpoly has already booted')

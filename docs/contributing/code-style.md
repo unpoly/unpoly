@@ -114,30 +114,40 @@ and after.
   export const linkConfig = newConfig('up.link.config', (): t.LinkConfig => ({ … }))
   ```
 
-- **Events are interfaces that extend `UpEvent`**, a shared base, or the event they build on.
-  The shared bases are `ElementEvent` for an event that is always emitted on an element, and
-  `GuardEvent` for one emitted before a render pass. Use one line per property when that's clearer:
+- **Every event has its own interface** (never a type alias), named after the event in
+  PascalCase plus `Event`: `up:fragment:kept` → `FragmentKeptEvent`. That holds for an event
+  without properties of its own, too. Use one line per property when that's clearer.
+- **Prefer repeating a property over a shared base type.** Sibling events extend `UpEvent` and
+  each list their properties, even when they overlap:
 
   ```ts
   /** The `up:fragment:kept` event. */
-  export interface FragmentKeptEvent extends ElementEvent {
+  export interface FragmentKeptEvent extends UpEvent {
+    target: Element
     newFragment: Element
     newData: PlainObject
   }
 
   /** The `up:fragment:keep` event. */
-  export interface FragmentKeepEvent extends FragmentKeptEvent { renderOptions: RenderOptions }
+  export interface FragmentKeepEvent extends UpEvent {
+    target: Element
+    newFragment: Element
+    newData: PlainObject
+    renderOptions: RenderOptions
+  }
   ```
 
-  Every event has its own interface (never a type alias), named after the event in PascalCase
-  plus `Event`: `up:fragment:kept` → `FragmentKeptEvent`. That holds for an event without
-  properties of its own, too. Events that share properties extend a base named after what they
-  have in common:
+  When several types share a complex value, give the value a name as a local type that isn't
+  exported, like `type BootMode = 'auto' | 'manual'`. Use a base type only for a real "is a",
+  where one function builds all the events that extend it:
 
   ```ts
   /** The `up:layer:dismissed` event. */
   export interface LayerDismissedEvent extends LayerCloseEvent {}
   ```
+
+  A type like `GuardEvent` may exist without any event extending it, when an option needs it
+  (`{ guardEvent }`). The events fit it structurally.
 
   `UpEventMap` maps each event type to its interface, like `HTMLElementEventMap` does for DOM
   events, and `up.on()` and `up.emit()` look it up. A new event gets an interface with the
