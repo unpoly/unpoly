@@ -1,4 +1,3 @@
-import type * as u from '../util.js'
 import type { InputDevice } from '../event.js'
 import type { LookupOptions } from '../fragment.js'
 import type { LayerReference } from '../layer.js'
@@ -25,10 +24,16 @@ export interface ViewportConfig {
   anchoredRightSelectors: string[]
   revealSnap: number
   revealPadding: number
-  revealMax: number | false | ((element: Element) => number)
+  revealMax: RevealMax
   revealTop: boolean
   autoFocusVisible: (props: { element: Element, inputDevice: InputDevice }) => boolean
 }
+
+/**
+How many pixel rows of a tall element to reveal: a number, a function that takes the element
+and returns a number, or `false` for no limit.
+*/
+export type RevealMax = number | false | ((element: Element) => number)
 
 /**
 Options for `up.reveal()`. Each `reveal*` option is an alias used by render options.
@@ -43,8 +48,8 @@ export interface RevealOptions {
   revealPadding?: number
   top?: boolean
   revealTop?: boolean
-  max?: u.ValueOrFunction<number>
-  revealMax?: u.ValueOrFunction<number>
+  max?: RevealMax
+  revealMax?: RevealMax
   // Also focus the element.
   focus?: boolean
   // For looking up the element. After the lookup, `up.reveal()` sets the element's layer.
