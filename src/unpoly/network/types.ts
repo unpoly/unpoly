@@ -100,7 +100,6 @@ export interface RequestProps {
   fail?: u.ValueOrFunction<boolean>
   abortable?: boolean | null
   lateDelay?: number | false
-  previews?: unknown[]
   bindLayer?: Layer
 }
 

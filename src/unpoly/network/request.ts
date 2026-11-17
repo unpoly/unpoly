@@ -50,7 +50,6 @@ export class UpRequest {
   declare builtAt: Date
   declare wrapMethod: boolean | null
   declare abortable: boolean | null
-  declare previews: unknown[]
   // The constructor resolves the { layer } and { failLayer } options.
   declare layer?: Layer | 'new'
   declare failLayer?: Layer | 'new'
@@ -69,7 +68,6 @@ export class UpRequest {
       builtAt = new Date(),
       wrapMethod = networkConfig.wrapMethod,
       abortable = true,
-      previews = [],
     } = options
 
     this.state = 'new'
@@ -105,7 +103,6 @@ export class UpRequest {
     this.fail = options.fail
     this.abortable = abortable
     this.lateDelay = options.lateDelay
-    this.previews = previews
 
     // Normalize a first time to get a normalized cache key.
     this._normalize()
