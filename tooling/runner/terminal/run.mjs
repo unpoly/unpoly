@@ -246,6 +246,10 @@ async function drive(config) {
     browser: config.browser,
     headless: config.headless,
     args: [`--window-size=${WINDOW.width},${WINDOW.height}`],
+    // Puppeteer hides scrollbars in headless Chrome, which gives the root viewport a scrollbar
+    // width of 0. Specs for overlays that hide the document scrollbar would then be skipped in CI.
+    // Keep classic scrollbars, so headless runs measure the same width as a visible browser.
+    ignoreDefaultArgs: ['--hide-scrollbars'],
     defaultViewport: { width: WINDOW.width, height: WINDOW.height },
   })
 
