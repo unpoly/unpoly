@@ -661,34 +661,37 @@ export function containsMainPseudo(target: string): boolean {
   return MAIN_PSEUDO.test(target)
 }
 
-// Takes a target, an element, `true` for :main, or a list of these.
-// oxlint-disable-next-line typescript/no-explicit-any -- probes targets of several kinds
-export function expandTargets(targets: any, options: t.LookupOptions = {}): string[] {
+// Takes a target, an element, `true` for :main, `false` for no target, or a list of these.
+export function expandTargets(
+  targets: t.RenderTarget | boolean | u.List<string | Element | true> | undefined,
+  options: t.LookupOptions = {},
+): string[] {
   const { layer } = options
   if (layer !== 'new' && !(layer instanceof Layer)) {
     fail('Must pass an up.Layer as { layer } option, but got %o', layer)
   }
 
   // Copy the list since targets might be a jQuery collection, and this does not support shift or push.
-  targets = u.copy(u.wrapList(targets))
+  // oxlint-disable-next-line typescript/no-explicit-any -- probes targets of several kinds
+  let queue: any[] = u.copy(u.wrapList(targets))
 
   const expanded: string[] = []
 
-  while (targets.length) {
-    let target = targets.shift()
+  while (queue.length) {
+    let target = queue.shift()
     if (target === true) target = ':main'
 
     if (containsMainPseudo(target)) {
       let mode = resolveMode(options)
       let replaced = mainTargets(mode).map((mainTarget) => target.replace(MAIN_PSEUDO, mainTarget))
-      targets.unshift(...replaced)
+      queue.unshift(...replaced)
     } else if (LAYER_PSEUDO.test(target)) {
       // Discard this target for new layers, which don't have a first-swappable-element.
       // Also don't && the layer check into the `else if` condition above, or it will
       // be returned as a verbatim string below.
       if (layer === 'new' || layer.state === 'opening') continue
       let firstSwappableTarget = toTarget(layer.getFirstSwappableElement(), options)
-      targets.unshift(target.replace(LAYER_PSEUDO, firstSwappableTarget))
+      queue.unshift(target.replace(LAYER_PSEUDO, firstSwappableTarget))
     } else if (u.isElementLike(target)) {
       expanded.push(toTarget(target, options))
     } else if (u.isString(target)) {
